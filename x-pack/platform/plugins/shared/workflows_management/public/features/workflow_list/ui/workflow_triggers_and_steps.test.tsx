@@ -8,8 +8,10 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import type { Step, WorkflowExecutionHistoryModel } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowTriggersAndSteps } from './workflow_triggers_and_steps';
+import type { WorkflowTrigger } from '../../../../common/lib/trigger_types';
 import { getWorkflowNextExecutionTime } from '../../../lib/next_execution_time';
 import { TestProvider } from '../../../shared/mocks/test_providers';
 import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
@@ -91,5 +93,22 @@ describe('WorkflowTriggersAndSteps', () => {
 
     expect(await screen.findByText('Scheduled')).toBeInTheDocument();
     expect(screen.getByText('Next execution: Jan 15, 2025 11:00 AM')).toBeInTheDocument();
+  });
+
+  it('should not recompute the next execution when re-rendered with the same inputs', () => {
+    mockGetWorkflowNextExecutionTime.mockReturnValue(new Date('2025-01-15T11:00:00Z'));
+    mockGetFormattedDateTime.mockReturnValue('Jan 15, 2025 11:00 AM');
+    const triggers: WorkflowTrigger[] = [{ type: 'scheduled', with: { every: '5m' } }];
+    const steps: Step[] = [];
+    const history: WorkflowExecutionHistoryModel[] = [];
+
+    const { rerender } = render(
+      <WorkflowTriggersAndSteps triggers={triggers} steps={steps} history={history} />,
+      { wrapper: TestProvider }
+    );
+    rerender(<WorkflowTriggersAndSteps triggers={triggers} steps={steps} history={history} />);
+    rerender(<WorkflowTriggersAndSteps triggers={triggers} steps={steps} history={history} />);
+
+    expect(mockGetWorkflowNextExecutionTime).toHaveBeenCalledTimes(1);
   });
 });

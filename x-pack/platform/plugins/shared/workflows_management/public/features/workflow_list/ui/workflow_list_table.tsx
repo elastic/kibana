@@ -25,9 +25,16 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useStableCallback } from '@kbn/react-hooks';
 import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
-import type { WorkflowListItemDto, WorkflowSortField } from '@kbn/workflows';
+import type {
+  Step,
+  WorkflowExecutionHistoryModel,
+  WorkflowListItemDto,
+  WorkflowSortField,
+} from '@kbn/workflows';
 import { WorkflowTriggersAndSteps } from './workflow_triggers_and_steps';
+import type { WorkflowTrigger } from '../../../../common/lib/trigger_types';
 import {
   getRunTooltipContent,
   ManagedWorkflowBadge,
@@ -38,6 +45,187 @@ import { getWorkflowDetailRouteState } from '../../../shared/utils/workflow_navi
 import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 
 const MAX_VISIBLE_TAGS = 2;
+
+// Stable fallbacks so `WorkflowTriggersAndSteps` memoization is not defeated by fresh `[]` per render.
+const EMPTY_TRIGGERS: WorkflowTrigger[] = [];
+const EMPTY_STEPS: Step[] = [];
+const EMPTY_HISTORY: WorkflowExecutionHistoryModel[] = [];
+
+const nameCellContainerStyle = css`
+  max-width: 100%;
+  overflow: hidden;
+`;
+
+const nameCellLinkItemStyle = css`
+  min-width: 0;
+`;
+
+const nameCellTextStyle = css`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  max-width: 100%;
+`;
+
+const nameCellDescriptionStyle = css`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  display: block;
+  width: 100%;
+`;
+
+// The cells below only depend on their own item, so memoizing them lets React skip every row when
+// `EuiBasicTable` re-runs all `render` callbacks on a selection change.
+const WorkflowNameCell = React.memo(
+  ({
+    item,
+    canReadWorkflow,
+    workflowsListSearch,
+  }: {
+    item: WorkflowListItemDto;
+    canReadWorkflow: boolean;
+    workflowsListSearch: string;
+  }) => {
+    const routerHistory = useHistory();
+    const { name } = item;
+
+    return (
+      <div css={nameCellContainerStyle}>
+        <EuiFlexGroup direction="column" gutterSize="xs">
+          <EuiFlexItem>
+            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
+              <EuiFlexItem grow={false} css={nameCellLinkItemStyle}>
+                {canReadWorkflow ? (
+                  <EuiLink
+                    href={routerHistory.createHref({ pathname: `/${item.id}` })}
+                    onClick={(event: React.MouseEvent) => {
+                      if (hasActiveModifierKey(event)) return;
+                      event.preventDefault();
+                      routerHistory.push({
+                        pathname: `/${item.id}`,
+                        state: getWorkflowDetailRouteState(workflowsListSearch),
+                      });
+                    }}
+                    css={nameCellTextStyle}
+                    title={name}
+                    data-test-subj="workflowNameLink"
+                  >
+                    {name}
+                  </EuiLink>
+                ) : (
+                  <EuiText
+                    size="s"
+                    css={nameCellTextStyle}
+                    title={name}
+                    data-test-subj="workflowNameText"
+                  >
+                    {name}
+                  </EuiText>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText
+              size="xs"
+              color="subdued"
+              title={item.description}
+              css={nameCellDescriptionStyle}
+            >
+              {item.description || (
+                <FormattedMessage
+                  id="workflows.workflowList.noDescription"
+                  defaultMessage="No description"
+                />
+              )}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
+    );
+  }
+);
+WorkflowNameCell.displayName = 'WorkflowNameCell';
+
+const WorkflowLastRunCell = React.memo(
+  ({
+    history,
+    canReadWorkflowExecution,
+  }: {
+    history: WorkflowListItemDto['history'];
+    canReadWorkflowExecution: boolean;
+  }) => {
+    if (!canReadWorkflowExecution) {
+      return (
+        <EuiText size="xs" color="subdued" data-test-subj="workflowLastRunRestricted">
+          {i18n.translate('workflows.workflowList.lastRun.restricted', {
+            defaultMessage: '—',
+          })}
+        </EuiText>
+      );
+    }
+    if (!history || history.length === 0) return null;
+    const lastRun = history[0];
+    return <StatusBadge status={lastRun.status} date={lastRun.finishedAt || lastRun.startedAt} />;
+  }
+);
+WorkflowLastRunCell.displayName = 'WorkflowLastRunCell';
+
+const WorkflowEnabledCell = React.memo(
+  ({
+    item,
+    canUpdateWorkflow,
+    onToggleWorkflow,
+  }: {
+    item: WorkflowListItemDto;
+    canUpdateWorkflow: boolean;
+    onToggleWorkflow: (item: WorkflowListItemDto) => void;
+  }) => {
+    // Validation errors block turning the workflow on, not off.
+    const canToggleEnabled = item.enabled || item.valid;
+    return (
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={
+              !canToggleEnabled
+                ? i18n.translate('workflows.workflowList.invalid', {
+                    defaultMessage: 'Fix errors to enable workflow',
+                  })
+                : undefined
+            }
+          >
+            <EuiSwitch
+              data-test-subj={`workflowToggleSwitch-${item.id}`}
+              disabled={!canUpdateWorkflow || item.permissions?.edit === false || !canToggleEnabled}
+              checked={item.enabled}
+              onChange={() => onToggleWorkflow(item)}
+              label={
+                item.enabled
+                  ? i18n.translate('workflows.workflowList.enabled', {
+                      defaultMessage: 'Enabled',
+                    })
+                  : i18n.translate('workflows.workflowList.disabled', {
+                      defaultMessage: 'Disabled',
+                    })
+              }
+              showLabel={false}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+        {!item.valid && (
+          <EuiFlexItem grow={false}>
+            <WorkflowStatus valid={item.valid} />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    );
+  }
+);
+WorkflowEnabledCell.displayName = 'WorkflowEnabledCell';
 
 export interface WorkflowListTableProps {
   items: WorkflowListItemDto[];
@@ -73,12 +261,12 @@ export const WorkflowListTable = ({
   selectedItems,
   onSelectionChange,
   onPageChange,
-  onToggleWorkflow,
-  onDeleteWorkflow,
-  onCloneWorkflow,
-  onExportWorkflow,
-  onRequestRun,
-  onEditWorkflow,
+  onToggleWorkflow: onToggleWorkflowProp,
+  onDeleteWorkflow: onDeleteWorkflowProp,
+  onCloneWorkflow: onCloneWorkflowProp,
+  onExportWorkflow: onExportWorkflowProp,
+  onRequestRun: onRequestRunProp,
+  onEditWorkflow: onEditWorkflowProp,
   canCreateWorkflow,
   canReadWorkflow,
   canReadWorkflowExecution,
@@ -90,8 +278,16 @@ export const WorkflowListTable = ({
   sortOrder,
   onSortChange,
 }: WorkflowListTableProps) => {
-  const routerHistory = useHistory();
   const allowRowSelection = canUpdateWorkflow || canDeleteWorkflow || canReadWorkflow;
+
+  // The parent recreates these on every render (they close over mutation objects), which would
+  // invalidate `columns` and every memoized cell on each selection change.
+  const onToggleWorkflow = useStableCallback(onToggleWorkflowProp);
+  const onDeleteWorkflow = useStableCallback(onDeleteWorkflowProp);
+  const onCloneWorkflow = useStableCallback(onCloneWorkflowProp);
+  const onExportWorkflow = useStableCallback(onExportWorkflowProp);
+  const onRequestRun = useStableCallback(onRequestRunProp);
+  const onEditWorkflow = useStableCallback(onEditWorkflowProp);
 
   const columns = useMemo<Array<EuiBasicTableColumn<WorkflowListItemDto>>>(
     () => [
@@ -101,87 +297,11 @@ export const WorkflowListTable = ({
         dataType: 'string',
         sortable: true,
         render: (name: string, item) => (
-          <div
-            css={css`
-              max-width: 100%;
-              overflow: hidden;
-            `}
-          >
-            <EuiFlexGroup direction="column" gutterSize="xs">
-              <EuiFlexItem>
-                <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
-                  <EuiFlexItem
-                    grow={false}
-                    css={css`
-                      min-width: 0;
-                    `}
-                  >
-                    {canReadWorkflow ? (
-                      <EuiLink
-                        href={routerHistory.createHref({ pathname: `/${item.id}` })}
-                        onClick={(event: React.MouseEvent) => {
-                          if (hasActiveModifierKey(event)) return;
-                          event.preventDefault();
-                          routerHistory.push({
-                            pathname: `/${item.id}`,
-                            state: getWorkflowDetailRouteState(workflowsListSearch),
-                          });
-                        }}
-                        css={css`
-                          white-space: nowrap;
-                          overflow: hidden;
-                          text-overflow: ellipsis;
-                          display: block;
-                          max-width: 100%;
-                        `}
-                        title={name}
-                        data-test-subj="workflowNameLink"
-                      >
-                        {name}
-                      </EuiLink>
-                    ) : (
-                      <EuiText
-                        size="s"
-                        css={css`
-                          white-space: nowrap;
-                          overflow: hidden;
-                          text-overflow: ellipsis;
-                          display: block;
-                          max-width: 100%;
-                        `}
-                        title={name}
-                        data-test-subj="workflowNameText"
-                      >
-                        {name}
-                      </EuiText>
-                    )}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText
-                  size="xs"
-                  color="subdued"
-                  title={item.description}
-                  css={css`
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    max-width: 100%;
-                    display: block;
-                    width: 100%;
-                  `}
-                >
-                  {item.description || (
-                    <FormattedMessage
-                      id="workflows.workflowList.noDescription"
-                      defaultMessage="No description"
-                    />
-                  )}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </div>
+          <WorkflowNameCell
+            item={item}
+            canReadWorkflow={canReadWorkflow}
+            workflowsListSearch={workflowsListSearch}
+          />
         ),
       },
       {
@@ -189,7 +309,7 @@ export const WorkflowListTable = ({
         name: i18n.translate('workflows.workflowList.column.tags', {
           defaultMessage: 'Tags',
         }),
-        width: '18%',
+        width: '11em',
         render: (value: unknown, item: WorkflowListItemDto) => (
           <WorkflowTagsCell tags={item.definition?.tags} isManaged={item.managed === true} />
         ),
@@ -199,11 +319,11 @@ export const WorkflowListTable = ({
         name: i18n.translate('workflows.workflowList.column.triggersAndSteps', {
           defaultMessage: 'Triggers and Steps',
         }),
-        width: '24%',
+        width: '220px',
         render: (value: unknown, item: WorkflowListItemDto) => {
-          const triggers = item.definition?.triggers ?? [];
-          const steps = item.definition?.steps ?? [];
-          const history = item.history ?? [];
+          const triggers = item.definition?.triggers ?? EMPTY_TRIGGERS;
+          const steps = item.definition?.steps ?? EMPTY_STEPS;
+          const history = item.history ?? EMPTY_HISTORY;
 
           return <WorkflowTriggersAndSteps triggers={triggers} steps={steps} history={history} />;
         },
@@ -213,23 +333,13 @@ export const WorkflowListTable = ({
           defaultMessage: 'Last run',
         }),
         field: 'runHistory',
-        width: '10%',
-        render: (value: unknown, item: WorkflowListItemDto) => {
-          if (!canReadWorkflowExecution) {
-            return (
-              <EuiText size="xs" color="subdued" data-test-subj="workflowLastRunRestricted">
-                {i18n.translate('workflows.workflowList.lastRun.restricted', {
-                  defaultMessage: '—',
-                })}
-              </EuiText>
-            );
-          }
-          if (!item.history || item.history.length === 0) return null;
-          const lastRun = item.history[0];
-          return (
-            <StatusBadge status={lastRun.status} date={lastRun.finishedAt || lastRun.startedAt} />
-          );
-        },
+        width: '8em',
+        render: (value: unknown, item: WorkflowListItemDto) => (
+          <WorkflowLastRunCell
+            history={item.history}
+            canReadWorkflowExecution={canReadWorkflowExecution}
+          />
+        ),
       },
       {
         name: i18n.translate('workflows.workflowList.column.enabled', {
@@ -238,49 +348,13 @@ export const WorkflowListTable = ({
         field: 'enabled',
         width: '90px',
         sortable: true,
-        render: (value: unknown, item: WorkflowListItemDto) => {
-          // Validation errors block turning the workflow on, not off.
-          const canToggleEnabled = item.enabled || item.valid;
-          return (
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={
-                    !canToggleEnabled
-                      ? i18n.translate('workflows.workflowList.invalid', {
-                          defaultMessage: 'Fix errors to enable workflow',
-                        })
-                      : undefined
-                  }
-                >
-                  <EuiSwitch
-                    data-test-subj={`workflowToggleSwitch-${item.id}`}
-                    disabled={
-                      !canUpdateWorkflow || item.permissions?.edit === false || !canToggleEnabled
-                    }
-                    checked={item.enabled}
-                    onChange={() => onToggleWorkflow(item)}
-                    label={
-                      item.enabled
-                        ? i18n.translate('workflows.workflowList.enabled', {
-                            defaultMessage: 'Enabled',
-                          })
-                        : i18n.translate('workflows.workflowList.disabled', {
-                            defaultMessage: 'Disabled',
-                          })
-                    }
-                    showLabel={false}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-              {!item.valid && (
-                <EuiFlexItem grow={false}>
-                  <WorkflowStatus valid={item.valid} />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          );
-        },
+        render: (value: unknown, item: WorkflowListItemDto) => (
+          <WorkflowEnabledCell
+            item={item}
+            canUpdateWorkflow={canUpdateWorkflow}
+            onToggleWorkflow={onToggleWorkflow}
+          />
+        ),
       },
       {
         name: '',
@@ -372,7 +446,6 @@ export const WorkflowListTable = ({
       canCreateWorkflow,
       canDeleteWorkflow,
       onEditWorkflow,
-      routerHistory,
       workflowsListSearch,
       onToggleWorkflow,
       onCloneWorkflow,
@@ -463,83 +536,80 @@ const overflowPopoverStyle = css`
   overflow: auto;
 `;
 
-const WorkflowTagsCell = ({
-  tags,
-  isManaged,
-}: {
-  tags: readonly string[] | undefined;
-  isManaged: boolean;
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
-  const close = useCallback(() => setIsOpen(false), []);
+const WorkflowTagsCell = React.memo(
+  ({ tags, isManaged }: { tags: readonly string[] | undefined; isManaged: boolean }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
+    const close = useCallback(() => setIsOpen(false), []);
 
-  if (!isManaged && (!tags || tags.length === 0)) return null;
+    if (!isManaged && (!tags || tags.length === 0)) return null;
 
-  const workflowTags = tags ?? [];
-  const visibleWorkflowTags = workflowTags.slice(
-    0,
-    isManaged ? MAX_VISIBLE_TAGS - 1 : MAX_VISIBLE_TAGS
-  );
-  const hidden = workflowTags.slice(visibleWorkflowTags.length);
+    const workflowTags = tags ?? [];
+    const visibleWorkflowTags = workflowTags.slice(
+      0,
+      isManaged ? MAX_VISIBLE_TAGS - 1 : MAX_VISIBLE_TAGS
+    );
+    const hidden = workflowTags.slice(visibleWorkflowTags.length);
 
-  return (
-    <EuiFlexGroup
-      alignItems="center"
-      gutterSize="xs"
-      responsive={false}
-      css={tagsRowStyle}
-      data-test-subj="workflowTags"
-    >
-      {isManaged ? (
-        <EuiFlexItem grow={false} css={visibleTagStyle}>
-          <ManagedWorkflowBadge />
-        </EuiFlexItem>
-      ) : null}
-      {visibleWorkflowTags.map((tag) => (
-        <EuiFlexItem key={tag} grow={false} css={visibleTagStyle}>
-          <EuiBadge color="hollow" title={tag}>
-            {tag}
-          </EuiBadge>
-        </EuiFlexItem>
-      ))}
-      {hidden.length > 0 && (
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            ownFocus
-            isOpen={isOpen}
-            closePopover={close}
-            aria-label={i18n.translate('workflows.workflowList.tags.popoverTitle', {
-              defaultMessage: 'Tags',
-            })}
-            button={
-              <EuiBadge
-                color="hollow"
-                onClick={toggle}
-                onClickAriaLabel={i18n.translate('workflows.workflowList.tags.moreAriaLabel', {
-                  defaultMessage: 'View more tags',
-                })}
-                data-test-subj="workflowTagsOverflowBadge"
-              >
-                {`+${hidden.length}`}
-              </EuiBadge>
-            }
-          >
-            <EuiPopoverTitle>
-              {i18n.translate('workflows.workflowList.tags.popoverTitle', {
+    return (
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="xs"
+        responsive={false}
+        css={tagsRowStyle}
+        data-test-subj="workflowTags"
+      >
+        {isManaged ? (
+          <EuiFlexItem grow={false} css={visibleTagStyle}>
+            <ManagedWorkflowBadge />
+          </EuiFlexItem>
+        ) : null}
+        {visibleWorkflowTags.map((tag) => (
+          <EuiFlexItem key={tag} grow={false} css={visibleTagStyle}>
+            <EuiBadge color="hollow" title={tag}>
+              {tag}
+            </EuiBadge>
+          </EuiFlexItem>
+        ))}
+        {hidden.length > 0 && (
+          <EuiFlexItem grow={false}>
+            <EuiPopover
+              ownFocus
+              isOpen={isOpen}
+              closePopover={close}
+              aria-label={i18n.translate('workflows.workflowList.tags.popoverTitle', {
                 defaultMessage: 'Tags',
               })}
-            </EuiPopoverTitle>
-            <EuiBadgeGroup gutterSize="xs" css={overflowPopoverStyle}>
-              {hidden.map((tag) => (
-                <EuiBadge key={tag} color="hollow">
-                  {tag}
+              button={
+                <EuiBadge
+                  color="hollow"
+                  onClick={toggle}
+                  onClickAriaLabel={i18n.translate('workflows.workflowList.tags.moreAriaLabel', {
+                    defaultMessage: 'View more tags',
+                  })}
+                  data-test-subj="workflowTagsOverflowBadge"
+                >
+                  {`+${hidden.length}`}
                 </EuiBadge>
-              ))}
-            </EuiBadgeGroup>
-          </EuiPopover>
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-  );
-};
+              }
+            >
+              <EuiPopoverTitle>
+                {i18n.translate('workflows.workflowList.tags.popoverTitle', {
+                  defaultMessage: 'Tags',
+                })}
+              </EuiPopoverTitle>
+              <EuiBadgeGroup gutterSize="xs" css={overflowPopoverStyle}>
+                {hidden.map((tag) => (
+                  <EuiBadge key={tag} color="hollow">
+                    {tag}
+                  </EuiBadge>
+                ))}
+              </EuiBadgeGroup>
+            </EuiPopover>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    );
+  }
+);
+WorkflowTagsCell.displayName = 'WorkflowTagsCell';
