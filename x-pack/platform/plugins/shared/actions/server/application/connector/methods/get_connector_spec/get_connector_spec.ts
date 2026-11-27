@@ -33,27 +33,28 @@ export async function getConnectorSpecAsJsonSchema({
     throw error;
   }
 
-  const registered = getRegisteredSpec(context.actionTypeRegistry, id);
-  const actionType = context.actionTypeRegistry.get(id);
+  const actionType =
+    configurationUtilities.isCatalogEnabled() && context.actionTypeRegistry.has(id)
+      ? context.actionTypeRegistry.get(id)
+      : undefined;
+  const resolvedSpec = actionType?.specs?.size
+    ? resolveConnectorSpecVersion({ actionType, specVersion, configurationUtilities })
+    : undefined;
+  const registered = getRegisteredSpec(context.actionTypeRegistry, id, resolvedSpec?.selectedSpec);
 
-  const hasSpecVersions = configurationUtilities.isCatalogEnabled() && actionType?.specs?.size! > 0;
   if (
-    !hasSpecVersions &&
+    !resolvedSpec &&
     specVersion !== undefined &&
     specVersion !== DEFAULT_CONNECTOR_SPEC_VERSION
   ) {
     throw createUnknownSpecVersionError(specVersion, id);
   }
 
-  const { resolvedSpecVersion, selectedSpec } = hasSpecVersions
-    ? resolveConnectorSpecVersion({ actionType, specVersion, configurationUtilities })
-    : { resolvedSpecVersion: undefined, selectedSpec: registered.spec };
-
-  const spec = selectedSpec ?? registered.spec;
-  const detail = serializeSpecDetail({ ...registered, spec }, configurationUtilities);
+  const { spec } = registered;
+  const detail = serializeSpecDetail(registered, configurationUtilities);
 
   return {
-    metadata: { ...spec.metadata, specVersion: resolvedSpecVersion },
+    metadata: { ...spec.metadata, specVersion: resolvedSpec?.resolvedSpecVersion },
     schema: detail.formSchema,
     isTestable: detail.isTestable,
     authTypeIds: detail.authTypeIds,
