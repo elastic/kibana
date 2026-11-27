@@ -15,7 +15,10 @@ import {
   getMockMitreSubtechnique,
 } from '../../mocks/mitre_entities.mock';
 import { createMitreAttackDataClient } from './mitre_attack_data_client';
-import { MITRE_ATTACK_ENTITY_SO_TYPE } from '@kbn/security-mitre-attack-common';
+import {
+  MITRE_ATTACK_ENTITY_SO_TYPE,
+  MitreDataUnavailableError,
+} from '@kbn/security-mitre-attack-common';
 import { mitreAttackDataServiceMock } from '../__mocks__/mitre_attack_data_service';
 
 describe('MitreAttackDataClient.list', () => {
@@ -114,7 +117,20 @@ describe('MitreAttackDataClient.list', () => {
         per_page: 1,
         page: 1,
       })
-      .mockResolvedValueOnce({ saved_objects: [], total: 0, per_page: 10000, page: 1 });
+      .mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'enterprise:15.1:TA0001',
+            type: MITRE_ATTACK_ENTITY_SO_TYPE,
+            references: [],
+            score: 0,
+            attributes: getMockMitreTactic({ framework_version: '15.1' }),
+          },
+        ],
+        total: 1,
+        per_page: 10000,
+        page: 1,
+      });
 
     await buildClient().list({ types: ['tactic'] });
 
@@ -138,7 +154,20 @@ describe('MitreAttackDataClient.list', () => {
         per_page: 1,
         page: 1,
       })
-      .mockResolvedValueOnce({ saved_objects: [], total: 0, per_page: 10000, page: 1 });
+      .mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'enterprise:15.1:TA0001',
+            type: MITRE_ATTACK_ENTITY_SO_TYPE,
+            references: [],
+            score: 0,
+            attributes: getMockMitreTactic({ framework_version: '15.1' }),
+          },
+        ],
+        total: 1,
+        per_page: 10000,
+        page: 1,
+      });
 
     await buildClient().list({ types: ['technique'] });
 
@@ -162,7 +191,20 @@ describe('MitreAttackDataClient.list', () => {
         per_page: 1,
         page: 1,
       })
-      .mockResolvedValueOnce({ saved_objects: [], total: 0, per_page: 10000, page: 1 });
+      .mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'enterprise:15.1:TA0001',
+            type: MITRE_ATTACK_ENTITY_SO_TYPE,
+            references: [],
+            score: 0,
+            attributes: getMockMitreTactic({ framework_version: '15.1' }),
+          },
+        ],
+        total: 1,
+        per_page: 10000,
+        page: 1,
+      });
 
     await buildClient().list({ types: ['subtechnique'] });
 
@@ -171,6 +213,7 @@ describe('MitreAttackDataClient.list', () => {
   });
 
   it('excludes revoked and deprecated entities by default', async () => {
+    const tactic = getMockMitreTactic({ framework_version: '15.1' });
     savedObjectsRepository.find
       .mockResolvedValueOnce({
         saved_objects: [
@@ -179,14 +222,27 @@ describe('MitreAttackDataClient.list', () => {
             type: MITRE_ATTACK_ENTITY_SO_TYPE,
             references: [],
             score: 0,
-            attributes: getMockMitreTactic({ framework_version: '15.1' }),
+            attributes: tactic,
           },
         ],
         total: 1,
         per_page: 1,
         page: 1,
       })
-      .mockResolvedValueOnce({ saved_objects: [], total: 0, per_page: 10000, page: 1 });
+      .mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: `enterprise:15.1:${tactic.id}`,
+            type: MITRE_ATTACK_ENTITY_SO_TYPE,
+            references: [],
+            score: 1.0,
+            attributes: tactic,
+          },
+        ],
+        total: 1,
+        per_page: 10000,
+        page: 1,
+      });
 
     await buildClient().list();
 
@@ -196,6 +252,7 @@ describe('MitreAttackDataClient.list', () => {
   });
 
   it("includes revoked and deprecated entities when status is 'all'", async () => {
+    const tactic = getMockMitreTactic({ framework_version: '15.1' });
     savedObjectsRepository.find
       .mockResolvedValueOnce({
         saved_objects: [
@@ -204,14 +261,27 @@ describe('MitreAttackDataClient.list', () => {
             type: MITRE_ATTACK_ENTITY_SO_TYPE,
             references: [],
             score: 0,
-            attributes: getMockMitreTactic({ framework_version: '15.1' }),
+            attributes: tactic,
           },
         ],
         total: 1,
         per_page: 1,
         page: 1,
       })
-      .mockResolvedValueOnce({ saved_objects: [], total: 0, per_page: 10000, page: 1 });
+      .mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: `enterprise:15.1:${tactic.id}`,
+            type: MITRE_ATTACK_ENTITY_SO_TYPE,
+            references: [],
+            score: 1.0,
+            attributes: tactic,
+          },
+        ],
+        total: 1,
+        per_page: 10000,
+        page: 1,
+      });
 
     await buildClient().list({ status: 'all' });
 
@@ -236,7 +306,7 @@ describe('MitreAttackDataClient.list', () => {
     expect(result.subtechniques).toHaveLength(0);
   });
 
-  it('returns empty collection with frameworkVersion undefined when no docs exist', async () => {
+  it('throws MitreDataUnavailableError when an unpinned query returns empty (storage loss)', async () => {
     savedObjectsRepository.find.mockResolvedValueOnce({
       saved_objects: [],
       total: 0,
@@ -244,10 +314,60 @@ describe('MitreAttackDataClient.list', () => {
       page: 1,
     });
 
-    const result = await buildClient().list();
+    await expect(buildClient().list()).rejects.toThrow(MitreDataUnavailableError);
+    expect(dataService.reportEmptyWhileReady).toHaveBeenCalled();
+  });
 
-    expect(result.frameworkVersion).toBeUndefined();
+  const mockLatestVersionThenEmpty = () =>
+    savedObjectsRepository.find
+      .mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'enterprise:15.1:any',
+            type: MITRE_ATTACK_ENTITY_SO_TYPE,
+            references: [],
+            score: 0,
+            attributes: getMockMitreTactic({ framework_version: '15.1' }),
+          },
+        ],
+        total: 1,
+        per_page: 1,
+        page: 1,
+      })
+      .mockResolvedValueOnce({ saved_objects: [], total: 0, per_page: 10000, page: 1 });
+
+  it('throws and reports when a non-enterprise framework query returns empty', async () => {
+    mockLatestVersionThenEmpty();
+
+    await expect(buildClient().list({ framework: 'atlas' })).rejects.toThrow(
+      MitreDataUnavailableError
+    );
+    expect(dataService.reportEmptyWhileReady).toHaveBeenCalled();
+  });
+
+  it('throws and reports when a types-filtered enterprise query returns empty', async () => {
+    mockLatestVersionThenEmpty();
+
+    await expect(
+      buildClient().list({ framework: 'enterprise', types: ['tactic'] })
+    ).rejects.toThrow(MitreDataUnavailableError);
+    expect(dataService.reportEmptyWhileReady).toHaveBeenCalled();
+  });
+
+  it('returns empty collection without throwing or reporting when a frameworkVersion is pinned', async () => {
+    savedObjectsRepository.find.mockResolvedValueOnce({
+      saved_objects: [],
+      total: 0,
+      per_page: 10000,
+      page: 1,
+    });
+
+    const result = await buildClient().list({ framework: 'atlas', frameworkVersion: '0.0' });
+
     expect(result.tactics).toHaveLength(0);
+    expect(result.techniques).toHaveLength(0);
+    expect(result.subtechniques).toHaveLength(0);
+    expect(dataService.reportEmptyWhileReady).not.toHaveBeenCalled();
   });
 
   it('throws when a stored document fails validation', async () => {
@@ -286,6 +406,7 @@ describe('MitreAttackDataClient.list', () => {
   });
 
   it('calls find with perPage 10000 and all namespaces', async () => {
+    const tactic = getMockMitreTactic({ framework_version: '15.1' });
     savedObjectsRepository.find
       .mockResolvedValueOnce({
         saved_objects: [
@@ -294,14 +415,27 @@ describe('MitreAttackDataClient.list', () => {
             type: MITRE_ATTACK_ENTITY_SO_TYPE,
             references: [],
             score: 0,
-            attributes: getMockMitreTactic({ framework_version: '15.1' }),
+            attributes: tactic,
           },
         ],
         total: 1,
         per_page: 1,
         page: 1,
       })
-      .mockResolvedValueOnce({ saved_objects: [], total: 0, per_page: 10000, page: 1 });
+      .mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: `enterprise:15.1:${tactic.id}`,
+            type: MITRE_ATTACK_ENTITY_SO_TYPE,
+            references: [],
+            score: 1.0,
+            attributes: tactic,
+          },
+        ],
+        total: 1,
+        per_page: 10000,
+        page: 1,
+      });
 
     await buildClient().list();
 
@@ -410,16 +544,10 @@ describe('MitreAttackDataClient.list', () => {
     );
   });
 
-  it('returns the empty collection and issues no repository call when ensureInitialized() resolves false', async () => {
+  it('throws MitreDataUnavailableError and issues no repository call when ensureInitialized() resolves false', async () => {
     dataService.ensureInitialized.mockResolvedValueOnce(false);
 
-    const result = await buildClient().list();
-
-    expect(result.framework).toBe('enterprise');
-    expect(result.frameworkVersion).toBeUndefined();
-    expect(result.tactics).toHaveLength(0);
-    expect(result.techniques).toHaveLength(0);
-    expect(result.subtechniques).toHaveLength(0);
+    await expect(buildClient().list()).rejects.toThrow(MitreDataUnavailableError);
     expect(savedObjectsRepository.find).not.toHaveBeenCalled();
   });
 });

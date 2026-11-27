@@ -346,6 +346,83 @@ describe('MitreAttackDataService', () => {
     });
   });
 
+  it('counts only successfully written entities', async () => {
+    const entities = [
+      getMockMitreTactic({ id: 'TA0001' }),
+      getMockMitreTactic({ id: 'TA0002' }),
+      getMockMitreTactic({ id: 'AML.TA0001', framework: 'atlas', framework_version: '5.0' }),
+    ];
+    mockLoadMitreArtifact.mockReturnValue(entities);
+    savedObjectsRepository.bulkCreate.mockResolvedValue({
+      saved_objects: [
+        ...['TA0001', 'TA0002'].map((id) => ({
+          id: `enterprise:15.1:${id}`,
+          type: 'mitre-attack-entity',
+          attributes: getMockMitreTactic({ id }),
+          references: [],
+          version: '1',
+        })),
+        {
+          id: 'atlas:5.0:AML.TA0001',
+          type: 'mitre-attack-entity',
+          error: { statusCode: 500, error: 'Internal Server Error', message: 'ES error' },
+        },
+      ],
+    } as SavedObjectsBulkResponse<MitreEntity>);
+
+    await service.populate();
+
+    const status = service.getStatus();
+    expect(status.status).toBe('degraded');
+    expect(status.counts?.atlas).toBeUndefined();
+    expect(status.counts?.enterprise).toBe(2);
+  });
+
+  it('reports degraded while a repair serves partial data, and initializing on a first run', async () => {
+    const entities = [getMockMitreTactic({ id: 'TA0001' }), getMockMitreTactic({ id: 'TA0002' })];
+    mockLoadMitreArtifact.mockReturnValue(entities);
+    const toResponse = (failedIds: string[]) =>
+      ({
+        saved_objects: entities.map(({ id }) =>
+          failedIds.includes(id)
+            ? {
+                id: `enterprise:15.1:${id}`,
+                type: 'mitre-attack-entity',
+                error: { statusCode: 500, error: 'Internal Server Error', message: 'ES error' },
+              }
+            : {
+                id: `enterprise:15.1:${id}`,
+                type: 'mitre-attack-entity',
+                attributes: entities[0],
+                references: [],
+                version: '1',
+              }
+        ),
+      } as SavedObjectsBulkResponse<MitreEntity>);
+    let resolveRepair!: (value: SavedObjectsBulkResponse<MitreEntity>) => void;
+    savedObjectsRepository.bulkCreate
+      .mockResolvedValueOnce(toResponse(['TA0002']))
+      .mockReturnValueOnce(
+        new Promise<SavedObjectsBulkResponse<MitreEntity>>((resolve) => {
+          resolveRepair = resolve;
+        })
+      );
+
+    const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(1_000_000);
+    const firstRun = service.populate();
+    expect(service.getStatus().status).toBe('initializing');
+    await firstRun;
+    expect(service.getStatus().status).toBe('degraded');
+
+    nowSpy.mockReturnValue(1_000_000 + POPULATION_RETRY_COOLDOWN_MS);
+    await service.ensureInitialized();
+    expect(service.getStatus().status).toBe('degraded');
+
+    resolveRepair(toResponse([]));
+    await service.populate();
+    expect(service.getStatus().status).toBe('ready');
+  });
+
   it('a failure of every entity sets the state to failed', async () => {
     const entities = [getMockMitreTactic({ id: 'TA0001' }), getMockMitreTactic({ id: 'TA0002' })];
     mockLoadMitreArtifact.mockReturnValue(entities);
@@ -364,6 +441,67 @@ describe('MitreAttackDataService', () => {
       expect.stringContaining('Failed to populate MITRE data: 2 error(s) out of 2 entities')
     );
     expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  describe('getStatus()', () => {
+    it('returns idle initially', () => {
+      expect(service.getStatus()).toEqual({ status: 'idle' });
+    });
+
+    it('returns ready with counts after successful population', async () => {
+      await service.populate();
+
+      const status = service.getStatus();
+      expect(status.status).toBe('ready');
+      expect(status.counts).toEqual({ enterprise: 1 });
+      expect(status.lastError).toBeUndefined();
+      expect(status.lastAttemptAt).toEqual(expect.any(Number));
+    });
+
+    it('returns failed with lastError after failed population', async () => {
+      savedObjectsRepository.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'enterprise:15.1:TA0001',
+            type: 'mitre-attack-entity',
+            error: { statusCode: 500, error: 'Internal Server Error', message: 'ES write error' },
+          },
+        ],
+      } as SavedObjectsBulkResponse<MitreEntity>);
+
+      await service.populate();
+
+      const status = service.getStatus();
+      expect(status.status).toBe('failed');
+      expect(status.lastError).toEqual(expect.any(String));
+      expect(status.lastAttemptAt).toEqual(expect.any(Number));
+    });
+  });
+
+  describe('reportEmptyWhileReady()', () => {
+    it('flips ready to degraded and triggers repopulation', async () => {
+      await service.populate();
+      expect(service.getStatus().status).toBe('ready');
+      expect(savedObjectsRepository.bulkCreate).toHaveBeenCalledTimes(1);
+
+      service.reportEmptyWhileReady();
+
+      expect(service.getStatus().status).toBe('degraded');
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('MITRE data reported empty while state is ready')
+      );
+      await service.populate(); // joins the repair run
+      expect(savedObjectsRepository.bulkCreate).toHaveBeenCalledTimes(2);
+      expect(service.getStatus().status).toBe('ready');
+    });
+
+    it('is a no-op when not in ready state', () => {
+      service.reportEmptyWhileReady();
+
+      expect(service.getStatus()).toEqual({ status: 'idle' });
+      expect(savedObjectsRepository.bulkCreate).not.toHaveBeenCalled();
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
   });
 
   describe('retry cooldown', () => {
