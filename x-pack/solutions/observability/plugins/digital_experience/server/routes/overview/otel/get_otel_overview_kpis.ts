@@ -18,6 +18,7 @@ import type { ApplicationOverviewKpisResponse } from '../../../../common/types/o
 import { runEsql, timeFilter } from '../../../lib/esql';
 import { serviceDocuments } from '../../../lib/otel/queries';
 import type { ApplicationSearch } from '../../application_tab_route';
+import { overviewDiscoverQueries } from './discover_queries';
 import { overviewKpisQuery, type OverviewKpisRow } from './kpis_query';
 
 const NANOSECONDS_PER_MILLISECOND = 1_000_000;
@@ -86,9 +87,12 @@ export const getOtelOverviewKpis = async ({
   end,
   filters = {},
   percentile = DEFAULT_OVERVIEW_PERCENTILE,
+  kueryText,
   ...application
 }: ApplicationSearch & {
   percentile?: OverviewPercentile;
+  /** The KQL query as typed, which Discover runs; `application.kuery` is its translation. */
+  kueryText?: string;
 }): Promise<ApplicationOverviewKpisResponse> => {
   const previousPeriod = getPreviousPeriod(start, end);
   const query = overviewKpisQuery(filters, percentile);
@@ -111,6 +115,12 @@ export const getOtelOverviewKpis = async ({
 
   return {
     percentile,
+    discover: overviewDiscoverQueries({
+      serviceName: application.serviceName,
+      environment: application.environment,
+      filters,
+      kuery: kueryText,
+    }),
     sessions: toComparedValue(current.sessions, previous.sessions),
     errorFreeSessions: toComparedValue(current.errorFreeSessions, previous.errorFreeSessions),
     pageLoads: toComparedValue(current.pageLoads, previous.pageLoads),

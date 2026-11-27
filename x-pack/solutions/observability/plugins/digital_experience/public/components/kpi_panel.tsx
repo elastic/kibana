@@ -27,6 +27,7 @@ import {
 export function KpiPanel({
   label,
   hint,
+  discoverAction,
   value,
   isEmpty = false,
   isLoading,
@@ -37,6 +38,8 @@ export function KpiPanel({
   label: string;
   /** How the value is calculated. */
   hint?: string;
+  /** A button that opens the events behind the value in Discover; none without it. */
+  discoverAction?: ReactNode;
   value: ReactNode;
   /** The value says there is none, e.g. not enough data: shown as a note, not as a number. */
   isEmpty?: boolean;
@@ -67,6 +70,7 @@ export function KpiPanel({
                 {label}
               </EuiText>
             </EuiFlexItem>
+            {discoverAction && <EuiFlexItem grow={false}>{discoverAction}</EuiFlexItem>}
             {hint && (
               <EuiFlexItem grow={false}>
                 <EuiIconTip

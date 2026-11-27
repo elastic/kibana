@@ -48,7 +48,7 @@ export function DataPanel({
   actions?: ReactNode;
   isLoading: boolean;
   isEmpty: boolean;
-  emptyMessage?: string;
+  emptyMessage?: ReactNode;
   /** Links the empty state to the EDOT Browser docs, for data that depends on instrumentation. */
   showInstrumentationDocs?: boolean;
   'data-test-subj': string;

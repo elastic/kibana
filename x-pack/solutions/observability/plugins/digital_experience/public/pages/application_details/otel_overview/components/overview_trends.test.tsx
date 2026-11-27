@@ -13,6 +13,7 @@ import type { OverviewPercentile } from '../../../../../common/overview_filters'
 import type { OverviewTrendPoint } from '../../../../../common/types/overview';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import { createUiSettingsMock } from '../../../../test_utils/ui_settings_mock';
+import type { OverviewDiscoverHrefs } from '../hooks/use_overview_discover_hrefs';
 import { OverviewTrends } from './overview_trends';
 
 const mockBrushEndListeners: BrushEndListener[] = [];
@@ -56,7 +57,8 @@ const renderTrends = (
   onTimeRangeSelect = jest.fn(),
   percentile: OverviewPercentile = 75,
   onPercentileChange = jest.fn(),
-  range = MATCHING_RANGE
+  range = MATCHING_RANGE,
+  discoverHrefs: OverviewDiscoverHrefs = {}
 ) =>
   render(
     <OverviewTrends
@@ -66,6 +68,7 @@ const renderTrends = (
       loadTimePercentileMs={1500.5}
       percentile={percentile}
       onPercentileChange={onPercentileChange}
+      discoverHrefs={discoverHrefs}
       isLoading={isLoading}
       onTimeRangeSelect={onTimeRangeSelect}
     />,
@@ -91,6 +94,27 @@ beforeEach(() => {
 });
 
 describe('OverviewTrends', () => {
+  it('opens the page loads and the load time in Discover, where there are links', () => {
+    renderTrends(undefined, false, undefined, 75, undefined, undefined, {
+      pageLoads: '/discover/page-loads',
+      loadTime: '/discover/load-time',
+    });
+
+    expect(
+      within(pageLoadsChart()).getByTestId('digitalExperienceOverviewPageLoadsTrendDiscover')
+    ).toHaveAttribute('href', '/discover/page-loads');
+    expect(
+      within(loadTimeChart()).getByTestId('digitalExperienceOverviewLoadTimeTrendDiscover')
+    ).toHaveAttribute('href', '/discover/load-time');
+  });
+
+  it('has a hint on how each metric is calculated', () => {
+    renderTrends();
+
+    expect(screen.getByTestId('digitalExperienceOverviewPageLoadsTrendHint')).toBeInTheDocument();
+    expect(screen.getByTestId('digitalExperienceOverviewLoadTimeTrendHint')).toBeInTheDocument();
+  });
+
   it('draws the page loads and the load time on the buckets of the response', () => {
     renderTrends();
 
@@ -101,15 +125,15 @@ describe('OverviewTrends', () => {
   it('shows the page loads and the load time of the whole range above their charts', () => {
     renderTrends();
 
-    expect(pageLoadsChart()).toHaveTextContent('Page loads2');
-    expect(loadTimeChart()).toHaveTextContent('Load time (p75)1.50 s');
+    expect(pageLoadsChart()).toHaveTextContent('Page loadsInfo2');
+    expect(loadTimeChart()).toHaveTextContent('Load time (p75)Info1.50 s');
   });
 
   it('names the percentile in the load time, and offers the others', () => {
     const onPercentileChange = jest.fn();
     renderTrends(POINTS, false, jest.fn(), 95, onPercentileChange);
 
-    expect(loadTimeChart()).toHaveTextContent('Load time (p95)1.50 s');
+    expect(loadTimeChart()).toHaveTextContent('Load time (p95)Info1.50 s');
     const select = screen.getByTestId('digitalExperienceOverviewPercentile');
     expect(select).toHaveValue('95');
     expect(

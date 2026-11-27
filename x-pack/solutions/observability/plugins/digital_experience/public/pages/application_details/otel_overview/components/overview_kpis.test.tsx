@@ -11,6 +11,7 @@ import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { OverviewPercentile } from '../../../../../common/overview_filters';
 import type { ApplicationOverviewKpisResponse } from '../../../../../common/types/overview';
+import type { OverviewDiscoverHrefs } from '../hooks/use_overview_discover_hrefs';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import { createUiSettingsMock } from '../../../../test_utils/ui_settings_mock';
 import { OverviewKpis } from './overview_kpis';
@@ -52,6 +53,15 @@ const KPIS: ApplicationOverviewKpisResponse = {
   jsErrors: compared(42, 30),
   failedHttpRequests: compared(0.125, 0.1),
   requestLatency: compared(180.4, 200),
+  discover: {
+    sessions: 'FROM sessions',
+    errorFreeSessions: 'FROM errors',
+    pageLoads: 'FROM page-loads',
+    loadTime: 'FROM load-time',
+    jsErrors: 'FROM js-errors',
+    failedHttpRequests: 'FROM failed-requests',
+    requestLatency: 'FROM latency',
+  },
   counts: {
     sessionsWithErrors: 20,
     loadTimeSamples: 1500,
@@ -65,7 +75,9 @@ const renderKpis = ({
   isLoading = false,
   isComparing = false,
   percentile = 75,
+  discoverHrefs = {},
 }: {
+  discoverHrefs?: OverviewDiscoverHrefs;
   kpis?: ApplicationOverviewKpisResponse;
   isLoading?: boolean;
   isComparing?: boolean;
@@ -77,6 +89,7 @@ const renderKpis = ({
         <OverviewKpis
           kpis={isLoading ? undefined : kpis}
           percentile={percentile}
+          discoverHrefs={discoverHrefs}
           isComparing={isComparing}
           isLoading={isLoading}
         />
@@ -93,6 +106,35 @@ beforeEach(() => {
 });
 
 describe('OverviewKpis', () => {
+  it('opens the events behind a tile in Discover, where it has a link', () => {
+    renderKpis({
+      discoverHrefs: {
+        pageLoads: '/app/discover#/?page-loads',
+        jsErrors: '/app/discover#/?errors',
+      },
+    });
+
+    expect(screen.getByTestId('digitalExperienceOverviewPageLoadsDiscover')).toHaveAttribute(
+      'href',
+      '/app/discover#/?page-loads'
+    );
+    expect(screen.getByTestId('digitalExperienceOverviewJsErrorsDiscover')).toHaveAttribute(
+      'href',
+      '/app/discover#/?errors'
+    );
+    expect(
+      screen.queryByTestId('digitalExperienceOverviewSessionsDiscover')
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows no Discover button without a link', () => {
+    renderKpis();
+
+    expect(
+      screen.queryByTestId('digitalExperienceOverviewPageLoadsDiscover')
+    ).not.toBeInTheDocument();
+  });
+
   it('shows every metric with its unit', () => {
     renderKpis();
 

@@ -111,6 +111,9 @@ export const boundedParamRt = (maxLength: number) =>
 /** A frustrated element's selector or page path the list can filter by. */
 export const frustrationFilterRt = filterValueRt(SESSIONS_LIST_MAX_FRUSTRATION_FILTER_LENGTH);
 
+/** An entry page the list can filter by. */
+export const entryPageFilterRt = filterValueRt(SESSIONS_LIST_MAX_FACET_LENGTHS.entryPage);
+
 /** `toBooleanRt` for a URL param: an unset param stays unset rather than becoming `false`. */
 const booleanParamRt = new t.Type<boolean, boolean, unknown>(
   'BooleanParam',
@@ -139,7 +142,7 @@ export const sessionsListQueryRt = t.partial({
   browser: filterValueRt(SESSIONS_LIST_MAX_FACET_LENGTHS.browser),
   os: filterValueRt(SESSIONS_LIST_MAX_FACET_LENGTHS.os),
   country: filterValueRt(SESSIONS_LIST_MAX_FACET_LENGTHS.country),
-  entryPage: filterValueRt(SESSIONS_LIST_MAX_FACET_LENGTHS.entryPage),
+  entryPage: entryPageFilterRt,
   withJsErrors: booleanParamRt,
   withFailedRequests: booleanParamRt,
   withFrustration: booleanParamRt,
