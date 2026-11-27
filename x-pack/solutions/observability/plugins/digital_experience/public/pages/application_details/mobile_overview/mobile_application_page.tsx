@@ -71,7 +71,6 @@ export function MobileApplicationPage({
   const shareAction = useShareAction({ serviceName, source: SOURCE, tab });
   const discoverHref = useMobileDiscoverHref(serviceName, tab);
   const kpisState = useMobileKpis(serviceName);
-
   const isUnsupportedTab = !isMobileTab(selectedTab);
   useEffect(() => {
     if (isUnsupportedTab) {
