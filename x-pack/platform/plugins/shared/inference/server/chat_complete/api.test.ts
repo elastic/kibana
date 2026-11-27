@@ -21,7 +21,9 @@ import {
   type ChatCompleteAPI,
   type ChatCompletionChunkEvent,
   type InferenceClient,
+  InferenceConnectorType,
   MessageRole,
+  ToolChoiceType,
   isChatCompletionChunkEvent,
   isChatCompletionTokenCountEvent,
   createInferenceProviderError,
@@ -166,6 +168,24 @@ describe('createChatCompleteApi', () => {
       temperature: 0.7,
       modelName: 'gpt-4o',
     });
+  });
+
+  it('accepts a Bedrock text response after downgrading a forced tool choice', async () => {
+    const connector = createInferenceConnectorMock({
+      type: InferenceConnectorType.Bedrock,
+      config: { defaultModel: 'eu.anthropic.claude-sonnet-5-5' },
+    });
+    getInferenceExecutorMock.mockResolvedValue(createInferenceExecutorMock({ connector }));
+
+    await expect(
+      chatComplete({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        toolChoice: ToolChoiceType.required,
+        tools: { lookup: { description: 'Look up a value' } },
+        maxRetries: 0,
+      })
+    ).resolves.toMatchObject({ content: 'chunk-1', toolCalls: [] });
   });
 
   it('forwards `maxContentLength` down to `inferenceAdapter.chatComplete`', async () => {
@@ -1384,6 +1404,26 @@ describe('createChatCompleteApi', () => {
           logger,
         })
       );
+    });
+
+    it('accepts endpoint text when the endpoint model downgrades a named tool choice', async () => {
+      resolveInferenceEndpointMock.mockResolvedValue({
+        inferenceId: 'my-endpoint',
+        provider: 'elastic',
+        modelId: 'anthropic-claude-5.5-sonnet',
+        taskType: 'chat_completion',
+      });
+
+      await expect(
+        chatComplete({
+          connectorId: 'my-endpoint',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          modelName: 'gpt-4o',
+          toolChoice: { function: 'lookup' },
+          tools: { lookup: { description: 'Look up a value' } },
+          maxRetries: 0,
+        })
+      ).resolves.toMatchObject({ content: 'endpoint-chunk', toolCalls: [] });
     });
 
     it('returns a promise with the response in non-stream mode', async () => {

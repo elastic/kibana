@@ -56,9 +56,10 @@ describe('chunksIntoMessage', () => {
     });
   });
 
-  it.each([ToolChoiceType.required, { function: 'myFunction' }])(
-    'rejects a completion with only empty tool deltas when the tool choice is %p',
-    async (toolChoice) => {
+  [ToolChoiceType.required, { function: 'myFunction' }].forEach((toolChoice) => {
+    it(`rejects a completion with only empty tool deltas for ${JSON.stringify(
+      toolChoice
+    )}`, async () => {
       const message = lastValueFrom(
         fromEvents({
           type: ChatCompletionEventType.ChatCompletionChunk,
@@ -76,8 +77,8 @@ describe('chunksIntoMessage', () => {
       );
 
       await expect(message).rejects.toThrow('The model response is missing a required tool call');
-    }
-  );
+    });
+  });
 
   it('preserves an explicit refusal when a tool call is required', async () => {
     const message = await lastValueFrom(
