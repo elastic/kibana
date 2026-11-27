@@ -8,6 +8,8 @@
 import type { IRouter } from '@kbn/core/server';
 import {
   type GetConnectorSpecParamsV1,
+  type GetConnectorSpecQueryV1,
+  getConnectorSpecQuerySchemaV1,
   getConnectorSpecParamsSchemaV1,
 } from '../../../../common/routes/connector/apis/get_spec';
 import {
@@ -49,11 +51,20 @@ export const getConnectorSpecRoute = (
       validate: {
         request: {
           params: getConnectorSpecParamsSchemaV1,
+          ...(configurationUtilities.isCatalogEnabled() && {
+            query: getConnectorSpecQuerySchemaV1,
+          }),
         },
         response: {
           200: {
             description: 'Connector specification returned successfully.',
-            body: () => getConnectorSpecResponseBodySchemaV1,
+            body: () =>
+              getConnectorSpecResponseBodySchemaV1({
+                includeSpecVersionField: configurationUtilities.isCatalogEnabled(),
+              }),
+          },
+          400: {
+            description: 'Invalid or unknown connector spec version.',
           },
           404: {
             description: 'Connector type not found or not spec-based.',
@@ -64,13 +75,16 @@ export const getConnectorSpecRoute = (
         },
       },
     },
+
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const actionsClient = (await context.actions).getActionsClient();
         const { id }: GetConnectorSpecParamsV1 = req.params;
+        const { spec_version: specVersion }: GetConnectorSpecQueryV1 = req.query;
         const specResult = await actionsClient.getConnectorSpec({
           id,
           configurationUtilities,
+          ...(configurationUtilities.isCatalogEnabled() && { specVersion }),
         });
         const responseBody: GetConnectorSpecResponseV1 =
           transformGetConnectorSpecResponseV1(specResult);

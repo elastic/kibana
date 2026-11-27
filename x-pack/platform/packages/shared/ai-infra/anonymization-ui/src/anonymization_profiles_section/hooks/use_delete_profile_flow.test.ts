@@ -30,7 +30,7 @@ const createDeleteProfileMutationMock = ({
     isLoading,
     error,
     reset,
-  } as unknown as ReturnType<typeof useDeleteProfile>);
+  }) as unknown as ReturnType<typeof useDeleteProfile>;
 
 const client = {
   findProfiles: jest.fn(),

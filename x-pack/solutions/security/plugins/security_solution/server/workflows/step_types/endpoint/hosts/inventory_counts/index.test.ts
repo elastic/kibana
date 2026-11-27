@@ -40,7 +40,7 @@ const createContext = (callKibanaApi: jest.Mock, esSearch: jest.Mock): Inventory
       getContext: jest.fn(),
       renderInputTemplate: jest.fn(),
     },
-  } as unknown as InventoryContext);
+  }) as unknown as InventoryContext;
 
 const metadataSearchResponse = (count: number) => ({
   hits: { total: { value: count, relation: 'eq' }, hits: [] },

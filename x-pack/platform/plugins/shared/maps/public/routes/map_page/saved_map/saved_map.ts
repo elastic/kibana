@@ -396,7 +396,7 @@ export class SavedMap {
   public getAutoFitToBounds(): boolean {
     return this._mapEmbeddableState?.mapSettings?.autoFitToDataBounds !== undefined
       ? this._mapEmbeddableState.mapSettings.autoFitToDataBounds
-      : this._attributes?.settings?.autoFitToDataBounds ?? false;
+      : (this._attributes?.settings?.autoFitToDataBounds ?? false);
   }
 
   public getSharingSavedObjectProps(): SharingSavedObjectProps | null {

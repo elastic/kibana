@@ -445,7 +445,10 @@ export class WorkflowExecutionQueryService {
     const size = params.size ?? DEFAULT_PAGE_SIZE;
     const from = (page - 1) * size;
     const sort = params.sortField
-      ? [{ [params.sortField]: { order: params.sortOrder ?? 'desc' } }]
+      ? [
+          { [params.sortField]: { order: params.sortOrder ?? 'desc' } },
+          ...(params.collapse === 'workflowId' ? [{ id: 'desc' as const }] : []),
+        ]
       : undefined;
 
     return searchWorkflowExecutions({
@@ -579,7 +582,7 @@ export class WorkflowExecutionQueryService {
     const total =
       typeof response.hits.total === 'number'
         ? response.hits.total
-        : response.hits.total?.value ?? 0;
+        : (response.hits.total?.value ?? 0);
 
     const allResults = response.hits.hits
       .map((hit) => hit._source)
@@ -697,7 +700,7 @@ export class WorkflowExecutionQueryService {
     const total =
       typeof response.hits.total === 'number'
         ? response.hits.total
-        : response.hits.total?.value ?? 0;
+        : (response.hits.total?.value ?? 0);
 
     const allResults = response.hits.hits
       .map((hit) => hit._source)

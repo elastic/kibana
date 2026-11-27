@@ -550,7 +550,7 @@ describe('connector attachment type', () => {
 
 describe('connector toSurfaceComposition', () => {
   const connectorType = createConnectorAttachmentType({
-    getActionSavedObjectsClient: async () => ({} as never),
+    getActionSavedObjectsClient: async () => ({}) as never,
   });
   const spec = {
     metadata: {

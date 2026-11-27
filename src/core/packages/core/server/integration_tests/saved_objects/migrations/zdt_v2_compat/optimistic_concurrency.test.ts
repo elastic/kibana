@@ -47,9 +47,8 @@ describe('ZDT & V2 upgrades - optimistic concurrency tests', () => {
   it.each(['v2', 'zdt'] as const)(
     'doesnt overwrite changes made while migrating (%s)',
     async (migrationAlgorithm) => {
-      const { runMigrations, savedObjectsRepository, client } = await prepareScenario(
-        migrationAlgorithm
-      );
+      const { runMigrations, savedObjectsRepository, client } =
+        await prepareScenario(migrationAlgorithm);
 
       const originalBulkImplementation = client.bulk;
       const spy = jest.spyOn(client, 'bulk');

@@ -198,13 +198,16 @@ const MATCHING_DATA_STREAMS = [
   },
 ];
 
-const DATA_STREAMS_PRIVILEGES = Object.values(MATCHING_DATA_STREAMS).reduce((acc, stream) => {
-  acc[stream.name] = {
-    read: true,
-    monitor: true,
-    read_failure_store: true,
-    manage_failure_store: true,
-  };
+const DATA_STREAMS_PRIVILEGES = Object.values(MATCHING_DATA_STREAMS).reduce(
+  (acc, stream) => {
+    acc[stream.name] = {
+      read: true,
+      monitor: true,
+      read_failure_store: true,
+      manage_failure_store: true,
+    };
 
-  return acc;
-}, {} as Record<string, Record<string, boolean>>);
+    return acc;
+  },
+  {} as Record<string, Record<string, boolean>>
+);

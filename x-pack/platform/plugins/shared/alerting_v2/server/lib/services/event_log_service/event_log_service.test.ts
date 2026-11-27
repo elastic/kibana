@@ -18,7 +18,7 @@ const buildSearchResponse = (
 ) =>
   ({
     hits: { hits, total },
-  } as any);
+  }) as any;
 
 describe('EventLogService', () => {
   describe('logEvent', () => {

@@ -477,7 +477,7 @@ const fieldValue = ({
 }: DataApiField): unknown =>
   isNull
     ? null
-    : stringValue ?? longValue ?? doubleValue ?? booleanValue ?? blobValue ?? arrayValue ?? null;
+    : (stringValue ?? longValue ?? doubleValue ?? booleanValue ?? blobValue ?? arrayValue ?? null);
 
 const recordsToRows = (
   records: DataApiField[][],
@@ -511,4 +511,6 @@ const resolveSchemaName = (
   database: string | undefined,
   schema: string | undefined
 ): string =>
-  getConfig(ctx).engine === 'mysql' ? resolveDatabase(database, ctx) : schema ?? DEFAULT_PG_SCHEMA;
+  getConfig(ctx).engine === 'mysql'
+    ? resolveDatabase(database, ctx)
+    : (schema ?? DEFAULT_PG_SCHEMA);

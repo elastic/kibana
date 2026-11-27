@@ -427,7 +427,7 @@ describe('Upgrade', () => {
             namespace: 'default',
             policy_ids: [`agent-policy-${id}`],
             inputs: [{ id: 'toto', enabled: true, streams: [], type: 'logs' }],
-          } as any)
+          }) as any
       );
 
       const res = await _packagePoliciesGetUpgradeDryRunDiffs({
@@ -455,7 +455,7 @@ describe('Upgrade', () => {
           namespace: 'default',
           policy_ids: [`agent-policy-${id}`],
           inputs: [{ id: 'toto', enabled: true, streams: [], type: 'logs' }],
-        } as any);
+        }) as any;
       const getPackagePolicy = jest.fn(async (_soClient: unknown, id: string) =>
         id === 'with-condition'
           ? packagePolicyOf(id, 'test-agent-condition')

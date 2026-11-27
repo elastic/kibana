@@ -311,7 +311,7 @@ function computeSharedPartitionLayerState(config: PartitionConfig) {
   // Only the first non-collapsed group is colored, as in `fromLensStateToAPIGroups`.
   const coloredGroup = config.group_by?.find(groupIsNotCollapsed);
   const groupColouring = coloredGroup
-    ? coloredGroup.color ?? DEFAULT_CATEGORICAL_COLOR_MAPPING
+    ? (coloredGroup.color ?? DEFAULT_CATEGORICAL_COLOR_MAPPING)
     : undefined;
   const hasColorMapping = groupColouring != null && !('type' in groupColouring);
   const collapseFns = Object.fromEntries(
@@ -514,10 +514,10 @@ function fromLensStateToSharedPartitionAPI(
       layerState.legendDisplay === 'default'
         ? 'auto'
         : layerState.legendDisplay === 'show'
-        ? 'visible'
-        : layerState.legendDisplay === 'hide'
-        ? 'hidden'
-        : undefined,
+          ? 'visible'
+          : layerState.legendDisplay === 'hide'
+            ? 'hidden'
+            : undefined,
     truncate_after_lines: getLegendTruncateAfterLines(layerState),
     nested: isStateWaffleChart(visualization) ? undefined : layerState.nestedLegend,
     size: legendSizeCompat.toAPI(layerState.legendSize),
@@ -573,7 +573,7 @@ function fromLensStateToAPIMetrics(
   const colorForMetric = (id: string) =>
     !supportsMetricColor || hasActiveGroupBy
       ? undefined
-      : fromStaticColorLensStateToAPI(staticColouring?.[id]) ?? AUTO_COLOR;
+      : (fromStaticColorLensStateToAPI(staticColouring?.[id]) ?? AUTO_COLOR);
 
   if (isTextBasedLayer(layer)) {
     return getMetrics(vizLayer).map(
@@ -759,8 +759,8 @@ function fromLensStateToChartSpecificStylingAPI(
       layerState.numberDisplay === 'percent'
         ? ('percentage' as const)
         : layerState.numberDisplay === 'value'
-        ? ('absolute' as const)
-        : undefined,
+          ? ('absolute' as const)
+          : undefined,
     percent_decimals: layerState.percentDecimals,
   });
   const values = Object.keys(valueDisplay).length > 0 ? valueDisplay : undefined;

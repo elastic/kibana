@@ -21,14 +21,11 @@ import { registerRoutes } from './routes';
 import { queryActivityFeature } from './query_activity_feature';
 import { uiSettings } from './ui_settings';
 
-export class QueryActivityPlugin
-  implements
-    Plugin<
-      QueryActivityServerSetup,
-      QueryActivityServerStart,
-      QueryActivityServerSetupDependencies
-    >
-{
+export class QueryActivityPlugin implements Plugin<
+  QueryActivityServerSetup,
+  QueryActivityServerStart,
+  QueryActivityServerSetupDependencies
+> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

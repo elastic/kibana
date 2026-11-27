@@ -52,8 +52,8 @@ export const revokeEarsCredentials = async ({
       result.status === 'fulfilled'
         ? result.value.earsRequestId
         : result.reason instanceof EarsRequestError
-        ? result.reason.earsRequestId
-        : undefined;
+          ? result.reason.earsRequestId
+          : undefined;
     if (earsRequestId) {
       earsRequestIds.push(earsRequestId);
     }

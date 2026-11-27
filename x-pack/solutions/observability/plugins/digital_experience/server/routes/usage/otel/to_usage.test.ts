@@ -33,9 +33,9 @@ const EMPTY_FRUSTRATION: Aggregations['frustration'] = {
 const byType = (rage = 0, dead = 0, error = 0) => {
   return termsAggregate(
     [
-      { key: 'browser.frustration.rage_click', doc_count: rage },
-      { key: 'browser.frustration.dead_click', doc_count: dead },
-      { key: 'browser.frustration.error_click', doc_count: error },
+      { key: 'elastic.frustration.rage_click', doc_count: rage },
+      { key: 'elastic.frustration.dead_click', doc_count: dead },
+      { key: 'elastic.frustration.error_click', doc_count: error },
     ].filter(({ doc_count: count }) => count > 0)
   );
 };

@@ -58,8 +58,7 @@ export type MlEmbeddableTypes =
  * Common API for all ML embeddables
  */
 export interface MlEmbeddableBaseApi<StateType extends object = object>
-  extends DefaultEmbeddableApi<StateType>,
-    PublishesTimeRange {}
+  extends DefaultEmbeddableApi<StateType>, PublishesTimeRange {}
 
 export type MlEntity = Record<string, MlEntityField['fieldValue']>;
 
@@ -71,7 +70,7 @@ export interface AnomalySwimlaneServices {
 export type AnomalySwimlaneEmbeddableServices = [
   CoreStart,
   MlDependencies,
-  AnomalySwimlaneServices
+  AnomalySwimlaneServices,
 ];
 
 export type EditSwimLaneActionApi = HasType<AnomalySwimLaneEmbeddableType> &
@@ -205,7 +204,7 @@ export type AnomalyChartsEmbeddableServices = [CoreStart, MlDependencies, Anomal
 export type SingleMetricViewerEmbeddableServices = [
   CoreStart,
   MlDependencies,
-  SingleMetricViewerServices
+  SingleMetricViewerServices,
 ];
 export interface EditAnomalyChartsPanelContext {
   embeddable: AnomalyChartsEmbeddableApi;
@@ -222,5 +221,5 @@ export type MappedEmbeddableTypeOf<TEmbeddableType extends MlEmbeddableTypes> =
   TEmbeddableType extends AnomalyExplorerChartsEmbeddableType
     ? AnomalyChartsEmbeddableState
     : TEmbeddableType extends AnomalySingleMetricViewerEmbeddableType
-    ? SingleMetricViewerEmbeddableState
-    : unknown;
+      ? SingleMetricViewerEmbeddableState
+      : unknown;

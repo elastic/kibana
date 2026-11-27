@@ -62,7 +62,7 @@ export function useFetchApmSuggestions({
   });
 
   return {
-    suggestions: isInitialLoading ? NO_SUGGESTIONS : data ?? NO_SUGGESTIONS,
+    suggestions: isInitialLoading ? NO_SUGGESTIONS : (data ?? NO_SUGGESTIONS),
     isLoading: isInitialLoading || isLoading || isRefetching,
     isSuccess,
     isError,

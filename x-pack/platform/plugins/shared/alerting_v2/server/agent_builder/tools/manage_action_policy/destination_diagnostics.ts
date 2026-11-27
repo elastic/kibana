@@ -58,7 +58,7 @@ export interface PersistedWorkflowLookup {
   getWorkflow: (
     id: string,
     spaceId: string
-  ) => Promise<{ id: string; name?: string; yaml?: string } | null>;
+  ) => Promise<{ id: string; name?: string; yaml?: string; managed?: boolean } | null>;
 }
 
 export interface ConnectorLookup {
@@ -95,7 +95,8 @@ export interface DestinationValidationConfig {
   validateWorkflow?: (
     yaml: string,
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { isManaged?: boolean }
   ) => Promise<ValidateWorkflowResponseDto>;
   request?: KibanaRequest;
   logger?: LoggerServiceContract;
@@ -171,7 +172,10 @@ export class DestinationValidator {
     if (!workflow) return false;
 
     if (workflow.yaml) {
-      await this.validateWorkflow(destinationId, workflow.yaml);
+      // A managed workflow's stored YAML can use steps limited to managed workflows.
+      await this.validateWorkflow(destinationId, workflow.yaml, {
+        isManaged: workflow.managed === true,
+      });
     }
     return true;
   }
@@ -283,12 +287,16 @@ export class DestinationValidator {
   }
 
   /** Validates variable refs and Liquid syntax via the workflow validation service. */
-  async validateWorkflowRefs(destinationId: string, yaml: string): Promise<void> {
+  async validateWorkflowRefs(
+    destinationId: string,
+    yaml: string,
+    { isManaged = false }: { isManaged?: boolean } = {}
+  ): Promise<void> {
     const { validateWorkflow, request, spaceId, logger } = this.config;
     if (!validateWorkflow || !request) return;
 
     try {
-      const result = await validateWorkflow(yaml, spaceId, request);
+      const result = await validateWorkflow(yaml, spaceId, request, { isManaged });
       for (const diagnostic of result.diagnostics) {
         if (diagnostic.severity !== 'error') continue;
         this.push(
@@ -501,7 +509,11 @@ export class DestinationValidator {
   }
 
   /** Runs all workflow checks: manual trigger → payload `$ref` → common mistakes → validation service. */
-  async validateWorkflow(destinationId: string, yaml: string): Promise<void> {
+  async validateWorkflow(
+    destinationId: string,
+    yaml: string,
+    options: { isManaged?: boolean } = {}
+  ): Promise<void> {
     const triggers = parseWorkflowTriggers(yaml);
     const manualTrigger = this.validateManualTrigger(destinationId, triggers);
     if (!manualTrigger) return;
@@ -513,7 +525,7 @@ export class DestinationValidator {
     this.validatePayloadLiquidPresence(destinationId, yaml);
     this.validatePayloadFieldPaths(destinationId, yaml);
     this.validateAlertDetailsLink(destinationId, yaml);
-    await this.validateWorkflowRefs(destinationId, yaml);
+    await this.validateWorkflowRefs(destinationId, yaml, options);
   }
 
   // ---------------------------------------------------------------------------
@@ -534,8 +546,8 @@ export class DestinationValidator {
         warnings.length === 0
           ? ''
           : warnings.length === 1
-          ? ', 1 warning'
-          : `, ${warnings.length} warnings`;
+            ? ', 1 warning'
+            : `, ${warnings.length} warnings`;
       const header = `Destination validation failed (${errorCount}${warningCount}):`;
       const formatted = this.diagnostics.map((d, i) => `[${i + 1}] [${d.severity}] ${d.message}`);
       throw new ActionPolicyOperationValidationError(`${header}\n\n${formatted.join('\n\n')}`);

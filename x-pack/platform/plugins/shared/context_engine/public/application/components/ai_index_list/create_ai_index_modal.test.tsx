@@ -17,13 +17,23 @@ import React from 'react';
 import { CONTEXT_ENGINE_APP_ID } from '../../../../common/features';
 import { AI_INDEX_CREATED_LOCATION_STATE } from '../../ai_index_created_location_state';
 import { useMemoryEnabled } from '../../hooks/use_memory_enabled';
+import { useSetupWizardEnabled } from '../../hooks/use_setup_wizard_enabled';
+import {
+  readSetupWizardStoredValue,
+  writeSetupWizardStoredValue,
+} from '../../utils/setup_wizard_storage';
 import { CreateAiIndexModal } from './create_ai_index_modal';
 
 jest.mock('../../hooks/use_memory_enabled', () => ({
   useMemoryEnabled: jest.fn(),
 }));
 
+jest.mock('../../hooks/use_setup_wizard_enabled', () => ({
+  useSetupWizardEnabled: jest.fn(),
+}));
+
 const mockUseMemoryEnabled = jest.mocked(useMemoryEnabled);
+const mockUseSetupWizardEnabled = jest.mocked(useSetupWizardEnabled);
 
 const renderWithProviders = (core: CoreStart, onClose: () => void = jest.fn()) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -55,6 +65,7 @@ const VALID_ID = 'support-ticket-triage';
 describe('CreateAiIndexModal', () => {
   beforeEach(() => {
     mockUseMemoryEnabled.mockReturnValue(false);
+    mockUseSetupWizardEnabled.mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -146,8 +157,40 @@ describe('CreateAiIndexModal', () => {
     });
   });
 
-  it('continues to the dreaming setup after creating an AI index while memory is on', async () => {
+  it('forgets the setup wizard state of an older AI index with the same id', async () => {
+    const storageKey = { basePath: '', aiIndexId: VALID_ID };
+    writeSetupWizardStoredValue(storageKey, 'closed');
+    const services = coreMock.createStart();
+    services.http.post.mockResolvedValue({});
+
+    renderWithProviders(services);
+    typeId(VALID_ID);
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexModalConfirmButton'));
+
+    await waitFor(() => expect(services.application.navigateToApp).toHaveBeenCalled());
+    expect(readSetupWizardStoredValue(storageKey)).toBeUndefined();
+  });
+
+  it('opens the Overview, where the setup wizard handles dreaming, while memory is on', async () => {
     mockUseMemoryEnabled.mockReturnValue(true);
+    const services = coreMock.createStart();
+    services.http.post.mockResolvedValue({});
+
+    renderWithProviders(services);
+    typeId(VALID_ID);
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexModalConfirmButton'));
+
+    await waitFor(() => {
+      expect(services.application.navigateToApp).toHaveBeenCalledWith(CONTEXT_ENGINE_APP_ID, {
+        path: '/ai_index/support-ticket-triage',
+        state: AI_INDEX_CREATED_LOCATION_STATE,
+      });
+    });
+  });
+
+  it('continues to the dreaming setup while memory is on and the setup wizard is off', async () => {
+    mockUseMemoryEnabled.mockReturnValue(true);
+    mockUseSetupWizardEnabled.mockReturnValue(false);
     const services = coreMock.createStart();
     services.http.post.mockResolvedValue({});
 

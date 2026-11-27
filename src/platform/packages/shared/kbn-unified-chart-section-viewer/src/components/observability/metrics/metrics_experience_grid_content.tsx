@@ -37,11 +37,10 @@ import { extractUsedMetadataFields } from '../../../utils/extract_used_metadata_
 import { useEsqlQueryInfo } from '../../../hooks';
 import { getDuplicateMetricNames } from './utils/get_duplicate_metric_names';
 
-export interface MetricsExperienceGridContentProps
-  extends Pick<
-    UnifiedMetricsGridProps,
-    'services' | 'fetchParams' | 'onBrushEnd' | 'onFilter' | 'actions' | 'histogramCss'
-  > {
+export interface MetricsExperienceGridContentProps extends Pick<
+  UnifiedMetricsGridProps,
+  'services' | 'fetchParams' | 'onBrushEnd' | 'onFilter' | 'actions' | 'histogramCss'
+> {
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   metricItems: ParsedMetricItem[];
   activeDimensions: Dimension[];

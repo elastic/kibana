@@ -79,16 +79,16 @@ export const hasEpisodeFlyoutServices = (
 ): services is EpisodeFlyoutServices =>
   Boolean(
     services.http &&
-      services.application &&
-      services.uiSettings &&
-      services.userProfile &&
-      services.notifications &&
-      services.charts &&
-      services.data &&
-      services.dataViews &&
-      services.expressions &&
-      services.spaces &&
-      services.unifiedDocViewer
+    services.application &&
+    services.uiSettings &&
+    services.userProfile &&
+    services.notifications &&
+    services.charts &&
+    services.data &&
+    services.dataViews &&
+    services.expressions &&
+    services.spaces &&
+    services.unifiedDocViewer
   );
 
 /**

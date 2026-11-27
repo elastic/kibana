@@ -64,7 +64,7 @@ export const asKibanaLogger = (log: ScoutLogger): Logger =>
     log: () => {},
     get: () => asKibanaLogger(log),
     isLevelEnabled: () => true,
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 export const createTestIndices = async (esClient: EsClient) => {
   await esClient.indices.create({

@@ -86,15 +86,15 @@ export const AlertEpisodeOverviewListSection = ({
     );
   }
 
-  const groupingFields = isRuleLoaded(ruleState) ? ruleState.rule.grouping?.fields ?? [] : [];
+  const groupingFields = isRuleLoaded(ruleState) ? (ruleState.rule.grouping?.fields ?? []) : [];
   const groupingStatus: GroupingRowStatus =
     isRuleForbidden(ruleState) || isRuleNotFound(ruleState)
       ? 'hidden'
       : isRuleError(ruleState) || isEpisodeDataError
-      ? 'error'
-      : isLoadingEpisodeData
-      ? 'loading'
-      : 'visible';
+        ? 'error'
+        : isLoadingEpisodeData
+          ? 'loading'
+          : 'visible';
   const groupingData = parseEpisodeDataJson(episode?.episode_data);
   const episodeAction = episodeActionsMap?.get(episodeId);
   const assigneeUid = episodeAction?.lastAssigneeUid ?? undefined;

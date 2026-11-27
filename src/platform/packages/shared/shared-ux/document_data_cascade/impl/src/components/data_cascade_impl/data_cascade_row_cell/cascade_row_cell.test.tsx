@@ -83,7 +83,7 @@ describe('CascadeRowCellPrimitive', () => {
           enqueue: jest.fn(() => jest.fn()),
           isReturningCell: jest.fn(() => false),
         },
-      } as unknown as CascadeVirtualizerReturnValue)
+      }) as unknown as CascadeVirtualizerReturnValue
   );
 
   it('will invoke the passed onCascadeLeafNodeExpanded if the leafNode has no data', () => {
@@ -239,7 +239,7 @@ describe('CascadeRowCellPrimitive', () => {
             scrollElement: null,
             activeStickyIndex: null,
             childController: mockChildController,
-          } as unknown as CascadeVirtualizerReturnValue)
+          }) as unknown as CascadeVirtualizerReturnValue
       );
 
       const rowData = cascadeGroups.reduce((acc, value, idx) => ({ ...acc, [value]: idx }), {

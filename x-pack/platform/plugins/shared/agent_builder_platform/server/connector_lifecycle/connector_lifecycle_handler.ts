@@ -23,7 +23,7 @@ interface ConnectorLifecycleHandlerDeps {
     [
       CoreStart,
       { spaces?: SpacesPluginStart; agentBuilderSml: AgentBuilderSmlPluginStart },
-      unknown
+      unknown,
     ]
   >;
 }

@@ -117,12 +117,12 @@ export const OverviewPage: React.FC = () => {
   const heartbeatMonitorsHidden = pageState.includeHeartbeatMonitors === false;
   const hasActiveOverviewFilter = Boolean(
     heartbeatMonitorsHidden ||
-      pageState.query ||
-      pageState.tags?.length ||
-      pageState.locations?.length ||
-      pageState.monitorTypes?.length ||
-      pageState.projects?.length ||
-      pageState.schedules?.length
+    pageState.query ||
+    pageState.tags?.length ||
+    pageState.locations?.length ||
+    pageState.monitorTypes?.length ||
+    pageState.projects?.length ||
+    pageState.schedules?.length
   );
 
   // Ping-only Heartbeat / Elastic Agent (and CCS remote) monitors have no saved object,

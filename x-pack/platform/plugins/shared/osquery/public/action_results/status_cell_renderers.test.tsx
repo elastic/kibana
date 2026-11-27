@@ -19,7 +19,7 @@ const createMockRow = (flattened: Record<string, unknown>): DataTableRecord =>
     id: 'test-row',
     raw: { _id: 'test-row', _index: 'test' },
     flattened,
-  } as DataTableRecord);
+  }) as DataTableRecord;
 
 const createCellProps = (row: DataTableRecord): DataGridCellValueElementProps =>
   ({
@@ -31,7 +31,7 @@ const createCellProps = (row: DataTableRecord): DataGridCellValueElementProps =>
     colIndex: 0,
     rowIndex: 0,
     isExpandable: false,
-  } as unknown as DataGridCellValueElementProps);
+  }) as unknown as DataGridCellValueElementProps;
 
 describe('getStatusCellRenderers', () => {
   const renderers = getStatusCellRenderers({ getFleetAppUrl: mockGetFleetAppUrl });

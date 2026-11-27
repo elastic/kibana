@@ -137,8 +137,9 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
       width: 100%;
       height: 100%;
 
-      ${showBorder
-        ? css`
+      ${
+        showBorder
+          ? css`
             .embPanel {
               outline: var(--internalBorderStyle);
 
@@ -149,7 +150,7 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
               })},
             }
           `
-        : css`
+          : css`
             .embPanel {
               outline: var(--internalBorderStyle); // necessary for outline-color transition
               outline-color: transparent; // necessary for outline-color transition
@@ -175,7 +176,8 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
                 })},
               }
             }
-          `}
+          `
+      }
 
       ${hoverActionStyles};
 
@@ -187,7 +189,8 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
         visibility: hidden;
 
         // delay hiding hover actions to make grabbing the drag handle easier
-        transition: opacity ${euiTheme.animation.extraFast} ease-in,
+        transition:
+          opacity ${euiTheme.animation.extraFast} ease-in,
           z-index ${euiTheme.animation.extraFast} linear,
           visibility ${euiTheme.animation.extraFast} linear;
         transition-delay: ${euiTheme.animation.fast};

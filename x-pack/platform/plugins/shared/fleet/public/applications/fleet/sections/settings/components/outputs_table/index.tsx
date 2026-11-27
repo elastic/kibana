@@ -56,7 +56,7 @@ function getOutputHosts(output: Output): string[] {
   if (isOtlpOutput(output)) {
     return output.otlp_exporter?.endpoint ? [output.otlp_exporter.endpoint] : [];
   }
-  return isBeatsOutput(output) ? output.hosts ?? [] : [];
+  return isBeatsOutput(output) ? (output.hosts ?? []) : [];
 }
 
 function displayOutputType(type: string) {
@@ -121,14 +121,14 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
                         'This output uses {provider} for private network connectivity.',
                       values: {
                         provider: getPrivateLinkProvider(
-                          isBeatsOutput(output) ? output.hosts ?? [] : []
+                          isBeatsOutput(output) ? (output.hosts ?? []) : []
                         ),
                       },
                     }
                   )}
                 >
                   <EuiBadge tabIndex={0}>
-                    {getPrivateLinkProvider(isBeatsOutput(output) ? output.hosts ?? [] : [])}
+                    {getPrivateLinkProvider(isBeatsOutput(output) ? (output.hosts ?? []) : [])}
                   </EuiBadge>
                 </EuiToolTip>
               </EuiFlexItem>

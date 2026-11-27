@@ -34,10 +34,8 @@ export const buildAssumableBy = ({
     project_type: projectType,
     project_id: projectId,
   },
-  ...platformServiceAccountIds.map(
-    (serviceAccountId): ServiceAccountAssumableBy => ({
-      type: 'platform-service-account',
-      service_account_id: serviceAccountId,
-    })
-  ),
+  ...platformServiceAccountIds.map((serviceAccountId): ServiceAccountAssumableBy => ({
+    type: 'platform-service-account',
+    service_account_id: serviceAccountId,
+  })),
 ];

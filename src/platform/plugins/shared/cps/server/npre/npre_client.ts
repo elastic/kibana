@@ -57,7 +57,10 @@ export interface INpreClient {
  * Service for managing project routing expressions in Elasticsearch.
  */
 export class NpreClient implements INpreClient {
-  constructor(private readonly logger: Logger, private readonly esClient: IScopedClusterClient) {}
+  constructor(
+    private readonly logger: Logger,
+    private readonly esClient: IScopedClusterClient
+  ) {}
 
   private getClient(): IScopedClusterClient {
     return this.esClient;

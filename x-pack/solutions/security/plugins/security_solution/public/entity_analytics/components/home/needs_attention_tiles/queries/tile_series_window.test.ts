@@ -16,7 +16,7 @@ import {
 } from './tile_series_window';
 
 const response = (columns: string[], values: unknown[][]) =>
-  ({ columns: columns.map((name) => ({ name })), values } as unknown as ESQLSearchResponse);
+  ({ columns: columns.map((name) => ({ name })), values }) as unknown as ESQLSearchResponse;
 
 describe('tile series window', () => {
   it('has 6 dots for every range, a step apart, covering exactly the range', () => {

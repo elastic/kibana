@@ -23,7 +23,7 @@ const createRequest = ({
   ({
     id: 'req-1',
     route: { method, path, routePath },
-  } as unknown as KibanaRequest);
+  }) as unknown as KibanaRequest;
 
 describe('recordOversizedInboundEvent', () => {
   const logger = loggingSystemMock.createLogger();

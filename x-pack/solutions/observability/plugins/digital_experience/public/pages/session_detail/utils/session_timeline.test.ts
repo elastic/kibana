@@ -148,7 +148,7 @@ describe('layoutWaterfall', () => {
     const layout = layoutWaterfall(
       { startTime: START, durationMs: 20_000 },
       [visit('/', 0, 20_000)],
-      [event('error', 5_000), event('frustration', 15_000, 'browser.frustration.rage_click')]
+      [event('error', 5_000), event('frustration', 15_000, 'elastic.frustration.rage_click')]
     );
 
     expect(layout.errorMarkers).toHaveLength(1);

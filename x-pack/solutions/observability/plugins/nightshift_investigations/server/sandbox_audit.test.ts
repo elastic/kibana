@@ -36,7 +36,7 @@ const stepCaller: SandboxCaller = {
 };
 
 const createAudit = (enabled = true) =>
-  ({ log: jest.fn(), enabled, includeSavedObjectNames: false } as jest.Mocked<AuditLogger>);
+  ({ log: jest.fn(), enabled, includeSavedObjectNames: false }) as jest.Mocked<AuditLogger>;
 
 const createSession = () =>
   ({
@@ -46,7 +46,7 @@ const createSession = () =>
     writeFiles: jest.fn(),
     mkdirs: jest.fn(),
     statFiles: jest.fn(),
-  } as unknown as jest.Mocked<SandboxSession>);
+  }) as unknown as jest.Mocked<SandboxSession>;
 
 describe('auditedSandboxSession', () => {
   let session: jest.Mocked<SandboxSession>;

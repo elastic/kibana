@@ -20,8 +20,9 @@ import type { PerRuleState } from '../maintainers/automated_resolution/types';
 
 const EMAIL_SPEC = getResolutionRuleConfig(RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH)!.matcher!;
 const SID_SPEC = getResolutionRuleConfig(RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE)!.matcher!;
-const CROWDSTRIKE_SID_SPEC = getResolutionRuleConfig(RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE)!
-  .matcher!;
+const CROWDSTRIKE_SID_SPEC = getResolutionRuleConfig(
+  RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE
+)!.matcher!;
 
 const WATERMARK = '2026-08-10T00:00:00Z';
 
@@ -54,7 +55,7 @@ const esqlResponse = (columns: string[], values: unknown[][]): ESQLSearchRespons
   ({
     columns: columns.map((name) => ({ name, type: 'keyword' })),
     values,
-  } as ESQLSearchResponse);
+  }) as ESQLSearchResponse;
 
 const GROUP_COLUMNS: string[] = Object.values(MATCH_GROUP_COLUMNS);
 

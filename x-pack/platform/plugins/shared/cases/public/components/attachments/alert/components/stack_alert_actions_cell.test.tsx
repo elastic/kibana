@@ -17,7 +17,7 @@ import {
 type Props = React.ComponentProps<typeof StackAlertActionsCell>;
 
 const getProps = (overrides: Partial<Props> = {}): Props =>
-  ({ alert: { _id: 'alert-1', _index: 'index-1' }, ...overrides } as unknown as Props);
+  ({ alert: { _id: 'alert-1', _index: 'index-1' }, ...overrides }) as unknown as Props;
 
 describe('StackAlertActionsCell', () => {
   it('renders nothing without onRemoveFromCase', () => {

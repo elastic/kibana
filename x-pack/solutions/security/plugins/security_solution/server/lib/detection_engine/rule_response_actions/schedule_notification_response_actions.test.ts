@@ -378,14 +378,12 @@ describe('ScheduleNotificationResponseActions', () => {
 
       afterEach(() => {
         // @ts-expect-error write to readonly prop is ok
-        endpointServiceMock.experimentalFeatures.responseActionsEndpointKillProcessDescendants =
-          false;
+        endpointServiceMock.experimentalFeatures.responseActionsEndpointKillProcessDescendants = false;
       });
 
       it('should pass `kill_descendants` when the feature flag is enabled and it is `true`', async () => {
         // @ts-expect-error write to readonly prop is ok
-        endpointServiceMock.experimentalFeatures.responseActionsEndpointKillProcessDescendants =
-          true;
+        endpointServiceMock.experimentalFeatures.responseActionsEndpointKillProcessDescendants = true;
         const signals = getSignals();
 
         await scheduleNotificationResponseActions({
@@ -405,8 +403,7 @@ describe('ScheduleNotificationResponseActions', () => {
 
       it('should NOT pass `kill_descendants` when it is `false`', async () => {
         // @ts-expect-error write to readonly prop is ok
-        endpointServiceMock.experimentalFeatures.responseActionsEndpointKillProcessDescendants =
-          true;
+        endpointServiceMock.experimentalFeatures.responseActionsEndpointKillProcessDescendants = true;
         const signals = getSignals();
 
         await scheduleNotificationResponseActions({
@@ -423,8 +420,7 @@ describe('ScheduleNotificationResponseActions', () => {
 
       it('should NOT pass `kill_descendants` when it is not defined', async () => {
         // @ts-expect-error write to readonly prop is ok
-        endpointServiceMock.experimentalFeatures.responseActionsEndpointKillProcessDescendants =
-          true;
+        endpointServiceMock.experimentalFeatures.responseActionsEndpointKillProcessDescendants = true;
         const signals = getSignals();
 
         await scheduleNotificationResponseActions({
@@ -441,8 +437,7 @@ describe('ScheduleNotificationResponseActions', () => {
 
       it('should NOT pass `kill_descendants` when the feature flag is disabled', async () => {
         // @ts-expect-error write to readonly prop is ok
-        endpointServiceMock.experimentalFeatures.responseActionsEndpointKillProcessDescendants =
-          false;
+        endpointServiceMock.experimentalFeatures.responseActionsEndpointKillProcessDescendants = false;
         const signals = getSignals();
 
         await scheduleNotificationResponseActions({

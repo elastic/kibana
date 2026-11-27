@@ -77,6 +77,7 @@ import type {
   LayerCellValueActions,
   MultiFilterEvent,
   AnnotationClickEvent,
+  OverlayPointClickEvent,
 } from '../types';
 import { isTimeChart } from '../../common/helpers';
 import type {
@@ -125,6 +126,12 @@ import {
   OUTSIDE_RECT_ANNOTATION_WIDTH,
   OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION,
 } from './annotations';
+import {
+  getClickedBaseSeriesEvent,
+  getClickedOverlayPoint,
+  OverlayPoints,
+  useOverlays,
+} from './overlay_points';
 import { AxisExtentModes, SeriesTypes, ValueLabelModes, XScaleTypes } from '../../common/constants';
 import { DataLayers } from './data_layers';
 import { Tooltip as CustomTooltip } from './tooltip';
@@ -162,6 +169,7 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   layerCellValueActions: LayerCellValueActions;
   onSelectRange: (data: BrushEvent['data']) => void;
   onAnnotationClick: (data: AnnotationClickEvent['data']) => void;
+  onOverlayPointClick?: (data: OverlayPointClickEvent['data']) => void;
   renderMode: RenderMode;
   syncColors: boolean;
   syncTooltips: boolean;
@@ -227,6 +235,7 @@ export function XYChart({
   layerCellValueActions,
   onSelectRange,
   onAnnotationClick,
+  onOverlayPointClick,
   setChartSize,
   interactive = true,
   syncColors,
@@ -236,6 +245,7 @@ export function XYChart({
   uiState,
   timeFormat,
   overrides,
+  overlays$,
 }: XYChartRenderProps) {
   const {
     legend,
@@ -254,6 +264,7 @@ export function XYChart({
     pointVisibility,
   } = args;
   const chartRef = useRef<Chart>(null);
+  const overlays = useOverlays(overlays$);
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   const darkMode = useKibanaIsDarkMode();
   const palettes = useKbnPalettes();
@@ -524,8 +535,8 @@ export function XYChart({
       .map((config) => ({
         ...config,
         position: config
-          ? getAxisGroupForReferenceLine(axesConfiguration, config, shouldRotate)?.position ??
-            Position.Left
+          ? (getAxisGroupForReferenceLine(axesConfiguration, config, shouldRotate)?.position ??
+            Position.Left)
           : Position.Bottom,
       })),
     ...groupedLineAnnotations,
@@ -647,9 +658,21 @@ export function XYChart({
         }
       : {};
 
-  const clickHandler: ElementClickListener = ([elementEvent]) => {
+  const clickHandler: ElementClickListener = (elementEvents) => {
     // this cast is safe because we are rendering a cartesian chart
-    const [xyGeometry, xySeries] = elementEvent as XYChartElementEvent;
+    const xyElementEvents = elementEvents as XYChartElementEvent[];
+
+    const overlayPoint = getClickedOverlayPoint(overlays, xyElementEvents);
+    if (overlayPoint) {
+      onOverlayPointClick?.(overlayPoint);
+      return;
+    }
+
+    const baseSeriesEvent = getClickedBaseSeriesEvent(overlays, xyElementEvents);
+    if (!baseSeriesEvent) {
+      return;
+    }
+    const [xyGeometry, xySeries] = baseSeriesEvent;
 
     const layer = dataLayers.find((l) =>
       xySeries.seriesKeys.some((key: string | number) =>
@@ -726,7 +749,7 @@ export function XYChart({
       return;
     }
     const [min, max] = x;
-    if (!xAxisColumn || !isHistogramVis) {
+    if (!xAxisColumn || !isHistogramVis || (isEsqlMode && !isTimeVis)) {
       return;
     }
 
@@ -1140,6 +1163,14 @@ export function XYChart({
                 pointVisibility={pointVisibility}
               />
             )}
+            {overlays.length ? (
+              <OverlayPoints
+                overlays={overlays}
+                yAxesConfiguration={yAxesConfiguration}
+                dataLayers={dataLayers}
+                defaultXScaleType={defaultXScaleType}
+              />
+            ) : null}
             {referenceLineLayers.length ? (
               <ReferenceLines
                 layers={referenceLineLayers}
@@ -1166,8 +1197,9 @@ export function XYChart({
                   rangeAnnotations.length && shouldHideDetails
                     ? OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION
                     : isHorizontalTimeAxis
-                    ? MULTILAYER_TIME_AXIS_TICKLINE_PADDING + chartBaseTheme.axes.tickLabel.fontSize
-                    : Math.max(chartBaseTheme.axes.tickLine.size, OUTSIDE_RECT_ANNOTATION_WIDTH)
+                      ? MULTILAYER_TIME_AXIS_TICKLINE_PADDING +
+                        chartBaseTheme.axes.tickLabel.fontSize
+                      : Math.max(chartBaseTheme.axes.tickLine.size, OUTSIDE_RECT_ANNOTATION_WIDTH)
                 }
               />
             ) : null}

@@ -467,6 +467,7 @@ export class AssetManagerClient {
     await Promise.all([
       stopHistorySnapshotTask({
         taskManager: this.taskManager,
+        esClient: this.internalEsClient,
         logger: this.logger,
         namespace: this.namespace,
       }),
@@ -636,9 +637,8 @@ export class AssetManagerClient {
   ): Promise<CheckPrivilegesResponse> {
     const checkPrivileges = this.security.authz.checkPrivilegesDynamicallyWithRequest(request);
 
-    const sourceIndexPatterns = await this.logsExtractionClient.getLocalIndexPatterns(
-      additionalIndexPatterns
-    );
+    const sourceIndexPatterns =
+      await this.logsExtractionClient.getLocalIndexPatterns(additionalIndexPatterns);
 
     const kibanaPrivileges = this.security.authz.actions.savedObject.get(
       EngineDescriptorTypeName,

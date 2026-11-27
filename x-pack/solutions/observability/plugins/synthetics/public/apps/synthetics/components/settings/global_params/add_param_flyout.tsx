@@ -142,7 +142,7 @@ export const AddParamFlyout = ({
               path: source?.path ?? '',
               field: source?.field ?? '',
             })
-          : value ?? '',
+          : (value ?? ''),
     };
 
     if (isEditingItem && id) {

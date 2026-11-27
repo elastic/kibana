@@ -24,9 +24,7 @@ export interface InvestigationLocatorParams extends SerializableRecord {
 
 export type InvestigationLocator = LocatorPublic<InvestigationLocatorParams>;
 
-export class InvestigationLocatorDefinition
-  implements LocatorDefinition<InvestigationLocatorParams>
-{
+export class InvestigationLocatorDefinition implements LocatorDefinition<InvestigationLocatorParams> {
   public readonly id = NIGHTSHIFT_INVESTIGATION_LOCATOR_ID;
 
   public readonly getLocation = async (params?: InvestigationLocatorParams) => {

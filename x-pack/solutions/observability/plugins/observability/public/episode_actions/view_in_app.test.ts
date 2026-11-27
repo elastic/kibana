@@ -39,10 +39,10 @@ const makeClassicEpisode = (
       workflowTags: [],
       caseIds: [],
     } as ClassicAlertActionContext,
-  } as unknown as AlertEpisode);
+  }) as unknown as AlertEpisode;
 
 const makeNativeEpisode = (id: string): AlertEpisode =>
-  ({ 'episode.id': id, 'rule.id': 'rule-v2' } as unknown as AlertEpisode);
+  ({ 'episode.id': id, 'rule.id': 'rule-v2' }) as unknown as AlertEpisode;
 
 const defaultFormatter: AlertFormatter = () => ({ reason: '', link: '/app/apm' });
 

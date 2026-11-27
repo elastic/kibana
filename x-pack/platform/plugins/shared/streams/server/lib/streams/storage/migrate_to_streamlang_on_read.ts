@@ -163,10 +163,10 @@ const recursivelyConvertCondition = (condition: OldCondition): Condition => {
     condition.operator === 'exists'
       ? true
       : condition.operator === 'notExists'
-      ? false
-      : 'value' in condition
-      ? condition.value
-      : undefined;
+        ? false
+        : 'value' in condition
+          ? condition.value
+          : undefined;
 
   // If it's a filter condition, convert formats.
   return {

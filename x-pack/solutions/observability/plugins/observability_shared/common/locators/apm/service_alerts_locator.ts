@@ -16,9 +16,7 @@ export { SERVICE_ALERTS_LOCATOR_ID, type ServiceAlertsLocatorParams };
 
 export type ServiceAlertsLocator = LocatorPublic<ServiceAlertsLocatorParams>;
 
-export class ServiceAlertsLocatorDefinition
-  implements LocatorDefinition<ServiceAlertsLocatorParams>
-{
+export class ServiceAlertsLocatorDefinition implements LocatorDefinition<ServiceAlertsLocatorParams> {
   public readonly id = SERVICE_ALERTS_LOCATOR_ID;
 
   public readonly getLocation = async ({

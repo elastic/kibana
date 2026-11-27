@@ -11,8 +11,10 @@ import type { QuickFiltersMenuItem } from './quick_filters';
 
 export type QueryLanguageType = 'lucene' | 'kuery';
 
-export interface AlertsSearchBarProps
-  extends Omit<Partial<SearchBarProps>, 'query' | 'onQueryChange' | 'onQuerySubmit'> {
+export interface AlertsSearchBarProps extends Omit<
+  Partial<SearchBarProps>,
+  'query' | 'onQueryChange' | 'onQuerySubmit'
+> {
   appName: string;
   disableQueryLanguageSwitcher?: boolean;
   rangeFrom?: string;

@@ -31,7 +31,7 @@ const minimal = (overrides: Partial<WorkflowYaml> = {}): WorkflowYaml =>
     triggers: [{ type: 'manual', enabled: true }],
     steps: [],
     ...overrides,
-  } as unknown as WorkflowYaml);
+  }) as unknown as WorkflowYaml;
 
 const runLayout = (yaml: WorkflowYaml, direction: 'TB' | 'LR' = 'TB') => {
   const transformed = transformWorkflowToGraph(yaml);

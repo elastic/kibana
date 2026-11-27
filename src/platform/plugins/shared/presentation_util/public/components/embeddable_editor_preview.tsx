@@ -30,7 +30,7 @@ import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 interface EmbeddableEditorPreviewProps<
   SerializedState extends object,
   Api extends DefaultEmbeddableApi<SerializedState> & HasSerializableState<SerializedState>,
-  ParentApi extends HasSerializedChildState<SerializedState>
+  ParentApi extends HasSerializedChildState<SerializedState>,
 > {
   type: string;
   serializedState: SerializedState;
@@ -62,7 +62,7 @@ const previewTitle = i18n.translate('presentationUtil.embeddableEditorPreview.fl
 export const EmbeddableEditorPreview = <
   SerializedState extends object,
   Api extends DefaultEmbeddableApi<SerializedState> & HasSerializableState<SerializedState>,
-  ParentApi extends HasSerializedChildState<SerializedState>
+  ParentApi extends HasSerializedChildState<SerializedState>,
 >({
   type,
   serializedState,

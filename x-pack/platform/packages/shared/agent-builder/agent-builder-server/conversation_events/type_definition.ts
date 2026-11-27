@@ -34,27 +34,22 @@ export interface ConversationEventFormatContext {
  * True for the erased `ZodObject<any>` default, whose inferred payload would be
  * `Record<string, unknown>` and reject the stored `object` payload of a generic event.
  */
-type IsErasedSchema<TSchema> = TSchema extends ZodObject<infer TShape>
-  ? 0 extends 1 & TShape
-    ? true
-    : false
-  : false;
+type IsErasedSchema<TSchema> =
+  TSchema extends ZodObject<infer TShape> ? (0 extends 1 & TShape ? true : false) : false;
 
 /**
  * The stored event a definition's `format` receives: payload typed by the schema when it is
  * known, the raw event envelope when the definition is handled generically (e.g. from the registry).
  */
-export type ConversationEventOf<
-  TType extends string,
-  TSchema extends ZodObject<any>
-> = IsErasedSchema<TSchema> extends true
-  ? ConversationEvent<TType>
-  : ConversationEvent<TType, z.infer<TSchema>>;
+export type ConversationEventOf<TType extends string, TSchema extends ZodObject<any>> =
+  IsErasedSchema<TSchema> extends true
+    ? ConversationEvent<TType>
+    : ConversationEvent<TType, z.infer<TSchema>>;
 
 /** Server-side definition of a conversation event type. */
 export interface ConversationEventTypeDefinition<
   TType extends string = string,
-  TSchema extends ZodObject<any> = ZodObject<any>
+  TSchema extends ZodObject<any> = ZodObject<any>,
 > {
   /** Unique discriminator written to `event.type` in the stored document. */
   type: TType;

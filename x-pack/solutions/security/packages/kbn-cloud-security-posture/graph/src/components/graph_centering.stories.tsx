@@ -97,7 +97,7 @@ const createEntityNode = ({
     isOriginAlert: false,
     icon: 'user',
     toolbarItemsFn: storybookToolbarItems,
-  } as NodeViewModel);
+  }) as NodeViewModel;
 
 const createRelationshipStoryNode = ({
   id,
@@ -113,7 +113,7 @@ const createRelationshipStoryNode = ({
     kind: 'relationship',
     label,
     isOrigin,
-  } as NodeViewModel);
+  }) as NodeViewModel;
 
 const createEventNode = ({
   id,

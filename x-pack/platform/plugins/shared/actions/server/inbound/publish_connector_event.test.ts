@@ -1,0 +1,200 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { slack2HitlAction, type ConnectorEventHubFields } from '@kbn/connector-topics';
+import { defineTopic, type Topic } from '@kbn/core/server';
+import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+
+import { publishConnectorEvent, setConnectorEventPublisher } from './publish_connector_event';
+
+jest.mock('uuid', () => ({
+  v4: () => 'generated-id',
+}));
+
+type SlackMessagePublishData = ConnectorEventHubFields & { channel: string };
+
+const slackMessageTopic =
+  defineTopic<Topic<SlackMessagePublishData, 'slack2.message'>>('slack2.message');
+
+const message = {
+  channel: 'C123',
+  connectorId: 'connector-1',
+  connectorTypeId: '.slack2',
+  spaceId: 'default',
+};
+
+describe('publishConnectorEvent', () => {
+  const logger = loggingSystemMock.createLogger();
+
+  beforeEach(() => {
+    setConnectorEventPublisher(undefined);
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    setConnectorEventPublisher(undefined);
+  });
+
+  it('requires the hub fields from connectorEventSchema', async () => {
+    // @ts-expect-error connectorId, connectorTypeId, and spaceId are required
+    const published = publishConnectorEvent('slack2.message', { channel: 'C123' });
+
+    await expect(published).resolves.toBeUndefined();
+  });
+
+  it('does nothing when no publisher is installed', async () => {
+    await expect(publishConnectorEvent('slack2.message', message)).resolves.toBeUndefined();
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('scopes a correlation key to the receiving space and connector', async () => {
+    const pubsub = coreMock.createStart().pubsub;
+    setConnectorEventPublisher({
+      pubsub,
+      logger,
+      topics: new Map([[slackMessageTopic.name, slackMessageTopic]]),
+    });
+
+    const data = { ...message, correlationKey: 'vendor-event-1' };
+    await publishConnectorEvent(slackMessageTopic.name, data);
+    await publishConnectorEvent(slackMessageTopic.name, {
+      ...data,
+      connectorId: 'connector-2',
+    });
+
+    expect(pubsub.publish).toHaveBeenNthCalledWith(1, slackMessageTopic, {
+      id: JSON.stringify(['default', 'connector-1', 'vendor-event-1']),
+      data,
+    });
+    expect(pubsub.publish).toHaveBeenNthCalledWith(2, slackMessageTopic, {
+      id: JSON.stringify(['default', 'connector-2', 'vendor-event-1']),
+      data: { ...data, connectorId: 'connector-2' },
+    });
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('publishes a lone surrogate in the correlation key', async () => {
+    const pubsub = coreMock.createStart().pubsub;
+    setConnectorEventPublisher({
+      pubsub,
+      logger,
+      topics: new Map([[slackMessageTopic.name, slackMessageTopic]]),
+    });
+
+    const data = { ...message, correlationKey: '\uD800' };
+    await expect(publishConnectorEvent(slackMessageTopic.name, data)).resolves.toBeUndefined();
+
+    expect(pubsub.publish).toHaveBeenCalledWith(slackMessageTopic, {
+      id: JSON.stringify(['default', 'connector-1', '\uD800']),
+      data,
+    });
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('keeps a long scoped id stable and within the bus limit', async () => {
+    const pubsub = coreMock.createStart().pubsub;
+    setConnectorEventPublisher({
+      pubsub,
+      logger,
+      topics: new Map([[slackMessageTopic.name, slackMessageTopic]]),
+    });
+
+    const correlationKey = '\\'.repeat(128);
+    const data = { ...message, correlationKey };
+    await publishConnectorEvent(slackMessageTopic.name, data);
+    await publishConnectorEvent(slackMessageTopic.name, data);
+    await publishConnectorEvent(slackMessageTopic.name, {
+      ...data,
+      spaceId: 'other-space',
+    });
+
+    const firstId = pubsub.publish.mock.calls[0][1].id;
+    expect(correlationKey).toHaveLength(128);
+    expect(JSON.stringify(['default', 'connector-1', correlationKey]).length).toBeGreaterThan(256);
+    expect(firstId).toHaveLength(64);
+    expect(pubsub.publish.mock.calls[1][1].id).toBe(firstId);
+    expect(pubsub.publish.mock.calls[2][1].id).not.toBe(firstId);
+  });
+
+  it('uses a new id when the correlation key is absent', async () => {
+    const pubsub = coreMock.createStart().pubsub;
+    setConnectorEventPublisher({
+      pubsub,
+      logger,
+      topics: new Map([[slackMessageTopic.name, slackMessageTopic]]),
+    });
+
+    await publishConnectorEvent(slackMessageTopic.name, message);
+
+    expect(pubsub.publish).toHaveBeenCalledWith(slackMessageTopic, {
+      id: 'generated-id',
+      data: message,
+    });
+  });
+
+  it('does not warn when slack2.hitl_action has no topic', async () => {
+    const pubsub = coreMock.createStart().pubsub;
+    setConnectorEventPublisher({
+      pubsub,
+      logger,
+      topics: new Map([[slackMessageTopic.name, slackMessageTopic]]),
+    });
+
+    await expect(publishConnectorEvent(slack2HitlAction.name, message)).resolves.toBeUndefined();
+
+    expect(pubsub.publish).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      `Connector event is not a bus topic (eventId=${slack2HitlAction.name})`
+    );
+  });
+
+  it('logs a missing topic and does not publish', async () => {
+    const pubsub = coreMock.createStart().pubsub;
+    setConnectorEventPublisher({
+      pubsub,
+      logger,
+      topics: new Map([[slackMessageTopic.name, slackMessageTopic]]),
+    });
+
+    await expect(publishConnectorEvent('github.unknown', message)).resolves.toBeUndefined();
+
+    expect(pubsub.publish).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Connector event topic is not registered (eventId=github.unknown)'
+    );
+  });
+
+  it('logs a rejected publish and does not throw', async () => {
+    const pubsub = coreMock.createStart().pubsub;
+    pubsub.publish.mockRejectedValue(new Error('bus stopped'));
+    setConnectorEventPublisher({
+      pubsub,
+      logger,
+      topics: new Map([[slackMessageTopic.name, slackMessageTopic]]),
+    });
+
+    await expect(publishConnectorEvent(slackMessageTopic.name, message)).resolves.toBeUndefined();
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Failed to publish connector event (eventId=slack2.message): bus stopped'
+    );
+  });
+
+  it('does nothing after the publisher is cleared', async () => {
+    const pubsub = coreMock.createStart().pubsub;
+    setConnectorEventPublisher({
+      pubsub,
+      logger,
+      topics: new Map([[slackMessageTopic.name, slackMessageTopic]]),
+    });
+    setConnectorEventPublisher(undefined);
+
+    await publishConnectorEvent(slackMessageTopic.name, message);
+
+    expect(pubsub.publish).not.toHaveBeenCalled();
+  });
+});

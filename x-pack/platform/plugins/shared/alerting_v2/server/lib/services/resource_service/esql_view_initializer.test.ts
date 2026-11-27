@@ -12,7 +12,7 @@ import { ESQLViewInitializer } from './esql_view_initializer';
 const createMockEsClient = (transportRequestMock: jest.Mock) =>
   ({
     transport: { request: transportRequestMock },
-  } as unknown as ElasticsearchClient);
+  }) as unknown as ElasticsearchClient;
 
 describe('ESQLViewInitializer', () => {
   let esClient: ElasticsearchClient;

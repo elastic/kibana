@@ -35,7 +35,10 @@ export class ActionPoliciesListPage {
   /** Close button of the "Affected rules" flyout, which closes the whole flyout history. */
   public readonly affectedRulesCloseButton: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly mountConfig: AlertingMountConfig) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly mountConfig: AlertingMountConfig
+  ) {
     this.createButton = this.page.testSubj.locator('createActionPolicyButton');
     this.detailsFlyout = this.page.testSubj.locator('actionPolicyDetailsFlyout');
     this.detailsFlyoutTakeActionButton = this.page.testSubj.locator(

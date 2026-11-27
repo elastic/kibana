@@ -209,8 +209,10 @@ export const wakeParent = async ({
   return triggerMode === ChatTriggerMode.Never ? 'queued' : 'woken';
 };
 
-export interface ReportToParentParams
-  extends Omit<WakeParentParams, 'childExecutionId' | 'signal'> {
+export interface ReportToParentParams extends Omit<
+  WakeParentParams,
+  'childExecutionId' | 'signal'
+> {
   execution: AgentExecution;
   taskManager: TaskManagerStartContract;
   logger: Logger;

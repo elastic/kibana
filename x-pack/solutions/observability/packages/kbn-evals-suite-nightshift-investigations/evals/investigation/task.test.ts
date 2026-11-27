@@ -288,8 +288,8 @@ it('flags a finished investigation whose conversation never finished persisting'
           path === '/internal/nightshift/investigations'
             ? { investigation_id: 'unpersisted' }
             : path.startsWith('/internal/investigations/')
-            ? investigation({ id: 'unpersisted' })
-            : unfinished
+              ? investigation({ id: 'unpersisted' })
+              : unfinished
         )
       );
 

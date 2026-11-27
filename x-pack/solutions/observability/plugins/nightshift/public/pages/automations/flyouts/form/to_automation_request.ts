@@ -72,8 +72,8 @@ export const toAutomationRequestBody = (
     completions: !values.slackAction
       ? []
       : values.slackAction.target === 'thread'
-      ? [{ action: 'post_to_slack', targetMode: 'thread' }]
-      : [{ action: 'post_to_slack', targetMode: values.slackAction.target, destination }],
+        ? [{ action: 'post_to_slack', targetMode: 'thread' }]
+        : [{ action: 'post_to_slack', targetMode: values.slackAction.target, destination }],
     runtime:
       values.dailyDispatchLimit === UNLIMITED_DAILY_LIMIT
         ? {}

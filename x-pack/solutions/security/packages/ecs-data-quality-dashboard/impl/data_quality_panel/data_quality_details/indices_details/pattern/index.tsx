@@ -212,10 +212,10 @@ const PatternComponent: React.FC<Props> = ({
         pattern,
         results: undefined,
         sizeInBytes: isILMAvailable
-          ? getPatternSizeInBytes({
+          ? (getPatternSizeInBytes({
               indexNames: getIndexNames({ stats, ilmExplain, ilmPhases, isILMAvailable }),
               stats,
-            }) ?? 0
+            }) ?? 0)
           : undefined,
         stats,
       });

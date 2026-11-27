@@ -22,8 +22,7 @@ const noop = () => {};
  * The feature flag will remain disabled until we're ready to ship some of the content. The target is to release an MVP by 9.4 then have it fully functional by 9.5.
  */
 export interface EnhancedAlertEventOverviewProps
-  extends DocViewRenderProps,
-    DocViewRestorableStateProps {
+  extends DocViewRenderProps, DocViewRestorableStateProps {
   overviewTab?: SecuritySolutionAlertFlyoutOverviewTabFeature;
   refreshData?: () => void;
 }

@@ -533,13 +533,16 @@ export class ObservabilityAIAssistantClient {
     let toolChoice: ToolChoiceType | { function: string } | undefined;
 
     if (functions?.length) {
-      tools = functions.reduce((acc, fn) => {
-        acc[fn.name] = {
-          description: fn.description,
-          schema: fn.parameters,
-        };
-        return acc;
-      }, {} as Record<string, { description: string; schema: any }>);
+      tools = functions.reduce(
+        (acc, fn) => {
+          acc[fn.name] = {
+            description: fn.description,
+            schema: fn.parameters,
+          };
+          return acc;
+        },
+        {} as Record<string, { description: string; schema: any }>
+      );
 
       toolChoice = functionCall
         ? {

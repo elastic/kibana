@@ -110,15 +110,18 @@ export const OverviewPage: FC<{ timefilter: TimefilterContract }> = ({ timefilte
     function setUpMemoryUsageStats() {
       if (memoryUsageLoading || memoryUsageError) return;
 
-      const sumSizeByType = memoryUsageData.reduce((acc, current) => {
-        const { type, size } = current;
-        if (acc[type] === undefined) {
-          acc[type] = size;
-        } else {
-          acc[type] = (acc[type] as number) + size;
-        }
-        return acc;
-      }, {} as Record<MlSavedObjectType, number>);
+      const sumSizeByType = memoryUsageData.reduce(
+        (acc, current) => {
+          const { type, size } = current;
+          if (acc[type] === undefined) {
+            acc[type] = size;
+          } else {
+            acc[type] = (acc[type] as number) + size;
+          }
+          return acc;
+        },
+        {} as Record<MlSavedObjectType, number>
+      );
 
       const formattedSizes: StatEntry[] = [];
 

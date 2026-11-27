@@ -31,7 +31,7 @@ const makeLink = (sourceId: string, ruleId: string): QueryLink =>
     rule_backed: true,
     rule_id: ruleId,
     query: { id: `${ruleId}-query`, severity_score: 90 },
-  } as QueryLink);
+  }) as QueryLink;
 
 const setup = ({
   links = [makeLink('enabled-source', 'rule-1'), makeLink('disabled-source', 'rule-2')],

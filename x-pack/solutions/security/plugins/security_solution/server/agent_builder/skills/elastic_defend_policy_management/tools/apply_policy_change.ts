@@ -5,48 +5,50 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
-import { assessPolicyChangeParamsSchema } from '../domain/impact';
-import { POLICY_IDENTIFIER_MAX_LENGTH, policyIdentifierInputSchema } from '../domain/input_schemas';
+import { assessPolicyChangeParamsSchema } from '../../../../../common/workflows/step_types/endpoint/policies/policy_change_operation';
+import {
+  expectedVersionInputSchema,
+  policyIdentifierInputSchema,
+} from '../../../../../common/workflows/step_types/endpoint/policies/input_schemas';
 import type {
   ApplyPolicyChangePreview,
   ApplyPolicyChangeResult,
-} from '../services/apply_policy_change';
-import { createEndpointPolicyManagementService } from '../services/endpoint_policy_management_service';
-import { PolicyWriteRejectedError } from '../services/policy_errors';
+} from '../../../../endpoint/services/policy_management/services/apply_policy_change';
+import { createEndpointPolicyManagementService } from '../../../../endpoint/services/policy_management/services/endpoint_policy_management_service';
+import { PolicyWriteRejectedError } from '../../../../endpoint/services/policy_management/services/policy_errors';
 import {
   renderApplyPolicyChangeConfirmation,
   selectApplyPreviewFacts,
 } from './apply_policy_change_confirmation';
-import { presentApplyPolicyChangeResult } from './present_apply_policy_change_result';
+import {
+  APPLY_POLICY_CHANGE_MAX_RESULT_TOKENS,
+  presentApplyPolicyChangeResult,
+} from '../../../../endpoint/services/policy_management/presentation/present_apply_policy_change_result';
 import { createPolicyTool } from './create_policy_tool';
 
 export const APPLY_POLICY_CHANGE_TOOL_ID = 'security.policy_management.apply_policy_change';
 
-const APPLY_POLICY_CHANGE_MAX_RESULT_TOKENS = 12_000;
-
-export const applyPolicyChangeSchema = z
-  .object({
-    idOrName: policyIdentifierInputSchema.describe(
-      'Saved-object id or exact full stored endpoint policy name in the current space. ' +
-        'A presented name with name_string_truncated true is display-only; pass the policy id as later idOrName.'
-    ),
-    changes: assessPolicyChangeParamsSchema.shape.changes.describe(
-      'The same change operations assessed for this policy in the current conversation, at most 50.'
-    ),
-    expectedVersion: z
-      .string()
-      .min(1)
-      .max(POLICY_IDENTIFIER_MAX_LENGTH)
-      .describe(
+export const applyPolicyChangeSchema = lazySchema(() =>
+  z
+    .object({
+      idOrName: policyIdentifierInputSchema.describe(
+        'Saved-object id or exact full stored endpoint policy name in the current space. ' +
+          'A presented name with name_string_truncated true is display-only; pass the policy id as later idOrName.'
+      ),
+      changes: assessPolicyChangeParamsSchema.shape.changes.describe(
+        'The same change operations assessed for this policy in the current conversation, at most 50.'
+      ),
+      expectedVersion: expectedVersionInputSchema.describe(
         'The version returned by the successful assessment of this policy for these same operations in the current conversation. ' +
           'Never a policy revision and never a version from a later policy read. ' +
           'A truncated version cannot match and the apply reports a conflict.'
       ),
-  })
-  .strict();
+    })
+    .strict()
+);
 
 export type ApplyPolicyChangeInput = z.infer<typeof applyPolicyChangeSchema>;
 

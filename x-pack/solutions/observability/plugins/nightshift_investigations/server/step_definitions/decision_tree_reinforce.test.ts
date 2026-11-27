@@ -46,7 +46,7 @@ describe('decisionTreeReinforceStepDefinition', () => {
       abortSignal: new AbortController().signal,
       stepId: 'reinforce_decision_trees',
       stepType: 'nightshift.decisionTreeReinforce',
-    } as never);
+    }) as never;
 
   const run = (input: Record<string, unknown>) =>
     decisionTreeReinforceStepDefinition({ getAgentBuilder: () => agentBuilder }).handler(

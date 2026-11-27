@@ -20,7 +20,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({ useKibana: jest.fn() }));
 
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 
-const row = (id: string) => ({ id } as ProposalsPageResponse['proposals'][number]);
+const row = (id: string) => ({ id }) as ProposalsPageResponse['proposals'][number];
 
 const pagesOf = (...ids: string[]): InfiniteData<ProposalsPageResponse> => ({
   pages: [{ proposals: ids.map(row), total: ids.length }],

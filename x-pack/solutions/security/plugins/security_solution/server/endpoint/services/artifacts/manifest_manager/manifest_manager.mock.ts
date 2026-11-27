@@ -67,8 +67,10 @@ export enum ManifestManagerMockType {
   NormalFlow,
 }
 
-export interface ManifestManagerMockOptions
-  extends Pick<ManifestManagerContext, 'savedObjectsClientFactory'> {
+export interface ManifestManagerMockOptions extends Pick<
+  ManifestManagerContext,
+  'savedObjectsClientFactory'
+> {
   exceptionListClient: ExceptionListClient;
   packagePolicyService: jest.Mocked<PackagePolicyClient>;
   savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;

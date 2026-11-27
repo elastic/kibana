@@ -31,7 +31,7 @@ When in doubt, choose the more conservative option and ask the Kibana security t
 
 {{kib}} makes a [public commitment](../../../reference/kibana-accessibility-statement.md) to creating an accessible product for people with disabilities. Accessibility is not a polish task at the end of a feature — inaccessible components block real users from doing their jobs, and retrofitting accessibility onto a shipped feature is almost always harder than building it in from the start.
 
-Use EUI components wherever possible; they embody our accessibility playbook. Treat accessibility-related ESLint warnings as blockers, not warnings. Add `axe-core` assertions to new or modified UI. See [Accessibility](./accessibility.md) for concrete tooling, test patterns, and the pre-commit checklist.
+Use EUI components wherever possible; they embody our accessibility playbook. Treat accessibility-related lint warnings as blockers, not warnings. Add `axe-core` assertions to new or modified UI. See [Accessibility](./accessibility.md) for concrete tooling, test patterns, and the pre-commit checklist.
 
 ## Do the right thing even when it's the hard thing
 
@@ -81,9 +81,9 @@ As with any codebase that evolves organically over time, {{kib}} has a fair shar
 
 We can leverage the cumulative knowledge of the broader developer community to iteratively improve the quality of our software, but the fundamental building blocks of {{kib}} are designed to support {{kib}}'s needs as a project rather than the conveniences of popular tools and developer community sentiment.
 
-Whenever possible, automated tools should be used to aid in consistency (e.g. linting, prettier).
+Whenever possible, automated tools should be used to aid in consistency (e.g. oxlint, oxfmt).
 
-We use ESLint rules where possible, but also review the [styleguide](https://github.com/elastic/kibana/blob/main/STYLEGUIDE.mdx) for recommendations that can't be linted. Per-plugin ESLint overrides are discouraged — inconsistent enforcement erodes the benefit of shared rules.
+We use lint rules where possible, but also review the [styleguide](https://github.com/elastic/kibana/blob/main/STYLEGUIDE.mdx) for recommendations that can't be linted. Per-plugin lint overrides are discouraged — inconsistent enforcement erodes the benefit of shared rules.
 
 ## TypeScript over JavaScript
 

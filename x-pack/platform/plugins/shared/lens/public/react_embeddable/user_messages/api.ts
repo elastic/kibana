@@ -107,6 +107,7 @@ export function buildUserMessagesHelpers(
   updateWarnings: () => void;
   updateMessages: (messages: UserMessage[]) => void;
   discardRuntimeMessages: () => void;
+  removeUserMessages: (predicate: (uniqueId: string) => boolean) => boolean;
   updateBlockingErrors: (blockingMessages: UserMessage[] | Error) => void;
   updateValidationErrors: (messages: UserMessage[]) => void;
 } {
@@ -122,6 +123,15 @@ export function buildUserMessagesHelpers(
 
   const discardRuntimeMessages = () => {
     runtimeUserMessages = {};
+  };
+
+  /** Drops the runtime messages whose id matches, and returns whether any was dropped. */
+  const removeUserMessages = (predicate: (uniqueId: string) => boolean) => {
+    const ids = Object.keys(runtimeUserMessages).filter(predicate);
+    for (const id of ids) {
+      delete runtimeUserMessages[id];
+    }
+    return ids.length > 0;
   };
 
   const getUserMessages: UserMessagesGetter = (locationId, filters) => {
@@ -244,6 +254,7 @@ export function buildUserMessagesHelpers(
   return {
     addUserMessages,
     discardRuntimeMessages,
+    removeUserMessages,
     getUserMessages,
     /**
      * Here pass all the messages that comes directly from the Lens validation/info system
@@ -281,12 +292,13 @@ export function buildUserMessagesHelpers(
         blockingMessages instanceof Error
           ? blockingMessages
           : blockingMessages.length
-          ? new Error(
-              typeof blockingMessages[0].longMessage === 'string' && blockingMessages[0].longMessage
-                ? blockingMessages[0].longMessage
-                : blockingMessages[0].shortMessage
-            )
-          : undefined;
+            ? new Error(
+                typeof blockingMessages[0].longMessage === 'string' &&
+                  blockingMessages[0].longMessage
+                  ? blockingMessages[0].longMessage
+                  : blockingMessages[0].shortMessage
+              )
+            : undefined;
 
       if (error) {
         addLog(`Blocking error: ${error?.message}`);

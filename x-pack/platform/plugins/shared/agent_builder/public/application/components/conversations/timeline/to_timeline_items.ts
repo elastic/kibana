@@ -74,10 +74,10 @@ export const groupTimelineEvents = (
     steers.unread(event)
       ? undefined
       : awaitingPromptEventId
-      ? 'before_pause'
-      : steers.hasLiveExecution
-      ? 'waiting'
-      : undefined;
+        ? 'before_pause'
+        : steers.hasLiveExecution
+          ? 'waiting'
+          : undefined;
   const answers = answersByPromptId(displayEvents);
   const resolvedToolCalls = resolvedToolCallIds(displayEvents);
   const resumeLinks = resumeToOriginalExecutionId(displayEvents, eventsById);
@@ -227,9 +227,8 @@ export const groupTimelineEvents = (
     }
   }
 
-  return ordered.map(
-    (entry): GroupedItem =>
-      'executionId' in entry ? accumulatorToItem(entry, eventsById, awaitingPromptEventId) : entry
+  return ordered.map((entry): GroupedItem =>
+    'executionId' in entry ? accumulatorToItem(entry, eventsById, awaitingPromptEventId) : entry
   );
 };
 

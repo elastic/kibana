@@ -32,7 +32,7 @@ const rawEvents = mockTimelineData.map(
       _id: event._id,
       _index: 'test-index',
       fields: {},
-    } as unknown as EsHitRecord)
+    }) as unknown as EsHitRecord
 );
 
 describe('useTimelineControlColumns', () => {

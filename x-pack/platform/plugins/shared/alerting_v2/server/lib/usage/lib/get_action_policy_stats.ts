@@ -203,7 +203,9 @@ export async function getActionPolicyStats(
   });
 
   const total =
-    typeof response.hits.total === 'number' ? response.hits.total : response.hits.total?.value ?? 0;
+    typeof response.hits.total === 'number'
+      ? response.hits.total
+      : (response.hits.total?.value ?? 0);
 
   const aggs = response.aggregations as unknown as ActionPolicyStatsAggregations | undefined;
   const workflowsPerPolicy = aggs?.workflows_per_policy_percentiles.values;

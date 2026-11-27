@@ -49,7 +49,7 @@ export type ServerExtensionCallback<A extends object | void = void, R = A> = (ar
 interface ServerExtensionPointDefinition<
   T extends string,
   Args extends object | void = void,
-  Response = Args
+  Response = Args,
 > {
   type: T;
   /**
@@ -217,7 +217,7 @@ export interface ExtensionPointStorageClientInterface {
   pipeRun<
     T extends ExtensionPoint['type'],
     D extends NarrowExtensionPointToType<T> = NarrowExtensionPointToType<T>,
-    P extends Parameters<D['callback']> = Parameters<D['callback']>
+    P extends Parameters<D['callback']> = Parameters<D['callback']>,
   >(
     extensionType: T,
     initialCallbackInput: P[0]['data'],

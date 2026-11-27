@@ -114,8 +114,8 @@ const auditEventBody = ({
   const message = error
     ? `Failed attempt to ${present} ${doc}`
     : outcome === 'unknown'
-    ? `User is ${progressive} ${doc}`
-    : `User has ${past} ${doc}`;
+      ? `User is ${progressive} ${doc}`
+      : `User has ${past} ${doc}`;
 
   return {
     message,
@@ -265,8 +265,8 @@ export const sessionEventsSaveAuditEvent = ({
     message: error
       ? `Failed attempt to save events of session [id=${sessionId}]`
       : failedAll
-      ? `Failed to save ${failed} event(s) of session [id=${sessionId}]`
-      : `User has saved ${saved} event(s) of session [id=${sessionId}], ${failed} failed`,
+        ? `Failed to save ${failed} event(s) of session [id=${sessionId}]`
+        : `User has saved ${saved} event(s) of session [id=${sessionId}], ${failed} failed`,
     event: {
       action: MemoryAuditAction.SAVE_EVENT,
       category: ['database'],

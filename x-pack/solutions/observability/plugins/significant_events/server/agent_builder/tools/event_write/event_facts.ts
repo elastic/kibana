@@ -36,8 +36,10 @@ import type {
 const isLiveStatus = (status: SignificantEvent['status'] | undefined): boolean =>
   SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS.some((live) => live === status);
 
-interface EventFacts
-  extends Pick<SignificantEvent, 'status' | 'severity' | 'signals' | 'confidence'> {
+interface EventFacts extends Pick<
+  SignificantEvent,
+  'status' | 'severity' | 'signals' | 'confidence'
+> {
   candidate: ResolvedWriteCandidate;
   rest: Omit<EventsWriteInput, 'event_id'>;
   episodeContext: ReturnType<typeof mergeEpisodeContext>;
@@ -205,7 +207,7 @@ export const computeEventFacts = ({
   const signals = (
     isContinuation && !reopens
       ? mergeSignalsLatestPerRule(currentEpisode, candidate.input.signals ?? [], timestamp)
-      : candidate.input.signals ?? []
+      : (candidate.input.signals ?? [])
   ).map((signal) => {
     const collectedAt = getSignalCollectedAt(signal);
     return collectedAt === signal.collected_at ? signal : { ...signal, collected_at: collectedAt };

@@ -52,7 +52,7 @@ const createContext = (input: Record<string, unknown>): StepHandlerContext<never
     abortSignal: new AbortController().signal,
     stepId: 'attach_impact',
     stepType: 'investigations.attachImpact',
-  } as unknown as StepHandlerContext<never, never>);
+  }) as unknown as StepHandlerContext<never, never>;
 
 describe('investigations.attachImpact input schema', () => {
   it('should require at least one entity', () => {
@@ -107,7 +107,7 @@ describe('investigations.attachImpact step', () => {
             return result.written;
           }),
           revertAttach: jest.fn().mockResolvedValue(undefined),
-        } as unknown as ImpactService),
+        }) as unknown as ImpactService,
       resolveUser,
       privileges,
       getAttachmentClient: getAttachmentClient as never,
@@ -238,7 +238,7 @@ describe('investigations.getImpact step', () => {
     readableIds: string[] | undefined = undefined
   ) =>
     getGetImpactStepDefinition({
-      getImpactService: () => ({ getByConversationId } as unknown as ImpactService),
+      getImpactService: () => ({ getByConversationId }) as unknown as ImpactService,
       privileges,
       getConversationClient: async () =>
         ({
@@ -248,7 +248,7 @@ describe('investigations.getImpact step', () => {
                 .filter((id) => readableIds === undefined || readableIds.includes(id))
                 .map((id) => [id, { id }])
             ),
-        } as unknown as ConversationPublicClient),
+        }) as unknown as ConversationPublicClient,
     });
 
   it('should report a conversation the workflow identity cannot read as not found', async () => {
