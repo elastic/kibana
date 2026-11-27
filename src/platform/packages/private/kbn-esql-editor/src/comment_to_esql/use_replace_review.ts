@@ -12,6 +12,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import type { MutableRefObject } from 'react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { ReviewActionsWidget } from './review_actions_widget';
+import type { PreviewPendingRef } from './preview_pending';
 import { CODE_ADDED_CLASS, LINE_REPLACED_CLASS } from '../editor_ai.styles';
 
 export interface ReviewState {
@@ -28,9 +29,17 @@ interface UseReplaceReviewParams {
   contextKeyId: string;
   rejectAction: { id: string; label: string };
   editSourceId: string;
+  /** Whether accepting replaces original lines ("Replace") or only keeps the new ones ("Keep"). */
+  isReplaceMode?: (state: ReviewState) => boolean;
+  /** Cleared when the review ends so the following accept/reject edit can publish. */
+  previewPendingRef?: PreviewPendingRef;
+  /** Publishes the editor text when an edit ends the review without removing any suggestion text. */
+  publishQuery: (query: string) => void;
   onAfterAccept?: (state: ReviewState, acceptedQuery: string) => void;
   onAfterReject?: (state: ReviewState) => void;
 }
+
+const alwaysReplace = () => true;
 
 /**
  * Shared review UI for inline diff-and-replace flows: decorates original changed
@@ -38,11 +47,18 @@ interface UseReplaceReviewParams {
  * Accepting is left to the editor's run action (Cmd/Ctrl+Enter), which is why only
  * the undo keybinding is registered here.
  *
+ * The generated lines are followed through edits with a tracked decoration, so removing
+ * them stays correct even if the user typed above them.
+ *
  * Returns:
  *  - showReview  — call after inserting the generated lines into the model
  *  - cleanup     — clears decorations/widget/keybindings without reverting editor content
- *  - reject      — reverts the editor to before the suggestion and cleans up
+ *  - dismiss     — removes the generated lines and cleans up, without calling any callback
+ *  - reject      — dismiss, then calls onAfterReject
  *  - accept      — keeps the suggestion and drops the original lines; false if nothing was pending
+ *
+ * Editing the query ends the review: the suggestion is removed and the resulting text published.
+ * Nothing is published for a query replaced from outside, such as a tab switch.
  */
 export const useReplaceReview = ({
   editorRef,
@@ -51,6 +67,9 @@ export const useReplaceReview = ({
   contextKeyId,
   rejectAction,
   editSourceId,
+  isReplaceMode = alwaysReplace,
+  previewPendingRef,
+  publishQuery,
   onAfterAccept,
   onAfterReject,
 }: UseReplaceReviewParams) => {
@@ -59,8 +78,13 @@ export const useReplaceReview = ({
   const actionDisposablesRef = useRef<monaco.IDisposable[]>([]);
   const contextKeyRef = useRef<monaco.editor.IContextKey<boolean> | undefined>(undefined);
   const reviewStateRef = useRef<ReviewState | null>(null);
+  const generatedBlockIndexRef = useRef<number | undefined>(undefined);
 
   const cleanup = useCallback(() => {
+    // Clear before any follow-up edit so accept/reject still publish. Only the review that
+    // set the flag may clear it, so an inactive one cannot release another review's preview.
+    if (previewPendingRef && reviewStateRef.current) previewPendingRef.current = false;
+
     decorationsRef.current?.clear();
     decorationsRef.current = undefined;
 
@@ -72,9 +96,52 @@ export const useReplaceReview = ({
 
     contextKeyRef.current?.set(false);
     reviewStateRef.current = null;
-  }, []);
+    generatedBlockIndexRef.current = undefined;
+  }, [previewPendingRef]);
 
   useEffect(() => cleanup, [cleanup]);
+
+  const dismiss = useCallback(() => {
+    const editor = editorRef.current;
+    const model = editorModel.current;
+    const blockIndex = generatedBlockIndexRef.current;
+    const block =
+      blockIndex === undefined ? null : decorationsRef.current?.getRange(blockIndex) ?? null;
+
+    cleanup();
+
+    if (!editor || !model || !block || block.isEmpty()) return false;
+
+    // The preview was inserted with one newline. Remove it too, unless the user joined the
+    // first generated line to an original one, in which case only the generated text goes.
+    const startsOwnLine = block.startColumn === 1 && block.startLineNumber > 1;
+    const lineBefore = block.startLineNumber - 1;
+    editor.executeEdits(`${editSourceId}-reject`, [
+      {
+        range: startsOwnLine
+          ? new monaco.Range(
+              lineBefore,
+              model.getLineMaxColumn(lineBefore),
+              block.endLineNumber,
+              block.endColumn
+            )
+          : new monaco.Range(
+              block.startLineNumber,
+              block.startColumn,
+              block.endLineNumber,
+              block.endColumn
+            ),
+        text: null,
+      },
+    ]);
+    return true;
+  }, [editorRef, editorModel, cleanup, editSourceId]);
+
+  const reject = useCallback(() => {
+    const state = reviewStateRef.current;
+    dismiss();
+    if (state) onAfterReject?.(state);
+  }, [dismiss, onAfterReject]);
 
   const accept = useCallback(() => {
     const editor = editorRef.current;
@@ -85,45 +152,28 @@ export const useReplaceReview = ({
 
     if (!editor || !model || !state) return false;
 
-    editor.executeEdits(`${editSourceId}-accept`, [
-      {
-        range: new monaco.Range(
-          state.firstChangedOriginalLine,
-          1,
-          state.lastChangedOriginalLine + 1,
-          1
-        ),
-        text: null,
-      },
-    ]);
+    const { firstChangedOriginalLine: first, lastChangedOriginalLine: last } = state;
+    if (last >= first) {
+      // A replaced last line has no following newline, so remove the preceding one instead.
+      const isLastLine = last >= model.getLineCount() && first > 1;
+      editor.executeEdits(`${editSourceId}-accept`, [
+        {
+          range: isLastLine
+            ? new monaco.Range(
+                first - 1,
+                model.getLineMaxColumn(first - 1),
+                last,
+                model.getLineMaxColumn(last)
+              )
+            : new monaco.Range(first, 1, last + 1, 1),
+          text: null,
+        },
+      ]);
+    }
 
     onAfterAccept?.(state, model.getValue());
     return true;
   }, [editorRef, editorModel, cleanup, editSourceId, onAfterAccept]);
-
-  const reject = useCallback(() => {
-    const editor = editorRef.current;
-    const model = editorModel.current;
-    const state = reviewStateRef.current;
-
-    cleanup();
-
-    if (!editor || !model || !state) return;
-
-    editor.executeEdits(`${editSourceId}-reject`, [
-      {
-        range: new monaco.Range(
-          state.lastChangedOriginalLine,
-          model.getLineMaxColumn(state.lastChangedOriginalLine),
-          state.generatedLineEnd,
-          model.getLineMaxColumn(state.generatedLineEnd)
-        ),
-        text: null,
-      },
-    ]);
-
-    onAfterReject?.(state);
-  }, [editorRef, editorModel, cleanup, editSourceId, onAfterReject]);
 
   const showReview = useCallback(
     (state: ReviewState) => {
@@ -132,23 +182,38 @@ export const useReplaceReview = ({
 
       reviewStateRef.current = state;
 
+      const model = editorModel.current;
+      if (!model) return;
+
       const decorations: monaco.editor.IModelDeltaDecoration[] = [];
 
-      for (
-        let line = state.firstChangedOriginalLine;
-        line <= state.lastChangedOriginalLine;
-        line++
-      ) {
+      if (state.lastChangedOriginalLine >= state.firstChangedOriginalLine) {
         decorations.push({
-          range: new monaco.Range(line, 1, line, 1),
+          range: new monaco.Range(
+            state.firstChangedOriginalLine,
+            1,
+            state.lastChangedOriginalLine,
+            model.getLineMaxColumn(state.lastChangedOriginalLine)
+          ),
           options: { isWholeLine: true, className: LINE_REPLACED_CLASS },
         });
       }
 
-      for (let line = state.generatedLineStart; line <= state.generatedLineEnd; line++) {
+      if (state.generatedLineEnd >= state.generatedLineStart) {
+        generatedBlockIndexRef.current = decorations.length;
         decorations.push({
-          range: new monaco.Range(line, 1, line, 1),
-          options: { isWholeLine: true, className: CODE_ADDED_CLASS },
+          range: new monaco.Range(
+            state.generatedLineStart,
+            1,
+            state.generatedLineEnd,
+            model.getLineMaxColumn(state.generatedLineEnd)
+          ),
+          options: {
+            isWholeLine: true,
+            className: CODE_ADDED_CLASS,
+            // Text typed next to the suggestion is the user's, not part of it.
+            stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+          },
         });
       }
 
@@ -162,9 +227,10 @@ export const useReplaceReview = ({
       widgetRef.current = new ReviewActionsWidget(
         euiTheme,
         editor,
-        state.generatedLineEnd,
+        // Below both blocks, whichever comes first.
+        Math.max(state.generatedLineEnd, state.lastChangedOriginalLine),
         { onAccept: accept, onReject: reject },
-        true
+        isReplaceMode(state)
       );
 
       const activeElement = document.activeElement;
@@ -186,10 +252,32 @@ export const useReplaceReview = ({
           precondition: contextKeyId,
           run: () => reject(),
         }),
+        // Any edit, including a tab switch replacing the query, ends the review. It runs after
+        // the event because the editor applies change events in order and must not see an
+        // edit made from inside one.
+        editor.onDidChangeModelContent(() => {
+          queueMicrotask(() => {
+            if (reviewStateRef.current !== state) return;
+            // Removing the suggestion publishes the text itself. Only publish here when there was
+            // nothing to remove, for example after the user replaced the whole query.
+            if (!dismiss()) publishQuery(editorModel.current?.getValue() ?? '');
+          });
+        }),
       ];
     },
-    [editorRef, euiTheme, contextKeyId, rejectAction, accept, reject]
+    [
+      editorRef,
+      editorModel,
+      euiTheme,
+      contextKeyId,
+      rejectAction,
+      isReplaceMode,
+      accept,
+      reject,
+      dismiss,
+      publishQuery,
+    ]
   );
 
-  return { showReview, cleanup, reject, accept };
+  return { showReview, cleanup, dismiss, reject, accept, reviewStateRef };
 };

@@ -17,6 +17,8 @@ import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { AiReviewAction, type ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 import { GENERATING_HINT_CLASS } from '../editor_ai.styles';
 import { findChangedRegion } from './utils';
+import { insertPendingPreview } from '../comment_to_esql/preview_pending';
+import type { PreviewPendingRef } from '../comment_to_esql/preview_pending';
 import { useReplaceReview } from '../comment_to_esql/use_replace_review';
 
 type SuggestFixHandler = (
@@ -71,6 +73,9 @@ interface UseSuggestFixParams {
   onSubmit: (query: string) => void;
   telemetryService?: ESQLEditorTelemetryService;
   onAfterInsert?: () => void;
+  previewPendingRef?: PreviewPendingRef;
+  publishQuery: (query: string) => void;
+  dismissAllReviews: () => void;
 }
 
 export const useSuggestFix = ({
@@ -82,6 +87,9 @@ export const useSuggestFix = ({
   onSubmit,
   telemetryService,
   onAfterInsert,
+  previewPendingRef,
+  publishQuery,
+  dismissAllReviews,
 }: UseSuggestFixParams) => {
   const { euiTheme } = useEuiTheme();
 
@@ -123,7 +131,7 @@ export const useSuggestFix = ({
     showReview,
     reject: rejectFix,
     accept: acceptReview,
-    cleanup: discardReview,
+    dismiss: dismissReview,
   } = useReplaceReview({
     editorRef,
     editorModel,
@@ -136,6 +144,8 @@ export const useSuggestFix = ({
       }),
     },
     editSourceId: 'esql-suggest-fix',
+    previewPendingRef,
+    publishQuery,
     onAfterAccept: (state, acceptedQuery) => {
       trackFixReview(AiReviewAction.ACCEPT, state.generatedLineEnd - state.generatedLineStart + 1);
       onSubmit(acceptedQuery);
@@ -197,6 +207,12 @@ export const useSuggestFix = ({
         }
 
         const fixedQuery = result.content.replace(/\n+$/, '');
+        // Leave other flows' previews alone when there is nothing to show.
+        if (fixedQuery === queryString.replace(/\n+$/, '')) return;
+
+        // The request took a while, so another flow may have shown a preview meanwhile.
+        dismissAllReviews();
+
         const originalLines = model.getValue().split('\n');
         const fixedLines = fixedQuery.split('\n');
 
@@ -211,38 +227,40 @@ export const useSuggestFix = ({
           return;
         }
 
-        // Insert only the changed fix lines after the last changed original line
-        const insertMaxCol = model.getLineMaxColumn(lastChangedOriginalLine);
-        editor.executeEdits('esql-suggest-fix', [
-          {
-            range: new monaco.Range(
-              lastChangedOriginalLine,
-              insertMaxCol,
-              lastChangedOriginalLine,
-              insertMaxCol
-            ),
-            text: '\n' + changedFixedLines.join('\n'),
-            forceMoveMarkers: true,
-          },
-        ]);
-        onAfterInsert?.();
+        // Hold publishing until accept/reject so the preview is not saved as the query.
+        insertPendingPreview(previewPendingRef, () => {
+          const insertMaxCol = model.getLineMaxColumn(lastChangedOriginalLine);
+          editor.executeEdits('esql-suggest-fix', [
+            {
+              range: new monaco.Range(
+                lastChangedOriginalLine,
+                insertMaxCol,
+                lastChangedOriginalLine,
+                insertMaxCol
+              ),
+              text: '\n' + changedFixedLines.join('\n'),
+              forceMoveMarkers: true,
+            },
+          ]);
+          onAfterInsert?.();
 
-        const generatedLineStart = lastChangedOriginalLine + 1;
-        const generatedLineEnd = lastChangedOriginalLine + changedFixedLines.length;
+          const generatedLineStart = lastChangedOriginalLine + 1;
+          const generatedLineEnd = lastChangedOriginalLine + changedFixedLines.length;
 
-        trackFixResult(
-          queryString.length,
-          startTime,
-          true,
-          errorCode,
-          generatedLineEnd - generatedLineStart + 1
-        );
+          trackFixResult(
+            queryString.length,
+            startTime,
+            true,
+            errorCode,
+            generatedLineEnd - generatedLineStart + 1
+          );
 
-        showReview({
-          firstChangedOriginalLine,
-          lastChangedOriginalLine,
-          generatedLineStart,
-          generatedLineEnd,
+          showReview({
+            firstChangedOriginalLine,
+            lastChangedOriginalLine,
+            generatedLineStart,
+            generatedLineEnd,
+          });
         });
       } catch (error) {
         if (controller.signal.aborted) return;
@@ -264,12 +282,14 @@ export const useSuggestFix = ({
       editorRef,
       editorModel,
       rejectFix,
+      dismissAllReviews,
       http,
       onAfterInsert,
       trackFixResult,
       showReview,
       notifications.toasts,
       clearGeneratingDecoration,
+      previewPendingRef,
     ]
   );
 
@@ -285,5 +305,5 @@ export const useSuggestFix = ({
     };
   }, [isEnabled, runSuggestFix, editorModel]);
 
-  return { acceptReview, discardReview };
+  return { acceptReview, dismissReview };
 };

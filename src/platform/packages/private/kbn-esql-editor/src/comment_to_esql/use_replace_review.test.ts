@@ -20,22 +20,34 @@ jest.mock('@kbn/code-editor', () => ({
       startColumn: sc,
       endLineNumber: el,
       endColumn: ec,
+      isEmpty: () => sl === el && sc === ec,
     })),
     KeyMod: { CtrlCmd: 2048, Shift: 1024 },
     KeyCode: { Backspace: 1 },
+    editor: { TrackedRangeStickiness: { NeverGrowsWhenTypingAtEdges: 1 } },
   },
 }));
 
 interface Decoration {
+  range: { startLineNumber: number; endLineNumber: number };
   options: { className: string };
 }
 
 const buildEditor = () => {
   const clearDecorations = jest.fn();
   let lastDecorations: Decoration[] = [];
+  let getRangeOverride: ((index: number) => unknown) | undefined;
   const createDecorationsCollection = jest.fn((decs: Decoration[]) => {
     lastDecorations = decs;
-    return { clear: clearDecorations };
+    return {
+      clear: clearDecorations,
+      getRange: (index: number) => getRangeOverride?.(index) ?? decs[index].range,
+    };
+  });
+  const contentListeners: Array<() => void> = [];
+  const onDidChangeModelContent = jest.fn((listener: () => void) => {
+    contentListeners.push(listener);
+    return { dispose: jest.fn() };
   });
 
   const contextKeySet = jest.fn();
@@ -62,6 +74,7 @@ const buildEditor = () => {
     createDecorationsCollection,
     createContextKey,
     addAction,
+    onDidChangeModelContent,
     executeEdits,
     focus,
     revealLineInCenter,
@@ -74,6 +87,10 @@ const buildEditor = () => {
     clearDecorations,
     contextKeySet,
     getAction: (id: string) => registeredActions.get(id),
+    emitContentChange: () => contentListeners.forEach((listener) => listener()),
+    setTrackedRange: (range: unknown) => {
+      getRangeOverride = () => range;
+    },
     executeEdits,
     focus,
     revealLineInCenter,
@@ -83,9 +100,10 @@ const buildEditor = () => {
 
 const MODEL_VALUE = 'FROM logs | LIMIT 10';
 
-const buildModel = (lineMaxColumn = 10) =>
+const buildModel = (lineMaxColumn = 10, lineCount = 100) =>
   ({
     getLineMaxColumn: jest.fn(() => lineMaxColumn),
+    getLineCount: jest.fn(() => lineCount),
     getValue: jest.fn(() => MODEL_VALUE),
   }) as unknown as monaco.editor.ITextModel;
 
@@ -110,6 +128,7 @@ describe('useReplaceReview', () => {
       contextKeyId: 'testContextKey',
       rejectAction: { id: 'test.reject', label: 'Reject' },
       editSourceId: 'test-edit',
+      publishQuery: jest.fn(),
       onAfterAccept: jest.fn(),
       onAfterReject: jest.fn(),
       ...overrides,
@@ -158,7 +177,7 @@ describe('useReplaceReview', () => {
     });
   });
 
-  it('showReview creates one decoration per original line and one per generated line', () => {
+  it('showReview tracks the original lines and the generated lines as one range each', () => {
     const params = makeParams();
     const { editor, getDecorations } = buildEditor();
     params.editorRef.current = editor;
@@ -169,10 +188,16 @@ describe('useReplaceReview', () => {
     act(() => result.current.showReview(REVIEW_STATE));
 
     const decorations = getDecorations();
-    // 2 original lines (2–3) + 3 generated lines (4–6) = 5
-    expect(decorations).toHaveLength(5);
-    expect(decorations.filter((d) => d.options.className === 'esqlLineReplaced')).toHaveLength(2);
-    expect(decorations.filter((d) => d.options.className === 'esqlCodeAdded')).toHaveLength(3);
+    // One range for the original lines (2–3) and one for the generated lines (4–6)
+    expect(decorations).toHaveLength(2);
+    expect(decorations[0]).toMatchObject({
+      range: { startLineNumber: 2, endLineNumber: 3 },
+      options: { className: 'esqlLineReplaced' },
+    });
+    expect(decorations[1]).toMatchObject({
+      range: { startLineNumber: 4, endLineNumber: 6 },
+      options: { className: 'esqlCodeAdded' },
+    });
   });
 
   it('reject deletes the generated lines and calls onAfterReject', () => {
@@ -196,6 +221,210 @@ describe('useReplaceReview', () => {
       }),
     ]);
     expect(params.onAfterReject).toHaveBeenCalledWith(REVIEW_STATE);
+  });
+
+  it('reject deletes the generated lines where they are now, not where they were inserted', () => {
+    const params = makeParams();
+    const { editor, executeEdits, setTrackedRange } = buildEditor();
+    params.editorRef.current = editor;
+    params.editorModel.current = buildModel(20);
+
+    const { result } = renderHook(() => useReplaceReview(params));
+
+    act(() => result.current.showReview(REVIEW_STATE));
+    // The user added a line above, so Monaco moved the generated lines down by one.
+    setTrackedRange({
+      startLineNumber: 5,
+      startColumn: 1,
+      endLineNumber: 7,
+      endColumn: 40,
+      isEmpty: () => false,
+    });
+    act(() => result.current.reject());
+
+    expect(executeEdits).toHaveBeenCalledWith('test-edit-reject', [
+      expect.objectContaining({
+        range: expect.objectContaining({ startLineNumber: 4, endLineNumber: 7 }),
+        text: null,
+      }),
+    ]);
+  });
+
+  it('reject leaves the text alone when the user already deleted the generated lines', () => {
+    const params = makeParams();
+    const { editor, executeEdits, setTrackedRange } = buildEditor();
+    params.editorRef.current = editor;
+    params.editorModel.current = buildModel(20);
+
+    const { result } = renderHook(() => useReplaceReview(params));
+
+    act(() => result.current.showReview(REVIEW_STATE));
+    setTrackedRange({ startLineNumber: 4, endLineNumber: 4, isEmpty: () => true });
+    act(() => result.current.reject());
+
+    expect(executeEdits).not.toHaveBeenCalled();
+    expect(params.onAfterReject).toHaveBeenCalledTimes(1);
+  });
+
+  it('an edit ends the review and removes the suggestion, which publishes the text itself', async () => {
+    const params = makeParams();
+    const { editor, executeEdits, emitContentChange } = buildEditor();
+    params.editorRef.current = editor;
+    params.editorModel.current = buildModel(20);
+
+    const { result } = renderHook(() => useReplaceReview(params));
+
+    act(() => result.current.showReview(REVIEW_STATE));
+    act(() => emitContentChange());
+    // The review ends after the change event, not inside it.
+    expect(executeEdits).not.toHaveBeenCalled();
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(result.current.reviewStateRef.current).toBeNull();
+    expect(executeEdits).toHaveBeenCalledWith('test-edit-reject', expect.any(Array));
+    expect(params.publishQuery).not.toHaveBeenCalled();
+    expect(params.onAfterReject).not.toHaveBeenCalled();
+    expect(params.onAfterAccept).not.toHaveBeenCalled();
+  });
+
+  it('publishing is enabled again before the removal edit, so the edited query reaches the parent', async () => {
+    const previewPendingRef = { current: true };
+    const params = makeParams({ previewPendingRef });
+    const { editor, executeEdits, emitContentChange } = buildEditor();
+    params.editorRef.current = editor;
+    params.editorModel.current = buildModel(20);
+    let pendingDuringRemoval: boolean | undefined;
+    executeEdits.mockImplementation(() => {
+      pendingDuringRemoval = previewPendingRef.current;
+    });
+
+    const { result } = renderHook(() => useReplaceReview(params));
+
+    act(() => result.current.showReview(REVIEW_STATE));
+    act(() => emitContentChange());
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    // The editor publishes the removal edit through its change handler, which skips
+    // publishing while the flag is set.
+    expect(pendingDuringRemoval).toBe(false);
+  });
+
+  it('an edit that already replaced the suggestion still publishes the new text', async () => {
+    const params = makeParams();
+    const { editor, executeEdits, emitContentChange, setTrackedRange } = buildEditor();
+    params.editorRef.current = editor;
+    params.editorModel.current = buildModel(20);
+
+    const { result } = renderHook(() => useReplaceReview(params));
+
+    act(() => result.current.showReview(REVIEW_STATE));
+    setTrackedRange({ isEmpty: () => true });
+    act(() => emitContentChange());
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(executeEdits).not.toHaveBeenCalled();
+    expect(params.publishQuery).toHaveBeenCalledWith(MODEL_VALUE);
+  });
+
+  it('an edit that follows an accept does not end a review again', async () => {
+    const params = makeParams();
+    const { editor, emitContentChange } = buildEditor();
+    params.editorRef.current = editor;
+    params.editorModel.current = buildModel(20);
+
+    const { result } = renderHook(() => useReplaceReview(params));
+
+    act(() => result.current.showReview(REVIEW_STATE));
+    act(() => emitContentChange());
+    act(() => {
+      result.current.accept();
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(params.publishQuery).not.toHaveBeenCalled();
+  });
+
+  it('dismiss removes only the generated text when the user joined it to an original line', () => {
+    const params = makeParams();
+    const { editor, executeEdits, setTrackedRange } = buildEditor();
+    params.editorRef.current = editor;
+    params.editorModel.current = buildModel(20);
+
+    const { result } = renderHook(() => useReplaceReview(params));
+
+    act(() => result.current.showReview(REVIEW_STATE));
+    setTrackedRange({
+      startLineNumber: 3,
+      startColumn: 12,
+      endLineNumber: 5,
+      endColumn: 22,
+      isEmpty: () => false,
+    });
+    act(() => result.current.dismiss());
+
+    expect(executeEdits).toHaveBeenCalledWith('test-edit-reject', [
+      {
+        range: expect.objectContaining({
+          startLineNumber: 3,
+          startColumn: 12,
+          endLineNumber: 5,
+          endColumn: 22,
+        }),
+        text: null,
+      },
+    ]);
+  });
+
+  it('tracks the generated lines without absorbing text typed at their edges', () => {
+    const params = makeParams();
+    const { editor, getDecorations } = buildEditor();
+    params.editorRef.current = editor;
+    params.editorModel.current = buildModel();
+    const { result } = renderHook(() => useReplaceReview(params));
+
+    act(() => result.current.showReview(REVIEW_STATE));
+
+    expect(getDecorations()[1].options).toMatchObject({ stickiness: 1 });
+  });
+
+  it('a hook without an active review does not clear another review’s pending flag', () => {
+    const previewPendingRef = { current: true };
+    const params = makeParams({ previewPendingRef });
+    const { editor } = buildEditor();
+    params.editorRef.current = editor;
+    params.editorModel.current = buildModel(20);
+
+    const { result } = renderHook(() => useReplaceReview(params));
+
+    act(() => result.current.reject());
+    act(() => result.current.dismiss());
+    act(() => result.current.cleanup());
+
+    expect(previewPendingRef.current).toBe(true);
+  });
+
+  it('dismiss removes the generated lines without calling any callback', () => {
+    const params = makeParams();
+    const { editor, executeEdits } = buildEditor();
+    params.editorRef.current = editor;
+    params.editorModel.current = buildModel(20);
+
+    const { result } = renderHook(() => useReplaceReview(params));
+
+    act(() => result.current.showReview(REVIEW_STATE));
+    act(() => result.current.dismiss());
+
+    expect(executeEdits).toHaveBeenCalledTimes(1);
+    expect(params.onAfterReject).not.toHaveBeenCalled();
+    expect(params.onAfterAccept).not.toHaveBeenCalled();
   });
 
   it('accept deletes the original lines and calls onAfterAccept with the accepted query', () => {
@@ -226,6 +455,48 @@ describe('useReplaceReview', () => {
     expect(params.onAfterAccept).toHaveBeenCalledWith(REVIEW_STATE, MODEL_VALUE);
   });
 
+  it('accept removes the preceding newline when the replaced line is the last line', () => {
+    const params = makeParams();
+    const { editor, executeEdits } = buildEditor();
+    params.editorRef.current = editor;
+    params.editorModel.current = buildModel(10, REVIEW_STATE.lastChangedOriginalLine);
+
+    const { result } = renderHook(() => useReplaceReview(params));
+
+    act(() => result.current.showReview(REVIEW_STATE));
+    act(() => {
+      result.current.accept();
+    });
+
+    expect(executeEdits).toHaveBeenCalledWith('test-edit-accept', [
+      expect.objectContaining({
+        range: expect.objectContaining({
+          startLineNumber: REVIEW_STATE.firstChangedOriginalLine - 1,
+          endLineNumber: REVIEW_STATE.lastChangedOriginalLine,
+        }),
+        text: null,
+      }),
+    ]);
+  });
+
+  it('accept only keeps the generated lines when nothing is replaced', () => {
+    const params = makeParams();
+    const { editor, executeEdits } = buildEditor();
+    params.editorRef.current = editor;
+    params.editorModel.current = buildModel();
+
+    const { result } = renderHook(() => useReplaceReview(params));
+    const keepOnly = { ...REVIEW_STATE, firstChangedOriginalLine: 7, lastChangedOriginalLine: 6 };
+
+    act(() => result.current.showReview(keepOnly));
+    act(() => {
+      expect(result.current.accept()).toBe(true);
+    });
+
+    expect(executeEdits).not.toHaveBeenCalled();
+    expect(params.onAfterAccept).toHaveBeenCalledWith(keepOnly, MODEL_VALUE);
+  });
+
   it('accept reports whether a review was pending', () => {
     const params = makeParams();
     const { editor, executeEdits } = buildEditor();
@@ -253,6 +524,21 @@ describe('useReplaceReview', () => {
     });
     expect(accepted).toBe(false);
     expect(params.onAfterAccept).toHaveBeenCalledTimes(1);
+  });
+
+  it('cleanup clears the pending preview mark', () => {
+    const previewPendingRef = { current: true };
+    const params = makeParams({ previewPendingRef });
+    const { editor } = buildEditor();
+    params.editorRef.current = editor;
+    params.editorModel.current = buildModel();
+
+    const { result } = renderHook(() => useReplaceReview(params));
+
+    act(() => result.current.showReview(REVIEW_STATE));
+    act(() => result.current.cleanup());
+
+    expect(previewPendingRef.current).toBe(false);
   });
 
   it('cleanup clears decorations and resets the context key', () => {

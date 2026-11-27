@@ -160,7 +160,8 @@ const ESQLEditorInternal = function ESQLEditor({
   // (comment-to-ES|QL, Fix with AI, visor) is pending; populated below by those hooks.
   const pendingReviewRef = useRef<PendingReviewActions>({
     accept: () => false,
-    discard: () => {},
+    dismiss: () => {},
+    cancel: () => {},
   });
   useImperativeHandle(
     editorApiRef,
@@ -230,6 +231,9 @@ const ESQLEditorInternal = function ESQLEditor({
     () => fixESQLQueryWithVariables(query.esql, esqlVariables),
     [esqlVariables, query.esql]
   );
+
+  // True while a generated preview is inserted in the model and must not be saved.
+  const previewPendingRef = useRef(false);
 
   const esqlService = kibana.services?.esql;
   const variablesService = esqlService?.variablesService;
@@ -326,6 +330,25 @@ const ESQLEditorInternal = function ESQLEditor({
       onTextLangQueryChange({ esql: value } as AggregateQuery);
     },
     [onTextLangQueryChange]
+  );
+
+  // The editor reports a query replaced from outside, such as a tab switch, as a model change
+  // too. That text is already the committed query, so it must not be echoed back as an edit.
+  const publishEditedQuery = useCallback(
+    (value: string) => {
+      if (value !== fixedQueryRef.current) onQueryUpdate(value);
+    },
+    [onQueryUpdate]
+  );
+
+  const dismissAllReviews = useCallback(() => pendingReviewRef.current.dismiss(), []);
+
+  const onEditorModelChange = useCallback(
+    (value: string) => {
+      if (previewPendingRef.current) return;
+      onQueryUpdate(value);
+    },
+    [onQueryUpdate]
   );
 
   const { onSuggestionsReady, resetSuggestionsTracking } = useSuggestionsLatencyTracking({
@@ -650,7 +673,8 @@ const ESQLEditorInternal = function ESQLEditor({
     isReviewActiveRef,
     isGeneratingRef,
     acceptReview: acceptCommentReview,
-    discardReview: discardCommentReview,
+    dismissReview: dismissCommentReview,
+    cancelGeneration: cancelCommentGeneration,
   } = useCommentToEsql({
     editorRef,
     editorModel,
@@ -661,6 +685,9 @@ const ESQLEditorInternal = function ESQLEditor({
     clearGhostHintRef,
     telemetryService,
     onAfterInsert: expandToFitContent,
+    previewPendingRef,
+    publishQuery: publishEditedQuery,
+    dismissAllReviews,
   });
 
   const onGenerateFromCommentRef = useRef(onGenerateFromComment);
@@ -715,7 +742,7 @@ const ESQLEditorInternal = function ESQLEditor({
       },
     });
 
-  const { acceptReview: acceptFixReview, discardReview: discardFixReview } = useSuggestFix({
+  const { acceptReview: acceptFixReview, dismissReview: dismissFixReview } = useSuggestFix({
     editorRef,
     editorModel,
     http: core.http,
@@ -724,6 +751,9 @@ const ESQLEditorInternal = function ESQLEditor({
     onSubmit: runAcceptedQuery,
     telemetryService,
     onAfterInsert: expandToFitContent,
+    previewPendingRef,
+    publishQuery: publishEditedQuery,
+    dismissAllReviews,
   });
 
   const focusEditor = useCallback(() => editorRef.current?.focus(), []);
@@ -736,22 +766,26 @@ const ESQLEditorInternal = function ESQLEditor({
   const {
     showVisorReview,
     acceptReview: acceptVisorReview,
-    discardReview: discardVisorReview,
+    dismissReview: dismissVisorReview,
   } = useVisorNlToEsql({
     editorRef,
     editorModel,
     onSubmit: visorNlOnSubmit,
     onAfterInsert: expandToFitContent,
     telemetryService,
+    previewPendingRef,
+    publishQuery: publishEditedQuery,
+    dismissAllReviews,
   });
 
   // The first review that reports it was pending wins; accepting submits the query itself.
   pendingReviewRef.current = {
     accept: () => acceptCommentReview() || acceptFixReview() || acceptVisorReview(),
-    discard: () => {
-      discardCommentReview();
-      discardFixReview();
-      discardVisorReview();
+    cancel: cancelCommentGeneration,
+    dismiss: () => {
+      dismissCommentReview();
+      dismissFixReview();
+      dismissVisorReview();
     },
   };
 
@@ -875,7 +909,7 @@ const ESQLEditorInternal = function ESQLEditor({
                   inlineCompletionsProvider={inlineCompletionsProvider}
                   documentHighlightProvider={documentHighlightProvider}
                   codeActions={codeActionsProvider}
-                  onChange={onQueryUpdate}
+                  onChange={onEditorModelChange}
                   editorDidMount={async (editor) => {
                     // Track editor init time once per mount
                     reportInitLatency();

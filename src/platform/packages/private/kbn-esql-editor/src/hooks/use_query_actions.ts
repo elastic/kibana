@@ -17,12 +17,14 @@ import type { ESQLEditorTelemetryService } from '../telemetry/telemetry_service'
 import { getToggleCommentLines } from '../helpers';
 import type { ESQLEditorProps } from '../types';
 
-/** Hooks a pending AI review into the query actions: running accepts it, replacing the query discards it. */
+/** Hooks a pending AI review into the query actions: running accepts it, replacing the query dismisses it. */
 export interface PendingReviewActions {
   /** Accepts the pending review, which submits the resulting query itself; false if nothing was pending. */
   accept: () => boolean;
-  /** Tears down the pending review without touching the editor content. */
-  discard: () => void;
+  /** Ends the pending review and removes its generated lines from the editor. */
+  dismiss: () => void;
+  /** Cancels AI requests still running, whose result would belong to the previous query. */
+  cancel: () => void;
 }
 
 interface UseQueryActionsParams {
@@ -96,7 +98,8 @@ export const useQueryActions = ({
         telemetryService.trackQueryHistoryClicked(querySource === QuerySource.STARRED);
       }
       // The new query supersedes whatever a pending AI proposal was about to change.
-      pendingReviewRef.current.discard();
+      pendingReviewRef.current.cancel();
+      pendingReviewRef.current.dismiss();
       // Update the query state first, then submit on the next tick so React
       // processes the state change before the submit reads the editor value.
       onQueryUpdate(newQuery);
@@ -108,6 +111,8 @@ export const useQueryActions = ({
   );
 
   const onPrettifyQuery = useCallback(() => {
+    // Format the query itself, not a query with a pending suggestion inserted in it.
+    pendingReviewRef.current.dismiss();
     const qs = editorRef.current?.getValue();
     if (qs) {
       const editor = editorRef.current;
@@ -121,7 +126,7 @@ export const useQueryActions = ({
         onQueryUpdate(prettyCode);
       }
     }
-  }, [editorRef, onQueryUpdate, measuredEditorWidth]);
+  }, [editorRef, onQueryUpdate, measuredEditorWidth, pendingReviewRef]);
 
   const onCommentLine = useCallback(() => {
     const currentSelection = editorRef?.current?.getSelection();
