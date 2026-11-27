@@ -17,7 +17,7 @@ export default createTestConfig({
     reportName: 'Serverless Search Saved Objects Management Functional Tests',
   },
   kbnServerArgs: findTestPluginPaths([
-    resolve(REPO_ROOT, 'src/platform/test/plugin_functional/plugins'),
+    resolve(REPO_ROOT, 'src/platform/test_plugins/plugin_functional'),
   ]),
 
   // include settings from project controller

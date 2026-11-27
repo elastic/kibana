@@ -628,6 +628,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     if (
       ((await doAnySuiteRelevantChangesMatch([
         /^x-pack\/platform\/plugins\/shared\/osquery/,
+        /^x-pack\/platform\/packages\/private\/osquery-plugin-cypress/,
         /^x-pack\/solutions\/security\/test\/osquery_cypress/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
         /^\.buildkite\/pipelines\/pull_request\/security_solution\/osquery_cypress\.yml/,

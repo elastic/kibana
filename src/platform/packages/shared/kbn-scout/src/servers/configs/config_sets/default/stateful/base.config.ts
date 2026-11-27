@@ -138,9 +138,9 @@ export const defaultConfig: ScoutServerConfig = {
       '--telemetry.sendUsageTo=staging',
       `--server.maxPayload=1679958`,
       // newsfeed mock service
-      `--plugin-path=${join(REPO_ROOT, '/src/platform/test/common/plugins/newsfeed')}`,
+      `--plugin-path=${join(REPO_ROOT, '/src/platform/test_plugins/common/newsfeed')}`,
       // otel mock service
-      `--plugin-path=${join(REPO_ROOT, '/src/platform/test/common/plugins/otel_metrics')}`,
+      `--plugin-path=${join(REPO_ROOT, '/src/platform/test_plugins/otel_metrics')}`,
       `--newsfeed.service.urlRoot=${kbnUrl}`,
       `--newsfeed.service.pathTemplate=/api/_newsfeed-FTS-external-service-simulators/kibana/v{VERSION}.json`,
       `--logging.appenders.deprecation=${JSON.stringify({
