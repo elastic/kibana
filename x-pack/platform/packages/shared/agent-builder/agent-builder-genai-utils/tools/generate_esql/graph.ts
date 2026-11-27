@@ -15,6 +15,7 @@ import type { InferenceChatModelCallOptions } from '@kbn/inference-langchain';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base';
 import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
+import { validateQueryTarget } from '@kbn/esql-utils';
 import { extractRefusal, extractTextContent } from '../../langchain/messages';
 import type { EsqlResponse } from '../utils/esql';
 import { resolveResourceForEsqlWithSamplingStats } from '../utils/resources';
@@ -28,7 +29,7 @@ import {
   buildTimeSeriesTimeRangeFilter,
 } from '../utils/esql';
 import { createRequestDocumentationPrompt, createGenerateEsqlPrompt } from './prompts';
-import type { ResolvedResourceWithSampling } from '../utils/resources';
+import type { ResolvedResourceWithSampling, ResolveResourceResponse } from '../utils/resources';
 import type {
   Action,
   ExecuteQueryAction,
@@ -87,6 +88,16 @@ const StateAnnotation = Annotation.Root({
 
 export type StateType = typeof StateAnnotation.State;
 
+/**
+ * Pins the generated query to its target: every candidate must read only from the target (and
+ * keep its exclusions); `sourceCommand` and `projectRouting`, when set, must be kept too.
+ * A mismatch is fed back to the model as a validation error.
+ */
+export interface SourcePin {
+  sourceCommand?: string;
+  projectRouting?: string;
+}
+
 export const createNlToEsqlGraph = ({
   model,
   esClient,
@@ -98,6 +109,8 @@ export const createNlToEsqlGraph = ({
   includeFrozen = false,
   sessionId,
   cacheControl,
+  resolveResource,
+  sourcePin,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
@@ -109,6 +122,10 @@ export const createNlToEsqlGraph = ({
   includeFrozen?: boolean;
   sessionId?: string;
   cacheControl?: ChatCompleteCacheControl;
+  /** Replaces the default resolution of the target, e.g. with an already resolved resource. */
+  resolveResource?: (target: string) => Promise<ResolveResourceResponse>;
+  /** When set, candidates that do not read exactly the target fail validation. */
+  sourcePin?: SourcePin;
 }) => {
   const resolveTarget = async (state: StateType) => {
     const resolvedResource = await resolveResourceForEsqlWithSamplingStats({
@@ -118,9 +135,18 @@ export const createNlToEsqlGraph = ({
       includeViews,
       includeFrozen,
       esClient,
+      resolve: resolveResource,
     });
 
     return { resource: resolvedResource };
+  };
+
+  /** Local validation plus, when pinned, the source check. */
+  const validateCandidate = async (query: string, target: string): Promise<string | undefined> => {
+    const validationError = await validateEsqlQuery(query, esqlCallbacks);
+    const pinError = sourcePin ? validateQueryTarget({ query, target, ...sourcePin }) : undefined;
+    const errors = [validationError, pinError].filter((error): error is string => Boolean(error));
+    return errors.length > 0 ? errors.join('\n') : undefined;
   };
 
   const requestDocCallConfig: Partial<InferenceChatModelCallOptions> = {
@@ -271,7 +297,7 @@ export const createNlToEsqlGraph = ({
       throw new Error(`Last action is not a generate_query or autocorrect_query action`);
     }
 
-    const errorMessage = await validateEsqlQuery(query, esqlCallbacks);
+    const errorMessage = await validateCandidate(query, state.target);
     const action: ValidateQueryAction = {
       type: 'validate_query',
       success: !errorMessage,
@@ -307,7 +333,7 @@ export const createNlToEsqlGraph = ({
       throw new Error(`Last action is not a generate_query or autocorrect_query action`);
     }
 
-    const validationError = await validateEsqlQuery(query, esqlCallbacks);
+    const validationError = await validateCandidate(query, state.target);
     if (validationError) {
       return {
         actions: [

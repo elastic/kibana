@@ -22,6 +22,11 @@ jest.mock('@kbn/esql-server-utils', () => ({
   buildServerESQLCallbacks: jest.fn().mockReturnValue({}),
 }));
 
+jest.mock('./resolve_query_target', () => ({
+  ...jest.requireActual('./resolve_query_target'),
+  resolveQueryTarget: jest.fn(),
+}));
+
 jest.mock('./graph', () => ({
   createNlToEsqlGraph: jest.fn(),
   requestDocumentationSchema: {},
@@ -48,6 +53,7 @@ import { createNlToEsqlGraph } from './graph';
 import { indexExplorer } from '../index_explorer';
 import { loadDocumentation } from './documentation';
 import { generateEsql, DEFAULT_EXECUTION_TIMEOUT_MS } from './nl_to_esql';
+import { resolveQueryTarget } from './resolve_query_target';
 
 const mockDocBase = { getDocumentation: jest.fn().mockReturnValue({}) };
 const mockGraphOutput = {
@@ -163,5 +169,108 @@ describe('generateEsql — doc-prefetch orchestration', () => {
       expect.objectContaining({ executionTimeoutMs: 5_000 }),
       expect.anything()
     );
+  });
+});
+
+describe('generateEsql — source from the current query', () => {
+  let mockGraphInvoke: jest.Mock;
+
+  const resource = { name: 'logs-*', type: 'index_pattern', fields: [] };
+
+  beforeEach(() => {
+    mockGraphInvoke = jest.fn().mockResolvedValue(mockGraphOutput);
+    (EsqlDocumentBase.load as jest.Mock).mockResolvedValue(mockDocBase);
+    (createNlToEsqlGraph as jest.Mock).mockReturnValue({ invoke: mockGraphInvoke });
+    (indexExplorer as jest.Mock).mockResolvedValue({ resources: [{ name: 'logs-test' }] });
+    (loadDocumentation as jest.Mock).mockResolvedValue({
+      getDocContent: jest.fn().mockReturnValue(''),
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const base = () => {
+    const { model, docInvoke } = createMockModel();
+    return {
+      docInvoke,
+      params: {
+        nlQuery: 'add a sparkline of errors',
+        model,
+        esClient: {} as ElasticsearchClient,
+        logger: { debug: jest.fn() } as unknown as Logger,
+        execute: 'none' as const,
+        sourceResolution: 'cascade' as const,
+      },
+    };
+  };
+
+  it('generates over the current sources, pinned, without the picker', async () => {
+    (resolveQueryTarget as jest.Mock).mockResolvedValue({
+      strategy: 'current_query',
+      resource,
+      sourceCommand: 'TS',
+      projectRouting: '_alias:*',
+    });
+    const { params, docInvoke } = base();
+
+    const result = await generateEsql({ ...params, currentQuery: 'TS logs-* | LIMIT 10' });
+
+    expect(indexExplorer).not.toHaveBeenCalled();
+    expect(docInvoke).not.toHaveBeenCalled();
+    expect(createNlToEsqlGraph).toHaveBeenCalledWith(
+      expect.objectContaining({ sourcePin: { sourceCommand: 'TS', projectRouting: '_alias:*' } })
+    );
+    const { resolveResource } = (createNlToEsqlGraph as jest.Mock).mock.calls[0][0];
+    await expect(resolveResource('logs-*')).resolves.toBe(resource);
+    expect(mockGraphInvoke).toHaveBeenCalledWith(
+      expect.objectContaining({ target: 'logs-*', actions: [] }),
+      expect.anything()
+    );
+    expect(result).toEqual(expect.objectContaining({ query: mockGraphOutput.query }));
+  });
+
+  it('does not pin the source command when the instruction asks for one', async () => {
+    (resolveQueryTarget as jest.Mock).mockResolvedValue({
+      strategy: 'current_query',
+      resource,
+      sourceCommand: 'FROM',
+    });
+    const { params } = base();
+
+    await generateEsql({
+      ...params,
+      nlQuery: 'rewrite this with TS',
+      currentQuery: 'FROM logs-*',
+    });
+
+    expect(createNlToEsqlGraph).toHaveBeenCalledWith(expect.objectContaining({ sourcePin: {} }));
+  });
+
+  it('falls back to the picker when the current query gives no source', async () => {
+    (resolveQueryTarget as jest.Mock).mockResolvedValue(undefined);
+    const { params, docInvoke } = base();
+
+    await generateEsql({ ...params, currentQuery: 'ROW a = 1' });
+
+    expect(indexExplorer).toHaveBeenCalledTimes(1);
+    expect(docInvoke).toHaveBeenCalledTimes(1);
+    expect(createNlToEsqlGraph).toHaveBeenCalledWith(
+      expect.not.objectContaining({ sourcePin: expect.anything() })
+    );
+    expect(mockGraphInvoke).toHaveBeenCalledWith(
+      expect.objectContaining({ target: 'logs-test' }),
+      expect.anything()
+    );
+  });
+
+  it('ignores the current query without the cascade, and when an index is given', async () => {
+    const { params } = base();
+
+    await generateEsql({ ...params, sourceResolution: undefined, currentQuery: 'FROM logs-*' });
+    await generateEsql({ ...params, index: 'metrics-*', currentQuery: 'FROM logs-*' });
+
+    expect(resolveQueryTarget).not.toHaveBeenCalled();
   });
 });

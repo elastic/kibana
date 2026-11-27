@@ -84,6 +84,8 @@ export {
   getInferenceEndpoints,
   getEditorExtensions,
   getProjectRoutingFromEsqlQuery,
+  validateQueryTarget,
+  type ValidateQueryTargetParams,
   hasOnlySourceCommand,
   hasTimeseriesInfoCommand,
   hasChangePointCommand,

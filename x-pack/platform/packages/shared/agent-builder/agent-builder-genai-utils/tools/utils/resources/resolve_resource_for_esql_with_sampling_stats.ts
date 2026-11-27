@@ -18,6 +18,7 @@ export type ResolvedResourceWithSampling = Omit<ResolveResourceResponse, 'fields
 
 /**
  * Resolve an ES|QL target and generate field stats based on sampling.
+ * `resolve` replaces the default resolution, e.g. with a resource the caller already resolved.
  */
 export const resolveResourceForEsqlWithSamplingStats = async ({
   resourceName,
@@ -26,6 +27,7 @@ export const resolveResourceForEsqlWithSamplingStats = async ({
   includeDatasets = false,
   includeViews = false,
   includeFrozen = false,
+  resolve,
 }: {
   resourceName: string;
   esClient: ElasticsearchClient;
@@ -33,14 +35,17 @@ export const resolveResourceForEsqlWithSamplingStats = async ({
   includeDatasets?: boolean;
   includeViews?: boolean;
   includeFrozen?: boolean;
+  resolve?: (resourceName: string) => Promise<ResolveResourceResponse>;
 }) => {
-  const resource = await resolveResourceForEsql({
-    resourceName,
-    esClient,
-    includeDatasets,
-    includeViews,
-    includeFrozen,
-  });
+  const resource = resolve
+    ? await resolve(resourceName)
+    : await resolveResourceForEsql({
+        resourceName,
+        esClient,
+        includeDatasets,
+        includeViews,
+        includeFrozen,
+      });
   // datasets and views are not searchable via `_search`, so skip sampling entirely for them
   const stats =
     resource.type === EsResourceType.dataset || resource.type === EsResourceType.view

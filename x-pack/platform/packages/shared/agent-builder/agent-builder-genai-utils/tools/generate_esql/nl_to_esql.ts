@@ -16,12 +16,14 @@ import { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
 import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
 import type { EsqlResponse } from '../utils/esql';
+import type { SourcePin } from './graph';
 import { createNlToEsqlGraph, requestDocumentationSchema } from './graph';
 import type { RequestDocumentationAction } from './actions';
 import { indexExplorer } from '../index_explorer';
 import { loadDocumentation } from './documentation';
 import { createRequestDocumentationPromptNoResource } from './prompts';
 import { withPromqlKeyword } from './promql_keyword';
+import { resolveQueryTarget } from './resolve_query_target';
 
 export const DEFAULT_EXECUTION_TIMEOUT_MS = 30_000;
 
@@ -150,9 +152,29 @@ export interface GenerateEsqlOptions {
    * EIS session id for best-effort provider stickiness across calls. Non-EIS connectors ignore it.
    */
   sessionId?: string;
+  /**
+   * The query in the user's editor. With `sourceResolution: 'cascade'`, its sources are the
+   * target.
+   */
+  currentQuery?: string;
+  /**
+   * How the target is chosen when `index` is not given.
+   * - `'llm_picker'` (default): a model picks one source from the catalog; no pick throws
+   *   {@link GenerateEsqlNoDataError}.
+   * - `'cascade'`: the current query's sources, and the generated query is pinned to them.
+   *   Without usable current sources, the model picks one as with `'llm_picker'`.
+   */
+  sourceResolution?: 'llm_picker' | 'cascade';
 }
 
 export type GenerateEsqlParams = GenerateEsqlOptions & GenerateEsqlDeps;
+
+/**
+ * Whether the instruction asks for a source command (`TS`, `FROM`, PromQL, time series), in
+ * which case the current one is not pinned. `FROM` and `TS` count only in capitals.
+ */
+const requestsSourceCommand = (nlQuery: string): boolean =>
+  /\b(?:FROM|TS)\b/.test(nlQuery) || /\b(?:promql|time[ -]?series)\b/i.test(nlQuery);
 
 export const generateEsql = async ({
   nlQuery,
@@ -175,6 +197,8 @@ export const generateEsql = async ({
   internalEsClient,
   logger,
   sessionId,
+  currentQuery,
+  sourceResolution = 'llm_picker',
 }: GenerateEsqlParams): Promise<GenerateEsqlResponse> => {
   const model = modelProvider
     ? await modelProvider.selectModel({ effortLevel: EffortLevels.low })
@@ -187,17 +211,113 @@ export const generateEsql = async ({
     logger,
   });
 
-  const graph = createNlToEsqlGraph({
-    model,
-    esClient,
-    docBase,
-    documentation,
-    esqlCallbacks,
-    includeDatasets,
-    includeViews,
-    includeFrozen,
-    sessionId,
-  });
+  const createGraph = (
+    extra: Pick<Parameters<typeof createNlToEsqlGraph>[0], 'resolveResource' | 'sourcePin'> = {}
+  ) =>
+    createNlToEsqlGraph({
+      model,
+      esClient,
+      docBase,
+      documentation,
+      esqlCallbacks,
+      includeDatasets,
+      includeViews,
+      includeFrozen,
+      sessionId,
+      ...extra,
+    });
+
+  // Doc keywords from the NL query alone, fetched in parallel with source discovery.
+  // The resource-less prompt is an accepted quality tradeoff for the latency win.
+  const prefetchDocumentation = (): Promise<RequestDocumentationAction> => {
+    const requestDocModel = model.chatModel.withStructuredOutput(requestDocumentationSchema, {
+      name: 'request_documentation',
+    });
+    return requestDocModel
+      .invoke(
+        createRequestDocumentationPromptNoResource({
+          nlQuery,
+          documentation,
+          additionalContext,
+        })
+      )
+      .then(({ commands = [], functions = [] }) => {
+        const requestedKeywords = withPromqlKeyword(
+          [...commands, ...functions],
+          nlQuery,
+          additionalContext
+        );
+        return {
+          type: 'request_documentation' as const,
+          requestedKeywords,
+          fetchedDoc: docBase.getDocumentation(requestedKeywords),
+        };
+      });
+  };
+
+  const invokeGraph = (
+    graph: ReturnType<typeof createNlToEsqlGraph>,
+    target: string,
+    actions: RequestDocumentationAction[]
+  ) =>
+    graph.invoke(
+      {
+        nlQuery,
+        target,
+        execute,
+        maxRetries,
+        additionalInstructions,
+        additionalContext,
+        rowLimit,
+        disableNamedParams,
+        timeRange,
+        esqlVariables,
+        executionTimeoutMs,
+        // Empty when the target is known up front: the graph requests documentation itself,
+        // with the resource as context.
+        actions,
+      },
+      {
+        recursionLimit: 25,
+        tags: ['generate_esql'],
+        metadata: { graphName: 'generate_esql' },
+      }
+    );
+
+  /**
+   * The cascade path: when the current query has sources, generate a query pinned to them.
+   * Returns undefined when it has none, so the caller discovers a source.
+   */
+  const generateFromCurrentQuery = async (): Promise<GenerateEsqlResponse | undefined> => {
+    const current = await resolveQueryTarget({
+      currentQuery,
+      esClient,
+      logger,
+      includeDatasets,
+      includeViews,
+      includeFrozen,
+    });
+    if (!current) {
+      return undefined;
+    }
+
+    const { resource } = current;
+    const sourcePin: SourcePin = {
+      ...(current.sourceCommand && !requestsSourceCommand(nlQuery)
+        ? { sourceCommand: current.sourceCommand }
+        : {}),
+      ...(current.projectRouting ? { projectRouting: current.projectRouting } : {}),
+    };
+    const graph = createGraph({ resolveResource: async () => resource, sourcePin });
+    const outState = await invokeGraph(graph, resource.name, []);
+
+    return {
+      error: outState.error,
+      answer: outState.answer,
+      query: outState.query,
+      results: outState.results,
+    };
+  };
 
   return withActiveInferenceSpan(
     'generate_esql',
@@ -212,35 +332,18 @@ export const generateEsql = async ({
           ? `${nlQuery.trim()}\n\n${additionalContext.trim()}`
           : nlQuery.trim();
 
+        if (sourceResolution === 'cascade' && !index) {
+          const fromCurrentQuery = await generateFromCurrentQuery();
+          if (fromCurrentQuery) {
+            return fromCurrentQuery;
+          }
+        }
+
         let selectedTarget = index;
         let precomputedDocAction: RequestDocumentationAction | undefined;
 
         if (!selectedTarget) {
-          // Pre-fetch doc keywords from the NL query alone, in parallel with index discovery.
-          // The resource-less prompt is an accepted quality tradeoff for the latency win.
-          const requestDocModel = model.chatModel.withStructuredOutput(requestDocumentationSchema, {
-            name: 'request_documentation',
-          });
-          const docPromise = requestDocModel
-            .invoke(
-              createRequestDocumentationPromptNoResource({
-                nlQuery,
-                documentation,
-                additionalContext,
-              })
-            )
-            .then(({ commands = [], functions = [] }) => {
-              const requestedKeywords = withPromqlKeyword(
-                [...commands, ...functions],
-                nlQuery,
-                additionalContext
-              );
-              return {
-                type: 'request_documentation' as const,
-                requestedKeywords,
-                fetchedDoc: docBase.getDocumentation(requestedKeywords),
-              };
-            });
+          const docPromise = prefetchDocumentation();
 
           const [
             {
@@ -270,27 +373,10 @@ export const generateEsql = async ({
           precomputedDocAction = docAction;
         }
 
-        const outState = await graph.invoke(
-          {
-            nlQuery,
-            target: selectedTarget,
-            execute,
-            maxRetries,
-            additionalInstructions,
-            additionalContext,
-            rowLimit,
-            disableNamedParams,
-            timeRange,
-            esqlVariables,
-            executionTimeoutMs,
-            // Empty when index is known — graph runs request_documentation in-graph with resource context.
-            actions: precomputedDocAction ? [precomputedDocAction] : [],
-          },
-          {
-            recursionLimit: 25,
-            tags: ['generate_esql'],
-            metadata: { graphName: 'generate_esql' },
-          }
+        const outState = await invokeGraph(
+          createGraph(),
+          selectedTarget,
+          precomputedDocAction ? [precomputedDocAction] : []
         );
 
         return {
