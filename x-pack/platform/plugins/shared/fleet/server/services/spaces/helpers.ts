@@ -93,13 +93,12 @@ export function getValidSpaceId(spacedIds?: string[]) {
  * enrollment settings that resolve the default Fleet Server host and download source, so a global
  * default change affects all of them. The caller must hold Fleet privileges in each.
  *
- * When space awareness is disabled there is a single global scope, represented by `*`, which
- * forces a global privilege check. Fails closed (`truncated: true`) if the listing is capped.
+ * The real `space` objects are listed in both space-awareness modes so a caller scoped to exactly
+ * the spaces that exist (e.g. only the default space in a deployment that has just that space) is
+ * allowed, rather than being forced through a global-only check. Fails closed (`truncated: true`)
+ * if the listing is capped.
  */
 export async function getAllSpaceIds(): Promise<{ spaceIds: Set<string>; truncated: boolean }> {
-  if (!(await isSpaceAwarenessEnabled())) {
-    return { spaceIds: new Set([ALL_SPACES_ID]), truncated: false };
-  }
   const soClient = appContextService.getInternalUserSOClientForSpaces();
   const result = await soClient.find<unknown>({
     type: 'space',
@@ -109,6 +108,11 @@ export async function getAllSpaceIds(): Promise<{ spaceIds: Set<string>; truncat
   const spaceIds = new Set<string>();
   for (const so of result.saved_objects) {
     spaceIds.add(so.id);
+  }
+  // Fail closed to a global check if no space could be listed, rather than passing an empty set
+  // (which would skip the privilege check entirely).
+  if (spaceIds.size === 0) {
+    spaceIds.add(ALL_SPACES_ID);
   }
   return { spaceIds, truncated: result.saved_objects.length < result.total };
 }
