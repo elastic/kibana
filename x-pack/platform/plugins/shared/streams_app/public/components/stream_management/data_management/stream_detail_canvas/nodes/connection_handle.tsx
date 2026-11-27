@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import type { Position } from '@xyflow/react';
 import { Handle, useNodeId } from '@xyflow/react';
 import { i18n } from '@kbn/i18n';
+import { usePendingConnectionContext } from '../canvas_connection_highlight';
 
 export const CONNECTION_HANDLE_CLASS = 'streamsConnectionHandle';
 /** The open circle drawn at each side of a unit node. */
 export const NODE_HANDLE_CLASS = 'streamsNodeHandle';
-
-const ConnectionTargetsContext = createContext<ReadonlySet<string> | null>(null);
-
-/** Node ids that can accept the line currently being dragged. */
-export const ConnectionTargetsProvider = ConnectionTargetsContext.Provider;
 
 interface ConnectionHandleProps {
   /** Distinguishes several handles of the same type on one node. */
@@ -45,11 +41,11 @@ export function ConnectionHandle({
   connectAriaLabel,
 }: ConnectionHandleProps) {
   const nodeId = useNodeId();
-  const connectionTargets = useContext(ConnectionTargetsContext);
+  const pendingConnection = usePendingConnectionContext();
   const canStart = type === 'source' && isConnectable && isConnectableStart;
   const canTarget = type === 'target' && isConnectable;
   const highlighted =
-    type === 'target' && nodeId !== null && connectionTargets?.has(nodeId) === true;
+    type === 'target' && nodeId !== null && pendingConnection?.targetIds.has(nodeId) === true;
   const className = useMemo(
     () =>
       [

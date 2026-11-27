@@ -11,6 +11,7 @@ import { css } from '@emotion/react';
 import { euiCanAnimate } from '@elastic/eui';
 import type { NodeMouseHandler } from '@xyflow/react';
 import { FLOW_DIMMED_OPACITY, FLOW_HIGHLIGHT_TRANSITION_MS } from './canvas_constants';
+import { useConnectionDimState } from './canvas_connection_highlight';
 import { getConnectedFlow, type ConnectedFlow } from './connected_flow';
 import type { ClassicCanvasGraph, ClassicCanvasNode } from './types';
 
@@ -75,13 +76,15 @@ export const useHoveredFlow = ({ nodes, edges }: ClassicCanvasGraph): HoveredFlo
   return { hoveredFlow, onNodeMouseEnter, onNodeMouseLeave: clearHoveredFlow, clearHoveredFlow };
 };
 
-/** Fades a node, card and handles alike, while it sits outside the spotlighted flow. */
+/** Fades a node outside the spotlighted flow, or one that cannot take the dragged line. */
 export const withFlowHighlight = <Props extends { id: string }>(
   NodeComponent: FunctionComponent<Props>
 ): ComponentType<Props> => {
   const MemoizedNode = memo(NodeComponent);
   const FlowHighlightedNode = (props: Props) => {
-    const state = useFlowHighlightState(props.id, 'node');
+    const hoverState = useFlowHighlightState(props.id, 'node');
+    const connectionState = useConnectionDimState(props.id);
+    const state = hoverState ?? connectionState;
     return (
       <div css={getFlowDimStyles(state)} data-flow-highlight={state}>
         <MemoizedNode {...props} />

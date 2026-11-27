@@ -20,6 +20,8 @@ import { StreamsAppContextProvider } from '../../../../streams_app_context_provi
 import type { StatsFixtureScenario } from '../../../../../services/unit_stats_client/fixture_unit_stats_client';
 import { StatsManagerProvider } from '../../../../unit_stats/state_management/use_stats_manager';
 import type { DestinationNodeData, DestinationNode as DestinationNodeType } from '../types';
+import { PendingConnectionProvider, type PendingConnection } from '../canvas_connection_highlight';
+import { withFlowHighlight } from '../canvas_flow_highlight';
 import { DestinationNode } from './destination_node';
 
 // The route of the unit, which the popover reads the unit from when it asks for the series of a
@@ -31,6 +33,8 @@ const storyRouter = createRouter<RouteMap>({
   },
 });
 const storyHistory = createMemoryHistory({ initialEntries: ['/v2/unit/default/map'] });
+
+const FlowHighlightedDestinationNode = withFlowHighlight(DestinationNode);
 
 /**
  * The popover of a node asks for the series of its destination with a client that it builds from
@@ -68,9 +72,11 @@ function FixtureRepositoryClient({
 function DestinationNodeStory({
   scenario,
   data,
+  pendingConnection = null,
 }: {
   scenario: StatsFixtureScenario;
   data: DestinationNodeData;
+  pendingConnection?: PendingConnection | null;
 }) {
   const client = useMemo(() => createFixtureUnitStatsClient({ scenario }), [scenario]);
 
@@ -79,11 +85,18 @@ function DestinationNodeStory({
       <FixtureRepositoryClient scenario={scenario}>
         <ReactFlowProvider>
           <StatsManagerProvider unitId="default" client={client}>
-            <div style={{ inlineSize: 280, paddingBlockStart: 260 }}>
-              <DestinationNode
-                {...({ data, selected: false, dragging: false } as NodeProps<DestinationNodeType>)}
-              />
-            </div>
+            <PendingConnectionProvider value={pendingConnection}>
+              <div style={{ inlineSize: 280, paddingBlockStart: 260 }}>
+                <FlowHighlightedDestinationNode
+                  {...({
+                    id: 'story-destination',
+                    data,
+                    selected: false,
+                    dragging: false,
+                  } as NodeProps<DestinationNodeType>)}
+                />
+              </div>
+            </PendingConnectionProvider>
           </StatsManagerProvider>
         </ReactFlowProvider>
       </FixtureRepositoryClient>
@@ -158,4 +171,13 @@ export const StatsCouldNotBeLoaded: Story = {
 /** No source feeds the destination in the saved unit, so nothing is requested. */
 export const NoSavedSource: Story = {
   args: { scenario: 'data', data: { ...ELASTICSEARCH, hasSavedSource: false } },
+};
+
+/** A line is dragged from another node and this destination cannot take it, so the card fades. */
+export const DimmedWhileConnecting: Story = {
+  args: {
+    scenario: 'data',
+    data: ELASTICSEARCH,
+    pendingConnection: { originId: 'story-source', targetIds: new Set() },
+  },
 };
