@@ -8,11 +8,9 @@
  */
 
 import {
-  appendReturnParamsToHash,
   getHashQuery,
   getTutorialDirectoryAppHeaderBack,
   getTutorialDirectoryFirstCrumb,
-  getTutorialIntroductionBackLink,
 } from './tutorial_directory_return_crumb';
 
 const addBasePath = (path: string) => path;
@@ -100,59 +98,56 @@ describe('getTutorialDirectoryAppHeaderBack', () => {
   });
 });
 
-describe('Home return params', () => {
-  const homeHash = '#/tutorial_directory/sampleData?returnAppId=home&returnPath=%23%2F';
+describe('registered app titles', () => {
+  const titles: Record<string, string> = {
+    home: 'Home',
+    searchHomepage: 'Home',
+    searchGettingStarted: 'Getting started',
+  };
+  const getAppTitle = (appId: string) => titles[appId];
 
-  it('names Home in the first crumb', () => {
-    expect(getTutorialDirectoryFirstCrumb({ hash: homeHash, addBasePath, getUrlForApp })).toEqual({
-      text: 'Home',
-      href: '/app/home#/',
-    });
-  });
-
-  it('names Home as the app header back destination', () => {
+  it.each([
+    ['home', '%23%2F', 'Home', '/app/home#/'],
+    ['searchHomepage', '%2F', 'Home', '/app/searchHomepage/'],
+    ['searchGettingStarted', '%2F', 'Getting started', '/app/searchGettingStarted/'],
+  ])('names %s by its registered title', (appId, returnPath, label, href) => {
+    const hash = `#/tutorial_directory/sampleData?returnAppId=${appId}&returnPath=${returnPath}`;
     expect(
-      getTutorialDirectoryAppHeaderBack({ hash: homeHash, addBasePath, getUrlForApp })
-    ).toEqual({ label: 'Home', href: '/app/home#/' });
-  });
-
-  it('names Back to Home in the tutorial introduction back link', () => {
-    expect(getTutorialIntroductionBackLink({ hash: homeHash, addBasePath, getUrlForApp })).toEqual({
-      text: 'Back to Home',
-      href: '/app/home#/',
-    });
-  });
-
-  it('appends return params and keeps them readable via getHashQuery', () => {
-    const hash = appendReturnParamsToHash('#/tutorial_directory/sampleData', {
-      returnAppId: 'home',
-      returnPath: '#/',
-    });
-    expect(hash).toBe(homeHash);
-    expect(getHashQuery(hash)).toBe('?returnAppId=home&returnPath=%23%2F');
-    expect(getHashQuery('#/tutorial_directory/sampleData')).toBe('');
-  });
-});
-
-describe('Search getting started return params', () => {
-  const hash = '#/tutorial_directory/sampleData?returnAppId=searchGettingStarted&returnPath=%2F';
-
-  it('names Getting started as the back destination', () => {
-    expect(getTutorialDirectoryAppHeaderBack({ hash, addBasePath, getUrlForApp })).toEqual({
-      label: 'Getting started',
-      href: '/app/searchGettingStarted/',
-    });
-  });
-});
-
-describe('Search homepage return params', () => {
-  it('names Home as the back destination', () => {
+      getTutorialDirectoryFirstCrumb({ hash, addBasePath, getUrlForApp, getAppTitle })
+    ).toEqual({ text: label, href });
     expect(
-      getTutorialDirectoryAppHeaderBack({
-        hash: '#/tutorial_directory/fileDataViz?returnAppId=searchHomepage&returnPath=%2F',
+      getTutorialDirectoryAppHeaderBack({ hash, addBasePath, getUrlForApp, getAppTitle })
+    ).toEqual({ label, href });
+  });
+
+  it('keeps the special label for observability onboarding', () => {
+    expect(
+      getTutorialDirectoryFirstCrumb({
+        hash: '#/tutorial_directory/sampleData?returnAppId=observabilityOnboarding&returnPath=%3F',
         addBasePath,
         getUrlForApp,
-      })
-    ).toEqual({ label: 'Home', href: '/app/searchHomepage/' });
+        getAppTitle,
+      }).text
+    ).toBe('Add data');
+  });
+
+  it('falls back to Previous page when the app has no registered title', () => {
+    expect(
+      getTutorialDirectoryFirstCrumb({
+        hash: '#/tutorial_directory/sampleData?returnAppId=otherApp&returnPath=%2Ffoo',
+        addBasePath,
+        getUrlForApp,
+        getAppTitle,
+      }).text
+    ).toBe('Previous page');
+  });
+});
+
+describe('getHashQuery', () => {
+  it('returns the query string with the leading ?', () => {
+    expect(getHashQuery('#/tutorial_directory/sampleData?returnAppId=home&returnPath=%23%2F')).toBe(
+      '?returnAppId=home&returnPath=%23%2F'
+    );
+    expect(getHashQuery('#/tutorial_directory/sampleData')).toBe('');
   });
 });

@@ -28,16 +28,13 @@ import type { ApplicationStart } from '@kbn/core/public';
 import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 import { MoveData } from '../move_data';
 import { SetupCloudConnect, CalloutSkeleton } from '../setup_cloud_connect';
-import {
-  appendReturnParamsToHash,
-  HOME_RETURN_APP_ID,
-  HOME_RETURN_PATH,
-} from '../tutorial_directory_return_crumb';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 import { getServices } from '../../kibana_services';
 
-const withHomeReturnParams = (hash: string) =>
-  appendReturnParamsToHash(hash, { returnAppId: HOME_RETURN_APP_ID, returnPath: HOME_RETURN_PATH });
+const getAddDataHref = (tab: 'sampleData' | 'fileDataViz'): string => {
+  const params = new URLSearchParams({ returnAppId: 'home', returnPath: '#/' });
+  return `#/tutorial_directory/${tab}?${params.toString()}`;
+};
 
 interface Props {
   addBasePath: (path: string) => string;
@@ -128,7 +125,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
 
               <EuiButtonEmpty
                 data-test-subj="addSampleData"
-                href={addBasePath(withHomeReturnParams('#/tutorial_directory/sampleData'))}
+                href={addBasePath(getAddDataHref('sampleData'))}
                 iconType="documents"
               >
                 <FormattedMessage
@@ -139,7 +136,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
 
               <EuiButtonEmpty
                 data-test-subj="uploadFile"
-                href={addBasePath(withHomeReturnParams('#/tutorial_directory/fileDataViz'))}
+                href={addBasePath(getAddDataHref('fileDataViz'))}
                 iconType="download"
               >
                 <FormattedMessage

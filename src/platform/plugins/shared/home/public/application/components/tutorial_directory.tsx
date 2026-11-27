@@ -11,6 +11,7 @@ import _ from 'lodash';
 import React from 'react';
 import { EuiFlexItem, EuiFlexGrid } from '@elastic/eui';
 import { AppHeader, type AppHeaderTab } from '@kbn/app-header';
+import type { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import { injectI18n } from '@kbn/i18n-react';
@@ -55,6 +56,7 @@ interface TutorialCard extends Pick<TutorialType, 'id' | 'category' | 'name'> {
 interface TutorialDirectoryUiState {
   selectedTabId: TutorialDirectoryUiProps['openTab'];
   tutorialCards: TutorialCard[];
+  appTitles: ReadonlyMap<string, string>;
 }
 
 class TutorialDirectoryUi extends React.Component<
@@ -62,6 +64,7 @@ class TutorialDirectoryUi extends React.Component<
   TutorialDirectoryUiState
 > {
   private _isMounted: boolean;
+  private appsSubscription?: Subscription;
   tabs: Array<{ id: string; name: string; content: JSX.Element }>;
 
   constructor(props: TutorialDirectoryUiProps) {
@@ -96,16 +99,24 @@ class TutorialDirectoryUi extends React.Component<
     this.state = {
       selectedTabId: openTab,
       tutorialCards: [],
+      appTitles: new Map(),
     };
   }
 
   componentWillUnmount() {
     this._isMounted = false;
+    this.appsSubscription?.unsubscribe();
   }
 
   async componentDidMount() {
     this._isMounted = true;
     this.setBreadcrumbs();
+    // Registered app titles name the page the back link returns to.
+    this.appsSubscription = getServices().application.applications$?.subscribe((apps) => {
+      const appTitles = new Map<string, string>();
+      apps.forEach(({ id, title }) => appTitles.set(id, title));
+      this.setState({ appTitles });
+    });
     const tutorialConfigs: TutorialType[] = await getTutorials();
     if (!this._isMounted) {
       return;
@@ -184,10 +195,15 @@ class TutorialDirectoryUi extends React.Component<
       }
     }
 
-    if (prevState.selectedTabId !== this.state.selectedTabId) {
+    if (
+      prevState.selectedTabId !== this.state.selectedTabId ||
+      prevState.appTitles !== this.state.appTitles
+    ) {
       this.setBreadcrumbs();
     }
   }
+
+  getAppTitle = (appId: string) => this.state.appTitles.get(appId);
 
   setBreadcrumbs = () => {
     const tab = this.getSelectedTab();
@@ -198,6 +214,7 @@ class TutorialDirectoryUi extends React.Component<
       hash,
       addBasePath: this.props.addBasePath,
       getUrlForApp: application.getUrlForApp,
+      getAppTitle: this.getAppTitle,
     });
     const breadcrumbs = [firstCrumb];
 
@@ -295,6 +312,7 @@ class TutorialDirectoryUi extends React.Component<
       hash,
       addBasePath: this.props.addBasePath,
       getUrlForApp: application.getUrlForApp,
+      getAppTitle: this.getAppTitle,
     });
 
     return (

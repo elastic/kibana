@@ -17,14 +17,6 @@ const addDataLinkText = i18n.translate('home.breadcrumbs.addDataLinkText', {
   defaultMessage: 'Add data',
 });
 
-const homeLinkText = i18n.translate('home.breadcrumbs.homeLinkText', {
-  defaultMessage: 'Home',
-});
-
-const gettingStartedLinkText = i18n.translate('home.breadcrumbs.gettingStartedLinkText', {
-  defaultMessage: 'Getting started',
-});
-
 const previousPageLinkText = i18n.translate('home.breadcrumbs.previousPageLinkText', {
   defaultMessage: 'Previous page',
 });
@@ -36,16 +28,9 @@ const backToSelectionLinkText = i18n.translate(
   }
 );
 
-const backToHomeLinkText = i18n.translate('home.tutorial.introduction.backToHomeLinkText', {
-  defaultMessage: 'Back to Home',
-});
-
 const selectionLinkText = i18n.translate('home.tutorial.directory.selectionLinkText', {
   defaultMessage: 'Selection',
 });
-
-export const HOME_RETURN_APP_ID = 'home';
-export const HOME_RETURN_PATH = '#/';
 
 export function readReturnParamsFromHash(
   hash: string
@@ -81,24 +66,11 @@ function getReturnHref({
   };
 }
 
-function getReturnAppLinkText(returnAppId: string): string {
-  if (returnAppId === 'observabilityOnboarding') return addDataLinkText;
-  if (returnAppId === HOME_RETURN_APP_ID || returnAppId === 'searchHomepage') return homeLinkText;
-  if (returnAppId === 'searchGettingStarted') return gettingStartedLinkText;
-  return previousPageLinkText;
-}
+type GetAppTitle = (appId: string) => string | undefined;
 
-/** Appends the return params that make the Add data back links point to `returnAppId`. */
-export function appendReturnParamsToHash(
-  hash: string,
-  { returnAppId, returnPath }: { returnAppId: string; returnPath: string }
-): string {
-  const queryStart = hash.indexOf('?');
-  const base = queryStart === -1 ? hash : hash.slice(0, queryStart);
-  const params = new URLSearchParams(queryStart === -1 ? '' : hash.slice(queryStart + 1));
-  params.set('returnAppId', returnAppId);
-  params.set('returnPath', returnPath);
-  return `${base}?${params.toString()}`;
+function getReturnAppLinkText(returnAppId: string, getAppTitle?: GetAppTitle): string {
+  if (returnAppId === 'observabilityOnboarding') return addDataLinkText;
+  return getAppTitle?.(returnAppId) ?? previousPageLinkText;
 }
 
 /** Returns the query string (with leading `?`) of a hash route, or an empty string. */
@@ -111,10 +83,12 @@ export function getTutorialDirectoryFirstCrumb({
   hash,
   addBasePath,
   getUrlForApp,
+  getAppTitle,
 }: {
   hash: string;
   addBasePath: (path: string) => string;
   getUrlForApp: (appId: string, options: { path: string }) => string;
+  getAppTitle?: GetAppTitle;
 }): { text: string; href: string } {
   const returned = getReturnHref({ hash, getUrlForApp });
   if (!returned) {
@@ -124,7 +98,7 @@ export function getTutorialDirectoryFirstCrumb({
     };
   }
   return {
-    text: getReturnAppLinkText(returned.returnAppId),
+    text: getReturnAppLinkText(returned.returnAppId, getAppTitle),
     href: returned.href,
   };
 }
@@ -133,12 +107,19 @@ export function getTutorialDirectoryAppHeaderBack({
   hash,
   addBasePath,
   getUrlForApp,
+  getAppTitle,
 }: {
   hash: string;
   addBasePath: (path: string) => string;
   getUrlForApp: (appId: string, options: { path: string }) => string;
+  getAppTitle?: GetAppTitle;
 }): { href: string; label: string } {
-  const crumb = getTutorialDirectoryFirstCrumb({ hash, addBasePath, getUrlForApp });
+  const crumb = getTutorialDirectoryFirstCrumb({
+    hash,
+    addBasePath,
+    getUrlForApp,
+    getAppTitle,
+  });
   const returned = getReturnHref({ hash, getUrlForApp });
   if (returned?.returnAppId === 'observabilityOnboarding') {
     return { href: crumb.href, label: selectionLinkText };
@@ -158,9 +139,6 @@ export function getTutorialIntroductionBackLink({
   const returned = getReturnHref({ hash, getUrlForApp });
   if (returned?.returnAppId === 'observabilityOnboarding') {
     return { text: backToSelectionLinkText, href: returned.href };
-  }
-  if (returned?.returnAppId === HOME_RETURN_APP_ID) {
-    return { text: backToHomeLinkText, href: returned.href };
   }
   return {
     href: addBasePath('/app/integrations'),
