@@ -12,6 +12,7 @@ import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { fetchInferenceEndpoints } from './lib/fetch_inference_endpoints';
 import { defineInferenceSettingsRoutes } from './routes/inference_settings';
+import { definePublicInferenceSettingsRoutes } from './routes/public_inference_settings';
 import { defineInferenceFeaturesRoutes } from './routes/inference_features';
 import { defineInferenceConnectorsRoute } from './routes/inference_connectors';
 import { defineRegionPolicyRoutes } from './routes/region_policy';
@@ -43,6 +44,7 @@ export function defineRoutes({
   getInferenceClient: GetInferenceClient;
 }) {
   defineInferenceSettingsRoutes({ logger, router, featureRegistry, getConnectorById });
+  definePublicInferenceSettingsRoutes({ logger, router, featureRegistry, getConnectorById });
   defineInferenceFeaturesRoutes({ logger, router, featureRegistry });
   defineRegionPolicyRoutes({ logger, router });
   defineTestInferenceEndpointRoute({ logger, router, getInferenceClient });

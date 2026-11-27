@@ -7,35 +7,41 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const inferenceSettingsSchemaV2 = schema.object({
-  features: schema.arrayOf(
+const endpointSettingSchema = schema.object({
+  id: schema.string({ minLength: 1, maxLength: 256 }),
+  parameters: schema.maybe(
     schema.object({
-      feature_id: schema.string({ minLength: 1, maxLength: 256 }),
-      endpoints: schema.arrayOf(
+      reasoning: schema.maybe(
         schema.object({
-          id: schema.string({ minLength: 1, maxLength: 256 }),
-          parameters: schema.maybe(
-            schema.object({
-              reasoning: schema.maybe(
-                schema.object({
-                  effort: schema.maybe(
-                    schema.oneOf([
-                      schema.literal('none'),
-                      schema.literal('minimal'),
-                      schema.literal('low'),
-                      schema.literal('medium'),
-                      schema.literal('high'),
-                      schema.literal('xhigh'),
-                    ])
-                  ),
-                })
-              ),
-            })
+          effort: schema.maybe(
+            schema.oneOf([
+              schema.literal('none'),
+              schema.literal('minimal'),
+              schema.literal('low'),
+              schema.literal('medium'),
+              schema.literal('high'),
+              schema.literal('xhigh'),
+            ])
           ),
-        }),
-        { minSize: 0, maxSize: 30 }
+        })
       ),
-    }),
-    { maxSize: 30 }
+    })
   ),
+});
+
+const featureSettingSchema = schema.object({
+  feature_id: schema.string({ minLength: 1, maxLength: 256 }),
+  endpoints: schema.arrayOf(endpointSettingSchema, { minSize: 0, maxSize: 30 }),
+});
+
+export const inferenceSettingsSchemaV2 = schema.object({
+  features: schema.arrayOf(featureSettingSchema, { maxSize: 30 }),
+});
+
+export const inferenceFeatureEndpointsSchema = schema.object({
+  endpoints: schema.arrayOf(endpointSettingSchema, { minSize: 0, maxSize: 30 }),
+});
+
+export const featureSettingsFeatureIdSchema = schema.object({
+  feature_id: schema.string({ minLength: 1, maxLength: 256 }),
 });

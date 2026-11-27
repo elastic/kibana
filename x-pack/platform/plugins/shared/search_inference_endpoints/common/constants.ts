@@ -30,6 +30,8 @@ export enum ROUTE_VERSIONS {
   v1 = '1',
 }
 
+export const FEATURE_SETTINGS_API_VERSION = '2023-10-31';
+
 export const NO_DEFAULT_MODEL = 'NO_DEFAULT_MODEL';
 
 export const CHAT_COMPLETION_TASK_TYPE = 'chat_completion';

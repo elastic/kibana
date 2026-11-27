@@ -6,8 +6,12 @@
  */
 
 import type { KibanaRole } from '@kbn/scout';
+import { FEATURE_SETTINGS_API_VERSION } from '../../../common/constants';
 
 export const INFERENCE_SETTINGS_API_PATH = 'internal/search_inference_endpoints/settings';
+export const PUBLIC_FEATURE_SETTINGS_API_PATH = 'api/model_management/feature_settings';
+export const publicFeatureSettingPath = (featureId: string) =>
+  `${PUBLIC_FEATURE_SETTINGS_API_PATH}/${encodeURIComponent(featureId)}`;
 export const INFERENCE_FEATURES_API_PATH = 'internal/search_inference_endpoints/features';
 export const REGION_POLICY_API_PATH = 'internal/search_inference_endpoints/region_policy';
 export const getTestEndpointApiPath = (inferenceId: string) =>
@@ -19,6 +23,12 @@ export const COMMON_HEADERS = {
   'x-elastic-internal-origin': 'kibana',
   'Content-Type': 'application/json;charset=UTF-8',
   'elastic-api-version': API_VERSION,
+} as const;
+
+export const PUBLIC_FEATURE_SETTINGS_HEADERS = {
+  'kbn-xsrf': 'some-xsrf-token',
+  'Content-Type': 'application/json;charset=UTF-8',
+  'elastic-api-version': FEATURE_SETTINGS_API_VERSION,
 } as const;
 
 export const FEATURE_PRIVILEGED_ROLE: KibanaRole = {

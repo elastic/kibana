@@ -1,0 +1,41 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        updateOneFeature:
+          summary: Replace one feature's models
+          value:
+            endpoints:
+              - id: .anthropic-claude-4.6-sonnet-chat_completion
+                parameters:
+                  reasoning:
+                    effort: high
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          featureSettingsAfterUpdate:
+            summary: All feature settings after the update
+            value:
+              features:
+                - feature_id: agent_builder
+                  endpoints:
+                    - id: .anthropic-claude-4.6-sonnet-chat_completion
+                      parameters:
+                        reasoning:
+                          effort: high
+                - feature_id: attack_discovery
+                  endpoints:
+                    - id: .eis-claude-3.7-sonnet
+  400:
+    content:
+      application/json:
+        examples:
+          unknownFeatureId:
+            summary: Unknown feature id
+            value:
+              message: Invalid inference settings
+              attributes:
+                errors:
+                  - 'Unknown feature_id values: not_a_feature'

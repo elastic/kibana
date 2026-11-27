@@ -65,6 +65,23 @@ export const validateInferenceSettings = (attrs: InferenceSettingsAttributes): s
   return errors;
 };
 
+export const validateFeatureIds = (
+  featureIds: string[],
+  isAllowed: (featureId: string) => boolean
+): string[] => {
+  const unknownFeatureIds = [...new Set(featureIds.filter((featureId) => !isAllowed(featureId)))];
+  if (unknownFeatureIds.length === 0) {
+    return [];
+  }
+
+  return [
+    i18n.translate('xpack.searchInferenceEndpoints.settings.unknownFeatureIds', {
+      defaultMessage: 'Unknown feature_id values: {ids}',
+      values: { ids: unknownFeatureIds.join(', ') },
+    }),
+  ];
+};
+
 const getConnectorIfFound = async (
   id: string,
   getConnectorById: (id: string) => Promise<InferenceConnector>,
