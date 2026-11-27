@@ -4893,8 +4893,8 @@ importers:
         specifier: 18.2.0
         version: 18.2.0
       react-day-picker:
-        specifier: 10.0.1
-        version: 10.0.1(@types/react@18.2.79)(react@18.2.0)
+        specifier: 10.0.2
+        version: 10.0.2(@types/react@18.2.79)(react@18.2.0)
       react-diff-view:
         specifier: 3.3.3
         version: 3.3.3(react@18.2.0)
@@ -22356,8 +22356,8 @@ packages:
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
 
-  react-day-picker@10.0.1:
-    resolution: {integrity: sha512-eNh6BlwcYInWaJtRv18mXQ06Ys/H6rdTZAnTaSdOYJuTpwP1JMCHNd1FDRadA+gbeinq+psdULN5Xnowy9mV8w==}
+  react-day-picker@10.0.2:
+    resolution: {integrity: sha512-QetiKtZWE9Uaw/pM/SYNv6WPYOTRnSJ2puL0GgwkmUFMIwiY0dtjH1W4B7DOVXVNQM0ZOClGpH/heOfBSzWeiA==}
     engines: {node: '>=18'}
     peerDependencies:
       '@types/react': 18.2.79
@@ -39915,7 +39915,7 @@ snapshots:
       '@babel/runtime': 7.29.7
       react: 18.2.0
 
-  react-day-picker@10.0.1(@types/react@18.2.79)(react@18.2.0):
+  react-day-picker@10.0.2(@types/react@18.2.79)(react@18.2.0):
     dependencies:
       '@date-fns/tz': 1.5.0
       date-fns: 4.4.0
