@@ -44,6 +44,15 @@ export interface Column {
 }
 
 /**
+ * What a formatter needs to know about a field. A `DataViewField`, a `FilterableField` of `source.fields` or
+ * a {@link Column} fit as they are. A `Column` has one Elasticsearch type, `esType`, used when `esTypes` is
+ * missing. `defaultFormatter` is the default of a mapped field, a data view honors it.
+ */
+export type FormatterField = DataViewFieldBase &
+  Pick<FieldSpec, 'defaultFormatter'> &
+  Pick<Column, 'esType'>;
+
+/**
  * Extends {@link DataViewBase} so filter utilities in `@kbn/es-query` accept a `DataSource` directly.
  *
  * Design rules — load-bearing, do not violate:
@@ -53,15 +62,6 @@ export interface Column {
  * 3. {@link EsqlSource} must never call `_field_caps`.
  * 4. {@link serialize} returns identity only — columns are runtime, never persisted.
  */
-/**
- * What a formatter needs to know about a field. A `DataViewField`, a `FilterableField` of `source.fields` or
- * a {@link Column} fit as they are. A `Column` has one Elasticsearch type, `esType`, used when `esTypes` is
- * missing. `defaultFormatter` is the default of a mapped field, a data view honors it.
- */
-export type FormatterField = DataViewFieldBase &
-  Pick<FieldSpec, 'defaultFormatter'> &
-  Pick<Column, 'esType'>;
-
 export interface DataSourceBase extends DataViewBase {
   readonly kind: DataSourceKind;
 
@@ -90,7 +90,8 @@ export interface DataSourceBase extends DataViewBase {
 
   /**
    * The formatter of the values of a field. A `DataViewSource` answers with the field formats of its
-   * `DataView`; an `EsqlSource` with the default formatter of the type of the field.
+   * `DataView`, and for a field it knows by name with that field's own metadata; an `EsqlSource` with the
+   * default formatter of the type of the field.
    */
   getFormatter(field: FormatterField, fieldFormats: FieldFormatsStartCommon): FieldFormat;
 

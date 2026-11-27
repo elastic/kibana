@@ -77,12 +77,15 @@ export class DataViewSource implements DataSourceBase {
   }
 
   public getFormatter(field: FormatterField): FieldFormat {
-    return this.dataView.getFormatterForField({
-      name: field.name,
-      type: field.type,
-      esTypes: getFormatterEsTypes(field),
-      defaultFormatter: field.defaultFormatter,
-    });
+    // a field the data view knows keeps its own metadata, whatever shape it is passed in
+    return this.dataView.getFormatterForField(
+      this.dataView.fields.getByName(field.name) ?? {
+        name: field.name,
+        type: field.type,
+        esTypes: getFormatterEsTypes(field),
+        defaultFormatter: field.defaultFormatter,
+      }
+    );
   }
 
   public async getFilterableFields(): Promise<readonly Column[]> {

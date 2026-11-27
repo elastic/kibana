@@ -28,11 +28,10 @@ import {
   type ESQLSourceInfoColumn,
 } from '@kbn/esql-utils';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { FieldFormat, FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { Column, DataSourceBase, FormatterField, SerializedDataSource } from '../types';
-import { getFormatterEsTypes } from '../formatter_field';
+import { getDefaultFormatter } from '../formatter_field';
 import { columnFromDatatableColumn, columnToFieldBase } from '../to_column';
 import { sha256 } from '../sha256';
 import { buildFilterableFieldSpecs } from '../filterable_fields';
@@ -349,10 +348,7 @@ export class EsqlSource implements DataSourceBase {
   }
 
   public getFormatter(field: FormatterField, fieldFormats: FieldFormatsStartCommon): FieldFormat {
-    return fieldFormats.getDefaultInstance(
-      field.type as KBN_FIELD_TYPES,
-      getFormatterEsTypes(field) as ES_FIELD_TYPES[]
-    );
+    return getDefaultFormatter(field, fieldFormats);
   }
 
   /** Names of the result columns without values. They stay in {@link getColumns} but are missing from the rows. */

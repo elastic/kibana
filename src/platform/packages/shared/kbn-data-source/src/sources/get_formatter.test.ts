@@ -27,11 +27,12 @@ const defaultTypeMap = {
   _default_: { id: 'string', params: {} },
 };
 
-const buildFieldFormats = () => {
+const buildFieldFormats = (extraTypeMap: Record<string, object> = {}) => {
+  const typeMap = { ...defaultTypeMap, ...extraTypeMap };
   const registry = new FieldFormatsRegistry();
   registry.init(
     ((key: string) =>
-      key === 'format:defaultTypeMap' ? defaultTypeMap : undefined) as FieldFormatsGetConfigFn,
+      key === 'format:defaultTypeMap' ? typeMap : undefined) as FieldFormatsGetConfigFn,
     {},
     baseFormatters
   );
@@ -157,6 +158,33 @@ describe('getFormatter', () => {
       expect(source.getFormatter(nanosDate, fieldFormats).type.id).toBe('duration');
     });
 
+    it('formats a time series counter column like its field, without the counter prefix', async () => {
+      const fieldFormats = buildFieldFormats({ long: { id: 'bytes', params: {}, es: true } });
+      const source = await EsqlSource.create({
+        query: 'FROM metrics-*',
+        resultColumns: [
+          { id: 'requests', name: 'requests', meta: { type: 'number', esType: 'counter_long' } },
+        ],
+      });
+      const [column] = source.getColumns();
+
+      expect(column.esType).toBe('counter_long');
+      expect(source.getFormatter(column, fieldFormats).type.id).toBe('bytes');
+      expect(source.getFormatter(source.fields[0], fieldFormats).type.id).toBe('bytes');
+    });
+
+    it('uses the esType of a field whose esTypes is empty', async () => {
+      const fieldFormats = buildFieldFormats();
+      const source = await EsqlSource.create({ query: 'FROM logs-*', resultColumns: [] });
+
+      const formatter = source.getFormatter(
+        { name: 'precise_time', type: 'date', esTypes: [], esType: 'date_nanos' },
+        fieldFormats
+      );
+
+      expect(formatter.type.id).toBe('duration');
+    });
+
     it('is what the shared mock answers too, so consumer tests format like production', async () => {
       const fieldFormats = buildFieldFormats();
       const source = await EsqlSource.create({ query: 'FROM logs-*', resultColumns: [] });
@@ -247,6 +275,85 @@ describe('getFormatter', () => {
         expect(source.getFormatter(field).toJSON()).toEqual(
           dataView.getFormatterForField(field).toJSON()
         );
+      });
+    });
+
+    describe('with mapping defaults, conflicting types and custom formats', () => {
+      const richFields = [
+        { name: 'duration_seconds', type: 'number', esTypes: ['long'], defaultFormatter: 's' },
+        { name: 'mixed_time', type: 'date', esTypes: ['date', 'date_nanos'] },
+        { name: 'bytes', type: 'number', esTypes: ['long'] },
+        { name: 'host', type: 'string', esTypes: ['keyword'] },
+        { name: 'precise_time', type: 'date', esTypes: ['date_nanos'] },
+      ];
+
+      const buildRichDataView = (fieldFormats: FieldFormatsRegistry) =>
+        new DataView({
+          fieldFormats,
+          spec: {
+            id: 'rich',
+            title: 'rich-*',
+            fields: Object.fromEntries(
+              richFields.map((field) => [
+                field.name,
+                { ...field, searchable: true, aggregatable: true },
+              ])
+            ),
+            fieldFormats: { bytes: { id: 'percent' } },
+          },
+        });
+
+      it('formats a field it knows like the data view does, whatever shape the field is passed in', async () => {
+        const fieldFormats = buildFieldFormats();
+        const dataView = buildRichDataView(fieldFormats);
+        const source = new DataViewSource(dataView);
+        const filterableSource = await source.toFilterableSource();
+
+        dataView.fields.getAll().forEach((dataViewField) => {
+          const expected = dataView.getFormatterForField(dataViewField).toJSON();
+          const shapes = [
+            dataViewField,
+            dataViewField.spec,
+            source.getColumn(dataViewField.name),
+            filterableSource.getFieldByName(dataViewField.name),
+            // even a field that only carries the name, with the wrong type
+            { name: dataViewField.name, type: 'string' },
+          ];
+
+          shapes.forEach((shape) => {
+            expect(shape && source.getFormatter(shape).toJSON()).toEqual(expected);
+          });
+        });
+      });
+
+      it('keeps the mapping default and every Elasticsearch type that a column does not carry', () => {
+        const fieldFormats = buildFieldFormats();
+        const source = new DataViewSource(buildRichDataView(fieldFormats));
+        const formatColumn = (name: string) => {
+          const column = source.getColumn(name);
+          return column && source.getFormatter(column).type.id;
+        };
+
+        expect(source.getColumn('duration_seconds')).not.toHaveProperty('defaultFormatter');
+        expect(formatColumn('duration_seconds')).toBe('duration');
+        expect(source.getColumn('mixed_time')?.esType).toBe('date');
+        expect(formatColumn('mixed_time')).toBe('duration');
+        expect(formatColumn('bytes')).toBe('percent');
+      });
+
+      it('formats a field it does not know from what the field carries, like the data view would', () => {
+        const fieldFormats = buildFieldFormats();
+        const dataView = buildRichDataView(fieldFormats);
+        const source = new DataViewSource(dataView);
+        const unmapped = { name: 'unmapped', type: 'number', esTypes: ['long'] };
+
+        expect(source.getFormatter(unmapped).toJSON()).toEqual(
+          dataView.getFormatterForField(unmapped).toJSON()
+        );
+        expect(
+          source.getFormatter({ name: 'unmapped_nanos', type: 'date', esType: 'date_nanos' }).type
+            .id
+        ).toBe('duration');
       });
     });
 

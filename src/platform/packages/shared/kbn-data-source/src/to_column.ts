@@ -12,16 +12,23 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { Column } from './types';
 
+const COUNTER_PREFIX = 'counter_';
+
+/** The Elasticsearch types of a column: its single type, without the prefix of a time series counter. */
+export const getColumnEsTypes = (esType: string | undefined): string[] | undefined => {
+  const type = esType?.startsWith(COUNTER_PREFIX) ? esType.slice(COUNTER_PREFIX.length) : esType;
+  return type ? [type] : undefined;
+};
+
 /** A column as a field; ES|QL counter types (`counter_long`, …) become their base type plus `timeSeriesMetric`. */
 export function columnToFieldBase(
   column: Column
 ): DataViewFieldBase & { timeSeriesMetric?: 'counter' } {
-  const isCounter = column.esType?.startsWith('counter_') ?? false;
-  const esType = isCounter ? column.esType?.replace('counter_', '') : column.esType;
+  const isCounter = column.esType?.startsWith(COUNTER_PREFIX) ?? false;
   return {
     name: column.name,
     type: column.type,
-    esTypes: esType ? [esType] : undefined,
+    esTypes: getColumnEsTypes(column.esType),
     ...(isCounter ? { timeSeriesMetric: 'counter' as const } : {}),
   };
 }
