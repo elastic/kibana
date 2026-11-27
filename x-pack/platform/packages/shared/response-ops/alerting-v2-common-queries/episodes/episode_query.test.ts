@@ -50,6 +50,7 @@ describe('buildEpisodeQuery', () => {
     expect(queryString).toContain(
       'severity = LAST(severity, @timestamp) WHERE status == "breached" AND severity IS NOT NULL'
     );
+    expect(queryString).toContain('reason = LAST(reason, @timestamp) WHERE reason IS NOT NULL');
     expect(queryString).toContain('BY `episode.id`');
     expect(queryString).toContain(
       'EVAL @timestamp = last_timestamp, duration = DATE_DIFF("ms", first_timestamp, last_timestamp)'

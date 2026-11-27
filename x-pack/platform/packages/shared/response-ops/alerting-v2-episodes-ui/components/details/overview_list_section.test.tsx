@@ -77,6 +77,47 @@ describe('AlertEpisodeOverviewListSection', () => {
     );
   });
 
+  it('passes the episode reason to the overview list', async () => {
+    runEsqlAsyncSearchMock.mockResolvedValue({
+      columns: [
+        { name: '@timestamp', type: 'date' },
+        { name: 'episode.status', type: 'keyword' },
+        { name: 'rule.id', type: 'keyword' },
+        { name: 'group_hash', type: 'keyword' },
+        { name: 'reason', type: 'keyword' },
+      ],
+      values: [
+        [
+          '2024-01-01T00:00:00.000Z',
+          ALERT_EPISODE_STATUS.ACTIVE,
+          'rule-1',
+          'gh-1',
+          'It is on fire',
+        ],
+      ],
+    });
+    mockHttp.get.mockResolvedValueOnce(mockRule);
+    fetchEpisodeActionsMock.mockResolvedValue([]);
+    fetchGroupActionsMock.mockResolvedValue([]);
+
+    render(
+      <I18nProvider>
+        <AlertEpisodeOverviewListSection
+          episodeId="ep-1"
+          groupHash="gh-1"
+          services={mockServices}
+        />
+      </I18nProvider>,
+      { wrapper }
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId('alertingV2EpisodeDetailsOverviewListReason')).toHaveTextContent(
+        'It is on fire'
+      )
+    );
+  });
+
   it('renders the loading state while data is loading', () => {
     runEsqlAsyncSearchMock.mockImplementation(() => new Promise(() => {}));
     fetchEpisodeActionsMock.mockImplementation(() => new Promise(() => {}));
