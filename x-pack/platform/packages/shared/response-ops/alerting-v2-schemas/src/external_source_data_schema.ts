@@ -6,12 +6,16 @@
  */
 
 import { isoDateTime, lazySchema, z } from '@kbn/zod/v4';
-import { actorSchema, entityIdSchema, ENTITY_ID_NOTE, tagsSchema } from './common';
+import { actorSchema, entityIdSchema, ENTITY_ID_NOTE, queryIntSchema, tagsSchema } from './common';
 import {
+  FIND_DEFAULT_PER_PAGE,
+  FIND_MAX_RESULT_WINDOW,
   ID_MAX_LENGTH,
   EXTERNAL_SOURCE_TYPES,
   MAX_DESCRIPTION_LENGTH,
   MAX_NAME_LENGTH,
+  MAX_PER_PAGE,
+  MAX_SEARCH_LENGTH,
 } from './constants';
 
 /** Kind */
@@ -224,3 +228,55 @@ export const findExternalSourcesSortFieldSchema = lazySchema(() =>
 );
 
 export type FindExternalSourcesSortField = z.infer<typeof findExternalSourcesSortFieldSchema>;
+
+/** Query parameters for the find external sources (list) API. */
+export const findExternalSourcesRequestSchema = lazySchema(() =>
+  z
+    .object({
+      page: queryIntSchema({ min: 1, max: FIND_MAX_RESULT_WINDOW })
+        .optional()
+        .describe('The page number to return. Defaults to 1.'),
+      per_page: queryIntSchema({ min: 1, max: MAX_PER_PAGE })
+        .optional()
+        .describe('The number of imports to return per page. Defaults to 20.'),
+      search: z
+        .string()
+        .trim()
+        .min(1)
+        .max(MAX_SEARCH_LENGTH)
+        .optional()
+        .describe('A text string to search across import names and descriptions.'),
+      sort_field: findExternalSourcesSortFieldSchema
+        .optional()
+        .describe('The field to sort imports by.'),
+      sort_order: z.enum(['asc', 'desc']).optional().describe('The sort direction.'),
+      connector_id: connectorIdSchema
+        .optional()
+        .describe('Only return the imports that use this connector.'),
+      type: externalSourceTypeSchema
+        .optional()
+        .describe('Only return the imports that receive events from this source.'),
+    })
+    .strict()
+    .refine(
+      ({ page = 1, per_page = FIND_DEFAULT_PER_PAGE }) => page * per_page <= FIND_MAX_RESULT_WINDOW,
+      { message: `page * per_page cannot exceed ${FIND_MAX_RESULT_WINDOW}.`, path: ['page'] }
+    )
+);
+
+export type FindExternalSourcesRequest = z.infer<typeof findExternalSourcesRequestSchema>;
+
+/** A page of external sources. */
+export const findExternalSourcesResponseSchema = lazySchema(() =>
+  z
+    .object({
+      items: z.array(externalSourceResponseSchema).describe('The list of imports.'),
+      total: z.number().describe('The number of imports matching the query.'),
+      page: z.number().describe('The current page number.'),
+      per_page: z.number().describe('The number of imports per page.'),
+    })
+    .describe('Paginated list of imports.')
+    .meta({ id: 'alerting_external_source_list_response' })
+);
+
+export type FindExternalSourcesResponse = z.infer<typeof findExternalSourcesResponseSchema>;

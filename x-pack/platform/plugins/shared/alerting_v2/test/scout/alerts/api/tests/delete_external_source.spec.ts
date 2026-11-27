@@ -38,14 +38,17 @@ apiTest.describe('Delete external source API', { tag: testData.API_ENGINE_TAG },
     await apiServices.alertingV2.externalSources.cleanUp();
   });
 
-  apiTest('should delete the import and its connector', async ({ apiClient, apiServices }) => {
+  apiTest('should delete the import and its connector', async ({ apiClient }) => {
     const response = await apiClient.delete(getExternalSourceUrl('scout-import-delete'), {
       headers: writerHeaders,
     });
 
     expect(response).toHaveStatusCode(204);
 
-    expect(await apiServices.alertingV2.externalSources.exists('scout-import-delete')).toBe(false);
+    const getResponse = await apiClient.get(getExternalSourceUrl('scout-import-delete'), {
+      headers: writerHeaders,
+    });
+    expect(getResponse).toHaveStatusCode(404);
 
     const connectorResponse = await apiClient.get(getConnectorUrl(connectorId), {
       headers: writerHeaders,
