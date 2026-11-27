@@ -190,4 +190,31 @@ describe('KbnClientRequester.request()', () => {
     const headers = init.headers as Record<string, string>;
     expect(headers['content-type']).toBe('application/json');
   });
+
+  // `dispatcher` is private, so we assert through the narrowest seam available:
+  // the RequestInit handed to fetch. Plain-http requests used to pass no
+  // dispatcher at all, so undici's default 300s headersTimeout applied and slow
+  // self-hosted LLM converse calls died at the transport (observed
+  // HeadersTimeoutError at ~339.82s). Both protocols must now carry an Agent.
+  it('passes a non-null dispatcher for plain-http requests', async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ ok: true }), { status: 200 }));
+
+    const requester = new KbnClientRequester(log, { url: 'http://localhost:5620' });
+    await requester.request({ method: 'GET', path: '/api/status', retries: 0 });
+
+    const init = fetchMock.mock.calls[0][1] as RequestInit & { dispatcher?: unknown };
+    expect(init.dispatcher).toBeDefined();
+    expect(init.dispatcher).not.toBeNull();
+  });
+
+  it('passes a non-null dispatcher for https requests', async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ ok: true }), { status: 200 }));
+
+    const requester = new KbnClientRequester(log, { url: 'https://localhost:5620' });
+    await requester.request({ method: 'GET', path: '/api/status', retries: 0 });
+
+    const init = fetchMock.mock.calls[0][1] as RequestInit & { dispatcher?: unknown };
+    expect(init.dispatcher).toBeDefined();
+    expect(init.dispatcher).not.toBeNull();
+  });
 });
