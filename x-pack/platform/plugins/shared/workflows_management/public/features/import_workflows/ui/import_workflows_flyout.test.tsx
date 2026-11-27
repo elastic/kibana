@@ -172,6 +172,7 @@ describe('ImportWorkflowsFlyout', () => {
     mockUseKibana.mockReturnValue({
       services: {
         notifications: { toasts: mockToasts },
+        workflowsManagement: {},
       },
     } as any);
     mockUseTelemetry.mockReturnValue(mockTelemetry as any);
@@ -775,6 +776,53 @@ describe('ImportWorkflowsFlyout', () => {
   });
 
   describe('parse errors', () => {
+    describe('request size limit', () => {
+      const createHttpError = (status: number) =>
+        Object.assign(new Error(`HTTP ${status}`), {
+          response: { status },
+          body: { statusCode: status },
+        });
+
+      const createLargeResult = () =>
+        createPreflightResult({
+          workflows: [createWorkflowPreview({ id: 'large' })],
+          rawWorkflows: [{ id: 'large', originalId: 'large', yaml: 'x'.repeat(1024 * 1024) }],
+        });
+
+      it('should explain the limit and block the import when the conflict check exceeds it', async () => {
+        mockParseImportFile.mockResolvedValue(createLargeResult());
+        mockCheckWorkflowIdConflicts.mockRejectedValue(createHttpError(502));
+
+        renderFlyout();
+        fireEvent.change(getFileInput(), {
+          target: { files: [createSmallFile('large.yml', 'x')] },
+        });
+
+        const callout = await screen.findByTestId('import-workflows-payload-too-large');
+        expect(callout).toHaveTextContent('over the 1.0 MB request limit');
+        expect(callout).toHaveTextContent('workflowsManagement.import.maxPayloadBytes');
+        expect(screen.queryByTestId('import-workflows-conflict-check-failed')).toBeNull();
+        expect(screen.getByTestId('import-workflows-confirm')).toBeDisabled();
+      });
+
+      it('should show the limit in the error toast when the import itself exceeds it', async () => {
+        mockParseImportFile.mockResolvedValue(createLargeResult());
+        mockCheckWorkflowIdConflicts.mockResolvedValue({ existingIds: [] });
+        mockBulkCreateWorkflows.mockRejectedValue(createHttpError(413));
+
+        renderFlyout();
+        fireEvent.change(getFileInput(), {
+          target: { files: [createSmallFile('large.yml', 'x')] },
+        });
+        await waitFor(() => expect(screen.getByTestId('import-workflows-confirm')).toBeEnabled());
+        fireEvent.click(screen.getByTestId('import-workflows-confirm'));
+
+        await waitFor(() => expect(mockToasts.addError).toHaveBeenCalled());
+        const [error] = mockToasts.addError.mock.calls[0];
+        expect(error.message).toContain('over the 1.0 MB request limit');
+      });
+    });
+
     it('should show parse errors callout when preflight returns parseErrors', async () => {
       const clientResult = createPreflightResult({
         format: 'zip',

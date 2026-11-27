@@ -18,6 +18,10 @@ import {
 } from '../../../common/lib/telemetry/events/workflows';
 import type { TelemetryServiceClient } from '../../../common/lib/telemetry/types';
 import { WorkflowsBaseTelemetry } from '../../../common/service/telemetry';
+import {
+  DEFAULT_IMPORT_MAX_PAYLOAD_BYTES,
+  ImportPayloadTooLargeError,
+} from '../../../features/import_workflows/lib/import_payload_limit';
 import { parseImportFile } from '../../../features/import_workflows/lib/parse_import_file';
 import type { ClientPreflightResult } from '../../../features/import_workflows/lib/parse_import_file';
 import { useTelemetry } from '../../../hooks/use_telemetry';
@@ -31,9 +35,15 @@ const mockParseImportFile = parseImportFile as jest.MockedFunction<typeof parseI
 jest.mock('../../../features/import_workflows/lib/parse_import_file');
 jest.mock('../../../hooks/use_telemetry');
 const mockRemoveRecentlyViewed = jest.fn();
+const mockImportMaxPayloadBytes = jest.fn<number | undefined, []>();
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
-    services: { workflowsManagement: { recentlyViewed: { remove: mockRemoveRecentlyViewed } } },
+    services: {
+      workflowsManagement: {
+        recentlyViewed: { remove: mockRemoveRecentlyViewed },
+        importMaxPayloadBytes: mockImportMaxPayloadBytes(),
+      },
+    },
   }),
 }));
 jest.mock('@kbn/workflows-ui', () => ({
@@ -72,6 +82,12 @@ jest.mock('@kbn/workflows-ui', () => {
 
 const mockUseTelemetry = useTelemetry as jest.MockedFunction<typeof useTelemetry>;
 
+const createHttpError = (status: number) =>
+  Object.assign(new Error(`HTTP ${status}`), {
+    response: { status },
+    body: { statusCode: status },
+  });
+
 const createFile = (name: string, content: string): File =>
   new File([content], name, { type: 'text/plain' });
 
@@ -100,6 +116,7 @@ describe('useWorkflowActions – import mutations', () => {
     };
 
     mockUseTelemetry.mockReturnValue(mockTelemetry as unknown as ReturnType<typeof useTelemetry>);
+    mockImportMaxPayloadBytes.mockReturnValue(undefined);
 
     queryClient = createQueryClient();
   });
@@ -237,6 +254,52 @@ describe('useWorkflowActions – import mutations', () => {
         expect(result.current.preflightImportWorkflows.isError).toBe(false);
         expect(result.current.preflightImportWorkflows.error).toBeNull();
         expect(result.current.preflightImportWorkflows.data).toBeUndefined();
+      });
+    });
+
+    describe('when the conflict check is rejected for exceeding the request size limit', () => {
+      const largeParseResult: ClientPreflightResult = {
+        ...clientParseResult,
+        rawWorkflows: [
+          { id: 'w-1', originalId: 'w-1', yaml: 'x'.repeat(DEFAULT_IMPORT_MAX_PAYLOAD_BYTES) },
+        ],
+      };
+
+      it.each([413, 502])('should flag payloadTooLarge on a %s', async (status) => {
+        mockParseImportFile.mockResolvedValueOnce(largeParseResult);
+        mockWorkflowApi.checkWorkflowIdConflicts.mockRejectedValueOnce(createHttpError(status));
+
+        const { result } = renderHook(() => useWorkflowActions(), { wrapper });
+
+        act(() => {
+          result.current.preflightImportWorkflows.mutate({ file: createFile('a.zip', 'zip') });
+        });
+
+        await waitFor(() => expect(result.current.preflightImportWorkflows.isSuccess).toBe(true));
+
+        expect(result.current.preflightImportWorkflows.data?.payloadTooLarge).toEqual({
+          requestBytes: expect.any(Number),
+          limitBytes: DEFAULT_IMPORT_MAX_PAYLOAD_BYTES,
+        });
+        expect(result.current.preflightImportWorkflows.data?.conflictCheckFailed).toBe(false);
+      });
+
+      it('should use the configured limit', async () => {
+        mockImportMaxPayloadBytes.mockReturnValue(DEFAULT_IMPORT_MAX_PAYLOAD_BYTES * 4);
+        mockParseImportFile.mockResolvedValueOnce(largeParseResult);
+        mockWorkflowApi.checkWorkflowIdConflicts.mockRejectedValueOnce(createHttpError(502));
+
+        const { result } = renderHook(() => useWorkflowActions(), { wrapper });
+
+        act(() => {
+          result.current.preflightImportWorkflows.mutate({ file: createFile('a.zip', 'zip') });
+        });
+
+        await waitFor(() => expect(result.current.preflightImportWorkflows.isSuccess).toBe(true));
+
+        // The body is under the configured limit, so the 502 is an ordinary failure.
+        expect(result.current.preflightImportWorkflows.data?.payloadTooLarge).toBeUndefined();
+        expect(result.current.preflightImportWorkflows.data?.conflictCheckFailed).toBe(true);
       });
     });
 
@@ -460,6 +523,38 @@ describe('useWorkflowActions – import mutations', () => {
       );
 
       invalidateSpy.mockRestore();
+    });
+
+    it('should reject with ImportPayloadTooLargeError when the request exceeds the size limit', async () => {
+      const largeWorkflows = [
+        { id: 'w-1', originalId: 'w-1', yaml: 'x'.repeat(DEFAULT_IMPORT_MAX_PAYLOAD_BYTES) },
+      ];
+      mockWorkflowApi.bulkCreateWorkflows.mockRejectedValueOnce(createHttpError(502));
+
+      const { result } = renderHook(() => useWorkflowActions(), { wrapper });
+
+      act(() => {
+        result.current.importWorkflows.mutate({ workflows: largeWorkflows, conflictIds: [] });
+      });
+
+      await waitFor(() => expect(result.current.importWorkflows.isError).toBe(true));
+
+      expect(result.current.importWorkflows.error).toBeInstanceOf(ImportPayloadTooLargeError);
+    });
+
+    it('should keep the original error for a 502 on a request within the limit', async () => {
+      const httpError = createHttpError(502);
+      mockWorkflowApi.bulkCreateWorkflows.mockRejectedValueOnce(httpError);
+
+      const { result } = renderHook(() => useWorkflowActions(), { wrapper });
+
+      act(() => {
+        result.current.importWorkflows.mutate({ workflows, conflictIds: [] });
+      });
+
+      await waitFor(() => expect(result.current.importWorkflows.isError).toBe(true));
+
+      expect(result.current.importWorkflows.error).toBe(httpError);
     });
 
     it('should NOT invalidate queries on error', async () => {

@@ -175,6 +175,7 @@ describe('Workflow routes', () => {
           .fn()
           .mockResolvedValue({ userProfile: { bulkGet: mockBulkGetProfiles } }),
       },
+      config: { import: {} },
       logger: mockLogger,
       spaces: mockSpaces as any,
       audit: mockAudit,
