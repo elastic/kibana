@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Suspense, lazy, type ReactNode } from 'react';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
@@ -20,16 +19,15 @@ import { getMetricVisRenderer } from './expression_renderers';
 import { setThemeService } from './services/theme_service';
 import { setUiSettingsService } from './services/ui_settings';
 import { metricTrendlineFunction } from '../common/expression_functions/metric_trendline_function';
+import {
+  registerExperimentalColorsToolbarItem,
+  type DeveloperToolbarStart,
+} from './experimental_colors/register_toolbar_item';
 
 /** @internal */
 export interface ExpressionMetricPluginSetup {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   charts: ChartsPluginSetup;
-}
-
-/** The developer toolbar's start contract, typed here so production code doesn't import the dev-only plugin. */
-interface DeveloperToolbarStart {
-  registerItem: (item: { id: string; children: ReactNode; priority?: number }) => () => void;
 }
 
 /** @internal */
@@ -39,15 +37,9 @@ export interface ExpressionMetricPluginStart {
   developerToolbar?: DeveloperToolbarStart;
 }
 
-const LazySubduedTargetsPanel = lazy(() =>
-  import('./components/subdued_targets_panel').then(({ SubduedTargetsPanel }) => ({
-    default: SubduedTargetsPanel,
-  }))
-);
-
 /** @internal */
 export class ExpressionMetricPlugin implements Plugin {
-  private unregisterSubduedTargetsPanel?: () => void;
+  private unregisterExperimentalColors?: () => void;
 
   public setup(
     core: CoreSetup<ExpressionMetricPluginStart, void>,
@@ -73,17 +65,10 @@ export class ExpressionMetricPlugin implements Plugin {
     setFormatService(fieldFormats);
     setFeatureFlagsService(core.featureFlags);
 
-    this.unregisterSubduedTargetsPanel = developerToolbar?.registerItem({
-      id: 'Metric contrast',
-      children: (
-        <Suspense fallback={null}>
-          <LazySubduedTargetsPanel />
-        </Suspense>
-      ),
-    });
+    this.unregisterExperimentalColors = registerExperimentalColorsToolbarItem(developerToolbar);
   }
 
   public stop() {
-    this.unregisterSubduedTargetsPanel?.();
+    this.unregisterExperimentalColors?.();
   }
 }
