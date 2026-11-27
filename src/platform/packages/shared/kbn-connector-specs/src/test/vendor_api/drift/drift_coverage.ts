@@ -130,6 +130,13 @@ export const summarizeDriftCoverage = (
 const plural = (count: number, one: string, many = `${one}s`) =>
   `${count} ${count === 1 ? one : many}`;
 
+const pinnedOnly = (count: number) => {
+  if (count === 0) return '';
+  return count === 1
+    ? '; the other only has pinned sources'
+    : `; the other ${count} only have pinned sources`;
+};
+
 const sourceList = (names: readonly string[]) =>
   names.length > 0 ? names.map((name) => `\`${name}\``).join(', ') : '—';
 
@@ -141,9 +148,9 @@ export const renderCoverageAnnotation = ({ totals, connectors }: DriftCoverageSu
       `${totals.temporaryExemptions} temporary) and ${totals.unrecorded} neither.`,
     '',
     `Of the ${plural(totals.checked, 'connector')} checked, ${totals.detectVendorChanges} can ` +
-      `detect a vendor change; the others only have pinned sources. They track ` +
-      `${totals.trackedActions} of their ${plural(totals.checkedActions, 'action')}, out of ` +
-      `${totals.allActions} across every connector.` +
+      `detect a vendor change${pinnedOnly(totals.checked - totals.detectVendorChanges)}. They ` +
+      `track ${totals.trackedActions} of their ${plural(totals.checkedActions, 'action')}; ` +
+      `all connectors together declare ${plural(totals.allActions, 'action')}.` +
       (totals.failed > 0 ? ` ${plural(totals.failed, 'connector')} couldn't be checked.` : ''),
   ];
   if (connectors.length === 0) {

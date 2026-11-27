@@ -158,19 +158,30 @@ describe('renderCoverageAnnotation', () => {
       '**Coverage:** 2 of 5 connectors recorded, 2 exempt (1 permanent, 1 temporary) and 1 neither.'
     );
     expect(markdown).toContain(
-      'Of the 2 connectors checked, 1 can detect a vendor change; the others only have pinned sources. They track 4 of their 8 actions, out of 32 across every connector.'
+      'Of the 2 connectors checked, 1 can detect a vendor change; the other only has pinned sources. They track 4 of their 8 actions; all connectors together declare 32 actions.'
     );
     expect(markdown).toContain('| `.box` | 2 of 5 | — | `mcp` | 1 |');
     expect(markdown).toContain('| `.github` | 2 of 3 | `rest` | — | 1 |');
     expect(markdown).toContain('<details><summary>Coverage per connector</summary>');
   });
 
-  it('says how many connectors could not be checked', () => {
+  it('says how many connectors could not be checked, and leaves out pinned ones when none are', () => {
+    const markdown = renderCoverageAnnotation(
+      summarizeDriftCoverage(documents, [drift('.github'), { connector: '.box', error: 'x' }])
+    );
+
+    expect(markdown).toContain("1 connector couldn't be checked.");
+    expect(markdown).toContain('1 can detect a vendor change. They track');
+  });
+
+  it('counts the connectors that only have pinned sources', () => {
+    const pinned = { followingSources: [], pinnedSources: ['mcp'] };
+
     expect(
       renderCoverageAnnotation(
-        summarizeDriftCoverage(documents, [drift('.github'), { connector: '.box', error: 'x' }])
+        summarizeDriftCoverage(documents, [drift('.github', pinned), drift('.box', pinned)])
       )
-    ).toContain("1 connector couldn't be checked.");
+    ).toContain('0 can detect a vendor change; the other 2 only have pinned sources.');
   });
 
   it('has no table when no connector was checked', () => {
