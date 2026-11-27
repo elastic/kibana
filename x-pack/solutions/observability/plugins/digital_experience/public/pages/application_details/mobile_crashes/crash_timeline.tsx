@@ -133,7 +133,8 @@ const toRows = (events: SessionTimelineEvent[], crash: MobileCrash): TimelineRow
       beforeMs: 0,
       name: crash.type ?? KIND_LABELS.crash,
       page: null,
-      detail: crash.message,
+      // The flyout's header shows the message.
+      detail: null,
       statusCode: null,
       durationMs: null,
     },

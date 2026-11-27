@@ -209,16 +209,12 @@ function LatestCrashContext({ release, osVersion, deviceModel }: MobileCrash) {
 }
 
 /**
- * The latest crash's stack trace, or its message under a note when it has none. The header shows
- * the type and message already, and a JVM stack trace starts with them.
+ * The latest crash's stack trace, or a note when it has none. The header shows the type and
+ * message already, and a JVM stack trace starts with them.
  */
-function CrashStacktrace({ message, stacktrace }: MobileCrash) {
+function CrashStacktrace({ stacktrace }: MobileCrash) {
   if (!stacktrace) {
-    return (
-      <KbnInfoCallout size="s" title={NO_STACKTRACE_TITLE}>
-        {message}
-      </KbnInfoCallout>
-    );
+    return <KbnInfoCallout size="s" title={NO_STACKTRACE_TITLE} />;
   }
   // The code block alone: `PlaintextStacktrace` would add an empty heading without its title.
   return (

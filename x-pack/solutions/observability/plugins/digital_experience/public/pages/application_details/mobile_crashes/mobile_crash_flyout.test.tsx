@@ -172,6 +172,18 @@ describe('MobileCrashFlyout', () => {
     expect(within(stacktrace).getAllByText(/TrackRecorder is null/)).toHaveLength(1);
   });
 
+  it("shows a crash without a stack trace's message only in the header", () => {
+    mockDetail({ detail: { ...DETAIL, latestCrash: { ...LATEST_CRASH, stacktrace: null } } });
+    renderFlyout();
+
+    expect(screen.getByText('This crash has no stack trace')).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('digitalExperienceMobileCrashFlyout')).getAllByText(
+        'TrackRecorder is null'
+      )
+    ).toHaveLength(1);
+  });
+
   it('titles a link to a group with no crash in the range neutrally, not as an unknown type', () => {
     mockDetail({ detail: { ...DETAIL, latestCrash: null, beforeCrash: [] } });
     renderFlyout({ group: null });

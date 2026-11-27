@@ -88,4 +88,18 @@ describe('CrashTimeline', () => {
     );
     expect(widgetTapRow).toHaveTextContent('Map');
   });
+
+  it("names the crash by its type, leaving its message to the flyout's header", () => {
+    render(<CrashTimeline events={[]} crash={CRASH} />, {
+      wrapper: ({ children }) => (
+        <I18nProvider>
+          <EuiProvider>{children}</EuiProvider>
+        </I18nProvider>
+      ),
+    });
+
+    const [crashRow] = rows();
+    expect(crashRow).toHaveTextContent('java.lang.NullPointerException');
+    expect(crashRow).not.toHaveTextContent('TrackRecorder is null');
+  });
 });
