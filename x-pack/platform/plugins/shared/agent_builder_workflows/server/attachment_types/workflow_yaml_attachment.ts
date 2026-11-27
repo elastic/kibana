@@ -8,6 +8,7 @@
 import type {
   AttachmentFormatContext,
   AttachmentResolveContext,
+  SurfaceComposition,
 } from '@kbn/agent-builder-server/attachments';
 import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { z } from '@kbn/zod/v4';
@@ -24,6 +25,7 @@ import { hasWorkflowReadPrivilege } from '@kbn/agent-builder-tools-base/workflow
 import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
 import deepEqual from 'fast-deep-equal';
 import { workflowTools } from '../../common/constants';
+import { toOpenWorkflowButton, toWorkflowTitle } from './workflow_surface';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 
@@ -202,6 +204,21 @@ const createWorkflowYamlAttachmentType = (
       },
     };
   },
+  /** The workflow's YAML as code, with a button to the workflow when it is saved. */
+  toSurfaceComposition: ({
+    data: { yaml, workflowId, name },
+    origin,
+  }: {
+    data: WorkflowYamlData;
+    origin?: string;
+  }): SurfaceComposition => ({
+    type: 'view',
+    title: toWorkflowTitle(name),
+    body: [
+      ...(yaml.trim() ? [{ type: 'code' as const, language: 'yaml', text: yaml }] : []),
+      ...toOpenWorkflowButton(workflowId ?? origin),
+    ],
+  }),
   getTools: () => [
     ...Object.values(workflowTools),
     platformCoreTools.generateWorkflow,

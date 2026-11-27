@@ -16,6 +16,8 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
+import type { SurfaceComposition } from '@kbn/agent-builder-server/attachments';
+import { SURFACE_BASE_URL, renderSurface } from './test_utils';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 
@@ -57,6 +59,10 @@ interface RegisteredAttachmentType {
   };
   getTools: () => string[];
   getAgentDescription: () => string;
+  toSurfaceComposition: (attachment: {
+    data: WorkflowYamlAttachmentData;
+    origin?: string;
+  }) => SurfaceComposition;
 }
 
 const registerAndCapture = (
@@ -414,6 +420,48 @@ steps:
       expect(description).toContain(WORKFLOW_YAML_ATTACHMENT_TYPE);
       expect(description).toContain(platformCoreTools.generateWorkflow);
       expect(description).toContain(workflowTools.getStepDefinitions);
+    });
+  });
+
+  describe('toSurfaceComposition', () => {
+    const yaml = 'name: Notify on-call\nenabled: true';
+
+    it('renders the YAML as code with a link to the saved workflow', async () => {
+      const type = registerAndCapture();
+
+      const composition = type.toSurfaceComposition({
+        data: { yaml, workflowId: 'workflow-1', name: 'Notify on-call' },
+      });
+
+      expect(composition.title).toBe('Notify on-call');
+      expect(composition.body[0]).toEqual({ type: 'code', language: 'yaml', text: yaml });
+
+      const { valid, errors, slack } = await renderSurface(composition);
+
+      expect(errors).toEqual([]);
+      expect(valid).toBe(true);
+      expect(slack).toContain('enabled: true');
+      expect(slack).toContain(`${SURFACE_BASE_URL}/app/workflows/workflow-1`);
+    });
+
+    it('links to the origin when the data has no workflow id', async () => {
+      const type = registerAndCapture();
+
+      const { slack } = await renderSurface(
+        type.toSurfaceComposition({ data: { yaml }, origin: 'workflow-2' })
+      );
+
+      expect(slack).toContain(`${SURFACE_BASE_URL}/app/workflows/workflow-2`);
+    });
+
+    it('has no link for an unsaved workflow, and a generic title without a name', async () => {
+      const type = registerAndCapture();
+
+      const composition = type.toSurfaceComposition({ data: { yaml } });
+
+      expect(composition.title).toBe('Workflow');
+      expect(composition.body).toEqual([{ type: 'code', language: 'yaml', text: yaml }]);
+      expect((await renderSurface(composition)).valid).toBe(true);
     });
   });
 

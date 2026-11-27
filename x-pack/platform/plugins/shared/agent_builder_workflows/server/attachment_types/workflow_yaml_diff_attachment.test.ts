@@ -8,6 +8,8 @@
 import { registerWorkflowYamlDiffAttachment } from './workflow_yaml_diff_attachment';
 import { WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { SurfaceComposition } from '@kbn/agent-builder-server/attachments';
+import { SURFACE_BASE_URL, renderSurface } from './test_utils';
 
 interface RegisteredDiffType {
   id: string;
@@ -21,6 +23,16 @@ interface RegisteredDiffType {
     };
   }) => { getRepresentation: () => { type: 'text'; value: string } };
   getAgentDescription: () => string;
+  toSurfaceComposition: (attachment: {
+    data: {
+      beforeYaml: string;
+      afterYaml: string;
+      proposalId: string;
+      status: string;
+      workflowId?: string;
+      name?: string;
+    };
+  }) => SurfaceComposition;
 }
 
 const registerAndCapture = () => {
@@ -91,6 +103,65 @@ describe('workflow_yaml_diff_attachment', () => {
     it('references the diff attachment type', () => {
       const type = registerAndCapture();
       expect(type.getAgentDescription()).toContain(WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE);
+    });
+  });
+
+  describe('toSurfaceComposition', () => {
+    const beforeYaml = Array.from({ length: 20 }, (_, index) => `line${index + 1}: a`).join('\n');
+    const afterYaml = beforeYaml.replace('line10: a', 'line10: b');
+
+    it('renders only the changed hunks, with the status and a link to the workflow', async () => {
+      const type = registerAndCapture();
+
+      const composition = type.toSurfaceComposition({
+        data: {
+          beforeYaml,
+          afterYaml,
+          proposalId: 'p-1',
+          status: 'pending',
+          workflowId: 'workflow 1',
+          name: 'Notify on-call',
+        },
+      });
+
+      expect(composition.title).toBe('Notify on-call');
+      expect(composition.subtitle).toBe('Proposed change · Pending');
+      expect(composition.body[0]).toEqual({
+        type: 'code',
+        language: 'diff',
+        text: [
+          '@@ -7,7 +7,7 @@',
+          ' line7: a',
+          ' line8: a',
+          ' line9: a',
+          '-line10: a',
+          '+line10: b',
+          ' line11: a',
+          ' line12: a',
+          ' line13: a',
+        ].join('\n'),
+      });
+
+      const { valid, errors, slack } = await renderSurface(composition);
+
+      expect(errors).toEqual([]);
+      expect(valid).toBe(true);
+      expect(slack).toContain('+line10: b');
+      expect(slack).not.toContain('line1: a');
+      expect(slack).toContain(`${SURFACE_BASE_URL}/app/workflows/workflow%201`);
+    });
+
+    it('says there are no changes when the YAML is the same', async () => {
+      const type = registerAndCapture();
+
+      const composition = type.toSurfaceComposition({
+        data: { beforeYaml, afterYaml: beforeYaml, proposalId: 'p-1', status: 'accepted' },
+      });
+
+      expect(composition.title).toBe('Workflow');
+      expect(composition.subtitle).toBe('Proposed change · Accepted');
+      expect(composition.body).toEqual([{ type: 'markdown', text: 'No changes.' }]);
+      expect((await renderSurface(composition)).valid).toBe(true);
     });
   });
 });

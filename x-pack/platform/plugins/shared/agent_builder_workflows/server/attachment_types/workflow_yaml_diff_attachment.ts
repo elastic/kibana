@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { diffLines } from 'diff';
+import { diffLines, structuredPatch } from 'diff';
+import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import { WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { SurfaceComposition } from '@kbn/agent-builder-server/attachments';
+import { toOpenWorkflowButton, toWorkflowTitle } from './workflow_surface';
 
 const workflowYamlDiffStatusSchema = z.enum(['pending', 'accepted', 'declined']);
 
@@ -40,6 +43,32 @@ const buildUnifiedDiff = (beforeYaml: string, afterYaml: string): string => {
   return result.join('\n');
 };
 
+/** The changed hunks of the proposal, like a git patch, or nothing when the YAML is unchanged. */
+const buildDiffHunks = (beforeYaml: string, afterYaml: string): string =>
+  structuredPatch('', '', beforeYaml, afterYaml, undefined, undefined, { context: 3 })
+    .hunks.flatMap(({ oldStart, oldLines, newStart, newLines, lines }) => [
+      `@@ -${oldStart},${oldLines} +${newStart},${newLines} @@`,
+      ...lines,
+    ])
+    .join('\n');
+
+const toStatusLabel = (status: WorkflowYamlDiffData['status']): string => {
+  switch (status) {
+    case 'accepted':
+      return i18n.translate('workflows.agentBuilder.attachments.diff.surface.accepted', {
+        defaultMessage: 'Proposed change · Accepted',
+      });
+    case 'declined':
+      return i18n.translate('workflows.agentBuilder.attachments.diff.surface.declined', {
+        defaultMessage: 'Proposed change · Declined',
+      });
+    default:
+      return i18n.translate('workflows.agentBuilder.attachments.diff.surface.pending', {
+        defaultMessage: 'Proposed change · Pending',
+      });
+  }
+};
+
 const workflowYamlDiffAttachmentType = {
   id: WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
   validate: (input: unknown) => {
@@ -67,6 +96,31 @@ ${diff}
 
 If the proposal is pending, user can accept or decline it from the workflow YAML diff attachment UI.`,
       }),
+    };
+  },
+  /** The proposal's status and changed hunks. Accepting or declining it stays in Kibana. */
+  toSurfaceComposition: ({
+    data: { beforeYaml, afterYaml, status, workflowId, name },
+  }: {
+    data: WorkflowYamlDiffData;
+  }): SurfaceComposition => {
+    const hunks = buildDiffHunks(beforeYaml, afterYaml);
+
+    return {
+      type: 'view',
+      title: toWorkflowTitle(name),
+      subtitle: toStatusLabel(status),
+      body: [
+        hunks
+          ? { type: 'code', language: 'diff', text: hunks }
+          : {
+              type: 'markdown',
+              text: i18n.translate('workflows.agentBuilder.attachments.diff.surface.noChanges', {
+                defaultMessage: 'No changes.',
+              }),
+            },
+        ...toOpenWorkflowButton(workflowId),
+      ],
     };
   },
   getAgentDescription: () =>
