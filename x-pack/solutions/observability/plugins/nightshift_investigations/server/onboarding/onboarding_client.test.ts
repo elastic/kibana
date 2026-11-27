@@ -31,6 +31,9 @@ const setup = ({
   agentInstalled = true,
   agentConnectorIds = [],
   withAgentBuilder = true,
+  withExecutionService = true,
+  agentExecutions = [],
+  agentExecution,
   withActions = true,
   assistantEnabled = false,
   spaceId,
@@ -42,6 +45,12 @@ const setup = ({
   /** The agent's connector list as read back after `ensure`. */
   agentConnectorIds?: string[];
   withAgentBuilder?: boolean;
+  /** Whether Agent Builder exposes its execution service. */
+  withExecutionService?: boolean;
+  /** The agent executions found for the workflow execution. */
+  agentExecutions?: Array<{ executionId: string }>;
+  /** The agent execution as read back with its events. */
+  agentExecution?: Record<string, unknown>;
   withActions?: boolean;
   assistantEnabled?: boolean;
   /** Space the request targets; the default space unless a test overrides it. */
@@ -61,6 +70,10 @@ const setup = ({
   const agents = {
     getRegistry: jest.fn().mockResolvedValue(registry),
     ensure: jest.fn().mockResolvedValue(undefined),
+  };
+  const agentExecutionService = {
+    findExecutions: jest.fn().mockResolvedValue(agentExecutions),
+    getExecution: jest.fn().mockResolvedValue(agentExecution),
   };
   const agentAvailability = { kind: 'always' } as never;
   const actionsClient = actionsClientMock.create();
@@ -83,7 +96,10 @@ const setup = ({
     getDeps: () => ({
       workflowsManagement: { management } as unknown as WorkflowsServerPluginSetup,
       agentBuilder: withAgentBuilder
-        ? ({ agents } as unknown as AgentBuilderPluginStart)
+        ? ({
+            agents,
+            ...(withExecutionService ? { execution: agentExecutionService } : {}),
+          } as unknown as AgentBuilderPluginStart)
         : undefined,
       agentAvailability,
       ...(spaceId
@@ -103,6 +119,7 @@ const setup = ({
     client,
     management,
     agents,
+    agentExecutionService,
     registry,
     actionsClient,
     esClient,
@@ -311,6 +328,113 @@ describe('createOnboardingClient', () => {
     expect((await client.get(request)).execution).toEqual(
       expect.objectContaining({ status: 'running', suggestions: undefined })
     );
+  });
+
+  describe('progress while running', () => {
+    const toolCall = (id: string, data: Record<string, unknown> = {}) => ({
+      type: 'tool_call',
+      data: { tool_call_id: id, tool_id: 'bash', params: { command: 'secret' }, ...data },
+    });
+    const runningSetup = (overrides: Parameters<typeof setup>[0] = {}) =>
+      setup({
+        executions: [{ id: 'exec-1' }],
+        execution: { id: 'exec-1', status: 'running', context: {} },
+        agentExecutions: [{ executionId: 'agent-1' }],
+        ...overrides,
+      });
+
+    it("reports the agent's tool calls, without params or results", async () => {
+      const { client, agentExecutionService, request } = runningSetup({
+        agentExecution: {
+          events: [
+            { type: 'reasoning', data: { reasoning: 'thinking' } },
+            toolCall('c1', { intent: ' Checking active alerts ' }),
+            { type: 'tool_result', data: { tool_call_id: 'c1', results: [{ data: 'secret' }] } },
+            toolCall('c2'),
+          ],
+        },
+      });
+
+      const { execution } = await client.get(request);
+
+      expect(execution?.progress).toEqual([
+        { tool_call_id: 'c1', tool_id: 'bash', intent: 'Checking active alerts' },
+        { tool_call_id: 'c2', tool_id: 'bash' },
+      ]);
+      expect(JSON.stringify(execution)).not.toContain('secret');
+      expect(agentExecutionService.findExecutions).toHaveBeenCalledWith(request, {
+        filter: { metadata: { workflow_execution_id: 'exec-1' } },
+        sort: { field: '@timestamp', order: 'desc' },
+        size: 1,
+      });
+      expect(agentExecutionService.getExecution).toHaveBeenCalledWith('agent-1');
+    });
+
+    it('keeps the newest 20 tool calls and caps long intents', async () => {
+      const { client, request } = runningSetup({
+        agentExecution: {
+          events: Array.from({ length: 25 }, (_, i) =>
+            toolCall(`c${i}`, { intent: 'x'.repeat(500) })
+          ),
+        },
+      });
+
+      const progress = (await client.get(request)).execution?.progress;
+
+      expect(progress).toHaveLength(20);
+      expect(progress?.[0].tool_call_id).toBe('c5');
+      expect(progress?.[19].tool_call_id).toBe('c24');
+      expect(progress?.[0].intent).toHaveLength(200);
+    });
+
+    it('reports no progress before the agent has made a tool call', async () => {
+      const { client, request } = runningSetup({
+        agentExecution: { events: [{ type: 'reasoning', data: {} }] },
+      });
+      expect((await client.get(request)).execution?.progress).toBeUndefined();
+    });
+
+    it('reports no progress before the agent execution exists', async () => {
+      const { client, agentExecutionService, request } = runningSetup({ agentExecutions: [] });
+
+      expect((await client.get(request)).execution).not.toHaveProperty('progress');
+      expect(agentExecutionService.getExecution).not.toHaveBeenCalled();
+    });
+
+    it('does not look for progress once the run is over', async () => {
+      const { client, agentExecutionService, request } = setup({
+        executions: [{ id: 'exec-1' }],
+        execution: { id: 'exec-1', status: 'completed', context: {} },
+      });
+
+      expect((await client.get(request)).execution).not.toHaveProperty('progress');
+      expect(agentExecutionService.findExecutions).not.toHaveBeenCalled();
+    });
+
+    it('still answers when the agent execution cannot be found', async () => {
+      const { client, agentExecutionService, logger, request } = runningSetup();
+      agentExecutionService.findExecutions.mockRejectedValue(new Error('index missing'));
+
+      expect((await client.get(request)).execution).toEqual(
+        expect.objectContaining({ status: 'running' })
+      );
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('index missing'));
+    });
+
+    it('still answers when the agent execution cannot be read', async () => {
+      const { client, agentExecutionService, logger, request } = runningSetup();
+      agentExecutionService.getExecution.mockRejectedValue(new Error('boom'));
+
+      expect((await client.get(request)).execution).not.toHaveProperty('progress');
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('boom'));
+    });
+
+    it('still answers when Agent Builder has no execution service', async () => {
+      const { client, request } = runningSetup({ withExecutionService: false });
+      expect((await client.get(request)).execution).toEqual(
+        expect.objectContaining({ status: 'running' })
+      );
+    });
   });
 
   it('starts the workflow without inputs', async () => {
