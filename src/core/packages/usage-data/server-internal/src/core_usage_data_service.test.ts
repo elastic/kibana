@@ -18,7 +18,10 @@ import { configServiceMock } from '@kbn/config-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { config as RawLoggingConfig } from '@kbn/core-logging-server-internal';
 import { config as RawElasticsearchConfig } from '@kbn/core-elasticsearch-server-internal';
-import { config as RawHttpConfig } from '@kbn/core-http-server-internal';
+import {
+  config as RawHttpConfig,
+  permissionsPolicyConfig as RawPermissionsPolicyConfig,
+} from '@kbn/core-http-server-internal';
 import { savedObjectsConfig as RawSavedObjectsConfig } from '@kbn/core-saved-objects-base-server-internal';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
@@ -346,7 +349,8 @@ describe('CoreUsageDataService', () => {
                 "securityResponseHeaders": Object {
                   "crossOriginOpenerPolicy": "same-origin",
                   "disableEmbedding": false,
-                  "permissionsPolicyConfigured": true,
+                  "permissionsPolicyConfigured": false,
+                  "permissionsPolicyDisabled": false,
                   "referrerPolicy": "strict-origin-when-cross-origin",
                   "strictTransportSecurity": "NULL",
                   "xContentTypeOptions": "nosniff",
@@ -702,6 +706,69 @@ describe('CoreUsageDataService', () => {
           return doTest({
             serviceAccountToken: 'any',
             expectedPrincipal: 'kibana_service_account',
+          });
+        });
+      });
+
+      describe('securityResponseHeaders.permissionsPolicy', () => {
+        async function doTest({
+          permissionsPolicy,
+          enabled,
+          expected,
+        }: {
+          permissionsPolicy?: string | null;
+          enabled?: boolean;
+          expected: { permissionsPolicyConfigured: boolean; permissionsPolicyDisabled: boolean };
+        }) {
+          const defaultMockImplementation = getConfigServiceAtPathMockImplementation();
+          configService.atPath.mockImplementation((path) => {
+            if (path === 'server') {
+              return new BehaviorSubject(
+                RawHttpConfig.schema.validate({ securityResponseHeaders: { permissionsPolicy } })
+              );
+            }
+            if (path === 'permissionsPolicy') {
+              return new BehaviorSubject(RawPermissionsPolicyConfig.schema.validate({ enabled }));
+            }
+            return defaultMockImplementation(path);
+          });
+          const { getCoreUsageData } = setup();
+          return expect(getCoreUsageData()).resolves.toEqual(
+            expect.objectContaining({
+              config: expect.objectContaining({
+                http: expect.objectContaining({
+                  securityResponseHeaders: expect.objectContaining(expected),
+                }),
+              }),
+            })
+          );
+        }
+
+        it('reports neither when nothing is configured', async () => {
+          return doTest({
+            expected: { permissionsPolicyConfigured: false, permissionsPolicyDisabled: false },
+          });
+        });
+
+        it('reports a deprecated policy string as configured but not disabled', async () => {
+          return doTest({
+            permissionsPolicy: 'camera=()',
+            expected: { permissionsPolicyConfigured: true, permissionsPolicyDisabled: false },
+          });
+        });
+
+        // `null` is how the header is disabled today, and the setting that allows it goes in 10.0.0.
+        it('reports a deprecated null as configured and disabled', async () => {
+          return doTest({
+            permissionsPolicy: null,
+            expected: { permissionsPolicyConfigured: true, permissionsPolicyDisabled: true },
+          });
+        });
+
+        it('reports permissionsPolicy.enabled: false as disabled but not configured', async () => {
+          return doTest({
+            enabled: false,
+            expected: { permissionsPolicyConfigured: false, permissionsPolicyDisabled: true },
           });
         });
       });
