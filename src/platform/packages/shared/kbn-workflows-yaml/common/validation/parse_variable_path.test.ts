@@ -165,6 +165,16 @@ describe('parseVariablePath', () => {
     });
   });
 
+  it('should handle Liquid colon-style filter arguments', () => {
+    const result = parseVariablePath(
+      'alert.fields["url.path"] | default: "n/a" | truncate: 20, "..."'
+    );
+    expect(result).toEqual({
+      propertyPath: 'alert.fields["url.path"]',
+      filters: ['default: "n/a"', 'truncate: 20, "..."'],
+    });
+  });
+
   it('should handle spaces around pipes and filter names', () => {
     const result = parseVariablePath('  foo  |  title  |  upper  ');
     expect(result).toEqual({

@@ -15,13 +15,21 @@
 const VARIABLE_KEY_CHARS = String.raw`[\w.\s|()\[\],"']`;
 
 /**
+ * One token of a complete mustache key: an unquoted key character (including the `:` of
+ * Liquid filter arguments such as `| default: "n/a"`) or a whole quoted string. Quotes are
+ * absent from the unquoted class, so each token is chosen by its first character and the
+ * pattern stays linear. Quoted strings exclude `}` so a match never runs past `}}`.
+ */
+const VARIABLE_KEY_TOKEN = String.raw`(?:[\w.\s|()\[\],:]|"[^"}]*"|'[^'}]*')`;
+
+/**
  * Matches `{{ … }}`. The key is greedy and bounded by the closing braces, with no
  * surrounding `\s*`: an earlier form padded a lazy key with `\s*` on both sides, and
  * because the key class also matches whitespace, the engine had to try every split of a
  * whitespace run between the three (CodeQL `js/polynomial-redos`). `matchVariable` and
  * friends trim the captured key, so callers see the same value as before.
  */
-export const VARIABLE_REGEX = new RegExp(String.raw`\{\{(?<key>${VARIABLE_KEY_CHARS}*)\}\}`);
+export const VARIABLE_REGEX = new RegExp(String.raw`\{\{(?<key>${VARIABLE_KEY_TOKEN}*)\}\}`);
 export const VARIABLE_REGEX_GLOBAL = new RegExp(VARIABLE_REGEX.source, 'g');
 /** Matches a `{{ …` that runs to the end of the line, for autocomplete. */
 export const UNFINISHED_VARIABLE_REGEX_GLOBAL = new RegExp(

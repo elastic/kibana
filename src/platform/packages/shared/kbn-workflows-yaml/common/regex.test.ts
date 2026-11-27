@@ -37,6 +37,13 @@ describe('regex patterns', () => {
       expect(matches[0][0]).toBe('{{  steps.getData.output  }}');
     });
 
+    it('should match expressions with colon-style filter arguments', () => {
+      const matches = matchAllVariables('{{ alert.fields["url.path"] | default: "n/a" }}');
+
+      expect(matches).toHaveLength(1);
+      expect(matches[0].groups.key).toBe('alert.fields["url.path"] | default: "n/a"');
+    });
+
     it('should report an empty key for an empty expression', () => {
       expect(matchVariable('{{}}')?.groups.key).toBe('');
       expect(matchVariable('{{ }}')?.groups.key).toBe('');
@@ -85,6 +92,15 @@ describe('regex patterns', () => {
       expect(matchAllVariables(REDOS_INPUT)).toHaveLength(0);
       expect([...REDOS_INPUT.matchAll(VARIABLE_REGEX_GLOBAL)]).toHaveLength(0);
       expect([...REDOS_INPUT.matchAll(UNFINISHED_VARIABLE_REGEX_GLOBAL)]).toHaveLength(1);
+
+      expect(Date.now() - start).toBeLessThan(1_000);
+    });
+
+    it('scans a long unclosed quoted argument in linear time', () => {
+      const input = `{{ a | default: "${'x '.repeat(500_000)}`;
+      const start = Date.now();
+
+      expect(matchAllVariables(input)).toHaveLength(0);
 
       expect(Date.now() - start).toBeLessThan(1_000);
     });
