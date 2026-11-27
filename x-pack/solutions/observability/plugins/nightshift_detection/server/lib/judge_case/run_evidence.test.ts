@@ -198,13 +198,38 @@ describe('runEvidence', () => {
     it.each([
       ['no rows', table(['message'], [])],
       // What `drop_null_columns` returns for an aggregate over no matches, such as `STATS m = MAX(x)`.
-      ['rows whose every cell was null, so no column is left', table([], [[], []])],
+      ['one row whose every cell was null, so no column is left', table([], [[]])],
     ])('reports %s as empty', async (_title, response) => {
       const esClient = createClient();
       respondWith(esClient, response);
 
       expect(await runEvidence({ esClient, query: QUERY })).toEqual({ result: 'empty' });
     });
+
+    it.each([
+      // Matched documents whose kept fields are all null: only a non-aggregate query returns these.
+      ['two rows with no value', table([], [[], []]), 2, false],
+      // Elasticsearch keeps `late` for the 6th row; the 5 kept rows hold no value of it.
+      [
+        'six rows with a value only in the 6th',
+        table(['late'], [[null], [null], [null], [null], [null], ['only here']]),
+        5,
+        true,
+      ],
+    ])(
+      'keeps %s as found with empty rows, not as a negative',
+      async (_title, response, rowCount, rowsTruncated) => {
+        const esClient = createClient();
+        respondWith(esClient, response);
+
+        expect(await runEvidence({ esClient, query: QUERY })).toEqual({
+          result: 'found',
+          rows: Array.from({ length: rowCount }, () => ({})),
+          rows_truncated: rowsTruncated,
+          cells_truncated: false,
+        });
+      }
+    );
 
     it.each([
       ['columns', { values: [[1]] }],
@@ -227,7 +252,7 @@ describe('runEvidence', () => {
       expect(await runEvidence({ esClient, query: QUERY })).toEqual({
         result: 'error',
         reason: 'query_failed',
-        message: 'the response is partial: a cluster or shard was left out',
+        message: 'the response is partial: a remote cluster or linked project was skipped',
       });
     });
   });

@@ -23,12 +23,12 @@ const MAX_TIMEOUT_MS = 2 ** 31 - 1;
 /** Rows asked of Elasticsearch: the kept ones plus one, which only says whether there were more. */
 const QUERY_ROW_LIMIT = EVIDENCE_MAX_ROWS + 1;
 
-/** What a run cancelled before or while its query ran gets. */
-const ABORTED: EvidenceResult = {
+/** What a run cancelled before or while its query ran gets. Frozen, because every caller shares it. */
+const ABORTED: EvidenceResult = Object.freeze({
   result: 'error',
   reason: 'aborted',
   message: 'evidence query aborted',
-};
+});
 
 /**
  * A cell as the response may carry it. The client types a cell as a scalar, but ES|QL also returns
@@ -102,7 +102,7 @@ const toResult = (table: EsqlTable): EvidenceResult => {
   // A skipped remote cluster or linked project does not fail the query, even with
   // `allow_partial_results: false`: the response is marked partial instead.
   if (isPartial) {
-    return queryFailed('the response is partial: a cluster or shard was left out');
+    return queryFailed('the response is partial: a remote cluster or linked project was skipped');
   }
   if (!Array.isArray(columns) || !Array.isArray(values)) {
     return queryFailed('the response has no columns or no values');
@@ -114,9 +114,18 @@ const toResult = (table: EsqlTable): EvidenceResult => {
   const keptColumns = columns
     .map(({ name }, index) => ({ name, index }))
     .filter(({ index }) => keptValues.some((rowValues) => (rowValues[index] ?? null) !== null));
-  // No rows, or rows whose every cell is null, such as an aggregate over no matches.
   if (keptColumns.length === 0) {
-    return { result: 'empty' };
+    // No rows, or one row whose every cell is null: an aggregate over no matches. More rows than
+    // that matched documents whose kept cells hold no value, so they stay a match, not a negative.
+    if (values.length <= 1) {
+      return { result: 'empty' };
+    }
+    return {
+      result: 'found',
+      rows: keptValues.map((): EvidenceRow => Object.create(null)),
+      rows_truncated: values.length > EVIDENCE_MAX_ROWS,
+      cells_truncated: false,
+    };
   }
 
   let cellsTruncated = false;
@@ -174,7 +183,8 @@ export const runEvidence = async ({
     timeout.addEventListener('abort', abortQuery, { once: true });
     // Elasticsearch drops the columns that are null in every row before it responds: without a
     // `KEEP`, a log source returns every mapped field, and most are null in any given minute. The
-    // limit keeps both the rows it sends and the columns that survive to what is kept.
+    // limit bounds the rows it sends; a column with a value only in the extra row is dropped in
+    // `toResult`.
     const response: EsqlTable = await esClient.esql.query(
       {
         query: esql(query).limit(QUERY_ROW_LIMIT).print('basic'),

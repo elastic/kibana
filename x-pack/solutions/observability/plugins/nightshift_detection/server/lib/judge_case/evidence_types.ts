@@ -57,8 +57,9 @@ export interface FoundEvidence {
 }
 
 /**
- * The query ran and returned nothing to read: no rows, or kept rows whose every cell was null (an
- * aggregate over no matches). A real negative, unlike an error.
+ * The query ran and returned nothing to read: no rows, or one row whose every cell was null (an
+ * aggregate over no matches, which a single matched row with no value cannot be told apart from).
+ * A real negative, unlike an error. More rows with no value are `found`, with empty rows.
  */
 export interface EmptyEvidence {
   result: 'empty';
