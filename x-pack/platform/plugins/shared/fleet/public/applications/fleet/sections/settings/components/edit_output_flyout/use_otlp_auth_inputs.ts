@@ -192,10 +192,13 @@ export const getSelectedOtlpAuthHeaderName = (inputs: OtlpAuthInputs): string | 
     : OTLP_AUTHORIZATION_HEADER;
 };
 
+/** The `https://` prefix is checked on the raw value: the URL parser repairs `https:/host`. */
 const isHttpsUrlWithHost = (endpoint: string): boolean => {
+  if (!/^https:\/\//i.test(endpoint)) {
+    return false;
+  }
   try {
-    const url = new URL(endpoint);
-    return url.protocol === 'https:' && url.hostname !== '';
+    return new URL(endpoint).hostname !== '';
   } catch {
     return false;
   }

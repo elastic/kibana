@@ -2785,7 +2785,7 @@ describe('EditOutputFlyout', () => {
           expect((mockSendPutOutput.mock.calls[0][1] as any).secrets).toBeUndefined();
         });
 
-        it.each(['http://collector.example.com:4318', 'https://'])(
+        it.each(['http://collector.example.com:4318', 'https://', 'https:/collector.example.com'])(
           'should show an error for the endpoint %s',
           (endpoint) => {
             const { utils } = renderFlyout(otlpOutputWithAzureAuth);
