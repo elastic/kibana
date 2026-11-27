@@ -680,13 +680,12 @@ describe('customContentEmbeddableFactory', () => {
 
       expect(capturedComponentProps?.isFetchContextReady).toBe(false);
 
-      await act(async () => {
-        isFetchPaused$.next(false);
-        await new Promise((resolve) => setTimeout(resolve, 0));
-      });
+      await act(async () => isFetchPaused$.next(false));
 
-      expect(capturedComponentProps?.isFetchContextReady).toBe(true);
-      expect(capturedComponentProps?.esqlVariables).toEqual([region]);
+      await waitFor(() => {
+        expect(capturedComponentProps?.isFetchContextReady).toBe(true);
+        expect(capturedComponentProps?.esqlVariables).toEqual([region]);
+      });
     });
   });
 
