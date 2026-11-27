@@ -36,6 +36,10 @@ describe('buildEpisodesBaseQuery', () => {
     expect(queryString).toContain(
       'severity = LAST(severity, @timestamp) WHERE status == "breached" AND severity IS NOT NULL'
     );
+    expect(queryString).toContain(
+      'reason = LAST(event_reason, @timestamp) WHERE event_reason IS NOT NULL'
+    );
+    expect(queryString).toContain('EVAL event_reason = TO_STRING(reason)');
     expect(queryString).toContain('BY episode.id');
     expect(queryString).toContain('EVAL duration = DATE_DIFF');
     expect(queryString).toContain('"ms"');

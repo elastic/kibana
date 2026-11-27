@@ -60,6 +60,11 @@ export const alertEpisodeSchema = lazySchema(() =>
       episode_data: z.string().nullable().optional(),
       /** Latest top-level `severity` from a breached rule event, when present. */
       severity: z.string().min(1).nullable().optional(),
+      /**
+       * Latest rendered `reason` of the rule events of the episode. Recovery events carry none, so it
+       * is the one of the last event that had a reason, not of the last event.
+       */
+      reason: z.string().nullable().optional(),
       /** Source that originated the alert (e.g. "zabbix", "datadog"). Native Elastic rules use "internal". */
       source: z.string().min(1).nullable().optional(),
     })
