@@ -8,7 +8,6 @@
 import { isEmpty, reduce } from 'lodash';
 import type { DefaultValues } from 'react-hook-form';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
-import type { GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
 
 export type ECSMappingArray = Array<{
   key: string;
@@ -58,18 +57,43 @@ export type ShardsArray = Array<{
   policy: {
     key: string;
     label: string;
+    /**
+     * Agent policies a shared-integration row writes its shard for. Kept on the row so
+     * a group that disappears mid-edit (Fleet changed in another tab) never serializes
+     * the integration id as an agent policy id.
+     */
+    memberIds?: string[];
   };
   percentage: number;
 }>;
 
 export type Shard = Record<string, number>;
 
-export const convertShardsToObject = (shards: ShardsArray): Shard =>
+export type ShardIntegrationGroups = Record<string, { policyIds: string[] }>;
+
+/**
+ * @param selectedPolicyIds agent policies selected without a shard. A group row also
+ * writes its shard for the members of its integration selected after the row was loaded,
+ * so "Select all" never leaves a member to the server's 100% default while the form
+ * shows a lower value.
+ */
+export const convertShardsToObject = (
+  shards: ShardsArray,
+  groups: ShardIntegrationGroups = {},
+  selectedPolicyIds: readonly string[] = []
+): Shard =>
   reduce(
     shards,
     (acc, value) => {
-      if (!isEmpty(value?.policy)) {
-        acc[value.policy.key] = value.percentage;
+      if (value?.policy?.key) {
+        const group = groups[value.policy.key];
+        const members = value.policy.memberIds ?? group?.policyIds ?? [value.policy.key];
+        const selectedMembers = value.policy.memberIds
+          ? (group?.policyIds ?? []).filter((id) => selectedPolicyIds.includes(id))
+          : [];
+        for (const policyId of new Set([...members, ...selectedMembers])) {
+          acc[policyId] = value.percentage;
+        }
       }
 
       return acc;
@@ -77,24 +101,66 @@ export const convertShardsToObject = (shards: ShardsArray): Shard =>
     {} as Shard
   );
 
+const FULL_SHARD = 100;
+
+/**
+ * @param targetedPolicyIds agent policies selected without a shard. The server
+ * resolves one shard per shared integration as the max over its targeted
+ * members, counting a targeted member without a shard as 100%, so the group
+ * row has to start from that same value. Otherwise saving the form unchanged
+ * would lower the live shard.
+ *
+ * A group row keeps only its explicitly targeted members (sharded or selected) in
+ * `memberIds`, so saving does not add the integration's other agent policies to the
+ * pack's targets.
+ */
 export const convertShardsToArray = (
   shards: DefaultValues<Shard>,
-  policiesById?: Record<string, GetAgentPoliciesResponseItem>
-): ShardsArray =>
-  reduce(
-    shards,
-    (acc, value, key) => {
-      if (value != null) {
-        acc.push({
-          policy: {
-            key,
-            label: policiesById?.[key]?.name ?? '',
-          },
-          percentage: value,
-        });
-      }
-
-      return acc;
-    },
-    [] as ShardsArray
+  policiesById?: Record<string, { name: string }>,
+  groups: ShardIntegrationGroups = {},
+  targetedPolicyIds: readonly string[] = []
+): ShardsArray => {
+  const groupIdByPolicyId = new Map(
+    Object.entries(groups).flatMap(([id, { policyIds }]) =>
+      policyIds.map((policyId) => [policyId, id] as const)
+    )
   );
+  const targeted = new Set(targetedPolicyIds);
+  const rows = new Map<string, ShardsArray[number]>();
+  for (const [policyId, percentage] of Object.entries(shards ?? {})) {
+    if (percentage == null) {
+      continue;
+    }
+
+    const key = groupIdByPolicyId.get(policyId) ?? policyId;
+    const existing = rows.get(key);
+    if (existing) {
+      existing.percentage = Math.max(existing.percentage, percentage);
+      continue;
+    }
+
+    if (key === policyId) {
+      rows.set(key, {
+        policy: { key, label: policiesById?.[policyId]?.name ?? '' },
+        percentage,
+      });
+      continue;
+    }
+
+    const groupMemberIds = groups[key].policyIds;
+    const isShardKey = (id: string) => (shards as Shard | undefined)?.[id] != null;
+    const hasTargetedMemberWithoutShard = groupMemberIds.some(
+      (id) => targeted.has(id) && !isShardKey(id)
+    );
+    rows.set(key, {
+      policy: {
+        key,
+        label: groupMemberIds.map((id) => policiesById?.[id]?.name ?? '').join(', '),
+        memberIds: groupMemberIds.filter((id) => isShardKey(id) || targeted.has(id)),
+      },
+      percentage: hasTargetedMemberWithoutShard ? FULL_SHARD : percentage,
+    });
+  }
+
+  return [...rows.values()];
+};

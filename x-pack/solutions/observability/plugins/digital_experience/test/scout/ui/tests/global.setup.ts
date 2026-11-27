@@ -7,6 +7,7 @@
 
 import { globalSetupHook } from '@kbn/scout-oblt';
 import { ES_ARCHIVES } from '../../common/fixtures/constants';
+import { ingestMobileCrashData } from '../../common/fixtures/mobile_crash_data';
 import { ingestMobileData } from '../../common/fixtures/mobile_data';
 import { ingestOtelRumData } from '../../common/fixtures/otel_rum_data';
 import { ingestSessionsData } from '../../common/fixtures/sessions_data';
@@ -19,6 +20,7 @@ globalSetupHook(
   async ({ apiServices, esArchiver, esClient, kbnClient, config }) => {
     await ingestOtelRumData(esClient);
     await ingestMobileData(esClient);
+    await ingestMobileCrashData(esClient);
 
     // Setting up sessions calls a Digital Experience route, which answers 404 while the flag is
     // off.
