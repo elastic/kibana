@@ -724,6 +724,48 @@ describe('RulesListPage', () => {
     expect(screen.queryByTestId('ruleCreateSearchSendToAgent')).not.toBeInTheDocument();
   });
 
+  it('searches Universal options in the create rule flyout and opens the selected flow', async () => {
+    mockUnifiedRuleCreationEnabled = true;
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+
+    fireEvent.change(screen.getByTestId('ruleCreateSearchInput'), {
+      target: { value: 'esql' },
+    });
+
+    const esqlItem = await screen.findByTestId('ruleCreateSearchItem-universal-esql');
+    expect(esqlItem).toHaveTextContent('Write ES|QL query');
+
+    fireEvent.click(esqlItem);
+
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByTestId('ruleCreateSearchItem-universal-esql')).not.toBeInTheDocument();
+    });
+  });
+
+  it('navigates to the sequence builder when selected from the create rule search', async () => {
+    mockUnifiedRuleCreationEnabled = true;
+    const locators = createMockLocators();
+    render(
+      <ListPageTestProviders locators={locators}>
+        <RulesListPage />
+      </ListPageTestProviders>
+    );
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+
+    fireEvent.change(screen.getByTestId('ruleCreateSearchInput'), {
+      target: { value: 'sequence' },
+    });
+
+    fireEvent.click(await screen.findByTestId('ruleCreateSearchItem-universal-sequence'));
+
+    expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
+    expect(locators.rulesLocators.navigateSync).toHaveBeenCalledWith({ page: 'sequence_create' });
+  });
+
   it('closes create rule options flyout without navigating', async () => {
     renderPage();
     await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());

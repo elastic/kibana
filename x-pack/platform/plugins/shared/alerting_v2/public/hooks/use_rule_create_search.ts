@@ -5,17 +5,18 @@
  * 2.0.
  */
 
+import { useMemo, useState } from 'react';
 import type { RuleCreateSearchProps } from '../components/rule_create_search';
 import { getCreateRuleWithAgentPrompt } from '../constants';
 import { useAreAgentBuilderSkillsAvailable } from './use_are_agent_builder_skills_available';
 import { useOpenAgentBuilderChat } from './use_open_agent_builder_chat';
 import { useUnifiedRuleCreationEnabled } from './use_unified_rule_creation_enabled';
+import {
+  useUniversalSearchSection,
+  type UniversalSearchSectionHandlers,
+} from './use_universal_search_section';
 
-// Sections are wired by their own issues; until then the search shows no results.
-const NO_SEARCH_SECTIONS: RuleCreateSearchProps['sections'] = {};
-const ignoreSearchQuery = () => {};
-
-interface UseRuleCreateSearchOptions {
+interface UseRuleCreateSearchOptions extends UniversalSearchSectionHandlers {
   /** Called before the typed text is sent to the agent, to close the create rule flyout. */
   onClose: () => void;
 }
@@ -26,18 +27,33 @@ interface UseRuleCreateSearchOptions {
  */
 export const useRuleCreateSearch = ({
   onClose,
+  onCreateEsqlRule,
+  onCreateThresholdRule,
+  onBuildSequence,
 }: UseRuleCreateSearchOptions): RuleCreateSearchProps | undefined => {
   const isUnifiedRuleCreationEnabled = useUnifiedRuleCreationEnabled();
   const areAgentBuilderSkillsAvailable = useAreAgentBuilderSkillsAvailable();
   const openAgentBuilderChat = useOpenAgentBuilderChat();
+  const [query, setQuery] = useState('');
+
+  const universalSection = useUniversalSearchSection(query, {
+    onCreateEsqlRule,
+    onCreateThresholdRule,
+    onBuildSequence,
+  });
+
+  const sections = useMemo<RuleCreateSearchProps['sections']>(
+    () => ({ universal: universalSection }),
+    [universalSection]
+  );
 
   if (!isUnifiedRuleCreationEnabled) {
     return undefined;
   }
 
   return {
-    sections: NO_SEARCH_SECTIONS,
-    onQueryChange: ignoreSearchQuery,
+    sections,
+    onQueryChange: setQuery,
     onSendToAgent: areAgentBuilderSkillsAvailable
       ? (text) => {
           onClose();
