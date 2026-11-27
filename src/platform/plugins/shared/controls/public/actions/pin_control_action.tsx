@@ -9,6 +9,7 @@
 
 import { map } from 'rxjs';
 
+import { apiPublishesRequired } from '@kbn/controls-renderer';
 import { i18n } from '@kbn/i18n';
 import {
   apiCanBePinned,
@@ -92,6 +93,8 @@ export class PinControlAction
     if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
     if (embeddable.parentApi.panelIsPinned(embeddable.uuid)) {
       embeddable.parentApi.unpinPanel(embeddable.uuid);
+      // only pinned controls can be required, so clear it when the control is unpinned
+      if (apiPublishesRequired(embeddable)) embeddable.setRequired(undefined);
     } else {
       embeddable.parentApi.pinPanel(embeddable.uuid);
     }

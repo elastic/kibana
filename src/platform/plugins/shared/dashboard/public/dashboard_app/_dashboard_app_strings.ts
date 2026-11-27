@@ -300,6 +300,9 @@ export const topNavStrings = {
     description: i18n.translate('dashboard.topNave.addConfigDescription', {
       defaultMessage: 'Add content to your dashboard',
     }),
+    awaitingRequiredFiltersTooltip: i18n.translate('dashboard.topNave.addRequiredFiltersTooltip', {
+      defaultMessage: 'Set the required controls before adding panels to this dashboard.',
+    }),
   },
   backgroundSearch: {
     label: i18n.translate('dashboard.topNave.backgroundSearchButtonAriaLabel', {

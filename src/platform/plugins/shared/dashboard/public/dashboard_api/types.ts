@@ -43,6 +43,7 @@ import type {
   PublishesTitle,
   PublishesUnifiedSearch,
   PublishesApproximation,
+  PublishesAwaitingRequiredFilters,
   PublishesViewMode,
   PublishesWritableViewMode,
   PublishingSubject,
@@ -181,6 +182,7 @@ export type DashboardApi = CanExpandPanels &
   HasUniqueId &
   PresentationContainer &
   PublishesDataLoading &
+  PublishesAwaitingRequiredFilters &
   PublishesDataSources &
   PublishesDescription &
   PublishesHideBorder &
@@ -264,7 +266,7 @@ export type DashboardApi = CanExpandPanels &
     setState: (state: DashboardState, options?: DashboardSetStateOptions) => Promise<void>;
 
     publishedChildFilters$: PublishingSubject<Filter[] | undefined>;
-    unpublishedChildFilters$: PublishingSubject<Filter[] | undefined>;
+    hasUnpublishedFilters$: Observable<boolean>;
     publishFilters: () => void;
 
     publishedTimeslice$: PublishingSubject<TimeSlice | undefined>;

@@ -78,6 +78,12 @@ export type EmbeddableServerDefinition<
   getSchema?: (getDrilldownsSchema: GetDrilldownsSchemaFnType) => ZodObjectType | undefined;
 
   /**
+   * Optional schema used instead of `getSchema` when the embeddable is a pinned panel.
+   * Provide when pinned panels support state that non-pinned panels do not.
+   */
+  getPinnedSchema?: (getDrilldownsSchema: GetDrilldownsSchemaFnType) => ZodObjectType | undefined;
+
+  /**
    * Returns comparators used to determine whether two states are equal.
    * Containers, such as dashboard, use comparators to compare embeddable state.
    * May be async so comparator code can be loaded on demand instead of with the plugin.

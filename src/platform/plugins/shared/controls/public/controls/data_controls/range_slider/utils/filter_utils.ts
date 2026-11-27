@@ -11,6 +11,10 @@ import { type Filter, type RangeFilterParams, buildRangeFilter } from '@kbn/es-q
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
 import type { FilterableSource } from '@kbn/data-source';
 
+/** A range only produces a filter when at least one of its bounds is numeric */
+export const hasNumericBound = (value: RangeSliderControlState['value']): boolean =>
+  Boolean(value?.some((bound) => !isNaN(parseFloat(bound ?? ''))));
+
 export const buildFilter = (
   dataSource: FilterableSource,
   controlId: string,
@@ -23,7 +27,7 @@ export const buildFilter = (
   const gte = parseFloat(filterState.value?.[0] ?? '');
   const lte = parseFloat(filterState.value?.[1] ?? '');
 
-  if (filterState.value && field && (!isNaN(gte) || !isNaN(lte))) {
+  if (field && hasNumericBound(filterState.value)) {
     const params = {
       gte: !isNaN(gte) ? gte : -Infinity,
       lte: !isNaN(lte) ? lte : Infinity,

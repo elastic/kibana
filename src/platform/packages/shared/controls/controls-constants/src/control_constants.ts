@@ -16,6 +16,7 @@ export const TIME_SLIDER_CONTROL = 'time_slider_control';
 export const DEFAULT_DATA_CONTROL_STATE = {
   use_global_filters: true,
   ignore_validations: false,
+  required: false,
 };
 
 /**

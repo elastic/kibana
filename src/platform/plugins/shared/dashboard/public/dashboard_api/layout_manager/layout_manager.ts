@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import deepEqual from 'fast-deep-equal';
 import { getSafe } from '@kbn/std';
-import { cloneDeep, omit, pick } from 'lodash';
+import { cloneDeep, omit, pick, xor } from 'lodash';
 import {
   BehaviorSubject,
   combineLatest,
@@ -17,6 +18,8 @@ import {
   distinctUntilChanged,
   map,
   merge,
+  of,
+  pairwise,
   skip,
   tap,
   type Observable,
@@ -86,7 +89,9 @@ export function initializeLayoutManager(
   viewModeManager: ReturnType<typeof initializeViewModeManager>,
   initialPanels: DashboardState['panels'],
   initialPinnedPanels: DashboardState['pinned_panels'],
-  trackPanel: ReturnType<typeof initializeTrackPanel>['api']
+  trackPanel: ReturnType<typeof initializeTrackPanel>['api'],
+  /** When `true`, the grid is replaced by an awaiting screen, so grid panels are not rendered */
+  awaitingRequiredFilters$: Observable<boolean> = of(false)
 ) {
   // --------------------------------------------------------------------------------------
   // Set up panel state manager
@@ -110,23 +115,49 @@ export function initializeLayoutManager(
     }
   });
 
-  /** Publishes `true` while some rendered children's APIs haven't registered yet */
-  const childApisPending$ = combineLatest([children$, layout$, viewModeManager.api.viewMode$]).pipe(
-    map(([children, layout, viewMode]) => {
-      const renderedPanelCount = Object.keys(layout.panels).filter((uuid) => {
-        const sectionId = layout.panels[uuid].grid.sectionId;
-        return !(sectionId && isSectionCollapsed(sectionId)); // if a panel is collapseed, it does not render
-      }).length;
-      const expectedChildCount = renderedPanelCount + Object.keys(layout.pinnedPanels).length;
-
-      const currentChildCount = Object.keys(children).filter((uuid) => {
-        const sectionId = layout.panels[uuid]?.grid.sectionId; // uuid might reference a pinned panel
-        return !(sectionId && isSectionCollapsed(sectionId)); // if a panel is collapsed, it should never trigger loading, even if the API exists
-      }).length;
-
-      return expectedChildCount !== currentChildCount;
+  /**
+   * The ids of the children that are actually going to be rendered, which must match `DashboardViewport`:
+   * pinned panels are always rendered, while grid panels are not rendered when they sit in a collapsed
+   * section or while the grid is replaced by the awaiting screen.
+   */
+  const visibleChildren$ = combineLatest([layout$, awaitingRequiredFilters$]).pipe(
+    map(([{ panels, pinnedPanels }, awaitingRequiredFilters]) => {
+      const pinnedPanelIds = Object.keys(pinnedPanels); // always rendered
+      const gridPanelIds = awaitingRequiredFilters
+        ? [] // the grid is replaced by the awaiting screen
+        : Object.keys(panels).filter((uuid) => !isSectionCollapsed(panels[uuid].grid.sectionId));
+      return [...pinnedPanelIds, ...gridPanelIds];
     }),
+    distinctUntilChanged<string[]>(deepEqual)
+  );
+
+  /** Publishes `true` while some rendered children's APIs haven't registered yet */
+  const childApisPending$ = combineLatest([
+    children$,
+    visibleChildren$,
+    viewModeManager.api.viewMode$,
+  ]).pipe(
+    map(([children, visibleChildren]) => visibleChildren.some((uuid) => !children[uuid])),
     distinctUntilChanged()
+  );
+
+  /**
+   * The APIs of the rendered children. An API lingers in `children$` after its panel unmounts, but its
+   * subscriptions are gone, so state it published while mounted (e.g. loading) would never be reset.
+   */
+  const renderedChildren$ = combineLatest([children$, visibleChildren$]).pipe(
+    map(([children, visibleChildren]) => pick(children, visibleChildren))
+  );
+
+  /**
+   * Emits the ids of the sections that were just collapsed or expanded, which only changes which panels are
+   * rendered. Sections that are added expanded do not emit.
+   */
+  const sectionToggled$: Observable<string[]> = layout$.pipe(
+    map(({ sections }) => Object.keys(sections).filter(isSectionCollapsed)),
+    distinctUntilChanged<string[]>(deepEqual),
+    pairwise(),
+    map(([previousCollapsed, collapsed]) => xor(previousCollapsed, collapsed))
   );
 
   let lastSavedLayout = initialLayout;
@@ -534,6 +565,9 @@ export function initializeLayoutManager(
       getSerializedStateForPanel: (panelId: string) => currentChildState[panelId],
       getLastSavedStateForPanel: (panelId: string) => lastSavedChildState[panelId],
       gridLayout$,
+      visibleChildren$,
+      renderedChildren$,
+      sectionToggled$,
       childApisPending$,
       reset: resetLayout,
       serializeLayout: () => serializeLayout(layout$.value, currentChildState),

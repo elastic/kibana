@@ -42,6 +42,10 @@ export type SelectionsState = Pick<
   'exclude' | 'exists_selected' | 'selected_options' | 'sort'
 >;
 
+export const hasInitialSelections = (
+  state: Pick<SelectionsState, 'selected_options' | 'exists_selected'>
+): boolean => Boolean(state.selected_options?.length || state.exists_selected);
+
 export function initializeSelectionsManager(initialState: SelectionsState) {
   const selectionsManager = initializeStateManager<SelectionsState>(
     initialState,
@@ -52,9 +56,7 @@ export function initializeSelectionsManager(initialState: SelectionsState) {
   return {
     ...selectionsManager,
     internalApi: {
-      hasInitialSelections: Boolean(
-        initialState.selected_options?.length || initialState.exists_selected
-      ),
+      hasInitialSelections: hasInitialSelections(initialState),
     },
   };
 }

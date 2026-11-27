@@ -58,6 +58,7 @@ describe('options list control transforms', () => {
           "exclude": true,
           "field_name": "test",
           "ignore_validations": false,
+          "required": false,
           "search_technique": "prefix",
           "selected_options": Array [
             "val",
@@ -85,11 +86,37 @@ describe('options list control transforms', () => {
           "data_view_id": "data-view-id",
           "field_name": "test",
           "ignore_validations": false,
+          "required": false,
           "title": "Test",
           "use_global_filters": true,
           "values_source": "field",
         }
       `);
+    });
+
+    it('carries `required` through for field controls and defaults it to false', () => {
+      const required = transformOut(
+        { ...baseState, required: true },
+        panelReferences,
+        undefined,
+        undefined
+      );
+      expect(required).toHaveProperty('required', true);
+
+      const unset = transformOut(baseState, panelReferences, undefined, undefined);
+      expect(unset).toHaveProperty('required', false);
+    });
+
+    it('carries `required` through for ES|QL controls and defaults it to false', () => {
+      const esqlState = {
+        values_source: 'esql',
+        esql_query: 'FROM logs | STATS BY field',
+        title: 'Test',
+      };
+      expect(
+        transformOut({ ...esqlState, required: true }, [], undefined, undefined)
+      ).toHaveProperty('required', true);
+      expect(transformOut(esqlState, [], undefined, undefined)).toHaveProperty('required', false);
     });
 
     it('throws on empty required fields', () => {

@@ -18,14 +18,14 @@ import type {
   pinnedControlSchema,
 } from './controls_group_schema';
 import type {
-  optionsListDSLControlSchema,
+  pinnedOptionsListDSLControlSchema,
   optionsListESQLControlSchema,
   optionsListDisplaySettingsSchema,
   optionsListSearchTechniqueSchema,
   optionsListSelectionSchema,
   optionsListSortSchema,
 } from './options_list_schema';
-import type { rangeSliderControlSchema, rangeValueSchema } from './range_slider_schema';
+import type { pinnedRangeSliderControlSchema, rangeValueSchema } from './range_slider_schema';
 import type { timeSliderControlSchema } from './time_slider_schema';
 
 /**
@@ -56,12 +56,18 @@ export type PinnedControlLayoutState = z.output<typeof pinnedControlSchema> & {
 export type ControlWidth = z.output<typeof controlWidthSchema>;
 export type ControlState = z.output<typeof controlTitleSchema>;
 
-export type StrictDataControlState = z.output<typeof dataControlSchema>;
+/**
+ * `required` is only part of the pinned schemas, but runtime state is shared with non-pinned controls,
+ * so it is optional here.
+ */
+export type StrictDataControlState = z.output<typeof dataControlSchema> & { required?: boolean };
 export type DataControlState = LooseUnion<StrictDataControlState>;
 
 export type OptionsListDisplaySettings = z.output<typeof optionsListDisplaySettingsSchema>;
 
-export type OptionsListDSLControlState = LooseUnion<z.output<typeof optionsListDSLControlSchema>>;
+export type OptionsListDSLControlState = LooseUnion<
+  z.output<typeof pinnedOptionsListDSLControlSchema>
+>;
 export type OptionsListESQLControlState = z.output<typeof optionsListESQLControlSchema>;
 export type OptionsListControlState = OptionsListDSLControlState | OptionsListESQLControlState;
 
@@ -69,7 +75,7 @@ export type OptionsListSearchTechnique = z.output<typeof optionsListSearchTechni
 export type OptionsListSelection = z.output<typeof optionsListSelectionSchema>;
 export type OptionsListSortingType = z.output<typeof optionsListSortSchema>;
 
-export type RangeSliderControlState = LooseUnion<z.output<typeof rangeSliderControlSchema>>;
+export type RangeSliderControlState = LooseUnion<z.output<typeof pinnedRangeSliderControlSchema>>;
 export type RangeSliderValue = z.output<typeof rangeValueSchema>;
 
 export type TimeSlice = [number, number];

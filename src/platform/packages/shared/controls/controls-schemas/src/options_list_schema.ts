@@ -18,6 +18,7 @@ import {
   controlTitleSchema,
   dataControlEsqlVariantSchema,
   dataControlFieldVariantSchema,
+  pinnedDataControlProps,
   withFieldValuesSourceDefault,
 } from './control_schema';
 
@@ -106,21 +107,36 @@ const optionsListDSLExtras = {
   sort: optionsListSortSchema,
 };
 
-export const optionsListDSLControlSchema = z.preprocess(
-  withFieldValuesSourceDefault,
-  z.discriminatedUnion('values_source', [
-    dataControlEsqlVariantSchema.extend(optionsListDSLExtras).meta({
-      id: 'kbn-controls-schemas-options-list-dsl-control-schema-esql',
-      title: 'EsqlOptionsListControl',
-      description:
-        "An options list control whose available options come from an ES|QL query's results.",
-    }),
-    dataControlFieldVariantSchema.extend(optionsListDSLExtras).meta({
-      id: 'kbn-controls-schemas-options-list-dsl-control-schema-field',
-      title: 'FieldOptionsListControl',
-      description: 'An options list control whose available options come from a data view field.',
-    }),
-  ])
+const getOptionsListDSLControlSchema = <TProps extends z.ZodRawShape>(
+  props: TProps,
+  idPrefix: string
+) => {
+  const extras = { ...optionsListDSLExtras, ...props };
+  return z.preprocess(
+    withFieldValuesSourceDefault,
+    z.discriminatedUnion('values_source', [
+      dataControlEsqlVariantSchema.extend(extras).meta({
+        id: `${idPrefix}-options-list-dsl-control-schema-esql`,
+        title: 'EsqlOptionsListControl',
+        description:
+          "An options list control whose available options come from an ES|QL query's results.",
+      }),
+      dataControlFieldVariantSchema.extend(extras).meta({
+        id: `${idPrefix}-options-list-dsl-control-schema-field`,
+        title: 'FieldOptionsListControl',
+        description: 'An options list control whose available options come from a data view field.',
+      }),
+    ])
+  );
+};
+
+export const optionsListDSLControlSchema = getOptionsListDSLControlSchema(
+  {},
+  'kbn-controls-schemas'
+);
+export const pinnedOptionsListDSLControlSchema = getOptionsListDSLControlSchema(
+  pinnedDataControlProps,
+  'kbn-controls-schemas-pinned'
 );
 
 const baseEsqlControlSchema = z

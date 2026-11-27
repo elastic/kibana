@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { ControlValuesSource, DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
 
 export const controlTitleSchema = z
@@ -15,6 +15,24 @@ export const controlTitleSchema = z
     title: z.string().optional().meta({ description: 'A human-readable title for the control.' }),
   })
   .strict();
+
+/**
+ * only pinned controls can be required
+ */
+export const pinnedDataControlProps = {
+  required: lazySchema(() =>
+    z
+      .boolean()
+      .default(DEFAULT_DATA_CONTROL_STATE.required)
+      .meta({
+        description:
+          'When `true`, dashboard panels do not render until a selection is made in the control. ' +
+          'If the dashboard does not auto-apply filters, the selection must also be applied before panels render. ' +
+          'This does not guarantee that panels never load without a selection. If the control has a blocking error ' +
+          '(for example, a missing data view or field), it can never produce a selection, so panels render without its filter.',
+      })
+  ),
+};
 
 const sharedDataControlProps = {
   ...controlTitleSchema.shape,

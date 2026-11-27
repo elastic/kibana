@@ -37,7 +37,7 @@ import { initializeRangeControlSelections } from './range_control_selections';
 import { RangeSliderStrings } from './range_slider_strings';
 import type { RangeSliderControlApi } from './types';
 import { editorComparators, initializeEditorStateManager } from './editor_state_manager';
-import { buildFilter } from './utils/filter_utils';
+import { buildFilter, hasNumericBound } from './utils/filter_utils';
 import { getPlacementHints, LAYOUT_CONSTRAINTS } from '../../constants';
 
 export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
@@ -47,6 +47,7 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
   return {
     type: RANGE_SLIDER_CONTROL,
     getPlacementHints,
+    isAwaitingFilters: (state) => Boolean(state.required && !hasNumericBound(state.value)),
     layoutConstraints: LAYOUT_CONSTRAINTS,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
@@ -64,7 +65,7 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
         typeDisplayName: RangeSliderStrings.control.getDisplayName(),
         state,
         parentApi,
-        willHaveInitialFilter: state.value !== undefined,
+        willHaveInitialFilter: hasNumericBound(state.value),
         getInitialFilter: (dataSource) => buildFilter(dataSource, uuid, state),
         editorStateManager,
       });
@@ -187,6 +188,8 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
           max: number | undefined;
         }) => {
           if (error) {
+            // a cancelled request is not a failure; keep the current state so required controls stay blocking
+            if (error.name === 'AbortError') return;
             dataControlManager.api.setBlockingError(error);
           }
           max$.next(max !== undefined ? Math.ceil(max) : undefined);
@@ -244,6 +247,7 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
             fieldName,
             viewMode,
             label,
+            required,
           ] = useBatchedPublishingSubjects(
             dataLoading$,
             dataControlManager.api.fieldFormatter,
@@ -254,7 +258,8 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
             selections.value$,
             dataControlManager.api.fieldName$,
             viewMode$,
-            dataControlManager.api.label$
+            dataControlManager.api.label$,
+            dataControlManager.api.required$
           );
 
           useEffect(() => {
@@ -286,6 +291,7 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
               compressed={isCompressed(api)}
               isPinned={isPinned}
               label={label}
+              required={required}
             />
           );
         },

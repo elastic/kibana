@@ -13,10 +13,11 @@ import type { RangeSliderControlState } from '@kbn/controls-schemas';
 import { DEFAULT_RANGE_SLIDER_STATE } from '@kbn/controls-constants';
 import { RangeSliderStrings } from '../../range_slider_strings';
 import type { CustomOptionsComponentProps } from '../../../types';
-import { CustomOptionsAdditionalSettings } from '../../../components';
+import { CustomOptionsAdditionalSettings, RequiredSelectionsSwitch } from '../../../components';
 
 export const RangeSliderEditorOptions = ({
   initialState,
+  isPinned,
   updateState,
   setControlEditorValid,
 }: CustomOptionsComponentProps<RangeSliderControlState>) => {
@@ -24,6 +25,20 @@ export const RangeSliderEditorOptions = ({
 
   return (
     <>
+      {isPinned && (
+        <EuiFormRow
+          label={RangeSliderStrings.editor.getSelectionsTitle()}
+          data-test-subj="rangeSliderControl__selectionOptionsRow"
+        >
+          <RequiredSelectionsSwitch
+            initialState={initialState}
+            updateState={updateState}
+            label={RangeSliderStrings.editor.getRequiredSelectionsLabel()}
+            tooltip={RangeSliderStrings.editor.getRequiredSelectionsTooltip()}
+            data-test-subj="rangeSliderControl__requiredSelectionsAdditionalSetting"
+          />
+        </EuiFormRow>
+      )}
       <EuiFormRow fullWidth label={RangeSliderStrings.editor.getStepTitle()}>
         <EuiFieldNumber
           compressed

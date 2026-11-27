@@ -57,7 +57,11 @@ import {
 import { fetchAndValidate$ } from './fetch_and_validate';
 import { OptionsListControlContext } from './options_list_context_provider';
 import { OptionsListStrings } from './options_list_strings';
-import { initializeSelectionsManager, selectionComparators } from './selections_manager';
+import {
+  hasInitialSelections,
+  initializeSelectionsManager,
+  selectionComparators,
+} from './selections_manager';
 import { initializeTemporayStateManager } from './temporay_state_manager';
 import type { DSLOptionsListComponentApi, OptionsListControlApi } from './types';
 import { buildFilter } from './utils/filter_utils';
@@ -77,6 +81,7 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
   return {
     type: OPTIONS_LIST_CONTROL,
     getPlacementHints,
+    isAwaitingFilters: (state) => Boolean(state.required && !hasInitialSelections(state)),
     layoutConstraints: LAYOUT_CONSTRAINTS,
     buildEmbeddable: async ({ initialState: state, finalizeApi, uuid, parentApi }) => {
       const editorStateManager = initializeEditorStateManager(state);
@@ -154,7 +159,7 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
         });
 
       /** Fetch the suggestions and perform validation */
-      const suggestionLoadError$ = new BehaviorSubject<Error | undefined>(undefined);
+      let suggestionLoadError: Error | undefined;
       const loadMoreSubject = new Subject<void>();
       const { suggestions$, cancelRequests } = fetchAndValidate$({
         api: {
@@ -174,11 +179,18 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
       const fetchSubscription = suggestions$.subscribe((result) => {
         // if there was an error during fetch, set suggestion load error and return early
         if (Object.hasOwn(result, 'error')) {
-          suggestionLoadError$.next((result as { error: Error }).error);
+          const { error } = result as { error: Error };
+          // a cancelled request is not a failure; keep the current state so required controls stay blocking
+          if (error?.name === 'AbortError') return;
+          suggestionLoadError = error;
+          dataControlManager.api.setBlockingError(suggestionLoadError);
           return;
-        } else if (suggestionLoadError$.getValue()) {
-          // otherwise,  if there was a previous error, clear it
-          suggestionLoadError$.next(undefined);
+        } else if (suggestionLoadError) {
+          // otherwise, if there was a previous suggestion error, clear it (without clobbering other control errors)
+          if (dataControlManager.api.blockingError$.value === suggestionLoadError) {
+            dataControlManager.api.setBlockingError(undefined);
+          }
+          suggestionLoadError = undefined;
         }
 
         // fetch was successful so set all attributes from result
@@ -293,24 +305,11 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
         ...panelIsRelatedByGlobalFilters(dataControlManager.api.useGlobalFilters$),
       });
 
-      const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
-      const errorsSubscription = combineLatest([
-        dataControlManager.api.blockingError$,
-        suggestionLoadError$,
-      ])
-        .pipe(
-          map(([controlError, suggestionError]) => {
-            return controlError ?? suggestionError;
-          })
-        )
-        .subscribe((error) => blockingError$.next(error));
-
       const api = finalizeApi({
         cancelRequests,
         ...stateApi,
         ...dataControlManager.api,
         ...relatedPanelsApi,
-        blockingError$,
         dataLoading$: temporaryStateManager.api.dataLoading$,
         getTypeDisplayName: OptionsListStrings.control.getDisplayName,
         clearSelections: () => clearSelections({ selectionsManager, temporaryStateManager }),
@@ -359,7 +358,6 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
               validSearchStringSubscription.unsubscribe();
               hasSelectionsSubscription.unsubscribe();
               selectionsSubscription.unsubscribe();
-              errorsSubscription.unsubscribe();
 
               dataControlManager.cleanup();
             };

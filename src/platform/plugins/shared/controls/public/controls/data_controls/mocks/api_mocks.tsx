@@ -59,6 +59,7 @@ export const getOptionsListContextMock = () => {
       loadMoreSubject: new Subject<void>(),
       viewMode$: new BehaviorSubject<ViewMode>('edit'),
       isPartial$: new BehaviorSubject<boolean>(false),
+      required$: new BehaviorSubject<boolean | undefined>(undefined),
     } as unknown as Required<DSLOptionsListComponentApi>,
     displaySettings: {} as OptionsListDisplaySettings & {
       isInteractive?: boolean;

@@ -18,8 +18,11 @@ import {
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
-import { optionsListDSLControlSchema, optionsListESQLControlSchema } from './options_list_schema';
-import { rangeSliderControlSchema } from './range_slider_schema';
+import {
+  optionsListESQLControlSchema,
+  pinnedOptionsListDSLControlSchema,
+} from './options_list_schema';
+import { pinnedRangeSliderControlSchema } from './range_slider_schema';
 import { timeSliderControlSchema } from './time_slider_schema';
 
 export const controlWidthSchema = z
@@ -64,7 +67,7 @@ export const getControlsSchema = () => {
     pinnedControlSchema
       .extend({
         type: z.literal(OPTIONS_LIST_CONTROL),
-        config: optionsListDSLControlSchema,
+        config: pinnedOptionsListDSLControlSchema,
       })
       .meta({
         id: 'kbn-controls-schemas-controls-group-schema-options-list-control',
@@ -75,7 +78,7 @@ export const getControlsSchema = () => {
     pinnedControlSchema
       .extend({
         type: z.literal(RANGE_SLIDER_CONTROL),
-        config: rangeSliderControlSchema,
+        config: pinnedRangeSliderControlSchema,
       })
       .meta({
         id: 'kbn-controls-schemas-controls-group-schema-range-slider-control',

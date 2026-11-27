@@ -12,7 +12,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { waitFor } from '@testing-library/react';
 
-import { dataViewsService } from '../../../services/kibana_services';
+import { coreServices, dataViewsService } from '../../../services/kibana_services';
 import { getMockedFinalizeApi } from '../../mocks/control_mocks';
 import { getOptionsListControlFactory } from './get_options_list_control_factory';
 import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
@@ -269,6 +269,75 @@ describe('Options List Control Api', () => {
           },
         ]);
       });
+    });
+  });
+
+  describe('required selections', () => {
+    let fetchSpy: jest.SpyInstance;
+
+    beforeAll(() => {
+      dataViewsService.get = jest.fn().mockImplementation(getDataView);
+    });
+
+    beforeEach(() => {
+      // a failed suggestions request is a blocking error, so make sure requests succeed
+      fetchSpy = jest.spyOn(coreServices.http, 'fetch').mockResolvedValue({
+        suggestions: [],
+        totalCardinality: 0,
+      });
+    });
+
+    afterEach(() => {
+      fetchSpy.mockRestore();
+    });
+
+    const buildWithState = (state: Partial<OptionsListDSLControlState>) =>
+      factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState: {
+          ...DEFAULT_DSL_OPTIONS_LIST_STATE,
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
+          ...state,
+        } as OptionsListDSLControlState,
+        finalizeApi,
+        uuid,
+        parentApi: {},
+      });
+
+    test.each([
+      ['required with no selection', { required: true }, true],
+      ['required with selected options', { required: true, selected_options: ['a'] }, false],
+      ['required with exists selected', { required: true, exists_selected: true }, false],
+      ['not required with no selection', { required: false }, false],
+    ])('isAwaitingFilters is correct for %s', (_, state, expected) => {
+      expect(factory.isAwaitingFilters?.(state as OptionsListDSLControlState)).toBe(expected);
+    });
+
+    test('awaitingRequiredFilters$ is true when required with no selection', async () => {
+      const { api } = await buildWithState({ required: true });
+      expect(api.awaitingRequiredFilters$.value).toBe(true);
+    });
+
+    test('awaitingRequiredFilters$ is false when required with an initial selection', async () => {
+      const { api } = await buildWithState({ required: true, selected_options: ['a'] });
+      await waitFor(() => expect(api.awaitingRequiredFilters$.value).toBe(false));
+    });
+
+    test('awaitingRequiredFilters$ follows selections being made and cleared', async () => {
+      const { api } = await buildWithState({ required: true });
+      api.setSelectedOptions(['woof']);
+      await waitFor(() => expect(api.awaitingRequiredFilters$.value).toBe(false));
+
+      api.setSelectedOptions([]);
+      await waitFor(() => expect(api.awaitingRequiredFilters$.value).toBe(true));
+    });
+
+    test('awaitingRequiredFilters$ is false when the suggestions request fails', async () => {
+      fetchSpy.mockRejectedValue(new Error('suggestions failed'));
+      const { api } = await buildWithState({ required: true });
+      await waitFor(() => expect(api.blockingError$?.value?.message).toBe('suggestions failed'));
+      expect(api.awaitingRequiredFilters$.value).toBe(false);
     });
   });
 

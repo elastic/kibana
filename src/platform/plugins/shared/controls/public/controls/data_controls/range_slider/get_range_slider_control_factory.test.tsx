@@ -174,6 +174,55 @@ describe('RangeSliderControlApi', () => {
     });
   });
 
+  describe('awaitingRequiredFilters$', () => {
+    const buildWithState = async (state: Partial<RangeSliderControlState>) =>
+      factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState: {
+          ...DEFAULT_RANGE_SLIDER_STATE,
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
+          ...state,
+        } as RangeSliderControlState,
+        finalizeApi,
+        uuid,
+        parentApi,
+      });
+
+    test('is published and true when required with no selection', async () => {
+      const { api } = await buildWithState({ required: true });
+      expect(api.awaitingRequiredFilters$.value).toBe(true);
+    });
+
+    test('is false when not required', async () => {
+      const { api } = await buildWithState({ required: false });
+      expect(api.awaitingRequiredFilters$.value).toBe(false);
+    });
+
+    test('becomes false once a value is selected', async () => {
+      const { api } = await buildWithState({ required: true, value: ['5', '10'] });
+      await waitFor(() => expect(api.awaitingRequiredFilters$.value).toBe(false));
+    });
+  });
+
+  describe('isAwaitingFilters', () => {
+    const isAwaiting = (state: Partial<RangeSliderControlState>) =>
+      factory.isAwaitingFilters?.({
+        ...DEFAULT_RANGE_SLIDER_STATE,
+        ...state,
+      } as RangeSliderControlState);
+
+    test.each<[string, Partial<RangeSliderControlState>, boolean]>([
+      ['required with no value', { required: true }, true],
+      ['required with an empty range', { required: true, value: ['', ''] }, true],
+      ['required with a numeric lower bound', { required: true, value: ['5', ''] }, false],
+      ['required with a numeric upper bound', { required: true, value: ['', '10'] }, false],
+      ['not required', { required: false, value: ['', ''] }, false],
+    ])('when %s', (_title, state, expected) => {
+      expect(isAwaiting(state)).toBe(expected);
+    });
+  });
+
   describe('selected range has no results', () => {
     test('should display invalid state', async () => {
       totalResults = 0; // simulate no results by returning hits total of zero

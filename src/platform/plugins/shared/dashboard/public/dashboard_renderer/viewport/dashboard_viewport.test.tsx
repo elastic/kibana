@@ -10,7 +10,15 @@
 import React from 'react';
 
 import { EuiThemeProvider } from '@elastic/eui';
-import { render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
+import { BehaviorSubject } from 'rxjs';
+
+import {
+  ControlValuesSource,
+  DEFAULT_DSL_OPTIONS_LIST_STATE,
+  DEFAULT_PINNED_CONTROL_STATE,
+} from '@kbn/controls-constants';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 
 import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 import { DashboardInternalContext } from '../../dashboard_api/use_dashboard_internal_api';
@@ -24,13 +32,43 @@ jest.mock('../grid', () => {
   };
 });
 
-const renderDashboardViewport = async (internalApiOverrides?: Partial<DashboardInternalApi>) => {
+jest.mock('./empty_screen/awaiting_filters_screen', () => {
+  return {
+    AwaitingFiltersScreen: () => <div data-test-subj="mockAwaitingFiltersScreen" />,
+  };
+});
+
+const pinnedControls = [
+  {
+    ...DEFAULT_PINNED_CONTROL_STATE,
+    id: 'control1',
+    type: 'options_list_control',
+    config: {
+      ...DEFAULT_DSL_OPTIONS_LIST_STATE,
+      values_source: ControlValuesSource.FIELD,
+      data_view_id: '',
+      field_name: '',
+    },
+  },
+] as DashboardState['pinned_panels'];
+
+const renderDashboardViewport = async ({
+  internalApiOverrides,
+  pinnedPanels,
+}: {
+  internalApiOverrides?: Partial<DashboardInternalApi>;
+  pinnedPanels?: DashboardState['pinned_panels'];
+} = {}) => {
   const panels = getMockPanels();
-  const { api, internalApi } = buildMockDashboardApi({
+  const { api: baseApi, internalApi } = buildMockDashboardApi({
     overrides: {
       panels,
+      ...(pinnedPanels ? { pinned_panels: pinnedPanels } : {}),
     },
   });
+  // drive the awaiting state directly, independent of any real control
+  const awaitingRequiredFilters$ = new BehaviorSubject<boolean>(false);
+  const api = { ...baseApi, awaitingRequiredFilters$ };
   const component = render(
     <EuiThemeProvider>
       <DashboardContext.Provider value={api}>
@@ -51,7 +89,7 @@ const renderDashboardViewport = async (internalApiOverrides?: Partial<DashboardI
     component.getByTestId('dshDashboardViewport');
   });
 
-  return { dashboardApi: api, internalApi, component };
+  return { dashboardApi: api, internalApi, component, awaitingRequiredFilters$ };
 };
 
 describe('DashboardViewport', () => {
@@ -77,5 +115,57 @@ describe('DashboardViewport', () => {
      */
     // const gridLayout = component.getByTestId('kbnGridLayout');
     // expect(gridLayout).toHaveStyleRule('display', 'block !important');
+  });
+
+  describe('required controls', () => {
+    test('shows the awaiting screen instead of the grid while awaiting required filters', async () => {
+      const { component, awaitingRequiredFilters$ } = await renderDashboardViewport();
+      await waitFor(() => component.getByTestId('mockDashboardGrid'));
+
+      act(() => awaitingRequiredFilters$.next(true));
+      await waitFor(() => {
+        component.getByTestId('mockAwaitingFiltersScreen');
+        expect(component.queryByTestId('mockDashboardGrid')).toBeNull();
+      });
+    });
+
+    test('advertises zero shared items while awaiting so screenshotting does not wait for panels', async () => {
+      const { component, awaitingRequiredFilters$ } = await renderDashboardViewport();
+      await waitFor(() => component.getByTestId('mockDashboardGrid'));
+      const viewport = component.getByTestId('dshDashboardViewport');
+      expect(Number(viewport.getAttribute('data-shared-items-count'))).toBeGreaterThan(0);
+
+      act(() => awaitingRequiredFilters$.next(true));
+      await waitFor(() => expect(viewport).toHaveAttribute('data-shared-items-count', '0'));
+
+      act(() => awaitingRequiredFilters$.next(false));
+      await waitFor(() =>
+        expect(Number(viewport.getAttribute('data-shared-items-count'))).toBeGreaterThan(0)
+      );
+    });
+
+    test('shows the grid again once the required filters are provided', async () => {
+      const { component, awaitingRequiredFilters$ } = await renderDashboardViewport();
+      act(() => awaitingRequiredFilters$.next(true));
+      await waitFor(() => component.getByTestId('mockAwaitingFiltersScreen'));
+
+      act(() => awaitingRequiredFilters$.next(false));
+      await waitFor(() => {
+        component.getByTestId('mockDashboardGrid');
+        expect(component.queryByTestId('mockAwaitingFiltersScreen')).toBeNull();
+      });
+    });
+
+    test('shows the awaiting screen from the api value even before any pinned control has mounted', async () => {
+      const { component, awaitingRequiredFilters$ } = await renderDashboardViewport({
+        pinnedPanels: pinnedControls,
+      });
+      await waitFor(() => component.getByTestId('mockDashboardGrid'));
+
+      // the api value is seeded before any control mounts, so the viewport follows it as-is
+      act(() => awaitingRequiredFilters$.next(true));
+      await waitFor(() => component.getByTestId('mockAwaitingFiltersScreen'));
+      expect(component.queryByTestId('mockDashboardGrid')).toBeNull();
+    });
   });
 });

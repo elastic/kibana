@@ -36,8 +36,10 @@ describe('Options list sorting button', () => {
   const mountComponent = ({
     initialState,
     field,
+    isPinned = true,
     componentApi = {},
   }: Pick<CustomOptionsComponentProps, 'initialState' | 'field'> & {
+    isPinned?: boolean;
     componentApi?: Partial<DSLOptionsListComponentApi>;
   }) => {
     const { componentApi: mockComponentApiBase, displaySettings } = getOptionsListContextMock();
@@ -51,6 +53,7 @@ describe('Options list sorting button', () => {
         <OptionsListEditorOptions
           initialState={initialState}
           field={field}
+          isPinned={isPinned}
           updateState={updateState}
           setControlEditorValid={jest.fn()}
         />
@@ -58,6 +61,45 @@ describe('Options list sorting button', () => {
     );
     return component;
   };
+
+  describe('required selections setting', () => {
+    test.each([
+      ['shown for', true],
+      ['hidden for', false],
+    ])('is %s controls (isPinned: %s)', (_, isPinned) => {
+      const component = mountComponent({
+        initialState: getMockedState(),
+        field: { type: 'string' } as DataViewField,
+        isPinned,
+      });
+      expect(Boolean(component.queryByText('Make selections required'))).toBe(isPinned);
+    });
+
+    test('persists the required state via updateState when toggled', async () => {
+      updateState.mockClear();
+      const component = mountComponent({
+        initialState: getMockedState(),
+        field: { type: 'string' } as DataViewField,
+      });
+      const toggle = component.getByTestId(
+        'optionsListControl__requiredSelectionsAdditionalSetting'
+      );
+      await userEvent.click(toggle);
+      expect(updateState).toHaveBeenCalledWith({ required: true });
+      await userEvent.click(toggle);
+      expect(updateState).toHaveBeenLastCalledWith({ required: false });
+    });
+
+    test('starts checked when the initial state is required', () => {
+      const component = mountComponent({
+        initialState: getMockedState({ required: true }),
+        field: { type: 'string' } as DataViewField,
+      });
+      expect(
+        component.getByTestId('optionsListControl__requiredSelectionsAdditionalSetting')
+      ).toBeChecked();
+    });
+  });
 
   describe('run past timeout', () => {
     test('can toggle the setting', async () => {
@@ -159,6 +201,7 @@ describe('Options list sorting button', () => {
             <OptionsListEditorOptions
               initialState={initialState}
               field={{ type: 'string' } as DataViewField}
+              isPinned
               updateState={updateState}
               setControlEditorValid={jest.fn()}
             />
@@ -176,6 +219,7 @@ describe('Options list sorting button', () => {
             <OptionsListEditorOptions
               initialState={initialState}
               field={{ type: 'ip' } as DataViewField} // initial search technique IS valid
+              isPinned
               updateState={jest.fn()}
               setControlEditorValid={jest.fn()}
             />
@@ -195,6 +239,7 @@ describe('Options list sorting button', () => {
             <OptionsListEditorOptions
               initialState={initialState}
               field={{ type: 'string' } as DataViewField}
+              isPinned
               updateState={updateState}
               setControlEditorValid={jest.fn()}
             />{' '}
@@ -220,6 +265,7 @@ describe('Options list sorting button', () => {
             <OptionsListEditorOptions
               initialState={initialState}
               field={{ type: 'number' } as DataViewField} // current selected search technique IS valid, initial state is not
+              isPinned
               updateState={jest.fn()}
               setControlEditorValid={jest.fn()}
             />
@@ -236,6 +282,7 @@ describe('Options list sorting button', () => {
             <OptionsListEditorOptions
               initialState={initialState}
               field={{ type: 'string' } as DataViewField}
+              isPinned
               updateState={updateState}
               setControlEditorValid={jest.fn()}
             />
@@ -253,6 +300,7 @@ describe('Options list sorting button', () => {
             <OptionsListEditorOptions
               initialState={initialState}
               field={{ type: 'number' } as DataViewField} // neither initial nor current search technique is valid
+              isPinned
               updateState={jest.fn()}
               setControlEditorValid={jest.fn()}
             />

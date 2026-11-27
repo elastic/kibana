@@ -9,6 +9,8 @@
 
 import React from 'react';
 
+import { BehaviorSubject } from 'rxjs';
+
 import type { OptionsListDisplaySettings } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { render } from '@testing-library/react';
@@ -56,6 +58,22 @@ describe('Options list control', () => {
     const control = mountComponent(contextMock);
     const existsOption = control.getByTestId('optionsList-control-testDoesNotExist');
     expect(existsOption).toHaveTextContent('DOES NOT Exist');
+  });
+
+  describe('required state', () => {
+    test.each([
+      { required: true, expected: 'true' },
+      { required: false, expected: null },
+      { required: undefined, expected: null },
+    ])('sets aria-required to $expected when required is $required', ({ required, expected }) => {
+      const contextMock = getOptionsListContextMock();
+      contextMock.componentApi.uuid = 'testRequired';
+      contextMock.componentApi.required$ = new BehaviorSubject<boolean | undefined>(required);
+      const control = mountComponent(contextMock);
+      expect(
+        control.getByTestId('optionsList-control-testRequired').getAttribute('aria-required')
+      ).toBe(expected);
+    });
   });
 
   describe('renders proper delimiter', () => {

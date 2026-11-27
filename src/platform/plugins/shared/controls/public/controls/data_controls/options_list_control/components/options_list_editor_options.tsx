@@ -9,7 +9,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { EuiFormRow, EuiRadioGroup, EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiRadioGroup, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import type { OptionsListDSLControlState, OptionsListSearchTechnique } from '@kbn/controls-schemas';
 
@@ -17,7 +17,7 @@ import { getCompatibleSearchTechniques } from '../../../../../common/options_lis
 import { ControlSettingTooltipLabel } from '../../../../control_group/components/control_setting_tooltip_label';
 import type { CustomOptionsComponentProps } from '../../types';
 import { OptionsListStrings } from '../options_list_strings';
-import { CustomOptionsAdditionalSettings } from '../../components';
+import { CustomOptionsAdditionalSettings, RequiredSelectionsSwitch } from '../../components';
 
 const selectionOptions = [
   {
@@ -68,6 +68,7 @@ const allSearchOptions = [
 export const OptionsListEditorOptions = ({
   initialState,
   field,
+  isPinned,
   updateState,
 }: CustomOptionsComponentProps<OptionsListDSLControlState>) => {
   const [singleSelect, setSingleSelect] = useState<boolean>(initialState.single_select ?? false);
@@ -123,17 +124,31 @@ export const OptionsListEditorOptions = ({
         label={OptionsListStrings.editor.getSelectionOptionsTitle()}
         data-test-subj="optionsListControl__selectionOptionsRadioGroup"
       >
-        <EuiRadioGroup
-          compressed
-          options={selectionOptions}
-          idSelected={singleSelect ? 'single' : 'multi'}
-          onChange={(id) => {
-            const newSingleSelect = id === 'single';
-            setSingleSelect(newSingleSelect);
-            updateState({ single_select: newSingleSelect });
-          }}
-          name="selectionType"
-        />
+        <>
+          <EuiRadioGroup
+            compressed
+            options={selectionOptions}
+            idSelected={singleSelect ? 'single' : 'multi'}
+            onChange={(id) => {
+              const newSingleSelect = id === 'single';
+              setSingleSelect(newSingleSelect);
+              updateState({ single_select: newSingleSelect });
+            }}
+            name="selectionType"
+          />
+          {isPinned && (
+            <>
+              <EuiSpacer size="s" />
+              <RequiredSelectionsSwitch
+                initialState={initialState}
+                updateState={updateState}
+                label={OptionsListStrings.editor.getRequiredSelectionsLabel(singleSelect)}
+                tooltip={OptionsListStrings.editor.getRequiredSelectionsTooltip(singleSelect)}
+                data-test-subj="optionsListControl__requiredSelectionsAdditionalSetting"
+              />
+            </>
+          )}
+        </>
       </EuiFormRow>
       {compatibleSearchTechniques.length > 1 && (
         <EuiFormRow

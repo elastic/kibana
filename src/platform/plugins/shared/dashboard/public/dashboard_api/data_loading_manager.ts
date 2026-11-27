@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Observable } from 'rxjs';
 import { BehaviorSubject, debounceTime, first, map } from 'rxjs';
 import type { PublishesDataLoading, PublishingSubject } from '@kbn/presentation-publishing';
 import {
@@ -18,7 +19,9 @@ import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 
 export function initializeDataLoadingManager(
-  children$: PublishingSubject<{ [key: string]: DefaultEmbeddableApi }>
+  children$: PublishingSubject<{ [key: string]: DefaultEmbeddableApi }>,
+  /** A child that unmounts mid-fetch never reports that it is done, so only rendered children count as loading */
+  renderedChildren$: Observable<{ [key: string]: DefaultEmbeddableApi }>
 ) {
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
 
@@ -26,7 +29,7 @@ export function initializeDataLoadingManager(
     PublishesDataLoading,
     boolean | undefined
   >(
-    { children$ },
+    { children$: renderedChildren$ },
     'dataLoading$',
     apiPublishesDataLoading,
     undefined,

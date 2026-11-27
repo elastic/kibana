@@ -11,6 +11,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import {
   rangeSliderControlSchema,
+  pinnedRangeSliderControlSchema,
   type LegacyStoredDataControlState,
   type LegacyStoredRangeSliderExplicitInput,
   type RangeSliderControlState,
@@ -29,6 +30,7 @@ export const registerRangeSliderControlTransforms = (embeddable: EmbeddableSetup
   embeddable.registerEmbeddableServerDefinition(RANGE_SLIDER_CONTROL, {
     title: 'Range slider control',
     getSchema: () => rangeSliderControlSchema,
+    getPinnedSchema: () => pinnedRangeSliderControlSchema,
     getTransforms: () => ({
       transformIn: (state: RangeSliderControlState) => {
         const { state: dataControlState, references } = transformDataControlIn(

@@ -17,6 +17,7 @@ describe('RangeSliderEditorOptions', () => {
     const component = render(
       <RangeSliderEditorOptions
         initialState={{} as RangeSliderControlState}
+        isPinned
         updateState={jest.fn()}
         setControlEditorValid={jest.fn()}
       />
@@ -31,6 +32,7 @@ describe('RangeSliderEditorOptions', () => {
     const component = render(
       <RangeSliderEditorOptions
         initialState={{} as RangeSliderControlState}
+        isPinned
         updateState={jest.fn()}
         setControlEditorValid={setControlEditorValid}
       />
@@ -56,5 +58,38 @@ describe('RangeSliderEditorOptions', () => {
       target: { valueAsNumber: 10 },
     });
     expect(setControlEditorValid).toHaveBeenCalledWith(true);
+  });
+
+  describe('required selections setting', () => {
+    test.each([
+      ['shown for', true],
+      ['hidden for', false],
+    ])('is %s controls (isPinned: %s)', (_, isPinned) => {
+      const component = render(
+        <RangeSliderEditorOptions
+          initialState={{} as RangeSliderControlState}
+          isPinned={isPinned}
+          updateState={jest.fn()}
+          setControlEditorValid={jest.fn()}
+        />
+      );
+      expect(Boolean(component.queryByText('Make selections required'))).toBe(isPinned);
+    });
+
+    test('persists the required state via updateState when toggled', () => {
+      const updateState = jest.fn();
+      const component = render(
+        <RangeSliderEditorOptions
+          initialState={{} as RangeSliderControlState}
+          isPinned={true}
+          updateState={updateState}
+          setControlEditorValid={jest.fn()}
+        />
+      );
+      fireEvent.click(component.getByLabelText(/Make selections required/));
+      expect(updateState).toHaveBeenCalledWith({ required: true });
+      fireEvent.click(component.getByLabelText(/Make selections required/));
+      expect(updateState).toHaveBeenLastCalledWith({ required: false });
+    });
   });
 });

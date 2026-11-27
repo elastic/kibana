@@ -11,7 +11,7 @@ import type { FC } from 'react';
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { debounce } from 'lodash';
 import type { EuiRangeTick, EuiDualRangeProps } from '@elastic/eui';
-import { EuiDualRange, EuiToken, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiDualRange, EuiScreenReaderOnly, EuiToken, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { RangeSliderControlState, RangeSliderValue } from '@kbn/controls-schemas';
 import { MIN_POPOVER_WIDTH } from '../../../constants';
 import { RangeSliderStrings } from '../range_slider_strings';
@@ -35,6 +35,7 @@ export interface Props {
   isInteractive?: boolean;
   isPinned: boolean;
   label?: string;
+  required?: boolean;
 }
 
 export const RangeSliderControl: FC<Props> = ({
@@ -54,6 +55,7 @@ export const RangeSliderControl: FC<Props> = ({
   isInteractive = true,
   isPinned,
   label,
+  required,
 }: Props) => {
   const rangeSliderRef = useRef<EuiDualRangeProps | null>(null);
 
@@ -142,6 +144,8 @@ export const RangeSliderControl: FC<Props> = ({
   const euiTheme = useEuiTheme();
   const styles = rangeSliderControlStyles(euiTheme);
 
+  const requiredDescriptionId = `controls-range-slider-${uuid}-required-description`;
+
   const getCommonInputProps = useCallback(
     ({
       inputValue,
@@ -170,10 +174,12 @@ export const RangeSliderControl: FC<Props> = ({
         'data-test-subj': `rangeSlider__${testSubj}`,
         'aria-label': ariaLabel,
         'aria-labelledby': `control-title-${id}`,
+        // only one selection is needed for `required`, so describe that instead of marking each input `aria-required`
+        'aria-describedby': required ? requiredDescriptionId : undefined,
         id: `controls-range-slider-${id}`,
       };
     },
-    [isInvalid, step, styles]
+    [isInvalid, step, styles, required, requiredDescriptionId]
   );
 
   const minInputProps = useMemo(() => {
@@ -204,6 +210,13 @@ export const RangeSliderControl: FC<Props> = ({
         data-test-subj={`range-slider-control-${uuid}`}
         data-control-id={uuid}
       >
+        {required && (
+          <EuiScreenReaderOnly>
+            <span id={requiredDescriptionId}>
+              {RangeSliderStrings.control.getRequiredDescription()}
+            </span>
+          </EuiScreenReaderOnly>
+        )}
         <EuiDualRange
           ref={rangeSliderRef}
           id={uuid}

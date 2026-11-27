@@ -27,6 +27,8 @@ import {
 } from './transform_pinned_panels_out';
 import {
   optionsListDSLControlSchema,
+  pinnedOptionsListDSLControlSchema,
+  pinnedRangeSliderControlSchema,
   rangeSliderControlSchema,
   timeSliderControlSchema,
 } from '@kbn/controls-schemas';
@@ -61,9 +63,14 @@ beforeAll(() => {
         };
       }
     }
+    function getPinnedSchema(type: string) {
+      if (type === OPTIONS_LIST_CONTROL) return pinnedOptionsListDSLControlSchema;
+      if (type === RANGE_SLIDER_CONTROL) return pinnedRangeSliderControlSchema;
+    }
     return {
       transformOut: jest.fn().mockImplementation((val) => val),
       schema: getSchema(embeddableType),
+      pinnedSchema: getPinnedSchema(embeddableType),
     };
   });
 });
@@ -131,6 +138,22 @@ describe('pinned panels', () => {
   it('should transform pinned panels object to array with all transformations applied', () => {
     const result = transformPinnedPanelsOut(undefined, { panels: mockPinnedPanels }, []);
     expect(result.panels).toEqual(transformedPinnedPanels);
+  });
+
+  it('keeps `required` on pinned controls', () => {
+    const { panels } = transformPinnedPanelsOut(
+      undefined,
+      {
+        panels: {
+          control1: {
+            ...mockPinnedPanels.control1,
+            config: { ...mockPinnedPanels.control1.config, required: true },
+          },
+        },
+      },
+      []
+    );
+    expect(panels[0].config).toHaveProperty('required', true);
   });
 
   it('should transform pinned panels object to array', () => {

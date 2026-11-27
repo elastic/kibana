@@ -57,6 +57,8 @@ export const defaultDataControlComparators: StateComparators<DataControlState> =
   ignore_validations: (a: boolean | undefined, b: boolean | undefined) =>
     (a ?? DEFAULT_DATA_CONTROL_STATE.ignore_validations) ===
     (b ?? DEFAULT_DATA_CONTROL_STATE.ignore_validations),
+  required: (a: boolean | undefined, b: boolean | undefined) =>
+    (a ?? DEFAULT_DATA_CONTROL_STATE.required) === (b ?? DEFAULT_DATA_CONTROL_STATE.required),
 };
 
 export const defaultDataControlState: WithAllKeys<Omit<DataControlState, 'title'>> = {
@@ -100,7 +102,6 @@ export const initializeDataControlManager = async <EditorState extends object = 
     defaultDataControlState,
     defaultDataControlComparators
   );
-
   const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
   function setBlockingError(error: Error | undefined) {
     blockingError$.next(error);
@@ -345,6 +346,22 @@ export const initializeDataControlManager = async <EditorState extends object = 
     initialFilter ? [initialFilter] : undefined
   );
 
+  const awaitingRequiredFilters$ = new BehaviorSubject<boolean>(false);
+  const awaitingRequiredFiltersSubscription = combineLatest([
+    dataControlStateManager.api.required$,
+    appliedFilters$,
+    blockingError$,
+  ])
+    .pipe(
+      map(([required, appliedFilters, blockingError]) => {
+        // A control with a blocking error can never produce a filter, so don't wait on it forever
+        if (blockingError) return false;
+        return Boolean(required && (appliedFilters ?? []).length === 0);
+      }),
+      distinctUntilChanged()
+    )
+    .subscribe((awaiting) => awaitingRequiredFilters$.next(awaiting));
+
   return {
     api: {
       ...dataControlStateManager.api,
@@ -359,6 +376,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
       fieldFormatter,
       onEdit,
       appliedFilters$,
+      awaitingRequiredFilters$,
       filtersLoading$,
       getTypeDisplayName: () => typeDisplayName,
       isEditingEnabled: () => true,
@@ -373,6 +391,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
       esqlQueryDataSourceSubscription.unsubscribe();
       valuesSourceFetchPlanSubscription.unsubscribe();
       labelManager.cleanup();
+      awaitingRequiredFiltersSubscription.unsubscribe();
     },
     internalApi: {
       onSelectionChange: () => {

@@ -54,11 +54,13 @@ export function getEmbeddableServerRegistry(
       return schemas;
     },
     getEmbeddableTransforms: (type: string) => {
-      const { getTransforms, throwOnUnmappedPanel } = registry[type] ?? {};
+      const { getTransforms, getPinnedSchema, throwOnUnmappedPanel } = registry[type] ?? {};
       const schema = getCachedSchema(type);
+      const pinnedSchema = getPinnedSchema?.(drilldownRegistry.getSchema);
       return {
         ...getTransforms?.(drilldownRegistry.transforms),
         ...(schema ? { schema } : {}),
+        ...(pinnedSchema ? { pinnedSchema } : {}),
         ...(typeof throwOnUnmappedPanel === 'boolean' ? { throwOnUnmappedPanel } : {}),
       };
     },

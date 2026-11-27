@@ -19,11 +19,13 @@ import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_inter
 import { DashboardGrid } from '../grid';
 import { SelectedPanelsToolbar } from '../selected_panels_toolbar';
 import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
+import { AwaitingFiltersScreen } from './empty_screen/awaiting_filters_screen';
 
 export const DashboardViewport = () => {
   const dashboardApi = useDashboardApi();
   const dashboardInternalApi = useDashboardInternalApi();
   const [
+    awaitingRequired,
     dashboardTitle,
     description,
     expandedPanelId,
@@ -32,6 +34,7 @@ export const DashboardViewport = () => {
     useMargins,
     fullScreenMode,
   ] = useBatchedPublishingSubjects(
+    dashboardApi.awaitingRequiredFilters$,
     dashboardApi.title$,
     dashboardApi.description$,
     dashboardApi.expandedPanelId$,
@@ -58,6 +61,7 @@ export const DashboardViewport = () => {
 
   const classes = classNames('dshDashboardViewport', {
     'dshDashboardViewport--empty': panelCount === 0 && sectionCount === 0,
+    'dshDashboardViewport--awaitingFilters': awaitingRequired,
     'dshDashboardViewport--print': viewMode === 'print',
     'dshDashboardViewport--panelExpanded': Boolean(expandedPanelId),
   });
@@ -83,11 +87,17 @@ export const DashboardViewport = () => {
         data-shared-items-container
         data-title={dashboardTitle}
         data-description={description}
-        data-shared-items-count={visiblePanelCount}
+        data-shared-items-count={awaitingRequired ? 0 : visiblePanelCount}
         data-view-mode={viewMode}
         data-test-subj={'dshDashboardViewport'}
       >
-        {panelCount === 0 && sectionCount === 0 ? <DashboardEmptyScreen /> : <DashboardGrid />}
+        {awaitingRequired ? (
+          <AwaitingFiltersScreen />
+        ) : panelCount === 0 && sectionCount === 0 ? (
+          <DashboardEmptyScreen />
+        ) : (
+          <DashboardGrid />
+        )}
       </div>
       <SelectedPanelsToolbar />
     </div>
@@ -111,7 +121,9 @@ const dashboardViewportStyles = {
   }),
   viewport: {
     width: '100%',
-    '&.dshDashboardViewport--empty': {
+    // only the empty and awaiting-filters screens fill the viewport; a grid must size to its panels, otherwise
+    // reports capture a stretched container
+    '&.dshDashboardViewport--empty, &.dshDashboardViewport--awaitingFilters': {
       height: '100%',
     },
     '&.dshDashboardViewport--panelExpanded': {

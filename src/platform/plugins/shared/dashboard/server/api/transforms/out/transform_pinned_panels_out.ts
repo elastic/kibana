@@ -130,7 +130,8 @@ function transformPanels(
   const warnings: Warnings = [];
 
   panels.forEach((panel) => {
-    const { transformOut, schema } = embeddableService.getTransforms(panel.type) ?? {};
+    const { transformOut, schema, pinnedSchema } =
+      embeddableService.getTransforms(panel.type) ?? {};
     // eslint-disable-next-line prefer-const
     let { config, type, ...rest } = panel;
     try {
@@ -142,8 +143,9 @@ function transformPanels(
           panel.id
         ) as DashboardPinnedPanel['config'];
       }
-      if (schema) {
-        config = schema.parse(config) as DashboardPinnedPanel['config'];
+      const panelSchema = pinnedSchema ?? schema;
+      if (panelSchema) {
+        config = panelSchema.parse(config) as DashboardPinnedPanel['config'];
       }
       transformedPanels.push({
         ...pinnedControlSchema.parse(rest),

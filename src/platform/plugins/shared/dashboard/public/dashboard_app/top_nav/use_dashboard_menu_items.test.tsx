@@ -63,6 +63,24 @@ describe('useDashboardMenuItems', () => {
 
       expect(returnFocus).toHaveBeenCalledTimes(1);
     });
+
+    test('is disabled while the grid is hidden awaiting required filters', () => {
+      const { result } = renderHook(
+        () =>
+          useDashboardMenuItems({
+            redirectTo: jest.fn(),
+          }),
+        {
+          wrapper: dashboardContextWrapper({
+            apiOverrides: { awaitingRequiredFilters$: new BehaviorSubject<boolean>(true) },
+          }),
+        }
+      );
+
+      expect(
+        result.current.editModeTopNavConfig.items?.find(({ id }) => id === 'add')?.disableButton
+      ).toBe(true);
+    });
   });
 
   describe('Export', () => {

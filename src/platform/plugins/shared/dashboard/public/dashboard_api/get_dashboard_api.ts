@@ -67,6 +67,7 @@ export function getDashboardApi({
   isAccessControlEnabled,
   changedBy,
   viewMode,
+  initiallyAwaitingFilters = false,
 }: {
   creationOptions?: DashboardCreationOptions;
   panelFlyoutType?: EuiFlyoutProps['type'];
@@ -78,6 +79,8 @@ export function getDashboardApi({
   isAccessControlEnabled?: boolean;
   changedBy?: readonly DashboardChangeSource[];
   viewMode?: ViewMode;
+  /** Whether required controls are expected to await filters, resolved before any control is mounted */
+  initiallyAwaitingFilters?: boolean;
 }) {
   const fullScreenMode$ = new BehaviorSubject(creationOptions?.fullScreenMode ?? false);
   const isManaged = readResult?.meta.managed ?? false;
@@ -113,15 +116,22 @@ export function getDashboardApi({
     viewModeManager.api.viewMode$
   );
 
+  // written by the filters manager, read by the layout manager to know which children are going to be rendered
+  const awaitingRequiredFilters$ = new BehaviorSubject<boolean>(initiallyAwaitingFilters);
+
   const layoutManager = initializeLayoutManager(
     viewModeManager,
     initialState.panels,
     initialState.pinned_panels,
-    trackPanel.api
+    trackPanel.api,
+    awaitingRequiredFilters$
   );
   childrenSubject$.next(layoutManager.api.children$);
 
-  const dataLoadingManager = initializeDataLoadingManager(layoutManager.api.children$);
+  const dataLoadingManager = initializeDataLoadingManager(
+    layoutManager.api.children$,
+    layoutManager.internalApi.renderedChildren$
+  );
   const dataViewsManager = initializeDataViewsManager(layoutManager.api.children$);
   const settingsManager = initializeSettingsManager(initialState);
 
@@ -150,7 +160,8 @@ export function getDashboardApi({
     unifiedSearchManager,
     layoutManager,
     settingsManager,
-    forcePublishOnReset$
+    forcePublishOnReset$,
+    awaitingRequiredFilters$
   );
   const projectRoutingManager = initializeProjectRoutingManager(
     initialState,
@@ -262,7 +273,9 @@ export function getDashboardApi({
     layoutManager.api.addIncomingEmbeddables(incomingEmbeddables);
   }
 
-  const pauseFetchManager = initializePauseFetchManager(filtersManager);
+  const pauseFetchManager = initializePauseFetchManager(
+    filtersManager.internalApi.initialPublishPending$
+  );
 
   const canCancel$ = new BehaviorSubject<boolean>(false);
   const canCancelSubscription = combineLatest([

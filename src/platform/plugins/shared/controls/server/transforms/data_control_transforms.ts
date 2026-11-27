@@ -71,7 +71,7 @@ export function transformDataControlOut<
   containerReferences: Reference[] = []
 ): StrictDataControlState {
   if (state.values_source === ControlValuesSource.ESQL) {
-    const { title, esql_query, use_global_filters, ignore_validations } = state;
+    const { title, esql_query, use_global_filters, ignore_validations, required } = state;
     const convertedState = {
       ...DEFAULT_DATA_CONTROL_STATE,
       values_source: ControlValuesSource.ESQL,
@@ -79,6 +79,7 @@ export function transformDataControlOut<
       esql_query: esql_query ?? '',
       ...(typeof use_global_filters === 'boolean' && { use_global_filters }),
       ...(typeof ignore_validations === 'boolean' && { ignore_validations }),
+      ...(typeof required === 'boolean' && { required }),
     } as EsqlDataControlState<StoredStateType>;
 
     ensureRequiredFields(convertedState);
@@ -109,6 +110,7 @@ export function transformDataControlOut<
       state as LegacyStoredDataControlState
     );
 
+  const { required } = state;
   const dataViewId = dataViewRef?.id ?? data_view_id ?? '';
   const convertedState = {
     ...DEFAULT_DATA_CONTROL_STATE,
@@ -118,6 +120,7 @@ export function transformDataControlOut<
     field_name: field_name ?? '',
     ...(typeof use_global_filters === 'boolean' && { use_global_filters }),
     ...(typeof ignore_validations === 'boolean' && { ignore_validations }),
+    ...(typeof required === 'boolean' && { required }),
   } as FieldDataControlState;
 
   ensureRequiredFields(convertedState);

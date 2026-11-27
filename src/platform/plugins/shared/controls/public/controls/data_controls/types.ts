@@ -10,7 +10,10 @@
 import type { DataControlState } from '@kbn/controls-schemas';
 import type { FilterableField } from '@kbn/data-source';
 import type { TextContextTypeConvert } from '@kbn/field-formats-plugin/common';
-import type { HasPanelCapabilities } from '@kbn/presentation-publishing';
+import type {
+  HasPanelCapabilities,
+  PublishesAwaitingRequiredFilters,
+} from '@kbn/presentation-publishing';
 import type {
   AppliesFilters,
   HasEditCapabilities,
@@ -53,6 +56,7 @@ export type DataControlApi = StateManager<Omit<DataControlState, 'title'>>['api'
   PublishesValuesSourceFetchPlan &
   PublishesDataLoading &
   AppliesFilters &
+  PublishesAwaitingRequiredFilters &
   HasPanelCapabilities &
   ReturnType<typeof initializeLabelManager>['api'] & {
     setDataLoading: (loading: boolean) => void;
@@ -62,6 +66,8 @@ export type DataControlApi = StateManager<Omit<DataControlState, 'title'>>['api'
 export interface CustomOptionsComponentProps<State extends DataControlState = DataControlState> {
   initialState: Partial<State>;
   field?: FilterableField;
+  /** Whether the control is (or, when being created, will be) pinned. Some settings only apply to pinned controls. */
+  isPinned: boolean;
   updateState: (newState: Partial<State>) => void;
   setControlEditorValid: (valid: boolean) => void;
 }
