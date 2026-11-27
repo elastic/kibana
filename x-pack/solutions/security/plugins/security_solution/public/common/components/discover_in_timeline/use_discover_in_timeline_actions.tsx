@@ -162,11 +162,16 @@ export const useDiscoverInTimelineActions = (
   /*
    * resets discover state to a default value
    *
+   * `isCreatingTimeline` marks a reset that runs before a new timeline replaces the one on
+   * screen, rather than after an opened timeline took over the active slot.
    * */
   const resetDiscoverAppState = useCallback(
     async (
       newSavedSearchId?: string | null,
-      { isRestoringFromUrl = false }: { isRestoringFromUrl?: boolean } = {}
+      {
+        isRestoringFromUrl = false,
+        isCreatingTimeline = false,
+      }: { isRestoringFromUrl?: boolean; isCreatingTimeline?: boolean } = {}
     ) => {
       const restoreRequest = ++latestRestoreRequest.current;
       const isSuperseded = () => latestRestoreRequest.current !== restoreRequest;
@@ -177,12 +182,15 @@ export const useDiscoverInTimelineActions = (
       // state has reached a container and the tab otherwise applies it on its next mount.
       timelineRestorePending.current = isRestoringFromUrl ? 'fromUrl' : 'opened';
 
-      // An opened timeline takes over the active slot, and the timeline URL param, in the history
-      // entry that is current now. The Discover state in that entry is the previous timeline's,
-      // and a reload or a Back to the entry would restore it as this timeline's own. Dropping it
-      // here, before any await, keeps every entry's Discover state with the timeline it names.
-      // Discover's URL sync ignores the removal and only writes on its own state changes.
-      if (!isRestoringFromUrl) dropDiscoverUrlState();
+      // A timeline taking over the active slot also takes over the history entry that is current
+      // when it does. The Discover state in that entry is the previous timeline's, and a reload
+      // or a Back to it would restore that state as the new timeline's own, so it is dropped
+      // before any await. An opened timeline already holds the slot. A created one takes it only
+      // once this reset resolves, and a mounted tab pushes the reset state to the URL before
+      // then, so the current entry stays the previous timeline's and keeps its state. Discover's
+      // URL sync ignores the removal and only writes on its own state changes.
+      const keepsPreviousTimelineEntry = isCreatingTimeline && discoverStateContainer.current;
+      if (!isRestoringFromUrl && !keepsPreviousTimelineEntry) dropDiscoverUrlState();
 
       if (newSavedSearchId) {
         // Applying the default state below would empty the redux copy of the Discover state and

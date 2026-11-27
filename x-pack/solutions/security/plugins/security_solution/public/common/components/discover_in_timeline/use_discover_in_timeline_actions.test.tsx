@@ -382,6 +382,28 @@ describe('useDiscoverInTimelineActions', () => {
         timeline: '(id:destination)',
       });
     });
+    it('should keep the Discover state of the timeline on screen in the URL when a new one is created from its ES|QL tab', async () => {
+      // The new timeline only takes over the URL after the reset, and the mounted tab pushes the
+      // reset state to a new history entry first. Back returns to the outgoing timeline's entry,
+      // which has to keep its query and time range.
+      const history = createMemoryHistory({
+        initialEntries: [
+          '/timelines?_a=(query:(esql:outgoing))&_g=(time:(from:now-1y,to:now))&timeline=(id:outgoing)',
+        ],
+      });
+      const { result } = renderHook(
+        () => useDiscoverInTimelineActions(mockDiscoverStateContainerRef, history),
+        { wrapper: getTestProviderWithCustomState() }
+      );
+
+      await result.current.resetDiscoverAppState(undefined, { isCreatingTimeline: true });
+
+      expect(qs.parse(history.location.search)).toEqual({
+        _a: '(query:(esql:outgoing))',
+        _g: '(time:(from:now-1y,to:now))',
+        timeline: '(id:outgoing)',
+      });
+    });
     describe('while the ES|QL tab is not mounted', () => {
       const urlWithDiscoverState =
         '/timelines?_a=(query:(esql:previous))&_g=(time:(from:now-1y,to:now))&timeline=(id:next)';
@@ -396,6 +418,18 @@ describe('useDiscoverInTimelineActions', () => {
         );
 
         await result.current.resetDiscoverAppState(savedSearchMock.id);
+
+        expect(qs.parse(history.location.search)).toEqual({ timeline: '(id:next)' });
+      });
+      it('should drop the Discover state of the previous timeline from the URL when a new one is created', async () => {
+        // No tab writes the reset state, so the new timeline takes over the current entry.
+        const history = createMemoryHistory({ initialEntries: [urlWithDiscoverState] });
+        const { result } = renderHook(
+          () => useDiscoverInTimelineActions({ current: undefined }, history),
+          { wrapper: getTestProviderWithCustomState() }
+        );
+
+        await result.current.resetDiscoverAppState(undefined, { isCreatingTimeline: true });
 
         expect(qs.parse(history.location.search)).toEqual({ timeline: '(id:next)' });
       });
