@@ -29,6 +29,7 @@ const createLoggerMock = (): jest.Mocked<Logger> => {
   const logger = {
     debug: jest.fn(),
     info: jest.fn(),
+    warn: jest.fn(),
     error: jest.fn(),
     get: jest.fn(),
   } as unknown as jest.Mocked<Logger>;
@@ -376,6 +377,36 @@ describe('StorageIndexAdapter', () => {
 
     it('deletes the documents', async () => {
       await verifyClean();
+    });
+  });
+
+  describe('when writing to a backing index that exists without the alias', () => {
+    beforeAll(async () => {
+      jest.spyOn(getSchemaVersionModule, 'getSchemaVersion').mockReturnValue('current_version');
+      await esClient.indices.create({
+        index: `${TEST_INDEX_NAME}-000001`,
+        settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
+      });
+
+      await client.bulk({
+        operations: [{ index: { _id: 'foo', document: { foo: 'bar' } } }],
+        throwOnFail: true,
+      });
+    });
+
+    afterAll(async () => {
+      await client?.clean();
+    });
+
+    it('adds the write alias and the mappings to the existing index', async () => {
+      await verifyIndex();
+      expect(loggerMock.warn).toHaveBeenCalledWith(
+        `Index ${TEST_INDEX_NAME}-000001 exists without the write alias ${TEST_INDEX_NAME}; adding it`
+      );
+    });
+
+    it('returns the document', async () => {
+      expect(await client.get({ id: 'foo' })).toMatchObject({ _source: { foo: 'bar' } });
     });
   });
 
