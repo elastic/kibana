@@ -14,7 +14,6 @@ const NONE = {
   runInvestigations: false,
   runConnectorProbes: false,
   runWikiOptimize: false,
-  runWriteup: false,
   runReinforcement: false,
   storedDatasetIds: [],
 };
@@ -63,11 +62,10 @@ describe('resolveEvalSelection', () => {
     });
   });
 
-  it('runs only the writeup eval for writeup, without credentials', () => {
-    expect(resolveEvalSelection({ NIGHTSHIFT_DATASETS: 'writeup' })).toEqual({
-      ...NONE,
-      runWriteup: true,
-    });
+  it('leaves the writeup eval to its own suite', () => {
+    expect(() => resolveEvalSelection({ NIGHTSHIFT_DATASETS: 'writeup' })).toThrow(
+      'Unknown dataset(s) in NIGHTSHIFT_DATASETS: writeup'
+    );
   });
 
   it('combines evals in one list', () => {
@@ -84,7 +82,6 @@ describe('resolveEvalSelection', () => {
       expect(resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: value })).toMatchObject({
         runConnectorProbes: false,
         runWikiOptimize: false,
-        runWriteup: false,
         storedDatasetIds: [],
       });
     }
@@ -253,15 +250,16 @@ describe('reinforcement selection', () => {
 
 describe('ORCA selection', () => {
   const orcaEnv = { ...WITH_SANDBOX, NIGHTSHIFT_CONNECTOR_SET: 'orcabench' };
-  it.each([{ EVAL_SHARD_ID: 'orcabench' }, { NIGHTSHIFT_DATASETS: 'orcabench' }])(
-    'isolates the ORCA job from existing coverage: %j',
-    (selection) => {
-      expect(resolveEvalSelection({ ...orcaEnv, ...selection })).toEqual({
-        ...NONE,
-        runOrca: true,
-      });
-    }
-  );
+  it.each([
+    { EVAL_SHARD_ID: 'orcabench' },
+    { EVAL_SHARD_ID: 'orcabench-2-of-5' },
+    { NIGHTSHIFT_DATASETS: 'orcabench' },
+  ])('isolates the ORCA job from existing coverage: %j', (selection) => {
+    expect(resolveEvalSelection({ ...orcaEnv, ...selection })).toEqual({
+      ...NONE,
+      runOrca: true,
+    });
+  });
   it.each([{}, { NIGHTSHIFT_CONNECTOR_SET: 'default' }])(
     'rejects an ORCA run on a reused server with another connector set: %j',
     (connectorSet) => {

@@ -156,6 +156,7 @@ interface DiscoveryCompletedProps extends DiscoveryRunIdentityProps {
   held_back_count?: number;
   needs_agent_count?: number;
   written_rule_count?: number;
+  unknown_reported_rule_count?: number;
   classifier_failed?: boolean;
   error_message?: string;
 }

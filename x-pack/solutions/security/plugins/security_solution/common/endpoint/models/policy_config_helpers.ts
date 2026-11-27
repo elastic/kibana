@@ -7,7 +7,6 @@
 
 import { get, isObject } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
-import type { ExperimentalFeatures } from '../../experimental_features';
 import { CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS } from '../service/policy/custom_yara_signatures';
 import {
   DefaultPolicyNotificationMessage,
@@ -451,18 +450,8 @@ export const removeLinuxDnsEvents = (policy: PolicyConfig): PolicyConfig => {
 };
 
 /**
- * Linux ransomware protection is configurable only from the per-OS policy form, so it is
- * enabled only when both feature flags are on.
- */
-export const isLinuxRansomwareProtectionEnabled = ({
-  linuxRansomwareProtection,
-  perOsPolicySettings,
-}: Pick<ExperimentalFeatures, 'linuxRansomwareProtection' | 'perOsPolicySettings'>): boolean =>
-  linuxRansomwareProtection && perOsPolicySettings;
-
-/**
  * Returns a copy of the passed `PolicyConfig` with Linux ransomware protection and its user
- * notification removed. Used when `isLinuxRansomwareProtectionEnabled` is false.
+ * notification removed. Used when the `linuxRansomwareProtection` experimental feature is off.
  */
 export const removeLinuxRansomware = (policy: PolicyConfig): PolicyConfig => {
   // The policy may come from an unvalidated API payload, so tolerate a malformed `linux` branch.
@@ -486,19 +475,9 @@ export const removeLinuxRansomware = (policy: PolicyConfig): PolicyConfig => {
 };
 
 /**
- * AI Data Collection is configurable only from the per-OS policy form, so it is enabled only when
- * both feature flags are on.
- */
-export const isAiDataCollectionEnabled = ({
-  endpointAiDataCollection,
-  perOsPolicySettings,
-}: Pick<ExperimentalFeatures, 'endpointAiDataCollection' | 'perOsPolicySettings'>): boolean =>
-  endpointAiDataCollection && perOsPolicySettings;
-
-/**
  * Returns a copy of the passed `PolicyConfig` with the `ai_data_collection` block removed from
  * every OS, so the policy leaves AI event enrichment unset (treated as disabled by Endpoint). Used
- * when `isAiDataCollectionEnabled` is false.
+ * when the `endpointAiDataCollection` experimental feature is off.
  */
 export const removeAiDataCollection = (policy: PolicyConfig): PolicyConfig => {
   const { ai_data_collection: windowsAiDataCollection, ...windows } = policy.windows;

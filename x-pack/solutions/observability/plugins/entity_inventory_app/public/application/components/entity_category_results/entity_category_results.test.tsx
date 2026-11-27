@@ -9,8 +9,6 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import type { EntityInventoryApiClient } from '../../../inventory_api/client';
 import { createFixtureEntityInventoryApiClient } from '../../../__fixtures__/inventory_client';
@@ -23,12 +21,9 @@ import {
   buildScenarioListResponse,
   createScenarioEntityInventoryApiClient,
 } from '../../../__fixtures__/inventory_scenarios';
-import { createAppServicesMock } from '../../../mocks';
+import { createAppServicesMock, MockEntityInventoryProvider } from '../../../mocks';
 import { EntityTablePreferencesProvider } from '../../context/entity_table_preferences_context';
-import {
-  EntityInventorySearchProvider,
-  useEntityInventorySearch,
-} from '../../context/search_context';
+import { useEntityInventorySearch } from '../../context/search_context';
 import { EntityTypesProvider } from '../../context/entity_types_context';
 import { EntityCategoryResults } from './entity_category_results';
 import {
@@ -77,18 +72,18 @@ const renderResults = (
   const results = (prefix: string | null) => (
     <I18nProvider>
       <EuiProvider>
-        <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
-          <EntityTablePreferencesProvider>
-            <Router history={history}>
-              <EntityInventorySearchProvider entityCategory="hosts">
-                <EntityTypesProvider>
-                  <NewRangeButton />
-                  <EntityCategoryResults entityTypeIdPrefix={prefix ?? undefined} />
-                </EntityTypesProvider>
-              </EntityInventorySearchProvider>
-            </Router>
-          </EntityTablePreferencesProvider>
-        </KibanaContextProvider>
+        <EntityTablePreferencesProvider>
+          <MockEntityInventoryProvider
+            entityCategory="hosts"
+            services={createAppServicesMock({ inventoryApi })}
+            history={history}
+          >
+            <EntityTypesProvider>
+              <NewRangeButton />
+              <EntityCategoryResults entityTypeIdPrefix={prefix ?? undefined} />
+            </EntityTypesProvider>
+          </MockEntityInventoryProvider>
+        </EntityTablePreferencesProvider>
       </EuiProvider>
     </I18nProvider>
   );

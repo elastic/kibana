@@ -28,6 +28,9 @@ import {
 import { BULK_CREATE_MAX_ARTIFACTS_BYTES } from './services/artifacts/artifacts';
 
 const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled_packages');
+/** The hosts a provisioning callback verifier stand-in may be on. */
+const LOOPBACK_HOSTNAMES = ['localhost', '127.0.0.1', '[::1]'];
+
 const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasticsearch');
 
 const REGISTRY_SPEC_MIN_VERSION = '2.3';
@@ -238,6 +241,7 @@ export const config: PluginConfigDescriptor = {
           api: schema.maybe(
             schema.object({
               url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+              rumUrl: schema.maybe(schema.uri({ scheme: ['https'] })),
               tls: schema.maybe(
                 schema.object({
                   certificate: schema.maybe(schema.string()),
@@ -335,6 +339,22 @@ export const config: PluginConfigDescriptor = {
         disableBundledPackagesCache: schema.boolean({
           defaultValue: false,
         }),
+        // Where a provisioning callback's proof of origin is checked instead of the cloud's own
+        // endpoint (for AWS, the regional STS endpoint), per cloud provider. For tests only:
+        // whoever answers here decides which account a report is accepted from, so only a
+        // stand-in on this host is accepted.
+        provisioningCallbackVerifierUrls: schema.maybe(
+          schema.recordOf(
+            schema.oneOf([schema.literal('aws'), schema.literal('azure'), schema.literal('gcp')]),
+            schema.uri({
+              scheme: ['http', 'https'],
+              validate: (value) =>
+                LOOPBACK_HOSTNAMES.includes(new URL(value).hostname)
+                  ? undefined
+                  : 'must be on the loopback interface: whoever answers decides which account a report is accepted from',
+            })
+          )
+        ),
       }),
       packageVerification: schema.object({
         gpgKeyPath: schema.string({ defaultValue: DEFAULT_GPG_KEY_PATH }),

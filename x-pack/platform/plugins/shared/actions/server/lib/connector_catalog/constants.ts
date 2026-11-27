@@ -14,3 +14,9 @@ export const getCatalogDefinitionDocId = ({ id, version }: CatalogDefinitionRef)
   `definition:${id}@${version}`;
 
 export const getCatalogAssetDocId = (sha256: string): string => `asset:${sha256}`;
+
+// Bounds the Elasticsearch reads of the first load. Building and registering the types runs after the read and is not cut short.
+export const CATALOG_START_LOAD_TIMEOUT_MS = 30_000;
+
+// Longest a request waits for the first load before it continues with in-tree types only.
+export const CATALOG_REQUEST_WAIT_MS = 10_000;

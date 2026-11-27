@@ -1,5 +1,5 @@
 {
-  "sha1": "e0faf75523681dfb193324bbd9ae22a26b7514ca",
+  "sha1": "20724a8856c1a5cf449832e127134491d514b71b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,6 +13,19 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/global.setup.ts",
         "line": 5,
         "column": 1
+      }
+    },
+    {
+      "id": "c1ebefc104d26d3-53f7ed5608421ed",
+      "title": "Endpoint details workflow insights on Security Essentials hides the insights section on the endpoint details flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_details_insights_essentials.spec.ts",
+        "line": 39,
+        "column": 53
       }
     },
     {

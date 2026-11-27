@@ -8,7 +8,11 @@
 import { createHash } from 'crypto';
 import net from 'node:net';
 import type { estypes } from '@elastic/elasticsearch';
-import { isNonRoutableIpIoc, isRejectedExtractionMethod } from '@kbn/alertzero-common';
+import {
+  isNonRoutableIpIoc,
+  isPlaceholderEmailIoc,
+  isRejectedExtractionMethod,
+} from '@kbn/alertzero-common';
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import {
@@ -416,6 +420,8 @@ const buildBulkOps = (reports: ReportHit[], now: string): IocIndicatorOp[] => {
     // The non-routable check is by value: reports extracted before the shared
     // range set existed can carry a promotable tier on CGNAT, multicast or other
     // special-use space, and promoting it would match internal traffic.
+    // The placeholder-email check is by value for the same reason: a stored
+    // `test@test.com` with a promotable tier would become a live email-addr indicator.
     const usableIocs = iocs.filter(
       (ioc): ioc is typeof ioc & { type: IocType; value: string; tier: string } =>
         typeof ioc.value === 'string' &&
@@ -424,7 +430,8 @@ const buildBulkOps = (reports: ReportHit[], now: string): IocIndicatorOp[] => {
         isWellFormedForType(ioc.type, ioc.value) &&
         isPromotableTier(ioc.tier) &&
         ioc.deferred_unreviewed !== true &&
-        !isNonRoutableIpIoc(ioc)
+        !isNonRoutableIpIoc(ioc) &&
+        !isPlaceholderEmailIoc(ioc)
     );
     for (const ioc of usableIocs) {
       const id = indicatorId(spaceId, ioc.type, ioc.value);

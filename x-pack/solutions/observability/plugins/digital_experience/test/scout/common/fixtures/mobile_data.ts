@@ -11,10 +11,10 @@ const LOGS_INDEX = 'logs-generic.otel-default';
 const TRACES_INDEX = 'traces-generic.otel-default';
 
 /** Inside `TIME_RANGE`. */
-const TIMESTAMP = '2021-01-18T12:30:00.000Z';
+export const TIMESTAMP = '2021-01-18T12:30:00.000Z';
 /** Inside `TIME_RANGE`, before and after `TIMESTAMP`, for releases that show up apart. */
-const EARLIER_TIMESTAMP = '2021-01-18T12:10:00.000Z';
-const LATER_TIMESTAMP = '2021-01-18T12:45:00.000Z';
+export const EARLIER_TIMESTAMP = '2021-01-18T12:10:00.000Z';
+export const LATER_TIMESTAMP = '2021-01-18T12:45:00.000Z';
 
 /**
  * The edges of `TIME_RANGE` (12:00 to 13:00) and of the hour before it, the previous period. Both
@@ -33,7 +33,8 @@ export const BOUNDARY_TIMESTAMPS = {
  * A React Native app on Android, iOS and iPadOS, an Android app, an Android app on an SDK that
  * still sends `telemetry.sdk.name: android` without the distribution, an Android app with sessions
  * on the edges of the periods, an Android app without numeric releases, one whose releases all
- * showed up at once, an iOS app on two-part releases, and two services that must never show up as
+ * showed up at once, an iOS app on two-part releases, an Android app with enough sessions in one
+ * minute for the release health's error rates, and two services that must never show up as
  * mobile: a backend Java service, and EDOT Browser on an iPhone, which is the Elastic distribution
  * on `os.name: iOS` too.
  */
@@ -45,6 +46,7 @@ export const MOBILE_APPS = {
   nightlyAndroid: 'scout-nightly-android',
   tiedAndroid: 'scout-tied-android',
   shortVersionIos: 'scout-short-version-ios',
+  busyAndroid: 'scout-busy-android',
   backendJava: 'scout-backend-java',
   browserOnIphone: 'scout-browser-on-iphone',
 } as const;
@@ -69,6 +71,10 @@ interface MobileDocument {
 }
 
 const EDOT_MOBILE = { distroName: 'elastic', version: '1.0.0' };
+
+/** The sessions and release of `MOBILE_APPS.busyAndroid`. */
+export const BUSY_SESSIONS = 120;
+export const BUSY_RELEASE = '4.0.0';
 
 const MOBILE_DOCUMENTS: MobileDocument[] = [
   // React Native, Android: `versionName` as the release, `versionCode` as the build.
@@ -116,11 +122,13 @@ const MOBILE_DOCUMENTS: MobileDocument[] = [
   },
   // Most sessions still on 2.9.0, the newest release 2.10.0, which only a version sort puts last.
   // Later in the same session, versions that aren't releases: the `version` type would sort each
-  // after 2.10.0, and each showed up after it.
+  // after 2.10.0, and each showed up after it. 2.10.0 shows up again then, in the same bucket as
+  // 2.010.0, both left for "Other".
   ...[
     { version: '2.9.0', sessionId: 'android-1' },
     { version: '2.9.0', sessionId: 'android-2' },
     { version: '2.10.0', sessionId: 'android-3' },
+    { version: '2.10.0', sessionId: 'android-3', timestamp: LATER_TIMESTAMP },
     ...['debug', '', 'v3.0.0', '3.0.0-beta', '3.0.0+45', '2.010.0'].map((version) => ({
       version,
       sessionId: 'android-3',
@@ -193,6 +201,28 @@ const MOBILE_DOCUMENTS: MobileDocument[] = [
     sessionId: 'SHORT-1',
     timestamp,
   })),
+  // Above the release health's floors: 120 sessions in the range, all in the same minute so a
+  // time bucket has them too, an exception in every tenth.
+  ...Array.from({ length: BUSY_SESSIONS }, (_, index) => ({
+    ...EDOT_MOBILE,
+    serviceName: MOBILE_APPS.busyAndroid,
+    sdkLanguage: 'java',
+    osName: 'Android',
+    version: BUSY_RELEASE,
+    installationId: `installation-busy-${index}`,
+    sessionId: `busy-${index}`,
+    exception: index % 10 === 0,
+  })),
+  // A second event of a session without an exception: the error rate still counts it once.
+  {
+    ...EDOT_MOBILE,
+    serviceName: MOBILE_APPS.busyAndroid,
+    sdkLanguage: 'java',
+    osName: 'Android',
+    version: BUSY_RELEASE,
+    installationId: 'installation-busy-1',
+    sessionId: 'busy-1',
+  },
   {
     serviceName: MOBILE_APPS.backendJava,
     sdkLanguage: 'java',
@@ -251,6 +281,14 @@ const documents = MOBILE_DOCUMENTS.map((doc, index) => ({
 
 /** What the applications route should answer for each mobile application, all its platforms. */
 export const EXPECTED_MOBILE_ROWS = [
+  {
+    serviceName: MOBILE_APPS.busyAndroid,
+    platforms: ['android'],
+    latestRelease: BUSY_RELEASE,
+    sessions: { count: BUSY_SESSIONS },
+    users: { count: BUSY_SESSIONS },
+    errorRate: 0.1,
+  },
   {
     // One application on Android, iOS and iPadOS, which counts as iOS.
     serviceName: MOBILE_APPS.reactNative,

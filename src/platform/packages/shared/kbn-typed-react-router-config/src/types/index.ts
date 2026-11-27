@@ -166,11 +166,6 @@ export interface Router<TRoutes extends RouteMap> {
     path3: T3,
     location: Location
   ): TypeOf<TRoutes, T1> | TypeOf<TRoutes, T2> | TypeOf<TRoutes, T3>;
-  getParams<TPath extends PathsOf<TRoutes>, TOptional extends boolean>(
-    path: TPath,
-    location: Location,
-    optional: TOptional
-  ): TOptional extends true ? TypeOf<TRoutes, TPath> | undefined : TypeOf<TRoutes, TPath>;
   link<TPath extends PathsOf<TRoutes>>(
     path: TPath,
     ...args: TypeAsArgs<TypeOf<TRoutes, TPath, false>>

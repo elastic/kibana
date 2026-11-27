@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-// These fields are unbounded (additionalProperties: true, no ingest-time size limit)
-// and can hold ~100 KB+ of raw data per document. Exclude them from bulk fetches
-// to avoid exceeding Kibana's 100 MB max response size.
-export const UNBOUNDED_SCORE_FIELDS = [
-  'task.output',
-  'example.input',
-  'example.metadata',
-  'evaluator.metadata',
-];
+// Lives in the contract package so the pinned-baseline routes in the agent_builder
+// plugin snapshot score documents with the same exclusions this plugin reads them with.
+export { UNBOUNDED_SCORE_FIELDS } from '@kbn/evals-common';

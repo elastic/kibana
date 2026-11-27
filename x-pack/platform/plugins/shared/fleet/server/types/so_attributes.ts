@@ -19,6 +19,7 @@ import type {
   OutputPreset,
   AgentlessAgentPolicyConfig,
   OtlpExporterConfig,
+  OtlpOutputAuth,
 } from '../../common/types';
 import type {
   AgentStatus,
@@ -301,7 +302,11 @@ export interface OutputSoKafkaAttributes extends BeatsSoBaseAttributes {
 export interface OutputSoOtlpAttributes extends OutputSoBaseAttributes {
   type: OutputType['Otlp'];
   otlp_exporter: OtlpExporterConfig;
+  auth?: OtlpOutputAuth | null;
   secrets?: {
+    auth?: {
+      credential?: { id: string };
+    };
     otlp_exporter?: {
       tls?: {
         key_pem?: { id: string };

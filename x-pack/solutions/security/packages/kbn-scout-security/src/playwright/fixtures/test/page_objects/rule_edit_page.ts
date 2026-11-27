@@ -6,6 +6,8 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { APP_LOAD_TIMEOUT_MS } from '../../../constants/timeouts';
+import { getSaveWithErrorsModal } from './helpers/save_with_errors_modal';
 
 /**
  * Detection rule edit page (`/app/security/rules/id/<id>/edit`) and its save flow.
@@ -20,16 +22,15 @@ export class RuleEditPage {
   constructor(private readonly page: ScoutPage) {
     this.saveButton = this.page.testSubj.locator('ruleEditSubmitButton');
     this.eqlQueryInput = this.page.testSubj.locator('eqlQueryBarTextInput');
-    this.saveWithWarningsModal = this.page.testSubj.locator('save-with-errors-confirmation-modal');
-    this.saveWithWarningsConfirmButton = this.saveWithWarningsModal.getByTestId(
-      'confirmModalConfirmButton'
-    );
+    const { modal, confirmButton } = getSaveWithErrorsModal(this.page);
+    this.saveWithWarningsModal = modal;
+    this.saveWithWarningsConfirmButton = confirmButton;
     this.ruleDetailsAboutSection = this.page.testSubj.locator('aboutRule');
   }
 
   async navigate(ruleId: string): Promise<void> {
     await this.page.gotoApp(`security/rules/id/${ruleId}/edit`);
-    await this.saveButton.waitFor({ state: 'visible' });
+    await this.saveButton.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
   }
 
   async save(): Promise<void> {

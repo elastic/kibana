@@ -29,13 +29,14 @@ import { getData, getSearchBar } from '../../../kibana_services';
 import { GlobalFilterCheckbox } from '../../../components/global_filter_checkbox';
 import { GlobalTimeCheckbox } from '../../../components/global_time_checkbox';
 import type { ILayer } from '../../../classes/layers/layer';
+import type { SourcePropName } from '../../../classes/sources/source';
 import { hasESSourceMethod } from '../../../classes/sources/es_source';
 import { ForceRefreshCheckbox } from '../../../components/force_refresh_checkbox';
 
 export interface Props {
   layer: ILayer;
   setLayerQuery: (id: string, query: Query) => void;
-  updateSourceProp: (layerId: string, propName: string, value: unknown) => void;
+  updateSourceProp: (layerId: string, propName: SourcePropName, value: unknown) => void;
   isFeatureEditorOpenForLayer: boolean;
 }
 

@@ -12,13 +12,9 @@ import { test } from '../fixtures';
 
 test.describe('Browse integration', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ apiServices, config }) => {
-    // TODO: re-enable when the 'beforeAll' hook starts working on Cloud
-    // The following line will skip all tests in this suite when running on ECH
+    // TODO: enable on ECH once the suite has been verified there
     // eslint-disable-next-line playwright/no-skipped-test
-    test.skip(
-      config.isCloud === true,
-      `Core API returns 404 for 'xpack.fleet.experimentalFeatures' on ECH`
-    );
+    test.skip(config.isCloud === true, 'Not yet verified on ECH');
 
     // skip() in beforeAll only skips the tests, not the beforeAll hook itself
     if (config.isCloud) {
@@ -26,19 +22,6 @@ test.describe('Browse integration', { tag: tags.stateful.classic }, () => {
     }
 
     await apiServices.fleet.internal.setup();
-
-    await apiServices.core.settings({
-      'xpack.fleet.experimentalFeatures': { newBrowseIntegrationUx: true },
-    });
-  });
-
-  test.afterAll(async ({ apiServices, config }) => {
-    if (config.isCloud) {
-      return;
-    }
-    await apiServices.core.settings({
-      'xpack.fleet.experimentalFeatures': { newBrowseIntegrationUx: false },
-    });
   });
 
   test('loads the browse integration page and allow to scroll through it', async ({

@@ -36,8 +36,8 @@ const DATASTREAM_WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS = {
 
 export const WORKFLOW_EXECUTIONS_DATA_STREAM_DEFINITION = {
   name: WORKFLOWS_EXECUTIONS_DATA_STREAM,
-  // Version 2 rolled out `executedByUser`. Version 3 rolls out `workflowUid`.
-  version: 3,
+  // Version 2 rolled out `executedByUser`, version 3 `workflowUid`. Version 4 rolls out `executionChain`.
+  version: 4,
   hidden: true,
   settings: {
     auto_expand_replicas: '0-1',

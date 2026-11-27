@@ -52,6 +52,9 @@ export const getStepIconType = (type: string): IconType => {
     case 'workflow.executeAsync':
       iconType = HardcodedIcons['workflow.executeAsync'];
       break;
+    case 'workflow.awaitExecutions':
+      iconType = HardcodedIcons['workflow.awaitExecutions'];
+      break;
     case 'workflow.output':
       iconType = HardcodedIcons['workflow.output'];
       break;

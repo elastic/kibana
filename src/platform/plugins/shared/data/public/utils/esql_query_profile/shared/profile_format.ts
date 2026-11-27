@@ -1,0 +1,48 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { i18n } from '@kbn/i18n';
+
+const trimNumber = (value: number): string => {
+  const fixed = value >= 10 ? value.toFixed(0) : value.toFixed(1);
+  return fixed.endsWith('.0') ? fixed.slice(0, -2) : fixed;
+};
+
+/** Formats a profile duration for the duration bar and operator rows. */
+export function formatDurationMillis(millis: number): string {
+  if (millis >= 1000) {
+    return i18n.translate('data.inspector.queryProfile.durationSecondsLabel', {
+      defaultMessage: '{seconds} s',
+      values: { seconds: trimNumber(millis / 1000) },
+    });
+  }
+
+  return i18n.translate('data.inspector.queryProfile.durationMillisLabel', {
+    defaultMessage: '{millis} ms',
+    values: { millis: trimNumber(millis) },
+  });
+}
+
+/** Formats an operator's share of process time. */
+export function formatShare(share: number): string {
+  const percent = share * 100;
+  const rounded = percent >= 10 || percent === 0 ? String(Math.round(percent)) : percent.toFixed(1);
+  return i18n.translate('data.inspector.queryProfile.percentLabel', {
+    defaultMessage: '{percent}%',
+    values: { percent: rounded },
+  });
+}
+
+/** Formats a row count. */
+export function formatCount(count: number): string {
+  return i18n.translate('data.inspector.queryProfile.countLabel', {
+    defaultMessage: '{count, number}',
+    values: { count },
+  });
+}
