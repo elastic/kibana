@@ -56,6 +56,10 @@ export const createCaseAttachmentSavedObjectType = (): SavedObjectsType => ({
             type: 'keyword',
             ignore_above: 1024,
           },
+          legacyId: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
           /*
           state: {
             dynamic: false,
