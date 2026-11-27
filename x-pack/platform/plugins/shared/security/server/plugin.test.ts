@@ -374,7 +374,6 @@ describe('Security Plugin', () => {
         serverlessPlugin({
           enabled: true,
           url: 'https://uiam',
-          sharedSecret: 'shared-secret',
         }).setup(mockCoreSetup, mockSetupDependencies)
       ).not.toThrow();
     });

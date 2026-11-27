@@ -547,6 +547,7 @@ export class SecurityPlugin
           kibanaServerResourceURL,
           elasticsearchUrl: this.elasticsearchUrl,
           kibanaVersion: this.initializerContext.env.packageInfo.version,
+          encryptionKey: config.encryptionKey,
         })
       : undefined;
     this.uiam = uiam;

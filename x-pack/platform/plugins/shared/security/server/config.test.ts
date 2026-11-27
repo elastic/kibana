@@ -1866,23 +1866,22 @@ describe('config schema', () => {
       ).toThrow('[uiam.url]: expected value of type [string] but got [undefined].');
 
       expect(() =>
-        ConfigSchema.validate(
-          { uiam: { enabled: true, sharedSecret: 'some-secret' } },
-          { serverless: true }
-        )
+        ConfigSchema.validate({ uiam: { enabled: true } }, { serverless: true })
       ).toThrow('[uiam.url]: expected value of type [string] but got [undefined].');
     });
 
-    it('should throw error if UIAM is enabled, but UIAM shared secret is not specified', () => {
+    it('no longer accepts a UIAM shared secret', () => {
       expect(() =>
         ConfigSchema.validate(
-          { uiam: { enabled: true, url: 'https://uiam.service' } },
+          { uiam: { enabled: true, url: 'https://uiam.service', sharedSecret: 'some-secret' } },
           { serverless: true }
         )
-      ).toThrow('[uiam.sharedSecret]: expected value of type [string] but got [undefined]');
+      ).toThrow(
+        "[uiam.sharedSecret]: Additional properties are not allowed ('sharedSecret' was unexpected)"
+      );
     });
 
-    it('does not require UIAM URL or shared secret if UIAM is disabled', () => {
+    it('does not require UIAM URL if UIAM is disabled', () => {
       expect(
         ConfigSchema.validate({ uiam: { enabled: false } }, { serverless: true }).uiam
       ).toEqual({ enabled: false, ssl: { verificationMode: 'full' } });
@@ -1891,21 +1890,17 @@ describe('config schema', () => {
     it('accepts both HTTP and HTTPS URLs for UIAM service', () => {
       for (const url of ['http://uiam.service', 'https://uiam.service']) {
         expect(
-          ConfigSchema.validate(
-            { uiam: { enabled: true, url, sharedSecret: 'some-secret' } },
-            { serverless: true }
-          ).uiam
+          ConfigSchema.validate({ uiam: { enabled: true, url } }, { serverless: true }).uiam
         ).toEqual({
           enabled: true,
           url,
-          sharedSecret: 'some-secret',
           ssl: { verificationMode: 'full' },
         });
       }
 
       expect(() =>
         ConfigSchema.validate(
-          { uiam: { enabled: true, url: 'ftp://uiam.service', sharedSecret: 'some-secret' } },
+          { uiam: { enabled: true, url: 'ftp://uiam.service' } },
           { serverless: true }
         )
       ).toThrow('[uiam.url]: expected URI with scheme [https|http].');
@@ -1914,13 +1909,12 @@ describe('config schema', () => {
     it('accepts full UIAM config', () => {
       expect(
         ConfigSchema.validate(
-          { uiam: { enabled: true, url: 'https://uiam.service', sharedSecret: 'some-secret' } },
+          { uiam: { enabled: true, url: 'https://uiam.service' } },
           { serverless: true }
         ).uiam
       ).toEqual({
         enabled: true,
         url: 'https://uiam.service',
-        sharedSecret: 'some-secret',
         ssl: { verificationMode: 'full' },
       });
 
@@ -1928,19 +1922,16 @@ describe('config schema', () => {
         {
           enabled: true,
           url: 'https://uiam.service',
-          sharedSecret: 'some-secret',
           ssl: { verificationMode: 'certificate', certificateAuthorities: ['/path-1'] },
         },
         {
           enabled: true,
           url: 'https://uiam.service',
-          sharedSecret: 'some-secret',
           ssl: { verificationMode: 'certificate', certificateAuthorities: '/path-1' },
         },
         {
           enabled: true,
           url: 'https://uiam.service',
-          sharedSecret: 'some-secret',
           ssl: { verificationMode: 'none' },
         },
       ];
@@ -1958,7 +1949,6 @@ describe('config schema', () => {
             uiam: {
               enabled: true,
               url: 'https://uiam.service',
-              sharedSecret: 'some-secret',
               ssl: {
                 certificate: '/path/to/cert.pem',
                 key: '/path/to/key.pem',
@@ -1981,7 +1971,6 @@ describe('config schema', () => {
             uiam: {
               enabled: true,
               url: 'https://uiam.service',
-              sharedSecret: 'some-secret',
               unsafe: { grantedApiKeyDefaultExpiration: '4h' },
             },
           },
@@ -1999,7 +1988,6 @@ describe('config schema', () => {
               uiam: {
                 enabled: true,
                 url: 'https://uiam.service',
-                sharedSecret: 'some-secret',
                 unsafe: { grantedApiKeyDefaultExpiration },
               },
             },
@@ -2022,7 +2010,6 @@ describe('config schema', () => {
             uiam: {
               enabled: true,
               url: 'https://uiam.service',
-              sharedSecret: 'some-secret',
               ssl: { certificate: '/path/to/cert.pem' },
             },
           },
@@ -2038,7 +2025,6 @@ describe('config schema', () => {
             uiam: {
               enabled: true,
               url: 'https://uiam.service',
-              sharedSecret: 'some-secret',
               ssl: { key: '/path/to/key.pem' },
             },
           },

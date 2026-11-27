@@ -420,7 +420,9 @@ export class APIKeys implements NativeAPIKeysType {
     const { authorizationHeader, authHeaders } = credentials;
     let clientAuthentication: ClientAuthentication | undefined;
     if (this.uiam && isUiamCredential(authorizationHeader)) {
-      clientAuthentication = this.uiam.getClientAuthentication({ headers: authHeaders });
+      clientAuthentication = this.uiam.getClientAuthentication(authorizationHeader, {
+        headers: authHeaders,
+      });
     } else {
       // Native JWTs are not renewed. Their client-authentication header stays on the request.
       const clientAuthorizationHeader = HTTPAuthorizationHeader.parseFromRequest(

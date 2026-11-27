@@ -6,7 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { timingSafeEqual } from 'crypto';
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import {
@@ -242,10 +241,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
   }
 
   isOwnClientAuthentication(value: string): boolean {
-    const own = this.uiam.getClientAuthentication().value;
-    const presented = Buffer.from(value);
-    const expected = Buffer.from(own);
-    return presented.length === expected.length && timingSafeEqual(presented, expected);
+    return this.uiam.isOwnClientAuthentication(value);
   }
 
   /**

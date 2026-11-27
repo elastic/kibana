@@ -461,7 +461,7 @@ function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
     MOCK_IDP_REALM_NAME,
     MOCK_IDP_UIAM_OAUTH_BASE_URL,
     MOCK_IDP_UIAM_SERVICE_URL,
-    MOCK_IDP_UIAM_SHARED_SECRET,
+    MOCK_IDP_UIAM_KIBANA_ENCRYPTION_KEY,
     MOCK_IDP_UIAM_ORGANIZATION_ID,
     MOCK_IDP_UIAM_PROJECT_ID, // eslint-disable-next-line import/no-dynamic-require
   } = require(MOCK_IDP_PLUGIN_PATH);
@@ -533,8 +533,8 @@ function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
       lodashSet(rawConfig, 'xpack.security.uiam.url', MOCK_IDP_UIAM_SERVICE_URL);
     }
 
-    if (!_.has(rawConfig, 'xpack.security.uiam.sharedSecret')) {
-      lodashSet(rawConfig, 'xpack.security.uiam.sharedSecret', MOCK_IDP_UIAM_SHARED_SECRET);
+    if (!_.has(rawConfig, 'xpack.security.encryptionKey')) {
+      lodashSet(rawConfig, 'xpack.security.encryptionKey', MOCK_IDP_UIAM_KIBANA_ENCRYPTION_KEY);
     }
 
     if (!_.has(rawConfig, 'xpack.cloud.organization_id')) {

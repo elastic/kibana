@@ -11,6 +11,7 @@ import type { ScopeableRequest } from '@kbn/core/server';
 import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import {
   deriveInternalCallerAttestation,
+  deriveUiamAttestationKey,
   HTTPAuthorizationHeader,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
@@ -38,6 +39,8 @@ function expectAuthenticateCall(
   const mockScopedClusterClient = mockClusterClient.asScoped.mock.results[0].value;
   expect(mockScopedClusterClient.asCurrentUser.security.authenticate).toHaveBeenCalledTimes(1);
 }
+
+const TEST_ATTESTATION_KEY = deriveUiamAttestationKey('a'.repeat(32));
 
 describe('HTTPAuthenticationProvider', () => {
   let mockOptions: MockAuthenticationProviderOptions;
@@ -431,7 +434,7 @@ describe('HTTPAuthenticationProvider', () => {
             {
               authHeaders: {
                 authorization: 'Bearer essu_ephemeral_token',
-                [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
+                [ES_CLIENT_AUTHENTICATION_HEADER]: 'Assertion some-assertion',
               },
             }
           )
@@ -446,7 +449,7 @@ describe('HTTPAuthenticationProvider', () => {
           headers: {
             ...request.headers,
             authorization: 'Bearer essu_ephemeral_token',
-            [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'Assertion some-assertion',
           },
         });
       }
@@ -592,7 +595,7 @@ describe('HTTPAuthenticationProvider', () => {
       if (!uiam) throw new Error('Expected UIAM');
       uiam.getInternalCallerAttestationHeaders.mockImplementation((credential) => ({
         [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
-          'shared-secret',
+          TEST_ATTESTATION_KEY,
           credential
         ),
       }));
@@ -674,7 +677,7 @@ describe('HTTPAuthenticationProvider', () => {
       if (!uiam) throw new Error('Expected UIAM');
       uiam.getInternalCallerAttestationHeaders.mockImplementation((credential) => ({
         [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
-          'shared-secret',
+          TEST_ATTESTATION_KEY,
           credential
         ),
       }));
@@ -683,7 +686,7 @@ describe('HTTPAuthenticationProvider', () => {
         headers: {
           authorization: 'Bearer essu_oauth_token',
           [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
-            'shared-secret',
+            TEST_ATTESTATION_KEY,
             new HTTPAuthorizationHeader('Bearer', 'essu_other_token')
           ),
         },

@@ -34,6 +34,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   unused('authorization.legacyFallback.enabled', { level: 'warning' }),
   unused('authc.saml.maxRedirectURLSize', { level: 'warning' }),
   unused('showNavLinks', { level: 'warning' }),
+  unused('uiam.sharedSecret', { level: 'warning' }),
 
   // Deprecation warning for the old array-based format of `xpack.security.authc.providers`.
   (settings, _fromPath, addDeprecation, { branch }) => {

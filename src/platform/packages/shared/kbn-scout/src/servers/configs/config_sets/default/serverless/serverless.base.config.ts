@@ -30,7 +30,7 @@ import {
   MOCK_IDP_UIAM_ORGANIZATION_ID,
   MOCK_IDP_UIAM_PROJECT_ID,
   MOCK_IDP_UIAM_SERVICE_URL,
-  MOCK_IDP_UIAM_SHARED_SECRET,
+  MOCK_IDP_UIAM_KIBANA_ENCRYPTION_KEY,
 } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { PRODUCT_DOC_STUB_REPOSITORY_URL } from '@kbn/test-kibana-server';
@@ -244,7 +244,7 @@ export const defaultConfig: ScoutServerConfig = {
       ...(isRunOnCI ? [] : ['--mockIdpPlugin.uiam.enabled=true']),
       `--xpack.security.uiam.enabled=true`,
       `--xpack.security.uiam.url=${MOCK_IDP_UIAM_SERVICE_URL}`,
-      `--xpack.security.uiam.sharedSecret=${MOCK_IDP_UIAM_SHARED_SECRET}`,
+      `--xpack.security.encryptionKey=${MOCK_IDP_UIAM_KIBANA_ENCRYPTION_KEY}`,
       `--xpack.security.uiam.ssl.certificate=${KBN_CERT_PATH}`,
       `--xpack.security.uiam.ssl.key=${KBN_KEY_PATH}`,
       '--xpack.security.uiam.ssl.verificationMode=none',

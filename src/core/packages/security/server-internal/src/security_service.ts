@@ -23,7 +23,7 @@ import type {
 } from './internal_contracts';
 import type { SecurityServiceConfigType, PKCS12ConfigType } from './utils';
 import { getDefaultSecurityImplementation, convertSecurityApi } from './utils';
-import { createCoreUiamService } from './uiam';
+import { createCoreUiamService, createUiamClientAuthenticationContext } from './uiam';
 import { WorkloadTypeRegistry } from './workload_type_registry';
 import { createBoundWorkloadResolver } from './resolve_bound_workloads';
 
@@ -111,7 +111,12 @@ export class SecurityService
           this.workloadTypes.register(pluginId, registration),
       },
       uiam: securityConfig?.uiam?.enabled
-        ? createCoreUiamService(securityConfig.uiam.sharedSecret)
+        ? createCoreUiamService(
+            createUiamClientAuthenticationContext({
+              encryptionKey: securityConfig.encryptionKey,
+              uiam: securityConfig.uiam,
+            })
+          )
         : null,
     };
   }

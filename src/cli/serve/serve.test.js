@@ -116,9 +116,9 @@ describe('applyConfigOverrides', () => {
             },
             selector: { enabled: false },
           },
+          encryptionKey: 'uiam-local-kibana-encryption-key-0123456789',
           uiam: {
             enabled: true,
-            sharedSecret: 'Dw7eRt5yU2iO9pL3aS4dF6gH8jK0lZ1xC2vB3nM4qW5=',
             url: 'https://localhost:8443',
             ssl: {
               certificate: KBN_SERVERLESS_UIAM_CERTS.search.certPath,

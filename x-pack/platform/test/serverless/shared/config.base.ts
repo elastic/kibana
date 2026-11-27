@@ -24,7 +24,7 @@ import {
   MOCK_IDP_UIAM_ORGANIZATION_ID,
   MOCK_IDP_UIAM_PROJECT_ID,
   MOCK_IDP_UIAM_SERVICE_URL,
-  MOCK_IDP_UIAM_SHARED_SECRET,
+  MOCK_IDP_UIAM_KIBANA_ENCRYPTION_KEY,
 } from '@kbn/mock-idp-utils';
 import path from 'path';
 import { fleetPackageRegistryDockerImage, defineDockerServersConfig } from '@kbn/test';
@@ -203,7 +203,7 @@ export default async () => {
         ...(isRunOnCI ? [] : ['--mockIdpPlugin.uiam.enabled=true']),
         `--xpack.security.uiam.enabled=true`,
         `--xpack.security.uiam.url=${MOCK_IDP_UIAM_SERVICE_URL}`,
-        `--xpack.security.uiam.sharedSecret=${MOCK_IDP_UIAM_SHARED_SECRET}`,
+        `--xpack.security.encryptionKey=${MOCK_IDP_UIAM_KIBANA_ENCRYPTION_KEY}`,
         `--xpack.security.uiam.ssl.certificate=${KBN_CERT_PATH}`,
         `--xpack.security.uiam.ssl.key=${KBN_KEY_PATH}`,
         '--xpack.security.uiam.ssl.verificationMode=none',

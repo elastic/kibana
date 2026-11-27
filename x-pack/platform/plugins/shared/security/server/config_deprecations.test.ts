@@ -269,6 +269,27 @@ describe('Config Deprecations', () => {
     `);
   });
 
+  it(`warns that 'xpack.security.uiam.sharedSecret' is unused`, () => {
+    const config = {
+      xpack: {
+        security: {
+          uiam: {
+            enabled: true,
+            url: 'https://uiam.service',
+            sharedSecret: 'some-secret',
+          },
+        },
+      },
+    };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated.xpack.security.uiam).toEqual({ enabled: true, url: 'https://uiam.service' });
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "You no longer need to configure \\"xpack.security.uiam.sharedSecret\\".",
+      ]
+    `);
+  });
+
   it(`warns that 'xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize' is unused`, () => {
     const config = {
       xpack: {

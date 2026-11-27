@@ -11,19 +11,20 @@ import { HTTPAuthorizationHeader, isUiamBearerCredential } from '@kbn/core-secur
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 
 /**
- * Client authentication composed by the caller: a shared secret to present verbatim. Where this
- * type is accepted, `null` means deliberately no client authentication at all, which UIAM requires
- * for external (organization) API keys, and `undefined` means the caller supplied nothing and
- * Kibana's own shared secret is presented instead.
+ * Client authentication composed by the caller: a value to present verbatim. Where this type is
+ * accepted, `null` means deliberately no client authentication at all, which UIAM requires for
+ * external (organization) API keys, and `undefined` means the caller supplied nothing and Kibana's
+ * own assertion is presented instead.
  */
 export interface UiamClientAuthentication {
-  readonly sharedSecret: string;
+  readonly value: string;
 }
 
 /**
- * Reads the client secret paired with a UIAM bearer token, or returns `undefined` if absent.
- * Accepts stored authentication headers as well as request headers, so a renewed token uses
- * its own client secret. This function does not decide when to attach Kibana's own secret.
+ * Reads the client authentication paired with a UIAM bearer token, or returns `undefined` if
+ * absent. Accepts stored authentication headers as well as request headers, so a renewed token uses
+ * its own client authentication. This function does not decide when to attach Kibana's own
+ * assertion.
  */
 export const getUiamClientAuthentication = (
   request: Pick<KibanaRequest, 'headers'>
@@ -33,6 +34,6 @@ export const getUiamClientAuthentication = (
     return undefined;
   }
 
-  const sharedSecret = request.headers[ES_CLIENT_AUTHENTICATION_HEADER];
-  return typeof sharedSecret === 'string' ? { sharedSecret } : undefined;
+  const value = request.headers[ES_CLIENT_AUTHENTICATION_HEADER];
+  return typeof value === 'string' ? { value } : undefined;
 };

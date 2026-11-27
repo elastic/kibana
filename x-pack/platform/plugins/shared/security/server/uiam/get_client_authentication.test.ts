@@ -10,27 +10,27 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { getUiamClientAuthentication } from './get_client_authentication';
 
 describe('getUiamClientAuthentication', () => {
-  it('reads the client secret from stored credentials without a full request', () => {
+  it('reads the client authentication from stored credentials without a full request', () => {
     const headers = {
       authorization: 'Bearer essu_renewed',
       'x-client-authentication': 'renewed-token-secret',
     };
     expect(getUiamClientAuthentication({ headers })).toEqual({
-      sharedSecret: 'renewed-token-secret',
+      value: 'renewed-token-secret',
     });
   });
 
   it.each(['Bearer', 'bearer'])(
     'forwards supplied client authentication for %s tokens',
     (scheme) => {
-      for (const sharedSecret of ['upstream-secret', '']) {
+      for (const value of ['upstream-secret', 'Assertion upstream.jwt.value', '']) {
         const request = httpServerMock.createKibanaRequest({
           headers: {
             authorization: `${scheme} essu_token`,
-            'x-client-authentication': sharedSecret,
+            'x-client-authentication': value,
           },
         });
-        expect(getUiamClientAuthentication(request)).toEqual({ sharedSecret });
+        expect(getUiamClientAuthentication(request)).toEqual({ value });
       }
     }
   );

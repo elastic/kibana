@@ -14,9 +14,15 @@ export {
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
   ES_CLIENT_AUTHENTICATION_HEADER,
   deriveInternalCallerAttestation,
+  deriveUiamAttestationKey,
 } from './attestation';
+export { createUiamAssertionSigner } from './assertion_signer';
+export type { UiamAssertionSigner, UiamAssertionSignerParams } from './assertion_signer';
 export type { UiamProjectType } from './project_type';
 export type { CoreUiamAuthorizationService } from './authorization';
 export { markExternalUiamCredential, isExternalUiamCredential } from './external_credential';
 export { resolveUiamClientAuthentication } from './client_authentication';
-export type { UiamClientAuthenticationParams } from './client_authentication';
+export type {
+  UiamClientAuthenticationContext,
+  UiamClientAuthenticationParams,
+} from './client_authentication';

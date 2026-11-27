@@ -21,6 +21,7 @@ import { SecurityService } from './security_service';
 import { WorkloadTypeRegistry } from './workload_type_registry';
 import { convertSecurityApi as actualConvertSecurityApi } from './utils/convert_security_api';
 import { configServiceMock } from '@kbn/config-mocks';
+import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { getFips } from 'crypto';
 
 const createStubInternalContract = (): CoreSecurityDelegateContract => {
@@ -287,7 +288,7 @@ describe('SecurityService', function () {
                 xpack: {
                   security: {
                     fipsMode: { enabled: !!getFips() },
-                    uiam: { enabled: false, sharedSecret: 'some-secret' },
+                    uiam: { enabled: false },
                   },
                 },
               },
@@ -297,7 +298,7 @@ describe('SecurityService', function () {
         expect(service.setup().uiam).toBeNull();
       });
 
-      it('should attach the configured shared secret if UIAM is enabled', () => {
+      it('should attach a signed assertion if UIAM is enabled', () => {
         service = new SecurityService(
           mockCoreContext.create({
             configService: configServiceMock.create({
@@ -305,7 +306,8 @@ describe('SecurityService', function () {
                 xpack: {
                   security: {
                     fipsMode: { enabled: !!getFips() },
-                    uiam: { enabled: true, sharedSecret: 'some-secret' },
+                    encryptionKey: 'a'.repeat(32),
+                    uiam: { enabled: true, ssl: { certificate: KBN_CERT_PATH, key: KBN_KEY_PATH } },
                   },
                 },
               },
@@ -317,7 +319,27 @@ describe('SecurityService', function () {
             credentialSource: 'internal',
             credential: new HTTPAuthorizationHeader('ApiKey', 'essu_internal_key'),
           })
-        ).toBe('some-secret');
+        ).toMatch(/^Assertion [\w-]+\.[\w-]+\.[\w-]+$/);
+      });
+
+      it('should fail setup if UIAM is enabled without an explicit encryption key', () => {
+        service = new SecurityService(
+          mockCoreContext.create({
+            configService: configServiceMock.create({
+              getConfig$: {
+                xpack: {
+                  security: {
+                    fipsMode: { enabled: !!getFips() },
+                    uiam: { enabled: true, ssl: { certificate: KBN_CERT_PATH, key: KBN_KEY_PATH } },
+                  },
+                },
+              },
+            }),
+          })
+        );
+        expect(() => service.setup()).toThrowErrorMatchingInlineSnapshot(
+          `"[xpack.security.encryptionKey] must be set explicitly when UIAM is enabled."`
+        );
       });
     });
   });

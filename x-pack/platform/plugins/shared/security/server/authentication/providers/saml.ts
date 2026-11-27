@@ -524,7 +524,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
           ? {
               type: 'uiamAccessToken',
               accessToken: result.access_token,
-              clientAuthentication: this.options.uiam.getClientAuthentication(),
+              clientAuthentication: this.options.uiam.getClientAuthentication(
+                new HTTPAuthorizationHeader('Bearer', result.access_token)
+              ),
             }
           : { type: 'accessToken', accessToken: result.access_token },
         state: {
@@ -742,7 +744,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
           userProfileGrant: {
             type: 'uiamAccessToken',
             accessToken,
-            clientAuthentication: this.options.uiam.getClientAuthentication(),
+            clientAuthentication: this.options.uiam.getClientAuthentication(
+              new HTTPAuthorizationHeader('Bearer', accessToken)
+            ),
           },
         }),
         state: { accessToken, refreshToken, realm: this.realm || session.state.realm },

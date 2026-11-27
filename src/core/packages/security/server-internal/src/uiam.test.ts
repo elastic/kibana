@@ -7,26 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
+import type { UiamAssertionSigner } from '@kbn/core-security-server';
 import {
   HTTPAuthorizationHeader,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
   deriveInternalCallerAttestation,
+  deriveUiamAttestationKey,
 } from '@kbn/core-security-server';
 
-import { createCoreUiamService } from './uiam';
+import { createCoreUiamService, createUiamClientAuthenticationContext } from './uiam';
 
-const SHARED_SECRET = 'shared-secret';
+const ENCRYPTION_KEY = 'a'.repeat(32);
+const ATTESTATION_KEY = deriveUiamAttestationKey(ENCRYPTION_KEY);
+
+const signer: UiamAssertionSigner = {
+  subject: 'spiffe://kibana.test',
+  sign: (credential) => `Assertion signed-for(${credential.toString()})`,
+  isOwnAssertion: () => false,
+};
 
 // `ApiKey` and `Bearer` both carry UIAM credentials, and every rule below applies to each
 // identically. Parameterized rather than picked, so neither scheme can quietly drift.
 describe.each(['ApiKey', 'Bearer'] as const)('createCoreUiamService (%s)', (scheme) => {
   const UIAM_CREDENTIAL = new HTTPAuthorizationHeader(scheme, 'essu_internal_key');
-  const VALID_ATTESTATION = deriveInternalCallerAttestation(SHARED_SECRET, UIAM_CREDENTIAL);
+  const OWN_ASSERTION = signer.sign(UIAM_CREDENTIAL);
+  const VALID_ATTESTATION = deriveInternalCallerAttestation(ATTESTATION_KEY, UIAM_CREDENTIAL);
 
   let uiam: ReturnType<typeof createCoreUiamService>;
 
   beforeEach(() => {
-    uiam = createCoreUiamService(SHARED_SECRET);
+    uiam = createCoreUiamService({ signer, attestationKey: ATTESTATION_KEY });
   });
 
   describe('getElasticsearchClientAuthentication', () => {
@@ -45,13 +56,13 @@ describe.each(['ApiKey', 'Bearer'] as const)('createCoreUiamService (%s)', (sche
       ).toBeUndefined();
     });
 
-    it('returns the shared secret for an internal UIAM credential, with no attestation', () => {
+    it('returns an assertion for an internal UIAM credential, with no attestation', () => {
       expect(
         uiam.getElasticsearchClientAuthentication({
           credentialSource: 'internal',
           credential: UIAM_CREDENTIAL,
         })
-      ).toBe(SHARED_SECRET);
+      ).toBe(OWN_ASSERTION);
     });
 
     it('returns undefined for an external (user-created) UIAM credential', () => {
@@ -63,7 +74,7 @@ describe.each(['ApiKey', 'Bearer'] as const)('createCoreUiamService (%s)', (sche
       ).toBeUndefined();
     });
 
-    it('returns the shared secret for an inbound UIAM credential with a valid attestation', () => {
+    it('returns an assertion for an inbound UIAM credential with a valid attestation', () => {
       expect(
         uiam.getElasticsearchClientAuthentication({
           credentialSource: 'inbound',
@@ -71,7 +82,7 @@ describe.each(['ApiKey', 'Bearer'] as const)('createCoreUiamService (%s)', (sche
           relayedClientAuthentication: undefined,
           requestHeaders: { [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: VALID_ATTESTATION },
         })
-      ).toBe(SHARED_SECRET);
+      ).toBe(OWN_ASSERTION);
     });
 
     it.each([
@@ -87,17 +98,6 @@ describe.each(['ApiKey', 'Bearer'] as const)('createCoreUiamService (%s)', (sche
           requestHeaders: {},
         })
       ).toEqual(relayed);
-    });
-
-    it('forwards relayed client authentication over a valid attestation', () => {
-      expect(
-        uiam.getElasticsearchClientAuthentication({
-          credentialSource: 'inbound',
-          credential: UIAM_CREDENTIAL,
-          relayedClientAuthentication: 'upstream-shared-secret',
-          requestHeaders: { [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: VALID_ATTESTATION },
-        })
-      ).toBe('upstream-shared-secret');
     });
 
     it('returns undefined for an inbound UIAM credential with no attestation', () => {
@@ -119,67 +119,57 @@ describe.each(['ApiKey', 'Bearer'] as const)('createCoreUiamService (%s)', (sche
           relayedClientAuthentication: undefined,
           requestHeaders: {
             [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
-              'a-different-secret',
+              deriveUiamAttestationKey('b'.repeat(32)),
               UIAM_CREDENTIAL
             ),
           },
         })
       ).toBeUndefined();
     });
-
-    it('returns undefined for an attestation minted for a different credential', () => {
-      expect(
-        uiam.getElasticsearchClientAuthentication({
-          credentialSource: 'inbound',
-          credential: UIAM_CREDENTIAL,
-          relayedClientAuthentication: undefined,
-          requestHeaders: {
-            [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
-              SHARED_SECRET,
-              new HTTPAuthorizationHeader(scheme, 'essu_another_internal_key')
-            ),
-          },
-        })
-      ).toBeUndefined();
-    });
-
-    it('returns undefined for an attestation of a different length (no timing-safe throw)', () => {
-      expect(
-        uiam.getElasticsearchClientAuthentication({
-          credentialSource: 'inbound',
-          credential: UIAM_CREDENTIAL,
-          relayedClientAuthentication: undefined,
-          requestHeaders: { [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: 'short' },
-        })
-      ).toBeUndefined();
-    });
-
-    it('never derives an attestation equal to the shared secret', () => {
-      expect(VALID_ATTESTATION).not.toBe(SHARED_SECRET);
-    });
   });
 });
 
-describe('createCoreUiamService attestation binding', () => {
-  // The attestation covers the serialized header, scheme included, so the same credentials under a
-  // different scheme are a different credential and the attestation must not carry over.
-  it('does not accept an attestation minted for the same credentials under another scheme', () => {
-    const uiam = createCoreUiamService(SHARED_SECRET);
-    const apiKey = new HTTPAuthorizationHeader('ApiKey', 'essu_internal_key');
-    const bearer = new HTTPAuthorizationHeader('Bearer', 'essu_internal_key');
+describe('createUiamClientAuthenticationContext', () => {
+  it('builds a signer from the UIAM client certificate and key', () => {
+    const context = createUiamClientAuthenticationContext({
+      encryptionKey: ENCRYPTION_KEY,
+      uiam: { ssl: { certificate: KBN_CERT_PATH, key: KBN_KEY_PATH } },
+    });
 
-    expect(
-      uiam.getElasticsearchClientAuthentication({
-        credentialSource: 'inbound',
-        credential: bearer,
-        relayedClientAuthentication: undefined,
-        requestHeaders: {
-          [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
-            SHARED_SECRET,
-            apiKey
-          ),
-        },
+    expect(context.signer.subject).toMatch(/^EIDENT\./);
+    expect(context.signer.sign(new HTTPAuthorizationHeader('Bearer', 'essu_token'))).toMatch(
+      /^Assertion [\w-]+\.[\w-]+\.[\w-]+$/
+    );
+  });
+
+  it('derives the attestation key from the encryption key', () => {
+    const context = createUiamClientAuthenticationContext({
+      encryptionKey: ENCRYPTION_KEY,
+      uiam: { ssl: { certificate: KBN_CERT_PATH, key: KBN_KEY_PATH } },
+    });
+
+    expect(context.attestationKey.equals(ATTESTATION_KEY)).toBe(true);
+  });
+
+  it.each([
+    ['the certificate', { key: KBN_KEY_PATH }],
+    ['the key', { certificate: KBN_CERT_PATH }],
+    ['both', undefined],
+  ])('throws when %s is not configured', (_label, ssl) => {
+    expect(() =>
+      createUiamClientAuthenticationContext({ encryptionKey: ENCRYPTION_KEY, uiam: { ssl } })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[xpack.security.uiam.ssl.certificate] and [xpack.security.uiam.ssl.key] must be set when UIAM is enabled."`
+    );
+  });
+
+  it('throws when the encryption key is not set explicitly', () => {
+    expect(() =>
+      createUiamClientAuthenticationContext({
+        uiam: { ssl: { certificate: KBN_CERT_PATH, key: KBN_KEY_PATH } },
       })
-    ).toBeUndefined();
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[xpack.security.encryptionKey] must be set explicitly when UIAM is enabled."`
+    );
   });
 });
