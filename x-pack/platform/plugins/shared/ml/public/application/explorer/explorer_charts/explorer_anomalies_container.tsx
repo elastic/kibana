@@ -42,6 +42,8 @@ interface ExplorerAnomaliesContainerProps {
   timeRange: { from: string; to: string } | undefined;
   showFilterIcons: boolean;
   isInteractive?: boolean;
+  /** Colours the box which highlights the selected time range of each chart by the severity of its anomalies */
+  colorSelectedIntervalBySeverity?: boolean;
 }
 
 const tooManyBucketsCalloutMsg = i18n.translate(
@@ -68,6 +70,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
   timeRange,
   showFilterIcons,
   isInteractive = true,
+  colorSelectedIntervalBySeverity,
 }) => {
   return (
     <div>
@@ -109,6 +112,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
             chartsService,
             id,
             showFilterIcons,
+            colorSelectedIntervalBySeverity,
           }}
         />
       )}

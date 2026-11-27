@@ -10,6 +10,7 @@
  * the Machine Learning Explorer dashboard.
  */
 
+import { getSelectedIntervalColor } from './utils/get_selected_interval_color';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -115,6 +116,8 @@ export class ExplorerChartDistribution extends React.Component {
       tooltipService,
       timeBuckets,
       showSelectedInterval,
+      colorSelectedIntervalBySeverity,
+      tableData,
       onPointerUpdate,
       id: chartId,
     } = this.props;
@@ -477,7 +480,7 @@ export class ExplorerChartDistribution extends React.Component {
       const rectEnd = Math.min(config.selectedLatest, config.plotLatest);
       const rectWidth = lineChartXScale(rectEnd) - lineChartXScale(rectStart);
 
-      lineChartGroup
+      const selectedInterval = lineChartGroup
         .append('rect')
         .attr('class', 'selected-interval')
         .attr('x', lineChartXScale(new Date(rectStart)) + 2)
@@ -486,6 +489,18 @@ export class ExplorerChartDistribution extends React.Component {
         .attr('ry', 3)
         .attr('width', rectWidth - 4)
         .attr('height', CHART_HEIGHT - 4);
+
+      const selectedIntervalColor = colorSelectedIntervalBySeverity
+        ? getSelectedIntervalColor(config, tableData?.anomalies, euiTheme)
+        : undefined;
+      if (selectedIntervalColor) {
+        // Replaces the default colours of the highlight
+        selectedInterval
+          .style('stroke', selectedIntervalColor)
+          .style('stroke-opacity', 1)
+          .style('fill', selectedIntervalColor)
+          .style('fill-opacity', 0.15);
+      }
     }
 
     function drawRareChartMarkers(data) {

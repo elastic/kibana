@@ -260,7 +260,11 @@ export class MlServerPlugin implements Plugin<
       filtersRoutes(routeInit);
       jobAuditMessagesRoutes(routeInit);
       jobRoutes(routeInit);
-      jobServiceRoutes(routeInit);
+      jobServiceRoutes(routeInit, {
+        getAgentBuilder: () =>
+          coreSetup.getStartServices().then(([, { agentBuilder }]) => agentBuilder),
+        compatibleModuleType: this.compatibleModuleType,
+      });
       resultsServiceRoutes(routeInit);
       jobValidationRoutes(routeInit);
     }

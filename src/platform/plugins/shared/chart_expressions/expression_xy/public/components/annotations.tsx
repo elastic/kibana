@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect, useMemo } from 'react';
 import { omit, snakeCase } from 'lodash';
 import type { CustomAnnotationTooltip } from '@elastic/charts';
 import { AnnotationDomainType, LineAnnotation, Position, RectAnnotation } from '@elastic/charts';
@@ -43,6 +43,9 @@ import { getExtraFields } from '../helpers/get_extra_fields';
 export interface AnnotationsProps {
   groupedLineAnnotations: MergedAnnotation[];
   rangeAnnotations: ManualRangeEventAnnotationRow[];
+  /** Whether the pointer is over a range annotation outside the plot area, which makes them opaque and extends them over the plot area */
+  isRangeAnnotationsHovered: boolean;
+  onRangeAnnotationHoverChange: (id: string, isHovered: boolean) => void;
   timeFormat?: string;
   isHorizontal: boolean;
   paddingMap: Partial<Record<Position, number>>;
@@ -277,6 +280,7 @@ RectAnnotation.displayName = 'RectAnnotation';
 export const Annotations = ({
   groupedLineAnnotations,
   rangeAnnotations,
+  onRangeAnnotationHoverChange,
   timeFormat,
   isHorizontal,
   paddingMap,
@@ -285,8 +289,59 @@ export const Annotations = ({
   isBarChart,
   outsideDimension,
 }: AnnotationsProps) => {
+  // TEMPORARY: always show the extended bands, ignoring the hover state
+  const isRangeAnnotationsHovered = true;
   const { colorMode } = useEuiTheme();
   const isDarkMode = colorMode === 'DARK';
+
+  // The tooltips are stable components, as the chart would otherwise remount them, and so lose the hover, on every render
+  const rangeTooltips = useMemo(
+    () =>
+      Object.fromEntries(
+        rangeAnnotations.map(({ id, label, time, color }) => {
+          const resolvedColor = getResolvedAnnotationColor({ color, isDarkMode, isRange: true });
+          // A transparent annotation is an area to hover, which has nothing to show
+          const Tooltip: CustomAnnotationTooltip = isFullyTransparent(resolvedColor)
+            ? () => (
+                <RangeAnnotationHoverSignal id={id} onHoverChange={onRangeAnnotationHoverChange} />
+              )
+            : () => (
+                <EuiPanel
+                  color="plain"
+                  hasShadow={false}
+                  hasBorder={false}
+                  paddingSize="none"
+                  borderRadius="none"
+                  css={styles.tooltip}
+                >
+                  <RangeAnnotationHoverSignal
+                    id={id}
+                    onHoverChange={onRangeAnnotationHoverChange}
+                  />
+                  <div css={styles.tooltipRow}>
+                    <EuiFlexGroup gutterSize="xs">
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon
+                          type="stopFill"
+                          color={withoutAlpha(resolvedColor)}
+                          aria-hidden={true}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <EuiTitle size="xxxs">
+                          <h6>{label}</h6>
+                        </EuiTitle>
+                        <EuiFlexItem>{moment(time).format(timeFormat)}</EuiFlexItem>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </div>
+                </EuiPanel>
+              );
+          return [id, Tooltip];
+        })
+      ),
+    [rangeAnnotations, isDarkMode, timeFormat, onRangeAnnotationHoverChange]
+  );
 
   return (
     <>
@@ -365,36 +420,16 @@ export const Annotations = ({
           isDarkMode,
           isRange: true,
         });
+        // Translucent annotations outside the plot area all become opaque when the pointer is over any of them
+        const fill =
+          outside && isRangeAnnotationsHovered && !isFullyTransparent(resolvedColor)
+            ? withoutAlpha(resolvedColor)
+            : resolvedColor;
         return (
           <RectAnnotation
             id={id}
             key={id}
-            customTooltip={() => (
-              <EuiPanel
-                color="plain"
-                hasShadow={false}
-                hasBorder={false}
-                paddingSize="none"
-                borderRadius="none"
-                css={styles.tooltip}
-              >
-                <div css={styles.tooltipRow}>
-                  <EuiFlexGroup gutterSize="xs">
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type="stopFill" color={resolvedColor} aria-hidden={true} />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiTitle size="xxxs">
-                        <h6>{label}</h6>
-                      </EuiTitle>
-                      <EuiFlexItem>{`${moment(time).format(timeFormat)} — ${moment(endTime).format(
-                        timeFormat
-                      )}`}</EuiFlexItem>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </div>
-              </EuiPanel>
-            )}
+            customTooltip={rangeTooltips[id]}
             dataValues={[
               {
                 coordinates: {
@@ -404,14 +439,88 @@ export const Annotations = ({
                 details: label,
               },
             ]}
-            style={{ fill: resolvedColor, opacity: 1 }}
+            style={{ fill, opacity: 1 }}
             outside={Boolean(outside)}
             outsideDimension={outsideDimension}
           />
         );
       })}
+      {/* The same annotations are extended over the chart, above its series, while they are all opaque */}
+      {isRangeAnnotationsHovered
+        ? rangeAnnotations.map(({ id, label, time, color, endTime, outside }) => {
+            const resolvedColor = getResolvedAnnotationColor({
+              color,
+              isDarkMode,
+              isRange: true,
+            });
+            if (!outside || isFullyTransparent(resolvedColor)) {
+              return null;
+            }
+            return (
+              <RectAnnotation
+                id={`${id}-extended`}
+                key={`${id}-extended`}
+                dataValues={[
+                  {
+                    coordinates: {
+                      x0: moment(time).valueOf(),
+                      x1: moment(endTime).valueOf(),
+                    },
+                    details: label,
+                  },
+                ]}
+                style={{
+                  fill: withoutAlpha(resolvedColor),
+                  opacity: EXTENDED_ANNOTATION_OPACITY,
+                }}
+                zIndex={EXTENDED_ANNOTATION_Z_INDEX}
+                hideTooltips
+              />
+            );
+          })
+        : null}
     </>
   );
+};
+
+// How opaque the extension of the hovered annotations over the chart is, and its z-index to be drawn above the series
+const EXTENDED_ANNOTATION_OPACITY = 0.6;
+const EXTENDED_ANNOTATION_Z_INDEX = 1;
+
+const RGBA_COLOR = /^rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d.]+)\s*\)$/;
+const HEX_COLOR_WITH_ALPHA = /^(#[0-9a-f]{6})[0-9a-f]{2}$/i;
+
+/** Returns the color without its transparency, which is the same color when it has none. */
+export const withoutAlpha = (color: string): string => {
+  const rgba = RGBA_COLOR.exec(color);
+  if (rgba) {
+    return `rgb(${rgba[1]}, ${rgba[2]}, ${rgba[3]})`;
+  }
+  return HEX_COLOR_WITH_ALPHA.exec(color)?.[1] ?? color;
+};
+
+/** Whether the color is fully transparent, which makes its annotation an area which can only be hovered. */
+export const isFullyTransparent = (color: string): boolean => {
+  const rgba = RGBA_COLOR.exec(color);
+  return color === 'transparent' || (rgba !== null && Number(rgba[4]) === 0);
+};
+
+/**
+ * Reports to the chart that the pointer is over the range annotation for as long as its tooltip,
+ * which the chart shows only on hover, is shown.
+ */
+const RangeAnnotationHoverSignal = ({
+  id,
+  onHoverChange,
+}: {
+  id: string;
+  onHoverChange: (id: string, isHovered: boolean) => void;
+}) => {
+  useEffect(() => {
+    onHoverChange(id, true);
+    return () => onHoverChange(id, false);
+  }, [id, onHoverChange]);
+  return null;
 };
 
 const styles = {
