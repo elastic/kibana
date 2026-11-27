@@ -5,31 +5,25 @@
  * 2.0.
  */
 
-import React from 'react';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import {
   triageMatchFpDecisionsStepCommonDefinition,
   triageRevokeFpDecisionStepCommonDefinition,
   triageStoreFpDecisionsStepCommonDefinition,
 } from '../../common/step_types/alert_triage';
+import { AlertZeroStepIcon } from './alertzero_step_icon';
 
 export const triageStoreFpDecisionsPublicStepDefinition = createPublicStepDefinition({
   ...triageStoreFpDecisionsStepCommonDefinition,
-  icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/save').then(({ icon }) => ({ default: icon }))
-  ),
+  icon: AlertZeroStepIcon,
 });
 
 export const triageMatchFpDecisionsPublicStepDefinition = createPublicStepDefinition({
   ...triageMatchFpDecisionsStepCommonDefinition,
-  icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/filter').then(({ icon }) => ({ default: icon }))
-  ),
+  icon: AlertZeroStepIcon,
 });
 
 export const triageRevokeFpDecisionPublicStepDefinition = createPublicStepDefinition({
   ...triageRevokeFpDecisionStepCommonDefinition,
-  icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/undo').then(({ icon }) => ({ default: icon }))
-  ),
+  icon: AlertZeroStepIcon,
 });

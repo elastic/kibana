@@ -18,7 +18,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { AlertZeroIcon } from '@kbn/security-solution-navigation';
 import { useKibanaTimeZone } from '../../hooks/use_kibana_time_zone';
 
 /**
@@ -180,7 +179,7 @@ export const AlertZeroPageHeader: React.FC<AlertZeroPageHeaderProps> = ({
                   border-color ${euiTheme.animation.slow} ease;
               `}
             >
-              <EuiIcon type={AlertZeroIcon} size="m" aria-hidden={true} />
+              <EuiIcon type="productAlertZero" size="m" aria-hidden={true} />
               <span
                 style={{
                   display: 'inline-block',

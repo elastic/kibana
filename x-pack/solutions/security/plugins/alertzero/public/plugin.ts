@@ -104,7 +104,7 @@ export class AlertZeroPublicPlugin
       title: APP_TITLE,
       appRoute: ALERTZERO_APP_PATH,
       category: DEFAULT_APP_CATEGORIES.security,
-      euiIconType: 'securitySignalDetected',
+      euiIconType: 'productAlertZero',
       // Inaccessible until the per-space setting is on. Core then empties `visibleIn` and
       // `deepLinks` for us, which is what removes the AlertZero nodes from the Security
       // navigation tree — those trees hold no check of their own.

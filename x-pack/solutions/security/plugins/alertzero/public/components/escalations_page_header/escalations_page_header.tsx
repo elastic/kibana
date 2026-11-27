@@ -17,7 +17,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { AlertZeroIcon } from '@kbn/security-solution-navigation';
 
 const getEscalationsHeroTitle = ({
   isLoading,
@@ -116,7 +115,7 @@ export const EscalationsPageHeader: React.FC<EscalationsPageHeaderProps> = ({
                   border-color ${euiTheme.animation.slow} ease;
               `}
             >
-              <EuiIcon type={AlertZeroIcon} size="m" aria-hidden={true} />
+              <EuiIcon type="productAlertZero" size="m" aria-hidden={true} />
               <span
                 style={{
                   display: 'inline-block',

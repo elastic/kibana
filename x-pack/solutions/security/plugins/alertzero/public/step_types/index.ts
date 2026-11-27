@@ -23,4 +23,36 @@ export const registerAlertZeroPublicStepDefinitions = (
   workflowsExtensions.registerStepDefinition(() =>
     import('./triage_decision_steps').then((m) => m.triageRevokeFpDecisionPublicStepDefinition)
   );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./alert_triage_steps').then((m) => m.triageHeadroomPublicStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./alert_triage_steps').then((m) => m.triagePlanSweepPublicStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./alert_triage_steps').then((m) => m.triageLoadAlertsPublicStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./alert_triage_steps').then((m) => m.triageTagPatternKeysPublicStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./alert_triage_steps').then((m) => m.triageGroupFpCandidatesPublicStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./alert_triage_steps').then((m) => m.triageJoinProposalPublicStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./alert_triage_steps').then((m) => m.triageRetagProposalAlertsPublicStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./resolve_proposals_step').then((m) => m.resolveProposalsPublicStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./summarize_investigation_step').then(
+      (m) => m.summarizeInvestigationPublicStepDefinition
+    )
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./package_report_step').then((m) => m.packageReportPublicStepDefinition)
+  );
 };
