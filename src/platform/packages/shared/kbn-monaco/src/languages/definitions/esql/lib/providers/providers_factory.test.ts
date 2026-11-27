@@ -19,13 +19,13 @@ describe('Providers Factory', () => {
     ({
       isDisposed: () => false,
       getValue: jest.fn().mockReturnValue('query text'),
-    } as unknown as monaco.editor.ITextModel);
+    }) as unknown as monaco.editor.ITextModel;
 
   const disposedModel = () =>
     ({
       isDisposed: () => true,
       getValue: jest.fn(),
-    } as unknown as monaco.editor.ITextModel);
+    }) as unknown as monaco.editor.ITextModel;
 
   describe('createMonacoProvider', () => {
     it('returns the run function result for a usable model', async () => {

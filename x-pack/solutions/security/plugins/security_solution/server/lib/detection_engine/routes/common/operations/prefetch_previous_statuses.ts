@@ -303,7 +303,7 @@ export const prefetchPreviousStatusesByQuery = async (
       : {}),
   });
   const totalHits = searchResponse.hits.total;
-  const totalCount = typeof totalHits === 'number' ? totalHits : totalHits?.value ?? 0;
+  const totalCount = typeof totalHits === 'number' ? totalHits : (totalHits?.value ?? 0);
   const truncated = totalCount > MAX_ALERTS_PER_TRIGGER;
   const ids: string[] = [];
   const previousStatuses: PreviousStatus[] = [];

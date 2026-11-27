@@ -19,7 +19,7 @@ const useKibanaContextForPluginMock = useKibanaContextForPlugin as jest.MockedFu
   typeof useKibanaContextForPlugin
 >;
 
-const asProject = (id: string) => ({ _id: id } as CPSProject);
+const asProject = (id: string) => ({ _id: id }) as CPSProject;
 
 const createCpsManager = ({ hasLinkedProjects = true }: { hasLinkedProjects?: boolean } = {}) =>
   ({
@@ -29,7 +29,7 @@ const createCpsManager = ({ hasLinkedProjects = true }: { hasLinkedProjects?: bo
       .mockResolvedValue({ origin: asProject('origin'), linkedProjects: [asProject('linked')] }),
     getTotalProjectCount: jest.fn().mockReturnValue(3),
     hasLinkedProjects: jest.fn().mockReturnValue(hasLinkedProjects),
-  } as unknown as ICPSManager);
+  }) as unknown as ICPSManager;
 
 const renderJobProjectScopes = (
   jobs: JobProjectScopeItem[],

@@ -57,7 +57,7 @@ const mockMutedInstances = (mutedByRuleId?: Record<string, string[]>) => {
   mockedGetSnoozeState.mockImplementation(async ({ ruleIds }) => ({
     data: ruleIds.map((id) => ({
       id,
-      mutedAlertIds: mutedByRuleId ? mutedByRuleId[id] ?? [] : TEST_INSTANCE_IDS,
+      mutedAlertIds: mutedByRuleId ? (mutedByRuleId[id] ?? []) : TEST_INSTANCE_IDS,
       snoozedInstances: [],
     })),
   }));

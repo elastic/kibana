@@ -14,7 +14,7 @@ export type ReservedActionGroups<RecoveryActionGroupId extends string> =
 
 export type WithoutReservedActionGroups<
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 > = ActionGroupIds extends ReservedActionGroups<RecoveryActionGroupId> ? never : ActionGroupIds;
 
 export function getBuiltinActionGroups<RecoveryActionGroupId extends string>(

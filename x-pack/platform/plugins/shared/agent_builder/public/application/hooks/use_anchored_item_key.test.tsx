@@ -56,10 +56,10 @@ const setState = (state: State) => {
   const streamType = isAttaching
     ? 'attach'
     : isResuming
-    ? 'resume'
-    : isStreaming
-    ? 'send'
-    : undefined;
+      ? 'resume'
+      : isStreaming
+        ? 'send'
+        : undefined;
   jest.mocked(useCurrentConversationStreamType).mockReturnValue(streamType);
   jest.mocked(useTimelineItems).mockReturnValue(items);
 };

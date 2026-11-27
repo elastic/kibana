@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
@@ -25,6 +26,10 @@ const mockGetDirectoryHeaderLinks = jest.fn<TutorialDirectoryHeaderLinkComponent
 const mockGetUrlForApp = jest.fn(
   (appId: string, { path }: { path: string }) => `/app/${appId}${path}`
 );
+const mockApplications$ = new BehaviorSubject<ReadonlyMap<string, { id: string; title: string }>>(
+  new Map([['home', { id: 'home', title: 'Home' }]])
+);
+let mockHash = '#/tutorial_directory/sampleData';
 const mockAddBasePath = jest.fn((url: string) => url);
 
 jest.mock('../kibana_services', () => ({
@@ -41,10 +46,11 @@ jest.mock('../kibana_services', () => ({
     },
     application: {
       getUrlForApp: mockGetUrlForApp,
+      applications$: mockApplications$,
     },
     history: {
       push: mockHistoryPush,
-      location: { hash: '#/tutorial_directory/sampleData' },
+      location: { hash: mockHash },
     },
   }),
 }));
@@ -62,6 +68,7 @@ describe('TutorialDirectory', () => {
     mockSetBreadcrumbs.mockClear();
     mockDocTitleChange.mockClear();
     mockHistoryPush.mockClear();
+    mockHash = '#/tutorial_directory/sampleData';
     mockGetAddDataTabs.mockReturnValue([]);
     mockGetDirectoryHeaderLinks.mockReturnValue([]);
   });
@@ -149,5 +156,35 @@ describe('TutorialDirectory', () => {
       'true'
     );
     expect(screen.getByTestId('uploadFileTab')).toBeInTheDocument();
+  });
+  describe('with return params', () => {
+    const query = '?returnAppId=home&returnPath=%23%2F';
+
+    beforeEach(() => {
+      mockHash = `#/tutorial_directory/sampleData${query}`;
+    });
+
+    it('names the return app by its registered title in the back link', async () => {
+      renderDirectory();
+
+      const back = await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.back);
+      expect(back).toHaveAttribute('href', '/app/home#/');
+      expect(back).toHaveAccessibleName('Back to Home');
+    });
+
+    it('keeps the query string when switching tabs', async () => {
+      mockGetAddDataTabs.mockReturnValue([
+        {
+          id: 'fileDataViz',
+          name: 'Upload file',
+          getComponent: () => <div data-test-subj="uploadFileTab" />,
+        },
+      ]);
+      renderDirectory();
+
+      fireEvent.click(await screen.findByTestId('homeTab-fileDataViz'));
+
+      expect(mockHistoryPush).toHaveBeenCalledWith(`#/tutorial_directory/fileDataViz${query}`);
+    });
   });
 });

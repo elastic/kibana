@@ -21,7 +21,7 @@ const createDataSource = (name: string, type: DataSource['type'] | string): Data
     type,
     description: '',
     settings: {},
-  } as unknown as DataSource);
+  }) as unknown as DataSource;
 
 describe('DataSourcesTable', () => {
   const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: unknown[]) => {

@@ -98,4 +98,4 @@ export const createConversationMarkdownComponents = ({
         {children}
       </EuiTableRowCell>
     ),
-  } satisfies ConversationMarkdownComponents);
+  }) satisfies ConversationMarkdownComponents;

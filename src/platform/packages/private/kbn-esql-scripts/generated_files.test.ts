@@ -28,8 +28,8 @@ const listFiles = (dir: string): string[] =>
 describe('ES|QL generated definitions and docs', () => {
   let renderedFiles: GeneratedFile[] = [];
 
-  beforeAll(() => {
-    renderedFiles = renderGeneratedFiles();
+  beforeAll(async () => {
+    renderedFiles = await renderGeneratedFiles();
   }, RENDER_TIMEOUT_MS);
 
   it('are in sync with @elastic/esql-definitions and the generators', () => {

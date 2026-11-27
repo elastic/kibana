@@ -90,7 +90,10 @@ export class ObservabilityAlertingPage {
   public readonly bulkActionsMenuButton: Locator;
   public readonly addToCaseBulkAction: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.pageTitle = this.page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title);
     this.appNotFoundPageContent = this.page.testSubj.locator('appNotFoundPageContent');
     this.requiredPrivilegesPrompt = this.page.testSubj.locator('alertingRequiredPrivilegesPrompt');

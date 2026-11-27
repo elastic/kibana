@@ -21,8 +21,7 @@ import {
 } from '../../components/security_redux_embedded_provider';
 import { EntityCardFlyoutOverviewCanvas } from '../../components/entity_card_flyout_overview_canvas';
 
-export interface EntityAttachmentCanvasContentProps
-  extends AttachmentRenderProps<EntityAttachment> {
+export interface EntityAttachmentCanvasContentProps extends AttachmentRenderProps<EntityAttachment> {
   experimentalFeatures: ExperimentalFeatures;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }

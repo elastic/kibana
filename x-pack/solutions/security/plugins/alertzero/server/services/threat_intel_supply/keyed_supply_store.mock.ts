@@ -123,7 +123,7 @@ export const createKeyedSupplyStore = ({
       const doc = docs.get(keyOf(spaceId, `${CTH}-${workflowIdSuffix}`));
       return {
         installed: getHuntEnabled ? true : doc != null,
-        enabled: getHuntEnabled ? getHuntEnabled(spaceId) : doc?.enabled ?? false,
+        enabled: getHuntEnabled ? getHuntEnabled(spaceId) : (doc?.enabled ?? false),
       };
     }
   );
@@ -184,4 +184,4 @@ export const createHardGateEsClient = (reportsIndexExists: boolean): Elasticsear
       })),
     },
     inference: { get: jest.fn(async () => ({})) },
-  } as unknown as ElasticsearchClient);
+  }) as unknown as ElasticsearchClient;

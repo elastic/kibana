@@ -272,9 +272,8 @@ describe('NavigationCustomizationService', () => {
     const openModalGetCallbacks = async (
       savedCustomization?: NavigationCustomization
     ): Promise<any> => {
-      const { openCustomizeNavigationModal: openCustomizeNavigationModalModule } = await import(
-        '@kbn/navigation-customization-components'
-      );
+      const { openCustomizeNavigationModal: openCustomizeNavigationModalModule } =
+        await import('@kbn/navigation-customization-components');
       (openCustomizeNavigationModalModule as jest.Mock).mockClear();
 
       const { core, chrome } = makeDeps();

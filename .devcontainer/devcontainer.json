@@ -10,7 +10,7 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "dbaeumer.vscode-eslint",
+        "oxc.oxc-vscode",
         "ms-azuretools.vscode-docker",
         "editorconfig.editorconfig",
         "timonwong.shellcheck",

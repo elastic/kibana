@@ -18,7 +18,7 @@ import type { HookProps } from './use_multi_content';
  * @param Component The component to wrap with the MultiContentProvider
  */
 export function WithMultiContent<
-  P extends object = { [key: string]: any } // The Props for the wrapped component
+  P extends object = { [key: string]: any }, // The Props for the wrapped component
 >(Component: React.FunctionComponent<P & HookProps<any>>) {
   return function <T extends object = { [key: string]: any }>(props: P & HookProps<T>) {
     const { defaultValue, onChange, ...rest } = props;

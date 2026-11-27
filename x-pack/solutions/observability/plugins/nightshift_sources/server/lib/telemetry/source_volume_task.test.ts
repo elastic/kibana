@@ -43,7 +43,7 @@ const source = (
     attributes: { enabled, esql, type: 'logs' },
     references: [],
     score: 0,
-  } as unknown as SavedObjectsFindResult<NightshiftSourceAttributes>);
+  }) as unknown as SavedObjectsFindResult<NightshiftSourceAttributes>;
 
 const setup = (sources: Array<SavedObjectsFindResult<NightshiftSourceAttributes>>) => {
   const soRepository = savedObjectsRepositoryMock.create();

@@ -26,7 +26,7 @@ const testPanel = (overrides: Record<string, unknown> = {}) =>
     grid: { x: 0, y: 0, w: 12, h: 8 },
     config: { title: 'Count' },
     ...overrides,
-  } as DashboardPanel);
+  }) as DashboardPanel;
 
 const pinnedPanel = (title = 'Host') =>
   getControlsSchema().parse({
@@ -81,7 +81,7 @@ describe('arePanelConfigsEqual', () => {
           ({
             attributes: (a: { title?: string } | undefined, b: { title?: string } | undefined) =>
               a?.title === b?.title,
-          } as StateComparators<object>)
+          }) as StateComparators<object>
       )
     ).toBe(true);
   });

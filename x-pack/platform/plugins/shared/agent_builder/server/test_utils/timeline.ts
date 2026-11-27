@@ -55,7 +55,7 @@ const fixtureConversation = (rounds: ConversationRound[]): Conversation =>
     created_at: EPOCH,
     updated_at: EPOCH,
     rounds,
-  } as Conversation);
+  }) as Conversation;
 
 /** An events-native conversation storing `events` (its rounds projection is irrelevant here). */
 export const eventsNativeConversation = (events: TimelineEvent[]): Conversation => ({
@@ -127,7 +127,7 @@ export const userMessageEvent = (roundId: string, createdAt = T0): TimelineEvent
     created_at: createdAt,
     actor: userActor,
     data: { message: `hello ${roundId}` },
-  } as TimelineEvent);
+  }) as TimelineEvent;
 
 export const promptResponseEvent = (
   roundId: string,
@@ -141,7 +141,7 @@ export const promptResponseEvent = (
     created_at: createdAt,
     actor: userActor,
     data: { prompt_requested_event_id: answers, responses: {} },
-  } as TimelineEvent);
+  }) as TimelineEvent;
 
 /** The `RoundState` a pause stores: one `execute_tool` node per tool call the run paused on. */
 export const pauseState = (toolCallIds: string[]): RoundState => ({
@@ -322,7 +322,7 @@ export const pausedRoundTimeline = (
           tool_id: 'my_tool',
           params: {},
           results: [],
-        } as ConversationRoundStep)
+        }) as ConversationRoundStep
     ),
     outcome: {
       type: 'prompt_requested',
@@ -332,7 +332,7 @@ export const pausedRoundTimeline = (
             id: `tools.my_tool.confirmation.${id}`,
             type: AgentPromptType.confirmation,
             tool_call_id: id,
-          } as never)
+          }) as never
       ),
     },
     ...(toolCallIds.length > 0 ? { state: pauseState(toolCallIds) } : {}),

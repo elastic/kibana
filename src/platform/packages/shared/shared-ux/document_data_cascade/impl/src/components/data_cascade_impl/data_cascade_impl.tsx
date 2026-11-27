@@ -167,12 +167,15 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   const connectedChildrenPersistedAnchors = useMemo(() => {
     if (!initialState?.connectedChildren) return undefined;
 
-    return Object.entries(initialState.connectedChildren).reduce((acc, [cellId, child]) => {
-      if (child.isConnected) {
-        acc[cellId] = child.scrollAnchorItemIndex;
-      }
-      return acc;
-    }, {} as Record<string, number | null>);
+    return Object.entries(initialState.connectedChildren).reduce(
+      (acc, [cellId, child]) => {
+        if (child.isConnected) {
+          acc[cellId] = child.scrollAnchorItemIndex;
+        }
+        return acc;
+      },
+      {} as Record<string, number | null>
+    );
   }, [initialState?.connectedChildren]);
 
   const [restorationTarget] = useState(() => {
@@ -274,9 +277,9 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
 
   const shouldRenderStickyHeader = Boolean(
     activeStickyRow &&
-      isCascadeGroupRowNode(currentGroupByColumns, activeStickyRow) &&
-      activeStickyMeasurement &&
-      (virtualizer.scrollOffset ?? 0) > activeStickyMeasurement.start
+    isCascadeGroupRowNode(currentGroupByColumns, activeStickyRow) &&
+    activeStickyMeasurement &&
+    (virtualizer.scrollOffset ?? 0) > activeStickyMeasurement.start
   );
 
   // Rendered by the auto sizer on every render of the cascade, so that it reads the virtualizer's current items

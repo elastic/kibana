@@ -104,7 +104,7 @@ describe('useElementHeight', () => {
         ({
           height: currentHeight,
           width: 200,
-        } as DOMRect)
+        }) as DOMRect
     );
 
     const { result } = renderHook(() => {
@@ -185,7 +185,7 @@ describe('useElementHeight', () => {
         ({
           height,
           width: 200,
-        } as DOMRect)
+        }) as DOMRect
     );
 
     const { result } = renderHook(() => {

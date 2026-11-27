@@ -17,11 +17,10 @@ import { ContentFrameworkTable } from '../content_framework';
 import { HighlightField } from '../observability/traces/components/highlight_field';
 import { fieldLabels } from '../observability/constants';
 
-interface LogsOverviewHighlightsProps
-  extends Pick<
-    DocViewRenderProps,
-    'filter' | 'onAddColumn' | 'onRemoveColumn' | 'dataView' | 'hit'
-  > {
+interface LogsOverviewHighlightsProps extends Pick<
+  DocViewRenderProps,
+  'filter' | 'onAddColumn' | 'onRemoveColumn' | 'dataView' | 'hit'
+> {
   formattedDoc: LogDocumentOverview;
 }
 

@@ -47,19 +47,19 @@ const sourceResponse = (rows: MockRow[]): ESQLSearchResponse =>
       ...(row.createdAt !== undefined ? [row.createdAt] : []),
       ...(row.operatorClosed !== undefined ? [row.operatorClosed] : []),
     ]),
-  } as unknown as ESQLSearchResponse);
+  }) as unknown as ESQLSearchResponse;
 
 const dataJsonResponse = (dataJsonRows: string[]): ESQLSearchResponse =>
   ({
     columns: [{ name: 'data_json', type: 'keyword' }],
     values: dataJsonRows.map((dataJson) => [dataJson]),
-  } as unknown as ESQLSearchResponse);
+  }) as unknown as ESQLSearchResponse;
 
 const countResponse = (total: number): ESQLSearchResponse =>
   ({
     columns: [{ name: 'total', type: 'long' }],
     values: [[total]],
-  } as unknown as ESQLSearchResponse);
+  }) as unknown as ESQLSearchResponse;
 
 const dataDoc = {
   event_id: 'agent-event-1',
@@ -128,7 +128,7 @@ const makeStatusAlertEventsClient = (
   ({
     createAlertEvent: jest.fn().mockResolvedValue(undefined),
     ...overrides,
-  } as jest.Mocked<AlertEventsClientApi>);
+  }) as jest.Mocked<AlertEventsClientApi>;
 
 const makeStatusAlertActionsClient = (
   overrides: Partial<jest.Mocked<AlertActionsClientApi>> = {}
@@ -136,7 +136,7 @@ const makeStatusAlertActionsClient = (
   ({
     createEpisodeAction: jest.fn().mockResolvedValue(undefined),
     ...overrides,
-  } as jest.Mocked<AlertActionsClientApi>);
+  }) as jest.Mocked<AlertActionsClientApi>;
 
 const createStatusSearchClient = (
   latest: SignificantEvent | undefined,
@@ -329,7 +329,7 @@ describe('RuleEventsClient', () => {
 
     describe('an operator change', () => {
       const withEpisode = (overrides: Partial<SignificantEvent> = {}) =>
-        ({ ...createStatusEvent(overrides), episode_id: 'episode-7' } as SignificantEvent);
+        ({ ...createStatusEvent(overrides), episode_id: 'episode-7' }) as SignificantEvent;
 
       it.each<['inactive' | 'active', string]>([
         ['inactive', ALERT_EPISODE_ACTION_TYPE.DEACTIVATE],
@@ -641,7 +641,7 @@ describe('RuleEventsClient', () => {
       );
 
     const withEpisode = (overrides: Partial<SignificantEvent> = {}) =>
-      ({ ...createStatusEvent(overrides), episode_id: 'episode-1' } as SignificantEvent);
+      ({ ...createStatusEvent(overrides), episode_id: 'episode-1' }) as SignificantEvent;
 
     beforeEach(() => telemetry.trackEventStatusChanged.mockReset());
 
@@ -1262,7 +1262,7 @@ describe('RuleEventsClient', () => {
               { name: 'episode_id', type: 'keyword' },
             ],
             values: Array.from({ length: 10_000 }, (_, index) => [1, 'event-1', `ep-${index}`]),
-          } as unknown as ESQLSearchResponse)
+          }) as unknown as ESQLSearchResponse
       );
 
       await expect(client.findEventIdsByEpisodeIds(['id-1'])).rejects.toThrow(
@@ -1287,7 +1287,7 @@ describe('RuleEventsClient', () => {
               [1, 'episode-2', 'event-2'],
               [1, 'episode-2', 'event-3'],
             ],
-          } as unknown as ESQLSearchResponse)
+          }) as unknown as ESQLSearchResponse
       );
 
       const eventIdsByEpisode = await client.findEventIdsByEpisodeIds([
@@ -1346,7 +1346,7 @@ describe('RuleEventsClient', () => {
 
     it('leaves the investigation counts out, and runs no query for them, when the episodes could not be read', async () => {
       const { client, query } = createClient(
-        async () => ({ columns: [], values: [] } as unknown as ESQLSearchResponse)
+        async () => ({ columns: [], values: [] }) as unknown as ESQLSearchResponse
       );
 
       const facets = await client.countFacets({
@@ -1510,7 +1510,7 @@ describe('RuleEventsClient', () => {
             reason = 'noise',
           }) => [at, groupHash, episodeId, type, actor, reason]
         ),
-      } as unknown as ESQLSearchResponse);
+      }) as unknown as ESQLSearchResponse;
 
     const heads = [{ groupHash: 'series-1', episodeId: 'episode-1' }];
     const setup = (docs: ActionDoc[] | Error) => {
@@ -1629,7 +1629,7 @@ describe('RuleEventsClient', () => {
       ({
         columns: [{ name: 'group_hash', type: 'keyword' }],
         values: hashes.map((hash) => [hash]),
-      } as unknown as ESQLSearchResponse);
+      }) as unknown as ESQLSearchResponse;
     const actionResponse = (
       rows: Array<[string, string | null, string | null]>
     ): ESQLSearchResponse =>
@@ -1640,7 +1640,7 @@ describe('RuleEventsClient', () => {
           { name: 'reason', type: 'text' },
         ],
         values: rows,
-      } as unknown as ESQLSearchResponse);
+      }) as unknown as ESQLSearchResponse;
     const setup = (actions: ESQLSearchResponse, hashes: string[] = ['group-1']) => {
       const logger = { error: jest.fn() };
       const query = jest.fn(async (request: EsqlRequest) =>
@@ -1692,7 +1692,7 @@ describe('RuleEventsClient', () => {
           { name: 'rule.id', type: 'keyword' },
         ],
         values: rows.map(([ruleId, latest]) => [latest, ruleId]),
-      } as unknown as ESQLSearchResponse);
+      }) as unknown as ESQLSearchResponse;
 
     it('returns an empty map without querying when no rules are requested', async () => {
       const { client, query } = createClient(async () => latestResponse([]));
@@ -2098,7 +2098,7 @@ describe('RuleEventsClient', () => {
         createAlertEvent: jest
           .fn()
           .mockResolvedValue({ group_hash: 'hash-1', alert_id: 'alert-1' }),
-      } as jest.Mocked<Pick<AlertEventsClientApi, 'createAlertEvent'>>);
+      }) as jest.Mocked<Pick<AlertEventsClientApi, 'createAlertEvent'>>;
     const clientWith = ({
       head,
       writer,

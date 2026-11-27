@@ -63,8 +63,8 @@ export async function getBulkOperationTaskResults(
   const status = !state?.isDone
     ? 'pending'
     : state?.error || state?.results?.some((r) => !r.success)
-    ? 'failed'
-    : 'success';
+      ? 'failed'
+      : 'success';
   return {
     status,
     error: state.error,

@@ -18,6 +18,6 @@ export const apiPublishesApproximation = (
 ): unknownApi is PublishesApproximation =>
   Boolean(
     unknownApi &&
-      typeof (unknownApi as PublishesApproximation).isApproximate$ === 'object' &&
-      (unknownApi as PublishesApproximation).isApproximate$ !== null
+    typeof (unknownApi as PublishesApproximation).isApproximate$ === 'object' &&
+    (unknownApi as PublishesApproximation).isApproximate$ !== null
   );

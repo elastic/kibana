@@ -62,7 +62,7 @@ describe('eval baselines routes', () => {
       agentBuilder: Promise.resolve({
         spaces: { getSpaceId: () => spaceId },
       }),
-    } as any);
+    }) as any;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -92,7 +92,7 @@ describe('eval baselines routes', () => {
       getInternalServices: () =>
         ({
           evalBaselines: { pin, repin, findLatest, getScores },
-        } as unknown as InternalStartServices),
+        }) as unknown as InternalStartServices,
       pluginsSetup: { evals: { enabled: true, mode: 'full' } },
       logger: loggingSystemMock.createLogger(),
     } as unknown as RouteDependencies);
@@ -111,7 +111,7 @@ describe('eval baselines routes', () => {
       registerEvalBaselineRoutes({
         router: { get: capture, post: capture },
         coreSetup: { getStartServices: jest.fn() },
-        getInternalServices: () => ({} as InternalStartServices),
+        getInternalServices: () => ({}) as InternalStartServices,
         pluginsSetup,
         logger: loggingSystemMock.createLogger(),
       } as unknown as RouteDependencies);

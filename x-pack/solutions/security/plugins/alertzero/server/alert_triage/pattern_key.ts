@@ -251,7 +251,7 @@ export const describePatternKey = (key: string): PatternKeyDescription => {
     string | number | null,
     string,
     string,
-    Array<[string, string]>
+    Array<[string, string]>,
   ];
   return {
     ruleId: ruleId ?? '',

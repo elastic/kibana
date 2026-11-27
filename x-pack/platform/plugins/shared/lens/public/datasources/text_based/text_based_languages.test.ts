@@ -949,6 +949,7 @@ describe('Textbased Data Source', () => {
             operation: {
               dataType: 'number',
               isBucketed: false,
+              scale: 'ratio',
               label: 'bytes',
             },
           },
@@ -957,6 +958,7 @@ describe('Textbased Data Source', () => {
             operation: {
               dataType: 'string',
               isBucketed: true,
+              scale: 'ordinal',
               label: 'dest',
             },
           },
@@ -1092,6 +1094,7 @@ describe('Textbased Data Source', () => {
             operation: {
               dataType: 'date',
               isBucketed: true,
+              scale: 'interval',
               label: '@timestamp',
             },
           },
@@ -1100,6 +1103,7 @@ describe('Textbased Data Source', () => {
             operation: {
               dataType: 'string',
               isBucketed: true,
+              scale: 'ordinal',
               label: 'dest',
             },
           },
@@ -1790,6 +1794,68 @@ describe('Textbased Data Source', () => {
         (c) => c.columnId === 'bucket'
       );
       expect(persistedBucket?.meta?.type).toEqual('string');
+    });
+
+    test('treats numeric ES|QL bucket columns as interval buckets', () => {
+      const state = {
+        layers: {
+          a: {
+            columns: [
+              { columnId: 'count', fieldName: 'count', meta: { type: 'number' } },
+              { columnId: 'b', fieldName: 'b', meta: { type: 'number' } },
+            ],
+            query: { esql: 'FROM numeric_bucket_test' },
+            index: 'foo',
+          },
+        },
+      } as unknown as TextBasedPrivateState;
+
+      const activeData = {
+        a: {
+          type: 'datatable',
+          columns: [
+            { id: 'count', name: 'count', meta: { type: 'number' } },
+            {
+              id: 'b',
+              name: 'b',
+              meta: { type: 'number', esMeta: { bucket: { interval: 1000 } } },
+            },
+          ],
+          rows: [],
+        },
+      } as unknown as Record<string, Datatable>;
+
+      const suggestions = TextBasedDatasource.getDatasourceSuggestionsFromCurrentState(
+        state,
+        indexPatterns,
+        undefined,
+        activeData
+      );
+
+      const unchanged = suggestions.find((s) => s.table.changeType === 'unchanged');
+      expect(unchanged?.table.columns).toEqual([
+        {
+          columnId: 'count',
+          operation: expect.objectContaining({
+            dataType: 'number',
+            isBucketed: false,
+            scale: 'ratio',
+          }),
+        },
+        {
+          columnId: 'b',
+          operation: expect.objectContaining({
+            dataType: 'number',
+            isBucketed: true,
+            scale: 'interval',
+          }),
+        },
+      ]);
+
+      const metricOnly = suggestions.find(
+        (s) => s.table.changeType === 'reduced' && s.table.columns.length === 1
+      );
+      expect(metricOnly?.table.columns.map((c) => c.columnId)).toEqual(['count']);
     });
   });
 

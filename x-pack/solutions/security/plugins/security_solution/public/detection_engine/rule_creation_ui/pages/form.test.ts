@@ -30,7 +30,7 @@ const createDeferred = <T>(): Deferred<T> => {
   return deferred;
 };
 
-const asDataView = (id: string): DataView => ({ id, title: `${id}-title` } as unknown as DataView);
+const asDataView = (id: string): DataView => ({ id, title: `${id}-title` }) as unknown as DataView;
 
 describe('useRuleIndexPattern', () => {
   const getDataView = jest.fn();

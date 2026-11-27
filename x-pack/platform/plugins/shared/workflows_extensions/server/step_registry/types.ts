@@ -80,7 +80,7 @@ export interface PhaseErrorResult<Output extends z.ZodType = z.ZodType> {
 
 export type DurablePhaseResult<
   Output extends z.ZodType = z.ZodType,
-  State extends z.ZodObject = z.ZodObject
+  State extends z.ZodObject = z.ZodObject,
 > = PhaseDoneResult<Output> | PollContinueResult<State> | PhaseErrorResult<Output>;
 
 /**
@@ -92,7 +92,7 @@ export type StartWithHandoffHandler<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
   Config extends z.ZodObject = z.ZodObject,
-  State extends z.ZodObject = z.ZodObject
+  State extends z.ZodObject = z.ZodObject,
 > = (context: StepHandlerContext<Input, Config>) => Promise<DurablePhaseResult<Output, State>>;
 
 /**
@@ -104,7 +104,7 @@ export type PollHandler<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
   Config extends z.ZodObject = z.ZodObject,
-  State extends z.ZodObject = z.ZodObject
+  State extends z.ZodObject = z.ZodObject,
 > = (
   context: PollHandlerContext<Input, Config, State>
 ) => Promise<DurablePhaseResult<Output, State>>;
@@ -119,7 +119,7 @@ export type PollHandler<
 export type StepHandler<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
-  Config extends z.ZodObject = z.ZodObject
+  Config extends z.ZodObject = z.ZodObject,
 > = (context: StepHandlerContext<Input, Config>) => Promise<StepHandlerResult<Output>>;
 
 /**
@@ -138,7 +138,7 @@ export type StepHandler<
  */
 export type OnCancelHandler<
   Input extends z.ZodType = z.ZodType,
-  Config extends z.ZodObject = z.ZodObject
+  Config extends z.ZodObject = z.ZodObject,
 > = (context: StepHandlerContext<Input, Config>) => Promise<void> | void;
 
 // -----------------------------------------------------------------------------
@@ -187,7 +187,7 @@ export interface PollCeilings {
 export interface CommonServerStepDefinition<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
-  Config extends z.ZodObject = z.ZodObject
+  Config extends z.ZodObject = z.ZodObject,
 > extends CommonStepDefinition<Input, Output, Config> {
   onCancel?: OnCancelHandler<Input, Config>;
 }
@@ -227,7 +227,7 @@ export interface CommonServerStepDefinition<
 export interface ServerHandlerStepDefinition<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
-  Config extends z.ZodObject = z.ZodObject
+  Config extends z.ZodObject = z.ZodObject,
 > extends CommonServerStepDefinition<Input, Output, Config> {
   /**
    * The handler function that executes this step's logic.
@@ -239,7 +239,7 @@ export interface ServerHandlerStepDefinition<
 export type PollOnCancelHandler<
   Input extends z.ZodType = z.ZodType,
   Config extends z.ZodObject = z.ZodObject,
-  State extends z.ZodObject = z.ZodObject
+  State extends z.ZodObject = z.ZodObject,
 > = (context: PollHandlerContext<Input, Config, State>) => Promise<void> | void;
 
 /**
@@ -251,7 +251,7 @@ export type ServerPollStepDefinition<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
   Config extends z.ZodObject = z.ZodObject,
-  State extends z.ZodObject = z.ZodObject
+  State extends z.ZodObject = z.ZodObject,
 > = CommonServerStepDefinition<Input, Output, Config> & {
   poll: PollHandler<Input, Output, Config, State>;
   start?: StartWithHandoffHandler<Input, Output, Config, State>;
@@ -292,7 +292,7 @@ export const isPollStepDefinition = (
 export function createServerStepDefinition<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
-  Config extends z.ZodObject = z.ZodObject
+  Config extends z.ZodObject = z.ZodObject,
 >(
   definition: ServerHandlerStepDefinition<Input, Output, Config>
 ): ServerHandlerStepDefinition<Input, Output, Config> {
@@ -315,7 +315,7 @@ export function createPollServerStepDefinition<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
   Config extends z.ZodObject = z.ZodObject,
-  State extends z.ZodObject = z.ZodObject
+  State extends z.ZodObject = z.ZodObject,
 >(
   definition: ServerPollStepDefinition<Input, Output, Config, State>
 ): ServerPollStepDefinition<Input, Output, Config, State> {
@@ -390,8 +390,11 @@ export interface StepHandlerContext<TInput = z.ZodType, TConfig = z.ZodObject> {
  * Context passed to a {@link PollHandler}. Extends {@link StepHandlerContext}
  * with the persisted author `state` from the previous start/poll invocation.
  */
-export interface PollHandlerContext<TInput = z.ZodType, TConfig = z.ZodObject, TState = z.ZodObject>
-  extends StepHandlerContext<TInput, TConfig> {
+export interface PollHandlerContext<
+  TInput = z.ZodType,
+  TConfig = z.ZodObject,
+  TState = z.ZodObject,
+> extends StepHandlerContext<TInput, TConfig> {
   /**
    * Author state persisted by the most recent run/poll invocation.
    * Undefined on the first poll of a poll-only step (no `start` to seed it).
@@ -517,7 +520,7 @@ export type ServerStepDefinition<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
   Config extends z.ZodObject = z.ZodObject,
-  State extends z.ZodObject = z.ZodObject
+  State extends z.ZodObject = z.ZodObject,
 > =
   | ServerHandlerStepDefinition<Input, Output, Config>
   | ServerPollStepDefinition<Input, Output, Config, State>;

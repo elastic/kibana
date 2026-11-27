@@ -96,7 +96,7 @@ export function buildTriggerStepExecutionFromContext(
   const triggerOutput: JsonValue | undefined =
     triggerContext.triggerType !== 'manual' && hasManualInputs
       ? (manualInputs as JsonValue)
-      : (workflowExecution.context?.output as JsonValue | undefined) ?? undefined;
+      : ((workflowExecution.context?.output as JsonValue | undefined) ?? undefined);
 
   return {
     id: 'trigger',
@@ -105,7 +105,7 @@ export function buildTriggerStepExecutionFromContext(
     status: failedBeforeSteps ? ExecutionStatus.FAILED : ExecutionStatus.COMPLETED,
     input: triggerContext.input,
     output: triggerOutput,
-    error: failedBeforeSteps ? workflowExecution.error ?? undefined : undefined,
+    error: failedBeforeSteps ? (workflowExecution.error ?? undefined) : undefined,
     scopeStack: [],
     workflowRunId: workflowExecution.id,
     workflowId: workflowExecution.workflowId || '',

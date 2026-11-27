@@ -47,9 +47,8 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   validate: (ruleParams: any) => {
     if (!validateFunc) {
       (async function loadValidate() {
-        const { validateMonitorStatusParams } = await import(
-          './lazy_wrapper/validate_monitor_status'
-        );
+        const { validateMonitorStatusParams } =
+          await import('./lazy_wrapper/validate_monitor_status');
         validateFunc = validateMonitorStatusParams;
       })();
     }

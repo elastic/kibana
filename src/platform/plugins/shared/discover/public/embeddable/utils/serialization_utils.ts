@@ -147,7 +147,7 @@ export const serializeState = ({
       // A deleted tab or one without a Data View shows no table, so the overrides stay as they are
       overrides: selectedSessionTab?.tab
         ? getTableSettingsOverrides(selectedSessionTab.tab, tableSettings)
-        : runtimeState.overrides ?? {},
+        : (runtimeState.overrides ?? {}),
     };
   }
 

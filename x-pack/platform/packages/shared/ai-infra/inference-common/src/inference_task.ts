@@ -11,7 +11,7 @@ import type { ServerSentEventBase } from '@kbn/sse-utils';
  */
 export type InferenceTaskEventBase<
   TEventType extends string,
-  TData extends Record<string, any>
+  TData extends Record<string, any>,
 > = ServerSentEventBase<TEventType, TData>;
 
 export enum InferenceTaskEventType {

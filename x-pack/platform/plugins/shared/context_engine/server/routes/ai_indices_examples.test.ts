@@ -16,6 +16,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { registerAiIndexRoutes } from './ai_indices';
 import { registerSessionEventsRoutes } from './session_events';
 import { registerSessionMemoryRoutes } from './session_memory';
+import type { SessionMemoryClient } from '../session_memory_client/client';
+import { ContextEngineDisabledError } from '../session_memory_client/errors';
 
 interface ExampleMediaType {
   content: { 'application/json': { examples: Record<string, { value: unknown }> } };
@@ -79,21 +81,24 @@ registerAiIndexRoutes({
   getSpaces: jest.fn(),
 });
 
+// The memory write routes learn that Context Engine is off from the session memory client.
+const rejectAsDisabled = async () => {
+  throw new ContextEngineDisabledError();
+};
+const disabledSessionMemoryClient = async (): Promise<SessionMemoryClient> => ({
+  saveEvents: rejectAsDisabled,
+  remember: rejectAsDisabled,
+  forget: rejectAsDisabled,
+});
+
 registerSessionEventsRoutes({
   router: routerCapturingRoutes,
-  getSpaces: jest.fn(),
-  getSessionEventsService: jest.fn(),
-  getAiIndexService: jest.fn(),
-  isMemoryEnabled: async () => false,
+  getSessionMemoryClient: disabledSessionMemoryClient,
 });
 
 registerSessionMemoryRoutes({
   router: routerCapturingRoutes,
-  getSpaces: jest.fn(),
-  getSessionMemoryService: jest.fn(),
-  getAiIndexService: jest.fn(),
-  isMemoryEnabled: async () => false,
-  logger: loggerMock.create(),
+  getSessionMemoryClient: disabledSessionMemoryClient,
 });
 
 const routesWithExamples = registered.flatMap(({ route, opts, handler }) => {
@@ -114,7 +119,9 @@ const examplesOf = ({ content }: ExampleMediaType) =>
 
 const codeSampleBody = ({ lang, source }: CodeSample) =>
   JSON.parse(
-    lang === 'curl' ? /-d '([\s\S]*)'/.exec(source)?.[1] ?? '' : source.slice(source.indexOf('\n'))
+    lang === 'curl'
+      ? (/-d '([\s\S]*)'/.exec(source)?.[1] ?? '')
+      : source.slice(source.indexOf('\n'))
   );
 
 const codeSampleRequest = ({ lang, source }: CodeSample) => {

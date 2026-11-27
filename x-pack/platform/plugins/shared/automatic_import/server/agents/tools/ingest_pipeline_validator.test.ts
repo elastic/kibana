@@ -36,7 +36,7 @@ const buildFieldsMetadataClient = (ecsFields: Record<string, string>): IFieldsMe
       pick: () => ({ allowed_values: [{ name: 'event' }] }),
     }),
     matchesAnyTypeForEventCategory: jest.fn().mockResolvedValue(true),
-  } as unknown as IFieldsMetadataClient);
+  }) as unknown as IFieldsMetadataClient;
 
 const buildEsClient = (sources: Array<Record<string, unknown>>): ElasticsearchClient =>
   ({
@@ -45,7 +45,7 @@ const buildEsClient = (sources: Array<Record<string, unknown>>): ElasticsearchCl
         docs: sources.map((source) => ({ doc: { _source: source } })),
       }),
     },
-  } as unknown as ElasticsearchClient);
+  }) as unknown as ElasticsearchClient;
 
 const runValidator = async (
   sources: Array<Record<string, unknown>>,

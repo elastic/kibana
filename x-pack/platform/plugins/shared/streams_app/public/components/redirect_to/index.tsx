@@ -15,7 +15,7 @@ import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 
 export function RedirectTo<
   TPath extends PathsOf<StreamsAppRoutes>,
-  TParams extends TypeOf<StreamsAppRoutes, TPath, false>
+  TParams extends TypeOf<StreamsAppRoutes, TPath, false>,
 >({
   children,
   path,

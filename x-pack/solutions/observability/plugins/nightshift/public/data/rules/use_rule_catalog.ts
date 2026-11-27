@@ -85,13 +85,11 @@ const findV2Rules = async (
     const response = await findV2RulesPage(http, signal, page);
     total = response.total;
     rules.push(
-      ...response.items.map(
-        ({ metadata: { name, tags } }): CatalogRule => ({
-          name,
-          tags: tags ?? [],
-          family: 'universal',
-        })
-      )
+      ...response.items.map(({ metadata: { name, tags } }): CatalogRule => ({
+        name,
+        tags: tags ?? [],
+        family: 'universal',
+      }))
     );
     if (rules.length >= response.total || response.items.length < V2_PAGE_SIZE) break;
   }

@@ -204,7 +204,7 @@ describe('buildDiscoverEsqlUrl continuation (useHash)', () => {
           get: (id: string) => (id === 'DISCOVER_APP_LOCATOR' ? { getRedirectUrl } : undefined),
         },
       },
-    } as unknown as SharePluginStart);
+    }) as unknown as SharePluginStart;
 
   it('forwards the query, the absolute range and useHash, with no columns', () => {
     const getRedirectUrl = jest.fn().mockReturnValue('/app/r?l=DISCOVER_APP_LOCATOR');

@@ -349,8 +349,8 @@ function isSubscribeOfFlag(sourceCode, node) {
   const callee = unwrap(current.callee);
   return Boolean(
     callee &&
-      callee.type === 'MemberExpression' &&
-      expressionReadsFlag(sourceCode, callee.object, new Set())
+    callee.type === 'MemberExpression' &&
+    expressionReadsFlag(sourceCode, callee.object, new Set())
   );
 }
 

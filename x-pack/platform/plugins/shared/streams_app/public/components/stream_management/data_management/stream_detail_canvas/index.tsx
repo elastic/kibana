@@ -900,8 +900,8 @@ function StreamsCanvasInner() {
     flyoutName && flyoutKind === 'index'
       ? flyoutName
       : flyoutName && !flyoutKind && !flyoutDestination
-      ? flyoutName
-      : undefined;
+        ? flyoutName
+        : undefined;
 
   return (
     <div css={canvasColumnStyles}>

@@ -24,7 +24,7 @@ export const registerTimeSliderControlTransforms = (embeddable: EmbeddableSetup)
       transformOut: <
         StoredStateType extends Partial<
           LegacyStoredTimeSliderExplicitInput & TimeSliderControlState
-        >
+        >,
       >(
         state: StoredStateType
       ): Partial<TimeSliderControlState> => {

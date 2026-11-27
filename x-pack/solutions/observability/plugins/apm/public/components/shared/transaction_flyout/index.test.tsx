@@ -83,7 +83,7 @@ const buildTransaction = (id: string, name: string, dropped = 0) =>
       duration: { us: 5000 },
       span_count: { dropped },
     },
-  } as unknown as Transaction);
+  }) as unknown as Transaction;
 
 const setFetch = (data: Transaction | undefined, status: FETCH_STATUS) =>
   mockUseFetcher.mockReturnValue({ data, status, refetch: jest.fn() } as unknown as ReturnType<

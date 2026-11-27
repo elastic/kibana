@@ -268,7 +268,7 @@ export const AutonomyLevelControl: React.FC<AutonomyLevelControlProps> = ({
     selectedLevel === levels[levels.length - 1] &&
     selectedLevel === 'supervised';
   const warn = isHighest
-    ? cards.supervisedWarning ?? supervisedWarnForWorker(workerNameForCards(workerId))
+    ? (cards.supervisedWarning ?? supervisedWarnForWorker(workerNameForCards(workerId)))
     : null;
 
   return (

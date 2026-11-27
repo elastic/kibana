@@ -32,12 +32,12 @@ describe('readSessionMemories step', () => {
 
   const run = (stepInput: Record<string, unknown> = input) =>
     getReadSessionMemoriesStepDefinition({
-      getAiIndexService: () => ({ get } as unknown as AiIndexService),
+      getAiIndexService: () => ({ get }) as unknown as AiIndexService,
       isContextEngineEnabled: async () => true,
       isMemoryEnabled: async () => memoryEnabled,
       checkReadPrivilege: async () => canRead,
-      getSessionMemoryService: async () => ({ readRevised } as unknown as SessionMemoryService),
-      getSessionEventsService: async () => ({} as SessionEventsService),
+      getSessionMemoryService: async () => ({ readRevised }) as unknown as SessionMemoryService,
+      getSessionEventsService: async () => ({}) as SessionEventsService,
     }).handler(createMockStepContext({ input: stepInput, esClient: {}, spaceId: 'team-a' }));
 
   beforeEach(() => {

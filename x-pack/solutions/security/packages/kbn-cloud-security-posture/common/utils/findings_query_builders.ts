@@ -265,7 +265,7 @@ export const createMisconfigurationFindingsQuery = (resourceId?: string, ruleId?
   };
 };
 
-/* 
+/*
 The event.id is important in this query because removing it can lead to unintended results—specifically, 
 if vulnerabilityId = ['a'], the query may return documents where vulnerabilityId is ['a'], ['a', 'b'], and so on. 
 This happens because the check only verifies if the value exists within the combined string representation.

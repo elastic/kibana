@@ -17,6 +17,10 @@ const addDataLinkText = i18n.translate('home.breadcrumbs.addDataLinkText', {
   defaultMessage: 'Add data',
 });
 
+const homeLinkText = i18n.translate('home.breadcrumbs.homeTitle', {
+  defaultMessage: 'Home',
+});
+
 const previousPageLinkText = i18n.translate('home.breadcrumbs.previousPageLinkText', {
   defaultMessage: 'Previous page',
 });
@@ -66,14 +70,31 @@ function getReturnHref({
   };
 }
 
+type GetAppTitle = (appId: string) => string | undefined;
+
+function getReturnAppLinkText(returnAppId: string, getAppTitle?: GetAppTitle): string {
+  if (returnAppId === 'observabilityOnboarding') return addDataLinkText;
+  // Home registers its title as a literal, so use the localized string instead.
+  if (returnAppId === 'home') return homeLinkText;
+  return getAppTitle?.(returnAppId) ?? previousPageLinkText;
+}
+
+/** Returns the query string (with leading `?`) of a hash route, or an empty string. */
+export function getHashQuery(hash: string): string {
+  const queryStart = hash.indexOf('?');
+  return queryStart === -1 ? '' : hash.slice(queryStart);
+}
+
 export function getTutorialDirectoryFirstCrumb({
   hash,
   addBasePath,
   getUrlForApp,
+  getAppTitle,
 }: {
   hash: string;
   addBasePath: (path: string) => string;
   getUrlForApp: (appId: string, options: { path: string }) => string;
+  getAppTitle?: GetAppTitle;
 }): { text: string; href: string } {
   const returned = getReturnHref({ hash, getUrlForApp });
   if (!returned) {
@@ -83,8 +104,7 @@ export function getTutorialDirectoryFirstCrumb({
     };
   }
   return {
-    text:
-      returned.returnAppId === 'observabilityOnboarding' ? addDataLinkText : previousPageLinkText,
+    text: getReturnAppLinkText(returned.returnAppId, getAppTitle),
     href: returned.href,
   };
 }
@@ -93,12 +113,19 @@ export function getTutorialDirectoryAppHeaderBack({
   hash,
   addBasePath,
   getUrlForApp,
+  getAppTitle,
 }: {
   hash: string;
   addBasePath: (path: string) => string;
   getUrlForApp: (appId: string, options: { path: string }) => string;
+  getAppTitle?: GetAppTitle;
 }): { href: string; label: string } {
-  const crumb = getTutorialDirectoryFirstCrumb({ hash, addBasePath, getUrlForApp });
+  const crumb = getTutorialDirectoryFirstCrumb({
+    hash,
+    addBasePath,
+    getUrlForApp,
+    getAppTitle,
+  });
   const returned = getReturnHref({ hash, getUrlForApp });
   if (returned?.returnAppId === 'observabilityOnboarding') {
     return { href: crumb.href, label: selectionLinkText };
@@ -116,13 +143,10 @@ export function getTutorialIntroductionBackLink({
   getUrlForApp: (appId: string, options: { path: string }) => string;
 }): { href: string; text?: string } {
   const returned = getReturnHref({ hash, getUrlForApp });
-  if (!returned || returned.returnAppId !== 'observabilityOnboarding') {
-    return {
-      href: addBasePath('/app/integrations'),
-    };
+  if (returned?.returnAppId === 'observabilityOnboarding') {
+    return { text: backToSelectionLinkText, href: returned.href };
   }
   return {
-    text: backToSelectionLinkText,
-    href: returned.href,
+    href: addBasePath('/app/integrations'),
   };
 }

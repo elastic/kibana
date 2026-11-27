@@ -64,7 +64,7 @@ const aborted = createExecutionAbortedEvent({
 });
 
 const savedConversation = (events: Conversation['events']) =>
-  ({ id: conversationId, rounds: [], events } as unknown as Conversation);
+  ({ id: conversationId, rounds: [], events }) as unknown as Conversation;
 
 const setup = () => {
   const conversationStreamService = new ConversationStreamService();
@@ -93,7 +93,7 @@ const setup = () => {
 };
 
 const chunk = (text: string): ChatEvent =>
-  ({ type: ChatEventType.messageChunk, data: { message_id: 'm', text_chunk: text } } as ChatEvent);
+  ({ type: ChatEventType.messageChunk, data: { message_id: 'm', text_chunk: text } }) as ChatEvent;
 
 const streamToCompletion = (source: Subject<ChatEvent>) => {
   source.next(started as ChatEvent);

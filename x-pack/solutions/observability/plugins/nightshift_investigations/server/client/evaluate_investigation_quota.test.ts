@@ -13,7 +13,7 @@ import { evaluateInvestigationQuota } from './evaluate_investigation_quota';
 const createLogger = () =>
   ({
     warn: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 describe('evaluateInvestigationQuota', () => {
   afterEach(() => {

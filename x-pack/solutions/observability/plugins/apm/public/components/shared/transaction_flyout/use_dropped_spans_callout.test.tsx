@@ -22,7 +22,7 @@ const buildTransaction = (dropped?: number): Transaction =>
     transaction: {
       span_count: dropped === undefined ? undefined : { dropped },
     },
-  } as Transaction);
+  }) as Transaction;
 
 const renderCallout = (transaction?: Transaction) =>
   renderHook(() => useDroppedSpansCallout(transaction)).result.current;

@@ -83,6 +83,7 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
     webhook: { ssl: { pfx: { enabled: true } } },
     auth: { ears: { enabled: true, enableExperimental: true } },
     inboundEvents: { enabled: true },
+    catalog: { enabled: true },
   },
 };
 

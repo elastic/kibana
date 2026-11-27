@@ -33,7 +33,7 @@ export const getAggregationConfigChanges = (
     Object.entries(SETTINGS_BY_METRIC_TYPE) as Array<
       [
         MetricAggregationConfigMetricType,
-        (typeof SETTINGS_BY_METRIC_TYPE)[MetricAggregationConfigMetricType]
+        (typeof SETTINGS_BY_METRIC_TYPE)[MetricAggregationConfigMetricType],
       ]
     >
   ).flatMap(([metricType, { aggregation, visualization }]) => {

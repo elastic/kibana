@@ -386,7 +386,7 @@ node scripts/type_check --project x-pack/solutions/security/packages/kbn-evals-s
 ### Linting
 
 ```bash
-node scripts/eslint x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules
+node scripts/lint x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules
 ```
 
 ## Contributing

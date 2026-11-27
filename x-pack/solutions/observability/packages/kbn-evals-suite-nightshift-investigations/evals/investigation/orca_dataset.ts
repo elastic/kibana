@@ -97,8 +97,8 @@ export const getOrcaDatasetHash = (
       left.metadata.case_id < right.metadata.case_id
         ? -1
         : left.metadata.case_id > right.metadata.case_id
-        ? 1
-        : 0
+          ? 1
+          : 0
     );
   const serialized = stringify(ordered);
   assert(serialized, 'Cannot serialize the ORCA dataset');
@@ -166,8 +166,8 @@ export const selectOrcaSlice = (
     left.metadata.case_id < right.metadata.case_id
       ? -1
       : left.metadata.case_id > right.metadata.case_id
-      ? 1
-      : 0
+        ? 1
+        : 0
   );
   const start = Math.floor(((index - 1) * ordered.length) / count);
   const end = Math.floor((index * ordered.length) / count);
@@ -191,8 +191,8 @@ const hasRows = (stdout: string): boolean => {
     const rows = Array.isArray(data)
       ? data
       : data !== null && typeof data === 'object'
-      ? data.values
-      : undefined;
+        ? data.values
+        : undefined;
     return (
       Array.isArray(rows) &&
       rows.some(

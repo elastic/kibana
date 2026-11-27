@@ -53,8 +53,8 @@ const setup = ({
     id === CONTEXT_ENGINE_ENABLED_SETTING_ID
       ? contextSetting
       : id === SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED
-      ? analysisSetting
-      : discoverySetting
+        ? analysisSetting
+        : discoverySetting
   );
   // `serverBasePath` is a readonly string, so swap in a mock base path whose `get` carries the
   // space prefix the way a real non-default space does.

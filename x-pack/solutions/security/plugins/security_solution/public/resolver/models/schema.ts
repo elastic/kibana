@@ -94,7 +94,7 @@ type OptionalKeyWhenValueAcceptsUndefined<T extends { [key: string]: unknown }> 
 export function object<
   ValidatorDictionary extends {
     [key: string]: Validator<unknown>;
-  }
+  },
 >(validatorDictionary: ValidatorDictionary) {
   return function (
     value: unknown

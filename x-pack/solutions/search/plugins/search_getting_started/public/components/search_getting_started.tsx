@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { getAddDataPath } from '../common/add_data_path';
 import { useKibana } from '../hooks/use_kibana';
 import { useGettingStartedLoaded } from '../hooks/use_getting_started_loaded';
 import { SearchGettingStartedPageTemplate } from '../layout/page_template';
@@ -66,7 +67,7 @@ export const SearchGettingStartedPage: React.FC = () => {
                       data-test-subj="uploadFilesButton"
                       onClick={() => {
                         application.navigateToApp('home', {
-                          path: '#/tutorial_directory/fileDataViz',
+                          path: getAddDataPath('fileDataViz'),
                         });
                       }}
                     >
@@ -86,7 +87,7 @@ export const SearchGettingStartedPage: React.FC = () => {
                       data-test-subj="viewSampleDataButton"
                       onClick={() => {
                         application.navigateToApp('home', {
-                          path: '#/tutorial_directory/sampleData',
+                          path: getAddDataPath('sampleData'),
                         });
                       }}
                     >

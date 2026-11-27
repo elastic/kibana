@@ -98,8 +98,8 @@ const mergeSchemas = (a: JsonSchema, b: JsonSchema): JsonSchema => {
       a.items === undefined
         ? b.items
         : b.items === undefined
-        ? a.items
-        : mergeSchemas(a.items as JsonSchema, b.items as JsonSchema);
+          ? a.items
+          : mergeSchemas(a.items as JsonSchema, b.items as JsonSchema);
     return { type: 'array', ...(items === undefined ? {} : { items }), ...nullable };
   }
   if (a.type !== undefined && a.type === b.type) {

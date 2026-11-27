@@ -163,10 +163,12 @@ export interface DashboardStart {
   areEqual: (a: DashboardState, b: DashboardState) => Promise<boolean>;
 }
 
-export class DashboardPlugin
-  implements
-    Plugin<DashboardSetup, DashboardStart, DashboardSetupDependencies, DashboardStartDependencies>
-{
+export class DashboardPlugin implements Plugin<
+  DashboardSetup,
+  DashboardStart,
+  DashboardSetupDependencies,
+  DashboardStartDependencies
+> {
   constructor(initializerContext: PluginInitializerContext) {
     setLogger(initializerContext.logger.get('dashboard'));
   }

@@ -951,10 +951,10 @@ export const ENTITY_STORE_RESOLUTION_ERROR_EVENT = {
   },
 } as const satisfies EventTypeOpts<ResolutionErrorEvent>;
 
-const countField = (description: string) => ({ type: 'long', _meta: { description } } as const);
+const countField = (description: string) => ({ type: 'long', _meta: { description } }) as const;
 
 const keywordField = (description: string) =>
-  ({ type: 'keyword', _meta: { description } } as const);
+  ({ type: 'keyword', _meta: { description } }) as const;
 
 export const ENTITY_STORE_SOURCE_STATE_EVENT = {
   eventType: 'entity_store_source_state',

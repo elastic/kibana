@@ -205,7 +205,7 @@ describe('vegaEmbeddableFactory', () => {
 
   it('does not publish the default data view when the spec has none', async () => {
     const dataViews = dataViewPluginMocks.createStartContract();
-    dataViews.getDefault = jest.fn(async () => ({ id: 'default-view' } as DataView));
+    dataViews.getDefault = jest.fn(async () => ({ id: 'default-view' }) as DataView);
     setDataViews(dataViews);
 
     const { api } = await buildEmbeddable({
@@ -220,7 +220,7 @@ describe('vegaEmbeddableFactory', () => {
     const fromSpec = [{ id: 'spec-view' }] as DataView[];
     mockExtractIndexPatterns.mockResolvedValue(fromSpec);
     const dataViews = dataViewPluginMocks.createStartContract();
-    dataViews.getDefault = jest.fn(async () => ({ id: 'default-view' } as DataView));
+    dataViews.getDefault = jest.fn(async () => ({ id: 'default-view' }) as DataView);
     setDataViews(dataViews);
 
     const { api } = await buildEmbeddable({
@@ -786,7 +786,7 @@ describe('vegaEmbeddableFactory', () => {
       expect(await api.saveToLibrary?.('New item')).toBe('new-item');
       const [path, { body }] = coreStart.http.post.mock.calls[0] as unknown as [
         string,
-        { body: string }
+        { body: string },
       ];
       expect(path).toBe('/api/vega');
       expect(JSON.parse(body)).toEqual({

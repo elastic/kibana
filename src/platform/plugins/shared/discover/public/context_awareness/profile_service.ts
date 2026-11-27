@@ -89,8 +89,11 @@ export interface BaseProfileProvider<TProfile extends PartialProfile, TContext> 
 /**
  * A synchronous profile provider interface
  */
-export interface ProfileProvider<TProfile extends PartialProfile, TParams, TContext>
-  extends BaseProfileProvider<TProfile, TContext> {
+export interface ProfileProvider<
+  TProfile extends PartialProfile,
+  TParams,
+  TContext,
+> extends BaseProfileProvider<TProfile, TContext> {
   /**
    * The method responsible for context resolution and determining if the associated profile is a match
    * @param params Parameters specific to the provider context level
@@ -102,8 +105,11 @@ export interface ProfileProvider<TProfile extends PartialProfile, TParams, TCont
 /**
  * An asynchronous profile provider interface
  */
-export interface AsyncProfileProvider<TProfile extends PartialProfile, TParams, TContext>
-  extends BaseProfileProvider<TProfile, TContext> {
+export interface AsyncProfileProvider<
+  TProfile extends PartialProfile,
+  TParams,
+  TContext,
+> extends BaseProfileProvider<TProfile, TContext> {
   /**
    * The method responsible for context resolution and determining if the associated profile is a match
    * @param params Parameters specific to the provider context level
@@ -123,16 +129,14 @@ export type ContextWithProfileId<TContext> = TContext &
 /**
  * Used to extract the profile type from a profile provider
  */
-type ExtractProfile<TProvider> = TProvider extends BaseProfileProvider<infer TProfile, {}>
-  ? TProfile
-  : never;
+type ExtractProfile<TProvider> =
+  TProvider extends BaseProfileProvider<infer TProfile, {}> ? TProfile : never;
 
 /**
  * Used to extract the context type from a profile provider
  */
-type ExtractContext<TProvider> = TProvider extends BaseProfileProvider<{}, infer TContext>
-  ? TContext
-  : never;
+type ExtractContext<TProvider> =
+  TProvider extends BaseProfileProvider<{}, infer TContext> ? TContext : never;
 
 /**
  * Extract the resolution match type from a profile provider
@@ -174,7 +178,7 @@ const toContextWithProfileId = <TContext>(
 export abstract class BaseProfileService<
   TProvider extends BaseProfileProvider<TProfile, TContext>,
   TProfile extends PartialProfile = ExtractProfile<TProvider>,
-  TContext = ExtractContext<TProvider>
+  TContext = ExtractContext<TProvider>,
 > {
   protected readonly providers: TProvider[] = [];
 
@@ -224,11 +228,12 @@ export abstract class BaseProfileService<
 /**
  * Used to extract the parameters type from a profile provider
  */
-type ExtractParams<TProvider> = TProvider extends ProfileProvider<{}, infer P, {}>
-  ? P
-  : TProvider extends AsyncProfileProvider<{}, infer P, {}>
-  ? P
-  : never;
+type ExtractParams<TProvider> =
+  TProvider extends ProfileProvider<{}, infer P, {}>
+    ? P
+    : TProvider extends AsyncProfileProvider<{}, infer P, {}>
+      ? P
+      : never;
 
 /**
  * A synchronous profile service implementation
@@ -236,7 +241,7 @@ type ExtractParams<TProvider> = TProvider extends ProfileProvider<{}, infer P, {
 export class ProfileService<
   TProvider extends ProfileProvider<{}, TParams, TContext>,
   TParams = ExtractParams<TProvider>,
-  TContext = ExtractContext<TProvider>
+  TContext = ExtractContext<TProvider>,
 > extends BaseProfileService<TProvider> {
   /**
    * Performs context resolution based on the provided context level parameters,
@@ -263,7 +268,7 @@ export class ProfileService<
 export class AsyncProfileService<
   TProvider extends AsyncProfileProvider<{}, TParams, TContext>,
   TParams = ExtractParams<TProvider>,
-  TContext = ExtractContext<TProvider>
+  TContext = ExtractContext<TProvider>,
 > extends BaseProfileService<TProvider> {
   /**
    * Performs context resolution based on the provided context level parameters,

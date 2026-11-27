@@ -54,8 +54,10 @@ export class NoUsableAuthTypeError extends Error {
   }
 }
 
-export interface RecordActionsOptions
-  extends Omit<ContractContextOptions, 'specs' | 'fixtures' | 'recordings' | 'trackFields'> {
+export interface RecordActionsOptions extends Omit<
+  ContractContextOptions,
+  'specs' | 'fixtures' | 'recordings' | 'trackFields'
+> {
   /** The vendor specs by source name, as in the manifest's `sources`. */
   readonly specs: Readonly<Record<string, OpenApiDocument | GraphQLSpec | McpSpec>>;
   readonly fixtures?: VendorApiFixtures;

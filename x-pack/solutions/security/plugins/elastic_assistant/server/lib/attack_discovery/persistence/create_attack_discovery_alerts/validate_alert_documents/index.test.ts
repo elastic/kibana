@@ -31,7 +31,7 @@ describe('validateAlertDocument', () => {
       [ALERT_RULE_EXECUTION_UUID]: 'generation-uuid-123',
       [ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN]: 'Summary markdown',
       [ALERT_ATTACK_DISCOVERY_TITLE]: 'Test Attack Discovery',
-    } as unknown as AttackDiscoveryAlertDocument);
+    }) as unknown as AttackDiscoveryAlertDocument;
 
   const createDocumentWithoutTimestamp = (): AttackDiscoveryAlertDocument => {
     const { '@timestamp': _removed, ...document } = createValidDocument();
@@ -290,7 +290,7 @@ describe('validateAlertDocuments', () => {
       [ALERT_RULE_EXECUTION_UUID]: 'generation-uuid-123',
       [ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN]: 'Summary markdown',
       [ALERT_ATTACK_DISCOVERY_TITLE]: 'Test Attack Discovery',
-    } as unknown as AttackDiscoveryAlertDocument);
+    }) as unknown as AttackDiscoveryAlertDocument;
 
   const createDocumentWithoutTimestamp = (): AttackDiscoveryAlertDocument => {
     const { '@timestamp': _removed, ...document } = createValidDocument();

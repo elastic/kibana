@@ -91,12 +91,13 @@ export interface EsqlDataset {
 
 function columnsFromSourceInfo(columns: ESQLSourceInfoColumn[], query: string): DatatableColumn[] {
   const querySummary = getQuerySummary(query);
-  return columns.map(({ name, esType }) => ({
+  return columns.map(({ name, esType, columnMeta }) => ({
     id: name,
     name,
     meta: {
       type: esFieldTypeToKibanaFieldType(esType) as DatatableColumn['meta']['type'],
       esType,
+      ...(columnMeta !== undefined && { esMeta: columnMeta }),
     },
     isNull: false,
     isComputedColumn: isComputedColumn(name, querySummary),
@@ -210,8 +211,8 @@ export class EsqlSource implements DataSourceBase {
       args.timeFieldName != null
         ? `${baseKey}\0${args.timeFieldName}`
         : skipsTimeField
-        ? `${baseKey}\0without-time-field`
-        : baseKey;
+          ? `${baseKey}\0without-time-field`
+          : baseKey;
 
     // A caller that skips the time field prefers an instance that has it.
     const cached =

@@ -570,9 +570,8 @@ export const createCommentsController = (services: CommentsHostServices): Commen
       const { captureViewport } = services;
       // What shows on hover is gone once the pointer leaves for the composer.
       if ((revealedBy || isInTooltip(element)) && captureViewport) {
-        draft.snapshot = takeScreenshot(draft, captureViewport).catch(
-          (error): ScreenshotError =>
-            error instanceof ScreenshotError ? error : new ScreenshotError(errorMessage(error))
+        draft.snapshot = takeScreenshot(draft, captureViewport).catch((error): ScreenshotError =>
+          error instanceof ScreenshotError ? error : new ScreenshotError(errorMessage(error))
         );
       }
       store.setState({ pending: draft, activeThreadId: null, focusPinId: null });

@@ -20,7 +20,7 @@ const getHandler = (stepId: string) => {
   const step = createEvalsServerSteps({
     logger: loggingSystemMock.createLogger(),
     taskProviderRegistry: {} as unknown as TaskProviderRegistry,
-    getInferenceStart: async () => ({} as unknown as InferenceServerStart),
+    getInferenceStart: async () => ({}) as unknown as InferenceServerStart,
   }).find(({ id }) => id === stepId);
 
   if (!step || !isOneShotStepDefinition(step)) {
@@ -39,7 +39,7 @@ const buildContext = (input: unknown, callKibanaApi: jest.Mock) =>
       getContext: () => ({ workflow: { spaceId: 'marketing' } }),
       getFakeRequest: jest.fn(),
     },
-  } as unknown as StepHandlerContext);
+  }) as unknown as StepHandlerContext;
 
 const okResult = {
   status: 'ok',

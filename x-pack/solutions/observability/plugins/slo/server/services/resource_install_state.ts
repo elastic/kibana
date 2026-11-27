@@ -90,10 +90,13 @@ export class ResourceInstallState {
     let timer: ReturnType<typeof setTimeout> | undefined;
     let lockWaitExpired = false;
     const expired = new Promise<never>((_, reject) => {
-      timer = setTimeout(() => {
-        lockWaitExpired = true;
-        reject(new SLOResourcesNotInstalled(LOCK_WAIT_TIMEOUT_MESSAGE));
-      }, Math.max(deadline - performance.now(), 0));
+      timer = setTimeout(
+        () => {
+          lockWaitExpired = true;
+          reject(new SLOResourcesNotInstalled(LOCK_WAIT_TIMEOUT_MESSAGE));
+        },
+        Math.max(deadline - performance.now(), 0)
+      );
     });
     const attempt = this.installUnderLock(retryOptions, undefined, {
       onLockAcquired: () => {

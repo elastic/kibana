@@ -147,8 +147,10 @@ export interface DesiredResources {
 }
 
 /** What building a strategy's resources needs. */
-export interface ResourceContext
-  extends Pick<GeneratorContext, 'spaceId' | 'esClient' | 'abortSignal'> {
+export interface ResourceContext extends Pick<
+  GeneratorContext,
+  'spaceId' | 'esClient' | 'abortSignal'
+> {
   /**
    * Every source of the space, enabled or not, so a strategy keeps a disabled source's rules,
    * disabled, instead of leaving them out and having them deleted.

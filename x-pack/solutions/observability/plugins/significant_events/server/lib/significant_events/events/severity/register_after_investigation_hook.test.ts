@@ -63,7 +63,7 @@ const roundContext = (
     round: { status: ConversationRoundStatus.completed },
     request: {},
     ...overrides,
-  } as never);
+  }) as never;
 
 const synced = () => ({
   status: 'available',
@@ -138,7 +138,7 @@ describe('registerAfterInvestigationHook', () => {
       (
         | Partial<Pick<AfterExecutionHookContext, 'agentId' | 'conversationAccess'>>
         | { round: { status: ConversationRoundStatus } }
-      )
+      ),
     ]
   >([
     ['another agent', { agentId: 'some.other.agent' }],

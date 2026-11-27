@@ -49,8 +49,8 @@ const getSettingsApplicationStory = ({ hasGlobalSettings }: StoryProps) => (
           scope === 'namespace'
             ? getSettingsMock()
             : hasGlobalSettings
-            ? getGlobalSettingsMock()
-            : {}
+              ? getGlobalSettingsMock()
+              : {}
         ),
     }}
     getAllowlistedSettings={(_scope, _solution, definitions) =>

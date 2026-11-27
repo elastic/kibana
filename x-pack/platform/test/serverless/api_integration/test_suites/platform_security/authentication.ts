@@ -134,9 +134,8 @@ export default function ({ getService }: FtrProviderContext) {
           let body: any;
           let status: number;
 
-          ({ body, status } = await supertestViewerWithCookieCredentials.get(
-            '/internal/security/me'
-          ));
+          ({ body, status } =
+            await supertestViewerWithCookieCredentials.get('/internal/security/me'));
           // expect a rejection because we're not using the internal header
           expect(body).toEqual({
             statusCode: 400,

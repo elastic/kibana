@@ -340,7 +340,7 @@ export class SearchService {
 
   private registerSearchStrategy = <
     SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-    SearchStrategyResponse extends IKibanaSearchResponse<any> = IEsSearchResponse
+    SearchStrategyResponse extends IKibanaSearchResponse<any> = IEsSearchResponse,
   >(
     name: string | symbol,
     strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>
@@ -351,7 +351,7 @@ export class SearchService {
 
   private getSearchStrategy = <
     SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-    SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+    SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse,
   >(
     name: string | symbol = ENHANCED_ES_SEARCH_STRATEGY
   ): ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse> => {
@@ -365,7 +365,7 @@ export class SearchService {
 
   private search = <
     SearchStrategyRequest extends IKibanaSearchRequest,
-    SearchStrategyResponse extends IKibanaSearchResponse
+    SearchStrategyResponse extends IKibanaSearchResponse,
   >(
     deps: SearchStrategyDependencies,
     request: SearchStrategyRequest,
@@ -578,7 +578,7 @@ export class SearchService {
       };
       const search = <
         SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-        SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+        SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse,
       >(
         searchRequest: SearchStrategyRequest,
         options: ISearchOptions = {}

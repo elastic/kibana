@@ -36,8 +36,7 @@ export interface HttpSelfCredentialRefresherReplaceParams {
 /**
  * @public
  */
-export interface HttpSelfCredentialRefresherReplaceResult
-  extends HttpSelfCredentialRefresherReplaceParams {
+export interface HttpSelfCredentialRefresherReplaceResult extends HttpSelfCredentialRefresherReplaceParams {
   type: 'replace';
 }
 
@@ -55,8 +54,7 @@ export interface HttpSelfCredentialRefresherRejectParams {
 /**
  * @public
  */
-export interface HttpSelfCredentialRefresherRejectResult
-  extends HttpSelfCredentialRefresherRejectParams {
+export interface HttpSelfCredentialRefresherRejectResult extends HttpSelfCredentialRefresherRejectParams {
   type: 'reject';
 }
 
