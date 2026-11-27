@@ -205,7 +205,7 @@ export const ConnectorSchedulingComponent: React.FC<ConnectorContentSchedulingPr
                     <p>
                       <FormattedMessage
                         id="searchConnectors.connectorScheduling.schedulePanel.documentLevelSecurity.dlsDisabledCallout.text"
-                        defaultMessage="{link} for this connector to activate these options."
+                        defaultMessage="{link} for this content crawler to activate these options."
                         values={{
                           link: (
                             <EuiLink onClick={configurationPathOnClick}>

@@ -10,17 +10,17 @@ import { i18n } from '@kbn/i18n';
 
 export const CONTENT_CONNECTORS_TITLE = i18n.translate(
   'xpack.elasticAssistant.aiSettings.contentConnectors.title',
-  { defaultMessage: 'Content connectors' }
+  { defaultMessage: 'Content crawlers' }
 );
 
 export const CONTENT_CONNECTORS_DESCRIPTION = i18n.translate(
   'xpack.elasticAssistant.aiSettings.contentConnectors.description',
   {
-    defaultMessage: 'Use content connectors to add knowledge to the Knowledge Base.',
+    defaultMessage: 'Use content crawlers to add knowledge to the Knowledge Base.',
   }
 );
 
 export const SETTINGS_MANAGE_CONNECTORS = i18n.translate(
   'xpack.elasticAssistant.aiSettings.settings.manageConnectors',
-  { defaultMessage: 'Manage connectors' }
+  { defaultMessage: 'Manage content crawlers' }
 );

@@ -49,7 +49,7 @@ export const detailsConnectorBreadcrumbs: ChromeBreadcrumb[] = [
   ...connectorsBreadcrumbs,
   {
     text: i18n.translate('xpack.contentConnectors.content.connectors.detailsBreadcrumb', {
-      defaultMessage: 'Connector Details',
+      defaultMessage: 'Content Crawler Details',
     }),
   },
 ];
@@ -187,7 +187,7 @@ export const ConnectorDetail: React.FC = () => {
       const name = nextTitle.trim();
       if (!name) {
         return i18n.translate('xpack.contentConnectors.nameAndDescription.name.error.empty', {
-          defaultMessage: 'Connector name cannot be empty',
+          defaultMessage: 'Content crawler name cannot be empty',
         });
       }
 
@@ -202,13 +202,13 @@ export const ConnectorDetail: React.FC = () => {
         flashSuccessToast(
           i18n.translate(
             'xpack.contentConnectors.content.indices.configurationConnector.nameAndDescription.successToast.title',
-            { defaultMessage: 'Connector name and description updated' }
+            { defaultMessage: 'Content crawler name and description updated' }
           )
         );
       } catch {
         return i18n.translate(
           'xpack.contentConnectors.connectors.nameAndDescription.name.error.saveFailed',
-          { defaultMessage: 'Unable to update connector name' }
+          { defaultMessage: 'Unable to update content crawler name' }
         );
       }
     },
@@ -220,13 +220,13 @@ export const ConnectorDetail: React.FC = () => {
       ariaLabel: i18n.translate(
         'xpack.contentConnectors.connectors.nameAndDescription.name.ariaLabel',
         {
-          defaultMessage: 'Edit connector name',
+          defaultMessage: 'Edit content crawler name',
         }
       ),
       onSave: onSaveTitle,
       placeholder: i18n.translate(
         'xpack.contentConnectors.connectors.nameAndDescription.name.placeholder',
-        { defaultMessage: 'Add a name to your connector' }
+        { defaultMessage: 'Add a name to your content crawler' }
       ),
       text: connector?.name ?? '',
     }),
@@ -253,7 +253,7 @@ export const ConnectorDetail: React.FC = () => {
           title={
             <h1>
               {i18n.translate('xpack.contentConnectors.connectors.notFound', {
-                defaultMessage: 'Could not find connector {connectorId}',
+                defaultMessage: 'Could not find content crawler {connectorId}',
                 values: { connectorId },
               })}
             </h1>
@@ -284,7 +284,7 @@ export const ConnectorDetail: React.FC = () => {
           back={{
             href: getContentConnectorsUrl(application?.getUrlForApp, CONNECTORS_PATH),
             label: i18n.translate('xpack.contentConnectors.content.connectors.breadcrumb', {
-              defaultMessage: 'Content Connectors',
+              defaultMessage: 'Content Crawlers',
             }),
           }}
           tabs={headerTabs}

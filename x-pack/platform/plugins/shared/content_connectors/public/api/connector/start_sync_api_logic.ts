@@ -25,6 +25,6 @@ export const startSync = async ({ connectorId, http }: StartSyncArgs) => {
 export const StartSyncApiLogic = createApiLogic(['start_sync_api_logic'], startSync, {
   showSuccessFlashFn: () =>
     i18n.translate('xpack.contentConnectors.content.searchIndex.index.syncSuccess.message', {
-      defaultMessage: 'Successfully scheduled a sync, waiting for a connector to pick it up',
+      defaultMessage: 'Successfully scheduled a sync, waiting for a content crawler to pick it up',
     }),
 });

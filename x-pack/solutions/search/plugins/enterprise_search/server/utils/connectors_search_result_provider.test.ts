@@ -43,7 +43,7 @@ describe('Enterprise Search - connectors search provider', () => {
     id: connectorNameMap[name].name,
     score: 90,
     title: connectorNameMap[name].name,
-    type: 'Connector',
+    type: 'Content crawler',
     url: {
       path: `${ENTERPRISE_SEARCH_DATA_PLUGIN.URL}/connectors/${connectorNameMap[name].id}`,
       prependBasePath: true,
@@ -98,6 +98,28 @@ describe('Enterprise Search - connectors search provider', () => {
         )
       );
       expect(results).toEqual([{ ...getConnectorSearchData('postgres'), score: 100 }]);
+    });
+
+    it('returns results when the content crawler type is specified', async () => {
+      const results = await lastValueFrom(
+        connectorsSearchResultProvider.find(
+          { term: 'companyName-postgres-connector-all', types: ['content crawler'] },
+          {
+            aborted$: NEVER,
+            maxResults: 100,
+            client,
+            preference: '',
+          },
+          mockSearchProviderContext
+        )
+      );
+      expect(results).toEqual([{ ...getConnectorSearchData('postgres'), score: 100 }]);
+    });
+
+    it('advertises the content crawler searchable type', () => {
+      expect(connectorsSearchResultProvider.getSearchableTypes(mockSearchProviderContext)).toEqual([
+        'content crawler',
+      ]);
     });
 
     it('returns all matched results', async () => {

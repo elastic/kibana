@@ -167,7 +167,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
       <EuiFlexItem>
         <StatCard
           title={i18n.translate('xpack.contentConnectors.connectorStats.h4.connectorLabel', {
-            defaultMessage: 'Connector',
+            defaultMessage: 'Content crawler',
           })}
           content={
             <EuiFlexGroup
@@ -215,7 +215,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                           content={i18n.translate(
                             'xpack.contentConnectors.connectorStats.copyConnectorIdButton',
                             {
-                              defaultMessage: 'Copy Connector ID',
+                              defaultMessage: 'Copy content crawler ID',
                             }
                           )}
                           disableScreenReaderOutput
@@ -227,7 +227,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                             aria-label={i18n.translate(
                               'xpack.contentConnectors.connectorStats.copyConnectorIdButton',
                               {
-                                defaultMessage: 'Copy Connector ID',
+                                defaultMessage: 'Copy content crawler ID',
                               }
                             )}
                             data-test-subj="copyConnectorIdButton"
@@ -403,7 +403,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                       })
                     )}
                   >
-                    Elastic Connectors
+                    Elastic Content Crawlers
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>

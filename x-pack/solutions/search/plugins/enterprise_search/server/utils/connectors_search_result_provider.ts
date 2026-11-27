@@ -26,7 +26,7 @@ export function getConnectorsSearchResultProvider(
 ): GlobalSearchResultProvider {
   return {
     find: ({ term, types, tags }, { aborted$, client, maxResults }, { core: { capabilities } }) => {
-      if (!client || !term || tags || (types && !types.includes('connector'))) {
+      if (!client || !term || tags || (types && !types.includes('content crawler'))) {
         return from([[]]);
       }
       const getConnectorData = async (): Promise<GlobalSearchProviderResult[]> => {
@@ -40,7 +40,7 @@ export function getConnectorsSearchResultProvider(
               score,
               title: name,
               type: i18n.translate('xpack.enterpriseSearch.searchConnectorProvider.type.name', {
-                defaultMessage: 'Connector',
+                defaultMessage: 'Content crawler',
               }),
               url: {
                 path: `${ENTERPRISE_SEARCH_DATA_PLUGIN.URL}/connectors/${id}`,
@@ -64,7 +64,7 @@ export function getConnectorsSearchResultProvider(
         })
       );
     },
-    getSearchableTypes: () => ['connector'],
+    getSearchableTypes: () => ['content crawler'],
     id: 'enterpriseSearchConnectors',
   };
 }

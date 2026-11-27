@@ -15,7 +15,7 @@ describe('ingestionStatus helper functions', () => {
       expect(ingestionStatusToText(IngestionStatus.CONNECTED)).toEqual('Connected');
     });
     it('should return error for error', () => {
-      expect(ingestionStatusToText(IngestionStatus.ERROR)).toEqual('Connector failure');
+      expect(ingestionStatusToText(IngestionStatus.ERROR)).toEqual('Content crawler failure');
     });
     it('should return error for sync error', () => {
       expect(ingestionStatusToText(IngestionStatus.SYNC_ERROR)).toEqual('Sync failure');

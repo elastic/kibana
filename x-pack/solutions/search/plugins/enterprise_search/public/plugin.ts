@@ -107,7 +107,7 @@ const contentLinks: AppDeepLink[] = [
     id: 'connectors',
     path: `/${CONNECTORS_PATH}`,
     title: i18n.translate('xpack.enterpriseSearch.navigation.contentConnectorsLinkLabel', {
-      defaultMessage: 'Connectors',
+      defaultMessage: 'Content crawlers',
     }),
     visibleIn: ['globalSearch'],
   },

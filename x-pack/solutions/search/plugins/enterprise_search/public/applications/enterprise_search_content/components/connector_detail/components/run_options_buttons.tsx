@@ -33,7 +33,7 @@ export const RunOptionsButtons: React.FC<RunOptionsButtonsProps> = ({
       <EuiText size="s">
         <FormattedMessage
           id="xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.description"
-          defaultMessage="The connector service is a Python package that you host on your own infrastructure. You can deploy with Docker or, optionally, run from source."
+          defaultMessage="The content crawler is a Python package that you host on your own infrastructure. You can deploy with Docker or, optionally, run from source."
         />
         <EuiSpacer />
         <EuiFlexGroup direction="row">

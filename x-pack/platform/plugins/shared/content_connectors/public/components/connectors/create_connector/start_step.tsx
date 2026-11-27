@@ -110,7 +110,7 @@ const StartStep: React.FC<StartStepProps> = ({
                   fullWidth
                   label={i18n.translate(
                     'xpack.contentConnectors.createConnector.startStep.euiFormRow.connectorLabel',
-                    { defaultMessage: 'Connector' }
+                    { defaultMessage: 'Content crawler' }
                   )}
                 >
                   <ChooseConnector selfManaged={selfManagePreference} disabled={!!connector} />
@@ -122,7 +122,7 @@ const StartStep: React.FC<StartStepProps> = ({
                   isInvalid={!!error}
                   label={i18n.translate(
                     'xpack.contentConnectors.createConnector.startStep.euiFormRow.connectorNameLabel',
-                    { defaultMessage: 'Connector name' }
+                    { defaultMessage: 'Content crawler name' }
                   )}
                   helpText={
                     <>
@@ -134,7 +134,7 @@ const StartStep: React.FC<StartStepProps> = ({
                           'xpack.contentConnectors.startStep.namesShouldBeLowercaseTextLabel',
                           {
                             defaultMessage:
-                              'The connector name should be lowercase and cannot contain spaces or special characters.',
+                              'The content crawler name should be lowercase and cannot contain spaces or special characters.',
                           }
                         )}
                       </EuiText>
@@ -181,7 +181,7 @@ const StartStep: React.FC<StartStepProps> = ({
                 {i18n.translate(
                   'xpack.contentConnectors.createConnector.startStep.p.whereDoYouWantLabel',
                   {
-                    defaultMessage: 'Choose how to deploy and manage your connector:',
+                    defaultMessage: 'Choose how to deploy and manage your content crawler:',
                   }
                 )}
               </p>
@@ -265,7 +265,7 @@ const StartStep: React.FC<StartStepProps> = ({
                     'xpack.contentConnectors.createConnector.startStep.p.youWillStartTheLabel',
                     {
                       defaultMessage:
-                        "We'll automatically configure your index, API key, and connector ID. Alternatively, create these manually and use a custom configuration.",
+                        "We'll automatically configure your index, API key, and content crawler ID. Alternatively, create these manually and use a custom configuration.",
                     }
                   )}
                 </p>
@@ -330,7 +330,7 @@ const StartStep: React.FC<StartStepProps> = ({
                     'xpack.contentConnectors.createConnector.startStep.p.thisProcessWillCreateLabel',
                     {
                       defaultMessage:
-                        'This process will create a new index, API key, and a Connector ID. Optionally you can bring your own configuration as well.',
+                        'This process will create a new index, API key, and a content crawler ID. Optionally you can bring your own configuration as well.',
                     }
                   )}
                 </p>

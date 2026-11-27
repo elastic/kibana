@@ -179,7 +179,7 @@ export const IndexViewLogic = kea<
           i18n.translate(
             'xpack.contentConnectors.content.searchIndex.index.recheckSuccess.message',
             {
-              defaultMessage: 'Your connector has been rechecked.',
+              defaultMessage: 'Your content crawler has been rechecked.',
             }
           )
         );

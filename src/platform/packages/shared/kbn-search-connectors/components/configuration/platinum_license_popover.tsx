@@ -65,7 +65,7 @@ export const PlatinumLicensePopover: React.FC<PlatinumLicensePopoverProps> = ({
         <p>
           {i18n.translate('searchConnectors.connectors.upgradeDescription', {
             defaultMessage:
-              'To use this connector, you must update your license to Platinum or start a 30-day free trial.',
+              'To use this content crawler, you must update your license to Platinum or start a 30-day free trial.',
           })}
         </p>
       </EuiText>

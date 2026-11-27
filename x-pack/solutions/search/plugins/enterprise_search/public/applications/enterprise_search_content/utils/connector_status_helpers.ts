@@ -9,7 +9,7 @@ import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
 import type { Connector } from '@kbn/search-connectors';
-import { ConnectorStatus, SyncStatus } from '@kbn/search-connectors';
+import { CRAWLER_SERVICE_TYPE, ConnectorStatus, SyncStatus } from '@kbn/search-connectors';
 
 export const isLastSeenOld = (connector: Connector): boolean =>
   connector.last_seen
@@ -21,7 +21,7 @@ export const getConnectorLastSeenError = (connector: Connector): string => {
     'xpack.enterpriseSearch.content.searchIndices.connectorStatus.lastSeenError.label',
     {
       defaultMessage:
-        'Your connector has not checked in for over 30 minutes. (last_seen: {lastSeen})',
+        'Your content crawler has not checked in for over 30 minutes. (last_seen: {lastSeen})',
       values: { lastSeen: connector.last_seen },
     }
   );
@@ -56,9 +56,15 @@ export function connectorStatusToText(connector: Connector): string {
     );
   }
   if (isLastSeenOld(connector) || connectorStatus === ConnectorStatus.ERROR) {
+    if (connector.service_type === CRAWLER_SERVICE_TYPE) {
+      return i18n.translate(
+        'xpack.enterpriseSearch.content.searchIndices.connectorStatus.crawlerFailure.label',
+        { defaultMessage: 'Crawler failure' }
+      );
+    }
     return i18n.translate(
       'xpack.enterpriseSearch.content.searchIndices.connectorStatus.connectorFailure.label',
-      { defaultMessage: 'Connector Failure' }
+      { defaultMessage: 'Content crawler failure' }
     );
   }
   if (!hasIndexName) {

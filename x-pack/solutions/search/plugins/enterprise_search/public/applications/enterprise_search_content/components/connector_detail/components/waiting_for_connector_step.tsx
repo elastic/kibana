@@ -30,14 +30,14 @@ export const WaitingForConnectorStep: React.FC<WaitingForConnectorStepProps> = (
         title={i18n.translate(
           'xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.waitingForConnector.callout.title',
           {
-            defaultMessage: 'Waiting for your connector',
+            defaultMessage: 'Waiting for your content crawler',
           }
         )}
         text={i18n.translate(
           'xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.waitingForConnector.callout.description',
           {
             defaultMessage:
-              'Your connector has not connected to Search. Troubleshoot your configuration and refresh the page.',
+              'Your content crawler has not connected to Search. Troubleshoot your configuration and refresh the page.',
           }
         )}
         actionProps={{

@@ -42,7 +42,7 @@ export const ConnectorNameAndDescriptionApiLogic = createApiLogic(
     showSuccessFlashFn: () =>
       i18n.translate(
         'xpack.enterpriseSearch.content.indices.configurationConnector.nameAndDescription.successToast.title',
-        { defaultMessage: 'Connector name and description updated' }
+        { defaultMessage: 'Content crawler name and description updated' }
       ),
   }
 );

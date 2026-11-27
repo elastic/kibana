@@ -150,7 +150,7 @@ export const ChooseConnector: React.FC<ChooseConnectorSelectableProps> = ({
       isDisabled={disabled}
       aria-label={i18n.translate(
         'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.euiComboBox.accessibleScreenReaderLabelLabel',
-        { defaultMessage: 'Select a data source for your connector to use.' }
+        { defaultMessage: 'Select a data source for your content crawler to use.' }
       )}
       prepend={<EuiFormPrepend iconLeft={selectedConnector?.iconPath ?? 'plugs'} />}
       singleSelection

@@ -14,11 +14,11 @@ import { BetaCallOut } from './beta_callout';
 export const BetaConnectorCallout: React.FC = () => (
   <BetaCallOut
     title={i18n.translate('xpack.enterpriseSearch.betaConnectorCalloutTitle', {
-      defaultMessage: 'Beta connector',
+      defaultMessage: 'Beta content crawler',
     })}
     description={i18n.translate('xpack.enterpriseSearch.betaConnectorCalloutDescription', {
       defaultMessage:
-        'This connector is in beta. Beta features are subject to change and are not covered by the support SLA of general release (GA) features. Elastic plans to promote this feature to GA in a future release.',
+        'This content crawler is in beta. Beta features are subject to change and are not covered by the support SLA of general release (GA) features. Elastic plans to promote this feature to GA in a future release.',
     })}
   />
 );

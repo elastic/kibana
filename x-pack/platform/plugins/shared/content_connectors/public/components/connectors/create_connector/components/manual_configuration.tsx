@@ -87,7 +87,7 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
         return `    "${key}": ${defaultValue}`;
       })
       .join(',\n');
-    const CONSOLE_SNIPPET = dedent` # Example of how to create a ${connectorInfo?.name} connector using the API
+    const CONSOLE_SNIPPET = dedent` # Example of how to create a ${connectorInfo?.name} content crawler using the API
 # This also creates related resources like an index and an API key.
 # This is an alternative to using the UI creation flow.
 
@@ -101,10 +101,10 @@ PUT connector-${rawName}
     }
   }
 }  
-# 2. Create a connector
+# 2. Create a content crawler
 PUT _connector/${rawName}
 {
-  "name": "My ${connectorInfo?.name} connector",
+  "name": "My ${connectorInfo?.name} content crawler",
   "index_name":  "connector-${rawName}",
   "service_type": "${selectedConnector?.serviceType}"
 }
@@ -135,7 +135,7 @@ POST /_security/api_key
   }
 }
 
-# 🔧 Configure your connector
+# 🔧 Configure your content crawler
 # NOTE: Configuration keys differ per service type.
 PUT _connector/${rawName}/_configuration
 {
@@ -144,7 +144,7 @@ ${dynamicConfigValues}
   }
 }
 
-# 🔌 Verify your connector is connected
+# 🔌 Verify your content crawler is connected
 GET _connector/${rawName}
 
 # 🔄 Sync data

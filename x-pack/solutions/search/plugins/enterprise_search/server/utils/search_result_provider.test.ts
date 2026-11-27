@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { NEVER, of } from 'rxjs';
+import { firstValueFrom, NEVER, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 
 import type { GlobalSearchProviderContext } from '@kbn/global-search-plugin/server';
+import { CONNECTOR_DEFINITIONS } from '@kbn/search-connectors';
 
 import { ENTERPRISE_SEARCH_DATA_PLUGIN } from '../../common/constants';
 
@@ -230,6 +231,26 @@ describe('Search search provider', () => {
           a: [],
         });
       });
+    });
+
+    it('matches built-in sources when searching content crawlers', async () => {
+      const searchProvider = getSearchResultProvider(
+        { hasConnectors: true } as any,
+        CONNECTOR_DEFINITIONS
+      );
+      const results = await firstValueFrom(
+        searchProvider.find(
+          { term: 'content crawlers' },
+          { aborted$: NEVER, maxResults: 100, preference: '' },
+          mockSearchProviderContext
+        )
+      );
+
+      expect(results).toHaveLength(CONNECTOR_DEFINITIONS.length);
+      expect(results.map((result) => result.id).sort()).toEqual(
+        CONNECTOR_DEFINITIONS.map((definition) => definition.serviceType).sort()
+      );
+      expect(results.every((result) => result.score === 50)).toBe(true);
     });
 
     it('returns appropriate native flags when on cloud', () => {

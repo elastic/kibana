@@ -73,13 +73,14 @@ export const ConnectorField: React.FC<ConnectorFieldProps> = ({ connector, field
         inputAriaLabel={i18n.translate(
           `xpack.enterpriseSearch.content.connectors.nameAndDescription.${field}.ariaLabel`,
           {
-            defaultMessage: `Edit connector ${field}`,
+            defaultMessage: `Edit content crawler ${field}`,
           }
         )}
         placeholder={i18n.translate(
           `xpack.enterpriseSearch.content.connectors.nameAndDescription.${field}.placeholder`,
           {
-            defaultMessage: field === 'name' ? 'Add a name to your connector' : 'Add a description',
+            defaultMessage:
+              field === 'name' ? 'Add a name to your content crawler' : 'Add a description',
           }
         )}
         value={value || ''}
@@ -95,7 +96,7 @@ export const ConnectorField: React.FC<ConnectorFieldProps> = ({ connector, field
                   error: [
                     i18n.translate(
                       'xpack.enterpriseSearch.content.nameAndDescription.name.error.empty',
-                      { defaultMessage: 'Connector name cannot be empty' }
+                      { defaultMessage: 'Content crawler name cannot be empty' }
                     ),
                   ],
                 }

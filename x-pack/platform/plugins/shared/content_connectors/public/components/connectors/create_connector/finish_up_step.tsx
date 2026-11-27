@@ -118,7 +118,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                       'xpack.contentConnectors.createConnector.finishUpStep.euiCard.exploreYourDataDescription',
                       {
                         defaultMessage:
-                          'See your connector documents or make a data view to explore them',
+                          'See the documents synced by your content crawler or make a data view to explore them',
                       }
                     )}
                     footer={
@@ -171,13 +171,13 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                     titleSize="s"
                     title={i18n.translate(
                       'xpack.contentConnectors.createConnector.finishUpStep.euiCard.manageYourConnectorLabel',
-                      { defaultMessage: 'Manage your connector' }
+                      { defaultMessage: 'Manage your content crawler' }
                     )}
                     description={i18n.translate(
                       'xpack.contentConnectors.createConnector.finishUpStep.euiCard.manageYourConnectorDescription',
                       {
                         defaultMessage:
-                          'Now you can manage your connector, schedule a sync and much more',
+                          'Now you can manage your content crawler, schedule a sync and much more',
                       }
                     )}
                     footer={
@@ -203,7 +203,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                           >
                             {i18n.translate(
                               'xpack.contentConnectors.createConnector.finishUpStep.manageConnectorButtonLabel',
-                              { defaultMessage: 'Manage connector' }
+                              { defaultMessage: 'Manage content crawler' }
                             )}
                           </EuiButton>
                         </EuiFlexItem>

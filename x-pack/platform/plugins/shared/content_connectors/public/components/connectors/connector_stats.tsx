@@ -85,7 +85,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
                   <h4>
                     {!isCrawler
                       ? i18n.translate('xpack.contentConnectors.stats.h4.connectorSummaryLabel', {
-                          defaultMessage: 'Connector summary',
+                          defaultMessage: 'Content crawler summary',
                         })
                       : i18n.translate('xpack.contentConnectors.stats.h4.crawlerSummaryLabel', {
                           defaultMessage: 'Web crawler summary',
@@ -98,11 +98,11 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
                   {!isCrawler
                     ? hasMultipleConnectors
                       ? i18n.translate('xpack.contentConnectors.stats.multipleConnectorsText', {
-                          defaultMessage: '{count} connectors',
+                          defaultMessage: '{count} content crawlers',
                           values: { count: connectorCount },
                         })
                       : i18n.translate('xpack.contentConnectors.stats.singleConnectorText', {
-                          defaultMessage: '{count} connector',
+                          defaultMessage: '{count} content crawler',
                           values: { count: connectorCount },
                         })
                     : hasMultipleConnectors

@@ -28,12 +28,12 @@ export const getConnectedConnectorsTooltipContent = (
     {!isCrawler ? (
       <FormattedMessage
         id="xpack.enterpriseSearch.connectorStats.connectedTooltip"
-        defaultMessage="{connectedCount} {completeConnectorsText} - Number of connectors successfully configured and connected in the last 30 minutes."
+        defaultMessage="{connectedCount} {completeConnectorsText} - Number of content crawlers successfully configured and connected in the last 30 minutes."
         values={{
           completeConnectorsText: (
             <b>
               {i18n.translate('xpack.enterpriseSearch.connectorStats.connectorTooltipConnected', {
-                defaultMessage: `Connected connectors`,
+                defaultMessage: `Connected content crawlers`,
               })}
             </b>
           ),
@@ -63,12 +63,12 @@ export const getIncompleteConnectorsTooltip = (incompleteCount: number, isCrawle
     {!isCrawler ? (
       <FormattedMessage
         id="xpack.enterpriseSearch.connectorStats.incompleteTooltip"
-        defaultMessage="{incompleteCount} {incompleteConnectorsText} - Number of connectors whose configuration is incomplete. Syncs won't be possible until the connector is fully configured and running."
+        defaultMessage="{incompleteCount} {incompleteConnectorsText} - Number of content crawlers whose configuration is incomplete. Syncs won't be possible until the content crawler is fully configured and running."
         values={{
           incompleteConnectorsText: (
             <b>
               {i18n.translate('xpack.enterpriseSearch.connectorStats.incompleteTooltipConnected', {
-                defaultMessage: `Incomplete connectors`,
+                defaultMessage: `Incomplete content crawlers`,
               })}
             </b>
           ),
@@ -176,7 +176,7 @@ export const getIdleJobsTooltip = (idleCount: number) => (
   <EuiText size="xs">
     <FormattedMessage
       id="xpack.enterpriseSearch.connectorStats.idleTooltip"
-      defaultMessage="{idleCount} {idleCountText} - Number of sync jobs which are still running but have not seen any update from the backend connector for more than 1 minute"
+      defaultMessage="{idleCount} {idleCountText} - Number of sync jobs which are still running but have not seen any update from the backend for more than 1 minute"
       values={{
         idleCount: <b>{idleCount}</b>,
         idleCountText: (
@@ -195,7 +195,7 @@ export const getOrphanedJobsTooltip = (orphanedCount: number, isCrawler: boolean
     {!isCrawler ? (
       <FormattedMessage
         id="xpack.enterpriseSearch.connectorStats.orphanedTooltip"
-        defaultMessage="{orphanedCount} {orphanedCountText} - Number of sync jobs whose associated connector can't be found. The connector might have been deleted."
+        defaultMessage="{orphanedCount} {orphanedCountText} - Number of sync jobs whose associated content crawler can't be found. The content crawler might have been deleted."
         values={{
           orphanedCount: <b>{orphanedCount}</b>,
           orphanedCountText: (
@@ -244,7 +244,7 @@ export const getSyncJobErrorsTooltip = (errorCount: number, isCrawler: boolean) 
     {!isCrawler ? (
       <FormattedMessage
         id="xpack.enterpriseSearch.connectorStats.errorTooltip"
-        defaultMessage="{errorCount} {errorCountText} - Number of connectors whose last full sync failed"
+        defaultMessage="{errorCount} {errorCountText} - Number of content crawlers whose last full sync failed"
         values={{
           errorCount: <b>{errorCount}</b>,
           errorCountText: (

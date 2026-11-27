@@ -61,8 +61,8 @@ describe('resultToOption', () => {
     );
   });
 
-  it('uses icon for `connector` type', () => {
-    const input = createSearchResult({ type: 'connector', icon: 'connector-icon' });
+  it('uses icon for `content crawler` type', () => {
+    const input = createSearchResult({ type: 'Content crawler', icon: 'connector-icon' });
     expect(resultToOption(input, [])).toEqual(
       expect.objectContaining({
         icon: { type: 'connector-icon' },

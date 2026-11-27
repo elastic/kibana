@@ -126,7 +126,7 @@ export function ingestionMethodToText(ingestionMethod: IngestionMethod) {
       return i18n.translate(
         'xpack.enterpriseSearch.content.searchIndices.ingestionMethod.connector',
         {
-          defaultMessage: 'Connector',
+          defaultMessage: 'Content crawler',
         }
       );
     case IngestionMethod.CRAWLER:

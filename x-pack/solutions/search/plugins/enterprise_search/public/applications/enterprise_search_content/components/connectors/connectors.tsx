@@ -33,7 +33,7 @@ import { SelfManagedWebCrawlerEmptyPrompt } from './self_managed_web_crawler_emp
 
 export const connectorsBreadcrumbs = [
   i18n.translate('xpack.enterpriseSearch.content.connectors.breadcrumb', {
-    defaultMessage: 'Connectors',
+    defaultMessage: 'Content crawlers',
   }),
 ];
 
@@ -90,7 +90,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
       primaryActionItem: {
         id: 'newConnector',
         label: i18n.translate('xpack.enterpriseSearch.connectors.newConnectorButtonLabel', {
-          defaultMessage: 'New Connector',
+          defaultMessage: 'New Content Crawler',
         }),
         iconType: 'plusCircle',
         testId: 'entSearchContent-connectors-newConnectorButton',
@@ -114,7 +114,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
             title={
               !isCrawler
                 ? i18n.translate('xpack.enterpriseSearch.connectors.title', {
-                    defaultMessage: 'Elasticsearch connectors',
+                    defaultMessage: 'Elasticsearch content crawlers',
                   })
                 : i18n.translate('xpack.enterpriseSearch.crawlers.title', {
                     defaultMessage: 'Elastic Web Crawler',
@@ -156,7 +156,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
                     {!isCrawler ? (
                       <FormattedMessage
                         id="xpack.enterpriseSearch.connectorsTable.h2.availableConnectorsLabel"
-                        defaultMessage="Available connectors"
+                        defaultMessage="Available content crawlers"
                       />
                     ) : (
                       <FormattedMessage
@@ -175,7 +175,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
                     placeholder: !isCrawler
                       ? i18n.translate(
                           'xpack.enterpriseSearch.connectorsTable.euiSearchBar.filterConnectorsPlaceholder',
-                          { defaultMessage: 'Filter connectors' }
+                          { defaultMessage: 'Filter content crawlers' }
                         )
                       : i18n.translate(
                           'xpack.enterpriseSearch.connectorsTable.euiSearchBar.filterCrawlersPlaceholder',
@@ -186,7 +186,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
                     !isCrawler
                       ? i18n.translate(
                           'xpack.enterpriseSearch.connectorsTable.euiSearchBar.filterConnectorsLabel',
-                          { defaultMessage: 'Filter connectors' }
+                          { defaultMessage: 'Filter content crawlers' }
                         )
                       : i18n.translate(
                           'xpack.enterpriseSearch.connectorsTable.euiSearchBar.filterCrawlersLabel',

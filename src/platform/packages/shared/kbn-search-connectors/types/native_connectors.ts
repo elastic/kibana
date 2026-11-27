@@ -1872,7 +1872,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         sensitive: true,
         tooltip: translate('searchConnectors.nativeConnectors.gdrive.tooltip', {
           defaultMessage:
-            'This connectors authenticates as a service account to synchronize content from Google Drive.',
+            'This content crawler authenticates as a service account to synchronize content from Google Drive.',
         }),
         type: STRING,
         ui_restrictions: [],
@@ -1894,7 +1894,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           'searchConnectors.nativeConnectors.gdrive.useDomainWideDelegation.tooltip',
           {
             defaultMessage:
-              'Enable domain-wide delegation to automatically sync content from all shared and personal drives in the Google workspace. This eliminates the need to manually share Google Drive data with your service account, though it may increase sync time. If disabled, only items and folders manually shared with the service account will be synced. Please refer to the connector documentation to ensure domain-wide delegation is correctly configured and has the appropriate scopes.',
+              'Enable domain-wide delegation to automatically sync content from all shared and personal drives in the Google workspace. This eliminates the need to manually share Google Drive data with your service account, though it may increase sync time. If disabled, only items and folders manually shared with the service account will be synced. Please refer to the content crawler documentation to ensure domain-wide delegation is correctly configured and has the appropriate scopes.',
           }
         ),
         type: BOOLEAN,
@@ -1925,7 +1925,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           'searchConnectors.nativeConnectors.gdrive.workspaceAdminEmailDataSync.tooltip',
           {
             defaultMessage:
-              'Provide the admin email to be used with domain-wide delegation for data sync. This email enables the connector to utilize the Admin Directory API for listing organization users. Please refer to the connector documentation to ensure domain-wide delegation is correctly configured and has the appropriate scopes.',
+              'Provide the admin email to be used with domain-wide delegation for data sync. This email enables the content crawler to utilize the Admin Directory API for listing organization users. Please refer to the content crawler documentation to ensure domain-wide delegation is correctly configured and has the appropriate scopes.',
           }
         ),
         type: STRING,
@@ -3918,7 +3918,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         sensitive: false,
         tooltip: translate('searchConnectors.nativeConnectors.outlook.data_source.tooltip', {
           defaultMessage:
-            'The Outlook Server option is deprecated. For on-premises Exchange, use the Exchange Server connector instead.',
+            'The Outlook Server option is deprecated. For on-premises Exchange, use the Exchange Server Content Crawler instead.',
         }),
         type: STRING,
         ui_restrictions: [],
@@ -5389,7 +5389,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           'searchConnectors.nativeConnectors.sharepoint_online.configuration.aclSyncConcurrencyTooltip',
           {
             defaultMessage:
-              'Number of users processed in parallel during an access control sync. Lower this value if Microsoft Graph throttles the connector.',
+              'Number of users processed in parallel during an access control sync. Lower this value if Microsoft Graph throttles the content crawler.',
           }
         ),
         type: INTEGER,

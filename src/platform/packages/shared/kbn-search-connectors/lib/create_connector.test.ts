@@ -183,7 +183,7 @@ describe('createConnector lib', () => {
         indexName: 'some-index',
         language: 'somelang',
       })
-    ).rejects.toEqual(new Error('Could not retrieve the created connector'));
+    ).rejects.toEqual(new Error('Could not retrieve the created content crawler'));
 
     expect(mockClient.transport.request).toHaveBeenCalledWith({
       method: 'POST',

@@ -27,7 +27,7 @@ export const ConnectorUnconfigured: React.FC<ConnectorUnconfiguredProps> = ({
         title={i18n.translate(
           'searchConnectors.content.indices.connectorScheduling.notConnected.title',
           {
-            defaultMessage: 'Configure your connector to schedule a sync',
+            defaultMessage: 'Configure your content crawler to schedule a sync',
           }
         )}
       >
@@ -36,7 +36,7 @@ export const ConnectorUnconfigured: React.FC<ConnectorUnconfiguredProps> = ({
             'searchConnectors.content.indices.connectorScheduling.notConnected.description',
             {
               defaultMessage:
-                'Configure and deploy your connector, then return here to set your sync schedule. This schedule will dictate the interval that the connector will sync with your data source for updated documents.',
+                'Configure and deploy your content crawler, then return here to set your sync schedule. This schedule will dictate the interval that the content crawler will sync with your data source for updated documents.',
             }
           )}
         </EuiText>

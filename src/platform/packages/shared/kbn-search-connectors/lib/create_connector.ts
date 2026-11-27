@@ -68,7 +68,7 @@ export const createConnector = async (
   if (!connector) {
     throw new Error(
       i18n.translate('searchConnectors.server.connectors.not_found_error', {
-        defaultMessage: 'Could not retrieve the created connector',
+        defaultMessage: 'Could not retrieve the created content crawler',
       })
     );
   }

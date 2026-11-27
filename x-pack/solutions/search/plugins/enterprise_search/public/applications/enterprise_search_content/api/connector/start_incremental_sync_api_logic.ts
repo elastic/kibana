@@ -28,7 +28,7 @@ export const StartIncrementalSyncApiLogic = createApiLogic(
     showSuccessFlashFn: () =>
       i18n.translate('xpack.enterpriseSearch.content.searchIndex.index.incSyncSuccess.message', {
         defaultMessage:
-          'Successfully scheduled an incremental sync, waiting for a connector to pick it up',
+          'Successfully scheduled an incremental sync, waiting for a content crawler to pick it up',
       }),
   }
 );

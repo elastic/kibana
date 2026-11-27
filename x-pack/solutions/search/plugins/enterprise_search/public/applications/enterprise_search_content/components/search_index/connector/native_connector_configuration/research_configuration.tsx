@@ -32,7 +32,7 @@ export const ResearchConfiguration: React.FC<ResearchConfigurationProps> = ({
       text={
         <FormattedMessage
           id="xpack.enterpriseSearch.researchConfiguration.p.referToTheDocumentationLabel"
-          defaultMessage="Refer to the documentation for this connector to learn about prerequisites for connecting to {serviceType} and configuration requirements."
+          defaultMessage="Refer to the documentation for this content crawler to learn about prerequisites for connecting to {serviceType} and configuration requirements."
           values={{
             serviceType: name,
           }}

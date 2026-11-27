@@ -103,7 +103,7 @@ export const IngestPipelineFlyout: React.FC<IngestPipelineFlyoutProps> = ({
                   'xpack.enterpriseSearch.content.index.pipelines.settings.extractBinaryDisabledWarningContent',
                   {
                     defaultMessage:
-                      'Because local content extraction is enabled for this connector, pipeline content extraction settings cannot be used.',
+                      'Because local content extraction is enabled for this content crawler, pipeline content extraction settings cannot be used.',
                   }
                 )}
                 actionProps={{
@@ -161,7 +161,7 @@ export const IngestPipelineFlyout: React.FC<IngestPipelineFlyoutProps> = ({
                       'xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.modalBodyConnectorText',
                       {
                         defaultMessage:
-                          'This pipeline runs automatically on all Crawler and Connector indices created through Search.',
+                          'This pipeline runs automatically on all Web and Content Crawler indices created through Search.',
                       }
                     )
                   )}

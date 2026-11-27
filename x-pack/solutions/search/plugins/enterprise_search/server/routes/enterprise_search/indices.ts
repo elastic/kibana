@@ -685,7 +685,7 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
           message: i18n.translate(
             'xpack.enterpriseSearch.server.routes.createApiIndex.connectorExistsError',
             {
-              defaultMessage: 'A connector for this index already exists',
+              defaultMessage: 'A content crawler for this index already exists',
             }
           ),
           response,

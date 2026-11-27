@@ -95,7 +95,7 @@ export const ConnectorScheduling: React.FC = () => {
               <p>
                 <FormattedMessage
                   id="xpack.enterpriseSearch.content.indices.connectorScheduling.page.description"
-                  defaultMessage="Your connector is now deployed. Schedule recurring content and access control syncs here. If you want to run a quick test, launch a one-time sync using the {sync} button."
+                  defaultMessage="Your content crawler is now deployed. Schedule recurring content and access control syncs here. If you want to run a quick test, launch a one-time sync using the {sync} button."
                   values={{
                     sync: (
                       <b>

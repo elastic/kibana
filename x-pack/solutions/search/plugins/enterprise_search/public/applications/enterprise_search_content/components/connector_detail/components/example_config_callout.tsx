@@ -19,13 +19,13 @@ export const ExampleConfigCallout: React.FC = () => (
       title={i18n.translate(
         'xpack.enterpriseSearch.content.connectors.overview.connectorUnsupportedCallOut.title',
         {
-          defaultMessage: 'Example connector',
+          defaultMessage: 'Example content crawler',
         }
       )}
       text={
         <FormattedMessage
           id="xpack.enterpriseSearch.content.connectors.overview.connectorUnsupportedCallOut.description"
-          defaultMessage="This is an example connector that serves as a building block for customizations. The design and code is being provided as-is with no warranties. This is not subject to the SLA of supported features."
+          defaultMessage="This is an example content crawler that serves as a building block for customizations. The design and code is being provided as-is with no warranties. This is not subject to the SLA of supported features."
         />
       }
     />

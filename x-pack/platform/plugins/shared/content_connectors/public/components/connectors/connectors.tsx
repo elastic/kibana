@@ -45,7 +45,7 @@ const CreateConnector = lazy(() => import('./create_connector/create_connector')
 export const connectorsBreadcrumbs = [
   {
     text: i18n.translate('xpack.contentConnectors.content.connectors.breadcrumb', {
-      defaultMessage: 'Content Connectors',
+      defaultMessage: 'Content Crawlers',
     }),
     href: '/connectors',
   },
@@ -107,7 +107,7 @@ const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged
 
   const newConnectorLabel = i18n.translate(
     'xpack.contentConnectors.connectors.newConnectorButtonLabel',
-    { defaultMessage: 'New Connector' }
+    { defaultMessage: 'New Content Crawler' }
   );
 
   const listingMenu = useMemo<AppHeaderMenu | undefined>(() => {
@@ -147,7 +147,7 @@ const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged
             label: i18n.translate(
               'xpack.contentConnectors.connectors.newNativeConnectorButtonLabel',
               {
-                defaultMessage: 'New Elastic managed Connector',
+                defaultMessage: 'New Elastic managed Content Crawler',
               }
             ),
             iconType: 'plusCircle',
@@ -158,7 +158,7 @@ const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged
             id: 'newConnectorClient',
             label: i18n.translate(
               'xpack.contentConnectors.connectors.newConnectorsClientButtonLabel',
-              { defaultMessage: 'New Self-managed Connector' }
+              { defaultMessage: 'New Self-managed Content Crawler' }
             ),
             iconType: 'plusCircle',
             href: newSelfManagedConnectorHref,
@@ -188,7 +188,7 @@ const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged
           title={
             !isCrawler
               ? i18n.translate('xpack.contentConnectors.title', {
-                  defaultMessage: 'Content connectors',
+                  defaultMessage: 'Content crawlers',
                 })
               : i18n.translate('xpack.contentConnectors.crawlers.title', {
                   defaultMessage: 'Elastic Web Crawler',
@@ -233,7 +233,7 @@ const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged
                     {!isCrawler ? (
                       <FormattedMessage
                         id="xpack.contentConnectors.connectorsTable.h2.availableConnectorsLabel"
-                        defaultMessage="Available connectors"
+                        defaultMessage="Available content crawlers"
                       />
                     ) : (
                       <FormattedMessage
@@ -252,7 +252,7 @@ const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged
                     placeholder: !isCrawler
                       ? i18n.translate(
                           'xpack.contentConnectors.euiSearchBar.filterConnectorsPlaceholder',
-                          { defaultMessage: 'Filter connectors' }
+                          { defaultMessage: 'Filter content crawlers' }
                         )
                       : i18n.translate(
                           'xpack.contentConnectors.euiSearchBar.filterCrawlersPlaceholder',
@@ -263,7 +263,7 @@ const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged
                     !isCrawler
                       ? i18n.translate(
                           'xpack.contentConnectors.euiSearchBar.filterConnectorsLabel',
-                          { defaultMessage: 'Filter connectors' }
+                          { defaultMessage: 'Filter content crawlers' }
                         )
                       : i18n.translate('xpack.contentConnectors.euiSearchBar.filterCrawlersLabel', {
                           defaultMessage: 'Filter web crawlers',

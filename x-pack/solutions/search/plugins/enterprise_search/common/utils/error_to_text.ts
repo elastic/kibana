@@ -26,7 +26,7 @@ export const errorToText = (error?: HttpError): string | undefined => {
     return i18n.translate(
       'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.error.connectorAlreadyExists',
       {
-        defaultMessage: 'A connector for this index already exists',
+        defaultMessage: 'A content crawler for this index already exists',
       }
     );
   }
@@ -34,7 +34,7 @@ export const errorToText = (error?: HttpError): string | undefined => {
     return i18n.translate(
       'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.error.connectorAlreadyExists',
       {
-        defaultMessage: 'A connector for this index already exists',
+        defaultMessage: 'A content crawler for this index already exists',
       }
     );
   }
@@ -42,7 +42,7 @@ export const errorToText = (error?: HttpError): string | undefined => {
     return i18n.translate(
       'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.error.unauthorizedError',
       {
-        defaultMessage: 'You are not authorized to create this connector',
+        defaultMessage: 'You are not authorized to create this content crawler',
       }
     );
   } else

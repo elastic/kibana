@@ -198,7 +198,7 @@ export const ConnectorDetail: React.FC = () => {
         return i18n.translate(
           'xpack.enterpriseSearch.content.nameAndDescription.name.error.empty',
           {
-            defaultMessage: 'Connector name cannot be empty',
+            defaultMessage: 'Content crawler name cannot be empty',
           }
         );
       }
@@ -213,13 +213,13 @@ export const ConnectorDetail: React.FC = () => {
         flashSuccessToast(
           i18n.translate(
             'xpack.enterpriseSearch.content.indices.configurationConnector.nameAndDescription.successToast.title',
-            { defaultMessage: 'Connector name and description updated' }
+            { defaultMessage: 'Content crawler name and description updated' }
           )
         );
       } catch {
         return i18n.translate(
           'xpack.enterpriseSearch.connectors.nameAndDescription.name.error.saveFailed',
-          { defaultMessage: 'Unable to update connector name' }
+          { defaultMessage: 'Unable to update content crawler name' }
         );
       }
     },
@@ -233,13 +233,13 @@ export const ConnectorDetail: React.FC = () => {
             ariaLabel: i18n.translate(
               'xpack.enterpriseSearch.content.connectors.nameAndDescription.name.ariaLabel',
               {
-                defaultMessage: 'Edit connector name',
+                defaultMessage: 'Edit content crawler name',
               }
             ),
             onSave: onSaveTitle,
             placeholder: i18n.translate(
               'xpack.enterpriseSearch.content.connectors.nameAndDescription.name.placeholder',
-              { defaultMessage: 'Add a name to your connector' }
+              { defaultMessage: 'Add a name to your content crawler' }
             ),
             text: connector.name,
           }
@@ -271,7 +271,7 @@ export const ConnectorDetail: React.FC = () => {
           back={{
             href: getEnterpriseSearchContentUrl(CONNECTORS_PATH),
             label: i18n.translate('xpack.enterpriseSearch.content.connectors.breadcrumb', {
-              defaultMessage: 'Connectors',
+              defaultMessage: 'Content crawlers',
             }),
           }}
           tabs={headerTabs}
