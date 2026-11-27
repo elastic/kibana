@@ -21,10 +21,12 @@ export {
   FILTER_OPERATORS,
 } from './filter_operators';
 export {
+  getDataViewName,
   getFieldFromFilter,
   getOperatorFromFilter,
   getFilterableFields,
   getOperatorOptions,
   validateParams,
   isFilterValid,
+  rebindFilterDataView,
 } from './filter_editor_utils';
