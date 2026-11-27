@@ -246,6 +246,20 @@ describe('sanitizeSvg', () => {
     expect(result).toContain('<use href="#café"');
   });
 
+  it('should keep same-document references only on <use> and gradients', () => {
+    const result = sanitizeSvg(
+      Buffer.from(
+        '<svg><linearGradient id="g"/><linearGradient id="h" href="#g"/><path id="p" d="M0 0h1"/>' +
+          '<use href="#p"/><a href="#p"><rect/></a><filter id="f"><feImage href="#p"/></filter>' +
+          '<image href="#p"/></svg>'
+      )
+    ).toString('utf8');
+
+    expect(result).toContain('<use href="#p"');
+    expect(result).toContain('<linearGradient id="h" href="#g"');
+    expect(result).not.toMatch(/<(a|feImage|image)\b[^>]*href=/);
+  });
+
   describe('<use> limits', () => {
     const countKeptUses = (svg: string): number =>
       sanitizeSvg(Buffer.from(svg))
@@ -342,6 +356,19 @@ describe('sanitizeSvg', () => {
 
     expect(result).toContain(`<image width="1" height="1" href="${png}"`);
     expect(result).toContain(`<image xlink:href="${png}"`);
+  });
+
+  it('should drop SMIL animations that could rewrite an href', () => {
+    const result = sanitizeSvg(
+      Buffer.from(
+        '<svg><path id="p" d="M0 0h1"/><use href="#p"><set attributeName="href" to="javascript:alert(1)"/>' +
+          '<animate attributeName="href" values="javascript:alert(1)"/>' +
+          '<animateTransform attributeName="xlink:href" values="javascript:alert(1)"/></use></svg>'
+      )
+    ).toString('utf8');
+
+    expect(result).not.toMatch(/<(set|animate)\b/);
+    expect(result).not.toMatch(/attributeName="[^"]*href/i);
   });
 
   it('should remove hrefs that are not same-document references or embedded raster images', () => {

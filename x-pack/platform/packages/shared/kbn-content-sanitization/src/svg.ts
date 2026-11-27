@@ -17,9 +17,18 @@ const RASTER_DATA_URI = /^data:image\/(?:png|jpe?g|gif|webp);base64,[\sA-Za-z0-9
 const MAX_USE_REFERENCES = 256;
 const MAX_USE_COPIED_ELEMENTS = 10_000;
 
-// Same-document references only, e.g. <use href="#shape">; anything else could load a remote resource.
+// Same-document references only where registry logos need them, e.g. <use href="#shape">; anything else could
+// load a remote resource.
+const FRAGMENT_HREF_TAGS: ReadonlySet<string> = new Set([
+  'use',
+  'lineargradient',
+  'radialgradient',
+]);
+
 const isSafeHref = (tagName: string, value: string): boolean =>
-  getFragmentId(value) !== undefined || (tagName === 'image' && RASTER_DATA_URI.test(value));
+  tagName === 'image'
+    ? RASTER_DATA_URI.test(value)
+    : FRAGMENT_HREF_TAGS.has(tagName) && getFragmentId(value) !== undefined;
 
 const collectElements = (root: Element, window: DOMWindow): Element[] => {
   // Prototype method, because a parsed element can shadow a document's methods by name.
@@ -58,43 +67,52 @@ const countCopiedElements = (
 
 // Runs on the sanitized tree, so every target checked is the element the browser will find for that id.
 const limitUseReferences = (root: Element, window: DOMWindow): void => {
-  const elements = collectElements(root, window);
+  const uses: Element[] = [];
   const elementsById = new Map<string, Element>();
-  for (const element of elements) {
+  for (const element of collectElements(root, window)) {
+    if (element.localName === 'use') {
+      uses.push(element);
+    }
+
     const id = element.getAttribute('id');
     if (id && !elementsById.has(id)) {
       elementsById.set(id, element);
     }
   }
 
+  // Undefined when a target is missing or its copy would exceed the budget.
+  const countTargets = (ids: Set<string | undefined>, budget: number): number | undefined => {
+    let total = 0;
+    for (const id of ids) {
+      const target = id === undefined ? undefined : elementsById.get(id);
+      const count = target && countCopiedElements(target, budget - total, window);
+      if (count === undefined) {
+        return undefined;
+      }
+      total += count;
+    }
+    return total;
+  };
+
   let references = 0;
   let copiedElements = 0;
-  for (const use of elements.filter(({ localName }) => localName === 'use')) {
+  for (const use of uses) {
     const hrefs = Array.from(use.attributes).filter(({ localName }) => localName === 'href');
     if (hrefs.length === 0) {
       continue;
     }
-    references++;
+
     // An href and its xlink:href fallback that name the same target render it once.
     const targetIds = new Set(hrefs.map(({ value }) => getFragmentId(value)));
-    let isAllowed = references <= MAX_USE_REFERENCES;
-    let useCopiedElements = 0;
-    for (const id of targetIds) {
-      const target = id === undefined ? undefined : elementsById.get(id);
-      const remaining = MAX_USE_COPIED_ELEMENTS - copiedElements - useCopiedElements;
-      const count =
-        isAllowed && target ? countCopiedElements(target, remaining, window) : undefined;
-      if (count === undefined) {
-        isAllowed = false;
-        break;
-      }
-      useCopiedElements += count;
-    }
+    const count =
+      ++references <= MAX_USE_REFERENCES
+        ? countTargets(targetIds, MAX_USE_COPIED_ELEMENTS - copiedElements)
+        : undefined;
     // A <use> that loses its hrefs renders nothing, so only an allowed one is charged.
-    if (isAllowed) {
-      copiedElements += useCopiedElements;
-    } else {
+    if (count === undefined) {
       hrefs.forEach((href) => use.removeAttributeNode(href));
+    } else {
+      copiedElements += count;
     }
   }
 };
