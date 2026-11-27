@@ -51,6 +51,22 @@ describe('EvidenceView', () => {
     expect(screen.getByText('Errors spiked.')).toBeVisible();
   });
 
+  it('renders <time> tags in the description', () => {
+    const { container } = render(
+      <EuiProvider>
+        <EvidenceView
+          evidence={{
+            description: 'Errors began at <time datetime="2026-11-24T17:20:00Z"></time>.',
+          }}
+        />
+      </EuiProvider>
+    );
+
+    const time = container.querySelector('time');
+    expect(time).toHaveAttribute('datetime', '2026-11-24T17:20:00Z');
+    expect(time?.textContent).not.toBe('');
+  });
+
   it('renders nothing for empty evidence', () => {
     const { container } = render(<EvidenceView evidence={{ description: '  ' }} />);
 

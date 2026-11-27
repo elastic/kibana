@@ -14,11 +14,11 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiLoadingSpinner,
-  EuiMarkdownFormat,
   EuiSpacer,
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { TimeAwareMarkdown } from '@kbn/agentic-investigations-common';
 import type {
   Hypothesis,
   HypothesisStatus,
@@ -78,9 +78,9 @@ export const HypothesisDetail = ({
   <>
     <div data-test-subj="investigationHypothesisReason">
       {reason?.trim() ? (
-        <EuiMarkdownFormat textSize="xs" color="subdued">
+        <TimeAwareMarkdown textSize="xs" color="subdued">
           {reason}
-        </EuiMarkdownFormat>
+        </TimeAwareMarkdown>
       ) : (
         <EuiText size="xs" color="subdued">
           <p>{NO_REASON}</p>

@@ -310,6 +310,31 @@ describe('renderInvestigationSlackMessage', () => {
     expect(text.length).toBeLessThanOrEqual(4000);
   });
 
+  it('shows time tags in the findings and hypotheses as readable UTC times', () => {
+    const tag = '<time datetime="2026-08-09T14:02:00Z"></time>';
+    const message = render({
+      investigation: completed({
+        summary: `p99 latency on checkout rose after the deploy at ${tag}.`,
+        verdict: `Connection pool exhausted. It filled up at ${tag}.`,
+        impact: { summary: `Checkout errors for 12% of users from ${tag}.`, entities: [] },
+        hypotheses: [
+          {
+            candidate: 'payments-api leaks connections',
+            confidence: 0.86,
+            status: 'confirmed',
+            reason: `**Result:** pool hit its max at ${tag}.`,
+          },
+        ],
+      }),
+    });
+    const output = JSON.stringify(message);
+
+    expect(output).not.toContain('<time');
+    expect(output).not.toContain('&lt;time');
+    expect(leadsOf(message)).toContain('after the deploy at Aug 9');
+    expect(output.match(/Aug 9(, 2026)?, 14:02 UTC/g)?.length).toBeGreaterThanOrEqual(4);
+  });
+
   it('does not let agent text broadcast or link through Slack control sequences', () => {
     const hostile = '<!channel> <!here> <https://evil.example|click> &amp;';
     const { blocks, text } = render({

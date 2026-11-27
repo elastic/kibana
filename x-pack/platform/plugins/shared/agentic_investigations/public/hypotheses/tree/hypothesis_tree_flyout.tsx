@@ -15,7 +15,6 @@ import {
   EuiFlyoutHeader,
   EuiIcon,
   EuiLoadingSpinner,
-  EuiMarkdownFormat,
   EuiPanel,
   EuiPortal,
   EuiSpacer,
@@ -25,6 +24,7 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { TimeAwareMarkdown } from '@kbn/agentic-investigations-common';
 import {
   Background,
   BackgroundVariant,
@@ -153,7 +153,7 @@ const NodeDetail = ({
       );
     }
     case 'conclusion':
-      return <EuiMarkdownFormat textSize="s">{data.conclusion}</EuiMarkdownFormat>;
+      return <TimeAwareMarkdown textSize="s">{data.conclusion}</TimeAwareMarkdown>;
     case 'actions': {
       const { id } = data.proposals[Math.min(selectedActionIndex ?? 0, data.proposals.length - 1)];
       return <ProposalDecision key={id} investigationId={investigationId} proposalId={id} />;

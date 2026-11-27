@@ -14,7 +14,6 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiMarkdownFormat,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
@@ -24,6 +23,7 @@ import {
   GroupedAttachmentRow,
   ShowMoreFooter,
   type GroupedAttachmentRowAction,
+  TimeAwareMarkdown,
 } from '@kbn/agentic-investigations-common';
 import {
   impactEntityFlyoutType,
@@ -191,7 +191,7 @@ const ImpactSummary = ({ summary }: { summary: string }) => {
 
   return (
     <div data-test-subj="investigationImpactSummary">
-      <EuiMarkdownFormat textSize="s">{shown}</EuiMarkdownFormat>
+      <TimeAwareMarkdown textSize="s">{shown}</TimeAwareMarkdown>
       {isLong && (
         <EuiButtonEmpty
           size="xs"

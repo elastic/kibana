@@ -7,7 +7,8 @@
 
 import { css } from '@emotion/react';
 import React from 'react';
-import { EuiMarkdownFormat, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
+import { TimeAwareMarkdown } from '@kbn/agentic-investigations-common';
 
 /** Inline code size in flyouts that use 14px body text (matches event flyout markdown code). */
 export const NIGHTSHIFT_INLINE_CODE_FONT_SIZE = '12px';
@@ -64,12 +65,12 @@ export function InvestigationFormattedText({
           : ''}
       `}
     >
-      <EuiMarkdownFormat
+      <TimeAwareMarkdown
         textSize={fontSize ? 'relative' : textSize}
         color={subdued ? 'subdued' : undefined}
       >
         {text}
-      </EuiMarkdownFormat>
+      </TimeAwareMarkdown>
     </div>
   );
 }

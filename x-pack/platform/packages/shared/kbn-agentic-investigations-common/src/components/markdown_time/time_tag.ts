@@ -1,0 +1,56 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import moment from 'moment';
+
+/**
+ * A complete `<time ...>` tag: self-closed, or open with optional inner text and a close.
+ * Capture group 1 is the inner text. Compile with the `i` flag (and `g` to scan).
+ */
+export const COMPLETE_TIME_TAG = '<time(?=[\\s/>])[^>]*?(?:\\/>|>([^<]*)<\\/time\\s*>)';
+
+const DATETIME_ATTRIBUTE = /\sdatetime\s*=\s*(?:"([^"]*)"|'([^']*)')/i;
+const ISO_WITH_ZONE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}(:?\d{2})?)$/i;
+
+/** The value of the `datetime` attribute of an opening tag, if it has one. */
+export const getTimeTagDatetime = (openTag: string): string | undefined => {
+  const [, doubleQuoted, singleQuoted] = DATETIME_ATTRIBUTE.exec(openTag) ?? [];
+  return doubleQuoted ?? singleQuoted;
+};
+
+/** The moment for an ISO 8601 value that carries a time zone, or undefined for anything else. */
+export const parseTimeTagDatetime = (value: string | undefined): moment.Moment | undefined => {
+  if (!value || !ISO_WITH_ZONE.test(value)) return undefined;
+  const parsed = moment(value, moment.ISO_8601, true);
+  return parsed.isValid() ? parsed : undefined;
+};
+
+/** Whether the clock time occurs twice in the viewer's zone, as in the hour repeated when DST ends. */
+const isRepeatedClockTime = (local: moment.Moment): boolean => {
+  const offset = local.utcOffset();
+  return (
+    local.clone().subtract(1, 'hour').utcOffset() > offset ||
+    local.clone().add(1, 'hour').utcOffset() < offset
+  );
+};
+
+const labelFormat = (local: moment.Moment, now: moment.Moment): string => {
+  if (local.isSame(now, 'day')) return 'HH:mm';
+  if (local.isSame(now, 'year')) return 'MMM D, HH:mm';
+  return 'MMM D, YYYY, HH:mm';
+};
+
+/**
+ * The inline label for a time, in the viewer's zone: the clock time for today, with the day for
+ * this year and with the year for older times, so it reads as a point in a sentence or a window.
+ * A clock time that occurs twice (when DST ends) also gets its UTC offset, so it stays unambiguous.
+ */
+export const formatTimeTagLabel = (time: moment.Moment, now: moment.Moment = moment()): string => {
+  const local = moment(time);
+  const label = local.format(labelFormat(local, now));
+  return isRepeatedClockTime(local) ? `${label} (UTC${local.format('Z')})` : label;
+};
