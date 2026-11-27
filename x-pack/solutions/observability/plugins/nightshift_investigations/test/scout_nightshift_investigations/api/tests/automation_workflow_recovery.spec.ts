@@ -47,6 +47,7 @@ const createRequest =
 
 const INVALID_MESSAGE = expect.stringContaining('The automation workflow is not valid');
 const invalidInstructions = 'Check the queue {% if %} depth';
+const saveableInstructions = 'Review health {{ unknown.variable }}';
 const dailyTrigger = {
   rows: [{ kind: 'schedule', schedulePreset: 'daily', time: '03:00', timezone: 'UTC' }],
 };
@@ -126,7 +127,7 @@ apiTest.describe(
               },
             ],
           },
-          execution: { promptTemplate: 'Review health.' },
+          execution: { promptTemplate: saveableInstructions },
           completions: [],
           runtime: { dailyDispatchLimit: 3 },
         });
@@ -152,7 +153,7 @@ apiTest.describe(
         expect(current.body).toMatchObject({
           workflowId,
           isEnabled: true,
-          execution: { promptTemplate: 'Review health.' },
+          execution: { promptTemplate: saveableInstructions },
         });
       }
     );

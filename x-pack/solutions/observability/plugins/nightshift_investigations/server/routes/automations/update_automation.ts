@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { badRequest, isBoom, serverUnavailable } from '@hapi/boom';
+import { badRequest, serverUnavailable } from '@hapi/boom';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
@@ -147,8 +147,9 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
     if (existing.attributes.workflowId) {
       const { workflowId } = existing.attributes;
       const { management } = workflowsManagement;
+      let yaml: string | undefined;
       try {
-        const yaml = pauseOnly
+        yaml = pauseOnly
           ? undefined
           : generateWorkflowYaml({
               automationId: params.path.id,
@@ -156,7 +157,11 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
               serviceAccountId,
               universalAlerts: isUniversalAlertingAvailable(),
             });
-        if (yaml) await assertValidWorkflowYaml({ management, yaml, spaceId, request });
+      } catch (err) {
+        throw badRequest(`Failed to update backing workflow: ${err.message}`);
+      }
+      if (yaml) await assertValidWorkflowYaml({ management, yaml, spaceId, request });
+      try {
         const result = await management.updateWorkflow(
           workflowId,
           yaml ? { yaml } : { enabled: false },
@@ -171,8 +176,6 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
               'The backing workflow was deleted. Open the automation and use Repair.'
             );
           }
-        } else if (isBoom(err)) {
-          throw err;
         } else {
           throw badRequest(`Failed to update backing workflow: ${err.message}`);
         }
