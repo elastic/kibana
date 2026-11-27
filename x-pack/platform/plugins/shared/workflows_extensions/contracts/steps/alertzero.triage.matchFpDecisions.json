@@ -53,6 +53,10 @@
   "output": {
     "additionalProperties": false,
     "properties": {
+      "blocked_by_verdict": {
+        "description": "Matches of an approved decision that was not acted on, because an alert of its key has a true positive or inconclusive verdict.",
+        "type": "number"
+      },
       "candidates": {
         "description": "Open untriaged alerts of the look-back that were checked.",
         "type": "number"
@@ -62,7 +66,7 @@
         "type": "number"
       },
       "close_failures": {
-        "description": "Decisions whose alerts could not all be closed.",
+        "description": "Approved decisions whose alerts could not all be closed, or that could not be read before the close. Each decision counts once.",
         "type": "number"
       },
       "closed": {
@@ -112,7 +116,11 @@
         "type": "string"
       },
       "tag_failures": {
-        "description": "Tag updates that failed. Those alerts match again next sweep.",
+        "description": "Decisions whose alerts could not all be tagged, or, for a dismissal, that could not be read before the tags. Each decision counts once. Those alerts match again next sweep.",
+        "type": "number"
+      },
+      "unsettled_decisions": {
+        "description": "Decisions whose alerts the sweep could not check or put back after it wrote to them: the decision could not be read again, or a revoke that landed in between could not be undone. The sweep leaves the alerts as they are, and they may still carry the decision tag, but that is not certain: a revoke that ran in the meantime can have taken the tag off an alert before the sweep closed it. If the decision was revoked, run the revoke again: it finds the alerts that still carry the tag. An alert that does not carry it is not found and needs a manual review.",
         "type": "number"
       },
       "would_close": {
@@ -125,6 +133,7 @@
       }
     },
     "required": [
+      "blocked_by_verdict",
       "candidates",
       "capped",
       "close_failures",
@@ -139,6 +148,7 @@
       "skipped",
       "status",
       "tag_failures",
+      "unsettled_decisions",
       "would_close",
       "would_skip"
     ],

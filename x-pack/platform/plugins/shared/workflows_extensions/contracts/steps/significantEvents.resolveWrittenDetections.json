@@ -15,57 +15,12 @@
           },
           "classifier": {
             "properties": {
-              "baseline": {
-                "properties": {
-                  "decision": {
-                    "enum": [
-                      "above_normal",
-                      "background",
-                      "warming_up"
-                    ],
-                    "type": "string"
-                  },
-                  "median": {
-                    "type": "number"
-                  },
-                  "samples": {
-                    "maximum": 9007199254740991,
-                    "minimum": 0,
-                    "type": "integer"
-                  },
-                  "threshold": {
-                    "type": "number"
-                  },
-                  "value": {
-                    "type": "number"
-                  }
-                },
-                "required": [
-                  "decision",
-                  "samples",
-                  "value"
-                ],
-                "type": "object"
-              },
               "live_events": {
                 "items": {
                   "$ref": "#/definitions/__schema1"
                 },
                 "maxItems": 50,
                 "type": "array"
-              },
-              "probe_has_rows": {
-                "type": "boolean"
-              },
-              "probe_status": {
-                "enum": [
-                  "ok",
-                  "error",
-                  "timeout",
-                  "no_query",
-                  "aborted"
-                ],
-                "type": "string"
               },
               "reason": {
                 "enum": [
@@ -81,6 +36,9 @@
                   "over_cap"
                 ],
                 "type": "string"
+              },
+              "rule_breached": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -168,7 +126,6 @@
     },
     "required": [
       "batch",
-      "reported_rule_uuids",
       "workflow_execution_id"
     ],
     "type": "object"

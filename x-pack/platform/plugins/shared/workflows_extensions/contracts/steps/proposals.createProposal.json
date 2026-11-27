@@ -1,5 +1,5 @@
 {
-  "exposure": "open",
+  "exposure": "internal",
   "id": "proposals.createProposal",
   "input": {
     "definitions": {

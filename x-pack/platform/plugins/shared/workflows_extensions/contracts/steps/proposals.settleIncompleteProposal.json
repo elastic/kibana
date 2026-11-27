@@ -1,5 +1,5 @@
 {
-  "exposure": "open",
+  "exposure": "internal",
   "id": "proposals.settleIncompleteProposal",
   "input": {
     "definitions": {

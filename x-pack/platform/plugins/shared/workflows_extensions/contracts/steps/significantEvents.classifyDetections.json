@@ -17,21 +17,10 @@
       }
     },
     "properties": {
-      "baseline_bucket_minutes": {
-        "default": 5,
-        "maximum": 60,
+      "batch_max": {
+        "default": 10,
+        "maximum": 1000,
         "minimum": 1,
-        "type": "integer"
-      },
-      "baseline_window_minutes": {
-        "default": 300,
-        "maximum": 1440,
-        "minimum": 60,
-        "type": "integer"
-      },
-      "budget_ms": {
-        "maximum": 60000,
-        "minimum": 2000,
         "type": "integer"
       },
       "columns": {
@@ -53,21 +42,6 @@
         "minimum": 1,
         "type": "number"
       },
-      "probe_concurrency": {
-        "maximum": 10,
-        "minimum": 1,
-        "type": "integer"
-      },
-      "probe_timeout_ms": {
-        "maximum": 30000,
-        "minimum": 1000,
-        "type": "integer"
-      },
-      "probe_window_minutes": {
-        "maximum": 360,
-        "minimum": 15,
-        "type": "integer"
-      },
       "review_fresh_minutes": {
         "default": 240,
         "maximum": 1440,
@@ -87,11 +61,7 @@
       }
     },
     "required": [
-      "budget_ms",
       "max_skip_age_hours",
-      "probe_concurrency",
-      "probe_timeout_ms",
-      "probe_window_minutes",
       "space_id"
     ],
     "type": "object"
@@ -113,32 +83,12 @@
           "classifier": {
             "additionalProperties": false,
             "properties": {
-              "baseline": {
-                "allOf": [
-                  {
-                    "$ref": "#/definitions/__schema1"
-                  }
-                ]
-              },
               "live_events": {
                 "items": {
-                  "$ref": "#/definitions/__schema2"
+                  "$ref": "#/definitions/__schema1"
                 },
                 "maxItems": 50,
                 "type": "array"
-              },
-              "probe_has_rows": {
-                "type": "boolean"
-              },
-              "probe_status": {
-                "enum": [
-                  "ok",
-                  "error",
-                  "timeout",
-                  "no_query",
-                  "aborted"
-                ],
-                "type": "string"
               },
               "reason": {
                 "enum": [
@@ -154,6 +104,9 @@
                   "over_cap"
                 ],
                 "type": "string"
+              },
+              "rule_breached": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -193,39 +146,6 @@
       "__schema1": {
         "additionalProperties": false,
         "properties": {
-          "decision": {
-            "enum": [
-              "above_normal",
-              "background",
-              "warming_up"
-            ],
-            "type": "string"
-          },
-          "median": {
-            "type": "number"
-          },
-          "samples": {
-            "maximum": 9007199254740991,
-            "minimum": 0,
-            "type": "integer"
-          },
-          "threshold": {
-            "type": "number"
-          },
-          "value": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "decision",
-          "samples",
-          "value"
-        ],
-        "type": "object"
-      },
-      "__schema2": {
-        "additionalProperties": false,
-        "properties": {
           "event_id": {
             "maxLength": 255,
             "type": "string"
@@ -248,11 +168,11 @@
         ],
         "type": "object"
       },
-      "__schema3": {
+      "__schema2": {
         "maxLength": 255,
         "type": "string"
       },
-      "__schema4": {
+      "__schema3": {
         "additionalProperties": false,
         "properties": {
           "rule_uuid": {
@@ -278,11 +198,42 @@
                 "type": "string"
               },
               "baseline": {
-                "allOf": [
-                  {
-                    "$ref": "#/definitions/__schema1"
+                "additionalProperties": false,
+                "properties": {
+                  "decision": {
+                    "enum": [
+                      "above_normal",
+                      "background",
+                      "warming_up"
+                    ],
+                    "type": "string"
+                  },
+                  "median": {
+                    "type": "number"
+                  },
+                  "samples": {
+                    "maximum": 9007199254740991,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "threshold": {
+                    "type": "number"
+                  },
+                  "value": {
+                    "type": "number"
                   }
-                ]
+                },
+                "required": [
+                  "decision",
+                  "samples",
+                  "value"
+                ],
+                "type": "object"
+              },
+              "breach_window_minutes": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
               },
               "event_id": {
                 "maxLength": 255,
@@ -325,6 +276,9 @@
                 "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|[+-](?:[01]\\d|2[0-3]):[0-5]\\d)$",
                 "type": "string"
               },
+              "rule_breached": {
+                "type": "boolean"
+              },
               "stored_verdict": {
                 "maxLength": 32,
                 "type": "string"
@@ -343,7 +297,7 @@
         ],
         "type": "object"
       },
-      "__schema5": {
+      "__schema4": {
         "additionalProperties": {
           "maximum": 9007199254740991,
           "minimum": 0,
@@ -351,7 +305,7 @@
         },
         "type": "object"
       },
-      "__schema6": {
+      "__schema5": {
         "maxLength": 255,
         "type": "string"
       }
@@ -367,21 +321,24 @@
       "failed": {
         "type": "boolean"
       },
+      "flaky_live_reason_counts": {
+        "$ref": "#/definitions/__schema4"
+      },
       "held_back_count": {
         "maximum": 9007199254740991,
         "minimum": 0,
         "type": "integer"
+      },
+      "held_reason_counts": {
+        "$ref": "#/definitions/__schema4"
       },
       "needs_agent_count": {
         "maximum": 9007199254740991,
         "minimum": 0,
         "type": "integer"
       },
-      "probe_status_counts": {
-        "$ref": "#/definitions/__schema5"
-      },
       "reason_counts": {
-        "$ref": "#/definitions/__schema5"
+        "$ref": "#/definitions/__schema4"
       },
       "row_count": {
         "maximum": 9007199254740991,
@@ -395,21 +352,21 @@
       },
       "skipped_detection_ids": {
         "items": {
-          "$ref": "#/definitions/__schema6"
+          "$ref": "#/definitions/__schema5"
         },
         "maxItems": 1000,
         "type": "array"
       },
       "skipped_rule_uuids": {
         "items": {
-          "$ref": "#/definitions/__schema3"
+          "$ref": "#/definitions/__schema2"
         },
         "maxItems": 1000,
         "type": "array"
       },
       "skips": {
         "items": {
-          "$ref": "#/definitions/__schema4"
+          "$ref": "#/definitions/__schema3"
         },
         "maxItems": 1000,
         "type": "array"
@@ -418,9 +375,10 @@
     "required": [
       "batch",
       "failed",
+      "flaky_live_reason_counts",
       "held_back_count",
+      "held_reason_counts",
       "needs_agent_count",
-      "probe_status_counts",
       "reason_counts",
       "row_count",
       "skipped_count",
