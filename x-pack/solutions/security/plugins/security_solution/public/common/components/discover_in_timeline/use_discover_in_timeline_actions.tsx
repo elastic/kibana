@@ -11,7 +11,7 @@ import type { SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
 import type { History } from 'history';
 import { isEqualWith } from 'lodash';
 import qs from 'query-string';
-import { useMemo, useCallback, useEffect, useRef } from 'react';
+import { useMemo, useCallback, useRef } from 'react';
 import type { RefObject } from 'react';
 import { useDispatch, useStore } from 'react-redux';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
@@ -103,17 +103,6 @@ export const useDiscoverInTimelineActions = (
   // Identifies the latest restore. Each one awaits the saved search and Discover, so an older one
   // can resume after a newer one took over the marker and the container.
   const latestRestoreRequest = useRef(0);
-  // Counts the moves to another history entry (Back, Forward, links). The URL state syncing
-  // rewrites the current entry in place with `REPLACE`, which is not counted.
-  const historyNavigations = useRef(0);
-
-  useEffect(
-    () =>
-      history?.listen((_location, action) => {
-        if (action !== 'REPLACE') historyNavigations.current += 1;
-      }),
-    [history]
-  );
 
   const queryClient = useQueryClient();
 
@@ -181,7 +170,6 @@ export const useDiscoverInTimelineActions = (
     ) => {
       const restoreRequest = ++latestRestoreRequest.current;
       const isSuperseded = () => latestRestoreRequest.current !== restoreRequest;
-      const historyNavigationsAtStart = historyNavigations.current;
 
       // The ES|QL tab publishes its state container while it is mounted and releases it when it
       // is not. Opening a timeline switches it to the Query tab, which can release the container
@@ -189,25 +177,19 @@ export const useDiscoverInTimelineActions = (
       // state has reached a container and the tab otherwise applies it on its next mount.
       timelineRestorePending.current = isRestoringFromUrl ? 'fromUrl' : 'opened';
 
-      const deferToTabMount = () => {
-        // After a different timeline was opened, the Discover state in the URL is the previous
-        // timeline's. A reload before the tab mounts restores this timeline from the URL, which
-        // would then take the previous timeline's query and time range as its own. After a move
-        // to another history entry, the URL state is the destination's and is left to it.
-        if (!isRestoringFromUrl && historyNavigations.current === historyNavigationsAtStart) {
-          dropDiscoverUrlState();
-        }
-      };
+      // An opened timeline takes over the active slot, and the timeline URL param, in the history
+      // entry that is current now. The Discover state in that entry is the previous timeline's,
+      // and a reload or a Back to the entry would restore it as this timeline's own. Dropping it
+      // here, before any await, keeps every entry's Discover state with the timeline it names.
+      // Discover's URL sync ignores the removal and only writes on its own state changes.
+      if (!isRestoringFromUrl) dropDiscoverUrlState();
 
       if (newSavedSearchId) {
         // Applying the default state below would empty the redux copy of the Discover state and
         // move the timefilter to `now-15m`, even though the caller asked for a session to be
         // restored. Leave both alone and let the tab restore itself when it mounts.
         const containerAtStart = discoverStateContainer.current;
-        if (!containerAtStart) {
-          deferToTabMount();
-          return;
-        }
+        if (!containerAtStart) return;
 
         let savedSearch;
         try {
@@ -221,7 +203,6 @@ export const useDiscoverInTimelineActions = (
             !currentContainer?.injectCurrentTab ||
             !currentContainer?.internalActions
           ) {
-            deferToTabMount();
             return;
           }
 
@@ -267,8 +248,6 @@ export const useDiscoverInTimelineActions = (
           // state. A tab that mounted during the fetch reads the marker itself.
           if (discoverStateContainer.current === containerAtStart) {
             timelineRestorePending.current = null;
-          } else if (!discoverStateContainer.current) {
-            deferToTabMount();
           }
         }
       } else {
@@ -300,8 +279,6 @@ export const useDiscoverInTimelineActions = (
         discoverDataService.query.timefilter.timefilter.setTime(defaultDiscoverTimeRange);
         if (discoverState) {
           timelineRestorePending.current = null;
-        } else {
-          deferToTabMount();
         }
       }
     },

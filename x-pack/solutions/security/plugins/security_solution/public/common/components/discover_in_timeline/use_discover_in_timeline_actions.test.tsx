@@ -342,9 +342,9 @@ describe('useDiscoverInTimelineActions', () => {
 
       expect(result.current.timelineRestorePending.current).toBe('opened');
     });
-    it('should leave the Discover state in the URL alone after a move to another history entry', async () => {
-      // The destination timeline is resolved before its own restore starts, so this restore is
-      // not superseded yet when it resumes, but the URL is no longer the opened timeline's.
+    it('should drop the previous timeline Discover state from the URL before the saved search is fetched', async () => {
+      // Leaving the opened timeline's history entry while the saved search loads must not leave
+      // the previous timeline's state in it, for Back to restore as the opened timeline's own.
       let resolveFetch: (savedSearch: SavedSearch) => void = () => {};
       (startServicesMock.savedSearch.get as jest.Mock).mockImplementationOnce(
         () =>
@@ -355,12 +355,20 @@ describe('useDiscoverInTimelineActions', () => {
       const containerRef: { current: ExtendedDiscoverStateContainer | undefined } = {
         current: createMockDiscoverStateContainer(discoverServices),
       };
-      const history = createMemoryHistory({ initialEntries: ['/timelines?timeline=(id:opened)'] });
+      const history = createMemoryHistory({
+        initialEntries: [
+          '/timelines?_a=(query:(esql:previous))&_g=(time:(from:now-1y,to:now))&timeline=(id:opened)',
+        ],
+      });
       const { result } = renderHook(() => useDiscoverInTimelineActions(containerRef, history), {
         wrapper: getTestProviderWithCustomState(),
       });
 
       const restore = result.current.resetDiscoverAppState(savedSearchMock.id);
+
+      expect(qs.parse(history.location.search)).toEqual({ timeline: '(id:opened)' });
+
+      // Whatever the user moves to next, including a Discover-only update, is left alone.
       containerRef.current = undefined;
       history.push(
         '/timelines?_a=(query:(esql:destination))&_g=(time:(from:now-1y,to:now))&timeline=(id:destination)'

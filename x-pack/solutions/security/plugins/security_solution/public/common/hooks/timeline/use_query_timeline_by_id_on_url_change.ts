@@ -67,8 +67,9 @@ export const useQueryTimelineByIdOnUrlChange = () => {
       queryTimelineById({
         activeTimelineTab: activeTab ?? TimelineTabs.query,
         duplicate: false,
-        // Back and Forward return to an entry whose Discover state is this timeline's own, while
-        // the legacy URL conflict link copies the current timeline's Discover state along.
+        // Back and Forward return to an entry whose Discover state is this timeline's own: opening
+        // a timeline drops the previous one's from the entry it takes over. The legacy URL
+        // conflict link copies the current timeline's Discover state along.
         isRestoringFromUrl: action === 'POP',
         timelineId: newId,
         openTimeline: true,
