@@ -23,11 +23,14 @@ export function createEsqlEquivalenceEvaluator({
   log,
   predictionExtractor,
   groundTruthExtractor,
+  instructions,
 }: {
   inferenceClient: BoundInferenceClient;
   log: ToolingLog;
   predictionExtractor: EsqlPredictionExtractor;
   groundTruthExtractor: EsqlGroundTruthExtractor;
+  /** Dataset-specific guidance for the judge, such as which differences don't affect equivalence. */
+  instructions?: string;
 }): Evaluator {
   return {
     evaluate: async ({ output, expected }) => {
@@ -53,6 +56,7 @@ export function createEsqlEquivalenceEvaluator({
           input: {
             ground_truth: groundTruth,
             prediction,
+            instructions,
           },
           finalToolChoice: {
             function: 'evaluate',
