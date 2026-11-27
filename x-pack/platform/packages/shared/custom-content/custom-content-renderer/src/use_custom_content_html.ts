@@ -83,7 +83,10 @@ export function useCustomContentHtml({
   setApproximationApplied,
 }: UseCustomContentHtmlParams): UseCustomContentHtmlResult {
   const [filledHtml, setFilledHtml] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  // A panel with queries starts loading, so its host never sees it as done before it has fetched.
+  const [isLoading, setIsLoading] = useState(
+    () => Boolean(savedTemplate?.trim()) && esqlQueries.length > 0
+  );
   const [error, setError] = useState<string | undefined>();
 
   const trimmedTemplate = savedTemplate?.trim() || undefined;

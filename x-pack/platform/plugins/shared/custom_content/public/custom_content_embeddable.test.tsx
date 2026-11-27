@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { ESQLVariableType } from '@kbn/esql-types';
+import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { RequestAdapter, apiHasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import { render, screen, act, waitFor } from '@testing-library/react';
 import { EsqlSource } from '@kbn/data-source';
@@ -33,8 +33,9 @@ const mockApiIsPresentationContainer = apiIsPresentationContainer as jest.Mocked
 let capturedComponentProps:
   | {
       esqlQueries?: readonly string[];
-      esqlVariables?: unknown;
+      esqlVariables?: ESQLControlVariable[];
       isFetchContextReady?: boolean;
+      generationVersion?: number;
       isGenerating?: boolean;
       requestAdapter?: unknown;
       onGenerateWithChat?: () => void;
@@ -679,6 +680,9 @@ describe('customContentEmbeddableFactory', () => {
       const esqlVariables$ = new BehaviorSubject([region]);
       const { embeddable } = await buildEmbeddable(baseState, { isFetchPaused$, esqlVariables$ });
       await act(async () => render(<embeddable.Component />));
+      // Give fetch$ and the batched props time to land, so false means held back, not just early.
+      await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
+      await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
 
       expect(capturedComponentProps?.isFetchContextReady).toBe(false);
 
@@ -697,6 +701,51 @@ describe('customContentEmbeddableFactory', () => {
       await act(async () => render(<embeddable.Component />));
 
       await act(async () => capturedComponentProps?.onLoadingChange?.(true));
+      expect(embeddable.api.dataLoading$.getValue()).toBe(true);
+
+      await act(async () => capturedComponentProps?.onLoadingChange?.(false));
+      expect(embeddable.api.dataLoading$.getValue()).toBe(false);
+    });
+
+    it('reloads with the dashboard, but not while deferred offscreen, catching up once visible', async () => {
+      const reload$ = new Subject<void>();
+      const isPausedOffscreen$ = new BehaviorSubject(false);
+      const { embeddable } = await buildEmbeddable(
+        baseState,
+        { reload$ },
+        { isFetchPaused$: isPausedOffscreen$ }
+      );
+      await act(async () => render(<embeddable.Component />));
+      await waitFor(() => expect(capturedComponentProps?.isFetchContextReady).toBe(true));
+      expect(capturedComponentProps?.generationVersion).toBe(0);
+
+      await act(async () => reload$.next());
+      await waitFor(() => expect(capturedComponentProps?.generationVersion).toBe(1));
+
+      await act(async () => {
+        isPausedOffscreen$.next(true);
+        reload$.next();
+        reload$.next();
+      });
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(capturedComponentProps?.generationVersion).toBe(1);
+
+      await act(async () => isPausedOffscreen$.next(false));
+      await waitFor(() => expect(capturedComponentProps?.generationVersion).toBe(2));
+    });
+
+    it('keeps a request in flight counted as loading when the panel scrolls offscreen', async () => {
+      const isPausedOffscreen$ = new BehaviorSubject(false);
+      const { embeddable } = await buildEmbeddable(
+        baseState,
+        {},
+        { isFetchPaused$: isPausedOffscreen$ }
+      );
+      await act(async () => render(<embeddable.Component />));
+      await waitFor(() => expect(capturedComponentProps?.isFetchContextReady).toBe(true));
+
+      await act(async () => capturedComponentProps?.onLoadingChange?.(true));
+      await act(async () => isPausedOffscreen$.next(true));
       expect(embeddable.api.dataLoading$.getValue()).toBe(true);
 
       await act(async () => capturedComponentProps?.onLoadingChange?.(false));

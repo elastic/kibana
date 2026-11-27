@@ -29,7 +29,6 @@ import {
   initializeStateApi,
   useBatchedPublishingSubjects,
   apiPublishesPauseFetch,
-  apiPublishesReload,
   apiPublishesTimeRange,
   apiIsPresentationContainer,
   fetch$,
@@ -234,6 +233,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     // screenshotting would otherwise capture an empty panel.
     const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
     const isComponentLoading$ = new BehaviorSubject<boolean>(true);
+    const reloadCount$ = new BehaviorSubject<number>(0);
 
     const serializeState = (): CustomContentEmbeddableState => ({
       ...titleManager.getLatestState(),
@@ -443,19 +443,22 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       filters$.next(ctx.filters);
       esqlVariables$.next(ctx.esqlVariables);
       effectiveTimeRange$.next(ctx.timeRange);
-      if (!ctx.isReload) {
+      if (ctx.isReload) {
+        reloadCount$.next(reloadCount$.getValue() + 1);
+      } else {
         previewHtml$.next(null);
       }
       isFetchContextReady$.next(true);
     });
 
-    // A panel paused because it is offscreen (deferred loading) must not hold up the dashboard's
-    // auto-refresh, while one waiting for the dashboard's controls still counts as loading.
+    // An offscreen panel that has never fetched (deferred loading) must not hold up the dashboard's
+    // auto-refresh; one waiting for the dashboard's controls, or with a request in flight, is loading.
     const dataLoadingSubscription = combineLatest([
       isComponentLoading$,
       apiPublishesPauseFetch(api) ? api.isFetchPaused$ : of(false),
-    ]).subscribe(([isLoading, isPausedOffscreen]) =>
-      dataLoading$.next(isLoading && !isPausedOffscreen)
+      isFetchContextReady$,
+    ]).subscribe(([isLoading, isPausedOffscreen, isFetchContextReady]) =>
+      dataLoading$.next(isLoading && !(isPausedOffscreen && !isFetchContextReady))
     );
 
     const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('edit');
@@ -473,6 +476,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           filters,
           esqlVariables,
           isFetchContextReady,
+          generationVersion,
           previewHtml,
           timeRange,
           isGenerating,
@@ -487,12 +491,12 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           filters$,
           esqlVariables$,
           isFetchContextReady$,
+          reloadCount$,
           previewHtml$,
           effectiveTimeRange$,
           isGenerating$,
           viewMode$
         );
-        const [generationVersion, setGenerationVersion] = useState(0);
 
         useEffect(() => {
           return () => {
@@ -501,12 +505,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
             fetchSubscription.unsubscribe();
             dataLoadingSubscription.unsubscribe();
           };
-        }, []);
-
-        useEffect(() => {
-          if (!apiPublishesReload(parentApi)) return;
-          const sub = parentApi.reload$.subscribe(() => setGenerationVersion((v) => v + 1));
-          return () => sub.unsubscribe();
         }, []);
 
         useEffect(() => registerPanelPreviewHandler(uuid, applyAttachmentData), []);

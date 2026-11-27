@@ -537,6 +537,18 @@ describe('useCustomContentHtml', () => {
       );
     });
 
+    it('is loading from its first render, so a host never sees it as done before it fetches', () => {
+      const firstValues: boolean[] = [];
+      renderHook(() => {
+        const result = useCustomContentHtml({ ...esqlParams, isFetchContextReady: false });
+        firstValues.push(result.isLoading);
+        return result;
+      });
+
+      expect(firstValues[0]).toBe(true);
+      expect(firstValues).not.toContain(false);
+    });
+
     it('renders a static panel right away, since it fetches nothing', async () => {
       const { result } = renderHook(() =>
         useCustomContentHtml({
