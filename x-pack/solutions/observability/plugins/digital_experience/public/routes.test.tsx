@@ -5,8 +5,33 @@
  * 2.0.
  */
 
-import { InvalidRouteParamsException } from '@kbn/typed-react-router-config';
+import React from 'react';
+import type { ComponentProps } from 'react';
+import { render, screen } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
+import {
+  InvalidRouteParamsException,
+  RouteRenderer,
+  RouterProvider,
+} from '@kbn/typed-react-router-config';
 import { digitalExperienceRouter } from './routes';
+
+jest.mock('./application/digital_experience_layout', () => ({
+  DigitalExperienceLayout: () => {
+    const { Outlet: LayoutOutlet } = jest.requireActual('@kbn/typed-react-router-config');
+    return <LayoutOutlet />;
+  },
+}));
+jest.mock('./pages/frustration/frustration_page', () => ({
+  FrustrationPage: ({ serviceName, source }: { serviceName: string; source: string }) => (
+    <div data-test-subj="frustrationPage">{`${serviceName} ${source}`}</div>
+  ),
+}));
+jest.mock('./pages/application_details/application_page', () => ({
+  ApplicationPage: ({ selectedTab }: { selectedTab: string }) => (
+    <div data-test-subj="applicationPage">{selectedTab}</div>
+  ),
+}));
 
 const locationOf = (pathname: string) => ({ pathname, search: '', hash: '', state: undefined });
 
@@ -137,6 +162,30 @@ describe('digitalExperienceRouter', () => {
     });
   });
 
+  it('matches the Crashes tab, with the open crash group, and drops a too long one', () => {
+    const location = { ...locationOf('/my-app/crashes'), search: '?source=otel&crashGroup=abc' };
+
+    expect(digitalExperienceRouter.matchRoutes(location).map(({ route }) => route.path)).toEqual([
+      '/',
+      '/{serviceName}',
+      '/{serviceName}/crashes',
+    ]);
+    expect(digitalExperienceRouter.getParams('/{serviceName}/crashes', location)).toEqual({
+      path: { serviceName: 'my-app' },
+      query: { source: 'otel', crashGroup: 'abc' },
+    });
+    expect(() =>
+      digitalExperienceRouter.matchRoutes({
+        ...locationOf('/my-app/crashes'),
+        search: `?source=otel&crashGroup=${'a'.repeat(257)}`,
+      })
+    ).toThrow(
+      expect.objectContaining({
+        patched: expect.objectContaining({ query: { source: 'otel' } }),
+      })
+    );
+  });
+
   it('removes invalid sessions list params', () => {
     const location = {
       ...locationOf('/my-app/sessions'),
@@ -192,5 +241,50 @@ describe('digitalExperienceRouter', () => {
         query: { source: 'otel', withFailedRequests: true, perPage: 50 },
       })
     ).toBe('/my-app/sessions/abc?perPage=50&source=otel&withFailedRequests=true');
+  });
+
+  it('matches the frustration page below the application, and not as a tab', () => {
+    expect(
+      digitalExperienceRouter
+        .matchRoutes({ ...locationOf('/my-app/frustration'), search: '?source=otel' })
+        .map(({ route }) => route.path)
+    ).toEqual(['/', '/{serviceName}', '/{serviceName}/frustration']);
+  });
+
+  it('links the frustration page with the source', () => {
+    expect(
+      digitalExperienceRouter.link('/{serviceName}/frustration', {
+        path: { serviceName: 'my-app' },
+        query: { source: 'otel', rangeFrom: 'now-7d', rangeTo: 'now', environment: 'production' },
+      })
+    ).toBe('/my-app/frustration?environment=production&rangeFrom=now-7d&rangeTo=now&source=otel');
+  });
+
+  describe('rendering', () => {
+    const renderAt = (url: string) =>
+      render(
+        <RouterProvider
+          history={createMemoryHistory({ initialEntries: [url] })}
+          router={
+            digitalExperienceRouter as unknown as ComponentProps<typeof RouterProvider>['router']
+          }
+        >
+          <RouteRenderer />
+        </RouterProvider>
+      );
+
+    it('renders the frustration page for the application and source of the URL', () => {
+      renderAt('/my-app/frustration?source=otel');
+
+      expect(screen.getByTestId('frustrationPage')).toHaveTextContent('my-app otel');
+      expect(screen.queryByTestId('applicationPage')).not.toBeInTheDocument();
+    });
+
+    it('still renders the Overview at the application path', () => {
+      renderAt('/my-app?source=otel');
+
+      expect(screen.getByTestId('applicationPage')).toHaveTextContent('overview');
+      expect(screen.queryByTestId('frustrationPage')).not.toBeInTheDocument();
+    });
   });
 });

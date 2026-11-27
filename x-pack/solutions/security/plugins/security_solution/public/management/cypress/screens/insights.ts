@@ -43,9 +43,6 @@ export const workflowInsightsSelectors = {
     cy
       .getByTestSubj('globalToastList')
       .within(() => cy.getByTestSubj('euiToastBody').contains(content)),
-  connectorSelectorExists: () => {
-    cy.getByTestSubj('connector-selector').should('exist');
-  },
   connectorSelectorDoesNotExist: () => {
     cy.getByTestSubj('connector-selector').should('not.exist');
   },

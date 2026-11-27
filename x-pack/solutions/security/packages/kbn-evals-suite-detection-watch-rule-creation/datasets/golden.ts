@@ -8,7 +8,7 @@
 /**
  * Golden dataset for the Rule Creation Worker eval.
  *
- * Each entry maps the four trigger inputs of rule_creation.yaml
+ * Each entry maps the four trigger inputs of coverage_rule_creation.yaml
  * (technique, gap_description, evidence, confidence) to expected
  * evaluator ground truth.
  *

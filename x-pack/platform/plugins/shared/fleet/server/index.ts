@@ -24,6 +24,7 @@ export type { PackageAsset } from './services/epm/archive/storage';
 export { getRegistryUrl } from './services';
 export { NamingCollisionError } from './services/epm/packages/custom_integrations/validation/check_naming_collision';
 
+export type { AgentlessRumClient, AgentlessRumPolicy } from './services/agents/agentless_agent';
 export type { FleetSetupContract, FleetSetupDeps, FleetStartContract } from './plugin';
 export type {
   ExternalCallback,
