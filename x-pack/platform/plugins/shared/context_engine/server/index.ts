@@ -14,6 +14,7 @@ import type {
 } from './types';
 
 export type { ContextEnginePluginSetup, ContextEnginePluginStart } from './types';
+export type { SessionEventInput } from './session_events/types';
 export type {
   ForgetSessionMemoriesInput,
   RememberSessionMemoryInput,
