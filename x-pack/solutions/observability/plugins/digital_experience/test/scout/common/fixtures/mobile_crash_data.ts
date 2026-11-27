@@ -9,7 +9,8 @@ import type { EsClient } from '@kbn/scout-oblt';
 import { CRASH_FINGERPRINT_CASES } from '../../../../common/mobile/crash_fingerprint.test_helpers';
 
 const LOGS_INDEX = 'logs-generic.otel-default';
-const TRACES_INDEX = 'traces-generic.otel-default';
+/** The fixture's own data stream, which setup rolls over and teardown deletes. */
+const TRACES_INDEX = 'traces-generic.otel-scoutcrashes';
 
 /** Applications of their own, so the other mobile fixtures' counts stay as they are. */
 export const CRASH_APPS = {
@@ -408,10 +409,12 @@ const documents = [
 ];
 
 /**
- * Deletes every document of the fixture's applications, whose names no other fixture uses, so a
- * run that was interrupted, even with older document ids, leaves nothing behind.
+ * Deletes the fixture's traces data stream with its backing indices, and every document of the
+ * fixture's applications, whose names no other fixture uses, so a run that was interrupted, even
+ * with older document ids, leaves nothing behind.
  */
 export const deleteMobileCrashData = async (esClient: EsClient): Promise<void> => {
+  await esClient.indices.deleteDataStream({ name: TRACES_INDEX }, { ignore: [404] });
   await esClient.deleteByQuery({
     index: ['logs-*.otel-*', 'traces-*.otel-*'],
     query: { terms: { 'service.name': Object.values(CRASH_APPS) } },
