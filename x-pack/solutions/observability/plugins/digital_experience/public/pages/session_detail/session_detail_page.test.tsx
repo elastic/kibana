@@ -138,6 +138,7 @@ const detail = (overrides: Partial<SessionDetailResponse> = {}): SessionDetailRe
     failedRequestCount: 2,
     frustration: emptyFrustration(),
     bounced: false,
+    hasReplay: null,
     entryPage: '/',
     exitPage: '/cart',
     journey: ['/', '/cart'],
