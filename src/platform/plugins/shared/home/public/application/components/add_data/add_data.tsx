@@ -31,6 +31,11 @@ import { SetupCloudConnect, CalloutSkeleton } from '../setup_cloud_connect';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 import { getServices } from '../../kibana_services';
 
+const getAddDataHref = (tab: 'sampleData' | 'fileDataViz'): string => {
+  const params = new URLSearchParams({ returnAppId: 'home', returnPath: '#/' });
+  return `#/tutorial_directory/${tab}?${params.toString()}`;
+};
+
 interface Props {
   addBasePath: (path: string) => string;
   application: ApplicationStart;
@@ -120,7 +125,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
 
               <EuiButtonEmpty
                 data-test-subj="addSampleData"
-                href={addBasePath('#/tutorial_directory/sampleData')}
+                href={addBasePath(getAddDataHref('sampleData'))}
                 iconType="documents"
               >
                 <FormattedMessage
@@ -131,7 +136,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
 
               <EuiButtonEmpty
                 data-test-subj="uploadFile"
-                href={addBasePath('#/tutorial_directory/fileDataViz')}
+                href={addBasePath(getAddDataHref('fileDataViz'))}
                 iconType="download"
               >
                 <FormattedMessage
