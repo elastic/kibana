@@ -360,4 +360,19 @@ steps:
       expect(correctYamlSyntax(input)).toBe(expected);
     });
   });
+
+  describe('lines to leave alone', () => {
+    it('does not touch the given lines (1-based), and corrects the others as before', () => {
+      const input = ['a: *x', 'b: *y', 'c: *z'].join('\n');
+
+      expect(correctYamlSyntax(input, new Set([2]))).toBe(
+        ['a: "*x"', 'b: *y', 'c: "*z"'].join('\n')
+      );
+    });
+
+    it('behaves as before without a set', () => {
+      expect(correctYamlSyntax('a: *x')).toBe('a: "*x"');
+      expect(correctYamlSyntax('a: *x', new Set())).toBe('a: "*x"');
+    });
+  });
 });

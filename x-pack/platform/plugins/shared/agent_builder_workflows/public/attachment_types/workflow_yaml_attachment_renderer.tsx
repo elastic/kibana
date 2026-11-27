@@ -19,6 +19,7 @@ import type { ApplicationStart, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider, useKibana } from '@kbn/kibana-react-plugin/public';
 import {
+  preloadWorkflowGraphCanvas,
   useWorkflowsApi,
   useWorkflowsCapabilities,
   type WorkflowApi,
@@ -329,6 +330,19 @@ const WorkflowYamlCanvasContent: React.FC<{
   return <WorkflowYamlCanvasPreview yaml={attachment.data.yaml} showGraph />;
 };
 
+/**
+ * The inline card shows up before the user opens Preview. Fetch the canvas chunk meanwhile, so
+ * Preview opens without a wait and the canvas is not downloaded on pages that never show a workflow.
+ */
+const WorkflowInlineCard = ({ yaml }: { yaml: string }) => {
+  useEffect(() => {
+    preloadWorkflowGraphCanvas().catch(() => {
+      // Harmless: the canvas requests its chunk again when Preview renders it.
+    });
+  }, []);
+  return <WorkflowInfoStripe yaml={yaml} showTitle />;
+};
+
 export const createWorkflowYamlAttachmentUiDefinition = ({
   core,
   telemetry,
@@ -409,7 +423,7 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
     renderInlineContent: ({ attachment }) => (
       <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false}>
         <WorkflowsUiServicesProvider services={workflowsUiServices}>
-          <WorkflowInfoStripe yaml={attachment.data.yaml} showTitle />
+          <WorkflowInlineCard yaml={attachment.data.yaml} />
         </WorkflowsUiServicesProvider>
       </EuiPanel>
     ),

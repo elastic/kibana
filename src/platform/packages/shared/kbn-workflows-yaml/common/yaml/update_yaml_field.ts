@@ -12,11 +12,12 @@ import { parseDocument, isScalar, Scalar, stringify } from 'yaml';
 /**
  * Updates a field in YAML by `fieldPath` (e.g. `enabled`, `metadata.author`).
  *
- * For an existing scalar field with a primitive value, the new value is
- * spliced into the source at the scalar's byte range, leaving every other
- * byte (indentation, quoting, comments, blank lines, block scalars, trailing
- * newlines) untouched. For a missing field or a non-scalar value, we fall
- * back to `doc.setIn` + `doc.toString()`, which can normalize formatting.
+ * For an existing scalar field with a single-line primitive value, the new
+ * value is spliced into the source at the scalar's byte range, leaving every
+ * other byte (indentation, quoting, comments, blank lines, block scalars,
+ * trailing newlines) untouched. For a missing field, a non-scalar value or a
+ * multi-line string, we fall back to `doc.setIn` + `doc.toString()`, which can
+ * normalize formatting.
  */
 export function updateYamlField(yamlString: string, fieldPath: string, value: unknown): string {
   try {
@@ -34,7 +35,14 @@ export function updateYamlField(yamlString: string, fieldPath: string, value: un
     ) {
       const [start, end] = existingNode.range;
       const serialized = stringify(value, { lineWidth: 0 }).replace(/\n+$/, '');
-      return yamlString.slice(0, start) + serialized + yamlString.slice(end);
+      if (!serialized.includes('\n')) {
+        return yamlString.slice(0, start) + serialized + yamlString.slice(end);
+      }
+      // A multi-line string serializes, on its own, as a block scalar indented for a document
+      // root: not valid under a key. Let the document serialize it in context, as a block scalar
+      // rather than in the plain/quoted style of the value it replaces (which would fold the
+      // line breaks).
+      existingNode.type = undefined;
     }
 
     doc.setIn(pathArray, value);

@@ -26,6 +26,7 @@ export {
   isDynamicValue,
   isVariableValue,
   isLiquidTagValue,
+  isReferenceValue,
 } from './common/regex';
 
 // JSON Schema template-tolerance weaver
@@ -119,6 +120,7 @@ export {
   modifyStepProperty,
   modifyWorkflowProperty,
   deleteStep,
+  detectIndent,
   WORKFLOW_PROPERTY_KEYS,
 } from './lib/yaml_edit';
 export type { StepDefinition } from './lib/yaml_edit';
