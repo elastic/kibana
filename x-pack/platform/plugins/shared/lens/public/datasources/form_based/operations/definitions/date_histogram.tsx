@@ -505,7 +505,7 @@ export const dateHistogramOperation: OperationDefinition<
         <p>
           <FormattedMessage
             id="xpack.lens.indexPattern.dateHistogram.autoLongerExplanation"
-            defaultMessage="To choose the interval, Lens picks the finest interval that produces at most {targetBarSetting} buckets. For example, when the time range is 4 days, the data is divided into hourly buckets."
+            defaultMessage="To choose the interval, Lens picks the finest interval that produces at most {targetBarSetting} buckets. For example, with the default of 100 buckets, a 4 day time range is divided into hourly buckets."
             values={{
               targetBarSetting: <EuiCode>{UI_SETTINGS.HISTOGRAM_BAR_TARGET}</EuiCode>,
             }}

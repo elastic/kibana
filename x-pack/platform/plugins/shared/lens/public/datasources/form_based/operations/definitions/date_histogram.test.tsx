@@ -33,6 +33,10 @@ dataStart.search.aggs.calculateAutoTimeExpression = getCalculateAutoTimeExpressi
     if (path === UI_SETTINGS.HISTOGRAM_MAX_BARS) {
       return 10;
     }
+    // Auto intervals follow the bar target, not the max bars. Pin it so the expected interval is explicit.
+    if (path === UI_SETTINGS.HISTOGRAM_BAR_TARGET) {
+      return 100;
+    }
   }
 );
 
