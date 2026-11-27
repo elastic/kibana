@@ -36,7 +36,6 @@ const staysInApp = (path: string): boolean => PROBE_APPS.every((app) => staysInP
 /** A path inside a Kibana app, which can't leave it. */
 export const appPathSchema = z
   .string()
-  .max(2000)
   .refine((value) => /^[/?#]/.test(value) && !value.startsWith('//') && !value.includes('\\'), {
     error: 'must start with /, ? or #, and not with //',
   })

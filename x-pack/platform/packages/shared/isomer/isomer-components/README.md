@@ -21,13 +21,15 @@ Kibana's [Isomer](https://github.com/elastic/isomer) pack of content and layout 
   - `{ type: 'quote', text }`, plain text up to 3,000 characters, with line breaks kept. Slack gets one `rich_text` block with a `rich_text_quote`, so the text needs no `mrkdwn` escaping.
   - To title it, put it in a `section`.
 - `actions`: up to 5 link buttons, such as "View Full Investigation".
-  - `{ type: 'actions', buttons: [{ label, url, primary? }] }`. Slack gets an `actions` block of URL buttons, with labels clamped to 75 characters; other surfaces render links.
+  - `{ type: 'actions', buttons: [{ label, url, primary? }] }`. `label` is plain text up to 100 characters. Slack gets an `actions` block of URL buttons, with labels clamped to 75 characters; other surfaces render links.
   - A button takes a Kibana `app` and `path` instead of a `url`, resolved like a `link`'s: Slack joins it onto the render's `baseUrl` and React calls `resolveKibanaPath`. Where it doesn't resolve, Slack drops the button, React shows its label as text, and Text and Markdown leave it out.
   - `url` follows the navigation policy, so a relative path works in React and HTML. Slack can't open one, so it drops that button, and the block when no button is left. For a page in Kibana, give `app` and `path` instead.
+  - The schema sets no length on `url` or `path`. Slack takes a URL of up to 3,000 characters, so it drops a button whose resolved URL is longer; other surfaces link it.
 - `link`: one link, to a page in Kibana or on the web, such as "Open in Discover".
   - `{ type: 'link', label, app, path? }` for a Kibana app path, where `app` is the app's route after `/app/` (such as `security`), not its id (`securitySolutionUI`), or `{ type: 'link', label, url }` for an absolute URL. Slack gets an inline `mrkdwn` link in a `section`, or a `rich_text` link when the escaped URL won't fit one.
   - Each host resolves an app path. React calls `resolveKibanaPath('/app/{app}{path}')` from the render context (`ComponentsRenderContext`), such as `http.basePath.prepend` in the browser. Slack joins `/app/{app}{path}` onto the render's `baseUrl` (`runtime.surfaces.slack.render(composition, { baseUrl })`), keeping its base path and space, so pass the space-aware Kibana URL. Text and Markdown have no host input, so only `url` links render there.
-  - A link that doesn't resolve renders nothing. Unlike `actions`, it isn't a call to action.
+  - `label` is plain text up to 100 characters, and the schema sets no length on `url` or `path`.
+  - A link that doesn't resolve renders nothing, and neither does one in Slack whose resolved URL is past Slack's 3,000 characters. Unlike `actions`, it isn't a call to action.
 - `fields`: up to 10 labeled values, such as an app and a time range.
   - `{ type: 'fields', items: [{ label, value }] }`. `value` is plain text, or `{ raw, format?, precision?, currency? }` formatted by the SDK's `formatDisplayValue` the same on every surface. Slack gets one `section` with a `mrkdwn` field per item, the value clamped after escaping to 2,000 characters.
 - `code`: code or source shown as written, such as an ES|QL query.

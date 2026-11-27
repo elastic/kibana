@@ -7,7 +7,6 @@
 
 import { navigationHref, z, type PrimitiveNode } from '@elastic/isomer-sdk';
 import { fromChildren } from '@elastic/isomer-sdk/author';
-import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
 
 import { componentIcon, definePrimitive, oneLine, plainText } from '../../lib';
 import { appPathSchema, appRouteSchema, refineAppOrUrl } from '../link/link_target';
@@ -18,10 +17,8 @@ import { actionsMarkdownRenderer } from './actions_markdown';
 
 const buttonSchema = z
   .object({
-    label: plainText(SLACK_LIMITS.buttonTextChars).describe('What the link opens, in a few words.'),
-    url: navigationHref({ max: SLACK_LIMITS.urlChars })
-      .optional()
-      .describe('The URL it opens. Give either `url` or `app`.'),
+    label: plainText(100).describe('What the link opens, in a few words.'),
+    url: navigationHref().optional().describe('The URL it opens. Give either `url` or `app`.'),
     app: appRouteSchema
       .optional()
       .describe(
