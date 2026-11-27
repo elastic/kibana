@@ -1116,6 +1116,15 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       subagentCreation: resolvedParams.subagentCreation,
     });
 
+    // Reading a conversation back requires use access to its agent, and a missing agent reads as
+    // "Conversation not found". Check before creating one so the error names the agent and no
+    // unreadable conversation is stored. `resolveExecutionIdentity` reads the agent the same way
+    // for `ai.agent` runs, but never on the `trigger_mode: 'never'` path that lands here.
+    if (conversation.operation === 'CREATE') {
+      const agentRegistry = await this.deps.agentService.getRegistry({ request });
+      await agentRegistry.get(resolved.agentId, { access: 'use' });
+    }
+
     return {
       validatedParams: resolvedParams,
       conversation,

@@ -457,6 +457,7 @@ export class AlertZeroPlugin implements Plugin<
       {
         ensureAgentForSpace: (spaceId) =>
           ensureAgentSafe({ agentBuilder, spaceId, logger: this.logger }),
+        requireAgentForSpace: (spaceId) => ensureAgent({ agentBuilder, spaceId }),
         agentBuilder,
         agentTypes: [agentType],
       },

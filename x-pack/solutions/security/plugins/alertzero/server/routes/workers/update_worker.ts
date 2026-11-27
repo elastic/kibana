@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { KibanaRequest } from '@kbn/core/server';
 import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import {
+  ALERTZERO_THIN_AGENT_ID,
   API_VERSIONS,
   INTERNAL_API_ACCESS,
   ALERTZERO_WORKER_URL_TEMPLATE,
@@ -49,6 +50,12 @@ const WORKER_ENABLE_BLOCKED_MESSAGES: Record<
       defaultMessage:
         '{workerName} cannot be turned on because no AI model is available to you in this space. Configure one in Feature settings, or ask an administrator for access to connectors.',
       values: { workerName: displayName },
+    }),
+  sharedAgentIdTaken: (displayName) =>
+    i18n.translate('xpack.alertzero.workerEnableSharedAgentIdTakenErrorMessage', {
+      defaultMessage:
+        '{workerName} cannot be turned on because another agent in this space uses the id "{agentId}". Delete or rename that agent in Agent Builder, then try again.',
+      values: { workerName: displayName, agentId: ALERTZERO_THIN_AGENT_ID },
     }),
 };
 
