@@ -42,10 +42,7 @@ export interface DocumentExtractionEndpoint {
   service: string;
 }
 
-/**
- * Lists the `document_extraction` endpoints a crawl can use. The Elastic Inference Service ones
- * come first, so the first endpoint is the one to crawl with when none is asked for.
- */
+/** The Elastic Inference Service endpoints come first, so the first one is the default. */
 export const listDocumentExtractionEndpoints = async (
   esClient: ElasticsearchClient
 ): Promise<DocumentExtractionEndpoint[]> => {
@@ -98,10 +95,7 @@ interface ExtractPageOptions {
   beforeRetry?: () => Promise<void>;
 }
 
-/**
- * Has the inference endpoint fetch a web page and return it as markdown, backing off and trying
- * again when the endpoint is rate limiting.
- */
+/** Retries with a backoff while the endpoint is rate limiting. */
 export const extractPage = async (
   esClient: ElasticsearchClient,
   options: ExtractPageOptions

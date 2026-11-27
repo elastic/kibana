@@ -8,25 +8,11 @@
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { WebCrawlIndexMeta } from './crawl_index';
-import {
-  createCrawlIndex,
-  getIndexPrivileges,
-  readCrawlIndexState,
-  updateCrawlIndexMappings,
-} from './crawl_index';
+import { createCrawlIndex, getIndexPrivileges, readCrawlIndexState } from './crawl_index';
 
 const INDEX_NAME = 'web-crawl-example.com';
 
 const INDEX_META: WebCrawlIndexMeta = { url: 'https://example.com/' };
-
-const LATER_PROPERTIES = {
-  crawl_scope: { type: 'keyword' },
-  url_host: { type: 'keyword' },
-  url_path: { type: 'keyword' },
-  url_path_dir1: { type: 'keyword' },
-  url_path_dir2: { type: 'keyword' },
-  url_path_dir3: { type: 'keyword' },
-};
 
 const createEsError = (statusCode: number) =>
   Object.assign(new Error(`status ${statusCode}`), { statusCode });
@@ -88,7 +74,7 @@ describe('readCrawlIndexState', () => {
   });
 });
 
-describe('createCrawlIndex and updateCrawlIndexMappings', () => {
+describe('createCrawlIndex', () => {
   let esClient: ElasticsearchClientMock;
 
   beforeEach(() => {
@@ -112,19 +98,14 @@ describe('createCrawlIndex and updateCrawlIndexMappings', () => {
           depth: { type: 'integer' },
           crawl_id: { type: 'keyword' },
           crawled_at: { type: 'date' },
-          ...LATER_PROPERTIES,
+          crawl_scope: { type: 'keyword' },
+          url_host: { type: 'keyword' },
+          url_path: { type: 'keyword' },
+          url_path_dir1: { type: 'keyword' },
+          url_path_dir2: { type: 'keyword' },
+          url_path_dir3: { type: 'keyword' },
         },
       },
-    });
-  });
-
-  it('adds only the fields introduced after the first crawl indices to an existing index', async () => {
-    await updateCrawlIndexMappings(esClient, INDEX_NAME);
-
-    expect(esClient.indices.putMapping).toHaveBeenCalledTimes(1);
-    expect(esClient.indices.putMapping).toHaveBeenCalledWith({
-      index: INDEX_NAME,
-      properties: LATER_PROPERTIES,
     });
   });
 });

@@ -13,14 +13,11 @@ interface PurgeOptions {
   signal: AbortSignal;
   indexName: string;
   crawlId: string;
-  /** Only documents of this scope are deleted. */
   crawlScope: string;
   /** When the crawl began. Documents indexed since are kept. */
   startedAt: string;
   maxDepth: number;
-  /** The hosts this crawl covered. Documents of other hosts are kept. */
   hosts: string[];
-  /** Documents the path rules exclude are kept. */
   pathRules: PathRules;
 }
 

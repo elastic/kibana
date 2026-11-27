@@ -46,7 +46,7 @@ export const normalizePathPrefixes = (paths: string[] = []): string[] | null => 
   return isValid ? normalized : null;
 };
 
-/** Whether the rules let the crawl follow a link. An excluded path wins over an included one. */
+/** An excluded path wins over an included one. */
 export const isPathAllowed = (url: string, { includePaths, excludePaths }: PathRules): boolean => {
   const { pathname } = new URL(url);
   if (excludePaths.some((prefix) => pathname.startsWith(prefix))) {

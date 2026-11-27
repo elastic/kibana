@@ -20,18 +20,6 @@ export interface CrawlIndexState {
   isCrawlIndex: boolean;
 }
 
-// The fields added after the first crawl indices were created.
-const LATER_PROPERTIES: Record<string, estypes.MappingProperty> = {
-  crawl_scope: { type: 'keyword' },
-  url_host: { type: 'keyword' },
-  url_path: { type: 'keyword' },
-  url_path_dir1: { type: 'keyword' },
-  url_path_dir2: { type: 'keyword' },
-  url_path_dir3: { type: 'keyword' },
-};
-
-// `content` is copied into `content_semantic`, so one field value is ingested for both full-text
-// and semantic search. `content_semantic` uses the default `semantic_text` inference endpoint.
 const CRAWL_INDEX_PROPERTIES: Record<string, estypes.MappingProperty> = {
   url: { type: 'keyword' },
   title: { type: 'text' },
@@ -41,7 +29,12 @@ const CRAWL_INDEX_PROPERTIES: Record<string, estypes.MappingProperty> = {
   depth: { type: 'integer' },
   crawl_id: { type: 'keyword' },
   crawled_at: { type: 'date' },
-  ...LATER_PROPERTIES,
+  crawl_scope: { type: 'keyword' },
+  url_host: { type: 'keyword' },
+  url_path: { type: 'keyword' },
+  url_path_dir1: { type: 'keyword' },
+  url_path_dir2: { type: 'keyword' },
+  url_path_dir3: { type: 'keyword' },
 };
 
 export const readCrawlIndexState = async (
@@ -74,15 +67,7 @@ export const createCrawlIndex = async (
   });
 };
 
-/** Adds the fields introduced after an index was created. */
-export const updateCrawlIndexMappings = async (
-  esClient: ElasticsearchClient,
-  indexName: string
-): Promise<void> => {
-  await esClient.indices.putMapping({ index: indexName, properties: LATER_PROPERTIES });
-};
-
-/** Reports, for each index, whether the user holds `privilege` on it. Works for missing indices too. */
+/** Works for missing indices too. */
 export const getIndexPrivileges = async (
   esClient: ElasticsearchClient,
   indexNames: string[],

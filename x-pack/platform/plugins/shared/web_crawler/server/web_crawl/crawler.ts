@@ -43,11 +43,8 @@ export interface CrawlProgress {
   failedCount: number;
   /** Pages handed to the inference endpoint so far, whether or not they came back. */
   requestedCount: number;
-  /** Pages found and waiting for a free extraction slot. */
   queuedCount: number;
-  /** Links not followed because robots.txt disallows them. */
   skippedByRobotsCount: number;
-  /** Links not followed because of the path rules. */
   skippedByRulesCount: number;
 }
 
@@ -56,9 +53,7 @@ export interface CrawlOptions {
   logger: Logger;
   signal: AbortSignal;
   url: string;
-  /** More pages to start from, on the site of `url` or on other sites. */
   additionalSeedUrls?: string[];
-  /** Sitemaps to read besides the ones the sites declare. */
   sitemapUrls?: string[];
   indexName: string;
   inferenceId: string;
@@ -67,7 +62,6 @@ export interface CrawlOptions {
   maxDocuments: number;
   /** Narrow the links the crawl follows. The URL it starts from is always crawled. */
   pathRules?: PathRules;
-  /** Extensions of linked files to crawl as pages. None by default. */
   fileExtensions?: readonly string[];
   /** Called synchronously whenever the counts change. */
   onProgress?: (progress: CrawlProgress) => void;
@@ -78,7 +72,6 @@ export interface CrawlResult {
   failedCount: number;
   skippedByRobotsCount: number;
   skippedByRulesCount: number;
-  /** Pages of earlier crawls that were deleted because this crawl did not find them again. */
   purgedCount: number;
   aborted: boolean;
 }
@@ -390,7 +383,6 @@ export const crawlSite = async ({
     }
     queues[0].push(...allowedSeedUrls);
 
-    // Spaces out the requests of all workers to a site by the pause that site asked for.
     const waitForRequestSlot = async (siteKey: string, crawlDelayMs: number) => {
       const now = Date.now();
       const startAt = Math.max(now, nextRequestAtBySite.get(siteKey) ?? 0);
@@ -620,7 +612,6 @@ export const crawlSite = async ({
             ),
           ])
         ).flat();
-        // The links of the start pages are queued first.
         await seedsCrawled;
         if (!sitemapAbort.signal.aborted) {
           await enqueue(sitemapPages, 1);

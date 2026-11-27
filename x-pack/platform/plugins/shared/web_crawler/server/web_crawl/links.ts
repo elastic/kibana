@@ -116,7 +116,6 @@ export interface UrlFields {
   url_path_dir3?: string;
 }
 
-/** Splits a URL into the fields that let a search filter or facet by site section. */
 export const getUrlFields = (url: string): UrlFields => {
   const { hostname, pathname } = new URL(url);
   const [dir1, dir2, dir3] = getPathSegments(pathname);

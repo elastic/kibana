@@ -122,12 +122,9 @@ interface DiscoverSitemapPagesOptions {
   siteUrl: string;
   /** Sitemaps named by robots.txt. The conventional `/sitemap.xml` is tried when there are none. */
   declaredSitemaps: string[];
-  /** The sites whose pages are collected. Defaults to the site of `siteUrl`. */
   siteKeys?: string[];
-  /** How many sitemaps may be requested. */
   maxRequests?: number;
   maxPages: number;
-  /** Files listed in a sitemap that count as pages. */
   fileExtensions?: readonly string[];
   signal: AbortSignal;
   fetchContent: (url: string) => Promise<string | undefined>;

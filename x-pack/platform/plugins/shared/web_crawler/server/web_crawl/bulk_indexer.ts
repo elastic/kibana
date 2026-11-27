@@ -12,7 +12,6 @@ import { getPageKey } from './links';
 
 // `semantic_text` runs inference on every document at ingest, so a single request stays small.
 export const BULK_SIZE = 20;
-/** A request also closes at this content size. */
 export const MAX_BULK_BYTES = 1024 * 1024;
 export const MAX_CONCURRENT_BULKS = 3;
 const MAX_BUFFERED_DOCUMENTS = BULK_SIZE * MAX_CONCURRENT_BULKS;
@@ -27,7 +26,6 @@ export interface CrawledDocument {
   content: string;
   depth: number;
   crawl_id: string;
-  /** Identifies what the crawl set out to cover, so a later crawl of the same scope can purge it. */
   crawl_scope: string;
   crawled_at: string;
   url_host: string;
@@ -47,7 +45,6 @@ interface BulkIndexerOptions {
   logger: Logger;
   signal: AbortSignal;
   indexName: string;
-  /** Called after every bulk request that Elasticsearch answered. */
   onIndexed: () => void;
   /** Called once, with the error of the first bulk request that failed as a whole. */
   onError: (error: Error) => void;
