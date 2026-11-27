@@ -33,10 +33,10 @@ function getNodeRegisterParserConfig(path) {
 
 /**
  * @param {string} path
- * @param {{ inlineSourceMaps?: boolean, inlineSourcesContent?: boolean }} options
+ * @param {{ inlineSourceMaps?: boolean, inlineSourcesContent?: boolean, source?: string }} options
  */
 function getNodeRegisterSwcConfig(path, options = {}) {
-  const { inlineSourceMaps = false, inlineSourcesContent = true } = options;
+  const { inlineSourceMaps = false, inlineSourcesContent = true, source } = options;
   const reactTransform =
     Path.extname(path) === '.ts'
       ? {}
@@ -67,7 +67,48 @@ function getNodeRegisterSwcConfig(path, options = {}) {
     },
     module: {
       type: 'commonjs',
+      ...(source === undefined ? {} : { lazy: getLazyImports(path, source) }),
     },
+  });
+}
+
+/**
+ * Defer static bindings until use while preserving namespace re-exports in the pinned SWC version.
+ * @param {string} path
+ * @param {string} source
+ * @returns {string[]}
+ */
+function getLazyImports(path, source) {
+  const { parseSync } = require('@swc/core');
+  const ast = parseSync(source, getNodeRegisterParserConfig(path));
+  const eagerSources = new Set(
+    ast.body.flatMap((statement) => {
+      if (statement.type === 'ImportDeclaration' && statement.specifiers.length === 0) {
+        return [statement.source.value];
+      }
+      if (
+        statement.type === 'ExportNamedDeclaration' &&
+        statement.source &&
+        statement.specifiers.some((specifier) => specifier.type === 'ExportNamespaceSpecifier')
+      ) {
+        return [statement.source.value];
+      }
+      return [];
+    })
+  );
+
+  return ast.body.flatMap((statement) => {
+    if (statement.type === 'ImportDeclaration' && !eagerSources.has(statement.source.value)) {
+      return [statement.source.value];
+    }
+    if (
+      statement.type === 'ExportNamedDeclaration' &&
+      statement.source &&
+      !eagerSources.has(statement.source.value)
+    ) {
+      return [statement.source.value];
+    }
+    return [];
   });
 }
 

@@ -38,7 +38,7 @@ function getCachePrefixSwcConfig(path) {
 
 function determineCachePrefix() {
   const json = JSON.stringify({
-    cacheVersion: 1,
+    cacheVersion: 6,
     swcVersion,
     peggyVersion,
     js: getCachePrefixSwcConfig('foo.js'),
