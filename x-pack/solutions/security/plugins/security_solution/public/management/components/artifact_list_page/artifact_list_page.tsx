@@ -287,6 +287,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       allowCardDeleteAction,
       allowCardEditAction,
       disabled: showAsSimpleTable,
+      dataUpdatedAt,
     });
 
     const memoizedRouteState = useMemoizedRouteState(routeState);
@@ -695,6 +696,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
             ) : (
               <PaginatedContent<ExceptionListItemSchema, ArtifactEntryCardType>
                 items={items}
+                itemId="id"
                 ItemComponent={ArtifactEntryCard}
                 itemComponentProps={handleCardProps}
                 onChange={handlePaginationChange}
@@ -704,7 +706,6 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
                 contentClassName="card-container"
                 data-test-subj={getTestId('list')}
                 CardDecorator={CardDecorator}
-                dataUpdatedAt={dataUpdatedAt}
               />
             )}
           </>
