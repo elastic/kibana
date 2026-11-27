@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { getEbtProps } from '@kbn/ebt-click';
 import { css } from '@emotion/react';
 import React from 'react';
 import { EuiButtonIcon, EuiPanel, EuiText, EuiTitle, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import {
   type IntroBannerDismissal,
   useIntroBannerDismissal,
@@ -112,6 +114,10 @@ const IntroBanner = ({
             aria-label={dismissLabel}
             onClick={dismissal.dismiss}
             data-test-subj="nightshiftOnboardingIntroBannerDismiss"
+            {...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.DISMISS_INTRO_BANNER,
+              element: NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_INTRO_BANNER,
+            })}
           />
         </EuiToolTip>
       </div>

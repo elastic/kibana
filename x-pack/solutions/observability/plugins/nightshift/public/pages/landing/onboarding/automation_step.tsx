@@ -25,10 +25,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { connectedPowerPlug } from '@elastic/eui-illustrations';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
-import { NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { InvestigationCardActions } from '../../../components/entities/investigation/investigation_card_actions';
 import { useInvestigationAssignees } from '../../../components/entities/investigation/use_investigation_assignees';
 import { SourceCard } from '../../../components/entities/sandbox_connector/source_card';
@@ -407,6 +408,10 @@ function TrialInvestigationCard({
               isDisabled={isSelected}
               onClick={() => onOpenInvestigation(investigation)}
               data-test-subj="nightshiftOnboardingTrialInvestigationOpen"
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.VIEW_INVESTIGATION,
+                element: NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_TRIAL_INVESTIGATION,
+              })}
             >
               {i18n.translate('xpack.nightshift.onboarding.automate.viewResultsButton', {
                 defaultMessage: 'View results',
@@ -455,6 +460,10 @@ function FirstAutomationCard({
           onClick={onCreate}
           isDisabled={!canManage}
           data-test-subj="nightshiftOnboardingCreateAutomation"
+          {...getEbtProps({
+            action: NIGHTSHIFT_EBT_ACTIONS.CREATE_AUTOMATION,
+            element: NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_AUTOMATION,
+          })}
         >
           {CREATE_AUTOMATION}
         </EuiButton>
@@ -507,6 +516,10 @@ function AutomationCards({
             icon: 'pencil',
             onClick: () => onEdit(automation),
             'data-test-subj': 'nightshiftOnboardingEditAutomation',
+            ebt: {
+              action: NIGHTSHIFT_EBT_ACTIONS.OPEN_AUTOMATION,
+              element: NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_AUTOMATION,
+            },
           }}
         />
       ))}
@@ -532,6 +545,10 @@ function AutomationCards({
                 defaultMessage: 'You cannot create automations right now.',
               })),
           'data-test-subj': 'nightshiftOnboardingCreateAutomation',
+          ebt: {
+            action: NIGHTSHIFT_EBT_ACTIONS.CREATE_AUTOMATION,
+            element: NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_AUTOMATION,
+          },
         }}
       />
     </div>
@@ -618,6 +635,14 @@ function EditAutomationFlyout({
           }}
           cancelButtonText={listLabels.cancel}
           confirmButtonText={listLabels.delete}
+          cancelButtonProps={getEbtProps({
+            action: NIGHTSHIFT_EBT_ACTIONS.CANCEL_AUTOMATION_DELETE,
+            element: NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_DELETE_AUTOMATION_MODAL,
+          })}
+          confirmButtonProps={getEbtProps({
+            action: NIGHTSHIFT_EBT_ACTIONS.CONFIRM_AUTOMATION_DELETE,
+            element: NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_DELETE_AUTOMATION_MODAL,
+          })}
           buttonColor="danger"
           isLoading={deleteAutomation.isLoading}
           aria-label={getDeleteConfirmTitle(automationToDelete.name)}
