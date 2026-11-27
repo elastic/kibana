@@ -284,7 +284,6 @@ enabled:
   - x-pack/platform/test/spaces_api_integration/security_and_spaces/config_trial.ts
   - x-pack/platform/test/spaces_api_integration/spaces_only/config.ts
   - x-pack/platform/test/spaces_api_integration/access_control_objects/config.ts
-  - x-pack/platform/test/spaces_api_integration/access_control_objects/feature_disabled.config.ts
   - x-pack/platform/test/ui_capabilities/security_and_spaces/config.ts
   - x-pack/platform/test/ui_capabilities/spaces_only/config.ts
   - x-pack/platform/test/usage_collection/config.ts

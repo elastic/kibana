@@ -17,10 +17,7 @@ import type {
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { LEGACY_URL_ALIAS_TYPE } from '../legacy_alias';
 import { decodeVersion, encodeVersion } from '../version';
-import type {
-  ISavedObjectTypeRegistryInternal,
-  SavedObjectTypeRegistry,
-} from '../saved_objects_type_registry';
+import type { ISavedObjectTypeRegistryInternal } from '../saved_objects_type_registry';
 
 /**
  * Core internal implementation of {@link ISavedObjectsSerializer}
@@ -130,10 +127,7 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       ...(_source.created_at && { created_at: _source.created_at }),
       ...(_source.created_by && { created_by: _source.created_by }),
       ...(version && { version }),
-      ...((this.registry as SavedObjectTypeRegistry).isAccessControlEnabled() &&
-        _source.accessControl && {
-          accessControl: _source.accessControl,
-        }),
+      ...(_source.accessControl && { accessControl: _source.accessControl }),
     };
   }
 

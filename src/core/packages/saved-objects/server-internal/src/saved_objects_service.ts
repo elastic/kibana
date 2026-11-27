@@ -154,8 +154,6 @@ export class SavedObjectsService
       this.coreContext.configService.atPath<SavedObjectsMigrationConfigType>('migrations')
     );
     this.config = new SavedObjectConfig(savedObjectsConfig, savedObjectsMigrationConfig);
-    const accessControlEnabled = this.config.enableAccessControl;
-    this.typeRegistry.setAccessControlEnabled(accessControlEnabled);
 
     deprecations.getRegistry('savedObjects').registerDeprecations(
       getSavedObjectsDeprecationsProvider({
@@ -244,7 +242,6 @@ export class SavedObjectsService
       },
       getTypeRegistry: () => this.typeRegistry,
       getDefaultIndex: () => MAIN_SAVED_OBJECT_INDEX,
-      isAccessControlEnabled: () => accessControlEnabled,
     };
   }
 

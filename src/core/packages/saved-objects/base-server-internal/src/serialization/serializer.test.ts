@@ -18,19 +18,15 @@ const createMockedTypeRegistry = ({
   isNamespaceAgnostic,
   isSingleNamespace,
   isMultiNamespace,
-  accessControlEnabled = true, // default to true
 }: {
   isNamespaceAgnostic: boolean;
   isSingleNamespace: boolean;
   isMultiNamespace: boolean;
-  accessControlEnabled?: boolean;
 }): ISavedObjectTypeRegistryInternal => {
   const typeRegistry: Partial<ISavedObjectTypeRegistryInternal> = {
     isNamespaceAgnostic: jest.fn().mockReturnValue(isNamespaceAgnostic),
     isSingleNamespace: jest.fn().mockReturnValue(isSingleNamespace),
     isMultiNamespace: jest.fn().mockReturnValue(isMultiNamespace),
-    setAccessControlEnabled: jest.fn(),
-    isAccessControlEnabled: jest.fn().mockReturnValue(accessControlEnabled),
   };
   return typeRegistry as ISavedObjectTypeRegistryInternal;
 };
@@ -55,22 +51,6 @@ typeRegistry = typeRegistry = createMockedTypeRegistry({
   isMultiNamespace: true,
 });
 const multiNamespaceSerializer = new SavedObjectsSerializer(typeRegistry);
-
-typeRegistry = typeRegistry = createMockedTypeRegistry({
-  isNamespaceAgnostic: false,
-  isSingleNamespace: false,
-  isMultiNamespace: true,
-  accessControlEnabled: false,
-});
-const accessControlDisabledSerializer = new SavedObjectsSerializer(typeRegistry);
-
-typeRegistry = typeRegistry = createMockedTypeRegistry({
-  isNamespaceAgnostic: false,
-  isSingleNamespace: false,
-  isMultiNamespace: true,
-  accessControlEnabled: true,
-});
-const accessControlEnabledSerializer = new SavedObjectsSerializer(typeRegistry);
 
 const sampleTemplate = {
   _id: 'foo:bar',
@@ -703,49 +683,31 @@ describe('#rawToSavedObject', () => {
   });
 
   describe('accessControl property', () => {
-    describe('Access control feature enabled', () => {
-      test('it copies the accessControl property from _source.accessControl', () => {
-        const actual = accessControlEnabledSerializer.rawToSavedObject({
-          _id: 'foo:bar',
-          _source: {
-            type: 'foo',
-            accessControl: {
-              owner: 'my_user_id',
-              accessMode: 'write_restricted',
-            },
+    test('it copies the accessControl property from _source.accessControl', () => {
+      const actual = multiNamespaceSerializer.rawToSavedObject({
+        _id: 'foo:bar',
+        _source: {
+          type: 'foo',
+          accessControl: {
+            owner: 'my_user_id',
+            accessMode: 'write_restricted',
           },
-        });
-        expect(actual).toHaveProperty('accessControl', {
-          owner: 'my_user_id',
-          accessMode: 'write_restricted',
-        });
+        },
       });
-
-      test('it does not create the accessControl property if not present in _source.accessControl', () => {
-        const actual = accessControlEnabledSerializer.rawToSavedObject({
-          _id: 'foo:bar',
-          _source: {
-            type: 'foo',
-          },
-        });
-        expect(actual).not.toHaveProperty('accessControl');
+      expect(actual).toHaveProperty('accessControl', {
+        owner: 'my_user_id',
+        accessMode: 'write_restricted',
       });
     });
 
-    describe('Access control feature disabled', () => {
-      test('it strips the accessControl property if the feature is disabled', () => {
-        const actual = accessControlDisabledSerializer.rawToSavedObject({
-          _id: 'foo:bar',
-          _source: {
-            type: 'foo',
-            accessControl: {
-              owner: 'my_user_id',
-              accessMode: 'write_restricted',
-            },
-          },
-        });
-        expect(actual).not.toHaveProperty('accessControl');
+    test('it does not create the accessControl property if not present in _source.accessControl', () => {
+      const actual = multiNamespaceSerializer.rawToSavedObject({
+        _id: 'foo:bar',
+        _source: {
+          type: 'foo',
+        },
       });
+      expect(actual).not.toHaveProperty('accessControl');
     });
   });
 });

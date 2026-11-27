@@ -215,9 +215,7 @@ describe('SavedObjectTypeRegistry', () => {
     });
 
     describe(`supports access control`, () => {
-      it('sets `supportsAccessControl` when access control feature is enabled', () => {
-        registry.setAccessControlEnabled(true);
-
+      it('keeps `supportsAccessControl` as declared by the type', () => {
         expect(() => {
           registry.registerType(
             createType({
@@ -259,37 +257,6 @@ describe('SavedObjectTypeRegistry', () => {
         }).toThrowErrorMatchingInlineSnapshot(
           `"Type typeAC: Cannot specify 'supportsAccessControl' as 'true' unless 'namespaceType' is either 'multiple' or 'multiple-isolated'."`
         );
-      });
-
-      it('overwrites `supportsAccessControl` to false when access control feature is disabled', () => {
-        registry.setAccessControlEnabled(false);
-
-        expect(() => {
-          registry.registerType(
-            createType({
-              name: 'typeAC',
-              namespaceType: 'multiple',
-              supportsAccessControl: true,
-            })
-          );
-        }).not.toThrow();
-
-        expect(() => {
-          registry.registerType(
-            createType({
-              name: 'typeNAC',
-              supportsAccessControl: false,
-            })
-          );
-        }).not.toThrow();
-
-        let readback = registry.getType('typeAC');
-        expect(readback).toBeDefined();
-        expect(readback?.supportsAccessControl).toBe(false);
-
-        readback = registry.getType('typeNAC');
-        expect(readback).toBeDefined();
-        expect(readback?.supportsAccessControl).toBe(false);
       });
     });
 

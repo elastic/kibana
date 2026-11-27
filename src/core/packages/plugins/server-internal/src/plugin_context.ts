@@ -284,7 +284,6 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       setAccessControlTransforms: deps.savedObjects.setAccessControlTransforms,
       registerType: deps.savedObjects.registerType,
       getDefaultIndex: deps.savedObjects.getDefaultIndex,
-      isAccessControlEnabled: deps.savedObjects.isAccessControlEnabled,
     },
     status: {
       core$: deps.status.core$,
