@@ -108,6 +108,8 @@ const SPAN_KINDS: readonly MobileSessionEventKind[] = ['request', 'screen'];
  * The latest events of a mobile session before a time, newest first: requests, screens, taps,
  * handled errors and logs. A span sent twice is listed once, before the limit is applied: the
  * copy whose index and document id come first, as a document id is only unique within an index.
+ * Only the spans need that, so the other events are a `FORK` branch of their own, sorted and cut
+ * without grouping the session's documents first.
  */
 export const sessionEventsBefore = ({
   serviceName,
@@ -133,10 +135,14 @@ export const sessionEventsBefore = ({
   ).pipe`WHERE @timestamp < TO_DATETIME(${{
     before,
   }})`.pipe`EVAL ${eventKindColumn} = ${eventKind()}`.pipe`WHERE ${eventKindColumn} IS NOT NULL`
-    .pipe`EVAL ${documentKey} = CONCAT(_index, "/", _id)`
-    .pipe`INLINE STATS ${keptKey} = MIN(${documentKey}) BY ${traceId}, ${spanId}, ${eventKindColumn}`
-    .pipe`WHERE NOT ${isSpan} OR ${traceId} IS NULL OR ${spanId} IS NULL OR ${documentKey} == ${keptKey}`
-    .pipe`SORT @timestamp DESC`.pipe`LIMIT ${limit}`.pipe`EVAL
+    .pipe`FORK
+      (WHERE NOT ${isSpan} | SORT @timestamp DESC | LIMIT ${limit})
+      (WHERE ${isSpan}
+        | EVAL ${documentKey} = CONCAT(_index, "/", _id)
+        | INLINE STATS ${keptKey} = MIN(${documentKey}) BY ${traceId}, ${spanId}, ${eventKindColumn}
+        | WHERE ${traceId} IS NULL OR ${spanId} IS NULL OR ${documentKey} == ${keptKey}
+        | SORT @timestamp DESC
+        | LIMIT ${limit})`.pipe`SORT @timestamp DESC`.pipe`LIMIT ${limit}`.pipe`EVAL
       ${resultColumn('name')} = COALESCE(CASE(
         ${is(KIND.request)}, ${mobileColumn('httpMethod')},
         ${is(KIND.error)}, ${mobileColumn('exceptionType')},

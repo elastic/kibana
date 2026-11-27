@@ -39,8 +39,16 @@ describe('sessionEventsBefore', () => {
     expect(query).toContain('FROM traces-*.otel-*, logs-*.otel-* METADATA _index, _id |');
     // A span id is only unique within a trace, and a document id within an index.
     expect(query).toContain(
-      '| EVAL document_key = CONCAT(_index, "/", _id) | INLINE STATS kept_key = MIN(document_key) BY trace_id, span_id, event_kind | WHERE NOT (event_kind IN ("request", "screen")) OR trace_id IS NULL OR span_id IS NULL OR document_key == kept_key | SORT @timestamp DESC | LIMIT 20'
+      '(WHERE event_kind IN ("request", "screen") | EVAL document_key = CONCAT(_index, "/", _id) | INLINE STATS kept_key = MIN(document_key) BY trace_id, span_id, event_kind | WHERE trace_id IS NULL OR span_id IS NULL OR document_key == kept_key | SORT @timestamp DESC | LIMIT 20)'
     );
+  });
+
+  it('sorts and cuts the events that are no spans without grouping them', () => {
+    expect(query).toContain(
+      '| FORK (WHERE NOT (event_kind IN ("request", "screen")) | SORT @timestamp DESC | LIMIT 20)'
+    );
+    // Both branches' latest events, cut again to the limit.
+    expect(query).toContain('LIMIT 20) | SORT @timestamp DESC | LIMIT 20 | EVAL');
   });
 
   it("computes each kind's timeline fields", () => {
