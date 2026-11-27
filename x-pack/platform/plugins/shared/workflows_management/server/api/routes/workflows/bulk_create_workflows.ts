@@ -15,7 +15,8 @@ import { WORKFLOW_BULK_CREATE_SECURITY } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerBulkCreateWorkflowsRoute(deps: RouteDependencies) {
-  const { router, api, spaces, audit } = deps;
+  const { router, api, spaces, audit, config } = deps;
+  const { maxPayloadBytes } = config.import;
   router.versioned
     .post({
       path: '/api/workflows',
@@ -27,6 +28,8 @@ export function registerBulkCreateWorkflowsRoute(deps: RouteDependencies) {
       options: {
         tags: [OAS_TAG],
         availability: AVAILABILITY,
+        // When unset, the global `server.maxPayload` applies.
+        ...(maxPayloadBytes === undefined ? {} : { body: { maxBytes: maxPayloadBytes } }),
       },
     })
     .addVersion(

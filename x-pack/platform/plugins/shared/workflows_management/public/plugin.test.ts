@@ -56,6 +56,7 @@ const createPlugin = () =>
       logging: { console: false },
       available: true,
       pages: { enabled: false },
+      import: {},
     })
   );
 

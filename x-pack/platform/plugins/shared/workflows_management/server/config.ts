@@ -77,12 +77,24 @@ const configSchema = schema.object({
   pages: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
+  /**
+   * Workflow import (`POST /api/workflows`, which also serves the import conflict check).
+   */
+  import: schema.object({
+    /**
+     * Maximum request body size, in bytes, accepted when importing workflows. When unset the
+     * global `server.maxPayload` applies (1 MB by default), which fits roughly 40 typical
+     * workflows per request. Set it to import larger archives in one go.
+     */
+    maxPayloadBytes: schema.maybe(schema.number({ min: 1024, max: 100 * 1024 * 1024 })),
+  }),
 });
 
 export type WorkflowsManagementConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<WorkflowsManagementConfig> = {
   schema: configSchema,
-  // The editor builds the YAML schema in the browser, so it needs the pages switch.
-  exposeToBrowser: { pages: true },
+  // The editor builds the YAML schema in the browser, so it needs the pages switch. The import
+  // flyout needs the payload limit to explain a rejected import.
+  exposeToBrowser: { pages: true, import: true },
 };
