@@ -75,7 +75,7 @@ Elasticsearch turns away as too many are sent again twice, with a backoff.
 
 A crawl that read the whole site ends by deleting the documents it did not find again, on the hosts
 it covered and within its path rules. It only deletes what an earlier crawl with the same start
-URLs and path rules indexed: every document carries that scope in `crawl_scope`, so two crawls of
+URLs, sitemap URLs and path rules indexed, the URLs compared as they were given: every document carries that scope in `crawl_scope`, so two crawls of
 different sections of a site can share an index. A page that two such crawls both reach belongs to
 the one that indexed it last, and only that one deletes it. A crawl that failed on a page or a sitemap,
 reached the page maximum or another of its limits, or was stopped deletes nothing, because it

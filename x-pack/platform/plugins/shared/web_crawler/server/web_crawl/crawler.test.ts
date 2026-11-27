@@ -836,7 +836,39 @@ describe('crawlSite', () => {
         getIndexedDocuments()
           .filter(({ url }) => url === `${ORIGIN}/target`)
           .map(({ depth }) => depth)
-      ).toEqual([2]);
+      ).toEqual([2, 2]);
+    });
+
+    it('is still indexed, at the shallower depth, when the request from there fails', async () => {
+      const releaseSlow = hold(`${ORIGIN}/slow`);
+      const releaseTarget = hold(`${ORIGIN}/target`);
+      let targetRequests = 0;
+      mockPages((pageUrl) => {
+        if (pageUrl !== `${ORIGIN}/target`) {
+          return {
+            [SEED_URL]: pageLinkingTo(['/fast', '/slow']),
+            [`${ORIGIN}/fast`]: pageLinkingTo(['/deep']),
+            [`${ORIGIN}/deep`]: pageLinkingTo(['/target']),
+            [`${ORIGIN}/slow`]: pageLinkingTo(['/target']),
+          }[pageUrl];
+        }
+        if (++targetRequests > 1) {
+          throw new Error('rate limited');
+        }
+        return pageLinkingTo([]);
+      });
+      const getTargetRequests = () =>
+        getPageRequests().filter((pageUrl) => pageUrl === `${ORIGIN}/target`);
+
+      const crawling = crawl({ maxDepth: 3 });
+      await waitUntil(() => getTargetRequests().length === 1);
+      releaseSlow();
+      await waitUntil(() => getTargetRequests().length === 2);
+      releaseTarget();
+
+      await expect(crawling).resolves.toEqual(toResult({ documentsCount: 5, failedCount: 1 }));
+      expect(getIndexedDepths()[`${ORIGIN}/target`]).toBe(2);
+      expect(esClient.deleteByQuery).not.toHaveBeenCalled();
     });
 
     it('deletes nothing when a link was dropped for a page budget that its earlier queue entry held', async () => {
@@ -925,6 +957,17 @@ describe('crawlSite', () => {
       ).resolves.toEqual(toResult({ documentsCount: 1 }));
 
       expect(getPageRequests()).toEqual([SEED_URL]);
+    });
+
+    it('deletes nothing when the robots.txt of a start URL cannot be read, though another URL of its page is crawled', async () => {
+      siteFiles[`${HTTP_ORIGIN}/robots.txt`] = new Error('rate limited');
+      mockSmallSite();
+
+      await expect(crawl({ additionalSeedUrls: [`${HTTP_ORIGIN}/`] })).resolves.toEqual(
+        toResult({ documentsCount: 3 })
+      );
+
+      expect(esClient.deleteByQuery).not.toHaveBeenCalled();
     });
 
     it('reads the sitemaps that the robots.txt of every start URL of a site declares', async () => {
@@ -1665,6 +1708,9 @@ describe('crawlSite', () => {
       expect(await getScope({ url: `${ORIGIN}/a`, additionalSeedUrls: [SEED_URL] })).toBe(
         twoSeedsScope
       );
+      // Another URL of the start page besides it is another scope.
+      expect(await getScope({ additionalSeedUrls: ['http://example.com/'] })).not.toBe(scope);
+      expect(await getScope({ sitemapUrls: [EXPLICIT_SITEMAP_URL] })).not.toBe(scope);
       expect(
         await getScope({ pathRules: { includePaths: [], excludePaths: ['/private'] } })
       ).not.toBe(scope);

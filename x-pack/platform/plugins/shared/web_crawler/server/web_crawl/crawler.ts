@@ -91,16 +91,22 @@ interface QueuedPage {
 // The depth of a URL that is known and is not a page to crawl, such as a sitemap.
 const NOT_A_PAGE = -1;
 
-// Two crawls that start from the same pages with the same path rules cover the same ground, so one
-// may delete what the other indexed and no longer finds. A crawl from elsewhere may not.
-const getCrawlScope = (seedUrls: string[], { includePaths, excludePaths }: PathRules): string =>
+// Two crawls that start from the same URLs and sitemaps with the same path rules cover the same
+// ground, so one may delete what the other indexed and no longer finds. A crawl from elsewhere may
+// not. The URLs are compared as given: another URL of the same page can lead to other links, and to
+// the robots.txt and sitemaps of another origin.
+const getCrawlScope = (
+  seedUrls: string[],
+  sitemapUrls: string[],
+  { includePaths, excludePaths }: PathRules
+): string =>
   createHash('sha256')
     .update(
-      JSON.stringify([
-        [...new Set(seedUrls.map(getPageKey))].sort(),
-        [...includePaths].sort(),
-        [...excludePaths].sort(),
-      ])
+      JSON.stringify(
+        [seedUrls, sitemapUrls, includePaths, excludePaths].map((values) =>
+          [...new Set(values)].sort()
+        )
+      )
     )
     .digest('hex');
 
@@ -178,7 +184,7 @@ export const crawlSite = async ({
   const depthByPage = new Map<string, number>();
   const givenSeedUrls = [url, ...additionalSeedUrls];
   givenSeedUrls.forEach((seedUrl) => depthByPage.set(getPageKey(seedUrl), 0));
-  const crawlScope = getCrawlScope(givenSeedUrls, pathRules);
+  const crawlScope = getCrawlScope(givenSeedUrls, sitemapUrls, pathRules);
   // A sitemap or robots.txt a page links to is not a page to crawl, unless it is a start URL.
   const markNotAPage = (fileUrl: string) => {
     const pageKey = getPageKey(fileUrl);
@@ -381,6 +387,10 @@ export const crawlSite = async ({
     }
     skippedByRobotsCount += readableSeedUrls.length - allowedSeedUrls.length;
     extractionFailedCount += seedUrls.length - readableSeedUrls.length;
+    // A start URL left out for another URL of its page still had an origin the crawl could not read.
+    if (!givenSeedUrls.every(isReadable)) {
+      hasDroppedLinks = true;
+    }
     queues[0].push(...allowedSeedUrls);
 
     // Spaces out the requests of all workers to a site by the pause that site asked for.
@@ -514,14 +524,13 @@ export const crawlSite = async ({
         extractionFailedCount++;
         return;
       }
-      // Found closer to a start URL in the meantime, the page is crawled again from there. Indexing
-      // it from here as well could leave it with the deeper of the two depths.
-      if (depthByPage.get(getPageKey(pageUrl)) !== depth) {
-        return;
-      }
+      // Found closer to a start URL in the meantime, the page is crawled again from there, and its
+      // links are followed from there. It is indexed here all the same, in case that request
+      // fails, and at that depth, so that whichever of the two is indexed last leaves the same.
+      const knownDepth = depthByPage.get(getPageKey(pageUrl)) ?? depth;
 
       // Links are queued before the page is indexed, so idle workers start on them right away.
-      if (depth < maxDepth) {
+      if (knownDepth === depth && depth < maxDepth) {
         const links = extractLinks(page.content, pageUrl, fileExtensions);
         if (links.length >= MAX_LINKS_PER_PAGE) {
           hasDroppedLinks = true;
@@ -534,7 +543,7 @@ export const crawlSite = async ({
         title: page.title ?? pageUrl,
         description: page.description,
         content: truncateContent(page.content),
-        depth,
+        depth: knownDepth,
         crawl_id: crawlId,
         crawl_scope: crawlScope,
         crawled_at: new Date().toISOString(),
