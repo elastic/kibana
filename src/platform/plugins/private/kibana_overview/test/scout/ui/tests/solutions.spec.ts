@@ -10,6 +10,7 @@
 import { test, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { ES_ARCHIVE, KBN_ARCHIVE } from '../constants';
+import { gotoOverviewApp } from '../helpers';
 
 test.describe('Kibana Overview - Solutions', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient }) => {
@@ -23,7 +24,7 @@ test.describe('Kibana Overview - Solutions', { tag: tags.stateful.classic }, () 
 
   test('contains Security and Observability solutions', async ({ browserAuth, page }) => {
     await browserAuth.loginAsViewer();
-    await page.gotoApp('kibana_overview');
+    await gotoOverviewApp(page);
 
     const solutionCards = page.testSubj.locator('kbnOverviewItem');
     await expect(solutionCards).not.toHaveCount(0);
@@ -37,7 +38,7 @@ test.describe('Kibana Overview - Solutions', { tag: tags.stateful.classic }, () 
 
   test('click on Observability card leads to Observability', async ({ browserAuth, page }) => {
     await browserAuth.loginAsViewer();
-    await page.gotoApp('kibana_overview');
+    await gotoOverviewApp(page);
 
     const observabilityCard = page.testSubj
       .locator('kbnOverviewItem')
@@ -49,7 +50,7 @@ test.describe('Kibana Overview - Solutions', { tag: tags.stateful.classic }, () 
 
   test('click on Security card leads to Security', async ({ browserAuth, page }) => {
     await browserAuth.loginAsViewer();
-    await page.gotoApp('kibana_overview');
+    await gotoOverviewApp(page);
 
     const securityCard = page.testSubj.locator('kbnOverviewItem').filter({ hasText: 'Security' });
     await expect(securityCard).toBeVisible();

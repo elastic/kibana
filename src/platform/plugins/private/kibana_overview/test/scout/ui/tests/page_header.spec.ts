@@ -11,6 +11,7 @@ import { test, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { ES_ARCHIVE, KBN_ARCHIVE } from '../constants';
+import { gotoOverviewApp } from '../helpers';
 
 test.describe('Kibana Overview - Page Header', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient }) => {
@@ -28,21 +29,21 @@ test.describe('Kibana Overview - Page Header', { tag: tags.stateful.classic }, (
     pageObjects,
   }) => {
     await browserAuth.loginAsViewer();
-    await page.gotoApp('kibana_overview');
+    await gotoOverviewApp(page);
     await pageObjects.appMenu.clickItem(APP_HEADER_TEST_SUBJECTS.menuAddIntegrations);
     await expect(page).toHaveURL(/app\/integrations\/browse/);
   });
 
   test('click on management leads to management', async ({ browserAuth, page, pageObjects }) => {
     await browserAuth.loginAsViewer();
-    await page.gotoApp('kibana_overview');
+    await gotoOverviewApp(page);
     await pageObjects.appMenu.clickItem('homeManage');
     await expect(page).toHaveURL(/app\/management/);
   });
 
   test('click on dev tools leads to dev tools', async ({ browserAuth, page, pageObjects }) => {
     await browserAuth.loginAsViewer();
-    await page.gotoApp('kibana_overview');
+    await gotoOverviewApp(page);
     await pageObjects.appMenu.clickItem('homeDevTools');
     await expect(page).toHaveURL(/app\/dev_tools/);
   });
