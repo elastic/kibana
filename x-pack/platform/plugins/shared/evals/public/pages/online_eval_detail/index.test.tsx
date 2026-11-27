@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Router, Route } from '@kbn/shared-ux-router';
 import { API_VERSIONS, EVALS_ONLINE_SCORES_URL } from '@kbn/evals-common';
@@ -20,6 +20,7 @@ import {
 } from '../../hooks/use_online_eval_workflows';
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import { useEvalsTraceFetcher } from '../../hooks/use_evals_api';
+import { useOnlineScoreNames } from '../../hooks/use_online_score_names';
 import { useModelConnectors } from '../../hooks/use_model_connectors';
 import { useActiveSpaceId } from '../../hooks/use_active_space_id';
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -29,8 +30,14 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 jest.mock('../../hooks/use_online_eval_workflows');
 jest.mock('../../hooks/use_evals_permissions');
 jest.mock('../../hooks/use_evals_api');
+jest.mock('../../hooks/use_online_score_names');
 jest.mock('../../hooks/use_model_connectors');
 jest.mock('../../hooks/use_active_space_id');
+jest.mock('../../components/online_eval_alert_rule/online_eval_alert_rule_button', () => ({
+  OnlineEvalAlertRuleButton: ({ metrics }: { metrics: Array<{ metric: string }> }) => (
+    <div data-test-subj="mockAlertRuleButton">{metrics.map(({ metric }) => metric).join(',')}</div>
+  ),
+}));
 
 jest.mock('@kbn/lens-embeddable-utils', () => ({
   LensConfigBuilder: jest.fn().mockImplementation(() => ({
@@ -59,6 +66,7 @@ const mockedUseEvalsPermissions = jest.mocked(useEvalsPermissions);
 const mockedUseEvalsTraceFetcher = jest.mocked(useEvalsTraceFetcher);
 const mockedUseModelConnectors = jest.mocked(useModelConnectors);
 const mockedUseActiveSpaceId = jest.mocked(useActiveSpaceId);
+const mockedUseOnlineScoreNames = jest.mocked(useOnlineScoreNames);
 
 const lensEmbeddableComponent = jest.fn((props: { attributes?: unknown }) => (
   <div data-test-subj="mockLensEmbeddable">{JSON.stringify(props.attributes)}</div>
@@ -79,15 +87,16 @@ const parsedConfig = {
   connectorId: 'connector-1',
 };
 
-const renderPage = () => {
-  const history = createMemoryHistory({ initialEntries: ['/online/workflow-1'] });
-  return render(
+const renderPage = (entry = '/online/workflow-1') => {
+  const history = createMemoryHistory({ initialEntries: [entry] });
+  const result = render(
     <Router history={history}>
       <Route path="/online/:workflowId">
         <OnlineEvalDetailPage />
       </Route>
     </Router>
   );
+  return { ...result, history };
 };
 
 describe('OnlineEvalDetailPage', () => {
@@ -102,6 +111,9 @@ describe('OnlineEvalDetailPage', () => {
 
     mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: true });
     mockedUseActiveSpaceId.mockReturnValue({ spaceId: 'space-a', isLoading: false });
+    mockedUseOnlineScoreNames.mockReturnValue({ data: undefined } as unknown as ReturnType<
+      typeof useOnlineScoreNames
+    >);
     mockedUseEvalsTraceFetcher.mockReturnValue(jest.fn());
     mockedUseOnlineEvalWorkflow.mockReturnValue({
       data: {
@@ -204,6 +216,74 @@ describe('OnlineEvalDetailPage', () => {
     expect(lensEmbeddableComponent).not.toHaveBeenCalled();
   });
 
+  it('offers every stored score name to the alert rule button, not just the loaded page', async () => {
+    const scoreRow = (name: string) => ({
+      '@timestamp': '2026-07-03T14:00:00.000Z',
+      monitor: { id: 'workflow-1', name: '[online-eval] quality monitor' },
+      trace_id: `trace-${name}`,
+      evaluator: { name: 'correctness', version: '1.0.0', kind: 'llm' },
+      score: { name, value: 0.9, label: 'pass' },
+    });
+    httpGet.mockImplementation(async (url: string) =>
+      url === EVALS_ONLINE_SCORES_URL
+        ? { total: 1, data: [scoreRow('factuality')] }
+        : { evaluators: [{ name: 'correctness', version: '1.0.0', kind: 'llm' }] }
+    );
+    mockedUseOnlineScoreNames.mockReturnValue({
+      data: {
+        names: [
+          { name: 'factuality', evaluatorName: 'correctness' },
+          { name: 'tone', evaluatorName: 'style' },
+        ],
+      },
+    } as unknown as ReturnType<typeof useOnlineScoreNames>);
+    renderPage();
+
+    // `tone` is stored but not on the loaded page; it must still be offered.
+    await waitFor(() => {
+      expect(screen.getByTestId('mockAlertRuleButton')).toHaveTextContent('factuality,tone');
+    });
+  });
+
+  it('falls back to the observed page names when the score names request fails', async () => {
+    const scoreRow = (name: string) => ({
+      '@timestamp': '2026-07-03T14:00:00.000Z',
+      monitor: { id: 'workflow-1', name: '[online-eval] quality monitor' },
+      trace_id: `trace-${name}`,
+      evaluator: { name: 'correctness', version: '1.0.0', kind: 'llm' },
+      score: { name, value: 0.9, label: 'pass' },
+    });
+    httpGet.mockImplementation(async (url: string) =>
+      url === EVALS_ONLINE_SCORES_URL
+        ? { total: 1, data: [scoreRow('factuality')] }
+        : { evaluators: [{ name: 'correctness', version: '1.0.0', kind: 'llm' }] }
+    );
+    mockedUseOnlineScoreNames.mockReturnValue({
+      data: undefined,
+      error: new Error('es failure'),
+    } as unknown as ReturnType<typeof useOnlineScoreNames>);
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('mockAlertRuleButton')).toHaveTextContent('factuality');
+    });
+    expect(screen.getByTestId('mockAlertRuleButton')).not.toHaveTextContent('tone');
+  });
+
+  it('offers no alert metrics while the monitor has no scores', async () => {
+    httpGet.mockImplementation(async (url: string) =>
+      url === EVALS_ONLINE_SCORES_URL
+        ? { total: 0, data: [] }
+        : { evaluators: [{ name: 'correctness', version: '1.0.0', kind: 'llm' }] }
+    );
+    renderPage();
+
+    await waitFor(() => {
+      expect(httpGet).toHaveBeenCalledWith(EVALS_ONLINE_SCORES_URL, expect.anything());
+    });
+    expect(screen.getByTestId('mockAlertRuleButton')).toBeEmptyDOMElement();
+  });
+
   it('renders rows from the online scores route response', async () => {
     renderPage();
 
@@ -220,9 +300,72 @@ describe('OnlineEvalDetailPage', () => {
 
     expect(await screen.findByText('trace-123')).toBeInTheDocument();
     expect(screen.getByText('correctness@1.0.0')).toBeInTheDocument();
-    expect(screen.getByText('factuality')).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('onlineEvalRecentScoresTable')).getByText('factuality')
+    ).toBeInTheDocument();
     expect(screen.getByText('Scores and traces')).toBeInTheDocument();
     expect(screen.getByText('Score trends')).toBeInTheDocument();
+  });
+
+  it('narrows the scores table to the window and metric from the alert drill-down link', async () => {
+    renderPage('/online/workflow-1?from=now-1h&to=now&metric=factuality');
+
+    await waitFor(() => {
+      expect(httpGet).toHaveBeenCalledWith(EVALS_ONLINE_SCORES_URL, {
+        query: {
+          monitor_id: 'workflow-1',
+          page: 1,
+          per_page: 25,
+          from: 'now-1h',
+          to: 'now',
+          score_name: 'factuality',
+        },
+        version: API_VERSIONS.internal.v1,
+      });
+    });
+  });
+
+  it('requests page 1 when the URL window changes while a later page is selected', async () => {
+    const scoreRow = {
+      '@timestamp': '2026-07-03T14:00:00.000Z',
+      monitor: { id: 'workflow-1', name: '[online-eval] quality monitor' },
+      trace_id: 'trace-123',
+      evaluator: { name: 'correctness', version: '1.0.0', kind: 'llm' },
+      score: { name: 'factuality', value: 0.9, label: 'pass' },
+    };
+    httpGet.mockImplementation(async (url: string) =>
+      url === EVALS_ONLINE_SCORES_URL
+        ? { total: 100, data: [scoreRow] }
+        : { evaluators: [{ name: 'correctness', version: '1.0.0', kind: 'llm' }] }
+    );
+    const { history } = renderPage('/online/workflow-1?from=now-1h&to=now&metric=factuality');
+
+    fireEvent.click(await screen.findByTestId('pagination-button-2'));
+    await waitFor(() => {
+      expect(httpGet).toHaveBeenCalledWith(
+        EVALS_ONLINE_SCORES_URL,
+        expect.objectContaining({ query: expect.objectContaining({ page: 3 }) })
+      );
+    });
+    httpGet.mockClear();
+
+    history.push('/online/workflow-1?from=now-24h&to=now&metric=relevance');
+
+    await waitFor(() => {
+      expect(httpGet).toHaveBeenCalledWith(EVALS_ONLINE_SCORES_URL, {
+        query: {
+          monitor_id: 'workflow-1',
+          page: 1,
+          per_page: 25,
+          from: 'now-24h',
+          to: 'now',
+          score_name: 'relevance',
+        },
+        version: API_VERSIONS.internal.v1,
+      });
+    });
+    const scoreRequests = httpGet.mock.calls.filter(([url]) => url === EVALS_ONLINE_SCORES_URL);
+    expect(scoreRequests).toHaveLength(1);
   });
 
   it('opens the trace waterfall flyout when trace id is clicked', async () => {

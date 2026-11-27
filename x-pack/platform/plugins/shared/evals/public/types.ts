@@ -10,6 +10,11 @@ import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extens
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 export type EvalsPublicSetup = Record<string, never>;
 
@@ -100,4 +105,10 @@ export interface EvalsStartDependencies {
   spaces?: SpacesPluginStart;
   dataViews: DataViewsPublicPluginStart;
   lens: LensPublicStart;
+  /** Optional: the alert-rule action is hidden when any of these are unavailable. */
+  triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
+  data?: DataPublicPluginStart;
+  unifiedSearch?: UnifiedSearchPublicPluginStart;
+  charts?: ChartsPluginStart;
+  fieldsMetadata?: FieldsMetadataPublicStart;
 }

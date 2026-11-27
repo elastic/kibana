@@ -94,9 +94,12 @@ export const queryKeys = {
   onlineEvals: {
     all: ['evals', 'online_evals'] as const,
     list: () => ['evals', 'online_evals', 'list'] as const,
+    privileges: () => ['evals', 'online_evals', 'privileges'] as const,
     detail: (workflowId: string) => ['evals', 'online_evals', 'detail', workflowId] as const,
     scores: (workflowId: string, page: number, perPage: number) =>
       ['evals', 'online_evals', 'scores', workflowId, page, perPage] as const,
+    scoreNames: (workflowId: string) =>
+      ['evals', 'online_evals', 'scoreNames', workflowId] as const,
   },
   tracing: {
     all: ['evals', 'tracing'] as const,

@@ -49,10 +49,13 @@ import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
 import { useEvalsTraceFetcher } from '../../hooks/use_evals_api';
+import { useOnlineScoreNames } from '../../hooks/use_online_score_names';
 import { OnlineEvalScoresTable } from '../../components/online_eval_scores_table';
+import { OnlineEvalAlertRuleButton } from '../../components/online_eval_alert_rule/online_eval_alert_rule_button';
+import type { OnlineEvalAlertMetric } from '../../components/online_eval_alert_rule/online_eval_alert_rule_button';
 import {
   useDeleteOnlineEvalWorkflow,
   useOnlineEvalWorkflow,
@@ -240,7 +243,23 @@ const buildScoreCountByLabelLensConfig = ({
 
 export const OnlineEvalDetailPage: React.FC = () => {
   const history = useHistory();
+  const { search } = useLocation();
   const { workflowId } = useParams<{ workflowId: string }>();
+  const scoreWindow = useMemo(() => {
+    const query = new URLSearchParams(search);
+    return {
+      from: query.get('from') ?? undefined,
+      to: query.get('to') ?? undefined,
+      metric: query.get('metric') ?? undefined,
+    };
+  }, [search]);
+  const timeRange = useMemo(
+    () =>
+      scoreWindow.from && scoreWindow.to
+        ? { from: scoreWindow.from, to: scoreWindow.to }
+        : EMPTY_TIME_RANGE,
+    [scoreWindow]
+  );
   const { services } = useKibana<{
     http: HttpStart;
     dataViews: DataViewsPublicPluginStart;
@@ -248,6 +267,13 @@ export const OnlineEvalDetailPage: React.FC = () => {
   }>();
   const { canManage } = useEvalsPermissions();
   const [pageIndex, setPageIndex] = useState(0);
+  const [pageWindow, setPageWindow] = useState(scoreWindow);
+  if (pageWindow !== scoreWindow) {
+    // Reset during render (not in an effect) so a drill-down link that changes the window or
+    // metric never fetches the previously selected page of the new results.
+    setPageWindow(scoreWindow);
+    setPageIndex(0);
+  }
   const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDataViewLoading, setIsDataViewLoading] = useState(true);
@@ -332,6 +358,10 @@ export const OnlineEvalDetailPage: React.FC = () => {
               monitor_id: workflowId,
               page: pageIndex + 1,
               per_page: SCORES_PER_PAGE,
+              ...(scoreWindow.from && scoreWindow.to
+                ? { from: scoreWindow.from, to: scoreWindow.to }
+                : {}),
+              ...(scoreWindow.metric ? { score_name: scoreWindow.metric } : {}),
             },
             version: API_VERSIONS.internal.v1,
           }
@@ -357,7 +387,7 @@ export const OnlineEvalDetailPage: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [services.http, workflowId, pageIndex]);
+  }, [services.http, workflowId, pageIndex, scoreWindow]);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -458,6 +488,23 @@ export const OnlineEvalDetailPage: React.FC = () => {
       }),
     [draftState.draft?.evaluators, evaluatorOptions]
   );
+
+  // The server aggregation covers every stored `score.name` for this monitor, not just the
+  // page currently loaded; the page rows win when both know a name, so the evaluator
+  // attribution stays exact for freshly ingested scores.
+  const { data: storedScoreNames } = useOnlineScoreNames(workflowId);
+  const alertMetrics = useMemo<OnlineEvalAlertMetric[]>(() => {
+    const byMetric = new Map<string, OnlineEvalAlertMetric>();
+    storedScoreNames?.names.forEach(({ name, evaluatorName }) => {
+      if (!byMetric.has(name)) {
+        byMetric.set(name, { metric: name, evaluatorName });
+      }
+    });
+    scoresData.forEach(({ score, evaluator }) => {
+      byMetric.set(score.name, { metric: score.name, evaluatorName: evaluator.name });
+    });
+    return Array.from(byMetric.values());
+  }, [scoresData, storedScoreNames]);
 
   const canEditSettings = canManage && Boolean(draftState.draft);
   const hasLlmEvaluatorSelected = selectedEvaluators.some((option) => option.kind === 'llm');
@@ -565,6 +612,14 @@ export const OnlineEvalDetailPage: React.FC = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <OnlineEvalAlertRuleButton
+                  workflowId={workflow.id}
+                  workflowName={workflow.name}
+                  spaceId={spaceId}
+                  metrics={alertMetrics}
+                />
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiSwitch
                   label={i18n.translate('xpack.evals.onlineEvaluations.detail.enabledSwitchLabel', {
@@ -1179,7 +1234,7 @@ export const OnlineEvalDetailPage: React.FC = () => {
                     <services.lens.EmbeddableComponent
                       id="online-evals-average-score-trend"
                       attributes={averageScoreAttributes}
-                      timeRange={EMPTY_TIME_RANGE}
+                      timeRange={timeRange}
                       style={{ height: 280 }}
                     />
                   </div>
@@ -1216,7 +1271,7 @@ export const OnlineEvalDetailPage: React.FC = () => {
                     <services.lens.EmbeddableComponent
                       id="online-evals-score-label-counts"
                       attributes={scoreCountAttributes}
-                      timeRange={EMPTY_TIME_RANGE}
+                      timeRange={timeRange}
                       style={{ height: 280 }}
                     />
                   </div>
