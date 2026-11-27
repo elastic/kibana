@@ -1028,6 +1028,7 @@ x-pack/platform/packages/private/kbn-data-quality @elastic/kibana-management
 x-pack/platform/packages/private/kbn-infra-forge @elastic/nightshift-sre-agent-team
 x-pack/platform/packages/private/kbn-random-sampling @elastic/kibana-dashboards
 x-pack/platform/packages/private/kbn-scout-release-testing @elastic/appex-qa
+x-pack/platform/packages/private/kbn-secrets @elastic/workflows-eng
 x-pack/platform/packages/private/maps/vector_tile_utils @elastic/kibana-dashboards
 x-pack/platform/packages/private/ml/agg_utils @elastic/search-ml-ux
 x-pack/platform/packages/private/ml/aiops_components @elastic/search-ml-ux
@@ -1259,6 +1260,7 @@ x-pack/platform/plugins/private/reporting @elastic/response-ops
 x-pack/platform/plugins/private/rollup @elastic/kibana-management
 x-pack/platform/plugins/private/runtime_fields @elastic/kibana-management
 x-pack/platform/plugins/private/search_boost @elastic/kibana-management
+x-pack/platform/plugins/private/secrets @elastic/workflows-eng
 x-pack/platform/plugins/private/snapshot_restore @elastic/kibana-management
 x-pack/platform/plugins/private/subscription_status @elastic/appex-sharedux
 x-pack/platform/plugins/private/task_manager_dependencies @elastic/response-ops

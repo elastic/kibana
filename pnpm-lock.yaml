@@ -3458,6 +3458,12 @@ importers:
       '@kbn/searchprofiler-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/searchprofiler
+      '@kbn/secrets':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/private/kbn-secrets
+      '@kbn/secrets-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/private/secrets
       '@kbn/security-ai-prompts':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/security-ai-prompts
@@ -9038,6 +9044,8 @@ importers:
 
   x-pack/platform/packages/private/kbn-scout-release-testing: {}
 
+  x-pack/platform/packages/private/kbn-secrets: {}
+
   x-pack/platform/packages/private/maps/vector_tile_utils: {}
 
   x-pack/platform/packages/private/ml/agg_utils: {}
@@ -9499,6 +9507,8 @@ importers:
   x-pack/platform/plugins/private/runtime_fields: {}
 
   x-pack/platform/plugins/private/search_boost: {}
+
+  x-pack/platform/plugins/private/secrets: {}
 
   x-pack/platform/plugins/private/snapshot_restore: {}
 
