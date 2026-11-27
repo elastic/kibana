@@ -140,6 +140,22 @@ describe('createTraceBasedEvaluator', () => {
     expect(result.explanation).toBe('Invalid traceId');
   });
 
+  it('should explain that an all-zero trace ID means no tracer was active', async () => {
+    const evaluator = createTraceBasedEvaluator({
+      traceEsClient: mockEsClient,
+      log: mockLog,
+      config: mockConfig,
+    });
+
+    const result = await evaluateWith(evaluator, '00000000000000000000000000000000');
+
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('error');
+    expect(result.explanation).toContain('without an active tracer');
+    expect(result.explanation).toContain('TRACING_EXPORTERS');
+    expect(mockEsClient.esql.query as jest.Mock).not.toHaveBeenCalled();
+  });
+
   it('should retry when extractResult returns null (default validation)', async () => {
     const query = mockEsClient.esql.query as jest.Mock;
     query
