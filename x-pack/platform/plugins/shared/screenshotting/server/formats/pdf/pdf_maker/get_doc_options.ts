@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import type { BufferOptions } from 'pdfmake/interfaces';
+import type { CustomTableLayout } from 'pdfmake/interfaces';
 
 export const REPORTING_TABLE_LAYOUT = 'noBorder';
 
-export function getDocOptions(tableBorderWidth: number): BufferOptions {
+export function getDocOptions(tableBorderWidth: number): {
+  tableLayouts: Record<string, CustomTableLayout>;
+} {
   return {
     tableLayouts: {
       [REPORTING_TABLE_LAYOUT]: {

@@ -14,7 +14,7 @@ import path from 'path';
 import { getTemplate } from './get_template';
 import type { TemplateLayout } from './types';
 import { assetPath } from './constants';
-import { _, Printer } from './worker_dependencies';
+import { _, pdfmake } from './worker_dependencies';
 
 export interface WorkerData {
   port: MessagePort;
@@ -121,7 +121,24 @@ async function execute({ data: { layout, logo, title, content } }: GeneratePdfRe
       message: 'Initializing PDF printer',
     });
 
-    const printer = new Printer(fonts);
+    pdfmake.setFonts(fonts);
+    pdfmake.setTableLayouts({
+      noBorder: {
+        // format is function (i, node) { ... };
+        hLineWidth: () => 0,
+        vLineWidth: () => 0,
+        paddingLeft: () => 0,
+        paddingRight: () => 0,
+        paddingTop: () => 0,
+        paddingBottom: () => 0,
+      },
+    });
+    // Documents only use the bundled fonts and logo, and in-memory or data URL images.
+    pdfmake.setUrlAccessPolicy(() => false);
+    pdfmake.setLocalAccessPolicy((filePath) => {
+      const relativePath = path.relative(assetPath, path.resolve(filePath));
+      return !relativePath.startsWith('..') && !path.isAbsolute(relativePath);
+    });
 
     const docDefinition = _.assign(getTemplate(layout, logo, title, tableBorderWidth, assetPath), {
       content: _.cloneDeepWith(content, (value) =>
@@ -140,19 +157,7 @@ async function execute({ data: { layout, logo, title, content } }: GeneratePdfRe
       message: 'Generating document stream',
     });
 
-    const pdfDoc = printer.createPdfKitDocument(docDefinition, {
-      tableLayouts: {
-        noBorder: {
-          // format is function (i, node) { ... };
-          hLineWidth: () => 0,
-          vLineWidth: () => 0,
-          paddingLeft: () => 0,
-          paddingRight: () => 0,
-          paddingTop: () => 0,
-          paddingBottom: () => 0,
-        },
-      },
-    });
+    const pdfDoc = await pdfmake.createPdf(docDefinition).getStream();
 
     if (!pdfDoc) {
       throw new Error('Document stream has not been generated');

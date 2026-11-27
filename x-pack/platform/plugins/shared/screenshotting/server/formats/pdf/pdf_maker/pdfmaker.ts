@@ -8,7 +8,7 @@
 import type { Logger, PackageInfo } from '@kbn/core/server';
 import type { SerializableRecord } from '@kbn/utility-types';
 import path from 'path';
-import type { Content, ContentImage, ContentText } from 'pdfmake/interfaces';
+import type { Content, ContentImage } from 'pdfmake/interfaces';
 import type { MessagePort } from 'worker_threads';
 import { MessageChannel, Worker } from 'worker_threads';
 import type { Layout } from '../../../layouts';
@@ -87,16 +87,8 @@ export class PdfMaker {
 
   private addPageContents(contents: Content[]) {
     this.content.push(
-      // Insert a page break after each content item
-      (this.content.length > 1
-        ? [
-            {
-              text: '',
-              pageBreak: 'after',
-            } as ContentText as Content,
-          ]
-        : []
-      ).concat(contents)
+      // Start each content item on a new page
+      this.content.length > 1 ? [{ stack: contents, pageBreak: 'before' }] : contents
     );
   }
 
