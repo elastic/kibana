@@ -24,7 +24,7 @@ import { TransformSavedObjectDocumentError } from '.';
 type MigrateAndConvertFn = IDocumentMigrator['migrateAndConvert'];
 
 export interface DocumentsTransformFailed {
-  readonly type: string;
+  readonly type: 'documents_transform_failed';
   readonly corruptDocumentIds: string[];
   readonly transformErrors: TransformErrorObjects[];
   readonly processedDocs: SavedObjectsRawDoc[];
@@ -140,7 +140,7 @@ export function migrateRawDocsSafely({
     }
     if (corruptSavedObjectIds.length > 0 || transformErrors.length > 0) {
       return Either.left({
-        type: 'documents_transform_failed',
+        type: 'documents_transform_failed' as const,
         corruptDocumentIds: [...corruptSavedObjectIds],
         transformErrors,
         processedDocs,
