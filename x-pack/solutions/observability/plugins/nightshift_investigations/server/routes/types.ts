@@ -24,7 +24,7 @@ import type { OnboardingClient } from '../onboarding/onboarding_client';
 import type { DecisionTreeStore } from '../decision_trees/store';
 import type { MemoryPageStore } from '../memory/page_store';
 import type { KnowledgePurgeClient } from '../purge/purge_client';
-import type { GetTriggerEmitter } from '../types';
+import type { GetTriggerEmitter, SlackChannelBindingChecker } from '../types';
 import type { InvestigatorServiceAccountService } from '../lib/service_account/investigator_service_account';
 import type { NotificationRoutingClient } from '../lib/notifications/notification_routing_client';
 
@@ -76,6 +76,7 @@ export interface NightshiftInvestigationsRouteHandlerResources
   getWorkflowsManagement: GetWorkflowsManagement;
   getUserProfileService: () => Promise<CoreStart['userProfile']>;
   isUniversalAlertingAvailable: () => boolean;
+  getSlackChannelBindingChecker: () => SlackChannelBindingChecker | undefined;
   getWikiPageStore: GetWikiPageStore;
   isWikiEnabled: () => boolean;
   listSandboxConnectors: ListSandboxConnectors;

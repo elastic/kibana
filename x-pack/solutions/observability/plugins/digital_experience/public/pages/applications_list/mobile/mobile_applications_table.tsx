@@ -42,6 +42,8 @@ import {
   timeColumnPreset,
 } from '../../../utils/column_presets';
 import { renderLastSeen } from '../components/render_last_seen';
+import type { IngestColumnState } from '../components/ingest_column';
+import { SORT_BY_INGEST, ingestColumn } from '../components/ingest_column';
 
 const columnNames = {
   application: i18n.translate('xpack.digitalExperience.applications.mobile.applicationColumn', {
@@ -65,8 +67,6 @@ const getRowId = ({ serviceName }: MobileApplicationSummary) => serviceName;
 
 const nameCss = css({ minWidth: 0 });
 
-const SORT_BY_SESSIONS = { sort: { field: 'sessions.count', direction: 'desc' } } as const;
-
 const renderCrashFree = (formatters: Formatters) => (compared: ComparedValue) => {
   const { value } = compared;
   if (value === null) {
@@ -81,18 +81,21 @@ const renderCrashFree = (formatters: Formatters) => (compared: ComparedValue) =>
   );
 };
 
-/** The mobile applications, with the columns that suit them; sorted by sessions. */
+/** The mobile applications, with the columns that suit them; sorted by ingest. */
 export function MobileApplicationsTable({
   items,
   searchTerm,
   isLoading,
   noItemsMessage,
+  ingest,
 }: {
   items: MobileApplicationSummary[];
   searchTerm: string;
   isLoading: boolean;
   /** Shown instead of rows: loading, an error, no match or no mobile data. */
   noItemsMessage: ReactNode;
+  /** The rows' ingest, which loads apart from them. */
+  ingest: IngestColumnState;
 }) {
   const { application } = useKibanaServices();
   const router = useDigitalExperienceRouter();
@@ -154,6 +157,7 @@ export function MobileApplicationsTable({
             <span data-test-subj="digitalExperienceMobileLatestRelease">{release}</span>
           ),
       },
+      ingestColumn<MobileApplicationSummary>(ingest),
       {
         field: 'sessions.count',
         name: SESSIONS_LABEL,
@@ -201,7 +205,7 @@ export function MobileApplicationsTable({
         render: renderLastSeen(formatters),
       },
     ],
-    [application, router, listQuery, searchTerm, formatters, formatNumber]
+    [application, router, listQuery, searchTerm, formatters, formatNumber, ingest]
   );
 
   return (
@@ -214,7 +218,7 @@ export function MobileApplicationsTable({
       tableLayout="auto"
       scrollableInline
       pagination={true}
-      sorting={SORT_BY_SESSIONS}
+      sorting={SORT_BY_INGEST}
       loading={isLoading}
       noItemsMessage={noItemsMessage}
     />

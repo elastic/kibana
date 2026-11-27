@@ -10,14 +10,17 @@ import { useHistory } from 'react-router-dom';
 import { EuiPageSection } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderBadge } from '@kbn/app-header';
-import { i18n } from '@kbn/i18n';
 import { APPLICATION_SOURCE } from '../../../../common/application_source';
-import type { ApplicationTabId, MobilePlatform } from '../../../../common/types/applications';
+import {
+  MOBILE_APPLICATION_TAB_IDS,
+  type ApplicationTabId,
+  type MobileApplicationTabId,
+  type MobilePlatform,
+} from '../../../../common/types/applications';
 import { useRouteBreadcrumb } from '../../../breadcrumbs/use_route_breadcrumb';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS } from '../../../ebt_constants';
 import { useApplicationLinks } from '../../../hooks/use_application_links';
 import { useApplicationsHref } from '../../../hooks/use_applications_href';
-import { useQueryParam } from '../../../hooks/use_query_param';
 import { useShareAction } from '../../../hooks/use_share_action';
 import {
   APPLICATIONS_LABEL,
@@ -25,16 +28,13 @@ import {
   OPEN_IN_DISCOVER_LABEL,
   PLATFORM_LABELS,
 } from '../../../labels';
+import { MobileCrashesTab } from '../mobile_crashes/mobile_crashes_tab';
 import { MobileOverview } from './mobile_overview';
 import { useMobileDiscoverHref } from './use_mobile_discover_href';
 import { useMobileKpis } from './use_mobile_kpis';
 
 /** Mobile applications are EDOT data. */
 const SOURCE = APPLICATION_SOURCE.otel;
-
-const COMPARE_LABEL = i18n.translate('xpack.digitalExperience.mobile.compare', {
-  defaultMessage: 'Compare to the previous period',
-});
 
 /** The platforms the application reported on, as the header's badges. */
 const platformBadges = (platforms: MobilePlatform[]): AppHeaderBadge[] =>
@@ -44,10 +44,13 @@ const platformBadges = (platforms: MobilePlatform[]): AppHeaderBadge[] =>
     'data-test-subj': `digitalExperienceMobilePlatformBadge-${platform}`,
   }));
 
+const isMobileTab = (tab: ApplicationTabId): tab is MobileApplicationTabId =>
+  MOBILE_APPLICATION_TAB_IDS.some((id) => id === tab);
+
 /**
  * A mobile application's page, all its platforms: its header, with its platforms as badges and
- * Compare and Open in Discover as actions, as the Session page has them, and its Overview, its only
- * tab, which shows the KPIs the page fetches.
+ * Open in Discover as an action, as the Session page has it, and its Overview and Crashes tabs.
+ * The page fetches the KPIs, whose filter options both tabs use.
  */
 export function MobileApplicationPage({
   serviceName,
@@ -58,25 +61,27 @@ export function MobileApplicationPage({
 }) {
   const history = useHistory();
   const applicationsHref = useApplicationsHref();
-  const { overviewHref, overviewPath } = useApplicationLinks(serviceName, SOURCE);
-  const shareAction = useShareAction({ serviceName, source: SOURCE, tab: 'overview' });
-  const discoverHref = useMobileDiscoverHref(serviceName);
+  const { overviewHref, overviewPath, crashesHref } = useApplicationLinks(serviceName, SOURCE);
+  const tabHrefs: Record<MobileApplicationTabId, string> = {
+    overview: overviewHref,
+    crashes: crashesHref,
+  };
+  // A web application's tab isn't one of this page's: its URL is replaced by the Overview's.
+  const tab: MobileApplicationTabId = isMobileTab(selectedTab) ? selectedTab : 'overview';
+  const shareAction = useShareAction({ serviceName, source: SOURCE, tab });
+  const discoverHref = useMobileDiscoverHref(serviceName, tab);
   const kpisState = useMobileKpis(serviceName);
-  // In the URL, so a reload or Share keeps it.
-  const { value: compare, setValue: setCompare } = useQueryParam('compare');
-  const isComparing = compare === 'true';
 
-  // Any other tab's URL is replaced by the Overview's.
-  const isOverview = selectedTab === 'overview';
+  const isUnsupportedTab = !isMobileTab(selectedTab);
   useEffect(() => {
-    if (!isOverview) {
+    if (isUnsupportedTab) {
       history.replace(overviewPath);
     }
-  }, [history, isOverview, overviewPath]);
+  }, [history, isUnsupportedTab, overviewPath]);
 
   useRouteBreadcrumb([
     { text: serviceName, href: overviewHref },
-    { text: APPLICATION_TAB_LABELS.overview },
+    { text: APPLICATION_TAB_LABELS[tab] },
   ]);
 
   return (
@@ -88,21 +93,11 @@ export function MobileApplicationPage({
         badges={platformBadges(kpisState.kpis?.platforms ?? [])}
         menu={{
           items: [
-            {
-              id: 'compare',
-              order: 1,
-              label: COMPARE_LABEL,
-              iconType: 'compare',
-              isSelected: isComparing,
-              run: () => setCompare(isComparing ? undefined : 'true'),
-              testId: 'digitalExperienceMobileCompareToggle',
-              ebt: { action: DIGITAL_EXPERIENCE_EBT_ACTIONS.TOGGLE_COMPARE },
-            },
             ...(discoverHref
               ? [
                   {
                     id: 'openInDiscover',
-                    order: 2,
+                    order: 1,
                     label: OPEN_IN_DISCOVER_LABEL,
                     iconType: 'discoverApp',
                     href: discoverHref,
@@ -113,19 +108,21 @@ export function MobileApplicationPage({
               : []),
           ],
         }}
-        tabs={[
-          {
-            id: 'overview',
-            label: APPLICATION_TAB_LABELS.overview,
-            isSelected: true,
-            href: overviewHref,
-            'data-test-subj': 'digitalExperienceTab-overview',
-          },
-        ]}
+        tabs={MOBILE_APPLICATION_TAB_IDS.map((id) => ({
+          id,
+          label: APPLICATION_TAB_LABELS[id],
+          isSelected: id === tab,
+          href: tabHrefs[id],
+          'data-test-subj': `digitalExperienceTab-${id}`,
+        }))}
       />
-      {isOverview && (
+      {!isUnsupportedTab && (
         <EuiPageSection paddingSize="m" restrictWidth={false}>
-          <MobileOverview kpisState={kpisState} />
+          {tab === 'crashes' ? (
+            <MobileCrashesTab serviceName={serviceName} kpisState={kpisState} />
+          ) : (
+            <MobileOverview serviceName={serviceName} kpisState={kpisState} />
+          )}
         </EuiPageSection>
       )}
     </>

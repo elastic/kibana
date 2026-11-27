@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { LATENCY_MAP_ROWS } from '../query/duration_rows';
 import { LAYOUT } from './layout';
 import type { PlotArea } from './map_geometry';
 
@@ -47,6 +48,33 @@ export function calibratePlot(cell: ChartCell, columnIndex: number): PlotArea {
     top: GRID_ORIGIN.top + (cell.y - gap / 2) - cell.yIndex * rowHeight,
     colWidth,
     rowHeight,
+  };
+}
+
+/**
+ * The plot as the chart's layout gives it, before the chart has told of a cell: from the grid's
+ * origin to the right margin, and down to the time labels. For what shows with the map, not
+ * under the pointer. The rows are exact; the columns are narrower than this when the chart
+ * makes room for its last time label, which the first cell it reports corrects.
+ */
+export function estimatePlot({
+  width,
+  height,
+  rightMargin,
+  bins,
+}: {
+  /** The chart's size, axes included. */
+  width: number;
+  height: number;
+  rightMargin: number;
+  bins: number;
+}): PlotArea {
+  // The chart ends its grid half a gap short of the margin, as it starts it half a gap in.
+  const right = width - rightMargin - LAYOUT.cellGap / 2;
+  return {
+    ...GRID_ORIGIN,
+    colWidth: Math.max(right - GRID_ORIGIN.left, 0) / Math.max(bins, 1),
+    rowHeight: Math.max(height - LAYOUT.xAxisHeight - GRID_ORIGIN.top, 0) / LATENCY_MAP_ROWS,
   };
 }
 

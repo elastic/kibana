@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/zod'
   - '@kbn/zod-helpers'
+  - '@kbn/as-code-shared-schemas'
 tags:
   - shared-common
   - package

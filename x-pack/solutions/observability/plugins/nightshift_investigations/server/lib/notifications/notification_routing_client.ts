@@ -328,6 +328,7 @@ export class NotificationRoutingClient {
                 error: undefined,
                 message_ts: undefined,
                 external_conversation_id: undefined,
+                workspace: undefined,
                 sent_at: undefined,
                 ...result,
               }

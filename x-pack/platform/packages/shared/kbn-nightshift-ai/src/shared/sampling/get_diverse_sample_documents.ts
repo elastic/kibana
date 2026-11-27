@@ -8,10 +8,11 @@
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { esql } from '@elastic/esql';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { dateRangeQuery } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import {
+  buildCountQuery,
+  esqlTimeRange,
   getEsqlColumnSchema,
   parseEsqlSourceDocuments,
   getEsqlDocumentId,
@@ -47,17 +48,16 @@ export async function getDiverseSampleDocuments({
   logger,
   signal,
 }: GetDiverseSampleDocumentsOptions): Promise<{ hits: Array<SearchHit<Record<string, unknown>>> }> {
-  const timeRangeFilter = dateRangeQuery(start, end);
-  const filter = { bool: { filter: timeRangeFilter } };
   const indices = Array.isArray(index) ? index : [index];
 
-  const [messageField, totalDocs] = await Promise.all([
-    detectMessageField({ esClient, index, start, end, signal }),
-    runEsqlCount({ esClient, indices, filter }),
-  ]);
+  // Nothing to categorize in the early returns; the caller's random sampling arm backfills them.
+  const messageField = await detectMessageField({ esClient, index, start, end, signal });
+  if (!messageField) {
+    return { hits: [] };
+  }
 
-  if (totalDocs === 0 || !messageField) {
-    // Nothing to categorize; the caller's random sampling arm backfills this case.
+  const totalDocs = await runEsqlCount({ esClient, indices, start, end, field: messageField });
+  if (totalDocs === 0) {
     return { hits: [] };
   }
 
@@ -70,7 +70,8 @@ export async function getDiverseSampleDocuments({
     field: messageField,
     total: totalDocs,
     samplingProbability,
-    filter,
+    start,
+    end,
   });
 
   const window = selectStratifiedWindow(rows, { iteration, size });
@@ -89,7 +90,8 @@ export async function getDiverseSampleDocuments({
     indices,
     field: messageField,
     sampleValues,
-    filter,
+    start,
+    end,
   });
 
   const hits: Array<SearchHit<Record<string, unknown>>> = [];
@@ -167,13 +169,15 @@ async function fetchRepresentativeDocuments({
   indices,
   field,
   sampleValues,
-  filter,
+  start,
+  end,
 }: {
   esClient: TracedElasticsearchClient;
   indices: string[];
   field: string;
   sampleValues: string[];
-  filter: { bool: { filter: ReturnType<typeof dateRangeQuery> } };
+  start: number;
+  end: number;
 }): Promise<Map<string, SearchHit<Record<string, unknown>>>> {
   const valueToHit = new Map<string, SearchHit<Record<string, unknown>>>();
   let pending = sampleValues;
@@ -185,8 +189,9 @@ async function fetchRepresentativeDocuments({
         field,
         values: pending,
         limit: pending.length * SOURCE_FETCH_PER_VALUE,
+        start,
+        end,
       }),
-      filter,
     })) as unknown as ESQLSearchResponse;
 
     const docs = parseEsqlSourceDocuments(fetchResponse);
@@ -240,18 +245,22 @@ function buildSourceFetchQuery({
   field,
   values,
   limit,
+  start,
+  end,
 }: {
   indices: string[];
   field: string;
   values: string[];
   limit: number;
+  start: number;
+  end: number;
 }): string {
   const fieldCol = esql.col(columnPath(field));
   const phrases = values
     .map((value) => esql.exp`MATCH_PHRASE(${fieldCol}, ${esql.str(value)})`)
     .reduce((acc, clause) => esql.exp`${acc} OR ${clause}`);
 
-  return esql.from(indices, ['_id', '_source'])
+  return esql.from(indices, ['_id', '_source']).where`${esqlTimeRange(start, end)}`
     .where`(${phrases}) AND ${fieldCol}::keyword IN (${values.map((value) => esql.str(value))})`
     .limit(limit)
     .print('basic');
@@ -295,15 +304,18 @@ async function detectMessageField({
 async function runEsqlCount({
   esClient,
   indices,
-  filter,
+  start,
+  end,
+  field,
 }: {
   esClient: TracedElasticsearchClient;
   indices: string[];
-  filter: { bool: { filter: ReturnType<typeof dateRangeQuery> } };
+  start: number;
+  end: number;
+  field: string;
 }): Promise<number> {
   const response = (await esClient.esql('diverse_sample_count', {
-    query: esql.from(indices).pipe`STATS total = COUNT(*)`.print('basic'),
-    filter,
+    query: buildCountQuery({ index: indices, start, end, populatedField: field }),
   })) as unknown as ESQLSearchResponse;
   const total = response.values[0]?.[0];
 

@@ -8,6 +8,7 @@
 import { escapeStringValue } from '@kbn/esql-utils';
 import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
 import { getEuidSourceFields } from '@kbn/entity-store/common/domain/euid';
+import { getUnmappedLatestFieldPlaceholders } from '@kbn/entity-store/common/domain/latest_index_added_fields';
 import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ESQLSearchResponse } from '@kbn/es-types';
@@ -33,7 +34,10 @@ export const getEntityAlias = (namespace: string) => getEntitiesAlias(ENTITY_LAT
 export const getAlertsIndex = (namespace: string) => `${DEFAULT_ALERTS_INDEX}-${namespace}`;
 export const getRiskScoreIndex = (namespace: string) => getRiskScoreTimeSeriesIndex(namespace);
 
-/** Alert and anomaly indices don't map every EUID field; unmapped ones read as null instead of failing. */
+/**
+ * Alert and anomaly indices don't map every EUID field, and an entity index created before the
+ * definition stored a field lacks it; unmapped ones read as null instead of failing.
+ */
 export const SET_UNMAPPED_NULLIFY = 'SET unmapped_fields="nullify";';
 
 export const RISK_SCORE_TYPE = `COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type)`;
@@ -148,7 +152,11 @@ export const joinAnd = (...parts: Array<string | undefined | null | false>): str
 
 /** Joins on `entity.id` only: ES|QL rejects KQL in `ON`, and the join needs a concrete index name. */
 export const buildLookupJoinClause = (concreteEntityIndexName: string): string =>
-  `| LOOKUP JOIN ${concreteEntityIndexName} ON \`entity.id\``;
+  [
+    // The grid keeps every field the entity store added to the latest index after it shipped.
+    ...getUnmappedLatestFieldPlaceholders(),
+    `| LOOKUP JOIN ${concreteEntityIndexName} ON \`entity.id\``,
+  ].join('\n');
 
 /** The order of every grid page, `field <dir> NULLS LAST, entity.id ASC`, and its limit. */
 export const buildSortSuffix = (field: string, direction: SortDir, limit: number): string[] => [

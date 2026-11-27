@@ -23,6 +23,10 @@ export interface TimeGrid {
   startMs: number;
 }
 
+/** What tells one grid's cells from another's: where the columns start, how wide, how many. */
+export const getTimeGridKey = (timeGrid?: TimeGrid): string | undefined =>
+  timeGrid && `${timeGrid.fromMs}:${timeGrid.binMs}:${timeGrid.bins}`;
+
 export function getTimeGrid(from: string, to: string, targetBins: number): TimeGrid {
   const startMs = Date.parse(from);
   const endMs = Math.max(startMs + 1, Date.parse(to));

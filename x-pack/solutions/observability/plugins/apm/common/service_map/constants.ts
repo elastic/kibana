@@ -87,6 +87,19 @@ export const RANK_SEPARATION = 120;
 export const NODE_SEPARATION = 80;
 export const GRAPH_MARGIN = 50;
 
+/** Space between the members of an open group and the edge of its box. */
+export const GROUP_BOX_PADDING = 24;
+
+/** Room at the top of an open group's box for its label and close button. */
+export const GROUP_BOX_HEADER_HEIGHT = 48;
+
+/**
+ * From this many members, an open group whose own layout is much longer than it is wide (see
+ * `FOLD_ASPECT_RATIO_THRESHOLD`) packs its members into a grid. Members with few or no calls
+ * between them would otherwise line up in one long row or column.
+ */
+export const GROUP_BOX_GRID_MIN_MEMBER_COUNT = 6;
+
 /**
  * Below this node count the service map is never folded into serpentine bands: small maps already
  * fit the viewport, and folding them just adds visual noise.

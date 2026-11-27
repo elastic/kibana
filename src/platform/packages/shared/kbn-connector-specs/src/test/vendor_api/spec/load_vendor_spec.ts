@@ -9,6 +9,7 @@
 
 import type { OpenApiDocument } from '@kbn/connector-emulate';
 import {
+  convertAglioReference,
   convertDiscovery,
   convertSmithy,
   convertSwagger2,
@@ -19,7 +20,7 @@ import { bundleSpec } from './bundle_spec';
 import { isJsonObject } from '../json_pointer';
 import { loadMarkdownReference } from './load_markdown_reference';
 import type { ManifestSource } from '../manifest';
-import { isMarkdownFormat } from '../manifest';
+import { isAglioFormat, isMarkdownFormat } from '../manifest';
 import { parseSpecText } from './parse_spec_text';
 
 export interface LoadedVendorSpec {
@@ -42,6 +43,13 @@ const apiVersionOf = ({ info }: OpenApiDocument): { apiVersion?: string } => {
   return typeof version === 'string' ? { apiVersion: version } : {};
 };
 
+/** The version in the page's file name (`…_v6.16.0.html`), not elsewhere in its URL. */
+const aglioVersionOf = (url: string): string | undefined => {
+  const { pathname } = new URL(url);
+  const fileName = pathname.slice(pathname.lastIndexOf('/') + 1);
+  return /[_-]v(\d+(?:\.\d+)+)/.exec(fileName)?.[1];
+};
+
 /**
  * Fetches a vendor spec and turns it into one OpenAPI 3.x document: Google Discovery, Smithy,
  * Swagger 2.0 and Markdown references are converted, external `$ref`s are bundled.
@@ -55,6 +63,19 @@ export const loadVendorSpec = async (
     return {
       format: declaredFormat,
       document: await loadMarkdownReference({ format: declaredFormat, url, pages, fetchText }),
+    };
+  }
+  if (isAglioFormat(declaredFormat)) {
+    // The page states no version of its own; vendors put it in the file's name (`…_v6.16.0.html`).
+    const apiVersion = aglioVersionOf(url);
+    return {
+      format: declaredFormat,
+      ...(apiVersion ? { apiVersion } : {}),
+      document: convertAglioReference({
+        format: declaredFormat,
+        html: await fetchText(url),
+        version: apiVersion,
+      }),
     };
   }
   const parsed = parseSpecText(await fetchText(url)) as OpenApiDocument;

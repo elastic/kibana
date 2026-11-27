@@ -9,17 +9,21 @@
 
 import type { ISource } from './source';
 
-export type SourceRegistryEntry = {
+export type SourceRegistryEntry<TSourceDescriptor extends object = object> = {
   ConstructorFunction: new (
-    sourceDescriptor: any // this is the source-descriptor that corresponds specifically to the particular ISource instance
-  ) => ISource;
+    sourceDescriptor: TSourceDescriptor // the source-descriptor that corresponds specifically to the particular ISource instance
+  ) => ISource<TSourceDescriptor>;
   type: string;
 };
 
-const registry: SourceRegistryEntry[] = [];
+// The registry holds entries for many different descriptor types, so the descriptor type is erased here.
+// Type safety is enforced at the registerSource boundary.
+const registry: Array<SourceRegistryEntry<any>> = [];
 
-export function registerSource(entry: SourceRegistryEntry) {
-  const sourceTypeExists = registry.some(({ type }: SourceRegistryEntry) => {
+export function registerSource<TSourceDescriptor extends object>(
+  entry: SourceRegistryEntry<TSourceDescriptor>
+) {
+  const sourceTypeExists = registry.some(({ type }) => {
     return entry.type === type;
   });
   if (sourceTypeExists) {
@@ -30,6 +34,6 @@ export function registerSource(entry: SourceRegistryEntry) {
   registry.push(entry);
 }
 
-export function getSourceByType(sourceType: string): SourceRegistryEntry | undefined {
-  return registry.find((source: SourceRegistryEntry) => source.type === sourceType);
+export function getSourceByType(sourceType: string): SourceRegistryEntry<any> | undefined {
+  return registry.find((source) => source.type === sourceType);
 }

@@ -1,5 +1,5 @@
 {
-  "sha1": "2d226c015bfff111dbbba5901ea3e6bca0a16c14",
+  "sha1": "9571c0fac5e734fda4f5601c888846d924c0d420",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -325,8 +325,8 @@
       }
     },
     {
-      "id": "5f3e82013678cd8-5c7e494ef05a18e",
-      "title": "POST /internal/entity_inventory/entities/{type}/_list returns the columns in column order, the same as the types route",
+      "id": "5f3e82013678cd8-fa26270eee1261d",
+      "title": "POST /internal/entity_inventory/entities/{type}/_list returns the columns in column order, the same names and kinds as the types route",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -352,8 +352,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 196,
-        "column": 53
+        "line": 199,
+        "column": 36
       }
     },
     {
@@ -368,8 +368,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 210,
-        "column": 53
+        "line": 213,
+        "column": 16
       }
     },
     {
@@ -384,8 +384,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 223,
-        "column": 13
+        "line": 224,
+        "column": 84
       }
     },
     {
@@ -400,8 +400,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 231,
-        "column": 74
+        "line": 235,
+        "column": 24
       }
     },
     {
@@ -416,8 +416,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 241,
-        "column": 7
+        "line": 240,
+        "column": 19
       }
     },
     {
@@ -433,7 +433,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
         "line": 255,
-        "column": 32
+        "column": 7
       }
     },
     {
@@ -448,7 +448,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 294,
+        "line": 295,
         "column": 13
       }
     },
@@ -465,7 +465,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
         "line": 341,
-        "column": 23
+        "column": 25
       }
     },
     {
@@ -481,7 +481,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
         "line": 371,
-        "column": 19
+        "column": 9
       }
     },
     {
@@ -496,8 +496,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 384,
-        "column": 68
+        "line": 387,
+        "column": 16
       }
     },
     {
@@ -513,7 +513,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
         "line": 391,
-        "column": 68
+        "column": 11
       }
     },
     {
@@ -529,7 +529,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
         "line": 403,
-        "column": 14
+        "column": 9
       }
     },
     {
@@ -544,8 +544,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 408,
-        "column": 55
+        "line": 411,
+        "column": 71
       }
     },
     {
@@ -561,7 +561,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
         "line": 415,
-        "column": 14
+        "column": 13
       }
     },
     {
@@ -576,8 +576,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 419,
-        "column": 89
+        "line": 421,
+        "column": 7
       }
     },
     {
@@ -592,8 +592,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 421,
-        "column": 28
+        "line": 424,
+        "column": 61
       }
     },
     {
@@ -608,8 +608,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 424,
-        "column": 14
+        "line": 425,
+        "column": 68
       }
     },
     {
@@ -624,8 +624,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 436,
-        "column": 67
+        "line": 437,
+        "column": 14
       }
     },
     {
@@ -641,7 +641,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
         "line": 449,
-        "column": 13
+        "column": 14
       }
     },
     {
@@ -661,8 +661,8 @@
       }
     },
     {
-      "id": "ae4e9e8902d076f-7579f40658b8e87",
-      "title": "GET /internal/entity_inventory/types returns the suggested filters of the built-in host",
+      "id": "ae4e9e8902d076f-7433801200f31b3",
+      "title": "GET /internal/entity_inventory/types returns the labels of the k8s.deployment columns",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -677,6 +677,22 @@
       }
     },
     {
+      "id": "ae4e9e8902d076f-7579f40658b8e87",
+      "title": "GET /internal/entity_inventory/types returns the suggested filters of the built-in host",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/types.spec.ts",
+        "line": 73,
+        "column": 62
+      }
+    },
+    {
       "id": "ae4e9e8902d076f-6b7e86fe9a6f030",
       "title": "GET /internal/entity_inventory/types returns every type with a dynamic block",
       "expectedStatus": "passed",
@@ -688,8 +704,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/types.spec.ts",
-        "line": 70,
-        "column": 14
+        "line": 84,
+        "column": 18
       }
     },
     {
@@ -704,8 +720,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/types.spec.ts",
-        "line": 80,
-        "column": 18
+        "line": 90,
+        "column": 55
       }
     },
     {
@@ -720,8 +736,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/types.spec.ts",
-        "line": 92,
-        "column": 23
+        "line": 105,
+        "column": 7
       }
     }
   ]

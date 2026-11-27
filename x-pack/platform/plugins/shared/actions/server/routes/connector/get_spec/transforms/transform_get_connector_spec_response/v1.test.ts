@@ -29,6 +29,7 @@ const result: GetConnectorSpecResult = {
     minimumLicense: 'gold',
     isTechnicalPreview: true,
     supportedFeatureIds: ['alerting'],
+    specVersion: '1.3',
   },
   schema: formSchema,
   isTestable: true,
@@ -59,6 +60,7 @@ describe('transformGetConnectorSpecResponse', () => {
         icon: 'testIcon',
         docs_url: 'https://example.com/docs',
         is_technical_preview: true,
+        spec_version: '1.3',
       },
       schema: formSchema,
       is_testable: true,
@@ -74,7 +76,7 @@ describe('transformGetConnectorSpecResponse', () => {
   });
 
   it('omits optional metadata keys and action fields when undefined', () => {
-    const { icon, docsUrl, isTechnicalPreview, ...metadata } = result.metadata;
+    const { icon, docsUrl, isTechnicalPreview, specVersion, ...metadata } = result.metadata;
     const pingAction: GetConnectorSpecResult['actions'][number] = {
       name: 'ping',
       isTool: false,
@@ -86,6 +88,7 @@ describe('transformGetConnectorSpecResponse', () => {
     expect(body.metadata).not.toHaveProperty('icon');
     expect(body.metadata).not.toHaveProperty('docs_url');
     expect(body.metadata).not.toHaveProperty('is_technical_preview');
+    expect(body.metadata).not.toHaveProperty('spec_version');
     expect(body.actions[0]).toEqual({ name: 'ping', is_tool: false, scope: 'write' });
   });
 
@@ -104,7 +107,9 @@ describe('transformGetConnectorSpecResponse', () => {
 
   it('validates against the live getConnectorSpecResponseBodySchemaV1', () => {
     expect(() =>
-      getConnectorSpecResponseBodySchemaV1.validate(transformGetConnectorSpecResponse(result))
+      getConnectorSpecResponseBodySchemaV1({ includeSpecVersionField: true }).validate(
+        transformGetConnectorSpecResponse(result)
+      )
     ).not.toThrow();
   });
 });

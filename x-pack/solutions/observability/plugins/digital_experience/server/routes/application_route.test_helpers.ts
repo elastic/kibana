@@ -37,15 +37,15 @@ export const applicationRouteTestCases = ({
   route,
   getData,
   hasFilters = false,
-  takesPage = true,
+  takesUrlText = true,
 }: {
   route: () => ApplicationRoute;
   /** The mocked function the handler returns the result of. */
   getData: jest.Mock;
   /** Whether the route takes the Overview's filters and KQL query too. */
   hasFilters?: boolean;
-  /** Whether the route applies the page filter; the one whose documents have no page URL does not. */
-  takesPage?: boolean;
+  /** Whether the route applies the URL text filter; the one whose documents have no URL does not. */
+  takesUrlText?: boolean;
 }) => {
   const esClient = { search: jest.fn() };
   const RESPONSE = { data: 'response' };
@@ -152,7 +152,7 @@ export const applicationRouteTestCases = ({
         end: END,
         filters: encodeOverviewFilters({
           browser: [...include('Chrome'), ...exclude('Safari')],
-          ...(takesPage ? { pageUrl: include('https://shop.test/') } : {}),
+          pageUrl: include('https://shop.test/'),
         }),
       });
       expect(getData).toHaveBeenLastCalledWith(
@@ -162,7 +162,7 @@ export const applicationRouteTestCases = ({
               { value: 'Chrome', exclude: false },
               { value: 'Safari', exclude: true },
             ],
-            ...(takesPage ? { pageUrl: [{ value: 'https://shop.test/', exclude: false }] } : {}),
+            pageUrl: [{ value: 'https://shop.test/', exclude: false }],
           },
         })
       );
@@ -224,29 +224,29 @@ export const applicationRouteTestCases = ({
       ).toBe(false);
     });
 
-    if (takesPage) {
-      it('bounds the page like the Overview route', () => {
-        const query = (pageUrl: string) => ({
-          start: START,
-          end: END,
-          filters: encodeOverviewFilters({ pageUrl: include(pageUrl) }),
-        });
-
-        expect(schemaOf('query').safeParse(query('x'.repeat(1024))).success).toBe(true);
-        expect(schemaOf('query').safeParse(query('x'.repeat(1025))).success).toBe(false);
+    it('bounds the page like the Overview route', () => {
+      const query = (pageUrl: string) => ({
+        start: START,
+        end: END,
+        filters: encodeOverviewFilters({ pageUrl: include(pageUrl) }),
       });
-    } else {
-      it('rejects a page filter, as its documents have no page URL', () => {
+
+      expect(schemaOf('query').safeParse(query('x'.repeat(1024))).success).toBe(true);
+      expect(schemaOf('query').safeParse(query('x'.repeat(1025))).success).toBe(false);
+    });
+
+    if (!takesUrlText) {
+      it('rejects the URL text filter, as its documents have no URL', () => {
         const withFilters = (filters: string) =>
           schemaOf('query').safeParse({ start: START, end: END, filters }).success;
 
         expect(withFilters(encodeOverviewFilters({ browser: include('Chrome') }) ?? '')).toBe(true);
+        expect(
+          withFilters(encodeOverviewFilters({ pageUrl: include('/products/{slug}') }) ?? '')
+        ).toBe(true);
         expect(withFilters(encodeOverviewFilters({ pageContains: include('/cart') }) ?? '')).toBe(
           false
         );
-        expect(
-          withFilters(encodeOverviewFilters({ pageUrl: include('https://shop.test/') }) ?? '')
-        ).toBe(false);
       });
     }
   }

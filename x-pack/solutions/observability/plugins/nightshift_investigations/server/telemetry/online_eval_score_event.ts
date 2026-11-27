@@ -37,6 +37,8 @@ export interface OnlineEvalScore {
   name: string;
   value?: number;
   label?: string;
+  /** Keywords for monitoring, such as which checks ran. Fixed vocabularies, never free text. */
+  tags?: string[];
   explanation?: string;
 }
 
@@ -228,6 +230,20 @@ const onlineEvalScoreSchema: RootSchema<OnlineEvalScoreEvent> = {
         label: {
           type: 'keyword',
           _meta: { description: 'Label of the score.', optional: true },
+        },
+        tags: {
+          type: 'array',
+          items: {
+            type: 'keyword',
+            _meta: {
+              description:
+                'Tag of the score, such as strategy:rule_execution_trace:ran or mechanism:evidenced. Drawn from fixed vocabularies, so it carries no customer data and is sent whether or not explanations are.',
+            },
+          },
+          _meta: {
+            description: 'Tags that make the kinds of checks a score covers easy to monitor.',
+            optional: true,
+          },
         },
         explanation: {
           type: 'text',

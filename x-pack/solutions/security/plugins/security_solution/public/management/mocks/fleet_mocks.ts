@@ -424,7 +424,7 @@ export const fleetGetAgentStatusHttpMock =
   ]);
 
 export type FleetPutEndpointPackagePolicyHttpMockInterface = ResponseProvidersInterface<{
-  updateEndpointPolicy: () => UpdatePolicyResponse;
+  updateEndpointPolicy: (options: HttpFetchOptionsWithPath) => UpdatePolicyResponse;
 }>;
 export const fleetPutEndpointPackagePolicyHttpMock =
   httpHandlerMockFactory<FleetPutEndpointPackagePolicyHttpMockInterface>([

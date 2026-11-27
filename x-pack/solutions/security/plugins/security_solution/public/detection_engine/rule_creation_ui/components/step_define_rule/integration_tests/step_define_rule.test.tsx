@@ -891,6 +891,37 @@ describe('StepDefineRule', () => {
           })
         ).rejects.toThrow();
       });
+
+      it('stops showing ES|QL query is required once a query is entered', async () => {
+        const initialState = {
+          queryBar: {
+            query: { query: '', language: 'esql' },
+            filters: [],
+            saved_id: null,
+          },
+          ruleType: 'esql' as const,
+        };
+        render(<TestForm formProps={{ isQueryBarValid: false }} initialState={initialState} />, {
+          wrapper: TestProviders,
+        });
+
+        await submitForm();
+
+        await waitFor(() => {
+          expect(screen.getByTestId('ruleEsqlQueryBar')).toHaveTextContent(
+            'ES|QL query is required'
+          );
+        });
+
+        typeQuery('from my_index metadata _id');
+        await submitForm();
+
+        await waitFor(() => {
+          expect(screen.getByTestId('ruleEsqlQueryBar')).not.toHaveTextContent(
+            'ES|QL query is required'
+          );
+        });
+      });
     });
 
     describe('EQL rule', () => {

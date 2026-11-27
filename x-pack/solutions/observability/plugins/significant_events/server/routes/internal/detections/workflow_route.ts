@@ -187,20 +187,34 @@ const changePointScanRoute = createServerRoute({
 
     const startedAt = Date.now();
     const scanResults = await Promise.all(
-      groupQueryLinksByAnalysisProfile(queryLinks).map(({ config, queryLinks: groupedLinks }) => {
-        const isCritical = config.profile === CRITICAL_ANALYSIS_PROFILE;
-        return sigEventsContext.alertsReader.runChangePointScan(
-          esClient,
-          {
-            // Critical uses workflow inputs; default keeps its fixed profile.
-            lookback: isCritical ? criticalLookback : config.lookback,
-            bucketInterval: isCritical ? criticalBucketInterval : config.bucketInterval,
-            ruleIds: groupedLinks.map((queryLink) => queryLink.rule_id),
-            spaceId,
-          },
-          groupedLinks
-        );
-      })
+      groupQueryLinksByAnalysisProfile(queryLinks).map(
+        async ({ config, queryLinks: groupedLinks }) => {
+          const isCritical = config.profile === CRITICAL_ANALYSIS_PROFILE;
+          // Critical uses workflow inputs; default keeps its fixed profile.
+          const lookback = isCritical ? criticalLookback : config.lookback;
+          const result = await sigEventsContext.alertsReader.runChangePointScan(
+            esClient,
+            {
+              lookback,
+              bucketInterval: isCritical ? criticalBucketInterval : config.bucketInterval,
+              ruleIds: groupedLinks.map((queryLink) => queryLink.rule_id),
+              spaceId,
+            },
+            groupedLinks
+          );
+          // The Detection workflow's write gate sizes each rule's lookup by the window it was scanned over.
+          const lookbackMinutes = parseLookbackMinutes(lookback);
+          return {
+            ...result,
+            by_rule: {
+              buckets: result.by_rule.buckets.map((bucket) => ({
+                ...bucket,
+                lookback_minutes: lookbackMinutes,
+              })),
+            },
+          };
+        }
+      )
     );
     const durationMs = Date.now() - startedAt;
     const took = scanResults.reduce((sum, result) => sum + (result.took ?? 0), 0);

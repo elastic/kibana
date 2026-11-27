@@ -1280,6 +1280,8 @@ class AgentPolicyService {
           {
             ...options,
             bumpRevision: false,
+            // The new agent policy has no agents yet, so none can stop collecting data
+            acknowledgeAgentVersionIncompatibility: true,
           }
         );
       }
@@ -1290,7 +1292,10 @@ class AgentPolicyService {
           ...packagePolicy,
           policy_ids: [...packagePolicy.policy_ids, newAgentPolicy.id],
         }));
-        await packagePolicyService.bulkUpdate(soClient, esClient, updatedSharedPackagePolicies);
+        await packagePolicyService.bulkUpdate(soClient, esClient, updatedSharedPackagePolicies, {
+          // The new agent policy has no agents yet, so none can stop collecting data
+          acknowledgeAgentVersionIncompatibility: true,
+        });
       }
     }
 
@@ -2343,7 +2348,7 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     id: string,
     agentVersion: string,
-    options?: { standalone: boolean; redactProxySecrets?: boolean }
+    options?: { standalone: boolean; redactSecrets?: boolean }
   ): Promise<string | null> {
     const fullAgentPolicy = await getFullAgentPolicy(soClient, id, options);
     if (fullAgentPolicy) {
@@ -2395,7 +2400,7 @@ class AgentPolicyService {
       standalone?: boolean;
       agentPolicy?: AgentPolicy;
       agentVersion?: string;
-      redactProxySecrets?: boolean;
+      redactSecrets?: boolean;
       spaceId?: string;
     }
   ): Promise<FullAgentPolicy | null> {

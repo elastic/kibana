@@ -72,7 +72,6 @@ const CUSTOM_DATA_STREAMS_PROFILES: readonly BoostProfile[] = [
 
 const match = (name: string, overrides: Partial<BoostRuleMatch> = {}): BoostRuleMatch => ({
   name,
-  isHidden: false,
   ...overrides,
 });
 
@@ -84,8 +83,8 @@ const INDICES_MATCHES: readonly BoostRuleMatch[] = [
   match('search-analytics'),
   match('synonyms'),
   match('users'),
-  match('.internal-alerts', { isHidden: true }),
-  match('.kibana-observability-ai-assistant', { isHidden: true }),
+  match('.internal-alerts'),
+  match('.kibana-observability-ai-assistant'),
 ];
 
 const DATA_STREAMS_MATCHES: readonly BoostRuleMatch[] = [
@@ -100,8 +99,8 @@ const DATA_STREAMS_MATCHES: readonly BoostRuleMatch[] = [
   match('metrics-system-network'),
   match('metrics-kubernetes-pod'),
   match('traces-apm-default'),
-  match('.logs-elastic-agent', { isHidden: true }),
-  match('.metrics-elastic-agent', { isHidden: true }),
+  match('.logs-elastic-agent'),
+  match('.metrics-elastic-agent'),
 ];
 
 const INDICES_ARGS: Pick<

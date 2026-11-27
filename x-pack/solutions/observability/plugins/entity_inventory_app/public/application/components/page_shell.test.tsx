@@ -14,6 +14,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { EntityInventoryEntityCategory } from '../../types';
 import { createPublicConfigMock } from '../../mocks';
+import { EntityInventoryDateRangeProvider } from '../context/date_range_context';
 import { useEntityInventorySearch } from '../context/search_context';
 import { EntityInventoryPageShell } from './page_shell';
 
@@ -29,7 +30,9 @@ const renderWithServices = (ui: React.ReactElement) => {
     <KibanaContextProvider
       services={{ ...coreMock.createStart(), unifiedSearch, config: createPublicConfigMock() }}
     >
-      <Router history={createMemoryHistory()}>{ui}</Router>
+      <Router history={createMemoryHistory()}>
+        <EntityInventoryDateRangeProvider>{ui}</EntityInventoryDateRangeProvider>
+      </Router>
     </KibanaContextProvider>
   );
 };
