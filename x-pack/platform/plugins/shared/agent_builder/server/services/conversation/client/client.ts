@@ -1296,6 +1296,7 @@ class ConversationClientImpl implements ConversationClient {
         thread_id: threadId,
         title: thread.title,
         ...(resolvedCutEventId ? { cut_event_id: resolvedCutEventId } : {}),
+        ...(highlight ? { highlight } : {}),
       },
     };
 

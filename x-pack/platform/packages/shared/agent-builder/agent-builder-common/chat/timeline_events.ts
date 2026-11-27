@@ -237,6 +237,7 @@ export interface ThreadCreatedEventData {
   thread_id: string;
   title: string;
   cut_event_id?: string;
+  highlight?: { text: string };
 }
 /** Written on the parent when a thread is started from it. */
 export type ThreadCreatedEvent = BaseTimelineEvent<

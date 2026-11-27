@@ -432,7 +432,12 @@ describe('ConversationClient', () => {
       serveParentAndIndexed(parentDocument());
 
       await client.createThread(
-        { parentId: PARENT_ID, threadId: THREAD_ID, title: 'Side question' },
+        {
+          parentId: PARENT_ID,
+          threadId: THREAD_ID,
+          title: 'Side question',
+          highlight: { text: 'Why is the disk full?' },
+        },
         { source: 'http_api' }
       );
 
@@ -441,7 +446,11 @@ describe('ConversationClient', () => {
       expect(threadCreated).toMatchObject({
         id: `thread_created-${THREAD_ID}`,
         type: TimelineEventType.threadCreated,
-        data: { thread_id: THREAD_ID, title: 'Side question' },
+        data: {
+          thread_id: THREAD_ID,
+          title: 'Side question',
+          highlight: { text: 'Why is the disk full?' },
+        },
       });
     });
 
