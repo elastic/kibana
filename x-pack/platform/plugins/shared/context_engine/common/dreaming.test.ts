@@ -9,7 +9,7 @@ import {
   CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
   CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
   CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
-  CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
+  CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import {
   dreamingBuildsAnything,
@@ -17,11 +17,30 @@ import {
   isDreamedKiType,
   isDreamingAutomation,
   isDreamingConfigured,
+  maintenanceConfigOf,
   validateDreamingTypes,
 } from './dreaming';
 
 const customer = { type: 'customer', attributes: ['tier'] };
 const city = { type: 'city' };
+
+describe('maintenanceConfigOf', () => {
+  it('fills in the defaults, reporting only', () => {
+    expect(maintenanceConfigOf(undefined)).toEqual({
+      enabled: false,
+      mode: 'report',
+      schedule: { interval: '24h' },
+      neighbors: 5,
+      sweep_size: 200,
+    });
+  });
+
+  it('keeps what is set', () => {
+    expect(maintenanceConfigOf({ enabled: true, mode: 'apply', neighbors: 3 })).toEqual(
+      expect.objectContaining({ enabled: true, mode: 'apply', neighbors: 3 })
+    );
+  });
+});
 
 describe('dreamingTypesOf', () => {
   it('returns the facts, entities and relationships a config builds', () => {
@@ -91,7 +110,9 @@ describe('isDreamingAutomation', () => {
 
   it('matches the workflows dreaming attaches to an AI index', () => {
     expect(isDreamingAutomation(workflow(CONTEXT_ENGINE_DREAMING_WORKFLOW_ID))).toBe(true);
-    expect(isDreamingAutomation(workflow(CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID))).toBe(true);
+    expect(isDreamingAutomation(workflow(CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW_ID))).toBe(
+      true
+    );
     expect(isDreamingAutomation(workflow(CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID))).toBe(true);
   });
 

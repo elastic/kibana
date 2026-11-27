@@ -55,9 +55,12 @@ export const useConversationStream = () => {
     ({
       message,
       conversationId: targetConversationId,
+      onRejected,
     }: {
       message: string;
       conversationId: string;
+      /** Handles a request the server rejected before running anything; see `SendMessageVars`. */
+      onRejected?: (error: unknown) => boolean;
     }) => {
       if (!agentId) {
         throw new Error('agentId is required to send a message');
@@ -72,6 +75,7 @@ export const useConversationStream = () => {
         conversationAttachments: conversation?.attachments,
         resetAttachments,
         browserApiTools,
+        ...(onRejected ? { onRejected } : {}),
       });
     },
     [

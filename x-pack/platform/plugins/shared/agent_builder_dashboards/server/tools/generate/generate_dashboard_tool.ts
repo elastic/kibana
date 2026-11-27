@@ -87,7 +87,8 @@ const getConfigTitle = (config: unknown): string | undefined =>
  * The full dashboard payload lives in the dashboard attachment (referenced by
  * id); the LLM only ever sees this slim summary, so it never has to re-emit the
  * heavy payload into a follow-up tool call. Panel titles let it tell panels apart when their ids
- * do not describe them, and grids let it report where the layout step put panels.
+ * do not describe them, and grids let it report where the layout step put panels. The options
+ * are the stored values under their input name, left out when unset.
  *
  * `authoringNotesByPanelId` holds the one-sentence note describing every chart
  * authored in this run, keyed by panel id. Panels that were not authored now
@@ -99,6 +100,7 @@ const summarizeDashboard = (
 ) => ({
   title: dashboardData.title,
   description: dashboardData.description,
+  options: dashboardData.options,
   panels: dashboardData.panels.map((widget) => {
     if (isSection(widget)) {
       return {
@@ -186,6 +188,7 @@ Changes are applied one by one: failed ones are listed in \`failures\` with the 
           removed,
           failures,
           panelAuthoringNotes,
+          panelHeightHints,
         } = await executeDashboardUpsert({
           dashboardData: latestVersion?.data,
           upsert,
@@ -212,6 +215,7 @@ Changes are applied one by one: failed ones are listed in \`failures\` with the 
             originalPanels: latestVersion?.data.panels ?? [],
             dashboardData: validatedDashboardData,
             instructions: layout,
+            heightHints: panelHeightHints,
             arrangeLayout: createLayoutArranger({ modelProvider }),
             logger,
           });

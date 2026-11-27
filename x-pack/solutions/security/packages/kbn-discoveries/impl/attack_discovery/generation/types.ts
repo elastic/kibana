@@ -57,6 +57,11 @@ export type GetStartServices = () => Promise<{
   pluginsStart: unknown;
 }>;
 
+/** The slice of the elastic_assistant start contract that generation consumes. */
+export interface ElasticAssistantStart {
+  ensureSpaceResources: (spaceId: string) => Promise<boolean>;
+}
+
 export interface ParsedApiConfig {
   action_type_id: string;
   connector_id: string;

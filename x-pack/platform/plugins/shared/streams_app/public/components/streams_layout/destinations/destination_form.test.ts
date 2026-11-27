@@ -579,6 +579,17 @@ describe('getVisibleDestinationFormErrors', () => {
       getVisibleDestinationFormErrors({ errors, touchedFields: {}, isSubmitted: true })
     ).toEqual(errors);
   });
+
+  it('keeps the other errors hidden while their fields are still being typed', () => {
+    expect(
+      getVisibleDestinationFormErrors({
+        errors,
+        touchedFields: {},
+        dirtyFields: { elasticsearch: { logsIndex: true }, s3: { region: true } },
+        isSubmitted: false,
+      })
+    ).toEqual({});
+  });
 });
 
 describe('validateRemoteEndpoint', () => {

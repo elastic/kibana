@@ -142,6 +142,20 @@ describe('shouldSkipAsNoOp', () => {
     ).toBe(false);
   });
 
+  it('does not skip when the summary changes at the same severity', () => {
+    const signal = makeSignal();
+    expect(
+      shouldSkipAsNoOp({
+        candidate: makeCandidate(
+          [signal],
+          { summary: 'P99 latency breached SLO and checkout requests now fail.' },
+          makeStored([signal])
+        ),
+        severity: 'high',
+      })
+    ).toBe(false);
+  });
+
   it('never skips when there is no stored version', () => {
     expect(shouldSkipAsNoOp({ candidate: makeCandidate([makeSignal()]), severity: 'high' })).toBe(
       false
@@ -154,14 +168,17 @@ describe('computeEventFacts', () => {
     signals,
     candidateOverrides,
     stored,
+    resolvedSeverity,
   }: {
     signals: SignalEntry[];
     candidateOverrides?: Partial<EventsWriteInput>;
     stored?: SignificantEvent;
+    resolvedSeverity?: Severity;
   }) => {
     return computeEventFacts({
       candidate: makeCandidate(signals, candidateOverrides, stored),
       timestamp: TS_NOW,
+      resolvedSeverity,
     });
   };
 
@@ -213,6 +230,38 @@ describe('computeEventFacts', () => {
 
     expect(result.severity).toBe('critical');
     expect(result.signals).toHaveLength(2);
+  });
+
+  describe('escalating a stored verdict', () => {
+    it('frees the title and hypothesis when an off-topic rule is confirmed', () => {
+      const stored = makeStored([makeSignal({ verdict: 'off_topic' })]);
+
+      const result = facts({ signals: [makeSignal({ verdict: 'confirms' })], stored });
+
+      expect(result.frozenNarrative).toBeUndefined();
+    });
+
+    it('keeps the narrative frozen when the stored signal already confirmed the rule', () => {
+      const stored = makeStored([makeSignal({ verdict: 'confirms' })]);
+
+      const result = facts({ signals: [makeSignal({ verdict: 'confirms' })], stored });
+
+      expect(result.frozenNarrative).toMatchObject({
+        title: 'Checkout latency',
+        narrativePreserved: true,
+      });
+    });
+
+    it('keeps the narrative frozen when a confirmed rule comes back as off-topic', () => {
+      const stored = makeStored([makeSignal({ verdict: 'confirms' })]);
+
+      const result = facts({ signals: [makeSignal({ verdict: 'off_topic' })], stored });
+
+      expect(result.frozenNarrative).toMatchObject({
+        title: 'Checkout latency',
+        narrativePreserved: true,
+      });
+    });
   });
 
   it('keeps an explicit severity on a signal-less write, and defaults it to low', () => {
@@ -272,7 +321,12 @@ describe('computeEventFacts', () => {
   it('refuses signals without a proposed severity rather than guessing one', () => {
     expect(() =>
       facts({ signals: [makeSignal()], candidateOverrides: { severity: undefined } })
-    ).toThrow('needs a proposed severity');
+    ).toThrow(
+      expect.objectContaining({
+        code: 'validation_error',
+        message: expect.stringContaining('needs a proposed severity'),
+      })
+    );
   });
 
   it('is unchanged however many topology entities the event lists', () => {
@@ -293,5 +347,19 @@ describe('computeEventFacts', () => {
     });
 
     expect(result.severity).toBe('medium');
+  });
+
+  it('keeps a resolved severity on a resolution, which would otherwise floor to low', () => {
+    const resolved: Severity = 'medium';
+    const signal = makeSignal();
+
+    expect(
+      facts({
+        signals: [signal],
+        candidateOverrides: { status: 'inactive' },
+        stored: makeStored([signal], { severity: resolved }),
+        resolvedSeverity: resolved,
+      }).severity
+    ).toBe(resolved);
   });
 });

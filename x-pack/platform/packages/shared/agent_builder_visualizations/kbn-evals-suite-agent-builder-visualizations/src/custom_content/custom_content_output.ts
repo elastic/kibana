@@ -21,6 +21,8 @@ import { extractVisualizations, type ExtractedVisualization } from '../extract_v
 export interface StoredCustomContent {
   /** The main query, the one the template reads as `rows`. Absent for a static panel. */
   esql?: string;
+  /** Every query of the panel, in the order the template reads them: `rows`, `queries[1]`, ... */
+  esqls?: string[];
   template?: string;
   height?: number;
 }
@@ -66,6 +68,17 @@ export interface CustomContentTaskOutput {
   prompts: unknown[];
 }
 
+/** Every query of a stored panel, the first one being the one the template reads as `rows`. */
+export const getQueries = (content: StoredCustomContent | undefined): string[] =>
+  content?.esqls ?? (content?.esql ? [content.esql] : []);
+
+const toQueries = (value: unknown): string[] => {
+  const queries = (Array.isArray(value) ? value : [value]).map((query) =>
+    typeof query === 'string' ? query : ''
+  );
+  return queries.some((query) => query.trim().length > 0) ? queries : [];
+};
+
 /** Reads the fields the evaluators score from one stored version of a visualization attachment. */
 export const toStoredCustomContent = (data: unknown): StoredCustomContent | undefined => {
   if (!isRecord(data) || data.renderer !== 'custom_content') {
@@ -73,11 +86,11 @@ export const toStoredCustomContent = (data: unknown): StoredCustomContent | unde
   }
   const { visualization } = data;
   const stored: StoredCustomContent = {};
-  // A list since a panel can have several queries, a string in attachments saved before that. As
-  // for a dashboard panel, the evaluators judge the first one, the one the template reads as `rows`.
-  const [esql] = Array.isArray(data.esql) ? data.esql : [data.esql];
-  if (typeof esql === 'string' && esql.trim().length > 0) {
-    stored.esql = esql;
+  // A list since a panel can have several queries, a string in attachments saved before that.
+  const esqls = toQueries(data.esql);
+  if (esqls.length > 0) {
+    [stored.esql] = esqls;
+    stored.esqls = esqls;
   }
   if (isRecord(visualization)) {
     if (typeof visualization.template === 'string') {
@@ -169,9 +182,10 @@ const toStoredFromPanel = (panel: DashboardPanel | undefined): StoredCustomConte
   }
   const config = isRecord(panel.config) ? panel.config : {};
   const stored: StoredCustomContent = {};
-  const [esql] = Array.isArray(config.esql_query) ? config.esql_query : [];
-  if (typeof esql === 'string' && esql.trim().length > 0) {
-    stored.esql = esql;
+  const esqls = toQueries(config.esql_query);
+  if (esqls.length > 0) {
+    [stored.esql] = esqls;
+    stored.esqls = esqls;
   }
   if (typeof config.template === 'string') {
     stored.template = config.template;
@@ -287,7 +301,7 @@ export const getCustomContentToolArgs = (
 
     if (toolId === CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID && Array.isArray(params.panels)) {
       return params.panels.flatMap((item: unknown) =>
-        isRecord(item) && isRecord(item.content) && item.content.renderer === 'custom_content'
+        isRecord(item) && isRecord(item.content) && item.content.type === 'custom_content'
           ? [
               `${toolId} panel ${String(item.id)}: dataQueries=${count(
                 item.content.dataQueries
@@ -330,7 +344,7 @@ export const toLoggedVisualizations = (
   stored
     ? [
         {
-          esql: stored.esql ?? '',
+          esql: getQueries(stored).join('\n\n'),
           renderer: 'custom_content',
           attachmentId,
           visualization: {

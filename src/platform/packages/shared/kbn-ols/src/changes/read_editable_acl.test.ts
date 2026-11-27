@@ -14,7 +14,7 @@ import { readEditableAcl } from './read_editable_acl';
 const acl = (overrides: Partial<StoredAcl> = {}): StoredAcl => ({
   version: [1],
   owner: { type: ['user'], id: ['u_owner'] },
-  general_access: ['none'],
+  general: { access: ['none'] },
   entries: [],
   ...overrides,
 });
@@ -32,7 +32,7 @@ describe('readEditableAcl', () => {
       )
     ).toEqual({
       owner: { type: 'user', id: 'u_owner' },
-      general_access: 'none',
+      general: { access: 'none' },
       entries: [{ type: 'user', id: 'u_grantee', access: 'use', added_at: '2026-10-21' }],
     });
   });
@@ -60,19 +60,19 @@ describe('readEditableAcl', () => {
       )
     ).toEqual({
       owner: { type: 'user', id: 'u_owner' },
-      general_access: 'none',
+      general: { access: 'none' },
       entries: [{ type: 'user', id: 'u_grantee', access: 'use' }],
     });
   });
 
   it('uses the lowest allowed general access, or none', () => {
-    expect(readEditableAcl(FIXTURE_POLICY, acl({ general_access: ['edit', 'use'] }))).toMatchObject(
-      {
-        general_access: 'use',
-      }
-    );
-    expect(readEditableAcl(FIXTURE_POLICY, acl({ general_access: ['view'] }))).toMatchObject({
-      general_access: 'none',
+    expect(
+      readEditableAcl(FIXTURE_POLICY, acl({ general: { access: ['edit', 'use'] } }))
+    ).toMatchObject({
+      general: { access: 'use' },
+    });
+    expect(readEditableAcl(FIXTURE_POLICY, acl({ general: { access: ['view'] } }))).toMatchObject({
+      general: { access: 'none' },
     });
   });
 

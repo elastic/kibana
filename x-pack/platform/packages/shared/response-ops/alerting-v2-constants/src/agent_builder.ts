@@ -18,7 +18,6 @@ export const ALERTING_TOOL_IDS = {
   manageRule: alertingTool('manage_rule'),
   manageActionPolicy: alertingTool('manage_action_policy'),
   linkRuleAndActionPolicy: alertingTool('link_rule_and_action_policy'),
-  findActionPolicies: alertingTool('find_action_policies'),
   attachRule: alertingTool('attach_rule'),
   attachActionPolicy: alertingTool('attach_action_policy'),
 } as const;
@@ -36,6 +35,14 @@ export const ALERTING_API_IDS = {
 
 export const RULE_AUTHORING_SKILL_ID = 'rule-authoring';
 export const ACTION_POLICY_AUTHORING_SKILL_ID = 'action-policy-authoring';
+export const UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID = 'universal-alerting-failure-diagnosis';
+
+/**
+ * Markdown skill badge that invokes the `universal-alerting-failure-diagnosis` skill. The Agent Builder chat
+ * renders it as a skill chip and the model treats it as an explicit request to load the skill.
+ */
+export const getUniversalAlertingFailureDiagnosisSkillBadge = (): string =>
+  `[/${UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID}](skill://${UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID})`;
 
 /**
  * Initial message sent to the Agent Builder when the user clicks "Create with

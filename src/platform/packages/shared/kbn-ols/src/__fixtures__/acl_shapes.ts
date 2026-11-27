@@ -8,7 +8,7 @@
  */
 
 import type { AclState } from '../acl';
-import type { EntryLevel } from '../levels';
+import type { EntryAccess } from '../levels';
 import type { AccessPolicy } from '../policy';
 import type { Principal } from '../principals';
 
@@ -17,14 +17,14 @@ import type { Principal } from '../principals';
  * and entries that grant `use`.
  */
 export const FIXTURE_POLICY: AccessPolicy = {
-  generalAccessLevels: ['none', 'use', 'edit'],
-  defaultGeneralAccessLevel: 'edit',
-  entryLevels: ['use'],
+  generalAccess: ['none', 'use', 'edit'],
+  defaultGeneralAccess: 'edit',
+  entryAccess: ['use'],
   operations: {
-    view: { level: 'view', privileges: {} },
-    use: { level: 'use', privileges: {} },
-    edit: { level: 'edit', privileges: {} },
-    delete: { level: 'edit', privileges: {} },
+    view: { access: 'view', privileges: {} },
+    use: { access: 'use', privileges: {} },
+    edit: { access: 'edit', privileges: {} },
+    delete: { access: 'edit', privileges: {} },
   },
 };
 
@@ -33,9 +33,9 @@ export const FIXTURE_POLICY: AccessPolicy = {
  * be `view` but not `use`, and entries that grant `view`, `use`, or `edit`.
  */
 export const FIXTURE_POLICY_ALL_LEVELS: AccessPolicy = {
-  generalAccessLevels: ['none', 'view', 'edit'],
-  defaultGeneralAccessLevel: 'none',
-  entryLevels: ['view', 'use', 'edit'],
+  generalAccess: ['none', 'view', 'edit'],
+  defaultGeneralAccess: 'none',
+  entryAccess: ['view', 'use', 'edit'],
   operations: FIXTURE_POLICY.operations,
 };
 
@@ -44,9 +44,9 @@ export const FIXTURE_POLICY_ALL_LEVELS: AccessPolicy = {
  * be `view`, and entries that grant `use` or `manage`.
  */
 export const FIXTURE_POLICY_MANAGE_ENTRIES: AccessPolicy = {
-  generalAccessLevels: ['none', 'view'],
-  defaultGeneralAccessLevel: 'none',
-  entryLevels: ['use', 'manage'],
+  generalAccess: ['none', 'view'],
+  defaultGeneralAccess: 'none',
+  entryAccess: ['use', 'manage'],
   operations: FIXTURE_POLICY.operations,
 };
 
@@ -88,12 +88,12 @@ export interface AclShapeFixture {
    * them, and the owner of a valid ACL acts at `manage`. A probe that can't even view the object
    * is left out.
    */
-  access: Partial<Record<FixtureProbe, EntryLevel>>;
+  access: Partial<Record<FixtureProbe, EntryAccess>>;
 }
 
 const VERSION = { version: 1 };
 const OWNER = { owner: { type: 'user', id: 'u_owner' } };
-const PRIVATE = { ...VERSION, ...OWNER, general_access: 'none' };
+const PRIVATE = { ...VERSION, ...OWNER, general: { access: 'none' } };
 const GRANTEE_USE = {
   type: 'user',
   id: 'u_grantee',
@@ -104,7 +104,7 @@ const GRANTEE_USE = {
 /**
  * Every probe at the same level.
  */
-const allProbesAt = (level: EntryLevel): Record<FixtureProbe, EntryLevel> => ({
+const allProbesAt = (level: EntryAccess): Record<FixtureProbe, EntryAccess> => ({
   owner: level,
   grantee: level,
   stranger: level,
@@ -176,14 +176,14 @@ export const ACL_SHAPE_FIXTURES: AclShapeFixture[] = [
   },
   {
     name: 'general access use',
-    source: { acl: { ...VERSION, ...OWNER, general_access: 'use' } },
+    source: { acl: { ...VERSION, ...OWNER, general: { access: 'use' } } },
     indexable: true,
     state: 'valid',
     access: { ...allProbesAt('use'), owner: 'manage' },
   },
   {
     name: 'general access edit with entries',
-    source: { acl: { ...VERSION, ...OWNER, general_access: 'edit', entries: [GRANTEE_USE] } },
+    source: { acl: { ...VERSION, ...OWNER, general: { access: 'edit' }, entries: [GRANTEE_USE] } },
     indexable: true,
     state: 'valid',
     access: { ...allProbesAt('edit'), owner: 'manage' },
@@ -197,14 +197,14 @@ export const ACL_SHAPE_FIXTURES: AclShapeFixture[] = [
   },
   {
     name: 'no owner is damaged',
-    source: { acl: { ...VERSION, general_access: 'edit' } },
+    source: { acl: { ...VERSION, general: { access: 'edit' } } },
     indexable: true,
     state: 'invalid',
     access: {},
   },
   {
     name: 'owner without an ID is damaged',
-    source: { acl: { ...VERSION, owner: { type: 'user' }, general_access: 'edit' } },
+    source: { acl: { ...VERSION, owner: { type: 'user' }, general: { access: 'edit' } } },
     indexable: true,
     state: 'invalid',
     access: {},
@@ -218,70 +218,98 @@ export const ACL_SHAPE_FIXTURES: AclShapeFixture[] = [
   },
   {
     name: 'an empty general access string is damaged',
-    source: { acl: { general_access: '' } },
+    source: { acl: { general: { access: '' } } },
     indexable: true,
     state: 'invalid',
     access: {},
   },
   {
     name: 'several general access values use the lowest',
-    source: { acl: { ...VERSION, ...OWNER, general_access: ['edit', 'none', 'use'] } },
+    source: { acl: { ...VERSION, ...OWNER, general: { access: ['edit', 'none', 'use'] } } },
     indexable: true,
     state: 'valid',
     access: { owner: 'manage' },
   },
   {
     name: 'unknown general access is damaged',
-    source: { acl: { ...VERSION, ...OWNER, general_access: 'everyone' } },
+    source: { acl: { ...VERSION, ...OWNER, general: { access: 'everyone' } } },
     indexable: true,
     state: 'invalid',
     access: {},
   },
   {
     name: 'general access manage is damaged',
-    source: { acl: { ...VERSION, ...OWNER, general_access: 'manage' } },
+    source: { acl: { ...VERSION, ...OWNER, general: { access: 'manage' } } },
     indexable: true,
     state: 'invalid',
     access: {},
   },
   {
     name: 'general access the type does not allow means none',
-    source: { acl: { ...VERSION, ...OWNER, general_access: 'view' } },
+    source: { acl: { ...VERSION, ...OWNER, general: { access: 'view' } } },
     indexable: true,
     state: 'valid',
     access: { owner: 'manage' },
   },
   {
     name: 'general access the type does not allow is ignored next to an allowed one',
-    source: { acl: { ...VERSION, ...OWNER, general_access: ['view', 'edit'] } },
+    source: { acl: { ...VERSION, ...OWNER, general: { access: ['view', 'edit'] } } },
     indexable: true,
     state: 'valid',
     access: { ...allProbesAt('edit'), owner: 'manage' },
   },
   {
     name: 'unknown values are ignored when an allowed one exists',
-    source: { acl: { ...VERSION, ...OWNER, general_access: ['use', 'everyone'] } },
+    source: { acl: { ...VERSION, ...OWNER, general: { access: ['use', 'everyone'] } } },
     indexable: true,
     state: 'valid',
     access: { ...allProbesAt('use'), owner: 'manage' },
   },
   {
+    name: 'general access in an array of objects uses the lowest',
+    source: { acl: { ...VERSION, ...OWNER, general: [{ access: 'edit' }, { access: 'none' }] } },
+    indexable: true,
+    state: 'valid',
+    access: { owner: 'manage' },
+  },
+  {
+    name: 'dotted general access inside acl',
+    source: { acl: { ...VERSION, ...OWNER, 'general.access': 'use' } },
+    indexable: true,
+    state: 'valid',
+    access: { ...allProbesAt('use'), owner: 'manage' },
+  },
+  {
+    name: 'general access as a plain value is rejected by the mapping',
+    source: { acl: { ...VERSION, ...OWNER, general: 'edit' } },
+    indexable: false,
+    state: 'invalid',
+    access: {},
+  },
+  {
+    name: 'general access outside the general object is ignored',
+    source: { acl: { ...VERSION, ...OWNER, general_access: 'edit' } },
+    indexable: true,
+    state: 'invalid',
+    access: {},
+  },
+  {
     name: 'unsupported version',
-    source: { acl: { ...PRIVATE, version: 2, general_access: 'edit' } },
+    source: { acl: { ...PRIVATE, version: 2, general: { access: 'edit' } } },
     indexable: true,
     state: 'invalid',
     access: {},
   },
   {
     name: 'missing version',
-    source: { acl: { ...OWNER, general_access: 'edit' } },
+    source: { acl: { ...OWNER, general: { access: 'edit' } } },
     indexable: true,
     state: 'invalid',
     access: {},
   },
   {
     name: 'mixed versions',
-    source: { acl: { ...PRIVATE, version: [1, 2], general_access: 'edit' } },
+    source: { acl: { ...PRIVATE, version: [1, 2], general: { access: 'edit' } } },
     indexable: true,
     state: 'invalid',
     access: {},
@@ -306,7 +334,7 @@ export const ACL_SHAPE_FIXTURES: AclShapeFixture[] = [
       acl: {
         ...VERSION,
         owner: { type: ['user', 'service_account'], id: 'u_owner' },
-        general_access: 'edit',
+        general: { access: 'edit' },
         entries: [GRANTEE_USE],
       },
     },
@@ -381,7 +409,7 @@ export const ACL_SHAPE_FIXTURES: AclShapeFixture[] = [
       acl: {
         ...VERSION,
         owner: { type: 'user', id: 'u_grantee' },
-        general_access: 'none',
+        general: { access: 'none' },
         entries: [{ ...GRANTEE_USE, type: 'service_account', id: 'u_owner' }],
       },
     },
@@ -392,7 +420,7 @@ export const ACL_SHAPE_FIXTURES: AclShapeFixture[] = [
   {
     name: 'dotted root keys are indexed',
     source: {
-      acl: { ...VERSION, general_access: 'none' },
+      acl: { ...VERSION, general: { access: 'none' } },
       'acl.owner.type': 'user',
       'acl.owner.id': 'u_owner',
     },
@@ -403,7 +431,12 @@ export const ACL_SHAPE_FIXTURES: AclShapeFixture[] = [
   {
     name: 'dotted key inside acl',
     source: {
-      acl: { ...VERSION, general_access: 'none', 'owner.id': 'u_owner', owner: { type: 'user' } },
+      acl: {
+        ...VERSION,
+        general: { access: 'none' },
+        'owner.id': 'u_owner',
+        owner: { type: 'user' },
+      },
     },
     indexable: true,
     state: 'valid',
@@ -435,14 +468,14 @@ export const ACL_SHAPE_FIXTURES: AclShapeFixture[] = [
   },
   {
     name: 'dotted root value merges with a lower nested value',
-    source: { acl: { ...PRIVATE }, 'acl.general_access': 'edit' },
+    source: { acl: { ...PRIVATE }, 'acl.general.access': 'edit' },
     indexable: true,
     state: 'valid',
     access: { owner: 'manage' },
   },
   {
     name: 'dotted root value merges with a higher nested value',
-    source: { acl: { ...PRIVATE, general_access: 'edit' }, 'acl.general_access': 'none' },
+    source: { acl: { ...PRIVATE, general: { access: 'edit' } }, 'acl.general.access': 'none' },
     indexable: true,
     state: 'valid',
     access: { owner: 'manage' },
@@ -452,7 +485,7 @@ export const ACL_SHAPE_FIXTURES: AclShapeFixture[] = [
     source: {
       acl: [
         { ...VERSION, ...OWNER },
-        { general_access: 'none', entries: [GRANTEE_USE] },
+        { general: { access: 'none' }, entries: [GRANTEE_USE] },
       ],
     },
     indexable: true,
@@ -461,14 +494,14 @@ export const ACL_SHAPE_FIXTURES: AclShapeFixture[] = [
   },
   {
     name: 'numeric owner ID is read as text',
-    source: { acl: { ...VERSION, owner: { type: 'user', id: 1 }, general_access: 'none' } },
+    source: { acl: { ...VERSION, owner: { type: 'user', id: 1 }, general: { access: 'none' } } },
     indexable: true,
     state: 'valid',
     access: { numericIdUser: 'manage' },
   },
   {
     name: 'boolean general access is damaged',
-    source: { acl: { ...VERSION, ...OWNER, general_access: true } },
+    source: { acl: { ...VERSION, ...OWNER, general: { access: true } } },
     indexable: true,
     state: 'invalid',
     access: {},
@@ -483,7 +516,7 @@ export const ACL_SHAPE_FIXTURES: AclShapeFixture[] = [
   },
   {
     name: 'general access view with a use grant',
-    source: { acl: { ...VERSION, ...OWNER, general_access: 'view', entries: [GRANTEE_USE] } },
+    source: { acl: { ...VERSION, ...OWNER, general: { access: 'view' }, entries: [GRANTEE_USE] } },
     indexable: true,
     policy: FIXTURE_POLICY_ALL_LEVELS,
     state: 'valid',
@@ -535,7 +568,7 @@ export const ACL_SHAPE_FIXTURES: AclShapeFixture[] = [
       acl: {
         ...VERSION,
         ...OWNER,
-        general_access: 'view',
+        general: { access: 'view' },
         entries: [{ ...GRANTEE_USE, id: 'u_owner', access: 'manage' }],
       },
     },

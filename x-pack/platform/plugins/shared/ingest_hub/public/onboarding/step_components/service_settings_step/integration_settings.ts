@@ -15,6 +15,7 @@ import {
 import { validateAgentConditionExpression } from '@kbn/elastic-agent-condition-language';
 
 import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../aws_service_matrix';
+import { serializeCustomFields, type CustomField } from '../../common/policy_settings';
 
 /** Fleet's package policy name limit. */
 export const MAX_POLICY_NAME_LENGTH = 255;
@@ -151,4 +152,94 @@ export const getProxyUrlError = (proxyUrl: string): string | undefined => {
       defaultMessage: 'Enter a valid proxy URL starting with http:// or https://.',
     });
   }
+};
+
+/**
+ * The limits of the agentless policy API's `global_data_tags`, which onboarding sends them to. A
+ * package policy sets no length for a value and only warns on a name past 255 characters, so these
+ * are a defensive bound rather than a Fleet-wide rule.
+ */
+export const MAX_CUSTOM_FIELDS = 100;
+export const MAX_CUSTOM_FIELD_LENGTH = 1024;
+
+/** What the onboarding record keeps for one setting, which the serialized fields must fit. */
+const MAX_CUSTOM_FIELDS_TEXT_LENGTH = PACKAGE_POLICY_CONDITION_MAX_LENGTH;
+
+export interface CustomFieldsErrors {
+  /** The error of each row, in the order of the fields. A row left entirely blank has none. */
+  rows: Array<{ name?: string; value?: string }>;
+  /** An error of the list as a whole. */
+  list?: string;
+}
+
+const getCustomFieldTooLongError = (): string =>
+  i18n.translate('xpack.ingestHub.integrationSettings.customFields.tooLongError', {
+    defaultMessage: 'Must be {max} characters or less.',
+    values: { max: MAX_CUSTOM_FIELD_LENGTH },
+  });
+
+const getCustomFieldNameError = (name: string, isDuplicate: boolean): string | undefined => {
+  if (!name) {
+    return i18n.translate('xpack.ingestHub.integrationSettings.customFields.nameRequiredError', {
+      defaultMessage: 'Name cannot be empty.',
+    });
+  }
+  if (/\s/.test(name)) {
+    return i18n.translate('xpack.ingestHub.integrationSettings.customFields.nameSpacesError', {
+      defaultMessage: 'Name cannot contain spaces.',
+    });
+  }
+  if (name.length > MAX_CUSTOM_FIELD_LENGTH) return getCustomFieldTooLongError();
+  if (isDuplicate) {
+    return i18n.translate('xpack.ingestHub.integrationSettings.customFields.nameUniqueError', {
+      defaultMessage: 'Name must be unique.',
+    });
+  }
+};
+
+const getCustomFieldValueError = (value: string): string | undefined => {
+  if (!value) {
+    return i18n.translate('xpack.ingestHub.integrationSettings.customFields.valueRequiredError', {
+      defaultMessage: 'Value cannot be empty.',
+    });
+  }
+  if (value.length > MAX_CUSTOM_FIELD_LENGTH) return getCustomFieldTooLongError();
+};
+
+const getCustomFieldsListError = (filled: CustomField[]): string | undefined => {
+  if (filled.length > MAX_CUSTOM_FIELDS) {
+    return i18n.translate('xpack.ingestHub.integrationSettings.customFields.tooManyError', {
+      defaultMessage: 'Add at most {max} custom fields.',
+      values: { max: MAX_CUSTOM_FIELDS },
+    });
+  }
+  if (serializeCustomFields(filled).length > MAX_CUSTOM_FIELDS_TEXT_LENGTH) {
+    return i18n.translate('xpack.ingestHub.integrationSettings.customFields.tooLargeError', {
+      defaultMessage: 'The custom fields are too long in total. Remove some or shorten them.',
+    });
+  }
+};
+
+/**
+ * Custom fields are optional. As in Fleet's Add integration, a name is required, cannot contain
+ * spaces and must be unique, and a value is required. A row left entirely blank is not a field,
+ * it is dropped when the settings are saved.
+ */
+export const getCustomFieldsErrors = (fields: CustomField[]): CustomFieldsErrors | undefined => {
+  const trimmed = fields.map(({ name, value }) => ({ name: name.trim(), value: value.trim() }));
+  const filled = trimmed.filter(({ name, value }) => name !== '' || value !== '');
+  const nameCounts = new Map<string, number>();
+  filled.forEach(({ name }) => nameCounts.set(name, (nameCounts.get(name) ?? 0) + 1));
+
+  const rows = trimmed.map(({ name, value }) =>
+    name === '' && value === ''
+      ? {}
+      : {
+          name: getCustomFieldNameError(name, (nameCounts.get(name) ?? 0) > 1),
+          value: getCustomFieldValueError(value),
+        }
+  );
+  const list = getCustomFieldsListError(filled);
+
+  return list || rows.some(({ name, value }) => name || value) ? { rows, list } : undefined;
 };

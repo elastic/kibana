@@ -7,10 +7,8 @@
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import type { AvailabilityConfig } from '@kbn/agent-builder-server/availability';
-import { internalTools } from '@kbn/agent-builder-common/tools';
 import {
   ACTION_POLICY_AUTHORING_SKILL_ID,
-  ALERTING_API_IDS,
   ALERTING_TOOL_IDS,
   ALERTING_V2_ENABLED_SETTING_ID,
   RULE_AUTHORING_SKILL_ID,
@@ -21,6 +19,7 @@ import type { LinkRuleAndActionPolicyToolDeps } from '../tools/link_rule_and_act
 import { linkRuleAndActionPolicyTool } from '../tools/link_rule_and_action_policy';
 import type { ManageRuleToolDeps } from '../tools/manage_rule';
 import { manageRuleTool } from '../tools/manage_rule';
+import { generateRuleDiscoveryGuidance } from './rule_discovery_guidance';
 import {
   generateRuleOperationsDoc,
   generateRuleKindDoc,
@@ -94,14 +93,7 @@ Do **not** use this skill for:
 ## Rule Discovery
 
 When a user asks about existing rules, read them with the Kibana API tools:
-- To list or search, call ${internalTools.describeApi} for \`${
-      ALERTING_API_IDS.listRules
-    }\` to confirm its params, then call ${internalTools.executeApi} with \`target: "kibana"\`.
-- Use \`search\` with keywords from the user's request. For a broad listing, omit \`search\`. Page with \`page\` and \`per_page\`.
-- To read a single rule, call ${internalTools.executeApi} for \`${
-      ALERTING_API_IDS.getRule
-    }\` with the rule \`id\`.
-- Summarize matches in plain language: name, kind, schedule, and query snippet.
+${generateRuleDiscoveryGuidance()}
 - Do **not** attach rules by default when only listing or comparing.
 - To inspect or edit a saved rule, attach it with ${
       ALERTING_TOOL_IDS.attachRule

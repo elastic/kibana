@@ -49,7 +49,7 @@ x-codeSamples:
   - lang: curl
     source: |
       curl \
-        -X DELETE "https://${KIBANA_URL}/api/context_engine/ai_index/customer_support?delete_knowledge_indicators=true" \
+        -X DELETE "${KIBANA_URL}/api/context_engine/ai_index/customer_support?delete_knowledge_indicators=true" \
         -H "Authorization: ApiKey ${API_KEY}" \
         -H "kbn-xsrf: true"
   - lang: Console

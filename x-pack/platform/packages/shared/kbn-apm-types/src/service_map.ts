@@ -329,7 +329,46 @@ export interface GroupedNodeData extends BaseNodeData {
   count: number;
 }
 
-export type ServiceMapNodeData = ServiceNodeData | DependencyNodeData | GroupedNodeData;
+/**
+ * A closed service group (2+ services drawn as one node). Distinct from resource
+ * `GroupedNodeData` (`isGrouped`).
+ */
+export interface ServiceGroupNodeData extends BaseNodeData {
+  isService: false;
+  isServiceGroup: true;
+  groupKind: ServiceMapGroup['kind'];
+  memberServiceIds: string[];
+  memberCount: number;
+  /** True when a selected / highlighted service is a member of this closed group */
+  contextHighlight?: boolean;
+  serviceAnomalyStats?: ServiceAnomalyStats;
+  alertsCount?: number;
+  alertsByStatus?: Partial<Record<AlertStatus, number>>;
+  sloStatus?: SloStatus | 'noSLOs';
+  sloCount?: number;
+  /** Rolled up from members when service map grouping / numbers-on-nodes are on */
+  stats?: ServiceMapServiceStats;
+}
+
+/**
+ * An open service group: the box drawn around its member services. The members are ordinary
+ * service nodes whose `parentId` is this node's id. Distinct from the closed `ServiceGroupNodeData`
+ * so filters and badges never read the box as a service.
+ */
+export interface ServiceGroupBoxNodeData extends BaseNodeData {
+  isService: false;
+  isServiceGroupBox: true;
+  groupKind: ServiceMapGroup['kind'];
+  memberServiceIds: string[];
+  memberCount: number;
+}
+
+export type ServiceMapNodeData =
+  | ServiceNodeData
+  | DependencyNodeData
+  | GroupedNodeData
+  | ServiceGroupNodeData
+  | ServiceGroupBoxNodeData;
 
 export type ServiceMapNode = Node<ServiceMapNodeData>;
 
@@ -342,6 +381,8 @@ export interface EdgeMarker extends ReactFlowEdgeMarker {
 export interface ServiceMapEdgeData extends Record<string, unknown> {
   isBidirectional: boolean;
   isGrouped?: boolean;
+  /** Both ends are services of the same open group, so the call stays inside its box. */
+  isIntraGroup?: boolean;
   sourceData?: ConnectionNode;
   targetData?: ConnectionNode;
   sourceLabel?: string;
@@ -372,4 +413,6 @@ export interface ReactFlowServiceMapResponse {
   edges: ServiceMapEdge[];
   nodesCount: number;
   tracesCount: number;
+  /** Passthrough from the raw map response when grouping produced a result */
+  serviceGrouping?: ServiceMapGrouping;
 }

@@ -60,7 +60,8 @@ export const useInvestigationAssignees = (
 
   return useCallback(
     (investigation: InvestigationSummary): React.ReactNode => (
-      <AssignToUsers {...getPickerProps(investigation)} />
+      // Match the card's chat / overflow icons (`color="text"`), not the default primary `+`.
+      <AssignToUsers {...getPickerProps(investigation)} buttonIconColor="text" />
     ),
     [getPickerProps]
   );

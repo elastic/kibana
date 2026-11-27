@@ -16,7 +16,8 @@ project:
   channel: ''
   owner: '@elastic/kibana-discover'
   sourceRoot: src/platform/packages/shared/kbn-discover-data-grid
-dependsOn: []
+dependsOn:
+  - '@kbn/i18n'
 tags:
   - shared-browser
   - package

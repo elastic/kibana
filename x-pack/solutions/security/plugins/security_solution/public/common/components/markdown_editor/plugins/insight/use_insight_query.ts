@@ -8,7 +8,7 @@
 import { useMemo, useState } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import type { DataProvider } from '@kbn/timelines-plugin/common';
+import type { DataProvider } from '@kbn/securitysolution-timeline-common';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { PageScope } from '../../../../../data_view_manager/constants';
 import { TimelineId } from '../../../../../../common/types/timeline';

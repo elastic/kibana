@@ -39,5 +39,4 @@ export const buildDataStreamName = ({
 export const PACKAGES = {
   apache: { name: 'apache', version: '1.14.0' },
   nginx: { name: 'nginx', version: '1.23.0' },
-  fleetServer: { name: 'fleet_server', version: '1.6.0' },
 } as const;

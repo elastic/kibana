@@ -24,7 +24,7 @@ import { registerSiemWorkflowMigrationsUpdateWorkflowsRoute } from './workflows/
 /**
  * Workflow migration routes follow the SIEM rule migration API.
  * Vendor routes parse that vendor's export and store the original workflow.
- * Start, stop, and stats stay placeholders.
+ * Start, stop, and stats run the shared migration task lifecycle.
  */
 export const registerSiemWorkflowMigrationsRoutes = (
   router: SecuritySolutionPluginRouter,

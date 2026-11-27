@@ -311,6 +311,7 @@ export function useChangePointResults(
           );
         }
       } catch (e) {
+        setProgress(null);
         if (usageCollection?.reportUiCounter && embeddingOrigin) {
           usageCollection.reportUiCounter(
             embeddingOrigin,

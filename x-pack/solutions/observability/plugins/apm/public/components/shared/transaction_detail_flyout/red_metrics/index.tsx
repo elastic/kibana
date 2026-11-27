@@ -101,20 +101,26 @@ function FlyoutTimeseriesChartPanel({
           padding: ${euiTheme.size.s} ${euiTheme.size.m} 0;
         `}
       >
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        {/* Title and action share one row, like the service flyout charts. */}
+        <EuiFlexGroup
+          gutterSize="s"
+          alignItems="center"
+          justifyContent="spaceBetween"
+          responsive={false}
+          data-test-subj={`${id}-header`}
+        >
           <EuiFlexItem grow={false}>
-            <EuiTitle size="xxs">
-              <h4>{title}</h4>
-            </EuiTitle>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xxs">
+                  <h4>{title}</h4>
+                </EuiTitle>
+              </EuiFlexItem>
+              {titleTip ? <EuiFlexItem grow={false}>{titleTip}</EuiFlexItem> : null}
+            </EuiFlexGroup>
           </EuiFlexItem>
-          {titleTip ? <EuiFlexItem grow={false}>{titleTip}</EuiFlexItem> : null}
+          {titleAction ? <EuiFlexItem grow={false}>{titleAction}</EuiFlexItem> : null}
         </EuiFlexGroup>
-        {titleAction ? (
-          <>
-            <EuiSpacer size="xs" />
-            {titleAction}
-          </>
-        ) : null}
       </div>
       <div
         css={css`
@@ -187,6 +193,7 @@ function TransactionDetailFlyoutApiRedMetrics({
           <LatencyAggregationTypeSelect
             latencyAggregationType={latencyAggregationType}
             onChange={setLatencyAggregationType}
+            compact
           />
         }
       >
@@ -286,6 +293,7 @@ function TransactionDetailFlyoutEsqlRedMetrics({
           <LatencyAggregationTypeSelect
             latencyAggregationType={latencyAggregationType}
             onChange={setLatencyAggregationType}
+            compact
           />
         ),
         projectRouting,

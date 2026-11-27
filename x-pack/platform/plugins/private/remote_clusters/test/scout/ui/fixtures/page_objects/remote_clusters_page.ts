@@ -28,6 +28,7 @@ export class RemoteClustersPage {
   readonly formNameInput: Locator;
   readonly formRemoteAddressInput: Locator;
   readonly formNextButton: Locator;
+  readonly formGlobalError: Locator;
   readonly reviewNextButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
@@ -50,6 +51,7 @@ export class RemoteClustersPage {
     this.formNameInput = page.testSubj.locator('remoteClusterFormNameInput');
     this.formRemoteAddressInput = page.testSubj.locator('remoteClusterFormRemoteAddressInput');
     this.formNextButton = page.testSubj.locator('remoteClusterFormNextButton');
+    this.formGlobalError = page.testSubj.locator('remoteClusterFormGlobalError');
     this.reviewNextButton = page.testSubj.locator('remoteClusterReviewtNextButton');
   }
 

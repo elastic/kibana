@@ -7,6 +7,7 @@ on:
       - '.github/scripts/label_flaky_fix_pr_test.ts'
       - '.github/scripts/team_labels.ts'
       - '.github/scripts/prefetch_pr_context.js'
+      - '.github/scripts/prefetch_pr_context.test.js'
       - '.github/scripts/flaky_fix_retrospective_context.js'
       - '.github/scripts/flaky_fix_retrospective_context.test.js'
       - '.github/scripts/flaky_fix_findings.js'
@@ -41,6 +42,9 @@ jobs:
 
       - name: Run labeling tests
         run: node --test .github/scripts/label_flaky_fix_pr_test.ts
+
+      - name: Run prefetch PR context tests
+        run: node --test .github/scripts/prefetch_pr_context.test.js
 
       - name: Run retrospective context tests
         run: node --test .github/scripts/flaky_fix_retrospective_context.test.js

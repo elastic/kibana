@@ -16,10 +16,15 @@ import { registerSecurityUsageCollector } from './security_usage_collector';
 import type { SecurityLicenseFeatures } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { ConfigSchema, createConfig } from '../config';
+import type { ServiceAccountsServiceStart } from '../service_accounts';
+import { serviceAccountsServiceMock } from '../service_accounts/service_accounts_service.mock';
 
 describe('Security UsageCollector', () => {
-  const createSecurityConfig = (config: TypeOf<typeof ConfigSchema>) => {
-    return createConfig(config, loggingSystemMock.createLogger(), { isTLSEnabled: true });
+  const createSecurityConfig = (
+    config: TypeOf<typeof ConfigSchema>,
+    { isTLSEnabled = true }: { isTLSEnabled?: boolean } = {}
+  ) => {
+    return createConfig(config, loggingSystemMock.createLogger(), { isTLSEnabled });
   };
 
   const createSecurityLicense = ({
@@ -41,6 +46,15 @@ describe('Security UsageCollector', () => {
   };
 
   const collectorFetchContext = createCollectorFetchContextMock();
+  const logger = loggingSystemMock.createLogger();
+  const getServiceAccounts = jest.fn<ServiceAccountsServiceStart | null | undefined, []>();
+  const deps = { logger, getServiceAccounts };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    getServiceAccounts.mockReturnValue(null);
+  });
+
   const DEFAULT_USAGE = {
     auditLoggingEnabled: false,
     accessAgreementEnabled: false,
@@ -53,7 +67,11 @@ describe('Security UsageCollector', () => {
     sessionLifespanInMinutes: 43200,
     sessionCleanupInMinutes: 60,
     sessionConcurrentSessionsMaxSessions: 0,
+    sessionCookieSecure: true,
+    sessionCookieSameSite: 'not_configured',
+    sessionCookieNameCustomized: false,
     anonymousCredentialType: undefined,
+    serviceAccounts: { enabled: false },
   };
 
   describe('initialization', () => {
@@ -61,7 +79,7 @@ describe('Security UsageCollector', () => {
       const config = createSecurityConfig(ConfigSchema.validate({}));
       const usageCollection = undefined;
       const license = createSecurityLicense({ allowRbac: false, isLicenseAvailable: false });
-      registerSecurityUsageCollector({ usageCollection, config, license });
+      registerSecurityUsageCollector({ usageCollection, config, license, ...deps });
     });
 
     it('registers itself and waits for the license to become available before reporting itself as ready', async () => {
@@ -69,12 +87,27 @@ describe('Security UsageCollector', () => {
       const usageCollection = usageCollectionPluginMock.createSetupContract();
       const license = createSecurityLicense({ allowRbac: false, isLicenseAvailable: false });
 
-      registerSecurityUsageCollector({ usageCollection, config, license });
+      registerSecurityUsageCollector({ usageCollection, config, license, ...deps });
 
       expect(usageCollection.getCollectorByType('security')?.isReady()).toBe(false);
 
       license.isLicenseAvailable.mockReturnValue(true);
       license.getFeatures.mockReturnValue({ allowRbac: true } as SecurityLicenseFeatures);
+
+      expect(usageCollection.getCollectorByType('security')?.isReady()).toBe(true);
+    });
+
+    it('is not ready until the plugin has started', () => {
+      const config = createSecurityConfig(ConfigSchema.validate({}));
+      const usageCollection = usageCollectionPluginMock.createSetupContract();
+      const license = createSecurityLicense({ isLicenseAvailable: true });
+      getServiceAccounts.mockReturnValue(undefined);
+
+      registerSecurityUsageCollector({ usageCollection, config, license, ...deps });
+
+      expect(usageCollection.getCollectorByType('security')?.isReady()).toBe(false);
+
+      getServiceAccounts.mockReturnValue(null);
 
       expect(usageCollection.getCollectorByType('security')?.isReady()).toBe(true);
     });
@@ -84,7 +117,7 @@ describe('Security UsageCollector', () => {
     const config = createSecurityConfig(ConfigSchema.validate({}));
     const usageCollection = usageCollectionPluginMock.createSetupContract();
     const license = createSecurityLicense({ isLicenseAvailable: true });
-    registerSecurityUsageCollector({ usageCollection, config, license });
+    registerSecurityUsageCollector({ usageCollection, config, license, ...deps });
 
     const usage = await usageCollection
       .getCollectorByType('security')
@@ -98,7 +131,7 @@ describe('Security UsageCollector', () => {
     const usageCollection = usageCollectionPluginMock.createSetupContract();
     const license = createSecurityLicense({ allowRbac: false, isLicenseAvailable: true });
 
-    registerSecurityUsageCollector({ usageCollection, config, license });
+    registerSecurityUsageCollector({ usageCollection, config, license, ...deps });
 
     const usage = await usageCollection
       .getCollectorByType('security')
@@ -116,7 +149,11 @@ describe('Security UsageCollector', () => {
       sessionLifespanInMinutes: 0,
       sessionCleanupInMinutes: 0,
       sessionConcurrentSessionsMaxSessions: 0,
+      sessionCookieSecure: false,
+      sessionCookieSameSite: undefined,
+      sessionCookieNameCustomized: false,
       anonymousCredentialType: undefined,
+      serviceAccounts: { enabled: false },
     });
   });
 
@@ -148,7 +185,7 @@ describe('Security UsageCollector', () => {
       );
       const usageCollection = usageCollectionPluginMock.createSetupContract();
       const license = createSecurityLicense({ isLicenseAvailable: true });
-      registerSecurityUsageCollector({ usageCollection, config, license });
+      registerSecurityUsageCollector({ usageCollection, config, license, ...deps });
 
       const usage = await usageCollection
         .getCollectorByType('security')
@@ -190,7 +227,7 @@ describe('Security UsageCollector', () => {
       );
       const usageCollection = usageCollectionPluginMock.createSetupContract();
       const license = createSecurityLicense({ isLicenseAvailable: true });
-      registerSecurityUsageCollector({ usageCollection, config, license });
+      registerSecurityUsageCollector({ usageCollection, config, license, ...deps });
 
       const usage = await usageCollection
         .getCollectorByType('security')
@@ -224,7 +261,7 @@ describe('Security UsageCollector', () => {
       );
       const usageCollection = usageCollectionPluginMock.createSetupContract();
       const license = createSecurityLicense({ isLicenseAvailable: true });
-      registerSecurityUsageCollector({ usageCollection, config, license });
+      registerSecurityUsageCollector({ usageCollection, config, license, ...deps });
 
       const usage = await usageCollection
         .getCollectorByType('security')
@@ -257,7 +294,7 @@ describe('Security UsageCollector', () => {
       );
       const usageCollection = usageCollectionPluginMock.createSetupContract();
       const license = createSecurityLicense({ isLicenseAvailable: true });
-      registerSecurityUsageCollector({ usageCollection, config, license });
+      registerSecurityUsageCollector({ usageCollection, config, license, ...deps });
 
       const usage = await usageCollection
         .getCollectorByType('security')
@@ -292,7 +329,7 @@ describe('Security UsageCollector', () => {
         isLicenseAvailable: true,
         allowAccessAgreement: false,
       });
-      registerSecurityUsageCollector({ usageCollection, config, license });
+      registerSecurityUsageCollector({ usageCollection, config, license, ...deps });
 
       const usage = await usageCollection
         .getCollectorByType('security')
@@ -330,7 +367,7 @@ describe('Security UsageCollector', () => {
       );
       const usageCollection = usageCollectionPluginMock.createSetupContract();
       const license = createSecurityLicense({ isLicenseAvailable: true });
-      registerSecurityUsageCollector({ usageCollection, config, license });
+      registerSecurityUsageCollector({ usageCollection, config, license, ...deps });
 
       const usage = await usageCollection
         .getCollectorByType('security')
@@ -366,7 +403,7 @@ describe('Security UsageCollector', () => {
       );
       const usageCollection = usageCollectionPluginMock.createSetupContract();
       const license = createSecurityLicense({ isLicenseAvailable: true });
-      registerSecurityUsageCollector({ usageCollection, config, license });
+      registerSecurityUsageCollector({ usageCollection, config, license, ...deps });
 
       const usage = await usageCollection
         .getCollectorByType('security')
@@ -394,7 +431,7 @@ describe('Security UsageCollector', () => {
         isLicenseAvailable: true,
         allowAuditLogging: true,
       });
-      registerSecurityUsageCollector({ usageCollection, config, license });
+      registerSecurityUsageCollector({ usageCollection, config, license, ...deps });
 
       const usage = await usageCollection
         .getCollectorByType('security')
@@ -417,7 +454,7 @@ describe('Security UsageCollector', () => {
       );
       const usageCollection = usageCollectionPluginMock.createSetupContract();
       const license = createSecurityLicense({ isLicenseAvailable: true, allowAuditLogging: false });
-      registerSecurityUsageCollector({ usageCollection, config, license });
+      registerSecurityUsageCollector({ usageCollection, config, license, ...deps });
 
       const usage = await usageCollection
         .getCollectorByType('security')
@@ -444,7 +481,7 @@ describe('Security UsageCollector', () => {
         isLicenseAvailable: true,
         allowFips: true,
       });
-      registerSecurityUsageCollector({ usageCollection, config, license });
+      registerSecurityUsageCollector({ usageCollection, config, license, ...deps });
 
       const usage = await usageCollection
         .getCollectorByType('security')
@@ -466,7 +503,7 @@ describe('Security UsageCollector', () => {
       );
       const usageCollection = usageCollectionPluginMock.createSetupContract();
       const license = createSecurityLicense({ isLicenseAvailable: true, allowFips: false });
-      registerSecurityUsageCollector({ usageCollection, config, license });
+      registerSecurityUsageCollector({ usageCollection, config, license, ...deps });
 
       const usage = await usageCollection
         .getCollectorByType('security')
@@ -492,7 +529,7 @@ describe('Security UsageCollector', () => {
       );
       const usageCollection = usageCollectionPluginMock.createSetupContract();
       const license = createSecurityLicense({ isLicenseAvailable: true, allowAuditLogging: false });
-      registerSecurityUsageCollector({ usageCollection, config, license });
+      registerSecurityUsageCollector({ usageCollection, config, license, ...deps });
 
       const usage = await usageCollection
         .getCollectorByType('security')
@@ -516,7 +553,7 @@ describe('Security UsageCollector', () => {
       );
       const usageCollection = usageCollectionPluginMock.createSetupContract();
       const license = createSecurityLicense({ isLicenseAvailable: true, allowAuditLogging: false });
-      registerSecurityUsageCollector({ usageCollection, config, license });
+      registerSecurityUsageCollector({ usageCollection, config, license, ...deps });
 
       const usage = await usageCollection
         .getCollectorByType('security')
@@ -544,7 +581,7 @@ describe('Security UsageCollector', () => {
       );
       const usageCollection = usageCollectionPluginMock.createSetupContract();
       const license = createSecurityLicense({ isLicenseAvailable: true, allowAuditLogging: false });
-      registerSecurityUsageCollector({ usageCollection, config, license });
+      registerSecurityUsageCollector({ usageCollection, config, license, ...deps });
 
       const usage = await usageCollection
         .getCollectorByType('security')
@@ -557,6 +594,54 @@ describe('Security UsageCollector', () => {
         sessionCleanupInMinutes: 789,
         sessionConcurrentSessionsMaxSessions: 321,
       });
+    });
+  });
+
+  describe('session cookies', () => {
+    const fetchUsage = async (config: ReturnType<typeof createSecurityConfig>) => {
+      const usageCollection = usageCollectionPluginMock.createSetupContract();
+      const license = createSecurityLicense({ isLicenseAvailable: true });
+      registerSecurityUsageCollector({ usageCollection, config, license, ...deps });
+
+      return usageCollection.getCollectorByType('security')?.fetch(collectorFetchContext);
+    };
+
+    it.each(['Strict', 'Lax', 'None'] as const)(
+      'reports the configured SameSite attribute (%s)',
+      async (sameSiteCookies) => {
+        const usage = await fetchUsage(
+          createSecurityConfig(ConfigSchema.validate({ sameSiteCookies }))
+        );
+
+        expect(usage).toEqual({ ...DEFAULT_USAGE, sessionCookieSameSite: sameSiteCookies });
+      }
+    );
+
+    it('reports a customized cookie name without reporting the name itself', async () => {
+      const usage = await fetchUsage(
+        createSecurityConfig(ConfigSchema.validate({ cookieName: 'custom-sid' }))
+      );
+
+      expect(usage).toEqual({ ...DEFAULT_USAGE, sessionCookieNameCustomized: true });
+      expect(JSON.stringify(usage)).not.toContain('custom-sid');
+    });
+
+    it('reports that cookies are not secure when TLS is disabled and secure cookies are not configured', async () => {
+      const usage = await fetchUsage(
+        createSecurityConfig(ConfigSchema.validate({}), { isTLSEnabled: false })
+      );
+
+      expect(usage).toEqual({ ...DEFAULT_USAGE, sessionCookieSecure: false });
+    });
+
+    it('reports that cookies are secure when TLS is disabled and secure cookies are configured', async () => {
+      const usage = await fetchUsage(
+        createSecurityConfig(ConfigSchema.validate({ secureCookies: true }), {
+          isTLSEnabled: false,
+        })
+      );
+
+      expect(usage).toEqual({ ...DEFAULT_USAGE, sessionCookieSecure: true });
     });
   });
 
@@ -580,7 +665,7 @@ describe('Security UsageCollector', () => {
       );
       const usageCollection = usageCollectionPluginMock.createSetupContract();
       const license = createSecurityLicense({ isLicenseAvailable: true, allowAuditLogging: false });
-      registerSecurityUsageCollector({ usageCollection, config, license });
+      registerSecurityUsageCollector({ usageCollection, config, license, ...deps });
 
       const usage = await usageCollection
         .getCollectorByType('security')
@@ -612,7 +697,7 @@ describe('Security UsageCollector', () => {
       );
       const usageCollection = usageCollectionPluginMock.createSetupContract();
       const license = createSecurityLicense({ isLicenseAvailable: true, allowAuditLogging: false });
-      registerSecurityUsageCollector({ usageCollection, config, license });
+      registerSecurityUsageCollector({ usageCollection, config, license, ...deps });
 
       const usage = await usageCollection
         .getCollectorByType('security')
@@ -642,7 +727,7 @@ describe('Security UsageCollector', () => {
       );
       const usageCollection = usageCollectionPluginMock.createSetupContract();
       const license = createSecurityLicense({ isLicenseAvailable: true, allowAuditLogging: false });
-      registerSecurityUsageCollector({ usageCollection, config, license });
+      registerSecurityUsageCollector({ usageCollection, config, license, ...deps });
 
       const usage = await usageCollection
         .getCollectorByType('security')
@@ -675,7 +760,7 @@ describe('Security UsageCollector', () => {
       );
       const usageCollection = usageCollectionPluginMock.createSetupContract();
       const license = createSecurityLicense({ isLicenseAvailable: true, allowAuditLogging: false });
-      registerSecurityUsageCollector({ usageCollection, config, license });
+      registerSecurityUsageCollector({ usageCollection, config, license, ...deps });
 
       const usage = await usageCollection
         .getCollectorByType('security')
@@ -692,7 +777,7 @@ describe('Security UsageCollector', () => {
       const config = createSecurityConfig(ConfigSchema.validate({}));
       const usageCollection = usageCollectionPluginMock.createSetupContract();
       const license = createSecurityLicense({ isLicenseAvailable: true, allowAuditLogging: false });
-      registerSecurityUsageCollector({ usageCollection, config, license });
+      registerSecurityUsageCollector({ usageCollection, config, license, ...deps });
 
       const usage = await usageCollection
         .getCollectorByType('security')
@@ -739,7 +824,7 @@ describe('Security UsageCollector', () => {
       );
       const usageCollection = usageCollectionPluginMock.createSetupContract();
       const license = createSecurityLicense({ isLicenseAvailable: true, allowAuditLogging: false });
-      registerSecurityUsageCollector({ usageCollection, config, license });
+      registerSecurityUsageCollector({ usageCollection, config, license, ...deps });
 
       const usage = await usageCollection
         .getCollectorByType('security')
@@ -750,6 +835,60 @@ describe('Security UsageCollector', () => {
         enabledAuthProviders: ['anonymous'],
         anonymousCredentialType: 'username_password',
       });
+    });
+  });
+  describe('service accounts', () => {
+    const summary = {
+      total: 3,
+      serviceAccounts: 2,
+      byWorkload: [{ pluginId: 'workflowsExecutionEngine', workloadType: 'workflow', count: 3 }],
+      byBinderType: { user: 2, api_key: 1, service_account: 0 },
+    };
+
+    const fetchUsage = async () => {
+      const config = createSecurityConfig(ConfigSchema.validate({}));
+      const usageCollection = usageCollectionPluginMock.createSetupContract();
+      const license = createSecurityLicense({ isLicenseAvailable: true });
+      registerSecurityUsageCollector({ usageCollection, config, license, ...deps });
+      return await usageCollection.getCollectorByType('security')?.fetch(collectorFetchContext);
+    };
+
+    it('reports the bound workloads when service accounts are available', async () => {
+      const serviceAccounts = serviceAccountsServiceMock.createStart();
+      serviceAccounts.management.summarizeBoundWorkloads.mockResolvedValue(summary);
+      getServiceAccounts.mockReturnValue(serviceAccounts);
+
+      expect(await fetchUsage()).toEqual({
+        ...DEFAULT_USAGE,
+        serviceAccounts: { enabled: true, boundWorkloads: summary },
+      });
+    });
+
+    it('reports only that service accounts are available when the summary fails', async () => {
+      const serviceAccounts = serviceAccountsServiceMock.createStart();
+      serviceAccounts.management.summarizeBoundWorkloads.mockRejectedValue(
+        new Error('search failed')
+      );
+      getServiceAccounts.mockReturnValue(serviceAccounts);
+
+      expect(await fetchUsage()).toEqual({ ...DEFAULT_USAGE, serviceAccounts: { enabled: true } });
+      expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('search failed'));
+    });
+
+    it('does not summarize when security is disabled in Elasticsearch', async () => {
+      const serviceAccounts = serviceAccountsServiceMock.createStart();
+      getServiceAccounts.mockReturnValue(serviceAccounts);
+      const config = createSecurityConfig(ConfigSchema.validate({}));
+      const usageCollection = usageCollectionPluginMock.createSetupContract();
+      const license = createSecurityLicense({ allowRbac: false, isLicenseAvailable: true });
+      registerSecurityUsageCollector({ usageCollection, config, license, ...deps });
+
+      const usage = await usageCollection
+        .getCollectorByType('security')
+        ?.fetch(collectorFetchContext);
+
+      expect(usage).toMatchObject({ serviceAccounts: { enabled: false } });
+      expect(serviceAccounts.management.summarizeBoundWorkloads).not.toHaveBeenCalled();
     });
   });
 });

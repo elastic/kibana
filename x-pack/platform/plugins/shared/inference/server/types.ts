@@ -27,6 +27,7 @@ import type {
   BoundInferenceClient,
   BoundOptions,
   ChatCompleteOptions,
+  DecideAPI,
   FeatureChatCompleteAPI,
   InferenceClient,
   InferenceConnector,
@@ -77,9 +78,17 @@ export type InferenceModelTarget =
   | { featureId: string; connectorId?: never };
 
 /**
- * An {@link InferenceClient} whose `chatComplete` also accepts a `featureId` instead of a `connectorId`.
+ * An {@link InferenceClient} whose `chatComplete` also accepts a `featureId` instead of a `connectorId`,
+ * and that can ask decision models with `decide`.
  */
-export type InferenceServerClient = InferenceClient & { chatComplete: FeatureChatCompleteAPI };
+export type InferenceServerClient = InferenceClient & {
+  chatComplete: FeatureChatCompleteAPI;
+  /**
+   * Asks a decision model bounded questions about an input.
+   * @experimental The Elasticsearch `decision` inference task it calls is experimental.
+   */
+  decide: DecideAPI;
+};
 
 /**
  * Setup contract of the inference plugin.

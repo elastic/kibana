@@ -412,6 +412,21 @@ describe('AgentExecutionService', () => {
       expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
     });
 
+    it('assertCanRunAgent applies the start-of-run check to a caller joining a run', async () => {
+      const boundService = createBoundService();
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(
+        boundService.assertCanRunAgent({ request, agentId: 'agent-1' })
+      ).resolves.toBeUndefined();
+      expect(agentRegistry.get).toHaveBeenCalledWith('agent-1', { access: 'use' });
+
+      checkPrivileges.mockResolvedValue({ hasAllRequested: false });
+      await expect(
+        boundService.assertCanRunAgent({ request, agentId: 'agent-1' })
+      ).rejects.toMatchObject({ meta: { statusCode: 403 } });
+    });
+
     it('checks the privilege for the agent the conversation resolves to, not the requested one', async () => {
       resolveConversation.mockResolvedValueOnce({
         conversationId: 'investigation-1',
@@ -2855,7 +2870,11 @@ describe('AgentExecutionService', () => {
       await converse();
 
       const [{ executionId }] = mockExecutionClient.create.mock.calls[0];
-      expect(appendedActiveExecution()).toEqual({ action: 'acquire', executionId });
+      expect(appendedActiveExecution()).toEqual({
+        action: 'acquire',
+        executionId,
+        timelineExecutionId: expect.stringMatching(/::execution$/),
+      });
     });
 
     it('sets the active execution with an update without fields on a HITL resume', async () => {
@@ -2873,7 +2892,11 @@ describe('AgentExecutionService', () => {
           source: 'execution',
           access: 'converse',
           retryOnConflict: true,
-          activeExecution: { action: 'acquire', executionId },
+          activeExecution: {
+            action: 'acquire',
+            executionId,
+            timelineExecutionId: 'round-1::execution::1',
+          },
         }
       );
       expect(conversationClient.appendEvents).not.toHaveBeenCalled();

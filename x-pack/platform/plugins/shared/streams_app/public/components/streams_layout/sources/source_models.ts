@@ -211,6 +211,26 @@ export const connectedDestinationLabels = (unit: Unit): Record<string, string[]>
     ])
   );
 
+const sourceConnectedDestinationIdsByUnit = new WeakMap<Unit, ReadonlySet<string>>();
+
+/** Ids of destinations reached by any unit source, including unmanaged types. Cached per unit. */
+export const sourceConnectedDestinationIds = (unit: Unit): ReadonlySet<string> => {
+  const cached = sourceConnectedDestinationIdsByUnit.get(unit);
+  if (cached) {
+    return cached;
+  }
+  const ids = new Set(
+    getUnitConnections(
+      unit,
+      new Set(getUnitSources(unit).map(({ id }) => id)),
+      new Set((unit.unit.destinations ?? []).map(({ id }) => id))
+    ).map(({ destinationId }) => destinationId)
+  );
+  sourceConnectedDestinationIdsByUnit.set(unit, ids);
+
+  return ids;
+};
+
 export const createRuntimeMetadata = (
   source: ConfiguredSource,
   environment: SourceEnvironment

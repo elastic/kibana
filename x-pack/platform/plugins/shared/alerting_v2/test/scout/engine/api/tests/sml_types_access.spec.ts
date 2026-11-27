@@ -25,9 +25,10 @@ import { apiTest } from '../fixtures';
 
 const TOOLS_EXECUTE_API = '/api/agent_builder/tools/_execute';
 const SML_CRAWLER_TASK_TYPE = 'agent_builder_sml:sml_crawler';
-// Must outlive one fully missed 1m crawl cycle (the crawler's `fetchFrequency`) plus a slow Cloud crawl.
+// Must outlive an in-flight crawl draining, a re-nudged crawl, and its `refresh: 'wait_for'` bulk on Cloud.
 const CRAWL_POLL_TIMEOUT_MS = 150_000;
 const CRAWL_POLL_INTERVAL_MS = 1_000;
+const CRAWL_NUDGE_INTERVAL_MS = 10_000;
 
 const EXECUTE_HEADERS = {
   ...COMMON_HEADERS,
@@ -177,12 +178,22 @@ apiTest.describe('Agent Builder — alerting V2 SML type access', { tag: API_ENG
     policyId = createdPolicy.id;
     policyAttachmentId = `${ACTION_POLICY_KI_TYPE}://${policyId}`;
 
-    await apiServices.alertingV2.taskManager.runSoon(smlCrawlerTaskId(RULE_KI_TYPE), {
-      ignoreErrors: true,
-    });
-    await apiServices.alertingV2.taskManager.runSoon(smlCrawlerTaskId(ACTION_POLICY_KI_TYPE), {
-      ignoreErrors: true,
-    });
+    // Task Manager voids `run_soon` for a crawl already running, so one nudge can silently fall back to the 1m cadence.
+    let lastNudgeAt = 0;
+    const nudgeCrawlers = async () => {
+      if (Date.now() - lastNudgeAt < CRAWL_NUDGE_INTERVAL_MS) {
+        return;
+      }
+      lastNudgeAt = Date.now();
+      await apiServices.alertingV2.taskManager.runSoon(smlCrawlerTaskId(RULE_KI_TYPE), {
+        ignoreErrors: true,
+      });
+      await apiServices.alertingV2.taskManager.runSoon(smlCrawlerTaskId(ACTION_POLICY_KI_TYPE), {
+        ignoreErrors: true,
+      });
+    };
+
+    await nudgeCrawlers();
 
     limitedCredentials = await requestAuth.getApiKeyForCustomRole(LIMITED_ALERTING_V2_CHAT_ROLE);
     agentBuilderOnlyCredentials = await requestAuth.getApiKeyForCustomRole(
@@ -192,6 +203,7 @@ apiTest.describe('Agent Builder — alerting V2 SML type access', { tag: API_ENG
     await expect
       .poll(
         async () => {
+          await nudgeCrawlers();
           const response = await postSmlSearch(apiClient, limitedCredentials, {
             query: searchToken,
           });

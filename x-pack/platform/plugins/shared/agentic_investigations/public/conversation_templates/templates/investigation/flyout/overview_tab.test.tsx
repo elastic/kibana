@@ -104,6 +104,38 @@ describe('InvestigationOverview', () => {
     );
   });
 
+  it('shows what a subject came through as a "via" line under the trigger', () => {
+    mockUseInvestigation.mockReturnValue({
+      data: {
+        ...investigation,
+        subjects: [
+          {
+            type: 'alert',
+            id: 'alert-1',
+            via: { label: 'Payments alerts' },
+            created_at: 'x',
+          },
+        ],
+      },
+    });
+
+    renderOverview();
+
+    expect(screen.getByTestId('investigationSubjectList')).toContainElement(
+      screen.getByTestId('investigationSubjectVia')
+    );
+    expect(screen.getByTestId('investigationSubjectVia')).toHaveTextContent('via Payments alerts');
+    expect(screen.queryByText('Started by')).not.toBeInTheDocument();
+  });
+
+  it('shows no "via" line for subjects without one', () => {
+    mockUseInvestigation.mockReturnValue({ data: investigation });
+
+    renderOverview();
+
+    expect(screen.queryByTestId('investigationSubjectVia')).not.toBeInTheDocument();
+  });
+
   it('leaves the hypothesis tree out without hypotheses', () => {
     mockUseInvestigation.mockReturnValue({ data: { ...investigation, hypotheses: undefined } });
 

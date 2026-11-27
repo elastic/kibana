@@ -11,7 +11,7 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 /**
  * Type-agnostic primitives for inline panel content resolution: the resolution
  * result and the request fields shared by every panel type.
- * Each renderer contributes its own request shape (see `panels/<type>`),
+ * Each request kind contributes its own request shape (see `panels/<type>`),
  * and the panels barrel aggregates them into the `ResolvePanelContent` contract,
  * which the host implements and injects.
  */
@@ -24,11 +24,19 @@ export type PanelContentAttempt =
       type: 'success';
       panelContent: PanelContent;
       authoringNote?: string;
+      /** Pixel height the content needs, when the renderer estimated one for this call. */
+      heightHint?: number;
     }
   | {
       type: 'failure';
       error: string;
     };
+
+/** The pixel height a panel's content needs, for the layout step to size the panel by. */
+export interface PanelHeightHint {
+  panelId: string;
+  heightPx: number;
+}
 
 /** One-sentence note describing a chart authored during the current turn. */
 export interface PanelAuthoringNote {
@@ -37,8 +45,8 @@ export interface PanelAuthoringNote {
 }
 
 /**
- * Fields common to every panel resolution request, independent of renderer.
- * Per-renderer modules extend this with a `renderer` discriminator and their
+ * Fields common to every panel resolution request, independent of its kind.
+ * Each kind's module extends this with its `type` discriminator and its
  * own payload (e.g. `panels/vis` adds the natural-language / ES|QL fields).
  */
 /**
@@ -52,7 +60,7 @@ export type ResolveEsqlVariables = (
 ) => Promise<ESQLControlVariable[]>;
 
 export interface PanelResolutionRequestBase {
-  /** Present when editing an existing panel; upsert has checked it matches the renderer. */
+  /** Present when editing an existing panel; upsert has checked it is of the request's kind. */
   existingPanel?: AttachmentPanel;
   /** Gives the values of the dashboard's ES|QL controls that a query refers to (`?name`). */
   resolveEsqlVariables?: ResolveEsqlVariables;

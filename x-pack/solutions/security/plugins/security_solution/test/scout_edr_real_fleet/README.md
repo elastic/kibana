@@ -21,13 +21,12 @@ All configs are listed in `.buildkite/scout_ci_config.yml` `excluded_configs` so
 
 Requires Multipass and Docker.
 
-`run-tests --location local` starts Elasticsearch and Kibana. Do not also leave `start-server` running — the two commands fight for the same ports.
+`run-tests --location local` starts Elasticsearch and Kibana with the `edr_real_fleet` config set, which it derives from the config path. Do not also leave `start-server` running — the two commands fight for the same ports.
 
 Start servers and run tests in one step:
 
 ```bash
 node scripts/scout run-tests --location local --arch stateful --domain classic \
-  --serverConfigSet edr_real_fleet \
   --config x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/shared_host/ui/playwright.config.ts
 ```
 
@@ -35,7 +34,6 @@ Local serverless Security (complete) uses the same Playwright config and a diffe
 
 ```bash
 node scripts/scout run-tests --location local --arch serverless --domain security_complete \
-  --serverConfigSet edr_real_fleet \
   --config x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/shared_host/ui/playwright.config.ts
 ```
 
@@ -43,7 +41,6 @@ The API project uses the same server config set and a different Playwright confi
 
 ```bash
 node scripts/scout run-tests --location local --arch stateful --domain classic \
-  --serverConfigSet edr_real_fleet \
   --config x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/shared_host/api/playwright.config.ts
 ```
 

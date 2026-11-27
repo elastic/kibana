@@ -100,6 +100,7 @@ describe('continuous_onboarding.yaml stays in sync with constants', () => {
   it('starts onboarding via workflow.executeAsync for the managed onboarding workflow', () => {
     assertYamlContains('type: workflow.executeAsync');
     assertYamlContains("workflow-id: 'system-streams-ki-onboarding'");
+    assertYamlContains("sourceType: '${{ foreach.item.sourceType }}'");
   });
 
   it('runs both features identification and queries generation', () => {

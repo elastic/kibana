@@ -8,3 +8,6 @@
 export { createKiStepDefinition } from './create_ki';
 export { updateKiStepDefinition } from './update_ki';
 export { deleteKiStepDefinition } from './delete_ki';
+export { gatherMaintenanceStepDefinition } from './gather_maintenance';
+export { applyMaintenanceChangesStepDefinition } from './apply_maintenance_changes';
+export { recordMaintenanceRunStepDefinition } from './record_maintenance_run';

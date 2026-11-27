@@ -37,15 +37,20 @@ export const createConnectorRoute = (
       },
       validate: () => {
         const includeInboundEventsField = actionsConfigUtils.isInboundEventsEnabled();
+        const includeSpecVersionField = actionsConfigUtils.isCatalogEnabled();
         return {
           request: {
             params: createConnectorRequestParamsSchemaV1,
-            body: getCreateConnectorRequestBodySchemaV1(includeInboundEventsField),
+            body: getCreateConnectorRequestBodySchemaV1(
+              includeInboundEventsField,
+              includeSpecVersionField
+            ),
           },
           response: {
             200: {
               description: 'Indicates a successful call.',
-              body: () => getConnectorResponseSchemaV1(includeInboundEventsField),
+              body: () =>
+                getConnectorResponseSchemaV1(includeInboundEventsField, includeSpecVersionField),
             },
             403: {
               description: 'Indicates that this call is forbidden.',
@@ -59,9 +64,14 @@ export const createConnectorRoute = (
         try {
           const actionsClient = (await context.actions).getActionsClient();
           const action = transformCreateConnectorBodyV1(req.body);
-          const resp = await actionsClient.create({ action, options: req.params });
+          const resp = await actionsClient.create({
+            action,
+            options: req.params,
+          });
+
           const body = transformConnectorResponseV1(resp, {
             includeInboundEventsField: actionsConfigUtils.isInboundEventsEnabled(),
+            includeSpecVersionField: actionsConfigUtils.isCatalogEnabled(),
           });
 
           return res.ok({

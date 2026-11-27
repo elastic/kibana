@@ -171,6 +171,7 @@ jest.mock(
         upgrade: jest.fn(),
         bulkUpgrade: jest.fn(),
         getUpgradeDryRunDiff: jest.fn(),
+        getUpgradeDryRunDiffs: jest.fn(),
         enrichPolicyWithDefaultsFromPackage: jest.fn(),
       } as any,
     };

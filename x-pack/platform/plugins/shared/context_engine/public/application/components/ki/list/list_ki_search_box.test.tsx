@@ -7,49 +7,41 @@
 
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import React, { useState } from 'react';
-import { ListKiSearchBox } from './list_ki_search_box';
+import { LIST_KI_SEARCH_DEBOUNCE_MS, ListKiSearchBox } from './list_ki_search_box';
 
-const SearchBoxWrapper = ({
-  onChange,
-  onCommit,
-  submittedQuery = '',
-}: {
-  onChange: jest.Mock;
-  onCommit: jest.Mock;
-  submittedQuery?: string;
-}) => {
+const SearchBoxWrapper = ({ onChange, onCommit }: { onChange: jest.Mock; onCommit: jest.Mock }) => {
   const [value, setValue] = useState('');
   const handleChange = (text: string) => {
     onChange(text);
     setValue(text);
   };
-  return (
-    <ListKiSearchBox
-      value={value}
-      submittedQuery={submittedQuery}
-      onChange={handleChange}
-      onCommit={onCommit}
-      onSubmitClick={() => onCommit(value)}
-    />
-  );
+  return <ListKiSearchBox value={value} onChange={handleChange} onCommit={onCommit} />;
 };
 
-const renderSearchBox = (onChange: jest.Mock, onCommit: jest.Mock, submittedQuery?: string) =>
+const renderSearchBox = (onChange: jest.Mock, onCommit: jest.Mock) =>
   render(
     <I18nProvider>
       <EuiProvider>
-        <SearchBoxWrapper onChange={onChange} onCommit={onCommit} submittedQuery={submittedQuery} />
+        <SearchBoxWrapper onChange={onChange} onCommit={onCommit} />
       </EuiProvider>
     </I18nProvider>
   );
 
 describe('ListKiSearchBox', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('calls onCommit with the raw text when Enter is pressed', () => {
-    const onChange = jest.fn();
     const onCommit = jest.fn();
-    renderSearchBox(onChange, onCommit);
+    renderSearchBox(jest.fn(), onCommit);
+    onCommit.mockClear();
 
     const input = screen.getByTestId('contextListKiSearchBox');
     fireEvent.change(input, { target: { value: '  refund  ' } });
@@ -59,10 +51,14 @@ describe('ListKiSearchBox', () => {
     expect(onCommit).toHaveBeenCalledWith('  refund  ');
   });
 
-  it('calls onChange on every keystroke without committing', () => {
+  it('commits once after the pause, not on every keystroke', () => {
     const onChange = jest.fn();
     const onCommit = jest.fn();
     renderSearchBox(onChange, onCommit);
+    act(() => {
+      jest.advanceTimersByTime(LIST_KI_SEARCH_DEBOUNCE_MS);
+    });
+    onCommit.mockClear();
 
     const input = screen.getByTestId('contextListKiSearchBox');
     fireEvent.change(input, { target: { value: 'r' } });
@@ -71,21 +67,12 @@ describe('ListKiSearchBox', () => {
 
     expect(onChange).toHaveBeenCalledTimes(3);
     expect(onCommit).not.toHaveBeenCalled();
-  });
 
-  it('disables submit when typed and submitted queries match', () => {
-    renderSearchBox(jest.fn(), jest.fn(), 'refund');
-
-    fireEvent.change(screen.getByTestId('contextListKiSearchBox'), { target: { value: 'refund' } });
-    expect(screen.getByTestId('contextListKiSearchSubmitButton')).toBeDisabled();
-  });
-
-  it('enables submit when typed text differs from the submitted query', () => {
-    renderSearchBox(jest.fn(), jest.fn(), 'refund');
-
-    fireEvent.change(screen.getByTestId('contextListKiSearchBox'), {
-      target: { value: 'returns' },
+    act(() => {
+      jest.advanceTimersByTime(LIST_KI_SEARCH_DEBOUNCE_MS);
     });
-    expect(screen.getByTestId('contextListKiSearchSubmitButton')).toBeEnabled();
+
+    expect(onCommit).toHaveBeenCalledTimes(1);
+    expect(onCommit).toHaveBeenCalledWith('ref');
   });
 });

@@ -42,11 +42,10 @@ type BoundsRow = Record<string, number | string | null>;
 const emptyRawResponse: ExecuteEsqlResult<BoundsRow>['rawResponse'] = {
   columns: [],
   values: [],
-  requestParams: { query: '' },
 };
 
 const resolved = (documents: BoundsRow[]): Promise<ExecuteEsqlResult<BoundsRow>> =>
-  Promise.resolve({ documents, rawResponse: emptyRawResponse, requestParams: { query: '' } });
+  Promise.resolve({ documents, rawResponse: emptyRawResponse });
 
 const deferred = () => {
   let resolve: (rows: BoundsRow[]) => void = () => {};
@@ -55,7 +54,6 @@ const deferred = () => {
       resolvePromise({
         documents: rows,
         rawResponse: emptyRawResponse,
-        requestParams: { query: '' },
       });
   });
   return { promise, resolve };
@@ -88,7 +86,7 @@ const gauge = createMetric({
 });
 
 const services = {
-  data: { search: { search: jest.fn() } },
+  data: { search: { esql: jest.fn() } },
   uiSettings: {},
 } as unknown as ChartSectionProps['services'];
 
@@ -106,6 +104,7 @@ const createProps = (overrides: Partial<HookProps> = {}): HookProps => ({
     filters: [],
     esqlVariables: [],
     relativeTimeRange: { from: 'now-15m', to: 'now' },
+    searchSessionId: 'cached-session',
   }),
   services,
   whereStatements: [],
@@ -200,7 +199,7 @@ describe('useFetchHistogramBounds', () => {
     ]);
   });
 
-  it('passes the relative time range, filters, variables, and bounds execution context, without approximation', async () => {
+  it('passes the relative time range, filters, variables, and bounds execution context, without session or approximation', async () => {
     renderBoundsHook(
       createProps({
         metricItems: [histogramA],
@@ -224,6 +223,7 @@ describe('useFetchHistogramBounds', () => {
         executionContextName: MetricsExecutionContextName.HISTOGRAM_BOUNDS,
       })
     );
+    expect(params).not.toHaveProperty('sessionId');
     expect(params).not.toHaveProperty('approximation');
     expect(params).not.toHaveProperty('isApproximate');
   });

@@ -59,6 +59,21 @@ describe('evals_pr pipeline generation', () => {
     expect(yaml).toContain('continue_on_failure: true');
   });
 
+  it('skips the distribution build when the PR build artifact is reused', async () => {
+    mockGetEvalPipeline.mockReturnValue('  - group: LLM Evals\n    key: kibana-evals');
+
+    await importPipelineModule();
+
+    const yaml = (mockEmitPipeline.mock.calls[0][0] as string[]).join('\n');
+    const buildStep = yaml.slice(
+      yaml.indexOf('key: build'),
+      yaml.indexOf('timeout_in_minutes: 90')
+    );
+    expect(buildStep).toContain(
+      `if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"`
+    );
+  });
+
   it('fails loudly (exit 1) instead of emitting an empty pipeline when no suites match', async () => {
     mockGetEvalPipeline.mockReturnValue(null);
     const errorSpy = jest.spyOn(console, 'error').mockImplementation();

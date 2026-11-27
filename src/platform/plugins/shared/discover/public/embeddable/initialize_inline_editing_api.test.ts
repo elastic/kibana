@@ -10,6 +10,7 @@
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { DiscoverTabType } from '@kbn/discover-session-constants';
+import type { IDslPagination } from '@kbn/search-types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DiscoverGridSettings, SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type {
@@ -24,21 +25,26 @@ import { createDiscoverServicesMock } from '../__mocks__/services';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { getPersistedTabMock } from '../application/main/state_management/redux/__mocks__/internal_state.mocks';
 import { initializeInlineEditingApi } from './initialize_inline_editing_api';
+import { fromDiscoverSessionTab, toSessionTabAttributes } from './utils/panel_tab';
 import type { SearchEmbeddableStateManager } from './types';
 
 const defaultServices = createDiscoverServicesMock();
 
-const tab1 = getPersistedTabMock({
-  dataView: dataViewMock,
-  services: defaultServices,
-  tabId: 'tab-1',
-});
+const tab1 = fromDiscoverSessionTab(
+  getPersistedTabMock({
+    dataView: dataViewMock,
+    services: defaultServices,
+    tabId: 'tab-1',
+  })
+);
 
-const tab2 = getPersistedTabMock({
-  dataView: dataViewMock,
-  services: defaultServices,
-  tabId: 'tab-2',
-});
+const tab2 = fromDiscoverSessionTab(
+  getPersistedTabMock({
+    dataView: dataViewMock,
+    services: defaultServices,
+    tabId: 'tab-2',
+  })
+);
 
 const createSearchEmbeddableStateManager = (): SearchEmbeddableStateManager => ({
   columns: new BehaviorSubject<string[] | undefined>(['message']),
@@ -56,6 +62,8 @@ const createSearchEmbeddableStateManager = (): SearchEmbeddableStateManager => (
   rows: new BehaviorSubject<DataTableRecord[]>([]),
   totalHitCount: new BehaviorSubject<number | undefined>(undefined),
   inspectorAdapters: new BehaviorSubject<Record<string, unknown>>({}),
+  pagination: new BehaviorSubject<IDslPagination | undefined>(undefined),
+  isLoadingMore: new BehaviorSubject<boolean>(false),
 });
 
 const createMockSavedSearch = (): SavedSearch => ({
@@ -126,7 +134,10 @@ describe('initializeInlineEditingApi', () => {
 
     await api.startInlineEditing();
     await api.previewInlineTabSelection('tab-2');
-    expect(searchEmbeddable.reinitializeState).toHaveBeenNthCalledWith(1, tab2);
+    expect(searchEmbeddable.reinitializeState).toHaveBeenNthCalledWith(
+      1,
+      toSessionTabAttributes(tab2)
+    );
 
     savedSearch$.next({ ...savedSearch$.getValue(), tabTypeState: undefined });
     await api.cancelInlineTabSelection();

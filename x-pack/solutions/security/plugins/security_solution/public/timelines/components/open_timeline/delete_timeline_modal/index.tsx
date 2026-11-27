@@ -7,7 +7,7 @@
 
 import { EuiModal } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { createGlobalStyle } from 'styled-components';
+import { css, Global } from '@emotion/react';
 
 import { useParams } from 'react-router-dom';
 import { DeleteTimelineModal, DELETE_TIMELINE_MODAL_WIDTH } from './delete_timeline_modal';
@@ -16,11 +16,15 @@ import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/t
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import * as i18n from '../translations';
 
-const RemovePopover = createGlobalStyle`
-div[data-popover-open] {
-  display: none;
-}
-`;
+const RemovePopover = () => (
+  <Global
+    styles={css`
+      div[data-popover-open] {
+        display: none;
+      }
+    `}
+  />
+);
 
 interface Props {
   deleteTimelines: DeleteTimelines;

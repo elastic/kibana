@@ -77,17 +77,17 @@ create_sync_pr() {
 # Returns gh's status on failure, since callers run it inside $(...) where
 # errexit doesn't apply.
 find_open_sync_pr() {
-  local pr_title="$1" matches title url
-  # Repeated author: qualifiers are ORed; gh's GraphQL search returns nothing for (a OR b) groups.
+  local pr_title="$1" matches title url author
+  # Authors are filtered here: legacy and advanced GitHub search combine author: qualifiers differently.
   matches=$(gh pr list \
-    --search "\"$pr_title\" in:title author:$KIBANA_MACHINE_USERNAME author:app/elastic-vault-github-plugin-prod" \
+    --search "\"$pr_title\" in:title" \
     --state open \
     --limit 20 \
-    --json title,url \
-    -q '.[] | "\(.title)\t\(.url)"') || return
+    --json title,url,author \
+    -q '.[] | "\(.title)\t\(.url)\t\(.author.login)"') || return
 
-  while IFS=$'\t' read -r title url; do
-    if [ "$title" == "$pr_title" ]; then
+  while IFS=$'\t' read -r title url author; do
+    if [[ "$title" == "$pr_title" && ( "$author" == "$KIBANA_MACHINE_USERNAME" || "$author" == "app/elastic-vault-github-plugin-prod" ) ]]; then
       echo "$url"
       return 0
     fi

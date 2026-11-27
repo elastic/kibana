@@ -153,7 +153,7 @@ describe('TemplateInstallSection', () => {
     expect(onStepChange).toHaveBeenCalledWith('setup');
   });
 
-  it('should open the editor with the previewed YAML as history state on Remix with AI', () => {
+  it('should open the editor with the previewed YAML and its template as history state on Remix with AI', () => {
     renderSection();
     const remixButton = screen.getByTestId('workflowLibraryTemplateRemixButton');
 
@@ -164,7 +164,7 @@ describe('TemplateInstallSection', () => {
 
     expect(navigateToApp).toHaveBeenCalledWith('workflows', {
       path: '/create',
-      state: { initialYaml: PREVIEW_YAML },
+      state: { initialYaml: PREVIEW_YAML, template: { slug: 'demo', version: '1.0.0' } },
     });
   });
 

@@ -5,17 +5,31 @@
  * 2.0.
  */
 
-import type { Action } from 'redux-actions';
-import { handleActions } from 'redux-actions';
+import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 import type { ILicense } from '@kbn/licensing-types';
 
-import { addLicense } from '../actions/add_license';
+import type { LicenseState } from '../types';
 
-export const license = handleActions<ILicense | null, ILicense>(
-  {
-    [String(addLicense)](_state: ILicense | null, { payload }: Action<ILicense>) {
-      return payload;
+/** Extracts the serializable license fields kept in the store. */
+export const toLicenseState = ({
+  type,
+  expiryDateInMillis,
+  isActive,
+}: LicenseState): LicenseState => ({ type, expiryDateInMillis, isActive });
+
+const getInitialState = (): LicenseState | null => null;
+
+const licenseSlice = createSlice({
+  name: 'license',
+  initialState: getInitialState,
+  reducers: {
+    addLicense: {
+      reducer: (_state, { payload }: PayloadAction<LicenseState>) => payload,
+      prepare: (license: ILicense) => ({ payload: toLicenseState(license) }),
     },
   },
-  null
-);
+});
+
+export const { addLicense } = licenseSlice.actions;
+export const license = licenseSlice.reducer;

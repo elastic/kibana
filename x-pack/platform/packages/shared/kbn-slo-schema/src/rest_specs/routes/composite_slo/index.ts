@@ -7,7 +7,6 @@
 
 export * from './composite_slo_create';
 export * from './composite_slo_get';
-export * from './composite_slo_batch_get';
 export * from './find_composite_slo';
 export * from './composite_slo_update';
 export * from './composite_slo_delete';

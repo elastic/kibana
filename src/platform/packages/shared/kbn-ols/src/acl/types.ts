@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EntryLevel, GeneralAccessLevel } from '../levels';
+import type { EntryAccess, GeneralAccess } from '../levels';
 import type { Principal, StoredPrincipal } from '../principals';
 
 /**
@@ -22,18 +22,28 @@ export interface Acl {
    */
   owner: Principal;
   /** What everyone who can reach the object can do. */
-  general_access: GeneralAccessLevel;
+  general: AclGeneral;
   /** Grants to named principals. */
   entries: AclEntry[];
 }
 
 /**
- * A grant of one level to one named principal, without the time it was added. A caller asks for
+ * General access of an ACL: what everyone who can reach the object can do. It's an object, not a
+ * single value, so that it has the same shape as an entry and can get more fields later without a
+ * new mapping.
+ */
+export interface AclGeneral {
+  /** The access everyone gets. It has to be a value the object's type allows for general access. */
+  access: GeneralAccess;
+}
+
+/**
+ * A grant of access to one named principal, without the time it was added. A caller asks for
  * grants in this shape, and every kind of ACL entry extends it.
  */
 export interface AclGrant extends Principal {
-  /** The granted level. It has to be a level the object's type allows for entries. */
-  access: EntryLevel;
+  /** The granted access. It has to be a value the object's type allows for entries. */
+  access: EntryAccess;
 }
 
 /**
@@ -48,11 +58,11 @@ export interface AclEntry extends AclGrant {
  * ACL as it is read back from storage, as opposed to {@link Acl}, the shape Kibana writes.
  *
  * Elasticsearch lets any stored field hold several values, for example
- * `"general_access": ["edit", "none"]` in a hand-edited document, and a search matches the document
- * when any of those values matches. For reading a single object to agree with searching for it,
- * the read keeps every value of every field, in stored order, and the access rules decide what
- * several values mean (for levels, the lowest allowed one wins). Fields that don't affect access,
- * such as `added_at`, are arrays only so that every field is read the same way.
+ * `"general": { "access": ["edit", "none"] }` in a hand-edited document, and a search matches the
+ * document when any of those values matches. For reading a single object to agree with searching
+ * for it, the read keeps every value of every field, in stored order, and the access rules decide
+ * what several values mean (for access values, the lowest allowed one wins). Fields that don't
+ * affect access, such as `added_at`, are arrays only so that every field is read the same way.
  */
 export interface StoredAcl {
   /**
@@ -66,23 +76,34 @@ export interface StoredAcl {
    * count.
    */
   owner: StoredPrincipal;
-  /**
-   * Every stored general access value. The ACL is damaged unless at least one value is a level
-   * that general access can take. The lowest value the type allows then applies, or `none` when
-   * the type allows none of them.
-   */
-  general_access: string[];
+  /** The stored general access. */
+  general: StoredAclGeneral;
   /** Every stored entry. */
   entries: StoredAclEntry[];
 }
 
 /**
+ * General access of a {@link StoredAcl}. Like every other field of a stored ACL, its field is an
+ * array.
+ */
+export interface StoredAclGeneral {
+  /**
+   * Every stored general access value. The ACL is damaged unless at least one value is one that
+   * general access can take. The lowest value the type allows then applies, or `none` when the
+   * type allows none of them.
+   */
+  access: string[];
+}
+
+/**
  * Entry of a {@link StoredAcl}. Like every other field of a stored ACL, each field is an array.
  * An entry that names no principal grants nothing, and the rest of the ACL still applies. An entry
- * that names one grants its level to each of its IDs.
+ * that names one grants its access to each of its IDs.
  */
 export interface StoredAclEntry extends StoredPrincipal {
-  /** Every stored level. The lowest one the type allows for entries applies, else nothing. */
+  /**
+   * Every stored access value. The lowest one the type allows for entries applies, else nothing.
+   */
   access: string[];
   /** Every stored timestamp. It doesn't affect access. */
   added_at: string[];

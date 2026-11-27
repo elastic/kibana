@@ -16,7 +16,7 @@ node scripts/workflow_graph_screenshot.js --input <path> [options]
 ```sh
 # Directory — renders all *.yaml / *.yml files inside
 node scripts/workflow_graph_screenshot.js \
-  --input src/platform/plugins/shared/workflows_management/common/examples
+  --input x-pack/platform/plugins/shared/workflows_management/common/examples
 
 # Single file
 node scripts/workflow_graph_screenshot.js \

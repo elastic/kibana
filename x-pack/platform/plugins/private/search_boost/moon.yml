@@ -26,6 +26,18 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/storybook'
   - '@kbn/kibana-react-plugin'
+  - '@kbn/i18n-react'
+  - '@kbn/content-list'
+  - '@kbn/content-list-provider'
+  - '@kbn/content-list-toolbar'
+  - '@kbn/data-lifecycle-phases'
+  - '@kbn/es-ui-shared-plugin'
+  - '@kbn/react-query'
+  - '@kbn/shared-ux-router'
+  - '@kbn/core-security-server'
+  - '@kbn/index-management-shared-types'
+  - '@kbn/share-plugin'
+  - '@kbn/router-utils'
 tags:
   - plugin
   - prod

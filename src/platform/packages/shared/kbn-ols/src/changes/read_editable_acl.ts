@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AclGrant, StoredAcl } from '../acl';
-import { compareLevels, lowestAllowed, type GeneralAccessLevel } from '../levels';
+import type { AclGeneral, AclGrant, StoredAcl } from '../acl';
+import { compareLevels, lowestAllowed } from '../levels';
 import type { AccessPolicy } from '../policy';
 import {
   getPrincipalKey,
@@ -35,7 +35,7 @@ export interface EditableAcl {
    */
   owner?: Principal;
   /** The general access that applies, or `none` when the type allows none of the stored values. */
-  general_access: GeneralAccessLevel;
+  general: AclGeneral;
   /** One entry for each principal that a stored entry grants something to. */
   entries: EditableAclEntry[];
 }
@@ -56,7 +56,7 @@ export interface EditableAclEntry extends AclGrant {
  * Reads an object's current access from its stored ACL, so that it can be shown, edited, or written
  * back in the shapes Kibana writes. It applies the rules for reading a stored ACL: an entry that
  * grants to several IDs becomes one entry for each ID, an entry without exactly one known kind or
- * an allowed level is dropped, and several entries for one principal keep the highest grant. A
+ * allowed access is dropped, and several entries for one principal keep the highest grant. A
  * blank ID is skipped, in the owner and in entries, because a request can't contain one.
  *
  * @param policy The access policy of the object's type.
@@ -72,7 +72,7 @@ export const readEditableAcl = (policy: AccessPolicy, acl: StoredAcl): EditableA
   const entries = new Map<string, EditableAclEntry>();
   for (const entry of acl.entries) {
     const kind = getPrincipalKind(entry.type);
-    const access = lowestAllowed(entry.access, policy.entryLevels);
+    const access = lowestAllowed(entry.access, policy.entryAccess);
     if (!kind || !access) {
       continue;
     }
@@ -89,7 +89,7 @@ export const readEditableAcl = (policy: AccessPolicy, acl: StoredAcl): EditableA
 
   return {
     ...(owner && { owner }),
-    general_access: lowestAllowed(acl.general_access, policy.generalAccessLevels) ?? 'none',
+    general: { access: lowestAllowed(acl.general.access, policy.generalAccess) ?? 'none' },
     entries: [...entries.values()],
   };
 };

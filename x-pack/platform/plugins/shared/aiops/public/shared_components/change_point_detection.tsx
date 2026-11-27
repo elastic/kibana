@@ -62,7 +62,7 @@ export interface ChangePointDetectionProps {
   lastReloadRequestTime?: number;
   /** Origin of the embeddable instance */
   embeddingOrigin?: string;
-  onLoading: (isLoading: boolean) => void;
+  onLoading?: (isLoading: boolean) => void;
   onRenderComplete: () => void;
   onError: (error: Error) => void;
   filtersApi?: PublishesFilters;

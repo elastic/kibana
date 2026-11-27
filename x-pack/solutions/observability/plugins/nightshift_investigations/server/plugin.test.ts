@@ -9,6 +9,7 @@ import { MockUrlService } from '@kbn/share-plugin/common/mocks';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import {
@@ -35,6 +36,7 @@ const createPlugin = (memoryEnabled = false) =>
 const createSetupDeps = () =>
   ({
     share: { url: new MockUrlService() },
+    taskManager: taskManagerMock.createSetup(),
   } as unknown as NightshiftInvestigationsSetupDeps);
 
 describe('NightshiftInvestigationsPlugin setup', () => {
@@ -109,7 +111,7 @@ describe('NightshiftInvestigationsPlugin setup', () => {
     expect(await isEnabled(request)).toBe(false);
   });
 
-  it('registers the reference-free, alert-outcome, Wiki, and memory judges with the evals plugin', () => {
+  it('registers the reference-free, alert-outcome, recovery due-diligence, Wiki, and memory judges with the evals plugin', () => {
     const registerEvaluator = jest.fn();
 
     createPlugin().setup(coreMock.createSetup(), {
@@ -123,9 +125,13 @@ describe('NightshiftInvestigationsPlugin setup', () => {
         'nightshift_investigation_process@1.0.0',
         'nightshift_conclusion_quality@1.0.0',
         'nightshift_missing_data@1.0.0',
+        'nightshift_tool_call_health@1.0.0',
         'nightshift_alert_outcome_rca_accuracy@1.1.0',
         'nightshift_alert_outcome_benign_classification@1.0.0',
         'nightshift_alert_outcome_rca_reporting_gap@1.0.0',
+        'nightshift_recovery_causal_checklist@1.2.0',
+        'nightshift_recovery_root_cause_evidence@1.2.0',
+        'nightshift_recovery_evidence_families@2.1.0',
         'nightshift_wiki_pages_read@1.0.0',
         'nightshift_wiki_page_influence@1.0.0',
         'nightshift_memory_read_judge@1.0.0',

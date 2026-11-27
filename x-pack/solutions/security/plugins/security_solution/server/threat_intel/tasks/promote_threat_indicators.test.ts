@@ -449,6 +449,36 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
     });
   });
 
+  describe('placeholder emails are kept out of promotion', () => {
+    it.each([
+      ['uncertain', 'test@test.com'],
+      ['discriminating', 'zimbra@mail.lab.test'],
+      ['contextual', 'address@host.name'],
+    ])('does not upsert a promotable-tier (%s) placeholder email %s', (tier, value) => {
+      const ops = buildBulkOpsForTest(
+        [makeReport({ id: 'r-placeholder', iocs: [{ type: 'email', value, tier }] })],
+        NOW
+      );
+      expect(ops).toHaveLength(0);
+    });
+
+    it('still promotes a real-domain email from the same report', () => {
+      const ops = buildBulkOpsForTest(
+        [
+          makeReport({
+            id: 'r-mixed-email',
+            iocs: [
+              { type: 'email', value: 'test@test.com', tier: 'uncertain' },
+              { type: 'email', value: 'actor@malicious.org', tier: 'uncertain' },
+            ],
+          }),
+        ],
+        NOW
+      );
+      expect(ops.map((op) => op._id)).toEqual(['default:email:actor@malicious.org']);
+    });
+  });
+
   describe('deferred and rejected reports are kept out of promotion', () => {
     it('does not upsert an IOC that semantic review deferred', () => {
       const ops = buildBulkOpsForTest(
@@ -490,6 +520,21 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
             id: 'r-workflow-rejected',
             iocs: [{ type: 'ip', value: '1.2.3.4' }],
             extractionMethod: 'workflow_v4_rejected',
+          }),
+        ],
+        NOW
+      );
+
+      expect(ops).toHaveLength(0);
+    });
+
+    it('produces no ops for a report marked rejected with the version-independent value', () => {
+      const ops = buildBulkOpsForTest(
+        [
+          makeReport({
+            id: 'r-workflow-rejected-current',
+            iocs: [{ type: 'ip', value: '1.2.3.4' }],
+            extractionMethod: 'enrich_workflow_rejected',
           }),
         ],
         NOW

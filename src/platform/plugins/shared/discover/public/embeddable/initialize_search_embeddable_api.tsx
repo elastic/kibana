@@ -29,6 +29,7 @@ import type {
   JsonModeSettings,
   DocumentsDisplayMode,
 } from '@kbn/unified-data-table';
+import type { IDslPagination } from '@kbn/search-types';
 
 import {
   isOfAggregateQueryType,
@@ -205,6 +206,8 @@ export const initializeSearchEmbeddableApi = async ({
   const resultDataSource$ = new BehaviorSubject<EsqlSource | undefined>(undefined);
   const totalHitCount$ = new BehaviorSubject<number | undefined>(undefined);
   const inspectorAdapters$ = new BehaviorSubject<Adapters>({});
+  const pagination$ = new BehaviorSubject<IDslPagination | undefined>(undefined);
+  const isLoadingMore$ = new BehaviorSubject<boolean>(false);
 
   /**
    * The state manager is used to modify the state of the saved search - this should never be
@@ -226,6 +229,8 @@ export const initializeSearchEmbeddableApi = async ({
     documentsDisplayMode: documentsDisplayMode$,
     jsonModeSettings: jsonModeSettings$,
     inspectorAdapters: inspectorAdapters$,
+    pagination: pagination$,
+    isLoadingMore: isLoadingMore$,
   };
 
   /** The saved search should be the source of truth for all state  */

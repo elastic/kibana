@@ -196,9 +196,36 @@ const hypothesesNodes = (
   return [markdown(serializeMarkdown([md.paragraph(md.strong('Hypotheses')), ...items]))];
 };
 
+const proposalsNodes = (
+  recommendations: NonNullable<NotifiableInvestigation['recommendations']>
+): ComponentsNode[] => {
+  if (recommendations.length === 0) {
+    return [];
+  }
+  const items = recommendations.map(({ title, impact, confidence }) => {
+    const levels = [
+      impact && `${capitalize(impact)} impact`,
+      confidence && `${capitalize(confidence)} confidence`,
+    ].filter(Boolean);
+    return md.paragraph(
+      md.strong(clampSlackText(oneLine(title), MAX_CANDIDATE_LENGTH)),
+      ...(levels.length > 0 ? [' ', md.emphasis(`(${levels.join(' · ')})`)] : [])
+    );
+  });
+  return [
+    markdown(
+      serializeMarkdown([
+        md.paragraph(md.strong('Proposed actions')),
+        md.list(items, { ordered: true }),
+      ])
+    ),
+  ];
+};
+
 const detailsSection = (
   findings: Finding[],
-  hypotheses: NotifiableInvestigation['hypotheses']
+  hypotheses: NotifiableInvestigation['hypotheses'],
+  recommendations: NotifiableInvestigation['recommendations']
 ): ComponentsNode[] => {
   const groups: ComponentsNode[][] = [
     ...findings
@@ -217,6 +244,7 @@ const detailsSection = (
         ];
       }),
     hypothesesNodes(hypotheses ?? []),
+    proposalsNodes(recommendations ?? []),
   ].filter((group) => group.length > 0);
   return groups.length > 0
     ? [
@@ -298,7 +326,7 @@ export const buildInvestigationSlackComposition = ({
       automation
     ),
     ...leadNodes(findings),
-    ...detailsSection(findings, investigation.hypotheses),
+    ...detailsSection(findings, investigation.hypotheses, investigation.recommendations),
     openInvestigation(url),
   ];
 };

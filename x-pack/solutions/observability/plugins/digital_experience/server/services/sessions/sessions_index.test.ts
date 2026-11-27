@@ -17,7 +17,7 @@ import {
   SESSIONS_VERSION,
 } from '../../../common/sessions';
 import { SESSION_ATTRIBUTE_FIELDS } from '../../../common/session_attribute_fields';
-import { ENVIRONMENT_FIELDS } from '../../lib/otel/queries';
+import { ENVIRONMENT_FIELDS } from '../../../common/otel_data';
 import {
   createSessionsIndex,
   putSessionsIndexTemplate,
@@ -25,8 +25,11 @@ import {
   sessionsIndexTemplate,
   type SessionDocument,
 } from './sessions_index';
+import { indexPatternCovers } from './sessions_privileges';
 
 type Client = ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+
+const BROWSER_INDEX = { index: SESSIONS_INDEX, indexTemplate: sessionsIndexTemplate };
 
 interface MappingNode {
   type?: string;
@@ -38,7 +41,7 @@ const samples = { count: 4, good: 2, needs_improvement: 1, poor: 1 };
 /** A summary with every field set, so each one's path can be checked against the mappings. */
 const fullDocument: SessionDocument = {
   session: { id: 'session-a' },
-  service: { name: 'storefront-web' },
+  service: { name: 'storefront-web', version: '2.4.0' },
   start_time: '2026-10-27T10:00:00.000Z',
   end_time: '2026-10-27T10:05:00.000Z',
   duration_ms: 300_000,
@@ -47,6 +50,12 @@ const fullDocument: SessionDocument = {
   page_load_count: 1,
   click_count: 4,
   js_error_count: 2,
+  rage_click_count: 2,
+  dead_click_count: 1,
+  error_click_count: 0,
+  frustration_count: 3,
+  frustration_targets: ['#buy'],
+  frustration_pages: ['/cart'],
   http_request_count: 5,
   http_failed_request_count: 1,
   bounced: false,
@@ -60,6 +69,7 @@ const fullDocument: SessionDocument = {
   geo: { country_iso: 'ES', region: 'Madrid', city: 'Madrid' },
   web_vitals: { lcp: 2100, inp: 120, cls: 0.05, fcp: 900, ttfb: 300 },
   web_vital_samples: { lcp: samples, inp: samples, cls: samples, fcp: samples, ttfb: samples },
+  load_time: { p75: 1800, count: 1 },
   search: ['session-a', 'ana@example.com'],
 };
 
@@ -116,6 +126,21 @@ describe('sessions index', () => {
       expect(sessionsIndexMappings.properties.search).toEqual({ type: 'wildcard' });
     });
 
+    it('maps the frustration counts as numbers, and the frustrated selectors and pages as keywords', () => {
+      const { properties } = sessionsIndexMappings;
+
+      for (const field of [
+        properties.rage_click_count,
+        properties.dead_click_count,
+        properties.error_click_count,
+        properties.frustration_count,
+      ]) {
+        expect(field).toEqual({ type: 'long' });
+      }
+      expect(properties.frustration_targets).toEqual({ type: 'keyword', ignore_above: 1024 });
+      expect(properties.frustration_pages).toEqual({ type: 'keyword', ignore_above: 1024 });
+    });
+
     it('bounds the environment, which the browser sets', () => {
       expect(sessionsIndexMappings.properties.environment).toEqual({
         type: 'keyword',
@@ -149,13 +174,24 @@ describe('sessions index', () => {
         'index.sort.field': ['start_time', 'session.id'],
         'index.sort.order': ['desc', 'asc'],
       });
-      expect(SESSIONS_INDEX).toBe(`digital-experience-sessions-${SESSIONS_VERSION}`);
+      expect(SESSIONS_INDEX).toBe(`digital-experience-sessions-browser-${SESSIONS_VERSION}`);
+    });
+
+    it('covers the browser sessions indices of every version, and no other platform’s', () => {
+      const templateCovers = (index: string): boolean =>
+        [sessionsIndexTemplate.index_patterns]
+          .flat()
+          .some((pattern) => pattern !== undefined && indexPatternCovers(pattern, index));
+
+      expect(templateCovers(SESSIONS_INDEX)).toBe(true);
+      expect(templateCovers('digital-experience-sessions-browser-2')).toBe(true);
+      expect(templateCovers('digital-experience-sessions-mobile-1')).toBe(false);
     });
 
     it('puts the template with the given client and signal', async () => {
       const { signal } = new AbortController();
 
-      await putSessionsIndexTemplate(client, signal);
+      await putSessionsIndexTemplate(client, BROWSER_INDEX, signal);
 
       expect(client.indices.putIndexTemplate).toHaveBeenCalledWith(sessionsIndexTemplate, {
         signal,
@@ -167,14 +203,14 @@ describe('sessions index', () => {
     it('creates the index of this version and says so', async () => {
       const { signal } = new AbortController();
 
-      expect(await createSessionsIndex(client, signal)).toBe(true);
+      expect(await createSessionsIndex(client, BROWSER_INDEX, signal)).toBe(true);
       expect(client.indices.create).toHaveBeenCalledWith({ index: SESSIONS_INDEX }, { signal });
     });
 
     it('keeps an existing index, without needing view_index_metadata to check for it', async () => {
       client.indices.create.mockRejectedValue(esError(400, 'resource_already_exists_exception'));
 
-      expect(await createSessionsIndex(client)).toBe(false);
+      expect(await createSessionsIndex(client, BROWSER_INDEX)).toBe(false);
       expect(client.indices.exists).not.toHaveBeenCalled();
     });
 
@@ -185,7 +221,7 @@ describe('sessions index', () => {
     ])('rethrows %s', async (_name, error) => {
       client.indices.create.mockRejectedValue(error);
 
-      await expect(createSessionsIndex(client)).rejects.toBe(error);
+      await expect(createSessionsIndex(client, BROWSER_INDEX)).rejects.toBe(error);
     });
   });
 });

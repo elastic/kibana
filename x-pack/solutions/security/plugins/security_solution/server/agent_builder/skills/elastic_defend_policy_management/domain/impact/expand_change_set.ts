@@ -65,8 +65,8 @@ const protectionReference = (protection: PolicyCouplingProtection) =>
   getPolicyProtectionsReference().find(({ keyPath }) => keyPath === `${protection}.mode`);
 
 /**
- * Card-level operations (`set_protection_level`/`set_protection_enabled`) and coupled popup writes
- * otherwise apply to every OS a protection supports. Linux ransomware and its notification must
+ * Card-level operations (`set_protection_level`/`set_protection_enabled`)
+ * apply to every OS a protection supports. Linux ransomware and its notification must
  * stay untouched while `linuxRansomwareProtection` is off, so those broad writes drop Linux from
  * the protection's OS list before dispatch runs.
  */
@@ -249,23 +249,7 @@ const dispatch = (
       helpers.setBehaviorReputationService(policy, mode !== ProtectionModes.off);
     return backfillLinuxRansomware(policy, existedBefore, licenseInformation);
   }
-  // The shared popup rule writes every OS the protection supports; Linux must stay out while the flag is off.
-  if (
-    classified?.kind === 'popup_enabled' &&
-    classified.protection === 'ransomware' &&
-    !linuxRansomwareProtection
-  ) {
-    const reference = protectionReference(classified.protection);
-    if (reference)
-      helpers.setPopupEnabled(
-        policy,
-        classified.protection,
-        restrictBroadOsList(classified.protection, reference.osList, linuxRansomwareProtection),
-        classified.value
-      );
-  } else {
-    applySetFieldValue(policy, operation, classified);
-  }
+  applySetFieldValue(policy, operation, classified);
   return backfillLinuxRansomware(policy, existedBefore, licenseInformation);
 };
 

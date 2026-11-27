@@ -72,9 +72,10 @@ if [[ "\${1:-} \${2:-}" == "pr list" ]]; then
     echo "HTTP 401: Bad credentials" >&2
     exit 1
   fi
-  printf '%s\\t%s\\n' "[Console] Update console definitions (9.6)" "https://github.com/elastic/kibana/pull/7"
+  printf '%s\\t%s\\t%s\\n' "[Console] Update console definitions (9.6)" "https://github.com/elastic/kibana/pull/7" "kibanamachine"
+  printf '%s\\t%s\\t%s\\n' "\${TEST_PR_TITLE}" "https://github.com/elastic/kibana/pull/8" "someone-else"
   if [[ "\${TEST_EXISTING_PR}" == "true" ]]; then
-    printf '%s\\t%s\\n' "\${TEST_PR_TITLE}" "\${TEST_PR_URL}"
+    printf '%s\\t%s\\t%s\\n' "\${TEST_PR_TITLE}" "\${TEST_PR_URL}" "app/elastic-vault-github-plugin-prod"
   fi
   exit 0
 fi
@@ -175,10 +176,10 @@ describe('WHEN Console definitions are synchronized', () => {
       expect(result.uploadedPipeline).toContain('- "#kibana-management"');
       expect(result.uploadedPipeline).toContain(`<${PR_URL}|${PR_TITLE}> hasn't been merged yet`);
       expect(result.uploadedPipeline).toContain('if: step.outcome == "passed"');
-      expect(result.prListArgs).toContain(
-        `"${PR_TITLE}" in:title author:kibanamachine author:app/elastic-vault-github-plugin-prod`
-      );
-      expect(result.prListArgs).not.toContain('--author');
+      expect(result.prListArgs).toContain(`"${PR_TITLE}" in:title`);
+      expect(result.prListArgs).not.toContain('author:');
+      expect(result.prListArgs).toContain('--json title,url,author');
+      expect(result.prListArgs).toContain('"\\(.title)\\t\\(.url)\\t\\(.author.login)"');
     } finally {
       result.cleanup();
     }
@@ -235,7 +236,7 @@ describe('WHEN the Console definitions sync reminder runs', () => {
     }
   });
 
-  it('SHOULD ignore PRs whose title only partly matches', () => {
+  it('SHOULD ignore PRs whose title only partly matches or that another author opened', () => {
     const result = runSync({ script: REMINDER_SCRIPT, reminderMode: 'review_or_close' });
     try {
       expect(result.status).toBe(0);

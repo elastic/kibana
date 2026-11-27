@@ -230,7 +230,6 @@ const GroupSelectorComponent = ({
         iconSize="s"
         iconType="chevronSingleDown"
         onClick={onButtonClick}
-        title={buttonLabel}
         size="xs"
       >
         {popoverButtonLabel ?? `${title}: ${buttonLabel}`}

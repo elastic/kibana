@@ -62,6 +62,16 @@ const capOutput = async (
   )}\n[... ${omitted} chars omitted; ${pointer} ...]\n${text.slice(-INLINE_TAIL_CHARS)}`;
 };
 
+const hasAllowRuleForHost = (rules: readonly string[], host: string): boolean =>
+  rules.some((rule) => {
+    if (rule.startsWith('deny ')) return false;
+
+    // Space rules are canonical: a bare host or `allow SCHEME HOST[:PORT] ...`.
+    // Preserve any existing host-level allow's scheme, port, method and path restrictions.
+    const ruleHost = (rule.startsWith('allow ') ? rule.split(' ')[2] : rule).split(':')[0];
+    return ruleHost === host || (ruleHost.startsWith('*.') && host.endsWith(ruleHost.slice(1)));
+  });
+
 const RESOURCE_EXHAUSTED_HINT =
   ' The output was too large for the sandbox transport; redirect it to a file, then grep or summarize it.';
 
@@ -170,6 +180,7 @@ export const createSandboxBashTool = ({
     let credentialEnv: Record<string, string> = {};
     let secretEnvKeys: SecretEnvKey[] = [];
     let secretValues: readonly string[] = [];
+    let connectorAllowedHosts: string[] = [];
     if (connector_id) {
       if (!resolveConnectorCredentials) {
         return {
@@ -190,6 +201,7 @@ export const createSandboxBashTool = ({
       credentialEnv = resolved.env;
       secretEnvKeys = resolved.secretEnvKeys;
       secretValues = resolved.secretValues;
+      connectorAllowedHosts = resolved.allowedHosts;
     }
 
     let spaceAllowedHosts: string[] = [];
@@ -213,6 +225,13 @@ export const createSandboxBashTool = ({
       }
     }
 
+    const allowedHosts = [
+      ...new Set([
+        ...spaceAllowedHosts,
+        ...connectorAllowedHosts.filter((host) => !hasAllowRuleForHost(spaceAllowedHosts, host)),
+      ]),
+    ];
+
     logger.debug(`Executing sandbox bash command for session ${rawConversationId}: ${command}`);
 
     try {
@@ -229,7 +248,7 @@ export const createSandboxBashTool = ({
         directory: working_directory,
         env: mergedEnv,
         ...(secretEnvKeys.length > 0 ? { secret_env_keys: secretEnvKeys } : {}),
-        ...(spaceAllowedHosts.length > 0 ? { allowed_hosts: spaceAllowedHosts } : {}),
+        ...(allowedHosts.length > 0 ? { allowed_hosts: allowedHosts } : {}),
         timeout_seconds:
           timeout_seconds && timeout_seconds > 0
             ? Math.min(timeout_seconds, MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS)

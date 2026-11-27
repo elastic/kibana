@@ -36,7 +36,7 @@ const baseResult = (
     hits: [],
     affected_assets: {
       hosts: [{ name: 'WIN-ANALYST01', hit_count: 2 }],
-      users: [{ name: 'dev-user@corp.example', hit_count: 1 }],
+      users: [{ name: 'dev-user@corp.example.cloud', hit_count: 1 }],
       services: [],
     },
     per_index: [],

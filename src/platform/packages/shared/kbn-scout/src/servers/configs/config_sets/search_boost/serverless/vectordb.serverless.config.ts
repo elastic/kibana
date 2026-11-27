@@ -10,9 +10,17 @@
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as defaultConfig } from '../../default/serverless/vectordb.serverless.config';
 
-// The plugin flag is read at boot, so it can't be set at runtime.
+// The plugin flag is read at boot, so it can't be set at runtime. The `_boost` APIs are off until
+// Elasticsearch turns them on.
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
+  esTestCluster: {
+    ...defaultConfig.esTestCluster,
+    serverArgs: [
+      ...defaultConfig.esTestCluster.serverArgs,
+      'serverless.search.boost_profile.enabled=true',
+    ],
+  },
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
     serverArgs: [...defaultConfig.kbnTestServer.serverArgs, '--xpack.searchBoost.enabled=true'],

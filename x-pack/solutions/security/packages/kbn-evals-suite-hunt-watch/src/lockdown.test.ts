@@ -37,7 +37,11 @@ describe('lockdown scan', () => {
 describe('findForbiddenLiterals', () => {
   it.each([
     ['a decoy IP', 'MATCH(source.ip, "198.51.100.40")', ['198.51.100.40']],
-    ['a principal', "const who = 'dev-user@corp.example';", ['dev-user@corp.example', 'dev-user']],
+    [
+      'a principal',
+      "const who = 'dev-user@corp.example.cloud';",
+      ['dev-user@corp.example.cloud', 'dev-user'],
+    ],
     ['the actor name', 'attributed to TA-DEMO-SHADOW-ADMIN', ['TA-DEMO-SHADOW-ADMIN']],
     [
       'the report id family',

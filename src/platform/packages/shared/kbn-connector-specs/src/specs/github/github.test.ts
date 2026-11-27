@@ -81,14 +81,15 @@ describe('GithubConnector', () => {
       );
     });
 
-    it('declares the GitHub API hosts and the configured MCP server host as sandbox hosts', () => {
+    it('declares the GitHub API and git hosts and the configured MCP server host as sandbox hosts', () => {
       expect(getSandboxHosts(GithubConnector.sandbox, {})).toEqual([
         'api.github.com',
         'api.githubcopilot.com',
+        'github.com',
       ]);
       expect(
         getSandboxHosts(GithubConnector.sandbox, { serverUrl: 'https://mcp.ghe.example.com/mcp/' })
-      ).toEqual(['api.github.com', 'api.githubcopilot.com', 'mcp.ghe.example.com']);
+      ).toEqual(['api.github.com', 'api.githubcopilot.com', 'github.com', 'mcp.ghe.example.com']);
     });
 
     it('existing connectors with bearer auth still pass schema validation', () => {

@@ -39,7 +39,7 @@ import { breadcrumbService, IndexManagementBreadcrumb } from '../../../services/
 import { documentationService } from '../../../services/documentation';
 import { DataStreamTable } from './data_stream_table';
 import { DataStreamDetailPanel } from './data_stream_detail_panel';
-import { filterDataStreams, isSelectedDataStreamHidden } from '../../../lib/data_streams';
+import { filterDataStreams, isManaged } from '../../../lib/data_streams';
 import type { Filters } from '../components';
 import { useStateWithLocalStorage } from '../../../hooks/use_state_with_localstorage';
 
@@ -60,7 +60,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   const decodedDataStreamName = attemptToURIDecode(dataStreamName);
 
   const {
-    config: { enableProjectLevelRetentionChecks },
+    config: { enableProjectLevelRetentionChecks, showManagedDataStreamsByDefault },
     core: { getUrlForApp, executionContext },
     plugins: { isFleetEnabled, cloud },
   } = useAppContext();
@@ -108,7 +108,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
       name: i18n.translate('xpack.idxMgmt.dataStreamList.viewManagedLabel', {
         defaultMessage: 'Managed data streams',
       }),
-      checked: 'on',
+      checked: showManagedDataStreamsByDefault ? 'on' : 'off',
     },
     hidden: {
       name: i18n.translate('xpack.idxMgmt.dataStreamList.viewHiddenLabel', {
@@ -118,17 +118,39 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
     },
   });
 
-  const activateHiddenFilter = (shouldBeActive: boolean) => {
-    if (shouldBeActive && filters.hidden.checked === 'off') {
-      setFilters({
-        ...filters,
-        hidden: {
-          ...filters.hidden,
-          checked: 'on',
-        },
-      });
+  const selectedDataStream = dataStreams?.find(({ name }) => name === decodedDataStreamName);
+  const selectedDataStreamName = selectedDataStream?.name;
+  const isSelectedDataStreamHidden = Boolean(selectedDataStream?.hidden);
+  const isSelectedDataStreamManaged = selectedDataStream ? isManaged(selectedDataStream) : false;
+
+  // A deep-linked data stream should always be visible in the list, so turn on the view filters
+  // that would otherwise exclude it. Keyed on primitives so a reload doesn't re-apply the filters
+  // the user may have turned off in the meantime.
+  useEffect(() => {
+    if (!selectedDataStreamName) {
+      return;
     }
-  };
+
+    setFilters((currentFilters) => {
+      const shouldShowHidden =
+        isSelectedDataStreamHidden && currentFilters.hidden.checked === 'off';
+      const shouldShowManaged =
+        isSelectedDataStreamManaged && currentFilters.managed.checked === 'off';
+
+      if (!shouldShowHidden && !shouldShowManaged) {
+        return currentFilters;
+      }
+
+      return {
+        managed: shouldShowManaged
+          ? { ...currentFilters.managed, checked: 'on' }
+          : currentFilters.managed,
+        hidden: shouldShowHidden
+          ? { ...currentFilters.hidden, checked: 'on' }
+          : currentFilters.hidden,
+      };
+    });
+  }, [selectedDataStreamName, isSelectedDataStreamHidden, isSelectedDataStreamManaged]);
 
   const filteredDataStreams = useMemo(() => {
     if (!dataStreams) {
@@ -142,6 +164,11 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
 
     return filterDataStreams(dataStreams, visibleTypes);
   }, [dataStreams, filters]);
+
+  const excludedDataStreams = useMemo(() => {
+    const visibleDataStreams = new Set(filteredDataStreams);
+    return (dataStreams ?? []).filter((dataStream) => !visibleDataStreams.has(dataStream));
+  }, [dataStreams, filteredDataStreams]);
 
   const renderHeader = () => {
     return (
@@ -277,7 +304,6 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
       />
     );
   } else {
-    activateHiddenFilter(isSelectedDataStreamHidden(dataStreams!, decodedDataStreamName));
     content = (
       <EuiPageSection paddingSize="none" data-test-subj="dataStreamList">
         {enableProjectLevelRetentionChecks && projectLevelRetentionCallout && (
@@ -324,6 +350,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
           dataStreams={filteredDataStreams}
           isLoading={isLoading}
           reload={reload}
+          excludedDataStreams={excludedDataStreams}
           viewFilters={filters}
           onViewFilterChange={setFilters}
           history={history as ScopedHistory}

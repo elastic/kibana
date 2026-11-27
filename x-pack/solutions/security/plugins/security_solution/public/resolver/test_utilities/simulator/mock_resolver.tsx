@@ -51,7 +51,7 @@ type MockResolverProps = {
 } & ResolverProps;
 
 /**
- * This is a mock Resolver component. It is intended to be used with `enzyme` tests via the `Simulator` class. It wraps Resolver in the required providers:
+ * This is a mock Resolver component. It is intended to be used with tests via the `Simulator` class. It wraps Resolver in the required providers:
  *  * `i18n`
  *  * `Router` using a provided `History`
  *  * `SideEffectContext.Provider` using side effect simulator it creates
@@ -69,7 +69,7 @@ export const MockResolver = React.memo((props: MockResolverProps) => {
   const [resolverElement, setResolverElement] = useState<HTMLDivElement | null>(null);
 
   // Get a ref to the underlying Resolver element so we can resize.
-  // Use a callback function because the underlying DOM node can change. In fact, `enzyme` seems to change it a lot.
+  // Use a callback function because the underlying DOM node can change.
   const resolverRef = useCallback((element: HTMLDivElement | null) => {
     setResolverElement(element);
   }, []);

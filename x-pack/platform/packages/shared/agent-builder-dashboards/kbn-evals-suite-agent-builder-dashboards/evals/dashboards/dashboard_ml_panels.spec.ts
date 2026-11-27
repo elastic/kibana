@@ -18,10 +18,14 @@ evaluate.describe('Agent Builder Dashboards - ML Panels', { tag: tags.serverless
     for (const jobId of ML_PANEL_JOB_IDS) {
       await fetch(`/internal/ml/anomaly_detectors/${jobId}`, {
         method: 'PUT',
-        version: '1',
+        headers: { 'elastic-api-version': '1' },
         body: JSON.stringify({
           description: 'Agent Builder dashboards eval job',
-          analysis_config: { bucket_span: '15m', detectors: [{ function: 'count' }] },
+          analysis_config: {
+            bucket_span: '15m',
+            detectors: [{ function: 'count' }],
+            influencers: [],
+          },
           data_description: { time_field: '@timestamp' },
         }),
       });

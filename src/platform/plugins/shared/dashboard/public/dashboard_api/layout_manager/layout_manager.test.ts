@@ -31,7 +31,7 @@ import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { getSampleDashboardState } from '../../mocks';
 import type { initializeTrackPanel } from '../track_panel';
 import type { initializeViewModeManager } from '../view_mode_manager';
-import { deserializeLayout } from './deserialize_layout';
+import { deserializeLayout } from '../../../common/dashboard_state/layout/deserialize_layout';
 import { initializeLayoutManager } from './layout_manager';
 
 jest.mock('uuid', () => ({
@@ -47,6 +47,7 @@ jest.mock('rxjs', () => ({
 const trackPanelMock = {
   setScrollToPanelId: jest.fn(),
   setHighlightPanelId: jest.fn(),
+  scrollToBottom$: { next: jest.fn() },
 } as unknown as ReturnType<typeof initializeTrackPanel>['api'];
 
 const viewModeManagerMock = { api: { viewMode$: new BehaviorSubject('view') } } as ReturnType<
@@ -373,10 +374,10 @@ describe('layout manager', () => {
         },
       ]);
 
-      expect(layoutManager.internalApi.childrenStateLoading$.value).toBe(true);
+      expect(layoutManager.internalApi.applyingChildState$.value).toBe(true);
       await waitFor(() => {
         expect(applySerializedState).toHaveBeenCalledWith(updatedState);
-        expect(layoutManager.internalApi.childrenStateLoading$.value).toBe(false);
+        expect(layoutManager.internalApi.applyingChildState$.value).toBe(false);
       });
 
       const layout = layoutManager.api.layout$.value;
@@ -414,10 +415,10 @@ describe('layout manager', () => {
         },
       ]);
 
-      expect(layoutManager.internalApi.childrenStateLoading$.value).toBe(true);
+      expect(layoutManager.internalApi.applyingChildState$.value).toBe(true);
       await waitFor(() => {
         expect(applySerializedState).toHaveBeenCalledWith({ title: 'Updated Panel One' });
-        expect(layoutManager.internalApi.childrenStateLoading$.value).toBe(false);
+        expect(layoutManager.internalApi.applyingChildState$.value).toBe(false);
       });
 
       expect(trackPanelMock.setScrollToPanelId).toHaveBeenCalledWith(PANEL_ONE_ID);
@@ -601,6 +602,49 @@ describe('layout manager', () => {
     });
   });
 
+  describe('groupPanelsInSection', () => {
+    const panel2 = { ...panel1, id: 'panelTwo', grid: { w: 1, h: 1, x: 1, y: 0 } };
+
+    test('moves the panels into a new section at the bottom in a single layout update', () => {
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        [panel2, section1],
+        pinnedControls,
+        trackPanelMock
+      );
+      const layoutListener = jest.fn();
+      const subscription = layoutManager.api.layout$.subscribe(layoutListener);
+      layoutListener.mockClear();
+
+      layoutManager.api.groupPanelsInSection(['panelTwo', 'control1']);
+
+      expect(layoutListener).toHaveBeenCalledTimes(1);
+      const { panels, sections } = layoutManager.api.layout$.getValue();
+      expect(sections['54321']).toBeDefined();
+      expect(panels.panelTwo.grid.sectionId).toBe('54321');
+      expect(trackPanelMock.scrollToBottom$.next).toHaveBeenCalledTimes(1);
+      subscription.unsubscribe();
+    });
+
+    test('does not update the layout when none of the panels are grid panels', () => {
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        [panel1],
+        pinnedControls,
+        trackPanelMock
+      );
+      const layoutListener = jest.fn();
+      const subscription = layoutManager.api.layout$.subscribe(layoutListener);
+      layoutListener.mockClear();
+
+      layoutManager.api.groupPanelsInSection(['control1', 'unknownPanel']);
+
+      expect(layoutListener).not.toHaveBeenCalled();
+      expect(trackPanelMock.scrollToBottom$.next).not.toHaveBeenCalled();
+      subscription.unsubscribe();
+    });
+  });
+
   describe('getChildApi', () => {
     test('should return api when api is available', (done) => {
       const layoutManager = initializeLayoutManager(
@@ -762,7 +806,7 @@ describe('layout manager', () => {
     });
   });
 
-  describe('childrenLoading$', () => {
+  describe('childApisPending$', () => {
     test('all children load when no sections', async () => {
       const loadingStates: boolean[] = [];
       const layoutManager = initializeLayoutManager(
@@ -771,7 +815,7 @@ describe('layout manager', () => {
         pinnedControls,
         trackPanelMock
       );
-      layoutManager.internalApi.childrenLoading$.subscribe((loading) => {
+      layoutManager.internalApi.childApisPending$.subscribe((loading) => {
         loadingStates.push(loading);
       });
 
@@ -798,7 +842,7 @@ describe('layout manager', () => {
         pinnedControls,
         trackPanelMock
       );
-      layoutManager.internalApi.childrenLoading$.subscribe((loading) => {
+      layoutManager.internalApi.childApisPending$.subscribe((loading) => {
         loadingStates.push(loading);
       });
 
@@ -827,7 +871,7 @@ describe('layout manager', () => {
         pinnedControls,
         trackPanelMock
       );
-      layoutManager.internalApi.childrenLoading$.subscribe((loading) => {
+      layoutManager.internalApi.childApisPending$.subscribe((loading) => {
         loadingStates.push(loading);
       });
 
@@ -870,7 +914,7 @@ describe('layout manager', () => {
         trackPanelMock
       );
 
-      layoutManager.internalApi.childrenLoading$.subscribe((loading) => {
+      layoutManager.internalApi.childApisPending$.subscribe((loading) => {
         loadingStates.push(loading);
       });
       layoutManager.api.registerChildApi(panel1Api);

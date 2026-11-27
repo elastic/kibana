@@ -6,14 +6,17 @@
  */
 
 import { type DiagnosticResult, errors } from '@elastic/elasticsearch';
+import Boom from '@hapi/boom';
+import { setTimeout as delay } from 'timers/promises';
 
 import { schema } from '@kbn/config-schema';
-import type {
-  CoreSetup,
-  CoreStart,
-  ElasticsearchClient,
-  KibanaRequest,
-  PluginInitializerContext,
+import {
+  type CoreSetup,
+  type CoreStart,
+  type ElasticsearchClient,
+  type KibanaRequest,
+  type PluginInitializerContext,
+  SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
@@ -28,18 +31,31 @@ import {
   type BulkUpdateTaskResult,
   type ConcreteTaskInstance,
   getUiamApiKeySecret,
+  TaskCost,
+  type TaskManagerSetupContract,
   type TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 
 import type { PluginStartDependencies } from '.';
+import {
+  CredentialRecovery,
+  credentialRecoverySchema,
+  runConcurrentOperations,
+} from './credential_recovery';
 
 export const SESSION_INDEX_CLEANUP_TASK_NAME = 'session_cleanup';
 
 const SELF_CLIENT_ES_TARGET = '/internal/test_endpoints/self_client/fake_request';
 const SELF_CLIENT_OAUTH_TARGET = '/internal/test_endpoints/self_client/oauth_me';
+const SELF_CLIENT_PROFILE_TARGET = '/internal/test_endpoints/self_client/current_profile';
 const SELF_CLIENT_TARGET_PATH = schema.maybe(
   schema.oneOf([schema.literal(SELF_CLIENT_ES_TARGET), schema.literal(SELF_CLIENT_OAUTH_TARGET)])
 );
+
+interface CurrentProfileBody {
+  profileId: string | null;
+  profileUid: string | null;
+}
 
 const getReceivedSelfCallHeaders = (headers: Headers, uiam: UiamAPIKeysType | null) => {
   const clientAuthentication = headers[ES_CLIENT_AUTHENTICATION_HEADER];
@@ -55,7 +71,8 @@ const getReceivedSelfCallHeaders = (headers: Headers, uiam: UiamAPIKeysType | nu
 
 export function initRoutes(
   initializerContext: PluginInitializerContext,
-  core: CoreSetup<PluginStartDependencies>
+  core: CoreSetup<PluginStartDependencies>,
+  taskManagerSetup: TaskManagerSetupContract
 ) {
   const logger = initializerContext.logger.get();
   // Capture once — reading esClient.openPointInTime on disable would recapture the mock.
@@ -140,7 +157,7 @@ export function initRoutes(
           | {
               PKIAuthenticationProvider?: {
                 prototype: {
-                  authenticate: (request: KibanaRequest, session?: unknown) => Promise<unknown>;
+                  authenticate: (request: KibanaRequest, ...args: unknown[]) => Promise<unknown>;
                 };
               };
             }
@@ -168,14 +185,15 @@ export function initRoutes(
 
     const pkiProviderClass = findPkiAuthenticationProvider();
     const originalPkiAuthenticate = pkiProviderClass.prototype.authenticate;
+    // Preserve every argument, including the session reauthentication options, in both hold paths.
     pkiProviderClass.prototype.authenticate = async function wrappedPkiAuthenticate(
       this: unknown,
-      request: KibanaRequest,
-      session?: unknown
+      ...args: Parameters<typeof originalPkiAuthenticate>
     ) {
+      const [request] = args;
       const holdId = readHoldId(request.headers[PREAUTH_HOLD_HEADER]);
       if (!holdId) {
-        return originalPkiAuthenticate.call(this, request, session);
+        return originalPkiAuthenticate.apply(this, args);
       }
 
       preauthHolds.get(holdId)?.release();
@@ -219,7 +237,7 @@ export function initRoutes(
 
       hold.continuedAfterHold = true;
       try {
-        return await originalPkiAuthenticate.call(this, request, session);
+        return await originalPkiAuthenticate.apply(this, args);
       } finally {
         hold.authCompleted = true;
         hold.parked = false;
@@ -440,6 +458,162 @@ export function initRoutes(
 
         throw err;
       }
+    }
+  );
+
+  router.post(
+    {
+      path: '/internal/test_endpoints/authentication/credential_recovery',
+      options: { access: 'internal', timeout: { idleSocket: 150_000 } },
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'Test endpoint exercising session recovery through scoped calls and API key grants',
+        },
+      },
+      validate: { body: credentialRecoverySchema },
+    },
+    async (_context, request, response) => {
+      const [coreStart] = await core.getStartServices();
+      const recovery = new CredentialRecovery(coreStart, request, request.body);
+      let failure: Error | undefined;
+
+      try {
+        await recovery.run();
+      } catch (error) {
+        logger.error(
+          `Credential recovery scenario '${request.body.scenario}' failed: ${error.message}`
+        );
+        failure = error;
+      } finally {
+        await recovery.cleanup();
+      }
+
+      const body = recovery.getResult(failure);
+      if (failure) {
+        return response.customError({
+          statusCode: Boom.isBoom(failure) ? failure.output.statusCode : 500,
+          bypassErrorFormat: true,
+          body: { ...body, message: failure.message },
+        });
+      }
+
+      return response.ok({ body });
+    }
+  );
+
+  const authenticationTaskType = 'securityTestEndpoints:authentication';
+  taskManagerSetup.registerTaskDefinitions({
+    [authenticationTaskType]: {
+      title: 'Authentication test no-op',
+      description: 'Tests API key grants during task scheduling without executing work.',
+      timeout: '10s',
+      cost: TaskCost.Tiny,
+      maxAttempts: 1,
+      createTaskRunner: () => ({ run: async () => undefined }),
+    },
+  });
+
+  router.post(
+    {
+      path: '/internal/test_endpoints/authentication/tasks',
+      options: { access: 'internal' },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Test endpoint exercising session recovery during Task Manager API key grants',
+        },
+      },
+      validate: {
+        query: schema.object({
+          waitMs: schema.number({ min: 0, max: 20_000, defaultValue: 0 }),
+          count: schema.number({ min: 1, max: 3, defaultValue: 1 }),
+          concurrent: schema.boolean({ defaultValue: false }),
+          authenticateFirst: schema.boolean({ defaultValue: false }),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const [, { taskManager }] = await core.getStartServices();
+      const { waitMs, count, concurrent, authenticateFirst } = request.query;
+      const tasks: Array<{ id: string; apiKeyId: string | undefined }> = [];
+
+      const scheduleTask = async () => {
+        const task = await taskManager.schedule(
+          {
+            taskType: authenticationTaskType,
+            runAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+            params: {},
+            state: {},
+          },
+          { request }
+        );
+        tasks.push({ id: task.id, apiKeyId: task.userScope?.apiKeyId });
+      };
+
+      try {
+        // Expire the token inside this request, after HTTP authentication has completed.
+        await delay(waitMs);
+        if (authenticateFirst) {
+          const { elasticsearch } = await context.core;
+          await elasticsearch.client.asCurrentUser.security.authenticate();
+        }
+
+        if (concurrent) {
+          await runConcurrentOperations(Array.from({ length: count }, scheduleTask));
+        } else {
+          for (let index = 0; index < count; index++) {
+            await scheduleTask();
+          }
+        }
+      } catch (error) {
+        await runConcurrentOperations(tasks.map(({ id }) => taskManager.removeIfExists(id)));
+        return response.customError({
+          statusCode: Boom.isBoom(error) ? error.output.statusCode : 500,
+          body: { message: error.message },
+        });
+      }
+
+      const [task, ...additionalTasks] = tasks;
+      return response.ok({
+        body: { ...task, ...(additionalTasks.length ? { additionalTasks } : {}) },
+      });
+    }
+  );
+
+  router.delete(
+    {
+      path: '/internal/test_endpoints/authentication/tasks/{taskId}',
+      options: { access: 'internal' },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Test endpoint removing a task created by an authentication test',
+        },
+      },
+      validate: {
+        params: schema.object({ taskId: schema.string({ minLength: 1, maxLength: 128 }) }),
+      },
+    },
+    async (_context, request, response) => {
+      const [, { taskManager }] = await core.getStartServices();
+      const { taskId } = request.params;
+      try {
+        // Remove only tasks this plugin scheduled, never unrelated background tasks.
+        const { taskType } = await taskManager.get(taskId);
+        if (taskType !== authenticationTaskType) {
+          return response.forbidden({ body: { message: 'Only authentication test tasks.' } });
+        }
+      } catch (error) {
+        if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+          return response.noContent();
+        }
+        throw error;
+      }
+
+      await taskManager.removeIfExists(taskId);
+      return response.noContent();
     }
   );
 
@@ -853,6 +1027,63 @@ export function initRoutes(
 
   router.get(
     {
+      path: SELF_CLIENT_PROFILE_TARGET,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Security test endpoint verifies how the profile of an API key request resolves.',
+        },
+      },
+      validate: false,
+      options: { access: 'internal' },
+    },
+    async (context, request, response) => {
+      const { userProfile } = await context.core;
+      const profile = await userProfile.getCurrent();
+      const body: CurrentProfileBody = {
+        profileId: await userProfile.getCurrentProfileId(),
+        profileUid: profile?.uid ?? null,
+      };
+      return response.ok({ body });
+    }
+  );
+
+  // Resolves the profile of an API key twice: in-process on a fake request, the way a background
+  // task does, and through a real self HTTP call that is authenticated by the key.
+  router.post(
+    {
+      path: '/test_endpoints/self_client/fake_request_profile',
+      security: {
+        authc: {
+          enabled: false,
+          reason: 'Security test endpoint constructs its own fake request credentials.',
+        },
+        authz: { enabled: false, reason: 'Security test endpoint verifies target authorization.' },
+      },
+      validate: { body: schema.object({ apiKey: schema.string({ maxLength: 1024 }) }) },
+    },
+    async (_context, request, response) => {
+      const [coreStart] = await core.getStartServices();
+      const fakeRequest = kibanaRequestFactory({
+        headers: { authorization: `ApiKey ${request.body.apiKey}` },
+      });
+
+      const [profileId, profile] = await Promise.all([
+        coreStart.userProfile.getCurrentProfileId({ request: fakeRequest }),
+        coreStart.userProfile.getCurrent({ request: fakeRequest }),
+      ]);
+      const selfCall = await coreStart.http.selfClient
+        .asScoped(fakeRequest)
+        .fetch<CurrentProfileBody>(SELF_CLIENT_PROFILE_TARGET, { access: 'internal' });
+
+      return response.ok({
+        body: { inProcess: { profileId, profileUid: profile?.uid ?? null }, selfCall },
+      });
+    }
+  );
+
+  router.get(
+    {
       path: SELF_CLIENT_OAUTH_TARGET,
       security: {
         authz: {
@@ -1066,6 +1297,39 @@ export function initRoutes(
         logger.error(`Failed to create a system identity token: ${err}`, err);
         return response.customError({
           statusCode: 500,
+          body: { message: err.message },
+        });
+      }
+    }
+  );
+
+  // Asks Core's security contract what the request's own credentials may do in Cloud, so tests
+  // can observe UIAM's decision for each kind of user.
+  router.get(
+    {
+      path: '/test_endpoints/uiam/access',
+      validate: false,
+      security: {
+        authz: { enabled: false, reason: 'Test endpoint relaying UIAM access checks' },
+      },
+    },
+    async (context, request, response) => {
+      const { security } = await context.core;
+      const { uiam } = security.authz;
+      if (!uiam) {
+        return response.badRequest({ body: { message: 'UIAM authorization is not available' } });
+      }
+
+      try {
+        const [canViewBillingDetails, canInviteOrganizationMembers] = await Promise.all([
+          uiam.canViewBillingDetails(),
+          uiam.canInviteOrganizationMembers(),
+        ]);
+        return response.ok({ body: { canViewBillingDetails, canInviteOrganizationMembers } });
+      } catch (err) {
+        logger.error(`Failed to check access with UIAM: ${err}`, err);
+        return response.customError({
+          statusCode: Boom.isBoom(err) ? err.output.statusCode : 500,
           body: { message: err.message },
         });
       }

@@ -32,6 +32,7 @@ export function ConnectorList({
   onOpenDetails,
   canDelete,
   onDelete,
+  ebtElement,
   'data-test-subj': dataTestSubj,
 }: {
   connectors: SandboxConnector[];
@@ -39,6 +40,7 @@ export function ConnectorList({
   onOpenDetails: (connector: SandboxConnector) => void;
   canDelete: boolean;
   onDelete: (connector: SandboxConnector) => void;
+  ebtElement: string;
   'data-test-subj'?: string;
 }): React.ReactElement {
   const { assignedIds, assign, unassign, canEditAgent, updatingId } = useAgentConnectors();
@@ -62,6 +64,7 @@ export function ConnectorList({
               : editNoPermissionTooltip
           }
           onDelete={() => onDelete(connector)}
+          ebtElement={ebtElement}
           deleteDisabledReason={
             connector.is_preconfigured
               ? preconfiguredTooltip

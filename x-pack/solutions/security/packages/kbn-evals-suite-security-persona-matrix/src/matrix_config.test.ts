@@ -9,6 +9,8 @@ import { parseMatrixConfig } from '@kbn/security-evals-matrix';
 import { AD_FAILURE_CLASS_EVALUATOR_NAME } from './evaluators/ad_failure_class_evaluator';
 import { CHAIN_COVERAGE_EVALUATOR_NAME } from './evaluators/chain_coverage_evaluator';
 import { EICAR_TRAP_EVALUATOR_NAME } from './evaluators/eicar_trap_evaluator';
+import { AD_AXES_RUBRIC_EVALUATOR_NAME } from './evaluators/ad_axes_rubric_evaluator';
+import { PERSONA_RUBRIC_EVALUATOR_NAME } from './evaluators/persona_rubric_evaluator';
 import { RUBRIC_CAP_NO_TOOL_CALL_EVALUATOR_NAME } from './evaluators/rubric_cap_no_tool_call_evaluator';
 import { SIMULATION_AWARENESS_EVALUATOR_NAME } from './evaluators/simulation_awareness_evaluator';
 import { STALLED_AFTER_LOAD_SKILL_EVALUATOR_NAME } from './evaluators/stalled_after_load_skill_evaluator';
@@ -186,6 +188,8 @@ describe.each([
     RUBRIC_CAP_NO_TOOL_CALL_EVALUATOR_NAME,
     CHAIN_COVERAGE_EVALUATOR_NAME,
     AD_FAILURE_CLASS_EVALUATOR_NAME,
+    PERSONA_RUBRIC_EVALUATOR_NAME,
+    AD_AXES_RUBRIC_EVALUATOR_NAME,
   ])('excludes %s from cell means', (name) => {
     expect(excluded).toContain(name);
   });

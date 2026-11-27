@@ -262,15 +262,49 @@ describe('Duration Format', () => {
     fixtures: [
       {
         input: 1988,
-        output: '0.00 milliseconds',
+        output: '1.99 microseconds',
       },
       {
         input: 658,
-        output: '0.00 milliseconds',
+        output: '658.00 nanoseconds',
       },
       {
         input: 3857,
-        output: '0.00 milliseconds',
+        output: '3.86 microseconds',
+      },
+      {
+        input: 1000,
+        output: '1.00 microseconds',
+      },
+      {
+        input: 1000000,
+        output: '1.00 milliseconds',
+      },
+      {
+        input: -1988,
+        output: '-1.99 microseconds',
+      },
+    ],
+  });
+
+  testCase({
+    inputFormat: 'picoseconds',
+    outputFormat: 'humanizePrecise',
+    outputPrecision: 2,
+    showSuffix: true,
+    useShortSuffix: true,
+    fixtures: [
+      {
+        input: 500,
+        output: '0.50 ns',
+      },
+      {
+        input: 1500,
+        output: '1.50 ns',
+      },
+      {
+        input: 2500000,
+        output: '2.50 µs',
       },
     ],
   });
@@ -287,7 +321,7 @@ describe('Duration Format', () => {
       },
       {
         input: 658,
-        output: '0.66 milliseconds',
+        output: '658.00 microseconds',
       },
       {
         input: 3857,
@@ -308,11 +342,11 @@ describe('Duration Format', () => {
       },
       {
         input: 0,
-        output: '0.0 milliseconds',
+        output: '0',
       },
       {
         input: 658,
-        output: '0.7 milliseconds',
+        output: '658.0 microseconds',
       },
       {
         input: 3857,
@@ -459,7 +493,15 @@ describe('Duration Format', () => {
     fixtures: [
       {
         input: 0.5,
-        output: '0.50 ms',
+        output: '500.00 µs',
+      },
+      {
+        input: -0.5,
+        output: '-500.00 µs',
+      },
+      {
+        input: 0,
+        output: '0',
       },
       {
         input: -123.5,
@@ -630,7 +672,7 @@ describe('Duration Format', () => {
     fixtures: [
       {
         input: 0.5,
-        output: '1ms',
+        output: '500µs',
       },
       {
         input: -123,

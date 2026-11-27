@@ -65,7 +65,7 @@ const input: Partial<SignificantEvent> & { slugs: string[] } = {
 const getFeatures = jest.fn().mockResolvedValue({ hits: [] });
 
 const createTool = (
-  telemetry: { trackAgentToolEventsWrite: jest.Mock },
+  telemetry: { trackAgentToolEventsWrite: jest.Mock; trackAgentToolFailed?: jest.Mock },
   logger = loggingSystemMock.createLogger(),
   storedDetections: Array<SignalEntry['metadata'] & { workflow_execution_id?: string }> = []
 ) => {
@@ -969,6 +969,67 @@ describe('events_write tool', () => {
           }),
         ],
       })
+    );
+  });
+});
+
+describe('events_write tool failure reporting', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
+    (assertCanManageSignificantEvents as jest.Mock).mockResolvedValue(undefined);
+  });
+
+  it('reports an unresolved feature_id as a refused batch and keeps the id out of the log and telemetry', async () => {
+    getFeatures.mockImplementation((_sourceIds, options) =>
+      Promise.resolve({
+        hits:
+          options && ('featureIds' in options || 'id' in options)
+            ? []
+            : [
+                {
+                  id: 'checkout-api',
+                  uuid: 'uuid-checkout',
+                  source_id: 'logs.test',
+                  type: 'entity',
+                  subtype: 'service',
+                },
+              ],
+      })
+    );
+    const telemetry = { trackAgentToolEventsWrite: jest.fn(), trackAgentToolFailed: jest.fn() };
+    const logger = loggingSystemMock.createLogger();
+    const item = {
+      ...input,
+      blast_radius: [{ feature_id: 'topolvm-lvmvg-storage', name: 'TopoLVM' }],
+    };
+
+    const result = await invokeHandler(
+      createTool(telemetry, logger) as never,
+      { items: [item, { ...item, event_id: 'event-2' }] },
+      createMockToolContext()
+    );
+
+    expect(JSON.stringify(result)).toContain('topolvm-lvmvg-storage');
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(telemetry.trackAgentToolFailed).toHaveBeenCalledTimes(1);
+    expect(telemetry.trackAgentToolFailed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tool_id: 'platform.sig_events.events_write',
+        error_code: 'unresolved_feature_reference',
+        input_rejected: true,
+        item_count: 2,
+        unresolved_count: 1,
+      }),
+      expect.anything()
+    );
+    expect(telemetry.trackAgentToolEventsWrite).toHaveBeenCalledTimes(2);
+    expect(telemetry.trackAgentToolEventsWrite).toHaveBeenCalledWith(
+      expect.objectContaining({ success: false, error_message: 'unresolved_feature_reference' }),
+      expect.anything()
+    );
+    expect(JSON.stringify(telemetry.trackAgentToolEventsWrite.mock.calls)).not.toContain(
+      'topolvm-lvmvg-storage'
     );
   });
 });

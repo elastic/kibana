@@ -259,6 +259,23 @@ const mockVarGroups: RegistryVarGroup[] = [
   },
 ];
 
+const mockStreamVarGroups: RegistryVarGroup[] = [
+  {
+    name: 'log_group_source',
+    title: 'Log Group Source',
+    selector_title: 'Select log group source',
+    options: [
+      { name: 'log_group_arn', title: 'Log Group ARN', vars: ['log_group_arn'] },
+      { name: 'log_group_name', title: 'Log Group Name', vars: ['log_group_name'] },
+      {
+        name: 'log_group_name_prefix',
+        title: 'Log Group Name Prefix',
+        vars: ['log_group_name_prefix'],
+      },
+    ],
+  },
+];
+
 describe('useVarGroupSelections', () => {
   let mockOnSelectionsChange: jest.Mock;
 
@@ -338,6 +355,37 @@ describe('useVarGroupSelections', () => {
       });
     });
 
+    it('should infer stream selections from stream vars, not package vars, on the edit page', () => {
+      // The stream-level call site has no packagePolicy, so without
+      // varsForInference it could never infer — validation infers from the
+      // stream's vars while the form defaulted to the first visible option.
+      // Stream vars must be the evidence; package-level vars for a different
+      // group must not leak in.
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: mockStreamVarGroups,
+          savedSelections: undefined,
+          isAgentlessEnabled: false,
+          onSelectionsChange: mockOnSelectionsChange,
+          packagePolicy: {
+            vars: {
+              client_id: { type: 'text', value: 'my-client' },
+              client_secret: { type: 'password', value: 'shhh' },
+            },
+          } as any,
+          varsForInference: {
+            log_group_name: { type: 'text', value: 'my-group' },
+          },
+          isEditPage: true,
+        })
+      );
+
+      expect(result.current.selections).toEqual({ log_group_source: 'log_group_name' });
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith({
+        var_group_selections: { log_group_source: 'log_group_name' },
+      });
+    });
+
     it('should not infer from vars on the create page', () => {
       const { result } = renderHook(() =>
         useVarGroupSelections({
@@ -372,6 +420,323 @@ describe('useVarGroupSelections', () => {
       );
 
       expect(result.current.selections).toEqual({ auth_method: 'api_key' });
+    });
+  });
+
+  describe('stale saved selections', () => {
+    // A stored selection naming an option the package no longer declares
+    // was returned as-is, so shouldShowVar matched no option and hid every
+    // group-controlled field while validation required the inferred
+    // option's vars. The hook must normalize stale selections the same way
+    // validation does — treat them as missing so derive/inference runs and
+    // gets persisted.
+    const twoGroups: RegistryVarGroup[] = [...mockVarGroups, ...mockStreamVarGroups];
+
+    it('should infer from populated vars on the edit page when the saved selection is stale', () => {
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: mockVarGroups,
+          savedSelections: { auth_method: 'saml' },
+          isAgentlessEnabled: false,
+          onSelectionsChange: mockOnSelectionsChange,
+          packagePolicy: {
+            vars: {
+              client_id: { type: 'text', value: 'my-client' },
+              client_secret: { type: 'password', value: 'shhh' },
+            },
+          } as any,
+          isEditPage: true,
+        })
+      );
+
+      // Same value validation derives for this policy (oauth), not the
+      // stale name and not the first visible option (api_key)
+      expect(result.current.selections).toEqual({ auth_method: 'oauth' });
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith({
+        var_group_selections: { auth_method: 'oauth' },
+      });
+    });
+
+    it('should fall back to defaults on the edit page when the saved selection is stale and nothing is populated', () => {
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: mockVarGroups,
+          savedSelections: { auth_method: 'saml' },
+          isAgentlessEnabled: false,
+          onSelectionsChange: mockOnSelectionsChange,
+          packagePolicy: { vars: {} } as any,
+          isEditPage: true,
+        })
+      );
+
+      expect(result.current.selections).toEqual({ auth_method: 'api_key' });
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith({
+        var_group_selections: { auth_method: 'api_key' },
+      });
+    });
+
+    it('should fall back to defaults on the create page when the saved selection is stale', () => {
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: mockVarGroups,
+          savedSelections: { auth_method: 'saml' },
+          isAgentlessEnabled: false,
+          onSelectionsChange: mockOnSelectionsChange,
+        })
+      );
+
+      expect(result.current.selections).toEqual({ auth_method: 'api_key' });
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith({
+        var_group_selections: { auth_method: 'api_key' },
+      });
+    });
+
+    it('should keep valid saved selections while normalizing only the stale group', () => {
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: twoGroups,
+          savedSelections: { auth_method: 'saml', log_group_source: 'log_group_name' },
+          isAgentlessEnabled: false,
+          onSelectionsChange: mockOnSelectionsChange,
+          packagePolicy: {
+            vars: {
+              client_id: { type: 'text', value: 'my-client' },
+              client_secret: { type: 'password', value: 'shhh' },
+            },
+          } as any,
+          isEditPage: true,
+        })
+      );
+
+      expect(result.current.selections).toEqual({
+        auth_method: 'oauth',
+        log_group_source: 'log_group_name',
+      });
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith({
+        var_group_selections: {
+          auth_method: 'oauth',
+          log_group_source: 'log_group_name',
+        },
+      });
+    });
+
+    it('should not resurrect a stale selection when another group changes', () => {
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: twoGroups,
+          savedSelections: { auth_method: 'saml', log_group_source: 'log_group_arn' },
+          isAgentlessEnabled: false,
+          onSelectionsChange: mockOnSelectionsChange,
+        })
+      );
+
+      // Clear the initialization call
+      mockOnSelectionsChange.mockClear();
+
+      act(() => {
+        result.current.handleSelectionChange('log_group_source', 'log_group_name');
+      });
+
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith({
+        var_group_selections: { auth_method: 'api_key', log_group_source: 'log_group_name' },
+      });
+    });
+
+    it('should apply policy effects when a stale selection is normalized on mount', () => {
+      // Combination of the stale-selection normalization with the policy
+      // effects the mount write must apply (upstream #303565): the
+      // normalized selection is the agentless default, and its support-flag
+      // var starts undefined on the policy, so it must be set here.
+      const providerVarGroups: RegistryVarGroup[] = [
+        {
+          name: 'credential_type',
+          title: 'Setup Access',
+          selector_title: 'Preferred method',
+          required: true,
+          options: [
+            {
+              name: 'identity_federation',
+              title: 'Identity Federation',
+              vars: ['role_arn', 'supports_identity_federation'],
+              provider: 'aws',
+              hide_in_deployment_modes: ['default'],
+            },
+            {
+              name: 'direct_access_key',
+              title: 'Direct Access Keys',
+              vars: ['access_key_id', 'secret_access_key'],
+            },
+          ],
+        },
+      ];
+
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: providerVarGroups,
+          savedSelections: { credential_type: 'saml' },
+          isAgentlessEnabled: true,
+          onSelectionsChange: mockOnSelectionsChange,
+          packagePolicy: {
+            vars: {
+              role_arn: { type: 'text', value: undefined },
+              supports_identity_federation: { type: 'bool', value: undefined },
+            },
+          } as any,
+          isEditPage: true,
+        })
+      );
+
+      expect(result.current.selections).toEqual({ credential_type: 'identity_federation' });
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          var_group_selections: { credential_type: 'identity_federation' },
+          supports_cloud_connector: true,
+          vars: expect.objectContaining({
+            supports_identity_federation: { type: 'bool', value: true },
+          }),
+        })
+      );
+    });
+
+    it('should persist the normalized selection without deactivating the cloud connector when a stale selection is normalized to a non-cloud option', () => {
+      // When the saved cloud-connector option was removed by a package
+      // upgrade and normalization picks a non-cloud option, the mount write
+      // persists the selections only: with no explicit user choice it must
+      // not deactivate the connector (supports_cloud_connector /
+      // cloud_connector_id / support-flag var stay as stored until the user
+      // changes the selector). The groups below no longer declare the
+      // cloud-connector option, so the saved selection is stale.
+      const noCloudConnectorGroups: RegistryVarGroup[] = [
+        {
+          name: 'auth_method',
+          title: 'Authentication',
+          selector_title: 'Select method',
+          options: [
+            { name: 'api_key', title: 'API Key', vars: ['api_key_var'] },
+            { name: 'oauth', title: 'OAuth', vars: ['client_id', 'client_secret'] },
+          ],
+        },
+      ];
+
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: noCloudConnectorGroups,
+          savedSelections: { auth_method: 'cloud_connector' },
+          isAgentlessEnabled: false,
+          onSelectionsChange: mockOnSelectionsChange,
+          packagePolicy: {
+            supports_cloud_connector: true,
+            cloud_connector_id: 'conn-123',
+            vars: {
+              supports_cloud_connectors: { type: 'bool', value: true },
+            },
+            inputs: [],
+          } as any,
+          isEditPage: true,
+        })
+      );
+
+      expect(result.current.selections).toEqual({ auth_method: 'api_key' });
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith({
+        var_group_selections: { auth_method: 'api_key' },
+      });
+      // No deactivation fields: the connector state is left untouched
+      const call = mockOnSelectionsChange.mock.calls[0][0];
+      expect('supports_cloud_connector' in call).toBe(false);
+      expect('cloud_connector_id' in call).toBe(false);
+      expect('vars' in call).toBe(false);
+    });
+  });
+
+  describe('incomplete saved selections', () => {
+    // With an existing incomplete map (including {}), sanitization
+    // returns the original reference, so the old mount effect never
+    // persisted the derived selections for the missing groups. The
+    // selectors then show valid derived options without storing them, and
+    // package-level groups only infers from populated vars — skips the
+    // required fields of the group the form shows as selected, so an
+    // incomplete policy can still be saved.
+    const twoGroups: RegistryVarGroup[] = [...mockVarGroups, ...mockStreamVarGroups];
+
+    it('should persist derived selections when the saved map is empty', () => {
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: twoGroups,
+          savedSelections: {},
+          isAgentlessEnabled: false,
+          onSelectionsChange: mockOnSelectionsChange,
+        })
+      );
+
+      expect(result.current.selections).toEqual({
+        auth_method: 'api_key',
+        log_group_source: 'log_group_arn',
+      });
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith({
+        var_group_selections: {
+          auth_method: 'api_key',
+          log_group_source: 'log_group_arn',
+        },
+      });
+    });
+
+    it('should persist the derived selection for a group missing from a partial saved map', () => {
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: twoGroups,
+          savedSelections: { auth_method: 'api_key' },
+          isAgentlessEnabled: false,
+          onSelectionsChange: mockOnSelectionsChange,
+          packagePolicy: { vars: {} } as any,
+          isEditPage: true,
+        })
+      );
+
+      expect(result.current.selections).toEqual({
+        auth_method: 'api_key',
+        log_group_source: 'log_group_arn',
+      });
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith({
+        var_group_selections: {
+          auth_method: 'api_key',
+          log_group_source: 'log_group_arn',
+        },
+      });
+    });
+
+    it('should persist a derived selection for a missing group without deactivating the cloud connector', () => {
+      // The stored policy still has cloud connector enabled, but the
+      // derived option for the missing auth group is a non-cloud one — the
+      // mount write persists the selections and leaves the connector state
+      // untouched, since no explicit user choice was made.
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: twoGroups,
+          savedSelections: { log_group_source: 'log_group_name' },
+          isAgentlessEnabled: false,
+          onSelectionsChange: mockOnSelectionsChange,
+          packagePolicy: {
+            supports_cloud_connector: true,
+            cloud_connector_id: 'conn-123',
+            vars: {
+              supports_cloud_connectors: { type: 'bool', value: true },
+            },
+            inputs: [],
+          } as any,
+          isEditPage: true,
+        })
+      );
+
+      expect(result.current.selections).toEqual({
+        auth_method: 'api_key',
+        log_group_source: 'log_group_name',
+      });
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith({
+        var_group_selections: {
+          auth_method: 'api_key',
+          log_group_source: 'log_group_name',
+        },
+      });
     });
   });
 
@@ -545,6 +910,57 @@ describe('useVarGroupSelections', () => {
 
       expect(mockOnSelectionsChange).toHaveBeenCalledWith({
         var_group_selections: { auth_method: 'oauth' },
+      });
+    });
+
+    it('should clear deselected stream vars when streamVars is provided', () => {
+      const savedSelections = { log_group_source: 'log_group_arn' };
+      const streamVars = {
+        log_group_arn: { value: 'arn:aws:logs:us-east-1:123456789012:log-group:my-group' },
+        log_group_name: { value: '' },
+      };
+
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: mockStreamVarGroups,
+          savedSelections,
+          isAgentlessEnabled: false,
+          onSelectionsChange: mockOnSelectionsChange,
+          streamVars,
+        })
+      );
+
+      act(() => {
+        result.current.handleSelectionChange('log_group_source', 'log_group_name');
+      });
+
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith({
+        var_group_selections: { log_group_source: 'log_group_name' },
+        vars: {
+          log_group_arn: { value: undefined },
+          log_group_name: { value: '' },
+        },
+      });
+    });
+
+    it('should not include vars when streamVars is not provided', () => {
+      const savedSelections = { log_group_source: 'log_group_arn' };
+
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: mockStreamVarGroups,
+          savedSelections,
+          isAgentlessEnabled: false,
+          onSelectionsChange: mockOnSelectionsChange,
+        })
+      );
+
+      act(() => {
+        result.current.handleSelectionChange('log_group_source', 'log_group_name');
+      });
+
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith({
+        var_group_selections: { log_group_source: 'log_group_name' },
       });
     });
   });

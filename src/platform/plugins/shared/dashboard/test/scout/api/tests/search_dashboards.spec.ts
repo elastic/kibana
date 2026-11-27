@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { randomUUID } from 'crypto';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import { apiTest, COMMON_HEADERS, DASHBOARD_API_PATH, KBN_ARCHIVES } from '../fixtures';
+
+// the suite asserts exact dashboard totals, so it needs a space holding nothing but its archives
+const spaceId = `dashboard-search-${randomUUID()}`;
 
 const buildUrl = (params: Record<string, string | string[] | number | undefined>) => {
   const searchParams = new URLSearchParams();
@@ -26,24 +30,25 @@ const buildUrl = (params: Record<string, string | string[] | number | undefined>
     }
   }
   const query = searchParams.toString();
-  return query ? `${DASHBOARD_API_PATH}?${query}` : DASHBOARD_API_PATH;
+  return `s/${spaceId}/${query ? `${DASHBOARD_API_PATH}?${query}` : DASHBOARD_API_PATH}`;
 };
 
 apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => {
   let viewerCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
+  apiTest.beforeAll(async ({ apiServices, kbnClient, requestAuth }) => {
     viewerCredentials = await requestAuth.getApiKey('viewer');
-    await kbnClient.importExport.load(KBN_ARCHIVES.MANY_DASHBOARDS);
-    await kbnClient.importExport.load(KBN_ARCHIVES.TAGS);
+    await apiServices.spaces.create({ id: spaceId, name: spaceId });
+    await kbnClient.importExport.load(KBN_ARCHIVES.MANY_DASHBOARDS, { space: spaceId });
+    await kbnClient.importExport.load(KBN_ARCHIVES.TAGS, { space: spaceId });
   });
 
-  apiTest.afterAll(async ({ kbnClient }) => {
-    await kbnClient.savedObjects.cleanStandardList();
+  apiTest.afterAll(async ({ apiServices }) => {
+    await apiServices.spaces.delete(spaceId);
   });
 
   apiTest('should retrieve a paginated list of dashboards', async ({ apiClient }) => {
-    const response = await apiClient.get(DASHBOARD_API_PATH, {
+    const response = await apiClient.get(buildUrl({}), {
       headers: {
         ...COMMON_HEADERS,
         ...viewerCredentials.apiKeyHeader,

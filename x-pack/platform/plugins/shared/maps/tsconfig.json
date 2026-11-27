@@ -62,6 +62,9 @@
     "@kbn/custom-integrations-plugin",
     "@kbn/config-schema",
     "@kbn/zod",
+    "@kbn/as-code-data-views-schema",
+    "@kbn/as-code-data-views-transforms",
+    "@kbn/data-views-types",
     "@kbn/shared-ux-router",
     "@kbn/content-management-plugin",
     "@kbn/core-saved-objects-api-server",
@@ -106,7 +109,8 @@
     "@kbn/cps",
     "@kbn/kql",
     "@kbn/cps-utils",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/test-jest-helpers"
   ],
   "exclude": [
     "target/**/*"

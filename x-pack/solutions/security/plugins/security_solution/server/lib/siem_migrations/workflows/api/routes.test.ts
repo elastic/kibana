@@ -30,6 +30,10 @@ import { registerSiemWorkflowMigrationsDeleteRoute } from './delete';
 import { registerSiemWorkflowMigrationsGetRoute } from './get';
 import { registerSiemWorkflowMigrationsRoutes } from '.';
 import { registerSiemWorkflowMigrationsStartRoute } from './start';
+import { registerSiemWorkflowMigrationsStatsAllRoute } from './stats_all';
+import { registerSiemWorkflowMigrationsStatsRoute } from './stats';
+import { registerSiemWorkflowMigrationsStopRoute } from './stop';
+import { registerSiemWorkflowMigrationsTranslationStatsRoute } from './translation_stats';
 import { registerSiemWorkflowMigrationsUpdateRoute } from './update';
 import { registerSiemWorkflowMigrationsGetWorkflowsRoute } from './workflows/get';
 import { registerSiemWorkflowMigrationsCreateTinesWorkflowsRoute } from './workflows/tines/create';
@@ -229,6 +233,25 @@ describe('workflow migration routes', () => {
       expect(response.status).toEqual(500);
     });
 
+    it('returns 409 when deleting a running migration', async () => {
+      clients.siemWorkflowMigrationsClient.task.isMigrationRunning.mockReturnValueOnce(true);
+      registerSiemWorkflowMigrationsDeleteRoute(server.router, logger);
+      const response = await server.inject(
+        requestMock.create({
+          method: 'delete',
+          path: SIEM_WORKFLOW_MIGRATION_PATH,
+          params: { migration_id: 'mig-1' },
+        }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(clients.siemWorkflowMigrationsClient.data.deleteMigration).not.toHaveBeenCalled();
+      expect(response.status).toEqual(409);
+      expect(response.body).toEqual(
+        'A running workflow migration cannot be deleted. Please stop the migration first and try again'
+      );
+    });
+
     it('stores a Tines story as a workflow document', async () => {
       registerSiemWorkflowMigrationsCreateTinesWorkflowsRoute(server.router, logger);
       const response = await invokeHandler(
@@ -367,7 +390,9 @@ describe('workflow migration routes', () => {
       expect(response.body).toEqual(stored);
     });
 
-    it('does not start a migration', async () => {
+    it('starts a migration with the selected connector', async () => {
+      const getConnectorById = jest.fn().mockResolvedValue({ id: 'connector-1' });
+      clients.getInferenceClient.mockReturnValue({ getConnectorById });
       registerSiemWorkflowMigrationsStartRoute(server.router, logger);
       const response = await server.inject(
         requestMock.create({
@@ -379,8 +404,199 @@ describe('workflow migration routes', () => {
         requestContextMock.convertContext(context)
       );
 
+      expect(getConnectorById).toHaveBeenCalledWith('connector-1');
+      expect(clients.siemWorkflowMigrationsClient.task.start).toHaveBeenCalledWith({
+        migrationId: 'mig-1',
+        connectorId: 'connector-1',
+        invocationConfig: { callbacks: expect.any(Array) },
+      });
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({ started: true });
+    });
+
+    it('retries only the selected failed workflows before starting', async () => {
+      clients.getInferenceClient.mockReturnValue({
+        getConnectorById: jest.fn().mockResolvedValue({ id: 'connector-1' }),
+      });
+      registerSiemWorkflowMigrationsStartRoute(server.router, logger);
+      const response = await server.inject(
+        requestMock.create({
+          method: 'post',
+          path: SIEM_WORKFLOW_MIGRATION_START_PATH,
+          params: { migration_id: 'mig-1' },
+          body: {
+            settings: { connector_id: 'connector-1' },
+            retry: 'failed',
+          },
+        }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(clients.siemWorkflowMigrationsClient.task.updateToRetry).toHaveBeenCalledWith(
+        'mig-1',
+        { failed: true }
+      );
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({ started: true });
+    });
+
+    it('does not start when a running migration cannot be marked for retry', async () => {
+      clients.getInferenceClient.mockReturnValue({
+        getConnectorById: jest.fn().mockResolvedValue({ id: 'connector-1' }),
+      });
+      clients.siemWorkflowMigrationsClient.task.updateToRetry.mockResolvedValueOnce({
+        updated: false,
+      });
+      registerSiemWorkflowMigrationsStartRoute(server.router, logger);
+      const response = await server.inject(
+        requestMock.create({
+          method: 'post',
+          path: SIEM_WORKFLOW_MIGRATION_START_PATH,
+          params: { migration_id: 'mig-1' },
+          body: {
+            settings: { connector_id: 'connector-1' },
+            retry: 'selected',
+            selection: { ids: ['workflow-1'] },
+          },
+        }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(clients.siemWorkflowMigrationsClient.task.start).not.toHaveBeenCalled();
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({ started: false });
+    });
+
+    it('stops a running migration', async () => {
+      registerSiemWorkflowMigrationsStopRoute(server.router, logger);
+      const response = await server.inject(
+        requestMock.create({
+          method: 'post',
+          path: SIEM_WORKFLOW_MIGRATION_STOP_PATH,
+          params: { migration_id: 'mig-1' },
+        }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(clients.siemWorkflowMigrationsClient.task.stop).toHaveBeenCalledWith('mig-1');
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({ stopped: true });
+    });
+
+    it('returns migration stats', async () => {
+      registerSiemWorkflowMigrationsStatsRoute(server.router, logger);
+      const response = await server.inject(
+        requestMock.create({
+          method: 'get',
+          path: SIEM_WORKFLOW_MIGRATION_STATS_PATH,
+          params: { migration_id: 'mig-1' },
+        }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(clients.siemWorkflowMigrationsClient.task.getStats).toHaveBeenCalledWith('mig-1');
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual(
+        expect.objectContaining({
+          id: 'mig-1',
+          status: 'ready',
+          items: { total: 1, pending: 1, processing: 0, completed: 0, failed: 0 },
+        })
+      );
+    });
+
+    it('returns no content when a migration has no workflows', async () => {
+      clients.siemWorkflowMigrationsClient.task.getStats.mockResolvedValueOnce({
+        id: 'mig-1',
+        name: 'Tines stories',
+        status: 'ready',
+        items: { total: 0, pending: 0, processing: 0, completed: 0, failed: 0 },
+        created_at: '2026-01-01T00:00:00.000Z',
+        last_updated_at: '2026-01-01T00:00:00.000Z',
+      });
+      registerSiemWorkflowMigrationsStatsRoute(server.router, logger);
+      const response = await invokeHandler(
+        'get',
+        SIEM_WORKFLOW_MIGRATION_STATS_PATH,
+        requestMock.create({
+          method: 'get',
+          path: SIEM_WORKFLOW_MIGRATION_STATS_PATH,
+          routePath: SIEM_WORKFLOW_MIGRATION_STATS_PATH,
+          params: { migration_id: 'mig-1' },
+        })
+      );
+
+      expect(response.noContent).toHaveBeenCalled();
+    });
+
+    it('returns stats for every migration', async () => {
+      clients.siemWorkflowMigrationsClient.task.getAllStats.mockResolvedValueOnce([
+        {
+          id: 'mig-1',
+          name: 'Tines stories',
+          status: 'ready',
+          items: { total: 1, pending: 1, processing: 0, completed: 0, failed: 0 },
+          created_at: '2026-01-01T00:00:00.000Z',
+          last_updated_at: '2026-01-01T00:00:00.000Z',
+        },
+      ]);
+      registerSiemWorkflowMigrationsStatsAllRoute(server.router, logger);
+      const response = await server.inject(
+        requestMock.create({
+          method: 'get',
+          path: SIEM_WORKFLOW_MIGRATIONS_ALL_STATS_PATH,
+        }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual([
+        expect.objectContaining({
+          id: 'mig-1',
+          items: { total: 1, pending: 1, processing: 0, completed: 0, failed: 0 },
+        }),
+      ]);
+    });
+
+    it('returns translation stats', async () => {
+      clients.siemWorkflowMigrationsClient.data.items.getTranslationStats.mockResolvedValueOnce({
+        id: 'mig-1',
+        items: {
+          total: 2,
+          success: {
+            total: 1,
+            result: { full: 1, partial: 0, untranslatable: 0 },
+            installable: 0,
+          },
+          failed: 1,
+        },
+      });
+      registerSiemWorkflowMigrationsTranslationStatsRoute(server.router, logger);
+      const response = await server.inject(
+        requestMock.create({
+          method: 'get',
+          path: SIEM_WORKFLOW_MIGRATION_TRANSLATION_STATS_PATH,
+          params: { migration_id: 'mig-1' },
+        }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(
+        clients.siemWorkflowMigrationsClient.data.items.getTranslationStats
+      ).toHaveBeenCalledWith('mig-1');
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        id: 'mig-1',
+        items: {
+          total: 2,
+          success: {
+            total: 1,
+            result: { full: 1, partial: 0, untranslatable: 0 },
+            installable: 0,
+          },
+          failed: 1,
+        },
+      });
     });
   });
 });

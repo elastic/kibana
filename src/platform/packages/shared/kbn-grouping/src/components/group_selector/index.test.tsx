@@ -79,6 +79,10 @@ describe('group selector', () => {
     const { getByTestId } = render(<GroupSelector {...testProps} />);
     expect(getByTestId('group-selector-dropdown').textContent).toBe('Group alerts by: Rule name');
   });
+  it('Does not set a title attribute that duplicates the button text for screen readers', () => {
+    const { getByTestId } = render(<GroupSelector {...testProps} />);
+    expect(getByTestId('group-selector-dropdown')).not.toHaveAttribute('title');
+  });
   it('Sets the Group by title from the title prop', () => {
     const { getByTestId } = render(
       <GroupSelector {...testProps} title="Group custom property by" />
@@ -111,14 +115,18 @@ describe('group selector', () => {
         groupsSelected={[...testProps.groupsSelected, 'user.name', 'host.name']}
       />
     );
-    expect(getByTestId('group-selector-dropdown').title).toEqual('Rule name, User name, Host name');
+    expect(getByTestId('group-selector-dropdown').textContent).toEqual(
+      'Group alerts by: Rule name, User name, Host name'
+    );
     rerender(
       <GroupSelector
         {...testProps}
         groupsSelected={[...testProps.groupsSelected, 'host.name', 'user.name']}
       />
     );
-    expect(getByTestId('group-selector-dropdown').title).toEqual('Rule name, Host name, User name');
+    expect(getByTestId('group-selector-dropdown').textContent).toEqual(
+      'Group alerts by: Rule name, Host name, User name'
+    );
   });
   it('Labels button with selection not in options', () => {
     const { getByTestId } = render(
@@ -127,7 +135,9 @@ describe('group selector', () => {
         groupsSelected={[...testProps.groupsSelected, 'ugly.name', 'host.name']}
       />
     );
-    expect(getByTestId('group-selector-dropdown').title).toEqual('Rule name, Host name');
+    expect(getByTestId('group-selector-dropdown').textContent).toEqual(
+      'Group alerts by: Rule name, Host name'
+    );
   });
   it('Labels button when `none` is selected', () => {
     const { getByTestId } = render(
@@ -136,7 +146,9 @@ describe('group selector', () => {
         groupsSelected={[...testProps.groupsSelected, 'ugly.name', 'host.name']}
       />
     );
-    expect(getByTestId('group-selector-dropdown').title).toEqual('Rule name, Host name');
+    expect(getByTestId('group-selector-dropdown').textContent).toEqual(
+      'Group alerts by: Rule name, Host name'
+    );
   });
   describe('when maxGroupingLevels is 1', () => {
     it('Presents single option selector label when dropdown is clicked', () => {

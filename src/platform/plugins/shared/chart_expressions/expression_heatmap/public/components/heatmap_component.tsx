@@ -49,6 +49,7 @@ import type { CoreSetup } from '@kbn/core/public';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
 import {
   applyPaletteParams,
+  fillMissingHeatmapYBuckets,
   findMinMaxByColumnId,
   getFormattedTable,
   getSortPredicate,
@@ -470,6 +471,15 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
           return row;
         });
       }
+    }
+
+    // DSL histograms already include or drop empty rows via the agg toggle. Only ES|QL
+    // numeric buckets need the client to insert the missing steps.
+    if (isEsqlMode) {
+      const yInterval = yAxisColumn
+        ? datatableUtilities.getNumberHistogramInterval(yAxisColumn)
+        : undefined;
+      chartData = fillMissingHeatmapYBuckets(chartData, yAccessor, valueAccessor, yInterval);
     }
 
     chartData = sortRowsByRangeLowerBound(chartData, xAxisColumn, args.gridConfig.xSortPredicate);

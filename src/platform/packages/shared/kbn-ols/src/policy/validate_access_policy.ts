@@ -18,25 +18,22 @@ import { isReservedOperation, REQUIRED_OPERATIONS, type AccessPolicy } from './t
  * general access, misses a {@link REQUIRED_OPERATIONS} entry, or defines a reserved operation.
  */
 export const validateAccessPolicy = (policy: AccessPolicy): void => {
-  const { generalAccessLevels, defaultGeneralAccessLevel, entryLevels, operations } = policy;
+  const { generalAccess, defaultGeneralAccess, entryAccess, operations } = policy;
 
-  if (
-    generalAccessLevels.length === 0 ||
-    generalAccessLevels.some((level) => !isGeneralAccessLevel(level))
-  ) {
+  if (generalAccess.length === 0 || generalAccess.some((value) => !isGeneralAccessLevel(value))) {
     throw new Error(
-      `General access must allow one or more levels below "manage", got [${generalAccessLevels}].`
+      `General access must allow one or more values below "manage", got [${generalAccess}].`
     );
   }
 
-  if (!generalAccessLevels.includes(defaultGeneralAccessLevel)) {
+  if (!generalAccess.includes(defaultGeneralAccess)) {
     throw new Error(
-      `Default general access "${defaultGeneralAccessLevel}" is not one of the allowed levels.`
+      `Default general access "${defaultGeneralAccess}" is not one of the allowed values.`
     );
   }
 
-  if (entryLevels.length === 0 || entryLevels.some((level) => !isEntryLevel(level))) {
-    throw new Error(`Entry levels must be a non-empty list of grantable levels.`);
+  if (entryAccess.length === 0 || entryAccess.some((value) => !isEntryLevel(value))) {
+    throw new Error(`Entry access must be a non-empty list of values other than "none".`);
   }
 
   for (const operation of REQUIRED_OPERATIONS) {
@@ -45,8 +42,8 @@ export const validateAccessPolicy = (policy: AccessPolicy): void => {
     }
   }
 
-  if (operations.view.level !== 'view') {
-    throw new Error(`Operation "view" must require the "view" level.`);
+  if (operations.view.access !== 'view') {
+    throw new Error(`Operation "view" must require "view" access.`);
   }
 
   for (const [name, operation] of Object.entries(operations)) {
@@ -54,8 +51,8 @@ export const validateAccessPolicy = (policy: AccessPolicy): void => {
       throw new Error(`Operation "${name}" is reserved by the platform.`);
     }
 
-    if (!isEntryLevel(operation.level)) {
-      throw new Error(`Operation "${name}" has an invalid level "${operation.level}".`);
+    if (!isEntryLevel(operation.access)) {
+      throw new Error(`Operation "${name}" has invalid access "${operation.access}".`);
     }
   }
 };

@@ -25,7 +25,11 @@ export const reportUnsuccessfulInvestigation = async (
   const { execution, investigationId } = await client.getUnsuccessfulRun(source.executionId);
   const phase = execution.status === ExecutionStatus.TIMED_OUT ? 'timed_out' : 'failed';
   const reason = (
-    execution.error?.message?.trim() ||
+    (execution.status === ExecutionStatus.CANCELLED
+      ? i18n.translate('xpack.nightshiftInvestigations.sweep.cancelledErrorMessage', {
+          defaultMessage: 'Investigation was stopped',
+        })
+      : execution.error?.message?.trim()) ||
     (phase === 'timed_out'
       ? i18n.translate('xpack.nightshiftInvestigations.sweep.timeoutErrorMessage', {
           defaultMessage: 'Investigation exceeded its workflow timeout',

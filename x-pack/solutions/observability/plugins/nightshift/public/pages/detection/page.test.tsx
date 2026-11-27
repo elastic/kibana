@@ -569,4 +569,44 @@ describe('DetectionPage', () => {
     expect(params.has('page')).toBe(false);
     expect(params.has('eventId')).toBe(false);
   });
+
+  describe('viewport size', () => {
+    const originalInnerWidth = window.innerWidth;
+
+    afterEach(() => {
+      window.innerWidth = originalInnerWidth;
+    });
+
+    const getWorkspaceSection = () =>
+      screen.getByTestId('nightshiftDetectionOverviewFullSlot').parentElement?.parentElement;
+
+    it('clips the workspace to the viewport so its panes scroll on their own on a desktop', async () => {
+      renderPage();
+      expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
+
+      expect(getWorkspaceSection()).toHaveStyle({ overflow: 'hidden' });
+    });
+
+    it('lets the page scroll as a whole instead of clipping the workspace', async () => {
+      window.innerWidth = 400;
+      renderPage();
+      expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
+
+      expect(getWorkspaceSection()).not.toHaveStyle({ overflow: 'hidden' });
+    });
+
+    it('shows the compact overview on a phone, where the tab body does not scroll on its own', async () => {
+      window.innerWidth = 400;
+      renderPage();
+      expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
+
+      expect(screen.getByTestId('nightshiftDetectionOverviewFullSlot')).toHaveAttribute(
+        'data-collapsed',
+        'true'
+      );
+      expect(screen.getByTestId('nightshiftDetectionOverviewCompactSlot')).not.toHaveAttribute(
+        'data-collapsed'
+      );
+    });
+  });
 });

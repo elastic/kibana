@@ -15,11 +15,10 @@ import { installationStatuses } from '../../../../../../../common/constants';
 import {
   INTEGRATIONS_ROUTING_PATHS,
   INTEGRATIONS_SEARCH_QUERYPARAM,
-  INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM,
   INTEGRATIONS_SHOW_DEPRECATED_QUERYPARAM,
 } from '../../../../constants';
 import { DefaultLayout } from '../../../../layouts';
-import { ExperimentalFeaturesService, isPackageUpdatable } from '../../../../services';
+import { isPackageUpdatable } from '../../../../services';
 import { InstalledIntegrationsPage } from '../installed_integrations';
 import { BrowseIntegrationsPage } from '../browse_integrations';
 import {
@@ -31,8 +30,6 @@ import {
 } from '../../../../hooks';
 
 import type { CategoryFacet, ExtendedIntegrationCategory } from './category_facets';
-
-import { AvailablePackages } from './available_packages';
 
 export { mapToCard, type IntegrationCardItem } from './card_utils';
 
@@ -46,7 +43,6 @@ export const getParams = (params: CategoryParams, search: string) => {
   const selectedCategory: ExtendedIntegrationCategory = category || '';
   const queryParams = new URLSearchParams(search);
   const searchParam = queryParams.get(INTEGRATIONS_SEARCH_QUERYPARAM) || '';
-  const onlyAgentlessParam = queryParams.get(INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM) === 'true';
 
   const showDeprecatedParam =
     queryParams.get(INTEGRATIONS_SHOW_DEPRECATED_QUERYPARAM) === 'true' ? true : undefined;
@@ -55,7 +51,6 @@ export const getParams = (params: CategoryParams, search: string) => {
     selectedCategory,
     searchParam,
     selectedSubcategory: subcategory,
-    onlyAgentless: onlyAgentlessParam,
     showDeprecated: showDeprecatedParam,
   };
 };
@@ -139,19 +134,13 @@ export const EPMHomePage: React.FC = () => {
         </DefaultLayout>
       </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_all}>
-        {ExperimentalFeaturesService.get().newBrowseIntegrationUx ? (
-          <DefaultLayout
-            section="browse"
-            noSpacerInContent={true}
-            notificationsBySection={notificationsBySection}
-          >
-            <BrowseIntegrationsPage prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled} />
-          </DefaultLayout>
-        ) : (
-          <DefaultLayout section="browse" notificationsBySection={notificationsBySection}>
-            <AvailablePackages prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled} />
-          </DefaultLayout>
-        )}
+        <DefaultLayout
+          section="browse"
+          noSpacerInContent={true}
+          notificationsBySection={notificationsBySection}
+        >
+          <BrowseIntegrationsPage prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled} />
+        </DefaultLayout>
       </Route>
     </Routes>
   );

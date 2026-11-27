@@ -70,6 +70,87 @@ describe('getValidator', () => {
     expect(errors.every((error) => !error.message.includes('Unknown parameter'))).toBe(true);
   });
 
+  describe('when body validation is skipped', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        index: { type: 'string', 'x-found-in': 'path' },
+        timeout: { type: 'string', 'x-found-in': 'query' },
+        mappings: {
+          type: 'object',
+          'x-found-in': 'body',
+          properties: { dynamic: { type: 'boolean' } },
+        },
+      },
+      required: ['index', 'mappings'],
+    };
+
+    it('accepts any value for a body param', async () => {
+      const validate = await getValidator('elasticsearch', schema, { skipBodyValidation: true });
+
+      expect(validate({ index: 'logs', mappings: { dynamic: 'not-a-boolean' } })).toEqual([]);
+      expect(validate({ index: 'logs', mappings: 'not-an-object' })).toEqual([]);
+    });
+
+    it('still validates path and query params', async () => {
+      const validate = await getValidator('elasticsearch', schema, { skipBodyValidation: true });
+
+      const errors = validate({ index: 5, timeout: false, mappings: {} });
+
+      expect(errors.map(({ path }) => path)).toEqual(
+        expect.arrayContaining(['#/index', '#/timeout'])
+      );
+    });
+
+    it('still reports a missing required body param', async () => {
+      const validate = await getValidator('elasticsearch', schema, { skipBodyValidation: true });
+
+      expect(validate({ index: 'logs' })).toEqual([
+        expect.objectContaining({
+          message: expect.stringContaining('required property "mappings"'),
+        }),
+      ]);
+    });
+
+    it('still names an unknown param', async () => {
+      const validate = await getValidator('elasticsearch', schema, { skipBodyValidation: true });
+
+      expect(validate({ index: 'logs', mappings: {}, mapping: {} })).toEqual([
+        {
+          path: '#/mapping',
+          message: 'Unknown parameter "mapping". It is not accepted by this API.',
+        },
+      ]);
+    });
+
+    it('does not load the schemas that only body params reference', async () => {
+      const validate = await getValidator(
+        'elasticsearch',
+        {
+          type: 'object',
+          properties: {
+            mappings: { 'x-found-in': 'body', $ref: './does_not_exist.json#/$defs/x' },
+          },
+        },
+        { skipBodyValidation: true }
+      );
+
+      expect(validate({ mappings: { any: 'value' } })).toEqual([]);
+    });
+
+    it('keeps validating the body of the same schema when the option is not set', async () => {
+      const params = { index: 'logs', mappings: { dynamic: 'not-a-boolean' } };
+
+      const skipping = await getValidator('elasticsearch', schema, { skipBodyValidation: true });
+      const validating = await getValidator('elasticsearch', schema);
+
+      expect(skipping(params)).toEqual([]);
+      expect(validating(params)).toEqual(
+        expect.arrayContaining([expect.objectContaining({ path: '#/mappings/dynamic' })])
+      );
+    });
+  });
+
   it('refuses a schema reference that escapes the schemas package', async () => {
     await expect(
       getValidator('elasticsearch', {

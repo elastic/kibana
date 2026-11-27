@@ -65,9 +65,11 @@ export const IDLE_SHARE_OF_MEDIAN = 0.1;
 /** Opacity for idle (low-traffic) service nodes. */
 export const IDLE_NODE_OPACITY = 0.5;
 
-// Node dimensions for React Flow service map
-export const SERVICE_NODE_CIRCLE_SIZE = 56;
+// Node dimensions for React Flow service map (circle for services, square for closed groups)
+export const SERVICE_NODE_SIZE = 56;
 export const DEPENDENCY_NODE_DIAMOND_SIZE = 48;
+/** Max width for service / group labels and badge rows under the node. */
+export const NODE_LABEL_MAX_WIDTH = 220;
 
 /** Border width (px) for service and dependency nodes when not selected. */
 export const NODE_BORDER_WIDTH_DEFAULT = 3;
@@ -84,6 +86,19 @@ export const NODE_HEIGHT = 80;
 export const RANK_SEPARATION = 120;
 export const NODE_SEPARATION = 80;
 export const GRAPH_MARGIN = 50;
+
+/** Space between the members of an open group and the edge of its box. */
+export const GROUP_BOX_PADDING = 24;
+
+/** Room at the top of an open group's box for its label and close button. */
+export const GROUP_BOX_HEADER_HEIGHT = 48;
+
+/**
+ * From this many members, an open group whose own layout is much longer than it is wide (see
+ * `FOLD_ASPECT_RATIO_THRESHOLD`) packs its members into a grid. Members with few or no calls
+ * between them would otherwise line up in one long row or column.
+ */
+export const GROUP_BOX_GRID_MIN_MEMBER_COUNT = 6;
 
 /**
  * Below this node count the service map is never folded into serpentine bands: small maps already

@@ -44,6 +44,7 @@ export class KnowledgeIndicatorService {
     space,
     context,
     withSourceWrite,
+    onWrite,
     config = DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   }: {
     esClient: ElasticsearchClient;
@@ -51,6 +52,7 @@ export class KnowledgeIndicatorService {
     space: string;
     context: SignificantEventsAlertingContext;
     withSourceWrite?: KnowledgeIndicatorClientDeps['withSourceWrite'];
+    onWrite?: KnowledgeIndicatorClientDeps['onWrite'];
     config?: Pick<
       SignificantEventsTuningConfig,
       'semantic_min_score' | 'rrf_rank_constant' | 'feature_ttl_days'
@@ -75,6 +77,7 @@ export class KnowledgeIndicatorService {
         logger: this.logger.get('knowledge_indicators'),
         space,
         withSourceWrite,
+        onWrite,
       },
       significantEventsAvailable,
       context,
@@ -90,9 +93,20 @@ export class KnowledgeIndicatorService {
     esClient: ElasticsearchClient;
     space: string;
   }): Promise<string[]> {
-    const links = await new IndicatorReader(
-      new RevisionReader(esClient, this.logger.get('knowledge_indicators'), space)
-    ).getRuleBackedQueryLinks();
+    const links = await this.getReader({ esClient, space }).getRuleBackedQueryLinks();
     return ruleIdsFromQueryLinks(links);
+  }
+
+  /** Reads the knowledge indicators of one space, without the rules or the write path of a client. */
+  getReader({
+    esClient,
+    space,
+  }: {
+    esClient: ElasticsearchClient;
+    space: string;
+  }): IndicatorReader {
+    return new IndicatorReader(
+      new RevisionReader(esClient, this.logger.get('knowledge_indicators'), space)
+    );
   }
 }

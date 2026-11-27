@@ -49,7 +49,9 @@ export class IndicatorWriter {
     private readonly logger: Logger,
     private readonly revisionReader: RevisionReader,
     private readonly ttlDays: number,
-    private readonly space: string
+    private readonly space: string,
+    /** Called after a write to `sourceId` commits; must not throw. */
+    private readonly onWrite?: (sourceId: string) => void
   ) {}
 
   async bulk(
@@ -103,6 +105,7 @@ export class IndicatorWriter {
         }) as Array<StoredKnowledgeIndicator & Record<string, unknown>>,
       })
     );
+    this.onWrite?.(sourceId);
 
     return { applied: totalApplied, skipped: totalSkipped };
   }
@@ -445,5 +448,6 @@ export class IndicatorWriter {
         } tombstone writes errored`
       );
     }
+    this.onWrite?.(sourceId);
   }
 }

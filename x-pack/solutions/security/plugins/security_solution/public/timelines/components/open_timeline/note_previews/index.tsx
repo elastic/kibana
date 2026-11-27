@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { useDispatch } from 'react-redux-v7';
 import { userSelectedNotesForDeletion } from '../../../../notes';
 import { PageScope } from '../../../../data_view_manager/constants';
@@ -38,7 +38,7 @@ import { DocumentEventTypes, FLYOUT_ORIGIN } from '../../../../common/lib/teleme
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 export const NotePreviewsContainer = styled.section`
-  padding-top: ${({ theme }) => `${theme.eui.euiSizeS}`};
+  padding-top: ${({ theme }) => `${theme.euiTheme.size.s}`};
 `;
 
 NotePreviewsContainer.displayName = 'NotePreviewsContainer';

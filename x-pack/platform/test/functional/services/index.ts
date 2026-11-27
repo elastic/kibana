@@ -20,7 +20,6 @@ import { PipelineEditorProvider } from './pipeline_editor';
 import { PipelineListProvider } from './pipeline_list';
 import { RandomProvider } from './random';
 import { RulesServiceProvider } from './rules';
-import { TransformProvider } from './transform';
 import { UserMenuProvider } from './user_menu';
 
 import {
@@ -74,7 +73,6 @@ export const services = {
   aceEditor: AceEditorProvider,
   rules: RulesServiceProvider,
   ml: MachineLearningProvider,
-  transform: TransformProvider,
   reporting: ReportingFunctionalProvider,
   random: RandomProvider,
   pipelineList: PipelineListProvider,

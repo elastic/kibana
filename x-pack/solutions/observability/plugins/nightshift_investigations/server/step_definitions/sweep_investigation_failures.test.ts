@@ -71,7 +71,7 @@ describe('nightshift.sweepInvestigationFailures', () => {
     expect(management.searchExecutionsView).toHaveBeenCalledWith(
       expect.objectContaining({
         request,
-        statuses: [ExecutionStatus.FAILED, ExecutionStatus.TIMED_OUT],
+        statuses: [ExecutionStatus.FAILED, ExecutionStatus.TIMED_OUT, ExecutionStatus.CANCELLED],
         finishedAfter: '2026-10-29T00:00:00.000Z',
         includeManagedExecutions: true,
         size: FAILURE_SWEEP_BATCH_SIZE,

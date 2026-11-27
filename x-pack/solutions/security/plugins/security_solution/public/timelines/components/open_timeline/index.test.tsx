@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
-import { fireEvent, render, renderHook, waitFor } from '@testing-library/react';
+import { fireEvent, render, renderHook, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { useHistory, useParams } from 'react-router-dom';
 
 import '../../../common/mock/formatted_relative';
@@ -25,7 +25,6 @@ import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines_page';
 import { getAllTimeline, useGetAllTimeline } from '../../containers/all';
 
 import { useTimelineStatus } from './use_timeline_status';
-import { NotePreviews } from './note_previews';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 import { StatefulOpenTimeline } from '.';
 import { TimelineTabsStyle } from './types';
@@ -65,10 +64,21 @@ jest.mock('../../containers/all', () => {
   };
 });
 const mockNavigateTo = jest.fn();
+const mockNavigateToUrl = jest.fn();
 jest.mock('../../../common/lib/kibana', () => {
   const actual = jest.requireActual('../../../common/lib/kibana');
   return {
     ...actual,
+    useKibana: () => {
+      const kibana = actual.useKibana();
+      return {
+        ...kibana,
+        services: {
+          ...kibana.services,
+          application: { ...kibana.services.application, navigateToUrl: mockNavigateToUrl },
+        },
+      };
+    },
     useNavigation: () => ({
       getAppUrl: jest.fn(),
       navigateTo: mockNavigateTo,
@@ -80,8 +90,11 @@ jest.mock('../../../common/components/link_to', () => {
   const originalModule = jest.requireActual('../../../common/components/link_to');
   return {
     ...originalModule,
-    getTimelineTabsUrl: jest.fn(),
-    useFormatUrl: jest.fn().mockReturnValue({ formatUrl: jest.fn(), search: 'urlSearch' }),
+    getTimelineTabsUrl: jest.fn((tabName: string) => `/timelines/${tabName}`),
+    useFormatUrl: jest.fn().mockReturnValue({
+      formatUrl: jest.fn((url: string) => url),
+      search: 'urlSearch',
+    }),
   };
 });
 
@@ -102,6 +115,7 @@ describe('StatefulOpenTimeline', () => {
   const title = 'All Timelines / Open Timelines';
   let mockHistory: History[];
   const mockInstallPrepackagedTimelines = jest.fn();
+  const mockFetchAllTimeline = jest.fn();
 
   beforeEach(() => {
     (useParams as jest.Mock).mockReturnValue({
@@ -115,7 +129,7 @@ describe('StatefulOpenTimeline', () => {
     mockHistory = [];
     (useHistory as jest.Mock).mockReturnValue(mockHistory);
     (useGetAllTimeline as unknown as jest.Mock).mockReturnValue({
-      fetchAllTimeline: jest.fn(),
+      fetchAllTimeline: mockFetchAllTimeline,
       timelines: getAllTimeline('', mockOpenTimelineQueryResults.timeline ?? []),
       loading: false,
       totalCount: mockOpenTimelineQueryResults.totalCount,
@@ -135,31 +149,31 @@ describe('StatefulOpenTimeline', () => {
     mockHistory = [];
   });
 
-  test('it has the expected initial state', () => {
-    const wrapper = mount(
-      <TestProviders>
+  const renderOpenTimeline = (
+    props: Partial<React.ComponentProps<typeof StatefulOpenTimeline>> = {},
+    store?: ReturnType<typeof createMockStore>
+  ) =>
+    render(
+      <TestProviders store={store}>
         <StatefulOpenTimeline
           data-test-subj="stateful-timeline"
           isModal={false}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           title={title}
+          {...props}
         />
       </TestProviders>
     );
 
-    const componentProps = wrapper.find('[data-test-subj="open-timeline"]').last().props();
+  test('it has the expected initial state', () => {
+    renderOpenTimeline();
 
-    expect(componentProps).toEqual({
-      ...componentProps,
-      itemIdToExpandedNotesRowMap: {},
-      onlyFavorites: false,
-      pageIndex: 0,
-      pageSize: 10,
-      query: '',
-      selectedItems: [],
-      sortDirection: 'desc',
-      sortField: 'updated',
-    });
+    expect(screen.getByTestId('selected-count')).toHaveTextContent('Selected 0 Timelines');
+    expect(screen.getByTestId('selectable-query-text')).toBeEmptyDOMElement();
+    expect(screen.getByTestId('only-favorites-toggle')).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByTestId('search-bar')).toHaveValue('');
+    expect(document.querySelector('th[aria-sort="descending"]')).toHaveTextContent('Last modified');
+    expect(screen.queryByTestId('note-comment-list')).not.toBeInTheDocument();
   });
 
   describe("Template timelines' tab", () => {
@@ -191,28 +205,21 @@ describe('StatefulOpenTimeline', () => {
     });
 
     test("should land on correct templates' tab after switching tab", async () => {
-      (useParams as jest.Mock).mockReturnValue({
-        tabName: TimelineTypeEnum.template,
-        pageName: SecurityPageName.timelines,
-      });
+      renderOpenTimeline();
 
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulOpenTimeline
-            data-test-subj="stateful-timeline"
-            isModal={false}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            title={title}
-          />
-        </TestProviders>
+      const templatesTab = screen.getByTestId(
+        `timeline-${TimelineTabsStyle.tab}-${TimelineTypeEnum.template}`
       );
-      await waitFor(() => {
-        wrapper
-          .find(`[data-test-subj="timeline-${TimelineTabsStyle.tab}-${TimelineTypeEnum.template}"]`)
-          .first()
-          .simulate('click');
+      expect(templatesTab).toHaveAttribute('aria-selected', 'false');
 
-        expect(history.length).toBeGreaterThan(0);
+      fireEvent.click(templatesTab);
+
+      expect(mockNavigateToUrl).toHaveBeenCalledTimes(1);
+      expect(mockNavigateToUrl).toHaveBeenCalledWith(`/timelines/${TimelineTypeEnum.template}`);
+      await waitFor(() => {
+        expect(mockFetchAllTimeline).toHaveBeenLastCalledWith(
+          expect.objectContaining({ timelineType: TimelineTypeEnum.template })
+        );
       });
     });
 
@@ -238,109 +245,67 @@ describe('StatefulOpenTimeline', () => {
         pageName: SecurityPageName.case,
       });
 
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulOpenTimeline
-            data-test-subj="stateful-timeline"
-            isModal={true}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            title={title}
-          />
-        </TestProviders>
+      renderOpenTimeline({ isModal: true });
+
+      fireEvent.click(
+        screen.getByTestId(
+          `open-timeline-modal-body-${TimelineTabsStyle.filter}-${TimelineTypeEnum.template}`
+        )
       );
+
       await waitFor(() => {
-        wrapper
-          .find(
-            `[data-test-subj="open-timeline-modal-body-${TimelineTabsStyle.filter}-${TimelineTypeEnum.template}"]`
-          )
-          .first()
-          .simulate('click');
         expect(mockHistory.length).toEqual(0);
       });
     });
   });
 
   describe('#onQueryChange', () => {
+    const enterQuery = async (value: string) => {
+      await userEvent.type(screen.getByTestId('search-bar'), `${value}{enter}`);
+    };
+
     test('it updates the query state with the expected trimmed value when the user enters a query', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulOpenTimeline
-            data-test-subj="stateful-timeline"
-            isModal={false}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            title={title}
-          />
-        </TestProviders>
-      );
+      renderOpenTimeline();
+
+      await enterQuery('   abcd   ');
+
       await waitFor(() => {
-        wrapper
-          .find('[data-test-subj="search-bar"] input')
-          .simulate('keyup', { key: 'Enter', target: { value: '   abcd   ' } });
-        expect(wrapper.find('[data-test-subj="search-row"]').first().prop('query')).toEqual('abcd');
+        expect(screen.getByTestId('selectable-query-text')).toHaveTextContent('with "abcd"');
       });
-    });
-    test('it appends the word "with" to the Showing in Timelines message when the user enters a query', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulOpenTimeline
-            isModal={false}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            title={title}
-          />
-        </TestProviders>
+      expect(mockFetchAllTimeline).toHaveBeenLastCalledWith(
+        expect.objectContaining({ search: 'abcd' })
       );
+    });
+
+    test('it appends the word "with" to the Showing in Timelines message when the user enters a query', async () => {
+      renderOpenTimeline();
+
+      await enterQuery('   abcd   ');
 
       await waitFor(() => {
-        wrapper
-          .find('[data-test-subj="search-bar"] input')
-          .simulate('keyup', { key: 'Enter', target: { value: '   abcd   ' } });
-
-        expect(wrapper.find('[data-test-subj="query-message"]').first().text()).toContain(
-          'Showing: 11 timelines with'
-        );
+        expect(screen.getByTestId('query-message')).toHaveTextContent('Showing: 11 timelines with');
       });
     });
 
     test('echos (renders) the query when the user enters a query', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulOpenTimeline
-            isModal={false}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            title={title}
-          />
-        </TestProviders>
-      );
+      renderOpenTimeline();
+
+      await enterQuery('   abcd   ');
 
       await waitFor(() => {
-        wrapper
-          .find('[data-test-subj="search-bar"] input')
-          .simulate('keyup', { key: 'Enter', target: { value: '   abcd   ' } });
-
-        expect(wrapper.find('[data-test-subj="selectable-query-text"]').first().text()).toEqual(
-          'with "abcd"'
-        );
+        expect(screen.getByTestId('selectable-query-text')).toHaveTextContent(/^with "abcd"$/);
       });
     });
   });
 
   describe('#focusInput', () => {
     test('focuses the input when the component mounts', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulOpenTimeline
-            isModal={false}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            title={title}
-          />
-        </TestProviders>
-      );
+      const { container } = renderOpenTimeline();
 
       await waitFor(() => {
         expect(
-          wrapper.find(`.${OPEN_TIMELINE_CLASS_NAME} input`).first().getDOMNode().id ===
-            document.activeElement?.id
-        ).toBe(true);
+          container.querySelector<HTMLInputElement>(`.${OPEN_TIMELINE_CLASS_NAME} input`)
+        ).toHaveFocus();
       });
     });
   });
@@ -350,24 +315,12 @@ describe('StatefulOpenTimeline', () => {
     test.skip('it invokes addTimelinesToFavorites with the selected timelines when the button is clicked', async () => {
       const addTimelinesToFavorites = jest.fn();
 
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulOpenTimeline
-            isModal={false}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            title={title}
-          />
-        </TestProviders>
-      );
+      renderOpenTimeline();
+
+      fireEvent.click(screen.getByTestId('checkboxSelectAll'));
+      fireEvent.click(screen.getByTestId('favorite-selected'));
 
       await waitFor(() => {
-        wrapper
-          .find('input.euiCheckbox__input')
-          .first()
-          .simulate('change', { target: { checked: true } });
-
-        wrapper.find('[data-test-subj="favorite-selected"]').first().simulate('click');
-
         expect(addTimelinesToFavorites).toHaveBeenCalledWith([
           'saved-timeline-11',
           'saved-timeline-10',
@@ -385,25 +338,13 @@ describe('StatefulOpenTimeline', () => {
 
   describe('#onDeleteSelected', () => {
     test('it invokes deleteTimelines with the selected timelines when the button is clicked', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulOpenTimeline
-            isModal={false}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            title={title}
-          />
-        </TestProviders>
-      );
-      wrapper
-        .find('button[data-test-subj="euiCollapsedItemActionsButton"]')
-        .first()
-        .simulate('click');
-      wrapper.find('button[data-test-subj="delete-timeline"]').first().simulate('click');
-      wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
+      renderOpenTimeline();
+
+      fireEvent.click(screen.getAllByTestId('euiCollapsedItemActionsButton')[0]);
+      fireEvent.click(screen.getByTestId('delete-timeline'));
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
       await waitFor(() => {
-        wrapper.update();
-
         expect(deleteTimelinesByIds).toHaveBeenCalled();
       });
     });
@@ -411,280 +352,122 @@ describe('StatefulOpenTimeline', () => {
 
   describe('#onSelectionChange', () => {
     test('it updates the selection state when timelines are selected', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulOpenTimeline
-            data-test-subj="stateful-timeline"
-            isModal={false}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            title={title}
-          />
-        </TestProviders>
-      );
+      renderOpenTimeline();
+
+      fireEvent.click(screen.getByTestId('checkboxSelectAll'));
 
       await waitFor(() => {
-        wrapper
-          .find('input.euiCheckbox__input')
-          .first()
-          .simulate('change', { target: { checked: true } });
-
-        const selectedItems: [] = wrapper
-          .find('[data-test-subj="open-timeline"]')
-          .last()
-          .prop('selectedItems');
-
-        expect(selectedItems.length).toEqual(13); // 13 because we did mock 13 timelines in the query
+        // 13 because we did mock 13 timelines in the query
+        expect(screen.getByTestId('selected-count')).toHaveTextContent('Selected 13 Timelines');
       });
     });
   });
 
   describe('#onTableChange', () => {
     test('it updates the sort state when the user clicks on a column to sort it', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulOpenTimeline
-            data-test-subj="stateful-timeline"
-            isModal={false}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            title={title}
-          />
-        </TestProviders>
-      );
+      const { container } = renderOpenTimeline();
 
-      expect(wrapper.find('[data-test-subj="open-timeline"]').last().prop('sortDirection')).toEqual(
-        'desc'
-      );
+      const sortedHeader = () => container.querySelector('th[aria-sort]') as HTMLElement;
+      expect(sortedHeader()).toHaveAttribute('aria-sort', 'descending');
 
-      wrapper.find('thead tr th button').at(0).simulate('click');
+      fireEvent.click(container.querySelector('thead tr th button') as HTMLElement);
 
-      expect(wrapper.find('[data-test-subj="open-timeline"]').last().prop('sortDirection')).toEqual(
-        'asc'
-      );
+      expect(container.querySelector('th[aria-sort="ascending"]')).toBeInTheDocument();
+      expect(container.querySelector('th[aria-sort="descending"]')).not.toBeInTheDocument();
     });
   });
 
   describe('#onToggleOnlyFavorites', () => {
     test('it updates the onlyFavorites state when the user clicks the Only Favorites button', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulOpenTimeline
-            data-test-subj="stateful-timeline"
-            isModal={false}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            title={title}
-          />
-        </TestProviders>
-      );
+      renderOpenTimeline();
 
-      expect(wrapper.find('[data-test-subj="open-timeline"]').last().prop('onlyFavorites')).toEqual(
-        false
-      );
+      expect(screen.getByTestId('only-favorites-toggle')).toHaveAttribute('aria-pressed', 'false');
 
-      wrapper.find('button[data-test-subj="only-favorites-toggle"]').first().simulate('click');
+      fireEvent.click(screen.getByTestId('only-favorites-toggle'));
 
-      expect(wrapper.find('[data-test-subj="open-timeline"]').last().prop('onlyFavorites')).toEqual(
-        true
-      );
+      expect(screen.getByTestId('only-favorites-toggle')).toHaveAttribute('aria-pressed', 'true');
     });
   });
 
   describe('#onToggleShowNotes', () => {
-    test('it updates the itemIdToExpandedNotesRowMap state when the user clicks the expand notes button', async () => {
-      const mockStateWithTimeline = {
-        ...mockGlobalState,
-        timeline: {
-          ...mockGlobalState.timeline,
-          timelineById: {
-            ...mockGlobalState.timeline.timelineById,
-            [TimelineId.active]: {
-              ...mockGlobalState.timeline.timelineById[TimelineId.test],
-              noteIds: ['noteId1'],
-              createdBy: 'thisisclearlyagapinourtypes',
-            },
+    const mockStateWithTimeline = {
+      ...mockGlobalState,
+      timeline: {
+        ...mockGlobalState.timeline,
+        timelineById: {
+          ...mockGlobalState.timeline.timelineById,
+          [TimelineId.active]: {
+            ...mockGlobalState.timeline.timelineById[TimelineId.test],
+            noteIds: ['noteId1'],
+            createdBy: 'thisisclearlyagapinourtypes',
           },
         },
-      };
-      const wrapper = mount(
-        <TestProviders store={createMockStore(mockStateWithTimeline)}>
-          <StatefulOpenTimeline
-            data-test-subj="stateful-timeline"
-            isModal={false}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            title={title}
-          />
-        </TestProviders>
-      );
+      },
+    };
 
-      wrapper.update();
+    test('it updates the itemIdToExpandedNotesRowMap state when the user clicks the expand notes button', async () => {
+      renderOpenTimeline({}, createMockStore(mockStateWithTimeline));
 
-      expect(
-        wrapper.find('[data-test-subj="open-timeline"]').last().prop('itemIdToExpandedNotesRowMap')
-      ).toEqual({});
+      expect(screen.queryByTestId('note-comment-list')).not.toBeInTheDocument();
 
-      wrapper.find('[data-test-subj="expand-notes"]').first().simulate('click');
+      fireEvent.click(screen.getAllByTestId('expand-notes')[0]);
 
-      await waitFor(() => {
-        expect(
-          wrapper
-            .find('[data-test-subj="open-timeline"]')
-            .last()
-            .prop('itemIdToExpandedNotesRowMap')
-        ).toEqual({
-          '10849df0-7b44-11e9-a608-ab3d811609': (
-            <NotePreviews
-              notes={
-                mockOpenTimelineQueryResults.timeline[0].notes != null
-                  ? mockOpenTimelineQueryResults.timeline[0].notes.map((note) => ({
-                      ...note,
-                      savedObjectId: note.noteId,
-                    }))
-                  : []
-              }
-              timelineId={TimelineId.active}
-            />
-          ),
-        });
-      });
+      expect(await screen.findByTestId('note-comment-list')).toBeInTheDocument();
     });
 
     test('it renders the expanded notes when the expand button is clicked', async () => {
-      const mockStateWithTimeline = {
-        ...mockGlobalState,
-        timeline: {
-          ...mockGlobalState.timeline,
-          timelineById: {
-            ...mockGlobalState.timeline.timelineById,
-            [TimelineId.active]: {
-              ...mockGlobalState.timeline.timelineById[TimelineId.test],
-              noteIds: ['noteId1'],
-              createdBy: 'thisisclearlyagapinourtypes',
-            },
-          },
-        },
-      };
-      const wrapper = mount(
-        <TestProviders store={createMockStore(mockStateWithTimeline)}>
-          <StatefulOpenTimeline
-            data-test-subj="stateful-timeline"
-            isModal={false}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            title={title}
-          />
-        </TestProviders>
-      );
+      renderOpenTimeline({}, createMockStore(mockStateWithTimeline));
 
-      await waitFor(() => {
-        wrapper.update();
+      fireEvent.click(screen.getAllByTestId('expand-notes')[0]);
 
-        wrapper.find('[data-test-subj="expand-notes"]').first().simulate('click');
-        expect(wrapper.find('.euiCommentEvent__headerUsername').exists()).toEqual(true);
-        expect(wrapper.find('.euiCommentEvent__headerUsername').first().text()).toEqual('elastic');
-      });
+      expect(await screen.findByTestId('note-comment-list')).toHaveTextContent('elastic');
     });
 
     test('it has the expected initial state for openTimeline - templateTimelineFilter', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulOpenTimeline
-            data-test-subj="stateful-timeline"
-            isModal={false}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            title={title}
-          />
-        </TestProviders>
-      );
+      renderOpenTimeline();
 
-      expect(wrapper.find('[data-test-subj="open-timeline-subtabs"]').exists()).toEqual(true);
+      expect(screen.getByTestId('open-timeline-subtabs')).toBeInTheDocument();
     });
 
     test('it has the expected initial state for openTimelineModalBody - templateTimelineFilter', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulOpenTimeline
-            data-test-subj="stateful-timeline"
-            isModal={true}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            title={title}
-          />
-        </TestProviders>
-      );
+      renderOpenTimeline({ isModal: true });
 
       expect(
-        wrapper
-          .find(
-            `[data-test-subj="open-timeline-modal-body-${TimelineTabsStyle.filter}-${TimelineTypeEnum.default}"]`
-          )
-          .exists()
-      ).toEqual(true);
+        screen.getByTestId(
+          `open-timeline-modal-body-${TimelineTabsStyle.filter}-${TimelineTypeEnum.default}`
+        )
+      ).toBeInTheDocument();
     });
   });
 
   describe('#resetSelectionState', () => {
     test('when the user deletes selected timelines, resetSelectionState is invoked to clear the selection state', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulOpenTimeline
-            data-test-subj="stateful-timeline"
-            isModal={false}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            title={title}
-          />
-        </TestProviders>
-      );
-      const getSelectedItem = (): [] =>
-        wrapper.find('[data-test-subj="open-timeline"]').last().prop('selectedItems');
+      renderOpenTimeline();
+
+      expect(screen.getByTestId('selected-count')).toHaveTextContent('Selected 0 Timelines');
+      fireEvent.click(screen.getByTestId('checkboxSelectAll'));
       await waitFor(() => {
-        expect(getSelectedItem().length).toEqual(0);
-        wrapper
-          .find('input.euiCheckbox__input')
-          .first()
-          .simulate('change', { target: { checked: true } });
-        expect(getSelectedItem().length).toEqual(13);
+        expect(screen.getByTestId('selected-count')).toHaveTextContent('Selected 13 Timelines');
       });
     });
   });
 
   test('it renders the expected count of matching timelines when no query has been entered', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <StatefulOpenTimeline
-          data-test-subj="stateful-timeline"
-          isModal={false}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          title={title}
-        />
-      </TestProviders>
-    );
+    renderOpenTimeline();
 
     await waitFor(() => {
-      wrapper.update();
-
-      expect(wrapper.find('[data-test-subj="query-message"]').first().text()).toContain(
-        'Showing: 11 timelines '
-      );
+      expect(screen.getByTestId('query-message')).toHaveTextContent('Showing: 11 timelines');
     });
   });
 
   test('it invokes onOpenTimeline with the expected parameters when the hyperlink is clicked', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <StatefulOpenTimeline
-          data-test-subj="stateful-timeline"
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          isModal={false}
-          title={title}
-        />
-      </TestProviders>
+    renderOpenTimeline();
+
+    fireEvent.click(
+      screen.getByTestId(`timeline-title-${mockOpenTimelineQueryResults.timeline[0].savedObjectId}`)
     );
 
     await waitFor(() => {
-      wrapper
-        .find(
-          `[data-test-subj="timeline-title-${mockOpenTimelineQueryResults.timeline[0].savedObjectId}"]`
-        )
-        .last()
-        .simulate('click');
-
       expect((mockQueryTimelineById as jest.Mock).mock.calls[0][0].timelineId).toEqual(
         mockOpenTimelineQueryResults.timeline[0].savedObjectId
       );
@@ -693,21 +476,10 @@ describe('StatefulOpenTimeline', () => {
   });
 
   test('it invokes onOpenTimeline with the expected params when the button is clicked', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <StatefulOpenTimeline
-          data-test-subj="stateful-timeline"
-          isModal={false}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          title={title}
-        />
-      </TestProviders>
-    );
-    wrapper
-      .find('button[data-test-subj="euiCollapsedItemActionsButton"]')
-      .first()
-      .simulate('click');
-    wrapper.find('button[data-test-subj="open-duplicate"]').first().simulate('click');
+    renderOpenTimeline();
+
+    fireEvent.click(screen.getAllByTestId('euiCollapsedItemActionsButton')[0]);
+    fireEvent.click(screen.getByTestId('open-duplicate'));
 
     expect((mockQueryTimelineById as jest.Mock).mock.calls[0][0].timelineId).toEqual(
       mockOpenTimelineQueryResults.timeline[0].savedObjectId
@@ -811,7 +583,7 @@ describe('StatefulOpenTimeline', () => {
       (useUserPrivileges as jest.Mock).mockReturnValue({
         timelinePrivileges: { crud: true },
       });
-      mount(
+      render(
         <TestProviders>
           <StatefulOpenTimeline
             isModal={false}
@@ -830,7 +602,7 @@ describe('StatefulOpenTimeline', () => {
       (useUserPrivileges as jest.Mock).mockReturnValue({
         timelinePrivileges: { crud: false },
       });
-      mount(
+      render(
         <TestProviders>
           <StatefulOpenTimeline
             isModal={false}

@@ -11,8 +11,12 @@ import { useRouteBreadcrumb } from '../breadcrumbs/use_route_breadcrumb';
 import { useApplicationsHref } from '../hooks/use_applications_href';
 import { useSyncTimeRange } from '../hooks/use_time_range';
 import { APPLICATIONS_LABEL, DIGITAL_EXPERIENCE_LABEL } from '../labels';
+import { SessionsStatusProvider } from './sessions_status_provider';
 
-/** Root route: syncs the time range and registers the `Digital Experience › Applications` crumbs. */
+/**
+ * Root route: syncs the time range, registers the `Digital Experience › Applications` crumbs and
+ * holds the sessions status, setting sessions up on the first visit of a user who can.
+ */
 export function DigitalExperienceLayout() {
   const hasValidTimeRange = useSyncTimeRange();
   const applicationsHref = useApplicationsHref();
@@ -22,5 +26,5 @@ export function DigitalExperienceLayout() {
     { text: APPLICATIONS_LABEL, href: applicationsHref },
   ]);
 
-  return hasValidTimeRange ? <Outlet /> : null;
+  return <SessionsStatusProvider>{hasValidTimeRange ? <Outlet /> : null}</SessionsStatusProvider>;
 }
