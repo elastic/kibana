@@ -47,6 +47,7 @@ export const summarizeInvestigationStepCommonDefinition: CommonStepDefinition<
   ),
   category: StepCategory.KibanaSecurity,
   stability: 'tech_preview',
+  exposure: 'internal',
   inputSchema,
   outputSchema,
 };

@@ -39,18 +39,6 @@ export const CLIENT_REGISTRATION_EXCEPTIONS: readonly string[] = [
   'significantEvents.classifyDetections',
   'significantEvents.resolveModel',
 
-  // @elastic/alertzero-common-layer — alertzero
-  'alertzero.investigation.summarize',
-  'alertzero.resolveProposals',
-  'alertzero.triage.groupFpCandidates',
-  'alertzero.triage.headroom',
-  'alertzero.triage.joinProposal',
-  'alertzero.triage.loadAlerts',
-  'alertzero.triage.planSweep',
-  'alertzero.triage.retagProposalAlerts',
-  'alertzero.triage.tagPatternKeys',
-  'hunt.packageReport',
-
   // @elastic/context-eng — context_engine
   'context-engine.applyDreamChanges',
   'context-engine.applyDreamRelationships',

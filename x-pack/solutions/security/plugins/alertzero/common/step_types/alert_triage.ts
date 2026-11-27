@@ -66,6 +66,7 @@ export const triageHeadroomStepCommonDefinition: CommonStepDefinition<
   }),
   category: StepCategory.KibanaSecurity,
   stability: 'tech_preview',
+  exposure: 'internal',
   inputSchema: headroomInputSchema,
   outputSchema: headroomSchema,
 };
@@ -127,6 +128,7 @@ export const triagePlanSweepStepCommonDefinition: CommonStepDefinition<
   }),
   category: StepCategory.KibanaSecurity,
   stability: 'tech_preview',
+  exposure: 'internal',
   inputSchema: planSweepInputSchema,
   outputSchema: planSweepOutputSchema,
 };
@@ -159,6 +161,7 @@ export const triageLoadAlertsStepCommonDefinition: CommonStepDefinition<
   }),
   category: StepCategory.KibanaSecurity,
   stability: 'tech_preview',
+  exposure: 'internal',
   inputSchema: loadAlertsInputSchema,
   outputSchema: loadAlertsOutputSchema,
 };
@@ -204,6 +207,7 @@ export const triageTagPatternKeysStepCommonDefinition: CommonStepDefinition<
   }),
   category: StepCategory.KibanaSecurity,
   stability: 'tech_preview',
+  exposure: 'internal',
   inputSchema: tagPatternKeysInputSchema,
   outputSchema: tagPatternKeysOutputSchema,
 };
@@ -323,6 +327,7 @@ export const triageGroupFpCandidatesStepCommonDefinition: CommonStepDefinition<
   ),
   category: StepCategory.KibanaSecurity,
   stability: 'tech_preview',
+  exposure: 'internal',
   inputSchema: groupFpCandidatesInputSchema,
   outputSchema: groupFpCandidatesOutputSchema,
 };
@@ -364,6 +369,7 @@ export const triageJoinProposalStepCommonDefinition: CommonStepDefinition<
   }),
   category: StepCategory.KibanaSecurity,
   stability: 'tech_preview',
+  exposure: 'internal',
   inputSchema: joinProposalInputSchema,
   outputSchema: joinProposalOutputSchema,
 };
@@ -418,6 +424,7 @@ export const triageRetagProposalAlertsStepCommonDefinition: CommonStepDefinition
   ),
   category: StepCategory.KibanaSecurity,
   stability: 'tech_preview',
+  exposure: 'internal',
   inputSchema: retagProposalAlertsInputSchema,
   outputSchema: retagProposalAlertsOutputSchema,
 };
@@ -493,6 +500,7 @@ export const triageStoreFpDecisionsStepCommonDefinition: CommonStepDefinition<
   ),
   category: StepCategory.KibanaSecurity,
   stability: 'tech_preview',
+  exposure: 'internal',
   inputSchema: storeFpDecisionsInputSchema,
   outputSchema: storeFpDecisionsOutputSchema,
 };
@@ -592,6 +600,7 @@ export const triageMatchFpDecisionsStepCommonDefinition: CommonStepDefinition<
   ),
   category: StepCategory.KibanaSecurity,
   stability: 'tech_preview',
+  exposure: 'internal',
   inputSchema: matchFpDecisionsInputSchema,
   outputSchema: matchFpDecisionsOutputSchema,
 };
@@ -640,6 +649,7 @@ export const triageRevokeFpDecisionStepCommonDefinition: CommonStepDefinition<
   ),
   category: StepCategory.KibanaSecurity,
   stability: 'tech_preview',
+  exposure: 'internal',
   inputSchema: revokeFpDecisionInputSchema,
   outputSchema: revokeFpDecisionOutputSchema,
 };

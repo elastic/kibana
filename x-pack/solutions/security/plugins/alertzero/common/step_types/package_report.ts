@@ -285,6 +285,7 @@ export const packageReportStepCommonDefinition: CommonStepDefinition<
   }),
   category: StepCategory.KibanaSecurity,
   stability: 'tech_preview',
+  exposure: 'internal',
   inputSchema: packageReportInputSchema,
   outputSchema: packageReportOutputSchema,
   documentation: {

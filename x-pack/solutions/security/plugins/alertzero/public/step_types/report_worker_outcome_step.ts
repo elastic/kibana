@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { reportWorkerOutcomeStepCommonDefinition } from '../../common/step_types';
+import { AlertZeroStepIcon } from './alertzero_step_icon';
 
 export const reportWorkerOutcomePublicStepDefinition = createPublicStepDefinition({
   ...reportWorkerOutcomeStepCommonDefinition,
-  icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/stats').then(({ icon }) => ({
-      default: icon,
-    }))
-  ),
+  icon: AlertZeroStepIcon,
 });

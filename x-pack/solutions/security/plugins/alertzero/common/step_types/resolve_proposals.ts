@@ -120,6 +120,7 @@ export const resolveProposalsStepCommonDefinition: CommonStepDefinition<
   }),
   category: StepCategory.KibanaSecurity,
   stability: 'tech_preview',
+  exposure: 'internal',
   inputSchema: resolveProposalsInputSchema,
   outputSchema: resolveProposalsOutputSchema,
   documentation: {

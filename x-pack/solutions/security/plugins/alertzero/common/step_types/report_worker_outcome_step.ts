@@ -385,6 +385,7 @@ export const reportWorkerOutcomeStepCommonDefinition: CommonStepDefinition<
   }),
   category: StepCategory.Kibana,
   stability: 'beta',
+  exposure: 'internal',
   inputSchema: reportWorkerOutcomeStepInputSchema,
   outputSchema: reportWorkerOutcomeStepOutputSchema,
   documentation: {

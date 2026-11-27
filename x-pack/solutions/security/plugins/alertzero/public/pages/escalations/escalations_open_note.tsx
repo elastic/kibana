@@ -8,7 +8,6 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
-import { AlertZeroIcon } from '@kbn/security-solution-navigation';
 import { ESCALATIONS_OPEN_NOTE } from './translations';
 
 /** Centered explainer with the small Alert Zero icon, shown in the Open section only when it is empty. */
@@ -27,7 +26,7 @@ export const EscalationsOpenNote: React.FC = () => {
       data-test-subj="alertZeroEscalationsOpenNote"
     >
       <EuiFlexItem grow={false}>
-        <EuiIcon type={AlertZeroIcon} size="m" color="subdued" aria-hidden={true} />
+        <EuiIcon type="productAlertZero" size="m" color="subdued" aria-hidden={true} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="s" textAlign="center">
