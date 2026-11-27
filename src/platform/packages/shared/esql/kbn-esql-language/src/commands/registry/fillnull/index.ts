@@ -27,7 +27,5 @@ export const fillNullCommand: ICommand = {
       'FROM employees | FILLNULL 0 ON salary_*',
       'FROM employees | FILLNULL DEFAULT ON *',
     ],
-    preview: true,
-    hidden: true,
   },
 };
