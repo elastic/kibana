@@ -17,6 +17,7 @@ import {
 
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { FilterableSource } from '@kbn/data-source';
 import { createVegaVisualization } from '../vega_visualization';
 import type { VegaVisualizationDependencies } from '../plugin';
 import type { VegaRenderDescriptor } from '../data_model/types';
@@ -34,6 +35,8 @@ interface VegaVisComponentProps {
   /** Whether runtime Vega warnings are surfaced in the panel. Enabled while authoring a spec. */
   showWarnings: boolean;
   visData: VegaRenderDescriptor;
+  /** The data sources of the spec, read when a chart filter names no index. */
+  getDataSources: () => Promise<FilterableSource[]>;
 }
 
 type VegaVisController = InstanceType<ReturnType<typeof createVegaVisualization>>;
@@ -54,6 +57,7 @@ export const VegaVisComponent = ({
   renderComplete,
   deps,
   showWarnings,
+  getDataSources,
 }: VegaVisComponentProps) => {
   const styles = useMemoCss(vegaVisStyles);
   const chartDiv = useRef<HTMLDivElement>(null);
@@ -73,7 +77,7 @@ export const VegaVisComponent = ({
 
   useEffect(() => {
     const asyncRender = async (visCtrl: VegaVisController) => {
-      await visCtrl.render(visData, inspectorAdapters);
+      await visCtrl.render(visData, getDataSources, inspectorAdapters);
       renderCompleted.current = true;
       renderComplete();
     };
@@ -81,7 +85,7 @@ export const VegaVisComponent = ({
     if (visController.current) {
       asyncRender(visController.current);
     }
-  }, [inspectorAdapters, renderComplete, visData]);
+  }, [getDataSources, inspectorAdapters, renderComplete, visData]);
 
   const onContainerResize: EuiResizeObserverProps['onResize'] = useCallback((dimensions) => {
     if (renderCompleted.current) {

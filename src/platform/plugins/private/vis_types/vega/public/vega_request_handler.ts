@@ -8,8 +8,7 @@
  */
 
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import type { Filter, TimeRange, Query, ProjectRouting } from '@kbn/es-query';
+import type { DataViewBase, Filter, TimeRange, Query, ProjectRouting } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
@@ -21,6 +20,7 @@ import type { VegaVisualizationDependencies } from './plugin';
 import type { VisParams } from './vega_fn';
 import { getData, getDataViews } from './services';
 import type { VegaInspectorAdapters } from './vega_inspector';
+import { resolveVegaEsqlSourcesOfText, type VegaEsqlSources } from './lib/vega_data_sources';
 
 interface VegaRequestHandlerParams {
   query: Query | Query[] | undefined;
@@ -33,6 +33,8 @@ interface VegaRequestHandlerParams {
   /** Only applies to ES|QL-backed vega data sources */
   isApproximate: boolean;
   esqlVariables?: ESQLControlVariable[];
+  /** The resolved ES|QL sources of the spec, when the caller holds them; otherwise resolved here. */
+  esqlSources?: VegaEsqlSources;
 }
 
 interface VegaRequestHandlerContext {
@@ -62,6 +64,7 @@ export function createVegaRequestHandler(
     projectRouting,
     isApproximate,
     esqlVariables,
+    esqlSources: heldEsqlSources,
   }: VegaRequestHandlerParams) {
     const { search } = getData();
     const dataViews = getDataViews();
@@ -84,15 +87,16 @@ export function createVegaRequestHandler(
 
     timeCache.setTimeRange(timeRange);
 
-    let dataView: DataView;
+    const esqlSources = heldEsqlSources ?? (await resolveVegaEsqlSourcesOfText(visParams.spec));
+    // An ES|QL filter names the dataset of a query of the spec, any other filter a data view.
     const firstFilterIndex = filters?.[0]?.meta.index;
-    if (firstFilterIndex) {
-      // @ts-expect-error upgrade typescript v5.9.3
-      dataView = await dataViews.get(firstFilterIndex).catch(() => undefined);
-    }
+    const filterSource: DataViewBase | undefined = firstFilterIndex
+      ? esqlSources.filterableSources.find(({ id }) => id === firstFilterIndex) ??
+        (await dataViews.get(firstFilterIndex).catch((): undefined => undefined))
+      : undefined;
 
     const esQueryConfigs = getEsQueryConfig(uiSettings);
-    const filtersDsl = buildEsQuery(dataView, query ?? [], filters ?? [], esQueryConfigs);
+    const filtersDsl = buildEsQuery(filterSource, query ?? [], filters ?? [], esQueryConfigs);
     const { VegaParser } = await import('./async_services');
 
     const vp = new VegaParser(
@@ -102,7 +106,8 @@ export function createVegaRequestHandler(
       filtersDsl,
       getServiceSettings,
       theme.getTheme(),
-      esqlVariables
+      esqlVariables,
+      esqlSources
     );
     return (await vp.parseAsync()).toRenderDescriptor();
   };

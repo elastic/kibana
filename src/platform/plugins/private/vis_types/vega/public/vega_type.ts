@@ -15,7 +15,7 @@ import type { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 import { VIS_EVENT_TO_TRIGGER, VisGroups } from '@kbn/visualizations-plugin/public';
 
 import { getDefaultSpec } from './default_spec';
-import { extractIndexPatternsFromSpec } from './lib/extract_index_pattern';
+import { resolveVegaDataSourcesOfText } from './lib/vega_data_sources';
 import { extractProjectRoutingOverrides } from './lib/extract_project_routing_overrides';
 import { getPublishedEsqlQuery } from './lib/spec_uses_esql';
 import { createInspectorAdapters } from './vega_inspector';
@@ -51,16 +51,7 @@ export const vegaVisType: VisTypeDefinition<VisParams> = {
   getSupportedTriggers: () => {
     return [VIS_EVENT_TO_TRIGGER.applyFilter];
   },
-  getUsedIndexPattern: async (visParams) => {
-    try {
-      const spec = parse(visParams.spec, { legacyRoot: false, keepWsc: true });
-
-      return await extractIndexPatternsFromSpec(spec);
-    } catch (e) {
-      // spec is invalid
-    }
-    return [];
-  },
+  getUsedIndexPattern: (visParams) => resolveVegaDataSourcesOfText(visParams.spec),
   getProjectRoutingOverrides: async (visParams) => {
     try {
       const spec = parse(visParams.spec, { legacyRoot: false, keepWsc: true });

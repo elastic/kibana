@@ -13,8 +13,10 @@ import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common'
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { VisualizationContainer } from '@kbn/visualizations-components';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import type { FilterableSource } from '@kbn/data-source';
 import type { VegaVisualizationDependencies } from './plugin';
 import { reportVegaRender } from './lib/vega_render_telemetry';
+import { resolveVegaDataSourcesOfText } from './lib/vega_data_sources';
 import type { RenderValue } from './vega_fn';
 const LazyVegaVisComponent = lazy(() =>
   import('./async_services').then(({ VegaVisComponent }) => ({ default: VegaVisComponent }))
@@ -39,10 +41,14 @@ export const getVegaVisRenderer: (
 ) => ExpressionRenderDefinition<RenderValue> = (deps) => ({
   name: 'vega_vis',
   reuseDomNode: true,
-  render: async (domNode, { visData, inspectorAdapters }, handlers) => {
+  render: async (domNode, { visData, visConfig, inspectorAdapters }, handlers) => {
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
+
+    // Nothing holds the sources of a legacy visualization, so a chart filter resolves them once.
+    let dataSources: Promise<FilterableSource[]> | undefined;
+    const getDataSources = () => (dataSources ??= resolveVegaDataSourcesOfText(visConfig.spec));
 
     const renderComplete = () => {
       reportVegaRender({
@@ -68,6 +74,7 @@ export const getVegaVisRenderer: (
             // other than `view` — the Visualize editor's `edit` in practice — showed warnings.
             showWarnings={handlers.getRenderMode() !== 'view'}
             visData={visData}
+            getDataSources={getDataSources}
           />
         </VisualizationContainer>
       </KibanaRenderContextProvider>,

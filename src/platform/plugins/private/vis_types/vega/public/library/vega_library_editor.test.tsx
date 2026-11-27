@@ -63,8 +63,8 @@ const lastTimePickerProps = () => mockTimePicker.mock.lastCall?.[0];
 
 jest.mock('../default_spec', () => ({ getDefaultSpec: () => '{ mark: default }' }));
 jest.mock('./save_to_library', () => ({ saveVegaToLibrary: jest.fn() }));
-jest.mock('../lib/extract_index_pattern', () => ({
-  extractIndexPatternsFromSpec: jest.fn().mockResolvedValue([]),
+jest.mock('../lib/vega_data_sources', () => ({
+  resolveVegaDataSourcesOfText: jest.fn().mockResolvedValue([]),
 }));
 
 const item: { id: string; data: VegaReadResponseBody['data'] } = {

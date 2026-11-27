@@ -11,7 +11,8 @@ import React, { Suspense, lazy, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, euiFullHeight } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { isEsqlFilterableSource, type FilterableSource } from '@kbn/data-source';
 import { isCombinedFilter, isOfQueryType, type Filter, type Query } from '@kbn/es-query';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { omit } from 'lodash';
@@ -56,6 +57,9 @@ const bindDataViewId = (filter: Filter, dataViewId: string): Filter => ({
   },
 });
 
+const isAdHocSource = (source: FilterableSource): boolean =>
+  isEsqlFilterableSource(source) || (source instanceof DataView && !source.isPersisted());
+
 /** Whether there are more filters than a panel or library item can store. */
 export const hasTooManyFilters = (filters?: unknown[]) => (filters?.length ?? 0) > VEGA_MAX_FILTERS;
 
@@ -66,8 +70,8 @@ export const tooManyFiltersMessage = i18n.translate('visTypeVega.editor.tooManyF
 
 interface VegaEditorBodyProps {
   SearchBar: VegaPluginStartDependencies['unifiedSearch']['ui']['SearchBar'];
-  /** The data views the spec names, which the search bar suggests fields from. */
-  specDataViews?: DataView[];
+  /** The data views and ES|QL sources the spec names, which the search bar suggests fields from. */
+  specDataSources?: FilterableSource[];
   /** Used instead when the spec names no data views, like Visualize's search bar. */
   defaultDataView?: DataView;
   query?: Query;
@@ -86,7 +90,7 @@ interface VegaEditorBodyProps {
 /** The query bar and spec editor shared by the dashboard panel and library item editors. */
 export const VegaEditorBody = ({
   SearchBar,
-  specDataViews,
+  specDataSources,
   defaultDataView,
   query,
   filters,
@@ -97,16 +101,16 @@ export const VegaEditorBody = ({
   onSpecChange,
   onFormatChange,
 }: VegaEditorBodyProps) => {
-  const dataViews = specDataViews?.length
-    ? specDataViews
+  const dataSources: FilterableSource[] = specDataSources?.length
+    ? specDataSources
     : defaultDataView
     ? [defaultDataView]
     : [];
-  // Filters on the only ad-hoc data view are stored without its id, because the id isn't a
+  // Filters on the only ad-hoc source are stored without its id, because the id isn't a
   // saved object and a reference to it fails import. The search bar gets the id back, because the
   // filter editor opens an empty filter when it can't match one.
-  const adHocDataViews = dataViews.filter((dataView) => !dataView.isPersisted());
-  const implicitDataViewId = adHocDataViews.length === 1 ? adHocDataViews[0].id : undefined;
+  const adHocSources = dataSources.filter(isAdHocSource);
+  const implicitDataViewId = adHocSources.length === 1 ? adHocSources[0].id : undefined;
   const searchBarFilters = useMemo(
     () =>
       (filters ?? []).map((filter) =>
@@ -122,7 +126,7 @@ export const VegaEditorBody = ({
           appName="vegaEditorFlyout"
           query={isOfQueryType(query) ? query : getData().query.queryString.getDefaultQuery()}
           filters={searchBarFilters}
-          indexPatterns={dataViews}
+          indexPatterns={dataSources}
           showQueryInput
           showFilterBar
           // Pinned filters live in global state, which panel filters are not persisted to.

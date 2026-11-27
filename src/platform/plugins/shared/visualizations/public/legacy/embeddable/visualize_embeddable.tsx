@@ -20,7 +20,7 @@ import type { KibanaExecutionContext, SavedObjectAttributes } from '@kbn/core/pu
 import type { ErrorLike } from '@kbn/expressions-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { FilterableSource } from '@kbn/data-source';
 import { Warnings } from '@kbn/charts-plugin/public';
 import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
 import type { Adapters } from '@kbn/inspector-plugin/public';
@@ -67,7 +67,7 @@ export interface VisualizeEmbeddableDeps {
 
 export interface VisualizeEmbeddableConfiguration {
   vis: Vis;
-  indexPatterns?: DataView[];
+  indexPatterns?: FilterableSource[];
   editPath: string;
   editUrl: string;
   capabilities: { visualizeSave: boolean; dashboardSave: boolean; visualizeOpen: boolean };
@@ -92,7 +92,7 @@ export interface VisualizeOutput extends EmbeddableOutput {
   editPath: string;
   editApp: string;
   editUrl: string;
-  indexPatterns?: DataView[];
+  indexPatterns?: FilterableSource[];
   visTypeName: string;
 }
 

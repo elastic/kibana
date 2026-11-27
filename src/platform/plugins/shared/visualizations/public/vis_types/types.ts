@@ -16,7 +16,7 @@ import type {
   AggGroupName,
   TimefilterContract,
 } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { FilterableSource } from '@kbn/data-source';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { NavigateToLensContext } from '@kbn/lens-common';
 import type { Vis, VisEditorOptionsProps, VisParams, VisToExpressionAst } from '../types';
@@ -126,7 +126,9 @@ export interface VisTypeDefinition<TVisParams extends VisParams> {
    * Some visualizations are created without SearchSource and may change the used indexes during the visualization configuration.
    * Using this method we can rewrite the standard mechanism for getting used indexes
    */
-  readonly getUsedIndexPattern?: (visParams: VisParams) => DataView[] | Promise<DataView[]>;
+  readonly getUsedIndexPattern?: (
+    visParams: VisParams
+  ) => FilterableSource[] | Promise<FilterableSource[]>;
 
   /**
    * Vega may provide project routing overrides.

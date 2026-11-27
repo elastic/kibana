@@ -58,7 +58,7 @@ export const VegaEditorFlyout = ({
   const [spec, setSpec] = useState(initialEditorValue);
   const [previewedSpec, setPreviewedSpec] = useState(initialEditorValue);
   const [format, setFormat] = useState<VegaByValueState['spec']['format']>(initialSpec.format);
-  const [publishedQuery, publishedFilters, publishedDataViews] = useBatchedPublishingSubjects(
+  const [publishedQuery, publishedFilters, publishedDataSources] = useBatchedPublishingSubjects(
     api.query$,
     api.filters$,
     api.dataSources$
@@ -113,7 +113,7 @@ export const VegaEditorFlyout = ({
       <EuiFlyoutBody data-test-subj="editorFlyoutBody" css={vegaEditorFlyoutBodyCss}>
         <VegaEditorBody
           SearchBar={SearchBar}
-          specDataViews={publishedDataViews}
+          specDataSources={publishedDataSources}
           defaultDataView={defaultDataView}
           query={search.query}
           filters={search.filters}

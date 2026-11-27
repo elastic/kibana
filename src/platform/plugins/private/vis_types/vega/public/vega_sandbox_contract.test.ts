@@ -147,7 +147,11 @@ describe('Vega render path across the sandbox boundary', () => {
     expect(isVegaSandboxOutboundMessage(applyFilterMessage)).toBe(true);
 
     const fireEvent = jest.fn();
-    const handle = createVegaFilterActionHandler({ spec: parser.spec, filterManager, fireEvent });
+    const handle = createVegaFilterActionHandler({
+      getDataSources: async () => [],
+      filterManager,
+      fireEvent,
+    });
     await handle(applyFilterMessage.intent);
 
     expect(fireEvent).toHaveBeenCalledWith({

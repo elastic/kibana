@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { FilterableSource } from '@kbn/data-source';
 import type { Vis } from '../../types';
 import type {
   VisualizeInput,
@@ -38,7 +38,7 @@ export const createVisEmbeddableFromObject =
 
       const editUrl = visId ? getHttp().basePath.prepend(`/app/visualize${urlFor(visId)}`) : '';
 
-      let indexPatterns: DataView[] = [];
+      let indexPatterns: FilterableSource[] = [];
 
       if (vis.type.getUsedIndexPattern) {
         try {

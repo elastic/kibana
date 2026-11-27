@@ -28,6 +28,7 @@ import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
 import type { SearchAPI } from './search_api';
 import type { TimeCache } from './time_cache';
+import type { VegaEsqlSources } from '../lib/vega_data_sources';
 import type { IServiceSettings } from '../vega_view/vega_map_view/service_settings/service_settings_types';
 import type {
   Bool,
@@ -81,6 +82,7 @@ export class VegaParser {
   timeCache: TimeCache;
   theme: CoreTheme;
   esqlVariables?: ESQLControlVariable[];
+  esqlSources?: VegaEsqlSources;
 
   constructor(
     spec: VegaSpec | string,
@@ -89,7 +91,8 @@ export class VegaParser {
     filters: Bool,
     getServiceSettings: () => Promise<IServiceSettings>,
     theme: CoreTheme,
-    esqlVariables?: ESQLControlVariable[]
+    esqlVariables?: ESQLControlVariable[],
+    esqlSources?: VegaEsqlSources
   ) {
     this.spec = spec as VegaSpec;
     this.hideWarnings = false;
@@ -102,6 +105,7 @@ export class VegaParser {
     this.timeCache = timeCache;
     this.theme = theme;
     this.esqlVariables = esqlVariables;
+    this.esqlSources = esqlSources;
   }
 
   async parseAsync() {
@@ -644,7 +648,8 @@ The URL is an identifier only. Kibana and your browser will never access this UR
           this.searchAPI,
           this.filters,
           onWarn,
-          this.esqlVariables
+          this.esqlVariables,
+          this.esqlSources
         ),
         emsfile: new EmsFileParser(serviceSettings),
         url: new UrlParser(onWarn),

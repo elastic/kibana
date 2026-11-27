@@ -13,22 +13,16 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { setDataViews } from '../services';
 import type { VegaFilterAction } from '../types';
-import type { VegaSpec } from '../data_model/types';
+import type { FilterableSource } from '@kbn/data-source';
 import { createVegaFilterActionHandler } from './vega_filter_action_handler';
 
 describe('createVegaFilterActionHandler', () => {
   const dataViews = dataViewPluginMocks.createStartContract();
   const { filterManager } = dataPluginMock.createStartContract().query;
   const fireEvent = jest.fn();
+  const getDataSources = jest.fn(async (): Promise<FilterableSource[]> => []);
 
-  const handle = createVegaFilterActionHandler({
-    spec: {
-      $schema: 'https://vega.github.io/schema/vega/v5.json',
-      config: {},
-    } as unknown as VegaSpec,
-    filterManager,
-    fireEvent,
-  });
+  const handle = createVegaFilterActionHandler({ getDataSources, filterManager, fireEvent });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -64,6 +58,22 @@ describe('createVegaFilterActionHandler', () => {
           data: { filters: [expect.objectContaining({ meta: { index: 'default-id' } })] },
         })
       );
+    });
+
+    it('applies a filter without an index to the first data source of the spec', async () => {
+      getDataSources.mockResolvedValueOnce([
+        { kind: 'esql', id: 'esql-dataset' } as FilterableSource,
+        { id: 'logs-id' } as FilterableSource,
+      ]);
+
+      await handle({ fn: 'kibanaAddFilter', args: [{ match_all: {} }] });
+
+      expect(fireEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: { filters: [expect.objectContaining({ meta: { index: 'esql-dataset' } })] },
+        })
+      );
+      expect(dataViews.getDefault).not.toHaveBeenCalled();
     });
 
     it('rejects an index that does not exist', async () => {

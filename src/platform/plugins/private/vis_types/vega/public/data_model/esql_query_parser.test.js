@@ -27,7 +27,13 @@ const mockFilters = {
   },
 };
 
-function createParser(min = rangeStart, max = rangeEnd, dashboardCtx = {}, esqlVariables) {
+function createParser(
+  min = rangeStart,
+  max = rangeEnd,
+  dashboardCtx = {},
+  esqlVariables,
+  esqlSources
+) {
   const timeCache = {
     getTimeBounds: () => ({ min, max }),
   };
@@ -38,7 +44,14 @@ function createParser(min = rangeStart, max = rangeEnd, dashboardCtx = {}, esqlV
 
   const onWarning = jest.fn();
 
-  const parser = new EsqlQueryParser(timeCache, searchAPI, dashboardCtx, onWarning, esqlVariables);
+  const parser = new EsqlQueryParser(
+    timeCache,
+    searchAPI,
+    dashboardCtx,
+    onWarning,
+    esqlVariables,
+    esqlSources
+  );
   parser.$$$warnCount = 0;
   parser._onWarning = (...args) => {
     parser.$$$warnCount++;
@@ -434,6 +447,62 @@ describe('EsqlQueryParser.populateData', () => {
         }),
       })
     );
+  });
+
+  describe('with the resolved sources of the spec', () => {
+    const query = 'FROM kibana_sample_data_flights | STATS count = COUNT(*) BY Dest';
+    const createParserWithSource = (timeFieldName) =>
+      createParser(rangeStart, rangeEnd, {}, undefined, {
+        filterableSources: [],
+        getSource: (sourceQuery) => (sourceQuery === query ? { timeFieldName } : undefined),
+      });
+    const runQuery = async (parser, searchAPI, extraUrlParams = {}) => {
+      const dataObject = { name: 'held_source_query' };
+      const { url } = parser.parseUrl(dataObject, { '%type%': 'esql', query, ...extraUrlParams });
+      searchAPI.searchEsql.mockReturnValue(
+        of([
+          {
+            name: 'held_source_query',
+            rawResponse: { columns: [{ name: 'count', type: 'long' }], values: [[1]] },
+          },
+        ])
+      );
+      await parser.populateData([{ url, dataObject }]);
+      return searchAPI.searchEsql.mock.calls[0][0][0].filter;
+    };
+    const rangeOn = (field) => ({
+      range: {
+        [field]: {
+          gte: new Date(rangeStart).toISOString(),
+          lte: new Date(rangeEnd).toISOString(),
+          format: 'strict_date_optional_time',
+        },
+      },
+    });
+
+    test('applies the time filter on the time field of the source of the query, without asking for it', async () => {
+      const { parser, searchAPI } = createParserWithSource('event_time');
+
+      const filter = await runQuery(parser, searchAPI);
+
+      expect(getESQLTimeField).not.toHaveBeenCalled();
+      expect(filter.bool.filter).toEqual([rangeOn('event_time')]);
+    });
+
+    test('applies no time filter when the source of the query has no time field', async () => {
+      const { parser, searchAPI } = createParserWithSource(undefined);
+
+      expect(await runQuery(parser, searchAPI)).toBeUndefined();
+      expect(getESQLTimeField).not.toHaveBeenCalled();
+    });
+
+    test('keeps an explicit %timefield% over the time field of the source', async () => {
+      const { parser, searchAPI } = createParserWithSource('event_time');
+
+      const filter = await runQuery(parser, searchAPI, { '%timefield%': 'timestamp' });
+
+      expect(filter.bool.filter).toEqual([rangeOn('timestamp')]);
+    });
   });
 
   test('does not apply a time filter when no default time field exists', async () => {

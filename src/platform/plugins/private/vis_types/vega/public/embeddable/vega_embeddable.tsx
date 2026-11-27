@@ -12,7 +12,7 @@ import { EuiLoadingChart } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { fromStoredFilters } from '@kbn/as-code-filters-transforms';
 import { toAsCodeQuery, toStoredQuery } from '@kbn/as-code-shared-transforms';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { FilterableSource } from '@kbn/data-source';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { dispatchRenderComplete } from '@kbn/kibana-utils-plugin/public';
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
@@ -25,10 +25,10 @@ import {
   BehaviorSubject,
   combineLatest,
   distinctUntilChanged,
-  EMPTY,
   filter,
   map,
   merge,
+  shareReplay,
   skip,
   switchMap,
   tap,
@@ -69,9 +69,13 @@ import { VEGA_EMBEDDABLE_TYPE, VEGA_SUPPORTED_TRIGGERS } from '../../common/cons
 import { VEGA_EVENT_APPLY_FILTER } from '../constants';
 import type { VegaEvent } from '../types';
 import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from '../plugin';
-import type { VegaRenderDescriptor } from '../data_model/types';
+import type { VegaRenderDescriptor, VegaSpec } from '../data_model/types';
 import { parseSpec } from '../lib/editor_spec';
-import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
+import {
+  resolveVegaDataSources,
+  resolveVegaEsqlSources,
+  type VegaEsqlSources,
+} from '../lib/vega_data_sources';
 import { getDefaultDataView } from '../lib/get_default_data_view';
 import { isVegaByReferenceState } from '../../common/utils';
 import { toPanelFilters, type VegaEditableState } from '../lib/editable_state';
@@ -106,7 +110,22 @@ const LazyVegaVisComponent = lazy(() =>
 interface VegaRenderInput {
   showWarnings: boolean;
   visData: VegaRenderDescriptor;
+  getDataSources: () => Promise<FilterableSource[]>;
 }
+
+/** A spec with its sources, resolved once: the fetch reads the ES|QL ones, the panel publishes all. */
+interface ResolvedSpec {
+  spec: VegaEditableState['spec'];
+  parsed: VegaSpec | undefined;
+  esqlSources: Promise<VegaEsqlSources>;
+  dataSources: Promise<FilterableSource[]>;
+}
+
+const resolveSpec = (spec: VegaEditableState['spec']): ResolvedSpec => {
+  const parsed = parseSpec(spec);
+  const esqlSources = resolveVegaEsqlSources(parsed);
+  return { spec, parsed, esqlSources, dataSources: resolveVegaDataSources(parsed, esqlSources) };
+};
 
 /**
  * API of the dedicated Dashboard Vega panel. The panel stores its spec by value, or references a
@@ -127,7 +146,7 @@ export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaEmbeddableState> &
   PublishesEsql &
   PublishesWritableUnifiedSearch &
   PublishesProjectRoutingOverrides &
-  PublishesDataSources<DataView> &
+  PublishesDataSources &
   PublishesRendered & {
     /** Returns the editor panel content for an already-open flyout. */
     getEditPanel?: (options: {
@@ -212,23 +231,27 @@ export const vegaEmbeddableFactory = (
     const esql$ = new BehaviorSubject<AggregateQuery[]>([]);
     const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
     const projectRoutingOverrides$ = new BehaviorSubject<ProjectRoutingOverrides>(undefined);
-    const dataSources$ = new BehaviorSubject<DataView[] | undefined>(undefined);
+    const dataSources$ = new BehaviorSubject<FilterableSource[] | undefined>(undefined);
 
-    // A spec change is parsed once for all derived subjects. `switchMap` is used instead
-    // of `tap` for dataSources$ because `extractIndexPatternsFromSpec` is async.
-    const specSubscription = content$
+    // A spec change is parsed and its sources resolved once, for all derived subjects and the fetch.
+    const resolvedSpec$ = content$.pipe(
+      map(({ spec }) => spec),
+      // Query and filter previews keep the spec, so it isn't parsed again.
+      distinctUntilChanged(isEqual),
+      map(resolveSpec),
+      tap(({ parsed }) => {
+        esql$.next(parsed ? getEsqlQueriesFromSpec(parsed).map((esql) => ({ esql })) : []);
+        projectRoutingOverrides$.next(parsed ? extractProjectRoutingOverrides(parsed) : undefined);
+      }),
+      shareReplay({ bufferSize: 1, refCount: true })
+    );
+    const specSubscription = resolvedSpec$
       .pipe(
-        map(({ spec }) => spec),
-        // Query and filter previews keep the spec, so it isn't parsed again.
-        distinctUntilChanged(isEqual),
-        map(parseSpec),
-        tap((spec) => {
-          esql$.next(spec ? getEsqlQueriesFromSpec(spec).map((esql) => ({ esql })) : []);
-          projectRoutingOverrides$.next(spec ? extractProjectRoutingOverrides(spec) : undefined);
-        }),
-        switchMap((spec) => (spec ? extractIndexPatternsFromSpec(spec) : EMPTY))
+        // A spec that doesn't parse, e.g. while it is edited, keeps the published sources.
+        filter(({ parsed }) => parsed !== undefined),
+        switchMap(({ dataSources }) => dataSources)
       )
-      .subscribe((dataViews) => dataSources$.next(dataViews));
+      .subscribe((sources) => dataSources$.next(sources));
 
     const renderInput$ = new BehaviorSubject<VegaRenderInput | undefined>(undefined);
     const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
@@ -458,12 +481,15 @@ export const vegaEmbeddableFactory = (
 
     const fetchSubscription = combineLatest([
       content$,
+      resolvedSpec$,
       fetch$(api),
       panelSearchStateManager.api.query$,
       panelSearchStateManager.api.filters$,
     ])
       .pipe(
-        switchMap(async ([content, data, panelQuery, panelFilters]) => {
+        // Fetch with the sources of the spec that renders.
+        filter(([content, resolved]) => isEqual(content.spec, resolved.spec)),
+        switchMap(async ([content, resolved, data, panelQuery, panelFilters]) => {
           const { spec, query: libraryQuery, filters: libraryFilters } = content;
           abortController.abort();
           abortController = new AbortController();
@@ -488,7 +514,10 @@ export const vegaEmbeddableFactory = (
             : data.timeRange;
 
           try {
-            const { createVegaRequestHandler } = await import('../async_services');
+            const [{ createVegaRequestHandler }, esqlSources] = await Promise.all([
+              import('../async_services'),
+              resolved.esqlSources,
+            ]);
             if (signal.aborted) {
               if (isCurrentFetch()) rendered$.next(true);
               return;
@@ -517,6 +546,7 @@ export const vegaEmbeddableFactory = (
               projectRouting: data.projectRouting,
               isApproximate: data.isApproximate,
               esqlVariables: data.esqlVariables,
+              esqlSources,
             });
 
             if (!isCurrentFetch()) {
@@ -527,6 +557,7 @@ export const vegaEmbeddableFactory = (
             renderInput$.next({
               showWarnings: getInheritedViewMode(api) === 'edit',
               visData,
+              getDataSources: () => resolved.dataSources,
             });
           } catch (error) {
             if (signal.aborted) {
@@ -581,6 +612,7 @@ export const vegaEmbeddableFactory = (
                   renderComplete={onRenderComplete}
                   showWarnings={renderInput.showWarnings}
                   visData={renderInput.visData}
+                  getDataSources={renderInput.getDataSources}
                 />
               </Suspense>
             ) : null}
