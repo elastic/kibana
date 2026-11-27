@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { render } from '@testing-library/react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { ExceptionsConditions } from '.';
@@ -14,6 +15,7 @@ import { getRulesEqlSchemaMock } from '../../../../../../common/api/detection_en
 import type { Rule } from '../../../../rule_management/logic/types';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import * as i18n from './translations';
 
 jest.mock('@kbn/lists-plugin/public');
@@ -196,6 +198,49 @@ describe('ExceptionsConditions', () => {
       );
 
       expect(wrapper.find('[data-test-subj="osSelectionDropdown"]').exists()).toBeFalsy();
+    });
+  });
+
+  describe('custom fields in the condition builder', () => {
+    beforeEach(() => {
+      jest.mocked(getExceptionBuilderComponentLazy).mockClear();
+    });
+
+    const renderConditions = (exceptionListType: ExceptionListTypeEnum): void => {
+      render(
+        <TestProviders>
+          <ExceptionsConditions
+            exceptionItemName={'Item name'}
+            allowLargeValueLists={false}
+            exceptionListItems={[]}
+            indexPatterns={mockIndexPattern}
+            rules={[getRulesEqlSchemaMock() as Rule]}
+            showOsTypeOptions={false}
+            isEdit={false}
+            selectedOs={undefined}
+            exceptionListType={exceptionListType}
+            onOsChange={jest.fn()}
+            onExceptionItemAdd={jest.fn()}
+            onSetErrorExists={jest.fn()}
+          />
+        </TestProviders>
+      );
+    };
+
+    it('allows custom fields for a rule exception', () => {
+      renderConditions(ExceptionListTypeEnum.RULE_DEFAULT);
+
+      expect(getExceptionBuilderComponentLazy).toHaveBeenLastCalledWith(
+        expect.objectContaining({ allowCustomFieldOptions: true })
+      );
+    });
+
+    it('does not allow custom fields for an endpoint exception', () => {
+      renderConditions(ExceptionListTypeEnum.ENDPOINT);
+
+      expect(getExceptionBuilderComponentLazy).toHaveBeenLastCalledWith(
+        expect.objectContaining({ allowCustomFieldOptions: false })
+      );
     });
   });
 });

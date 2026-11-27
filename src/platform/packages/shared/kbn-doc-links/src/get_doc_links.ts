@@ -1141,6 +1141,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     synthetics: {
       featureRoles: `${ELASTIC_DOCS}solutions/observability/synthetics/grant-access-to-secured-resources`,
+      deleteAbandonedPackagePolicy: `${ELASTIC_DOCS}troubleshoot/observability/troubleshooting-synthetics#synthetics-troubleshooting-delete-abandoned-package-policy`,
     },
     telemetry: {
       settings: `${ELASTIC_DOCS}reference/kibana/configuration-reference/telemetry-settings`,

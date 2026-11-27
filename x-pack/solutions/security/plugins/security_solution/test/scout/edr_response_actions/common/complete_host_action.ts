@@ -9,6 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import type { EsClient, KbnClient, ScoutTestConfig } from '@kbn/scout-security';
 import { INTERNAL_API_HEADERS } from '@kbn/scout-security';
+import { timeoutSignal } from '@kbn/std';
 import type { ActionDetails } from '../../../../common/endpoint/types';
 import {
   AGENT_STATUS_ROUTE,
@@ -16,6 +17,7 @@ import {
   ENDPOINT_ACTIONS_INDEX,
   FILE_STORAGE_DATA_INDEX,
   FILE_STORAGE_METADATA_INDEX,
+  METADATA_DATASTREAM,
 } from '../../../../common/endpoint/constants';
 import { getFileDownloadId } from '../../../../common/endpoint/service/response_actions/get_file_download_id';
 import {
@@ -23,7 +25,9 @@ import {
   sendFleetActionResponse,
 } from '../../../../scripts/endpoint/common/response_actions';
 import { createSystemIndicesEsClient } from '../ui/fixtures/system_indices_es_client';
+import { collectHostIsolationDiagnostics } from './host_isolation_diagnostics';
 import { runCleanups } from './run_cleanups';
+import { withMetadataTransformLock } from './with_metadata_transform_lock';
 
 interface AgentStatusResponse {
   data: Record<string, { isolated: boolean }>;
@@ -192,28 +196,90 @@ export const deleteGetFileUploads = async ({
 };
 
 /**
- * Waits until agent status reports the isolation flag written by `completeHostAction`.
- * The metadata transform has to pick up the new document before the flyout can show it.
+ * How long `completeHostIsolationAction` waits for the metadata-transform lock: the suite's budget
+ * for one host seed (`HOST_SEED_TIMEOUT_MS`). The lock is not fair, so consecutive seeds by the
+ * other worker can exceed it.
  */
-export const waitForHostIsolation = async ({
-  kbnClient,
-  spaceId,
-  agentId,
-  isolated,
-}: {
+export const HOST_ISOLATION_LOCK_WAIT_MS = 600_000;
+
+/** Agent-status poll budget, counted once the isolation document is written. */
+const HOST_ISOLATION_POLL_MS = 60_000;
+
+interface HostIsolationWaitParams {
   kbnClient: KbnClient;
+  /** Only read when the poll times out, to add ES-side evidence to the error. */
+  esClient: EsClient;
   spaceId: string;
   agentId: string;
   isolated: boolean;
+}
+
+const ISOLATION_BY_COMMAND: Readonly<Partial<Record<ActionDetails['command'], boolean>>> = {
+  isolate: true,
+  unisolate: false,
+};
+
+/**
+ * Completes an isolate or release `action` (see `completeHostAction`) and waits until agent
+ * status reports the new isolation state for `agentId`.
+ * The write, a refresh of the metadata data stream and the agent-status poll all run under one
+ * metadata-transform lock: another worker's host seed restarts that transform and writes
+ * metadata, which can make it checkpoint past the isolation document before it is searchable,
+ * and then it never picks it up. Waiting for the lock fails after `HOST_ISOLATION_LOCK_WAIT_MS`;
+ * the 60s poll budget starts once the document is written.
+ */
+export const completeHostIsolationAction = async ({
+  esClient,
+  kbnClient,
+  config,
+  spaceId,
+  agentId,
+  action,
+}: {
+  esClient: EsClient;
+  kbnClient: KbnClient;
+  config: ScoutTestConfig;
+  spaceId: string;
+  agentId: string;
+  action: ActionDetails;
 }): Promise<void> => {
-  const deadline = Date.now() + 60_000;
+  const isolated = ISOLATION_BY_COMMAND[action.command];
+  if (isolated === undefined) {
+    throw new Error(`Expected an isolate or unisolate action, got ${action.command} ${action.id}`);
+  }
+
+  await withMetadataTransformLock(
+    async () => {
+      await completeHostAction({ esClient, config, action });
+      // sendEndpointMetadataUpdate does not refresh, and completeHostAction returns only once the
+      // Fleet check-in it sends alongside is searchable. Under this lock that should be safe: every
+      // successful holder releases it only after the transform has consumed its documents, so no
+      // other change should make the transform checkpoint past this one before it is searchable.
+      // The refresh only makes it searchable sooner.
+      await esClient.indices.refresh({ index: METADATA_DATASTREAM });
+      await pollHostIsolation({ kbnClient, esClient, spaceId, agentId, isolated });
+    },
+    { acquireTimeoutMs: HOST_ISOLATION_LOCK_WAIT_MS }
+  );
+};
+
+const pollHostIsolation = async ({
+  kbnClient,
+  esClient,
+  spaceId,
+  agentId,
+  isolated,
+}: HostIsolationWaitParams): Promise<void> => {
+  const deadline = Date.now() + HOST_ISOLATION_POLL_MS;
   const pathPrefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
   const path = `${pathPrefix}${AGENT_STATUS_ROUTE}?agentIds=${encodeURIComponent(
     agentId
   )}&agentType=endpoint`;
 
   let lastError: unknown;
+  let lastAgentStatus: unknown;
   while (Date.now() < deadline) {
+    const signal = timeoutSignal(Math.max(deadline - Date.now(), 1));
     try {
       const response = await kbnClient.request<AgentStatusResponse>({
         method: 'GET',
@@ -222,20 +288,27 @@ export const waitForHostIsolation = async ({
           'kbn-xsrf': 'scout',
           ...INTERNAL_API_HEADERS,
         },
+        // One attempt bounded by the remaining budget: the lock is held while this runs, and the loop retries.
+        retries: 1,
+        signal,
       });
+      lastAgentStatus = response.data;
 
       if (response.data?.data?.[agentId]?.isolated === isolated) {
         return;
       }
     } catch (error) {
       lastError = error;
+    } finally {
+      signal.dispose();
     }
 
     await new Promise((resolve) => setTimeout(resolve, 1_000));
   }
 
   const detail = lastError instanceof Error ? `: ${lastError.message}` : '';
+  const diagnostics = await collectHostIsolationDiagnostics({ esClient, agentId, lastAgentStatus });
   throw new Error(
-    `Timed out waiting for agent ${agentId} isolation to be ${isolated} in space ${spaceId}${detail}`
+    `Timed out waiting for agent ${agentId} isolation to be ${isolated} in space ${spaceId}${detail}\n${diagnostics}`
   );
 };

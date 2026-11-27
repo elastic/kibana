@@ -28,6 +28,7 @@ export {
   getInlinePanelKindGuidance,
   getPanelTypeSelection,
   getRequestPanelEmbeddableType,
+  getVegaSpecText,
   isRequestPanelType,
   parseVegaSpec,
   requiresRegisteredSchema,

@@ -6,11 +6,11 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { AiIndexNotWritableError } from './errors';
+import { AiIndexWriteForbiddenError } from './errors';
 import type { AiIndexService } from './service';
 
 /**
- * Throws `AiIndexNotFoundError` for an AI index missing from the space, and `AiIndexNotWritableError`
+ * Throws `AiIndexNotFoundError` for an AI index missing from the space, and `AiIndexWriteForbiddenError`
  * when `esClient`'s user lacks `write` on an AI index's backing index.
  */
 export const assertAiIndicesWritable = async ({
@@ -37,6 +37,6 @@ export const assertAiIndicesWritable = async ({
 
   const notWritable = aiIndices.find(({ dest }) => index[dest.value]?.write !== true);
   if (notWritable) {
-    throw new AiIndexNotWritableError(notWritable.id);
+    throw new AiIndexWriteForbiddenError(notWritable.id);
   }
 };

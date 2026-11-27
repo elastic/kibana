@@ -111,6 +111,8 @@ export const prepareWorkflowDocumentFromYaml = async (params: {
   logger?: Logger;
   /** Preserved across a full-document rewrite. Assigned when omitted. */
   workflowUid?: string;
+  /** Whether the document is a managed workflow: `managed_only` steps make other workflows invalid. */
+  isManaged: boolean;
 }): Promise<{ id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml }> => {
   const {
     id: providedId,
@@ -123,6 +125,7 @@ export const prepareWorkflowDocumentFromYaml = async (params: {
     nameFallback,
     logger,
     workflowUid,
+    isManaged,
   } = params;
 
   const looseMetadata = extractLooseMetadataFields(yaml);
@@ -139,13 +142,17 @@ export const prepareWorkflowDocumentFromYaml = async (params: {
     valid: false,
   };
 
-  const validation = await validateWorkflowYaml(yaml, zodSchema, { triggerDefinitions });
+  const validation = await validateWorkflowYaml(yaml, zodSchema, {
+    triggerDefinitions,
+    isManaged,
+  });
   if (validation.valid && validation.parsedWorkflow) {
     workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
   } else if (validation.parsedWorkflow) {
     workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
     workflowToCreate.valid = false;
     workflowToCreate.definition = undefined;
+    workflowToCreate.enabled = false;
   }
 
   const id = providedId || generateWorkflowId(workflowToCreate.name);
@@ -196,13 +203,18 @@ export const applyYamlUpdate = async (params: {
   triggerDefinitions: Array<{ id: string; eventSchema: z.ZodType }>;
   logger?: Logger;
   workflowId?: string;
+  /** Whether the updated workflow is managed: `managed_only` steps make other workflows invalid. */
+  isManaged: boolean;
 }): Promise<{
   updatedDataPatch: Partial<WorkflowProperties>;
   validationErrors: string[];
   shouldUpdateScheduler: boolean;
 }> => {
-  const { workflowYaml, zodSchema, triggerDefinitions, logger, workflowId } = params;
-  const validation = await validateWorkflowYaml(workflowYaml, zodSchema, { triggerDefinitions });
+  const { workflowYaml, zodSchema, triggerDefinitions, logger, workflowId, isManaged } = params;
+  const validation = await validateWorkflowYaml(workflowYaml, zodSchema, {
+    triggerDefinitions,
+    isManaged,
+  });
   logIgnoredKibanaFetcherOnPersist({
     logger,
     steps: validation.parsedWorkflow?.steps,

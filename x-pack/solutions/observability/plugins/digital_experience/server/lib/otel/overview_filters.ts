@@ -8,7 +8,6 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { partitionFilterValues } from '../../../common/filter_values';
 import type { FacetBucket } from '../../../common/sessions';
-import { SESSION_ATTRIBUTE_FIELDS } from '../../../common/session_attribute_fields';
 import {
   isFreeTextFilter,
   OVERVIEW_FILTER_MAX_LENGTHS,
@@ -21,42 +20,9 @@ import {
   type OverviewFilters,
 } from '../../../common/overview_filters';
 import { ENVIRONMENT_FIELDS, EVENT_NAVIGATION_TIMING } from '../../../common/otel_data';
-import {
-  DEVICE_DESKTOP_LABEL,
-  DEVICE_MOBILE_LABEL,
-  SOURCE_APP_VERSION_FIELDS,
-  SOURCE_MOBILE_FIELDS,
-  SOURCE_URL_FIELD,
-  SOURCE_URL_TEMPLATE_FIELD,
-} from '../../../common/otel_source_fields';
+import { FIELD_VALUE_LABELS, FILTER_SOURCE_FIELDS } from '../../../common/overview_filter_fields';
 import { environmentFilter } from '../helpers/environment';
 import { eventCount } from './queries';
-
-/** What a field that is not a name says, per value: the device name of `browser.mobile`. */
-export const FIELD_VALUE_LABELS: Record<string, Record<string, string>> = Object.fromEntries(
-  SOURCE_MOBILE_FIELDS.map((field) => [
-    field,
-    { true: DEVICE_MOBILE_LABEL, false: DEVICE_DESKTOP_LABEL },
-  ])
-);
-
-/**
- * The fields each filter reads, in priority order. The session summaries' lists come first, so a
- * browser, OS, device or country means the same in the Overview and the Sessions where they have
- * one; the device then falls back to `browser.mobile`.
- */
-export const FILTER_SOURCE_FIELDS: Record<OverviewFilterName, readonly string[]> = {
-  browser: SESSION_ATTRIBUTE_FIELDS.browser,
-  os: SESSION_ATTRIBUTE_FIELDS.os,
-  device: [...SESSION_ATTRIBUTE_FIELDS.device, ...SOURCE_MOBILE_FIELDS],
-  country: SESSION_ATTRIBUTE_FIELDS.countryIso,
-  appVersion: SOURCE_APP_VERSION_FIELDS,
-  // The route the app reports, like `/products/{slug}`, groups the URLs of a page; without one, as
-  // with an SDK that doesn't add routes, the page is its URL
-  pageUrl: [SOURCE_URL_TEMPLATE_FIELD, SOURCE_URL_FIELD],
-  // The text of the URL itself, which the route doesn't have
-  pageContains: [SOURCE_URL_FIELD],
-};
 
 /** The runtime field that coalesces the alternatives of a filter. */
 const runtimeFieldOf = (name: OverviewFilterName) => `digital_experience_filter_${name}`;

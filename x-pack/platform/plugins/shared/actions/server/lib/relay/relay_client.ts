@@ -55,6 +55,8 @@ export interface RelayClientOptions {
 /** Largest page size the Relay accepts on its cursor-paginated list endpoints. */
 const RELAY_MAX_PAGE_LIMIT = 200;
 
+const RELAY_NOT_BOUND_REASON = 'not_bound';
+
 interface RelayErrorResponse {
   message?: string;
   reason?: string;
@@ -217,6 +219,26 @@ export class RelayClient implements RelayClientContract {
     );
 
     return { bindings, nextCursor: body?.next_cursor };
+  }
+
+  async isChannelBound(tenantKey: string, channelId: string): Promise<boolean> {
+    try {
+      await this.get(
+        `/v1/slack/tenants/${encodeURIComponent(tenantKey)}/bindings/${encodeURIComponent(
+          channelId
+        )}`
+      );
+      return true;
+    } catch (error) {
+      if (
+        error instanceof RelayRequestError &&
+        error.statusCode === 404 &&
+        error.reason === RELAY_NOT_BOUND_REASON
+      ) {
+        return false;
+      }
+      throw error;
+    }
   }
 
   async listAvailableChannels(tenantKey: string): Promise<RelayAvailableChannelsPage> {

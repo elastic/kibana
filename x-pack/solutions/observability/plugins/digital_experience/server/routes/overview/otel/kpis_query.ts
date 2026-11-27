@@ -19,13 +19,13 @@ import {
   SOURCE_LOAD_EVENT_END_FIELD,
   SOURCE_SESSION_ID_FIELD,
 } from '../../../../common/otel_source_fields';
-import { cleanedValue } from '../../../lib/esql';
+import { cleanedValue } from '../../../../common/esql_values';
 import {
   esqlDocumentConditions,
   esqlLogConditions,
   esqlFilterEvals,
   esqlPageLoadConditions,
-} from '../../../lib/otel/overview_filters_esql';
+} from '../../../../common/overview_filters_esql';
 import {
   HTTP_REQUEST_CONDITIONS,
   HTTP_REQUEST_EVALS,

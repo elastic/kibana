@@ -46,7 +46,6 @@ const MATCH_CASES: ReadonlyArray<{
  */
 export const describeBlocklistMatchOperator = (artifact: ArtifactTabCase): void => {
   const { pagePrefix, listId, urlPath, entries, osTypes } = artifact;
-  const condition = `${pagePrefix}-card-criteriaConditions-condition`;
 
   spaceTest.describe(
     'Blocklist Match (wildcard) operator',
@@ -89,7 +88,9 @@ export const describeBlocklistMatchOperator = (artifact: ArtifactTabCase): void 
 
             const card = pageObjects.artifactListPage.cardByName(pagePrefix, name);
             await expect(card).toBeVisible();
-            await expect(card.getByTestId(condition)).toHaveText(expectedCondition);
+            await expect(
+              pageObjects.artifactListPage.cardCriteriaByName(pagePrefix, name)
+            ).toHaveText(expectedCondition);
           }
         );
       }

@@ -19,6 +19,7 @@ const summaryRow = (overrides: EsqlRow = {}): EsqlRow => ({
   start_time: '2026-11-10T10:00:00.000Z',
   end_time: '2026-11-10T10:05:00.000Z',
   event_count: 20,
+  replay_start_count: 0,
   page_view_count: 3,
   page_load_count: 1,
   click_count: 4,
@@ -100,6 +101,7 @@ describe('toSessionDocuments', () => {
       http_request_count: 5,
       http_failed_request_count: 1,
       bounced: false,
+      has_replay: false,
       // In first-view order, query strings dropped, repeats kept once.
       journey: ['/', '/cart'],
       entry_page: '/',
@@ -142,6 +144,22 @@ describe('toSessionDocuments', () => {
     expect(several.bounced).toBe(false);
     // Without a captured page there was none to leave.
     expect(none.bounced).toBe(false);
+  });
+
+  it('has a replay when the session has a replay start record, one per recorded segment', () => {
+    const [one] = toSessionDocuments([summaryRow({ replay_start_count: 1 })]);
+    const [several] = toSessionDocuments([summaryRow({ replay_start_count: 3 })]);
+
+    expect(one.has_replay).toBe(true);
+    expect(several.has_replay).toBe(true);
+  });
+
+  it('has no replay without a replay start record, as a value rather than a missing one', () => {
+    const [none] = toSessionDocuments([summaryRow({ replay_start_count: 0 })]);
+    const [missing] = toSessionDocuments([summaryRow({ replay_start_count: null })]);
+
+    expect(none.has_replay).toBe(false);
+    expect(missing.has_replay).toBe(false);
   });
 
   it('bounces on the pages seen, not the page views reported for one page', () => {
@@ -272,6 +290,15 @@ describe('toSessionDocuments', () => {
         summaryRow({ session: null }),
         summaryRow({ service: '' }),
         summaryRow({ end_time: null }),
+      ])
+    ).toEqual([]);
+  });
+
+  it('skips a session whose only events in the window are replay start records', () => {
+    // The start records are not counted in a session's times, so the query returns none for it.
+    expect(
+      toSessionDocuments([
+        summaryRow({ start_time: null, end_time: null, event_count: 0, replay_start_count: 2 }),
       ])
     ).toEqual([]);
   });

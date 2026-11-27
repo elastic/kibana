@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { LoopContinueNode, WorkflowGraph } from '@kbn/workflows/graph';
+import type { LoopContinueNode } from '@kbn/workflows/graph';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../../../workflow_context_manager/step_execution_runtime_factory';
-import type { StepIoService } from '../../../workflow_context_manager/step_io_service';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
 import { LoopContinueNodeImpl } from '../loop_continue_node_impl';
@@ -19,8 +18,6 @@ describe('LoopContinueNodeImpl', () => {
   let wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager;
   let workflowLogger: IWorkflowEventLogger;
   let stepExecutionRuntimeFactory: StepExecutionRuntimeFactory;
-  let stepIoService: StepIoService;
-  let workflowGraph: WorkflowGraph;
   let underTest: LoopContinueNodeImpl;
 
   beforeEach(() => {
@@ -49,23 +46,12 @@ describe('LoopContinueNodeImpl', () => {
 
     stepExecutionRuntimeFactory = {} as StepExecutionRuntimeFactory;
 
-    stepIoService = {
-      evictStaleLoopOutputs: jest.fn(),
-    } as unknown as StepIoService;
-
-    workflowGraph = {
-      getNode: jest.fn().mockReturnValue({ stepId: 'my_loop' }),
-      getInnerStepIds: jest.fn().mockReturnValue(new Set(['innerAction'])),
-    } as unknown as WorkflowGraph;
-
     underTest = new LoopContinueNodeImpl(
       node,
       stepExecutionRuntime,
       wfExecutionRuntimeManager,
       workflowLogger,
-      stepExecutionRuntimeFactory,
-      stepIoService,
-      workflowGraph
+      stepExecutionRuntimeFactory
     );
   });
 
@@ -86,13 +72,5 @@ describe('LoopContinueNodeImpl', () => {
       expect.any(Function)
     );
     expect(wfExecutionRuntimeManager.navigateToNode).toHaveBeenCalledWith('exitForeach_my_loop');
-  });
-
-  it('should evict stale loop outputs before navigating to the exit node', () => {
-    underTest.run();
-
-    expect(workflowGraph.getNode).toHaveBeenCalledWith('exitForeach_my_loop');
-    expect(workflowGraph.getInnerStepIds).toHaveBeenCalledWith('my_loop');
-    expect(stepIoService.evictStaleLoopOutputs).toHaveBeenCalledWith(new Set(['innerAction']));
   });
 });
