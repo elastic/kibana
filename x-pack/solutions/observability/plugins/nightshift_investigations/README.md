@@ -369,7 +369,9 @@ The Slack connector delivers each event at least once. The workflow passes Slack
 
 ## Sandbox connectors
 
-The investigation agent reaches external systems from its sandbox through Kibana connectors. A connector is usable from the sandbox when the actions plugin reports it as sandbox capable and the caller can execute it; the sandbox bash tool then injects the connector's config and auth headers as `CONNECTOR_*` environment variables for one command (see the actions plugin's `getSandboxCredentials`).
+The investigation agent reaches external systems from its sandbox through Kibana connectors. A connector is usable from the sandbox when the actions plugin reports it as sandbox capable and the caller can execute it. Pass `connector_ids` to `nightshift_sandbox_bash` (at most 5 array entries; exact duplicates are removed). Omitted or `[]` means no credentials. Every selected connector must resolve through the existing authorization checks before the command runs (see the actions plugin's `getSandboxCredentials`).
+
+All connector variables are namespaced for that one command, even with a single connector: `CONNECTOR_<NORMALIZED_ID>_ID`, `CONNECTOR_<NORMALIZED_ID>_TYPE`, `CONNECTOR_<NORMALIZED_ID>_CONFIG_<KEY>` and `CONNECTOR_<NORMALIZED_ID>_HEADER_<NAME>`. Normalization uppercases ids, replaces non-alphanumeric runs with `_`, and trims edge `_`. Empty normalized ids, normalized-id collisions and final environment-key collisions fail the whole call. `/workspace/connectors.md` lists every connector's exact prefix. For example, `connector_ids: ["github-1", "search-1"]` exposes `CONNECTOR_GITHUB_1_HEADER_AUTHORIZATION` and `CONNECTOR_SEARCH_1_CONFIG_URL`. Each secret remains bound to its own connector's hosts; command network access combines selected connector hosts with the space rules without broadening existing scoped rules, and command output redacts all selected secrets.
 
 ## Notifications
 

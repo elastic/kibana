@@ -7,10 +7,12 @@ pull requests and issues. Not for: GitLab or Bitbucket, or files already in the 
 
 Check `/workspace/connectors.md` for a GitHub connector:
 
-- **GitHub connector**: pass its id as `connector_id`. For that single command only, the
-  environment contains `CONNECTOR_HEADER_AUTHORIZATION` (full `Authorization` header value,
-  `Bearer <token>`) and `CONNECTOR_CONFIG_SERVERURL` (the GitHub MCP server URL; do not use it for
-  REST calls).
+- **GitHub connector**: pass its id in `connector_ids`, even for one connector. Each connector's
+  exact environment prefix is listed in `/workspace/connectors.md`. The examples below assume
+  `connector_ids: ["github-1"]`, with prefix `CONNECTOR_GITHUB_1_`; replace that prefix with your
+  connector's listed prefix. For that single command only, the environment contains
+  `CONNECTOR_GITHUB_1_HEADER_AUTHORIZATION` (full `Authorization` header value, `Bearer <token>`)
+  and `CONNECTOR_GITHUB_1_CONFIG_SERVERURL` (the GitHub MCP server URL; do not use it for REST calls).
 - **No connector**: public repositories work without credentials; drop the `Authorization` header.
   Unauthenticated REST calls are limited to 60 requests per hour, so prefer a shallow clone for
   bulk reads.
@@ -19,7 +21,7 @@ The REST API base is `https://api.github.com`:
 
 ```bash
 curl --fail-with-body -sS --max-time 60 \
-  -H "Authorization: $CONNECTOR_HEADER_AUTHORIZATION" \
+  -H "Authorization: $CONNECTOR_GITHUB_1_HEADER_AUTHORIZATION" \
   -H "Accept: application/vnd.github+json" \
   "https://api.github.com/repos/{owner}/{repo}"
 ```
@@ -120,9 +122,9 @@ Public repositories clone without credentials:
 git clone --depth 1 --filter=blob:none https://github.com/{owner}/{repo}.git
 ```
 
-For a private repository, run the same command with the GitHub connector's id as `connector_id`.
+For a private repository, run the same command with the GitHub connector's id in `connector_ids`.
 git gets the token from the sandbox's credential helper; never put the token in the URL or echo
-it. Run later `git fetch` or `git pull` in the clone with `connector_id` too:
+it. Run later `git fetch` or `git pull` in the clone with `connector_ids` too:
 
 ```bash
 git clone --depth 1 --filter=blob:none https://github.com/{owner}/{repo}.git
@@ -131,7 +133,7 @@ git clone --depth 1 --filter=blob:none https://github.com/{owner}/{repo}.git
 If git still asks for a username, pass the header explicitly:
 
 ```bash
-git -c http.extraHeader="Authorization: Basic $(printf 'x-access-token:%s' "${CONNECTOR_HEADER_AUTHORIZATION#* }" | base64 | tr -d '\n')" \
+git -c http.extraHeader="Authorization: Basic $(printf 'x-access-token:%s' "${CONNECTOR_GITHUB_1_HEADER_AUTHORIZATION#* }" | base64 | tr -d '\n')" \
   clone --depth 1 --filter=blob:none https://github.com/{owner}/{repo}.git
 ```
 

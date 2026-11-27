@@ -33,7 +33,7 @@ const output = (overrides: Partial<ConnectorProbeTaskOutput> = {}): ConnectorPro
     },
     {
       tool_id: 'nightshift_sandbox_bash',
-      params: { command: 'curl ...', connector_id: 'telemetry' },
+      params: { command: 'curl ...', connector_ids: ['telemetry'] },
       result: 'exit_code: 0',
     },
   ],
@@ -48,7 +48,7 @@ const params = (taskOutput: ConnectorProbeTaskOutput) => ({
 });
 
 describe('connector probe evaluators', () => {
-  it('passes connector_used only when a bash call carried a connector_id', async () => {
+  it('passes connector_used only when a bash call carried nonempty connector_ids', async () => {
     expect((await connectorUsedEvaluator.evaluate(params(output()))).score).toBe(1);
     expect(
       (
@@ -67,6 +67,51 @@ describe('connector probe evaluators', () => {
       (await connectorUsedEvaluator.evaluate(params(output({ execution_error: 'boom' })))).score
     ).toBe(0);
   });
+
+  it('recognizes successful multi-connector calls', async () => {
+    const taskOutput = output({
+      tool_call_trajectory: [
+        {
+          tool_id: 'nightshift_sandbox_bash',
+          params: { command: 'curl ...', connector_ids: ['github', 'telemetry'] },
+          result: 'exit_code: 0',
+        },
+      ],
+    });
+
+    expect((await connectorUsedEvaluator.evaluate(params(taskOutput))).score).toBe(1);
+  });
+
+  it.each([
+    {},
+    { connector_ids: [] },
+    { connector_ids: 'telemetry' },
+    { connector_ids: ['telemetry', 42] },
+    { connector_ids: [''] },
+    { connector_id: 'telemetry' },
+  ])(
+    'rejects missing or invalid connector_ids without calling the judge: %j',
+    async (toolParams) => {
+      const evaluate = jest.fn().mockResolvedValue({ score: 1 });
+      const criteria = jest.fn(
+        (): Evaluator => ({ name: 'criteria', kind: 'LLM', direction: 'maximize', evaluate })
+      );
+      const evaluator = createReferenceBehaviourEvaluator({ criteria });
+      const taskOutput = output({
+        tool_call_trajectory: [
+          {
+            tool_id: 'nightshift_sandbox_bash',
+            params: { command: 'curl ...', ...toolParams },
+            result: 'exit_code: 0',
+          },
+        ],
+      });
+
+      expect((await connectorUsedEvaluator.evaluate(params(taskOutput))).score).toBe(0);
+      expect((await evaluator.evaluate(params(taskOutput))).score).toBe(0);
+      expect(evaluate).not.toHaveBeenCalled();
+    }
+  );
 
   it('scores the run against the time budget', async () => {
     const evaluator = createWithinTimeBudgetEvaluator(30);
@@ -108,7 +153,7 @@ describe('connector probe evaluators', () => {
       tool_call_trajectory: [
         {
           tool_id: 'nightshift_sandbox_bash',
-          params: { command: 'curl ...', connector_id: 'telemetry' },
+          params: { command: 'curl ...', connector_ids: ['telemetry'] },
           result: 'Error: Failed to execute sandbox command: 4 DEADLINE_EXCEEDED',
         },
         { tool_id: 'execute_api', params: { api: 'count' }, result: '{"count":0}' },

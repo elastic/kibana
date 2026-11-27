@@ -44,7 +44,7 @@ export type ResolveConnectorCredentials = (
   callContext: SandboxCallContext
 ) => Promise<ConnectorCredentialResolution>;
 
-const toEnvKey = (segment: string): string =>
+export const toEnvKey = (segment: string): string =>
   segment
     .replace(/[^A-Za-z0-9]+/g, '_')
     .replace(/^_+|_+$/g, '')
@@ -129,8 +129,8 @@ export const deriveConnectorCredentialSecretValues = (
 };
 
 /**
- * Builds the CONNECTOR_* environment from framework-resolved config and auth headers.
- * Config keys map to CONNECTOR_CONFIG_<KEY>; header names map to CONNECTOR_HEADER_<NAME>.
+ * Builds the CONNECTOR_<NORMALIZED_ID>_* environment from resolved config and auth headers.
+ * Config keys use the CONFIG_<KEY> suffix; header names use HEADER_<NAME>.
  * Header keys are marked as secrets bound to the connector's hosts; config stays plain env.
  */
 export const buildConnectorEnv = ({
@@ -146,21 +146,22 @@ export const buildConnectorEnv = ({
   headers: Record<string, string>;
   hosts: string[];
 }): ConnectorCredentialEnv => {
+  const prefix = `${CONNECTOR_ENV_PREFIX}${toEnvKey(connectorId)}_`;
   const env: Record<string, string> = {
-    [`${CONNECTOR_ENV_PREFIX}ID`]: connectorId,
-    [`${CONNECTOR_ENV_PREFIX}TYPE`]: actionTypeId,
+    [`${prefix}ID`]: connectorId,
+    [`${prefix}TYPE`]: actionTypeId,
   };
   const secretValues: string[] = [];
 
   for (const [key, value] of Object.entries(config)) {
     if (NON_ENV_CONFIG_KEYS.has(key)) continue;
     const envValue = toEnvValue(value);
-    if (envValue !== undefined) env[`${CONNECTOR_ENV_PREFIX}CONFIG_${toEnvKey(key)}`] = envValue;
+    if (envValue !== undefined) env[`${prefix}CONFIG_${toEnvKey(key)}`] = envValue;
   }
   for (const [key, value] of Object.entries(headers)) {
     const envValue = toEnvValue(value);
     if (envValue === undefined) continue;
-    env[`${CONNECTOR_ENV_PREFIX}HEADER_${toEnvKey(key)}`] = envValue;
+    env[`${prefix}HEADER_${toEnvKey(key)}`] = envValue;
     if (envValue.length >= MIN_REDACTABLE_SECRET_LENGTH) secretValues.push(envValue);
   }
 
@@ -172,7 +173,7 @@ export const buildConnectorEnv = ({
   }
 
   const secretEnvKeys = Object.keys(env)
-    .filter((key) => key.startsWith(`${CONNECTOR_ENV_PREFIX}HEADER_`))
+    .filter((key) => key.startsWith(`${prefix}HEADER_`))
     .map((key) => ({ key, allowed_hosts: [...hosts] }));
 
   return { env, secretValues: [...new Set(secretValues)], secretEnvKeys, allowedHosts: [...hosts] };
