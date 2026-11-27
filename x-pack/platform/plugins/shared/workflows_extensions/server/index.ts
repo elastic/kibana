@@ -47,6 +47,7 @@ export type {
   ServerPollStepDefinition,
   StepHandler,
   StepHandlerContext,
+  StepLogMeta,
   StepHandlerResult,
   OnCancelHandler,
   StartWithHandoffHandler,
