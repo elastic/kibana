@@ -62,7 +62,7 @@ import {
   STEERS_PER_RUN_MAX,
   TimelineEventType,
   ConversationParentRelation,
-  DEFAULT_CONVERSATION_TITLE,
+  DEFAULT_THREAD_TITLE,
   type ThreadCreatedEvent,
   type ThreadStartedEvent,
   type UserMessageEvent,
@@ -1237,7 +1237,7 @@ class ConversationClientImpl implements ConversationClient {
 
     const copy = copyForThread(parent, cutEventId);
     const actor = currentUserActor(this.getUser());
-    const threadTitle = title ?? DEFAULT_CONVERSATION_TITLE;
+    const threadTitle = title ?? DEFAULT_THREAD_TITLE;
     const resolvedCutEventId = cutEventId ?? copy.cutEventId;
 
     const threadStarted: ThreadStartedEvent = {

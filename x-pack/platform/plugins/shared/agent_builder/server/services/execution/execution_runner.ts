@@ -43,6 +43,7 @@ import {
   createInternalError,
   normalizeInteractive,
   DEFAULT_CONVERSATION_TITLE,
+  DEFAULT_THREAD_TITLE,
 } from '@kbn/agent-builder-common';
 import type { InteractivityConfig } from '@kbn/agent-builder-common';
 import { getConnectorProvider } from '@kbn/inference-common';
@@ -581,7 +582,9 @@ export const collectAndWriteEvents = ({
 };
 
 const conversationNeedsTitle = (conversation: { title?: string }): boolean =>
-  !conversation.title || conversation.title === DEFAULT_CONVERSATION_TITLE;
+  !conversation.title ||
+  conversation.title === DEFAULT_CONVERSATION_TITLE ||
+  conversation.title === DEFAULT_THREAD_TITLE;
 
 const stripResumeExecution = (event: ChatEvent): ChatEvent => {
   if (!isRoundCompleteEvent(event) || !event.data.resume_execution) {

@@ -36,6 +36,7 @@ import {
   CONVERSATION_SCHEMA_VERSION,
   ConversationRoundStatus,
   DEFAULT_CONVERSATION_TITLE,
+  DEFAULT_THREAD_TITLE,
   ExecutionStatus,
 } from '@kbn/agent-builder-common';
 import type {
@@ -805,6 +806,36 @@ describe('handleAgentExecution', () => {
       await lastValueFrom(events$.pipe(toArray()));
 
       expect(generateTitleMock).not.toHaveBeenCalled();
+    });
+
+    it('generates a title for a stored thread that still has the default thread title', async () => {
+      const conversation = createEmptyConversation({
+        id: 'conversation-1',
+        agent_id: 'test-agent',
+        title: DEFAULT_THREAD_TITLE,
+      });
+      const conversationClient = createConversationClientMock();
+      conversationClient.get.mockResolvedValue(conversation);
+      conversationClient.appendEvents.mockImplementation(async (request) => ({
+        ...conversation,
+        schema_version: 1,
+        events: request.events,
+      }));
+      conversationClient.replaceRoundEvents.mockImplementation(async (request) => ({
+        ...conversation,
+        schema_version: 1,
+        events: request.events,
+      }));
+      mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()]);
+      stubResolveServices(conversationClient);
+
+      const events$ = await runHandle({
+        agentParams: { agentId: 'test-agent', nextInput: { message: 'Summarize' } },
+        conversationClient,
+      });
+      await lastValueFrom(events$.pipe(toArray()));
+
+      expect(generateTitleMock).toHaveBeenCalled();
     });
 
     it('marks a one-shot run as storing nothing, but not as read-only', async () => {

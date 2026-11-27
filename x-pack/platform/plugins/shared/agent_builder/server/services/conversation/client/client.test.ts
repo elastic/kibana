@@ -14,6 +14,7 @@ import {
   ConversationActivityEventType,
   ConversationParentRelation,
   ConversationRoundStatus,
+  DEFAULT_THREAD_TITLE,
   EventActorType,
   ExecutionStatus,
   TimelineEventType,
@@ -406,6 +407,8 @@ describe('ConversationClient', () => {
       expect(created).toBe(true);
 
       const document = indexedDocument(THREAD_ID);
+
+      expect(document?.title).toBe(DEFAULT_THREAD_TITLE);
       const types = document?.events?.map(({ type }) => type);
 
       expect(document?.parent_conversation).toEqual({

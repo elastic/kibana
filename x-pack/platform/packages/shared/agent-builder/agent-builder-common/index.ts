@@ -269,6 +269,7 @@ export {
   type ConversationAccessControlPrincipalType,
   type ToolCallWithResult,
   DEFAULT_CONVERSATION_TITLE,
+  DEFAULT_THREAD_TITLE,
   CHAT_MESSAGE_MAX_LENGTH,
   STEER_MESSAGE_MAX_LENGTH,
   CONVERSATION_TITLE_MAX_LENGTH,
