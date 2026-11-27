@@ -198,7 +198,6 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
 
   const isCatalogEnabled =
     connectorContext?.services.isCatalogEnabled ?? services.actions?.isCatalogEnabled;
-  const specVersion = isCatalogEnabled ? connector.specVersion : undefined;
 
   const isMounted = useRef(false);
   const canSave = hasSaveActionsCapability(capabilities);
@@ -256,6 +255,8 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   const [revealedInboundConnector, setRevealedInboundConnector] = useState<ActionConnector | null>(
     null
   );
+  const savedConnector = formConnector ?? connector;
+  const specVersion = isCatalogEnabled ? savedConnector.specVersion : undefined;
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
   const hasErrors = isFormValid === false;
   const isSaving = isUpdatingConnector || isSubmitting || isExecutingConnector || isRotating;
@@ -651,8 +652,6 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   const renderConnectorRulesList = useCallback(() => {
     return <ConnectorRulesList connector={connector} />;
   }, [connector]);
-
-  const savedConnector = formConnector ?? connector;
 
   // This specific logic can be removed once inference connectors are no longer experimental. Tracked here https://github.com/elastic/kibana/issues/244985
   const isExperimental: boolean | undefined = useMemo(() => {

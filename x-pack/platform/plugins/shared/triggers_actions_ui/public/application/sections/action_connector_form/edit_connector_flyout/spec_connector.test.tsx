@@ -208,6 +208,84 @@ describe('spec connector edit flyout Test tab', () => {
       expect(onConnectorUpdated.mock.calls[0][0]).not.toHaveProperty('specVersion');
     });
 
+    it('uses the pin from the first save while the connector prop remains unpinned', async () => {
+      const specVersion = '1.3';
+      const specPath = '/internal/actions/connector_types/spec-connector-test/spec';
+      const updatePath = '/api/actions/connector/spec-connector-id';
+      const spec = mockSpecResponse(true);
+      const get = jest.fn().mockResolvedValue({
+        ...spec,
+        metadata: { ...spec.metadata, spec_version: specVersion },
+      });
+      const savedConnector = {
+        id: specConnector.id,
+        name: 'Updated connector',
+        connector_type_id: specConnector.actionTypeId,
+        config: {},
+        is_preconfigured: false,
+        is_deprecated: false,
+        is_missing_secrets: false,
+        is_system_action: false,
+        spec_version: specVersion,
+      };
+      const put = jest
+        .fn()
+        .mockResolvedValueOnce(savedConnector)
+        .mockResolvedValue({ ...savedConnector, name: 'Updated connector again' });
+      appMockRenderer.coreStart.actions = {
+        ...appMockRenderer.coreStart.actions,
+        isCatalogEnabled: true,
+      };
+      appMockRenderer.coreStart.http.get = get;
+      appMockRenderer.coreStart.http.put = put;
+
+      appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          connector={specConnector}
+          onClose={onClose}
+          onConnectorUpdated={onConnectorUpdated}
+        />
+      );
+
+      const nameInput = await screen.findByTestId('nameInput');
+      await userEvent.clear(nameInput);
+      await userEvent.type(nameInput, 'Updated connector');
+      await userEvent.type(
+        await screen.findByTestId('generator-field-secrets-apiKey'),
+        'my-api-key'
+      );
+      await userEvent.click(screen.getByTestId('edit-connector-flyout-save-btn'));
+
+      await waitFor(() => expect(onConnectorUpdated).toHaveBeenCalledTimes(1));
+      expect(get.mock.calls[0][0]).toBe(specPath);
+      expect(get.mock.calls[0][1]).not.toHaveProperty(['query', 'spec_version']);
+      expect(put.mock.calls[0][0]).toBe(updatePath);
+      expect(JSON.parse(put.mock.calls[0][1].body)).not.toHaveProperty('spec_version');
+      expect(onConnectorUpdated).toHaveBeenCalledWith(expect.objectContaining({ specVersion }));
+
+      await waitFor(() => {
+        expect(get).toHaveBeenCalledWith(
+          specPath,
+          expect.objectContaining({ query: { spec_version: specVersion } })
+        );
+      });
+
+      await userEvent.type(await screen.findByDisplayValue('Updated connector'), ' again');
+      await userEvent.type(
+        await screen.findByTestId('generator-field-secrets-apiKey'),
+        'new-api-key'
+      );
+      await userEvent.click(screen.getByTestId('edit-connector-flyout-save-btn'));
+
+      await waitFor(() => expect(onConnectorUpdated).toHaveBeenCalledTimes(2));
+      expect(put.mock.calls[1][0]).toBe(updatePath);
+      expect(JSON.parse(put.mock.calls[1][1].body)).toMatchObject({
+        name: 'Updated connector again',
+        spec_version: specVersion,
+      });
+    });
+
     it('loads and saves unversioned spec when catalog is disabled and a pinned version is available', async () => {
       const pinnedVersion = '1.3';
       const expectedVersion = undefined;
