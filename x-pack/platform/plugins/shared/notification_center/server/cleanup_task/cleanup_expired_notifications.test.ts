@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   buildCleanupQuery,
   buildGroupCleanupQuery,
   CLEANUP_PAGE_SIZE,
-  cleanupExpiredNotifications,
+  NotificationCleanupService,
 } from './cleanup_expired_notifications';
 import { NOTIFICATION_DATA_STREAM_NAME } from '../storage/notification_data_stream';
 
-describe('cleanupExpiredNotifications', () => {
+const createService = (
+  esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>
+) => new NotificationCleanupService(esClient, loggingSystemMock.createLogger());
+
+describe('NotificationCleanupService.cleanupExpiredNotifications', () => {
   const abortController = new AbortController();
 
   const expiredGroup = (notificationId: string, newestExpiredAt: number) => ({
@@ -108,7 +112,7 @@ describe('cleanupExpiredNotifications', () => {
       .mockResolvedValueOnce(searchResponse({ buckets: [expiredGroup('two', 1_787_000_000_000)] }));
     esClient.deleteByQuery.mockResolvedValue({});
 
-    await cleanupExpiredNotifications(esClient, abortController.signal);
+    await createService(esClient).cleanupExpiredNotifications(abortController.signal);
 
     expect(esClient.search).toHaveBeenCalledTimes(2);
     expect(esClient.search.mock.calls[0][0]).toEqual(

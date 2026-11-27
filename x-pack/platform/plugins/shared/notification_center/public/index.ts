@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { PluginInitializer } from '@kbn/core/public';
-import { NotificationCenterPlugin } from './plugin';
+import { KibanaContainerModule, Setup, Start } from '@kbn/core-di';
 import type { NotificationCenterPublicSetup, NotificationCenterPublicStart } from './types';
 
 export type { NotificationCenterPublicSetup, NotificationCenterPublicStart } from './types';
 
-export const plugin: PluginInitializer<
-  NotificationCenterPublicSetup,
-  NotificationCenterPublicStart
-> = () => new NotificationCenterPlugin();
+const pluginModule = new KibanaContainerModule(({ bind }) => {
+  bind(Setup).toConstantValue({} satisfies NotificationCenterPublicSetup);
+  bind(Start).toConstantValue({} satisfies NotificationCenterPublicStart);
+});
+
+export { pluginModule as module };

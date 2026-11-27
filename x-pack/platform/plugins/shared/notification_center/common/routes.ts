@@ -13,5 +13,3 @@ export const GET_UNREAD_STATUS_PATH =
 export const MARK_READ_PATH = `${NOTIFICATION_CENTER_API_BASE}/notifications/_mark_read` as const;
 export const MARK_ALL_READ_PATH =
   `${NOTIFICATION_CENTER_API_BASE}/notifications/_mark_all_read` as const;
-
-export const NOTIFICATION_CENTER_API_VERSION = '1' as const;
