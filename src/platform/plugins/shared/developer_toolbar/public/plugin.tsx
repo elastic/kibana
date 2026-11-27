@@ -15,7 +15,7 @@ import type { InternalFeatureFlagsStart } from '@kbn/core-feature-flags-browser'
 import type { InternalThemeServiceStart } from '@kbn/core-theme-browser-internal-types';
 
 import { BehaviorSubject } from 'rxjs';
-import { type DeveloperToolbarItemProps } from '@kbn/developer-toolbar';
+import { type DeveloperToolbarItemProps } from '@kbn/ui-developer-toolbar';
 
 const FEATURE_FLAGS_HELPER_ITEM_ID = 'Feature flags helper';
 
@@ -28,13 +28,13 @@ export type DeveloperToolbarSetup = DeveloperToolbarItemRegistry;
 export type DeveloperToolbarStart = DeveloperToolbarItemRegistry;
 
 const LazyColorThemeToggle = lazy(() =>
-  import('@kbn/developer-toolbar').then(({ LiveColorThemeToggle }) => ({
+  import('./toolbar_items/color_theme_toggle').then(({ LiveColorThemeToggle }) => ({
     default: LiveColorThemeToggle,
   }))
 );
 
 const LazyMeasureButton = lazy(() =>
-  import('@kbn/design-tools').then(({ MeasureButton }) => ({
+  import('@kbn/ui-developer-toolbar').then(({ MeasureButton }) => ({
     default: MeasureButton,
   }))
 );
@@ -44,6 +44,8 @@ const LazyFontInspectButton = lazy(() =>
     default: FontInspectButton,
   }))
 );
+
+const KIBANA_CHROME_CLASS_PREFIXES = ['kbnChromeLayout'] as const;
 
 const LazyDesignToolsButton = lazy(() =>
   import('@kbn/design-tools').then(({ DesignToolsButton }) => ({
@@ -102,7 +104,7 @@ export class DeveloperToolbarPlugin
       id: 'Measure Component',
       children: (
         <Suspense fallback={null}>
-          <LazyMeasureButton />
+          <LazyMeasureButton ignoredClassPrefixes={KIBANA_CHROME_CLASS_PREFIXES} />
         </Suspense>
       ),
     });

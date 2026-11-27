@@ -243,7 +243,6 @@
     "devComments": "src/platform/packages/private/kbn-dev-comments",
     "developerToolbarProfilers": "src/platform/plugins/private/developer_toolbar_profilers",
     "kbnDesignTools": "src/platform/packages/shared/kbn-design-tools",
-    "kbnInspectComponent": "src/platform/plugins/private/inspect_component",
     "kql": "src/platform/plugins/shared/kql",
     "navigationCustomizationComponents": "src/platform/packages/shared/navigation-customization-components",
     "savedSearchComponent": "src/platform/packages/shared/kbn-saved-search-component",

@@ -386,6 +386,7 @@ src/platform/kbn-ui/app-header @elastic/appex-sharedux
 src/platform/kbn-ui/app-menu @elastic/appex-sharedux
 src/platform/kbn-ui/callout @elastic/appex-sharedux
 src/platform/kbn-ui/chrome-layout @elastic/appex-sharedux
+src/platform/kbn-ui/developer-toolbar @elastic/appex-sharedux
 src/platform/kbn-ui/favorite-button @elastic/appex-sharedux
 src/platform/kbn-ui/feedback @elastic/appex-sharedux
 src/platform/kbn-ui/react-assembly @elastic/appex-sharedux
@@ -609,7 +610,6 @@ src/platform/packages/shared/kbn-dev-cli-runner @elastic/kibana-operations
 src/platform/packages/shared/kbn-dev-proc-runner @elastic/kibana-operations
 src/platform/packages/shared/kbn-dev-utils @elastic/kibana-operations
 src/platform/packages/shared/kbn-dev-validation-runner @elastic/kibana-operations
-src/platform/packages/shared/kbn-developer-toolbar @elastic/appex-sharedux
 src/platform/packages/shared/kbn-discover-contextual-components @elastic/obs-signals-logs-team @elastic/obs-signals-traces-team @elastic/kibana-discover
 src/platform/packages/shared/kbn-discover-data-grid @elastic/kibana-discover
 src/platform/packages/shared/kbn-discover-utils @elastic/kibana-discover

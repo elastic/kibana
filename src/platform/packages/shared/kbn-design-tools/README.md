@@ -12,7 +12,6 @@ Developer toolbar design tools addon - an interactive DOM editor overlaid on Kib
 | `Cmd+D` (`Ctrl+D`) | Duplicate hovered element |
 | `Cmd+Z` (`Ctrl+Z`) | Undo |
 | `Cmd+Shift+Z` (`Ctrl+Shift+Z`) | Redo |
-| `Cmd+.` (`Ctrl+.`) | Toggle measure mode |
 | `Shift` (during drag) | Free move without grid snapping |
 
 ## Architecture
@@ -23,7 +22,6 @@ flowchart LR
   DT["Design Tools"]
   EO["Edit Overlay"]
   LO["Layout Overlay"]
-  MO["Measure Overlay"]
 
   subgraph Interaction
     IM["Interaction Engine"]
@@ -54,7 +52,6 @@ flowchart LR
 
   DT --> EO
   DT --> LO
-  DT --> MO
 
   EO --> IM
   IM --> FSM

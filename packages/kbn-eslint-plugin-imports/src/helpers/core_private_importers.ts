@@ -29,7 +29,6 @@ export const CORE_PRIVATE_IMPORTERS: ReadonlySet<string> = new Set([
   'src/platform/packages/private/kbn-journeys/services/page/project_page.ts',
   'src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts',
   'src/platform/packages/private/kbn-ui-shared-deps-src/src/entry.js',
-  'src/platform/packages/shared/kbn-developer-toolbar/src/toolbar_items/color_theme/color_theme_toggle.tsx',
   'src/platform/packages/shared/kbn-router-to-openapispec/src/generate_oas.test.util.ts',
   'src/platform/packages/shared/kbn-router-to-openapispec/src/generate_oas.ts',
   'src/platform/packages/shared/kbn-router-to-openapispec/src/process_router.test.ts',

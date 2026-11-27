@@ -10,17 +10,14 @@
 import React, { lazy, Suspense } from 'react';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { DeveloperToolbarStart } from '@kbn/developer-toolbar-plugin/public';
+import type { InspectMode } from '@kbn/ui-developer-toolbar';
 import type { ConfigSchema } from '../server/config';
 
 interface PluginStartDeps {
   developerToolbar?: DeveloperToolbarStart;
 }
 
-const LazyInspectButton = lazy(() =>
-  import('./components/inspect/inspect_button').then(({ InspectButton }) => ({
-    default: InspectButton,
-  }))
-);
+const KIBANA_CHROME_CLASS_PREFIXES = ['kbnChromeLayout'] as const;
 
 export class InspectComponentPluginPublic implements Plugin<void, PluginStartDeps> {
   private readonly isDev: boolean;
@@ -42,11 +39,29 @@ export class InspectComponentPluginPublic implements Plugin<void, PluginStartDep
     if (!this.isEnabled || !this.isDev) return {};
 
     if (plugins.developerToolbar) {
+      const { branch } = this;
+      const LazyInspectButton = lazy(async () => {
+        const [{ InspectButton }, { createInspectHost }] = await Promise.all([
+          import('@kbn/ui-developer-toolbar'),
+          import('./lib/create_inspect_host'),
+        ]);
+        const host = createInspectHost({ http: core.http, branch });
+        const InspectToolbarButton = ({ mode }: { mode: InspectMode }) => (
+          <InspectButton
+            host={host}
+            mode={mode}
+            ignoredClassPrefixes={KIBANA_CHROME_CLASS_PREFIXES}
+          />
+        );
+
+        return { default: InspectToolbarButton };
+      });
+
       plugins.developerToolbar.registerItem({
         id: 'Inspect Component',
         children: (
           <Suspense fallback={null}>
-            <LazyInspectButton core={core} branch={this.branch} buttonLocation="developerToolbar" />
+            <LazyInspectButton mode="inspect" />
           </Suspense>
         ),
       });
@@ -55,12 +70,7 @@ export class InspectComponentPluginPublic implements Plugin<void, PluginStartDep
         id: 'Grab Component',
         children: (
           <Suspense fallback={null}>
-            <LazyInspectButton
-              core={core}
-              branch={this.branch}
-              buttonLocation="developerToolbar"
-              mode="grab"
-            />
+            <LazyInspectButton mode="grab" />
           </Suspense>
         ),
       });
