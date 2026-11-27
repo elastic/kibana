@@ -134,6 +134,30 @@ describe('MatrixEvalsClient', () => {
       query: { execution_id: 'exec', model_id: 'model' },
     });
   });
+
+  it('fetches a trace by encoded id with the versioned header and validates the response', async () => {
+    const { kbnClient, request } = clientReturning({
+      trace_id: 't 1',
+      spans: [],
+      total_spans: 0,
+    });
+
+    const trace = await new MatrixEvalsClient(kbnClient, log).getTrace('t 1');
+
+    expect(trace.total_spans).toBe(0);
+    expect(request.mock.calls[0][0]).toMatchObject({
+      method: 'GET',
+      path: expect.stringContaining('t%201'),
+      headers: { 'elastic-api-version': expect.any(String) },
+    });
+  });
+
+  it('rethrows trace request failures so bounded retry can engage', async () => {
+    const request = jest.fn().mockRejectedValue(new Error('boom'));
+    const client = new MatrixEvalsClient({ request } as unknown as KbnClient, log);
+
+    await expect(client.getTrace('t')).rejects.toThrow('boom');
+  });
 });
 
 describe('createEvaluationsKbnClient', () => {

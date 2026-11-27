@@ -12,35 +12,61 @@ import type { MatrixTraceData, MatrixTraceEntry, TraceStep } from './trace_types
 import { traceKey, parseDirectTraceKey } from './trace_types';
 
 /**
- * Resolves a direct trace for a `datasetIds`-restricted column: only a trace whose own
- * `datasetId` is in the column's allow-list AND whose suite is one of the column's
- * configured `suites` qualifies. Checking the dataset id alone is not enough — two selected
- * suites can reuse the same dataset id, and matching on dataset id only would let a trace
- * from an unrelated suite (never read by this column) win and get displayed as this
- * column's prompt/answer/score. Falling through to the suite-level key (as non-restricted
- * columns do) would attach another dataset's prompt/answer/score to this column, since that
- * key holds the suite's first complete example regardless of dataset.
+ * Enumerates every direct per-example trace a non-prefix column reads, one entry per run.
+ *
+ * A `datasetIds` column only qualifies traces whose own `datasetId` is in its allow-list AND
+ * whose suite is one of its configured `suites`. Checking the dataset id alone is not enough —
+ * two selected suites can reuse the same dataset id, and matching on dataset id only would let a
+ * trace from an unrelated suite (never read by this column) win and get displayed as this
+ * column's prompt/answer/score. The suite-level key must never stand in for a dataset column
+ * either: it holds the suite's first complete example regardless of dataset, so it would label
+ * another dataset's prompt/answer/score as this column's. An unmatched dataset column therefore
+ * yields no entries and stays unavailable.
+ *
+ * A suite-only column (no `datasetIds`) reads every dataset of its suites except those a sibling
+ * `datasetIds` column of the same suite already claims, so no run renders under two columns.
  */
-const findDatasetTrace = (
+const findDirectTraces = (
   traces: MatrixTraceData | undefined,
   modelId: string,
-  column: MatrixColumnConfig
-): MatrixTraceEntry | undefined => {
-  if (!traces || !column.datasetIds?.length) {
-    return undefined;
+  column: MatrixColumnConfig,
+  allColumns: readonly MatrixColumnConfig[]
+): Array<{ label: string; trace: MatrixTraceEntry }> => {
+  if (!traces) {
+    return [];
   }
-  const allowedDatasets = new Set(column.datasetIds);
+  const allowedDatasets = column.datasetIds?.length ? new Set(column.datasetIds) : undefined;
   const allowedSuites = new Set(column.suites);
+  const claimedDatasets = new Set(
+    allowedDatasets
+      ? []
+      : allColumns
+          .filter((other) => other.datasetIds?.length)
+          .filter((other) => other.suites.some((suite) => allowedSuites.has(suite)))
+          .flatMap((other) => other.datasetIds ?? [])
+  );
   const modelPrefix = `${traceKey(modelId, '')}`;
-  for (const [key, entry] of Object.entries(traces)) {
-    if (key.startsWith(modelPrefix) && entry.datasetId && allowedDatasets.has(entry.datasetId)) {
-      const parsed = parseDirectTraceKey(key);
-      if (parsed && allowedSuites.has(parsed.suiteId)) {
-        return entry;
+  const matches: Array<{ exampleId: string; datasetId?: string; trace: MatrixTraceEntry }> = [];
+  for (const [key, trace] of Object.entries(traces)) {
+    const parsed = key.startsWith(modelPrefix) ? parseDirectTraceKey(key) : undefined;
+    if (parsed && allowedSuites.has(parsed.suiteId)) {
+      const datasetId = trace.datasetId ?? parsed.datasetId;
+      const inScope = allowedDatasets
+        ? datasetId !== undefined && allowedDatasets.has(datasetId)
+        : datasetId === undefined || !claimedDatasets.has(datasetId);
+      if (inScope) {
+        matches.push({ exampleId: parsed.exampleId, datasetId, trace });
       }
     }
   }
-  return undefined;
+  // Bare-index example ids repeat across datasets; qualify the label only when they would clash.
+  const qualify = new Set(matches.map((m) => m.datasetId)).size > 1;
+  return matches
+    .map(({ exampleId, datasetId, trace }) => ({
+      label: qualify && datasetId ? `${datasetId}/${exampleId}` : exampleId,
+      trace,
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label, undefined, { numeric: true }));
 };
 
 const REPORT_CSS = `
@@ -414,6 +440,19 @@ const renderSummaryTable = (matrix: Matrix): string => {
   return `<table><thead>${header}</thead><tbody>${rows}</tbody></table>`;
 };
 
+const compactCount = (n: number): string =>
+  n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}k` : String(Math.round(n));
+
+/** `12.3k in / 450 out tokens`; empty unless the trace carried usage. */
+const tokensLabel = (trace?: { inputTokens?: number; outputTokens?: number }): string => {
+  const { inputTokens, outputTokens } = trace ?? {};
+  if (inputTokens === undefined && outputTokens === undefined) return '';
+  return `${compactCount(inputTokens ?? 0)} in / ${compactCount(outputTokens ?? 0)} out tokens`;
+};
+
+const formatLatency = (ms: number): string =>
+  ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${Math.round(ms)}ms`;
+
 /** Worst-case spread across repetitions as a `±` badge; empty for single-rep cells. */
 const spreadLabel = (trace?: { spread?: Record<string, number> }): string => {
   const values = Object.values(trace?.spread ?? {});
@@ -508,6 +547,13 @@ const renderModelCard = (
             }
             variantTraces.sort((a, b) => a.label.localeCompare(b.label));
           }
+          // Non-prefix columns render one card per direct run (every example of their dataset
+          // or suite), not just the first.
+          const directCards = column?.examplePrefixes?.length
+            ? []
+            : column
+            ? findDirectTraces(traces, row.modelId, column, config.columns)
+            : [];
           const fallbackTrace =
             traces?.[traceKey(row.modelId, col.id)] ??
             // examplePrefixes columns consume synthetic `prefix:<p>` datasets.
@@ -517,16 +563,20 @@ const renderModelCard = (
             // `datasetIds`-restricted columns must resolve a direct trace from their own
             // dataset: the suite-level key below holds the suite's first complete example
             // regardless of dataset, so falling through to it would label another dataset's
-            // prompt/answer/score as this column's. Whether or not a dataset-scoped trace
-            // exists, an unmatched dataset column stays unavailable rather than borrowing one.
+            // prompt/answer/score as this column's. An unmatched dataset column stays
+            // unavailable rather than borrowing one.
             (column?.datasetIds?.length
-              ? findDatasetTrace(traces, row.modelId, column)
+              ? undefined
               : // Column ids differ from suite ids, so fall back to the column's suites.
                 column?.suites
                   .map((s) => traces?.[traceKey(row.modelId, s)])
                   .find((t) => t != null));
           const cards =
-            variantTraces.length > 0 ? variantTraces : [{ label: col.id, trace: fallbackTrace }];
+            variantTraces.length > 0
+              ? variantTraces
+              : directCards.length > 0
+              ? directCards
+              : [{ label: col.id, trace: fallbackTrace }];
           return cards
             .map(({ label, trace }) => {
               const scoreStr =
@@ -540,6 +590,8 @@ const renderModelCard = (
                 spreadLabel(trace),
                 trace?.stepCount ? `${trace.stepCount} steps` : '',
                 trace?.toolCount ? `${trace.toolCount} tools` : '',
+                tokensLabel(trace),
+                trace?.latencyMs !== undefined ? formatLatency(trace.latencyMs) : '',
               ].filter(Boolean);
 
               let body = '';
@@ -551,7 +603,13 @@ const renderModelCard = (
                   trace.toolTrail.join(', ')
                 )}</code></p>`;
               }
-              if (trace?.answer) {
+              if (trace?.traceFetchFailed) {
+                body +=
+                  '<p class="empty">Trace fetch failed — the run exists but its tool calls could not be retrieved.</p>';
+              } else if (trace?.traceEmpty) {
+                body +=
+                  '<p class="empty">Trace unavailable — the run exists but its trace holds no spans.</p>';
+              } else if (trace?.answer) {
                 body += `<div class="answer">${mdToHtml(trace.answer)}</div>`;
               } else if (trace?.question || (trace?.stepCount ?? 0) > 0) {
                 body +=
