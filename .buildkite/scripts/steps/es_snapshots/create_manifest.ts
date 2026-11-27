@@ -111,7 +111,7 @@ interface ManifestEntry {
       cd "${destination}"
       gcloud storage cp --recursive *.* gs://${BASE_BUCKET_DAILY}/${DESTINATION}
       cp manifest.json manifest-latest.json
-      gcloud storage cp --cache-control="no-cache, max-age=0, no-transform" manifest-latest.json gs://${BASE_BUCKET_DAILY}/${VERSION}
+      gcloud storage cp --cache-control="no-cache, max-age=0, no-transform" manifest-latest.json gs://${BASE_BUCKET_DAILY}/${VERSION}/
 
       buildkite-agent meta-data set ES_SNAPSHOT_MANIFEST 'https://storage.googleapis.com/${BASE_BUCKET_DAILY}/${DESTINATION}/manifest.json'
       buildkite-agent meta-data set ES_SNAPSHOT_VERSION '${VERSION}'
