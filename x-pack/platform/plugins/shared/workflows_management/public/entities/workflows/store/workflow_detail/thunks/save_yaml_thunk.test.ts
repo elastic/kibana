@@ -108,6 +108,9 @@ describe('saveYamlThunk', () => {
         yaml: 'name: Updated Workflow\nsteps: []',
       });
       expect(mockLoadWorkflowThunk).toHaveBeenCalled();
+      expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
+        queryKey: ['workflows', 'test-workflow-1'],
+      });
       expect(mockServices.notifications.toasts.addSuccess).toHaveBeenCalled();
       expect(result.type).toBe('detail/saveYamlThunk/fulfilled');
     });

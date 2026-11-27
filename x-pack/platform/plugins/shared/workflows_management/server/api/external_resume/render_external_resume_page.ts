@@ -60,6 +60,7 @@ function renderPage({
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="referrer" content="no-referrer" />
     <title>${escapeHtml(PAGE_TITLE)}</title>
     <style>
       *, *::before, *::after {
@@ -136,38 +137,54 @@ function renderPage({
 </html>`;
 }
 
-export function renderExternalResumeSuccessPage(): string {
+export function renderExternalResumeSuccessPage(message = SUCCESS_MESSAGE): string {
   return renderPage({
     title: SUCCESS_TITLE,
-    message: SUCCESS_MESSAGE,
+    message,
     isError: false,
   });
 }
 
-export function renderExternalResumeErrorPage(message: string): string {
+export function renderExternalResumeErrorPage(message: string, title = ERROR_TITLE): string {
   return renderPage({
-    title: ERROR_TITLE,
+    title,
     message,
     isError: true,
   });
 }
 
 export function renderExternalResumeFormPage({
+  title = FORM_TITLE,
   message,
   formActionUrl,
   fieldsHtml,
+  notice,
+  errors = [],
 }: {
+  title?: string;
   message?: string;
   formActionUrl: string;
   fieldsHtml: string;
+  /** Fixed text shown under the form, such as the workflow page phishing notice. */
+  notice?: string;
+  /** Validation errors from the last submission, shown above the fields. */
+  errors?: string[];
 }): string {
   const prompt = message && message.length > 0 ? message : FORM_DEFAULT_MESSAGE;
+  const errorsHtml =
+    errors.length > 0
+      ? `<div class="errors" role="alert"><ul>${errors
+          .map((error) => `<li>${escapeHtml(error)}</li>`)
+          .join('')}</ul></div>`
+      : '';
+  const noticeHtml = notice ? `<p class="notice">${escapeHtml(notice)}</p>` : '';
 
   return `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="referrer" content="no-referrer" />
     <title>${escapeHtml(PAGE_TITLE)}</title>
     <style>
       *, *::before, *::after {
@@ -277,17 +294,38 @@ export function renderExternalResumeFormPage({
       button:hover {
         background: #005A9E;
       }
+      .errors {
+        margin: 0 0 16px;
+        padding: 12px 16px;
+        border: 1px solid #BD271E;
+        border-radius: 4px;
+        background: #F8E9E9;
+        color: #BD271E;
+        font-size: 14px;
+      }
+      .errors ul {
+        margin: 0;
+        padding-left: 16px;
+      }
+      .notice {
+        margin: 24px 0 0;
+        font-size: 12px;
+        line-height: 1.4;
+        color: #69707D;
+      }
     </style>
   </head>
   <body>
     <main class="card">
       <div class="brand">Elastic Workflows</div>
-      <h1>${escapeHtml(FORM_TITLE)}</h1>
+      <h1>${escapeHtml(title)}</h1>
       <p class="intro">${escapeHtml(prompt)}</p>
+      ${errorsHtml}
       <form method="POST" action="${escapeHtml(formActionUrl)}">
         ${fieldsHtml}
         <button type="submit">${escapeHtml(FORM_SUBMIT_LABEL)}</button>
       </form>
+      ${noticeHtml}
     </main>
   </body>
 </html>`;

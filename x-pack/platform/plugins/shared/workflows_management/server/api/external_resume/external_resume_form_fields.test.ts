@@ -76,5 +76,27 @@ describe('external_resume_form_fields', () => {
 
       expect(validated).toEqual({ tactics: ['persistence'] });
     });
+
+    it('keeps numeric enum values as numbers', () => {
+      const schema = {
+        type: 'object',
+        properties: { levels: { type: 'array', items: { type: 'number', enum: [1, 2, 3] } } },
+      } as JsonModelSchemaType;
+      const parsed = parseExternalResumeFormBody({ levels: ['1', '3'] }, schema);
+
+      expect(validateExternalResumeInput(parsed, schema)).toEqual({ levels: [1, 3] });
+    });
+  });
+
+  describe('number fields', () => {
+    it('accepts fractions for number fields and keeps whole steps for integer fields', () => {
+      const html = buildExternalResumeFormFieldsHtml({
+        type: 'object',
+        properties: { ratio: { type: 'number' }, count: { type: 'integer' } },
+      } as JsonModelSchemaType);
+
+      expect(html).toContain('<input type="number" id="ratio" name="ratio" step="any"');
+      expect(html).toContain('<input type="number" id="count" name="count" />');
+    });
   });
 });

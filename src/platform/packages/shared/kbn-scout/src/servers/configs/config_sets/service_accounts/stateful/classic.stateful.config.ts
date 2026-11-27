@@ -32,6 +32,8 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
       ...serviceAccountsServerArgs,
+      // Workflow pages run as a service account, so their API tests live in this config set.
+      '--workflowsManagement.pages.enabled=true',
       // The audit log is shared by every spec in this config set, so audit specs match events by
       // the unique account or workload they create.
       ...securityAuditServerArgs,

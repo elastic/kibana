@@ -7,7 +7,8 @@
 
 import { getPageTriggerId, isPageTrigger } from '@kbn/workflows';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
-import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
+import type { PageServiceAccountBindings } from './check_page_service_account';
+import { checkPageServiceAccount, isPrivateWorkflow } from './check_page_service_account';
 import type { WorkflowPageRef } from '../pages/page_secret';
 import type { WorkflowPageMissReason } from '../pages/types';
 import type { WorkflowPagesSystemClient } from '../pages/workflow_pages_system_client';
@@ -17,10 +18,7 @@ export interface ResolveWorkflowPageDeps {
   /** Reads a workflow of the space. Returns null for a soft-deleted or global workflow. */
   getWorkflowSource: (id: string, spaceId: string) => Promise<WorkflowProperties | null>;
   pagesSystemClient: Pick<WorkflowPagesSystemClient, 'verifyPageSecret'>;
-  serviceAccountBindings: Pick<
-    WorkflowsExecutionEnginePluginStart['serviceAccountBindings'],
-    'isEnabled' | 'getWorkloadBinding'
-  >;
+  serviceAccountBindings: PageServiceAccountBindings;
 }
 
 export type ResolveWorkflowPageResult =
@@ -64,16 +62,14 @@ export const resolveWorkflowPage = async (
   if (!hasTrigger) {
     return { reason: 'trigger_missing' };
   }
-  // The page runs without the visitor's identity. Without a matching binding, the run would be
-  // accepted and then fail when core mints the service account credential.
-  const accountId = workflow.definition?.settings?.run_as;
-  if (!accountId || !serviceAccountBindings.isEnabled()) {
-    return { reason: 'not_bound' };
+  if (isPrivateWorkflow(workflow)) {
+    return { reason: 'workflow_private' };
   }
-  const binding = await serviceAccountBindings.getWorkloadBinding({
-    workloadType: 'workflow',
-    workloadId: ref.workflowId,
+  // The page runs without the visitor's identity, so its service account must be able to run it.
+  const accountReason = await checkPageServiceAccount(serviceAccountBindings, {
+    workflow,
+    workflowId: ref.workflowId,
     spaceId: ref.spaceId,
   });
-  return binding?.serviceAccountId === accountId ? { workflow } : { reason: 'not_bound' };
+  return accountReason ? { reason: accountReason } : { workflow };
 };

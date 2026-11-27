@@ -49,7 +49,19 @@ export const WorkflowManagementAuditActions = {
   PAGE_ENABLED_CHANGE: 'workflow_page_enabled_change',
   PAGE_CREATE: 'workflow_page_create',
   PAGE_RETIRE: 'workflow_page_retire',
+  PAGE_VIEW: 'workflow_page_view',
+  PAGE_SUBMIT: 'workflow_page_submit',
 } as const;
+
+const PAGE_USER_AGENT_MAX_LENGTH = 512;
+
+/** What happened to one public page request. Every value but `served` and `submitted` fails. */
+export type WorkflowPageRequestOutcome =
+  | 'served'
+  | 'submitted'
+  | 'invalid_input'
+  | 'not_found'
+  | 'error';
 
 type WorkflowAuditEventType = 'access' | 'change' | 'creation' | 'deletion';
 
@@ -608,6 +620,55 @@ export class WorkflowManagementAuditLog implements WorkflowPageAuditLog {
       ...params,
       verb: 'retired',
       detail: `reason=${params.reason}`,
+    });
+  }
+
+  /**
+   * Logs one public page request, also a failed one. The visitor is anonymous, so the event
+   * carries the socket IP (added by the audit logger) and the user agent. Never the secret.
+   */
+  logPageRequest(
+    request: KibanaRequest,
+    params: {
+      kind: 'view' | 'submit';
+      workflowId: string;
+      pageId: string;
+      spaceId: string;
+      outcome: WorkflowPageRequestOutcome;
+      /** Why the visitor got the 404. The visitor never sees it. */
+      reason?: string;
+      /** False when the secret never matched: the ids are only what the URL claims. */
+      verified: boolean;
+      executionId?: string;
+      error?: unknown;
+    }
+  ): void {
+    const { kind, workflowId, pageId, spaceId, outcome, reason, verified, executionId, error } =
+      params;
+    const ids = verified
+      ? `[workflowId=${workflowId}] [pageId=${pageId}]`
+      : `[claimedWorkflowId=${workflowId}] [claimedPageId=${pageId}]`;
+    const failed = outcome !== 'served' && outcome !== 'submitted';
+    const executionPart = executionId ? ` [executionId=${executionId}]` : '';
+    const reasonPart = reason ? ` [reason=${reason}]` : '';
+    const event = createEvent(
+      kind === 'view'
+        ? WorkflowManagementAuditActions.PAGE_VIEW
+        : WorkflowManagementAuditActions.PAGE_SUBMIT,
+      kind === 'view' ? 'access' : 'creation',
+      `Anonymous visitor ${
+        kind === 'view' ? 'opened' : 'submitted'
+      } workflow page ${ids} [space=${spaceId}] [outcome=${outcome}]${reasonPart}${executionPart}`,
+      error
+    );
+    const userAgent = request.headers['user-agent'];
+    this.log(request, {
+      ...event,
+      event: { ...event.event, outcome: failed ? 'failure' : 'success' },
+      // The visitor controls this header, so keep the audit record bounded.
+      ...(typeof userAgent === 'string'
+        ? { user_agent: { original: userAgent.slice(0, PAGE_USER_AGENT_MAX_LENGTH) } }
+        : {}),
     });
   }
 

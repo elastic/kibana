@@ -29,6 +29,12 @@ export const WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID = 'workflows:ui:showExecutor:
 export const WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID = 'workflows:ui:showManagedWorkflows';
 
 /**
+ * Global kill switch for workflow pages. Every page request reads it, so turning it off takes
+ * every page offline without a restart. Registered only with `workflowsManagement.pages.enabled`.
+ */
+export const WORKFLOWS_PAGES_ENABLED_SETTING_ID = 'workflows:pages:enabled';
+
+/**
  * Feature flag ID for enabling / disabling the workflow execution stats bar UI
  */
 export const WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID = 'workflows:executionStatsBar:enabled';

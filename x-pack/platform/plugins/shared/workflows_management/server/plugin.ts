@@ -75,7 +75,7 @@ export class WorkflowsPlugin
   ) {
     this.logger.debug('Workflows Management: Setup');
 
-    registerUISettings(core, plugins);
+    registerUISettings(core, plugins, { pagesEnabled: this.config.pages.enabled });
     registerLibraryEventTypes(core.analytics);
     if (plugins.usageCollection) {
       registerLibraryUsageCollector({

@@ -46,7 +46,21 @@ function getArrayOfEnumChoices(field: FlatFieldSchema): unknown[] | undefined {
   return itemEnum;
 }
 
-function buildFieldHtml(name: string, field: FlatFieldSchema, required: Set<string>): string {
+const rawToString = (raw: unknown): string =>
+  raw == null ? '' : typeof raw === 'string' ? raw : JSON.stringify(raw);
+
+const rawToStrings = (raw: unknown): string[] =>
+  raw == null ? [] : (Array.isArray(raw) ? raw : [raw]).map(String);
+
+function buildFieldHtml(
+  name: string,
+  field: FlatFieldSchema,
+  required: Set<string>,
+  raw?: unknown
+): string {
+  const valueAttr = raw == null ? '' : ` value="${escapeHtml(rawToString(raw))}"`;
+  const selected = new Set(rawToStrings(raw));
+  const selectedAttr = (choice: unknown) => (selected.has(String(choice)) ? ' selected' : '');
   const label = escapeHtml(field.title ?? name);
   const description =
     typeof field.description === 'string' && field.description.length > 0
@@ -62,7 +76,9 @@ function buildFieldHtml(name: string, field: FlatFieldSchema, required: Set<stri
           ${description}
           <textarea id="${escapeHtml(name)}" name="${escapeHtml(
       name
-    )}" rows="4"${requiredAttr} placeholder="{&quot;key&quot;: &quot;value&quot;}"></textarea>
+    )}" rows="4"${requiredAttr} placeholder="{&quot;key&quot;: &quot;value&quot;}">${escapeHtml(
+      rawToString(raw)
+    )}</textarea>
         </label>`;
   }
 
@@ -70,7 +86,9 @@ function buildFieldHtml(name: string, field: FlatFieldSchema, required: Set<stri
     const options = field.enum
       .map(
         (choice) =>
-          `<option value="${escapeHtml(String(choice))}">${escapeHtml(String(choice))}</option>`
+          `<option value="${escapeHtml(String(choice))}"${selectedAttr(choice)}>${escapeHtml(
+            String(choice)
+          )}</option>`
       )
       .join('');
     return `
@@ -89,7 +107,9 @@ function buildFieldHtml(name: string, field: FlatFieldSchema, required: Set<stri
     const options = arrayEnumChoices
       .map(
         (choice) =>
-          `<option value="${escapeHtml(String(choice))}">${escapeHtml(String(choice))}</option>`
+          `<option value="${escapeHtml(String(choice))}"${selectedAttr(choice)}>${escapeHtml(
+            String(choice)
+          )}</option>`
       )
       .join('');
     return `
@@ -105,7 +125,9 @@ function buildFieldHtml(name: string, field: FlatFieldSchema, required: Set<stri
   if (field.type === 'boolean') {
     return `
         <label class="field field-checkbox" for="${escapeHtml(name)}">
-          <input type="checkbox" id="${escapeHtml(name)}" name="${escapeHtml(name)}" value="true" />
+          <input type="checkbox" id="${escapeHtml(name)}" name="${escapeHtml(name)}" value="true"${
+      raw === true || raw === 'true' || raw === 'on' ? ' checked' : ''
+    } />
           <span class="field-label">${label}</span>
           ${description}
         </label>`;
@@ -116,7 +138,9 @@ function buildFieldHtml(name: string, field: FlatFieldSchema, required: Set<stri
         <label class="field" for="${escapeHtml(name)}">
           <span class="field-label">${label}${requiredMarker}</span>
           ${description}
-          <input type="number" id="${escapeHtml(name)}" name="${escapeHtml(name)}"${requiredAttr} />
+          <input type="number" id="${escapeHtml(name)}" name="${escapeHtml(name)}"${
+      field.type === 'number' ? ' step="any"' : ''
+    }${requiredAttr}${valueAttr} />
         </label>`;
   }
 
@@ -124,11 +148,17 @@ function buildFieldHtml(name: string, field: FlatFieldSchema, required: Set<stri
       <label class="field" for="${escapeHtml(name)}">
         <span class="field-label">${label}${requiredMarker}</span>
         ${description}
-        <input type="text" id="${escapeHtml(name)}" name="${escapeHtml(name)}"${requiredAttr} />
+        <input type="text" id="${escapeHtml(name)}" name="${escapeHtml(
+    name
+  )}"${requiredAttr}${valueAttr} />
       </label>`;
 }
 
-export function buildExternalResumeFormFieldsHtml(schema: JsonModelSchemaType | undefined): string {
+export function buildExternalResumeFormFieldsHtml(
+  schema: JsonModelSchemaType | undefined,
+  /** Raw submitted values, as the browser sent them, to refill the form after a 400. */
+  values: Record<string, unknown> = {}
+): string {
   const properties = schema?.properties;
   if (!properties || typeof properties !== 'object') {
     return '';
@@ -138,7 +168,7 @@ export function buildExternalResumeFormFieldsHtml(schema: JsonModelSchemaType | 
   const fields = Object.entries(properties)
     .filter(([, propertySchema]) => propertySchema != null && typeof propertySchema === 'object')
     .map(([name, propertySchema]) =>
-      buildFieldHtml(name, propertySchema as FlatFieldSchema, required)
+      buildFieldHtml(name, propertySchema as FlatFieldSchema, required, values[name])
     );
 
   return fields.join('\n');
@@ -179,32 +209,53 @@ function parseFieldValue(name: string, field: FlatFieldSchema, raw: unknown): un
     }
 
     const values = Array.isArray(raw) ? raw : [raw];
-    return values.map((value) => String(value));
+    // The browser sends strings. Map each back to its enum value, so `[1, 2]` stays numbers.
+    return values.map(
+      (value) =>
+        arrayEnumChoices.find((choice) => String(choice) === String(value)) ?? String(value)
+    );
   }
 
   return String(raw);
+}
+
+/** Parses every field of a form post. Returns the values and one error per field that fails. */
+export function parseExternalResumeFormFields(
+  body: Record<string, unknown>,
+  schema: JsonModelSchemaType | undefined
+): { input: Record<string, unknown>; errors: Record<string, string> } {
+  const input: Record<string, unknown> = {};
+  const errors: Record<string, string> = {};
+  const properties = schema?.properties;
+  if (!properties || typeof properties !== 'object') {
+    return { input, errors };
+  }
+
+  for (const [name, propertySchema] of Object.entries(properties)) {
+    if (propertySchema != null && typeof propertySchema === 'object') {
+      try {
+        const parsed = parseFieldValue(name, propertySchema as FlatFieldSchema, body[name]);
+        if (parsed !== undefined || (propertySchema as FlatFieldSchema).type === 'boolean') {
+          input[name] = parsed;
+        }
+      } catch (error) {
+        errors[name] = error instanceof Error ? error.message : String(error);
+      }
+    }
+  }
+
+  return { input, errors };
 }
 
 export function parseExternalResumeFormBody(
   body: Record<string, unknown>,
   schema: JsonModelSchemaType | undefined
 ): Record<string, unknown> {
-  const properties = schema?.properties;
-  if (!properties || typeof properties !== 'object') {
-    return {};
+  const { input, errors } = parseExternalResumeFormFields(body, schema);
+  const [firstError] = Object.values(errors);
+  if (firstError) {
+    throw new Error(firstError);
   }
-
-  const input: Record<string, unknown> = {};
-
-  for (const [name, propertySchema] of Object.entries(properties)) {
-    if (propertySchema != null && typeof propertySchema === 'object') {
-      const parsed = parseFieldValue(name, propertySchema as FlatFieldSchema, body[name]);
-      if (parsed !== undefined || (propertySchema as FlatFieldSchema).type === 'boolean') {
-        input[name] = parsed;
-      }
-    }
-  }
-
   return input;
 }
 

@@ -537,6 +537,66 @@ describe('WorkflowManagementAuditLog', () => {
     });
   });
 
+  describe('logPageRequest', () => {
+    const page = {
+      kind: 'submit',
+      workflowId: 'w-1',
+      pageId: 'default',
+      spaceId: 'default',
+    } as const;
+    const withUserAgent = (userAgent: string) =>
+      ({ headers: { 'user-agent': userAgent } } as unknown as KibanaRequest);
+
+    it('logs a verified submission with its ids and the user agent', async () => {
+      const { audit, log } = await createAuditHarness();
+      audit.logPageRequest(withUserAgent('Mozilla/5.0'), {
+        ...page,
+        outcome: 'submitted',
+        verified: true,
+        executionId: 'e-1',
+      });
+
+      expect(log.mock.calls[0][0]).toEqual(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: WorkflowManagementAuditActions.PAGE_SUBMIT,
+            outcome: 'success',
+          }),
+          user_agent: { original: 'Mozilla/5.0' },
+        })
+      );
+      expect(log.mock.calls[0][0].message).toContain('[workflowId=w-1] [pageId=default]');
+      expect(log.mock.calls[0][0].message).toContain('[executionId=e-1]');
+    });
+
+    it('marks the ids as claimed when the secret never matched', async () => {
+      const { audit, log } = await createAuditHarness();
+      audit.logPageRequest(withUserAgent('curl'), {
+        ...page,
+        outcome: 'not_found',
+        reason: 'secret_mismatch',
+        verified: false,
+      });
+
+      const { message, event } = log.mock.calls[0][0];
+      expect(event.outcome).toBe('failure');
+      expect(message).toContain('[claimedWorkflowId=w-1] [claimedPageId=default]');
+      expect(message).toContain('[reason=secret_mismatch]');
+      expect(message).not.toContain('[workflowId=');
+    });
+
+    it('bounds the user agent the visitor sends', async () => {
+      const { audit, log } = await createAuditHarness();
+      audit.logPageRequest(withUserAgent('x'.repeat(10_000)), {
+        ...page,
+        outcome: 'not_found',
+        verified: false,
+      });
+
+      expect(log.mock.calls[0][0].user_agent.original).toHaveLength(512);
+    });
+  });
+
   describe('bulk audit action naming for operators (workflow_bulk_* prefix)', () => {
     const bulkActionPrefix = /^workflow_bulk_/;
 

@@ -18,9 +18,19 @@ import { ChangeHistoryModalContext } from '@kbn/change-history-ui';
 import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
+import { useQuery } from '@kbn/react-query';
+import { getPageTriggerId, isPageTrigger } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import {
+  getPageShareStatusView,
+  WORKFLOW_PAGE_API_VERSION,
+  workflowPageApiPath,
+  workflowPageQueryKey,
+} from './page_share_model';
 import { WorkflowAccessControlModal } from './workflow_access_control_modal';
+import { WorkflowPageShareModal } from './workflow_page_share_modal';
 import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
+import type { WorkflowPageResponse } from '../../../../common/pages';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
 import {
   selectHasChanges,
@@ -46,6 +56,7 @@ import {
   navigateToWorkflowsList,
   type WorkflowDetailRouteState,
 } from '../../../shared/utils/workflow_navigation';
+import { triggerSchemas } from '../../../trigger_schemas';
 
 const executionsTabReadExecutionDisabledTooltip = i18n.translate(
   'workflows.workflowDetailHeader.executionsTabReadExecutionDisabledTooltip',
@@ -119,16 +130,18 @@ export const WorkflowDetailHeader = React.memo(
     onOpenExecutionList,
   }: WorkflowDetailHeaderProps) => {
     const { id: workflowId } = useParams<{ id?: string }>();
-    const { application } = useKibana().services;
+    const { application, http } = useKibana().services;
     const back = useWorkflowDetailHeaderBack();
     const styles = useMemoCss(componentStyles);
     const [isAccessOpen, setIsAccessOpen] = useState(false);
+    const [isPageShareOpen, setIsPageShareOpen] = useState(false);
     const {
       canCreateWorkflow,
       canUpdateWorkflow: hasUpdatePrivilege,
       canReadWorkflow,
       canReadWorkflowExecution,
       canReadManagedWorkflowExecution,
+      canExecuteWorkflow,
     } = useWorkflowsCapabilities();
 
     const { activeTab, isViewingExecution, setActiveTab } = useWorkflowUrlState();
@@ -137,6 +150,8 @@ export const WorkflowDetailHeader = React.memo(
     const workflow = useSelector(selectWorkflow);
     const canUpdateWorkflow = hasUpdatePrivilege && workflow?.permissions?.edit !== false;
     const canManageAccess = hasUpdatePrivilege && workflow?.permissions?.manage === true;
+    // The page API checks this workflow's ACL, like Run and Test do.
+    const canSharePage = canExecuteWorkflow && workflow?.permissions?.execute !== false;
     const isManagedWorkflow = workflow?.managed === true;
     const canReadVisibleWorkflowExecution =
       canReadWorkflowExecution && (!isManagedWorkflow || canReadManagedWorkflowExecution);
@@ -303,6 +318,52 @@ export const WorkflowDetailHeader = React.memo(
       };
     }, [showHistoryButton, openHistoryModal]);
 
+    // The page serves the saved definition, so the button follows the saved page trigger.
+    const savedPageTrigger = useMemo(
+      () =>
+        triggerSchemas.getTriggerSchemaOptions().includePageTrigger
+          ? workflow?.definition?.triggers?.find(isPageTrigger)
+          : undefined,
+      [workflow?.definition?.triggers]
+    );
+    const pageId = savedPageTrigger ? getPageTriggerId(savedPageTrigger) : undefined;
+    const { data: sharedPage } = useQuery({
+      queryKey: workflowPageQueryKey(workflowId ?? '', pageId ?? ''),
+      queryFn: () => {
+        if (!workflowId || !pageId) {
+          throw new Error('Workflow page query ran without a workflow or page id');
+        }
+        return http.get<WorkflowPageResponse>(
+          workflowPageApiPath(workflowId, pageId),
+          WORKFLOW_PAGE_API_VERSION
+        );
+      },
+      enabled: Boolean(workflowId && pageId && canSharePage),
+      refetchOnWindowFocus: false,
+    });
+    const pageShareStatus = useMemo(
+      () => (sharedPage ? getPageShareStatusView(sharedPage, 'header') : undefined),
+      [sharedPage]
+    );
+
+    const sharePageItem = useMemo<AppMenuItemType | undefined>(() => {
+      if (!workflowId || !savedPageTrigger || !canSharePage || isViewingExecution) {
+        return undefined;
+      }
+      return {
+        id: 'sharePage',
+        // Before History: for a workflow with a page, sharing it is the main thing to do here.
+        order: 1,
+        label: i18n.translate('workflows.workflowDetailHeader.sharePageButton', {
+          defaultMessage: 'Share page',
+        }),
+        iconType: 'link',
+        tooltipContent: pageShareStatus?.tooltip,
+        run: () => setIsPageShareOpen(true),
+        testId: 'workflowDetailSharePageButton',
+      };
+    }, [workflowId, savedPageTrigger, canSharePage, isViewingExecution, pageShareStatus]);
+
     const enabledSwitchConfig = useMemo<NonNullable<AppMenuConfig['switch']> | undefined>(() => {
       if (!workflowId) {
         return undefined;
@@ -344,6 +405,20 @@ export const WorkflowDetailHeader = React.memo(
 
     const badges = useMemo<AppHeaderBadge[]>(() => {
       const result: AppHeaderBadge[] = [];
+
+      if (pageShareStatus) {
+        result.push({
+          label: pageShareStatus.label,
+          color: pageShareStatus.color,
+          tooltip: pageShareStatus.tooltip,
+          onClick: () => setIsPageShareOpen(true),
+          onClickAriaLabel: i18n.translate('workflows.workflowDetailHeader.sharePageStatusBadge', {
+            defaultMessage: 'Share page, {status}',
+            values: { status: pageShareStatus.label },
+          }),
+          'data-test-subj': 'workflowDetailPageStatusBadge',
+        });
+      }
 
       if (isManagedWorkflow) {
         result.push({
@@ -402,6 +477,7 @@ export const WorkflowDetailHeader = React.memo(
 
       return result;
     }, [
+      pageShareStatus,
       isManagedWorkflow,
       hasUnsavedChanges,
       workflowId,
@@ -421,6 +497,9 @@ export const WorkflowDetailHeader = React.memo(
       }
       if (historyItem) {
         items.push(historyItem);
+      }
+      if (sharePageItem) {
+        items.push(sharePageItem);
       }
       if (addConnectorsMenuItem) {
         items.push(addConnectorsMenuItem);
@@ -454,6 +533,7 @@ export const WorkflowDetailHeader = React.memo(
       workflowId,
       executionsToggleItem,
       historyItem,
+      sharePageItem,
       addConnectorsMenuItem,
       enabledSwitchConfig,
       handleSaveWorkflow,
@@ -503,6 +583,14 @@ export const WorkflowDetailHeader = React.memo(
         </EuiPageTemplate>
         {isAccessOpen && workflow && (
           <WorkflowAccessControlModal workflow={workflow} onClose={() => setIsAccessOpen(false)} />
+        )}
+        {isPageShareOpen && workflowId && savedPageTrigger && (
+          <WorkflowPageShareModal
+            workflowId={workflowId}
+            pageId={getPageTriggerId(savedPageTrigger)}
+            serviceAccountId={workflow?.definition?.settings?.run_as}
+            onClose={() => setIsPageShareOpen(false)}
+          />
         )}
         {disableConfirmModal}
       </>

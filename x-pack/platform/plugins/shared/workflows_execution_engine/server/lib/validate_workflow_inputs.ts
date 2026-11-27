@@ -7,7 +7,11 @@
 
 import { isDeepStrictEqual } from 'node:util';
 import type { CoreStart, Logger } from '@kbn/core/server';
-import { evaluatesProvidedInputExpressions, ExecutionStatus } from '@kbn/workflows';
+import {
+  evaluatesProvidedInputExpressions,
+  ExecutionStatus,
+  PAGE_TRIGGER_SOURCE,
+} from '@kbn/workflows';
 import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import {
   applyInputDefaults,
@@ -40,7 +44,12 @@ export const validateWorkflowInputs = async (
   coreStart?: CoreStart,
   dependencies?: ContextDependencies
 ): Promise<boolean> => {
-  if (!workflowExecution.workflowDefinition) {
+  // A page run provides `page.inputs`, not `inputs`. The page route validated them against the
+  // page trigger's schema, so the workflow inputs do not apply.
+  if (
+    !workflowExecution.workflowDefinition ||
+    workflowExecution.triggeredBy === PAGE_TRIGGER_SOURCE
+  ) {
     return true;
   }
   const normalizedSchema = getInputsFromDefinition(workflowExecution.workflowDefinition);

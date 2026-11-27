@@ -70,13 +70,18 @@ export interface TriggerEventsContract {
 export interface WorkflowsExecutionEnginePluginStart {
   serviceAccountBindings: Pick<
     CoreStart['security']['serviceAccounts'],
-    'isEnabled' | 'bindWorkload' | 'unbindWorkload' | 'getWorkloadBinding'
+    | 'isEnabled'
+    | 'bindWorkload'
+    | 'unbindWorkload'
+    | 'getWorkloadBinding'
+    | 'getWorkloadServiceAccountSummary'
   >;
   __internalStorage: {
     workflowExecutionsDataClient: WorkflowExecutionsDataClient;
     stepExecutionsDataClient: StepExecutionsDataClient;
   };
   executeWorkflow: ExecuteWorkflow;
+  executeWorkflowAsServiceAccount: ExecuteWorkflowAsServiceAccount;
   executeWorkflowStep: ExecuteWorkflowStep;
   cancelWorkflowExecution: CancelWorkflowExecution;
   cancelAllActiveWorkflowExecutions: CancelAllActiveWorkflowExecutions;
@@ -107,6 +112,12 @@ export type ExecuteWorkflow = (
   workflow: WorkflowExecutionEngineModel,
   context: Record<string, unknown>,
   request: KibanaRequest
+) => Promise<ExecuteWorkflowResponse>;
+
+/** Starts a run of a saved workflow as its bound service account, for callers with no identity. */
+export type ExecuteWorkflowAsServiceAccount = (
+  workflow: WorkflowExecutionEngineModel,
+  context: Record<string, unknown> & { spaceId: string }
 ) => Promise<ExecuteWorkflowResponse>;
 
 export type ExecuteWorkflowStep = (

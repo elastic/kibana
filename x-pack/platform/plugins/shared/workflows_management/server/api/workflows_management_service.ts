@@ -35,6 +35,7 @@ import type {
   WorkflowStatsDto,
 } from '@kbn/workflows';
 import { computeRetryDelayMs } from '@kbn/workflows';
+import { WORKFLOWS_PAGES_ENABLED_SETTING_ID } from '@kbn/workflows/common/constants';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { ManagedWorkflowId } from '@kbn/workflows/managed';
 import type { ManagedFilter } from '@kbn/workflows/server';
@@ -86,8 +87,10 @@ import type {
   WorkflowChangesHistoryResponse,
 } from '../../common/lib/workflow_change_history/types';
 import type { WorkflowLookupItem } from '../../common/lib/workflow_dependents/types';
+import type { WorkflowPageStatus } from '../../common/pages';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { getHistoryForWorkflow } from '../lib/get_workflow_change_history';
+import { getWorkflowPageStatus } from '../lib/get_workflow_page_status';
 import {
   MANAGED_INSTALL_MAX_RETRIES,
   MANAGED_INSTALL_RETRY_DELAY,
@@ -102,6 +105,7 @@ import {
 } from '../lib/wait_for_managed_workflow_install_readiness';
 import { WorkflowsElasticsearchUnavailableError } from '../lib/workflows_elasticsearch_unavailable_error';
 import type { WorkflowPageRef } from '../pages/page_secret';
+import type { WorkflowPageDto } from '../pages/types';
 import type { WorkflowPagesClient } from '../pages/workflow_pages_client';
 import type {
   WorkflowPagesService,
@@ -410,6 +414,37 @@ export class WorkflowsService {
       },
       { ref, secret }
     );
+  }
+
+  /** Lists every reason a page does not serve. The caller must have read the page already. */
+  public async getWorkflowPageStatus(
+    page: WorkflowPageDto,
+    spaceId: string
+  ): Promise<WorkflowPageStatus> {
+    await this.ensureInitialized();
+    if (!this.pages) throw new Error('Workflow pages are not set up');
+    const { canEncrypt } = this.pages;
+    const workflow = await this.crudService.getWorkflowDocumentSource(page.workflowId, spaceId, {
+      includeGlobal: false,
+    });
+    if (!workflow) throw new WorkflowNotFoundError(page.workflowId);
+    return getWorkflowPageStatus(
+      {
+        arePagesEnabled: () => this.arePagesEnabled(),
+        canEncrypt,
+        serviceAccountBindings: this.workflowsExecutionEngine.serviceAccountBindings,
+      },
+      { page, workflow, spaceId }
+    );
+  }
+
+  /** Reads the global page kill switch. Read on every page request, so it needs no restart. */
+  public async arePagesEnabled(): Promise<boolean> {
+    await this.ensureInitialized();
+    const client = this.coreStart.savedObjects.getUnsafeInternalClient();
+    return this.coreStart.uiSettings
+      .globalAsScopedToClient(client)
+      .get<boolean>(WORKFLOWS_PAGES_ENABLED_SETTING_ID);
   }
 
   public async getAccessControl(): Promise<WorkflowAccessControlService> {
