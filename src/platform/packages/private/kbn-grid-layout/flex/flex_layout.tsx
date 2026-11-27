@@ -95,7 +95,7 @@ export const FlexLayout = ({
         renderPanelContents,
         useCustomDragHandle,
         gridLayoutStateManager,
-      } as FlexLayoutContextType),
+      }) as FlexLayoutContextType,
     [renderPanelContents, useCustomDragHandle, gridLayoutStateManager]
   );
 

@@ -55,7 +55,7 @@ const renderFlexLayout = (propsOverrides: PropsOverrides = {}) => {
       renderPanelContents,
       onLayoutChange,
       ...overrides,
-    } as GridLayoutProps);
+    }) as GridLayoutProps;
 
   const { rerender, ...rest } = render(<FlexLayout {...getProps(propsOverrides)} />, {
     wrapper: EuiThemeProvider,
@@ -103,7 +103,7 @@ const mockRects = () =>
           height,
           x: left,
           y: top,
-        } as DOMRect);
+        }) as DOMRect;
 
       if (this.classList.contains('kbnFlex')) return rect(0, 1000, 500);
       // handles sit at the left edge of their panel, so they move along with a dragged panel
@@ -521,7 +521,7 @@ describe('FlexLayout pointer resize with wrapping', () => {
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
       .mockImplementation(function (this: HTMLElement) {
         const rect = (left: number, top: number, width: number, height: number) =>
-          ({ left, top, width, height, right: left + width, bottom: top + height } as DOMRect);
+          ({ left, top, width, height, right: left + width, bottom: top + height }) as DOMRect;
 
         if (this.classList.contains('kbnFlex')) return rect(0, 0, CONTAINER_WIDTH, 500);
         const panel = this.closest<HTMLElement>('.kbnFlexPanel');

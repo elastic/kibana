@@ -51,7 +51,7 @@ const getControl = (order: number): PinnedControlLayoutState =>
     order,
     width: CONTROL_WIDTH_MEDIUM,
     grow: false,
-  } as PinnedControlLayoutState);
+  }) as PinnedControlLayoutState;
 
 const getControls = (): ControlsLayout => ({
   controls: { control1: getControl(0), control2: getControl(1), control3: getControl(2) },
@@ -63,7 +63,7 @@ const getParentApi = (viewMode: 'edit' | 'view' = 'edit') =>
     children$: new BehaviorSubject({}),
     registerChildApi: jest.fn(),
     getSerializedStateForChild: jest.fn().mockReturnValue({ type: OPTIONS_LIST_CONTROL }),
-  } as unknown as ControlsRendererParentApi & { viewMode$: BehaviorSubject<string> });
+  }) as unknown as ControlsRendererParentApi & { viewMode$: BehaviorSubject<string> };
 
 const onControlsChanged = jest.fn();
 
@@ -119,7 +119,7 @@ const mockRects = () =>
     .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
     .mockImplementation(function (this: HTMLElement) {
       const rect = (left: number, width: number, height: number, top = 0) =>
-        ({ left, right: left + width, top, bottom: top + height, width, height } as DOMRect);
+        ({ left, right: left + width, top, bottom: top + height, width, height }) as DOMRect;
 
       if (this.classList.contains('kbnFlex')) return rect(0, 1000, 500);
       const panel = this.closest<HTMLElement>('.kbnFlexPanel');
