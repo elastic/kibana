@@ -10,20 +10,26 @@ import type { StatesIndexStatus } from '../../../../common/runtime_types';
 import { StatesIndexStatusType } from '../../../../common/runtime_types';
 import { apiService } from './utils';
 
-let indexStatusPromise: Promise<{ indexExists: boolean; indices: string }> | null = null;
+const indexStatusPromises = new Map<string, Promise<StatesIndexStatus>>();
 
 export const fetchIndexStatus = async (from?: string, to?: string): Promise<StatesIndexStatus> => {
-  if (indexStatusPromise) {
-    return indexStatusPromise;
+  const rangeKey = `${from ?? ''}|${to ?? ''}`;
+  const inFlight = indexStatusPromises.get(rangeKey);
+  if (inFlight) {
+    return inFlight;
   }
-  indexStatusPromise = apiService.get(API_URLS.INDEX_STATUS, { from, to }, StatesIndexStatusType);
-  indexStatusPromise.then(
-    () => {
-      indexStatusPromise = null;
-    },
-    () => {
-      indexStatusPromise = null;
-    }
+
+  const indexStatusPromise: Promise<StatesIndexStatus> = apiService.get(
+    API_URLS.INDEX_STATUS,
+    { from, to },
+    StatesIndexStatusType
   );
+  indexStatusPromises.set(rangeKey, indexStatusPromise);
+
+  const clear = () => {
+    indexStatusPromises.delete(rangeKey);
+  };
+  indexStatusPromise.then(clear, clear);
+
   return indexStatusPromise;
 };
