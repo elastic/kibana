@@ -622,6 +622,7 @@ describe('runFindingsPass', () => {
       listActions: jest.fn().mockResolvedValue(actions),
       propose: jest.fn().mockResolvedValue(undefined),
       revise: jest.fn().mockResolvedValue(true),
+      retire: jest.fn().mockResolvedValue(true),
     });
     const finalWith = (proposals: unknown[]) => [answerWith({ ...output, proposals })];
     const sentMessages = (chatComplete: jest.Mock) =>
@@ -1079,7 +1080,7 @@ describe('runFindingsPass', () => {
       await run(deps, memory, { answer: 'Root cause: bad deploy' });
 
       expect(sentMessages(chatComplete)).toContain(
-        '5 of 5 open slots used, so no new action can be added: supersede one only to refine that same action, and leave a different action out'
+        '5 of 5 open slots used, so a new action can be added only after retiring an obsolete one: supersede one only to refine that same action, never retire one that still needs doing to make room, and otherwise leave a different action out'
       );
       expect(proposals.revise).toHaveBeenCalledTimes(1);
       expect(proposals.revise).toHaveBeenCalledWith(expect.objectContaining({ proposalId: 'p-2' }));
@@ -1209,6 +1210,230 @@ describe('runFindingsPass', () => {
         expect.objectContaining({ proposalId: 'p-reopened' })
       );
       expect(proposals.propose).not.toHaveBeenCalled();
+    });
+
+    describe('retire_proposals', () => {
+      const todo = (overrides: Partial<ExistingRecorderProposal> = {}) =>
+        existingProposal({ retirable: true, ...overrides });
+      const openTodos = (count: number) =>
+        Array.from({ length: count }, (_, i) =>
+          todo({ id: `p-${i + 1}`, title: `Open action ${i + 1}`, comment: `Step ${i + 1}` })
+        );
+      const finalRetiring = (retire: string[], proposals?: unknown[]) => [
+        answerWith({ ...output, retire_proposals: retire, ...(proposals ? { proposals } : {}) }),
+      ];
+
+      it('retires an obsolete open proposal by its handle, with no proposals in the answer', async () => {
+        const proposals = proposed(openTodos(2));
+        const { deps, chatComplete, memory } = setup({
+          answers: finalRetiring(['P1']),
+          proposals,
+        });
+
+        await run(deps, memory, { answer: 'The check is answered.' });
+
+        expect(sentMessages(chatComplete)).toContain('list obsolete IDs in retire_proposals');
+        expect(proposals.retire).toHaveBeenCalledTimes(1);
+        expect(proposals.retire).toHaveBeenCalledWith({ request, proposalId: 'p-1' });
+        expect(proposals.propose).not.toHaveBeenCalled();
+        expect(proposals.revise).not.toHaveBeenCalled();
+        expect(deps.logger.warn).not.toHaveBeenCalled();
+      });
+
+      it('never retires from a live pass', async () => {
+        const proposals = proposed(openTodos(2));
+        const { deps, memory } = setup({ answers: finalRetiring(['P1']), proposals });
+
+        await run(deps, memory);
+
+        expect(proposals.retire).not.toHaveBeenCalled();
+      });
+
+      it('frees the slot for a new proposal at the cap, retiring before it proposes', async () => {
+        const proposals = proposed(openTodos(5));
+        const { deps, memory } = setup({
+          answers: finalRetiring(['P1'], [{ title: 'New fix', comment: 'Do it.' }]),
+          proposals,
+        });
+
+        await run(deps, memory, { answer: 'Done.' });
+
+        expect(proposals.retire).toHaveBeenCalledWith({ request, proposalId: 'p-1' });
+        expect(proposals.propose).toHaveBeenCalledTimes(1);
+        expect(proposals.retire.mock.invocationCallOrder[0]).toBeLessThan(
+          proposals.propose.mock.invocationCallOrder[0]
+        );
+      });
+
+      it.each([
+        ['refused', (retire: jest.Mock) => retire.mockResolvedValue(false)],
+        ['failed', (retire: jest.Mock) => retire.mockRejectedValue(new Error('unavailable'))],
+      ])('does not free a slot for a retirement that was %s', async (_, arrange) => {
+        const proposals = proposed(openTodos(5));
+        arrange(proposals.retire);
+        const { deps, memory } = setup({
+          answers: finalRetiring(['P1'], [{ title: 'New fix', comment: 'Do it.' }]),
+          proposals,
+        });
+
+        await run(deps, memory, { answer: 'Done.' });
+
+        expect(proposals.retire).toHaveBeenCalledTimes(1);
+        expect(proposals.propose).not.toHaveBeenCalled();
+        expect(deps.logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('"New fix": 5 proposals are already open')
+        );
+      });
+
+      it('logs a refused retirement as a person acting first', async () => {
+        const proposals = proposed(openTodos(1));
+        proposals.retire.mockResolvedValue(false);
+        const { deps, memory } = setup({ answers: finalRetiring(['P1']), proposals });
+
+        await run(deps, memory, { answer: 'Done.' });
+
+        expect(deps.logger.info).toHaveBeenCalledWith(
+          expect.stringContaining(
+            '"Open action 1" for c1 unchanged: a person revised or decided it'
+          )
+        );
+      });
+
+      it('marks a gated proposal as not retirable, and neither retires it nor frees its slot', async () => {
+        const proposals = proposed([
+          ...openTodos(4),
+          existingProposal({ id: 'p-gated', title: 'Open a ticket', comment: 'File it.' }),
+        ]);
+        const { deps, chatComplete, memory } = setup({
+          answers: finalRetiring(['P5'], [{ title: 'New fix', comment: 'Do it.' }]),
+          proposals,
+        });
+
+        await run(deps, memory, { answer: 'Done.' });
+
+        expect(sentMessages(chatComplete)).toContain(
+          'P5: Open a ticket [impact: low, confidence: high, cannot be retired]'
+        );
+        expect(proposals.retire).not.toHaveBeenCalled();
+        expect(proposals.propose).not.toHaveBeenCalled();
+        expect(deps.logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining(
+            'retire "Open a ticket": a gate workflow owns it, so it cannot be retired'
+          )
+        );
+      });
+
+      it('retires only the proposal the model was shown, not a revision a person wrote meanwhile', async () => {
+        const shown = todo({ id: 'p-shown', comment: 'Check the logs.' });
+        const theirs = todo({ id: 'p-theirs', comment: 'Check the logs. Owner: Sam.' });
+        const proposals = proposed();
+        proposals.list.mockResolvedValueOnce([shown]).mockResolvedValueOnce([theirs]);
+        const { deps, memory } = setup({ answers: finalRetiring(['P1']), proposals });
+
+        await run(deps, memory, { answer: 'Done.' });
+
+        expect(proposals.retire).not.toHaveBeenCalled();
+        expect(deps.logger.info).toHaveBeenCalledWith(
+          expect.stringContaining('a person revised or decided it during the pass')
+        );
+      });
+
+      it('merges two open proposals by revising one before retiring the other', async () => {
+        const proposals = proposed(openTodos(2));
+        const { deps, memory } = setup({
+          answers: finalRetiring(
+            ['P2'],
+            [{ supersedes: 'P1', title: 'Combined action', comment: 'Steps 1 and 2.' }]
+          ),
+          proposals,
+        });
+
+        await run(deps, memory, { answer: 'Done.' });
+
+        expect(proposals.revise).toHaveBeenCalledWith(
+          expect.objectContaining({ proposalId: 'p-1' })
+        );
+        expect(proposals.retire).toHaveBeenCalledWith({ request, proposalId: 'p-2' });
+        expect(proposals.revise.mock.invocationCallOrder[0]).toBeLessThan(
+          proposals.retire.mock.invocationCallOrder[0]
+        );
+      });
+
+      it.each([
+        [
+          'the revision is refused',
+          (p: ReturnType<typeof proposed>) => p.revise.mockResolvedValue(false),
+        ],
+        [
+          'the revision fails',
+          (p: ReturnType<typeof proposed>) => p.revise.mockRejectedValue(new Error('boom')),
+        ],
+        [
+          'a person decided the target during the pass',
+          (p: ReturnType<typeof proposed>) =>
+            p.list
+              .mockResolvedValueOnce(openTodos(2))
+              .mockResolvedValueOnce([
+                { ...openTodos(1)[0], status: 'no_action', decision: 'approved' },
+                openTodos(2)[1],
+              ]),
+        ],
+      ])('retires nothing in the pass when %s', async (_, arrange) => {
+        const proposals = proposed(openTodos(3));
+        arrange(proposals);
+        const { deps, memory } = setup({
+          answers: finalRetiring(
+            ['P2'],
+            [{ supersedes: 'P1', title: 'Combined action', comment: 'Steps 1 and 2.' }]
+          ),
+          proposals,
+        });
+
+        await run(deps, memory, { answer: 'Done.' });
+
+        expect(proposals.retire).not.toHaveBeenCalled();
+        expect(deps.logger.info).toHaveBeenCalledWith(
+          expect.stringContaining(
+            'did not retire "Open action 2" for c1: a revision in the same pass was not written'
+          )
+        );
+      });
+
+      it('revises rather than retires a proposal the same pass also updates', async () => {
+        const proposals = proposed(openTodos(1));
+        const { deps, memory } = setup({
+          answers: finalRetiring(
+            ['P1'],
+            [{ supersedes: 'P1', title: 'Open action 1', comment: 'Refined step.' }]
+          ),
+          proposals,
+        });
+
+        await run(deps, memory, { answer: 'Done.' });
+
+        expect(proposals.revise).toHaveBeenCalledTimes(1);
+        expect(proposals.retire).not.toHaveBeenCalled();
+        expect(deps.logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('retire "Open action 1": it was updated in this pass')
+        );
+      });
+
+      it('does not retire a closed proposal or a reference to none', async () => {
+        const proposals = proposed([
+          todo({ id: 'p-applied', title: 'Applied', status: 'no_action', decision: 'approved' }),
+          ...openTodos(1),
+        ]);
+        const { deps, memory } = setup({ answers: finalRetiring(['Applied', 'P7']), proposals });
+
+        await run(deps, memory, { answer: 'Done.' });
+
+        expect(proposals.retire).not.toHaveBeenCalled();
+        expect(deps.logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining(
+            'retire [Applied]: not an open proposal; retire [P7]: not an open proposal'
+          )
+        );
+      });
     });
 
     describe('with action workflows', () => {

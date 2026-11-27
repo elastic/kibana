@@ -41,16 +41,23 @@ const originFilter = ({ origin }: ChartsWindow): ESQLAstExpression =>
 
 /** Open is exactly `pending`: every other status is a settled proposal. */
 const PENDING: ProposalStatus = 'pending';
+const SUPERSEDED: ProposalStatus = 'superseded';
 
-/** A superseded proposal is represented by its replacement; counting both double-counts a retry. */
-const NOT_SUPERSEDED: ESQLAstExpression = exp`supersededBy IS NULL`;
+/**
+ * A superseded proposal is represented by its replacement; counting both double-counts a retry.
+ * A proposal retired with no replacement stays in, open until `retiredAt`, so retiring it does
+ * not rewrite the buckets it was open in. A `superseded` row with neither is left out: nothing
+ * records when it closed, so it would read as open forever.
+ */
+const NOT_SUPERSEDED: ESQLAstExpression = exp`supersededBy IS NULL AND (status != ${SUPERSEDED} OR retiredAt IS NOT NULL)`;
 
 /**
  * When a proposal stopped being open. A decision sets `decidedAt`; a deadline
  * nobody answered leaves it null and settles the status to `expired`, where
- * `expiresAt` is the moment. Non-null for anything not `pending`.
+ * `expiresAt` is the moment; a retirement sets `retiredAt`. Non-null for
+ * anything not `pending` that {@link NOT_SUPERSEDED} keeps.
  */
-const CLOSED_AT: ESQLAstExpression = exp`COALESCE(decidedAt, expiresAt)`;
+const CLOSED_AT: ESQLAstExpression = exp`COALESCE(decidedAt, expiresAt, retiredAt)`;
 
 export type EventStream = 'opens' | 'closes';
 

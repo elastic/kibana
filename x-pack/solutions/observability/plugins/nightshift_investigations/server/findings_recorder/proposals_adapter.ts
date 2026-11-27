@@ -12,6 +12,7 @@ import {
   type ProposalsPluginStart,
 } from '@kbn/proposals-plugin/server';
 import {
+  isGatelessProposal,
   MAX_PROPOSALS_PAGE_SIZE,
   PROPOSAL_CATEGORY_TODO,
   proposalConfidenceSchema,
@@ -57,6 +58,7 @@ const toExisting = ({
   actionWorkflowId,
   actionInput,
   expiresAt,
+  gate,
   gateReleasedAt,
 }: Proposal): ExistingRecorderProposal => ({
   id,
@@ -68,13 +70,14 @@ const toExisting = ({
   confidence,
   ...(actionWorkflowId ? { actionWorkflowId, ...(actionInput ? { actionInput } : {}) } : {}),
   ...(expiresAt ? { expiresAt } : {}),
+  ...(isGatelessProposal({ gate }) ? { retirable: true } : {}),
   ...(gateReleasedAt ? { gateReleasedAt } : {}),
 });
 
 /**
  * What the findings recorder needs from the proposals plugin: the proposals already on a
- * conversation, the action workflows a proposal can run, and a way to propose a new one or revise
- * an open one in place.
+ * conversation, the action workflows a proposal can run, and a way to propose a new one, revise
+ * an open one in place, or retire an obsolete one.
  */
 export const createRecorderProposals = ({
   proposals,
@@ -202,6 +205,21 @@ export const createRecorderProposals = ({
           getSpaceId(request),
           request
         );
+        return true;
+      } catch (error) {
+        if (error instanceof ProposalConflictError || error instanceof ProposalNotFoundError) {
+          return false;
+        }
+        throw error;
+      }
+    },
+
+    // Exactly the id the model was shown, like `revise`: a revision a person wrote meanwhile is
+    // work the model never judged obsolete, and `retire()` refuses the superseded id.
+    retire: async ({ request, proposalId }) => {
+      await proposals.getProposalPrivileges().assertCanManage(request);
+      try {
+        await proposals.getProposalsService().retire(proposalId, getSpaceId(request));
         return true;
       } catch (error) {
         if (error instanceof ProposalConflictError || error instanceof ProposalNotFoundError) {

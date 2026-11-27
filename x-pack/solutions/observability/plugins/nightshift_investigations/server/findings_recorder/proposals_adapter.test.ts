@@ -46,6 +46,7 @@ const setup = ({
       : { proposals: [pendingRollback, appliedSecrets], total: 2 }
   );
   const revise = jest.fn().mockResolvedValue({ proposalId: 'p-rev-2', revision: 2 });
+  const retire = jest.fn().mockResolvedValue({ id: 'p-shown', status: 'superseded' });
   const listActions = jest.fn().mockResolvedValue({
     actions: Array.from({ length: 25 }, (_, i) => ({
       workflowId: `wf-${i}`,
@@ -62,14 +63,23 @@ const setup = ({
   });
   const adapter = createRecorderProposals({
     proposals: {
-      getProposalsService: () => ({ list, revise }),
+      getProposalsService: () => ({ list, revise, retire }),
       getProposalPrivileges: () => ({ assertCanRead, assertCanManage }),
       createProposal,
       listActions,
     } as never,
     getSpaceId: () => 'space-a',
   });
-  return { adapter, list, revise, createProposal, assertCanRead, assertCanManage, listActions };
+  return {
+    adapter,
+    list,
+    revise,
+    retire,
+    createProposal,
+    assertCanRead,
+    assertCanManage,
+    listActions,
+  };
 };
 
 describe('createRecorderProposals', () => {
@@ -143,6 +153,22 @@ describe('createRecorderProposals', () => {
       actionInput: { service: 'orders' },
       expiresAt: '2026-11-24T00:00:00.000Z',
       gateReleasedAt: '2026-11-23T00:00:00.000Z',
+    });
+  });
+
+  it('marks only a gateless proposal as retirable, so an older one with no gate stays gated', async () => {
+    const { adapter, list } = setup();
+    const gateless = { ...pendingRollback, id: 'p-gateless', gate: 'none' };
+    const workflow = { ...pendingRollback, id: 'p-workflow', gate: 'workflow' };
+    const legacy = { ...pendingRollback, id: 'p-legacy' };
+    list.mockResolvedValue({ proposals: [gateless, workflow, legacy], total: 3 });
+
+    const listed = await adapter.list({ request, conversationId: 'c1' });
+
+    expect(Object.fromEntries(listed.map(({ id, retirable }) => [id, retirable]))).toEqual({
+      'p-gateless': true,
+      'p-workflow': undefined,
+      'p-legacy': undefined,
     });
   });
 
@@ -245,6 +271,37 @@ describe('createRecorderProposals', () => {
     await expect(adapter.revise({ request, proposalId: 'p-1', proposal })).rejects.toThrow(
       'actionInput does not satisfy action workflow'
     );
+  });
+
+  it('retires exactly the id it was given, after checking manage privileges', async () => {
+    const { adapter, assertCanManage, retire } = setup();
+
+    await expect(adapter.retire({ request, proposalId: 'p-shown' })).resolves.toBe(true);
+
+    expect(assertCanManage).toHaveBeenCalledWith(request);
+    expect(retire).toHaveBeenCalledWith('p-shown', 'space-a');
+  });
+
+  it('resolves false from retire when the proposal was revised, decided, gated or removed', async () => {
+    const { adapter, retire } = setup();
+
+    retire.mockRejectedValueOnce(new ProposalConflictError('already superseded'));
+    await expect(adapter.retire({ request, proposalId: 'p-1' })).resolves.toBe(false);
+
+    retire.mockRejectedValueOnce(new ProposalNotFoundError('gone'));
+    await expect(adapter.retire({ request, proposalId: 'p-1' })).resolves.toBe(false);
+
+    retire.mockRejectedValueOnce(new Error('cluster unavailable'));
+    await expect(adapter.retire({ request, proposalId: 'p-1' })).rejects.toThrow(
+      'cluster unavailable'
+    );
+  });
+
+  it('does not retire for a user who may not manage proposals', async () => {
+    const { adapter, retire } = setup({ canManage: false });
+
+    await expect(adapter.retire({ request, proposalId: 'p-1' })).rejects.toThrow('Forbidden');
+    expect(retire).not.toHaveBeenCalled();
   });
 
   it("lists only the space's own action workflows, capped for the prompt", async () => {

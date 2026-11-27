@@ -6,6 +6,7 @@
  */
 
 import { createHash } from 'node:crypto';
+import { uniqBy } from 'lodash';
 import { z, lazySchema } from '@kbn/zod/v4';
 import {
   EVIDENCE_CHART_TYPES,
@@ -115,6 +116,8 @@ export const findingsOutputSchema = lazySchema(() => {
         })
       )
       .optional(),
+    // Open proposals to retire with no replacement. Only the final pass records them.
+    retire_proposals: z.array(z.string()).nullish(),
     hypotheses: z.array(hypothesisSchema),
   });
 });
@@ -224,9 +227,11 @@ export interface RecordedProposal {
 /** A parsed record with its evidence trimmed to what the stores accept. */
 export type FindingsRecord = Omit<
   FindingsOutput,
-  'impact_evidence' | 'impact_entities' | 'hypotheses' | 'proposals'
+  'impact_evidence' | 'impact_entities' | 'hypotheses' | 'proposals' | 'retire_proposals'
 > & {
   proposals?: RecordedProposal[];
+  /** Handles such as `P1` of open proposals to retire with no replacement, deduplicated. */
+  retire_proposals?: string[];
   /** `null` retracts the stored evidence. */
   impact_evidence?: InvestigationEvidence | null;
   impact_entities?: Array<{ name: string; type?: string; evidence?: InvestigationEvidence }>;
@@ -242,10 +247,17 @@ export const limitFindings = (output: FindingsOutput): FindingsRecord => {
     impact_evidence: rawImpactEvidence,
     impact_entities: rawEntities,
     proposals: rawProposals,
+    retire_proposals: rawRetire,
     hypotheses: rawHypotheses,
     ...rest
   } = output;
   const impactEvidence = rawImpactEvidence ? limitEvidence(rawImpactEvidence) : rawImpactEvidence;
+  const retire = rawRetire
+    ? uniqBy(
+        rawRetire.map((ref) => truncate(ref.trim(), MAX_ENTITY_ID_LENGTH)).filter(Boolean),
+        (ref) => ref.toLowerCase()
+      ).slice(0, MAX_OPEN_PROPOSALS)
+    : undefined;
   return {
     ...rest,
     impact_evidence: impactEvidence,
@@ -304,6 +316,7 @@ export const limitFindings = (output: FindingsOutput): FindingsRecord => {
             ),
         }
       : {}),
+    ...(retire ? { retire_proposals: retire } : {}),
     hypotheses: rawHypotheses.slice(0, MAX_HYPOTHESES).map(({ evidence, ...hypothesis }) => {
       const kept = (evidence ?? [])
         .map(limitEvidence)
@@ -492,6 +505,11 @@ export const FINDINGS_JSON_SCHEMA = {
         },
         required: ['title', 'comment'],
       },
+    },
+    retire_proposals: {
+      ...orNull({ type: 'array', items: { type: 'string' } }),
+      description:
+        'IDs of open proposals (such as P1) that are now obsolete with no replacement: a check this round already carried out or whose question is settled, an action for a hypothesis this round ruled out, or the second of two overlapping open proposals merged into one by superseding the other. Never one that still needs to be carried out, never one marked cannot be retired, and never a closed one. Omit when none are obsolete.',
     },
     hypotheses: {
       type: 'array',
