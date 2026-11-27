@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { FileUploadStartDependencies } from '../../kibana_context';
-import { STATUS } from '../../../../file_upload_manager';
+import { FileUploadManager, STATUS } from '../../../../file_upload_manager';
 import { useFileUploadContext } from '../../../use_file_upload';
 import { FileUploadPanel } from './file_upload_panel';
 
@@ -98,6 +98,21 @@ describe('FileUploadPanel', () => {
       'Data has already been uploaded to the index sales.'
     );
     expect(screen.queryByTestId('mockIndexInput')).not.toBeInTheDocument();
+  });
+
+  it('adds a semantic_text field using ELSER for Tika files', () => {
+    mockContext(STATUS.NOT_STARTED);
+    renderPanel();
+
+    expect(FileUploadManager).toHaveBeenCalledWith(
+      expect.anything(),
+      '.elser-2-elasticsearch',
+      true,
+      true,
+      null,
+      undefined,
+      'agent-builder'
+    );
   });
 
   it('pre-fills the suggested index name and shows Import under it', () => {

@@ -25,6 +25,9 @@ import { UploadImage } from '../upload_image';
 import { OverallUploadStatus } from '../overall_upload_status';
 import { ImportErrors } from '../import_errors';
 
+/** Inference endpoint used to add a semantic_text field when uploading Tika files (PDF, Word, etc.). */
+const SEMANTIC_TEXT_INFERENCE_ID = '.elser-2-elasticsearch';
+
 export interface FileUploadPanelProps {
   dependencies: FileUploadStartDependencies;
   /** Index the user already uploaded into, when the panel is reopened after an upload. */
@@ -154,7 +157,7 @@ const FileUploadPanelContents: FC<PanelContentsProps> = ({
           notifications,
           capabilities: application.capabilities,
         },
-        null,
+        SEMANTIC_TEXT_INFERENCE_ID,
         true,
         true,
         null,
