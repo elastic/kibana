@@ -12,5 +12,8 @@ export {
   SavedObjectsClient,
   SavedObjectsClientProvider,
   PointInTimeFinder,
+  AGGREGATION_CONTAINER_KEYS,
+  FIELD_PATH_VALUE_KEYS,
+  FIELD_PATH_MAP_KEYS,
 } from './src';
 export type { ISavedObjectsClientProvider } from './src';

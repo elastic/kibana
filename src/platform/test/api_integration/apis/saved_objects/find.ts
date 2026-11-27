@@ -303,6 +303,36 @@ export default function ({ getService }: FtrProviderContext) {
               statusCode: 400,
             });
           }));
+
+      it('should return a 400 when using a top_hits aggregation', async () =>
+        await supertest
+          .get(
+            `/s/${SPACE_ID}/api/saved_objects/_find?type=visualization&per_page=0&aggs=${encodeURIComponent(
+              JSON.stringify({ hits: { top_hits: { size: 1 } } })
+            )}`
+          )
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .expect(400)
+          .then((resp) => {
+            expect(resp.body.message).to.be(
+              'Invalid aggregation: top_hits aggregations are not supported by this API'
+            );
+          }));
+
+      it('should return a 400 when aggregating on the namespaces field', async () =>
+        await supertest
+          .get(
+            `/s/${SPACE_ID}/api/saved_objects/_find?type=visualization&per_page=0&aggs=${encodeURIComponent(
+              JSON.stringify({ spaces: { terms: { field: 'visualization.namespaces' } } })
+            )}`
+          )
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .expect(400)
+          .then((resp) => {
+            expect(resp.body.message).to.be(
+              'Invalid aggregation: aggregating on [visualization.namespaces] is not supported by this API'
+            );
+          }));
     });
 
     describe('`has_reference` and `has_reference_operator` parameters', () => {

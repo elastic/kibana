@@ -470,6 +470,63 @@ describe('GET /api/saved_objects/_find', () => {
     );
   });
 
+  it('accepts the query parameter aggs', async () => {
+    const aggs = { type_count: { max: { field: 'foo.attributes.version' } } };
+    await supertest(server.listener)
+      .get(`/api/saved_objects/_find?type=foo&aggs=${encodeURIComponent(JSON.stringify(aggs))}`)
+      .set('x-elastic-internal-origin', 'kibana')
+      .expect(200);
+
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.find.mock.calls[0][0]).toEqual(expect.objectContaining({ aggs }));
+  });
+
+  it('returns with status 400 when aggs contains a top_hits aggregation', async () => {
+    const aggs = { hits: { top_hits: { size: 1 } } };
+    const result = await supertest(server.listener)
+      .get(`/api/saved_objects/_find?type=foo&aggs=${encodeURIComponent(JSON.stringify(aggs))}`)
+      .set('x-elastic-internal-origin', 'kibana')
+      .expect(400);
+
+    expect(result.body.message).toBe(
+      'Invalid aggregation: top_hits aggregations are not supported by this API'
+    );
+    expect(savedObjectsClient.find).not.toHaveBeenCalled();
+  });
+
+  it('returns with status 400 when aggs contains a nested top_hits aggregation', async () => {
+    const aggs = {
+      by_title: {
+        terms: { field: 'foo.attributes.title' },
+        aggregations: {
+          latest: { max: { field: 'foo.updated_at' }, aggs: { hits: { top_hits: {} } } },
+        },
+      },
+    };
+    const result = await supertest(server.listener)
+      .get(`/api/saved_objects/_find?type=foo&aggs=${encodeURIComponent(JSON.stringify(aggs))}`)
+      .set('x-elastic-internal-origin', 'kibana')
+      .expect(400);
+
+    expect(result.body.message).toBe(
+      'Invalid aggregation: top_hits aggregations are not supported by this API'
+    );
+    expect(savedObjectsClient.find).not.toHaveBeenCalled();
+  });
+
+  it('returns with status 400 when aggs aggregates on the namespaces field', async () => {
+    const aggs = { spaces: { terms: { field: 'foo.namespaces' } } };
+    const result = await supertest(server.listener)
+      .get(`/api/saved_objects/_find?type=foo&aggs=${encodeURIComponent(JSON.stringify(aggs))}`)
+      .set('x-elastic-internal-origin', 'kibana')
+      .expect(400);
+
+    expect(result.body.message).toBe(
+      'Invalid aggregation: aggregating on [foo.namespaces] is not supported by this API'
+    );
+    expect(savedObjectsClient.find).not.toHaveBeenCalled();
+  });
+
   it('logs a warning message when called', async () => {
     await supertest(server.listener)
       .get('/api/saved_objects/_find?type=foo&type=bar')
