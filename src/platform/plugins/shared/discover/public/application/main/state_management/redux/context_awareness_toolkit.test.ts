@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { dataViewMockWithTimeField, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { DataSourceType } from '../../../../../common/data_sources';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
@@ -86,7 +87,7 @@ describe('createContextAwarenessToolkit', () => {
 
   it('maps setExpandedDoc options.initialTabId to initialDocViewerTabId', async () => {
     const { internalState, profileStateRegistry, tabId } = await setup();
-    const setExpandedDocSpy = jest.spyOn(internalStateActions, 'setExpandedDoc');
+    const setExpandedDocSpy = jest.spyOn(internalStateActions, 'setExpandedDocExtPointAction');
 
     createContextAwarenessToolkit({
       internalState,
@@ -101,6 +102,23 @@ describe('createContextAwarenessToolkit', () => {
       expandedDoc: undefined,
       initialDocViewerTabId: 'overview',
     });
+  });
+
+  it('resolves the document profile of a record handed to setExpandedDoc', async () => {
+    const { internalState, profileStateRegistry, tabId } = await setup();
+    const record = buildDataTableRecord(esHitsMock[0], dataViewMockWithTimeField);
+
+    createContextAwarenessToolkit({
+      internalState,
+      profileStateRegistry,
+      tabId,
+    }).actions.setExpandedDoc?.(record);
+
+    // A profile's record is not one Discover fetched: it gets the document context here,
+    // so the flyout can pick its document profile.
+    const { expandedDoc } = selectTab(internalState.getState(), tabId);
+    expect(expandedDoc && 'context' in expandedDoc).toBe(true);
+    expect(expandedDoc?.raw).toBe(record.raw);
   });
 
   it('dispatches openInNewTab through openInNewTabExtPointAction', async () => {

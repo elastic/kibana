@@ -165,7 +165,9 @@ function transformToWorkflowExecutionListModel(
   includeNamedExecution: boolean
 ): WorkflowExecutionListDto {
   const total =
-    typeof response.hits.total === 'number' ? response.hits.total : response.hits.total?.value ?? 0;
+    typeof response.hits.total === 'number'
+      ? response.hits.total
+      : (response.hits.total?.value ?? 0);
 
   const results = response.hits.hits.reduce<WorkflowExecutionListDto['results']>((acc, hit) => {
     const source = hit._source;
@@ -204,7 +206,7 @@ function transformToWorkflowExecutionListModel(
     results.length >= size && lastHit?.sort != null ? [...lastHit.sort] : undefined;
 
   const hasNamedExecution = includeNamedExecution
-    ? readHasNamedExecution(response) ?? false
+    ? (readHasNamedExecution(response) ?? false)
     : undefined;
 
   return {

@@ -16,14 +16,15 @@ import type {
 const rewriteBodyRequest: RewriteResponseCase<
   Pick<
     ActionConnectorWithoutId,
-    'actionTypeId' | 'name' | 'config' | 'secrets' | 'isInboundEventsEnabled'
+    'actionTypeId' | 'name' | 'config' | 'secrets' | 'isInboundEventsEnabled' | 'specVersion'
   >
-> = ({ actionTypeId, isInboundEventsEnabled, ...res }) => ({
+> = ({ actionTypeId, isInboundEventsEnabled, specVersion, ...res }) => ({
   ...res,
   connector_type_id: actionTypeId,
   ...(isInboundEventsEnabled !== undefined
     ? { is_inbound_events_enabled: isInboundEventsEnabled }
     : {}),
+  ...(specVersion !== undefined ? { spec_version: specVersion } : {}),
 });
 
 const rewriteBodyRes: RewriteRequestCase<
@@ -36,6 +37,7 @@ const rewriteBodyRes: RewriteRequestCase<
   is_system_action: isSystemAction,
   is_connector_type_deprecated: isConnectorTypeDeprecated,
   auth_mode: authMode,
+  spec_version: specVersion,
   is_inbound_events_enabled: isInboundEventsEnabled,
   ...res
 }) => ({
@@ -48,6 +50,7 @@ const rewriteBodyRes: RewriteRequestCase<
   isConnectorTypeDeprecated,
   ...(authMode !== undefined ? { authMode } : {}),
   ...(isInboundEventsEnabled !== undefined ? { isInboundEventsEnabled } : {}),
+  ...(specVersion !== undefined ? { specVersion } : {}),
 });
 
 export async function createActionConnector({
@@ -58,7 +61,7 @@ export async function createActionConnector({
   http: HttpSetup;
   connector: Pick<
     ActionConnectorWithoutId,
-    'actionTypeId' | 'name' | 'config' | 'secrets' | 'isInboundEventsEnabled'
+    'actionTypeId' | 'name' | 'config' | 'secrets' | 'isInboundEventsEnabled' | 'specVersion'
   >;
   id?: string;
 }): Promise<ActionConnector> {

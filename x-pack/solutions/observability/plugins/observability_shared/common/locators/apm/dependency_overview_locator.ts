@@ -11,9 +11,7 @@ import { DEPENDENCY_OVERVIEW_LOCATOR_ID } from '@kbn/deeplinks-observability/loc
 
 export type DependencyOverviewLocator = LocatorPublic<DependencyOverviewParams>;
 
-export class DependencyOverviewLocatorDefinition
-  implements LocatorDefinition<DependencyOverviewParams>
-{
+export class DependencyOverviewLocatorDefinition implements LocatorDefinition<DependencyOverviewParams> {
   public readonly id = DEPENDENCY_OVERVIEW_LOCATOR_ID;
 
   public readonly getLocation = async ({

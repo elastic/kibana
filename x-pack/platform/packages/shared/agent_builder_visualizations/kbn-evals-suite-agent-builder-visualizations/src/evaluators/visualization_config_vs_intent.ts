@@ -54,7 +54,7 @@ const mergeReports = (target: MatchReport, source: MatchReport): void => {
  */
 export function createVisualizationConfigVsIntentEvaluator<
   TExample extends Example = Example,
-  TTaskOutput extends TaskOutput = TaskOutput
+  TTaskOutput extends TaskOutput = TaskOutput,
 >(config: {
   visualizationExtractor: (output: TTaskOutput) => ExtractedVisualization[];
   expectedConfigExtractor: (expected: TExample['output']) => VisualizationGoldConfig | undefined;

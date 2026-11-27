@@ -73,17 +73,13 @@ describe('EndpointActionsClient', () => {
     );
 
     // @ts-expect-error mocking this for testing purposes
-    classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDump =
-      true;
+    classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDump = true;
     // @ts-expect-error mocking this for testing purposes
-    classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointRunScript =
-      true;
+    classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointRunScript = true;
     // @ts-expect-error mocking this for testing purposes
-    classConstructorOptions.endpointService.experimentalFeatures.responseActionsScriptLibraryManagement =
-      true;
+    classConstructorOptions.endpointService.experimentalFeatures.responseActionsScriptLibraryManagement = true;
     // @ts-expect-error mocking this for testing purposes
-    classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointCancel =
-      true;
+    classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointCancel = true;
   });
 
   it('should validate endpoint ids and log those that are invalid', async () => {
@@ -770,6 +766,206 @@ describe('EndpointActionsClient', () => {
       });
     });
 
+    describe('when `export` parameter is set', () => {
+      it('should throw error when feature flag is disabled', async () => {
+        await expect(
+          endpointActionsClient.getFile(
+            responseActionsClientMock.createGetFileOptions({
+              ...getCommonResponseActionOptions(),
+              parameters: { path: 'C:\\file.txt', export: 'provider-1' },
+            })
+          )
+        ).rejects.toMatchObject({
+          message: 'get-file `export` parameter is not enabled',
+          statusCode: 400,
+        });
+      });
+
+      describe('and the feature flag is enabled', () => {
+        beforeEach(() => {
+          Object.assign(classConstructorOptions.endpointService.experimentalFeatures, {
+            responseActionsEndpointFileExport: true,
+          });
+        });
+
+        it('should throw error when endpoint does not support `file_export` capability', async () => {
+          const generator = new EndpointMetadataGenerator('seed');
+
+          applyEsClientSearchMock({
+            esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+            index: metadataCurrentIndexPattern,
+            response: generator.toEsSearchResponse([
+              // `capabilities` overrides are merged into the generated ones (not replaced), so pin
+              // a version (< 9.7.0) whose generated capabilities include neither `file_export` nor
+              // `get_file_force`
+              generator.toEsSearchHit(
+                generator.generate({ agent: { version: '9.6.0' }, Endpoint: { capabilities: [] } })
+              ),
+            ]),
+          });
+
+          await expect(
+            endpointActionsClient.getFile(
+              responseActionsClientMock.createGetFileOptions({
+                ...getCommonResponseActionOptions(),
+                parameters: { path: 'C:\\file.txt', export: 'provider-1' },
+              })
+            )
+          ).rejects.toMatchObject({
+            message: expect.stringContaining(
+              'The following agent IDs do not support exporting files to external storage'
+            ),
+            statusCode: 400,
+          });
+        });
+
+        it('should succeed and keep `export` in the Fleet action and the action request when endpoint supports the `file_export` capability', async () => {
+          const generator = new EndpointMetadataGenerator('seed');
+
+          applyEsClientSearchMock({
+            esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+            index: metadataCurrentIndexPattern,
+            response: generator.toEsSearchResponse([
+              generator.toEsSearchHit(
+                generator.generate({ Endpoint: { capabilities: ['file_export'] } })
+              ),
+            ]),
+          });
+
+          const parameters = { path: 'C:\\file.txt', export: 'provider-1' };
+
+          await expect(
+            endpointActionsClient.getFile(
+              responseActionsClientMock.createGetFileOptions({
+                ...getCommonResponseActionOptions(),
+                parameters,
+              })
+            )
+          ).resolves.toBeDefined();
+
+          // Dropping `export` would silently turn the export into a normal upload to Fleet
+          expect(
+            (await classConstructorOptions.endpointService.getFleetActionsClient())
+              .create as jest.Mock
+          ).toHaveBeenCalledWith(
+            expect.objectContaining({ data: expect.objectContaining({ parameters }) })
+          );
+          expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+            expect.objectContaining({
+              index: ENDPOINT_ACTIONS_INDEX,
+              document: expect.objectContaining({
+                EndpointActions: expect.objectContaining({
+                  data: expect.objectContaining({ parameters }),
+                }),
+              }),
+            }),
+            expect.anything()
+          );
+        });
+
+        describe('and `force` is also set to `true`', () => {
+          const getFileWithForceAndExport = () =>
+            endpointActionsClient.getFile(
+              responseActionsClientMock.createGetFileOptions({
+                ...getCommonResponseActionOptions(),
+                parameters: { path: 'C:\\locked.dat', force: true, export: 'provider-1' },
+              })
+            );
+
+          it('should report only the `export` error when only `get_file_force` is supported', async () => {
+            const generator = new EndpointMetadataGenerator('seed');
+
+            applyEsClientSearchMock({
+              esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+              index: metadataCurrentIndexPattern,
+              response: generator.toEsSearchResponse([
+                generator.toEsSearchHit(
+                  generator.generate({
+                    agent: { version: '9.6.0' },
+                    Endpoint: { capabilities: ['get_file_force'] },
+                  })
+                ),
+              ]),
+            });
+
+            const error = await getFileWithForceAndExport().catch((e) => e);
+
+            expect(error).toMatchObject({ statusCode: 400 });
+            expect(error.message).toContain(
+              'The following agent IDs do not support exporting files to external storage'
+            );
+            expect(error.message).not.toContain('do not support the get-file `force` parameter');
+          });
+
+          it('should report only the `force` error when only `file_export` is supported', async () => {
+            const generator = new EndpointMetadataGenerator('seed');
+
+            applyEsClientSearchMock({
+              esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+              index: metadataCurrentIndexPattern,
+              response: generator.toEsSearchResponse([
+                generator.toEsSearchHit(
+                  generator.generate({
+                    agent: { version: '9.6.0' },
+                    Endpoint: { capabilities: ['file_export'] },
+                  })
+                ),
+              ]),
+            });
+
+            const error = await getFileWithForceAndExport().catch((e) => e);
+
+            expect(error).toMatchObject({ statusCode: 400 });
+            expect(error.message).toContain('do not support the get-file `force` parameter');
+            expect(error.message).not.toContain(
+              'do not support exporting files to external storage'
+            );
+          });
+
+          it('should report both errors when neither capability is supported', async () => {
+            const generator = new EndpointMetadataGenerator('seed');
+
+            applyEsClientSearchMock({
+              esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+              index: metadataCurrentIndexPattern,
+              response: generator.toEsSearchResponse([
+                generator.toEsSearchHit(
+                  generator.generate({
+                    agent: { version: '9.6.0' },
+                    Endpoint: { capabilities: [] },
+                  })
+                ),
+              ]),
+            });
+
+            const error = await getFileWithForceAndExport().catch((e) => e);
+
+            expect(error).toMatchObject({ statusCode: 400 });
+            expect(error.message).toContain('do not support the get-file `force` parameter');
+            expect(error.message).toContain('do not support exporting files to external storage');
+          });
+
+          it('should succeed when both capabilities are supported', async () => {
+            const generator = new EndpointMetadataGenerator('seed');
+
+            applyEsClientSearchMock({
+              esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+              index: metadataCurrentIndexPattern,
+              response: generator.toEsSearchResponse([
+                generator.toEsSearchHit(
+                  generator.generate({
+                    Endpoint: { capabilities: ['get_file_force', 'file_export'] },
+                  })
+                ),
+              ]),
+            });
+
+            await expect(getFileWithForceAndExport()).resolves.toBeDefined();
+          });
+        });
+      });
+    });
+
     it('should succeed without checking capability when `force` is not set', async () => {
       await expect(
         endpointActionsClient.getFile(
@@ -874,14 +1070,12 @@ describe('EndpointActionsClient', () => {
     describe('when `kill_descendants` parameter is set to `true`', () => {
       beforeEach(() => {
         // @ts-expect-error mocking this for testing purposes
-        classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointKillProcessDescendants =
-          true;
+        classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointKillProcessDescendants = true;
       });
 
       it('should throw error when feature flag is disabled', async () => {
         // @ts-expect-error mocking this for testing purposes
-        classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointKillProcessDescendants =
-          false;
+        classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointKillProcessDescendants = false;
 
         await expect(
           endpointActionsClient.killProcess(
@@ -944,8 +1138,7 @@ describe('EndpointActionsClient', () => {
 
       it('should succeed without checking capability when `kill_descendants` is false', async () => {
         // @ts-expect-error mocking this for testing purposes
-        classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointKillProcessDescendants =
-          false;
+        classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointKillProcessDescendants = false;
 
         await expect(
           endpointActionsClient.killProcess(
@@ -962,8 +1155,7 @@ describe('EndpointActionsClient', () => {
   describe('#memoryDump()', () => {
     it('should error when feature flag is false', async () => {
       // @ts-expect-error mocking this for testing purposes
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDump =
-        false;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDump = false;
 
       await expect(
         endpointActionsClient.memoryDump(
@@ -992,8 +1184,7 @@ describe('EndpointActionsClient', () => {
 
         if (memoryDumpParameters.type === 'raw') {
           // @ts-expect-error update of readonly property is ok here
-          classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw =
-            true;
+          classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw = true;
         }
 
         await expect(
@@ -1011,8 +1202,7 @@ describe('EndpointActionsClient', () => {
 
     it('should validate that agent supports memory dump of raw', async () => {
       // @ts-expect-error mocking this for testing purposes
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw =
-        true;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw = true;
 
       const generator = new EndpointMetadataGenerator('seed');
 
@@ -1038,8 +1228,7 @@ describe('EndpointActionsClient', () => {
 
     it('should error when `raw` type is used but the feature flag is disabled', async () => {
       // @ts-expect-error mocking this for testing purposes
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw =
-        false;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw = false;
 
       await expect(
         endpointActionsClient.memoryDump(
@@ -1053,8 +1242,7 @@ describe('EndpointActionsClient', () => {
 
     it('should process `raw` memory dump when the agent supports it', async () => {
       // @ts-expect-error mocking this for testing purposes
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw =
-        true;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw = true;
 
       const generator = new EndpointMetadataGenerator('seed');
 
@@ -1089,6 +1277,106 @@ describe('EndpointActionsClient', () => {
         })
       );
     });
+
+    describe('when `export` parameter is set', () => {
+      it('should throw error when feature flag is disabled', async () => {
+        await expect(
+          endpointActionsClient.memoryDump(
+            responseActionsClientMock.createMemoryDumpActionOption({
+              ...getCommonResponseActionOptions(),
+              parameters: { type: 'process', pid: 123, export: 'provider-1' },
+            })
+          )
+        ).rejects.toMatchObject({
+          message: 'memory-dump `export` parameter is not enabled',
+          statusCode: 400,
+        });
+      });
+
+      describe('and the feature flag is enabled', () => {
+        beforeEach(() => {
+          Object.assign(classConstructorOptions.endpointService.experimentalFeatures, {
+            responseActionsEndpointFileExport: true,
+          });
+        });
+
+        it('should throw the `export` capability error when endpoint supports `memdump_process` but not `file_export`', async () => {
+          const generator = new EndpointMetadataGenerator('seed');
+
+          applyEsClientSearchMock({
+            esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+            index: metadataCurrentIndexPattern,
+            response: generator.toEsSearchResponse([
+              generator.toEsSearchHit(
+                generator.generate({
+                  agent: { version: '9.6.0' },
+                  Endpoint: { capabilities: ['memdump_process'] },
+                })
+              ),
+            ]),
+          });
+
+          await expect(
+            endpointActionsClient.memoryDump(
+              responseActionsClientMock.createMemoryDumpActionOption({
+                ...getCommonResponseActionOptions(),
+                parameters: { type: 'process', pid: 123, export: 'provider-1' },
+              })
+            )
+          ).rejects.toMatchObject({
+            message: expect.stringContaining(
+              'The following agent IDs do not support exporting files to external storage'
+            ),
+            statusCode: 400,
+          });
+        });
+
+        it('should succeed and keep `export` in the Fleet action and the action request when endpoint supports both `memdump_process` and `file_export`', async () => {
+          const generator = new EndpointMetadataGenerator('seed');
+
+          applyEsClientSearchMock({
+            esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+            index: metadataCurrentIndexPattern,
+            response: generator.toEsSearchResponse([
+              generator.toEsSearchHit(
+                generator.generate({
+                  Endpoint: { capabilities: ['memdump_process', 'file_export'] },
+                })
+              ),
+            ]),
+          });
+
+          const parameters = { type: 'process' as const, pid: 123, export: 'provider-1' };
+
+          await expect(
+            endpointActionsClient.memoryDump(
+              responseActionsClientMock.createMemoryDumpActionOption({
+                ...getCommonResponseActionOptions(),
+                parameters,
+              })
+            )
+          ).resolves.toBeDefined();
+
+          expect(
+            (await classConstructorOptions.endpointService.getFleetActionsClient())
+              .create as jest.Mock
+          ).toHaveBeenCalledWith(
+            expect.objectContaining({ data: expect.objectContaining({ parameters }) })
+          );
+          expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+            expect.objectContaining({
+              index: ENDPOINT_ACTIONS_INDEX,
+              document: expect.objectContaining({
+                EndpointActions: expect.objectContaining({
+                  data: expect.objectContaining({ parameters }),
+                }),
+              }),
+            }),
+            expect.anything()
+          );
+        });
+      });
+    });
   });
 
   describe('#cancel()', () => {
@@ -1109,8 +1397,7 @@ describe('EndpointActionsClient', () => {
 
     it('should error when feature flag is false', async () => {
       // @ts-expect-error mocking this for testing purposes
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointCancel =
-        false;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointCancel = false;
 
       await expect(
         endpointActionsClient.cancel(
@@ -1197,8 +1484,7 @@ describe('EndpointActionsClient', () => {
   describe('#runscript()', () => {
     it('should error if feature flag is disabled', async () => {
       // @ts-expect-error mocking this for testing purposes
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointRunScript =
-        false;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointRunScript = false;
 
       await expect(
         endpointActionsClient.runscript(endpointActionClientMock.createRunScriptOptions())

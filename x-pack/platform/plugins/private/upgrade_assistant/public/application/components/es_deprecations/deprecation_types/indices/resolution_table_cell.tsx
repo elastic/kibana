@@ -258,8 +258,8 @@ export const ReindexResolutionCell: React.FunctionComponent<{
     deprecation.correctiveAction?.type === 'unfreeze'
       ? 'unfreeze'
       : deprecation.correctiveAction?.type === 'reindex'
-      ? 'readOnly'
-      : 'update';
+        ? 'readOnly'
+        : 'update';
 
   if (reindexState.loadingState === LoadingState.Loading) {
     return (

@@ -333,12 +333,15 @@ const fetchAndCompareCustomAssets = async (
 
     const componentTemplatesByName = (
       installedComponentTemplates?.component_templates || []
-    ).reduce((acc, componentTemplate) => {
-      if (componentTemplate?.name) {
-        acc[componentTemplate.name] = componentTemplate.component_template?.template;
-      }
-      return acc;
-    }, {} as Record<string, ClusterComponentTemplateSummary>);
+    ).reduce(
+      (acc, componentTemplate) => {
+        if (componentTemplate?.name) {
+          acc[componentTemplate.name] = componentTemplate.component_template?.template;
+        }
+        return acc;
+      },
+      {} as Record<string, ClusterComponentTemplateSummary>
+    );
     const componentTemplates = installedComponentTemplates?.component_templates
       ? componentTemplatesByName
       : undefined;

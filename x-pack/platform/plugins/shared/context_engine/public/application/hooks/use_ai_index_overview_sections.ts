@@ -18,8 +18,6 @@ export interface AiIndexOverviewSections {
   hideEditControls: boolean;
   showOnboardingPanel: boolean;
   showAutomationsPanel: boolean;
-  showSignalsSection: boolean;
-  showSignalsPanel: boolean;
 }
 
 /** Progressive disclosure for Overview tab sections on the AI index detail page. */
@@ -38,7 +36,5 @@ export const useAiIndexOverviewSections = ({
     showOnboardingPanel:
       !isManaged && !isLoading && !isKnowledgeIndicatorsLoading && !hasKnowledgeIndicators,
     showAutomationsPanel: isManaged || isLoading || hasSources || hasAutomations,
-    showSignalsSection: false,
-    showSignalsPanel: false,
   };
 };

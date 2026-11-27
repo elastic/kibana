@@ -30,23 +30,16 @@ import type {
   AnomalySummaryResponse,
   AssetCriticalityRecord,
   ConfigureRiskEngineSavedObjectRequestBodyInput,
-  CreateEntitySourceResponse,
-  CreatePrivilegesImportIndexResponse,
   CreateWatchlistRequestBodyInput,
   CreateWatchlistResponse,
   DisableRiskEngineResponse,
   EnableRiskEngineResponse,
   EntityAnalyticsPrivileges,
   FindAssetCriticalityRecordsResponse,
-  InitMonitoringEngineResponse,
   InitRiskEngineResponse,
   InternalUploadAssetCriticalityV2CsvResponse,
   EntityType,
   ListEntitiesResponse,
-  ListEntitySourcesResponse,
-  PrivMonHealthResponse,
-  PrivMonPrivilegesResponse,
-  PrivmonBulkUploadUsersCSVResponse,
   ReadRiskEngineSettingsResponse,
   RiskEngineStatusResponse,
   RiskScoreHistoryEntry,
@@ -55,8 +48,6 @@ import type {
   RiskScoresEntityCalculationResponse,
   RiskScoresPreviewRequest,
   RiskScoresPreviewResponse,
-  SearchPrivilegesIndicesResponse,
-  UpdateEntitySourceResponse,
   UploadAssetCriticalityRecordsResponse,
 } from '../../../common/api/entity_analytics';
 import type { ListWatchlistsResponse } from '../../../common/api/entity_analytics/watchlists/management/list.gen';
@@ -82,15 +73,7 @@ import {
   ASSET_CRITICALITY_PUBLIC_LIST_URL,
   ASSET_CRITICALITY_PUBLIC_URL,
   ENTITY_STORE_INTERNAL_PRIVILEGES_URL,
-  getPrivmonMonitoringSourceByIdUrl,
   LIST_ENTITIES_URL,
-  MONITORING_ENGINE_INIT_URL,
-  MONITORING_ENTITY_LIST_SOURCES_URL,
-  MONITORING_ENTITY_SOURCE_URL,
-  MONITORING_USERS_CSV_UPLOAD_URL,
-  PRIVMON_HEALTH_URL,
-  PRIVMON_INDICES_URL,
-  PRIVMON_PRIVILEGE_CHECK_API,
   RISK_ENGINE_CLEANUP_URL,
   RISK_ENGINE_CONFIGURE_SO_URL,
   RISK_ENGINE_PRIVILEGES_URL,
@@ -136,11 +119,6 @@ export interface DeleteAssetCriticalityResponse {
   deleted: true;
 }
 
-/**
- * This hardcoded name was temporarily introduced for 9.1.0.
- * It is used to identify the only entity source that can be edited by the UI.
- */
-const ENTITY_SOURCE_NAME = 'User Monitored Indices';
 const ENTITY_STORE_V2_QUERY = { apiVersion: ENTITY_STORE_API_VERSIONS.internal.v2 } as const;
 
 const getMaintainerRouteWithId = (route: string, id: string): string =>
@@ -284,10 +262,10 @@ export const useEntityAnalyticsRoutes = () => {
       const riskEngineStatus = !riskScoreMaintainer
         ? 'NOT_INSTALLED'
         : riskScoreMaintainer.taskStatus === 'started'
-        ? 'ENABLED'
-        : riskScoreMaintainer.taskStatus === 'stopped'
-        ? 'DISABLED'
-        : 'NOT_INSTALLED';
+          ? 'ENABLED'
+          : riskScoreMaintainer.taskStatus === 'stopped'
+            ? 'DISABLED'
+            : 'NOT_INSTALLED';
       const runAt = riskScoreMaintainer?.nextRunAt;
 
       // The maintainer API doesn't expose the underlying TaskManager status directly,
@@ -408,68 +386,6 @@ export const useEntityAnalyticsRoutes = () => {
       http.fetch<EntityAnalyticsPrivileges>(ENTITY_STORE_ROUTES.internal.CHECK_PRIVILEGES, {
         version: ENTITY_STORE_API_VERSIONS.internal.v2,
         method: 'GET',
-      });
-
-    /**
-     * Search indices for privilege monitoring import
-     */
-    const searchPrivMonIndices = async (params: {
-      query: string | undefined;
-      signal?: AbortSignal;
-      context?: KibanaExecutionContext;
-    }) =>
-      http.fetch<SearchPrivilegesIndicesResponse>(PRIVMON_INDICES_URL, {
-        version: API_VERSIONS.public.v1,
-        method: 'GET',
-        query: {
-          searchQuery: params.query,
-        },
-        signal: params.signal,
-        context: params.context,
-      });
-
-    /**
-     * Create an index for privilege monitoring import
-     */
-    const createPrivMonImportIndex = async (params: {
-      name: string;
-      mode: 'standard' | 'lookup';
-      signal?: AbortSignal;
-    }) =>
-      http.fetch<CreatePrivilegesImportIndexResponse>(PRIVMON_INDICES_URL, {
-        version: API_VERSIONS.public.v1,
-        method: 'PUT',
-        body: JSON.stringify({
-          name: params.name,
-          mode: params.mode,
-        }),
-        signal: params.signal,
-      });
-    /**
-     * Register a data source for privilege monitoring engine
-     */
-    const registerPrivMonMonitoredIndices = async (indexPattern: string | undefined) =>
-      http.fetch<CreateEntitySourceResponse>(MONITORING_ENTITY_SOURCE_URL, {
-        version: API_VERSIONS.public.v1,
-        method: 'POST',
-        body: JSON.stringify({
-          type: 'index',
-          name: ENTITY_SOURCE_NAME,
-          indexPattern,
-        }),
-      });
-
-    /**
-     * Update a data source for privilege monitoring engine
-     */
-    const updatePrivMonMonitoredIndices = async (id: string, indexPattern: string | undefined) =>
-      http.fetch<UpdateEntitySourceResponse>(getPrivmonMonitoringSourceByIdUrl(id), {
-        version: API_VERSIONS.public.v1,
-        method: 'PUT',
-        body: JSON.stringify({
-          name: ENTITY_SOURCE_NAME,
-          indexPattern,
-        }),
       });
 
     /**
@@ -613,71 +529,6 @@ export const useEntityAnalyticsRoutes = () => {
         }
       );
     };
-
-    /**
-     * List all data source for privilege monitoring engine
-     */
-    const listPrivMonMonitoredIndices = async ({
-      signal,
-      context,
-    }: {
-      signal?: AbortSignal;
-      context?: KibanaExecutionContext;
-    }) =>
-      http.fetch<ListEntitySourcesResponse>(MONITORING_ENTITY_LIST_SOURCES_URL, {
-        version: API_VERSIONS.public.v1,
-        method: 'GET',
-        signal,
-        context,
-        query: {
-          type: 'index',
-          managed: false,
-          name: ENTITY_SOURCE_NAME,
-        },
-      });
-
-    const uploadPrivilegedUserMonitoringFile = async (
-      fileContent: string,
-      fileName: string,
-      context?: KibanaExecutionContext
-    ): Promise<PrivmonBulkUploadUsersCSVResponse> => {
-      const file = new File([new Blob([fileContent])], fileName, {
-        type: 'text/csv',
-      });
-      const body = new FormData();
-      body.append('file', file);
-
-      return http.fetch<PrivmonBulkUploadUsersCSVResponse>(MONITORING_USERS_CSV_UPLOAD_URL, {
-        version: API_VERSIONS.public.v1,
-        method: 'POST',
-        headers: {
-          'Content-Type': undefined, // Lets the browser set the appropriate content type
-        },
-        body,
-        context,
-      });
-    };
-
-    const initPrivilegedMonitoringEngine = (): Promise<InitMonitoringEngineResponse> =>
-      http.fetch<InitMonitoringEngineResponse>(MONITORING_ENGINE_INIT_URL, {
-        version: API_VERSIONS.public.v1,
-        method: 'POST',
-      });
-
-    const fetchPrivilegeMonitoringEngineStatus = (
-      context?: KibanaExecutionContext
-    ): Promise<PrivMonHealthResponse> =>
-      http.fetch<PrivMonHealthResponse>(PRIVMON_HEALTH_URL, {
-        version: API_VERSIONS.public.v1,
-        method: 'GET',
-        context,
-      });
-
-    const fetchPrivilegeMonitoringPrivileges = (): Promise<PrivMonPrivilegesResponse> =>
-      http.fetch<PrivMonPrivilegesResponse>(PRIVMON_PRIVILEGE_CHECK_API, {
-        version: API_VERSIONS.public.v1,
-        method: 'GET',
-      });
 
     const fetchWatchlistsPrivileges = (): Promise<EntityAnalyticsPrivileges> =>
       http.fetch<EntityAnalyticsPrivileges>(WATCHLISTS_PRIVILEGES_URL, {
@@ -1081,19 +932,11 @@ export const useEntityAnalyticsRoutes = () => {
       fetchAssetCriticalityPrivileges,
       fetchEntityStorePrivileges,
       fetchEntityStoreV2Privileges,
-      searchPrivMonIndices,
-      createPrivMonImportIndex,
       createAssetCriticality,
       deleteAssetCriticality,
       fetchAssetCriticality,
       fetchAssetCriticalityList,
       uploadAssetCriticalityFile,
-      uploadPrivilegedUserMonitoringFile,
-      initPrivilegedMonitoringEngine,
-      registerPrivMonMonitoredIndices,
-      updatePrivMonMonitoredIndices,
-      fetchPrivilegeMonitoringEngineStatus,
-      fetchPrivilegeMonitoringPrivileges,
       fetchWatchlistsPrivileges,
       createWatchlist,
       getWatchlist,
@@ -1111,7 +954,6 @@ export const useEntityAnalyticsRoutes = () => {
       fetchEntitiesList,
       fetchEntitiesListV2,
       updateSavedObjectConfiguration,
-      listPrivMonMonitoredIndices,
       fetchEntityDetailsHighlights,
       saveEntityAiSummary,
       fetchPersistedAiSummary,

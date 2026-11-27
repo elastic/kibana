@@ -12,7 +12,6 @@ import { simpleGit } from 'simple-git';
 import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
-import * as Eslint from './eslint';
 import * as Oxlint from './oxlint';
 import * as Stylelint from './stylelint';
 import { extname } from 'path';
@@ -161,13 +160,9 @@ class SemverRangesCheck extends PrecommitCheck {
   }
 }
 
-// oxlint and ESLint both autofix the same JS/TS files, so oxlint runs alone before the
-// parallel checks (matching the CI order in .buildkite/scripts/steps/lint.sh).
-const OXLINT_CHECK = new LinterCheck('oxlint', Oxlint);
-
 const PRECOMMIT_CHECKS = [
   new FileCasingCheck(),
-  new LinterCheck('ESLint', Eslint),
+  new LinterCheck('oxlint', Oxlint),
   new LinterCheck('StyleLint', Stylelint),
   new YamlLintCheck(),
   new SemverRangesCheck(),
@@ -204,11 +199,9 @@ run(
 
     log.verbose('Running pre-commit checks...');
     const options = { fix: flags.fix, stage: flags.stage };
-    const oxlintResult = await runTimed(OXLINT_CHECK, log, files, options);
-    const results = [
-      oxlintResult,
-      ...(await Promise.all(PRECOMMIT_CHECKS.map((check) => runTimed(check, log, files, options)))),
-    ];
+    const results = await Promise.all(
+      PRECOMMIT_CHECKS.map((check) => runTimed(check, log, files, options))
+    );
 
     const failedChecks = results.filter((result) => !result.succeeded);
 

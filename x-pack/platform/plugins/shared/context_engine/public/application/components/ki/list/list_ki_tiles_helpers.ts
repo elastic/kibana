@@ -54,18 +54,16 @@ export const buildTiles = (
 ): ListKiTile[] => {
   const alphabetical = groups.map(({ type }) => type).sort((a, b) => a.localeCompare(b));
   const liveCount = (type: string, baseCount: number): number =>
-    live ? live.groups.find((group) => group.type === type)?.count ?? 0 : baseCount;
-  const typeTiles = groups.map(
-    ({ type, count }): ListKiTile => ({
-      key: getTypeSectionKey(type),
-      kind: 'type',
-      type,
-      label: formatKiTypeLabel(type),
-      count: liveCount(type, count),
-      baseCount: count,
-      colorIndex: alphabetical.indexOf(type) % TILE_COLOR_COUNT,
-    })
-  );
+    live ? (live.groups.find((group) => group.type === type)?.count ?? 0) : baseCount;
+  const typeTiles = groups.map(({ type, count }): ListKiTile => ({
+    key: getTypeSectionKey(type),
+    kind: 'type',
+    type,
+    label: formatKiTypeLabel(type),
+    count: liveCount(type, count),
+    baseCount: count,
+    colorIndex: alphabetical.indexOf(type) % TILE_COLOR_COUNT,
+  }));
   if (totalOther <= 0) {
     return typeTiles;
   }

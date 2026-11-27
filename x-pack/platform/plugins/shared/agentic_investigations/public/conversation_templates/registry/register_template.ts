@@ -77,19 +77,36 @@ export const registerTemplate = ({
       return { default: Wrapped };
     });
 
+  const loadFlyoutProvider: TemplateRegistrationContext['loadFlyoutProvider'] = async ({
+    getQueryClient,
+  } = {}) => {
+    const [{ KibanaContextProvider }, { QueryClient, QueryClientProvider }, sharedQueryClient] =
+      await Promise.all([
+        import('@kbn/kibana-react-plugin/public'),
+        import('@kbn/react-query'),
+        getQueryClient?.(),
+      ]);
+    const queryClient = sharedQueryClient ?? new QueryClient();
+    const FlyoutProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
+      React.createElement(
+        KibanaContextProvider,
+        { services },
+        React.createElement(QueryClientProvider, { client: queryClient }, children)
+      );
+    return FlyoutProvider;
+  };
+
   const LazyConnectedAssignees = makeLazyWithProviders(async () => {
-    const { ConnectedAssignees } = await import(
-      '../shared/connected_assignees/connected_assignees'
-    );
+    const { ConnectedAssignees } =
+      await import('../shared/connected_assignees/connected_assignees');
     return ConnectedAssignees as React.ComponentType<
       React.ComponentProps<typeof ConnectedAssignees>
     >;
   });
 
   const LazyConnectedStatusToggle = makeLazyWithProviders(async () => {
-    const { ConnectedStatusToggle } = await import(
-      '../shared/connected_status/connected_status_toggle'
-    );
+    const { ConnectedStatusToggle } =
+      await import('../shared/connected_status/connected_status_toggle');
     return ConnectedStatusToggle as React.ComponentType<
       React.ComponentProps<typeof ConnectedStatusToggle>
     >;
@@ -98,14 +115,14 @@ export const registerTemplate = ({
   const renderAssignees: RenderAssignees = (props) =>
     React.createElement(
       EscalationModalBoundary,
-      null,
+      { inline: true },
       React.createElement(LazyConnectedAssignees, props)
     );
 
   const renderStatus: RenderStatus = (props) =>
     React.createElement(
       EscalationModalBoundary,
-      null,
+      { inline: true },
       React.createElement(LazyConnectedStatusToggle, props)
     );
 
@@ -115,6 +132,7 @@ export const registerTemplate = ({
     services,
     escalationsEnabled,
     makeLazyWithProviders,
+    loadFlyoutProvider,
     groupedAttachments,
     renderAssignees,
     renderStatus,

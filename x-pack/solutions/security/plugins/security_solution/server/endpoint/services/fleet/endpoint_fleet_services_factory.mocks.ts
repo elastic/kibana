@@ -21,8 +21,7 @@ import { createSavedObjectsClientFactoryMock } from '../saved_objects/saved_obje
 export type EndpointInternalFleetServicesInterfaceMocked =
   DeeplyMockedKeys<EndpointInternalFleetServicesInterface>;
 
-export interface EndpointFleetServicesFactoryInterfaceMocked
-  extends EndpointFleetServicesFactoryInterface {
+export interface EndpointFleetServicesFactoryInterfaceMocked extends EndpointFleetServicesFactoryInterface {
   asInternalUser: (
     ...args: Parameters<EndpointFleetServicesFactoryInterface['asInternalUser']>
   ) => EndpointInternalFleetServicesInterfaceMocked;

@@ -17,7 +17,7 @@ import {
 } from '../../../../../common/workflows/step_types/common/budget';
 
 const createMockEsClient = () =>
-  ({ search: jest.fn() } as unknown as jest.Mocked<Pick<ElasticsearchClient, 'search'>>);
+  ({ search: jest.fn() }) as unknown as jest.Mocked<Pick<ElasticsearchClient, 'search'>>;
 
 const createMockContext = (rawInput: Record<string, unknown>) => {
   return {

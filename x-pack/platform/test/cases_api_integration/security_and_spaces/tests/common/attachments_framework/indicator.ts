@@ -40,7 +40,7 @@ const legacyIndicatorPayload = (overrides: Record<string, unknown> = {}): Attach
     },
     owner: 'securitySolutionFixture',
     ...overrides,
-  } as AttachmentRequest);
+  }) as AttachmentRequest;
 
 /**
  * Unified shape that the new indicator writer posts. `createComment`'s `params` is
@@ -58,7 +58,7 @@ const unifiedIndicatorPayload = (overrides: Record<string, unknown> = {}): Attac
     },
     owner: 'securitySolutionFixture',
     ...overrides,
-  } as unknown as AttachmentRequest);
+  }) as unknown as AttachmentRequest;
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');

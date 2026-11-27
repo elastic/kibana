@@ -12,10 +12,11 @@ import { TooltipSelector } from '../../../components/tooltip_selector';
 import type { IEmsFileSource } from './ems_file_source';
 import type { IField } from '../../fields/field';
 import type { OnSourceChangeArgs } from '../source';
+import type { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
 
 interface Props {
   layerId: string;
-  onChange: (...args: OnSourceChangeArgs[]) => void;
+  onChange: (...args: OnSourceChangeArgs<EMSFileSourceDescriptor>[]) => void;
   source: IEmsFileSource;
   tooltipFields: IField[];
 }

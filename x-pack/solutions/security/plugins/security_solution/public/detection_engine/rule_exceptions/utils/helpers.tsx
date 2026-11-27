@@ -303,7 +303,7 @@ export const getEntityCodeSignature = <
   T extends {
     Ext?: { code_signature?: Flattened<CodeSignature[] | CodeSignature> };
     code_signature?: CodeSignature;
-  }
+  },
 >(
   entity: Flattened<FileEcs | ProcessEcs | DllEcs> | T | undefined,
   fieldPrefix: string

@@ -8,7 +8,6 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import {
   EuiBadge,
-  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -46,6 +45,7 @@ import {
   deleteAllProcessorsPromptOptions,
   discardProcessingChangesPromptOptions,
 } from './prompt_options';
+import { SaveAndApplyButton } from './save_and_apply_button';
 
 const deleteAllLabel = i18n.translate('xpack.streams.processingFlyout.deleteAll', {
   defaultMessage: 'Delete all processors',
@@ -403,17 +403,12 @@ export function ProcessingFlyout({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              isLoading={isSaving}
+            <SaveAndApplyButton
+              isSaving={isSaving}
               isDisabled={!canEdit || !hasChanges || isEditing}
+              isEditing={isEditing}
               onClick={() => ref.send({ type: 'flyout.save' })}
-              data-test-subj="streamsProcessingFlyoutSave"
-            >
-              {i18n.translate('xpack.streams.processingFlyout.save', {
-                defaultMessage: 'Save and apply',
-              })}
-            </EuiButton>
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

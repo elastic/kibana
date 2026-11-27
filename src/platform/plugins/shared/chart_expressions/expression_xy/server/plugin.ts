@@ -28,9 +28,10 @@ import {
 import type { SetupDeps } from './types';
 import { eventAnnotationsResult } from '../common/expression_functions/event_annotations_result';
 
-export class ExpressionXyPlugin
-  implements Plugin<ExpressionXyPluginSetup, ExpressionXyPluginStart>
-{
+export class ExpressionXyPlugin implements Plugin<
+  ExpressionXyPluginSetup,
+  ExpressionXyPluginStart
+> {
   public setup(core: CoreSetup, { expressions }: SetupDeps) {
     expressions.registerFunction(yAxisConfigFunction);
     expressions.registerFunction(dataDecorationConfigFunction);

@@ -92,7 +92,7 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
         const fieldType = inferFieldType(value);
         const textValue =
           fieldType === 'date'
-            ? getFormattedDateTime(new Date(value as string)) ?? ''
+            ? (getFormattedDateTime(new Date(value as string)) ?? '')
             : String(value);
         const displayValue = fieldType === 'date' ? textValue : formatValueAsElement(value);
 

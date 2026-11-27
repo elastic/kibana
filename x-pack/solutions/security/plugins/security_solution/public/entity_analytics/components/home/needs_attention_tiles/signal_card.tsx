@@ -566,15 +566,15 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, timeRang
   const tileBackground = selected
     ? euiTheme.colors.backgroundBasePrimary
     : emphasized
-    ? euiTheme.colors.backgroundBaseSubdued
-    : euiTheme.colors.backgroundBasePlain;
+      ? euiTheme.colors.backgroundBaseSubdued
+      : euiTheme.colors.backgroundBasePlain;
   const activeBorder = euiTheme.colors.borderStrongPrimary;
   const hoverBorder = euiTheme.colors.borderBaseProminent;
   const borderColor = selected
     ? activeBorder
     : emphasized
-    ? hoverBorder
-    : euiTheme.colors.borderBasePlain;
+      ? hoverBorder
+      : euiTheme.colors.borderBasePlain;
 
   const { delta, trend } = card;
   // Each part that is still loading has a skeleton or no line, and the tile gets one progress bar.
@@ -652,7 +652,8 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, timeRang
         overflow: hidden;
         position: relative;
         z-index: ${selected || emphasized ? 2 : 1};
-        transition: border-color ${euiTheme.animation.fast} ${euiTheme.animation.resistance},
+        transition:
+          border-color ${euiTheme.animation.fast} ${euiTheme.animation.resistance},
           background-color ${euiTheme.animation.fast} ${euiTheme.animation.resistance};
 
         /* A ring on the tile's own outline: painted above its children (the sparkline), so it

@@ -56,13 +56,11 @@ export const header = definePrimitive<HeaderNode, typeof schema>({
   examples: [
     { type: 'header', text: 'Checkout latency doubled on web-prod' },
     example,
-    ...([1, 2, 4] as const).map(
-      (level): HeaderNode => ({
-        type: 'header',
-        text: `A level ${level} header`,
-        level,
-      })
-    ),
+    ...([1, 2, 4] as const).map((level): HeaderNode => ({
+      type: 'header',
+      text: `A level ${level} header`,
+      level,
+    })),
   ],
   renderers: {
     react: headerReactRenderer,

@@ -31,7 +31,7 @@ const buildContext = (taskManager = taskManagerMock.createStart()) =>
     monitorConfigRepository: {
       getAll: jest.fn().mockResolvedValue([{ attributes: { maintenance_windows: ['mw-1'] } }]),
     },
-  } as unknown as RouteContext);
+  }) as unknown as RouteContext;
 
 describe('getMaintenanceWindowsRoute', () => {
   it('returns only referenced windows with the sync status of the private location sync task', async () => {

@@ -23,15 +23,12 @@ import type {
   ProfilingRequestHandlerContext,
 } from './types';
 
-export class ProfilingPlugin
-  implements
-    Plugin<
-      ProfilingPluginSetup,
-      ProfilingPluginStart,
-      ProfilingPluginSetupDeps,
-      ProfilingPluginStartDeps
-    >
-{
+export class ProfilingPlugin implements Plugin<
+  ProfilingPluginSetup,
+  ProfilingPluginStart,
+  ProfilingPluginSetupDeps,
+  ProfilingPluginStartDeps
+> {
   private readonly logger: Logger;
 
   constructor(private readonly initializerContext: PluginInitializerContext<ProfilingConfig>) {

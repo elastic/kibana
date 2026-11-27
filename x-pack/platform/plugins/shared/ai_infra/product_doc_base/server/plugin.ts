@@ -38,15 +38,12 @@ import { resolveArtifactRepositoryUrl } from './artifact_repository';
 // (gen_ai_settings vs search_inference_endpoints "Use AI features" toggle).
 const AI_DISABLED_SENTINELS = new Set(['NO_DEFAULT_MODEL', 'NO_DEFAULT_CONNECTOR']);
 
-export class ProductDocBasePlugin
-  implements
-    Plugin<
-      ProductDocBaseSetupContract,
-      ProductDocBaseStartContract,
-      ProductDocBaseSetupDependencies,
-      ProductDocBaseStartDependencies
-    >
-{
+export class ProductDocBasePlugin implements Plugin<
+  ProductDocBaseSetupContract,
+  ProductDocBaseStartContract,
+  ProductDocBaseSetupDependencies,
+  ProductDocBaseStartDependencies
+> {
   private logger: Logger;
   private internalServices?: InternalServices;
   private cloud?: ProductDocBaseSetupDependencies['cloud'];

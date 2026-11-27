@@ -214,13 +214,13 @@ describe('convertDiscovery', () => {
       Array.isArray(node)
         ? node.map(withScopes)
         : node && typeof node === 'object'
-        ? Object.fromEntries(
-            Object.entries(node).map(([key, value]) => [
-              key,
-              key === 'scopes' && Array.isArray(value) ? [SCOPE, READ_ONLY] : withScopes(value),
-            ])
-          )
-        : node;
+          ? Object.fromEntries(
+              Object.entries(node).map(([key, value]) => [
+                key,
+                key === 'scopes' && Array.isArray(value) ? [SCOPE, READ_ONLY] : withScopes(value),
+              ])
+            )
+          : node;
     const spec = convertDiscovery(withScopes(discovery) as typeof discovery);
     const { fetch } = createEmulatorFetch({ specs: [spec], checkScopes: true });
     const token = await fetch('https://oauth2.googleapis.com/token', {

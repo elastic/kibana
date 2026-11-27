@@ -144,7 +144,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 name: 'logs.otel',
               },
               body: {
-                field_definitions: [{ name: 'body.text', type: 'boolean' }],
+                // logs.otel sets index.mapping.ignore_malformed, which ES now honors in simulations
+                field_definitions: [
+                  { name: 'body.text', type: 'boolean', ignore_malformed: false },
+                ],
               },
             },
           }
@@ -270,8 +273,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         )
           ? existingIndexTemplate.ignore_missing_component_templates
           : existingIndexTemplate.ignore_missing_component_templates
-          ? [existingIndexTemplate.ignore_missing_component_templates]
-          : undefined;
+            ? [existingIndexTemplate.ignore_missing_component_templates]
+            : undefined;
 
         // `getIndexTemplate` returns extra fields (e.g. `created_date`) that are not allowed
         // when updating templates. Build a "put-safe" body from the known writable properties.

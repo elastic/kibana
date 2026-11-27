@@ -24,7 +24,7 @@ import { packagePolicyService } from '../../../../package_policy';
 
 import { auditLoggingService } from '../../../../audit_logging';
 
-import { withPackageSpan } from '../../utils';
+import { logFailedPackagePolicyUpgrades, withPackageSpan } from '../../utils';
 
 import { clearLatestFailedAttempts } from '../../install_errors_helpers';
 import { generateESIndexPatterns } from '../../../elasticsearch/template/template';
@@ -179,11 +179,12 @@ export async function stepSaveSystemObject(context: InstallContext) {
       logger.debug(
         `Package install - Package is flagged with keep_policies_up_to_date, upgrading its associated package policies ${policyIdsToUpgrade}`
       );
-      await packagePolicyService.bulkUpgrade(
+      const upgradeResults = await packagePolicyService.bulkUpgrade(
         savedObjectsClient,
         esClient,
         policyIdsToUpgrade.items
       );
+      logFailedPackagePolicyUpgrades(logger, pkgName, upgradeResults);
     });
   }
   logger.debug(

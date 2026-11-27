@@ -159,7 +159,7 @@ export class ActionTypeRegistry {
     Config extends ActionTypeConfig = ActionTypeConfig,
     Secrets extends ActionTypeSecrets = ActionTypeSecrets,
     Params extends ActionTypeParams = ActionTypeParams,
-    ExecutorResultData = void
+    ExecutorResultData = void,
   >(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>) {
     const registeredActionType = this.actionTypes.get(actionType.id);
     const hasVersionedSpecs =
@@ -253,6 +253,15 @@ export class ActionTypeRegistry {
       actionTypeMaxAttempts: actionType.maxAttempts,
     });
 
+    // Runs before any state change, so a throw here leaves the type unregistered.
+    // No need to notify usage on basic action types
+    if (actionType.minimumLicenseRequired !== 'basic') {
+      this.licensing.featureUsage.register(
+        getActionTypeFeatureUsageName(actionType as unknown as ActionType),
+        actionType.minimumLicenseRequired
+      );
+    }
+
     this.actionTypes.set(actionType.id, {
       ...actionType,
       ...(specs && { specs: new Map([...(registeredActionType?.specs ?? []), ...specs]) }),
@@ -270,13 +279,6 @@ export class ActionTypeRegistry {
         },
       });
     }
-    // No need to notify usage on basic action types
-    if (actionType.minimumLicenseRequired !== 'basic') {
-      this.licensing.featureUsage.register(
-        getActionTypeFeatureUsageName(actionType as unknown as ActionType),
-        actionType.minimumLicenseRequired
-      );
-    }
   }
 
   /**
@@ -286,7 +288,7 @@ export class ActionTypeRegistry {
     Config extends ActionTypeConfig = ActionTypeConfig,
     Secrets extends ActionTypeSecrets = ActionTypeSecrets,
     Params extends ActionTypeParams = ActionTypeParams,
-    ExecutorResultData = void
+    ExecutorResultData = void,
   >(id: string): ActionType<Config, Secrets, Params, ExecutorResultData> {
     if (!this.has(id)) {
       throw Boom.badRequest(

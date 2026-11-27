@@ -32,6 +32,10 @@ const ENDPOINT_STREAM_TIMEOUT_MS = 180_000;
 
 export const FLEET_AND_HOST_TIMEOUT_MS = 600_000;
 
+// Fleet setup and the agent download run before the VM is created, inside FLEET_AND_HOST_TIMEOUT_MS.
+// Keep `vagrant destroy`, `vagrant up` and its retry inside this share of it.
+const VAGRANT_CREATE_BUDGET_MS = 360_000;
+
 export interface EnrolledEndpoint {
   agentId: string;
   hostname: string;
@@ -125,6 +129,7 @@ export const withEnrolledHost = async (
       agentPolicyId,
       hostname,
       useClosestVersionMatch: true,
+      vagrantCreateBudgetMs: VAGRANT_CREATE_BUDGET_MS,
     });
 
     try {

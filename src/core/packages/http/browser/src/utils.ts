@@ -84,8 +84,8 @@ export function buildPath(path: string, params: HttpPathParams = {}) {
         multiSegmentMatch == null
           ? undefined
           : segmentCountMatch === ''
-          ? -1
-          : Number(segmentCountMatch);
+            ? -1
+            : Number(segmentCountMatch);
 
       return serializePathParam(paramName, value, segmentCount);
     }

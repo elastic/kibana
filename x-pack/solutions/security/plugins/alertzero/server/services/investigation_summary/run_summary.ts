@@ -49,7 +49,7 @@ export interface RunInvestigationSummaryDeps {
   /** The model the summary is written with; undefined when no connector is available. */
   resolveChatModel: (request: KibanaRequest) => Promise<ScopedModel['chatModel'] | undefined>;
   /** Reads the proposals for the story by id; one that is missing or off-limits is left out. */
-  getProposals?: (
+  readProposals?: (
     proposalIds: string[],
     spaceId: string,
     request: KibanaRequest
@@ -165,8 +165,8 @@ export const runInvestigationSummary = async ({
     attachments: conversation.attachments,
   }).slice(-MAX_PROPOSALS_READ);
   const proposals =
-    deps.getProposals && proposalIds.length > 0
-      ? await deps.getProposals(proposalIds, spaceId, request)
+    deps.readProposals && proposalIds.length > 0
+      ? await deps.readProposals(proposalIds, spaceId, request)
       : {};
   const story = formatInvestigationStory({
     events: conversation.events ?? [],

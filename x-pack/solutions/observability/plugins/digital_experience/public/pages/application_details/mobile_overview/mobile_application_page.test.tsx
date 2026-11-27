@@ -13,10 +13,12 @@ import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { useRouteBreadcrumb } from '../../../breadcrumbs/use_route_breadcrumb';
 import { useApplicationLinks } from '../../../hooks/use_application_links';
-import { useQueryParam } from '../../../hooks/use_query_param';
 import { useShareAction } from '../../../hooks/use_share_action';
 import { MobileApplicationPage } from './mobile_application_page';
+import { MobileCrashesTab } from '../mobile_crashes/mobile_crashes_tab';
 import { MobileOverview } from './mobile_overview';
+import { useMobileAppStarts } from './performance/use_mobile_app_starts';
+import { useMobileReleases } from './release_health/use_mobile_releases';
 import { useMobileDiscoverHref } from './use_mobile_discover_href';
 import { useMobileKpis } from './use_mobile_kpis';
 import type { MobileKpisState } from './use_mobile_kpis';
@@ -34,15 +36,19 @@ jest.mock('../../../hooks/use_application_links');
 jest.mock('../../../hooks/use_share_action');
 jest.mock('./use_mobile_discover_href');
 jest.mock('./use_mobile_kpis');
-jest.mock('../../../hooks/use_query_param');
+jest.mock('./release_health/use_mobile_releases');
+jest.mock('./performance/use_mobile_app_starts');
 jest.mock('./mobile_overview', () => ({
   MobileOverview: jest.fn(() => <div data-test-subj="mobileOverview" />),
+}));
+jest.mock('../mobile_crashes/mobile_crashes_tab', () => ({
+  MobileCrashesTab: jest.fn(() => <div data-test-subj="mobileCrashesTab" />),
 }));
 
 const OVERVIEW_PATH = '/shop-mobile?applicationType=mobile&source=otel';
 const DISCOVER_HREF = '/app/discover#/?_a=(query:(esql:mobile))';
 
-// EUI's theme too: a selected header action, as Compare when on, reads it.
+// EUI's theme too, which the header's actions read.
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
   <EuiProvider>
     <MockAppHeaderProvider>{children}</MockAppHeaderProvider>
@@ -58,6 +64,8 @@ const KPIS_STATE: MobileKpisState = {
     sessions: { value: 4, previous: 2, delta: 2 },
     users: { value: 3, previous: 3, delta: 0 },
     errorRate: { value: 0.25, previous: null, delta: null },
+    coldStart: { value: 1800, previous: 1500, delta: 300, count: 42, previousCount: 30 },
+    warmStart: { value: 400, previous: null, delta: null, count: 2, previousCount: 0 },
     releases: [{ key: '1.0.0', count: 4 }],
     osNames: [{ key: 'Android', count: 2 }],
     platforms: ['android', 'ios'],
@@ -69,10 +77,6 @@ const KPIS_STATE: MobileKpisState = {
   refresh: jest.fn(),
 };
 
-const setCompare = jest.fn();
-const mockCompare = (compare?: 'true') =>
-  jest.mocked(useQueryParam).mockReturnValue({ value: compare, setValue: setCompare });
-
 beforeEach(() => {
   jest.clearAllMocks();
   jest.mocked(useApplicationLinks).mockReturnValue({
@@ -81,12 +85,13 @@ beforeEach(() => {
     errorsHref: '/errors-href',
     networkHref: '/network-href',
     reportsHref: '/reports-href',
+    frustrationHref: '/frustration-href',
+    crashesHref: '/crashes-href',
     sessionsHref: () => '/sessions-href',
     sessionHref: () => '/session-href',
   });
   jest.mocked(useMobileDiscoverHref).mockReturnValue(DISCOVER_HREF);
   jest.mocked(useMobileKpis).mockReturnValue(KPIS_STATE);
-  mockCompare();
 });
 
 describe('MobileApplicationPage', () => {
@@ -101,12 +106,16 @@ describe('MobileApplicationPage', () => {
     expect(useApplicationLinks).toHaveBeenCalledWith('shop-mobile', 'otel');
   });
 
-  it('has the Overview as its only tab, and its breadcrumb', () => {
+  it('has the Overview and Crashes tabs, and the selected one in the breadcrumb', () => {
     render(<MobileApplicationPage serviceName="shop-mobile" selectedTab="overview" />);
 
     expect(screen.getByTestId('digitalExperienceTab-overview')).toHaveAttribute(
       'href',
       '/overview-href'
+    );
+    expect(screen.getByTestId('digitalExperienceTab-crashes')).toHaveAttribute(
+      'href',
+      '/crashes-href'
     );
     ['errors', 'network', 'sessions', 'reports'].forEach((tab) =>
       expect(screen.queryByTestId(`digitalExperienceTab-${tab}`)).toBeNull()
@@ -124,16 +133,13 @@ describe('MobileApplicationPage', () => {
     const discover = screen.getByTestId('digitalExperienceMobileOpenInDiscover');
     expect(discover).toHaveTextContent('Open in Discover');
     expect(discover).toHaveAttribute('href', DISCOVER_HREF);
-    expect(useMobileDiscoverHref).toHaveBeenCalledWith('shop-mobile');
+    expect(useMobileDiscoverHref).toHaveBeenCalledWith('shop-mobile', 'overview');
   });
 
-  it('has no Open in Discover without access to Discover', async () => {
+  it('has no Open in Discover without access to Discover', () => {
     jest.mocked(useMobileDiscoverHref).mockReturnValue(undefined);
     render(<MobileApplicationPage serviceName="shop-mobile" selectedTab="overview" />);
-    await openAppMenuOverflow();
 
-    // Compare is still there.
-    expect(screen.getByTestId('digitalExperienceMobileCompareToggle')).toBeInTheDocument();
     expect(screen.queryByTestId('digitalExperienceMobileOpenInDiscover')).toBeNull();
   });
 
@@ -153,7 +159,7 @@ describe('MobileApplicationPage', () => {
   });
 
   it.each(['sessions', 'errors', 'network', 'reports'] as const)(
-    'replaces the %s route with the Overview, its only tab, without rendering it',
+    "replaces a web application's %s route with the Overview, without rendering it",
     (tab) => {
       render(<MobileApplicationPage serviceName="shop-mobile" selectedTab={tab} />);
 
@@ -186,29 +192,44 @@ describe('MobileApplicationPage', () => {
     expect(useMobileKpis).toHaveBeenCalledWith('shop-mobile');
   });
 
-  it('turns Compare on from the header, in the URL, so a reload or Share keeps it', async () => {
+  it("leaves Compare to the Overview's health summary, out of the header", async () => {
     render(<MobileApplicationPage serviceName="shop-mobile" selectedTab="overview" />);
     await openAppMenuOverflow();
 
-    fireEvent.click(screen.getByTestId('digitalExperienceMobileCompareToggle'));
-
-    expect(useQueryParam).toHaveBeenCalledWith('compare');
-    expect(setCompare).toHaveBeenCalledWith('true');
+    expect(screen.queryByTestId('digitalExperienceMobileCompareToggle')).toBeNull();
   });
 
-  it('turns Compare off from the header when the URL has it on', async () => {
-    mockCompare('true');
-    render(<MobileApplicationPage serviceName="shop-mobile" selectedTab="overview" />);
-    await openAppMenuOverflow();
+  it('renders the Crashes tab, with the KPIs for its filters, its breadcrumb and Share', () => {
+    render(<MobileApplicationPage serviceName="shop-mobile" selectedTab="crashes" />);
 
-    fireEvent.click(screen.getByTestId('digitalExperienceMobileCompareToggle'));
-
-    expect(setCompare).toHaveBeenCalledWith(undefined);
+    expect(historyReplace).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('mobileOverview')).toBeNull();
+    expect(jest.mocked(MobileCrashesTab).mock.calls.at(-1)?.[0]).toEqual({
+      serviceName: 'shop-mobile',
+      kpisState: KPIS_STATE,
+    });
+    expect(useRouteBreadcrumb).toHaveBeenCalledWith([
+      { text: 'shop-mobile', href: '/overview-href' },
+      { text: 'Crashes' },
+    ]);
+    expect(useShareAction).toHaveBeenCalledWith(expect.objectContaining({ tab: 'crashes' }));
   });
 
-  it('gives the Overview the KPIs the page fetched', () => {
+  it('gives the Overview the KPIs the page fetched, and leaves the release health and the app starts to it', () => {
     render(<MobileApplicationPage serviceName="shop-mobile" selectedTab="overview" />);
 
-    expect(jest.mocked(MobileOverview).mock.calls.at(-1)?.[0]).toEqual({ kpisState: KPIS_STATE });
+    expect(jest.mocked(MobileOverview).mock.calls.at(-1)?.[0]).toEqual({
+      serviceName: 'shop-mobile',
+      kpisState: KPIS_STATE,
+    });
+    expect(useMobileReleases).not.toHaveBeenCalled();
+    expect(useMobileAppStarts).not.toHaveBeenCalled();
+  });
+
+  it('runs no release health or app starts query on the Crashes tab', () => {
+    render(<MobileApplicationPage serviceName="shop-mobile" selectedTab="crashes" />);
+
+    expect(useMobileReleases).not.toHaveBeenCalled();
+    expect(useMobileAppStarts).not.toHaveBeenCalled();
   });
 });

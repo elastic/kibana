@@ -25,9 +25,12 @@ import {
   MAX_DREAMING_TYPE_LENGTH,
   MIN_DREAMING_INTERVAL_MINUTES,
   RESERVED_ENTITY_ATTRIBUTE_KEYS,
+  MAX_DREAMING_WORKFLOW_ID_LENGTH,
   validateDreamingConfig,
 } from '../../../common/dreaming';
 import { validateDreamingInterval } from '../../../common/validation';
+const MAX_WORKFLOW_EXECUTION_ID_LENGTH = 256;
+const MAX_DREAMING_WORKFLOWS = 10;
 
 const validateType = (value: string): string | undefined =>
   DREAMING_TYPE_PATTERN.test(value)
@@ -226,7 +229,39 @@ export const dreamingConfigSchema = schema.object(
   }
 );
 
+const workflowIdsSchema = schema.arrayOf(
+  schema.string({
+    maxLength: MAX_DREAMING_WORKFLOW_ID_LENGTH,
+    meta: { description: 'A dreaming workflow attached to the AI Index.' },
+  }),
+  { maxSize: MAX_DREAMING_WORKFLOWS }
+);
+
 export const dreamingResponseSchema = () =>
   schema.object({
     dreaming: dreamingConfigSchema,
+    workflow_ids: workflowIdsSchema,
+  });
+
+export const getDreamingResponseSchema = () =>
+  schema.object({
+    dreaming: dreamingConfigSchema,
+    workflow_ids: workflowIdsSchema,
+  });
+
+export const runDreamingResponseSchema = () =>
+  schema.object({
+    executions: schema.arrayOf(
+      schema.object({
+        workflow_id: schema.string({ maxLength: MAX_DREAMING_WORKFLOW_ID_LENGTH }),
+        execution_id: schema.string({ maxLength: MAX_WORKFLOW_EXECUTION_ID_LENGTH }),
+      }),
+      { maxSize: MAX_DREAMING_WORKFLOWS }
+    ),
+    failed: schema.arrayOf(schema.string({ maxLength: MAX_DREAMING_WORKFLOW_ID_LENGTH }), {
+      maxSize: MAX_DREAMING_WORKFLOWS,
+    }),
+    skipped: schema.arrayOf(schema.string({ maxLength: MAX_DREAMING_WORKFLOW_ID_LENGTH }), {
+      maxSize: MAX_DREAMING_WORKFLOWS,
+    }),
   });

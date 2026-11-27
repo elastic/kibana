@@ -80,8 +80,7 @@ import {
 } from '../../../../common/sse_view';
 import type { SseDetection, SseEventGroup } from '../../../../common/sse_view';
 
-export interface SignificantSecurityEventInlineContentProps
-  extends AttachmentRenderProps<SignificantSecurityEventAttachment> {
+export interface SignificantSecurityEventInlineContentProps extends AttachmentRenderProps<SignificantSecurityEventAttachment> {
   navigation: AttachmentNavigationDeps;
 }
 
@@ -792,8 +791,8 @@ const WhatMatched: React.FC<{
       huntIndices.length === 0
         ? citedIndices
         : huntResult?.tier1.per_index_truncated
-        ? [...huntIndices, ...citedIndices]
-        : huntIndices;
+          ? [...huntIndices, ...citedIndices]
+          : huntIndices;
     const esql = buildIocMatchEsql({ indices, field: detection.field, value, iocType: ioc?.type });
     if (!esql) {
       return undefined;

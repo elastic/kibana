@@ -158,7 +158,7 @@ export const addressSchema = z
   .meta({ id: 'Address', description: 'Mailing address for a foo resource.' });
 ```
 
-If an API uses tagged unions, prefer `schema.discriminatedUnion('type', [...])` or `z.discriminatedUnion('type', [...])` over a plain union. With Zod, when each variant has its own `.meta({ id })`, the OAS generator produces a discriminator mapping automatically.
+If an API uses tagged unions, prefer `schema.discriminatedUnion('type', [...])` or `z.discriminatedUnion('type', [...])` over a plain union. With Zod, the OAS generator produces a discriminator mapping automatically when each variant has its own `.meta({ id })` and a required string discriminator (no `.optional()`, `.default()`, or `.nullable()`). Otherwise it omits the discriminator and emits a plain `oneOf`.
 
 ### Zod field descriptions
 

@@ -104,7 +104,7 @@ export function validateUpdateSchemaContinuity(name: string, registeredType: Sav
   const modelVersionMap =
     typeof registeredType.modelVersions === 'function'
       ? registeredType.modelVersions()
-      : registeredType.modelVersions ?? {};
+      : (registeredType.modelVersions ?? {});
 
   const versions = Object.keys(modelVersionMap)
     .map(Number)
@@ -209,7 +209,7 @@ export function validateAllMappingsInModelVersion(
   const modelVersionMap =
     typeof registeredType.modelVersions === 'function'
       ? registeredType.modelVersions()
-      : registeredType.modelVersions ?? {};
+      : (registeredType.modelVersions ?? {});
 
   const latestVersionKey = Object.keys(modelVersionMap)
     .map(Number)

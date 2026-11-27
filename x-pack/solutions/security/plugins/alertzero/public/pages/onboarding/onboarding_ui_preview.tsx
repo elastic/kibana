@@ -87,7 +87,8 @@ export const OnboardingUiPreview: React.FC = () => {
       css={css`
         border: ${euiTheme.border.width.thin} solid transparent;
         border-radius: ${euiTheme.size.m};
-        background: linear-gradient(
+        background:
+          linear-gradient(
               97.76deg,
               ${euiTheme.colors.backgroundBasePrimary} 17%,
               ${euiTheme.colors.backgroundBaseAccent} 83%

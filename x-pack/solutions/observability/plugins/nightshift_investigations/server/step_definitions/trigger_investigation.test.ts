@@ -48,7 +48,7 @@ const createContext = (
         kibanaUrl: 'https://kibana.example.com',
       }),
     },
-  } as never);
+  }) as never;
 
 const createDefinition = (start: jest.Mock, soClient = savedObjectsClientMock.create()) => {
   const getInvestigationsClient = jest

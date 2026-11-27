@@ -156,7 +156,7 @@
   "sources": {
     "v1": {
       "apiVersion": "unversioned",
-      "fetchedAt": "2026-10-07T20:48:53.372Z",
+      "fetchedAt": "2026-11-23T11:12:57.897Z",
       "format": "swagger",
       "url": "https://raw.githubusercontent.com/kubernetes/kubernetes/master/api/openapi-spec/swagger.json"
     }

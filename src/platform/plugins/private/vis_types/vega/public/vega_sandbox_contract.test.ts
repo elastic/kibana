@@ -26,7 +26,7 @@ import type { VegaRenderDescriptor } from './data_model/types';
 import { setDataViews } from './services';
 import { createVegaFilterActionHandler } from './vega_view/vega_filter_action_handler';
 
-const ELASTIC_FIRST_COLOR = '#16C5C0';
+const ELASTIC_FIRST_COLOR = '#00BDA0';
 
 const spec = {
   $schema: 'https://vega.github.io/schema/vega/v5.json',
@@ -103,7 +103,7 @@ describe('Vega render path across the sandbox boundary', () => {
       searchAPI,
       {} as TimeCache,
       {},
-      async () => ({} as never),
+      async () => ({}) as never,
       { darkMode: false, name: 'borealis' }
     );
     await parser.parseAsync();

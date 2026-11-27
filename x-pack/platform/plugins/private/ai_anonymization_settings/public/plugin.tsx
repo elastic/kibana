@@ -31,15 +31,12 @@ export interface AiAnonymizationSettingsPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AiAnonymizationSettingsPluginStart {}
 
-export class AiAnonymizationSettingsPlugin
-  implements
-    Plugin<
-      AiAnonymizationSettingsPluginSetup,
-      AiAnonymizationSettingsPluginStart,
-      AiAnonymizationSettingsSetupDeps,
-      AiAnonymizationSettingsStartDeps
-    >
-{
+export class AiAnonymizationSettingsPlugin implements Plugin<
+  AiAnonymizationSettingsPluginSetup,
+  AiAnonymizationSettingsPluginStart,
+  AiAnonymizationSettingsSetupDeps,
+  AiAnonymizationSettingsStartDeps
+> {
   private registeredApp?: ManagementApp;
   private licenseSubscription?: Subscription;
 

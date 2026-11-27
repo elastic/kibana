@@ -76,7 +76,9 @@ export const accumulatorToItem = (
   const trigger = triggerEventId ? eventsById.get(triggerEventId) : undefined;
   const origin: ConversationRoundOrigin | undefined = trigger?.actor.origin;
   const triggerAttachmentRefs = [
-    ...(trigger?.type === TimelineEventType.userMessage ? trigger.data.attachment_refs ?? [] : []),
+    ...(trigger?.type === TimelineEventType.userMessage
+      ? (trigger.data.attachment_refs ?? [])
+      : []),
     ...(agentAttachmentRefs ?? []),
   ];
   const status = resolveStatus(acc, awaitingPromptEventId);

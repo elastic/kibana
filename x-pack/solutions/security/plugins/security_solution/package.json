@@ -5,8 +5,8 @@
   "private": true,
   "license": "Elastic License 2.0",
   "scripts": {
-    "extract-mitre-attacks": "node scripts/extract_tactics_techniques_mitre.js && node ../../../../../scripts/eslint ./common/detection_engine/mitre/mitre_tactics_techniques.ts ./common/detection_engine/mitre/mitre_version.ts --fix",
-    "build-beat-doc": "node scripts/beat_docs/build.js && node ../../../../../scripts/eslint ../timelines/server/utils/beat_schema/fields.ts --fix",
+    "extract-mitre-attacks": "node scripts/extract_tactics_techniques_mitre.js && node ../../../../../scripts/lint --fix ./common/detection_engine/mitre/mitre_tactics_techniques.ts ./common/detection_engine/mitre/mitre_version.ts && node ../../../../../scripts/oxfmt ./common/detection_engine/mitre/mitre_tactics_techniques.ts ./common/detection_engine/mitre/mitre_version.ts",
+    "build-beat-doc": "node scripts/beat_docs/build.js && node ../../../../../scripts/lint --fix ../timelines/server/utils/beat_schema/fields.ts && node ../../../../../scripts/oxfmt ../timelines/server/utils/beat_schema/fields.ts",
     "cypress": "../../../../../node_modules/.bin/cypress",
     "cypress:burn": "pnpm cypress:dw run --env burn=2 --headed",
     "cypress:changed-specs-only": "pnpm cypress:dw run --changed-specs-only --env burn=2",

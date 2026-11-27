@@ -48,8 +48,7 @@ const CHANGE_POINT_CHART_LOCAL_STORAGE_KEY = 'discover:changePointExperience';
  * must NOT be included here.
  */
 interface ChangePointDataSourceProfileContext
-  extends ChangePointPvalueCellContext,
-    ChangePointSummaryContext {
+  extends ChangePointPvalueCellContext, ChangePointSummaryContext {
   typeColumnId: string;
   chartSectionProps$: ChangePointChartSectionProps$;
 }

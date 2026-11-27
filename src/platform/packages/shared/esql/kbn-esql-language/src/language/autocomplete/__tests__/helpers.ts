@@ -444,7 +444,9 @@ export const setup = async (caret = '/') => {
       const resultTexts = [...result.map((suggestion) => suggestion.text)].sort();
 
       const expectedTexts = expected
-        .map((suggestion) => (typeof suggestion === 'string' ? suggestion : suggestion.text ?? ''))
+        .map((suggestion) =>
+          typeof suggestion === 'string' ? suggestion : (suggestion.text ?? '')
+        )
         .sort();
 
       expect(resultTexts).toEqual(expectedTexts);

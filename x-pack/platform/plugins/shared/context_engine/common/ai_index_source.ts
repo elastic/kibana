@@ -8,15 +8,45 @@
 import { Parser, Walker } from '@elastic/esql';
 import { matchesGlob } from './matches_glob';
 
-export const isCircularSource = (query: string, dest: string): boolean => {
+/** An index expression an ES|QL query reads. */
+export interface EsqlSourceTarget {
+  /** The command that reads it, such as `from`, `ts` or `join`. */
+  command: string;
+  /** The remote cluster alias of a cross-cluster source; missing for a local one. */
+  prefix?: string;
+  index: string;
+}
+
+/**
+ * The index expressions an ES|QL query reads, in query order, across every command that names one
+ * and the subqueries nested in them. A quoted comma list yields one target per expression, and
+ * an ENRICH policy is not a target.
+ */
+export const getEsqlSourceTargets = (query: string): EsqlSourceTarget[] => {
   const { root } = Parser.parse(query);
-  const targets: string[] = [];
+  const targets: EsqlSourceTarget[] = [];
   Walker.walk(root, {
-    visitSource: ({ prefix, index, name }) => {
-      if (prefix === undefined) {
-        targets.push(...(index?.valueUnquoted ?? name).split(','));
+    visitSource: ({ prefix, index, name, sourceType }, parent) => {
+      if (sourceType === 'policy') {
+        return;
+      }
+      const command = parent?.type === 'command' ? parent.name : '';
+      for (const expression of (index?.valueUnquoted ?? name).split(',')) {
+        const trimmed = expression.trim();
+        if (trimmed !== '') {
+          targets.push({
+            command,
+            ...(prefix !== undefined && { prefix: prefix.valueUnquoted }),
+            index: trimmed,
+          });
+        }
       }
     },
   });
-  return targets.some((target) => matchesGlob(target.trim(), dest));
+  return targets;
 };
+
+export const isCircularSource = (query: string, dest: string): boolean =>
+  getEsqlSourceTargets(query).some(
+    ({ prefix, index }) => prefix === undefined && matchesGlob(index, dest)
+  );

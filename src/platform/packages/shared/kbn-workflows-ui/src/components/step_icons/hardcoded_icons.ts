@@ -57,6 +57,7 @@ export const HardcodedIcons: Record<string, string> = {
   manual: user,
   'workflow.execute': glyph,
   'workflow.executeAsync': union,
+  'workflow.awaitExecutions': clock,
   'workflow.output': output,
   'workflow.fail': fail,
   trigger: bolt,

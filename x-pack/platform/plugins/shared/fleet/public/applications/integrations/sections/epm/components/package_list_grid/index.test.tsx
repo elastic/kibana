@@ -113,7 +113,7 @@ describe('PackageListGrid', () => {
         url: `/mock/app/integrations/detail/${name}-1.0.0/overview`,
         version: '1.0.0',
         integration: '',
-      } as IntegrationCardItem);
+      }) as IntegrationCardItem;
     const collection = {
       id: 'collection:nginx',
       name: 'nginx',

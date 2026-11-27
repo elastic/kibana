@@ -30,5 +30,5 @@ export const EnhancedIOCFlyoutHeader = ({
 
   return renderHeader
     ? renderHeader({ hit, ...docViewProps })
-    : fallbackRenderHeader?.({ hit, ...docViewProps }) ?? null;
+    : (fallbackRenderHeader?.({ hit, ...docViewProps }) ?? null);
 };

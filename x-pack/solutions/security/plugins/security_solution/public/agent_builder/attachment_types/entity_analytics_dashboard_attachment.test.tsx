@@ -120,7 +120,7 @@ const makeAttachment = (): EntityAnalyticsDashboardAttachment =>
         { entity_type: 'host', identifier: 'beta' },
       ],
     },
-  } as unknown as EntityAnalyticsDashboardAttachment);
+  }) as unknown as EntityAnalyticsDashboardAttachment;
 
 const renderCanvas = (
   overrides: {

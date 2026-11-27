@@ -33,7 +33,7 @@ export interface UseAbortableAsyncOptions<T> {
 
 export type UseAbortableAsync<
   TAdditionalParameters extends Record<string, unknown> = Record<string, never>,
-  TAdditionalOptions extends Record<string, unknown> = Record<string, never>
+  TAdditionalOptions extends Record<string, unknown> = Record<string, never>,
 > = <T>(
   fn: ({}: { signal: AbortSignal } & TAdditionalParameters) => T | Promise<T>,
   deps: DependencyList,

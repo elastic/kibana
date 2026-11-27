@@ -25,7 +25,6 @@ export const Skeleton: React.FunctionComponent = () => {
           }),
         }}
         spacing="bleed"
-        sticky={false}
       />
 
       <EuiSpacer size="m" />

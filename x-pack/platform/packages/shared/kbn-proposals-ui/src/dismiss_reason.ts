@@ -39,10 +39,13 @@ export const DISMISS_REASON_OPTIONS = dismissReasonSchema.options.map((value) =>
 }));
 
 /**
- * The reason line a decided (`dismissed`) proposal shows — the structured reason first, since
- * that is what a scanning analyst wants, then the free-text rationale when the decliner left one.
+ * The reason line a decided (`dismissed`) proposal shows. `no_reason` means the decliner picked no
+ * reason, so a rationale stands alone; every other reason leads, since that is what a scanning
+ * analyst wants, followed by the free-text rationale when one was left.
  */
 export const formatDismissReason = (dismissReason: DismissReason, rationale?: string): string => {
   const label = DISMISS_REASON_LABELS[dismissReason];
-  return rationale ? `${label} — ${rationale}` : label;
+  const detail = rationale?.trim();
+  if (!detail) return label;
+  return dismissReason === 'no_reason' ? detail : `${label} — ${detail}`;
 };

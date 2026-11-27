@@ -46,7 +46,7 @@ const setup = (spaceId = 'default') => {
       },
       logger: loggerMock.create(),
       abortSignal: new AbortController().signal,
-    } as never);
+    }) as never;
   return { definition, request, getInvestigationsClient, getNotifiableInvestigation, context };
 };
 

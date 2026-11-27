@@ -32,8 +32,9 @@ export function InvestigationFormattedText({
       css={css`
         overflow-wrap: anywhere;
 
-        ${fontSize
-          ? `
+        ${
+          fontSize
+            ? `
               font-size: ${fontSize};
               line-height: 1.5;
 
@@ -50,9 +51,11 @@ export function InvestigationFormattedText({
                 line-height: 1.5;
               }
             `
-          : ''}
-        ${bold
-          ? `
+            : ''
+        }
+        ${
+          bold
+            ? `
               font-weight: ${euiTheme.font.weight.bold};
 
               p,
@@ -61,7 +64,8 @@ export function InvestigationFormattedText({
                 font-weight: ${euiTheme.font.weight.bold};
               }
             `
-          : ''}
+            : ''
+        }
       `}
     >
       <EuiMarkdownFormat

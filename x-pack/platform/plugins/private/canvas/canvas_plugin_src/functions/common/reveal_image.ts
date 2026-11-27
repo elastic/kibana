@@ -65,9 +65,8 @@ export function revealImage(): ExpressionFunctionDefinition<
         throw errors.invalidPercent(percent);
       }
 
-      const { resolveWithMissingImage, elasticOutline, isValidUrl } = await import(
-        '../../../public/lib'
-      );
+      const { resolveWithMissingImage, elasticOutline, isValidUrl } =
+        await import('../../../public/lib');
 
       if (args.image && !isValidUrl(args.image)) {
         throw errors.invalidImageUrl(args.image);

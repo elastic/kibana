@@ -45,5 +45,5 @@ export const eventsWriteResultEventId = (
   }
   return result.reason === 'superseded'
     ? result.event_id
-    : result.existing_event_id ?? callerEventId;
+    : (result.existing_event_id ?? callerEventId);
 };

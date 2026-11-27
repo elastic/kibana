@@ -7,14 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint "no-restricted-syntax": [
-            "error",
-            {
-                "selector": "CallExpression[callee.object.name='console'][callee.property.name!=/^(warn|error)$/]",
-                "message": "Debug logging to stdout in this file will attempt to upload the log message as yaml to buildkite, which might result in pipeline syntax error. Use emitPipeline() to upload steps, or log to stderr."
-            }
-        ] */
-
 import { getEvalPipeline } from '../../../pipelines/evals/eval_pipeline.ts';
 import { emitPipeline } from '#pipeline-utils';
 import { postBuildSteps, renderSteps } from '#pipeline-utils/step-library';
@@ -22,7 +14,8 @@ import { postBuildSteps, renderSteps } from '#pipeline-utils/step-library';
 // Forwarded by the trigger from kibana-pull-request; re-selects the same suites/models.
 const GITHUB_PR_LABELS = process.env.GITHUB_PR_LABELS ?? '';
 
-// Short-circuits when KIBANA_BUILD_ID reuses the PR artifact; kept so `depends_on: build` resolves.
+// The build step is skipped when KIBANA_BUILD_ID reuses the PR artifact, as in kibana-pull-request;
+// a skipped step still satisfies `depends_on: build`.
 const preludeSteps = [
   `  - label: ':construction_worker: Pre-Build'`,
   `    key: pre_build`,
@@ -42,8 +35,9 @@ const preludeSteps = [
   `    key: build`,
   `    depends_on: pre_build`,
   `    command: .buildkite/scripts/steps/build_kibana.sh`,
-  // timeout/retry only bite on the rare fallback rebuild (expired artifact / manual trigger
-  // with no KIBANA_BUILD_ID) so it fails cleanly instead of hanging on the small agent.
+  `    if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"`,
+  // timeout/retry only bite on a manual trigger with no KIBANA_BUILD_ID, so it fails cleanly
+  // instead of hanging on the small agent.
   `    timeout_in_minutes: 90`,
   `    agents:`,
   `      image: family/kibana-ubuntu-2404`,

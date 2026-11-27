@@ -138,7 +138,7 @@ The package includes GitHub Actions integration for automated maintenance:
 - **Weekly Updates**: Pulls latest semantic conventions every Monday
 - **Docker Integration**: Uses official `otel/weaver` for YAML generation
 - **Smart PRs**: Only creates pull requests when conventions change
-- **Quality Assurance**: Automatic ESLint fixing and validation
+- **Quality Assurance**: Automatic lint fixing and validation
 
 Workflow location: `.github/workflows/update-otel-semconv.yml`
 

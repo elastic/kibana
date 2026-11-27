@@ -19,7 +19,7 @@ export const partitionRecordsByError = (
 ): [OracleRecord[], OracleRecordError[]] => {
   const [errors, validRecords] = partition(res, isRecordError) as [
     OracleRecordError[],
-    OracleRecord[]
+    OracleRecord[],
   ];
 
   return [validRecords, errors];
@@ -30,7 +30,7 @@ export const partitionByNonFoundErrors = <T extends Array<{ statusCode: number }
 ): [T, T] => {
   const [nonFoundErrors, restOfErrors] = partition(errors, (error) => error.statusCode === 404) as [
     T,
-    T
+    T,
   ];
 
   return [nonFoundErrors, restOfErrors];

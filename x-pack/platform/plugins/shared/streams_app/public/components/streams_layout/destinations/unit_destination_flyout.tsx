@@ -23,13 +23,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ResolvedDestinationIndex } from '@kbn/streams-plugin/common';
-import { getSignalTargetsWritePatterns } from '@kbn/streams-schema';
+import { useKibana } from '../../../hooks/use_kibana';
 import { DESTINATION_TYPES_WITH_STATS } from '../../stream_management/data_management/stream_detail_canvas/nodes/destination_stats_status';
-import { IngestRateChartContent } from '../../stream_detail_overview/ingest_rate_chart';
 import { DeferredMount } from '../deferred_mount';
 import { DeleteDestinationConfirmation } from './delete_destination_confirmation';
-import { getReadableFailureStoreNames } from './destination_index_stats';
-import { DestinationDeliverySection } from './destination_delivery_section';
+import {
+  DestinationDeliverySection,
+  type DeliveryTotalsInput,
+} from './destination_delivery_section';
 import { DestinationIndicesTable } from './destination_indices_table';
 import { useDestinationIndexStats } from './destinations_context';
 import { FlyoutPanel } from './flyout_panel';
@@ -86,7 +87,7 @@ const DestinationDeleteFooter = ({
   );
 };
 
-/** Stats only cover data streams, so a total over regular indices too is unknown. */
+/** Storage is only loaded for data streams, so a total over regular indices too is unknown. */
 const sumStat = (
   indices: readonly ResolvedDestinationIndex[],
   values: Record<string, number> | undefined
@@ -127,38 +128,30 @@ export const UnitDestinationFlyout = ({
 }) => {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'streamsUnitDestinationFlyoutTitle' });
 
+  const { isServerless } = useKibana();
   const { stats: indexStats, status: indexStatsStatus } =
     useDestinationIndexStats(destinationDetailRef);
-  const esqlSource = useMemo(() => {
-    if (destination.type !== 'elasticsearch') {
-      return undefined;
-    }
-    // ES|QL fails on a concrete index that doesn't exist yet, so only resolved names are queried.
-    const resolvedNames = new Set(indices.map(({ name }) => name));
-    const patterns = getSignalTargetsWritePatterns(destination).filter(
-      (pattern) => pattern.includes('*') || resolvedNames.has(pattern)
-    );
-    if (patterns.length === 0) {
-      return undefined;
-    }
-    // Selected per data stream: `::failures` on a regular index or unreadable stream fails the query.
-    const failureStores = getReadableFailureStoreNames(indices).map((name) => `${name}::failures`);
-    return [...patterns, ...failureStores].join(',');
-  }, [destination, indices]);
 
-  // The types that report collector metrics, which the failures are read from.
-  const hasFailureStats = DESTINATION_TYPES_WITH_STATS.includes(destination.type);
+  // The types that report collector metrics, which the delivery panel is read from.
+  const hasDeliveryStats = DESTINATION_TYPES_WITH_STATS.includes(destination.type);
 
   const totals = useMemo(
-    () => ({
-      docs: sumStat(indices, indexStats?.docs),
-      storageBytes: sumStat(indices, indexStats?.storageBytes),
-      loading: indexStatsStatus === 'loading',
-      storageError:
-        indexStatsStatus === 'failed' ||
-        (indexStatsStatus === 'ready' && indexStats?.storageBytes === undefined),
+    (): DeliveryTotalsInput => ({
+      documents: {
+        count:
+          indicesStatus === 'ready'
+            ? indices.reduce((total, { documents }) => total + documents, 0)
+            : undefined,
+        loading: indicesStatus === 'loading',
+      },
+      storage: isServerless
+        ? undefined
+        : {
+            bytes: sumStat(indices, indexStats?.storageBytes),
+            loading: indicesStatus === 'loading' || indexStatsStatus === 'loading',
+          },
     }),
-    [indexStats, indexStatsStatus, indices]
+    [indexStats, indexStatsStatus, indices, indicesStatus, isServerless]
   );
 
   return (
@@ -201,13 +194,11 @@ export const UnitDestinationFlyout = ({
       <EuiFlyoutBody>
         {destination.type === 's3' ? (
           <>
-            {hasFailureStats && (
+            {hasDeliveryStats && (
               <>
-                {/* S3 has no ingest chart, so its panel is the delivery of the flyout. */}
                 <DestinationDeliverySection
                   destinationId={destination.id}
                   destinationType={destination.type}
-                  panelRole="delivery"
                 />
                 <EuiSpacer size="l" />
               </>
@@ -218,12 +209,11 @@ export const UnitDestinationFlyout = ({
           </>
         ) : destination.type === REMOTE_ELASTICSEARCH_TYPE ? (
           <>
-            {hasFailureStats && (
+            {hasDeliveryStats && (
               <>
                 <DestinationDeliverySection
                   destinationId={destination.id}
                   destinationType={destination.type}
-                  panelRole="delivery"
                 />
                 <EuiSpacer size="l" />
               </>
@@ -234,26 +224,12 @@ export const UnitDestinationFlyout = ({
           </>
         ) : (
           <DeferredMount>
-            {esqlSource && (
+            {hasDeliveryStats && (
               <>
-                <IngestRateChartContent
-                  streamName={destination.id}
-                  esqlSource={esqlSource}
-                  canReadFailureStore={false}
-                  isQueryStream={false}
-                  isDraft={false}
-                  totals={totals}
-                />
-                <EuiSpacer size="l" />
-              </>
-            )}
-            {hasFailureStats && (
-              <>
-                {/* The ingest chart shows the delivery, so the panel adds only the failures to it. */}
                 <DestinationDeliverySection
                   destinationId={destination.id}
                   destinationType={destination.type}
-                  panelRole={esqlSource ? 'failures' : 'delivery'}
+                  totals={totals}
                 />
                 <EuiSpacer size="l" />
               </>

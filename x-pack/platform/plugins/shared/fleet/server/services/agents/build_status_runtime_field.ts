@@ -124,8 +124,8 @@ function _buildSource(
 
   return `
     long lastCheckinMillis = doc.containsKey(${fieldPath('last_checkin')}) && ${field(
-    'last_checkin'
-  )}.size() > 0
+      'last_checkin'
+    )}.size() > 0
       ? ${field('last_checkin')}.value.toInstant().toEpochMilli()
       : (
           ${field('enrolled_at')}.size() > 0
@@ -134,8 +134,8 @@ function _buildSource(
         );
     ${agentIsInactiveCondition ? _buildPolicyBaseIdDeclaration({ field, fieldPath }) : ''}
     if (!doc.containsKey(${fieldPath('active')}) || (${field('active')}.size() > 0 && ${field(
-    'active'
-  )}.value == false)) {
+      'active'
+    )}.value == false)) {
       emit('unenrolled');
     }
     ${agentIsInactiveCondition ? `else if (${agentIsInactiveCondition}) {emit('inactive');}` : ''}

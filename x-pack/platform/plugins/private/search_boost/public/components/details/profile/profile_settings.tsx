@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiHealth, EuiText, EuiTextColor, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiHealth, EuiSpacer, EuiText, EuiTextColor, useEuiTheme } from '@elastic/eui';
 import type {
   BoostProfile,
   DataStreamsBoostProfile,
@@ -22,6 +22,7 @@ import { DetailsSection } from '../details_section';
 import type { SettingsListItem } from '../settings_list';
 import { SettingsList } from '../settings_list';
 import {
+  BOOST_PERIOD_DESCRIPTIONS,
   OFF_LABEL,
   SETTINGS_TITLE,
   ON_LABEL,
@@ -67,34 +68,40 @@ const IndicesSettings = ({ profile }: { profile: IndicesBoostProfile }) => (
 );
 
 const DataStreamsSettings = ({ profile }: { profile: DataStreamsBoostProfile }) => {
+  const { euiTheme } = useEuiTheme();
   const colors = useBoostPeriodColors();
 
-  const items = getBoostPeriods(profile).map<SettingsListItem>((period) => ({
-    id: period.id,
-    label: (
-      <EuiHealth color={period.skippedReason ? 'subdued' : colors[period.id]}>
-        {period.skippedReason ? (
-          <EuiTextColor color="subdued">{period.label}</EuiTextColor>
-        ) : (
-          period.label
-        )}
-      </EuiHealth>
-    ),
-    value: period.skippedReason ? (
-      <EuiToolTip content={period.skippedReason}>
-        <EuiTextColor color="subdued" tabIndex={0}>
-          {SKIPPED_LABEL}
+  // A skipped period never holds data: it keeps its boost, muted, and says why in its tooltip. Its
+  // dot takes the disabled color, which is too light for text.
+  const items = getBoostPeriods(profile).map<SettingsListItem>((period) => {
+    const { id, label, boost, skippedReason } = period;
+    return {
+      id,
+      label: (
+        <EuiHealth color={skippedReason ? euiTheme.colors.textDisabled : colors[id]}>
+          {label}
+        </EuiHealth>
+      ),
+      info: skippedReason ? (
+        <>
+          {BOOST_PERIOD_DESCRIPTIONS[id]}
+          <EuiSpacer size="s" />
+          {skippedReason}
+        </>
+      ) : (
+        BOOST_PERIOD_DESCRIPTIONS[id]
+      ),
+      isMuted: Boolean(skippedReason),
+      value: (
+        <EuiTextColor component="div" color={skippedReason ? 'subdued' : 'inherit'}>
+          {formatPeriodBoost(formatBoostRange(boost))}
+          <EuiText size="xs" color="subdued">
+            {skippedReason ? SKIPPED_LABEL : formatPeriodAges(period)}
+          </EuiText>
         </EuiTextColor>
-      </EuiToolTip>
-    ) : (
-      <>
-        {formatPeriodBoost(formatBoostRange(period.boost))}
-        <EuiText size="xs" color="subdued">
-          {formatPeriodAges(period)}
-        </EuiText>
-      </>
-    ),
-  }));
+      ),
+    };
+  });
 
   return <SettingsList items={items} data-test-subj="searchBoostProfileSettingsList" />;
 };

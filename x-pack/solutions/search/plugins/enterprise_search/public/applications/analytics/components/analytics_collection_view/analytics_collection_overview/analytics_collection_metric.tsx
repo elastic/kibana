@@ -46,7 +46,7 @@ const getMetricTheme = (euiTheme: EuiThemeComputed, status: MetricStatus) =>
       color: euiThemeVars.euiColorVis0,
       icon: 'sortUp',
     },
-  }[status]);
+  })[status];
 
 const getMetricStatus = (metric: number): MetricStatus => {
   if (metric > 0) return MetricStatus.INCREASE;

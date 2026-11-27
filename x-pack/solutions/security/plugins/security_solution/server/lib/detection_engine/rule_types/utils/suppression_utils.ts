@@ -74,7 +74,7 @@ export const getSuppressionTerms = ({
 }): SuppressionTerm[] => {
   const suppressedBy = alertSuppression?.groupBy ?? [];
   const suppressionTerms = suppressedBy.map((field) => {
-    const value = input != null ? robustGet({ document: input, key: field }) ?? null : null;
+    const value = input != null ? (robustGet({ document: input, key: field }) ?? null) : null;
     const sortedValue = Array.isArray(value) ? (sortBy(value) as string[] | number[]) : value;
     return {
       field,

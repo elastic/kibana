@@ -103,6 +103,73 @@ describe('useSaveAiIndexSources', () => {
     });
   });
 
+  it('shows a warning toast naming what the save did not do, and still reports it saved', async () => {
+    const core = coreMock.createStart();
+    core.http.put.mockResolvedValue({
+      status: 'updated',
+      warnings: [
+        {
+          source: { type: 'esql', value: 'FROM   logs-*\n| LIMIT 10' },
+          message: 'No index matching logs-* was found, or you do not have read access to it.',
+        },
+        {
+          source: { type: 'esql', value: 'FROM orders' },
+          message: 'The index metadata automation could not be installed: workflows unavailable',
+        },
+      ],
+    });
+
+    const { result } = renderUseSaveAiIndexSources(core);
+
+    let saved = false;
+    await act(async () => {
+      saved = await result.current.saveSources(aiIndex, selectedSources);
+    });
+
+    expect(saved).toBe(true);
+    expect(core.notifications.toasts.addWarning).toHaveBeenCalledWith({
+      title: 'Sources saved, but some automations were not updated',
+      text: 'FROM logs-* | LIMIT 10: No index matching logs-* was found, or you do not have read access to it. FROM orders: The index metadata automation could not be installed: workflows unavailable.',
+    });
+    expect(core.notifications.toasts.addError).not.toHaveBeenCalled();
+  });
+
+  it('lists the first few warnings and counts the rest', async () => {
+    const core = coreMock.createStart();
+    core.http.put.mockResolvedValue({
+      status: 'updated',
+      warnings: ['a', 'b', 'c', 'd', 'e'].map((index) => ({
+        source: { type: 'esql', value: `FROM ${index}` },
+        message: 'Skipped.',
+      })),
+    });
+
+    const { result } = renderUseSaveAiIndexSources(core);
+
+    await act(async () => {
+      await result.current.saveSources(aiIndex, selectedSources);
+    });
+
+    expect(core.notifications.toasts.addWarning).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: 'FROM a: Skipped. FROM b: Skipped. FROM c: Skipped. And 2 more.',
+      })
+    );
+  });
+
+  it('shows no warning toast when the save came back without warnings', async () => {
+    const core = coreMock.createStart();
+    core.http.put.mockResolvedValue({ status: 'updated' });
+
+    const { result } = renderUseSaveAiIndexSources(core);
+
+    await act(async () => {
+      await result.current.saveSources(aiIndex, selectedSources);
+    });
+
+    expect(core.notifications.toasts.addWarning).not.toHaveBeenCalled();
+  });
+
   it('returns false and shows an error toast when the PUT fails', async () => {
     const core = coreMock.createStart();
     const requestError = new Error('Network error');

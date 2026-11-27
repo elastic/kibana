@@ -23,7 +23,7 @@ interface ManagementBottomBarProps {
   insufficientPrivileges?: boolean;
   isLoading?: boolean;
   isInvalid?: boolean;
-  streamType?: 'classic' | 'wired' | 'query' | 'unknown';
+  streamType?: 'classic' | 'wired' | 'unknown';
   onCancel: () => void;
   onConfirm: () => void;
   onViewCodeClick?: () => void;
@@ -99,13 +99,13 @@ export function ManagementBottomBar({
                       }
                     )
                   : insufficientPrivileges
-                  ? i18n.translate(
-                      'xpack.streams.streamDetailView.managementTab.bottomBar.onlySimulate',
-                      {
-                        defaultMessage: "You don't have sufficient privileges to save changes.",
-                      }
-                    )
-                  : undefined
+                    ? i18n.translate(
+                        'xpack.streams.streamDetailView.managementTab.bottomBar.onlySimulate',
+                        {
+                          defaultMessage: "You don't have sufficient privileges to save changes.",
+                        }
+                      )
+                    : undefined
               }
             >
               <EuiButton

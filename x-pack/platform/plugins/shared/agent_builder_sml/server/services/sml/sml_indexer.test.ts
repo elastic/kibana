@@ -37,7 +37,7 @@ const createMockEsClient = (): jest.Mocked<ElasticsearchClient> =>
     count: jest.fn().mockResolvedValue({ count: 0 }),
     indices: { refresh: jest.fn().mockResolvedValue({ _shards: { failed: 0 } }) },
     get: jest.fn().mockResolvedValue({ found: false }),
-  } as unknown as jest.Mocked<ElasticsearchClient>);
+  }) as unknown as jest.Mocked<ElasticsearchClient>;
 
 const createMockLogger = () => {
   const log = loggerMock.create();

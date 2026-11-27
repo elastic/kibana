@@ -33,7 +33,7 @@ describe('createEntityStoreNameLookup', () => {
     const createCRUDClient = jest.fn().mockReturnValue({ listEntities });
     const lookup = createEntityStoreNameLookup({
       getEntityStore: () => (entityStore ? ({ createCRUDClient } as never) : undefined),
-      getEsClient: () => ({} as never),
+      getEsClient: () => ({}) as never,
       getSpaceId: () => 'default',
       logger,
     });

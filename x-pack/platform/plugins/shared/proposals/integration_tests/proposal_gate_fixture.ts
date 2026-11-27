@@ -273,7 +273,7 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
         create: jest.fn(async ({ origin }: { origin: string }) => {
           attachedProposalIds.push(origin);
         }),
-      } as never),
+      }) as never,
     resolveUser: async () => ({
       username: 'analyst',
       fullName: null,
@@ -382,7 +382,7 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
 
   const proposals = () =>
     [...documents.entries()].map(
-      ([id, { document }]) => ({ id, ...document } as Proposal & { id: string })
+      ([id, { document }]) => ({ id, ...document }) as Proposal & { id: string }
     );
 
   /** Stages the payload `waitForApproval` reduces a resume to, without waking the run. */

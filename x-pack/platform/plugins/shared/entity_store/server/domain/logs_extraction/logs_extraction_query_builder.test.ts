@@ -43,6 +43,55 @@ describe('buildLogsExtractionEsqlQuery', () => {
     await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
   });
 
+  describe('entity id cursor placement', () => {
+    const ID_COLUMN = 'recent.entity.EngineMetadata.UntypedId';
+    const CURSOR_FILTER = `| WHERE ${ID_COLUMN} > "cursor-id"`;
+    const buildWithCursor = (type: EntityType, withCursor = true) =>
+      buildLogsExtractionEsqlQuery({
+        indexPatterns: ['test-index-*'],
+        latestIndex: 'latest-index',
+        entityDefinition: getEntityDefinition(type, 'default'),
+        docsLimit: 10000,
+        fromDateISO: '2022-01-01T00:00:00.000Z',
+        toDateISO: '2022-01-01T23:59:59.999Z',
+        ...(withCursor ? { pagination: { idCursor: 'cursor-id' } } : {}),
+      });
+
+    it.each(['host', 'user'] as const)(
+      '%s: the cursor filters raw rows before STATS and LOOKUP JOIN, and only once',
+      async (type) => {
+        const query = buildWithCursor(type);
+        const cursorIdx = query.indexOf(CURSOR_FILTER);
+        expect(cursorIdx).toBeGreaterThan(query.indexOf(`${ID_COLUMN} = `));
+        expect(cursorIdx).toBeLessThan(query.indexOf('| STATS'));
+        expect(cursorIdx).toBeLessThan(query.indexOf('LOOKUP JOIN'));
+        expect(query.split(CURSOR_FILTER)).toHaveLength(2);
+        await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+      }
+    );
+
+    it.each(['host', 'user'] as const)('%s: no cursor filter on the first page', (type) => {
+      expect(buildWithCursor(type, false)).not.toContain(`${ID_COLUMN} >`);
+    });
+
+    it('user (postAggFilter): SORT and LIMIT stay after the postAggFilter', () => {
+      const query = buildWithCursor('user');
+      const lookupIdx = query.indexOf('LOOKUP JOIN');
+      const sortIdx = query.indexOf(`| SORT ${ID_COLUMN} ASC`);
+      expect(getEntityDefinition('user', 'default').extraction.postAggFilter).toBeDefined();
+      expect(sortIdx).toBeGreaterThan(lookupIdx);
+      expect(query.indexOf('| LIMIT 10000')).toBeGreaterThan(sortIdx);
+    });
+
+    it('host (no postAggFilter): SORT and LIMIT stay before LOOKUP JOIN', () => {
+      const query = buildWithCursor('host');
+      expect(query.indexOf('| LIMIT 10000')).toBeLessThan(query.indexOf('LOOKUP JOIN'));
+      expect(query.indexOf('| LIMIT 10000')).toBeGreaterThan(
+        query.indexOf(`| SORT ${ID_COLUMN} ASC`)
+      );
+    });
+  });
+
   it('excludes managed fields from STATS, merge EVAL, and produces a valid query', async () => {
     const base = getEntityDefinition('host', 'default');
     // Inject a managed field alongside a normal log-derived field to verify orthogonality.
@@ -206,6 +255,33 @@ describe('buildLogsExtractionEsqlQuery', () => {
 
     it.each([0, -0.5, 1.5, NaN])('rejects out-of-range rate %p', (samplingRate) => {
       expect(() => buildWith(samplingRate)).toThrow(/must be in \(0, 1\]/);
+    });
+  });
+
+  describe('latest index created before the definition stored a field', () => {
+    const buildFor = (type: 'user' | 'host') =>
+      buildLogsExtractionEsqlQuery({
+        indexPatterns: ['test-index-*'],
+        latestIndex: 'latest-index',
+        entityDefinition: getEntityDefinition(type, 'default'),
+        docsLimit: 10000,
+        fromDateISO: '2022-01-01T00:00:00.000Z',
+        toDateISO: '2022-01-01T23:59:59.999Z',
+      });
+
+    it('sets user.entity.id to null right before the join so an unmapped lookup column resolves', async () => {
+      const query = buildFor('user');
+
+      const placeholder =
+        '| EVAL user.entity.id = TO_STRING(null)\n| LOOKUP JOIN _coordinator:latest-index';
+      expect(query).toContain(placeholder);
+      expect(query.indexOf(placeholder)).toBeGreaterThan(query.indexOf('| STATS'));
+      expect(query.split('TO_STRING(null)')).toHaveLength(2);
+      await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+    });
+
+    it('adds no placeholder to a definition that does not store the field', () => {
+      expect(buildFor('host')).not.toContain('TO_STRING(null)');
     });
   });
 

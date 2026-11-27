@@ -36,7 +36,7 @@ describe('getRecordMaintenanceRunStepDefinition', () => {
             managed: false,
             dreaming: { enabled: true },
           }),
-        } as unknown as AiIndexService),
+        }) as unknown as AiIndexService,
       isDreamingAvailable: async () => dreamingAvailable,
       checkWritePrivilege: async () => canWrite,
       ...mockKiStepTelemetry(),

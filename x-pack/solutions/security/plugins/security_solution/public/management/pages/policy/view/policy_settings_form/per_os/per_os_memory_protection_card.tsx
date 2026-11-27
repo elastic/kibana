@@ -260,7 +260,7 @@ const PerOsCustomYaraSignaturesSwitch = memo<PerOsCustomYaraSignaturesSwitchProp
     const checked = Boolean(accessor.read().memory_protection.custom_yara_signatures);
     const tooltipContent = isAvailable
       ? CUSTOM_YARA_SIGNATURES_HINT
-      : upsellMessage ?? CUSTOM_YARA_SIGNATURES_LICENSE_UPSELL;
+      : (upsellMessage ?? CUSTOM_YARA_SIGNATURES_LICENSE_UPSELL);
 
     const handleSwitchChange = useCallback<EuiSwitchProps['onChange']>(
       (event) => {

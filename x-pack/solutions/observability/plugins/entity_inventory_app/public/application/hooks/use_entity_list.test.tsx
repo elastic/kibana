@@ -6,16 +6,14 @@
  */
 
 import React from 'react';
-import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { EntityInventoryApiClient } from '../../inventory_api/client';
 import { createFixtureEntityInventoryApiClient } from '../../__fixtures__/inventory_client';
 import { createScenarioEntityInventoryApiClient } from '../../__fixtures__/inventory_scenarios';
-import { createAppServicesMock } from '../../mocks';
+import { createAppServicesMock, MockEntityInventoryProvider } from '../../mocks';
 import { DEFAULT_TIME_RANGE } from '../constants';
-import { EntityInventorySearchProvider, useEntityInventorySearch } from '../context/search_context';
+import { useEntityInventorySearch } from '../context/search_context';
 import { INITIAL_LIST_RESPONSE, useEntityList } from './use_entity_list';
 
 const createClientMock = (
@@ -32,13 +30,13 @@ const renderUseEntityList = (inventoryApi: EntityInventoryApiClient, entityType 
     () => ({ search: useEntityInventorySearch(), result: useEntityList(entityType) }),
     {
       wrapper: ({ children }) => (
-        <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
-          <Router history={history}>
-            <EntityInventorySearchProvider entityCategory="hosts">
-              {children}
-            </EntityInventorySearchProvider>
-          </Router>
-        </KibanaContextProvider>
+        <MockEntityInventoryProvider
+          entityCategory="hosts"
+          services={createAppServicesMock({ inventoryApi })}
+          history={history}
+        >
+          {children}
+        </MockEntityInventoryProvider>
       ),
     }
   );
@@ -174,13 +172,13 @@ describe('useEntityList', () => {
       },
       {
         wrapper: ({ children }) => (
-          <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
-            <Router history={createMemoryHistory()}>
-              <EntityInventorySearchProvider entityCategory="hosts">
-                {children}
-              </EntityInventorySearchProvider>
-            </Router>
-          </KibanaContextProvider>
+          <MockEntityInventoryProvider
+            entityCategory="hosts"
+            services={createAppServicesMock({ inventoryApi })}
+            history={createMemoryHistory()}
+          >
+            {children}
+          </MockEntityInventoryProvider>
         ),
       }
     );
@@ -235,13 +233,13 @@ describe('useEntityList when it is not enabled', () => {
       {
         initialProps: { isEnabled: enabled },
         wrapper: ({ children }) => (
-          <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
-            <Router history={history}>
-              <EntityInventorySearchProvider entityCategory="hosts">
-                {children}
-              </EntityInventorySearchProvider>
-            </Router>
-          </KibanaContextProvider>
+          <MockEntityInventoryProvider
+            entityCategory="hosts"
+            services={createAppServicesMock({ inventoryApi })}
+            history={history}
+          >
+            {children}
+          </MockEntityInventoryProvider>
         ),
       }
     );

@@ -77,10 +77,12 @@ const useStyles = ({ isSearchResultEmpty }: { isSearchResultEmpty: boolean }) =>
       width: 100%;
       ${useEuiOverflowScroll('y', true)}
 
-      ${isSearchResultEmpty &&
-      css`
-        display: flex; /* Will center vertically the empty search result */
-      `}
+      ${
+        isSearchResultEmpty &&
+        css`
+          display: flex; /* Will center vertically the empty search result */
+        `
+      }
     `,
   };
 };

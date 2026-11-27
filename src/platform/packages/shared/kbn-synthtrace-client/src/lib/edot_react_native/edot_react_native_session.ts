@@ -101,6 +101,11 @@ export type EdotReactNativeSessionOptions = SessionAnchor & {
    * spans, freezes, backend spans, and crashes reported on the next launch on both platforms.
    */
   proposedSignals?: boolean;
+  /**
+   * Writes an `elastic.app.start` per launch, as the SDKs will through the native layer; always on
+   * with `proposedSignals`.
+   */
+  appStartEvents?: boolean;
   /** The previous session of the installation, written as `session.previous_id`. */
   previousSessionId?: string;
   random?: () => number;
@@ -226,6 +231,9 @@ const TRANSPORT_ERRORS: Readonly<Record<MobilePlatform, readonly TransportError[
  * freezes, handled errors, and backend spans. It stamps the screen's name on what it writes, and
  * both platforms report a crash on the next launch, with the crash time.
  *
+ * With `appStartEvents` alone, it writes the app starts only. They draw nothing from `random`, so
+ * the rest of the session stays the same.
+ *
  * Planning and simulation draw from the same `random` source, so a seed reproduces a session.
  */
 
@@ -235,6 +243,7 @@ interface SessionContext {
   health: MobileHealthProfile;
   manualSpans: ManualSpanOptions;
   proposedSignals: boolean;
+  appStartEvents: boolean;
   random: () => number;
 }
 
@@ -389,10 +398,10 @@ const sendRequest = (
   const statusCode = isNetworkError
     ? undefined
     : random() < failureRate
-    ? pick(random, failureStatusCodes.length ? failureStatusCodes : DEFAULT_FAILURE_STATUS_CODES)
-    : method === 'POST'
-    ? 201
-    : 200;
+      ? pick(random, failureStatusCodes.length ? failureStatusCodes : DEFAULT_FAILURE_STATUS_CODES)
+      : method === 'POST'
+        ? 201
+        : 200;
   const transportError = isNetworkError
     ? pick(random, TRANSPORT_ERRORS[client.platform])
     : undefined;
@@ -690,7 +699,7 @@ const simulateVisit = (
   visit: VisitPlan,
   pendingCrash?: PendingCrash
 ): { events: EdotReactNativeEvent[]; crash?: PendingCrash } => {
-  const { client, manualSpans, proposedSignals, random } = ctx;
+  const { client, manualSpans, proposedSignals, appStartEvents, random } = ctx;
   const { start, cold, launched, screenViews, end, crashedAt } = visit;
   const events: EdotReactNativeEvent[] = [];
 
@@ -706,7 +715,7 @@ const simulateVisit = (
     events.push(crashLog);
   }
 
-  if (proposedSignals) {
+  if (appStartEvents) {
     events.push(
       client
         .appStart({
@@ -787,13 +796,22 @@ export const session = (options: EdotReactNativeSessionOptions): EdotReactNative
     dwell = DEFAULT_DWELL,
     manualSpans = {},
     proposedSignals = false,
+    appStartEvents = false,
     previousSessionId,
     random = Math.random,
   } = options;
   if (app.screens.length === 0) {
     throw new Error('An app must have at least one screen to simulate a session');
   }
-  const ctx: SessionContext = { client, app, health, manualSpans, proposedSignals, random };
+  const ctx: SessionContext = {
+    client,
+    app,
+    health,
+    manualSpans,
+    proposedSignals,
+    appStartEvents: appStartEvents || proposedSignals,
+    random,
+  };
   const plans = planVisits(ctx, { screenViews: Math.max(screenViews, 1), visits, dwell });
 
   // A crash at the end of the session is reported when the user relaunches the app

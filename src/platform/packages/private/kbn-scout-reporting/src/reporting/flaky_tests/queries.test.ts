@@ -269,8 +269,8 @@ describe('fetchBranchStats', () => {
           ? []
           : setupRows
         : playwright
-        ? outcomeRows
-        : attemptRows;
+          ? outcomeRows
+          : attemptRows;
       return { toRecords: jest.fn().mockResolvedValue({ records: rows }) };
     });
 

@@ -45,7 +45,7 @@ import { FieldStatusBadge } from './field_status';
 
 interface SchemaChangesReviewModalProps {
   onClose: () => void;
-  streamType?: 'wired' | 'classic' | 'query' | 'unknown';
+  streamType?: 'wired' | 'classic' | 'unknown';
   definition: Streams.ingest.all.GetResponse;
   fields: SchemaEditorField[];
   storedFields: SchemaEditorField[];
@@ -361,8 +361,8 @@ export function SchemaChangesReviewModal({
                 isSimulating
                   ? 'streamsAppSchemaChangesCheckingConflicts'
                   : fieldConflicts.length > 0
-                  ? 'streamsAppSchemaChangesFieldConflictsWarning'
-                  : 'streamsAppSchemaChangesNoConflicts'
+                    ? 'streamsAppSchemaChangesFieldConflictsWarning'
+                    : 'streamsAppSchemaChangesNoConflicts'
               }
             >
               {isSimulating ? (

@@ -29,7 +29,7 @@ export const canonicalDetectionsFromGroundTruth = ({
     const timestamp =
       authored && shift
         ? shiftSnapshotTimestamp({ timestamp: authored, ...shift })
-        : authored ?? CANONICAL_TIMESTAMP;
+        : (authored ?? CANONICAL_TIMESTAMP);
     return {
       '@timestamp': timestamp,
       detection_id: rule.detection_id ?? `${rule.rule_uuid ?? `rule-${index}`}-canonical-${index}`,

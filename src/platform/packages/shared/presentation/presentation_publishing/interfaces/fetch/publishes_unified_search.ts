@@ -68,9 +68,9 @@ export const apiPublishesUnifiedSearch = (
 ): unknownApi is PublishesUnifiedSearch => {
   return Boolean(
     unknownApi &&
-      apiPublishesTimeRange(unknownApi) &&
-      apiPublishesFilters(unknownApi) &&
-      (unknownApi as PublishesUnifiedSearch)?.query$ !== undefined
+    apiPublishesTimeRange(unknownApi) &&
+    apiPublishesFilters(unknownApi) &&
+    (unknownApi as PublishesUnifiedSearch)?.query$ !== undefined
   );
 };
 
@@ -79,8 +79,8 @@ export const apiPublishesPartialUnifiedSearch = (
 ): unknownApi is Partial<PublishesUnifiedSearch> => {
   return Boolean(
     apiPublishesTimeRange(unknownApi) ||
-      apiPublishesFilters(unknownApi) ||
-      (unknownApi as PublishesUnifiedSearch)?.query$ !== undefined
+    apiPublishesFilters(unknownApi) ||
+    (unknownApi as PublishesUnifiedSearch)?.query$ !== undefined
   );
 };
 

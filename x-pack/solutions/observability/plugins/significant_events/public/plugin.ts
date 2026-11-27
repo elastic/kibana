@@ -17,14 +17,11 @@ export interface SignificantEventsPublicPluginStart {
   significantEventsRepositoryClient: SignificantEventsRepositoryClient;
 }
 
-export class SignificantEventsPublicPlugin
-  implements
-    Plugin<
-      SignificantEventsPublicPluginSetup,
-      SignificantEventsPublicPluginStart,
-      SignificantEventsPublicSetupDependencies
-    >
-{
+export class SignificantEventsPublicPlugin implements Plugin<
+  SignificantEventsPublicPluginSetup,
+  SignificantEventsPublicPluginStart,
+  SignificantEventsPublicSetupDependencies
+> {
   constructor(_ctx: PluginInitializerContext) {}
 
   setup(
@@ -32,6 +29,12 @@ export class SignificantEventsPublicPlugin
     plugins: SignificantEventsPublicSetupDependencies
   ): SignificantEventsPublicPluginSetup {
     registerSignificantEventsWorkflowTriggers(plugins.workflowsExtensions);
+    plugins.workflowsExtensions?.registerStepDefinition(() =>
+      import('./workflows/steps/resolve_written_detections').then(
+        ({ resolveWrittenDetectionsPublicStepDefinition }) =>
+          resolveWrittenDetectionsPublicStepDefinition
+      )
+    );
     return {};
   }
 

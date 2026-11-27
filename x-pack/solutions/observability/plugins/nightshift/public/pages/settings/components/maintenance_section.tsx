@@ -209,12 +209,12 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
                     defaultMessage: 'Checking status…',
                   })
                 : paused
-                ? i18n.translate('xpack.nightshift.settings.maintenance.resumeButton', {
-                    defaultMessage: 'Resume detection engine',
-                  })
-                : i18n.translate('xpack.nightshift.settings.maintenance.pauseButton', {
-                    defaultMessage: 'Pause detection engine',
-                  })}
+                  ? i18n.translate('xpack.nightshift.settings.maintenance.resumeButton', {
+                      defaultMessage: 'Resume detection engine',
+                    })
+                  : i18n.translate('xpack.nightshift.settings.maintenance.pauseButton', {
+                      defaultMessage: 'Pause detection engine',
+                    })}
             </EuiButton>
           </EuiFlexItem>
           {(isPausing || paused) && (

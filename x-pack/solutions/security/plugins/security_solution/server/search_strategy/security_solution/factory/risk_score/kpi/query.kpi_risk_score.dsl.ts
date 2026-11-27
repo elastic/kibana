@@ -35,21 +35,24 @@ export const buildKpiRiskScoreQuery = ({
   const entities = Array.isArray(entity) ? entity : [entity];
 
   // Build aggregations for each entity type
-  const entityAggregations = entities.reduce((acc, entityType) => {
-    acc[entityType] = {
-      terms: {
-        field: EntityTypeToLevelField[entityType],
-      },
-      aggs: {
-        unique_entries: {
-          cardinality: {
-            field: EntityTypeToIdentifierField[entityType],
+  const entityAggregations = entities.reduce(
+    (acc, entityType) => {
+      acc[entityType] = {
+        terms: {
+          field: EntityTypeToLevelField[entityType],
+        },
+        aggs: {
+          unique_entries: {
+            cardinality: {
+              field: EntityTypeToIdentifierField[entityType],
+            },
           },
         },
-      },
-    };
-    return acc;
-  }, {} as Record<string, AggregationsAggregationContainer>);
+      };
+      return acc;
+    },
+    {} as Record<string, AggregationsAggregationContainer>
+  );
 
   const dslQuery = {
     index: defaultIndex,

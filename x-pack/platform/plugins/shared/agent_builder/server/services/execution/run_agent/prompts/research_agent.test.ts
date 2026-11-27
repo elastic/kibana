@@ -7,6 +7,7 @@
 
 import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import { INTENT_PARAM } from '@kbn/agent-builder-genai-utils/langchain';
 import { z } from '@kbn/zod/v4';
 import { getResearchAgentPrompt } from './research_agent';
 import { attachmentToolsUnavailableNotice } from './utils/attachments';
@@ -37,7 +38,7 @@ describe('getResearchAgentPrompt', () => {
               id: type,
               validate: (input: unknown) => ({ valid: true, data: input }),
               format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
-            } as any),
+            }) as any,
         }),
       },
       configuration: {
@@ -63,7 +64,7 @@ describe('getResearchAgentPrompt', () => {
       resultTransformer: jest.fn(),
       renderers: [],
       ...overrides,
-    } as any);
+    }) as any;
 
   const asText = (m: any): string =>
     Array.isArray(m) ? String(m[1]) : typeof m?.content === 'string' ? m.content : '';
@@ -116,6 +117,13 @@ describe('getResearchAgentPrompt', () => {
     expect(prepareMessages).toHaveBeenCalledWith(
       expect.objectContaining({ conversationTimestamp: now })
     );
+  });
+
+  it('asks the model to label each tool call with an intent clients may show', async () => {
+    const system = asText((await getResearchAgentPrompt(makeParams()))[0]);
+
+    expect(system).toContain(`Also set \`${INTENT_PARAM}\` on each tool call that accepts it`);
+    expect(system).toContain("Clients may show it to the user as that step's label.");
   });
 
   it('renders the deployment section as the last section of the system message', async () => {
@@ -504,7 +512,7 @@ describe('getResearchAgentPrompt', () => {
               id: type,
               validate: (input: unknown) => ({ valid: true, data: input }),
               format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
-            } as any),
+            }) as any,
         }),
       },
       configuration: {

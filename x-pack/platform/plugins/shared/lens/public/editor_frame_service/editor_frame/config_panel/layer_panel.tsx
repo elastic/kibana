@@ -431,7 +431,7 @@ export function LayerPanel(props: LayerPanelProps) {
     Boolean(
       (Object.values(visualizationLayerSettings).some(Boolean) &&
         activeVisualization.LayerSettingsComponent) ||
-        layerDatasource?.LayerSettingsComponent
+      layerDatasource?.LayerSettingsComponent
     );
 
   const layerSettingsAction = useMemo(

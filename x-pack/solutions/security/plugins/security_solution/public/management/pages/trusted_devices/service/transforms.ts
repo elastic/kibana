@@ -103,7 +103,7 @@ export const readTransform = (item: ExceptionListItemSchema): ExceptionListItemS
 };
 
 export const writeTransform = <
-  T extends CreateExceptionListItemSchema | UpdateExceptionListItemSchema
+  T extends CreateExceptionListItemSchema | UpdateExceptionListItemSchema,
 >(
   item: T
 ): T => {

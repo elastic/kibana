@@ -130,4 +130,12 @@ export const scoutOverrides: OxlintOverride[] = [
       '@kbn/eslint/scout_prefer_both_arch_tags': 'warn',
     },
   },
+  {
+    // Observability Scout tests: every root describe must declare its tags (including the
+    // single-architecture plugins excluded above)
+    files: ['x-pack/solutions/observability/{packages,plugins}/*/test/{scout,scout_*}/**/*.ts'],
+    rules: {
+      '@kbn/eslint/scout_require_tags': 'error',
+    },
+  },
 ];

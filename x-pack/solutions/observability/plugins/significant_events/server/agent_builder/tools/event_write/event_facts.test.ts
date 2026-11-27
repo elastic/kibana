@@ -54,7 +54,7 @@ const makeStored = (
     summary: 'P99 latency breached SLO',
     confidence: 0.8,
     ...overrides,
-  } as SignificantEvent);
+  }) as SignificantEvent;
 
 const makeCandidate = (
   signals: SignalEntry[],
@@ -138,6 +138,20 @@ describe('shouldSkipAsNoOp', () => {
       skip({
         stored: [makeSignal({ verdict: 'confirms' })],
         submitted: [makeSignal({ verdict: 'refutes' })],
+      })
+    ).toBe(false);
+  });
+
+  it('does not skip when the summary changes at the same severity', () => {
+    const signal = makeSignal();
+    expect(
+      shouldSkipAsNoOp({
+        candidate: makeCandidate(
+          [signal],
+          { summary: 'P99 latency breached SLO and checkout requests now fail.' },
+          makeStored([signal])
+        ),
+        severity: 'high',
       })
     ).toBe(false);
   });

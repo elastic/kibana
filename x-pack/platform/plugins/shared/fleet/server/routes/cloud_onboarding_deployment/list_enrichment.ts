@@ -98,7 +98,7 @@ export async function enrichDeployments(
       ...(withAgentCount
         ? {
             agentCount: agentPolicyIdsOf(deployment).reduce(
-              (sum, id) => sum + (accessibleAgentPolicyIds.has(id) ? agentCounts[id] ?? 0 : 0),
+              (sum, id) => sum + (accessibleAgentPolicyIds.has(id) ? (agentCounts[id] ?? 0) : 0),
               0
             ),
           }

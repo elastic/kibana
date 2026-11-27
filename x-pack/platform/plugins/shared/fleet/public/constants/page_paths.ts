@@ -101,7 +101,6 @@ export const FLEET_ROUTING_PATHS = {
 };
 
 export const INTEGRATIONS_SEARCH_QUERYPARAM = 'q';
-export const INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM = 'onlyAgentless';
 export const INTEGRATIONS_SHOW_DEPRECATED_QUERYPARAM = 'showDeprecated';
 export const INTEGRATIONS_ROUTING_PATHS = {
   integrations: '/:tabId',
@@ -139,27 +138,22 @@ export const pagePathGetters: {
     searchTerm,
     category,
     subCategory,
-    onlyAgentless,
     showDeprecated,
   }: {
     searchTerm?: string;
     category?: string;
     subCategory?: string;
-    onlyAgentless?: boolean;
     showDeprecated?: boolean;
   }) => {
     const categoryPath =
       category && subCategory
         ? `/${category}/${subCategory}`
         : category && !subCategory
-        ? `/${category}`
-        : ``;
+          ? `/${category}`
+          : ``;
     const queryParams = new URLSearchParams();
     if (searchTerm) {
       queryParams.set(INTEGRATIONS_SEARCH_QUERYPARAM, searchTerm);
-    }
-    if (onlyAgentless) {
-      queryParams.set(INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM, 'true');
     }
     if (showDeprecated === true) {
       queryParams.set(INTEGRATIONS_SHOW_DEPRECATED_QUERYPARAM, 'true');
@@ -299,10 +293,10 @@ export const pagePathGetters: {
       kuery && showInactive
         ? `?kuery=${kuery}&showInactive=true`
         : showInactive
-        ? '?showInactive=true'
-        : kuery
-        ? `?kuery=${kuery}`
-        : ''
+          ? '?showInactive=true'
+          : kuery
+            ? `?kuery=${kuery}`
+            : ''
     }`,
   ],
   agent_details: ({ agentId, tabId, logQuery }) => [

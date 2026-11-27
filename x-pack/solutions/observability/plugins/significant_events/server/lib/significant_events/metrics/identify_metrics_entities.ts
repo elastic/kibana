@@ -83,13 +83,14 @@ const rowsFromResponse = (response: ESQLSearchResponse): EsqlRow[] =>
   );
 
 // NULLIFY turns missing fields into null so one query works across ECS and OTel sources that lack some fields.
-const buildSourceQuery = (esql: string): string =>
+export const buildMetricsSourceQuery = (esql: string): string =>
   `SET unmapped_fields = "NULLIFY"; ${toFromSourceQuery(esql)}`;
 
 const buildDatasetQuery = (sourceQuery: string): string =>
   `${sourceQuery} | WHERE @timestamp > NOW() - 1 hour | STATS docs = COUNT(*) BY data_stream.dataset`;
 
-const getMetricsDatasets = async ({
+/** Lists the datasets with data in a metrics source during the last hour. */
+export const getMetricsDatasets = async ({
   esClient,
   sourceQuery,
   signal,
@@ -152,7 +153,7 @@ export const identifyMetricsEntities = async ({
   signal,
 }: IdentifyMetricsEntitiesOptions): Promise<IdentifyMetricsEntitiesResult> => {
   const startedAt = Date.now();
-  const sourceQuery = buildSourceQuery(esql);
+  const sourceQuery = buildMetricsSourceQuery(esql);
   const datasets = await getMetricsDatasets({ esClient, sourceQuery, signal });
 
   const catalogueMs = Date.now() - startedAt;
