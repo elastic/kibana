@@ -14,6 +14,7 @@ import React, {
   useEffect,
   useLayoutEffect,
   useCallback,
+  useState,
 } from 'react';
 
 import { css } from '@emotion/react';
@@ -27,9 +28,10 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import { FOCUSABLE_SELECTOR } from './constants';
+import { FOCUSABLE_SELECTOR, MODIFICATION_DECREASE, MODIFICATION_INCREASE } from './constants';
 import {
   findCorrespondingInputPart,
+  getInputOffsetAtClientX,
   getInputScrollLeftToCenter,
   isRelativeToNow,
   resolveInitialFocus,
@@ -38,6 +40,7 @@ import { DateRangePickerAutoRefreshButton } from './date_range_picker_auto_refre
 import { useDateRangePickerContext } from './date_range_picker_context';
 import { useSelectTextPartsWithArrowKeys } from './hooks/use_select_text_parts_with_arrow_keys';
 import { useInputHintText } from './hooks/use_input_hint_text';
+import { useWheelSteps } from './hooks/use_wheel_steps';
 import { inputControlTexts } from './translations';
 import { DateRangeValueDisplay } from './date_range_value_display';
 import { applyPartModification } from './parse/modify_range_parts';
@@ -117,7 +120,94 @@ export function DateRangePickerControl() {
     },
   });
 
+  /**
+   * Text before the user started scrolling over display parts. Non-null means
+   * there is a pending (unapplied) scroll change: the calendar icon becomes a
+   * confirm button, and clicking outside restores this text.
+   */
+  const [preScrollText, setPreScrollText] = useState<string | null>(null);
+  const hasPendingScroll = preScrollText !== null;
+
+  const handleDisplayPartWheel = useCallback(
+    (displayPart: RangePart, direction: 1 | -1) => {
+      const inputParts = parseInputParts(text, timeRange.type).filter((part) => part.navigable);
+      const target = findCorrespondingInputPart(
+        inputParts,
+        displayPart,
+        parseDisplayParts(displayText)
+      );
+      if (!target) return;
+
+      const action = direction === 1 ? MODIFICATION_INCREASE : MODIFICATION_DECREASE;
+      const newText = applyPartModification(text, target, action, inputParts);
+      if (newText === undefined || newText === text) return;
+
+      setPreScrollText((prev) => prev ?? text);
+      setText(newText);
+    },
+    [text, timeRange.type, displayText, setText]
+  );
+
+  /**
+   * In edit mode, scrolling over a part of the input steps it directly; the change
+   * stays in the input and is applied with Enter like any typed edit (no confirm button).
+   */
+  useWheelSteps(inputRef, isEditing && !disabled, (event, direction) => {
+    const input = inputRef.current;
+    if (!input) return false;
+    const offset = getInputOffsetAtClientX(input, event.clientX);
+    if (offset === undefined) return false;
+
+    const currentText = input.value;
+    const inputParts = parseInputParts(currentText, timeRange.type).filter((p) => p.navigable);
+    const target = inputParts.find((p) => offset >= p.start && offset <= p.end);
+    if (!target) return false;
+
+    const action = direction === 1 ? MODIFICATION_INCREASE : MODIFICATION_DECREASE;
+    const newText = applyPartModification(currentText, target, action, inputParts);
+    if (newText === undefined) return true;
+
+    setText(newText);
+    onInputChange?.(newText);
+
+    // Keep the stepped part selected so the user sees what's changing
+    const delta = newText.length - currentText.length;
+    requestAnimationFrame(() => input.setSelectionRange(target.start, target.end + delta));
+    return true;
+  });
+
+  const confirmScrollChange = () => {
+    setPreScrollText(null);
+    applyRange();
+  };
+
+  const cancelScrollChange = useCallback(() => {
+    if (preScrollText === null) return;
+    setText(preScrollText);
+    setPreScrollText(null);
+  }, [preScrollText, setText]);
+
+  /** Restore the pre-scroll text when clicking outside the control or pressing Escape. */
+  useEffect(() => {
+    if (!hasPendingScroll || isEditing) return;
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (!controlRef.current?.contains(event.target as Node)) cancelScrollChange();
+    };
+    const onKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.key === keys.ESCAPE) cancelScrollChange();
+    };
+    document.addEventListener('pointerdown', onPointerDown, true);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown, true);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [hasPendingScroll, isEditing, cancelScrollChange]);
+
   const onButtonClick = () => {
+    // Clicking into the input keeps the scrolled draft as the editable text.
+    setPreScrollText(null);
     setIsEditing(true);
   };
 
@@ -223,6 +313,45 @@ export function DateRangePickerControl() {
   const tooltipStyles = css`
     max-inline-size: min(58ch, 90vw);
   `;
+  // High-contrast filled button so the pending-scroll confirm action reads as clickable
+  const { buttons } = euiTheme.components;
+  const confirmScrollButtonStyles = css`
+    [data-test-subj='dateRangePickerConfirmScrollButton'] {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: ${euiTheme.size.xxs};
+      border-radius: ${euiTheme.border.radius.small};
+      color: ${buttons.textColorFilledPrimary};
+      background-color: ${buttons.backgroundFilledPrimary};
+      cursor: pointer;
+      transition: background-color ${euiTheme.animation.fast} ease-in;
+
+      &:hover,
+      &:focus-visible {
+        background-color: ${buttons.backgroundFilledPrimaryHover};
+      }
+      &:active {
+        background-color: ${buttons.backgroundFilledPrimaryActive};
+      }
+      svg {
+        color: inherit;
+        fill: currentColor;
+      }
+    }
+  `;
+  // Reuse EUI's form-control focus border while a scroll change is pending, signalling an unapplied edit
+  const pendingScrollStyles = css`
+    [data-test-subj='dateRangePickerControlButton'] {
+      --euiFormControlStateColor: ${euiTheme.colors.primary};
+      --euiFormControlStateHoverColor: ${euiTheme.colors.primary};
+      --euiFormControlStateWidth: ${euiTheme.border.width.thick};
+      position: relative;
+      z-index: 1;
+      box-shadow: none;
+      outline: var(--euiFormControlStateWidth) solid var(--euiFormControlStateColor);
+      outline-offset: calc(-1 * var(--euiFormControlStateWidth));
+    }
   const roundedSuffixStyles = css`
     color: ${euiTheme.colors.textSubdued};
     white-space: nowrap;
@@ -256,7 +385,17 @@ export function DateRangePickerControl() {
       data-test-subj="dateRangePickerControlWrapper"
     >
       <EuiFormControlLayout
-        icon="calendar"
+        icon={
+          hasPendingScroll && !isEditing
+            ? {
+                type: 'check',
+                onClick: confirmScrollChange,
+                'aria-label': inputControlTexts.confirmScrollChangeAriaLabel,
+                'data-test-subj': 'dateRangePickerConfirmScrollButton',
+              }
+            : 'calendar'
+        }
+        css={[confirmScrollButtonStyles, hasPendingScroll && !isEditing && pendingScrollStyles]}
         compressed={compressed}
         isInvalid={isInvalid}
         isDisabled={disabled}
@@ -338,6 +477,8 @@ export function DateRangePickerControl() {
                 <DateRangeValueDisplay
                   displayText={displayText}
                   onPartClick={handleDisplayPartClick}
+                  onPartWheel={handleDisplayPartWheel}
+                  disabled={disabled}
                   disabled={disabled || readOnly}
                   locale={locale}
                 />
