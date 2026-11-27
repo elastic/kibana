@@ -14,13 +14,16 @@ import { AiIndexDataReadService } from './data_read_service';
 import { describeAiIndex } from './describe';
 import { AiIndexNotFoundError, AiIndexNotReadableError } from './errors';
 import { filterReadableAiIndices, probeAiIndices } from './filter_readable_ai_indices';
+import { searchAiIndices } from './search';
 
 jest.mock('./describe');
 jest.mock('./filter_readable_ai_indices');
+jest.mock('./search');
 
 const describeAiIndexMock = jest.mocked(describeAiIndex);
 const filterReadableAiIndicesMock = jest.mocked(filterReadableAiIndices);
 const probeAiIndicesMock = jest.mocked(probeAiIndices);
+const searchAiIndicesMock = jest.mocked(searchAiIndices);
 
 const aiIndex: AiIndexItem = {
   id: 'support',
@@ -60,6 +63,7 @@ describe('AiIndexDataReadService', () => {
     describeAiIndexMock.mockReset();
     filterReadableAiIndicesMock.mockReset();
     probeAiIndicesMock.mockReset();
+    searchAiIndicesMock.mockReset();
   });
 
   describe('query', () => {
@@ -277,6 +281,48 @@ describe('AiIndexDataReadService', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({ action: 'ai_index_list', outcome: 'failure' }),
+          error: { code: 'Error', message: 'boom' },
+        })
+      );
+    });
+  });
+
+  describe('search', () => {
+    const request = { query: 'checkout latency', userId: 'alice', size: 10, aiIndexIds: ['ops'] };
+
+    it('searches in the service space as the caller and audit-logs success', async () => {
+      const results = [{ id: 'ki-1', aiIndexId: 'ops', content: 'Checkout is slow' }];
+      searchAiIndicesMock.mockResolvedValue(results);
+
+      await expect(service.search(request)).resolves.toBe(results);
+
+      expect(searchAiIndicesMock).toHaveBeenCalledWith({
+        esClient,
+        aiIndexService,
+        logger,
+        spaceId: 'marketing',
+        ...request,
+      });
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: 'User has queried an AI index',
+          event: expect.objectContaining({ action: 'ai_index_query', outcome: 'success' }),
+        })
+      );
+    });
+
+    it('audit-logs failure and rethrows', async () => {
+      const failure = new Error('boom');
+      searchAiIndicesMock.mockRejectedValue(failure);
+
+      await expect(service.search(request)).rejects.toBe(failure);
+
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: 'Failed attempt to query an AI index',
+          event: expect.objectContaining({ action: 'ai_index_query', outcome: 'failure' }),
           error: { code: 'Error', message: 'boom' },
         })
       );

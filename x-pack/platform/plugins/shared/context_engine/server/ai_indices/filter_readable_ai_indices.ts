@@ -19,6 +19,7 @@ export interface ProbedAiIndex {
   aiIndex: AiIndexItem;
   /** Absent when readable. `privilege` is true for a refusal, false for unavailability. */
   failure?: { reason: string; privilege: boolean };
+  missing?: boolean;
 }
 
 /** Strict index options on purpose: `ignore_unavailable` silently drops unreadable indices. */
@@ -71,7 +72,7 @@ export const probeAiIndices = async ({
   return aiIndices.map((aiIndex, index) => {
     const response = responses[index];
     if (isMissingIndex(aiIndex.dest.value, response)) {
-      return { aiIndex };
+      return { aiIndex, missing: true };
     }
     const reason = failureReason(response);
     if (reason === undefined) {

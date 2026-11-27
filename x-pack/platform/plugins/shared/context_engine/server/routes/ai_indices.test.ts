@@ -299,7 +299,7 @@ describe('ai indices routes', () => {
       getWorkflowIds: jest.fn().mockReturnValue([]),
       run: jest.fn(),
     };
-    readService = { query: jest.fn(), describe: jest.fn(), list: jest.fn() };
+    readService = { query: jest.fn(), describe: jest.fn(), list: jest.fn(), search: jest.fn() };
     readServiceParams = [];
 
     const createVersionedRoute = (method: string) => (config: RegisteredRoute['config']) => ({

@@ -70,6 +70,29 @@ describe('probeAiIndices', () => {
       { id: 'degraded', failure: { reason: '1 shard(s) failed', privilege: false } },
     ]);
   });
+
+  it('marks not-yet-created indices as missing and existing readable ones as not', async () => {
+    msearch.mockResolvedValue({
+      responses: [
+        ok(),
+        failed(404, 'index_not_found_exception', 'no such index [ai-index-idx-missing]'),
+      ],
+    });
+
+    const result = await probeAiIndices({
+      ...params,
+      aiIndices: ['readable', 'missing'].map((id) => aiIndex(id)),
+    });
+
+    expect(
+      result.map(({ aiIndex: { id }, failure, missing }) => ({ id, failure, missing }))
+    ).toEqual([
+      { id: 'readable', failure: undefined, missing: undefined },
+      { id: 'missing', failure: undefined, missing: true },
+    ]);
+    expect(result[0]).not.toHaveProperty('missing');
+    expect(logger.debug).not.toHaveBeenCalled();
+  });
 });
 
 describe('filterReadableAiIndices', () => {
