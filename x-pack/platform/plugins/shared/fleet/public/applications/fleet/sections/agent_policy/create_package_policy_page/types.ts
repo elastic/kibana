@@ -68,7 +68,7 @@ export type CreatePackagePolicyParams = React.FunctionComponent<{
   noBreadcrumb?: boolean;
   addIntegrationFlyoutProps?: {
     selectIntegrationStep: EuiStepProps;
-    onSubmitCompleted: () => void;
+    onSubmitCompleted: (close?: boolean) => void;
     isSubmitted: boolean;
     agentPolicy: AgentPolicy;
     updateHasErrors: (hasErrors: boolean) => void;

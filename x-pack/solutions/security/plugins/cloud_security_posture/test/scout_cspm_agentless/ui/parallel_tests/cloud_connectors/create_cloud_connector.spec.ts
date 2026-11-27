@@ -76,6 +76,9 @@ spaceTest.describe(
         // Cloud connectors is selected by default when agentless + cloud connectors are enabled
         await pageObjects.cspmIntegrationPage.fillCloudConnectorName(connectorName);
         await pageObjects.cspmIntegrationPage.fillAwsCloudConnectorDetails(roleArn, externalId);
+        await expect(
+          page.getByTestId('awsIdentityFederationSetup-launchCloudFormation')
+        ).toHaveCount(0);
         await pageObjects.cspmIntegrationPage.fillIntegrationName(integrationName);
 
         // Wait for the save button to be enabled before clicking

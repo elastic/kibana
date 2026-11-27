@@ -52,6 +52,21 @@ jest.mock('../components/steps/components/use_policies', () => {
   };
 });
 
+jest.mock(
+  '../../../../../../components/cloud_connector/aws_connect_setup/aws_identity_federation_setup',
+  () => ({
+    AwsIdentityFederationSetup: ({
+      onReadyChange,
+    }: {
+      onReadyChange: (ready: boolean) => void;
+    }) => (
+      <button type="button" onClick={() => onReadyChange(true)}>
+        Report identity ready
+      </button>
+    ),
+  })
+);
+
 jest.mock('../../../../../../hooks/use_request/agentless_policy');
 
 jest.mock('../../../../hooks', () => {
@@ -1379,6 +1394,31 @@ describe('When on the package policy create page', () => {
           },
         });
         (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(getAwsLikePackageInfo());
+      });
+
+      test('keeps Save disabled after the shared identity setup reports ready', async () => {
+        await act(async () => {
+          render(undefined, 'billing');
+        });
+
+        await act(async () => {
+          fireEvent.change(renderResult.getByTestId('varGroupSelector-credential_type'), {
+            target: { value: 'identity_federation' },
+          });
+        });
+        const identityReady = await renderResult.findByRole('button', {
+          name: 'Report identity ready',
+        });
+        const save = renderResult.getByRole('button', { name: 'Save and continue' });
+        expect(save).toBeDisabled();
+
+        await act(async () => {
+          fireEvent.click(identityReady);
+        });
+
+        expect(save).toBeDisabled();
+        expect(sendCreateAgentPolicy).not.toHaveBeenCalled();
+        expect(sendCreateAgentlessPolicy).not.toHaveBeenCalled();
       });
 
       test('should create an agentless policy on save when the deployment mode was not changed', async () => {
