@@ -115,9 +115,28 @@ describe('createRedirectSafeFetch', () => {
     ).not.toThrow();
   });
 
+  test("detaches from the caller's signal once the final body is read", async () => {
+    const controller = new AbortController();
+    const removeListener = jest.spyOn(controller.signal, 'removeEventListener');
+    const body = new PassThrough();
+    fetch.mockResolvedValueOnce(new Response(body, { status: 200 }));
+    const safeFetch = createRedirectSafeFetch({ configurationUtilities, logger, fetch });
+
+    const response = await safeFetch('https://api.example.com/v1', { signal: controller.signal });
+    expect(removeListener).not.toHaveBeenCalled();
+
+    body.end('ok');
+    await response.text();
+
+    expect(removeListener).toHaveBeenCalledWith('abort', expect.any(Function));
+  });
+
   test("passes the caller's abort to the request in flight", async () => {
     const controller = new AbortController();
-    const safeFetch = setup(redirectTo('/v2'));
+    fetch
+      .mockResolvedValueOnce(redirectTo('/v2'))
+      .mockResolvedValueOnce(new Response(new PassThrough(), { status: 200 }));
+    const safeFetch = createRedirectSafeFetch({ configurationUtilities, logger, fetch });
 
     await safeFetch('https://api.example.com/v1', { signal: controller.signal });
     controller.abort();

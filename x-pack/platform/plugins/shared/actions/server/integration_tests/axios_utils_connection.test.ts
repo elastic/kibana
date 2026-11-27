@@ -352,7 +352,12 @@ describe('axios connections', () => {
       };
 
       afterEach(() => {
-        servers.splice(0).forEach((server) => server.close());
+        // close() leaves active connections open, so a redirect socket that never closes would
+        // keep the Jest worker alive instead of failing the test.
+        servers.splice(0).forEach((server) => {
+          server.closeAllConnections();
+          server.close();
+        });
       });
 
       test('it drops credential headers when redirecting to another origin', async () => {

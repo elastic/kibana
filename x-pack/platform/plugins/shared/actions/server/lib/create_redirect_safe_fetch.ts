@@ -99,6 +99,16 @@ export const createRedirectSafeFetch = ({
 
     const location = response.headers.get('location');
     if (!REDIRECT_STATUSES.has(response.status) || location == null) {
+      // The caller can still cancel while the body streams; detach once the body is done.
+      const detach = () => callerSignal?.removeEventListener('abort', abortHop);
+      const { body } = response;
+      if (body?.once) {
+        body.once('end', detach);
+        body.once('close', detach);
+        body.once('error', detach);
+      } else {
+        detach();
+      }
       return response;
     }
 
