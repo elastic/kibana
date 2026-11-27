@@ -8,7 +8,7 @@
 import { Builder, esql, type ComposerQuery } from '@elastic/esql';
 import type { ESQLAstExpression, ESQLColumn } from '@elastic/esql/types';
 import { CRASH_EVENTS, OTEL_LOGS_INDEX } from '../otel_data';
-import { MOBILE_MAX_CRASH_DELAY_HOURS } from '../sessions';
+import { MOBILE_MAX_CRASH_DELAY_HOURS, MOBILE_MAX_OBSERVED_CRASH_AGE_DAYS } from '../sessions';
 import { ERROR_GROUPS_ROWS } from '../top_rows';
 import { crashFingerprint, isIosReport, reportOsVersion, reportRelease } from './crash_fingerprint';
 import { mobileDocuments } from './documents';
@@ -35,14 +35,16 @@ export interface CrashEventsParams extends MobilePanelFilters {
 
 /**
  * When a crash happened: the earlier of `@timestamp` and its observed time, as EDOT iOS sends a
- * crash on the next launch with only its observed time set to the crash. An observed time from
- * before a crash can be sent late is no crash time, e.g. the zero an exporter can leave.
+ * crash on the next launch with only its observed time set to the crash, however late that launch
+ * is. An observed time more than `MOBILE_MAX_OBSERVED_CRASH_AGE_DAYS` before is unset, e.g. the
+ * zero an exporter can leave. A crash sent more than `MOBILE_MAX_CRASH_DELAY_HOURS` after the range
+ * is outside its `@timestamp` filter, so only a longer range finds a crash sent that late.
  */
 const crashTimeOf = (): ESQLAstExpression => {
   const observed = esql.exp`TO_DATETIME(${mobileColumn('observedTimestamp')})`;
   // The arithmetic is on the observed time: `@timestamp` reads as `NULL` where no index maps it.
   return esql.exp`LEAST(@timestamp, CASE(
-    ${observed} + ${esql.exp(`${MOBILE_MAX_CRASH_DELAY_HOURS} hours`)} >= @timestamp,
+    ${observed} + ${esql.exp(`${MOBILE_MAX_OBSERVED_CRASH_AGE_DAYS} days`)} >= @timestamp,
     ${observed},
     @timestamp
   ))`;
