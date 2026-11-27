@@ -9,7 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { SESSIONS_LOOKBACK_DAYS } from '../../../common/sessions';
 import { describeError } from '../../lib/helpers/errors';
 import { SESSIONS_PLATFORMS } from './sessions_platforms';
-import { NULLIFY_UNMAPPED_FIELDS } from './summary_queries';
+import { NULLIFY_UNMAPPED_FIELDS } from '../../../common/otel_source_fields';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 

@@ -29,6 +29,20 @@ export const isHeldBack = ({
   row: readonly unknown[];
 }): boolean => row[columns.indexOf('held_back')] === true;
 
+const timeColumn = ({
+  columns,
+  row,
+  name,
+}: {
+  columns: readonly string[];
+  row: readonly unknown[];
+  name: string;
+}): number | undefined => {
+  const value = row[columns.indexOf(name)];
+  const time = typeof value === 'string' ? Date.parse(value) : NaN;
+  return Number.isNaN(time) ? undefined : time;
+};
+
 /**
  * When the agent last reviewed the row's rule: the `last_reviewed_at` column, in epoch milliseconds.
  * Absent when the column is missing or does not hold a readable time.
@@ -39,11 +53,20 @@ export const lastReviewedAt = ({
 }: {
   columns: readonly string[];
   row: readonly unknown[];
-}): number | undefined => {
-  const value = row[columns.indexOf('last_reviewed_at')];
-  const time = typeof value === 'string' ? Date.parse(value) : NaN;
-  return Number.isNaN(time) ? undefined : time;
-};
+}): number | undefined => timeColumn({ columns, row, name: 'last_reviewed_at' });
+
+/**
+ * When the rule's oldest unprocessed detection fired: the `oldest_unprocessed` column, in epoch
+ * milliseconds. The row itself is the rule's newest detection, so this is how long the rule has waited.
+ * Absent when the column is missing or does not hold a readable time.
+ */
+export const oldestUnprocessedAt = ({
+  columns,
+  row,
+}: {
+  columns: readonly string[];
+  row: readonly unknown[];
+}): number | undefined => timeColumn({ columns, row, name: 'oldest_unprocessed' });
 
 /** Names a detection row's cells, and keeps the fields the agent reads. */
 export const toBatchEntry = ({

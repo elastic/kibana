@@ -1,0 +1,31 @@
+overlay: 1.0.0
+# Cursor names come from live nextLinks, not only from the spec examples: endpoints (skipToken) and
+# OAT (nextBatchToken) from the real tenant; alerts (skipToken) from the spec example, because the
+# tenant had no alert page to read at the time.
+info:
+  title: TrendAI Vision One API corrections
+  version: 1.0.0
+actions:
+  - target: $.paths['/v3.0/workbench/alerts'].get.parameters
+    description: >-
+      The response's nextLink ("Link to retrieve the next page of entries in paginated output",
+      for example .../v3.0/workbench/alerts?skipToken=...) carries skipToken, which the operation's
+      parameters omit. The connector follows nextLink as given.
+    update:
+      - { in: query, name: skipToken, required: false, schema: { type: string } }
+
+  - target: $.paths['/v3.0/oat/detections'].get.parameters
+    description: >-
+      The response's nextLink carries nextBatchToken, which the operation's parameters omit. The
+      spec's nextLink example carries nextBatchToken
+      (.../v3.0/oat/detection?startDateTime=...&endDateTime=...&nextBatchToken=...), and so does a
+      live nextLink (...&top=...&orderBy=...&nextBatchToken=...). The connector follows nextLink as given.
+    update:
+      - { in: query, name: nextBatchToken, required: false, schema: { type: string } }
+
+  - target: $.paths['/v3.0/endpointSecurity/endpoints'].get.parameters
+    description: >-
+      The response's nextLink carries skipToken (the spec's nextLink examples end in
+      ?skipToken=...), which the operation's parameters omit. The connector follows nextLink as given.
+    update:
+      - { in: query, name: skipToken, required: false, schema: { type: string } }
