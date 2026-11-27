@@ -246,7 +246,7 @@ export function MobileCrashFlyout({
 }) {
   const { formatNumber, formatDate } = useFormatters();
   const titleId = useGeneratedHtmlId({ prefix: 'digitalExperienceMobileCrashFlyoutTitle' });
-  const { detail, error, refresh } = useMobileCrashGroup(serviceName, fingerprint);
+  const { detail, error, refresh } = useMobileCrashGroup(serviceName, fingerprint, group?.type);
   const latestCrash = detail?.latestCrash ?? null;
   // A neutral title until there is a crash to name, so a link to a missing group doesn't look like
   // a crash without a type.

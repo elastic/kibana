@@ -60,7 +60,7 @@ const detailRoute = createDigitalExperienceServerRoute({
     request,
     logger,
   }): Promise<MobileCrashGroupDetailResponse> => {
-    const { osName, release } = params.query;
+    const { osName, release, crashType } = params.query;
     const { esClient, serviceName, start, end, environment } = await toApplicationSearch({
       params,
       context,
@@ -72,6 +72,7 @@ const detailRoute = createDigitalExperienceServerRoute({
         esClient,
         filters: { serviceName, osName, release },
         fingerprint: params.path.fingerprint,
+        crashType: crashType === undefined ? undefined : crashType || null,
         start,
         end,
         environment,

@@ -137,7 +137,8 @@ export const getCrashGroups = async ({
         esClient,
         'get_mobile_latest_release',
         withLatestReleases(mobilePanelQuery(allReleases)),
-        timeFilter(lookbackStart, end, environment)
+        // As far as the crashes: a crash sent after the range can be on a release it first shows.
+        timeFilter(lookbackStart, end + CRASH_DELAY_MS, environment)
       )
     : [];
   const latestRelease = latest?.[RESULT_COLUMNS.latestRelease] ?? null;

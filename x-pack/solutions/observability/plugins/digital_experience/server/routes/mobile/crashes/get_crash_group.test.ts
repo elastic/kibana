@@ -307,4 +307,42 @@ describe('getCrashGroup', () => {
       expect(query).not.toContain('`attributes.exception.type` IN')
     );
   });
+
+  it('fingerprints only the crashes of the type the app knows for the latest crash', async () => {
+    const { client, esClient } = createTracedEsClientMock();
+    client.esql.query.mockResolvedValue(esqlResponse([]));
+
+    await getCrashGroup({
+      esClient,
+      filters: { serviceName: 'ride-ios' },
+      fingerprint: 'abc',
+      crashType: 'SIGTRAP',
+      start: START,
+      end: END,
+    });
+
+    const [[latestRequest]] = client.esql.query.mock.calls;
+    expect(latestRequest.query).toContain(
+      'WHERE `attributes.elastic.error.grouping_key` IS NOT NULL OR (`attributes.exception.type` IN ("SIGTRAP"))'
+    );
+  });
+
+  it('fingerprints only the crashes without a type for a group without one', async () => {
+    const { client, esClient } = createTracedEsClientMock();
+    client.esql.query.mockResolvedValue(esqlResponse([]));
+
+    await getCrashGroup({
+      esClient,
+      filters: { serviceName: 'ride-ios' },
+      fingerprint: 'abc',
+      crashType: null,
+      start: START,
+      end: END,
+    });
+
+    const [[latestRequest]] = client.esql.query.mock.calls;
+    expect(latestRequest.query).toContain(
+      '`attributes.exception.type` IS NULL OR `attributes.exception.type` == ""'
+    );
+  });
 });

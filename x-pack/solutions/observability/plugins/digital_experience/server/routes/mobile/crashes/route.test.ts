@@ -127,13 +127,13 @@ describe('mobile crash groups route', () => {
 });
 
 describe('mobile crash group route', () => {
-  const runDetailHandler = (fingerprint: string) => {
+  const runDetailHandler = (fingerprint: string, query: Record<string, string> = {}) => {
     const handler = mobileCrashesRouteRepository[MOBILE_CRASH_GROUP_ENDPOINT]
       .handler as unknown as (resources: unknown) => Promise<MobileCrashGroupDetailResponse>;
     return handler({
       params: {
         path: { serviceName: 'trailmap-android', fingerprint },
-        query: { start: START, end: END, release: '4.2.0' },
+        query: { start: START, end: END, release: '4.2.0', ...query },
       },
       context: {
         core: Promise.resolve({
@@ -161,6 +161,17 @@ describe('mobile crash group route', () => {
         end: Date.parse(END),
       })
     );
+    expect(jest.mocked(getCrashGroup).mock.calls[0][0].crashType).toBeUndefined();
+  });
+
+  it("passes the group's type when the app knows it, an empty one as none", async () => {
+    await runDetailHandler('npe', { crashType: 'java.lang.NullPointerException' });
+    await runDetailHandler('npe', { crashType: '' });
+
+    expect(jest.mocked(getCrashGroup).mock.calls.map(([{ crashType }]) => crashType)).toEqual([
+      'java.lang.NullPointerException',
+      null,
+    ]);
   });
 
   it("reports partial values when the user can't read every logs and traces index", async () => {
@@ -184,5 +195,17 @@ describe('mobile crash group route', () => {
     expect(isValid('a'.repeat(64))).toBe(true);
     expect(isValid('')).toBe(false);
     expect(isValid('a'.repeat(257))).toBe(false);
+  });
+
+  it('bounds the crash type', () => {
+    const schema = mobileCrashesRouteRepository[MOBILE_CRASH_GROUP_ENDPOINT].params as unknown as {
+      shape: { query: { safeParse: (query: unknown) => { success: boolean } } };
+    };
+    const isValid = (crashType: string) =>
+      schema.shape.query.safeParse({ start: START, end: END, crashType }).success;
+
+    expect(isValid('')).toBe(true);
+    expect(isValid('a'.repeat(1024))).toBe(true);
+    expect(isValid('a'.repeat(1025))).toBe(false);
   });
 });

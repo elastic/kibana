@@ -139,6 +139,19 @@ describe('getCrashGroups', () => {
       expect.arrayContaining([{ crash_start: new Date(END - 30 * DAY).toISOString() }])
     );
     expect(latestRequest.params).toEqual([{ service_name: 'trailmap-android' }]);
+    // As far as the crashes, so a release a late crash first shows can be the newest.
+    expect(latestRequest.filter).toEqual({
+      bool: {
+        filter: [
+          {
+            range: {
+              '@timestamp': { gte: END - 30 * DAY, lt: END + DAY, format: 'epoch_millis' },
+            },
+          },
+          expect.anything(),
+        ],
+      },
+    });
   });
 
   it('marks nothing new without a newest release', async () => {

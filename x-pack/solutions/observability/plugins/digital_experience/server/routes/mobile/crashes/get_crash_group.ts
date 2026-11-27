@@ -39,6 +39,8 @@ export interface GetCrashGroupParams {
   esClient: TracedElasticsearchClient;
   filters: MobilePanelFilters;
   fingerprint: string;
+  /** The group's type, as its list shows it, when the app knows it; `null` for none. */
+  crashType?: string | null;
   start: number;
   end: number;
   environment?: string;
@@ -117,6 +119,7 @@ export const getCrashGroup = async ({
   esClient,
   filters,
   fingerprint,
+  crashType,
   start,
   end,
   environment,
@@ -130,10 +133,12 @@ export const getCrashGroup = async ({
     );
   };
   const filter = timeFilter(start, end + CRASH_DELAY_MS, environment);
+  // A group's crashes all have its type, unless its fingerprint was stored, which `withCrashTypes`
+  // keeps whatever the type, so a known type only spares hashing the other crashes.
   const [latestRow] = await runEsql<LatestCrashRow>(
     esClient,
     'get_mobile_crash_group_latest',
-    withLatestCrash(groupCrashes()),
+    withLatestCrash(groupCrashes(crashType === undefined ? undefined : [crashType])),
     filter
   );
   if (!latestRow) {

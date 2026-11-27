@@ -143,7 +143,12 @@ describe('MobileCrashFlyout', () => {
     );
     expect(flyout).toHaveTextContent('New in 4.2.0');
     expect(flyout).toHaveTextContent('184');
-    expect(useMobileCrashGroup).toHaveBeenCalledWith('trailmap-android', 'npe');
+    // With the group's type, so the detail fingerprints only the crashes of that type.
+    expect(useMobileCrashGroup).toHaveBeenCalledWith(
+      'trailmap-android',
+      'npe',
+      'java.lang.NullPointerException'
+    );
   });
 
   it('shows the stack trace of the latest crash, after where it crashed', () => {
