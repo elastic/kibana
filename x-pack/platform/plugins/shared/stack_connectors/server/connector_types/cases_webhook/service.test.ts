@@ -364,6 +364,7 @@ describe('Cases webhook service', () => {
           "axios": [Function],
           "connectorUsageCollector": ConnectorUsageCollector {
             "connectorId": "test-connector-id",
+            "connectorTypeId": undefined,
             "logger": Object {
               "context": Array [],
               "debug": [MockFunction],
@@ -637,6 +638,7 @@ describe('Cases webhook service', () => {
           "axios": [Function],
           "connectorUsageCollector": ConnectorUsageCollector {
             "connectorId": "test-connector-id",
+            "connectorTypeId": undefined,
             "logger": Object {
               "context": Array [],
               "debug": [MockFunction],
@@ -921,6 +923,7 @@ describe('Cases webhook service', () => {
           "axios": [Function],
           "connectorUsageCollector": ConnectorUsageCollector {
             "connectorId": "test-connector-id",
+            "connectorTypeId": undefined,
             "logger": Object {
               "context": Array [],
               "debug": [MockFunction] {
@@ -1218,6 +1221,7 @@ describe('Cases webhook service', () => {
           "axios": [Function],
           "connectorUsageCollector": ConnectorUsageCollector {
             "connectorId": "test-connector-id",
+            "connectorTypeId": undefined,
             "logger": Object {
               "context": Array [],
               "debug": [MockFunction],
@@ -1507,6 +1511,7 @@ describe('Cases webhook service', () => {
           "axios": [Function],
           "connectorUsageCollector": ConnectorUsageCollector {
             "connectorId": "test-connector-id",
+            "connectorTypeId": undefined,
             "logger": Object {
               "context": Array [],
               "debug": [MockFunction],

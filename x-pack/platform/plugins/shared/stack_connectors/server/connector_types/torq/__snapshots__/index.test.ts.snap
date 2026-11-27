@@ -5,6 +5,7 @@ Object {
   "axios": Any<Function>,
   "connectorUsageCollector": Object {
     "connectorId": "test-connector-id",
+    "connectorTypeId": undefined,
     "logger": Object {
       "context": Array [],
       "debug": [MockFunction] {

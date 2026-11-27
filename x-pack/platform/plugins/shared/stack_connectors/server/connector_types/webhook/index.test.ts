@@ -723,6 +723,7 @@ describe('execute()', () => {
         "axios": undefined,
         "connectorUsageCollector": ConnectorUsageCollector {
           "connectorId": "test-connector-id",
+          "connectorTypeId": undefined,
           "logger": Object {
             "context": Array [],
             "debug": [MockFunction] {
@@ -982,6 +983,7 @@ describe('execute()', () => {
         "axios": undefined,
         "connectorUsageCollector": ConnectorUsageCollector {
           "connectorId": "test-connector-id",
+          "connectorTypeId": undefined,
           "logger": Object {
             "context": Array [],
             "debug": [MockFunction] {
