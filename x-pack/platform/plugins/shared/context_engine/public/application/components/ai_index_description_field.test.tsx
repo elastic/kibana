@@ -13,7 +13,10 @@ import { MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../common/constants';
 import { validateTextInput } from '../utils/validate_text_input';
 import { AiIndexDescriptionField } from './ai_index_description_field';
 
-const ControlledField = ({ initialValue = '' }: { initialValue?: string }) => {
+const ControlledField = ({
+  initialValue = '',
+  ...fieldProps
+}: { initialValue?: string } & Partial<React.ComponentProps<typeof AiIndexDescriptionField>>) => {
   const [value, setValue] = useState(initialValue);
   const { error, warning } = validateTextInput({
     value,
@@ -27,15 +30,19 @@ const ControlledField = ({ initialValue = '' }: { initialValue?: string }) => {
       error={error}
       warning={warning}
       data-test-subj="contextAiIndexDescriptionInput"
+      {...fieldProps}
     />
   );
 };
 
-const renderField = (initialValue = '') =>
+const renderField = (
+  initialValue = '',
+  fieldProps: Partial<React.ComponentProps<typeof AiIndexDescriptionField>> = {}
+) =>
   render(
     <I18nProvider>
       <EuiProvider>
-        <ControlledField initialValue={initialValue} />
+        <ControlledField initialValue={initialValue} {...fieldProps} />
       </EuiProvider>
     </I18nProvider>
   );
@@ -51,12 +58,29 @@ describe('AiIndexDescriptionField', () => {
     ).toBeInTheDocument();
   });
 
+  it('hides the help text when hasHelpText is false, but still shows a warning', () => {
+    const { unmount } = renderField('', { hasHelpText: false });
+
+    expect(screen.queryByText(/Important: This description shapes/)).not.toBeInTheDocument();
+
+    unmount();
+    renderField('a'.repeat(MAX_AI_INDEX_DESCRIPTION_LENGTH - 10), { hasHelpText: false });
+
+    expect(screen.getByText(/10 characters remaining/)).toBeInTheDocument();
+  });
+
+  it('disables the textarea when isDisabled is true', () => {
+    renderField('', { isDisabled: true });
+
+    expect(screen.getByTestId('contextAiIndexDescriptionInput')).toBeDisabled();
+  });
+
   it('shows placeholder guidance for what to include', () => {
     renderField();
 
     expect(screen.getByTestId('contextAiIndexDescriptionInput')).toHaveAttribute(
       'placeholder',
-      'Describe what this AI index is for and the information its Knowledge Indicators contain. Include example questions they should help answer and any known gaps in that information.'
+      'Describe what this AI index is for and the information its knowledge documents contain. Include example questions they should help answer and any known gaps in that information.'
     );
   });
 

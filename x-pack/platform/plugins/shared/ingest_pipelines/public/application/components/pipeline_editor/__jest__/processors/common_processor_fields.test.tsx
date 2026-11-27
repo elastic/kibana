@@ -77,3 +77,111 @@ describe('Processor: Common Fields For All Processors', () => {
     });
   });
 });
+
+describe('Processor: Common Fields with a script object condition', () => {
+  const ifScript = {
+    source: "ctx['_dataId'] == params.dataId",
+    lang: 'painless',
+    params: { dataId: 'data-abc-123' },
+  };
+  const storedScript = { id: 'my_stored_condition', params: { dataId: 'data-abc-123' } };
+  const UPDATED_TAG = 'updated_tag';
+
+  let onUpdate: jest.Mock;
+
+  const renderWithCondition = (condition: Record<string, unknown>) => {
+    const { httpSetup } = setupEnvironment();
+    renderProcessorEditor(httpSetup, {
+      value: {
+        processors: [{ [BYTES_TYPE]: { field: 'field_1', if: condition } }],
+      },
+      onFlyoutOpen: jest.fn(),
+      onUpdate,
+    });
+  };
+
+  const openEditForm = async () => {
+    fireEvent.click(within(screen.getByTestId('processors>0')).getByTestId('manageItemButton'));
+    const form = await screen.findByTestId('editProcessorForm');
+    return { form, conditionEditor: within(form).getByTestId('mockedCodeEditor') };
+  };
+
+  const setTag = (form: HTMLElement) => {
+    fireEvent.change(within(within(form).getByTestId('tagField')).getByTestId('input'), {
+      target: { value: UPDATED_TAG },
+    });
+  };
+
+  const submitAndGetBytesProcessor = async (form: HTMLElement) => {
+    fireEvent.click(within(form).getByTestId('submitButton'));
+    await waitFor(() => expect(screen.queryByTestId('editProcessorForm')).not.toBeInTheDocument());
+    return getProcessorValue(onUpdate)[0].bytes;
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    onUpdate = jest.fn();
+  });
+
+  test('renders the script source in the condition editor', async () => {
+    renderWithCondition(ifScript);
+    const { conditionEditor } = await openEditForm();
+
+    expect(conditionEditor).toHaveValue(ifScript.source);
+  });
+
+  test('preserves the script object when the condition is not edited', async () => {
+    renderWithCondition(ifScript);
+    const { form } = await openEditForm();
+
+    setTag(form);
+    const bytesProcessor = await submitAndGetBytesProcessor(form);
+
+    expect(bytesProcessor.tag).toBe(UPDATED_TAG);
+    expect(bytesProcessor.if).toEqual(ifScript);
+  });
+
+  test('updates only the script source when the condition is edited', async () => {
+    renderWithCondition(ifScript);
+    const { form, conditionEditor } = await openEditForm();
+    const updatedSource = "ctx['_dataId'] != params.dataId";
+
+    fireEvent.change(conditionEditor, { target: { value: updatedSource } });
+    const bytesProcessor = await submitAndGetBytesProcessor(form);
+
+    expect(bytesProcessor.if).toEqual({ ...ifScript, source: updatedSource });
+  });
+
+  test('removes the condition when the editor is cleared', async () => {
+    renderWithCondition(ifScript);
+    const { form, conditionEditor } = await openEditForm();
+
+    fireEvent.change(conditionEditor, { target: { value: '' } });
+    const bytesProcessor = await submitAndGetBytesProcessor(form);
+
+    expect(bytesProcessor.if).toBeUndefined();
+  });
+
+  test('preserves a stored script reference that has no source', async () => {
+    renderWithCondition(storedScript);
+    const { form, conditionEditor } = await openEditForm();
+    expect(conditionEditor).toHaveValue('');
+
+    setTag(form);
+    const bytesProcessor = await submitAndGetBytesProcessor(form);
+
+    expect(bytesProcessor.tag).toBe(UPDATED_TAG);
+    expect(bytesProcessor.if).toEqual(storedScript);
+  });
+
+  test('keeps the script params when a stored script reference is replaced by a source', async () => {
+    renderWithCondition(storedScript);
+    const { form, conditionEditor } = await openEditForm();
+    const inlineSource = "ctx['_dataId'] == params.dataId";
+
+    fireEvent.change(conditionEditor, { target: { value: inlineSource } });
+    const bytesProcessor = await submitAndGetBytesProcessor(form);
+
+    expect(bytesProcessor.if).toEqual({ source: inlineSource, params: storedScript.params });
+  });
+});

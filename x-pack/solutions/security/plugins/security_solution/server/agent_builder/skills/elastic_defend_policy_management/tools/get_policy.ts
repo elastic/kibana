@@ -8,27 +8,18 @@
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
-import { policyReferenceInputSchema, toPolicyRef } from '../domain/input_schemas';
-import type { EndpointPolicyBaselinePreset } from '../domain/input_schemas';
-import type {
-  EndpointPolicyBaseline,
-  EndpointPolicySummary,
-  PolicyBaselineEnvironment,
-} from '../domain/normalized_endpoint_policy';
-import type { NormalizedPolicyConfig } from '../domain/normalized_policy_config';
-import type { PolicyIdentity } from '../services/read_policy';
-import { createPolicyTool } from './create_policy_tool';
-import type { PresentedPolicyIdentity, TrimLimits, TrimSummary } from './trim_policy_result';
 import {
-  presentBoundedIdentityStrings,
-  presentWithinGuardedBudget,
-  toPresentationHash,
-  trimPolicyResultWithMeta,
-} from './trim_policy_result';
+  policyReferenceInputSchema,
+  toPolicyRef,
+} from '../../../../endpoint/services/policy_management/domain/input_schemas';
+import { createPolicyTool } from './create_policy_tool';
+import {
+  GET_POLICY_MAX_RESULT_TOKENS,
+  presentGetPolicy,
+  presentGetPolicyBaseline,
+} from '../../../../endpoint/services/policy_management/presentation/present_get_policy';
 
 export const GET_POLICY_TOOL_ID = 'security.policy_management.get_policy';
-
-const GET_POLICY_MAX_RESULT_TOKENS = 12_000;
 
 export const getPolicySchema = lazySchema(() => {
   const getPolicyIdOrNameSelectorSchema = z
@@ -61,90 +52,6 @@ export const getPolicySchema = lazySchema(() => {
     })
     .strict();
 });
-
-type PresentedGetPolicyFallback = Readonly<{
-  policy: PresentedPolicyIdentity;
-  normalizedHash: string;
-}>;
-
-type PresentedGetPolicy = PresentedGetPolicyFallback &
-  Readonly<{
-    config: unknown;
-    config_truncation?: TrimSummary;
-  }>;
-
-type PresentedBaselineReference = Readonly<{
-  type: 'baseline';
-  preset: EndpointPolicyBaselinePreset;
-  environment: PolicyBaselineEnvironment;
-}>;
-
-type PresentedGetBaselineFallback = Readonly<{
-  baseline: PresentedBaselineReference;
-  normalizedHash: string;
-}>;
-
-type PresentedGetBaseline = PresentedGetBaselineFallback &
-  Readonly<{
-    summary: EndpointPolicySummary;
-    config: unknown;
-    config_truncation?: TrimSummary;
-  }>;
-
-const presentGetPolicy = (
-  policy: PolicyIdentity,
-  normalizedConfig: NormalizedPolicyConfig,
-  serviceHash: string
-): PresentedGetPolicy | PresentedGetPolicyFallback => {
-  const identity = presentBoundedIdentityStrings(policy);
-  const normalizedHash = toPresentationHash(serviceHash);
-
-  const buildFull = (limits: TrimLimits): PresentedGetPolicy => {
-    const trimmed = trimPolicyResultWithMeta(normalizedConfig, limits);
-    return {
-      policy: identity,
-      normalizedHash,
-      config: trimmed.value,
-      ...(trimmed.summary === undefined ? {} : { config_truncation: trimmed.summary }),
-    };
-  };
-
-  const buildFallback = (): PresentedGetPolicyFallback => ({
-    policy: identity,
-    normalizedHash,
-  });
-
-  return presentWithinGuardedBudget(buildFull, GET_POLICY_MAX_RESULT_TOKENS, buildFallback);
-};
-
-const presentGetPolicyBaseline = (
-  baseline: EndpointPolicyBaseline
-): PresentedGetBaseline | PresentedGetBaselineFallback => {
-  const presentedBaseline: PresentedBaselineReference = {
-    type: 'baseline',
-    preset: baseline.preset,
-    environment: baseline.environment,
-  };
-  const normalizedHash = toPresentationHash(baseline.normalizedHash);
-
-  const buildFull = (limits: TrimLimits): PresentedGetBaseline => {
-    const trimmed = trimPolicyResultWithMeta(baseline.normalizedConfig, limits);
-    return {
-      baseline: presentedBaseline,
-      normalizedHash,
-      summary: baseline.summary,
-      config: trimmed.value,
-      ...(trimmed.summary === undefined ? {} : { config_truncation: trimmed.summary }),
-    };
-  };
-
-  const buildFallback = (): PresentedGetBaselineFallback => ({
-    baseline: presentedBaseline,
-    normalizedHash,
-  });
-
-  return presentWithinGuardedBudget(buildFull, GET_POLICY_MAX_RESULT_TOKENS, buildFallback);
-};
 
 export const createGetPolicyTool = ({
   endpointAppContextService,

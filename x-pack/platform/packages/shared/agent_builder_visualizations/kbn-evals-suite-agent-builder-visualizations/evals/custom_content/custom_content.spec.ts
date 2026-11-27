@@ -27,7 +27,7 @@ evaluate.describe(
           dataset: {
             name: 'agent builder visualizations: custom content',
             description:
-              'Custom panels over kibana_sample_data_logs and kibana_sample_data_flights: status cards, a funnel, a flow, a ranking, KPIs, a user-supplied query, static panels, and two-turn style and data edits. Scored from the stored panel: template validity, a query only when the panel has data, an executable query that is not truncated by the chart default, rows in the requested order, template columns bound to the query, and edits that keep or change the query as asked.',
+              'Custom panels over kibana_sample_data_logs and kibana_sample_data_flights: status cards, a funnel, a flow, a ranking, KPIs, a user-supplied query, panels whose parts each need their own query, static panels, and two-turn style and data edits, on one query and on several. Scored from the stored panel: template validity, a query only when the panel has data, the number of queries, executable queries that are not truncated by the chart default, rows in the requested order, template columns bound to the query each is read from, every query read by the template, and edits that keep or change the queries as asked.',
             examples: CUSTOM_CONTENT_EXAMPLES,
           },
         });

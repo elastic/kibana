@@ -286,17 +286,11 @@ export const TABLE_COLUMNS = {
   status: i18n.translate('xpack.entityInventoryApp.performanceOverlay.column.status', {
     defaultMessage: 'Status',
   }),
-  httpStatus: i18n.translate('xpack.entityInventoryApp.performanceOverlay.column.httpStatus', {
-    defaultMessage: 'HTTP status',
-  }),
   column: i18n.translate('xpack.entityInventoryApp.performanceOverlay.column.column', {
     defaultMessage: 'Column',
   }),
   field: i18n.translate('xpack.entityInventoryApp.performanceOverlay.column.field', {
     defaultMessage: 'Field',
-  }),
-  reason: i18n.translate('xpack.entityInventoryApp.performanceOverlay.column.reason', {
-    defaultMessage: 'Reason',
   }),
   expand: i18n.translate('xpack.entityInventoryApp.performanceOverlay.column.expand', {
     defaultMessage: 'Details',
@@ -309,9 +303,6 @@ export const SECTION_TITLES = {
   }),
   probes: i18n.translate('xpack.entityInventoryApp.performanceOverlay.section.probes', {
     defaultMessage: 'Probes',
-  }),
-  errors: i18n.translate('xpack.entityInventoryApp.performanceOverlay.section.errors', {
-    defaultMessage: 'Errors',
   }),
 } as const;
 
@@ -335,10 +326,25 @@ export const ROW_STATUS = {
   partial: i18n.translate('xpack.entityInventoryApp.performanceOverlay.rowStatus.partial', {
     defaultMessage: 'Partial',
   }),
+  unusable: i18n.translate('xpack.entityInventoryApp.performanceOverlay.rowStatus.unusable', {
+    defaultMessage: 'Unusable',
+  }),
   failed: i18n.translate('xpack.entityInventoryApp.performanceOverlay.rowStatus.failed', {
     defaultMessage: 'Failed',
   }),
 } as const;
+
+/** An expanded row's error: its kind, the HTTP status when there was one, and the reason. */
+export const ROW_ERROR_TITLE = (kind: string, reason: string, status: number | null): string =>
+  status === null
+    ? i18n.translate('xpack.entityInventoryApp.performanceOverlay.rowError.title', {
+        defaultMessage: '{kind}: {reason}',
+        values: { kind, reason },
+      })
+    : i18n.translate('xpack.entityInventoryApp.performanceOverlay.rowError.titleWithStatus', {
+        defaultMessage: '{kind} (HTTP {status}): {reason}',
+        values: { kind, reason, status },
+      });
 
 /** The plans a probe's outcome allows for its index pattern. */
 export const PROBE_PLANS = {

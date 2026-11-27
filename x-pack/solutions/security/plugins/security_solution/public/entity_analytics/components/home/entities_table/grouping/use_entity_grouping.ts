@@ -39,7 +39,11 @@ import {
   useFetchGroupedData,
   useFetchUnfilteredResolutionGroupData,
 } from './use_fetch_grouped_data';
-import { createGroupPanelRenderer, createGroupStatsRenderer } from './entity_group_renderer';
+import {
+  createGroupPanelRenderer,
+  createGroupStatsRenderer,
+  createGroupToggleAriaLabelGetter,
+} from './entity_group_renderer';
 import { useHasEntityResolutionLicense } from '../../../../../common/hooks/use_has_entity_resolution_license';
 
 const EMPTY_TARGET_METADATA: TargetMetadataMap = new Map();
@@ -337,6 +341,11 @@ export const useEntityGrouping = ({
     [targetMetadata, tableId]
   );
 
+  const getGroupToggleAriaLabel = useMemo(
+    () => createGroupToggleAriaLabelGetter(targetMetadata),
+    [targetMetadata]
+  );
+
   const groupStatsRenderer = useMemo(
     () => createGroupStatsRenderer(targetMetadata),
     [targetMetadata]
@@ -347,6 +356,7 @@ export const useEntityGrouping = ({
       unit: entitiesUnit,
       groupPanelRenderer,
       getGroupStats: groupStatsRenderer,
+      getGroupToggleAriaLabel,
       groupsUnit: entitiesGroupsUnit,
     },
     defaultGroupingOptions,

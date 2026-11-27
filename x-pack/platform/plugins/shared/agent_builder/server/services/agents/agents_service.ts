@@ -34,6 +34,8 @@ import type {
 } from './types';
 import type { AgentsUsingSkillsResult, AgentsUsingToolsResult } from './persisted/types';
 import type { ToolsServiceStart } from '../tools';
+import { AvailabilityCache } from '../common/availability_cache';
+import type { PrincipalKeyResolver } from '../common/principal_key';
 import {
   createBuiltinAgentRegistry,
   createBuiltinProviderFn,
@@ -55,6 +57,8 @@ export interface AgentsServiceStartDeps {
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
   toolsService: ToolsServiceStart;
+  /** Identifies the caller for availability results cached per principal. */
+  getPrincipalKey: PrincipalKeyResolver;
 }
 
 export class AgentsService {
@@ -133,7 +137,15 @@ export class AgentsService {
     }
 
     const { logger } = this.setupDeps;
-    const { security, elasticsearch, spaces, toolsService, uiSettings, savedObjects } = startDeps;
+    const {
+      security,
+      elasticsearch,
+      spaces,
+      toolsService,
+      uiSettings,
+      savedObjects,
+      getPrincipalKey,
+    } = startDeps;
     this.settingsDeps = { uiSettings, savedObjects };
 
     this.validateAgentTypes();
@@ -143,7 +155,14 @@ export class AgentsService {
       logger,
     });
 
-    const builtinProviderFn = createBuiltinProviderFn({ registry: this.builtinRegistry });
+    // Created once per service start, so that availability results are reused across requests.
+    // Both providers share it: `ensure` rejects a persisted agent that uses a built-in agent's id.
+    const availabilityCache = new AvailabilityCache({ getPrincipalKey });
+
+    const builtinProviderFn = createBuiltinProviderFn({
+      registry: this.builtinRegistry,
+      availabilityCache,
+    });
     const persistedProviderFn = createPersistedProviderFn({
       elasticsearch,
       security,
@@ -151,6 +170,7 @@ export class AgentsService {
       logger,
       availabilityByAgentId: this.availabilityByAgentId,
       hiddenByAgentId: this.hiddenByAgentId,
+      availabilityCache,
     });
 
     const getAgentClient = async ({ request }: { request: KibanaRequest }) => {
