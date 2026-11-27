@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { useKibanaTimeZone } from '../../hooks/use_kibana_time_zone';
+import { EscalationsPageHeader } from '../escalations_page_header';
 import { AlertZeroPageHeader } from './alertzero_page_header';
 import type { AlertZeroPageHeaderProps } from './alertzero_page_header';
 
@@ -66,6 +67,86 @@ describe('AlertZeroPageHeader', () => {
     setup({ isLoading: true, isQueueEmpty: true, eventCount: 0 });
 
     expect(heading()).toContain('Looking into your data...');
+  });
+
+  describe('queue greeting icon', () => {
+    const originalMatchMedia = window.matchMedia;
+
+    afterEach(() => {
+      window.matchMedia = originalMatchMedia;
+    });
+
+    const mockReducedMotion = (matches: boolean) => {
+      window.matchMedia = jest.fn().mockImplementation((query: string) => ({
+        matches: query === '(prefers-reduced-motion: reduce)' ? matches : false,
+        media: query,
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+      })) as unknown as typeof window.matchMedia;
+    };
+
+    const renderHeader = (props: AlertZeroPageHeaderProps = {}) => {
+      const view = setup(props);
+      return {
+        ...view,
+        rerenderHeader: (next: AlertZeroPageHeaderProps) =>
+          view.rerender(
+            <EuiProvider>
+              <AlertZeroPageHeader {...next} />
+            </EuiProvider>
+          ),
+      };
+    };
+
+    it('should animate the glyph while the queue load is in progress', () => {
+      mockReducedMotion(false);
+      renderHeader({ animateQueueGreeting: true, isLoading: true });
+
+      expect(screen.getByTestId('alertZeroQueueGreetingIcon')).toBeInTheDocument();
+      expect(screen.queryByTestId('alertZeroStaticIcon')).not.toBeInTheDocument();
+    });
+
+    it('should keep the animated glyph until the turn is holding, then show the static icon', () => {
+      mockReducedMotion(false);
+      const { rerenderHeader } = renderHeader({ animateQueueGreeting: true, isLoading: true });
+
+      rerenderHeader({ animateQueueGreeting: true, isLoading: false });
+      expect(screen.getByTestId('alertZeroQueueGreetingIcon')).toBeInTheDocument();
+      expect(screen.queryByTestId('alertZeroStaticIcon')).not.toBeInTheDocument();
+
+      fireEvent.animationEnd(screen.getByTestId('alertZeroQueueGreetingSpin'));
+
+      expect(screen.queryByTestId('alertZeroQueueGreetingIcon')).not.toBeInTheDocument();
+      expect(screen.getByTestId('alertZeroStaticIcon')).toBeInTheDocument();
+    });
+
+    it('should show the static icon when reduced motion is requested', () => {
+      mockReducedMotion(true);
+      renderHeader({ animateQueueGreeting: true, isLoading: true });
+
+      expect(screen.queryByTestId('alertZeroQueueGreetingIcon')).not.toBeInTheDocument();
+      expect(screen.getByTestId('alertZeroStaticIcon')).toBeInTheDocument();
+    });
+
+    it('should not animate onboarding, which uses this header without the queue gate', () => {
+      mockReducedMotion(false);
+      renderHeader({ isLoading: true });
+
+      expect(screen.queryByTestId('alertZeroQueueGreetingIcon')).not.toBeInTheDocument();
+      expect(screen.getByTestId('alertZeroStaticIcon')).toBeInTheDocument();
+    });
+
+    it('should not animate the Escalations header', () => {
+      mockReducedMotion(false);
+      render(
+        <EuiProvider>
+          <EscalationsPageHeader isLoading />
+        </EuiProvider>
+      );
+
+      expect(screen.queryByTestId('alertZeroQueueGreetingIcon')).not.toBeInTheDocument();
+      expect(screen.getByTestId('escalationsPageHeader')).toBeInTheDocument();
+    });
   });
 
   it('should render the subtitle under the heading when given', () => {
