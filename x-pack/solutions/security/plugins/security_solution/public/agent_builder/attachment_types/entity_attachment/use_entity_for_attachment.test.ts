@@ -221,6 +221,35 @@ describe('useEntityForAttachment', () => {
       });
     });
 
+    it('shows last_seen over last_activity, for the group and for the entity itself', async () => {
+      const withLastSeen = {
+        ...target,
+        entity: {
+          ...target.entity,
+          lifecycle: {
+            ...target.entity.lifecycle,
+            last_seen: '2026-10-29T07:00:00.000Z',
+          },
+        },
+      };
+
+      mockFetch.mockResolvedValue({ target: withLastSeen, aliases: [alias], group_size: 2 });
+      const grouped = renderHook(() => useEntityForAttachment(identifier), {
+        wrapper: createWrapper(),
+      });
+      await waitFor(() => expect(grouped.result.current.data?.isEntityInStore).toBe(true));
+      // The target's last_seen (07:00) wins over its last_activity (09:00); the alias falls
+      // back to its last_activity (08:00), which is the latest of the two.
+      expect(grouped.result.current.data?.lastSeen).toBe('2026-10-29T08:00:00.000Z');
+
+      mockFetch.mockResolvedValue({ records: [withLastSeen] });
+      const single = renderHook(() => useEntityForAttachment({ ...identifier, mode: undefined }), {
+        wrapper: createWrapper(),
+      });
+      await waitFor(() => expect(single.result.current.data?.isEntityInStore).toBe(true));
+      expect(single.result.current.data?.lastSeen).toBe('2026-10-29T07:00:00.000Z');
+    });
+
     it('shows only the entity itself without the mode', async () => {
       mockFetch.mockResolvedValue({ records: [target] });
 
