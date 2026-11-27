@@ -88,7 +88,7 @@ export const combineSourceFilterWithMetricFilter = (
 
 /**
  * Builds the STATS aggregation for one metric under `engine`, or undefined when the engine cannot
- * compute it (TS-only aggs on `FROM`).
+ * compute it (rates on `FROM`).
  */
 export const buildMetricStatsAgg = (
   columnName: string,
@@ -134,17 +134,13 @@ export const buildMetricStatsAgg = (
       return `${quotedName} = AVG(RATE(${quotedField}))`;
     case 'min_rate':
       return `${quotedName} = MIN(RATE(${quotedField}))`;
-    case 'sum_increase':
-      return `${quotedName} = SUM(INCREASE(${quotedField}))`;
-    case 'sum_delta':
-      return `${quotedName} = SUM(DELTA(${quotedField}))`;
   }
 };
 
 /**
  * Builds the WHERE predicate that requires metric fields to be present on the plan's documents:
- * OR of `field IS NOT NULL` over value-metric fields (including TS-only aggs), or over count
- * fields when the plan is counts-only. Undefined when the plan has no metrics.
+ * OR of `field IS NOT NULL` over value-metric fields (including rates), or over count fields when
+ * the plan is counts-only. Undefined when the plan has no metrics.
  */
 export const buildMetricPresenceWherePredicate = (
   metrics: readonly DynamicMetric[]

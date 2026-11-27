@@ -267,7 +267,7 @@ describe('buildColumns with metrics', () => {
     );
   });
 
-  it('throws when the same metric name has incompatible aggs across plans', () => {
+  it('throws when the same metric name has different aggs across plans', () => {
     const definition: EntityDefinitionWithoutId = {
       ...k8sNodeFixture,
       dynamic: {
@@ -285,11 +285,11 @@ describe('buildColumns with metrics', () => {
     };
     expect(() => columnsOf(definition)).toThrow(InventoryDefinitionError);
     expect(() => columnsOf(definition)).toThrow(
-      'metric "cpu" must keep a compatible aggregation and the same unit across plans of definition "k8s.node"'
+      'metric "cpu" must keep the same agg and unit across plans of definition "k8s.node"'
     );
   });
 
-  it('keeps the first plan agg when sum_increase and sum_delta share change_over_range', () => {
+  it('merges the same metric name with the same agg and unit across plans into one column', () => {
     const definition: EntityDefinitionWithoutId = {
       ...k8sNodeFixture,
       dynamic: {
@@ -298,9 +298,9 @@ describe('buildColumns with metrics', () => {
             indexPattern: 'metrics-a-*',
             metrics: [
               {
-                name: 'restarts',
-                field: 'kubernetes.container.status.restarts',
-                agg: 'sum_increase',
+                name: 'available',
+                field: 'kubernetes.deployment.replicas.available',
+                agg: 'last',
                 unit: 'count',
               },
             ],
@@ -309,9 +309,9 @@ describe('buildColumns with metrics', () => {
             indexPattern: 'metrics-b-*',
             metrics: [
               {
-                name: 'restarts',
-                field: 'k8s.container.restarts',
-                agg: 'sum_delta',
+                name: 'available',
+                field: 'k8s.deployment.available',
+                agg: 'last',
                 unit: 'count',
               },
             ],
@@ -320,12 +320,18 @@ describe('buildColumns with metrics', () => {
       },
     };
     const columns = columnsOf(definition);
-    expect(columns.find((column) => column.name === 'restarts')).toMatchObject({
-      kind: 'metric',
-      agg: 'sum_increase',
-      unit: 'count',
-      fieldByPlan: { 0: 'kubernetes.container.status.restarts', 1: 'k8s.container.restarts' },
-    });
+    expect(columns.filter((column) => column.name === 'available')).toEqual([
+      {
+        name: 'available',
+        kind: 'metric',
+        agg: 'last',
+        unit: 'count',
+        fieldByPlan: {
+          0: 'kubernetes.deployment.replicas.available',
+          1: 'k8s.deployment.available',
+        },
+      },
+    ]);
   });
 });
 

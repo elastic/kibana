@@ -47,7 +47,7 @@ const K8S_DEPLOYMENT_LIST_COLUMNS: InventoryTypeColumn[] = [
   { name: 'k8s.deployment.uid', kind: 'attribute' },
   { name: 'k8s.deployment.available', kind: 'metric', agg: 'last', unit: 'count' },
   { name: 'k8s.deployment.desired', kind: 'metric', agg: 'last', unit: 'count' },
-  { name: 'k8s.container.restarts', kind: 'metric', agg: 'last', unit: 'count' },
+  { name: 'k8s.container.restarts', kind: 'metric', agg: 'max', unit: 'count' },
   { name: 'last_seen', kind: 'last_seen' },
 ];
 

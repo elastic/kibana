@@ -12,14 +12,13 @@ export const K8S_ARCHIVE =
 
 // The archive's time-series indices and the template that lets them be plain indices (see index.ts).
 export const K8S_TSDS_INDEX = 'metrics-k8sclusterreceiver.otel-tsds';
-export const K8S_STATE_TSDS_INDEX = 'metrics-kubernetes.state_container_ts-tsds';
+export const K8S_STATE_TSDS_INDEX = 'metrics-kubernetes.state_deployment-tsds';
 export const K8S_TSDS_INDEX_TEMPLATE = 'entity-inventory-scout-k8s-tsds-index';
 
 // Templates the archive installs for its data streams. Scout-specific names and exact stream patterns
 // keep them from overwriting or matching the Fleet integration's `metrics-kubernetes.*` templates.
 export const K8S_FIXTURE_DATA_STREAM_TEMPLATES = {
   'metrics-kubernetes.state_deployment-default': 'entity-inventory-scout-state-deployment',
-  'metrics-kubernetes.state_container-default': 'entity-inventory-scout-state-container',
   'metrics-k8sclusterreceiver.otel-default': 'entity-inventory-scout-k8sclusterreceiver-otel',
 } as const;
 
@@ -35,7 +34,6 @@ export const K8S_FIXTURE_PLAIN_INDICES = [
 // filtered alias.
 const K8S_FIXTURE_INDICES = [
   'metrics-kubernetes.state_deployment-default',
-  'metrics-kubernetes.state_container-default',
   K8S_STATE_TSDS_INDEX,
   'metrics-k8sclusterreceiver.otel-default',
   K8S_TSDS_INDEX,

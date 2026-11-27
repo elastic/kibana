@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import {
-  areMetricAggsEquivalent,
-  type DynamicMetricAgg,
-  type DynamicMetricUnit,
-  type EntityDefinitionWithoutId,
+import type {
+  DynamicMetricAgg,
+  DynamicMetricUnit,
+  EntityDefinitionWithoutId,
 } from '@kbn/entity-store/common';
 import type { OutputColumnKind } from '../../../common';
 import { getDynamicBlock } from './dynamic';
@@ -28,7 +27,7 @@ export interface OutputColumn {
   kind: OutputColumnKind;
   /** Attributes and metrics: plan index to the source field read in that plan. */
   fieldByPlan?: Record<number, string>;
-  /** Metrics only: canonical agg from the first plan that declared the column (equivalents may differ per source). */
+  /** Metrics only: the aggregate every source declared for this column. */
   agg?: DynamicMetricAgg;
   /** Metrics only: optional unit for client formatting. */
   unit?: DynamicMetricUnit;
@@ -114,9 +113,9 @@ export const buildColumns = (
         metricColumns.set(name, { fieldByPlan: { [index]: field }, agg, unit });
         return;
       }
-      if (!areMetricAggsEquivalent(prior.agg, agg) || prior.unit !== unit) {
+      if (prior.agg !== agg || prior.unit !== unit) {
         throw new InventoryDefinitionError(
-          `metric "${name}" must keep a compatible aggregation and the same unit across plans of definition "${definition.type}"`
+          `metric "${name}" must keep the same agg and unit across plans of definition "${definition.type}"`
         );
       }
       prior.fieldByPlan[index] = field;

@@ -55,22 +55,18 @@ export const METRIC_AGGS = [
   'max_rate',
   'avg_rate',
   'min_rate',
-  'sum_increase',
-  'sum_delta',
 ] as const;
 
 /** Closed set of units the inventory client can format. */
 export const METRIC_UNITS = ['percent', 'ratio', 'bytes', 'ms', 's', 'count'] as const;
 
 const COUNT_AGGS: ReadonlySet<(typeof METRIC_AGGS)[number]> = new Set(['count', 'count_distinct']);
-/** Aggregates with a true zero (rates and changes over the range), so an offset is meaningless. */
+/** Aggregates with a true zero (rates), so an offset is meaningless. */
 const TRUE_ZERO_AGGS: ReadonlySet<(typeof METRIC_AGGS)[number]> = new Set([
   'sum_rate',
   'max_rate',
   'avg_rate',
   'min_rate',
-  'sum_increase',
-  'sum_delta',
 ]);
 
 /** A mapped field path: dot-separated segments, no wildcards, expressions, quoting or whitespace. */
@@ -155,8 +151,7 @@ export const dynamicMetricSchema = lazySchema(() =>
       filter: filterSchema.optional(),
       // Applied after STATS as `m = m * scale [+ offset]`. Forbidden on count aggregates.
       scale: z.number().finite().optional(),
-      // Applied after STATS (and after scale when both are set). Forbidden on count, rate and
-      // change-over-range (`sum_increase`, `sum_delta`) aggs.
+      // Applied after STATS (and after scale when both are set). Forbidden on count and rate aggs.
       offset: z.number().finite().optional(),
       // How the inventory client formats the value; closed set so list cells can render units.
       unit: z.enum(METRIC_UNITS).optional(),

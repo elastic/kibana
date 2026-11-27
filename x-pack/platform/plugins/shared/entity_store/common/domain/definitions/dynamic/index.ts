@@ -53,9 +53,3 @@ export {
   RESERVED_LAST_SEEN_FIELD,
   SERVABLE_IDENTITY_RULE,
 } from './dynamic_definition_rules';
-export {
-  CHANGE_OVER_RANGE_AGGS,
-  CHANGE_OVER_RANGE_MEASUREMENT,
-  areMetricAggsEquivalent,
-  getMetricMeasurementClass,
-} from './metric_measurement';

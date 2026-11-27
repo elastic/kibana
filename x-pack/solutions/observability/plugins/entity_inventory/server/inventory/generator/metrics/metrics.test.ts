@@ -34,8 +34,6 @@ const ALL_AGGS: DynamicMetricAgg[] = [
   'max_rate',
   'avg_rate',
   'min_rate',
-  'sum_increase',
-  'sum_delta',
 ];
 
 const RATE_AGGS: DynamicMetricAgg[] = ['sum_rate', 'max_rate', 'avg_rate', 'min_rate'];
@@ -86,14 +84,6 @@ describe('buildMetricStatsAgg', () => {
       TS: '`m` = MIN(RATE(`f`))',
       FROM: undefined,
     },
-    sum_increase: {
-      TS: '`m` = SUM(INCREASE(`f`))',
-      FROM: undefined,
-    },
-    sum_delta: {
-      TS: '`m` = SUM(DELTA(`f`))',
-      FROM: undefined,
-    },
   };
 
   it.each(
@@ -126,15 +116,6 @@ describe('buildMetricPresenceWherePredicate', () => {
         metric('cpu_again', 'system.cpu.pct', 'avg'),
       ])
     ).toBe('(`system.cpu.pct` IS NOT NULL OR `host.network.bytes` IS NOT NULL)');
-  });
-
-  it('counts change-over-range aggs as value metrics', () => {
-    expect(
-      buildMetricPresenceWherePredicate([
-        metric('restarts', 'k8s.container.restarts', 'sum_delta'),
-        metric('pods', 'kubernetes.pod.name', 'count_distinct'),
-      ])
-    ).toBe('`k8s.container.restarts` IS NOT NULL');
   });
 
   it('falls back to count fields when the plan is counts-only', () => {
@@ -232,19 +213,5 @@ describe('rate aggs are TS-only at STATS', () => {
   it.each(RATE_AGGS)('%s is defined under TS and omitted under FROM', (agg) => {
     expect(buildMetricStatsAgg('m', 'f', agg, 'TS')).toContain('RATE(`f`)');
     expect(buildMetricStatsAgg('m', 'f', agg, 'FROM')).toBeUndefined();
-  });
-});
-
-describe('change-over-range aggs are TS-only at STATS', () => {
-  it.each([
-    ['sum_increase', '`restarts` = SUM(INCREASE(`kubernetes.container.status.restarts`))'],
-    ['sum_delta', '`restarts` = SUM(DELTA(`kubernetes.container.status.restarts`))'],
-  ] as const)('%s is defined under TS and omitted under FROM', (agg, expected) => {
-    expect(buildMetricStatsAgg('restarts', 'kubernetes.container.status.restarts', agg, 'TS')).toBe(
-      expected
-    );
-    expect(
-      buildMetricStatsAgg('restarts', 'kubernetes.container.status.restarts', agg, 'FROM')
-    ).toBeUndefined();
   });
 });

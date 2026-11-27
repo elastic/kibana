@@ -10,7 +10,6 @@ import {
   canEngineComputeMetricAgg,
   isCountMetricAgg,
   isRateMetricAgg,
-  isTimeSeriesOnlyMetricAgg,
   listMetricsUnsupportedOnEngine,
   listSkippedMetricsOnPlan,
   overTimeInnerAgg,
@@ -18,7 +17,6 @@ import {
 
 const COUNT_AGGS: DynamicMetricAgg[] = ['count', 'count_distinct'];
 const RATE_AGGS: DynamicMetricAgg[] = ['sum_rate', 'max_rate', 'avg_rate', 'min_rate'];
-const CHANGE_OVER_RANGE_AGGS: DynamicMetricAgg[] = ['sum_increase', 'sum_delta'];
 const VALUE_AGGS: DynamicMetricAgg[] = ['last', 'avg', 'min', 'max', 'sum'];
 
 const metric = (agg: DynamicMetricAgg, name: string = agg): DynamicMetric => ({
@@ -32,7 +30,7 @@ describe('isCountMetricAgg', () => {
     expect(isCountMetricAgg(agg)).toBe(true);
   });
 
-  it.each([...VALUE_AGGS, ...RATE_AGGS, ...CHANGE_OVER_RANGE_AGGS])('is false for %s', (agg) => {
+  it.each([...VALUE_AGGS, ...RATE_AGGS])('is false for %s', (agg) => {
     expect(isCountMetricAgg(agg)).toBe(false);
   });
 });
@@ -42,24 +40,14 @@ describe('isRateMetricAgg', () => {
     expect(isRateMetricAgg(agg)).toBe(true);
   });
 
-  it.each([...VALUE_AGGS, ...COUNT_AGGS, ...CHANGE_OVER_RANGE_AGGS])('is false for %s', (agg) => {
-    expect(isRateMetricAgg(agg)).toBe(false);
-  });
-});
-
-describe('isTimeSeriesOnlyMetricAgg', () => {
-  it.each([...RATE_AGGS, ...CHANGE_OVER_RANGE_AGGS])('is true for %s', (agg) => {
-    expect(isTimeSeriesOnlyMetricAgg(agg)).toBe(true);
-  });
-
   it.each([...VALUE_AGGS, ...COUNT_AGGS])('is false for %s', (agg) => {
-    expect(isTimeSeriesOnlyMetricAgg(agg)).toBe(false);
+    expect(isRateMetricAgg(agg)).toBe(false);
   });
 });
 
 describe('canEngineComputeMetricAgg', () => {
   it('allows every agg under TS', () => {
-    for (const agg of [...VALUE_AGGS, ...COUNT_AGGS, ...RATE_AGGS, ...CHANGE_OVER_RANGE_AGGS]) {
+    for (const agg of [...VALUE_AGGS, ...COUNT_AGGS, ...RATE_AGGS]) {
       expect(canEngineComputeMetricAgg('TS', agg)).toBe(true);
     }
   });
@@ -70,7 +58,7 @@ describe('canEngineComputeMetricAgg', () => {
     }
   });
 
-  it.each([...RATE_AGGS, ...CHANGE_OVER_RANGE_AGGS])('rejects %s under FROM', (agg) => {
+  it.each(RATE_AGGS)('rejects %s under FROM', (agg) => {
     expect(canEngineComputeMetricAgg('FROM', agg)).toBe(false);
   });
 });
@@ -81,20 +69,16 @@ describe('listMetricsUnsupportedOnEngine', () => {
     metric('sum_rate', 'bytes_in'),
     metric('count', 'restarts'),
     metric('avg_rate', 'bytes_out'),
-    metric('sum_increase', 'restarts_ecs'),
-    metric('sum_delta', 'restarts_otel'),
   ];
 
   it('returns no metrics under TS', () => {
     expect(listMetricsUnsupportedOnEngine(metrics, 'TS')).toEqual([]);
   });
 
-  it('returns only TS-only metrics under FROM', () => {
+  it('returns only rate metrics under FROM', () => {
     expect(listMetricsUnsupportedOnEngine(metrics, 'FROM')).toEqual([
       metric('sum_rate', 'bytes_in'),
       metric('avg_rate', 'bytes_out'),
-      metric('sum_increase', 'restarts_ecs'),
-      metric('sum_delta', 'restarts_otel'),
     ]);
   });
 

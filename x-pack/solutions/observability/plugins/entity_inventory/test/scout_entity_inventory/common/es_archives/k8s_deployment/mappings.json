@@ -81,73 +81,6 @@
 {
   "type": "data_stream",
   "value": {
-    "data_stream": "metrics-kubernetes.state_container-default",
-    "template": {
-      "data_stream": {
-        "allow_custom_routing": false,
-        "hidden": false
-      },
-      "index_patterns": [
-        "metrics-kubernetes.state_container-default"
-      ],
-      "name": "entity-inventory-scout-state-container",
-      "priority": 200,
-      "template": {
-        "mappings": {
-          "dynamic": false,
-          "properties": {
-            "@timestamp": {
-              "type": "date"
-            },
-            "metricset": {
-              "properties": {
-                "name": {
-                  "type": "keyword"
-                }
-              }
-            },
-            "orchestrator": {
-              "properties": {
-                "cluster": {
-                  "properties": {
-                    "name": {
-                      "type": "keyword"
-                    }
-                  }
-                }
-              }
-            },
-            "kubernetes": {
-              "properties": {
-                "namespace": {
-                  "type": "keyword"
-                },
-                "deployment": {
-                  "properties": {
-                    "name": {
-                      "type": "keyword"
-                    }
-                  }
-                },
-                "container": {
-                  "properties": {
-                    "name": {
-                      "type": "keyword"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-{
-  "type": "data_stream",
-  "value": {
     "data_stream": "metrics-k8sclusterreceiver.otel-default",
     "template": {
       "data_stream": {
@@ -559,7 +492,7 @@
 {
   "type": "index",
   "value": {
-    "index": "metrics-kubernetes.state_container_ts-tsds",
+    "index": "metrics-kubernetes.state_deployment-tsds",
     "mappings": {
       "dynamic": false,
       "properties": {
@@ -620,22 +553,6 @@
                   }
                 }
               }
-            },
-            "container": {
-              "properties": {
-                "name": {
-                  "type": "keyword",
-                  "time_series_dimension": true
-                },
-                "status": {
-                  "properties": {
-                    "restarts": {
-                      "type": "long",
-                      "time_series_metric": "counter"
-                    }
-                  }
-                }
-              }
             }
           }
         }
@@ -647,8 +564,7 @@
         "routing_path": [
           "orchestrator.cluster.name",
           "kubernetes.namespace",
-          "kubernetes.deployment.name",
-          "kubernetes.container.name"
+          "kubernetes.deployment.name"
         ],
         "time_series": {
           "start_time": "2026-11-09T00:00:00.000Z",

@@ -157,12 +157,8 @@ export {
   MAX_QUERY_PLANS,
   METRIC_AGGS,
   METRIC_UNITS,
-  CHANGE_OVER_RANGE_AGGS,
-  CHANGE_OVER_RANGE_MEASUREMENT,
-  areMetricAggsEquivalent,
   getIdentityCompositions,
   getIdentityFields,
-  getMetricMeasurementClass,
   getPresenceFilter,
 } from './domain/definitions/dynamic';
 

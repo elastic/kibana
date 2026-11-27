@@ -28,31 +28,10 @@ const DEPLOYMENT_IDS = [
   'k8s.deployment:platform/ingress',
 ];
 
-// One Agent source reads the state_deployment and state_container data streams and the
-// state_container time-series index.
-const STATE_PATTERN = 'metrics-kubernetes.*';
+// One Agent source reads the state_deployment data stream and the state_deployment time-series
+// index.
+const STATE_PATTERN = 'metrics-kubernetes.state_deployment-*';
 const OTEL_PATTERN = 'metrics-k8sclusterreceiver.otel-*';
-
-// Restarts are a counter on the Agent source (`SUM(INCREASE)`) and a gauge on the OpenTelemetry
-// source (`SUM(DELTA)`). Both functions exist only under `TS`, so each source's `FROM` plan leaves
-// the column out and reports it, whatever the window: restarts are `null` on rows read only by
-// `FROM` plans.
-const RESTARTS_UNSUPPORTED_ON_FROM = [
-  {
-    indexPattern: STATE_PATTERN,
-    engine: 'FROM',
-    column: 'k8s.container.restarts',
-    field: 'kubernetes.container.status.restarts',
-    agg: 'sum_increase',
-  },
-  {
-    indexPattern: OTEL_PATTERN,
-    engine: 'FROM',
-    column: 'k8s.container.restarts',
-    field: 'k8s.container.restarts',
-    agg: 'sum_delta',
-  },
-];
 
 // No index maps `k8s.deployment.uid`, so each of the OpenTelemetry source's two plans (`TS` and
 // `FROM`) reports it: the response carries the same entry twice.
@@ -69,9 +48,6 @@ const summarizeQueries = (
   queries: QueryDiagnostic[]
 ): Array<Pick<QueryDiagnostic, 'indexPattern' | 'engine' | 'rowCount'>> =>
   queries.map(({ indexPattern, engine, rowCount }) => ({ indexPattern, engine, rowCount }));
-
-const restartsByEntityId = (rows: ListResponse['rows']): Record<string, unknown> =>
-  Object.fromEntries(rows.map((row) => [row['entity.id'], row['k8s.container.restarts']]));
 
 interface ListResponse {
   columns: Array<{ name: string; kind: string; agg?: string; unit?: string }>;
@@ -141,14 +117,15 @@ apiTest.describe(
           'k8s.deployment.label.app': 'cart-api',
           // Mapped in no index, so no plan reads a value for it.
           'k8s.deployment.uid': null,
-          // Read only by `FROM` plans, which cannot compute `INCREASE` or `DELTA`.
-          'k8s.container.restarts': null,
+          // Declared by the OpenTelemetry source only: `max` of the gauge samples 4 and 5.
+          'k8s.container.restarts': 5,
           last_seen: '2026-11-01T10:01:00.000Z',
         });
         expect(body.truncated).toBe(false);
         expect(body.errors).toStrictEqual([]);
         expect(body.unavailableColumns).toStrictEqual(UID_UNAVAILABLE_PER_OTEL_PLAN);
-        expect(body.unsupportedMetrics).toStrictEqual(RESTARTS_UNSUPPORTED_ON_FROM);
+        // Every metric aggregation of k8s.deployment is computable under both `TS` and `FROM`.
+        expect(body.unsupportedMetrics).toStrictEqual([]);
       }
     );
 
@@ -250,11 +227,10 @@ apiTest.describe(
             agg: 'last',
             unit: 'count',
           },
-          // The column carries the first source's agg; the OpenTelemetry source uses `sum_delta`.
           {
             name: 'k8s.container.restarts',
             kind: 'metric',
-            agg: 'sum_increase',
+            agg: 'max',
             unit: 'count',
           },
           { name: 'last_seen', kind: 'last_seen' },
@@ -326,8 +302,8 @@ apiTest.describe(
     apiTest(
       'gives a source with a time-series index a TS and a FROM plan and lists the FROM rows',
       async ({ apiClient }) => {
-        // The Agent `metrics-kubernetes.*` pattern holds two data streams and a time-series index
-        // whose documents are all on 2026-11-09, so here only the `FROM` plan reads rows.
+        // The Agent `metrics-kubernetes.state_deployment-*` pattern holds a data stream and an
+        // empty time-series index, so here only the `FROM` plan reads rows.
         const response = await postList(
           apiClient,
           { from: '2026-11-01T09:00:00.000Z', to: '2026-11-01T11:00:00.000Z' },
@@ -351,7 +327,7 @@ apiTest.describe(
     apiTest(
       'gives a source only a FROM plan when the caller can read none of its time-series indices',
       async ({ apiClient, samlAuth }) => {
-        // The role reads the archive except `metrics-kubernetes.state_container_ts-tsds`, the Agent
+        // The role reads the archive except `metrics-kubernetes.state_deployment-tsds`, the Agent
         // pattern's only time-series index, so the probe finds none the caller can read.
         const { cookieHeader } = await samlAuth.asInteractiveUser(
           K8S_FIXTURE_READER_WITHOUT_AGENT_TSDS_ROLE
@@ -470,17 +446,17 @@ apiTest.describe(
       }
     );
 
-    // Metric samples per window: common/README.md. available and desired use `last`; restarts use
-    // `sum_increase` on the Agent counter and `sum_delta` on the OpenTelemetry gauge, both `TS` only.
+    // Metric samples per window: common/README.md. available and desired use `last`; restarts, on
+    // the OpenTelemetry source only, use `max` of the gauge, computed under both `TS` and `FROM`.
     apiTest(
-      'returns last available and desired, and null restarts, when only FROM plans read the data',
+      'returns last available and desired, and max restarts, when only FROM plans read the data',
       async ({ apiClient }) => {
         const response = await postList(apiClient, WINDOW);
 
         expect(response).toHaveStatusCode(200);
         const { rows, columns, unsupportedMetrics }: ListResponse = response.body;
 
-        expect(unsupportedMetrics).toStrictEqual(RESTARTS_UNSUPPORTED_ON_FROM);
+        expect(unsupportedMetrics).toStrictEqual([]);
         expect(columns.find(({ name }) => name === 'k8s.deployment.available')).toStrictEqual({
           name: 'k8s.deployment.available',
           kind: 'metric',
@@ -496,7 +472,7 @@ apiTest.describe(
         expect(columns.find(({ name }) => name === 'k8s.container.restarts')).toStrictEqual({
           name: 'k8s.container.restarts',
           kind: 'metric',
-          agg: 'sum_increase',
+          agg: 'max',
           unit: 'count',
         });
 
@@ -504,7 +480,7 @@ apiTest.describe(
         expect(cartApi?.['kubernetes.deployment.name']).toBe('cart-api');
         expect(cartApi?.['k8s.deployment.available']).toBe(3);
         expect(cartApi?.['k8s.deployment.desired']).toBe(3);
-        expect(cartApi?.['k8s.container.restarts']).toBeNull();
+        expect(cartApi?.['k8s.container.restarts']).toBe(5);
 
         const payments = rows.find(
           (row) => row['entity.id'] === 'k8s.deployment:checkout/payments'
@@ -512,18 +488,18 @@ apiTest.describe(
         expect(payments?.['kubernetes.deployment.name']).toBe('payments');
         expect(payments?.['k8s.deployment.available']).toBe(2);
         expect(payments?.['k8s.deployment.desired']).toBe(3);
-        expect(payments?.['k8s.container.restarts']).toBeNull();
+        expect(payments?.['k8s.container.restarts']).toBe(1);
 
         const ingress = rows.find((row) => row['entity.id'] === 'k8s.deployment:platform/ingress');
         expect(ingress?.['kubernetes.deployment.name']).toBe('ingress');
         expect(ingress?.['k8s.deployment.available']).toBe(1);
         expect(ingress?.['k8s.deployment.desired']).toBe(1);
-        expect(ingress?.['k8s.container.restarts']).toBeNull();
+        expect(ingress?.['k8s.container.restarts']).toBe(0);
       }
     );
 
     apiTest(
-      'uses the last sample inside the window for cart-api available and desired',
+      'uses the samples inside the window for cart-api available, desired and restarts',
       async ({ apiClient }) => {
         const through1000 = await postList(apiClient, {
           from: '2026-11-01T09:00:00.000Z',
@@ -539,15 +515,15 @@ apiTest.describe(
         );
         expect(earlier?.['k8s.deployment.available']).toBe(3);
         expect(earlier?.['k8s.deployment.desired']).toBe(3);
-        // Only data streams hold 2026-11-01 documents, and `FROM` cannot compute restarts.
-        expect(earlier?.['k8s.container.restarts']).toBeNull();
+        // Only the 10:00:00 restarts sample (4) is inside the window.
+        expect(earlier?.['k8s.container.restarts']).toBe(4);
 
         const later = through1001.body.rows.find(
           (row: Record<string, unknown>) => row['entity.id'] === CART_API_ID
         );
         expect(later?.['k8s.deployment.available']).toBe(3);
         expect(later?.['k8s.deployment.desired']).toBe(3);
-        expect(later?.['k8s.container.restarts']).toBeNull();
+        expect(later?.['k8s.container.restarts']).toBe(5);
       }
     );
 
@@ -565,10 +541,9 @@ apiTest.describe(
       );
       expect(tsWindow?.['k8s.deployment.available']).toBe(2);
       expect(tsWindow?.['k8s.deployment.desired']).toBe(2);
-      // `SUM(DELTA)` of the gauge: 6 at 14:00:00, 8 at 14:01:00.
-      expect(tsWindow?.['k8s.container.restarts']).toBe(2);
-      // The `FROM` plans read no row here but still cannot compute restarts.
-      expect(unsupportedMetrics).toStrictEqual(RESTARTS_UNSUPPORTED_ON_FROM);
+      // `max` of the gauge: 6 at 14:00:00, 8 at 14:01:00.
+      expect(tsWindow?.['k8s.container.restarts']).toBe(8);
+      expect(unsupportedMetrics).toStrictEqual([]);
     });
 
     apiTest(
@@ -582,28 +557,28 @@ apiTest.describe(
         expect(response).toHaveStatusCode(200);
         const { rows }: ListResponse = response.body;
 
-        // TSDS 10:01 (5), not standard-index 10:00 (4). Every time series here has one sample in
-        // the window, and `DELTA` needs two, so restarts are null on the `TS` rows as well.
+        // TSDS 10:01 (5), not standard-index 10:00 (4): a metric takes the first non-null value in
+        // plan order, and the `TS` plan comes first. The same holds for restarts: 12, not 10.
         const shared = rows.find(
           (row) => row['entity.id'] === 'k8s.deployment:streaming/tsds-shared'
         );
         expect(shared?.['k8s.deployment.available']).toBe(5);
         expect(shared?.['k8s.deployment.desired']).toBe(5);
-        expect(shared?.['k8s.container.restarts']).toBeNull();
+        expect(shared?.['k8s.container.restarts']).toBe(12);
 
         const standardOnly = rows.find(
           (row) => row['entity.id'] === 'k8s.deployment:streaming/standard-only'
         );
         expect(standardOnly?.['k8s.deployment.available']).toBe(1);
         expect(standardOnly?.['k8s.deployment.desired']).toBe(5);
-        expect(standardOnly?.['k8s.container.restarts']).toBeNull();
+        expect(standardOnly?.['k8s.container.restarts']).toBe(3);
 
         const tsdsOnly = rows.find(
           (row) => row['entity.id'] === 'k8s.deployment:streaming/tsds-only'
         );
         expect(tsdsOnly?.['k8s.deployment.available']).toBe(2);
         expect(tsdsOnly?.['k8s.deployment.desired']).toBe(5);
-        expect(tsdsOnly?.['k8s.container.restarts']).toBeNull();
+        expect(tsdsOnly?.['k8s.container.restarts']).toBe(7);
       }
     );
 
@@ -616,103 +591,30 @@ apiTest.describe(
       expect(response).toHaveStatusCode(200);
       const { rows }: ListResponse = response.body;
 
-      // kept-standard is read under `FROM`; kept-tsds has one sample, and `DELTA` needs two.
+      // kept-standard is read under `FROM`, kept-tsds under `TS`.
       const keptStandard = rows.find(
         (row) => row['entity.id'] === 'k8s.deployment:aliased/kept-standard'
       );
       expect(keptStandard?.['k8s.deployment.available']).toBe(1);
       expect(keptStandard?.['k8s.deployment.desired']).toBe(1);
-      expect(keptStandard?.['k8s.container.restarts']).toBeNull();
+      expect(keptStandard?.['k8s.container.restarts']).toBe(9);
 
       const keptTsds = rows.find((row) => row['entity.id'] === 'k8s.deployment:aliased/kept-tsds');
       expect(keptTsds?.['k8s.deployment.available']).toBe(2);
       expect(keptTsds?.['k8s.deployment.desired']).toBe(2);
-      expect(keptTsds?.['k8s.container.restarts']).toBeNull();
+      expect(keptTsds?.['k8s.container.restarts']).toBe(11);
     });
 
     apiTest(
-      'sums the INCREASE of the Agent restarts counter over the containers of each deployment',
+      'returns the max of the OpenTelemetry restarts gauge when the gauge drops',
       async ({ apiClient, samlAuth }) => {
         // A role that reads only the archive, so the plan row counts do not depend on other data
         // on the cluster.
         const { cookieHeader } = await samlAuth.asInteractiveUser(K8S_FIXTURE_READER_ROLE);
-        // Only the Agent time-series index holds 2026-11-09 documents, namespace `counters`.
-        // two-containers: app 1, 2, 4 and sidecar 5, 6, 6. counter-reset: app 3, 5, 0, 2 (reset at
-        // 10:02:00). steady: app 7, 7, 7.
-        const response = await postList(
-          apiClient,
-          { from: '2026-11-09T09:00:00.000Z', to: '2026-11-09T11:00:00.000Z' },
-          K8S_DEPLOYMENT_LIST_PATH,
-          cookieHeader
-        );
-
-        expect(response).toHaveStatusCode(200);
-        const { rows, errors, queries, unsupportedMetrics }: ListResponse = response.body;
-
-        expect(errors).toStrictEqual([]);
-        expect(summarizeQueries(queries)).toStrictEqual([
-          { indexPattern: STATE_PATTERN, engine: 'TS', rowCount: 3 },
-          { indexPattern: STATE_PATTERN, engine: 'FROM', rowCount: 0 },
-          { indexPattern: OTEL_PATTERN, engine: 'TS', rowCount: 0 },
-          { indexPattern: OTEL_PATTERN, engine: 'FROM', rowCount: 0 },
-        ]);
-        expect(unsupportedMetrics).toStrictEqual(RESTARTS_UNSUPPORTED_ON_FROM);
-        expect(rows.map(({ last_seen: lastSeen }) => lastSeen)).toStrictEqual([
-          '2026-11-09T10:03:00.000Z',
-          '2026-11-09T10:02:00.000Z',
-          '2026-11-09T10:02:00.000Z',
-        ]);
-        // two-containers: (4 - 1) + (6 - 5). counter-reset: (5 - 3) + 0 + (2 - 0), the drop to 0
-        // read as a counter reset rather than a decrease. steady: 0, not null.
-        expect(restartsByEntityId(rows)).toStrictEqual({
-          'k8s.deployment:counters/counter-reset': 4,
-          'k8s.deployment:counters/steady': 0,
-          'k8s.deployment:counters/two-containers': 4,
-        });
-        // No state_deployment document in this window, so available and desired have no sample.
-        rows.forEach((row) => {
-          expect(row['k8s.deployment.available']).toBeNull();
-          expect(row['k8s.deployment.desired']).toBeNull();
-        });
-      }
-    );
-
-    apiTest(
-      'counts only the Agent restarts that happened inside the window',
-      async ({ apiClient, samlAuth }) => {
-        // A role that reads only the archive, so the plan row counts do not depend on other data
-        // on the cluster.
-        const { cookieHeader } = await samlAuth.asInteractiveUser(K8S_FIXTURE_READER_ROLE);
-        // Ends before the 10:02:00 samples: two-containers reads app 1, 2 and sidecar 5, 6,
-        // counter-reset reads 3, 5 (before its reset), steady reads 7, 7.
-        const response = await postList(
-          apiClient,
-          { from: '2026-11-09T09:00:00.000Z', to: '2026-11-09T10:01:30.000Z' },
-          K8S_DEPLOYMENT_LIST_PATH,
-          cookieHeader
-        );
-
-        expect(response).toHaveStatusCode(200);
-        const { rows }: ListResponse = response.body;
-
-        expect(restartsByEntityId(rows)).toStrictEqual({
-          'k8s.deployment:counters/counter-reset': 2,
-          'k8s.deployment:counters/steady': 0,
-          'k8s.deployment:counters/two-containers': 2,
-        });
-      }
-    );
-
-    apiTest(
-      'reports the DELTA of the OpenTelemetry restarts gauge, negative when the gauge drops',
-      async ({ apiClient, samlAuth }) => {
-        // A role that reads only the archive, so the plan row counts do not depend on other data
-        // on the cluster.
-        const { cookieHeader } = await samlAuth.asInteractiveUser(K8S_FIXTURE_READER_ROLE);
-        // `gauges/restarts-drop` in the OpenTelemetry time-series index: 9, 9, 4 at 16:00:00 to
-        // 16:02:00 on 2026-11-05. A gauge has no reset handling, so the drop is a negative change.
-        // Its available and desired replicas are 2, 2, 1 in the same window, so `last` is 1 where
-        // `max` would be 2.
+        // `gauges/restarts-drop` in the OpenTelemetry time-series index: restarts 9, 9, 4 at
+        // 16:00:00 to 16:02:00 on 2026-11-05, so `max` is 9 where `last` would be 4. Its available
+        // and desired replicas are 2, 2, 1 in the same window, so `last` is 1 where `max` would
+        // be 2.
         const response = await postList(
           apiClient,
           { from: '2026-11-05T15:30:00.000Z', to: '2026-11-05T16:30:00.000Z' },
@@ -735,14 +637,14 @@ apiTest.describe(
           'entity.id': 'k8s.deployment:gauges/restarts-drop',
           'k8s.deployment.available': 1,
           'k8s.deployment.desired': 1,
-          'k8s.container.restarts': -5,
+          'k8s.container.restarts': 9,
           last_seen: '2026-11-05T16:02:00.000Z',
         });
       }
     );
 
     apiTest(
-      'sums the DELTA of the OpenTelemetry restarts gauge over the containers of each deployment',
+      'returns the max of the OpenTelemetry restarts gauge over the containers of each deployment',
       async ({ apiClient, samlAuth }) => {
         // A role that reads only the archive, so the plan row counts do not depend on other data
         // on the cluster.
@@ -767,13 +669,13 @@ apiTest.describe(
           { indexPattern: OTEL_PATTERN, engine: 'TS', rowCount: 1 },
           { indexPattern: OTEL_PATTERN, engine: 'FROM', rowCount: 0 },
         ]);
-        // (3 - 1) + (9 - 4) = 7. Taking the largest container's change instead would give 5.
+        // The largest sample of any container: app 3, sidecar 9.
         expect(rows).toHaveLength(1);
         expect(rows[0]).toMatchObject({
           'entity.id': 'k8s.deployment:gauges/two-containers',
           'k8s.deployment.available': null,
           'k8s.deployment.desired': null,
-          'k8s.container.restarts': 7,
+          'k8s.container.restarts': 9,
           last_seen: '2026-11-05T17:01:00.000Z',
         });
       }

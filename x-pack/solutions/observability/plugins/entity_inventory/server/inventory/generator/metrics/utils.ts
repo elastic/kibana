@@ -16,30 +16,18 @@ const RATE_AGGS: ReadonlySet<DynamicMetricAgg> = new Set([
   'avg_rate',
   'min_rate',
 ]);
-// Change over the time range: `INCREASE` on counters, `DELTA` on gauges.
-const CHANGE_OVER_RANGE_AGGS: ReadonlySet<DynamicMetricAgg> = new Set([
-  'sum_increase',
-  'sum_delta',
-]);
 
 /** Whether `agg` is a count-style aggregate (no scale/offset; presence uses count fields). */
 export const isCountMetricAgg = (agg: DynamicMetricAgg): boolean => COUNT_AGGS.has(agg);
 
-/** Whether `agg` is a per-second counter rate (`RATE`). */
+/** Whether `agg` is a counter rate (supported under `TS` only). */
 export const isRateMetricAgg = (agg: DynamicMetricAgg): boolean => RATE_AGGS.has(agg);
 
-/**
- * Whether `agg` uses an ES|QL time series aggregation function (`RATE`, `INCREASE`, `DELTA`),
- * which only `TS` accepts.
- */
-export const isTimeSeriesOnlyMetricAgg = (agg: DynamicMetricAgg): boolean =>
-  isRateMetricAgg(agg) || CHANGE_OVER_RANGE_AGGS.has(agg);
-
-/** Whether `engine` can compute this metric aggregate (`FROM` cannot compute TS-only aggs). */
+/** Whether `engine` can compute this metric aggregate (`FROM` cannot compute rates). */
 export const canEngineComputeMetricAgg = (engine: QueryEngine, agg: DynamicMetricAgg): boolean =>
-  !(engine === 'FROM' && isTimeSeriesOnlyMetricAgg(agg));
+  !(engine === 'FROM' && isRateMetricAgg(agg));
 
-/** Metrics that `engine` cannot compute (TS-only aggs under `FROM`). */
+/** Metrics that `engine` cannot compute (rates under `FROM`). */
 export const listMetricsUnsupportedOnEngine = (
   metrics: readonly DynamicMetric[],
   engine: QueryEngine

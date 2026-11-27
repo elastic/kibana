@@ -14,7 +14,6 @@ import {
   type DynamicMetric,
   type DynamicSource,
 } from './dynamic_block_schema';
-import { areMetricAggsEquivalent } from './metric_measurement';
 import { ENTITY_ID_FIELD, isNotEmptyCondition } from '../common_fields';
 import type {
   CalculatedEntityIdentity,
@@ -29,12 +28,7 @@ export const NO_IDENTITY_ATTRIBUTE_RULE = 'attributes are not identity fields';
 export const NO_IDENTITY_METRIC_RULE = 'metrics are not identity fields';
 /** Name of the rule that metric output names stay off reserved inventory columns and attributes. */
 export const METRIC_NAME_RULE = 'metric names';
-/**
- * Name of the rule that the same metric name keeps one measurement and unit across sources.
- * Aggregations may differ only when they share a declared measurement class (see
- * `areMetricAggsEquivalent`); e.g. `avg` vs `max` and `sum_rate` vs `last` are rejected,
- * `sum_increase` vs `sum_delta` is allowed.
- */
+/** Name of the rule that the same metric name keeps the same agg and unit across sources. */
 export const METRIC_CONSISTENCY_RULE = 'metric consistency across sources';
 /** Name of the rule that a display label is for an attribute of a source or an identity field. */
 export const DISPLAY_LABEL_RULE = 'display labels are identity fields or attributes';
@@ -229,12 +223,12 @@ const checkMetricNamesAndFields = (
         });
         return;
       }
-      if (!areMetricAggsEquivalent(prior.agg, metric.agg) || prior.unit !== metric.unit) {
+      if (prior.agg !== metric.agg || prior.unit !== metric.unit) {
         addIssue(
           namePath,
           `${METRIC_CONSISTENCY_RULE}: metric "${
             metric.name
-          }" must keep a compatible aggregation and the same unit on every source (first seen as agg "${
+          }" must keep the same agg and the same unit on every source (first seen as agg "${
             prior.agg
           }"${prior.unit !== undefined ? ` unit "${prior.unit}"` : ' with no unit'})`
         );
@@ -248,7 +242,7 @@ const checkMetricNamesAndFields = (
 /**
  * Whole-definition rules for a definition carrying `dynamic`: its identity must be servable as
  * ES|QL `BY` keys, no attribute or metric may read an identity field, metric names stay off
- * attributes and reserved columns, the same metric name keeps one measurement class and unit
+ * attributes and reserved columns, the same metric name keeps the same agg and unit
  * across sources, every display label is for an attribute or an identity field, and every
  * suggested filter is an attribute or an identity field. A definition without `dynamic` is never
  * checked.

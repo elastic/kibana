@@ -23,13 +23,13 @@ apiTest.describe(
     });
 
     apiTest('leave no template under an integration name', async ({ esClient }) => {
-      const { index_templates: templates } = await esClient.indices.getIndexTemplate({
-        name: 'metrics-kubernetes.state_*',
-      });
+      const { index_templates: templates } = await esClient.indices.getIndexTemplate(
+        { name: 'metrics-kubernetes.state_*' },
+        { ignore: [404] }
+      );
 
       // A Fleet integration template may exist on a shared cluster; the archive must not be its source.
       for (const { index_template: template } of templates) {
-        expect(template.index_patterns).not.toContain('metrics-kubernetes.state_container-default');
         expect(template.index_patterns).not.toContain(
           'metrics-kubernetes.state_deployment-default'
         );

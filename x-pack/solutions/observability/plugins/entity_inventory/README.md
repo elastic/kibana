@@ -22,7 +22,7 @@ No body and no parameters. It returns one entry per registered definition that h
     {
       "type": "k8s.deployment",
       "name": "K8s Deployment",
-      "description": "A Kubernetes deployment, identified by namespace/name. Read from the Elastic Agent Kubernetes integration (state_deployment, state_container) and the OpenTelemetry k8sclusterreceiver. The same namespace/name in two clusters is one entity; the cluster is shown as a column.",
+      "description": "A Kubernetes deployment, identified by namespace/name. Read from the Elastic Agent Kubernetes integration (state_deployment) and the OpenTelemetry k8sclusterreceiver. The same namespace/name in two clusters is one entity; the cluster is shown as a column.",
       "identityFields": ["kubernetes.namespace", "kubernetes.deployment.name"],
       "columns": [
         { "name": "entity.id", "kind": "id", "label": "ID" },
@@ -34,19 +34,14 @@ No body and no parameters. It returns one entry per registered definition that h
         { "name": "k8s.deployment.uid", "kind": "attribute" },
         { "name": "k8s.deployment.available", "kind": "metric", "agg": "last", "unit": "count" },
         { "name": "k8s.deployment.desired", "kind": "metric", "agg": "last", "unit": "count" },
-        {
-          "name": "k8s.container.restarts",
-          "kind": "metric",
-          "agg": "sum_increase",
-          "unit": "count"
-        },
+        { "name": "k8s.container.restarts", "kind": "metric", "agg": "max", "unit": "count" },
         { "name": "last_seen", "kind": "last_seen", "label": "Last seen" }
       ],
       "suggestedFilters": ["k8s.cluster.name", "kubernetes.namespace"],
       "sources": [
         {
-          "indexPattern": "metrics-kubernetes.*",
-          "filter": "metricset.name == \"state_deployment\" OR metricset.name == \"state_container\""
+          "indexPattern": "metrics-kubernetes.state_deployment-*",
+          "filter": "metricset.name == \"state_deployment\""
         },
         { "indexPattern": "metrics-k8sclusterreceiver.otel-*" }
       ]
@@ -92,12 +87,12 @@ Anything about one source degrades the result and is reported in `errors`; it ne
 
 A metric column of a row is null when no source produced a value for that entity. A null is not an error and does not set `errors`. The response tells the reasons apart:
 
-| reason                                                                                                                                                                                                                                              | where it shows                                                                                                    |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| No index behind the source's pattern maps the metric's field.                                                                                                                                                                                       | `unavailableColumns`                                                                                              |
-| The metric's `agg` is `sum_rate`, `max_rate`, `avg_rate`, `min_rate`, `sum_increase` or `sum_delta`, and no time-series index exists behind the source's pattern. These aggregations run only under `TS`, and the source has only a `FROM` plan.    | `unsupportedMetrics` with `engine` `FROM`, and `probes` with `outcome` `no_time_series`; not `unavailableColumns` |
-| The same six aggregations have a `TS` plan, but the entity has fewer than two samples of one series in the window. They compute a rate or a change between samples of the same series, so a series with a single sample in the window adds nothing. | Nowhere: the `TS` plan ran and returned the row                                                                   |
-| The entity has no document with a value for the field in the window (`LAST` and the other aggregations skip null values).                                                                                                                           | Nowhere                                                                                                           |
+| reason                                                                                                                                                                                                                                   | where it shows                                                                                                    |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| No index behind the source's pattern maps the metric's field.                                                                                                                                                                            | `unavailableColumns`                                                                                              |
+| The metric's `agg` is `sum_rate`, `max_rate`, `avg_rate` or `min_rate`, and no time-series index exists behind the source's pattern. These aggregations run only under `TS`, and the source has only a `FROM` plan.                      | `unsupportedMetrics` with `engine` `FROM`, and `probes` with `outcome` `no_time_series`; not `unavailableColumns` |
+| The same four aggregations have a `TS` plan, but the entity has fewer than two samples of one series in the window. They compute a rate between samples of the same series, so a series with a single sample in the window adds nothing. | Nowhere: the `TS` plan ran and returned the row                                                                   |
+| The entity has no document with a value for the field in the window (`LAST` and the other aggregations skip null values).                                                                                                                | Nowhere                                                                                                           |
 
 The last two rows leave no trace in the response, so a null there is only explained by the window: widening it, or a collection interval shorter than the window, changes it.
 
@@ -185,9 +180,9 @@ names of every definition the store holds, its own and the built-ins.
 
 Registered today:
 
-| type             | identified by                                                                                                                                                                      | sources                                                                                                                                                                                                                                   |
-| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `k8s.deployment` | `<namespace>/<name>` (`kubernetes.namespace`, `kubernetes.deployment.name`; the ECS<->OTel alias layer resolves them on the OTel stream), cluster as the `k8s.cluster.name` column | `metrics-kubernetes.*` filtered to `state_deployment` and `state_container` (available/desired `last`, restarts `sum_increase`, a counter), `metrics-k8sclusterreceiver.otel-*` (available/desired `last`, restarts `sum_delta`, a gauge) |
+| type             | identified by                                                                                                                                                                      | sources                                                                                                                                                                                    |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `k8s.deployment` | `<namespace>/<name>` (`kubernetes.namespace`, `kubernetes.deployment.name`; the ECS<->OTel alias layer resolves them on the OTel stream), cluster as the `k8s.cluster.name` column | `metrics-kubernetes.state_deployment-*` filtered to `state_deployment` (available/desired `last`), `metrics-k8sclusterreceiver.otel-*` (available/desired `last`, restarts `max`, a gauge) |
 
 The same namespace and name in two clusters is one `k8s.deployment` entity today.
 

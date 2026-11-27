@@ -13,7 +13,7 @@ export const k8sDeploymentDefinition: RegistrableEntityDefinition = {
   type: 'k8s.deployment',
   name: 'K8s Deployment',
   description:
-    'A Kubernetes deployment, identified by namespace/name. Read from the Elastic Agent Kubernetes integration (state_deployment, state_container) and the OpenTelemetry k8sclusterreceiver. The same namespace/name in two clusters is one entity; the cluster is shown as a column.',
+    'A Kubernetes deployment, identified by namespace/name. Read from the Elastic Agent Kubernetes integration (state_deployment) and the OpenTelemetry k8sclusterreceiver. The same namespace/name in two clusters is one entity; the cluster is shown as a column.',
   managedBy: MANAGED_BY,
   identityField: {
     euidRanking: {
@@ -38,8 +38,8 @@ export const k8sDeploymentDefinition: RegistrableEntityDefinition = {
     ],
     sources: [
       {
-        indexPattern: 'metrics-kubernetes.*',
-        filter: 'metricset.name == "state_deployment" OR metricset.name == "state_container"',
+        indexPattern: 'metrics-kubernetes.state_deployment-*',
+        filter: 'metricset.name == "state_deployment"',
         attributes: [
           { name: 'k8s.cluster.name', field: 'orchestrator.cluster.name' },
           { name: 'k8s.deployment.paused', field: 'kubernetes.deployment.paused' },
@@ -56,12 +56,6 @@ export const k8sDeploymentDefinition: RegistrableEntityDefinition = {
             name: 'k8s.deployment.desired',
             field: 'kubernetes.deployment.replicas.desired',
             agg: 'last',
-            unit: 'count',
-          },
-          {
-            name: 'k8s.container.restarts',
-            field: 'kubernetes.container.status.restarts',
-            agg: 'sum_increase',
             unit: 'count',
           },
         ],
@@ -88,7 +82,7 @@ export const k8sDeploymentDefinition: RegistrableEntityDefinition = {
           {
             name: 'k8s.container.restarts',
             field: 'k8s.container.restarts',
-            agg: 'sum_delta',
+            agg: 'max',
             unit: 'count',
           },
         ],
