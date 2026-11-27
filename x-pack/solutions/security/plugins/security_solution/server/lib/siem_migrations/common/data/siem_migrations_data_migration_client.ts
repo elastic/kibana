@@ -15,7 +15,7 @@ import { MAX_ES_SEARCH_SIZE } from './constants';
 import { MIGRATION_ID_NOT_FOUND } from '../translations';
 
 export class SiemMigrationsDataMigrationClient<
-  M extends MigrationDocument = MigrationDocument
+  M extends MigrationDocument = MigrationDocument,
 > extends SiemMigrationsDataBaseClient {
   async create(name: string): Promise<string> {
     const migrationId = uuidV4();

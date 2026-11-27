@@ -37,8 +37,8 @@ const isChangePointGridExploreApi = (api: unknown): api is ChangePointGridExplor
   const candidate = api as Partial<ChangePointGridExploreApi>;
   return Boolean(
     candidate.esql$ &&
-      candidate.searchContext$ &&
-      typeof candidate.applyDashboardContext === 'boolean'
+    candidate.searchContext$ &&
+    typeof candidate.applyDashboardContext === 'boolean'
   );
 };
 

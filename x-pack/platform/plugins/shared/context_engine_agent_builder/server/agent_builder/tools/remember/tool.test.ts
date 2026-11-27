@@ -29,7 +29,7 @@ describe('remember tool', () => {
 
   const createTool = () =>
     createRememberTool({
-      getAiIndexService: async () => ({ get } as unknown as AiIndexService),
+      getAiIndexService: async () => ({ get }) as unknown as AiIndexService,
       getCoreStart: async () => {
         const coreStart = coreMock.createStart();
         coreStart.uiSettings.globalAsScopedToClient = jest

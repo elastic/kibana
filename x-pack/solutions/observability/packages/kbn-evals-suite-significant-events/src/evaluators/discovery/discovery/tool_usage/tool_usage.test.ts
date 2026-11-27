@@ -21,8 +21,8 @@ const toolCall = (
   params: Record<string, unknown> | undefined = toolId === TOOL_ID_EVENTS_WRITE
     ? { items: [{ status: 'active' }] }
     : toolId === TOOL_ID_EXECUTE_ESQL
-    ? { timeout_seconds: 60 }
-    : undefined,
+      ? { timeout_seconds: 60 }
+      : undefined,
   results?: unknown[]
 ): ConverseStep => ({
   type: 'tool_call',

@@ -38,7 +38,7 @@ const mockModel = (
   };
 };
 
-const mockLogger = (): Logger => ({ warn: jest.fn() } as unknown as Logger);
+const mockLogger = (): Logger => ({ warn: jest.fn() }) as unknown as Logger;
 
 const fixedColorPaths = (node: unknown, path = '$'): string[] => {
   if (Array.isArray(node)) {

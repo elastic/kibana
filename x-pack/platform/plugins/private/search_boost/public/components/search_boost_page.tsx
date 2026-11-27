@@ -13,6 +13,7 @@ import type { BoostLists } from '../api';
 import { useBoostLists } from '../api';
 import { SEARCH_BOOST_APP_TITLE } from '../app_title';
 import { PROFILES_PATH, RULES_PATH, decodeName } from '../links';
+import type { IndexManagementServices } from '../types';
 import { SEARCH_BOOST_PAGE_DESCRIPTION } from '../translations';
 import { ProfileDetailsRoute } from './details/profile/profile_details_route';
 import { RuleDetailsRoute } from './details/rule/rule_details_route';
@@ -24,6 +25,7 @@ interface SearchBoostPageProps {
   http: HttpStart;
   /** Whether the user can create, edit, and delete profiles and rules. */
   canEdit: boolean;
+  indexManagement?: IndexManagementServices;
 }
 
 interface ListsPageProps {
@@ -48,10 +50,11 @@ const ListsPage = ({ lists, canEdit }: ListsPageProps) => (
   </>
 );
 
-export const SearchBoostPage = ({ http, canEdit }: SearchBoostPageProps) => {
+export const SearchBoostPage = ({ http, canEdit, indexManagement }: SearchBoostPageProps) => {
   const { data, error, isFetching, refetch } = useBoostLists(http);
+  const lists = error ? undefined : data;
 
-  if (!data && error && !isFetching) {
+  if (error && !isFetching) {
     return (
       <LoadErrorState message={error.body?.message ?? error.message} onRetry={() => refetch()} />
     );
@@ -63,7 +66,13 @@ export const SearchBoostPage = ({ http, canEdit }: SearchBoostPageProps) => {
         exact
         path={`${RULES_PATH}/:ruleName`}
         render={({ match }) => (
-          <RuleDetailsRoute ruleName={decodeName(match.params.ruleName)} lists={data} />
+          <RuleDetailsRoute
+            key={match.params.ruleName}
+            ruleName={decodeName(match.params.ruleName)}
+            lists={lists}
+            onReload={() => refetch()}
+            indexManagement={indexManagement}
+          />
         )}
       />
       <Route
@@ -72,13 +81,13 @@ export const SearchBoostPage = ({ http, canEdit }: SearchBoostPageProps) => {
         render={({ match }) => (
           <ProfileDetailsRoute
             profileName={decodeName(match.params.profileName)}
-            lists={data}
+            lists={lists}
             canEdit={canEdit}
           />
         )}
       />
       <Route>
-        <ListsPage lists={data} canEdit={canEdit} />
+        <ListsPage lists={lists} canEdit={canEdit} />
       </Route>
     </Routes>
   );

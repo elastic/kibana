@@ -11,6 +11,7 @@ import {
   AI_INDEX_INTERNAL_API_VERSION,
   AI_INDEX_KI_BY_ID_PATH,
   AI_INDEX_KI_GROUPS_PATH,
+  AI_INDEX_KI_HISTOGRAM_PATH,
   AI_INDEX_KI_LIST_PATH,
   AI_INDEX_KI_RESTORE_PATH,
 } from '../../../common/constants';
@@ -20,6 +21,7 @@ import type { KiListSort } from '../../../common/ki_list_sort';
 import type {
   DeleteKiResponse,
   GetKiResponse,
+  KiHistogramResponse,
   ListKiGroupsResponse,
   ListKisResponse,
   RestoreKiResponse,
@@ -172,5 +174,14 @@ export const restoreKi = (
   http.post<RestoreKiResponse>(buildPath(AI_INDEX_KI_RESTORE_PATH, { aiIndexId, kiId }), {
     version: AI_INDEX_INTERNAL_API_VERSION,
     query: { index },
+    ...(signal ? { signal } : {}),
+  });
+
+export const getKiHistogram = (
+  http: HttpStart,
+  { aiIndexId, signal }: { aiIndexId: string; signal?: AbortSignal }
+): Promise<KiHistogramResponse> =>
+  http.get<KiHistogramResponse>(buildPath(AI_INDEX_KI_HISTOGRAM_PATH, { aiIndexId }), {
+    version: AI_INDEX_INTERNAL_API_VERSION,
     ...(signal ? { signal } : {}),
   });

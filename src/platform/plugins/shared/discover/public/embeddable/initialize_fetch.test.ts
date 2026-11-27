@@ -240,6 +240,7 @@ describe('initialize fetch', () => {
       expect(mockedApi.dataLoading$.getValue()).toBe(true);
       expect(stateManager.isLoadingMore.getValue()).toBe(true);
 
+      jest.mocked(discoverServiceMock.data.search.showError).mockClear();
       cancelRequests?.(); // what the dashboard cancel button triggers
       await pending;
 
@@ -247,6 +248,7 @@ describe('initialize fetch', () => {
       expect(mockedApi.dataLoading$.getValue()).toBe(false);
       expect(stateManager.isLoadingMore.getValue()).toBe(false);
       expect(mockedApi.searchError$.getValue()).toBeUndefined();
+      expect(discoverServiceMock.data.search.showError).not.toHaveBeenCalled();
     });
 
     it('should do nothing when there is no next page', async () => {
@@ -383,6 +385,7 @@ describe('initialize fetch', () => {
       await waitOneTick();
       expect(stateManager.isLoadingMore.getValue()).toBe(true);
 
+      jest.mocked(discoverServiceMock.data.search.showError).mockClear();
       mockedApi.savedSearch$.next(savedSearch); // a refetch replaces the request
       await waitOneTick();
       await pending;
@@ -392,24 +395,29 @@ describe('initialize fetch', () => {
       expect(stateManager.isLoadingMore.getValue()).toBe(false);
       expect(mockedApi.dataLoading$.getValue()).toBe(true);
       expect(mockedApi.searchError$.getValue()).toBeUndefined();
+      expect(discoverServiceMock.data.search.showError).not.toHaveBeenCalled();
     });
 
-    it('should surface an error from loading the next page and stop loading', async () => {
+    it('should keep loaded rows and show an error toast when the next page fails', async () => {
+      const error = new Error('Next page failed');
+      jest.mocked(discoverServiceMock.data.search.showError).mockClear();
       discoverServiceMock.data.search.dslPaginated = jest.fn().mockResolvedValue({
         rawResponse: { hits: { hits: firstPage, total: 2 } },
-        pagination: createPagination(
-          true,
-          jest.fn().mockRejectedValue(new Error('Next page failed'))
-        ),
+        pagination: createPagination(true, jest.fn().mockRejectedValue(error)),
       });
       mockedApi.savedSearch$.next(savedSearch);
       await waitOneTick();
+      const pagination = stateManager.pagination.getValue();
 
       await fetchMore?.();
 
-      expect(mockedApi.searchError$.getValue()?.message).toBe('Next page failed');
+      expect(discoverServiceMock.data.search.showError).toHaveBeenCalledTimes(1);
+      expect(discoverServiceMock.data.search.showError).toHaveBeenCalledWith(error);
+      expect(mockedApi.searchError$.getValue()).toBeUndefined();
       expect(stateManager.isLoadingMore.getValue()).toBe(false);
+      expect(mockedApi.dataLoading$.getValue()).toBe(false);
       expect(stateManager.rows.getValue()).toHaveLength(1);
+      expect(stateManager.pagination.getValue()).toBe(pagination);
     });
   });
 

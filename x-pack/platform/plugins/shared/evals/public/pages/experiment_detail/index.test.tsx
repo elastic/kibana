@@ -99,7 +99,7 @@ describe('DatasetStatsAccordion', () => {
           isLoading: false,
           error: null,
           refetch: options?.includePreviews ? refetchPreviews : refetchExamples,
-        } as unknown as ReturnType<typeof useExperimentDatasetExamples>)
+        }) as unknown as ReturnType<typeof useExperimentDatasetExamples>
     );
   });
 

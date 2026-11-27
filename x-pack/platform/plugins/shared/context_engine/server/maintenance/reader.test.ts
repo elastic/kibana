@@ -21,9 +21,9 @@ const collapsedHit = (source: Record<string, unknown>) => ({
 });
 
 const searchResponse = (hits: Array<ReturnType<typeof collapsedHit>>) =>
-  ({ hits: { hits } } as unknown as Awaited<
+  ({ hits: { hits } }) as unknown as Awaited<
     ReturnType<ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>['search']>
-  >);
+  >;
 
 describe('createMaintenanceReader', () => {
   const setup = () => {

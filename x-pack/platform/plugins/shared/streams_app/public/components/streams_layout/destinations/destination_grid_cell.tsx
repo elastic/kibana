@@ -50,7 +50,8 @@ export const DestinationGridCell = ({
       if (destination.type !== 'elasticsearch') {
         return '-';
       }
-      if (resolvedIndicesStatus === 'loading' && targetedIndexCount === 0) {
+      // The previous count is of another range or unit, so it is not shown while indices reload.
+      if (resolvedIndicesStatus === 'loading') {
         return (
           <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
             <EuiLoadingSpinner size="s" />

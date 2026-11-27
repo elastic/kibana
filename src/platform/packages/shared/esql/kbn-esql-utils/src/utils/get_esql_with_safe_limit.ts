@@ -22,18 +22,9 @@ export function getESQLWithSafeLimit(esql: string, limit: number): string {
     return name === 'sort';
   });
 
-  if (!sortCommand || (sortCommand && sortCommandIndex !== 1)) {
-    const sourcePipeText = esql.substring(
-      sourceCommand.location.min,
-      sourceCommand.location.max + 1
-    );
-    return esql.replace(sourcePipeText, `${sourcePipeText} \n| LIMIT ${limit}`);
-  }
+  const commandBeforeLimit = sortCommand && sortCommandIndex === 1 ? sortCommand : sourceCommand;
+  // Split at the offset, not by text: a LET in the header can repeat the same commands.
+  const end = commandBeforeLimit.location.max + 1;
 
-  const sourceSortPipeText = esql.substring(
-    sourceCommand.location.min,
-    sortCommand.location.max + 1
-  );
-
-  return esql.replace(sourceSortPipeText, `${sourceSortPipeText} \n| LIMIT ${limit}`);
+  return `${esql.slice(0, end)} \n| LIMIT ${limit}${esql.slice(end)}`;
 }

@@ -35,10 +35,6 @@ export const DETECTION_SNAPSHOT_SO_TYPES = [
   NIGHTSHIFT_SANDBOX_ALLOWLIST_SO_TYPE,
 ];
 
-// Connector types a managed workflow translates into alerts, mapped to the source it writes.
-const EXTERNAL_ALERT_SOURCE_BY_CONNECTOR_TYPE_ID: Readonly<Record<string, string>> = {
-  '.datadog': 'datadog',
-};
 const ELIGIBLE_RULES_FILTER = 'kind: alert and enabled: true';
 const AUTOMATIONS_PAGE_SIZE = 1000;
 
@@ -110,13 +106,13 @@ export const createDetectionSnapshotSources = ({
     };
   },
 
-  listExternalConnectorSources: async (spaceId) => {
+  listConnectors: async (spaceId) => {
     if (!actions) return [];
     const connectors = await actions.getUnsecuredActionsClient().getAll(asSpaceId(spaceId));
-    return connectors.flatMap(({ actionTypeId, isInboundEventsEnabled }) => {
-      const source = EXTERNAL_ALERT_SOURCE_BY_CONNECTOR_TYPE_ID[actionTypeId];
-      return source && isInboundEventsEnabled ? [source] : [];
-    });
+    return connectors.map(({ actionTypeId, isInboundEventsEnabled }) => ({
+      actionTypeId,
+      isInboundEventsEnabled,
+    }));
   },
 
   getAlertActivity: async (spaceId, connectorSources, signal) => {

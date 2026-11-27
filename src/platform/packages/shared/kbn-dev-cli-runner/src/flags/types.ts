@@ -13,24 +13,24 @@ type Coalesce<T extends any[]> = T extends [infer T1, ...infer TTail]
     ? Coalesce<TTail>
     : T1
   : T extends [infer T1]
-  ? T1
-  : false;
+    ? T1
+    : false;
 
 // make sure string[] is not converted into { [key:string]: string }
 // which is too wide to be useful
 type FlagsToObj<T extends string[] | undefined, TValue> = string[] extends T
   ? {}
   : T extends string[]
-  ? {
-      [key in T[number] & string]?: TValue;
-    }
-  : {};
+    ? {
+        [key in T[number] & string]?: TValue;
+      }
+    : {};
 
 type IsStringLiteral<T extends string[] | undefined> = string[] extends T
   ? false
   : undefined extends T
-  ? false
-  : true;
+    ? false
+    : true;
 
 type IsTypedFlagOptions<TFlagOptions extends FlagOptions> = Coalesce<
   [IsStringLiteral<TFlagOptions['string']>, IsStringLiteral<TFlagOptions['boolean']>]

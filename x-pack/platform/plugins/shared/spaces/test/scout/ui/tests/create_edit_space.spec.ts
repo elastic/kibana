@@ -124,7 +124,7 @@ test.describe('Spaces Management: Create and Edit', { tag: tags.stateful.classic
       await test.step('switches to the search solution side navigation', async () => {
         await pageObjects.spaces.changeSolutionView('es');
         await pageObjects.spaces.saveSpace();
-        await pageObjects.spaces.confirmModal();
+        await pageObjects.spaces.confirmSaveAndWaitForReload();
 
         await expect(esSideNav).toBeVisible();
         await expect(mgtSideNav).toBeHidden();
@@ -139,7 +139,7 @@ test.describe('Spaces Management: Create and Edit', { tag: tags.stateful.classic
         await expect(pageObjects.spaces.userImpactWarningLocator()).toBeVisible();
 
         await pageObjects.spaces.saveSpace();
-        await pageObjects.spaces.confirmModal();
+        await pageObjects.spaces.confirmSaveAndWaitForReload();
 
         await expect(mgtSideNav).toBeVisible();
         await expect(esSideNav).toBeHidden();
@@ -181,11 +181,9 @@ test.describe('Spaces Management: Create and Edit', { tag: tags.stateful.classic
       await expect(pageObjects.spaces.userImpactWarningLocator()).toBeVisible();
 
       await pageObjects.spaces.saveSpace();
-      await pageObjects.spaces.confirmModal();
+      await pageObjects.spaces.confirmSaveAndWaitForReload();
 
-      // Saving redirects back to the grid; wait for it to land before
-      // re-navigating, otherwise the explicit goto below races the app's own
-      // post-save navigation and Playwright aborts with an interrupted goto.
+      // Saving redirects back to the grid.
       await expect(pageObjects.spaces.gridPageLocator()).toBeVisible();
 
       // Re-open the edit page and confirm the feature is still unselected.

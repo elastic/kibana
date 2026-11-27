@@ -32,8 +32,7 @@ export interface ServerlessVectordbAppStartDependencies {
   elasticsearchHome: ElasticsearchHomePublicStart;
 }
 
-export interface ServerlessVectordbStartDependencies
-  extends ServerlessVectordbAppStartDependencies {
+export interface ServerlessVectordbStartDependencies extends ServerlessVectordbAppStartDependencies {
   navigation: NavigationPublicPluginStart;
 }
 

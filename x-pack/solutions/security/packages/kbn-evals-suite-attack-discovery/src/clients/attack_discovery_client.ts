@@ -55,7 +55,10 @@ const formatAsPageContent = (source: Record<string, unknown>, fallbackId?: strin
 };
 
 export class AttackDiscoveryClient {
-  constructor(private readonly esClient: EsClient, private readonly log: ToolingLog) {}
+  constructor(
+    private readonly esClient: EsClient,
+    private readonly log: ToolingLog
+  ) {}
 
   async searchAlertsAsContext({
     alertsIndexPattern = DEFAULT_ALERTS_INDEX_PATTERN,

@@ -210,7 +210,7 @@ function buildDatasourceStatesLayer(
             fieldName: column.name,
             columnId: column.id,
             meta: column.meta,
-          } as TextBasedLayerColumn)
+          }) as TextBasedLayerColumn
       ),
       index: '',
       query: undefined,
@@ -356,7 +356,12 @@ export function isDataViewDataset(dataset: LensDataset): dataset is LensDataview
 }
 
 export function isLensAPIFormat(config: unknown): config is LensApiConfig {
-  return typeof config === 'object' && config !== null && 'type' in config;
+  return (
+    typeof config === 'object' &&
+    config !== null &&
+    'type' in config &&
+    !isLensLegacyAttributes(config)
+  );
 }
 
 export function isLensLegacyFormat(config: unknown): config is LensConfig {

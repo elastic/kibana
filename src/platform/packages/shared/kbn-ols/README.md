@@ -246,8 +246,15 @@ the policy.
 principal gets. A caller uses it to skip resolving the principal and checking recovery when the answer can't change.
 An invalid ACL never takes this shortcut, and an operation that the policy doesn't define is never permitted.
 
+`getOperationsAtAccess` lists the operations that an access permits under a policy, and access management at
+`manage`. It answers for any access, also one that the type doesn't let general access or entries take, so a caller
+can find the feature privileges that an access needs without building an ACL. The order of the access values stays
+inside the package.
+
 `toObjectDecision` turns a decision into the outcome of one operation: `allowed`, `forbidden` when the caller can view
-the object, and `not_found` when the caller can't, so that a denial never reveals that the object exists.
+the object, and `not_found` when the caller can't, so that a denial never reveals that the object exists. A service
+that refuses the operation throws an `ObjectAccessError` with the same code, and each storage or HTTP layer turns it
+into its own 404 or 403, as with `AclChangeError`.
 
 ## Changing an ACL
 
@@ -273,6 +280,12 @@ one exists before storing the ACL. The list holds the recipient of every new or 
 transfer, and, when a replacement repairs an invalid ACL, its owner and every entry. Unchanged and lower grants aren't
 listed, so that a deleted or disabled recipient never blocks an unrelated change. A caller who becomes the owner of a
 new or claimed object isn't listed either.
+
+The package doesn't check feature privileges. A caller that checks them returns what it finds with the stored change,
+as an `AclWarning`: an `entry` warning names a grant whose recipient lacks the privileges of its access, and an
+`owner` warning names a new owner who lacks the privileges of the `view` and `edit` operations, which managing access
+and transfers need. Neither blocks the change, because the access applies as soon as the principal gets the
+privileges.
 
 `prepareInitialAcl` builds the ACL of a new object. The caller becomes the owner, general access is the requested
 value or the type's default, and every entry gets the current time as `added_at`. A request without a principal

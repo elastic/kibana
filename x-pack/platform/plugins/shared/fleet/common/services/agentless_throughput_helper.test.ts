@@ -29,7 +29,7 @@ const makePolicy = (
         })),
       },
     ],
-  } as unknown as Pick<PackagePolicy, 'inputs'>);
+  }) as unknown as Pick<PackagePolicy, 'inputs'>;
 
 describe('getAgentlessThroughputIndexPatterns', () => {
   it('returns empty array when there are no inputs', () => {

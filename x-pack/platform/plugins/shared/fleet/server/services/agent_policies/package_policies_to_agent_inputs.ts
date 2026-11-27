@@ -150,10 +150,13 @@ export const storedPackagePolicyToAgentInputs = (
     // deeply merge the input.config values with the full policy input
     merge(
       fullInput,
-      Object.entries(input.config || {}).reduce((acc, [key, { value }]) => {
-        acc[key] = value;
-        return acc;
-      }, {} as Record<string, unknown>)
+      Object.entries(input.config || {}).reduce(
+        (acc, [key, { value }]) => {
+          acc[key] = value;
+          return acc;
+        },
+        {} as Record<string, unknown>
+      )
     );
     if (packagePolicy.package) {
       fullInput.meta = {
@@ -239,10 +242,13 @@ export const getFullInputStreams = (
                 },
                 ...compiledStream,
                 ...(streamCondition !== undefined ? { condition: streamCondition } : {}),
-                ...Object.entries(stream.config || {}).reduce((acc, [key, { value }]) => {
-                  acc[key] = value;
-                  return acc;
-                }, {} as { [k: string]: any }),
+                ...Object.entries(stream.config || {}).reduce(
+                  (acc, [key, { value }]) => {
+                    acc[key] = value;
+                    return acc;
+                  },
+                  {} as { [k: string]: any }
+                ),
               };
               const dsTypeVar = stream.vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value;
               if (dsTypeVar) {

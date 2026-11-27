@@ -30,7 +30,7 @@ const ISO_DATETIME_OFFSET_REGEX = new RegExp(
  */
 export const isoDateTime = (options?: IsoDateTimeOptions): z.ZodString => {
   const { offset = false, message } =
-    typeof options === 'string' ? { message: options } : options ?? {};
+    typeof options === 'string' ? { message: options } : (options ?? {});
   const regex = offset ? ISO_DATETIME_OFFSET_REGEX : ISO_DATETIME_UTC_REGEX;
   const errorMessage = message ?? 'Invalid ISO datetime';
 

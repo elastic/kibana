@@ -11,24 +11,7 @@ actions:
       API from its own domain, which the connector takes as config. Without a fixed server, requests
       to any of them match.
     remove: true
-  - target: >-
-      $.paths['/api/0/organizations/{organization_id_or_slug}/issues/{issue_id}/'].put.requestBody.content['application/json'].schema.properties.statusDetails.allOf[0].required
-    description: >-
-      The spec marks every statusDetails field required, but the endpoint validates the body with
-      GroupValidator(data=data, partial=True, ...) in
-      https://github.com/getsentry/sentry/blob/master/src/sentry/api/helpers/group_index/update.py,
-      and partial validation applies to the nested statusDetails serializer too, so e.g.
-      {"ignoreDuration": 30} alone is accepted.
-    remove: true
-  - target: >-
-      $.paths['/api/0/organizations/{organization_id_or_slug}/issues/{issue_id}/'].put.requestBody.content['application/json'].schema.required
-    description: >-
-      The spec marks every body field required, but https://docs.sentry.io/api/events/update-an-issue/
-      says "Only the attributes submitted are modified" and its example sends -d '{}', and the
-      endpoint validates the body with GroupValidator(data=data, partial=True, ...) in
-      https://github.com/getsentry/sentry/blob/master/src/sentry/api/helpers/group_index/update.py.
-    remove: true
-  - target: $.paths['/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/issues/'].get.parameters
+  - target: $.paths['/projects/{organization_id_or_slug}/{project_id_or_slug}/issues/'].get.parameters
     description: >-
       The spec omits environment, but the endpoint declares GlobalParams.ENVIRONMENT ("The name of
       environments to filter by.", many=True) and documents ":qparam string environment: this
@@ -42,7 +25,7 @@ actions:
           type: array
           items:
             type: string
-  - target: $.paths['/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/issues/'].put.parameters[2].schema
+  - target: $.paths['/projects/{organization_id_or_slug}/{project_id_or_slug}/issues/'].put.parameters[2].schema
     description: >-
       The spec types id as one integer, but the endpoint documents ":qparam int id: a list of IDs of
       the issues to be mutated. This parameter shall be repeated for each issue." in
@@ -52,3 +35,16 @@ actions:
       type: array
       items:
         type: integer
+  - target: $
+    description: >-
+      The spec's server URL is https://{region}.sentry.io/api/0, and its paths no longer repeat
+      /api/0. The first correction drops the regional hosts, which would drop /api/0 with them, so
+      this one puts the base path back on a host that takes any value: Sentry's docs send requests to
+      https://sentry.io/api/0/..., as on https://docs.sentry.io/api/events/retrieve-an-issue/, and
+      self-hosted Sentry serves the same /api/0 from its own domain.
+    update:
+      servers:
+        - url: https://{host}/api/0
+          variables:
+            host:
+              default: sentry.io

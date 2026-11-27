@@ -23,6 +23,9 @@ interface ChartAreaProps {
   isLoading: boolean;
   hasData: boolean;
   emptyMessage: string;
+  /** Announces the loading chart to screen readers. */
+  loadingLabel?: string;
+  'data-test-subj'?: string;
   children: ReactNode;
 }
 
@@ -36,10 +39,11 @@ const chartAreaContent = ({
   isLoading,
   hasData,
   emptyMessage,
+  loadingLabel,
   children,
-}: Omit<ChartAreaProps, 'height' | 'grow'>): ReactNode => {
+}: Omit<ChartAreaProps, 'height' | 'grow' | 'data-test-subj'>): ReactNode => {
   if (isLoading) {
-    return centered(<EuiLoadingChart size="l" />);
+    return centered(<EuiLoadingChart size="l" aria-label={loadingLabel} />);
   }
   if (!hasData) {
     return centered(
@@ -52,14 +56,26 @@ const chartAreaContent = ({
 };
 
 /** A chart that keeps its height while loading or without data, so the panel does not jump. */
-export function ChartArea({ height, grow = false, ...content }: ChartAreaProps) {
+export function ChartArea({
+  height,
+  grow = false,
+  'data-test-subj': dataTestSubj,
+  ...content
+}: ChartAreaProps) {
   if (!grow) {
-    return <div css={{ blockSize: height }}>{chartAreaContent(content)}</div>;
+    return (
+      <div css={{ blockSize: height }} data-test-subj={dataTestSubj}>
+        {chartAreaContent(content)}
+      </div>
+    );
   }
   // The content is laid over the area, so that what it measures is the area's height, which is
   // what the flex column gives it, and not the height of the content.
   return (
-    <div css={{ flex: '1 1 0', minBlockSize: height, position: 'relative' }}>
+    <div
+      css={{ flex: '1 1 0', minBlockSize: height, position: 'relative' }}
+      data-test-subj={dataTestSubj}
+    >
       <div css={{ position: 'absolute', inset: 0 }}>{chartAreaContent(content)}</div>
     </div>
   );

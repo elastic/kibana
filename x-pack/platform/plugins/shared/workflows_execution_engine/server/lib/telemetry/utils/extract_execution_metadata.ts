@@ -9,11 +9,11 @@ import { ExecutionStatus, isTopLevelWorkflowExecution } from '@kbn/workflows';
 import type {
   EsWorkflowExecution,
   EsWorkflowStepExecution,
+  ExecutionChainHop,
   WorkflowExecutionEventDispatchMetadata,
 } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
 import { getExecutionServiceAccountId } from '../../../service_account_execution';
-import type { ExecutionChainHop } from '../../../utils';
 import { hasExecutionChain, parseDuration, toExecutionChainHop } from '../../../utils';
 import type {
   OutputSizeStats,
@@ -368,8 +368,8 @@ function extractEmitToStartMs(workflowExecution: EsWorkflowExecution): number | 
     typeof dispatchTimestamp === 'string'
       ? Date.parse(dispatchTimestamp)
       : typeof dispatchTimestamp === 'number'
-      ? dispatchTimestamp
-      : Number.NaN;
+        ? dispatchTimestamp
+        : Number.NaN;
 
   if (Number.isNaN(dispatchMs)) {
     return undefined;

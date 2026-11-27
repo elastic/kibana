@@ -88,7 +88,7 @@ describe('HypothesisTreeNode', () => {
     jest
       .mocked(useProposal)
       .mockImplementation(
-        (id) => ({ data: id ? loadedProposals[id] : undefined } as ReturnType<typeof useProposal>)
+        (id) => ({ data: id ? loadedProposals[id] : undefined }) as ReturnType<typeof useProposal>
       );
     jest.mocked(useIsApprovingProposal).mockReturnValue(false);
     jest.mocked(useIsDecliningProposal).mockReturnValue(false);

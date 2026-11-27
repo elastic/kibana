@@ -19,7 +19,10 @@ export class DataFrameAnalyticsPage {
   private readonly codeEditor: KibanaCodeEditorWrapper;
   private histogramRequestSucceeded?: Promise<boolean>;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
   }
 
@@ -403,8 +406,8 @@ export class DataFrameAnalyticsPage {
             ? 'PageDown'
             : 'ArrowLeft'
           : Math.abs(diff) >= 10
-          ? 'PageUp'
-          : 'ArrowRight';
+            ? 'PageUp'
+            : 'ArrowRight';
 
       await slider.press(key);
       await expect

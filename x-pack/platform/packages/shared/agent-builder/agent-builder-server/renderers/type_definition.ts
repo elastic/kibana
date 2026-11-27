@@ -17,7 +17,7 @@ import type { RendererDefinition } from '@kbn/agent-builder-common/renderers';
  */
 export interface RendererTypeDefinition<
   TType extends string = string,
-  TSchema extends ZodObject<any> = ZodObject<any>
+  TSchema extends ZodObject<any> = ZodObject<any>,
 > extends RendererDefinition<TType, TSchema> {
   /**
    * Optional description of the renderer type, exposed to the agent so it can

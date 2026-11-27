@@ -96,8 +96,9 @@ imports:
 
 engine:
   id: claude
-  version: '2.1.165'
-  model: opus
+  version: '2.1.317'
+  # an exact ID: gh-aw resolves the `opus` alias to the newest Opus the gateway lists
+  model: claude-opus-5-5
   max-turns: 120
   env:
     BUILDKITE_API_TOKEN: ${{ steps.buildkite_auth.outputs.token }}
@@ -106,9 +107,9 @@ engine:
     ANTHROPIC_API_KEY: ${{ env.ANTHROPIC_API_KEY || 'agent-router' }}
     # the gateway reads only `Authorization: Bearer`
     AWF_ANTHROPIC_AUTH_HEADER: Authorization
-    ANTHROPIC_DEFAULT_OPUS_MODEL: claude-opus-5
-    ANTHROPIC_DEFAULT_HAIKU_MODEL: claude-haiku-4-5
-    ANTHROPIC_DEFAULT_SONNET_MODEL: claude-sonnet-4-6
+    ANTHROPIC_DEFAULT_OPUS_MODEL: claude-opus-5-5
+    ANTHROPIC_DEFAULT_HAIKU_MODEL: claude-haiku-5-5
+    ANTHROPIC_DEFAULT_SONNET_MODEL: claude-sonnet-5-5
     CLAUDE_CODE_EFFORT_LEVEL: high
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 
@@ -137,15 +138,14 @@ sandbox:
 
 safe-outputs:
   threat-detection:
-    # The detection job can't request an OIDC token, so it runs on Copilot. It inherits the
-    # main engine's env: blank the secrets it must not receive.
+    # The detection job can't request an OIDC token, so it runs on Copilot.
     engine:
       id: copilot
-      model: sonnet
+      model: claude-opus-5
       env:
         BUILDKITE_API_TOKEN: ${{ '' }}
-        ANTHROPIC_API_KEY: ${{ '' }}
-        AWF_ANTHROPIC_AUTH_HEADER: ${{ '' }}
+    # a detection failure blocks the outputs instead of passing with a warning
+    continue-on-error: false
   noop:
     report-as-issue: false
   activation-comments: false

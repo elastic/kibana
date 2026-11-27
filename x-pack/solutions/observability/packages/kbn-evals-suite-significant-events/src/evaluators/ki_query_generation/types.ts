@@ -73,7 +73,7 @@ export const getQueriesFromOutput = (output: KIQueryGenerationOutput | undefined
   if (!output) {
     return [];
   }
-  return Array.isArray(output) ? output : output.queries ?? [];
+  return Array.isArray(output) ? output : (output.queries ?? []);
 };
 
 export const getToolUsageFromOutput = (

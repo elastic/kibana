@@ -911,8 +911,8 @@ describe('POST /internal/significant_events/events/{id}/update', () => {
           asRuleEventsClient(
             { findLatestByEventId },
             {
-              getAlertEventsClient: async () => ({ createAlertEvent } as never),
-              getAlertActionsClient: async () => ({ createEpisodeAction } as never),
+              getAlertEventsClient: async () => ({ createAlertEvent }) as never,
+              getAlertActionsClient: async () => ({ createEpisodeAction }) as never,
               emitTrigger,
             }
           ),

@@ -56,7 +56,7 @@ export function esqlColumnValuesToOptionsListResponse(
           by: '_key' as const,
           direction: sort.direction,
         }
-      : sort ?? DEFAULT_DSL_OPTIONS_LIST_STATE.sort;
+      : (sort ?? DEFAULT_DSL_OPTIONS_LIST_STATE.sort);
   const directionMultiplier = sortConfig.direction === 'asc' ? 1 : -1;
 
   const suggestions = uniqueValues

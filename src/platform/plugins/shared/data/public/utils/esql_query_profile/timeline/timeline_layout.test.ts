@@ -11,7 +11,7 @@ import type { TimelineDriver } from '../profile/types';
 import { driverSpread, fullDomain, groupDrivers, laneBox } from './timeline_layout';
 
 const driver = (description: string, startMillis: number, stopMillis: number) =>
-  ({ description, startMillis, stopMillis } as TimelineDriver);
+  ({ description, startMillis, stopMillis }) as TimelineDriver;
 
 describe('laneBox', () => {
   const domain = { startMillis: 1_000, stopMillis: 1_200 };

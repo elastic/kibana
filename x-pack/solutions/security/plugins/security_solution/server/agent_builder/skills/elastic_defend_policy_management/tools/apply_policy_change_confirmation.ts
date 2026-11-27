@@ -6,13 +6,13 @@
  */
 
 import type { ConfirmPromptDefinition } from '@kbn/agent-builder-common/agents';
-import type { ApplyPolicyChangePreview } from '../services/apply_policy_change';
-import type { EndpointCountResult } from '../services/count_endpoints';
+import type { ApplyPolicyChangePreview } from '../../../../endpoint/services/policy_management/services/apply_policy_change';
+import type { EndpointCountResult } from '../../../../endpoint/services/policy_management/services/count_endpoints';
 import {
   DEFAULT_TRIM_LIMITS,
   capPresentedIdentityString,
   presentFromTo,
-} from './trim_policy_result';
+} from '../../../../endpoint/services/policy_management/presentation/trim_policy_result';
 
 export type ApplyPreviewChangeRow = Readonly<{
   path: string;
@@ -109,10 +109,10 @@ const renderBlastRadius = (blastRadius: ApplyPreviewFacts['blastRadius']): reado
     agentPolicyCount === 0
       ? 'Enrolled agents: count unavailable because the policy has no agent policy assignments.'
       : enrollment.status.all !== undefined
-      ? `Enrolled agents: ${enrollment.status.all} (source: ${escapeMarkdownText(
-          enrollment.source
-        )}).`
-      : 'Enrolled agents: count unavailable.';
+        ? `Enrolled agents: ${enrollment.status.all} (source: ${escapeMarkdownText(
+            enrollment.source
+          )}).`
+        : 'Enrolled agents: count unavailable.';
   const entries = Object.entries(enrollment.status);
   const statusLine =
     entries.length === 0

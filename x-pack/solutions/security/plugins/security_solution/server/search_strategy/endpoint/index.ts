@@ -50,7 +50,7 @@ const noResults = <T extends EndpointFactoryQueryTypes>(): EndpointStrategyParse
     isRunning: false,
     total: 0,
     loaded: 0,
-  } as unknown as EndpointStrategyParseResponseType<T>);
+  }) as unknown as EndpointStrategyParseResponseType<T>;
 
 export const endpointSearchStrategyProvider = <T extends EndpointFactoryQueryTypes>(
   data: PluginStart,

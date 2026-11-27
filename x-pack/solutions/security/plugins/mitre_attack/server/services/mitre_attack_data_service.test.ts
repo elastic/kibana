@@ -246,7 +246,7 @@ describe('MitreAttackDataService', () => {
                 version: '1',
               }
         ),
-      } as SavedObjectsBulkResponse<MitreEntity>);
+      }) as SavedObjectsBulkResponse<MitreEntity>;
     savedObjectsRepository.bulkCreate
       .mockResolvedValueOnce(toResponse('TA0002'))
       .mockResolvedValueOnce(toResponse());
@@ -284,7 +284,7 @@ describe('MitreAttackDataService', () => {
                 version: '1',
               }
         ),
-      } as SavedObjectsBulkResponse<MitreEntity>);
+      }) as SavedObjectsBulkResponse<MitreEntity>;
 
     beforeEach(() => {
       mockLoadMitreArtifact.mockReturnValue(entities);

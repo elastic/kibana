@@ -14,7 +14,10 @@ const errorMessage = (error: unknown): string =>
 
 /** The policy update failed and the rule attachment could not be restored either. */
 export class LinkRollbackError extends Error {
-  constructor(public readonly saveError: unknown, public readonly rollbackError: unknown) {
+  constructor(
+    public readonly saveError: unknown,
+    public readonly rollbackError: unknown
+  ) {
     super(
       `Failed to save the action policy (${errorMessage(saveError)}) and to restore the rule ` +
         `attachment (${errorMessage(

@@ -76,6 +76,7 @@ import type {
 } from '../../../../common/http_api/conversations';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import {
+  buildOwnedConversationFilter,
   buildPinnedFilter,
   buildReadAccessFilter,
   hasConversationConverseAccess,
@@ -1021,6 +1022,7 @@ class ConversationClientImpl implements ConversationClient {
           filter: [
             createSpaceDslFilter(this.space),
             { term: { 'origin.external_conversation_id': origin.external_conversation_id } },
+            buildOwnedConversationFilter({ user: this.getUser() }),
           ],
         },
       },
@@ -1487,7 +1489,7 @@ class ConversationClientImpl implements ConversationClient {
   private mapListResponse(response: ConversationListEsResponse): ConversationListResult {
     const hitsTotal = response.hits.total;
     const total = Math.min(
-      typeof hitsTotal === 'number' ? hitsTotal : hitsTotal?.value ?? 0,
+      typeof hitsTotal === 'number' ? hitsTotal : (hitsTotal?.value ?? 0),
       MAX_RESULT_WINDOW
     );
 

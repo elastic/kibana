@@ -23,6 +23,11 @@ export interface TraceSource {
   timeRange: { from: string; to: string };
   /** ES|QL boolean expressions over raw fields, applied to every span. */
   filters?: string[];
+  /**
+   * Whatever else the host's `runEsql` applies to every query (its own filters, variables),
+   * as an opaque key: a change loads the map again. Never read by the map.
+   */
+  contextKey?: string;
 }
 
 /** Whether the map counts every span, or traces, each at its root span. */
@@ -54,6 +59,12 @@ export interface LatencyMapSelection {
   maxDuration: number;
   /** Only the failed spans of the region. */
   failedOnly?: boolean;
+  /**
+   * What the selection was made from, such as a slowest-spans shortcut. Shown with its bounds.
+   * Not part of the ES|QL condition, so a selection read back from a query carries none, and
+   * moving or resizing drops it: the bounds are then no longer what the label named.
+   */
+  label?: string;
 }
 
 /** A cell of the map with its counts. */

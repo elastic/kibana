@@ -85,10 +85,10 @@ export function NumberBadge({ value, shortenAtExpSize, textAlign = 'right' }: Nu
         {Number.isNaN(value)
           ? '-'
           : Math.floor(value / Math.pow(10, shortenAtExpSize)) >= 1
-          ? getSiPrefixedNumber(value)
-          : Number.isInteger(value)
-          ? value
-          : value.toFixed(2)}
+            ? getSiPrefixedNumber(value)
+            : Number.isInteger(value)
+              ? value
+              : value.toFixed(2)}
       </h5>
     </EuiText>
   );

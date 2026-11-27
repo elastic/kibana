@@ -1,9 +1,37 @@
 {
-  "sha1": "61269d252e9c5b1cbc7aa27c28db13765f7e525f",
+  "sha1": "1774509a7747694ed6e9bc5c93c2f3a4b93a515d",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "d9a30b88c6f1ec2-bb7c11213a26c90",
+      "title": "Agent Tamper Protection on agent policies on Security Essentials rejects enabling tamper protection on an existing agent policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/api/tests/agent_tamper_protection_tier_access_essentials.spec.ts",
+        "line": 40,
+        "column": 50
+      }
+    },
+    {
+      "id": "d9a30b88c6f1ec2-a96847d10b6b321",
+      "title": "Agent Tamper Protection on agent policies on Security Essentials rejects creating an agent policy with tamper protection enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/api/tests/agent_tamper_protection_tier_access_essentials.spec.ts",
+        "line": 55,
+        "column": 15
+      }
+    },
     {
       "id": "60214e2b70f57e2-1dfffa94c293b93",
       "title": "deprecated `siem` versions map onto current `ui:` actions maps siem ui: actions onto siemV5 in both directions",
@@ -66,6 +94,62 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/api/tests/siem_deprecated_ui_actions.spec.ts",
         "line": 223,
         "column": 11
+      }
+    },
+    {
+      "id": "3ae7bb6bbd09657-440967d915ac705",
+      "title": "Workflow insights APIs on Security Essentials denies reading workflow insights",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/api/tests/workflow_insights_tier_access_essentials.spec.ts",
+        "line": 31,
+        "column": 47
+      }
+    },
+    {
+      "id": "3ae7bb6bbd09657-f667a73aa190af2",
+      "title": "Workflow insights APIs on Security Essentials denies updating a workflow insight",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/api/tests/workflow_insights_tier_access_essentials.spec.ts",
+        "line": 44,
+        "column": 9
+      }
+    },
+    {
+      "id": "3ae7bb6bbd09657-91a9de21cefacb3",
+      "title": "Workflow insights APIs on Security Essentials does not expose reading running defend insights",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/api/tests/workflow_insights_tier_access_essentials.spec.ts",
+        "line": 58,
+        "column": 27
+      }
+    },
+    {
+      "id": "3ae7bb6bbd09657-b3615a40af9163e",
+      "title": "Workflow insights APIs on Security Essentials does not expose creating defend insights",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/api/tests/workflow_insights_tier_access_essentials.spec.ts",
+        "line": 67,
+        "column": 25
       }
     },
     {

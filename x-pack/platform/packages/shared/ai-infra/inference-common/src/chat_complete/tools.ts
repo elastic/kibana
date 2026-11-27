@@ -42,7 +42,7 @@ export type ToolChoice<TToolName extends string = string> =
  * The definition of a tool that will be provided to the LLM for it to eventually call.
  */
 export interface ToolDefinition<
-  TToolSchema extends ToolSchema | undefined = ToolSchema | undefined
+  TToolSchema extends ToolSchema | undefined = ToolSchema | undefined,
 > {
   /**
    * A description of what the tool does. Note that this will be exposed to the LLM,
@@ -82,7 +82,7 @@ export interface ToolCallArguments {
  */
 export interface ToolCall<
   TName extends string = string,
-  TArguments extends ToolCallArguments = ToolCallArguments
+  TArguments extends ToolCallArguments = ToolCallArguments,
 > {
   /**
    * The id of the tool call, that must be re-used when providing the tool call response
@@ -112,7 +112,7 @@ export interface ToolCallbackResult {
 
 export type ToolCallback<
   TToolCall extends ToolCall = ToolCall,
-  TToolCallbackResult extends ToolCallbackResult = ToolCallbackResult
+  TToolCallbackResult extends ToolCallbackResult = ToolCallbackResult,
 > = (toolCall: TToolCall) => Promise<TToolCallbackResult>;
 
 export interface ToolDefinitions {
@@ -126,7 +126,7 @@ export interface ToolOptions<
   TToolDefinitions extends ToolDefinitions = ToolDefinitions,
   TToolChoice extends ToolChoice<keyof ToolDefinitions & string> = ToolChoice<
     keyof ToolDefinitions & string
-  >
+  >,
 > {
   /**
    * The choice of tool execution.

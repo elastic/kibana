@@ -28,9 +28,10 @@ import type { AiIndexAutomation } from '../../../../common/http_api/ai_indices';
 import { useAutomationRowMenuItems } from '../../hooks/use_automation_row_menu_items';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLatestWorkflowExecution } from '../../hooks/use_latest_workflow_execution';
+import { useRefreshKnowledgeDocumentsAfterRun } from '../../hooks/use_refresh_knowledge_documents_after_run';
 import { useRunAutomation } from '../../hooks/use_run_automation';
 import { getWorkflowExecutionPath } from '../../utils/get_workflow_execution_path';
-import type { WorkflowSummary } from '../../hooks/use_workflow_summaries';
+import { hasReadableWorkflow, type WorkflowSummary } from '../../hooks/use_workflow_summaries';
 import { ItemRow } from '../item_row';
 import { ItemRowIcon } from '../item_row_icon';
 import { AutomationDeleteConfirmModal } from './automation_delete_confirm_modal';
@@ -45,6 +46,7 @@ const runningLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.automatio
 });
 
 interface AutomationRowProps {
+  aiIndexId?: string;
   automation: AiIndexAutomation;
   workflowSummary?: WorkflowSummary;
   editHref: string;
@@ -55,6 +57,7 @@ interface AutomationRowProps {
 }
 
 export const AutomationRow = ({
+  aiIndexId,
   automation,
   workflowSummary,
   editHref,
@@ -76,13 +79,14 @@ export const AutomationRow = ({
   const displayName = workflowSummary?.name ?? automation.value;
   const enabled = workflowSummary?.enabled;
   const definition = workflowSummary?.definition;
-  const hasWorkflowDefinition = definition != null;
+  const hasWorkflowDefinition = hasReadableWorkflow(workflowSummary);
   const awaitedExecutionIds = startedExecutionId === undefined ? undefined : [startedExecutionId];
   const latest = useLatestWorkflowExecution([automation.value], {
     enabled: hasWorkflowDefinition,
     awaitedExecutionIds,
     onAwaitedObserved: clearStartedExecutionId,
   });
+  useRefreshKnowledgeDocumentsAfterRun(aiIndexId, latest.isRunning);
   const latestExecution = latest.executions?.[0]?.execution;
   const isRunning = isLoading || latest.isRunning;
   const runningExecutionId = latest.activeExecutionId ?? startedExecutionId;

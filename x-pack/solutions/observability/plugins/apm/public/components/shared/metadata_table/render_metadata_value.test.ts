@@ -14,7 +14,7 @@ const createDataView = (
   ({
     getFieldByName: (name: string) => (fields[name] ? { name } : undefined),
     getFormatterForField: (field: { name: string }) => fields[field.name],
-  } as unknown as DataView);
+  }) as unknown as DataView;
 
 describe('renderMetadataFieldValue', () => {
   it('uses the data view formatter when the field is mapped', () => {

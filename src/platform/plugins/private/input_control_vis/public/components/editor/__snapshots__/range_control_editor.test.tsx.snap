@@ -105,6 +105,7 @@ exports[`renders RangeControlEditor 1`] = `
                   type="button"
                 >
                   <span
+                    aria-hidden="true"
                     class="euiFormControlLayoutClearButton__icon emotion-euiFormControlLayoutClearButton__icon-m"
                     data-euiicon-type="cross"
                   />

@@ -188,7 +188,7 @@ Add an optional, nullable `outcome` to the `InboxAction` schema
             `response_mode` (human vs timeout).
 ```
 
-Regenerate `.gen.ts` (`pnpm openapi:generate` in `kbn-inbox-common`, then eslint --fix the
+Regenerate `.gen.ts` (`pnpm openapi:generate` in `kbn-inbox-common`, then lint --fix and oxfmt the
 generated files — see plugin README §"Regenerating OpenAPI schemas"). Thread `outcome`
 through `toInboxHistoryAction` (`to_inbox_action.ts`):
 - winner row → `outcome: 'applied'`,
@@ -268,7 +268,8 @@ Integration/race (optional but recommended):
   step doc and asserting exactly one `won: true`, one `lost_race` 409, and a single
   `hitl.respondedAt`.
 
-Validation gates (per repo rules): `node scripts/eslint --fix $(git diff --name-only)`,
+Validation gates (per repo rules): `node scripts/lint --fix $(git diff --name-only)`,
+`node scripts/oxfmt $(git diff --name-only)`,
 `node scripts/type_check --project …` for `kbn-inbox-common`, `inbox`, and
 `workflows_management`, `node scripts/i18n_check --fix`, and jest for all touched suites.
 

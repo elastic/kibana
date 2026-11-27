@@ -29,6 +29,56 @@ test.describe('Security - Login Page', { tag: tags.stateful.classic }, () => {
     await expect(page.testSubj.locator('userMenuAvatar')).toBeVisible();
   });
 
+  test('loads only plugin entries selected for the login page', async ({
+    context,
+    page,
+    pageObjects,
+    perfTracker,
+    log,
+  }) => {
+    const cdp = await context.newCDPSession(page);
+    await cdp.send('Network.enable');
+    perfTracker.captureBundleResponses(cdp);
+    const requestedPluginEntryIds = new Set<string>();
+    cdp.on('Network.requestWillBeSent', ({ request }) => {
+      const filename = new URL(request.url).pathname.split('/').pop() ?? '';
+      const pluginEntryMatch = filename.match(/^plugin-(.+)\.[a-f0-9]{8,}\.js$/i);
+      if (pluginEntryMatch) {
+        requestedPluginEntryIds.add(pluginEntryMatch[1]);
+      }
+    });
+
+    await pageObjects.login.goto();
+    await page.testSubj.locator('loginSubmit').waitFor({ state: 'visible' });
+    await perfTracker.waitForJsLoad(cdp);
+
+    const stats = perfTracker.collectJsBundleStats(page.url());
+    const selectedPluginIds = await page.evaluate(
+      () =>
+        (
+          window as typeof window & {
+            __kbnPluginIdsToLoad__?: string[];
+          }
+        ).__kbnPluginIdsToLoad__ ?? []
+    );
+    const requestedPluginIds = [...requestedPluginEntryIds].sort();
+    log.info(
+      `Login requested ${requestedPluginIds.length} plugin entries across ${
+        stats.bundleCount
+      } JavaScript bundles (${stats.totalSize} transferred bytes): ${requestedPluginIds.join(', ')}`
+    );
+
+    expect(selectedPluginIds).toContain('core');
+    expect(selectedPluginIds).toContain('security');
+    expect(requestedPluginIds).toContain('core');
+    expect(requestedPluginIds).toContain('security');
+    expect(
+      requestedPluginIds.filter((pluginId) => !selectedPluginIds.includes(pluginId))
+    ).toStrictEqual([]);
+    expect(requestedPluginIds).not.toContain('dashboard');
+    expect(requestedPluginIds).not.toContain('discover');
+  });
+
   test('displays message acknowledging logout', async ({ page, pageObjects }) => {
     await pageObjects.login.loginWithUsernamePassword(username, password);
     await pageObjects.home.goto();

@@ -15,31 +15,37 @@ import { policyFactory } from '../../../../../common/endpoint/models/policy_conf
 import { ProtectionModes } from '../../../../../common/endpoint/types';
 import { createMockEndpointAppContextService } from '../../../../endpoint/mocks';
 import { createToolHandlerContext } from '../../../__mocks__/test_helpers';
-import { createEndpointPolicySnapshot } from '../domain/endpoint_policy_snapshot';
-import { buildPolicyChangeAssessment } from '../domain/impact';
-import type { PolicyChangeCapabilities } from '../domain/impact';
-import { normalizeEndpointPolicy } from '../domain/normalized_endpoint_policy';
+import { createEndpointPolicySnapshot } from '../../../../endpoint/services/policy_management/domain/endpoint_policy_snapshot';
+import { buildPolicyChangeAssessment } from '../../../../endpoint/services/policy_management/domain/impact';
+import type { PolicyChangeCapabilities } from '../../../../endpoint/services/policy_management/domain/impact';
+import { normalizeEndpointPolicy } from '../../../../endpoint/services/policy_management/domain/normalized_endpoint_policy';
 import type {
   ApplyPolicyChangePreview,
   ApplyPolicyChangeResult,
-} from '../services/apply_policy_change';
-import type { EndpointCountResult } from '../services/count_endpoints';
-import type { EndpointPolicyManagementService } from '../services/endpoint_policy_management_service';
-import { createEndpointPolicyManagementService } from '../services/endpoint_policy_management_service';
-import { POLICY_TOOL_ERROR_MESSAGES } from './create_policy_tool';
+} from '../../../../endpoint/services/policy_management/services/apply_policy_change';
+import type { EndpointCountResult } from '../../../../endpoint/services/policy_management/services/count_endpoints';
+import type { EndpointPolicyManagementService } from '../../../../endpoint/services/policy_management/services/endpoint_policy_management_service';
+import { createEndpointPolicyManagementService } from '../../../../endpoint/services/policy_management/services/endpoint_policy_management_service';
+import { POLICY_TOOL_ERROR_MESSAGES } from '../../../../endpoint/services/policy_management/presentation/present_policy_error';
 import { renderApplyPolicyChangeConfirmation } from './apply_policy_change_confirmation';
-import { presentApplyPolicyChangeResult } from './present_apply_policy_change_result';
+import { presentApplyPolicyChangeResult } from '../../../../endpoint/services/policy_management/presentation/present_apply_policy_change_result';
 import {
   APPLY_POLICY_CHANGE_TOOL_ID,
   applyPolicyChangeSchema,
   createApplyPolicyChangeTool,
 } from './apply_policy_change';
 import type { ApplyPolicyChangeInput } from './apply_policy_change';
-import { PolicyVersionConflictError, PolicyWriteRejectedError } from '../services/policy_errors';
+import {
+  PolicyVersionConflictError,
+  PolicyWriteRejectedError,
+} from '../../../../endpoint/services/policy_management/services/policy_errors';
 
-jest.mock('../services/endpoint_policy_management_service', () => ({
-  createEndpointPolicyManagementService: jest.fn(),
-}));
+jest.mock(
+  '../../../../endpoint/services/policy_management/services/endpoint_policy_management_service',
+  () => ({
+    createEndpointPolicyManagementService: jest.fn(),
+  })
+);
 
 jest.mock('./apply_policy_change_confirmation', () => {
   const actual = jest.requireActual('./apply_policy_change_confirmation');

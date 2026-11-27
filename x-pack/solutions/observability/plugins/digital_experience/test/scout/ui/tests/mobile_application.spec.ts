@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../fixtures';
-import { MOBILE_APPS } from '../../common/fixtures/mobile_data';
+import { BUSY_RELEASE, MOBILE_APPS } from '../../common/fixtures/mobile_data';
 import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
 
@@ -109,6 +109,91 @@ test.describe('Digital Experience mobile applications', { tag: DIGITAL_EXPERIENC
       await digitalExperience.toggleMobileCompare();
       await expect(page).not.toHaveURL(/compare=/);
       await expect(digitalExperience.mobileKpiPrevious('Sessions')).toBeHidden();
+    });
+  });
+
+  test('shows the release health and app starts of an application with enough sessions, drawn', async ({
+    page,
+    pageObjects: { digitalExperience },
+  }) => {
+    await digitalExperience.gotoApplication(MOBILE_APPS.busyAndroid, {
+      ...TIME_RANGE,
+      source: 'otel',
+      applicationType: 'mobile',
+    });
+
+    await test.step('lists the release in the table, with its error rate', async () => {
+      await expect(digitalExperience.mobileReleaseHealth).toBeVisible();
+      await expect(
+        digitalExperience.mobileReleaseTable.getByText(BUSY_RELEASE, { exact: true })
+      ).toBeVisible();
+    });
+
+    await test.step('draws both charts, the release in their legends', async () => {
+      await expect(
+        digitalExperience.mobileChartSeries(
+          digitalExperience.mobileReleaseErrorRateChart,
+          BUSY_RELEASE
+        )
+      ).toBeVisible();
+      await expect(
+        digitalExperience.mobileChartSeries(
+          digitalExperience.mobileReleaseAdoptionChart,
+          BUSY_RELEASE
+        )
+      ).toBeVisible();
+    });
+
+    await test.step('shows the average cold and warm start, in the tiles and the table', async () => {
+      // The values themselves are the API specs' and the unit tests' concern
+      for (const kpi of ['ColdStart', 'WarmStart'] as const) {
+        await expect(digitalExperience.mobileKpiValue(kpi)).toHaveText(/\d/);
+      }
+      await expect(
+        digitalExperience.mobileReleaseTable.getByTestId('digitalExperienceMobileReleaseColdStart')
+      ).toHaveText(/\d/);
+    });
+
+    await test.step('draws the cold and warm starts over time in the Performance section', async () => {
+      await expect(digitalExperience.mobilePerformance).toBeVisible();
+      // The series in the legend: the chart drew its line, not an empty frame
+      for (const [chart, series] of [
+        [digitalExperience.mobileColdStartChart, 'Avg. cold start'],
+        [digitalExperience.mobileWarmStartChart, 'Avg. warm start'],
+      ] as const) {
+        await expect(digitalExperience.mobileChartSeries(chart, series)).toBeVisible();
+      }
+    });
+
+    await test.step('has no accessibility violations with the charts drawn', async () => {
+      const { violations } = await page.checkA11y({ include: ['main'] });
+      expect(violations).toHaveLength(0);
+    });
+  });
+
+  test('filters the page by a release from its table, and takes the filter off', async ({
+    page,
+    pageObjects: { digitalExperience },
+  }) => {
+    await digitalExperience.gotoApplication(MOBILE_APPS.android, {
+      ...TIME_RANGE,
+      source: 'otel',
+      applicationType: 'mobile',
+    });
+    await expect(digitalExperience.mobileKpiValue('Sessions')).toHaveText('3');
+
+    await test.step('narrows the URL and the data to the release', async () => {
+      await digitalExperience.mobileReleaseFilter('2.9.0').click();
+      await expect(page).toHaveURL(/release=2\.9\.0/);
+      await expect(digitalExperience.mobileKpiValue('Sessions')).toHaveText('2');
+      await expect(digitalExperience.mobileReleaseFilterRemove('2.9.0')).toBeVisible();
+    });
+
+    await test.step('takes the filter off from its pill', async () => {
+      await digitalExperience.mobileReleaseFilterRemove('2.9.0').click();
+      await expect(page).not.toHaveURL(/release=/);
+      await expect(digitalExperience.mobileKpiValue('Sessions')).toHaveText('3');
+      await expect(digitalExperience.mobileReleaseFilter('2.9.0')).toBeVisible();
     });
   });
 });

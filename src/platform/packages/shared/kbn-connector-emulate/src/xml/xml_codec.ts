@@ -264,8 +264,8 @@ const createCodec = (document: OpenApiDocument) => {
       variants.length > 0
         ? Object.assign({}, ...variants.map((variant) => variant.properties ?? {}))
         : isRecord(target.properties)
-        ? target.properties
-        : {};
+          ? target.properties
+          : {};
     const values = isRecord(value) ? value : {};
     let attributes = '';
     let children = '';

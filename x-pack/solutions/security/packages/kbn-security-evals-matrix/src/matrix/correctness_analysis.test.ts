@@ -19,9 +19,9 @@ const analysis = {
   analysis: [],
 };
 
-const buildLog = () => ({ warning: jest.fn(), error: jest.fn() } as unknown as ToolingLog);
+const buildLog = () => ({ warning: jest.fn(), error: jest.fn() }) as unknown as ToolingLog;
 
-const buildClient = (prompt: jest.Mock) => ({ prompt } as unknown as BoundInferenceClient);
+const buildClient = (prompt: jest.Mock) => ({ prompt }) as unknown as BoundInferenceClient;
 
 describe('createCorrectnessAnalysis', () => {
   it('sends the shared correctness prompt with the question, last message and ground truth', async () => {

@@ -101,9 +101,9 @@ export const isCancellableNode = (
   return typeof (node as unknown as CancellableNode).onCancel === 'function';
 };
 
-export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
-  implements NodeImplementation
-{
+export abstract class BaseAtomicNodeImplementation<
+  TStep extends BaseStep,
+> implements NodeImplementation {
   protected step: TStep;
   protected stepExecutionRuntime: StepExecutionRuntime;
   protected connectorExecutor: ConnectorExecutor | undefined;
@@ -152,8 +152,8 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   }
 
   /** Input recorded on the first entry of this step execution. */
-  private recordedInput(): Record<string, unknown> {
-    const stored = this.stepExecutionRuntime.getCurrentStepResult()?.input;
+  private async recordedInput(): Promise<Record<string, unknown>> {
+    const stored = await this.stepExecutionRuntime.getCurrentStepInput();
     if (stored != null && typeof stored === 'object' && !Array.isArray(stored)) {
       return stored as Record<string, unknown>;
     }
@@ -184,7 +184,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     let suspended = false;
     try {
       if (this.stepExecutionRuntime.isInputRecorded) {
-        input = this.recordedInput();
+        input = await this.recordedInput();
       } else {
         input = await this.getInput();
         this.stepExecutionRuntime.setInput(input);

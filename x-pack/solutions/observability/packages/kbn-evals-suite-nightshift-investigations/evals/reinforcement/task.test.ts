@@ -580,7 +580,7 @@ describe('treesAfterRun', () => {
         visited_path: ['S1', 'E1'],
         causal_path: [],
       })),
-    } as unknown as SubmitArguments);
+    }) as unknown as SubmitArguments;
 
   it('fails rather than skip a tree whose provenance it could not read', async () => {
     const { esClient } = fakeEsClient([], {});

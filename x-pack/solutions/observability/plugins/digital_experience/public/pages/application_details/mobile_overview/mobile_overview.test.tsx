@@ -20,8 +20,16 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { useUpdateUrlQuery } from '../../../hooks/use_update_url_query';
 import { createUiSettingsMock } from '../../../test_utils/ui_settings_mock';
 import { MobileOverview } from './mobile_overview';
+import { ReleaseHealth } from './release_health/release_health';
+import { useMobileAppStarts, type MobileAppStartsState } from './performance/use_mobile_app_starts';
+import { useMobileReleases, type MobileReleasesState } from './release_health/use_mobile_releases';
 import { useMobileKpis } from './use_mobile_kpis';
 
+jest.mock('./release_health/use_mobile_releases');
+jest.mock('./performance/use_mobile_app_starts');
+jest.mock('./release_health/release_health', () => ({
+  ReleaseHealth: jest.fn(() => <div data-test-subj="digitalExperienceMobileReleaseHealth" />),
+}));
 jest.mock('../../../hooks/use_api_client');
 jest.mock('../../../hooks/use_digital_experience_params');
 jest.mock('../../../hooks/use_environment');
@@ -31,7 +39,11 @@ jest.mock('../../../hooks/use_formatters', () => ({
 }));
 jest.mock('../../../hooks/use_time_range');
 jest.mock('../../../hooks/use_update_url_query');
-jest.mock('../../../components/time_range_picker', () => ({ TimeRangePicker: () => null }));
+jest.mock('../../../components/time_range_picker', () => ({
+  TimeRangePicker: ({ onRefresh }: { onRefresh: () => void }) => (
+    <button data-test-subj="timeRangeRefresh" onClick={onRefresh} />
+  ),
+}));
 jest.mock('../../../components/environment_filter', () => ({
   EnvironmentFilter: jest.fn(() => null),
 }));
@@ -45,6 +57,8 @@ const KPIS: MobileKpisResponse = {
   sessions: { value: 12, previous: 10, delta: 2 },
   users: { value: 4, previous: 4, delta: 0 },
   errorRate: { value: 0.5, previous: 0.25, delta: 0.25 },
+  coldStart: { value: 2000, previous: 1500, delta: 500, count: 3, previousCount: 2 },
+  warmStart: { value: 400, previous: null, delta: null, count: 2, previousCount: 0 },
   releases: [
     { key: '2.0.0', count: 8 },
     { key: '1.9.0', count: 4 },
@@ -81,12 +95,30 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 // The page fetches the KPIs and hands them to the Overview, as this does.
-const Overview = () => <MobileOverview kpisState={useMobileKpis('shop-mobile')} />;
+const RELEASES_STATE: MobileReleasesState = {
+  releases: undefined,
+  isLoading: true,
+  error: undefined,
+  refresh: jest.fn(),
+};
+
+const APP_STARTS_STATE: MobileAppStartsState = {
+  appStarts: undefined,
+  isLoading: true,
+  error: undefined,
+  refresh: jest.fn(),
+};
+
+const Overview = () => (
+  <MobileOverview serviceName="shop-mobile" kpisState={useMobileKpis('shop-mobile')} />
+);
 
 const renderPage = () => render(<Overview />, { wrapper: Wrapper });
 
 beforeEach(() => {
   jest.clearAllMocks();
+  jest.mocked(useMobileReleases).mockReturnValue(RELEASES_STATE);
+  jest.mocked(useMobileAppStarts).mockReturnValue(APP_STARTS_STATE);
   fetch.mockResolvedValue(KPIS);
   jest
     .mocked(useApiClient)
@@ -105,14 +137,17 @@ beforeEach(() => {
 });
 
 describe('MobileOverview', () => {
-  it('shows the KPIs that have data: sessions, users and error rate, in order', async () => {
+  it('shows the KPIs that have data: sessions, users, error rate, cold and warm start, in order', async () => {
     renderPage();
 
     expect(await screen.findByTestId('digitalExperienceMobileKpiSessionsValue')).toHaveTextContent(
       '12'
     );
     expect(screen.getByTestId('digitalExperienceMobileKpiUsersValue')).toHaveTextContent('4');
-    expect(screen.getByTestId('digitalExperienceMobileKpiErrorRateValue')).toHaveTextContent('0.5');
+    // Two decimals, as the release table and the applications list show it.
+    expect(screen.getByTestId('digitalExperienceMobileKpiErrorRateValue')).toHaveTextContent(
+      '0.50'
+    );
     expect(
       Array.from(
         screen
@@ -124,7 +159,55 @@ describe('MobileOverview', () => {
       'digitalExperienceMobileKpiSessionsValue',
       'digitalExperienceMobileKpiUsersValue',
       'digitalExperienceMobileKpiErrorRateValue',
+      'digitalExperienceMobileKpiColdStartValue',
+      'digitalExperienceMobileKpiWarmStartValue',
     ]);
+  });
+
+  it('shows the average cold and warm start, and the starts each is based on in its tooltip', async () => {
+    mockParams({ compare: 'true' });
+    renderPage();
+    await screen.findByTestId('digitalExperienceMobileKpis');
+
+    expect(screen.getByTestId('digitalExperienceMobileKpiColdStartValue')).toHaveTextContent(
+      '2.00 s'
+    );
+    // Slower is worse
+    expect(screen.getByTestId('digitalExperienceMobileKpiColdStartChange')).toHaveTextContent(
+      '+33.3%'
+    );
+    expect(screen.getByTestId('digitalExperienceMobileKpiWarmStartValue')).toHaveTextContent(
+      '400 ms'
+    );
+
+    fireEvent.mouseOver(screen.getByTestId('digitalExperienceMobileKpiColdStartHint'));
+    // With Compare on, the starts of the previous period too, so a change on a few reads as such
+    expect(
+      await screen.findByText(/Based on 3 cold starts, and 2 cold starts in the previous period\./)
+    ).toBeInTheDocument();
+    fireEvent.mouseOver(screen.getByTestId('digitalExperienceMobileKpiWarmStartHint'));
+    expect(
+      await screen.findByText(/Based on 2 warm starts, and 0 warm starts in the previous period\./)
+    ).toBeInTheDocument();
+  });
+
+  it('reads "No data" on the app start tiles when no start of their type counts', async () => {
+    const none = { value: null, previous: null, delta: null, count: 0, previousCount: 0 };
+    fetch.mockResolvedValue({ ...KPIS, coldStart: none, warmStart: none });
+    renderPage();
+    await screen.findByTestId('digitalExperienceMobileKpis');
+
+    ['ColdStart', 'WarmStart'].forEach((kpi) =>
+      expect(screen.getByTestId(`digitalExperienceMobileKpi${kpi}Value`)).toHaveTextContent(
+        'No data'
+      )
+    );
+    fireEvent.mouseOver(screen.getByTestId('digitalExperienceMobileKpiColdStartHint'));
+    expect(
+      await screen.findByText(
+        /No cold starts of 60 seconds or less in the time range and filters\./
+      )
+    ).toBeInTheDocument();
   });
 
   it('shows no crash-free card nor placeholder sections until the sibling issues fill them', async () => {
@@ -309,6 +392,53 @@ describe('MobileOverview', () => {
     expect(environmentProps()).toMatchObject({ isLoading: false, environments: ['production'] });
   });
 
+  it('heads the KPI row with the health summary and its Compare toggle', async () => {
+    renderPage();
+    await screen.findByTestId('digitalExperienceMobileKpis');
+
+    expect(screen.getByRole('region', { name: 'Health summary' })).toContainElement(
+      screen.getByTestId('digitalExperienceMobileKpis')
+    );
+    const toggle = screen.getByTestId('digitalExperienceMobileCompareToggle');
+    expect(screen.getByText('Compare to the previous period')).toBeInTheDocument();
+    expect(toggle).toHaveAttribute('aria-checked', 'false');
+  });
+
+  it('turns Compare on in the URL, so a reload or Share keeps it', async () => {
+    renderPage();
+    await screen.findByTestId('digitalExperienceMobileKpis');
+
+    fireEvent.click(screen.getByTestId('digitalExperienceMobileCompareToggle'));
+
+    expect(updateUrlQuery).toHaveBeenCalledWith({ compare: 'true' });
+  });
+
+  it('turns Compare off when the URL has it on', async () => {
+    mockParams({ compare: 'true' });
+    renderPage();
+    await screen.findByTestId('digitalExperienceMobileKpis');
+
+    const toggle = screen.getByTestId('digitalExperienceMobileCompareToggle');
+    expect(toggle).toHaveAttribute('aria-checked', 'true');
+    fireEvent.click(toggle);
+
+    expect(updateUrlQuery).toHaveBeenCalledWith({ compare: undefined });
+  });
+
+  it('lets the release health filter the page by a release, kept in the URL', async () => {
+    mockParams({ release: '2.0.0' });
+    renderPage();
+    await screen.findByTestId('digitalExperienceMobileKpis');
+
+    const props = jest.mocked(ReleaseHealth).mock.calls.at(-1)?.[0];
+    expect(props?.selectedRelease).toBe('2.0.0');
+    // Every release of the OS, whatever the filter, so a release keeps its colour when picked
+    expect(props?.rankedReleases).toEqual(['2.0.0', '1.9.0']);
+    props?.onSelectRelease('1.9.0');
+
+    expect(updateUrlQuery).toHaveBeenCalledWith({ release: '1.9.0' });
+  });
+
   it('shows no change nor previous period with Compare off, its default', async () => {
     renderPage();
     await screen.findByTestId('digitalExperienceMobileKpis');
@@ -330,7 +460,8 @@ describe('MobileOverview', () => {
     expect(screen.getByTestId('digitalExperienceMobileKpiSessionsPrevious')).toHaveTextContent(
       'vs 10'
     );
-    ['Users', 'ErrorRate'].forEach((kpi) => {
+    // The warm start has no previous value in the fixture, so it shows no change
+    ['Users', 'ErrorRate', 'ColdStart'].forEach((kpi) => {
       expect(screen.getByTestId(`digitalExperienceMobileKpi${kpi}Change`)).toBeInTheDocument();
       expect(screen.getByTestId(`digitalExperienceMobileKpi${kpi}Previous`)).toBeInTheDocument();
     });
@@ -371,6 +502,53 @@ describe('MobileOverview', () => {
 
     expect(await screen.findByTestId('digitalExperienceMobileKpis')).toBeInTheDocument();
     expect(screen.queryByTestId('digitalExperienceMobileKpisError')).toBeNull();
+  });
+
+  it('shows the release health below the KPIs, and only with them', async () => {
+    renderPage();
+
+    const kpis = await screen.findByTestId('digitalExperienceMobileKpis');
+    const releaseHealth = screen.getByTestId('digitalExperienceMobileReleaseHealth');
+    expect(kpis.compareDocumentPosition(releaseHealth)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  it.each([
+    ['fail', () => fetch.mockRejectedValue(new Error('Internal Server Error'))],
+    ['have no data', () => fetch.mockResolvedValue({ ...KPIS, hasData: false })],
+  ])('hides the release health when the KPIs %s', async (_, arrange) => {
+    arrange();
+    renderPage();
+
+    await waitFor(() => expect(screen.queryByTestId('digitalExperienceMobileKpis')).toBeNull());
+    expect(screen.queryByTestId('digitalExperienceMobileReleaseHealth')).toBeNull();
+  });
+
+  it("fetches the application's release health and app starts itself, so only the Overview runs them", async () => {
+    renderPage();
+
+    await waitFor(() => expect(useMobileReleases).toHaveBeenCalledWith('shop-mobile'));
+    expect(useMobileAppStarts).toHaveBeenCalledWith('shop-mobile');
+  });
+
+  it('refreshes the release health and the app starts with the KPIs from the toolbar', async () => {
+    renderPage();
+    await screen.findByTestId('digitalExperienceMobileKpis');
+
+    fireEvent.click(screen.getByTestId('timeRangeRefresh'));
+
+    expect(RELEASES_STATE.refresh).toHaveBeenCalled();
+    expect(APP_STARTS_STATE.refresh).toHaveBeenCalled();
+  });
+
+  it('shows the Performance section below the release health, and only with the KPIs', async () => {
+    renderPage();
+    await screen.findByTestId('digitalExperienceMobileKpis');
+
+    const releaseHealth = screen.getByTestId('digitalExperienceMobileReleaseHealth');
+    const performance = screen.getByTestId('digitalExperienceMobilePerformance');
+    expect(releaseHealth.compareDocumentPosition(performance)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
   });
 
   it('links to the EDOT Android and iOS docs without mobile data', async () => {

@@ -43,7 +43,7 @@ describe('ensureInvestigationAgentStepDefinition', () => {
       abortSignal: new AbortController().signal,
       stepId: 'ensure_investigation_agent',
       stepType: 'nightshift.ensureInvestigationAgent',
-    } as never);
+    }) as never;
 
   const availability = { cacheMode: 'space' as const, handler: jest.fn() };
 

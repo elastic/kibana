@@ -197,7 +197,7 @@ describe('restoreTSBuildArtifacts', () => {
               .fn()
               .mockResolvedValue({ shas: new Set([restoredSha]), elapsedMs: 0 }),
             restoreArchive: mockGcsRestore,
-          } as unknown as GcsFileSystem)
+          }) as unknown as GcsFileSystem
       );
 
       const mkdirSpy = jest.spyOn(Fs.promises, 'mkdir').mockResolvedValue(undefined);
@@ -226,7 +226,7 @@ describe('restoreTSBuildArtifacts', () => {
       const mockGcsRestore = jest.fn().mockResolvedValue('abc123');
 
       (GcsFileSystem as jest.MockedClass<typeof GcsFileSystem>).mockImplementationOnce(
-        () => ({ restoreArchive: mockGcsRestore } as unknown as GcsFileSystem)
+        () => ({ restoreArchive: mockGcsRestore }) as unknown as GcsFileSystem
       );
 
       const mkdirSpy = jest.spyOn(Fs.promises, 'mkdir').mockResolvedValue(undefined);
@@ -293,7 +293,7 @@ describe('resolveRestoreStrategy', () => {
         ({
           listAvailableCommitShas: gcsListMock,
           restoreArchive: jest.fn().mockResolvedValue(undefined),
-        } as unknown as GcsFileSystem)
+        }) as unknown as GcsFileSystem
     );
 
     // No local artifacts by default — empty config-paths.json, no state file.

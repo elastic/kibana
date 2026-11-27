@@ -28,12 +28,12 @@ const mockUiSettings = (): UiSettingsCommon =>
       if (key === 'dateFormat:tz') return 'UTC';
       return undefined;
     }),
-  } as unknown as UiSettingsCommon);
+  }) as unknown as UiSettingsCommon;
 
 const mockNowProvider = (): NowProviderPublicContract =>
   ({
     get: jest.fn().mockReturnValue(new Date('2024-01-01T00:00:00Z')),
-  } as unknown as NowProviderPublicContract);
+  }) as unknown as NowProviderPublicContract;
 
 const createExecutionContext = (inspectorAdapter?: RequestAdapter): ExecutionContext =>
   ({
@@ -44,7 +44,7 @@ const createExecutionContext = (inspectorAdapter?: RequestAdapter): ExecutionCon
     getKibanaRequest: jest.fn(() => ({ id: 'mock-request-id' })),
     getSearchSessionId: jest.fn(),
     getExecutionContext: jest.fn(),
-  } as unknown as ExecutionContext);
+  }) as unknown as ExecutionContext;
 
 const getMockSearchService = (
   rawResponse: any = { columns: [], rows: [] }

@@ -103,7 +103,7 @@ describe('materializeMemory', () => {
       applyCounterUpdates: jest.fn(),
       archive: jest.fn(),
       delete: jest.fn(),
-    } as never);
+    }) as never;
 
   it('writes only the ranked top-K files, not the full catalog', async () => {
     const store = createStore(candidates);

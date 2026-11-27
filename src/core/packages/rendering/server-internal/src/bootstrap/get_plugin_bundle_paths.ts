@@ -40,10 +40,10 @@ export const getPluginsBundlePaths = ({
       bundlePath: `${bundlesHref}/plugin/${pluginId}/${version}/${pluginId}.plugin.js`,
     });
 
-    const pluginBundleIds = uiPlugins.internal.get(pluginId)?.requiredBundles ?? [];
-    pluginBundleIds.forEach((bundleId) => {
-      if (!pluginBundlePaths.has(bundleId)) {
-        pluginsToProcess.push(bundleId);
+    const dependencies = [...plugin.requiredPlugins, ...plugin.requiredBundles];
+    dependencies.forEach((dependencyId) => {
+      if (!pluginBundlePaths.has(dependencyId)) {
+        pluginsToProcess.push(dependencyId);
       }
     });
   }

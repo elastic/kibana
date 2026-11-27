@@ -133,8 +133,10 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     return this._descriptor.geoField;
   }
 
-  renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> {
-    async function onChange(...sourceChanges: OnSourceChangeArgs[]) {
+  renderSourceSettingsEditor(
+    sourceEditorArgs: SourceEditorArgs<ESGeoGridSourceDescriptor>
+  ): ReactElement<any> {
+    async function onChange(...sourceChanges: OnSourceChangeArgs<ESGeoGridSourceDescriptor>[]) {
       sourceEditorArgs.onChange(...sourceChanges);
       const resolutionPropChange = sourceChanges.find((sourceChange) => {
         return sourceChange.propName === 'resolution';

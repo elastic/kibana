@@ -90,7 +90,7 @@ const makeEsClient = (): jest.Mocked<ElasticsearchClient> =>
     bulk: jest.fn(),
     delete: jest.fn(),
     deleteByQuery: jest.fn(),
-  } as unknown as jest.Mocked<ElasticsearchClient>);
+  }) as unknown as jest.Mocked<ElasticsearchClient>;
 
 const makePluginsStart = (): WorkflowsServerPluginStartDeps =>
   ({
@@ -108,13 +108,13 @@ const makePluginsStart = (): WorkflowsServerPluginStartDeps =>
     workflowsExtensions: {
       getAllTriggerDefinitions: jest.fn().mockReturnValue([]),
     },
-  } as unknown as WorkflowsServerPluginStartDeps);
+  }) as unknown as WorkflowsServerPluginStartDeps;
 
 const makeCoreStart = (esClient: ElasticsearchClient): CoreStart =>
   ({
     ...coreMock.createStart(),
     elasticsearch: { client: { asInternalUser: esClient } },
-  } as unknown as CoreStart);
+  }) as unknown as CoreStart;
 
 const makeCoreSetup = (
   startServices: () => Promise<[CoreStart, WorkflowsServerPluginStartDeps]>
@@ -124,10 +124,10 @@ const makeCoreSetup = (
     status: {
       core$: { subscribe: jest.fn() },
     },
-  } as unknown as CoreSetup<WorkflowsServerPluginStartDeps>);
+  }) as unknown as CoreSetup<WorkflowsServerPluginStartDeps>;
 
 const makePluginsSetup = (): WorkflowsServerPluginSetupDeps =>
-  ({} as unknown as WorkflowsServerPluginSetupDeps);
+  ({}) as unknown as WorkflowsServerPluginSetupDeps;
 
 describe('WorkflowsService (facade)', () => {
   let crudSpies: PrototypeSpies;
@@ -157,7 +157,7 @@ describe('WorkflowsService (facade)', () => {
         ({
           initialize: jest.fn().mockResolvedValue(undefined),
           isInitialized: jest.fn().mockReturnValue(true),
-        } as unknown as WorkflowChangeHistoryService)
+        }) as unknown as WorkflowChangeHistoryService
     );
     mockedWaitForManagedWorkflowInstallReadiness.mockResolvedValue({ ready: true });
     crudSpies = spyPrototype(WorkflowCrudService, [
@@ -311,7 +311,9 @@ describe('WorkflowsService (facade)', () => {
       await service.bulkCreateWorkflows([{ name: 'n' } as any], 'default', request, {
         overwrite: true,
       });
-      await service.updateWorkflow('wf-1', { name: 'new' } as any, 'default', request);
+      await service.updateWorkflow('wf-1', { name: 'new' } as any, 'default', request, {
+        isManaged: false,
+      });
       await service.deleteWorkflows(['wf-1'], 'default', { force: true }, request);
       await service.disableAllWorkflows('my-space', request);
 
@@ -337,7 +339,8 @@ describe('WorkflowsService (facade)', () => {
         'wf-1',
         { name: 'new' },
         'default',
-        request
+        request,
+        { isManaged: false }
       );
       expect(crudSpies.deleteWorkflows).toHaveBeenCalledWith(
         ['wf-1'],
@@ -356,7 +359,7 @@ describe('WorkflowsService (facade)', () => {
             initialize: jest.fn().mockResolvedValue(undefined),
             isInitialized: jest.fn().mockReturnValue(true),
             getHistory,
-          } as unknown as WorkflowChangeHistoryService)
+          }) as unknown as WorkflowChangeHistoryService
       );
 
       crudSpies.getWorkflowDocumentSource.mockResolvedValue({
@@ -439,6 +442,7 @@ describe('WorkflowsService (facade)', () => {
 
       await service.getAvailableConnectors('default', request);
       await service.validateWorkflow('name: wf', 'default', request, {
+        isManaged: false,
         includeVariableRules: false,
         includeEsqlRules: false,
       });
@@ -449,7 +453,7 @@ describe('WorkflowsService (facade)', () => {
         'name: wf',
         'default',
         request,
-        { includeVariableRules: false, includeEsqlRules: false }
+        { includeVariableRules: false, includeEsqlRules: false, isManaged: false }
       );
       expect(validationSpies.getWorkflowZodSchema).toHaveBeenCalledWith(
         { loose: false },

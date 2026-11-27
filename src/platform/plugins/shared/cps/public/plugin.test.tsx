@@ -24,7 +24,7 @@ describe('CpsPlugin (public)', () => {
         ({
           whenReady: () => Promise.resolve(),
           hasLinkedProjects: () => hasLinkedProjects,
-        } as unknown as CPSManager)
+        }) as unknown as CPSManager
     );
   };
 

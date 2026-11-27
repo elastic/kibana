@@ -35,10 +35,12 @@ interface EvalsPublicConfig {
   mode: 'runtime' | 'full';
 }
 
-export class EvalsPublicPlugin
-  implements
-    Plugin<EvalsPublicSetup, EvalsPublicStart, EvalsSetupDependencies, EvalsStartDependencies>
-{
+export class EvalsPublicPlugin implements Plugin<
+  EvalsPublicSetup,
+  EvalsPublicStart,
+  EvalsSetupDependencies,
+  EvalsStartDependencies
+> {
   private readonly config: EvalsPublicConfig;
 
   constructor(initializerContext: PluginInitializerContext) {

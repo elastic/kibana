@@ -19,15 +19,15 @@ type StripIndex<T> = {
 type KnownKeys<T> = T extends string | number | boolean | bigint | symbol | null | undefined
   ? T
   : T extends readonly (infer U)[]
-  ? Array<KnownKeys<U>>
-  : T extends object
-  ? keyof StripIndex<T> extends never
-    ? string extends keyof T
-      ? Record<string, KnownKeys<T[string]>>
-      : number extends keyof T
-      ? Record<number, KnownKeys<T[number]>>
-      : StripIndex<T>
-    : StripIndex<T>
-  : T;
+    ? Array<KnownKeys<U>>
+    : T extends object
+      ? keyof StripIndex<T> extends never
+        ? string extends keyof T
+          ? Record<string, KnownKeys<T[string]>>
+          : number extends keyof T
+            ? Record<number, KnownKeys<T[number]>>
+            : StripIndex<T>
+        : StripIndex<T>
+      : T;
 
 export type SchemaOutput<S extends z.ZodType> = KnownKeys<z.output<S>>;

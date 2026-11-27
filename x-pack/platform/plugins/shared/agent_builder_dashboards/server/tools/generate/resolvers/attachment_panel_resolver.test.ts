@@ -17,7 +17,7 @@ import { createAttachmentPanelResolver } from './attachment_panel_resolver';
 const makeAttachments = (record?: Record<string, unknown>): AttachmentStateManager =>
   ({
     getAttachmentRecord: jest.fn().mockReturnValue(record),
-  } as unknown as AttachmentStateManager);
+  }) as unknown as AttachmentStateManager;
 
 const makeVisualizationAttachment = (data: Record<string, unknown>) => ({
   id: 'att-1',
@@ -76,7 +76,10 @@ describe('createAttachmentPanelResolver', () => {
 
     expect(resolve('att-1')).toEqual({
       type: 'success',
-      panelContent: { type: VEGA_VIS_TYPE, config: { spec: '{"$schema":"vega-lite"}' } },
+      panelContent: {
+        type: VEGA_VIS_TYPE,
+        config: { spec: { format: 'hjson', value: '{"$schema":"vega-lite"}' } },
+      },
     });
   });
 

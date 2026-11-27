@@ -7,15 +7,36 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { isCloudFormationStackArn } from '../../../common/services/cloud_connectors/iac_deployment';
+import {
+  PROVISIONING_CALLBACK_PROVIDERS,
+  isProvisioningCallbackProvider,
+} from '../../../common/types/models/provisioning_callback';
 
-const AWS_IAM_ROLE_ARN_PATTERN = /^arn:aws[a-zA-Z-]*:iam::\d{12}:role\/.+$/;
+import { provisioningCallbackReportSchema } from './provisioning_callback_providers';
+
+const CloudProviderSchema = schema.oneOf([
+  schema.literal('aws'),
+  schema.literal('azure'),
+  schema.literal('gcp'),
+]);
+
+/** A cloud provider this Kibana can receive a callback for. */
+const ProvisioningCallbackProviderSchema = schema.oneOf(
+  [schema.literal('aws'), schema.literal('azure'), schema.literal('gcp')],
+  {
+    validate: (value) =>
+      isProvisioningCallbackProvider(value)
+        ? undefined
+        : `provisioning callbacks are supported for: ${PROVISIONING_CALLBACK_PROVIDERS.join(', ')}`,
+    meta: { description: 'Cloud provider of the deployment that will report back.' },
+  }
+);
 
 const CallbackIdParamsSchema = schema.object({
   callbackId: schema.string({
     minLength: 1,
     maxLength: 128,
-    meta: { description: 'ID of the callback record, as issued to the stack.' },
+    meta: { description: 'ID of the callback record, as issued to the launched deployment.' },
   }),
 });
 
@@ -29,14 +50,14 @@ const ProvisioningCallbackStatusSchema = schema.oneOf(
   {
     meta: {
       description:
-        'State of the callback record. `pending`: waiting for the stack. `receiving`: a report is being applied. `received`: values stored and the identity exists. `cancelled`: the form stopped waiting and the token is refused.',
+        'State of the callback record. `pending`: waiting for the deployment. `receiving`: a report is being applied. `received`: values stored and the identity exists. `cancelled`: the form stopped waiting and the token is refused.',
     },
   }
 );
 
 export const CloudConnectorCallbackItemSchema = schema.object({
   id: schema.string(),
-  provider: schema.literal('aws'),
+  provider: CloudProviderSchema,
   status: ProvisioningCallbackStatusSchema,
   created_at: schema.string(),
   created_by: schema.maybe(schema.string()),
@@ -63,7 +84,7 @@ export const GetProvisioningCallbackAvailabilityResponseSchema = schema.object({
 
 export const CreateProvisioningCallbackRequestSchema = {
   body: schema.object({
-    provider: schema.literal('aws'),
+    provider: ProvisioningCallbackProviderSchema,
     connector_name: schema.maybe(
       schema.string({
         minLength: 1,
@@ -98,7 +119,7 @@ export const CreateProvisioningCallbackResponseSchema = schema.object({
   token: schema.string({
     meta: {
       description:
-        'The token the stack presents to report to this record, in the `x-elastic-callback-token` header. Not an Elasticsearch credential. Returned exactly once; only its hash is kept.',
+        'The token the deployment presents to report to this record, in the `x-elastic-callback-token` header. Not an Elasticsearch credential. Returned exactly once; only its hash is kept.',
     },
   }),
 });
@@ -121,22 +142,7 @@ export const DeleteProvisioningCallbackResponseSchema = schema.object({
 
 export const ReceiveProvisioningCallbackRequestSchema = {
   params: CallbackIdParamsSchema,
-  body: schema.object({
-    role_arn: schema.string({
-      minLength: 1,
-      maxLength: 2048,
-      validate: (value) =>
-        AWS_IAM_ROLE_ARN_PATTERN.test(value) ? undefined : 'must be an IAM role ARN',
-      meta: { description: 'ARN of the IAM role the stack created.' },
-    }),
-    stack_arn: schema.string({
-      minLength: 1,
-      maxLength: 2048,
-      validate: (value) =>
-        isCloudFormationStackArn(value) ? undefined : 'must be a CloudFormation stack ARN',
-      meta: { description: 'ARN (StackId) of the CloudFormation stack.' },
-    }),
-  }),
+  body: provisioningCallbackReportSchema(),
 };
 
 export const ReceiveProvisioningCallbackResponseSchema = schema.object({

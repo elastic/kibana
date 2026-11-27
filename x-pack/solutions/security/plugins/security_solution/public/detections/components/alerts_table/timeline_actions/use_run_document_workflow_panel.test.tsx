@@ -104,7 +104,7 @@ const useTimelineEventsHandlerMock = useTimelineEventsHandler as jest.MockedFunc
 >;
 
 const timelineItem = (id: string, index: string): TimelineItem =>
-  ({ _id: id, _index: index, data: [], ecs: { _id: id } } as TimelineItem);
+  ({ _id: id, _index: index, data: [], ecs: { _id: id } }) as TimelineItem;
 
 /**
  * Stubs the id-resolving search so a select-all run resolves to `events` out of `totalCount`

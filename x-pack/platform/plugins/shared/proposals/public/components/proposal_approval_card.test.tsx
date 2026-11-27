@@ -202,7 +202,7 @@ const capabilitiesFor = (canDecide: boolean) =>
       },
       http: { basePath: { serverBasePath: '', prepend: (path: string) => path } },
     },
-  } as unknown as ReturnType<typeof useKibana>);
+  }) as unknown as ReturnType<typeof useKibana>;
 
 const baseProposal = (overrides: Partial<ProposalWithMetadata> = {}): ProposalWithMetadata => ({
   id: 'proposal-1',
@@ -630,7 +630,7 @@ describe('ProposalApprovalCard', () => {
       } as unknown as ReturnType<typeof useApproveProposal>);
       render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
 
-      await expect(latestOnApprove!()).rejects.toThrow(/no longer available to decide/);
+      await expect(latestOnApprove!()).rejects.toThrow(/changed while you were deciding/);
     });
 
     it('rejects with a permission message for a 403', async () => {

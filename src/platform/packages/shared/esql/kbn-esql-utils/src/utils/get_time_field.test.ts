@@ -15,7 +15,7 @@ describe('getESQLTimeField', () => {
   const createHttp = (timeField = '@timestamp'): HttpStart =>
     ({
       post: jest.fn(async () => ({ timeField })),
-    } as unknown as HttpStart);
+    }) as unknown as HttpStart;
 
   it('does not reuse the cache across SET project_routing values for the same FROM', async () => {
     const http = createHttp();
@@ -42,5 +42,35 @@ describe('getESQLTimeField', () => {
     await getESQLTimeField({ query, http });
 
     expect(http.post).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not reuse the cache between a LET and a FROM with the same indices', async () => {
+    const http = createHttp();
+
+    await getESQLTimeField({ query: 'FROM logs-timefield-let-*', http });
+    await getESQLTimeField({ query: 'LET a = (FROM logs-timefield-let-*); FROM a', http });
+
+    expect(http.post).toHaveBeenCalledTimes(2);
+  });
+
+  it('reuses the cache when only the pipeline of a LET changes', async () => {
+    const http = createHttp();
+    const query = 'LET a = (FROM logs-timefield-pipe-* | LIMIT 1); FROM a';
+
+    await getESQLTimeField({ query, http });
+    await getESQLTimeField({ query: query.replace('LIMIT 1', 'LIMIT 2'), http });
+
+    expect(http.post).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not reuse the cache when the time field inside a LET changes', async () => {
+    const http = createHttp();
+    const query =
+      'LET a = (FROM logs-timefield-param-* | WHERE event.ingested >= ?_tstart); FROM a';
+
+    await getESQLTimeField({ query, http });
+    await getESQLTimeField({ query: query.replace('event.ingested', 'event.created'), http });
+
+    expect(http.post).toHaveBeenCalledTimes(2);
   });
 });

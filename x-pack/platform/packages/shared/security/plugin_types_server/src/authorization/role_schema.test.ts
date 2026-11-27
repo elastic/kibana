@@ -21,12 +21,69 @@ describe('elasticsearchRoleSchema', () => {
     ).not.toThrow();
   });
 
-  test('rejects more than 1000 index names in one privilege entry', () => {
-    const names = Array.from({ length: 1001 }, (_unused, index) => `index-${index}`);
+  test.each([
+    {
+      name: 'data source names',
+      role: (values: string[]) => ({
+        global: { data_source: [{ names: values, privileges: ['read'] }] },
+      }),
+    },
+    { name: 'cluster privileges', role: (values: string[]) => ({ cluster: values }) },
+    {
+      name: 'remote cluster privileges',
+      role: (values: string[]) => ({
+        remote_cluster: [{ privileges: values, clusters: ['remote'] }],
+      }),
+    },
+    {
+      name: 'remote cluster aliases',
+      role: (values: string[]) => ({
+        remote_cluster: [{ privileges: ['monitor_enrich'], clusters: values }],
+      }),
+    },
+    {
+      name: 'remote cluster entries',
+      role: (values: string[]) => ({
+        remote_cluster: values.map((cluster) => ({
+          privileges: ['monitor_enrich'],
+          clusters: [cluster],
+        })),
+      }),
+    },
+    {
+      name: 'index names',
+      role: (values: string[]) => ({ indices: [{ names: values, privileges: ['read'] }] }),
+    },
+    {
+      name: 'index privileges',
+      role: (values: string[]) => ({ indices: [{ names: ['index'], privileges: values }] }),
+    },
+    {
+      name: 'remote index aliases',
+      role: (values: string[]) => ({
+        remote_indices: [{ clusters: values, names: ['index'], privileges: ['read'] }],
+      }),
+    },
+    {
+      name: 'remote index names',
+      role: (values: string[]) => ({
+        remote_indices: [{ clusters: ['remote'], names: values, privileges: ['read'] }],
+      }),
+    },
+    {
+      name: 'remote index privileges',
+      role: (values: string[]) => ({
+        remote_indices: [{ clusters: ['remote'], names: ['index'], privileges: values }],
+      }),
+    },
+    { name: 'run-as users', role: (values: string[]) => ({ run_as: values }) },
+  ])('$name accepts 1000 entries and rejects 1001', ({ role }) => {
+    const values = Array.from({ length: 1001 }, (_unused, index) => `value-${index}`);
 
-    expect(() =>
-      elasticsearchRoleSchema.validate({ indices: [{ names, privileges: ['read'] }] })
-    ).toThrow('array size is [1001], but cannot be greater than [1000]');
+    expect(() => elasticsearchRoleSchema.validate(role(values.slice(0, 1000)))).not.toThrow();
+    expect(() => elasticsearchRoleSchema.validate(role(values))).toThrow(
+      'array size is [1001], but cannot be greater than [1000]'
+    );
   });
 });
 
@@ -37,6 +94,17 @@ const basePrivilegeNamesMap = {
 
 describe('getKibanaRoleSchema', () => {
   describe('input hardening', () => {
+    test('feature privileges accept 1000 entries and reject 1001', () => {
+      const values = Array.from({ length: 1001 }, (_unused, index) => `privilege-${index}`);
+      const role = (privileges: string[]) => [{ feature: { foo: privileges } }];
+      const roleSchema = getKibanaRoleSchema(() => basePrivilegeNamesMap);
+
+      expect(() => roleSchema.validate(role(values.slice(0, 1000)))).not.toThrow();
+      expect(() => roleSchema.validate(role(values))).toThrow(
+        'array size is [1001], but cannot be greater than [1000]'
+      );
+    });
+
     test('resolves base privilege names at most once regardless of entry/privilege count', () => {
       const getBasePrivilegeNames = jest.fn(() => basePrivilegeNamesMap);
       const kibana = Array.from({ length: 25 }, (_unused, i) => ({

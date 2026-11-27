@@ -50,25 +50,21 @@ export const listOperations = (
   operations: readonly ContractOperation[],
   protocols: readonly LoadedProtocol[]
 ): EmulatorOperation[] => [
-  ...operations.map(
-    ({ id, method, path, servers, spec: { source } }): EmulatorHttpOperation => ({
-      protocol: 'openapi',
-      id,
-      method: method.toUpperCase(),
-      path,
-      servers: servers.map(({ url }) => url),
-      ...(source === undefined ? {} : { source }),
-    })
-  ),
+  ...operations.map(({ id, method, path, servers, spec: { source } }): EmulatorHttpOperation => ({
+    protocol: 'openapi',
+    id,
+    method: method.toUpperCase(),
+    path,
+    servers: servers.map(({ url }) => url),
+    ...(source === undefined ? {} : { source }),
+  })),
   ...protocols.flatMap(({ protocol, instance: { endpoints, operations: named } }) =>
-    named.map(
-      ({ name, readOnly, source }): EmulatorNamedOperation => ({
-        protocol,
-        name,
-        readOnly,
-        endpoints,
-        ...(source === undefined ? {} : { source }),
-      })
-    )
+    named.map(({ name, readOnly, source }): EmulatorNamedOperation => ({
+      protocol,
+      name,
+      readOnly,
+      endpoints,
+      ...(source === undefined ? {} : { source }),
+    }))
   ),
 ];

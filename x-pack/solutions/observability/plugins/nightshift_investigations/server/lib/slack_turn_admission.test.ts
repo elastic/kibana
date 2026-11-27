@@ -12,7 +12,7 @@ import { NIGHTSHIFT_ASSISTANT_AGENT_ID, NIGHTSHIFT_INVESTIGATION_AGENT_ID } from
 import type { InvestigationQuotaCallback } from '../types';
 import { createSlackTurnAdmissionCheck, USER_FACING_ERROR_HEADER } from './slack_turn_admission';
 
-const createLogger = () => ({ warn: jest.fn() } as unknown as Logger);
+const createLogger = () => ({ warn: jest.fn() }) as unknown as Logger;
 
 const admit = (agentId: string, callback?: InvestigationQuotaCallback) =>
   createSlackTurnAdmissionCheck({

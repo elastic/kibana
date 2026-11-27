@@ -6046,7 +6046,7 @@ describe('Package policy service', () => {
               references: [],
               version: '2',
               attributes: attrs,
-            } as any)
+            }) as any
         );
         soClient.get.mockResolvedValue({
           id: policy.id,
@@ -11910,7 +11910,7 @@ describe('Package policy service', () => {
             },
           ],
           assets: {},
-        } as unknown as PackageInfo);
+        }) as unknown as PackageInfo;
 
       const makeCelInputsOverride = (extraProps?: Record<string, unknown>): InputsOverride[] => [
         {
@@ -12304,7 +12304,7 @@ describe('Package policy service', () => {
               },
             ],
             assets: {},
-          } as unknown as PackageInfo);
+          }) as unknown as PackageInfo;
 
         const makeCelOverrideWithDefaults = (): InputsOverride[] => [
           {
@@ -13324,7 +13324,7 @@ describe('Package policy service', () => {
             },
           ],
           assets: {},
-        } as unknown as PackageInfo);
+        }) as unknown as PackageInfo;
 
       // The cel InputsOverride with 3 streams: 2 new (migrating from httpjson) + 1 existing
       const makePartialMigrationOverride = (): InputsOverride[] => [
@@ -14390,7 +14390,7 @@ describe('Package policy service', () => {
             },
           ],
           assets: {},
-        } as unknown as PackageInfo);
+        }) as unknown as PackageInfo;
 
       const makeRenameOverridePathA = (): InputsOverride[] => [
         {
@@ -14801,7 +14801,7 @@ describe('Package policy service', () => {
             },
           ],
           assets: {},
-        } as unknown as PackageInfo);
+        }) as unknown as PackageInfo;
 
       const makeOverride = (
         inputVars: PackagePolicyConfigRecord,

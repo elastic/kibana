@@ -8,7 +8,7 @@
 import path from 'node:path';
 import { schema } from '@kbn/config-schema';
 import type { IRouter, KibanaRequest } from '@kbn/core/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { isResponseError } from '@kbn/es-errors';
 import {
   AI_INDEX_API_VERSION,
   MAX_AI_INDEX_ID_LENGTH,
@@ -23,18 +23,12 @@ import {
   MAX_SESSION_EVENT_TOOL_NAME_LENGTH,
   SESSION_EVENTS_SAVE_PATH,
 } from '../../common/constants';
-import type { SaveSessionEventsResponse } from '../../common/http_api/session_events';
-import { validateAiIndexId, validateIsoDate, validateNonBlank } from '../../common/validation';
-import { assertAiIndicesWritable } from '../ai_indices/assert_ai_indices_writable';
-import { AiIndexNotFoundError, AiIndexNotWritableError } from '../ai_indices/errors';
-import type { AiIndexService } from '../ai_indices/service';
-import { sessionEventsSaveAuditEvent } from '../audit/audit_events';
-import type { SessionEventsService } from '../session_events/types';
-import { resolveSpaceId } from '../utils/resolve_space_id';
+import { validateAiIndexId, validateDate, validateNonBlank } from '../../common/validation';
+import type { SessionMemoryClient } from '../session_memory_client/client';
+import { formatEsError } from '../utils/format_es_error';
 import { CONTEXT_ENGINE_DOCS_NOTE } from './constants';
-import { MEMORY_WRITE_SECURITY, resolveMemoryUser, toError } from './memory_user';
+import { MEMORY_WRITE_SECURITY, toMemoryWriteErrorResponse } from './memory_write';
 import { errorResponseSchema } from './schemas/ai_indices_schema';
-import { MEMORY_DISABLED_MESSAGE, withContextEngineFeatureFlag } from './with_feature_flag';
 
 const idSchema = (description: string) =>
   schema.string({
@@ -62,7 +56,7 @@ const baseEventProps = {
   turn_id: idSchema('The turn the event belongs to. Events are grouped into turns by this id.'),
   event_at: schema.string({
     maxLength: MAX_SESSION_EVENT_TIMESTAMP_LENGTH,
-    validate: validateIsoDate,
+    validate: validateDate,
     meta: {
       description:
         'When the agent created the event, as an ISO 8601 date and time such as `2026-11-16T09:58:00.000Z`.',
@@ -234,16 +228,10 @@ const saveEventsResponseSchema = () =>
 /** Registers the public session events write route (`POST /api/context_engine/memory/_save_event`). */
 export const registerSessionEventsRoutes = ({
   router,
-  getSpaces,
-  getSessionEventsService,
-  getAiIndexService,
-  isMemoryEnabled,
+  getSessionMemoryClient,
 }: {
   router: IRouter;
-  getSpaces: () => Promise<SpacesPluginStart | undefined>;
-  getSessionEventsService: () => Promise<SessionEventsService>;
-  getAiIndexService: () => AiIndexService;
-  isMemoryEnabled: (request: KibanaRequest) => Promise<boolean>;
+  getSessionMemoryClient: (request: KibanaRequest) => Promise<SessionMemoryClient>;
 }) => {
   router.versioned
     .post({
@@ -257,6 +245,7 @@ export const registerSessionEventsRoutes = ({
         'Each event gets its own result, in request order. A `failed` event, for example when its content could not be embedded, does not fail the request; resend it to retry. A resent event is stored again, and readers drop duplicates by session and event id.',
         "The route needs the `contextEngine:write` privilege. Without `user_id` the events belong to the caller's user profile, and a caller without one gets a 403. Naming another user in `user_id` also needs `contextEngine:manage_memory`. Each AI index in `ai_index_ids` must exist in this space, and the caller needs the Elasticsearch `write` privilege on its backing index. Otherwise the request is rejected and nothing is saved.",
         'After authorization, validation, and feature-flag checks pass, each request writes one `memory_save_event` audit event.',
+        'Returns 429 when Elasticsearch rejects the request because it is overloaded. The whole request is rejected (unlike individual `failed` items in a 200 response); retry with backoff.',
         'Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`), when memory is turned off (`contextEngine:memoryEnabled`), or when an AI index in `ai_index_ids` does not exist.',
         CONTEXT_ENGINE_DOCS_NOTE,
       ].join('\n\n'),
@@ -285,88 +274,42 @@ export const registerSessionEventsRoutes = ({
               body: errorResponseSchema,
               description: 'Context Engine or memory is turned off, or an AI index does not exist.',
             },
+            429: {
+              body: errorResponseSchema,
+              description:
+                'Elasticsearch rejected the request because it is overloaded. The whole request was rejected (unlike individual `failed` items in a 200 response); retry with backoff.',
+            },
           },
         },
         options: {
           oasOperationObject: () => path.join(__dirname, 'examples/session_events_save.yaml'),
         },
       },
-      withContextEngineFeatureFlag(async (ctx, request, response) => {
-        if (!(await isMemoryEnabled(request))) {
-          return response.notFound({ body: { message: MEMORY_DISABLED_MESSAGE } });
-        }
-
+      async (_ctx, request, response) => {
         const {
           session_id: sessionId,
-          user_id: requestedUserId,
-          ai_index_ids: aiIndexIds = [],
+          user_id: userId,
+          ai_index_ids: aiIndexIds,
           events,
         } = request.body;
-        const uniqueAiIndexIds = [...new Set(aiIndexIds)];
-        const space = resolveSpaceId(await getSpaces(), request);
-        const { security, elasticsearch, userProfile } = await ctx.core;
-        const esClient = elasticsearch.client.asCurrentUser;
-        let targetUserId: string | undefined = requestedUserId;
-
-        const audit = (outcome: { saved?: number; failed?: number; error?: Error }) =>
-          security.audit.logger.log(
-            sessionEventsSaveAuditEvent({
-              sessionId,
-              targetUserId,
-              ...outcome,
-            })
-          );
-        const reject = (error: Error, status: 'forbidden' | 'notFound') => {
-          audit({ error });
-          return response[status]({ body: { message: error.message } });
-        };
-
-        let resolvedUser: Awaited<ReturnType<typeof resolveMemoryUser>>;
         try {
-          resolvedUser = await resolveMemoryUser({ request, userProfile, requestedUserId });
-        } catch (error) {
-          audit({ error: toError(error) });
-          throw error;
-        }
-        targetUserId = resolvedUser.userId;
-
-        if (!resolvedUser.ok) {
-          return reject(resolvedUser.error, 'forbidden');
-        }
-
-        try {
-          await assertAiIndicesWritable({
-            aiIndexService: getAiIndexService(),
-            esClient,
-            spaceId: space,
-            aiIndexIds: uniqueAiIndexIds,
+          const client = await getSessionMemoryClient(request);
+          const body = await client.saveEvents({
+            sessionId,
+            userId,
+            aiIndexIds,
+            events,
           });
+          return response.ok({ body });
         } catch (error) {
-          if (error instanceof AiIndexNotFoundError) {
-            return reject(error, 'notFound');
+          if (isResponseError(error) && error.statusCode === 429) {
+            return response.customError({
+              statusCode: 429,
+              body: { message: formatEsError(error) },
+            });
           }
-          if (error instanceof AiIndexNotWritableError) {
-            return reject(error, 'forbidden');
-          }
-          audit({ error: toError(error) });
-          throw error;
+          return toMemoryWriteErrorResponse(error, response);
         }
-
-        let body: SaveSessionEventsResponse;
-        try {
-          const service = await getSessionEventsService();
-          body = await service.saveEvents(
-            { space, userId: resolvedUser.userId },
-            { sessionId, aiIndexIds: uniqueAiIndexIds, events }
-          );
-        } catch (error) {
-          audit({ error: toError(error) });
-          throw error;
-        }
-
-        const failed = body.results.filter(({ status }) => status === 'failed').length;
-        audit({ saved: body.results.length - failed, failed });
-        return response.ok({ body });
-      })
+      }
     );
 };

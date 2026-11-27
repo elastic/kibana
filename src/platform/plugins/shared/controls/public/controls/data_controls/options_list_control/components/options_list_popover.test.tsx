@@ -205,6 +205,26 @@ describe('Options list popover', () => {
     expect(option).not.toBeChecked();
   });
 
+  describe('document count', () => {
+    const mountWithDocumentCount = () => {
+      const contextMock = getOptionsListContextMock();
+      contextMock.componentApi.setAvailableOptions([{ value: 'woof', docCount: 1234 }]);
+      const popover = mountComponent(contextMock);
+      const option = popover.getByTestId('optionsList-control-selection-woof');
+      const badge = within(option).getByTestId('optionsList-document-count-badge');
+      return { popover, option, badge };
+    };
+
+    test('keeps the hidden badge out of the tab order and announces the count to screen readers', () => {
+      const { option, badge } = mountWithDocumentCount();
+
+      expect(badge).toHaveTextContent('1,234');
+      expect(badge).toHaveAttribute('aria-hidden', 'true');
+      expect(badge.tabIndex).toBe(-1);
+      expect(option).toHaveTextContent('Appears in 1,234 documents');
+    });
+  });
+
   describe('show only selected', () => {
     test('show only selected options', async () => {
       const contextMock = getOptionsListContextMock();

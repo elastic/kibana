@@ -8,6 +8,7 @@
 import { esql, type ComposerQuery } from '@elastic/esql';
 import type { ESQLSingleAstItem } from '@elastic/esql/types';
 import type { ComparedValue } from '../types/applications';
+import { appStartStats, withAppStartDurations, type AppStartStats } from './app_starts';
 import type { RESULT_COLUMNS } from './fields';
 import { mobileColumn, resultColumn } from './fields';
 
@@ -27,19 +28,29 @@ export const toComparedValue = (
   delta: current !== null && previous !== null ? current - previous : null,
 });
 
-/** The KPIs as `STATS` fields: sessions, users and exceptions; an unmapped field counts 0. */
-export const kpiStats = (): ESQLSingleAstItem[] => [
-  esql.exp`${resultColumn('sessions')} = COUNT_DISTINCT(${mobileColumn('sessionId')})`,
-  esql.exp`${resultColumn('users')} = COUNT_DISTINCT(${mobileColumn('installationId')})`,
-  esql.exp`${resultColumn('exceptions')} = COUNT(${mobileColumn('exceptionType')})`,
-];
+const sessionsStat = () =>
+  esql.exp`${resultColumn('sessions')} = COUNT_DISTINCT(${mobileColumn('sessionId')})`;
+const usersStat = () =>
+  esql.exp`${resultColumn('users')} = COUNT_DISTINCT(${mobileColumn('installationId')})`;
+const exceptionsStat = () =>
+  esql.exp`${resultColumn('exceptions')} = COUNT(${mobileColumn('exceptionType')})`;
 
-/** The KPIs of the documents, and their count, which tells whether there is any data. */
+/** The KPIs as `STATS` fields: sessions, users and exceptions; an unmapped field counts 0. */
+export const kpiStats = (): ESQLSingleAstItem[] => [sessionsStat(), usersStat(), exceptionsStat()];
+
+/** The sessions and exceptions of `kpiStats`, for an error rate. */
+export const errorRateStats = (): ESQLSingleAstItem[] => [sessionsStat(), exceptionsStat()];
+
+/** The KPIs and app starts of the documents, and their count, which tells whether there is any data. */
 export const withKpiStats = (query: ComposerQuery): ComposerQuery =>
-  query.pipe`STATS ${[esql.exp`${resultColumn('docs')} = COUNT(*)`, ...kpiStats()]}`;
+  withAppStartDurations(query).pipe`STATS ${[
+    esql.exp`${resultColumn('docs')} = COUNT(*)`,
+    ...kpiStats(),
+    ...appStartStats(),
+  ]}`;
 
 /** The row of `withKpiStats`. A column every row has null for is dropped, so any can be missing. */
-export interface KpiRow {
+export interface KpiRow extends AppStartStats {
   [RESULT_COLUMNS.docs]: number;
   [RESULT_COLUMNS.sessions]: number;
   [RESULT_COLUMNS.users]: number;

@@ -261,14 +261,14 @@ export const shiftIsoMinutes = (value: string, minutes: number): string => {
   const zone = !offset
     ? ''
     : offset === 'Z'
-    ? '+00:00'
-    : (() => {
-        const digits = offset.slice(1).replace(/:/g, '');
-        const parts = [digits.slice(0, 2), digits.slice(2, 4), digits.slice(4, 6)].filter(
-          (part, index) => index < 2 || (part && part !== '00')
-        );
-        return `${offset[0]}${parts.join(':')}`;
-      })();
+      ? '+00:00'
+      : (() => {
+          const digits = offset.slice(1).replace(/:/g, '');
+          const parts = [digits.slice(0, 2), digits.slice(2, 4), digits.slice(4, 6)].filter(
+            (part, index) => index < 2 || (part && part !== '00')
+          );
+          return `${offset[0]}${parts.join(':')}`;
+        })();
   return (
     `${String(shifted.getUTCFullYear()).padStart(4, '0')}-${two(shifted.getUTCMonth() + 1)}-` +
     `${two(shifted.getUTCDate())}T${two(shifted.getUTCHours())}:${two(shifted.getUTCMinutes())}:` +

@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  DETECTION_SIGNAL_SOURCE,
-  detectionSignalSchema,
-  storedDetectionSignalSchema,
-} from './detection_signal';
+import { DETECTION_SIGNAL_SOURCE } from './constants';
+import { detectionSignalSchema, storedDetectionSignalSchema } from './detection_signal';
 
 const SIGNAL = {
   scheduled_timestamp: '2026-11-13T10:00:00.000Z',

@@ -13,7 +13,13 @@ import type { ContractRequest, ContractResponse } from '../contract/types';
 import { AUTHORIZATION_URL as GOOGLE_AUTHORIZATION_URL } from './convert_discovery';
 import { compileUrlMatcher } from './match_operation';
 import { isRecord } from './schema_walk';
-import type { ContractOperation, OpenApiDocument, OperationServer, Violation } from './types';
+import type {
+  ContractOperation,
+  OpenApiDocument,
+  OperationServer,
+  ServerVariable,
+  Violation,
+} from './types';
 
 // The mock accepts any token, so the issued ones are fixed, apart from the scopes they carry.
 const ACCESS_TOKEN = 'contract-mock-access-token';
@@ -115,24 +121,70 @@ const removeDotSegments = (path: string): string => {
 // Resolves a token URL against a server as a URL reference (RFC 3986) on the templates
 // themselves, since `URL` rejects or mangles variables such as `{subdomain}` or `{port}`. Throws
 // when the token URL isn't a URL, checked with each variable as `0`, which any component accepts.
+// A scheme-relative URL on a server whose scheme is a variable resolves once per scheme it allows.
 const resolveTokenUrl = (
   url: string,
   { url: base, variables }: OperationServer
-): OperationServer => {
+): OperationServer[] => {
   new URL(url.replace(TEMPLATE_VARIABLE, '0'), 'https://relative.invalid');
   if (ABSOLUTE_URL.test(url)) {
-    return { url: withoutQuery(url), variables };
+    return [{ url: withoutQuery(url), variables }];
   }
   // Relative servers such as `/v1` have no origin, and their token URLs match on the path only.
   const [, origin = '', basePath = base] = ORIGIN.exec(base) ?? [];
   if (url.startsWith('//')) {
-    const [scheme = 'https'] = origin.split(':');
-    return { url: withoutQuery(`${scheme}:${url}`), variables };
+    // A server such as `/v1` has no scheme to take, and the URL only matches by host with one. A
+    // scheme that is a variable, `{protocol}://…`, is each value it allows.
+    const templated = /^\{([^}]+)\}:\/\//.exec(base)?.[1];
+    const variable = templated === undefined ? undefined : variables[templated];
+    const declared =
+      templated === undefined
+        ? [origin.split(':')[0]]
+        : (variable?.enum ?? (variable === undefined ? [] : [variable.default]));
+    const schemes = [...new Set(declared.filter((scheme) => scheme !== ''))];
+    return (schemes.length > 0 ? schemes : ['https']).map((scheme) => ({
+      url: withoutQuery(`${scheme}:${url}`),
+      variables,
+    }));
   }
   const path = url.startsWith('/')
     ? url
     : `${withoutQuery(basePath || '/').replace(/[^/]*$/, '')}${url}`;
-  return { url: `${origin}${removeDotSegments(withoutQuery(path))}`, variables };
+  return [{ url: `${origin}${removeDotSegments(withoutQuery(path))}`, variables }];
+};
+
+/** A server a token URL resolves against: its URL, with its variables when it has any. */
+export type TokenUrlServer =
+  | string
+  | { readonly url: string; readonly variables?: Readonly<Record<string, ServerVariable>> };
+
+/**
+ * Resolves a spec's `tokenUrl` against its server URLs, for a reader that has the committed
+ * document but has not loaded it, such as the connector coverage report. Template variables
+ * survive: `URL` lowercases `{yourOktaDomain}` and rejects `{protocol}://{name}` outright, so
+ * resolving with it would silently produce a URL that matches nothing. A server the token URL
+ * cannot be resolved against is left out, and the raw value stands when none resolves.
+ */
+export const resolveTokenUrlAgainstServers = (
+  tokenUrl: string,
+  serverUrls: readonly TokenUrlServer[]
+): string[] => {
+  const servers: OperationServer[] =
+    serverUrls.length > 0
+      ? serverUrls.map((server) =>
+          typeof server === 'string'
+            ? { url: server, variables: {} }
+            : { url: server.url, variables: server.variables ?? {} }
+        )
+      : [DEFAULT_SERVER];
+  const resolved = servers.flatMap((server) => {
+    try {
+      return resolveTokenUrl(tokenUrl, server).map(({ url }) => url);
+    } catch {
+      return [];
+    }
+  });
+  return resolved.length > 0 ? [...new Set(resolved)] : [tokenUrl];
 };
 
 const uniqueServers = (operations: readonly ContractOperation[]): OperationServer[] => {
@@ -172,21 +224,20 @@ const findFlowEndpoints = (
         return;
       }
       for (const server of servers) {
-        let endpoint: OperationServer;
+        let resolved: OperationServer[];
         try {
-          endpoint = resolveTokenUrl(url, server);
+          resolved = resolveTokenUrl(url, server);
         } catch {
           throw new Error(`${describe()} ${JSON.stringify(url)} is not a valid URL`);
         }
-        if (!include(endpoint)) {
-          continue;
-        }
-        const key = JSON.stringify(endpoint);
-        const existing = endpoints.get(key);
-        if (existing) {
-          existing.grants.add(grant);
-        } else {
-          endpoints.set(key, { matches: compileUrlMatcher(endpoint), grants: new Set([grant]) });
+        for (const endpoint of resolved.filter(include)) {
+          const key = JSON.stringify(endpoint);
+          const existing = endpoints.get(key);
+          if (existing) {
+            existing.grants.add(grant);
+          } else {
+            endpoints.set(key, { matches: compileUrlMatcher(endpoint), grants: new Set([grant]) });
+          }
         }
       }
     };
@@ -303,7 +354,7 @@ const refresh = (grant: string[] | undefined, requested: string[]): TokenExchang
       'scope',
     ]);
   }
-  const scopes = requested.length > 0 ? requested : grant ?? [];
+  const scopes = requested.length > 0 ? requested : (grant ?? []);
   return issued({
     access_token: withScopes(ACCESS_TOKEN, scopes),
     token_type: 'Bearer',

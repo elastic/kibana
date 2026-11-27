@@ -35,6 +35,7 @@ import {
   ConnectSourcesGrid,
   isAdditionalType,
 } from '../../../components/entities/sandbox_connector/connect_sources_grid';
+import { NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { IconMark } from '../../../components/ui/icon_mark';
 import { CONNECT_SOURCES_TITLE } from './connect_sources_step';
 import { useStartOnboardingSuggestions } from './use_onboarding';
@@ -94,7 +95,7 @@ export function OnboardingFirstInvestigationStep({
 
   // A failed run and a run with nothing to suggest look the same: an empty state with a retry.
   const suggestions = useMemo(
-    () => (execution.status === 'failed' ? [] : execution.suggestions ?? []),
+    () => (execution.status === 'failed' ? [] : (execution.suggestions ?? [])),
     [execution.status, execution.suggestions]
   );
   const hasSuggestions = suggestions.length > 0;
@@ -141,7 +142,10 @@ export function OnboardingFirstInvestigationStep({
             <h4>{CONNECT_SOURCES_TITLE}</h4>
           </EuiTitle>
           <EuiSpacer size="m" />
-          <ConnectSourcesGrid filter={isAdditionalType} />
+          <ConnectSourcesGrid
+            ebtElement={NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_CONNECTORS}
+            filter={isAdditionalType}
+          />
         </section>
         {compose}
       </div>

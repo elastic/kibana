@@ -225,12 +225,12 @@ export const FrameJankIndicator: React.FC = () => {
     warning?.kind === 'input'
       ? 'Slow interaction'
       : warning?.kind === 'stall'
-      ? 'Long task'
-      : warning?.kind === 'blocking'
-      ? 'Blocking time'
-      : warning?.kind === 'frames'
-      ? 'Frame jank'
-      : null;
+        ? 'Long task'
+        : warning?.kind === 'blocking'
+          ? 'Blocking time'
+          : warning?.kind === 'frames'
+            ? 'Frame jank'
+            : null;
 
   const tooltipContent = (
     <div css={tooltipContentStyles}>

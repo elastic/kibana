@@ -9,14 +9,15 @@ description: >-
 
   Consumers also need:
     permissions       - id-token: write, and copilot-requests: write for threat detection
+    engine.model      - an exact gateway model ID, not an alias: gh-aw resolves an alias
+                        to the newest model the gateway lists
     engine.env        - ANTHROPIC_BASE_URL (the /anthropic path), ANTHROPIC_API_KEY
                         (env.ANTHROPIC_API_KEY, which the steps below export, with a
                         literal fallback for the activation job's key check),
                         AWF_ANTHROPIC_AUTH_HEADER: Authorization, and gateway model IDs
                         in ANTHROPIC_DEFAULT_*_MODEL
-    threat-detection  - the copilot engine, with ANTHROPIC_API_KEY and
-                        AWF_ANTHROPIC_AUTH_HEADER blanked: the detection job can't
-                        request an OIDC token and inherits the main engine's env
+    threat-detection  - the copilot engine, because the detection job can't request
+                        an OIDC token, and continue-on-error: false
 pre-agent-steps:
   - name: Authenticate to Agent Router
     id: agent-router-auth

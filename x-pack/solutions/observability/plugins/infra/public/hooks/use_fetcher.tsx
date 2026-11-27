@@ -124,7 +124,7 @@ function createInfraApiClient(
 // yet", letting consumers gate on async prerequisites (see `useHostsPageReady`).
 export function useFetcher<
   TReturn,
-  Fn extends (apiClient: ApiCallClient) => Promise<TReturn> | undefined
+  Fn extends (apiClient: ApiCallClient) => Promise<TReturn> | undefined,
 >(
   fn: Fn,
   fnDeps: DependencyList = [],
@@ -194,7 +194,7 @@ export function useFetcher<
       if (!signal.aborted) {
         const errorDetails = err.response
           ? getDetailsFromErrorResponse(err)
-          : err.body?.message ?? err.message;
+          : (err.body?.message ?? err.message);
 
         if (showToastOnError) {
           notifications.toasts.addDanger({

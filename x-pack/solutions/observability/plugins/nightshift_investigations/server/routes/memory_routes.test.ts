@@ -40,7 +40,7 @@ const memory = (overrides: Partial<MemoryPage> = {}): MemoryPage =>
       last_impression_time: '2026-01-01T00:00:00.000Z',
     },
     ...overrides,
-  } as unknown as MemoryPage);
+  }) as unknown as MemoryPage;
 
 /** A read of one page, as Elasticsearch reports it: the page and its revision. */
 const versioned = (page: MemoryPage) => ({ page, seqNo: 7, primaryTerm: 1 });
@@ -57,7 +57,7 @@ const context = (store: unknown, enabled: boolean, params: unknown = { path: { i
         security: { authc: { getCurrentUser: () => ({ username: 'tester' }) } },
       }),
     },
-  } as never);
+  }) as never;
 
 const ID = 'memory_kafka-lag';
 const path = (id: string = ID) => ({ path: { id } });

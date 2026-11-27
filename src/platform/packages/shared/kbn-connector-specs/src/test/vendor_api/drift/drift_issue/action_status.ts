@@ -1,0 +1,371 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/**
+ * What an action's row of a drift issue says: whether it passes, why it doesn't, and the details
+ * behind that. One action is judged on its own, against the committed snapshot and the latest
+ * spec, so this is where the check's findings for it become a verdict.
+ */
+
+import type { ActionDrift, SpecChange } from '../detect_drift';
+import { isRequestChange, isResponseChange, scopeName, securityGrantsOf } from '../oasdiff_text';
+import { capitalized, code, listed, plural } from './issue_markdown';
+import { firstProblem, issueLinksOf, problemText } from './problem_text';
+import type { ReviewItem } from './review_item';
+
+/** How an action sorts in the table: what needs attention first, then what doesn't. */
+export type Rank = 'fails' | 'attention' | 'passes' | 'not-checked';
+
+/** The Status column. */
+export type Outcome = 'passes' | 'fails' | 'not-checked';
+
+/**
+ * Why an action needs attention. An action has one as soon as the check can't call it passing, so
+ * `reason` is also what tells the actions that need attention from the rest.
+ */
+export type FailureReason = 'credentials' | 'latest' | 'snapshot' | 'removed' | 'moved';
+
+export interface ActionStatus {
+  readonly rank: Rank;
+  /** Why it needs attention, if it does; what the summary groups the failing actions by. */
+  readonly reason?: FailureReason;
+  /** The Status column. */
+  readonly outcome: Outcome;
+  /** The Details column. */
+  readonly details: string;
+}
+
+export const OUTCOMES: Record<Outcome, string> = {
+  passes: '✅ Passes',
+  fails: '❌ Fails',
+  'not-checked': '➖ Not checked',
+};
+
+/** Every action of the report has a status; this stands in if one is ever missing. */
+export const PASSES: ActionStatus = { rank: 'passes', outcome: 'passes', details: '' };
+
+export const RANKS: readonly Rank[] = ['fails', 'attention', 'passes', 'not-checked'];
+
+export const ICONS: Record<Rank, string> = {
+  fails: '❌',
+  attention: '⚠️',
+  passes: '✅',
+  'not-checked': '➖',
+};
+
+/** How the legend and an action's details name a path that moved into the server URL. */
+export const MOVED_STATUS = 'Moved in the spec, same URL';
+
+const UNMATCHED_PROBLEM = / matches no operation of any source/;
+
+// Each scheme the security changes of one rule add or remove, with the scopes they name.
+const schemesOf = (changes: readonly SpecChange[], rule: string): Map<string, Set<string>> => {
+  const schemes = new Map<string, Set<string>>();
+  for (const { id, text } of changes) {
+    if (id !== rule) continue;
+    for (const { scheme, scope } of securityGrantsOf(id, text) ?? []) {
+      const scopes = schemes.get(scheme) ?? new Set<string>();
+      if (scope !== undefined) scopes.add(scope);
+      schemes.set(scheme, scopes);
+    }
+  }
+  return schemes;
+};
+
+// Names scopes by the end of their URL, unless two of them would then read the same.
+const scopeNamer = (scopes: Iterable<string>): ((scope: string) => string) => {
+  const byName = new Map<string, Set<string>>();
+  for (const scope of scopes) {
+    const name = scopeName(scope);
+    byName.set(name, (byName.get(name) ?? new Set<string>()).add(scope));
+  }
+  return (scope) => {
+    const name = scopeName(scope);
+    return (byName.get(name)?.size ?? 0) > 1 ? scope : name;
+  };
+};
+
+// How the security of an endpoint changed, as schemes and their scopes.
+interface AuthChange {
+  readonly schemesAdded: Map<string, Set<string>>;
+  readonly schemesRemoved: Map<string, Set<string>>;
+  readonly scopesAdded: Map<string, Set<string>>;
+  readonly scopesRemoved: Map<string, Set<string>>;
+}
+
+// The security changes of one endpoint. A scheme it removes and adds again, as oasdiff reports
+// regrouped requirements, keeps the scopes both name: only the difference is a change, so it is
+// netted out with the scope changes. Regrouping is per endpoint, so this never mixes endpoints.
+const authChangeOf = (changes: readonly SpecChange[]): AuthChange => {
+  const added = schemesOf(changes, 'api-security-added');
+  const removed = schemesOf(changes, 'api-security-removed');
+  const regrouped = [...added.keys()].filter((scheme) => removed.has(scheme));
+  const scopesOf = (
+    rule: string,
+    side: Map<string, Set<string>>,
+    others: Map<string, Set<string>>
+  ) => {
+    const scopes = schemesOf(changes, rule);
+    for (const scheme of regrouped) {
+      const other = others.get(scheme) ?? new Set<string>();
+      const net = [...(side.get(scheme) ?? [])].filter((scope) => !other.has(scope));
+      if (net.length > 0) {
+        scopes.set(scheme, new Set([...(scopes.get(scheme) ?? []), ...net]));
+      }
+    }
+    return scopes;
+  };
+  const without = (schemes: Map<string, Set<string>>) =>
+    new Map([...schemes].filter(([scheme]) => !regrouped.includes(scheme)));
+  return {
+    schemesAdded: without(added),
+    schemesRemoved: without(removed),
+    scopesAdded: scopesOf('api-security-scope-added', added, removed),
+    scopesRemoved: scopesOf('api-security-scope-removed', removed, added),
+  };
+};
+
+const mergedSchemes = (all: ReadonlyArray<Map<string, Set<string>>>): Map<string, Set<string>> => {
+  const merged = new Map<string, Set<string>>();
+  for (const schemes of all) {
+    for (const [scheme, scopes] of schemes) {
+      merged.set(scheme, new Set([...(merged.get(scheme) ?? []), ...scopes]));
+    }
+  }
+  return merged;
+};
+
+/**
+ * Why a request the connector doesn't authenticate as the latest spec wants fails: what the
+ * validator expected, then how the spec's security for it changed, endpoint by endpoint. An added
+ * scheme may be one of several the endpoint accepts, so the change is told apart from what is
+ * required.
+ */
+const credentialsDetails = (
+  authChangesByEndpoint: ReadonlyArray<readonly SpecChange[]>,
+  expected: string
+): string => {
+  const requires = `The latest spec requires credentials the connector doesn't send: ${expected}.`;
+  const changes = authChangesByEndpoint.map(authChangeOf);
+  const merged = (key: keyof AuthChange) => mergedSchemes(changes.map((change) => change[key]));
+  const schemesAdded = merged('schemesAdded');
+  const schemesRemoved = merged('schemesRemoved');
+  const scopesAdded = merged('scopesAdded');
+  const scopesRemoved = merged('scopesRemoved');
+  const nameOf = scopeNamer(
+    [schemesAdded, scopesAdded, scopesRemoved].flatMap((schemes) =>
+      [...schemes.values()].flatMap((scopes) => [...scopes])
+    )
+  );
+  const scopesText = (scopes: ReadonlySet<string>): string =>
+    `${scopes.size === 1 ? 'scope' : 'scopes'} ${listed(
+      [...scopes].map((scope) => code(nameOf(scope)))
+    )}`;
+  const what = [
+    ...[...schemesAdded].map(
+      ([scheme, scopes]) =>
+        `adds ${code(scheme)}${scopes.size > 0 ? ` (${scopesText(scopes)})` : ''}`
+    ),
+    ...[...scopesAdded].map(([scheme, scopes]) => `adds ${scopesText(scopes)} to ${code(scheme)}`),
+    ...[...scopesRemoved].map(
+      ([scheme, scopes]) => `removes ${scopesText(scopes)} from ${code(scheme)}`
+    ),
+    ...[...schemesRemoved.keys()].map((scheme) => `no longer accepts ${code(scheme)}`),
+  ];
+  if (what.length === 0) {
+    return requires;
+  }
+  const where = authChangesByEndpoint.length > 1 ? 'the endpoints it calls' : 'this endpoint';
+  return `${requires} For ${where}, the latest spec ${listed(what)}.`;
+};
+
+/**
+ * The operations of an action whose requests broke the latest spec, as the emulator matched them:
+ * by their path in the manifest, or the one they moved to.
+ */
+const violatedOperationsOf = ({
+  operations,
+  latestViolations = [],
+}: ActionDrift): ActionDrift['operations'] =>
+  operations.filter(({ source, operation, latest }) => {
+    const method = operation.slice(0, operation.indexOf(' '));
+    const latestOperation = latest?.status === 'moved' ? `${method} ${latest.path}` : operation;
+    return latestViolations.some(
+      (violation) =>
+        violation.source === source &&
+        (violation.operation === operation || violation.operation === latestOperation)
+    );
+  });
+
+// The one violation a request with credentials the operation doesn't accept has.
+const MISSING_CREDENTIALS =
+  /breaks the spec: Request has no credentials for the operation; expected ([^;]+)$/;
+
+// The changes to review a passing action's Details names, at most.
+const MAX_REVIEW_DETAILS = 3;
+
+export const isChecked = ({ operations, latestProblems = [] }: ActionDrift): boolean =>
+  operations.length > 0 || latestProblems.length > 0;
+
+export const statusOf = (
+  action: ActionDrift,
+  changesOf: (source: string, operation: string) => readonly SpecChange[],
+  reviewOf: (source: string, operation: string) => readonly ReviewItem[]
+): ActionStatus => {
+  if (action.snapshotProblems.length > 0) {
+    const problem = firstProblem(action.snapshotProblems);
+    return {
+      rank: 'fails',
+      reason: 'snapshot',
+      outcome: 'fails',
+      details: `Against the committed snapshot: ${problem}`,
+    };
+  }
+  if (action.latestProblems === undefined && isChecked(action)) {
+    return {
+      rank: 'attention',
+      outcome: 'not-checked',
+      details: "The latest spec didn't load; passes against the committed snapshot",
+    };
+  }
+  const latestProblems = action.latestProblems ?? [];
+  if (latestProblems.length > 0) {
+    const locations = action.operations.map(({ latest }) => latest?.status);
+    const unmatchedOnly = latestProblems.every((problem) => UNMATCHED_PROBLEM.test(problem));
+    if (unmatchedOnly && locations.includes('moved') && !locations.includes('missing')) {
+      return {
+        rank: 'attention',
+        reason: 'moved',
+        // Its request goes where it did, but the check can't match it to the latest spec.
+        outcome: 'not-checked',
+        details: `${ICONS.attention} ${MOVED_STATUS}, so it isn't checked against the latest spec (see below)`,
+      };
+    }
+    if (unmatchedOnly && locations.includes('missing')) {
+      const missing = action.operations.filter(({ latest }) => latest?.status === 'missing');
+      const details = `Removed from current spec: ${listed(
+        missing.map(({ operation }) => code(operation))
+      )}`;
+      return { rank: 'fails', reason: 'removed', outcome: 'fails', details };
+    }
+    // Credentials the latest spec doesn't accept, and nothing else: often a spec that started
+    // documenting OAuth scopes per operation, rather than a vendor that stopped taking the others.
+    const expected = latestProblems.flatMap((problem) => {
+      const credentials = problem.match(MISSING_CREDENTIALS)?.[1];
+      return credentials === undefined ? [] : [credentials];
+    });
+    if (expected.length === latestProblems.length) {
+      // Only the requests that failed: another operation's auth changes say nothing about them.
+      const failing = violatedOperationsOf(action);
+      const authChangesByEndpoint = failing.map(({ source, operation }) =>
+        changesOf(source, operation).filter(({ id }) => id.startsWith('api-security-'))
+      );
+      return {
+        rank: 'fails',
+        reason: 'credentials',
+        outcome: 'fails',
+        details: credentialsDetails(
+          authChangesByEndpoint,
+          problemText(`expected ${listed([...new Set(expected)])}`)
+        ),
+      };
+    }
+    const problem = firstProblem(latestProblems);
+    return {
+      rank: 'fails',
+      reason: 'latest',
+      outcome: 'fails',
+      details: `Against the latest spec: ${problem}`,
+    };
+  }
+  if (!isChecked(action) && action.unmatched.length > 0) {
+    // Missing when the connector was recorded, as the manifest acknowledges with a reason; a
+    // new unmatched request is a problem of the run instead.
+    const issues = [...new Set(action.unmatched.flatMap(({ reason }) => issueLinksOf(reason)))];
+    return {
+      rank: 'not-checked',
+      outcome: 'not-checked',
+      details: `No spec describes the endpoint (${[...issues, 'see below'].join(', ')})`,
+    };
+  }
+  if (!isChecked(action)) {
+    return {
+      rank: 'not-checked',
+      outcome: 'not-checked',
+      details: 'Calls no vendor operation',
+    };
+  }
+  const passes = (rank: Rank, details: string): ActionStatus => ({
+    rank,
+    outcome: 'passes',
+    details,
+  });
+  const fieldChanges = action.fieldChanges ?? [];
+  if (fieldChanges.length > 0) {
+    return passes(
+      'attention',
+      `${ICONS.attention} Vendor response has changed, including fields Connector reads: ${listed(
+        fieldChanges.map(({ field, changes: what }) => `${code(field)} (${what.join(', ')})`)
+      )}`
+    );
+  }
+  // The action works, but what it calls needs a look, as the summary counts it: oasdiff's own
+  // description of each change says what.
+  const toReview = [
+    ...new Set(
+      action.operations.flatMap(({ source, operation }) =>
+        reviewOf(source, operation).map(({ change: { text } }) => capitalized(text))
+      )
+    ),
+  ];
+  if (toReview.length > 0) {
+    const shown = toReview.slice(0, MAX_REVIEW_DETAILS);
+    return passes(
+      'passes',
+      `${ICONS.attention} ${shown.join('; ')}${
+        toReview.length > shown.length
+          ? ` (and ${plural(toReview.length - shown.length, 'more change')})`
+          : ''
+      }`
+    );
+  }
+  const changes = action.operations.flatMap(({ source, operation }) =>
+    changesOf(source, operation).map((change) => ({ source, operation, change }))
+  );
+  const notable = changes.filter(({ change }) => change.kind !== 'non-breaking');
+  if (notable.length > 0 && action.tracked) {
+    // Its operations changed in ways running it and its field use verify.
+    const responses = notable.filter(({ change }) => isResponseChange(change.id));
+    const passedAlong = responses.flatMap(({ source, operation }) => {
+      const { copied = [], returned = [] } = action.fieldUse?.[`${source} ${operation}`] ?? {};
+      return [...copied, ...returned];
+    });
+    const sentences = [
+      ...(notable.some(({ change }) => isRequestChange(change.id))
+        ? ["Vendor request has changed, and Connector's requests still match it"]
+        : []),
+      ...(responses.length === 0
+        ? []
+        : passedAlong.includes('')
+          ? [
+              'Vendor response has changed, and Connector is passing along the entire changed response',
+            ]
+          : passedAlong.length > 0
+            ? [
+                'Vendor response has changed, and Connector is passing along parts of it as they are',
+              ]
+            : ['Vendor response has changed, but Connector is not using changed fields']),
+    ];
+    return passes(
+      'passes',
+      sentences.length > 0 ? `${sentences.join('. ')}.` : 'Vendor spec has changed'
+    );
+  }
+  return passes('passes', changes.length > 0 ? plural(changes.length, 'non-breaking change') : '');
+};

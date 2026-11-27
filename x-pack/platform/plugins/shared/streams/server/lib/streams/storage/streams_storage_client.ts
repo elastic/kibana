@@ -15,6 +15,10 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Streams } from '@kbn/streams-schema';
 import { migrateOnRead } from './migrate_on_read';
+import {
+  isRemovedStreamTypeDefinition,
+  RemovedStreamTypeNotFoundError,
+} from './removed_stream_types';
 
 const streamsStorageSettings = {
   name: '.kibana_streams',
@@ -54,5 +58,26 @@ export function createStreamsStorageClient(
     }
   );
 
-  return adapter.getClient();
+  const client = adapter.getClient();
+
+  const search: StreamsStorageClient['search'] = async (request, transportOptions) => {
+    const response = await client.search(request, transportOptions);
+    return {
+      ...response,
+      hits: {
+        ...response.hits,
+        hits: response.hits.hits.filter(({ _source }) => !isRemovedStreamTypeDefinition(_source)),
+      },
+    };
+  };
+
+  const get: StreamsStorageClient['get'] = async (request, transportOptions) => {
+    const response = await client.get(request, transportOptions);
+    if (isRemovedStreamTypeDefinition(response._source)) {
+      throw new RemovedStreamTypeNotFoundError();
+    }
+    return response;
+  };
+
+  return { ...client, search, get };
 }

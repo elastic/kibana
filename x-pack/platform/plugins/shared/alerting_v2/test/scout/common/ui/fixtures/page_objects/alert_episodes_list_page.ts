@@ -41,7 +41,10 @@ export class AlertEpisodesListPage {
   public readonly ruleSummaryFlyout: Locator;
   public readonly ruleSummaryFlyoutCloseButton: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly mountConfig: AlertingMountConfig) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly mountConfig: AlertingMountConfig
+  ) {
     this.pageContainer = this.page.testSubj.locator('alertingV2AlertsListPage');
     this.tableToolbar = this.page.testSubj.locator('unifiedDataTableToolbar');
     this.itemCount = this.page.testSubj.locator('alertEpisodesItemCount');

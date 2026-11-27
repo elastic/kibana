@@ -8,6 +8,8 @@
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { AiIndexService } from '../ai_indices/service';
 import type { ImprovementsServiceApi } from '../improvements/service';
+import type { SessionEventsService } from '../session_events/types';
+import type { SessionMemoryService } from '../session_memory/types';
 import { registerStepDefinitions } from '.';
 import { mockKiStepTelemetry } from './test_utils';
 
@@ -21,15 +23,15 @@ describe('registerStepDefinitions', () => {
 
     registerStepDefinitions({
       workflowsExtensions,
-      getAiIndexService: () => ({} as AiIndexService),
+      getAiIndexService: () => ({}) as AiIndexService,
       isContextEngineEnabled: async () => true,
       isDreamingAvailable: async () => true,
       checkWritePrivilege: async () => true,
       ...telemetry,
       verifyKi: jest.fn(),
       feedbackAnalysis: {
-        getAiIndexService: () => ({} as AiIndexService),
-        getImprovementsService: () => ({} as ImprovementsServiceApi),
+        getAiIndexService: () => ({}) as AiIndexService,
+        getImprovementsService: () => ({}) as ImprovementsServiceApi,
         getAuditLogger: async () => undefined,
         isContextEngineEnabled: async () => true,
         isFeedbackLoopEnabled: async () => true,
@@ -37,10 +39,12 @@ describe('registerStepDefinitions', () => {
         logger: telemetry.logger,
       },
       dreaming: {
-        getAiIndexService: () => ({} as AiIndexService),
+        getAiIndexService: () => ({}) as AiIndexService,
         isContextEngineEnabled: async () => true,
         isMemoryEnabled: async () => true,
         checkReadPrivilege: async () => true,
+        getSessionMemoryService: async () => ({}) as SessionMemoryService,
+        getSessionEventsService: async () => ({}) as SessionEventsService,
       },
     });
 
@@ -51,7 +55,8 @@ describe('registerStepDefinitions', () => {
       'context-engine.getFeedbackContext',
       'context-engine.recordImprovements',
       'context-engine.getDreamingStatus',
-      'context-engine.readTraceTranscripts',
+      'context-engine.readSessionMemories',
+      'context-engine.readSessionTranscripts',
       'context-engine.applyDreamChanges',
       'context-engine.applyDreamRelationships',
       'context-engine.gatherMaintenance',

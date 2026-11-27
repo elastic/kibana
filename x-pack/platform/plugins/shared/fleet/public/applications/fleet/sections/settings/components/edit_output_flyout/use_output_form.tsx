@@ -107,11 +107,26 @@ import {
   validateKafkaOAuth2Inputs,
 } from './use_kafka_oauth2_inputs';
 import type { OtlpInputs } from './use_otlp_inputs';
-import { buildOtlpExporterConfig, useOtlpInputs, validateOtlpInputs } from './use_otlp_inputs';
+import {
+  buildOtlpExporterConfig,
+  getOtlpInputEndpoints,
+  useOtlpInputs,
+  validateOtlpInputs,
+} from './use_otlp_inputs';
+import type { OtlpAuthInputs } from './use_otlp_auth_inputs';
+import {
+  buildOtlpAuth,
+  getSelectedOtlpAuthHeaderName,
+  isOtlpAuthAvailable,
+  isOtlpAuthSelected,
+  useOtlpAuthInputs,
+  validateOtlpAuthInputs,
+} from './use_otlp_auth_inputs';
 
 const DEFAULT_QUEUE_MAX_SIZE = 4096;
 
-export interface OutputFormInputsType extends KafkaOAuth2Inputs, KafkaKerberosInputs, OtlpInputs {
+export interface OutputFormInputsType
+  extends KafkaOAuth2Inputs, KafkaKerberosInputs, OtlpInputs, OtlpAuthInputs {
   nameInput: ReturnType<typeof useInput>;
   typeInput: ReturnType<typeof useInput>;
   elasticsearchUrlInput: ReturnType<typeof useComboInput>;
@@ -356,16 +371,16 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   // not the regular ES input. Use the default output hosts instead.
   // For an existing ES output (incl. the PrivateLink output) always show that output's own
   // hosts; only fall back to the default when creating a new output in serverless.
-  const outputHosts = output && isBeatsOutput(output) ? output.hosts ?? [] : [];
+  const outputHosts = output && isBeatsOutput(output) ? (output.hosts ?? []) : [];
   const defaultHosts =
-    defaultOutput && isBeatsOutput(defaultOutput) ? defaultOutput.hosts ?? [] : [];
+    defaultOutput && isBeatsOutput(defaultOutput) ? (defaultOutput.hosts ?? []) : [];
   const elasticsearchUrlDefaultValue = isEditingRemoteEsOutput
     ? defaultHosts
     : outputHosts.length
-    ? outputHosts
-    : isServerless
-    ? defaultHosts
-    : [];
+      ? outputHosts
+      : isServerless
+        ? defaultHosts
+        : [];
   const elasticsearchUrlDisabled = isServerless || isDisabled('hosts');
   const elasticsearchUrlInput = useComboInput(
     'esHostsComboxBox',
@@ -386,8 +401,8 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
 
   const presetInput = useInput(
     output && isBeatsOutput(output)
-      ? output.preset ??
-          getDefaultPresetForEsOutput(output.config_yaml ?? '', yaml?.parse ?? (() => ({})))
+      ? (output.preset ??
+          getDefaultPresetForEsOutput(output.config_yaml ?? '', yaml?.parse ?? (() => ({}))))
       : getDefaultPresetForEsOutput('', yaml?.parse ?? (() => ({}))),
     () => undefined,
     isDisabled('preset')
@@ -774,11 +789,25 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   const isRemoteElasticsearch = typeInput.value === outputType.RemoteElasticsearch;
   const isOtlp = typeInput.value === outputType.Otlp;
 
+  const isOtlpAuthDisabled = isDisabled('auth');
+  const otlpAuthInputs = useOtlpAuthInputs(
+    output && isOtlpOutput(output) ? output : undefined,
+    isOtlp,
+    isOtlpAuthDisabled
+  );
   const isOtlpExporterDisabled = isDisabled('otlp_exporter');
   const otlpInputs = useOtlpInputs(
     output && isOtlpOutput(output) ? output : undefined,
     isOtlp,
-    isOtlpExporterDisabled
+    isOtlpExporterDisabled,
+    {
+      headerName: getSelectedOtlpAuthHeaderName(otlpAuthInputs),
+      managedOtlpUrl: cloud?.managedOtlp?.url,
+    }
+  );
+  const isOtlpAuthEnabled = isOtlpAuthAvailable(
+    getOtlpInputEndpoints(otlpInputs),
+    cloud?.managedOtlp?.url
   );
 
   const inputs: OutputFormInputsType = {
@@ -827,6 +856,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     ...kafkaOAuth2Inputs,
     ...kafkaKerberosInputs,
     ...otlpInputs,
+    ...otlpAuthInputs,
     kafkaSaslMechanismInput,
     kafkaPartitionTypeInput,
     kafkaPartitionTypeRandomInput,
@@ -897,7 +927,15 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
       : kafkaPasswordSecretValid;
 
     if (isOtlp) {
-      return [nameInputValid, validateOtlpInputs(otlpInputs)].every(Boolean);
+      return [
+        nameInputValid,
+        // an exporter that can not be edited is not sent, so its settings are not checked
+        (output && isOtlpExporterDisabled) || validateOtlpInputs(otlpInputs),
+        // an authentication that is kept for the managed OTLP endpoint has to be removed explicitly
+        isOtlpAuthEnabled
+          ? validateOtlpAuthInputs(otlpAuthInputs, otlpInputs.otlpProtocolInput.value)
+          : !isOtlpAuthSelected(otlpAuthInputs),
+      ].every(Boolean);
     }
     if (isLogstash) {
       // validate logstash
@@ -998,6 +1036,10 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     kafkaStaticTopicInput,
     kafkaDynamicTopicInput,
     otlpInputs,
+    otlpAuthInputs,
+    isOtlpAuthEnabled,
+    isOtlpExporterDisabled,
+    output,
     isLogstash,
     isKafka,
     isRemoteElasticsearch,
@@ -1055,7 +1097,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
         // (or null when unset) so saving other fields does not turn "unset" into `false`
         otel_disable_beatsauth: otelDisableBeatsauthInput.hasChanged
           ? otelDisableBeatsauthInput.value
-          : otelOutput?.otel_disable_beatsauth ?? null,
+          : (otelOutput?.otel_disable_beatsauth ?? null),
       };
 
       // the client SSL key of the Elasticsearch, remote Elasticsearch and Logstash outputs
@@ -1089,6 +1131,11 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
               ...(output && isOtlpExporterDisabled
                 ? {}
                 : { otlp_exporter: buildOtlpExporterConfig(otlpInputs) }),
+              ...(output && isOtlpAuthDisabled
+                ? {}
+                : buildOtlpAuth(otlpAuthInputs, {
+                    hasStoredAuth: !!(output && isOtlpOutput(output) && output.auth),
+                  })),
             } as NewOtlpOutput;
           case outputType.Kafka:
             const definedCA = kafkaSslCertificateAuthoritiesInput.value.filter(
@@ -1216,10 +1263,10 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
                     topic: kafkaStaticTopicInput.value,
                   }
                 : kafkaTopicsInput.value === kafkaTopicsType.Dynamic && kafkaDynamicTopicInput.value
-                ? {
-                    topic: kafkaDynamicTopicInput.value,
-                  }
-                : {}),
+                  ? {
+                      topic: kafkaDynamicTopicInput.value,
+                    }
+                  : {}),
               headers: kafkaHeadersInput.value,
               // not supported with OAuth2, the form does not show it then
               ...(isKafkaOAuth2Selected
@@ -1380,6 +1427,8 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     kafkaOutput,
     otlpInputs,
     isOtlpExporterDisabled,
+    otlpAuthInputs,
+    isOtlpAuthDisabled,
     nameInput.value,
     kafkaHostsInput.value,
     defaultOutputInput.value,
@@ -1436,12 +1485,12 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   const isHostsMissing = isOtlp
     ? !otlpInputs.otlpEndpointInput.value.trim()
     : isKafka
-    ? !kafkaHostsInput.value.some((v) => v.trim())
-    : isLogstash
-    ? !logstashHostsInput.value.some((v) => v.trim())
-    : isRemoteElasticsearch
-    ? !remoteElasticsearchUrlInput.value.some((v) => v.trim())
-    : !elasticsearchUrlInput.value.some((v) => v.trim());
+      ? !kafkaHostsInput.value.some((v) => v.trim())
+      : isLogstash
+        ? !logstashHostsInput.value.some((v) => v.trim())
+        : isRemoteElasticsearch
+          ? !remoteElasticsearchUrlInput.value.some((v) => v.trim())
+          : !elasticsearchUrlInput.value.some((v) => v.trim());
 
   return {
     inputs,

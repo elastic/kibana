@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { IngestBaseStream } from './base';
 import {
   IngestBase,
@@ -44,16 +44,16 @@ interface IngestWired {
   wired: {
     fields: FieldDefinition;
     routing: RoutingDefinition[];
-    draft?: boolean;
   };
 }
 
 const ingestWiredShape = {
-  wired: z.object({
-    fields: fieldDefinitionSchema,
-    routing: routingDefinitionListSchema,
-    draft: z.boolean().optional(),
-  }),
+  wired: lazySchema(() =>
+    z.object({
+      fields: fieldDefinitionSchema,
+      routing: routingDefinitionListSchema,
+    })
+  ),
 };
 
 export type WiredIngest = Omit<IngestBase, 'processing'> &
@@ -93,7 +93,7 @@ type OmitWiredStreamUpsertProps<
     ingest: Omit<WiredIngest, 'processing'> & {
       processing: Omit<WiredIngest['processing'], 'updated_at'> & { updated_at?: string };
     };
-  }
+  },
 > = Omit<T, 'ingest'> & {
   ingest: Omit<WiredIngest, 'processing'> & {
     processing: StreamlangIngestStreamProcessingUpsert;
@@ -191,9 +191,9 @@ WiredStream.Definition.is = (
 ): stream is WiredStream.Definition =>
   Boolean(
     'ingest' in stream &&
-      typeof stream.ingest === 'object' &&
-      stream.ingest &&
-      'wired' in stream.ingest
+    typeof stream.ingest === 'object' &&
+    stream.ingest &&
+    'wired' in stream.ingest
   );
 
 // Optimized implementation for GetResponse check - avoids full DeepStrict Zod parse
@@ -206,28 +206,3 @@ WiredStream.GetResponse.is = (
   response.privileges !== null &&
   'read_failure_store' in response.privileges &&
   'manage_failure_store' in response.privileges;
-
-/**
- * A wired stream definition where `draft` is narrowed to `true`.
- */
-export type DraftStreamDefinition = WiredStream.Definition & {
-  ingest: { wired: { draft: true } };
-};
-
-/**
- * Type guard that checks whether a stream definition is a draft wired stream.
- */
-export function isDraftStream(
-  definition: BaseStream.Model['Definition']
-): definition is DraftStreamDefinition {
-  return WiredStream.Definition.is(definition) && definition.ingest.wired.draft === true;
-}
-
-/**
- * Checks whether a GetResponse represents a draft wired stream.
- */
-export function isDraftGetResponse(
-  response: BaseStream.Model['GetResponse']
-): response is WiredStream.GetResponse {
-  return WiredStream.GetResponse.is(response) && isDraftStream(response.stream);
-}

@@ -298,6 +298,7 @@ describe('toSessionSummary', () => {
       failedRequestCount: 1,
       frustration: emptyFrustration(),
       bounced: false,
+      hasReplay: null,
       entryPage: '/',
       exitPage: '/cart',
       journey: ['/', '/products', '/cart'],
@@ -343,6 +344,7 @@ describe('toSessionSummary', () => {
       failedRequestCount: 0,
       frustration: emptyFrustration(),
       bounced: false,
+      hasReplay: null,
       entryPage: null,
       exitPage: null,
       journey: [],
@@ -352,6 +354,12 @@ describe('toSessionSummary', () => {
       geo: { countryIso: null, region: null, city: null },
       webVitals: { lcp: null, inp: null, cls: null, fcp: null, ttfb: null },
     });
+  });
+
+  it('tells a session with a replay from one without, and from one the summary does not say', () => {
+    expect(toSessionSummary({ ...sessionDoc, has_replay: true }).hasReplay).toBe(true);
+    expect(toSessionSummary({ ...sessionDoc, has_replay: false }).hasReplay).toBe(false);
+    expect(toSessionSummary(omit(sessionDoc, 'has_replay')).hasReplay).toBeNull();
   });
 
   it('derives bounced from exactly one page view when the document lacks it', () => {

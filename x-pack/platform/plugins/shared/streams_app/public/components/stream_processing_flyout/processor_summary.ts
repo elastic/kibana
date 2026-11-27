@@ -74,8 +74,8 @@ const describeWrite = (item: Record<string, unknown>): string => {
     item.ottl_value !== undefined
       ? ` = ${formatValue(item.ottl_value)}`
       : item.value !== undefined
-      ? ` = ${JSON.stringify(item.value)}`
-      : '';
+        ? ` = ${JSON.stringify(item.value)}`
+        : '';
   return `${formatValue(item.action ?? 'upsert')} ${target}${value}`;
 };
 

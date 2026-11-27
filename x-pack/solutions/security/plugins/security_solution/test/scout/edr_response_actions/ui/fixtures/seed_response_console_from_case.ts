@@ -31,6 +31,7 @@ import {
   ENDPOINT_DEVICE_INDEX,
   ENDPOINT_EVENTS_INDEX,
 } from '../../../../../scripts/endpoint/common/constants';
+import { withMetadataTransformLock } from '../../common/with_metadata_transform_lock';
 import { createSystemIndicesEsClient } from './system_indices_es_client';
 import { scopeKbnClientToSpace } from './scope_kbn_client_to_space';
 
@@ -142,25 +143,27 @@ export const seedResponseConsoleFromCase = async ({
   };
 
   try {
-    host = await indexHostsAndAlerts(
-      systemEsClient,
-      kbnClient,
-      `response-console-case-${randomUUID()}`,
-      1,
-      1,
-      METADATA_DATASTREAM,
-      POLICY_RESPONSE_INDEX,
-      ENDPOINT_EVENTS_INDEX,
-      ENDPOINT_ALERTS_INDEX,
-      ENDPOINT_DEVICE_INDEX,
-      0,
-      true,
-      {},
-      EndpointDocGenerator,
-      false,
-      undefined,
-      undefined,
-      config.serverless
+    host = await withMetadataTransformLock(() =>
+      indexHostsAndAlerts(
+        systemEsClient,
+        kbnClient,
+        `response-console-case-${randomUUID()}`,
+        1,
+        1,
+        METADATA_DATASTREAM,
+        POLICY_RESPONSE_INDEX,
+        ENDPOINT_EVENTS_INDEX,
+        ENDPOINT_ALERTS_INDEX,
+        ENDPOINT_DEVICE_INDEX,
+        0,
+        true,
+        {},
+        EndpointDocGenerator,
+        false,
+        undefined,
+        undefined,
+        config.serverless
+      )
     );
 
     const agentId = host.hosts[host.hosts.length - 1]?.agent.id;

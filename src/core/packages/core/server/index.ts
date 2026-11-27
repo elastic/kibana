@@ -77,7 +77,7 @@ export type {
   FeatureFlagsStart,
   FeatureFlagsSetup,
 } from '@kbn/core-feature-flags-server';
-export { defineTopic } from '@kbn/core-pubsub-server';
+export { defineTopic, PUBSUB_MAX_ID_LENGTH } from '@kbn/core-pubsub-server';
 export type {
   PubSubEvent,
   PubSubEventInit,
@@ -634,7 +634,7 @@ type PublicRequestHandler<
   B = unknown,
   Context extends RequestHandlerContext = RequestHandlerContext,
   Method extends RouteMethod = any,
-  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
+  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory,
 > = RequestHandler<P, Q, B, Context, Method, ResponseFactory>;
 
 export type { PublicRequestHandler as RequestHandler, RequestHandler as BaseRequestHandler };

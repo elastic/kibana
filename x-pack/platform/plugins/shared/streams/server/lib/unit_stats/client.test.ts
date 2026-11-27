@@ -1207,3 +1207,91 @@ describe('UnitStatsClient.getStats', () => {
     });
   });
 });
+
+describe('UnitStatsClient.getDestinationCollections', () => {
+  const window = { start: '2026-10-19T11:45:00.000Z', end: '2026-10-19T12:00:00.000Z' };
+  const collectionsResponse: EsqlResponse = {
+    columns: [
+      { name: 'id', type: 'keyword' },
+      { name: 'collection', type: 'keyword' },
+      { name: 'documents', type: 'double' },
+    ],
+    values: [
+      ['es-prod', 'logs-nginx.otel-default', 120],
+      ['es-prod', 'logs-app.otel-default', 30],
+      ['es-dev', 'logs-dev.otel-default', 4],
+      ['es-unknown', 'logs-other.otel-default', 9],
+    ],
+  };
+
+  const collectionsEsql = (respond: () => EsqlResponse = () => collectionsResponse) =>
+    jest.fn(async ({ query }: { query: string }) => (isProbe(query) ? responses.probe : respond()));
+
+  const getCollections = (
+    esql: jest.Mock,
+    destinationIds: string[] = ['es-prod', 'es-dev', 'es-idle'],
+    logger = loggingSystemMock.createLogger()
+  ) =>
+    new UnitStatsClient({
+      esClient: {
+        esql: { query: esql },
+        security: { hasPrivileges },
+      } as unknown as ElasticsearchClient,
+      logger,
+    }).getDestinationCollections({ unitId: 'default', destinationIds, window });
+
+  beforeEach(() => {
+    hasPrivileges.mockReset().mockResolvedValue({ has_all_requested: true });
+  });
+
+  it('lists the collections of each named destination with their documents, and none for one that wrote nothing', async () => {
+    await expect(getCollections(collectionsEsql())).resolves.toEqual({
+      'es-prod': [
+        { name: 'logs-nginx.otel-default', documents: 120 },
+        { name: 'logs-app.otel-default', documents: 30 },
+      ],
+      'es-dev': [{ name: 'logs-dev.otel-default', documents: 4 }],
+      'es-idle': [],
+    });
+  });
+
+  it('queries the window of the request', async () => {
+    const esql = collectionsEsql();
+    await getCollections(esql);
+
+    const [query] = statsQueries(esql);
+    expect(query).toContain(`@timestamp >= "${window.start}" AND @timestamp < "${window.end}"`);
+    expect(query).toContain('attributes.db.collection.name');
+  });
+
+  it('runs no query for no destinations', async () => {
+    const esql = collectionsEsql();
+
+    await expect(getCollections(esql, [])).resolves.toEqual({});
+    expect(esql).not.toHaveBeenCalled();
+  });
+
+  it('gives every destination an empty list while the stats stream does not exist', async () => {
+    const esql = jest.fn(async () => {
+      throw unknownIndexError();
+    });
+
+    await expect(getCollections(esql, ['es-prod'])).resolves.toEqual({ 'es-prod': [] });
+    expect(esql).toHaveBeenCalledTimes(1);
+  });
+
+  it('splits the destinations into requests of at most the component limit', async () => {
+    const esql = collectionsEsql(() => ({ ...collectionsResponse, values: [] }));
+    const ids = Array.from({ length: MAX_STREAMS_UNIT_STATS_COMPONENTS + 1 }, (_, i) => `es-${i}`);
+
+    await getCollections(esql, ids);
+
+    expect(statsQueries(esql)).toHaveLength(2);
+  });
+
+  it('throws a forbidden error when the user cannot read the stats stream', async () => {
+    await expect(
+      getCollections(collectionsEsql(failWith(responseError(403))))
+    ).rejects.toMatchObject({ code: 'forbidden', statusCode: 403 });
+  });
+});

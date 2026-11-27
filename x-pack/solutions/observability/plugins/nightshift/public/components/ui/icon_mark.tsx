@@ -41,15 +41,17 @@ export function IconMark({
         ${plateShadow}
       `
     : color === 'ai'
-    ? css`
-        background: ${surface ??
-        `linear-gradient(99.4deg, ${euiTheme.colors.backgroundLightPrimary} 3.97%, ${euiTheme.colors.backgroundLightAssistance} 65.6%)`};
-      `
-    : css`
-        background: ${euiTheme.colors.backgroundBaseHighlighted};
-        border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
-        color: ${euiTheme.colors.textParagraph};
-      `;
+      ? css`
+          background: ${
+            surface ??
+            `linear-gradient(99.4deg, ${euiTheme.colors.backgroundLightPrimary} 3.97%, ${euiTheme.colors.backgroundLightAssistance} 65.6%)`
+          };
+        `
+      : css`
+          background: ${euiTheme.colors.backgroundBaseHighlighted};
+          border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+          color: ${euiTheme.colors.textParagraph};
+        `;
 
   return (
     <div

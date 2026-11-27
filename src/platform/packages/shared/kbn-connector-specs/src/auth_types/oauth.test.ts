@@ -31,13 +31,13 @@ const EXPECTED_TOKEN_OPTS = {
 };
 
 const createMockAxiosInstance = (): AxiosInstance =>
-  ({ defaults: { headers: { common: {} } } } as unknown as AxiosInstance);
+  ({ defaults: { headers: { common: {} } } }) as unknown as AxiosInstance;
 
 const createMockContext = (overrides: Partial<AuthContext> = {}): AuthContext =>
   ({
     getToken: jest.fn().mockResolvedValue(ACCESS_TOKEN),
     ...overrides,
-  } as unknown as AuthContext);
+  }) as unknown as AuthContext;
 
 describe('OAuth (client credentials)', () => {
   it('has the expected id', () => {

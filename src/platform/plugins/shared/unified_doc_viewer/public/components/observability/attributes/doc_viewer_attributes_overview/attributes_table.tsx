@@ -23,11 +23,10 @@ import {
 import { getEuiCellActions } from '../../../doc_viewer_table/table_grid/eui_data_grid_adapter';
 import type { AttributeField } from './attributes_overview';
 
-interface AttributesTableProps
-  extends Pick<
-    DocViewRenderProps,
-    'hit' | 'dataView' | 'filter' | 'onAddColumn' | 'onRemoveColumn' | 'columns'
-  > {
+interface AttributesTableProps extends Pick<
+  DocViewRenderProps,
+  'hit' | 'dataView' | 'filter' | 'onAddColumn' | 'onRemoveColumn' | 'columns'
+> {
   dataSource: DataSource | undefined;
   fields: AttributeField[];
   searchTerm: string;
