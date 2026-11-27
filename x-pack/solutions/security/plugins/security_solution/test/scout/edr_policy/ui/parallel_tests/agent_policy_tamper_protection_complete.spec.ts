@@ -26,6 +26,7 @@ spaceTest.describe(
 
         // The section loads lazily: wait for it before checking what must be absent.
         await expect(agentPolicySettings.tamperProtectionSwitch).toBeVisible();
+        await expect(agentPolicySettings.tamperProtectionSwitch).toBeEnabled();
         await expect(agentPolicySettings.uninstallCommandLink).toBeVisible();
         await expect(agentPolicySettings.missingIntegrationTooltip).toBeHidden();
         await expect(agentPolicySettings.lockedCard).toBeHidden();
