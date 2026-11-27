@@ -12,6 +12,7 @@ import {
   isBillablePolicy,
   removeCustomYaraSignaturesAdvancedSettings,
 } from './policy_config_helpers';
+import { removeExportProviders } from './export_providers';
 
 /**
  * Return a new default `PolicyConfig` for platinum and above licenses
@@ -321,7 +322,9 @@ export const policyFactoryWithoutPaidEnterpriseFeatures = (
     },
   };
 
-  return removeCustomYaraSignaturesAdvancedSettings(withoutPaidEnterpriseFeatures);
+  return removeExportProviders(
+    removeCustomYaraSignaturesAdvancedSettings(withoutPaidEnterpriseFeatures)
+  );
 };
 
 /**
@@ -496,7 +499,7 @@ export const policyFactoryWithoutPaidFeatures = (
     },
   };
 
-  return removeCustomYaraSignaturesAdvancedSettings(withoutPaidFeatures);
+  return removeExportProviders(removeCustomYaraSignaturesAdvancedSettings(withoutPaidFeatures));
 };
 
 /**

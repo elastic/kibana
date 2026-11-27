@@ -8,6 +8,7 @@
 import type { ApplicationStart } from '@kbn/core/public';
 import type { Agent, PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import type { ManifestSchema } from '../schema/manifest';
+import type { PolicyResponseActionsConfig } from './export_providers';
 
 export * from './actions';
 export * from './os';
@@ -20,6 +21,7 @@ export type * from './microsoft_defender_endpoint';
 export type { ConditionEntriesMap, ConditionEntry } from './exception_list_items';
 export type * from './scripts_library';
 export * from './libyara';
+export type * from './export_providers';
 
 /**
  * Supported React-Router state for the Policy Details page
@@ -1061,6 +1063,7 @@ export interface PolicyConfig {
       };
     };
     ai_data_collection?: AiDataCollectionFields;
+    response_actions?: PolicyResponseActionsConfig;
   };
   mac: {
     advanced?: {};
@@ -1102,6 +1105,7 @@ export interface PolicyConfig {
       file: string;
     };
     ai_data_collection?: AiDataCollectionFields;
+    response_actions?: PolicyResponseActionsConfig;
   };
   linux: {
     advanced?: {};
@@ -1144,6 +1148,7 @@ export interface PolicyConfig {
       file: string;
     };
     ai_data_collection?: AiDataCollectionFields;
+    response_actions?: PolicyResponseActionsConfig;
   };
 }
 

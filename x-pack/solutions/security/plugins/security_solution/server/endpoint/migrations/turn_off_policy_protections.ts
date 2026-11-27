@@ -16,6 +16,10 @@ import {
   isPolicySetToEventCollectionOnly,
   resetCustomNotifications,
 } from '../../../common/endpoint/models/policy_config_helpers';
+import {
+  hasExportProviders,
+  removeExportProviders,
+} from '../../../common/endpoint/models/export_providers';
 import type { PolicyData } from '../../../common/endpoint/types';
 import type { EndpointInternalFleetServicesInterface } from '../services/fleet';
 import { getPolicyDataForUpdate } from '../../../common/endpoint/service/policy';
@@ -41,12 +45,16 @@ export const turnOffPolicyProtectionsIfNotSupported = async (
   const isRegistryCredentialHardeningFeatureEnabled = productFeaturesService.isEnabled(
     ProductFeatureSecurityKey.endpointRegistryCredentialHardening
   );
+  const isResponseActionsEnabled = productFeaturesService.isEnabled(
+    ProductFeatureSecurityKey.endpointResponseActions
+  );
 
   if (
     isPolicyProtectionsEnabled &&
     isProtectionUpdatesFeatureEnabled &&
     isCustomNotificationEnabled &&
-    isRegistryCredentialHardeningFeatureEnabled
+    isRegistryCredentialHardeningFeatureEnabled &&
+    isResponseActionsEnabled
   ) {
     log.info('All relevant features are enabled. Nothing to do!');
     return;
@@ -83,12 +91,17 @@ export const turnOffPolicyProtectionsIfNotSupported = async (
         !isRegistryCredentialHardeningFeatureEnabled &&
         policySettings.windows.attack_surface_reduction.registry_credential_hardening?.enabled ===
           true;
+      // Export providers need the response actions product feature. The update callback would only
+      // strip them on the next update; this removes them on the downgrade itself.
+      const shouldRemoveExportProviders =
+        !isResponseActionsEnabled && hasExportProviders(policySettings);
 
       if (
         (!isPolicyProtectionsEnabled && !isOnlyCollectingEvents) ||
         shouldDowngradeProtectionUpdates ||
         shouldDowngradeCustomNotifications ||
-        shouldDowngradeRegistryCredentialHardening
+        shouldDowngradeRegistryCredentialHardening ||
+        shouldRemoveExportProviders
       ) {
         if (!isPolicyProtectionsEnabled && !isOnlyCollectingEvents) {
           messages.push(
@@ -110,8 +123,13 @@ export const turnOffPolicyProtectionsIfNotSupported = async (
             `Policy [${integrationPolicy.id}][${integrationPolicy.name}] updated to disable registry credential hardening.`
           );
         }
+        if (shouldRemoveExportProviders) {
+          messages.push(
+            `Policy [${integrationPolicy.id}][${integrationPolicy.name}] updated to remove export providers.`
+          );
+        }
 
-        integrationPolicy.inputs[0].config.policy.value = merge(
+        const updatedPolicySettings = merge(
           {},
           policySettings,
           !isPolicyProtectionsEnabled && !isOnlyCollectingEvents
@@ -127,6 +145,10 @@ export const turnOffPolicyProtectionsIfNotSupported = async (
               }
             : {}
         );
+
+        integrationPolicy.inputs[0].config.policy.value = shouldRemoveExportProviders
+          ? removeExportProviders(updatedPolicySettings)
+          : updatedPolicySettings;
 
         updates.push({
           ...getPolicyDataForUpdate(integrationPolicy),
