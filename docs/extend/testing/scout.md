@@ -20,7 +20,7 @@ Scout is Kibana's **modern UI and API test framework** built on [Playwright](htt
 ## Scout benefits [scout-main-features]
 
 - **Parallel execution**: run UI suites in [parallel](./parallelism.md) against the same deployment.
-- **Selective testing**: PR builds run only the Scout tests scoped to changed modules, cutting CI time.
+- **Selective testing**: PR builds can limit Scout runs to affected Playwright configs, cutting CI time. See [how selection works](#scout-faq-selective-testing).
 - **Co-located tests**: keep tests close to [plugin code](./setup-scout.md) for easier iteration and maintenance.
 - **Deployment-agnostic**: write tests once, then use [tags](./deployment-tags.md) to declare where they should run (stateful/serverless).
 - **Fixture-based**: [fixtures](./fixtures.md) cover auth, data setup, clients, and common workflows.
@@ -85,11 +85,27 @@ Often yes, especially with [parallel test execution](./parallelism.md) and selec
 
 #### Q: What is selective testing? [scout-faq-selective-testing]
 
-In PR builds, Scout automatically detects which modules changed and runs only the relevant tests, reducing CI time. You can confirm your tests ran by looking for the `affected Scout:` prefix on Buildkite steps. See PR [#261510](https://github.com/elastic/kibana/pull/261510) for details.
+Scout uses the changed files to narrow the eligible tests in PR builds:
+
+- **Critical Scout changes or selective testing disabled:** run all eligible configs.
+- **Only Scout tests changed:** run their owning configs. Markdown, README, and changelog changes don’t affect this classification.
+- **Other changes, including production code and Scout fixtures:** run configs in affected modules and their known downstream consumers, potentially across multiple namespaces.
+
+**Runtime dependencies need explicit coverage.** Some relationships—such as ML registering actions that Dashboard renders—aren’t captured by the static dependency graph. Scout supplements that graph with manually maintained [implicit-consumer rules](https://github.com/elastic/kibana/blob/main/.buildkite/scripts/steps/test/scout/scout_implicit_consumers.ts). When adding or changing a runtime integration, check whether those rules need updating so the consuming module’s tests are selected.
+
+Deployment tags and the pipeline’s CI test-channel selection still apply in every mode.
+
+To inspect the selection decision, open `.scout/testing_scope.json` in the **Scout Test Run Builder** step's Buildkite artifacts. The `kind` field identifies the selection mode:
+
+- `tests-only`: `affectedConfigs` lists the selected Playwright config paths.
+- `dependency-tree`: `affectedModules` lists the modules used to select configs.
+- `full`: `reason` explains why selective filtering was disabled.
+
+This file records the selection scope, not execution results. Deployment tags and CI test channels still apply. To confirm a suite actually ran, check its test results in the corresponding `Scout Lane #<number> - <arch>-<domain> / <config-set>` step.
 
 #### Q: Why is it a good idea for tests to be close to the plugin code? [scout-faq-colocation]
 
-It’s easier to iterate and maintain, and it enables selective testing: PR builds automatically run only the Scout tests for affected modules.
+It’s easier to iterate and maintain, and it lets [selective testing](#scout-faq-selective-testing) map changes to the configs and modules that own the tests.
 
 #### Q: Can I use FTR services in Scout (for example, `esArchiver`)? [scout-faq-ftr-services]
 
