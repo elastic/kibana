@@ -104,7 +104,7 @@ export const OptionsListControl = ({
     DSLOptionsListComponentApi['field$'] | PublishingSubject<undefined>,
     DSLOptionsListComponentApi['fieldFormatter'] | PublishingSubject<undefined>,
     ESQLOptionsListComponentApi['tooltipLabel$'] | PublishingSubject<undefined>,
-    DSLOptionsListComponentApi['required$'] | PublishingSubject<undefined>
+    DSLOptionsListComponentApi['required$'] | PublishingSubject<undefined>,
   ] = useMemo(() => {
     const isDSLControl = isDSLOptionsListApi(componentApi);
     return [

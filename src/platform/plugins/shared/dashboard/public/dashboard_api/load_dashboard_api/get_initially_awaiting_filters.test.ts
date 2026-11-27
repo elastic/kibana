@@ -18,7 +18,7 @@ jest.mock('../../services/kibana_services', () => ({
 const getEmbeddableDefinition = embeddableService.getEmbeddableDefinition as jest.Mock;
 
 const pinned = (type: string, config: object = {}) =>
-  ({ type, config } as unknown as NonNullable<DashboardState['pinned_panels']>[number]);
+  ({ type, config }) as unknown as NonNullable<DashboardState['pinned_panels']>[number];
 
 describe('getInitiallyAwaitingFilters', () => {
   beforeEach(() => {

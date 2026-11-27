@@ -17,7 +17,7 @@ const buildChild = (uuid: string, dataLoading: boolean) =>
   ({
     uuid,
     dataLoading$: new BehaviorSubject<boolean | undefined>(dataLoading),
-  } as unknown as DefaultEmbeddableApi);
+  }) as unknown as DefaultEmbeddableApi;
 
 describe('data loading manager', () => {
   const control = buildChild('control', false);

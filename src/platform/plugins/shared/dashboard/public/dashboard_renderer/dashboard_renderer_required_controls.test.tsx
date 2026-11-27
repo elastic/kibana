@@ -109,7 +109,7 @@ const stateWithControls = (
       config,
       order,
     })),
-  } as unknown as DashboardState);
+  }) as unknown as DashboardState;
 
 const mountPreview = async (initialState: DashboardState) => {
   let api: DashboardApi | undefined;
