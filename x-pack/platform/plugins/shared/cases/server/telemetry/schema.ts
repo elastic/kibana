@@ -22,6 +22,7 @@ import type {
   TemplatesSolutionTelemetrySchema,
   WorkflowsSolutionTelemetrySchema,
   UserActionsSourceTelemetrySchema,
+  CaseAgeStatsSchema,
 } from './types';
 
 const long: TypeLong = { type: 'long' };
@@ -340,6 +341,210 @@ const templatesSolutionTelemetrySchema: TemplatesSolutionTelemetrySchema = {
   },
 };
 
+const caseAgeClosedSchema: CaseAgeStatsSchema = {
+  total: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of cases closed in the last 30 days that have a recorded time to close. Every bucket and percentile below covers only these cases',
+    },
+  },
+  p50: {
+    type: 'long',
+    _meta: {
+      description:
+        'Approximate 50th percentile of the time from creation to the latest close of cases closed in the last 30 days, in seconds. 0 when there are none',
+    },
+  },
+  p90: {
+    type: 'long',
+    _meta: {
+      description:
+        'Approximate 90th percentile of the time from creation to the latest close of cases closed in the last 30 days, in seconds. 0 when there are none',
+    },
+  },
+  buckets: {
+    upTo1h: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of cases closed in the last 30 days whose time from creation to the latest close is under 1 hour',
+      },
+    },
+    upTo1d: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of cases closed in the last 30 days whose time from creation to the latest close is at least 1 hour and under 1 day',
+      },
+    },
+    upTo7d: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of cases closed in the last 30 days whose time from creation to the latest close is at least 1 day and under 7 days',
+      },
+    },
+    upTo30d: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of cases closed in the last 30 days whose time from creation to the latest close is at least 7 days and under 30 days',
+      },
+    },
+    upTo90d: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of cases closed in the last 30 days whose time from creation to the latest close is at least 30 days and under 90 days',
+      },
+    },
+    over90d: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of cases closed in the last 30 days whose time from creation to the latest close is 90 days or more',
+      },
+    },
+  },
+};
+
+const caseAgeOpenSchema: CaseAgeStatsSchema = {
+  total: {
+    type: 'long',
+    _meta: {
+      description: 'Number of open cases',
+    },
+  },
+  p50: {
+    type: 'long',
+    _meta: {
+      description:
+        'Approximate 50th percentile of the age since creation of open cases, in seconds. 0 when there are none',
+    },
+  },
+  p90: {
+    type: 'long',
+    _meta: {
+      description:
+        'Approximate 90th percentile of the age since creation of open cases, in seconds. 0 when there are none',
+    },
+  },
+  buckets: {
+    upTo1h: {
+      type: 'long',
+      _meta: {
+        description: 'Number of open cases whose age since creation is under 1 hour',
+      },
+    },
+    upTo1d: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of open cases whose age since creation is at least 1 hour and under 1 day',
+      },
+    },
+    upTo7d: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of open cases whose age since creation is at least 1 day and under 7 days',
+      },
+    },
+    upTo30d: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of open cases whose age since creation is at least 7 days and under 30 days',
+      },
+    },
+    upTo90d: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of open cases whose age since creation is at least 30 days and under 90 days',
+      },
+    },
+    over90d: {
+      type: 'long',
+      _meta: {
+        description: 'Number of open cases whose age since creation is 90 days or more',
+      },
+    },
+  },
+};
+
+const caseAgeInProgressSchema: CaseAgeStatsSchema = {
+  total: {
+    type: 'long',
+    _meta: {
+      description: 'Number of in-progress cases',
+    },
+  },
+  p50: {
+    type: 'long',
+    _meta: {
+      description:
+        'Approximate 50th percentile of the age since creation of in-progress cases, in seconds. 0 when there are none',
+    },
+  },
+  p90: {
+    type: 'long',
+    _meta: {
+      description:
+        'Approximate 90th percentile of the age since creation of in-progress cases, in seconds. 0 when there are none',
+    },
+  },
+  buckets: {
+    upTo1h: {
+      type: 'long',
+      _meta: {
+        description: 'Number of in-progress cases whose age since creation is under 1 hour',
+      },
+    },
+    upTo1d: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of in-progress cases whose age since creation is at least 1 hour and under 1 day',
+      },
+    },
+    upTo7d: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of in-progress cases whose age since creation is at least 1 day and under 7 days',
+      },
+    },
+    upTo30d: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of in-progress cases whose age since creation is at least 7 days and under 30 days',
+      },
+    },
+    upTo90d: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of in-progress cases whose age since creation is at least 30 days and under 90 days',
+      },
+    },
+    over90d: {
+      type: 'long',
+      _meta: {
+        description: 'Number of in-progress cases whose age since creation is 90 days or more',
+      },
+    },
+  },
+};
+
+const caseAgeSolutionTelemetrySchema = {
+  closed: caseAgeClosedSchema,
+  open: caseAgeOpenSchema,
+  inProgress: caseAgeInProgressSchema,
+};
+
 const workflowsSolutionTelemetrySchema: WorkflowsSolutionTelemetrySchema = {
   runs: {
     total: {
@@ -600,5 +805,11 @@ export const casesSchema: CasesTelemetrySchema = {
     sec: workflowsSolutionTelemetrySchema,
     obs: workflowsSolutionTelemetrySchema,
     main: workflowsSolutionTelemetrySchema,
+  },
+  caseAge: {
+    all: caseAgeSolutionTelemetrySchema,
+    sec: caseAgeSolutionTelemetrySchema,
+    obs: caseAgeSolutionTelemetrySchema,
+    main: caseAgeSolutionTelemetrySchema,
   },
 };
