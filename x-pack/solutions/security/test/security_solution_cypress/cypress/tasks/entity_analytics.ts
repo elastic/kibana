@@ -123,76 +123,87 @@ const entityStoreDsl = (entityIndex: string) =>
  * tables render with stub data in environments where the entity store index is
  * not populated (e.g. CI inspect-button tests).
  *
+ * Only risk-filtered requests (those whose `filterQuery` requires
+ * `entity.risk.calculated_score_norm`) are stubbed; the All Hosts and All Users
+ * tables still reach the real endpoint.
+ *
  * Coverage note: `inspect.dsl` always echoes the hardcoded `entityIndex`, so
- * the table-case assertions on `INSPECT_MODAL_INDEX_PATTERN` are circular and
+ * the risk-table assertions on `INSPECT_MODAL_INDEX_PATTERN` are circular and
  * cannot detect a wrong-index regression. The KPI lens-visualization cases
  * (which use the search strategy, not this intercept) are unaffected.
  */
 export const mockEntityStoreRiskScores = () => {
   const entityIndex = '.entities.v2.latest.security_default-00001';
 
-  cy.intercept('GET', ENTITY_STORE_ENTITIES_URL, (req) => {
-    const entityTypesParam = req.query?.entity_types;
-    const entityTypes: string = Array.isArray(entityTypesParam)
-      ? entityTypesParam.join(',')
-      : String(entityTypesParam ?? '');
-    const isHost = entityTypes.includes('host');
-    const isUser = entityTypes.includes('user');
+  cy.intercept(
+    {
+      method: 'GET',
+      url: ENTITY_STORE_ENTITIES_URL,
+      query: { filterQuery: /entity\.risk\.calculated_score_norm/ },
+    },
+    (req) => {
+      const entityTypesParam = req.query?.entity_types;
+      const entityTypes: string = Array.isArray(entityTypesParam)
+        ? entityTypesParam.join(',')
+        : String(entityTypesParam ?? '');
+      const isHost = entityTypes.includes('host');
+      const isUser = entityTypes.includes('user');
 
-    const hostRecord = {
-      '@timestamp': '2025-01-01T00:00:00.000Z',
-      'host.name': 'mock-host',
-      entity: {
-        name: 'mock-host',
-        type: 'node',
-        risk: { calculated_score_norm: 70, calculated_level: 'High' },
-      },
-      host: {
-        name: 'mock-host',
-        risk: {
-          calculated_score_norm: 70,
-          calculated_level: 'High',
-          rule_risks: [],
-          multipliers: [],
+      const hostRecord = {
+        '@timestamp': '2025-01-01T00:00:00.000Z',
+        'host.name': 'mock-host',
+        entity: {
+          name: 'mock-host',
+          type: 'node',
+          risk: { calculated_score_norm: 70, calculated_level: 'High' },
         },
-      },
-    };
-
-    const userRecord = {
-      '@timestamp': '2025-01-01T00:00:00.000Z',
-      'user.name': 'mock-user',
-      entity: {
-        name: 'mock-user',
-        type: 'node',
-        risk: { calculated_score_norm: 60, calculated_level: 'Medium' },
-      },
-      user: {
-        name: 'mock-user',
-        risk: {
-          calculated_score_norm: 60,
-          calculated_level: 'Medium',
-          rule_risks: [],
-          multipliers: [],
+        host: {
+          name: 'mock-host',
+          risk: {
+            calculated_score_norm: 70,
+            calculated_level: 'High',
+            rule_risks: [],
+            multipliers: [],
+          },
         },
-      },
-    };
+      };
 
-    const records = isHost ? [hostRecord] : isUser ? [userRecord] : [];
-
-    req.reply({
-      statusCode: 200,
-      body: {
-        records,
-        page: 1,
-        per_page: 10,
-        total: records.length,
-        inspect: {
-          dsl: [entityStoreDsl(entityIndex)],
-          response: [JSON.stringify({ hits: { total: { value: records.length }, hits: [] } })],
+      const userRecord = {
+        '@timestamp': '2025-01-01T00:00:00.000Z',
+        'user.name': 'mock-user',
+        entity: {
+          name: 'mock-user',
+          type: 'node',
+          risk: { calculated_score_norm: 60, calculated_level: 'Medium' },
         },
-      },
-    });
-  }).as('entityStoreEntities');
+        user: {
+          name: 'mock-user',
+          risk: {
+            calculated_score_norm: 60,
+            calculated_level: 'Medium',
+            rule_risks: [],
+            multipliers: [],
+          },
+        },
+      };
+
+      const records = isHost ? [hostRecord] : isUser ? [userRecord] : [];
+
+      req.reply({
+        statusCode: 200,
+        body: {
+          records,
+          page: 1,
+          per_page: 10,
+          total: records.length,
+          inspect: {
+            dsl: [entityStoreDsl(entityIndex)],
+            response: [JSON.stringify({ hits: { total: { value: records.length }, hits: [] } })],
+          },
+        },
+      });
+    }
+  ).as('entityStoreEntities');
 };
 
 export const openRiskInformationFlyout = () => cy.get(OPEN_RISK_INFORMATION_FLYOUT_BUTTON).click();
