@@ -211,6 +211,8 @@ describe('EvalsClient', () => {
             dataset_name: 'Dataset 1',
             evaluator_name: 'correctness',
             example_count: 5,
+            judges_attempted: 5,
+            judges_null_scored: 0,
             stats: {
               mean: 0.9,
               median: 0.95,
@@ -246,6 +248,10 @@ describe('EvalsClient', () => {
           datasetId: 'dataset-1',
           datasetName: 'Dataset 1',
           evaluatorName: 'correctness',
+          // judges_attempted/judges_null_scored absent on pre-upgrade responses; the
+          // mapper falls back so no warning renders.
+          judgesAttempted: 5,
+          judgesNullScored: 0,
           stats: {
             mean: 0.9,
             median: 0.95,
