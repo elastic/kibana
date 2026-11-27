@@ -54,6 +54,54 @@ describe('chunksIntoMessage', () => {
     });
   });
 
+  it('ignores an empty tool delta before a valid tool call at the same index', async () => {
+    const toolCall = {
+      index: 3,
+      toolCallId: 'call_1',
+      function: { name: 'myFunction', arguments: '{"foo":"bar"}' },
+    };
+    const events = await lastValueFrom(
+      fromEvents(
+        {
+          type: ChatCompletionEventType.ChatCompletionChunk,
+          content: 'Checking.',
+          tool_calls: [{ index: 3, toolCallId: '', function: { name: '', arguments: '' } }],
+        },
+        {
+          type: ChatCompletionEventType.ChatCompletionChunk,
+          content: '',
+          tool_calls: [toolCall],
+        }
+      ).pipe(
+        chunksIntoMessage({
+          logger,
+          toolOptions: { tools: { myFunction: { description: 'Look up a value' } } },
+        }),
+        toArray()
+      )
+    );
+
+    expect(events).toEqual([
+      {
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        content: 'Checking.',
+        tool_calls: [],
+      },
+      {
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        content: '',
+        tool_calls: [{ ...toolCall, index: 0 }],
+      },
+      {
+        type: ChatCompletionEventType.ChatCompletionMessage,
+        content: 'Checking.',
+        toolCalls: [
+          { toolCallId: 'call_1', function: { name: 'myFunction', arguments: { foo: 'bar' } } },
+        ],
+      },
+    ]);
+  });
+
   it('parses tool calls', async () => {
     const message = await lastValueFrom(
       chunksIntoMessage({

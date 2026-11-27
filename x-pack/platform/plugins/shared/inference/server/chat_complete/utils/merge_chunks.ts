@@ -22,6 +22,7 @@ interface UnvalidatedMessage {
  * - `function.arguments` is streamed across multiple chunks and should be accumulated
  * - When `toolCallId` is empty, it's a continuation chunk for the most recent tool call at that index,
  *   or the start of a new tool call if none exists yet at that index
+ * - Deltas with no id, name, or arguments are ignored
  */
 const mergeToolCalls = (chunks: ChatCompletionChunkEvent[]): UnvalidatedToolCall[] => {
   // Map to store tool calls by their resolved index
@@ -31,6 +32,9 @@ const mergeToolCalls = (chunks: ChatCompletionChunkEvent[]): UnvalidatedToolCall
   for (const chunk of chunks) {
     chunk.tool_calls?.forEach((toolCall) => {
       const key = resolveIndex(toolCall);
+      if (key === undefined) {
+        return;
+      }
 
       const existingToolCall = toolCallsMap.get(key);
       const updatedToolCall: UnvalidatedToolCall = {

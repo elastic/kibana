@@ -34,6 +34,18 @@ describe('mergeChunks', () => {
     });
   });
 
+  it('ignores tool call deltas without an id, name, or arguments', () => {
+    const message = mergeChunks([
+      {
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        content: 'Done.',
+        tool_calls: [{ index: 3, toolCallId: '', function: { name: '', arguments: '' } }],
+      },
+    ]);
+
+    expect(message).toEqual({ content: 'Done.', tool_calls: [] });
+  });
+
   it('concatenates tool calls', async () => {
     const message = mergeChunks([
       {
