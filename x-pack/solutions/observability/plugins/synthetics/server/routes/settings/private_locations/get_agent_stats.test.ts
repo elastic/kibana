@@ -303,27 +303,36 @@ describe('getPrivateLocationAgentStats route', () => {
     );
   });
 
-  it('counts a visible project monitor by its package-policy id', async () => {
-    mockListByAgentPolicy.mockResolvedValue([
-      { id: 'project-monitor-id-loc-1', condition: agentIdCondition('agent-1') },
-    ]);
-    const listAgents = jest.fn().mockResolvedValue({ agents: [agent()], total: 1 });
-    const { routeContext } = makeContext({ listAgentsImpl: listAgents, hasEnterprise: true });
-    routeContext.monitorConfigRepository.getAll.mockResolvedValue([
-      {
-        id: 'saved-object-id',
-        attributes: {
-          config_id: 'saved-object-id',
-          [ConfigKey.MONITOR_QUERY_ID]: 'project-monitor-id',
-          [ConfigKey.LOCATIONS]: [{ id: 'loc-1' }],
+  it.each([
+    [
+      'the heartbeat id, for a policy created before ids were built from the saved-object id',
+      'project-monitor-id-loc-1',
+    ],
+    ['the saved-object id', 'saved-object-id-loc-1'],
+  ])(
+    'counts a visible project monitor by its package-policy id under %s',
+    async (_label, policyId) => {
+      mockListByAgentPolicy.mockResolvedValue([
+        { id: policyId, condition: agentIdCondition('agent-1') },
+      ]);
+      const listAgents = jest.fn().mockResolvedValue({ agents: [agent()], total: 1 });
+      const { routeContext } = makeContext({ listAgentsImpl: listAgents, hasEnterprise: true });
+      routeContext.monitorConfigRepository.getAll.mockResolvedValue([
+        {
+          id: 'saved-object-id',
+          attributes: {
+            config_id: 'saved-object-id',
+            [ConfigKey.MONITOR_QUERY_ID]: 'project-monitor-id',
+            [ConfigKey.LOCATIONS]: [{ id: 'loc-1' }],
+          },
         },
-      },
-    ]);
+      ]);
 
-    const result = await run(routeContext);
+      const result = await run(routeContext);
 
-    expect(result[0].agents[0].monitorsAssigned).toBe(1);
-  });
+      expect(result[0].agents[0].monitorsAssigned).toBe(1);
+    }
+  );
 
   it('does not count a same-ID monitor that is only visible at another location', async () => {
     mockGetLocations.mockResolvedValue({

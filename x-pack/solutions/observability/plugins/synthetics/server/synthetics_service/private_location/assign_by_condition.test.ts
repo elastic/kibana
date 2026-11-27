@@ -183,6 +183,45 @@ describe('assignedAgentIdForMonitorLocation', () => {
     expect(agentId).toBe('legacy-agent');
   });
 
+  it('finds the policy under the saved-object id of a monitor with a custom heartbeat id', () => {
+    const agentId = assignedAgentIdForMonitorLocation(
+      [{ id: 'so-uuid-loc-1', condition: agentIdCondition('new-agent') }],
+      'journey-project-default',
+      'loc-1',
+      'default',
+      'so-uuid'
+    );
+
+    expect(agentId).toBe('new-agent');
+  });
+
+  it('finds a policy created under the heartbeat id before ids were built from the saved-object id', () => {
+    const agentId = assignedAgentIdForMonitorLocation(
+      [{ id: 'journey-project-default-loc-1', condition: agentIdCondition('old-agent') }],
+      'journey-project-default',
+      'loc-1',
+      'default',
+      'so-uuid'
+    );
+
+    expect(agentId).toBe('old-agent');
+  });
+
+  it('prefers the saved-object id policy when the heartbeat-id one is still around', () => {
+    const agentId = assignedAgentIdForMonitorLocation(
+      [
+        { id: 'journey-project-default-loc-1', condition: agentIdCondition('old-agent') },
+        { id: 'so-uuid-loc-1', condition: agentIdCondition('new-agent') },
+      ],
+      'journey-project-default',
+      'loc-1',
+      'default',
+      'so-uuid'
+    );
+
+    expect(agentId).toBe('new-agent');
+  });
+
   it('does not treat a prefix-matching unrelated policy as the legacy twin', () => {
     expect(
       assignedAgentIdForMonitorLocation(

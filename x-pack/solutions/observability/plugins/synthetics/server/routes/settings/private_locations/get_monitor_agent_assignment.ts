@@ -64,9 +64,9 @@ export const getMonitorAgentAssignment: SyntheticsRestApiRouteFactory<
 
     try {
       const monitor = await monitorConfigRepository.get(monitorId);
-      // Fleet package-policy ids use HeartbeatConfig.id (MONITOR_QUERY_ID /
-      // custom_heartbeat_id), which differs from the saved-object config_id on
-      // project monitors. Looking up by monitorId would miss the pin.
+      // New package-policy ids use the saved-object config_id, but policies created before that
+      // use HeartbeatConfig.id (MONITOR_QUERY_ID / custom_heartbeat_id), which differs from the
+      // config_id on project monitors. Looking up by one of them would miss the pin.
       const policyMonitorId = monitor.attributes[ConfigKey.MONITOR_QUERY_ID] || monitorId;
       const privateMonitorLocations = (monitor.attributes.locations ?? []).filter(
         (location) => !location.isServiceManaged
@@ -91,10 +91,15 @@ export const getMonitorAgentAssignment: SyntheticsRestApiRouteFactory<
         shardedMonitorLocations.length > 0
           ? await new PackagePolicyService(server).getByIds({
               spaceId,
-              packagePolicyIds: shardedMonitorLocations.flatMap((location) => [
-                `${policyMonitorId}-${location.id}`,
-                `${policyMonitorId}-${location.id}-${spaceId}`,
-              ]),
+              packagePolicyIds: [
+                ...new Set(
+                  shardedMonitorLocations.flatMap((location) => [
+                    `${monitorId}-${location.id}`,
+                    `${policyMonitorId}-${location.id}`,
+                    `${policyMonitorId}-${location.id}-${spaceId}`,
+                  ])
+                ),
+              ],
               fields: ['id', 'name', 'condition'],
             })
           : [];
@@ -125,7 +130,8 @@ export const getMonitorAgentAssignment: SyntheticsRestApiRouteFactory<
             ),
             policyMonitorId,
             monitorLocation.id,
-            spaceId
+            spaceId,
+            monitorId
           );
           const assigned = assignedAgentId ? enrolled.get(assignedAgentId) : undefined;
           if (assigned) {
