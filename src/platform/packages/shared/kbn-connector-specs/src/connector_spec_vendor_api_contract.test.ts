@@ -11,7 +11,7 @@ import { execFileSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { CoverageAtBase } from './test/vendor_api/exemptions';
+import type { CoverageAtBase, VendorApiExemptions } from './test/vendor_api/exemptions';
 import { findLostCoverage, vendorApiExemptionsSchema } from './test/vendor_api/exemptions';
 import type { FoundConnector } from './test/vendor_api/find_connector';
 import { listConnectors } from './test/vendor_api/find_connector';
@@ -52,7 +52,7 @@ const existsAtBase = (base: string, file: string) =>
 
 describe('vendor API contract', () => {
   let connectors: FoundConnector[];
-  let exemptions: Record<string, string>;
+  let exemptions: VendorApiExemptions;
 
   beforeAll(async () => {
     connectors = await listConnectors();
@@ -101,7 +101,7 @@ describe('vendor API contract', () => {
         lost.map(({ id, atBase: before }) =>
           before === 'recorded'
             ? `${id}: had vendor_api artifacts at the merge base; restore them, since coverage may only grow`
-            : `${id}: is a new connector without vendor_api artifacts; run ${SCRIPT} --connector ${id} --source <name>=<url>, or exempt it in vendor_api_exemptions.json if it doesn't call an HTTP API`
+            : `${id}: is a new connector without vendor_api artifacts; run ${SCRIPT} --connector ${id} --source <name>=<url>, or exempt it in vendor_api_exemptions.json (with a category, apiType and reason) if it doesn't call an HTTP API`
         )
       ).toEqual([]);
     }

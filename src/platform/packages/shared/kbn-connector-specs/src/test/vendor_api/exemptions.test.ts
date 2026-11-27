@@ -36,9 +36,34 @@ describe('findLostCoverage', () => {
 });
 
 describe('vendorApiExemptionsSchema', () => {
+  const permanent = { category: 'permanent', apiType: 'database', reason: 'Driver protocol' };
+  const temporary = {
+    category: 'temporary',
+    blockedBy: 303330,
+    apiType: 'mcp',
+    reason: 'tools/list needs credentials',
+  };
+
+  it('accepts permanent and temporary exemptions', () => {
+    expect(
+      vendorApiExemptionsSchema.safeParse({ '.mysql': permanent, '.box': temporary }).success
+    ).toBe(true);
+  });
+
   it.each([
-    ['ids without the leading dot', { mysql: 'Driver protocol' }],
-    ['empty reasons', { '.mysql': '' }],
+    ['ids without the leading dot', { mysql: permanent }],
+    ['a bare reason', { '.mysql': 'Driver protocol' }],
+    ['empty reasons', { '.mysql': { ...permanent, reason: '' } }],
+    ['a missing category', { '.mysql': { apiType: 'database', reason: 'Driver protocol' } }],
+    ['an unknown category', { '.mysql': { ...permanent, category: 'forever' } }],
+    ['a missing API type', { '.mysql': { category: 'permanent', reason: 'Driver protocol' } }],
+    ['an unknown API type', { '.mysql': { ...permanent, apiType: 'rest' } }],
+    [
+      'a temporary exemption without the issue it waits on',
+      { '.box': { category: 'temporary', apiType: 'mcp', reason: 'Needs credentials' } },
+    ],
+    ['a permanent exemption waiting on an issue', { '.mysql': { ...permanent, blockedBy: 1 } }],
+    ['an issue that is not a number', { '.box': { ...temporary, blockedBy: '#303330' } }],
   ])('rejects %s', (_, exemptions) => {
     expect(vendorApiExemptionsSchema.safeParse(exemptions).success).toBe(false);
   });

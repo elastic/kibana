@@ -134,7 +134,7 @@ export const collectCoverage = async (
       buildCoverageDocument({
         spec: connector,
         manifest,
-        exemptionReason: exemptions[connector.metadata.id],
+        exemption: exemptions[connector.metadata.id],
         facts: {
           authTypes: getAuthTypeFacts(connector),
           servedTokenUrls: await readServedTokenUrls(directory),
