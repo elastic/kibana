@@ -20,6 +20,8 @@ const mockConnectors: unknown[] = [
   },
 ];
 
+const mockGetSetting = jest.fn();
+
 jest.mock('react-use/lib/useLocalStorage', () =>
   jest.fn().mockImplementation((key, defaultValue) => {
     if (key.includes('START_LOCAL_STORAGE_KEY')) {
@@ -55,7 +57,11 @@ jest.mock('../../../common/lib/kibana', () => ({
       uiSettings: {
         get: jest.fn(),
       },
-      settings: {},
+      settings: {
+        client: {
+          get: (key: string) => mockGetSetting(key),
+        },
+      },
     },
   }),
 }));
@@ -95,6 +101,7 @@ jest.mock('../use_get_attack_discovery_generations', () => ({
 describe('useAttackDiscoveryControls', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetSetting.mockReset();
 
     (useLoadConnectors as jest.Mock).mockReturnValue({
       isFetched: true,
@@ -177,6 +184,41 @@ describe('useAttackDiscoveryControls', () => {
     });
 
     it('defaults to the first (highest-priority) connector when none is selected', () => {
+      (useLocalStorage as jest.Mock).mockImplementation((key: string) => {
+        if (key.endsWith('connectorId')) {
+          return [undefined, jest.fn()];
+        }
+        return ['test-id', jest.fn()];
+      });
+
+      const { result } = renderHook(() => useAttackDiscoveryControls());
+
+      expect(result.current.connectorId).toBe('connector-1');
+    });
+
+    it('defaults to the global default connector when no recommended model is listed', () => {
+      mockGetSetting.mockReturnValue('connector-2');
+      (useLocalStorage as jest.Mock).mockImplementation((key: string) => {
+        if (key.endsWith('connectorId')) {
+          return [undefined, jest.fn()];
+        }
+        return ['test-id', jest.fn()];
+      });
+
+      const { result } = renderHook(() => useAttackDiscoveryControls());
+
+      expect(result.current.connectorId).toBe('connector-2');
+    });
+
+    it('defaults to the first recommended model, not the global default connector', () => {
+      mockGetSetting.mockReturnValue('connector-2');
+      (useLoadConnectors as jest.Mock).mockReturnValue({
+        isFetched: true,
+        data: [
+          { ...(multipleConnectors[0] as object), isRecommended: true },
+          multipleConnectors[1],
+        ],
+      });
       (useLocalStorage as jest.Mock).mockImplementation((key: string) => {
         if (key.endsWith('connectorId')) {
           return [undefined, jest.fn()];

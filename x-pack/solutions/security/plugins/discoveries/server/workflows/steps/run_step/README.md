@@ -6,7 +6,7 @@ The `security.attack-discovery.run` step is the high-level entry point into the 
 
 When a workflow invokes `security.attack-discovery.run`, the step:
 
-1. **Resolves the connector** — `connector_id` is optional; when omitted it is resolved to the default connector (`resolveDefaultConnectorId`). The step then looks up the `action_type_id` for the effective connector so the generation engine knows which LLM provider to use.
+1. **Resolves the connector** — `connector_id` is optional; when omitted it is resolved by `resolveDefaultConnectorId`, from `feature_id` (default: the `attack_discovery` Model Settings feature), then the default connector. The step then looks up the `action_type_id` for the effective connector so the generation engine knows which LLM provider to use.
 2. **Builds a workflow config** — maps the step's inputs to the internal `WorkflowConfig` structure, including alert retrieval mode, ES|QL query, pre-retrieved alerts, and validation overrides.
 3. **Runs the pipeline** via `executeGenerationWorkflow` from `@kbn/discoveries`:
    - **Alert retrieval** — fetches and anonymizes alerts from Elasticsearch (unless `alerts` is provided directly).

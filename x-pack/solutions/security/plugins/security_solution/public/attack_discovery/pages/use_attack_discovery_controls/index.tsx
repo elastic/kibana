@@ -22,6 +22,7 @@ import {
 } from '@kbn/elastic-assistant';
 import { DEFAULT_END, DEFAULT_START } from '@kbn/elastic-assistant-common';
 import { useLoadConnectors } from '@kbn/inference-connectors';
+import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 
 import { useKibana } from '../../../common/lib/kibana';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
@@ -30,6 +31,7 @@ import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_
 import { useAttackDiscovery } from '../use_attack_discovery';
 import { useInvalidateGetAttackDiscoveryGenerations } from '../use_get_attack_discovery_generations';
 import { getConnectorNameFromId } from '../utils/get_connector_name_from_id';
+import { getInitialConnectorId } from '../utils/get_initial_connector_id';
 import { parseFilterQuery } from '../settings_flyout/parse_filter_query';
 import { CONNECTOR_ID_LOCAL_STORAGE_KEY, getDefaultQuery, getSize } from '../helpers';
 import { deserializeQuery } from '../local_storage/deserialize_query';
@@ -212,12 +214,22 @@ export const useAttackDiscoveryControls = () => {
       // If there is only one connector, set it as the selected connector
       setConnectorId(aiConnectors[0].id);
     } else {
-      // Multiple connectors are available: default to the highest-priority connector
-      // (the server already orders this list by the GenAI settings default connector,
-      // or the feature-recommended connector, first) when nothing has been selected yet.
-      setConnectorId((currentConnectorId) => currentConnectorId ?? aiConnectors[0].id);
+      // Multiple connectors are available: when nothing has been selected yet, default to the
+      // first recommended model, else the GenAI settings default connector (see
+      // `getInitialConnectorId`).
+      setConnectorId(
+        (currentConnectorId) =>
+          currentConnectorId ??
+          getInitialConnectorId({
+            aiConnectors,
+            globalDefaultConnectorId: settings.client.get<string | undefined>(
+              GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+              undefined
+            ),
+          })
+      );
     }
-  }, [aiConnectors]);
+  }, [aiConnectors, settings]);
 
   const onCloseFlyout = useCallback(() => setShowFlyout(false), []);
 

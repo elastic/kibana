@@ -21,7 +21,8 @@ export const RunStepTypeId = 'security.attack-discovery.run';
  * Input schema for the Run step.
  *
  * All fields are optional. When `connector_id` is omitted, the server tries
- * each `feature_id` in order, then the configured default AI connector
+ * each `feature_id` in order (the `attack_discovery` Model Settings feature when
+ * `feature_id` is omitted), then the configured default AI connector
  * (`genAiSettings:defaultAIConnector`, with an `inference.getDefaultConnector`
  * fallback). Provide `connector_id` to override both.
  */
@@ -50,7 +51,9 @@ export const RunStepInputSchema = lazySchema(() =>
      * than having a `connector_id` threaded down to it through `workflow.execute`
      * inputs.
      *
-     * Consulted only when `connector_id` is omitted. Each id is tried in order
+     * Consulted only when `connector_id` is omitted, and defaults to the
+     * `attack_discovery` feature (the Attack Discovery row, which recommends
+     * frontier-class models). Each id is tried in order
      * and the first registered `chat_completion` feature with a configured model
      * wins. An id that is not registered, or that resolves no connector, is
      * skipped — resolution then continues to the next id and finally the

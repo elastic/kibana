@@ -201,6 +201,7 @@ import { forwardCasesAlertStatusToSecuritySolution } from './workflows/triggers/
 import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
 import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
 import { initializeEndpointExceptionsPerPolicyOptInStatus } from './endpoint/lib/reference_data';
+import { getAttackDiscoveryInferenceFeature } from './lib/attack_discovery_inference_feature';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -497,14 +498,11 @@ export class Plugin implements ISecuritySolutionPlugin {
         recommendedEndpoints: [],
       });
 
-      plugins.searchInferenceEndpoints.features.register({
-        parentFeatureId: SECURITY_INFERENCE_PARENT_FEATURE_ID,
-        featureId: 'attack_discovery',
-        featureName: 'Attack Discovery',
-        featureDescription: 'Attack Discovery inference endpoint configuration',
-        taskType: 'chat_completion',
-        recommendedEndpoints: [],
-      });
+      plugins.searchInferenceEndpoints.features.register(
+        getAttackDiscoveryInferenceFeature({
+          parentFeatureId: SECURITY_INFERENCE_PARENT_FEATURE_ID,
+        })
+      );
 
       if (experimentalFeatures.leadGenerationEnabled) {
         plugins.searchInferenceEndpoints.features.register({

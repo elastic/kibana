@@ -26,3 +26,11 @@
  * engine overhead.
  */
 export const ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS = 90_000;
+
+/**
+ * The Model Settings feature a run step resolves its model from when it names
+ * neither a `connector_id` nor a `feature_id`: the Attack Discovery row, which
+ * recommends the same frontier-class models as the AlertZero Attack Discovery
+ * worker.
+ */
+export const DEFAULT_RUN_STEP_FEATURE_ID = 'attack_discovery';
