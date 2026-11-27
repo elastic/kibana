@@ -22,6 +22,19 @@ describe('Cloud plugin config', () => {
     });
   });
 
+  describe('created_at', () => {
+    test('Accepts created_at as a string and exposes it to the browser', () => {
+      const output = config.schema.validate({ created_at: '2026-11-04T14:16:56.000Z' });
+      expect(output.created_at).toBe('2026-11-04T14:16:56.000Z');
+      expect(config.exposeToBrowser).toEqual(expect.objectContaining({ created_at: true }));
+    });
+
+    test('Coerces a numeric created_at, which YAML reads from an unquoted year, to a string', () => {
+      const output = config.schema.validate({ created_at: 2026 });
+      expect(output.created_at).toBe('2026');
+    });
+  });
+
   describe('Serverless config', () => {
     test('Fails on invalid project_type', () => {
       expect(() =>

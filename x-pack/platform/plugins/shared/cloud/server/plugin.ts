@@ -24,6 +24,7 @@ import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_i
 import type { DecodedCloudId } from '../common/decode_cloud_id';
 import { decodeCloudId } from '../common/decode_cloud_id';
 import { parseOnboardingSolution } from '../common/parse_onboarding_default_solution';
+import { parseCreatedAt } from '../common/parse_created_at';
 import { getFullCloudUrl, withTargetOrganization } from '../common/utils';
 import { readInstanceSizeMb } from './env';
 import { defineRoutes } from './routes';
@@ -59,6 +60,11 @@ export interface CloudSetup {
    * Provider-specific region name without the CSP prefix.
    */
   region?: string;
+  /**
+   * When the deployment or project was created.
+   * Undefined if the creation time is unknown or could not be parsed.
+   */
+  createdAt?: Date;
   /**
    * The Elastic Cloud Organization that owns this deployment/project.
    */
@@ -361,6 +367,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       cloudId: this.config.id,
       csp: this.config.csp,
       region: this.config.region,
+      createdAt: parseCreatedAt(this.config.created_at, this.logger),
       organizationId,
       instanceSizeMb: readInstanceSizeMb(),
       deploymentId,

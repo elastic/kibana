@@ -98,6 +98,33 @@ describe('Cloud Experiments server plugin', () => {
       });
     });
 
+    test('adds created_at, csp and region to the kibana context without requiring Serverless', async () => {
+      const coreSetupMock = coreMock.createSetup();
+      const createdAt = new Date('2026-11-04T14:16:56.000Z');
+      plugin.setup(coreSetupMock, {
+        cloud: {
+          ...cloudMock.createSetup(),
+          isCloudEnabled: true,
+          isServerlessEnabled: false,
+          createdAt,
+          csp: 'aws',
+          region: 'us-east-1',
+        },
+        usageCollection: usageCollectionPluginMock.createSetupContract(),
+      });
+
+      await jest.advanceTimersByTimeAsync(100); // Remove the debounceTime effect
+      expect(coreSetupMock.featureFlags.appendContext).toHaveBeenCalledWith(
+        expect.objectContaining({
+          kibana: expect.objectContaining({
+            created_at: '2026-11-04T14:16:56.000Z',
+            csp: 'aws',
+            region: 'us-east-1',
+          }),
+        })
+      );
+    });
+
     test('registers the initial feature flags getter to enable bootstrapping', async () => {
       const coreSetupMock = coreMock.createSetup();
       plugin.setup(coreSetupMock, {

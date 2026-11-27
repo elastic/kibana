@@ -217,6 +217,11 @@ export interface CloudSetup extends CloudBasicUrls {
    */
   region?: string;
   /**
+   * When the deployment or project was created.
+   * Undefined if the creation time is unknown or could not be parsed.
+   */
+  createdAt?: Date;
+  /**
    * Method to retrieve privileged URLs for the Cloud plugin.
    */
   getPrivilegedUrls: () => Promise<CloudPrivilegedUrls>;

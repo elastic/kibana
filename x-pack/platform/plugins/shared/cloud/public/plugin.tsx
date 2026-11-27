@@ -19,6 +19,7 @@ import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_i
 import { ELASTICSEARCH_CONFIG_ROUTE } from '../common/constants';
 import { decodeCloudId, type DecodedCloudId } from '../common/decode_cloud_id';
 import { parseOnboardingSolution } from '../common/parse_onboarding_default_solution';
+import { parseCreatedAt } from '../common/parse_created_at';
 import type { CloudDataAttributes, ElasticsearchConfigType } from '../common/types';
 import type { CloudSetup, CloudStart, PublicElasticsearchConfigType } from './types';
 import { CloudUrlsService } from './urls';
@@ -30,6 +31,7 @@ export interface CloudConfigType {
   cname?: string;
   csp?: string;
   region?: string;
+  created_at?: string;
   base_url?: string;
   profile_url?: string;
   deployments_url?: string;
@@ -102,6 +104,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       cname,
       csp,
       region,
+      createdAt: parseCreatedAt(this.config.created_at, this.logger),
       cloudHost: decodedId?.host,
       cloudDefaultPort: decodedId?.defaultPort,
       trialEndDate: this.config.trial_end_date ? new Date(this.config.trial_end_date) : undefined,

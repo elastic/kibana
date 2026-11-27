@@ -77,6 +77,21 @@ export interface FlatMetadata {
    */
   orchestrator_target?: string;
   /**
+   * When the deployment or project was created, as an ISO-8601 string (when known)
+   * @group Kibana Static Values
+   */
+  created_at?: string;
+  /**
+   * The cloud service provider hosting the deployment or project (when known)
+   * @group Kibana Static Values
+   */
+  csp?: string;
+  /**
+   * The provider's region id, without the CSP prefix (when known)
+   * @group Kibana Static Values
+   */
+  region?: string;
+  /**
    * The Elastic Cloud Organization's ID
    * @group Organization Static Values
    */
@@ -152,6 +167,9 @@ export class MetadataService {
               project_type: metadata.project_type,
               product_tier: metadata.product_tier,
               orchestrator_target: metadata.orchestrator_target,
+              created_at: metadata.created_at,
+              csp: metadata.csp,
+              region: metadata.region,
               has_data: metadata.has_data,
             }),
           }),

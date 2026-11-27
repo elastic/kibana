@@ -199,6 +199,23 @@ describe('Cloud Plugin', () => {
         });
         expect(setup.serverless.projectType).toBe('security');
       });
+
+      describe('createdAt', () => {
+        it('is the parsed `created_at`', () => {
+          const { setup } = setupPlugin({ created_at: '2026-11-04T14:16:56.000Z' });
+          expect(setup.createdAt).toEqual(new Date('2026-11-04T14:16:56.000Z'));
+        });
+
+        it('is undefined when `created_at` is not set', () => {
+          const { setup } = setupPlugin({});
+          expect(setup.createdAt).toBeUndefined();
+        });
+
+        it('is undefined when `created_at` cannot be parsed', () => {
+          const { setup } = setupPlugin({ created_at: 'not-a-date' });
+          expect(setup.createdAt).toBeUndefined();
+        });
+      });
       describe('exposes isInTrial', () => {
         it('is `true` when `serverless.in_trial` is set', () => {
           const { setup } = setupPlugin({

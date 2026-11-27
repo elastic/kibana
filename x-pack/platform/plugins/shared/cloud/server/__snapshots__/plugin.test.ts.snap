@@ -10,6 +10,7 @@ Object {
   "cloudDefaultPort": undefined,
   "cloudHost": undefined,
   "cloudId": "cloudId",
+  "createdAt": undefined,
   "csp": "aws",
   "deploymentId": "deployment-id",
   "elasticsearchClusterId": undefined,
