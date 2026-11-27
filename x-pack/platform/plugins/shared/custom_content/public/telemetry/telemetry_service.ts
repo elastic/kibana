@@ -26,7 +26,7 @@ export class CustomContentTelemetryService {
     }
   }
 
-  trackPanelAdded(source: 'dashboard_panel') {
+  trackPanelAdded(source: 'dashboard_panel' | 'agent_generated') {
     this._reportEvent(CUSTOM_CONTENT_PANEL_ADDED, { source });
   }
 

@@ -24,7 +24,7 @@ export const registerCustomContentAnalyticsEvents = once((analytics: AnalyticsSe
       source: {
         type: 'keyword',
         _meta: {
-          description: 'How the panel was added. Possible values: dashboard_panel',
+          description: 'How the panel was added. Possible values: dashboard_panel|agent_generated',
         },
       },
     },
