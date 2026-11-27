@@ -136,6 +136,8 @@ export interface IAlertsClient<
     rawActiveAlerts: Record<string, RawAlertInstance>;
     rawRecoveredAlerts: Record<string, RawAlertInstance>;
   };
+  /** Returns the task state entry of an alert that was active when the run started. */
+  getRawTrackedActiveAlert(id: string): RawAlertInstance | undefined;
   factory(): PublicAlertFactory<
     State,
     Context,
@@ -178,6 +180,9 @@ export interface InitializeExecutionOpts {
   activeAlertsFromState: Record<string, RawAlertInstance>;
   recoveredAlertsFromState: Record<string, RawAlertInstance>;
   snoozedInstances?: RawRuleSnoozedInstance[];
+  // Only a regular rule run may set this. It untracks active alert documents that are missing
+  // from the task state, so the state passed in must be the rule's own.
+  shouldUntrackOrphanedAlerts?: boolean;
 }
 
 export interface TrackedAlerts<

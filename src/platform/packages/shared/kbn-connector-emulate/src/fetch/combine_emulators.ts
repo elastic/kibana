@@ -322,6 +322,7 @@ export const combineEmulators = (
     rejectedResponses: connectors.flatMap((connector) =>
       emulators[connector].rejectedResponses.map((rejected) => ({ ...rejected, connector }))
     ),
+    invalidOperations: connectors.flatMap((connector) => emulators[connector].invalidOperations),
     runtimeFixtures: {
       prepare: prepareFixtures,
       set: (fixtures, options) => {

@@ -8,6 +8,12 @@
 import type { KiDocument, KiJsonValue } from './http_api/knowledge_indicators';
 import { KI_LIFECYCLE_STATUSES, type KiLifecycleStatus } from './step_types/ki';
 
+export const KI_STATUSES = [...KI_LIFECYCLE_STATUSES, 'expired'] as const;
+export type KiStatus = (typeof KI_STATUSES)[number];
+
+/** Statuses of KIs that still count as existing: everything except deleted and failed. */
+export const KI_NOT_DELETED_STATUSES: readonly KiStatus[] = ['active', 'expired'];
+
 export const isKiJsonRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
@@ -20,6 +26,16 @@ const isKiLifecycleStatus = (value: string): value is KiLifecycleStatus =>
 
 export const toOptionalKiLifecycleStatus = (value: unknown): KiLifecycleStatus | undefined => {
   if (typeof value !== 'string' || !isKiLifecycleStatus(value)) {
+    return undefined;
+  }
+  return value;
+};
+
+const isKiStatus = (value: string): value is KiStatus =>
+  (KI_STATUSES as readonly string[]).includes(value);
+
+export const toOptionalKiStatus = (value: unknown): KiStatus | undefined => {
+  if (typeof value !== 'string' || !isKiStatus(value)) {
     return undefined;
   }
   return value;

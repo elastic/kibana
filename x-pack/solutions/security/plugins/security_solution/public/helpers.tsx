@@ -17,6 +17,7 @@ import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
 import { isObject } from 'lodash';
 import { CLOUD_SECURITY_POSTURE_BASE_PATH } from '@kbn/cloud-security-posture-common';
+import { CLOUD_DEFEND_BASE_PATH } from '@kbn/cloud-defend-plugin/public';
 import { PageScope } from './data_view_manager/constants';
 import {
   ALERTS_PATH,
@@ -32,6 +33,7 @@ import {
   RULES_CHANGES_HISTORY_PATH,
   RULES_CREATE_PATH,
   RULES_PATH,
+  SIEM_READINESS_PATH,
   THREAT_INTELLIGENCE_PATH,
   ONBOARDING_PATH,
 } from '../common/constants';
@@ -276,11 +278,29 @@ export const isCloudSecurityPosturePath = (pathname: string): boolean =>
   });
 
 /**
+ * Matches the Defend for containers (D4C) pages, whose app header owns the page actions.
+ */
+export const isCloudDefendPath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: CLOUD_DEFEND_BASE_PATH,
+    strict: false,
+  });
+
+/**
  * Matches the Configurations page, whose app header owns the page actions.
  */
 export const isConfigurationsPath = (pathname: string): boolean =>
   !!matchPath(pathname, {
     path: CONFIGURATIONS_PATH,
+    strict: false,
+  });
+
+/**
+ * Matches the SIEM readiness page, whose app header owns the page actions.
+ */
+export const isSiemReadinessPath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: SIEM_READINESS_PATH,
     strict: false,
   });
 
@@ -336,7 +356,9 @@ export const isPageWithAppHeaderPath = (pathname: string): boolean =>
     isCoverageOverviewPath,
     isExceptionsPath,
     isCloudSecurityPosturePath,
+    isCloudDefendPath,
     isConfigurationsPath,
+    isSiemReadinessPath,
     isEndpointManagementPath,
     isManageLandingPath,
   ].some((matchesPath) => matchesPath(pathname));

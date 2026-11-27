@@ -155,6 +155,9 @@
             "_tier_preference": "",
             "_id": ""
           },
+          "require": {
+            "*": ""
+          },
           "initial_recovery": {
             "_id": ""
           },
@@ -258,6 +261,11 @@
               false
             ]
           }
+        }
+      },
+      "requests": {
+        "cache": {
+          "enable": ""
         }
       },
       "similarity": {

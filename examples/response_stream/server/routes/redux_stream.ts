@@ -16,7 +16,7 @@ import {
   deleteEntity,
   error,
   type ReduxStreamApiAction,
-} from '../../common/api/redux_stream/data_slice';
+} from '../../common/api/redux_stream/data_actions';
 import { reducerStreamRequestBodySchema } from './schemas/reducer_stream';
 import { RESPONSE_STREAM_API_ENDPOINT } from '../../common/api';
 

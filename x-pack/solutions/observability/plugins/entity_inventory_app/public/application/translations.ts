@@ -17,6 +17,14 @@ export const TIME_RANGE_CLAMPED_TOAST_TITLE = i18n.translate(
   }
 );
 
+export const TIME_RANGE_NOT_ALLOWED_TOAST_TITLE = i18n.translate(
+  'xpack.entityInventoryApp.searchBar.timeRangeNotAllowedToast',
+  {
+    defaultMessage: 'The time range was not applied. It must be within the last {maxDays} days.',
+    values: { maxDays: ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS },
+  }
+);
+
 export const INVALID_QUERY_TOAST_TITLE = i18n.translate(
   'xpack.entityInventoryApp.searchBar.invalidQueryToastTitle',
   { defaultMessage: 'Invalid query' }

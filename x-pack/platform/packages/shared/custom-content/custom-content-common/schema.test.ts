@@ -15,8 +15,7 @@ import {
 import {
   customContentStateSchema,
   customContentPanelUpdateSchema,
-  readEsqlQuery,
-  toEsqlQueryState,
+  customContentDataQueriesSchema,
 } from './schema';
 
 describe('customContentStateSchema', () => {
@@ -103,79 +102,41 @@ describe('customContentPanelUpdateSchema', () => {
     ).toBe(true);
   });
 
-  it('still requires at least one of prompt or esqlQuery', () => {
+  it('requires something to change', () => {
     expect(customContentPanelUpdateSchema.safeParse({ embeddable_id: 'p1' }).success).toBe(false);
   });
 
-  it('accepts an esqlQuery on its own', () => {
+  it('accepts removing every query on its own', () => {
     expect(
-      customContentPanelUpdateSchema.safeParse({ embeddable_id: 'p1', esqlQuery: 'FROM logs-*' })
+      customContentPanelUpdateSchema.safeParse({ embeddable_id: 'p1', removeAllQueries: true })
         .success
     ).toBe(true);
   });
 
-  it('accepts regenerateEsql with a prompt and an index', () => {
+  it('rejects removeAllQueries together with dataQueries', () => {
     expect(
       customContentPanelUpdateSchema.safeParse({
         embeddable_id: 'p1',
-        prompt: 'Also show the error rate',
-        regenerateEsql: true,
-        index: 'logs-*',
-      }).success
-    ).toBe(true);
-  });
-
-  it('rejects regenerateEsql without a prompt', () => {
-    expect(
-      customContentPanelUpdateSchema.safeParse({
-        embeddable_id: 'p1',
-        esqlQuery: 'FROM logs-*',
-        regenerateEsql: true,
+        removeAllQueries: true,
+        dataQueries: [{ esql: 'FROM logs' }],
       }).success
     ).toBe(false);
   });
 
-  it('rejects an edit whose only change is a blank esqlQuery', () => {
-    expect(
-      customContentPanelUpdateSchema.safeParse({ embeddable_id: 'p1', esqlQuery: '  ' }).success
-    ).toBe(false);
-  });
+  it.each([
+    [{ esqlQuery: 'FROM logs' }],
+    [{ esqlQuery: null, prompt: 'x' }],
+    [{ regenerateEsql: true }],
+    [{ index: 'logs' }],
+  ])('rejects the removed fields instead of dropping them: %j', (extra) => {
+    const result = customContentPanelUpdateSchema.safeParse({
+      embeddable_id: 'p1',
+      prompt: 'Show it',
+      ...extra,
+    });
 
-  it('accepts a blank esqlQuery next to a prompt, as not supplied', () => {
-    expect(
-      customContentPanelUpdateSchema.safeParse({
-        embeddable_id: 'p1',
-        prompt: 'Make the badges blue',
-        esqlQuery: '',
-      }).success
-    ).toBe(true);
-  });
-
-  it('rejects regenerateEsql together with esqlQuery: null', () => {
-    expect(
-      customContentPanelUpdateSchema.safeParse({
-        embeddable_id: 'p1',
-        prompt: 'Show errors by host',
-        esqlQuery: null,
-        regenerateEsql: true,
-      }).success
-    ).toBe(false);
-  });
-
-  it('rejects an index longer than the limit', () => {
-    expect(
-      customContentPanelUpdateSchema.safeParse({
-        embeddable_id: 'p1',
-        prompt: 'Show errors',
-        index: 'x'.repeat(257),
-      }).success
-    ).toBe(false);
-  });
-
-  it('accepts a null esqlQuery to clear the query', () => {
-    expect(
-      customContentPanelUpdateSchema.safeParse({ embeddable_id: 'p1', esqlQuery: null }).success
-    ).toBe(true);
+    expect(result.success).toBe(false);
+    expect(JSON.stringify(result)).toContain('is no longer accepted');
   });
 
   it('rejects a prompt exceeding CUSTOM_CONTENT_MAX_PROMPT_LENGTH', () => {
@@ -194,21 +155,77 @@ describe('customContentPanelUpdateSchema', () => {
   });
 });
 
-describe('esql_query accessors', () => {
-  it('round-trips a single query', () => {
-    expect(readEsqlQuery({ esql_query: toEsqlQueryState('FROM logs') })).toBe('FROM logs');
+describe('customContentDataQueriesSchema', () => {
+  it('accepts descriptions, supplied queries and empty entries', () => {
+    expect(
+      customContentDataQueriesSchema.safeParse([
+        { description: 'totals', index: 'logs' },
+        { esql: 'FROM logs | LIMIT 5' },
+        {},
+      ]).success
+    ).toBe(true);
   });
 
-  it('maps no query to an absent field rather than an empty array', () => {
-    expect(toEsqlQueryState(undefined)).toBeUndefined();
+  it('rejects an empty list and more data queries than a panel can hold', () => {
+    expect(customContentDataQueriesSchema.safeParse([]).success).toBe(false);
+    expect(
+      customContentDataQueriesSchema.safeParse(
+        Array.from({ length: CUSTOM_CONTENT_MAX_ESQL_QUERIES + 1 }, () => ({ esql: 'FROM x' }))
+      ).success
+    ).toBe(false);
   });
 
-  it('reads undefined from a panel with no query', () => {
-    expect(readEsqlQuery({})).toBeUndefined();
-    expect(readEsqlQuery({ esql_query: [] })).toBeUndefined();
+  it('bounds the text of a data query', () => {
+    expect(
+      customContentDataQueriesSchema.safeParse([
+        { description: 'a'.repeat(CUSTOM_CONTENT_MAX_PROMPT_LENGTH + 1) },
+      ]).success
+    ).toBe(false);
+    expect(
+      customContentDataQueriesSchema.safeParse([
+        { esql: 'a'.repeat(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH + 1) },
+      ]).success
+    ).toBe(false);
+    expect(customContentDataQueriesSchema.safeParse([{ index: 'a'.repeat(257) }]).success).toBe(
+      false
+    );
+  });
+});
+
+describe('customContentDataQueriesSchema entries that would do nothing', () => {
+  it.each([
+    [[{ index: 'metrics-*' }]],
+    [[{ description: '   ' }]],
+    [[{ esql: '  ' }]],
+    [[{ esql: 'FROM logs', index: 'logs' }]],
+  ])('are rejected, so the call does not succeed on a no-op: %j', (entries) => {
+    expect(customContentDataQueriesSchema.safeParse(entries).success).toBe(false);
   });
 
-  it('reads the first query of a panel with several as the main one', () => {
-    expect(readEsqlQuery({ esql_query: ['FROM a', 'FROM b', 'FROM c'] })).toBe('FROM a');
+  it('still accepts an empty entry, which keeps the query at its position', () => {
+    expect(customContentDataQueriesSchema.safeParse([{}, { description: 'totals' }]).success).toBe(
+      true
+    );
+  });
+});
+
+describe('customContentPanelUpdateSchema data queries', () => {
+  const parse = (input: Record<string, unknown>) =>
+    customContentPanelUpdateSchema.safeParse({ embeddable_id: 'p1', ...input });
+
+  it('accepts data queries with a prompt', () => {
+    expect(parse({ prompt: 'Show it', dataQueries: [{ description: 'totals' }] }).success).toBe(
+      true
+    );
+  });
+
+  it('counts data queries as a change', () => {
+    expect(parse({ dataQueries: [{ esql: 'FROM logs' }] }).success).toBe(true);
+  });
+
+  it('needs a prompt when a data query has a description', () => {
+    const result = parse({ dataQueries: [{ description: 'totals' }] });
+    expect(result.success).toBe(false);
+    expect(JSON.stringify(result)).toContain('needs a prompt');
   });
 });

@@ -12,6 +12,7 @@ import type { SignificantEventsServer } from '../../types';
 import { RelayRequestError } from '@kbn/actions-plugin/server';
 import { createAgentNotFoundError, createAgentUnavailableError } from '@kbn/agent-builder-common';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
+import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import { RELAY_APP_CONNECTION_STATUS } from '../../../common/slack_app/types';
 import { ELASTIC_APPS_SLACK_CONNECTOR_ID, SlackAppService } from './service';
 import { SlackAppUnavailableError } from './errors';
@@ -390,6 +391,30 @@ describe('SlackAppService', () => {
       expect(soClient.create).toHaveBeenCalledWith(
         RELAY_APP_CONNECTION_SO_TYPE,
         expect.objectContaining({ apiKeyId: 'new-key', claimId: 'claim-2' }),
+        { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
+      );
+    });
+
+    it('records the full name of the connecting user instead of an opaque username', async () => {
+      const { server, soClient, grantAsInternalUser } = createHarness();
+      jest.mocked(server.security.authc.getCurrentUser).mockReturnValue(
+        mockAuthenticatedUser({
+          username: '12345',
+          full_name: 'Test User',
+          email: 't@example.com',
+        })
+      );
+      grantAsInternalUser.mockResolvedValue({ id: 'new-key', name: 'k', api_key: 'secret' });
+      startInstall.mockResolvedValue({ authorize_url: 'https://slack/oauth', claim_id: 'claim-2' });
+
+      await new SlackAppService(server).connect(request);
+
+      expect(startInstall).toHaveBeenCalledWith(
+        expect.objectContaining({ created_by_user_key: '12345' })
+      );
+      expect(soClient.create).toHaveBeenCalledWith(
+        RELAY_APP_CONNECTION_SO_TYPE,
+        expect.objectContaining({ createdBy: 'Test User' }),
         { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
       );
     });
@@ -1564,6 +1589,89 @@ describe('SlackAppService', () => {
       expect(server.logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Failed to list bindings from Relay')
       );
+    });
+  });
+
+  describe('isChannelBound', () => {
+    const isChannelBound = jest.fn();
+
+    const createConnectedHarness = () => {
+      const harness = createHarness();
+      (harness.server as unknown as { relayClient: unknown }).relayClient = {
+        startInstall,
+        fetchClaim,
+        unbind,
+        isChannelBound,
+      };
+      harness.soClient.get.mockResolvedValue({
+        attributes: { status: RELAY_APP_CONNECTION_STATUS.connected, tenantKey: 'tenant-A' },
+      });
+      return harness;
+    };
+
+    beforeEach(() => {
+      isChannelBound.mockReset();
+    });
+
+    it('returns true when the Relay says the channel is bound', async () => {
+      const { server } = createConnectedHarness();
+      isChannelBound.mockResolvedValue(true);
+
+      await expect(new SlackAppService(server).isChannelBound(request, 'C1')).resolves.toBe(true);
+      expect(isChannelBound).toHaveBeenCalledWith('tenant-A', 'C1');
+    });
+
+    it('returns false when the Relay says the channel is not bound', async () => {
+      const { server } = createConnectedHarness();
+      isChannelBound.mockResolvedValue(false);
+
+      await expect(new SlackAppService(server).isChannelBound(request, 'C1')).resolves.toBe(false);
+    });
+
+    it('returns false when the Slack App is not connected', async () => {
+      const { server } = createHarness();
+
+      await expect(new SlackAppService(server).isChannelBound(request, 'C1')).resolves.toBe(false);
+      expect(isChannelBound).not.toHaveBeenCalled();
+    });
+
+    it('logs the status, reason and error message of a Relay failure before rethrowing', async () => {
+      const { server, logger } = createConnectedHarness();
+      isChannelBound.mockRejectedValue(
+        new RelayRequestError('/bindings', 503, 'down', 'relay_busy')
+      );
+
+      await expect(
+        new SlackAppService(server).isChannelBound(request, 'C1')
+      ).rejects.toBeInstanceOf(RelayRequestError);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('status 503, reason relay_busy, down')
+      );
+    });
+
+    it('logs the status and error message when the failure has no reason', async () => {
+      const { server, logger } = createConnectedHarness();
+      isChannelBound.mockRejectedValue(new RelayRequestError('/bindings', 502, 'upstream down'));
+
+      await expect(
+        new SlackAppService(server).isChannelBound(request, 'C1')
+      ).rejects.toBeInstanceOf(RelayRequestError);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('status 502, upstream down')
+      );
+    });
+
+    it('rethrows a Relay failure and logs it once', async () => {
+      const { server, logger } = createConnectedHarness();
+      const relayError = new Error('relay down');
+      isChannelBound.mockRejectedValue(relayError);
+
+      await expect(new SlackAppService(server).isChannelBound(request, 'C1')).rejects.toBe(
+        relayError
+      );
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('relay down'));
     });
   });
 

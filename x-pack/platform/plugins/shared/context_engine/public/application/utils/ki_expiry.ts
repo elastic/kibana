@@ -6,15 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { KiStatus } from '../../../common/ki_lifecycle_status';
 import type { KiLifecycleStatus } from '../../../common/step_types/ki';
 
-export type KiStatus = KiLifecycleStatus | 'expired';
-
-export const KI_STATUS_BADGE_COLOR: Record<KiStatus, 'success' | 'danger' | 'warning'> = {
+/** Only Failed stands out; other statuses use the default badge. */
+export const KI_STATUS_BADGE_COLOR: Record<KiStatus, 'default' | 'success' | 'danger'> = {
   active: 'success',
-  deleted: 'danger',
-  verification_failed: 'warning',
-  expired: 'warning',
+  deleted: 'default',
+  verification_failed: 'danger',
+  expired: 'default',
 };
 
 export const KI_STATUS_LABEL: Record<KiStatus, string> = {

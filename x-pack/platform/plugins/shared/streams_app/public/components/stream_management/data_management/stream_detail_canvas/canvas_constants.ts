@@ -55,8 +55,10 @@ export const PAN_MARGIN = 500;
 /** Fixed card widths (px) for each node kind; the single source of truth used
  * by both the node components and the pan-bound estimate below. */
 export const SOURCE_NODE_WIDTH = 246;
-// Wide enough for the stats footer: a status, a rate and an index count on one row.
-export const DESTINATION_NODE_WIDTH = 260;
+// Wide enough for the stats footer in the worst case, all on one row: a rate such as `12.5k/s`, a
+// latency such as `999ms`, the `Failures` badge, and a two-digit index count such as `99 indices`.
+// The columns of the layout are `COLUMN_GAP` apart, center to center, so this does not move them.
+export const DESTINATION_NODE_WIDTH = 300;
 export const ROUTING_NODE_WIDTH = 172;
 export const PROCESSING_NODE_WIDTH = 130;
 

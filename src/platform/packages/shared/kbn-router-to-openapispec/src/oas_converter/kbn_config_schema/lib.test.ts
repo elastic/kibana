@@ -962,3 +962,23 @@ test('getParamSchema from {pathVar*}', () => {
   // Special * syntax with ? in API defs
   expect(getParamSchema({ a, b, [`${keyName}?*`]: c }, keyName)).toBe(c);
 });
+
+test('publishes the planned bounds of reporting-mode strings as vendor extensions', () => {
+  const { schema: converted } = convert(
+    schema.object({
+      strict: schema.savedObjectId(),
+      reporting: schema.savedObjectId.warn({ label: 'dashboard.panelId' }),
+      reportingWithoutMinimum: schema.description.warn(),
+    })
+  );
+
+  expect((converted as OpenAPIV3.SchemaObject).properties).toEqual({
+    strict: { type: 'string', minLength: 1, maxLength: 512 },
+    reporting: {
+      type: 'string',
+      'x-kibana-planned-min-length': 1,
+      'x-kibana-planned-max-length': 512,
+    },
+    reportingWithoutMinimum: { type: 'string', 'x-kibana-planned-max-length': 10000 },
+  });
+});

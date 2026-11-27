@@ -290,6 +290,18 @@ export const settingsPanelTexts = {
         'Time zone is set to {timeZoneLabel} by your administrator. This applies to all users in this space.',
       values: { timeZoneLabel },
     }),
+  timeZoneUnsetBrowserDescription: (timeZoneLabel: string) =>
+    i18n.translate(
+      'sharedUXPackages.dateRangePicker.settingsPanel.timeZoneUnsetBrowserDescription',
+      {
+        defaultMessage: "Time zone is unset. Your browser's default is {timeZoneLabel}.",
+        values: { timeZoneLabel },
+      }
+    ),
+  timeZoneUnsetDescription: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.timeZoneUnsetDescription',
+    { defaultMessage: "Time zone is unset. Your browser's default is used." }
+  ),
   timeZoneBrowserLocale: (abbreviation: string) =>
     i18n.translate('sharedUXPackages.dateRangePicker.settingsPanel.timeZoneBrowserLocale', {
       defaultMessage: "your browser's locale ({abbreviation})",

@@ -71,7 +71,13 @@ export const usePurgeKnowledge = () => {
           title: i18n.translate('xpack.nightshift.settings.purge.partialToastTitle', {
             defaultMessage: 'Purged with errors',
           }),
-          text: `${summary} ${result.failures.map(({ scope }) => scope).join(', ')} failed.`,
+          text: i18n.translate('xpack.nightshift.settings.purge.partialToastText', {
+            defaultMessage: '{summary} {failedScopes} failed.',
+            values: {
+              summary,
+              failedScopes: result.failures.map(({ scope }) => scope).join(', '),
+            },
+          }),
         });
         return;
       }

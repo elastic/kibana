@@ -12,8 +12,8 @@
  * components (`ContextualServiceMapGraph`, popovers, service flyout).
  *
  * NOT exported from the attachments barrel (`./index.ts`): that barrel is
- * imported by server-side code and `createEdgeMarker` pulls `@xyflow/react`
- * at runtime. Import this file directly from browser code and tests.
+ * imported by server-side code, which has no use for this transform. Import
+ * this file directly from browser code and tests.
  */
 
 import type {

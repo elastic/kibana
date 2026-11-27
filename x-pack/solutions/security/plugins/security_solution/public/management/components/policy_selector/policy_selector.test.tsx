@@ -32,6 +32,7 @@ describe('PolicySelector component', () => {
   let mockedContext: AppContextTestRender;
   let apiMocks: ReturnType<typeof allFleetHttpMocks>;
   let testPolicyId1: string;
+  let testPolicyName1: string;
   let testPolicyId2: string;
   let testPolicyId3: string;
   let props: PolicySelectorProps;
@@ -46,6 +47,7 @@ describe('PolicySelector component', () => {
 
     const apiPolicies = apiMocks.responseProvider.packagePolicies().items;
     testPolicyId1 = apiPolicies[0].id;
+    testPolicyName1 = apiPolicies[0].name;
     testPolicyId2 = apiPolicies[1].id;
     testPolicyId3 = apiPolicies[2].id;
     apiMocks.responseProvider.packagePolicies.mockClear();
@@ -217,7 +219,9 @@ describe('PolicySelector component', () => {
     props.useCheckbox = true;
     const { getByTestId } = await render();
 
-    expect(getByTestId(`test-policy-${testPolicyId1}-checkbox`)).toBeTruthy();
+    expect(getByTestId(`test-policy-${testPolicyId1}-checkbox`)).toHaveAccessibleName(
+      testPolicyName1
+    );
   });
 
   describe('and when "showPolicyLink" prop is true', () => {
@@ -536,7 +540,7 @@ describe('PolicySelector component', () => {
       props.useCheckbox = true;
       const { getByTestId, queryByTestId } = await render();
 
-      expect(getByTestId('test-customItem1-checkbox')).toBeTruthy();
+      expect(getByTestId('test-customItem1-checkbox')).toHaveAccessibleName('Item 1');
       expect(getByTestId('test-customItem2-checkbox')).toBeTruthy();
 
       // EUI Selectable Group Label item should NOT have the checkbox

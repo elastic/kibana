@@ -15,6 +15,40 @@
 export const ES_VALID_SAMPLE_STEPS = [
   // Search operations
   {
+    // Spec syntax that the OpenAPI spec drops: shortcuts, `aggs` alias, field-keyed entries.
+    name: 'search-spec-syntax',
+    type: 'elasticsearch.search',
+    with: {
+      index: 'test-index',
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { term: { status_code: 500 } },
+            { prefix: { 'host.name': 'web' } },
+            { geo_distance: { distance: '10km', 'source.geo.location': { lat: 52.5, lon: 13.4 } } },
+          ],
+        },
+      },
+      _source: { includes: ['host.*'], excludes: ['host.ip'] },
+      collapse: {
+        field: 'host.name',
+        inner_hits: { name: 'latest', sort: [{ '@timestamp': 'desc' }] },
+      },
+      aggs: {
+        by_host: {
+          terms: { field: 'host.name' },
+          aggs: { avg_bytes: { avg: { field: 'bytes' } } },
+        },
+      },
+      script_fields: {
+        kb: {
+          script: { source: "doc['bytes'].value / params.divisor", params: { divisor: 1024 } },
+        },
+      },
+    },
+  },
+  {
     name: 'search-simple-query',
     type: 'elasticsearch.search',
     with: {
@@ -202,6 +236,19 @@ export const ES_VALID_SAMPLE_STEPS = [
         counter: 1,
         tags: [],
       },
+    },
+  },
+  {
+    name: 'update-document-with-scalar-script-params',
+    type: 'elasticsearch.update',
+    with: {
+      index: 'test-index',
+      id: '1',
+      script: {
+        source: 'ctx._source.counter += params.count',
+        params: { count: 1, tags: ['a', 'b'], enabled: true },
+      },
+      _source: { includes: ['counter'] },
     },
   },
   // Index management operations

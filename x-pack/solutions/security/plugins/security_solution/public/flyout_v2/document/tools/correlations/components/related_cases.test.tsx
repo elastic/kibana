@@ -19,10 +19,14 @@ import {
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../../shared/components/test_ids';
 import { SecurityPageName } from '@kbn/deeplinks-security';
-import { TestProviders } from '../../../../../common/mock';
+import { mockGetAppUrl } from '@kbn/security-solution-navigation/mocks/navigation';
+import { createMockStore, mockGlobalState, TestProviders } from '../../../../../common/mock';
 import { APP_UI_ID } from '../../../../../../common';
 
 jest.mock('../../../main/hooks/use_fetch_related_cases');
+jest.mock('@kbn/security-solution-navigation/src/navigation');
+
+mockGetAppUrl.mockImplementation(({ path }) => path);
 
 const mockNavigateToApp = jest.fn();
 jest.mock('../../../../../common/lib/kibana', () => {
@@ -119,6 +123,34 @@ describe('<RelatedCases />', () => {
     expect(mockNavigateToApp).toHaveBeenCalledWith(APP_UI_ID, {
       deepLinkId: SecurityPageName.case,
       path: '/id',
+      openInNewTab: true,
+    });
+  });
+
+  it('should close the timeline in the case url when the timeline is open', () => {
+    (useFetchRelatedCases as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [{ id: 'id', title: 'title', description: 'description', status: 'open' }],
+      dataCount: 1,
+    });
+    const store = createMockStore({
+      ...mockGlobalState,
+      globalUrlParam: { timeline: { id: 'timeline-id', isOpen: true } },
+    });
+
+    const { getByTestId } = render(
+      <TestProviders store={store}>
+        <RelatedCases eventId={eventId} />
+      </TestProviders>
+    );
+    const link = getByTestId('case-details-link');
+    expect(link).toHaveAttribute('href', '/id?timeline=(isOpen:!f)');
+
+    link.click();
+    expect(mockNavigateToApp).toHaveBeenCalledWith(APP_UI_ID, {
+      deepLinkId: SecurityPageName.case,
+      path: '/id?timeline=(isOpen:!f)',
       openInNewTab: true,
     });
   });

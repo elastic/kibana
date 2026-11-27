@@ -1176,7 +1176,7 @@ describe('Download Service', () => {
       await downloadSourceService.delete('download-source-preconfigured', {
         fromPreconfiguration: true,
       });
-      expect(soClientMock.delete).toBeCalled();
+      expect(soClientMock.delete).toHaveBeenCalled();
     });
 
     describe('cross-space authorization', () => {

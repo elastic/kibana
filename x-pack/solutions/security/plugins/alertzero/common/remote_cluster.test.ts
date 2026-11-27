@@ -6,6 +6,7 @@
  */
 
 import {
+  isDotPrefixedIndex,
   isIndexExclusion,
   joinRemoteCluster,
   mapIndexPart,
@@ -82,5 +83,18 @@ describe('parseIndexScopeEntry', () => {
   ])('reads %s', (_label, entry, expected) => {
     expect(parseIndexScopeEntry(entry)).toEqual(expected);
     expect(isIndexExclusion(entry)).toBe(expected.exclude);
+  });
+});
+
+describe('isDotPrefixedIndex', () => {
+  it.each([
+    ['a local alerts index', '.alerts-security.alerts-default', true],
+    ['a remote alerts index', 'remote:.alerts-security.alerts-default', true],
+    ['a plain local name', 'logs-*', false],
+    ['a data stream backing index', '.ds-logs-okta.system-default-2026.09.30-000001', false],
+    ['a remote backing index', 'remote:.ds-logs-okta.system-default-2026.09.30-000001', false],
+    ['a name with a dot only in the middle', 'logs-okta.system-default', false],
+  ])('%s', (_label, name, expected) => {
+    expect(isDotPrefixedIndex(name)).toBe(expected);
   });
 });

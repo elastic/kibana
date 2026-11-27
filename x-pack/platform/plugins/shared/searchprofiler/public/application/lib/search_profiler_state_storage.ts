@@ -74,20 +74,12 @@ export const updateSearchProfilerState = (state: SearchProfilerStoredState): voi
   });
 };
 
-export const isSearchProfilerQueryPersistable = (query: string): boolean => {
-  return query === '' || checkForParseErrors(query).error === null;
-};
-
 export const updateSearchProfilerQueryState = (query: string): void => {
-  if (!isSearchProfilerQueryPersistable(query)) {
-    return;
-  }
-
   updateSearchProfilerState({ query });
 };
 
 const getValidQuery = (query?: string | null): string | undefined => {
-  if (!query || !isSearchProfilerQueryPersistable(query)) {
+  if (!query || checkForParseErrors(query).error !== null) {
     return undefined;
   }
 
@@ -100,9 +92,7 @@ export const getInitialSearchProfilerQuery = ({
   storedQuery,
 }: InitialSearchProfilerQueryParams): string => {
   return (
-    getValidQuery(queryFromUrl) ??
-    (queryFromUrl === null ? getValidQuery(storedQuery) : undefined) ??
-    defaultQuery
+    getValidQuery(queryFromUrl) ?? (queryFromUrl === null ? storedQuery : undefined) ?? defaultQuery
   );
 };
 

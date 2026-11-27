@@ -63,6 +63,16 @@ describe('Actions Plugin', () => {
       `);
     });
 
+    it.each([undefined, false, true])(
+      'exposes catalog config %s with a false default',
+      (enabled) => {
+        const context = coreMock.createPluginInitializerContext(
+          enabled === undefined ? {} : { catalog: { enabled } }
+        );
+        expect(new Plugin(context).setup().isCatalogEnabled).toBe(enabled ?? false);
+      }
+    );
+
     it('returns isWebhookSslWithPfxEnabled if set in kibana config', async () => {
       const context = coreMock.createPluginInitializerContext({
         webhook: {

@@ -1,5 +1,5 @@
 {
-  "sha1": "9c20dd93c4ccc8ed8ea680206b33fd5e99a08ae9",
+  "sha1": "b756bed23b3025206bbe83827a6c184217f80d31",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -205,6 +205,58 @@
       }
     },
     {
+      "id": "fec37228c1c4138-d1661fe23286695",
+      "title": "bundle compression returns gzip files when client only supports gzip",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/core/test/scout/api/tests/bundle_compression.spec.ts",
+        "line": 25,
+        "column": 12
+      }
+    },
+    {
+      "id": "fec37228c1c4138-795cf21bc090e37",
+      "title": "bundle compression returns br files when client only supports br",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/core/test/scout/api/tests/bundle_compression.spec.ts",
+        "line": 34,
+        "column": 7
+      }
+    },
+    {
+      "id": "fec37228c1c4138-e68807cf0f0b9ad",
+      "title": "bundle compression returns br files when client only supports gzip and br",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/core/test/scout/api/tests/bundle_compression.spec.ts",
+        "line": 42,
+        "column": 72
+      }
+    },
+    {
+      "id": "fec37228c1c4138-ea7bb42fb6884c6",
+      "title": "bundle compression returns gzip files when client prefers gzip",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/core/test/scout/api/tests/bundle_compression.spec.ts",
+        "line": 52,
+        "column": 18
+      }
+    },
+    {
       "id": "33567c4e7f7fca5-6f4b0a7c5c0ce07",
       "title": "capabilities returns a 400 when an invalid app id is provided",
       "expectedStatus": "passed",
@@ -262,6 +314,32 @@
         "file": "src/core/packages/core/test/scout/api/tests/compression.spec.ts",
         "line": 25,
         "column": 24
+      }
+    },
+    {
+      "id": "385b4df4ac52423-98e7ec9cdd1e335",
+      "title": "cookie handling allows non-strict cookies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/core/test/scout/api/tests/cookies.spec.ts",
+        "line": 17,
+        "column": 48
+      }
+    },
+    {
+      "id": "385b4df4ac52423-4e109471f9cfcac",
+      "title": "cookie handling returns an error if the cookie cannot be parsed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/core/test/scout/api/tests/cookies.spec.ts",
+        "line": 26,
+        "column": 8
       }
     },
     {
@@ -482,6 +560,86 @@
         "file": "src/core/packages/core/test/scout/api/tests/ui_settings_crud.spec.ts",
         "line": 112,
         "column": 12
+      }
+    },
+    {
+      "id": "bea776dc2850b5d-c862887a4f44f2d",
+      "title": "ui settings metadata without credentials rejects unauthenticated requests for the namespace definitions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/core/packages/core/test/scout/api/tests/ui_settings_metadata_unauthenticated.spec.ts",
+        "line": 21,
+        "column": 15
+      }
+    },
+    {
+      "id": "bea776dc2850b5d-40fd2cb7c068035",
+      "title": "ui settings metadata without credentials rejects unauthenticated requests for the global definitions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/core/packages/core/test/scout/api/tests/ui_settings_metadata_unauthenticated.spec.ts",
+        "line": 21,
+        "column": 15
+      }
+    },
+    {
+      "id": "7be93aea40d2d31-bb376e0540ee199",
+      "title": "ui settings metadata returns the namespace definitions without saved values to a read-only user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/core/packages/core/test/scout/api/tests/ui_settings_metadata.spec.ts",
+        "line": 52,
+        "column": 11
+      }
+    },
+    {
+      "id": "7be93aea40d2d31-4191936e6b94586",
+      "title": "ui settings metadata returns the global definitions without saved values to a read-only user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/core/packages/core/test/scout/api/tests/ui_settings_metadata.spec.ts",
+        "line": 68,
+        "column": 13
       }
     },
     {

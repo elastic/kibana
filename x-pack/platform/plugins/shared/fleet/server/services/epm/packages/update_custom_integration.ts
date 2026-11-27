@@ -43,6 +43,8 @@ import { getInstalledPackageWithAssets } from './get';
 
 import { installPackageWithStateMachine } from './install';
 
+import { logFailedPackagePolicyUpgrades } from './utils';
+
 export async function updateCustomIntegration(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
@@ -221,7 +223,12 @@ export async function incrementVersionAndUpdate(
   );
 
   if (policyIdsToUpgrade.items.length) {
-    await packagePolicyService.bulkUpgrade(soClient, esClient, policyIdsToUpgrade.items);
+    const upgradeResults = await packagePolicyService.bulkUpgrade(
+      soClient,
+      esClient,
+      policyIdsToUpgrade.items
+    );
+    logFailedPackagePolicyUpgrades(appContextService.getLogger(), pkgName, upgradeResults);
   }
   return res;
 }

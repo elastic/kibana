@@ -190,8 +190,8 @@ function createLineLayerDescriptor(
           name: COUNT_PROP_NAME,
           origin: FIELD_ORIGIN.SOURCE,
         },
-        minSize: 1,
-        maxSize: 8,
+        min_size: 1,
+        max_size: 8,
       },
     },
   };

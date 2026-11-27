@@ -1,5 +1,5 @@
 {
-  "sha1": "8642159c3378298d33824983fff4cfc78870e5e0",
+  "sha1": "8252fc4e66bb7cc48072fd68ba95aa5ba3bf8f35",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -96,8 +96,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/details_integrations.spec.ts",
-        "line": 87,
-        "column": 13
+        "line": 75,
+        "column": 48
       }
     },
     {
@@ -112,24 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/details_integrations.spec.ts",
-        "line": 105,
-        "column": 7
-      }
-    },
-    {
-      "id": "d87fd2b522244fa-a1e6bc31b5d265e",
-      "title": "Dataset quality details integrations hides the dashboards action and links to the overview of a package without dashboards",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/details_integrations.spec.ts",
-        "line": 128,
-        "column": 9
+        "line": 80,
+        "column": 24
       }
     },
     {
@@ -144,8 +128,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/details_integrations.spec.ts",
-        "line": 157,
-        "column": 9
+        "line": 113,
+        "column": 15
       }
     },
     {
@@ -160,8 +144,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/details_integrations.spec.ts",
-        "line": 173,
-        "column": 9
+        "line": 133,
+        "column": 10
       }
     },
     {
@@ -256,8 +240,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/table_filters.spec.ts",
-        "line": 91,
-        "column": 7
+        "line": 102,
+        "column": 61
       }
     },
     {
@@ -272,8 +256,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/table_filters.spec.ts",
-        "line": 119,
-        "column": 10
+        "line": 128,
+        "column": 63
       }
     },
     {
@@ -288,8 +272,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/table_filters.spec.ts",
-        "line": 137,
-        "column": 10
+        "line": 146,
+        "column": 67
       }
     },
     {
@@ -304,8 +288,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/table_filters.spec.ts",
-        "line": 160,
-        "column": 13
+        "line": 171,
+        "column": 26
       }
     },
     {
@@ -320,8 +304,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/table_filters.spec.ts",
-        "line": 194,
-        "column": 9
+        "line": 198,
+        "column": 12
       }
     },
     {
@@ -336,8 +320,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/table.spec.ts",
-        "line": 77,
-        "column": 48
+        "line": 92,
+        "column": 7
       }
     },
     {
@@ -352,8 +336,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/table.spec.ts",
-        "line": 84,
-        "column": 24
+        "line": 116,
+        "column": 7
       }
     },
     {
@@ -368,8 +352,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/table.spec.ts",
-        "line": 131,
-        "column": 7
+        "line": 136,
+        "column": 14
       }
     },
     {
@@ -384,8 +368,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/table.spec.ts",
-        "line": 142,
-        "column": 59
+        "line": 146,
+        "column": 25
       }
     },
     {
@@ -400,8 +384,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/table.spec.ts",
-        "line": 145,
-        "column": 20
+        "line": 150,
+        "column": 7
       }
     },
     {
@@ -416,8 +400,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/table.spec.ts",
-        "line": 151,
-        "column": 78
+        "line": 156,
+        "column": 24
       }
     },
     {
@@ -432,8 +416,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/table.spec.ts",
-        "line": 136,
-        "column": 24
+        "line": 177,
+        "column": 5
       }
     }
   ]

@@ -8,7 +8,7 @@
 import { esql } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 
-const TIME_FIELD = '@timestamp';
+export const TIME_FIELD = '@timestamp';
 
 /**
  * Builds an inline ES|QL `@timestamp` range predicate for `[start, end]` (epoch millis).

@@ -21,6 +21,9 @@ export enum SiemMigrationsEventTypes {
   // Dashboards
   DashboardTranslationSuccess = 'siem_migrations_dashboard_translation_success',
   DashboardTranslationFailure = 'siem_migrations_dashboard_translation_failure',
+  // Workflows
+  WorkflowTranslationSuccess = 'siem_migrations_workflow_translation_success',
+  WorkflowTranslationFailure = 'siem_migrations_workflow_translation_failure',
 }
 
 export const siemMigrationEventNames = {
@@ -39,12 +42,15 @@ export const siemMigrationEventNames = {
   // Dashboards
   [SiemMigrationsEventTypes.DashboardTranslationFailure]: 'Dashboard translation failure',
   [SiemMigrationsEventTypes.DashboardTranslationSuccess]: 'Dashboard translation success',
+  // Workflows
+  [SiemMigrationsEventTypes.WorkflowTranslationFailure]: 'Workflow translation failure',
+  [SiemMigrationsEventTypes.WorkflowTranslationSuccess]: 'Workflow translation success',
 } as const;
 
 export const SIEM_MIGRATIONS_MIGRATION_SUCCESS: EventTypeOpts<{
   model: string;
   migrationId: string;
-  type: 'rules' | 'dashboards';
+  type: 'rules' | 'dashboards' | 'workflows';
   duration: number;
   completed: number;
   failed: number;
@@ -76,7 +82,7 @@ export const SIEM_MIGRATIONS_MIGRATION_SUCCESS: EventTypeOpts<{
     type: {
       type: 'keyword',
       _meta: {
-        description: 'The type of migration, either rules or dashboards',
+        description: 'The type of migration: rules, dashboards, or workflows',
       },
     },
     duration: {
@@ -116,7 +122,7 @@ export const SIEM_MIGRATIONS_MIGRATION_FAILURE: EventTypeOpts<{
   model: string;
   error: string;
   migrationId: string;
-  type: 'rules' | 'dashboards';
+  type: 'rules' | 'dashboards' | 'workflows';
   duration: number;
   completed: number;
   failed: number;
@@ -154,7 +160,7 @@ export const SIEM_MIGRATIONS_MIGRATION_FAILURE: EventTypeOpts<{
     type: {
       type: 'keyword',
       _meta: {
-        description: 'The type of migration, either rules or dashboards',
+        description: 'The type of migration: rules, dashboards, or workflows',
       },
     },
     duration: {
@@ -194,7 +200,7 @@ export const SIEM_MIGRATIONS_MIGRATION_ABORTED: EventTypeOpts<{
   model: string;
   reason: string;
   migrationId: string;
-  type: 'rules' | 'dashboards';
+  type: 'rules' | 'dashboards' | 'workflows';
   duration: number;
   completed: number;
   failed: number;
@@ -232,7 +238,7 @@ export const SIEM_MIGRATIONS_MIGRATION_ABORTED: EventTypeOpts<{
     type: {
       type: 'keyword',
       _meta: {
-        description: 'The type of migration, either rules or dashboards',
+        description: 'The type of migration: rules, dashboards, or workflows',
       },
     },
     duration: {
@@ -271,7 +277,7 @@ export const SIEM_MIGRATIONS_MIGRATION_ABORTED: EventTypeOpts<{
 export const SIEM_MIGRATIONS_SOURCE_QUERY_KEYWORDS: EventTypeOpts<{
   migrationId: string;
   vendor: SiemMigrationVendor;
-  type: 'rules' | 'dashboards';
+  type: 'rules' | 'dashboards' | 'workflows';
   keywords: string[];
   eventName: string;
 }> = {
@@ -299,7 +305,7 @@ export const SIEM_MIGRATIONS_SOURCE_QUERY_KEYWORDS: EventTypeOpts<{
     type: {
       type: 'keyword',
       _meta: {
-        description: 'The type of migration, either rules or dashboards',
+        description: 'The type of migration: rules, dashboards, or workflows',
       },
     },
     keywords: {
@@ -645,6 +651,100 @@ export const SIEM_MIGRATIONS_DASHBOARD_TRANSLATION_FAILURE: EventTypeOpts<{
   },
 };
 
+export const SIEM_MIGRATIONS_WORKFLOW_TRANSLATION_SUCCESS: EventTypeOpts<{
+  model: string;
+  migrationId: string;
+  duration: number;
+  translationResult: string;
+  eventName: string;
+  vendor: SiemMigrationVendor;
+}> = {
+  eventType: SiemMigrationsEventTypes.WorkflowTranslationSuccess,
+  schema: {
+    eventName: {
+      type: 'keyword',
+      _meta: {
+        description: 'The event name/description',
+        optional: false,
+      },
+    },
+    translationResult: {
+      type: 'keyword',
+      _meta: {
+        description: 'Describes if the translation was full or partial',
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'The LLM model that was used',
+      },
+    },
+    migrationId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Unique identifier for the migration',
+      },
+    },
+    duration: {
+      type: 'long',
+      _meta: {
+        description: 'Duration of the migration in milliseconds',
+      },
+    },
+    vendor: {
+      type: 'keyword',
+      _meta: {
+        description: 'Vendor of the migration',
+      },
+    },
+  },
+};
+
+export const SIEM_MIGRATIONS_WORKFLOW_TRANSLATION_FAILURE: EventTypeOpts<{
+  model: string;
+  error: string;
+  migrationId: string;
+  eventName: string;
+  vendor: SiemMigrationVendor;
+}> = {
+  eventType: SiemMigrationsEventTypes.WorkflowTranslationFailure,
+  schema: {
+    eventName: {
+      type: 'keyword',
+      _meta: {
+        description: 'The event name/description',
+        optional: false,
+      },
+    },
+    error: {
+      type: 'keyword',
+      _meta: {
+        description: 'Error message for the translation failure',
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'The LLM model that was used',
+      },
+    },
+    migrationId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Unique identifier for the migration',
+      },
+    },
+    vendor: {
+      type: 'keyword',
+      _meta: {
+        description: 'Vendor of the migration',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const SIEM_MIGRATIONS_EVENTS = [
   SIEM_MIGRATIONS_MIGRATION_SUCCESS,
   SIEM_MIGRATIONS_MIGRATION_ABORTED,
@@ -656,4 +756,6 @@ export const SIEM_MIGRATIONS_EVENTS = [
   SIEM_MIGRATIONS_INTEGRATIONS_MATCH,
   SIEM_MIGRATIONS_DASHBOARD_TRANSLATION_SUCCESS,
   SIEM_MIGRATIONS_DASHBOARD_TRANSLATION_FAILURE,
+  SIEM_MIGRATIONS_WORKFLOW_TRANSLATION_SUCCESS,
+  SIEM_MIGRATIONS_WORKFLOW_TRANSLATION_FAILURE,
 ];

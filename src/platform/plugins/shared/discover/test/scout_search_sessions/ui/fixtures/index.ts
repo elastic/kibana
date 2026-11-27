@@ -47,6 +47,7 @@ export {
   ESQL_SEARCH_REQUESTS,
   RELATIVE_TIME_DEFAULTS,
   goToDashboards,
+  openDashboard,
   refetchDiscover,
   waitForDiscoverResults,
 } from './replay_cache';

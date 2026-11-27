@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { firstValueFrom } from 'rxjs';
 import type { PluginInitializerContext, CoreSetup, Logger, Plugin } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type {
@@ -15,7 +14,7 @@ import type {
   VisTypeVegaPluginSetup,
   VisTypeVegaPluginStart,
 } from './types';
-import { VEGA_AS_CODE_ENABLED_FLAG, VEGA_EMBEDDABLE_TYPE } from '../common/constants';
+import { VEGA_EMBEDDABLE_TYPE } from '../common/constants';
 import { getVegaEmbeddableSchema } from './embeddable/schema';
 import { getTransforms } from './embeddable/transforms';
 import { vegaLibraryItemSavedObjectType } from './vega_saved_object';
@@ -33,25 +32,11 @@ export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisType
     core: CoreSetup,
     { embeddable, usageCollection }: VisTypeVegaPluginSetupDependencies
   ) {
-    // Startup-only: public API/OpenAPI contract should not hot-swap mid-process.
-    // The embeddable definition is registered only once the flag is known, so
-    // `getSchema` can never observe the default (disabled) value while the flag is on.
-    void core
-      .getStartServices()
-      .then(async ([{ featureFlags }]) => {
-        const asCodeEnabled = await firstValueFrom(
-          featureFlags.getBooleanValue$(VEGA_AS_CODE_ENABLED_FLAG, false)
-        );
-        embeddable.registerEmbeddableServerDefinition(VEGA_EMBEDDABLE_TYPE, {
-          title: 'Vega',
-          getTransforms: (drilldownTransforms) => getTransforms(drilldownTransforms, this.logger),
-          getSchema: (getDrilldownsSchema) =>
-            asCodeEnabled ? getVegaEmbeddableSchema(getDrilldownsSchema) : undefined,
-        });
-      })
-      .catch((error) => {
-        this.logger.error(`Failed to register the Vega embeddable: ${error}`);
-      });
+    embeddable.registerEmbeddableServerDefinition(VEGA_EMBEDDABLE_TYPE, {
+      title: 'Vega',
+      getTransforms: (drilldownTransforms) => getTransforms(drilldownTransforms, this.logger),
+      getSchema: (getDrilldownsSchema) => getVegaEmbeddableSchema(getDrilldownsSchema),
+    });
 
     core.savedObjects.registerType(vegaLibraryItemSavedObjectType);
 

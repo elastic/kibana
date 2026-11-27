@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { InvalidSchemaError, loadContractOperations } from '.';
+import { InvalidSchemaError, loadContractOperations, loadValidContractOperations } from '.';
 
 const documentWith = (schemas: Record<string, unknown>) => ({
   openapi: '3.0.3',
@@ -72,5 +72,31 @@ describe('loadContractOperations', () => {
     expect(load).toThrow(
       /POST \/items \(request body application\/json\): Invalid regular expression/
     );
+  });
+});
+
+describe('loadValidContractOperations', () => {
+  it('leaves out the operations whose schemas have defects, and lists them', () => {
+    const document = documentWith({ Item: { $ref: '#/components/schemas/Missing' } });
+    const { operations, broken, invalid } = loadValidContractOperations({
+      ...document,
+      paths: {
+        ...document.paths,
+        '/health': { get: { responses: { '200': { description: 'ok' } } } },
+      },
+    });
+
+    expect(operations.map(({ method, path }) => `${method} ${path}`)).toEqual(['get /health']);
+    expect(broken.map(({ method, path }) => `${method} ${path}`)).toEqual(['post /items']);
+    expect(invalid).toEqual([
+      expect.objectContaining({
+        operation: 'POST /items',
+        location: 'request body application/json',
+      }),
+      expect.objectContaining({
+        operation: 'POST /items',
+        location: 'response 201 application/json',
+      }),
+    ]);
   });
 });

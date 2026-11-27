@@ -76,6 +76,26 @@ describe('AiIndexManagedRow', () => {
     );
   });
 
+  it('counts active and expired knowledge documents', async () => {
+    const core = coreMock.createStart();
+    core.http.get.mockResolvedValue({
+      kis: [],
+      total: 0,
+      summary: { total: 0, counts_by_type: [] },
+    });
+
+    renderWithProviders(core, buildManagedAiIndex());
+
+    await waitFor(() =>
+      expect(core.http.get).toHaveBeenCalledWith(
+        '/internal/context_engine/ai_index/elastic/kis',
+        expect.objectContaining({
+          query: expect.objectContaining({ status: ['active', 'expired'] }),
+        })
+      )
+    );
+  });
+
   it('navigates to the detail page when the row is clicked', async () => {
     const core = coreMock.createStart();
     core.http.get.mockResolvedValue({

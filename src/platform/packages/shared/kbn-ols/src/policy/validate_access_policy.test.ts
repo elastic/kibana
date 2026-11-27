@@ -11,14 +11,14 @@ import type { AccessPolicy } from './types';
 import { validateAccessPolicy } from './validate_access_policy';
 
 const POLICY: AccessPolicy = {
-  generalAccessLevels: ['none', 'use', 'edit'],
-  defaultGeneralAccessLevel: 'edit',
-  entryLevels: ['use'],
+  generalAccess: ['none', 'use', 'edit'],
+  defaultGeneralAccess: 'edit',
+  entryAccess: ['use'],
   operations: {
-    view: { level: 'view', privileges: {} },
-    use: { level: 'use', privileges: { api: ['some_feature'] } },
-    edit: { level: 'edit', privileges: {} },
-    delete: { level: 'edit', privileges: {} },
+    view: { access: 'view', privileges: {} },
+    use: { access: 'use', privileges: { api: ['some_feature'] } },
+    edit: { access: 'edit', privileges: {} },
+    delete: { access: 'edit', privileges: {} },
   },
 };
 
@@ -28,33 +28,33 @@ describe('validateAccessPolicy', () => {
   });
 
   it.each<[string, Partial<AccessPolicy>]>([
-    ['manage general access', { generalAccessLevels: ['edit', 'manage' as 'edit'] }],
-    ['no general access values', { generalAccessLevels: [] }],
+    ['manage general access', { generalAccess: ['edit', 'manage' as 'edit'] }],
+    ['no general access values', { generalAccess: [] }],
     [
-      'a default outside the allowed levels',
-      { generalAccessLevels: ['none'], defaultGeneralAccessLevel: 'use' },
+      'a default outside the allowed values',
+      { generalAccess: ['none'], defaultGeneralAccess: 'use' },
     ],
-    ['no entry levels', { entryLevels: [] }],
-    ['an entry level of none', { entryLevels: ['none' as 'use'] }],
+    ['no entry access values', { entryAccess: [] }],
+    ['entry access of none', { entryAccess: ['none' as 'use'] }],
     [
       'a missing delete operation',
       { operations: { view: POLICY.operations.view, edit: POLICY.operations.edit } },
     ],
     [
       'a view operation above view',
-      { operations: { ...POLICY.operations, view: { level: 'use', privileges: {} } } },
+      { operations: { ...POLICY.operations, view: { access: 'use', privileges: {} } } },
     ],
     [
-      'an operation with an unknown level',
-      { operations: { ...POLICY.operations, run: { level: 'owner' as 'use', privileges: {} } } },
+      'an operation with unknown access',
+      { operations: { ...POLICY.operations, run: { access: 'owner' as 'use', privileges: {} } } },
     ],
     [
       'the reserved transfer operation',
-      { operations: { ...POLICY.operations, transfer: { level: 'edit', privileges: {} } } },
+      { operations: { ...POLICY.operations, transfer: { access: 'edit', privileges: {} } } },
     ],
     [
       'the reserved manage_access operation',
-      { operations: { ...POLICY.operations, manage_access: { level: 'manage', privileges: {} } } },
+      { operations: { ...POLICY.operations, manage_access: { access: 'manage', privileges: {} } } },
     ],
   ])('rejects %s', (_, overrides) => {
     expect(() => validateAccessPolicy({ ...POLICY, ...overrides })).toThrow();

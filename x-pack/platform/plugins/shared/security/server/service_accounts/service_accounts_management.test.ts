@@ -90,6 +90,7 @@ describe('ServiceAccountsManagement', () => {
     store = {
       findByServiceAccountId: jest.fn().mockResolvedValue([]),
       countByServiceAccountIds: jest.fn().mockResolvedValue(new Map()),
+      summarize: jest.fn(),
       getVerified: jest.fn(),
     } as unknown as jest.Mocked<WorkloadBindingStore>;
     mockCheckPrivileges = { globally: jest.fn() } as unknown as jest.Mocked<CheckPrivileges>;
@@ -322,6 +323,22 @@ describe('ServiceAccountsManagement', () => {
 
       await expect(management.countBoundWorkloads(['service-account-id'])).resolves.toBe(counts);
       expect(store.countByServiceAccountIds).toHaveBeenCalledWith(['service-account-id']);
+      expect(mockCheckPrivileges.globally).not.toHaveBeenCalled();
+      expect(store.getVerified).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('#summarizeBoundWorkloads', () => {
+    it('summarizes through the store, without checking privileges or verifying bindings', async () => {
+      const summary = {
+        total: 1,
+        serviceAccounts: 1,
+        byWorkload: [{ pluginId: 'workflowsExecutionEngine', workloadType: 'workflow', count: 1 }],
+        byBinderType: { user: 1, api_key: 0, service_account: 0 },
+      };
+      store.summarize.mockResolvedValue(summary);
+
+      await expect(management.summarizeBoundWorkloads()).resolves.toBe(summary);
       expect(mockCheckPrivileges.globally).not.toHaveBeenCalled();
       expect(store.getVerified).not.toHaveBeenCalled();
     });

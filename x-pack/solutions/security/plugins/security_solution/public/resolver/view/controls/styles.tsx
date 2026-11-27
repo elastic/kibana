@@ -11,9 +11,9 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
-export const COLUMN_WIDTH = ['fit-content(10em)', 'auto'];
+export const COLUMN_WIDTH: [string, string] = ['fit-content(10em)', 'auto'];
 
 // EuiRange is currently only horizontally positioned. This reorients the track to a vertical position
 export const StyledEuiRange = styled(EuiRange)<EuiRangeProps>`
@@ -45,7 +45,10 @@ export const StyledEuiDescriptionListDescription = styled(EuiDescriptionListDesc
   lineheight: '2.2em'; // lineHeight to align center vertically
 `;
 
-export const StyledEuiButtonIcon = styled(EuiButtonIcon)<StyledGraphControlProps>`
+export const StyledEuiButtonIcon = styled(EuiButtonIcon, {
+  shouldForwardProp: (prop) =>
+    prop !== '$backgroundColor' && prop !== '$iconColor' && prop !== '$borderColor',
+})<StyledGraphControlProps>`
   background-color: ${(props) => props.$backgroundColor};
   color: ${(props) => props.$iconColor};
   border-color: ${(props) => props.$borderColor};
@@ -60,7 +63,9 @@ export const StyledEuiButtonIcon = styled(EuiButtonIcon)<StyledGraphControlProps
   }
 `;
 
-export const StyledGraphControls = styled.div<Partial<StyledGraphControlProps>>`
+export const StyledGraphControls = styled('div', {
+  shouldForwardProp: (prop) => prop !== '$iconColor',
+})<Partial<StyledGraphControlProps>>`
   display: flex;
   flex-direction: row;
   position: absolute;

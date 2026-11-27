@@ -21,3 +21,9 @@ export type StoredHeatmapLayer = z.output<typeof heatmapLayerSchema>;
 export type StoredLayerGroup = z.output<typeof layerGroupSchema>;
 export type StoredRasterLayer = z.output<typeof rasterLayerSchema>;
 export type StoredVectorLayer = z.output<typeof vectorLayerSchema>;
+export type StoredLayer =
+  | StoredEMSVectorTileLayer
+  | StoredHeatmapLayer
+  | StoredLayerGroup
+  | StoredRasterLayer
+  | StoredVectorLayer;

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux-v7';
+import { connect } from 'react-redux';
 import { setBreadcrumb } from '../../store/actions/set_breadcrumb';
-import { uploadLicense, uploadLicenseStatus } from '../../store/actions/upload_license';
-import { addUploadErrorMessage } from '../../store/actions/add_error_message';
+import { uploadLicense } from '../../store/actions/upload_license';
+import { uploadLicenseStatus } from '../../store/reducers/upload_status';
+import { addUploadErrorMessage } from '../../store/reducers/upload_error_message';
 
 import {
   getUploadErrorMessage,

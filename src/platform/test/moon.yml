@@ -37,7 +37,6 @@ dependsOn:
   - '@kbn/rison'
   - '@kbn/field-formats-plugin'
   - '@kbn/axe-config'
-  - '@kbn/config-schema'
   - '@kbn/analytics'
   - '@kbn/ftr-screenshot-filename'
   - '@kbn/es-archiver'
@@ -66,6 +65,7 @@ dependsOn:
   - '@kbn/deeplinks-analytics'
   - '@kbn/core-chrome-browser-components'
   - '@kbn/monaco'
+  - '@kbn/dashboard-constants'
 tags:
   - test-helper
   - package

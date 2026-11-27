@@ -6,5 +6,6 @@
  */
 
 export { apiTest } from '@kbn/scout';
+export * from './history';
 export * from './osquery_fakes';
 export * from './workflows_client';

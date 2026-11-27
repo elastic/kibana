@@ -86,7 +86,12 @@ export class HomePageObject extends FtrService {
     await this.doesSampleDataSetExist('ecommerce');
   }
 
-  async addSampleDataSet(id: string) {
+  /**
+   * Installs a sample data set by driving the sample data UI.
+   * Only use this when testing the sample data functionality itself.
+   * In all other cases, use `sampleData.testResources.installKibanaSampleData` instead.
+   */
+  async addSampleDataSetFromUi(id: string) {
     await this.openSampleDataAccordion();
     if (await this.isSampleDataSetInstalled(id)) {
       return;
@@ -102,7 +107,12 @@ export class HomePageObject extends FtrService {
     );
   }
 
-  async removeSampleDataSet(id: string) {
+  /**
+   * Removes a sample data set by driving the sample data UI.
+   * Only use this when testing the sample data functionality itself.
+   * In all other cases, use `sampleData.testResources.removeKibanaSampleData` instead.
+   */
+  async removeSampleDataSetFromUi(id: string) {
     await this.openSampleDataAccordion();
     if (!(await this.isSampleDataSetInstalled(id))) {
       return;
@@ -154,7 +164,7 @@ export class HomePageObject extends FtrService {
   }
 
   async launchSampleDataSet(id: string) {
-    await this.addSampleDataSet(id);
+    await this.addSampleDataSetFromUi(id);
     await this.toasts.dismissIfExists();
     await this.retry.try(async () => {
       await this.testSubjects.click(`launchSampleDataSet${id}`);

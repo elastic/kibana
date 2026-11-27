@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import { TestProviders } from '../../../../../../common/mock';
 import { mockEndgameDnsRequest } from '../../../../../../common/mock/mock_endgame_ecs_data';
-import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 
 import { DnsRequestEventDetails } from './dns_request_event_details';
 
@@ -24,10 +24,8 @@ jest.mock('@elastic/eui', () => {
 });
 
 describe('DnsRequestEventDetails', () => {
-  const mount = useMountAppended();
-
   test('it renders the expected text given an Endgame DNS request_event', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <DnsRequestEventDetails
           contextId="test-context"
@@ -36,7 +34,7 @@ describe('DnsRequestEventDetails', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual(
+    expect(container.textContent).toEqual(
       'SYSTEM\\NT AUTHORITY@HD-obe-8bf77f54asked forupdate.googleapis.comwith question typeA, which resolved to10.100.197.67viaGoogleUpdate.exe(443192)3008dns'
     );
   });

@@ -33,15 +33,8 @@ type DiagnosticPath = Array<string | number>;
 
 export interface IgnoredKibanaFetcherOccurrence {
   path: DiagnosticPath;
-  stepType: string;
   stepName?: string;
 }
-
-/** Core self-client ignores YAML `fetcher` for every `kibana.*` step. */
-export const shouldWarnIgnoredKibanaFetcher = (
-  stepType: string,
-  warnKibanaFetcher: boolean
-): boolean => warnKibanaFetcher && isKibanaWorkflowStepType(stepType);
 
 const ON_FAILURE_STEP_KEYS = ['on-failure', 'iteration-on-failure'] as const;
 
@@ -58,7 +51,6 @@ const collectIgnoredKibanaFetcherOccurrencesFromSteps = (
     if (stepHasIgnoredKibanaFetcher(step)) {
       occurrences.push({
         path: [...stepPath, 'with', 'fetcher'],
-        stepType: step.type,
         stepName: typeof step.name === 'string' ? step.name : undefined,
       });
     }
@@ -137,7 +129,7 @@ const collectIgnoredKibanaFetcherOccurrencesFromContainers = (
   }
 };
 
-/** Structural `WorkflowDiagnostic.path` values plus step type for ignored kibana `with.fetcher` settings. */
+/** Structural `WorkflowDiagnostic.path` values for ignored kibana `with.fetcher` settings. */
 export const collectIgnoredKibanaFetcherOccurrences = (
   steps: WorkflowYaml['steps'] | undefined
 ): IgnoredKibanaFetcherOccurrence[] => {

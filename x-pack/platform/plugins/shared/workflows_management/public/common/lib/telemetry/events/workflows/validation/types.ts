@@ -1,0 +1,60 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { WorkflowValidationRuleId } from '@kbn/workflows';
+import type { WorkflowEditorType, WorkflowTelemetryOrigin } from '../types';
+
+export enum WorkflowValidationEventTypes {
+  /**
+   * When a workflow validation error occurs
+   * This tracks validation issues users encounter when creating or updating workflows.
+   */
+  WorkflowValidationError = 'workflows_workflow_validation_error',
+}
+
+export type WorkflowValidationErrorType =
+  | 'schema'
+  | 'step-name-validation'
+  | 'connector-id-validation'
+  | 'service-account-validation'
+  | 'variable-validation'
+  | 'liquid-template-validation'
+  | 'invalid_yaml'
+  | 'other'
+  | string; // Allow any string to accommodate future validation types
+
+/**
+ * Parameters for workflow validation error telemetry.
+ */
+export interface ReportWorkflowValidationErrorActionParams {
+  eventName: string;
+  /**
+   * The workflow ID if validation error occurred on existing workflow. Undefined for new workflows.
+   */
+  workflowId?: string;
+  /**
+   * Unique validation error types
+   */
+  errorTypes: WorkflowValidationErrorType[];
+  /**
+   * Unique rule IDs of the errors. Stable across rewordings and translations, unlike
+   * `errorTypes`, which only names the validator that produced the error.
+   */
+  ruleIds: WorkflowValidationRuleId[];
+  /**
+   * Total number of validation errors
+   */
+  errorCount: number;
+  /**
+   * Editor context if error occurred on workflow detail page
+   */
+  editorType?: WorkflowEditorType;
+  /**
+   * Origin of the action: 'workflow_list' or 'workflow_detail'
+   */
+  origin?: WorkflowTelemetryOrigin;
+}

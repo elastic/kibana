@@ -71,7 +71,7 @@ describe('SAMLAuthenticationProvider', () => {
             state: {
               requestIdMap: {
                 [mockSAMLSet1.requestId]: {
-                  redirectURL: '/test-base-path/some-path#some-app',
+                  redirectURL: '/mock-server-basepath/some-path#some-app',
                 },
               },
               realm: 'test-realm',
@@ -79,7 +79,7 @@ describe('SAMLAuthenticationProvider', () => {
           })
         )
       ).resolves.toEqual(
-        AuthenticationResult.redirectTo('/test-base-path/some-path#some-app', {
+        AuthenticationResult.redirectTo('/mock-server-basepath/some-path#some-app', {
           userProfileGrant: { type: 'accessToken', accessToken: 'some-token' },
           state: {
             accessToken: 'some-token',
@@ -99,6 +99,47 @@ describe('SAMLAuthenticationProvider', () => {
           realm: 'test-realm',
         },
       });
+    });
+
+    it('gets token and redirects user to the base path URL if requested URL is not a Kibana internal URL.', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+        access_token: 'some-token',
+        refresh_token: 'some-refresh-token',
+        realm: 'test-realm',
+        authentication: mockUser,
+        in_response_to: mockSAMLSet1.requestId,
+      });
+
+      await expect(
+        provider.login(
+          request,
+          { type: SAMLLogin.LoginWithSAMLResponse, samlResponse: mockSAMLSet1.samlResponse },
+          sessionMock.createValue({
+            state: {
+              requestIdMap: {
+                [mockSAMLSet1.requestId]: { redirectURL: 'https://some-host/some-path' },
+              },
+              realm: 'test-realm',
+            },
+          })
+        )
+      ).resolves.toEqual(
+        AuthenticationResult.redirectTo('/mock-server-basepath/', {
+          userProfileGrant: { type: 'accessToken', accessToken: 'some-token' },
+          state: {
+            accessToken: 'some-token',
+            refreshToken: 'some-refresh-token',
+            realm: 'test-realm',
+          },
+          user: mockUser,
+        })
+      );
+
+      expect(mockOptions.logger.warn).toHaveBeenCalledWith(
+        'Redirect URL is not a valid Kibana internal URL, using base path instead.'
+      );
     });
 
     it('gets token and redirects user to the requested URL if SAML Response is valid ignoring Relay State.', async () => {
@@ -126,14 +167,16 @@ describe('SAMLAuthenticationProvider', () => {
           sessionMock.createValue({
             state: {
               requestIdMap: {
-                [mockSAMLSet1.requestId]: { redirectURL: '/test-base-path/some-path#some-app' },
+                [mockSAMLSet1.requestId]: {
+                  redirectURL: '/mock-server-basepath/some-path#some-app',
+                },
               },
               realm: 'test-realm',
             },
           })
         )
       ).resolves.toEqual(
-        AuthenticationResult.redirectTo('/test-base-path/some-path#some-app', {
+        AuthenticationResult.redirectTo('/mock-server-basepath/some-path#some-app', {
           userProfileGrant: { type: 'accessToken', accessToken: 'some-token' },
           state: {
             accessToken: 'some-token',
@@ -355,7 +398,7 @@ describe('SAMLAuthenticationProvider', () => {
           sessionMock.createValue({
             state: {
               requestIdMap: {
-                [mockSAMLSet1.requestId]: { redirectURL: '/test-base-path/some-path' },
+                [mockSAMLSet1.requestId]: { redirectURL: '/mock-server-basepath/some-path' },
               },
               realm: 'test-realm',
             },
@@ -410,7 +453,7 @@ describe('SAMLAuthenticationProvider', () => {
             })
           )
         ).resolves.toEqual(
-          AuthenticationResult.redirectTo('/path25', {
+          AuthenticationResult.redirectTo('/mock-server-basepath/path25', {
             user: mockUser,
             userProfileGrant: { type: 'accessToken', accessToken: 'some-token' },
             state: {
@@ -435,7 +478,7 @@ describe('SAMLAuthenticationProvider', () => {
         const newRequestId = '_mock_request_id_51';
         const requestIdMapResult = { ...requestIdMap };
         delete requestIdMapResult[mockSamlResponses.set1.requestId];
-        requestIdMapResult[newRequestId] = { redirectURL: '/path51' };
+        requestIdMapResult[newRequestId] = { redirectURL: '/mock-server-basepath/path51' };
 
         mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
           id: newRequestId,
@@ -448,7 +491,7 @@ describe('SAMLAuthenticationProvider', () => {
             request,
             {
               type: SAMLLogin.LoginInitiatedByUser,
-              redirectURL: '/path51',
+              redirectURL: '/mock-server-basepath/path51',
             },
             sessionMock.createValue({ state: { requestIdMap } })
           )
@@ -962,7 +1005,7 @@ describe('SAMLAuthenticationProvider', () => {
         await expect(
           provider.login(request, {
             type: SAMLLogin.LoginInitiatedByUser,
-            redirectURL: '/test-base-path/some-path#some-fragment',
+            redirectURL: '/mock-server-basepath/some-path#some-fragment',
           })
         ).resolves.toEqual(
           AuthenticationResult.redirectTo(
@@ -970,7 +1013,9 @@ describe('SAMLAuthenticationProvider', () => {
             {
               state: {
                 requestIdMap: {
-                  'some-request-id': { redirectURL: '/test-base-path/some-path#some-fragment' },
+                  'some-request-id': {
+                    redirectURL: '/mock-server-basepath/some-path#some-fragment',
+                  },
                 },
                 realm: 'test-realm',
               },
@@ -1004,7 +1049,7 @@ describe('SAMLAuthenticationProvider', () => {
             request,
             {
               type: SAMLLogin.LoginInitiatedByUser,
-              redirectURL: '/test-base-path/some-path#some-fragment',
+              redirectURL: '/mock-server-basepath/some-path#some-fragment',
             },
             null
           )
@@ -1014,7 +1059,9 @@ describe('SAMLAuthenticationProvider', () => {
             {
               state: {
                 requestIdMap: {
-                  'some-request-id': { redirectURL: '/test-base-path/some-path#some-fragment' },
+                  'some-request-id': {
+                    redirectURL: '/mock-server-basepath/some-path#some-fragment',
+                  },
                 },
                 realm: 'test-realm',
               },
@@ -1054,7 +1101,7 @@ describe('SAMLAuthenticationProvider', () => {
             request,
             {
               type: SAMLLogin.LoginInitiatedByUser,
-              redirectURL: '/test-base-path/some-path#some-fragment',
+              redirectURL: '/mock-server-basepath/some-path#some-fragment',
             },
             sessionMock.createValue({ state: { realm: 'test-realm' } })
           )
@@ -1064,7 +1111,9 @@ describe('SAMLAuthenticationProvider', () => {
             {
               state: {
                 requestIdMap: {
-                  'some-request-id': { redirectURL: '/test-base-path/some-path#some-fragment' },
+                  'some-request-id': {
+                    redirectURL: '/mock-server-basepath/some-path#some-fragment',
+                  },
                 },
                 realm: 'test-realm',
               },
@@ -1091,7 +1140,7 @@ describe('SAMLAuthenticationProvider', () => {
         await expect(
           provider.login(request, {
             type: SAMLLogin.LoginInitiatedByUser,
-            redirectURL: '/test-base-path/some-path#some-fragment',
+            redirectURL: '/mock-server-basepath/some-path#some-fragment',
           })
         ).resolves.toEqual(AuthenticationResult.failed(failureReason));
 
@@ -1108,7 +1157,7 @@ describe('SAMLAuthenticationProvider', () => {
     describe('Secure cookie flag (isHttps)', () => {
       const buildLoginAttempt = () => ({
         type: SAMLLogin.LoginInitiatedByUser as const,
-        redirectURL: '/test-base-path/some-path#some-fragment',
+        redirectURL: '/mock-server-basepath/some-path#some-fragment',
       });
 
       const overridePublicBaseUrl = (
@@ -1279,6 +1328,73 @@ describe('SAMLAuthenticationProvider', () => {
         body: {
           acs: 'https://test-hostname:1234/mock-server-basepath/api/security/saml/callback',
         },
+      });
+    });
+
+    describe('URL hash fragment validation', () => {
+      const idpRedirect = 'https://idp-host/path/login?SAMLRequest=some%20request%20';
+      const handshakeResult = (redirectURL: string) =>
+        AuthenticationResult.redirectTo(idpRedirect, {
+          state: { requestIdMap: { 'some-request-id': { redirectURL } } },
+          stateCookieOptions: { sameSite: 'None', isSecure: true },
+        });
+
+      beforeEach(() => {
+        mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+          id: 'some-request-id',
+          redirect: idpRedirect,
+        });
+      });
+
+      it('initiates SAML handshake if URL hash fragment is empty.', async () => {
+        mockOptions.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/s/foo/some-path');
+
+        const request = httpServerMock.createKibanaRequest({
+          path: '/s/foo/some-path',
+          query: { [AUTH_URL_HASH_QUERY_STRING_PARAMETER]: '' },
+        });
+        await expect(provider.authenticate(request)).resolves.toEqual(
+          handshakeResult('/mock-server-basepath/s/foo/some-path')
+        );
+
+        expect(mockOptions.logger.warn).not.toHaveBeenCalled();
+      });
+
+      it.each(['some-fragment', '/some-path'])(
+        'initiates SAML handshake without URL hash fragment if it does not start with `#` (%j).',
+        async (urlHash) => {
+          mockOptions.getRequestOriginalURL.mockReturnValue(
+            '/mock-server-basepath/s/foo/some-path'
+          );
+
+          const request = httpServerMock.createKibanaRequest({
+            path: '/s/foo/some-path',
+            query: { [AUTH_URL_HASH_QUERY_STRING_PARAMETER]: urlHash },
+          });
+          await expect(provider.authenticate(request)).resolves.toEqual(
+            handshakeResult('/mock-server-basepath/s/foo/some-path')
+          );
+
+          expect(mockOptions.logger.warn).toHaveBeenCalledWith(
+            '"auth_url_hash" is not a URL hash fragment and will be ignored.'
+          );
+        }
+      );
+
+      it('initiates SAML handshake with the base path URL if original URL is not a Kibana internal URL.', async () => {
+        mockOptions.getRequestOriginalURL.mockReturnValue('https://some-host/some-path');
+
+        const request = httpServerMock.createKibanaRequest({
+          path: '/some-path',
+          query: { [AUTH_URL_HASH_QUERY_STRING_PARAMETER]: '#some-fragment' },
+        });
+        await expect(provider.authenticate(request)).resolves.toEqual(
+          handshakeResult('/mock-server-basepath/')
+        );
+
+        expect(mockOptions.logger.warn).toHaveBeenCalledWith(
+          'Redirect URL is not a valid Kibana internal URL, using base path instead.'
+        );
       });
     });
 
@@ -1905,14 +2021,16 @@ describe('SAMLAuthenticationProvider', () => {
             sessionMock.createValue({
               state: {
                 requestIdMap: {
-                  [mockSAMLSet1.requestId]: { redirectURL: '/test-base-path/some-path#some-app' },
+                  [mockSAMLSet1.requestId]: {
+                    redirectURL: '/mock-server-basepath/some-path#some-app',
+                  },
                 },
                 realm: ELASTIC_CLOUD_SSO_REALM_NAME,
               },
             })
           )
         ).resolves.toEqual(
-          AuthenticationResult.redirectTo('/test-base-path/some-path#some-app', {
+          AuthenticationResult.redirectTo('/mock-server-basepath/some-path#some-app', {
             userProfileGrant: {
               type: 'uiamAccessToken',
               accessToken: 'essu_dev_some-token',
@@ -2154,14 +2272,16 @@ describe('SAMLAuthenticationProvider', () => {
             sessionMock.createValue({
               state: {
                 requestIdMap: {
-                  [mockSAMLSet1.requestId]: { redirectURL: '/test-base-path/some-path#some-app' },
+                  [mockSAMLSet1.requestId]: {
+                    redirectURL: '/mock-server-basepath/some-path#some-app',
+                  },
                 },
                 realm: ELASTIC_CLOUD_SSO_REALM_NAME,
               },
             })
           )
         ).resolves.toEqual(
-          AuthenticationResult.redirectTo('/test-base-path/some-path#some-app', {
+          AuthenticationResult.redirectTo('/mock-server-basepath/some-path#some-app', {
             userProfileGrant: { type: 'accessToken', accessToken: 'x_essu_dev_some-token' },
             state: {
               accessToken: 'x_essu_dev_some-token',

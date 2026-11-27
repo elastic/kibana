@@ -267,7 +267,7 @@ export class Session {
     stateCookieOptions?: SessionStorageSetOptions
   ) {
     const [sid, aad] = await Promise.all([
-      this.randomBytes(SID_BYTE_LENGTH).then((sidBuffer) => sidBuffer.toString('base64')),
+      this.randomBytes(SID_BYTE_LENGTH).then((sidBuffer) => sidBuffer.toString('base64url')),
       this.randomBytes(AAD_BYTE_LENGTH).then((aadBuffer) => aadBuffer.toString('base64')),
     ]);
 

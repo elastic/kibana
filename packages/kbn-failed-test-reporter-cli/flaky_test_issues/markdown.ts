@@ -16,6 +16,7 @@ import type {
   TestFramework,
 } from '@kbn/scout-reporting';
 import { redactSensitiveGithubFailureText } from '../failed_tests_reporter/report_failure';
+import { testHistoryUrl } from '../failed_tests_reporter/test_history_dashboard';
 
 /** Markdown building blocks of the flaky suite issue body. */
 
@@ -34,21 +35,21 @@ export const CATEGORY_LABELS: Record<string, string> = {
   'unit-integration-test': 'Unit integration',
 };
 
+/** Keeps words together on one line in a table cell. */
+export const NBSP = '&nbsp;';
+
 export const KIBANA_BLOB_URL = 'https://github.com/elastic/kibana/blob/main';
 export const BUILDKITE_ORG_URL = 'https://buildkite.com/elastic';
-/** The Scout dashboard of a single test: its flaky rate, failures and runs over time. */
-export const SCOUT_TEST_DASHBOARD_URL =
-  'https://appex-qa.kb.europe-west1.gcp.cloud.es.io/s/scout/app/dashboards#/view/a06c26f6-23ac-479d-acb5-5a8b234793a8';
+/** A button with the Kibana logo; GitHub strips the HTML that could style a link as one. */
+const DASHBOARD_BUTTON_IMAGE_URL =
+  'https://img.shields.io/badge/-%20-005571?logo=kibana&logoColor=white';
 
-/** A rison string literal: single quotes, with `!` and `'` escaped by `!`. */
-const risonString = (value: string): string => `'${value.replace(/!/g, '!!').replace(/'/g, "!'")}'`;
+/** The Kibana logo button that opens the test's history dashboard. */
+export const dashboardButton = (testId: string): string =>
+  `[![Dashboard](${DASHBOARD_BUTTON_IMAGE_URL})](${testHistoryUrl(testId)})`;
 
-/** The Scout dashboard filtered on one test id. */
-export const testDashboardUrl = (testId: string): string =>
-  encodeURI(
-    `${SCOUT_TEST_DASHBOARD_URL}?_g=(filters:!((meta:(alias:'Test ID',disabled:!f,negate:!f),` +
-      `query:(bool:(must:!((match_phrase:(test.id:${risonString(testId)}))))))))`
-  );
+/** Forbids a line break between two emoji, which browsers otherwise allow. */
+const WORD_JOINER = '\u2060';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -62,6 +63,12 @@ export const table = (header: string[], rows: string[][]): string =>
 
 export const plural = (count: number, singular: string, pluralForm = `${singular}s`): string =>
   `${count} ${count === 1 ? singular : pluralForm}`;
+
+/** `a`, `a and b`, `a, b and c` */
+export const andList = (items: readonly string[]): string =>
+  items.length <= 1
+    ? items.join('')
+    : `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}`;
 
 /** `#1, #2` */
 export const issueList = (numbers: readonly number[]): string =>
@@ -124,13 +131,13 @@ export const pipelineTargetEnvironment = (target: {
   return target.type === 'local' ? `${environment} (${inlineCode(target.pipeline)})` : environment;
 };
 
-/** `98 / 505 (**19%**)`, the rate in bold so it stands out in a table. */
+/** `**19%** (98 / 505)`, the rate first and in bold, as in the tests table, kept on one line. */
 export const formatFailedBuilds = ({
   builds,
   failedBuilds,
   buildFailRate,
 }: Pick<FlakyTestBranchStats, 'builds' | 'failedBuilds' | 'buildFailRate'>): string =>
-  `${failedBuilds} / ${builds} (**${formatPercent(buildFailRate)}**)`;
+  `**${formatPercent(buildFailRate)}**${NBSP}(${failedBuilds}${NBSP}/${NBSP}${builds})`;
 
 /** `2026-09-08 16:05 UTC` */
 export const formatDateTime = (date: Date): string =>
@@ -141,6 +148,10 @@ export const formatDay = (date: Date, withYear = false): string =>
   `${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]}${
     withYear ? ` ${date.getUTCFullYear()}` : ''
   }`;
+
+/** `8 Sep 16:05`, UTC: a time within the report window, short enough for a table cell. */
+export const formatShortDateTime = (date: Date): string =>
+  `${formatDay(date)} ${date.toISOString().slice(11, 16)}`;
 
 /** `3–10 Sep 2026`, `28 Aug – 4 Sep 2026`, `28 Dec 2025 – 4 Jan 2026`, or `7 Sep 2026` for one day. */
 export const formatDateRange = (from: Date, to: Date): string => {
@@ -207,7 +218,8 @@ export const isFlakyBranch = (
 /**
  * `` **`9.5` 3% (4 / 122)** ``, one line per branch on which the test clears every threshold of the
  * report, highest rate first, a pipeline judged on its own named. The total over branches is left
- * out on purpose, a clean branch dilutes it below what qualified.
+ * out on purpose, a clean branch dilutes it below what qualified. The rate and counts stay on one
+ * line.
  */
 export const formatBranchRates = (
   test: Pick<FlakyTestEntry, 'byBranch'>,
@@ -226,16 +238,56 @@ export const formatBranchRates = (
     )
     .map(
       (stats) =>
-        `**${formatScope(stats)} ${formatPercent(stats.buildFailRate)} (${stats.failedBuilds} / ${
-          stats.builds
-        })**`
+        `**${formatScope(stats)} ${formatPercent(stats.buildFailRate)}${NBSP}(${
+          stats.failedBuilds
+        }${NBSP}/${NBSP}${stats.builds})**`
     )
     .join('<br>');
 };
 
+/** Days of the window a test failed and ran on, as days before the window's end. */
+export interface TestDays {
+  failed: ReadonlySet<number>;
+  ran: ReadonlySet<number>;
+}
+
 /**
- * Rows of the per-test table, with a link to each test's dashboard unless told otherwise, and the
- * issues each test was tracked in before when any has some; the suite's tests come ranked.
+ * The days the test failed and ran on the branches it is flaky on, those of the tests table.
+ * Undefined for reports written before the days were recorded.
+ */
+export const flakyDays = (
+  test: Pick<FlakyTestEntry, 'byBranch'>,
+  thresholds: BranchThresholds,
+  lookbackDays: number
+): TestDays | undefined => {
+  const flaky = test.byBranch.filter((stats) => isFlakyBranch(stats, thresholds));
+  if (flaky.length === 0 || flaky.some((stats) => stats.ranDaysAgo === undefined)) {
+    return undefined;
+  }
+  // A run at the very start of the window is a whole window before its end
+  const days = (values: Array<number[] | undefined>) =>
+    new Set(values.flatMap((value) => value ?? []).map((day) => Math.min(day, lookbackDays - 1)));
+  return {
+    failed: days(flaky.map((stats) => stats.failedDaysAgo)),
+    ran: days(flaky.map((stats) => stats.ranDaysAgo)),
+  };
+};
+
+/**
+ * `🟩🟥🟥🟩⬜🟥🟥`: one square per day of the window, oldest first, red for a day the test failed
+ * on, green for one it only passed on, white for one it did not run on. The squares never wrap.
+ */
+export const dayStrip = ({ failed, ran }: TestDays, lookbackDays: number): string =>
+  Array.from({ length: lookbackDays }, (_, index) => {
+    const daysAgo = lookbackDays - 1 - index;
+    if (failed.has(daysAgo)) return '🟥';
+    return ran.has(daysAgo) ? '🟩' : '⬜';
+  }).join(WORD_JOINER);
+
+/**
+ * Rows of the per-test table: a button to each test's history dashboard unless told otherwise,
+ * the test's flaky branches, the days it failed on when the report has them, and the issues each
+ * test was tracked in before when any has some; the suite's tests come ranked.
  */
 export const testsTable = (
   tests: readonly FlakyTestEntry[],
@@ -243,29 +295,40 @@ export const testsTable = (
     withDashboardLinks,
     maxRows,
     thresholds,
+    lookbackDays,
     previousIssues,
   }: {
     withDashboardLinks: boolean;
     maxRows: number;
     thresholds: BranchThresholds;
+    /** Days of the report window, one square each in the strip of the days a test failed on. */
+    lookbackDays?: number;
     previousIssues?: PreviousIssues;
   }
 ): string => {
   const shown = tests.slice(0, maxRows);
   const previousOf = (test: FlakyTestEntry) => previousIssues?.get(test.testId) ?? [];
   const withPrevious = shown.some((test) => previousOf(test).length > 0);
+  const daysOf = (test: FlakyTestEntry) =>
+    lookbackDays ? flakyDays(test, thresholds, lookbackDays) : undefined;
+  const withDays = lookbackDays !== undefined && shown.some((test) => daysOf(test) !== undefined);
   const header = [
+    ...(withDashboardLinks ? [''] : []),
     'Test',
     'Flaky branches',
-    ...(withDashboardLinks ? ['Dashboard'] : []),
+    ...(withDays ? [`Past${NBSP}${lookbackDays}${NBSP}days`] : []),
     ...(withPrevious ? ['Previously tracked in'] : []),
   ];
-  const rows = shown.map((test) => [
-    test.title,
-    formatBranchRates(test, thresholds),
-    ...(withDashboardLinks ? [`[dashboard](${testDashboardUrl(test.testId)})`] : []),
-    ...(withPrevious ? [issueList(previousOf(test))] : []),
-  ]);
+  const rows = shown.map((test) => {
+    const days = daysOf(test);
+    return [
+      ...(withDashboardLinks ? [dashboardButton(test.testId)] : []),
+      test.title,
+      formatBranchRates(test, thresholds),
+      ...(withDays ? [days && lookbackDays ? dayStrip(days, lookbackDays) : '-'] : []),
+      ...(withPrevious ? [issueList(previousOf(test))] : []),
+    ];
+  });
   const rest = tests.length - maxRows;
   return [
     table(header, rows),

@@ -29,16 +29,8 @@ import {
   SPAN_STATUS_ERROR,
   WEB_VITAL_NAME,
   WEB_VITAL_VALUE,
+  ENVIRONMENT_FIELDS,
 } from '../../../common/otel_data';
-
-/**
- * `service.environment` aliases the deprecated `deployment.environment`, which newer SDKs replace
- * with `deployment.environment.name`.
- */
-export const ENVIRONMENT_FIELDS = [
-  SERVICE_ENVIRONMENT,
-  RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT_NAME,
-];
 
 /** The browser SDK documents of the time range, for every application. */
 export const browserDocuments = (start: number, end: number) => [
@@ -119,13 +111,18 @@ export const byEnvironment = <
   inEnvironment: { filter: inEnvironmentFilter(environment, filters), aggs },
 });
 
-/** One vital's samples (the filter's doc count) and stats, matching `cls` and `CLS` alike. */
+/** The web vital events of one vital, by its name, matching `cls` and `CLS` alike. */
+export const webVitalNameFilter = (vital: CoreWebVital) => ({
+  term: { [WEB_VITAL_NAME]: { value: vital, case_insensitive: true } },
+});
+
+/** One vital's samples (the filter's doc count) and stats. */
 export const webVital = (vital: CoreWebVital) => ({
   filter: {
     bool: {
       filter: [
         ...termQuery(OTEL_EVENT_NAME, EVENT_WEB_VITAL),
-        { term: { [WEB_VITAL_NAME]: { value: vital, case_insensitive: true } } },
+        webVitalNameFilter(vital),
         { exists: { field: WEB_VITAL_VALUE } },
       ],
     },

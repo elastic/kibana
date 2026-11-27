@@ -61,6 +61,7 @@ export const Timeline: React.FC<TimelineProps> = ({
                 <UserMessageEvent
                   event={item.event}
                   isPending={item.isPending}
+                  steerState={item.steerState}
                   attachmentRefs={item.attachmentRefs}
                   conversationAttachments={conversationAttachments}
                 />

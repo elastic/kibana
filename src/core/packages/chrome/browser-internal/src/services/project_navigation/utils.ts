@@ -24,6 +24,36 @@ import type { SideNavigationSection } from '@kbn/core-chrome-browser/src/project
 
 const wrapIdx = (index: number): string => `[${index}]`;
 
+/** Minimal structural shape of a navigation node needed to walk `link`/`children`. */
+interface NavTreeNodeLike {
+  link?: string;
+  children?: NavTreeNodeLike[];
+}
+
+/**
+ * Recursively collect every `link` target referenced by a navigation tree definition. A target is
+ * either an application id (e.g. `"discover"`) or a deep-link id (e.g. `"management:transform"`).
+ *
+ * Used, in development builds only, to attribute a solution nav tree's cross-plugin navigation
+ * references (see https://github.com/elastic/kibana/issues/66682).
+ */
+export const collectNavTreeLinks = (navTree: NavigationTreeDefinition): string[] => {
+  const links = new Set<string>();
+
+  const visit = (node: NavTreeNodeLike): void => {
+    if (typeof node.link === 'string') {
+      links.add(node.link);
+    }
+    node.children?.forEach(visit);
+  };
+
+  [...(navTree.body ?? []), ...(navTree.footer ?? [])].forEach((node) =>
+    visit(node as unknown as NavTreeNodeLike)
+  );
+
+  return [...links];
+};
+
 /**
  * Flatten the navigation tree into a record of path => node
  * for quicker access when detecting the active path

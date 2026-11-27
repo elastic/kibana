@@ -75,3 +75,15 @@ it.each(['succeeded', 'skipped'] as const)(
     expect(screen.queryByText(/u_alice/)).not.toBeInTheDocument();
   }
 );
+
+it.each(['succeeded', 'skipped'] as const)(
+  'shows the Run as row in %s run details only for service account runs',
+  (status) => {
+    const { unmount } = renderRunDetail({ ...baseRun, status, runsAsServiceAccount: true });
+    expect(screen.getByText('Nightshift automations service account')).toBeInTheDocument();
+    unmount();
+
+    renderRunDetail({ ...baseRun, status });
+    expect(screen.queryByText('Run as')).not.toBeInTheDocument();
+  }
+);

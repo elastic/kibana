@@ -257,6 +257,17 @@ describe('SubjectView presentation', () => {
       'Trigger · Significant event'
     );
   });
+
+  it('shows what its document records the subject came through as a "via" line', () => {
+    renderView({
+      ...base,
+      subjectType: 'alert',
+      subjectId: 'alert-1',
+      via: { label: 'Payments alerts' },
+    });
+
+    expect(screen.getByTestId('investigationSubjectVia')).toHaveTextContent('via Payments alerts');
+  });
 });
 
 describe('SubjectView alert flyout', () => {
@@ -442,6 +453,113 @@ const renderList = (subjects: SubjectRowData[], services: SubjectServices = {}) 
   );
 
 describe('SubjectList', () => {
+  describe('with what the subjects came through', () => {
+    const locator = { id: 'SOME_LOCATOR', params: { automationId: 'automation-1' } };
+    const via = { label: 'Payments alerts', locator };
+    const withVia = (subject: SubjectRowData): SubjectRowData => ({ ...subject, via });
+    const locatedHref = `/located/SOME_LOCATOR?${JSON.stringify(locator.params)}`;
+
+    it('adds a "via" line under the trigger that links to the page its locator resolves to', async () => {
+      const { services } = createShare();
+      renderList([withVia(alertSubject('a-1'))], services);
+
+      const link = await screen.findByTestId('investigationSubjectViaLink');
+      // The trigger row keeps its own line; the "via" line is a further line below it.
+      expect(screen.getByTestId('investigationSubject-alert')).toHaveTextContent(
+        /^Rule a-1Trigger · Alert$/
+      );
+      expect(screen.getByTestId('investigationSubjectVia')).toHaveTextContent(
+        'via Payments alerts'
+      );
+      expect(link).toHaveTextContent('Payments alerts');
+      expect(link).toHaveAttribute('href', locatedHref);
+      expect(screen.getByTestId('investigationSubject-alert')).not.toContainElement(link);
+    });
+
+    it('adds it under the "N alerts" row too, once', async () => {
+      const { services } = createShare();
+      renderList([alertSubject('a-1'), alertSubject('a-2')].map(withVia), services);
+
+      await screen.findByTestId('investigationSubjectViaLink');
+      expect(screen.getAllByTestId('investigationSubjectVia')).toHaveLength(1);
+      expect(screen.getByTestId('investigationSubject-alerts')).not.toContainElement(
+        screen.getByTestId('investigationSubjectVia')
+      );
+    });
+
+    it('leaves it off the "N alerts" row when the alerts did not all come through the same thing', async () => {
+      const { services } = createShare();
+      renderList(
+        [
+          withVia(alertSubject('a-1')),
+          { ...alertSubject('a-2'), via: { label: 'Checkout alerts' } },
+          alertSubject('a-3'),
+        ],
+        services
+      );
+
+      await waitFor(() =>
+        expect(screen.getByTestId('investigationSubject-alerts')).toHaveAttribute('href')
+      );
+      expect(screen.queryByTestId('investigationSubjectVia')).not.toBeInTheDocument();
+    });
+
+    it('shows it on each listed alert instead when the alerts did not all come through the same thing', () => {
+      renderList([
+        withVia(alertSubject('a-1')),
+        { ...alertSubject('a-2'), via: { label: 'Checkout alerts' } },
+        alertSubject('a-3'),
+      ]);
+
+      expect(screen.queryByTestId('investigationSubjectVia')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('investigationSubject-alerts'));
+
+      expect(screen.getAllByTestId('investigationSubjectVia').map((el) => el.textContent)).toEqual([
+        'via Payments alerts',
+        'via Checkout alerts',
+      ]);
+    });
+
+    it('navigates through the locator inside Kibana, and leaves a modified click to the browser', async () => {
+      const { services, navigate } = createShare();
+      renderList([withVia(alertSubject('a-1'))], services);
+      const link = await screen.findByTestId('investigationSubjectViaLink');
+
+      fireEvent.click(link);
+      expect(navigate).toHaveBeenCalledWith(locator.params);
+
+      navigate.mockClear();
+      fireEvent.click(link, { metaKey: true });
+      expect(navigate).not.toHaveBeenCalled();
+    });
+
+    it('shows the label without a link when the locator is not registered', async () => {
+      const services = {
+        share: { url: { locators: { get: () => undefined } } },
+      } as unknown as SubjectServices;
+      renderList([withVia(alertSubject('a-1'))], services);
+
+      expect(screen.getByTestId('investigationSubjectVia')).toHaveTextContent(
+        'via Payments alerts'
+      );
+      expect(screen.queryByTestId('investigationSubjectViaLink')).not.toBeInTheDocument();
+    });
+
+    it('shows the label without a link when the subject records no locator', () => {
+      const { services } = createShare();
+      renderList([{ ...alertSubject('a-1'), via: { label: 'Slack bot' } }], services);
+
+      expect(screen.getByTestId('investigationSubjectVia')).toHaveTextContent('via Slack bot');
+      expect(screen.queryByTestId('investigationSubjectViaLink')).not.toBeInTheDocument();
+    });
+
+    it('shows no "via" line for a subject without one', () => {
+      renderList([alertSubject('a-1')], createShare().services);
+
+      expect(screen.queryByTestId('investigationSubjectVia')).not.toBeInTheDocument();
+    });
+  });
+
   it('renders one row per subject when there is at most one alert', () => {
     renderList([alertSubject('a-1'), { type: 'manual', id: 'q-1', summary: 'Why is it slow?' }]);
 

@@ -49,6 +49,9 @@ describe('warm_start', () => {
 
     await Promise.resolve();
     expect(mockedStartKibana).toHaveBeenCalledTimes(1);
+    expect(mockedStartKibana).toHaveBeenCalledWith(
+      expect.objectContaining({ isolatedConfig: true })
+    );
 
     await jest.advanceTimersByTimeAsync(WARM_START_POST_READY_SETTLING_MS - 1);
     expect(mockedStartKibana).toHaveBeenCalledTimes(1);

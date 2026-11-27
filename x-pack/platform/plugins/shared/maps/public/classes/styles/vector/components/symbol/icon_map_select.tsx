@@ -22,22 +22,20 @@ import type { IDynamicStyleProperty } from '../../properties/dynamic_style_prope
 const CUSTOM_MAP_ID = 'CUSTOM_MAP_ID';
 
 const DEFAULT_ICON_STOPS: IconStop[] = [
-  { stop: null, icon: PREFERRED_ICONS[0], iconSource: ICON_SOURCE.MAKI }, // first stop is the "other" category
-  { stop: '', icon: PREFERRED_ICONS[1], iconSource: ICON_SOURCE.MAKI },
+  { stop: null, icon: PREFERRED_ICONS[0], icon_source: ICON_SOURCE.MAKI }, // first stop is the "other" category
+  { stop: '', icon: PREFERRED_ICONS[1], icon_source: ICON_SOURCE.MAKI },
 ];
 
-export interface StyleOptionChanges {
-  customIconStops?: IconStop[];
-  iconPaletteId?: string | null;
-  useCustomIconMap: boolean;
-}
+export type StyleOptionChanges = Partial<
+  Pick<IconDynamicOptions, 'icon_palette_id' | 'custom_icon_stops' | 'use_custom_icon_map'>
+>;
 
 interface Props {
   customIconStops?: IconStop[];
   iconPaletteId: string | null;
   customIcons: CustomIcon[];
   onCustomIconsChange: (customIcons: CustomIcon[]) => void;
-  onChange: ({ customIconStops, iconPaletteId, useCustomIconMap }: StyleOptionChanges) => void;
+  onChange: (changes: StyleOptionChanges) => void;
   styleProperty: IDynamicStyleProperty<IconDynamicOptions>;
   useCustomIconMap?: boolean;
   isCustomOnly: boolean;
@@ -55,13 +53,13 @@ export class IconMapSelect extends Component<Props, State> {
   _onMapSelect = (selectedValue: string) => {
     const useCustomIconMap = selectedValue === CUSTOM_MAP_ID;
     const changes: StyleOptionChanges = {
-      iconPaletteId: useCustomIconMap ? null : selectedValue,
-      useCustomIconMap,
+      icon_palette_id: useCustomIconMap ? null : selectedValue,
+      use_custom_icon_map: useCustomIconMap,
     };
     // edge case when custom palette is first enabled
     // customIconStops is undefined so need to update custom stops with default so icons are rendered.
     if (!this.props.customIconStops) {
-      changes.customIconStops = DEFAULT_ICON_STOPS;
+      changes.custom_icon_stops = DEFAULT_ICON_STOPS;
     }
     this.props.onChange(changes);
   };
@@ -78,8 +76,8 @@ export class IconMapSelect extends Component<Props, State> {
 
     if (!isInvalid) {
       this.props.onChange({
-        useCustomIconMap: true,
-        customIconStops: customStops,
+        use_custom_icon_map: true,
+        custom_icon_stops: customStops,
       });
     }
   };

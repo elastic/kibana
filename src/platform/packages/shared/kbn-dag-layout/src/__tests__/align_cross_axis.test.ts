@@ -106,7 +106,7 @@ describe('separatePositionedOverlapsInPlace — PAVA pin demotion (Cycle A)', ()
     it('does not move a symmetric single-parent/single-child chain (equal widths)', () => {
       // Import applyDagre to test barycentre end-to-end without reserved lanes.
       // applyDagre calls alignDagreCrossAxisInPlace internally.
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { applyDagre } = require('../apply_dagre');
 
       const W = 100;
@@ -133,7 +133,7 @@ describe('separatePositionedOverlapsInPlace — PAVA pin demotion (Cycle A)', ()
     });
 
     it('centres the parent over its only child when widths differ', () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { applyDagre } = require('../apply_dagre');
 
       const nodes = [

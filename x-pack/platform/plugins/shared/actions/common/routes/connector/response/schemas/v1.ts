@@ -62,6 +62,17 @@ const isInboundEventsEnabledResponseField = {
   ),
 };
 
+const specVersionResponseField = {
+  spec_version: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'The exact major.minor schema version pinned to the connector. Present for versioned connector types.',
+      },
+    })
+  ),
+};
+
 const referencedByCountField = {
   referenced_by_count: schema.number({
     meta: {
@@ -72,29 +83,39 @@ const referencedByCountField = {
 };
 
 /** Connector response schema; omit `is_inbound_events_enabled` unless inbound events are enabled. */
-export const getConnectorResponseSchema = (includeInboundEventsField: boolean) =>
+export const getConnectorResponseSchema = (
+  includeInboundEventsField: boolean,
+  includeSpecVersionField: boolean
+) =>
   schema.object(
     {
       ...connectorResponseFields,
       ...(includeInboundEventsField ? isInboundEventsEnabledResponseField : {}),
+      ...(includeSpecVersionField ? specVersionResponseField : {}),
     },
     { meta: { id: 'connector_response' } }
   );
 
 /** Get-all connectors response schema; omit `is_inbound_events_enabled` unless inbound events are enabled. */
-export const getGetAllConnectorsResponseSchema = (includeInboundEventsField: boolean) =>
+export const getGetAllConnectorsResponseSchema = (
+  includeInboundEventsField: boolean,
+  includeSpecVersionField: boolean
+) =>
   // codeql[js/kibana/unbounded-array-in-schema] Response schema for the connector list; Kibana builds the array, it is not request input
   schema.arrayOf(
-    getConnectorResponseSchema(includeInboundEventsField).extends(referencedByCountField, {
-      meta: { id: 'connector_response_with_references_count' },
-    })
+    getConnectorResponseSchema(includeInboundEventsField, includeSpecVersionField).extends(
+      referencedByCountField,
+      {
+        meta: { id: 'connector_response_with_references_count' },
+      }
+    )
   );
 
 /** Flag-on schema so TypeOf includes the optional field. */
-export const connectorResponseSchema = getConnectorResponseSchema(true);
+export const connectorResponseSchema = getConnectorResponseSchema(true, true);
 
 /** Flag-on schema so TypeOf includes the optional field. */
-export const getAllConnectorsResponseSchema = getGetAllConnectorsResponseSchema(true);
+export const getAllConnectorsResponseSchema = getGetAllConnectorsResponseSchema(true, true);
 
 export const connectorTypeResponseSchema = schema.object(
   {
@@ -285,99 +306,115 @@ export const connectorAuthStatusResponseSchema = schema.recordOf(
   }
 );
 
-export const getConnectorSpecResponseBodySchema = schema.object({
-  metadata: schema.object(
-    {
-      id: schema.string({
-        meta: {
-          description: 'The connector type identifier (same shape as an action type id).',
-        },
-      }),
-      display_name: schema.string({
-        meta: {
-          description: 'Human-readable label for this connector type.',
-        },
-      }),
-      description: schema.string({
-        meta: {
-          description: 'Short summary of what this connector type is used for.',
-        },
-      }),
-      minimum_license: schema.string({
-        meta: {
-          description: 'Minimum Elastic license tier required to use this connector type.',
-        },
-      }),
-      supported_feature_ids: schema.arrayOf(schema.string(), {
-        maxSize: 100,
-        meta: {
-          description:
-            'Kibana feature identifiers this connector type supports (for example alerting or workflows).',
-        },
-      }),
-      icon: schema.maybe(
-        schema.string({
+export const getConnectorSpecResponseBodySchema = ({ includeSpecVersionField = false } = {}) =>
+  schema.object({
+    metadata: schema.object(
+      {
+        id: schema.string({
           meta: {
-            description: 'Optional icon key or URL for this connector type in the UI.',
+            description: 'The connector type identifier (same shape as an action type id).',
           },
-        })
-      ),
-      docs_url: schema.maybe(
-        schema.string({
+        }),
+        display_name: schema.string({
           meta: {
-            description: 'Optional link to documentation for this connector type.',
+            description: 'Human-readable label for this connector type.',
           },
-        })
-      ),
-      is_technical_preview: schema.maybe(
-        schema.boolean({
+        }),
+        description: schema.string({
           meta: {
-            description: 'When true, this connector type is offered as a technical preview.',
+            description: 'Short summary of what this connector type is used for.',
           },
-        })
-      ),
-    },
-    {
-      meta: {
-        description: 'Connector spec metadata (snake_case HTTP shape).',
+        }),
+        minimum_license: schema.string({
+          meta: {
+            description: 'Minimum Elastic license tier required to use this connector type.',
+          },
+        }),
+        supported_feature_ids: schema.arrayOf(schema.string(), {
+          maxSize: 100,
+          meta: {
+            description:
+              'Kibana feature identifiers this connector type supports (for example alerting or workflows).',
+          },
+        }),
+        icon: schema.maybe(
+          schema.string({
+            meta: {
+              description: 'Optional icon key or URL for this connector type in the UI.',
+            },
+          })
+        ),
+        docs_url: schema.maybe(
+          schema.string({
+            meta: {
+              description: 'Optional link to documentation for this connector type.',
+            },
+          })
+        ),
+        is_technical_preview: schema.maybe(
+          schema.boolean({
+            meta: {
+              description: 'When true, this connector type is offered as a technical preview.',
+            },
+          })
+        ),
+        ...(includeSpecVersionField
+          ? {
+              spec_version: schema.maybe(
+                schema.string({
+                  meta: {
+                    description:
+                      'The exact major.minor version of the connector form schema returned by this endpoint.',
+                  },
+                })
+              ),
+            }
+          : {}),
       },
-    }
-  ),
-  schema: schema.recordOf(schema.string(), schema.any(), {
-    meta: {
-      description:
-        'JSON Schema envelope for the connector form (top-level `config` and `secrets` shapes)',
-    },
-  }),
-  is_testable: schema.boolean({
-    meta: {
-      description: 'When true, this connector type supports the reserved test sub-action.',
-    },
-  }),
-  actions: schema.arrayOf(
-    schema.object({
-      name: schema.string({
-        meta: { description: 'The action key, e.g. "listIncidents".' },
-      }),
-      description: schema.maybe(
-        schema.string({
-          meta: { description: 'Human-readable description of what this action does.' },
-        })
-      ),
-      is_tool: schema.boolean({
-        meta: { description: 'Whether this action is exposed as an agent tool.' },
-      }),
-      scope: schema.maybe(
-        schema.oneOf([schema.literal('read'), schema.literal('write'), schema.literal('destroy')], {
-          meta: { description: 'Permission scope of this action (read, write, or destroy).' },
-        })
-      ),
+      {
+        meta: {
+          description: 'Connector spec metadata (snake_case HTTP shape).',
+        },
+      }
+    ),
+    schema: schema.recordOf(schema.string(), schema.any(), {
+      meta: {
+        description:
+          'JSON Schema envelope for the connector form (top-level `config` and `secrets` shapes)',
+      },
     }),
-    {
-      maxSize: 500,
+    is_testable: schema.boolean({
       meta: {
-        description: 'The actions available on this connector type.',
+        description: 'When true, this connector type supports the reserved test sub-action.',
       },
-    }
-  ),
-});
+    }),
+    actions: schema.arrayOf(
+      schema.object({
+        name: schema.string({
+          meta: { description: 'The action key, e.g. "listIncidents".' },
+        }),
+        description: schema.maybe(
+          schema.string({
+            meta: { description: 'Human-readable description of what this action does.' },
+          })
+        ),
+        is_tool: schema.boolean({
+          meta: { description: 'Whether this action is exposed as an agent tool.' },
+        }),
+        scope: schema.maybe(
+          schema.oneOf(
+            [schema.literal('read'), schema.literal('write'), schema.literal('destroy')],
+            {
+              meta: { description: 'Permission scope of this action (read, write, or destroy).' },
+            }
+          )
+        ),
+      }),
+      {
+        maxSize: 500,
+        meta: {
+          description: 'The actions available on this connector type.',
+        },
+      }
+    ),
+  });

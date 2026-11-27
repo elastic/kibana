@@ -14,6 +14,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { NIGHTSHIFT_API_PRIVILEGES, NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
+import { getUserDisplayName } from '@kbn/user-profile-components/server';
 import {
   MAX_CUSTOM_CONTEXT_AUTHOR_NAME_LENGTH,
   MAX_CUSTOM_CONTEXT_SNIPPETS,
@@ -156,7 +157,7 @@ export const createCustomContextClient = ({
 
   const getAuthorName = (request: KibanaRequest): string => {
     const user = getDeps().security?.authc.getCurrentUser(request);
-    const name = user?.full_name || user?.username || UNKNOWN_AUTHOR;
+    const name = user ? getUserDisplayName(user) : UNKNOWN_AUTHOR;
     return name.slice(0, MAX_CUSTOM_CONTEXT_AUTHOR_NAME_LENGTH);
   };
 

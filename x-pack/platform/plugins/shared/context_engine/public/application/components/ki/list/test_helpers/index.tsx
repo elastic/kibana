@@ -13,9 +13,12 @@ import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { render } from '@testing-library/react';
+import { render, type RenderResult } from '@testing-library/react';
+import { createMemoryHistory, type MemoryHistory } from 'history';
 import React from 'react';
+import { Router } from '@kbn/shared-ux-router';
 import type { GetAiIndexResponse } from '../../../../../../common/http_api/ai_indices';
+import { uiPrivileges } from '../../../../../../common/features';
 
 export const listKiTestAiIndex: GetAiIndexResponse = {
   id: 'sample-ki',
@@ -36,19 +39,37 @@ export const SAMPLE_DISCOVER_URL =
 export interface ListKiRenderOptions {
   discoverShow?: boolean;
   indexManagementMonitor?: boolean;
+  initialPath?: string;
+  canWrite?: boolean;
 }
+
+type ListKiTestServices = ReturnType<typeof coreMock.createStart> & {
+  share: ReturnType<typeof sharePluginMock.createStartContract>;
+};
+
+export type ListKiRenderResult = RenderResult & {
+  history: MemoryHistory;
+  services: ListKiTestServices;
+};
 
 export const renderListKiWithProviders = (
   ui: React.ReactElement,
   options: ListKiRenderOptions = {}
-) => {
-  const { discoverShow = true, indexManagementMonitor = true } = options;
-  const services = {
+): ListKiRenderResult => {
+  const {
+    discoverShow = true,
+    indexManagementMonitor = true,
+    initialPath = '/ai_index/sample-ki/knowledge_documents',
+    canWrite = false,
+  } = options;
+  const history = createMemoryHistory({ initialEntries: [initialPath] });
+  const services: ListKiTestServices = {
     ...coreMock.createStart(),
     share: sharePluginMock.createStartContract(),
   };
   services.application.capabilities = {
     ...services.application.capabilities,
+    contextEngine: { show: true, [uiPrivileges.write]: canWrite },
     discover_v2: { show: discoverShow },
     index_management: {
       ...services.application.capabilities.index_management,
@@ -72,13 +93,17 @@ export const renderListKiWithProviders = (
 
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
-  return render(
+  const result = render(
     <I18nProvider>
       <EuiProvider>
-        <KibanaContextProvider services={services}>
-          <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+        <KibanaContextProvider services={{ ...services, history }}>
+          <QueryClientProvider client={queryClient}>
+            <Router history={history}>{ui}</Router>
+          </QueryClientProvider>
         </KibanaContextProvider>
       </EuiProvider>
     </I18nProvider>
   );
+
+  return { ...result, history, services };
 };

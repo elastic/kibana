@@ -10,21 +10,27 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
+  CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID,
   CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
-  CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
-  CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
+  CONTEXT_ENGINE_TRANSCRIPT_DREAMING_BATCH_WORKFLOW_ID,
+  CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
+import { ExecutionStatus } from '@kbn/workflows';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { AiIndexItem } from '../../common/http_api/ai_indices';
 import type { AiIndexService } from '../ai_indices/service';
 import type { DreamingWorkflowsApi } from './schedule';
+import { DreamingNotSetUpError } from './dreaming_not_set_up_error';
+import { DreamingRunNothingStartedError } from './dreaming_run_nothing_started_error';
 import {
   createDreamingScheduleService,
   dreamingWorkflowIdFor,
+  maintenanceWorkflowIdFor,
   relationshipsWorkflowIdFor,
   shouldDream,
-  traceDreamingBatchWorkflowIdFor,
-  traceDreamingWorkflowIdFor,
+  shouldMaintain,
+  transcriptDreamingBatchWorkflowIdFor,
+  transcriptDreamingWorkflowIdFor,
 } from './schedule';
 
 const SPACE = 'marketing';
@@ -63,10 +69,14 @@ describe('shouldDream', () => {
 });
 
 describe('createDreamingScheduleService', () => {
-  let client: jest.Mocked<Pick<PluginScopedManagedWorkflowsApi, 'install' | 'uninstall'>>;
+  let client: jest.Mocked<
+    Pick<PluginScopedManagedWorkflowsApi, 'install' | 'uninstall' | 'execute'>
+  >;
   let workflowsManagement: {
     updateWorkflow: jest.Mock;
     cancelAllActiveWorkflowExecutions: jest.Mock;
+    getWorkflowExecutions: jest.Mock;
+    getWorkflowExecution: jest.Mock;
   };
   let aiIndexService: jest.Mocked<Pick<AiIndexService, 'addAutomation' | 'removeAutomation'>>;
   let request: KibanaRequest;
@@ -83,10 +93,18 @@ describe('createDreamingScheduleService', () => {
     client = {
       install: jest.fn().mockResolvedValue(undefined),
       uninstall: jest.fn().mockResolvedValue(undefined),
+      execute: jest.fn(),
     };
     workflowsManagement = {
       updateWorkflow: jest.fn().mockResolvedValue(undefined),
       cancelAllActiveWorkflowExecutions: jest.fn().mockResolvedValue(undefined),
+      getWorkflowExecutions: jest.fn().mockResolvedValue({
+        results: [],
+        total: 0,
+        page: 1,
+        size: 1,
+      }),
+      getWorkflowExecution: jest.fn().mockResolvedValue({ status: ExecutionStatus.RUNNING }),
     };
     aiIndexService = {
       addAutomation: jest.fn().mockResolvedValue('attached'),
@@ -120,6 +138,8 @@ describe('createDreamingScheduleService', () => {
         factTypes: dreaming.facts,
         entityTypes: dreaming.entities.nodes,
         relationshipTypes: dreaming.relationships,
+        maintenanceIntervalMinutes: 1440,
+        maintenanceMode: 'report',
       },
     });
   });
@@ -195,8 +215,8 @@ describe('createDreamingScheduleService', () => {
     });
   });
 
-  describe('trace dreaming', () => {
-    const traceWorkflowId = `${CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID}-${suffix}`;
+  describe('transcript dreaming', () => {
+    const traceWorkflowId = `${CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW_ID}-${suffix}`;
 
     it('installs, enables and attaches its workflow with dreaming, on the same config', async () => {
       await createService(workflowsManagement).reconcile({
@@ -205,13 +225,13 @@ describe('createDreamingScheduleService', () => {
         request,
       });
 
-      expect(traceDreamingWorkflowIdFor('support', SPACE)).toBe(traceWorkflowId);
+      expect(transcriptDreamingWorkflowIdFor('support', SPACE)).toBe(traceWorkflowId);
       const [[dreamingId, dreamingInstall], [batchId, batchInstall], [traceId, traceInstall]] =
         client.install.mock.calls;
       expect([dreamingId, batchId, traceId]).toEqual([
         CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
-        CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
-        CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
+        CONTEXT_ENGINE_TRANSCRIPT_DREAMING_BATCH_WORKFLOW_ID,
+        CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW_ID,
       ]);
       expect(batchInstall).toEqual(dreamingInstall);
       expect(traceInstall).toEqual(dreamingInstall);
@@ -234,8 +254,10 @@ describe('createDreamingScheduleService', () => {
         request,
       });
 
-      const batchWorkflowId = traceDreamingBatchWorkflowIdFor('support', SPACE);
-      expect(batchWorkflowId).toBe(`${CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID}-${suffix}`);
+      const batchWorkflowId = transcriptDreamingBatchWorkflowIdFor('support', SPACE);
+      expect(batchWorkflowId).toBe(
+        `${CONTEXT_ENGINE_TRANSCRIPT_DREAMING_BATCH_WORKFLOW_ID}-${suffix}`
+      );
       expect(workflowsManagement.updateWorkflow).toHaveBeenCalledWith(
         batchWorkflowId,
         { enabled: true },
@@ -259,8 +281,8 @@ describe('createDreamingScheduleService', () => {
       expect(relationshipsWorkflowId).toBe(`${CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID}-${suffix}`);
       expect(client.install.mock.calls.map(([definitionId]) => definitionId)).toEqual([
         CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
-        CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
-        CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
+        CONTEXT_ENGINE_TRANSCRIPT_DREAMING_BATCH_WORKFLOW_ID,
+        CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW_ID,
         CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
       ]);
       expect(aiIndexService.addAutomation.mock.calls.map(([, , { value }]) => value)).toEqual([
@@ -278,7 +300,7 @@ describe('createDreamingScheduleService', () => {
       });
 
       expect(client.install).toHaveBeenCalledWith(
-        CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
+        CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW_ID,
         expect.anything()
       );
     });
@@ -290,10 +312,13 @@ describe('createDreamingScheduleService', () => {
         spaceId: SPACE,
         request,
       });
-      expect(client.uninstall).toHaveBeenCalledWith(CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID, {
-        spaceId: SPACE,
-        workflowIdSuffix: suffix,
-      });
+      expect(client.uninstall).toHaveBeenCalledWith(
+        CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW_ID,
+        {
+          spaceId: SPACE,
+          workflowIdSuffix: suffix,
+        }
+      );
       expect(aiIndexService.removeAutomation).toHaveBeenCalledWith('support', SPACE, {
         type: 'workflow',
         value: traceWorkflowId,
@@ -301,9 +326,80 @@ describe('createDreamingScheduleService', () => {
 
       client.uninstall.mockClear();
       await service.remove({ aiIndexId: 'support', spaceId: SPACE, request });
-      expect(client.uninstall).toHaveBeenCalledWith(CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID, {
+      expect(client.uninstall).toHaveBeenCalledWith(
+        CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW_ID,
+        {
+          spaceId: SPACE,
+          workflowIdSuffix: suffix,
+        }
+      );
+    });
+  });
+
+  describe('memory maintenance', () => {
+    const maintenanceWorkflowId = `${CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID}-${suffix}`;
+    const maintaining = (maintenance: Record<string, unknown> = {}) =>
+      aiIndex({ dreaming: { ...dreaming, maintenance: { enabled: true, ...maintenance } } });
+
+    it('maintains only an AI index that dreams with maintenance on', () => {
+      expect(shouldMaintain(maintaining())).toBe(true);
+      expect(shouldMaintain(maintaining({ enabled: false }))).toBe(false);
+      expect(shouldMaintain(aiIndex())).toBe(false);
+      expect(
+        shouldMaintain(
+          aiIndex({ dreaming: { ...dreaming, enabled: false, maintenance: { enabled: true } } })
+        )
+      ).toBe(false);
+    });
+
+    it('installs, enables and attaches its workflow last, on its own schedule and mode', async () => {
+      await createService(workflowsManagement).reconcile({
+        aiIndex: maintaining({ mode: 'apply', schedule: { interval: '12h' } }),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(maintenanceWorkflowIdFor('support', SPACE)).toBe(maintenanceWorkflowId);
+      const [definitionId, install] = client.install.mock.calls[4];
+      expect(definitionId).toBe(CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID);
+      expect(install.values).toEqual(
+        expect.objectContaining({ maintenanceIntervalMinutes: 720, maintenanceMode: 'apply' })
+      );
+      expect(workflowsManagement.updateWorkflow).toHaveBeenCalledWith(
+        maintenanceWorkflowId,
+        { enabled: true },
+        SPACE,
+        request
+      );
+      expect(aiIndexService.addAutomation).toHaveBeenCalledWith('support', SPACE, {
+        type: 'workflow',
+        value: maintenanceWorkflowId,
+      });
+      expect(client.uninstall).not.toHaveBeenCalled();
+    });
+
+    it('is removed and detached while maintenance is off, and dreaming keeps running', async () => {
+      await createService(workflowsManagement).reconcile({
+        aiIndex: maintaining({ enabled: false }),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(client.install).not.toHaveBeenCalledWith(
+        CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID,
+        expect.anything()
+      );
+      expect(client.install).toHaveBeenCalledWith(
+        CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
+        expect.anything()
+      );
+      expect(client.uninstall).toHaveBeenCalledWith(CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID, {
         spaceId: SPACE,
         workflowIdSuffix: suffix,
+      });
+      expect(aiIndexService.removeAutomation).toHaveBeenCalledWith('support', SPACE, {
+        type: 'workflow',
+        value: maintenanceWorkflowId,
       });
     });
   });
@@ -350,7 +446,7 @@ describe('createDreamingScheduleService', () => {
       SPACE,
       request
     );
-    expect(client.uninstall).toHaveBeenCalledTimes(6);
+    expect(client.uninstall).toHaveBeenCalledTimes(7);
   });
 
   it('does not cancel runs when the uninstall fails for another reason', async () => {
@@ -360,5 +456,260 @@ describe('createDreamingScheduleService', () => {
       createService(workflowsManagement).remove({ aiIndexId: 'support', spaceId: SPACE, request })
     ).rejects.toThrow('cluster unavailable');
     expect(workflowsManagement.cancelAllActiveWorkflowExecutions).not.toHaveBeenCalled();
+  });
+
+  describe('getWorkflowIds', () => {
+    it('returns no ids when dreaming is off or not set up', () => {
+      const service = createService(workflowsManagement);
+      expect(
+        service.getWorkflowIds({
+          aiIndex: aiIndex({ dreaming: { enabled: false } }),
+          spaceId: SPACE,
+        })
+      ).toEqual([]);
+      expect(
+        service.getWorkflowIds({
+          aiIndex: aiIndex({ dreaming: { enabled: true } }),
+          spaceId: SPACE,
+        })
+      ).toEqual([]);
+    });
+
+    it('returns attached workflow ids in display order', () => {
+      const ids = createService(workflowsManagement).getWorkflowIds({
+        aiIndex: aiIndex(),
+        spaceId: SPACE,
+      });
+
+      expect(ids).toEqual([
+        dreamingWorkflowIdFor('support', SPACE),
+        transcriptDreamingWorkflowIdFor('support', SPACE),
+        relationshipsWorkflowIdFor('support', SPACE),
+      ]);
+    });
+  });
+
+  describe('run', () => {
+    it('rejects when dreaming is not set up', async () => {
+      await expect(
+        createService(workflowsManagement).run({
+          aiIndex: aiIndex({ dreaming: { enabled: true } }),
+          spaceId: SPACE,
+          request,
+        })
+      ).rejects.toBeInstanceOf(DreamingNotSetUpError);
+    });
+
+    it('rejects when dreaming is disabled', async () => {
+      await expect(
+        createService(workflowsManagement).run({
+          aiIndex: aiIndex({ dreaming: { ...dreaming, enabled: false } }),
+          spaceId: SPACE,
+          request,
+        })
+      ).rejects.toBeInstanceOf(DreamingNotSetUpError);
+    });
+
+    it('starts all three workflows and returns partial failures', async () => {
+      const dreamingId = dreamingWorkflowIdFor('support', SPACE);
+      const traceId = transcriptDreamingWorkflowIdFor('support', SPACE);
+      const relationshipsId = relationshipsWorkflowIdFor('support', SPACE);
+      client.execute
+        .mockResolvedValueOnce('exec-dreaming')
+        .mockRejectedValueOnce(new Error('Cannot start: running executions'))
+        .mockResolvedValueOnce('exec-relationships');
+
+      const result = await createService(workflowsManagement).run({
+        aiIndex: aiIndex(),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(client.execute).toHaveBeenCalledTimes(3);
+      expect(result).toEqual({
+        executions: [
+          { workflow_id: dreamingId, execution_id: 'exec-dreaming' },
+          { workflow_id: relationshipsId, execution_id: 'exec-relationships' },
+        ],
+        failed: [traceId],
+        skipped: [],
+      });
+    });
+
+    it('puts concurrency-skipped runs in skipped instead of executions', async () => {
+      const dreamingId = dreamingWorkflowIdFor('support', SPACE);
+      const traceId = transcriptDreamingWorkflowIdFor('support', SPACE);
+      const relationshipsId = relationshipsWorkflowIdFor('support', SPACE);
+      client.execute
+        .mockResolvedValueOnce('exec-dreaming')
+        .mockResolvedValueOnce('exec-trace-skipped')
+        .mockResolvedValueOnce('exec-relationships');
+      workflowsManagement.getWorkflowExecution.mockImplementation(async (executionId: string) =>
+        executionId === 'exec-trace-skipped'
+          ? { status: ExecutionStatus.SKIPPED }
+          : { status: ExecutionStatus.RUNNING }
+      );
+
+      const result = await createService(workflowsManagement).run({
+        aiIndex: aiIndex(),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(workflowsManagement.getWorkflowExecution).toHaveBeenCalledWith(
+        'exec-trace-skipped',
+        SPACE,
+        { request }
+      );
+      expect(result).toEqual({
+        executions: [
+          { workflow_id: dreamingId, execution_id: 'exec-dreaming' },
+          { workflow_id: relationshipsId, execution_id: 'exec-relationships' },
+        ],
+        failed: [],
+        skipped: [traceId],
+      });
+    });
+
+    it('returns only skipped workflows when every workflow already has an active run', async () => {
+      const dreamingId = dreamingWorkflowIdFor('support', SPACE);
+      const traceId = transcriptDreamingWorkflowIdFor('support', SPACE);
+      const relationshipsId = relationshipsWorkflowIdFor('support', SPACE);
+      workflowsManagement.getWorkflowExecutions.mockResolvedValue({
+        results: [{ id: 'active-exec', status: ExecutionStatus.RUNNING }],
+        total: 1,
+        page: 1,
+        size: 1,
+      });
+
+      const result = await createService(workflowsManagement).run({
+        aiIndex: aiIndex(),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(client.execute).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        executions: [],
+        failed: [],
+        skipped: [dreamingId, traceId, relationshipsId],
+      });
+    });
+
+    it('skips a workflow with an active run without calling execute', async () => {
+      const dreamingId = dreamingWorkflowIdFor('support', SPACE);
+      const traceId = transcriptDreamingWorkflowIdFor('support', SPACE);
+      const relationshipsId = relationshipsWorkflowIdFor('support', SPACE);
+      workflowsManagement.getWorkflowExecutions.mockImplementation(
+        async (params: { workflowId: string }) =>
+          params.workflowId === traceId
+            ? {
+                results: [{ id: 'trace-active', status: ExecutionStatus.RUNNING }],
+                total: 1,
+                page: 1,
+                size: 1,
+              }
+            : { results: [], total: 0, page: 1, size: 1 }
+      );
+      client.execute
+        .mockResolvedValueOnce('exec-dreaming')
+        .mockResolvedValueOnce('exec-relationships');
+
+      const result = await createService(workflowsManagement).run({
+        aiIndex: aiIndex(),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(client.execute).toHaveBeenCalledTimes(2);
+      expect(result).toEqual({
+        executions: [
+          { workflow_id: dreamingId, execution_id: 'exec-dreaming' },
+          { workflow_id: relationshipsId, execution_id: 'exec-relationships' },
+        ],
+        failed: [],
+        skipped: [traceId],
+      });
+    });
+
+    it('still executes when the active-run lookup throws', async () => {
+      const dreamingId = dreamingWorkflowIdFor('support', SPACE);
+      workflowsManagement.getWorkflowExecutions.mockRejectedValue(new Error('lookup failed'));
+      client.execute.mockResolvedValue('exec-id');
+
+      const result = await createService(workflowsManagement).run({
+        aiIndex: aiIndex(),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(client.execute).toHaveBeenCalledTimes(3);
+      expect(result.executions[0]).toEqual({
+        workflow_id: dreamingId,
+        execution_id: 'exec-id',
+      });
+    });
+
+    it('throws when no workflow could be started', async () => {
+      client.execute.mockRejectedValue(new Error('running executions'));
+
+      await expect(
+        createService(workflowsManagement).run({
+          aiIndex: aiIndex(),
+          spaceId: SPACE,
+          request,
+        })
+      ).rejects.toBeInstanceOf(DreamingRunNothingStartedError);
+    });
+
+    it('treats an execution as started when its status cannot be read yet', async () => {
+      const dreamingId = dreamingWorkflowIdFor('support', SPACE);
+      client.execute
+        .mockResolvedValueOnce('exec-dreaming')
+        .mockResolvedValueOnce('exec-trace')
+        .mockResolvedValueOnce('exec-relationships');
+      workflowsManagement.getWorkflowExecution.mockResolvedValue(null);
+
+      const result = await createService(workflowsManagement).run({
+        aiIndex: aiIndex(),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(result.executions).toHaveLength(3);
+      expect(result.executions[0]).toEqual({
+        workflow_id: dreamingId,
+        execution_id: 'exec-dreaming',
+      });
+      expect(result.skipped).toEqual([]);
+      expect(result.failed).toEqual([]);
+    });
+
+    it('treats an execution as started when its status lookup fails', async () => {
+      const dreamingId = dreamingWorkflowIdFor('support', SPACE);
+      const traceId = transcriptDreamingWorkflowIdFor('support', SPACE);
+      const relationshipsId = relationshipsWorkflowIdFor('support', SPACE);
+      client.execute
+        .mockResolvedValueOnce('exec-dreaming')
+        .mockResolvedValueOnce('exec-trace')
+        .mockResolvedValueOnce('exec-relationships');
+      workflowsManagement.getWorkflowExecution.mockRejectedValue(new Error('lookup failed'));
+
+      const result = await createService(workflowsManagement).run({
+        aiIndex: aiIndex(),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(result).toEqual({
+        executions: [
+          { workflow_id: dreamingId, execution_id: 'exec-dreaming' },
+          { workflow_id: traceId, execution_id: 'exec-trace' },
+          { workflow_id: relationshipsId, execution_id: 'exec-relationships' },
+        ],
+        failed: [],
+        skipped: [],
+      });
+    });
   });
 });

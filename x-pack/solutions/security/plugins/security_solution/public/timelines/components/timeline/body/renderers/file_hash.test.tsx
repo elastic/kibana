@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import { TestProviders } from '../../../../../common/mock';
-import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 import { CellActionsRenderer } from '../../../../../common/components/cell_actions/cell_actions_renderer';
 
 import { FileHash } from './file_hash';
@@ -37,8 +37,6 @@ describe('FileHash', () => {
   beforeEach(() => {
     (CellActionsRenderer as unknown as jest.Mock).mockImplementation(MockedCellActionsRenderer);
   });
-  const mount = useMountAppended();
-
   const allProps = {
     scopeId: 'some_scope',
     contextId: 'test',
@@ -47,33 +45,33 @@ describe('FileHash', () => {
   };
 
   test('displays the fileHashSha256 when provided', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <FileHash {...allProps} fileHashSha256="[fileHashSha256]" />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('[fileHashSha256]');
+    expect(container.textContent).toEqual('[fileHashSha256]');
   });
 
   test('displays nothing when fileHashSha256 is null', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <FileHash {...allProps} fileHashSha256={null} />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('');
+    expect(container).toBeEmptyDOMElement();
   });
 
   test('displays nothing when fileHashSha256 is undefined', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <FileHash {...allProps} />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('');
+    expect(container).toBeEmptyDOMElement();
   });
   test('should passing correct scopeId to cell actions', () => {
-    mount(
+    render(
       <TestProviders>
         <FileHash {...allProps} />
       </TestProviders>

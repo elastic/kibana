@@ -34,6 +34,9 @@ const isRecoverable = (err: any) => {
   if (isInferenceRequestAbortedError(err)) {
     return true;
   }
+  if (err?.name === 'TimeoutError') {
+    return true;
+  }
   if (isInferenceProviderError(err)) {
     const status = err.status;
     if (status && STATUS_NO_RETRY.includes(status)) {

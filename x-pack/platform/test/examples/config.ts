@@ -36,6 +36,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
         // Required to load new platform plugins via `--plugin-path` flag.
         '--env.name=development',
+        // `--env.name=development` sets `env.mode.dev`, which defaults `lens.apiFormat` to true.
+        // Keep the embedded Lens suite on the production (legacy) wire format.
+        '--feature_flags.overrides.lens.apiFormat=false',
         // Search sessions used by example plugins exercised in this suite
         '--data.search.sessions.enabled=true',
         ...findTestPluginPaths([

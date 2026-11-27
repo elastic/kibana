@@ -9,7 +9,10 @@
 
 /** Post-processes @hey-api/openapi-ts Zod output for Kibana workflow contracts. */
 export const postProcessOpenapiZodGen = (source: string): string => {
-  let result = source.replace(/import { z } from 'zod\/v4';/, "import { z } from '@kbn/zod/v4';");
+  let result = source.replace(
+    /import { z } from 'zod(?:\/v4)?';/,
+    "import { z } from '@kbn/zod/v4';"
+  );
   result = result.replace(/z\.iso\.datetime\(/g, 'isoDateTime(');
 
   if (result.includes('isoDateTime(')) {

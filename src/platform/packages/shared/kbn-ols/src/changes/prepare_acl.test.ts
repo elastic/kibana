@@ -33,7 +33,7 @@ const STRANGER = FIXTURE_PROBES.stranger;
 const stored: StoredAcl = {
   version: [1],
   owner: { type: ['user'], id: [OWNER.id] },
-  general_access: ['none'],
+  general: { access: ['none'] },
   entries: [{ type: ['user'], id: [GRANTEE.id], access: ['use'], added_at: [EARLIER] }],
 };
 
@@ -78,7 +78,7 @@ const expectError = (fn: () => unknown, code: AclChangeErrorCode) => {
 describe('prepareInitialAcl', () => {
   it('makes the creator the owner with the default general access', () => {
     expect(prepareInitialAcl({ policy, principal: OWNER, enabled: true, now: NOW })).toEqual({
-      next: { version: 1, owner: OWNER, general_access: 'edit', entries: [] },
+      next: { version: 1, owner: OWNER, general: { access: 'edit' }, entries: [] },
       principalsToCheck: [],
     });
   });
@@ -88,7 +88,7 @@ describe('prepareInitialAcl', () => {
       policy,
       principal: OWNER,
       requested: {
-        general_access: 'none',
+        general: { access: 'none' },
         entries: [
           { ...GRANTEE, access: 'use' },
           { ...OWNER, access: 'use' },
@@ -102,7 +102,7 @@ describe('prepareInitialAcl', () => {
       next: {
         version: 1,
         owner: OWNER,
-        general_access: 'none',
+        general: { access: 'none' },
         entries: [{ ...GRANTEE, access: 'use', added_at: NOW }],
       },
       principalsToCheck: [GRANTEE],
@@ -118,7 +118,7 @@ describe('prepareInitialAcl', () => {
         prepareInitialAcl({
           policy,
           principal: OWNER,
-          requested: { general_access: 'edit' },
+          requested: { general: { access: 'edit' } },
           enabled: false,
           now: NOW,
         }),
@@ -128,12 +128,17 @@ describe('prepareInitialAcl', () => {
 
   it('writes no ACL without a principal, and rejects any access but the default', () => {
     expect(
-      prepareInitialAcl({ policy, requested: { general_access: 'edit' }, enabled: true, now: NOW })
+      prepareInitialAcl({
+        policy,
+        requested: { general: { access: 'edit' } },
+        enabled: true,
+        now: NOW,
+      })
     ).toBeUndefined();
     expect(prepareInitialAcl({ policy, enabled: true, now: NOW })).toBeUndefined();
 
     for (const requested of [
-      { general_access: 'use' as const },
+      { general: { access: 'use' } as const },
       { entries: [{ ...GRANTEE, access: 'use' as const }] },
     ]) {
       expectError(
@@ -145,8 +150,8 @@ describe('prepareInitialAcl', () => {
     expectError(
       () =>
         prepareInitialAcl({
-          policy: { ...policy, defaultGeneralAccessLevel: 'use' },
-          requested: { general_access: 'edit' },
+          policy: { ...policy, defaultGeneralAccess: 'use' },
+          requested: { general: { access: 'edit' } },
           enabled: true,
           now: NOW,
         }),
@@ -207,7 +212,7 @@ describe('prepareInitialAcl', () => {
   });
 
   it.each<[string, Parameters<typeof prepareInitialAcl>[0]['requested']]>([
-    ['a general access the type does not allow', { general_access: 'view' }],
+    ['a general access the type does not allow', { general: { access: 'view' } }],
     ['a level the type cannot grant', { entries: [{ ...GRANTEE, access: 'edit' }] }],
     [
       'a duplicate principal',
@@ -245,14 +250,14 @@ describe('prepareAclChange', () => {
   // Each change is refused for its own reason: the object has no owner yet, already has an ACL, or
   // the caller lacks the operation. A caller who can't view the object must get none of them.
   describe('a caller who cannot view the object', () => {
-    const privatePolicy = { ...policy, defaultGeneralAccessLevel: 'none' as const };
+    const privatePolicy = { ...policy, defaultGeneralAccess: 'none' as const };
     const states: Array<[string, StoredAcl | undefined]> = [
       ['a valid ACL', stored],
       ['an invalid ACL', { ...stored, version: [2] }],
       ['no ACL', undefined],
     ];
     const changes: AclChange[] = [
-      { kind: 'replace', general_access: 'none', entries: [] },
+      { kind: 'replace', general: { access: 'none' }, entries: [] },
       { kind: 'claim' },
       { kind: 'transfer', owner: STRANGER },
     ];
@@ -284,7 +289,7 @@ describe('prepareAclChange', () => {
     it('keeps added_at for existing principals and checks only new or higher grants', () => {
       const result = change(stored, OWNER, {
         kind: 'replace',
-        general_access: 'use',
+        general: { access: 'use' },
         entries: [
           { ...GRANTEE, access: 'use' },
           { ...STRANGER, access: 'use' },
@@ -295,7 +300,7 @@ describe('prepareAclChange', () => {
         next: {
           version: 1,
           owner: OWNER,
-          general_access: 'use',
+          general: { access: 'use' },
           entries: [
             { ...GRANTEE, access: 'use', added_at: EARLIER },
             { ...STRANGER, access: 'use', added_at: NOW },
@@ -309,7 +314,7 @@ describe('prepareAclChange', () => {
       const result = change(
         { ...stored, entries: [{ ...stored.entries[0], added_at: [] }] },
         OWNER,
-        { kind: 'replace', general_access: 'none', entries: [{ ...GRANTEE, access: 'use' }] }
+        { kind: 'replace', general: { access: 'none' }, entries: [{ ...GRANTEE, access: 'use' }] }
       );
 
       expect(result.next.entries).toEqual([{ ...GRANTEE, access: 'use', added_at: NOW }]);
@@ -323,17 +328,17 @@ describe('prepareAclChange', () => {
           { type: ['user'], id: ['', GRANTEE.id, '  '], access: ['use'], added_at: [EARLIER] },
         ],
       };
-      const { general_access: generalAccess, entries } = readEditableAcl(policy, current);
+      const { general, entries } = readEditableAcl(policy, current);
 
-      expect(
-        change(current, OWNER, { kind: 'replace', general_access: generalAccess, entries }).next
-          .entries
-      ).toEqual([{ ...GRANTEE, access: 'use', added_at: EARLIER }]);
+      expect(change(current, OWNER, { kind: 'replace', general, entries }).next.entries).toEqual([
+        { ...GRANTEE, access: 'use', added_at: EARLIER },
+      ]);
     });
 
     it('requires access management', () => {
       expectError(
-        () => change(stored, GRANTEE, { kind: 'replace', general_access: 'none', entries: [] }),
+        () =>
+          change(stored, GRANTEE, { kind: 'replace', general: { access: 'none' }, entries: [] }),
         'forbidden'
       );
     });
@@ -342,7 +347,7 @@ describe('prepareAclChange', () => {
       const result = change(
         { ...stored, version: [2] },
         STRANGER,
-        { kind: 'replace', general_access: 'none', entries: [{ ...GRANTEE, access: 'use' }] },
+        { kind: 'replace', general: { access: 'none' }, entries: [{ ...GRANTEE, access: 'use' }] },
         { recovery: true }
       );
 
@@ -350,7 +355,7 @@ describe('prepareAclChange', () => {
         next: {
           version: 1,
           owner: OWNER,
-          general_access: 'none',
+          general: { access: 'none' },
           entries: [{ ...GRANTEE, access: 'use', added_at: EARLIER }],
         },
         principalsToCheck: [OWNER, GRANTEE],
@@ -367,7 +372,7 @@ describe('prepareAclChange', () => {
           change(
             { ...stored, owner },
             STRANGER,
-            { kind: 'replace', general_access: 'none', entries: [] },
+            { kind: 'replace', general: { access: 'none' }, entries: [] },
             { recovery: true }
           ),
         'bad_request'
@@ -379,7 +384,7 @@ describe('prepareAclChange', () => {
         () =>
           change({ ...stored, owner: { type: ['user'], id: [OWNER.id, GRANTEE.id] } }, OWNER, {
             kind: 'replace',
-            general_access: 'none',
+            general: { access: 'none' },
             entries: [],
           }),
         'bad_request'
@@ -388,7 +393,8 @@ describe('prepareAclChange', () => {
 
     it('refuses an object without an ACL, which needs a claim first', () => {
       expectError(
-        () => change(undefined, OWNER, { kind: 'replace', general_access: 'none', entries: [] }),
+        () =>
+          change(undefined, OWNER, { kind: 'replace', general: { access: 'none' }, entries: [] }),
         'bad_request'
       );
     });
@@ -413,7 +419,7 @@ describe('prepareAclChange', () => {
         principal: OWNER,
         change: {
           kind: 'replace',
-          general_access: 'none',
+          general: { access: 'none' },
           entries: [
             { type: 'user', id: 'u_raised', access: 'use' },
             { type: 'user', id: 'u_lowered', access: 'use' },
@@ -437,14 +443,14 @@ describe('prepareAclChange', () => {
       expect(
         change(stored, OWNER, {
           kind: 'replace',
-          general_access: 'none',
+          general: { access: 'none' },
           entries: [{ ...OWNER, access: 'use' }],
         }).next.entries
       ).toEqual([]);
     });
 
     it('lets an entry at manage replace access, but not transfer ownership', () => {
-      const managerPolicy = { ...policy, entryLevels: ['use' as const, 'manage' as const] };
+      const managerPolicy = { ...policy, entryAccess: ['use' as const, 'manage' as const] };
       const current: StoredAcl = {
         ...stored,
         entries: [{ type: ['user'], id: [GRANTEE.id], access: ['manage'], added_at: [EARLIER] }],
@@ -461,20 +467,20 @@ describe('prepareAclChange', () => {
           now: NOW,
         });
 
-      expect(prepare({ kind: 'replace', general_access: 'use', entries: [] }).next.owner).toEqual(
-        OWNER
-      );
+      expect(
+        prepare({ kind: 'replace', general: { access: 'use' }, entries: [] }).next.owner
+      ).toEqual(OWNER);
       expectError(() => prepare({ kind: 'transfer', owner: GRANTEE }), 'forbidden');
     });
   });
 
   describe('claim', () => {
     it('makes an editor of an object without an ACL its owner', () => {
-      expect(change(undefined, GRANTEE, { kind: 'claim', general_access: 'none' })).toEqual({
-        next: { version: 1, owner: GRANTEE, general_access: 'none', entries: [] },
+      expect(change(undefined, GRANTEE, { kind: 'claim', general: { access: 'none' } })).toEqual({
+        next: { version: 1, owner: GRANTEE, general: { access: 'none' }, entries: [] },
         principalsToCheck: [],
       });
-      expect(change(undefined, GRANTEE, { kind: 'claim' }).next.general_access).toBe('edit');
+      expect(change(undefined, GRANTEE, { kind: 'claim' }).next.general.access).toBe('edit');
     });
 
     it('fails when the object already has an ACL, even an invalid one', () => {
@@ -490,9 +496,9 @@ describe('prepareAclChange', () => {
       expectError(
         () =>
           prepareAclChange({
-            policy: { ...policy, defaultGeneralAccessLevel: 'use' },
+            policy: { ...policy, defaultGeneralAccess: 'use' },
             decision: evaluateAcl({
-              policy: { ...policy, defaultGeneralAccessLevel: 'use' },
+              policy: { ...policy, defaultGeneralAccess: 'use' },
               principal: GRANTEE,
             }),
             principal: GRANTEE,
@@ -506,7 +512,7 @@ describe('prepareAclChange', () => {
 
     it('rejects a general access the type does not allow, and an invalid principal', () => {
       expectError(
-        () => change(undefined, GRANTEE, { kind: 'claim', general_access: 'view' }),
+        () => change(undefined, GRANTEE, { kind: 'claim', general: { access: 'view' } }),
         'bad_request'
       );
       expectError(
@@ -516,7 +522,7 @@ describe('prepareAclChange', () => {
     });
 
     it('never lets recovery claim an object it can only view', () => {
-      const privatePolicy = { ...policy, defaultGeneralAccessLevel: 'none' as const };
+      const privatePolicy = { ...policy, defaultGeneralAccess: 'none' as const };
       expectError(
         () =>
           prepareAclChange({
@@ -535,7 +541,7 @@ describe('prepareAclChange', () => {
   describe('transfer', () => {
     it('replaces the owner and removes the new owner entry', () => {
       expect(change(stored, OWNER, { kind: 'transfer', owner: GRANTEE })).toEqual({
-        next: { version: 1, owner: GRANTEE, general_access: 'none', entries: [] },
+        next: { version: 1, owner: GRANTEE, general: { access: 'none' }, entries: [] },
         principalsToCheck: [GRANTEE],
       });
     });
@@ -552,7 +558,7 @@ describe('prepareAclChange', () => {
       const damaged: StoredAcl = {
         version: [1, 2],
         owner: { type: ['user', 'service_account'], id: [OWNER.id] },
-        general_access: ['use', 'none'],
+        general: { access: ['use', 'none'] },
         entries: [
           { type: ['user'], id: [GRANTEE.id, 'u_other'], access: ['use'], added_at: [] },
           { type: ['user', 'service_account'], id: ['u_ambiguous'], access: ['use'], added_at: [] },
@@ -565,7 +571,7 @@ describe('prepareAclChange', () => {
         next: {
           version: 1,
           owner: STRANGER,
-          general_access: 'none',
+          general: { access: 'none' },
           entries: [
             { ...GRANTEE, access: 'use', added_at: NOW },
             { type: 'user', id: 'u_other', access: 'use', added_at: NOW },
@@ -580,7 +586,7 @@ describe('prepareAclChange', () => {
       const oversized: StoredAcl = {
         version: [1],
         owner: { type: ['user', 'service_account'], id: [OWNER.id] },
-        general_access: ['none'],
+        general: { access: ['none'] },
         entries: [{ type: ['user'], id: ids, access: ['use'], added_at: [EARLIER] }],
       };
 

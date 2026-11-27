@@ -202,8 +202,16 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     } = useVarGroupSelections({
       varGroups: inputVarGroups,
       savedSelections: packagePolicyInput.var_group_selections,
-      isAgentlessEnabled,
+      // The policy's own deployment mode (prop), not "agentless is available
+      // in this deployment" from useAgentless() — the two differ on Cloud
+      // with agentless enabled for an agent-based policy, and the defaults
+      // must follow the policy, like validation does.
+      isAgentlessEnabled: isAgentless,
       onSelectionsChange: (update) => updatePackagePolicyInput(update),
+      // On the edit page, infer the selection from this input's own vars so
+      // the form agrees with validation (same fix as the stream call site).
+      varsForInference: packagePolicyInput.vars,
+      isEditPage,
     });
     const yaml = useYaml();
     // Showing streams toggle state (initialized once when yaml loads so we can validate)
@@ -630,6 +638,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                     }
                     forceShowErrors={forceShowErrors}
                     isEditPage={isEditPage}
+                    isAgentless={isAgentless}
                     showConditionField={packagePolicyInputStream!.enabled && conditionFieldAllowed}
                     varGroupSelections={varGroupSelections}
                   />

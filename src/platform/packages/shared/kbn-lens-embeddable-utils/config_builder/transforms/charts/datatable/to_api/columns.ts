@@ -13,6 +13,7 @@ import type {
   ColumnState,
   CellDecorationFillConfig,
 } from '@kbn/lens-common';
+import { LENS_DATATABLE_DEFAULT_COLOR_STEPS } from '@kbn/lens-common';
 import type { PaletteOutput } from '@kbn/coloring';
 import type {
   DatatableConfig,
@@ -74,8 +75,10 @@ function buildPaletteFillColor(palette: ColumnState['palette']): PaletteFillColo
   }
   // The editor's seed palette has no params until the user edits it, and renders as a distributed palette.
   return (
-    fromColorByValueLensStateToAPI(palette.params ? palette : { ...palette, params: {} }) ??
-    AUTO_COLOR
+    fromColorByValueLensStateToAPI(
+      palette.params ? palette : { ...palette, params: {} },
+      LENS_DATATABLE_DEFAULT_COLOR_STEPS
+    ) ?? AUTO_COLOR
   );
 }
 
@@ -145,7 +148,7 @@ export function buildColorProps(column: ColumnState): APIClassicColorProps | Pro
     return {
       apply_color_to: applyColorTo,
       color: palette.params
-        ? fromColorByValueLensStateToAPI(palette)
+        ? fromColorByValueLensStateToAPI(palette, LENS_DATATABLE_DEFAULT_COLOR_STEPS)
         : // Intentional `as PaletteOutput` type assertion as the legacy palette export bridge accepts palettes with opaque params.
           fromColorMappingLensStateToAPI(undefined, palette as PaletteOutput), // support for legacy palettes
     };

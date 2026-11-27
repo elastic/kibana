@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import type { SignificantEventsMaintenanceStatus } from '@kbn/significant-events-plugin/common';
 import { KbnDangerCallout } from '@kbn/ui-callout';
-import React, { Fragment } from 'react';
+import React from 'react';
 import { DetectionStatusBadge } from './detection_status_badge';
 import { MetricCell, type MetricCellProps } from './metric_cell';
 import {
@@ -30,8 +30,10 @@ import {
   OVERVIEW_RETRY_LABEL,
 } from './translations';
 
-/** Hairline before every metric except the first (no leading separator). */
-const METRIC_SEPARATOR_BEFORE_INDEX = 1;
+/** Column counts the banner steps through as it narrows. Four is skipped so five metrics never split 4 + 1. */
+const OVERVIEW_COLUMN_STEPS = [1, 2, 3, 5] as const;
+/** Narrowest a metric can get before the banner drops to the next column step. */
+const OVERVIEW_METRIC_MIN_WIDTH_BASE = 12;
 
 export interface DetectionOverviewCounts {
   entities: number;
@@ -63,6 +65,25 @@ export const DetectionOverview = ({
   compact = false,
 }: DetectionOverviewProps): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
+  const metricMinWidthPx = euiTheme.base * OVERVIEW_METRIC_MIN_WIDTH_BASE;
+  // N columns need N * minWidth + (N - 1) * gap. Each step owns the range up to the next step.
+  const getMinWidthPx = (columns: number) =>
+    columns * metricMinWidthPx + (columns - 1) * euiTheme.base;
+  const columnStepStyles = Object.fromEntries(
+    OVERVIEW_COLUMN_STEPS.map((columns, index) => {
+      const next = OVERVIEW_COLUMN_STEPS[index + 1];
+      const minQuery = index === 0 ? '' : `${getMinWidthPx(columns)}px <= `;
+      const maxQuery = next === undefined ? '' : ` < ${getMinWidthPx(next)}px`;
+      return [
+        `@container (${minQuery}width${maxQuery})`,
+        {
+          '& > div': { gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` },
+          // No hairline before the first metric of each row.
+          [`& > div > *:nth-child(${columns}n + 1) [data-metric-separator]`]: { display: 'none' },
+        },
+      ];
+    })
+  );
   const metrics: Array<Omit<MetricCellProps, 'isLoading'>> = [
     {
       icon: 'chartTagCloud',
@@ -146,41 +167,38 @@ export const DetectionOverview = ({
               }}
             />
           ) : (
-            <EuiFlexGroup
-              alignItems="center"
-              gutterSize="none"
-              wrap
-              responsive={false}
-              css={{ gap: euiTheme.size.base }}
-            >
-              {metrics.map((metric, index) => (
-                <Fragment key={metric.testSubject}>
-                  {index >= METRIC_SEPARATOR_BEFORE_INDEX ? (
-                    <EuiFlexItem grow={false}>
+            <div css={{ containerType: 'inline-size', ...columnStepStyles }}>
+              <div css={{ display: 'grid', gap: euiTheme.size.base, alignItems: 'center' }}>
+                {metrics.map((metric, index) => (
+                  <div
+                    key={metric.testSubject}
+                    css={{
+                      minWidth: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: euiTheme.size.base,
+                    }}
+                  >
+                    {index > 0 ? (
                       <div
                         aria-hidden
+                        data-metric-separator
                         css={{
+                          flexShrink: 0,
                           width: euiTheme.border.width.thin,
                           // Match EuiAvatar size="l".
                           height: euiTheme.size.xxl,
                           backgroundColor: euiTheme.colors.borderBaseSubdued,
                         }}
                       />
-                    </EuiFlexItem>
-                  ) : null}
-                  <EuiFlexItem
-                    grow={1}
-                    css={{
-                      // Wrap before labels crush into neighbors at narrow widths / zoom.
-                      flex: `1 1 ${euiTheme.base * 12}px`,
-                      minWidth: 0,
-                    }}
-                  >
-                    <MetricCell {...metric} isLoading={isCountsLoading} />
-                  </EuiFlexItem>
-                </Fragment>
-              ))}
-            </EuiFlexGroup>
+                    ) : null}
+                    <div css={{ minWidth: 0, flex: '1 1 auto' }}>
+                      <MetricCell {...metric} isLoading={isCountsLoading} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
         </>
       )}

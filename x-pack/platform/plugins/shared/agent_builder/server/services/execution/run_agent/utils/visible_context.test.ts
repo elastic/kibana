@@ -299,6 +299,56 @@ describe('renderVisibleContext', () => {
     }
   });
 
+  describe('a steer the current run read', () => {
+    const delivered: ConversationRoundStep = {
+      type: ConversationRoundStepType.deliveredMessage,
+      event_id: 'steer-1',
+      author: { type: 'user', id: 'u1' },
+      is_run_owner: true,
+      message: 'STEER_TEXT',
+      delivered_at: '2026-01-01T00:00:00.000Z',
+      cycle: 1,
+      tool_call_group_id: 'x1',
+    } as ConversationRoundStep;
+    const steps = [call('x1'), delivered, call('x2'), call('x3')];
+    const currentRun = (cursor?: CompactionCursor) =>
+      run(steps, { cursor, renderState: renderStateOf(['x1', 'x2', 'x3']) });
+
+    it('stays after the request once its cycle is covered, rendered once', async () => {
+      for (const cursor of [undefined, { round_id: 'current', tool_call_id: 'x2' }]) {
+        const rendered = text(
+          await renderVisibleContext(
+            {
+              conversation: conversation(twoRoundTimeline()),
+              run: currentRun(cursor),
+              phase: 'research',
+            },
+            deps()
+          )
+        );
+        expect(rendered.split('STEER_TEXT')).toHaveLength(2);
+        expect(rendered.indexOf('STEER_TEXT')).toBeGreaterThan(rendered.indexOf('NEXT_INPUT'));
+        expect(rendered.indexOf('STEER_TEXT')).toBeLessThan(rendered.indexOf('RAW_x3'));
+      }
+    });
+
+    it('is in the unit of its own cycle only, so later units and their estimates leave it out', async () => {
+      const convo = conversation(twoRoundTimeline());
+      const view = buildContextView({ conversation: convo, run: currentRun() }, deps());
+      const units = listVisibleUnits({
+        entries: view.history.entries,
+        steps,
+        visibility: view.visibility,
+      }).filter((unit) => unit.kind === 'current_cycle');
+      const rendered = await Promise.all(
+        units.map(async (unit) =>
+          text(await renderUnit(unit, { view, run: currentRun(), conversation: convo }))
+        )
+      );
+      expect(rendered.map((unit) => unit.includes('STEER_TEXT'))).toEqual([false, true, false]);
+    });
+  });
+
   it('renders the custom events after the cursor, and hides the ones it covers', async () => {
     const [roundA, roundB] = [
       { id: 'a', input: { message: 'FIRST_INPUT', attachments: [] }, steps: [call('a1')] },

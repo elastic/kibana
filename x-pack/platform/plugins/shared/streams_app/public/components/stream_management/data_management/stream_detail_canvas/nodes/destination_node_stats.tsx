@@ -13,7 +13,9 @@ import {
   formatDuration,
   formatEventsRate,
 } from '../../../../../services/unit_stats_client/format_stats';
+import { hasDestinationFailures } from '../../../../streams_layout/destinations/destination_failures';
 import { useDestinationStats } from '../../../../unit_stats/state_management/use_stats_manager';
+import { DestinationFailureIcon } from './destination_failure_icon';
 import { StatsProblemIcon } from './stats_problem_icon';
 
 interface DestinationNodeStatsProps {
@@ -31,6 +33,12 @@ interface DestinationNodeStatsProps {
  * update re-renders only this row, and never the node or the graph. It always reserves its row, so
  * the card does not change size when the first result arrives. Until then, and when the stats could
  * not be loaded, it shows no numbers, so a load or a failure never looks like a measured value.
+ *
+ * A destination that rejects what it is sent, such as refused credentials, has a short failure
+ * badge in the row, whose popover shows the failures, and it does not say `Data not flowing in`. The
+ * badge stays in the row, because a taller card would overlap its neighbors on the Map. Stats that loaded
+ * only in part, with an error beside real values, keep their numbers and add a partial icon. An
+ * old (`stale`) entry shows only the stale icon, and an `error` entry only the error icon.
  */
 export function DestinationNodeStats({
   destinationId,
@@ -44,8 +52,12 @@ export function DestinationNodeStats({
     entry?.status === 'ready' || entry?.status === 'noData' || entry?.status === 'stale';
   const eventsRate = entry?.stats?.eventsRate ?? null;
   const latencyAverage = entry?.stats?.latencyAverage ?? null;
+  const failed = entry?.stats?.failed;
+  const hasFailures = hasValues && failed !== undefined && hasDestinationFailures(failed);
+  // A destination that rejects what it is sent is not idle, so it does not say that no data flows.
   const isNotFlowing =
-    !hasSavedSource || (hasValues && eventsRate === null && latencyAverage === null);
+    !hasSavedSource ||
+    (hasValues && !hasFailures && eventsRate === null && latencyAverage === null);
 
   return (
     <div
@@ -86,6 +98,13 @@ export function DestinationNodeStats({
           </EuiText>
         </>
       )}
+      {hasFailures && failed && (
+        <DestinationFailureIcon
+          destinationId={destinationId}
+          failed={failed}
+          dataTestSubj="streamsCanvasDestinationFailures"
+        />
+      )}
       {entry?.status === 'stale' && (
         <StatsProblemIcon problem="stale" dataTestSubj="streamsCanvasDestinationStale" />
       )}
@@ -96,6 +115,13 @@ export function DestinationNodeStats({
           dataTestSubj="streamsCanvasDestinationError"
         />
       )}
+      {entry?.status === 'ready' && entry.error && (
+        <StatsProblemIcon
+          problem="partial"
+          reason={entry.error.reason}
+          dataTestSubj="streamsCanvasDestinationPartial"
+        />
+      )}
       {typeof indexCount === 'number' && indexCount > 0 && (
         <EuiText
           size="xs"
@@ -104,6 +130,7 @@ export function DestinationNodeStats({
           // Pushed to the right edge, so the rate and latency sit on the left and the row uses the width.
           css={css`
             margin-left: auto;
+            white-space: nowrap;
           `}
         >
           {i18n.translate('xpack.streams.canvas.destinationNode.indexCount', {

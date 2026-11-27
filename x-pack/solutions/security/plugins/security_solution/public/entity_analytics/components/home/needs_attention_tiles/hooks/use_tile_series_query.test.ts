@@ -6,7 +6,6 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { of } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -25,7 +24,7 @@ describe('useTileSeriesQuery', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useKibana as jest.Mock).mockReturnValue({
-      services: { data: { search: { search: mockSearch } } },
+      services: { data: { search: { esql: mockSearch } } },
     });
     mockUseQuery.mockReturnValue({
       data: 3,
@@ -104,20 +103,20 @@ describe('useTileSeriesQuery', () => {
     );
   });
 
-  it('searches with the ES|QL strategy, in the local project only, and parses the response', async () => {
-    mockSearch.mockReturnValue(of({ rawResponse: { columns: [{ name: 'a' }], values: [[1, 2]] } }));
+  it('searches in the local project only, and parses the response', async () => {
+    mockSearch.mockResolvedValue({ rawResponse: { columns: [{ name: 'a' }], values: [[1, 2]] } });
     renderHook(() =>
       useTileSeriesQuery({ tileKey: 'tile', query: 'FROM x', enabled: true, parse })
     );
     expect(await lastCall()[1]({ signal: undefined })).toBe(2);
     expect(mockSearch).toHaveBeenCalledWith(
-      { params: { query: 'FROM x' } },
-      expect.objectContaining({ strategy: 'esql_async', projectRouting: '_alias:_origin' })
+      { query: 'FROM x', projectRouting: '_alias:_origin' },
+      expect.anything()
     );
   });
 
   it('fails when the parser throws, so the line is left out', async () => {
-    mockSearch.mockReturnValue(of({ rawResponse: { columns: [], values: [] } }));
+    mockSearch.mockResolvedValue({ rawResponse: { columns: [], values: [] } });
     renderHook(() =>
       useTileSeriesQuery({
         tileKey: 'tile',

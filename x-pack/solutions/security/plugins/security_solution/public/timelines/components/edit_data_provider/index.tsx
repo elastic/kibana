@@ -18,7 +18,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import type { BrowserFields } from '../../../common/containers/source';
 import type { PrimitiveOrArrayOfPrimitives } from '../../../common/lib/kuery';

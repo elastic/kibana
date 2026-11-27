@@ -67,7 +67,7 @@ export function createVisualizationRenderer({
     customContent: {
       http,
       uiSettings,
-      search: startDependencies.data.search.search,
+      search: startDependencies.data.search,
     },
   };
 

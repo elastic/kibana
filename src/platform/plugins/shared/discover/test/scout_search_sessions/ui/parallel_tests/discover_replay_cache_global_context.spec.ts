@@ -19,18 +19,16 @@ import {
   DISCOVER_SEARCH_REQUESTS,
   LOGSTASH_TIME_RANGE,
   RELATIVE_TIME_DEFAULTS,
+  openDashboard,
   refetchDiscover,
   waitForDiscoverResults,
 } from '../fixtures';
 
 const STORED_TIME_DASHBOARD = 'Replay stored time';
-const STORED_TIME_DASHBOARD_LINK = 'dashboardListingTitleLink-Replay-stored-time';
 const UNSTORED_TIME_DASHBOARD = 'Replay unstored time';
-const UNSTORED_TIME_DASHBOARD_LINK = 'dashboardListingTitleLink-Replay-unstored-time';
 const PINNED_FILTER = { field: 'extension.raw', operator: 'is', value: 'jpg' } as const;
 
-// Failing: See https://github.com/elastic/kibana/issues/305534
-spaceTest.describe.skip(
+spaceTest.describe(
   'Discover replay cache with a changed global context',
   { tag: '@local-stateful-classic' },
   () => {
@@ -63,8 +61,7 @@ spaceTest.describe.skip(
     spaceTest(
       'loads fresh results after opening a dashboard with a stored time range',
       async ({ page, pageObjects, network }) => {
-        await pageObjects.collapsibleNav.clickItem('Dashboards');
-        await page.testSubj.click(STORED_TIME_DASHBOARD_LINK);
+        await openDashboard(page, pageObjects.collapsibleNav, STORED_TIME_DASHBOARD);
         await expect
           .poll(() => pageObjects.datePicker.getTimeRangeText(), { timeout: 30_000 })
           .toContain('2015');
@@ -91,8 +88,7 @@ spaceTest.describe.skip(
         await refetchDiscover(discoverContext, () =>
           pageObjects.filterBar.toggleFilterPinned(PINNED_FILTER.field)
         );
-        await pageObjects.collapsibleNav.clickItem('Dashboards');
-        await page.testSubj.click(UNSTORED_TIME_DASHBOARD_LINK);
+        await openDashboard(page, pageObjects.collapsibleNav, UNSTORED_TIME_DASHBOARD);
         await expect
           .poll(
             () => pageObjects.filterBar.hasFilter({ field: PINNED_FILTER.field, pinned: true }),

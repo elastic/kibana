@@ -6,62 +6,30 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  EuiBadge,
-  EuiBadgeGroup,
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiDragDropContext,
-  EuiDraggable,
-  EuiDroppable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiIcon,
-  EuiIconTip,
-  EuiPanel,
-  EuiSpacer,
-  EuiSplitPanel,
-  EuiText,
-  EuiToolTip,
-  euiDragDropReorder,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { isEqual, omit, pick } from 'lodash';
+import { pick } from 'lodash';
 import { NO_DEFAULT_MODEL } from '../../../common/constants';
-import { useRegisteredFeatures } from '../../hooks/use_registered_features';
 import { getConnectorIcon } from '../../utils/connector_display';
-import type {
-  InferenceFeatureResponse as InferenceFeatureConfig,
-  ReasoningEffortLevel,
-} from '../../../common/types';
+import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 import { useConnectors } from '../../hooks/use_connectors';
 import { useRegionAvailableEndpoints } from '../../hooks/use_region_available_endpoints';
+import { useRegisteredFeatures } from '../../hooks/use_registered_features';
 import { useSupportedEffortLevels } from '../../hooks/use_supported_effort_levels';
 import type { EndpointDeprecationInfo, EndpointEfforts } from '../../types';
-import { ModelStatusBadge } from '../model_status/model_status_badge';
-import { AddModelPopover } from './add_model_popover';
+import type { EndpointDisplay } from './types';
 import { CopyToModal } from './copy_to_modal';
 import { DisableRecommendedModelsModal } from './disable_recommended_models_modal';
-import { EffortBadge } from './effort_badge';
-import { ADD_EFFORT_CLASS_NAME } from './add_effort_badge';
-import { ReasoningEffortPopover } from './reasoning_effort_popover';
-import { RecommendedDefaultsSwitch } from './recommended_defaults_switch';
+import { EditableEndpointsList } from './editable_endpoints_list';
+import { RecommendedEndpointsList } from './recommended_endpoints_list';
 import { ResetDefaultsModal } from './reset_defaults_modal';
-import { SettingTitle } from './setting_title';
+import { SubFeatureCardHeader } from './sub_feature_card_header';
+import { useRecommendedDefaults } from './use_recommended_defaults';
 
-const COLLAPSED_COUNT = 5;
-const NO_EFFORT_LEVELS: ReasoningEffortLevel[] = [];
-
-const endpointRowStyles = css`
-  &:hover .${ADD_EFFORT_CLASS_NAME} {
-    opacity: 1;
-  }
+const columnStyles = css`
+  min-inline-size: min(20rem, 50%);
 `;
-
-const arraysEqual = (a: string[], b: string[]) =>
-  a.length === b.length && a.every((v, i) => v === b[i]);
 
 interface SubFeatureCardProps {
   featureId: string;
@@ -104,43 +72,31 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   const supportedEffortLevels = useSupportedEffortLevels();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
-  const [isDisableModalOpen, setIsDisableModalOpen] = useState(false);
-  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   const [listWidth, setListWidth] = useState<number | undefined>(undefined);
-  // Sticky session flag: the editable list is seeded with the recommended endpoints, so without this
-  // the toggle would snap back to ON immediately after the user confirms "Turn off recommended defaults".
-  const [hasOptedIntoCustomMode, setHasOptedIntoCustomMode] = useState(false);
-  useEffect(() => {
-    // Discarding restores the saved assignments, so the card must also leave custom mode.
-    setHasOptedIntoCustomMode(false);
-  }, [discardVersion]);
   const listRef = useRef<HTMLDivElement>(null);
-  const { isTechPreview, isBeta } = feature;
-
   const { regionDeniedEndpointIds, availableEndpointIds } =
     useRegionAvailableEndpoints(endpointIds);
-  const availableRecommendedEndpointIds = useMemo(
-    () =>
-      effectiveRecommendedEndpoints.filter(
-        (endpointId) => !regionDeniedEndpointIds.has(endpointId)
-      ),
-    [effectiveRecommendedEndpoints, regionDeniedEndpointIds]
-  );
-  const hasAvailableRecommendedEndpoints = availableRecommendedEndpointIds.length > 0;
-
-  const matchesRecommendedDefaults = useMemo(() => {
-    const matchesRecommendedEndpoints = arraysEqual(endpointIds, effectiveRecommendedEndpoints);
-    const matchesRecommendedSelection =
-      matchesRecommendedEndpoints && isEqual(efforts, effectiveRecommendedEfforts);
-    return !hasOptedIntoCustomMode && matchesRecommendedSelection;
-  }, [
-    hasOptedIntoCustomMode,
+  const {
+    hasAvailableRecommendedEndpoints,
+    isUsingRecommendedDefaults,
+    isDisableModalOpen,
+    isResetModalOpen,
+    toggleRecommendedDefaults,
+    confirmDisableRecommendedDefaults,
+    confirmResetToDefaults,
+    closeDisableModal,
+    closeResetModal,
+  } = useRecommendedDefaults({
+    featureId,
     endpointIds,
     effectiveRecommendedEndpoints,
     efforts,
     effectiveRecommendedEfforts,
-  ]);
-  const isUsingRecommendedDefaults = hasAvailableRecommendedEndpoints && matchesRecommendedDefaults;
+    regionDeniedEndpointIds,
+    onEndpointsChange,
+    onEffortsChange,
+    discardVersion,
+  });
 
   useEffect(() => {
     const el = listRef.current;
@@ -152,7 +108,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
 
   const endpointDisplayMap = useMemo(
     () =>
-      new Map(
+      new Map<string, EndpointDisplay>(
         connectors.map((connector) => [
           connector.connectorId,
           {
@@ -168,59 +124,24 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
     (f) => f.featureId !== featureId && f.parentFeatureId !== undefined
   );
 
-  const hasOverflow = availableEndpointIds.length > COLLAPSED_COUNT;
-  const visibleEndpoints = isExpanded
-    ? availableEndpointIds
-    : availableEndpointIds.slice(0, COLLAPSED_COUNT);
-  const hiddenCount = availableEndpointIds.length - COLLAPSED_COUNT;
-  const canAddMore =
-    !feature.maxNumberOfEndpoints || availableEndpointIds.length < feature.maxNumberOfEndpoints;
-
   const isGlobalDefaultAvailable =
     globalDefaultId !== NO_DEFAULT_MODEL && !regionDeniedEndpointIds.has(globalDefaultId);
   const showGlobalDefaultRow = !hasSavedObject && isGlobalDefaultAvailable;
-  const hasAssignedRows = availableEndpointIds.length > 0 || showGlobalDefaultRow;
   const { icon: globalDefaultIcon = 'processor', label: globalDefaultLabel = globalDefaultId } =
     endpointDisplayMap.get(globalDefaultId) ?? {};
-  const globalDefaultDeprecationInfo =
-    !hasSavedObject && globalDefaultId !== NO_DEFAULT_MODEL
-      ? deprecatedEndpointsMap.get(globalDefaultId)
+  const globalDefaultRow =
+    showGlobalDefaultRow && globalDefaultId
+      ? {
+          icon: globalDefaultIcon,
+          label: globalDefaultLabel,
+          showBadge: !isFeatureDirty,
+          globalDefaultId,
+          deprecationInfo: deprecatedEndpointsMap.get(globalDefaultId),
+        }
       : undefined;
 
-  const handleRemove = useCallback(
-    (index: number) => {
-      onEndpointsChange(
-        featureId,
-        availableEndpointIds.filter((_, i) => i !== index)
-      );
-    },
-    [availableEndpointIds, featureId, onEndpointsChange]
-  );
-
-  const handleAdd = useCallback(
-    (endpointId: string) => {
-      onEndpointsChange(featureId, [...availableEndpointIds, endpointId]);
-    },
-    [availableEndpointIds, featureId, onEndpointsChange]
-  );
-
-  const handleDragEnd = useCallback(
-    ({
-      source,
-      destination,
-    }: {
-      source: { index: number };
-      destination?: { index: number } | null;
-    }) => {
-      if (destination && source.index !== destination.index) {
-        onEndpointsChange(
-          featureId,
-          euiDragDropReorder(availableEndpointIds, source.index, destination.index)
-        );
-      }
-    },
-    [availableEndpointIds, featureId, onEndpointsChange]
-  );
+  const expandList = useCallback(() => setIsExpanded(true), []);
+  const openCopyModal = useCallback(() => setIsCopyModalOpen(true), []);
 
   const handleCopyApply = useCallback(
     (selectedFeatureIds: string[]) => {
@@ -232,51 +153,6 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
     [availableEndpointIds, efforts, onEndpointsChange, onEffortsChange]
   );
 
-  const handleEffortChange = useCallback(
-    (endpointId: string, effort?: ReasoningEffortLevel) => {
-      onEffortsChange(
-        featureId,
-        effort === undefined ? omit(efforts, endpointId) : { ...efforts, [endpointId]: effort }
-      );
-    },
-    [efforts, featureId, onEffortsChange]
-  );
-
-  const handleToggleRecommendedDefaults = useCallback(
-    (checked: boolean) => {
-      if (checked) {
-        if (!isUsingRecommendedDefaults) {
-          setIsResetModalOpen(true);
-        }
-        return;
-      }
-      setIsDisableModalOpen(true);
-    },
-    [isUsingRecommendedDefaults]
-  );
-
-  const confirmResetToDefaults = useCallback(() => {
-    setHasOptedIntoCustomMode(false);
-    onEndpointsChange(featureId, [...effectiveRecommendedEndpoints]);
-    onEffortsChange(featureId, { ...effectiveRecommendedEfforts });
-    setIsResetModalOpen(false);
-  }, [
-    featureId,
-    effectiveRecommendedEndpoints,
-    effectiveRecommendedEfforts,
-    onEndpointsChange,
-    onEffortsChange,
-  ]);
-
-  const confirmDisableRecommendedDefaults = useCallback(() => {
-    setHasOptedIntoCustomMode(true);
-    onEndpointsChange(featureId, [...availableRecommendedEndpointIds]);
-    setIsDisableModalOpen(false);
-  }, [featureId, availableRecommendedEndpointIds, onEndpointsChange]);
-
-  const showAddModelPopover = canManage && (!hasOverflow || isExpanded) && canAddMore;
-  const showCopyToButton = canManage && (!hasOverflow || isExpanded) && hasOtherSubFeatures;
-
   return (
     <>
       <EuiFlexGroup
@@ -285,60 +161,19 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
         alignItems="baseline"
         wrap
       >
-        <EuiFlexItem
-          css={css`
-            min-inline-size: min(20rem, 50%);
-          `}
-        >
-          <EuiFlexGroup responsive={false}>
-            <EuiFlexItem grow={false}>
-              <SettingTitle
-                heading="h4"
-                data-test-subj={`subFeatureCardTitle-${featureId}`}
-                isUnsaved={isFeatureDirty}
-                title={feature.featureName}
-              />
-            </EuiFlexItem>
-            {(isTechPreview || isBeta) && (
-              <EuiFlexItem grow={false}>
-                <EuiBadgeGroup>
-                  {isTechPreview && (
-                    <EuiBadge>
-                      {i18n.translate('xpack.searchInferenceEndpoints.settings.techPreview', {
-                        defaultMessage: 'Technical Preview',
-                      })}
-                    </EuiBadge>
-                  )}
-                  {isBeta && (
-                    <EuiBadge>
-                      {i18n.translate('xpack.searchInferenceEndpoints.settings.betaBadge', {
-                        defaultMessage: 'Beta',
-                      })}
-                    </EuiBadge>
-                  )}
-                </EuiBadgeGroup>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued">
-            <p>{feature.featureDescription}</p>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <RecommendedDefaultsSwitch
+        <EuiFlexItem css={columnStyles}>
+          <SubFeatureCardHeader
             featureId={featureId}
-            checked={isUsingRecommendedDefaults}
+            feature={feature}
+            isFeatureDirty={isFeatureDirty}
+            isUsingRecommendedDefaults={isUsingRecommendedDefaults}
             hasAvailableRecommendedEndpoints={hasAvailableRecommendedEndpoints}
             canManage={canManage}
-            onChange={handleToggleRecommendedDefaults}
+            onToggleRecommendedDefaults={toggleRecommendedDefaults}
           />
         </EuiFlexItem>
 
-        <EuiFlexItem
-          css={css`
-            min-inline-size: min(20rem, 50%);
-          `}
-        >
+        <EuiFlexItem css={columnStyles}>
           <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
             <EuiText size="xs" color="subdued">
               <strong>
@@ -357,257 +192,30 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                 endpointDisplayMap={endpointDisplayMap}
                 invalidEndpointIds={invalidEndpointIds}
                 deprecatedEndpointsMap={deprecatedEndpointsMap}
-                globalDefaultRow={
-                  showGlobalDefaultRow && globalDefaultId
-                    ? {
-                        icon: globalDefaultIcon,
-                        label: globalDefaultLabel,
-                        showBadge: !isFeatureDirty,
-                        globalDefaultId,
-                        deprecationInfo: globalDefaultDeprecationInfo,
-                      }
-                    : undefined
-                }
+                globalDefaultRow={globalDefaultRow}
               />
             ) : (
-              <EuiDragDropContext onDragEnd={handleDragEnd}>
-                <div ref={listRef}>
-                  <EuiSplitPanel.Outer hasBorder={hasAssignedRows}>
-                    {showGlobalDefaultRow && globalDefaultId && (
-                      <GlobalDefaultLockedRow
-                        featureId={featureId}
-                        icon={globalDefaultIcon}
-                        label={globalDefaultLabel}
-                        showBadge={!isFeatureDirty}
-                        globalDefaultId={globalDefaultId}
-                        deprecationInfo={globalDefaultDeprecationInfo}
-                      />
-                    )}
-                    <EuiDroppable droppableId={`assigned-models-${featureId}`} spacing="none">
-                      {visibleEndpoints.map((endpointId, index) => (
-                        <EuiDraggable
-                          key={endpointId}
-                          index={index}
-                          draggableId={endpointId}
-                          customDragHandle
-                          hasInteractiveChildren
-                        >
-                          {(provided) => {
-                            const { icon = 'processor', label = endpointId } =
-                              endpointDisplayMap.get(endpointId) ?? {};
-                            const isInvalid = invalidEndpointIds.has(endpointId);
-                            const deprecationInfo = deprecatedEndpointsMap.get(endpointId);
-                            const supportedLevels = supportedEffortLevels.get(endpointId);
-                            const effort = efforts[endpointId];
-                            const showEffortControl =
-                              supportedLevels !== undefined || effort !== undefined;
-                            return (
-                              <div>
-                                <EuiSplitPanel.Inner
-                                  paddingSize="s"
-                                  css={endpointRowStyles}
-                                  data-test-subj={`endpoint-row-${endpointId}`}
-                                >
-                                  <EuiFlexGroup alignItems="center" gutterSize="s">
-                                    {canManage && (
-                                      <EuiFlexItem grow={false}>
-                                        <EuiPanel
-                                          color="transparent"
-                                          paddingSize="none"
-                                          {...provided.dragHandleProps}
-                                          aria-label={i18n.translate(
-                                            'xpack.searchInferenceEndpoints.settings.dragHandle',
-                                            { defaultMessage: 'Drag to reorder' }
-                                          )}
-                                        >
-                                          <EuiIcon
-                                            type="dragVertical"
-                                            size="s"
-                                            color="subdued"
-                                            aria-hidden
-                                          />
-                                        </EuiPanel>
-                                      </EuiFlexItem>
-                                    )}
-                                    <EuiFlexItem grow={false}>
-                                      {isInvalid ? (
-                                        <EuiIconTip
-                                          type="warning"
-                                          size="m"
-                                          color="warning"
-                                          content={i18n.translate(
-                                            'xpack.searchInferenceEndpoints.settings.endpointUnavailable',
-                                            {
-                                              defaultMessage:
-                                                'This inference endpoint is no longer available',
-                                            }
-                                          )}
-                                          aria-label={i18n.translate(
-                                            'xpack.searchInferenceEndpoints.settings.endpointUnavailable.ariaLabel',
-                                            {
-                                              defaultMessage:
-                                                'Inference endpoint {label} is no longer available',
-                                              values: { label },
-                                            }
-                                          )}
-                                        />
-                                      ) : (
-                                        <EuiIcon type={icon} size="m" aria-hidden />
-                                      )}
-                                    </EuiFlexItem>
-                                    <EuiFlexItem
-                                      grow
-                                      css={css`
-                                        min-width: 0;
-                                      `}
-                                    >
-                                      <EuiToolTip title={label} content={endpointId} position="top">
-                                        <EuiText
-                                          size="s"
-                                          tabIndex={0}
-                                          css={css`
-                                            overflow: hidden;
-                                            text-overflow: ellipsis;
-                                            white-space: nowrap;
-                                          `}
-                                        >
-                                          <span>{label}</span>
-                                        </EuiText>
-                                      </EuiToolTip>
-                                    </EuiFlexItem>
-                                    {deprecationInfo && (
-                                      <ModelStatusBadge
-                                        id={endpointId}
-                                        status={deprecationInfo.status}
-                                        metadata={deprecationInfo.metadata}
-                                      />
-                                    )}
-                                    {showEffortControl && (
-                                      <EuiFlexItem grow={false}>
-                                        {canManage ? (
-                                          <ReasoningEffortPopover
-                                            endpointId={endpointId}
-                                            label={label}
-                                            effort={effort}
-                                            supportedLevels={supportedLevels ?? NO_EFFORT_LEVELS}
-                                            onChange={(newEffort) =>
-                                              handleEffortChange(endpointId, newEffort)
-                                            }
-                                          />
-                                        ) : (
-                                          effort !== undefined && (
-                                            <EffortBadge endpointId={endpointId} effort={effort} />
-                                          )
-                                        )}
-                                      </EuiFlexItem>
-                                    )}
-                                    {canManage && (
-                                      <EuiFlexItem grow={false}>
-                                        <EuiToolTip
-                                          content={i18n.translate(
-                                            'xpack.searchInferenceEndpoints.settings.removeModel',
-                                            {
-                                              defaultMessage: 'Remove model',
-                                            }
-                                          )}
-                                          disableScreenReaderOutput
-                                        >
-                                          <EuiButtonIcon
-                                            iconType="cross"
-                                            aria-label={i18n.translate(
-                                              'xpack.searchInferenceEndpoints.settings.removeModel',
-                                              {
-                                                defaultMessage: 'Remove model',
-                                              }
-                                            )}
-                                            size="s"
-                                            color="text"
-                                            onClick={() => handleRemove(index)}
-                                            isDisabled={availableEndpointIds.length <= 1}
-                                            data-test-subj={`remove-endpoint-${endpointId}`}
-                                          />
-                                        </EuiToolTip>
-                                      </EuiFlexItem>
-                                    )}
-                                  </EuiFlexGroup>
-                                </EuiSplitPanel.Inner>
-                                {index !== visibleEndpoints.length - 1 && (
-                                  <EuiHorizontalRule margin="none" />
-                                )}
-                              </div>
-                            );
-                          }}
-                        </EuiDraggable>
-                      ))}
-                    </EuiDroppable>
-                  </EuiSplitPanel.Outer>
-                  {!hasAssignedRows && (
-                    <EuiText
-                      size="s"
-                      color="subdued"
-                      data-test-subj={`no-models-available-${featureId}`}
-                    >
-                      <p>
-                        {i18n.translate(
-                          'xpack.searchInferenceEndpoints.settings.assignedModels.noModelsAvailable',
-                          { defaultMessage: 'No models available' }
-                        )}
-                      </p>
-                    </EuiText>
-                  )}
-                </div>
-              </EuiDragDropContext>
-            )}
-
-            {!isUsingRecommendedDefaults && (
-              <>
-                <EuiSpacer size="xs" />
-                <EuiFlexGroup alignItems="center" gutterSize="m" wrap>
-                  {hasOverflow && !isExpanded && (
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty
-                        iconType="chevronSingleDown"
-                        size="s"
-                        onClick={() => setIsExpanded(true)}
-                        data-test-subj={`show-more-${featureId}`}
-                        color="text"
-                      >
-                        {i18n.translate('xpack.searchInferenceEndpoints.settings.showMore', {
-                          defaultMessage: 'Show {count} more',
-                          values: { count: hiddenCount },
-                        })}
-                      </EuiButtonEmpty>
-                    </EuiFlexItem>
-                  )}
-                  {showAddModelPopover && (
-                    <EuiFlexItem grow={false}>
-                      <AddModelPopover
-                        existingEndpointIds={availableEndpointIds}
-                        onAdd={handleAdd}
-                        taskType={feature.taskType}
-                        panelWidth={listWidth}
-                        allowTemplateRequiredModels={feature.allowTemplateRequiredModels}
-                      />
-                    </EuiFlexItem>
-                  )}
-                  {showCopyToButton && (
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty
-                        iconType="copy"
-                        size="s"
-                        color="text"
-                        onClick={() => setIsCopyModalOpen(true)}
-                        isDisabled={availableEndpointIds.length === 0}
-                        data-test-subj={`copy-to-${featureId}`}
-                      >
-                        {i18n.translate('xpack.searchInferenceEndpoints.settings.copyTo.button', {
-                          defaultMessage: 'Copy to',
-                        })}
-                      </EuiButtonEmpty>
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-              </>
+              <EditableEndpointsList
+                featureId={featureId}
+                feature={feature}
+                endpointIds={availableEndpointIds}
+                efforts={efforts}
+                endpointDisplayMap={endpointDisplayMap}
+                supportedEffortLevels={supportedEffortLevels}
+                invalidEndpointIds={invalidEndpointIds}
+                deprecatedEndpointsMap={deprecatedEndpointsMap}
+                showGlobalDefaultRow={showGlobalDefaultRow}
+                globalDefaultRow={globalDefaultRow}
+                canManage={canManage}
+                hasOtherSubFeatures={hasOtherSubFeatures}
+                isExpanded={isExpanded}
+                listRef={listRef}
+                listWidth={listWidth}
+                onExpand={expandList}
+                onCopyTo={openCopyModal}
+                onEndpointsChange={onEndpointsChange}
+                onEffortsChange={onEffortsChange}
+              />
             )}
           </EuiPanel>
         </EuiFlexItem>
@@ -626,181 +234,12 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
       {isDisableModalOpen && (
         <DisableRecommendedModelsModal
           onConfirm={confirmDisableRecommendedDefaults}
-          onCancel={() => setIsDisableModalOpen(false)}
+          onCancel={closeDisableModal}
         />
       )}
       {isResetModalOpen && (
-        <ResetDefaultsModal
-          onConfirm={confirmResetToDefaults}
-          onCancel={() => setIsResetModalOpen(false)}
-        />
+        <ResetDefaultsModal onConfirm={confirmResetToDefaults} onCancel={closeResetModal} />
       )}
     </>
-  );
-};
-
-interface GlobalDefaultLockedRowProps {
-  featureId: string;
-  icon: string;
-  label: string;
-  showBadge: boolean;
-  globalDefaultId: string;
-  deprecationInfo?: EndpointDeprecationInfo;
-}
-
-const GlobalDefaultLockedRow: React.FC<GlobalDefaultLockedRowProps> = ({
-  featureId,
-  icon,
-  label,
-  showBadge,
-  globalDefaultId,
-  deprecationInfo,
-}) => (
-  <>
-    <EuiSplitPanel.Inner paddingSize="s" data-test-subj={`global-default-row-${featureId}`}>
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiPanel color="transparent" paddingSize="none">
-            <EuiIcon type="lock" size="s" color="subdued" aria-hidden />
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type={icon} size="m" aria-hidden />
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow
-          css={css`
-            min-width: 0;
-          `}
-        >
-          <EuiToolTip title={label} content={globalDefaultId} position="top">
-            <EuiText
-              size="s"
-              color="subdued"
-              tabIndex={0}
-              css={css`
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-              `}
-            >
-              <span>{label}</span>
-            </EuiText>
-          </EuiToolTip>
-        </EuiFlexItem>
-        {showBadge && (
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow" data-test-subj={`global-default-badge-${featureId}`}>
-              {i18n.translate('xpack.searchInferenceEndpoints.settings.globalDefaultBadge', {
-                defaultMessage: 'Global default',
-              })}
-            </EuiBadge>
-          </EuiFlexItem>
-        )}
-        {deprecationInfo && (
-          <EuiFlexItem grow={false}>
-            <ModelStatusBadge
-              id={globalDefaultId}
-              status={deprecationInfo.status}
-              metadata={deprecationInfo.metadata}
-            />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </EuiSplitPanel.Inner>
-    <EuiHorizontalRule margin="none" />
-  </>
-);
-
-interface RecommendedEndpointsListProps {
-  featureId: string;
-  endpointIds: string[];
-  efforts: EndpointEfforts;
-  endpointDisplayMap: Map<string, { icon: string; label: string }>;
-  invalidEndpointIds: Set<string>;
-  deprecatedEndpointsMap: Map<string, EndpointDeprecationInfo>;
-  globalDefaultRow?: {
-    icon: string;
-    label: string;
-    showBadge: boolean;
-    globalDefaultId: string;
-    deprecationInfo?: EndpointDeprecationInfo;
-  };
-}
-
-const RecommendedEndpointsList: React.FC<RecommendedEndpointsListProps> = ({
-  featureId,
-  endpointIds,
-  efforts,
-  endpointDisplayMap,
-  invalidEndpointIds,
-  deprecatedEndpointsMap,
-  globalDefaultRow,
-}) => {
-  return (
-    <EuiSplitPanel.Outer hasBorder>
-      {globalDefaultRow && (
-        <GlobalDefaultLockedRow
-          featureId={featureId}
-          icon={globalDefaultRow.icon}
-          label={globalDefaultRow.label}
-          showBadge={globalDefaultRow.showBadge}
-          globalDefaultId={globalDefaultRow.globalDefaultId}
-          deprecationInfo={globalDefaultRow.deprecationInfo}
-        />
-      )}
-      {endpointIds.map((endpointId, index) => {
-        const { icon = 'processor', label = endpointId } = endpointDisplayMap.get(endpointId) ?? {};
-        const isInvalid = invalidEndpointIds.has(endpointId);
-        const deprecationInfo = deprecatedEndpointsMap.get(endpointId);
-        const effort = efforts[endpointId];
-        return (
-          <div key={endpointId}>
-            <EuiSplitPanel.Inner paddingSize="s" data-test-subj={`endpoint-row-${endpointId}`}>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  {isInvalid ? (
-                    <EuiIconTip
-                      type="warning"
-                      size="m"
-                      color="warning"
-                      content={i18n.translate(
-                        'xpack.searchInferenceEndpoints.settings.endpointUnavailable',
-                        { defaultMessage: 'This inference endpoint is no longer available' }
-                      )}
-                    />
-                  ) : (
-                    <EuiIcon type={icon} size="m" color="subdued" aria-hidden />
-                  )}
-                </EuiFlexItem>
-                <EuiFlexItem
-                  grow
-                  css={css`
-                    min-width: 0;
-                  `}
-                >
-                  <EuiText size="s" color="subdued">
-                    <span>{label}</span>
-                  </EuiText>
-                </EuiFlexItem>
-                {deprecationInfo && (
-                  <ModelStatusBadge
-                    id={endpointId}
-                    status={deprecationInfo.status}
-                    metadata={deprecationInfo.metadata}
-                  />
-                )}
-                {effort !== undefined && (
-                  <EuiFlexItem grow={false}>
-                    <EffortBadge endpointId={endpointId} effort={effort} />
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-            </EuiSplitPanel.Inner>
-            {index !== endpointIds.length - 1 && <EuiHorizontalRule margin="none" />}
-          </div>
-        );
-      })}
-    </EuiSplitPanel.Outer>
   );
 };

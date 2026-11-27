@@ -6,11 +6,12 @@
       "jest",
       "node",
       "react",
+      "@testing-library/jest-dom",
       "@kbn/ambient-ui-types",
       "@kbn/ambient-storybook-types"
     ]
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["target/**/*"],
-  "kbn_references": []
+  "kbn_references": ["@kbn/i18n"]
 }

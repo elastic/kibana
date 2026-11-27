@@ -326,6 +326,11 @@ export interface ChartSectionProps {
    */
   setLensRequestAdapter?: (adapter: RequestAdapter | undefined) => void;
   /**
+   * Optional callback for reporting the only fields the custom chart section can use as a breakdown.
+   * When nothing is reported, any field supported by the default breakdown is accepted.
+   */
+  setBreakdownFieldNames?: (fieldNames: string[] | undefined) => void;
+  /**
    * Indicates whether the current tab is selected/active.
    */
   isTabSelected: boolean;

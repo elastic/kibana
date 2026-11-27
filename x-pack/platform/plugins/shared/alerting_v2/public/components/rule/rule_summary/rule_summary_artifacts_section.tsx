@@ -19,7 +19,6 @@ export const RuleSummaryArtifactsSection: React.FC = () => {
   const rule = useRuleSummary();
   const canReadActionPolicies = useService(UserCapabilities).canRead('actionPolicies');
   const showActionPolicies = rule.kind !== 'signal' && canReadActionPolicies;
-  const hasDashboards = Boolean(rule.artifacts?.some((artifact) => artifact.type === 'dashboard'));
 
   return (
     <FlyoutAccordion
@@ -27,7 +26,7 @@ export const RuleSummaryArtifactsSection: React.FC = () => {
         defaultMessage: 'Artifacts',
       })}
       hasBorder={false}
-      initialIsOpen={hasDashboards}
+      initialIsOpen
       data-test-subj="ruleSummaryArtifacts"
     >
       <EuiFlexGroup

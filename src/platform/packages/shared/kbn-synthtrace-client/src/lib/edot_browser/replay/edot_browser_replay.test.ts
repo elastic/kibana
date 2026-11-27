@@ -52,7 +52,13 @@ const simulate = (
     pageViews = 4,
     health = 'critical',
     hardNavigationRate = 1,
-  }: { pageViews?: number; health?: HealthProfileName; hardNavigationRate?: number } = {}
+    frustration = false,
+  }: {
+    pageViews?: number;
+    health?: HealthProfileName;
+    hardNavigationRate?: number;
+    frustration?: boolean;
+  } = {}
 ): SimulatedSession => {
   const random = createSeededRandom(`replay-test:${seed}`);
   const client = app.client(edotBrowser.browserProfiles.chromeMacos, {
@@ -67,6 +73,7 @@ const simulate = (
     pageViews,
     hardNavigationRate,
     end: END,
+    ...(frustration ? { frustrationRandom: createSeededRandom(`replay-test:${seed}:rage`) } : {}),
   });
   return { visits: [{ client, documents }], documents, events };
 };
@@ -300,6 +307,32 @@ describe('edotBrowser.replaySession', () => {
           .map(({ event }) => event!.timestamp - 1)
       );
       clickTimes.forEach((time) => expect(recordedClicks).toContain(time));
+    });
+
+    it('records the repeated clicks of a rage click on the element of the click they repeat', () => {
+      const raging = Array.from({ length: 30 }, (_, seed) =>
+        simulate(seed, { frustration: true })
+      ).find(({ documents }) => documents.some((doc) => doc.repeatedClickTimes?.length));
+      if (!raging) {
+        throw new Error('No session with a rage click');
+      }
+      const repeated = new Set(raging.documents.flatMap((doc) => doc.repeatedClickTimes ?? []));
+      let compared = 0;
+      reassemble(replay(raging)).forEach(({ events }) => {
+        // Mouse ups, a millisecond after the click
+        const clicks = events.flatMap(({ event }) =>
+          event && event.type === 3 && event.data.source === 2 && event.data.type === 0
+            ? [event]
+            : []
+        );
+        clicks.forEach((click, index) => {
+          if (index > 0 && repeated.has(click.timestamp - 1)) {
+            expect(click.data).toEqual(clicks[index - 1].data);
+            compared++;
+          }
+        });
+      });
+      expect(compared).toBe(repeated.size);
     });
 
     it('is the same for the same random source', () => {

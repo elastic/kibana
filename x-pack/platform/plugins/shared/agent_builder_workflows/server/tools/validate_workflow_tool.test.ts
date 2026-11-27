@@ -7,7 +7,30 @@
 
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
+import { z } from '@kbn/zod/v4';
 import { registerValidateWorkflowTool } from './validate_workflow_tool';
+
+const mockConnectors = [
+  {
+    type: 'custom.openStep',
+    summary: 'Open step',
+    paramsSchema: z.object({ message: z.string() }),
+  },
+  {
+    type: 'custom.managedOnlyStep',
+    summary: 'Managed-only step',
+    paramsSchema: z.object({ message: z.string() }),
+  },
+];
+const mockGetStepExposure = jest.fn();
+jest.mock('@kbn/workflows-management-plugin/common/schema', () => ({
+  addDynamicConnectorsToCache: jest.fn(),
+  getAllConnectors: () => mockConnectors,
+  getCachedAllConnectorsMap: () =>
+    new Map(mockConnectors.map((connector) => [connector.type, connector])),
+  getDeprecatedStepMetadata: () => undefined,
+  getStepExposure: (...args: unknown[]) => mockGetStepExposure(...args),
+}));
 
 const invokeHandler = async (tool: BuiltinToolDefinition, input: unknown, context: unknown) =>
   (await tool.handler(input as never, context as never)) as ToolHandlerStandardReturn;
@@ -17,10 +40,13 @@ describe('registerValidateWorkflowTool', () => {
 
   const mockApi = {
     validateWorkflow: jest.fn(),
+    getAvailableConnectors: jest.fn(),
   } as any;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetStepExposure.mockReturnValue('open');
+    mockApi.getAvailableConnectors.mockResolvedValue({ connectorTypes: {}, totalConnectors: 0 });
     mockApi.validateWorkflow.mockResolvedValue({
       valid: true,
       errors: [],
@@ -67,5 +93,24 @@ describe('registerValidateWorkflowTool', () => {
       errors: [],
       warnings: [],
     });
+  });
+
+  it('leaves managed-only steps out of the step definitions it adds when validation fails', async () => {
+    mockApi.validateWorkflow.mockResolvedValue({ valid: false, errors: ['invalid'], warnings: [] });
+    mockGetStepExposure.mockImplementation((stepType: string) =>
+      stepType === 'custom.managedOnlyStep' ? 'managed_only' : 'open'
+    );
+    const yaml = `version: '1'\nname: test\ntriggers:\n  - type: manual\nsteps:\n  - name: open\n    type: custom.openStep\n  - name: managed\n    type: custom.managedOnlyStep\n`;
+
+    const result = await invokeHandler(
+      registeredTool,
+      { yaml },
+      { spaceId: 'default', request: {} }
+    );
+
+    const { stepDefinitions } = result.results[0].data as {
+      stepDefinitions: Array<{ id: string }>;
+    };
+    expect(stepDefinitions.map(({ id }) => id)).toEqual(['custom.openStep']);
   });
 });

@@ -1,0 +1,123 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
+import { EuiFlyout, EuiProvider, getFlyoutManagerStore } from '@elastic/eui';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { noop } from 'lodash';
+
+import { QueryDetailsFlyout } from './query_details_flyout';
+
+// Kibana's Jest resolver uses EUI's test-env flyout stub, which omits session management.
+jest.mock('@elastic/eui', () =>
+  jest.requireActual(
+    require.resolve('@elastic/eui/package.json').replace('package.json', 'lib/index.js')
+  )
+);
+
+const action = { id: 'action-1', query: 'select * from uptime;' };
+
+const renderWithProviders = (ui: React.ReactElement) =>
+  render(
+    <EuiProvider>
+      <IntlProvider locale="en">{ui}</IntlProvider>
+    </EuiProvider>
+  );
+
+const expectDetailsShown = () => {
+  expect(screen.getByTestId('osquery-query-details-flyout')).toBeInTheDocument();
+  expect(screen.getByText('Query Details')).toBeVisible();
+  expect(screen.getByText('action-1')).toBeVisible();
+  // the SQL block is syntax highlighted, so the text is split across spans
+  expect(screen.getByTestId('osquery-query-details-flyout')).toHaveTextContent(action.query);
+};
+
+const validationErrors = (spy: jest.SpyInstance) =>
+  spy.mock.calls.filter((args: Parameters<typeof console.error>) =>
+    args.some((arg) => String(arg?.message ?? arg).includes('EuiFlyout validation error'))
+  );
+
+describe('QueryDetailsFlyout', () => {
+  let consoleErrorSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    consoleErrorSpy = jest.spyOn(console, 'error');
+  });
+
+  afterEach(() => {
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('renders inside a managed size m parent flyout without throwing', () => {
+    renderWithProviders(
+      <EuiFlyout session="start" size="m" aria-label="parent" onClose={noop}>
+        <QueryDetailsFlyout
+          action={action}
+          onClose={jest.fn()}
+          flyoutProps={{ session: 'inherit', size: 's' }}
+        />
+      </EuiFlyout>
+    );
+
+    expectDetailsShown();
+    expect(validationErrors(consoleErrorSpy)).toHaveLength(0);
+    expect(getFlyoutManagerStore().getState().flyouts).toEqual(
+      expect.arrayContaining([expect.objectContaining({ level: 'child', size: 's' })])
+    );
+  });
+
+  it('defaults to a standalone flyout that registers no session', () => {
+    renderWithProviders(<QueryDetailsFlyout action={action} onClose={jest.fn()} />);
+
+    expectDetailsShown();
+    expect(getFlyoutManagerStore().getState().flyouts).toHaveLength(0);
+  });
+
+  it('close button calls onClose once', () => {
+    const onClose = jest.fn();
+    const onParentClose = jest.fn();
+    renderWithProviders(
+      <EuiFlyout session="start" size="m" aria-label="parent" onClose={onParentClose}>
+        <div data-test-subj="parent-content">parent</div>
+        <QueryDetailsFlyout
+          action={action}
+          onClose={onClose}
+          flyoutProps={{ session: 'inherit', size: 's' }}
+        />
+      </EuiFlyout>
+    );
+
+    const details = screen.getByTestId('osquery-query-details-flyout');
+    fireEvent.click(within(details).getByTestId('euiFlyoutCloseButton'));
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('parent-content')).toBeInTheDocument();
+    expect(onParentClose).not.toHaveBeenCalled();
+  });
+
+  it('Escape calls onClose once', () => {
+    const onClose = jest.fn();
+    const onParentClose = jest.fn();
+    renderWithProviders(
+      <EuiFlyout session="start" size="m" aria-label="parent" onClose={onParentClose}>
+        <div data-test-subj="parent-content">parent</div>
+        <QueryDetailsFlyout
+          action={action}
+          onClose={onClose}
+          flyoutProps={{ session: 'inherit', size: 's' }}
+        />
+      </EuiFlyout>
+    );
+
+    fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' });
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('parent-content')).toBeInTheDocument();
+    expect(onParentClose).not.toHaveBeenCalled();
+  });
+});

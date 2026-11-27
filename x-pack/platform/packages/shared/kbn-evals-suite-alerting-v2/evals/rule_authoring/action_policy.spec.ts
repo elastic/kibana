@@ -74,10 +74,12 @@ evaluate.describe(
                   ],
                   notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
                   // The full notification flow also composes the rule and generates the
-                  // notification workflow before the policy is wired up.
+                  // notification workflow before the policy is wired up, and links them
+                  // with the routing-tag tool instead of setting tags by hand.
                   expectedToolIds: [
                     ALERTING_TOOL_IDS.manageActionPolicy,
                     ALERTING_TOOL_IDS.manageRule,
+                    ALERTING_TOOL_IDS.linkRuleAndActionPolicy,
                     WORKFLOW_GENERATION_TOOL_ID,
                   ],
                   expectRenderAttachment: [

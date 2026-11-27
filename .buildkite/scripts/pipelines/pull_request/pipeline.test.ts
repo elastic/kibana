@@ -472,7 +472,10 @@ describe('pull_request pipeline generation', () => {
     expect(output).toContain('Build Storybooks');
     expect(mockGetAffectedPackages).toHaveBeenCalledWith(
       undefined,
-      expect.objectContaining({ changedFiles: expect.any(Array) })
+      expect.objectContaining({
+        changedFiles: expect.any(Array),
+        ignorePatterns: expect.arrayContaining(['packages/kbn-rspack-optimizer/limits.yml']),
+      })
     );
   });
 

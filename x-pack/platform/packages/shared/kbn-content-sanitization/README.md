@@ -5,7 +5,11 @@ Server-side sanitizers for user-supplied content that Kibana stores and later se
 ## SVG
 
 `sanitizeSvg` runs an SVG through DOMPurify with a strict SVG profile. It removes scripts, event handlers, `<style>`,
-`<foreignObject>`, and every `href` / `xlink:href`. Before DOMPurify runs, it copies a safe subset of `<style>` rules
+and `<foreignObject>`. It keeps an `href` / `xlink:href` only when it is a same-document reference such as `#shape`,
+or a base64 PNG, JPEG, GIF or WebP data URL on `<image>`; every other value, including external URLs and SVG data
+URLs, is removed. Because browsers render a copy of what each `<use>` references, a `<use>` keeps its reference only
+if the target exists and contains no `<use>`, and only up to 256 references or 10,000 copied elements per SVG.
+Before DOMPurify runs, it copies a safe subset of `<style>` rules
 onto the matching elements as presentation attributes, so icons that color their shapes with CSS classes still render.
 If that step can't keep the SVG intact, it falls back to the plain DOMPurify result.
 

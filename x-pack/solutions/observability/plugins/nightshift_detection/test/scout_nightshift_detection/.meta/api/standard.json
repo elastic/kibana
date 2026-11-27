@@ -1,0 +1,88 @@
+{
+  "sha1": "988501d99504481b5556ea94c9621362837eeb9e",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "ef53eec30cd633d-a1d02785c3d8653",
+      "title": "Set the default space up with the detection service account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_detection/test/scout_nightshift_detection/api/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "0d71ea9d8ce7c23-44db3bd16ada2c7",
+      "title": "POST /internal/nightshift/detection/_reconcile the space setup installs and turns on the reconcile workflow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_detection/test/scout_nightshift_detection/api/tests/reconcile.spec.ts",
+        "line": 98,
+        "column": 7
+      }
+    },
+    {
+      "id": "0d71ea9d8ce7c23-aceea886f65222e",
+      "title": "POST /internal/nightshift/detection/_reconcile deletes a managed rule no strategy wants, as the account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_detection/test/scout_nightshift_detection/api/tests/reconcile.spec.ts",
+        "line": 108,
+        "column": 44
+      }
+    },
+    {
+      "id": "0d71ea9d8ce7c23-040e45b6a116c2a",
+      "title": "POST /internal/nightshift/detection/_reconcile a source change reconciles the space through the workflow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_detection/test/scout_nightshift_detection/api/tests/reconcile.spec.ts",
+        "line": 130,
+        "column": 61
+      }
+    },
+    {
+      "id": "c3dfb9c030cd60b-5ee64f1353dfa20",
+      "title": "POST /internal/nightshift/detection/_tick runs a tick in a set-up space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_detection/test/scout_nightshift_detection/api/tests/tick.spec.ts",
+        "line": 50,
+        "column": 7
+      }
+    }
+  ]
+}

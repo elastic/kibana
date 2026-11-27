@@ -6,12 +6,7 @@
  */
 
 import { MockUrlService } from '@kbn/share-plugin/common/mocks';
-import {
-  ExecutionStatus,
-  StepCategory,
-  WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG,
-} from '@kbn/workflows';
-import { of } from 'rxjs';
+import { ExecutionStatus, StepCategory } from '@kbn/workflows';
 import {
   NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
   NIGHTSHIFT_INVESTIGATION_FAILURE_SWEEP_WORKFLOW_ID,
@@ -75,9 +70,6 @@ const setup = (failure?: Failure, persistenceFailures = 0, eventWriteFailure = f
     .mockResolvedValue('default-nightshift-connector');
   const fixture = createNightshiftWorkflowFixture();
   const { engine } = fixture;
-  engine.dependencies.coreStart.featureFlags.getBooleanValue$.mockImplementation(
-    (flag, defaultValue) => of(flag === WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG || defaultValue)
-  );
   const routing = createRoutingTestContext('default');
   const destinations = [{ type: 'slack', connector_id: 'slack', params: { channel: '#alerts' } }];
   const delivered: NotificationExecution[] = [];

@@ -190,6 +190,7 @@ export const Tab: React.FC<TabProps> = (props) => {
     item,
     tabsSizeConfig,
     fontWeight,
+    isUnsaved,
   });
 
   useEffect(() => {

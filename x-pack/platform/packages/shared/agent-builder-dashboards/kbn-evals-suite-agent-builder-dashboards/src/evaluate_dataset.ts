@@ -36,6 +36,7 @@ import {
   dashboardTitlesEvaluator,
 } from './evaluators/dashboard_rule_evaluators';
 import { dashboardRoutingEvaluator } from './evaluators/dashboard_routing';
+import { panelConfigReferenceEvaluator } from './evaluators/panel_config_reference';
 import { dashboardStructureEvaluator } from './evaluators/dashboard_structure';
 import { dashboardTimeRangeEvaluator } from './evaluators/dashboard_time_range';
 import {
@@ -47,6 +48,7 @@ import {
 import { enhanceScopeEvaluator } from './evaluators/enhance_scope_evaluator';
 import { dashboardLayoutEditEvaluator } from './evaluators/layout_edit';
 import { dashboardPanelEditsEvaluator } from './evaluators/panel_edits';
+import { dashboardSettingsEvaluator } from './evaluators/dashboard_settings';
 import { dashboardReplaceConfirmationEvaluator } from './evaluators/replace_confirmation';
 import { createReplyEvaluator } from './evaluators/reply_judge';
 import { createUnavailableRequestsEvaluator } from './evaluators/unavailable_requests';
@@ -298,6 +300,7 @@ export function createEvaluateDataset({
   // evaluators report counts and seconds, so a "low" value means nothing there.
   const qualityEvaluators = [
     dashboardRoutingEvaluator,
+    panelConfigReferenceEvaluator,
     wholeDashboardOnly(dashboardStructureEvaluator),
     wholeDashboardOnly(dashboardTimeRangeEvaluator),
     wholeDashboardOnly(dashboardLayoutRulesEvaluator),
@@ -315,6 +318,7 @@ export function createEvaluateDataset({
     enhanceScopeEvaluator,
     dashboardLayoutEditEvaluator,
     dashboardPanelEditsEvaluator,
+    dashboardSettingsEvaluator,
     dashboardReplaceConfirmationEvaluator,
     createUnavailableRequestsEvaluator(esClient),
     createReplyEvaluator(evaluators),

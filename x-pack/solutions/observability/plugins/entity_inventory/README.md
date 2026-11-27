@@ -10,11 +10,11 @@ xpack.entityInventory.enabled: true
 
 ## Routes
 
-The routes exist only when the plugin is enabled. Both are internal: send `x-elastic-internal-origin: kibana`, and `kbn-xsrf` on `POST`.
+The routes exist only when the plugin is enabled. All are internal: send `x-elastic-internal-origin: kibana`, and `kbn-xsrf` on `POST`.
 
 ### `GET /internal/entity_inventory/types`
 
-No body and no parameters. It returns one entry per registered definition that has a `dynamic` block, whoever registered it, so the entity store's built-in `host` is listed beside this plugin's own types. Example response for `k8s.deployment`:
+No body and no parameters. It returns one entry per registered definition that has a `dynamic` block, whoever registered it, so the entity store's built-in `host` is listed beside this plugin's own types. `suggestedFilters` lists the columns the definition offers as dropdown filters, in display order, and is empty when it suggests none. Example response for `k8s.deployment`:
 
 ```json
 {
@@ -25,17 +25,18 @@ No body and no parameters. It returns one entry per registered definition that h
       "description": "A Kubernetes deployment, identified by namespace/name. Read from the Elastic Agent Kubernetes integration (state_deployment) and the OpenTelemetry k8sclusterreceiver. The same namespace/name in two clusters is one entity; the cluster is shown as a column.",
       "identityFields": ["kubernetes.namespace", "kubernetes.deployment.name"],
       "columns": [
-        { "name": "entity.id", "kind": "id" },
-        { "name": "kubernetes.namespace", "kind": "identity" },
+        { "name": "entity.id", "kind": "id", "label": "ID" },
+        { "name": "kubernetes.namespace", "kind": "identity", "label": "Namespace" },
         { "name": "kubernetes.deployment.name", "kind": "identity" },
-        { "name": "k8s.cluster.name", "kind": "attribute" },
+        { "name": "k8s.cluster.name", "kind": "attribute", "label": "Cluster" },
         { "name": "k8s.deployment.available", "kind": "attribute" },
         { "name": "k8s.deployment.desired", "kind": "attribute" },
         { "name": "k8s.deployment.paused", "kind": "attribute" },
         { "name": "k8s.deployment.label.app", "kind": "attribute" },
         { "name": "k8s.deployment.uid", "kind": "attribute" },
-        { "name": "last_seen", "kind": "last_seen" }
+        { "name": "last_seen", "kind": "last_seen", "label": "Last seen" }
       ],
+      "suggestedFilters": ["k8s.cluster.name", "kubernetes.namespace"],
       "sources": [
         {
           "indexPattern": "metrics-kubernetes.state_deployment-*",
@@ -47,6 +48,8 @@ No body and no parameters. It returns one entry per registered definition that h
   ]
 }
 ```
+
+A column's optional `label` is its user-facing text. It comes from the definition's `dynamic.displayLabels` (a list of `{ name, label }`, where `name` is an identity field or an attribute), with built-in defaults for `entity.id` ("ID") and `last_seen` ("Last seen"). A column with no label is shown by its `name`. Only this route returns labels; the `_list` response columns stay `{ name, kind }`.
 
 ### `POST /internal/entity_inventory/entities/{type}/_list`
 
@@ -63,21 +66,21 @@ Response:
 
 | key | |
 | --- | --- |
-| `columns` | `{ name, kind }` in column order: `entity.id`, the identity fields, the attributes in source order, `last_seen`. The same columns the `types` route returns for the type. No Elasticsearch type: values arrive with their JSON type and `kind` marks `last_seen` as the date. |
+| `columns` | `{ name, kind }` in column order: `entity.id`, the identity fields, the attributes in source order, `last_seen`. The same names and kinds the `types` route returns for the type, without its labels. No Elasticsearch type: values arrive with their JSON type and `kind` marks `last_seen` as the date. |
 | `rows` | At most `limit`, ordered by `last_seen` descending, ties by `entity.id`. Every row carries every column, null where no source produced a value. |
 | `provenance` | For each returned row's `entity.id`, the index pattern that supplied each attribute value. |
-| `truncated` | True only when the row limit left rows out: a plan was cut (returned `limit + 1` rows), or the merge holds more than `limit` rows. A failed or partial plan does not set it, since narrowing the request would not fix it; it is reported in `errors`. There is no `total`. |
-| `took` | Wall time of the request in milliseconds, probes included. |
-| `queries` | One entry per plan query sent, in plan order: `indexPattern`, `engine` (`TS` or `FROM`), `esql`, `params`, and Elasticsearch's `took`, `documentsFound` and `rowCount`. A failed query has null `took` and `documentsFound` and `rowCount` 0. Probes are not listed. |
-| `errors` | `{ indexPattern, status, reason }` per source problem; never a stack. |
+| `truncated` | True only when the row limit left rows out: a plan was cut (returned `limit + 1` rows), or the merge holds more than `limit` rows. A failed or partial plan does not set it, since narrowing the request would not fix it. There is no `total`. |
+| `queries` | One entry per plan query sent, in plan order: `indexPattern`, `engine` (`TS` or `FROM`), `esql`, `params`, `rowCount`, `isPartial`, `error`, and Elasticsearch's execution metadata: `took`, `documentsFound`, `valuesLoaded`, `rowsEmitted`, `cpuNanos`, `driverNanos`, `bytesRead`, `shards`. A failed query has null metadata and `rowCount` 0. `error` is null unless the query's rows were lost; a partial result keeps its rows and leaves it null. |
+| `probes` | One entry per distinct source pattern: `indexPattern`, `esql`, `params`, `outcome` (`time_series`, `no_time_series` or `failed`), `isPartial`, `error` and the same execution metadata as `queries`; a probe that threw has null metadata. `error` is null unless `outcome` is `failed`. |
+| `timings` | Server phases in fractional milliseconds: `definitionMs`, `planningMs` (probes and query generation), `probesMs` (part of `planningMs`), `queriesMs`, `processingMs` and `totalMs`, their sum. |
 | `unavailableColumns` | `{ column, indexPattern, field }` for an attribute no index behind that source's pattern maps; its value is null. |
 
-Anything about one source degrades the result and is reported in `errors`; it never fails the request:
+Anything about one source degrades the result and never fails the request. A lost probe or query carries `error: { kind, status, reason }`, never a stack: `kind` is `failed` (Elasticsearch answered with an error or did not answer; always the kind of a probe's error) or `unusable` (the response was read and its rows dropped). `status` is the Elasticsearch HTTP status of a `failed` error, null when there was no response, and always null for `unusable`. `reason` is the Elasticsearch error type and reason, or the executor's explanation. A failed query has no response to judge, so a query is never both.
 
-- A probe that fails for a reason other than verification: none of the source's plans run.
-- A plan query that fails: the other plans still return rows.
-- A plan whose response is partial (`is_partial`, some shards or clusters did not answer): its rows are kept and it is reported in `errors`.
-- A plan that reads nothing usable, because no readable index behind its pattern maps `@timestamp` or its identity fields are unmapped: the plan is dropped and reported in `errors`. A user who can read none of the source indices gets `rows: []`, every plan in `errors` and `truncated: false`.
+- A probe that fails for a reason other than verification: none of the source's plans run, and the probe carries the error.
+- A plan query that fails: the other plans still return rows, and the query carries the error.
+- A plan whose response is partial (`is_partial`, some shards or clusters did not answer): its rows are kept and `isPartial` is true. `error` stays null unless the plan is also unusable, which drops its rows.
+- A plan that reads nothing usable, because no readable index behind its pattern maps `@timestamp` or its identity fields are unmapped: the plan's rows are dropped and its query carries an `unusable` error. A user who can read none of the source indices gets `rows: []`, an error on every query and `truncated: false`.
 
 Errors that fail the request:
 
@@ -92,9 +95,60 @@ Errors that fail the request:
 
 The route does not cap the window length: it checks only that `from` and `to` are instants and that `from` is earlier than `to`. The limit lives in the UI, which clamps its picker to `ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS` (3 days, `entity_inventory_app/public/application/constants.ts`). A direct caller is therefore unbounded — `{"from":"1970-01-01T00:00:00Z","to":"2200-01-01T00:00:00Z"}` is a valid request — which is acceptable while the route is internal and both plugins are off by default.
 
+### `POST /internal/entity_inventory/entities/{type}/_plan`
+
+Lets a caller, such as a benchmark, run the inventory's generated queries itself: it plans the request exactly as `_list` does, probes included, and returns the probes and the list queries `_list` would send for the same request, without running the list queries. Planning and the request body are shared with `_list`, so the queries are the ones `_list` sends.
+
+Body: the same as `_list` (`from`, `to`, `limit`, strict).
+
+Response:
+
+| key | |
+| --- | --- |
+| `probes` | One entry per distinct source pattern, in source order: `indexPattern`, `request`, `hasTimeSeries`, whether the probe found a readable time-series index (null when the probe failed), and `error`, as on a `_list` probe. |
+| `queries` | One entry per plan query `_list` would send, in plan order: `indexPattern`, `engine` (`TS` or `FROM`) and `request`. A source whose probe failed has none, as in `_list`. |
+
+Each `request` is the body to send to Elasticsearch's `POST /_query` unchanged: `query`, `params` (the named parameters, never interpolated) and `include_execution_metadata: true`. A probe that fails carries its `error` and never fails the request. The request errors and their statuses are those of `_list`.
+
+### `POST /internal/entity_inventory/filters/_values`
+
+Returns the distinct values a dropdown can offer for one attribute, merged across the sources of the types in scope, narrowed by the other dropdowns and by the time range.
+
+Body, strict (an unknown key such as `documentFilter` is a 400):
+
+| key | | |
+| --- | --- | --- |
+| `attribute` | required | The column to list: an attribute or identity field, 1 to 512 characters, that at least one type in `types` lists in its `suggestedFilters` |
+| `types` | required | 1 to 32 type ids. A type that does not suggest the attribute is left out |
+| `filters` | optional | The other dropdowns' selections: column name to the values selected, as the response shows them (value labels applied). At most 16 columns and 100 values each. A source reads each column from the field it declares for it, and a label is matched against every raw value that reads as it |
+| `selected` | optional | The values currently selected in this dropdown, at most 100 |
+| `from`, `to` | required | As in `_list` |
+| `limit` | optional | integer 1–9,999, default 9,999 |
+
+Response:
+
+| key | |
+| --- | --- |
+| `values` | The distinct values, sorted, with value labels applied, at most `limit`. A value that is empty or longer than 256 characters is not offered, because the route could not take it back as a selection |
+| `invalidSelections` | The `selected` values that are not in `values`: no longer offered, or cut by `limit` (then `truncated` is true). Every selected value is in one of the two lists |
+| `truncated` | True only when `limit` left values out |
+| `errors` | `{ indexPattern, status, reason }` per source problem, never a stack; unlike `_list`, the errors of this route are a top-level list. A source whose probe or query failed, whose pattern has no readable index that maps `@timestamp`, or whose answer is partial is listed and never fails the request. `status` is the Elasticsearch HTTP status, null when there was no response or no request failed |
+
+How it runs: one values query per source plan that can contribute, run concurrently. A source that declares no field for the attribute is neither probed nor queried. The value labels, the selections and the length filter are part of the query, and the values go in as named parameters, never as text. The values come from the documents of the window, not from entities, so a value that only a hidden duplicate of an entity carries is still offered.
+
+Errors that fail the request:
+
+| request | status |
+| --- | --- |
+| No type in `types` suggests `attribute` | 400 |
+| A type has no entity definition, or has no `dynamic` block | 404 |
+| A body key is missing or invalid, `from >= to`, or `limit` is not an integer in 1–9,999 | 400 |
+| An unknown body key | 400 |
+| The definition cannot be turned into queries | 400 |
+
 ### Access control (interim)
 
-Kibana checks no privilege on the inventory routes: they declare `INTERIM_AUTHZ` (`server/routes/interim_authz.ts`), which is `AuthzDisabled.delegateToESClient`. Every probe and plan query runs with the request-scoped Elasticsearch client, so Elasticsearch enforces the user's index privileges: an index the user cannot read is left out like one that does not exist, and a source with none readable is reported in `errors`. This is acceptable for now because the routes are internal and the plugin is off by default. `types` reads definitions, not indices, so any authenticated user gets the same types. [elastic/observability-dev#6244](https://github.com/elastic/observability-dev/issues/6244) replaces this with the inventory's privilege model.
+Kibana checks no privilege on the inventory routes: they declare `INTERIM_AUTHZ` (`server/routes/interim_authz.ts`), which is `AuthzDisabled.delegateToESClient`. Every probe and plan query runs with the request-scoped Elasticsearch client, so Elasticsearch enforces the user's index privileges: an index the user cannot read is left out like one that does not exist, and a source with none readable has an error on its queries. This is acceptable for now because the routes are internal and the plugin is off by default. `types` reads definitions, not indices, so any authenticated user gets the same types. [elastic/observability-dev#6244](https://github.com/elastic/observability-dev/issues/6244) replaces this with the inventory's privilege model.
 
 Errors thrown by the inventory service reach clients through `server/routes/create_server_route.ts`: `InventoryTypeNotFoundError` becomes 404, `InventoryRequestError` and `InventoryTypeDefinitionError` become 400, each with the error message only. Any other error is rethrown unchanged.
 
@@ -135,6 +189,8 @@ registers them.
 | `columns.ts` | The output columns in order: `entity.id`, identity fields, attributes (one column per name across sources), `last_seen`. |
 | `list_query.ts` | One list query per plan. |
 | `probe_query.ts` | The probe deciding whether a source gets a `TS` plan. |
+| `attribute_filters.ts` | The other dropdowns' selections as one ES\|QL predicate per plan: each column read from the field the plan's source declares, each label matched against every raw value that reads as it, values as named parameters. A plan that cannot match the selections gets none. |
+| `attribute_values_query.ts` | One values query per plan: the distinct values of an attribute among the documents of the type in the window that pass the selections, with value labels applied before the sort and the limit, and empty or over-long values dropped. |
 
 Attributes only for now; metrics, detail and the document filter are later phases.
 
@@ -186,7 +242,7 @@ The executor reads the type of the `@timestamp` column to decide whether the sou
 | `source_probe.ts` | Runs the probe once per distinct pattern and reads whether a time-series index exists behind it. |
 | `esql_results_to_rows.ts` | Turns the ES\|QL `columns` and `values` arrays into rows keyed by column name. |
 | `esql_client.ts` | Runs one generated query with its named parameters and `include_execution_metadata`, returning rows as objects keyed by column name (multi-values stay arrays) with `took`, documents found, values loaded and the row count. `drop_null_columns` stays off so every plan returns the same columns. |
-| `errors/source_error.ts` | Flattens a failed query to `{ indexPattern, status, reason }`; never a stack or the raw body. |
+| `errors/source_error.ts` | Flattens a thrown error to the `{ status, reason }` of a `failed` error; never a stack or the raw body. |
 | `value_labels.ts` | Maps an attribute's raw values to its `valueLabels` per plan, before the merge; an unmapped value passes through stringified. |
 | `merge.ts` | One row per `entity.id` across plans: attributes from the row with the newest `last_seen`, identity fields and `entity.id` first non-null, `last_seen` newest, a null never replacing a value; `provenance` names the source pattern behind each attribute value. |
 | `plan_result.ts` | Reads from a plan's column types whether it is usable and which of its attribute fields no index maps. |
@@ -196,7 +252,7 @@ No metadata API is called and no concrete index is named: the executor learns ev
 
 **Probe.** One probe per distinct pattern, concurrently: `TS <pattern> | KEEP @timestamp | LIMIT 0`. `@timestamp` of any type other than `null` means a time-series index exists and the source gets a `TS` plan. `null`, no column, or a verification error (a concrete index that is not time series, a name that does not exist) means none. Any other failure is a source error and no plan of the source runs: the `FROM` plan excludes time-series indices, so reading the failure as "none" would silently leave them out. The decision reads the error type, never the message. Elasticsearch drops indices the user cannot read like indices that do not exist.
 
-**Reading results.** Every query runs with `unmapped_fields="nullify"`, so a field no index maps comes back as a column of type `null`. `last_seen` of type `null` means no readable index maps `@timestamp` and the plan is unusable. A plan is also unusable when no identity composition has every field mapped; a field the id evaluation overwrites, in practice `entity.id`, which the evaluation types `keyword` even when unmapped, is read from `raw:entity.id`, its value as the documents supplied it, which the response does not carry. An attribute of type `null` is an unavailable field, not fatal. A plan that returns its full limit is cut, and `truncated` is true only when the row limit left rows out. A failed probe or query and a partial result (`is_partial`) do not set `truncated`; each is reported in `errors[]`, and a partial plan's rows are kept.
+**Reading results.** Every query runs with `unmapped_fields="nullify"`, so a field no index maps comes back as a column of type `null`. `last_seen` of type `null` means no readable index maps `@timestamp` and the plan is unusable. A plan is also unusable when no identity composition has every field mapped; a field the id evaluation overwrites, in practice `entity.id`, which the evaluation types `keyword` even when unmapped, is read from `raw:entity.id`, its value as the documents supplied it, which the response does not carry. An attribute of type `null` is an unavailable field, not fatal. A plan that returns its full limit is cut, and `truncated` is true only when the row limit left rows out. A failed probe or query and a partial result (`is_partial`) do not set `truncated`; a failed one carries its `error`, and a partial plan's rows are kept.
 
 Nothing is cached yet.
 

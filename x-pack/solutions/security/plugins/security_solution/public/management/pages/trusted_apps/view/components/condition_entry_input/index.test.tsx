@@ -16,7 +16,7 @@ import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoin
 import { cleanup, fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { OPERATOR_TITLES } from '../../translations';
+import { ENTRY_PROPERTY_TITLES, OPERATOR_TITLES } from '../../translations';
 
 let onRemoveMock: jest.Mock;
 let onChangeMock: jest.Mock;
@@ -178,6 +178,17 @@ describe('Condition entry input', () => {
     render();
     const operatorField = renderResult.getByTestId(`${formPrefix}-operator`);
     expect(operatorField).toHaveValue(OPERATOR_TITLES.is);
+  });
+
+  it('should name the operator and value inputs even when labels are not shown', () => {
+    props = { ...props, showLabels: false };
+    render();
+    expect(renderResult.getByTestId(`${formPrefix}-operator`)).toHaveAccessibleName(
+      ENTRY_PROPERTY_TITLES.operator
+    );
+    expect(renderResult.getByTestId(`${formPrefix}-value`)).toHaveAccessibleName(
+      ENTRY_PROPERTY_TITLES.value
+    );
   });
 
   it('should show operator dropdown with two values when field is PATH', async () => {

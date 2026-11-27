@@ -32,6 +32,10 @@ triggers:
         round_id:
           type: string
           description: Id of the completed conversation round.
+        round_trace_id:
+          type: string
+          maxLength: 128
+          description: Trace id of the agent run for this round, so spans join the agent trace.
         agent_id:
           type: string
           description: Supported agent policy selector; never a storage or Space boundary.
@@ -120,6 +124,7 @@ steps:
               round_connector_id: '{{ inputs.round_connector_id }}'
               conversation_id: '{{ inputs.conversation_id }}'
               round_id: '{{ inputs.round_id }}'
+              round_trace_id: '{{ inputs.round_trace_id }}'
               sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'
               background_trace_id: '{{ inputs.workflow_context["nightshift.semantic_memory.recall"].data.background_trace_id }}'
               # ${{ }} keeps the array. Liquid `{{ }}` stringifies it as "[object Object]…".
@@ -137,6 +142,7 @@ steps:
               round_connector_id: '{{ inputs.round_connector_id }}'
               conversation_id: '{{ inputs.conversation_id }}'
               round_id: '{{ inputs.round_id }}'
+              round_trace_id: '{{ inputs.round_trace_id }}'
               sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'
               background_trace_id: '{{ inputs.workflow_context["nightshift.semantic_memory.recall"].data.background_trace_id }}'
               # Preserve the array for the step's bounded Zod schema.
@@ -167,6 +173,7 @@ steps:
       round_connector_id: '{{ inputs.round_connector_id }}'
       conversation_id: '{{ inputs.conversation_id }}'
       round_id: '{{ inputs.round_id }}'
+      round_trace_id: '{{ inputs.round_trace_id }}'
       agent_id: '{{ inputs.agent_id }}'
       background_trace_id: '{{ inputs.workflow_context["nightshift.semantic_memory.recall"].data.background_trace_id }}'
       # ${{ }} keeps the array. Liquid `{{ }}` stringifies it as "[object Object]…"

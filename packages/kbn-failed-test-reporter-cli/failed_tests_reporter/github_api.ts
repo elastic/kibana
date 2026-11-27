@@ -218,8 +218,10 @@ export class GithubApi {
   }
 
   /** The issue as GitHub has it right now; undefined in dry-run mode, where nothing is fetched. */
-  async getIssue(issueNumber: number): Promise<GithubIssueMini | undefined> {
-    const resp = await this.request<GithubIssueMini | undefined>(
+  async getIssue(
+    issueNumber: number
+  ): Promise<(GithubIssueMini & Pick<GithubIssue, 'state'>) | undefined> {
+    const resp = await this.request<(GithubIssueMini & Pick<GithubIssue, 'state'>) | undefined>(
       {
         method: 'GET',
         url: Url.resolve(this.baseUrl, `issues/${encodeURIComponent(issueNumber)}`),

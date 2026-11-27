@@ -9,7 +9,7 @@ import { set } from '@kbn/safer-lodash-set';
 import { get } from 'lodash/fp';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { Fields } from '@kbn/securitysolution-timeline-search-strategy';
-import { toStringArray } from '@kbn/timelines-plugin/common/utils/to_array';
+import { toStringArray } from '../../../../../../../common/utils/to_array';
 import { getNestedParentPath } from './get_nested_parent_path';
 
 export const buildObjectRecursive = (

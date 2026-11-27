@@ -37,7 +37,7 @@ export const IntegrationCardTopCallout = React.memo<{
     activeIntegrationsCount === 0 && selectedTabId === IntegrationTabId.endpoint;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup direction="column" gutterSize="s" style={{ flexGrow: 0 }}>
       {showMigrationCallout && (
         <EuiFlexItem>
           <MigrationsCallout />

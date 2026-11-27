@@ -282,6 +282,7 @@ export async function buildGroupPackagePolicy(
   namespace?: string;
   output_id?: string;
   condition?: string;
+  additional_datastreams_permissions?: string[];
   vars?: Record<string, string | SecretRefValue | null>;
   create_dataset_templates?: boolean;
   inputs: Record<string, unknown>;

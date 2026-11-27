@@ -24,7 +24,7 @@ const getContent = async ({ github, context }, ref, path) => {
 const parseYaml = (content) => {
   const result = {};
   for (const line of content.split('\n')) {
-    const match = line.match(/^\s{2}(\w+):\s*(\d+)/);
+    const match = line.match(/^\s{2}([\w-]+):\s*(\d+)/);
     if (match) result[match[1]] = parseInt(match[2], 10);
   }
   return result;
