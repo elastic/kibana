@@ -258,6 +258,8 @@ For browser monitors, the minimum timeout is 30 seconds. Browser monitor timeout
   [ConfigKey.IGNORE_HTTPS_ERRORS]: 'Ignore HTTPS errors. Defaults to `false`.',
   [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]:
     "PEM certificates whose public keys (SPKI) are allowlisted so Chromium bypasses certificate errors for matching presented certificates. This does not add a CA to Chromium's trust store.",
+  [ConfigKey.FILMSTRIPS]:
+    'Capture filmstrip screenshots for each step of a browser monitor. Defaults to `false`.',
   [ConfigKey.PLAYWRIGHT_OPTIONS]: 'Playwright options.',
   [ConfigKey.SCREENSHOTS]:
     'The screenshot option: `on`, `off`, or `only-on-failure`. Defaults to `on`.',

@@ -484,6 +484,7 @@ function getMonitorDetailsMockSlice() {
       'filter_journeys.tags': [],
       ignore_https_errors: false,
       certificate_error_spki_allowlist: [],
+      filmstrips: false,
       throttling: {
         value: {
           download: '5',

@@ -20,6 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import styled from 'styled-components';
+import { DisplayFilmstrips } from '../../step_details_page/display_filmstrips';
 import { FAILED_TO_SCHEDULE } from '../manual_test_run_mode/browser_test_results';
 import { BrowserStepsList } from '../../common/monitor_test_result/browser_steps_list';
 import type { CheckGroupResult } from '../hooks/use_browser_run_once_monitors';
@@ -122,6 +123,7 @@ export const BrowserTestRunResult = ({
                   pageSize={completedSteps === 0 ? 5 : 2}
                 />
               )}
+            {summaryDoc && <DisplayFilmstrips checkGroup={summaryDoc.monitor.check_group} />}
 
             {completedSteps > 0 && (
               <>

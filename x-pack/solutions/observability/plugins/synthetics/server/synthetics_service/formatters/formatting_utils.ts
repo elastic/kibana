@@ -103,6 +103,26 @@ export const resolveHttpAuthParams = <T extends Partial<MonitorFields>>(
   return next;
 };
 
+const FILMSTRIPS_CAPABILITY = 'filmstrips';
+
+/**
+ * Heartbeat has no `filmstrips` setting, so the option reaches the synthetics
+ * agent as `--capability filmstrips` appended to `synthetics_args`.
+ */
+export const applyFilmstripsCapability = <T extends Partial<MonitorFields>>(config: T): T => {
+  if (config[ConfigKey.FILMSTRIPS] !== true) {
+    return config;
+  }
+  const args = config[ConfigKey.SYNTHETICS_ARGS] ?? [];
+  if (args.includes(FILMSTRIPS_CAPABILITY)) {
+    return config;
+  }
+  return {
+    ...config,
+    [ConfigKey.SYNTHETICS_ARGS]: [...args, '--capability', FILMSTRIPS_CAPABILITY],
+  };
+};
+
 const allParamsAreMissing = (parsedVars: ParsedVars, params: Record<string, string>) => {
   const hasDefault = parsedVars.some(
     (parsedVar) => parsedVar.type === 'var' && parsedVar.content.default

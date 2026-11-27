@@ -126,6 +126,7 @@ describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
           id: '311cf324-2fc9-4453-9ba5-5e745fd81722',
           ignore_https_errors: false,
           certificate_error_spki_allowlist: [],
+          filmstrips: false,
           journey_id: '',
           locations: [
             {

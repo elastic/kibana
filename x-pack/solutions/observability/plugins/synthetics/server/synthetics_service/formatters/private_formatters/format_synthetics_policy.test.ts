@@ -224,6 +224,56 @@ describe('formatSyntheticsPolicy', () => {
     });
   });
 
+  describe('filmstrips', () => {
+    const getSyntheticsArgsVar = (filmstrips: boolean, syntheticsArgs: string[] = []) => {
+      const { formattedPolicy } = formatSyntheticsPolicy(
+        testNewPolicy,
+        MonitorTypeEnum.BROWSER,
+        {
+          ...browserConfig,
+          [ConfigKey.FILMSTRIPS]: filmstrips,
+          [ConfigKey.SYNTHETICS_ARGS]: syntheticsArgs,
+        },
+        gParams,
+        testMW
+      );
+      const browserStream = formattedPolicy.inputs
+        .find((input) => input.type === 'synthetics/browser')
+        ?.streams.find((stream) => stream.data_stream.dataset === 'browser');
+      return browserStream?.vars;
+    };
+
+    it('passes --capability filmstrips to the agent when enabled', () => {
+      const vars = getSyntheticsArgsVar(true);
+
+      expect(vars?.synthetics_args).toEqual({
+        type: 'text',
+        value: JSON.stringify(['--capability', 'filmstrips']),
+      });
+      expect(vars?.filmstrips).toBeUndefined();
+    });
+
+    it('keeps existing synthetics_args when enabled', () => {
+      const vars = getSyntheticsArgsVar(true, ['--no-sandbox']);
+
+      expect(vars?.synthetics_args?.value).toEqual(
+        JSON.stringify(['--no-sandbox', '--capability', 'filmstrips'])
+      );
+    });
+
+    it('does not duplicate the capability when already present in synthetics_args', () => {
+      const vars = getSyntheticsArgsVar(true, ['--capability', 'filmstrips']);
+
+      expect(vars?.synthetics_args?.value).toEqual(JSON.stringify(['--capability', 'filmstrips']));
+    });
+
+    it('leaves synthetics_args untouched when disabled', () => {
+      const vars = getSyntheticsArgsVar(false);
+
+      expect(vars?.synthetics_args?.value).toBeNull();
+    });
+  });
+
   it.each([true, false])('formats http policy', (isTLSEnabled) => {
     const { formattedPolicy } = formatSyntheticsPolicy(
       testNewPolicy,
