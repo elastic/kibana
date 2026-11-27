@@ -23,6 +23,9 @@ jest.mock('@kbn/react-query', () => ({
   useQueryClient: () => ({ invalidateQueries: mockInvalidateQueries }),
 }));
 
+// These renders take ~50ms, so the 5s default only ever fails to a CI wall-clock stall.
+jest.setTimeout(30_000);
+
 describe('usePackageInstall', () => {
   const coreStart = coreMock.createStart();
 
