@@ -15,7 +15,7 @@ import type {
   AgentRow,
   AgentStoreContext,
   RelatedEntity,
-} from '../../../../../entity_analytics/components/ai_agents/types';
+} from '../../../../../entity_analytics/components/ai_security/types';
 import { ContextSection } from './context_section';
 import { AI_AGENT_TEST_IDS } from '../test_ids';
 

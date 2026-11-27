@@ -10,14 +10,14 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import { useFlyoutApi } from '../../../../use_flyout_api';
 import { createFlyoutApiMock } from '../../../../use_flyout_api.mock';
-import { useAiAgentAlerts } from '../../../../../entity_analytics/components/ai_agents/hooks/use_ai_agents';
-import { AGENT_ALERTS_MAX_ROWS } from '../../../../../entity_analytics/components/ai_agents/constants';
-import type { AgentAlert } from '../../../../../entity_analytics/components/ai_agents/types';
+import { useAiAgentAlerts } from '../../../../../entity_analytics/components/ai_security/hooks/use_ai_agents';
+import { AGENT_ALERTS_MAX_ROWS } from '../../../../../entity_analytics/components/ai_security/constants';
+import type { AgentAlert } from '../../../../../entity_analytics/components/ai_security/types';
 import { AlertsSection } from './alerts_section';
 import { AI_AGENT_TEST_IDS } from '../test_ids';
 
 jest.mock('../../../../use_flyout_api');
-jest.mock('../../../../../entity_analytics/components/ai_agents/hooks/use_ai_agents');
+jest.mock('../../../../../entity_analytics/components/ai_security/hooks/use_ai_agents');
 
 const alert = (index: number, overrides: Partial<AgentAlert> = {}): AgentAlert => ({
   id: `alert-${index}`,

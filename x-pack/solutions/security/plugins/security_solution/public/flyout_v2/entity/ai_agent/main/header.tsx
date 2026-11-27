@@ -21,11 +21,11 @@ import { RiskLevelBadge } from '../../shared/components/risk_level_badge';
 import type {
   AgentIdentity,
   AgentRow,
-} from '../../../../entity_analytics/components/ai_agents/types';
-import { getAgentDisplayName } from '../../../../entity_analytics/components/ai_agents/utils';
-import { getAgentIconType } from '../../../../entity_analytics/components/ai_agents/components/agent_logo';
-import { useWatchlistLookup } from '../../../../entity_analytics/components/ai_agents/hooks/use_watchlist_lookup';
-import { UNKNOWN_VERSION } from '../../../../entity_analytics/components/ai_agents/translations';
+} from '../../../../entity_analytics/components/ai_security/types';
+import { getAgentDisplayName } from '../../../../entity_analytics/components/ai_security/utils';
+import { getAgentIconType } from '../../../../entity_analytics/components/ai_security/components/agent_logo';
+import { useWatchlistLookup } from '../../../../entity_analytics/components/ai_security/hooks/use_watchlist_lookup';
+import { UNKNOWN_VERSION } from '../../../../entity_analytics/components/ai_security/translations';
 import { WatchlistBadges } from './components/watchlist_badges';
 import { AI_AGENT_TEST_IDS } from './test_ids';
 import {

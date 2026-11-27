@@ -13,7 +13,7 @@ import {
 } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
 import { ENTITY_ANALYTICS } from '../app/translations';
-import { ENTITY_ANALYTICS_AI_AGENTS_PATH } from './components/ai_agents/constants';
+import { ENTITY_ANALYTICS_AI_SECURITY_PATH } from './components/ai_security/constants';
 
 export const entityAnalyticsLinks: LinkItem = {
   id: SecurityPageName.entityAnalyticsHomePage,
@@ -31,19 +31,19 @@ export const entityAnalyticsLinks: LinkItem = {
   licenseType: 'platinum',
 };
 
-/** The AI agents page. Proof of concept, behind `entityAnalyticsAiAgentsPoc`. */
-export const entityAnalyticsAiAgentsLinks: LinkItem = {
-  id: SecurityPageName.entityAnalyticsAiAgents,
-  title: i18n.translate('xpack.securitySolution.appLinks.entityAnalyticsAiAgents', {
+/** The AI security page. Proof of concept, behind `entityAnalyticsAiSecurityPoc`. */
+export const entityAnalyticsAiSecurityLinks: LinkItem = {
+  id: SecurityPageName.entityAnalyticsAiSecurity,
+  title: i18n.translate('xpack.securitySolution.appLinks.entityAnalyticsAiSecurity', {
     defaultMessage: 'AI security',
   }),
-  path: ENTITY_ANALYTICS_AI_AGENTS_PATH,
+  path: ENTITY_ANALYTICS_AI_SECURITY_PATH,
   globalSearchKeywords: [
-    i18n.translate('xpack.securitySolution.appLinks.entityAnalyticsAiAgents.agents', {
+    i18n.translate('xpack.securitySolution.appLinks.entityAnalyticsAiSecurity.agents', {
       defaultMessage: 'AI agents',
     }),
   ],
-  experimentalKey: 'entityAnalyticsAiAgentsPoc',
+  experimentalKey: 'entityAnalyticsAiSecurityPoc',
   hideTimeline: false,
   skipUrlState: false,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],

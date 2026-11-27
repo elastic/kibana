@@ -107,7 +107,7 @@ export enum SecurityPageName {
   entityAnalyticsOverview = 'entity_analytics-overview',
   entityAnalyticsHomePage = 'entity_analytics-home_page',
   entityAnalyticsEntityStoreManagement = 'entity_analytics-entity_store_management',
-  entityAnalyticsAiAgents = 'entity_analytics-ai_agents',
+  entityAnalyticsAiSecurity = 'entity_analytics-ai_security',
   coverageOverview = 'coverage-overview',
   notes = 'notes',
   alertSummary = 'alert_summary',

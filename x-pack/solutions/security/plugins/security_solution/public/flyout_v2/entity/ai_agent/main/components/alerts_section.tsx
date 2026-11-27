@@ -27,9 +27,9 @@ import { getSeverityColor } from '../../../../../detections/components/alerts_kp
 import { useFlyoutApi } from '../../../../use_flyout_api';
 import { cellActionRenderer } from '../../../../shared/components/cell_actions';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
-import { useAiAgentAlerts } from '../../../../../entity_analytics/components/ai_agents/hooks/use_ai_agents';
-import { AGENT_ALERTS_MAX_ROWS } from '../../../../../entity_analytics/components/ai_agents/constants';
-import type { AgentAlert } from '../../../../../entity_analytics/components/ai_agents/types';
+import { useAiAgentAlerts } from '../../../../../entity_analytics/components/ai_security/hooks/use_ai_agents';
+import { AGENT_ALERTS_MAX_ROWS } from '../../../../../entity_analytics/components/ai_security/constants';
+import type { AgentAlert } from '../../../../../entity_analytics/components/ai_security/types';
 import { GeneratedDataBadge } from './generated_data_badge';
 import { AI_AGENT_TEST_IDS } from '../test_ids';
 import {
@@ -49,7 +49,7 @@ const ALWAYS_RELATIVE_HOURS = 24 * 365;
 
 /**
  * Alerts stamped with the agent ID, including those on its descendants, in every workflow status
- * (the AI agents page counts open alerts only). Each opens the alert flyout.
+ * (the AI security page counts open alerts only). Each opens the alert flyout.
  */
 export const AlertsSection = memo(({ entityId }: { entityId: string }) => {
   const { data, isLoading } = useAiAgentAlerts(entityId);

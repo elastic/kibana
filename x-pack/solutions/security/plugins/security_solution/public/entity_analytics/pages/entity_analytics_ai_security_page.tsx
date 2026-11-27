@@ -21,10 +21,10 @@ import { HeaderPage } from '../../common/components/header_page';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { ENTITY_ANALYTICS } from '../../app/translations';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
-import { useAiAgentsInventory } from '../components/ai_agents/hooks/use_ai_agents';
-import { AiAgentsTable } from '../components/ai_agents/components/ai_agents_table';
-import { AI_AGENTS_SCOPE_ID } from '../components/ai_agents/constants';
-import type { AgentInventoryRow } from '../components/ai_agents/types';
+import { useAiAgentsInventory } from '../components/ai_security/hooks/use_ai_agents';
+import { AiAgentsTable } from '../components/ai_security/components/ai_agents_table';
+import { AI_SECURITY_SCOPE_ID } from '../components/ai_security/constants';
+import type { AgentInventoryRow } from '../components/ai_security/types';
 import {
   ALERTS_UNAVAILABLE,
   EMPTY_BODY,
@@ -37,9 +37,9 @@ import {
   TILE_RUNS_AS_ROOT,
   TILE_SHARED_ACCOUNTS,
   TILE_WITH_ALERTS,
-} from '../components/ai_agents/translations';
+} from '../components/ai_security/translations';
 
-export const AI_AGENTS_PAGE_TEST_ID = 'entityAnalyticsAiAgentsPage';
+export const AI_SECURITY_PAGE_TEST_ID = 'entityAnalyticsAiSecurityPage';
 
 const countSharedAccounts = (rows: readonly AgentInventoryRow[]): number => {
   const installsByEmail = new Map<string, number>();
@@ -51,8 +51,8 @@ const countSharedAccounts = (rows: readonly AgentInventoryRow[]): number => {
   return [...installsByEmail.values()].filter((installs) => installs > 1).length;
 };
 
-/** AI agents page (proof of concept): one row per install from the Entity Store. */
-export const EntityAnalyticsAiAgentsPage = () => {
+/** AI security page (proof of concept): one row per install from the Entity Store. */
+export const EntityAnalyticsAiSecurityPage = () => {
   const { data, isLoading, isError } = useAiAgentsInventory();
   const { openAiAgentFlyout } = useFlyoutApi();
   const rows = useMemo(() => data?.rows ?? [], [data]);
@@ -62,7 +62,7 @@ export const EntityAnalyticsAiAgentsPage = () => {
       openAiAgentFlyout({
         entityId: row.entityId,
         entityName: row.entityName,
-        scopeId: AI_AGENTS_SCOPE_ID,
+        scopeId: AI_SECURITY_SCOPE_ID,
       }),
     [openAiAgentFlyout]
   );
@@ -81,7 +81,7 @@ export const EntityAnalyticsAiAgentsPage = () => {
   );
 
   return (
-    <SecuritySolutionPageWrapper data-test-subj={AI_AGENTS_PAGE_TEST_ID}>
+    <SecuritySolutionPageWrapper data-test-subj={AI_SECURITY_PAGE_TEST_ID}>
       <HeaderPage
         title={PAGE_TITLE}
         subtitle={[PAGE_DESCRIPTION]}
@@ -129,7 +129,7 @@ export const EntityAnalyticsAiAgentsPage = () => {
           </EuiPanel>
         </>
       )}
-      <SpyRoute pageName={SecurityPageName.entityAnalyticsAiAgents} />
+      <SpyRoute pageName={SecurityPageName.entityAnalyticsAiSecurity} />
     </SecuritySolutionPageWrapper>
   );
 };

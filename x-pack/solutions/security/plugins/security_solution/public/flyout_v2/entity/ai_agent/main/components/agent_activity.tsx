@@ -31,23 +31,23 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { PreferenceFormattedDate } from '../../../../../common/components/formatted_date';
 import { useFlyoutApi } from '../../../../use_flyout_api';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
-import { useAiAgentActivity } from '../../../../../entity_analytics/components/ai_agents/hooks/use_ai_agents';
+import { useAiAgentActivity } from '../../../../../entity_analytics/components/ai_security/hooks/use_ai_agents';
 import type {
   ActivitySection,
   ActivityStep,
   AgentRun,
   LaunchMode,
   ProcessStep,
-} from '../../../../../entity_analytics/components/ai_agents/activity/types';
+} from '../../../../../entity_analytics/components/ai_security/activity/types';
 import type {
   AgentIdentity,
   AgentRow,
-} from '../../../../../entity_analytics/components/ai_agents/types';
+} from '../../../../../entity_analytics/components/ai_security/types';
 import {
   getToolShellCommand,
   isClaudeCode,
-} from '../../../../../entity_analytics/components/ai_agents/utils';
-import { GAP_IDS } from '../../../../../entity_analytics/components/ai_agents/gaps';
+} from '../../../../../entity_analytics/components/ai_security/utils';
+import { GAP_IDS } from '../../../../../entity_analytics/components/ai_security/gaps';
 import { GapLink, MissingLayerNote } from './missing_layer_note';
 import { GeneratedDataBadge } from './generated_data_badge';
 import { AI_AGENT_TEST_IDS } from '../test_ids';

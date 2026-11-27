@@ -407,9 +407,9 @@ export const allowedExperimentalValues = Object.freeze({
   siemRuleMigrationsAgentBuilderEnabled: true,
 
   /**
-   * Proof of concept: the AI agents page under Entity Analytics and the AI agent entity flyout.
+   * Proof of concept: the AI security page under Entity Analytics and the AI agent entity flyout.
    */
-  entityAnalyticsAiAgentsPoc: false,
+  entityAnalyticsAiSecurityPoc: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

@@ -19,8 +19,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FormattedRelativePreferenceDate } from '../../../../../common/components/formatted_date';
 import { AssetCriticalityBadge } from '../../../../../entity_analytics/components/asset_criticality/asset_criticality_badge';
-import type { AgentStoreContext } from '../../../../../entity_analytics/components/ai_agents/types';
-import type { WatchlistLookup } from '../../../../../entity_analytics/components/ai_agents/hooks/use_watchlist_lookup';
+import type { AgentStoreContext } from '../../../../../entity_analytics/components/ai_security/types';
+import type { WatchlistLookup } from '../../../../../entity_analytics/components/ai_security/hooks/use_watchlist_lookup';
 import { GeneratedDataBadge } from './generated_data_badge';
 import { WatchlistBadges } from './watchlist_badges';
 import { AI_AGENT_TEST_IDS } from '../test_ids';

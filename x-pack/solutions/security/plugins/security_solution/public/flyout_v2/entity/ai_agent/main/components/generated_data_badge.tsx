@@ -10,7 +10,7 @@ import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import {
   MOCK_DATA_BADGE,
   MOCK_DATA_TOOLTIP,
-} from '../../../../../entity_analytics/components/ai_agents/translations';
+} from '../../../../../entity_analytics/components/ai_security/translations';
 import { AI_AGENT_TEST_IDS } from '../test_ids';
 
 /** Marks a value read from a document tagged `poc-mock`. */

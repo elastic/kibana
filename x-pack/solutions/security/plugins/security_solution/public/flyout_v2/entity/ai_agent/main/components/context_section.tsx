@@ -23,7 +23,7 @@ import { AssetCriticalityBadge } from '../../../../../entity_analytics/component
 import {
   useWatchlistLookup,
   type WatchlistLookup,
-} from '../../../../../entity_analytics/components/ai_agents/hooks/use_watchlist_lookup';
+} from '../../../../../entity_analytics/components/ai_security/hooks/use_watchlist_lookup';
 import { RiskLevelBadge } from '../../../shared/components/risk_level_badge';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 import { useFlyoutApi } from '../../../../use_flyout_api';
@@ -33,9 +33,9 @@ import type {
   AgentStoreContext,
   IdpAccount,
   RelatedEntity,
-} from '../../../../../entity_analytics/components/ai_agents/types';
-import { getAgentDisplayName } from '../../../../../entity_analytics/components/ai_agents/utils';
-import { GAP_IDS } from '../../../../../entity_analytics/components/ai_agents/gaps';
+} from '../../../../../entity_analytics/components/ai_security/types';
+import { getAgentDisplayName } from '../../../../../entity_analytics/components/ai_security/utils';
+import { GAP_IDS } from '../../../../../entity_analytics/components/ai_security/gaps';
 import { GapLink } from './missing_layer_note';
 import { GeneratedDataBadge } from './generated_data_badge';
 import { StoreContextPanel } from './store_context_panel';
@@ -68,7 +68,7 @@ import {
   SUSPENDED,
   WATCHLISTS_LABEL,
 } from '../translations';
-import { NO_SCORE_YET } from '../../../../../entity_analytics/components/ai_agents/translations';
+import { NO_SCORE_YET } from '../../../../../entity_analytics/components/ai_security/translations';
 
 type OpenEntity = (row: RelatedEntity) => void;
 

@@ -38,25 +38,25 @@ export const COLLECTION_GAPS: Readonly<Record<GapId, CollectionGap>> = {
   [GAP_IDS.claudeOtelNotCollected]: {
     id: GAP_IDS.claudeOtelNotCollected,
     title: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.claudeOtelNotCollected.title',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.claudeOtelNotCollected.title',
       {
         defaultMessage: 'Claude Code OTel did not reach the lab cluster',
       }
     ),
     blocks: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.claudeOtelNotCollected.blocks',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.claudeOtelNotCollected.blocks',
       {
         defaultMessage: 'Prompts, tool calls, tokens, model, OTel session ID',
       }
     ),
     status: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.claudeOtelNotCollected.status',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.claudeOtelNotCollected.status',
       {
         defaultMessage: 'Test accounts requested 26 November',
       }
     ),
     workaround: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.claudeOtelNotCollected.workaround',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.claudeOtelNotCollected.workaround',
       {
         defaultMessage: 'Generator --claude-otel, tagged poc-mock',
       }
@@ -65,25 +65,25 @@ export const COLLECTION_GAPS: Readonly<Record<GapId, CollectionGap>> = {
   [GAP_IDS.claudePromptOptIn]: {
     id: GAP_IDS.claudePromptOptIn,
     title: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.claudePromptOptIn.title',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.claudePromptOptIn.title',
       {
         defaultMessage: 'Claude prompt text is opt-in',
       }
     ),
     blocks: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.claudePromptOptIn.blocks',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.claudePromptOptIn.blocks',
       {
         defaultMessage: 'What was asked, for interactive sessions',
       }
     ),
     status: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.claudePromptOptIn.status',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.claudePromptOptIn.status',
       {
         defaultMessage: 'Confirm with the test accounts (OTEL_LOG_USER_PROMPTS)',
       }
     ),
     workaround: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.claudePromptOptIn.workaround',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.claudePromptOptIn.workaround',
       {
         defaultMessage: 'Mock prompts',
       }
@@ -92,25 +92,25 @@ export const COLLECTION_GAPS: Readonly<Record<GapId, CollectionGap>> = {
   [GAP_IDS.defendHeadlessOnly]: {
     id: GAP_IDS.defendHeadlessOnly,
     title: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.defendHeadlessOnly.title',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.defendHeadlessOnly.title',
       {
         defaultMessage: 'Defend only has the prompt for headless runs',
       }
     ),
     blocks: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.defendHeadlessOnly.blocks',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.defendHeadlessOnly.blocks',
       {
         defaultMessage: 'What was asked, for interactive sessions',
       }
     ),
     status: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.defendHeadlessOnly.status',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.defendHeadlessOnly.status',
       {
         defaultMessage: 'None, by design: an interactive launch is just the agent binary',
       }
     ),
     workaround: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.defendHeadlessOnly.workaround',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.defendHeadlessOnly.workaround',
       {
         defaultMessage: 'None needed',
       }
@@ -119,25 +119,25 @@ export const COLLECTION_GAPS: Readonly<Record<GapId, CollectionGap>> = {
   [GAP_IDS.claudeSessionIdUnmapped]: {
     id: GAP_IDS.claudeSessionIdUnmapped,
     title: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.claudeSessionIdUnmapped.title',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.claudeSessionIdUnmapped.title',
       {
         defaultMessage: 'Defend Claude session ID unmapped in package 9.6.1',
       }
     ),
     blocks: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.claudeSessionIdUnmapped.blocks',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.claudeSessionIdUnmapped.blocks',
       {
         defaultMessage: 'Joining Defend to OTel, session grouping in ES|QL and rules',
       }
     ),
     status: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.claudeSessionIdUnmapped.status',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.claudeSessionIdUnmapped.status',
       {
         defaultMessage: 'Mapped in endpoint-package #820, 9.6 backport #825. Next package release',
       }
     ),
     workaround: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.claudeSessionIdUnmapped.workaround',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.claudeSessionIdUnmapped.workaround',
       {
         defaultMessage: 'Runtime field, or the generator --map-session-id',
       }
@@ -146,25 +146,25 @@ export const COLLECTION_GAPS: Readonly<Record<GapId, CollectionGap>> = {
   [GAP_IDS.cursorNoSessionId]: {
     id: GAP_IDS.cursorNoSessionId,
     title: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.cursorNoSessionId.title',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.cursorNoSessionId.title',
       {
         defaultMessage: 'No Cursor session ID in Defend',
       }
     ),
     blocks: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.cursorNoSessionId.blocks',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.cursorNoSessionId.blocks',
       {
         defaultMessage: 'Cursor session grouping',
       }
     ),
     status: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.cursorNoSessionId.status',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.cursorNoSessionId.status',
       {
         defaultMessage: 'Asked the Endpoint team 26 November',
       }
     ),
     workaround: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.cursorNoSessionId.workaround',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.cursorNoSessionId.workaround',
       {
         defaultMessage: 'Group by process tree',
       }
@@ -173,25 +173,25 @@ export const COLLECTION_GAPS: Readonly<Record<GapId, CollectionGap>> = {
   [GAP_IDS.cursorNoPromptSource]: {
     id: GAP_IDS.cursorNoPromptSource,
     title: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.cursorNoPromptSource.title',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.cursorNoPromptSource.title',
       {
         defaultMessage: 'No Cursor prompt or session data in any integration',
       }
     ),
     blocks: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.cursorNoPromptSource.blocks',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.cursorNoPromptSource.blocks',
       {
         defaultMessage: 'What was asked, and tool calls, for Cursor',
       }
     ),
     status: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.cursorNoPromptSource.status',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.cursorNoPromptSource.status',
       {
         defaultMessage: 'Vendor: the Cursor audit log holds admin events only',
       }
     ),
     workaround: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.cursorNoPromptSource.workaround',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.cursorNoPromptSource.workaround',
       {
         defaultMessage: 'None',
       }
@@ -199,23 +199,26 @@ export const COLLECTION_GAPS: Readonly<Record<GapId, CollectionGap>> = {
   },
   [GAP_IDS.noIdpData]: {
     id: GAP_IDS.noIdpData,
-    title: i18n.translate('xpack.securitySolution.entityAnalytics.aiAgents.gaps.noIdpData.title', {
-      defaultMessage: 'No IdP data in the lab',
-    }),
+    title: i18n.translate(
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.noIdpData.title',
+      {
+        defaultMessage: 'No IdP data in the lab',
+      }
+    ),
     blocks: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.noIdpData.blocks',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.noIdpData.blocks',
       {
         defaultMessage: 'The person behind the agent, IdP status, MFA, watchlists',
       }
     ),
     status: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.noIdpData.status',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.noIdpData.status',
       {
         defaultMessage: 'Test IdP tenant, or org-data',
       }
     ),
     workaround: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.noIdpData.workaround',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.noIdpData.workaround',
       {
         defaultMessage: 'Generated IdP users',
       }
@@ -223,23 +226,26 @@ export const COLLECTION_GAPS: Readonly<Record<GapId, CollectionGap>> = {
   },
   [GAP_IDS.noMfaState]: {
     id: GAP_IDS.noMfaState,
-    title: i18n.translate('xpack.securitySolution.entityAnalytics.aiAgents.gaps.noMfaState.title', {
-      defaultMessage: 'Okta and Entra ID integrations do not send MFA state',
-    }),
+    title: i18n.translate(
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.noMfaState.title',
+      {
+        defaultMessage: 'Okta and Entra ID integrations do not send MFA state',
+      }
+    ),
     blocks: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.noMfaState.blocks',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.noMfaState.blocks',
       {
         defaultMessage: 'The storyline MFA off',
       }
     ),
     status: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.noMfaState.status',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.noMfaState.status',
       {
         defaultMessage: 'Integration owners',
       }
     ),
     workaround: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.noMfaState.workaround',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.noMfaState.workaround',
       {
         defaultMessage: 'Mock field in the demo',
       }
@@ -248,25 +254,25 @@ export const COLLECTION_GAPS: Readonly<Record<GapId, CollectionGap>> = {
   [GAP_IDS.emailAfterSignIn]: {
     id: GAP_IDS.emailAfterSignIn,
     title: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.emailAfterSignIn.title',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.emailAfterSignIn.title',
       {
         defaultMessage: 'Account email only after sign-in, and only on the agent own events',
       }
     ),
     blocks: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.emailAfterSignIn.blocks',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.emailAfterSignIn.blocks',
       {
         defaultMessage: 'Signed in as, account linking',
       }
     ),
     status: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.emailAfterSignIn.status',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.emailAfterSignIn.status',
       {
         defaultMessage: 'Defend design',
       }
     ),
     workaround: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.emailAfterSignIn.workaround',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.emailAfterSignIn.workaround',
       {
         defaultMessage: 'Read the email from the agent own events',
       }
@@ -275,25 +281,25 @@ export const COLLECTION_GAPS: Readonly<Record<GapId, CollectionGap>> = {
   [GAP_IDS.noAgentStamp]: {
     id: GAP_IDS.noAgentStamp,
     title: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.noAgentStamp.title',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.noAgentStamp.title',
       {
         defaultMessage: 'No agent ID stamp on alerts',
       }
     ),
     blocks: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.noAgentStamp.blocks',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.noAgentStamp.blocks',
       {
         defaultMessage: 'Agent alerts, agent risk',
       }
     ),
     status: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.noAgentStamp.status',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.noAgentStamp.status',
       {
         defaultMessage: 'Ours, demo plan workstream B',
       }
     ),
     workaround: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.noAgentStamp.workaround',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.noAgentStamp.workaround',
       {
         defaultMessage: 'Prototype branch',
       }
@@ -302,25 +308,25 @@ export const COLLECTION_GAPS: Readonly<Record<GapId, CollectionGap>> = {
   [GAP_IDS.noAgentRisk]: {
     id: GAP_IDS.noAgentRisk,
     title: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.noAgentRisk.title',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.noAgentRisk.title',
       {
         defaultMessage: 'Released risk scoring does not score ai_agent',
       }
     ),
     blocks: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.noAgentRisk.blocks',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.noAgentRisk.blocks',
       {
         defaultMessage: 'Agent risk',
       }
     ),
     status: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.noAgentRisk.status',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.noAgentRisk.status',
       {
         defaultMessage: 'Ours, demo plan workstream B',
       }
     ),
     workaround: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.noAgentRisk.workaround',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.noAgentRisk.workaround',
       {
         defaultMessage: 'Prototype branch',
       }
@@ -329,27 +335,27 @@ export const COLLECTION_GAPS: Readonly<Record<GapId, CollectionGap>> = {
   [GAP_IDS.userRowsNoIdpStatus]: {
     id: GAP_IDS.userRowsNoIdpStatus,
     title: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.userRowsNoIdpStatus.title',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.userRowsNoIdpStatus.title',
       {
         defaultMessage: "User entity rows don't keep IdP account status",
       }
     ),
     blocks: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.userRowsNoIdpStatus.blocks',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.userRowsNoIdpStatus.blocks',
       {
         defaultMessage:
           'Facts about the person on the agent row, store-query watchlists on "deprovisioned", the orphaned agent',
       }
     ),
     status: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.userRowsNoIdpStatus.status',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.userRowsNoIdpStatus.status',
       {
         defaultMessage:
           'Entity Analytics (ours): extract user.account.status.* or asset.status into the user definition',
       }
     ),
     workaround: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.userRowsNoIdpStatus.workaround',
+      'xpack.securitySolution.entityAnalytics.aiSecurity.gaps.userRowsNoIdpStatus.workaround',
       {
         defaultMessage: 'Watchlists from the HR index instead',
       }

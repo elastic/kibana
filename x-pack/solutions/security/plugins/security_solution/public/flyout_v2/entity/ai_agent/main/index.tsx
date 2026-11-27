@@ -17,8 +17,8 @@ import {
   EuiTabs,
 } from '@elastic/eui';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
-import { useAiAgentContext } from '../../../../entity_analytics/components/ai_agents/hooks/use_ai_agents';
-import { parseAgentId } from '../../../../entity_analytics/components/ai_agents/utils';
+import { useAiAgentContext } from '../../../../entity_analytics/components/ai_security/hooks/use_ai_agents';
+import { parseAgentId } from '../../../../entity_analytics/components/ai_security/utils';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { AiAgentHeader } from './header';

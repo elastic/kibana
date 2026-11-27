@@ -19,7 +19,7 @@ import {
   COLLECTION_GAPS,
   GAPS_REGISTER_NAME,
   type GapId,
-} from '../../../../../entity_analytics/components/ai_agents/gaps';
+} from '../../../../../entity_analytics/components/ai_security/gaps';
 import { GAP_BLOCKS, GAP_LINK, GAP_REGISTER, GAP_STATUS, GAP_WORKAROUND } from '../translations';
 import { AI_AGENT_TEST_IDS } from '../test_ids';
 

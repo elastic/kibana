@@ -14,8 +14,8 @@ import { SecurityAppHeader } from '../../common/components/app_header';
 import { useKibana } from '../../common/lib/kibana';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { ENTITY_ANALYTICS_AI_AGENTS_PATH } from '../components/ai_agents/constants';
-import { NAV_LINK_LABEL as AI_AGENTS_LABEL } from '../components/ai_agents/translations';
+import { ENTITY_ANALYTICS_AI_SECURITY_PATH } from '../components/ai_security/constants';
+import { NAV_LINK_LABEL as AI_SECURITY_LABEL } from '../components/ai_security/translations';
 
 const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.homePage.pageTitle', {
   defaultMessage: 'Entity analytics',
@@ -35,8 +35,8 @@ export const ENTITY_ANALYTICS_HOME_MANAGEMENT_MENU_ITEM_TEST_ID =
   'entityAnalyticsHomeSettingsMenuItem';
 export const ENTITY_ANALYTICS_HOME_PRODUCT_TOUR_MENU_ITEM_TEST_ID =
   'entityAnalyticsHomeProductTourMenuItem';
-export const ENTITY_ANALYTICS_HOME_AI_AGENTS_MENU_ITEM_TEST_ID =
-  'entityAnalyticsHomeAiAgentsMenuItem';
+export const ENTITY_ANALYTICS_HOME_AI_SECURITY_MENU_ITEM_TEST_ID =
+  'entityAnalyticsHomeAiSecurityMenuItem';
 
 export interface EntityAnalyticsHomeHeaderProps {
   /** Adds a Product tour menu item that starts the page tour. */
@@ -52,22 +52,22 @@ export const EntityAnalyticsHomeHeader = React.memo(
       USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG,
       true
     );
-    const isAiAgentsPocEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsAiAgentsPoc');
+    const isAiSecurityPocEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsAiSecurityPoc');
 
     const menu = useMemo<AppHeaderMenu>(
       () => ({
         items: [
-          ...(isAiAgentsPocEnabled
+          ...(isAiSecurityPocEnabled
             ? [
                 {
-                  id: 'entityAnalyticsAiAgents',
-                  label: AI_AGENTS_LABEL,
+                  id: 'entityAnalyticsAiSecurity',
+                  label: AI_SECURITY_LABEL,
                   iconType: 'sparkles' as const,
                   href: application.getUrlForApp(APP_UI_ID, {
-                    path: ENTITY_ANALYTICS_AI_AGENTS_PATH,
+                    path: ENTITY_ANALYTICS_AI_SECURITY_PATH,
                   }),
                   order: 0,
-                  testId: ENTITY_ANALYTICS_HOME_AI_AGENTS_MENU_ITEM_TEST_ID,
+                  testId: ENTITY_ANALYTICS_HOME_AI_SECURITY_MENU_ITEM_TEST_ID,
                 },
               ]
             : []),
@@ -97,7 +97,7 @@ export const EntityAnalyticsHomeHeader = React.memo(
             : []),
         ],
       }),
-      [getSecuritySolutionUrl, onStartTour, isAiAgentsPocEnabled, application]
+      [getSecuritySolutionUrl, onStartTour, isAiSecurityPocEnabled, application]
     );
 
     return (

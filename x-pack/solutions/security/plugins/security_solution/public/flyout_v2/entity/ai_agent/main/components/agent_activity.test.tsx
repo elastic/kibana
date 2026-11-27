@@ -10,16 +10,16 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import { useFlyoutApi } from '../../../../use_flyout_api';
 import { createFlyoutApiMock } from '../../../../use_flyout_api.mock';
-import { useAiAgentActivity } from '../../../../../entity_analytics/components/ai_agents/hooks/use_ai_agents';
-import type { AgentActivityResult } from '../../../../../entity_analytics/components/ai_agents/hooks/use_ai_agents';
-import { buildAgentActivity } from '../../../../../entity_analytics/components/ai_agents/activity/build_agent_activity';
-import type { ProcessRecord } from '../../../../../entity_analytics/components/ai_agents/activity/types';
-import type { AgentIdentity } from '../../../../../entity_analytics/components/ai_agents/types';
+import { useAiAgentActivity } from '../../../../../entity_analytics/components/ai_security/hooks/use_ai_agents';
+import type { AgentActivityResult } from '../../../../../entity_analytics/components/ai_security/hooks/use_ai_agents';
+import { buildAgentActivity } from '../../../../../entity_analytics/components/ai_security/activity/build_agent_activity';
+import type { ProcessRecord } from '../../../../../entity_analytics/components/ai_security/activity/types';
+import type { AgentIdentity } from '../../../../../entity_analytics/components/ai_security/types';
 import { AgentActivity } from './agent_activity';
 import { AI_AGENT_TEST_IDS } from '../test_ids';
 
 jest.mock('../../../../use_flyout_api');
-jest.mock('../../../../../entity_analytics/components/ai_agents/hooks/use_ai_agents');
+jest.mock('../../../../../entity_analytics/components/ai_security/hooks/use_ai_agents');
 
 const claude: AgentIdentity = {
   entityId: 'ai_agent:claude_code@host-1@ec2-user',

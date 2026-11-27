@@ -64,7 +64,7 @@ import {
 import type { EntityViewMode } from '../../../common/entity_analytics/entity_store/resolution_group';
 import { EntityType } from '../../../common/entity_analytics/types';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
-import { AI_AGENT_ENGINE_TYPE } from '../../entity_analytics/components/ai_agents/constants';
+import { AI_AGENT_ENGINE_TYPE } from '../../entity_analytics/components/ai_security/constants';
 
 // Lazy-loaded so consumers of this hook don't statically pull the entity flyout graph into their
 // bundle; each chunk only loads when the corresponding flyout is actually opened.
@@ -76,10 +76,10 @@ const GenericEntity = lazy(() =>
 );
 const AiAgent = lazy(() => import('./ai_agent/main').then((m) => ({ default: m.AiAgent })));
 
-/** AI agent flyouts are a proof of concept, routed only with `entityAnalyticsAiAgentsPoc` on. */
+/** AI agent flyouts are a proof of concept, routed only with `entityAnalyticsAiSecurityPoc` on. */
 const isAiAgentFlyoutEnabled = (): boolean => {
   try {
-    return ExperimentalFeaturesService.get().entityAnalyticsAiAgentsPoc;
+    return ExperimentalFeaturesService.get().entityAnalyticsAiSecurityPoc;
   } catch {
     return false;
   }

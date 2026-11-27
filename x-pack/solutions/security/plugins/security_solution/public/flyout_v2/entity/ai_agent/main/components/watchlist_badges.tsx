@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
-import type { WatchlistLabel } from '../../../../../entity_analytics/components/ai_agents/hooks/use_watchlist_lookup';
+import type { WatchlistLabel } from '../../../../../entity_analytics/components/ai_security/hooks/use_watchlist_lookup';
 import { NONE, watchlistRiskModifierTooltip } from '../translations';
 
 /** Watchlist names as badges, with the watchlist's risk modifier in a tooltip when it has one. */

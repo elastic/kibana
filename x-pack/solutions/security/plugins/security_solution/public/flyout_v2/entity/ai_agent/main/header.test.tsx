@@ -11,7 +11,7 @@ import { TestProviders } from '../../../../common/mock';
 import type {
   AgentIdentity,
   AgentRow,
-} from '../../../../entity_analytics/components/ai_agents/types';
+} from '../../../../entity_analytics/components/ai_security/types';
 import { AiAgentHeader } from './header';
 import { AI_AGENT_TEST_IDS } from './test_ids';
 

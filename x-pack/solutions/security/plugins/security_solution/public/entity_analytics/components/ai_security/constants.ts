@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-/** Path of the AI agents page, under the Security app. Proof of concept, behind `entityAnalyticsAiAgentsPoc`. */
-export const ENTITY_ANALYTICS_AI_AGENTS_PATH = '/entity_analytics_ai_agents' as const;
+/** Path of the AI security page, under the Security app. Proof of concept, behind `entityAnalyticsAiSecurityPoc`. */
+export const ENTITY_ANALYTICS_AI_SECURITY_PATH = '/entity_analytics_ai_security' as const;
 
-export const AI_AGENTS_SCOPE_ID = 'entity-analytics-ai-agents';
+export const AI_SECURITY_SCOPE_ID = 'entity-analytics-ai-security';
 
 /** Entity Store engine type of AI agent rows. */
 export const AI_AGENT_ENGINE_TYPE = 'ai_agent';
