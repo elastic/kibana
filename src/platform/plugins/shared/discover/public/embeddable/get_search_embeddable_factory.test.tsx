@@ -8,14 +8,17 @@
  */
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { DiscoverTabType } from '@kbn/discover-session-constants';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
-import type { PresentationContainer } from '@kbn/presentation-publishing';
+import {
+  apiPublishesUnsavedChanges,
+  type PresentationContainer,
+} from '@kbn/presentation-publishing';
 import type { PhaseEvent, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { act, render, waitFor } from '@testing-library/react';
@@ -48,6 +51,7 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
 
 jest.mock('./utils/serialization_utils', () => ({
+  ...jest.requireActual('./utils/serialization_utils'),
   deserializeState: jest.fn(),
 }));
 
@@ -518,6 +522,50 @@ describe('saved search embeddable', () => {
         expect(api.savedSearch$.getValue().tabTypeState).toEqual(tabTypeState);
         await waitOneTick(); // let the refetch triggered above settle before the next test
       });
+
+      it('has no unsaved changes when a reset shows the new first tab of the session', async () => {
+        const tab = { id: 'tab-1', label: 'Tab 1' };
+        const newFirstTab = { id: 'new-tab', label: 'New tab' };
+        const lastSavedState = { ref_id: 'id', overrides: {} };
+        const parentApi = {
+          ...mockedDashboardApi,
+          lastSavedStateForChild$: () => new BehaviorSubject(lastSavedState),
+          getLastSavedStateForChild: () => lastSavedState,
+        };
+        runtimeState = getInitialRuntimeState({
+          partialState: { savedObjectId: 'id', selectedTabId: tab.id, tabs: [tab] },
+        });
+
+        const { api } = await factory.buildEmbeddable({
+          initializeDrilldownsManager,
+          initialState: lastSavedState,
+          finalizeApi: (apiRegistration) => ({
+            ...finalizeApiMock(apiRegistration),
+            applySerializedState: apiRegistration.applySerializedState,
+            parentApi,
+          }),
+          uuid,
+          parentApi,
+        });
+        await waitOneTick();
+
+        runtimeState = getInitialRuntimeState({
+          partialState: {
+            savedObjectId: 'id',
+            selectedTabId: newFirstTab.id,
+            tabs: [newFirstTab, tab],
+          },
+        });
+        await act(async () => {
+          await api.applySerializedState(lastSavedState);
+        });
+
+        const hasUnsavedChanges = apiPublishesUnsavedChanges(api)
+          ? await firstValueFrom(api.hasUnsavedChanges$)
+          : undefined;
+        expect(hasUnsavedChanges).toBe(false);
+        await waitOneTick();
+      });
     });
 
     it('should not fetch data if only a new input title is set', async () => {
@@ -882,6 +930,33 @@ describe('saved search embeddable', () => {
         expect(component.queryByTestId('discoverDocTable')).not.toBeInTheDocument();
       });
     });
+
+    it.each(['removed-tab', 'tab-without-data-view'])(
+      'should not offer unlinking when the selected tab cannot be shown (%s)',
+      async (selectedTabId) => {
+        runtimeState = getInitialRuntimeState({
+          partialState: {
+            savedObjectId: 'id',
+            selectedTabId,
+            tabs: [
+              { id: 'tab-with-data-view', tab: {} },
+              { id: 'tab-without-data-view' },
+            ] as SearchEmbeddableRuntimeState['tabs'],
+          },
+        });
+
+        const { api } = await factory.buildEmbeddable({
+          initializeDrilldownsManager: mockInitializeDrilldownsManager,
+          initialState: { ref_id: 'id', overrides: {} },
+          finalizeApi: finalizeApiMock,
+          uuid,
+          parentApi: mockedDashboardApi,
+        });
+        await waitOneTick();
+
+        expect(await api.canUnlinkFromLibrary()).toBe(false);
+      }
+    );
   });
 
   describe('context awareness', () => {

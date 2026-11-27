@@ -9,6 +9,11 @@ description: >
   `fp-dismissal-<hash>`, which the alerts carry in their `az:closed_by_decision:<id>` and
   `az:skipped_by_decision:<id>` tags. It is safe to run again: a run that reports `failures` leaves
   the tag on the alerts it could not put back.
+
+  Who can run it: the caller needs the privilege to run workflows, the privilege to manage alerts,
+  and `read` and `index` on the decisions index `.ai-index-idx-security-triage-decisions`. Elasticsearch
+  hides decisions from users, so an analyst without the index privileges gets `status: denied` and
+  nothing changes. Today the worker's service account or an administrator can run it.
 enabled: true
 tags:
   - security

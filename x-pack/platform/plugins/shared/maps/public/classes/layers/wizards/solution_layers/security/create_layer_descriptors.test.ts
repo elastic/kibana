@@ -76,7 +76,7 @@ describe('createLayerDescriptor', () => {
             ...getDefaultStaticProperties(),
             fill_color: {
               options: {
-                color: '#A6EDEA',
+                color: '#93F0D9',
               },
               type: 'STATIC',
             },
@@ -231,7 +231,7 @@ describe('createLayerDescriptor', () => {
             ...getDefaultStaticProperties(),
             line_color: {
               options: {
-                color: '#A6EDEA',
+                color: '#93F0D9',
               },
               type: 'STATIC',
             },
@@ -307,7 +307,7 @@ describe('createLayerDescriptor', () => {
             ...getDefaultStaticProperties(),
             fill_color: {
               options: {
-                color: '#A6EDEA',
+                color: '#93F0D9',
               },
               type: 'STATIC',
             },
@@ -456,7 +456,7 @@ describe('createLayerDescriptor', () => {
             ...getDefaultStaticProperties(),
             line_color: {
               options: {
-                color: '#A6EDEA',
+                color: '#93F0D9',
               },
               type: 'STATIC',
             },
@@ -534,7 +534,7 @@ describe('createLayerDescriptor', () => {
             ...getDefaultStaticProperties(),
             fill_color: {
               options: {
-                color: '#A6EDEA',
+                color: '#93F0D9',
               },
               type: 'STATIC',
             },
@@ -683,7 +683,7 @@ describe('createLayerDescriptor', () => {
             ...getDefaultStaticProperties(),
             line_color: {
               options: {
-                color: '#A6EDEA',
+                color: '#93F0D9',
               },
               type: 'STATIC',
             },

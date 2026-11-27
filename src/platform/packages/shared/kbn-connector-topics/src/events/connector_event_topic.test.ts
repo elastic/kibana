@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ConnectorEventHubFields } from './connector_event_schema';
 import {
   getConnectorEventTopicName,
   type ConnectorEventBusData,
@@ -85,5 +86,31 @@ describe('connector event topic types', () => {
     expect(numericChannel.connectorId).toBe('sales-ingress');
     expect(missingChannel.messageId).toBe('123.456');
     expect(withKey.correlationKey).toBe('corr-1');
+  });
+
+  it('takes the hub fields from connectorEventSchema', () => {
+    const hub: ConnectorEventHubFields = {
+      connectorId: 'sales-ingress',
+      connectorTypeId: '.slack2',
+      spaceId: 'default',
+    };
+    const withKey: ConnectorEventHubFields = { ...hub, correlationKey: 'corr-1' };
+    // @ts-expect-error connectorId is required by connectorEventSchema
+    const missingConnectorId: ConnectorEventHubFields = {
+      connectorTypeId: '.slack2',
+      spaceId: 'default',
+    };
+    const spokeField: ConnectorEventHubFields = {
+      connectorId: 'sales-ingress',
+      connectorTypeId: '.slack2',
+      spaceId: 'default',
+      // @ts-expect-error spoke fields are not hub fields
+      channel: 'C1',
+    };
+
+    expect(hub.connectorId).toBe('sales-ingress');
+    expect(withKey.correlationKey).toBe('corr-1');
+    expect(missingConnectorId.spaceId).toBe('default');
+    expect(spokeField.connectorTypeId).toBe('.slack2');
   });
 });

@@ -31,8 +31,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
-  // Failing: See https://github.com/elastic/kibana/issues/259686
-  describe.skip('eventLog', () => {
+  describe('eventLog', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     const runRuleAndEnsureCompletion = async ({
@@ -150,8 +149,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
                 schedule: { interval: '24h' },
-                notify_when: RuleNotifyWhen.THROTTLE,
-                throttle: '1s',
+                // Notify on every active run without a throttle window, so back-to-back forced runs cannot skip an action
+                notify_when: RuleNotifyWhen.ACTIVE,
+                throttle: null,
                 params: {
                   pattern,
                 },
@@ -650,9 +650,20 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             });
           });
 
+          // A new alert's new-instance and active-instance events are logged in the same run and can share
+          // a timestamp. The event log only sorts by timestamp, so order those ties by the alert lifecycle.
+          const lifecycleOrder = ['new-instance', 'active-instance', 'recovered-instance'];
+          const getTime = (event: (typeof events)[number]) =>
+            new Date(event?.['@timestamp'] ?? 0).getTime();
+          const getLifecycleRank = (event: (typeof events)[number]) =>
+            lifecycleOrder.indexOf(event?.event?.action ?? '');
+          const orderedEvents = [...events].sort(
+            (a, b) => getTime(a) - getTime(b) || getLifecycleRank(a) - getLifecycleRank(b)
+          );
+
           let currentUuid: string | undefined;
           const seenUuids = new Set<string>();
-          for (const event of events) {
+          for (const event of orderedEvents) {
             const action = event?.event?.action;
             const uuid = event?.kibana?.alert?.uuid;
 

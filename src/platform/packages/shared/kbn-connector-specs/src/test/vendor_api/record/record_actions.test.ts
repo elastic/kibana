@@ -131,6 +131,8 @@ describe('recordActions', () => {
       expect.objectContaining({
         kind: 'request-violation',
         action: 'tooMany',
+        // The operation the emulator matched, which the drift issue ties auth changes to
+        operation: { source: 'v1', method: 'get', path: '/items' },
         violations: [expect.objectContaining({ code: 'maximum' })],
       })
     );

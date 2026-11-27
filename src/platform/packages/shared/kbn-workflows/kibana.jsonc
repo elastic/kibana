@@ -10,8 +10,8 @@
     // negated here, otherwise they won't be converted to `.yaml.js` and their imports will break.
     "noParse": [
       "managed/definitions/**/*.yaml",
-      "!managed/definitions/alertzero/detection_rule_coverage.yaml",
-      "!managed/definitions/alertzero/detection_rule_tuning.yaml",
+      "!managed/definitions/alertzero/detection/coverage.yaml",
+      "!managed/definitions/alertzero/detection/tuning.yaml",
       "!managed/definitions/alertzero/floor_alert_triage.yaml",
       "!managed/definitions/alertzero/floor_attack_discovery.yaml",
       "!managed/definitions/alertzero/forensics_endpoint_analysis.yaml",
