@@ -46,6 +46,7 @@ interface InitializeAlertsClientOpts<Params extends RuleTypeParams> {
   rule: RuleData<Params>;
   ruleType: UntypedNormalizedRuleType;
   runTimestamp?: Date;
+  shouldUntrackOrphanedAlerts?: boolean;
   startedAt: Date | null;
   taskInstance: RuleTaskInstance;
 }
@@ -66,6 +67,7 @@ export const initializeAlertsClient = async <
   rule,
   ruleType,
   runTimestamp,
+  shouldUntrackOrphanedAlerts,
   startedAt,
   taskInstance,
 }: InitializeAlertsClientOpts<Params>) => {
@@ -143,6 +145,7 @@ export const initializeAlertsClient = async <
     activeAlertsFromState: alertRawInstances,
     recoveredAlertsFromState: alertRecoveredRawInstances,
     snoozedInstances: rule.snoozedInstances,
+    shouldUntrackOrphanedAlerts,
   });
 
   return alertsClient;

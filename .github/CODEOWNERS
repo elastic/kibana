@@ -274,12 +274,12 @@ src/core/packages/mount-utils/browser-internal @elastic/kibana-core
 src/core/packages/node/server @elastic/kibana-core
 src/core/packages/node/server-internal @elastic/kibana-core
 src/core/packages/node/server-mocks @elastic/kibana-core
-src/core/packages/notifications/browser @elastic/kibana-core
-src/core/packages/notifications/browser-internal @elastic/kibana-core
-src/core/packages/notifications/browser-mocks @elastic/kibana-core
-src/core/packages/overlays/browser @elastic/kibana-core
-src/core/packages/overlays/browser-internal @elastic/kibana-core
-src/core/packages/overlays/browser-mocks @elastic/kibana-core
+src/core/packages/notifications/browser @elastic/appex-sharedux
+src/core/packages/notifications/browser-internal @elastic/appex-sharedux
+src/core/packages/notifications/browser-mocks @elastic/appex-sharedux
+src/core/packages/overlays/browser @elastic/appex-sharedux
+src/core/packages/overlays/browser-internal @elastic/appex-sharedux
+src/core/packages/overlays/browser-mocks @elastic/appex-sharedux
 src/core/packages/plugins/base-server-internal @elastic/kibana-core
 src/core/packages/plugins/browser @elastic/kibana-core
 src/core/packages/plugins/browser-internal @elastic/kibana-core
@@ -934,7 +934,7 @@ src/platform/plugins/shared/esql @elastic/kibana-discover
 src/platform/plugins/shared/esql_datagrid @elastic/kibana-discover
 src/platform/plugins/shared/expressions @elastic/kibana-dashboards
 src/platform/plugins/shared/field_formats @elastic/kibana-discover
-src/platform/plugins/shared/files @elastic/appex-sharedux
+src/platform/plugins/shared/files @elastic/kibana-core @elastic/appex-sharedux
 src/platform/plugins/shared/home @elastic/appex-sharedux
 src/platform/plugins/shared/inspector @elastic/kibana-dashboards
 src/platform/plugins/shared/kibana_react @elastic/appex-sharedux
@@ -1325,7 +1325,7 @@ x-pack/platform/plugins/shared/maintenance_windows @elastic/response-ops
 x-pack/platform/plugins/shared/maps @elastic/kibana-dashboards
 x-pack/platform/plugins/shared/ml @elastic/search-ml-ux
 x-pack/platform/plugins/shared/notification_center @elastic/search-ml-ux
-x-pack/platform/plugins/shared/notifications @elastic/appex-sharedux
+x-pack/platform/plugins/shared/notifications @elastic/response-ops
 x-pack/platform/plugins/shared/observability_ai_assistant @elastic/nightshift-context-and-research-team
 x-pack/platform/plugins/shared/osquery @elastic/security-defend-workflows
 x-pack/platform/plugins/shared/proposals @elastic/alertzero-common-layer
@@ -2460,6 +2460,7 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 /x-pack/platform/test/saved_objects_field_count/ @elastic/kibana-core
 /x-pack/platform/test/serverless/**/test_suites/saved_objects_management/ @elastic/kibana-core
 /x-pack/platform/test/serverless/api_integration/test_suites/telemetry/ @elastic/kibana-core
+/src/platform/plugins/shared/files/server @elastic/kibana-core
 
 #CC# /src/core/packages/core/server/csp/ @elastic/kibana-core
 #CC# /src/plugins/saved_objects/ @elastic/kibana-core
@@ -2753,6 +2754,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/inbound_webhook/** @e
 src/platform/packages/shared/kbn-connector-specs/src/specs/jenkins/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/jina/** @elastic/jinastic
 src/platform/packages/shared/kbn-connector-specs/src/specs/kubernetes/** @elastic/nightshift
+src/platform/packages/shared/kbn-connector-specs/src/specs/microsoft_defender_for_endpoint/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/microsoft_sql_server/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/microsoft_teams/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/misp/** @elastic/workflows-eng
@@ -2768,6 +2770,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/opensearch_aws_opense
 src/platform/packages/shared/kbn-connector-specs/src/specs/outlook/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/pagerduty/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/prometheus/** @elastic/nightshift
+src/platform/packages/shared/kbn-connector-specs/src/specs/redis/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/salesforce/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/sentinelone/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/servicenow_search/** @elastic/workchat-eng
@@ -2782,6 +2785,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/sublime_security/** @
 src/platform/packages/shared/kbn-connector-specs/src/specs/tavily/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/threatq/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/trello/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/trend_vision_one/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/unifi/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/urlscan_io/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/urlvoid/** @elastic/workflows-eng
@@ -3253,7 +3257,7 @@ src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_detect
 # Context Engine managed workflows
 src/platform/packages/shared/kbn-workflows/managed/definitions/context_engine @elastic/context-eng
 
-# AlertZero managed workflows (shared files: index, constants, template values, rule workflows)
+# AlertZero managed workflows (shared files: index, constants, template values)
 src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero @elastic/alertzero-common-layer
 # Per-watch definitions without an override below fall back to @elastic/alertzero-common-layer.
 
@@ -3308,6 +3312,20 @@ x-pack/solutions/security/plugins/security_solution/common/workflows/alert_analy
 /x-pack/solutions/security/plugins/alertzero/server/telemetry/workers/hunt.md @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui/pages/alert_analysis_workflow @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/server/workflows/alert_analysis_workflow @elastic/security-investigations
+
+# AlertZero Detection Watch services
+/src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/detection @elastic/security-detection-engineering
+/x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/components/detection_watch_settings.schema.yaml @elastic/security-detection-engineering
+/x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/components/detection_watch_settings.gen.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/packages/kbn-alertzero-common/impl/worker_settings/detection_watch.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/common/telemetry/to_detection_rule_type.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/common/telemetry/to_detection_rule_type.test.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/public/pages/watches/custom_settings/rule_coverage @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/public/pages/watches/custom_settings/rule_tuning @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/server/managed_workflows/detection_rule_workflows.test.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/server/step_types/report_worker_outcome/shipped_yaml_contract.detection.fixture.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/server/step_types/report_worker_outcome/shipped_yaml_contract.detection.test.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/server/telemetry/workers/detection.md @elastic/security-detection-engineering
 
 # AlertZero Triage Watch
 /x-pack/solutions/security/plugins/alertzero/server/alert_triage @elastic/security-investigations
@@ -3622,6 +3640,7 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/test_suites/test-suites-security-solution-apis/test_suites/edr_workflows/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution/test/scout/edr_policy/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/ @elastic/security-defend-workflows
@@ -3890,6 +3909,7 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /x-pack/platform/plugins/shared/spaces/test/scout/ui/fixtures/ @elastic/appex-sharedux
 /x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_selection_serverless.spec.ts @elastic/appex-sharedux
 /x-pack/platform/test/serverless/functional/page_objects/svl_common_navigation.ts @elastic/appex-sharedux
+/src/platform/plugins/shared/files/public @elastic/appex-sharedux
 
 # OpenAPI spec files
 oas_docs/linters                              @elastic/ski-docs
@@ -3988,6 +4008,9 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 # Kibana accessibility
 /.agents/skills/accessibility/** @elastic/kibana-accessibility
 
+# Kibana Core: OAS generation guidance
+/.agents/skills/improve-oas/** @elastic/kibana-core
+
 # No owner - generated files covered by CI checks
 **/moon.yml
 # Only the workflow step schema sync PR changes these (auto-approved), feature PRs never do
@@ -4004,6 +4027,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.github/workflows/ @elastic/kibana-operations
 /.github/workflows/failed-test-investigator.* @elastic/kibana-operations @elastic/appex-qa
 /.github/workflows/flaky-test-fixer.* @elastic/kibana-operations @elastic/appex-qa
+/.github/workflows/evals-gate.yml @elastic/kibana-operations @elastic/nightshift-context-and-research-team
 /.github/workflows/flaky-fix-verifier.* @elastic/kibana-operations @elastic/appex-qa
 /.github/workflows/flaky-fix-curator.* @elastic/kibana-operations @elastic/appex-qa
 /.github/workflows/flaky-fix-retrospective.* @elastic/kibana-operations @elastic/appex-qa

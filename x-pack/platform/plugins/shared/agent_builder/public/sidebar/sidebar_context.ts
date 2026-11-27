@@ -36,7 +36,7 @@ export interface SidebarRuntimeContext {
   options: OpenConversationSidebarOptions;
   onRegisterCallbacks?: (callbacks: {
     updateProps: (props: EmbeddableConversationProps) => void;
-    resetBrowserApiTools: () => void;
+    resetChatConfig: () => void;
     addAttachment: (attachment: AttachmentInput) => void;
     removeAttachmentById: (attachmentId: string) => void;
   }) => void;

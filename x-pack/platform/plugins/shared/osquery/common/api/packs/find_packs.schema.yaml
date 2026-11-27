@@ -92,6 +92,11 @@ components:
                 nullable: true
               updated_by_profile_uid:
                 type: string
+              effective_policy_ids:
+                description: 'Agent policies that receive this pack through Fleet, including those that share an Osquery Manager integration with a selected agent policy. Returned only when the request sets `withEffectivePolicyIds=true`, and absent when Fleet state is unavailable.'
+                type: array
+                items:
+                  type: string
               policy_ids:
                 $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PolicyIdsOrUndefined'
               read_only:
@@ -178,6 +183,11 @@ components:
               nullable: true
             updated_by_profile_uid:
               type: string
+            effective_policy_ids:
+              description: 'Agent policies that receive this pack through Fleet, including those that share an Osquery Manager integration with a selected agent policy. Returned only when the request sets `withEffectivePolicyIds=true`, and absent when Fleet state is unavailable.'
+              type: array
+              items:
+                type: string
             policy_ids:
               $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PolicyIdsOrUndefined'
             shards:

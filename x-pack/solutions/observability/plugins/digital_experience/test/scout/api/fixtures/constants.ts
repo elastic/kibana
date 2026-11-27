@@ -58,6 +58,17 @@ export const mobileReleasesPath = (
   query: Record<string, string> = {}
 ): string => mobileRoutePath(serviceName, 'releases', query);
 
+/** The crash groups route of a mobile application in `TIME_RANGE`, or one group's with `fingerprint`. */
+export const mobileCrashGroupsPath = (
+  serviceName: string,
+  { fingerprint, ...query }: Record<string, string> = {}
+): string =>
+  mobileRoutePath(
+    serviceName,
+    fingerprint ? `crash_groups/${encodeURIComponent(fingerprint)}` : 'crash_groups',
+    query
+  );
+
 export const APPLICATIONS_IN_TIME_RANGE_PATH = `${APPLICATIONS_PATH}?start=${TIME_RANGE.rangeFrom}&end=${TIME_RANGE.rangeTo}`;
 
 export const SESSIONS_ENABLE_PATH = 'internal/digital_experience/sessions/enable';

@@ -58,7 +58,7 @@ export const registerPostDataViewAsCodeRoute = ({
             },
             400: {
               description:
-                'The request is invalid, for example when a field format type does not exist.',
+                'The request is invalid, for example when a field format type does not exist or `spaces` does not include the current space.',
             },
             403: {
               description: 'forbidden',
@@ -71,7 +71,7 @@ export const registerPostDataViewAsCodeRoute = ({
       },
       requestHandler(args, async (ctx, req, res) => {
         const dataViewsAsCodeService = await getDataViewsAsCodeService(ctx, getStartServices, req);
-        const storedDataView = await dataViewsAsCodeService.create(req.body);
+        const storedDataView = await dataViewsAsCodeService.create(req.body, req.spaceId);
 
         return res.created({ body: storedDataView });
       })

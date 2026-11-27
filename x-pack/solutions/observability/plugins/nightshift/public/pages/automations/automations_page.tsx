@@ -7,7 +7,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { EuiConfirmModal, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
-import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useHistory, useParams } from 'react-router-dom';
 import { RETRY_BUTTON_LABEL } from '../../common/messages';
@@ -31,6 +31,7 @@ import {
   useRefreshAutomations,
   useRunAutomation,
   useFetchAutomations,
+  useAutomationsLastRuns,
   type Automation,
 } from '../../data/automations/use_automations';
 import { AutomationsEmptyPrompt, FilteredEmptyPrompt } from './list/automations_empty_prompt';
@@ -88,6 +89,13 @@ export const AutomationsPage = (): React.ReactElement => {
   const [order, setOrder] = useState<string[]>([]);
   const [page, setPage] = useState({ index: 0, size: DEFAULT_PAGE_SIZE });
   const automations = useMemo(() => data?.automations ?? [], [data?.automations]);
+  const {
+    data: lastRuns,
+    isInitialLoading: isLoadingLastRuns,
+    isError: didLastRunsFail,
+    isFetching: isFetchingLastRuns,
+    refetch: refetchLastRuns,
+  } = useAutomationsLastRuns(automations.length > 0);
   const isCreating = id === 'new';
   const detailAutomation = isCreating
     ? undefined
@@ -170,6 +178,8 @@ export const AutomationsPage = (): React.ReactElement => {
         isRunPending={runAutomation.isLoading}
         editDisabledReason={editDisabledReason}
         runCounts={runCounts}
+        lastRuns={didLastRunsFail ? undefined : lastRuns}
+        isLoadingLastRuns={isLoadingLastRuns}
         usedToday={usedToday}
         getFacets={getFacets}
         isRateLimited={isRateLimited}
@@ -253,6 +263,25 @@ export const AutomationsPage = (): React.ReactElement => {
             onCreate={openCreateFlyout}
             createDisabledReason={editDisabledReason}
           />
+        </>
+      )}
+      {didLastRunsFail && visibleAutomations.length > 0 && (
+        <>
+          <KbnWarningCallout
+            announceOnMount
+            size="s"
+            title={listLabels.lastRunLoadErrorTitle}
+            text={listLabels.lastRunLoadErrorDescription}
+            actionProps={{
+              primary: {
+                children: RETRY_BUTTON_LABEL,
+                iconType: 'refresh',
+                isLoading: isFetchingLastRuns,
+                onClick: () => refetchLastRuns(),
+              },
+            }}
+          />
+          <EuiSpacer size="m" />
         </>
       )}
       {renderContent()}

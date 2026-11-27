@@ -10,6 +10,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiLink,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -32,7 +33,7 @@ import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
 import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
-import { useEditableSettings } from '@kbn/management-settings-hooks';
+import { SettingDefinitionsLoadError, useEditableSettings } from '@kbn/management-settings-hooks';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 import { BottomBarActions } from './bottom_bar_actions';
@@ -65,8 +66,22 @@ export function Settings() {
     },
   } = useProfilingDependencies();
 
-  const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
-    useEditableSettings({ settingsKeys: SETTINGS_KEYS, settingsClient: settings.client });
+  const {
+    fields,
+    isLoading,
+    loadError,
+    retry,
+    handleFieldChange,
+    unsavedChanges,
+    saveAll,
+    isSaving,
+    cleanUnsavedChanges,
+  } = useEditableSettings({
+    settingsKeys: SETTINGS_KEYS,
+    settingsClient: settings.client,
+    metadataClient: settings.metadata,
+    scope: 'namespace',
+  });
 
   async function handleSave() {
     try {
@@ -104,6 +119,16 @@ export function Settings() {
           </EuiText>
         </EuiTitle>
         <EuiSpacer />
+        {loadError && (
+          <>
+            <SettingDefinitionsLoadError
+              error={loadError}
+              onRetry={retry}
+              data-test-subj="profilingSettingsLoadError"
+            />
+            <EuiSpacer />
+          </>
+        )}
         {[
           {
             label: i18n.translate('xpack.profiling.settings.co2Section', {
@@ -266,8 +291,19 @@ export function Settings() {
                     <EuiSpacer size="m" />
                   </>
                 ) : null}
+                {isLoading && (
+                  <EuiFlexGroup justifyContent="center">
+                    <EuiFlexItem grow={false}>
+                      <EuiLoadingSpinner size="xl" data-test-subj="profilingSettingsLoading" />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                )}
                 {item.settings.map((settingKey) => {
                   const field = fields[settingKey];
+                  if (!field) {
+                    return null;
+                  }
+
                   return (
                     <FieldRowProvider
                       {...{
