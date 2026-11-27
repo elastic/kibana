@@ -627,6 +627,24 @@ describe('OtelOverview', () => {
       return screen.findByTestId('digitalExperienceOverviewFiltersFlyout');
     };
 
+    it('covers the page by default, and keeps the mode the user picks for the next visit', async () => {
+      window.localStorage.clear();
+      await openFlyout();
+
+      expect(screen.getByRole('button', { name: 'Overlay' })).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      );
+
+      fireEvent.click(screen.getByTestId('digitalExperienceOverviewFiltersFlyoutPush'));
+
+      expect(screen.getByRole('button', { name: 'Push' })).toHaveAttribute('aria-pressed', 'true');
+      expect(
+        window.localStorage.getItem('xpack.digitalExperience.overview.filtersFlyoutType')
+      ).toBe('"push"');
+      window.localStorage.clear();
+    });
+
     it('says what the Page and URL contains filters leave out, beside their values', async () => {
       await openFlyout();
 
