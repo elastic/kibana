@@ -42,7 +42,10 @@ import {
 import { appContextService } from './app_context';
 
 import { agentPolicyService } from './agent_policy';
-import { assertPrivilegesInSpaces } from './security/assert_privileges_in_spaces';
+import {
+  assertPrivilegesInSpaces,
+  assertCanManageDefaultSettings,
+} from './security/assert_privileges_in_spaces';
 import { escapeSearchQueryPhrase } from './saved_object';
 import {
   deleteFleetServerHostsSecrets,
@@ -93,6 +96,26 @@ function savedObjectToFleetServerHost(
   };
 }
 
+/**
+ * Promoting a Fleet Server host to the global default re-points agent policies that inherit the
+ * default, in every space that holds a policy. Require the caller to hold Fleet privileges in all
+ * of those spaces, so a caller scoped to exactly the spaces that have policies is allowed while
+ * one missing a space with policies is blocked.
+ */
+async function assertCanManageDefaultFleetServerHost(request: KibanaRequest) {
+  const security = appContextService.getSecurity();
+  if (!security || !security.authz.mode.useRbacForRequest(request)) {
+    return;
+  }
+  const { spaceIds, truncated } = await agentPolicyService.getAllPolicySpaceIds();
+  if (truncated) {
+    throw new FleetServerHostUnauthorizedError(
+      `Unable to verify authorization to set a global default Fleet Server host: too many agent policies to enumerate`
+    );
+  }
+  await assertCanManageDefaultSettings(request, 'fleet server host', spaceIds);
+}
+
 class FleetServerHostService {
   private get soClient() {
     return appContextService.getInternalUserSOClient();
@@ -111,12 +134,19 @@ class FleetServerHostService {
       overwrite?: boolean;
       fromPreconfiguration?: boolean;
       secretHashes?: Record<string, any>;
+      request?: KibanaRequest;
     }
   ): Promise<FleetServerHost> {
     const logger = appContextService.getLogger();
     const data: FleetServerHostSOAttributes = { ...omit(fleetServerHost, ['ssl', 'secrets']) };
 
     validateFleetSavedObjectId(options?.id);
+
+    // Registering a global default Fleet Server host re-points agent policies in every space.
+    // Fleet Server hosts are space-agnostic, so require Fleet privileges in all spaces.
+    if (options?.request && !options.fromPreconfiguration && fleetServerHost.is_default) {
+      await assertCanManageDefaultFleetServerHost(options.request);
+    }
     ensureNoDuplicateSecrets(
       fleetServerHost,
       (options?.fromPreconfiguration || fleetServerHost.is_preconfigured) ?? false
@@ -407,6 +437,7 @@ class FleetServerHostService {
        * kept. Set by preconfiguration, for which the Kibana config file is authoritative.
        */
       declaresAllSecrets?: boolean;
+      request?: KibanaRequest;
     }
   ) {
     let secretsToDelete: SecretReference[] = [];
@@ -415,6 +446,32 @@ class FleetServerHostService {
     logger.debug(`Updating fleet server host ${id}`);
 
     const originalItem = await this.get(id);
+
+    // Fleet Server hosts are space-agnostic: verify cross-space authorization before mutating
+    // one that policies in other spaces rely on. Skipped for preconfiguration (kibana.yml is
+    // trusted), including the internal recursive call that unsets the previous default.
+    if (options?.request && !options.fromPreconfiguration) {
+      const security = appContextService.getSecurity();
+      if (security && security.authz.mode.useRbacForRequest(options.request)) {
+        const { spaceIds, truncated } =
+          await agentPolicyService.getSpacesForPoliciesUsingFleetServerHost(id);
+        if (truncated) {
+          throw new FleetServerHostUnauthorizedError(
+            `Unable to verify update authorization for Fleet Server host ${id}: too many agent policies to enumerate`
+          );
+        }
+        await assertPrivilegesInSpaces({
+          request: options.request,
+          spaceIds,
+          apiPrivileges: ['fleet-agent-policies-all'],
+          errorMessage: `Insufficient privileges to update Fleet Server host ${id}: it is used by agent policies in spaces you are not authorized to access`,
+        });
+        // Promoting a host to the global default affects policies across their spaces.
+        if (data.is_default && !originalItem.is_default) {
+          await assertCanManageDefaultFleetServerHost(options.request);
+        }
+      }
+    }
     ensureNoDuplicateSecrets(
       data,
       (options?.fromPreconfiguration || originalItem.is_preconfigured) ?? false

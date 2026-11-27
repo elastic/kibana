@@ -108,7 +108,7 @@ export const putFleetProxyHandler: RequestHandler<
       request.body.certificate,
       request.body.certificate_key,
     ]);
-    const item = await updateFleetProxy(soClient, proxyId, request.body);
+    const item = await updateFleetProxy(soClient, proxyId, request.body, { request });
     const body = {
       item,
     };
@@ -158,7 +158,7 @@ export const deleteFleetProxyHandler: RequestHandler<
       proxyId
     );
 
-    await deleteFleetProxy(soClient, esClient, request.params.itemId);
+    await deleteFleetProxy(soClient, esClient, request.params.itemId, { request });
 
     await bumpRelatedPolicies(soClient, esClient, fleetServerHosts, outputs, downloadSources);
 

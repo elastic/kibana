@@ -10,7 +10,10 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { FleetUnauthorizedError } from '../../errors';
 import { appContextService } from '..';
 
-import { assertPrivilegesInSpaces } from './assert_privileges_in_spaces';
+import {
+  assertPrivilegesInSpaces,
+  assertCanManageDefaultSettings,
+} from './assert_privileges_in_spaces';
 
 // Mutable stubs closed over by the mock factory so tests can override them per-test.
 const mockFns = {
@@ -217,5 +220,50 @@ describe('assertPrivilegesInSpaces', () => {
     expect(mockFns.atSpaces).toHaveBeenCalledWith(['default'], {
       kibana: ['api:integrations-all', 'api:fleet-agent-policies-all'],
     });
+  });
+});
+
+describe('assertCanManageDefaultSettings', () => {
+  it('requires fleet-agent-policies-all in exactly the spaces that hold policies', async () => {
+    await expect(
+      assertCanManageDefaultSettings(mockRequest, 'output', ['space1', 'space2'])
+    ).resolves.toBeUndefined();
+
+    // A per-space check over the affected spaces, not a blanket global grant.
+    expect(mockFns.atSpaces).toHaveBeenCalledWith(['space1', 'space2'], {
+      kibana: ['api:fleet-agent-policies-all'],
+    });
+    expect(mockFns.globally).not.toHaveBeenCalled();
+  });
+
+  it('allows a caller scoped to only the default space when that is the only policy space', async () => {
+    await expect(
+      assertCanManageDefaultSettings(mockRequest, 'output', ['default'])
+    ).resolves.toBeUndefined();
+    expect(mockFns.atSpaces).toHaveBeenCalledWith(['default'], expect.any(Object));
+  });
+
+  it('throws when the caller lacks the privilege in an affected space', async () => {
+    mockFns.atSpaces.mockResolvedValue({ hasAllRequested: false });
+
+    await expect(
+      assertCanManageDefaultSettings(mockRequest, 'fleet server host', ['default', 'space-a'])
+    ).rejects.toThrow(FleetUnauthorizedError);
+  });
+
+  it('is a no-op when no policies exist (empty affected spaces)', async () => {
+    await expect(
+      assertCanManageDefaultSettings(mockRequest, 'download source', [])
+    ).resolves.toBeUndefined();
+    expect(mockFns.atSpaces).not.toHaveBeenCalled();
+  });
+
+  it('is a no-op when RBAC is not active for the request', async () => {
+    mockFns.useRbacForRequest.mockReturnValue(false);
+
+    await expect(
+      assertCanManageDefaultSettings(mockRequest, 'download source', ['default'])
+    ).resolves.toBeUndefined();
+    expect(mockFns.atSpaces).not.toHaveBeenCalled();
   });
 });

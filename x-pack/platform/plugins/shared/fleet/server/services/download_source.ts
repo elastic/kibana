@@ -45,7 +45,10 @@ import {
 import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
 import { escapeSearchQueryPhrase } from './saved_object';
-import { assertPrivilegesInSpaces } from './security/assert_privileges_in_spaces';
+import {
+  assertPrivilegesInSpaces,
+  assertCanManageDefaultSettings,
+} from './security/assert_privileges_in_spaces';
 import { getFleetProxy } from './fleet_proxies';
 import {
   extractAndWriteDownloadSourcesSecrets,
@@ -82,6 +85,26 @@ export function savedObjectToDownloadSource(so: SavedObject<DownloadSourceSOAttr
     ...(auth ? { auth: JSON.parse(auth as string) } : {}),
     id: sourceId ?? so.id,
   };
+}
+
+/**
+ * Promoting a download source to the global default re-points agent policies that inherit the
+ * default, in every space that holds a policy. Require the caller to hold Fleet privileges in all
+ * of those spaces, so a caller scoped to exactly the spaces that have policies is allowed while
+ * one missing a space with policies is blocked.
+ */
+async function assertCanManageDefaultDownloadSource(request: KibanaRequest) {
+  const security = appContextService.getSecurity();
+  if (!security || !security.authz.mode.useRbacForRequest(request)) {
+    return;
+  }
+  const { spaceIds, truncated } = await agentPolicyService.getAllPolicySpaceIds();
+  if (truncated) {
+    throw new DownloadSourceError(
+      `Unable to verify authorization to set a global default download source: too many agent policies to enumerate`
+    );
+  }
+  await assertCanManageDefaultSettings(request, 'download source', spaceIds);
 }
 
 class DownloadSourceService {
@@ -141,12 +164,18 @@ class DownloadSourceService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     downloadSource: DownloadSourceBase,
-    options?: { id?: string; overwrite?: boolean }
+    options?: { id?: string; overwrite?: boolean; fromPreconfiguration?: boolean; request?: KibanaRequest }
   ): Promise<DownloadSource> {
     const logger = appContextService.getLogger();
     logger.debug(`Creating new download source`);
 
     validateFleetSavedObjectId(options?.id);
+
+    // Setting a global default download source re-points agent policies in every space.
+    // Download sources are space-agnostic, so require Fleet privileges in all spaces.
+    if (options?.request && !options.fromPreconfiguration && downloadSource.is_default) {
+      await assertCanManageDefaultDownloadSource(options.request);
+    }
     if (options?.id === DEFAULT_DOWNLOAD_SOURCE_REFERENCE) {
       throw new DownloadSourceError(
         `'${DEFAULT_DOWNLOAD_SOURCE_REFERENCE}' is a reserved download source ID and cannot be used.`
@@ -260,7 +289,8 @@ class DownloadSourceService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     id: string,
-    newData: Partial<DownloadSource> & { auth?: DownloadSource['auth'] | null }
+    newData: Partial<DownloadSource> & { auth?: DownloadSource['auth'] | null },
+    options?: { fromPreconfiguration?: boolean; request?: KibanaRequest }
   ) {
     let secretsToDelete: SecretReference[] = [];
 
@@ -268,6 +298,31 @@ class DownloadSourceService {
     logger.debug(`Updating download source ${id}`);
 
     const originalItem = await this.get(id);
+
+    // Download sources are space-agnostic: verify cross-space authorization before mutating one
+    // that policies in other spaces rely on. Skipped for preconfiguration (kibana.yml is trusted).
+    if (options?.request && !options.fromPreconfiguration) {
+      const security = appContextService.getSecurity();
+      if (security && security.authz.mode.useRbacForRequest(options.request)) {
+        const { spaceIds, truncated } =
+          await agentPolicyService.getSpacesForPoliciesUsingDownloadSource(id);
+        if (truncated) {
+          throw new DownloadSourceError(
+            `Unable to verify update authorization for download source ${id}: too many agent policies to enumerate`
+          );
+        }
+        await assertPrivilegesInSpaces({
+          request: options.request,
+          spaceIds,
+          apiPrivileges: ['fleet-agent-policies-all'],
+          errorMessage: `Insufficient privileges to update download source ${id}: it is used by agent policies in spaces you are not authorized to access`,
+        });
+        // Promoting a download source to the global default affects policies across their spaces.
+        if (newData.is_default && !originalItem.is_default) {
+          await assertCanManageDefaultDownloadSource(options.request);
+        }
+      }
+    }
     const updateData: Partial<DownloadSourceSOAttributes> = {
       ...omit(newData, ['ssl', 'auth', 'secrets', 'id']),
     };

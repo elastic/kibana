@@ -81,3 +81,28 @@ export async function assertPrivilegesInSpaces({
     throw new FleetUnauthorizedError(errorMessage);
   }
 }
+
+/**
+ * Setting a space-agnostic Fleet settings object (output, Fleet Server host, download source) as
+ * the global default re-points every agent policy that relies on the default. Any policy without
+ * an explicit assignment inherits the default, so the affected spaces are every space that holds
+ * an agent policy (`affectedSpaceIds`). The caller must hold the Fleet agent-policies privilege in
+ * all of them. This correctly allows a caller scoped to exactly the spaces that contain policies
+ * (e.g. only the default space, or space1 + space2 when no other spaces exist) while still blocking
+ * a caller who lacks access to a space that has policies.
+ *
+ * No-op when security is disabled, RBAC is not active for the request, or no policies exist.
+ * Throws `FleetUnauthorizedError` (→ 403) otherwise.
+ */
+export async function assertCanManageDefaultSettings(
+  request: KibanaRequest,
+  objectType: 'output' | 'fleet server host' | 'download source',
+  affectedSpaceIds: Iterable<string>
+): Promise<void> {
+  await assertPrivilegesInSpaces({
+    request,
+    spaceIds: affectedSpaceIds,
+    apiPrivileges: ['fleet-agent-policies-all'],
+    errorMessage: `Insufficient privileges to set a global default ${objectType}: it affects agent policies in spaces you are not authorized to access`,
+  });
+}

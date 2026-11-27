@@ -9,6 +9,7 @@ import type {
   SavedObjectsClientContract,
   SavedObject,
   ElasticsearchClient,
+  KibanaRequest,
 } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { omit } from 'lodash';
@@ -35,6 +36,54 @@ import { appContextService } from './app_context';
 import { fleetServerHostService } from './fleet_server_host';
 import { outputService } from './output';
 import { downloadSourceService } from './download_source';
+import { agentPolicyService } from './agent_policy';
+import { packagePolicyService } from './package_policy';
+import { assertPrivilegesInSpaces } from './security/assert_privileges_in_spaces';
+
+/**
+ * Proxies are space-agnostic and are referenced by outputs, Fleet Server hosts and download
+ * sources (themselves space-agnostic). Mutating or deleting a proxy redirects traffic for every
+ * agent policy that uses one of those objects, across every space. Fail closed unless the caller
+ * holds Fleet privileges in all of those spaces.
+ */
+async function assertProxyCrossSpacePrivileges(request: KibanaRequest, proxyId: string) {
+  const security = appContextService.getSecurity();
+  if (!security || !security.authz.mode.useRbacForRequest(request)) {
+    return;
+  }
+  const { outputs, fleetServerHosts, downloadSources } = await getFleetProxyRelatedSavedObjects(
+    proxyId
+  );
+  const results = await Promise.all([
+    ...outputs.flatMap((o) => [
+      agentPolicyService.getSpacesForPoliciesUsingOutput(o.id),
+      packagePolicyService.getSpacesForPoliciesUsingOutput(o.id),
+    ]),
+    ...fleetServerHosts.map((h) =>
+      agentPolicyService.getSpacesForPoliciesUsingFleetServerHost(h.id)
+    ),
+    ...downloadSources.map((d) =>
+      agentPolicyService.getSpacesForPoliciesUsingDownloadSource(d.id)
+    ),
+  ]);
+  if (results.some((r) => r.truncated)) {
+    throw new FleetProxyUnauthorizedError(
+      `Unable to verify authorization for proxy ${proxyId}: too many agent policies to enumerate`
+    );
+  }
+  const spaceIds = new Set<string>();
+  for (const result of results) {
+    for (const spaceId of result.spaceIds) {
+      spaceIds.add(spaceId);
+    }
+  }
+  await assertPrivilegesInSpaces({
+    request,
+    spaceIds,
+    apiPrivileges: ['fleet-agent-policies-all'],
+    errorMessage: `Insufficient privileges to modify proxy ${proxyId}: it is used by agent policies in spaces you are not authorized to access`,
+  });
+}
 
 function savedObjectToFleetProxy(so: SavedObject<FleetProxySOAttributes>): FleetProxy {
   const { proxy_headers: proxyHeaders, ...rest } = so.attributes;
@@ -139,7 +188,7 @@ export async function deleteFleetProxy(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   id: string,
-  options?: { fromPreconfiguration?: boolean }
+  options?: { fromPreconfiguration?: boolean; request?: KibanaRequest }
 ) {
   const logger = appContextService.getLogger();
   logger.debug(`Deleting fleet proxy ${id}`);
@@ -148,6 +197,10 @@ export async function deleteFleetProxy(
 
   if (fleetProxy.is_preconfigured && !options?.fromPreconfiguration) {
     throw new FleetProxyUnauthorizedError(`Cannot delete ${id} preconfigured proxy`);
+  }
+
+  if (options?.request && !options.fromPreconfiguration) {
+    await assertProxyCrossSpacePrivileges(options.request, id);
   }
   const { outputs, fleetServerHosts, downloadSources } = await getFleetProxyRelatedSavedObjects(id);
 
@@ -173,7 +226,7 @@ export async function updateFleetProxy(
   soClient: SavedObjectsClientContract,
   id: string,
   data: Partial<FleetProxy>,
-  options?: { fromPreconfiguration?: boolean }
+  options?: { fromPreconfiguration?: boolean; request?: KibanaRequest }
 ) {
   const logger = appContextService.getLogger();
   logger.debug(`Updating fleet proxy ${id}`);
@@ -181,6 +234,10 @@ export async function updateFleetProxy(
 
   if (data.is_preconfigured && !options?.fromPreconfiguration) {
     throw new FleetProxyUnauthorizedError(`Cannot update ${id} preconfigured proxy`);
+  }
+
+  if (options?.request && !options.fromPreconfiguration) {
+    await assertProxyCrossSpacePrivileges(options.request, id);
   }
 
   await soClient.update<FleetProxySOAttributes>(
