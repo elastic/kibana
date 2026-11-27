@@ -295,6 +295,30 @@ describe('Field Builder', () => {
       expect(result).toBeDefined();
       expect(result).toHaveProperty('message');
     });
+
+    it('should skip validation when shouldSkipValidation returns true for the field path', () => {
+      const shouldSkipValidation = jest.fn(() => true);
+      const field = getFieldFromSchema({
+        schema: z.string().min(1),
+        path: 'secrets.apiKey',
+        formConfig: { shouldSkipValidation },
+        meta,
+      });
+
+      expect(field.validate(createValidationArg('', 'secrets.apiKey'))).toBeUndefined();
+      expect(shouldSkipValidation).toHaveBeenCalledWith('secrets.apiKey', expect.anything());
+    });
+
+    it('should validate when shouldSkipValidation returns false', () => {
+      const field = getFieldFromSchema({
+        schema: z.string().min(1),
+        path: 'secrets.apiKey',
+        formConfig: { shouldSkipValidation: () => false },
+        meta,
+      });
+
+      expect(field.validate(createValidationArg('', 'secrets.apiKey'))).toHaveProperty('message');
+    });
   });
 
   describe('renderField', () => {

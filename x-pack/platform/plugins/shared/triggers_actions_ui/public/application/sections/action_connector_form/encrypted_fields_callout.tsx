@@ -7,6 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { isRunActionsOff } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
 import {
   FIELD_TYPES,
@@ -76,6 +77,12 @@ const EncryptedFieldsCalloutComponent: React.FC<EncryptedFieldsCalloutProps> = (
    */
   const [_] = useFormData();
   const { getFields } = useFormContext();
+
+  // Run actions off means the connector only receives events, so the secret fields stay mounted
+  // but unused. The reenter callout would ask for credentials the form is not collecting.
+  if (isRunActionsOff({ getFields })) {
+    return null;
+  }
 
   const allFields = getFields();
   const secretFields = getSecretFields(allFields);

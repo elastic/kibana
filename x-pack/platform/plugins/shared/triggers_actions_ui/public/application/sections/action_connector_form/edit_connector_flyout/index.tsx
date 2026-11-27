@@ -212,6 +212,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     isValid: undefined,
     submit: async () => ({ isValid: false, data: {} as ConnectorFormSchema }),
     preSubmitValidator: null,
+    runActionsOff: false,
   });
 
   const [selectedTab, setTab] = useState<EditConnectorTabs>(tab);
@@ -270,7 +271,9 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   });
 
   const isSpecConnector = !actionTypeRegistry.has(connector.actionTypeId);
-  const isTestable = actionTypeModel?.isTestable ?? actionTypeRegistry.has(connector.actionTypeId);
+  const isTestable =
+    (actionTypeModel?.isTestable ?? actionTypeRegistry.has(connector.actionTypeId)) &&
+    formState.runActionsOff !== true;
 
   const onIngestTokenRotated = useCallback(
     (ingestToken: string) => {

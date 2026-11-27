@@ -11,7 +11,12 @@ import { connectorsSpecs, TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { z as z4 } from '@kbn/zod/v4';
 import { ActionTypeRegistry, type ActionTypeRegistryOpts } from '../../action_type_registry';
-import { validateConfig, validateParams, validateSecrets } from '../validate_with_schema';
+import {
+  validateConfig,
+  validateConnector,
+  validateParams,
+  validateSecrets,
+} from '../validate_with_schema';
 import { createConnectorTypeFromSpec } from './create_connector_from_spec';
 import * as createConnectorNetworkSettingsModule from './create_connector_network_settings';
 import * as generateConfigSchemaModule from './generate_config_schema';
@@ -284,6 +289,91 @@ describe('createConnectorTypeFromSpec', () => {
 
     expect(connectorType.validate.config).toBeDefined();
     expect(connectorType.validate.secrets).toBeDefined();
+  });
+
+  describe('receive-only connectors', () => {
+    const authTypeId = (authType: string | { type: string }): string =>
+      typeof authType === 'string' ? authType : authType.type;
+
+    const inboundEvents: NonNullable<ConnectorSpec['events']> = {
+      definitions: {
+        received: {
+          eventId: 'test.received',
+          title: 'Received',
+          description: 'An inbound event',
+          eventSchema: z4.object({}),
+        },
+      },
+      handleEvents: async () => ({ type: 'emit', events: [] }),
+    };
+
+    it('leaves a dual spec that is not opted in without none auth or the connector validator', () => {
+      const connectorType = createConnectorTypeFromSpec(
+        createMockSpec({
+          events: inboundEvents,
+          auth: { types: ['basic'] },
+        }),
+        mockActionsPlugin
+      );
+
+      expect(connectorType.validate.connector).toBeUndefined();
+      expect(connectorType.spec?.auth?.types).toEqual(['basic']);
+      expect(() =>
+        validateConfig(
+          connectorType,
+          { selectedActions: [] },
+          { configurationUtilities: mockActionsConfigUtils }
+        )
+      ).toThrow('selectedActions must include at least one action when set.');
+    });
+
+    it('lets Datadog save with no authentication only when every action is off', () => {
+      const connectorType = createConnectorTypeFromSpec(connectorsSpecs.Datadog, mockActionsPlugin);
+
+      expect(connectorType.spec?.auth?.types?.map(authTypeId)).toEqual(['basic', 'none']);
+      expect(() =>
+        validateConfig(
+          connectorType,
+          { site: 'datadoghq.com', selectedActions: [] },
+          { configurationUtilities: mockActionsConfigUtils }
+        )
+      ).not.toThrow();
+      expect(() =>
+        validateSecrets(
+          connectorType,
+          { authType: 'none' },
+          { configurationUtilities: mockActionsConfigUtils }
+        )
+      ).not.toThrow();
+      expect(() =>
+        validateConnector(connectorType, {
+          config: { selectedActions: [] },
+          secrets: { authType: 'none' },
+        })
+      ).not.toThrow();
+      expect(() =>
+        validateConnector(connectorType, {
+          config: { selectedActions: ['listMonitors'] },
+          secrets: { authType: 'none' },
+        })
+      ).toThrow(
+        'error validating action type connector: A Datadog connector with no authentication can only receive events. Set selectedActions to an empty list, or add credentials.'
+      );
+      expect(() =>
+        validateConnector(connectorType, {
+          config: { selectedActions: ['listMonitors'] },
+          secrets: { authType: 'basic' },
+        })
+      ).not.toThrow();
+    });
+
+    it('does not append none or install the validator for Slack', () => {
+      const connectorType = createConnectorTypeFromSpec(connectorsSpecs.Slack, mockActionsPlugin);
+
+      expect(connectorType.validate.connector).toBeUndefined();
+      expect(connectorType.spec?.auth?.types?.map(authTypeId)).not.toContain('none');
+      expect(connectorType.spec).toBe(connectorsSpecs.Slack);
+    });
   });
 
   it('includes globalAuthHeaders when provided in spec', () => {

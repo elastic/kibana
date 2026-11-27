@@ -110,6 +110,21 @@ describe('generateConfigSchema', () => {
       ).toThrow('selectedActions must include at least one action when set.');
     });
 
+    it('allows an empty selectedActions array when allowNoSelectedActions is set', () => {
+      const validator = generateConfigSchema(
+        z.object({ apiUrl: z.string() }),
+        ['search', 'sendMessage'],
+        { allowNoSelectedActions: true }
+      );
+
+      expect(() =>
+        validator.customValidator!(
+          { apiUrl: 'https://example.com', selectedActions: [] },
+          validatorServices
+        )
+      ).not.toThrow();
+    });
+
     it('tolerates unknown action names (stale names after spec rename must not break execution)', () => {
       const validator = generateConfigSchema(z.object({ apiUrl: z.string() }), [
         'search',

@@ -137,6 +137,7 @@ const ConnectorAddModal = ({
     isValid: undefined,
     submit: async () => ({ isValid: false, data: {} as ConnectorFormSchema }),
     preSubmitValidator: null,
+    runActionsOff: false,
   });
 
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;

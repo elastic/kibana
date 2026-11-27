@@ -119,6 +119,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     actionTypeModelError,
     refetchConnectorSpec,
     showLoadingSpinner,
+    formState,
     setFormState,
     defaultConnector,
     isSaving,
@@ -146,7 +147,8 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
   const isUsingInitialConnector = Boolean(initialConnector);
   const hasConnectorTypeSelected = actionType != null;
-  const isTestable = isConnectorTypeTestable(actionType ?? undefined);
+  const isTestable =
+    isConnectorTypeTestable(actionType ?? undefined) && formState.runActionsOff !== true;
 
   const groupActionTypeModel: Array<ActionTypeModel & { name: string }> =
     actionTypeModel && actionTypeModel.subtype
