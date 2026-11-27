@@ -418,7 +418,7 @@ apiTest.describe('POST /api/data_views/v2 - as code', { tag: tags.deploymentAgno
   );
 
   apiTest(
-    'creates the data view only in the url space when spaces is omitted from a non-default space',
+    'creates the data view only in the current space when spaces is omitted from a non-default space',
     async ({ apiClient }) => {
       const response = await apiClient.post(`s/${spaceId}${BASE_PATH}`, {
         headers: {

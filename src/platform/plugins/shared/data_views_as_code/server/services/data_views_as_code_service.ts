@@ -189,7 +189,7 @@ export class DataViewsAsCodeService {
     const hasBodySpaces = bodySpaces && bodySpaces.length > 0;
     const spacesToUpdate = hasBodySpaces ? bodySpaces : [currentSpaceId];
 
-    // Body spaces have priority over the url space when updating.
+    // Body spaces have priority over the current space when updating.
     const spacesToAdd = spacesToUpdate.filter(
       (space) => !existingDataView.namespaces.includes(space)
     );

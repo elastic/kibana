@@ -517,7 +517,7 @@ describe('DataViewsAsCodeService', () => {
       expect(mockDataViewsService.createAndSaveDataViewLazy).not.toHaveBeenCalled();
     });
 
-    it('should accept spaces that include the url space or `*`', async () => {
+    it('should accept spaces that include the current space or `*`', async () => {
       const { service, mockDataViewsService } = createService();
       mockDataViewsService.createAndSaveDataViewLazy.mockResolvedValue(
         createMockDataViewLazy({ id: 'dv-spaces', spec: { title: 'logs-*' } })
@@ -529,7 +529,7 @@ describe('DataViewsAsCodeService', () => {
       expect(mockDataViewsService.createAndSaveDataViewLazy).toHaveBeenCalledTimes(2);
     });
 
-    it('should throw a 400 when the spaces do not include the url space', async () => {
+    it('should throw a 400 when the spaces do not include the current space', async () => {
       const { service, mockDataViewsService } = createService();
 
       await expect(
@@ -663,7 +663,7 @@ describe('DataViewsAsCodeService', () => {
         );
       });
 
-      it('falls back to the url space when spaces is not provided', async () => {
+      it('falls back to the current space when spaces is not provided', async () => {
         const { service, mockSavedObjectsClient } = setup({ namespaces: ['default', 'space-1'] });
 
         await service.upsert(id, inputSpecWithoutId, 'default');
@@ -709,7 +709,7 @@ describe('DataViewsAsCodeService', () => {
         });
       });
 
-      it('throws a 400 when the requested spaces do not include the url space', async () => {
+      it('throws a 400 when the requested spaces do not include the current space', async () => {
         const { service, mockDataViewsService, mockSavedObjectsClient } = setup({
           namespaces: ['default'],
         });
@@ -763,7 +763,7 @@ describe('DataViewsAsCodeService', () => {
       });
     });
 
-    it('should throw a 400 when creating with spaces that do not include the url space', async () => {
+    it('should throw a 400 when creating with spaces that do not include the current space', async () => {
       const { service, mockDataViewsService } = createService();
       mockDataViewsService.getDataViewLazy.mockRejectedValue(
         SavedObjectsErrorHelpers.createGenericNotFoundError()

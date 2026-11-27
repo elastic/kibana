@@ -122,7 +122,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'returns 400 when creating with spaces that do not include the url space',
+      'returns 400 when creating with spaces that do not include the current space',
       async ({ apiClient }) => {
         const response = await apiClient.put(
           `${BASE_PATH}/dv-put-without-url-space-${Date.now()}`,
@@ -178,7 +178,7 @@ apiTest.describe(
     };
 
     apiTest(
-      'without spaces in the body, updates the data view and leaves it only in the url space',
+      'without spaces in the body, updates the data view and leaves it only in the current space',
       async ({ apiClient }) => {
         const id = await createSharedDataView(apiClient, ['default', spaceId]);
         const updatedPattern = `put-spaces-updated-${Date.now()}-*`;
@@ -209,7 +209,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'without spaces in the body, updates the data view when it is already only in the url space',
+      'without spaces in the body, updates the data view when it is already only in the current space',
       async ({ apiClient }) => {
         const id = await createSharedDataView(apiClient, ['default']);
         const updatedPattern = `put-spaces-same-${Date.now()}-*`;
@@ -270,7 +270,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'without spaces in the body, creates the data view only in the url space of a non-default space',
+      'without spaces in the body, creates the data view only in the current space of a non-default space',
       async ({ apiClient }) => {
         const id = `dv-put-named-space-${Date.now()}-${Math.random()}`;
         // Tracked before asserting, so a regression that saves it in `default` doesn't leak it.
@@ -301,7 +301,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'without spaces in the body, updates the data view leaving it only in the url space of a non-default space',
+      'without spaces in the body, updates the data view leaving it only in the current space of a non-default space',
       async ({ apiClient }) => {
         const id = await createSharedDataView(apiClient, ['default', spaceId]);
 
@@ -390,7 +390,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'with spaces in the body that do not include the url space, returns 400 and does not update the data view',
+      'with spaces in the body that do not include the current space, returns 400 and does not update the data view',
       async ({ apiClient }) => {
         const id = await createSharedDataView(apiClient, ['default', spaceId]);
         const originalPattern = (
@@ -403,7 +403,7 @@ apiTest.describe(
           })
         ).body.data.index_pattern;
 
-        // Sent from the named space, so the url space is `spaceId` and `default` is not enough.
+        // Sent from the named space, so the current space is `spaceId` and `default` is not enough.
         const response = await apiClient.put(`s/${spaceId}${BASE_PATH}/${id}`, {
           headers: {
             ...COMMON_HEADERS,
