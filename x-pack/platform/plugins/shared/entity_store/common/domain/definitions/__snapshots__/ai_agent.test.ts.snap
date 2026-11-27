@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[
+  `ai_agent entity definition filters descendants out in ES|QL, keeping events without the flag 1`
+] = `"TO_STRING(process.ai_agent.name) IS NOT NULL AND TO_STRING(process.ai_agent.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND (TO_STRING(process.ai_agent.is_descendant) IS NULL OR TO_STRING(process.ai_agent.is_descendant) == \\"false\\")"`;

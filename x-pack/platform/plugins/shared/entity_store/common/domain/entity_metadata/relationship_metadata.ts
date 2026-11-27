@@ -14,7 +14,9 @@ export const RELATIONSHIP_KINDS = [
   'administers',
   'depends_on',
   'owns',
+  'owns_inferred',
   'supervises',
+  'acts_on_behalf_of',
 ] as const;
 
 export type RelationshipKind = (typeof RELATIONSHIP_KINDS)[number];

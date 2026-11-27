@@ -13,7 +13,7 @@ import { resetToZero } from './reset_to_zero';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
 import { persistRiskScoresToEntityStore } from '../../persist_risk_scores_to_entity_store';
 import type { WatchlistObject } from '../../../../../../common/api/entity_analytics/watchlists/management/common.gen';
-import type { RiskEngineDataWriter } from '../../risk_engine_data_writer';
+import { RiskEngineDataWriter } from '../../risk_engine_data_writer';
 
 jest.mock('../../persist_risk_scores_to_entity_store');
 
@@ -248,6 +248,54 @@ describe('resetToZero (maintainer)', () => {
         }),
       ],
     });
+  });
+
+  it('resets ai_agent scores read from ai_agent.risk and writes them to the risk index', async () => {
+    const agentId = 'ai_agent:test-agent@host-a@alice';
+    (esClient.esql.query as jest.Mock)
+      .mockResolvedValueOnce({ values: [[agentId, null]] })
+      .mockResolvedValueOnce({ values: [] });
+    (esClient.bulk as jest.Mock).mockResolvedValue({
+      took: 1,
+      errors: false,
+      items: [{ create: { status: 201 } }],
+    });
+    const realWriter = new RiskEngineDataWriter({
+      esClient,
+      logger,
+      index: 'risk-score.risk-score-default',
+      namespace: 'default',
+    });
+
+    const result = await resetToZero({
+      esClient,
+      writer: realWriter,
+      spaceId: 'default',
+      entityType: EntityType.ai_agent,
+      logger,
+      crudClient,
+      calculationRunId: 'run-id-1',
+      now,
+      watchlistConfigs: emptyWatchlistConfigs,
+    });
+
+    const query = (esClient.esql.query as jest.Mock).mock.calls[0][0].query as string;
+    expect(query).toContain('TO_STRING(ai_agent.risk.id_value)');
+    expect(query).toContain('TO_DOUBLE(ai_agent.risk.calculated_score_norm)');
+    expect(result.scoresWrittenRiskIndex).toEqual(1);
+    const [{ operations }] = (esClient.bulk as jest.Mock).mock.lastCall;
+    expect(operations[1]).toEqual(
+      expect.objectContaining({
+        ai_agent: {
+          name: agentId,
+          risk: expect.objectContaining({
+            id_value: agentId,
+            calculated_score: 0,
+            calculated_score_norm: 0,
+          }),
+        },
+      })
+    );
   });
 
   it('proceeds with empty entity map when entity fetch fails', async () => {

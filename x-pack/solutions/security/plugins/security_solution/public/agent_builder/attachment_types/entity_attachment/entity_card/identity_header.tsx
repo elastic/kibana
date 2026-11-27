@@ -33,6 +33,10 @@ const ENTITY_TYPE_LABEL: Record<EntityType, string> = {
     'xpack.securitySolution.agentBuilder.entityAttachment.entityType.generic',
     { defaultMessage: 'Entity' }
   ),
+  [EntityType.ai_agent]: i18n.translate(
+    'xpack.securitySolution.agentBuilder.entityAttachment.entityType.aiAgent',
+    { defaultMessage: 'AI agent' }
+  ),
 };
 
 interface IdentityHeaderProps {

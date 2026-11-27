@@ -20,17 +20,18 @@ import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import { getRiskIndex } from '../../../../common/search_strategy/security_solution/risk_score/common';
 import { securityTool } from '../constants';
 import { getAlertsById } from '../get_alerts_by_id';
+import { ENTITY_IDENTIFIER_TYPES, normalizeEntityId } from './entity_resolution';
 
 const entityRiskScoreSchema = lazySchema(() =>
   z.object({
     identifierType: z
-      .enum(['host', 'user', 'service', 'generic'])
-      .describe('The type of entity: host, user, service, or generic'),
+      .enum(ENTITY_IDENTIFIER_TYPES)
+      .describe('The type of entity: host, user, service, generic, or ai_agent'),
     identifier: z
       .string()
       .min(1)
       .describe(
-        'The value that identifies the entity (e.g., hostname, username). Use "*" to get all entities of the specified type, sorted by risk score (highest first).'
+        'The value that identifies the entity (e.g., hostname, username). For ai_agent, the entity id (`ai_agent:<product>@<host.id>@<user.name>`). Use "*" to get all entities of the specified type, sorted by risk score (highest first).'
       ),
     limit: z
       .number()
@@ -98,7 +99,7 @@ export const entityRiskScoreTool = (
   return {
     id: SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
     type: ToolType.builtin,
-    description: `Call this tool to get the latest entity risk score and the inputs that contributed to the calculation for a specific entity (host, user, service, or generic). Use identifier "*" to get all entities of the specified type sorted by risk score. IMPORTANT: Always use 'calculated_score_norm' (0-100) when reporting risk scores, NOT 'calculated_score' which is a raw value. The 'calculated_score_norm' field is the normalized score suitable for comparison between entities. The 'modifiers' array contains risk adjustments such as asset criticality and privileged user monitoring (watchlist/privmon type).`,
+    description: `Call this tool to get the latest entity risk score and the inputs that contributed to the calculation for a specific entity (host, user, service, generic, or ai_agent). Use identifier "*" to get all entities of the specified type sorted by risk score. IMPORTANT: Always use 'calculated_score_norm' (0-100) when reporting risk scores, NOT 'calculated_score' which is a raw value. The 'calculated_score_norm' field is the normalized score suitable for comparison between entities. The 'modifiers' array contains risk adjustments such as asset criticality and privileged user monitoring (watchlist/privmon type).`,
     schema: entityRiskScoreSchema,
     availability: {
       cacheMode: 'space',
@@ -218,7 +219,11 @@ export const entityRiskScoreTool = (
 
         riskScores = await getRiskScore({
           entityType,
-          entityIdentifier: identifier,
+          // Agent scores are keyed on the full entity id, which composes three fields.
+          entityIdentifier:
+            identifierType === 'ai_agent'
+              ? normalizeEntityId(identifier, identifierType)
+              : identifier,
           pagination: { querySize: 1, cursorStart: 0 },
         });
 

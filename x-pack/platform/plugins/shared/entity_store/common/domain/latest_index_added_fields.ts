@@ -14,7 +14,18 @@
  * Add the field here when you bump the version for it; the extraction query and the entities grid
  * both read this list. Delete an entry once every install is past its version.
  */
-export const LATEST_INDEX_ADDED_FIELDS = [{ field: 'user.entity.id', version: 1 }] as const;
+export const LATEST_INDEX_ADDED_FIELDS = [
+  { field: 'user.entity.id', version: 1 },
+  { field: 'entity.relationships.acts_on_behalf_of.ids', version: 2 },
+  { field: 'entity.relationships.acts_on_behalf_of.raw_identifiers.host.id', version: 2 },
+  { field: 'entity.relationships.acts_on_behalf_of.raw_identifiers.host.name', version: 2 },
+  { field: 'entity.relationships.acts_on_behalf_of.raw_identifiers.service.name', version: 2 },
+  { field: 'entity.relationships.acts_on_behalf_of.raw_identifiers.user.email', version: 2 },
+  { field: 'entity.relationships.acts_on_behalf_of.raw_identifiers.user.id', version: 2 },
+  { field: 'entity.relationships.acts_on_behalf_of.raw_identifiers.user.name', version: 2 },
+  { field: 'process.ai_agent.name', version: 2 },
+  { field: 'process.executable', version: 2 },
+] as const;
 
 /**
  * The `| EVAL <field> = TO_STRING(null)` steps to put before a `LOOKUP JOIN` on the latest index,

@@ -49,7 +49,9 @@ const RELATIONSHIP_METADATA_FIELD_PATHS = [
   'entity.relationships.administers.target',
   'entity.relationships.depends_on.target',
   'entity.relationships.owns.target',
+  'entity.relationships.owns_inferred.target',
   'entity.relationships.supervises.target',
+  'entity.relationships.acts_on_behalf_of.target',
 ] as const satisfies ReadonlyArray<keyof RelationshipMetadataDoc>;
 
 // True iff A and B are mutually assignable. Used to enforce exhaustiveness

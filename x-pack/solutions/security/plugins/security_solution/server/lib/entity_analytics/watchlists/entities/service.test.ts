@@ -52,11 +52,48 @@ describe('Watchlist entities service', () => {
         user: ['user:jdoe'],
         host: ['host:server-1'],
         service: ['service:api'],
+        ai_agent: [],
         generic: [],
       },
     });
 
     expect(esClient.search).toHaveBeenCalledTimes(1);
+  });
+
+  it('turns a store rule with a leading wildcard into a query_string clause Elasticsearch accepts', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as never);
+    const service = createWatchlistEntitiesService({ esClient, namespace: 'default' });
+    const emailField = 'entity.relationships.acts_on_behalf_of.raw_identifiers.user.email';
+    const queryRule = `entity.EngineMetadata.Type: "ai_agent" and ${emailField}: * and not ${emailField}: *@example.com`;
+
+    await service.listEntityStoreEntities({ type: 'store', queryRule }).next();
+
+    const [{ query }] = esClient.search.mock.calls[0] as [{ query: unknown }];
+    expect(query).toEqual({
+      bool: {
+        filter: [
+          {
+            bool: {
+              should: [{ match_phrase: { 'entity.EngineMetadata.Type': 'ai_agent' } }],
+              minimum_should_match: 1,
+            },
+          },
+          { bool: { should: [{ exists: { field: emailField } }], minimum_should_match: 1 } },
+          {
+            bool: {
+              must_not: {
+                bool: {
+                  // `allow_leading_wildcard` is left unset, so Elasticsearch applies its default (true).
+                  should: [{ query_string: { fields: [emailField], query: '*@example.com' } }],
+                  minimum_should_match: 1,
+                },
+              },
+            },
+          },
+        ],
+      },
+    });
   });
 
   it('yields multiple pages and uses search_after between them', async () => {

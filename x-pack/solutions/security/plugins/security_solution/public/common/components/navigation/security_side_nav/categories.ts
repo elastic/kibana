@@ -43,6 +43,7 @@ export const getNavCategories = (
       type: LinkCategoryType.separator,
       linkIds: [
         SecurityPageName.entityAnalyticsHomePage,
+        SecurityPageName.entityAnalyticsAiSecurity,
         SecurityPageName.exploreLanding,
         SecurityPageName.timelines,
         SecurityPageName.threatIntelligence,

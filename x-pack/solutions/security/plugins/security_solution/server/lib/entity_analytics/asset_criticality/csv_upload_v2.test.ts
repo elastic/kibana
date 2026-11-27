@@ -101,7 +101,7 @@ describe('csvUploadV2', () => {
         expect(result.total).toBe(1);
         expect(result.items[0]).toEqual({
           error:
-            'Error processing row: Invalid entity type: "invalid_type". Must be one of: user, host, service, generic',
+            'Error processing row: Invalid entity type: "invalid_type". Must be one of: user, host, service, generic, ai_agent',
           matchedEntities: 0,
           status: 'failure',
         });

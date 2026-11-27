@@ -36,8 +36,9 @@ export type TileCountIssue =
 /** Why a tile's change can't be shown even though history exists: the history check or the previous-period query failed. */
 export type TileDeltaFailure = 'history' | 'delta';
 
-export interface SignalCardData {
-  id: SignalCardId;
+/** A tile's display data. `Id` defaults to the home page tiles, other pages pass their own ids. */
+export interface SignalCardData<Id extends string = SignalCardId> {
+  id: Id;
   title: string;
   value: number;
   isLoading?: boolean;

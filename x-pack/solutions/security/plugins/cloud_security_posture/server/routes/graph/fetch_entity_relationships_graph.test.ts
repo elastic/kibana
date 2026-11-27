@@ -352,6 +352,40 @@ describe('fetchEntityRelationships', () => {
       // Verify sourceFields are included in actor doc data
       expect(query).toContain('sourceFields');
     });
+
+    it('draws acts_on_behalf_of edges and keeps AI agent actors typed', async () => {
+      const toRecordsMock = jest.fn().mockResolvedValue({ records: [] });
+      esClient.asCurrentUser.helpers.esql.mockReturnValue({
+        toRecords: toRecordsMock,
+        toArrowTable: jest.fn(),
+        toArrowReader: jest.fn(),
+      });
+      const agentId = 'ai_agent:claude_code@host-1@ec2-user';
+
+      await fetchEntityRelationships({
+        esClient,
+        logger,
+        entityIds: [{ id: agentId, isOrigin: true }],
+        entityStoreIndexName: '.entities.v2.latest.default-00001',
+      });
+
+      const calls = esClient.asCurrentUser.helpers.esql.mock.calls;
+      const queries = calls.map(([args]) => args.query ?? '');
+      expect(queries.some((q) => q.includes('`entity.relationships.acts_on_behalf_of.ids`'))).toBe(
+        true
+      );
+      // The agent's identity fields are emitted for ai_agent EUIDs, and the generic bucket
+      // excludes them.
+      expect(queries[0]).toContain('STARTS_WITH(entity.id, "ai_agent:") AND process.ai_agent.name');
+      expect(queries[0]).toContain('NOT STARTS_WITH(entity.id, "ai_agent:")');
+      expect(calls[0][0].filter).toMatchObject({
+        bool: {
+          should: expect.arrayContaining([
+            { terms: { 'entity.relationships.acts_on_behalf_of.ids': [agentId] } },
+          ]),
+        },
+      });
+    });
   });
 });
 

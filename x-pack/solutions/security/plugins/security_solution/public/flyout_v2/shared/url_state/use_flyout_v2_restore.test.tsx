@@ -1079,6 +1079,36 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     );
   });
 
+  it('reopens the originating AI agent from a restored ai_agent risk inputs tool', () => {
+    const agentId = 'ai_agent:claude_code@host-1@ec2-user';
+    renderRestore(
+      buildUrl([
+        {
+          kind: 'entityRiskInputs',
+          entityType: 'ai_agent',
+          entityName: 'agent-1',
+          entityId: agentId,
+          scopeId: 'scope-1',
+        },
+      ])
+    );
+    act(() => {
+      jest.runAllTimers();
+    });
+    const { entityType, onShowEntity } = mockFlyoutApi.openEntityRiskInputs.mock.calls[0][0];
+    expect(entityType).toBe('ai_agent');
+    act(() => {
+      onShowEntity?.();
+    });
+    expect(mockFlyoutApi.openAiAgentFlyoutAsChild).toHaveBeenCalledWith({
+      entityId: agentId,
+      entityName: 'agent-1',
+      scopeId: 'scope-1',
+      title: 'agent-1',
+    });
+    expect(mockFlyoutApi.openGenericEntityFlyoutAsChild).not.toHaveBeenCalled();
+  });
+
   it('reopens the originating user for a user-scoped tool header callback', () => {
     renderRestore(
       buildUrl([

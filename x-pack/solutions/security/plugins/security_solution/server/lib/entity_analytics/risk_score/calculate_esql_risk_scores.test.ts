@@ -372,7 +372,7 @@ describe('Calculate risk scores with ESQL', () => {
     });
 
     describe('storedEuidCoalesceClause', () => {
-      it('emits the coalesce clause in getBaseScoreESQL for host, scanning all three array positions', () => {
+      it('emits the coalesce clause in getBaseScoreESQL for host, scanning one array position per stamped type', () => {
         const query = getBaseScoreESQL(
           EntityType.host,
           { lower: 'host:a', upper: 'host:z' },
@@ -382,10 +382,74 @@ describe('Calculate risk scores with ESQL', () => {
         );
 
         expect(query).toContain(
-          'EVAL entity_id = CASE(STARTS_WITH(MV_FIRST(MV_SLICE(kibana.alert.entity.id, 0, 0)), "host:")'
+          'EVAL stamped_entity_id = CASE(STARTS_WITH(MV_FIRST(MV_SLICE(kibana.alert.entity.id, 0, 0)), "host:")'
         );
         expect(query).toContain('MV_SLICE(kibana.alert.entity.id, 1, 1)');
         expect(query).toContain('MV_SLICE(kibana.alert.entity.id, 2, 2)');
+        expect(query).toContain('MV_SLICE(kibana.alert.entity.id, 3, 3)');
+        expect(query).toContain('EVAL entity_id = COALESCE(stamped_entity_id, entity_id)');
+      });
+
+      it.each([EntityType.host, EntityType.user, EntityType.service])(
+        'requires the documents filter for %s alerts, stamped or not',
+        (entityType) => {
+          const query = getBaseScoreESQL(
+            entityType,
+            { lower: `${entityType}:a`, upper: `${entityType}:z` },
+            10000,
+            3500,
+            '.alerts-security.alerts-default'
+          );
+
+          expect(query).not.toContain('stamped_entity_id IS NOT NULL');
+          expect(query).toMatch(/WHERE kibana\.alert\.risk_score IS NOT NULL AND \(/);
+          expect(query.indexOf('kibana.alert.risk_score IS NOT NULL AND')).toBeLessThan(
+            query.indexOf('EVAL stamped_entity_id')
+          );
+        }
+      );
+
+      it('requires the documents filter for resolution scoring of non-agent types', () => {
+        const query = getResolutionScoreESQLByIds(
+          EntityType.user,
+          ['user:target'],
+          5000,
+          1000,
+          '.alerts-security.alerts-default',
+          '.entity_analytics.risk_score.lookup-default'
+        );
+
+        expect(query).not.toContain('stamped_entity_id IS NOT NULL');
+        expect(query).toMatch(/WHERE kibana\.alert\.risk_score IS NOT NULL AND \(/);
+      });
+
+      it('keeps agent alerts stamped for the type even when the documents filter rejects them', () => {
+        // Agent descendants are stamped with their agent, but the agent documents filter rejects
+        // descendants and the alerts index doesn't map the agent fields.
+        const query = getBaseScoreESQL(
+          EntityType.ai_agent,
+          { lower: 'ai_agent:a', upper: 'ai_agent:z' },
+          10000,
+          3500,
+          '.alerts-security.alerts-default'
+        );
+
+        expect(query).toContain(
+          'STARTS_WITH(MV_FIRST(MV_SLICE(kibana.alert.entity.id, 0, 0)), "ai_agent:")'
+        );
+        expect(query).toMatch(/WHERE stamped_entity_id IS NOT NULL OR \(/);
+        expect(query.indexOf('stamped_entity_id IS NOT NULL')).toBeLessThan(
+          query.indexOf('COALESCE(stamped_entity_id, entity_id)')
+        );
+      });
+
+      it('reads the agent stamp first when paging by derived EUIDs', () => {
+        const { script } = buildEuidRuntimeMappingWithStoredFieldFastPath(EntityType.ai_agent);
+
+        expect(script.source).toContain("__id.startsWith('ai_agent:')");
+        expect(script.source.indexOf("__id.startsWith('ai_agent:')")).toBeLessThan(
+          script.source.indexOf('___euid_rt_eval(doc); if')
+        );
       });
 
       it('emits the coalesce clause in getBaseScoreESQL for user', () => {

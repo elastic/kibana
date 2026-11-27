@@ -9,6 +9,7 @@ import type { AssetCriticalityLevel } from '@kbn/entity-store/common';
 import type { RiskScoreModifierEntity } from '../maintainer/steps/pipeline_types';
 
 import type { WatchlistObject } from '../../../../../common/api/entity_analytics/watchlists/management/common.gen';
+import { EntityType } from '../../../../../common/entity_analytics/types';
 import type { ParsedRiskScore } from '../maintainer/steps/parse_esql_row';
 import {
   extractModifiersFromEntity,
@@ -270,6 +271,39 @@ describe('applyScoreModifiersFromEntities', () => {
     expect(doc.calculated_score_norm).toBeGreaterThan(75);
     expect(doc.criticality_level).toBe('extreme_impact');
     expect(doc.criticality_modifier).toBe(2.0);
+  });
+
+  it("applies an ai_agent row's own watchlist modifier, raising it above an unlisted entity with the same alerts", () => {
+    const agentId = 'ai_agent:claude_code@host-1@ec2-user';
+    const localUserId = 'user:ec2-user@host-1@local';
+    const watchlistConfigs = buildWatchlistConfigs({
+      id: 'agents-for-departing',
+      name: 'Agents acting for departing employees',
+      riskModifier: 1.5,
+    });
+    const entities = new Map([
+      [agentId, buildTestEntity({ id: agentId, watchlists: ['agents-for-departing'] })],
+      [localUserId, buildTestEntity({ id: localUserId })],
+    ]);
+
+    const [agentDoc, localUserDoc] = applyScoreModifiersFromEntities({
+      now,
+      identifierType: EntityType.ai_agent,
+      page: { scores: [buildScore(agentId), buildScore(localUserId)], identifierField },
+      entities,
+      watchlistConfigs,
+    });
+
+    expect(agentDoc.modifiers).toEqual([
+      expect.objectContaining({
+        type: 'watchlist',
+        subtype: 'Agents acting for departing employees',
+        modifier_value: 1.5,
+        metadata: { watchlist_id: 'agents-for-departing' },
+      }),
+    ]);
+    expect(localUserDoc.modifiers).toEqual([]);
+    expect(agentDoc.calculated_score_norm).toBeGreaterThan(localUserDoc.calculated_score_norm);
   });
 
   it('keeps a saturated score at 100 and Critical, with and without modifiers', () => {

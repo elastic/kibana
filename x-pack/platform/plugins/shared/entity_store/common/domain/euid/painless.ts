@@ -455,13 +455,15 @@ export function conditionToPainless(
     }
     const nonEmpty = expressions.isNotEmpty(field);
     const valueExpr = expressions.value(field);
+    // Compared as strings, as ES|QL (TO_STRING) and the in-memory path do, so a boolean or numeric
+    // field can match a condition value.
     if ('eq' in c && c.eq !== undefined) {
       const val = escapePainlessString(String(c.eq));
-      return `(${nonEmpty} && ${valueExpr} == "${val}")`;
+      return `(${nonEmpty} && String.valueOf(${valueExpr}) == "${val}")`;
     }
     if ('neq' in c && c.neq !== undefined) {
       const val = escapePainlessString(String(c.neq));
-      return `(!(${nonEmpty}) || ${valueExpr} != "${val}")`;
+      return `(!(${nonEmpty}) || String.valueOf(${valueExpr}) != "${val}")`;
     }
     if ('exists' in c) {
       return c.exists ? nonEmpty : `!(${nonEmpty})`;

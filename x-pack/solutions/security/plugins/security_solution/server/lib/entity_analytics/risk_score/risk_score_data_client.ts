@@ -443,6 +443,7 @@ interface RiskScoreTimeSeriesSource {
   readonly host?: { readonly risk: RiskScoreTimeSeriesRisk };
   readonly user?: { readonly risk: RiskScoreTimeSeriesRisk };
   readonly service?: { readonly risk: RiskScoreTimeSeriesRisk };
+  readonly ai_agent?: { readonly risk: RiskScoreTimeSeriesRisk };
 }
 
 // ES only accepts calendar units (`1w`, `1M`, `1q`, `1y`) with a value of 1 and
@@ -478,6 +479,9 @@ const getRiskFromSource = (
   }
   if (entityType === 'service') {
     return source.service?.risk;
+  }
+  if (entityType === 'ai_agent') {
+    return source.ai_agent?.risk;
   }
   return undefined;
 };

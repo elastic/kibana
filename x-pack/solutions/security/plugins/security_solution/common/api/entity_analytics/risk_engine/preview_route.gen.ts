@@ -158,6 +158,13 @@ export const RiskScoresPreviewResponse = lazySchema(() =>
         .array(EntityRiskScoreRecord)
         .optional()
         .describe('A list of generic entities risk scores'),
+      /**
+       * A list of AI agent risk scores
+       */
+      ai_agent: z
+        .array(EntityRiskScoreRecord)
+        .optional()
+        .describe('A list of AI agent risk scores'),
     }),
   })
 );

@@ -15,7 +15,6 @@ import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
 import { INDEX_PATTERN_REGEX } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import type { ProjectRouting } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 
-import { ALL_ENTITY_TYPES } from '@kbn/entity-store/common';
 import {
   getEuidEsqlEvaluation,
   getFieldEvaluationsEsql,
@@ -35,6 +34,7 @@ import {
   GRAPH_ACTOR_EUID_SOURCE_FIELDS,
   GRAPH_TARGET_EUID_SOURCE_FIELDS,
   TYPED_ENTITY_PREFIXES,
+  EVENT_TYPED_ENTITY_TYPES,
 } from './constants';
 import { getTargetEuidEsqlEvaluation } from './target_euid';
 import { SECURITY_ALERTS_PARTIAL_IDENTIFIER } from '../../../common/constants';
@@ -195,12 +195,12 @@ const buildDslFilter = (
  * these fields are unmapped. Unconditional: EUID resolution always runs.
  */
 const buildEuidSourceFieldCasts = (): string => {
-  const actorFields = (TYPED_ENTITY_PREFIXES as readonly string[])
-    .flatMap((prefix) => GRAPH_ACTOR_EUID_SOURCE_FIELDS[prefix as keyof EuidSourceFields])
-    .filter((f) => !f.startsWith('event.') && !f.startsWith('data_stream.'));
-  const targetFields = (TYPED_ENTITY_PREFIXES as readonly string[])
-    .flatMap((prefix) => GRAPH_TARGET_EUID_SOURCE_FIELDS[prefix as keyof EuidSourceFields])
-    .filter((f) => !f.startsWith('event.') && !f.startsWith('data_stream.'));
+  const actorFields = EVENT_TYPED_ENTITY_TYPES.flatMap(
+    (type) => GRAPH_ACTOR_EUID_SOURCE_FIELDS[type]
+  ).filter((f) => !f.startsWith('event.') && !f.startsWith('data_stream.'));
+  const targetFields = EVENT_TYPED_ENTITY_TYPES.flatMap(
+    (type) => GRAPH_TARGET_EUID_SOURCE_FIELDS[type]
+  ).filter((f) => !f.startsWith('event.') && !f.startsWith('data_stream.'));
   const uniqueFields = [...new Set([...actorFields, ...targetFields])];
   return uniqueFields.map((f) => `| EVAL \`${f}\` = TO_STRING(\`${f}\`)`).join('\n');
 };
@@ -224,10 +224,9 @@ const buildV2ActorResolution = (): string => {
   // MV_EXPAND typed actor source fields so EUID CONCAT receives single values.
   // entity.id is excluded: its EUID is the raw value (no CONCAT),
   // and multi-value is handled by the downstream MV_EXPAND actorEntityId.
-  const typedActorFields = Object.keys(GRAPH_ACTOR_EUID_SOURCE_FIELDS)
-    .filter((f) => (TYPED_ENTITY_PREFIXES as readonly string[]).includes(f))
-    .map((f) => GRAPH_ACTOR_EUID_SOURCE_FIELDS[f as keyof EuidSourceFields])
-    .flat();
+  const typedActorFields = EVENT_TYPED_ENTITY_TYPES.flatMap(
+    (type) => GRAPH_ACTOR_EUID_SOURCE_FIELDS[type]
+  );
   const mvExpandStatements = typedActorFields
     .filter((f) => !f.startsWith('event.') && !f.startsWith('data_stream.'))
     .map((field) => `| MV_EXPAND \`${field}\``)
@@ -238,19 +237,20 @@ const buildV2ActorResolution = (): string => {
   const userFieldEvaluationsEsql = getFieldEvaluationsEsql(getBuiltInEntityDefinition('user'));
 
   // Compute EUIDs for typed entity types (excludes generic — falls back to entity.id)
-  const typedEntityTypes = ALL_ENTITY_TYPES.filter((t) => t !== 'generic');
-
   const evalParts: string[] = [];
   if (userFieldEvaluationsEsql) {
     evalParts.push(userFieldEvaluationsEsql);
   }
-  typedEntityTypes.forEach((type) => {
+  EVENT_TYPED_ENTITY_TYPES.forEach((type) => {
     evalParts.push(getEuidEsqlEvaluation(getBuiltInEntityDefinition(type), `_actor_${type}_euid`));
   });
 
   // Use raw entity.id directly (not saved variable) since buildSaveSourceFieldsEsql
   // runs after resolution. entity.id is still the original value at this point.
-  const coalesceArgs = [...typedEntityTypes.map((type) => `_actor_${type}_euid`), '`entity.id`'];
+  const coalesceArgs = [
+    ...EVENT_TYPED_ENTITY_TYPES.map((type) => `_actor_${type}_euid`),
+    '`entity.id`',
+  ];
 
   return `${mvExpandStatements}
 | EVAL ${evalParts.join(',\n  ')}
@@ -274,22 +274,22 @@ const buildV2TargetResolution = (): string => {
   // MV_EXPAND typed target source fields so EUID CONCAT receives single values.
   // entity.target.id is excluded: its EUID is the raw value (no CONCAT),
   // and multi-value is handled by the downstream MV_EXPAND targetEntityId.
-  const typedTargetFields = Object.keys(GRAPH_TARGET_EUID_SOURCE_FIELDS)
-    .filter((f) => (TYPED_ENTITY_PREFIXES as readonly string[]).includes(f))
-    .map((f) => GRAPH_TARGET_EUID_SOURCE_FIELDS[f as keyof EuidSourceFields])
-    .flat();
+  const typedTargetFields = EVENT_TYPED_ENTITY_TYPES.flatMap(
+    (type) => GRAPH_TARGET_EUID_SOURCE_FIELDS[type]
+  );
   const mvExpandStatements = typedTargetFields
     .filter((f) => !f.startsWith('event.') && !f.startsWith('data_stream.'))
     .map((field) => `| MV_EXPAND \`${field}\``)
     .join('\n');
 
-  const targetEvalParts = ALL_ENTITY_TYPES.map((type) =>
+  const targetEntityTypes = [...EVENT_TYPED_ENTITY_TYPES, 'generic'] as const;
+  const targetEvalParts = targetEntityTypes.map((type) =>
     getTargetEuidEsqlEvaluation(type, `_target_${type}_euid`)
   );
 
   const appendStatements = [
     '| EVAL targetEntityId = TO_STRING(null)',
-    ...ALL_ENTITY_TYPES.map(
+    ...targetEntityTypes.map(
       (type) => `| EVAL targetEntityId = CASE(
     _target_${type}_euid IS NULL,
     targetEntityId,
@@ -356,7 +356,9 @@ const buildSaveSourceFieldsEsql = (): string => {
  * Uses REPLACE to fix null properties.
  */
 const buildSourceFieldsJson = (fields: EuidSourceFields, euidColumn: string): string => {
+  const sourceFieldTypes: readonly string[] = ['all', 'generic', ...EVENT_TYPED_ENTITY_TYPES];
   const properties = Object.keys(fields)
+    .filter((type) => sourceFieldTypes.includes(type))
     .map((type) => {
       if (type === 'all') {
         return fields[type as keyof EuidSourceFields].map((field) => {

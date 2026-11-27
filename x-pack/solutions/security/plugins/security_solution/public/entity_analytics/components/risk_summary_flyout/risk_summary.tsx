@@ -62,7 +62,8 @@ const RESOLUTION_RISK_SCORE_QUERY_ID_PREFIX = 'riskSummaryResolutionRiskScoreQue
 
 const entityCaseAttachmentLabel = (entityType: EntityType, entityName?: string) =>
   i18n.translate('xpack.securitySolution.flyout.entityDetails.riskSummary.casesAttachmentLabel', {
-    defaultMessage: 'Risk score for {entityType, select, user {user} other {host}} {entityName}',
+    defaultMessage:
+      'Risk score for {entityType, select, user {user} ai_agent {AI agent} other {host}} {entityName}',
     values: {
       entityName,
       entityType,
@@ -74,13 +75,23 @@ const resolutionCaseAttachmentLabel = (entityType: EntityType, entityName?: stri
     'xpack.securitySolution.flyout.entityDetails.resolutionRiskSummary.casesAttachmentLabel',
     {
       defaultMessage:
-        'Resolution group risk score for {entityType, select, user {user} other {host}} {entityName}',
+        'Resolution group risk score for {entityType, select, user {user} ai_agent {AI agent} other {host}} {entityName}',
       values: {
         entityName,
         entityType,
       },
     }
   );
+
+const aiAgentCaptionLabel = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.riskSummary.aiAgentCaptionLabel',
+  {
+    defaultMessage: 'AI agent',
+  }
+);
+
+const getCaptionEntityLabel = (entityType: EntityType): string =>
+  entityType === 'ai_agent' ? aiAgentCaptionLabel : capitalize(entityType);
 export interface RiskSummaryProps<T extends EntityType> {
   /**
    * General risk score source. In V1 this is name-filtered records from the
@@ -188,19 +199,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
   );
 
   const casesAttachmentMetadata = useMemo(
-    () => ({
-      description: i18n.translate(
-        'xpack.securitySolution.flyout.entityDetails.riskSummary.casesAttachmentLabel',
-        {
-          defaultMessage:
-            'Risk score for {entityType, select, user {user} other {host}} {entityName}',
-          values: {
-            entityName: entityData?.name,
-            entityType,
-          },
-        }
-      ),
-    }),
+    () => ({ description: entityCaseAttachmentLabel(entityType, entityData?.name) }),
     [entityData?.name, entityType]
   );
 
@@ -349,14 +348,14 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
     'xpack.securitySolution.flyout.entityDetails.riskSummaryTableCaption',
     {
       defaultMessage: 'Risk summary for {entity}',
-      values: { entity: capitalize(entityType) },
+      values: { entity: getCaptionEntityLabel(entityType) },
     }
   );
   const resolutionTableCaption = i18n.translate(
     'xpack.securitySolution.flyout.entityDetails.resolutionRiskSummaryTableCaption',
     {
       defaultMessage: 'Resolution risk summary for {entity}',
-      values: { entity: capitalize(entityType) },
+      values: { entity: getCaptionEntityLabel(entityType) },
     }
   );
 

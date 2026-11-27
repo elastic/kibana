@@ -1,6 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`getLatestIndexMappingProperties please bump 'LATEST_INDEX_MAPPINGS_VERSION' when the latest index mappings change 1`] = `
+exports[
+  `getLatestIndexMappingProperties please bump 'LATEST_INDEX_MAPPINGS_VERSION' when the latest index mappings change 1`
+] = `
 Object {
   "properties": Object {
     "@timestamp": Object {
@@ -83,6 +85,39 @@ Object {
     },
     "entity.EngineMetadata.UntypedId": Object {
       "type": "keyword",
+    },
+    "entity.attributes.ai_agent_activity.active_days": Object {
+      "type": "long",
+    },
+    "entity.attributes.ai_agent_activity.computed_at": Object {
+      "type": "date",
+    },
+    "entity.attributes.ai_agent_activity.permission_bypass_sessions": Object {
+      "type": "long",
+    },
+    "entity.attributes.ai_agent_activity.sessions": Object {
+      "type": "long",
+    },
+    "entity.attributes.ai_agent_activity.unattended_sessions": Object {
+      "type": "long",
+    },
+    "entity.attributes.ai_agent_context.computed_at": Object {
+      "type": "date",
+    },
+    "entity.attributes.ai_agent_context.host_criticality": Object {
+      "type": "keyword",
+    },
+    "entity.attributes.ai_agent_context.person_criticality": Object {
+      "type": "keyword",
+    },
+    "entity.attributes.ai_agent_context.person_mfa_enabled": Object {
+      "type": "boolean",
+    },
+    "entity.attributes.ai_agent_context.person_watchlists": Object {
+      "type": "keyword",
+    },
+    "entity.attributes.ai_agent_context.shared_account_installs": Object {
+      "type": "long",
     },
     "entity.attributes.asset": Object {
       "type": "boolean",
@@ -175,6 +210,27 @@ Object {
       "type": "keyword",
     },
     "entity.relationships.accesses_infrequently.raw_identifiers.user.name": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.acts_on_behalf_of.ids": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.acts_on_behalf_of.raw_identifiers.host.id": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.acts_on_behalf_of.raw_identifiers.host.name": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.acts_on_behalf_of.raw_identifiers.service.name": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.acts_on_behalf_of.raw_identifiers.user.email": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.acts_on_behalf_of.raw_identifiers.user.id": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.acts_on_behalf_of.raw_identifiers.user.name": Object {
       "type": "keyword",
     },
     "entity.relationships.administers.ids": Object {
@@ -519,6 +575,15 @@ Object {
     "orchestrator.type": Object {
       "type": "keyword",
     },
+    "process.ai_agent.api_key_auth": Object {
+      "type": "boolean",
+    },
+    "process.ai_agent.name": Object {
+      "type": "keyword",
+    },
+    "process.executable": Object {
+      "type": "keyword",
+    },
     "service.address": Object {
       "type": "keyword",
     },
@@ -598,6 +663,6 @@ Object {
       "type": "keyword",
     },
   },
-  "version": 1,
+  "version": 4,
 }
 `;

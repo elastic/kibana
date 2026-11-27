@@ -19,7 +19,9 @@ import type { BriefViewModel } from './view_model';
 
 export const MAX_BRIEF_CANDIDATES = 25;
 
-export type BriefEntityType = 'host' | 'user' | 'service' | 'generic';
+/** The brief shows AI agents as `generic`, so its view model and renderer stay on four types. */
+export const BRIEF_ENTITY_TYPES = ['host', 'user', 'service', 'generic'] as const;
+export type BriefEntityType = (typeof BRIEF_ENTITY_TYPES)[number];
 
 /** A flagged entity, with its Entity Store record. */
 export interface BriefCandidate {

@@ -58,6 +58,8 @@ export enum RiskScoreFields {
   serviceName = EntityIdentifierFields.serviceName,
   serviceRiskScore = 'service.risk.calculated_score_norm',
   serviceRisk = 'service.risk.calculated_level',
+  aiAgentRiskScore = 'ai_agent.risk.calculated_score_norm',
+  aiAgentRisk = 'ai_agent.risk.calculated_level',
   alertsCount = 'alertsCount',
   unsupported = 'unsupported', // Temporary value used while we don't support the universal entity
 }
@@ -94,6 +96,7 @@ export const EntityTypeToLevelField: Record<EntityType, RiskScoreFields> = {
   [EntityType.user]: RiskScoreFields.userRisk,
   [EntityType.service]: RiskScoreFields.serviceRisk,
   [EntityType.generic]: RiskScoreFields.unsupported, // We don't calculate risk for the generic entity
+  [EntityType.ai_agent]: RiskScoreFields.aiAgentRisk,
 };
 
 export const EntityTypeToScoreField: Record<EntityType, RiskScoreFields> = {
@@ -101,4 +104,5 @@ export const EntityTypeToScoreField: Record<EntityType, RiskScoreFields> = {
   [EntityType.user]: RiskScoreFields.userRiskScore,
   [EntityType.service]: RiskScoreFields.serviceRiskScore,
   [EntityType.generic]: RiskScoreFields.unsupported, // We don't calculate risk for the generic entity
+  [EntityType.ai_agent]: RiskScoreFields.aiAgentRiskScore,
 };

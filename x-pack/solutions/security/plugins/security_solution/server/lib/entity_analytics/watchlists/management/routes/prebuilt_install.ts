@@ -65,6 +65,7 @@ export const installPrebuiltWatchlistsRoute = (
             esClient,
             getStartServices,
             hasEncryptionKey,
+            experimentalFeatures: secSol.getConfig().experimentalFeatures,
           });
 
           return response.ok({

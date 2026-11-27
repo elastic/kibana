@@ -56,6 +56,15 @@ describe('entityRiskScoreTool', () => {
       expect(result.success).toBe(true);
     });
 
+    it('accepts the ai_agent identifierType', () => {
+      const result = tool.schema.safeParse({
+        identifierType: 'ai_agent',
+        identifier: 'ai_agent:claude_code@host-id-1@ec2-user',
+      });
+
+      expect(result.success).toBe(true);
+    });
+
     it('rejects invalid identifierType', () => {
       const invalidInput = {
         identifierType: 'invalid',
@@ -244,6 +253,26 @@ describe('entityRiskScoreTool', () => {
         entityIdentifier: 'hostname-1',
         pagination: { querySize: 1, cursorStart: 0 },
       });
+    });
+
+    it.each([
+      ['an untyped agent id', 'claude_code@host-id-1@ec2-user'],
+      ['a full agent entity id', 'ai_agent:claude_code@host-id-1@ec2-user'],
+    ])('looks up an ai_agent score by its full entity id, given %s', async (_label, identifier) => {
+      const mockGetRiskScores = jest.fn().mockResolvedValue([]);
+      mockCreateGetRiskScores.mockReturnValue(mockGetRiskScores);
+
+      await tool.handler(
+        { identifierType: 'ai_agent', identifier },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      expect(mockGetRiskScores).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entityType: 'ai_agent',
+          entityIdentifier: 'ai_agent:claude_code@host-id-1@ec2-user',
+        })
+      );
     });
 
     it('returns error when no risk score found', async () => {

@@ -24,8 +24,12 @@ export const buildUserNamesFilter = (userNames: string[]) => {
   return buildEntityNameFilter(EntityType.user, userNames);
 };
 
+/** Agent risk documents keep the agent's entity ID in `ai_agent.name`, as host documents keep `host.name`. */
+const getRiskNameField = (riskEntity: EntityType): string =>
+  riskEntity === EntityType.ai_agent ? 'ai_agent.name' : EntityTypeToIdentifierField[riskEntity];
+
 export const buildEntityNameFilter = (riskEntity: EntityType, entityNames: string[]): ESQuery => {
-  return { terms: { [EntityTypeToIdentifierField[riskEntity]]: entityNames } };
+  return { terms: { [getRiskNameField(riskEntity)]: entityNames } };
 };
 
 export { EntityType };

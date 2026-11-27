@@ -151,6 +151,7 @@ describe('Watchlist index sync — demotion regression (update + deletion detect
       host: [],
       service: [],
       generic: [],
+      ai_agent: [],
     };
     const watchlistsByEuid: WatchlistsByEuid = new Map([
       ['user:alice', [watchlist.name]],
@@ -243,6 +244,7 @@ describe('Watchlist index sync — demotion regression (update + deletion detect
       host: [],
       service: [],
       generic: [],
+      ai_agent: [],
     };
     const watchlistsByEuid: WatchlistsByEuid = new Map([
       ['user:alice', [watchlist.name]],
@@ -309,6 +311,7 @@ describe('Watchlist index sync — demotion regression (update + deletion detect
       host: [],
       service: [],
       generic: [],
+      ai_agent: [],
     };
     const watchlistsByEuid: WatchlistsByEuid = new Map([
       ['user:alice', [watchlist.name]],

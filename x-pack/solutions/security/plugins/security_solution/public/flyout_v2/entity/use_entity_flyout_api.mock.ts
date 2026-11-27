@@ -21,6 +21,8 @@ export const createEntityFlyoutApiMock = (): jest.Mocked<EntityFlyoutApi> => ({
   openServiceFlyoutAsChild: jest.fn(),
   openGenericEntityFlyout: jest.fn(),
   openGenericEntityFlyoutAsChild: jest.fn(),
+  openAiAgentFlyout: jest.fn(),
+  openAiAgentFlyoutAsChild: jest.fn(),
   openEntityFlyout: jest.fn(),
   openEntityDetailsAsChild: jest.fn(),
   openEntityRiskInputs: jest.fn(),

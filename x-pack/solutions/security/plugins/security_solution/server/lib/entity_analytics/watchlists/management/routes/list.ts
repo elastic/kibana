@@ -85,6 +85,7 @@ export const listWatchlistsRoute = (
                 esClient: internalEsClient,
                 getStartServices,
                 hasEncryptionKey,
+                experimentalFeatures: secSol.getConfig().experimentalFeatures,
               });
             } catch (installError) {
               const { message } = transformError(installError);

@@ -23,6 +23,7 @@ const ENTITY_NAME_FIELD: Record<EntityType, string> = {
   host: 'host.name',
   service: 'service.name',
   generic: 'entity.name',
+  ai_agent: 'entity.name',
 };
 
 const hasEsSource = (d: EsHit | SourceDoc): d is EsHit =>

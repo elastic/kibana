@@ -26,7 +26,7 @@ import type { TimeRange } from '../../../../../common/entity_analytics/home/cons
 import type { SignalCardData, TileDeltaFailure } from './data';
 
 export interface SignalCardProps {
-  card: SignalCardData;
+  card: SignalCardData<string>;
   selected: boolean;
   /** The selected range; the delta compares with the range just before it. */
   timeRange: TimeRange;
@@ -530,7 +530,7 @@ const DeltaSkeleton: React.FC<{ label: string }> = ({ label }) => {
   );
 };
 
-const renderValueRow = (card: SignalCardData, isZero: boolean) => {
+const renderValueRow = (card: SignalCardData<string>, isZero: boolean) => {
   // A 0 without a result (failed, skipped, timed out, no access) is not a count: keep the dash.
   if (isZero && !card.hasCount) {
     return '—';

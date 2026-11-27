@@ -55,6 +55,7 @@ const EXTRA_SOURCE_FIELD_COLUMNS = [
     ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.host,
     ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.service,
     ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.generic,
+    ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.ai_agent,
   ]),
 ].filter((col) => !BASE_ENRICHMENT_COLUMNS.has(col));
 

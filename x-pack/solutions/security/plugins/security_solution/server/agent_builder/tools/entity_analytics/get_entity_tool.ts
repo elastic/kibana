@@ -48,7 +48,7 @@ import { fetchRiskScoreGrounding } from './risk_score_grounding';
 const schema = lazySchema(() =>
   z.object({
     entityType: IdentifierType.describe(
-      'The type of entity: host, user, service, or generic'
+      'The type of entity: host, user, service, generic, or ai_agent'
     ).optional(),
     entityId: z
       .string()
@@ -56,7 +56,8 @@ const schema = lazySchema(() =>
       .describe(
         'The entity id (EUID), canonical entity.name, or user.full_name to fetch. ' +
           'Examples: "host:server1" (prefixed EUID), "server1" (non-prefixed), ' +
-          '"LAPTOP-SALES04" (entity.name), "John Doe" (user.full_name).'
+          '"LAPTOP-SALES04" (entity.name), "John Doe" (user.full_name), ' +
+          '"ai_agent:claude_code@<host.id>@<user.name>" (AI agent EUID).'
       ),
     interval: z
       .string()
@@ -140,6 +141,8 @@ const identifierTypeToRiskEntityType = (
       return EntityType.service;
     case 'generic':
       return EntityType.generic;
+    case 'ai_agent':
+      return EntityType.ai_agent;
     default:
       return null;
   }
@@ -480,7 +483,7 @@ export const getEntityTool = (
   return {
     id: SECURITY_GET_ENTITY_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieve profile for security entity (user, host, service, generic) from the Entity store using entity ID (EUID). Includes the alerts that contributed to the risk score if the entity has a risk score.
+    description: `Retrieve profile for security entity (user, host, service, generic, ai_agent) from the Entity store using entity ID (EUID). Includes the alerts that contributed to the risk score if the entity has a risk score.
 
 When exactly one entity is resolved, this tool also stores a \`security.entity\` attachment (creating new or updating existing) and its \`other\` result includes a pre-formatted \`renderTag\` string. To show the rich entity card inline, copy that \`renderTag\` string verbatim onto its own line in your reply BEFORE your prose summary. Do NOT assemble the tag yourself from \`attachmentId\` and \`version\`, and do NOT substitute the id with anything derived from the user's prompt. When the query resolves multiple candidates (fallback match) no attachment is stored, no \`renderTag\` is returned, and you must not emit a render tag in that case.`,
     schema,

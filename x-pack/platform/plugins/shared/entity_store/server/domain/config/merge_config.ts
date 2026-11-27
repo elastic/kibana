@@ -26,6 +26,7 @@ import {
 export const DEFAULT_CONFIG_BY_TYPE: Partial<Record<EntityType, Partial<LogExtractionConfig>>> = {
   service: { frequency: '10m' },
   generic: { frequency: '30m' },
+  ai_agent: { frequency: '10m' },
 };
 
 /**

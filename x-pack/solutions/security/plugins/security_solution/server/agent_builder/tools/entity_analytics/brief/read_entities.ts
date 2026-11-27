@@ -18,9 +18,8 @@ import { getEntityType } from '../../../../../common/entity_analytics/entity_sto
 import { getRiskLevel } from '../../../../../common/entity_analytics/risk_engine/risk_levels';
 import { fetchGroupMembers } from '../../../../lib/entity_analytics/entity_case_counts/fetch_group_member_ids';
 import { resolveDisplayName } from '../../../../lib/entity_analytics/lead_generation/entity_conversion';
-import { ENTITY_IDENTIFIER_TYPES } from '../entity_resolution';
 import type { BriefCandidate, BriefEntityType } from './types';
-import { MAX_BRIEF_CANDIDATES } from './types';
+import { BRIEF_ENTITY_TYPES, MAX_BRIEF_CANDIDATES } from './types';
 
 /** Display names come from source logs, so an attacker can choose them. */
 const MAX_NAME_LENGTH = 80;
@@ -201,7 +200,7 @@ export const toAttachmentIdentifier = (candidate: BriefCandidate) => ({
 /** The record's entity type, or the EUID prefix when the record has none. */
 export const getBriefEntityType = (record: Entity, id: string): BriefEntityType => {
   const isKnown = (type: unknown): type is BriefEntityType =>
-    ENTITY_IDENTIFIER_TYPES.some((known) => known === type);
+    BRIEF_ENTITY_TYPES.some((known) => known === type);
   try {
     const type = getEntityType(record);
     if (isKnown(type)) {

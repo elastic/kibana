@@ -7,7 +7,8 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
-import { SECURITY_ENTITY_RISK_SCORE_TOOL_ID } from '../tools';
+import { SECURITY_ENTITY_RISK_SCORE_TOOL_ID, SECURITY_GET_ENTITY_TOOL_ID } from '../tools';
+import { ENTITY_IDENTIFIER_TYPES } from '../tools/entity_analytics/entity_resolution';
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
 /**
@@ -19,7 +20,7 @@ export const MAX_ENTITIES_PER_ATTACHMENT = 50;
 
 const entityIdentifierSchema = lazySchema(() =>
   z.object({
-    identifierType: z.enum(['host', 'user', 'service', 'generic']),
+    identifierType: z.enum(ENTITY_IDENTIFIER_TYPES),
     identifier: z.string().min(1),
     /**
      * Canonical `entity.id` value from the entity store (for example
@@ -92,7 +93,7 @@ const riskStatsPayloadSchema = lazySchema(() =>
 const riskEntityAttachmentDataSchema = lazySchema(() =>
   z.union([
     securityAttachmentDataSchema.extend({
-      identifierType: z.enum(['host', 'user', 'service', 'generic']),
+      identifierType: z.enum(ENTITY_IDENTIFIER_TYPES),
       identifier: z.string().min(1),
       entityStoreId: z.string().min(1).optional(),
       mode: z.literal('resolved').optional(),
@@ -129,6 +130,13 @@ The attachment data is one of two shapes:
 - Single entity: top-level \`identifierType\` + \`identifier\` (+ optional \`attachmentLabel\`).
 - Multi-entity: an \`entities\` array of \`{ identifierType, identifier }\` objects (+ optional \`attachmentLabel\`).
 Handle both shapes.
+
+## AI AGENTS
+An \`identifierType\` of \`ai_agent\` is one install of an AI coding agent (for example Claude Code) for one OS user on one host.
+- \`entityStoreId\` is the agent's entity id, \`ai_agent:<product>@<host.id>@<user.name>\`, for example \`ai_agent:claude_code@<host id>@ec2-user\`. \`identifier\` is its display name, \`<product>@<user.name>@<host.name>\`.
+- Look the agent up with \`${SECURITY_GET_ENTITY_TOOL_ID}\`, passing \`entityStoreId\` as \`entityId\` and \`entityType: "ai_agent"\`. Never search by \`identifier\` alone, because one person can run the same product on many hosts.
+- The agent's row says which host it runs on (\`entity.relationships.depends_on\`), which signed-in accounts and people it acts for (\`entity.relationships.acts_on_behalf_of\`), and summarises those people and hosts in \`entity.attributes.ai_agent_context\` (the people's watchlists, criticality and MFA, the host criticality, and how many other installs share the account). Its own risk score comes from alerts on the agent and its child processes, and from the agent's watchlists.
+- Report the agent's risk as the agent's, not as the person's or the host's.
 
 ## INLINE RENDERING (REQUIRED)
 When a ${SecurityAgentBuilderAttachments.entity} attachment is present in the conversation, you MUST render it inline using the exact custom XML element shown below. The element name is literally \`render_attachment\` and the attribute names are literally \`id\` and \`version\` — do not rename, translate, or abbreviate them.

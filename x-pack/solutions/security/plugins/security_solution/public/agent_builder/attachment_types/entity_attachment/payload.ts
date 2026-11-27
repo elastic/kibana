@@ -12,7 +12,7 @@ import type {
   NormalisedEntityAttachment,
 } from './types';
 
-const ALLOWED_TYPES = new Set(['host', 'user', 'service', 'generic']);
+const ALLOWED_TYPES = new Set(['host', 'user', 'service', 'generic', 'ai_agent']);
 
 const isValidIdentifier = (candidate: unknown): candidate is EntityAttachmentIdentifier => {
   if (!candidate || typeof candidate !== 'object') return false;

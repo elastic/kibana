@@ -26,6 +26,8 @@ import { EntityAnalyticsHomePage } from './pages/entity_analytics_home_page';
 import { EntityAnalyticsNewHomePage } from './pages/entity_analytics_new_home_page';
 import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 import { useKibana } from '../common/lib/kibana';
+import { EntityAnalyticsAiSecurityPage } from './pages/entity_analytics_ai_security_page';
+import { ENTITY_ANALYTICS_AI_SECURITY_PATH } from './components/ai_security/constants';
 
 // ---- Management routes ----
 const EntityAnalyticsManagementWrapper = () => (
@@ -156,6 +158,29 @@ const EntityAnalyticsHomePageContainer: React.FC = React.memo(() => {
 
 EntityAnalyticsHomePageContainer.displayName = 'EntityAnalyticsHomePageContainer';
 
+// ---- AI security routes (proof of concept, behind `entityAnalyticsAiSecurityPoc`) ----
+const EntityAnalyticsAiSecurityContainer: React.FC = React.memo(() => {
+  const isAiSecurityPocEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsAiSecurityPoc');
+  return (
+    <Routes>
+      {isAiSecurityPocEnabled && (
+        <Route
+          path={ENTITY_ANALYTICS_AI_SECURITY_PATH}
+          exact
+          render={() => (
+            <PluginTemplateWrapper>
+              <EntityAnalyticsAiSecurityPage />
+            </PluginTemplateWrapper>
+          )}
+        />
+      )}
+      <Route component={NotFoundPage} />
+    </Routes>
+  );
+});
+
+EntityAnalyticsAiSecurityContainer.displayName = 'EntityAnalyticsAiSecurityContainer';
+
 const RedirectToEntityAnalyticsHome: React.FC = () => (
   <Redirect to={ENTITY_ANALYTICS_HOME_PAGE_PATH} />
 );
@@ -186,6 +211,13 @@ export const routes = [
     component: withSecurityRoutePageWrapper(
       EntityAnalyticsHomePageContainer,
       SecurityPageName.entityAnalyticsHomePage
+    ),
+  },
+  {
+    path: ENTITY_ANALYTICS_AI_SECURITY_PATH,
+    component: withSecurityRoutePageWrapper(
+      EntityAnalyticsAiSecurityContainer,
+      SecurityPageName.entityAnalyticsAiSecurity
     ),
   },
   {

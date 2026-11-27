@@ -7,7 +7,6 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { CRUDClient } from '@kbn/entity-store/server/domain/crud/crud_client';
-import { ALL_ENTITY_TYPES } from '@kbn/entity-store/common';
 import type { EntityType } from '@kbn/entity-store/common';
 import type { WatchlistDataSources } from '../../../../../../../common/api/entity_analytics';
 import type { EntityStoreEntityIdsByType, WatchlistsByEuid } from '../../../entities/service';
@@ -96,9 +95,26 @@ const paginatedDetection = async <B>(
   return { entities: allEntities, maxTimestamp };
 };
 
+/** The entity types watchlist sources sync. */
+const WATCHLIST_ENTITY_TYPES = [
+  'user',
+  'host',
+  'service',
+  'generic',
+] as const satisfies readonly EntityType[];
+
+/**
+ * A store source's KQL rule already picks the entity rows, so it also syncs `ai_agent` rows.
+ * Integration sources stay on the types their integrations emit.
+ */
+const STORE_SOURCE_ENTITY_TYPES = [
+  ...WATCHLIST_ENTITY_TYPES,
+  'ai_agent',
+] as const satisfies readonly EntityType[];
+
 const getAllowedEntityIds = (
   entityStoreEntityIdsByType: EntityStoreEntityIdsByType,
-  entityType: EntityType
+  entityType: (typeof STORE_SOURCE_ENTITY_TYPES)[number]
 ): string[] => entityStoreEntityIdsByType[entityType] ?? [];
 
 export const createUpdateDetectionService = ({
@@ -225,7 +241,7 @@ export const createUpdateDetectionService = ({
     entityStoreEntityIdsByType: EntityStoreEntityIdsByType
   ) => {
     const allEntities: WatchlistBulkEntity[] = [];
-    for (const entityType of ALL_ENTITY_TYPES) {
+    for (const entityType of STORE_SOURCE_ENTITY_TYPES) {
       const euids = getAllowedEntityIds(entityStoreEntityIdsByType, entityType);
       for (const euid of euids) {
         allEntities.push({ euid, type: entityType, sourceId: source.id });
@@ -258,7 +274,7 @@ export const createUpdateDetectionService = ({
           ? fullSyncState.syncMarker
           : await syncMarkersService.getLastProcessedMarker(source);
 
-      for (const entityType of ALL_ENTITY_TYPES) {
+      for (const entityType of WATCHLIST_ENTITY_TYPES) {
         const allowedEntityIds = getAllowedEntityIds(entityStoreEntityIdsByType, entityType);
         const { entities, maxTimestamp } = await detectForIntegrationEntityType(
           source,

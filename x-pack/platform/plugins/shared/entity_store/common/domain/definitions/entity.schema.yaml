@@ -203,6 +203,9 @@ components:
             supervises:
               $ref: '#/components/schemas/EntityRelationship'
               description: Entities supervised by this entity.
+            acts_on_behalf_of:
+              $ref: '#/components/schemas/EntityRelationship'
+              description: Accounts whose delegated credentials this entity acts with (for example, the account an AI agent is signed in as).
             resolution:
               type: object
               description: Resolution metadata linking this entity to another.

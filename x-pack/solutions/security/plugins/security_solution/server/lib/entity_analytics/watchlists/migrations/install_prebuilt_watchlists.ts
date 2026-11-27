@@ -18,8 +18,11 @@ import { buildNamespacedInternalSavedObjectsClientUnsafe } from '../../utils/int
 import { PRIVILEGED_USER_MODIFIER } from '../../risk_score/modifiers/privileged_users';
 import {
   getPrivilegedUserWatchlistSavedObjectId,
+  getUnsanctionedAiAgentsWatchlistSavedObjectId,
   PRIVILEGED_USER_WATCHLIST_NAME,
+  UNSANCTIONED_AI_AGENTS_WATCHLIST_NAME,
 } from '../../../../../common/entity_analytics/watchlists/constants';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { getStreamPatternFor } from '../../privilege_monitoring/data_sources/constants';
 import type { WatchlistConfigClient } from '../management/watchlist_config';
 import { WatchlistConfigClient as WatchlistConfigClientClass } from '../management/watchlist_config';
@@ -34,7 +37,7 @@ import { generateWatchlistEntityIndexMappings } from '../entities/mappings';
 import { ENTITY_ANALYTICS_WATCHLISTS_PREFIX } from '../entities/utils';
 
 // Bump this when PREBUILT_WATCHLISTS definitions change
-export const PREBUILT_WATCHLISTS_VERSION = 3;
+export const PREBUILT_WATCHLISTS_VERSION = 4;
 
 const WATCHLIST_INDEX_TEMPLATE_NAME = 'entity_analytics_watchlists';
 
@@ -81,7 +84,10 @@ const AD_QUERY_RULE = 'entityanalytics_ad.user.privileged_group_member: true';
 // getOrCreateWatchlist uses name to locate a watchlist regardless of stored ID, so
 // duplicate names would cause the wrong watchlist to be matched. Uniqueness is enforced
 // by a unit test in install_prebuilt_watchlists.test.ts.
-export const getPrebuiltWatchlists = (namespace: string) => [
+export const getPrebuiltWatchlists = (
+  namespace: string,
+  experimentalFeatures?: Pick<ExperimentalFeatures, 'entityAnalyticsAiSecurityPoc'>
+) => [
   {
     id: getPrivilegedUserWatchlistSavedObjectId(namespace),
     name: PRIVILEGED_USER_WATCHLIST_NAME,
@@ -115,6 +121,20 @@ export const getPrebuiltWatchlists = (namespace: string) => [
       },
     ],
   },
+  // Ships empty: each customer adds the store-query source that defines "unsanctioned" for them.
+  ...(experimentalFeatures?.entityAnalyticsAiSecurityPoc
+    ? [
+        {
+          id: getUnsanctionedAiAgentsWatchlistSavedObjectId(namespace),
+          name: UNSANCTIONED_AI_AGENTS_WATCHLIST_NAME,
+          description:
+            'System-managed watchlist for AI agent installs your organization has not approved. Add an entity store query that defines unsanctioned use, or add agents manually.',
+          managed: true,
+          riskModifier: PRIVILEGED_USER_MODIFIER,
+          entitySources: [],
+        },
+      ]
+    : []),
 ];
 
 export type PrebuiltWatchlistDefinition = ReturnType<typeof getPrebuiltWatchlists>[number];
@@ -131,6 +151,7 @@ export const ensurePrebuiltWatchlists = async ({
   esClient,
   getStartServices,
   hasEncryptionKey,
+  experimentalFeatures,
 }: {
   watchlistClient: WatchlistConfigClient;
   soClient: SavedObjectsClientContract;
@@ -139,8 +160,9 @@ export const ensurePrebuiltWatchlists = async ({
   esClient: ElasticsearchClient;
   getStartServices: StartServicesAccessor<StartPlugins>;
   hasEncryptionKey: boolean;
+  experimentalFeatures?: Pick<ExperimentalFeatures, 'entityAnalyticsAiSecurityPoc'>;
 }) => {
-  for (const watchlist of getPrebuiltWatchlists(namespace)) {
+  for (const watchlist of getPrebuiltWatchlists(namespace, experimentalFeatures)) {
     const { id, entitySources, ...attrs } = watchlist;
 
     const watchlistId = await getOrCreateWatchlist({
@@ -354,6 +376,7 @@ export const installPrebuiltWatchlists = async ({
   getStartServices,
   hasEncryptionKey,
   spaceId,
+  experimentalFeatures,
 }: EntityAnalyticsMigrationsParams) => {
   const [coreStart] = await getStartServices();
   const esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -402,6 +425,7 @@ export const installPrebuiltWatchlists = async ({
       esClient,
       getStartServices,
       hasEncryptionKey,
+      experimentalFeatures,
     });
   }
 };

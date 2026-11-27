@@ -6,6 +6,9 @@
  */
 
 import {
+  mockAiAgentEntityRiskScores,
+  mockAiAgentId,
+  mockAiAgentRiskScoreState,
   mockHostRiskScoreState,
   mockUserRiskScoreState,
   mockHostEntityRiskScores,
@@ -295,6 +298,58 @@ describe('FlyoutRiskSummary', () => {
         sourceField: 'user.risk.calculated_score_norm',
       })
     );
+  });
+
+  describe('ai_agent', () => {
+    const renderAiAgentSummary = () =>
+      render(
+        <TestProviders>
+          <FlyoutRiskSummary
+            riskScoreData={mockAiAgentRiskScoreState}
+            entityRiskScores={mockAiAgentEntityRiskScores}
+            queryId={'testQuery'}
+            openDetailsPanel={() => {}}
+            recalculatingScore={false}
+            isPreviewMode={false}
+            entityType={EntityType.ai_agent}
+            entityId={mockAiAgentId}
+          />
+        </TestProviders>
+      );
+
+    it('builds lens attributes on the agent risk id', () => {
+      renderAiAgentSummary();
+
+      const lensAttributes: LensAttributes =
+        mockVisualizationEmbeddable.mock.calls[0][0].lensAttributes;
+      const datasourceLayers = Object.values(
+        lensAttributes.state.datasourceStates.formBased?.layers ?? {}
+      );
+      const firstColumn = Object.values(datasourceLayers[0].columns)[0];
+
+      expect((lensAttributes.state.query as Query).query).toEqual(
+        `ai_agent.risk.id_value: "${mockAiAgentId}" AND NOT ai_agent.risk.score_type: "resolution"`
+      );
+      expect(firstColumn).toEqual(
+        expect.objectContaining({ sourceField: 'ai_agent.risk.calculated_score_norm' })
+      );
+    });
+
+    it('names the agent in the cases attachment', () => {
+      renderAiAgentSummary();
+
+      expect(mockVisualizationEmbeddable.mock.calls[0][0].casesAttachmentMetadata).toEqual({
+        description: `Risk score for AI agent ${mockAiAgentId}`,
+      });
+    });
+
+    it('shows the alerts and the watchlist modifier contributions', () => {
+      const { getByTestId } = renderAiAgentSummary();
+
+      expect(getByTestId('risk-summary-table')).toHaveTextContent('Alerts (13)+64.76');
+      expect(getByTestId('risk-summary-table')).toHaveTextContent('Watchlists (1)+8.62');
+      expect(getByTestId('risk-summary-result-score')).toHaveTextContent('73.38');
+    });
   });
 
   it('entity risk inputs link calls openDetailsPanel with entity sub-tab', () => {

@@ -22,6 +22,7 @@ import {
   FLYOUT_ORIGIN,
   FLYOUT_SESSION_KIND,
   FLYOUT_SURFACE,
+  FLYOUT_TOOL,
   FLYOUT_TYPE,
 } from '../../common/lib/telemetry';
 
@@ -557,6 +558,30 @@ describe('useEntityFlyoutApi', () => {
         scopeId: 'entity-analytics-new-entities-table-7d',
       })
     );
+  });
+
+  it('openEntityRiskInputs reports an ai_agent risk inputs tool as a generic flyout', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    result.current.openEntityRiskInputs({
+      entityType: EntityType.ai_agent,
+      entityName: 'agent-1',
+      entityId: 'ai_agent:claude_code@host-1@ec2-user',
+      origin: FLYOUT_ORIGIN.RISK_SUMMARY_ENTITY,
+    });
+
+    expect(mockWriteOnOpen).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: FLYOUT_DESCRIPTOR_KIND.entityRiskInputs,
+        entityType: 'ai_agent',
+      })
+    );
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: FLYOUT_SURFACE.TOOL,
+      flyoutType: FLYOUT_TYPE.GENERIC,
+      tool: FLYOUT_TOOL.RISK_INPUTS,
+      session: FLYOUT_SESSION_KIND.START,
+      origin: FLYOUT_ORIGIN.RISK_SUMMARY_ENTITY,
+    });
   });
 
   it('openEntityAnomalyInsights writes an entityAnomalyInsights descriptor and clears the param on close', () => {

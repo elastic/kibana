@@ -297,6 +297,50 @@ describe('fetchEntityEnrichment', () => {
     expect(enrichment?.sourceFields?.['user.email']).toBeUndefined();
   });
 
+  it('builds typed sourceFields for AI agent entities', async () => {
+    const agentId = 'ai_agent:claude_code@host-1@ec2-user';
+    (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
+      toRecords: jest.fn().mockResolvedValue({
+        records: [
+          {
+            'entity.id': agentId,
+            'entity.name': 'claude_code@ec2-user@build-server',
+            'entity.type': 'AI Agent',
+            'entity.EngineMetadata.Type': 'ai_agent',
+            'process.ai_agent.name': 'claude_code',
+            'host.id': 'host-1',
+            'host.name': 'build-server',
+            'user.name': 'ec2-user',
+            'entity.risk.calculated_score_norm': 42,
+          },
+        ],
+      }),
+    });
+
+    const result = await fetchEntityEnrichment({
+      esClient,
+      logger,
+      entityIds: [agentId],
+      entityStoreIndexName: '.entities.v2.latest.default-00001',
+    });
+
+    const [{ query }] = (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mock
+      .calls[0];
+    expect(query).toContain('process.ai_agent.name');
+    expect(result.get(agentId)).toMatchObject({
+      type: 'AI Agent',
+      engineType: 'ai_agent',
+      riskScore: 42,
+      sourceFields: {
+        'process.ai_agent.name': 'claude_code',
+        'host.id': 'host-1',
+        'user.name': 'ec2-user',
+      },
+    });
+    // Not treated as a generic entity, and host-only identity fields stay off the agent.
+    expect(result.get(agentId)?.sourceFields).not.toHaveProperty('host.name');
+  });
+
   it('omits sourceFields entirely when all source columns are null', async () => {
     (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
       toRecords: jest.fn().mockResolvedValue({

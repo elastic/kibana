@@ -162,7 +162,13 @@ describe('createEntitySourcesService', () => {
       [
         expect.objectContaining({
           source: expect.objectContaining({ id: 'source-c' }),
-          entityStoreEntityIdsByType: { user: [], host: [], service: [], generic: [] },
+          entityStoreEntityIdsByType: {
+            user: [],
+            host: [],
+            service: [],
+            ai_agent: [],
+            generic: [],
+          },
         }),
       ],
       { hasNewFullSync: false }

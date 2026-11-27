@@ -13,6 +13,7 @@ import {
 } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
 import { ENTITY_ANALYTICS } from '../app/translations';
+import { ENTITY_ANALYTICS_AI_SECURITY_PATH } from './components/ai_security/constants';
 
 export const entityAnalyticsLinks: LinkItem = {
   id: SecurityPageName.entityAnalyticsHomePage,
@@ -24,6 +25,26 @@ export const entityAnalyticsLinks: LinkItem = {
       defaultMessage: 'Entity analytics',
     }),
   ],
+  hideTimeline: false,
+  skipUrlState: false,
+  capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
+  licenseType: 'platinum',
+};
+
+/** The AI security page. Proof of concept, behind `entityAnalyticsAiSecurityPoc`. */
+export const entityAnalyticsAiSecurityLinks: LinkItem = {
+  id: SecurityPageName.entityAnalyticsAiSecurity,
+  title: i18n.translate('xpack.securitySolution.appLinks.entityAnalyticsAiSecurity', {
+    defaultMessage: 'AI security',
+  }),
+  path: ENTITY_ANALYTICS_AI_SECURITY_PATH,
+  globalNavPosition: 7.5,
+  globalSearchKeywords: [
+    i18n.translate('xpack.securitySolution.appLinks.entityAnalyticsAiSecurity.agents', {
+      defaultMessage: 'AI agents',
+    }),
+  ],
+  experimentalKey: 'entityAnalyticsAiSecurityPoc',
   hideTimeline: false,
   skipUrlState: false,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],

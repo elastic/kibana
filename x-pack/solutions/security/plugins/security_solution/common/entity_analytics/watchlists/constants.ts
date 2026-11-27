@@ -37,6 +37,16 @@ export const PRIVILEGED_USER_WATCHLIST_NAME = 'Privileged Users';
 export const getPrivilegedUserWatchlistSavedObjectId = (namespace: string): string =>
   `${PRIVILEGED_USER_WATCHLIST_ID}-${namespace}`;
 
+const UNSANCTIONED_AI_AGENTS_WATCHLIST_ID = 'unsanctioned-ai-agents-watchlist-id';
+export const UNSANCTIONED_AI_AGENTS_WATCHLIST_NAME = 'Unsanctioned AI agents';
+
+/**
+ * Saved object id for the prebuilt watchlist of AI agent installs the organisation hasn't approved.
+ * The AI security page recognises it by this id and gives it precedence. Proof of concept.
+ */
+export const getUnsanctionedAiAgentsWatchlistSavedObjectId = (namespace: string): string =>
+  `${UNSANCTIONED_AI_AGENTS_WATCHLIST_ID}-${namespace}`;
+
 export const PREBUILT_WATCHLIST_NAMES: Record<string, string> = {
   [PRIVILEGED_USER_WATCHLIST_ID]: i18n.translate(
     'xpack.securitySolution.entityAnalytics.watchlists.prebuiltPrivName',
@@ -44,10 +54,24 @@ export const PREBUILT_WATCHLIST_NAMES: Record<string, string> = {
       defaultMessage: 'Privileged User',
     }
   ),
+  [UNSANCTIONED_AI_AGENTS_WATCHLIST_ID]: i18n.translate(
+    'xpack.securitySolution.entityAnalytics.watchlists.prebuiltUnsanctionedAiAgentsName',
+    {
+      defaultMessage: 'Unsanctioned AI agents',
+    }
+  ),
 };
 
-export const getWatchlistName = (watchlistId: string): string =>
-  PREBUILT_WATCHLIST_NAMES[watchlistId] ?? watchlistId;
+/**
+ * Display name of a prebuilt watchlist, or the id itself for any other watchlist. Entities carry the
+ * per-space saved object id (`<prebuilt id>-<space id>`), so both forms match.
+ */
+export const getWatchlistName = (watchlistId: string): string => {
+  const prebuiltId = Object.keys(PREBUILT_WATCHLIST_NAMES).find(
+    (id) => watchlistId === id || watchlistId.startsWith(`${id}-`)
+  );
+  return prebuiltId ? PREBUILT_WATCHLIST_NAMES[prebuiltId] : watchlistId;
+};
 
 /**
  * Real ES field names supported as the identifier field for index-type entity sources.

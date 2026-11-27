@@ -10,12 +10,13 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import {
   type EuidSourceFields,
   GRAPH_ACTOR_ENTITY_FIELDS,
+  GRAPH_ENTITY_TYPES,
   GRAPH_TARGET_ENTITY_FIELDS,
   getGraphActorEuidSourceFields,
   getGraphTargetEuidSourceFields,
   isGraphSupportedRuntimeMappingsIntegration,
 } from '@kbn/cloud-security-posture-common';
-import { ALL_ENTITY_TYPES, useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { getField, getFieldArray } from '../../../../flyout/document_details/shared/utils';
 import { useHasGraphVisualizationLicense } from '../../../../common/hooks/use_has_graph_visualization_license';
 import { useIsEntityStoreV2Available } from '../../../../flyout/shared/hooks/use_is_entity_store_v2_available';
@@ -63,7 +64,7 @@ const hasEuidIdentity = (
   fieldsByType: EuidSourceFields,
   flattened: DataTableRecord['flattened']
 ): boolean =>
-  ALL_ENTITY_TYPES.some((type) =>
+  GRAPH_ENTITY_TYPES.some((type) =>
     fieldsByType[type].some((field) => getFieldArray(flattened[field]).length > 0)
   );
 
