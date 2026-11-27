@@ -19,7 +19,7 @@ import { createDigitalExperienceServerRoute } from '../../create_digital_experie
 import { mobileCrashGroupParams, mobileFiltersParams } from '../mobile_params';
 import { isMobilePartialRead } from '../partial_read';
 import { getCrashGroup } from './get_crash_group';
-import { getCrashGroups, getCrashReleases } from './get_crash_groups';
+import { getCrashFilterOptions, getCrashGroups, getCrashReleases } from './get_crash_groups';
 
 export const MOBILE_CRASH_GROUPS_ENDPOINT =
   'GET /internal/digital_experience/mobile_applications/{serviceName}/crash_groups';
@@ -40,12 +40,13 @@ const listRoute = createDigitalExperienceServerRoute({
       logger,
     });
     const search = { esClient, filters: { serviceName, osName, release }, start, end, environment };
-    const [crashGroups, releases, isPartial] = await Promise.all([
+    const [crashGroups, releases, { osNames, environments }, isPartial] = await Promise.all([
       getCrashGroups(search),
       getCrashReleases(search),
+      getCrashFilterOptions(search),
       isMobilePartialRead({ context, request, logger }),
     ]);
-    return { crashGroups, releases, isPartial };
+    return { crashGroups, releases, osNames, environments, isPartial };
   },
 });
 

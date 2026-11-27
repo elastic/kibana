@@ -23,10 +23,20 @@ import {
 import { RESULT_COLUMNS } from '../../../../common/mobile/fields';
 import { mobilePanelQuery, type MobilePanelFilters } from '../../../../common/mobile/filters';
 import type { FacetBucket } from '../../../../common/sessions';
-import type { MobileCrashGroup } from '../../../../common/types/mobile';
+import type { MobileCrashGroup, MobileCrashGroupsResponse } from '../../../../common/types/mobile';
 import { runEsql, timeFilter } from '../../../lib/esql';
-import { withLatestReleases } from '../../../lib/mobile/queries';
-import { toRelease } from '../../../lib/mobile/rows';
+import {
+  withEnvironmentCounts,
+  withLatestReleases,
+  withOsCounts,
+} from '../../../lib/mobile/queries';
+import {
+  toEnvironments,
+  toOsNames,
+  toRelease,
+  type EnvironmentRow,
+  type OsRow,
+} from '../../../lib/mobile/rows';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -173,4 +183,34 @@ export const getCrashReleases = async ({
     const release = toRelease(row[RESULT_COLUMNS.release]);
     return release ? [{ key: release, count: row[RESULT_COLUMNS.events] }] : [];
   });
+};
+
+/**
+ * The OS names and environments that crashed in the range, as the KPIs list them: the OS names on
+ * any release, the environments whatever the environment filter. From the crashes, so a crash sent
+ * after the range, maybe the only telemetry of its OS or environment, can still be picked.
+ */
+export const getCrashFilterOptions = async ({
+  esClient,
+  filters,
+  start,
+  end,
+  environment,
+}: GetCrashGroupsParams): Promise<Pick<MobileCrashGroupsResponse, 'osNames' | 'environments'>> => {
+  const application = { serviceName: filters.serviceName, start, end };
+  const [osRows, environmentRows] = await Promise.all([
+    runEsql<OsRow>(
+      esClient,
+      'get_mobile_crash_os_names',
+      withOsCounts(crashEvents(application)),
+      timeFilter(start, end + CRASH_DELAY_MS, environment)
+    ),
+    runEsql<EnvironmentRow>(
+      esClient,
+      'get_mobile_crash_environments',
+      withEnvironmentCounts(crashEvents(application)),
+      timeFilter(start, end + CRASH_DELAY_MS, undefined)
+    ),
+  ]);
+  return { osNames: toOsNames(osRows), environments: toEnvironments(environmentRows) };
 };

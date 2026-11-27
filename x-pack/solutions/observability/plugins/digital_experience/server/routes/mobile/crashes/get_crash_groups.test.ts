@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { MOBILE_FIELDS } from '../../../../common/mobile/fields';
 import {
   createTracedEsClientMock,
   esqlResponse,
 } from '../../../lib/create_digital_experience_traced_es_client.test_helpers';
-import { getCrashGroups, getCrashReleases } from './get_crash_groups';
+import { getCrashFilterOptions, getCrashGroups, getCrashReleases } from './get_crash_groups';
 
 const DAY = 24 * 60 * 60 * 1000;
 const START = Date.parse('2021-01-18T12:00:00.000Z');
@@ -377,6 +378,51 @@ describe('getCrashReleases', () => {
           expect.anything(),
         ],
       },
+    });
+  });
+});
+
+describe('getCrashFilterOptions', () => {
+  it('lists the OS names and environments that crashed, whatever their own filters', async () => {
+    const { client, esClient } = createTracedEsClientMock();
+    client.esql.query.mockImplementation(async ({ query }) =>
+      esqlResponse(
+        query.includes('BY os_name')
+          ? [{ os_name: 'iOS', platform: 'ios', sessions: 2 }]
+          : [
+              {
+                docs: 3,
+                [MOBILE_FIELDS.environment]: 'production',
+                [MOBILE_FIELDS.environmentName]: null,
+              },
+            ]
+      )
+    );
+
+    const options = await getCrashFilterOptions({
+      esClient,
+      filters: { serviceName: 'ride-ios', osName: 'iPadOS', release: '8.4.0' },
+      start: START,
+      end: END,
+      environment: 'staging',
+    });
+
+    expect(options).toEqual({ osNames: [{ key: 'iOS', count: 2 }], environments: ['production'] });
+    const [[osRequest], [environmentsRequest]] = client.esql.query.mock.calls;
+    // The crashes of the range, sent late ones included, on any OS and release.
+    [osRequest, environmentsRequest].forEach(({ query, params }) => {
+      expect(query).toContain('crash_time >= TO_DATETIME(?crash_start)');
+      expect(params).not.toEqual(expect.arrayContaining([{ os_name: 'iPadOS' }]));
+      expect(params).not.toEqual(expect.arrayContaining([{ release: '8.4.0' }]));
+    });
+    const timestampRange = { gte: START, lt: END + DAY, format: 'epoch_millis' };
+    expect(osRequest.filter).toEqual({
+      bool: { filter: [{ range: { '@timestamp': timestampRange } }, expect.anything()] },
+    });
+    expect(osRequest.filter).not.toEqual(environmentsRequest.filter);
+    // Every environment, so the picker lists the others too.
+    expect(environmentsRequest.filter).toEqual({
+      bool: { filter: [{ range: { '@timestamp': timestampRange } }, { match_all: {} }] },
     });
   });
 });

@@ -104,6 +104,10 @@ export interface MobileCrashGroupsResponse {
    * Crashes tab's release picker, which filters on the release that crashed.
    */
   releases: FacetBucket[];
+  /** The OS names that crashed in the range, whatever the OS and release filters. */
+  osNames: FacetBucket[];
+  /** The environments that crashed in the range, whatever the environment filter. */
+  environments: string[];
   /**
    * Whether the user can't read every OTel logs and traces index, so crashes may be missing and
    * the newest release, which marks groups new, may be wrong.

@@ -103,8 +103,10 @@ export function MobileCrashesTab({
     <>
       <MobileToolbar
         kpis={kpisState.kpis}
-        // The releases that crashed, kept while the list refreshes: its filter is on them.
+        // What crashed, kept while the list refreshes: crashes sent after the range are listed too.
         releaseOptions={{ buckets: lastResponse?.releases }}
+        osOptions={{ buckets: lastResponse?.osNames }}
+        environmentOptions={{ environments: lastResponse?.environments }}
         isLoading={isLoading || kpisState.isLoading}
         onRefresh={refreshAll}
       />

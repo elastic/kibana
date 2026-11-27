@@ -19,7 +19,13 @@ jest.mock('../../../hooks/use_query_param');
 jest.mock('../../../hooks/use_time_range');
 
 const fetch = jest.fn();
-const LIST = { crashGroups: [{ fingerprint: 'npe' }], releases: [], isPartial: false };
+const LIST = {
+  crashGroups: [{ fingerprint: 'npe' }],
+  releases: [],
+  osNames: [],
+  environments: [],
+  isPartial: false,
+};
 const DETAIL = { latestCrash: null, isPartial: false };
 
 let release: string | undefined;

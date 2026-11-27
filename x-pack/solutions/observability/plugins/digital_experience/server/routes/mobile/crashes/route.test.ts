@@ -14,7 +14,7 @@ import type {
 } from '../../../../common/types/mobile';
 import { hasPartialReadAccess } from '../../applications/get_partial_access';
 import { getCrashGroup } from './get_crash_group';
-import { getCrashGroups, getCrashReleases } from './get_crash_groups';
+import { getCrashFilterOptions, getCrashGroups, getCrashReleases } from './get_crash_groups';
 import {
   MOBILE_CRASH_GROUPS_ENDPOINT,
   MOBILE_CRASH_GROUP_ENDPOINT,
@@ -77,6 +77,10 @@ beforeEach(() => {
     .mocked(getCrashReleases)
     .mockReset()
     .mockResolvedValue([{ key: '4.2.0', count: 3 }]);
+  jest
+    .mocked(getCrashFilterOptions)
+    .mockReset()
+    .mockResolvedValue({ osNames: [{ key: 'Android', count: 3 }], environments: ['production'] });
   jest.mocked(getCrashGroup).mockReset().mockResolvedValue(DETAIL);
   jest.mocked(hasPartialReadAccess).mockReset().mockResolvedValue(false);
 });
@@ -94,8 +98,14 @@ describe('mobile crash groups route', () => {
     expect(response).toStrictEqual({
       crashGroups: [GROUP],
       releases: [{ key: '4.2.0', count: 3 }],
+      osNames: [{ key: 'Android', count: 3 }],
+      environments: ['production'],
       isPartial: false,
     });
+    // The other pickers' options are of the crashes too, with the same search.
+    expect(jest.mocked(getCrashFilterOptions)).toHaveBeenCalledWith(
+      expect.objectContaining({ filters: expect.objectContaining({ osName: 'Android' }) })
+    );
     // The picker's releases are read with the same filters, which drop the release itself.
     expect(jest.mocked(getCrashReleases)).toHaveBeenCalledWith(
       expect.objectContaining({
