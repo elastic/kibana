@@ -19,6 +19,7 @@ import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { createDashboardAttachmentType } from './dashboard';
+import { SURFACE_BASE_URL, renderSurface, surfaceContext } from './test_utils';
 
 const dashboardAttachmentData: DashboardAttachmentData = {
   title: 'System Overview',
@@ -222,5 +223,100 @@ describe('createDashboardAttachmentType', () => {
     );
 
     expect(isStale).toBe(false);
+  });
+
+  describe('toSurfaceComposition', () => {
+    const definition = createDashboardAttachmentType({
+      logger: createLogger(),
+      getDashboardClient: async () => createDashboardClient(),
+    });
+
+    const panel = (id: string, config: Record<string, unknown> = {}) => ({
+      type: LENS_EMBEDDABLE_TYPE,
+      id,
+      grid: { x: 0, y: 0, w: 24, h: 15 },
+      config,
+    });
+
+    const toComposition = async (data: DashboardAttachmentData, origin?: string) =>
+      definition.toSurfaceComposition?.(
+        { id: 'att-1', type: DASHBOARD_ATTACHMENT_TYPE, data, origin },
+        surfaceContext
+      );
+
+    it('renders a saved dashboard as a card with its panels and a link', async () => {
+      const composition = await toComposition(
+        {
+          title: 'System Overview',
+          description: 'Main dashboard for key metrics',
+          time_range: { from: 'now-24h', to: 'now' },
+          panels: [panel('panel-1', { title: 'CPU Usage' }), panel('panel-2')],
+        },
+        'dashboard 1'
+      );
+
+      expect(composition?.title).toBe('System Overview');
+      expect(composition?.body).toEqual([
+        { type: 'markdown', text: 'Main dashboard for key metrics' },
+        { type: 'context', items: [{ text: '2 panels' }, { text: 'now-24h to now' }] },
+        {
+          type: 'table',
+          columns: [{ label: 'Panel' }, { label: 'Type' }],
+          rows: [
+            ['CPU Usage', LENS_EMBEDDABLE_TYPE],
+            ['—', LENS_EMBEDDABLE_TYPE],
+          ],
+        },
+        {
+          type: 'actions',
+          buttons: [{ label: 'Open dashboard', app: 'dashboards', path: '#/view/dashboard%201' }],
+        },
+      ]);
+
+      const { valid, errors, slack } = await renderSurface(composition);
+
+      expect(errors).toEqual([]);
+      expect(valid).toBe(true);
+      expect(slack).toContain('CPU Usage');
+      expect(slack).not.toContain('"text":""');
+      expect(slack).toContain(`${SURFACE_BASE_URL}/app/dashboards#/view/dashboard%201`);
+    });
+
+    it('names the section of each panel when the dashboard has sections', async () => {
+      const composition = await toComposition({
+        title: 'Sections',
+        panels: [
+          panel('panel-1', { title: 'Overview' }),
+          {
+            id: 'section-1',
+            title: 'Hosts',
+            collapsed: false,
+            grid: { y: 15 },
+            panels: [panel('panel-2', { title: 'Memory' })],
+          },
+        ],
+      });
+
+      expect(composition?.body).toEqual([
+        { type: 'context', items: [{ text: '2 panels' }] },
+        {
+          type: 'table',
+          columns: [{ label: 'Panel' }, { label: 'Type' }, { label: 'Section' }],
+          rows: [
+            ['Overview', LENS_EMBEDDABLE_TYPE, '—'],
+            ['Memory', LENS_EMBEDDABLE_TYPE, 'Hosts'],
+          ],
+        },
+      ]);
+
+      expect((await renderSurface(composition)).valid).toBe(true);
+    });
+
+    it('renders an empty, unsaved dashboard without a table or a link', async () => {
+      const composition = await toComposition({ title: 'Empty', panels: [] });
+
+      expect(composition?.body).toEqual([{ type: 'context', items: [{ text: '0 panels' }] }]);
+      expect((await renderSurface(composition)).valid).toBe(true);
+    });
   });
 });
