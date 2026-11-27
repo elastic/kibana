@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import mockFs from 'mock-fs';
+import { mockRepoRoot } from './docker.test.mocks';
 
-import Fs from 'fs';
+import Fs, { mkdirSync, writeFileSync } from 'fs';
 import Fsp from 'fs/promises';
 import { basename, join } from 'path';
 
@@ -38,7 +38,7 @@ import {
   getSharedServerlessParams,
 } from './docker';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
-import { CA_CERT_PATH, ES_P12_PATH } from '@kbn/dev-utils';
+import { ES_P12_PATH } from '@kbn/dev-utils';
 import {
   SERVERLESS_CONFIG_PATH,
   SERVERLESS_RESOURCES_PATHS,
@@ -107,7 +107,18 @@ const log = new ToolingLog();
 const logWriter = new ToolingLogCollectingWriter();
 log.setWriters([logWriter]);
 
-const KIBANA_ROOT = process.cwd();
+const KIBANA_ROOT = mockRepoRoot;
+
+// If ../paths loads before ./docker.test.mocks, these tests delete the real `.es/secrets`.
+for (const mockedPath of [
+  SERVERLESS_IDP_METADATA_PATH,
+  SERVERLESS_SECRETS_DIR,
+  SERVERLESS_OPERATOR_PATH,
+]) {
+  if (!mockedPath.startsWith(KIBANA_ROOT)) {
+    throw new Error(`${mockedPath} is not mocked; import ./docker.test.mocks before anything else`);
+  }
+}
 const projectType: ServerlessProjectType = 'es';
 const baseEsPath = `${KIBANA_ROOT}/.es`;
 const serverlessDir = 'stateless';
@@ -119,21 +130,15 @@ const ensureSAMLRoleMappingMock = jest.spyOn(mockIdpPluginUtil, 'ensureSAMLRoleM
 const createMockIdpMetadataMock = jest.spyOn(mockIdpPluginUtil, 'createMockIdpMetadata');
 
 beforeEach(() => {
+  mkdirSync(KIBANA_ROOT, { mode: 0o700 });
+  mkdirSync(baseEsPath);
   jest.resetAllMocks();
   log.indent(-log.getIndent());
   logWriter.messages.length = 0;
-
-  // jest relies on the filesystem to get sourcemaps when using console.log
-  // which breaks with the mocked FS, see https://github.com/tschaub/mock-fs/issues/234
-  // hijacking logging to process.stdout as a workaround for this suite.
-  jest.spyOn(console, 'log').mockImplementation((...args) => {
-    process.stdout.write(args + '\n');
-  });
 });
 
-afterEach(() => {
-  mockFs.restore();
-  // restore the console.log behavior
+afterEach(async () => {
+  await Fsp.rm(KIBANA_ROOT, { recursive: true, force: true });
   jest.clearAllMocks();
 });
 
@@ -784,19 +789,13 @@ describe('resolveEsArgs()', () => {
 });
 
 describe('setupServerlessVolumes()', () => {
-  const existingObjectStore = {
-    [baseEsPath]: {
-      [serverlessDir]: {
-        cluster_state: { 0: {}, 1: {}, lease: 'hello world' },
-      },
-    },
+  const createExistingObjectStore = () => {
+    mkdirSync(`${serverlessObjectStorePath}/cluster_state/0`, { recursive: true });
+    mkdirSync(`${serverlessObjectStorePath}/cluster_state/1`);
+    writeFileSync(`${serverlessObjectStorePath}/cluster_state/lease`, 'hello world');
   };
 
   test('should create stateless directory and return volume docker command', async () => {
-    mockFs({
-      [baseEsPath]: {},
-    });
-
     const volumeCmd = await setupServerlessVolumes(log, {
       projectType,
       basePath: baseEsPath,
@@ -807,7 +806,7 @@ describe('setupServerlessVolumes()', () => {
   });
 
   test('should use an existing object store', async () => {
-    mockFs(existingObjectStore);
+    createExistingObjectStore();
 
     const volumeCmd = await setupServerlessVolumes(log, { projectType, basePath: baseEsPath });
 
@@ -818,7 +817,7 @@ describe('setupServerlessVolumes()', () => {
   });
 
   test('should remove an existing object store when clean is passed', async () => {
-    mockFs(existingObjectStore);
+    createExistingObjectStore();
 
     const volumeCmd = await setupServerlessVolumes(log, {
       projectType,
@@ -831,7 +830,7 @@ describe('setupServerlessVolumes()', () => {
   });
 
   test('should add SSL and IDP metadata volumes when ssl is passed', async () => {
-    mockFs(existingObjectStore);
+    createExistingObjectStore();
     createMockIdpMetadataMock.mockResolvedValue('<xml/>');
 
     const volumeCmd = await setupServerlessVolumes(log, {
@@ -857,7 +856,7 @@ describe('setupServerlessVolumes()', () => {
   });
 
   test('should use resource overrides', async () => {
-    mockFs(existingObjectStore);
+    createExistingObjectStore();
     const volumeCmd = await setupServerlessVolumes(log, {
       projectType,
       basePath: baseEsPath,
@@ -873,7 +872,7 @@ describe('setupServerlessVolumes()', () => {
   });
 
   test('should throw if an unknown resource override is used', async () => {
-    mockFs(existingObjectStore);
+    createExistingObjectStore();
 
     await expect(async () => {
       await setupServerlessVolumes(log, {
@@ -890,10 +889,6 @@ describe('setupServerlessVolumes()', () => {
   test('should override data path when passed', async () => {
     const dataPath = 'stateless-cluster-ftr';
 
-    mockFs({
-      [baseEsPath]: {},
-    });
-
     const volumeCmd = await setupServerlessVolumes(log, {
       projectType,
       basePath: baseEsPath,
@@ -907,7 +902,7 @@ describe('setupServerlessVolumes()', () => {
   });
 
   test('should embed readStringSecrets output in operator settings.json', async () => {
-    mockFs(existingObjectStore);
+    createExistingObjectStore();
     const stringSecretsFixture = {
       'xpack.security.transport.ssl.keystore.secure_password': 'storepass',
       'xpack.security.authc.realms.jwt.jwt1.client_authentication.shared_secret': 'my_super_secret',
@@ -931,7 +926,7 @@ describe('setupServerlessVolumes()', () => {
   });
 
   test('should use SSL secrets file and embed string_secrets when ssl is enabled', async () => {
-    mockFs(existingObjectStore);
+    createExistingObjectStore();
     createMockIdpMetadataMock.mockResolvedValue('<xml/>');
     const stringSecretsFixture = {
       'xpack.security.http.ssl.keystore.secure_password': 'storepass',
@@ -954,7 +949,7 @@ describe('setupServerlessVolumes()', () => {
   });
 
   test('should mount the bundled secrets file when no secure files are passed', async () => {
-    mockFs(existingObjectStore);
+    createExistingObjectStore();
 
     const volumeCmd = await setupServerlessVolumes(log, { projectType, basePath: baseEsPath });
 
@@ -968,15 +963,14 @@ describe('setupServerlessVolumes()', () => {
   });
 
   test('should embed secure files as base64 file_secrets in an owner-only operator directory', async () => {
-    mockFs({
-      ...existingObjectStore,
-      '/creds/gcs.json': '{"type":"service_account"}',
-    });
+    createExistingObjectStore();
+    mkdirSync(`${KIBANA_ROOT}/creds`);
+    writeFileSync(`${KIBANA_ROOT}/creds/gcs.json`, '{"type":"service_account"}');
 
     const volumeCmd = await setupServerlessVolumes(log, {
       projectType,
       basePath: baseEsPath,
-      secureFiles: ['gcs.client.default.credentials_file=/creds/gcs.json'],
+      secureFiles: [`gcs.client.default.credentials_file=${KIBANA_ROOT}/creds/gcs.json`],
     });
 
     const encoded = Buffer.from('{"type":"service_account"}').toString('base64');
@@ -994,7 +988,7 @@ describe('setupServerlessVolumes()', () => {
   });
 
   test('should reject a malformed secure file entry', async () => {
-    mockFs(existingObjectStore);
+    createExistingObjectStore();
 
     await expect(
       setupServerlessVolumes(log, {
@@ -1050,9 +1044,6 @@ describe('runServerlessCluster()', () => {
 
   test('should start 2 serverless nodes', async () => {
     waitUntilClusterReadyMock.mockResolvedValue();
-    mockFs({
-      [baseEsPath]: {},
-    });
     execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
 
     await runServerlessCluster(log, { projectType, basePath: baseEsPath });
@@ -1074,9 +1065,6 @@ describe('runServerlessCluster()', () => {
 
   test('should start 2 serverless ES nodes and two UIAM containers when in UIAM mode', async () => {
     waitUntilClusterReadyMock.mockResolvedValue();
-    mockFs({
-      [baseEsPath]: {},
-    });
     execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
 
     await runServerlessCluster(log, { projectType, basePath: baseEsPath, uiam: true });
@@ -1105,9 +1093,6 @@ describe('runServerlessCluster()', () => {
 
   test(`should wait for serverless nodes to return 'green' status`, async () => {
     waitUntilClusterReadyMock.mockResolvedValue();
-    mockFs({
-      [baseEsPath]: {},
-    });
     execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
 
     await runServerlessCluster(log, { projectType, basePath: baseEsPath, waitForReady: true });
@@ -1118,10 +1103,6 @@ describe('runServerlessCluster()', () => {
 
   test(`should create SAML role mapping when ssl is passed`, async () => {
     waitUntilClusterReadyMock.mockResolvedValue();
-    mockFs({
-      [CA_CERT_PATH]: '',
-      [baseEsPath]: {},
-    });
     execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
     createMockIdpMetadataMock.mockResolvedValue('<xml/>');
 
@@ -1138,9 +1119,6 @@ describe('runServerlessCluster()', () => {
   test(`should wait for the security index`, async () => {
     waitUntilClusterReadyMock.mockResolvedValue();
     waitForSecurityIndexMock.mockResolvedValue();
-    mockFs({
-      [baseEsPath]: {},
-    });
     execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
 
     await runServerlessCluster(log, { projectType, basePath: baseEsPath, waitForReady: true });
@@ -1150,9 +1128,6 @@ describe('runServerlessCluster()', () => {
 
   test(`should not wait for the security index when security is disabled`, async () => {
     waitUntilClusterReadyMock.mockResolvedValue();
-    mockFs({
-      [baseEsPath]: {},
-    });
     execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
 
     await runServerlessCluster(log, {
@@ -1167,9 +1142,6 @@ describe('runServerlessCluster()', () => {
   test('should call onReady after the cluster is ready', async () => {
     waitUntilClusterReadyMock.mockResolvedValue();
     waitForSecurityIndexMock.mockResolvedValue();
-    mockFs({
-      [baseEsPath]: {},
-    });
     execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
 
     const onReady = jest.fn().mockResolvedValue(undefined);
@@ -1187,9 +1159,6 @@ describe('runServerlessCluster()', () => {
 
   test('should not call onReady when waitForReady is false', async () => {
     waitUntilClusterReadyMock.mockResolvedValue();
-    mockFs({
-      [baseEsPath]: {},
-    });
     execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
 
     const onReady = jest.fn().mockResolvedValue(undefined);
@@ -1198,9 +1167,6 @@ describe('runServerlessCluster()', () => {
   });
 
   test('should tear down already started containers when startup fails', async () => {
-    mockFs({
-      [baseEsPath]: {},
-    });
     execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
     execa.commandSync.mockImplementation(() => ({ stdout: 'es01\nes02\n' }));
     runUiamContainerMock.mockRejectedValue(new Error('uiam-cosmosdb failed to start'));
@@ -1227,7 +1193,8 @@ describe('stopServerlessCluster()', () => {
   });
 
   test('should remove the operator secrets directory', async () => {
-    mockFs({ [SERVERLESS_SECRETS_DIR]: { operator: { 'settings.json': '{}' } } });
+    mkdirSync(SERVERLESS_OPERATOR_PATH, { recursive: true });
+    writeFileSync(join(SERVERLESS_OPERATOR_PATH, 'settings.json'), '{}');
     execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
 
     await stopServerlessCluster(log, ['es01']);
@@ -1236,7 +1203,8 @@ describe('stopServerlessCluster()', () => {
   });
 
   test('should remove the operator secrets directory even when stopping fails', async () => {
-    mockFs({ [SERVERLESS_SECRETS_DIR]: { operator: { 'settings.json': '{}' } } });
+    mkdirSync(SERVERLESS_OPERATOR_PATH, { recursive: true });
+    writeFileSync(join(SERVERLESS_OPERATOR_PATH, 'settings.json'), '{}');
     execa.mockImplementation(() => Promise.reject(new Error('No such container: es01')));
 
     await expect(stopServerlessCluster(log, ['es01'])).rejects.toThrow('No such container');
