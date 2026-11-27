@@ -46,13 +46,13 @@ const mockUseUpgradeWithConflictsModal = useUpgradeWithConflictsModal as jest.Mo
 
 describe('usePrebuiltRulesUpgrade', () => {
   const mutateAsync = jest.fn().mockResolvedValue({});
-  const confirmLegacyMLJobs = jest.fn().mockResolvedValue(true);
+  const confirmMlRuleJobUpgrade = jest.fn().mockResolvedValue(true);
 
   beforeEach(() => {
     jest.clearAllMocks();
 
     mutateAsync.mockResolvedValue({});
-    confirmLegacyMLJobs.mockResolvedValue(true);
+    confirmMlRuleJobUpgrade.mockResolvedValue(true);
 
     mockUsePerformUpgradeRules.mockReturnValue({ mutateAsync });
     mockUsePrebuiltRulesCustomizationStatus.mockReturnValue({
@@ -61,7 +61,7 @@ describe('usePrebuiltRulesUpgrade', () => {
     mockUseIsInitializingPrebuiltRulesPackage.mockReturnValue(false);
     mockUseOutdatedMlJobsUpgradeModal.mockReturnValue({
       modal: null,
-      confirmLegacyMLJobs,
+      confirmMlRuleJobUpgrade,
       isLoading: false,
     });
     mockUseUpgradeWithConflictsModal.mockReturnValue({
@@ -200,7 +200,7 @@ describe('usePrebuiltRulesUpgrade', () => {
       await result.current.upgradeRulesToTarget(['ghost-rule-1', 'ghost-rule-2']);
     });
 
-    expect(confirmLegacyMLJobs).not.toHaveBeenCalled();
+    expect(confirmMlRuleJobUpgrade).not.toHaveBeenCalled();
     expect(mutateAsync).not.toHaveBeenCalled();
     expect(onUpgrade).not.toHaveBeenCalled();
     expect(result.current.loadingRules).toEqual([]);
@@ -220,7 +220,7 @@ describe('usePrebuiltRulesUpgrade', () => {
       await result.current.upgradeRules(['ghost-rule-1', 'ghost-rule-2']);
     });
 
-    expect(confirmLegacyMLJobs).not.toHaveBeenCalled();
+    expect(confirmMlRuleJobUpgrade).not.toHaveBeenCalled();
     expect(mutateAsync).not.toHaveBeenCalled();
     expect(onUpgrade).not.toHaveBeenCalled();
     expect(result.current.loadingRules).toEqual([]);
@@ -345,8 +345,8 @@ describe('usePrebuiltRulesUpgrade', () => {
       });
     });
 
-    it('does not call onUpgrade when the legacy-ML-jobs confirmation is cancelled', async () => {
-      confirmLegacyMLJobs.mockResolvedValueOnce(false);
+    it('does not call onUpgrade when the ML rule↔job upgrade confirmation is cancelled', async () => {
+      confirmMlRuleJobUpgrade.mockResolvedValueOnce(false);
       const onUpgrade = jest.fn();
 
       const { result } = renderHook(() => usePrebuiltRulesUpgrade({ onUpgrade }), {

@@ -153,15 +153,23 @@ export function usePrebuiltRulesUpgrade({
     usePrebuiltRulesUpgradeState(upgradeableRules);
   const ruleUpgradeStates = useMemo(() => Object.values(rulesUpgradeState), [rulesUpgradeState]);
 
-  const {
-    modal: confirmLegacyMlJobsUpgradeModal,
-    confirmLegacyMLJobs,
-    isLoading: areMlJobsLoading,
-  } = useOutdatedMlJobsUpgradeModal();
+  const { modal: confirmLegacyMlJobsUpgradeModal, confirmMlRuleJobUpgrade } =
+    useOutdatedMlJobsUpgradeModal();
   const { modal: upgradeConflictsModal, confirmConflictsUpgrade } = useUpgradeWithConflictsModal();
 
   const { mutateAsync: upgradeRulesRequest } = usePerformUpgradeRules();
   const upgradeRulesWithDryRun = useRulesUpgradeWithDryRun(confirmConflictsUpgrade);
+
+  const confirmLinkedMlJobUpgrades = useCallback(
+    async (ruleIds: RuleSignatureId[]) => {
+      const rulesForConfirm = ruleIds
+        .map((ruleId) => rulesUpgradeState[ruleId])
+        .filter((rule): rule is RuleUpgradeState => rule != null);
+
+      return confirmMlRuleJobUpgrade(rulesForConfirm);
+    },
+    [confirmMlRuleJobUpgrade, rulesUpgradeState]
+  );
 
   const upgradeRulesToResolved = useCallback(
     async (ruleIds: RuleSignatureId[]) => {
@@ -182,8 +190,8 @@ export function usePrebuiltRulesUpgrade({
       setLoadingRules((prev) => [...prev, ...ruleIds]);
 
       try {
-        // Handle MLJobs modal
-        if (!(await confirmLegacyMLJobs())) {
+        // Tie ML job updates to rule upgrades when linked job IDs change.
+        if ((await confirmLinkedMlJobUpgrades(ruleIds)) === false) {
           return;
         }
 
@@ -204,7 +212,7 @@ export function usePrebuiltRulesUpgrade({
         setLoadingRules((prev) => prev.filter((id) => !upgradedRuleIdsSet.has(id)));
       }
     },
-    [rulesUpgradeState, confirmLegacyMLJobs, upgradeRulesWithDryRun, onUpgrade]
+    [rulesUpgradeState, confirmLinkedMlJobUpgrades, upgradeRulesWithDryRun, onUpgrade]
   );
 
   const upgradeRulesToTarget = useCallback(
@@ -225,8 +233,8 @@ export function usePrebuiltRulesUpgrade({
       setLoadingRules((prev) => [...prev, ...ruleIds]);
 
       try {
-        // Handle MLJobs modal
-        if (!(await confirmLegacyMLJobs())) {
+        // Tie ML job updates to rule upgrades when linked job IDs change.
+        if ((await confirmLinkedMlJobUpgrades(ruleIds)) === false) {
           return;
         }
 
@@ -247,7 +255,7 @@ export function usePrebuiltRulesUpgrade({
         setLoadingRules((prev) => prev.filter((id) => !upgradedRuleIdsSet.has(id)));
       }
     },
-    [confirmLegacyMLJobs, onUpgrade, rulesUpgradeState, upgradeRulesRequest]
+    [confirmLinkedMlJobUpgrades, onUpgrade, rulesUpgradeState, upgradeRulesRequest]
   );
 
   const upgradeRules = useCallback(
@@ -270,8 +278,8 @@ export function usePrebuiltRulesUpgrade({
     setLoadingRules((prev) => [...prev, ...upgradeableRules.map((rule) => rule.rule_id)]);
 
     try {
-      // Handle MLJobs modal
-      if (!(await confirmLegacyMLJobs())) {
+      // Tie ML job updates to rule upgrades when linked job IDs change.
+      if ((await confirmMlRuleJobUpgrade(upgradeableRules)) === false) {
         return;
       }
 
@@ -301,7 +309,7 @@ export function usePrebuiltRulesUpgrade({
     upgradeableRules,
     upgradeRulesWithDryRun,
     upgradeRulesRequest,
-    confirmLegacyMLJobs,
+    confirmMlRuleJobUpgrade,
     isRulesCustomizationEnabled,
     performUpgradeFilter,
   ]);
@@ -315,8 +323,8 @@ export function usePrebuiltRulesUpgrade({
     setLoadingRules((prev) => [...prev, ...upgradeableRules.map((rule) => rule.rule_id)]);
 
     try {
-      // Handle MLJobs modal
-      if (!(await confirmLegacyMLJobs())) {
+      // Tie ML job updates to rule upgrades when linked job IDs change.
+      if ((await confirmMlRuleJobUpgrade(upgradeableRules)) === false) {
         return;
       }
 
@@ -335,7 +343,7 @@ export function usePrebuiltRulesUpgrade({
       setLoadingRules([]);
     }
   }, [
-    confirmLegacyMLJobs,
+    confirmMlRuleJobUpgrade,
     filterOptions?.ruleIds,
     onUpgrade,
     performUpgradeFilter,
@@ -554,7 +562,7 @@ export function usePrebuiltRulesUpgrade({
     ruleUpgradeStates,
     upgradeReviewResponse,
     isFetched,
-    isLoading: isLoading || areMlJobsLoading,
+    isLoading,
     isFetching,
     isRefetching,
     isInitializingPrebuiltRulesPackage,

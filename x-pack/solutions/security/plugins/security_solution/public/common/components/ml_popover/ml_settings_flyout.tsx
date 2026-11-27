@@ -20,6 +20,10 @@ import { MlJobSettingsContent } from './ml_job_settings_content';
 
 export const ML_SETTINGS_FLYOUT_TEST_ID = 'ml-settings-flyout';
 
+/** Default flyout width: fits search + Groups + Elastic/Custom filters on one row. */
+const ML_JOB_SETTINGS_FLYOUT_SIZE = 720;
+const ML_JOB_SETTINGS_FLYOUT_MIN_WIDTH = 680;
+
 export interface MlSettingsFlyoutProps {
   onClose: () => void;
 }
@@ -46,7 +50,9 @@ export const MlSettingsFlyout = React.memo(({ onClose }: MlSettingsFlyoutProps) 
       data-test-subj={ML_SETTINGS_FLYOUT_TEST_ID}
       focusTrapProps={{ returnFocus: false }}
       onClose={onClose}
-      size="m"
+      size={ML_JOB_SETTINGS_FLYOUT_SIZE}
+      minWidth={ML_JOB_SETTINGS_FLYOUT_MIN_WIDTH}
+      resizable
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">

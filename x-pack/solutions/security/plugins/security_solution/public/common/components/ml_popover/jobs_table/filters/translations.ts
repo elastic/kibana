@@ -41,3 +41,17 @@ export const SHOW_CUSTOM_JOBS = i18n.translate(
     defaultMessage: 'Custom jobs',
   }
 );
+
+export const SHOW_PREBUILT_JOBS = i18n.translate(
+  'xpack.securitySolution.components.mlPopover.jobsTable.filters.showPrebuiltJobsLabel',
+  {
+    defaultMessage: 'Pre-built jobs',
+  }
+);
+
+export const SHOW_INTEGRATION_JOBS = i18n.translate(
+  'xpack.securitySolution.components.mlPopover.jobsTable.filters.showIntegrationJobsLabel',
+  {
+    defaultMessage: 'Integration jobs',
+  }
+);

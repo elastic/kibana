@@ -16,13 +16,19 @@ import { useFetchJobsSummaryQuery } from '../../ml/hooks/use_fetch_jobs_summary_
 import { useMlCapabilities } from '../../ml/hooks/use_ml_capabilities';
 import * as i18n from '../../ml/translations';
 import type { SecurityJob } from '../types';
+import type { Module } from '../types';
+import { useFetchFleetMlModulesQuery } from './use_fetch_fleet_ml_modules_query';
 import { useFetchModulesQuery } from './use_fetch_modules_query';
 import { useFetchRecognizerQuery } from './use_fetch_recognizer_query';
-import { createSecurityJobs } from './use_security_jobs_helpers';
+import { createSecurityJobsBySource } from './use_security_jobs_helpers';
 
 export interface UseSecurityJobsReturn {
   loading: boolean;
   jobs: SecurityJob[];
+  /** ML jobs from Fleet packages (`ml-module` saved objects). */
+  integrationJobs: SecurityJob[];
+  /** Fleet `ml-module` packages available for the Integration jobs tab. */
+  fleetModules: Module[];
   isMlAdmin: boolean;
   isLicensed: boolean;
   refetch: inputsModel.Refetch;
@@ -66,6 +72,12 @@ export const useSecurityJobs = (): UseSecurityJobsReturn => {
   } = useFetchModulesQuery({}, { enabled: isMlEnabled, onError });
 
   const {
+    data: fleetModules,
+    isFetching: isFleetModulesFetching,
+    refetch: refetchFleetModules,
+  } = useFetchFleetMlModulesQuery({ enabled: isMlEnabled, onError });
+
+  const {
     data: compatibleModules,
     isFetching: isRecognizerFetching,
     refetch: refetchRecognizer,
@@ -77,21 +89,33 @@ export const useSecurityJobs = (): UseSecurityJobsReturn => {
   const refetch = useCallback(() => {
     refetchJobsSummary();
     refetchModules();
+    refetchFleetModules();
     refetchRecognizer();
-  }, [refetchJobsSummary, refetchModules, refetchRecognizer]);
+  }, [refetchFleetModules, refetchJobsSummary, refetchModules, refetchRecognizer]);
 
-  const jobs = useMemo(() => {
-    if (jobSummaryData && modulesData && compatibleModules) {
-      return createSecurityJobs(jobSummaryData, modulesData, compatibleModules);
+  const { jobs, integrationJobs } = useMemo(() => {
+    if (jobSummaryData && modulesData && compatibleModules && fleetModules) {
+      return createSecurityJobsBySource(
+        jobSummaryData,
+        modulesData,
+        compatibleModules,
+        fleetModules
+      );
     }
-    return [];
-  }, [compatibleModules, jobSummaryData, modulesData]);
+    return { jobs: [], integrationJobs: [] };
+  }, [compatibleModules, fleetModules, jobSummaryData, modulesData]);
 
   return {
     isLicensed,
     isMlAdmin,
     jobs,
-    loading: isJobSummaryFetching || isModulesFetching || isRecognizerFetching,
+    integrationJobs,
+    fleetModules: fleetModules ?? [],
+    loading:
+      isJobSummaryFetching ||
+      isModulesFetching ||
+      isFleetModulesFetching ||
+      isRecognizerFetching,
     refetch,
   };
 };
