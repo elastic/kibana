@@ -76,6 +76,7 @@ const DestinationDeleteFooter = ({
       {isConfirmingDelete && (
         <DeleteDestinationConfirmation
           destinationName={destinationName}
+          mapRemovalName={destinationName}
           onCancel={() => setIsConfirmingDelete(false)}
           onConfirm={() => {
             onDelete();

@@ -11,12 +11,14 @@ import { i18n } from '@kbn/i18n';
 
 interface DeleteDestinationConfirmationProps {
   destinationName: string;
+  mapRemovalName?: string;
   onCancel: () => void;
   onConfirm: () => void;
 }
 
 export const DeleteDestinationConfirmation = ({
   destinationName,
+  mapRemovalName,
   onCancel,
   onConfirm,
 }: DeleteDestinationConfirmationProps) => {
@@ -41,9 +43,15 @@ export const DeleteDestinationConfirmation = ({
       )}
       buttonColor="danger"
     >
-      {i18n.translate('xpack.streams.destinations.deleteDestinationConfirmDescription', {
-        defaultMessage: 'This permanently removes the destination from the streams unit.',
-      })}
+      {mapRemovalName !== undefined
+        ? i18n.translate('xpack.streams.destinations.deleteDestinationMapConfirmDescription', {
+            defaultMessage:
+              'Removes {name} from the map. Changes take effect when you save the map.',
+            values: { name: mapRemovalName },
+          })
+        : i18n.translate('xpack.streams.destinations.deleteDestinationConfirmDescription', {
+            defaultMessage: 'This permanently removes the destination from the streams unit.',
+          })}
     </EuiConfirmModal>
   );
 };

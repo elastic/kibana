@@ -12,6 +12,7 @@ import type { ResolvedDestinationIndex } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { useUnitId } from '../../../hooks/use_unit_id';
+import { withReservedComponents } from '../../../services/unit_pipeline';
 import { createUnitRepository, type Unit } from '../../../services/unit_repository';
 import {
   getDestinationViewModels,
@@ -46,8 +47,8 @@ export interface DestinationsController {
   selectedDestination?: DestinationViewModel;
   isCreateModalOpen: boolean;
   isRefreshingUnit: boolean;
-  /** The unit new destinations are validated against. */
   unitDefinition: Unit;
+  reservedUnitDefinition: Unit;
   isUnitSaving: boolean;
   persistenceError?: string;
   apiKeyError?: string;
@@ -195,6 +196,14 @@ export const useDestinations = ({
     (state) => state.context.persistenceError
   );
   const unitDefinition = useSelector(destinationsActorRef, (state) => state.context.unitDefinition);
+  const persistedUnitDefinition = useSelector(
+    destinationsActorRef,
+    (state) => state.context.persistedUnitDefinition
+  );
+  const reservedUnitDefinition = useMemo(
+    () => withReservedComponents(unitDefinition, persistedUnitDefinition),
+    [unitDefinition, persistedUnitDefinition]
+  );
   const apiKeyError = useSelector(destinationsActorRef, (state) => state.context.apiKeyError);
   const isCreatingDestination = useSelector(
     destinationsActorRef,
@@ -286,6 +295,7 @@ export const useDestinations = ({
       isCreateModalOpen,
       isRefreshingUnit,
       unitDefinition,
+      reservedUnitDefinition,
       isUnitSaving,
       persistenceError,
       apiKeyError,
@@ -334,6 +344,7 @@ export const useDestinations = ({
       apiKeyError,
       tableState,
       unitDefinition,
+      reservedUnitDefinition,
     ]
   );
 };

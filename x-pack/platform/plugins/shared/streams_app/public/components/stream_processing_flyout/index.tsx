@@ -31,11 +31,13 @@ import { SUPPORTED_COMPONENT_CATALOGUE_SCHEMA_VERSIONS } from '@kbn/streams-sche
 import { useDiscardConfirm } from '../../hooks/use_discard_confirm';
 import { useKibana } from '../../hooks/use_kibana';
 import { createComponentChecker, useComponentCatalogue } from '../../services/component_catalogue';
+import { getProcessorIdsOnUnsavedPipelines } from '../../services/unit_component_save';
 import { usedComponentIds } from '../../services/unit_pipeline';
 import { getSharedProcessorIds, type DraftProcessor } from '../../services/unit_processing';
 import type { ComponentReferenceOption } from '../component_definition_form';
 import {
   useCanvasEvents,
+  useCanvasPersistedUnit,
   useCanvasUnitDefinition,
   type CanvasProcessingFlyout,
 } from '../stream_management/data_management/stream_detail_canvas/state_management';
@@ -44,6 +46,7 @@ import { ProcessorList } from './processor_list';
 import {
   deleteAllProcessorsPromptOptions,
   discardProcessingChangesPromptOptions,
+  sharedProcessingUnsavedMessage,
 } from './prompt_options';
 import { SaveAndApplyButton } from './save_and_apply_button';
 
@@ -60,15 +63,18 @@ const closeLabel = i18n.translate('xpack.streams.processingFlyout.close', {
 export function ProcessingFlyout({
   flyout,
   readOnly = false,
+  isSlotUnsaved = false,
 }: {
   flyout: CanvasProcessingFlyout;
   /** Lists the processors without editing, for users without the V2 manage privilege. */
   readOnly?: boolean;
+  isSlotUnsaved?: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
   const headerId = useGeneratedHtmlId();
   const { closeProcessingFlyout } = useCanvasEvents();
   const unit = useCanvasUnitDefinition();
+  const savedUnit = useCanvasPersistedUnit();
   const { catalogue, editableCatalogue, unsupportedVersion, stale, loading, error, refresh } =
     useComponentCatalogue();
 
@@ -97,10 +103,22 @@ export function ProcessingFlyout({
     () => createComponentChecker({ streamsRepositoryClient }),
     [streamsRepositoryClient]
   );
-  const componentIds = useMemo(() => usedComponentIds(unit), [unit]);
+  const componentIds = useMemo(
+    () => new Set([...usedComponentIds(unit), ...usedComponentIds(savedUnit)]),
+    [unit, savedUnit]
+  );
 
   const isCatalogueUnsupported = unsupportedVersion !== undefined;
-  const canEdit = editable && !isCatalogueUnsupported && !readOnly;
+  const canEditSlot = editable && !isCatalogueUnsupported && !readOnly;
+  const canEdit = canEditSlot && !isSlotUnsaved;
+  const isEditingSlot = canEdit && isEditing;
+  const blockedProcessorIds = useMemo(
+    () => getProcessorIdsOnUnsavedPipelines(savedUnit, unit),
+    [savedUnit, unit]
+  );
+  const hasBlockedProcessor = steps.some(
+    ({ processor: { id } }) => id !== undefined && blockedProcessorIds.has(id)
+  );
   // Steps are still listed from an unsupported catalogue, but nothing in it is interpreted, so the
   // list falls back to raw types for display names.
   const listCatalogue = useMemo(
@@ -184,32 +202,37 @@ export function ProcessingFlyout({
         />
       );
     }
-    if (steps.length === 0 && !isEditing) {
-      return <NoProcessorsPrompt canAdd={canEdit} onAddProcessor={createStep} />;
-    }
     return (
-      <ProcessorList
-        catalogue={listCatalogue}
-        steps={steps}
-        editingKey={editingKey}
-        isEditing={isEditing}
-        newStepPosition={createPosition}
-        editable={canEdit && !isSaving}
-        telemetry={telemetry}
-        diagnostics={diagnostics}
-        sharedProcessorIds={sharedProcessorIds}
-        componentRefs={componentRefs}
-        checkComponent={checkComponent}
-        componentIds={componentIds}
-        onCreate={createStep}
-        onEdit={editStep}
-        onDelete={deleteStep}
-        onDuplicate={duplicateStep}
-        onMove={moveStep}
-        onCommit={commitStep}
-        onCancel={cancelStep}
-        onChange={changeStep}
-      />
+      <>
+        {steps.length === 0 && !isEditingSlot ? (
+          <NoProcessorsPrompt canAdd={canEdit} onAddProcessor={createStep} />
+        ) : null}
+        {steps.length > 0 || isEditingSlot ? (
+          <ProcessorList
+            catalogue={listCatalogue}
+            steps={steps}
+            editingKey={editingKey}
+            isEditing={isEditingSlot}
+            newStepPosition={createPosition}
+            editable={canEdit && !isSaving}
+            telemetry={telemetry}
+            diagnostics={diagnostics}
+            sharedProcessorIds={sharedProcessorIds}
+            blockedProcessorIds={blockedProcessorIds}
+            componentRefs={componentRefs}
+            checkComponent={checkComponent}
+            componentIds={componentIds}
+            onCreate={createStep}
+            onEdit={editStep}
+            onDelete={deleteStep}
+            onDuplicate={duplicateStep}
+            onMove={moveStep}
+            onCommit={commitStep}
+            onCancel={cancelStep}
+            onChange={changeStep}
+          />
+        ) : null}
+      </>
     );
   };
 
@@ -293,6 +316,39 @@ export function ProcessingFlyout({
                   defaultMessage:
                     'This processing uses telemetry-specific processor lists. Edit it in the YAML configuration.',
                 })}
+              />
+              <EuiSpacer size="m" />
+            </>
+          ) : null}
+          {canEditSlot && isSlotUnsaved ? (
+            <>
+              <KbnWarningCallout
+                announceOnMount
+                size="s"
+                title={i18n.translate('xpack.streams.processingFlyout.unsavedSlotTitle', {
+                  defaultMessage: 'Save the map first',
+                })}
+                text={i18n.translate('xpack.streams.processingFlyout.unsavedSlotText', {
+                  defaultMessage:
+                    'This connection has unsaved changes. Close this flyout and save the map. If the connection is incomplete, reconnect it before saving.',
+                })}
+                data-test-subj="streamsProcessingFlyoutUnsavedSlot"
+              />
+              <EuiSpacer size="m" />
+            </>
+          ) : null}
+          {canEdit && !isSaving && hasBlockedProcessor ? (
+            <>
+              <KbnWarningCallout
+                announceOnMount
+                size="s"
+                title={i18n.translate(
+                  'xpack.streams.processingFlyout.sharedProcessingUnsavedTitle',
+                  {
+                    defaultMessage: 'Some processors are read only',
+                  }
+                )}
+                text={sharedProcessingUnsavedMessage}
               />
               <EuiSpacer size="m" />
             </>
@@ -405,8 +461,8 @@ export function ProcessingFlyout({
           <EuiFlexItem grow={false}>
             <SaveAndApplyButton
               isSaving={isSaving}
-              isDisabled={!canEdit || !hasChanges || isEditing}
-              isEditing={isEditing}
+              isDisabled={!canEdit || !hasChanges || isEditingSlot}
+              isEditing={isEditingSlot}
               onClick={() => ref.send({ type: 'flyout.save' })}
             />
           </EuiFlexItem>

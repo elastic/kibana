@@ -73,6 +73,8 @@ interface SourceDetailsFlyoutProps {
   >;
   source: SourceViewModel;
   onClose: () => void;
+  onDelete?: (sourceId: string) => void;
+  isDeleteDisabled?: boolean;
   /** Hides API key management and deletion for users without the V2 manage privilege. */
   readOnly?: boolean;
 }
@@ -81,6 +83,8 @@ export const SourceDetailsFlyout = ({
   sources,
   source,
   onClose,
+  onDelete,
+  isDeleteDisabled = false,
   readOnly = false,
 }: SourceDetailsFlyoutProps) => {
   const {
@@ -277,6 +281,7 @@ export const SourceDetailsFlyout = ({
           <EuiFlyoutFooter>
             <EuiButton
               color="danger"
+              isDisabled={isDeleteDisabled}
               onClick={() => setIsConfirmingDelete(true)}
               data-test-subj="streamsSourceDeleteButton"
             >
@@ -290,9 +295,10 @@ export const SourceDetailsFlyout = ({
       {isConfirmingDelete && (
         <DeleteSourcesConfirmation
           count={1}
+          mapRemovalName={onDelete ? sourceName : undefined}
           onCancel={() => setIsConfirmingDelete(false)}
           onConfirm={() => {
-            deleteSource(source.id);
+            (onDelete ?? deleteSource)(source.id);
             setIsConfirmingDelete(false);
             onClose();
           }}

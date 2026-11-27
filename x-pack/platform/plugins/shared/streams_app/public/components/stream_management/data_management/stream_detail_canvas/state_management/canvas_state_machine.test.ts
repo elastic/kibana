@@ -17,14 +17,19 @@ import { createStreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import { createActor, createMachine, waitFor, type Actor, type SnapshotFrom } from 'xstate';
 import {
+  canConnectLine,
   connectLine,
   disconnectLine,
-  withoutUnconnectedWiring,
+  withPublishedTelemetry,
 } from '../../../../../services/unit_connections';
 import type { ProcessingNodeRef } from '../../../../../services/unit_graph';
 import { createDefaultUnit, type Unit } from '../../../../../services/unit_repository';
 import type { UnitDestination } from '@kbn/streams-schema';
-import { withUnitDestinations } from '../../../../streams_layout/destinations/destination_models';
+import {
+  getUnitDestinations,
+  withUnitDestinations,
+} from '../../../../streams_layout/destinations/destination_models';
+import { EMPTY_DESTINATION_CREATION_FORM } from '../../../../streams_layout/destinations/types';
 import { canvasStateMachine, createCanvasMachineImplementations } from './canvas_state_machine';
 import type { destinationsStateMachine } from '../../../../streams_layout/destinations/state_machines/destinations_state_machine';
 import type { DestinationApiKeyGenerationDeps } from '../../../../streams_layout/destinations/destination_api_keys';
@@ -75,7 +80,8 @@ const processor = {
 
 const startCanvas = (
   persistUnitDefinition: (unit: Unit) => Promise<Unit>,
-  unit: Unit = loadedUnit()
+  unit: Unit = loadedUnit(),
+  history = { hold: jest.fn(), reset: jest.fn(), discard: jest.fn() }
 ) => {
   const core = coreMock.createStart();
   // The destinations machine resolves each destination's indices when it loads.
@@ -93,13 +99,14 @@ const startCanvas = (
       },
       timeState,
       timeState$: EMPTY,
+      loadSourceEnvironment: async () => ({ managedInputBaseUrl: 'https://inputs.example.com' }),
       loadUnitDefinition: async () => unit,
       persistUnitDefinition,
-      createHistoryRef: { current: { hold: () => {}, reset: () => {}, discard: () => {} } },
+      createHistoryRef: { current: history },
     })
   );
   const canvas = createActor(machine, { input: defaultCanvasUrlState }).start();
-  return { canvas, toasts: core.notifications.toasts };
+  return { canvas, http: core.http, toasts: core.notifications.toasts };
 };
 
 type Canvas = ReturnType<typeof startCanvas>['canvas'];
@@ -125,6 +132,117 @@ const stageProcessorAndSave = (canvas: Canvas, slot: ProcessingNodeRef = sourceS
 };
 
 describe('canvas processing flyout', () => {
+  it('preserves a shared, untouched processor when adding a separate processor', async () => {
+    const saved = loadedUnit();
+    const shared = { ...processor, id: 'shared', description: '' };
+    saved.unit.processors = [shared];
+    const [pipeline] = saved.unit.pipelines;
+    pipeline.config.splice(1, 0, { name: 'processors', value: [shared.id] });
+    saved.unit.sources.push({ id: 'other', type: 'otlp', supported_telemetry: ['logs'] });
+    saved.unit.pipelines.push({
+      ...pipeline,
+      id: 'other-pipeline',
+      config: [{ name: 'sources', value: ['other'] }, ...pipeline.config.slice(1)],
+    });
+    const staged = disconnectLine(
+      saved,
+      { kind: 'processing', ref: { kind: 'pipeline', pipelineId: 'other-pipeline' } },
+      { kind: 'destination', id: 'es' }
+    );
+    const persist = jest.fn(async (unit: Unit) => unit);
+    const { canvas } = startCanvas(persist, saved);
+    await waitForUnitReady(canvas);
+    canvas.send({ type: 'unit.stage', unitDefinition: staged });
+    stageProcessorAndSave(canvas);
+    await waitForUnitReady(canvas);
+
+    expect(persist).toHaveBeenCalledTimes(1);
+    expect(persist.mock.calls[0][0].unit.processors).toStrictEqual([
+      shared,
+      expect.objectContaining({ id: 'add-fields-1' }),
+    ]);
+    expect(canvas.getSnapshot().context.nextUnit.unit.pipelines[1]).toEqual(
+      staged.unit.pipelines[1]
+    );
+  });
+
+  it('keeps a clean map clean after adding and removing the first draft processor', async () => {
+    const persist = jest.fn(async (unit: Unit) => unit);
+    const { canvas } = startCanvas(persist);
+    await waitForUnitReady(canvas);
+    const flyout = openFlyout(canvas);
+    flyout.ref.send({ type: 'step.create' });
+    flyout.ref.send({ type: 'step.commit', processor });
+    flyout.ref.send({ type: 'step.delete', key: 'step-0' });
+    flyout.ref.send({ type: 'flyout.save' });
+    await waitFor(canvas, (snapshot) => snapshot.context.processingFlyout === undefined);
+
+    const { unit, nextUnit } = canvas.getSnapshot().context;
+    expect(nextUnit).toBe(unit);
+    expect(unit.unit).not.toHaveProperty('processors');
+  });
+
+  it('rejects processing on a pipeline with unsaved changes', async () => {
+    const persist = jest.fn(async (unit: Unit) => unit);
+    const { canvas } = startCanvas(persist);
+    await waitForUnitReady(canvas);
+    const staged = loadedUnit();
+    staged.unit.pipelines[0].config.pop();
+    canvas.send({ type: 'unit.stage', unitDefinition: staged });
+
+    const flyout = stageProcessorAndSave(canvas);
+    expect(flyout.ref.getSnapshot().context.saveError).toBe(
+      "This processing is on a connection you haven't saved yet. Save the map, then apply the processing."
+    );
+    expect(persist).not.toHaveBeenCalled();
+    expect(canvas.getSnapshot().context.nextUnit).toEqual(staged);
+  });
+
+  it('keeps unrelated unhooked wiring staged after a processing save', async () => {
+    const saved = loadedUnit();
+    const persist = jest.fn(async (unit: Unit) => unit);
+    const { canvas } = startCanvas(persist, saved);
+    await waitForUnitReady(canvas);
+    const staged = loadedUnit();
+    const other = {
+      ...staged.unit.pipelines[0],
+      id: 'other',
+      config: [],
+    };
+    staged.unit.pipelines.push(other);
+    canvas.send({ type: 'unit.stage', unitDefinition: staged });
+    stageProcessorAndSave(canvas);
+    await waitFor(canvas, (snapshot) => snapshot.context.processingFlyout === undefined);
+    const { unit, nextUnit } = canvas.getSnapshot().context;
+    expect(persist).toHaveBeenCalledTimes(1);
+    expect(persist.mock.calls[0][0]).toEqual(unit);
+    expect(unit.unit.pipelines.map(({ id }) => id)).toEqual(['p-src']);
+    expect(unit.unit.processors).toEqual([expect.objectContaining({ id: 'add-fields-1' })]);
+    expect(nextUnit.unit.pipelines).toEqual([...unit.unit.pipelines, other]);
+  });
+
+  it('saves the staged map after processing persistence fails', async () => {
+    const persist = jest.fn(async (unit: Unit) => unit).mockRejectedValueOnce(new Error('boom'));
+    const { canvas } = startCanvas(persist);
+    await waitForUnitReady(canvas);
+    const staged = loadedUnit();
+    staged.unit.sources[0].name = 'Renamed';
+    canvas.send({ type: 'unit.stage', unitDefinition: staged });
+    stageProcessorAndSave(canvas);
+    await waitFor(canvas, (snapshot) => snapshot.matches({ ready: { unit: 'saveFailed' } }));
+    const { nextUnit, savingUnit, savingStagedUnit, stagedRollbackUnit } =
+      canvas.getSnapshot().context;
+    expect(nextUnit).toEqual(staged);
+    expect([savingUnit, savingStagedUnit, stagedRollbackUnit]).toEqual([
+      undefined,
+      undefined,
+      undefined,
+    ]);
+    canvas.send({ type: 'unit.save' });
+    await waitForUnitReady(canvas);
+    expect(persist.mock.calls.at(-1)?.[0]).toEqual(withPublishedTelemetry(staged));
+  });
+
   it("saves new processing into the source pipeline's own slot", async () => {
     const persisted: Unit[] = [];
     const { canvas, toasts } = startCanvas(async (unit) => {
@@ -237,6 +355,26 @@ describe('canvas processing flyout', () => {
     await waitFor(canvas, (snapshot) => snapshot.context.processingFlyout === undefined);
     await waitForUnitReady(canvas);
     expect(canvas.getSnapshot().context.nodePositions).toEqual({ es: { x: 370, y: 20 } });
+  });
+
+  it('keeps shared source wiring after adding and removing the first draft processor', async () => {
+    const saved = loadedUnit();
+    saved.unit.destinations.push({ id: 'debug', type: 'debug', supported_telemetry: ['logs'] });
+    saved.unit.pipelines[0].config[1] = { name: 'destinations', value: ['es', 'debug'] };
+    const persist = jest.fn(async (unit: Unit) => unit);
+    const { canvas } = startCanvas(persist, saved);
+    await waitForUnitReady(canvas);
+
+    canvas.send({ type: 'processing.open', line: { sourceId: 'src', destinationId: 'debug' } });
+    const flyout = canvas.getSnapshot().context.processingFlyout;
+    expect(flyout).toBeDefined();
+    flyout?.ref.send({ type: 'step.create' });
+    flyout?.ref.send({ type: 'step.commit', processor });
+    flyout?.ref.send({ type: 'step.delete', key: 'step-0' });
+    flyout?.ref.send({ type: 'flyout.save' });
+    await waitFor(canvas, (snapshot) => snapshot.context.processingFlyout === undefined);
+
+    expect(canvas.getSnapshot().context.unit.unit).toEqual(saved.unit);
   });
 
   it('moves a shared source line onto its own pipeline only when its processing saves', async () => {
@@ -478,7 +616,125 @@ describe('canvas routing flyout', () => {
   });
 });
 
+describe('canvas deletes', () => {
+  it.each([
+    { type: 'source.delete', sourceId: 'src' },
+    { type: 'destination.delete', destinationId: 'es' },
+  ] as const)('resyncs the children without persisting a $type event', async (event) => {
+    const persist = jest.fn(async (unit: Unit) => unit);
+    const { canvas } = startCanvas(persist);
+    await waitForUnitReady(canvas);
+    const { sourcesRef, destinationsRef } = canvas.getSnapshot().context;
+
+    if (event.type === 'source.delete') {
+      sourcesRef.send(event);
+    } else {
+      destinationsRef.send(event);
+    }
+    await waitForUnitReady(canvas);
+
+    expect(persist).not.toHaveBeenCalled();
+    const { nextUnit } = canvas.getSnapshot().context;
+    expect(nextUnit).toEqual(loadedUnit());
+    expect(sourcesRef.getSnapshot().context.unitDefinition).toEqual(nextUnit);
+    expect(destinationsRef.getSnapshot().context.unitDefinition).toEqual(nextUnit);
+    expect(sourcesRef.getSnapshot().context.persistedUnitDefinition).toEqual(nextUnit);
+    expect(destinationsRef.getSnapshot().context.persistedUnitDefinition).toEqual(nextUnit);
+    canvas.stop();
+  });
+
+  it('closes a removed source and restores its metadata on undo without revoking keys', async () => {
+    const persist = jest.fn(async (unit: Unit) => unit);
+    const unit = loadedUnit();
+    const { canvas, http } = startCanvas(persist, unit);
+    await waitForUnitReady(canvas);
+    const { sourcesRef } = canvas.getSnapshot().context;
+    await waitFor(sourcesRef, (snapshot) => snapshot.matches({ environment: 'ready' }));
+    const metadata = sourcesRef.getSnapshot().context.metadataBySourceId.src;
+    expect(metadata.endpoint).toContain('https://inputs.example.com');
+    sourcesRef.send({ type: 'source.view', sourceId: 'src' });
+    expect(sourcesRef.getSnapshot().context.selectedSourceId).toBe('src');
+
+    canvas.send({
+      type: 'unit.stage',
+      unitDefinition: { ...unit, unit: { ...unit.unit, sources: [], pipelines: [] } },
+    });
+    expect(sourcesRef.getSnapshot().context.selectedSourceId).toBeUndefined();
+    expect(sourcesRef.getSnapshot().context.metadataBySourceId.src).toBeUndefined();
+    canvas.send({ type: 'unit.stage', unitDefinition: unit });
+
+    expect(sourcesRef.getSnapshot().context.metadataBySourceId.src).toEqual(metadata);
+    expect(persist).not.toHaveBeenCalled();
+    expect(http.fetch).not.toHaveBeenCalledWith(
+      '/internal/streams/sources/api_key',
+      expect.objectContaining({ method: 'DELETE' })
+    );
+    canvas.stop();
+  });
+});
+
+describe('canvas id allocation', () => {
+  const staged = loadedUnit();
+  const saved: Unit = {
+    ...staged,
+    unit: {
+      ...staged.unit,
+      sources: [
+        ...staged.unit.sources,
+        { id: 'us-store', name: 'Legacy', type: 'otlp', supported_telemetry: ['logs'] },
+        { id: 'intake', type: 'otlp', supported_telemetry: ['logs'] },
+      ],
+    },
+  };
+
+  const openSourceCreation = async () => {
+    const persist = jest.fn(async (unit: Unit) => unit);
+    const { canvas } = startCanvas(persist, saved);
+    await waitForUnitReady(canvas);
+    const { sourcesRef } = canvas.getSnapshot().context;
+    await waitFor(sourcesRef, (snapshot) => snapshot.matches({ environment: 'ready' }));
+    canvas.send({ type: 'unit.stage', unitDefinition: staged });
+    sourcesRef.send({ type: 'modal.openCreate' });
+    return { canvas, persist, sourcesRef };
+  };
+
+  it('gives a new source an id the saved unit does not use', async () => {
+    const { canvas, persist, sourcesRef } = await openSourceCreation();
+
+    sourcesRef.send({
+      type: 'source.create',
+      formData: { sourceType: 'otlp', sourceName: 'US Store', signals: ['logs'] },
+    });
+    await waitForUnitReady(canvas);
+
+    expect(persist.mock.calls[0]?.[0].unit.sources.map(({ id }) => id)).toContain('us-store-2');
+    canvas.stop();
+  });
+
+  it('reserves the displayed id of an unnamed saved source', async () => {
+    const { canvas, persist, sourcesRef } = await openSourceCreation();
+
+    sourcesRef.send({
+      type: 'source.create',
+      formData: { sourceType: 'otlp', sourceName: 'Intake', signals: ['logs'] },
+    });
+    await waitForUnitReady(canvas);
+
+    expect(persist).not.toHaveBeenCalled();
+    expect(sourcesRef.getSnapshot().matches({ configuring: 'supplyingConfiguration' })).toBe(true);
+    canvas.stop();
+  });
+});
+
 describe('canvas save', () => {
+  const archive: UnitDestination = {
+    id: 'archive',
+    type: 'elasticsearch',
+    supported_telemetry: ['logs'],
+  };
+  const withArchive = (unit: Unit): Unit =>
+    withUnitDestinations(unit, [...getUnitDestinations(unit), archive]);
+
   const processedUnit = (): Unit => {
     const processed = loadedUnit();
     processed.unit.processors = [{ id: 'tag', type: 'add_fields', supported_telemetry: ['logs'] }];
@@ -488,6 +744,30 @@ describe('canvas save', () => {
       { name: 'destinations', value: ['es'] },
     ];
     return processed;
+  };
+
+  const routedUnit = (): Unit => {
+    const routed = loadedUnit();
+    routed.unit.sources = [
+      ...routed.unit.sources,
+      { id: 'metrics-src', type: 'otlp', supported_telemetry: ['metrics'] },
+    ];
+    routed.unit.destinations = [
+      ...routed.unit.destinations,
+      { id: 'es-metrics', type: 'elasticsearch', supported_telemetry: ['metrics'] },
+    ];
+    routed.unit.pipelines[0].supported_telemetry = ['logs', 'metrics'];
+    routed.unit.pipelines[0].config = [
+      { name: 'sources', value: ['src', 'metrics-src'] },
+      {
+        name: 'routes',
+        value: [
+          { telemetry: ['logs'], destinations: ['es'] },
+          { telemetry: ['metrics'], destinations: ['es-metrics'] },
+        ],
+      },
+    ];
+    return routed;
   };
 
   const refuseToSave = async (processed: Unit, unhooked: Unit) => {
@@ -520,8 +800,44 @@ describe('canvas save', () => {
     ]);
 
     expect(await refuseToSave(processed, unhooked)).toBe(
-      'Connect each processing node to a destination before saving. To remove a processing node, delete all of its processors.'
+      'Connect each processing node to a destination before saving. To remove processors, undo the disconnect or reconnect the node and save the map first.'
     );
+  });
+
+  it('allows removal of processors after undoing the disconnect', async () => {
+    const saved = processedUnit();
+    const persist = jest.fn(async (unit: Unit) => unit);
+    const { canvas } = startCanvas(persist, saved);
+    await waitForUnitReady(canvas);
+    const unhooked = disconnectLine(
+      saved,
+      { kind: 'processing', ref: sourceSlot },
+      { kind: 'destination', id: 'es' }
+    );
+    canvas.send({ type: 'unit.stage', unitDefinition: unhooked });
+    canvas.send({ type: 'unit.save' });
+    await waitFor(canvas, (snapshot) => snapshot.matches({ ready: { unit: 'saveFailed' } }));
+    expect(persist).not.toHaveBeenCalled();
+
+    canvas.send({ type: 'unit.stage', unitDefinition: saved });
+    const flyout = openFlyout(canvas);
+    flyout.ref.send({ type: 'step.deleteAll' });
+    flyout.ref.send({ type: 'flyout.save' });
+    await waitFor(canvas, (snapshot) => snapshot.context.processingFlyout === undefined);
+    const { nextUnit } = canvas.getSnapshot().context;
+    expect(nextUnit.unit.processors).toEqual([]);
+
+    canvas.send({
+      type: 'unit.stage',
+      unitDefinition: disconnectLine(
+        nextUnit,
+        { kind: 'source', id: 'src' },
+        { kind: 'destination', id: 'es' }
+      ),
+    });
+    canvas.send({ type: 'unit.save' });
+    await waitForUnitReady(canvas);
+    expect(persist.mock.calls[1][0].unit.pipelines).toEqual([]);
   });
 
   it('keeps a processing node nothing feeds staged but refuses to save it', async () => {
@@ -537,7 +853,7 @@ describe('canvas save', () => {
     ]);
 
     expect(await refuseToSave(processed, unhooked)).toBe(
-      'Connect a source or a routing rule to each processing and routing node before saving. To remove a processing node, delete all of its processors.'
+      'Connect a source or a routing rule to each processing and routing node before saving. To remove processors, undo the disconnect or reconnect the node and save the map first.'
     );
   });
 
@@ -563,26 +879,7 @@ describe('canvas save', () => {
   });
 
   it('keeps a scoped rule whose source was unhooked staged but refuses to save it', async () => {
-    const routed = loadedUnit();
-    routed.unit.sources = [
-      ...routed.unit.sources,
-      { id: 'metrics-src', type: 'otlp', supported_telemetry: ['metrics'] },
-    ];
-    routed.unit.destinations = [
-      ...routed.unit.destinations,
-      { id: 'es-metrics', type: 'elasticsearch', supported_telemetry: ['metrics'] },
-    ];
-    routed.unit.pipelines[0].supported_telemetry = ['logs', 'metrics'];
-    routed.unit.pipelines[0].config = [
-      { name: 'sources', value: ['src', 'metrics-src'] },
-      {
-        name: 'routes',
-        value: [
-          { telemetry: ['logs'], destinations: ['es'] },
-          { telemetry: ['metrics'], destinations: ['es-metrics'] },
-        ],
-      },
-    ];
+    const routed = routedUnit();
     const unhooked = disconnectLine(
       routed,
       { kind: 'source', id: 'metrics-src' },
@@ -617,30 +914,21 @@ describe('canvas save', () => {
     );
   });
 
-  it('still persists a destination create while a line is unhooked, keeping the staged wiring', async () => {
+  it('writes only the created destination alongside the saved wiring and destinations', async () => {
     const processed = processedUnit();
+    const saved = withUnitDestinations(processed, [
+      ...getUnitDestinations(processed),
+      { id: 'legacy', type: 'elasticsearch', supported_telemetry: ['logs'] },
+    ]);
     const unhooked = disconnectLine(
       processed,
       { kind: 'processing', ref: sourceSlot },
       { kind: 'destination', id: 'es' }
     );
-    const withNewDestination: Unit = {
-      ...unhooked,
-      unit: {
-        ...unhooked.unit,
-        destinations: [
-          ...unhooked.unit.destinations,
-          { id: 'archive', type: 'elasticsearch', supported_telemetry: ['logs'] },
-        ],
-      },
-    };
-    // The repository stores the unit without the unhooked processing pipeline.
-    const stored = withoutUnconnectedWiring(withNewDestination);
-    const persisted: Unit[] = [];
-    const { canvas } = startCanvas(async (unit) => {
-      persisted.push(unit);
-      return stored;
-    }, processed);
+    const withNewDestination = withArchive(unhooked);
+    const persist = jest.fn(async (unit: Unit) => unit);
+    const history = { hold: jest.fn(), reset: jest.fn(), discard: jest.fn() };
+    const { canvas } = startCanvas(persist, saved, history);
     await waitForUnitReady(canvas);
 
     canvas.send({ type: 'unit.stage', unitDefinition: unhooked });
@@ -652,26 +940,112 @@ describe('canvas save', () => {
     });
     await waitForUnitReady(canvas);
 
-    expect(persisted).toEqual([withNewDestination]);
-    expect(stored.unit.pipelines).toEqual([]);
-    const { unit, nextUnit, error, sourcesRef, destinationsRef } = canvas.getSnapshot().context;
-    expect(unit).toEqual(stored);
+    const written = withArchive(saved);
+    expect(persist).toHaveBeenCalledWith(written, undefined);
+    const { unit, nextUnit, sourcesRef, destinationsRef } = canvas.getSnapshot().context;
+    expect(getUnitDestinations(unit).map(({ id }) => id)).toEqual(['es', 'legacy', 'archive']);
     expect(nextUnit).toEqual(withNewDestination);
-    expect(unit).not.toBe(nextUnit);
-    expect(error).toBeUndefined();
-    // Both component machines build their next change from the staged unit, not the stored one.
+    expect(getUnitDestinations(nextUnit).map(({ id }) => id)).toEqual(['es', 'archive']);
     expect(sourcesRef.getSnapshot().context.unitDefinition).toEqual(withNewDestination);
+    expect(sourcesRef.getSnapshot().context.persistedUnitDefinition).toEqual(written);
     expect(destinationsRef.getSnapshot().context.unitDefinition).toEqual(withNewDestination);
+    expect(destinationsRef.getSnapshot().context.persistedUnitDefinition).toEqual(written);
+    expect(history.hold).toHaveBeenCalledTimes(1);
+    expect(history.reset).toHaveBeenCalledTimes(1);
+    expect(history.discard).not.toHaveBeenCalled();
 
-    // A second component mutation must not discard the unhooked processing pipeline.
-    destinationsRef.send({ type: 'destination.delete', destinationId: 'archive' });
-    await waitFor(canvas, (snapshot) => !ready(snapshot));
+    canvas.stop();
+  });
+
+  it('restores staged edits after a failed destination create and keeps them through a same-id retry', async () => {
+    const saved = processedUnit();
+    const staged = disconnectLine(
+      saved,
+      { kind: 'processing', ref: sourceSlot },
+      { kind: 'destination', id: 'es' }
+    );
+    const persist = jest.fn(async (unit: Unit) => unit).mockRejectedValueOnce(new Error('boom'));
+    const history = { hold: jest.fn(), reset: jest.fn(), discard: jest.fn() };
+    const { canvas } = startCanvas(persist, saved, history);
+    await waitForUnitReady(canvas);
+    const { destinationsRef } = canvas.getSnapshot().context;
+    canvas.send({ type: 'unit.stage', unitDefinition: staged });
+
+    const submit = () => {
+      destinationsRef.send({ type: 'modal.openCreate' });
+      destinationsRef.send({
+        type: 'destination.create',
+        formData: {
+          ...EMPTY_DESTINATION_CREATION_FORM,
+          destinationName: 'Archive',
+          storageKind: 'external_storage',
+          s3: {
+            region: 'eu-west-1',
+            bucket: 'demo-bucket',
+            prefix: '',
+            accessKeyId: 'AKIA',
+            secretAccessKey: 'shh',
+          },
+        },
+      });
+    };
+
+    submit();
+    await waitFor(canvas, failed);
+    const { nextUnit: afterFailure } = canvas.getSnapshot().context;
+    const destinationAfterFailure = destinationsRef.getSnapshot();
+    expect(destinationAfterFailure.matches({ configuring: 'failed' })).toBe(true);
+    expect(history.hold).toHaveBeenCalledTimes(1);
+    expect(history.discard).toHaveBeenCalledTimes(1);
+    expect(history.reset).not.toHaveBeenCalled();
+
+    destinationsRef.send({ type: 'modal.closeCreate' });
+    submit();
     await waitForUnitReady(canvas);
 
-    expect(persisted).toHaveLength(2);
-    expect(persisted[1].unit.destinations.map(({ id }) => id)).toEqual(['es']);
-    expect(persisted[1].unit.pipelines).toEqual(unhooked.unit.pipelines);
-    expect(canvas.getSnapshot().context.nextUnit.unit.pipelines).toEqual(unhooked.unit.pipelines);
+    expect(persist).toHaveBeenCalledTimes(2);
+    const written = persist.mock.calls.map(([unit]) => unit);
+    expect(written.map((unit) => getUnitDestinations(unit).map(({ id }) => id))).toEqual([
+      ['es', 'archive'],
+      ['es', 'archive'],
+    ]);
+    expect(written.map(({ unit }) => unit.pipelines)).toEqual([
+      saved.unit.pipelines,
+      saved.unit.pipelines,
+    ]);
+    expect(afterFailure).toBe(staged);
+    expect(destinationAfterFailure.context.unitDefinition).toBe(staged);
+    expect(destinationAfterFailure.context.persistedUnitDefinition).toBe(saved);
+    const { nextUnit } = canvas.getSnapshot().context;
+    expect(nextUnit.unit.pipelines).toEqual(staged.unit.pipelines);
+    expect(getUnitDestinations(nextUnit).map(({ id }) => id)).toEqual(['es', 'archive']);
+    expect(destinationsRef.getSnapshot().matches({ configuring: 'idle' })).toBe(true);
+    canvas.stop();
+  });
+
+  it('keeps the router open to reconnecting a staged-disconnected signal after a create', async () => {
+    const saved = routedUnit();
+    const from = { kind: 'source', id: 'metrics-src' } as const;
+    const to = { kind: 'pipeline', id: 'p-src' } as const;
+    const staged = disconnectLine(saved, from, to);
+    const stagedWithArchive = withArchive(staged);
+    const { canvas } = startCanvas(async (unit) => unit, saved);
+    await waitForUnitReady(canvas);
+
+    canvas.send({ type: 'unit.stage', unitDefinition: staged });
+    canvas.send({
+      type: 'unit.changed',
+      unitDefinition: stagedWithArchive,
+      destinationIds: ['archive'],
+      intent: 'create',
+    });
+    await waitForUnitReady(canvas);
+
+    const { nextUnit } = canvas.getSnapshot().context;
+    expect(canConnectLine(nextUnit, from, to)).toBe(true);
+    expect(nextUnit).toEqual(stagedWithArchive);
+    expect(nextUnit.unit.pipelines[0].supported_telemetry).toEqual(['logs', 'metrics']);
+    canvas.stop();
   });
 });
 
@@ -691,7 +1065,7 @@ const s3Node: UnitDestination = {
 
 describe('canvasStateMachine', () => {
   const unit = createDefaultUnit();
-  const unitWithS3 = withUnitDestinations(unit, [s3Node]);
+  const unitWithS3 = withUnitDestinations(unit, [...getUnitDestinations(unit), s3Node]);
   const secrets = { 's3-archive-secret-access-key': 'shh' };
   let core: ReturnType<typeof coreMock.createStart>;
   let persist: jest.Mock;

@@ -69,6 +69,7 @@ import {
   type DestinationDetailActorRef,
 } from './destination_detail_state_machine';
 import { removeComponentFromPipelines } from '../../../../services/unit_connections';
+import { withReservedComponents } from '../../../../services/unit_pipeline';
 import type { Unit } from '../../../../services/unit_repository';
 import { getFormattedError } from '../../../../util/errors';
 
@@ -122,6 +123,7 @@ export interface ResolvedIndicesError {
 
 export interface DestinationsStateContext {
   unitDefinition: Unit;
+  persistedUnitDefinition: Unit;
   creationContext?: DestinationCreationContext;
   selectedDestinationId?: string;
   persistenceError?: string;
@@ -138,15 +140,27 @@ export interface DestinationsStateContext {
   timeRange?: DestinationIndexStatsTimeRange;
 }
 
+const getReservedUnitDefinition = ({
+  unitDefinition,
+  persistedUnitDefinition,
+}: Pick<DestinationsStateContext, 'unitDefinition' | 'persistedUnitDefinition'>): Unit =>
+  withReservedComponents(unitDefinition, persistedUnitDefinition);
+
 export type DestinationsStateEvent =
-  | { type: 'unit.loaded'; unitDefinition: Unit }
+  | { type: 'unit.loaded'; unitDefinition: Unit; persistedUnitDefinition?: Unit }
   | { type: 'unit.save.started' }
   | { type: 'unit.save.finished' }
-  | { type: 'unit.persisted'; destinationIds: string[]; unitDefinition: Unit }
+  | {
+      type: 'unit.persisted';
+      destinationIds: string[];
+      unitDefinition: Unit;
+      persistedUnitDefinition?: Unit;
+    }
   | {
       type: 'unit.persistenceFailed';
       destinationIds: string[];
       unitDefinition: Unit;
+      persistedUnitDefinition?: Unit;
       message: string;
       intent: 'create' | 'delete';
     }
@@ -389,6 +403,7 @@ export const destinationsStateMachine = setup({
       );
       return {
         unitDefinition: event.unitDefinition,
+        persistedUnitDefinition: event.persistedUnitDefinition ?? event.unitDefinition,
         hasReceivedUnit: true,
         persistenceError: undefined,
         selectedDestinationId:
@@ -415,7 +430,7 @@ export const destinationsStateMachine = setup({
       const name = destinationName.trim();
       const id = createDestinationId({
         name,
-        existingIds: collectUnitComponentIds(context.unitDefinition.unit),
+        existingIds: collectUnitComponentIds(getReservedUnitDefinition(context).unit),
       });
       const node = createS3UnitDestination({
         id,
@@ -447,7 +462,7 @@ export const destinationsStateMachine = setup({
       const name = destinationName.trim();
       const id = createDestinationId({
         name,
-        existingIds: collectUnitComponentIds(context.unitDefinition.unit),
+        existingIds: collectUnitComponentIds(getReservedUnitDefinition(context).unit),
       });
       const node = createRemoteElasticsearchUnitDestination({
         id,
@@ -477,7 +492,7 @@ export const destinationsStateMachine = setup({
         ...spec,
         id: createDestinationId({
           name: context.creationContext.formData.destinationName.trim(),
-          existingIds: collectUnitComponentIds(context.unitDefinition.unit),
+          existingIds: collectUnitComponentIds(getReservedUnitDefinition(context).unit),
         }),
         patterns: getSignalTargetsWritePatterns(spec),
       };
@@ -601,6 +616,7 @@ export const destinationsStateMachine = setup({
       event.type === 'unit.persistenceFailed'
         ? {
             unitDefinition: event.unitDefinition,
+            persistedUnitDefinition: event.persistedUnitDefinition ?? event.unitDefinition,
             persistenceError: event.message,
             creationContext: context.creationContext
               ? {
@@ -625,7 +641,11 @@ export const destinationsStateMachine = setup({
     ),
     restoreUnitAfterPersistenceFailure: assign(({ event }) =>
       event.type === 'unit.persistenceFailed'
-        ? { unitDefinition: event.unitDefinition, persistenceError: event.message }
+        ? {
+            unitDefinition: event.unitDefinition,
+            persistedUnitDefinition: event.persistedUnitDefinition ?? event.unitDefinition,
+            persistenceError: event.message,
+          }
         : {}
     ),
   },
@@ -638,7 +658,7 @@ export const destinationsStateMachine = setup({
       event.type === 'destination.create' &&
       canSubmitDestinationForm({
         formData: event.formData,
-        unitDefinition: context.unitDefinition,
+        unitDefinition: getReservedUnitDefinition(context),
       }),
     isCreatedDestination: ({ context, event }) => {
       const createdDestinationId = context.creationContext?.createdDestination?.id;
@@ -677,6 +697,7 @@ export const destinationsStateMachine = setup({
   type: 'parallel',
   context: ({ input }) => ({
     unitDefinition: input.unitDefinition,
+    persistedUnitDefinition: input.unitDefinition,
     hasReceivedUnit: false,
     parentRef: input.parentRef,
     resolvedIndicesByDestination: new Map(),

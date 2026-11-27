@@ -79,6 +79,7 @@ interface ProcessorListProps {
   diagnostics: readonly ProcessingDiagnostic[];
   /** Ids of processors that other processing slots also apply. */
   sharedProcessorIds: ReadonlySet<string>;
+  blockedProcessorIds: ReadonlySet<string>;
   componentRefs: readonly ComponentReferenceOption[];
   /** Checks a processor the editor submits before it commits. */
   checkComponent: ComponentChecker;
@@ -105,6 +106,7 @@ export function ProcessorList({
   telemetry,
   diagnostics,
   sharedProcessorIds,
+  blockedProcessorIds,
   componentRefs,
   checkComponent,
   componentIds,
@@ -182,7 +184,11 @@ export function ProcessorList({
                     displayName={displayName}
                     diagnostics={diagnostics.filter(({ stepIndex }) => stepIndex === index)}
                     editable={editable && !isEditing}
-                    hasEditableDefinition={definition !== undefined}
+                    canEditProcessor={
+                      definition !== undefined &&
+                      (step.processor.id === undefined ||
+                        !blockedProcessorIds.has(step.processor.id))
+                    }
                     isFirst={index === 0}
                     isLast={index === steps.length - 1}
                     onEdit={() => onEdit(step.key)}

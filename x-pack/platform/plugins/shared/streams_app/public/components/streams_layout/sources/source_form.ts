@@ -37,7 +37,7 @@ const getSourceNameValidationError = ({
   }
 
   return getUnitSources(unitDefinition).some(
-    ({ name }) => name && normalizeSourceName(name) === normalizedSourceName
+    ({ id, name }) => normalizeSourceName(name ?? id) === normalizedSourceName
   )
     ? 'duplicate'
     : undefined;

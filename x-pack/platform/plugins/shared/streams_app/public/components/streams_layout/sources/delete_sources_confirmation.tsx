@@ -11,12 +11,14 @@ import { i18n } from '@kbn/i18n';
 
 interface DeleteSourcesConfirmationProps {
   count: number;
+  mapRemovalName?: string;
   onCancel: () => void;
   onConfirm: () => void;
 }
 
 export const DeleteSourcesConfirmation = ({
   count,
+  mapRemovalName,
   onCancel,
   onConfirm,
 }: DeleteSourcesConfirmationProps) => {
@@ -45,11 +47,17 @@ export const DeleteSourcesConfirmation = ({
       data-test-subj="streamsDeleteSourcesConfirmation"
     >
       <p>
-        {i18n.translate('xpack.streams.sources.deleteSourcesConfirmDescription', {
-          defaultMessage:
-            '{count, plural, one {This will permanently remove the source} other {This will permanently remove the selected sources}}.',
-          values: { count },
-        })}
+        {mapRemovalName !== undefined
+          ? i18n.translate('xpack.streams.sources.deleteSourceMapConfirmDescription', {
+              defaultMessage:
+                'Removes {name} from the map. Changes take effect when you save the map.',
+              values: { name: mapRemovalName },
+            })
+          : i18n.translate('xpack.streams.sources.deleteSourcesConfirmDescription', {
+              defaultMessage:
+                '{count, plural, one {This will permanently remove the source} other {This will permanently remove the selected sources}}.',
+              values: { count },
+            })}
       </p>
     </EuiConfirmModal>
   );

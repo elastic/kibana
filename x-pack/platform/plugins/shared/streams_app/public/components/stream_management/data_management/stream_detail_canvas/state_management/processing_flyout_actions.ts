@@ -11,6 +11,7 @@ import type {
   ProcessingFlyoutInput,
   ProcessingSaveRequest,
 } from '../../../../stream_processing_flyout/state_management/processing_flyout_machine';
+import { sharedProcessingUnsavedMessage } from '../../../../stream_processing_flyout/prompt_options';
 import { getProcessingDiagnostics } from '../../../../../services/unit_diagnostics';
 import {
   PROCESSING_DRAFT_FAILURE,
@@ -24,7 +25,17 @@ import {
   isProcessingSlotEditable,
   type UnitLine,
 } from '../../../../../services/unit_graph';
-import { isolateSourceLine } from '../../../../../services/unit_connections';
+import {
+  isProcessingSlotSaved,
+  PROCESSING_TRANSPLANT_FAILURE,
+  transplantProcessingDraft,
+  type ProcessingTransplantFailure,
+} from '../../../../../services/unit_component_save';
+import { usedComponentIds } from '../../../../../services/unit_pipeline';
+import {
+  findSourceLinePipelineId,
+  isolateSourceLine,
+} from '../../../../../services/unit_connections';
 import type { Unit } from '../../../../../services/unit_repository';
 import { getFormattedError } from '../../../../../util/errors';
 import type { CanvasState, CanvasUrlEvent } from './types';
@@ -56,7 +67,8 @@ export interface ProcessingFlyoutOpening {
 export const getProcessingFlyoutOpening = (
   unit: Unit,
   event: ProcessingOpenEvent,
-  parentRef: AnyActorRef
+  parentRef: AnyActorRef,
+  reservedIds?: ReadonlySet<string>
 ): ProcessingFlyoutOpening | undefined => {
   if (!('line' in event)) {
     const { slot, position } = event;
@@ -72,7 +84,7 @@ export const getProcessingFlyoutOpening = (
     };
   }
   const { line } = event;
-  const isolated = isolateSourceLine(unit, line.sourceId, line.destinationId);
+  const isolated = isolateSourceLine(unit, line.sourceId, line.destinationId, reservedIds);
   if (!isolated) {
     return undefined;
   }
@@ -95,10 +107,16 @@ const draftProcessingSave = (
   { slot, processors }: ProcessingSaveRequest
 ): ProcessingDraftResult => {
   const line = context.processingFlyout?.line;
+  const reservedIds = usedComponentIds(context.unit);
   if (!line) {
-    return applyProcessingDraft(context.nextUnit, slot, processors);
+    return applyProcessingDraft(context.nextUnit, slot, processors, reservedIds);
   }
-  const isolated = isolateSourceLine(context.nextUnit, line.sourceId, line.destinationId);
+  const isolated = isolateSourceLine(
+    context.nextUnit,
+    line.sourceId,
+    line.destinationId,
+    reservedIds
+  );
   if (
     !isolated ||
     slot.kind !== PROCESSING_SLOT_KIND.pipeline ||
@@ -106,26 +124,60 @@ const draftProcessingSave = (
   ) {
     return { ok: false, reason: PROCESSING_DRAFT_FAILURE.missingSlot };
   }
-  return applyProcessingDraft(isolated.unit, slot, processors);
+  return processors.length === 0
+    ? { ok: true, unit: context.nextUnit, processorIds: [] }
+    : applyProcessingDraft(isolated.unit, slot, processors, reservedIds);
 };
 
-/** The guard and the action of one `processing.save` transition receive the same event. */
-const draftsBySaveEvent = new WeakMap<ProcessingSaveRequest, ProcessingDraftResult>();
+type ProcessingSaveResult =
+  | { ok: true; staged: Unit; persisted: Unit; processorIds: string[] }
+  | { ok: false; reason: 'missing_slot' | ProcessingTransplantFailure };
 
-const getProcessingDraft = (
+const prepareProcessing = (
   context: CanvasState,
   event: ProcessingSaveRequest
-): ProcessingDraftResult => {
-  const cached = draftsBySaveEvent.get(event);
-  if (cached) {
-    return cached;
+): ProcessingSaveResult => {
+  const target = context.processingFlyout;
+  if (!target) return { ok: false, reason: 'missing_slot' };
+  if (!isProcessingSlotSaved(context.unit, context.nextUnit, target)) {
+    const exists = target.line
+      ? findSourceLinePipelineId(
+          context.nextUnit,
+          target.line.sourceId,
+          target.line.destinationId
+        ) !== undefined
+      : isProcessingSlotEditable(context.nextUnit, target.slot);
+    return { ok: false, reason: exists ? 'unsaved_slot' : 'missing_slot' };
   }
-  const result = draftProcessingSave(context, event);
-  draftsBySaveEvent.set(event, result);
+  const draft = draftProcessingSave(context, event);
+  if (!draft.ok) return draft;
+  const transplant = transplantProcessingDraft({
+    persisted: context.unit,
+    staged: context.nextUnit,
+    drafted: draft.unit,
+  });
+  if (!transplant.ok) return transplant;
+  return {
+    ok: true,
+    staged: draft.unit,
+    persisted: transplant.unit,
+    processorIds: draft.processorIds,
+  };
+};
+
+// Reuse the prepared save across guards and actions for the same event.
+const savesByEvent = new WeakMap<ProcessingSaveRequest, ProcessingSaveResult>();
+const getProcessingSave = (
+  context: CanvasState,
+  event: ProcessingSaveRequest
+): ProcessingSaveResult => {
+  const cached = savesByEvent.get(event);
+  if (cached) return cached;
+  const result = prepareProcessing(context, event);
+  savesByEvent.set(event, result);
   return result;
 };
 
-/** Stages the drafted unit as the one being saved, remembering what to restore on failure. */
 export const getProcessingSaveUpdate = ({
   context,
   event,
@@ -133,20 +185,18 @@ export const getProcessingSaveUpdate = ({
   if (event.type !== 'processing.save') {
     return {};
   }
-  const result = getProcessingDraft(context, event);
-  // Unreachable: `canApplyProcessingDraft` only lets drafts that applied through.
-  if (!result.ok) {
-    return {};
-  }
-  const { unit: nextUnit, processorIds } = result;
+  const result = getProcessingSave(context, event);
+  if (!result.ok) return {};
+  const { staged: nextUnit, persisted: savingUnit, processorIds } = result;
   return {
     nextUnit,
-    savingUnit: nextUnit,
+    savingUnit,
+    savingStagedUnit: nextUnit,
     savingComponentIds: undefined,
     savingComponentKind: undefined,
     savingComponentIntent: 'processing',
     savingSecrets: undefined,
-    processingRollbackUnit: context.nextUnit,
+    stagedRollbackUnit: context.nextUnit,
     processingRollbackNodePositions: context.nodePositions,
     processingSaveIds: processorIds,
     error: undefined,
@@ -156,18 +206,18 @@ export const getProcessingSaveUpdate = ({
 export const getProcessingRollbackUpdate = ({
   context,
 }: CanvasActionArgs): Partial<CanvasState> => ({
-  nextUnit: context.processingRollbackUnit ?? context.unit,
+  nextUnit: context.stagedRollbackUnit ?? context.unit,
   // The canvas tidies the flow a new processing node joins as the save starts.
   nodePositions: context.processingRollbackNodePositions ?? context.nodePositions,
   savingUnit: undefined,
+  savingStagedUnit: undefined,
   savingComponentIntent: undefined,
-  processingRollbackUnit: undefined,
+  stagedRollbackUnit: undefined,
   processingRollbackNodePositions: undefined,
   processingSaveIds: undefined,
 });
 
-// The flyout may have been closed while its save was in flight, so these only
-// reply when it is still open.
+// The flyout can close while a save is in flight.
 export const notifyProcessingSaved = ({ context }: CanvasActionArgs): void => {
   context.processingFlyout?.ref.send({ type: 'save.succeeded' });
 };
@@ -218,8 +268,36 @@ export const rejectBusyProcessingSave = ({ context }: CanvasActionArgs): void =>
 export const isSavingProcessing = ({ context }: CanvasActionArgs): boolean =>
   context.savingComponentIntent === 'processing';
 
-export const canApplyProcessingDraft = ({ context, event }: CanvasActionArgs): boolean =>
-  event.type === 'processing.save' && getProcessingDraft(context, event).ok;
+export const isProcessingDraftOnSavedSlot = ({ context, event }: CanvasActionArgs): boolean =>
+  event.type === 'processing.save' && getProcessingSave(context, event).ok;
+
+export const isUnsavedProcessingSlot = ({ context, event }: CanvasActionArgs): boolean => {
+  if (event.type !== 'processing.save') return false;
+  const result = getProcessingSave(context, event);
+  return !result.ok && result.reason !== PROCESSING_DRAFT_FAILURE.missingSlot;
+};
+
+export const processingSlotUnsavedMessage = i18n.translate(
+  'xpack.streams.streamDetailCanvas.processingSlotUnsavedMessage',
+  {
+    defaultMessage:
+      "This processing is on a connection you haven't saved yet. Save the map, then apply the processing.",
+  }
+);
+
+export const rejectUnsavedSlotProcessingSave = ({ context, event }: CanvasActionArgs): void => {
+  if (event.type !== 'processing.save') return;
+  const result = getProcessingSave(context, event);
+  if (result.ok) return;
+  context.processingFlyout?.ref.send({
+    type: 'save.failed',
+    message:
+      result.reason === PROCESSING_TRANSPLANT_FAILURE.sharedProcessor
+        ? sharedProcessingUnsavedMessage
+        : processingSlotUnsavedMessage,
+    diagnostics: [],
+  });
+};
 
 export const processingSavedToastTitle = i18n.translate(
   'xpack.streams.streamDetailCanvas.processingSavedSuccessTitle',

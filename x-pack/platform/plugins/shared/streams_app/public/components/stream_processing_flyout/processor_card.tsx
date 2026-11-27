@@ -31,8 +31,7 @@ interface ProcessorCardProps {
   displayName: string;
   diagnostics: readonly ProcessingDiagnostic[];
   editable: boolean;
-  /** False when Kibana has no definition it can edit the processor's type with. */
-  hasEditableDefinition?: boolean;
+  canEditProcessor: boolean;
   isFirst: boolean;
   isLast: boolean;
   onEdit: () => void;
@@ -48,7 +47,7 @@ export function ProcessorCard({
   displayName,
   diagnostics,
   editable,
-  hasEditableDefinition = true,
+  canEditProcessor,
   isFirst,
   isLast,
   onEdit,
@@ -97,7 +96,7 @@ export function ProcessorCard({
               >
                 <EuiButtonEmpty
                   onClick={onEdit}
-                  isDisabled={!editable || !hasEditableDefinition}
+                  isDisabled={!editable || !canEditProcessor}
                   color="text"
                   size="xs"
                   aria-label={i18n.translate('xpack.streams.processingFlyout.card.editLabel', {
@@ -172,7 +171,7 @@ export function ProcessorCard({
               <EuiFlexItem grow={false}>
                 <ProcessorContextMenu
                   isDisabled={!editable}
-                  isEditDisabled={!hasEditableDefinition}
+                  isEditDisabled={!canEditProcessor}
                   isFirst={isFirst}
                   isLast={isLast}
                   onMoveUp={onMoveUp}

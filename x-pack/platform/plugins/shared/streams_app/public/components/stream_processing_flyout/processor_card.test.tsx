@@ -33,6 +33,7 @@ const renderCard = (signals: UnitSignal[]) =>
         displayName="Add fields"
         diagnostics={[]}
         editable
+        canEditProcessor
         isFirst
         isLast
         onEdit={jest.fn()}

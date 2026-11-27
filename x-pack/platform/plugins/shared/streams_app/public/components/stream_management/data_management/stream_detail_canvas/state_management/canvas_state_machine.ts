@@ -48,6 +48,8 @@ import {
   getUnreachableScopes,
   withPublishedTelemetry,
 } from '../../../../../services/unit_connections';
+import { usedComponentIds } from '../../../../../services/unit_pipeline';
+import { applyComponentCreate } from '../../../../../services/unit_component_save';
 import { getFormattedError } from '../../../../../util/errors';
 import {
   CANVAS_URL_STATE_KEY,
@@ -65,7 +67,8 @@ import {
 } from './types';
 import {
   PROCESSING_FLYOUT_ID,
-  canApplyProcessingDraft,
+  isProcessingDraftOnSavedSlot,
+  isUnsavedProcessingSlot,
   getProcessingFlyoutOpening,
   getProcessingRollbackUpdate,
   getProcessingSaveUpdate,
@@ -75,6 +78,7 @@ import {
   processingSavedToastTitle,
   rejectBusyProcessingSave,
   rejectMissingSlotProcessingSave,
+  rejectUnsavedSlotProcessingSave,
 } from './processing_flyout_actions';
 import {
   ROUTING_FLYOUT_ID,
@@ -112,20 +116,25 @@ const SAVE_FAILURE_TRANSITIONS = [
     actions: [
       'discardCreateHistory',
       'storeUnitFailure',
-      'rollbackToPersistedUnit',
       'syncComponentSaveFailure',
+      'restoreStagedRollback',
       'notifyUnitFailure',
     ],
-  },
-  {
-    guard: 'isSavingConnection',
-    target: 'saveFailed',
-    actions: ['storeUnitFailure', 'rollbackToPersistedUnit', 'notifyUnitFailure'],
   },
   {
     target: 'saveFailed',
     actions: ['storeUnitFailure', 'storeRoutingDiagnostics', 'notifyUnitFailure'],
   },
+] as const;
+
+const COMPONENT_CHANGE_TRANSITIONS = [
+  {
+    guard: 'isComponentCreate',
+    target: 'validating',
+    actions: ['prepareChangedUnitSave', 'holdCreateHistory'],
+  },
+  // Roll back legacy child deletes without saving.
+  { actions: ['syncNextUnitToSources', 'syncNextUnitToDestinations'] },
 ] as const;
 
 export const canvasStateMachine = setup({
@@ -163,30 +172,24 @@ export const canvasStateMachine = setup({
     restoreNodePositions: assign(({ event }) =>
       event.type === 'nodes.positions.restore' ? { nodePositions: event.positions } : {}
     ),
-    prepareChangedUnitSave: assign(({ event }) => {
-      if (event.type !== 'unit.changed') {
+    prepareChangedUnitSave: assign(({ context, event }): Partial<CanvasState> => {
+      if (event.type !== 'unit.changed' || event.intent !== 'create') {
         return {};
       }
-      const nextUnit = event.unitDefinition;
-      if ('sourceIds' in event || 'destinationIds' in event) {
-        return {
-          nextUnit,
-          savingUnit: nextUnit,
-          savingComponentIds: 'sourceIds' in event ? event.sourceIds : event.destinationIds,
-          savingComponentKind:
-            'sourceIds' in event ? ('source' as const) : ('destination' as const),
-          savingComponentIntent: event.intent,
-          savingSecrets: 'destinationIds' in event ? event.secrets : undefined,
-          error: undefined,
-        };
-      }
+      const componentIds = 'sourceIds' in event ? event.sourceIds : event.destinationIds;
+      const componentKind = 'sourceIds' in event ? 'source' : 'destination';
       return {
-        nextUnit,
-        savingUnit: nextUnit,
-        savingComponentIds: undefined,
-        savingComponentKind: undefined,
-        savingComponentIntent: 'connect' as const,
-        savingSecrets: undefined,
+        nextUnit: event.unitDefinition,
+        savingStagedUnit: event.unitDefinition,
+        savingUnit: applyComponentCreate(context.unit, event.unitDefinition, {
+          kind: componentKind,
+          ids: componentIds,
+        }),
+        stagedRollbackUnit: context.nextUnit,
+        savingComponentIds: componentIds,
+        savingComponentKind: componentKind,
+        savingComponentIntent: event.intent,
+        savingSecrets: 'destinationIds' in event ? event.secrets : undefined,
         error: undefined,
       };
     }),
@@ -200,6 +203,8 @@ export const canvasStateMachine = setup({
     ),
     prepareUnitSave: assign({
       savingUnit: ({ context }) => context.nextUnit,
+      savingStagedUnit: undefined,
+      stagedRollbackUnit: undefined,
       savingComponentIds: undefined,
       savingComponentKind: undefined,
       savingComponentIntent: undefined,
@@ -212,6 +217,8 @@ export const canvasStateMachine = setup({
             unit: event.output,
             nextUnit: event.output,
             savingUnit: undefined,
+            savingStagedUnit: undefined,
+            stagedRollbackUnit: undefined,
             savingComponentIds: undefined,
             savingComponentKind: undefined,
             savingComponentIntent: undefined,
@@ -221,11 +228,10 @@ export const canvasStateMachine = setup({
           }
         : context
     ),
-    storePersistedUnitDefinition: assign(({ context, event }) => {
+    storePersistedUnitDefinition: assign(({ event }) => {
       if (event.type !== 'xstate.done.actor.persistUnitDefinition') {
         return {};
       }
-      // Wiring a component save left unhooked stays staged, so it still reads as unsaved.
       return {
         unit: event.output.unitDefinition,
         nextUnit: event.output.stagedUnitDefinition,
@@ -234,7 +240,8 @@ export const canvasStateMachine = setup({
         savingComponentKind: undefined,
         savingComponentIntent: undefined,
         savingSecrets: undefined,
-        processingRollbackUnit: undefined,
+        savingStagedUnit: undefined,
+        stagedRollbackUnit: undefined,
         processingRollbackNodePositions: undefined,
         processingSaveIds: undefined,
         routingDiagnostics: [],
@@ -252,9 +259,11 @@ export const canvasStateMachine = setup({
       savingSecrets: undefined,
       routingDiagnostics: [],
     }),
-    rollbackToPersistedUnit: assign({
-      nextUnit: ({ context }) => context.unit,
+    restoreStagedRollback: assign({
+      nextUnit: ({ context }) => context.stagedRollbackUnit ?? context.unit,
       savingUnit: undefined,
+      savingStagedUnit: undefined,
+      stagedRollbackUnit: undefined,
       savingSecrets: undefined,
     }),
     notifyUnitFailure: getPlaceholderFor(createNotifyUnitFailureAction),
@@ -284,7 +293,11 @@ export const canvasStateMachine = setup({
         if (event.type !== 'xstate.done.actor.loadUnitDefinition') {
           throw new Error('Expected a loaded unit definition');
         }
-        return { type: 'unit.loaded' as const, unitDefinition: event.output };
+        return {
+          type: 'unit.loaded' as const,
+          unitDefinition: event.output,
+          persistedUnitDefinition: event.output,
+        };
       }
     ),
     syncLoadedUnitToDestinations: sendTo(
@@ -293,25 +306,37 @@ export const canvasStateMachine = setup({
         if (event.type !== 'xstate.done.actor.loadUnitDefinition') {
           throw new Error('Expected a loaded unit definition');
         }
-        return { type: 'unit.loaded' as const, unitDefinition: event.output };
+        return {
+          type: 'unit.loaded' as const,
+          unitDefinition: event.output,
+          persistedUnitDefinition: event.output,
+        };
       }
     ),
     syncStagedUnitToSources: sendTo(
       ({ context }) => context.sourcesRef,
-      ({ event }) => {
+      ({ context, event }) => {
         if (event.type !== 'unit.stage') {
           throw new Error('Expected a staged unit definition');
         }
-        return { type: 'unit.loaded' as const, unitDefinition: event.unitDefinition };
+        return {
+          type: 'unit.loaded' as const,
+          unitDefinition: event.unitDefinition,
+          persistedUnitDefinition: context.unit,
+        };
       }
     ),
     syncStagedUnitToDestinations: sendTo(
       ({ context }) => context.destinationsRef,
-      ({ event }) => {
+      ({ context, event }) => {
         if (event.type !== 'unit.stage') {
           throw new Error('Expected a staged unit definition');
         }
-        return { type: 'unit.loaded' as const, unitDefinition: event.unitDefinition };
+        return {
+          type: 'unit.loaded' as const,
+          unitDefinition: event.unitDefinition,
+          persistedUnitDefinition: context.unit,
+        };
       }
     ),
     syncSavedUnitToOriginator: sendTo(
@@ -323,17 +348,18 @@ export const canvasStateMachine = setup({
         if (event.type !== 'xstate.done.actor.persistUnitDefinition') {
           throw new Error('Expected a persisted unit definition');
         }
-        // The component machines derive their next unit.changed from this unit, so hand
-        // them the staged copy or a later create / delete would drop unhooked wiring.
-        const unitDefinition = event.output.stagedUnitDefinition;
+        const units = {
+          unitDefinition: event.output.stagedUnitDefinition,
+          persistedUnitDefinition: event.output.unitDefinition,
+        };
         const componentIds = context.savingComponentIds;
         if (context.savingComponentKind === 'source' && componentIds?.length) {
-          return { type: 'unit.persisted' as const, sourceIds: componentIds, unitDefinition };
+          return { type: 'unit.persisted' as const, sourceIds: componentIds, ...units };
         }
         if (context.savingComponentKind === 'destination' && componentIds?.length) {
-          return { type: 'unit.persisted' as const, destinationIds: componentIds, unitDefinition };
+          return { type: 'unit.persisted' as const, destinationIds: componentIds, ...units };
         }
-        return { type: 'unit.loaded' as const, unitDefinition };
+        return { type: 'unit.loaded' as const, ...units };
       }
     ),
     syncSavedUnitToPeer: sendTo(
@@ -345,7 +371,11 @@ export const canvasStateMachine = setup({
         if (event.type !== 'xstate.done.actor.persistUnitDefinition') {
           throw new Error('Expected a persisted unit definition');
         }
-        return { type: 'unit.loaded' as const, unitDefinition: event.output.stagedUnitDefinition };
+        return {
+          type: 'unit.loaded' as const,
+          unitDefinition: event.output.stagedUnitDefinition,
+          persistedUnitDefinition: event.output.unitDefinition,
+        };
       }
     ),
     syncComponentSaveFailure: sendTo(
@@ -356,11 +386,7 @@ export const canvasStateMachine = setup({
       ({ context, event }) => {
         const intent = context.savingComponentIntent;
         const componentIds = context.savingComponentIds ?? [];
-        if (
-          !context.savingComponentKind ||
-          componentIds.length === 0 ||
-          (intent !== 'create' && intent !== 'delete')
-        ) {
+        if (!context.savingComponentKind || componentIds.length === 0 || intent !== 'create') {
           throw new Error('Expected a unit component mutation to be saving');
         }
         const message =
@@ -370,18 +396,21 @@ export const canvasStateMachine = setup({
             : i18n.translate('xpack.streams.streamDetailCanvas.unitSaveFailedErrorMessage', {
                 defaultMessage: 'Unable to save the streams configuration.',
               });
+        const unitDefinition = context.stagedRollbackUnit ?? context.nextUnit;
         return context.savingComponentKind === 'source'
           ? {
               type: 'unit.persistenceFailed' as const,
               sourceIds: componentIds,
-              unitDefinition: context.unit,
+              unitDefinition,
+              persistedUnitDefinition: context.unit,
               message,
               intent,
             }
           : {
               type: 'unit.persistenceFailed' as const,
               destinationIds: componentIds,
-              unitDefinition: context.unit,
+              unitDefinition,
+              persistedUnitDefinition: context.unit,
               message,
               intent,
             };
@@ -393,7 +422,12 @@ export const canvasStateMachine = setup({
       if (event.type !== 'processing.open') {
         return {};
       }
-      const opening = getProcessingFlyoutOpening(context.nextUnit, event, self);
+      const opening = getProcessingFlyoutOpening(
+        context.nextUnit,
+        event,
+        self,
+        usedComponentIds(context.unit)
+      );
       if (!opening) {
         return {};
       }
@@ -405,6 +439,7 @@ export const canvasStateMachine = setup({
     notifyProcessingSaved,
     notifyProcessingSaveFailed,
     rejectMissingSlotProcessingSave,
+    rejectUnsavedSlotProcessingSave,
     rejectBusyProcessingSave,
     restoreProcessingRollback: assign((args) => getProcessingRollbackUpdate(args)),
     stopRoutingFlyout: stopChild(ROUTING_FLYOUT_ID),
@@ -430,11 +465,19 @@ export const canvasStateMachine = setup({
     stageRoutingDraft: assign((args) => getRoutingStageUpdate(args)),
     syncNextUnitToSources: sendTo(
       ({ context }) => context.sourcesRef,
-      ({ context }) => ({ type: 'unit.loaded' as const, unitDefinition: context.nextUnit })
+      ({ context }) => ({
+        type: 'unit.loaded' as const,
+        unitDefinition: context.nextUnit,
+        persistedUnitDefinition: context.unit,
+      })
     ),
     syncNextUnitToDestinations: sendTo(
       ({ context }) => context.destinationsRef,
-      ({ context }) => ({ type: 'unit.loaded' as const, unitDefinition: context.nextUnit })
+      ({ context }) => ({
+        type: 'unit.loaded' as const,
+        unitDefinition: context.nextUnit,
+        persistedUnitDefinition: context.unit,
+      })
     ),
     notifyRoutingStaged,
     rejectMissingRoutingSave,
@@ -447,9 +490,10 @@ export const canvasStateMachine = setup({
       not(stateIn({ ready: { unit: 'persisting' } })),
     ]),
     isSavingComponentChange: ({ context }) => (context.savingComponentIds?.length ?? 0) > 0,
-    isSavingConnection: ({ context }) => context.savingComponentIntent === 'connect',
+    isComponentCreate: ({ event }) => event.type === 'unit.changed' && event.intent === 'create',
     isSavingProcessing,
-    canApplyProcessingDraft,
+    isProcessingDraftOnSavedSlot,
+    isUnsavedProcessingSlot,
     canApplyRoutingDraft,
   },
 }).createMachine({
@@ -612,10 +656,7 @@ export const canvasStateMachine = setup({
             ready: {
               entry: ['notifySourcesUnitSaveFinished', 'notifyDestinationsUnitSaveFinished'],
               on: {
-                'unit.changed': {
-                  target: 'validating',
-                  actions: ['prepareChangedUnitSave', 'holdCreateHistory'],
-                },
+                'unit.changed': COMPONENT_CHANGE_TRANSITIONS,
                 'unit.save': {
                   guard: 'hasUnsavedUnitChanges',
                   target: 'validating',
@@ -623,10 +664,11 @@ export const canvasStateMachine = setup({
                 },
                 'processing.save': [
                   {
-                    guard: 'canApplyProcessingDraft',
+                    guard: 'isProcessingDraftOnSavedSlot',
                     target: 'validating',
                     actions: 'prepareProcessingSave',
                   },
+                  { guard: 'isUnsavedProcessingSlot', actions: 'rejectUnsavedSlotProcessingSave' },
                   { actions: 'rejectMissingSlotProcessingSave' },
                 ],
                 'unit.reload': { target: 'reloading' },
@@ -655,10 +697,7 @@ export const canvasStateMachine = setup({
               entry: ['notifySourcesUnitSaveFinished', 'notifyDestinationsUnitSaveFinished'],
               on: {
                 'unit.reload': { target: 'reloading' },
-                'unit.changed': {
-                  target: 'validating',
-                  actions: ['prepareChangedUnitSave', 'holdCreateHistory'],
-                },
+                'unit.changed': COMPONENT_CHANGE_TRANSITIONS,
               },
             },
             validating: {
@@ -682,6 +721,7 @@ export const canvasStateMachine = setup({
                 src: 'persistUnitDefinition',
                 input: ({ context }) => ({
                   unit: context.savingUnit ?? context.nextUnit,
+                  stagedUnit: context.savingStagedUnit,
                   secrets: context.savingSecrets,
                 }),
                 onDone: [
@@ -703,15 +743,12 @@ export const canvasStateMachine = setup({
                   },
                   {
                     target: 'ready',
-                    // Sync while the saving component is still set. storePersistedUnitDefinition
-                    // clears it, and a later sync would tell the source or destination
-                    // machine the unit merely reloaded, leaving its create flow on "saving".
+                    // Notify the create flow before clearing the saving component.
                     actions: [
                       'syncSavedUnitToOriginator',
                       'syncSavedUnitToPeer',
                       'notifyUnitSaved',
-                      // Reset after a successful persist so undo cannot restore a destination / source
-                      // whose API key was already revoked on save.
+                      // An undo from before a save could remove a newly created component.
                       'resetHistory',
                       'storePersistedUnitDefinition',
                     ],
@@ -723,10 +760,7 @@ export const canvasStateMachine = setup({
             saveFailed: {
               entry: ['notifySourcesUnitSaveFinished', 'notifyDestinationsUnitSaveFinished'],
               on: {
-                'unit.changed': {
-                  target: 'validating',
-                  actions: ['prepareChangedUnitSave', 'holdCreateHistory'],
-                },
+                'unit.changed': COMPONENT_CHANGE_TRANSITIONS,
                 'unit.save': {
                   guard: 'hasUnsavedUnitChanges',
                   target: 'validating',
@@ -734,10 +768,11 @@ export const canvasStateMachine = setup({
                 },
                 'processing.save': [
                   {
-                    guard: 'canApplyProcessingDraft',
+                    guard: 'isProcessingDraftOnSavedSlot',
                     target: 'validating',
                     actions: 'prepareProcessingSave',
                   },
+                  { guard: 'isUnsavedProcessingSlot', actions: 'rejectUnsavedSlotProcessingSave' },
                   { actions: 'rejectMissingSlotProcessingSave' },
                 ],
                 'unit.reload': { target: 'reloading' },
@@ -888,7 +923,7 @@ async function validateCanvasUnitDefinition({
     throw new Error(
       i18n.translate('xpack.streams.streamDetailCanvas.unconnectedProcessingErrorMessage', {
         defaultMessage:
-          'Connect each processing node to a destination before saving. To remove a processing node, delete all of its processors.',
+          'Connect each processing node to a destination before saving. To remove processors, undo the disconnect or reconnect the node and save the map first.',
       })
     );
   }
@@ -896,7 +931,7 @@ async function validateCanvasUnitDefinition({
     throw new Error(
       i18n.translate('xpack.streams.streamDetailCanvas.unreachableProcessingErrorMessage', {
         defaultMessage:
-          'Connect a source or a routing rule to each processing and routing node before saving. To remove a processing node, delete all of its processors.',
+          'Connect a source or a routing rule to each processing and routing node before saving. To remove processors, undo the disconnect or reconnect the node and save the map first.',
       })
     );
   }
@@ -946,11 +981,14 @@ function createPersistUnitDefinitionActor({
   persistUnitDefinition: UnitRepository['persist'];
 }) {
   return fromPromise(
-    async ({ input }: { input: { unit: Unit; secrets?: StreamsUnit.Secrets } }) => {
+    async ({
+      input,
+    }: {
+      input: { unit: Unit; stagedUnit?: Unit; secrets?: StreamsUnit.Secrets };
+    }) => {
       const unitDefinition = await persistUnitDefinition(input.unit, input.secrets);
-      // The staged unit, narrowed like the stored one. A save that left nothing out
-      // hands back the stored unit itself, so the canvas reads as saved.
-      const staged = withPublishedTelemetry(input.unit);
+      // Keep staged router signals so a disconnected source can still be reconnected.
+      const staged = input.stagedUnit ?? withPublishedTelemetry(input.unit);
       return {
         unitDefinition,
         stagedUnitDefinition: isEqual(staged, unitDefinition) ? unitDefinition : staged,

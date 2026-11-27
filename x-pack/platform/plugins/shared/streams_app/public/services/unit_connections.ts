@@ -155,6 +155,15 @@ const findUnprocessedSourcePipelineIndex = (
       (destinationId === undefined || forwardsDirectlyTo(pipeline, destinationId))
   );
 
+export const findSourceLinePipelineId = (
+  unit: Unit,
+  sourceId: string,
+  destinationId: string
+): string | undefined =>
+  unit.unit.pipelines[
+    findUnprocessedSourcePipelineIndex(unit.unit.pipelines, sourceId, destinationId)
+  ]?.id;
+
 /** The pipeline a processing node's direct lines are stored on, unless it is a route's or scoped. */
 const findWirableProcessingPipelineIndex = (unit: Unit, ref: ProcessingNodeRef): number => {
   if (ref.kind !== PROCESSING_SLOT_KIND.pipeline) {
@@ -436,8 +445,14 @@ const writePipeline = (
   return replacePipelines(unit, pipelines);
 };
 
-const pipelineIdForSource = (unit: Unit, sourceId: string): string =>
-  allocateComponentId(`p-${sourceId}`, usedComponentIds(unit), { bareFirst: true });
+const pipelineIdForSource = (
+  unit: Unit,
+  sourceId: string,
+  reservedIds?: ReadonlySet<string>
+): string => {
+  const taken = new Set([...usedComponentIds(unit), ...(reservedIds ?? [])]);
+  return allocateComponentId(`p-${sourceId}`, taken, { bareFirst: true });
+};
 
 const insertSourcePipeline = (
   unit: Unit,
@@ -460,11 +475,12 @@ const appendSourcePipeline = (
   unit: Unit,
   sourceId: string,
   supportedTelemetry: readonly UnitSignal[],
-  forwarding: PipelineConfig
+  forwarding: PipelineConfig,
+  reservedIds?: ReadonlySet<string>
 ): Unit =>
   insertSourcePipeline(
     unit,
-    pipelineIdForSource(unit, sourceId),
+    pipelineIdForSource(unit, sourceId, reservedIds),
     sourceId,
     supportedTelemetry,
     forwarding
@@ -680,17 +696,13 @@ export const connectSourceToDestination = (
   );
 };
 
-/** Drops one direct line drawn from the source, from the pipeline without processors that owns it. */
-export const disconnectSourceFromDestination = (
+const removeSourceLineFromPipeline = (
   unit: Unit,
+  pipelineIndex: number,
   sourceId: string,
-  destinationId: string
+  destinationId: string,
+  reservedIds?: ReadonlySet<string>
 ): Unit => {
-  const pipelineIndex = findUnprocessedSourcePipelineIndex(
-    unit.unit.pipelines,
-    sourceId,
-    destinationId
-  );
   if (pipelineIndex === -1) {
     return unit;
   }
@@ -710,10 +722,27 @@ export const disconnectSourceFromDestination = (
   if (remaining.length === 0) {
     return detached;
   }
-  return appendSourcePipeline(detached, sourceId, pipeline.supported_telemetry, [
-    { name: PIPELINE_ENTRY.destinations, value: remaining },
-  ]);
+  return appendSourcePipeline(
+    detached,
+    sourceId,
+    pipeline.supported_telemetry,
+    [{ name: PIPELINE_ENTRY.destinations, value: remaining }],
+    reservedIds
+  );
 };
+
+/** Drops one direct line drawn from the source, from the pipeline without processors that owns it. */
+export const disconnectSourceFromDestination = (
+  unit: Unit,
+  sourceId: string,
+  destinationId: string
+): Unit =>
+  removeSourceLineFromPipeline(
+    unit,
+    findUnprocessedSourcePipelineIndex(unit.unit.pipelines, sourceId, destinationId),
+    sourceId,
+    destinationId
+  );
 
 /**
  * Moves one source line off the pipeline it shares with other lines onto a new
@@ -722,17 +751,26 @@ export const disconnectSourceFromDestination = (
 export const isolateSourceLine = (
   unit: Unit,
   sourceId: string,
-  destinationId: string
+  destinationId: string,
+  reservedIds?: ReadonlySet<string>
 ): { unit: Unit; pipelineId: string } | undefined => {
-  const pipeline =
-    unit.unit.pipelines[
-      findUnprocessedSourcePipelineIndex(unit.unit.pipelines, sourceId, destinationId)
-    ];
+  const pipelineIndex = findUnprocessedSourcePipelineIndex(
+    unit.unit.pipelines,
+    sourceId,
+    destinationId
+  );
+  const pipeline = unit.unit.pipelines[pipelineIndex];
   if (!pipeline) {
     return undefined;
   }
-  const released = disconnectSourceFromDestination(unit, sourceId, destinationId);
-  const pipelineId = pipelineIdForSource(released, sourceId);
+  const released = removeSourceLineFromPipeline(
+    unit,
+    pipelineIndex,
+    sourceId,
+    destinationId,
+    reservedIds
+  );
+  const pipelineId = pipelineIdForSource(released, sourceId, reservedIds);
   return {
     unit: insertSourcePipeline(released, pipelineId, sourceId, pipeline.supported_telemetry, [
       { name: PIPELINE_ENTRY.destinations, value: [destinationId] },
@@ -1565,14 +1603,7 @@ const withoutUnfedDestinations = (unit: Unit, pipelines: UnitPipeline[]): UnitPi
   );
 };
 
-/**
- * The unit without the wiring the distributor would reject: destination lines
- * that carry nothing, rules left without a target, scoped wiring whose signals
- * no longer reach it, then every pipeline `getUnconnectedPipelines` reports,
- * until none is left. The canvas Save refuses such a unit; a component save
- * persists the staged unit while lines are unhooked, so the published copy is
- * cleaned up here. A connected unit comes back as it is.
- */
+/** Removes wiring the distributor rejects, including pipelines disconnected by earlier removals. */
 export const withoutUnconnectedWiring = (unit: Unit): Unit => {
   let pipelines = withoutUnreachableScopes(
     unit,

@@ -14,6 +14,7 @@ import {
 } from '../../../services/unit_graph';
 import type { ProcessingDiagnostic } from '../../../services/unit_diagnostics';
 import type { UnitSignal } from '../../../services/unit_pipeline';
+import { toDraftProcessor } from '../../../services/unit_processing';
 import type { DraftProcessor, UnitProcessor } from '../../../services/unit_processing';
 
 /** Where a processor created in the flyout joins the slot's list. */
@@ -85,22 +86,6 @@ export interface ProcessingSaveRequest {
   slot: ProcessingNodeRef;
   processors: DraftProcessor[];
 }
-
-const toDraft = ({
-  id,
-  type,
-  name,
-  description,
-  supported_telemetry: telemetry,
-  config,
-}: UnitProcessor): DraftProcessor => ({
-  id,
-  type,
-  ...(name ? { name } : {}),
-  ...(description ? { description } : {}),
-  supported_telemetry: [...telemetry],
-  config: [...(config ?? [])],
-});
 
 export const processingFlyoutMachine = setup({
   types: {
@@ -231,7 +216,7 @@ export const processingFlyoutMachine = setup({
     validationSkipped: false,
     steps: input.processors.map((processor, index) => ({
       key: `step-${index}`,
-      processor: toDraft(processor),
+      processor: toDraftProcessor(processor),
       status: 'saved' as const,
     })),
     editingKey: undefined,

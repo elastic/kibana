@@ -8,6 +8,7 @@ import React, { useContext, useRef, useMemo } from 'react';
 import { createActorContext } from '@xstate/react';
 import type { XYPosition } from '@xyflow/react';
 import type { Unit } from '../../../../../services/unit_repository';
+import { isProcessingSlotSaved } from '../../../../../services/unit_component_save';
 import type { RoutingDiagnostic } from '../../../../../services/unit_diagnostics';
 import type { ProcessingNodeRef, UnitLine } from '../../../../../services/unit_graph';
 import type { RoutingFlyoutTarget } from '../../../../stream_routing_flyout/state_management/routing_flyout_machine';
@@ -129,6 +130,14 @@ export const useCanvasRoutingDiagnostics = (): RoutingDiagnostic[] =>
 export const useCanvasProcessingFlyout = () => {
   return useCanvasStateSelector((state) => state.context.processingFlyout);
 };
+
+export const useCanvasIsProcessingSlotUnsaved = (): boolean =>
+  useCanvasStateSelector(
+    ({ context: { unit, nextUnit, stagedRollbackUnit, processingFlyout } }) =>
+      // Use the pre-save unit while the optimistic draft is in flight.
+      processingFlyout !== undefined &&
+      !isProcessingSlotSaved(unit, stagedRollbackUnit ?? nextUnit, processingFlyout)
+  );
 
 export const useCanvasEvents = () => {
   const service = CanvasStateContext.useActorRef();

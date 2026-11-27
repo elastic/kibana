@@ -92,16 +92,17 @@ export interface CanvasState {
   unit: Unit;
   nextUnit: Unit;
   savingUnit?: Unit;
+  /** Raw Map state to keep after a component save. */
+  savingStagedUnit?: Unit;
+  stagedRollbackUnit?: Unit;
   savingComponentIds?: string[];
   savingComponentKind?: 'source' | 'destination';
-  savingComponentIntent?: 'create' | 'delete' | 'connect' | 'processing';
+  savingComponentIntent?: 'create' | 'processing';
   savingSecrets?: StreamsUnit.Secrets;
   routingFlyout?: CanvasRoutingFlyout;
   /** The unit a routing flyout save last staged, so the canvas can tell it placed a routing node. */
   routingStagedUnit?: Unit;
   processingFlyout?: CanvasProcessingFlyout;
-  /** Staged unit to return to when a processing flyout save fails. */
-  processingRollbackUnit?: Unit;
   /** Processor ids written for the flyout's steps, in step order, while they save. */
   processingSaveIds?: string[];
   /** Node positions to return to when a processing flyout save fails. */
@@ -129,11 +130,6 @@ export type CanvasUrlEvent =
       destinationIds: string[];
       intent: 'create' | 'delete';
       secrets?: StreamsUnit.Secrets;
-    }
-  | {
-      type: 'unit.changed';
-      unitDefinition: Unit;
-      intent: 'connect';
     }
   | { type: 'unit.stage'; unitDefinition: Unit }
   | { type: 'unit.save' }
