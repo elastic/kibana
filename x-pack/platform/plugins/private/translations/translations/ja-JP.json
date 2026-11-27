@@ -4206,7 +4206,6 @@
     "discover.agentBuilder.saveToDashboardObjectType": "Discoverセッション",
     "discover.agentBuilder.screenContextDescription": "ユーザーは{queryLanguage}モードでData view {dataViewTitle}のDiscoverタブを閲覧しています。",
     "discover.alerts.createSearchThreshold": "検索しきい値ルールの作成",
-    "discover.alerts.manageRulesAndConnectors": "ルールとコネクターの管理",
     "discover.alerts.missedTimeFieldToolTip": "データビューには時間フィールドがありません。",
     "discover.appHeader.renameSessionAriaLabel": "Discoverセッション名を編集",
     "discover.appHeader.renameSessionErrorMessage": "Discoverセッションの名前を変更できません",

@@ -28,6 +28,8 @@ import {
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID,
 } from './constants';
 import { getObservabilityAlertingDeepLinks } from './get_observability_alerting_deep_links';
+import { classicRulesLocatorDefinition } from './locators/classic_rules_locator';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 const APP_STUB: App = {
   id: OBSERVABILITY_ALERTING_APP_ID,
@@ -101,12 +103,21 @@ describe('ObservabilityAlertingPlugin', () => {
       return new BehaviorSubject(Boolean(fallback));
     });
 
+    const share = sharePluginMock.createSetupContract();
+    jest.spyOn(share.url.locators, 'create');
+
     const plugin = new ObservabilityAlertingPlugin();
-    plugin.setup(coreSetup);
+    plugin.setup(coreSetup, { alertingVTwo: {}, share });
 
     const registered = coreSetup.application.register.mock.calls[0][0];
-    return { coreSetup, coreStart, enabled$, plugin, registered };
+    return { coreSetup, coreStart, enabled$, plugin, registered, share };
   };
+
+  it('registers the classic rules locator', () => {
+    const { share } = setupWithSetting(false);
+
+    expect(share.url.locators.create).toHaveBeenCalledWith(classicRulesLocatorDefinition);
+  });
 
   it('registers the app with correct id, appRoute, and visibleIn', () => {
     const { coreSetup } = setupWithSetting(false);

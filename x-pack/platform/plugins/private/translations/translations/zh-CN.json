@@ -4203,7 +4203,6 @@
     "discover.agentBuilder.saveToDashboardObjectType": "Discover 会话",
     "discover.agentBuilder.screenContextDescription": "用户正在查看 {queryLanguage} 模式下数据视图 {dataViewTitle} 的 Discover 选项卡。",
     "discover.alerts.createSearchThreshold": "创建搜索阈值规则",
-    "discover.alerts.manageRulesAndConnectors": "管理规则和连接器",
     "discover.alerts.missedTimeFieldToolTip": "数据视图没有时间字段。",
     "discover.appHeader.renameSessionAriaLabel": "编辑 Discover 会话名称",
     "discover.appHeader.renameSessionErrorMessage": "无法重命名 Discover 会话",

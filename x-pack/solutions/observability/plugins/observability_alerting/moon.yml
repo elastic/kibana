@@ -34,6 +34,8 @@ dependsOn:
   - '@kbn/cases-plugin'
   - '@kbn/security-plugin'
   - '@kbn/kibana-utils-plugin'
+  - '@kbn/share-plugin'
+  - '@kbn/utility-types'
 tags:
   - plugin
   - prod

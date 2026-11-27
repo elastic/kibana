@@ -8,6 +8,7 @@
 import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
 import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ObservabilityEpisodeActionsCases } from '@kbn/observability-plugin/public';
@@ -17,6 +18,7 @@ export type ObservabilityAlertingCases = ObservabilityEpisodeActionsCases;
 
 export interface ObservabilityAlertingSetupDependencies {
   alertingVTwo: Record<string, never>;
+  share: SharePluginSetup;
 }
 
 export interface ObservabilityAlertingStartDependencies {

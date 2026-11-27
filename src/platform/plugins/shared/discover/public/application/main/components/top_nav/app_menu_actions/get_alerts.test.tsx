@@ -18,6 +18,8 @@ import {
 } from '@kbn/discover-utils';
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { CreateRuleOptionsFlyoutProps } from '@kbn/alerting-v2-plugin/public';
+import { ALERTING_V2_CLASSIC_RULES_LOCATOR } from '@kbn/alerting-v2-constants';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { getAlertsAppMenuItem, getCreateRuleOptionsAppMenuItem } from './get_alerts';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
@@ -35,6 +37,7 @@ interface SetupAlertsMenuItemParams {
   authorizedRuleTypeIds?: string[];
   services?: DiscoverServices;
   esqlQuery?: string;
+  solutionNavId?: string | null;
 }
 
 const setupAlertsMenuItem = async ({
@@ -43,6 +46,7 @@ const setupAlertsMenuItem = async ({
   authorizedRuleTypeIds = [ES_QUERY_ID],
   services = createDiscoverServicesMock(),
   esqlQuery = 'FROM logs-*',
+  solutionNavId = null,
 }: SetupAlertsMenuItemParams = {}) => {
   const toolkit = getDiscoverInternalStateMock({ services });
 
@@ -75,6 +79,7 @@ const setupAlertsMenuItem = async ({
     tabId: currentTab.id,
     getState: toolkit.internalState.getState,
     dispatch: toolkit.internalState.dispatch,
+    solutionNavId,
   });
 
   return { alertsMenuItem, currentTab, discoverParamsMock, services, toolkit };
@@ -223,25 +228,89 @@ describe('getAlertsAppMenuItem', () => {
       expect(createAlertItem?.disableButton).toBe(true);
     });
 
-    it('should include the manage rules and connectors link', async () => {
+    it('should include the manage rules link', async () => {
       const alertsMenuItem = await getAlertsMenuItem();
       const manageAlertsItem = alertsMenuItem.items?.find(
         (item) => item.testId === 'discoverManageAlertsButton'
       );
-      expect(manageAlertsItem).toBeDefined();
+      expect(manageAlertsItem?.label).toBe('Manage rules');
     });
   });
 
-  describe('Manage rules and connectors link', () => {
-    it('should link to the unified rules page when rules app is registered', async () => {
+  describe('Manage rules link', () => {
+    const STACK_RULES_HREF = '/app/management/insightsAndAlerting/triggersActions';
+    const CLASSIC_RULES_LOCATOR_HREF = '/app/r?l=ALERTING_V2_CLASSIC_RULES_LOCATOR';
+
+    const createServices = ({
+      alertingV2Enabled,
+      classicRulesLocatorRegistered = true,
+    }: {
+      alertingV2Enabled: boolean;
+      classicRulesLocatorRegistered?: boolean;
+    }) => {
       const services = createDiscoverServicesMock();
-      jest.mocked(services.application.isAppRegistered).mockReturnValue(true);
-      jest.mocked(services.application.getUrlForApp).mockImplementation((appId) => `/app/${appId}`);
-      const alertsMenuItem = await getAlertsMenuItem({ services });
-      const manageAlertsItem = alertsMenuItem.items?.find(
-        (item) => item.testId === 'discoverManageAlertsButton'
-      );
-      expect(manageAlertsItem?.href).toBe('/app/rules');
+      services.settings.globalClient.isDeclared = () => true;
+      services.settings.globalClient.get = <T,>(_key: string) => alertingV2Enabled as T;
+      jest
+        .mocked(services.application.getUrlForApp)
+        .mockImplementation((appId, options) => `/app/${appId}/${options?.path ?? ''}`);
+
+      const classicRulesLocator = sharePluginMock.createLocator();
+      classicRulesLocator.getRedirectUrl.mockReturnValue(CLASSIC_RULES_LOCATOR_HREF);
+      services.share = sharePluginMock.createStartContract();
+      jest
+        .spyOn(services.share.url.locators, 'get')
+        .mockImplementation((id) =>
+          classicRulesLocatorRegistered && id === ALERTING_V2_CLASSIC_RULES_LOCATOR
+            ? classicRulesLocator
+            : undefined
+        );
+      return services;
+    };
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    const getManageRulesHref = async (services: DiscoverServices, solutionNavId: string | null) => {
+      const alertsMenuItem = await getAlertsMenuItem({ services, solutionNavId });
+      return alertsMenuItem.items?.find((item) => item.testId === 'discoverManageAlertsButton')
+        ?.href;
+    };
+
+    it.each([
+      ['an Observability space', 'oblt'],
+      ['a classic space', null],
+    ])(
+      'should link to the classic rules locator in %s when Alerting v2 is enabled',
+      async (_label, solutionNavId) => {
+        const services = createServices({ alertingV2Enabled: true });
+        expect(await getManageRulesHref(services, solutionNavId)).toBe(CLASSIC_RULES_LOCATOR_HREF);
+      }
+    );
+
+    it.each([
+      ['a Security space', 'security'],
+      ['a Search space', 'es'],
+    ])(
+      'should link to the stack management rules page in %s when Alerting v2 is enabled',
+      async (_label, solutionNavId) => {
+        const services = createServices({ alertingV2Enabled: true });
+        expect(await getManageRulesHref(services, solutionNavId)).toBe(STACK_RULES_HREF);
+      }
+    );
+
+    it('should link to the stack management rules page when Alerting v2 is disabled', async () => {
+      const services = createServices({ alertingV2Enabled: false });
+      expect(await getManageRulesHref(services, 'oblt')).toBe(STACK_RULES_HREF);
+    });
+
+    it('should link to the stack management rules page when no classic rules locator is registered', async () => {
+      const services = createServices({
+        alertingV2Enabled: true,
+        classicRulesLocatorRegistered: false,
+      });
+      expect(await getManageRulesHref(services, 'oblt')).toBe(STACK_RULES_HREF);
     });
   });
 
