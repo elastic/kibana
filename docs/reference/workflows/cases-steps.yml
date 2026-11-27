@@ -1,0 +1,945 @@
+product: Kibana
+collection: Cases workflow steps
+id: workflows-cases-steps
+page_description: |
+  Cases steps create, find, update, and manage cases in any app that has Cases, including {{elastic-sec}} and {{observability}}.
+
+  Inputs use `snake_case`, such as `case_id`. Inputs that pass objects from another API, such as an alert attached by `cases.addAlerts`, keep that API's casing.
+
+  Steps that return a case put it at `steps.<step_name>.output.case`. To use the new case in a later step, reference `steps.<step_name>.output.case.id`.
+
+groups:
+  - group: Shared parameters
+    id: cases-shared-parameters
+    description: |
+      These parameters work the same way in every Cases step that accepts them.
+    settings:
+      - setting: push-case
+        id: cases-push-case
+        datatype: boolean
+        default: "false"
+        description: |
+          Optional. Set it at the top level of the step, next to `type`, not under `with`. When `true`, the step pushes the updated case to the case's external connector, such as Jira or ServiceNow, after the workflow operation succeeds.
+
+          Every Cases step accepts it except `cases.getCase`, `cases.getCases`, `cases.findCases`, `cases.findSimilarCases`, `cases.getCasesByAlertId`, `cases.getAllAttachments`, `cases.updateObservable`, `cases.deleteObservable`, `cases.pushCases`, and `cases.deleteCases`.
+        example: |
+          ```yaml
+          - name: create_and_push
+            type: cases.createCase
+            push-case: true
+            with:
+              title: "Triage required"
+              description: "Opened by a workflow."
+              owner: "securitySolution"
+          ```
+
+  - group: cases.createCase
+    id: cases-createcase
+    description: |
+      ```{applies_to}
+      stack: ga 9.4+
+      serverless: ga
+      ```
+
+      Create a case with a title, description, severity, tags, and optional assignees. Accepts an optional top-level `connector-id` to associate the case with a configured external connector (for example, Jira or ServiceNow).
+    settings:
+      - setting: connector-id
+        id: cases-createcase-connector-id
+        datatype: "string"
+        description: |
+          Optional. ID of a configured external connector to attach to the case.
+      - setting: with.title
+        id: cases-createcase-title
+        datatype: "string"
+        description: |
+          Required. Case title.
+      - setting: with.description
+        id: cases-createcase-description
+        datatype: "string"
+        description: |
+          Required. Case description. Markdown supported.
+      - setting: with.owner
+        id: cases-createcase-owner
+        datatype: "string"
+        description: |
+          Required. Case owner: `securitySolution`, `observability`, or `cases`.
+      - setting: with.severity
+        id: cases-createcase-severity
+        datatype: "string"
+        description: |
+          Optional. `low`, `medium`, `high`, or `critical`.
+      - setting: with.tags
+        id: cases-createcase-tags
+        datatype: "string[]"
+        description: |
+          Optional. Tags to apply to the case.
+      - setting: with.assignees
+        id: cases-createcase-assignees
+        datatype: "array"
+        description: |
+          Optional. Array of `{ uid }` objects.
+      - setting: with.category
+        id: cases-createcase-category
+        datatype: "string"
+        description: |
+          Optional. Case category.
+      - setting: with.customFields
+        id: cases-createcase-customfields
+        datatype: "array"
+        description: |
+          Optional. Custom field values.
+      - setting: with.settings
+        id: cases-createcase-settings
+        datatype: "object"
+        description: |
+          Optional. Case settings, for example `syncAlerts`.
+      # TODO: verify the release that added this input
+      - setting: with.template
+        id: cases-createcase-template
+        datatype: "object"
+        description: |
+          Optional. A case template to create the case from. Requires the `xpack.cases.templates.enabled` setting. The template's defaults apply, and any value you set explicitly wins.
+      # TODO: verify the release and get a description from the Cases team
+      - setting: with.extended_fields
+        id: cases-createcase-extended-fields
+        datatype: "object"
+        description: |
+          Optional. Extended field values to set on the new case.
+
+  - group: cases.createCaseFromTemplate
+    id: cases-createcasefromtemplate
+    description: |
+      ```{applies_to}
+      stack: ga 9.4+
+      serverless: ga
+      ```
+
+      Create a case from a configured case template. Useful when a team has pre-defined case shapes (default title, description, tags, severity) for common scenarios.
+    settings:
+      - setting: with.case_template_id
+        id: cases-createcasefromtemplate-case-template-id
+        datatype: "string"
+        description: |
+          Required. ID of the template to apply.
+      - setting: with.overwrites
+        id: cases-createcasefromtemplate-overwrites
+        datatype: "object"
+        description: |
+          Optional. Fields to override on the templated case, for example `title`, `tags`.
+      # TODO: verify the release that made this input required
+      - setting: with.owner
+        id: cases-createcasefromtemplate-owner
+        datatype: "string"
+        description: |
+          Required. The solution that owns the case: `securitySolution`, `observability`, or `cases`.
+
+  - group: cases.getCase
+    id: cases-getcase
+    description: |
+      ```{applies_to}
+      stack: ga 9.4+
+      serverless: ga
+      ```
+
+      Retrieve a complete case object by ID. Optionally include comments and attachments in the response.
+    settings:
+      - setting: with.case_id
+        id: cases-getcase-case-id
+        datatype: "string"
+        description: |
+          Required. Case ID.
+      - setting: with.include_comments
+        id: cases-getcase-include-comments
+        datatype: "boolean"
+        description: |
+          Optional. Deprecated. Use the `cases.getAllAttachments` step to get a case's attachments instead. Whether to include case comments in the response.
+
+  - group: cases.getCases
+    id: cases-getcases
+    description: |
+      ```{applies_to}
+      stack: ga 9.4+
+      serverless: ga
+      ```
+
+      Retrieve up to 1000 cases in a single request. IDs that can't be fetched are reported in the `errors` array on the output. Use this to avoid N sequential `cases.getCase` calls in fan-out workflows.
+
+      Output: `{ cases: array, errors: array }`. The `errors` array contains entries for any IDs that couldn't be fetched.
+    settings:
+      - setting: with.case_ids
+        id: cases-getcases-case-ids
+        datatype: "string[]"
+        description: |
+          Required. Array of case IDs. Maximum 1000.
+
+  - group: cases.findCases
+    id: cases-findcases
+    description: |
+      ```{applies_to}
+      stack: ga 9.4+
+      serverless: ga
+      ```
+
+      Search for cases matching filter criteria. Supports paging, sorting, and filtering by many fields.
+
+      The output includes a `cases` array plus per-status counts (`count_open_cases`, `count_in_progress_cases`, `count_closed_cases`), `page`, `per_page`, and `total`.
+    settings:
+      - setting: with.search
+        id: cases-findcases-search
+        datatype: "string"
+        description: |
+          Optional. Free-text search.
+      - setting: with.searchFields
+        id: cases-findcases-searchfields
+        datatype: "string | string[]"
+        description: |
+          Optional. Fields to search in.
+      - setting: with.defaultSearchOperator
+        id: cases-findcases-defaultsearchoperator
+        datatype: "string"
+        description: |
+          Optional. `AND` or `OR` for multi-term search.
+      - setting: with.status
+        id: cases-findcases-status
+        datatype: "string | string[]"
+        description: |
+          Optional. Filter by status.
+      - setting: with.severity
+        id: cases-findcases-severity
+        datatype: "string | string[]"
+        description: |
+          Optional. Filter by severity.
+      - setting: with.tags
+        id: cases-findcases-tags
+        datatype: "string | string[]"
+        description: |
+          Optional. Filter by tag.
+      - setting: with.category
+        id: cases-findcases-category
+        datatype: "string | string[]"
+        description: |
+          Optional. Filter by category.
+      - setting: with.owner
+        id: cases-findcases-owner
+        datatype: "string | string[]"
+        description: |
+          Optional. Filter by case owner.
+      - setting: with.assignees
+        id: cases-findcases-assignees
+        datatype: "string | string[]"
+        description: |
+          Optional. Filter by assignee UID.
+      - setting: with.reporters
+        id: cases-findcases-reporters
+        datatype: "string | string[]"
+        description: |
+          Optional. Filter by reporter.
+      - setting: with.customFields
+        id: cases-findcases-customfields
+        datatype: "object"
+        description: |
+          Optional. Map of custom-field ID to allowed values.
+      - setting: with.from
+        id: cases-findcases-from
+        datatype: "string"
+        description: |
+          Optional. Start of the time range.
+      - setting: with.to
+        id: cases-findcases-to
+        datatype: "string"
+        description: |
+          Optional. End of the time range.
+      - setting: with.page
+        id: cases-findcases-page
+        datatype: "number"
+        description: |
+          Optional. Page number. Defaults to `1`.
+      - setting: with.perPage
+        id: cases-findcases-perpage
+        datatype: "number"
+        description: |
+          Optional. Results per page. Defaults to `20`.
+      - setting: with.sortField
+        id: cases-findcases-sortfield
+        datatype: "string"
+        description: |
+          Optional. `title`, `category`, `createdAt`, `updatedAt`, `closedAt`, `status`, or `severity`.
+      - setting: with.sortOrder
+        id: cases-findcases-sortorder
+        datatype: "string"
+        description: |
+          Optional. `asc` or `desc`.
+
+  - group: cases.findSimilarCases
+    id: cases-findsimilarcases
+    description: |
+      ```{applies_to}
+      stack: ga 9.4+
+      serverless: ga
+      ```
+
+      Find cases similar to a given case, matched by shared observables. Useful for deduplication before creating a new case.
+
+      Output: `{ cases: array, page: integer, per_page: integer, total: integer }`.
+    settings:
+      - setting: with.case_id
+        id: cases-findsimilarcases-case-id
+        datatype: "string"
+        description: |
+          Required. Source case ID to find similar cases for.
+      - setting: with.page
+        id: cases-findsimilarcases-page
+        datatype: "integer"
+        description: |
+          Optional. Page number (1-based).
+      - setting: with.perPage
+        id: cases-findsimilarcases-perpage
+        datatype: "integer"
+        description: |
+          Optional. Results per page.
+
+  - group: cases.getCasesByAlertId
+    id: cases-getcasesbyalertid
+    description: |
+      ```{applies_to}
+      stack: ga 9.4+
+      serverless: ga
+      ```
+
+      Find every case that contains a specific alert. The canonical "does a case already exist for this alert?" query.
+
+      ---
+    settings:
+      - setting: with.alert_id
+        id: cases-getcasesbyalertid-alert-id
+        datatype: "string"
+        description: |
+          Required. Alert signal ID.
+      - setting: with.owner
+        id: cases-getcasesbyalertid-owner
+        datatype: "string"
+        description: |
+          Optional. Filter by case owner.
+
+  - group: cases.updateCase
+    id: cases-updatecase
+    description: |
+      ```{applies_to}
+      stack: ga 9.4+
+      serverless: ga
+      ```
+
+      Update one case's fields. Changes go inside a required `updates` object. An optional `version` field enforces optimistic concurrency.
+
+      :::{important}
+      Update fields must sit inside the `updates` object, not at the top level of `with`. `updates: { status: open }` is valid; `with: { status: open, case_id: ... }` is not.
+      :::
+    settings:
+      - setting: with.case_id
+        id: cases-updatecase-case-id
+        datatype: "string"
+        description: |
+          Required. Case ID.
+      - setting: with.version
+        id: cases-updatecase-version
+        datatype: "string"
+        description: |
+          Optional. Case version for optimistic concurrency.
+      - setting: with.updates
+        id: cases-updatecase-updates
+        datatype: "object"
+        description: |
+          Required. Fields to update. At least one field required. Includes `title`, `description`, `status`, `severity`, `category`, `tags`, `assignees`, `settings`, and more.
+
+  - group: cases.updateCases
+    id: cases-updatecases
+    description: |
+      ```{applies_to}
+      stack: ga 9.4+
+      serverless: ga
+      ```
+
+      Bulk-update multiple cases. Each element specifies its own `case_id`, optional `version`, and `updates` object.
+    settings:
+      - setting: with.cases
+        id: cases-updatecases-cases
+        datatype: "array"
+        description: |
+          Required. Array of `{ case_id, version?, updates }` objects.
+
+  - group: cases.setStatus
+    id: cases-setstatus
+    description: |
+      ```{applies_to}
+      stack: ga 9.4+
+      serverless: ga
+      ```
+
+      Set a case's status.
+    settings:
+      - setting: with.case_id
+        id: cases-setstatus-case-id
+        datatype: "string"
+        description: |
+          Required. Case ID.
+      - setting: with.status
+        id: cases-setstatus-status
+        datatype: "string"
+        description: |
+          Required. `open`, `in-progress`, or `closed`.
+      # TODO: verify the release that added this input
+      - setting: with.version
+        id: cases-setstatus-version
+        datatype: "string"
+        description: |
+          Optional. The case version to update. If you omit it, the step looks up the case's current version first.
+
+  - group: cases.setSeverity
+    id: cases-setseverity
+    description: |
+      ```{applies_to}
+      stack: ga 9.4+
+      serverless: ga
+      ```
+
+      Set a case's severity.
+    settings:
+      - setting: with.case_id
+        id: cases-setseverity-case-id
+        datatype: "string"
+        description: |
+          Required. Case ID.
+      - setting: with.severity
+        id: cases-setseverity-severity
+        datatype: "string"
+        description: |
+          Required. `low`, `medium`, `high`, or `critical`.
+      # TODO: verify the release that added this input
+      - setting: with.version
+        id: cases-setseverity-version
+        datatype: "string"
+        description: |
+          Optional. The case version to update. If you omit it, the step looks up the case's current version first.
+
+  - group: cases.setTitle
+    id: cases-settitle
+    description: |
+      ```{applies_to}
+      stack: ga 9.4+
+      serverless: ga
+      ```
+
+      Update a case's title.
+    settings:
+      - setting: with.case_id
+        id: cases-settitle-case-id
+        datatype: "string"
+        description: |
+          Required. Case ID.
+      - setting: with.title
+        id: cases-settitle-title
+        datatype: "string"
+        description: |
+          Required. New title.
+      # TODO: verify the release that added this input
+      - setting: with.version
+        id: cases-settitle-version
+        datatype: "string"
+        description: |
+          Optional. The case version to update. If you omit it, the step looks up the case's current version first.
+
+  - group: cases.setDescription
+    id: cases-setdescription
+    description: |
+      ```{applies_to}
+      stack: ga 9.4+
+      serverless: ga
+      ```
+
+      Update a case's description.
+    settings:
+      - setting: with.case_id
+        id: cases-setdescription-case-id
+        datatype: "string"
+        description: |
+          Required. Case ID.
+      - setting: with.description
+        id: cases-setdescription-description
+        datatype: "string"
+        description: |
+          Required. New description. Markdown supported.
+      # TODO: verify the release that added this input
+      - setting: with.version
+        id: cases-setdescription-version
+        datatype: "string"
+        description: |
+          Optional. The case version to update. If you omit it, the step looks up the case's current version first.
+
+  - group: cases.setCategory
+    id: cases-setcategory
+    description: |
+      ```{applies_to}
+      stack: ga 9.4+
+      serverless: ga
+      ```
+
+      Set a case's category.
+    settings:
+      - setting: with.case_id
+        id: cases-setcategory-case-id
+        datatype: "string"
+        description: |
+          Required. Case ID.
+      - setting: with.category
+        id: cases-setcategory-category
+        datatype: "string"
+        description: |
+          Required. Category name.
+      - setting: with.owner
+        id: cases-setcategory-owner
+        datatype: "string"
+        description: |
+          Optional. Case owner. Optional, but providing it helps with editor auto-completion.
+      # TODO: verify the release that added this input
+      - setting: with.version
+        id: cases-setcategory-version
+        datatype: "string"
+        description: |
+          Optional. The case version to update. If you omit it, the step looks up the case's current version first.
+
+  - group: cases.setCustomField
+    id: cases-setcustomfield
+    description: |
+      ```{applies_to}
+      stack: ga 9.4+
+      serverless: ga
+      ```
+
+      Set a single custom-field value on a case. The `field_name` parameter is the system-set custom-field identifier (a UUID-style string), not the human-readable label you see in the UI.
+    settings:
+      - setting: with.case_id
+        id: cases-setcustomfield-case-id
+        datatype: "string"
+        description: |
+          Required. Case ID.
+      - setting: with.field_name
+        id: cases-setcustomfield-field-name
+        datatype: "string"
+        description: |
+          Required. Custom-field identifier. System-set, typically a UUID.
+      - setting: with.value
+        id: cases-setcustomfield-value
+        datatype: "string | number | boolean"
+        description: |
+          Required. Field value.
+      - setting: with.owner
+        id: cases-setcustomfield-owner
+        datatype: "string"
+        description: |
+          Required. Case owner. Optional, but providing it helps with editor auto-completion.
+      - setting: with.version
+        id: cases-setcustomfield-version
+        datatype: "string"
+        description: |
+          Optional. Case version for optimistic concurrency.
+
+  - group: cases.closeCase
+    id: cases-closecase
+    description: |
+      ```{applies_to}
+      stack: ga 9.4+
+      serverless: ga
+      ```
+
+      Close a case.
+
+      To record why a case was closed, pair with `cases.addComment` beforehand:
+
+      ---
+    settings:
+      - setting: with.case_id
+        id: cases-closecase-case-id
+        datatype: "string"
+        description: |
+          Required. Case ID.
+      - setting: with.version
+        id: cases-closecase-version
+        datatype: "string"
+        description: |
+          Optional. Case version for optimistic concurrency.
+
+  - group: cases.addComment
+    id: cases-addcomment
+    description: |
+      ```{applies_to}
+      stack: ga 9.4+
+      serverless: ga
+      ```
+
+      Add a Markdown-formatted comment to a case.
+    settings:
+      - setting: with.case_id
+        id: cases-addcomment-case-id
+        datatype: "string"
+        description: |
+          Required. Case ID.
+      - setting: with.comment
+        id: cases-addcomment-comment
+        datatype: "string"
+        description: |
+          Required. Comment body.
+
+  - group: cases.addAlerts
+    id: cases-addalerts
+    description: |
+      ```{applies_to}
+      stack: ga 9.4+
+      serverless: ga
+      ```
+
+      Attach detection alerts to a case. Each entry is an **object** with `alertId` and `index`. The optional `rule` describes the rule that generated the alert.
+
+      :::{important}
+      `alerts` takes an array of objects, not an array of ID strings. Each alert object requires both `alertId` and the `index` where the alert document lives. Cases uses both to resolve the alert document.
+      :::
+    settings:
+      - setting: with.case_id
+        id: cases-addalerts-case-id
+        datatype: "string"
+        description: |
+          Required. Case ID.
+      - setting: with.alerts
+        id: cases-addalerts-alerts
+        datatype: "array"
+        description: |
+          Required. Array of `{ alertId, index, rule? }` objects.
+
+  - group: cases.addEvents
+    id: cases-addevents
+    description: |
+      ```{applies_to}
+      stack: ga 9.4+
+      serverless: ga
+      ```
+
+      Attach arbitrary event documents to a case. Each entry is `{ eventId, index }`.
+    settings:
+      - setting: with.case_id
+        id: cases-addevents-case-id
+        datatype: "string"
+        description: |
+          Required. Case ID.
+      - setting: with.events
+        id: cases-addevents-events
+        datatype: "array"
+        description: |
+          Required. Array of `{ eventId, index }` objects.
+
+  - group: cases.addObservables
+    id: cases-addobservables
+    description: |
+      ```{applies_to}
+      stack: ga 9.4+
+      serverless: ga
+      ```
+
+      Add observables (indicators of compromise such as IPs, file hashes, domains, or URLs) to a case. `typeKey` must match one of the built-in observable types in {{elastic-sec}}.
+
+      The `typeKey` must match one of the built-in observable type keys: `observable-type-ipv4`, `observable-type-ipv6`, `observable-type-url`, `observable-type-domain`, or `observable-type-file-hash`. Use `observable-type-file-hash` for all hash algorithms (MD5, SHA-1, SHA-256, and so on).
+    settings:
+      - setting: with.case_id
+        id: cases-addobservables-case-id
+        datatype: "string"
+        description: |
+          Required. Case ID.
+      - setting: with.observables
+        id: cases-addobservables-observables
+        datatype: "array"
+        description: |
+          Required. Array of `{ typeKey, value, description? }` objects.
+
+  - group: cases.addAttachments
+    id: cases-addattachments
+    description: |
+      ```{applies_to}
+      stack: ga 9.5+
+      serverless: ga
+      ```
+
+      Attach one or more items to a case in a single request. Use this when you need to add several attachment types together, such as a comment, an alert, and a dashboard, instead of chaining dedicated steps such as [`cases.addComment`](#cases-addcomment) or [`cases.addAlerts`](#cases-addalerts).
+
+      Each entry in `attachments` uses a `type` field that selects the payload shape. Required fields depend on that type (`data`, `attachmentId`, and `metadata` appear only when the type needs them). The YAML editor narrows the available fields after you set `type`. Don't set `owner`. The step injects it from the target case.
+
+      Common `type` values include:
+
+      - `comment` ([`cases.addComment`](#cases-addcomment))
+      - `stack.alert`, `security.alert`, `observability.alert` ([`cases.addAlerts`](#cases-addalerts))
+      - `security.event` ([`cases.addEvents`](#cases-addevents)), `security.endpoint`, `security.indicator`, `security.timeline`
+      - `osquery`
+      - `dashboard`, `map`, `discoverSession`
+      - `lens` (by saved-object reference: `attachmentId` plus `metadata.title` and `metadata.soType: "lens"`)
+
+      Which types appear depends on the solutions and plugins enabled in your deployment. Use the example below for the payload shapes this step expects.
+
+      Output: `{ case: object }` (the updated case).
+
+      :::{note}
+      These attachment types aren't available through this step:
+
+      - File attachments
+      - Anomaly charts, anomaly swim lane, and single metric viewer
+      - Change point detection, log pattern analysis, and log rate analysis
+      - Lens visualizations that include the full visualization state instead of a saved-object reference
+
+      For those, use the dedicated Cases UI flows. You can still attach a Lens visualization by saved-object reference with `type: lens`.
+      :::
+
+      % TODO: After https://github.com/elastic/docs-content/pull/7450 merges, link "Cases UI flows" above to explore-analyze/cases/attach-objects-to-cases.md (Attach objects to cases).
+    example: |
+      ```yaml
+      - name: attach_attachments
+        type: cases.addAttachments
+        with:
+          case_id: "{{ steps.create_case.output.case.id }}"
+          attachments:
+            - type: "comment"
+              data:
+                content: "Investigating this incident."
+            - type: "security.alert"
+              attachmentId: "{{ event.alerts[0]._id }}"
+              metadata:
+                index: "{{ event.alerts[0]._index }}"
+                rule:
+                  id: "{{ event.rule.id }}"
+                  name: "{{ event.rule.name }}"
+            - type: "dashboard"
+              attachmentId: "dashboard-id-1"
+              metadata:
+                title: "Security dashboard"
+                soType: "dashboard"
+      ```
+    settings:
+      - setting: with.case_id
+        id: cases-addattachments-case-id
+        datatype: "string"
+        description: |
+          Required. Case ID.
+      - setting: with.attachments
+        id: cases-addattachments-attachments
+        datatype: "array"
+        description: |
+          Required. Array of `{ type, attachmentId?, data?, metadata? }` objects (1–100).
+
+  - group: cases.getAllAttachments
+    id: cases-getallattachments
+    description: |
+      ```{applies_to}
+      stack: ga 9.4+
+      serverless: ga
+      ```
+
+      Fetch every attachment associated with a case without pagination. Use this when you need the complete set of attachments for decision-making, for example when checking evidence before closing or escalating.
+
+      Output: `{ attachments: array }`.
+
+      ---
+    settings:
+      - setting: with.case_id
+        id: cases-getallattachments-case-id
+        datatype: "string"
+        description: |
+          Required. Case ID.
+
+  - group: cases.addTags
+    id: cases-addtags
+    description: |
+      ```{applies_to}
+      stack: ga 9.4+
+      serverless: ga
+      ```
+
+      Add tags to a case.
+    settings:
+      - setting: with.case_id
+        id: cases-addtags-case-id
+        datatype: "string"
+        description: |
+          Required. Case ID.
+      - setting: with.tags
+        id: cases-addtags-tags
+        datatype: "string[]"
+        description: |
+          Required. Tags to add.
+
+  - group: cases.removeTags
+    id: cases-removetags
+    description: |
+      ```{applies_to}
+      stack: ga 9.4+
+      serverless: ga
+      ```
+
+      Remove tags from a case. Pass the case ID and the list of tags to remove.
+    settings:
+      - setting: with.case_id
+        id: cases-removetags-case-id
+        datatype: "string"
+        description: |
+          Required. Case ID.
+      - setting: with.tags
+        id: cases-removetags-tags
+        datatype: "string[]"
+        description: |
+          Required. Tags to remove. Tags that are not on the case are ignored.
+
+  - group: cases.assignCase
+    id: cases-assigncase
+    description: |
+      ```{applies_to}
+      stack: ga 9.4+
+      serverless: ga
+      ```
+
+      Assign a case to one or more users.
+    settings:
+      - setting: with.case_id
+        id: cases-assigncase-case-id
+        datatype: "string"
+        description: |
+          Required. Case ID.
+      - setting: with.assignees
+        id: cases-assigncase-assignees
+        datatype: "array"
+        description: |
+          Required. Array of `{ uid }` objects.
+      # TODO: verify the release that added this input
+      - setting: with.version
+        id: cases-assigncase-version
+        datatype: "string"
+        description: |
+          Optional. The case version to update. If you omit it, the step looks up the case's current version first.
+
+  - group: cases.unassignCase
+    id: cases-unassigncase
+    description: |
+      ```{applies_to}
+      stack: ga 9.4+
+      serverless: ga
+      ```
+
+      Remove assignees from a case.
+
+      ---
+    settings:
+      - setting: with.case_id
+        id: cases-unassigncase-case-id
+        datatype: "string"
+        description: |
+          Required. Case ID.
+      - setting: with.assignees
+        id: cases-unassigncase-assignees
+        datatype: "array"
+        description: |
+          Required. Array of `{ uid }` objects to remove. Pass an empty array (`[]`) to remove all assignees from the case.
+      # TODO: verify the release that added this input
+      - setting: with.version
+        id: cases-unassigncase-version
+        datatype: "string"
+        description: |
+          Optional. The case version to update. If you omit it, the step looks up the case's current version first.
+
+  - group: cases.updateObservable
+    id: cases-updateobservable
+    description: |
+      ```{applies_to}
+      stack: ga 9.4+
+      serverless: ga
+      ```
+
+      Update an existing observable on a case.
+    settings:
+      - setting: with.case_id
+        id: cases-updateobservable-case-id
+        datatype: "string"
+        description: |
+          Required. Case ID.
+      - setting: with.observable_id
+        id: cases-updateobservable-observable-id
+        datatype: "string"
+        description: |
+          Required. Observable ID.
+      - setting: with.value
+        id: cases-updateobservable-value
+        datatype: "string"
+        description: |
+          Required. Updated value.
+      - setting: with.description
+        id: cases-updateobservable-description
+        datatype: "string | null"
+        description: |
+          Optional. Updated description.
+
+  - group: cases.deleteObservable
+    id: cases-deleteobservable
+    description: |
+      ```{applies_to}
+      stack: ga 9.4+
+      serverless: ga
+      ```
+
+      Remove an observable from a case.
+
+      ---
+    settings:
+      - setting: with.case_id
+        id: cases-deleteobservable-case-id
+        datatype: "string"
+        description: |
+          Required. Case ID.
+      - setting: with.observable_id
+        id: cases-deleteobservable-observable-id
+        datatype: "string"
+        description: |
+          Required. Observable ID.
+
+  - group: cases.pushCases
+    id: cases-pushcases
+    description: |
+      ```{applies_to}
+      stack: ga 9.4+
+      serverless: ga
+      ```
+
+      Push one or more cases to their configured external connector. Each case must have a connector configured; the step fails if any case in `case_ids` doesn't have one.
+
+      Output: `{ cases: array }`. Each element is the updated case object returned after the push.
+
+      Push multiple cases in a single step:
+
+      ---
+    settings:
+      - setting: with.case_ids
+        id: cases-pushcases-case-ids
+        datatype: "string[]"
+        description: |
+          Required. Array of case IDs to push. Each case must already have a connector configured.
+
+  - group: cases.deleteCases
+    id: cases-deletecases
+    description: |
+      ```{applies_to}
+      stack: ga 9.4+
+      serverless: ga
+      ```
+
+      Delete one or more cases permanently, including their attachments and comments.
+
+      :::{warning}
+      Deleted cases can't be recovered. If you don't want to permanently delete a case, use [`cases.closeCase`](#cases-closecase) instead.
+      :::
+    settings:
+      - setting: with.case_ids
+        id: cases-deletecases-case-ids
+        datatype: "string[]"
+        description: |
+          Required. Array of case IDs to delete.

@@ -1,0 +1,174 @@
+product: Kibana
+collection: Cases workflow triggers
+id: workflows-cases-triggers
+page_description: |
+  Cases triggers start a workflow when a case changes, so you can react to case events without polling the Cases API.
+
+  Every Cases trigger event includes `event.caseId` and `event.owner`. To run a workflow only for some cases, add a KQL condition in `on.condition`. For example, this trigger only fires for {{elastic-sec}} cases:
+
+  ```yaml
+  triggers:
+    - type: cases.caseCreated
+      on:
+        condition: 'event.owner: "securitySolution"'
+  ```
+
+groups:
+
+  - group: cases.caseCreated
+    id: cases-casecreated-trigger
+    description: |
+      ```{applies_to}
+      stack: preview 9.5+
+      serverless: preview
+      ```
+
+      Fires when a case is created.
+    settings:
+      - setting: event.caseId
+        id: cases-casecreated-caseid
+        datatype: string
+        description: |
+          The new case's ID.
+      - setting: event.owner
+        id: cases-casecreated-owner
+        datatype: string
+        description: |
+          The solution that owns the case: `securitySolution`, `observability`, or `cases`.
+
+  - group: cases.caseUpdated
+    id: cases-caseupdated-trigger
+    description: |
+      ```{applies_to}
+      stack: preview 9.5+
+      serverless: preview
+      ```
+
+      Fires when a case is updated. For bulk updates, it fires once for each case.
+
+      It also fires when a case's status changes. The [`cases.caseStatusUpdated`](#cases-casestatusupdated-trigger) trigger fires at the same time and includes the previous status, which makes it easier to filter on.
+    settings:
+      - setting: event.caseId
+        id: cases-caseupdated-caseid
+        datatype: string
+        description: |
+          The updated case's ID.
+      - setting: event.owner
+        id: cases-caseupdated-owner
+        datatype: string
+        description: |
+          The solution that owns the case: `securitySolution`, `observability`, or `cases`.
+      - setting: event.updatedFields
+        id: cases-caseupdated-updatedfields
+        datatype: string[]
+        description: |
+          The names of the fields that changed in this update.
+
+  - group: cases.caseStatusUpdated
+    id: cases-casestatusupdated-trigger
+    description: |
+      ```{applies_to}
+      stack: preview 9.5+
+      serverless: preview
+      ```
+
+      Fires when a case's status changes.
+    settings:
+      - setting: event.caseId
+        id: cases-casestatusupdated-caseid
+        datatype: string
+        description: |
+          The case's ID.
+      - setting: event.owner
+        id: cases-casestatusupdated-owner
+        datatype: string
+        description: |
+          The solution that owns the case: `securitySolution`, `observability`, or `cases`.
+      - setting: event.status
+        id: cases-casestatusupdated-status
+        datatype: string
+        description: |
+          The new status: `open`, `in-progress`, or `closed`.
+      - setting: event.previousStatus
+        id: cases-casestatusupdated-previousstatus
+        datatype: string
+        description: |
+          The previous status: `open`, `in-progress`, or `closed`.
+
+  - group: cases.attachmentsAdded
+    id: cases-attachmentsadded-trigger
+    description: |
+      ```{applies_to}
+      stack: preview 9.5+
+      serverless: preview
+      ```
+
+      Fires when attachments are added to a case. If one operation adds attachments of several types, such as three alerts and two comments, the trigger fires once for each type.
+
+      Adding a comment fires both this trigger, with `event.attachmentType` set to `comment`, and the [`cases.commentsAdded`](#cases-commentsadded-trigger) trigger.
+    settings:
+      - setting: event.caseId
+        id: cases-attachmentsadded-caseid
+        datatype: string
+        description: |
+          The case's ID.
+      - setting: event.owner
+        id: cases-attachmentsadded-owner
+        datatype: string
+        description: |
+          The solution that owns the case: `securitySolution`, `observability`, or `cases`.
+      - setting: event.ids
+        id: cases-attachmentsadded-ids
+        datatype: string[]
+        description: |
+          The IDs of the added attachments, all of the same type. These are the attachments themselves, not the alerts or events they reference.
+        applies_to:
+          stack: preview 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+      - setting: event.attachmentIds
+        id: cases-attachmentsadded-attachmentids
+        datatype: string[]
+        description: |
+          Deprecated. Use `event.ids` instead, which has the same values.
+        applies_to:
+          stack: preview =9.5, deprecated 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+      - setting: event.attachmentType
+        id: cases-attachmentsadded-attachmenttype
+        datatype: string
+        description: |
+          The type of the added attachments, such as `comment` or `alert`.
+
+  - group: cases.commentsAdded
+    id: cases-commentsadded-trigger
+    description: |
+      ```{applies_to}
+      stack: preview 9.5+
+      serverless: preview
+      ```
+
+      Fires when comments are added to a case.
+    settings:
+      - setting: event.caseId
+        id: cases-commentsadded-caseid
+        datatype: string
+        description: |
+          The case's ID.
+      - setting: event.owner
+        id: cases-commentsadded-owner
+        datatype: string
+        description: |
+          The solution that owns the case: `securitySolution`, `observability`, or `cases`.
+      - setting: event.commentIds
+        id: cases-commentsadded-commentids
+        datatype: string[]
+        description: |
+          The IDs of the comments added in this operation.
