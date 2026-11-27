@@ -180,6 +180,7 @@ export default function ({ getService }: FtrProviderContext) {
         'alerts_invalidate_api_keys',
         'apm-source-map-migration-task',
         'apm-telemetry-task',
+        'apm:republish_rum_policy',
         'autoImport-dataStream-task',
         'cai:cases_analytics_index_backfill',
         'cai:cases_analytics_index_scheduler',
