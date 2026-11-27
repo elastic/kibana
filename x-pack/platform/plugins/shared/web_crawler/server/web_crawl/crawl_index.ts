@@ -43,10 +43,12 @@ export class IncompatibleCrawlIndexError extends Error {}
 export const readCrawlIndexMappings = async (
   esClient: ElasticsearchClient,
   indexName: string
-): Promise<estypes.MappingTypeMapping[] | undefined> => {
+): Promise<Record<string, estypes.MappingTypeMapping> | undefined> => {
   try {
     const indices = await esClient.indices.getMapping({ index: indexName });
-    return Object.values(indices).map(({ mappings }) => mappings);
+    return Object.fromEntries(
+      Object.entries(indices).map(([concreteName, { mappings }]) => [concreteName, mappings])
+    );
   } catch (error) {
     if (error?.statusCode === 404) {
       return undefined;
@@ -66,19 +68,18 @@ export const createCrawlIndex = async (
 };
 
 /**
- * Adds required fields to an existing index. Throws `IncompatibleCrawlIndexError` on mapping conflicts.
+ * Adds required fields to existing indices. Throws `IncompatibleCrawlIndexError` on mapping conflicts.
  */
 export const addCrawlFields = async (
   esClient: ElasticsearchClient,
-  indexName: string,
-  mappings: estypes.MappingTypeMapping[]
+  mappingsByIndex: Record<string, estypes.MappingTypeMapping>
 ): Promise<void> => {
-  const missing: Record<string, estypes.MappingProperty> = {};
-  for (const [field, property] of Object.entries(CRAWL_FIELDS)) {
-    for (const { properties = {} } of mappings) {
+  const missingByIndex: Record<string, Record<string, estypes.MappingProperty>> = {};
+  for (const [indexName, { properties = {} }] of Object.entries(mappingsByIndex)) {
+    for (const [field, property] of Object.entries(CRAWL_FIELDS)) {
       const existing = properties[field];
       if (!existing) {
-        missing[field] = property;
+        missingByIndex[indexName] = { ...missingByIndex[indexName], [field]: property };
       } else if (!COMPATIBLE_TYPES[property.type].includes(existing.type ?? 'object')) {
         throw new IncompatibleCrawlIndexError(
           `Index ${indexName} maps ${field} as ${
@@ -88,9 +89,12 @@ export const addCrawlFields = async (
       }
     }
   }
-  if (Object.keys(missing).length > 0) {
-    await esClient.indices.putMapping({ index: indexName, properties: missing });
-  }
+  // One request per index: behind an alias, each index can be missing different fields
+  await Promise.all(
+    Object.entries(missingByIndex).map(([indexName, properties]) =>
+      esClient.indices.putMapping({ index: indexName, properties })
+    )
+  );
 };
 
 export const getIndexPrivileges = async (

@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 const DOCUMENT_EXTRACTION_TASK_TYPE = 'document_extraction';
 const ELASTIC_INFERENCE_SERVICE = 'elastic';
-// A page that takes longer than this holds up an extraction slot for little gain.
+// Not worth holding an extraction slot for longer
 const EXTRACTION_TIMEOUT = '30s';
 const EXTRACTION_REQUEST_TIMEOUT_MS = 45_000;
 const TOO_MANY_REQUESTS = 429;
@@ -42,7 +42,7 @@ export interface DocumentExtractionEndpoint {
   service: string;
 }
 
-/** The Elastic Inference Service endpoints come first, so the first one is the default. */
+/** Elastic Inference Service endpoints first, so the first one is the default */
 export const listDocumentExtractionEndpoints = async (
   esClient: ElasticsearchClient
 ): Promise<DocumentExtractionEndpoint[]> => {
@@ -91,7 +91,7 @@ interface ExtractPageOptions {
   inferenceId: string;
   url: string;
   signal: AbortSignal;
-  /** Awaited before a request is sent again, on top of the backoff. */
+  /** Runs before each retry, after the backoff */
   beforeRetry?: () => Promise<void>;
 }
 

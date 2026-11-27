@@ -15,19 +15,19 @@ const NOT_PRINTABLE_ASCII = /[^\x21-\x7e]+/g;
 const PERCENT_ESCAPE = /%[0-9a-f]{2}/gi;
 const UNRESERVED = /[A-Za-z0-9\-._~]/;
 
-// An escaped unreserved character is the same as the character itself, in either spelling.
+// `%7E` and `~` are the same character
 const normalizeEscape = (escape: string): string => {
   const char = String.fromCharCode(parseInt(escape.slice(1), 16));
   return UNRESERVED.test(char) ? char : escape.toUpperCase();
 };
 
-// A URL carries its path percent-encoded, while a robots.txt may spell the same path out.
+// URLs percent-encode their path, robots.txt may not
 const toComparablePath = (path: string): string => {
   let encoded = path;
   try {
     encoded = path.replace(NOT_PRINTABLE_ASCII, encodeURIComponent);
   } catch {
-    // A lone surrogate cannot be encoded, and cannot be in a URL either.
+    // Lone surrogates can't be encoded and can't appear in a URL
   }
   return encoded.replace(PERCENT_ESCAPE, normalizeEscape);
 };
@@ -46,15 +46,15 @@ interface RobotsGroup {
 export interface RobotsRules {
   isAllowed: (url: string) => boolean;
   sitemaps: string[];
-  /** The pause the site asks for between requests, when its `Crawl-delay` is a positive number. */
+  /** From `Crawl-delay`, if it's a positive number */
   crawlDelayMs?: number;
-  /** The file had more rules than are kept, so a path it disallows may be taken as allowed. */
+  /** The file had more rules than we keep, so some disallowed paths may be treated as allowed */
   isTruncated?: boolean;
 }
 
 export const ALLOW_ALL_ROBOTS: RobotsRules = { isAllowed: () => true, sitemaps: [] };
 
-/** Matches a robots.txt path pattern, where `*` is any run of characters and a final `$` anchors the end. */
+/** `*` matches any characters, a trailing `$` anchors the end */
 const matchesPattern = (pattern: string, path: string): boolean => {
   const isEndAnchored = pattern.endsWith('$');
   const segments = (isEndAnchored ? pattern.slice(0, -1) : pattern).split('*');
@@ -97,10 +97,10 @@ const parseLine = (line: string): { field: string; value: string } | undefined =
 };
 
 /**
- * Parses a robots.txt file into the rules that apply to `userAgentToken`.
+ * Parses robots.txt into the rules for `userAgentToken`.
  *
- * The groups naming the token apply when there are any, otherwise the `*` groups do. Among the
- * rules matching a URL the longest pattern wins, and `Allow` wins a tie.
+ * Groups that name the token win over `*` groups. For a URL, the longest matching pattern wins, and
+ * `Allow` wins ties.
  */
 export const parseRobotsTxt = (content: string, userAgentToken: string): RobotsRules => {
   const token = userAgentToken.toLowerCase();
@@ -154,7 +154,7 @@ export const parseRobotsTxt = (content: string, userAgentToken: string): RobotsR
         sitemaps.push(value);
       }
     }
-    // Any other line is ignored, also between the `User-agent` lines of one group.
+    // Ignore unknown lines, even between the `User-agent` lines of a group
   }
 
   const { rules, crawlDelayMs, isTruncated } = hasTokenGroup ? tokenGroup : wildcardGroup;

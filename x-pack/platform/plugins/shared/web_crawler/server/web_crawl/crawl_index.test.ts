@@ -50,10 +50,10 @@ describe('readCrawlIndexMappings', () => {
       'docs-2': { mappings: {} },
     });
 
-    await expect(readCrawlIndexMappings(esClient, 'docs')).resolves.toEqual([
-      { properties: { title: { type: 'text' } } },
-      {},
-    ]);
+    await expect(readCrawlIndexMappings(esClient, 'docs')).resolves.toEqual({
+      'docs-1': { properties: { title: { type: 'text' } } },
+      'docs-2': {},
+    });
     expect(esClient.indices.getMapping).toHaveBeenCalledWith({ index: 'docs' });
   });
 });
@@ -98,9 +98,11 @@ describe('addCrawlFields', () => {
   it('adds only the fields the index does not have', async () => {
     const { depth, crawl_id: crawlId, ...missing } = CRAWL_FIELDS;
 
-    await addCrawlFields(esClient, INDEX_NAME, [
-      { properties: { title: { type: 'text' }, depth: { type: 'long' }, crawl_id: crawlId } },
-    ]);
+    await addCrawlFields(esClient, {
+      [INDEX_NAME]: {
+        properties: { title: { type: 'text' }, depth: { type: 'long' }, crawl_id: crawlId },
+      },
+    });
 
     expect(esClient.indices.putMapping).toHaveBeenCalledTimes(1);
     expect(esClient.indices.putMapping).toHaveBeenCalledWith({
@@ -109,8 +111,21 @@ describe('addCrawlFields', () => {
     });
   });
 
+  it('adds to each index behind an alias only what that index is missing', async () => {
+    const { depth, ...withoutDepth } = CRAWL_FIELDS;
+
+    await addCrawlFields(esClient, {
+      'docs-1': { properties: { ...withoutDepth, depth: { type: 'long' } } },
+      'docs-2': { properties: withoutDepth },
+    });
+
+    expect(esClient.indices.putMapping.mock.calls).toEqual([
+      [{ index: 'docs-2', properties: { depth } }],
+    ]);
+  });
+
   it('leaves an index that has them all alone', async () => {
-    await addCrawlFields(esClient, INDEX_NAME, [{ properties: CRAWL_FIELDS }]);
+    await addCrawlFields(esClient, { [INDEX_NAME]: { properties: CRAWL_FIELDS } });
 
     expect(esClient.indices.putMapping).not.toHaveBeenCalled();
   });
@@ -120,7 +135,9 @@ describe('addCrawlFields', () => {
     ['an object', { properties: {} }, 'object'],
   ])('refuses an index that maps one of them as %s', async (_, urlPath, type) => {
     await expect(
-      addCrawlFields(esClient, INDEX_NAME, [{ properties: { ...CRAWL_FIELDS, url_path: urlPath } }])
+      addCrawlFields(esClient, {
+        [INDEX_NAME]: { properties: { ...CRAWL_FIELDS, url_path: urlPath } },
+      })
     ).rejects.toThrow(
       new IncompatibleCrawlIndexError(
         `Index ${INDEX_NAME} maps url_path as ${type}, and a crawl needs it to be keyword`

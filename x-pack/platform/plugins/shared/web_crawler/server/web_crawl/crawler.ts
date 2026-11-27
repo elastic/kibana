@@ -27,15 +27,15 @@ import { MAX_SITEMAP_REQUESTS, discoverSitemapPages } from './sitemap';
 export const EXTRACTION_CONCURRENCY = 10;
 const MAX_CONTENT_LENGTH = 500_000;
 export const CRAWL_LIMITS = {
-  /** Caps the combined length of the URLs a crawl remembers, which bounds its memory. */
+  /** Bounds memory: max combined length of the URLs a crawl remembers */
   maxSeenUrlsLength: 10_000_000,
-  /** The origins, besides those of the start URLs, whose robots.txt a crawl reads. */
+  /** Max origins, besides those of the start URLs, that we read robots.txt for */
   maxLinkedOrigins: 50,
 };
 // Pages are fetched by the inference endpoint, so this only selects which robots.txt group applies.
 export const ROBOTS_USER_AGENT = 'Elastic-Crawler';
 const ROBOTS_CHECKS_PER_TICK = 100;
-// A longer pause could not fit the largest crawl into the time the crawl task is given.
+// With a longer delay the largest crawl wouldn't fit in the task timeout
 export const MAX_CRAWL_DELAY_MS = 3_000;
 
 export interface CrawlProgress {
@@ -60,10 +60,10 @@ export interface CrawlOptions {
   crawlId: string;
   maxDepth: number;
   maxDocuments: number;
-  /** Narrow the links the crawl follows. The URL it starts from is always crawled. */
+  /** Only applies to discovered links. Start URLs are always crawled. */
   pathRules?: PathRules;
   fileExtensions?: readonly string[];
-  /** Called synchronously whenever the counts change. */
+  /** Called synchronously on every count change */
   onProgress?: (progress: CrawlProgress) => void;
 }
 
@@ -81,12 +81,12 @@ interface QueuedPage {
   depth: number;
 }
 
-// The depth of a URL that is known and is not a page to crawl, such as a sitemap.
+// Depth for known URLs that aren't pages, like sitemaps
 const NOT_A_PAGE = -1;
 
-// Crawls with the same start URLs, sitemaps and path rules share a scope, and may purge each
-// other's documents. URLs are compared as given: another URL of the same page can lead to other
-// links, and to the robots.txt and sitemaps of another origin.
+// Crawls with the same start URLs, sitemaps and path rules share a scope and can purge each other's
+// documents. URLs are compared as given, because another URL of the same page can lead to different
+// links, robots.txt and sitemaps.
 const getCrawlScope = (
   seedUrls: string[],
   sitemapUrls: string[],
@@ -163,20 +163,20 @@ export const crawlSite = async ({
     };
   }
 
-  // Aborted with the task, and on an indexing error that makes further requests pointless.
+  // Aborts with the task, or when indexing fails
   const crawlAbort = new AbortController();
   const { signal } = crawlAbort;
   const abortCrawl = () => crawlAbort.abort();
   taskSignal.addEventListener('abort', abortCrawl, { once: true });
 
   const startedAt = new Date().toISOString();
-  // The depth each page was found at. Keyed by page, so a page is crawled once however many of its
-  // URLs the crawl comes across, unless it is found again closer to a start URL.
+  // Depth each page was found at. Keyed by page so we crawl it once, unless we find it again closer
+  // to a start URL.
   const depthByPage = new Map<string, number>();
   const givenSeedUrls = [url, ...additionalSeedUrls];
   givenSeedUrls.forEach((seedUrl) => depthByPage.set(getPageKey(seedUrl), 0));
   const crawlScope = getCrawlScope(givenSeedUrls, sitemapUrls, pathRules);
-  // A sitemap or robots.txt a page links to is not a page to crawl, unless it is a start URL.
+  // Don't crawl sitemaps and robots.txt as pages, unless they're start URLs
   const markNotAPage = (fileUrl: string) => {
     const pageKey = getPageKey(fileUrl);
     if (!depthByPage.has(pageKey)) {
@@ -184,11 +184,11 @@ export const crawlSite = async ({
     }
   };
   sitemapUrls.forEach(markNotAPage);
-  // The links turned away by the path rules or robots.txt, by URL: another URL of the same page
-  // may still be allowed.
+  // Links rejected by path rules or robots.txt. Keyed by URL, since another URL of the same page
+  // may be allowed.
   const skippedUrls = new Set<string>();
   let seenUrlsLength = 0;
-  // Set when a limit made the crawl drop links without counting them against the page limit.
+  // Set when links were dropped because of a limit. The crawl is then incomplete and doesn't purge.
   let hasDroppedLinks = false;
   const queues: string[][] = Array.from({ length: maxDepth + 1 }, () => []);
   const queueCursors: number[] = queues.map(() => 0);
@@ -259,7 +259,7 @@ export const crawlSite = async ({
       });
       return page?.content;
     } catch (error) {
-      // A sitemap that could not be read may list pages the crawl then never finds.
+      // An unreadable sitemap may list pages we never find
       if (!fetchSignal.aborted) {
         hasDroppedLinks = true;
       }
@@ -269,9 +269,8 @@ export const crawlSite = async ({
   };
 
   try {
-    // robots.txt is per origin (scheme, host and port). No content means the origin has none,
-    // which allows everything. When the request fails the rules are unknown, so the origin is not
-    // crawled.
+    // robots.txt is per origin (scheme, host and port). No content means no rules. If the request
+    // fails we don't know the rules, so we skip the origin.
     const robotsByOrigin = new Map<string, RobotsRules | null>();
     const robotsRequests = new Map<string, Promise<RobotsRules | null>>();
     const robotsErrorByOrigin = new Map<string, Error>();
@@ -285,7 +284,7 @@ export const crawlSite = async ({
       if (pending) {
         return pending;
       }
-      // A site can link to any number of its ports, each an origin with a robots.txt of its own.
+      // A site can link to any number of ports, and each is its own origin
       if (isLinked && ++linkedOriginsCount > CRAWL_LIMITS.maxLinkedOrigins) {
         if (linkedOriginsCount === CRAWL_LIMITS.maxLinkedOrigins + 1) {
           logger.warn(
@@ -309,7 +308,7 @@ export const crawlSite = async ({
           return rules;
         })
         .catch((error) => {
-          // An aborted crawl requests nothing more, so the rules do not matter.
+          // Aborted, so nothing more is requested anyway
           if (signal.aborted) {
             return ALLOW_ALL_ROBOTS;
           }
@@ -332,7 +331,7 @@ export const crawlSite = async ({
       robotsByOrigin.get(new URL(seedUrl).origin) !== null;
     const isAllowedSeed = (seedUrl: string): boolean =>
       isReadable(seedUrl) && getRobots(seedUrl).isAllowed(seedUrl);
-    // Of the start URLs that lead to one page, the first that may be crawled stands for the page.
+    // If several start URLs lead to the same page, use the first one we're allowed to crawl
     const seedByPage = new Map<string, string>();
     for (const seedUrl of givenSeedUrls) {
       const pageKey = getPageKey(seedUrl);
@@ -343,8 +342,8 @@ export const crawlSite = async ({
     }
     const seedUrls = [...seedByPage.values()];
     const readableSeedUrls = seedUrls.filter(isReadable);
-    // The first start URL of each site, which is where that site's sitemaps are looked for, and the
-    // sitemaps that the robots.txt of any of its start URLs declares.
+    // Per site: the first start URL, where we look for sitemaps, and the sitemaps declared in the
+    // robots.txt of any of its start URLs
     const siteSeeds = new Map<string, string>();
     const declaredSitemapsBySite = new Map<string, Set<string>>();
     for (const seedUrl of givenSeedUrls.filter(isReadable)) {
@@ -377,7 +376,7 @@ export const crawlSite = async ({
     }
     skippedByRobotsCount += readableSeedUrls.length - allowedSeedUrls.length;
     extractionFailedCount += seedUrls.length - readableSeedUrls.length;
-    // A start URL left out for another URL of its page still had an origin the crawl could not read.
+    // A start URL was replaced by another URL of the same page, but its origin is still unreadable
     if (!givenSeedUrls.every(isReadable)) {
       hasDroppedLinks = true;
     }
@@ -402,8 +401,8 @@ export const crawlSite = async ({
         if (isKnown()) {
           continue;
         }
-        // Pages past the request budget would never be taken. Stale entries of this queue count
-        // toward the budget here but are never requested, so the crawl may still end under it.
+        // Don't queue more than we can still request. Stale entries count here but are never
+        // requested, so the crawl can still end under budget.
         if (queue.length - queueCursors[depth] >= maxDocuments - requestedCount) {
           hasDroppedLinks = true;
           break;
@@ -417,7 +416,7 @@ export const crawlSite = async ({
           robots = robotsByOrigin.get(new URL(link).origin);
           if (robots === undefined) {
             robots = await readRobots(link, { isLinked: true });
-            // Another worker may have queued or skipped the link while robots.txt was read.
+            // Another worker may have queued or skipped the link while we waited for robots.txt
             if (isKnown()) {
               continue;
             }
@@ -429,8 +428,7 @@ export const crawlSite = async ({
           continue;
         }
         if (robots?.isAllowed(link)) {
-          // A page found again closer to a start URL is queued again, so that its links are
-          // followed further.
+          // Found again closer to a start URL: queue it again so its links are followed further
           if (knownDepth === undefined) {
             seenUrlsLength += pageKey.length;
           }
@@ -459,7 +457,7 @@ export const crawlSite = async ({
       for (let depth = 0; depth <= maxDepth; depth++) {
         while (queueCursors[depth] < queues[depth].length) {
           const pageUrl = queues[depth][queueCursors[depth]++];
-          // An entry is stale once its page was queued again at a shallower depth.
+          // Skip entries that were queued again at a shallower depth
           if (depthByPage.get(getPageKey(pageUrl)) === depth) {
             requestedCount++;
             return { pageUrl, depth };
@@ -473,10 +471,10 @@ export const crawlSite = async ({
     const seedsCrawled = new Promise<void>((resolve) => {
       markSeedsCrawled = resolve;
     });
-    // Start URLs past the page limit are never requested, so they are not waited for.
+    // Start URLs beyond the page limit are never requested, so don't wait for them
     let pendingSeedCount = Math.min(allowedSeedUrls.length, maxDocuments);
     signal.addEventListener('abort', markSeedsCrawled, { once: true });
-    // An abort while robots.txt was read happened before the listener was there.
+    // The abort may have happened before the listener was added
     if (signal.aborted) {
       markSeedsCrawled();
     }
@@ -497,7 +495,7 @@ export const crawlSite = async ({
           inferenceId,
           url: pageUrl,
           signal,
-          // A request sent again is another request to the site, so it waits its turn too.
+          // Retries are requests to the site too, so they also wait for a slot
           beforeRetry: waitForSlot,
         });
       } catch (error) {
@@ -512,12 +510,12 @@ export const crawlSite = async ({
         extractionFailedCount++;
         return;
       }
-      // A page found closer to a start URL in the meantime is crawled again from there, which
-      // follows its links. It is still indexed here, at that depth, in case that request fails.
+      // If the page was found closer to a start URL in the meantime, it's crawled again from there.
+      // Still index it here, at that depth, in case that request fails.
       const pageKey = getPageKey(pageUrl);
       const getKnownDepth = (): number => depthByPage.get(pageKey) ?? depth;
 
-      // Links are queued before the page is indexed, so idle workers start on them right away.
+      // Queue links before indexing so idle workers can start on them
       if (getKnownDepth() === depth && depth < maxDepth) {
         const links = extractLinks(page.content, pageUrl, fileExtensions);
         if (links.length >= MAX_LINKS_PER_PAGE) {
@@ -531,7 +529,7 @@ export const crawlSite = async ({
         title: page.title ?? pageUrl,
         description: page.description,
         content: truncateContent(page.content),
-        // Read only now: the page may have been found closer while its links were queued.
+        // Read late: the depth may have changed while links were queued
         depth: getKnownDepth(),
         crawl_id: crawlId,
         crawl_scope: crawlScope,
@@ -566,8 +564,8 @@ export const crawlSite = async ({
       }
     };
 
-    // Aborted with the crawl, and once the workers are done: a sitemap still being read by then
-    // lists pages that the request budget has no room for.
+    // Aborts with the crawl, and when the workers finish: by then there's no budget left for pages
+    // from a sitemap that's still being read
     const sitemapAbort = new AbortController();
     const abortSitemaps = () => sitemapAbort.abort();
     signal.addEventListener('abort', abortSitemaps, { once: true });
@@ -659,7 +657,7 @@ export const crawlSite = async ({
           startedAt,
           maxDepth,
           pathRules,
-          // A site none of whose start URLs could be crawled was not read, so its pages stay.
+          // Only purge sites we actually crawled
           hosts: [...new Set(allowedSeedUrls.map(getSiteKey))].flatMap((siteKey) => [
             siteKey,
             `www.${siteKey}`,

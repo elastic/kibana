@@ -15,9 +15,20 @@ export const getCrawlIndexName = (url: string): string =>
     .toLowerCase()
     .replace(/[^a-z0-9._-]+/g, '-')}`;
 
+// A lone surrogate can't be URI-encoded, so the Elasticsearch client can't send it
+const isWellFormed = (text: string): boolean => {
+  try {
+    encodeURIComponent(text);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 /** Elasticsearch's index name rules, plus no leading dot. */
 export const isValidCrawlIndexName = (indexName: string): boolean =>
   indexName !== '' &&
+  isWellFormed(indexName) &&
   indexName === indexName.toLowerCase() &&
   !/[\\/*?"<>| ,#:]/.test(indexName) &&
   !/^[-_+.]/.test(indexName) &&

@@ -10,7 +10,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { waitFor } from './document_extraction';
 import { getPageKey } from './links';
 
-// `semantic_text` runs inference on every document at ingest, so a single request stays small.
+// Keep requests small: `semantic_text` runs inference on every document at ingest
 export const BULK_SIZE = 20;
 export const MAX_BULK_BYTES = 1024 * 1024;
 export const MAX_CONCURRENT_BULKS = 3;
@@ -46,16 +46,16 @@ interface BulkIndexerOptions {
   signal: AbortSignal;
   indexName: string;
   onIndexed: () => void;
-  /** Called once, with the error of the first bulk request that failed as a whole. */
+  /** Called once, when a whole bulk request fails */
   onError: (error: Error) => void;
 }
 
 export interface BulkIndexer {
-  /** Queues a document. Waits only when a full set of requests is already buffered. */
+  /** Only waits when indexing has fallen behind */
   add: (document: CrawledDocument) => Promise<void>;
-  /** Sends what is still queued and waits for every request to settle. */
+  /** Flushes the queue and waits for all requests */
   drain: () => Promise<void>;
-  /** Waits for the requests already sent, leaving queued documents unsent. */
+  /** Waits for in-flight requests and drops what's still queued */
   settle: () => Promise<void>;
   getCounts: () => { documentsCount: number; failedCount: number; lastError?: Error };
 }
@@ -82,7 +82,7 @@ export const createBulkIndexer = ({
   const buffer: BufferedDocument[] = [];
   let bufferedBytes = 0;
   const inFlight = new Set<Promise<void>>();
-  // A page indexed again, when the crawl found it closer to a start URL, is still one document.
+  // A page can be indexed twice if it's found again closer to a start URL. Count it once.
   const indexedIds = new Set<string>();
   let failedCount = 0;
   let lastError: Error | undefined;

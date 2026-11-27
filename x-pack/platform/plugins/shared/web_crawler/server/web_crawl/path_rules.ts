@@ -14,7 +14,7 @@ export interface PathRules {
 
 export const NO_PATH_RULES: PathRules = { includePaths: [], excludePaths: [] };
 
-// The characters a URL carries percent-encoded in its path.
+// Characters that are percent-encoded in a URL path
 const ENCODED_IN_PATH = /[^\x21-\x7e]+|["<>`{}]/g;
 
 const toUrlPath = (path: string): string | null => {
@@ -25,10 +25,7 @@ const toUrlPath = (path: string): string | null => {
   }
 };
 
-/**
- * Trims and de-duplicates path prefixes and spells them the way a URL spells its path, or returns
- * `null` when one of them is not usable.
- */
+/** Normalizes path prefixes to how URLs encode paths. Returns `null` if one is invalid. */
 export const normalizePathPrefixes = (paths: string[] = []): string[] | null => {
   const urlPaths = paths
     .map((path) => path.trim())
@@ -46,7 +43,7 @@ export const normalizePathPrefixes = (paths: string[] = []): string[] | null => 
   return isValid ? normalized : null;
 };
 
-/** An excluded path wins over an included one. */
+/** Exclude wins over include */
 export const isPathAllowed = (url: string, { includePaths, excludePaths }: PathRules): boolean => {
   const { pathname } = new URL(url);
   if (excludePaths.some((prefix) => pathname.startsWith(prefix))) {

@@ -8,7 +8,7 @@
 import { getSiteKey, isSameSitePage, iterateLinkTargets, normalizeUrl } from './links';
 
 export const MAX_SITEMAP_REQUESTS = 3;
-// More nested sitemaps than any request budget gets to.
+// More than any request budget can reach
 const MAX_NESTED_SITEMAPS = 1000;
 const NO_PAGES: ReadonlySet<string> = new Set();
 const LOC_OPEN = '<loc>';
@@ -49,11 +49,11 @@ function* iterateLocTags(content: string): Generator<string> {
 
 function* iterateSitemapEntries(content: string): Generator<string> {
   yield* iterateLocTags(content);
-  // The inference endpoint may return the XML converted to markdown, with each entry as a link.
+  // The inference endpoint may return the XML as markdown, with each entry as a link
   yield* iterateLinkTargets(content);
 }
 
-// The inference endpoint reads a gzipped sitemap as it reads a plain one.
+// The inference endpoint can read gzipped sitemaps
 const isSitemapUrl = (url: string): boolean => {
   const pathname = new URL(url).pathname.toLowerCase();
   return pathname.endsWith('.xml') || pathname.endsWith('.xml.gz');
@@ -67,7 +67,7 @@ export interface SitemapEntries {
 
 interface ParseSitemapOptions {
   siteKeys: string[];
-  /** How many pages to read that are not among `knownPages`. */
+  /** Max pages that aren't in `knownPages` yet */
   maxPages: number;
   maxSitemaps?: number;
   fileExtensions?: readonly string[];
@@ -75,8 +75,8 @@ interface ParseSitemapOptions {
 }
 
 /**
- * Reads the same-site pages and the nested sitemaps a sitemap lists, stopping at `maxPages` new
- * pages. `isTruncated` tells that it listed more nested sitemaps than `maxSitemaps`.
+ * Reads the same-site pages and nested sitemaps from a sitemap. `isTruncated` means it had more
+ * nested sitemaps than `maxSitemaps`.
  */
 export const parseSitemap = (
   content: string,
@@ -120,7 +120,7 @@ export const parseSitemap = (
 
 interface DiscoverSitemapPagesOptions {
   siteUrl: string;
-  /** Sitemaps named by robots.txt. The conventional `/sitemap.xml` is tried when there are none. */
+  /** From robots.txt. Falls back to `/sitemap.xml` when empty. */
   declaredSitemaps: string[];
   siteKeys?: string[];
   maxRequests?: number;
@@ -128,13 +128,13 @@ interface DiscoverSitemapPagesOptions {
   fileExtensions?: readonly string[];
   signal: AbortSignal;
   fetchContent: (url: string) => Promise<string | undefined>;
-  /** Called when sitemaps or pages were left unread because a budget ran out. */
+  /** Called when a budget ran out before everything was read */
   onIncomplete?: () => void;
 }
 
 /**
- * Collects the pages a site lists in its sitemaps, following sitemap indexes within a small request
- * budget. Sitemaps known at the same time are read side by side.
+ * Collects the pages listed in a site's sitemaps, following sitemap indexes within a small request
+ * budget
  */
 export const discoverSitemapPages = async ({
   siteUrl,

@@ -14,7 +14,7 @@ interface PurgeOptions {
   indexName: string;
   crawlId: string;
   crawlScope: string;
-  /** When the crawl began. Documents indexed since are kept. */
+  /** Documents indexed after this are kept */
   startedAt: string;
   maxDepth: number;
   hosts: string[];
@@ -22,13 +22,11 @@ interface PurgeOptions {
 }
 
 /**
- * Deletes the pages earlier crawls indexed that the crawl `crawlId` did not find again, and
- * returns how many there were. Only pages last indexed for the same scope, before this crawl
- * began, are deleted. Pages deeper than this crawl went, pages of hosts it did not cover and pages
- * its path rules kept it away from are left alone.
+ * Deletes documents from earlier crawls of the same scope that this crawl didn't find again.
+ * Returns how many.
  *
- * A page this crawl indexed moments ago can still show its old crawl ID to the search. Deleting it
- * then fails on its version, and `conflicts: 'proceed'` keeps it.
+ * A page we just indexed can still show its old crawl ID in search. The delete then fails on the
+ * version conflict, and `conflicts: 'proceed'` keeps the page.
  */
 export const purgeStaleDocuments = async ({
   esClient,

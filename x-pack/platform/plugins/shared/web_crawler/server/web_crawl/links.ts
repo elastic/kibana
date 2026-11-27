@@ -9,7 +9,7 @@ import type { WebCrawlFileExtension } from '../../common/constants';
 import { WEB_CRAWL_FILE_EXTENSIONS } from '../../common/constants';
 
 const MAX_URL_LENGTH = 2048;
-// Deeper paths and longer queries are mostly calendars, faceted listings and other URL traps.
+// Deeper paths and longer queries are mostly URL traps like calendars and faceted listings
 const MAX_URL_SEGMENTS = 16;
 const MAX_URL_PARAMS = 10;
 export const MAX_LINKS_PER_PAGE = 2000;
@@ -57,9 +57,8 @@ const getPathSegments = (pathname: string): string[] =>
   pathname.split('/').filter((segment) => segment !== '');
 
 /**
- * Returns the absolute http(s) URL without fragment or credentials, or `null` when it is not
- * crawlable. `isDiscovered` is for links a crawl came across, which are also held to the limits
- * that keep it out of URL traps; the URL a user asks for is not.
+ * Returns an absolute http(s) URL without fragment or credentials, or `null` if we can't crawl it.
+ * Discovered links also have to pass the URL trap limits; URLs the user entered don't.
  */
 export const normalizeUrl = (
   rawUrl: string,
@@ -96,13 +95,10 @@ export const normalizeUrl = (
   return url.href.length > MAX_URL_LENGTH ? null : url.href;
 };
 
-/** Identifies the site a URL belongs to, treating the `www.` host as the bare host. */
+/** `www.example.com` and `example.com` are the same site */
 export const getSiteKey = (url: string): string => new URL(url).hostname.replace(/^www\./, '');
 
-/**
- * Identifies the page a URL leads to: the `http` and `https` URLs of a page are one page, and so
- * are its URLs with and without a trailing slash.
- */
+/** The http/https and trailing-slash variants of a URL are the same page */
 export const getPageKey = (url: string): string => {
   const { host, pathname, search } = new URL(url);
   return `${host}${pathname.endsWith('/') ? pathname.slice(0, -1) : pathname}${search}`;
@@ -132,7 +128,7 @@ const SUPPORTED_FILE_EXTENSIONS: ReadonlySet<string> = new Set(WEB_CRAWL_FILE_EX
 const isSupportedFileExtension = (extension: string): extension is WebCrawlFileExtension =>
   SUPPORTED_FILE_EXTENSIONS.has(extension);
 
-/** Lowercases and de-duplicates file extensions, or returns `null` when one cannot be crawled. */
+/** Returns `null` if any extension isn't supported */
 export const normalizeFileExtensions = (
   extensions: string[] = []
 ): WebCrawlFileExtension[] | null => {
@@ -165,10 +161,10 @@ const isLinkTargetEnd = (char: string, openParentheses: number): boolean =>
   isWhitespace(char) || (char === ')' && openParentheses === 0);
 
 /**
- * Yields the raw target of every markdown link in a document.
+ * Yields the raw target of every markdown link.
  *
- * Scans with a forward-only cursor, so the cost is linear in the document length. Balanced
- * parentheses are part of the target, and a target in angle brackets is everything between them.
+ * Uses a forward-only cursor so it stays linear on any input. Handles balanced parentheses and
+ * `<angle bracket>` targets.
  */
 export function* iterateLinkTargets(markdown: string): Generator<string> {
   let cursor = 0;
@@ -205,8 +201,7 @@ export function* iterateLinkTargets(markdown: string): Generator<string> {
 }
 
 /**
- * Whether a normalized URL is a page of the site. Assets are not, except files with one of
- * `fileExtensions`.
+ * Whether a URL is a page of this site. Files only count if their extension is in `fileExtensions`.
  */
 export const isSameSitePage = (
   url: string,

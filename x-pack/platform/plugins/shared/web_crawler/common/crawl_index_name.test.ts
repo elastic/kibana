@@ -58,6 +58,7 @@ describe('isValidCrawlIndexName', () => {
     ['a backslash', 'docs\\2024'],
     ['more than 255 characters', 'a'.repeat(256)],
     ['more than 255 bytes', 'é'.repeat(128)],
+    ['a lone surrogate', 'docs\ud800'],
   ])('rejects %s', (_, indexName) => {
     expect(isValidCrawlIndexName(indexName)).toBe(false);
   });
