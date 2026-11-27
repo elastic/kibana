@@ -96,3 +96,7 @@
 - [URLScan.io](/reference/connectors-kibana/urlscan-io-action-type.md): Search historical URL scans, detonate a URL in a sandboxed browser, and retrieve verdicts, screenshots, and page content.
 - [URLVoid](/reference/connectors-kibana/urlvoid-action-type.md): Check domain and URL reputation using multi-engine scanning.
 - [VirusTotal](/reference/connectors-kibana/virustotal-action-type.md): Perform file scanning, URL and domain analysis, result retrieval, and threat intelligence lookups.
+
+**Endpoint security**
+
+- [Bitdefender GravityZone](/reference/connectors-kibana/bitdefender-gravityzone-action-type.md): Find and isolate endpoints, scan them for malware, and manage quarantined files and blocklist entries.
