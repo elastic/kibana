@@ -39,6 +39,9 @@ export function formatDuration(duration: number): string {
   return `${Number(value.toPrecision(3))}min`;
 }
 
+/** A share of spans as `3.4%`, with just enough precision to compare. */
+export const formatShare = (share: number) => `${(share * 100).toFixed(1)}%`;
+
 export interface DurationTick {
   duration: number;
   /** Fractional row of the tick, for placing it. */

@@ -135,6 +135,12 @@ describe('executeWorkflowTool', () => {
     const getAvailability = (isWorkflowsAvailable: boolean, atSpace: jest.Mock) =>
       getAvailabilityWith(isWorkflowsAvailable, securityWith(atSpace));
 
+    it('caches the result per space and principal', () => {
+      const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
+
+      expect(tool.availability?.cacheMode).toBe('space-user');
+    });
+
     it('is available when Workflows is available and the caller can execute workflows', async () => {
       const atSpace = jest.fn().mockResolvedValue({ hasAllRequested: true });
 

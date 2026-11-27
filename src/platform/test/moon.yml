@@ -37,7 +37,6 @@ dependsOn:
   - '@kbn/rison'
   - '@kbn/field-formats-plugin'
   - '@kbn/axe-config'
-  - '@kbn/analytics'
   - '@kbn/ftr-screenshot-filename'
   - '@kbn/es-archiver'
   - '@kbn/core-application-browser'

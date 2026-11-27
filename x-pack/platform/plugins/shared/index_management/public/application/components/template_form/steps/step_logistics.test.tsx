@@ -276,4 +276,54 @@ describe('StepLogistics', () => {
       expect(screen.queryByTestId('lookupLifecycleWarning')).not.toBeInTheDocument();
     });
   });
+
+  describe('WHEN the template has data stream options', () => {
+    const renderStep = (hasDataStreamOptions: boolean, dataStream: object | undefined) =>
+      render(
+        <I18nProvider>
+          <StepLogistics
+            defaultValue={{ ...baseDefaultValue, dataStream }}
+            onChange={jest.fn()}
+            isLegacy={false}
+            hasDataStreamOptions={hasDataStreamOptions}
+          />
+        </I18nProvider>
+      );
+
+    it('SHOULD NOT show the callout while "Create data stream" is on', async () => {
+      renderStep(true, {});
+
+      await screen.findByTestId('dataStreamField');
+      expect(screen.queryByTestId('dataStreamOptionsLostCallout')).not.toBeInTheDocument();
+    });
+
+    it('SHOULD show the callout when "Create data stream" is toggled off, and hide it when toggled on again', async () => {
+      renderStep(true, {});
+
+      await screen.findByTestId('dataStreamField');
+      const toggle = within(screen.getByTestId('dataStreamField')).getByRole('switch');
+      fireEvent.click(toggle);
+
+      expect(await screen.findByTestId('dataStreamOptionsLostCallout')).toBeInTheDocument();
+
+      fireEvent.click(toggle);
+
+      await waitFor(() =>
+        expect(screen.queryByTestId('dataStreamOptionsLostCallout')).not.toBeInTheDocument()
+      );
+    });
+
+    it('SHOULD NOT show the callout when the template has no data stream options', async () => {
+      renderStep(false, {});
+
+      await screen.findByTestId('dataStreamField');
+      const toggle = within(screen.getByTestId('dataStreamField')).getByRole('switch');
+      fireEvent.click(toggle);
+
+      await waitFor(() =>
+        expect(screen.queryByTestId('totalRetentionBadge')).not.toBeInTheDocument()
+      );
+      expect(screen.queryByTestId('dataStreamOptionsLostCallout')).not.toBeInTheDocument();
+    });
+  });
 });

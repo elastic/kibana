@@ -11,6 +11,7 @@ import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBadge, EuiBasicTable, EuiHealth, EuiLink, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
+import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
 import { MAX_RELEASE_LENGTH } from '../../../../../common/filter_lengths';
 import { MIN_RELEASE_SESSIONS } from '../../../../../common/mobile/releases';
 import type { MobileReleaseRow } from '../../../../../common/types/mobile';
@@ -28,6 +29,13 @@ import {
   valueWithShareLabel,
 } from '../../../../labels';
 import { metricColumnPreset } from '../../../../utils/column_presets';
+import { formatDurationMs } from '../../../../utils/format_duration';
+import {
+  APP_START_DESCRIPTIONS,
+  APP_START_TITLES,
+  NO_STARTS_OF_TYPE,
+  appStartCountLabel,
+} from '../app_start_labels';
 
 const TABLE_CAPTION = i18n.translate('xpack.digitalExperience.mobile.releases.table.caption', {
   defaultMessage: 'Release health by app version',
@@ -38,6 +46,15 @@ const NOT_ENOUGH_DATA_TOOLTIP = i18n.translate(
   {
     defaultMessage:
       'A release needs at least {minSessions} sessions in the time range to show an error rate.',
+    values: { minSessions: MIN_RELEASE_SESSIONS },
+  }
+);
+
+const COLD_START_NOT_ENOUGH_DATA_TOOLTIP = i18n.translate(
+  'xpack.digitalExperience.mobile.releases.table.coldStartNotEnoughDataTooltip',
+  {
+    defaultMessage:
+      'A release needs at least {minSessions} sessions in the time range to show its cold start.',
     values: { minSessions: MIN_RELEASE_SESSIONS },
   }
 );
@@ -199,9 +216,40 @@ const releaseColumns = ({
         formatters.formatErrorRate(errorRate)
       ),
   },
+  {
+    field: 'coldStart',
+    name: APP_START_TITLES.cold,
+    nameTooltip: { content: APP_START_DESCRIPTIONS.cold },
+    ...metricColumnPreset<MobileReleaseRow>(),
+    sortable: true,
+    'data-test-subj': 'digitalExperienceMobileReleaseColdStart',
+    render: (coldStart: number | null, { sessions, coldStarts }: MobileReleaseRow) => {
+      if (sessions < MIN_RELEASE_SESSIONS) {
+        return (
+          <EuiToolTip content={COLD_START_NOT_ENOUGH_DATA_TOOLTIP}>
+            <span tabIndex={0}>{NOT_ENOUGH_DATA_LABEL}</span>
+          </EuiToolTip>
+        );
+      }
+      if (coldStart === null || coldStarts === 0) {
+        return (
+          <EuiToolTip content={NO_STARTS_OF_TYPE.cold}>
+            <span tabIndex={0}>
+              <EmptyCellValue />
+            </span>
+          </EuiToolTip>
+        );
+      }
+      return (
+        <EuiToolTip content={appStartCountLabel('cold', coldStarts)}>
+          <span tabIndex={0}>{formatDurationMs(coldStart)}</span>
+        </EuiToolTip>
+      );
+    },
+  },
 ];
 
-/** The releases with their sessions, users and error rate; a release filters the page by it. */
+/** The releases with their sessions, users, error rate and cold start; a release filters the page by it. */
 export function ReleaseTable({
   releases,
   colors,

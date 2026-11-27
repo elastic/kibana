@@ -9,7 +9,6 @@ import path from 'node:path';
 import { schema } from '@kbn/config-schema';
 import type { IRouter, KibanaRequest } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   AI_INDEX_API_VERSION,
   MAX_AI_INDEX_ID_LENGTH,
@@ -24,19 +23,12 @@ import {
   MAX_SESSION_EVENT_TOOL_NAME_LENGTH,
   SESSION_EVENTS_SAVE_PATH,
 } from '../../common/constants';
-import type { SaveSessionEventsResponse } from '../../common/http_api/session_events';
 import { validateAiIndexId, validateDate, validateNonBlank } from '../../common/validation';
-import { assertAiIndicesWritable } from '../ai_indices/assert_ai_indices_writable';
-import { AiIndexNotFoundError, AiIndexWriteForbiddenError } from '../ai_indices/errors';
-import type { AiIndexService } from '../ai_indices/service';
-import { sessionEventsSaveAuditEvent } from '../audit/audit_events';
-import type { SessionEventsService } from '../session_events/types';
+import type { SessionMemoryClient } from '../session_memory_client/client';
 import { formatEsError } from '../utils/format_es_error';
-import { resolveSpaceId } from '../utils/resolve_space_id';
 import { CONTEXT_ENGINE_DOCS_NOTE } from './constants';
-import { MEMORY_WRITE_SECURITY, resolveMemoryUser, toError } from './memory_user';
+import { MEMORY_WRITE_SECURITY, toMemoryWriteErrorResponse } from './memory_write';
 import { errorResponseSchema } from './schemas/ai_indices_schema';
-import { MEMORY_DISABLED_MESSAGE, withContextEngineFeatureFlag } from './with_feature_flag';
 
 const idSchema = (description: string) =>
   schema.string({
@@ -236,16 +228,10 @@ const saveEventsResponseSchema = () =>
 /** Registers the public session events write route (`POST /api/context_engine/memory/_save_event`). */
 export const registerSessionEventsRoutes = ({
   router,
-  getSpaces,
-  getSessionEventsService,
-  getAiIndexService,
-  isMemoryEnabled,
+  getSessionMemoryClient,
 }: {
   router: IRouter;
-  getSpaces: () => Promise<SpacesPluginStart | undefined>;
-  getSessionEventsService: () => Promise<SessionEventsService>;
-  getAiIndexService: () => AiIndexService;
-  isMemoryEnabled: (request: KibanaRequest) => Promise<boolean>;
+  getSessionMemoryClient: (request: KibanaRequest) => Promise<SessionMemoryClient>;
 }) => {
   router.versioned
     .post({
@@ -299,89 +285,31 @@ export const registerSessionEventsRoutes = ({
           oasOperationObject: () => path.join(__dirname, 'examples/session_events_save.yaml'),
         },
       },
-      withContextEngineFeatureFlag(async (ctx, request, response) => {
-        if (!(await isMemoryEnabled(request))) {
-          return response.notFound({ body: { message: MEMORY_DISABLED_MESSAGE } });
-        }
-
+      async (_ctx, request, response) => {
         const {
           session_id: sessionId,
-          user_id: requestedUserId,
-          ai_index_ids: aiIndexIds = [],
+          user_id: userId,
+          ai_index_ids: aiIndexIds,
           events,
         } = request.body;
-        const uniqueAiIndexIds = [...new Set(aiIndexIds)];
-        const space = resolveSpaceId(await getSpaces(), request);
-        const { security, elasticsearch, userProfile } = await ctx.core;
-        const esClient = elasticsearch.client.asCurrentUser;
-        let targetUserId: string | undefined = requestedUserId;
-
-        const audit = (outcome: { saved?: number; failed?: number; error?: Error }) =>
-          security.audit.logger.log(
-            sessionEventsSaveAuditEvent({
-              sessionId,
-              targetUserId,
-              ...outcome,
-            })
-          );
-        const reject = (error: Error, status: 'forbidden' | 'notFound') => {
-          audit({ error });
-          return response[status]({ body: { message: error.message } });
-        };
-        const fail = (error: unknown) => {
-          audit({ error: toError(error) });
+        try {
+          const client = await getSessionMemoryClient(request);
+          const body = await client.saveEvents({
+            sessionId,
+            userId,
+            aiIndexIds,
+            events,
+          });
+          return response.ok({ body });
+        } catch (error) {
           if (isResponseError(error) && error.statusCode === 429) {
             return response.customError({
               statusCode: 429,
               body: { message: formatEsError(error) },
             });
           }
-          throw error;
-        };
-
-        let resolvedUser: Awaited<ReturnType<typeof resolveMemoryUser>>;
-        try {
-          resolvedUser = await resolveMemoryUser({ request, userProfile, requestedUserId });
-        } catch (error) {
-          return fail(error);
+          return toMemoryWriteErrorResponse(error, response);
         }
-        targetUserId = resolvedUser.userId;
-
-        if (!resolvedUser.ok) {
-          return reject(resolvedUser.error, 'forbidden');
-        }
-
-        try {
-          await assertAiIndicesWritable({
-            aiIndexService: getAiIndexService(),
-            esClient,
-            spaceId: space,
-            aiIndexIds: uniqueAiIndexIds,
-          });
-        } catch (error) {
-          if (error instanceof AiIndexNotFoundError) {
-            return reject(error, 'notFound');
-          }
-          if (error instanceof AiIndexWriteForbiddenError) {
-            return reject(error, 'forbidden');
-          }
-          return fail(error);
-        }
-
-        let body: SaveSessionEventsResponse;
-        try {
-          const service = await getSessionEventsService();
-          body = await service.saveEvents(
-            { space, userId: resolvedUser.userId },
-            { sessionId, aiIndexIds: uniqueAiIndexIds, events }
-          );
-        } catch (error) {
-          return fail(error);
-        }
-
-        const failed = body.results.filter(({ status }) => status === 'failed').length;
-        audit({ saved: body.results.length - failed, failed });
-        return response.ok({ body });
-      })
+      }
     );
 };

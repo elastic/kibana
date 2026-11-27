@@ -250,6 +250,7 @@ export class Plugin implements CorePlugin<
       enabledEmailServices: plugins.actions.enabledEmailServices,
       isWebhookSslWithPfxEnabled: plugins.actions.isWebhookSslWithPfxEnabled,
       isInboundEventsEnabled: plugins.actions.isInboundEventsEnabled,
+      isCatalogEnabled: plugins.actions.isCatalogEnabled,
     };
 
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });

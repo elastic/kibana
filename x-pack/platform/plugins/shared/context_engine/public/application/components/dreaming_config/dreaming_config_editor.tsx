@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useState, type ReactNode } from 'react';
 import {
   ABOUT_RELATIONSHIP_TYPE,
+  type AiIndexDreamingConfig,
   type DreamingEntities,
   type DreamingEntityType,
   type DreamingFactType,
@@ -80,6 +81,10 @@ export const draftBuildsAnything = (draft: DreamingConfigDraft): boolean => {
   const { facts, entities } = typesOfDraft(draft);
   return facts.length > 0 || entities !== null;
 };
+
+/** Whether dreaming is set up: it runs, or it has types to build. */
+export const isDreamingSetUp = (dreaming: AiIndexDreamingConfig): boolean =>
+  dreaming.enabled || draftBuildsAnything(draftOf(dreaming));
 
 const editLabel = (type: string) =>
   i18n.translate('xpack.contextEngine.dreamingConfig.editAriaLabel', {

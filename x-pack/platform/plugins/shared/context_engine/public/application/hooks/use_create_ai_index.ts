@@ -47,7 +47,10 @@ export const useCreateAiIndex = () => {
       await createAiIndexRequest(http, { aiIndexId: id, properties });
       return { id };
     },
-    onSuccess: () => {
+    onSuccess: ({ id }) => {
+      // Data cached for a deleted AI index with the same id would show, and save, its old values.
+      queryClient.removeQueries({ queryKey: contextEngineQueryKeys.aiIndex.detail(id) });
+      queryClient.removeQueries({ queryKey: contextEngineQueryKeys.spend.aiIndex(id) });
       queryClient.invalidateQueries({ queryKey: contextEngineQueryKeys.aiIndex.list() });
     },
     onError: (error) => {

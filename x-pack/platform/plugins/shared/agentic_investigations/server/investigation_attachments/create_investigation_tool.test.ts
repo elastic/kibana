@@ -86,7 +86,7 @@ describe('createInvestigationTool', () => {
     const tool = createTool();
 
     expect(tool).toMatchObject({ id: 'agentic_investigations.test', excludeFromMcp: true });
-    expect(tool.availability?.cacheMode).toBe('none');
+    expect(tool.availability?.cacheMode).toBe('space-user');
   });
 
   it('is unavailable to a principal without the privilege', async () => {

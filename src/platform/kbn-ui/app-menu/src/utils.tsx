@@ -221,8 +221,8 @@ export const getTooltip = ({
 };
 
 export const createReturnFocus =
-  (triggerElement: HTMLElement, parentElement?: HTMLElement) => () => {
-    if (document.body.contains(triggerElement)) {
+  (triggerElement: HTMLElement | undefined, parentElement?: HTMLElement) => () => {
+    if (triggerElement && document.body.contains(triggerElement)) {
       triggerElement.focus();
       return;
     }
@@ -261,7 +261,10 @@ export const mapAppMenuItemToPanelItem = (
     const triggerElement = event.currentTarget as HTMLElement;
     item.run?.({
       triggerElement,
-      returnFocus: createReturnFocus(triggerElement, anchorDomElement),
+      returnFocus: createReturnFocus(
+        shouldClosePopover ? undefined : triggerElement,
+        anchorDomElement
+      ),
     });
 
     if (shouldClosePopover) {
