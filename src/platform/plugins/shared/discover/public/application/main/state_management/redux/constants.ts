@@ -12,6 +12,9 @@ import { TabInitializationStatus, type TabState } from './types';
 
 export const DEFAULT_EXPANDED_DOC_OWNER = 'discover_main_grid';
 
+/** Owns documents fetched by a query other than the current one, which links cannot restore. */
+export const QUERY_EXPANDED_DOC_OWNER = 'discover_query_lookup';
+
 export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
   initializationState: { initializationStatus: TabInitializationStatus.NotStarted },
   globalState: {},

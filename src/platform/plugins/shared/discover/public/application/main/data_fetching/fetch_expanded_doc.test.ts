@@ -11,7 +11,7 @@ import { of } from 'rxjs';
 import type { IEsqlSearchResult, IKibanaSearchResponse } from '@kbn/search-types';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
-import { fetchExpandedDoc } from './fetch_expanded_doc';
+import { fetchEsqlQueryDoc, fetchExpandedDoc } from './fetch_expanded_doc';
 
 const ref = { id: 'doc-1', index: '.ds-logs-nginx-2024.01.01-000001' };
 
@@ -173,5 +173,27 @@ describe('fetchExpandedDoc', () => {
 
       expect(record).toBeUndefined();
     });
+  });
+});
+
+describe('fetchEsqlQueryDoc', () => {
+  it('limits the query to its first row', async () => {
+    const { data, getEsqlParams } = setupEsql({
+      columns: [{ name: 'message', type: 'keyword' }],
+      values: [['hello']],
+    });
+
+    await fetchEsqlQueryDoc({
+      esqlQueryText: 'FROM logs-*',
+      data,
+      kibanaQueryContext: {
+        kibanaFilters: [],
+        esqlVariables: [],
+        timeRange: { from: 'now-15m', to: 'now' },
+      },
+      searchSessionId: undefined,
+    });
+
+    expect(getEsqlParams().query).toBe('FROM logs-* | LIMIT 1');
   });
 });

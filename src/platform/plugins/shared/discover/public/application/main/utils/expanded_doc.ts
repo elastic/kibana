@@ -53,6 +53,8 @@ export enum ExpandedDocLinkability {
   EsqlMissingMetadata = 'EsqlMissingMetadata',
   /** The ES|QL query derives its rows, so they do not correspond to documents that can be refetched */
   EsqlTransformational = 'EsqlTransformational',
+  /** The document was fetched by another query, which the current query does not find again */
+  QueryLookup = 'QueryLookup',
 }
 
 /** Whether the ES|QL source command supports linking to individual documents. */
@@ -72,18 +74,9 @@ export const getEsqlMissingMetadataExample = (esql: string): string => {
   return `${sourceCommand} ${indexPattern} METADATA _id, _index`;
 };
 
-/** Whether the ES|QL query's source command asks for the `_id` and `_index` metadata. */
-export const hasEsqlIdentityMetadata = (esql: string): boolean => {
-  const metadata = retrieveMetadataColumns(esql);
-  return metadata.includes('_id') && metadata.includes('_index');
-};
-
 /**
- * Determines whether a document is deep linkable. Transformational ES|QL rows cannot be reliably
- * refetched, and restoring a reference refetches through the query itself, so the query must ask
- * for the identity metadata - a record may carry `_id`/`_index` from elsewhere (a chart section's
- * own lookup), which a query without METADATA could never resolve again. The document's own
- * metadata is checked on the instance because query edits do not change open rows.
+ * Determines whether a document is deep linkable. Transformational ES|QL rows cannot be reliably refetched,
+ * and metadata is checked directly on the document instance because query edits do not change open rows.
  */
 export const getExpandedDocLinkability = (
   query: Query | AggregateQuery | undefined,
@@ -101,12 +94,36 @@ export const getExpandedDocLinkability = (
     return ExpandedDocLinkability.EsqlTransformational;
   }
 
-  if (!hasEsqlIdentityMetadata(query.esql)) {
-    return ExpandedDocLinkability.EsqlMissingMetadata;
-  }
-
   return getExpandedDocRef(doc)
     ? ExpandedDocLinkability.Linkable
+    : ExpandedDocLinkability.EsqlMissingMetadata;
+};
+
+/**
+ * Whether the query can restore a record fetched elsewhere: the record carries its own identity,
+ * so the query must read `_id` and `_index` as well.
+ */
+export const canQueryRestoreDoc = (
+  query: Query | AggregateQuery | undefined,
+  doc: DataTableRecord | undefined
+): boolean =>
+  getExpandedDocLinkability(query, doc) === ExpandedDocLinkability.Linkable &&
+  (!isOfAggregateQueryType(query) ||
+    ['_id', '_index'].every((field) => retrieveMetadataColumns(query.esql).includes(field)));
+
+/** Explains why a document fetched by another query has no link under the current query. */
+export const getQueryLookupLinkability = (
+  query: Query | AggregateQuery | undefined,
+  doc: DataTableRecord | undefined
+): ExpandedDocLinkability => {
+  const linkability = getExpandedDocLinkability(query, doc);
+
+  if (linkability !== ExpandedDocLinkability.Linkable) {
+    return linkability;
+  }
+
+  return canQueryRestoreDoc(query, doc)
+    ? ExpandedDocLinkability.QueryLookup
     : ExpandedDocLinkability.EsqlMissingMetadata;
 };
 
@@ -127,6 +144,10 @@ export const getExpandedDocLinkDisabledReason = (
       return i18n.translate('discover.expandedDoc.esqlTransformationalDescription', {
         defaultMessage:
           'Links to individual results are unavailable for queries that transform rows, such as STATS or KEEP.',
+      });
+    case ExpandedDocLinkability.QueryLookup:
+      return i18n.translate('discover.expandedDoc.queryLookupDescription', {
+        defaultMessage: "The current query doesn't return this result, so a link can't restore it.",
       });
     default:
       return undefined;

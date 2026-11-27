@@ -30,7 +30,11 @@ export {
   TabsBarVisibility,
 } from './types';
 
-export { DEFAULT_EXPANDED_DOC_OWNER, DEFAULT_TAB_STATE } from './constants';
+export {
+  DEFAULT_EXPANDED_DOC_OWNER,
+  DEFAULT_TAB_STATE,
+  QUERY_EXPANDED_DOC_OWNER,
+} from './constants';
 
 export {
   type InternalStateStore,

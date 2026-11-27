@@ -16,7 +16,6 @@ import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { fetchExpandedDoc } from '../../data_fetching/fetch_expanded_doc';
 import {
   getExpandedDocRef,
-  hasEsqlIdentityMetadata,
   isEsqlSourceCommandLinkable,
   matchesExpandedDocRef,
   type ExpandedDocRef,
@@ -101,12 +100,7 @@ export const useExpandedDocSync = ({
   const isEsqlUnrestorable = useMemo(() => {
     return (
       isEsqlQuery &&
-      (!isEsqlSourceCommandLinkable(query.esql) ||
-        hasTransformationalCommand(query.esql) ||
-        // Without identity metadata the query cannot refetch a reference. A document that
-        // carries `_id`/`_index` from elsewhere (a chart section's own lookup) then stays
-        // locally owned: no reference, no clearing, no doomed refetch.
-        !hasEsqlIdentityMetadata(query.esql))
+      (!isEsqlSourceCommandLinkable(query.esql) || hasTransformationalCommand(query.esql))
     );
   }, [isEsqlQuery, query]);
 

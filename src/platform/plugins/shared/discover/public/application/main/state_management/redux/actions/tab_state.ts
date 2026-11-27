@@ -40,7 +40,8 @@ import {
   getExpandedDocRef,
   matchesExpandedDocRef,
 } from '../../../utils/expanded_doc';
-import { DEFAULT_EXPANDED_DOC_OWNER } from '../constants';
+import { DEFAULT_EXPANDED_DOC_OWNER, QUERY_EXPANDED_DOC_OWNER } from '../constants';
+import { fetchEsqlQueryDoc, refetchThroughQuery } from '../../../data_fetching/fetch_expanded_doc';
 import { isEqualState } from '../../utils/state_comparators';
 import {
   internalStateSlice,
@@ -54,13 +55,13 @@ import {
   type ProfileStateDefaultsHandling,
 } from '../../../../../../common/context_awareness';
 import type { ProfileStateMutationOptions } from '../../../../../context_awareness';
-import { recordHasContext } from '../../../../../context_awareness/profiles_manager/record_has_context';
 import { selectTab } from '../selectors';
 import {
   selectDataSourceProfileId,
   selectCurrentProfileUrlState,
   selectCurrentProfileStateDefinition,
   selectTabRuntimeState,
+  getTabDataView,
 } from '../runtime_state';
 import type {
   DiscoverAppState,
@@ -180,28 +181,75 @@ export const setExpandedDoc: InternalStateThunkActionCreator<[ExpandedDocPayload
     );
   };
 
-type ExpandedDocExtPointPayload = TabActionPayload<{
-  expandedDoc: DataTableRecord | undefined;
+type ExpandedDocByQueryPayload = TabActionPayload<{
+  esqlQueryText: string;
   initialDocViewerTabId?: string;
+  abortSignal?: AbortSignal;
 }>;
 
-/** Sets the expanded document for a profile, which may hand in a record Discover did not fetch. */
-export const setExpandedDocExtPointAction: InternalStateThunkActionCreator<
-  [ExpandedDocExtPointPayload]
-> = ({ tabId, expandedDoc, initialDocViewerTabId }) =>
-  function setExpandedDocExtPointActionThunkFn(dispatch, _getState, { runtimeStateManager }) {
-    // A record from outside the fetch paths (a chart section's, for example) is not the
-    // proxy `resolveDocumentProfile` creates: without its lazy `context`, the flyout would
-    // fall back to the default document profile and show the generic viewer for a document
-    // a profile knows better. A record that carries its context passes through untouched.
-    const resolvedDoc =
-      expandedDoc && !recordHasContext(expandedDoc)
-        ? selectTabRuntimeState(runtimeStateManager, tabId)
-            .scopedProfilesManager$.getValue()
-            .resolveDocumentProfile({ record: expandedDoc })
-        : expandedDoc;
+/**
+ * Fetches the first row of an ES|QL query under the tab's filters, variables, time range and
+ * search session, and opens it with a shareable link only when the current query finds it again.
+ * Resolves to the opened document's ID.
+ */
+export const setExpandedDocByQuery: InternalStateThunkActionCreator<
+  [ExpandedDocByQueryPayload],
+  Promise<string | undefined>
+> = ({ tabId, esqlQueryText, initialDocViewerTabId, abortSignal }) =>
+  async function setExpandedDocByQueryThunkFn(
+    dispatch,
+    getState,
+    { services, runtimeStateManager }
+  ) {
+    const { data, filterManager } = services;
+    const { esqlVariables, dataRequestParams } = selectTab(getState(), tabId);
+    const record = await fetchEsqlQueryDoc({
+      esqlQueryText,
+      data,
+      kibanaQueryContext: {
+        kibanaFilters: filterManager.getFilters(),
+        esqlVariables,
+        timeRange:
+          dataRequestParams.timeRangeAbsolute ?? data.query.timefilter.timefilter.getAbsoluteTime(),
+      },
+      searchSessionId: dataRequestParams.searchSessionId,
+      abortSignal,
+    });
 
-    dispatch(setExpandedDoc({ tabId, expandedDoc: resolvedDoc, initialDocViewerTabId }));
+    if (!record || abortSignal?.aborted) {
+      return undefined;
+    }
+
+    const { query: queryToVerify } = selectTab(getState(), tabId).appState;
+    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+    const dataView = getTabDataView(tabRuntimeState);
+    // Links are restored through the current query, so only a document it finds again gets one.
+    const refetchedRecord = dataView
+      ? await refetchThroughQuery({ record, query: queryToVerify, dataView, data, abortSignal })
+      : undefined;
+
+    if (abortSignal?.aborted) {
+      return undefined;
+    }
+
+    // A reference is only valid for the query that verified it. If the query changed while the
+    // refetch was in flight, keep the document local instead of writing a stale URL reference.
+    const currentQuery = selectTab(getState(), tabId).appState.query;
+    const restorableRecord = isEqual(currentQuery, queryToVerify) ? refetchedRecord : undefined;
+    const resolvedDoc = tabRuntimeState.scopedProfilesManager$
+      .getValue()
+      .resolveDocumentProfile({ record: restorableRecord ?? record });
+
+    dispatch(
+      setExpandedDoc({
+        tabId,
+        expandedDoc: resolvedDoc,
+        expandedDocOwner: restorableRecord ? DEFAULT_EXPANDED_DOC_OWNER : QUERY_EXPANDED_DOC_OWNER,
+        initialDocViewerTabId,
+      })
+    );
+
+    return resolvedDoc.id;
   };
 
 type DocViewerShareableStatePayload = TabActionPayload<{

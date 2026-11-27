@@ -43,9 +43,20 @@ export interface ContextAwarenessToolkitActions {
    */
   updateAdHocDataViews?: (adHocDataViews: DataView[]) => Promise<void>;
   /**
-   * Opens or updates the expanded document flyout.
+   * Opens or updates the expanded document flyout for a record from Discover's own results.
    */
   setExpandedDoc?: (record?: DataTableRecord, options?: { initialTabId?: string }) => void;
+  /**
+   * Fetches the first row of an ES|QL query that differs from the current one (a chart's own
+   * lookup, for example) and opens it in the flyout, with a shareable link only when the current
+   * query finds it again.
+   * Resolves to the opened document's ID, or `undefined` when the query returns no rows.
+   */
+  setExpandedDocByQuery?: (params: {
+    esql: string;
+    initialTabId?: string;
+    abortSignal?: AbortSignal;
+  }) => Promise<string | undefined>;
 }
 
 /**

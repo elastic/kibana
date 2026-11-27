@@ -31,6 +31,7 @@ import {
 } from '../../../../components/discover_grid_flyout';
 import {
   DEFAULT_EXPANDED_DOC_OWNER,
+  QUERY_EXPANDED_DOC_OWNER,
   internalStateActions,
   useAppStateSelector,
   useCurrentTabAction,
@@ -44,7 +45,7 @@ import {
 import { useDataState } from '../../hooks/use_data_state';
 import { ExpandedDocNotice, useExpandedDocSync } from './use_expanded_doc_sync';
 import { useCopyExpandedDocLink } from './use_copy_expanded_doc_link';
-import { getExpandedDocLinkability } from '../../utils/expanded_doc';
+import { getExpandedDocLinkability, getQueryLookupLinkability } from '../../utils/expanded_doc';
 
 export interface DiscoverDocumentFlyoutProps {
   dataView: DataView;
@@ -91,10 +92,15 @@ export const DiscoverDocumentFlyout = memo(
       rows,
       fetchStatus: documentState.fetchStatus,
     });
+    const isDefaultOwner = expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER;
+    const isQueryLookup = expandedDocOwner === QUERY_EXPANDED_DOC_OWNER;
     const { copyLink, shareQuery } = useCopyExpandedDocLink({ dataView });
     const expandedDocLinkability = useMemo(
-      () => getExpandedDocLinkability(shareQuery, expandedDoc),
-      [shareQuery, expandedDoc]
+      () =>
+        isQueryLookup
+          ? getQueryLookupLinkability(shareQuery, expandedDoc)
+          : getExpandedDocLinkability(shareQuery, expandedDoc),
+      [isQueryLookup, shareQuery, expandedDoc]
     );
     const shareDirectLinkActions = useShareDirectLinkAction({
       copyLink,
@@ -158,7 +164,7 @@ export const DiscoverDocumentFlyout = memo(
     );
 
     const flyoutDataSource =
-      !expandedDocOwner || expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER
+      !expandedDocOwner || isDefaultOwner || isQueryLookup
         ? currentDataSource
         : cascadedLeafDataSource;
 

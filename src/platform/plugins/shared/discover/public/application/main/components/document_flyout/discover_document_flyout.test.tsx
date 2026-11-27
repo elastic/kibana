@@ -27,7 +27,7 @@ import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import type { DiscoverServices } from '../../../../build_services';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
-import { internalStateActions } from '../../state_management/redux';
+import { QUERY_EXPANDED_DOC_OWNER, internalStateActions } from '../../state_management/redux';
 import { FetchStatus } from '../../../types';
 import { DiscoverDocumentFlyout } from './discover_document_flyout';
 import {
@@ -93,7 +93,7 @@ const searchResponseFor = (hit: EsHitRecord): Promise<IKibanaSearchResponse> =>
 
 type InitialFlyout =
   | { type: 'restoreFromRef'; ref: ExpandedDocRef }
-  | { type: 'openDocument'; document: DataTableRecord }
+  | { type: 'openDocument'; document: DataTableRecord; expandedDocOwner?: string }
   | { type: 'closed' };
 
 const setup = async ({
@@ -161,6 +161,7 @@ const setup = async ({
         internalStateActions.setExpandedDoc({
           tabId: toolkit.getCurrentTab().id,
           expandedDoc: initialFlyout.document,
+          expandedDocOwner: initialFlyout.expandedDocOwner,
         })
       );
     }
@@ -303,9 +304,25 @@ describe('DiscoverDocumentFlyout', () => {
       linkability: ExpandedDocLinkability.EsqlTransformational,
       ebtDetail: 'esqlTransformational',
     },
+    {
+      name: 'a result opened from another query that the current one does not find',
+      query: { esql: 'FROM logs-* METADATA _id, _index' },
+      expandedDoc: buildDataTableRecord(outOfResultsHit, dataViewMock),
+      expandedDocOwner: QUERY_EXPANDED_DOC_OWNER,
+      linkability: ExpandedDocLinkability.QueryLookup,
+      ebtDetail: 'queryLookup',
+    },
   ])(
     'explains why a link cannot be copied for $name',
-    async ({ query, expandedDoc, linkability, ebtDetail, toastLifeTimeMs, expectedToastText }) => {
+    async ({
+      query,
+      expandedDoc,
+      expandedDocOwner,
+      linkability,
+      ebtDetail,
+      toastLifeTimeMs,
+      expectedToastText,
+    }) => {
       const services = createDiscoverServicesMock();
       let toastText: React.ReactNode = null;
 
@@ -323,7 +340,7 @@ describe('DiscoverDocumentFlyout', () => {
         hits: esHitsMock,
         query,
         services,
-        initialFlyout: { type: 'openDocument', document: expandedDoc },
+        initialFlyout: { type: 'openDocument', document: expandedDoc, expandedDocOwner },
       });
 
       const disabledReason = getExpandedDocLinkDisabledReason(linkability);
@@ -810,9 +827,7 @@ describe('DiscoverDocumentFlyout', () => {
     });
     expect(services.locator.getRedirectUrl).toHaveBeenCalledWith(
       expect.objectContaining({
-        // The nested grid query, asking for the identity metadata too, so the reference
-        // the link carries can be refetched on restore (fetch_expanded_doc.ts).
-        query: { esql: cascadeQuery!.esql.replace('FROM logs', 'FROM logs METADATA _id, _index') },
+        query: cascadeQuery,
         columns: [],
         expandedDoc: {
           id: esHitsMock[0]._id,

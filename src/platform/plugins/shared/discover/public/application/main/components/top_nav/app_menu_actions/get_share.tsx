@@ -29,11 +29,13 @@ import { getDiscoverLocatorParams } from '../../../utils/get_discover_locator_pa
 import {
   getExpandedDocLinkability,
   getExpandedDocLinkDisabledReason,
+  getQueryLookupLinkability,
 } from '../../../utils/expanded_doc';
 import type { DiscoverAppLocatorParams } from '../../../../../../common/app_locator';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
 import {
+  QUERY_EXPANDED_DOC_OWNER,
   selectCurrentProfileLocatorState,
   type RuntimeStateManager,
   type TabState,
@@ -68,7 +70,9 @@ const getExpandedDocHelpText = ({
 
   const isEsqlMode = isOfAggregateQueryType(currentTab.appState.query);
   const disabledReason = getExpandedDocLinkDisabledReason(
-    getExpandedDocLinkability(currentTab.appState.query, currentTab.expandedDoc)
+    currentTab.expandedDocOwner === QUERY_EXPANDED_DOC_OWNER
+      ? getQueryLookupLinkability(currentTab.appState.query, currentTab.expandedDoc)
+      : getExpandedDocLinkability(currentTab.appState.query, currentTab.expandedDoc)
   );
 
   // A non-linkable document takes precedence over the relative-time warning.

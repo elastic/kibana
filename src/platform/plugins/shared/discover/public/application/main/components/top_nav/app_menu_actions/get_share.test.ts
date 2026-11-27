@@ -23,7 +23,11 @@ import {
   type InternalStateMockToolkit,
 } from '../../../../../__mocks__/discover_state.mock';
 import { FetchStatus } from '../../../../types';
-import { internalStateActions, selectTabRuntimeState } from '../../../state_management/redux';
+import {
+  QUERY_EXPANDED_DOC_OWNER,
+  internalStateActions,
+  selectTabRuntimeState,
+} from '../../../state_management/redux';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { TEST_PROFILE_STATE_DEF } from '../../../../../context_awareness/__mocks__/profile_state';
 import { EXAMPLE_PROFILE_STATE_DEF } from '../../../../../../common/context_awareness';
@@ -354,11 +358,12 @@ describe('getShare', () => {
       dataViewMock
     );
 
-    const setExpandedDoc = (doc: DataTableRecord | undefined) => {
+    const setExpandedDoc = (doc: DataTableRecord | undefined, expandedDocOwner?: string) => {
       toolkit.internalState.dispatch(
         internalStateActions.setExpandedDoc({
           tabId: toolkit.getCurrentTab().id,
           expandedDoc: doc,
+          expandedDocOwner,
         })
       );
     };
@@ -443,6 +448,18 @@ describe('getShare', () => {
       expect(props?.title).toBe("This link won't include the open result");
       expect(props?.text).toBe(
         getExpandedDocLinkDisabledReason(ExpandedDocLinkability.EsqlTransformational)
+      );
+    });
+
+    it('explains when the expanded document comes from another query', async () => {
+      setQuery({ esql: 'FROM logs METADATA _id, _index' });
+      setExpandedDoc(expandedDoc, QUERY_EXPANDED_DOC_OWNER);
+
+      const props = await getHelpTextProps();
+
+      expect(props?.title).toBe("This link won't include the open result");
+      expect(props?.text).toBe(
+        getExpandedDocLinkDisabledReason(ExpandedDocLinkability.QueryLookup)
       );
     });
 
