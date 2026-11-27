@@ -267,7 +267,8 @@
     "context-engine.gatherMaintenance",
     "context-engine.getDreamingStatus",
     "context-engine.getFeedbackContext",
-    "context-engine.readTraceTranscripts",
+    "context-engine.readSessionMemories",
+    "context-engine.readSessionTranscripts",
     "context-engine.recordImprovements",
     "context-engine.recordMaintenanceRun",
     "context-engine.updateKi",
@@ -1115,11 +1116,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "11b3d087f7db6310f37ca31e6cf5d71ad0d2c41e2c4be6b048c45ede6d5d2f5b"
+      "sha256": "32d3a518e4cd17b4a9e69e9ea761083a01c2398425c5a1f8d45d8f8d5bce8946"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "68729982e602ae80e0dd6e26c35da17a29ba0fc3111ec9949bd6a0f8fe031c06"
+      "sha256": "c6b721d425a27cce426a9646e06103f07e195eb580c3b347db4be89da37ce979"
     }
   }
 }

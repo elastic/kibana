@@ -177,26 +177,6 @@ export const reAssignFleetAgentToPolicy = (
     });
 };
 
-// only used in "real" endpoint tests not in mocked ones
-export const uninstallAgentFromHost = (
-  hostname: string,
-  uninstallToken?: string
-): Cypress.Chainable<string> => {
-  return cy.task('uninstallAgentFromHost', {
-    hostname,
-    uninstallToken,
-  });
-};
-
-// only used in "real" endpoint tests not in mocked ones
-export const isAgentAndEndpointUninstalledFromHost = (
-  hostname: string
-): Cypress.Chainable<boolean> => {
-  return cy.task('isAgentAndEndpointUninstalledFromHost', {
-    hostname,
-  });
-};
-
 const waitForIsAgentUnenrolled = (agentId: string): Cypress.Chainable<boolean> => {
   let isUnenrolled = false;
   return cy

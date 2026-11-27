@@ -227,11 +227,11 @@ describe('createContractContext', () => {
   it('reports requests the vendor spec rejects', async () => {
     const { runAction, mock } = await createContractContext({
       connector: FirecrawlConnector,
-      specs: [firecrawlSpecWith({ type: 'integer', minimum: 0, maximum: 60000 })],
+      specs: [firecrawlSpecWith({ type: 'integer', minimum: 0, maximum: 1000 })],
     });
 
     await expect(
-      runAction('scrape', { url: 'https://example.com', waitFor: 120000 })
+      runAction('scrape', { url: 'https://example.com', waitFor: 2000 })
     ).rejects.toThrow();
     expect(mock.calls[0]).toMatchObject({
       status: 422,

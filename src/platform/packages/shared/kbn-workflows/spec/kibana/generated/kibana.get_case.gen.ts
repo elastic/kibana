@@ -51,9 +51,9 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
     bodyParams: [],
   },
   paramsSchema: z.object({
-    ...getShapeAt(get_case_default_space_request, 'body'),
-    ...getShapeAt(get_case_default_space_request, 'path'),
     ...getShapeAt(get_case_default_space_request, 'query'),
+    ...getShapeAt(get_case_default_space_request, 'path'),
+    ...getShapeAt(get_case_default_space_request, 'body'),
     fetcher: KibanaFetcherConfigSchema,
     ...KibanaStepMetaSchema,
   }),

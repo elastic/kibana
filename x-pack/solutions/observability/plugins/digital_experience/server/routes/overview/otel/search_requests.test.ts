@@ -7,6 +7,9 @@
 
 import { logsSearch } from './search_requests';
 
+/** The runtime field of the page filter, which reads the route of a page and then its URL. */
+const PAGE_FIELD = 'digital_experience_filter_pageUrl';
+
 const PARAMS = {
   serviceName: 'shop',
   start: 0,
@@ -164,6 +167,7 @@ describe('logsSearch with filters', () => {
   };
   const BROWSER_TERM = { terms: { digital_experience_filter_browser: ['Chrome'] } };
   const COUNTRY_TERM = { terms: { digital_experience_filter_country: ['DE'] } };
+  const PAGE_TERM = { terms: { [PAGE_FIELD]: ['https://shop.example.com/'] } };
 
   it('defines the runtime fields the filters read', () => {
     expect(Object.keys(logsSearch(PARAMS).runtime_mappings ?? {})).toEqual([
@@ -172,13 +176,16 @@ describe('logsSearch with filters', () => {
       'digital_experience_filter_device',
       'digital_experience_filter_country',
       'digital_experience_filter_appVersion',
+      'digital_experience_filter_pageUrl',
     ]);
   });
 
-  it('narrows the metrics to the selected browser, OS, device and country', () => {
+  it('narrows the metrics to the selected browser, OS, device, country and page', () => {
     const logs = inEnvironmentOf(logsSearch({ ...PARAMS, filters: FILTERS })).filter;
 
-    expect(logs).toEqual({ bool: { filter: [{ match_all: {} }, BROWSER_TERM, COUNTRY_TERM] } });
+    expect(logs).toEqual({
+      bool: { filter: [{ match_all: {} }, BROWSER_TERM, COUNTRY_TERM, PAGE_TERM] },
+    });
   });
 
   it('keep the picker environments and the filter values over every selection', () => {
@@ -191,18 +198,15 @@ describe('logsSearch with filters', () => {
     );
   });
 
-  it('narrow the page loads and their trend to the selected page, not the web vitals', () => {
-    const logs = inEnvironmentOf(logsSearch({ ...PARAMS, filters: FILTERS }));
+  it('narrow the page loads to the URL text, not the web vitals, which carry no URL', () => {
+    const filters = { pageContains: [{ value: 'cart', exclude: false }] };
+    const logs = inEnvironmentOf(logsSearch({ ...PARAMS, filters }));
 
-    expect(pageLoadsOf(logsSearch({ ...PARAMS, filters: FILTERS })).filter).toEqual({
-      bool: {
-        filter: [
-          { term: { event_name: 'browser.navigation_timing' } },
-          { terms: { 'attributes.url.full': ['https://shop.example.com/'] } },
-        ],
-      },
-    });
-    expect(JSON.stringify(logs.aggs.lcp)).not.toContain('attributes.url.full');
+    expect(JSON.stringify(pageLoadsOf(logsSearch({ ...PARAMS, filters })).filter)).toContain(
+      '*cart*'
+    );
+    expect(JSON.stringify(logs.filter)).not.toContain('*cart*');
+    expect(JSON.stringify(logs.aggs.lcp)).not.toContain('*cart*');
   });
 
   it('leave out the documents of an excluded value', () => {

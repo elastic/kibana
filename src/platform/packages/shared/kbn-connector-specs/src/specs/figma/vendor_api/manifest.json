@@ -43,8 +43,8 @@
   },
   "sources": {
     "rest": {
-      "apiVersion": "0.43.0",
-      "fetchedAt": "2026-10-07T11:55:35.314Z",
+      "apiVersion": "0.47.0",
+      "fetchedAt": "2026-11-23T11:10:19.565Z",
       "format": "openapi",
       "url": "https://raw.githubusercontent.com/figma/rest-api-spec/main/openapi/openapi.yaml"
     }

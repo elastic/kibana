@@ -96,6 +96,12 @@ export const InvestigationList = forwardRef<InvestigationListHandle, Investigati
       InvestigationSectionId[]
     >(getCollapsedSectionsStorageKey(http.basePath.get()), []);
 
+    // Closed is opt-in, including for returning users with existing severity preferences.
+    const [closedExpanded = false, setClosedExpanded] = useLocalStorage<boolean>(
+      `nightshift.investigations.closedExpanded:${http.basePath.get() || 'default'}`,
+      false
+    );
+
     // EUI's accordion can hold on to an older `onToggle`, and the setter's updater form would then
     // read an older list, so the next list is built from the latest one instead.
     const collapsedSectionsRef = useRef(collapsedSections);
@@ -117,12 +123,16 @@ export const InvestigationList = forwardRef<InvestigationListHandle, Investigati
 
     const setSectionOpen = useCallback(
       (id: InvestigationSectionId, isOpen: boolean) => {
+        if (id === 'closed') {
+          setClosedExpanded(isOpen);
+          return;
+        }
         const others = collapsedSectionsRef.current.filter((collapsedId) => collapsedId !== id);
         const next = isOpen ? others : [...others, id];
         collapsedSectionsRef.current = next;
         setCollapsedSections(next);
       },
-      [setCollapsedSections]
+      [setCollapsedSections, setClosedExpanded]
     );
 
     useImperativeHandle(ref, () => ({
@@ -261,7 +271,9 @@ export const InvestigationList = forwardRef<InvestigationListHandle, Investigati
               onRetry={section.refetch}
               selectedInvestigationId={selectedInvestigationId}
               onInvestigationClick={onInvestigationClick}
-              isOpen={!collapsedSections.includes(section.id)}
+              isOpen={
+                section.id === 'closed' ? closedExpanded : !collapsedSections.includes(section.id)
+              }
               onToggle={(isOpen) => setSectionOpen(section.id, isOpen)}
               isHighlighted={section.id === highlightedSection}
               isLoadingNewFilters={section.isPreviousData}

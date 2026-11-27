@@ -52,9 +52,9 @@ Get search results for an ES|QL (Elasticsearch query language) query.
     ],
   },
   paramsSchema: z.object({
-    ...getShapeAt(esql_query_request, 'body'),
-    ...getShapeAt(esql_query_request, 'path'),
     ...getShapeAt(esql_query_request, 'query'),
+    ...getShapeAt(esql_query_request, 'path'),
+    ...getShapeAt(esql_query_request, 'body'),
   }),
   outputSchema: esql_query_response,
 };

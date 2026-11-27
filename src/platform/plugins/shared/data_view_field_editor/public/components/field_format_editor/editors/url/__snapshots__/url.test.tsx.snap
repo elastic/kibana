@@ -101,9 +101,11 @@ exports[`UrlFormatEditor should render normally 1`] = `
               class="euiSwitch__icons emotion-euiSwitch__icons-off-enabled"
             >
               <span
+                aria-hidden="true"
                 data-euiicon-type="check"
               />
               <span
+                aria-hidden="true"
                 data-euiicon-type="cross"
               />
             </span>

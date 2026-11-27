@@ -63,8 +63,10 @@ export function getServiceMapViewTarget({
     return { kind: 'fit' };
   }
 
-  const centerX = median(visibleNodes.map((node) => node.position.x + getNodeWidth(node) / 2));
-  const centerY = median(visibleNodes.map((node) => node.position.y + getNodeHeight(node) / 2));
+  // Members of an open group are positioned relative to their box, which is itself in the list.
+  const topLevelNodes = visibleNodes.filter((node) => !node.parentId);
+  const centerX = median(topLevelNodes.map((node) => node.position.x + getNodeWidth(node) / 2));
+  const centerY = median(topLevelNodes.map((node) => node.position.y + getNodeHeight(node) / 2));
 
   return { kind: 'center', x: centerX, y: centerY };
 }

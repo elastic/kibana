@@ -5,29 +5,45 @@
  * 2.0.
  */
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
   useSessionsStatusState,
   type SessionsStatusState,
 } from '../pages/sessions/hooks/use_sessions_status';
 
-const SessionsStatusContext = createContext<SessionsStatusState | undefined>(undefined);
-
-/**
- * Holds the sessions status for every page of the app, so the applications list and the Sessions
- * tab read the same one, and sessions are set up at most once a visit.
- */
-export function SessionsStatusProvider({ children }: { children: ReactNode }) {
-  const state = useSessionsStatusState();
-  return <SessionsStatusContext.Provider value={state}>{children}</SessionsStatusContext.Provider>;
+interface SessionsStatusContextValue {
+  state: SessionsStatusState;
+  watch: () => () => void;
 }
 
-/** The sessions status of `SessionsStatusProvider`. */
-export const useSessionsStatus = (): SessionsStatusState => {
-  const state = useContext(SessionsStatusContext);
-  if (!state) {
+const SessionsStatusContext = createContext<SessionsStatusContextValue | undefined>(undefined);
+
+/** Holds the sessions status for every page of the app, fetched once a page asks for it. */
+export function SessionsStatusProvider({ children }: { children: ReactNode }) {
+  const [watchers, setWatchers] = useState(0);
+  const [isRequested, setRequested] = useState(false);
+  const state = useSessionsStatusState({ isRequested, isWatched: watchers > 0 });
+
+  const watch = useCallback(() => {
+    setRequested(true);
+    setWatchers((count) => count + 1);
+    return () => setWatchers((count) => count - 1);
+  }, []);
+  const value = useMemo(() => ({ state, watch }), [state, watch]);
+
+  return <SessionsStatusContext.Provider value={value}>{children}</SessionsStatusContext.Provider>;
+}
+
+/** The sessions status of `SessionsStatusProvider`, fetched unless `enabled` is off. */
+export const useSessionsStatus = ({
+  enabled = true,
+}: { enabled?: boolean } = {}): SessionsStatusState => {
+  const context = useContext(SessionsStatusContext);
+  if (!context) {
     throw new Error('useSessionsStatus must be used within a SessionsStatusProvider');
   }
+  const { state, watch } = context;
+  useEffect(() => (enabled ? watch() : undefined), [enabled, watch]);
   return state;
 };

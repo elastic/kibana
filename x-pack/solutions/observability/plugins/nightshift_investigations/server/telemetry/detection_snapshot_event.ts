@@ -17,6 +17,8 @@ export interface DetectionSnapshotKnowledgeCounts {
   significant_event_rules_active: number;
   significant_events_total: number;
   significant_events_open: number;
+  slack_connected?: boolean;
+  slack_channels_bound?: number;
 }
 
 export type DetectionSnapshotContributor = (params: {
@@ -39,6 +41,8 @@ export interface DetectionSnapshotEvent extends Partial<DetectionSnapshotKnowled
   automations_schedule_enabled: number;
   automations_slack_total: number;
   automations_slack_enabled: number;
+  connectors_configured: number;
+  connectors_by_type: Array<{ connector_type: string; count: number }>;
   external_connectors_configured: number;
   external_connectors_active_24h: number;
   external_sources_active_24h: number;
@@ -88,6 +92,16 @@ const detectionSnapshotSchema: RootSchema<DetectionSnapshotEvent> = {
   automations_schedule_enabled: count('Enabled automations with a schedule trigger.'),
   automations_slack_total: count('Automations with a Slack trigger.'),
   automations_slack_enabled: count('Enabled automations with a Slack trigger.'),
+  connectors_configured: count('Connectors of any type in the space.'),
+  connectors_by_type: {
+    type: 'array',
+    items: {
+      properties: {
+        connector_type: { type: 'keyword', _meta: { description: 'Connector type id.' } },
+        count: count('Connectors of this type in the space.'),
+      },
+    },
+  },
   external_connectors_configured: count(
     'Connectors of a type that imports alerts from an external system.'
   ),
@@ -123,6 +137,17 @@ const detectionSnapshotSchema: RootSchema<DetectionSnapshotEvent> = {
   significant_events_total: optionalCount('Significant Events in the space, open or closed.'),
   significant_events_open: optionalCount(
     'Significant Events whose current status is `active` or `recovering`.'
+  ),
+  slack_connected: {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether the Slack app is connected. The connection is per deployment, so every space reports the same value.',
+      optional: true,
+    },
+  },
+  slack_channels_bound: optionalCount(
+    'Slack channels bound to this deployment. The binding is per deployment, so every space reports the same value.'
   ),
 };
 

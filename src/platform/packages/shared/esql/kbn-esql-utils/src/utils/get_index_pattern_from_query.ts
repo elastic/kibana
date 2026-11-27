@@ -6,9 +6,21 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { BasicPrettyPrinter, isSource, isSubQuery, synth } from '@elastic/esql';
-import { esqlCommandRegistry, getIndexFromPromQLParams } from '@kbn/esql-language';
-import type { ESQLSource, ESQLCommand, ESQLAstPromqlCommand } from '@elastic/esql/types';
+import { BasicPrettyPrinter, Builder, isSource, isSubQuery, synth } from '@elastic/esql';
+import {
+  esqlCommandRegistry,
+  getIndexFromPromQLParams,
+  getNamedSubqueries,
+  getReferencedNamedSubqueries,
+  resolveNamedSubquerySources,
+  type NamedSubquery,
+} from '@kbn/esql-language';
+import type {
+  ESQLSource,
+  ESQLCommand,
+  ESQLAstPromqlCommand,
+  ESQLAstQueryExpression,
+} from '@elastic/esql/types';
 import { parseEsqlCached } from './parse_esql_cached';
 
 const INDEX_SOURCE_COMMANDS = new Set(['FROM', 'TS']);
@@ -43,7 +55,10 @@ function getDirectIndexSources(commands: ESQLCommand[]): ESQLSource[] {
   );
 }
 
-function getIndexSources(commands: ESQLCommand[]): ESQLSource[] {
+function getIndexSources(
+  commands: ESQLCommand[],
+  namedSubqueries: readonly NamedSubquery[]
+): ESQLSource[] {
   const sourceCommand = commands.find(({ name }) => INDEX_SOURCE_COMMANDS.has(name.toUpperCase()));
   if (!sourceCommand) {
     return [];
@@ -57,7 +72,15 @@ function getIndexSources(commands: ESQLCommand[]): ESQLSource[] {
     .filter(isSubQuery)
     .flatMap((subquery) => getDirectIndexSources(subquery.child.commands));
 
-  return [...directSources, ...subquerySources];
+  const sources = [...directSources, ...subquerySources];
+  if (namedSubqueries.length === 0) {
+    return sources;
+  }
+
+  // The resolver gets the sources collected above, in the same order, and replaces each LET
+  // reference with the indices of its body and of the LETs it reads. Inline subqueries keep
+  // being read one level deep, as without LET.
+  return resolveNamedSubquerySources({ ...sourceCommand, args: sources }, namedSubqueries);
 }
 
 function getSourceNameWithoutRemoteClusterPrefix(source: ESQLSource): string {
@@ -76,7 +99,7 @@ export function getIndexPatternsFromESQLQuery(esql?: string): ESQLIndexPatterns 
   }
 
   const { root } = parseEsqlCached(esql);
-  const indexSources = getIndexSources(root.commands);
+  const indexSources = getIndexSources(root.commands, getNamedSubqueries(root.header));
   const promqlSources = getPromQLSources(root.commands);
 
   const indexPattern = [...indexSources.map((source) => source.name), ...promqlSources];
@@ -129,26 +152,22 @@ export function getSourceCommandFromESQLQuery(
 // so a subquery contributes the fields of its source command.
 const reduceSubqueriesToSource = (command: ESQLCommand): ESQLCommand => ({
   ...command,
-  args: command.args.map((arg) => {
-    if (!isSubQuery(arg)) {
-      return arg;
-    }
-    const [subquerySource] = arg.child.commands;
-    return {
-      ...arg,
-      child: {
-        ...arg.child,
-        commands: subquerySource ? [reduceSubqueriesToSource(subquerySource)] : [],
-      },
-    };
-  }),
+  args: command.args.map((arg) =>
+    isSubQuery(arg) ? { ...arg, child: reduceQueryToSource(arg.child) } : arg
+  ),
 });
 
+const reduceQueryToSource = (query: ESQLAstQueryExpression): ESQLAstQueryExpression => {
+  const [source] = query.commands;
+  return { ...query, commands: source ? [reduceSubqueriesToSource(source)] : [] };
+};
+
 /**
- * Returns the FROM or TS command alone (with METADATA, and each subquery reduced to its source
- * command), whose columns are the schema of the queried dataset; for PROMQL, `FROM <index>` of
- * its index parameter. `SET project_routing` is left out, so the text matches the ES|QL editor's
- * fields query; pass the routing separately. Empty string if there is no such command.
+ * Returns the FROM or TS command, after the LET bindings it reads (with METADATA, and each
+ * subquery or binding body reduced to its source command), whose columns are the schema of the
+ * queried dataset; for PROMQL, `FROM <index>` of its index parameter. `SET project_routing` is
+ * left out, so the text matches the ES|QL editor's fields query; pass the routing separately.
+ * Empty string if there is no such command.
  */
 export function getSourceCommandQueryFromESQLQuery(esql: string | undefined): string {
   if (!esql?.trim()) {
@@ -163,7 +182,26 @@ export function getSourceCommandQueryFromESQLQuery(esql: string | undefined): st
   if (sourceCommand) {
     // Nothing to describe yet, e.g. `FROM ` while typing.
     const hasSources = sourceCommand.args.some((arg) => isSource(arg) || isSubQuery(arg));
-    return hasSources ? BasicPrettyPrinter.command(reduceSubqueriesToSource(sourceCommand)) : '';
+    if (!hasSources) {
+      return '';
+    }
+
+    const namedSubqueries = getNamedSubqueries(root.header);
+    const header = getReferencedNamedSubqueries(sourceCommand, namedSubqueries).map(
+      ({ identifier, query }) =>
+        Builder.header.command.let([
+          Builder.expression.func.binary('=', [
+            identifier,
+            Builder.expression.parens(reduceQueryToSource(query)),
+          ]),
+        ])
+    );
+
+    return BasicPrettyPrinter.print({
+      ...root,
+      header,
+      commands: [reduceSubqueriesToSource(sourceCommand)],
+    });
   }
 
   const [promqlIndex] = getPromQLSources(root.commands);
