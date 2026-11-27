@@ -5,10 +5,18 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type {
   AgentPerson,
   AgentStoreContext,
 } from '../../../../../entity_analytics/components/ai_security/types';
+import {
+  MFA_OFF,
+  TERMINATED,
+  statusIdpDeprovisioned,
+  statusIdpSuspended,
+  statusTerminatedOn,
+} from '../translations';
 
 export type PersonSignal =
   | { readonly kind: 'watchlist'; readonly watchlistId: string }
@@ -61,3 +69,31 @@ export const getPersonSignals = (
   if (getMfaEnabled(person, rowFacts) === false) signals.push({ kind: 'mfa_off' });
   return signals;
 };
+
+const formatDate = (date: string): string => {
+  const parsed = new Date(date);
+  if (Number.isNaN(parsed.getTime())) return date;
+  return new Intl.DateTimeFormat(i18n.getLocale(), {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(parsed);
+};
+
+const describeSignal = (signal: PersonSignal): string | undefined => {
+  if (signal.kind === 'terminated') {
+    return signal.date ? statusTerminatedOn(formatDate(signal.date)) : TERMINATED;
+  }
+  if (signal.kind === 'idp') {
+    return signal.state === 'deprovisioned'
+      ? statusIdpDeprovisioned(signal.provider)
+      : statusIdpSuspended(signal.provider);
+  }
+  if (signal.kind === 'mfa_off') return MFA_OFF;
+  return undefined;
+};
+
+/** The person's facts that need action now, as short phrases for one status line. Watchlists are left out. */
+export const formatPersonStatus = (signals: readonly PersonSignal[]): string[] =>
+  signals.map(describeSignal).filter((text): text is string => text !== undefined);

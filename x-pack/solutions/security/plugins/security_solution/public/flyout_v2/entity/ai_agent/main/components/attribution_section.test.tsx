@@ -24,8 +24,22 @@ jest.mock('../../../../../entity_analytics/api/hooks/use_get_watchlists', () => 
     ],
   }),
 }));
+jest.mock('../../../../document/main/components/alert_count_insight', () => ({
+  AlertCountInsight: ({
+    identityFields,
+    'data-test-subj': dataTestSubj,
+  }: {
+    identityFields: Record<string, string>;
+    'data-test-subj'?: string;
+  }) => <div data-test-subj={dataTestSubj}>{JSON.stringify(identityFields)}</div>,
+}));
 
-const renderSection = (context: AgentContext = mockAgentContext, onShowRelatedAgents = jest.fn()) =>
+const PANEL = `${AI_AGENT_TEST_IDS.attribution}Panel`;
+
+const renderSection = (
+  context: AgentContext = mockAgentContext,
+  { onShowRelatedAgents = jest.fn(), onShowGraph = jest.fn() } = {}
+) =>
   render(
     <TestProviders>
       <AttributionSection
@@ -33,6 +47,7 @@ const renderSection = (context: AgentContext = mockAgentContext, onShowRelatedAg
         identity={mockAgentIdentity}
         scopeId="scope"
         onShowRelatedAgents={onShowRelatedAgents}
+        onShowGraph={onShowGraph}
       />
     </TestProviders>
   );
@@ -45,25 +60,33 @@ describe('AttributionSection', () => {
     jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
   });
 
-  it('uses the AI security table labels in its order: Signed in as, Host, Runs as', () => {
+  it('uses the AI security table captions in its order: Signed in as, Host, Runs as', () => {
     renderSection();
-    const panel = screen.getByTestId(AI_AGENT_TEST_IDS.attribution);
-    expect(panel).toHaveTextContent(/Attribution.*Signed in as.*Host.*Runs as/);
+    expect(screen.getByTestId(PANEL)).toHaveTextContent(/Attribution.*Signed in as.*Host.*Runs as/);
   });
 
-  it('shows the signed-in person with only the abnormal signals as badges', () => {
+  it('opens the Graph tab from the title', () => {
+    const onShowGraph = jest.fn();
+    renderSection(mockAgentContext, { onShowGraph });
+    fireEvent.click(screen.getByTestId(`${AI_AGENT_TEST_IDS.attribution}TitleLink`));
+    expect(onShowGraph).toHaveBeenCalled();
+  });
+
+  it('shows the person with a labelled watchlist row and one status line', () => {
     renderSection();
     const person = screen.getByTestId(AI_AGENT_TEST_IDS.person);
     expect(person).toHaveTextContent('Avery Quinn');
     expect(person).toHaveTextContent('avery.quinn@example.com');
-    const signals = screen.getByTestId(AI_AGENT_TEST_IDS.personSignals);
-    expect(signals).toHaveTextContent('Departing Employees');
-    expect(signals).toHaveTextContent('Terminated Nov 25, 2026');
-    expect(signals).toHaveTextContent('Okta: Deprovisioned');
-    expect(signals).toHaveTextContent('MFA off');
+    expect(person).toHaveTextContent('Watchlists');
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.personWatchlists)).toHaveTextContent(
+      'Departing Employees'
+    );
+    expect(within(person).getByTestId(AI_AGENT_TEST_IDS.entityStatus)).toHaveTextContent(
+      'Terminated Nov 25, 2026 · Okta deprovisioned · MFA off'
+    );
   });
 
-  it('shows no badges for a healthy person', () => {
+  it('shows no watchlist row and no status for a healthy person', () => {
     renderSection({
       ...mockAgentContext,
       people: [
@@ -83,10 +106,10 @@ describe('AttributionSection', () => {
         },
       ],
     });
-    expect(screen.queryByTestId(AI_AGENT_TEST_IDS.personSignals)).not.toBeInTheDocument();
-    const panel = screen.getByTestId(AI_AGENT_TEST_IDS.attribution);
-    expect(panel).not.toHaveTextContent('MFA');
-    expect(panel).not.toHaveTextContent('ACTIVE');
+    const person = screen.getByTestId(AI_AGENT_TEST_IDS.person);
+    expect(person).not.toHaveTextContent('Watchlists');
+    expect(within(person).queryByTestId(AI_AGENT_TEST_IDS.entityStatus)).not.toBeInTheDocument();
+    expect(person).not.toHaveTextContent('MFA');
   });
 
   it("prefers the agent row's MFA and watchlists when the install has one person", () => {
@@ -101,9 +124,10 @@ describe('AttributionSection', () => {
         },
       },
     });
-    const signals = screen.getByTestId(AI_AGENT_TEST_IDS.personSignals);
-    expect(signals).toHaveTextContent('Privileged Users');
-    expect(signals).not.toHaveTextContent('MFA off');
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.personWatchlists)).toHaveTextContent(
+      'Privileged Users'
+    );
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.person)).not.toHaveTextContent('MFA off');
   });
 
   it('puts the last signed-in account first and the others on one line', () => {
@@ -114,22 +138,49 @@ describe('AttributionSection', () => {
         ...mockAgentContext.people,
       ],
     });
-    expect(screen.getByTestId(AI_AGENT_TEST_IDS.person)).toHaveTextContent(/^Avery Quinn/);
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.person)).toHaveTextContent('Avery Quinn');
     expect(screen.getByTestId(AI_AGENT_TEST_IDS.otherAccounts)).toHaveTextContent(
       'Also used jordan.blake@example.com'
     );
   });
 
-  it('shows the host with its criticality and risk, and the OS user with its risk', () => {
+  it("shows the host's criticality, risk level and alert bar under labels", () => {
     renderSection();
     const host = screen.getByTestId(AI_AGENT_TEST_IDS.host);
     expect(host).toHaveTextContent('ci-build-01');
+    expect(host).toHaveTextContent('Asset criticality');
     expect(host).toHaveTextContent('High Impact');
-    expect(host).toHaveTextContent('Risk: High');
+    expect(host).toHaveTextContent('Host risk level');
+    expect(host).not.toHaveTextContent('Risk:');
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.hostAlerts)).toHaveTextContent(
+      JSON.stringify({ 'host.name': 'ci-build-01' })
+    );
+  });
+
+  it('shows the OS user risk level under a label, without a pill', () => {
+    renderSection();
     const runsAs = screen.getByTestId(AI_AGENT_TEST_IDS.runsAs);
     expect(runsAs).toHaveTextContent('ec2-user');
-    expect(runsAs).toHaveTextContent('Risk: Moderate');
-    expect(runsAs).not.toHaveTextContent('Runs as root');
+    expect(runsAs).toHaveTextContent('User risk level');
+    expect(runsAs).toHaveTextContent('Moderate');
+    expect(runsAs).not.toHaveTextContent('Risk:');
+    expect(within(runsAs).queryByTestId(AI_AGENT_TEST_IDS.entityStatus)).not.toBeInTheDocument();
+  });
+
+  it('flags an install running as root on the status line', () => {
+    renderSection({
+      ...mockAgentContext,
+      runsAs: mockRelatedRow({
+        entityId: 'user:root@host-1@local',
+        engineType: 'user',
+        userName: 'root',
+      }),
+    });
+    expect(
+      within(screen.getByTestId(AI_AGENT_TEST_IDS.runsAs)).getByTestId(
+        AI_AGENT_TEST_IDS.entityStatus
+      )
+    ).toHaveTextContent('Runs as root');
   });
 
   it('opens the person, host and OS user as child flyouts', () => {
@@ -150,7 +201,7 @@ describe('AttributionSection', () => {
 
   it('links the shared account line to the related agents', () => {
     const onShowRelatedAgents = jest.fn();
-    renderSection(mockAgentContext, onShowRelatedAgents);
+    renderSection(mockAgentContext, { onShowRelatedAgents });
     const link = screen.getByTestId(AI_AGENT_TEST_IDS.sharedAccountLink);
     expect(link).toHaveTextContent('Account also signed in on 1 other install');
     fireEvent.click(link);
@@ -167,20 +218,10 @@ describe('AttributionSection', () => {
     expect(screen.getByTestId(AI_AGENT_TEST_IDS.noSignedInAccount)).toHaveTextContent(
       'No signed-in account'
     );
-    expect(screen.getByTestId(AI_AGENT_TEST_IDS.host)).toHaveTextContent('ci-build-01');
+    const host = screen.getByTestId(AI_AGENT_TEST_IDS.host);
+    expect(host).toHaveTextContent('ci-build-01');
+    expect(host).not.toHaveTextContent('Host risk level');
     expect(screen.getByTestId(AI_AGENT_TEST_IDS.runsAs)).toHaveTextContent('ec2-user');
     expect(screen.queryByTestId(AI_AGENT_TEST_IDS.sharedAccountLink)).not.toBeInTheDocument();
-  });
-
-  it('flags an install running as root', () => {
-    renderSection({
-      ...mockAgentContext,
-      runsAs: mockRelatedRow({
-        entityId: 'user:root@host-1@local',
-        engineType: 'user',
-        userName: 'root',
-      }),
-    });
-    expect(screen.getByTestId(AI_AGENT_TEST_IDS.runsAs)).toHaveTextContent('Runs as root');
   });
 });

@@ -13,10 +13,10 @@ import { InstallDetailsSection } from './install_details_section';
 import { AI_AGENT_TEST_IDS } from '../test_ids';
 
 describe('InstallDetailsSection', () => {
-  it('is collapsed by default and shows version, first seen and the entity ID when opened', () => {
+  it('is collapsed by default and shows version and first seen when opened', () => {
     render(
       <TestProviders>
-        <InstallDetailsSection entityId={mockAgentIdentity.entityId} agent={mockAgentRow} />
+        <InstallDetailsSection agent={mockAgentRow} />
       </TestProviders>
     );
     const toggle = screen.getByTestId(AI_AGENT_TEST_IDS.installDetailsToggle);
@@ -26,21 +26,25 @@ describe('InstallDetailsSection', () => {
     const section = screen.getByTestId(AI_AGENT_TEST_IDS.installDetails);
     expect(section).toHaveTextContent('Version2.1.332');
     expect(section).toHaveTextContent('First seen');
-    expect(section).toHaveTextContent(`Entity ID${mockAgentIdentity.entityId}`);
-    expect(screen.getByTestId(AI_AGENT_TEST_IDS.copyEntityId)).toHaveAttribute(
-      'aria-label',
-      'Copy entity ID'
-    );
   });
 
-  it('shows the entity ID even with no store row', () => {
+  it('leaves the entity ID to the summary grid', () => {
     render(
       <TestProviders>
-        <InstallDetailsSection entityId={mockAgentIdentity.entityId} />
+        <InstallDetailsSection agent={mockAgentRow} />
       </TestProviders>
     );
-    expect(screen.getByTestId(AI_AGENT_TEST_IDS.installDetails)).toHaveTextContent(
-      mockAgentIdentity.entityId
+    const section = screen.getByTestId(AI_AGENT_TEST_IDS.installDetails);
+    expect(section).not.toHaveTextContent('Entity ID');
+    expect(section).not.toHaveTextContent(mockAgentIdentity.entityId);
+  });
+
+  it('shows empty values with no store row', () => {
+    render(
+      <TestProviders>
+        <InstallDetailsSection />
+      </TestProviders>
     );
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.installDetails)).toHaveTextContent('Version—');
   });
 });

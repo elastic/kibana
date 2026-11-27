@@ -22,6 +22,7 @@ import { useAiAgentContext } from '../../../../entity_analytics/components/ai_se
 import { parseAgentId } from '../../../../entity_analytics/components/ai_security/utils';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
+import { EntitySummaryGrid } from '../../shared/components/entity_summary_grid';
 import { AiAgentHeader } from './header';
 import { Footer } from './footer';
 import { AttributionSection } from './components/attribution_section';
@@ -31,6 +32,7 @@ import { RelatedAgentsSection } from './components/related_agents_section';
 import { InstallDetailsSection } from './components/install_details_section';
 import { AgentActivity } from './components/agent_activity';
 import { GraphTab } from './components/graph_tab';
+import { toSummaryRecord } from './summary_record';
 import { AI_AGENT_TEST_IDS } from './test_ids';
 import { LOAD_ERROR, TAB_ACTIVITY, TAB_GRAPH, TAB_OVERVIEW } from './translations';
 
@@ -46,9 +48,10 @@ export interface AiAgentProps {
 type TabId = 'overview' | 'activity' | 'graph';
 
 /**
- * AI agent flyout (proof of concept). The overview reads top down: attribution (who signed in,
- * the host and the OS user), the shared risk summary, alerts worst first, related agents and
- * install details. Agent activity and the relationships graph have their own tabs.
+ * AI agent flyout (proof of concept). The overview reads top down: the shared summary grid for the
+ * agent's own facts, attribution (who signed in, the host and the OS user), the shared risk
+ * summary, alerts worst first, related agents and install details. Agent activity and the
+ * relationships graph have their own tabs. Agent criticality is read only.
  */
 export const AiAgent: FC<AiAgentProps> = memo(function AiAgent({ entityId, entityName, scopeId }) {
   const [selectedTab, setSelectedTab] = useState<TabId>('overview');
@@ -77,6 +80,8 @@ export const AiAgent: FC<AiAgentProps> = memo(function AiAgent({ entityId, entit
       relatedAgentsRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'start' })
     );
   }, []);
+
+  const onShowGraph = useCallback(() => setSelectedTab('graph'), []);
 
   if (!identity) {
     return (
@@ -117,11 +122,16 @@ export const AiAgent: FC<AiAgentProps> = memo(function AiAgent({ entityId, entit
             <EuiSkeletonText lines={8} />
           ) : (
             <>
+              <EntitySummaryGrid
+                entityRecord={toSummaryRecord(entityId, agent)}
+                criticalityLevel={agent?.criticality ?? 'unassigned'}
+              />
               <AttributionSection
                 context={data}
                 identity={identity}
                 scopeId={scopeId}
                 onShowRelatedAgents={onShowRelatedAgents}
+                onShowGraph={onShowGraph}
               />
               <EuiSpacer size="m" />
               <RiskSummarySection
@@ -141,7 +151,7 @@ export const AiAgent: FC<AiAgentProps> = memo(function AiAgent({ entityId, entit
                   onToggle={setIsRelatedAgentsOpen}
                 />
               </div>
-              <InstallDetailsSection entityId={entityId} agent={agent} />
+              <InstallDetailsSection agent={agent} />
             </>
           ))}
         {selectedTab === 'activity' && <AgentActivity agent={agent ?? identity} />}

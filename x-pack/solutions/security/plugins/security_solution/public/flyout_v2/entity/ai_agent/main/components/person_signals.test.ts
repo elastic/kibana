@@ -10,7 +10,7 @@ import type {
   AgentStoreContext,
   RelatedEntity,
 } from '../../../../../entity_analytics/components/ai_security/types';
-import { getMfaEnabled, getPersonSignals } from './person_signals';
+import { formatPersonStatus, getMfaEnabled, getPersonSignals } from './person_signals';
 
 const person = (overrides: Partial<AgentPerson> = {}): AgentPerson => ({
   email: 'avery.quinn@example.com',
@@ -127,5 +127,29 @@ describe('getMfaEnabled', () => {
         })
       )
     ).toBe(false);
+  });
+});
+
+describe('formatPersonStatus', () => {
+  it('turns the signals into short phrases, leaving watchlists out', () => {
+    expect(
+      formatPersonStatus([
+        { kind: 'watchlist', watchlistId: 'departing-employees' },
+        { kind: 'terminated', date: '2026-11-25' },
+        { kind: 'idp', provider: 'Okta', state: 'deprovisioned' },
+        { kind: 'idp', provider: 'Entra ID', state: 'suspended' },
+        { kind: 'mfa_off' },
+      ])
+    ).toEqual(['Terminated Nov 25, 2026', 'Okta deprovisioned', 'Entra ID suspended', 'MFA off']);
+  });
+
+  it('says Terminated without a date when none is known', () => {
+    expect(formatPersonStatus([{ kind: 'terminated' }])).toEqual(['Terminated']);
+  });
+
+  it('gives nothing when only watchlists are set', () => {
+    expect(formatPersonStatus([{ kind: 'watchlist', watchlistId: 'departing-employees' }])).toEqual(
+      []
+    );
   });
 });

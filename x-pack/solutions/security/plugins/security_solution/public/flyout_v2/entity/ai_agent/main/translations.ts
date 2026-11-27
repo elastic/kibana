@@ -49,14 +49,6 @@ export const NO_SIGNED_IN_ACCOUNT = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.attribution.noSignedInAccount',
   { defaultMessage: 'No signed-in account' }
 );
-export const DEPROVISIONED = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.aiAgent.attribution.deprovisioned',
-  { defaultMessage: 'Deprovisioned' }
-);
-export const SUSPENDED = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.aiAgent.attribution.suspended',
-  { defaultMessage: 'Suspended' }
-);
 export const TERMINATED = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.attribution.terminated',
   { defaultMessage: 'Terminated' }
@@ -65,15 +57,44 @@ export const MFA_OFF = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.attribution.mfaOff',
   { defaultMessage: 'MFA off' }
 );
+export const SHOW_IN_GRAPH = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.aiAgent.attribution.showInGraph',
+  { defaultMessage: 'Show in graph' }
+);
+export const ASSET_CRITICALITY_LABEL = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.aiAgent.attribution.assetCriticality',
+  { defaultMessage: 'Asset criticality' }
+);
+export const WATCHLISTS_LABEL = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.aiAgent.attribution.watchlists',
+  { defaultMessage: 'Watchlists' }
+);
+export const WATCHLISTS_OVERFLOW_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.aiAgent.attribution.watchlistsOverflowTitle',
+  { defaultMessage: 'Additional watchlists' }
+);
+export const statusTerminatedOn = (date: string) =>
+  i18n.translate('xpack.securitySolution.flyout.entityDetails.aiAgent.attribution.terminatedOn', {
+    defaultMessage: 'Terminated {date}',
+    values: { date },
+  });
+export const statusIdpDeprovisioned = (provider: string) =>
+  i18n.translate(
+    'xpack.securitySolution.flyout.entityDetails.aiAgent.attribution.idpDeprovisioned',
+    {
+      defaultMessage: '{provider} deprovisioned',
+      values: { provider },
+    }
+  );
+export const statusIdpSuspended = (provider: string) =>
+  i18n.translate('xpack.securitySolution.flyout.entityDetails.aiAgent.attribution.idpSuspended', {
+    defaultMessage: '{provider} suspended',
+    values: { provider },
+  });
 export const RUNS_AS_ROOT = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.attribution.runsAsRoot',
   { defaultMessage: 'Runs as root' }
 );
-export const watchlistRiskModifierTooltip = (modifier: number) =>
-  i18n.translate('xpack.securitySolution.flyout.entityDetails.aiAgent.watchlistRiskModifier', {
-    defaultMessage: 'Risk modifier {modifier}',
-    values: { modifier },
-  });
 
 export const relatedAgentsTitle = (count: number) =>
   i18n.translate('xpack.securitySolution.flyout.entityDetails.aiAgent.relatedAgents.title', {
@@ -100,14 +121,6 @@ export const VERSION_LABEL = i18n.translate(
 export const FIRST_SEEN_LABEL = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.installDetails.firstSeen',
   { defaultMessage: 'First seen' }
-);
-export const ENTITY_ID_LABEL = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.aiAgent.installDetails.entityId',
-  { defaultMessage: 'Entity ID' }
-);
-export const COPY_ENTITY_ID = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.aiAgent.installDetails.copyEntityId',
-  { defaultMessage: 'Copy entity ID' }
 );
 
 export const ALERTS_TITLE = i18n.translate(

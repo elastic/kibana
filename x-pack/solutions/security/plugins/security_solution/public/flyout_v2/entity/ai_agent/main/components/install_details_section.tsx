@@ -8,15 +8,9 @@
 import React, { memo } from 'react';
 import {
   EuiAccordion,
-  EuiButtonIcon,
-  EuiCopy,
   EuiDescriptionList,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiSpacer,
-  EuiText,
   EuiTitle,
-  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -26,21 +20,14 @@ import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import type { AgentRow } from '../../../../../entity_analytics/components/ai_security/types';
 import { ONE_WEEK_IN_HOURS } from '../../../shared/constants';
 import { AI_AGENT_TEST_IDS } from '../test_ids';
-import {
-  COPY_ENTITY_ID,
-  ENTITY_ID_LABEL,
-  FIRST_SEEN_LABEL,
-  INSTALL_DETAILS_TITLE,
-  VERSION_LABEL,
-} from '../translations';
+import { FIRST_SEEN_LABEL, INSTALL_DETAILS_TITLE, VERSION_LABEL } from '../translations';
 
 export interface InstallDetailsSectionProps {
-  readonly entityId: string;
   readonly agent?: AgentRow;
 }
 
-/** Version, first seen and the entity ID of the install, collapsed by default. */
-export const InstallDetailsSection = memo(({ entityId, agent }: InstallDetailsSectionProps) => {
+/** Version and first seen of the install, collapsed by default. */
+export const InstallDetailsSection = memo(({ agent }: InstallDetailsSectionProps) => {
   const { euiTheme } = useEuiTheme();
   const accordionId = useGeneratedHtmlId({ prefix: 'aiAgentInstallDetails' });
 
@@ -77,42 +64,6 @@ export const InstallDetailsSection = memo(({ entityId, agent }: InstallDetailsSe
               />
             ) : (
               getEmptyTagValue()
-            ),
-          },
-          {
-            title: ENTITY_ID_LABEL,
-            description: (
-              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                <EuiFlexItem
-                  css={css`
-                    min-width: 0;
-                  `}
-                >
-                  <EuiText
-                    size="xs"
-                    css={css`
-                      word-break: break-all;
-                    `}
-                  >
-                    {entityId}
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiCopy textToCopy={entityId}>
-                    {(copy) => (
-                      <EuiToolTip content={COPY_ENTITY_ID} disableScreenReaderOutput>
-                        <EuiButtonIcon
-                          iconType="copy"
-                          size="xs"
-                          onClick={copy}
-                          aria-label={COPY_ENTITY_ID}
-                          data-test-subj={AI_AGENT_TEST_IDS.copyEntityId}
-                        />
-                      </EuiToolTip>
-                    )}
-                  </EuiCopy>
-                </EuiFlexItem>
-              </EuiFlexGroup>
             ),
           },
         ]}

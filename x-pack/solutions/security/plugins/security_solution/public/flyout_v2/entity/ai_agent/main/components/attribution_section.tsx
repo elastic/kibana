@@ -6,24 +6,16 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import {
-  EuiBadge,
-  EuiDescriptionList,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText, EuiTextColor } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { DescriptionList } from '../../../../../../common/utility_types';
+import { EntityType } from '../../../../../../common/entity_analytics/types';
+import { EntityIconByType } from '../../../../../entity_analytics/components/entity_store/entity_icon_by_type';
 import { AssetCriticalityBadge } from '../../../../../entity_analytics/components/asset_criticality/asset_criticality_badge';
-import {
-  useWatchlistLookup,
-  type WatchlistLookup,
-} from '../../../../../entity_analytics/components/ai_security/hooks/use_watchlist_lookup';
+import { RiskScoreLevel } from '../../../../../entity_analytics/components/severity/common';
+import { HOST_RISK_LEVEL } from '../../../../../overview/components/host_overview/translations';
+import { USER_RISK_LEVEL } from '../../../../../overview/components/user_overview/translations';
+import { useWatchlistLookup } from '../../../../../entity_analytics/components/ai_security/hooks/use_watchlist_lookup';
 import type {
   AgentContext,
   AgentIdentity,
@@ -31,86 +23,27 @@ import type {
   AgentStoreContext,
   RelatedEntity,
 } from '../../../../../entity_analytics/components/ai_security/types';
-import { RiskLevelBadge } from '../../../shared/components/risk_level_badge';
+import { ExpandablePanel } from '../../../../shared/components/expandable_panel';
+import { AlertCountInsight } from '../../../../document/main/components/alert_count_insight';
+import { TruncatedBadgeList } from '../../../shared/components/entity_source_value';
 import { EntityLink, useOpenRelatedEntity, type OpenRelatedEntity } from './entity_link';
-import { getPersonSignals, type PersonSignal } from './person_signals';
-import { WatchlistBadge } from './watchlist_badge';
+import { formatPersonStatus, getPersonSignals } from './person_signals';
+import { RelatedEntityCard } from './related_entity_card';
 import { AI_AGENT_TEST_IDS } from '../test_ids';
 import {
+  ASSET_CRITICALITY_LABEL,
   ATTRIBUTION_TITLE,
-  DEPROVISIONED,
   HOST_LABEL,
-  MFA_OFF,
   NO_SIGNED_IN_ACCOUNT,
   RUNS_AS_LABEL,
   RUNS_AS_ROOT,
+  SHOW_IN_GRAPH,
   SIGNED_IN_AS_LABEL,
-  SUSPENDED,
-  TERMINATED,
+  WATCHLISTS_LABEL,
+  WATCHLISTS_OVERFLOW_TITLE,
 } from '../translations';
 
-const signalKey = (signal: PersonSignal): string => {
-  switch (signal.kind) {
-    case 'watchlist':
-      return `watchlist-${signal.watchlistId}`;
-    case 'idp':
-      return `idp-${signal.provider}`;
-    default:
-      return signal.kind;
-  }
-};
-
-const SignalBadge = ({
-  signal,
-  watchlistLookup,
-}: {
-  signal: PersonSignal;
-  watchlistLookup: WatchlistLookup;
-}) => {
-  switch (signal.kind) {
-    case 'watchlist':
-      return <WatchlistBadge watchlist={watchlistLookup([signal.watchlistId])[0]} />;
-    case 'terminated':
-      return (
-        <EuiBadge color="danger">
-          {signal.date ? (
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.entityDetails.aiAgent.attribution.terminatedOn"
-              defaultMessage="Terminated {date}"
-              values={{
-                date: (
-                  <FormattedDate
-                    value={signal.date}
-                    year="numeric"
-                    month="short"
-                    day="numeric"
-                    timeZone="UTC"
-                  />
-                ),
-              }}
-            />
-          ) : (
-            TERMINATED
-          )}
-        </EuiBadge>
-      );
-    case 'idp':
-      return (
-        <EuiBadge color="danger">
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.entityDetails.aiAgent.attribution.idpAccountState"
-            defaultMessage="{provider}: {state}"
-            values={{
-              provider: signal.provider,
-              state: signal.state === 'deprovisioned' ? DEPROVISIONED : SUSPENDED,
-            }}
-          />
-        </EuiBadge>
-      );
-    case 'mfa_off':
-      return <EuiBadge color="danger">{MFA_OFF}</EuiBadge>;
-  }
-};
+const HOST_ALERTS_QUERY_ID = 'aiAgentAttributionHostAlerts';
 
 const PersonName = ({ person, onOpen }: { person: AgentPerson; onOpen: OpenRelatedEntity }) => {
   const { primary, email } = person;
@@ -118,7 +51,36 @@ const PersonName = ({ person, onOpen }: { person: AgentPerson; onOpen: OpenRelat
   return <EntityLink row={primary} label={primary.fullName ?? email} onOpen={onOpen} />;
 };
 
-const SignedInAs = ({
+const OtherAccounts = ({
+  people,
+  onOpen,
+}: {
+  people: readonly AgentPerson[];
+  onOpen: OpenRelatedEntity;
+}) => (
+  <EuiFlexItem>
+    <EuiText size="xs" color="subdued" data-test-subj={AI_AGENT_TEST_IDS.otherAccounts}>
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.entityDetails.aiAgent.attribution.alsoUsed"
+        defaultMessage="Also used {emails}"
+        values={{
+          emails: people.map((person, index) => (
+            <React.Fragment key={person.email}>
+              {index > 0 && ', '}
+              {person.primary ? (
+                <EntityLink row={person.primary} label={person.email} onOpen={onOpen} />
+              ) : (
+                person.email
+              )}
+            </React.Fragment>
+          )),
+        }}
+      />
+    </EuiText>
+  </EuiFlexItem>
+);
+
+const PersonCard = ({
   people,
   signedInAs,
   rowFacts,
@@ -137,79 +99,54 @@ const SignedInAs = ({
   );
   if (!current) {
     return (
-      <EuiText size="s" color="subdued" data-test-subj={AI_AGENT_TEST_IDS.noSignedInAccount}>
-        {NO_SIGNED_IN_ACCOUNT}
-      </EuiText>
+      <RelatedEntityCard
+        caption={SIGNED_IN_AS_LABEL}
+        iconType={EntityIconByType[EntityType.user]}
+        name={
+          <EuiTextColor color="subdued" data-test-subj={AI_AGENT_TEST_IDS.noSignedInAccount}>
+            {NO_SIGNED_IN_ACCOUNT}
+          </EuiTextColor>
+        }
+        data-test-subj={AI_AGENT_TEST_IDS.person}
+      />
     );
   }
   const signals = getPersonSignals(current, rowFacts);
+  const watchlistNames = watchlistLookup(
+    signals.flatMap((signal) => (signal.kind === 'watchlist' ? [signal.watchlistId] : []))
+  ).map(({ name }) => name);
+  const items: DescriptionList[] =
+    watchlistNames.length > 0
+      ? [
+          {
+            title: WATCHLISTS_LABEL,
+            description: (
+              <TruncatedBadgeList
+                values={watchlistNames}
+                overflowTooltipTitle={WATCHLISTS_OVERFLOW_TITLE}
+                data-test-subj={AI_AGENT_TEST_IDS.personWatchlists}
+              />
+            ),
+          },
+        ]
+      : [];
+
   return (
-    <div data-test-subj={AI_AGENT_TEST_IDS.person}>
-      <EuiText size="s">
-        <strong>
-          <PersonName person={current} onOpen={onOpen} />
-        </strong>
-      </EuiText>
-      {current.primary?.fullName && (
-        <EuiText size="xs" color="subdued">
-          {current.email}
-        </EuiText>
-      )}
-      {signals.length > 0 && (
-        <>
-          <EuiSpacer size="xs" />
-          <EuiFlexGroup
-            gutterSize="xs"
-            wrap
-            responsive={false}
-            data-test-subj={AI_AGENT_TEST_IDS.personSignals}
-          >
-            {signals.map((signal) => (
-              <EuiFlexItem grow={false} key={signalKey(signal)}>
-                <SignalBadge signal={signal} watchlistLookup={watchlistLookup} />
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        </>
-      )}
-      {others.length > 0 && (
-        <>
-          <EuiSpacer size="xs" />
-          <EuiText size="xs" color="subdued" data-test-subj={AI_AGENT_TEST_IDS.otherAccounts}>
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.entityDetails.aiAgent.attribution.alsoUsed"
-              defaultMessage="Also used {emails}"
-              values={{
-                emails: others.map((person, index) => (
-                  <React.Fragment key={person.email}>
-                    {index > 0 && ', '}
-                    {person.primary ? (
-                      <EntityLink row={person.primary} label={person.email} onOpen={onOpen} />
-                    ) : (
-                      person.email
-                    )}
-                  </React.Fragment>
-                )),
-              }}
-            />
-          </EuiText>
-        </>
-      )}
-    </div>
+    <RelatedEntityCard
+      caption={SIGNED_IN_AS_LABEL}
+      iconType={EntityIconByType[EntityType.user]}
+      name={<PersonName person={current} onOpen={onOpen} />}
+      subtitle={current.primary?.fullName ? current.email : undefined}
+      items={items}
+      status={formatPersonStatus(signals)}
+      data-test-subj={AI_AGENT_TEST_IDS.person}
+    >
+      {others.length > 0 && <OtherAccounts people={others} onOpen={onOpen} />}
+    </RelatedEntityCard>
   );
 };
 
-const Item = ({ children }: { children: React.ReactNode }) => (
-  <EuiFlexItem grow={false}>{children}</EuiFlexItem>
-);
-
-const InlineRow = ({ children, testId }: { children: React.ReactNode; testId: string }) => (
-  <EuiFlexGroup gutterSize="s" alignItems="center" wrap responsive={false} data-test-subj={testId}>
-    {children}
-  </EuiFlexGroup>
-);
-
-const HostRow = ({
+const HostCard = ({
   context: { agent, host },
   identity,
   onOpen,
@@ -218,37 +155,48 @@ const HostRow = ({
   identity: AgentIdentity;
   onOpen: OpenRelatedEntity;
 }) => {
+  const hostName = host?.hostName ?? host?.name ?? agent?.hostName;
   const criticality = host?.criticality ?? agent?.storeContext?.hostCriticality;
+  const items: DescriptionList[] = [
+    ...(criticality && criticality !== 'unassigned'
+      ? [
+          {
+            title: ASSET_CRITICALITY_LABEL,
+            description: <AssetCriticalityBadge criticalityLevel={criticality} textSize="xs" />,
+          },
+        ]
+      : []),
+    ...(host?.riskLevel
+      ? [{ title: HOST_RISK_LEVEL, description: <RiskScoreLevel severity={host.riskLevel} /> }]
+      : []),
+  ];
   return (
-    <InlineRow testId={AI_AGENT_TEST_IDS.host}>
-      <Item>
-        <EuiText size="s">
-          {host ? (
-            <EntityLink
-              row={host}
-              label={host.hostName ?? host.name ?? host.entityId}
-              onOpen={onOpen}
-            />
-          ) : (
-            agent?.hostName ?? identity.hostId
-          )}
-        </EuiText>
-      </Item>
-      {criticality && criticality !== 'unassigned' && (
-        <Item>
-          <AssetCriticalityBadge criticalityLevel={criticality} textSize="xs" />
-        </Item>
+    <RelatedEntityCard
+      caption={HOST_LABEL}
+      iconType={EntityIconByType[EntityType.host]}
+      name={
+        host ? (
+          <EntityLink row={host} label={hostName ?? host.entityId} onOpen={onOpen} />
+        ) : (
+          hostName ?? identity.hostId
+        )
+      }
+      items={items}
+      data-test-subj={AI_AGENT_TEST_IDS.host}
+    >
+      {hostName && (
+        <AlertCountInsight
+          identityFields={{ 'host.name': hostName }}
+          entityType={EntityType.host}
+          queryId={HOST_ALERTS_QUERY_ID}
+          data-test-subj={AI_AGENT_TEST_IDS.hostAlerts}
+        />
       )}
-      {host?.riskLevel && (
-        <Item>
-          <RiskLevelBadge riskLevel={host.riskLevel} />
-        </Item>
-      )}
-    </InlineRow>
+    </RelatedEntityCard>
   );
 };
 
-const RunsAsRow = ({
+const RunsAsCard = ({
   runsAs,
   identity,
   onOpen,
@@ -259,23 +207,23 @@ const RunsAsRow = ({
 }) => {
   const userName = runsAs?.userName ?? identity.userName;
   return (
-    <InlineRow testId={AI_AGENT_TEST_IDS.runsAs}>
-      <Item>
-        <EuiText size="s">
-          {runsAs ? <EntityLink row={runsAs} label={userName} onOpen={onOpen} /> : userName}
-        </EuiText>
-      </Item>
-      {runsAs?.riskLevel && (
-        <Item>
-          <RiskLevelBadge riskLevel={runsAs.riskLevel} />
-        </Item>
-      )}
-      {userName === 'root' && (
-        <Item>
-          <EuiBadge color="danger">{RUNS_AS_ROOT}</EuiBadge>
-        </Item>
-      )}
-    </InlineRow>
+    <RelatedEntityCard
+      caption={RUNS_AS_LABEL}
+      iconType={EntityIconByType[EntityType.user]}
+      name={runsAs ? <EntityLink row={runsAs} label={userName} onOpen={onOpen} /> : userName}
+      items={
+        runsAs?.riskLevel
+          ? [
+              {
+                title: USER_RISK_LEVEL,
+                description: <RiskScoreLevel severity={runsAs.riskLevel} />,
+              },
+            ]
+          : []
+      }
+      status={userName === 'root' ? [RUNS_AS_ROOT] : []}
+      data-test-subj={AI_AGENT_TEST_IDS.runsAs}
+    />
   );
 };
 
@@ -285,78 +233,68 @@ export interface AttributionSectionProps {
   readonly scopeId: string;
   /** Opens and scrolls to the related agents section. */
   readonly onShowRelatedAgents: () => void;
+  /** Opens the Graph tab. */
+  readonly onShowGraph: () => void;
 }
 
 /**
- * Who is behind the agent and where it runs, with the AI security table's labels and order:
- * the signed-in person (only abnormal signals as badges), the host and the OS user. Every name
- * opens that entity's flyout.
+ * Who is behind the agent and where it runs, with the AI security table's labels and order: the
+ * signed-in person, the host and the OS user. Each is a card like the alert flyout's entity
+ * blocks, and every name opens that entity's flyout. The title opens the Graph tab.
  */
 export const AttributionSection = memo(
-  ({ context, identity, scopeId, onShowRelatedAgents }: AttributionSectionProps) => {
+  ({ context, identity, scopeId, onShowRelatedAgents, onShowGraph }: AttributionSectionProps) => {
     const onOpen = useOpenRelatedEntity(scopeId);
     const { agent, runsAs, people, signedInAs, otherInstallsOnAccount } = context;
     // The row's person facts are a union over every person, so they only stand in for one person.
     const rowFacts = people.length === 1 ? agent?.storeContext : undefined;
+    const link = useMemo(() => ({ callback: onShowGraph, tooltip: SHOW_IN_GRAPH }), [onShowGraph]);
 
     return (
-      <EuiPanel hasBorder paddingSize="m" data-test-subj={AI_AGENT_TEST_IDS.attribution}>
-        <EuiTitle size="xs">
-          <h3>{ATTRIBUTION_TITLE}</h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiDescriptionList
-          compressed
-          type="column"
-          columnWidths={[1, 3]}
-          rowGutterSize="m"
-          listItems={[
-            {
-              title: SIGNED_IN_AS_LABEL,
-              description: (
-                <SignedInAs
-                  people={people}
-                  signedInAs={signedInAs}
-                  rowFacts={rowFacts}
-                  onOpen={onOpen}
-                />
-              ),
-            },
-            {
-              title: HOST_LABEL,
-              description: <HostRow context={context} identity={identity} onOpen={onOpen} />,
-            },
-            {
-              title: RUNS_AS_LABEL,
-              description: <RunsAsRow runsAs={runsAs} identity={identity} onOpen={onOpen} />,
-            },
-          ]}
-        />
-        {otherInstallsOnAccount.length > 0 && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="warning" color="warning" size="s" aria-hidden={true} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs">
-                  <EuiLink
-                    onClick={onShowRelatedAgents}
-                    data-test-subj={AI_AGENT_TEST_IDS.sharedAccountLink}
-                  >
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.entityDetails.aiAgent.attribution.sharedAccount"
-                      defaultMessage="Account also signed in on {count, plural, one {# other install} other {# other installs}}"
-                      values={{ count: otherInstallsOnAccount.length }}
-                    />
-                  </EuiLink>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        )}
-      </EuiPanel>
+      <ExpandablePanel
+        header={{ title: ATTRIBUTION_TITLE, link }}
+        data-test-subj={AI_AGENT_TEST_IDS.attribution}
+      >
+        <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
+          <EuiFlexItem>
+            <PersonCard
+              people={people}
+              signedInAs={signedInAs}
+              rowFacts={rowFacts}
+              onOpen={onOpen}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <HostCard context={context} identity={identity} onOpen={onOpen} />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <RunsAsCard runsAs={runsAs} identity={identity} onOpen={onOpen} />
+          </EuiFlexItem>
+          {otherInstallsOnAccount.length > 0 && (
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="users" size="s" aria-hidden={true} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs">
+                    <EuiLink
+                      onClick={onShowRelatedAgents}
+                      data-test-subj={AI_AGENT_TEST_IDS.sharedAccountLink}
+                    >
+                      <FormattedMessage
+                        id="xpack.securitySolution.flyout.entityDetails.aiAgent.attribution.sharedAccount"
+                        defaultMessage="Account also signed in on {count, plural, one {# other install} other {# other installs}}"
+                        values={{ count: otherInstallsOnAccount.length }}
+                      />
+                    </EuiLink>
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </ExpandablePanel>
     );
   }
 );

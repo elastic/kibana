@@ -11,14 +11,19 @@ import { TestProviders } from '../../../../common/mock';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { createFlyoutApiMock } from '../../../use_flyout_api.mock';
 import { useAiAgentContext } from '../../../../entity_analytics/components/ai_security/hooks/use_ai_agents';
-import { mockAgentContext, mockAgentIdentity } from './mocks';
+import { mockAgentContext, mockAgentIdentity, mockAgentRow } from './mocks';
 import { AiAgent } from '.';
 import { AI_AGENT_TEST_IDS } from './test_ids';
 
 jest.mock('../../../use_flyout_api');
 jest.mock('../../../../entity_analytics/components/ai_security/hooks/use_ai_agents');
 jest.mock('../../../../entity_analytics/api/hooks/use_get_watchlists', () => ({
-  useGetWatchlists: jest.fn().mockReturnValue({ data: [] }),
+  useGetWatchlists: jest.fn().mockReturnValue({
+    data: [{ id: 'agents-for-departing-employees', name: 'Agents acting for departing employees' }],
+  }),
+}));
+jest.mock('../../../document/main/components/alert_count_insight', () => ({
+  AlertCountInsight: () => null,
 }));
 jest.mock('./components/risk_summary_section', () => ({
   RiskSummarySection: () => <div data-test-subj="mockRiskSummary" />,
@@ -50,16 +55,25 @@ describe('AiAgent', () => {
   beforeEach(() => {
     jest.mocked(useFlyoutApi).mockReturnValue(createFlyoutApiMock());
     jest.mocked(useAiAgentContext).mockReturnValue({
-      data: { ...mockAgentContext, identity: mockAgentIdentity },
+      data: {
+        ...mockAgentContext,
+        agent: {
+          ...mockAgentRow,
+          dataSources: ['endpoint'],
+          watchlistIds: ['agents-for-departing-employees'],
+        },
+        identity: mockAgentIdentity,
+      },
       isLoading: false,
       isError: false,
     } as unknown as ReturnType<typeof useAiAgentContext>);
   });
 
-  it('orders the overview: attribution, risk, alerts, related agents, install details', () => {
+  it('orders the overview: summary grid, attribution, risk, alerts, related agents, install details', () => {
     renderFlyout();
     const sections = [
-      screen.getByTestId(AI_AGENT_TEST_IDS.attribution),
+      screen.getByTestId('entityIdCell'),
+      screen.getByTestId(`${AI_AGENT_TEST_IDS.attribution}Panel`),
       screen.getByTestId('mockRiskSummary'),
       screen.getByTestId('mockAlerts'),
       screen.getByTestId(AI_AGENT_TEST_IDS.relatedAgents),
@@ -69,6 +83,24 @@ describe('AiAgent', () => {
       expect(isBefore(sections[index], section)).toBe(true);
     });
     expect(screen.getByTestId('mockFooter')).toBeInTheDocument();
+  });
+
+  it("shows the agent's own facts in the shared summary grid, with criticality read only", () => {
+    renderFlyout();
+    expect(screen.getByTestId('entityIdCell')).toHaveTextContent(mockAgentIdentity.entityId);
+    expect(screen.getByTestId('entityWatchlistsCell')).toHaveTextContent(
+      'Agents acting for departing employees'
+    );
+    const [agentCriticality, hostCriticality] = screen.getAllByTestId('asset-criticality-badge');
+    expect(agentCriticality).toHaveTextContent('Unassigned');
+    expect(hostCriticality).toHaveTextContent('High Impact');
+    expect(screen.queryByTestId('asset-criticality-edit-chevron')).not.toBeInTheDocument();
+  });
+
+  it('opens the Graph tab from the Attribution title', () => {
+    renderFlyout();
+    fireEvent.click(screen.getByTestId(`${AI_AGENT_TEST_IDS.attribution}TitleLink`));
+    expect(screen.getByTestId('mockGraph')).toBeInTheDocument();
   });
 
   it('keeps related agents closed until the shared account line opens them', () => {
