@@ -85,11 +85,11 @@ export async function assertPrivilegesInSpaces({
 /**
  * Setting a space-agnostic Fleet settings object (output, Fleet Server host, download source) as
  * the global default re-points every agent policy that relies on the default. Any policy without
- * an explicit assignment inherits the default, so the affected spaces are every space that holds
- * an agent policy (`affectedSpaceIds`). The caller must hold the Fleet agent-policies privilege in
- * all of them. This correctly allows a caller scoped to exactly the spaces that contain policies
- * (e.g. only the default space, or space1 + space2 when no other spaces exist) while still blocking
- * a caller who lacks access to a space that has policies.
+ * an explicit assignment inherits it, and every space resolves the default for enrollment, so the
+ * affected set (`affectedSpaceIds`) is every space that currently exists. The caller must hold the
+ * Fleet agent-policies privilege in all of them. This allows a caller scoped to exactly the spaces
+ * that exist (e.g. only the default space, or space1 + space2 when no other spaces exist) while
+ * blocking a caller who lacks access to any existing space.
  *
  * No-op when security is disabled, RBAC is not active for the request, or no policies exist.
  * Throws `FleetUnauthorizedError` (→ 403) otherwise.

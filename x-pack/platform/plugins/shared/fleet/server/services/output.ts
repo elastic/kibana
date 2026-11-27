@@ -151,6 +151,7 @@ import {
   assertPrivilegesInSpaces,
   assertCanManageDefaultSettings,
 } from './security/assert_privileges_in_spaces';
+import { getAllSpaceIds } from './spaces/helpers';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 
@@ -1257,31 +1258,32 @@ class OutputService {
   }
 
   /**
-   * Fails closed unless the caller holds Fleet privileges in every space that has a policy
-   * using this output. Outputs are space-agnostic saved objects, so a caller granted Fleet
-   * access in a single space could otherwise mutate an output that policies in other spaces
-   * depend on (changing or deleting the global default redirects where those agents ship data).
-   */
-  /**
-   * Promoting an output to the global default re-points agent policies that inherit the default,
-   * in every space that holds a policy. Require the caller to hold Fleet privileges in all of
-   * those spaces (not a blanket global grant), so a caller scoped to exactly the spaces that have
-   * policies is allowed while one missing a space with policies is blocked.
+   * Editing an output that is (or becomes) the global default re-points every agent policy that
+   * inherits the default. A policy with no explicit output inherits it, and every space — even one
+   * with no policies yet — resolves the default for enrollment, so the affected set is all spaces
+   * that currently exist. Require the caller to hold Fleet privileges in each of them, which still
+   * allows a caller scoped to exactly the spaces that exist while blocking one missing any space.
    */
   private async assertCanManageDefaultOutput(request: KibanaRequest) {
     const security = appContextService.getSecurity();
     if (!security || !security.authz.mode.useRbacForRequest(request)) {
       return;
     }
-    const { spaceIds, truncated } = await agentPolicyService.getAllPolicySpaceIds();
+    const { spaceIds, truncated } = await getAllSpaceIds();
     if (truncated) {
       throw new OutputUnauthorizedError(
-        `Unable to verify authorization to set a global default output: too many agent policies to enumerate`
+        `Unable to verify authorization to set a global default output: too many spaces to enumerate`
       );
     }
     await assertCanManageDefaultSettings(request, 'output', spaceIds);
   }
 
+  /**
+   * Fails closed unless the caller holds Fleet privileges in every space that has a policy
+   * using this output. Outputs are space-agnostic saved objects, so a caller granted Fleet
+   * access in a single space could otherwise mutate an output that policies in other spaces
+   * depend on (changing or deleting the global default redirects where those agents ship data).
+   */
   private async assertOutputCrossSpacePrivileges(
     id: string,
     request: KibanaRequest,

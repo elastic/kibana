@@ -243,6 +243,18 @@ class AppContextService {
     });
   }
 
+  /**
+   * Internal client that can read the `space` saved object type (hidden, owned by the spaces
+   * plugin), so Fleet can enumerate every space for cross-space authorization of global defaults.
+   */
+  public getInternalUserSOClientForSpaces() {
+    // soClient as kibana internal users, be careful on how you use it, security is not enabled
+    return appContextService.getSavedObjects().getUnsafeInternalClient({
+      excludedExtensions: [SPACES_EXTENSION_ID],
+      includedHiddenTypes: ['space'],
+    });
+  }
+
   public getInternalUserESClient() {
     if (!this.esClient) {
       throw new Error('Elasticsearch start service not set.');

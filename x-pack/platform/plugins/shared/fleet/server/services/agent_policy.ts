@@ -2492,37 +2492,6 @@ class AgentPolicyService {
     return { spaceIds, truncated: result.saved_objects.length < result.total };
   }
 
-  /**
-   * Returns every space that contains at least one agent policy. Used to authorize changes to the
-   * global default of a space-agnostic settings object: any policy without an explicit assignment
-   * inherits the default, so promoting a new default re-points policies across all of these spaces.
-   * Fails closed (`truncated: true`) when the result hits SO_SEARCH_LIMIT.
-   */
-  public async getAllPolicySpaceIds(): Promise<{ spaceIds: Set<string>; truncated: boolean }> {
-    const savedObjectType = await getAgentPolicySavedObjectType();
-    const result = await appContextService
-      .getInternalUserSOClientWithoutSpaceExtension()
-      .find<AgentPolicySOAttributes>({
-        type: savedObjectType,
-        fields: ['space_ids'],
-        perPage: SO_SEARCH_LIMIT,
-        namespaces: ['*'],
-      });
-    const spaceIds = new Set<string>();
-    for (const so of result.saved_objects) {
-      // A policy with no namespaces is space-agnostic (space awareness disabled): it spans every
-      // space, so map it to ALL_SPACES to force a global privilege check rather than dropping it.
-      if (!so.namespaces?.length) {
-        spaceIds.add(ALL_SPACES_ID);
-        continue;
-      }
-      for (const ns of so.namespaces) {
-        spaceIds.add(ns);
-      }
-    }
-    return { spaceIds, truncated: result.saved_objects.length < result.total };
-  }
-
   public getSpacesForPoliciesUsingOutput(outputId: string) {
     return this.getSpacesForPoliciesMatching(['data_output_id', 'monitoring_output_id'], outputId);
   }

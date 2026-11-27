@@ -46,6 +46,7 @@ import {
   assertPrivilegesInSpaces,
   assertCanManageDefaultSettings,
 } from './security/assert_privileges_in_spaces';
+import { getAllSpaceIds } from './spaces/helpers';
 import { escapeSearchQueryPhrase } from './saved_object';
 import {
   deleteFleetServerHostsSecrets,
@@ -97,20 +98,19 @@ function savedObjectToFleetServerHost(
 }
 
 /**
- * Promoting a Fleet Server host to the global default re-points agent policies that inherit the
- * default, in every space that holds a policy. Require the caller to hold Fleet privileges in all
- * of those spaces, so a caller scoped to exactly the spaces that have policies is allowed while
- * one missing a space with policies is blocked.
+ * Editing a Fleet Server host that is (or becomes) the global default re-points every agent policy
+ * that inherits the default. Every space resolves the default for enrollment, so the affected set
+ * is all spaces that currently exist; require the caller to hold Fleet privileges in each of them.
  */
 async function assertCanManageDefaultFleetServerHost(request: KibanaRequest) {
   const security = appContextService.getSecurity();
   if (!security || !security.authz.mode.useRbacForRequest(request)) {
     return;
   }
-  const { spaceIds, truncated } = await agentPolicyService.getAllPolicySpaceIds();
+  const { spaceIds, truncated } = await getAllSpaceIds();
   if (truncated) {
     throw new FleetServerHostUnauthorizedError(
-      `Unable to verify authorization to set a global default Fleet Server host: too many agent policies to enumerate`
+      `Unable to verify authorization to set a global default Fleet Server host: too many spaces to enumerate`
     );
   }
   await assertCanManageDefaultSettings(request, 'fleet server host', spaceIds);

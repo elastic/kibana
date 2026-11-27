@@ -322,7 +322,6 @@ export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceIn
     getSpacesForPoliciesUsingOutput: jest.fn(),
     getSpacesForPoliciesUsingFleetServerHost: jest.fn(),
     getSpacesForPoliciesUsingDownloadSource: jest.fn(),
-    getAllPolicySpaceIds: jest.fn().mockResolvedValue({ spaceIds: new Set(), truncated: false }),
   };
 };
 

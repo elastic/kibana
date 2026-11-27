@@ -39,6 +39,7 @@ import { downloadSourceService } from './download_source';
 import { agentPolicyService } from './agent_policy';
 import { packagePolicyService } from './package_policy';
 import { assertPrivilegesInSpaces } from './security/assert_privileges_in_spaces';
+import { getAllSpaceIds } from './spaces/helpers';
 
 /**
  * Proxies are space-agnostic and are referenced by outputs, Fleet Server hosts and download
@@ -72,7 +73,7 @@ async function assertProxyCrossSpacePrivileges(request: KibanaRequest, proxyId: 
     ...downloadSources.map((d) =>
       agentPolicyService.getSpacesForPoliciesUsingDownloadSource(d.id)
     ),
-    ...(relatedDefault ? [agentPolicyService.getAllPolicySpaceIds()] : []),
+    ...(relatedDefault ? [getAllSpaceIds()] : []),
   ]);
   if (results.some((r) => r.truncated)) {
     throw new FleetProxyUnauthorizedError(

@@ -8,7 +8,7 @@
 import type { SavedObject } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
-import { ALL_SPACES_ID } from '../../../common/constants';
+import { ALL_SPACES_ID, SO_SEARCH_LIMIT } from '../../../common/constants';
 
 import { appContextService } from '../app_context';
 import {
@@ -85,4 +85,30 @@ export function getValidSpaceId(spacedIds?: string[]) {
   const space = spacedIds?.[0];
 
   return space && space !== ALL_SPACES_ID ? space : DEFAULT_SPACE_ID;
+}
+
+/**
+ * Returns the ids of every space that currently exists. Used to authorize changes to a global
+ * default of a space-agnostic settings object: every space (even one with no agent policies) has
+ * enrollment settings that resolve the default Fleet Server host and download source, so a global
+ * default change affects all of them. The caller must hold Fleet privileges in each.
+ *
+ * When space awareness is disabled there is a single global scope, represented by `*`, which
+ * forces a global privilege check. Fails closed (`truncated: true`) if the listing is capped.
+ */
+export async function getAllSpaceIds(): Promise<{ spaceIds: Set<string>; truncated: boolean }> {
+  if (!(await isSpaceAwarenessEnabled())) {
+    return { spaceIds: new Set([ALL_SPACES_ID]), truncated: false };
+  }
+  const soClient = appContextService.getInternalUserSOClientForSpaces();
+  const result = await soClient.find<unknown>({
+    type: 'space',
+    fields: [],
+    perPage: SO_SEARCH_LIMIT,
+  });
+  const spaceIds = new Set<string>();
+  for (const so of result.saved_objects) {
+    spaceIds.add(so.id);
+  }
+  return { spaceIds, truncated: result.saved_objects.length < result.total };
 }

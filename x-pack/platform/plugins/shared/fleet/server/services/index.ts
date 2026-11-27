@@ -30,7 +30,6 @@ export interface AgentPolicyServiceInterface {
   getSpacesForPoliciesUsingOutput: (typeof agentPolicyService)['getSpacesForPoliciesUsingOutput'];
   getSpacesForPoliciesUsingFleetServerHost: (typeof agentPolicyService)['getSpacesForPoliciesUsingFleetServerHost'];
   getSpacesForPoliciesUsingDownloadSource: (typeof agentPolicyService)['getSpacesForPoliciesUsingDownloadSource'];
-  getAllPolicySpaceIds: (typeof agentPolicyService)['getAllPolicySpaceIds'];
 }
 
 // Agent services
