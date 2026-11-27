@@ -121,6 +121,10 @@ export function startTrackingDashboardLoadTelemetry(
           panelCount,
           totalLoadTime: completeLoadDuration,
           loadType,
+          // Only the load that opens the dashboard replays; later loads in the session fetch.
+          isReplayedLoad:
+            loadType !== 'dashboardSubsequentLoad' &&
+            dashboard.replayCacheLastFetched$.value !== undefined,
           children: Object.values(dashboard.children$.getValue()),
         });
       }
@@ -141,12 +145,14 @@ function reportPerformanceMetrics({
   panelCount,
   totalLoadTime,
   loadType,
+  isReplayedLoad,
   children,
 }: {
   timeToData: number;
   panelCount: number;
   totalLoadTime: number;
   loadType: DashboardLoadType;
+  isReplayedLoad: boolean;
   children: unknown[];
 }) {
   const duration =
@@ -179,6 +185,7 @@ function reportPerformanceMetrics({
     value9: meanPanelRenderComplete,
     meta: {
       approximationApplied: getApproximationApplied(children),
+      ...(isReplayedLoad ? { isReplayedLoad: true } : {}),
     },
   };
 

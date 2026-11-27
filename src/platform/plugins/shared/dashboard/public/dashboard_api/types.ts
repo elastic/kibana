@@ -208,6 +208,7 @@ export type DashboardApi = CanExpandPanels &
     anyStateChange$: Observable<void>;
     asyncResetToLastSavedState: () => Promise<void>;
     canCancel$: PublishingSubject<boolean>;
+    replayCacheLastFetched$: PublishingSubject<string | undefined>;
     cancelAllRequests: () => void;
     fullScreenMode$: PublishingSubject<boolean>;
     focusedPanelId$: PublishingSubject<string | undefined>;

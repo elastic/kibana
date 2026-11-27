@@ -8,6 +8,12 @@
  */
 
 import { Subject } from 'rxjs';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import {
+  DEFAULT_ESQL_OPTIONS_LIST_STATE,
+  DEFAULT_PINNED_CONTROL_STATE,
+  ESQL_CONTROL,
+} from '@kbn/controls-constants';
 import type { DashboardChangeSource } from '../../../common/change_sources';
 import { DEFAULT_DASHBOARD_STATE } from '../../../common/default_dashboard_state';
 import { embeddableService } from '../../services/kibana_services';
@@ -44,6 +50,23 @@ jest.mock('../../dashboard_client', () => {
 });
 
 const lastSavedQuery = { expression: 'memory:>220000', language: 'kql' as const };
+const restoredFilters: NonNullable<DashboardState['filters']> = [
+  { type: 'condition', condition: { field: 'response', operator: 'is', value: '404' } },
+  { type: 'condition', condition: { field: 'extension', operator: 'is', value: 'css' } },
+];
+const restoredPinnedPanel = {
+  ...DEFAULT_PINNED_CONTROL_STATE,
+  id: 'control',
+  type: ESQL_CONTROL,
+  config: {
+    ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
+    control_type: 'STATIC_VALUES',
+    available_options: ['US', 'IT'],
+    variable_name: 'country',
+    variable_type: 'values',
+    selected_options: ['US'],
+  },
+} satisfies DashboardState['pinned_panels'][number];
 let backupState: DashboardBackupState;
 
 describe('loadDashboardApi', () => {
@@ -90,6 +113,7 @@ describe('loadDashboardApi', () => {
       expect(getDashboardApiMock).toHaveBeenCalled();
       // @ts-ignore
       expect(getDashboardApiMock.mock.calls[0][0].initialState).toEqual(DEFAULT_DASHBOARD_STATE);
+      expect(getDashboardApiMock.mock.calls[0][0].skipReplay).toBe(false);
     });
 
     test('should overwrite saved object state with unsaved state', async () => {
@@ -125,6 +149,61 @@ describe('loadDashboardApi', () => {
         ...DEFAULT_DASHBOARD_STATE,
         query: queryFromUrl,
       });
+      expect(getDashboardApiMock.mock.calls[0][0].skipReplay).toBe(true);
+    });
+
+    test.each<{ name: string; overrides: Partial<DashboardState>; skipReplay: boolean }>([
+      { name: 'unchanged query', overrides: { query: lastSavedQuery }, skipReplay: false },
+      {
+        name: 'reordered and duplicated filters',
+        overrides: { filters: [restoredFilters[1], restoredFilters[0], restoredFilters[0]] },
+        skipReplay: false,
+      },
+      {
+        name: 'changed filter',
+        overrides: {
+          filters: [
+            restoredFilters[0],
+            { type: 'condition', condition: { field: 'extension', operator: 'is', value: 'html' } },
+          ],
+        },
+        skipReplay: true,
+      },
+      { name: 'cleared filters', overrides: { filters: [] }, skipReplay: true },
+      {
+        name: 'unchanged pinned panels',
+        overrides: { pinned_panels: [{ ...restoredPinnedPanel }] },
+        skipReplay: false,
+      },
+      {
+        name: 'changed control selection',
+        overrides: {
+          pinned_panels: [
+            {
+              ...restoredPinnedPanel,
+              config: { ...restoredPinnedPanel.config, selected_options: ['IT'] },
+            },
+          ],
+        },
+        skipReplay: true,
+      },
+      { name: 'removed pinned panels', overrides: { pinned_panels: [] }, skipReplay: true },
+    ])('handles navigation with $name', async ({ overrides, skipReplay }) => {
+      backupState = {
+        query: lastSavedQuery,
+        filters: restoredFilters,
+        pinned_panels: [restoredPinnedPanel],
+      };
+
+      await loadDashboardApi({
+        getCreationOptions: async () => ({
+          useSessionStorageIntegration: true,
+          getInitialInput: () => overrides,
+        }),
+        savedObjectId: '12345',
+      });
+
+      expect(getDashboardApiMock.mock.calls[0][0].skipReplay).toBe(skipReplay);
     });
   });
 

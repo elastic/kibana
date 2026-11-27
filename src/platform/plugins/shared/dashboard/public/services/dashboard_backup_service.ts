@@ -14,11 +14,16 @@ import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import { isEqual } from 'lodash';
 import { firstValueFrom } from 'rxjs';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import { dataService } from './kibana_services';
 import type { DashboardChangeSource } from '../../common/change_sources';
 
 export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
 const DASHBOARD_VIEWMODE_LOCAL_KEY = 'dashboardViewMode';
 const DASHBOARD_STATE_SESSION_KEY = 'dashboardStateManagerPanels';
+
+/** Identifies a dashboard, or the unsaved draft, in the client-side replay cache. */
+export const getReplayCacheAssetId = (dashboardId = DASHBOARD_PANELS_UNSAVED_ID) =>
+  `dashboard:${dashboardId}`;
 
 export type DashboardBackupState = Partial<DashboardState> & {
   viewMode?: ViewMode;
@@ -81,6 +86,7 @@ export const createDashboardBackupService = async (
       warnOnErrors(() => localStore.set(DASHBOARD_VIEWMODE_LOCAL_KEY, viewMode));
     },
     clearState: (dashboardId = DASHBOARD_PANELS_UNSAVED_ID) => {
+      dataService.replayCache.delete(getReplayCacheAssetId(dashboardId));
       warnOnErrors(() => {
         const allSpaces = sessionStore.get(DASHBOARD_STATE_SESSION_KEY) ?? {};
         const dashboards = getUnsavedDashboardChanges();

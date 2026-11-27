@@ -62,6 +62,7 @@ export function getSessionServiceMock(
     save: jest.fn(),
     isCurrentSession: jest.fn(),
     hasSession: jest.fn().mockReturnValue(false),
+    resolveTimeRange: jest.fn((timeRange) => timeRange),
     getSearchOptions: jest.fn(),
     enableStorage: jest.fn(),
     isSessionStorageReady: jest.fn(() => true),

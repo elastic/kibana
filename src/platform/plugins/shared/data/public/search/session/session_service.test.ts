@@ -104,6 +104,15 @@ describe('Session service', () => {
       expect(nowProvider.reset).toHaveBeenCalled();
     });
 
+    it('Resolves relative time ranges with the session reference time', () => {
+      nowProvider.get.mockReturnValue(new Date('2026-11-01T12:00:00.000Z'));
+
+      expect(sessionService.resolveTimeRange({ from: 'now-15m', to: 'now' })).toEqual({
+        from: '2026-11-01T11:45:00.000Z',
+        to: '2026-11-01T12:00:00.000Z',
+      });
+    });
+
     it("Can't clear other apps' session", async () => {
       sessionService.start();
       expect(sessionService.getSessionId()).not.toBeUndefined();

@@ -14,10 +14,18 @@ import type { DataRequest } from '../../util/data_request';
 const mockSearch = jest.fn();
 const mockGetESQLQueryColumnsRaw = jest.fn();
 const mockGetLimitFromESQLQuery = jest.fn().mockReturnValue(10000);
+const mockResolvedTimeRange = {
+  from: '2026-11-01T11:45:00.000Z',
+  to: '2026-11-01T12:00:00.000Z',
+};
+const mockResolveTimeRange = jest.fn().mockReturnValue(mockResolvedTimeRange);
 
 jest.mock('../../../kibana_services', () => ({
   getData: () => ({
-    search: { search: (...args: any[]) => mockSearch(...args) },
+    search: {
+      search: (...args: any[]) => mockSearch(...args),
+      session: { resolveTimeRange: (...args: any[]) => mockResolveTimeRange(...args) },
+    },
     query: {
       timefilter: {
         timefilter: { getAbsoluteTime: () => ({ from: 'now-15m', to: 'now' }) },
@@ -216,6 +224,26 @@ describe('getGeoJsonWithMeta', () => {
       resolution: GRID_RESOLUTION.FINE,
     });
     expect(mockSearch.mock.calls[0][0].params.params).toEqual([{ geotile: 9 }]);
+  });
+
+  test('should resolve the time range with the search session reference time', async () => {
+    mockSearch.mockReturnValue(of({ rawResponse: makeEsqlResponse(1), requestParams: {} }));
+
+    await createSource().getGeoJsonWithMeta(
+      'test',
+      requestMeta as any,
+      jest.fn(),
+      jest.fn(),
+      makeInspectorAdapters() as any
+    );
+
+    expect(mockResolveTimeRange).toHaveBeenCalledWith(requestMeta.timeFilters);
+    expect(mockGetNamedParams).toHaveBeenCalledWith(
+      ESQL,
+      mockResolvedTimeRange,
+      undefined,
+      expect.anything()
+    );
   });
 });
 

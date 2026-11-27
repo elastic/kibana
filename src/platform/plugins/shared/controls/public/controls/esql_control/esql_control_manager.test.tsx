@@ -11,6 +11,7 @@ import { waitFor } from '@testing-library/react';
 import { EsqlControlType, ESQLVariableType } from '@kbn/esql-types';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { DEFAULT_ESQL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
+import { dataService } from '../../services/kibana_services';
 import { initializeESQLControlManager } from './esql_control_manager';
 import { BehaviorSubject } from 'rxjs';
 
@@ -45,6 +46,53 @@ describe('initializeESQLControlManager', () => {
   const dashboardApi = {};
 
   describe('values from query', () => {
+    test('uses the session reference time and fetches again on Refresh', async () => {
+      const resolvedTimeRange = {
+        from: '2026-11-01T11:00:00.000Z',
+        to: '2026-11-01T12:00:00.000Z',
+      };
+      jest
+        .mocked(dataService.search.session.resolveTimeRange)
+        .mockReturnValueOnce(resolvedTimeRange);
+      mockFetch$.next({
+        timeRange: { from: 'now-1h', to: 'now' },
+        searchSessionId: 'cached-session',
+      });
+      getMock().mockClear();
+      const manager = initializeESQLControlManager(
+        uuid,
+        dashboardApi,
+        {
+          ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
+          control_type: EsqlControlType.VALUES_FROM_QUERY,
+          variable_name: 'variable1',
+          variable_type: ESQLVariableType.VALUES,
+          esql_query: 'FROM foo | WHERE @timestamp >= ?_tstart | KEEP field',
+        },
+        jest.fn()
+      );
+
+      await waitFor(() => expect(getMock()).toHaveBeenCalledTimes(1));
+      expect(dataService.search.session.resolveTimeRange).toHaveBeenCalledWith({
+        from: 'now-1h',
+        to: 'now',
+      });
+      expect(getMock()).toHaveBeenLastCalledWith(
+        expect.objectContaining({ sessionId: 'cached-session', timeRange: resolvedTimeRange })
+      );
+      mockFetch$.next({
+        timeRange: { from: 'now-1h', to: 'now' },
+        searchSessionId: 'refreshed-session',
+        isReload: true,
+      });
+      await waitFor(() => expect(getMock()).toHaveBeenCalledTimes(2));
+      expect(getMock()).toHaveBeenLastCalledWith(
+        expect.objectContaining({ sessionId: 'refreshed-session' })
+      );
+      manager.cleanup();
+      mockFetch$.next({});
+    });
+
     test('should load availableOptions but not serialize them', async () => {
       const initialState = {
         ...DEFAULT_ESQL_OPTIONS_LIST_STATE,

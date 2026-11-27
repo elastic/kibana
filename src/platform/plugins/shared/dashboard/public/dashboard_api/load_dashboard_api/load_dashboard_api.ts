@@ -24,6 +24,7 @@ import { logger } from '../../services/logger';
 import { getDashboardUserActivityService } from '../../services/user_activity_service';
 import { parseChangeSources } from '../../../common/change_sources';
 import { getDashboardApi } from '../get_dashboard_api';
+import { haveSearchOverridesChanged } from '../search_sessions/have_search_overrides_changed';
 import { DASHBOARD_DURATION_START_MARK } from '../telemetry/dashboard_duration_start_mark';
 import { startTrackingDashboardLoadTelemetry } from '../telemetry/dashboard_load_telemetry';
 import type { DashboardCreationOptions } from '../types';
@@ -105,6 +106,10 @@ export async function loadDashboardApi({
 
   const { api, cleanup, internalApi } = getDashboardApi({
     creationOptions,
+    skipReplay: haveSearchOverridesChanged(
+      { ...getLastSavedState(readResult), ...unsavedChanges },
+      overrideState
+    ),
     panelFlyoutType,
     incomingEmbeddables,
     initialState,

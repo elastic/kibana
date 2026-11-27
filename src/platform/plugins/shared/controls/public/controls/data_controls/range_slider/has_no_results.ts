@@ -9,7 +9,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { FilterableSource } from '@kbn/data-source';
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { FetchContext } from '@kbn/presentation-publishing';
@@ -78,6 +78,8 @@ export function hasNoResults$({
                 query: controlFetchContext.query,
                 timeRange,
                 filters,
+                searchSessionId: controlFetchContext.searchSessionId,
+                projectRouting: controlFetchContext.projectRouting,
               })
             : await hasNoDslResults({
                 abortSignal: abortController.signal,
@@ -88,6 +90,8 @@ export function hasNoResults$({
                   : controlFetchContext.query,
                 timeRange,
                 filters,
+                searchSessionId: controlFetchContext.searchSessionId,
+                projectRouting: controlFetchContext.projectRouting,
               });
         } catch (error) {
           // Ignore error, validation is not required for control to function properly
@@ -120,6 +124,8 @@ export async function hasNoEsqlResults({
   query,
   rangeFilter,
   timeRange,
+  searchSessionId,
+  projectRouting,
 }: {
   abortSignal: AbortSignal;
   dataSource: FilterableSource;
@@ -129,6 +135,8 @@ export async function hasNoEsqlResults({
   query?: Query | AggregateQuery;
   rangeFilter: Filter;
   timeRange?: TimeRange;
+  searchSessionId?: string;
+  projectRouting?: ProjectRouting;
 }): Promise<boolean> {
   // An ES|QL control without a query yet has nothing to validate
   if (!esqlQuery) return false;
@@ -136,7 +144,9 @@ export async function hasNoEsqlResults({
   // The values of the query that are in the range: there are none when the range has no results
   const result = await getESQLSingleColumnValues({
     query: `${esqlQuery}\n| LIMIT 1`,
-    timeRange,
+    timeRange: timeRange && dataService.search.session.resolveTimeRange(timeRange),
+    sessionId: searchSessionId,
+    projectRouting,
     filter: buildESQLPreFilter({
       fetchContext: { query, filters: [...(filters ?? []), rangeFilter] },
       useGlobalFilters: true,
@@ -162,6 +172,8 @@ export async function hasNoDslResults({
   query,
   rangeFilter,
   timeRange,
+  searchSessionId,
+  projectRouting,
 }: {
   abortSignal: AbortSignal;
   dataSource: FilterableSource;
@@ -169,6 +181,8 @@ export async function hasNoDslResults({
   query?: Query;
   rangeFilter: Filter;
   timeRange?: TimeRange;
+  searchSessionId?: string;
+  projectRouting?: ProjectRouting;
 }): Promise<boolean> {
   const dataView = await dataViewsService.get(dataSource.id ?? '');
 
@@ -194,10 +208,13 @@ export async function hasNoDslResults({
     searchSource.setField('query', query);
   }
 
+  // Pass projectRouting so switching projects doesn't reuse the previous project's cached results.
   const resp = await lastValueFrom(
     searchSource.fetch$({
       abortSignal,
       legacyHitsTotal: false,
+      sessionId: searchSessionId,
+      projectRouting,
     })
   );
   const count = (resp?.rawResponse?.hits?.total as estypes.SearchTotalHits)?.value ?? 0;

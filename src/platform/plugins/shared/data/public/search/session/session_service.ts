@@ -35,7 +35,9 @@ import type { IKibanaSearchResponse, ISearchOptions } from '@kbn/search-types';
 import { LRUCache } from 'lru-cache';
 import type { Logger } from '@kbn/logging';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
 import type { ConfigSchema } from '../../../server/config';
+import { getAbsoluteTimeRange } from '../../../common';
 import type { SessionMeta, SessionStateContainer } from './search_session_state';
 import {
   createSessionStateContainer,
@@ -690,6 +692,14 @@ export class SessionService {
   /** Checks whether the session is current or has an unexpired snapshot available to continue. */
   public hasSession(sessionId: string): boolean {
     return this.isCurrentSession(sessionId) || this.sessionSnapshots.has(sessionId);
+  }
+
+  /**
+   * Converts the relative dates of the given time range (e.g. `now-15m`) to absolute dates, using
+   * the search session reference time, so a continued or restored session rebuilds identical requests.
+   */
+  public resolveTimeRange(timeRange: TimeRange): TimeRange {
+    return getAbsoluteTimeRange(timeRange, { forceNow: this.nowProvider.get() });
   }
 
   /**

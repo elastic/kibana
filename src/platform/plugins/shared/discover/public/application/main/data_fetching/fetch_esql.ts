@@ -90,7 +90,9 @@ export async function fetchEsql({
         timeZone: dateFormatTZ ? getTimeZoneFromSettings(dateFormatTZ) : 'UTC',
         locale: i18n.getLocale(),
         kibanaQueryContext: {
-          timeRange: timeRange ?? data.query.timefilter.timefilter.getAbsoluteTime(),
+          timeRange: timeRange
+            ? data.search.session.resolveTimeRange(timeRange)
+            : data.query.timefilter.timefilter.getAbsoluteTime(),
           timeField: esqlSource?.timeFieldName,
           kibanaFilters: filters,
           kqlQuery: inputQuery,

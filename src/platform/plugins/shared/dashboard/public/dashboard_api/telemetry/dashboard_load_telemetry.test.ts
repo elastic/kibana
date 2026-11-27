@@ -275,6 +275,34 @@ describe('startTrackingDashboardLoadTelemetry', () => {
     );
   });
 
+  it('reports isReplayedLoad only for the load that replays a cached session', async () => {
+    const children = {
+      panel1: {
+        phase$: new BehaviorSubject<PhaseEvent>({ status: 'loading', id: '', timeToEvent: 0 }),
+      },
+    };
+    const { dashboard, performanceState } = mockDashboard(children);
+    const replayCacheLastFetched$ = new BehaviorSubject<string | undefined>('2026-11-26T10:00:00Z');
+
+    startTrackingDashboardLoadTelemetry(
+      { ...dashboard, replayCacheLastFetched$ },
+      performanceState
+    );
+    setChildrenStatus(children, 'rendered');
+
+    expect(mockMetricEvent).toHaveBeenLastCalledWith(
+      expect.objectContaining({ meta: { approximationApplied: false, isReplayedLoad: true } })
+    );
+
+    // A later fetch in the same session, such as a new control selection, is not a replay.
+    setChildrenStatus(children, 'loading');
+    setChildrenStatus(children, 'rendered');
+
+    expect(mockMetricEvent).toHaveBeenLastCalledWith(
+      expect.objectContaining({ value4: 2, meta: { approximationApplied: false } })
+    );
+  });
+
   it('ensures the duration is at least as long as the time to data', async () => {
     // start an empty Dashboard. This will set the creation end time to some short value
     const { dashboard, children$, performanceState } = mockDashboard();

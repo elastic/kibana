@@ -9,7 +9,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { FilterableField, FilterableSource } from '@kbn/data-source';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type {
   FetchContext,
@@ -86,6 +86,8 @@ export function minMax$({
                 fetchContext: controlFetchContext,
                 useGlobalFilters,
                 timeRange,
+                searchSessionId: controlFetchContext.searchSessionId,
+                projectRouting: controlFetchContext.projectRouting,
               })
             : await getDslMinMax({
                 abortSignal: abortController.signal,
@@ -96,6 +98,8 @@ export function minMax$({
                   : controlFetchContext.query,
                 timeRange,
                 filters: getFetchContextFilters(controlFetchContext, useGlobalFilters),
+                searchSessionId: controlFetchContext.searchSessionId,
+                projectRouting: controlFetchContext.projectRouting,
               });
         } catch (error) {
           return { error, max: undefined, min: undefined };
@@ -125,6 +129,8 @@ export async function getEsqlMinMax({
   fetchContext,
   useGlobalFilters,
   timeRange,
+  searchSessionId,
+  projectRouting,
 }: {
   abortSignal: AbortSignal;
   esqlQuery?: string;
@@ -132,13 +138,17 @@ export async function getEsqlMinMax({
   fetchContext: FetchContext;
   useGlobalFilters: boolean | undefined;
   timeRange?: TimeRange;
+  searchSessionId?: string;
+  projectRouting?: ProjectRouting;
 }): Promise<{ min: number | undefined; max: number | undefined }> {
   // An ES|QL control without a query yet has no values to fetch
   if (!esqlQuery) return { min: undefined, max: undefined };
 
   const result = await getESQLSingleColumnValues({
     query: esqlQuery,
-    timeRange,
+    timeRange: timeRange && dataService.search.session.resolveTimeRange(timeRange),
+    sessionId: searchSessionId,
+    projectRouting,
     // Pre-filter the ES|QL pipeline by the dashboard's fetch context, so it mirrors how
     // field-based controls inherit the filter bar.
     filter: buildESQLPreFilter({
@@ -169,6 +179,8 @@ export async function getDslMinMax({
   filters,
   query,
   timeRange,
+  searchSessionId,
+  projectRouting,
 }: {
   abortSignal: AbortSignal;
   dataSource: FilterableSource;
@@ -176,6 +188,8 @@ export async function getDslMinMax({
   filters?: Filter[];
   query?: Query;
   timeRange?: TimeRange;
+  searchSessionId?: string;
+  projectRouting?: ProjectRouting;
 }): Promise<{ min: number | undefined; max: number | undefined }> {
   const dataView = await dataViewsService.get(dataSource.id ?? '');
 
@@ -216,7 +230,10 @@ export async function getDslMinMax({
   };
   searchSource.setField('aggs', aggs);
 
-  const resp = await lastValueFrom(searchSource.fetch$({ abortSignal }));
+  // Pass projectRouting so switching projects doesn't reuse the previous project's cached results.
+  const resp = await lastValueFrom(
+    searchSource.fetch$({ abortSignal, sessionId: searchSessionId, projectRouting })
+  );
   return {
     min:
       (resp.rawResponse?.aggregations?.minAgg as estypes.AggregationsSingleMetricAggregateBase)

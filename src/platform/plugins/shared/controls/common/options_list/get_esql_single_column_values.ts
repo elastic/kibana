@@ -54,6 +54,7 @@ interface GetESQLSingleColumnValuesParams {
   /** From UI settings `dateFormat:tz` on either client or server. */
   timezone?: string;
   projectRouting?: string;
+  sessionId?: string;
 }
 export const getESQLSingleColumnValues = async ({
   query,
@@ -64,6 +65,7 @@ export const getESQLSingleColumnValues = async ({
   esqlVariables,
   timezone,
   projectRouting,
+  sessionId,
 }: GetESQLSingleColumnValuesParams): Promise<
   GetESQLSingleColumnValuesSuccess | GetESQLSingleColumnValuesFailure
 > => {
@@ -77,7 +79,7 @@ export const getESQLSingleColumnValues = async ({
         projectRouting,
         kibanaQueryContext: { timeRange, esqlVariables },
       },
-      { abortSignal: signal }
+      { abortSignal: signal, sessionId }
     );
     const columns = response.columns;
     const allColumns = response.all_columns;
