@@ -10,7 +10,10 @@ import type { Conversation } from '@kbn/agent-builder-common';
 import type { BrowserChatEvent } from './events';
 
 export interface ActiveConversation {
-  /** Agent selection, preserving an implicit default for embedded conversations. */
+  /**
+   * Agent selected for the chat surface, undefined for an embedded chat using the default agent.
+   * Not necessarily the agent of the bound conversation: use `conversation.agent_id` for that.
+   */
   agentId?: string;
   /** Session tag of the embedded chat that published this binding; the full-page chat has none. */
   sessionTag?: string;

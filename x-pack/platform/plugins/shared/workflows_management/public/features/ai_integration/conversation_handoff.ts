@@ -29,25 +29,31 @@ export const setLastCreateSessionId = (sessionId: string | undefined): void => {
   lastCreateSessionId = sessionId;
 };
 
-// Agent the `/workflows/create` chat has selected. Its conversation is stored under
-// that agent's key, so the saved workflow's chat has to use the same agent to find it.
-let lastCreateAgentId: string | undefined;
+/** Chat state of the `/workflows/create` editor that the saved workflow's chat continues. */
+export interface CreateChatState {
+  /** Its conversation is stored under this agent's key, so the saved chat must use it too. */
+  agentId?: string;
+  /** The chat was switched to a new conversation, so the stored one must not be restored. */
+  newConversation: boolean;
+}
 
-export const setLastCreateAgentId = (agentId: string | undefined): void => {
-  lastCreateAgentId = agentId;
+let lastCreateChat: CreateChatState | undefined;
+
+export const setLastCreateChat = (chat: CreateChatState | undefined): void => {
+  lastCreateChat = chat;
 };
 
-let carriedAgent: { workflowId: string; agentId: string } | undefined;
+let carriedChat: (CreateChatState & { workflowId: string }) | undefined;
 
 /**
- * Single-shot: the agent `carryConversationToWorkflow` handed over to the chat of
- * `workflowId`, if the create-route chat had one selected.
+ * Single-shot: the chat state `carryConversationToWorkflow` handed over to the chat of
+ * `workflowId`, if the create-route chat had an agent selected or a new conversation pending.
  */
-export const takeCarriedAgentFor = (workflowId: string): string | undefined => {
-  if (carriedAgent?.workflowId !== workflowId) return undefined;
-  const { agentId } = carriedAgent;
-  carriedAgent = undefined;
-  return agentId;
+export const takeCarriedChatFor = (workflowId: string): CreateChatState | undefined => {
+  if (carriedChat?.workflowId !== workflowId) return undefined;
+  const { agentId, newConversation } = carriedChat;
+  carriedChat = undefined;
+  return { agentId, newConversation };
 };
 
 let sidebarOpen = false;
@@ -90,18 +96,21 @@ export const hasPersistedConversation = (sessionId: string): boolean => {
 /**
  * Rewrite persisted conversation-id localStorage entries from the create
  * session's tag onto `savedWorkflowId`'s tag. Iterates a prefix because keys
- * include a trailing agentId we don't know here; the agent the create chat had
- * selected is kept for `takeCarriedAgentFor`. No-op if no create session was
+ * include a trailing agentId we don't know here; the agent and new-chat intent of the
+ * create chat are kept for `takeCarriedChatFor`. No-op if no create session was
  * tracked or `localStorage` is unavailable.
  */
 export const carryConversationToWorkflow = (savedWorkflowId: string): void => {
   const from = lastCreateSessionId;
   lastCreateSessionId = undefined;
-  const agentId = lastCreateAgentId;
-  lastCreateAgentId = undefined;
+  const chat = lastCreateChat;
+  lastCreateChat = undefined;
 
   if (!from || from === savedWorkflowId) return;
-  carriedAgent = agentId ? { workflowId: savedWorkflowId, agentId } : undefined;
+  carriedChat =
+    chat && (chat.agentId || chat.newConversation)
+      ? { ...chat, workflowId: savedWorkflowId }
+      : undefined;
   if (typeof window === 'undefined' || !window.localStorage) return;
 
   const fromTag = getWorkflowEditorSessionTag(from);

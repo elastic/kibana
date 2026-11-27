@@ -30,10 +30,10 @@ import {
   isWorkflowEditorSessionTag,
   ProposalManager,
   setActiveProposalManager,
-  setLastCreateAgentId,
+  setLastCreateChat,
   setLastCreateSessionId,
   setSidebarOpen,
-  takeCarriedAgentFor,
+  takeCarriedChatFor,
   WORKFLOW_EDITOR_ATTACHMENT_ID,
 } from '../../../../features/ai_integration';
 import { ProposalTracker } from '../../../../features/ai_integration/proposal_tracker';
@@ -128,6 +128,8 @@ export const useAgentBuilderIntegration = ({
   const hasSeenAgentRef = useRef(false);
   const selectedAgentIdRef = useRef<string | undefined>(undefined);
   const newAgentConversationRef = useRef<true | undefined>(undefined);
+  // Set while the chat may not have used what `openAgentChat` opened it with, such as a prompt.
+  const openOptionsPendingRef = useRef(false);
   // Whether the config the sidebar reopens with still asks for a new conversation.
   const savedNewConversationRef = useRef(false);
   const syncAttachmentIdRef = useRef<string | undefined>(undefined);
@@ -193,10 +195,12 @@ export const useAgentBuilderIntegration = ({
     }
 
     // The first save remounts the editor. The chat it carried over stays under the agent
-    // the create route had selected, so keep using that agent to find it.
+    // the create route had selected, so keep using that agent to find it, and a chat that was
+    // switched to a new conversation stays new.
     if (workflowId && !hasSeenAgentRef.current) {
-      const carriedAgentId = takeCarriedAgentFor(workflowId);
-      if (carriedAgentId) selectedAgentIdRef.current = carriedAgentId;
+      const carriedChat = takeCarriedChatFor(workflowId);
+      if (carriedChat?.agentId) selectedAgentIdRef.current = carriedChat.agentId;
+      if (carriedChat?.newConversation) newAgentConversationRef.current = true;
     }
 
     const tracker = new ProposalTracker();
@@ -280,10 +284,8 @@ export const useAgentBuilderIntegration = ({
     // `carryConversationToWorkflow` in the save thunk. Clearing here on
     // workflowId presence would race that consume after setWorkflow re-fires
     // this effect.
-    if (!workflowId) {
-      setLastCreateSessionId(sessionId);
-      setLastCreateAgentId(selectedAgentIdRef.current);
-    }
+    if (!workflowId) setLastCreateSessionId(sessionId);
+    rememberCreateChat(workflowId, selectedAgentIdRef.current, newAgentConversationRef.current);
 
     const bridge = new AttachmentBridge();
     bridge.start(manager, editorRef, tracker, {
@@ -339,9 +341,13 @@ export const useAgentBuilderIntegration = ({
       }
     });
 
+    // Whether the config the sidebar reopens with lags behind the editor.
+    let isSavedConfigStale = false;
+
     // Sets what the sidebar reopens with. An open sidebar takes it as its props, replacing
     // whatever it was opened with.
     const publishChatConfig = (attachments?: ConversationAttachment[]) => {
+      isSavedConfigStale = false;
       savedNewConversationRef.current = newAgentConversationRef.current === true;
       agentBuilder.setChatConfig({
         agentId: selectedAgentIdRef.current,
@@ -367,23 +373,48 @@ export const useAgentBuilderIntegration = ({
       if (!attachmentTargetResolvedRef.current) return;
       if (isOtherChatBound) {
         syncDeferred = true;
+        isSavedConfigStale = true;
         return;
       }
       syncDeferred = false;
       const attachment = buildAttachment(yaml);
-      // A chat that has only just mounted may not have used its open options yet, such as the
-      // prompt "Fix with AI" prefills, and publishing the config would replace them.
-      if (!keepOpenOptions) publishChatConfig([attachment]);
+      // A chat may not have used its open options yet, such as the prompt "Fix with AI"
+      // prefills, and publishing the config would replace them. It is published once the chat
+      // is gone instead.
+      if (keepOpenOptions) {
+        isSavedConfigStale = true;
+      } else {
+        publishChatConfig([attachment]);
+      }
       agentBuilder.addAttachment(attachment);
     };
     syncAttachmentRef.current = syncAttachment;
 
     // Brings the attachment of the editor chat up to date with edits made while another chat
-    // held the sidebar. The chat may have just mounted, so its open options stay as they are.
-    const runDeferredSync = () => {
+    // held the sidebar.
+    const runDeferredSync = (keepOpenOptions: boolean) => {
       if (!syncDeferred) return;
       const yaml = editor.getModel()?.getValue();
-      if (yaml !== undefined) syncAttachment(yaml, { keepOpenOptions: true });
+      if (yaml !== undefined) syncAttachment(yaml, { keepOpenOptions });
+    };
+
+    // Catches the reopen config up once no chat is bound. Waits a tick, because a chat that
+    // remounts (React StrictMode) binds again right away and may still need its open options.
+    let staleConfigTimer: ReturnType<typeof setTimeout> | undefined;
+    const publishStaleConfig = () => {
+      staleConfigTimer = undefined;
+      if (!isSavedConfigStale) return;
+      const yaml = editor.getModel()?.getValue();
+      if (yaml !== undefined) syncAttachment(yaml);
+    };
+    const schedulePublishStaleConfig = () => {
+      if (isSavedConfigStale && !staleConfigTimer) {
+        staleConfigTimer = setTimeout(publishStaleConfig);
+      }
+    };
+    const cancelPublishStaleConfig = () => {
+      clearTimeout(staleConfigTimer);
+      staleConfigTimer = undefined;
     };
 
     // The sidebar restores this session's last conversation, which may already
@@ -397,7 +428,6 @@ export const useAgentBuilderIntegration = ({
       const agentChanged = hasSeenAgentRef.current && agentId !== selectedAgentIdRef.current;
       hasSeenAgentRef.current = true;
       selectedAgentIdRef.current = agentId;
-      if (!workflowId) setLastCreateAgentId(agentId);
       return agentChanged;
     };
 
@@ -427,6 +457,15 @@ export const useAgentBuilderIntegration = ({
     // conversation is created before its id is bound, so this covers new and resumed
     // conversations alike.
     let isChatJustMounted = true;
+    // Whether the editor chat that binds now may not have used its open options yet. A chat that
+    // has just mounted has not, nor has one that `openAgentChat` re-propped without a remount.
+    const takeOpenOptionsPending = (sessionTag: string | undefined): boolean => {
+      const isOwnChat = sessionTag === chatSessionTag;
+      const isPending = isOwnChat && (isChatJustMounted || openOptionsPendingRef.current);
+      isChatJustMounted = false;
+      if (isOwnChat) openOptionsPendingRef.current = false;
+      return isPending;
+    };
     const activeConversationSub = agentBuilder.events.ui.activeConversation$.subscribe(
       (activeConversation) => {
         // `null` means no chat surface is bound, which says nothing about the
@@ -434,8 +473,10 @@ export const useAgentBuilderIntegration = ({
         if (!activeConversation) {
           isChatJustMounted = true;
           isOtherChatBound = false;
+          schedulePublishStaleConfig();
           return;
         }
+        cancelPublishStaleConfig();
         // Other chat surfaces, such as "Diagnose with AI", publish here too. Syncing the
         // editor into them would replace their session tag, prompt and attachments.
         const { sessionTag } = activeConversation;
@@ -444,8 +485,7 @@ export const useAgentBuilderIntegration = ({
           return;
         }
         isOtherChatBound = false;
-        const keepOpenOptions = isChatJustMounted && sessionTag === chatSessionTag;
-        isChatJustMounted = false;
+        const keepOpenOptions = takeOpenOptionsPending(sessionTag);
 
         const agentChanged = updateAgentSelection(activeConversation);
         const conversationChanged = activeConversation.id !== conversationIdRef.current;
@@ -457,6 +497,7 @@ export const useAgentBuilderIntegration = ({
           // Keep the agent selector's new-chat intent until this chat receives an id.
           newAgentConversationRef.current = true;
         }
+        rememberCreateChat(workflowId, selectedAgentIdRef.current, newAgentConversationRef.current);
 
         if (bindingChanged) {
           // Attachment ids belong to a conversation; a new chat starts with the editor id.
@@ -489,7 +530,7 @@ export const useAgentBuilderIntegration = ({
           const yaml = editor.getModel()?.getValue();
           if (yaml !== undefined) syncAttachment(yaml, { keepOpenOptions });
         }
-        runDeferredSync();
+        runDeferredSync(keepOpenOptions);
 
         // A create-session attachment predates the workflow, so nothing has
         // pointed it at one yet.
@@ -533,6 +574,7 @@ export const useAgentBuilderIntegration = ({
       if (debounceTimer) {
         clearTimeout(debounceTimer);
       }
+      cancelPublishStaleConfig();
       modelListener?.dispose();
       syncAttachmentRef.current = null;
       activeConversationSub.unsubscribe();
@@ -609,6 +651,9 @@ export const useAgentBuilderIntegration = ({
       if (options.newConversation !== undefined) {
         newAgentConversationRef.current = options.newConversation ? true : undefined;
       }
+      rememberCreateChat(workflowId, selectedAgentIdRef.current, newAgentConversationRef.current);
+      // Kept until the chat binds, so the config published then does not replace them.
+      if (hasOpenOptions(options)) openOptionsPendingRef.current = true;
 
       const currentYaml = executionsTabYaml ?? editorRef.current?.getModel()?.getValue() ?? '';
       // A new conversation has no restored attachment to wait for, so attach the YAML now.
@@ -745,6 +790,17 @@ export const useAgentBuilderIntegration = ({
 // before the editor has published its config.
 const isOtherChatSurface = (sessionTag: string | undefined): boolean =>
   sessionTag !== undefined && !isWorkflowEditorSessionTag(sessionTag);
+
+const rememberCreateChat = (
+  workflowId: string | undefined,
+  agentId: string | undefined,
+  newConversation: true | undefined
+): void => {
+  if (!workflowId) setLastCreateChat({ agentId, newConversation: newConversation === true });
+};
+
+const hasOpenOptions = ({ initialMessage, attachments }: OpenAgentChatOptions): boolean =>
+  Boolean(initialMessage || attachments?.length);
 
 const serializeClientDiagnostics = (
   errors: YamlValidationResult[] | null | undefined

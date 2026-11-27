@@ -13,21 +13,21 @@ import {
   isSidebarOpen,
   isWorkflowEditorSessionTag,
   requestSidebarRestore,
-  setLastCreateAgentId,
+  setLastCreateChat,
   setLastCreateSessionId,
   setSidebarOpen,
-  takeCarriedAgentFor,
+  takeCarriedChatFor,
 } from './conversation_handoff';
 
 describe('conversation_handoff', () => {
   beforeEach(() => {
     window.localStorage.clear();
     setLastCreateSessionId(undefined);
-    setLastCreateAgentId(undefined);
+    setLastCreateChat(undefined);
     setSidebarOpen(false);
     // Drain any lingering restore pending from a previous test.
     consumeSidebarRestoreFor('__reset__');
-    // Drop an agent a previous test left carried to a workflow.
+    // Drop a chat state a previous test left carried to a workflow.
     setLastCreateSessionId('__reset_from__');
     carryConversationToWorkflow('__reset_to__');
   });
@@ -47,60 +47,86 @@ describe('conversation_handoff', () => {
     });
   });
 
-  describe('agent of the create session', () => {
+  describe('chat of the create session', () => {
+    const CUSTOM_AGENT_CHAT = { agentId: 'custom-workflow-agent', newConversation: false };
+
     it('hands the selected agent to the saved workflow once', () => {
       setLastCreateSessionId('unsaved-uuid-A');
-      setLastCreateAgentId('custom-workflow-agent');
+      setLastCreateChat(CUSTOM_AGENT_CHAT);
 
       carryConversationToWorkflow('saved-wf-1');
 
-      expect(takeCarriedAgentFor('saved-wf-other')).toBeUndefined();
-      expect(takeCarriedAgentFor('saved-wf-1')).toBe('custom-workflow-agent');
-      expect(takeCarriedAgentFor('saved-wf-1')).toBeUndefined();
+      expect(takeCarriedChatFor('saved-wf-other')).toBeUndefined();
+      expect(takeCarriedChatFor('saved-wf-1')).toEqual(CUSTOM_AGENT_CHAT);
+      expect(takeCarriedChatFor('saved-wf-1')).toBeUndefined();
+    });
+
+    it('hands over a pending new conversation along with the agent', () => {
+      setLastCreateSessionId('unsaved-uuid-A');
+      setLastCreateChat({ agentId: 'custom-workflow-agent', newConversation: true });
+
+      carryConversationToWorkflow('saved-wf-1');
+
+      expect(takeCarriedChatFor('saved-wf-1')).toEqual({
+        agentId: 'custom-workflow-agent',
+        newConversation: true,
+      });
+    });
+
+    it('hands over a pending new conversation of the default agent', () => {
+      setLastCreateSessionId('unsaved-uuid-A');
+      setLastCreateChat({ agentId: undefined, newConversation: true });
+
+      carryConversationToWorkflow('saved-wf-1');
+
+      expect(takeCarriedChatFor('saved-wf-1')).toEqual({
+        agentId: undefined,
+        newConversation: true,
+      });
     });
 
     it('carries nothing when the create session used the default agent', () => {
       setLastCreateSessionId('unsaved-uuid-A');
-      setLastCreateAgentId('custom-workflow-agent');
-      setLastCreateAgentId(undefined);
+      setLastCreateChat(CUSTOM_AGENT_CHAT);
+      setLastCreateChat({ agentId: undefined, newConversation: false });
 
       carryConversationToWorkflow('saved-wf-1');
 
-      expect(takeCarriedAgentFor('saved-wf-1')).toBeUndefined();
+      expect(takeCarriedChatFor('saved-wf-1')).toBeUndefined();
     });
 
     it('carries nothing without a create session', () => {
-      setLastCreateAgentId('custom-workflow-agent');
+      setLastCreateChat(CUSTOM_AGENT_CHAT);
 
       carryConversationToWorkflow('saved-wf-1');
 
-      expect(takeCarriedAgentFor('saved-wf-1')).toBeUndefined();
+      expect(takeCarriedChatFor('saved-wf-1')).toBeUndefined();
     });
 
-    it('does not reuse the agent for the next save', () => {
+    it('does not reuse the chat state for the next save', () => {
       setLastCreateSessionId('unsaved-uuid-A');
-      setLastCreateAgentId('custom-workflow-agent');
+      setLastCreateChat(CUSTOM_AGENT_CHAT);
       carryConversationToWorkflow('saved-wf-1');
 
       setLastCreateSessionId('unsaved-uuid-B');
       carryConversationToWorkflow('saved-wf-2');
 
-      expect(takeCarriedAgentFor('saved-wf-2')).toBeUndefined();
-      expect(takeCarriedAgentFor('saved-wf-1')).toBeUndefined();
+      expect(takeCarriedChatFor('saved-wf-2')).toBeUndefined();
+      expect(takeCarriedChatFor('saved-wf-1')).toBeUndefined();
     });
 
-    it('keeps the agent when local storage cannot be used', () => {
+    it('keeps the chat state when local storage cannot be used', () => {
       const storage = jest.spyOn(window, 'localStorage', 'get').mockReturnValue(undefined as never);
       try {
         setLastCreateSessionId('unsaved-uuid-A');
-        setLastCreateAgentId('custom-workflow-agent');
+        setLastCreateChat(CUSTOM_AGENT_CHAT);
 
         carryConversationToWorkflow('saved-wf-1');
       } finally {
         storage.mockRestore();
       }
 
-      expect(takeCarriedAgentFor('saved-wf-1')).toBe('custom-workflow-agent');
+      expect(takeCarriedChatFor('saved-wf-1')).toEqual(CUSTOM_AGENT_CHAT);
     });
   });
 
