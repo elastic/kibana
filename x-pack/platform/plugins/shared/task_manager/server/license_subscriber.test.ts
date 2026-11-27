@@ -77,6 +77,18 @@ describe('LicenseSubscriber', () => {
       expect(licenseSubscriber.getIsSecurityDisabled()).toEqual(true);
     });
 
+    test('should return false if the license has no security feature', () => {
+      const license: Subject<ILicense> = new Subject();
+      const licenseSubscriber = new LicenseSubscriber(license);
+
+      license.next(
+        licensingMock.createLicense({
+          license: { status: 'active', type: 'basic' },
+        })
+      );
+      expect(licenseSubscriber.getIsSecurityDisabled()).toEqual(false);
+    });
+
     test('should return false if no license has been received', () => {
       const license: Subject<ILicense> = new Subject();
       const licenseSubscriber = new LicenseSubscriber(license);

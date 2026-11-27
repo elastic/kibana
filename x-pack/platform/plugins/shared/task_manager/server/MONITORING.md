@@ -37,7 +37,7 @@ Public Documentation: https://www.elastic.co/guide/en/kibana/master/task-manager
 
 ### Required Privileges
 
-Both `/api/task_manager/_health` and `/api/task_manager/metrics` return per-task-type details only to users with the `manage_taskManager` Kibana privilege (included in the `all` base privilege) or the `monitor` cluster privilege. If Elasticsearch security is disabled, there are no users or privileges to check, so the full response is always returned.
+Both `/api/task_manager/_health` and `/api/task_manager/metrics` return per-task-type details only to users with the `manage_taskManager` Kibana privilege (included in the `all` base privilege when granted in all spaces) or the `monitor` cluster privilege. If Elasticsearch security is disabled, there are no users or privileges to check, so the full response is always returned.
 
 Other users still get an HTTP `200` with the same response shape, but fields keyed by task type are returned empty:
 - `_health`: `workload.task_types`, `workload.schedule`, `runtime.drift_by_type`, `runtime.execution.duration`, `runtime.execution.result_frequency_percent_as_number`, `configuration.monitored_task_execution_thresholds.custom` and `configuration.execution_control.paused_task_types`.

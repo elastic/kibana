@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { pick } from 'lodash';
-import type { JsonObject } from '@kbn/utility-types';
+import { mapValues, pick, pickBy } from 'lodash';
+import type { JsonObject, JsonValue } from '@kbn/utility-types';
+import { FillPoolResult } from './fill_pool';
+import { TaskPersistence } from '../task_events';
 import type { MonitoredHealth } from '../routes/health';
 import type { NodeMetrics } from '../routes/metrics';
 import type { RawMonitoredStat } from '../monitoring/monitoring_stats_stream';
@@ -22,17 +24,32 @@ import type { TaskRunMetric } from '../metrics/task_run_metrics_aggregator';
 import type { TaskOverdueMetric } from '../metrics/task_overdue_metrics_aggregator';
 import type { TaskBackpressureMetric } from '../metrics/task_backpressure_metrics_aggregator';
 
-const POLLING_STAT_KEYS = [
-  'last_successful_poll',
-  'last_polling_delay',
-  'duration',
-  'claim_duration',
-  'claim_conflicts',
-  'claim_mismatches',
-  'claim_stale_tasks',
-  'result_frequency_percent_as_number',
-  'persistence',
-] as const;
+const POLLING_TIMESTAMP_KEYS = ['last_successful_poll', 'last_polling_delay'] as const;
+
+const AVERAGED_STAT_KEYS = ['p50', 'p90', 'p95', 'p99'] as const;
+
+const POLLING_NESTED_STAT_KEYS: Readonly<Record<string, readonly string[]>> = {
+  duration: AVERAGED_STAT_KEYS,
+  claim_duration: AVERAGED_STAT_KEYS,
+  claim_conflicts: AVERAGED_STAT_KEYS,
+  claim_mismatches: AVERAGED_STAT_KEYS,
+  claim_stale_tasks: AVERAGED_STAT_KEYS,
+  result_frequency_percent_as_number: Object.values(FillPoolResult),
+  persistence: Object.values(TaskPersistence),
+};
+
+const isJsonObject = (value: JsonValue): value is JsonObject =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const redactPolling = (
+  polling: SummarizedTaskRunStat['polling']
+): SummarizedTaskRunStat['polling'] => ({
+  ...pick(polling, POLLING_TIMESTAMP_KEYS),
+  ...mapValues(
+    pickBy(pick(polling, Object.keys(POLLING_NESTED_STAT_KEYS)), isJsonObject),
+    (stat, key) => pick(stat, POLLING_NESTED_STAT_KEYS[key])
+  ),
+});
 
 const redactAveragedStat = ({ p50, p90, p95, p99 }: AveragedStat): AveragedStat => ({
   p50,
@@ -127,7 +144,7 @@ const redactRuntime = ({
     result_frequency_percent_as_number: {},
     persistence: { recurring: persistence.recurring, non_recurring: persistence.non_recurring },
   },
-  polling: pick(polling, POLLING_STAT_KEYS),
+  polling: redactPolling(polling),
 });
 
 const redactCapacityEstimation = ({

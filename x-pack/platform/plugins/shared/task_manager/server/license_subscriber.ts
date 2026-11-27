@@ -34,14 +34,15 @@ export class LicenseSubscriber {
   }
 
   /**
-   * Returns true only when an available license reports security as disabled; an unknown license is not treated as disabled.
+   * Returns true only when an available license explicitly reports the security feature as disabled; an unknown license or missing feature is not treated as disabled.
    */
   public getIsSecurityDisabled() {
     if (!this.licenseState || !this.licenseState.isAvailable) {
       return false;
     }
 
-    return !this.licenseState.getFeature('security').isEnabled;
+    const { isAvailable, isEnabled } = this.licenseState.getFeature('security');
+    return isAvailable && !isEnabled;
   }
 
   public cleanup() {

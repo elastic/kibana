@@ -80,7 +80,20 @@ describe('redactHealth', () => {
         unexpected: { [MOCK_TASK_TYPE]: 1 },
         configuration: { value: { unexpected: MOCK_TASK_TYPE } },
         workload: { value: { unexpected: MOCK_TASK_TYPE } },
-        runtime: { value: { polling: { unexpected: MOCK_TASK_TYPE } } },
+        runtime: {
+          value: {
+            polling: {
+              unexpected: MOCK_TASK_TYPE,
+              duration: { unexpected: MOCK_TASK_TYPE },
+              claim_duration: { unexpected: MOCK_TASK_TYPE },
+              claim_conflicts: { unexpected: MOCK_TASK_TYPE },
+              claim_mismatches: { unexpected: MOCK_TASK_TYPE },
+              claim_stale_tasks: { unexpected: MOCK_TASK_TYPE },
+              result_frequency_percent_as_number: { [MOCK_TASK_TYPE]: 1 },
+              persistence: { [MOCK_TASK_TYPE]: 1 },
+            },
+          },
+        },
         capacity_estimation: { value: { observed: { unexpected: MOCK_TASK_TYPE } } },
       },
     });
