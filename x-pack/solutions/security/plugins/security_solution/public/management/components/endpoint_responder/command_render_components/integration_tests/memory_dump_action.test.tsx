@@ -16,7 +16,7 @@ import {
   ConsoleManagerTestComponent,
   getConsoleManagerMockRenderResultQueriesAndActions,
 } from '../../../console/components/console_manager/mocks';
-import { enterConsoleCommand } from '../../../console/mocks';
+import { enterConsoleCommand, getConsoleSelectorsAndActionMock } from '../../../console/mocks';
 import type { EndpointPrivileges } from '../../../../../../common/endpoint/types';
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
 import { getEndpointConsoleCommands } from '../..';
@@ -25,7 +25,10 @@ import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_
 import { waitFor } from '@testing-library/react';
 import { ExperimentalFeaturesService as _ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
 import type { SupportedHostOsType } from '../../../../../../common/endpoint/constants';
-import { MEMORY_DUMP_ROUTE } from '../../../../../../common/endpoint/constants';
+import {
+  EXPORT_PROVIDERS_ROUTE,
+  MEMORY_DUMP_ROUTE,
+} from '../../../../../../common/endpoint/constants';
 
 jest.mock('../../../../../common/experimental_features_service');
 
@@ -365,6 +368,102 @@ describe('Memory dump response action', () => {
 
         expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
           'The following memory-dump argument is not supported by this command: --raw'
+        );
+      });
+    });
+
+    describe('and --export argument', () => {
+      beforeEach(() => {
+        (ExperimentalFeaturesServiceMock.get as jest.Mock).mockReturnValue({
+          responseActionsEndpointMemoryDump: true,
+          responseActionsEndpointFileExport: true,
+        });
+      });
+
+      it('should send the selected storage provider as `parameters.export`', async () => {
+        await render();
+        await enterConsoleCommand(renderResult, user, 'memory-dump --kernel --export', {
+          inputOnly: true,
+        });
+
+        await waitFor(() => {
+          expect(apiMocks.responseProvider.exportProviders).toHaveBeenCalledWith({
+            path: EXPORT_PROVIDERS_ROUTE,
+            query: { agentId: 'a.b.c' },
+            version: '1',
+          });
+        });
+        await waitFor(() =>
+          user.click(
+            renderResult.getAllByTestId('exportProviderSelector-memory-dump-0-provider')[0]
+          )
+        );
+        await waitFor(() => {
+          expect(
+            renderResult.queryByTestId('exportProviderSelector-memory-dump-0-popoverPanel')
+          ).toBeNull();
+        });
+        getConsoleSelectorsAndActionMock(renderResult, user).submitCommand();
+
+        await waitFor(() => {
+          expect(apiMocks.responseProvider.memoryDump).toHaveBeenCalledWith({
+            body: '{"agent_type":"endpoint","endpoint_ids":["a.b.c"],"parameters":{"type":"kernel","export":"azure-1"}}',
+            path: MEMORY_DUMP_ROUTE,
+            version: '2023-10-31',
+          });
+        });
+      });
+
+      it('should not include `export` in the request body when --export is not used', async () => {
+        await render();
+        await enterConsoleCommand(renderResult, user, 'memory-dump --kernel');
+
+        await waitFor(() => {
+          expect(apiMocks.responseProvider.memoryDump).toHaveBeenCalledWith({
+            body: '{"agent_type":"endpoint","endpoint_ids":["a.b.c"],"parameters":{"type":"kernel"}}',
+            path: MEMORY_DUMP_ROUTE,
+            version: '2023-10-31',
+          });
+        });
+      });
+
+      it('should show --export in help when the `file_export` capability is present', async () => {
+        await render();
+        await enterConsoleCommand(renderResult, user, 'memory-dump --help');
+
+        expect(renderResult.getByTestId('test-helpOutput')).toHaveTextContent(
+          "--export - Export the memory dump to a storage provider from the host's Elastic Defend policy"
+        );
+      });
+
+      it('should not show or accept --export when the `file_export` capability is absent', async () => {
+        capabilities = capabilities.filter((value) => value !== 'file_export');
+        await render();
+        await enterConsoleCommand(renderResult, user, 'memory-dump --help');
+
+        expect(renderResult.getByTestId('test-helpOutput')).not.toHaveTextContent('--export');
+
+        await enterConsoleCommand(renderResult, user, 'memory-dump --kernel --export');
+
+        expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+          'The following memory-dump argument is not supported by this command: --export'
+        );
+      });
+
+      it('should not show or accept --export when the feature flag is disabled', async () => {
+        (ExperimentalFeaturesServiceMock.get as jest.Mock).mockReturnValue({
+          responseActionsEndpointMemoryDump: true,
+          responseActionsEndpointFileExport: false,
+        });
+        await render();
+        await enterConsoleCommand(renderResult, user, 'memory-dump --help');
+
+        expect(renderResult.getByTestId('test-helpOutput')).not.toHaveTextContent('--export');
+
+        await enterConsoleCommand(renderResult, user, 'memory-dump --kernel --export');
+
+        expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+          'The following memory-dump argument is not supported by this command: --export'
         );
       });
     });

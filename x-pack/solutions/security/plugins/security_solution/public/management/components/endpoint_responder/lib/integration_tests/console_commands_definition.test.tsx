@@ -18,7 +18,12 @@ import { HELP_GROUPS } from '../console_commands_definition';
 import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
 import type { CommandDefinition } from '../../../console';
 import type { HostMetadataInterface } from '../../../../../../common/endpoint/types';
-import { CONSOLE_RESPONSE_ACTION_COMMANDS } from '../../../../../../common/endpoint/service/response_actions/constants';
+import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
+import {
+  CONSOLE_RESPONSE_ACTION_COMMANDS,
+  ENDPOINT_CAPABILITIES,
+} from '../../../../../../common/endpoint/service/response_actions/constants';
+import { ExportProviderSelector } from '../../../console_argument_selectors';
 
 jest.mock('../../../../../common/experimental_features_service');
 
@@ -325,6 +330,87 @@ describe('When displaying Endpoint Response Actions', () => {
           expect(cancelCommand).toBeUndefined();
         });
       });
+    });
+  });
+
+  describe('`--export` argument of get-file and memory-dump', () => {
+    const allFlags = {
+      responseActionsEndpointMemoryDump: true,
+      responseActionsEndpointFileExport: true,
+      responseActionsSentinelOneV1Enabled: true,
+      crowdstrikeRunScriptEnabled: true,
+    };
+    const capabilitiesWithoutFileExport = ENDPOINT_CAPABILITIES.filter(
+      (capability) => capability !== 'file_export'
+    );
+
+    const getConsoleCommands = ({
+      agentType = 'endpoint',
+      capabilities = [...ENDPOINT_CAPABILITIES],
+      flags = allFlags,
+    }: {
+      agentType?: ResponseActionAgentType;
+      capabilities?: string[];
+      flags?: Partial<typeof allFlags>;
+    } = {}): CommandDefinition[] => {
+      (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue(flags);
+
+      return getEndpointConsoleCommands({
+        agentType,
+        endpointAgentId: '123',
+        endpointCapabilities: capabilities,
+        endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
+        platform: 'linux',
+      });
+    };
+
+    const getNamesOfCommandsWithExportArg = (commandList: CommandDefinition[]): string[] =>
+      commandList.filter((command) => command.args?.export).map((command) => command.name);
+
+    it('should be defined on get-file and memory-dump with the flag on and the `file_export` capability', () => {
+      const endpointCommands = getConsoleCommands();
+
+      expect(getNamesOfCommandsWithExportArg(endpointCommands)).toEqual([
+        'get-file',
+        'memory-dump',
+      ]);
+      expect(endpointCommands.find(({ name }) => name === 'get-file')?.args?.export).toEqual({
+        required: false,
+        allowMultiples: false,
+        mustHaveValue: 'non-empty-string',
+        about:
+          "Export the file to a storage provider from the host's Elastic Defend policy instead of downloading it through Elastic Security",
+        SelectorComponent: ExportProviderSelector,
+      });
+      expect(endpointCommands.find(({ name }) => name === 'memory-dump')?.args?.export).toEqual({
+        required: false,
+        allowMultiples: false,
+        mustHaveValue: 'non-empty-string',
+        about: "Export the memory dump to a storage provider from the host's Elastic Defend policy",
+        SelectorComponent: ExportProviderSelector,
+      });
+    });
+
+    it('should not be defined when the feature flag is off', () => {
+      const commandList = getConsoleCommands({
+        flags: { ...allFlags, responseActionsEndpointFileExport: false },
+      });
+
+      expect(getNamesOfCommandsWithExportArg(commandList)).toEqual([]);
+    });
+
+    it('should not be defined when the Endpoint does not report the `file_export` capability', () => {
+      const commandList = getConsoleCommands({ capabilities: capabilitiesWithoutFileExport });
+
+      expect(getNamesOfCommandsWithExportArg(commandList)).toEqual([]);
+    });
+
+    it.each<ResponseActionAgentType>([
+      'sentinel_one',
+      'crowdstrike',
+      'microsoft_defender_endpoint',
+    ])('should not be defined for agent type %s', (agentType) => {
+      expect(getNamesOfCommandsWithExportArg(getConsoleCommands({ agentType }))).toEqual([]);
     });
   });
 });

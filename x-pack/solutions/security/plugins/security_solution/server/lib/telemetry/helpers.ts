@@ -16,6 +16,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { copyAllowlistedFields, filterList } from './filterlists';
 import type { AllowlistFields } from './filterlists/types';
 import type { PolicyConfig, PolicyData, SafeEndpointEvent } from '../../../common/endpoint/types';
+import { removeExportProviders } from '../../../common/endpoint/models/export_providers';
 import type { ITelemetryReceiver } from './receiver';
 import type {
   AnyObject,
@@ -280,14 +281,29 @@ export const responseActionsCustomRuleTelemetryData = (
  */
 export const createUsageCounterLabel = (labelList: string[]): string => labelList.join('-');
 
+const hasResponseActions = (policy: PolicyConfig): boolean =>
+  [policy.windows, policy.mac, policy.linux].some(
+    (os) => isPlainObject(os) && 'response_actions' in os
+  );
+
 /**
  * Resiliantly handles an edge case where the endpoint config details are not present
  *
- * @returns the endpoint policy configuration
+ * @returns the endpoint policy configuration, copied without export providers when it has `response_actions`
  */
 export const extractEndpointPolicyConfig = (policyData: PolicyData | null) => {
   const epPolicyConfig = policyData?.inputs[0]?.config?.policy;
-  return epPolicyConfig ? epPolicyConfig : null;
+
+  if (!epPolicyConfig) {
+    return null;
+  }
+
+  // Export providers name the customer's storage accounts and containers, so they are never sent.
+  // Any other policy is returned as is, not copied: the endpoint task writes `value` back through
+  // the result, and a copy changes what it sends when a cluster has several policies.
+  return epPolicyConfig.value && hasResponseActions(epPolicyConfig.value)
+    ? { ...epPolicyConfig, value: removeExportProviders(epPolicyConfig.value) }
+    : epPolicyConfig;
 };
 
 export const addDefaultAdvancedPolicyConfigSettings = (policyConfig: PolicyConfig) => {

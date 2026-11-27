@@ -10,7 +10,10 @@ import { schema } from '@kbn/config-schema';
 import { MAX_COMMENT_LENGTH } from '../../../../constants';
 import { SUPPORTED_HOST_OS_TYPE } from '../../../../endpoint/constants';
 import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../endpoint/service/response_actions/constants';
-import { EXPORT_PROVIDER_ID_MAX_LENGTH } from '../../../../endpoint/service/response_actions/export_providers';
+import {
+  EXPORT_PROVIDER_ID_MAX_LENGTH,
+  EXPORT_PROVIDER_ID_PATTERN,
+} from '../../../../endpoint/service/response_actions/export_providers';
 
 export const AgentTypeSchemaLiteral = RESPONSE_ACTION_AGENT_TYPE.map((agentType) =>
   schema.literal(agentType)
@@ -91,9 +94,9 @@ export const ExportParameterSchema = schema.maybe(
     minLength: 1,
     maxLength: EXPORT_PROVIDER_ID_MAX_LENGTH,
     validate: (value) => {
-      // Endpoint uploads the file to Fleet when `export` is empty, so it must never be passed through
-      if (!value.trim().length) {
-        return 'export cannot be an empty string';
+      // Must have the format of an export provider `id` (see `EXPORT_PROVIDER_ID_PATTERN`)
+      if (!EXPORT_PROVIDER_ID_PATTERN.test(value)) {
+        return 'export can only contain letters, digits, "_" and "-"';
       }
     },
   })

@@ -20,10 +20,13 @@ import {
 import type { GetEndpointConsoleCommandsOptions } from '../../lib/console_commands_definition';
 import { getEndpointConsoleCommands } from '../../lib/console_commands_definition';
 import React from 'react';
-import { enterConsoleCommand } from '../../../console/mocks';
+import { enterConsoleCommand, getConsoleSelectorsAndActionMock } from '../../../console/mocks';
 import { waitFor } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
-import { GET_FILE_ROUTE } from '../../../../../../common/endpoint/constants';
+import {
+  EXPORT_PROVIDERS_ROUTE,
+  GET_FILE_ROUTE,
+} from '../../../../../../common/endpoint/constants';
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
 import type {
   ActionDetailsApiResponse,
@@ -309,6 +312,120 @@ describe('When using get-file action from response actions console', () => {
       expect(renderResult.getByTestId('test-badArgument-message')).toHaveTextContent(
         'The following get-file argument is not supported by this command: --force'
       );
+    });
+  });
+
+  describe('and the `--export` argument is used', () => {
+    const capabilitiesWithoutFileExport = (): EndpointCapabilities[] =>
+      ENDPOINT_CAPABILITIES.filter((capability) => capability !== 'file_export');
+
+    beforeEach(() => {
+      mockedContext.setExperimentalFlag({ responseActionsEndpointFileExport: true });
+    });
+
+    it('should send the selected storage provider as `parameters.export`', async () => {
+      await render();
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two" --export', {
+        inputOnly: true,
+      });
+
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.exportProviders).toHaveBeenCalledWith({
+          path: EXPORT_PROVIDERS_ROUTE,
+          query: { agentId: 'a.b.c' },
+          version: '1',
+        });
+      });
+      await waitFor(() =>
+        user.click(renderResult.getAllByTestId('exportProviderSelector-get-file-0-provider')[1])
+      );
+      await waitFor(() => {
+        expect(
+          renderResult.queryByTestId('exportProviderSelector-get-file-0-popoverPanel')
+        ).toBeNull();
+      });
+      getConsoleSelectorsAndActionMock(renderResult, user).submitCommand();
+
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.getFile).toHaveBeenCalledWith({
+          body: '{"agent_type":"endpoint","endpoint_ids":["a.b.c"],"parameters":{"path":"one/two","export":"azure-2"}}',
+          path: GET_FILE_ROUTE,
+          version: '2023-10-31',
+        });
+      });
+    });
+
+    it('should not include `export` in the request body when `--export` is not used', async () => {
+      await render();
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
+
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.getFile).toHaveBeenCalledWith({
+          body: '{"agent_type":"endpoint","endpoint_ids":["a.b.c"],"parameters":{"path":"one/two"}}',
+          path: GET_FILE_ROUTE,
+          version: '2023-10-31',
+        });
+      });
+    });
+
+    it('should error if no storage provider is selected', async () => {
+      await render();
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two" --export');
+
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+        'Argument --export must have a value'
+      );
+      expect(apiMocks.responseProvider.getFile).not.toHaveBeenCalled();
+    });
+
+    it('should display the `--export` argument in the command help', async () => {
+      await render();
+      await enterConsoleCommand(renderResult, user, 'get-file --help');
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('test-helpOutput')).toHaveTextContent('--export');
+      });
+      expect(renderResult.getByTestId('test-helpOutput')).toHaveTextContent(
+        "Export the file to a storage provider from the host's Elastic Defend policy instead of downloading it through Elastic Security"
+      );
+    });
+
+    it.each([
+      {
+        title: 'the feature flag is off',
+        setup: () =>
+          mockedContext.setExperimentalFlag({ responseActionsEndpointFileExport: false }),
+        capabilities: undefined,
+      },
+      {
+        title: 'the Endpoint does not support the `file_export` capability',
+        setup: () => {},
+        capabilities: capabilitiesWithoutFileExport(),
+      },
+      {
+        title: 'the agent type is not endpoint',
+        setup: () => {
+          getConsoleCommandsOptions.agentType = 'sentinel_one';
+        },
+        capabilities: undefined,
+      },
+    ])('should not display or accept `--export` when $title', async ({ setup, capabilities }) => {
+      setup();
+      await render(capabilities);
+      await enterConsoleCommand(renderResult, user, 'get-file --help');
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('test-helpOutput')).toBeInTheDocument();
+      });
+      expect(renderResult.getByTestId('test-helpOutput')).not.toHaveTextContent('--export');
+
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two" --export');
+
+      expect(renderResult.getByTestId('test-badArgument-message')).toHaveTextContent(
+        'The following get-file argument is not supported by this command: --export'
+      );
+      expect(apiMocks.responseProvider.getFile).not.toHaveBeenCalled();
+      expect(apiMocks.responseProvider.exportProviders).not.toHaveBeenCalled();
     });
   });
 

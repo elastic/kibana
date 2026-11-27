@@ -28,6 +28,7 @@ import {
   ArgumentFileSelector,
   CrowdstrikeScriptInputParams,
   EndpointScriptInputParams,
+  ExportProviderSelector,
   MicrosoftScriptInputParams,
 } from '../../console_argument_selectors';
 import type { ParsedArgData } from '../../console/service/types';
@@ -203,6 +204,7 @@ export const getEndpointConsoleCommands = ({
     microsoftDefenderEndpointRunScriptEnabled,
     microsoftDefenderEndpointCancelEnabled,
     responseActionsEndpointCancel,
+    responseActionsEndpointFileExport,
     responseActionsEndpointMemoryDump,
     responseActionsEndpointMemoryDumpRaw,
     responseActionsEndpointRunScript,
@@ -291,6 +293,26 @@ export const getEndpointConsoleCommands = ({
             allowMultiples: false,
             mustHaveValue: false,
             about: CONSOLE_COMMANDS.getFile.args.force.about,
+          },
+        }
+      : {};
+
+  // `get-file --export` and `memory-dump --export` apply only to the Elastic Defend Endpoint, are
+  // gated behind a feature flag and are only offered when the host's Endpoint can export files
+  // (reported via the `file_export` capability)
+  const canEndpointExportFiles =
+    agentType === 'endpoint' &&
+    responseActionsEndpointFileExport &&
+    (endpointCapabilities as EndpointCapabilities[]).includes('file_export');
+  const getExportArg = (about: string): Record<string, CommandArgDefinition> =>
+    canEndpointExportFiles
+      ? {
+          export: {
+            required: false,
+            allowMultiples: false,
+            mustHaveValue: 'non-empty-string',
+            about,
+            SelectorComponent: ExportProviderSelector,
           },
         }
       : {};
@@ -473,6 +495,7 @@ export const getEndpointConsoleCommands = ({
           },
         },
         ...getFileForceArg,
+        ...getExportArg(CONSOLE_COMMANDS.getFile.args.export.about),
         ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
@@ -916,6 +939,7 @@ export const getEndpointConsoleCommands = ({
               },
             }
           : {}),
+        ...getExportArg(CONSOLE_COMMANDS.memoryDump.exportArgAbout),
         entityId: {
           required: false,
           conditionallyRequired: ['process'],

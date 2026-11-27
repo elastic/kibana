@@ -102,6 +102,7 @@ export const RUN_SCRIPT_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/run_script`;
 export const MEMORY_DUMP_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/memory_dump`;
 export const CANCEL_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/cancel`;
 export const CUSTOM_SCRIPTS_ROUTE = `${BASE_INTERNAL_ENDPOINT_ACTION_ROUTE}/custom_scripts`;
+export const EXPORT_PROVIDERS_ROUTE = `${BASE_INTERNAL_ENDPOINT_ACTION_ROUTE}/export_providers`;
 
 /** Endpoint Actions Routes */
 export const ACTION_STATUS_ROUTE = `${BASE_ENDPOINT_ROUTE}/action_status`;
