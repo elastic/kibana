@@ -273,6 +273,8 @@ interface PanelNavItemProps {
   buttonProps?: Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'>;
   /** Duh */
   icon?: IconType;
+  /** Short status shown before the arrow, e.g. the current value of the linked panel. */
+  suffix?: ReactNode;
 }
 
 /** A navigation item within the panel body that links to another panel. */
@@ -280,6 +282,7 @@ export const PanelNavItem = ({
   onClick,
   buttonProps,
   icon,
+  suffix,
   className,
   'data-test-subj': dataTestSubj,
   children,
@@ -294,7 +297,10 @@ export const PanelNavItem = ({
           {icon && <EuiIcon type={icon} size="m" aria-hidden="true" />}
           {children}
         </span>
-        <EuiIcon type="chevronSingleRight" size="m" color="subdued" aria-hidden="true" />
+        <span css={styles.end}>
+          {suffix}
+          <EuiIcon type="chevronSingleRight" size="m" color="subdued" aria-hidden="true" />
+        </span>
       </button>
     </li>
   );

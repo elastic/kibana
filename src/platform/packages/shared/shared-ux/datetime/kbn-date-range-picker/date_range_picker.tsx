@@ -17,6 +17,7 @@ import type {
   TimeRangeBoundsOption,
   CalendarOptions,
   DateRangePickerSettings,
+  AutoRefreshSettings,
 } from './types';
 import type { TimeWindowButtonsConfig } from './date_range_picker_time_window_buttons';
 import { DateRangePickerProvider } from './date_range_picker_context';
@@ -32,6 +33,7 @@ import { CalendarPanel } from './panels/calendar_panel';
 import { CustomTimeRangePanel } from './panels/custom_time_range_panel';
 import { DocumentationPanel } from './panels/documentation_panel';
 import { SettingsPanel } from './panels/settings_panel';
+import { AutoRefreshPanel } from './panels/auto_refresh_panel';
 import { ExamplePanel, ExampleNestedPanel } from './panels/example_panel';
 
 const DEFAULT_PANEL_ID = 'main' as const;
@@ -157,7 +159,7 @@ export interface DateRangePickerProps {
   onPresetDelete?: (option: TimeRangeBoundsOption) => void;
   /** Calendar-specific options (e.g. first day of week). */
   calendarOptions?: CalendarOptions;
-  /** Current picker settings (e.g. rounding, refresh). */
+  /** Current picker display settings (e.g. rounding, time precision). */
   settings: DateRangePickerSettings;
   /** Called when the user changes a setting in the settings panel. */
   onSettingsChange: (settings: DateRangePickerSettings) => void;
@@ -173,8 +175,24 @@ export interface DateRangePickerProps {
    * @link https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
    */
   timeZone?: string;
-  /** Fires at the end of each auto-refresh interval while `settings.autoRefresh` exists, is enabled and timer is unpaused. */
+  /**
+   * Fires at the end of each auto-refresh interval while `autoRefresh` is enabled and unpaused.
+   * The auto-refresh UI is shown only when both this and `autoRefresh` are set.
+   */
   onRefresh?: () => void;
+  /** Current auto-refresh state. The auto-refresh UI is shown only when both this and `onRefresh` are set. */
+  autoRefresh?: AutoRefreshSettings;
+  /**
+   * Called when the user changes the auto-refresh state, e.g. enables it or pauses the timer.
+   * Without it, the auto-refresh controls show the state but can't be changed.
+   */
+  onAutoRefreshChange?: (autoRefresh: AutoRefreshSettings) => void;
+  /**
+   * Lowest refresh interval the user can set, in milliseconds. Lower values typed into the
+   * interval field are raised to it.
+   * @default 0
+   */
+  autoRefreshMinIntervalMs?: number;
   /**
    * Increment this value whenever an external timer (e.g. the Kibana timefilter) triggers a
    * refresh, so the visual countdown resets to stay in sync with actual query cadence and
@@ -253,6 +271,9 @@ export function DateRangePicker({
             </DateRangePickerPanel>
             <DateRangePickerPanel id={SettingsPanel.PANEL_ID}>
               <SettingsPanel />
+            </DateRangePickerPanel>
+            <DateRangePickerPanel id={AutoRefreshPanel.PANEL_ID}>
+              <AutoRefreshPanel />
             </DateRangePickerPanel>
             {panels.map(({ id, component: Component }) => (
               <DateRangePickerPanel key={id} id={id}>

@@ -134,7 +134,7 @@ describe('AlertingDateRangePicker', () => {
     expect(lastPickerProps?.isInvalid).toBe(false);
   });
 
-  it('includes autoRefresh settings when onRefresh is provided', () => {
+  it('passes autoRefresh when onRefresh is provided', () => {
     const onRefresh = jest.fn();
     render(
       <AlertingDateRangePicker
@@ -147,7 +147,7 @@ describe('AlertingDateRangePicker', () => {
     );
 
     expect(lastPickerProps?.onRefresh).toBe(onRefresh);
-    expect(lastPickerProps?.settings.autoRefresh).toEqual(
+    expect(lastPickerProps?.autoRefresh).toEqual(
       expect.objectContaining({
         isEnabled: false,
         isPaused: true,
@@ -156,7 +156,7 @@ describe('AlertingDateRangePicker', () => {
     );
   });
 
-  it('omits autoRefresh settings when onRefresh is absent', () => {
+  it('omits autoRefresh when onRefresh is absent', () => {
     render(
       <AlertingDateRangePicker
         from="now-15m"
@@ -167,7 +167,7 @@ describe('AlertingDateRangePicker', () => {
     );
 
     expect(lastPickerProps?.onRefresh).toBeUndefined();
-    expect(lastPickerProps?.settings.autoRefresh).toBeUndefined();
+    expect(lastPickerProps?.autoRefresh).toBeUndefined();
   });
 
   it('forwards time zone, week start day, date format, and advanced settings access from uiSettings/http/application', () => {

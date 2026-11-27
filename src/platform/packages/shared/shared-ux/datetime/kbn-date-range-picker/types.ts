@@ -124,11 +124,11 @@ export type TimeRangeFormatOptions = Omit<
 /** Time unit for the auto-refresh interval. */
 export type AutoRefreshIntervalUnit = 's' | 'm' | 'h';
 
-/** Auto-refresh configuration stored in picker settings. */
+/** Auto-refresh state, passed to the picker as `autoRefresh`. */
 export interface AutoRefreshSettings {
   /**
    * When true, shows the play/pause button and allows the timer to run (controlled with `isPaused`).
-   * Toggled from Settings, not from the append control.
+   * Toggled from the auto-refresh switch, not from the append control.
    */
   isEnabled: boolean;
   /**
@@ -138,10 +138,10 @@ export interface AutoRefreshSettings {
   /** Refresh interval in milliseconds. */
   intervalMs: number;
   /**
-   * The unit used to display the interval count in the Settings panel.
+   * The unit used to display the interval count.
    * Auto-determined from `intervalMs` when absent.
    */
-  intervalDisplayUnit: AutoRefreshIntervalUnit;
+  intervalDisplayUnit?: AutoRefreshIntervalUnit;
 }
 
 /** Controls sub-minute precision shown in absolute timestamps. */
@@ -168,11 +168,6 @@ export interface DateRangePickerSettings {
    * precision, so selecting a day in the calendar still ends at `23:59:59.999`.
    */
   timePrecision?: TimePrecision;
-  /**
-   * Auto-refresh preferences. The Settings “Refresh every” row and the toolbar play/pause control
-   * are shown only when both this and `DateRangePickerProps.onRefresh` are set.
-   */
-  autoRefresh?: AutoRefreshSettings;
 }
 
 export interface TimeRange {

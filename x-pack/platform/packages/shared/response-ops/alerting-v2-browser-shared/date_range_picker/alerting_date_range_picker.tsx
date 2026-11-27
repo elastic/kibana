@@ -131,11 +131,6 @@ export const AlertingDateRangePicker = ({
   const canAccessAdvancedSettings =
     (application.capabilities.advancedSettings?.save as boolean | undefined) ?? false;
 
-  const settings = useMemo(
-    () => (onRefresh ? { ...dateRangePickerSettings, autoRefresh } : dateRangePickerSettings),
-    [dateRangePickerSettings, autoRefresh, onRefresh]
-  );
-
   const calendarOptions = useMemo(
     () => ({
       firstDayOfWeek: moment.weekdays().indexOf(dayOfWeekSetting) as FirstDayOfWeek,
@@ -162,22 +157,6 @@ export const AlertingDateRangePicker = ({
   const handleManualRefresh = useCallback(() => {
     (onManualRefresh ?? onRefresh)?.();
   }, [onManualRefresh, onRefresh]);
-
-  const handleSettingsChange = useCallback(
-    (next: DateRangePickerSettings) => {
-      const { autoRefresh: nextAutoRefresh, ...rest } = next;
-      setDateRangePickerSettings(rest);
-      if (onRefresh && nextAutoRefresh) {
-        setAutoRefresh((prev) => {
-          if (!prev.isEnabled && nextAutoRefresh.isEnabled) {
-            return { ...nextAutoRefresh, isPaused: false };
-          }
-          return nextAutoRefresh;
-        });
-      }
-    },
-    [onRefresh]
-  );
 
   const canManuallyRefresh = Boolean(onManualRefresh ?? onRefresh);
 
@@ -214,8 +193,10 @@ export const AlertingDateRangePicker = ({
       recent={recentTimeRanges}
       onPresetSave={dateRangePickerPresets.onPresetSave}
       onPresetDelete={dateRangePickerPresets.onPresetDelete}
-      settings={settings}
-      onSettingsChange={handleSettingsChange}
+      settings={dateRangePickerSettings}
+      onSettingsChange={setDateRangePickerSettings}
+      autoRefresh={onRefresh ? autoRefresh : undefined}
+      onAutoRefreshChange={setAutoRefresh}
       onRefresh={onRefresh}
       width={width}
       compressed={compressed}

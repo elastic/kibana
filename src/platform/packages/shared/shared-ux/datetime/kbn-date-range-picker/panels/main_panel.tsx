@@ -10,6 +10,7 @@
 import React, { useCallback, useState } from 'react';
 
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonIcon,
   EuiTab,
@@ -19,7 +20,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import type { TimeRangeBoundsOption } from '../types';
+import type { AutoRefreshSettings, TimeRangeBoundsOption } from '../types';
 import {
   PanelContainer,
   PanelBody,
@@ -30,6 +31,7 @@ import {
 } from '../date_range_picker_panel_ui';
 import { DocumentationPanel } from './documentation_panel';
 import { SettingsPanel } from './settings_panel';
+import { AutoRefreshPanel } from './auto_refresh_panel';
 import { useDateRangePickerContext } from '../date_range_picker_context';
 import { useDateRangePickerPanelNavigation } from '../date_range_picker_panel_navigation';
 import { mainPanelStyles } from './main_panel.styles';
@@ -38,6 +40,7 @@ import {
   getOptionShorthand,
   getOptionInputText,
   hasRoundedOffset,
+  msToAutoRefreshInterval,
 } from '../utils';
 import { inputControlTexts, mainPanelTexts } from '../translations';
 import { panelDividerStyles } from '../date_range_picker_panel_ui.styles';
@@ -149,8 +152,30 @@ const PresetsRecentTabs = () => {
   );
 };
 
+/** Auto-refresh status shown in the nav item, e.g. "Every 10 sec" or "Disabled". */
+const AutoRefreshBadge = ({ autoRefresh }: { autoRefresh: AutoRefreshSettings }) => {
+  if (!autoRefresh.isEnabled) {
+    return (
+      <EuiBadge color="default" data-test-subj="dateRangePickerAutoRefreshBadge">
+        {mainPanelTexts.autoRefreshDisabledLabel}
+      </EuiBadge>
+    );
+  }
+
+  const { count, unit } = msToAutoRefreshInterval(
+    autoRefresh.intervalMs,
+    autoRefresh.intervalDisplayUnit
+  );
+  return (
+    <EuiBadge color="primary" data-test-subj="dateRangePickerAutoRefreshBadge">
+      {mainPanelTexts.autoRefreshEveryLabel(count, unit)}
+    </EuiBadge>
+  );
+};
+
 const SubPanelMenu = () => {
   const { navigateTo, panelDescriptors } = useDateRangePickerPanelNavigation();
+  const { hasAutoRefresh, autoRefresh } = useDateRangePickerContext();
   const euiThemeContext = useEuiTheme();
   const styles = mainPanelStyles(euiThemeContext);
 
@@ -170,6 +195,16 @@ const SubPanelMenu = () => {
       >
         {mainPanelTexts.customTimeRangePanelTitle}
       </PanelNavItem>
+      {hasAutoRefresh && autoRefresh && (
+        <PanelNavItem
+          onClick={() => navigateTo(AutoRefreshPanel.PANEL_ID)}
+          icon="refreshTime"
+          suffix={<AutoRefreshBadge autoRefresh={autoRefresh} />}
+          data-test-subj="dateRangePickerAutoRefreshNavItem"
+        >
+          {mainPanelTexts.autoRefreshPanelTitle}
+        </PanelNavItem>
+      )}
       {panelDescriptors.map(({ id, title, icon }) => (
         <PanelNavItem key={id} onClick={() => navigateTo(id)} icon={icon}>
           {title}

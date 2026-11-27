@@ -9,6 +9,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+import type { AutoRefreshIntervalUnit } from './types';
+
 export const timeWindowButtonsTexts = {
   legend: i18n.translate('sharedUXPackages.dateRangePicker.timeWindowButtons.legend', {
     defaultMessage: 'Time window actions',
@@ -236,30 +238,6 @@ export const settingsPanelTexts = {
   heading: i18n.translate('sharedUXPackages.dateRangePicker.settingsPanel.heading', {
     defaultMessage: 'Settings',
   }),
-  autoRefreshLabel: i18n.translate(
-    'sharedUXPackages.dateRangePicker.settingsPanel.autoRefreshLabel',
-    { defaultMessage: 'Refresh every' }
-  ),
-  autoRefreshIntervalCountAriaLabel: i18n.translate(
-    'sharedUXPackages.dateRangePicker.settingsPanel.autoRefreshIntervalCountAriaLabel',
-    { defaultMessage: 'Refresh interval count' }
-  ),
-  autoRefreshIntervalUnitAriaLabel: i18n.translate(
-    'sharedUXPackages.dateRangePicker.settingsPanel.autoRefreshIntervalUnitAriaLabel',
-    { defaultMessage: 'Refresh interval unit' }
-  ),
-  autoRefreshUnitSeconds: i18n.translate(
-    'sharedUXPackages.dateRangePicker.settingsPanel.autoRefreshUnitSeconds',
-    { defaultMessage: 'seconds' }
-  ),
-  autoRefreshUnitMinutes: i18n.translate(
-    'sharedUXPackages.dateRangePicker.settingsPanel.autoRefreshUnitMinutes',
-    { defaultMessage: 'minutes' }
-  ),
-  autoRefreshUnitHours: i18n.translate(
-    'sharedUXPackages.dateRangePicker.settingsPanel.autoRefreshUnitHours',
-    { defaultMessage: 'hours' }
-  ),
   roundRelativeTimeLabel: i18n.translate(
     'sharedUXPackages.dateRangePicker.settingsPanel.roundRelativeTimeLabel',
     { defaultMessage: 'Round relative time ranges' }
@@ -340,6 +318,35 @@ export const autoRefreshButtonTexts = {
     }),
 };
 
+export const refreshIntervalTexts = {
+  label: i18n.translate('sharedUXPackages.dateRangePicker.refreshInterval.label', {
+    defaultMessage: 'Refresh every',
+  }),
+  intervalCountAriaLabel: i18n.translate(
+    'sharedUXPackages.dateRangePicker.refreshInterval.intervalCountAriaLabel',
+    { defaultMessage: 'Refresh interval count' }
+  ),
+  intervalUnitAriaLabel: i18n.translate(
+    'sharedUXPackages.dateRangePicker.refreshInterval.intervalUnitAriaLabel',
+    { defaultMessage: 'Refresh interval unit' }
+  ),
+  unitSeconds: i18n.translate('sharedUXPackages.dateRangePicker.refreshInterval.unitSeconds', {
+    defaultMessage: 'seconds',
+  }),
+  unitMinutes: i18n.translate('sharedUXPackages.dateRangePicker.refreshInterval.unitMinutes', {
+    defaultMessage: 'minutes',
+  }),
+  unitHours: i18n.translate('sharedUXPackages.dateRangePicker.refreshInterval.unitHours', {
+    defaultMessage: 'hours',
+  }),
+};
+
+export const autoRefreshPanelTexts = {
+  doneButton: i18n.translate('sharedUXPackages.dateRangePicker.autoRefreshPanel.doneButton', {
+    defaultMessage: 'Done',
+  }),
+};
+
 export const mainPanelTexts = {
   presetsLabel: i18n.translate('sharedUXPackages.dateRangePicker.mainPanel.presetsLabel', {
     defaultMessage: 'Presets',
@@ -354,6 +361,19 @@ export const mainPanelTexts = {
   customTimeRangePanelTitle: i18n.translate(
     'sharedUXPackages.dateRangePicker.mainPanel.customTimeRangePanelTitle',
     { defaultMessage: 'Custom range' }
+  ),
+  autoRefreshPanelTitle: i18n.translate(
+    'sharedUXPackages.dateRangePicker.mainPanel.autoRefreshPanelTitle',
+    { defaultMessage: 'Auto-refresh' }
+  ),
+  autoRefreshEveryLabel: (count: number, unit: AutoRefreshIntervalUnit) =>
+    i18n.translate('sharedUXPackages.dateRangePicker.mainPanel.autoRefreshEveryLabel', {
+      defaultMessage: 'Every {count} {unit, select, s {sec} m {min} h {hr} other {}}',
+      values: { count, unit },
+    }),
+  autoRefreshDisabledLabel: i18n.translate(
+    'sharedUXPackages.dateRangePicker.mainPanel.autoRefreshDisabledLabel',
+    { defaultMessage: 'Disabled' }
   ),
   savePresetTooltip: i18n.translate(
     'sharedUXPackages.dateRangePicker.mainPanel.savePresetTooltip',

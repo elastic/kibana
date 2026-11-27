@@ -1,0 +1,391 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { useState } from 'react';
+import { fireEvent, screen } from '@testing-library/react';
+import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
+
+import type { AutoRefreshSettings } from '../types';
+import { RefreshInterval } from './refresh_interval';
+
+describe('RefreshInterval', () => {
+  it.each<[string, AutoRefreshSettings, Partial<AutoRefreshSettings>]>([
+    [
+      'starts the timer when turned on',
+      { isEnabled: false, isPaused: true, intervalMs: 10_000 },
+      { isEnabled: true, isPaused: false },
+    ],
+    [
+      'pauses the timer when turned off',
+      { isEnabled: true, isPaused: false, intervalMs: 10_000 },
+      { isEnabled: false, isPaused: true },
+    ],
+  ])('%s', (_, value, expected) => {
+    const onChange = jest.fn();
+    renderWithEuiTheme(<RefreshInterval value={value} onChange={onChange} />);
+
+    fireEvent.click(screen.getByTestId('dateRangePickerAutoRefreshToggle'));
+
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange).toHaveBeenCalledWith({ ...value, ...expected });
+  });
+
+  it('updates `intervalMs` when the count field changes', () => {
+    const onChange = jest.fn();
+    renderWithEuiTheme(
+      <RefreshInterval
+        value={{ isEnabled: true, isPaused: false, intervalMs: 60_000, intervalDisplayUnit: 'm' }}
+        onChange={onChange}
+      />
+    );
+
+    const count = screen.getByTestId('dateRangePickerAutoRefreshIntervalCount');
+    expect(count).toHaveValue(1);
+
+    fireEvent.change(count, { target: { value: '5' } });
+
+    expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ intervalMs: 5 * 60_000 }));
+  });
+
+  it('updates `intervalMs` and `intervalDisplayUnit` when the unit select changes', () => {
+    const onChange = jest.fn();
+    renderWithEuiTheme(
+      <RefreshInterval
+        value={{ isEnabled: true, isPaused: false, intervalMs: 60_000, intervalDisplayUnit: 'm' }}
+        onChange={onChange}
+      />
+    );
+
+    fireEvent.change(screen.getByTestId('dateRangePickerAutoRefreshIntervalUnit'), {
+      target: { value: 'h' },
+    });
+
+    expect(onChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ intervalDisplayUnit: 'h', intervalMs: 60 * 60_000 })
+    );
+  });
+
+  it('keeps a decimal count below one when the unit changes', () => {
+    const onChange = jest.fn();
+    renderWithEuiTheme(
+      <RefreshInterval
+        value={{ isEnabled: true, isPaused: false, intervalMs: 60_000, intervalDisplayUnit: 'm' }}
+        onChange={onChange}
+      />
+    );
+
+    fireEvent.change(screen.getByTestId('dateRangePickerAutoRefreshIntervalCount'), {
+      target: { value: '0.5' },
+    });
+    fireEvent.change(screen.getByTestId('dateRangePickerAutoRefreshIntervalUnit'), {
+      target: { value: 'h' },
+    });
+
+    expect(onChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ intervalDisplayUnit: 'h', intervalMs: 1_800_000 })
+    );
+  });
+
+  it('re-syncs the count field when intervalMs stays the same but intervalDisplayUnit is updated externally', () => {
+    const Harness = () => {
+      const [value, setValue] = useState<AutoRefreshSettings>({
+        isEnabled: true,
+        isPaused: true,
+        intervalMs: 60_000,
+        intervalDisplayUnit: 'm',
+      });
+
+      return (
+        <>
+          <button
+            type="button"
+            data-test-subj="externalSameMsSwitchToSeconds"
+            onClick={() => setValue((prev) => ({ ...prev, intervalDisplayUnit: 's' }))}
+          />
+          <RefreshInterval value={value} onChange={setValue} />
+        </>
+      );
+    };
+
+    renderWithEuiTheme(<Harness />);
+
+    expect(screen.getByTestId('dateRangePickerAutoRefreshIntervalCount')).toHaveValue(1);
+
+    fireEvent.click(screen.getByTestId('externalSameMsSwitchToSeconds'));
+
+    expect(screen.getByTestId('dateRangePickerAutoRefreshIntervalCount')).toHaveValue(60);
+  });
+
+  describe('with a decimal count', () => {
+    const renderHarness = (onChange: (value: AutoRefreshSettings) => void) => {
+      const Harness = () => {
+        const [value, setValue] = useState<AutoRefreshSettings>({
+          isEnabled: true,
+          isPaused: false,
+          intervalMs: 60_000,
+          intervalDisplayUnit: 'm',
+        });
+
+        return (
+          <RefreshInterval
+            value={value}
+            onChange={(next) => {
+              onChange(next);
+              setValue(next);
+            }}
+          />
+        );
+      };
+
+      renderWithEuiTheme(<Harness />);
+    };
+
+    it('applies it in the shown unit', () => {
+      const onChange = jest.fn();
+      renderHarness(onChange);
+
+      const count = screen.getByTestId('dateRangePickerAutoRefreshIntervalCount');
+      fireEvent.change(count, { target: { value: '1.5' } });
+      fireEvent.blur(count);
+
+      expect(onChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({ intervalMs: 90_000, intervalDisplayUnit: 'm' })
+      );
+      expect(count).toHaveValue(1.5);
+      expect(screen.getByTestId('dateRangePickerAutoRefreshIntervalUnit')).toHaveValue('m');
+    });
+
+    it('rounds it to two decimals', () => {
+      const onChange = jest.fn();
+      renderHarness(onChange);
+
+      const count = screen.getByTestId('dateRangePickerAutoRefreshIntervalCount');
+      fireEvent.change(count, { target: { value: '1.255' } });
+      fireEvent.blur(count);
+
+      expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ intervalMs: 75_000 }));
+      expect(count).toHaveValue(1.25);
+    });
+  });
+
+  it.each<[string, number, AutoRefreshSettings['intervalDisplayUnit'], string]>([
+    ['without a minimum', 0, 'm', '0'],
+    ['with a minimum in seconds', 5000, 's', '5'],
+    ['with a minimum below one minute', 5000, 'm', '0'],
+  ])('sets the field minimum to a whole count %s', (_, minIntervalMs, unit, expected) => {
+    renderWithEuiTheme(
+      <RefreshInterval
+        value={{ isEnabled: true, isPaused: false, intervalMs: 60_000, intervalDisplayUnit: unit }}
+        onChange={jest.fn()}
+        minIntervalMs={minIntervalMs}
+      />
+    );
+
+    expect(screen.getByTestId('dateRangePickerAutoRefreshIntervalCount')).toHaveAttribute(
+      'min',
+      expected
+    );
+  });
+
+  it('does not apply a count that rounds to zero', () => {
+    const onChange = jest.fn();
+    renderWithEuiTheme(
+      <RefreshInterval
+        value={{ isEnabled: true, isPaused: false, intervalMs: 10_000, intervalDisplayUnit: 's' }}
+        onChange={onChange}
+      />
+    );
+
+    const count = screen.getByTestId('dateRangePickerAutoRefreshIntervalCount');
+    fireEvent.change(count, { target: { value: '0.001' } });
+    fireEvent.blur(count);
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(count).toHaveValue(10);
+  });
+
+  it.each(['0', '-3', ''])(
+    'reverts the count "%s" to the current interval once focus leaves the form',
+    (typed) => {
+      const onChange = jest.fn();
+      renderWithEuiTheme(
+        <RefreshInterval
+          value={{ isEnabled: true, isPaused: false, intervalMs: 10_000, intervalDisplayUnit: 's' }}
+          onChange={onChange}
+        />
+      );
+
+      const count = screen.getByTestId('dateRangePickerAutoRefreshIntervalCount');
+      fireEvent.change(count, { target: { value: typed } });
+      fireEvent.blur(count);
+
+      expect(count).toHaveValue(10);
+      expect(onChange).not.toHaveBeenCalled();
+    }
+  );
+
+  it('disables every control when `readOnly`', () => {
+    renderWithEuiTheme(
+      <RefreshInterval
+        value={{ isEnabled: true, isPaused: false, intervalMs: 10_000 }}
+        onChange={jest.fn()}
+        readOnly
+      />
+    );
+
+    expect(screen.getByTestId('dateRangePickerAutoRefreshToggle')).toBeDisabled();
+    expect(screen.getByTestId('dateRangePickerAutoRefreshIntervalCount')).toBeDisabled();
+    expect(screen.getByTestId('dateRangePickerAutoRefreshIntervalUnit')).toBeDisabled();
+  });
+
+  it('keeps the shown unit when the count changes', () => {
+    const Harness = () => {
+      const [value, setValue] = useState<AutoRefreshSettings>({
+        isEnabled: true,
+        isPaused: false,
+        intervalMs: 59_000,
+        intervalDisplayUnit: 'm',
+      });
+
+      return <RefreshInterval value={value} onChange={setValue} />;
+    };
+
+    renderWithEuiTheme(<Harness />);
+
+    const count = screen.getByTestId('dateRangePickerAutoRefreshIntervalCount');
+    const unit = screen.getByTestId('dateRangePickerAutoRefreshIntervalUnit');
+    expect(count).toHaveValue(59);
+    expect(unit).toHaveValue('s');
+
+    fireEvent.change(count, { target: { value: '60' } });
+
+    expect(count).toHaveValue(60);
+    expect(unit).toHaveValue('s');
+  });
+
+  describe('with `minIntervalMs`', () => {
+    it('does not apply a count below the minimum while typing and raises it on blur', () => {
+      const onChange = jest.fn();
+      renderWithEuiTheme(
+        <RefreshInterval
+          value={{ isEnabled: true, isPaused: false, intervalMs: 60_000, intervalDisplayUnit: 's' }}
+          onChange={onChange}
+          minIntervalMs={5000}
+        />
+      );
+
+      const count = screen.getByTestId('dateRangePickerAutoRefreshIntervalCount');
+      fireEvent.change(count, { target: { value: '2' } });
+
+      expect(onChange).not.toHaveBeenCalled();
+
+      fireEvent.blur(count);
+
+      expect(count).toHaveValue(5);
+      expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ intervalMs: 5000 }));
+    });
+
+    it('applies the typed count to the unit picked right after it', () => {
+      const onChange = jest.fn();
+      renderWithEuiTheme(
+        <RefreshInterval
+          value={{ isEnabled: true, isPaused: false, intervalMs: 60_000, intervalDisplayUnit: 's' }}
+          onChange={onChange}
+          minIntervalMs={5000}
+        />
+      );
+
+      const count = screen.getByTestId('dateRangePickerAutoRefreshIntervalCount');
+      const unit = screen.getByTestId('dateRangePickerAutoRefreshIntervalUnit');
+      fireEvent.change(count, { target: { value: '2' } });
+      fireEvent.blur(count, { relatedTarget: unit });
+
+      expect(count).toHaveValue(2);
+      expect(onChange).not.toHaveBeenCalled();
+
+      fireEvent.change(unit, { target: { value: 'm' } });
+
+      expect(onChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({ intervalDisplayUnit: 'm', intervalMs: 2 * 60_000 })
+      );
+    });
+
+    it.each<[string, boolean]>([
+      ['off', false],
+      ['on', true],
+    ])(
+      'leaves an unedited interval below the minimum as is when auto-refresh is %s',
+      (_, isEnabled) => {
+        const onChange = jest.fn();
+        renderWithEuiTheme(
+          <>
+            <RefreshInterval
+              value={{
+                isEnabled,
+                isPaused: !isEnabled,
+                intervalMs: 2000,
+                intervalDisplayUnit: 's',
+              }}
+              onChange={onChange}
+              minIntervalMs={5000}
+            />
+            <button type="button" data-test-subj="outside" />
+          </>
+        );
+
+        fireEvent.blur(screen.getByTestId('dateRangePickerAutoRefreshToggle'), {
+          relatedTarget: screen.getByTestId('outside'),
+        });
+
+        expect(onChange).not.toHaveBeenCalled();
+        expect(screen.getByTestId('dateRangePickerAutoRefreshIntervalCount')).toHaveValue(2);
+      }
+    );
+
+    it('keeps a decimal count that meets the minimum in the picked unit', () => {
+      const onChange = jest.fn();
+      renderWithEuiTheme(
+        <RefreshInterval
+          value={{ isEnabled: true, isPaused: false, intervalMs: 60_000, intervalDisplayUnit: 's' }}
+          onChange={onChange}
+          minIntervalMs={5000}
+        />
+      );
+
+      const count = screen.getByTestId('dateRangePickerAutoRefreshIntervalCount');
+      const unit = screen.getByTestId('dateRangePickerAutoRefreshIntervalUnit');
+      fireEvent.change(count, { target: { value: '0.5' } });
+      fireEvent.blur(count, { relatedTarget: unit });
+      fireEvent.change(unit, { target: { value: 'm' } });
+
+      expect(onChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({ intervalDisplayUnit: 'm', intervalMs: 30_000 })
+      );
+    });
+
+    it('raises the count to the minimum when switching to a smaller unit', () => {
+      const onChange = jest.fn();
+      renderWithEuiTheme(
+        <RefreshInterval
+          value={{ isEnabled: true, isPaused: false, intervalMs: 60_000, intervalDisplayUnit: 'm' }}
+          onChange={onChange}
+          minIntervalMs={5000}
+        />
+      );
+
+      fireEvent.change(screen.getByTestId('dateRangePickerAutoRefreshIntervalUnit'), {
+        target: { value: 's' },
+      });
+
+      expect(onChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({ intervalDisplayUnit: 's', intervalMs: 5000 })
+      );
+    });
+  });
+});

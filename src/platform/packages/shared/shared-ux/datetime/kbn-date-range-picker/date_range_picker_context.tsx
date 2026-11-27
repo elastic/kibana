@@ -32,6 +32,7 @@ import type {
   InitialFocus,
   CalendarOptions,
   DateRangePickerSettings,
+  AutoRefreshSettings,
 } from './types';
 import { DATE_RANGE_INPUT_DELIMITER } from './constants';
 import { hasRoundedOffset } from './utils';
@@ -132,10 +133,18 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   isLoading: boolean;
   /** Calendar-specific options (e.g. first day of week). */
   calendarOptions?: CalendarOptions;
-  /** Current picker settings (e.g. rounding, refresh). */
+  /** Current picker display settings (e.g. rounding, time precision). */
   settings: DateRangePickerSettings;
   /** Called when the user changes a setting in the settings panel. */
   onSettingsChange: (settings: DateRangePickerSettings) => void;
+  /** Current auto-refresh state. */
+  autoRefresh?: AutoRefreshSettings;
+  /** Called when the user changes the auto-refresh state. No-op when the prop is not set. */
+  onAutoRefreshChange: (autoRefresh: AutoRefreshSettings) => void;
+  /** Whether the auto-refresh controls show the state without letting the user change it, because `onAutoRefreshChange` was not provided. */
+  isAutoRefreshReadOnly: boolean;
+  /** Lowest refresh interval the user can set, in milliseconds. */
+  autoRefreshMinIntervalMs?: number;
   /**
    * A valid time zone name from the IANA database, e.g. "America/Los_Angeles".
    * Used for calendar day boundaries and displayed in the panel footer.
@@ -143,9 +152,9 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   timeZone?: string;
   /** Seconds until the next auto-refresh. While paused, this value is frozen at the last countdown value. `null` when auto-refresh is disabled or the interval is invalid. */
   autoRefreshSecondsRemaining: number | null;
-  /** Toggles `settings.autoRefresh.isPaused` (play/pause on the input append). No-op when `settings.autoRefresh` is not set. */
+  /** Toggles `autoRefresh.isPaused` (play/pause on the input append). No-op when `autoRefresh` is not set. */
   toggleAutoRefresh: () => void;
-  /** Whether an `onRefresh` callback was provided; used to gate auto-refresh UI without exposing the function. */
+  /** Whether both `onRefresh` and `autoRefresh` were provided; gates the auto-refresh UI without exposing the callback. */
   hasAutoRefresh: boolean;
   /** Prepends the Kibana server basePath to a URL path. Identity function when not provided. */
   prependBasePath: (path: string) => string;
@@ -194,6 +203,9 @@ export function DateRangePickerProvider({
   calendarOptions,
   settings = { roundRelativeTime: false },
   onSettingsChange,
+  autoRefresh,
+  onAutoRefreshChange: onAutoRefreshChangeProp,
+  autoRefreshMinIntervalMs,
   timeZone,
   onRefresh,
   refreshEpoch,
@@ -298,32 +310,29 @@ export function DateRangePickerProvider({
     [text, value, transformOptions]
   );
 
-  const hasAutoRefresh = !!onRefresh;
+  const hasAutoRefresh = !!onRefresh && !!autoRefresh;
 
-  const refreshTimerPaused =
-    !onRefresh ||
-    !settings.autoRefresh ||
-    !settings.autoRefresh.isEnabled ||
-    settings.autoRefresh.isPaused;
+  const refreshTimerPaused = !hasAutoRefresh || !autoRefresh?.isEnabled || autoRefresh.isPaused;
 
   const { secondsRemaining: autoRefreshSecondsRemaining } = useAutoRefresh({
     isPaused: refreshTimerPaused,
-    intervalMs: settings.autoRefresh?.isEnabled ? settings.autoRefresh.intervalMs : 0,
+    intervalMs: autoRefresh?.isEnabled ? autoRefresh.intervalMs : 0,
     onRefresh: onAutoRefresh,
     refreshEpoch,
   });
 
-  const toggleAutoRefresh = useCallback(() => {
-    if (!settings.autoRefresh) return;
+  const onAutoRefreshChange = useCallback(
+    (next: AutoRefreshSettings) => onAutoRefreshChangeProp?.(next),
+    [onAutoRefreshChangeProp]
+  );
 
-    onSettingsChange({
-      ...settings,
-      autoRefresh: {
-        ...settings.autoRefresh,
-        isPaused: !settings.autoRefresh.isPaused,
-      },
-    });
-  }, [settings, onSettingsChange]);
+  const isAutoRefreshReadOnly = !onAutoRefreshChangeProp;
+
+  const toggleAutoRefresh = useCallback(() => {
+    if (!autoRefresh) return;
+
+    onAutoRefreshChange({ ...autoRefresh, isPaused: !autoRefresh.isPaused });
+  }, [autoRefresh, onAutoRefreshChange]);
 
   /** Apply a range: parse it, call `onChange`, and exit editing mode. */
   const applyRange = useCallback(
@@ -393,6 +402,10 @@ export function DateRangePickerProvider({
       calendarOptions,
       settings,
       onSettingsChange,
+      autoRefresh,
+      onAutoRefreshChange,
+      isAutoRefreshReadOnly,
+      autoRefreshMinIntervalMs,
       timeZone,
       autoRefreshSecondsRemaining,
       toggleAutoRefresh,
@@ -429,6 +442,10 @@ export function DateRangePickerProvider({
       calendarOptions,
       settings,
       onSettingsChange,
+      autoRefresh,
+      onAutoRefreshChange,
+      isAutoRefreshReadOnly,
+      autoRefreshMinIntervalMs,
       timeZone,
       autoRefreshSecondsRemaining,
       toggleAutoRefresh,
