@@ -227,7 +227,7 @@ export const routes = [
     path: ENTITY_ANALYTICS_AI_AGENTS_PATH,
     component: withSecurityRoutePageWrapper(
       EntityAnalyticsAiAgentsContainer,
-      SecurityPageName.entityAnalyticsHomePage
+      SecurityPageName.entityAnalyticsAiAgents
     ),
   },
   {

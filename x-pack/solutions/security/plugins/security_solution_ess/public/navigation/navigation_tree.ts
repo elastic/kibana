@@ -75,6 +75,11 @@ export const createNavigationTree = (
       },
       defaultNavigationTree.cases(),
       defaultNavigationTree.entityAnalytics(),
+      {
+        id: SecurityPageName.entityAnalyticsAiAgents,
+        icon: 'sparkles',
+        link: securityLink(SecurityPageName.entityAnalyticsAiAgents),
+      },
       defaultNavigationTree.explore(),
       defaultNavigationTree.investigations(),
       {

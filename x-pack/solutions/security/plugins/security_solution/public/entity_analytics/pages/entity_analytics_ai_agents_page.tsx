@@ -129,7 +129,7 @@ export const EntityAnalyticsAiAgentsPage = () => {
           </EuiPanel>
         </>
       )}
-      <SpyRoute pageName={SecurityPageName.entityAnalyticsHomePage} />
+      <SpyRoute pageName={SecurityPageName.entityAnalyticsAiAgents} />
     </SecuritySolutionPageWrapper>
   );
 };
