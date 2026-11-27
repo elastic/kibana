@@ -7,8 +7,8 @@
 
 // Extend jest with a custom matcher
 import '../test_utilities/extend_jest';
-import type { ReactWrapper } from 'enzyme';
-import { mount } from 'enzyme';
+import type { RenderResult } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { useCamera } from './use_camera';
 import { Provider } from 'react-redux-v7';
@@ -22,7 +22,6 @@ import { mock as mockResolverTree } from '../models/resolver_tree';
 import { createStore, combineReducers } from 'redux-v4';
 import { mockTreeFetcherParameters } from '../mocks/tree_fetcher_parameters';
 import * as nodeModel from '../../../common/endpoint/models/node';
-import { act } from 'react-dom/test-utils';
 import { mockResolverNode } from '../mocks/resolver_node';
 import { endpointSourceSchema } from '../mocks/tree_schema';
 import { panAnimationDuration } from '../store/camera/scaling_constants';
@@ -33,12 +32,12 @@ import { mockReducer } from '../store/helpers';
 const id = 'test-id';
 
 describe('useCamera on an unpainted element', () => {
-  /** Enzyme full DOM wrapper for the element the camera is attached to. */
-  let element: ReactWrapper;
+  /** The DOM element the camera is attached to. */
+  let element: HTMLElement;
   /**
-   * Enzyme full DOM wrapper for the alternate element that the camera can be attached to. Used for testing that the `ResizeObserver` attaches itself to the latest `ref`.
+   * The alternate element that the camera can be attached to. Used for testing that the `ResizeObserver` attaches itself to the latest `ref`.
    */
-  let alternateElement: ReactWrapper;
+  let alternateElement: HTMLElement;
   /**
    * projection matrix returned by camera on last render.
    */
@@ -52,15 +51,11 @@ describe('useCamera on an unpainted element', () => {
    */
   const alternateTestID = 'alternate';
   /**
-   * Returned by the legacy framework's render/mount function.
+   * Returned by the `@testing-library/react` render function.
    */
-  let wrapper: ReactWrapper;
+  let renderResult: RenderResult;
   let store: ResolverStore;
   let simulator: SideEffectSimulator;
-
-  /** Used to find an element by the data-test-subj attribute.
-   */
-  let domElementByTestSubj: (testSubj: string) => ReactWrapper;
 
   /**
    * Yield the result of `mapper` over and over, once per event-loop cycle.
@@ -72,11 +67,10 @@ describe('useCamera on an unpainted element', () => {
     while (timeoutCount < 10) {
       timeoutCount++;
       yield mapper();
-      await new Promise<void>((resolve) => {
-        setTimeout(() => {
-          wrapper.update();
-          resolve();
-        }, 0);
+      await act(async () => {
+        await new Promise<void>((resolve) => {
+          setTimeout(resolve, 0);
+        });
       });
     }
   }
@@ -115,13 +109,13 @@ describe('useCamera on an unpainted element', () => {
     projectionMatrix = camera.projectionMatrix;
     return useAlternateElement ? (
       <>
-        <div data-test-subj={testID} onMouseDown={onMouseDown} ref={ref} />
-        <div data-test-subj={alternateTestID} />
+        <div data-test-subj={testID} />
+        <div data-test-subj={alternateTestID} onMouseDown={onMouseDown} ref={ref} />
       </>
     ) : (
       <>
-        <div data-test-subj={testID} />
-        <div data-test-subj={alternateTestID} onMouseDown={onMouseDown} ref={ref} />
+        <div data-test-subj={testID} onMouseDown={onMouseDown} ref={ref} />
+        <div data-test-subj={alternateTestID} />
       </>
     );
   }
@@ -132,17 +126,11 @@ describe('useCamera on an unpainted element', () => {
 
     simulator = sideEffectSimulatorFactory();
 
-    wrapper = mount(<TestWrapper resolverStore={store} sideEffectors={simulator.mock} />);
+    renderResult = render(<TestWrapper resolverStore={store} sideEffectors={simulator.mock} />);
 
-    domElementByTestSubj = (testSubj: string) =>
-      wrapper
-        .find(`[data-test-subj="${testSubj}"]`)
-        // Omit React components that may be returned.
-        .filterWhere((item) => typeof item.type() === 'string');
+    element = screen.getByTestId(testID);
 
-    element = domElementByTestSubj(testID);
-
-    alternateElement = domElementByTestSubj(alternateTestID);
+    alternateElement = screen.getByTestId(alternateTestID);
   });
   it('returns a projectionMatrix that changes everything to 0', () => {
     expect(applyMatrix3([0, 0], projectionMatrix)).toEqual([0, 0]);
@@ -156,7 +144,7 @@ describe('useCamera on an unpainted element', () => {
     const centerY = height / 2 + topMargin;
     beforeEach(async () => {
       act(() => {
-        simulator.controls.simulateElementResize(element.getDOMNode(), {
+        simulator.controls.simulateElementResize(element, {
           width,
           height,
           left: leftMargin,
@@ -172,39 +160,41 @@ describe('useCamera on an unpainted element', () => {
       });
     });
 
-    it('provides a projection matrix that inverts the y axis and translates 400,300 (center of the element)', () => {
-      expect(map(() => applyMatrix3([0, 0], projectionMatrix))).toYieldEqualTo([400, 300]);
+    it('provides a projection matrix that inverts the y axis and translates 400,300 (center of the element)', async () => {
+      await expect(map(() => applyMatrix3([0, 0], projectionMatrix))).toYieldEqualTo([400, 300]);
     });
     describe('when the user presses the mousedown button in the middle of the element', () => {
       beforeEach(() => {
-        element.simulate('mousedown', {
+        fireEvent.mouseDown(element, {
           clientX: centerX,
           clientY: centerY,
         });
       });
       describe('when the user moves the mouse 50 pixels to the right', () => {
         beforeEach(() => {
-          element.simulate('mousemove', {
+          fireEvent.mouseMove(element, {
             clientX: centerX + 50,
             clientY: centerY,
           });
         });
-        it('should project [0, 0] in world corrdinates 50 pixels to the right of the center of the element', () => {
-          expect(map(() => applyMatrix3([0, 0], projectionMatrix))).toYieldEqualTo([450, 300]);
+        it('should project [0, 0] in world corrdinates 50 pixels to the right of the center of the element', async () => {
+          await expect(map(() => applyMatrix3([0, 0], projectionMatrix))).toYieldEqualTo([
+            450, 300,
+          ]);
         });
       });
     });
 
     describe('when the user uses the mousewheel w/ ctrl held down', () => {
       beforeEach(() => {
-        element.simulate('wheel', {
+        fireEvent.wheel(element, {
           ctrlKey: true,
           deltaY: -10,
           deltaMode: 0,
         });
       });
-      it('should zoom in', () => {
-        expect(map(() => projectionMatrix)).toYieldEqualTo([
+      it('should zoom in', async () => {
+        await expect(map(() => projectionMatrix)).toYieldEqualTo([
           1.0292841801261479, 0, 400, 0, -1.0292841801261479, 300, 0, 0, 0,
         ]);
       });
@@ -212,16 +202,16 @@ describe('useCamera on an unpainted element', () => {
 
     describe('when the element the camera is attached to is switched', () => {
       beforeEach(() => {
-        wrapper.setProps({
-          useAlternateElement: true,
-        });
+        renderResult.rerender(
+          <TestWrapper resolverStore={store} sideEffectors={simulator.mock} useSecondElement />
+        );
       });
       describe('and when that element changes size to 1200x800', () => {
         beforeEach(() => {
           act(() => {
             const alternateElementWidth = 1200;
             const alternateElementHeight = 800;
-            simulator.controls.simulateElementResize(alternateElement.getDOMNode(), {
+            simulator.controls.simulateElementResize(alternateElement, {
               width: alternateElementWidth,
               height: alternateElementHeight,
               left: leftMargin,
@@ -236,8 +226,10 @@ describe('useCamera on an unpainted element', () => {
             });
           });
         });
-        it('provides a projection matrix that inverts the y axis and translates 600,400', () => {
-          expect(map(() => applyMatrix3([0, 0], projectionMatrix))).toYieldEqualTo([600, 400]);
+        it('provides a projection matrix that inverts the y axis and translates 600,400', async () => {
+          await expect(map(() => applyMatrix3([0, 0], projectionMatrix))).toYieldEqualTo([
+            600, 400,
+          ]);
         });
       });
     });
@@ -266,15 +258,17 @@ describe('useCamera on an unpainted element', () => {
         const tree = mockResolverTree({ nodes });
         if (tree !== null) {
           const { schema, dataSource } = endpointSourceSchema();
-          store.dispatch(
-            serverReturnedResolverData({
-              id,
-              result: tree,
-              dataSource,
-              schema,
-              parameters: mockTreeFetcherParameters(),
-            })
-          );
+          act(() => {
+            store.dispatch(
+              serverReturnedResolverData({
+                id,
+                result: tree,
+                dataSource,
+                schema,
+                parameters: mockTreeFetcherParameters(),
+              })
+            );
+          });
         } else {
           throw new Error('failed to create tree');
         }
@@ -290,7 +284,9 @@ describe('useCamera on an unpainted element', () => {
         if (!nodeID) {
           throw new Error('could not find nodeID for process');
         }
-        store.dispatch(userSelectedResolverNode({ id, time: simulator.controls.time, nodeID }));
+        act(() => {
+          store.dispatch(userSelectedResolverNode({ id, time: simulator.controls.time, nodeID }));
+        });
       });
 
       it('should request animation frames in a loop', () => {
@@ -301,7 +297,9 @@ describe('useCamera on an unpainted element', () => {
         // Update the time so that the animation is partially complete.
         simulator.controls.time = animationDuration / 5;
         // Provide the animation frame, allowing the camera to rerender.
-        simulator.controls.provideAnimationFrame();
+        act(() => {
+          simulator.controls.provideAnimationFrame();
+        });
 
         // The animation is not complete, so the camera should request another animation frame.
         expect(simulator.mock.requestAnimationFrame).toHaveBeenCalledTimes(2);
@@ -310,7 +308,9 @@ describe('useCamera on an unpainted element', () => {
         simulator.controls.time = (animationDuration / 10) * 9;
 
         // Provide the animation frame
-        simulator.controls.provideAnimationFrame();
+        act(() => {
+          simulator.controls.provideAnimationFrame();
+        });
 
         // Since the animation isn't complete, it should request another frame
         expect(simulator.mock.requestAnimationFrame).toHaveBeenCalledTimes(3);
@@ -319,7 +319,9 @@ describe('useCamera on an unpainted element', () => {
         simulator.controls.time = animationDuration * 1.1;
 
         // Provide the last frame
-        simulator.controls.provideAnimationFrame();
+        act(() => {
+          simulator.controls.provideAnimationFrame();
+        });
 
         // Since animation is complete, it should not have requseted another frame
         expect(simulator.mock.requestAnimationFrame).toHaveBeenCalledTimes(3);

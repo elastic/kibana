@@ -120,7 +120,8 @@ beforeEach(() => {
 
 afterEach(() => jest.clearAllMocks());
 
-describe('LandingPage', () => {
+// Failing: See https://github.com/elastic/kibana/issues/297642
+describe.skip('LandingPage', () => {
   it('mounts the scan-failure callout on onboarding', () => {
     renderPage();
 

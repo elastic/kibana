@@ -24,7 +24,8 @@
       "HEAD"
     ],
     "patterns": [
-      "{index}/_doc/{id}"
+      "{index}/_doc/{id}",
+      "{index}/{_slice}/_doc/{id}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-get",
     "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-get",

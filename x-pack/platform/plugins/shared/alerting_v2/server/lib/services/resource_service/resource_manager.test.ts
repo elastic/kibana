@@ -8,22 +8,29 @@
 import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
-import type { IRetryService } from '../retry_service/alerting_retry_service';
+import type { IRetryService, RetryOptions } from '../retry_service/types';
 import { LoggerService } from '../logger_service/logger_service';
 import { ResourceManager } from './resource_manager';
 import type { IResourceInitializer } from './resource_manager';
 
+class RetryServiceMock implements IRetryService {
+  public readonly calls: RetryOptions[] = [];
+
+  public async retry<T>(callback: () => Promise<T>, options: RetryOptions): Promise<T> {
+    this.calls.push(options);
+    return callback();
+  }
+}
+
 describe('ResourceManager', () => {
   let mockLogger: jest.Mocked<Logger>;
   let loggerService: LoggerService;
+  let retryService: RetryServiceMock;
 
   function createManager() {
     mockLogger = loggerMock.create();
     loggerService = new LoggerService(mockLogger);
-
-    const retryService: IRetryService = {
-      retry: async (cb) => await cb(),
-    };
+    retryService = new RetryServiceMock();
 
     return new ResourceManager(loggerService, retryService);
   }
@@ -38,7 +45,7 @@ describe('ResourceManager', () => {
     jest.clearAllMocks();
   });
 
-  it('starts all registered resources and waitUntilReady resolves', async () => {
+  it('starts all registered resources', async () => {
     const manager = createManager();
 
     const initA = createInitializer(async () => {});
@@ -48,13 +55,36 @@ describe('ResourceManager', () => {
     manager.registerResource('r2', initB);
 
     manager.startInitialization();
-    await expect(manager.waitUntilReady()).resolves.toBeUndefined();
+
+    expect(initA.initialize).toHaveBeenCalledTimes(1);
+    expect(initB.initialize).toHaveBeenCalledTimes(1);
+
+    await expect(manager.waitForResources(['r1', 'r2'])).resolves.toBeUndefined();
 
     expect(initA.initialize).toHaveBeenCalledTimes(1);
     expect(initB.initialize).toHaveBeenCalledTimes(1);
 
     expect(manager.isReady('r1')).toBe(true);
     expect(manager.isReady('r2')).toBe(true);
+  });
+
+  it('retries each initializer through the resources logger labelled with the resource', async () => {
+    const manager = createManager();
+
+    manager.registerResource(
+      'r1',
+      createInitializer(async () => {})
+    );
+    manager.startInitialization();
+    await manager.waitForResources(['r1']);
+
+    expect(retryService.calls).toHaveLength(1);
+    const [{ logger }] = retryService.calls;
+
+    logger.info({ message: 'probe' });
+
+    expect(mockLogger.get).toHaveBeenCalledWith('resources');
+    expect(mockLogger.info).toHaveBeenCalledWith('probe', { labels: { resource: 'r1' } });
   });
 
   it('fails fast for consumers when a resource permanently fails (and does not retry on subsequent waits)', async () => {
@@ -68,7 +98,9 @@ describe('ResourceManager', () => {
     manager.registerResource('r1', init);
     manager.startInitialization();
 
-    await expect(manager.waitUntilReady()).rejects.toThrow('Error initializing resource');
+    await expect(manager.waitForResources(['r1'])).rejects.toThrow('Error initializing resource');
+    // A second wait must reuse the stored failure instead of re-running the initializer.
+    await expect(manager.waitForResources(['r1'])).rejects.toThrow('Error initializing resource');
 
     expect(init.initialize).toHaveBeenCalledTimes(1);
   });
@@ -101,55 +133,82 @@ describe('ResourceManager', () => {
     );
   });
 
-  describe('optional', () => {
-    it('waitUntilReady resolves even when an optional resource fails', async () => {
+  describe('waitForResources', () => {
+    it('resolves once the requested resources are ready', async () => {
       const manager = createManager();
 
-      const initHard = createInitializer(async () => {});
-      const initSoft = createInitializer(async () => {
-        throw new Error('view creation failed');
-      });
-
-      manager.registerResource('hard', initHard);
-      manager.registerResource('soft', initSoft, { optional: true });
-
+      manager.registerResource(
+        'r1',
+        createInitializer(async () => {})
+      );
+      manager.registerResource(
+        'r2',
+        createInitializer(async () => {})
+      );
       manager.startInitialization();
-      await expect(manager.waitUntilReady()).resolves.toBeUndefined();
 
-      expect(manager.isReady('hard')).toBe(true);
-      expect(manager.isReady('soft')).toBe(false);
+      await expect(manager.waitForResources(['r1', 'r2'])).resolves.toBeUndefined();
+
+      expect(manager.isReady('r1')).toBe(true);
+      expect(manager.isReady('r2')).toBe(true);
     });
 
-    it('waitUntilReady rejects when a required resource fails alongside an optional one', async () => {
+    it('does not wait for a pending resource that was not requested', async () => {
       const manager = createManager();
 
-      const initHard = createInitializer(async () => {
-        throw new Error('hard failure');
-      });
-      const initSoft = createInitializer(async () => {
-        throw new Error('soft failure');
-      });
-
-      manager.registerResource('hard', initHard);
-      manager.registerResource('soft', initSoft, { optional: true });
-
+      manager.registerResource(
+        'needed',
+        createInitializer(async () => {})
+      );
+      manager.registerResource(
+        'never-ready',
+        // Never settles, so this resource cannot become ready during the test.
+        createInitializer(() => new Promise<void>(() => {}))
+      );
       manager.startInitialization();
-      await expect(manager.waitUntilReady()).rejects.toThrow('hard failure');
+
+      await expect(manager.waitForResources(['needed'])).resolves.toBeUndefined();
+
+      expect(manager.isReady('never-ready')).toBe(false);
     });
 
-    it('ensureResourceReady still rejects for a failed optional resource', async () => {
+    it('resolves when a resource that was not requested failed', async () => {
       const manager = createManager();
 
-      const initSoft = createInitializer(async () => {
-        throw new Error('view creation failed');
-      });
-
-      manager.registerResource('soft', initSoft, { optional: true });
+      manager.registerResource(
+        'needed',
+        createInitializer(async () => {})
+      );
+      manager.registerResource(
+        'broken',
+        createInitializer(async () => {
+          throw new Error('broken failure');
+        })
+      );
       manager.startInitialization();
 
-      await manager.waitUntilReady();
+      await expect(manager.waitForResources(['broken'])).rejects.toThrow('broken failure');
+      await expect(manager.waitForResources(['needed'])).resolves.toBeUndefined();
+    });
 
-      await expect(manager.ensureResourceReady('soft')).rejects.toThrow('view creation failed');
+    it('rejects when a requested resource failed', async () => {
+      const manager = createManager();
+
+      manager.registerResource(
+        'needed',
+        createInitializer(async () => {})
+      );
+      manager.registerResource(
+        'broken',
+        createInitializer(async () => {
+          throw new Error('broken failure');
+        })
+      );
+      manager.startInitialization();
+
+      await expect(manager.waitForResources(['needed', 'broken'])).rejects.toThrow(
+        'broken failure'
+      );
     });
   });
 });

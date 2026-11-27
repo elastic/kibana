@@ -10,7 +10,7 @@ import type { SourceChangeEvent } from '@kbn/nightshift-sources-plugin/server';
 import type { SignificantEventsPluginStartDependencies } from '../../types';
 import type { SignificantEventsMaintenanceService } from '../maintenance/maintenance_service';
 import type { ContinuousOnboardingWorkflowService } from '../workflows/continuous_onboarding_workflow';
-import { getContinuousOnboardingTarget } from './get_continuous_onboarding_target';
+import { getSourcePresenceEnabledTarget } from '../source_presence/get_source_presence_enabled_target';
 import { setContinuousOnboardingEnabled } from './set_continuous_onboarding_enabled';
 
 interface StartServices {
@@ -57,7 +57,7 @@ export const syncContinuousOnboarding = async ({
     return;
   }
 
-  const enabled = getContinuousOnboardingTarget({
+  const enabled = getSourcePresenceEnabledTarget({
     eventType: event.type,
     total,
   });

@@ -7,13 +7,15 @@
 
 import { withSpan } from '@kbn/apm-utils';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { DEFAULT_OVERVIEW_PERCENTILE } from '../../../../common/overview_filters';
 import type { ApplicationOverviewResponse } from '../../../../common/types/overview';
 import { sortEnvironments } from '../../../lib/helpers/environment';
 import { pickerEnvironments } from '../../../lib/otel/environments';
+import { toFilterOptions } from '../../../lib/otel/overview_filters';
 import { OVERVIEW_SEARCH_SPAN_NAME } from '../constants';
 import type { OverviewSearchParams } from './search_requests';
-import { logsSearch, spansSearch } from './search_requests';
-import type { OverviewLogsAggregations, OverviewSpansAggregations } from './search_responses';
+import { logsSearch } from './search_requests';
+import type { OverviewLogsAggregations } from './search_responses';
 import { toOverview } from './to_overview';
 
 interface GetOtelOverviewParams extends OverviewSearchParams {
@@ -27,19 +29,22 @@ const searchOtelOverview = async ({
   signal,
   ...searchParams
 }: GetOtelOverviewParams): Promise<ApplicationOverviewResponse> => {
-  // In parallel, unlike the Applications list: both searches filter on the same application, so
-  // neither needs the other's result.
-  const [logsResponse, spansResponse] = await Promise.all([
-    esClient.search(logsSearch(searchParams), { signal }),
-    esClient.search(spansSearch(searchParams), { signal }),
-  ]);
-
+  const logsResponse = await esClient.search(logsSearch(searchParams), { signal });
   const logs = logsResponse.aggregations as unknown as OverviewLogsAggregations | undefined;
-  const spans = spansResponse.aggregations as unknown as OverviewSpansAggregations | undefined;
 
   return {
-    overview: toOverview(searchParams.serviceName, logs, spans),
+    overview: toOverview(
+      searchParams.serviceName,
+      searchParams.percentile ?? DEFAULT_OVERVIEW_PERCENTILE,
+      {
+        interval: searchParams.histogram.interval,
+        start: searchParams.start,
+        end: searchParams.end,
+      },
+      logs
+    ),
     environments: sortEnvironments(pickerEnvironments(logs)),
+    filters: toFilterOptions(logs),
   };
 };
 

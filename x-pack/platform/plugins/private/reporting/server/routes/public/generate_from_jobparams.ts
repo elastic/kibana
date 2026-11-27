@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaResponse } from '@kbn/core-http-router-server-internal';
+import { isKibanaResponse } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/core/server';
 import { PUBLIC_ROUTES } from '@kbn/reporting-common';
 import type { ReportingCore } from '../..';
@@ -50,7 +50,7 @@ export function registerGenerationRoutesPublic(reporting: ReportingCore, logger:
             jobParams: requestHandler.getJobParams(),
           });
         } catch (err) {
-          if (err instanceof KibanaResponse) {
+          if (isKibanaResponse(err)) {
             return err;
           }
           throw err;

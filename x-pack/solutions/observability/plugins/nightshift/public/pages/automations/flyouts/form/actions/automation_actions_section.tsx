@@ -34,17 +34,17 @@ import { SlackChannelComboBox } from '../slack_channel_combo_box';
 import { SentenceIcon } from '../triggers/pills/sentence';
 
 export const actionLabels = {
-  actions: i18n.translate('xpack.nightshift.automations.flyout.actions', {
-    defaultMessage: 'Actions',
+  notifications: i18n.translate('xpack.nightshift.automations.flyout.notifications', {
+    defaultMessage: 'Notifications',
   }),
-  empty: i18n.translate('xpack.nightshift.automations.flyout.actionsEmpty', {
-    defaultMessage: 'Choose what happens when this automation runs.',
+  empty: i18n.translate('xpack.nightshift.automations.flyout.notificationsEmpty', {
+    defaultMessage: 'Choose where Nightshift posts when this automation runs.',
   }),
-  noActions: i18n.translate('xpack.nightshift.automations.flyout.noActions', {
-    defaultMessage: 'No actions',
+  noNotifications: i18n.translate('xpack.nightshift.automations.flyout.noNotifications', {
+    defaultMessage: 'No notifications',
   }),
-  addAction: i18n.translate('xpack.nightshift.automations.flyout.addAction', {
-    defaultMessage: 'Add action',
+  addNotification: i18n.translate('xpack.nightshift.automations.flyout.addNotification', {
+    defaultMessage: 'Add notification',
   }),
   postInSlack: i18n.translate('xpack.nightshift.automations.flyout.postInSlack', {
     defaultMessage: 'Post in Slack',
@@ -64,8 +64,8 @@ export const actionLabels = {
   replyInThread: i18n.translate('xpack.nightshift.automations.flyout.replyInThread', {
     defaultMessage: 'Nightshift replies in the thread of the triggering message.',
   }),
-  removeAction: i18n.translate('xpack.nightshift.automations.flyout.removeAction', {
-    defaultMessage: 'Remove action',
+  removeNotification: i18n.translate('xpack.nightshift.automations.flyout.removeNotification', {
+    defaultMessage: 'Remove notification',
   }),
 };
 
@@ -179,11 +179,11 @@ const SlackActionRow = ({
       </EuiFlexItem>
       {!readOnly && (
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={actionLabels.removeAction} disableScreenReaderOutput>
+          <EuiToolTip content={actionLabels.removeNotification} disableScreenReaderOutput>
             <EuiButtonIcon
               iconType="trash"
               color="danger"
-              aria-label={actionLabels.removeAction}
+              aria-label={actionLabels.removeNotification}
               onClick={onRemove}
               data-test-subj="automationRemoveSlackAction"
             />
@@ -207,7 +207,7 @@ export const AutomationActionsSection = ({
 
   return (
     <>
-      <SectionHeader title={actionLabels.actions} />
+      <SectionHeader title={actionLabels.notifications} />
       <EuiSpacer size="s" />
       <EuiPanel
         hasBorder
@@ -216,7 +216,7 @@ export const AutomationActionsSection = ({
       >
         {!slackAction && (
           <EuiText size="s" color="subdued">
-            {readOnly ? actionLabels.noActions : actionLabels.empty}
+            {readOnly ? actionLabels.noNotifications : actionLabels.empty}
           </EuiText>
         )}
         {slackAction?.target === 'thread' && <SlackThreadActionRow />}
@@ -234,7 +234,7 @@ export const AutomationActionsSection = ({
           <>
             <EuiSpacer size="s" />
             <EuiPopover
-              aria-label={actionLabels.addAction}
+              aria-label={actionLabels.addNotification}
               isOpen={isAddOpen}
               closePopover={() => setIsAddOpen(false)}
               panelPaddingSize="none"
@@ -247,7 +247,7 @@ export const AutomationActionsSection = ({
                   onClick={() => setIsAddOpen((open) => !open)}
                   data-test-subj="automationAddAction"
                 >
-                  {actionLabels.addAction}
+                  {actionLabels.addNotification}
                 </EuiButton>
               }
             >

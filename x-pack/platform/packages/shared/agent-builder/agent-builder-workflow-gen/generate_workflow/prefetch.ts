@@ -7,9 +7,9 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { BaseStepDefinition, ConnectorContractUnion } from '@kbn/workflows';
-import { builtInStepDefinitions, builtInTriggerDefinitions } from '@kbn/workflows';
+import { builtInStepDefinitions, getBuiltInTriggerDefinitions } from '@kbn/workflows';
 import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
-import { getAllConnectors } from '@kbn/workflows-management-plugin/common/schema';
+import { getAllConnectors, getStepExposure } from '@kbn/workflows-management-plugin/common/schema';
 import { pickLabelAndDescription } from './tools/lookup_helpers';
 import type { ConnectorSummary, StepDefinitionSummary, TriggerDefinitionSummary } from './types';
 
@@ -83,12 +83,13 @@ export const prefetchStepDefinitions = async ({
   // Elasticsearch / Kibana API contracts (`elasticsearch.indices.create`,
   // `elasticsearch.search`, …), plus step definitions registered via
   // `workflowsExtensions`. Already excludes built-in flow control / data.* /
-  // ai.* steps which come from `builtInStepDefinitions` above.
+  // ai.* steps which come from `builtInStepDefinitions` above. Managed-only
+  // steps are left out: generated workflows aren't managed, so they can't use them.
   const allConnectors = getAllConnectors();
   const allConnectorIds = new Set<string>();
   const allConnectorSummaries: StepDefinitionSummary[] = [];
   for (const c of allConnectors) {
-    if (builtInIds.has(c.type) || c.deprecation) {
+    if (builtInIds.has(c.type) || c.deprecation || getStepExposure(c.type) === 'managed_only') {
       continue;
     }
     allConnectorIds.add(c.type);
@@ -113,7 +114,14 @@ export const prefetchStepDefinitions = async ({
         : [baseType];
 
     for (const stepType of stepTypes) {
-      if (builtInIds.has(stepType) || allConnectorIds.has(stepType)) continue;
+      // A dynamic connector of the same type must not bring back a managed-only step.
+      if (
+        builtInIds.has(stepType) ||
+        allConnectorIds.has(stepType) ||
+        getStepExposure(stepType) === 'managed_only'
+      ) {
+        continue;
+      }
       dynamicSummaries.push({
         id: stepType,
         label: info.displayName ?? stepType,
@@ -125,8 +133,10 @@ export const prefetchStepDefinitions = async ({
   return [...builtIns, ...allConnectorSummaries, ...dynamicSummaries];
 };
 
-export const prefetchTriggerDefinitions = async (): Promise<TriggerDefinitionSummary[]> =>
-  builtInTriggerDefinitions.map((t) => ({
+export const prefetchTriggerDefinitions = async ({
+  api,
+}: Pick<DepsBase, 'api'>): Promise<TriggerDefinitionSummary[]> =>
+  getBuiltInTriggerDefinitions(api.getTriggerSchemaOptions()).map((t) => ({
     id: t.id,
     label: t.label,
     description: t.description,

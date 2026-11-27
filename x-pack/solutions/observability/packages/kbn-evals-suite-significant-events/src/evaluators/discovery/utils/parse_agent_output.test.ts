@@ -219,6 +219,36 @@ describe('extractDiscoveriesFromToolCall', () => {
     ]);
   });
 
+  it('does not treat a rule_held_by_event skip as a produced discovery', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_EVENTS_WRITE,
+        tool_call_id: 'ew-rule-held',
+        params: { items: [{ event_id: 'event-target', title: 'Held rule', status: 'active' }] },
+        results: [
+          {
+            data: {
+              results: [
+                {
+                  index: 0,
+                  event_id: 'event-target',
+                  written: false,
+                  skipped: true,
+                  reason: 'rule_held_by_event',
+                  existing_event_id: 'event-holder',
+                  held_rules: [{ rule_uuid: 'rule-a', event_id: 'event-holder' }],
+                },
+              ],
+            },
+          },
+        ],
+      },
+    ];
+
+    expect(extractDiscoveriesFromToolCall(steps)).toEqual([]);
+  });
+
   it('extracts events from live Agent Builder underscore tool ids', () => {
     const steps: ConverseStep[] = [
       {
@@ -422,6 +452,33 @@ describe('extractSignificantEventsFromToolCall', () => {
         params: { status: 'active' },
       },
     ];
+    expect(extractSignificantEventsFromToolCall(steps)).toEqual([]);
+  });
+
+  it('excludes a rejected write from continuation seeding', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_EVENTS_WRITE,
+        tool_call_id: 'ew-rejected',
+        params: { items: [{ event_id: 'event-1', status: 'active' }] },
+        results: [
+          {
+            data: {
+              results: [
+                {
+                  index: 0,
+                  event_id: 'event-1',
+                  written: false,
+                  reason: 'bulk_error',
+                },
+              ],
+            },
+          },
+        ],
+      },
+    ];
+
     expect(extractSignificantEventsFromToolCall(steps)).toEqual([]);
   });
 

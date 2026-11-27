@@ -26,7 +26,7 @@ export const getInvestigatorServiceAccountRoute = createNightshiftInvestigations
   endpoint: `GET ${ENDPOINT}`,
   options: {
     access: 'internal',
-    summary: 'Get whether Nightshift is set up with its service account in this space',
+    summary: 'Get whether nightshift is set up with its service account in this space',
   },
   // Readable by every Nightshift user, so each sees the setup step and whether they may change
   // automations, whether or not their role also grants Agent Builder.
@@ -39,7 +39,7 @@ export const enableInvestigatorServiceAccountRoute = createNightshiftInvestigati
   endpoint: `POST ${ENDPOINT}/_enable`,
   options: {
     access: 'internal',
-    summary: 'Set up Nightshift in this space with its service account',
+    summary: 'Set up nightshift in this space with its service account',
   },
   security: SETUP_AUTHZ,
   params: lazySchema(() =>
@@ -66,7 +66,7 @@ export const disableInvestigatorServiceAccountRoute = createNightshiftInvestigat
   endpoint: `POST ${ENDPOINT}/_disable`,
   options: {
     access: 'internal',
-    summary: 'Remove the Nightshift service account setup from this space',
+    summary: 'Remove the nightshift service account setup from this space',
   },
   security: SETUP_AUTHZ,
   handler: async ({ request, getInvestigatorServiceAccountService, getSpaceId }) =>

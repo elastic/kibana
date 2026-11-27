@@ -8,6 +8,7 @@
 import { randomUUID } from 'crypto';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import type { Logger } from '@kbn/core/server';
+import type { KibanaIsomerRuntime } from '@kbn/isomer-plugin/server';
 import type { InvestigationNotificationDestination } from '../../../common';
 import { prepareNotificationDelivery } from './notification_delivery';
 import type {
@@ -39,6 +40,7 @@ interface DeliverInvestigationNotificationsParams {
   notificationDestinations: InvestigationNotificationDestination[];
   investigationUrl: string;
   getExecute: () => Promise<ExecuteConnector>;
+  getIsomerRuntime: () => Promise<KibanaIsomerRuntime>;
   routingClient: NotificationRoutingClient;
   signal: AbortSignal;
   logger: Pick<Logger, 'warn'>;
@@ -113,10 +115,11 @@ export const getStartedMessageTs = (
       attempt.status === 'sent'
   )?.message_ts;
 
-const prepareDestinationDelivery = (
+const prepareDestinationDelivery = async (
   {
     investigation,
     investigationUrl,
+    getIsomerRuntime,
     executionId,
     phase,
     reason,
@@ -124,7 +127,7 @@ const prepareDestinationDelivery = (
   routing: NotificationRouting,
   destination: NotificationDestination,
   setupError?: string
-): PreparedDestinationDelivery => {
+): Promise<PreparedDestinationDelivery> => {
   const explicitParent = destination.params.thread_ts;
   const threadTs =
     destination.thread?.thread_ts ||
@@ -154,6 +157,7 @@ const prepareDestinationDelivery = (
   let delivery: NotificationDelivery | undefined;
   try {
     delivery = prepareNotificationDelivery({
+      runtime: await getIsomerRuntime(),
       investigation,
       url: investigationUrl,
       phase,
@@ -185,8 +189,15 @@ const executeDestinationDelivery = async (
   { delivery, diagnostic }: PreparedDestinationDelivery,
   execute?: ExecuteConnector
 ): Promise<NotificationOutcome> => {
-  if (signal.aborted || !(await routingClient.isActive())) {
-    return { status: 'unconfirmed', error: 'Notification delivery stopped after claiming' };
+  const stopped: NotificationOutcome = {
+    status: 'failed',
+    error: 'Notification delivery stopped before posting',
+  };
+  if (signal.aborted) {
+    return stopped;
+  }
+  if (!(await routingClient.isActive()) || signal.aborted) {
+    return stopped;
   }
   if (diagnostic || !execute || !delivery) {
     return { status: 'failed', error: diagnostic || 'Notification delivery is unavailable' };
@@ -268,7 +279,7 @@ const deliverToDestination = async (
   if (!destination) {
     throw new Error('Notification destination disappeared');
   }
-  const delivery = prepareDestinationDelivery(params, routing, destination, setupError);
+  const delivery = await prepareDestinationDelivery(params, routing, destination, setupError);
   if (signal.aborted) {
     return;
   }
@@ -313,8 +324,9 @@ const deliverToDestination = async (
  * Uncertain root deliveries block automatic root recreation, including in later executions.
  *
  * Cancellation and inactive attachments stop further delivery. Setup, preparation, and connector
- * error responses are recorded per destination so other destinations can proceed. Posting
- * exceptions, missing confirmation, or cancellation after claiming remain unconfirmed.
+ * error responses are recorded per destination so other destinations can proceed, and so is
+ * cancellation before posting. Posting exceptions, missing confirmation, or cancellation during
+ * posting remain unconfirmed.
  * Persistence errors propagate and stop further posts, leaving any durable claim in place
  * without retrying the connector.
  */

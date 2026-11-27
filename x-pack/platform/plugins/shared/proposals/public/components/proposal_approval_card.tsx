@@ -23,6 +23,7 @@ import {
 } from '@kbn/proposals-common';
 import {
   useApproveProposal,
+  isDecisionShown,
   useDismissProposal,
   useIsApprovingProposal,
   useIsDecliningProposal,
@@ -46,7 +47,7 @@ const toFriendlyError = (error: unknown): Error => {
       return new Error(
         i18n.translate('xpack.proposals.proposalCard.conflictError', {
           defaultMessage:
-            'This proposal is no longer available to decide. Refresh the page to see its current status.',
+            'This proposal changed while you were deciding. Check its current status and try again if it is still open.',
         })
       );
     }
@@ -97,8 +98,9 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
   const dismissMutation = useDismissProposal();
   const reopenMutation = useReopenProposal();
   const isReopening = useIsReopeningProposal(proposalId);
-  const isApproving = useIsApprovingProposal(proposalId);
-  const isDeclining = useIsDecliningProposal(proposalId);
+  const decisionShown = isDecisionShown(proposalQuery.data);
+  const isApproving = useIsApprovingProposal(proposalId, decisionShown);
+  const isDeclining = useIsDecliningProposal(proposalId, decisionShown);
   const isSubmitting = isApproving ? 'applying' : isDeclining ? 'declining' : undefined;
   const { data: currentUserProfile } = useCurrentUserProfile();
 

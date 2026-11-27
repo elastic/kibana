@@ -34,6 +34,7 @@ describe('AgentBuilderDashboardsPlugin', () => {
         },
       },
       chrome: {},
+      notifications: { toasts: {} },
     } as unknown as CoreStart);
 
   const createStartDependencies = () =>

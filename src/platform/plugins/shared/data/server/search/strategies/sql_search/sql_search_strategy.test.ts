@@ -121,8 +121,25 @@ describe('SQL search strategy', () => {
         });
         expect(searchOptions).toEqual({
           meta: true,
-          requestTimeout: 30000,
+          requestTimeout: 600_000,
           signal: undefined,
+        });
+      });
+
+      it('uses options.pollLength as wait_for_completion_timeout when polling', async () => {
+        mockSqlGetAsync.mockResolvedValueOnce(mockSqlResponse);
+
+        const esSearch = await sqlSearchStrategyProvider(mockSearchConfig, mockLogger);
+
+        await esSearch.search({ id: 'foo' }, { pollLength: '30s' }, mockDeps).toPromise();
+
+        expect(mockSqlGetAsync).toHaveBeenCalled();
+        const [request] = mockSqlGetAsync.mock.calls[0];
+        expect(request).toEqual({
+          format: 'json',
+          id: 'foo',
+          keep_alive: '60000ms',
+          wait_for_completion_timeout: '30s',
         });
       });
 

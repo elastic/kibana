@@ -27,7 +27,6 @@ import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
 interface EvalDocSource {
-  '@timestamp'?: string;
   experiment_name?: string;
   task?: { model?: Partial<Model> };
   metadata?: Partial<ScoreMetadata>;
@@ -122,7 +121,6 @@ export const registerGetExperimentRoute = ({ router, logger, getSpaceId }: Route
               experiment_name: firstDoc.experiment_name ?? null,
               execution_id: firstDoc.metadata?.execution_id,
               suite_id: firstDoc.metadata?.suite_id ?? null,
-              timestamp: firstDoc['@timestamp'],
               task_model: toModelDisplay(firstDoc.task?.model),
               evaluator_model: evaluatorModels[0],
               evaluator_models: evaluatorModels,

@@ -27,8 +27,15 @@ import type {
 export const INVESTIGATION_TIMEOUT_MS = 30 * 60_000;
 /** The execution error of a run that ended without a `verdict`; judges still grade its hypotheses. */
 export const NO_CONCLUSION_ERROR = 'Investigation finished without recording a conclusion';
+/** Starts the execution error of an investigation that outlived its timeout. */
+export const STILL_IN_PROGRESS_ERROR_PREFIX = 'Investigation was still in progress after ';
+/** Starts the execution error of a round the agent failed. */
+export const ROUND_FAILED_ERROR_PREFIX = 'Investigation round failed: ';
 export const UNPERSISTED_CONVERSATION_ERROR =
   'Investigation conversation still had an unfinished round after polling';
+/** A finished investigation whose conversation never showed a round: the harness's failure. */
+export const MISSING_CONVERSATION_ERROR_PREFIX =
+  'Investigation finished but its conversation had no rounds after ';
 const MAX_PERSISTED_REPORT_BYTES = 512 * 1024;
 const POLL_INTERVAL_MS = 1000;
 /** How many polls a finished investigation's conversation gets to persist its rounds. */
@@ -69,14 +76,30 @@ const boundOutput = (output: InvestigationTaskOutput): InvestigationTaskOutput =
   return output;
 };
 
-const isNotFound = (error: unknown): boolean => {
+const httpStatus = (error: unknown): number | undefined => {
   const { status, response, body } = (error ?? {}) as {
     status?: number;
     response?: { status?: number };
     body?: { statusCode?: number };
   };
-  return status === 404 || response?.status === 404 || body?.statusCode === 404;
+  return status ?? response?.status ?? body?.statusCode;
 };
+
+const isNotFound = (error: unknown): boolean => httpStatus(error) === 404;
+
+/**
+ * A shard that is still starting, or a brief upstream failure, comes back as 500–504. The
+ * investigation keeps running, so a poll treats that like "not yet" and tries again.
+ */
+const TRANSIENT_READ_STATUSES = new Set([500, 502, 503, 504]);
+/** A 500-504 read, which a poll retries instead of failing the run. */
+export const isTransientReadError = (error: unknown): boolean => {
+  const status = httpStatus(error);
+  return status !== undefined && TRANSIENT_READ_STATUSES.has(status);
+};
+
+const errorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
 
 /**
  * Reads the investigation from the shared API. A start returns its id before the investigation's
@@ -119,7 +142,7 @@ const roundInterruptionError = (rounds: ConversationRound[]): string | undefined
   const interruption = rounds.at(-1)?.interruption;
   if (!interruption) return undefined;
   if (interruption.type === 'failed') {
-    return `Investigation round failed: ${interruption.error.message}`;
+    return `${ROUND_FAILED_ERROR_PREFIX}${interruption.error.message}`;
   }
   const source = interruption.aborted_by?.source;
   return `Investigation round was aborted${source ? ` by ${source}` : ''}`;
@@ -141,16 +164,29 @@ const readFinishedConversation = async (
   id: string,
   waitForRounds: boolean
 ): Promise<{ rounds: ConversationRound[] }> => {
-  let conversation = await readConversation(fetch, id);
+  let lastTransient: unknown;
+  const read = async () => {
+    try {
+      const conversation = await readConversation(fetch, id);
+      lastTransient = undefined;
+      return conversation;
+    } catch (error) {
+      if (!isTransientReadError(error)) throw error;
+      lastTransient = error;
+      return undefined;
+    }
+  };
+  let conversation = await read();
   for (
     let attempt = 1;
     waitForRounds && !isPersisted(conversation) && attempt < CONVERSATION_PERSIST_ATTEMPTS;
     attempt++
   ) {
     await setTimeout(POLL_INTERVAL_MS);
-    conversation = await readConversation(fetch, id);
+    conversation = await read();
   }
   if (!conversation || conversation.rounds.length === 0) {
+    if (lastTransient && !conversation) throw lastTransient;
     throw new Error('Investigation conversation has no persisted rounds');
   }
   return conversation;
@@ -171,11 +207,39 @@ export const toInvestigationReport = ({
   proposals: proposals.map(({ title, comment, status }) => ({ title, comment, status })),
 });
 
+/**
+ * Waits up to `timeoutMs` for an investigation, its last round included, to end, and says whether
+ * it did. One not found yet may still be created by its workflow, so it does not count as ended.
+ */
+export const waitForInvestigationToEnd = async (
+  fetch: HttpHandler,
+  id: string,
+  timeoutMs: number
+): Promise<boolean> => {
+  const started = Date.now();
+  for (;;) {
+    const investigation = await readInvestigation(fetch, id);
+    if (
+      investigation &&
+      !investigation.in_progress &&
+      isPersisted(await readConversation(fetch, id))
+    ) {
+      return true;
+    }
+    if (Date.now() - started >= timeoutMs) return false;
+    await setTimeout(POLL_INTERVAL_MS);
+  }
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
 /** Runs a manual investigation and retains a bounded report with references to its full evidence. */
 export const runInvestigation = async (
   fetch: HttpHandler,
   example: InvestigationExample,
-  connector: Pick<EvalConnector, 'id'>
+  connector: Pick<EvalConnector, 'id'>,
+  { timeoutMs = INVESTIGATION_TIMEOUT_MS }: { timeoutMs?: number } = {}
 ): Promise<InvestigationTaskOutput> => {
   const started = Date.now();
   const output: InvestigationTaskOutput = {
@@ -192,36 +256,76 @@ export const runInvestigation = async (
         body: JSON.stringify({
           subject: { type: 'manual' },
           message: example.input.question,
+          // An example may carry what does not fit in the message, such as an earlier round.
+          ...(isRecord(example.input.context) ? { context: example.input.context } : {}),
           connector_id: connector.id,
         }),
       }
     );
     output.investigation_id = investigationId;
     output.conversation_id = investigationId;
-    investigation = await readInvestigation(fetch, investigationId);
+    let lastTransient: unknown;
+    const readSnapshot = async () => {
+      try {
+        const snapshot = await readInvestigation(fetch, investigationId);
+        lastTransient = undefined;
+        return snapshot;
+      } catch (error) {
+        if (!isTransientReadError(error)) throw error;
+        lastTransient = error;
+        return undefined;
+      }
+    };
+    const readRound = async (id: string) => {
+      try {
+        const snapshot = await readConversation(fetch, id);
+        lastTransient = undefined;
+        return snapshot;
+      } catch (error) {
+        if (!isTransientReadError(error)) throw error;
+        lastTransient = error;
+        return undefined;
+      }
+    };
+    investigation = await readSnapshot();
     // A pending proposal ends `in_progress` while the agent's round is still running, so the run is
-    // only over once that round has finished too.
-    while (
-      !investigation ||
-      investigation.in_progress ||
-      !isPersisted((conversation = await readConversation(fetch, investigation.id)))
-    ) {
+    // only over once that round has finished too. A transient conversation read is retried on its
+    // own; an unfinished round goes back to the investigation, whose verdict may have landed.
+    while (!investigation || investigation.in_progress || !isPersisted(conversation)) {
       output.workflow_status = 'running';
-      if (Date.now() - started > INVESTIGATION_TIMEOUT_MS) {
-        const minutes = INVESTIGATION_TIMEOUT_MS / 60_000;
+      if (Date.now() - started > timeoutMs) {
+        const minutes = timeoutMs / 60_000;
+        // Only a run the agent was still working on timed out; a finished one whose conversation
+        // never persisted is a harness failure, which ORCA leaves unscored rather than scoring 0.
+        const agentStillWorking =
+          investigation?.in_progress || Boolean(conversation?.rounds.length);
+        const waited = !investigation
+          ? `Investigation was not created within ${minutes} minutes`
+          : agentStillWorking
+          ? `${STILL_IN_PROGRESS_ERROR_PREFIX}${minutes} minutes`
+          : `${MISSING_CONVERSATION_ERROR_PREFIX}${minutes} minutes`;
         throw new Error(
-          investigation
-            ? `Investigation was still in progress after ${minutes} minutes`
-            : `Investigation was not created within ${minutes} minutes`
+          lastTransient ? `${waited}. Last read failed: ${errorMessage(lastTransient)}` : waited
         );
       }
       await setTimeout(POLL_INTERVAL_MS);
-      investigation = (await readInvestigation(fetch, investigationId)) ?? investigation;
+      if (!investigation || investigation.in_progress) {
+        investigation = (await readSnapshot()) ?? investigation;
+        continue;
+      }
+      conversation = await readRound(investigation.id);
+      if (!conversation && lastTransient) {
+        continue;
+      }
+      if (!isPersisted(conversation)) {
+        investigation = (await readSnapshot()) ?? investigation;
+      }
     }
-    // The verdict may have been written after the last read, while the round was finishing.
-    investigation = (await readInvestigation(fetch, investigationId)) ?? investigation;
+    // The verdict may have been written after the last read, while the round was finishing. A
+    // transient failure here keeps the snapshot already read.
+    investigation = (await readSnapshot()) ?? investigation;
   } catch (error) {
-    output.execution_error = error instanceof Error ? error.message : String(error);
+    output.execution_error = errorMessage(error);
   }
   if (!investigation || !output.investigation_id) return boundOutput(output);
 
@@ -237,6 +341,11 @@ export const runInvestigation = async (
       );
     }
     if (!conversation) throw new Error('Investigation conversation has no persisted rounds');
+    // The timeout's missing-conversation error stood only until a round could be read: the rounds
+    // now say whether the agent failed, ended without a conclusion, or finished.
+    if (output.execution_error?.startsWith(MISSING_CONVERSATION_ERROR_PREFIX)) {
+      delete output.execution_error;
+    }
     if (!investigation.in_progress && !isPersisted(conversation)) {
       output.execution_error = UNPERSISTED_CONVERSATION_ERROR;
     }

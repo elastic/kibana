@@ -1,0 +1,53 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { render, screen } from '@testing-library/react';
+import React from 'react';
+import { WorkflowsEmptyStateReadOnly } from './workflows_empty_state';
+import { TestProvider } from '../../shared/mocks/test_providers';
+
+const mockNavigateToApp = jest.fn();
+
+jest.mock('../../hooks/use_kibana', () => ({
+  useKibana: () => ({
+    services: {
+      http: {
+        basePath: {
+          prepend: (path: string) => `/mock-base-path${path}`,
+        },
+      },
+      application: { navigateToApp: mockNavigateToApp },
+    },
+  }),
+}));
+
+const renderWithProviders = (component: React.ReactElement) =>
+  render(<TestProvider>{component}</TestProvider>);
+
+describe('WorkflowsEmptyStateReadOnly', () => {
+  it('renders the read-only empty state with title and description', () => {
+    renderWithProviders(<WorkflowsEmptyStateReadOnly />);
+
+    expect(screen.getByText('Workflows list will be here')).toBeInTheDocument();
+    expect(screen.getByText(/Workflows let you automate repetitive tasks/)).toBeInTheDocument();
+  });
+
+  it('does not render create workflow actions', () => {
+    renderWithProviders(<WorkflowsEmptyStateReadOnly />);
+
+    expect(screen.queryByText('Create workflow')).not.toBeInTheDocument();
+    expect(screen.queryByText('Example workflows')).not.toBeInTheDocument();
+    expect(screen.queryByText('Need help?')).not.toBeInTheDocument();
+  });
+
+  it('shows the required write privilege in the footer', () => {
+    renderWithProviders(<WorkflowsEmptyStateReadOnly />);
+
+    expect(screen.getByText('Minimum privileges required:')).toBeInTheDocument();
+    expect(screen.getByText('Workflows: Write')).toBeInTheDocument();
+  });
+});

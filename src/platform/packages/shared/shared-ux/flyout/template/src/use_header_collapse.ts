@@ -44,6 +44,22 @@ const canScrollBy = (element: HTMLElement, delta: number): boolean => {
   return element.scrollTop < element.scrollHeight - element.clientHeight - SCROLL_EDGE_EPSILON;
 };
 
+/**
+ * Whether an expanded control in the region owns a panel rendered outside it. An open EUI popover
+ * trigger points at its portalled panel with `aria-controls`, whereas a disclosure such as an
+ * accordion controls content inside the region, which collapses along with it.
+ */
+const hasExpandedControlWithExternalPanel = (region: HTMLElement): boolean => {
+  const expanded = region.querySelectorAll('[aria-expanded="true"][aria-controls]');
+  return Array.from(expanded).some((control) => {
+    const panelIds = (control.getAttribute('aria-controls') ?? '').split(/\s+/);
+    return panelIds.some((id) => {
+      const panel = region.ownerDocument.getElementById(id);
+      return panel != null && !region.contains(panel);
+    });
+  });
+};
+
 const SCROLLABLE_OVERFLOW = new Set(['auto', 'scroll', 'overlay']);
 
 /**
@@ -159,6 +175,13 @@ export const useHeaderCollapse = ({
       // incorrectly think it can't collapse, and expand again. This would cause an endless loop
       // of collapsing and expanding. Therefore, expanding is based purely on the scroll position.
       next = scrollTop > EXPAND_AT;
+    } else if (
+      collapsibleNodeRef.current &&
+      hasExpandedControlWithExternalPanel(collapsibleNodeRef.current)
+    ) {
+      // An open popover's panel is portalled outside the region, so collapsing would leave it
+      // floating over a hidden trigger that focus can no longer return to.
+      next = false;
     } else {
       next = scrollHeight - clientHeight > collapseBudget + EXPAND_AT && scrollTop >= COLLAPSE_AT;
     }

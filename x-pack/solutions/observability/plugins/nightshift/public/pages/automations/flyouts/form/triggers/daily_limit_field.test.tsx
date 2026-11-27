@@ -9,8 +9,15 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { DailyLimitField } from './daily_limit_field';
+import { useGlobalLimit } from '../../../hooks/use_global_limit';
+
+jest.mock('../../../hooks/use_global_limit', () => ({ useGlobalLimit: jest.fn() }));
 
 describe('DailyLimitField', () => {
+  beforeEach(() => {
+    (useGlobalLimit as jest.Mock).mockReturnValue({ isReached: false });
+  });
+
   it('shows the help text and reports changes', () => {
     const onChange = jest.fn();
     render(
@@ -22,6 +29,32 @@ describe('DailyLimitField', () => {
     expect(screen.getByText('Help text')).toBeInTheDocument();
     fireEvent.change(screen.getByTestId('automationDailyLimit'), { target: { value: '5' } });
     expect(onChange).toHaveBeenCalledWith('5');
+  });
+
+  it('warns only when the limit is below the schedule runs per day', () => {
+    const renderField = (value: string) =>
+      render(
+        <I18nProvider>
+          <DailyLimitField
+            value={value}
+            helpText="Help text"
+            onChange={jest.fn()}
+            scheduledRunsPerDay={24}
+          />
+        </I18nProvider>
+      );
+    const callout = 'automationDailyLimitBelowScheduleCallout';
+
+    const { unmount } = renderField('5');
+    expect(screen.getByTestId(callout)).toBeInTheDocument();
+    unmount();
+
+    const { unmount: unmountAtLimit } = renderField('24');
+    expect(screen.queryByTestId(callout)).not.toBeInTheDocument();
+    unmountAtLimit();
+
+    renderField('unlimited');
+    expect(screen.queryByTestId(callout)).not.toBeInTheDocument();
   });
 
   it('flags an invalid limit', () => {
@@ -47,6 +80,44 @@ describe('DailyLimitField', () => {
     );
     fireEvent.click(screen.getByTestId('automationDailyLimitRaise'));
     expect(onChange).toHaveBeenCalledWith('15');
+  });
+
+  it('shows no deployment limit callout for an automation that has no usage yet', () => {
+    (useGlobalLimit as jest.Mock).mockReturnValue({
+      isReached: true,
+      blockingLimit: 'automatic_investigation',
+      limit: 6,
+    });
+    render(
+      <I18nProvider>
+        <DailyLimitField value="10" helpText="Help text" onChange={jest.fn()} />
+      </I18nProvider>
+    );
+
+    expect(screen.queryByTestId('automationsGlobalLimitBanner')).not.toBeInTheDocument();
+  });
+
+  it('replaces the per-automation callout with the deployment limit callout', () => {
+    (useGlobalLimit as jest.Mock).mockReturnValue({
+      isReached: true,
+      blockingLimit: 'automatic_investigation',
+      limit: 6,
+      settingsHref: '/app/nightshift/settings/investigations',
+    });
+    render(
+      <I18nProvider>
+        <DailyLimitField value="10" helpText="Help text" onChange={jest.fn()} usedToday={10} />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('automationsGlobalLimitBanner')).toHaveTextContent(
+      'Automations reached a daily run limit of 6 for this deployment'
+    );
+    expect(screen.queryByTestId('automationDailyLimitReachedCallout')).not.toBeInTheDocument();
+    expect(screen.getByTestId('automationsGlobalLimitSettingsLink')).toHaveAttribute(
+      'href',
+      '/app/nightshift/settings/investigations'
+    );
   });
 
   it('shows the callout without the raise action when read-only', () => {

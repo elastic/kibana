@@ -7,20 +7,26 @@
 
 import type { Logger } from '@kbn/core/server';
 import { withTimeout } from '@kbn/std';
-import type { InvestigationQuotaCallback, InvestigationQuotaResult } from '../types';
+import type {
+  InvestigationQuotaCallback,
+  InvestigationQuotaResult,
+  InvestigationQuotaTrigger,
+} from '../types';
 import { InvestigationUnavailableError } from './errors';
 
 const INVESTIGATION_QUOTA_TIMEOUT_MS = 10_000;
 
 export const evaluateInvestigationQuota = async ({
   callback,
+  trigger,
   logger,
 }: {
   callback?: InvestigationQuotaCallback;
+  trigger: InvestigationQuotaTrigger;
   logger: Logger;
 }): Promise<InvestigationQuotaResult> => {
   const unavailable = (reason: string) => {
-    logger.warn(`Investigation quota check ${reason}; denying the automatic investigation`);
+    logger.warn(`Investigation quota check ${reason}; denying the ${trigger} investigation`);
     return new InvestigationUnavailableError('The investigation quota check is unavailable');
   };
 
@@ -28,7 +34,7 @@ export const evaluateInvestigationQuota = async ({
     throw unavailable('is unavailable');
   }
 
-  const pending = Promise.resolve().then(callback);
+  const pending = Promise.resolve().then(() => callback(trigger));
   const result = await withTimeout({
     promise: pending,
     timeoutMs: INVESTIGATION_QUOTA_TIMEOUT_MS,

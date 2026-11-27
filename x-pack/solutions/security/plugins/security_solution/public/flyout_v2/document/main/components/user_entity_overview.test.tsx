@@ -9,8 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
-import { UserEntityOverview, USER_PREVIEW_BANNER } from './user_entity_overview';
-import { UserPreviewPanelKey } from '../../../../flyout/entity_details/user_right';
+import { UserEntityOverview } from './user_entity_overview';
 import type { UserEntity } from '../../../../../common/api/entity_analytics';
 import {
   ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID,
@@ -19,13 +18,10 @@ import {
   ENTITIES_USER_OVERVIEW_LOADING_TEST_ID,
   ENTITIES_USER_OVERVIEW_MISCONFIGURATIONS_TEST_ID,
   ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID,
-  INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID,
 } from './test_ids';
 import { mockContextValue } from '../../../../flyout/document_details/shared/mocks/mock_context';
 import { mockDataFormattedForFieldBrowser } from '../../../../flyout/document_details/shared/mocks/mock_data_formatted_for_field_browser';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { mockFlyoutApi } from '../../../../flyout/document_details/shared/mocks/mock_flyout_context';
 import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 
@@ -42,7 +38,6 @@ const panelContextValue = {
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
 };
 
-jest.mock('@kbn/expandable-flyout');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
 
 jest.mock('../../../../common/hooks/use_experimental_features', () => ({
@@ -102,7 +97,6 @@ const renderUserEntityOverview = (
 
 describe('<UserEntityOverview />', () => {
   beforeAll(() => {
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     (useMisconfigurationPreview as jest.Mock).mockReturnValue({});
     (useAlertsByStatus as jest.Mock).mockReturnValue({ isLoading: false, items: {} });
   });
@@ -151,34 +145,6 @@ describe('<UserEntityOverview />', () => {
       expect(container).toHaveTextContent(userName);
       expect(container.querySelector('a, button')).toBeNull();
       container.click();
-      expect(mockFlyoutApi.openPreviewPanel).not.toHaveBeenCalled();
-    });
-
-    it('opens user preview when clicking on title with enableEntityLinks', () => {
-      mockUseRiskScore.mockReturnValue({ data: riskLevel });
-
-      const { getByTestId } = render(
-        <TestProviders>
-          <UserEntityOverview
-            userName={userName}
-            identityFields={identityFields}
-            scopeId={panelContextValue.scopeId}
-            enableEntityLinks
-          />
-        </TestProviders>
-      );
-
-      getByTestId(ENTITIES_USER_OVERVIEW_LINK_TEST_ID).click();
-      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
-        id: UserPreviewPanelKey,
-        params: {
-          contextID: panelContextValue.scopeId,
-          userName,
-          scopeId: panelContextValue.scopeId,
-          banner: USER_PREVIEW_BANNER,
-          entityId: undefined,
-        },
-      });
     });
   });
 
@@ -203,39 +169,6 @@ describe('<UserEntityOverview />', () => {
 
       const { getByTestId } = renderUserEntityOverview();
       expect(getByTestId(ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID)).toBeInTheDocument();
-    });
-
-    it('opens user alert details when clicking alert count with enableEntityLinks', () => {
-      (useAlertsByStatus as jest.Mock).mockReturnValue({
-        isLoading: false,
-        items: mockAlertData,
-      });
-      mockFlyoutApi.openFlyout.mockClear();
-
-      const { getByTestId } = render(
-        <TestProviders>
-          <UserEntityOverview
-            userName={userName}
-            identityFields={identityFields}
-            scopeId={panelContextValue.scopeId}
-            enableEntityLinks
-          />
-        </TestProviders>
-      );
-
-      getByTestId(INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID).click();
-      expect(mockFlyoutApi.openFlyout).toHaveBeenCalledWith(
-        expect.objectContaining({
-          left: expect.objectContaining({
-            params: expect.objectContaining({
-              path: {
-                tab: 'csp_insights',
-                subTab: 'alertsTabId',
-              },
-            }),
-          }),
-        })
-      );
     });
 
     it('should render misconfiguration when data is available', () => {

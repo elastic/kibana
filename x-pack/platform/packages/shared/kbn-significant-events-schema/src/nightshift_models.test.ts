@@ -31,7 +31,7 @@ describe('Nightshift model errors', () => {
 
   it('names the restriction, selected model, and allowed default', () => {
     expect(new NightshiftModelBlockedError('selected-model', 'default-model').message).toBe(
-      `Nightshift can't use model "selected-model": the GenAI setting "Default connector only" (genAiSettings:defaultAIConnectorOnly) only allows "default-model". Turn that setting off, or run with "default-model" as the model.`
+      `Nightshift can't use model "selected-model": the GenAI setting "Default connector only" (genAiSettings:defaultAIConnectorOnly) only allows "default-model". Turn that setting off to use Nightshift.`
     );
   });
 

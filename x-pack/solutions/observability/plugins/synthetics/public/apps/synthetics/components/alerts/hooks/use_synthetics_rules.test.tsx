@@ -44,7 +44,7 @@ jest.mock('@kbn/response-ops-rule-form/flyout', () => ({
 const mockDispatch = jest.fn();
 const mockUseSelector = redux.useSelector as jest.MockedFunction<typeof redux.useSelector>;
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const kibanaModule = require('@kbn/kibana-react-plugin/public');
 const mockUseKibana = kibanaModule.useKibana as jest.MockedFunction<any>;
 

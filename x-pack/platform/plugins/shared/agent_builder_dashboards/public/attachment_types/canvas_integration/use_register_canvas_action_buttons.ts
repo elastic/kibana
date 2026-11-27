@@ -86,6 +86,32 @@ export const useRegisterCanvasActionButtons = ({
 
     const buttons: ActionButton[] = [];
 
+    if (dashboardApi.locator) {
+      const { locator } = dashboardApi;
+      buttons.push({
+        label: i18n.translate(
+          'xpack.agentBuilderDashboards.attachments.dashboard.canvasEditActionLabel',
+          {
+            defaultMessage: 'Edit in Dashboard',
+          }
+        ),
+        type: ActionButtonType.PRIMARY,
+        disabled: isWriteActionDisabled,
+        disabledReason,
+        handler: async () => {
+          if (isWriteActionDisabled) {
+            return;
+          }
+          await handleEditInDashboard({
+            locator,
+            getExistingDashboardId: async () => getExistingDashboardIdRef.current(),
+            dashboardLocatorParams: dashboardLocatorParamsRef.current,
+          });
+          closeCanvas();
+          openSidebarConversationRef.current?.();
+        },
+      });
+    }
     buttons.push({
       label: i18n.translate(
         'xpack.agentBuilderDashboards.attachments.dashboard.canvasSaveActionLabel',
@@ -94,7 +120,7 @@ export const useRegisterCanvasActionButtons = ({
         }
       ),
       icon: 'save',
-      type: ActionButtonType.PRIMARY,
+      type: ActionButtonType.SECONDARY,
       disabled: isWriteActionDisabled,
       disabledReason,
       handler: async () => {
@@ -113,32 +139,6 @@ export const useRegisterCanvasActionButtons = ({
         }
       },
     });
-    if (dashboardApi.locator) {
-      const { locator } = dashboardApi;
-      buttons.push({
-        label: i18n.translate(
-          'xpack.agentBuilderDashboards.attachments.dashboard.canvasEditActionLabel',
-          {
-            defaultMessage: 'Edit in Dashboards',
-          }
-        ),
-        type: ActionButtonType.SECONDARY,
-        disabled: isWriteActionDisabled,
-        disabledReason,
-        handler: async () => {
-          if (isWriteActionDisabled) {
-            return;
-          }
-          await handleEditInDashboard({
-            locator,
-            getExistingDashboardId: async () => getExistingDashboardIdRef.current(),
-            dashboardLocatorParams: dashboardLocatorParamsRef.current,
-          });
-          closeCanvas();
-          openSidebarConversationRef.current?.();
-        },
-      });
-    }
     registerActionButtons(buttons);
   }, [
     dashboardApi,

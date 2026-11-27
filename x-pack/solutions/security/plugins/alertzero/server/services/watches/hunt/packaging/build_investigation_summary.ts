@@ -13,6 +13,8 @@ import type { CoordinatorInputs, CurrentRunState, DecidePackageReportResult } fr
 
 /** CE's attribute string cap. */
 export const MAX_INVESTIGATION_SUMMARY_CHARS = 10_000;
+/** Cap on the "Not searched" gap list so a long list cannot crowd the rest of the summary. */
+const MAX_NOT_SEARCHED_CHARS = 800;
 
 const formatWindow = (window?: { from: string; to: string }): string =>
   window ? ` Window: ${window.from.slice(0, 10)} → ${window.to.slice(0, 10)}.` : '';
@@ -157,6 +159,7 @@ export const buildInvestigationSummary = ({
   dismissHold = 'none',
   converged = [],
   alreadyOpen = 0,
+  unsearched,
 }: {
   state: CurrentRunState;
   decided: Pick<DecidePackageReportResult, 'dismiss' | 'proposals'>;
@@ -168,15 +171,24 @@ export const buildInvestigationSummary = ({
   alreadyOpen?: number;
   /** Why a run that would dismiss left the Investigation open instead. */
   dismissHold?: 'none' | 'open_proposal' | 'check_failed';
+  /** Gaps a retired run could not search; named when the hit path still left coverage incomplete. */
+  unsearched?: DedupedCoverageGaps;
 }): string => {
   const hitSources = [
     ...((state.evidence.tier1HitCount ?? 0) > 0 ? ['tier1'] : []),
     ...(state.evidence.tier2Confirmed.length > 0 ? ['tier2'] : []),
   ];
+  const notSearched = unsearched ? describeGaps(unsearched, MAX_NOT_SEARCHED_CHARS) : undefined;
+  const retiredNote =
+    unsearched && unsearched.gaps.length > 0
+      ? ` ${gapCountPhrase(
+          unsearched
+        )} left part of the report unsearched; the report is retired without a full search.`
+      : '';
   const outcome = state.hasConfirmedHit
     ? `Outcome: confirmed hit${
         hitSources.length > 0 ? ` (${hitSources.join(', ')})` : ''
-      }.${formatWindow(state.window)}`
+      }.${formatWindow(state.window)}${retiredNote}`
     : `Outcome: no confirmed hits.${formatWindow(state.window)}`;
 
   const corroborated = state.corroboratedTechniques.map((id) =>
@@ -195,6 +207,7 @@ export const buildInvestigationSummary = ({
     ...(state.users.length > 0 ? [`Users: ${state.users.join(', ')}`] : []),
     ...(state.services.length > 0 ? [`Services: ${state.services.join(', ')}`] : []),
     ...(state.hasConfirmedHit && identities.length > 0 ? [ASSET_CRITICALITY_NOTE] : []),
+    ...(notSearched ? [`Not searched: ${notSearched}`] : []),
     packagingLine({
       decided,
       mintSuppression,
@@ -228,7 +241,7 @@ export const buildCleanInvestigationSummary = ({
   unsearched?: DedupedCoverageGaps;
 }): string => {
   const executed = toCoverageBehaviors(inputs.behaviors ?? []);
-  const notSearched = unsearched ? describeGaps(unsearched) : undefined;
+  const notSearched = unsearched ? describeGaps(unsearched, MAX_NOT_SEARCHED_CHARS) : undefined;
   const outcome = retired
     ? `Outcome: no confirmed hits, but ${
         unsearched && unsearched.gaps.length > 0

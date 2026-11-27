@@ -63,7 +63,7 @@ const buildNewEpisodeId = ({
   scheduledTimestamp: string;
 }): string => uuidV5(`${ruleId}|${groupHash}|${scheduledTimestamp}`, EPISODE_ID_NAMESPACE);
 
-interface RunDirectorParams {
+export interface RunDirectorParams {
   rule: RuleResponse;
   alertEvents: readonly AlertEventDocument[];
   executionContext: ExecutionContext;
@@ -128,8 +128,12 @@ export interface DirectorRunResult {
   readonly previousAlertStateByGroupHash: ReadonlyMap<string, LatestAlertEventState>;
 }
 
+export interface DirectorServiceContract {
+  run(params: RunDirectorParams): Promise<DirectorRunResult>;
+}
+
 @injectable()
-export class DirectorService {
+export class DirectorService implements DirectorServiceContract {
   constructor(
     @inject(TransitionStrategyFactory)
     private readonly strategyFactory: TransitionStrategyFactory,
@@ -215,7 +219,7 @@ export class DirectorService {
     context: ExecutionContext
   ): Promise<Map<string, LatestAlertEventState>> {
     const request = getLatestAlertEventStateQuery({ ruleId: rule.id, groupHashes }).toRequest();
-    const records = await this.queryService.executeQueryRows<LatestAlertEventState>({
+    const records = await this.queryService.executeQuery<LatestAlertEventState>({
       query: request.query,
       // @ts-expect-error - the types of the composer query are not compatible with the types of the esql client
       params: request.params,

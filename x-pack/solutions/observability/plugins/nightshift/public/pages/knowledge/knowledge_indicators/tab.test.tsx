@@ -16,6 +16,15 @@ jest.mock('../../../data/run_quotas/use_significant_events_run_quotas');
 jest.mock('../../../data/maintenance/use_significant_events_maintenance', () => ({
   useBlocksNewActivity: () => ({ isBlocked: false }),
 }));
+jest.mock('../../../hooks/use_kibana', () => ({
+  useKibana: () => ({
+    services: {
+      application: {
+        getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
+      },
+    },
+  }),
+}));
 jest.mock('./knowledge_indicators_table', () => ({
   KnowledgeIndicatorsTable: () => <div data-test-subj="knowledgeIndicatorsTableStub" />,
 }));
@@ -24,14 +33,19 @@ const mockUseRunQuotas = useRunQuotas as jest.MockedFunction<typeof useRunQuotas
 
 const response = (kiExtractionLimit: number): RunQuotasResponse => ({
   enabled: true,
+  investigationLimitsEnabled: true,
   limits: {
     detection: 3,
     investigation: 1,
+    manual_investigation: 0,
+    total_investigation: 0,
     ki_extraction: kiExtractionLimit,
   },
   counts: {
     detection: 3,
     investigation: 1,
+    manual_investigation: 0,
+    total_investigation: 0,
     ki_extraction: 2,
   },
   window: {

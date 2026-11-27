@@ -36,6 +36,7 @@ import {
   FleetUnauthorizedError,
   PackagePolicyNameExistsError,
   PackageBreakingChangesNotAcknowledgedError,
+  PackagePolicyAgentVersionIncompatibleError,
   PackageOutdatedError,
   PackageInvalidArchiveError,
   BundledPackageLocationNotFoundError,
@@ -58,6 +59,7 @@ import {
   AgentlessAgentCreateOverProvisionnedError,
   FleetErrorWithStatusCode,
   PackageRollbackError,
+  AgentRestartPendingError,
 } from '.';
 
 type IngestErrorHandler = (
@@ -83,6 +85,9 @@ const getHTTPResponseCode = (error: FleetError): number => {
     return 400;
   }
   if (error instanceof PackageBreakingChangesNotAcknowledgedError) {
+    return 400;
+  }
+  if (error instanceof PackagePolicyAgentVersionIncompatibleError) {
     return 400;
   }
   if (error instanceof PackageInvalidArchiveError) {
@@ -143,6 +148,9 @@ const getHTTPResponseCode = (error: FleetError): number => {
   if (error instanceof AgentlessPolicyExistsRequestError) {
     return 409;
   }
+  if (error instanceof AgentRestartPendingError) {
+    return 409;
+  }
   // Unsupported Media Type
   if (error instanceof PackageUnsupportedMediaTypeError) {
     return 415;
@@ -201,7 +209,13 @@ export function fleetErrorToResponseOptions(error: IngestErrorHandlerParams['err
   if (error instanceof FleetError) {
     // only log the message
     const extraAttributes = getErrorExtraAttributes(error);
-    logger.error(error.message);
+    // Blocked by the agent version guard: an expected outcome that the caller can resolve, which
+    // bulk and automatic upgrades report on their own
+    if (error instanceof PackagePolicyAgentVersionIncompatibleError) {
+      logger.debug(error.message);
+    } else {
+      logger.error(error.message);
+    }
     return {
       statusCode: getHTTPResponseCode(error),
       body: {

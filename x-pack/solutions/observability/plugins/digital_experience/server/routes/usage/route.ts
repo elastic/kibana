@@ -9,7 +9,7 @@ import type { ApplicationUsageResponse } from '../../../common/types/usage';
 import {
   APPLICATION_TAB_ROUTE_OPTIONS,
   APPLICATION_TAB_ROUTE_SECURITY,
-  applicationTabRouteParams,
+  filteredApplicationTabRouteParams,
   toApplicationSearch,
 } from '../application_tab_route';
 import { createDigitalExperienceServerRoute } from '../create_digital_experience_server_route';
@@ -23,7 +23,7 @@ export const usageRouteRepository = createDigitalExperienceServerRoute({
   endpoint: APPLICATION_USAGE_ENDPOINT,
   options: APPLICATION_TAB_ROUTE_OPTIONS,
   security: APPLICATION_TAB_ROUTE_SECURITY,
-  params: applicationTabRouteParams,
+  params: filteredApplicationTabRouteParams,
   handler: async (resources): Promise<ApplicationUsageResponse> => {
     return getOtelUsage(await toApplicationSearch(resources));
   },

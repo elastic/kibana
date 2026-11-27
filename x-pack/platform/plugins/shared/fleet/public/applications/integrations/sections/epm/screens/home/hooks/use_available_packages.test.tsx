@@ -15,8 +15,6 @@ const mockUseGetPackageVerificationKeyId = jest.fn();
 const mockUseGetPackagesQuery = jest.fn();
 const mockUseGetCategoriesQuery = jest.fn();
 const mockUseGetAppendCustomIntegrationsQuery = jest.fn();
-const mockUseGetReplacementCustomIntegrationsQuery = jest.fn();
-const mockUseMergeEprPackagesWithReplacements = jest.fn();
 const mockUseBuildIntegrationsUrl = jest.fn();
 
 jest.mock(
@@ -31,7 +29,6 @@ jest.mock('../../../../../hooks', () => ({
   useGetPackagesQuery: (params: any) => mockUseGetPackagesQuery(params),
   useGetCategoriesQuery: (params: any) => mockUseGetCategoriesQuery(params),
   useGetAppendCustomIntegrationsQuery: () => mockUseGetAppendCustomIntegrationsQuery(),
-  useGetReplacementCustomIntegrationsQuery: () => mockUseGetReplacementCustomIntegrationsQuery(),
   useGetPackageVerificationKeyId: () => mockUseGetPackageVerificationKeyId(),
   useStartServices: () => ({
     featureFlags: { useBooleanValue: jest.fn().mockReturnValue(false) },
@@ -40,11 +37,6 @@ jest.mock('../../../../../hooks', () => ({
       getUrlForApp: jest.fn().mockReturnValue('/app/onboarding/aws'),
     },
   }),
-}));
-
-jest.mock('../../../../../hooks/use_merge_epr_with_replacements', () => ({
-  useMergeEprPackagesWithReplacements: (epr: any, custom: any) =>
-    mockUseMergeEprPackagesWithReplacements(epr, custom),
 }));
 
 jest.mock('./use_build_integrations_url', () => ({
@@ -216,20 +208,9 @@ describe('useAvailablePackages', () => {
       isInitialLoading: false,
     });
 
-    mockUseGetReplacementCustomIntegrationsQuery.mockReturnValue({
-      data: [],
-      isInitialLoading: false,
-    });
-
-    mockUseMergeEprPackagesWithReplacements.mockImplementation((epr, custom) => [
-      ...epr,
-      ...custom,
-    ]);
-
     mockUseBuildIntegrationsUrl.mockReturnValue({
       initialSelectedCategory: '',
       initialSubcategory: undefined,
-      initialOnlyAgentless: false,
       showDeprecated: undefined,
       setUrlandPushHistory: mockSetUrlandPushHistory,
       setUrlandReplaceHistory: mockSetUrlandReplaceHistory,
@@ -249,15 +230,12 @@ describe('useAvailablePackages', () => {
       expect(result.current.selectedCategory).toBe('');
       expect(result.current.selectedSubCategory).toBeUndefined();
       expect(result.current.searchTerm).toBe('');
-      expect(result.current.preference).toBe('agent');
-      expect(result.current.onlyAgentlessFilter).toBe(false);
     });
 
     it('should initialize from URL parameters', () => {
       mockUseBuildIntegrationsUrl.mockReturnValue({
         initialSelectedCategory: 'web',
         initialSubcategory: 'nginx',
-        initialOnlyAgentless: true,
         showDeprecated: false,
         setUrlandPushHistory: mockSetUrlandPushHistory,
         setUrlandReplaceHistory: mockSetUrlandReplaceHistory,
@@ -274,7 +252,6 @@ describe('useAvailablePackages', () => {
       expect(result.current.selectedCategory).toBe('web');
       expect(result.current.selectedSubCategory).toBe('nginx');
       expect(result.current.searchTerm).toBe('nginx');
-      expect(result.current.onlyAgentlessFilter).toBe(true);
     });
   });
 
@@ -333,11 +310,16 @@ describe('useAvailablePackages', () => {
           items: [
             {
               ...mockBasicPackage,
-              id: 'apm-1.0.0',
-              name: 'apm',
-              title: 'APM',
+              id: 'policy_only-1.0.0',
+              name: 'policy_only',
+              title: 'Policy only',
               policy_templates: [
-                { name: 'apmserver', title: 'APM Server', description: 'APM', type: 'integration' },
+                {
+                  name: 'server',
+                  title: 'Policy only server',
+                  description: 'Policy only',
+                  type: 'integration',
+                },
               ],
             },
           ],
@@ -488,27 +470,6 @@ describe('useAvailablePackages', () => {
       );
 
       expect(result.current.filteredCards).toHaveLength(2);
-    });
-
-    it('should filter to only agentless packages when agentless filter is enabled', () => {
-      mockUseAgentless.mockReturnValue({ isAgentlessEnabled: true });
-      mockUseBuildIntegrationsUrl.mockReturnValue({
-        ...mockUseBuildIntegrationsUrl(),
-        initialOnlyAgentless: true,
-      });
-      mockUseGetPackagesQuery.mockReturnValue({
-        data: { items: [mockBasicPackage, agentlessPackage] },
-        isLoading: false,
-        error: null,
-      });
-
-      const { result } = renderHook(() =>
-        useAvailablePackages({ prereleaseIntegrationsEnabled: false })
-      );
-
-      expect(result.current.filteredCards).toHaveLength(1);
-      // The package gets flattened into its policy templates, so check for the template title
-      expect(result.current.filteredCards[0].title).toBe('Default');
     });
   });
 
@@ -683,36 +644,21 @@ describe('useAvailablePackages', () => {
     });
   });
 
-  describe('preference switching', () => {
-    it('should use beats preference to show only custom integrations', () => {
-      const customIntegration = {
-        id: 'custom-1',
-        title: 'Custom Integration',
-        description: 'Custom',
-        categories: ['custom'],
-        shipper: 'beats',
-      };
-
-      mockUseGetReplacementCustomIntegrationsQuery.mockReturnValue({
-        data: [customIntegration],
-        isInitialLoading: false,
-      });
-
-      mockUseMergeEprPackagesWithReplacements.mockImplementation((epr, custom) => {
-        return [...epr, ...custom];
-      });
-
-      mockUseBuildIntegrationsUrl.mockReturnValue({
-        ...mockUseBuildIntegrationsUrl(),
+  describe('APM package', () => {
+    it('should not show the APM package', () => {
+      mockUseGetPackagesQuery.mockReturnValue({
+        data: {
+          items: [mockBasicPackage, { ...mockBasicPackage, id: 'apm-1.0.0', name: 'apm' }],
+        },
+        isLoading: false,
+        error: null,
       });
 
       const { result } = renderHook(() =>
         useAvailablePackages({ prereleaseIntegrationsEnabled: false })
       );
 
-      // Default preference is 'agent', so should show EPR packages
-      expect(result.current.preference).toBe('agent');
-      expect(mockUseMergeEprPackagesWithReplacements).toHaveBeenCalledWith(expect.any(Array), []);
+      expect(result.current.allCards.map((card) => card.id)).toEqual(['nginx-1.0.0']);
     });
   });
 
@@ -753,7 +699,6 @@ describe('useAvailablePackages', () => {
       mockUseBuildIntegrationsUrl.mockReturnValue({
         initialSelectedCategory: 'web',
         initialSubcategory: undefined,
-        initialOnlyAgentless: false,
         setUrlandPushHistory: mockSetUrlandPushHistory,
         setUrlandReplaceHistory: mockSetUrlandReplaceHistory,
         getHref: mockGetHref,
@@ -793,56 +738,6 @@ describe('useAvailablePackages', () => {
       expect(result.current.filteredCards[0].categories).toContain('web');
 
       // allCards should contain both packages regardless of category filter
-      expect(result.current.allCards).toHaveLength(2);
-    });
-
-    it('should return allCards regardless of onlyAgentlessFilter', () => {
-      mockUseAgentless.mockReturnValue({ isAgentlessEnabled: true });
-      mockUseBuildIntegrationsUrl.mockReturnValue({
-        initialSelectedCategory: '',
-        initialSubcategory: undefined,
-        initialOnlyAgentless: true,
-        setUrlandPushHistory: mockSetUrlandPushHistory,
-        setUrlandReplaceHistory: mockSetUrlandReplaceHistory,
-        getHref: mockGetHref,
-        getAbsolutePath: mockGetAbsolutePath,
-        searchParam: '',
-        addBasePath: mockAddBasePath,
-      });
-
-      const nonAgentlessPkg = {
-        ...mockBasicPackage,
-        id: 'regular',
-        name: 'regular',
-        title: 'Regular',
-      };
-      const agentlessPkg = {
-        ...mockBasicPackage,
-        id: 'agentless-only',
-        name: 'agentless-only',
-        title: 'Agentless Only',
-        supportsAgentless: true,
-      };
-
-      mockUseMergeEprPackagesWithReplacements.mockReturnValue([nonAgentlessPkg, agentlessPkg]);
-
-      // mapToCard mock preserves supportsAgentless from the item
-      jest.mock('..', () => ({
-        mapToCard: ({ item }: any) => ({
-          id: item.id,
-          title: item.title || item.name,
-          description: item.description || '',
-          categories: item.categories || [],
-          url: `/detail/${item.name}`,
-          supportsAgentless: item.supportsAgentless,
-        }),
-      }));
-
-      const { result } = renderHook(() =>
-        useAvailablePackages({ prereleaseIntegrationsEnabled: false })
-      );
-
-      // allCards should contain all packages regardless of agentless filter
       expect(result.current.allCards).toHaveLength(2);
     });
   });
@@ -976,7 +871,6 @@ describe('useAvailablePackages', () => {
         collectionCards: [nginxCollectionCard],
         ungroupedItems: [],
       });
-      mockUseMergeEprPackagesWithReplacements.mockReturnValue([]);
       mockUseGetPackagesQuery.mockReturnValue({
         data: { items: [] },
         isLoading: false,
@@ -1001,7 +895,6 @@ describe('useAvailablePackages', () => {
       mockUseBuildIntegrationsUrl.mockReturnValue({
         initialSelectedCategory: 'observability',
         initialSubcategory: undefined,
-        initialOnlyAgentless: false,
         setUrlandPushHistory: jest.fn(),
         setUrlandReplaceHistory: jest.fn(),
         getHref: jest.fn(),
@@ -1027,7 +920,6 @@ describe('useAvailablePackages', () => {
       mockUseBuildIntegrationsUrl.mockReturnValue({
         initialSelectedCategory: 'web',
         initialSubcategory: undefined,
-        initialOnlyAgentless: false,
         setUrlandPushHistory: jest.fn(),
         setUrlandReplaceHistory: jest.fn(),
         getHref: jest.fn(),
@@ -1053,7 +945,6 @@ describe('useAvailablePackages', () => {
       mockUseBuildIntegrationsUrl.mockReturnValue({
         initialSelectedCategory: 'security',
         initialSubcategory: undefined,
-        initialOnlyAgentless: false,
         setUrlandPushHistory: jest.fn(),
         setUrlandReplaceHistory: jest.fn(),
         getHref: jest.fn(),
@@ -1125,7 +1016,6 @@ describe('useAvailablePackages', () => {
       mockUseBuildIntegrationsUrl.mockReturnValue({
         initialSelectedCategory: 'observability',
         initialSubcategory: undefined,
-        initialOnlyAgentless: false,
         setUrlandPushHistory: jest.fn(),
         setUrlandReplaceHistory: jest.fn(),
         getHref: jest.fn(),
@@ -1148,7 +1038,6 @@ describe('useAvailablePackages', () => {
       mockUseBuildIntegrationsUrl.mockReturnValue({
         initialSelectedCategory: 'web',
         initialSubcategory: 'observability',
-        initialOnlyAgentless: false,
         setUrlandPushHistory: jest.fn(),
         setUrlandReplaceHistory: jest.fn(),
         getHref: jest.fn(),
@@ -1167,189 +1056,6 @@ describe('useAvailablePackages', () => {
       // Only nginx_otel has 'observability' subcategory → degrade to individual card
       expect(result.current.filteredCards).toHaveLength(1);
       expect(result.current.filteredCards[0].name).toBe('nginx_otel');
-    });
-  });
-
-  describe('collection card agentless filtering', () => {
-    const nginxMemberCard = {
-      id: 'epr:nginx',
-      name: 'nginx',
-      title: 'Nginx',
-      categories: ['web'],
-      url: '/detail/nginx',
-      isCollectionCard: false,
-      supportsAgentless: false,
-    };
-    const nginxOtelMemberCard = {
-      id: 'epr:nginx_otel',
-      name: 'nginx_otel',
-      title: 'Nginx OTel',
-      categories: ['web'],
-      url: '/detail/nginx_otel',
-      isCollectionCard: false,
-      supportsAgentless: true,
-    };
-    const nginxCollectionCard = {
-      id: 'collection:nginx',
-      name: 'nginx',
-      title: 'Nginx',
-      description: 'Nginx collection',
-      icons: [],
-      url: '/integrations',
-      integration: '',
-      version: '',
-      categories: ['web'],
-      isCollectionCard: true,
-      groupMembers: [nginxMemberCard, nginxOtelMemberCard],
-    };
-
-    beforeEach(() => {
-      mockUseAgentless.mockReturnValue({ isAgentlessEnabled: true });
-      mockExperimentalFeaturesServiceGet.mockReturnValue({
-        enableIntegrationCollectionTiles: true,
-      });
-      mockApplyGrouping.mockReturnValue({
-        collectionCards: [nginxCollectionCard],
-        ungroupedItems: [],
-      });
-      mockUseMergeEprPackagesWithReplacements.mockReturnValue([]);
-      mockUseGetPackagesQuery.mockReturnValue({
-        data: { items: [] },
-        isLoading: false,
-        error: null,
-      });
-      mockUseBuildIntegrationsUrl.mockReturnValue({
-        initialSelectedCategory: '',
-        initialSubcategory: undefined,
-        initialOnlyAgentless: true,
-        setUrlandPushHistory: jest.fn(),
-        setUrlandReplaceHistory: jest.fn(),
-        getHref: jest.fn(),
-        getAbsolutePath: jest.fn((p: string) => p),
-        searchParam: '',
-        addBasePath: jest.fn((p: string) => p),
-      });
-    });
-
-    it('degrades collection to individual card when only one member supports agentless', () => {
-      const { result } = renderHook(() =>
-        useAvailablePackages({
-          prereleaseIntegrationsEnabled: false,
-          enableCollectionGrouping: true,
-        })
-      );
-
-      expect(result.current.filteredCards).toHaveLength(1);
-      expect(result.current.filteredCards[0].isCollectionCard).toBeFalsy();
-      expect(result.current.filteredCards[0].name).toBe('nginx_otel');
-    });
-
-    it('keeps collection card with filtered members when multiple members support agentless', () => {
-      mockApplyGrouping.mockReturnValue({
-        collectionCards: [
-          {
-            ...nginxCollectionCard,
-            groupMembers: [{ ...nginxMemberCard, supportsAgentless: true }, nginxOtelMemberCard],
-          },
-        ],
-        ungroupedItems: [],
-      });
-
-      const { result } = renderHook(() =>
-        useAvailablePackages({
-          prereleaseIntegrationsEnabled: false,
-          enableCollectionGrouping: true,
-        })
-      );
-
-      const card = result.current.filteredCards.find((c) => c.isCollectionCard);
-      expect(card).toBeDefined();
-      expect(card?.groupMembers).toHaveLength(2);
-      expect(card?.groupMembers?.every((m) => m.supportsAgentless)).toBe(true);
-    });
-
-    it('excludes collection card when no members support agentless', () => {
-      mockApplyGrouping.mockReturnValue({
-        collectionCards: [
-          {
-            ...nginxCollectionCard,
-            groupMembers: [nginxMemberCard, { ...nginxOtelMemberCard, supportsAgentless: false }],
-          },
-        ],
-        ungroupedItems: [],
-      });
-
-      const { result } = renderHook(() =>
-        useAvailablePackages({
-          prereleaseIntegrationsEnabled: false,
-          enableCollectionGrouping: true,
-        })
-      );
-
-      expect(result.current.filteredCards).toHaveLength(0);
-    });
-
-    it('re-sorts after singleton degradation so the promoted card appears at its own title position', () => {
-      // Apache collection (title A) has two members: "Apache ECS" (not agentless) and
-      // "Tomcat" (agentless). Neighboring ungrouped "Nginx" (title N, agentless) sits between
-      // A and T. After the agentless filter, Apache ECS is dropped and the collection degrades
-      // to "Tomcat". Without re-sort the order would be [Apache..., Nginx]; with re-sort: [Nginx, Tomcat].
-      mockApplyGrouping.mockReturnValue({
-        collectionCards: [
-          {
-            id: 'collection:apache',
-            name: 'apache',
-            title: 'Apache',
-            description: 'Apache collection',
-            icons: [],
-            url: '/integrations',
-            integration: '',
-            version: '',
-            categories: ['web'],
-            isCollectionCard: true,
-            groupMembers: [
-              {
-                id: 'epr:apache_ecs',
-                name: 'apache_ecs',
-                title: 'Apache ECS',
-                categories: ['web'],
-                url: '/detail/apache_ecs',
-                isCollectionCard: false,
-                supportsAgentless: false,
-              },
-              {
-                id: 'epr:tomcat',
-                name: 'tomcat',
-                title: 'Tomcat',
-                categories: ['web'],
-                url: '/detail/tomcat',
-                isCollectionCard: false,
-                supportsAgentless: true,
-              },
-            ],
-          },
-        ],
-        ungroupedItems: [
-          {
-            id: 'epr:nginx',
-            name: 'nginx',
-            title: 'Nginx',
-            categories: ['web'],
-            url: '/detail/nginx',
-            isCollectionCard: false,
-            supportsAgentless: true,
-          },
-        ],
-      });
-
-      const { result } = renderHook(() =>
-        useAvailablePackages({
-          prereleaseIntegrationsEnabled: false,
-          enableCollectionGrouping: true,
-        })
-      );
-
-      expect(result.current.filteredCards.map((c) => c.title)).toEqual(['Nginx', 'Tomcat']);
     });
   });
 

@@ -373,5 +373,53 @@ describe('AlertsDetailsTable', () => {
       const { query } = (useQueryAlerts as jest.Mock).mock.calls[0][0];
       expect(JSON.stringify(query)).toContain(JSON.stringify(GROUP_FILTER));
     });
+
+    it.each([
+      [EntityIdentifierFields.hostName, 'host'],
+      [EntityIdentifierFields.userName, 'user'],
+      [EntityIdentifierFields.serviceName, 'service'],
+    ])(
+      'infers the entity type from the %s field when entityType is not provided',
+      (field, type) => {
+        render(
+          <TestProviders>
+            <AlertsDetailsTable
+              field={field}
+              value="my-entity"
+              entityId={`${type}:target`}
+              onShowAlert={jest.fn()}
+            />
+          </TestProviders>
+        );
+
+        expect(useEntityFromStore).toHaveBeenCalledWith(
+          expect.objectContaining({ entityType: type })
+        );
+      }
+    );
+  });
+
+  describe('alerts page link filter', () => {
+    it.each([
+      [EntityIdentifierFields.hostName, 'Host name'],
+      [EntityIdentifierFields.userName, 'Username'],
+      [EntityIdentifierFields.serviceName, 'Service name'],
+    ])('uses the matching title and field name for %s', (field, title) => {
+      const { getByTestId } = render(
+        <TestProviders>
+          <AlertsDetailsTable field={field} value="my-entity" onShowAlert={jest.fn()} />
+        </TestProviders>
+      );
+
+      fireEvent.click(getByTestId('securitySolutionFlyoutInsightsAlertsCount'));
+
+      const openAlertsPageWithFilters = (useNavigateToAlertsPageWithFilters as jest.Mock)();
+      const [filters] = openAlertsPageWithFilters.mock.calls[0];
+      expect(filters[0]).toEqual({
+        title,
+        selected_options: ['my-entity'],
+        field_name: field,
+      });
+    });
   });
 });

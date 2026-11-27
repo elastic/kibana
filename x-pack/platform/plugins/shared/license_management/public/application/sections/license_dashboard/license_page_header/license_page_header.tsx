@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { FC } from 'react';
-import { useSelector } from 'react-redux-v7';
+import { useSelector } from 'react-redux';
 import { EuiSpacer } from '@elastic/eui';
 import { AppHeader, type AppHeaderBadge } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';

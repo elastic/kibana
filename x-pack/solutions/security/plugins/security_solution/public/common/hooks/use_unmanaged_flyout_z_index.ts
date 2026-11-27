@@ -7,7 +7,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { getFlyoutManagerStore, useEuiTheme } from '@elastic/eui';
-import { useIsNewFlyoutEnabled } from './use_is_new_flyout_enabled';
 
 export interface UseUnmanagedFlyoutZIndexParams {
   /**
@@ -23,8 +22,6 @@ export interface UseUnmanagedFlyoutZIndexParams {
 }
 
 /**
- * Only relevant when the new (EUI-managed) flyout system is enabled (see `useIsNewFlyoutEnabled`).
- *
  * Lets a non-`EuiFlyout` surface (e.g. the Timeline portal, or the Response console `PageOverlay`)
  * slot into the same shared z-index sequence that EUI uses for its flyouts, so it renders above
  * whatever was already open and below anything opened afterwards.
@@ -44,14 +41,13 @@ export interface UseUnmanagedFlyoutZIndexParams {
  * This means we don't need to know/care whether a flyout was opened "from" the surface or not - the
  * ordering falls out naturally from *when* each surface registered itself.
  *
- * Returns `undefined` when the new flyout system is disabled or the surface isn't active, in which
- * case the caller should fall back to its existing static z-index behavior.
+ * Returns `undefined` when the surface isn't active, in which case the caller should fall back to
+ * its existing static z-index behavior.
  */
 export const useUnmanagedFlyoutZIndex = ({
   id,
   active,
 }: UseUnmanagedFlyoutZIndexParams): number | undefined => {
-  const isNewFlyoutEnabled = useIsNewFlyoutEnabled();
   const { euiTheme } = useEuiTheme();
   const [zIndex, setZIndex] = useState<number | undefined>(undefined);
   const flyoutLevel = euiTheme.levels.flyout as number;
@@ -61,7 +57,7 @@ export const useUnmanagedFlyoutZIndex = ({
   flyoutLevelRef.current = flyoutLevel;
 
   useEffect(() => {
-    if (!isNewFlyoutEnabled || !active) {
+    if (!active) {
       setZIndex(undefined);
       return;
     }
@@ -77,7 +73,7 @@ export const useUnmanagedFlyoutZIndex = ({
     return () => {
       store.closeUnmanagedFlyout(id);
     };
-  }, [isNewFlyoutEnabled, active, id]);
+  }, [active, id]);
 
-  return isNewFlyoutEnabled ? zIndex : undefined;
+  return zIndex;
 };

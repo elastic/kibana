@@ -33,10 +33,10 @@ describe('buildEpisodeActionsQuery', () => {
       'last_ack_actor = LAST(actor.profile_uid, @timestamp) WHERE action_type == "ack"'
     );
     expect(queryString).toContain(
-      'last_deactivate_action = LAST(action_type, @timestamp) WHERE (action_type IN ("deactivate", "activate"))'
+      'last_lifecycle_action = LAST(action_type, @timestamp) WHERE (action_type IN ("deactivate", "activate"))'
     );
     expect(queryString).toContain(
-      'last_deactivate_actor = LAST(actor.profile_uid, @timestamp) WHERE action_type == "deactivate"'
+      'last_lifecycle_actor = LAST(actor.profile_uid, @timestamp) WHERE action_type == "deactivate"'
     );
     expect(queryString).toContain('last_tags = LAST(tags, @timestamp) WHERE action_type == "tag"');
     expect(queryString).toMatch(/KEEP [^|]*\blast_tags\b/);

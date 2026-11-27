@@ -516,5 +516,88 @@ apiTest.describe(
         });
       }
     );
+
+    apiTest(
+      'keeps actions added on the default rule when connector settings change',
+      async ({ apiClient, apiServices }) => {
+        const statusGroup = 'xpack.synthetics.alerts.actionGroups.monitorStatus';
+        await apiServices.alerting.cleanup.deleteRulesByTags(['SYNTHETICS_DEFAULT_ALERT']);
+
+        const rule = await apiTest.step('creates the default rule from settings', async () => {
+          const settingsRes = await putDynamicSettings(apiClient, {
+            defaultConnectors: [connectorIds.webhook],
+          });
+          expect(settingsRes).toHaveStatusCode(200);
+
+          const response = await apiClient.post(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING, {
+            headers: editorCookieHeaders,
+            responseType: 'json',
+          });
+          expect(response).toHaveStatusCode(200);
+          return (response.body as { statusRule: DefaultRuleBody & { id: string } }).statusRule;
+        });
+
+        await apiTest.step('adds an action directly on the default rule', async () => {
+          const getResponse = await apiClient.get(`/api/alerting/rule/${rule.id}`, {
+            headers: editorHeaders,
+            responseType: 'json',
+          });
+          expect(getResponse).toHaveStatusCode(200);
+          const { name, tags, schedule, params, actions } = getResponse.body as {
+            name: string;
+            tags: string[];
+            schedule: { interval: string };
+            params: Record<string, unknown>;
+            actions: Array<Record<string, unknown>>;
+          };
+
+          const updateResponse = await apiClient.put(`/api/alerting/rule/${rule.id}`, {
+            headers: editorHeaders,
+            responseType: 'json',
+            body: {
+              name,
+              tags,
+              schedule,
+              params,
+              actions: [
+                ...actions.map(({ connector_type_id: _connectorTypeId, ...action }) => action),
+                {
+                  id: connectorIds.index,
+                  group: statusGroup,
+                  params: { documents: [{ monitorName: 'user-added' }] },
+                  frequency: { notify_when: 'onActionGroupChange', throttle: null, summary: false },
+                },
+              ],
+            },
+          });
+          expect(updateResponse).toHaveStatusCode(200);
+        });
+
+        await apiTest.step('changes default connectors through the settings API', async () => {
+          const settingsRes = await putDynamicSettings(apiClient, {
+            defaultConnectors: [connectorIds.email],
+            defaultEmail: { to: ['test@gmail.com'], cc: [], bcc: [] },
+          });
+          expect(settingsRes).toHaveStatusCode(200);
+
+          const response = await apiClient.get(`/api/alerting/rule/${rule.id}`, {
+            headers: editorHeaders,
+            responseType: 'json',
+          });
+          expect(response).toHaveStatusCode(200);
+          const { actions } = response.body as {
+            actions: Array<{ id: string; params: Record<string, unknown> }>;
+          };
+          const actionConnectorIds = actions.map(({ id }) => id);
+
+          expect(actionConnectorIds).toContain(connectorIds.index);
+          expect(actions.find(({ id }) => id === connectorIds.index)?.params).toMatchObject({
+            documents: [{ monitorName: 'user-added' }],
+          });
+          expect(actionConnectorIds).toContain(connectorIds.email);
+          expect(actionConnectorIds).not.toContain(connectorIds.webhook);
+        });
+      }
+    );
   }
 );

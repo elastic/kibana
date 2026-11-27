@@ -36,6 +36,11 @@ export const DESTINATION_AUTO_MODE_LABEL = i18n.translate(
   { defaultMessage: 'Auto (default)' }
 );
 
+export const WRITING_MODE_STEP_TITLE = i18n.translate(
+  'xpack.streams.destinations.writingModeStepTitle',
+  { defaultMessage: 'How should its documents be written?' }
+);
+
 export const DESTINATION_FIXED_INDEX_MODE_LABEL = i18n.translate(
   'xpack.streams.destinations.fixedIndexModeLabel',
   { defaultMessage: 'Fixed index per signal' }
@@ -51,4 +56,13 @@ export const DESTINATION_SIGNAL_LABELS: Record<DestinationSignal, string> = {
   traces: i18n.translate('xpack.streams.destinations.tracesSignalLabel', {
     defaultMessage: 'Traces',
   }),
+  docs: i18n.translate('xpack.streams.destinations.docsSignalLabel', {
+    defaultMessage: 'Documents',
+  }),
 };
+
+const isDestinationSignal = (signal: string): signal is DestinationSignal =>
+  Object.hasOwn(DESTINATION_SIGNAL_LABELS, signal);
+
+export const getSignalLabel = (signal: string): string =>
+  isDestinationSignal(signal) ? DESTINATION_SIGNAL_LABELS[signal] : signal;

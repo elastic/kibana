@@ -71,7 +71,14 @@ export const resolveSamplingRate = (
   override?: number | null
 ): number => {
   if (override !== null && override !== undefined) {
-    return Math.min(1, Math.max(MIN_SAMPLING_RATE, override));
+    return clampSamplingRateOverride(override);
   }
   return computeAdaptiveSamplingRate(inputs);
 };
+
+/**
+ * The rate an operator override resolves to. Split out because it reads none of the probe-derived
+ * inputs, so a caller holding an override knows the rate before running a probe at all.
+ */
+export const clampSamplingRateOverride = (override: number): number =>
+  Math.min(1, Math.max(MIN_SAMPLING_RATE, override));

@@ -7,7 +7,7 @@
 
 import { EuiText } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { DraggableBadge } from '../../../common/components/draggables';
 import { CertificateFingerprintLink } from '../../../common/components/links';

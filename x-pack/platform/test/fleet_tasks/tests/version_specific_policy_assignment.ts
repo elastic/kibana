@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 
 import { AGENT_POLICY_VERSION_SEPARATOR } from '@kbn/fleet-plugin/common/constants';
+import { getSentinelVersionPolicyId } from '@kbn/fleet-plugin/common/services';
 import type { FtrProviderContextWithServices } from '../ftr_provider_context';
 import { cleanupAgentDocs, createAgentDoc } from '../helpers';
 
@@ -530,7 +531,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
       expect(agent2.policy_id).to.be(`${policyId}${AGENT_POLICY_VERSION_SEPARATOR}8.18`);
     });
 
-    it('should not process agent policies without version conditions', async () => {
+    it('should move agents of agent policies without version conditions to the sentinel policy', async () => {
       // Create an agent policy without version conditions
       // Use unique name to avoid conflicts from previous failed runs
       const uniquePolicyName = `Normal Policy Without Version Conditions ${Date.now()}`;
@@ -551,12 +552,11 @@ export default function (providerContext: FtrProviderContextWithServices) {
 
         await waitForTask();
 
-        // Wait a bit more to ensure task had time to process
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-
-        // Agent should remain on the original policy (not reassigned)
-        const agent = await getAgent('agent1');
-        expect(agent.policy_id).to.be(normalPolicyId);
+        // The sentinel version is enabled in the config: the agent moves to `#sentinel`, not to a version
+        await retry.tryForTime(30000, async () => {
+          const agent = await getAgent('agent1');
+          expect(agent.policy_id).to.be(getSentinelVersionPolicyId(normalPolicyId));
+        });
       } finally {
         // Cleanup
         await supertest

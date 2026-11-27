@@ -10,12 +10,15 @@
 import { schema } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import type { Duration } from 'moment';
+import { PROFILING_DIR_MAX_LENGTH } from './event_loop_watchdog/sanitize';
 
 /** @internal */
 export const OPS_CONFIG_PATH = 'ops' as const;
 
 /** @internal */
 const OPS_METRICS_INTERVAL = '5s';
+
+export { PROFILING_DIR_MAX_LENGTH };
 
 /** @internal */
 interface OpsConfigCGroupOverridesOps {
@@ -24,10 +27,21 @@ interface OpsConfigCGroupOverridesOps {
 }
 
 /** @internal */
+export interface OpsConfigEventLoopWatchdogProfiling {
+  startAfter: Duration;
+  maxDuration: Duration;
+  cooldown: Duration;
+}
+
+/** @internal */
 export interface OpsConfigEventLoopWatchdog {
   enabled: boolean;
   blockThreshold: Duration;
-  startup: { blockThreshold?: Duration };
+  profiling: OpsConfigEventLoopWatchdogProfiling & { dir?: string };
+  startup: {
+    blockThreshold?: Duration;
+    profiling: Partial<OpsConfigEventLoopWatchdogProfiling>;
+  };
   statsInterval: Duration;
 }
 
@@ -39,6 +53,12 @@ export interface OpsConfigType {
 }
 
 const blockThresholdBounds = { min: '200ms', max: '60s' } as const;
+// Low enough for a profile to finish before a liveness probe restarts a blocked Kibana.
+const startAfterBounds = { min: '2s', max: '4m' } as const;
+// A longer capture makes a larger profile, which the worker holds in memory. A shorter one can
+// end before the profiler's ~1.5s cold start on Serverless, leaving it empty.
+const maxDurationBounds = { min: '2s', max: '10s' } as const;
+const cooldownBounds = { min: '10s', max: '24h' } as const;
 
 const configSchema = schema.object({
   interval: schema.duration({ defaultValue: OPS_METRICS_INTERVAL }),
@@ -52,9 +72,31 @@ const configSchema = schema.object({
     enabled: schema.boolean({ defaultValue: false }),
     // Minimum block length to report, for blocks that start in the `running` phase.
     blockThreshold: schema.duration({ defaultValue: '200ms', ...blockThresholdBounds }),
+    // CPU profiling settings for long blocks that begin after startup. A role-specific feature
+    // flag enables profiling.
+    profiling: schema.object({
+      // Start a profile when a block reaches this duration, or the block threshold if that's
+      // longer: a block is only detected once it reaches the block threshold.
+      startAfter: schema.duration({ defaultValue: '30s', ...startAfterBounds }),
+      // Maximum duration of one profile capture.
+      maxDuration: schema.duration({ defaultValue: '10s', ...maxDurationBounds }),
+      // Minimum wait after a capture before another can start.
+      cooldown: schema.duration({ defaultValue: '1m', ...cooldownBounds }),
+      // Directory for profile files. Use an absolute path; a relative one resolves against the
+      // directory Kibana was started from. Defaults to Node's `--diagnostic-dir`; without either,
+      // no files are written. `bin/kibana` sets `--diagnostic-dir` to its `data` directory on
+      // Linux, macOS and in Docker.
+      dir: schema.maybe(schema.string({ minLength: 1, maxLength: PROFILING_DIR_MAX_LENGTH })),
+    }),
     startup: schema.object({
       // Same for blocks that start in the `starting` phase; falls back to `blockThreshold`.
       blockThreshold: schema.maybe(schema.duration(blockThresholdBounds)),
+      // Profiling settings for startup blocks. Each unset value uses its setting above.
+      profiling: schema.object({
+        startAfter: schema.maybe(schema.duration(startAfterBounds)),
+        maxDuration: schema.maybe(schema.duration(maxDurationBounds)),
+        cooldown: schema.maybe(schema.duration(cooldownBounds)),
+      }),
     }),
     statsInterval: schema.duration({ defaultValue: '10m', min: '1m', max: '24h' }),
   }),

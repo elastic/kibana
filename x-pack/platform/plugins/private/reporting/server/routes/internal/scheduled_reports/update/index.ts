@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
-import { KibanaResponse } from '@kbn/core-http-router-server-internal';
+import { isKibanaResponse } from '@kbn/core-http-server';
 import type { ReportingCore } from '../../../..';
 import { ScheduledReportsService } from '../../../../services/scheduled_reports';
 import type { ReportingPluginRouter } from '../../../../types';
@@ -76,7 +76,7 @@ export const registerInternalUpdateScheduledReportRoute = ({
           headers: { 'content-type': 'application/json' },
         });
       } catch (err) {
-        if (err instanceof KibanaResponse) {
+        if (isKibanaResponse(err)) {
           return err;
         }
         throw err;

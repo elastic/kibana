@@ -24,6 +24,7 @@ import {
   MANAGED_USER_FILTER,
 } from '@kbn/content-list-provider';
 import type { UserProfileEntry } from '@kbn/content-list-provider';
+import { getContentListUserOptionSubj } from '@kbn/content-list-common';
 import {
   SelectableFilterPopover,
   StandardFilterOption,
@@ -120,9 +121,21 @@ export const UserFieldFilterRenderer = ({
         <EuiAvatar name={option.label} size="s" data-test-subj={testSubj} />
       );
 
+      // Key a second subject on the username so tests have a stable handle that
+      // matches the one the legacy `UserProfilesSelectable` popover exposes.
+      const optionSubj = getContentListUserOptionSubj(
+        fieldName,
+        isSentinel ? option.key : option.data?.user?.username ?? option.key
+      );
+
       return (
         <StandardFilterOption count={option.count} isActive={state.isActive}>
-          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexGroup
+            gutterSize="xs"
+            alignItems="center"
+            responsive={false}
+            data-test-subj={optionSubj}
+          >
             <EuiFlexItem grow={false}>{avatar}</EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="s">{option.label}</EuiText>

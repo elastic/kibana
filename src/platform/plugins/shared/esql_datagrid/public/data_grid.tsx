@@ -126,7 +126,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   );
 
   const rows: DataTableRecord[] = useMemo(() => {
-    const columnNames = props.columns?.map(({ name }) => name);
+    const columnNames = props.columns?.filter(({ isNull }) => !isNull).map(({ name }) => name);
     return props.rows
       .map((row) => zipObject(columnNames, row))
       .map((row, idx: number) => {

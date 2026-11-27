@@ -33,7 +33,11 @@ const MOCK_UNIT = {
         name: DESTINATION_NAME,
         type: 'elasticsearch',
         supported_telemetry: SUPPORTED_TELEMETRY,
-        config: [{ name: 'index', value: 'logs-canvas-search' }],
+        config: SUPPORTED_TELEMETRY.map((signal) => ({
+          name: 'index',
+          telemetry: [signal],
+          value: `${signal}-canvas_search.otel-default`,
+        })),
       },
     ],
     pipelines: [
@@ -62,7 +66,7 @@ const mockUnitDefinition = async (page: ScoutPage) => {
       body: JSON.stringify(MOCK_UNIT),
     });
   });
-  await page.route('**/internal/streams/unit/*/_resolve_indices', async (route) => {
+  await page.route('**/internal/streams/unit/*/_resolve_indices?**', async (route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -75,7 +79,7 @@ const mockUnitDefinition = async (page: ScoutPage) => {
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({
-        components: { destinations: {}, processors: {} },
+        components: { destinations: {}, processors: {}, sources: {} },
         meta: { window: { start: '2026-01-01T00:00:00.000Z', end: '2026-01-01T00:15:00.000Z' } },
       }),
     });

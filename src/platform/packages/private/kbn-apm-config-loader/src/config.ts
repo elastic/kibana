@@ -12,6 +12,7 @@ import { merge, isEmpty } from 'lodash';
 import { execSync } from 'child_process';
 import { getDataPath } from '@kbn/utils';
 import { readFileSync } from 'fs';
+import { hostname } from 'os';
 import type { AgentConfigOptions } from 'elastic-apm-node';
 import type { AgentConfigOptions as RUMAgentConfigOptions } from '@elastic/apm-rum';
 import { getFlattenedObject } from '@kbn/std';
@@ -64,6 +65,7 @@ interface KibanaRawConfig {
   };
   server?: {
     uuid?: string;
+    name?: string;
   };
 }
 
@@ -81,7 +83,7 @@ export class ApmConfiguration {
     private readonly rawKibanaConfig: KibanaRawConfig,
     private readonly isDistributable: boolean
   ) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     const { version, build } = require(join(this.rootDir, 'package.json'));
     this.kibanaVersion = version;
     this.pkgBuild = build;
@@ -116,6 +118,14 @@ export class ApmConfiguration {
 
   public getMonitoringCollectionConfig(): MonitoringCollectionConfig {
     return monitoringCollectionSchema.validate(this.rawKibanaConfig.monitoring_collection);
+  }
+
+  /**
+   * Returns the Kibana instance name (`server.name`), defaulting to the host name like the HTTP service does.
+   */
+  public getKibanaName(): string {
+    // must match the `server.name` default in `@kbn/core-http-server-internal`
+    return this.rawKibanaConfig.server?.name ?? hostname().replace(/[^\x00-\x7F]/g, '');
   }
 
   public isUsersRedactionEnabled(): boolean {

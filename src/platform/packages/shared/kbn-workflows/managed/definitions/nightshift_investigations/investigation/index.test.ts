@@ -81,8 +81,6 @@ describe('Nightshift investigation workflow', () => {
       'persist_investigation_started',
       'emit_investigation_started',
       'notify_started',
-      'list_investigation_sources',
-      'resolve_investigation_sources',
       'investigate',
       'emit_investigation_completed',
       'notify_completed',
@@ -188,6 +186,22 @@ describe('Nightshift investigation workflow', () => {
     }
   });
 
+  // Nightshift tells an alert-recovery round from a user's message by how the message opens
+  // (`isAlertRecoveryRound`), so nothing may come before the caller's message.
+  it.each([
+    ['an alert recovery', { source: 'alert', follow_up: 'alert_recovered' }],
+    ['a user follow-up', { source: 'slack' }],
+  ])("opens the agent's message with the caller's message on %s", (_case, context) => {
+    const message = 'An alert in this investigation has recovered. Evidence follows.';
+    const rendered = createWorkflowLiquidEngine().parseAndRenderSync(
+      requireStep('investigate').with?.message ?? '',
+      {
+        inputs: { message, context },
+      }
+    );
+    expect(rendered.startsWith(message)).toBe(true);
+  });
+
   it('attributes agent calls to Nightshift under the shared investigation id', () => {
     expect(requireStep('investigate')).toMatchObject({
       'plugin-id': 'nightshift_investigation',
@@ -195,10 +209,6 @@ describe('Nightshift investigation workflow', () => {
       'product-solution': 'observability',
       'product-feature': 'nightshift',
     });
-  });
-
-  it('loads every requested source on one page', () => {
-    expect(requireStep('list_investigation_sources').with?.path).toContain('per_page=100&');
   });
 
   it('passes WorkflowSchema normalization', () => {
@@ -284,10 +294,7 @@ describe('Nightshift investigation workflow', () => {
   });
 
   it('addresses the investigation by its id rather than the run', () => {
-    // The source lookup lists sources by id and never touches the investigation document.
-    const requestSteps = collectStepsByType(investigation.steps, 'kibana.request').filter(
-      ({ name }) => name !== 'list_investigation_sources'
-    );
+    const requestSteps = collectStepsByType(investigation.steps, 'kibana.request');
 
     for (const { with: params } of requestSteps) {
       expect(params?.path).toContain('{{ inputs.investigation_id | default: execution.id }}');
@@ -348,6 +355,25 @@ describe('Nightshift investigation workflow', () => {
       const passed = Object.keys(start.with.inputs);
       expect(passed.filter((name) => !(name in declared.properties))).toEqual([]);
       expect(declared.required.filter((name) => !passed.includes(name))).toEqual([]);
+    });
+
+    it.each([
+      [
+        'a first round',
+        { alerts: [{ rule_type_id: 'apm.transaction_error_rate' }] },
+        'apm.transaction_error_rate',
+      ],
+      [
+        'a recovery round',
+        { follow_up: 'alert_recovered', alert_rule_type: 'apm.transaction_error_rate' },
+        'apm.transaction_error_rate',
+      ],
+      ['a run without an alert', { source: 'manual' }, undefined],
+    ])('sends the alert rule type of %s', (_, context, expected) => {
+      const expression = start.with.inputs.alert_rule_type.slice(3, -2);
+      expect(createWorkflowLiquidEngine().evalValueSync(expression, { inputs: { context } })).toBe(
+        expected
+      );
     });
 
     it('sends the run start as a date the score step can read, to the millisecond', () => {

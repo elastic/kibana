@@ -26,10 +26,10 @@ import type {
 } from '@kbn/coloring';
 import {
   DEFAULT_COLOR_MAPPING_CONFIG,
-  CategoricalColorMapping,
   SPECIAL_TOKENS_STRING_CONVERSION,
   getConfigFromPalette,
 } from '@kbn/coloring';
+import { CategoricalColorMapping } from '@kbn/coloring-components';
 import { i18n } from '@kbn/i18n';
 import type { KbnPaletteId, KbnPalettes } from '@kbn/palettes';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';

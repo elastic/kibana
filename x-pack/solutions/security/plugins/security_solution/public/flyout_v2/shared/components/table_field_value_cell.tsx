@@ -14,9 +14,7 @@ import type { EventFieldsData } from '../../../common/components/event_details/t
 import { OverflowField } from '../../../common/components/tables/helpers';
 import { FormattedFieldValue } from '../../../timelines/components/timeline/body/renderers/formatted_field';
 import { MESSAGE_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
-import { FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID } from '../../../flyout/document_details/right/components/test_ids';
 import { isFlyoutLink } from '../../../flyout/shared/utils/link_utils';
-import { PreviewLink } from '../../../flyout/shared/components/preview_link';
 import type { OpenFlyoutLinkRenderer } from './open_flyout_link';
 
 export interface FieldValueCellProps {
@@ -49,10 +47,6 @@ export interface FieldValueCellProps {
    */
   values: string[] | null | undefined;
   /**
-   * Entity Store canonical id for host/user preview navigation when known
-   */
-  entityId?: string;
-  /**
    * The source document record, forwarded to the flyout link for entity resolution (new flyout).
    */
   hit?: DataTableRecord;
@@ -75,7 +69,6 @@ export const TableFieldValueCell = memo(
     ruleId,
     getLinkValue,
     values,
-    entityId,
     hit,
     renderFlyoutLink: RenderFlyoutLink,
   }: FieldValueCellProps) => {
@@ -101,19 +94,7 @@ export const TableFieldValueCell = memo(
           let content: React.ReactNode;
           if (data.field === MESSAGE_FIELD_NAME) {
             content = <OverflowField value={value} />;
-          } else if (isLink && !RenderFlyoutLink) {
-            // No renderFlyoutLink provided: open the preview panel.
-            content = (
-              <PreviewLink
-                field={data.field}
-                value={value}
-                entityId={entityId}
-                scopeId={scopeId}
-                ruleId={ruleId}
-                data-test-subj={`${FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID}-${i}`}
-              />
-            );
-          } else if (isLink && RenderFlyoutLink) {
+          } else if (isLink) {
             // New flyout: render the plain value; the `RenderFlyoutLink` wrapper below turns it
             // into a link that opens the relevant system flyout (host, ip, rule).
             content = <EuiText size="xs">{value}</EuiText>;

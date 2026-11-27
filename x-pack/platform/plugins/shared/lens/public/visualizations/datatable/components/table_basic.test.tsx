@@ -1008,6 +1008,16 @@ describe('DatatableComponent', () => {
     });
   });
 
+  describe('scrolling', () => {
+    it('should always reserve the vertical scrollbar of the grid scroller', () => {
+      renderDatatableComponent();
+      const scroller = screen
+        .getByTestId('lnsDataTable')
+        .querySelector<HTMLElement>('[style*="overflow"]');
+      expect(scroller?.style.overflow).toBe('auto scroll');
+    });
+  });
+
   describe('row numbers', () => {
     it('should show row numbers when enabled', () => {
       renderDatatableComponent({

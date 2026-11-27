@@ -8,6 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { getStaticDataViewId } from '@kbn/apm-data-view';
+import { GRID_RESOLUTION } from '@kbn/geo-precision';
 import type {
   AggDescriptor,
   ColorDynamicOptions,
@@ -21,7 +22,6 @@ import {
   COLOR_MAP_TYPE,
   emsWorldLayerId,
   FIELD_ORIGIN,
-  GRID_RESOLUTION,
   RENDER_AS,
   SOURCE_TYPES,
   STYLE_TYPE,

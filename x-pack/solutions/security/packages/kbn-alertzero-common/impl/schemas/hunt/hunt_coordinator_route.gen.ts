@@ -42,12 +42,12 @@ export const HuntCoordinatorResult = lazySchema(() =>
     report_id: z.string().optional(),
     run_id: z.string(),
     /**
-     * What IOC Hunt searched: the space's Security Solution default data view patterns, exclusions included, never an alerts index. Empty when the scope was blocked or resolution failed.
+     * What IOC Hunt searched: the space's Security Solution default data view patterns, exclusions included, with policy-skipped entries (hidden and alerts names) and unresolved local concrete names removed (under cross-project search no concrete name is removed). Empty when the scope was blocked or resolution failed.
      */
     index_patterns: z
       .array(z.string())
       .describe(
-        "What IOC Hunt searched: the space's Security Solution default data view patterns, exclusions included, never an alerts index. Empty when the scope was blocked or resolution failed."
+        "What IOC Hunt searched: the space's Security Solution default data view patterns, exclusions included, with policy-skipped entries (hidden and alerts names) and unresolved local concrete names removed (under cross-project search no concrete name is removed). Empty when the scope was blocked or resolution failed."
       ),
     /**
      * What Behavior Hunt was allowed to read, target, and count as a hit, chosen after the report was read and IOC Hunt ran: the union of the datasets the report's vendor or product matched, the indices IOC Hunt hit, the model's matches (only when neither of those found anything), and `actionable_indices`, each `*`-suffixed. `tier2_target_sources` says which signals contributed. Empty when the scope was blocked, resolution failed, or no signal named a target.
@@ -313,13 +313,13 @@ export const HuntCoordinatorResult = lazySchema(() =>
         'The distinct reasons of the coverage gaps that kept this run `incomplete_retryable`, from the coordinator and both tiers, judged in the same context as `completeness`. A reason that is final for this run (a technique it gave up on, a gate nothing could pass) is left out. Empty when the run is not retryable; absent on paths that record nothing.'
       ),
     /**
-     * The coordinator's own coverage gaps — input this run had to truncate, and a Behavior Hunt that was requested but could not run, or had nothing to run against. Not a copy of `tier1.incomplete` / `tier2.incomplete`, which the caller already has; this is the part of `completeness` that would otherwise reach the caller only as an enum, or on the paths where only IOC Hunt ran, not even that. Absent or empty means the coordinator itself found nothing to report here.
+     * The coordinator's own coverage gaps — input this run had to truncate, a default data view name the scope dropped from the search (`index_not_searched`), and a Behavior Hunt that was requested but could not run, or had nothing to run against. Not a copy of `tier1.incomplete` / `tier2.incomplete`, which the caller already has; this is the part of `completeness` that would otherwise reach the caller only as an enum, or on the paths where only IOC Hunt ran, not even that. Absent or empty means the coordinator itself found nothing to report here.
      */
     incomplete: z
       .array(HuntIncompleteness)
       .optional()
       .describe(
-        "The coordinator's own coverage gaps — input this run had to truncate, and a Behavior Hunt that was requested but could not run, or had nothing to run against. Not a copy of `tier1.incomplete` / `tier2.incomplete`, which the caller already has; this is the part of `completeness` that would otherwise reach the caller only as an enum, or on the paths where only IOC Hunt ran, not even that. Absent or empty means the coordinator itself found nothing to report here."
+        "The coordinator's own coverage gaps — input this run had to truncate, a default data view name the scope dropped from the search (`index_not_searched`), and a Behavior Hunt that was requested but could not run, or had nothing to run against. Not a copy of `tier1.incomplete` / `tier2.incomplete`, which the caller already has; this is the part of `completeness` that would otherwise reach the caller only as an enum, or on the paths where only IOC Hunt ran, not even that. Absent or empty means the coordinator itself found nothing to report here."
       ),
     /**
      * Report IOCs excluded by adjudication, not searched by this run.

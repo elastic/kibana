@@ -39,6 +39,7 @@ import {
 import { type PluginsService, createPluginsService } from './plugins';
 import { CallbackDeliveryService } from './execution/callback';
 import { createSpaceSettingsService } from './space_settings';
+import { PinnedBaselineService } from './eval_baselines/pinned_baseline_service';
 import { SurfacesServiceImpl } from './surfaces';
 import { ConversationTemplatesService } from './conversation/templates';
 
@@ -129,6 +130,7 @@ export class ServiceManager {
     uiSettings,
     savedObjects,
     featureFlags,
+    dataStreams,
     actions,
     taskManager,
     securityPlugin,
@@ -139,6 +141,8 @@ export class ServiceManager {
     deploymentInfo,
     deductiveRegister,
     isomer,
+    getSmlTypeDefinition,
+    cloud,
     conversationEventBus,
   }: ServicesStartDeps & { conversationEventBus?: ConversationEventBus }): InternalStartServices {
     if (!this.services) {
@@ -202,7 +206,7 @@ export class ServiceManager {
       toolsService: tools,
     });
 
-    const hooks = this.services.hooks.start();
+    const hooks = this.services.hooks.start({ security, spaces });
 
     const plugins = this.services.plugins.start({
       logger: logger.get('plugins'),
@@ -271,6 +275,8 @@ export class ServiceManager {
     const surfaces = new SurfacesServiceImpl({
       attachmentsService: attachments,
       isomer,
+      basePath: http.basePath,
+      cloud,
       logger: logger.get('surfaces'),
     });
 
@@ -291,6 +297,8 @@ export class ServiceManager {
       searchInferenceEndpoints,
       callbackDeliveryService: this.services.callbackDelivery,
       surfacesService: surfaces,
+      taskManager,
+      getExecutionService,
     });
 
     executionService = createAgentExecutionService({
@@ -304,6 +312,7 @@ export class ServiceManager {
       agentService: agents,
       runAgent: runner.runAgent,
       attachmentsService: attachments,
+      getSmlTypeDefinition,
       uiSettings,
       savedObjects,
       trackingService,
@@ -317,6 +326,8 @@ export class ServiceManager {
     const consumption = this.services.consumption.start({ elasticsearch, spaces });
 
     const spaceSettings = createSpaceSettingsService({ savedObjects });
+
+    const evalBaselines = new PinnedBaselineService(logger.get('evalBaselines'), dataStreams);
 
     this.internalStart = {
       tools,
@@ -343,6 +354,7 @@ export class ServiceManager {
       callbackDeliveryService: this.services.callbackDelivery,
       spaceSettings,
       conversationTemplates: conversationTemplatesStart,
+      evalBaselines,
     };
 
     return this.internalStart;

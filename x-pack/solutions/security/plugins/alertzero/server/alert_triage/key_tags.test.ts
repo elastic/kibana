@@ -69,6 +69,18 @@ describe('planKeyTags', () => {
     expect(one[1]).not.toBe(other[1]);
   });
 
+  it('counts a cloud false positive with a strict key on the fallback, because its wide key is rule only', () => {
+    const keyedCloud = {
+      ...cloudDoc('a'),
+      event: { action: 'login' },
+      cloud: { account: { id: '1' } },
+    };
+    const { counts } = plan([['a', keyedCloud]], ['a']);
+
+    expect(counts.alertsWithStrictKey).toBe(1);
+    expect(counts.fpCandidatesOnFallback).toBe(1);
+  });
+
   it('counts keys, the keys only one alert has, and the false positives on the fallback', () => {
     const { counts } = plan(
       [

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiButton,
@@ -15,9 +15,10 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiHorizontalRule,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
+  useEuiTheme,
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -27,12 +28,13 @@ import { isEqual } from 'lodash';
 import type {
   CatalogueComponentStatus,
   CatalogueComponentSummary,
+  CatalogueMetadata,
   ComponentCatalogue,
   ComponentValidationRequest,
 } from '@kbn/streams-schema';
 import { useDiscardConfirm } from '../../hooks/use_discard_confirm';
 import { BlockDisableOverlay } from '../draggable_steps';
-import type { ComponentChecker } from '../../services/component_catalogue';
+import { describeComponentStatus, type ComponentChecker } from '../../services/component_catalogue';
 import { allocateComponentId, type UnitSignal } from '../../services/unit_pipeline';
 import type { DraftProcessor } from '../../services/unit_processing';
 import {
@@ -41,7 +43,9 @@ import {
   toFieldErrors,
   type ComponentReferenceOption,
 } from '../component_definition_form';
+import { getSignalLabel } from '../streams_layout/destinations/destination_type_config';
 import { CheckOutcomeCallout, type CheckOutcome } from './check_outcome_callout';
+import { toProcessorHelp } from './processor_help';
 import {
   deleteProcessorPromptOptions,
   discardProcessorChangesPromptOptions,
@@ -65,12 +69,38 @@ const signalsLabel = i18n.translate('xpack.streams.processingFlyout.editor.signa
   defaultMessage: 'Signals',
 });
 
-const toOption = (component: CatalogueComponentSummary): EuiComboBoxOptionOption<string> => ({
+/** A status badge worded by the catalogue when it describes statuses, by its value otherwise. */
+function StatusBadge({
+  status,
+  metadata,
+}: {
+  status: CatalogueComponentStatus;
+  metadata: CatalogueMetadata;
+}) {
+  const described = describeComponentStatus(metadata, status);
+  const badge = (
+    <EuiBadge color={STATUS_COLORS[status]} data-test-subj="streamsProcessingFlyoutStatusBadge">
+      {described?.label ?? status}
+    </EuiBadge>
+  );
+  return described?.description ? (
+    <EuiToolTip content={described.description} position="right">
+      {badge}
+    </EuiToolTip>
+  ) : (
+    badge
+  );
+}
+
+const toOption = (
+  component: CatalogueComponentSummary,
+  metadata: CatalogueMetadata
+): EuiComboBoxOptionOption<string> => ({
   label: component.display_name,
   value: component.type,
   append:
     component.status && component.status !== 'stable' ? (
-      <EuiBadge color={STATUS_COLORS[component.status]}>{component.status}</EuiBadge>
+      <StatusBadge status={component.status} metadata={metadata} />
     ) : undefined,
 });
 
@@ -89,13 +119,19 @@ interface ProcessorEditorProps {
   /** `unchecked` when the configuration service could not be reached to check the processor. */
   onCommit: (processor: DraftProcessor, options?: { unchecked?: boolean }) => void;
   onCancel: () => void;
+  onChange: () => void;
   /** Deletes the step being edited; omitted when creating a processor. */
   onDelete?: () => void;
 }
 
+// Its own stacking context, so the overlay covers the form but not the action bar stuck over it.
 const formOverlayStyles = css`
   position: relative;
+  isolation: isolate;
 `;
+
+/** Where a submit that did not commit left something for the user to look at. */
+type SubmitFeedbackTarget = 'field' | 'outcome';
 
 // A disabled fieldset also stops keyboard input, which the overlay alone does not.
 const disabledFormStyles = css`
@@ -131,20 +167,71 @@ export function ProcessorEditor({
   componentIds,
   onCommit,
   onCancel,
+  onChange,
   onDelete,
 }: ProcessorEditorProps) {
   const form = useProcessorForm({ catalogue, step, telemetry });
+  useEffect(() => {
+    if (form.isDirty) {
+      onChange();
+    }
+  }, [form.isDirty, onChange]);
   const { type, component, definition, signals, doesNotFit } = form;
   const check = useComponentCheck(checkComponent);
   const [outcome, setOutcome] = useState<CheckOutcome>();
   // The processor the warnings were about; "Continue anyway" commits exactly that.
   const [warnedProcessor, setWarnedProcessor] = useState<DraftProcessor>();
-  const clearWarnings = () => {
-    if (warnedProcessor) {
-      setWarnedProcessor(undefined);
-      setOutcome(undefined);
-    }
+  const clearOutcome = () => {
+    setWarnedProcessor(undefined);
+    setOutcome(undefined);
   };
+  // An edit takes the service's errors off the fields, but what no field could show has no other
+  // place, so it stays until the processor is checked again.
+  const clearOutcomeOnEdit = () => {
+    setWarnedProcessor(undefined);
+    setOutcome((current) =>
+      current?.kind === 'rejected' && current.unmatched.length > 0
+        ? { ...current, highlightedCount: 0 }
+        : undefined
+    );
+  };
+
+  const { euiTheme } = useEuiTheme();
+  const formRef = useRef<HTMLDivElement>(null);
+  const outcomeRef = useRef<HTMLDivElement>(null);
+  // The action bar stays in view on a long form, so what a submit reports may be scrolled out of
+  // it. Each submit sets a new object, so a repeated one scrolls again.
+  const [feedback, setFeedback] = useState<{ target: SubmitFeedbackTarget }>();
+  useEffect(() => {
+    if (!feedback) {
+      return;
+    }
+    if (feedback.target === 'outcome') {
+      outcomeRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' });
+      return;
+    }
+    // Centred, as the bottom of the scroll area is under the action bar.
+    formRef.current
+      ?.querySelector('[aria-invalid="true"]')
+      ?.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
+  }, [feedback]);
+
+  // Sticks to the bottom of the flyout body while the editor runs below it. The bottom padding
+  // overlaps part of the padding of the block around the editor, so the bar looks the same at
+  // rest. It stops short of the block's edge, or the background would cover its border.
+  const actionBarStyles = css`
+    position: sticky;
+    bottom: 0;
+    margin-top: ${euiTheme.size.m};
+    margin-bottom: -${euiTheme.size.s};
+    padding: ${euiTheme.size.m} 0 ${euiTheme.size.s};
+    border-top: ${euiTheme.border.thin};
+    background-color: ${euiTheme.colors.backgroundBasePlain};
+  `;
+  // Keeps the outcome clear of the action bar when it is scrolled to the bottom of the view.
+  const outcomeStyles = css`
+    scroll-margin-bottom: ${euiTheme.size.xxxxl};
+  `;
 
   const confirmCancel = useDiscardConfirm(onCancel, {
     enabled: form.isDirty,
@@ -161,7 +248,10 @@ export function ProcessorEditor({
     confirmDelete();
   };
 
-  const options = useMemo(() => form.processors.map(toOption), [form.processors]);
+  const options = useMemo(
+    () => form.processors.map((processor) => toOption(processor, catalogue.metadata)),
+    [form.processors, catalogue.metadata]
+  );
   const [isSelectionCleared, setIsSelectionCleared] = useState(false);
   const selectedOptions = isSelectionCleared ? [] : options.filter(({ value }) => value === type);
 
@@ -171,6 +261,7 @@ export function ProcessorEditor({
     }
     const processor = form.validate();
     if (!processor) {
+      setFeedback({ target: 'field' });
       return;
     }
     setOutcome(undefined);
@@ -192,6 +283,7 @@ export function ProcessorEditor({
         if (result.diagnostics.length > 0) {
           setWarnedProcessor(processor);
           setOutcome({ kind: 'warned', diagnostics: result.diagnostics });
+          setFeedback({ target: 'outcome' });
           return;
         }
         onCommit(processor);
@@ -208,10 +300,12 @@ export function ProcessorEditor({
         );
         form.addErrors(errors);
         setOutcome({ kind: 'rejected', unmatched, highlightedCount: Object.keys(errors).length });
+        setFeedback({ target: 'outcome' });
         return;
       }
       case 'failed':
         setOutcome({ kind: 'failed', message: result.message });
+        setFeedback({ target: 'outcome' });
         return;
     }
   };
@@ -243,15 +337,11 @@ export function ProcessorEditor({
               <EuiSpacer size="m" />
             </>
           ) : null}
-          <div css={formOverlayStyles}>
+          <div ref={formRef} css={formOverlayStyles}>
             {check.isChecking ? <BlockDisableOverlay /> : null}
             <fieldset disabled={check.isChecking} css={disabledFormStyles}>
               <EuiForm fullWidth>
-                <EuiFormRow
-                  fullWidth
-                  label={processorLabel}
-                  helpText={definition?.help?.summary ?? definition?.description}
-                >
+                <EuiFormRow fullWidth label={processorLabel} helpText={toProcessorHelp(definition)}>
                   <EuiComboBox
                     aria-label={processorLabel}
                     fullWidth
@@ -263,7 +353,7 @@ export function ProcessorEditor({
                     onChange={([selected]) => {
                       setIsSelectionCleared(selected?.value === undefined);
                       if (selected?.value !== undefined && selected.value !== type) {
-                        clearWarnings();
+                        clearOutcome();
                         form.changeType(selected.value);
                       }
                     }}
@@ -327,7 +417,7 @@ export function ProcessorEditor({
                       selected={signals}
                       error={form.signalsError}
                       onChange={(next) => {
-                        clearWarnings();
+                        clearOutcomeOnEdit();
                         form.setSignals(
                           form.signalOptions.filter((signal) => next.includes(signal))
                         );
@@ -346,7 +436,7 @@ export function ProcessorEditor({
                     >
                       {i18n.translate('xpack.streams.processingFlyout.editor.fixedSignals', {
                         defaultMessage: 'Applies to every signal it supports: {signals}.',
-                        values: { signals: signals.join(', ') },
+                        values: { signals: signals.map(getSignalLabel).join(', ') },
                       })}
                     </EuiText>
                     <EuiSpacer size="m" />
@@ -361,7 +451,7 @@ export function ProcessorEditor({
                     errors={form.errors}
                     componentRefs={componentRefs}
                     onChange={(values) => {
-                      clearWarnings();
+                      clearOutcomeOnEdit();
                       form.setValues(values);
                     }}
                     onUnparsedInputChange={form.setHasUnparsedInput}
@@ -370,16 +460,23 @@ export function ProcessorEditor({
               </EuiForm>
             </fieldset>
           </div>
-          <CheckOutcomeCallout
-            outcome={outcome}
-            onCommitAnyway={() => {
-              if (warnedProcessor) {
-                onCommit(warnedProcessor);
-              }
-            }}
-          />
-          <EuiHorizontalRule margin="m" />
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+          <div ref={outcomeRef} css={outcomeStyles}>
+            <CheckOutcomeCallout
+              outcome={outcome}
+              onCommitAnyway={() => {
+                if (warnedProcessor) {
+                  onCommit(warnedProcessor);
+                }
+              }}
+            />
+          </div>
+          <EuiFlexGroup
+            justifyContent="spaceBetween"
+            alignItems="center"
+            responsive={false}
+            css={actionBarStyles}
+            data-test-subj="streamsProcessingFlyoutEditorActions"
+          >
             <EuiFlexItem grow={false}>
               {onDelete ? (
                 <EuiButton

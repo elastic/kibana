@@ -14,6 +14,7 @@ import { isSection } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardAgentTaskOutput, EnhanceGold } from '../types';
 import { GENERATE_DASHBOARD_TOOL_ID } from '../extract_dashboard';
 import { MESSY_LOGS_DASHBOARD } from '../fixtures/messy_logs_dashboard';
+import { dashboard as buildDashboard, section, xy } from '../test_helpers';
 import {
   enhanceDefectResolutionEvaluator,
   enhanceModeComplianceEvaluator,
@@ -154,6 +155,21 @@ describe('enhance evaluators', () => {
       ).toContain('panel queries');
     });
 
+    it('fails appearance mode when a Vega spec changes its ES|QL query', async () => {
+      const requeried = clone();
+      const vega = findPanel(requeried, 'requests-by-os-vega');
+      const spec = String(vega.config.spec);
+      const query = spec.match(/FROM [^"\\]+/)?.[0];
+      if (!query) {
+        throw new Error('no ES|QL query in the Vega spec');
+      }
+      vega.config.spec = spec.replace(query, 'FROM other | STATS COUNT(*)');
+      expect(
+        (await run(enhanceModeComplianceEvaluator, gold(), output({ dashboard: requeried })))
+          .explanation
+      ).toContain('panel queries');
+    });
+
     it('lets content mode drop one copy of a duplicate but not another panel', async () => {
       const dropped = clone();
       dropped.panels = dropped.panels.filter((widget) => widget.id !== 'response-breakdown');
@@ -229,10 +245,47 @@ describe('enhance evaluators', () => {
 
   describe('no regression', () => {
     it('passes when nothing the seed met is broken, and abstains without a write', async () => {
-      expect((await run(enhanceNoRegressionEvaluator, gold(), output({}))).score).toBe(1);
+      const retitled = { ...clone(), title: 'Web logs' };
+      expect(
+        (await run(enhanceNoRegressionEvaluator, gold(), output({ dashboard: retitled }))).score
+      ).toBe(1);
       expect(
         (await run(enhanceNoRegressionEvaluator, gold(), output({ steps: [] }))).score
       ).toBeNull();
+    });
+
+    describe('layout gaps', () => {
+      const sectionRows = (sectionId: string, gap: boolean): AttachmentPanel[] => [
+        xy(`${sectionId}-top`, { x: 0, y: 0, w: 48, h: 10 }),
+        xy(`${sectionId}-bottom`, { x: 0, y: gap ? 12 : 10, w: 48, h: 10 }),
+      ];
+      // The top level has a gap next to `a`, and both sections are titled Traffic unless renamed.
+      const sectioned = (gaps: { s1: boolean; s2: boolean }, s2Title = 'Traffic') =>
+        buildDashboard([
+          xy('a', { x: 0, y: 0, w: 24, h: 10 }),
+          section('s1', 'Traffic', 10, sectionRows('s1', gaps.s1)),
+          section('s2', s2Title, 11, sectionRows('s2', gaps.s2)),
+        ]);
+      const seed = sectioned({ s1: true, s2: false });
+
+      it('tolerates the seed gaps in their containers, also after renaming a section', async () => {
+        const result = await run(
+          enhanceNoRegressionEvaluator,
+          gold(),
+          output({ before: seed, dashboard: sectioned({ s1: true, s2: false }, 'Renamed') })
+        );
+        expect(result.score).toBe(1);
+      });
+
+      it('flags a gap in a section the seed kept filled, whatever the other sections show', async () => {
+        const result = await run(
+          enhanceNoRegressionEvaluator,
+          gold(),
+          output({ before: seed, dashboard: sectioned({ s1: true, s2: true }) })
+        );
+        expect(result.score).toBeLessThan(1);
+        expect(result.explanation).toContain('layout_gap');
+      });
     });
 
     it('flags a rule the seed met that the result breaks', async () => {

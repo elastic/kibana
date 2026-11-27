@@ -8,13 +8,7 @@
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EntityType } from '../../../../../common/entity_analytics/types';
-import {
-  EntityPanelKeyByType,
-  EntityPanelParamByType,
-} from '../../../../flyout/entity_details/shared/constants';
-import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { getOpenEntityFlyoutLabel, VIEW_ENTITY_DETAILS } from './translations';
@@ -41,14 +35,12 @@ interface EntityBadgeProps {
 }
 
 /**
- * Renders an entity's name/type as a badge. When the entity type maps to a
- * known entity flyout panel, clicking the badge opens that entity's flyout
+ * Renders an entity's name/type as a badge. When the entity type is a known
+ * entity type, clicking the badge opens that entity's flyout
  * instead of triggering the surrounding card's click handler (e.g. opening
  * the Agent Builder chat).
  */
 export const EntityBadge: React.FC<EntityBadgeProps> = ({ entity, scopeId }) => {
-  const enableNewFlyout = useIsNewFlyoutEnabled();
-  const { openFlyout } = useExpandableFlyoutApi();
   const { openEntityFlyout } = useFlyoutApi();
   const { euiTheme } = useEuiTheme();
 
@@ -91,35 +83,15 @@ export const EntityBadge: React.FC<EntityBadgeProps> = ({ entity, scopeId }) => 
     );
   }
 
-  if (!enableNewFlyout && !EntityPanelKeyByType[entity.type]) {
-    return (
-      <EuiBadge color="hollow" css={entityBadgeContainerCss}>
-        {badgeContent}
-      </EuiBadge>
-    );
-  }
-
   const handleOpenEntityFlyout = () => {
-    const sharedParams = { entityId: entity.id, contextID: scopeId, scopeId };
-
-    if (enableNewFlyout) {
-      openEntityFlyout({
-        engineType: entity.type,
-        entityName: entity.name,
-        origin: FLYOUT_ORIGIN.THREAT_HUNTING_LEADS,
-        ...sharedParams,
-      });
-      return;
-    }
-
-    const entityType = entity.type as EntityType;
-    const panelKey = EntityPanelKeyByType[entityType];
-    const paramName = EntityPanelParamByType[entityType];
-    if (panelKey && paramName) {
-      openFlyout({
-        right: { id: panelKey, params: { [paramName]: entity.name, ...sharedParams } },
-      });
-    }
+    openEntityFlyout({
+      engineType: entity.type,
+      entityName: entity.name,
+      origin: FLYOUT_ORIGIN.THREAT_HUNTING_LEADS,
+      entityId: entity.id,
+      contextID: scopeId,
+      scopeId,
+    });
   };
 
   // Rendered as a `span[role=button]` (rather than passing `onClick` to

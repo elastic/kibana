@@ -48,6 +48,18 @@ export const FILE_UPLOAD_ERROR = {
     'xpack.securitySolution.siemMigrations.common.dataInputFlyout.fileUploadError.invalidJson',
     { defaultMessage: 'The file does not contain valid JSON' }
   ),
+  INVALID_TINES_STORY: i18n.translate(
+    'xpack.securitySolution.siemMigrations.common.dataInputFlyout.fileUploadError.invalidTinesStory',
+    { defaultMessage: 'The file does not contain a valid Tines story export' }
+  ),
+  INVALID_TINES_STORY_WITH_REASON: (reason: string) =>
+    i18n.translate(
+      'xpack.securitySolution.siemMigrations.common.dataInputFlyout.fileUploadError.invalidTinesStoryWithReason',
+      {
+        defaultMessage: 'The file does not contain a valid Tines story export: {reason}',
+        values: { reason },
+      }
+    ),
   INVALID_SENTINEL_RESOURCES: i18n.translate(
     'xpack.securitySolution.siemMigrations.common.dataInputFlyout.fileUploadError.invalidSentinelResources',
     {

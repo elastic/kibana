@@ -31,6 +31,16 @@ export const ONGOING_REPEAT_MS = 3_000;
 /** ...and every REPORT_REFILL_MS after that. */
 export const ONGOING_FAST_REPEATS_UNTIL_MS = 12_000;
 
+/** CPU profiler sampling interval in microseconds: about 99 Hz. */
+export const SAMPLING_INTERVAL_US = 10_101;
+
+export const HOUR_MS = 60 * 60_000;
+/**
+ * A file is only saved if it has a different top frame to the previous ones seen within the same
+ * clock hour.
+ */
+export const FILES_PER_HOUR = 3;
+
 /** Kibana is considered running this long after its overall status first becomes available... */
 export const RUNNING_GRACE_MS = 30_000;
 /** ...or this long after the watchdog service starts, whichever comes first. */
@@ -45,7 +55,9 @@ export const Slot = {
   heartbeat: 0,
   /** When Kibana was considered running (0 while starting); blocks before it are `starting`. */
   runningSince: 1,
+  /** 1 while CPU profiling is on for one of this node's roles, 0 otherwise. */
+  profiling: 2,
 } as const;
-export const SLOT_COUNT = 2;
+export const SLOT_COUNT = 3;
 
 export const monotonicUs = (): number => Number(process.hrtime.bigint() / 1000n);

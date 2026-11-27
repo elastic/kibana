@@ -205,6 +205,35 @@ describe('#color', () => {
   });
 });
 
+describe('#initials', () => {
+  test('is optional', () => {
+    expect(() => spaceBaseSchema.validate({ ...defaultProperties })).not.toThrow();
+  });
+
+  test('allows up to 2 characters, counted as graphemes', () => {
+    for (const initials of ['AB', '\u{1F44D}\u{1F3FD}\u{1F44D}\u{1F3FD}', 'A\u{1F44D}']) {
+      expect(spaceBaseSchema.validate({ ...defaultProperties, initials })).toHaveProperty(
+        'initials',
+        initials
+      );
+    }
+  });
+
+  test('cannot exceed 2 characters', () => {
+    expect(() =>
+      spaceBaseSchema.validate({ ...defaultProperties, initials: 'ABC' })
+    ).toThrowErrorMatchingInlineSnapshot(`"[initials]: must have at most 2 characters"`);
+  });
+
+  test('cannot exceed the code unit cap', () => {
+    expect(() =>
+      spaceBaseSchema.validate({ ...defaultProperties, initials: `a${'\u0301'.repeat(64)}` })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[initials]: value has length [65] but it must have a maximum length of [64]."`
+    );
+  });
+});
+
 describe('#imageUrl', () => {
   test('is optional', () => {
     expect(() =>

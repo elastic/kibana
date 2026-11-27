@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HttpFetchError } from '@kbn/core-http-browser-internal/src/http_fetch_error';
+import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { cpsPluginMock } from '@kbn/cps/public/mocks';
 import { HasData } from './has_data';
@@ -192,7 +192,7 @@ describe('when calling hasData service', () => {
         // Mock getIndices
         const spy = jest.spyOn(http, 'get').mockImplementation(() =>
           Promise.reject(
-            new HttpFetchError(
+            createHttpFetchError(
               'Timeout while checking for Elasticsearch data',
               'TimeoutError',
               new Request(''),
@@ -236,7 +236,7 @@ describe('when calling hasData service', () => {
           .spyOn(http, 'get')
           .mockImplementation(() =>
             Promise.reject(
-              new HttpFetchError(
+              createHttpFetchError(
                 'Timeout while checking for Elasticsearch data',
                 'TimeoutError',
                 new Request(''),

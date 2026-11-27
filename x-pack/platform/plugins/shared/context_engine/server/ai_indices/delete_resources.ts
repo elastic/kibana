@@ -104,8 +104,11 @@ export const deleteBackingStoreResource = async ({
   }
 };
 
+const MANAGED_WORKFLOW_ID_PREFIX = 'system-';
+
 /**
- * Best-effort deletion of workflow automations. Returns one error string per failure.
+ * Best-effort deletion of workflow automations, except managed workflows. Returns one error
+ * string per failure.
  */
 export const deleteAutomationResources = async ({
   automations,
@@ -123,7 +126,10 @@ export const deleteAutomationResources = async ({
   aiIndexId: string;
 }): Promise<string[]> => {
   const workflowIds = automations
-    .filter((automation) => automation.type === 'workflow')
+    .filter(
+      (automation) =>
+        automation.type === 'workflow' && !automation.value.startsWith(MANAGED_WORKFLOW_ID_PREFIX)
+    )
     .map((automation) => automation.value);
 
   if (workflowIds.length === 0) {

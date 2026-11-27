@@ -10,6 +10,7 @@ import type { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracer
 import type { Logger } from '@kbn/logging';
 import type { ChatAgentEvent } from '@kbn/agent-builder-common';
 import {
+  EventActorType,
   ChatEventType,
   ConversationRoundStepType,
   ToolOrigin,
@@ -205,6 +206,33 @@ describe('convertGraphEvents', () => {
     expect(events).toEqual([{ type: ChatEventType.backgroundAgentComplete, data: { execution } }]);
   });
 
+  it('emits interim_answer then message_delivered from the check after the answer', async () => {
+    const delivered = {
+      event_id: 'e1',
+      author: { type: EventActorType.user, id: 'u1' },
+      is_run_owner: true,
+      message: 'use a table',
+      delivered_at: '2026-01-01T00:00:00.000Z',
+      cycle: 1,
+      after_answer: true,
+    };
+    const events = await collect([
+      chainEnd(steps.checkIncomingAfterAnswer, {
+        steps: [
+          stepUpdates.append({
+            type: ConversationRoundStepType.interimAnswer,
+            message: 'the first answer',
+          }),
+          stepUpdates.append({ type: ConversationRoundStepType.deliveredMessage, ...delivered }),
+        ],
+      }),
+    ]);
+    expect(events).toEqual([
+      { type: ChatEventType.interimAnswer, data: { message: 'the first answer' } },
+      { type: ChatEventType.messageDelivered, data: delivered },
+    ]);
+  });
+
   it('emits substitution_applied for substitution appends, and nothing for a compaction request', async () => {
     const substitution = {
       substituted_tool_calls: [{ round_id: 'round-1', tool_call_id: 'c1' }],
@@ -296,6 +324,96 @@ describe('convertGraphEvents', () => {
       { ...chainEnd(GRAPH, finalState), metadata: { graphName: GRAPH } } as LangchainStreamEvent,
     ]);
     expect(events).toEqual([]);
+  });
+
+  describe('model reasoning', () => {
+    const turnStart = {
+      event: 'on_chain_start',
+      name: steps.researchAgent,
+      run_id: 'run',
+      tags: [],
+      metadata: { graphName: GRAPH },
+      data: {},
+    } as LangchainStreamEvent;
+
+    const modelChunk = (
+      chunk: { content: string; additional_kwargs?: Record<string, unknown> },
+      tags: string[] = ['agent', 'research-agent']
+    ): LangchainStreamEvent =>
+      ({
+        event: 'on_chat_model_stream',
+        name: 'unused',
+        run_id: 'run',
+        tags,
+        metadata: { graphName: GRAPH },
+        data: { chunk },
+      } as unknown as LangchainStreamEvent);
+
+    it('streams reasoning chunks before the text chunk of the same model chunk', async () => {
+      const events = await collect([
+        turnStart,
+        modelChunk({ content: '', additional_kwargs: { reasoning_content: 'Let me ' } }),
+        modelChunk({ content: 'Hi', additional_kwargs: { reasoning_content: 'think.' } }),
+      ]);
+      expect(events.map((event) => event.type)).toEqual([
+        ChatEventType.modelReasoningChunk,
+        ChatEventType.modelReasoningChunk,
+        ChatEventType.messageChunk,
+      ]);
+      expect(events.map((event) => event.data)).toEqual([
+        { message_id: expect.any(String), text_chunk: 'Let me ' },
+        { message_id: expect.any(String), text_chunk: 'think.' },
+        { message_id: expect.any(String), text_chunk: 'Hi' },
+      ]);
+      const messageIds = new Set(
+        events.map((event) => (event.data as { message_id: string }).message_id)
+      );
+      expect(messageIds.size).toBe(1);
+    });
+
+    it('does not stream reasoning chunks of the structured answer agent', async () => {
+      const events = await collect([
+        modelChunk({ content: '', additional_kwargs: { reasoning_content: 'hmm' } }, [
+          'agent',
+          'answer-agent',
+        ]),
+      ]);
+      expect(events).toEqual([]);
+    });
+
+    it('emits model_reasoning from the researchAgent step updates, with the chunks message id', async () => {
+      const events = await collect([
+        turnStart,
+        modelChunk({ content: '', additional_kwargs: { reasoning_content: 'Searching.' } }),
+        chainEnd(steps.researchAgent, {
+          steps: [
+            stepUpdates.append({
+              type: ConversationRoundStepType.modelReasoning,
+              reasoning: 'Searching.',
+              tool_call_group_id: 'g',
+            }),
+            stepUpdates.append({
+              type: ConversationRoundStepType.reasoning,
+              reasoning: 'group',
+              tool_call_group_id: 'g',
+            }),
+          ],
+          researchOutcome: { type: 'tool_calls', toolCalls: [], toolCallGroupId: 'g' },
+          toolRenderState: {},
+        }),
+      ]);
+      expect(events.map((event) => event.type)).toEqual([
+        ChatEventType.modelReasoningChunk,
+        ChatEventType.modelReasoning,
+        ChatEventType.reasoning,
+      ]);
+      const chunkMessageId = (events[0].data as { message_id: string }).message_id;
+      expect(events[1].data).toEqual({
+        message_id: chunkMessageId,
+        reasoning: 'Searching.',
+        tool_call_group_id: 'g',
+      });
+    });
   });
 
   describe('thinking_complete', () => {

@@ -7,31 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
+import React, { useEffect, useMemo, useRef } from 'react';
 import type { KibanaContentListPageTab } from '@kbn/content-list-page';
 import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
-import {
-  TableListViewTable,
-  TableListViewKibanaProvider,
-} from '@kbn/content-management-table-list-view-table';
-import { FormattedRelative } from '@kbn/i18n-react';
 import { FavoritesClient } from '@kbn/content-management-favorites-public';
+import { ContentListClientProvider } from '@kbn/content-list-provider-client';
+import { i18n } from '@kbn/i18n';
+import { useContentListItems } from '@kbn/content-list';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
-import {
-  coreServices,
-  savedObjectsTaggingService,
-  serverlessService,
-  usageCollectionService,
-} from '../services/kibana_services';
-import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
+import { coreServices, usageCollectionService } from '../services/kibana_services';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
 import type {
   DashboardListingProps,
   DashboardListingTab,
   DashboardSavedObjectUserContent,
 } from './types';
+import { DashboardContentList } from './dashboard_content_list';
 
 export type GetDashboardListingTabsParams = Pick<
   DashboardListingProps,
@@ -44,12 +36,20 @@ type TabContentProps = Omit<GetDashboardListingTabsParams, 'getTabs'> & {
   parentProps: TableListTabParentProps<DashboardSavedObjectUserContent>;
 };
 
-const getBaseKibanaProviderProps = () => ({
-  core: coreServices,
-  savedObjectsTagging: savedObjectsTaggingService?.getTaggingApi(),
-  FormattedRelative,
-  isKibanaVersioningEnabled: !serverlessService,
-});
+const RefetchOnImport = ({ signal }: { signal?: boolean }) => {
+  const { refetch } = useContentListItems();
+  const previousSignal = useRef(signal);
+
+  useEffect(() => {
+    if (previousSignal.current === signal) {
+      return;
+    }
+
+    previousSignal.current = signal;
+    void refetch();
+  }, [signal, refetch]);
+  return null;
+};
 
 const DashboardsTabContent = ({
   goToDashboard,
@@ -59,46 +59,52 @@ const DashboardsTabContent = ({
   refreshListBouncer,
   parentProps,
 }: TabContentProps) => {
-  const {
-    unsavedDashboardIds,
-    refreshUnsavedDashboards,
-    tableListViewTableProps,
-    contentInsightsClient,
-  } = useDashboardListingTable({
-    goToDashboard,
-    getDashboardUrl,
-    useSessionStorageIntegration,
-    initialFilter,
-    showCreateDashboardButton: parentProps.showCreateButton,
-  });
+  const { setPageDataTestSubject, onFetchSuccess } = parentProps;
 
-  const dashboardFavoritesClient = useMemo(() => {
-    return new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_SAVED_OBJECT_TYPE, {
-      http: coreServices.http,
-      usageCollection: usageCollectionService,
-      userProfile: coreServices.userProfile,
+  const { contentListProviderProps, emptyState, unsavedDashboardIds, refreshUnsavedDashboards } =
+    useDashboardListingTable({
+      goToDashboard,
+      getDashboardUrl,
+      useSessionStorageIntegration,
+      initialFilter,
     });
-  }, []);
+
+  const dashboardFavoritesClient = useMemo(
+    () =>
+      new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_SAVED_OBJECT_TYPE, {
+        http: coreServices.http,
+        usageCollection: usageCollectionService,
+        userProfile: coreServices.userProfile,
+      }),
+    []
+  );
+
+  const services = useMemo(
+    () => ({
+      ...contentListProviderProps.services,
+      favorites: dashboardFavoritesClient,
+    }),
+    [contentListProviderProps.services, dashboardFavoritesClient]
+  );
+
+  useEffect(() => {
+    setPageDataTestSubject('dashboardLandingPage');
+  }, [setPageDataTestSubject]);
 
   return (
-    <TableListViewKibanaProvider
-      {...getBaseKibanaProviderProps()}
-      favorites={dashboardFavoritesClient}
-      contentInsightsClient={contentInsightsClient}
+    <ContentListClientProvider
+      {...contentListProviderProps}
+      services={services}
+      onFetchSuccess={onFetchSuccess}
     >
-      <DashboardUnsavedListing
+      <RefetchOnImport signal={refreshListBouncer} />
+      <DashboardContentList
+        emptyState={emptyState}
         goToDashboard={goToDashboard}
         unsavedDashboardIds={unsavedDashboardIds}
         refreshUnsavedDashboards={refreshUnsavedDashboards}
       />
-      <TableListViewTable<DashboardSavedObjectUserContent>
-        tableCaption={tableListViewTableProps.title}
-        {...tableListViewTableProps}
-        onFetchSuccess={parentProps.onFetchSuccess}
-        setPageDataTestSubject={parentProps.setPageDataTestSubject}
-        refreshListBouncer={refreshListBouncer}
-      />
-    </TableListViewKibanaProvider>
+    </ContentListClientProvider>
   );
 };
 
@@ -127,10 +133,7 @@ export const getDashboardListingTabs = ({
       <DashboardsTabContent {...commonProps} parentProps={parentProps} />
     ),
   };
-
-  const additionalTabs = getTabs ? getTabs() : [];
-
-  return [dashboardsTab, ...additionalTabs];
+  return [dashboardsTab, ...(getTabs?.() ?? [])];
 };
 
 /**

@@ -11,6 +11,7 @@ exports[`<AddFromLibraryButton /> is rendered 1`] = `
     class="emotion-euiButtonDisplayContent"
   >
     <span
+      aria-hidden="true"
       color="inherit"
       data-euiicon-type="folderOpen"
     />

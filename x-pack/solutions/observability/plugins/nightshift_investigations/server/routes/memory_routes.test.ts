@@ -48,7 +48,7 @@ const versioned = (page: MemoryPage) => ({ page, seqNo: 7, primaryTerm: 1 });
 /** Handler resources plus the parsed params for one request. */
 const context = (store: unknown, enabled: boolean, params: unknown = { path: { id: '' } }) =>
   ({
-    request: {},
+    request: { spaceId: 'default' },
     params,
     getMemoryPageStore: () => store,
     isMemoryEnabled: () => enabled,

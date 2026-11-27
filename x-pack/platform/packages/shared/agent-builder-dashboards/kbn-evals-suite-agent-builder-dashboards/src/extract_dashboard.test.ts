@@ -15,7 +15,9 @@ import {
   getControlFailures,
   getLastWrittenDashboardId,
   getDashboardFailures,
+  hasWrittenDashboard,
 } from './extract_dashboard';
+import { SECTIONED_LOGS_DASHBOARD } from './fixtures/sectioned_logs_dashboard';
 
 const generateCall = (
   controls: unknown[],
@@ -37,6 +39,38 @@ describe('extract dashboard helpers', () => {
     ];
     expect(getLastWrittenDashboardId(steps)).toBe('second');
     expect(getLastWrittenDashboardId([{ type: 'reasoning' }])).toBeUndefined();
+  });
+
+  describe('hasWrittenDashboard', () => {
+    const steps = [generateCall([])];
+    const edited = { ...SECTIONED_LOGS_DASHBOARD, title: 'Edited' };
+
+    it('counts a generate_dashboard call that changed the seed', () => {
+      expect(
+        hasWrittenDashboard({ steps, before: SECTIONED_LOGS_DASHBOARD, dashboard: edited })
+      ).toBe(true);
+    });
+
+    it('counts a new dashboard when there is no seed', () => {
+      expect(hasWrittenDashboard({ steps, dashboard: edited })).toBe(true);
+    });
+
+    it('does not count a call that left the seed as it was', () => {
+      expect(
+        hasWrittenDashboard({
+          steps,
+          before: SECTIONED_LOGS_DASHBOARD,
+          dashboard: structuredClone(SECTIONED_LOGS_DASHBOARD),
+        })
+      ).toBe(false);
+    });
+
+    it('does not count a changed dashboard without a generate_dashboard result', () => {
+      expect(
+        hasWrittenDashboard({ steps: [], before: SECTIONED_LOGS_DASHBOARD, dashboard: edited })
+      ).toBe(false);
+      expect(hasWrittenDashboard({ steps })).toBe(false);
+    });
   });
 
   it('lists attempted controls with their call index and user_requested flag', () => {

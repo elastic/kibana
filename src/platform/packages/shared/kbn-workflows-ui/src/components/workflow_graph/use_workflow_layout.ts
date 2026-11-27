@@ -52,7 +52,6 @@ const emptyBranchSignature = (items: StructureSequence): string[] =>
         )
       : []),
     ...(item.kind === 'container' ? emptyBranchSignature(item.body) : []),
-    ...(item.kind === 'step' && item.attached ? emptyBranchSignature(item.attached) : []),
     ...item.lanes.flatMap((lane) => emptyBranchSignature(lane.items)),
   ]);
 

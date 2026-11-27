@@ -27,6 +27,9 @@ export type {
   ClaimSubjectsResult,
 } from './subjects/services/subject_claims_service';
 
+// Server only, so the schema stays out of the page load bundle `common` lands in.
+export { MAX_VIA_LABEL_LENGTH, subjectViaSchema } from '../common/subjects/subject';
+
 export { defineInvestigationAttachment } from './investigation_attachments/define_investigation_attachment';
 export type {
   InvestigationAttachmentDocService,

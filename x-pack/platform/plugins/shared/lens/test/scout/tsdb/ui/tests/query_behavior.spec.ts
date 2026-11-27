@@ -188,9 +188,10 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
             page.testSubj.locator(`lns-indexPatternDimension-${operation} incompatible`)
           ).toHaveCount(0);
           await pageObjects.lens.selectOperation(operation);
-          // .euiFormErrorText is an EUI-internal CSS class — no data-test-subj available yet
           await expect(
-            page.locator('[data-test-subj="indexPattern-field-selection-row"] .euiFormErrorText')
+            page.testSubj
+              .locator('indexPattern-field-selection-row')
+              .getByText('This field does not work with the selected function.')
           ).toHaveCount(0);
           await pageObjects.lens.selectOperation('min');
         }
@@ -208,10 +209,11 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
             page.testSubj.locator(`lns-indexPatternDimension-${operation} incompatible`)
           ).toBeVisible();
           await pageObjects.lens.selectOperation(operation, true);
-          // .euiFormErrorText is an EUI-internal CSS class — no data-test-subj available yet
           await expect(
-            page.locator('[data-test-subj="indexPattern-field-selection-row"] .euiFormErrorText')
-          ).toHaveText('This field does not work with the selected function.');
+            page.testSubj
+              .locator('indexPattern-field-selection-row')
+              .getByText('This field does not work with the selected function.')
+          ).toBeVisible();
           await pageObjects.lens.selectOperation('min');
         }
         await pageObjects.lens.closeDimensionEditor();

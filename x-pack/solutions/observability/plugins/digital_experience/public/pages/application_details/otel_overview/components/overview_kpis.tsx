@@ -6,22 +6,28 @@
  */
 
 import React from 'react';
-import type { ReactNode } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiPanel, EuiStat } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
-import type { ApplicationOverview } from '../../../../../common/types/overview';
+import type { OverviewPercentile } from '../../../../../common/overview_filters';
+import type { ApplicationOverviewKpisResponse } from '../../../../../common/types/overview';
+import {
+  ComparedKpiPanel,
+  type ComparedKpiPanelProps,
+} from '../../../../components/compared_kpi_panel';
 import { useFormatters } from '../../../../hooks/use_formatters';
-import { LOAD_TIME_LABEL, PAGE_LOADS_LABEL } from '../../../../labels';
+import { loadTimeLabel, PAGE_LOADS_LABEL, SESSIONS_LABEL } from '../../../../labels';
 import { formatDurationMs } from '../../../../utils/format_duration';
 
-const JS_ERRORS_LABEL = i18n.translate('xpack.digitalExperience.overview.kpis.jsErrorsLabel', {
-  defaultMessage: 'JS errors',
-});
+type Kpi = Exclude<keyof ApplicationOverviewKpisResponse, 'percentile' | 'counts'>;
 
-const FAILED_HTTP_LABEL = i18n.translate('xpack.digitalExperience.overview.kpis.failedHttpLabel', {
-  defaultMessage: 'Failed HTTP requests',
-});
+type KpiCounts = ApplicationOverviewKpisResponse['counts'];
+
+const NO_COUNTS: KpiCounts = {
+  sessionsWithErrors: 0,
+  loadTimeSamples: 0,
+  httpRequests: 0,
+  failedHttpRequests: 0,
+};
 
 const loadTimeHint = (sampleCount: number) =>
   i18n.translate('xpack.digitalExperience.overview.kpis.loadTimeTooltip', {
@@ -37,89 +43,146 @@ const failedHttpHint = (failedCount: number, count: number) =>
     values: { failedCount, count },
   });
 
-/** A KPI panel; the value keeps its place while loading, so the row does not jump. */
-function Kpi({
-  label,
-  hint,
-  value,
-  isLoading,
-  'data-test-subj': dataTestSubj,
-}: {
-  label: string;
-  hint?: string;
-  value: ReactNode;
-  isLoading: boolean;
-  'data-test-subj': string;
-}) {
-  return (
-    <EuiFlexItem>
-      <EuiPanel hasBorder paddingSize="m">
-        <EuiFlexGroup alignItems="flexStart" gutterSize="xs" responsive={false}>
-          <EuiFlexItem>
-            <EuiStat
-              data-test-subj={dataTestSubj}
-              titleSize="m"
-              isLoading={isLoading}
-              title={value}
-              description={label}
-            />
-          </EuiFlexItem>
-          {hint && (
-            <EuiFlexItem grow={false}>
-              <EuiIconTip content={hint} type="info" />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiPanel>
-    </EuiFlexItem>
-  );
-}
+const errorFreeSessionsHint = (sessionsWithErrors: number) =>
+  i18n.translate('xpack.digitalExperience.overview.kpis.errorFreeSessionsTooltip', {
+    defaultMessage:
+      'The share of the sessions without a JS error or a failed HTTP request. {sessionsWithErrors, plural, one {# session} other {# sessions}} had one.',
+    values: { sessionsWithErrors },
+  });
 
-/** The four headline metrics of the Overview, each with its unit. */
+type KpiPanel = Pick<
+  ComparedKpiPanelProps,
+  'title' | 'tooltip' | 'formatValue' | 'changeUnit' | 'higherIsBetter' | 'data-test-subj'
+> & { kpi: Kpi };
+
+/** The KPI row, in order: the traffic and stability first, then the speed and failures. */
+const kpiPanels = ({
+  percentile,
+  counts,
+  formatNumber,
+  formatKpiPercent,
+}: {
+  percentile: OverviewPercentile;
+  counts: KpiCounts;
+  formatNumber: (value: number) => string;
+  formatKpiPercent: (share: number) => string;
+}): KpiPanel[] => [
+  {
+    kpi: 'sessions',
+    'data-test-subj': 'digitalExperienceOverviewSessions',
+    title: SESSIONS_LABEL,
+    tooltip: i18n.translate('xpack.digitalExperience.overview.kpis.sessionsTooltip', {
+      defaultMessage:
+        'Distinct session.id values of the events in the time range. Counts above a few thousand are approximate.',
+    }),
+    formatValue: formatNumber,
+    changeUnit: 'relative',
+  },
+  {
+    kpi: 'errorFreeSessions',
+    'data-test-subj': 'digitalExperienceOverviewErrorFreeSessions',
+    title: i18n.translate('xpack.digitalExperience.overview.kpis.errorFreeSessionsLabel', {
+      defaultMessage: 'Error-free sessions',
+    }),
+    tooltip: errorFreeSessionsHint(counts.sessionsWithErrors),
+    formatValue: formatKpiPercent,
+    changeUnit: 'percentagePoints',
+    higherIsBetter: true,
+  },
+  {
+    kpi: 'pageLoads',
+    'data-test-subj': 'digitalExperienceOverviewPageLoads',
+    title: PAGE_LOADS_LABEL,
+    tooltip: i18n.translate('xpack.digitalExperience.overview.kpis.pageLoadsTooltip', {
+      defaultMessage: 'Full page loads in the time range; in-app navigations are not counted.',
+    }),
+    formatValue: formatNumber,
+    changeUnit: 'relative',
+  },
+  {
+    kpi: 'loadTime',
+    'data-test-subj': 'digitalExperienceOverviewLoadTime',
+    title: loadTimeLabel(percentile),
+    tooltip: loadTimeHint(counts.loadTimeSamples),
+    formatValue: formatDurationMs,
+    changeUnit: 'relative',
+    higherIsBetter: false,
+  },
+  {
+    kpi: 'jsErrors',
+    'data-test-subj': 'digitalExperienceOverviewJsErrors',
+    title: i18n.translate('xpack.digitalExperience.overview.kpis.jsErrorsLabel', {
+      defaultMessage: 'JS errors',
+    }),
+    tooltip: i18n.translate('xpack.digitalExperience.overview.kpis.jsErrorsTooltip', {
+      defaultMessage: 'JS exceptions reported in the time range.',
+    }),
+    formatValue: formatNumber,
+    changeUnit: 'relative',
+    higherIsBetter: false,
+  },
+  {
+    kpi: 'failedHttpRequests',
+    'data-test-subj': 'digitalExperienceOverviewFailedHttp',
+    title: i18n.translate('xpack.digitalExperience.overview.kpis.failedHttpLabel', {
+      defaultMessage: 'Failed HTTP requests',
+    }),
+    tooltip: failedHttpHint(counts.failedHttpRequests, counts.httpRequests),
+    formatValue: formatKpiPercent,
+    changeUnit: 'percentagePoints',
+    higherIsBetter: false,
+  },
+  {
+    kpi: 'requestLatency',
+    'data-test-subj': 'digitalExperienceOverviewRequestLatency',
+    title: i18n.translate('xpack.digitalExperience.overview.kpis.requestLatencyLabel', {
+      defaultMessage: 'Avg request latency',
+    }),
+    tooltip: i18n.translate('xpack.digitalExperience.overview.kpis.requestLatencyTooltip', {
+      defaultMessage: 'The average duration of the fetch and XHR requests in the time range.',
+    }),
+    formatValue: formatDurationMs,
+    changeUnit: 'relative',
+    higherIsBetter: false,
+  },
+];
+
+/**
+ * The Overview's headline metrics. With Compare on, each shows its change against the period of
+ * equal length before the time range, colored by whether it went the better way.
+ */
 export function OverviewKpis({
-  overview,
+  kpis,
+  percentile,
+  isComparing,
   isLoading,
 }: {
-  overview: ApplicationOverview;
+  /** `undefined` while loading. */
+  kpis: ApplicationOverviewKpisResponse | undefined;
+  /** The percentile the load time is at, named in its label before its response arrives. */
+  percentile: OverviewPercentile;
+  isComparing: boolean;
   isLoading: boolean;
 }) {
-  const { formatNumber, formatPercent } = useFormatters();
-  const { pageLoads, loadTime, jsErrors, httpRequests } = overview;
+  const { formatNumber, formatKpiPercent } = useFormatters();
+  const panels = kpiPanels({
+    percentile,
+    counts: kpis?.counts ?? NO_COUNTS,
+    formatNumber,
+    formatKpiPercent,
+  });
 
   return (
-    <EuiFlexGroup gutterSize="m" data-test-subj="digitalExperienceOverviewKpis">
-      <Kpi
-        data-test-subj="digitalExperienceOverviewPageLoads"
-        label={PAGE_LOADS_LABEL}
-        value={formatNumber(pageLoads.count)}
-        isLoading={isLoading}
-      />
-      <Kpi
-        data-test-subj="digitalExperienceOverviewLoadTime"
-        label={LOAD_TIME_LABEL}
-        hint={loadTimeHint(loadTime.sampleCount)}
-        value={loadTime.p75Ms === null ? <EmptyCellValue /> : formatDurationMs(loadTime.p75Ms)}
-        isLoading={isLoading}
-      />
-      <Kpi
-        data-test-subj="digitalExperienceOverviewJsErrors"
-        label={JS_ERRORS_LABEL}
-        value={formatNumber(jsErrors.count)}
-        isLoading={isLoading}
-      />
-      <Kpi
-        data-test-subj="digitalExperienceOverviewFailedHttp"
-        label={FAILED_HTTP_LABEL}
-        hint={failedHttpHint(httpRequests.failedCount, httpRequests.count)}
-        value={
-          httpRequests.failedRatio === null ? (
-            <EmptyCellValue />
-          ) : (
-            formatPercent(httpRequests.failedRatio)
-          )
-        }
-        isLoading={isLoading}
-      />
+    <EuiFlexGroup gutterSize="m" wrap data-test-subj="digitalExperienceOverviewKpis">
+      {panels.map(({ kpi, ...panel }) => (
+        <ComparedKpiPanel
+          key={kpi}
+          {...panel}
+          value={kpis?.[kpi]}
+          isComparing={isComparing}
+          isLoading={isLoading}
+        />
+      ))}
     </EuiFlexGroup>
   );
 }

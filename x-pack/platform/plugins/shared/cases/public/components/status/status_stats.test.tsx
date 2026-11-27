@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { render, screen, within } from '@testing-library/react';
 
 import { CaseStatuses } from '../../../common/types/domain';
 import { StatusStats } from './status_stats';
@@ -18,49 +18,46 @@ describe('Stats', () => {
     isLoading: false,
     dataTestSubj: 'test-stats',
   };
-  it('it renders', async () => {
-    const wrapper = mount(<StatusStats {...defaultProps} />);
 
-    expect(wrapper.find(`[data-test-subj="test-stats"]`).exists()).toBeTruthy();
+  it('it renders', async () => {
+    render(<StatusStats {...defaultProps} />);
+
+    expect(screen.getByTestId('test-stats')).toBeInTheDocument();
   });
 
   it('shows the count', async () => {
-    const wrapper = mount(<StatusStats {...defaultProps} />);
+    render(<StatusStats {...defaultProps} />);
 
-    expect(wrapper.find(`[data-test-subj="test-stats"] .euiStat__title`).first().text()).toBe('2');
+    expect(within(screen.getByTestId('test-stats')).getByText('2')).toBeInTheDocument();
   });
 
   it('shows the loading spinner', async () => {
-    const wrapper = mount(<StatusStats {...defaultProps} isLoading={true} />);
+    render(<StatusStats {...defaultProps} isLoading={true} />);
 
-    expect(wrapper.find(`[data-test-subj="test-stats-loading-spinner"]`).exists()).toBeTruthy();
+    expect(screen.getByTestId('test-stats-loading-spinner')).toBeInTheDocument();
   });
 
   describe('Status title', () => {
     it('shows the correct description for status open', async () => {
-      const wrapper = mount(<StatusStats {...defaultProps} />);
+      render(<StatusStats {...defaultProps} />);
 
-      expect(
-        wrapper.find(`[data-test-subj="test-stats"] .euiStat__description`).first().text()
-      ).toBe('Open cases');
+      expect(within(screen.getByTestId('test-stats')).getByText('Open cases')).toBeInTheDocument();
     });
 
     it('shows the correct description for status in-progress', async () => {
-      const wrapper = mount(
-        <StatusStats {...defaultProps} caseStatus={CaseStatuses['in-progress']} />
-      );
+      render(<StatusStats {...defaultProps} caseStatus={CaseStatuses['in-progress']} />);
 
       expect(
-        wrapper.find(`[data-test-subj="test-stats"] .euiStat__description`).first().text()
-      ).toBe('In progress cases');
+        within(screen.getByTestId('test-stats')).getByText('In progress cases')
+      ).toBeInTheDocument();
     });
 
     it('shows the correct description for status closed', async () => {
-      const wrapper = mount(<StatusStats {...defaultProps} caseStatus={CaseStatuses.closed} />);
+      render(<StatusStats {...defaultProps} caseStatus={CaseStatuses.closed} />);
 
       expect(
-        wrapper.find(`[data-test-subj="test-stats"] .euiStat__description`).first().text()
-      ).toBe('Closed cases');
+        within(screen.getByTestId('test-stats')).getByText('Closed cases')
+      ).toBeInTheDocument();
     });
   });
 });

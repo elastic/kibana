@@ -101,6 +101,7 @@ export const indexHostsAndAlerts = usageTracker.track(
       integrationPolicies: [],
       agentPolicies: [],
     };
+    let metadataTransformsStopped = false;
 
     try {
       // Ensure fleet is setup and endpoint package installed
@@ -117,6 +118,8 @@ export const indexHostsAndAlerts = usageTracker.track(
       const shouldWaitForEndpointMetadataDocs = fleet;
       if (shouldWaitForEndpointMetadataDocs) {
         await waitForMetadataTransformsReady(client, epmEndpointPackage.version);
+        // Set before stopping: a force stop can partially succeed before it throws.
+        metadataTransformsStopped = true;
         await stopMetadataTransforms(client, epmEndpointPackage.version);
       }
 
@@ -177,6 +180,14 @@ export const indexHostsAndAlerts = usageTracker.track(
       // here. Callers only receive this value on success.
       if (response.hosts.length > 0 || response.agents.length > 0) {
         await deleteIndexedHostsAndAlerts(client, kbnClient, response).catch(() => undefined);
+      }
+      // Restart only after the rollback so the transforms do not re-materialize the
+      // deleted docs, and before returning so callers holding the seeding lock do not
+      // release it with the transforms stopped.
+      if (metadataTransformsStopped) {
+        await startMetadataTransforms(client, [], epmEndpointPackage.version).catch(
+          () => undefined
+        );
       }
       throw error;
     }

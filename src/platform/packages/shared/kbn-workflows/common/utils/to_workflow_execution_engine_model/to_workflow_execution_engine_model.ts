@@ -12,6 +12,10 @@ import {
   type ManagedWorkflowFieldsSource,
   pickManagedWorkflowFields,
 } from '../pick_managed_workflow_fields/pick_managed_workflow_fields';
+import {
+  pickTemplateOriginFields,
+  type TemplateOriginFieldsSource,
+} from '../pick_template_origin_fields/pick_template_origin_fields';
 import { pickWorkflowDocumentVersion } from '../pick_workflow_document_version/pick_workflow_document_version';
 
 export type WorkflowExecutionEngineModelSource = {
@@ -21,7 +25,9 @@ export type WorkflowExecutionEngineModelSource = {
   yaml: string;
   definition?: WorkflowYaml | null;
   version?: number;
-} & ManagedWorkflowFieldsSource;
+  workflowUid?: string;
+} & ManagedWorkflowFieldsSource &
+  TemplateOriginFieldsSource;
 
 export type ToWorkflowExecutionEngineModelOptions = Pick<
   WorkflowExecutionEngineModel,
@@ -41,7 +47,9 @@ export const toWorkflowExecutionEngineModel = (
     ...(definition !== undefined ? { definition } : {}),
     yaml: workflow.yaml,
     ...pickManagedWorkflowFields(workflow),
+    ...pickTemplateOriginFields(workflow),
     ...pickWorkflowDocumentVersion(workflow),
+    ...(workflow.workflowUid ? { workflowUid: workflow.workflowUid } : {}),
     ...options,
   };
 };

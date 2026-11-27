@@ -7,13 +7,16 @@
 
 import { act } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
-import { createCoreStartMock, createStartDependenciesMock } from './mocks';
+import { createCoreStartMock, createPublicConfigMock, createStartDependenciesMock } from './mocks';
 import { EntityInventoryAppPlugin } from './plugin';
+
+const createPlugin = () =>
+  new EntityInventoryAppPlugin(coreMock.createPluginInitializerContext(createPublicConfigMock()));
 
 describe('EntityInventoryAppPlugin setup', () => {
   it('registers the app on its own route with a deep link per entity page', () => {
     const coreSetup = coreMock.createSetup();
-    new EntityInventoryAppPlugin().setup(coreSetup, {});
+    createPlugin().setup(coreSetup, {});
 
     const [[app]] = coreSetup.application.register.mock.calls;
     expect(app).toEqual(
@@ -30,7 +33,7 @@ describe('EntityInventoryAppPlugin setup', () => {
     const plugins = createStartDependenciesMock();
     const coreSetup = coreMock.createSetup({ pluginStartDeps: plugins });
     coreSetup.getStartServices.mockResolvedValue([createCoreStartMock(), plugins, {}]);
-    new EntityInventoryAppPlugin().setup(coreSetup, {});
+    createPlugin().setup(coreSetup, {});
     const [[{ mount }]] = coreSetup.application.register.mock.calls;
     const mountParams = coreMock.createAppMountParameters('/app/entity-inventory');
     mountParams.history.push('/hosts');
@@ -53,7 +56,7 @@ describe('EntityInventoryAppPlugin start', () => {
   it('registers the entity pages in the classic nav and exposes them for the solution nav tree', () => {
     const plugins = createStartDependenciesMock();
 
-    const { navTreeGroup } = new EntityInventoryAppPlugin().start(coreMock.createStart(), plugins);
+    const { navTreeGroup } = createPlugin().start(coreMock.createStart(), plugins);
 
     expect(plugins.observabilityShared.navigation.registerSections).toHaveBeenCalledTimes(1);
     expect(navTreeGroup.children?.map(({ link }) => link)).toEqual([

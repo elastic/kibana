@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import type { StreamsAppStartDependencies } from '../../../types';
 import { getSourceTypeSlug } from './source_helpers';
 import type { ConfiguredSource, RevealedApiKey, SourceApiKey } from './types';
 
 export interface SourceApiKeyServicesDeps {
   streamsRepositoryClient: StreamsAppStartDependencies['streams']['streamsRepositoryClient'];
-  unitId?: string;
+  unitId: string;
   /** Whether the user has the V2 manage privilege; the API key routes require it. */
   canManage?: boolean;
 }
@@ -37,7 +36,7 @@ export interface SourceApiKeyServices {
 
 export const createSourceApiKeyServices = ({
   streamsRepositoryClient,
-  unitId = STREAMS_DEFAULT_UNIT_ID,
+  unitId,
   canManage = true,
 }: SourceApiKeyServicesDeps): SourceApiKeyServices => ({
   load: async (sourceId) => {

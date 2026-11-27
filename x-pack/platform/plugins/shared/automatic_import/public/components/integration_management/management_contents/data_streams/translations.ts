@@ -171,6 +171,30 @@ export const LOG_FILE_ERROR = {
       defaultMessage: 'This log file is too large to parse',
     }
   ),
+  BLOCKED_EXTENSION: (extension: string) =>
+    i18n.translate('xpack.automaticImport.dataStreams.logFileError.blockedExtension', {
+      defaultMessage:
+        "Files of type .{extension} aren't supported. Upload a file that contains log samples.",
+      values: { extension },
+    }),
+  COMPRESSED_FILE: i18n.translate('xpack.automaticImport.dataStreams.logFileError.compressedFile', {
+    defaultMessage: "Compressed files aren't supported. Decompress the file and upload the logs.",
+  }),
+  BINARY_FILE: i18n.translate('xpack.automaticImport.dataStreams.logFileError.binaryFile', {
+    defaultMessage: "This file doesn't appear to contain text log samples.",
+  }),
+  SCRIPT_FILE: i18n.translate('xpack.automaticImport.dataStreams.logFileError.scriptFile', {
+    defaultMessage: 'This file looks like a script or source code, not log samples.',
+  }),
+  EMPTY_FILE: i18n.translate('xpack.automaticImport.dataStreams.logFileError.emptyFile', {
+    defaultMessage: "This file doesn't contain any log lines.",
+  }),
+  LINES_TOO_LONG: (maxLength: number) =>
+    i18n.translate('xpack.automaticImport.dataStreams.logFileError.linesTooLong', {
+      defaultMessage:
+        'Every line in this file is longer than {maxLength, number} characters. Put each log event on its own line.',
+      values: { maxLength },
+    }),
 };
 
 export const SELECT_PLACEHOLDER = i18n.translate(

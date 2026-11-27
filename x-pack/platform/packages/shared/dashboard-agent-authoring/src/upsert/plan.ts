@@ -59,7 +59,10 @@ export interface NewSection {
   collapsed?: boolean;
 }
 
-export type DashboardMetadata = Pick<DashboardUpsert, 'title' | 'description' | 'time_range'>;
+export type DashboardMetadata = Pick<
+  DashboardUpsert,
+  'title' | 'description' | 'time_range' | 'options'
+>;
 
 /** The changes of one upsert call that can be applied, decided against the original dashboard. */
 export interface UpsertPlan {
@@ -432,6 +435,7 @@ export const planUpsert = ({
     title,
     description,
     time_range: timeRange,
+    options,
     sections = [],
     panels = [],
     controls = [],
@@ -448,7 +452,7 @@ export const planUpsert = ({
   const plannedPanels = planPanels({ original, panels: placement.panels });
 
   return {
-    metadata: { title, description, time_range: timeRange },
+    metadata: { title, description, time_range: timeRange, options },
     sectionUpdates: validItems.sectionUpdates,
     newSections: validItems.newSections,
     panels: plannedPanels.panels,

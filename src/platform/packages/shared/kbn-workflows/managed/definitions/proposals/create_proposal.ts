@@ -8,8 +8,8 @@
  */
 
 import { PROPOSALS_MANAGED_WORKFLOW_PLUGIN_ID, PROPOSALS_WORKFLOW_MANAGEMENT } from './constants';
-import CREATE_PROPOSAL_YAML from './create_proposal.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
+import { readManagedWorkflowYaml } from '../read_managed_workflow_yaml';
 
 export const CREATE_PROPOSAL_WORKFLOW_ID = 'system-create-proposal';
 
@@ -19,5 +19,7 @@ export const CREATE_PROPOSAL_WORKFLOW = {
   management: PROPOSALS_WORKFLOW_MANAGEMENT,
   pluginId: PROPOSALS_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 4,
-  yaml: CREATE_PROPOSAL_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'create_proposal.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;

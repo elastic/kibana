@@ -11,6 +11,7 @@ import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { Redirect, useHistory, useParams } from 'react-router-dom';
 import { NightshiftAppHeader } from '../../components/app_header';
+import { usePageSectionPaddingSize } from '../../hooks/use_is_mobile';
 import { useKibana } from '../../hooks/use_kibana';
 import { useKnowledgeTabsAvailability } from './hooks/use_knowledge_tabs_availability';
 import {
@@ -24,8 +25,8 @@ const KnowledgeIndicatorsTab = React.lazy(() =>
     default: module.KnowledgeIndicatorsTab,
   }))
 );
-const CortexTab = React.lazy(() =>
-  import('./cortex/tab').then((module) => ({ default: module.CortexTab }))
+const WikiTab = React.lazy(() =>
+  import('./wiki/tab').then((module) => ({ default: module.WikiTab }))
 );
 const MemoryTab = React.lazy(() =>
   import('./memory/tab').then((module) => ({ default: module.MemoryTab }))
@@ -35,7 +36,7 @@ const DecisionTreesTab = React.lazy(() =>
 );
 
 const nightshiftLabel = i18n.translate('xpack.nightshift.knowledgePage.backToNightshiftLabel', {
-  defaultMessage: 'Nightshift',
+  defaultMessage: 'nightshift',
 });
 
 export type KnowledgePageHeaderProps = Record<string, never>;
@@ -45,7 +46,12 @@ const KnowledgeLoadingSpinner = () => (
 );
 
 const KnowledgePageLoading = () => (
-  <EuiPageTemplate.Section component="div" restrictWidth={false}>
+  <EuiPageTemplate.Section
+    component="div"
+    color="transparent"
+    restrictWidth={false}
+    paddingSize={usePageSectionPaddingSize()}
+  >
     <KnowledgeLoadingSpinner />
   </EuiPageTemplate.Section>
 );
@@ -59,6 +65,7 @@ export function KnowledgePage({
   const { tab } = useParams<{ tab?: string }>();
   const history = useHistory();
   const availability = useKnowledgeTabsAvailability();
+  const sectionPaddingSize = usePageSectionPaddingSize();
 
   if (tab && isKnowledgeTabId(tab) && availability[tab].isLoading) {
     return <KnowledgePageLoading />;
@@ -101,10 +108,15 @@ export function KnowledgePage({
         }}
         tabs={tabs}
       />
-      <EuiPageTemplate.Section component="div" restrictWidth={false}>
+      <EuiPageTemplate.Section
+        component="div"
+        color="transparent"
+        restrictWidth={false}
+        paddingSize={sectionPaddingSize}
+      >
         <React.Suspense fallback={<KnowledgeLoadingSpinner />}>
           {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTab />}
-          {tab === 'cortex' && <CortexTab />}
+          {tab === 'wiki' && <WikiTab />}
           {tab === 'memory' && <MemoryTab />}
           {tab === 'decision_trees' && <DecisionTreesTab />}
         </React.Suspense>

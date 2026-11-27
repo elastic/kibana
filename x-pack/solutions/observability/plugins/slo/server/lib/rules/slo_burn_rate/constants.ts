@@ -11,4 +11,5 @@ export const BURN_RATE_EXECUTOR_SPAN_NAMES = {
   EVAL_DEPENDENCIES: 'slo_burn_rate_executor:eval_dependencies',
   ACTION_DISPATCH: 'slo_burn_rate_executor:action_dispatch',
   ES_QUERY: 'slo_burn_rate_executor:es_query',
+  CANDIDATES_QUERY: 'slo_burn_rate_executor:candidates_query',
 } as const;

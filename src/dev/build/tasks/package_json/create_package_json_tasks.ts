@@ -59,6 +59,9 @@ export const CreatePackageJson: Task = {
       dependencies: {
         // include dependencies which are explicitly used
         ...(await findUsedDependencies(transformedDeps, build.resolvePath('.'), plugins)),
+        // core serves the @elastic/charts theme CSS from node_modules (see `registerStaticDirs` in core_app.ts)
+        // but no server code imports it, so findUsedDependencies can't discover it
+        '@elastic/charts': transformedDeps['@elastic/charts'],
         // also include all plugin packages
         ...Object.fromEntries(
           plugins.map((p) => [p.manifest.id, `file:${p.normalizedRepoRelativeDir}`])

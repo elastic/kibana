@@ -25,7 +25,11 @@ export const reportUnsuccessfulInvestigation = async (
   const { execution, investigationId } = await client.getUnsuccessfulRun(source.executionId);
   const phase = execution.status === ExecutionStatus.TIMED_OUT ? 'timed_out' : 'failed';
   const reason = (
-    execution.error?.message?.trim() ||
+    (execution.status === ExecutionStatus.CANCELLED
+      ? i18n.translate('xpack.nightshiftInvestigations.sweep.cancelledErrorMessage', {
+          defaultMessage: 'Investigation was stopped',
+        })
+      : execution.error?.message?.trim()) ||
     (phase === 'timed_out'
       ? i18n.translate('xpack.nightshiftInvestigations.sweep.timeoutErrorMessage', {
           defaultMessage: 'Investigation exceeded its workflow timeout',
@@ -67,10 +71,16 @@ export const reportUnsuccessfulInvestigation = async (
               const emitter = deps.getTriggerEmitter(source.request);
               const subject = await client.getLifecycleSubject(investigationId);
               if (!emitter || !subject) return;
+              const correlation = await client.getLifecycleCorrelation(
+                investigationId,
+                execution.id
+              );
               // Timeouts remain unsuccessful outcomes for existing failure-trigger subscribers.
               emitter(INVESTIGATION_FAILED_TRIGGER_ID, {
                 investigation_id: investigationId,
+                workflow_execution_id: execution.id,
                 execution_id: execution.id,
+                ...correlation,
                 subject: subject.subject,
                 trigger_type: subject.triggerType,
                 started_at: execution.startedAt || subject.startedAt,

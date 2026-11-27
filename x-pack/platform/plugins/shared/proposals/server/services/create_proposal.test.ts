@@ -16,15 +16,26 @@ const setup = ({
   isWorkflowsAvailable = true,
   assertCanManage = jest.fn().mockResolvedValue(undefined),
   findByWorkflowExecutionId = jest.fn().mockResolvedValue(proposal),
+  assertActionProposable = jest.fn().mockResolvedValue(undefined),
 } = {}) => {
   const executeWorkflow = jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' });
+  const createDirectly = jest.fn().mockResolvedValue(proposal);
   const { create, assertAvailable } = createProposalCreator({
-    getProposalsService: () => ({ findByWorkflowExecutionId } as never),
+    getProposalsService: () =>
+      ({ findByWorkflowExecutionId, create: createDirectly, assertActionProposable } as never),
     getWorkflowsApi: () => ({ isWorkflowsAvailable, executeWorkflow } as never),
     privileges: { assertCanManage } as never,
     wait: { timeoutMs: 20, intervalMs: 5 },
   });
-  return { create, assertAvailable, executeWorkflow, assertCanManage, findByWorkflowExecutionId };
+  return {
+    create,
+    assertAvailable,
+    executeWorkflow,
+    assertCanManage,
+    findByWorkflowExecutionId,
+    createDirectly,
+    assertActionProposable,
+  };
 };
 
 const input = {
@@ -54,6 +65,7 @@ describe('createProposalCreator', () => {
         comment: 'Re-create them.',
         origin: 'nightshift',
       },
+      triggeredBy: 'proposals',
       waitForCompletion: false,
     });
   });
@@ -63,14 +75,83 @@ describe('createProposalCreator', () => {
 
     await create({
       ...input,
-      proposal: { ...input.proposal, impact: 'high', confidence: 'low', category: 'todo' },
+      proposal: { ...input.proposal, impact: 'high', confidence: 'low', category: 'tune' },
     });
 
     expect(executeWorkflow.mock.calls[0][0].inputs).toMatchObject({
       impact: 'high',
       confidence: 'low',
-      category: 'todo',
+      category: 'tune',
     });
+  });
+
+  it('writes a to-do directly, with no gate behind it', async () => {
+    const { create, executeWorkflow, createDirectly, assertCanManage } = setup();
+
+    await expect(
+      create({ ...input, proposal: { ...input.proposal, category: 'todo', impact: 'high' } })
+    ).resolves.toEqual({ proposal });
+
+    // Nothing parks on a to-do, and the answer carries no execution to poll.
+    expect(executeWorkflow).not.toHaveBeenCalled();
+    expect(assertCanManage).toHaveBeenCalledWith(request);
+    expect(createDirectly).toHaveBeenCalledWith(
+      {
+        gate: 'none',
+        conversationId: 'conv-1',
+        title: 'Restore the secrets',
+        comment: 'Re-create them.',
+        origin: 'nightshift',
+        category: 'todo',
+        impact: 'high',
+        confidence: 'medium',
+      },
+      { spaceId: 'default', request }
+    );
+  });
+
+  it('passes the discard-reason waiver through to the written to-do', async () => {
+    const { create, createDirectly } = setup();
+
+    await create({
+      ...input,
+      proposal: { ...input.proposal, category: 'todo', skipDiscardReason: true },
+    });
+
+    expect(createDirectly).toHaveBeenCalledWith(
+      expect.objectContaining({ skipDiscardReason: true }),
+      { spaceId: 'default', request }
+    );
+  });
+
+  it('leaves the waiver out when the caller says nothing about it', async () => {
+    const { create, createDirectly } = setup();
+
+    await create({ ...input, proposal: { ...input.proposal, category: 'todo' } });
+
+    const [params] = createDirectly.mock.calls[0];
+    expect(params).not.toHaveProperty('skipDiscardReason');
+  });
+
+  it('drops an impact or confidence it does not recognize', async () => {
+    const { create, createDirectly } = setup();
+
+    await create({
+      ...input,
+      proposal: { ...input.proposal, category: 'todo', impact: 'enormous', confidence: '' },
+    });
+
+    const [params] = createDirectly.mock.calls[0];
+    expect(params.impact).toBeUndefined();
+    expect(params.confidence).toBe('medium');
+  });
+
+  it('creates a to-do for a user without Workflows available', async () => {
+    const { create, createDirectly } = setup({ isWorkflowsAvailable: false });
+
+    await create({ ...input, proposal: { ...input.proposal, category: 'todo' } });
+
+    expect(createDirectly).toHaveBeenCalled();
   });
 
   it('returns the execution without a proposal when it is not stored in time', async () => {
@@ -96,5 +177,68 @@ describe('createProposalCreator', () => {
 
     await expect(create(input)).rejects.toThrow('Forbidden');
     expect(executeWorkflow).not.toHaveBeenCalled();
+  });
+
+  describe('with an action workflow', () => {
+    const withAction = {
+      ...input,
+      proposal: {
+        ...input.proposal,
+        actionWorkflowId: 'workflow-open-issue',
+        actionInput: { repo: 'kibana', title: 'Fix it' },
+      },
+    };
+
+    it('checks the action, then passes it to the gate', async () => {
+      const { create, executeWorkflow, assertActionProposable } = setup();
+
+      await create(withAction);
+
+      expect(assertActionProposable).toHaveBeenCalledWith(
+        'workflow-open-issue',
+        { repo: 'kibana', title: 'Fix it' },
+        'default',
+        request
+      );
+      expect(executeWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowId: CREATE_PROPOSAL_WORKFLOW_ID,
+          inputs: expect.objectContaining({
+            actionWorkflowId: 'workflow-open-issue',
+            actionInput: { repo: 'kibana', title: 'Fix it' },
+          }),
+        })
+      );
+    });
+
+    it('starts no gate for an action the proposal could not run', async () => {
+      const { create, executeWorkflow } = setup({
+        assertActionProposable: jest.fn().mockRejectedValue(new Error('actionInput is invalid')),
+      });
+
+      await expect(create(withAction)).rejects.toThrow('actionInput is invalid');
+      expect(executeWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('refuses an action on a to-do, which the analyst carries out themselves', async () => {
+      const { create, executeWorkflow, createDirectly } = setup();
+
+      await expect(
+        create({ ...withAction, proposal: { ...withAction.proposal, category: 'todo' } })
+      ).rejects.toThrow('cannot run action workflow [workflow-open-issue]');
+      expect(executeWorkflow).not.toHaveBeenCalled();
+      expect(createDirectly).not.toHaveBeenCalled();
+    });
+
+    it('passes no action fields for a proposal without one', async () => {
+      const { create, executeWorkflow, assertActionProposable } = setup();
+
+      await create(input);
+
+      expect(assertActionProposable).not.toHaveBeenCalled();
+      const [{ inputs }] = executeWorkflow.mock.calls[0];
+      expect(inputs).not.toHaveProperty('actionWorkflowId');
+      expect(inputs).not.toHaveProperty('actionInput');
+    });
   });
 });

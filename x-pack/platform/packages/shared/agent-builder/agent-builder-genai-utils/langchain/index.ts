@@ -15,6 +15,8 @@ export {
   createTextChunkEvent,
   createMessageEvent,
   createReasoningEvent,
+  createModelReasoningChunkEvent,
+  createModelReasoningEvent,
   createToolCallEvent,
   createBrowserToolCallEvent,
   createToolResultEvent,
@@ -25,6 +27,7 @@ export {
 } from './graph_events';
 export {
   extractTextContent,
+  extractReasoningContent,
   extractToolCalls,
   extractToolCallsWithIntent,
   extractToolReturn,
@@ -39,6 +42,7 @@ export {
 } from './messages';
 export {
   toolToLangchain,
+  renderDynamicToolDefinition,
   INTENT_PARAM,
   toolIdentifierFromToolCall,
   sanitizeToolId,

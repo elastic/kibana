@@ -21,6 +21,8 @@ export interface ContractRequest {
   readonly query: Readonly<Record<string, string | string[]>>;
   readonly headers: Readonly<Record<string, string>>;
   readonly body?: unknown;
+  /** Set once the request is routed to an OpenAPI operation, decoded. */
+  readonly pathParameters?: Readonly<Record<string, string>>;
 }
 
 export interface ContractResponse {
@@ -64,12 +66,24 @@ export interface NamedOperationRef {
 /** An operation a protocol request called, and whether it only reads vendor state. */
 export interface NamedOperation extends NamedOperationRef {
   readonly readOnly: boolean;
+  /** The types a GraphQL request names, in fragments and variables, which it needs to validate. */
+  readonly namedTypes?: readonly string[];
+  /**
+   * The root fields a GraphQL request's document mentions, as in `query boards`, including those
+   * in other operations or behind `@skip`. Validation checks the whole document, so needs them all.
+   */
+  readonly namedRootFields?: readonly string[];
 }
 
 export interface ProtocolExchange {
   readonly response: ContractResponse;
   /** The operations the request called; GraphQL requests can call several root fields. */
   readonly operations: readonly NamedOperation[];
+  /**
+   * Set when the request is valid yet executes no operation, such as GraphQL root fields that all
+   * sit behind `@skip`: what the request would have called, for what it depends on and reads.
+   */
+  readonly skipped?: NamedOperation;
   /** Protocol messages that call no vendor operation, such as MCP's `initialize`. */
   readonly messages?: readonly string[];
   readonly requestViolations: readonly Violation[];
@@ -88,8 +102,10 @@ export interface ContractProtocolOptions {
 export interface ContractProtocol {
   /** The `origin` and `pathname` of each URL it answers, without a trailing slash. */
   readonly endpoints: readonly string[];
-  /** The names of the operations the spec declares, such as `query boards`. */
-  readonly operations: ReadonlySet<string>;
+  /** Every operation the spec declares, named as `ProtocolExchange.operations` names them. */
+  readonly operations: readonly NamedOperation[];
+  /** The operations a fixture or recording can answer, such as `query boards`, by name. */
+  readonly answerable: ReadonlySet<string>;
   /** Recordings that aren't served because the spec contradicts them. */
   readonly rejectedResponses: readonly RejectedResponse[];
   handle(request: ContractRequest): Promise<ProtocolExchange>;

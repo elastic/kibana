@@ -24,7 +24,9 @@ jest.mock('../../hooks/use_kibana', () => ({
   }),
 }));
 
-const createPendingEvent = (): SignificantEventResponse => ({
+const createEvent = (
+  investigationState: SignificantEventResponse['investigation_state']
+): SignificantEventResponse => ({
   '@timestamp': new Date().toISOString(),
   created_at: new Date().toISOString(),
   event_id: 'event-1',
@@ -34,9 +36,7 @@ const createPendingEvent = (): SignificantEventResponse => ({
   summary: 'An event outside the current list page.',
   severity: 'high',
   confidence: 0.9,
-  investigations: [
-    { workflow_execution_id: 'investigation-1', started_at: new Date().toISOString() },
-  ],
+  investigation_state: investigationState,
 });
 
 describe('useFetchEventById polling', () => {
@@ -70,65 +70,31 @@ describe('useFetchEventById polling', () => {
     jest.useRealTimers();
   });
 
-  it.each(['completed', 'failed'] as const)(
-    'refetches a pending event and stops after its %s outcome arrives',
-    async (outcome) => {
-      const pending = createPendingEvent();
-      const terminal: SignificantEventResponse = {
-        ...pending,
-        investigations: pending.investigations?.map((investigation) => ({
-          ...investigation,
-          completed_at: new Date().toISOString(),
-          outcome,
-        })),
-      };
-      mockSignificantEventsFetch
-        .mockResolvedValueOnce({ hits: [pending] })
-        .mockResolvedValue({ hits: [terminal] });
-      const { result } = renderQuery();
-      await waitFor(() => expect(result.current.data).toEqual(pending));
-
-      await advanceTime(5_000);
-
-      await waitFor(() => expect(result.current.data).toEqual(terminal));
-      expect(mockSignificantEventsFetch).toHaveBeenCalledTimes(2);
-      await advanceTime(10_000);
-      expect(mockSignificantEventsFetch).toHaveBeenCalledTimes(2);
-    }
-  );
-
-  it('stops polling at the cutoff without fabricating a terminal outcome', async () => {
-    const pending = createPendingEvent();
-    pending.investigations = pending.investigations?.map((investigation) => ({
-      ...investigation,
-      started_at: new Date(Date.now() - 65 * 60 * 1000 + 5_000).toISOString(),
-    }));
-    mockSignificantEventsFetch.mockResolvedValue({ hits: [pending] });
+  it('refetches an event in progress and stops once it is completed', async () => {
+    const running = createEvent('in_progress');
+    const completed = createEvent('completed');
+    mockSignificantEventsFetch
+      .mockResolvedValueOnce({ hits: [running] })
+      .mockResolvedValue({ hits: [completed] });
     const { result } = renderQuery();
-    await waitFor(() => expect(result.current.data).toEqual(pending));
+    await waitFor(() => expect(result.current.data).toEqual(running));
 
     await advanceTime(5_000);
 
+    await waitFor(() => expect(result.current.data).toEqual(completed));
     expect(mockSignificantEventsFetch).toHaveBeenCalledTimes(2);
-    await advanceTime(10_000);
+    await advanceTime(60_000);
     expect(mockSignificantEventsFetch).toHaveBeenCalledTimes(2);
-    expect(result.current.data).toEqual(pending);
   });
 
-  it('does not poll an event whose pending investigation has already expired', async () => {
-    const pending = createPendingEvent();
-    pending.investigations = pending.investigations?.map((investigation) => ({
-      ...investigation,
-      started_at: new Date(Date.now() - 65 * 60 * 1000).toISOString(),
-    }));
-    mockSignificantEventsFetch.mockResolvedValue({ hits: [pending] });
+  it('does not poll an event that is not running', async () => {
+    mockSignificantEventsFetch.mockResolvedValue({ hits: [createEvent('completed')] });
     const { result } = renderQuery();
-    await waitFor(() => expect(result.current.data).toEqual(pending));
+    await waitFor(() => expect(result.current.data).not.toBeUndefined());
 
-    await advanceTime(10_000);
+    await advanceTime(60_000);
 
     expect(mockSignificantEventsFetch).toHaveBeenCalledTimes(1);
-    expect(result.current.data).toEqual(pending);
   });
 
   it('does not poll a missing event', async () => {
@@ -142,7 +108,7 @@ describe('useFetchEventById polling', () => {
   });
 
   it('does not poll cached pending data when the caller disables the query', async () => {
-    const pending = createPendingEvent();
+    const pending = createEvent('in_progress');
     queryClient.setQueryData([...EVENT_BY_ID_QUERY_KEY, 'event-1'], pending);
     const { result } = renderQuery({ enabled: false });
 

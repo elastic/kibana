@@ -44,7 +44,7 @@ export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({
   headerItems,
   children,
 }) => {
-  const docLink = useAlertZeroDocumentationLink();
+  const docLink = useAlertZeroDocumentationLink('watches');
   const menu = useMemo<AppHeaderMenu | undefined>(
     () =>
       headerSwitch || headerPrimaryActionItem || headerItems

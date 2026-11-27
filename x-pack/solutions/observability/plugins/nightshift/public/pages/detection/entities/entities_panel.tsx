@@ -197,6 +197,7 @@ export const EntitiesPanel = ({
     },
   ];
   const hasAttributeFilter = haveRules !== noRules || withEvents;
+  const canClear = selected.length > 0 || unassigned || attributeFilters.length > 0;
   const filterButton = (
     <EuiPopover
       isOpen={isFilterOpen}
@@ -256,21 +257,23 @@ export const EntitiesPanel = ({
           <EuiNotificationBadge color="subdued">{entities.length}</EuiNotificationBadge>
         </EuiFlexItem>
         <EuiFlexItem />
-        {selected.length > 0 || unassigned || attributeFilters.length > 0 ? (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="nightshiftEntitiesPanelButton"
-              size="xs"
-              onClick={() => {
-                clear();
-                setAttributeFilters([]);
-                setSearch('');
-              }}
-            >
-              {CLEAR_LABEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        ) : null}
+        {/* Always mounted so the header height stays stable when filters toggle. */}
+        <EuiFlexItem grow={false} css={{ visibility: canClear ? 'visible' : 'hidden' }}>
+          <EuiButtonEmpty
+            data-test-subj="nightshiftEntitiesPanelButton"
+            size="xs"
+            flush="right"
+            iconType="cross"
+            tabIndex={canClear ? undefined : -1}
+            onClick={() => {
+              clear();
+              setAttributeFilters([]);
+              setSearch('');
+            }}
+          >
+            {CLEAR_LABEL}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiSelectable

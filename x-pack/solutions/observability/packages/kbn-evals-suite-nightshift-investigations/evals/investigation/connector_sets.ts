@@ -8,13 +8,20 @@
 import type { HttpHandler } from '@kbn/core/public';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '@kbn/nightshift-investigations-plugin/common';
 
-/** The Elasticsearch connector to the cluster holding the ORCA snapshot. */
+/** The Elasticsearch connector to the cluster holding ORCA, whose key the eval swaps per cutoff. */
 export const ORCABENCH_ES_CONNECTOR_ID = 'orcabench-es';
 
-/** Connector ids each Scout connector set preconfigures, in `scout/connector_sets/<set>.yml`. */
+/** Whether a sandbox call went through the ORCA connector. */
+export const isOrcaConnectorId = (connectorId: unknown): boolean =>
+  connectorId === ORCABENCH_ES_CONNECTOR_ID;
+
+/**
+ * Connector ids each Scout connector set preconfigures, in `scout/connector_sets/<set>.yml`. ORCA
+ * preconfigures none: the eval creates its connector and puts each cutoff's key on it in turn.
+ */
 export const CONNECTOR_SETS = {
   default: ['elasticsearch'],
-  orcabench: [ORCABENCH_ES_CONNECTOR_ID],
+  orcabench: [],
 } as const;
 
 export type ConnectorSetName = keyof typeof CONNECTOR_SETS;
@@ -43,10 +50,28 @@ interface InvestigatorAgentResponse {
 }
 
 /**
- * Saves the stack's connector set on the investigator the way a user would in the agent's
- * settings. The update merges `connector_ids` into the saved configuration, so tools and
- * instructions already stored on the agent stay. It is a no-op without a connector set.
- * `withoutConnectors` saves none, for datasets that must not reach the stack's clusters.
+ * Saves these connectors on the investigator the way a user would in the agent's settings. The
+ * update merges `connector_ids` into the saved configuration, so tools and instructions already
+ * stored on the agent stay.
+ */
+export const saveConnectorsOnInvestigator = async (
+  fetch: HttpHandler,
+  connectorIds: readonly string[]
+): Promise<void> => {
+  const path = `/api/agent_builder/agents/${encodeURIComponent(NIGHTSHIFT_INVESTIGATION_AGENT_ID)}`;
+  const headers = { 'elastic-api-version': '2023-10-31' };
+  const current = await fetch<InvestigatorAgentResponse>(path, { method: 'GET', headers });
+  await fetch(path, {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify({
+      configuration: { ...current.configuration, connector_ids: [...connectorIds] },
+    }),
+  });
+};
+
+/**
+ * Saves the stack's connector set on the investigator. It is a no-op without a connector set. `withoutConnectors` saves none, for datasets that must not reach the stack's clusters.
  */
 export const saveConnectorSetOnInvestigator = async (
   fetch: HttpHandler,
@@ -57,17 +82,5 @@ export const saveConnectorSetOnInvestigator = async (
 ): Promise<void> => {
   const connectorSet = getConnectorSet(env);
   if (!connectorSet) return;
-  const path = `/api/agent_builder/agents/${encodeURIComponent(NIGHTSHIFT_INVESTIGATION_AGENT_ID)}`;
-  const headers = { 'elastic-api-version': '2023-10-31' };
-  const current = await fetch<InvestigatorAgentResponse>(path, { method: 'GET', headers });
-  await fetch(path, {
-    method: 'PUT',
-    headers,
-    body: JSON.stringify({
-      configuration: {
-        ...current.configuration,
-        connector_ids: withoutConnectors ? [] : [...CONNECTOR_SETS[connectorSet]],
-      },
-    }),
-  });
+  await saveConnectorsOnInvestigator(fetch, withoutConnectors ? [] : CONNECTOR_SETS[connectorSet]);
 };

@@ -1,0 +1,374 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { createHash } from 'crypto';
+import { execFileSync } from 'child_process';
+import { existsSync, readFileSync } from 'fs';
+import { join, resolve } from 'path';
+import { setTimeout } from 'timers/promises';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { getSafePath, writeFileSync } from '@kbn/fs';
+import {
+  MessageRole,
+  ToolChoiceType,
+  type BoundInferenceClient,
+  type Message,
+  type ToolCall,
+} from '@kbn/inference-common';
+import { RECORDING_TOOL, buildReplay, fillPrompt, safeToolName, type Replay } from './replay';
+import {
+  defaultReplyType,
+  type ExtraTurn,
+  type GeneratedReply,
+  type ReplyAttachment,
+  type WriteupExample,
+  type WriteupTaskOutput,
+} from './types';
+
+export const INVESTIGATOR_PROMPT_PATH =
+  'x-pack/solutions/observability/plugins/nightshift_investigations/server/agents/investigation/instructions/investigator.md.text';
+const INSTRUCTIONS_DIR =
+  'x-pack/solutions/observability/plugins/nightshift_investigations/server/agents/investigation/instructions';
+/** The reply rules, which the prompt pulls in at `{{response_style_section}}`. */
+export const RESPONSE_STYLE_PATH = `${INSTRUCTIONS_DIR}/response_style.md.text`;
+/** The knowledge section, by the name a prompt's placeholder uses: `wiki` now, `cortex` before #303544. */
+export const knowledgeSectionPath = (name: 'wiki' | 'cortex') =>
+  `${INSTRUCTIONS_DIR}/knowledge_${name}.text`;
+
+/** As the agent type fills `{{cortex_load_step}}` when Cortex is enabled (`agents/investigation/index.ts`). */
+export const CORTEX_LOAD_STEP = ' Also read the Knowledge Cortex — see <knowledge_cortex>.';
+
+/**
+ * Fills the context placeholders the way the agent type does with its knowledge section (the Wiki,
+ * formerly the Cortex) enabled and Semantic Memory and decision trees off. The recorded
+ * investigations ran with the Cortex on, so their replays should too; the other two are left out of
+ * every arm alike. A prompt from before the placeholders existed passes through unchanged.
+ */
+export const fillKnowledge = (prompt: string, section: string): string =>
+  prompt
+    .replace('{{cortex_load_step}}', CORTEX_LOAD_STEP)
+    .replace(/\{\{knowledge_(wiki|cortex)_section\}\}/, `\n${section.trimEnd()}\n`)
+    .replace(/\{\{(semantic_memory|decision_trees)_(section|load_step)\}\}/g, '');
+
+/** Generations are cached here (gitignored), so a re-run with another judge only makes judge calls. */
+export const WRITEUP_DATA_DIR = join(REPO_ROOT, 'data', 'nightshift_writeup');
+
+export interface PromptArm {
+  /** `current`, a file name, or a git ref with the commit it resolved to (`origin/main@1a2b3c4d5e`). */
+  label: string;
+  prompt: string;
+  hash: string;
+}
+
+export const hashText = (text: string): string =>
+  createHash('sha256').update(text).digest('hex').slice(0, 12);
+
+/**
+ * The commit a prompt spec names. `merge-base` is where this checkout branched from `main`, the
+ * baseline a branch's change should be compared against. In a fork checkout `origin` is the fork,
+ * whose `main` can lag behind, so `upstream/main` is used when it exists. A commit this checkout
+ * doesn't have (a shallow CI clone) is fetched from `origin` first, shallow only if the clone is.
+ */
+export const resolvePromptCommit = (spec: string, repoRoot = REPO_ROOT): string => {
+  const git = (...args: string[]) =>
+    execFileSync('git', args, { cwd: repoRoot, encoding: 'utf8', stdio: 'pipe' }).trim();
+  const hasRef = (ref: string) => {
+    try {
+      git('rev-parse', '--verify', '--quiet', `${ref}^{commit}`);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  if (spec === 'merge-base') {
+    return git('merge-base', 'HEAD', hasRef('upstream/main') ? 'upstream/main' : 'origin/main');
+  }
+  if (!hasRef(spec) && /^[0-9a-f]{40}$/.test(spec)) {
+    // Only a clone that is already shallow fetches shallow; a full clone must not become one.
+    const shallow = git('rev-parse', '--is-shallow-repository') === 'true';
+    git('fetch', '--quiet', '--no-tags', ...(shallow ? ['--depth=1'] : []), 'origin', spec);
+  }
+  return git('rev-parse', '--verify', `${spec}^{commit}`);
+};
+
+/**
+ * The prompt the writeup eval compares against. `NIGHTSHIFT_WRITEUP_BASELINE_PROMPT` when set (empty
+ * turns the comparison off). Otherwise a PR build compares against the commit the PR branched from,
+ * which CI exports as `PR_MERGE_BASE`, so a PR run scores the change head to head in one run.
+ */
+export const baselinePromptSpec = (
+  env: Record<string, string | undefined> = process.env
+): string | undefined => {
+  const explicit = env.NIGHTSHIFT_WRITEUP_BASELINE_PROMPT;
+  if (explicit !== undefined) return explicit.trim() || undefined;
+  return env.GITHUB_PR_NUMBER && env.PR_MERGE_BASE ? env.PR_MERGE_BASE.trim() : undefined;
+};
+
+/**
+ * The baseline to compare against, or why there is none. The same prompt on both sides compares a
+ * prompt with itself: noise at twice the cost, with both arms on one cache key. So a baseline that
+ * renders to the same replay prompt as the arm under test is skipped. The rendered prompts are
+ * compared, not the arms' hashes, since prompts that differ only in placeholders the replay strips
+ * reach the model identical.
+ */
+export const chooseBaseline = (
+  arm: PromptArm,
+  loaded: PromptArm | undefined
+): { baseline?: PromptArm; noBaseline?: string } => {
+  if (!loaded) return {};
+  if (fillPrompt(loaded.prompt) !== fillPrompt(arm.prompt)) return { baseline: loaded };
+  return {
+    noBaseline: `Baseline ${loaded.label} renders to the same replay prompt as ${arm.label}, so the head to head was skipped.`,
+  };
+};
+
+/**
+ * The investigator prompt to replay with. Without a spec it is the working tree's, so the eval
+ * measures the checkout it runs from. A spec is a prompt file, or else a git ref (or `merge-base`)
+ * whose prompt is read with `git show` at the commit it resolves to.
+ */
+export const loadPromptArm = (spec?: string, repoRoot = REPO_ROOT): PromptArm => {
+  const fromTree = (path: string) => readFileSync(join(repoRoot, path), 'utf8');
+  const fromRef = (ref: string, path: string) =>
+    execFileSync('git', ['show', `${ref}:${path}`], { cwd: repoRoot, encoding: 'utf8' });
+  let label = 'current';
+  let prompt: string;
+  // The sections come from the same place as the prompt; a prompt file uses the checkout's.
+  let section = (name: 'wiki' | 'cortex') => fromTree(knowledgeSectionPath(name));
+  let responseStyle = () => fromTree(RESPONSE_STYLE_PATH);
+  if (!spec) {
+    prompt = fromTree(INVESTIGATOR_PROMPT_PATH);
+  } else if (existsSync(resolve(spec))) {
+    label = spec.split('/').at(-1)!;
+    prompt = readFileSync(resolve(spec), 'utf8');
+  } else {
+    // A ref like `origin/main` moves, so read the prompt at the commit it names now and say which.
+    const commit = resolvePromptCommit(spec, repoRoot);
+    label = `${spec}@${commit.slice(0, 10)}`;
+    prompt = fromRef(commit, INVESTIGATOR_PROMPT_PATH);
+    section = (name) => fromRef(commit, knowledgeSectionPath(name));
+    responseStyle = () => fromRef(commit, RESPONSE_STYLE_PATH);
+  }
+  // A prompt from before the reply rules had their own file has them inline and no placeholder.
+  if (prompt.includes('{{response_style_section}}')) {
+    prompt = prompt.replace('{{response_style_section}}', responseStyle().trimEnd());
+  }
+  const knowledge = prompt.match(/\{\{knowledge_(wiki|cortex)_section\}\}/)?.[1] as
+    | 'wiki'
+    | 'cortex'
+    | undefined;
+  if (knowledge) prompt = fillKnowledge(prompt, section(knowledge));
+  return { label, prompt, hash: hashText(prompt) };
+};
+
+const MAX_EXTRA_CALLS = 6;
+const MAX_FAILURES = 3;
+
+/** Agent Builder offers this on every conversation, whether or not the recorded run used it. */
+const ATTACHMENTS_ADD = safeToolName('attachments.add');
+
+/**
+ * The result a replayed tool call gets. An attachment is kept, so a judge can read what the reply
+ * shows. Other recording calls succeed. Queries can't run in a replay, so they get "No new
+ * results": an error that named the replay came back in replies as "Let me finalize my reply".
+ */
+const replayToolResult = (
+  name: string,
+  args: Record<string, unknown>,
+  attachments: ReplyAttachment[]
+): Record<string, unknown> => {
+  if (name === ATTACHMENTS_ADD) {
+    const id = `replay-attachment-${attachments.length + 1}`;
+    let data: unknown = args.data;
+    try {
+      data = typeof data === 'string' ? JSON.parse(data) : data;
+    } catch {
+      // keep the raw string
+    }
+    const content = (data as { content?: unknown } | undefined)?.content;
+    attachments.push({
+      id,
+      type: String(args.type ?? 'text'),
+      content: typeof content === 'string' ? content : JSON.stringify(data ?? {}),
+    });
+    return { attachment_id: id, type: args.type ?? 'text', version: 1 };
+  }
+  return RECORDING_TOOL.test(name) ? { result: 'ok' } : { result: 'No new results.' };
+};
+
+/**
+ * Asks the model for its next message, as the agent loop would. The model may still call tools
+ * first, as it can in production: often a last recording call or an attachment before it
+ * replies. The loop stops at the first reply with text, after at most six extra calls.
+ */
+export const replayReply = async (
+  inferenceClient: Pick<BoundInferenceClient, 'chatComplete'>,
+  replay: Replay,
+  { retryDelayMs = 4_000 }: { retryDelayMs?: number } = {}
+): Promise<GeneratedReply> => {
+  // Schemas stay loose so no call fails validation; the model only needs the names.
+  const tools = Object.fromEntries(
+    [...new Set([...replay.toolNames, ATTACHMENTS_ADD])].map((name) => [
+      name,
+      {
+        description:
+          name === ATTACHMENTS_ADD
+            ? 'Add an attachment to the conversation: { type, data }.'
+            : `Investigation tool ${name}.`,
+        schema: { type: 'object', properties: {} },
+      },
+    ])
+  ) as Record<string, { description: string; schema: { type: 'object'; properties: {} } }>;
+  const messages: Message[] = [...replay.messages];
+  const extraCalls: string[] = [];
+  const extraTurns: ExtraTurn[] = [];
+  const attachments: ReplyAttachment[] = [];
+  let lastError = '';
+  for (let calls = 0, failures = 0; calls < MAX_EXTRA_CALLS && failures < MAX_FAILURES; ) {
+    try {
+      const response = await inferenceClient.chatComplete({
+        system: replay.system,
+        messages,
+        tools,
+        toolChoice: ToolChoiceType.auto,
+      });
+      const text = String(response.content ?? '').trim();
+      const toolCalls: ToolCall[] = response.toolCalls ?? [];
+      if (!toolCalls.length) {
+        // Length is the gates' call: a short answer can be the right one.
+        if (text) {
+          return {
+            reply: text,
+            extra_calls: extraCalls,
+            ...(extraTurns.length ? { extra_turns: extraTurns } : {}),
+            ...(attachments.length ? { attachments } : {}),
+          };
+        }
+        lastError = 'empty reply';
+        failures++;
+        continue;
+      }
+      calls++;
+      messages.push({ role: MessageRole.Assistant, content: text || null, toolCalls });
+      for (const call of toolCalls) {
+        extraCalls.push(call.function.name);
+        const args = (
+          typeof call.function.arguments === 'string'
+            ? JSON.parse(call.function.arguments || '{}')
+            : call.function.arguments ?? {}
+        ) as Record<string, unknown>;
+        const result = replayToolResult(call.function.name, args, attachments);
+        extraTurns.push({ name: call.function.name, args, result });
+        messages.push({
+          role: MessageRole.Tool,
+          name: call.function.name,
+          toolCallId: call.toolCallId,
+          response: result,
+        });
+      }
+    } catch (error) {
+      lastError = String((error as Error).message ?? error).slice(0, 300);
+      failures++;
+      await setTimeout(retryDelayMs * failures);
+    }
+  }
+  return {
+    extra_calls: extraCalls,
+    error: lastError || `no reply after ${extraCalls.length} extra calls`,
+  };
+};
+
+/**
+ * A JSON file cache keyed by content hash, in `data/<volume>` (gitignored). Failed generations
+ * aren't cached.
+ */
+export const createGenerationCache = (volume = 'nightshift_writeup/cache') => ({
+  key: (parts: string[]) => hashText(['v3', ...parts].join('\n')),
+  read(key: string): GeneratedReply | undefined {
+    const { fullPath } = getSafePath(`${key}.json`, volume);
+    return existsSync(fullPath)
+      ? (JSON.parse(readFileSync(fullPath, 'utf8')) as GeneratedReply)
+      : undefined;
+  },
+  write(key: string, value: GeneratedReply) {
+    if (!value.reply) return;
+    writeFileSync(`${key}.json`, JSON.stringify(value), { volume });
+  },
+});
+
+export type GenerationCache = ReturnType<typeof createGenerationCache>;
+
+/**
+ * Replays one round under the prompt (and the baseline prompt, when there is one). Repetitions of
+ * an example are separate samples, so each gets its own cache entry.
+ */
+export const createWriteupTask = ({
+  inferenceClient,
+  connectorId,
+  arm,
+  baseline,
+  cache,
+}: {
+  inferenceClient: Pick<BoundInferenceClient, 'chatComplete'>;
+  connectorId: string;
+  arm: PromptArm;
+  baseline?: PromptArm;
+  cache?: GenerationCache;
+}) => {
+  const samples = new Map<string, number>();
+  const generate = async (
+    example: WriteupExample,
+    replay: Replay,
+    sample: number
+  ): Promise<GeneratedReply> => {
+    // The replayed history and tools are in the key, so rebuilding a conversation or changing a
+    // follow-up question under the same case ID generates again instead of reusing a stale reply.
+    const key = cache?.key([
+      example.metadata.case_id,
+      connectorId,
+      replay.system,
+      hashText(JSON.stringify(replay.messages)),
+      replay.toolNames.join(','),
+      String(sample),
+    ]);
+    const hit = key ? cache?.read(key) : undefined;
+    if (hit) return { ...hit, cached: true };
+    let out = await replayReply(inferenceClient, replay);
+    // A round that ends without a reply (usually the model still wanting to query) gets one more
+    // try, the same for both arms, so a single unlucky sample doesn't count against the run.
+    if (!out.reply) {
+      const retry = await replayReply(inferenceClient, replay);
+      out = retry.reply ? { ...retry, retried: true } : retry;
+    }
+    if (key) cache?.write(key, out);
+    return out;
+  };
+
+  return async (example: WriteupExample): Promise<WriteupTaskOutput> => {
+    const { rounds, round_index: roundIndex } = example.input;
+    const sample = samples.get(example.metadata.case_id) ?? 0;
+    samples.set(example.metadata.case_id, sample + 1);
+    const replay = buildReplay(rounds, roundIndex, arm.prompt);
+    const [current, base] = await Promise.all([
+      generate(example, replay, sample),
+      baseline
+        ? generate(example, buildReplay(rounds, roundIndex, baseline.prompt), sample)
+        : undefined,
+    ]);
+    return {
+      case_id: example.metadata.case_id,
+      round_index: roundIndex,
+      reply_type: example.metadata.reply_type ?? defaultReplyType(roundIndex),
+      question: replay.question,
+      recorded_reply: example.output.recorded_reply,
+      replay_chars: replay.chars,
+      prompt_hash: arm.hash,
+      ...current,
+      ...(base && baseline ? { baseline: { ...base, prompt_hash: baseline.hash } } : {}),
+    };
+  };
+};

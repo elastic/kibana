@@ -11,6 +11,9 @@ import { SLACK_LIMITS, escapeMrkdwn } from '@elastic/isomer-sdk/slack';
 import type { TableNode } from './table';
 import { noRowsNote, rowsNote, tableView } from './table_model';
 
+/** Shown in a cell with no value: Slack takes no `raw_text` cell with empty text. */
+const EMPTY_CELL = '—';
+
 const cell = (text: string): SlackTableCell => ({ type: 'raw_text', text });
 
 const chars = (row: readonly string[]): number =>
@@ -32,7 +35,9 @@ export const tableSlackRenderer = (node: TableNode): SlackBlock[] => {
 
   let budget = SLACK_LIMITS.tableCellCharsPerMessage - chars(head);
   const rows: Array<readonly string[]> = [];
-  for (const row of view.rows) {
+  for (const values of view.rows) {
+    const row = values.map((text) => text || EMPTY_CELL);
+
     budget -= chars(row);
     if (budget < 0) {
       break;

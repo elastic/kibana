@@ -5,17 +5,40 @@
  * 2.0.
  */
 
+import path from 'path';
+
 import { IAC_PROVISIONER_API_ROUTES, API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthzRouter } from '../../services/security';
+import { withDefaultErrorHandler } from '../../services/security/fleet_router';
+import { getRequestStore } from '../../services/request_store';
+import type { FleetRouter } from '../../types/request_context';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 
-import { genericErrorResponse } from '../schema/errors';
+import { genericErrorResponse, notFoundResponse } from '../schema/errors';
 import {
   RenderIacTemplateRequestSchema,
   RenderIacTemplateResponseSchema,
 } from '../../types/rest_spec/iac_provisioner';
+import {
+  CreateProvisioningCallbackRequestSchema,
+  CreateProvisioningCallbackResponseSchema,
+  DeleteProvisioningCallbackRequestSchema,
+  DeleteProvisioningCallbackResponseSchema,
+  GetProvisioningCallbackAvailabilityResponseSchema,
+  GetProvisioningCallbackRequestSchema,
+  GetProvisioningCallbackResponseSchema,
+  ReceiveProvisioningCallbackRequestSchema,
+  ReceiveProvisioningCallbackResponseSchema,
+} from '../../types/rest_spec/provisioning_callback';
 
-import { renderIacTemplateHandler } from './handlers';
+import {
+  createProvisioningCallbackHandler,
+  deleteProvisioningCallbackHandler,
+  getProvisioningCallbackAvailabilityHandler,
+  getProvisioningCallbackHandler,
+  receiveProvisioningCallbackHandler,
+  renderIacTemplateHandler,
+} from './handlers';
 
 const IAC_PROVISIONER_ROUTE_SECURITY = {
   authz: {
@@ -27,6 +50,21 @@ const IAC_PROVISIONER_ROUTE_SECURITY = {
         anyRequired: [
           FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
           FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
+        ],
+      },
+    ],
+  },
+};
+
+const PROVISIONING_CALLBACK_WRITE_SECURITY = {
+  authz: {
+    // Creates a record a stack turns into an identity, so it needs the same privileges as
+    // creating an identity.
+    requiredPrivileges: [
+      {
+        anyRequired: [
+          FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+          FLEET_API_PRIVILEGES.INTEGRATIONS.ALL,
         ],
       },
     ],
@@ -61,5 +99,186 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       renderIacTemplateHandler
+    );
+
+  router.versioned
+    .get({
+      path: IAC_PROVISIONER_API_ROUTES.CALLBACK_AVAILABILITY_PATTERN,
+      summary: 'Check provisioning callback availability',
+      description:
+        'Whether a deployment launched from Kibana could report back to it: server.publicBaseUrl must be set and be an https URL. Returns the URL the deployment is given, or the reason the callback cannot be used.',
+      access: 'internal',
+      security: IAC_PROVISIONER_ROUTE_SECURITY,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: {},
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => GetProvisioningCallbackAvailabilityResponseSchema,
+            },
+            404: { description: 'AWS identity federation is not enabled.', body: notFoundResponse },
+          },
+        },
+      },
+      getProvisioningCallbackAvailabilityHandler
+    );
+
+  router.versioned
+    .post({
+      path: IAC_PROVISIONER_API_ROUTES.CALLBACK_CREATE_PATTERN,
+      summary: 'Create a provisioning callback',
+      description:
+        'Create a one-time record and the single-use token a launched deployment presents to report back to Kibana what it created. The token grants nothing but that report and is not an API key. The identity name, account type, and template details are stored on the record for the cloud connector the report creates.',
+      access: 'internal',
+      security: PROVISIONING_CALLBACK_WRITE_SECURITY,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: CreateProvisioningCallbackRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => CreateProvisioningCallbackResponseSchema,
+            },
+            400: { description: 'A bad request.', body: genericErrorResponse },
+            404: { description: 'AWS identity federation is not enabled.', body: notFoundResponse },
+            412: {
+              description: 'The public Kibana URL is not https.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      createProvisioningCallbackHandler
+    );
+
+  router.versioned
+    .get({
+      path: IAC_PROVISIONER_API_ROUTES.CALLBACK_INFO_PATTERN,
+      summary: 'Get a provisioning callback',
+      description:
+        'Get the state of a callback record. Never returns the token. A report the record holds but nobody is applying is applied on the way, so the route needs the privileges creating an identity does.',
+      access: 'internal',
+      security: PROVISIONING_CALLBACK_WRITE_SECURITY,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: GetProvisioningCallbackRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => GetProvisioningCallbackResponseSchema,
+            },
+            404: { description: 'Not found.', body: notFoundResponse },
+          },
+        },
+      },
+      getProvisioningCallbackHandler
+    );
+
+  router.versioned
+    .delete({
+      path: IAC_PROVISIONER_API_ROUTES.CALLBACK_DELETE_PATTERN,
+      summary: 'Cancel a provisioning callback',
+      description:
+        'Retire a callback record the form no longer waits on, so that its token is no longer accepted. A record the deployment has already reported to is returned unchanged.',
+      access: 'internal',
+      security: PROVISIONING_CALLBACK_WRITE_SECURITY,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: DeleteProvisioningCallbackRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => DeleteProvisioningCallbackResponseSchema,
+            },
+            404: { description: 'Not found.', body: notFoundResponse },
+          },
+        },
+      },
+      deleteProvisioningCallbackHandler
+    );
+};
+
+/**
+ * The route the launched deployment calls. It goes on the plain router: the Fleet router checks the
+ * caller's Fleet privileges on every request, and this caller has no identity to check.
+ */
+export const registerPublicRoutes = (router: FleetRouter) => {
+  router.versioned
+    .post({
+      path: IAC_PROVISIONER_API_ROUTES.CALLBACK_RECEIVE_PATTERN,
+      summary: 'Receive a provisioning callback',
+      operationId: 'receive-provisioning-callback',
+      description:
+        "Called by the deployment launched from Kibana to report what it created. The request is not authenticated: present the one-time token issued when the callback was created in the `x-elastic-callback-token` header. The token is not an Elasticsearch credential and admits nothing but this report. The body is shaped for the record's cloud provider and carries `origin_proof`, the provider's proof that the report was sent from the account of what it reports, bound to this callback and these values; a report whose proof does not verify returns 401 and leaves the record waiting. A deployment launched from a blueprint that sends the proof (for AWS, `aws/workload_identity_federation` 1.5.0 and later, as recorded on the callback at launch) must send it, and a report without one is a 400; a deployment launched before that may still report without it. For AWS, the CloudFormation stack's Lambda reports `role_arn` and `stack_arn`, which must be in the same account, and the proof is an STS `GetCallerIdentity` request signed from that account with the callback id and the SHA-256 of the reported values among its signed headers; Kibana forwards it to `sts.<region>.amazonaws.com`, so it needs egress to the regional STS endpoints. The signer must also be named as the stack's callback function and its role would be, which only turns away a stray principal: anyone in the account can pick those names, so the account is what the proof establishes. While the record is pending, a repeat report with the same values succeeds and different values return 409; an expired or cancelled record returns 410.",
+      access: 'public',
+      security: {
+        authc: {
+          enabled: false,
+          reason:
+            'The caller is the deployment launched in the customer account, with no Kibana identity; the record it reports to is admitted by its own token, checked in the handler',
+        },
+        authz: {
+          enabled: false,
+          reason: 'Authorized by the per-callback token bound to the record in the handler',
+        },
+      },
+      options: {
+        tags: ['oas-tag:Fleet IaC provisioner'],
+        availability: {
+          since: '9.6.0',
+          stability: 'experimental',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/post_provisioning_callback.yaml'),
+        },
+        validate: {
+          request: ReceiveProvisioningCallbackRequestSchema,
+          response: {
+            200: {
+              description: 'OK: the values were stored, or were already stored.',
+              body: () => ReceiveProvisioningCallbackResponseSchema,
+            },
+            400: { description: 'A bad request.', body: genericErrorResponse },
+            401: {
+              description:
+                'The proof of the sending account did not verify, or was made for another callback or other values.',
+              body: genericErrorResponse,
+            },
+            404: { description: 'Not found.', body: notFoundResponse },
+            409: {
+              description: 'Different values were already received for this callback.',
+              body: genericErrorResponse,
+            },
+            410: {
+              description: 'The callback has expired or was cancelled.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      withDefaultErrorHandler((context, request, response) =>
+        getRequestStore().run(request, () =>
+          receiveProvisioningCallbackHandler(context, request, response)
+        )
+      )
     );
 };

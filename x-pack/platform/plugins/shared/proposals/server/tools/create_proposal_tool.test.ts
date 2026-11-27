@@ -102,6 +102,7 @@ describe.skip('proposals.create', () => {
         origin: 'nightshift',
         impact: 'medium',
       },
+      triggeredBy: 'proposals',
       waitForCompletion: false,
     });
   });

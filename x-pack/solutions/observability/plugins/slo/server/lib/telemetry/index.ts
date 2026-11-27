@@ -5,8 +5,17 @@
  * 2.0.
  */
 
-export { getChangedFields, toSloDefinitionEbtData } from './build_slo_ebt_data';
 export {
+  getChangedFields,
+  getCompositeChangedFields,
+  toCompositeSloDefinitionEbtData,
+  toCompositeSloDeletedEbtData,
+  toSloDefinitionEbtData,
+} from './build_slo_ebt_data';
+export {
+  COMPOSITE_SLO_CREATED_EBT_EVENT_TYPE,
+  COMPOSITE_SLO_DELETED_EBT_EVENT_TYPE,
+  COMPOSITE_SLO_UPDATED_EBT_EVENT_TYPE,
   SLO_CREATED_EBT_EVENT_TYPE,
   SLO_DELETED_EBT_EVENT_TYPE,
   SLO_RESET_EBT_EVENT_TYPE,

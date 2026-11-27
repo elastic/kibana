@@ -19,7 +19,7 @@ import { apiTest, COMMON_HEADERS, INTERNAL_AGENT_BUILDER_SML } from '../fixtures
 
 /*
  * Kept in sync by hand with
- * `x-pack/platform/test/agent_builder_sml/plugins/sml_test_types/common/constants.ts`.
+ * `x-pack/platform/test_plugins/agent_builder_sml_test_types/common/constants.ts`.
  * The fixture plugin is loaded by path (`--plugin-path` in the `agent_builder` Scout config set),
  * not imported, so there is no package edge to hang a shared constant on. A drift shows up as the
  * readiness poll below timing out rather than as a silent pass.

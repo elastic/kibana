@@ -16,7 +16,7 @@ import type { EsqlRuleParams } from '../../rule_schema';
 import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
 import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 import type { SecuritySharedParams, SignalSource } from '../types';
-import { generateAlertId } from './utils';
+import { generateAlertId, omitReservedMetadataColumns } from './utils';
 
 export const wrapEsqlAlerts = ({
   sharedParams,
@@ -42,7 +42,8 @@ export const wrapEsqlAlerts = ({
 
     const baseAlert: DetectionAlertLatest = transformHitToAlert({
       sharedParams,
-      doc: event,
+      // the id above needs the values of the reserved metadata columns, the alert cannot store them
+      doc: { ...event, _source: omitReservedMetadataColumns(event._source) },
       applyOverrides: true,
       buildReasonMessage: buildReasonMessageForNewTermsAlert,
       alertUuid: id,

@@ -20,8 +20,7 @@ interface FilterOption {
 
 const listCss = css({ inlineSize: 280 });
 
-// Long values, such as environments named after URLs, are truncated; the title has them in full.
-const buttonCss = css({ maxInlineSize: '22em' });
+const DEFAULT_MAX_BUTTON_SIZE = '22em';
 
 /**
  * A filter button of an `EuiFilterGroup` that opens a list to pick one option, and shows the
@@ -35,6 +34,7 @@ export function SingleSelectFilter({
   onChange,
   searchable = false,
   isLoading = false,
+  maxButtonInlineSize = DEFAULT_MAX_BUTTON_SIZE,
   ebtElement,
   'data-test-subj': dataTestSubj,
 }: {
@@ -48,6 +48,11 @@ export function SingleSelectFilter({
   /** Adds a search box above the options, for long lists. */
   searchable?: boolean;
   isLoading?: boolean;
+  /**
+   * The widest the button gets. A longer selection, such as a URL, is truncated, and the title has
+   * it in full.
+   */
+  maxButtonInlineSize?: string;
   /** Names the filter in click telemetry. */
   ebtElement: string;
   'data-test-subj': string;
@@ -89,7 +94,7 @@ export function SingleSelectFilter({
             action: DIGITAL_EXPERIENCE_EBT_ACTIONS.OPEN_FILTER,
             element: ebtElement,
           })}
-          css={buttonCss}
+          css={css({ maxInlineSize: maxButtonInlineSize })}
           title={buttonText}
           iconType="chevronSingleDown"
           onClick={() => setIsOpen((open) => !open)}

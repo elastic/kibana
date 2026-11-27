@@ -15,6 +15,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -119,6 +120,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -219,6 +221,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -323,6 +326,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -408,7 +412,9 @@ Object {
 }
 `;
 
-exports[`RenderingService preboot() render() renders "core" page for unauthenticated requests 1`] = `
+exports[
+  `RenderingService preboot() render() renders "core" page for unauthenticated requests 1`
+] = `
 Object {
   "anonymousStatusPage": false,
   "apmConfig": Object {
@@ -423,6 +429,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -523,6 +530,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -612,7 +620,9 @@ Object {
 }
 `;
 
-exports[`RenderingService preboot() render() renders "core" with excluded global user settings 1`] = `
+exports[
+  `RenderingService preboot() render() renders "core" with excluded global user settings 1`
+] = `
 Object {
   "anonymousStatusPage": false,
   "apmConfig": Object {
@@ -627,6 +637,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -727,6 +738,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -827,6 +839,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -927,6 +940,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -1032,6 +1046,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -1136,6 +1151,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -1243,6 +1259,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -1352,6 +1369,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -1452,6 +1470,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -1557,6 +1576,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -1666,6 +1686,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -1771,6 +1792,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -1876,6 +1898,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -1983,6 +2006,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,

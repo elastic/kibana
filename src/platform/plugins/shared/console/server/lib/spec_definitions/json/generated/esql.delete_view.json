@@ -12,8 +12,8 @@
     "patterns": [
       "_query/view/{name}"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch#TODO",
-    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch#TODO",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-esql-delete-view",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-esql-delete-view",
     "availability": {
       "stack": true,
       "serverless": true

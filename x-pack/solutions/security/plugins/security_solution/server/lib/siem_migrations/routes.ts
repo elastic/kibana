@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { registerSiemRuleMigrationsRoutes } from './rules/api';
 import { registerSiemDashboardMigrationsRoutes } from './dashboards/api';
+import { registerSiemWorkflowMigrationsRoutes } from './workflows/api';
 import type { SecuritySolutionPluginRouter } from '../../types';
 import type { ConfigType } from '../../config';
 
@@ -22,5 +23,7 @@ export const registerSiemMigrationsRoutes = (
     if (config.experimentalFeatures.automaticDashboardsMigration) {
       registerSiemDashboardMigrationsRoutes(router, config, logger);
     }
+
+    registerSiemWorkflowMigrationsRoutes(router, config, logger);
   }
 };

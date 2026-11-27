@@ -16,7 +16,7 @@ export const localCheck = (): readonly Step[] => [
     command: '.buildkite/scripts/steps/checks/local_check.sh',
     label: 'Local Check',
     agents: {
-      ...spotAgent('n4-standard-16', spotZones.allUS),
+      ...spotAgent('n4-standard-16', spotZones.n4),
       ...hyperdiskBalanced,
     },
     key: 'check',

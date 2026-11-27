@@ -7,3 +7,4 @@
 
 export { AddRuleAttachmentToChatButton } from './add_rule_attachment_to_chat_button';
 export type { AddRuleAttachmentToChatButtonProps } from './add_rule_attachment_to_chat_button';
+export { useAddRuleAttachmentToChatMenuItem } from './use_add_rule_attachment_to_chat_menu_item';

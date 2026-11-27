@@ -5,28 +5,29 @@
  * 2.0.
  */
 
-import { handleActions } from 'redux-actions';
+import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 
-import { permissionsSuccess, permissionsError, permissionsLoading } from '../actions/permissions';
-import type { PermissionsState } from '../types';
+import type { PermissionsError, PermissionsState } from '../types';
 
-export const permissions = handleActions<PermissionsState, unknown>(
-  {
-    [String(permissionsLoading)](_state, action) {
-      return {
-        loading: Boolean(action.payload),
-      };
-    },
-    [String(permissionsSuccess)](_state, action) {
-      return {
-        hasPermission: Boolean(action.payload),
-      };
-    },
-    [String(permissionsError)](_state, action) {
-      return {
-        error: action.payload,
-      };
-    },
+const initialState: PermissionsState = {};
+
+const permissionsSlice = createSlice({
+  name: 'permissions',
+  initialState,
+  reducers: {
+    permissionsLoading: (_state, { payload }: PayloadAction<boolean>) => ({
+      loading: payload,
+    }),
+    permissionsSuccess: (_state, { payload }: PayloadAction<boolean>) => ({
+      hasPermission: payload,
+    }),
+    permissionsError: (_state, { payload }: PayloadAction<PermissionsError>) => ({
+      error: payload,
+    }),
   },
-  {}
-);
+});
+
+export const { permissionsLoading, permissionsSuccess, permissionsError } =
+  permissionsSlice.actions;
+export const permissions = permissionsSlice.reducer;

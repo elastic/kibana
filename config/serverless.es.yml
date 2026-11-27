@@ -36,9 +36,6 @@ xpack.fleet.internal.registry.excludePackages: [
 
   # Profiling integrations
   'profiler_agent',
-
-  # Search connectors
-  'elastic_connectors',
 ]
 
 ## Fine-tune the search solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
@@ -99,9 +96,6 @@ data_visualizer.resultLinks.fileBeat.enabled: false
 # Semantic text UI
 xpack.index_management.dev.enableSemanticText: true
 
-# Search Homepage
-xpack.searchHomepage.enabled: true
-
 # AI Assistant config
 xpack.observabilityAIAssistant.enabled: true
 xpack.searchAssistant.enabled: true
@@ -115,9 +109,6 @@ xpack.searchQueryRules.enabled: true
 
 ## ES|QL Data Federation in stack management
 xpack.dataFederation.enabled: true
-
-## Search Connectors in stack management
-xpack.contentConnectors.ui.enabled: false
 
 # Elastic Managed LLMs
 xpack.actions.preconfigured:

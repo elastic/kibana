@@ -7,7 +7,6 @@
 
 import { createHash } from 'crypto';
 
-import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { AlertEventSeverity, RuleResponse } from '@kbn/alerting-v2-schemas';
 import { alertEventSeverity } from '@kbn/alerting-v2-schemas';
 import type { AlertEventDocument, AlertEventType } from '../../resources/datastreams/alert_events';
@@ -319,17 +318,6 @@ export function buildNoDataAlertEvents({
   }));
 }
 
-export function rowToDocument(
-  columns: EsqlQueryResponse['columns'],
-  row: unknown[]
-): Record<string, unknown> {
-  const doc: Record<string, unknown> = {};
-  for (let i = 0; i < columns.length; i++) {
-    doc[columns[i].name] = row[i];
-  }
-  return doc;
-}
-
 export interface BuildQueryRecoveryAlertEventsOpts {
   ruleId: string;
   ruleVersion: number;
@@ -337,7 +325,7 @@ export interface BuildQueryRecoveryAlertEventsOpts {
   ruleAttributes: Pick<RuleResponse, 'grouping'>;
   activeGroupHashes: ActiveAlertGroupHash[];
   breachedGroupHashes: ReadonlySet<string>;
-  esqlResponse: EsqlQueryResponse;
+  rows: Array<Record<string, unknown>>;
   scheduledTimestamp: string;
   type: AlertEventType;
 }
@@ -357,14 +345,11 @@ export function buildQueryRecoveryAlertEvents({
   ruleAttributes,
   activeGroupHashes,
   breachedGroupHashes,
-  esqlResponse,
+  rows,
   scheduledTimestamp,
   type,
 }: BuildQueryRecoveryAlertEventsOpts): AlertEventDocument[] {
-  const columns = esqlResponse.columns ?? [];
-  const values = esqlResponse.values ?? [];
-
-  if (columns.length === 0 || values.length === 0) {
+  if (rows.length === 0) {
     return [];
   }
 
@@ -374,8 +359,7 @@ export function buildQueryRecoveryAlertEvents({
   // Keep the first matching row's data per group hash.
   const recoveredByGroupHash = new Map<string, Record<string, unknown>>();
 
-  for (let i = 0; i < values.length; i++) {
-    const rowDoc = rowToDocument(columns, values[i]);
+  for (const rowDoc of rows) {
     const groupHash = buildGroupHash({ rowDoc, groupKeyFields: groupingFields });
 
     if (

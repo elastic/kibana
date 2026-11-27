@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/elastic-assistant-plugin",
   "owner": [
-    "@elastic/security-threat-hunting"
+    "@elastic/security-investigations"
   ],
   "group": "security",
   "visibility": "private",

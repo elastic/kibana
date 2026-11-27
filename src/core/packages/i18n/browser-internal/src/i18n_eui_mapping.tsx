@@ -1906,5 +1906,15 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiKeyboardShortcuts.copyTitle': i18n.translate('core.euiKeyboardShortcuts.copyTitle', {
       defaultMessage: 'C',
     }),
+    'euiFlyoutMenu.maximize': i18n.translate('core.euiFlyoutMenu.maximize', {
+      defaultMessage: 'Maximize',
+    }),
+    'euiFlyoutMenu.restore': i18n.translate('core.euiFlyoutMenu.restore', {
+      defaultMessage: 'Restore',
+    }),
+    'euiExpression.invalid': i18n.translate('core.euiExpression.invalid', {
+      defaultMessage: 'Invalid expression',
+      description: 'Screen reader label for the warning icon shown on an invalid EuiExpression',
+    }),
   };
 };

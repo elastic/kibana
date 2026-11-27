@@ -28,6 +28,9 @@ export type { CorrelationsApiService } from './correlations';
 export { getPrevalenceApiService } from './prevalence';
 export type { PrevalenceApiService } from './prevalence';
 
+export { getThreatIntelligenceApiService } from './threat_intelligence';
+export type { ThreatIntelligenceApiService } from './threat_intelligence';
+
 export { getAnalyzerApiService } from './analyzer';
 export type { AnalyzerApiService } from './analyzer';
 

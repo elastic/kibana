@@ -7,7 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import type { TimeRange } from '../../../entities_grid/common';
+import { TIME_RANGE_DAYS, type TimeRange } from '../../../queries/time_range';
 import { getRiskScoreIndex } from '../../../entities_grid/queries/esql';
 import {
   RISK_MOVER_MIN_SCORE_CHANGE,
@@ -22,7 +22,6 @@ import {
 } from '../risk_series_query';
 import { buildNewlyHighCriticalCountQuery } from '../tile_newly_high_critical_query';
 import { buildRiskMoversCountQuery } from '../tile_risk_movers_query';
-import { TIME_RANGE_DAYS } from '../tile_period';
 import { getSeriesWindow, readSeriesDots } from '../tile_series_window';
 import { describeSeriesFollowsCount, readCounts, RANGES } from './series_follow_count_suite';
 

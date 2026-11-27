@@ -129,6 +129,23 @@ describe('ProfilesManager', () => {
     );
   });
 
+  it('should report inherited telemetry labels alongside the profile id', async () => {
+    mocks.dataSourceProfileProviderMock.telemetryLabels = ['logs-data-source-profile'];
+    await mocks.profilesManagerMock.resolveRootProfile({});
+    const scopedProfilesManager = createScopedProfilesManager();
+    await scopedProfilesManager.resolveDataSourceProfile({});
+
+    expect(mocks.scopedEbtManagerMock.updateProfilesContextWith).toHaveBeenCalledWith([
+      'root-profile',
+      'logs-data-source-profile',
+      'data-source-profile',
+    ]);
+    expect(mocks.scopedEbtManagerMock.trackContextualProfileResolvedEvent).toHaveBeenCalledWith({
+      profileId: 'data-source-profile',
+      contextLevel: 'dataSourceLevel',
+    });
+  });
+
   it('should expose profiles as an observable', async () => {
     const scopedProfilesManager = createScopedProfilesManager();
     const getProfilesSpy = jest.spyOn(scopedProfilesManager, 'getProfiles');

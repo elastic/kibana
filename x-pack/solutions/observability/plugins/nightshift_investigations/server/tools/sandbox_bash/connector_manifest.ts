@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { SandboxSession } from '@kbn/sandbox-plugin/server';
+import type { AuditedSandboxSession } from '../../sandbox_audit';
 import type { AgentConnector, ActionsClient } from './agent_connectors';
 import { listAgentConnectors } from './agent_connectors';
 import type { SandboxCallContext } from './tool_utils';
@@ -33,7 +33,7 @@ export const writeConnectorManifest = async ({
   getActionsClient,
   logger,
 }: {
-  session: SandboxSession;
+  session: AuditedSandboxSession;
   callContext: SandboxCallContext;
   getActionsClient: ((req: KibanaRequest) => Promise<ActionsClient>) | undefined;
   logger: Logger;

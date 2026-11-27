@@ -9,7 +9,7 @@ import type { ApplicationErrorsResponse } from '../../../common/types/errors';
 import {
   APPLICATION_TAB_ROUTE_OPTIONS,
   APPLICATION_TAB_ROUTE_SECURITY,
-  applicationTabRouteParams,
+  documentFilteredApplicationTabRouteParams,
   toApplicationSearch,
 } from '../application_tab_route';
 import { createDigitalExperienceServerRoute } from '../create_digital_experience_server_route';
@@ -23,7 +23,7 @@ export const errorsRouteRepository = createDigitalExperienceServerRoute({
   endpoint: APPLICATION_ERRORS_ENDPOINT,
   options: APPLICATION_TAB_ROUTE_OPTIONS,
   security: APPLICATION_TAB_ROUTE_SECURITY,
-  params: applicationTabRouteParams,
+  params: documentFilteredApplicationTabRouteParams,
   handler: async (resources): Promise<ApplicationErrorsResponse> => {
     return getOtelErrors(await toApplicationSearch(resources));
   },

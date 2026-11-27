@@ -13,7 +13,9 @@ import {
   PACKAGES,
   buildDataStreamName,
   cleanUpAll,
+  createIndexTemplate,
   deleteDataStreamIfExists,
+  deleteIndexTemplateIfExists,
   ensurePackageInstalled,
   fullAccessRoleWithIndices,
   getLogsForDataset,
@@ -27,6 +29,9 @@ const PLAIN_DATASET = 'privix.plain';
 const MONITORED_DATASET = 'privix.monitored';
 const PLAIN_DATA_STREAM = buildDataStreamName({ dataset: PLAIN_DATASET });
 const MONITORED_DATA_STREAM = buildDataStreamName({ dataset: MONITORED_DATASET });
+/** Keeps type discovery deterministic for the metrics-only and multi-type scenarios. */
+const METRICS_DATA_STREAM = buildDataStreamName({ type: 'metrics', dataset: 'privix.metrics' });
+const METRICS_INDEX_TEMPLATE = 'dq-privix-metrics';
 
 /** The Apache integration supplies the dashboards the last scenario needs. */
 const APACHE_ACCESS_DATASET = 'apache.access';
@@ -66,7 +71,12 @@ test.describe(
   () => {
     let uninstallApache: () => Promise<void>;
 
-    const ownedDataStreams = [PLAIN_DATA_STREAM, MONITORED_DATA_STREAM, APACHE_ACCESS_DATA_STREAM];
+    const ownedDataStreams = [
+      PLAIN_DATA_STREAM,
+      MONITORED_DATA_STREAM,
+      METRICS_DATA_STREAM,
+      APACHE_ACCESS_DATA_STREAM,
+    ];
 
     // Seeded once with the privileged client: each scenario varies the role, not the documents.
     test.beforeAll(async ({ apiServices, esClient, log, logsSynthtraceEsClient }) => {
@@ -86,6 +96,16 @@ test.describe(
         getLogsForDataset({ to: TO, count: 4, dataset: MONITORED_DATASET }),
         getLogsForDataset({ to: TO, count: 10, dataset: APACHE_ACCESS_DATASET }),
       ]);
+      await createIndexTemplate(esClient, {
+        name: METRICS_INDEX_TEMPLATE,
+        indexPatterns: [METRICS_DATA_STREAM],
+      });
+      await esClient.index({
+        index: METRICS_DATA_STREAM,
+        op_type: 'create',
+        refresh: true,
+        document: { '@timestamp': TO },
+      });
     });
 
     test.afterAll(async ({ esClient, log }) => {
@@ -93,6 +113,7 @@ test.describe(
         ...ownedDataStreams.map(
           (dataStream) => () => deleteDataStreamIfExists(esClient, dataStream, log)
         ),
+        () => deleteIndexTemplateIfExists(esClient, METRICS_INDEX_TEMPLATE, log),
         () => uninstallApache(),
       ]);
     });

@@ -6,7 +6,7 @@
  */
 
 import path from 'path';
-import { resetSLOParamsSchema } from '@kbn/slo-schema';
+import { resetSLOParamsSchema, resetSLOResponseSchema } from '@kbn/slo-schema';
 import { ResetSLO } from '../services/reset_slo';
 import { createSloServerRoute } from './utils/create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
@@ -27,6 +27,9 @@ export const resetSLORoute = createSloServerRoute({
     },
   },
   params: resetSLOParamsSchema,
+  responses: {
+    200: { description: 'Successful request', body: () => resetSLOResponseSchema },
+  },
   handler: async ({
     params,
     logger,
@@ -34,10 +37,10 @@ export const resetSLORoute = createSloServerRoute({
     plugins,
     corePlugins,
     getScopedClients,
-    commonResourcesInstalled,
+    resourceInstallState,
   }) => {
     await assertPlatinumLicense(plugins);
-    await commonResourcesInstalled;
+    await resourceInstallState.ensureInstalled();
 
     const {
       scopedClusterClient,

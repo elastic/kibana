@@ -7,16 +7,13 @@
 
 import React, { useCallback, useState } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useCaseViewNavigation, useCaseViewParams } from '@kbn/cases-plugin/public';
 import { CASE_VIEW_PAGE_TABS } from '@kbn/cases-plugin/common';
-import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { casesCellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { DocumentEventTypes, FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { getAlertHistoryTitle } from '../../../../flyout_v2/document/main/utils/get_header_title';
 import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 import { SHOW_ALERT_TOOLTIP } from '../translations';
@@ -30,14 +27,12 @@ export interface ShowAlertButtonProps {
 }
 
 export const ShowAlertButton = ({ id, alertId, index, ruleName }: ShowAlertButtonProps) => {
-  const { openFlyout } = useExpandableFlyoutApi();
   const {
     telemetry,
     application: { capabilities },
   } = useKibana().services;
   const { navigateToCaseView } = useCaseViewNavigation();
   const { detailName } = useCaseViewParams();
-  const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openDocumentFlyoutFromIndex } = useFlyoutApi();
   const [isEaseFlyoutOpen, setIsEaseFlyoutOpen] = useState(false);
   const closeEaseFlyout = useCallback(() => setIsEaseFlyoutOpen(false), []);
@@ -52,26 +47,13 @@ export const ShowAlertButton = ({ id, alertId, index, ruleName }: ShowAlertButto
       if (EASE) {
         setIsEaseFlyoutOpen(true);
       } else {
-        if (enableNewFlyout) {
-          openDocumentFlyoutFromIndex({
-            documentId: alertId,
-            indexName: index,
-            renderCellActions: casesCellActionRenderer,
-            origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
-            title: getAlertHistoryTitle(ruleName),
-          });
-        } else {
-          openFlyout({
-            right: {
-              id: DocumentDetailsRightPanelKey,
-              params: {
-                id: alertId,
-                indexName: index,
-                scopeId: TimelineId.casePage,
-              },
-            },
-          });
-        }
+        openDocumentFlyoutFromIndex({
+          documentId: alertId,
+          indexName: index,
+          renderCellActions: casesCellActionRenderer,
+          origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
+          title: getAlertHistoryTitle(ruleName),
+        });
         telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
           location: TimelineId.casePage,
           panel: 'right',
@@ -84,11 +66,9 @@ export const ShowAlertButton = ({ id, alertId, index, ruleName }: ShowAlertButto
     EASE,
     alertId,
     index,
-    openFlyout,
     telemetry,
     detailName,
     navigateToCaseView,
-    enableNewFlyout,
     openDocumentFlyoutFromIndex,
     ruleName,
   ]);

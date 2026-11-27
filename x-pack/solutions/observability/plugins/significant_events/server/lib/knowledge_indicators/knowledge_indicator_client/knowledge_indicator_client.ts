@@ -72,7 +72,8 @@ export class KnowledgeIndicatorClient {
       deps.logger,
       revisionReader,
       config.feature_ttl_days,
-      deps.space
+      deps.space,
+      deps.onWrite
     );
     this.reader = new IndicatorReader(revisionReader);
     this.searcher = new IndicatorSearcher(

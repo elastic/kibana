@@ -29,12 +29,14 @@ export type {
   ServiceAccountWorkloadTypeRegistration,
 } from './src/service_account_workloads';
 export {
+  SERVICE_ACCOUNT_WORKLOAD_BINDING_CHANGES_MAX,
   SERVICE_ACCOUNT_WORKLOAD_ID_MAX_LENGTH,
   SERVICE_ACCOUNT_WORKLOAD_TYPE_DESCRIPTION_MAX_LENGTH,
   SERVICE_ACCOUNT_WORKLOAD_TYPE_MAX_LENGTH,
   SERVICE_ACCOUNT_WORKLOAD_TYPE_NAME_MAX_LENGTH,
   SERVICE_ACCOUNT_WORKLOAD_TYPE_REGEX,
 } from './src/service_account_workloads';
+export { SERVICE_ACCOUNT_ID_MAX_LENGTH } from '@kbn/core-security-common';
 export type {
   AuthenticatedPrincipal,
   ServiceAccount,
@@ -42,24 +44,32 @@ export type {
   ServiceAccountWorkloadBinder,
   ServiceAccountWorkloadBinding,
   BindServiceAccountWorkloadParams,
+  ServiceAccountWorkloadBindingChange,
+  ServiceAccountWorkloadBindingChangeError,
+  ServiceAccountWorkloadBindingChangeResult,
   ServiceAccountWorkloadRef,
   ServiceAccountWorkloadCoordinates,
   ServiceAccountWorkloadRequestParams,
   ServiceAccountBoundWorkload,
+  ServiceAccountSummary,
 } from '@kbn/core-security-common';
 export type {
   CoreSecurityDelegateContract,
   AuthenticationServiceContract,
+  AuthorizationServiceContract,
   AuditServiceContract,
   ServiceAccountsServiceContract,
   CoreSecurityDelegateHandle,
   CoreSecurityDelegateServiceAccounts,
   ResolvedServiceAccountWorkload,
+  ResolveBoundWorkloadsOptions,
   ServiceAccountBoundWorkloadRef,
 } from './src/api_provider';
 export type {
   SecurityRequestHandlerContext,
   AuthcRequestHandlerContext,
+  AuthzRequestHandlerContext,
+  UiamAuthzRequestHandlerContext,
   AuditRequestHandlerContext,
 } from './src/request_handler_context';
 export type {
@@ -100,5 +110,10 @@ export {
   groupSecurityPrivileges,
   flattenSecurityPrivileges,
 } from './src/authz';
+export type { CoreAuthorizationService } from './src/authz';
 export { ApiPrivileges, ApiOperation } from './src/api_privileges';
-export type { UiamProjectType, UiamClientAuthenticationParams } from './src/uiam';
+export type {
+  UiamProjectType,
+  UiamClientAuthenticationParams,
+  CoreUiamAuthorizationService,
+} from './src/uiam';

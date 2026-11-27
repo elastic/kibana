@@ -106,7 +106,7 @@ export class AssignmentsService {
     const { conversation } = await client.patchMetadata(
       conversationId,
       { assignees: next },
-      { access: 'converse' }
+      { access: 'converse', refresh: 'wait_for' }
     );
 
     return conversation;

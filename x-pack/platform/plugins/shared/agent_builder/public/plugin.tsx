@@ -125,7 +125,7 @@ export class AgentBuilderPlugin
   private activeSidebarRef: ConversationSidebarRef | null = null;
   private sidebarCallbacks: {
     updateProps: (props: EmbeddableConversationProps) => void;
-    resetBrowserApiTools: () => void;
+    resetChatConfig: () => void;
     addAttachment: (attachment: AttachmentInput) => void;
     removeAttachmentById: (attachmentId: string) => void;
   } | null = null;
@@ -274,6 +274,7 @@ export class AgentBuilderPlugin
     const openConversationDetails = async ({
       conversationId,
       onClose,
+      onConversationUpdated,
       trailingActions,
     }: OpenConversationDetailsOptions): Promise<() => void> => {
       const { openConversationDetailsFlyout } = await import(
@@ -285,6 +286,7 @@ export class AgentBuilderPlugin
         conversationTemplatesService,
         conversationId,
         onClose,
+        onConversationUpdated,
         trailingActions,
       });
     };
@@ -436,8 +438,8 @@ export class AgentBuilderPlugin
       clearChatConfig: () => {
         this.conversationActiveConfig = {};
         if (this.activeSidebarRef && this.sidebarCallbacks) {
-          // Removes stale browserApiTools from the sidebar
-          this.sidebarCallbacks.resetBrowserApiTools();
+          // Removes the stale browserApiTools and conversationStarters of the page from the sidebar
+          this.sidebarCallbacks.resetChatConfig();
         }
       },
       openChat: (options?: OpenConversationSidebarOptions) => {

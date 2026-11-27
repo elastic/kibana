@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RunHistory, type Run } from './run_history';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -36,6 +36,7 @@ describe('RunHistory skipped run summary', () => {
       <I18nProvider>
         <RunHistory
           runs={[run]}
+          runCounts={{ succeeded: 0, running: 0, failed: 0, skipped: 1 }}
           isLoading={false}
           startedAfter="2026-01-01T00:00:00.000Z"
           startedBefore="2026-01-02T00:00:00.000Z"
@@ -45,6 +46,27 @@ describe('RunHistory skipped run summary', () => {
         />
       </I18nProvider>
     );
+
+  it('keeps the status filter clearable when run counts are unavailable', () => {
+    render(
+      <I18nProvider>
+        <RunHistory
+          runs={[skippedRun('daily_limit', 20)]}
+          initialFilter="succeeded"
+          isLoading={false}
+          startedAfter="2026-01-01T00:00:00.000Z"
+          startedBefore="2026-01-02T00:00:00.000Z"
+          rangeLabel="Last 24 hours"
+          automationName="Alert triage"
+          onSelect={jest.fn()}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.queryByText(/ runs? ·/)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('automationRunFilter-succeeded'));
+    expect(screen.getByTestId('automationRunFilter-skipped')).toHaveTextContent('1');
+  });
 
   it('explains a no_open_investigation skip instead of the daily limit', () => {
     renderRunHistory(skippedRun('no_open_investigation'));
@@ -75,6 +97,23 @@ describe('RunHistory skipped run summary', () => {
     ).toBeInTheDocument();
   });
 
+  it.each([
+    ['Alice Smith', 'Manual · Alice Smith'],
+    [undefined, 'Manual'],
+  ])('shows a resolved executor or a safe fallback for a manual run: %s', (name, label) => {
+    renderRunHistory({
+      id: 'manual-1',
+      status: 'running',
+      startedAt: '2026-01-01T12:00:00.000Z',
+      triggeredBy: 'manual',
+      executedBy: 'u_alice',
+      executedByDisplayName: name,
+      investigationId: 'inv-1',
+    });
+    expect(screen.getByText(label)).toBeInTheDocument();
+    expect(screen.queryByText(/u_alice/)).not.toBeInTheDocument();
+  });
+
   it('shows the failure reason of a failed run instead of the automation name', () => {
     renderRunHistory({
       id: 'run-2',
@@ -85,5 +124,35 @@ describe('RunHistory skipped run summary', () => {
 
     expect(screen.getByText('Model connector not found')).toBeInTheDocument();
     expect(screen.queryByText('Alert triage')).not.toBeInTheDocument();
+  });
+});
+
+describe('RunHistory load error', () => {
+  it('lets the user retry loading the remaining runs', () => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        charts: { theme: { useChartsBaseTheme: () => ({}), useSparklineOverrides: () => ({}) } },
+      },
+    });
+    const onRetry = jest.fn();
+    render(
+      <I18nProvider>
+        <RunHistory
+          runs={[skippedRun('daily_limit', 20)]}
+          isLoading={false}
+          isError
+          onRetry={onRetry}
+          startedAfter="2026-01-01T00:00:00.000Z"
+          startedBefore="2026-01-02T00:00:00.000Z"
+          rangeLabel="Last 24 hours"
+          automationName="Alert triage"
+          onSelect={jest.fn()}
+        />
+      </I18nProvider>
+    );
+
+    fireEvent.click(screen.getByTestId('automationRunsRetryButton'));
+
+    expect(onRetry).toHaveBeenCalledTimes(1);
   });
 });

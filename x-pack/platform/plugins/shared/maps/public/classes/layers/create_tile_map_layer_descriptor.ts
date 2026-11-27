@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { GRID_RESOLUTION } from '@kbn/geo-precision';
 import type {
   AggDescriptor,
   ColorDynamicOptions,
@@ -17,7 +18,6 @@ import {
   COLOR_MAP_TYPE,
   DEFAULT_PERCENTILE,
   FIELD_ORIGIN,
-  GRID_RESOLUTION,
   RENDER_AS,
   STYLE_TYPE,
   VECTOR_STYLES,
@@ -132,10 +132,10 @@ export function createTileMapLayerDescriptor({
         field: metricStyleField,
         color: colorPallette ? colorPallette.value : 'Yellow to Red',
         type: COLOR_MAP_TYPE.ORDINAL,
-        fieldMetaOptions: {
+        field_meta_options: {
           ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options as ColorDynamicOptions)
-            .fieldMetaOptions,
-          isEnabled: false,
+            .field_meta_options,
+          is_enabled: false,
         },
       },
     },
@@ -151,12 +151,12 @@ export function createTileMapLayerDescriptor({
       type: STYLE_TYPE.DYNAMIC,
       options: {
         ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options as SizeDynamicOptions),
-        maxSize: 18,
+        max_size: 18,
         field: metricStyleField,
-        fieldMetaOptions: {
+        field_meta_options: {
           ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options as SizeDynamicOptions)
-            .fieldMetaOptions,
-          isEnabled: false,
+            .field_meta_options,
+          is_enabled: false,
         },
       },
     };

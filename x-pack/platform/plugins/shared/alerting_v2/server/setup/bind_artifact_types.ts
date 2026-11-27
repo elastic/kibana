@@ -14,7 +14,8 @@ import { ArtifactTypeRegistry, registerBuiltinArtifactTypes } from '../lib/artif
  * Solution plugins register their own types via `AlertingServerSetup.registerArtifactType`.
  */
 export function bindArtifactTypes({ bind }: ContainerModuleLoadOptions) {
-  bind(OnSetup).toConstantValue((container) => {
-    registerBuiltinArtifactTypes(container.get(ArtifactTypeRegistry));
-  });
+  bind(OnSetup).toResolvedValue(
+    (registry) => () => registerBuiltinArtifactTypes(registry),
+    [ArtifactTypeRegistry]
+  );
 }

@@ -32,7 +32,10 @@ interface PanelResolvers {
   resolveEsqlControlColumnType?: ResolveEsqlControlColumnType;
 }
 
-export type ResolvedPanel = PanelChange<PanelContent> & { authoringNote?: string };
+export type ResolvedPanel = PanelChange<PanelContent> & {
+  authoringNote?: string;
+  heightHint?: number;
+};
 
 /** The planned panels and controls that can be applied, and a failure for each one that cannot. */
 export interface ResolvedChanges {
@@ -140,8 +143,8 @@ export const resolvePlan = async ({
   const resolvedPanels = panels.flatMap((panel, panelIndex): ResolvedPanel[] => {
     const attempt = attempts[panelIndex];
     if (attempt?.type === 'success') {
-      const { panelContent, authoringNote } = attempt;
-      return [{ ...panel, content: panelContent, authoringNote }];
+      const { panelContent, authoringNote, heightHint } = attempt;
+      return [{ ...panel, content: panelContent, authoringNote, heightHint }];
     }
     return panel.existingPanel ? [{ ...panel, content: undefined }] : [];
   });

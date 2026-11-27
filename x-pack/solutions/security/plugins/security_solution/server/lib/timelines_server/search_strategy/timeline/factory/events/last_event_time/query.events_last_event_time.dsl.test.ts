@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { TimelineEventsQueries } from '@kbn/timelines-plugin/common/api/search_strategy';
-import { LastEventIndexKey } from '@kbn/timelines-plugin/common/api/search_strategy/timeline/events_last_event_time';
+import {
+  TimelineEventsQueries,
+  LastEventIndexKey,
+} from '@kbn/securitysolution-timeline-search-strategy';
 import { buildLastEventTimeQuery } from './query.events_last_event_time.dsl';
 
 describe('buildLastEventTimeQuery', () => {

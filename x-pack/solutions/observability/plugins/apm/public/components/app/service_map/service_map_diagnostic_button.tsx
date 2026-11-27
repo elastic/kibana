@@ -6,7 +6,6 @@
  */
 
 import React, { useState } from 'react';
-import { Panel } from '@xyflow/react';
 import { EuiButtonEmpty, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { enableDiagnosticMode } from '@kbn/observability-plugin/common';
@@ -27,28 +26,26 @@ export function ServiceMapDiagnosticButton({ selection }: ServiceMapDiagnosticBu
 
   return (
     <>
-      <Panel position="bottom-left">
-        <EuiPanel hasBorder hasShadow={false} paddingSize="none" borderRadius="m" grow={false}>
-          <EuiToolTip
-            content={i18n.translate('xpack.apm.serviceMap.diagnosticButton.tooltip', {
-              defaultMessage: 'Open diagnostic tool',
-            })}
+      <EuiPanel hasBorder hasShadow={false} paddingSize="none" borderRadius="m" grow={false}>
+        <EuiToolTip
+          content={i18n.translate('xpack.apm.serviceMap.diagnosticButton.tooltip', {
+            defaultMessage: 'Open diagnostic tool',
+          })}
+        >
+          <EuiButtonEmpty
+            size="s"
+            iconType="linkSlash"
+            onClick={() => setIsOpen(true)}
+            data-test-subj="serviceMapOpenDiagnosticButton"
+            data-ebt-action="openDiagnosticTool"
+            data-ebt-element="serviceMapDiagnosticBar"
           >
-            <EuiButtonEmpty
-              size="s"
-              iconType="linkSlash"
-              onClick={() => setIsOpen(true)}
-              data-test-subj="serviceMapOpenDiagnosticButton"
-              data-ebt-action="openDiagnosticTool"
-              data-ebt-element="serviceMapDiagnosticBar"
-            >
-              {i18n.translate('xpack.apm.serviceMap.diagnosticButton.label', {
-                defaultMessage: 'Missing connections?',
-              })}
-            </EuiButtonEmpty>
-          </EuiToolTip>
-        </EuiPanel>
-      </Panel>
+            {i18n.translate('xpack.apm.serviceMap.diagnosticButton.label', {
+              defaultMessage: 'Missing connections?',
+            })}
+          </EuiButtonEmpty>
+        </EuiToolTip>
+      </EuiPanel>
       {isOpen && (
         <DiagnosticFlyout isOpen={true} onClose={() => setIsOpen(false)} selection={selection} />
       )}

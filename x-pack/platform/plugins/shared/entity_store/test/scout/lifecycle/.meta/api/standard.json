@@ -1,5 +1,5 @@
 {
-  "sha1": "bf662a2faadf5b32b2061dc4cbdef654a5c15590",
+  "sha1": "455ab65219c77f5c31e77ea4fb86d1d79eaf3faf",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -581,6 +581,110 @@
       }
     },
     {
+      "id": "c923ce3e21924ab-b29faed937ea041",
+      "title": "latest index mappings upgrade of an existing install adds user.entity.id and the version to an index that predates it, without touching the index itself",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/latest_index_mappings_upgrade.spec.ts",
+        "line": 163,
+        "column": 38
+      }
+    },
+    {
+      "id": "c923ce3e21924ab-aa9eff54b1279c0",
+      "title": "latest index mappings upgrade of an existing install is a no-op when run a second time",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/latest_index_mappings_upgrade.spec.ts",
+        "line": 192,
+        "column": 13
+      }
+    },
+    {
+      "id": "c923ce3e21924ab-c0a375e5b7dbabf",
+      "title": "latest index mappings upgrade of an existing install counts a user.entity.id that Elasticsearch mapped dynamically as present and leaves it alone",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/latest_index_mappings_upgrade.spec.ts",
+        "line": 212,
+        "column": 16
+      }
+    },
+    {
+      "id": "c923ce3e21924ab-924b4a62e032a78",
+      "title": "latest index mappings upgrade of an existing install keeps the live type of a conflicting field, adds the rest, writes the version and warns once",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/latest_index_mappings_upgrade.spec.ts",
+        "line": 257,
+        "column": 16
+      }
+    },
+    {
+      "id": "e678f4e517df7a6-0eae5d40eb4d1d8",
+      "title": "latest index mappings are installed with the entity store maps user.entity.id as keyword and stamps the mappings version on a fresh install",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/latest_index_mappings.spec.ts",
+        "line": 53,
+        "column": 7
+      }
+    },
+    {
+      "id": "e678f4e517df7a6-f7e6292e9b34709",
+      "title": "latest index mappings are installed with the entity store keeps the latest index in lookup mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/latest_index_mappings.spec.ts",
+        "line": 70,
+        "column": 69
+      }
+    },
+    {
+      "id": "e678f4e517df7a6-356cba3e0dbadfa",
+      "title": "latest index mappings are installed with the entity store does not change the mappings version when install is called again",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/latest_index_mappings.spec.ts",
+        "line": 74,
+        "column": 12
+      }
+    },
+    {
       "id": "46bb8a3a58b1410-f5452522a797eca",
       "title": "Entity Store per entity-type log extraction config reports identical non-cadence config for every engine, and the built-in cadence per type, when nothing is overridden",
       "expectedStatus": "passed",
@@ -1104,8 +1208,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/status.spec.ts",
-        "line": 41,
-        "column": 30
+        "line": 51,
+        "column": 5
       }
     },
     {
@@ -1120,8 +1224,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/status.spec.ts",
-        "line": 57,
-        "column": 24
+        "line": 64,
+        "column": 14
       }
     },
     {
@@ -1136,8 +1240,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/status.spec.ts",
-        "line": 67,
-        "column": 14
+        "line": 73,
+        "column": 7
       }
     },
     {
@@ -1152,8 +1256,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/status.spec.ts",
-        "line": 84,
-        "column": 14
+        "line": 92,
+        "column": 13
       }
     },
     {
@@ -1314,6 +1418,88 @@
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/uninstall.spec.ts",
         "line": 139,
         "column": 24
+      }
+    },
+    {
+      "id": "c61891d8be06d17-9eafd6649519629",
+      "title": "Entity Store update API key API tests Should move the task API keys to the user making the request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/update_api_key.spec.ts",
+        "line": 135,
+        "column": 85
+      }
+    },
+    {
+      "id": "c61891d8be06d17-f95a8dc0f01bca9",
+      "title": "Entity Store update API key API tests Should give the tasks their own keys when the caller authenticates with an API key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/update_api_key.spec.ts",
+        "line": 179,
+        "column": 12
+      }
+    },
+    {
+      "id": "c61891d8be06d17-c6c50fe6b2d757e",
+      "title": "Entity Store update API key API tests Should not change anything when the user lacks the privileges to install",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/update_api_key.spec.ts",
+        "line": 193,
+        "column": 23
+      }
+    },
+    {
+      "id": "c61891d8be06d17-2d87a56d70b4393",
+      "title": "Entity Store update API key API tests Should not change anything when the user cannot read the extra sources the store extracts from",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/update_api_key.spec.ts",
+        "line": 213,
+        "column": 16
+      }
+    },
+    {
+      "id": "c61891d8be06d17-2f099a85d926ef8",
+      "title": "Entity Store update API key API tests Should do nothing when the Entity Store is not installed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/update_api_key.spec.ts",
+        "line": 254,
+        "column": 9
       }
     }
   ]

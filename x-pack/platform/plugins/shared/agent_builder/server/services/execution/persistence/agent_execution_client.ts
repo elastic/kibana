@@ -91,8 +91,11 @@ export interface AgentExecutionClient {
   /** Create a new execution document. */
   create(execution: CreateExecutionParams): Promise<AgentExecution>;
 
-  /** Get an execution document by id (real-time GET). Returns undefined if not found. */
-  get(executionId: string): Promise<AgentExecution | undefined>;
+  /**
+   * Get an execution document by id (real-time GET). Returns undefined if not found. `signal`
+   * aborts the read.
+   */
+  get(executionId: string, options?: { signal?: AbortSignal }): Promise<AgentExecution | undefined>;
 
   /** Update the status of an execution, optionally persisting an error. */
   /**
@@ -213,8 +216,11 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
     return fromEs(document);
   }
 
-  async get(executionId: string): Promise<AgentExecution | undefined> {
-    const source = await this.getSource(executionId);
+  async get(
+    executionId: string,
+    { signal }: { signal?: AbortSignal } = {}
+  ): Promise<AgentExecution | undefined> {
+    const source = await this.getSource(executionId, signal);
     if (!source) {
       return undefined;
     }
@@ -402,12 +408,15 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
   /**
    * Shared helper: real-time GET on the execution document.
    */
-  private async getSource(executionId: string): Promise<AgentExecutionProperties | undefined> {
+  private async getSource(
+    executionId: string,
+    signal?: AbortSignal
+  ): Promise<AgentExecutionProperties | undefined> {
     try {
-      const response = await this.esClient.get<AgentExecutionProperties>({
-        index: agentExecutionIndexName,
-        id: executionId,
-      });
+      const response = await this.esClient.get<AgentExecutionProperties>(
+        { index: agentExecutionIndexName, id: executionId },
+        { signal }
+      );
       return response._source;
     } catch (err) {
       if (err?.meta?.statusCode === 404) {

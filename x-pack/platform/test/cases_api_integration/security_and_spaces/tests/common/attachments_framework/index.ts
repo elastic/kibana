@@ -35,6 +35,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./attack_status_sync'));
     loadTestFile(require.resolve('./legacy_route_compat'));
     loadTestFile(require.resolve('./import_export'));
+    loadTestFile(require.resolve('./search'));
 
     // Reference saved-object types that only exist as unified attachments
     loadTestFile(require.resolve('./saved_object_attachments'));

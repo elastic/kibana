@@ -68,14 +68,16 @@ spaceTest.describe(
             responseConsole.submitCommand()
           );
           submittedActions.push(submitted);
-          await expect(responseConsole.getFilePendingHostStatus).toHaveText('get-file is pending');
+          await expect(responseConsole.hostStatusFor('getFile', 'pending')).toHaveText(
+            'get-file is pending'
+          );
           return submitted;
         });
 
         await spaceTest.step('the agent response completes the action', async () => {
           // Pass the POST response: its agentState is still pending, so a response is written.
           await completeHostAction({ esClient, config, action });
-          await expect(responseConsole.getFileSuccessHostStatus).toHaveText(
+          await expect(responseConsole.hostStatusFor('getFile', 'success')).toHaveText(
             'get-file completed successfully'
           );
         });

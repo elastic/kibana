@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { AlertActionsClientApi, AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 import { RuleEventsClient } from './rule_events_client';
+import type { EventStatusChangeReporter } from './event_status_change_telemetry';
 
 /**
  * A `RuleEventsClient` whose reads are the given mocks and whose other methods, `createEvent`,
@@ -18,7 +19,12 @@ export const asRuleEventsClient = (
   reads: object,
   writer: {
     getAlertEventsClient?: () => Promise<AlertEventsClientApi>;
+    getAlertActionsClient?: () => Promise<AlertActionsClientApi>;
     emitTrigger?: TriggerEmitter;
+    telemetry?: EventStatusChangeReporter;
+    space?: string;
   } = {}
 ): RuleEventsClient =>
-  Object.assign(Object.create(RuleEventsClient.prototype), reads, { clients: writer });
+  Object.assign(Object.create(RuleEventsClient.prototype), reads, {
+    clients: { space: 'default', ...writer },
+  });

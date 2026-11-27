@@ -64,7 +64,7 @@ export const registerSyntheticsTLSCheckRule = (
     },
     defaultActionGroupId: TLS_CERTIFICATE.id,
     actionGroups: [TLS_CERTIFICATE],
-    actionVariables: getActionVariables({ plugins }),
+    actionVariables: getActionVariables({ plugins, ruleType: 'tls' }),
     isExportable: true,
     minimumLicenseRequired: 'basic',
     doesSetRecoveryContext: true,

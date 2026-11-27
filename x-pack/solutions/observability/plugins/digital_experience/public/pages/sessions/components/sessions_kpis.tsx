@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat } from '@elastic/eui';
+import type { ReactNode } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiPanel, EuiStat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SessionListKpis } from '../../../../common/sessions';
 import type { Formatters } from '../../../hooks/use_formatters';
@@ -29,9 +30,21 @@ export function SessionsKpis({
   formatters: Formatters;
 }) {
   const total = kpis?.totalSessions;
-  const errorShare = total ? (kpis?.sessionsWithErrors ?? 0) / total : null;
+  const shareOf = (count: number | undefined) =>
+    total && count !== undefined
+      ? i18n.translate('xpack.digitalExperience.sessions.kpis.shareLabel', {
+          defaultMessage: '{share} of sessions',
+          values: { share: formatPercent(count / total) },
+        })
+      : undefined;
 
-  const items = [
+  const items: Array<{
+    id: string;
+    title: string;
+    description: string;
+    hint?: string;
+    subtitle?: ReactNode;
+  }> = [
     {
       id: 'total',
       title: withValue(total, formatNumber),
@@ -40,18 +53,32 @@ export function SessionsKpis({
       }),
     },
     {
-      id: 'withErrors',
-      title: withValue(kpis?.sessionsWithErrors, formatNumber),
-      description: i18n.translate('xpack.digitalExperience.sessions.kpis.withErrorsLabel', {
-        defaultMessage: 'Sessions with errors',
+      id: 'withJsErrors',
+      title: withValue(kpis?.sessionsWithJsErrors, formatNumber),
+      description: i18n.translate('xpack.digitalExperience.sessions.kpis.withJsErrorsLabel', {
+        defaultMessage: 'Sessions with JS errors',
       }),
-      subtitle:
-        errorShare === null
-          ? undefined
-          : i18n.translate('xpack.digitalExperience.sessions.kpis.withErrorsShareLabel', {
-              defaultMessage: '{share} of sessions',
-              values: { share: formatPercent(errorShare) },
-            }),
+      subtitle: shareOf(kpis?.sessionsWithJsErrors),
+    },
+    {
+      id: 'withFailedRequests',
+      title: withValue(kpis?.sessionsWithFailedRequests, formatNumber),
+      description: i18n.translate('xpack.digitalExperience.sessions.kpis.withFailedRequestsLabel', {
+        defaultMessage: 'Sessions with failed requests',
+      }),
+      subtitle: shareOf(kpis?.sessionsWithFailedRequests),
+    },
+    {
+      id: 'withFrustration',
+      title: withValue(kpis?.sessionsWithFrustration, formatNumber),
+      description: i18n.translate('xpack.digitalExperience.sessions.kpis.withFrustrationLabel', {
+        defaultMessage: 'Frustrated sessions',
+      }),
+      hint: i18n.translate('xpack.digitalExperience.sessions.kpis.withFrustrationHint', {
+        defaultMessage:
+          'Sessions with a rage, dead or error click. Needs EDOT Browser with frustration detection.',
+      }),
+      subtitle: shareOf(kpis?.sessionsWithFrustration),
     },
     {
       id: 'medianDuration',
@@ -64,8 +91,9 @@ export function SessionsKpis({
       id: 'avgPageViews',
       // One decimal, in the Advanced Settings number format.
       title: withValue(kpis?.avgPageViews, (value) => formatNumber(Math.round(value * 10) / 10)),
+      // Page views, not page loads: in-app navigations count too.
       description: i18n.translate('xpack.digitalExperience.sessions.kpis.avgPageViewsLabel', {
-        defaultMessage: 'Pages per session',
+        defaultMessage: 'Page views per session',
       }),
     },
     {
@@ -80,12 +108,20 @@ export function SessionsKpis({
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj="digitalExperienceSessionsKpis">
       <EuiFlexGroup gutterSize="l" wrap responsive={false}>
-        {items.map(({ id, title, description, subtitle }) => (
+        {items.map(({ id, title, description, hint, subtitle }) => (
           <EuiFlexItem key={id} css={{ minWidth: 140 }}>
             <EuiStat
               data-test-subj={`digitalExperienceSessionsKpi-${id}`}
               title={title}
-              description={description}
+              description={
+                hint ? (
+                  <>
+                    {description} <EuiIconTip content={hint} type="info" size="s" />
+                  </>
+                ) : (
+                  description
+                )
+              }
               titleSize="s"
               isLoading={isLoading && !kpis}
             >

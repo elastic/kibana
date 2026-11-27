@@ -14,7 +14,11 @@ import type {
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
 import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
-import { getAccessorByDimension, getColumnByAccessor } from '@kbn/chart-expressions-common';
+import {
+  getAccessorByDimension,
+  getColumnByAccessor,
+  sortRowsByRangeLowerBound,
+} from '@kbn/chart-expressions-common';
 import type {
   CommonXYDataLayerConfig,
   CommonXYLayerConfig,
@@ -71,6 +75,21 @@ export function getFilteredLayers(layers: CommonXYLayerConfig[]) {
       return layer.accessors.length > 0 && layer.table?.rows.length > 0;
     }
   );
+}
+
+// An ordinal x-axis shows its values in row order, which ES|QL doesn't guarantee for number ranges
+// TODO remove once elastic-charts can sort ordinal x values with a comparator,
+// like https://github.com/elastic/elastic-charts/issues/2782 for the heatmap
+export function sortLayerRowsByXRange<T extends CommonXYLayerConfig>(layer: T): T {
+  if (!isDataLayer(layer) || !layer.xAccessor) {
+    return layer;
+  }
+  const xColumn = getColumnByAccessor(layer.xAccessor, layer.table.columns);
+  if (xColumn?.meta.type !== 'number_range') {
+    return layer;
+  }
+  const rows = sortRowsByRangeLowerBound(layer.table.rows, xColumn, 'asc');
+  return { ...layer, table: { ...layer.table, rows } };
 }
 
 const getAccessorWithFieldFormat = (

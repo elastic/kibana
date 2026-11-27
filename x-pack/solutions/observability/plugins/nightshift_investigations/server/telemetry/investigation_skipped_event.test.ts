@@ -22,6 +22,15 @@ describe('investigationSkippedEvent schema', () => {
       automation_id: 'a1',
       skip_reason: 'automation_daily_limit',
     },
+    {
+      trigger: 'automation',
+      origin: 'alert',
+      skip_reason: 'deployment_quota',
+      alert_version: 'v2',
+      alert_source: 'internal',
+      source_kind: 'elastic_configured',
+      fingerprint: 'f1',
+    },
   ])('accepts %o', (event) => {
     const analytics = createAnalytics({ isDev: true, logger: loggerMock.create() });
     analytics.registerEventType(investigationSkippedEvent);

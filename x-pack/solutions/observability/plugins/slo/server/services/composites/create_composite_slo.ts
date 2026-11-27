@@ -6,14 +6,20 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { CompositeSLODefinitionResponse, CreateCompositeSLOInput } from '@kbn/slo-schema';
+import type { CreateCompositeSLOParams, CreateCompositeSLOResponse } from '@kbn/slo-schema';
+import { createCompositeSLOResponseSchema } from '@kbn/slo-schema';
 import { v4 as uuidv4 } from 'uuid';
+import type { SloTelemetryReporter } from '../../lib/telemetry';
+import {
+  COMPOSITE_SLO_CREATED_EBT_EVENT_TYPE,
+  toCompositeSloDefinitionEbtData,
+} from '../../lib/telemetry';
 import type { SLODefinitionRepository } from '../slo_definition_repository';
 import type { SummaryClient } from '../summary_client';
 import type { CompositeSLORepository } from './composite_slo_repository';
 import { computeAndPersistCompositeSummaryDoc } from './composite_summary_writer';
 
-export interface CreateCompositeSloParams extends CreateCompositeSLOInput {
+export interface CreateCompositeSloParams extends CreateCompositeSLOParams {
   spaceId: string;
   userId: string;
 }
@@ -24,14 +30,15 @@ interface Dependencies {
   repository: SLODefinitionRepository;
   summaryClient: SummaryClient;
   logger: Logger;
+  telemetry: SloTelemetryReporter;
 }
 
 export async function createCompositeSlo(
   params: CreateCompositeSloParams,
-  { esClient, compositeRepository, repository, summaryClient, logger }: Dependencies
-): Promise<CompositeSLODefinitionResponse> {
+  { esClient, compositeRepository, repository, summaryClient, logger, telemetry }: Dependencies
+): Promise<CreateCompositeSLOResponse> {
   const { spaceId, userId, ...body } = params;
-  const now = new Date().toISOString();
+  const now = new Date();
   const compositeSlo = {
     ...body,
     id: body.id ?? uuidv4(),
@@ -46,6 +53,10 @@ export async function createCompositeSlo(
 
   const created = await compositeRepository.create(compositeSlo);
 
+  telemetry.report(COMPOSITE_SLO_CREATED_EBT_EVENT_TYPE, () =>
+    toCompositeSloDefinitionEbtData(created)
+  );
+
   await computeAndPersistCompositeSummaryDoc(created, {
     esClient,
     summaryClient,
@@ -54,5 +65,5 @@ export async function createCompositeSlo(
     spaceId,
   });
 
-  return created;
+  return createCompositeSLOResponseSchema.encode(created);
 }

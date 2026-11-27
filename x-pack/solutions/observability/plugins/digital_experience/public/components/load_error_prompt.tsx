@@ -10,6 +10,7 @@ import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS } from '../ebt_constants';
+import { httpErrorMessage } from '../utils/http_error_message';
 
 const RETRY_LABEL = i18n.translate('xpack.digitalExperience.loadError.retryButtonLabel', {
   defaultMessage: 'Try again',
@@ -23,6 +24,7 @@ export function LoadErrorPrompt({
   retryEbtElement,
   'data-test-subj': dataTestSubj,
   retryDataTestSubj,
+  headingLevel = 'h2',
 }: {
   title: string;
   error: Error;
@@ -30,14 +32,18 @@ export function LoadErrorPrompt({
   retryEbtElement: string;
   'data-test-subj': string;
   retryDataTestSubj: string;
+  /** `h3` for a section's error, under the section's `h2`. */
+  headingLevel?: 'h2' | 'h3';
 }) {
+  const Heading = headingLevel;
   return (
     <EuiEmptyPrompt
       data-test-subj={dataTestSubj}
       iconType="warning"
       color="danger"
-      title={<h2>{title}</h2>}
-      body={<p>{error.message}</p>}
+      title={<Heading>{title}</Heading>}
+      titleSize={headingLevel === 'h3' ? 'xs' : undefined}
+      body={<p>{httpErrorMessage(error)}</p>}
       actions={
         <EuiButton
           data-test-subj={retryDataTestSubj}

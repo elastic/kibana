@@ -11,6 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 const mockUseAutomaticImportAuthz = jest.fn();
+const mockUseAuthz = jest.fn();
 jest.mock('../../../../../hooks', () => ({
   useStartServices: () => ({
     application: { navigateToApp: jest.fn(), getUrlForApp: jest.fn(() => '/edit') },
@@ -19,6 +20,7 @@ jest.mock('../../../../../hooks', () => ({
     notifications: { toasts: { addSuccess: jest.fn(), addError: jest.fn() } },
     userProfile: { bulkGet: jest.fn().mockResolvedValue([]) },
   }),
+  useAuthz: () => mockUseAuthz(),
   useAutomaticImportAuthz: () => mockUseAutomaticImportAuthz(),
 }));
 
@@ -32,7 +34,19 @@ jest.mock('./manage_integration_actions', () => ({
   ManageIntegrationActions: () => null,
 }));
 jest.mock('./create_new_integration', () => ({
-  CreateNewIntegrationButton: () => <div data-test-subj="createNewIntegrationButtonMock" />,
+  CreateNewIntegrationButton: ({
+    canCreate,
+    canUpload,
+  }: {
+    canCreate: boolean;
+    canUpload: boolean;
+  }) => (
+    <div
+      data-test-subj="createNewIntegrationButtonMock"
+      data-can-create={String(canCreate)}
+      data-can-upload={String(canUpload)}
+    />
+  ),
 }));
 
 import { ManageIntegrationsTable } from './manage_integrations_table';
@@ -83,9 +97,13 @@ const renderTable = () =>
 const selectFirstRow = () =>
   fireEvent.click(screen.getByTestId('checkboxSelectRow-my_integration'));
 
+const setUploadPackages = (uploadPackages: boolean) =>
+  mockUseAuthz.mockReturnValue({ integrations: { uploadPackages } });
+
 describe('ManageIntegrationsTable privilege gating', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    setUploadPackages(false);
   });
 
   describe('with the Automatic Import "all" privilege', () => {
@@ -97,6 +115,15 @@ describe('ManageIntegrationsTable privilege gating', () => {
       renderTable();
 
       expect(screen.getByTestId('createNewIntegrationButtonMock')).toBeInTheDocument();
+    });
+
+    it('offers upload in the Create new integration button when the user can upload packages', () => {
+      setUploadPackages(true);
+      renderTable();
+
+      const button = screen.getByTestId('createNewIntegrationButtonMock');
+      expect(button).toHaveAttribute('data-can-create', 'true');
+      expect(button).toHaveAttribute('data-can-upload', 'true');
     });
 
     it('shows the bulk Delete button once rows are selected', () => {
@@ -118,10 +145,19 @@ describe('ManageIntegrationsTable privilege gating', () => {
       mockUseAutomaticImportAuthz.mockReturnValue(READ_AUTHZ);
     });
 
-    it('hides the Create new integration button', () => {
+    it('hides the Create new integration button when the user cannot upload packages', () => {
       renderTable();
 
       expect(screen.queryByTestId('createNewIntegrationButtonMock')).not.toBeInTheDocument();
+    });
+
+    it('offers only upload when the user can upload packages', () => {
+      setUploadPackages(true);
+      renderTable();
+
+      const button = screen.getByTestId('createNewIntegrationButtonMock');
+      expect(button).toHaveAttribute('data-can-create', 'false');
+      expect(button).toHaveAttribute('data-can-upload', 'true');
     });
 
     it('hides the bulk Delete button once rows are selected', () => {

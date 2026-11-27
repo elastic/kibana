@@ -6,13 +6,11 @@
  */
 
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
-import type { PluginInitializerContext } from '@kbn/core/server';
-import { PluginInitializer } from '@kbn/core-di-server';
 import { inject, injectable } from 'inversify';
 import { isError } from 'lodash';
 import { v4 as uuidV4 } from 'uuid';
-import type { PluginConfig } from '../../config';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
+import { ConfigService } from '../services/config_service/config_service';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -85,11 +83,10 @@ export class DispatcherService implements DispatcherServiceContract {
     @inject(DispatcherPipeline) private readonly pipeline: DispatcherPipelineContract,
     @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract,
     @inject(LoggerServiceToken) logger: LoggerServiceContract,
-    @inject(PluginInitializer('config'))
-    pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
+    @inject(ConfigService) configService: ConfigService
   ) {
     this.parentLogger = logger.forSubsystem('dispatcher');
-    const { dispatcher } = pluginConfigAccessor.get<PluginConfig>();
+    const dispatcher = configService.get('dispatcher');
     this.tickDeadlineMs = getTickDeadlineMs(dispatcher.run.timeout);
   }
 
@@ -257,7 +254,7 @@ export class DispatcherService implements DispatcherServiceContract {
     }
 
     // On a truncated batch, advance only to the truncation edge so the tail
-    // (beyond ESQL_QUERY_ROW_LIMIT) is re-read and also escape-hatched next tick.
+    // (beyond `dispatcher.run.alerts.max`) is re-read and also escape-hatched next tick.
     // The edge can sit at or behind the watermark (that is what made a truncated
     // tick stuck) — clamp so the watermark never regresses; progress then comes
     // from the dedup marks written below.

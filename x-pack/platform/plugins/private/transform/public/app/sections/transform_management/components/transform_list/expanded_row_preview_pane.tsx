@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 
+import { useEuiTheme } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataGrid } from '@kbn/ml-data-grid';
 
@@ -28,6 +29,7 @@ interface ExpandedRowPreviewPaneProps {
 }
 
 export const ExpandedRowPreviewPane: FC<ExpandedRowPreviewPaneProps> = ({ transformConfig }) => {
+  const { euiTheme } = useEuiTheme();
   const toastNotifications = useToastNotifications();
 
   const { searchQuery, validationStatus, previewRequest, runtimeMappings, projectRouting } =
@@ -57,10 +59,12 @@ export const ExpandedRowPreviewPane: FC<ExpandedRowPreviewPaneProps> = ({ transf
   );
 
   return (
-    <DataGrid
-      {...pivotPreviewProps}
-      dataTestSubj="transformPivotPreview"
-      toastNotifications={toastNotifications}
-    />
+    <div css={{ paddingBlockStart: euiTheme.base }}>
+      <DataGrid
+        {...pivotPreviewProps}
+        dataTestSubj="transformPivotPreview"
+        toastNotifications={toastNotifications}
+      />
+    </div>
   );
 };

@@ -41,7 +41,7 @@ import { UserAvatar } from '@kbn/user-profile-components';
 import { PackageIcon } from '../../../../../../../components/package_icon';
 
 import { useGetPackagesQuery } from '../../../../../../../hooks/use_request/epm';
-import { useAutomaticImportAuthz, useStartServices } from '../../../../../hooks';
+import { useAuthz, useAutomaticImportAuthz, useStartServices } from '../../../../../hooks';
 
 import { ManageIntegrationActions } from './manage_integration_actions';
 import type { ReviewIntegrationDetails } from './manage_integration_actions';
@@ -131,6 +131,7 @@ export const ManageIntegrationsTable: React.FC<{
     userProfile: userProfileService,
   } = useStartServices();
   const { canCreate, canEdit, canDelete } = useAutomaticImportAuthz();
+  const canUploadPackages = useAuthz().integrations.uploadPackages;
 
   const hasReportedView = useRef(false);
   useEffect(() => {
@@ -805,9 +806,9 @@ export const ManageIntegrationsTable: React.FC<{
           </EuiPopover>
         </EuiFilterGroup>
       </EuiFlexItem>
-      {canCreate && (
+      {(canCreate || canUploadPackages) && (
         <EuiFlexItem grow={false}>
-          <CreateNewIntegrationButton />
+          <CreateNewIntegrationButton canCreate={canCreate} canUpload={canUploadPackages} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

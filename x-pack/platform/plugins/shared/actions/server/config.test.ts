@@ -39,6 +39,9 @@ describe('config validation', () => {
             },
           },
         },
+        "catalog": Object {
+          "enabled": false,
+        },
         "connectorSigningKeys": Object {
           "enabled": false,
         },
@@ -113,6 +116,9 @@ describe('config validation', () => {
               },
             },
           },
+        },
+        "catalog": Object {
+          "enabled": false,
         },
         "connectorSigningKeys": Object {
           "enabled": false,
@@ -297,6 +303,9 @@ describe('config validation', () => {
               },
             },
           },
+        },
+        "catalog": Object {
+          "enabled": false,
         },
         "connectorSigningKeys": Object {
           "enabled": false,
@@ -508,6 +517,9 @@ describe('config validation', () => {
               },
             },
           },
+        },
+        "catalog": Object {
+          "enabled": false,
         },
         "connectorSigningKeys": Object {
           "enabled": false,
@@ -812,6 +824,35 @@ describe('config validation', () => {
         })
       ).toThrowErrorMatchingInlineSnapshot(
         `"[auth.ears.ssl]: must specify [auth.ears.ssl.certificate] when [auth.ears.ssl.key] is specified"`
+      );
+    });
+  });
+
+  describe('catalog.enabled', () => {
+    test('defaults to false', () => {
+      expect(configSchema.validate({}, { dev: false }).catalog.enabled).toBe(false);
+      expect(configSchema.validate({}, { dev: true }).catalog.enabled).toBe(false);
+    });
+
+    test('accepts true in development mode', () => {
+      const result = configSchema.validate({ catalog: { enabled: true } }, { dev: true });
+      expect(result.catalog.enabled).toBe(true);
+    });
+
+    test('accepts false in production mode', () => {
+      const result = configSchema.validate({ catalog: { enabled: false } }, { dev: false });
+      expect(result.catalog.enabled).toBe(false);
+    });
+
+    test('rejects true in production mode', () => {
+      expect(() => configSchema.validate({ catalog: { enabled: true } }, { dev: false })).toThrow(
+        '[catalog.enabled]: expected value to equal [false]'
+      );
+    });
+
+    test('rejects true when the dev context is not provided', () => {
+      expect(() => configSchema.validate({ catalog: { enabled: true } })).toThrow(
+        '[catalog.enabled]: expected value to equal [false]'
       );
     });
   });

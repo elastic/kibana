@@ -135,6 +135,7 @@ export const applicationUsageSchema = {
 
   // X-Pack
   agent_builder: commonSchema,
+  alertzero: commonSchema,
   apm: commonSchema,
   automaticImport: commonSchema,
   canvas: commonSchema,

@@ -15,7 +15,10 @@ import { services } from './services';
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
-  const featuresProviderPlugin = resolve(__dirname, './plugins/features_provider');
+  const featuresProviderPlugin = resolve(
+    __dirname,
+    '../../test_plugins/security_api_integration/plugins/features_provider'
+  );
 
   return {
     testConfigCategory: ScoutTestRunConfigCategory.API_TEST,

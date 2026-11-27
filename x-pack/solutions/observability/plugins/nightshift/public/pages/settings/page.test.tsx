@@ -144,10 +144,20 @@ describe('SettingsPage', () => {
     {
       path: '/settings/detections',
       expectedHref: '/app/nightshift/',
-      expectedLabel: 'Nightshift',
+      expectedLabel: 'nightshift',
+    },
+    {
+      path: '/settings/investigations?origin=automations',
+      expectedHref: '/app/nightshift/automations',
+      expectedLabel: 'Automations',
+    },
+    {
+      path: '/settings/investigations',
+      expectedHref: '/app/nightshift/',
+      expectedLabel: 'nightshift',
     },
   ])(
-    'links back to $expectedLabel from Detections settings for the matching origin',
+    'links back to $expectedLabel from settings for the matching origin',
     ({ path, expectedHref, expectedLabel }) => {
       renderPage(path);
 

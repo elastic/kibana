@@ -6,20 +6,18 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageHeader,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { AssistantBeacon } from '@kbn/ai-assistant-icon';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { AppHeader } from '@kbn/app-header';
+import type { UpsellingPageProps } from '@kbn/security-solution-upselling/service';
+import { useKibana } from '../../../common/services';
 import { UpgradeActions } from '../attack_discovery/upgrade_actions';
 import * as i18n from './translations';
 
-const AIValueUpsellingPageESSComponent: React.FC = () => {
+const AIValueUpsellingPageESSComponent: React.FC<UpsellingPageProps> = ({
+  appHeader: Header = AppHeader,
+}) => {
   const actions = useMemo(
     () => (
       <EuiFlexGroup justifyContent="center" gutterSize="none">
@@ -66,10 +64,18 @@ const AIValueUpsellingPageESSComponent: React.FC = () => {
     []
   );
 
+  const {
+    services: { docLinks },
+  } = useKibana();
+
   return (
     <KibanaPageTemplate restrictWidth={false} contentBorder={false} grow={true}>
+      <Header
+        title={i18n.PAGE_TITLE}
+        spacing="largeBleed"
+        docLink={docLinks.links.siem.valueReport}
+      />
       <KibanaPageTemplate.Section>
-        <EuiPageHeader bottomBorder pageTitle={i18n.PAGE_TITLE} />
         <EuiSpacer size="xxl" />
         <EuiEmptyPrompt title={title} body={body} actions={actions} />
       </KibanaPageTemplate.Section>

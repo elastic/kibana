@@ -11,14 +11,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { LeadCard } from './lead_card';
 import type { HuntingLead } from './types';
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({ openFlyout: jest.fn() }),
-}));
-
-jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
-  useIsNewFlyoutEnabled: () => false,
-}));
-
 jest.mock('../../../../flyout_v2/use_flyout_api', () => ({
   useFlyoutApi: () => ({ openEntityFlyout: jest.fn() }),
 }));

@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+export { createHuntServices } from './create_hunt_services';
 export type { HuntServices } from './types';

@@ -20,7 +20,9 @@ const mockFetchTopN = jest
   .mockResolvedValue({ TotalCount: 0, TopN: [], Metadata: {}, Labels: {} });
 let mockSchema: ProfilingSchema | undefined;
 
-jest.mock('@kbn/ebt-tools', () => ({ usePerformanceContext: () => ({ onPageReady: jest.fn() }) }));
+jest.mock('@kbn/ebt-tools/react', () => ({
+  usePerformanceContext: () => ({ onPageReady: jest.fn() }),
+}));
 jest.mock('../../components/contexts/profiling_dependencies/use_profiling_dependencies', () => ({
   useProfilingDependencies: () => ({ services: { fetchTopN: mockFetchTopN } }),
 }));

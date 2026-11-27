@@ -92,6 +92,52 @@ const MOCK_AWS_PACKAGE_RESPONSE = {
   },
 };
 
+// Same package, but the ec2_logs CloudWatch stream declares the source as a required var_group
+// (package-spec ≥ 3.6.0, as aws_mq and aws_bedrock_agentcore do): the flyout renders a selector
+// and only the selected option's vars, and the hard-coded "at least one of" rule steps aside.
+const MOCK_AWS_PACKAGE_WITH_VAR_GROUPS = {
+  item: {
+    ...MOCK_AWS_PACKAGE_RESPONSE.item,
+    data_streams: MOCK_AWS_PACKAGE_RESPONSE.item.data_streams.map((ds) =>
+      ds.path !== 'ec2_logs'
+        ? ds
+        : {
+            ...ds,
+            streams: [
+              {
+                input: 'aws-cloudwatch',
+                vars: [
+                  ...ds.streams[0].vars,
+                  optionalText('region_name', 'Region Name', { show_user: false }),
+                ],
+                var_groups: [
+                  {
+                    name: 'log_group_source',
+                    title: 'Log group',
+                    selector_title: 'Identify the log group by',
+                    required: true,
+                    options: [
+                      { name: 'log_group_arn', title: 'Log Group ARN', vars: ['log_group_arn'] },
+                      {
+                        name: 'log_group_name',
+                        title: 'Log Group Name',
+                        vars: ['log_group_name', 'region_name'],
+                      },
+                      {
+                        name: 'log_group_name_prefix',
+                        title: 'Log Group Name Prefix',
+                        vars: ['log_group_name_prefix', 'region_name'],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          }
+    ),
+  },
+};
+
 const ec2Vars = (varsByInput: Record<string, string>) => ({
   ec2: {
     enabledDataStreams: ['ec2_logs'],
@@ -124,6 +170,36 @@ test.describe(
 
     test.beforeEach(async ({ page }) => {
       await mockAwsPackage(page, MOCK_AWS_PACKAGE_RESPONSE);
+    });
+
+    test('a stream-level var_group drives the log group fields', async ({ browserAuth, page }) => {
+      await mockAwsPackage(page, MOCK_AWS_PACKAGE_WITH_VAR_GROUPS);
+      await navigateToOnboardingStep(browserAuth, page, 'service-settings', {
+        selectedServiceIds: ['ec2'],
+        serviceVars: ec2Vars({}),
+      });
+
+      await expect(page.testSubj.locator('serviceSettingsStep-continueButton')).toBeDisabled();
+      await page.testSubj.locator('serviceSettingsStep-editButton-ec2').click();
+
+      const selector = page.testSubj.locator(
+        'serviceSettingsFlyout-aws-cloudwatch-varGroup-log_group_source'
+      );
+      await expect(selector).toHaveValue('log_group_arn');
+      // Only the selected option's var is shown, as a required field; no generic hint.
+      await expect(field(page, 'aws-cloudwatch', 'log_group_arn')).toBeVisible();
+      await expect(field(page, 'aws-cloudwatch', 'log_group_name')).toBeHidden();
+      await expect(page.testSubj.locator('serviceSettingsFlyout-sourceRequiredHint')).toBeHidden();
+      await expect(page.testSubj.locator('serviceSettingsFlyout-saveButton')).toBeDisabled();
+
+      await selector.selectOption('log_group_name');
+      await expect(field(page, 'aws-cloudwatch', 'log_group_arn')).toBeHidden();
+      await field(page, 'aws-cloudwatch', 'log_group_name').getByRole('textbox').fill('/aws/ec2');
+      await expect(page.testSubj.locator('serviceSettingsFlyout-saveButton')).toBeEnabled();
+      await page.testSubj.locator('serviceSettingsFlyout-saveButton').click();
+
+      await expect(page.testSubj.locator('serviceSettingsStep-attentionIcon-ec2')).toBeHidden();
+      await expect(page.testSubj.locator('serviceSettingsStep-continueButton')).toBeEnabled();
     });
 
     test('CloudWatch logs input without a log group blocks Continue until one is set', async ({

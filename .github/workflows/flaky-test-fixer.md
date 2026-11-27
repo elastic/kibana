@@ -19,6 +19,10 @@ permissions:
   actions: read
   checks: read
   models: read
+  # Agent Router token for the agent (see shared/agent-router.md)
+  id-token: write
+  # threat detection runs on Copilot
+  copilot-requests: write
 
 if: "${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '') || (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'ai:fix-flaky' && !github.event.issue.pull_request) }}"
 
@@ -48,25 +52,33 @@ env:
 imports:
   - .github/workflows/buildkite-cli-setup.md
   - .github/workflows/shared/app-dex-agents-otel.md
+  - .github/workflows/shared/agent-router.md
 
 engine:
   id: claude
-  version: '2.1.165'
-  model: opus
+  version: '2.1.317'
+  model: claude-opus-5-5
   max-turns: 200
   env:
     BUILDKITE_API_TOKEN: ${{ steps.buildkite_auth.outputs.token }}
-    ANTHROPIC_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-    ANTHROPIC_BASE_URL: https://openrouter.ai/api
-    ANTHROPIC_DEFAULT_OPUS_MODEL: anthropic/claude-opus-5
-    ANTHROPIC_DEFAULT_HAIKU_MODEL: anthropic/claude-haiku-4.5
-    ANTHROPIC_DEFAULT_SONNET_MODEL: anthropic/claude-sonnet-4.6
+    ANTHROPIC_BASE_URL: https://llm.idea.elastichosting.ai/anthropic
+    # `Bearer <token>`, exported by shared/agent-router.md. The fallback passes the activation job's key check.
+    ANTHROPIC_API_KEY: ${{ env.ANTHROPIC_API_KEY || 'agent-router' }}
+    # the gateway reads only `Authorization: Bearer`
+    AWF_ANTHROPIC_AUTH_HEADER: Authorization
+    ANTHROPIC_DEFAULT_OPUS_MODEL: claude-opus-5-5
+    ANTHROPIC_DEFAULT_HAIKU_MODEL: claude-haiku-5-5
+    ANTHROPIC_DEFAULT_SONNET_MODEL: claude-sonnet-5-5
     CLAUDE_CODE_EFFORT_LEVEL: high
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 
 tools:
   github:
     toolsets: [default, search]
+    # the default for a public repository; issues by authors with no repository role are hidden
+    # from the agent, so the daily flaky test report's bot has to be trusted for its suite issues
+    min-integrity: approved
+    trusted-users: ['elastic-vault-github-plugin-prod[bot]']
   web-fetch:
   bash: true
 
@@ -89,7 +101,8 @@ steps:
       corepack prepare "pnpm@${PNPM_VERSION}" --activate
       pnpm --version
   - name: Bootstrap Kibana
-    run: pnpm kbn bootstrap
+    # `id-token: write` covers the whole job: keep the OIDC request variables away from install scripts
+    run: exec env -u ACTIONS_ID_TOKEN_REQUEST_TOKEN -u ACTIONS_ID_TOKEN_REQUEST_URL pnpm kbn bootstrap
   - name: Expose Kibana's Node.js path to the agent
     # the sandbox rebuilds PATH from every `bin` dir under RUNNER_TOOL_CACHE, so the agent's
     # `node` is whichever version the runner cached first, not the one setup-node just
@@ -160,7 +173,6 @@ network:
     - ci-stats.kibana.dev
     - github.com
     - api.github.com
-    - openrouter.ai
     # to properly display links to best practices docs
     - elastic.co
 sandbox:
@@ -168,11 +180,14 @@ sandbox:
 
 safe-outputs:
   threat-detection:
+    # The detection job can't request an OIDC token, so it runs on Copilot.
     engine:
-      id: claude
-      version: '2.1.165'
+      id: copilot
+      model: claude-opus-5
       env:
         BUILDKITE_API_TOKEN: ${{ '' }}
+    # a detection failure blocks the outputs instead of passing with a warning
+    continue-on-error: false
   activation-comments: true
   report-failure-as-issue: false
   messages:
@@ -261,7 +276,8 @@ safe-outputs:
               await github.rest.issues.updateComment({ owner, repo, comment_id: commentId, body: updated });
               core.info(`Filled fix-PR placeholders for #${prNumber} in comment ${commentId}.`);
 strict: false
-timeout-minutes: 90
+# the Agent Router token lasts about an hour and is not refreshed
+timeout-minutes: 55
 max-ai-credits: 1200
 ---
 
@@ -318,7 +334,7 @@ This run has a fixed AI-credit budget, and every tool result you read stays in t
 4. Decide where the fix should land. The default target is `main`. But if the failure is on a **version branch** (check the issue's CI data / investigator comment) and `main` already carries the fix, don't target `main` — follow "Fix already on `main`", which decides between recommending a backport of the existing PR and handing over a best-effort fix for the version branch. Neither path opens a PR.
 5. Apply the smallest patch that addresses the root cause on the target branch, whether that's in test code or application code, following the [Fix guidelines](#fix-guidelines). If the failing test is Security Cypress, apply [Security Cypress: what this fixer may ship](#security-cypress-what-this-fixer-may-ship) first — a migrate / new-Scout verdict means skip to step 8, not a Scout rewrite. Re-enable the test suite(s) or test case(s) if they were skipped. Remove any stale flaky comments (e.g., `// FLAKY: <issue-url>` / `// Failing: See <issue-url>`, etc.) if they carry any. Don't add explanatory code comments to the patch by default — a good fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it strictly to 1 comment line; a simple change like a timeout bump never warrants a comment.
 6. Verify the patch. Lint with `node scripts/eslint <changed files>`, after the PATH export from [Environment](#environment). **Don't type check** — `node scripts/type_check` builds a large project graph and is slow and memory-heavy on this runner (an unscoped run is even OOM-killed with `SIGKILL`), and the PR's CI type-checks the change anyway, so leave that to CI. For a Jest test, repeat it as described in [Verifying a Jest fix](#verifying-a-jest-fix). For an application-side fix, also run the Jest tests nearest the changed code. FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here.
-7. Open the PR (see "PR format" below) without release-note or backport labels. The Flaky Fix Verifier applies both after it validates the PR. If the fix has to land on a version branch rather than `main`, don't open a PR at all — hand it over in the outcome comment instead (see "Fixes that must target a version branch").
+7. Open the PR (see "PR format" below) without release-note or backport labels. The Flaky Fix Verifier chooses both after it validates the PR. If the fix has to land on a version branch rather than `main`, don't open a PR at all — hand it over in the outcome comment instead (see "Fixes that must target a version branch").
 8. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
 9. Remove the `ai:fix-flaky` label from the issue via the `remove-labels` safe output. Do this in **every** run once you have a result — whether you opened a PR, found an existing one, or opened none.
 10. **Only if you opened a PR in step 7**, call the `link_fix_pr` tool with `confirm: true`. It runs after the PR and your comment exist and replaces the `%%FIX_PR_URL%%` and `%%FIX_PR_BADGE%%` placeholders in your outcome comment with the PR link and a live PR-state badge. You cannot know the PR number while running (the PR is created afterwards), so leave the placeholders in place and never write the URL, number, or badge yourself — this tool is how they get filled.
@@ -395,7 +411,7 @@ awk '{total += $1; if ($1 > max) max = $1} END {printf "avg %dms, max %dms\n", t
 
 - **Run it on the unpatched test first** (`git stash` the patch if you already wrote it). If it never fails there, the flake doesn't reproduce here and a clean post-fix loop proves nothing: say so under "Not verified locally".
 - **Report both loops** as pass counts, not failure counts: `<passes>/<runs>` before the fix (avg, max), then the same after — e.g. `21/25` then `25/25`, never `4/25 failed` / `0/25 failed`. Use that on the Jest line of "Verified locally" and in the runtime table. Add under "Not verified locally" that neither loop ran under CI's parallel load.
-- **Read the timings, not only the counts.** A patch meant to make the test cheaper — an async step removed, a smaller unit under test, heavy children mocked — must show a clearly lower average, not a few percent. An average that barely moves means the expensive work is still there and the patch only changed how the test waits; that is the shape of Jest fix that comes back. An average that jumps after the patch means it bought reliability by waiting longer, which the body has to justify. A max far above the average means something is still racing. A deliberate timeout bump is the exception: it is not meant to lower the average. Two traps in the durations file — a `0` line means the test name did not match, not a fast run, and a run that crashed adds no line at all, so check you have one line per run.
+- **Read the timings, not only the counts.** A patch meant to make the test cheaper — an async step removed, a smaller unit under test, heavy children mocked — must show a clearly lower average, not a few percent. An average that barely moves means the expensive work is still there and the patch only changed how the test waits; that is the shape of Jest fix that comes back. An average that jumps after the patch means it bought reliability by waiting longer, which the body has to justify. A max far above the average means something is still racing. A deliberate timeout bump is the exception: it is not meant to lower the average. Compare those numbers with the budget before settling on the patch shape: when the average and the max both sit far below the budget, the render is not what ran out of time, so a bump is not the fix there. Time the file's other tests in the same loop — when the siblings also sit near the ceiling, the cost is probably in setup they share, and trimming only this test's own steps will not remove it. Two traps in the durations file — a `0` line means the test name did not match, not a fast run, and a run that crashed adds no line at all, so check you have one line per run.
 - **25 runs is the floor**, 50 when a run takes only seconds. A loop this size catches a test that fails every few runs, not one that fails weekly.
 - **Any failure in the post-fix loop means the fix did not hold.** Revise the patch and run both loops again.
 

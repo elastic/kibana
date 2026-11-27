@@ -26,14 +26,14 @@ destinations:
         value: __API_KEY__
 processors:
   - id: uppercase-message
-    type: add_fields
+    type: transform
     supported_telemetry: [logs]
     config:
-      - name: fields
+      - name: statements
         value:
-          - action: upsert
-            path: log.body
-            ottl_value: 'ToUpperCase(log.body)'
+          - context: log
+            statements:
+              - 'set(log.body, ToUpperCase(log.body))'
 pipelines:
   - id: main
     supported_telemetry: [logs]

@@ -7,10 +7,12 @@
 
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { CustomContentQueryChanges } from '@kbn/custom-content-common';
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { Logger } from '@kbn/logging';
 import { generateCustomContentEsql } from '../shared/custom_content_esql';
+import { resolveDataQueries, type GenerateDataQueryParams } from './resolve_data_queries';
 
 type GenerateParams = Parameters<typeof generateCustomContentEsql>[0];
 
@@ -23,22 +25,20 @@ export type ResolveCustomContentEsqlVariables = (
   options?: { anyVariable?: boolean }
 ) => Promise<ESQLControlVariable[] | undefined>;
 
-interface BuildCustomContentConfigParams {
+/**
+ * `dataQueries` says what to do with the panel's queries by position: each one describes or supplies
+ * the query at its position, an empty one keeps it, and a position past the stored queries adds
+ * one. Queries it does not reach are kept. Without it the queries stay as they are, and
+ * `removeAllQueries` wins over it.
+ */
+interface BuildCustomContentConfigParams extends CustomContentQueryChanges {
   /** What to show, or what to change on an existing panel. */
   nlQuery?: string;
-  /** Index, alias or data stream the query is generated from. */
-  index?: string;
-  /** A query the user supplied verbatim. It wins over `hasData`; `null` removes the stored query. */
-  esql?: string | null;
   /**
-   * `false`: the panel has no data, so no query. `true`: the panel has a query, generated when it
-   * has none. Omitted on an edit: keep the current data state.
+   * The panel being edited. Absent for a new panel. Its queries are in the order the template reads
+   * them: the first is the main query (`rows`), the others `queries[1]`, `queries[2]`, ...
    */
-  hasData?: boolean;
-  /** Regenerate the query from `nlQuery`, starting from the stored one so unrelated parts survive. */
-  regenerateESQL?: boolean;
-  /** The panel being edited. Absent for a new panel. */
-  existing?: { esqlQuery?: string; template?: string };
+  existing?: { esqlQueries?: readonly string[]; template?: string };
   timeRange?: GenerateParams['timeRange'];
   resolveEsqlVariables?: ResolveCustomContentEsqlVariables;
   modelProvider: ModelProvider;
@@ -48,42 +48,16 @@ interface BuildCustomContentConfigParams {
 }
 
 interface BuildCustomContentConfigResult {
-  /** The query the panel ends up with, absent for a panel without data. */
-  esqlQuery?: string;
+  /**
+   * The queries the panel ends up with, in the order the template reads them, none for a panel
+   * without data.
+   */
+  esqlQueries: string[];
   /** The HTML template. On an edit that neither has a prompt nor changes the query, the existing one. */
   template: string;
   /** Height the template needs, in CSS pixels. Absent when the existing template was kept. */
   height?: number;
 }
-
-/**
- * Decides which ES|QL query a custom content panel ends up with. A supplied query always wins. A
- * new panel gets a generated query unless it is declared data-free. An edit keeps the stored query
- * unless it is replaced, removed or explicitly regenerated, so a style-only edit never pays for
- * generation.
- */
-const resolveQuery = async ({
-  esql,
-  hasData,
-  regenerate,
-  existingQuery,
-  isNewPanel,
-  generate,
-}: {
-  esql?: string | null;
-  hasData?: boolean;
-  regenerate?: boolean;
-  existingQuery?: string;
-  isNewPanel: boolean;
-  generate: (existingQueries: string[]) => Promise<string>;
-}): Promise<string | undefined> => {
-  if (esql?.trim()) return esql;
-  if (esql === null || hasData === false) return undefined;
-  if (isNewPanel) return generate([]);
-  if (regenerate) return generate(existingQuery ? [existingQuery] : []);
-  if (existingQuery) return existingQuery;
-  return hasData === true ? generate([]) : undefined;
-};
 
 /**
  * Builds the query and the template of a custom content panel, for a new panel or an edit. The
@@ -96,10 +70,8 @@ const resolveQuery = async ({
  */
 export const buildCustomContentConfig = async ({
   nlQuery,
-  index,
-  esql,
-  hasData,
-  regenerateESQL,
+  dataQueries,
+  removeAllQueries,
   existing,
   timeRange,
   resolveEsqlVariables,
@@ -117,39 +89,53 @@ export const buildCustomContentConfig = async ({
       options
     );
 
-  const esqlQuery = await resolveQuery({
-    esql,
-    hasData,
-    regenerate: regenerateESQL,
-    existingQuery: existing?.esqlQuery,
-    isNewPanel: !existing,
-    generate: async (existingQueries) =>
-      generateCustomContentEsql({
-        nlQuery: nlQuery ?? '',
-        index,
-        existingQueries,
-        esqlVariables: await getEsqlVariables([esql, ...existingQueries], { anyVariable: true }),
-        modelProvider,
-        events,
-        logger,
-        esClient,
-        ...(timeRange ? { timeRange } : {}),
-      }),
-  });
+  const existingQueries = existing?.esqlQueries ?? [];
 
-  const isQueryChanging = esqlQuery !== existing?.esqlQuery;
-  if (existing && nlQuery === undefined && !isQueryChanging) {
-    return { esqlQuery, template: existing.template ?? '' };
+  const generateQuery = async ({
+    description,
+    index,
+    storedQuery,
+    queryCount,
+  }: GenerateDataQueryParams) => {
+    const storedQueries = storedQuery ? [storedQuery] : [];
+    return generateCustomContentEsql({
+      nlQuery: description,
+      index,
+      existingQueries: storedQueries,
+      queryCount,
+      esqlVariables: await getEsqlVariables(storedQueries, { anyVariable: true }),
+      modelProvider,
+      events,
+      logger,
+      esClient,
+      ...(timeRange ? { timeRange } : {}),
+    });
+  };
+
+  // `changedQueries` is per position: whether the query is new or changing, so it is sampled.
+  const {
+    queries: esqlQueries,
+    changed: changedQueries,
+    hasChanges,
+  } = await resolveDataQueries({
+    dataQueries,
+    removeAllQueries,
+    existingQueries,
+    generate: generateQuery,
+  });
+  if (existing && nlQuery === undefined && !hasChanges) {
+    return { esqlQueries, template: existing.template ?? '' };
   }
 
+  const queriesToSample = esqlQueries.filter((_, position) => changedQueries[position]);
   const resolveTemplate = createCustomContentTemplateResolver({ modelProvider, esClient, logger });
   const { template, height } = await resolveTemplate({
     prompt: nlQuery ?? '',
-    esqlQuery: isQueryChanging ? esqlQuery : undefined,
+    esqlQueries,
+    changedQueries,
     existingTemplate: existing?.template || undefined,
-    hasExistingQuery: !isQueryChanging && Boolean(esqlQuery),
-    esqlVariables: isQueryChanging && esqlQuery ? await getEsqlVariables([esqlQuery]) : undefined,
+    esqlVariables: queriesToSample.length ? await getEsqlVariables(queriesToSample) : undefined,
   });
 
-  return { esqlQuery, template, height };
+  return { esqlQueries, template, height };
 };

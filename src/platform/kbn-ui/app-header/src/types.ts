@@ -225,6 +225,8 @@ export interface AppHeaderFavoriteAction {
   status: AppHeaderFavoriteStatus;
   onToggle: () => void;
   isDisabled?: boolean;
+  /** Icon and labels: `star` (Add to Starred) or `pin` (Pin). Defaults to `star`. */
+  variant?: 'star' | 'pin';
 }
 
 /**

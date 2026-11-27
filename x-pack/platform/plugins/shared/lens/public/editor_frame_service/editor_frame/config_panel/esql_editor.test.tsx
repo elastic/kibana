@@ -162,6 +162,37 @@ describe('ESQLEditor', () => {
     useFetchContextMock.mockReturnValue(createMockFetchContext());
   });
 
+  it('passes the spec derived from the ES|QL layer to the results grid when none is persisted', async () => {
+    const layerAttributes = {
+      ...attributes,
+      state: {
+        ...attributes.state,
+        datasourceStates: {
+          textBased: {
+            layers: {
+              layer1: {
+                index: 'esql-id',
+                query: { esql: 'FROM index1' },
+                columns: [],
+                timeField: '@timestamp',
+              },
+            },
+          },
+        },
+      },
+    } as unknown as TypedLensSerializedState['attributes'];
+
+    renderEditor({
+      attributes: layerAttributes,
+      onLayerQuerySubmit: jest.fn().mockResolvedValue(undefined),
+    });
+    await waitFor(() => expect(getGridAttrsMock).toHaveBeenCalledTimes(1));
+
+    expect(getGridAttrsMock.mock.calls[0][1]).toEqual([
+      { id: 'esql-id', title: 'index1', type: 'esql', timeFieldName: '@timestamp' },
+    ]);
+  });
+
   it('runs the same query again after the previous run was aborted', async () => {
     renderEditor();
     await waitFor(() => expect(capturedOnSubmit).toBeDefined());

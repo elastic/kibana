@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SandboxSession } from '@kbn/sandbox-plugin/server';
+import type { AuditedSandboxSession } from '../sandbox_audit';
 import { createOutputRedactor } from '../tools/sandbox_bash/output_redactor';
 import { createRecorderWorkspace, resolveWorkspacePath } from './workspace_tools';
 
@@ -58,7 +58,7 @@ describe('createRecorderWorkspace', () => {
       mkdirs: jest.fn().mockResolvedValue([true]),
     };
     const workspace = createRecorderWorkspace({
-      session: session as unknown as SandboxSession,
+      session: session as unknown as AuditedSandboxSession,
       redactor: createOutputRedactor(redact),
     });
     return { session, workspace };

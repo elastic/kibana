@@ -5,9 +5,16 @@
  * 2.0.
  */
 
+import {
+  getContentListSelectionBarSubjects,
+  getContentListToolbarSubjects,
+} from '@kbn/content-list-common';
 import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
 import { v4 as uuidv4 } from 'uuid';
+
+const toolbarSubjects = getContentListToolbarSubjects();
+const selectionBarSubjects = getContentListSelectionBarSubjects(toolbarSubjects.selectionBar);
 
 export const journey = new Journey({
   esArchives: ['x-pack/performance/es_archives/sample_data_flights_many_fields'],
@@ -21,17 +28,23 @@ export const journey = new Journey({
     await kibanaPage.waitForListViewTable();
   })
   .step('Search dashboards', async ({ page, inputDelays, kibanaPage }) => {
-    await page.type(subj('tableListSearchBox'), 'Web', {
+    // Free-text search is debounced, so the table can still be showing unfiltered
+    // results when typing returns. Waiting for it to look idle would then pass on
+    // the pre-search table; wait for a row that cannot match to go instead.
+    const filteredOut = kibanaPage.listViewItemLink('[Flights] Global Flight Dashboard');
+
+    const searchBox = page.locator(subj(toolbarSubjects.searchBox));
+    await searchBox.pressSequentially('Web', {
       delay: inputDelays.TYPING,
     });
-    await kibanaPage.waitForListViewTable();
+    await filteredOut.waitFor({ state: 'detached' });
   })
   .step('Delete dashboard', async ({ page, kibanaPage }) => {
-    const deletedDashboard = page.locator(
-      subj('checkboxSelectRow-edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b')
-    );
-    await deletedDashboard.click();
-    await page.click(subj('deleteSelectedItems'));
+    const deletedDashboard = kibanaPage
+      .listViewItemLink('[Logs] Web Traffic')
+      .locator('xpath=ancestor::tr');
+    await deletedDashboard.getByRole('checkbox').click();
+    await page.click(subj(selectionBarSubjects.deleteButton));
     await page.click(subj('confirmModalConfirmButton'));
     await kibanaPage.waitForListViewTable();
     await deletedDashboard.waitFor({ state: 'detached' });

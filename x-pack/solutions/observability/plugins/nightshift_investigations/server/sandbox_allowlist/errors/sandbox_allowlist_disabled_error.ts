@@ -7,7 +7,7 @@
 
 export class SandboxAllowlistDisabledError extends Error {
   constructor() {
-    super('The sandbox allowlist is unavailable: Nightshift is not enabled.');
+    super('The sandbox allowlist is unavailable: nightshift is not enabled.');
     this.name = 'SandboxAllowlistDisabledError';
   }
 }

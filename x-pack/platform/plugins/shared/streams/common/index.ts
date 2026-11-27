@@ -19,6 +19,7 @@ export {
   FAILURE_STORE_SELECTOR,
   STREAMS_DEFAULT_UNIT_ID,
   MAX_STATS_STREAM_NAMES,
+  UNIT_METRICS_STREAM,
 } from './constants';
 
 export type { StreamDocsStat } from './doc_counts';

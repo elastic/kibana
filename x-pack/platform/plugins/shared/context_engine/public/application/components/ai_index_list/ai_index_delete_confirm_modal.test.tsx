@@ -27,7 +27,6 @@ jest.mock('../../hooks/use_delete_ai_index', () => ({
 const aiIndex: AiIndexHttpItem = {
   id: 'my-ai-index',
   managed: false,
-  memory_enabled: false,
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [{ type: 'workflow', value: 'wf-1' }],
   sources: [],

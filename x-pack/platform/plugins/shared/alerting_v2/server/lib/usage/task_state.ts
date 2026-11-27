@@ -221,6 +221,25 @@ const stateSchemaV7 = stateSchemaV6.extends({
   ),
 });
 
+// Dispatcher activity split by the policy configuration recorded on the events.
+const stateSchemaV8 = stateSchemaV7.extends({
+  dispatcher_action_groups_dispatched_per_policy_by_grouping_mode_24hr: schema.maybe(
+    schema.object({
+      per_alert: distributionSchema,
+      per_field: distributionSchema,
+      all: distributionSchema,
+    })
+  ),
+  dispatcher_action_groups_throttled_count_by_strategy_24hr: schema.maybe(
+    schema.object({
+      on_status_change: countSchema,
+      per_status_interval: countSchema,
+      time_interval: countSchema,
+      every_time: countSchema,
+    })
+  ),
+});
+
 export const stateSchemaByVersion = {
   1: {
     up: (state: Record<string, unknown>) => ({
@@ -344,9 +363,19 @@ export const stateSchemaByVersion = {
     }),
     schema: stateSchemaV7,
   },
+  8: {
+    up: (state: Record<string, unknown>) => ({
+      ...state,
+      dispatcher_action_groups_dispatched_per_policy_by_grouping_mode_24hr:
+        state.dispatcher_action_groups_dispatched_per_policy_by_grouping_mode_24hr ?? undefined,
+      dispatcher_action_groups_throttled_count_by_strategy_24hr:
+        state.dispatcher_action_groups_throttled_count_by_strategy_24hr ?? undefined,
+    }),
+    schema: stateSchemaV8,
+  },
 };
 
-const latestTaskStateSchema = stateSchemaByVersion[7].schema;
+const latestTaskStateSchema = stateSchemaByVersion[8].schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const emptyState: LatestTaskStateSchema = {

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import ALERT_ANALYSIS_WORKFLOW_YAML from './alert_analysis_workflow.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
+import { readManagedWorkflowYaml } from '../read_managed_workflow_yaml';
 
 export const SECURITY_ALERT_ANALYSIS_WORKFLOW_ID = 'system-security-alert-analysis';
 
@@ -25,7 +25,9 @@ export const SECURITY_ALERT_ANALYSIS_WORKFLOW = {
     selectors: ['rule_action'],
     solutions: ['security'],
   },
-  yaml: ALERT_ANALYSIS_WORKFLOW_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'alert_analysis_workflow.yaml');
+  },
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',

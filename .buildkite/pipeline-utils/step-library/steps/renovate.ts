@@ -15,7 +15,7 @@ export const renovateValidation = (): readonly Step[] => [
   commandStep({
     command: '.buildkite/scripts/steps/renovate.sh',
     label: 'Renovate validation',
-    agents: spotAgent('n2-highcpu-8', spotZones.centralFCA),
+    agents: spotAgent('n2-highcpu-8', spotZones.n2),
     key: 'renovate_validation',
     timeout_in_minutes: 60,
     retry: retry.agentLoss,

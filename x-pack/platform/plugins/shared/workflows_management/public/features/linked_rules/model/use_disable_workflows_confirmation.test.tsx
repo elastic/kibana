@@ -1,0 +1,217 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { act, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import React from 'react';
+import type { ConfirmDisableWorkflows } from './use_disable_workflows_confirmation';
+import { useDisableWorkflowsConfirmation } from './use_disable_workflows_confirmation';
+import { WORKFLOW_REMOVAL_IMPACT_ROUTE } from '../../../../common/lib/workflow_dependents/api';
+import type { WorkflowRemovalImpactResponse } from '../../../../common/lib/workflow_dependents/api';
+import { createStartServicesMock } from '../../../mocks';
+import { TestProvider } from '../../../shared/mocks/test_providers';
+
+const noLinkedRules = { total: 0, hiddenTotal: 0, rules: [] };
+const noCallers: WorkflowRemovalImpactResponse = { callers: [], indirect: 0 };
+
+describe('useDisableWorkflowsConfirmation', () => {
+  let confirmDisable: ConfirmDisableWorkflows;
+  let services: ReturnType<typeof createStartServicesMock>;
+  let unmount: () => void;
+
+  const Harness = () => {
+    const hook = useDisableWorkflowsConfirmation();
+    confirmDisable = hook.confirmDisable;
+    return hook.confirmModal;
+  };
+
+  const mockResponses = ({
+    linkedRules = Promise.resolve(noLinkedRules),
+    callers = Promise.resolve(noCallers),
+  }: {
+    linkedRules?: Promise<unknown>;
+    callers?: Promise<WorkflowRemovalImpactResponse>;
+  }) => {
+    (services.http.post as jest.Mock).mockImplementation((path: string) =>
+      path === WORKFLOW_REMOVAL_IMPACT_ROUTE ? callers : linkedRules
+    );
+  };
+
+  const openConfirmation = async (): Promise<{ confirmation: Promise<boolean> }> => {
+    let confirmation: Promise<boolean> = Promise.resolve(false);
+    act(() => {
+      confirmation = confirmDisable(['wf-1']);
+    });
+    await screen.findByTestId('workflowsDisableConfirmationModal');
+    return { confirmation };
+  };
+
+  beforeEach(() => {
+    services = createStartServicesMock();
+    (services.application.getUrlForApp as jest.Mock).mockImplementation(
+      (appId: string, { path }: { path: string }) => `/app/${appId}/${path.replace(/^\//, '')}`
+    );
+    ({ unmount } = render(
+      <TestProvider services={services}>
+        <Harness />
+      </TestProvider>
+    ));
+  });
+
+  const rulesToConfirm = {
+    linkedRules: Promise.resolve({
+      total: 1,
+      hiddenTotal: 0,
+      rules: [{ id: 'rule-1', name: 'Detection rule', ruleTypeId: 'siem.queryRule' }],
+    }),
+  };
+
+  it('resolves to false when the dialog closes with the page', async () => {
+    mockResponses(rulesToConfirm);
+
+    const { confirmation } = await openConfirmation();
+    unmount();
+
+    await expect(confirmation).resolves.toBe(false);
+  });
+
+  it('resolves to false when the page closes while the check runs', async () => {
+    let finishCheck: (rules: unknown) => void = () => {};
+    mockResponses({ linkedRules: new Promise((resolve) => (finishCheck = resolve)) });
+
+    const confirmation = confirmDisable(['wf-1']);
+    unmount();
+    finishCheck(await rulesToConfirm.linkedRules);
+
+    await expect(confirmation).resolves.toBe(false);
+  });
+
+  it('resolves to true without a prompt when nothing runs the workflows', async () => {
+    mockResponses({});
+
+    await expect(confirmDisable(['wf-1'])).resolves.toBe(true);
+
+    expect(services.http.post).toHaveBeenCalledWith('/internal/workflows/_linked_rules', {
+      body: JSON.stringify({ ids: ['wf-1'] }),
+      version: '1',
+    });
+    expect(services.http.post).toHaveBeenCalledWith(
+      WORKFLOW_REMOVAL_IMPACT_ROUTE,
+      expect.objectContaining({ body: JSON.stringify({ ids: ['wf-1'] }), version: '1' })
+    );
+    expect(screen.queryByTestId('workflowsDisableConfirmationModal')).not.toBeInTheDocument();
+  });
+
+  it('lists the linked rules with links and resolves to true on confirm', async () => {
+    mockResponses({
+      linkedRules: Promise.resolve({
+        total: 12,
+        hiddenTotal: 0,
+        rules: [
+          { id: 'rule-1', name: 'Detection rule', ruleTypeId: 'siem.queryRule' },
+          { id: 'rule-2', name: 'Stack rule', ruleTypeId: '.es-query' },
+        ],
+      }),
+    });
+
+    const { confirmation } = await openConfirmation();
+
+    expect(screen.getByText('Detection rule').closest('a')).toHaveAttribute(
+      'href',
+      '/app/securitySolutionUI/rules/id/rule-1'
+    );
+    expect(screen.getByText('Stack rule').closest('a')).toHaveAttribute(
+      'href',
+      '/app/management/insightsAndAlerting/triggersActions/rule/rule-2'
+    );
+    expect(screen.getByText('And 10 more.')).toBeInTheDocument();
+    expect(screen.queryByTestId('workflowCallersCallout')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+    await expect(confirmation).resolves.toBe(true);
+    expect(screen.queryByTestId('workflowsDisableConfirmationModal')).not.toBeInTheDocument();
+  });
+
+  it('warns about linked rules that the user cannot see', async () => {
+    mockResponses({ linkedRules: Promise.resolve({ total: 0, hiddenTotal: 2, rules: [] }) });
+
+    await openConfirmation();
+
+    expect(screen.getByText('2 alerting rules run this workflow')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowLinkedRulesHidden')).toHaveTextContent(
+      '2 rules are not visible to you.'
+    );
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+  });
+
+  it('warns about the workflows that run the workflows being disabled', async () => {
+    mockResponses({
+      callers: Promise.resolve({ callers: [{ id: 'parent', name: 'Parent' }], indirect: 2 }),
+    });
+
+    await openConfirmation();
+
+    expect(screen.getByText('1 workflow runs this workflow')).toBeInTheDocument();
+    expect(screen.getByText('Parent').closest('a')).toHaveAttribute(
+      'href',
+      '/app/workflows/parent'
+    );
+    expect(screen.getByTestId('workflowCallersIndirect')).toHaveTextContent(
+      '2 more workflows further up the chain run those'
+    );
+  });
+
+  it('resolves to false when the user cancels', async () => {
+    mockResponses({
+      linkedRules: Promise.resolve({
+        total: 1,
+        hiddenTotal: 0,
+        rules: [{ id: 'rule-1', name: 'Detection rule', ruleTypeId: 'siem.queryRule' }],
+      }),
+    });
+
+    const { confirmation } = await openConfirmation();
+    await userEvent.click(screen.getByTestId('confirmModalCancelButton'));
+
+    await expect(confirmation).resolves.toBe(false);
+  });
+
+  it('resolves a previous confirmation to false when a new one starts', async () => {
+    mockResponses({
+      linkedRules: Promise.resolve({
+        total: 1,
+        hiddenTotal: 0,
+        rules: [{ id: 'rule-1', name: 'Detection rule', ruleTypeId: 'siem.queryRule' }],
+      }),
+    });
+
+    const { confirmation: first } = await openConfirmation();
+    const { confirmation: second } = await openConfirmation();
+
+    await expect(first).resolves.toBe(false);
+    await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+    await expect(second).resolves.toBe(true);
+  });
+
+  it('warns that linked rules could not be checked when the lookup fails', async () => {
+    mockResponses({ linkedRules: Promise.reject(new Error('boom')) });
+
+    await openConfirmation();
+
+    expect(screen.getByTestId('workflowLinkedRulesError')).toBeInTheDocument();
+  });
+
+  it('warns that callers could not be checked when only the caller check fails', async () => {
+    mockResponses({ callers: Promise.reject(new Error('boom')) });
+
+    await openConfirmation();
+
+    expect(screen.getByTestId('workflowCallersError')).toBeInTheDocument();
+    expect(screen.queryByTestId('workflowLinkedRulesError')).not.toBeInTheDocument();
+  });
+});

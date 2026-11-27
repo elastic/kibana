@@ -8,7 +8,8 @@
 import { useMemo } from 'react';
 import { useTileQueryInputs } from './use_tile_query_inputs';
 import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
-import type { EntityFilters, TimeRange } from '../../entities_grid/common';
+import type { TimeRange } from '../../queries/time_range';
+import type { EntityFilters } from '../../entities_grid/common';
 import { buildRiskHistoryReachesBackQuery } from '../queries/risk_previous_period';
 import { buildNewlyHighCriticalCountQuery } from '../queries/tile_newly_high_critical_query';
 import { buildRiskMoversCountQuery } from '../queries/tile_risk_movers_query';

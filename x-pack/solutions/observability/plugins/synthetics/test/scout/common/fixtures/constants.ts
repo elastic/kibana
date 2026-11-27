@@ -21,6 +21,7 @@ export const SYNTHETICS_API_URLS = {
   INSPECT_TLS_RULE: '/internal/synthetics/inspect_tls_rule',
   GET_SYNTHETICS_MONITOR: '/api/synthetics/monitors/{id}',
   TEST_NOW_MONITOR: '/api/synthetics/monitor/test',
+  RUN_ONCE_MONITOR: '/internal/synthetics/service/monitors/run_once',
   FILTERS: '/internal/synthetics/monitor/filters',
   OVERVIEW_STATUS: '/internal/synthetics/overview_status',
   OVERVIEW_STATUS_STALE: '/internal/synthetics/overview_status/stale',

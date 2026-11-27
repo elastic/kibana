@@ -14,8 +14,10 @@ import {
   EuiPopover,
   useEuiTheme,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
+import { NIGHTSHIFT_EBT_ACTIONS } from '../../../common/ebt_constants';
 import { ConnectorList } from './connector_list';
 
 /**
@@ -32,6 +34,7 @@ export function ConnectPopover({
   onDelete,
   createDisabledReason,
   onCreate,
+  ebtElement,
 }: {
   typeId: string;
   typeName: string;
@@ -42,6 +45,7 @@ export function ConnectPopover({
   onDelete: (connector: SandboxConnector) => void;
   createDisabledReason?: string;
   onCreate: () => void;
+  ebtElement: string;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
@@ -80,10 +84,11 @@ export function ConnectPopover({
       <div
         css={css`
           min-width: 320px;
-          padding: ${euiTheme.size.xs} 0;
+          padding: ${euiTheme.size.s};
         `}
       >
         <ConnectorList
+          ebtElement={ebtElement}
           connectors={connectors}
           canOpenDetails={canOpenDetails}
           onOpenDetails={(connector) => {
@@ -107,6 +112,11 @@ export function ConnectPopover({
             onCreate();
           }}
           data-test-subj={`${typeId}-create`}
+          {...getEbtProps({
+            action: NIGHTSHIFT_EBT_ACTIONS.OPEN_ADD_SANDBOX_CONNECTOR,
+            element: ebtElement,
+            detail: typeId,
+          })}
         >
           {i18n.translate('xpack.nightshift.connectPopover.createConnector', {
             defaultMessage: 'Create connector',

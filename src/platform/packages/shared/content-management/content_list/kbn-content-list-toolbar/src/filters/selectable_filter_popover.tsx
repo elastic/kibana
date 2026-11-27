@@ -316,6 +316,7 @@ export const SelectableFilterPopover = <T extends object = Record<string, unknow
           {...(hideSearch
             ? { searchable: false as const }
             : { searchable: true as const, searchProps: { compressed: true } })}
+          listProps={{ paddingSize: 's' }}
           data-test-subj={`${dataTestSubj}-list`}
           aria-label={title}
         >

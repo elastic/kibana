@@ -323,7 +323,9 @@ export const HUNT_INDEX_COVERAGE_GUIDANCE_SERVERLESS = i18n.translate(
   'xpack.alertzero.watches.settings.huntIndexCoverage.guidanceServerless',
   {
     defaultMessage:
-      "The worker's built-in role reads the standard Elastic Agent and Beats patterns only, in this project and in linked Security projects. Linked projects of other types are not searched. Remove other patterns from securitySolution:defaultIndex or route their data into a covered data stream.",
+      "The worker's built-in role reads the standard Elastic Agent and Beats patterns only, in this project and in linked Security projects. Linked projects of other types are not searched. A <project>:<pattern> entry is searched only when this space's project routing includes that project. Remove other patterns from securitySolution:defaultIndex or route their data into a covered data stream.",
+    // `<project>:<pattern>` is literal text, not a rich-text tag.
+    ignoreTag: true,
   }
 );
 
@@ -505,7 +507,7 @@ export const EXCLUDE_BUILDING_BLOCKS_DETAIL_TEXT = i18n.translate(
   'xpack.alertzero.watches.settings.alertTriage.excludeBuildingBlocksDetailText',
   {
     defaultMessage:
-      "Each EQL sequence rule's main alert is still triaged. Only the building block alerts it creates are skipped.",
+      'Alerts marked as Building Block detections by the rule configuration will be skipped.',
   }
 );
 

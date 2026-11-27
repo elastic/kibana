@@ -23,20 +23,22 @@ type BuildFromResponseOpts = Omit<BuildAlertEventsBaseOpts, 'maxGroupsPerExecuti
   maxGroupsPerExecution?: number;
 };
 
-function buildAlertEventsFromEsqlResponse({
-  esqlResponse,
-  maxGroupsPerExecution = 10000,
-  ...baseOpts
-}: BuildFromResponseOpts) {
-  const builder = createAlertEventsBatchBuilder({ ...baseOpts, maxGroupsPerExecution });
-  const rows = (esqlResponse.values ?? []).map((row) => {
+const toRows = (esqlResponse: EsqlQueryResponse): Array<Record<string, unknown>> =>
+  (esqlResponse.values ?? []).map((row) => {
     const record: Record<string, unknown> = {};
     (esqlResponse.columns ?? []).forEach((col, i) => {
       record[col.name] = row[i];
     });
     return record;
   });
-  return builder.buildBatch(rows);
+
+function buildAlertEventsFromEsqlResponse({
+  esqlResponse,
+  maxGroupsPerExecution = 10000,
+  ...baseOpts
+}: BuildFromResponseOpts) {
+  const builder = createAlertEventsBatchBuilder({ ...baseOpts, maxGroupsPerExecution });
+  return builder.buildBatch(toRows(esqlResponse));
 }
 
 describe('resolveAlertEventType', () => {
@@ -213,6 +215,31 @@ describe('createAlertEventsBatchBuilder', () => {
       const [doc] = buildBatchOnce([{ 'host.name': 'host-a', severity: 'SEV1' }]);
 
       expect(doc.data).toEqual({ 'host.name': 'host-a', severity: 'SEV1' });
+    });
+  });
+
+  describe('events without a query row', () => {
+    it('does not give a reason to continued-breach, recovered or no-data events', () => {
+      const base = {
+        ruleId: 'rule-123',
+        ruleVersion: 1,
+        spaceId: 'default',
+        scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+        type: 'alert' as const,
+      };
+
+      const docs = [
+        ...buildContinuedBreachAlertEvents({ ...base, groupHashes: ['g1'] }),
+        ...buildNoDataAlertEvents({ ...base, groupHashes: ['g1'] }),
+        ...buildRecoveryAlertEvents({
+          ...base,
+          activeGroupHashes: [{ group_hash: 'g1' }] as never,
+          breachedGroupHashes: new Set<string>(),
+        }),
+      ];
+
+      expect(docs.length).toBeGreaterThan(0);
+      docs.forEach((doc) => expect(doc).not.toHaveProperty('reason'));
     });
   });
 
@@ -709,7 +736,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
       ruleAttributes: { grouping: { fields: ['host.name'] } },
       activeGroupHashes: [{ group_hash: activeGroupHash }],
       breachedGroupHashes: new Set(),
-      esqlResponse,
+      rows: toRows(esqlResponse),
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
       type: 'signal',
     });
@@ -735,7 +762,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
       ruleAttributes: { grouping: { fields: ['host.name'] } },
       activeGroupHashes: [{ group_hash: 'hash-a' }],
       breachedGroupHashes: new Set(),
-      esqlResponse: { columns: [], values: [] },
+      rows: [],
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
       type: 'signal',
     });
@@ -756,7 +783,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
       ruleAttributes: { grouping: { fields: ['host.name'] } },
       activeGroupHashes: [{ group_hash: 'hash-not-matching' }],
       breachedGroupHashes: new Set(),
-      esqlResponse,
+      rows: toRows(esqlResponse),
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
       type: 'signal',
     });
@@ -798,7 +825,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
       ruleAttributes: { grouping: { fields: ['host.name'] } },
       activeGroupHashes: [{ group_hash: activeGroupHash }],
       breachedGroupHashes: new Set(),
-      esqlResponse,
+      rows: toRows(esqlResponse),
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
       type: 'signal',
     });
@@ -834,7 +861,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
       activeGroupHashes: [{ group_hash: activeGroupHash }],
       // host-a is breaching this run: breach wins, no recovery event.
       breachedGroupHashes: new Set([activeGroupHash]),
-      esqlResponse,
+      rows: toRows(esqlResponse),
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
       type: 'signal',
     });
@@ -865,7 +892,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
       ruleAttributes: { grouping: { fields: ['host.name'] } },
       activeGroupHashes: [{ group_hash: breachedEvents[0].group_hash }],
       breachedGroupHashes: new Set(),
-      esqlResponse,
+      rows: toRows(esqlResponse),
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
       type: 'signal',
     });
@@ -885,10 +912,10 @@ describe('buildQueryRecoveryAlertEvents', () => {
       ruleAttributes: { grouping: undefined },
       activeGroupHashes: [{ group_hash: UNGROUPED_GROUP_HASH }],
       breachedGroupHashes: new Set(),
-      esqlResponse: {
+      rows: toRows({
         columns: [{ name: 'host.name', type: 'keyword' }],
         values: [['host-a'], ['host-b']],
-      },
+      }),
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
       type: 'alert',
     });

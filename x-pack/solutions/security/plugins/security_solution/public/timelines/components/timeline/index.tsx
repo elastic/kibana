@@ -9,9 +9,9 @@ import { pick } from 'lodash/fp';
 import { EuiPanel, EuiProgress, EuiText } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux-v7';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
-import { isTab } from '@kbn/timelines-plugin/public';
+import { isTab } from '../../../common/utils/accessibility';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { DEFAULT_ALERTS_INDEX, DEFAULT_DATA_VIEW_ID } from '../../../../common/constants';
 import { PageScope } from '../../../data_view_manager/constants';
@@ -80,6 +80,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
     description,
     initialized,
     changed,
+    savePromptDismissed,
   } = useDeepEqualSelector((state) =>
     pick(
       [
@@ -92,6 +93,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
         'show',
         'activeTab',
         'changed',
+        'savePromptDismissed',
       ],
       getTimeline(state, timelineId) ?? timelineDefaults
     )
@@ -158,8 +160,14 @@ const StatefulTimelineComponent: React.FC<Props> = ({
     if (!changed) {
       dispatch(timelineActions.setChanged({ id: timelineId, changed: false }));
     }
+    // `updateDataView` re-arms the unsaved changes prompt, which would ask again after the user
+    // already chose to leave.
+    if (savePromptDismissed) {
+      dispatch(timelineActions.setSavePromptDismissed({ id: timelineId, dismissed: true }));
+    }
   }, [
     changed,
+    savePromptDismissed,
     dispatch,
     savedObjectId,
     selectedDataViewId,

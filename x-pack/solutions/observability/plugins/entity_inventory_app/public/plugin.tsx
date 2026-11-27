@@ -11,10 +11,12 @@ import type {
   CoreSetup,
   CoreStart,
   Plugin,
+  PluginInitializerContext,
 } from '@kbn/core/public';
 import type { PanelOpenerChildDefinition } from '@kbn/core-chrome-browser';
 import { of } from 'rxjs';
 import type {
+  EntityInventoryAppPublicConfig,
   EntityInventoryAppPublicSetup,
   EntityInventoryAppPublicStart,
   EntityInventoryAppSetupDependencies,
@@ -32,11 +34,16 @@ export class EntityInventoryAppPlugin
       EntityInventoryAppStartDependencies
     >
 {
+  constructor(
+    private readonly initializerContext: PluginInitializerContext<EntityInventoryAppPublicConfig>
+  ) {}
+
   setup(
     core: CoreSetup<EntityInventoryAppStartDependencies, EntityInventoryAppPublicStart>,
     _plugins: EntityInventoryAppSetupDependencies
   ): EntityInventoryAppPublicSetup {
     const visibleIn: AppDeepLinkLocations[] = ['globalSearch', 'projectSideNav'];
+    const config = this.initializerContext.config.get();
 
     core.application.register({
       id: ENTITY_INVENTORY_APP_NAME,
@@ -52,7 +59,7 @@ export class EntityInventoryAppPlugin
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const { renderApp } = await import('./application');
-        return renderApp(coreStart, pluginsStart, params);
+        return renderApp(coreStart, pluginsStart, params, config);
       },
     });
 

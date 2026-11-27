@@ -7,20 +7,18 @@
 
 import { createPrompt } from '@kbn/inference-common';
 import { z, lazySchema } from '@kbn/zod/v4';
+import { MAX_JUDGE_TEXT_LENGTH } from '../alert_outcome_shared';
 import { gradeSchema } from '../run_judge';
+import { withIdentifierRule } from '../with_identifier_rule';
 import systemPromptText from './system_prompt.text';
 
 export const ALERT_OUTCOME_RCA_ACCURACY_TOOL_NAME = 'score_alert_outcome_rca';
 
-/** Generous bound on judge text; explanations are capped separately before persisting. */
-const MAX_JUDGE_TEXT_LENGTH = 100_000;
-
-/** The judge cuts each input to this length, below the prompt bound so the truncation marker fits. */
-export const MAX_JUDGE_INPUT_CHARS = 90_000;
+export const GROUND_TRUTH_VERDICTS = ['verified_cause', 'contradicted', 'unresolved'] as const;
 
 export const alertOutcomeRcaAccuracyOutputSchema = lazySchema(() =>
   z.object({
-    ground_truth_has_verified_cause: z.boolean(),
+    ground_truth_verdict: z.enum(GROUND_TRUTH_VERDICTS),
     root_cause_match: z.boolean(),
     mechanism_match: z.boolean(),
     evidence_match: z.boolean(),
@@ -36,7 +34,7 @@ export type AlertOutcomeRcaAccuracyOutput = z.infer<typeof alertOutcomeRcaAccura
 export const alertOutcomeRcaAccuracyPrompt = createPrompt({
   name: 'nightshift_alert_outcome_rca_accuracy',
   description:
-    "Grades a Nightshift investigation's conclusion against the root cause confirmed when its alert recovered",
+    "Grades a nightshift investigation's conclusion against the root cause confirmed when its alert recovered",
   input: lazySchema(() =>
     z.object({
       confirmed_root_cause: z.string().max(MAX_JUDGE_TEXT_LENGTH),
@@ -47,7 +45,7 @@ export const alertOutcomeRcaAccuracyPrompt = createPrompt({
   .version({
     system: {
       mustache: {
-        template: systemPromptText,
+        template: withIdentifierRule(systemPromptText),
       },
     },
     template: {
@@ -62,9 +60,11 @@ export const alertOutcomeRcaAccuracyPrompt = createPrompt({
         schema: {
           type: 'object',
           properties: {
-            ground_truth_has_verified_cause: {
-              type: 'boolean',
-              description: 'Does the confirmed root cause state a specific verified cause?',
+            ground_truth_verdict: {
+              type: 'string',
+              enum: GROUND_TRUTH_VERDICTS,
+              description:
+                "Whether the confirmed root cause states a verified cause, refutes the report's cause without naming one, or neither.",
             },
             root_cause_match: {
               type: 'boolean',
@@ -91,7 +91,7 @@ export const alertOutcomeRcaAccuracyPrompt = createPrompt({
             offending_claim: {
               type: 'string',
               description:
-                'The specific wrong claim (quote/paraphrase); required when materially_wrong_claim is true.',
+                'The specific wrong claim, paraphrased in your own words; required when materially_wrong_claim is true.',
             },
             reasoning: {
               type: 'string',
@@ -99,7 +99,7 @@ export const alertOutcomeRcaAccuracyPrompt = createPrompt({
             },
           },
           required: [
-            'ground_truth_has_verified_cause',
+            'ground_truth_verdict',
             'root_cause_match',
             'mechanism_match',
             'evidence_match',

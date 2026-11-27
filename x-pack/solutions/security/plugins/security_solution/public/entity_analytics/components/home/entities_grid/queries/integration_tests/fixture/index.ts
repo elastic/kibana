@@ -30,7 +30,7 @@ import type { FixtureIndex } from './fixture_index';
  * | host:h1          | web-1    | 90, Critical | high_impact | 3       | 4 (1 C, 2 H, 1 M), last 3h | –         | +30         |
  * | host:h2          | web-2    | 50, Moderate | –           | 1       | 1 (L), last 1h             | 1         | 0           |
  * | host:h3          | web-3    | –            | –           | 1       | 0                          | –         | –           |
- * | service:payments | payments | 20, Low      | –           | 1       | 0                          | –         | –           |
+ * | service:payments | payments | 20, Unknown  | –           | 1       | 0                          | –         | –           |
  * | user:alice@okta  | alice    | 70, High     | –           | 1       | 2 (2 M), last 2h           | 2         | -10         |
  * | user:bob@okta    | bob      | –            | –           | 2       | 0                          | –         | –           |
  *
@@ -84,6 +84,11 @@ export interface FixtureCluster {
   runQuery: EsqlRunner;
   /** The ids of the entity docs a DSL query matches, as Group by reads them. */
   searchEntityIds: (query: QueryDslQueryContainer) => Promise<string[]>;
+  /**
+   * Recreates the entities index without the mapping of `field`, as it is on an install whose
+   * latest index predates a definition field.
+   */
+  replaceEntitiesIndexWithoutField: (field: string) => Promise<void>;
   /** The fixture's load time: the reference for its relative timestamps. */
   now: number;
   stop: () => Promise<void>;
@@ -107,7 +112,23 @@ export const startFixtureCluster = async (): Promise<FixtureCluster> => {
     // The fixture writes dotted keys, as the entity store does.
     return hits.hits.flatMap(({ _source }) => String(_source?.['entity.id'] ?? [])).sort();
   };
-  return { runQuery: createRunQuery(client), searchEntityIds, now, stop: () => esServer.stop() };
+  const replaceEntitiesIndexWithoutField = async (field: string): Promise<void> => {
+    const { [field]: _omitted, ...fields } = entitiesIndex.fields;
+    await client.indices.delete({ index: ENTITY_INDEX });
+    // Dynamic mapping would map the field again from the docs that hold it.
+    const buildDocs = (loadTime: number) =>
+      entitiesIndex
+        .buildDocs(loadTime)
+        .map((doc) => Object.fromEntries(Object.entries(doc).filter(([key]) => key !== field)));
+    await loadIndex(client, { ...entitiesIndex, fields, buildDocs }, now);
+  };
+  return {
+    runQuery: createRunQuery(client),
+    searchEntityIds,
+    replaceEntitiesIndexWithoutField,
+    now,
+    stop: () => esServer.stop(),
+  };
 };
 
 /** Query arguments for the fixture: the 30 day window, resolved rows, one page of 25. */

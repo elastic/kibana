@@ -12,7 +12,7 @@ import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import {
-  selectTabSavedSearchByValueAttributes,
+  selectTabEmbeddableTab,
   useCurrentTabSelector,
   useInternalStateGetState,
   useRuntimeStateManager,
@@ -42,7 +42,7 @@ export function SaveDiscoverTableButton() {
       newTitle,
       newDescription,
     }: OnSaveProps & { dashboardId: string | null }) => {
-      const byValueState = await selectTabSavedSearchByValueAttributes({
+      const tab = selectTabEmbeddableTab({
         tabId: currentTabId,
         getState,
         runtimeStateManager,
@@ -51,7 +51,9 @@ export function SaveDiscoverTableButton() {
 
       services.embeddableEditor.transferBackToEditor(TransferAction.SaveByValue, {
         state: {
-          byValueState: { ...byValueState, title: newTitle, description: newDescription },
+          tab,
+          title: newTitle,
+          description: newDescription,
           controlGroupState,
         },
         app: 'dashboards',

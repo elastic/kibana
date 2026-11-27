@@ -17,7 +17,7 @@ import type { ConnectorEventEmitParams, ConnectorEventEmitter } from '@kbn/actio
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { HITL_SLACK_ACTION_EVENT_ID } from '@kbn/workflows';
+import { slack2HitlAction } from '@kbn/connector-topics';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
 import {
@@ -192,7 +192,7 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
 
     await emitter.emit(
       createEmitParams({
-        eventId: HITL_SLACK_ACTION_EVENT_ID,
+        eventId: slack2HitlAction.name,
         connectorTypeId: '.slack2',
         payload: {
           executionId: 'exec-1',
@@ -220,7 +220,7 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
 
     await emitter.emit(
       createEmitParams({
-        eventId: HITL_SLACK_ACTION_EVENT_ID,
+        eventId: slack2HitlAction.name,
         connectorTypeId: '.slack2',
         payload: {
           executionId: 'exec-1',
@@ -264,7 +264,7 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
     await expect(
       emitter.emit(
         createEmitParams({
-          eventId: HITL_SLACK_ACTION_EVENT_ID,
+          eventId: slack2HitlAction.name,
           connectorTypeId: '.slack2',
           payload: {
             executionId: 'exec-1',
@@ -301,7 +301,7 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
     await expect(
       emitter.emit(
         createEmitParams({
-          eventId: HITL_SLACK_ACTION_EVENT_ID,
+          eventId: slack2HitlAction.name,
           connectorTypeId: '.slack2',
           payload: {
             executionId: 'exec-1',
@@ -339,7 +339,7 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
     await expect(
       emitter.emit(
         createEmitParams({
-          eventId: HITL_SLACK_ACTION_EVENT_ID,
+          eventId: slack2HitlAction.name,
           connectorTypeId: '.slack2',
           payload: {
             executionId: 'exec-1',

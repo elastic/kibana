@@ -6,8 +6,8 @@
  */
 
 import { EuiEmptyPrompt, EuiLoadingElastic } from '@elastic/eui';
-import type { AppHeaderMenu } from '@kbn/app-header';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import type { AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
 import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
@@ -23,10 +23,10 @@ import { StreamsListEmptyPrompt } from './streams_list_empty_prompt';
 import { StreamsSettingsFlyout } from './streams_settings_flyout';
 import { StreamsTreeTable } from './tree_table';
 import { LegacyLogsDeprecationCallout } from './legacy_logs_deprecation_callout';
-import { CreateQueryStreamFlyoutContent } from '../query_streams/create_query_stream_flyout';
+import { NewExperienceCallout } from './new_experience_callout';
 import { getFormattedError } from '../../util/errors';
 
-export function StreamListView() {
+export function StreamListView({ tabs }: { tabs?: AppHeaderTab[] }) {
   const context = useKibana();
   const {
     dependencies: {
@@ -54,7 +54,6 @@ export function StreamListView() {
 
   const {
     ui: { manage: canManageStreamsKibana },
-    features: { queryStreams },
   } = useStreamsPrivileges();
 
   const [canManageClassicElasticsearch, setCanManageClassicElasticsearch] =
@@ -123,8 +122,6 @@ export function StreamListView() {
   const [isSettingsFlyoutOpen, setIsSettingsFlyoutOpen] = React.useState(false);
   const [isClassicStreamCreationFlyoutOpen, setIsClassicStreamCreationFlyoutOpen] =
     React.useState(false);
-  const [isQueryStreamCreationFlyoutOpen, setIsQueryStreamCreationFlyoutOpen] =
-    React.useState(false);
 
   const pageTitle = i18n.translate('xpack.streams.streamsListView.pageHeaderTitle', {
     defaultMessage: 'Streams',
@@ -136,19 +133,7 @@ export function StreamListView() {
     'xpack.streams.streamsListView.createClassicStreamButtonLabel',
     { defaultMessage: 'Create classic stream' }
   );
-  const createLabel = i18n.translate('xpack.streams.streamsListView.createButtonLabel', {
-    defaultMessage: 'Create',
-  });
-  const queryStreamMenuItemLabel = i18n.translate(
-    'xpack.streams.streamsListView.queryStreamMenuItemLabel',
-    { defaultMessage: 'Query stream' }
-  );
-  const classicStreamMenuItemLabel = i18n.translate(
-    'xpack.streams.streamsListView.classicStreamMenuItemLabel',
-    { defaultMessage: 'Classic stream' }
-  );
-
-  const showQueryStreams = Boolean(queryStreams?.enabled);
+  const mapHref = tabs?.find(({ id }) => id === 'map')?.href;
   const canCreateClassicStream = canManageStreamsKibana && canManageClassicElasticsearch;
 
   const menu = useMemo<AppHeaderMenu>(() => {
@@ -164,35 +149,6 @@ export function StreamListView() {
       },
     ];
 
-    if (showQueryStreams) {
-      return {
-        primaryActionItem: {
-          id: 'createStream',
-          label: createLabel,
-          iconType: 'plus',
-          testId: 'streamsAppCreateStreamButton',
-          items: [
-            {
-              id: 'createClassicStream',
-              order: 1,
-              label: classicStreamMenuItemLabel,
-              run: () => setIsClassicStreamCreationFlyoutOpen(true),
-              disableButton: !canCreateClassicStream,
-              testId: 'streamsAppCreateClassicStreamButton',
-            },
-            {
-              id: 'createQueryStream',
-              order: 2,
-              label: queryStreamMenuItemLabel,
-              run: () => setIsQueryStreamCreationFlyoutOpen(true),
-              testId: 'streamsAppCreateQueryStreamButton',
-            },
-          ],
-        },
-        items,
-      };
-    }
-
     return {
       primaryActionItem: {
         id: 'createClassicStream',
@@ -204,20 +160,13 @@ export function StreamListView() {
       },
       items,
     };
-  }, [
-    canCreateClassicStream,
-    classicStreamMenuItemLabel,
-    createClassicStreamLabel,
-    createLabel,
-    queryStreamMenuItemLabel,
-    settingsLabel,
-    showQueryStreams,
-  ]);
+  }, [canCreateClassicStream, createClassicStreamLabel, settingsLabel]);
 
   return (
     <>
-      <StreamsAppHeader title={pageTitle} menu={menu} docLink={streamsDocsLink} />
+      <StreamsAppHeader title={pageTitle} menu={menu} docLink={streamsDocsLink} tabs={tabs} />
       <StreamsAppPageTemplate.Body grow paddingSize="m">
+        {mapHref && <NewExperienceCallout mapHref={mapHref} />}
         {streamsListFetch.loading && streamsListFetch.value === undefined ? (
           <EuiEmptyPrompt
             icon={<EuiLoadingElastic size="xl" />}
@@ -256,12 +205,6 @@ export function StreamListView() {
       )}
       {isClassicStreamCreationFlyoutOpen && (
         <ClassicStreamCreationFlyout onClose={() => setIsClassicStreamCreationFlyoutOpen(false)} />
-      )}
-      {isQueryStreamCreationFlyoutOpen && (
-        <CreateQueryStreamFlyoutContent
-          onClose={() => setIsQueryStreamCreationFlyoutOpen(false)}
-          onQueryStreamCreated={streamsListFetch.refresh}
-        />
       )}
     </>
   );

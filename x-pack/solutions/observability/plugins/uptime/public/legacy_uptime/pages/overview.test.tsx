@@ -9,7 +9,7 @@ import React from 'react';
 import { OverviewPageComponent } from './overview';
 import { render } from '../lib/helper/rtl_helpers';
 
-jest.mock('@kbn/ebt-tools', () => ({
+jest.mock('@kbn/ebt-tools/react', () => ({
   usePageReady: jest.fn(),
 }));
 

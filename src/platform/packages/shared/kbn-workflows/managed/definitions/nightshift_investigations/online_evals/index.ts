@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import ONLINE_EVALS_WORKFLOW_YAML from './online_evals_workflow.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
+import { readManagedWorkflowYaml } from '../../read_managed_workflow_yaml';
 
 export const NIGHTSHIFT_ONLINE_EVALS_WORKFLOW_ID = 'system-nightshift-online-evals';
 
@@ -25,7 +25,9 @@ export const NIGHTSHIFT_ONLINE_EVALS_WORKFLOW = {
   pluginId: 'nightshiftInvestigations',
   version: 1,
   billable: false,
-  yaml: ONLINE_EVALS_WORKFLOW_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'online_evals_workflow.yaml');
+  },
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',

@@ -109,6 +109,7 @@ interface QueryPerformanceTrackerParams {
 interface QueryPerformanceReportEventParams {
   requestAdapter: RequestAdapter | undefined;
   approximationApplied?: boolean;
+  isReplayedLoad?: boolean;
 }
 
 export class ScopedDiscoverEBTManager {
@@ -438,6 +439,7 @@ export class ScopedDiscoverEBTManager {
       reportEvent: ({
         requestAdapter,
         approximationApplied,
+        isReplayedLoad,
       }: QueryPerformanceReportEventParams) => {
         if (reported || !this.reportPerformanceEvent) {
           return;
@@ -471,6 +473,7 @@ export class ScopedDiscoverEBTManager {
             multi_match_types: mergedAnalysis.rawTypes,
             ...(querySourceCommand ? { query_source_command: querySourceCommand } : {}),
             ...(isEsqlQuery ? { approximationApplied: approximationApplied ?? false } : {}),
+            ...(isReplayedLoad ? { isReplayedLoad: true } : {}),
           },
           eventName,
           duration,

@@ -16,7 +16,7 @@ import {
   apiPublishesReload,
   apiPublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
-import { areTimesEqual } from '../unified_search_manager';
+import { areTimesEqual } from '../../../common/dashboard_state/unified_search';
 
 const shouldRefreshFilterCompareOptions = {
   ...COMPARE_ALL_OPTIONS,

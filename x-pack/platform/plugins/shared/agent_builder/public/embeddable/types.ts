@@ -19,7 +19,7 @@ export interface EmbeddableConversationDependencies {
 
 export interface EmbeddableConversationCallbacks {
   updateProps: (props: EmbeddableConversationProps) => void;
-  resetBrowserApiTools: () => void;
+  resetChatConfig: () => void;
   addAttachment: (attachment: ConversationAttachment) => void;
   removeAttachmentById: (attachmentId: string) => void;
 }
@@ -29,7 +29,7 @@ export interface EmbeddableConversationSidebarProps {
   ariaLabelledBy: string;
   /**
    * Callback to register sidebar control methods.
-   * Used internally to update sidebar props and clear browser API tools.
+   * Used internally to update sidebar props and reset the config a page sets.
    * @internal
    */
   onRegisterCallbacks?: (callbacks: EmbeddableConversationCallbacks) => void;

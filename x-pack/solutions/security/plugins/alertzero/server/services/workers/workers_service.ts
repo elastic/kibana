@@ -38,6 +38,7 @@ import {
   ThreatIntelSupplyNotInstalledError,
   type ThreatIntelSupplyService,
 } from '../threat_intel_supply';
+import { isBlockedByPolicyOnly } from '../watches/hunt/common/partition_hunt_universe';
 import { getHuntAccountLabel } from '../watches/hunt/common/resolve_worker_index_coverage';
 import {
   readLatestFinishedSweepIndexScope,
@@ -575,9 +576,13 @@ export class WorkersService {
       }
       const account = getHuntAccountLabel({ serviceAccountId });
       const sweptAt = formatSweepTime(sweep.checkedAt);
-      return scope.resolution === 'blocked:discovery_failed'
-        ? `The sweep at ${sweptAt} running as ${account} could not resolve this space's default data view`
-        : `The sweep at ${sweptAt} running as ${account} could not see any index in this space's default data view`;
+      if (scope.resolution === 'blocked:discovery_failed') {
+        return `The sweep at ${sweptAt} running as ${account} could not resolve this space's default data view`;
+      }
+      if (isBlockedByPolicyOnly(scope)) {
+        return `The sweep at ${sweptAt} found only hidden or alerts indices in this space's default data view, which Hunt does not search`;
+      }
+      return `The sweep at ${sweptAt} running as ${account} could not see any index in this space's default data view`;
     } catch (error) {
       this.logger.debug(
         `Failed to read the last hunt sweep: ${
@@ -690,6 +695,7 @@ export class WorkersService {
       settingsRevision,
       // `installed` is any document at this id, including a user workflow that is not ours.
       workflowId: status.installed && status.status !== 'not_managed' ? status.workflowId : null,
+      workflowOutdated: status.status === 'drifted',
       blockingReasons,
       skills: projectSkillsFromDefinition(definition, agentLookupCallback),
     };

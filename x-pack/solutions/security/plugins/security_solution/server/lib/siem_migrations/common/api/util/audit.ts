@@ -27,6 +27,8 @@ export enum SiemMigrationsAuditActions {
   // Dashboards
   SIEM_MIGRATION_ADDED_DASHBOARDS = 'siem_migration_added_dashboards',
   SIEM_MIGRATION_INSTALLED_DASHBOARDS = 'siem_migration_installed_dashboards',
+  // Workflows
+  SIEM_MIGRATION_ADDED_WORKFLOWS = 'siem_migration_added_workflows',
 }
 
 export enum AUDIT_TYPE {
@@ -70,6 +72,7 @@ export const siemMigrationAuditEventType: Record<
   [SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_INTEGRATIONS_STATS]: AUDIT_TYPE.ACCESS,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_ADDED_DASHBOARDS]: AUDIT_TYPE.CREATION,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_INSTALLED_DASHBOARDS]: AUDIT_TYPE.CREATION,
+  [SiemMigrationsAuditActions.SIEM_MIGRATION_ADDED_WORKFLOWS]: AUDIT_TYPE.CREATION,
 };
 
 interface SiemMigrationAuditEvent {
@@ -82,7 +85,7 @@ export class SiemMigrationAuditLogger {
   private auditLogger?: AuditLogger | null = null;
   constructor(
     private readonly securitySolutionContextPromise: Promise<SecuritySolutionApiRequestHandlerContext>,
-    private readonly migrationType: 'rules' | 'dashboards'
+    private readonly migrationType: 'rules' | 'dashboards' | 'workflows'
   ) {}
 
   private setAuditLogger = async (): Promise<boolean> => {
@@ -202,6 +205,22 @@ export class SiemMigrationAuditLogger {
     } dashboards to the SIEM migration with [id=${migrationId}]`;
     return this.log({
       action: SiemMigrationsAuditActions.SIEM_MIGRATION_ADDED_DASHBOARDS,
+      message,
+      error,
+    });
+  }
+
+  public async logAddWorkflows(params: {
+    migrationId: string;
+    error?: Error;
+    count?: number;
+  }): Promise<void> {
+    const { migrationId, error, count } = params;
+    const message = `User adding ${
+      count ?? '0'
+    } workflows to the SIEM migration with [id=${migrationId}]`;
+    return this.log({
+      action: SiemMigrationsAuditActions.SIEM_MIGRATION_ADDED_WORKFLOWS,
       message,
       error,
     });

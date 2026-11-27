@@ -30,6 +30,7 @@ import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import { DURATION_LOWER_BOUND_FIELD } from '@kbn/alerting-v2-common-queries';
 import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
+import type { SnoozeCondition, SnoozeConditionOperator } from '@kbn/response-ops-alerts-apis/types';
 import type { EpisodeActionState, EpisodeStatusGroupAction } from '../types/action';
 import { isNativeV2Rule, isSourceEpisode, type AlertEpisode } from '../queries/episodes_query';
 import { AlertingEpisodeGroupingTags } from './grouping/alerting_episode_grouping_tags';
@@ -136,6 +137,11 @@ export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
   const groupAction: EpisodeStatusGroupAction = {
     lastSnoozeAction: (row.flattened.last_snooze_action as string | undefined) ?? null,
     snoozedUntil: (row.flattened.snoozed_until as string | undefined) ?? null,
+    snoozeConditions: row.flattened.snooze_conditions as SnoozeCondition[] | undefined,
+    snoozeConditionOperator: row.flattened.snooze_condition_operator as
+      | SnoozeConditionOperator
+      | undefined,
+    isMuted: row.flattened.is_muted as boolean | undefined,
   };
 
   return (
@@ -211,6 +217,20 @@ export const EpisodeSuppressedCell = ({ row }: CellRendererProps) => {
       {i18n.SUPPRESSED_BY_MAINTENANCE_WINDOW}
     </EuiBadge>
   );
+};
+
+/**
+ * Renders the source alert reason as inline text so the grid's line clamp truncates it; the
+ * full value is reachable through the cell popover, the row height setting and the flyout.
+ */
+export const EpisodeReasonCell = ({ row }: CellRendererProps) => {
+  const reason = row.flattened.reason;
+
+  if (typeof reason !== 'string' || reason.length === 0) {
+    return <>{EMPTY_VALUE}</>;
+  }
+
+  return <span data-test-subj="episodeReasonCell">{reason}</span>;
 };
 
 export const EpisodeSeverityCell = ({ row }: CellRendererProps) => {

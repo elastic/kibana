@@ -61,6 +61,19 @@ export interface PersonaMatrixExample {
      */
     allowSkills?: string[];
     expectedAttachmentReads?: number;
+    /**
+     * When true, `WorkflowValidity` creates the workflow the agent authored on
+     * the stack, runs it and records whether it completed.
+     */
+    validateWorkflow?: boolean;
+    /** The prompt's file hash is the EICAR test file; see `EicarTrap`. */
+    eicar?: boolean;
+    /**
+     * Side-effect tool ids (`create.case`, `create.channel`) the prompt
+     * explicitly asks for. Any other side-effect call is counted by
+     * `UnrequestedSideEffects`.
+     */
+    side_effects_requested?: string[];
     severity?: 'low' | 'medium' | 'high' | 'critical';
     tags?: string[];
   };
@@ -106,6 +119,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'than dismissal, citing entity risk context and any Security Labs research on the technique.',
     },
     metadata: {
+      eicar: true,
       pathContract: 'probe',
       expectedSkill: 'alert-analysis',
       // security.entity_risk_score is force-disabled under
@@ -203,6 +217,16 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
       question:
         'I want a new rule to detect the Chrysalis side-loading pattern we just hunted down. ' +
         'Draft it as an ES|QL rule with appropriate tags and threat mappings.',
+      // Each example starts a new conversation, so "the pattern we just hunted down" needs its
+      // antecedent supplied out-of-band; without it the agent asks the user and the round pauses.
+      // The attachment keeps the original question wording intact.
+      attachment:
+        'Hunt Findings (Chrysalis side-loading):\n' +
+        '  Host: srv-win-defend-01\n' +
+        '  Process: BluetoothService.exe side-loads log.dll\n' +
+        '  File hash (sha256): 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f\n' +
+        '  Path: C:\\Users\\Public\\\n' +
+        '  MITRE: T1574.002 (DLL Side-Loading)',
     },
     output: {
       reference:
@@ -211,6 +235,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'generates the underlying ES|QL rather than the agent hand-writing it separately.',
     },
     metadata: {
+      eicar: true,
       expectedSkill: 'detection-rule-edit',
       expectedTools: ['security.create_detection_rule'],
       severity: 'high',
@@ -250,6 +275,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'provides the GenAI Settings link, and makes no further tool calls as the tool instructs.',
     },
     metadata: {
+      eicar: true,
       expectedSkill: 'detection-rule-edit',
       expectedTools: ['security.security_labs_search'],
       severity: 'high',
@@ -358,6 +384,8 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'would carry, narrating each step.',
     },
     metadata: {
+      eicar: true,
+      side_effects_requested: ['create.channel'],
       pathContract: 'probe',
       expectedSkill: 'alert-analysis',
       // No Slack tool is seeded by this suite, so the Slack step is scored through the
@@ -390,6 +418,8 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'taken.',
     },
     metadata: {
+      eicar: true,
+      side_effects_requested: ['create.case', 'create.channel'],
       pathContract: 'probe',
       expectedSkill: 'alert-analysis',
       allowSkills: ['cases-management'],
@@ -422,6 +452,8 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'not escalate.',
     },
     metadata: {
+      eicar: true,
+      side_effects_requested: ['create.case', 'create.channel'],
       pathContract: 'probe',
       expectedSkill: 'alert-analysis',
       allowSkills: ['threat-hunting'],
@@ -527,6 +559,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'The workflow passes validation (validate_workflow reports it valid).',
     },
     metadata: {
+      validateWorkflow: true,
       expectedSkill: 'workflow-authoring',
       expectedTools: ['platform.core.generate_workflow', 'platform.workflows.validate_workflow'],
       expectedConnectorId: 'd7306385-cbe6-4541-9726-49afdff59ba5',
@@ -557,6 +590,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         '(validate_workflow reports it valid).',
     },
     metadata: {
+      validateWorkflow: true,
       // No expectedSkill: the prompt does not ask for the skill, and
       // `workflow-authoring` documents that it is NOT required for creating or
       // editing a workflow — call `platform.core.generate_workflow` directly.
@@ -587,6 +621,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'The workflow passes validation (validate_workflow reports it valid).',
     },
     metadata: {
+      validateWorkflow: true,
       // No expectedSkill: see `workflow-authoring-b` — the prompt does not ask
       // for the skill and generate_workflow is the documented direct path.
       expectedTools: ['platform.core.generate_workflow', 'platform.workflows.validate_workflow'],
@@ -613,6 +648,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'rather than reasoning about the hash without checking it or fabricating a verdict.',
     },
     metadata: {
+      eicar: true,
       // No expectedSkill: `workflow-authoring` documents that it is NOT required
       // for running workflows — the contract is a direct custom-tool call.
       expectedTools: ['virustotal_lookup'],
@@ -659,6 +695,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'and a description summarizing the side-loading activity, and confirms the case was created.',
     },
     metadata: {
+      side_effects_requested: ['create.case'],
       expectedSkill: 'cases-management',
       expectedTools: ['platform.core.cases.manage'],
       severity: 'critical',

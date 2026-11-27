@@ -454,6 +454,17 @@ export const getNewUserDefinedColumnSuggestion = (label: string): ISuggestionIte
   });
 };
 
+export const getNewNamedSubquerySuggestion = (label: string): ISuggestionItem => {
+  return withAutoSuggest({
+    label,
+    text: `${label} = `,
+    kind: 'Variable',
+    detail: i18n.translate('esqlLanguage.esql.autocomplete.newNamedSubqueryDoc', {
+      defaultMessage: 'Define a new subquery',
+    }),
+  });
+};
+
 export const assignCompletionItem: ISuggestionItem = withAutoSuggest({
   detail: i18n.translate('esqlLanguage.esql.autocomplete.newVarDoc', {
     defaultMessage: 'Define a new column',
@@ -489,6 +500,15 @@ export const semiColonCompleteItem = buildCharCompleteItem(
   }),
   { quoted: true, advanceCursorAndOpenSuggestions: true }
 );
+
+/** `=` after the name declared by a header command, e.g. `SET <setting> =`. */
+export const headerAssignCompleteItem: ISuggestionItem = { ...assignCompletionItem, detail: '' };
+
+/** `;` that ends a header command; the next instruction starts in the line below. */
+export const headerSemiColonCompleteItem: ISuggestionItem = {
+  ...semiColonCompleteItem,
+  text: ';\n',
+};
 
 export const listCompleteItem: ISuggestionItem = withAutoSuggest({
   label: '( ... )',

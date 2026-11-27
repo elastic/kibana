@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema, description as stringDescription } from '@kbn/zod/v4';
 import { DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
 import {
   validateEsqlQuery,
@@ -26,8 +26,10 @@ import {
 } from './common';
 import {
   ID_MAX_LENGTH,
+  MAX_BUILDER_TYPE_LENGTH,
   MAX_CONSECUTIVE_BREACHES,
   MAX_DESCRIPTION_LENGTH,
+  MAX_REASON_TEMPLATE_LENGTH,
   MAX_ESQL_QUERY_LENGTH,
   MAX_FIELD_NAME_LENGTH,
   MAX_PER_PAGE,
@@ -86,7 +88,7 @@ export type RuleKind = z.infer<typeof ruleKindSchema>;
 /** Metadata (required) */
 
 const METADATA_DESCRIPTION = 'Rule metadata.';
-const METADATA_NAME_DESCRIPTION = 'Rule name (must be unique within the space).';
+const METADATA_NAME_DESCRIPTION = 'Rule name.';
 const METADATA_DESCRIPTION_DESCRIPTION =
   'Human-readable description of the rule. Omit to leave it unset; send `null` on PATCH to clear it. An empty string is rejected.';
 const METADATA_TAGS_DESCRIPTION = 'Tags for categorization, e.g. ["production", "infra"].';
@@ -102,7 +104,11 @@ const metadataDescriptionSchema = lazySchema(() =>
 const metadataTagsSchema = lazySchema(() => tagsSchema.min(1));
 const metadataRoutingTagsSchema = lazySchema(() => tagsSchema.min(1));
 const metadataBuilderSchema = lazySchema(() =>
-  z.object({ type: z.string().max(64).trim().min(1).describe('Rule builder type.') }).strict()
+  z
+    .object({
+      type: z.string().max(MAX_BUILDER_TYPE_LENGTH).trim().min(1).describe('Rule builder type.'),
+    })
+    .strict()
 );
 
 export const metadataSchema = lazySchema(() =>
@@ -707,6 +713,23 @@ const artifactsSchema = lazySchema(() =>
 
 /** Create rule API schema */
 
+const REASON_DESCRIPTION = `Alert reason configuration. Only allowed when kind is "alert". \`template\` is the alert reason template, for example "CPU on {{data.host.name}} was {{data.cpu_pct}}%." Whitespace is preserved. Empty or whitespace-only templates are rejected.`;
+
+const reasonSchema = lazySchema(() =>
+  z
+    .object({
+      template: stringDescription({
+        minLength: 1,
+        maxLength: MAX_REASON_TEMPLATE_LENGTH,
+      })
+        .refine((value) => value.trim().length > 0, {
+          message: 'Reason template must not be blank.',
+        })
+        .describe('Alert reason template.'),
+    })
+    .strict()
+);
+
 const TIME_FIELD_DESCRIPTION =
   'Document field Kibana uses with `schedule.lookback` to time-filter `query.base`.';
 /**
@@ -716,11 +739,37 @@ const TIME_FIELD_DESCRIPTION =
  */
 const timeFieldSchema = lazySchema(() => z.string().min(1).max(MAX_FIELD_NAME_LENGTH));
 
-export const createRuleDataBaseSchema = lazySchema(() =>
+const ENABLED_DESCRIPTIONS = {
+  create:
+    'Whether the rule is enabled. Defaults to `true` when omitted. A disabled rule is saved but does not run until you enable it.',
+  put: 'Whether the rule is enabled. Unlike the other fields in this body, omitting it does not clear it. When the request creates the rule it defaults to `true`. When the request replaces an existing rule, omitting it keeps the current state and supplying it enables or disables the rule, the same as `_enable` or `_disable`. A disabled rule is saved but does not run until you enable it.',
+} as const;
+
+type RuleWriteApi = keyof typeof ENABLED_DESCRIPTIONS;
+
+/**
+ * Optional with no default because the meaning of "omitted"
+ * differs by outcome: on create it defaults to `true`, on replace it preserves
+ * the existing stored value.
+ */
+const enabledSchema = (api: RuleWriteApi) =>
+  z.boolean().optional().describe(ENABLED_DESCRIPTIONS[api]);
+
+const REASON_DESCRIPTIONS = {
+  create: `${REASON_DESCRIPTION} Omit to leave it unset. Null is not accepted.`,
+  put: `${REASON_DESCRIPTION} Omit to leave it unset on create or clear it when replacing an existing rule. Null is not accepted.`,
+} as const satisfies Record<RuleWriteApi, string>;
+
+const reasonSchemaFor = (api: RuleWriteApi) =>
+  reasonSchema.optional().describe(REASON_DESCRIPTIONS[api]);
+
+const buildRuleDataBaseSchema = (api: RuleWriteApi) =>
   z
     .object({
       kind: ruleKindSchema,
+      enabled: enabledSchema(api),
       metadata: metadataSchema,
+      reason: reasonSchemaFor(api),
       time_field: timeFieldSchema.default(DEFAULT_TIME_FIELD).describe(TIME_FIELD_DESCRIPTION),
       schedule: scheduleSchema,
       query: querySchema,
@@ -730,8 +779,9 @@ export const createRuleDataBaseSchema = lazySchema(() =>
       grouping: groupingSchema.optional(),
       artifacts: artifactsSchema.optional(),
     })
-    .strict()
-);
+    .strict();
+
+export const createRuleDataBaseSchema = lazySchema(() => buildRuleDataBaseSchema('create'));
 
 /** Cross-field validation predicates — shared between the CRUD API and the manage_rule tool. */
 
@@ -761,6 +811,14 @@ export const isRoutingTagsAllowedForKind = (data: {
 
 export const ROUTING_TAGS_SIGNAL_RULE_MESSAGE =
   'metadata.routing_tags is only allowed when kind is "alert".';
+
+/** Only alert rules can configure an alert reason template. */
+export const isReasonAllowedForKind = (data: {
+  kind?: string;
+  reason?: { template: string } | null;
+}): boolean => data.kind === 'alert' || data.reason == null;
+
+export const REASON_SIGNAL_RULE_MESSAGE = 'reason is only allowed when kind is "alert".';
 
 /** The two objects that describe an alert rule's episode lifecycle. */
 const LIFECYCLE_FIELDS = ['recovery', 'no_data'] as const;
@@ -833,7 +891,7 @@ export const isRecoveryTransitionConsistentWithStrategy = (data: RuleLifecycleSh
 /** The create-rule fields the refinements below read. */
 type CreateRuleRefinementFields = Pick<
   z.infer<typeof createRuleDataBaseSchema>,
-  'kind' | 'metadata' | 'query' | 'recovery' | 'no_data' | 'state_transition'
+  'kind' | 'metadata' | 'reason' | 'query' | 'recovery' | 'no_data' | 'state_transition'
 >;
 
 /**
@@ -854,6 +912,10 @@ const applyCreateRuleRefinements = <T extends z.ZodType<CreateRuleRefinementFiel
     .refine(isRoutingTagsAllowedForKind, {
       message: ROUTING_TAGS_SIGNAL_RULE_MESSAGE,
       path: ['metadata', 'routing_tags'],
+    })
+    .refine(isReasonAllowedForKind, {
+      message: REASON_SIGNAL_RULE_MESSAGE,
+      path: ['reason'],
     })
     .check((ctx) => {
       const allowed = isLifecycleConfigAllowedForKind(ctx.value);
@@ -908,8 +970,20 @@ const applyCreateRuleRefinements = <T extends z.ZodType<CreateRuleRefinementFiel
       }
     });
 
+export const ruleIdSchema = lazySchema(() =>
+  entityIdSchema.describe(`A rule identifier. ${ENTITY_ID_NOTE}`)
+);
+
 export const createRuleDataSchema = lazySchema(() =>
-  applyCreateRuleRefinements(createRuleDataBaseSchema).meta({
+  applyCreateRuleRefinements(
+    createRuleDataBaseSchema.extend({
+      id: ruleIdSchema
+        .optional()
+        .describe(
+          `Optional rule ID. If omitted, Kibana generates one. If a rule with this ID already exists, the request fails with HTTP 409 and the existing rule is not changed. ${ENTITY_ID_NOTE}`
+        ),
+    })
+  ).meta({
     id: 'alerting_new_rule',
   })
 );
@@ -918,22 +992,20 @@ export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
 export type CreateRuleDataInput = z.input<typeof createRuleDataSchema>;
 
 /**
- * Request body schema for `PUT /api/alerting/v2/rules/{id}`. Adds an optional
- * `enabled` on top of the create-rule data. Left as a plain optional (no
- * schema-level default) because the meaning of "omitted" differs by outcome:
- * on create it defaults to `true`, on replace it preserves the existing
- * stored value — both handled in application code, not here.
+ * Request body schema for `PUT /api/alerting/v2/rules/{id}`: the create-rule
+ * data.
+ *
+ * `enabled` is deliberately the only field on PUT that is kept when omitted.
+ * Every other field follows replace semantics and is cleared when absent.
+ * It is lifecycle state, not definition: on create it defaults to `true`, on
+ * replace omitting it keeps the stored value and supplying it applies the same
+ * transition as `_enable` / `_disable`. The default lives in the client, not
+ * here, because "omitted" means different things on create and replace.
+ * PATCH does not accept it.
  */
-export const putRuleDataSchema = applyCreateRuleRefinements(
-  createRuleDataBaseSchema.extend({
-    enabled: z
-      .boolean()
-      .optional()
-      .describe(
-        'Whether the rule is enabled. On create, defaults to `true` when omitted. On replace, omitting this field preserves the existing enabled state.'
-      ),
-  })
-).meta({ id: 'alerting_put_rule' });
+export const putRuleDataSchema = applyCreateRuleRefinements(buildRuleDataBaseSchema('put')).meta({
+  id: 'alerting_put_rule',
+});
 
 export type PutRuleData = z.infer<typeof putRuleDataSchema>;
 
@@ -975,6 +1047,12 @@ export const updateRuleDataSchema = lazySchema(() =>
   z
     .object({
       metadata: metadataPatchSchema.optional().describe(METADATA_DESCRIPTION),
+      reason: reasonSchema
+        .nullable()
+        .optional()
+        .describe(
+          `${REASON_DESCRIPTION} Omit to preserve the current value; send null to clear it.`
+        ),
       time_field: timeFieldSchema.optional().describe(TIME_FIELD_DESCRIPTION),
       schedule: schedulePatchSchema.optional().describe(SCHEDULE_DESCRIPTION),
       query: queryPatchSchema.optional().describe(QUERY_DESCRIPTION),
@@ -1006,6 +1084,9 @@ export const ruleResponseSchema = lazySchema(() =>
       // strict `metadata` block would break a GET -> PUT round-trip. Lifecycle
       // events and telemetry still read it from the saved object.
       metadata: metadataSchema.describe('Rule metadata.'),
+      reason: reasonSchema
+        .optional()
+        .describe(`${REASON_DESCRIPTION} Absent when no reason template is set.`),
       id: z.string().describe('Unique rule identifier.'),
       version: z
         .number()
@@ -1134,11 +1215,6 @@ export const ruleRoutingTagsResponseSchema = lazySchema(() =>
 );
 
 export type RuleRoutingTagsResponse = z.infer<typeof ruleRoutingTagsResponseSchema>;
-
-export const ruleIdSchema = lazySchema(() =>
-  entityIdSchema.describe(`A rule identifier. ${ENTITY_ID_NOTE}`)
-);
-
 /**
  * Response schema for `POST /api/alerting/v2/rules/_bulk_get`. Like every other
  * bulk route, a missing rule is a per-item error, not a request failure.
@@ -1164,8 +1240,8 @@ export type BulkGetRulesResponse = z.infer<typeof bulkGetRulesResponseSchema>;
 
 /**
  * A single item in a bulk-create request: the create-rule body plus optional
- * client-supplied `id` and `enabled` (default true). Disabled rules are saved
- * and do not run until enabled.
+ * client-supplied `id`. `enabled` is the same optional field as on a single
+ * create; disabled rules are saved and do not run until enabled.
  */
 export const bulkCreateRuleItemSchema = lazySchema(() =>
   applyCreateRuleRefinements(
@@ -1173,13 +1249,7 @@ export const bulkCreateRuleItemSchema = lazySchema(() =>
       id: ruleIdSchema
         .optional()
         .describe(
-          'Optional rule ID. If omitted, Kibana generates one. IDs in the request must be unique.'
-        ),
-      enabled: z
-        .boolean()
-        .default(true)
-        .describe(
-          'If `true` (default), the rule runs on its schedule after creation. If `false`, the rule is saved but does not run until you enable it.'
+          `Optional rule ID. If omitted, Kibana generates one. IDs must be unique within the request. If a rule with this ID already exists, that item is reported in \`errors\` with the code \`RULE_ALREADY_EXISTS\` and the existing rule is not changed. ${ENTITY_ID_NOTE}`
         ),
     })
   ).meta({ id: 'alerting_bulk_create_rule_item' })

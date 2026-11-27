@@ -10,6 +10,10 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import { SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
+import {
+  isNightshiftSupportedSpace,
+  NIGHTSHIFT_UNSUPPORTED_SPACE_MESSAGE,
+} from '@kbn/nightshift-shared';
 import type { SignificantEventsKIsOnboardingClient } from './onboarding_workflow_client';
 import { pollUntil } from './poll_until';
 
@@ -125,6 +129,16 @@ export const createContinuousOnboardingWorkflowService = ({
 
   return {
     async ensureWorkflow({ enabled, request, spaceId, skipExecutionDrain = false }) {
+      // Installing an enabled workflow binds work to a space, and Nightshift only runs in the
+      // default one. Disabling stays allowed everywhere, so a space set up on an earlier build
+      // can still be taken down.
+      if (enabled && !isNightshiftSupportedSpace(spaceId)) {
+        log.warn(
+          `Not installing the continuous KI onboarding workflow in space ${spaceId}: ${NIGHTSHIFT_UNSUPPORTED_SPACE_MESSAGE}`
+        );
+        return;
+      }
+
       const workflowId = `${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-${spaceId}`;
       const managedWorkflowOptions = { spaceId, workflowIdSuffix: spaceId };
 

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { createTGridMocks } from '@kbn/timelines-plugin/public/mock';
-
 import { createStartServicesMock } from '../kibana_react.mock';
 import { mockApm } from '../../apm/service.mock';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
@@ -49,7 +47,7 @@ export const useKibana = jest.fn().mockReturnValue({
       OsqueryResults: jest.fn().mockReturnValue(null),
       fetchAllLiveQueries: jest.fn().mockReturnValue({ data: { data: { items: [] } } }),
     },
-    timelines: createTGridMocks(),
+    timelines: {},
     savedObjectsTagging: {
       ui: {
         getTableColumnDefinition: jest.fn(),

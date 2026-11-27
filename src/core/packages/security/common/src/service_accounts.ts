@@ -8,6 +8,15 @@
  */
 
 /**
+ * Upper bound on a service account ID. Bindings are looked up by the account they name, to answer
+ * "what would break if this account went away?", and an ID longer than the index keeps would make
+ * its bindings invisible to that lookup.
+ *
+ * @public
+ */
+export const SERVICE_ACCOUNT_ID_MAX_LENGTH = 1024;
+
+/**
  * Parameters for creating a service account.
  *
  * @public
@@ -140,6 +149,69 @@ export interface BindServiceAccountWorkloadParams extends ServiceAccountWorkload
 }
 
 /**
+ * One change in a bulk update of workload bindings. `bind` binds the workload to the account,
+ * replacing any binding it has. `unbind` removes the workload's binding. Unbinding is named
+ * explicitly, never inferred from a missing account, so a caller that loses track of an account
+ * cannot silently drop a workload to no identity at all.
+ *
+ * @public
+ */
+export type ServiceAccountWorkloadBindingChange =
+  | ({ op: 'bind' } & BindServiceAccountWorkloadParams)
+  | ({ op: 'unbind' } & ServiceAccountWorkloadRef);
+
+/**
+ * Why one change in a bulk update of workload bindings was not applied. Safe to return to the
+ * caller's own client: a failure that is not a client error carries a generic message, and its
+ * details are only logged.
+ *
+ * @public
+ */
+export interface ServiceAccountWorkloadBindingChangeError {
+  /**
+   * The HTTP status code the change would have failed with on its own, e.g. `403`. A status
+   * below 500 means the change was not applied. A status of 500 or above means it may or may not
+   * have been applied, for example when the write timed out after Elasticsearch received it.
+   */
+  statusCode: number;
+  message: string;
+}
+
+/**
+ * The outcome of one change in a bulk update of workload bindings. Each result names the workload
+ * and the operation of the change it reports on.
+ *
+ * `previousServiceAccountId` is the account the workload was bound to when the change read its
+ * binding. It is absent when the workload had no binding, or when its binding failed integrity
+ * verification and so cannot be trusted to name an account. It is for information only, never a
+ * target to restore: the read comes before the write, so a concurrent change to the same workload
+ * can land in between, and restoring it would undo that change. A caller that has to undo a change
+ * reads the binding again with `getWorkloadBinding`, and changes it only while it still equals the
+ * `binding` the change returned.
+ *
+ * @public
+ */
+export type ServiceAccountWorkloadBindingChangeResult =
+  | (ServiceAccountWorkloadRef & {
+      op: 'bind';
+      ok: true;
+      binding: ServiceAccountWorkloadBinding;
+      previousServiceAccountId?: string;
+    })
+  | (ServiceAccountWorkloadRef & {
+      op: 'unbind';
+      ok: true;
+      /** Whether a binding existed and was removed. */
+      removed: boolean;
+      previousServiceAccountId?: string;
+    })
+  | (ServiceAccountWorkloadRef & {
+      op: ServiceAccountWorkloadBindingChange['op'];
+      ok: false;
+      error: ServiceAccountWorkloadBindingChangeError;
+    });
+
+/**
  * A service account.
  *
  * @public
@@ -156,4 +228,31 @@ export interface ServiceAccount {
   description?: string;
   /** The role names the account was created with. See {@link CreateServiceAccountParams.roles}. */
   roles: string[];
+}
+
+/**
+ * The parts of a service account that name it, for showing which account a workload runs as to
+ * users who may see the workload but not manage service accounts. Deliberately smaller than
+ * {@link ServiceAccount}: roles and description stay with the users who manage accounts.
+ *
+ * @public
+ */
+export interface ServiceAccountSummary {
+  /** See {@link ServiceAccount.id}. */
+  id: string;
+  /** See {@link ServiceAccount.name}. */
+  name: string;
+  /**
+   * Whether the account can authenticate. Always `true` on Serverless for now, because UIAM does
+   * not yet report whether an account is disabled.
+   */
+  enabled: boolean;
+  /**
+   * Whether this Kibana expects to be able to run as the account, judged without asking the
+   * account's identity provider. On Elasticsearch, that means Kibana holds a credential for it,
+   * which can be stale for an account that was deleted and recreated outside Kibana. On
+   * Serverless, it is always `true`, because UIAM only returns accounts that this project may
+   * assume.
+   */
+  assumable: boolean;
 }

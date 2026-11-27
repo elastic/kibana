@@ -14,8 +14,6 @@ import { InvestigationsSettingsTab } from './investigations_settings_tab';
 const mockRequestSave = jest.fn();
 const mockCancel = jest.fn();
 const mockOpenCustomContext = jest.fn();
-let mockRunLimitGroups: readonly string[] = [];
-let mockRunLimitExhaustionCallouts: string | undefined;
 const mockKibanaServices = {
   application: { navigateToUrl: jest.fn() },
   http: {},
@@ -32,25 +30,19 @@ jest.mock('../../hooks/use_kibana', () => ({
 jest.mock('./components/investigation_identity_section', () => ({
   InvestigationIdentitySection: () => <div data-test-subj="investigation-identity-section" />,
 }));
-jest.mock('./components/run_limits_section', () => ({
-  RunLimitsSection: ({ exhaustionCallouts }: { exhaustionCallouts: string }) => {
-    mockRunLimitExhaustionCallouts = exhaustionCallouts;
-    return <div data-test-subj="run-limits-section" />;
-  },
+jest.mock('./components/investigation_limits_section', () => ({
+  InvestigationLimitsSection: () => <div data-test-subj="run-limits-section" />,
 }));
-jest.mock('./components/use_run_limits_form', () => ({
-  useRunLimitsForm: ({ groups }: { groups: readonly string[] }) => {
-    mockRunLimitGroups = groups;
-    return {
-      isDirty: true,
-      isSaving: false,
-      canManage: true,
-      update: { limits: { investigation: 10 } },
-      requestSave: mockRequestSave,
-      confirmAndSave: jest.fn(),
-      cancel: mockCancel,
-    };
-  },
+jest.mock('./components/use_investigation_limits_form', () => ({
+  useInvestigationLimitsForm: () => ({
+    isDirty: true,
+    isSaving: false,
+    canManage: true,
+    update: { limits: { automatic_investigation: 10 } },
+    requestSave: mockRequestSave,
+    confirmAndSave: jest.fn(),
+    cancel: mockCancel,
+  }),
 }));
 
 const mockUseUnsavedChangesPrompt = useUnsavedChangesPrompt as jest.MockedFunction<
@@ -60,8 +52,6 @@ const mockUseUnsavedChangesPrompt = useUnsavedChangesPrompt as jest.MockedFuncti
 describe('InvestigationsSettingsTab', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockRunLimitGroups = [];
-    mockRunLimitExhaustionCallouts = undefined;
     mockRequestSave.mockResolvedValue('saved');
   });
 
@@ -78,8 +68,7 @@ describe('InvestigationsSettingsTab', () => {
     expect(screen.getByTestId('nightshiftInvestigationProcessSection')).toHaveTextContent(
       'Investigation process'
     );
-    expect(mockRunLimitGroups).toEqual(['investigation']);
-    expect(mockRunLimitExhaustionCallouts).toBe('automations');
+    expect(screen.getByTestId('run-limits-section')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('streams-settings-save-button'));
 
     await waitFor(() => expect(mockRequestSave).toHaveBeenCalledTimes(1));

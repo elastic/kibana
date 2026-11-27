@@ -7,6 +7,7 @@
 
 import type React from 'react';
 import { useMemo, useState } from 'react';
+import { noop } from 'lodash';
 import type { ActionType } from '@kbn/actions-types';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useRefreshSandboxConnectors } from '../../../data/sandbox_connectors/use_fetch_sandbox_connectors';
@@ -35,6 +36,8 @@ export function useAddConnectorFlyout({
     return triggersActionsUi.getAddConnectorFlyout({
       initialConnector: getInitialSandboxConnector(addingType),
       onClose: () => setAddingType(undefined),
+      hideSuccessToast: true,
+      onTestConnector: noop,
       onConnectorCreated: (connector) => {
         assign(connector);
         refresh();

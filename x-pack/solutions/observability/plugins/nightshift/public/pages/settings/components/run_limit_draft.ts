@@ -7,9 +7,12 @@
 
 import {
   DEFAULT_RUN_LIMITS,
+  INVESTIGATION_RUN_QUOTA_GROUPS,
+  isInvestigationRunQuotaGroup,
   MAX_RUN_LIMIT,
   MIN_RUN_LIMIT,
   RUN_QUOTA_GROUPS,
+  type InvestigationRunLimitsUpdate,
   type RunQuotaGroup,
   type RunQuotaSettingsUpdate,
   type RunQuotasResponse,
@@ -17,12 +20,17 @@ import {
 
 export { MAX_RUN_LIMIT, MIN_RUN_LIMIT, RUN_QUOTA_GROUPS };
 
-const isGloballyGated = (group: RunQuotaGroup): boolean => group !== 'investigation';
+const isGloballyGated = (group: RunQuotaGroup): boolean => !isInvestigationRunQuotaGroup(group);
+
+/** An investigation limit turned off is sent as `null`. */
+const toLimitUpdate = (group: RunQuotaGroup, limit: number): number | null =>
+  isInvestigationRunQuotaGroup(group) && limit === MIN_RUN_LIMIT ? null : limit;
 
 export type RunLimitDraft = number | '';
 
 interface SavedRunQuotaSettings {
   enabled: boolean;
+  investigationLimitsEnabled: boolean;
   limits: Record<RunQuotaGroup, number>;
 }
 
@@ -30,6 +38,7 @@ export interface RunQuotaDraftState {
   saved: SavedRunQuotaSettings;
   draft: {
     enabled: boolean;
+    investigationLimitsEnabled: boolean;
     limits: Record<RunQuotaGroup, RunLimitDraft>;
     restoreLimits: Record<RunQuotaGroup, number>;
   };
@@ -49,8 +58,10 @@ export const isValidRunLimitDraft = (value: unknown): value is number =>
 
 export const createRunQuotaDraftState = ({
   enabled,
+  investigationLimitsEnabled = true,
   limits,
 }: Pick<RunQuotasResponse, 'enabled'> & {
+  investigationLimitsEnabled?: boolean;
   limits?: Partial<Record<RunQuotaGroup, number>>;
 }): RunQuotaDraftState => {
   const resolvedLimits = Object.fromEntries(
@@ -69,10 +80,12 @@ export const createRunQuotaDraftState = ({
   return {
     saved: {
       enabled,
+      investigationLimitsEnabled,
       limits: effectiveLimits,
     },
     draft: {
       enabled,
+      investigationLimitsEnabled,
       limits: { ...effectiveLimits },
       restoreLimits: Object.fromEntries(
         RUN_QUOTA_GROUPS.map((group) => [
@@ -86,8 +99,48 @@ export const createRunQuotaDraftState = ({
   };
 };
 
+/**
+ * Keeps the finite limit to restore for each limit `next` stores as unlimited, so turning a limit
+ * back on after a save or a refresh restores the value it had rather than the default.
+ */
+export const keepRestoreLimits = (
+  next: RunQuotaDraftState,
+  previous?: RunQuotaDraftState
+): RunQuotaDraftState =>
+  previous
+    ? {
+        ...next,
+        draft: {
+          ...next.draft,
+          restoreLimits: Object.fromEntries(
+            RUN_QUOTA_GROUPS.map((group) => [
+              group,
+              next.saved.limits[group] === MIN_RUN_LIMIT
+                ? previous.draft.restoreLimits[group]
+                : next.draft.restoreLimits[group],
+            ])
+          ) as Record<RunQuotaGroup, number>,
+        },
+      }
+    : next;
+
+/** Reads every empty draft limit as unlimited, for a form in which an empty input means no limit. */
+export const withEmptyLimitsAsUnlimited = (state: RunQuotaDraftState): RunQuotaDraftState => ({
+  ...state,
+  draft: {
+    ...state.draft,
+    limits: Object.fromEntries(
+      RUN_QUOTA_GROUPS.map((group) => {
+        const limit = state.draft.limits[group];
+        return [group, limit === '' ? MIN_RUN_LIMIT : limit];
+      })
+    ) as Record<RunQuotaGroup, RunLimitDraft>,
+  },
+});
+
 export const hasRunQuotaDraftChanges = ({ saved, draft }: RunQuotaDraftState): boolean =>
   saved.enabled !== draft.enabled ||
+  saved.investigationLimitsEnabled !== draft.investigationLimitsEnabled ||
   RUN_QUOTA_GROUPS.some((group) => saved.limits[group] !== draft.limits[group]);
 
 export const isRunQuotaDraftValid = (
@@ -95,6 +148,26 @@ export const isRunQuotaDraftValid = (
 ): state is RunQuotaDraftState & {
   draft: { limits: Record<RunQuotaGroup, number> };
 } => RUN_QUOTA_GROUPS.every((group) => isValidRunLimitDraft(state.draft.limits[group]));
+
+/**
+ * Turns the investigation limits on or off, keeping their values. Turning them on while every one
+ * is unlimited restores the remembered limits, so the switch on always enforces a limit.
+ */
+export const setInvestigationLimitsEnabled = (
+  state: RunQuotaDraftState,
+  enabled: boolean
+): RunQuotaDraftState => {
+  const limits = { ...state.draft.limits };
+  if (
+    enabled &&
+    INVESTIGATION_RUN_QUOTA_GROUPS.every((group) => !isFiniteRunLimit(limits[group]))
+  ) {
+    for (const group of INVESTIGATION_RUN_QUOTA_GROUPS) {
+      limits[group] = state.draft.restoreLimits[group];
+    }
+  }
+  return { ...state, draft: { ...state.draft, investigationLimitsEnabled: enabled, limits } };
+};
 
 export const setRunLimitEnabled = (
   state: RunQuotaDraftState,
@@ -158,17 +231,19 @@ export const buildRunQuotaSettingsUpdate = (
       )
     ) as Partial<Record<RunQuotaGroup, number>>;
 
-    const investigationLimit = state.draft.limits.investigation;
+    const investigationLimits: InvestigationRunLimitsUpdate = Object.fromEntries(
+      INVESTIGATION_RUN_QUOTA_GROUPS.flatMap((group) => {
+        const next = state.draft.limits[group];
+        return state.saved.limits[group] === next ? [] : [[group, toLimitUpdate(group, next)]];
+      })
+    );
     return Object.keys(activateLimits).length > 0
       ? {
           activateLimits,
-          ...(state.saved.limits.investigation === investigationLimit
-            ? {}
-            : {
-                limits: {
-                  investigation: investigationLimit === MIN_RUN_LIMIT ? null : investigationLimit,
-                },
-              }),
+          ...(state.saved.investigationLimitsEnabled !== state.draft.investigationLimitsEnabled
+            ? { investigationLimitsEnabled: state.draft.investigationLimitsEnabled }
+            : {}),
+          ...(Object.keys(investigationLimits).length > 0 ? { limits: investigationLimits } : {}),
         }
       : undefined;
   }
@@ -177,6 +252,9 @@ export const buildRunQuotaSettingsUpdate = (
   if (state.saved.enabled !== state.draft.enabled) {
     update.enabled = state.draft.enabled;
   }
+  if (state.saved.investigationLimitsEnabled !== state.draft.investigationLimitsEnabled) {
+    update.investigationLimitsEnabled = state.draft.investigationLimitsEnabled;
+  }
 
   const changedLimits = Object.fromEntries(
     RUN_QUOTA_GROUPS.flatMap((group) => {
@@ -184,7 +262,7 @@ export const buildRunQuotaSettingsUpdate = (
       if (state.saved.limits[group] === next) {
         return [];
       }
-      return [[group, group === 'investigation' && next === MIN_RUN_LIMIT ? null : next]];
+      return [[group, toLimitUpdate(group, next)]];
     })
   ) as NonNullable<RunQuotaSettingsUpdate['limits']>;
 
@@ -192,7 +270,11 @@ export const buildRunQuotaSettingsUpdate = (
     update.limits = changedLimits;
   }
 
-  return update.enabled === undefined && update.limits === undefined ? undefined : update;
+  return update.enabled === undefined &&
+    update.investigationLimitsEnabled === undefined &&
+    update.limits === undefined
+    ? undefined
+    : update;
 };
 
 export const isFiniteRunLimit = (limit: RunLimitDraft): limit is number =>

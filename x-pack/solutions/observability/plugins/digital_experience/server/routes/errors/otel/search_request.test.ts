@@ -7,6 +7,9 @@
 
 import { NO_STACKTRACE, NO_TYPE, errorsSearch } from './search_request';
 
+/** The runtime field of the page filter, which reads the route of a page and then its URL. */
+const PAGE_FIELD = 'digital_experience_filter_pageUrl';
+
 const PARAMS = { serviceName: 'shop', start: 1000, end: 2000 };
 
 describe('errorsSearch', () => {
@@ -49,5 +52,45 @@ describe('errorsSearch', () => {
 
     expect(groupAggs.message.top_hits).toMatchObject({ size: 1, fields: ['exception.message'] });
     expect(groupAggs.lastSeen).toEqual({ max: { field: '@timestamp' } });
+  });
+});
+
+describe('errorsSearch with filters', () => {
+  const FILTERS = {
+    browser: [{ value: 'Chrome', exclude: false }],
+    pageUrl: [{ value: 'https://shop.example.com/', exclude: false }],
+  };
+
+  it('narrows the groups to the selected browser and page, not the picker environments', () => {
+    const request = errorsSearch({ ...PARAMS, filters: FILTERS });
+
+    expect(Object.keys(request.runtime_mappings)).toEqual(
+      expect.arrayContaining([
+        'digital_experience_filter_browser',
+        'digital_experience_filter_pageUrl',
+      ])
+    );
+    // Errors carry the route of their page, which the page filter reads first.
+    expect(request.aggs.inEnvironment.filter).toEqual({
+      bool: {
+        filter: [
+          { match_all: {} },
+          { terms: { digital_experience_filter_browser: ['Chrome'] } },
+          { terms: { [PAGE_FIELD]: ['https://shop.example.com/'] } },
+        ],
+      },
+    });
+    expect(request.aggs.environments).toBeDefined();
+  });
+
+  it('is unchanged without a selection', () => {
+    expect(errorsSearch(PARAMS).aggs.inEnvironment.filter).toEqual({ match_all: {} });
+  });
+
+  it('keeps the documents the KQL query matches', () => {
+    const kuery = { match: { 'browser.name': 'Chrome' } };
+
+    expect(errorsSearch({ ...PARAMS, kuery }).query.bool.filter).toContainEqual(kuery);
+    expect(errorsSearch(PARAMS).query.bool.filter).not.toContainEqual(kuery);
   });
 });

@@ -111,6 +111,7 @@ const classicWorkflowActions = (): EpisodeAction[] => {
         ...compositeDeps,
         overlays: overlayServiceMock.createStartContract(),
         rendering: renderingServiceMock.create(),
+        queryClient,
       },
       extensionFor('ALERTING_V2_SNOOZE_EPISODE')
     ),
@@ -305,6 +306,7 @@ describe('ClassicAlertDetailsFlyout', () => {
       order: 1,
       displayName: 'Test Action',
       iconType: 'star',
+      enforcesOwnPrivileges: false,
       isCompatible: jest.fn(() => true),
       execute: jest.fn(async () => {}),
     };
@@ -366,6 +368,7 @@ describe('ClassicAlertDetailsFlyout', () => {
       order: 1,
       displayName: 'Incompatible',
       iconType: 'star',
+      enforcesOwnPrivileges: false,
       isCompatible: () => false,
       execute: jest.fn(async () => {}),
     };
