@@ -88,7 +88,8 @@ export const tieredTechniqueCredit = (
  * F1 with ordinal credit: recall sums per-expected credit; precision counts
  * every scored generated id at its credit (a parent-only match contributes
  * 0.5, not a false positive). Generated ids outside the expected family stay
- * 0-credit false positives.
+ * 0-credit false positives. A parent co-tagged alongside its present required
+ * sub-technique, and a sub-technique of a required parent, are neutral (see below).
  */
 export const ordinalMitreF1 = (
   generated: Set<string>,
@@ -115,12 +116,31 @@ export const ordinalMitreF1 = (
   const expectedParents = new Set(
     [...expected].map((id) => parentTechniqueId(id)).filter((p): p is string => p != null)
   );
+  // Neutral ids are excluded from precision (numerator and denominator). Both are
+  // the schema's canonical nesting of a correct answer, not noise:
+  //  - a parent co-tag when one of its required sub-techniques is also present
+  //    (`technique: [{ id: 'T1053', subtechnique: [{ id: 'T1053.005' }] }]`);
+  //  - a sub-technique alongside its required parent, which is strictly more specific.
+  // A parent counts toward precision (at 0.5) only when none of its required
+  // sub-techniques is present, so the parent-only near-miss keeps its half credit.
   let precisionSum = 0;
+  let scoredCount = 0;
   for (const id of generated) {
-    if (expected.has(id)) precisionSum += 1;
-    else if (expectedParents.has(id)) precisionSum += 0.5;
+    const parent = parentTechniqueId(id);
+    const isExpected = expected.has(id);
+    const isParentOfPresentRequiredSub =
+      !isExpected &&
+      expectedParents.has(id) &&
+      [...expected].some((e) => parentTechniqueId(e) === id && generated.has(e));
+    const isSubOfRequiredParent =
+      !isExpected && parent != null && expected.has(parent) && generated.has(parent);
+    if (!isParentOfPresentRequiredSub && !isSubOfRequiredParent) {
+      scoredCount += 1;
+      if (isExpected) precisionSum += 1;
+      else if (expectedParents.has(id)) precisionSum += 0.5;
+    }
   }
-  const precision = precisionSum / generated.size;
+  const precision = scoredCount > 0 ? precisionSum / scoredCount : 0;
   const recall = recallSum / expected.size;
   const f1 = precision + recall > 0 ? (2 * precision * recall) / (precision + recall) : 0;
   return { f1, precision, recall, partials };
