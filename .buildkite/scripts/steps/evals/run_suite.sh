@@ -343,6 +343,7 @@ EOF
         retry:
           automatic:
             - exit_status: "-1"
+              signal_reason: none
               limit: 3
 EOF
         fi
