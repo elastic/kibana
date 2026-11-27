@@ -34,6 +34,7 @@ import type { DiscoverAppLocatorParams } from '../../../../../../common/app_loca
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
 import {
+  QUERY_EXPANDED_DOC_OWNER,
   selectCurrentProfileLocatorState,
   type RuntimeStateManager,
   type TabState,
@@ -67,9 +68,15 @@ const getExpandedDocHelpText = ({
   }
 
   const isEsqlMode = isOfAggregateQueryType(currentTab.appState.query);
-  const disabledReason = getExpandedDocLinkDisabledReason(
-    getExpandedDocLinkability(currentTab.appState.query, currentTab.expandedDoc)
-  );
+  const disabledReason =
+    currentTab.expandedDocOwner === QUERY_EXPANDED_DOC_OWNER
+      ? i18n.translate('discover.share.expandedDocFromQueryDescription', {
+          defaultMessage:
+            "It comes from a query other than the current one, so the link can't restore it.",
+        })
+      : getExpandedDocLinkDisabledReason(
+          getExpandedDocLinkability(currentTab.appState.query, currentTab.expandedDoc)
+        );
 
   // A non-linkable document takes precedence over the relative-time warning.
   if (disabledReason) {

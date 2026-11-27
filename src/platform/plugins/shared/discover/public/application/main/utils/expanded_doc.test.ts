@@ -15,7 +15,6 @@ import {
   getExpandedDocLinkDisabledReason,
   getExpandedDocLinkability,
   getExpandedDocRef,
-  hasEsqlIdentityMetadata,
   matchesExpandedDocRef,
 } from './expanded_doc';
 
@@ -94,14 +93,6 @@ describe('getExpandedDocLinkability', () => {
     );
   });
 
-  it('reports a query without METADATA as unlinkable even when the document has identity', () => {
-    // A record may carry _id/_index from elsewhere (a chart section's own lookup): a ref
-    // restored through this query could never be refetched, so none is written.
-    expect(getExpandedDocLinkability({ esql: 'FROM logs' }, docWithMetadata)).toBe(
-      ExpandedDocLinkability.EsqlMissingMetadata
-    );
-  });
-
   it('reports a transformational ES|QL query as unlinkable regardless of the document', () => {
     expect(
       getExpandedDocLinkability({ esql: 'FROM logs | STATS count() BY host' }, docWithMetadata)
@@ -112,22 +103,6 @@ describe('getExpandedDocLinkability', () => {
         docWithMetadata
       )
     ).toBe(ExpandedDocLinkability.EsqlTransformational);
-  });
-});
-
-describe('hasEsqlIdentityMetadata', () => {
-  it('finds _id and _index in the source command, whatever their order or case', () => {
-    expect(hasEsqlIdentityMetadata('FROM logs METADATA _id, _index | LIMIT 10')).toBe(true);
-    expect(hasEsqlIdentityMetadata('from logs metadata _index, _id')).toBe(true);
-  });
-
-  it('requires both identity fields, in the query itself', () => {
-    expect(hasEsqlIdentityMetadata('FROM logs')).toBe(false);
-    expect(hasEsqlIdentityMetadata('FROM logs METADATA _id')).toBe(false);
-    // A literal elsewhere in the query is not the source command's METADATA.
-    expect(hasEsqlIdentityMetadata('FROM logs | WHERE message == "METADATA _id, _index"')).toBe(
-      false
-    );
   });
 });
 

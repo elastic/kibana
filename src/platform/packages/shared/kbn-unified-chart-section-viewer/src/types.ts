@@ -11,7 +11,7 @@ import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
-import type { DataTableRecord, MetricsGridSettings, MetricsGridSort } from '@kbn/discover-utils';
+import type { MetricsGridSettings, MetricsGridSort } from '@kbn/discover-utils';
 import type { ValuesType } from 'utility-types';
 import type { ExternalServices } from './context/external_services';
 import type { METRICS_SORT_BY, METRICS_SORT_DIRECTION } from './common/constants';
@@ -25,9 +25,14 @@ interface ChartSectionActions {
   }) => void;
   updateESQLQuery?: (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
   /**
-   * Opens or updates the document flyout, as Discover's context awareness toolkit does.
+   * Has the host fetch the first row of an ES|QL query and open it in its document flyout.
+   * Resolves to the opened document's id, or `undefined` when the query returns no rows.
    */
-  setExpandedDoc?: (record?: DataTableRecord, options?: { initialTabId?: string }) => void;
+  setExpandedDocByQuery?: (params: {
+    esql: string;
+    initialTabId?: string;
+    abortSignal?: AbortSignal;
+  }) => Promise<string | undefined>;
 }
 
 export interface UnifiedMetricsGridProps extends ChartSectionProps {
