@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { combineReducers } from 'redux-v4';
+import { combineReducers, createSelector } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
-import { createSelector } from 'reselect-v4';
 
 import moment from 'moment-timezone';
 import { license } from './license';

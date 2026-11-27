@@ -1,5 +1,5 @@
 {
-  "sha1": "f7108b6616f0763c658f1ed057ec1290b494447f",
+  "sha1": "0bd7f502e02b8d10babcc6fe644024b297640efb",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -16,6 +16,20 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/approved_proposal_caption.spec.ts",
         "line": 38,
         "column": 37
+      }
+    },
+    {
+      "id": "a1fd0463f3b1446-7a45617dc07af03",
+      "title": "AlertZero in a Classic space opens AlertZero from the Security side navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/classic_space_navigation.spec.ts",
+        "line": 19,
+        "column": 28
       }
     },
     {

@@ -12,7 +12,7 @@ import { ProfilesTab } from './profiles_tab';
 
 const meta: Meta<typeof ProfilesTab> = {
   component: ProfilesTab,
-  title: 'Search boost/Boost profiles tab',
+  title: 'Search boost/Tables/Boost profiles tab',
   args: {
     profiles: mockProfiles,
     rules: mockRules,

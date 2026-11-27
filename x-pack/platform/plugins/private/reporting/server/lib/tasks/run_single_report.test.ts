@@ -1209,6 +1209,7 @@ describe('Run Single Report Task', () => {
   });
   describe('page-render-service retries', () => {
     const CREATED_AT = '2026-10-14T12:00:00.000Z';
+    const CLAIMED_RUN_AT = new Date(CREATED_AT);
 
     async function runFailingWith(
       error: Error,
@@ -1269,6 +1270,7 @@ describe('Run Single Report Task', () => {
           id: 'random-task-id',
           attempts,
           state,
+          runAt: CLAIMED_RUN_AT,
           params: {
             index: 'cool-reporting-index',
             id: 'test1',
@@ -1311,7 +1313,8 @@ describe('Run Single Report Task', () => {
       });
 
       await expect(result).resolves.toEqual({
-        runAt: expect.any(Date),
+        // Keeps its place ahead of reports queued after it.
+        runAt: CLAIMED_RUN_AT,
         state: { unavailableRuns: 1, queued: true },
       });
       // Closes the execution the run started, without calling it an error.
@@ -1323,19 +1326,23 @@ describe('Run Single Report Task', () => {
     it('reschedules an unreachable service as queuing, not an attempt', async () => {
       const { result } = await runFailingWith(new RenderServiceUnavailableError('down'));
 
-      await expect(result).resolves.toEqual({
+      const resolved = await result;
+      expect(resolved).toEqual({
         runAt: expect.any(Date),
         state: { unavailableRuns: 1, queued: true },
       });
+      expect((resolved as { runAt: Date }).runAt.getTime()).toBeGreaterThan(Date.now());
     });
 
     it('reschedules a failed render as another attempt', async () => {
       const { result, store } = await runFailingWith(new RenderFailedError('boom'));
 
-      await expect(result).resolves.toEqual({
+      const resolved = await result;
+      expect(resolved).toEqual({
         runAt: expect.any(Date),
         state: { unavailableRuns: 0, queued: false, waitingSince: expect.any(Number) },
       });
+      expect((resolved as { runAt: Date }).runAt.getTime()).toBeGreaterThan(Date.now());
       expect(store.setReportError).toHaveBeenCalled();
       expect(store.setReportFailed).not.toHaveBeenCalled();
     });

@@ -15,6 +15,8 @@ import type { ProcessedRoundInput } from './processed_input';
  */
 export type ProcessedUserMessageEvent = Omit<MessageEvent, 'data'> & {
   data: ProcessedRoundInput;
+  /** A steer the run it was sent to never read: earlier context, not a request to act on now. */
+  unread_steer?: true;
 };
 
 /** A standalone (custom or attachment) event with its LLM representation resolved. */

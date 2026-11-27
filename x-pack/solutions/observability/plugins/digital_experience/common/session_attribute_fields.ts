@@ -20,13 +20,15 @@ export const SESSION_ATTRIBUTE_FIELDS = {
     'resource.attributes.deployment.environment.name',
     'resource.attributes.deployment.environment',
   ],
+  // The fields of EDOT Browser's `setUser()`, which writes the name as `user.full_name`. It always
+  // writes `user.id`, so the id comes last or a name would never show.
   user: [
     'attributes.user.email',
     'resource.attributes.user.email',
+    'attributes.user.full_name',
+    'resource.attributes.user.full_name',
     'attributes.user.id',
     'resource.attributes.user.id',
-    'attributes.user.name',
-    'resource.attributes.user.name',
   ],
   browser: [
     'resource.attributes.browser.name',
@@ -51,12 +53,15 @@ export const SESSION_ATTRIBUTE_FIELDS = {
     'attributes.device.model.name',
     'resource.attributes.device.type',
   ],
+  // `SOURCE_MOBILE_FIELDS`: the device when there is no model or type.
+  mobile: ['resource.attributes.browser.mobile', 'attributes.browser.mobile'],
   countryIso: [
     'attributes.client.geo.country_iso_code',
     'resource.attributes.client.geo.country_iso_code',
   ],
   region: ['attributes.client.geo.region_name', 'resource.attributes.client.geo.region_name'],
   city: ['attributes.client.geo.city_name', 'resource.attributes.client.geo.city_name'],
+  appVersion: ['resource.attributes.service.version', 'attributes.service.version'],
 } as const;
 
 export type SessionAttribute = keyof typeof SESSION_ATTRIBUTE_FIELDS;

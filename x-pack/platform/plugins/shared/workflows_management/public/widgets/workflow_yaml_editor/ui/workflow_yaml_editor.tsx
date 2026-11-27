@@ -103,6 +103,7 @@ import {
   GenericMonacoConnectorHandler,
   HttpMonacoConnectorStepHandler,
   KibanaMonacoConnectorHandler,
+  WorkflowAwaitExecutionsMonacoConnectorHandler,
   WorkflowExecuteMonacoConnectorHandler,
 } from '../lib/monaco_connectors';
 import { CustomMonacoStepHandler } from '../lib/monaco_connectors/custom_monaco_step_handler';
@@ -546,6 +547,9 @@ export const WorkflowYAMLEditor = ({
 
         const workflowExecuteHandler = new WorkflowExecuteMonacoConnectorHandler();
         registerMonacoConnectorHandler(workflowExecuteHandler);
+
+        const workflowAwaitExecutionsHandler = new WorkflowAwaitExecutionsMonacoConnectorHandler();
+        registerMonacoConnectorHandler(workflowAwaitExecutionsHandler);
 
         const flowControlHandler = new FlowControlMonacoStepHandler();
         registerMonacoConnectorHandler(flowControlHandler);

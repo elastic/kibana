@@ -1,0 +1,200 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { NEVER } from 'rxjs';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { MobileKpisResponse } from '../../../common/types/mobile';
+import {
+  APPLICATION_TAB_ROUTE_OPTIONS,
+  APPLICATION_TAB_ROUTE_SECURITY,
+} from '../application_tab_route';
+import { hasPartialReadAccess } from '../applications/get_partial_access';
+import { getMobileKpis } from './get_mobile_kpis';
+import { getMobileReleases } from './get_mobile_releases';
+import { MOBILE_KPIS_ENDPOINT, MOBILE_RELEASES_ENDPOINT, mobileRouteRepository } from './route';
+
+jest.mock('./get_mobile_kpis');
+jest.mock('./get_mobile_releases');
+jest.mock('../applications/get_partial_access');
+
+const START = '2021-01-18T12:00:00.000Z';
+const END = '2021-01-18T13:00:00.000Z';
+
+const KPIS: Omit<MobileKpisResponse, 'isPartial'> = {
+  hasData: true,
+  sessions: { value: 7, previous: 5, delta: 2 },
+  users: { value: 3, previous: 3, delta: 0 },
+  errorRate: { value: 0.5, previous: null, delta: null },
+  releases: [{ key: '1.2.3', count: 7 }],
+  osNames: [{ key: 'iOS', count: 7 }],
+  platforms: ['ios'],
+  environments: ['production'],
+};
+
+const esClient = { esql: { query: jest.fn() } };
+const internalEsClient = { indices: { resolveIndex: jest.fn() } };
+
+const runHandler = ({
+  query = { start: START, end: END },
+}: {
+  query?: { start: string; end: string; environment?: string; osName?: string; release?: string };
+}) => {
+  const handler = mobileRouteRepository[MOBILE_KPIS_ENDPOINT].handler as unknown as (
+    resources: unknown
+  ) => Promise<MobileKpisResponse>;
+  return handler({
+    params: { path: { serviceName: 'shop-mobile' }, query },
+    context: {
+      core: Promise.resolve({
+        elasticsearch: { client: { asCurrentUser: esClient, asInternalUser: internalEsClient } },
+        featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+      }),
+    },
+    request: { events: { aborted$: NEVER } },
+    plugins: {},
+    isServerless: false,
+    isUxEnabled: true,
+    logger: loggingSystemMock.createLogger(),
+  });
+};
+
+beforeEach(() => {
+  jest.mocked(getMobileKpis).mockReset().mockResolvedValue(KPIS);
+  jest.mocked(hasPartialReadAccess).mockReset().mockResolvedValue(false);
+});
+
+describe('mobile KPIs route', () => {
+  it('queries the KPIs with the filters and the time range', async () => {
+    const response = await runHandler({
+      query: {
+        start: START,
+        end: END,
+        environment: 'production',
+        osName: 'iPadOS',
+        release: '1.2.3',
+      },
+    });
+
+    expect(response).toEqual({ ...KPIS, isPartial: false });
+    expect(jest.mocked(getMobileKpis)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        // The plugin's traced client, over the user's.
+        esClient: expect.objectContaining({ client: esClient }),
+        filters: { serviceName: 'shop-mobile', osName: 'iPadOS', release: '1.2.3' },
+        start: Date.parse(START),
+        end: Date.parse(END),
+        environment: 'production',
+      })
+    );
+  });
+
+  it("reports partial values when the user can't read every OTel index", async () => {
+    jest.mocked(hasPartialReadAccess).mockResolvedValue(true);
+
+    const response = await runHandler({});
+
+    expect(response.isPartial).toBe(true);
+    expect(jest.mocked(hasPartialReadAccess)).toHaveBeenCalledWith(
+      expect.objectContaining({ esClient, internalEsClient })
+    );
+    await expect(
+      jest.mocked(hasPartialReadAccess).mock.calls[0][0].getIndices()
+    ).resolves.toStrictEqual(['logs-*.otel-*', 'traces-*.otel-*']);
+  });
+
+  describe('params', () => {
+    const { params } = mobileRouteRepository[MOBILE_KPIS_ENDPOINT];
+    const schema = params as unknown as {
+      shape: { query: { safeParse: (query: unknown) => { success: boolean } } };
+    };
+    const isValid = (query: Record<string, string>) =>
+      schema.shape.query.safeParse({ start: START, end: END, ...query }).success;
+
+    it('accepts no filter, an OS and a release', () => {
+      expect(isValid({})).toBe(true);
+      expect(isValid({ osName: 'iPadOS', release: '1.2.3' })).toBe(true);
+    });
+
+    it('rejects a range that starts after it ends, an empty or too long OS, a too long release', () => {
+      expect(isValid({ start: END, end: START })).toBe(false);
+      expect(isValid({ osName: '' })).toBe(false);
+      expect(isValid({ osName: 'x'.repeat(65) })).toBe(false);
+      expect(isValid({ release: 'x'.repeat(1025) })).toBe(false);
+    });
+  });
+});
+
+describe('mobile releases route', () => {
+  const { params, handler } = mobileRouteRepository[MOBILE_RELEASES_ENDPOINT];
+  const schema = params as unknown as {
+    shape: { query: { safeParse: (query: unknown) => { success: boolean } } };
+  };
+  const isValid = (query: Record<string, string>) =>
+    schema.shape.query.safeParse({ start: START, end: END, ...query }).success;
+
+  it('takes the same params as the KPI route', () => {
+    expect(isValid({})).toBe(true);
+    expect(isValid({ osName: 'iPadOS', release: '1.2.3' })).toBe(true);
+    expect(isValid({ start: END, end: START })).toBe(false);
+    expect(isValid({ osName: '' })).toBe(false);
+    expect(isValid({ release: 'x'.repeat(1025) })).toBe(false);
+    // The time zone of the charts' buckets, as the applications and Overview routes take it
+    expect(isValid({ timeZone: 'America/New_York' })).toBe(true);
+    expect(isValid({ timeZone: '+05:30' })).toBe(true);
+    expect(isValid({ timeZone: 'Mars/Olympus' })).toBe(false);
+    // The options and security of every application tab route, as the KPI route has them.
+    ([MOBILE_RELEASES_ENDPOINT, MOBILE_KPIS_ENDPOINT] as const).forEach((endpoint) =>
+      expect(mobileRouteRepository[endpoint]).toEqual(
+        expect.objectContaining({
+          options: APPLICATION_TAB_ROUTE_OPTIONS,
+          security: APPLICATION_TAB_ROUTE_SECURITY,
+        })
+      )
+    );
+  });
+
+  it('queries the releases with the filters and the time range', async () => {
+    const releases = { histogram: { interval: { value: 1, unit: 's' }, start: 0, end: 1 } };
+    jest.mocked(getMobileReleases).mockResolvedValue(releases as never);
+
+    const response = await (handler as unknown as (resources: unknown) => Promise<unknown>)({
+      params: {
+        path: { serviceName: 'shop-mobile' },
+        query: {
+          start: START,
+          end: END,
+          environment: 'production',
+          osName: 'iOS',
+          release: '1.2.3',
+          timeZone: 'Europe/Madrid',
+        },
+      },
+      context: {
+        core: Promise.resolve({
+          elasticsearch: { client: { asCurrentUser: esClient, asInternalUser: internalEsClient } },
+          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+        }),
+      },
+      request: { events: { aborted$: NEVER } },
+      plugins: {},
+      isServerless: false,
+      isUxEnabled: true,
+      logger: loggingSystemMock.createLogger(),
+    });
+
+    expect(response).toBe(releases);
+    expect(jest.mocked(getMobileReleases)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filters: { serviceName: 'shop-mobile', osName: 'iOS', release: '1.2.3' },
+        start: Date.parse(START),
+        end: Date.parse(END),
+        environment: 'production',
+        timeZone: 'Europe/Madrid',
+      })
+    );
+  });
+});

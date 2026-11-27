@@ -29,6 +29,9 @@ const KIND_LABELS: Record<ActivityKind, string> = {
   error: i18n.translate('xpack.digitalExperience.sessionDetail.filters.errors', {
     defaultMessage: 'Errors',
   }),
+  frustration: i18n.translate('xpack.digitalExperience.sessionDetail.filters.frustration', {
+    defaultMessage: 'Frustration',
+  }),
   web_vital: i18n.translate('xpack.digitalExperience.sessionDetail.filters.webVitals', {
     defaultMessage: 'Web vitals',
   }),

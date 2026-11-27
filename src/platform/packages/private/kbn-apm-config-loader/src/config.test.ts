@@ -8,6 +8,7 @@
  */
 
 import type { AgentConfigOptions, Labels } from 'elastic-apm-node';
+import { hostname } from 'os';
 import {
   packageMock,
   mockedRootDir,
@@ -81,6 +82,18 @@ describe('ApmConfiguration', () => {
     const config = new ApmConfiguration(mockedRootDir, kibanaConfig, false);
     const labels = config.getConfig('serviceName').globalLabels as Labels;
     expect(labels.kibana_uuid).toBe('uuid-from-config');
+  });
+
+  describe('getKibanaName', () => {
+    it('uses `server.name` from the kibana config if present', () => {
+      const config = new ApmConfiguration(mockedRootDir, { server: { name: 'my-kibana' } }, false);
+      expect(config.getKibanaName()).toBe('my-kibana');
+    });
+
+    it('defaults to the host name', () => {
+      const config = new ApmConfiguration(mockedRootDir, {}, false);
+      expect(config.getKibanaName()).toBe(hostname().replace(/[^\x00-\x7F]/g, ''));
+    });
   });
 
   it('overrides metricsInterval, breakdownMetrics, captureHeaders, and captureBody when `isDistributable` is true', () => {

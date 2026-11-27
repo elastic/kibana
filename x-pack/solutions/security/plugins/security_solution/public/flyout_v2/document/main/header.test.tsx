@@ -14,7 +14,7 @@ import {
   ALERT_SUMMARY_PANEL_TEST_ID,
   DOCUMENT_FLYOUT_HEADER_SHARE_BUTTON_TEST_ID,
 } from '../../shared/components/test_ids';
-import { useGetFlyoutLink } from '../../../flyout/document_details/right/hooks/use_get_flyout_link';
+import { useGetFlyoutLink } from './hooks/use_get_flyout_link';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { FLYOUT_V2_DOCUMENT_PAGINATION_TEST_ID } from './components/test_ids';
 import { createPaginationStore } from '../pagination/store';
@@ -110,7 +110,7 @@ jest.mock('../../../common/hooks/is_in_security_app', () => ({
   useIsInSecurityApp: jest.fn(),
 }));
 
-jest.mock('../../../flyout/document_details/right/hooks/use_get_flyout_link', () => ({
+jest.mock('./hooks/use_get_flyout_link', () => ({
   useGetFlyoutLink: jest.fn(),
 }));
 

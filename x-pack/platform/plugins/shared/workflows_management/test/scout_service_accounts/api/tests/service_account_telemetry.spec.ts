@@ -32,8 +32,49 @@ const getCompletedEventProperties = async (
   return response.body[0].properties;
 };
 
+interface BoundWorkloadsUsage {
+  total: number;
+  serviceAccounts: number;
+  byWorkload: Array<{ pluginId: string; workloadType: string; count: number }>;
+  byBinderType: Record<string, number>;
+}
+
+const countWorkflowBindings = ({ byWorkload }: BoundWorkloadsUsage): number =>
+  byWorkload.find(
+    ({ pluginId, workloadType }) =>
+      pluginId === 'workflowsExecutionEngine' && workloadType === 'workflow'
+  )?.count ?? 0;
+
+const getBoundWorkloadsUsage = async (
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>
+): Promise<BoundWorkloadsUsage> => {
+  const response = await apiClient.post('internal/telemetry/clusters/_stats', {
+    headers: { ...headers, 'elastic-api-version': '2' },
+    body: { unencrypted: true, refreshCache: true },
+    responseType: 'json',
+  });
+  expect(response, JSON.stringify(response.body)).toHaveStatusCode(200);
+  const { enabled, boundWorkloads } =
+    response.body[0].stats.stack_stats.kibana.plugins.security.serviceAccounts;
+  expect(enabled).toBe(true);
+  expect(boundWorkloads).toBeDefined();
+  const usage: BoundWorkloadsUsage = boundWorkloads;
+  const { total, serviceAccounts, byWorkload, byBinderType } = usage;
+  const counts = [
+    total,
+    serviceAccounts,
+    ...byWorkload.map(({ count }) => count),
+    byBinderType.user,
+    byBinderType.api_key,
+    byBinderType.service_account,
+  ];
+  for (const count of counts) expect(typeof count).toBe('number');
+  return usage;
+};
+
 apiTest.describe(
-  '[NON-MKI] Workflow service accounts: execution telemetry',
+  '[NON-MKI] Workflow service accounts: telemetry',
   { tag: ['@local-stateful-classic'] },
   () => {
     const { getContext, setup, teardown, cleanupWorkflows } = createServiceAccountSuite();
@@ -80,6 +121,28 @@ apiTest.describe(
         );
         expect(properties).toMatchObject({ runAs: 'service_account', runAsInherited: false });
         expect(JSON.stringify(properties)).not.toContain(accountId);
+      }
+    );
+
+    apiTest(
+      'reports workflows bound by their own run_as in the security usage collector',
+      async ({ apiClient }) => {
+        const { headers, sessionHeaders, accountId, create } = getContext();
+        const before = await getBoundWorkloadsUsage(apiClient, headers);
+
+        // The suite's default headers carry an API key; the session headers carry a user. Binding
+        // a different number with each catches telemetry that swaps the two binder types.
+        await create(apiClient, workflowYaml(accountId));
+        await create(apiClient, workflowYaml(accountId));
+        await create(apiClient, workflowYaml(accountId), sessionHeaders);
+
+        const after = await getBoundWorkloadsUsage(apiClient, headers);
+        expect(after.total - before.total).toBe(3);
+        expect(after.serviceAccounts - before.serviceAccounts).toBe(1);
+        expect(countWorkflowBindings(after) - countWorkflowBindings(before)).toBe(3);
+        expect(after.byBinderType.api_key - before.byBinderType.api_key).toBe(2);
+        expect(after.byBinderType.user - before.byBinderType.user).toBe(1);
+        expect(after.byBinderType.service_account - before.byBinderType.service_account).toBe(0);
       }
     );
   }

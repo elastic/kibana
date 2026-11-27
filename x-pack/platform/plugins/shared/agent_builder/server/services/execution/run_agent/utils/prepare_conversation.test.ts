@@ -1166,6 +1166,39 @@ describe('prepareConversation', () => {
     });
   });
 
+  describe('steers', () => {
+    const steer = {
+      id: 'steer-1',
+      type: 'user_message',
+      created_at: '2024-01-02T00:00:00.000Z',
+      actor: { type: 'user', id: 'u1' },
+      data: { message: 'use a table', steer: { execution_id: 'exec-0' } },
+    } as unknown as TimelineEvent;
+    const timeline = [...timelineFromRounds([{ id: 'r0', input: { message: 'first' } }]), steer];
+
+    it('leaves a steer out of history unless it was settled unread', async () => {
+      const result = await prepareConversationFromTimeline({
+        timeline,
+        nextInput: { message: 'next' },
+        context: mockContext,
+      });
+
+      expect(result.timeline.map((event) => event.id)).not.toContain('steer-1');
+    });
+
+    it('keeps a steer its run never read as history, marked as such', async () => {
+      const result = await prepareConversationFromTimeline({
+        timeline,
+        nextInput: { message: 'next' },
+        context: mockContext,
+        unreadSteerIds: new Set(['steer-1']),
+      });
+
+      const kept = result.timeline.find((event) => event.id === 'steer-1');
+      expect(kept).toMatchObject({ unread_steer: true, data: { message: 'use a table' } });
+    });
+  });
+
   describe('custom conversation events', () => {
     const noteDefinition = (
       format?: ConversationEventTypeDefinition['format']

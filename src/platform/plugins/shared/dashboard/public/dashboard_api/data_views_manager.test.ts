@@ -18,6 +18,7 @@ const source = (id: string): FilterableSource => ({
   id,
   title: id,
   fields: [],
+  getFieldByName: () => undefined,
   isTimeBased: () => true,
 });
 

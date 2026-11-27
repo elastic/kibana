@@ -55,7 +55,7 @@ const OUTPUT_DIR = Path.resolve(
 // the codegen script's boot retries are not spent on a deterministic failure and the
 // script decides whether to enforce them for the current build type.
 const APPROVED_STEP_DEFINITIONS_DIR_RELATIVE =
-  'src/platform/plugins/shared/workflows_extensions/test/scout/api/fixtures/approved_step_definitions';
+  'x-pack/platform/plugins/shared/workflows_extensions/test/scout/api/fixtures/approved_step_definitions';
 const APPROVAL_REPORT_PATH = process.env.WORKFLOW_STEP_APPROVAL_REPORT;
 
 // Poll the *non-latching* step-definitions route, not `/api/workflows/schema`.

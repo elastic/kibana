@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { ComponentProps } from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MockedCodeEditor } from '@kbn/code-editor-mock';
 import type { MockedMonacoEditor } from '@kbn/code-editor-mock/monaco_mock';
@@ -25,7 +25,9 @@ jest.mock('@kbn/code-editor', () => {
 jest.mock('../hooks/use_edit_flyout_state');
 jest.mock('../services');
 jest.mock('./esql_data_section', () => ({
-  EsqlDataSection: () => <div data-test-subj="mockEsqlDataSection" />,
+  EsqlDataSection: ({ initialIsOpen }: { initialIsOpen?: boolean }) => (
+    <div data-test-subj="mockEsqlDataSection" data-initial-open={String(Boolean(initialIsOpen))} />
+  ),
 }));
 
 import { useEditFlyoutState } from '../hooks/use_edit_flyout_state';
@@ -51,7 +53,8 @@ const drafts = (...texts: string[]) =>
   }));
 
 const baseFlyoutState = {
-  draftQueries: drafts(),
+  // A panel with no saved query still has one blank draft to type into.
+  draftQueries: drafts(''),
   canAddQuery: false,
   addQuery: jest.fn(),
   removeQuery: jest.fn(),
@@ -91,6 +94,37 @@ beforeEach(() => {
 });
 
 describe('EditCustomContentFlyout', () => {
+  const templateToggle = () =>
+    within(screen.getByTestId('customContentTemplateSection')).getByRole('button', {
+      name: /Template \(HTML\)/,
+    });
+
+  it('starts with both sections open when the panel has no query and no template', () => {
+    render(<EditCustomContentFlyout {...defaultProps} />);
+    expect(templateToggle()).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByTestId('mockEsqlDataSection')).toHaveAttribute('data-initial-open', 'true');
+  });
+
+  it('starts with only the template open when the panel has a template and no query', () => {
+    mockUseEditFlyoutState.mockReturnValue({
+      ...baseFlyoutState,
+      draftTemplate: '<p>hi</p>',
+    });
+    render(<EditCustomContentFlyout {...defaultProps} template="<p>hi</p>" />);
+    expect(templateToggle()).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByTestId('mockEsqlDataSection')).toHaveAttribute('data-initial-open', 'false');
+  });
+
+  it('starts with the template section collapsed when a query exists', () => {
+    mockUseEditFlyoutState.mockReturnValue({
+      ...baseFlyoutState,
+      draftQueries: drafts('FROM logs'),
+    });
+    render(<EditCustomContentFlyout {...defaultProps} esqlQueries={['FROM logs']} />);
+    expect(templateToggle()).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByTestId('mockEsqlDataSection')).toHaveAttribute('data-initial-open', 'true');
+  });
+
   describe('Apply and close', () => {
     it('is disabled when nothing has been edited', () => {
       mockUseEditFlyoutState.mockReturnValue({

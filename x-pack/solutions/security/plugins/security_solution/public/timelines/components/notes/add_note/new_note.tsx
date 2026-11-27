@@ -7,7 +7,7 @@
 
 import { EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { MarkdownEditor } from '../../../../common/components/markdown_editor';
 import type { UpdateInternalNewNote } from '../helpers';

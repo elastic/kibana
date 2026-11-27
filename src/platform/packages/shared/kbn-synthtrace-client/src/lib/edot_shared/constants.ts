@@ -20,5 +20,13 @@ export const REPLAY_INDEX = 'logs-rum.replay.otel-default';
 
 // https://opentelemetry.io/docs/specs/otel/logs/data-model/#field-severitynumber
 export const SEVERITY_INFO = 9;
+export const SEVERITY_WARN = 13;
 export const SEVERITY_ERROR = 17;
 export const SEVERITY_FATAL = 21;
+
+// The OpenTelemetry semantic conventions event of an app crash
+export const EVENT_APP_CRASH = 'app.crash';
+// An exception, as the OpenTelemetry semantic conventions name it in logs and span events
+export const EVENT_EXCEPTION = 'exception';
+// A tap on a widget, which EDOT React Native already records
+export const EVENT_WIDGET_CLICK = 'app.widget.click';

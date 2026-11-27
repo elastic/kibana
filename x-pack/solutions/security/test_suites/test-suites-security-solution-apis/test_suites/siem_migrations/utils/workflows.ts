@@ -11,18 +11,29 @@ import {
 } from '@kbn/core-http-common';
 import { API_VERSIONS } from '@kbn/security-solution-plugin/common/constants';
 import {
+  SIEM_WORKFLOW_MIGRATIONS_ALL_STATS_PATH,
   SIEM_WORKFLOW_MIGRATIONS_PATH,
   SIEM_WORKFLOW_MIGRATION_PATH,
+  SIEM_WORKFLOW_MIGRATION_START_PATH,
+  SIEM_WORKFLOW_MIGRATION_STATS_PATH,
+  SIEM_WORKFLOW_MIGRATION_STOP_PATH,
   SIEM_WORKFLOW_MIGRATION_TINES_WORKFLOWS_PATH,
+  SIEM_WORKFLOW_MIGRATION_TRANSLATION_STATS_PATH,
   SIEM_WORKFLOW_MIGRATION_WORKFLOWS_PATH,
 } from '@kbn/security-solution-plugin/common/siem_migrations/workflows/constants';
 import type {
   CreateTinesWorkflowMigrationWorkflowsRequestBody,
   CreateWorkflowMigrationRequestBody,
   CreateWorkflowMigrationResponse,
+  GetAllWorkflowMigrationStatsResponse,
   GetWorkflowMigrationResponse,
+  GetWorkflowMigrationStatsResponse,
+  GetWorkflowMigrationTranslationStatsResponse,
   GetWorkflowMigrationWorkflowsRequestQuery,
   GetWorkflowMigrationWorkflowsResponse,
+  StartWorkflowMigrationRequestBody,
+  StartWorkflowMigrationResponse,
+  StopWorkflowMigrationResponse,
   UpdateWorkflowMigrationRequestBody,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/workflows/workflow_migration.gen';
 import type SuperTest from 'supertest';
@@ -120,6 +131,93 @@ export const workflowMigrationRouteFactory = (supertest: SuperTest.Agent) => {
         .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(body);
+
+      assertStatusCode(expectStatusCode, response);
+      return response;
+    },
+
+    stats: async ({
+      migrationId,
+      expectStatusCode = 200,
+    }: MigrationRequestParams): Promise<{ body: GetWorkflowMigrationStatsResponse }> => {
+      const url = replaceParams(SIEM_WORKFLOW_MIGRATION_STATS_PATH, {
+        migration_id: migrationId,
+      });
+      const response = await supertest
+        .get(url)
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+
+      assertStatusCode(expectStatusCode, response);
+      return response;
+    },
+
+    statsAll: async ({
+      expectStatusCode = 200,
+    }: RequestParams): Promise<{ body: GetAllWorkflowMigrationStatsResponse }> => {
+      const response = await supertest
+        .get(SIEM_WORKFLOW_MIGRATIONS_ALL_STATS_PATH)
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+
+      assertStatusCode(expectStatusCode, response);
+      return response;
+    },
+
+    translationStats: async ({
+      migrationId,
+      expectStatusCode = 200,
+    }: MigrationRequestParams): Promise<{
+      body: GetWorkflowMigrationTranslationStatsResponse;
+    }> => {
+      const url = replaceParams(SIEM_WORKFLOW_MIGRATION_TRANSLATION_STATS_PATH, {
+        migration_id: migrationId,
+      });
+      const response = await supertest
+        .get(url)
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+
+      assertStatusCode(expectStatusCode, response);
+      return response;
+    },
+
+    start: async ({
+      migrationId,
+      body,
+      expectStatusCode = 200,
+    }: MigrationRequestParams & { body: StartWorkflowMigrationRequestBody }): Promise<{
+      body: StartWorkflowMigrationResponse;
+    }> => {
+      const url = replaceParams(SIEM_WORKFLOW_MIGRATION_START_PATH, {
+        migration_id: migrationId,
+      });
+      const response = await supertest
+        .post(url)
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(body);
+
+      assertStatusCode(expectStatusCode, response);
+      return response;
+    },
+
+    stop: async ({
+      migrationId,
+      expectStatusCode = 200,
+    }: MigrationRequestParams): Promise<{ body: StopWorkflowMigrationResponse }> => {
+      const url = replaceParams(SIEM_WORKFLOW_MIGRATION_STOP_PATH, {
+        migration_id: migrationId,
+      });
+      const response = await supertest
+        .post(url)
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
 
       assertStatusCode(expectStatusCode, response);
       return response;

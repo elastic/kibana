@@ -791,6 +791,7 @@ describe('durable source revision reconciliation', () => {
       cancelBySource: jest.fn(async () => null),
       getNonTerminalExecutions: jest.fn().mockResolvedValue([]),
       getLatestExecution: jest.fn().mockResolvedValue(undefined),
+      isFullOnboardingRun: jest.fn().mockResolvedValue(true),
     };
     const sourcesClient = { get: jest.fn(async () => ({ source })) } as unknown as SourcesClient;
     const reconcile = async () => {
@@ -817,19 +818,17 @@ describe('durable source revision reconciliation', () => {
   };
 
   it('starts onboarding for a new source without deleting knowledge', async () => {
-    const { reconcile, state, scheduleSourceOnboarding, kiClient, source, onboardingClient } =
-      setup();
+    const { reconcile, state, scheduleSourceOnboarding, kiClient, source } = setup();
     state.revision = undefined;
     state.onboardingScheduled = false;
     await reconcile();
     expect(scheduleSourceOnboarding).toHaveBeenCalledWith(source);
     expect(kiClient.deleteIndicators).not.toHaveBeenCalled();
     expect(state.revision).toBe('revision-2');
-    expect(onboardingClient.getLatestExecution).not.toHaveBeenCalled();
   });
 
   it('clears an old reservation when the revision changes and schedules the new revision', async () => {
-    const { reconcile, state, checkpoint, scheduleSourceOnboarding, onboardingClient } = setup();
+    const { reconcile, state, checkpoint, scheduleSourceOnboarding } = setup();
     state.onboardingReservedAt = Date.now();
 
     await reconcile();
@@ -840,7 +839,6 @@ describe('durable source revision reconciliation', () => {
       onboardingReservedAt: null,
     });
     expect(scheduleSourceOnboarding).toHaveBeenCalledTimes(1);
-    expect(onboardingClient.getLatestExecution).not.toHaveBeenCalled();
   });
 
   it('retries failed cleanup before scheduling the replacement exactly once', async () => {
@@ -957,5 +955,126 @@ describe('durable source revision reconciliation', () => {
     expect(scheduleSourceOnboarding).toHaveBeenCalledTimes(1);
     expect(state.onboardingReservedAt).toBeGreaterThan(staleReservation);
     expect(onboardingClient.getLatestExecution).toHaveBeenCalledTimes(1);
+  });
+
+  describe('a new source that continuous onboarding already started', () => {
+    const REVISION = '2026-11-17T12:32:29.000Z';
+    const setupNewSource = () => {
+      const harness = setup();
+      harness.source.esql_updated_at = REVISION;
+      harness.state.revision = REVISION;
+      harness.state.onboardingScheduled = false;
+      return harness;
+    };
+
+    it('neither waits nor schedules while that run is going, and records nothing yet', async () => {
+      const { reconcile, state, onboardingClient, scheduleSourceOnboarding } = setupNewSource();
+      const run = { ...runningExecution('source-slug'), startedAt: '2026-11-17T12:32:30.000Z' };
+      onboardingClient.getLatestExecution.mockResolvedValue(run);
+      onboardingClient.getNonTerminalExecutions.mockResolvedValue([run]);
+
+      await expect(reconcile()).resolves.toBeUndefined();
+
+      expect(scheduleSourceOnboarding).not.toHaveBeenCalled();
+      expect(state.onboardingReservedAt).toBeUndefined();
+    });
+
+    it('schedules on a later reconcile when the run it let go ended cancelled', async () => {
+      const { reconcile, onboardingClient, scheduleSourceOnboarding } = setupNewSource();
+      const run = { ...runningExecution('source-slug'), startedAt: '2026-11-17T12:32:30.000Z' };
+      onboardingClient.getLatestExecution.mockResolvedValue(run);
+      onboardingClient.getNonTerminalExecutions.mockResolvedValue([run]);
+      await reconcile();
+
+      onboardingClient.getLatestExecution.mockResolvedValue({
+        ...run,
+        status: ExecutionStatus.CANCELLED,
+      });
+      onboardingClient.getNonTerminalExecutions.mockResolvedValue([]);
+      await reconcile();
+
+      expect(scheduleSourceOnboarding).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not schedule a second run once that run completed, and records it as the reservation', async () => {
+      const { reconcile, state, onboardingClient, scheduleSourceOnboarding } = setupNewSource();
+      onboardingClient.getLatestExecution.mockResolvedValue({
+        status: ExecutionStatus.COMPLETED,
+        startedAt: '2026-11-17T12:32:30.000Z',
+      });
+
+      await reconcile();
+
+      expect(scheduleSourceOnboarding).not.toHaveBeenCalled();
+      expect(state.onboardingReservedAt).toBe(Date.parse('2026-11-17T12:32:30.000Z'));
+    });
+
+    it('waits for a going run that only does one step, then schedules the full onboarding', async () => {
+      const { reconcile, state, onboardingClient, scheduleSourceOnboarding } = setupNewSource();
+      const partialRun = {
+        ...runningExecution('source-slug'),
+        startedAt: '2026-11-17T12:32:30.000Z',
+      };
+      onboardingClient.isFullOnboardingRun.mockResolvedValue(false);
+      onboardingClient.getLatestExecution.mockResolvedValue(partialRun);
+      onboardingClient.getNonTerminalExecutions.mockResolvedValue([partialRun]);
+
+      await expect(reconcile()).rejects.toThrow('previous onboarding');
+
+      onboardingClient.getLatestExecution.mockResolvedValue({
+        ...partialRun,
+        status: ExecutionStatus.COMPLETED,
+      });
+      onboardingClient.getNonTerminalExecutions.mockResolvedValue([]);
+      await reconcile();
+
+      expect(scheduleSourceOnboarding).toHaveBeenCalledTimes(1);
+      expect(state.onboardingReservedAt).not.toBe(Date.parse(partialRun.startedAt));
+    });
+
+    it('waits for a run it just cancelled instead of taking it for a run of the new query', async () => {
+      const { reconcile, state, onboardingClient, scheduleSourceOnboarding } = setupNewSource();
+      state.revision = '2026-11-17T12:00:00.000Z';
+      const cancelledRun = {
+        ...runningExecution('source-slug'),
+        startedAt: '2026-11-17T12:32:30.000Z',
+      };
+      onboardingClient.getLatestExecution.mockResolvedValue(cancelledRun);
+      onboardingClient.getNonTerminalExecutions.mockResolvedValue([cancelledRun]);
+
+      await expect(reconcile()).rejects.toThrow('previous onboarding');
+
+      expect(onboardingClient.cancelBySource).toHaveBeenCalledTimes(1);
+      expect(scheduleSourceOnboarding).not.toHaveBeenCalled();
+    });
+
+    it.each([ExecutionStatus.CANCELLED, ExecutionStatus.FAILED])(
+      'schedules the source when the run of this revision ended %s',
+      async (status) => {
+        const { reconcile, onboardingClient, scheduleSourceOnboarding } = setupNewSource();
+        onboardingClient.getLatestExecution.mockResolvedValue({
+          status,
+          startedAt: '2026-11-17T12:32:30.000Z',
+        });
+
+        await reconcile();
+
+        expect(scheduleSourceOnboarding).toHaveBeenCalledTimes(1);
+      }
+    );
+
+    it('still waits for a run of an older query to stop', async () => {
+      const { reconcile, onboardingClient, scheduleSourceOnboarding } = setupNewSource();
+      const olderRun = {
+        ...runningExecution('source-slug'),
+        startedAt: '2026-11-17T12:00:00.000Z',
+      };
+      onboardingClient.getLatestExecution.mockResolvedValue(olderRun);
+      onboardingClient.getNonTerminalExecutions.mockResolvedValue([olderRun]);
+
+      await expect(reconcile()).rejects.toThrow('previous onboarding');
+
+      expect(scheduleSourceOnboarding).not.toHaveBeenCalled();
+    });
   });
 });

@@ -7,11 +7,12 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { EuiConfirmModal, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
-import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useHistory, useParams } from 'react-router-dom';
 import { RETRY_BUTTON_LABEL } from '../../common/messages';
 import { useKibana } from '../../hooks/use_kibana';
+import { useAllRelayAppBindings } from '../../data/relay_apps/use_relay_app_bindings';
 import { useInvestigatorServiceAccount } from '../../data/service_accounts/use_investigator_service_account';
 import {
   MANAGE_SECURITY_REQUIRED_BODY,
@@ -30,6 +31,7 @@ import {
   useRefreshAutomations,
   useRunAutomation,
   useFetchAutomations,
+  useAutomationsLastRuns,
   type Automation,
 } from '../../data/automations/use_automations';
 import { AutomationsEmptyPrompt, FilteredEmptyPrompt } from './list/automations_empty_prompt';
@@ -72,6 +74,7 @@ export const AutomationsPage = (): React.ReactElement => {
       ? MANAGE_SECURITY_REQUIRED_REASON
       : undefined;
   const { data, error, isInitialLoading, refetch } = useFetchAutomations();
+  const connectedChannels = useAllRelayAppBindings();
   const deleteAutomation = useDeleteAutomation();
   const runAutomation = useRunAutomation();
   const refreshAutomations = useRefreshAutomations();
@@ -86,6 +89,13 @@ export const AutomationsPage = (): React.ReactElement => {
   const [order, setOrder] = useState<string[]>([]);
   const [page, setPage] = useState({ index: 0, size: DEFAULT_PAGE_SIZE });
   const automations = useMemo(() => data?.automations ?? [], [data?.automations]);
+  const {
+    data: lastRuns,
+    isInitialLoading: isLoadingLastRuns,
+    isError: didLastRunsFail,
+    isFetching: isFetchingLastRuns,
+    refetch: refetchLastRuns,
+  } = useAutomationsLastRuns(automations.length > 0);
   const isCreating = id === 'new';
   const detailAutomation = isCreating
     ? undefined
@@ -168,10 +178,13 @@ export const AutomationsPage = (): React.ReactElement => {
         isRunPending={runAutomation.isLoading}
         editDisabledReason={editDisabledReason}
         runCounts={runCounts}
+        lastRuns={didLastRunsFail ? undefined : lastRuns}
+        isLoadingLastRuns={isLoadingLastRuns}
         usedToday={usedToday}
         getFacets={getFacets}
         isRateLimited={isRateLimited}
         isGlobalLimitReached={isGlobalLimitReached}
+        connectedChannels={connectedChannels}
         pageIndex={pageIndex}
         pageSize={page.size}
         onPageChange={(index, size) => setPage({ index, size })}
@@ -250,6 +263,25 @@ export const AutomationsPage = (): React.ReactElement => {
             onCreate={openCreateFlyout}
             createDisabledReason={editDisabledReason}
           />
+        </>
+      )}
+      {didLastRunsFail && visibleAutomations.length > 0 && (
+        <>
+          <KbnWarningCallout
+            announceOnMount
+            size="s"
+            title={listLabels.lastRunLoadErrorTitle}
+            text={listLabels.lastRunLoadErrorDescription}
+            actionProps={{
+              primary: {
+                children: RETRY_BUTTON_LABEL,
+                iconType: 'refresh',
+                isLoading: isFetchingLastRuns,
+                onClick: () => refetchLastRuns(),
+              },
+            }}
+          />
+          <EuiSpacer size="m" />
         </>
       )}
       {renderContent()}

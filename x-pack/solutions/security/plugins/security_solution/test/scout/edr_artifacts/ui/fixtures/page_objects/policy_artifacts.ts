@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout-security';
+import { euiSelectors } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 import { TRUSTED_APP_HASH } from '../artifact_tabs_test_data';
 
@@ -82,6 +83,8 @@ export class PolicyArtifactsPage {
   readonly blocklistOperatorSelect: Locator;
   readonly blocklistValueInput: Locator;
   readonly blocklistValuesInput: Locator;
+  readonly eventFiltersValueInput: Locator;
+  readonly eventFiltersValueOptionsList: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.emptyUnexisting = this.page.testSubj.locator('policy-artifacts-empty-unexisting');
@@ -114,6 +117,22 @@ export class PolicyArtifactsPage {
     );
     this.blocklistValueInput = this.page.testSubj.locator('blocklist-form-value-input');
     this.blocklistValuesInput = this.page.testSubj.locator('blocklist-form-values-input');
+    this.eventFiltersValueInput = this.page.testSubj
+      .locator('valuesAutocompleteMatch')
+      .getByRole('combobox');
+    // EUI renders the options list in a portal, outside the combo box.
+    this.eventFiltersValueOptionsList = this.page.locator(
+      euiSelectors.comboBox.optionsListFor('valuesAutocompleteMatch')
+    );
+  }
+
+  eventFiltersValueOptions(): Locator {
+    return this.eventFiltersValueOptionsList.getByRole('option');
+  }
+
+  /** EUI shows this hint only once the list has loaded and no option matches `value`. */
+  eventFiltersValueNoMatchHint(value: string): Locator {
+    return this.eventFiltersValueOptionsList.getByText(`Add ${value} as a custom option`);
   }
 
   criteria(selector: string): Locator {
@@ -246,6 +265,53 @@ export class PolicyArtifactsPage {
     await this.fillComboBox('fieldAutocompleteComboBox', '@timestamp');
     await this.fillComboBox('valuesAutocompleteMatch', '1234', true);
     await this.page.testSubj.locator('eventFilters-form-description-input').click();
+  }
+
+  /**
+   * Swaps the field of the single event filters condition in the open
+   * flyout; the builder clears the old value when the field changes.
+   */
+  async replaceEventFiltersCondition(field: string, value: string) {
+    // The form shows a loader until the field list loads. Driving the combo
+    // before it renders makes the helper clear the field first, and the
+    // builder then re-fills the edited item's original field.
+    await this.page.testSubj.locator('fieldAutocompleteComboBox').waitFor({ state: 'visible' });
+    await this.fillComboBox('fieldAutocompleteComboBox', field);
+    await this.fillComboBox('valuesAutocompleteMatch', value, true);
+    await this.page.testSubj.locator('eventFilters-form-description-input').click();
+  }
+
+  /**
+   * Types at the end of the event filters condition value with real key
+   * presses. The combo box shows the selected value as plain text, so the
+   * typed text appends to it; the EUI helper clears the input first.
+   */
+  async typeInEventFiltersValue(text: string) {
+    await this.openEventFiltersValueList();
+    await this.eventFiltersValueInput.press('End');
+    await this.eventFiltersValueInput.pressSequentially(text);
+  }
+
+  /**
+   * Focusing the combo box opens its list and re-focuses the input on the
+   * next frame, which moves the caret; keys sent before that land elsewhere.
+   */
+  private async openEventFiltersValueList() {
+    await this.eventFiltersValueInput.click();
+    await this.eventFiltersValueOptionsList.waitFor({ state: 'visible' });
+  }
+
+  async pressInEventFiltersValue(key: string) {
+    await this.eventFiltersValueInput.press(key);
+  }
+
+  /**
+   * Empties the event filters condition value with select-all and Backspace,
+   * as a user does: the builder renders this combo box without a clear button.
+   */
+  async clearEventFiltersValue() {
+    await this.eventFiltersValueInput.press('ControlOrMeta+A');
+    await this.eventFiltersValueInput.press('Backspace');
   }
 
   private async fillBlocklistForm(name = 'Blocklist name') {

@@ -13,7 +13,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { hostFieldsMap } from '@kbn/securitysolution-ecs';
-import { toObjectArrayOfStrings } from '@kbn/timelines-plugin/common';
+import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 import { Direction } from '../../../../../../common/search_strategy/common';
 import type {
   AggregationRequest,

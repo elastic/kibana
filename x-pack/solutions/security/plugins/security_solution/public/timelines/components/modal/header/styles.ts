@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { EuiPanel } from '@elastic/eui';
 
 export const whiteSpaceNoWrapCSS = { 'white-space': 'nowrap' };
 export const autoOverflowXCSS = { 'overflow-x': 'auto' };
 
-export const VerticalDivider = euiStyled.span`
+export const VerticalDivider = styled.span`
   width: 0;
   height: 20px;
-  border-left: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
+  border-left: 1px solid ${({ theme }) => theme.euiTheme.colors.lightShade};
 `;
 
-export const TimelinePanel = euiStyled(EuiPanel)`
-  background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
-  color: ${(props) => props.theme.eui.euiTextColor};
-  padding-inline: ${(props) => props.theme.eui.euiSizeM};
-  border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
+export const TimelinePanel = styled(EuiPanel)`
+  background-color: ${({ theme }) => theme.euiTheme.colors.emptyShade};
+  color: ${({ theme }) => theme.euiTheme.colors.textParagraph};
+  padding-inline: ${({ theme }) => theme.euiTheme.size.m};
+  border-radius: ${({ theme }) => theme.euiTheme.border.radius.medium};
 `;

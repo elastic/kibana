@@ -16,18 +16,14 @@ import {
   getAvailableConnectors,
   takeRandomLlmSample,
 } from '@kbn/gen-ai-functional-testing';
-import { tags } from '@kbn/scout';
+import { getAgentBuilderSmokeEisModels, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { ChatRequestBodyPayload, ChatResponse } from '../../../../common/http_api/chat';
 
 import { apiTest } from '../fixtures';
 import { API_AGENT_BUILDER } from '../fixtures/constants';
 import type { AuthedApiClient } from '../../../scout_agent_builder_shared/lib/authed_api_client';
-import {
-  enableCcmForScoutSmokeTests,
-  getPreDiscoveredEisModelsForScout,
-  type DiscoveredEisModel,
-} from '../../lib/eis_smoke_for_scout_tests';
+import { enableCcmForScoutSmokeTests } from '../../lib/eis_smoke_for_scout_tests';
 import { triageLlmSmokeFailure } from '../../lib/llm_smoke_triage';
 
 const EIS_CCM_API_KEY_ENV = 'KIBANA_EIS_CCM_API_KEY';
@@ -51,7 +47,7 @@ const safeGetAvailableConnectors = (): AvailableConnectorWithId[] => {
 const allStaticConnectors: AvailableConnectorWithId[] = safeGetAvailableConnectors().filter(
   (c) => !EXCLUDED_STATIC_CONNECTOR_IDS.has(c.id)
 );
-const allEisModels: DiscoveredEisModel[] = getPreDiscoveredEisModelsForScout();
+const allEisModels = getAgentBuilderSmokeEisModels();
 
 let eisCcmConfigured = false;
 

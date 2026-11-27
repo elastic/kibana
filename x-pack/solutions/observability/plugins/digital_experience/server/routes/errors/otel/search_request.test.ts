@@ -7,6 +7,9 @@
 
 import { NO_STACKTRACE, NO_TYPE, errorsSearch } from './search_request';
 
+/** The runtime field of the page filter, which reads the route of a page and then its URL. */
+const PAGE_FIELD = 'digital_experience_filter_pageUrl';
+
 const PARAMS = { serviceName: 'shop', start: 1000, end: 2000 };
 
 describe('errorsSearch', () => {
@@ -58,17 +61,26 @@ describe('errorsSearch with filters', () => {
     pageUrl: [{ value: 'https://shop.example.com/', exclude: false }],
   };
 
-  it('narrows the groups to the selected browser, not the picker environments or the page', () => {
+  it('narrows the groups to the selected browser and page, not the picker environments', () => {
     const request = errorsSearch({ ...PARAMS, filters: FILTERS });
 
-    expect(Object.keys(request.runtime_mappings)).toContain('digital_experience_filter_browser');
+    expect(Object.keys(request.runtime_mappings)).toEqual(
+      expect.arrayContaining([
+        'digital_experience_filter_browser',
+        'digital_experience_filter_pageUrl',
+      ])
+    );
+    // Errors carry the route of their page, which the page filter reads first.
     expect(request.aggs.inEnvironment.filter).toEqual({
       bool: {
-        filter: [{ match_all: {} }, { terms: { digital_experience_filter_browser: ['Chrome'] } }],
+        filter: [
+          { match_all: {} },
+          { terms: { digital_experience_filter_browser: ['Chrome'] } },
+          { terms: { [PAGE_FIELD]: ['https://shop.example.com/'] } },
+        ],
       },
     });
     expect(request.aggs.environments).toBeDefined();
-    expect(JSON.stringify(request)).not.toContain('shop.example.com');
   });
 
   it('is unchanged without a selection', () => {

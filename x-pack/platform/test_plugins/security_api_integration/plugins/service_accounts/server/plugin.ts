@@ -161,6 +161,51 @@ export class ServiceAccountsTestPlugin
         });
       }
     );
+    // Changes the bindings of many jobs in one call. Unlike the route below, it does not check the
+    // caller's privileges itself: Core refuses each change on its own, and tests observe that.
+    const workloadIdSchema = schema.string({ minLength: 1, maxLength: 128 });
+    router.post(
+      {
+        path: '/internal/service_accounts_test/_bulk_update',
+        options: { access: 'internal' },
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'Core authorizes each binding change, and refuses it per change.',
+          },
+        },
+        validate: {
+          body: schema.object({
+            changes: schema.arrayOf(
+              schema.oneOf([
+                schema.object({
+                  op: schema.literal('bind'),
+                  workloadId: workloadIdSchema,
+                  serviceAccountId: schema.string({ minLength: 1, maxLength: 1024 }),
+                }),
+                schema.object({ op: schema.literal('unbind'), workloadId: workloadIdSchema }),
+              ]),
+              { maxSize: 1000 }
+            ),
+          }),
+        },
+      },
+      async (_context, request, response) => {
+        const [start] = await core.getStartServices();
+        try {
+          const results = await start.security.serviceAccounts.bulkUpdateWorkloadBindings(
+            request,
+            request.body.changes.map((change) => ({ ...change, workloadType: 'job' }))
+          );
+          return response.ok({ body: { results } });
+        } catch (error) {
+          return response.customError({
+            statusCode: Boom.isBoom(error) ? error.output.statusCode : 500,
+            body: { message: 'Service account test bulk update failed.' },
+          });
+        }
+      }
+    );
     router.post(
       {
         path: '/internal/service_accounts_test/{workloadId}',

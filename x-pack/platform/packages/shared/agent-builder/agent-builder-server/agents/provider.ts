@@ -23,6 +23,7 @@ import type {
   ExecutionStatus,
   InteractivityConfig,
   SerializedExecutionError,
+  UserIdAndName,
 } from '@kbn/agent-builder-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { HttpSelfService, KibanaRequest } from '@kbn/core-http-server';
@@ -62,6 +63,14 @@ import type { AgentRegistry } from './registry';
 export interface ConversationClient {
   /** True if a conversation with the given id exists in the current scope. */
   exists(conversationId: string): Promise<boolean>;
+  /** The conversation with the document version the steer drain compares `peekVersion` against. */
+  getWithVersion(
+    conversationId: string
+  ): Promise<{ conversation: Conversation; seqNo: number; primaryTerm: number }>;
+  /** The document version alone, for a cheap change probe. */
+  peekVersion(conversationId: string): Promise<{ seqNo: number; primaryTerm: number }>;
+  /** The user the client acts as; the run owner when the client runs an execution. */
+  getUser(): UserIdAndName;
   /**
    * Validates, serializes, and merges `updates` into the conversation metadata. Recorded as a
    * `metadata_updated` activity event attributed via `options.activity` (default: current user).

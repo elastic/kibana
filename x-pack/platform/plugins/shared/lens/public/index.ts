@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { LensPlugin } from './plugin';
 
 // Embeddable types
@@ -133,4 +134,5 @@ export type { EditorFrameServiceProviderProps } from './editor_frame_service/edi
 
 export type { LensPublicStart, LensPublicSetup, LensSuggestionsApi } from './plugin';
 
-export const plugin = () => new LensPlugin();
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new LensPlugin(initializerContext);

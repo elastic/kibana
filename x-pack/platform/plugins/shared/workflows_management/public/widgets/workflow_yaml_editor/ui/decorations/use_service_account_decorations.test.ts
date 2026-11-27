@@ -31,6 +31,7 @@ const setup = (value = yaml) => {
   const directory: jest.Mocked<ServiceAccountDirectory> = {
     isEnabled: jest.fn(() => true),
     get: jest.fn().mockResolvedValue(account),
+    lookup: jest.fn().mockResolvedValue({ status: 'found', account }),
     list: jest.fn(),
   };
   return { ...mocks, directory };
@@ -61,12 +62,36 @@ describe('service account editor badge', () => {
     'steps:\n  - with:\n      run_as: account-a',
     'settings:\n  run_as: |-\n\n',
     'settings:\n  run_as: >-\n\n',
-  ])('ignores comments, non-workflow settings, and multiline scalars', async (value) => {
+  ])('ignores comments, non-workflow settings, and empty block scalars', async (value) => {
     const { editor, directory, decorationsCollection } = setup(value);
     const registration = registerServiceAccountDecorations(editor, directory);
     await Promise.resolve();
     expect(directory.get).not.toHaveBeenCalled();
     expect(decorationsCollection.set).not.toHaveBeenCalled();
+    registration.dispose();
+  });
+
+  it.each([
+    ['a literal block', 'settings:\n  run_as: |-\n    account-a\nsteps: []', 'account-a'],
+    ['a folded block', 'settings:\n  run_as: >-\n    account-a\nsteps: []', 'account-a'],
+    [
+      'a quoted value that spans lines',
+      'settings:\n  run_as: "account\n    -a"\nsteps: []',
+      'account -a',
+    ],
+  ])('decorates %s from the start of the value, like connector badges', async (_, value, id) => {
+    const { editor, directory, decorationsCollection } = setup(value);
+    const registration = registerServiceAccountDecorations(editor, directory);
+    await Promise.resolve();
+    expect(directory.get).toHaveBeenCalledWith(id);
+    expect(decorationsCollection.set).toHaveBeenCalledWith([
+      expect.objectContaining({
+        range: expect.objectContaining({ startLineNumber: 2, startColumn: 11 }),
+        options: expect.objectContaining({
+          before: expect.objectContaining({ content: '✓ Demo reader' }),
+        }),
+      }),
+    ]);
     registration.dispose();
   });
 

@@ -22,7 +22,10 @@ export interface KiWriter {
 export interface StoredKi {
   id?: string;
   governance?: {
-    provenance?: { created_by?: KiWriter; updated_by?: KiWriter };
+    provenance?: {
+      created_by?: KiWriter;
+      updated_by?: KiWriter;
+    };
     lifecycle?: { status?: KiLifecycleStatus };
   };
   [key: string]: unknown;
@@ -66,6 +69,20 @@ export const mergeKiDoc = (
 
 export const isKiDeleted = (source: StoredKi): boolean =>
   source.governance?.lifecycle?.status === 'deleted';
+
+/**
+ * The `@timestamp` of a KI that is written again in full. An index dest keeps one document per
+ * KI, so it keeps the first `@timestamp`: the date the KI was added.
+ * A data stream appends a new revision, which needs its own time.
+ */
+export const rewrittenKiTimestamp = (
+  dest: AiIndexDest,
+  current: StoredKi | undefined,
+  now: string
+): string => {
+  const firstTimestamp = current?.['@timestamp'];
+  return dest.type === 'index' && typeof firstTimestamp === 'string' ? firstTimestamp : now;
+};
 
 /** Appends a new revision of a KI to a data stream. */
 export const appendKiRevision = async ({

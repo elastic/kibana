@@ -6,10 +6,15 @@
  */
 
 import { SESSION_ATTRIBUTE_FIELDS } from '../../../common/session_attribute_fields';
+import {
+  SESSIONS_FRUSTRATION_URL_CANDIDATES,
+  SESSIONS_FRUSTRATION_VALUES,
+} from '../../../common/sessions';
 import { FULL_HASH_RANGE, HASH_SPACE } from './hash_ranges';
 import {
   SESSION_ATTRIBUTE_GROUPS,
   attributeColumn,
+  browserSessionEvents,
   bucketDigitsOf,
   changedSessionIdsQuery,
   changedSessionsCountQuery,
@@ -21,7 +26,7 @@ const REBUILD = { changedTo: WINDOW.changedTo, rebuildFrom: '2026-11-09T10:00:00
 
 describe('changedSessionsCountQuery', () => {
   it('counts the browser sessions with an event in the window', () => {
-    const { query, params } = changedSessionsCountQuery(WINDOW);
+    const { query, params } = changedSessionsCountQuery(WINDOW, browserSessionEvents);
 
     expect(query).toMatch(/^SET unmapped_fields = "NULLIFY";/);
     expect(query).toContain('telemetry.sdk.language == "webjs"');
@@ -35,7 +40,7 @@ describe('changedSessionsCountQuery', () => {
 
 describe('changedSessionIdsQuery', () => {
   it('lists the ids of the sessions with an event in the window, a row per hash bucket', () => {
-    const { query, params } = changedSessionIdsQuery(WINDOW, FULL_HASH_RANGE);
+    const { query, params } = changedSessionIdsQuery(WINDOW, FULL_HASH_RANGE, browserSessionEvents);
 
     expect(query).toContain('@timestamp >= ?changed_from AND @timestamp < ?changed_to');
     expect(query).toContain('STATS BY session_id = attributes.session.id');
@@ -59,7 +64,7 @@ describe('changedSessionIdsQuery', () => {
     expect(bucketDigitsOf(255)).toBe(1);
     expect(bucketDigitsOf(15)).toBe(0);
 
-    const { query } = changedSessionIdsQuery(WINDOW, FULL_HASH_RANGE, 1_000);
+    const { query } = changedSessionIdsQuery(WINDOW, FULL_HASH_RANGE, browserSessionEvents, 1_000);
 
     expect(query).toContain(
       'STATS session_ids = VALUES(session_id) BY bucket = SUBSTRING(session_hash, 1, 2)'
@@ -68,17 +73,18 @@ describe('changedSessionIdsQuery', () => {
   });
 
   it('puts every id in one row when even 16 buckets would not fit', () => {
-    const { query } = changedSessionIdsQuery(WINDOW, FULL_HASH_RANGE, 10);
+    const { query } = changedSessionIdsQuery(WINDOW, FULL_HASH_RANGE, browserSessionEvents, 10);
 
     expect(query).toContain('STATS session_ids = VALUES(session_id)\n');
     expect(query).not.toContain('SUBSTRING');
   });
 
   it('keeps the sessions of a hash range only', () => {
-    const { query, params } = changedSessionIdsQuery(WINDOW, {
-      from: HASH_SPACE / 4,
-      to: HASH_SPACE / 2,
-    });
+    const { query, params } = changedSessionIdsQuery(
+      WINDOW,
+      { from: HASH_SPACE / 4, to: HASH_SPACE / 2 },
+      browserSessionEvents
+    );
 
     expect(query).toContain('WHERE session_hash >= ?hash_from AND session_hash < ?hash_to');
     expect(params).toEqual(
@@ -87,11 +93,12 @@ describe('changedSessionIdsQuery', () => {
   });
 
   it('leaves out the bound of a range that starts or ends the hash space', () => {
-    expect(changedSessionIdsQuery(WINDOW, { from: 0, to: HASH_SPACE / 2 }).params).toContainEqual({
-      hash_to: '80000000',
-    });
     expect(
-      changedSessionIdsQuery(WINDOW, { from: HASH_SPACE / 2, to: HASH_SPACE }).query
+      changedSessionIdsQuery(WINDOW, { from: 0, to: HASH_SPACE / 2 }, browserSessionEvents).params
+    ).toContainEqual({ hash_to: '80000000' });
+    expect(
+      changedSessionIdsQuery(WINDOW, { from: HASH_SPACE / 2, to: HASH_SPACE }, browserSessionEvents)
+        .query
     ).not.toContain('?hash_to');
   });
 });
@@ -134,6 +141,63 @@ describe('sessionSummaryQuery', () => {
     );
   });
 
+  it('takes the load time in a branch of its own, from the page loads that have a load event', () => {
+    const { query } = sessionSummaryQuery(REBUILD, ['a']);
+    const loadTimeBranch = query.indexOf('(WHERE event_name == "browser.navigation_timing"');
+
+    // On the source fields, so that Lucene applies the filter.
+    expect(query).toContain(
+      '(WHERE event_name == "browser.navigation_timing" AND attributes.browser.navigation_timing.load_event_end IS NOT NULL'
+    );
+    expect(query.slice(0, loadTimeBranch)).not.toContain('load_time');
+    expect(query.slice(loadTimeBranch)).toContain(
+      'EVAL load_time = TO_DOUBLE(attributes.browser.navigation_timing.load_event_end)'
+    );
+    expect(query).toContain('load_time_p75 = PERCENTILE(load_time, 75)');
+    expect(query).toContain('load_time_p75 = MAX(load_time_p75)');
+    // A session without a timed page load has no row in that branch.
+    expect(query).toContain('load_time_samples = COALESCE(load_time_samples, 0)');
+  });
+
+  it('counts the frustration signals per session', () => {
+    const { query } = sessionSummaryQuery(REBUILD, ['a']);
+
+    expect(query).toContain(
+      'rage_click_count = COUNT(*) WHERE event == "elastic.frustration.rage_click"'
+    );
+    expect(query).toContain(
+      'dead_click_count = COUNT(*) WHERE event == "elastic.frustration.dead_click"'
+    );
+    expect(query).toContain(
+      'error_click_count = COUNT(*) WHERE event == "elastic.frustration.error_click"'
+    );
+    expect(query).toContain('frustration_count = COUNT(*) WHERE is_frustration');
+    expect(query).toContain(
+      'is_frustration = event IN ("elastic.frustration.rage_click", "elastic.frustration.dead_click", "elastic.frustration.error_click")'
+    );
+    expect(query).toContain('frustration_count = MAX(frustration_count)');
+  });
+
+  it('counts the signals of each frustrated selector and URL in their own branches, and keeps the most signaled', () => {
+    const { query } = sessionSummaryQuery(REBUILD, ['a']);
+
+    expect(query).toContain(
+      'STATS target_signals = COUNT(*)\n            BY service = resource.attributes.service.name, session = attributes.session.id, target = attributes.browser.css_selector'
+    );
+    expect(query).toContain(
+      'STATS url_signals = COUNT(*)\n            BY service = resource.attributes.service.name, session = attributes.session.id, frustration_url = attributes.url.full'
+    );
+    expect(query).toContain(
+      `frustration_targets = TOP(target_signals, ${SESSIONS_FRUSTRATION_VALUES}, "desc", target) WHERE target IS NOT NULL`
+    );
+    expect(query).toContain(
+      `frustration_urls = TOP(url_signals, ${SESSIONS_FRUSTRATION_URL_CANDIDATES}, "desc", frustration_url) WHERE frustration_url IS NOT NULL`
+    );
+    // Unbounded per session, so not collected in the session branch.
+    expect(query).not.toContain('VALUES(attributes.browser.css_selector)');
+    expect(query).not.toContain('VALUES(attributes.url.full)');
+  });
+
   it('reads every attribute field from its group’s latest event', () => {
     const { query } = sessionSummaryQuery(REBUILD, ['a']);
 
@@ -148,6 +212,11 @@ describe('sessionSummaryQuery', () => {
     });
   });
 
+  it('reads the mobile flag apart from the user agent, so an event with only the flag keeps the browser', () => {
+    expect(SESSION_ATTRIBUTE_GROUPS.user_agent).not.toContain('mobile');
+    expect(SESSION_ATTRIBUTE_GROUPS.mobile).toEqual(['mobile']);
+  });
+
   it('cleans the attributes once per session, after the last stage', () => {
     const { query } = sessionSummaryQuery(REBUILD, ['a']);
     const lastStage = query.lastIndexOf('BY service, session');
@@ -157,6 +226,15 @@ describe('sessionSummaryQuery', () => {
       `${attributeColumn(
         'browser'
       )} = COALESCE(CASE(TRIM(TO_STRING(raw_resource_attributes_browser_name))`
+    );
+  });
+
+  it('shows a signed-in user by name before their id, which EDOT Browser always writes', () => {
+    const { query } = sessionSummaryQuery(REBUILD, ['a']);
+    const userEval = query.slice(query.indexOf(`${attributeColumn('user')} = COALESCE(`));
+
+    expect(userEval.indexOf('raw_attributes_user_full_name')).toBeLessThan(
+      userEval.indexOf('raw_attributes_user_id')
     );
   });
 

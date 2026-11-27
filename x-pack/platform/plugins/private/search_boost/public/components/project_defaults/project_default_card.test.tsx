@@ -16,10 +16,7 @@ const defaultProps: ProjectDefaultCardProps = {
   type: 'indices',
   ruleName: 'default_indices',
   profile: { name: 'default_indices', is_builtin: true },
-  matches: [
-    { name: 'products', isHidden: false },
-    { name: 'users', isHidden: false },
-  ],
+  matches: [{ name: 'products' }, { name: 'users' }],
   canEdit: true,
   onEdit: jest.fn(),
   onViewProfile: jest.fn(),
@@ -30,7 +27,7 @@ describe('ProjectDefaultCard', () => {
     render(<ProjectDefaultCard {...defaultProps} />);
 
     expect(screen.getByTestId('searchBoostProjectDefaultValue-indices')).toHaveTextContent(
-      'Performant'
+      'Default'
     );
     expect(
       screen.getByText(
@@ -47,9 +44,9 @@ describe('ProjectDefaultCard', () => {
       <ProjectDefaultCard
         {...defaultProps}
         matches={[
-          { name: 'products', isHidden: false },
-          { name: 'users', isHidden: false },
-          { name: 'archive', isHidden: false, outrankedByRuleName: 'Product catalog' },
+          { name: 'products' },
+          { name: 'users' },
+          { name: 'archive', outrankedByRuleName: 'Product catalog' },
         ]}
       />
     );
@@ -138,15 +135,6 @@ describe('ProjectDefaultCard', () => {
 
     expect(screen.getByText('Matching indices')).toBeInTheDocument();
     expect(screen.getByText('products')).toBeInTheDocument();
-  });
-
-  it('does not make the count badge open a popover when there are no matches', () => {
-    render(<ProjectDefaultCard {...defaultProps} matches={[]} />);
-
-    const badge = screen.getByTestId('searchBoostProjectDefaultCount-indices');
-    expect(badge).toHaveTextContent('0 indices');
-    expect(badge.tagName).toBe('SPAN');
-    expect(screen.queryByTestId('searchBoostMatchesPopover')).not.toBeInTheDocument();
   });
 
   it.each([

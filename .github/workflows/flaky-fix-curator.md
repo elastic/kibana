@@ -13,10 +13,16 @@ on:
   # One proposal at a time: wait until the previous curator PR is merged or closed.
   skip-if-match: 'is:pr is:open label:flaky-fix-curator'
 
+if: github.repository == 'elastic/kibana'
+
 permissions:
   contents: read
   issues: read
   pull-requests: read
+  # Agent Router token for the agent (see shared/agent-router.md)
+  id-token: write
+  # threat detection runs on Copilot
+  copilot-requests: write
 
 concurrency:
   group: flaky-fix-curator
@@ -29,18 +35,22 @@ env:
 
 imports:
   - .github/workflows/shared/app-dex-agents-otel.md
+  - .github/workflows/shared/agent-router.md
 
 engine:
   id: claude
-  version: '2.1.165'
-  model: opus
+  version: '2.1.317'
+  model: claude-opus-5-5
   max-turns: 100
   env:
-    ANTHROPIC_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-    ANTHROPIC_BASE_URL: https://openrouter.ai/api
-    ANTHROPIC_DEFAULT_OPUS_MODEL: anthropic/claude-opus-5
-    ANTHROPIC_DEFAULT_HAIKU_MODEL: anthropic/claude-haiku-4.5
-    ANTHROPIC_DEFAULT_SONNET_MODEL: anthropic/claude-sonnet-4.6
+    ANTHROPIC_BASE_URL: https://llm.idea.elastichosting.ai/anthropic
+    # `Bearer <token>`, exported by shared/agent-router.md. The fallback passes the activation job's key check.
+    ANTHROPIC_API_KEY: ${{ env.ANTHROPIC_API_KEY || 'agent-router' }}
+    # the gateway reads only `Authorization: Bearer`
+    AWF_ANTHROPIC_AUTH_HEADER: Authorization
+    ANTHROPIC_DEFAULT_OPUS_MODEL: claude-opus-5-5
+    ANTHROPIC_DEFAULT_HAIKU_MODEL: claude-haiku-5-5
+    ANTHROPIC_DEFAULT_SONNET_MODEL: claude-sonnet-5-5
     CLAUDE_CODE_EFFORT_LEVEL: high
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 
@@ -54,7 +64,6 @@ network:
     - defaults
     - github.com
     - api.github.com
-    - openrouter.ai
 sandbox:
   agent: awf
 
@@ -65,7 +74,7 @@ jobs:
     if: needs.collect.outputs.findings != '0'
   collect:
     needs: pre_activation
-    if: needs.pre_activation.outputs.activated == 'true'
+    if: needs.pre_activation.outputs.activated == 'true' && github.repository == 'elastic/kibana'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -108,9 +117,12 @@ steps:
 
 safe-outputs:
   threat-detection:
+    # The detection job can't request an OIDC token, so it runs on Copilot.
     engine:
-      id: claude
-      version: '2.1.165'
+      id: copilot
+      model: claude-opus-5
+    # a detection failure blocks the outputs instead of passing with a warning
+    continue-on-error: false
   activation-comments: false
   report-failure-as-issue: false
   create-pull-request:
@@ -163,7 +175,7 @@ The files you may change, and only these:
 - `.agents/skills/flaky-test-investigator/`: the investigation skill the investigator and fixer read.
 - `docs/extend/testing/`: the Scout testing docs the guidelines link to and the fixer reads. Change one when the lesson is about how to write the test, not about how the workflow runs.
 
-Prompt bodies and the guidelines are loaded at run time, so a merged change takes effect on the next run without recompiling the lock files.
+Prompt bodies and the guidelines are loaded at run time, so a merged change takes effect on the next run. Each workflow's lock file still records a hash of its prompt body, and CI fails while that hash is stale. You cannot recompile, so when you edit a workflow prompt, say so in the review notes. The shared guidelines, the skill and the docs have no lock file.
 
 ## Steps
 
@@ -197,7 +209,7 @@ Prompt bodies and the guidelines are loaded at run time, so a merged change take
 
    ### Review notes
 
-   - Prompt bodies load at run time, so no lock file recompile is needed for this change.
+   - <when a workflow prompt changed: "Before merging, run `node scripts/ensure_gh_aw_version.js` to get the repo-pinned compiler, then `gh aw compile <workflow>` for <each edited workflow>, and push the lock files. The lock validation check fails until then." Otherwise: "No lock file recompile is needed: only files without a lock changed.">
    - <any file you considered editing but did not, and why>
    ```
 

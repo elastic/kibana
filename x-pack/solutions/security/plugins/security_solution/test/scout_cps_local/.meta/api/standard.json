@@ -1,5 +1,5 @@
 {
-  "sha1": "ffe12b88c3f6d5ef9c310b7586e566ae7f419ca1",
+  "sha1": "7037a49e20d43a59c408cbe0ab6a078bacdc3e13",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -89,8 +89,8 @@
       }
     },
     {
-      "id": "752be1b1bae5fc6-100b06c2a31330c",
-      "title": "Hunt Watch - index scope and worker coverage across projects cannot resolve a linked project pattern in a space routed to the origin only",
+      "id": "752be1b1bae5fc6-71eab470ee4dc4e",
+      "title": "Hunt Watch - index scope and worker coverage across projects keeps a concrete unqualified name that only the linked project has",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-security_complete",
@@ -103,6 +103,34 @@
       }
     },
     {
+      "id": "752be1b1bae5fc6-4590381fe97c9e7",
+      "title": "Hunt Watch - index scope and worker coverage across projects keeps an absent concrete name in the list instead of blocking the scope",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/hunt/hunt_index_scope_cps.spec.ts",
+        "line": 252,
+        "column": 15
+      }
+    },
+    {
+      "id": "752be1b1bae5fc6-100b06c2a31330c",
+      "title": "Hunt Watch - index scope and worker coverage across projects cannot resolve a linked project pattern in a space routed to the origin only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/hunt/hunt_index_scope_cps.spec.ts",
+        "line": 289,
+        "column": 32
+      }
+    },
+    {
       "id": "752be1b1bae5fc6-687412fd0a9b7d5",
       "title": "Hunt Watch - index scope and worker coverage across projects finds a Tier 1 IOC hit on the linked project",
       "expectedStatus": "passed",
@@ -112,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/hunt/hunt_index_scope_cps.spec.ts",
-        "line": 241,
-        "column": 5
+        "line": 310,
+        "column": 18
       }
     },
     {
@@ -126,8 +154,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/hunt/hunt_index_scope_cps.spec.ts",
-        "line": 279,
-        "column": 11
+        "line": 351,
+        "column": 32
       }
     },
     {
@@ -140,8 +168,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/hunt/hunt_index_scope_cps.spec.ts",
-        "line": 297,
-        "column": 34
+        "line": 369,
+        "column": 42
       }
     },
     {

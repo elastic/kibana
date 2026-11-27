@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { DragDropContextWrapper } from '../../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { TimelineId } from '../../../../common/types/timeline';
-import { mockGlobalState, TestProviders } from '../../../common/mock';
+import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
 
 import type { Props as StatefulTimelineOwnProps } from '.';
 import { StatefulTimeline } from '.';
 import { useTimelineEvents } from '../../containers';
+import { timelineActions } from '../../store';
 import { DefaultCellRenderer } from './cell_rendering/default_cell_renderer';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from './styles';
 import { defaultRowRenderers } from './body/renderers';
@@ -110,16 +111,16 @@ describe('StatefulTimeline', () => {
   });
 
   test('renders ', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulTimeline {...props} />
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="timeline"]')).toBeTruthy();
+    expect(screen.getByTestId('timeline')).toBeInTheDocument();
   });
 
   test(`it add attribute data-timeline-id in ${SELECTOR_TIMELINE_GLOBAL_CONTAINER}`, () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <DragDropContextWrapper browserFields={mockBrowserFields}>
           <StatefulTimeline {...props} />
@@ -127,10 +128,60 @@ describe('StatefulTimeline', () => {
       </TestProviders>
     );
     expect(
-      wrapper
-        .find(`[data-timeline-id="timeline-test"].${SELECTOR_TIMELINE_GLOBAL_CONTAINER}`)
-        .first()
-        .exists()
-    ).toEqual(true);
+      container.querySelector(
+        `[data-timeline-id="timeline-test"].${SELECTOR_TIMELINE_GLOBAL_CONTAINER}`
+      )
+    ).toBeInTheDocument();
+  });
+
+  describe('data view sync', () => {
+    const renderWithSavedTimeline = (savePromptDismissed: boolean) => {
+      const store = createMockStore({
+        ...mockGlobalState,
+        timeline: {
+          ...mockGlobalState.timeline,
+          timelineById: {
+            ...mockGlobalState.timeline.timelineById,
+            [TimelineId.test]: {
+              ...mockGlobalState.timeline.timelineById[TimelineId.test],
+              savedObjectId: 'saved-timeline',
+              changed: true,
+              savePromptDismissed,
+            },
+          },
+        },
+      });
+      // The page data view differs from the one saved on the timeline, which triggers the sync.
+      jest.mocked(useDataView).mockReturnValue(withIndices(['synced-*'], 'synced-data-view'));
+
+      render(
+        <TestProviders store={store}>
+          <StatefulTimeline {...props} />
+        </TestProviders>
+      );
+    };
+
+    const dismissAction = timelineActions.setSavePromptDismissed({
+      id: TimelineId.test,
+      dismissed: true,
+    });
+
+    test('keeps the save prompt dismissal that the sync would re-arm', () => {
+      renderWithSavedTimeline(true);
+
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({ type: timelineActions.updateDataView.type })
+      );
+      expect(mockDispatch).toHaveBeenCalledWith(dismissAction);
+    });
+
+    test('does not dismiss the save prompt when the user did not', () => {
+      renderWithSavedTimeline(false);
+
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({ type: timelineActions.updateDataView.type })
+      );
+      expect(mockDispatch).not.toHaveBeenCalledWith(dismissAction);
+    });
   });
 });

@@ -10,11 +10,13 @@ import {
   CheckDecidePrivilegesStepId,
   CloneProposalStepId,
   CreateProposalStepId,
+  GetLatestRevisionStepId,
   GetProposalStepId,
   SettleIncompleteProposalStepId,
   UpdateProposalStepId,
 } from '@kbn/proposals-common';
 import { registerProposalsPublicStepDefinitions } from '.';
+import { ProposalsStepIcon } from './proposals_step_icon';
 
 type Loader = () => Promise<{ id: string } | undefined>;
 
@@ -31,13 +33,13 @@ describe('proposals public step definitions', () => {
   it('should register every step as a loader, so none reaches the page-load bundle', () => {
     const registered = register();
 
-    expect(registered).toHaveLength(6);
+    expect(registered).toHaveLength(7);
     for (const definition of registered) {
       expect(typeof definition).toBe('function');
     }
   });
 
-  it('should resolve to the six distinct step ids', async () => {
+  it('should resolve to the seven distinct step ids', async () => {
     // Near-identical modules, so a copy-paste slip would otherwise silently
     // register the same definition twice and drop a step from the YAML editor.
     const resolved = await Promise.all(register().map((load) => load()));
@@ -49,14 +51,23 @@ describe('proposals public step definitions', () => {
       GetProposalStepId,
       CloneProposalStepId,
       SettleIncompleteProposalStepId,
+      GetLatestRevisionStepId,
     ]);
   });
 
-  it('should give each step its own icon', async () => {
+  it('should give every step the proposals icon', async () => {
     const resolved = await Promise.all(register().map((load) => load()));
 
     for (const definition of resolved) {
-      expect(definition).toHaveProperty('icon');
+      expect(definition).toHaveProperty('icon', ProposalsStepIcon);
+    }
+  });
+
+  it('should mark every step internal, since they only exist for the managed workflows', async () => {
+    const resolved = await Promise.all(register().map((load) => load()));
+
+    for (const definition of resolved) {
+      expect(definition).toHaveProperty('exposure', 'internal');
     }
   });
 });

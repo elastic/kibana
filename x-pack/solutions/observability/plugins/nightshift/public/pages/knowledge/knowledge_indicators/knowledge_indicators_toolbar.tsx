@@ -17,6 +17,7 @@ import {
 import { css } from '@emotion/react';
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import React from 'react';
+import { useIsMobile } from '../../../hooks/use_is_mobile';
 import { TableTitle } from './components/table_title';
 import { KnowledgeIndicatorsTypeFilter } from './components/knowledge_indicators_type_filter';
 import { KnowledgeIndicatorsSubtypeFilter } from './components/knowledge_indicators_subtype_filter';
@@ -39,6 +40,10 @@ import {
 const searchBarStyle = css`
   width: 100%;
   min-height: 44px;
+`;
+
+const mobileSearchItemStyle = css`
+  min-width: 200px;
 `;
 
 interface KnowledgeIndicatorsToolbarProps {
@@ -110,10 +115,18 @@ export function KnowledgeIndicatorsToolbar({
   onDeleteSelected,
   canManage,
 }: KnowledgeIndicatorsToolbarProps) {
+  const isMobile = useIsMobile();
+
   return (
     <>
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} css={searchBarStyle}>
-        <EuiFlexItem>
+      <EuiFlexGroup
+        gutterSize="s"
+        alignItems="center"
+        responsive={false}
+        wrap={isMobile}
+        css={searchBarStyle}
+      >
+        <EuiFlexItem css={isMobile ? mobileSearchItemStyle : undefined}>
           <EuiFieldSearch
             data-test-subj="significantEventsAppKnowledgeIndicatorsToolbarFieldSearch"
             fullWidth

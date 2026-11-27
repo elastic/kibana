@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import type { ReactWrapper } from 'enzyme';
-import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { UserActionMoveToReference } from './move_to_reference';
 
 const outlineComment = jest.fn();
@@ -17,20 +17,20 @@ const props = {
 };
 
 describe('UserActionMoveToReference ', () => {
-  let wrapper: ReactWrapper;
-
-  beforeAll(() => {
-    wrapper = mount(<UserActionMoveToReference {...props} />);
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
   it('it renders', async () => {
-    expect(
-      wrapper.find(`[data-test-subj="move-to-link-${props.id}"]`).first().exists()
-    ).toBeTruthy();
+    render(<UserActionMoveToReference {...props} />);
+
+    expect(screen.getByTestId(`move-to-link-${props.id}`)).toBeInTheDocument();
   });
 
   it('calls outlineComment correctly', async () => {
-    wrapper.find(`[data-test-subj="move-to-link-${props.id}"]`).first().simulate('click');
+    render(<UserActionMoveToReference {...props} />);
+
+    await userEvent.click(screen.getByTestId(`move-to-link-${props.id}`));
     expect(outlineComment).toHaveBeenCalledWith(props.id);
   });
 });

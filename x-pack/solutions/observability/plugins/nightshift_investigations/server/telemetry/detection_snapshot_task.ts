@@ -49,8 +49,9 @@ export interface DetectionSnapshotSources {
     spaceId: string,
     page: { page: number; perPage: number }
   ) => Promise<{ rules: SnapshotRule[]; total: number }>;
-  /** One entry per connector, so sources repeat. */
-  listExternalConnectorSources: (spaceId: string) => Promise<string[]>;
+  listConnectors: (
+    spaceId: string
+  ) => Promise<Array<{ actionTypeId: string; isInboundEventsEnabled?: boolean }>>;
   getAlertActivity: (
     spaceId: string,
     connectorSources: readonly string[],
@@ -78,6 +79,21 @@ export interface DetectionSnapshotTaskDeps {
   sources: DetectionSnapshotSources;
   logger: Logger;
 }
+
+// Connector types a managed workflow translates into alerts, mapped to the source it writes.
+const EXTERNAL_ALERT_SOURCE_BY_CONNECTOR_TYPE_ID: Readonly<Record<string, string>> = {
+  '.datadog': 'datadog',
+};
+
+const countConnectorsByType = (
+  connectors: ReadonlyArray<{ actionTypeId: string }>
+): DetectionSnapshotEvent['connectors_by_type'] => {
+  const counts = new Map<string, number>();
+  for (const { actionTypeId } of connectors) {
+    counts.set(actionTypeId, (counts.get(actionTypeId) ?? 0) + 1);
+  }
+  return [...counts].map(([connector_type, count]) => ({ connector_type, count }));
+};
 
 const countRules = async (
   spaceId: string,
@@ -118,16 +134,25 @@ const countRules = async (
   };
 };
 
+type TriggerKind = SnapshotAutomation['trigger']['rows'][number]['kind'];
+
+const countByTrigger = (automations: readonly SnapshotAutomation[], kind: TriggerKind): number =>
+  automations.filter(({ trigger }) => trigger.rows.some((row) => row.kind === kind)).length;
+
 const collectSpaceSnapshot = async (
   spaceId: string,
   sources: DetectionSnapshotSources,
   logger: Logger,
   signal: AbortSignal
 ): Promise<DetectionSnapshotEvent> => {
-  const [automations, connectorSources] = await Promise.all([
+  const [automations, connectors] = await Promise.all([
     sources.listAutomations(spaceId),
-    sources.listExternalConnectorSources(spaceId),
+    sources.listConnectors(spaceId),
   ]);
+  const connectorSources = connectors.flatMap(({ actionTypeId, isInboundEventsEnabled }) => {
+    const source = EXTERNAL_ALERT_SOURCE_BY_CONNECTOR_TYPE_ID[actionTypeId];
+    return source && isInboundEventsEnabled ? [source] : [];
+  });
   const [
     rules,
     { activeConnectorSources, ...alertActivity },
@@ -147,11 +172,21 @@ const collectSpaceSnapshot = async (
     }),
   ]);
 
+  const enabledAutomations = automations.filter(({ isEnabled }) => isEnabled);
+
   return {
     space_id: spaceId,
     ...rules,
     automations_total: automations.length,
-    automations_enabled: automations.filter(({ isEnabled }) => isEnabled).length,
+    automations_enabled: enabledAutomations.length,
+    connectors_configured: connectors.length,
+    connectors_by_type: countConnectorsByType(connectors),
+    automations_alert_total: countByTrigger(automations, 'alert'),
+    automations_alert_enabled: countByTrigger(enabledAutomations, 'alert'),
+    automations_schedule_total: countByTrigger(automations, 'schedule'),
+    automations_schedule_enabled: countByTrigger(enabledAutomations, 'schedule'),
+    automations_slack_total: countByTrigger(automations, 'slack'),
+    automations_slack_enabled: countByTrigger(enabledAutomations, 'slack'),
     external_connectors_configured: connectorSources.length,
     external_connectors_active_24h: connectorSources.filter((source) =>
       activeConnectorSources.includes(source)

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEuiShadow } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
@@ -23,7 +22,6 @@ interface Props {
 }
 
 export function SloCardItemActions(props: Props) {
-  const shadow = useEuiShadow('l');
   return (
     <div
       css={({ euiTheme }) => css`
@@ -32,8 +30,6 @@ export function SloCardItemActions(props: Props) {
         bottom: ${euiTheme.size.xxl};
         left: ${euiTheme.size.m};
         z-index: 1;
-        border-radius: ${euiTheme.border.radius.medium};
-        ${shadow}
       `}
     >
       <SloItemActions

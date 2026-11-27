@@ -6,11 +6,39 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { OperatingSystem } from '@kbn/securitysolution-utils';
-import type {
-  EventFormOption,
-  SupplementalEventFormOption,
-} from '../components/event_collection_card';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
+import type { UIPolicyConfig } from '../../../../../../../common/endpoint/types';
+import { PolicyOperatingSystem } from '../../../../../../../common/endpoint/types';
+
+const mapOperatingSystemToPolicyOsKey = {
+  [OperatingSystem.WINDOWS]: PolicyOperatingSystem.windows,
+  [OperatingSystem.LINUX]: PolicyOperatingSystem.linux,
+  [OperatingSystem.MAC]: PolicyOperatingSystem.mac,
+} as const;
+
+type OperatingSystemToOsMap = typeof mapOperatingSystemToPolicyOsKey;
+
+export type ProtectionField<T extends OperatingSystem> =
+  keyof UIPolicyConfig[OperatingSystemToOsMap[T]]['events'];
+
+export type EventFormSelection<T extends OperatingSystem> = { [K in ProtectionField<T>]: boolean };
+
+export interface EventFormOption<T extends OperatingSystem> {
+  name: string;
+  protectionField: ProtectionField<T>;
+}
+
+export interface SupplementalEventFormOption<T extends OperatingSystem> {
+  name: string;
+  protectionField: ProtectionField<T>;
+  indented?: boolean;
+  id?: string;
+  title?: string;
+  description?: string;
+  tooltipText?: string;
+  beta?: boolean;
+  isDisabled?(policyConfig: UIPolicyConfig): boolean;
+}
 
 /** Per-OS supplemental option, adding the control widget to the shared shape. */
 export type PerOsSupplementalEventFormOption<OS extends OperatingSystem> =

@@ -55,6 +55,7 @@ describe('getDataViewIdFromESQLQuery', () => {
       id: 'esql-dataset-id',
       title: 'logs-*',
       fields: [],
+      getFieldByName: () => undefined,
       isTimeBased: () => false,
     };
     const parentApi = {

@@ -15,6 +15,7 @@ export const useEndpointActions = () => {
   const toasts = services.notifications?.toasts;
   const [showDeleteAction, setShowDeleteAction] = useState(false);
   const [showInferenceFlyout, setShowInferenceFlyout] = useState(false);
+  const [showTestAction, setShowTestAction] = useState(false);
   const [selectedInferenceEndpoint, setSelectedInferenceEndpoint] = useState<
     InferenceInferenceEndpointInfo | undefined
   >(undefined);
@@ -54,6 +55,16 @@ export const useEndpointActions = () => {
     []
   );
 
+  const displayTestActionItem = useCallback((selectedEndpoint: InferenceInferenceEndpointInfo) => {
+    setSelectedInferenceEndpoint(selectedEndpoint);
+    setShowTestAction(true);
+  }, []);
+
+  const onCloseTestModal = useCallback(() => {
+    setSelectedInferenceEndpoint(undefined);
+    setShowTestAction(false);
+  }, []);
+
   const displayInferenceFlyout = useCallback((selectedEndpoint: InferenceInferenceEndpointInfo) => {
     setSelectedInferenceEndpoint(selectedEndpoint);
     setShowInferenceFlyout(true);
@@ -67,10 +78,13 @@ export const useEndpointActions = () => {
   return {
     showDeleteAction,
     showInferenceFlyout,
+    showTestAction,
     selectedInferenceEndpoint,
     copyContent,
     onCancelDeleteModal,
     displayDeleteActionItem,
+    displayTestActionItem,
+    onCloseTestModal,
     displayInferenceFlyout,
     onCloseInferenceFlyout,
   };

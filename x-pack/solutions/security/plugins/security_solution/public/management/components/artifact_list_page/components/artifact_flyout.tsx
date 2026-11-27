@@ -468,7 +468,13 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
           id: location.state.insight.id,
           back_url: location.state.insight.back_url,
         });
-        setFormState({ isValid: true, item: location.state.insight.item });
+        setFormState({
+          isValid: true,
+          item: {
+            ...location.state.insight.item,
+            meta: createExceptionListItemForCreate(apiClient.listId).meta,
+          },
+        });
 
         location.state.insight = undefined;
       }

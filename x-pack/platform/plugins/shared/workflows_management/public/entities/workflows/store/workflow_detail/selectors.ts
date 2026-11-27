@@ -6,6 +6,7 @@
  */
 
 import { createSelector } from 'redux-toolkit-v1';
+import type { WorkflowsCreateRouteTemplate } from '@kbn/workflows-ui';
 import { getOmittedStepExecutionsCount } from '../../../../../common';
 import {
   buildStepDurations,
@@ -77,6 +78,11 @@ export const selectHasYamlSchemaValidationErrors = createSelector(
 export const selectAiAssisted = createSelector(
   selectDetail,
   (detail): boolean => detail.aiAssisted
+);
+
+export const selectRemixTemplate = createSelector(
+  selectDetail,
+  (detail): WorkflowsCreateRouteTemplate | undefined => detail.remixTemplate
 );
 
 export const selectFocusedStepId = createSelector(selectDetail, (detail) => detail.focusedStepId);

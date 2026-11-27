@@ -25,6 +25,13 @@ import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/clas
  * account. It is set directly rather than through `serviceAccountsServerArgs`: that helper also
  * loads the security API integration test plugin, which this suite never calls.
  *
+ * The preinstalled `endpoint` Fleet package (same flag the endpoint eval suite uses) serves the
+ * approval spec, not the scored Worker: approving the assume-role report's suspend-process
+ * Proposal runs the managed Defend action, whose request validation resolves the agent's policy
+ * through Fleet's package policies and whose action-log and response data streams are installed
+ * by that package. Without it the approve test cannot stage its Fleet policy or answer the
+ * dispatched action.
+ *
  * Nothing else is needed. `workflows:ui:enabled` already defaults to `true`, and `inbox` is only
  * an optional UI provider for workflows_management; the Proposal approve and dismiss routes the
  * approval spec calls live in the proposals plugin.
@@ -40,6 +47,8 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...evalsTracingConfig.kbnTestServer.serverArgs,
       '--xpack.security.serviceAccounts.enabled=true',
+      '--xpack.fleet.packages.0.name=endpoint',
+      '--xpack.fleet.packages.0.version=latest',
     ],
   },
 };

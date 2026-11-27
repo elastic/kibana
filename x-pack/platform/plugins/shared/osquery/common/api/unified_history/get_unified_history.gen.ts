@@ -19,15 +19,17 @@ import { z, lazySchema } from '@kbn/zod/v4';
 /**
  * The type of history source to include.
  */
-export const SourceFilter = lazySchema(() => z.enum(['live', 'rule', 'scheduled']));
+export const SourceFilter = lazySchema(() => z.enum(['live', 'rule', 'scheduled', 'workflow']));
 export type SourceFilter = z.infer<typeof SourceFilter>;
 export type SourceFilterEnum = typeof SourceFilter.enum;
 export const SourceFilterEnum = SourceFilter.enum;
 
 /**
- * The display label for the history source.
+ * What ran the live query: manually, a rule, a schedule, or a workflow. `Workflow` comes from an unverified request header and is for display only.
  */
-export const UnifiedHistorySource = lazySchema(() => z.enum(['Live', 'Scheduled', 'Rule']));
+export const UnifiedHistorySource = lazySchema(() =>
+  z.enum(['Live', 'Scheduled', 'Rule', 'Workflow'])
+);
 export type UnifiedHistorySource = z.infer<typeof UnifiedHistorySource>;
 export type UnifiedHistorySourceEnum = typeof UnifiedHistorySource.enum;
 export const UnifiedHistorySourceEnum = UnifiedHistorySource.enum;
@@ -69,13 +71,13 @@ export const GetUnifiedHistoryRequestQuery = lazySchema(() =>
       .optional()
       .describe('Comma-separated list of user IDs to filter live query history.'),
     /**
-     * Comma-separated list of source types to include. Valid values are `live`, `rule`, and `scheduled`.
+     * Comma-separated list of source types to include. Valid values are `live`, `rule`, `scheduled`, and `workflow`.
      */
     sourceFilters: z
       .string()
       .optional()
       .describe(
-        'Comma-separated list of source types to include. Valid values are `live`, `rule`, and `scheduled`.'
+        'Comma-separated list of source types to include. Valid values are `live`, `rule`, `scheduled`, and `workflow`.'
       ),
     /**
      * The start of the time range filter (ISO 8601).
@@ -167,11 +169,22 @@ export const LiveHistoryRow = lazySchema(() =>
        */
       sourceType: z.literal('live').describe('Identifies this as a live query history row.'),
       /**
-       * Whether this was a manually run live query or triggered by a rule.
+       * Whether the live query was run manually, by a rule, or by a workflow. `Workflow` comes from an unverified request header and is for display only.
        */
       source: z
-        .enum(['Live', 'Rule'])
-        .describe('Whether this was a manually run live query or triggered by a rule.'),
+        .enum(['Live', 'Rule', 'Workflow'])
+        .describe(
+          'Whether the live query was run manually, by a rule, or by a workflow. `Workflow` comes from an unverified request header and is for display only.'
+        ),
+      /**
+       * Set on `Workflow` rows only. Whether Kibana verified that the workflow run made the request. Always `false` until workflow runs can be verified.
+       */
+      originVerified: z
+        .boolean()
+        .optional()
+        .describe(
+          'Set on `Workflow` rows only. Whether Kibana verified that the workflow run made the request. Always `false` until workflow runs can be verified.'
+        ),
       /**
        * The Fleet action ID for the live query.
        */

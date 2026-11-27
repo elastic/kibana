@@ -15,16 +15,18 @@ import {
 import type { AccessPattern, DreamChangeSet } from '../../common/step_types/apply_dream_changes';
 import { baseContent } from './access_patterns';
 import { citedMemoryIds, kindOf, type DreamedKi, type DreamedKiKind } from './dreamed_ki';
-import { batchKeyOf, entityId, factId, TRACE_ROUND_ID_PREFIX } from './ids';
+import { batchKeyOf, entityId, EXTERNAL_MEMORY_ID_PREFIXES, factId } from './ids';
 import { audienceKeyOf, type KiPermissions } from './permissions';
 
 const NEW_REF_PREFIX = 'new:';
 const FACT_ID_PREFIX = 'fact-';
 
 const shownIdOf = (id: string, shown: ReadonlySet<string>): string =>
-  !shown.has(id) && shown.has(`${TRACE_ROUND_ID_PREFIX}${id}`)
-    ? `${TRACE_ROUND_ID_PREFIX}${id}`
-    : id;
+  shown.has(id)
+    ? id
+    : EXTERNAL_MEMORY_ID_PREFIXES.map((prefix) => `${prefix}${id}`).find((prefixed) =>
+        shown.has(prefixed)
+      ) ?? id;
 
 /** The fact and entity types the model may write. */
 export interface DreamingVocabulary {

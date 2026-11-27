@@ -124,6 +124,11 @@ dependsOn:
   - '@kbn/core-chrome-sidebar'
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/core-data-streams-server'
+  - '@kbn/data-streams'
+  - '@kbn/es-mappings'
+  - '@kbn/es-errors'
+  - '@kbn/evals-common'
+  - '@kbn/zod-helpers'
   - '@kbn/task-manager-plugin'
   - '@kbn/evals-plugin'
   - '@kbn/usage-api-plugin'
@@ -156,6 +161,7 @@ dependsOn:
   - '@kbn/ui-callout'
   - '@kbn/core-http-browser-mocks'
   - '@kbn/projects-solutions-groups'
+  - '@kbn/flyout-template'
 tags:
   - plugin
   - prod

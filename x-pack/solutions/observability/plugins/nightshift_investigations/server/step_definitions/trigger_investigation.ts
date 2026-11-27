@@ -12,12 +12,17 @@ import {
   SIGNIFICANT_EVENTS_ALERT_SOURCE,
 } from '@kbn/significant-events-schema';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { SLACK_MESSAGE_EVENT_ID, toSlackPlainText } from '@kbn/connector-specs';
 import { isBoom, serverUnavailable } from '@hapi/boom';
 import pRetry, { AbortError } from 'p-retry';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { NightshiftSettingsLocator } from '../../common/locators';
-import { notifyInvestigationQuotaReached } from '../lib/notifications/notify_investigation_quota_reached';
+import {
+  getLimitNoticeTargets,
+  notifyInvestigationLimitReached,
+  type LimitNoticeReason,
+} from '../lib/notifications/notify_investigation_quota_reached';
 import { DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID, toSlackThreadSubjectId } from '../../common';
 import {
   triggerInvestigationStepCommonDefinition,
@@ -78,6 +83,20 @@ const resolveAlerts = async ({
 const nonEmptyString = (value: unknown): string | undefined =>
   typeof value === 'string' && value.length > 0 ? value : undefined;
 
+/** A Slack-triggered thread is summarized by its message: stored workflows still pass the automation name as `summary`. */
+const toSubjectSummary = (
+  input: z.infer<typeof triggerInvestigationStepInputSchema>,
+  triggeredBy: string | undefined,
+  event: unknown
+): string | undefined => {
+  if (input.subject_type !== 'slack_thread' || triggeredBy !== SLACK_MESSAGE_EVENT_ID) {
+    return input.summary;
+  }
+  const text =
+    typeof event === 'object' && event !== null && 'text' in event ? event.text : undefined;
+  return nonEmptyString(toSlackPlainText(typeof text === 'string' ? text : undefined));
+};
+
 const toSubjectId = ({
   subject_type: subjectType,
   subject_id: subjectId,
@@ -117,10 +136,11 @@ export const triggerInvestigationStepDefinition = (
       const request = context.contextManager.getFakeRequest();
       // getFakeRequest() does not carry space info, so the space ID must be extracted from the
       // workflow context explicitly. See https://github.com/elastic/kibana/issues/284786.
-      const { workflow, kibanaUrl, execution } = context.contextManager.getContext();
+      const { workflow, kibanaUrl, execution, event } = context.contextManager.getContext();
       const spaceId = workflow.spaceId;
       const input = triggerInvestigationStepInputSchema.parse(context.input);
       let automationBudget: AutomationBudget | undefined;
+      let automationName: string | undefined;
       let isManualAutomationRun = false;
       if (input.automation_id) {
         const soClient = getAutomationsSoClient(request, spaceId);
@@ -131,6 +151,7 @@ export const triggerInvestigationStepDefinition = (
         if (automation.workflowId !== workflow.id) {
           throw new Error('The automation does not belong to this workflow.');
         }
+        automationName = automation.name;
         // Public workflow inputs and metadata cannot grant manual accounting.
         isManualAutomationRun = execution.triggeredBy === MANUAL_AUTOMATION_TRIGGER_SOURCE;
         if (isManualAutomationRun && !isScheduleOnlyAutomation(automation)) {
@@ -174,13 +195,29 @@ export const triggerInvestigationStepDefinition = (
       )?.slice(0, MAX_ID_LENGTH);
       const title =
         input.title && input.title !== subjectId ? input.title : alertTitle ?? input.title;
+      const notifyLimitReached = (reason: LimitNoticeReason) =>
+        notifyInvestigationLimitReached({
+          getSoClient: () => getAutomationsSoClient(request, spaceId),
+          getActions,
+          request,
+          spaceId,
+          targets: getLimitNoticeTargets({
+            slackThread: input.slack_thread,
+            notificationDestinations: input.notificationDestinations,
+          }),
+          reason,
+          settingsLocator,
+          kibanaUrl,
+          signal: context.abortSignal,
+          logger: context.logger,
+        });
       try {
         const result = await client.start(
           {
             subject: {
               type: input.subject_type,
               id: isManualAutomationRun ? DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID : subjectId,
-              summary: input.summary,
+              summary: toSubjectSummary(input, execution.triggeredBy, event),
             },
             title,
             trigger_type: isManualAutomationRun ? 'manual' : input.trigger_type ?? 'automatic',
@@ -203,6 +240,7 @@ export const triggerInvestigationStepDefinition = (
           {
             automationBudget,
             automationId: input.automation_id,
+            automationName,
             // A Slack thread subject means a Slack message started the run.
             entryPoint: input.subject_type === 'slack_thread' ? 'slack' : 'automation',
           }
@@ -238,27 +276,21 @@ export const triggerInvestigationStepDefinition = (
               input.subject_type === 'significant_event' ? subjectId : significantEventAlertId,
             ...alertIdentity,
           });
+          if (input.automation_id) {
+            await notifyLimitReached({
+              type: 'automation',
+              automationId: input.automation_id,
+              automationName: automationName ?? input.automation_id,
+              limit: error.limit,
+            });
+          }
           return { output: { skip_reason: 'daily_limit' as const, daily_limit: error.limit } };
         }
         if (error instanceof InvestigationQuotaDeniedError) {
           context.logger.info(
             `Skipped investigation of ${input.subject_type}/${subjectId}: ${error.message}`
           );
-          if (input.slack_thread) {
-            await notifyInvestigationQuotaReached({
-              getSoClient: () => getAutomationsSoClient(request, spaceId),
-              getActions,
-              deniedBy: error.deniedBy,
-              request,
-              spaceId,
-              slackThread: input.slack_thread,
-              settingsLocator,
-              kibanaUrl,
-              limit: error.limit,
-              signal: context.abortSignal,
-              logger: context.logger,
-            });
-          }
+          await notifyLimitReached({ type: 'quota', deniedBy: error.deniedBy, limit: error.limit });
           return { output: { skip_reason: 'investigation_limit' as const } };
         }
         throw error;

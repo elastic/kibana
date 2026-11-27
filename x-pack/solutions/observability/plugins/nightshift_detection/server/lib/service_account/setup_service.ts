@@ -18,7 +18,9 @@ import type {
 } from '../../../common/service_account';
 import { EngineHttpError } from '../errors/engine_http_error';
 import { getStatusCode } from '../errors/get_status_code';
+import { WorkflowInstaller } from '../workflows/workflow_installer';
 import { DetectionAccountService } from './detection_account';
+import { SpaceSetupLock } from './space_setup_lock';
 import { DETECTION_ENGINE_WORKLOAD_ID, DETECTION_ENGINE_WORKLOAD_TYPE } from './workload';
 
 const ACCOUNT_STATUS_FORBIDDEN = 403;
@@ -30,6 +32,9 @@ export class DetectionSetupService {
 
   constructor(
     @inject(DetectionAccountService) private readonly account: DetectionAccountService,
+    @inject(WorkflowInstaller)
+    private readonly workflows: Pick<WorkflowInstaller, 'install' | 'enable'>,
+    @inject(SpaceSetupLock) private readonly setupLock: Pick<SpaceSetupLock, 'run'>,
     @inject(CoreStartToken('security')) private readonly security: CoreStart['security'],
     @inject(CoreStartToken('elasticsearch'))
     private readonly elasticsearch: CoreStart['elasticsearch'],
@@ -72,6 +77,34 @@ export class DetectionSetupService {
     await this.assertSpaceExists({ request, spaceId });
     await this.assertRoleExists({ request });
 
+    // One setup per space at a time: two calls for different accounts would otherwise bind and
+    // install the same space against each other, and the workflow could end up running as the
+    // account that lost the binding, which every tick refuses.
+    const outcome = await this.setupLock.run({
+      spaceId,
+      callback: () => this.setUpSpace({ request, spaceId, serviceAccountId }),
+    });
+
+    if (!outcome.ran) {
+      throw new EngineHttpError(
+        `Another setup of space [${spaceId}] is in progress. Call _enable again once it has finished.`,
+        409
+      );
+    }
+
+    return outcome.result;
+  }
+
+  /** What `enable` does while it holds the space's setup lock. */
+  private async setUpSpace({
+    request,
+    spaceId,
+    serviceAccountId,
+  }: {
+    request: KibanaRequest;
+    spaceId: string;
+    serviceAccountId: string;
+  }): Promise<DetectionEngineEnableResponse> {
     // Bound first, so what the engine does outside workflow runs is tied to the account before
     // any workflow is. Binding again with another account rebinds the space.
     const previousAccountId = await this.account.getDetectionEngineAccountId({ spaceId });
@@ -82,13 +115,21 @@ export class DetectionSetupService {
     });
 
     // The UI reads the binding alone to decide whether to offer setup, so a failed call must not
-    // leave a space that was never set up reading as set up.
+    // leave a space that was never set up reading as set up. Once the workflow install has
+    // started, the workflow runs as the new account: putting a rebound space back on its previous
+    // account would split the engine and its workflow across two accounts, so a rebound space keeps
+    // the new binding and a retry converges on it. A first install leaves the workflow off, so a
+    // space that was never set up has nothing running to undo.
+    let isInstallStarted = false;
+
     try {
       await this.assertBoundAccountIsDetectionAccount({ spaceId, serviceAccountId });
 
-      // The engine's bound workflow is installed here (added with the tick route).
+      isInstallStarted = true;
+      await this.workflows.install({ request, spaceId, serviceAccountId });
 
-      // A concurrent call for another account may have rebound the space after this one bound it.
+      // The setup lock keeps another `_enable` out, so this only catches a binding changed by
+      // something else, which a workflow bound to this account must not outlive.
       const currentAccountId = await this.account.getDetectionEngineAccountId({ spaceId });
 
       if (currentAccountId !== serviceAccountId) {
@@ -97,13 +138,18 @@ export class DetectionSetupService {
           409
         );
       }
+
+      // Last, so a call that failed or lost a race above never switches the workflow on.
+      await this.workflows.enable({ request, spaceId, serviceAccountId });
     } catch (error) {
-      await this.restorePreviousBinding({
-        request,
-        spaceId,
-        serviceAccountId,
-        previousAccountId,
-      });
+      if (!isInstallStarted || previousAccountId === undefined) {
+        await this.restorePreviousBinding({
+          request,
+          spaceId,
+          serviceAccountId,
+          previousAccountId,
+        });
+      }
 
       throw error;
     }

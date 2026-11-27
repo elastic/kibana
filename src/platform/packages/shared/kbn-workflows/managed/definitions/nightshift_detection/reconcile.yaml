@@ -1,0 +1,74 @@
+# Installed per space, bound to the detection engine service account, by the space's setup. It
+# calls the engine's reconcile route as that account whenever knowledge indicators change, when the
+# engine starts it after a source changes (`triggeredBy: nightshift-detection.sourceChanged`, set by
+# server code), and every six hours to catch a change whose start was lost.
+version: "1"
+name: "Nightshift Detection Reconcile"
+description: "Keeps what the Nightshift detection strategies need in the space, today their alerting rules, up to date with its knowledge indicators and sources."
+# A first install starts off; the space's setup turns it on after checking the binding. A later
+# install keeps whatever state the installed workflow has.
+enabled: false
+tags:
+  - observability
+  - nightshift
+  - detection-engine
+settings:
+  # Replaced with the bound service account when the workflow is installed in a space.
+  run_as: __SERVICE_ACCOUNT_ID__
+  timeout: "5m"
+  # A burst of changes gives one reconciliation: each new run cancels the one still waiting, and
+  # the last one reads the knowledge as it is once the burst is over. A run the first step refuses
+  # gets a group of its own, since the group is applied before any step: in the shared one it would
+  # cancel the reconciliation in flight.
+  concurrency:
+    key: 'nightshift-detection-reconcile{% unless execution.triggeredBy == "scheduled" or execution.triggeredBy == "significant-events.knowledgeIndicatorsChanged" or execution.triggeredBy == "nightshift-detection.sourceChanged" %}-refused{% endunless %}'
+    strategy: cancel-in-progress
+    max: 1
+triggers:
+  - type: significant-events.knowledgeIndicatorsChanged
+  - type: scheduled
+    with:
+      every: "6h"
+steps:
+  # Only the schedule, the triggers above and the engine on a source change start this workflow.
+  # Anyone allowed to run workflows could otherwise change rules as the service account. Only
+  # server code sets `triggeredBy`.
+  - name: refuse_direct_runs
+    type: if
+    condition: 'not (execution.triggeredBy : "scheduled" or execution.triggeredBy : "significant-events.knowledgeIndicatorsChanged" or execution.triggeredBy : "nightshift-detection.sourceChanged")'
+    steps:
+      - name: refuse
+        type: workflow.fail
+        with:
+          message: >-
+            This workflow reconciles the Nightshift detection resources as its service account when
+            knowledge or sources change, and cannot be run directly. This run was started by
+            {{ execution.triggeredBy }}.
+
+  # Waits for the burst of writes to settle; a run started meanwhile cancels this one.
+  - name: settle
+    type: wait
+    with:
+      duration: 30s
+
+  - name: reconcile
+    type: kibana.request
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/nightshift/detection/_reconcile"
+      body: {}
+
+  # The route answers 200 when another reconciliation held the space and when some rules or
+  # strategies failed. Failing the run shows it; the next change or the schedule tries again.
+  - name: report_incomplete_reconciliation
+    type: if
+    condition: "${{ steps.reconcile.output.status == 'busy' or steps.reconcile.output.failures.size > 0 or steps.reconcile.output.strategy_errors.size > 0 }}"
+    steps:
+      - name: fail
+        type: workflow.fail
+        with:
+          message: >-
+            The reconciliation did not finish: status {{ steps.reconcile.output.status }},
+            {{ steps.reconcile.output.failures.size | default: 0 }} rule operation(s) failed,
+            {{ steps.reconcile.output.strategy_errors.size | default: 0 }} strategy(ies) failed.
+            The next change or the six-hour schedule tries again.

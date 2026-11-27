@@ -174,13 +174,14 @@ export interface InternalChromeStart extends ChromeStart {
     registerCustomizeNavigationHandler(handler: () => void): void;
 
     /**
-     * Attach hover lists to an existing project-nav deep link.
-     * Does not require project chrome style; unused until project nav renders.
-     * Primary and footer hover only; not attached in More.
+     * Attach supplementary lists to an existing project-nav deep link.
+     * Does not require project chrome style; unused until project nav renders. The lists render in
+     * primary and footer hover popovers and, for panel openers, the existing side panel. They do
+     * not create a side panel or render in More.
      */
     registerNavigationLinks(links: ProjectNavigationLinks): void;
 
-    /** Registered hover lists. Live updates. */
+    /** Registered supplementary navigation lists. Live updates. */
     getRegisteredNavigationLinks$(): Observable<readonly ProjectNavigationLinks[]>;
 
     /**

@@ -45,6 +45,16 @@ describe('buildVarietySummary', () => {
     );
   });
 
+  it('says a cloud proposal groups by rule only even when its alerts have a strict key', () => {
+    const cloud = {
+      'kibana.alert.rule.uuid': 'r',
+      'kibana.alert.rule.revision': 1,
+      event: { action: 'login' },
+      cloud: { account: { id: '1' } },
+    };
+    expect(buildVarietySummary([cloud], 'keyed')).toContain('group by rule only');
+  });
+
   it('says a proposal groups by rule only when no alert has an identifying field', () => {
     expect(buildVarietySummary([alert('h1')], 'keyed')).toContain('group by rule only');
   });

@@ -24,9 +24,12 @@ export function createExecuteEsqlGroundingEvaluator<
     kind: 'CODE',
     direction: 'maximize',
     evaluate: ({ output }) => {
-      const { noOfToolCalls, noOfToolCallsWithResults } = summarizeEsqlGrounding(
-        output.steps ?? []
-      );
+      const {
+        noOfToolCalls,
+        noOfToolCallsWithResults,
+        noOfToolCallsWithErrors,
+        noOfToolCallsWithoutResult,
+      } = summarizeEsqlGrounding(output.steps ?? []);
 
       if (noOfToolCalls === 0) {
         return Promise.resolve({
@@ -37,11 +40,29 @@ export function createExecuteEsqlGroundingEvaluator<
       }
 
       const grounded = noOfToolCallsWithResults > 0;
+      const failureReason =
+        noOfToolCallsWithErrors === 0 && noOfToolCallsWithoutResult === 0
+          ? `All ${noOfToolCalls} execute_esql call(s) returned zero rows`
+          : [
+              noOfToolCallsWithErrors > 0 &&
+                `${noOfToolCallsWithErrors} execute_esql call(s) failed with a query error`,
+              noOfToolCallsWithoutResult > 0 &&
+                `${noOfToolCallsWithoutResult} execute_esql call(s) returned no result`,
+              noOfToolCallsWithResults === 0 &&
+                noOfToolCallsWithErrors + noOfToolCallsWithoutResult < noOfToolCalls &&
+                'the remaining call(s) returned zero rows',
+            ]
+              .filter(Boolean)
+              .join('; ');
       return Promise.resolve({
         score: grounded ? 1 : 0,
         explanation: grounded
-          ? `${noOfToolCallsWithResults}/${noOfToolCalls} execute_esql call(s) returned rows`
-          : `All ${noOfToolCalls} execute_esql call(s) returned zero rows — analysis not grounded in data`,
+          ? `${noOfToolCallsWithResults}/${noOfToolCalls} execute_esql call(s) returned rows${
+              noOfToolCallsWithErrors > 0
+                ? ` (${noOfToolCallsWithErrors} failed with a query error)`
+                : ''
+            }`
+          : `${failureReason} — analysis not grounded in data`,
       });
     },
   };

@@ -49,9 +49,9 @@ paths:
         - name: sourceFilters
           in: query
           required: false
-          description: 'Comma-separated list of source types to include. Valid values are `live`, `rule`, and `scheduled`.'
+          description: 'Comma-separated list of source types to include. Valid values are `live`, `rule`, `scheduled`, and `workflow`.'
           schema:
-            description: 'Comma-separated list of source types to include. Valid values are `live`, `rule`, and `scheduled`.'
+            description: 'Comma-separated list of source types to include. Valid values are `live`, `rule`, `scheduled`, and `workflow`.'
             example: 'live,scheduled'
             type: string
         - name: startDate

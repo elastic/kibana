@@ -6,21 +6,25 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { Logger as CoreLogger } from '@kbn/core-di';
+import { Logger as CoreLogger, PluginSetup } from '@kbn/core-di';
+import type { CPSServerSetup } from '@kbn/cps/server';
+import type { KnowledgeIndicatorReader } from '@kbn/significant-events-plugin/server';
+import { memoize } from 'lodash';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
-import { inject, injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
+import { getErrorMessage } from '../errors/get_error_message';
 import { AvailabilityService } from '../availability/availability_service';
+import { ManagedRuleReader } from '../rules/managed_rule_reader';
 import { DetectionSignalStore } from '../signals/signal_store';
 import { wrapReading } from '../signals/wrap_reading';
 import { DetectionStateClient } from '../state/detection_state_client';
 import { StrategyCatalog } from '../strategies/strategy_catalog';
 import type { GenerateResult } from '../strategies/types';
-import { DetectionEngineDataClient } from './es_client_tokens';
 import { planWindows } from './plan_windows';
 import type { PlannedWindow } from './plan_windows';
 import { SpaceRunLock } from './space_run_lock';
-import type { StrategyRunResult, TickResult } from './tick_result';
-import { EnabledSources, RunContext } from './tokens';
+import type { StrategyRunResult, TickResult } from '../../../common/tick';
+import { DetectionEngineDataClient, KnowledgeIndicators, RunContext, Sources } from './tokens';
 
 /**
  * Deadline for the generators of one tick, counted from taking the space's run lock, so a slow
@@ -33,8 +37,10 @@ import { EnabledSources, RunContext } from './tokens';
  */
 export const RUN_BUDGET_MS = 4 * 60_000;
 
-function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
+function assertRunOpen(runSignal: AbortSignal): void {
+  if (runSignal.aborted) {
+    throw new Error('the run ended before the result could be stored');
+  }
 }
 
 function createAbortError(signal: AbortSignal): Error {
@@ -53,6 +59,18 @@ function rejectOnAbort(signal: AbortSignal): Promise<never> {
   });
 }
 
+function memoizeKnowledgeIndicators(knowledge: KnowledgeIndicatorReader): KnowledgeIndicatorReader {
+  // Read once per tick and set of sources, at the first window that asks: every strategy asks for
+  // the tick's enabled sources, so they share one read, and a tick with nothing due reads none.
+  return {
+    listQueries: memoize(
+      (params) => knowledge.listQueries(params),
+      ({ sourceIds }) => JSON.stringify(sourceIds)
+    ),
+    listFeatures: (params) => knowledge.listFeatures(params),
+  };
+}
+
 /**
  * One tick of the detection engine in one space: takes the space's run lock, runs every due
  * strategy over its window, stores the signals, and moves each strategy's generator state. It knows no
@@ -69,10 +87,19 @@ export class EngineRunner {
     @inject(DetectionStateClient) private readonly state: DetectionStateClient,
     @inject(SpaceRunLock) private readonly spaceRunLock: Pick<SpaceRunLock, 'run'>,
     @inject(DetectionSignalStore) private readonly signalStore: DetectionSignalStore,
-    @inject(EnabledSources) private readonly enabledSources: EnabledSources,
+    @inject(Sources) private readonly sources: Sources,
     @inject(DetectionEngineDataClient) private readonly dataClient: ElasticsearchClient,
-    @inject(CoreLogger) private readonly logger: Logger
-  ) {}
+    @inject(KnowledgeIndicators) knowledge: KnowledgeIndicatorReader,
+    @inject(ManagedRuleReader) private readonly rules: ManagedRuleReader,
+    @inject(CoreLogger) private readonly logger: Logger,
+    @inject(PluginSetup<CPSServerSetup>('cps'))
+    @optional()
+    private readonly cps: CPSServerSetup | undefined
+  ) {
+    this.knowledge = memoizeKnowledgeIndicators(knowledge);
+  }
+
+  private readonly knowledge: KnowledgeIndicatorReader;
 
   /**
    * Runs one tick:
@@ -142,7 +169,7 @@ export class EngineRunner {
       const windows = planWindows({ strategies, processedUntil, now, skipBacklog });
 
       // 4 and 5. Every due strategy runs on its own; one failing does not stop the others.
-      const sources = windows.length > 0 ? await this.enabledSources.list() : [];
+      const sources = windows.length > 0 ? await this.sources.list({ enabledOnly: true }) : [];
       const results = await Promise.all(
         windows.map((window) => this.runStrategy({ window, sources, runSignal: budget.signal }))
       );
@@ -153,6 +180,8 @@ export class EngineRunner {
     } finally {
       clearTimeout(budgetTimer);
       abortSignal?.removeEventListener('abort', abortRun);
+      // Ends the run for a generator that ignores its signal and comes back after the lock is free.
+      budget.abort('the run ended');
     }
   }
 
@@ -220,6 +249,9 @@ export class EngineRunner {
                   : controller.signal,
               }),
           },
+          knowledge: this.knowledge,
+          rules: this.rules,
+          cpsEnabled: this.cps?.getCpsEnabled() ?? false,
           abortSignal: controller.signal,
           logger: this.logger,
         }),
@@ -248,6 +280,10 @@ export class EngineRunner {
         return [wrapped.signal];
       });
 
+      // A generator that ignores its abort signal can come back after the run ended, when the lock
+      // is free and another node may be running this space. Nothing is stored or advanced from here.
+      assertRunOpen(runSignal);
+
       const { written, failures } = await this.signalStore.write(signals);
       result.signals = written;
 
@@ -263,6 +299,7 @@ export class EngineRunner {
         return result;
       }
 
+      assertRunOpen(runSignal);
       await this.state.advanceGeneratorState({ spaceId, strategyId, processedUntil: to });
     } catch (error) {
       result.error = getErrorMessage(error);

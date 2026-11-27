@@ -11,7 +11,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
-import type { SetupBuilds } from './breakages';
+import type { BuildOutcome, SetupBuilds } from './breakages';
 import {
   checkFlakyTest,
   classifyTest,
@@ -122,18 +122,27 @@ describe('flakiestQualifyingBranch', () => {
 const FIRST_BUILD_AT = Date.UTC(2026, 9, 1);
 const HOUR_MS = 60 * 60 * 1000;
 
-/** Builds of one setup numbered from `first` on, oldest first: `x` failed, `.` passed. */
+const OUTCOMES: Readonly<Record<string, BuildOutcome>> = {
+  x: 'failed',
+  r: 'recovered',
+  '.': 'passed',
+};
+
+/**
+ * Builds of one setup numbered from `first` on, oldest first: `x` failed every attempt, `r` failed
+ * then passed on a retry, `.` passed.
+ */
 const setupBuilds = (pattern: string, first = 1, branch = 'main'): SetupBuilds => ({
   branch,
   setup: 'kibana-on-merge a.config.ts stateful-classic local',
-  builds: [...pattern].map((outcome, index) => {
+  builds: [...pattern].map((mark, index) => {
     const ranAt = new Date(FIRST_BUILD_AT + (first + index) * HOUR_MS);
     return {
       buildId: `build-${first + index}`,
       buildNumber: first + index,
-      failed: outcome === 'x',
+      outcome: OUTCOMES[mark],
       ranAt,
-      failedAt: outcome === 'x' ? ranAt : undefined,
+      failedAt: mark !== '.' ? ranAt : undefined,
     };
   }),
 });
@@ -173,8 +182,17 @@ describe('checkFlakyTest', () => {
       outcome: 'dropped',
       cause: 'broken',
       reason:
-        'broken right now, 20 failed builds in a row on main (#81 to #100) in ' +
+        'broken right now, 20 builds in a row failing every attempt on main (#81 to #100) in ' +
         'kibana-on-merge a.config.ts stateful-classic local',
+    });
+  });
+
+  it('keeps a test that failed then passed on a retry in every build', () => {
+    // a retry passed in each of those builds: the test is at its flakiest, not broken
+    const setups = [setupBuilds('r'.repeat(89), 500, '9.5')];
+
+    expect(checkFlakyTest(setups, [branchCounts('9.5', 89, 89)], strict, after(589))).toEqual({
+      outcome: 'none',
     });
   });
 
@@ -186,8 +204,8 @@ describe('checkFlakyTest', () => {
       outcome: 'dropped',
       cause: 'breakages',
       reason:
-        'below the thresholds without its breakage, 12 failed builds in a row on main ' +
-        '(#91 to #102) in kibana-on-merge a.config.ts stateful-classic local',
+        'below the thresholds without its breakage, 12 builds in a row failing every attempt ' +
+        'on main (#91 to #102) in kibana-on-merge a.config.ts stateful-classic local',
     });
   });
 
@@ -200,8 +218,8 @@ describe('checkFlakyTest', () => {
       outcome: 'dropped',
       cause: 'breakages',
       reason:
-        'below the thresholds without its 2 breakages, the longest 8 failed builds in a row on ' +
-        'main (#146 to #153) in kibana-on-merge a.config.ts stateful-classic local',
+        'below the thresholds without its 2 breakages, the longest 8 builds in a row failing ' +
+        'every attempt on main (#146 to #153) in kibana-on-merge a.config.ts stateful-classic local',
     });
   });
 
@@ -899,8 +917,8 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       expect.objectContaining({ testId: 'never-passed' }),
     ]);
     expect(info).toHaveBeenCalledWith(
-      'Dropped a.test.ts › breaks from the report: broken right now, 20 failed builds in a row on main ' +
-        '(#81 to #100) in kibana-on-merge a.config.ts stateful-classic local'
+      'Dropped a.test.ts › breaks from the report: broken right now, 20 builds in a row failing ' +
+        'every attempt on main (#81 to #100) in kibana-on-merge a.config.ts stateful-classic local'
     );
   });
 
@@ -963,7 +981,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     );
     expect(info).toHaveBeenCalledWith(
       expect.stringMatching(
-        /^Checked 2 flaky tests for breakages \(failed builds in a row, too many to be chance\) and fixes in .+: dropped 0 from the report \(0 broken right now, 0 flaky only because of their breakages, 0 fixed: no failures in enough builds since their last one\); kept 1 that are flaky even without their breakages, with those builds taken off their counts; 1 unchanged$/
+        /^Checked 2 flaky tests for breakages \(builds in a row failing every attempt, too many to be chance\) and fixes in .+: dropped 0 from the report \(0 broken right now, 0 flaky only because of their breakages, 0 fixed: no failures in enough builds since their last one\); kept 1 that are flaky even without their breakages, with those builds taken off their counts; 1 unchanged$/
       )
     );
   });

@@ -10,11 +10,11 @@ import { test, testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_WITH_UX_TAGS } from '../../tags';
 import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 
-const { SERVICE_NAME, OTEL_APPS, OTEL_SHOP_PAGE_LOADS, TIME_RANGE } = testData;
+const { SERVICE_NAME, OTEL_APPS, OTEL_SHOP_PAGE_LOADS, LIST_TIME_RANGE } = testData;
 
 const hasTimeRange = (url: URL): boolean =>
-  url.searchParams.get('rangeFrom') === TIME_RANGE.rangeFrom &&
-  url.searchParams.get('rangeTo') === TIME_RANGE.rangeTo;
+  url.searchParams.get('rangeFrom') === LIST_TIME_RANGE.rangeFrom &&
+  url.searchParams.get('rangeTo') === LIST_TIME_RANGE.rangeTo;
 
 test.describe(
   'Digital Experience application navigation',
@@ -26,7 +26,7 @@ test.describe(
 
     test.beforeEach(async ({ browserAuth, pageObjects: { digitalExperience } }) => {
       await browserAuth.loginAsViewer();
-      await digitalExperience.gotoApplications();
+      await digitalExperience.gotoApplications(LIST_TIME_RANGE);
     });
 
     test.afterAll(async ({ apiServices }) => {
@@ -38,7 +38,13 @@ test.describe(
       pageObjects: { digitalExperience },
     }) => {
       await test.step('opens the Classic Overview from a Classic row', async () => {
+        // The applications and the sessions status land in separate renders, and picking a source
+        // across one of them loses the click to the re-render, leaving the list unfiltered.
+        await expect(digitalExperience.sessionsRetention).toBeVisible();
+        await expect(digitalExperience.applicationSource(SERVICE_NAME)).toHaveText('EDOT Browser');
+
         await digitalExperience.selectSource('Classic RUM');
+        await expect(digitalExperience.applicationSource(SERVICE_NAME)).toHaveText('Classic RUM');
         await digitalExperience.applicationLink(SERVICE_NAME).click();
 
         await expect(digitalExperience.overviewTab).toBeVisible();
@@ -51,7 +57,7 @@ test.describe(
       await test.step('goes back to the list with the same time range and filters', async () => {
         await digitalExperience.breadcrumbLink('Applications').click();
 
-        await expect(digitalExperience.applicationRow(SERVICE_NAME)).toContainText('Classic RUM');
+        await expect(digitalExperience.applicationSource(SERVICE_NAME)).toHaveText('Classic RUM');
         await expect(page).toHaveURL(hasTimeRange);
         await expect(page).toHaveURL(/sourceFilter=classic/);
       });

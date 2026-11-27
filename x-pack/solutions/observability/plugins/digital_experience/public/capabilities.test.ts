@@ -6,7 +6,7 @@
  */
 
 import type { Capabilities } from '@kbn/core/public';
-import { canCreateShortUrl, canManageSessions, canSaveViews } from './capabilities';
+import { canCreateShortUrl, canSaveViews } from './capabilities';
 
 const capabilities = (digitalExperience: Record<string, boolean>): Capabilities =>
   ({
@@ -35,12 +35,5 @@ describe('canCreateShortUrl', () => {
     expect(canCreateShortUrl(capabilities({ createShortUrl: true }))).toBe(true);
     expect(canCreateShortUrl(capabilities({ save: true }))).toBe(false);
     expect(canCreateShortUrl(capabilities({ show: true, createShortUrl: false }))).toBe(false);
-  });
-});
-
-describe('canManageSessions', () => {
-  it('is granted by its own sub-feature privilege, not by saving views', () => {
-    expect(canManageSessions(capabilities({ manageSessions: true }))).toBe(true);
-    expect(canManageSessions(capabilities({ save: true }))).toBe(false);
   });
 });

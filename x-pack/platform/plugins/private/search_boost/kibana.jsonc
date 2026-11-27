@@ -17,8 +17,12 @@
     ],
     "requiredPlugins": [
       "management",
-      "features"
+      "features",
+      "indexManagement",
+      "share"
     ],
-    "requiredBundles": []
+    "requiredBundles": [
+      "kibanaReact"
+    ]
   }
 }

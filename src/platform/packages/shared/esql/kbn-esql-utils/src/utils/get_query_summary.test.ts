@@ -31,6 +31,25 @@ describe('getQuerySummary', () => {
     expect(result.newColumns).toEqual(new Set(['avg_price', 'max_price']));
   });
 
+  it('returns the schema columns introduced by DESCRIBE', () => {
+    const { newColumns } = getQuerySummary('FROM logs | DESCRIBE');
+
+    expect(newColumns).toEqual(
+      new Set([
+        'name',
+        'type',
+        'role',
+        'field',
+        'origin',
+        'metric_type',
+        'unit',
+        'interval',
+        'time_zone',
+        'description',
+      ])
+    );
+  });
+
   it('returns generated columns from DENSE_VECTOR command', () => {
     expect(getQuerySummary('FROM index | DENSE_VECTOR title, body').newColumns).toEqual(
       new Set(['title_dense_vector', 'body_dense_vector'])
