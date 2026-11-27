@@ -7,14 +7,12 @@
 
 import { LRUCache } from 'lru-cache';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { REALTIME_BACKING_INDEX_WINDOW } from './constants';
 import type { DataStreamMetadataManager } from './data_stream_metadata_manager';
 import type { DocumentVersionFields } from '../../types';
 
 const VERSION_CACHE_MAX = 32;
 const VERSION_CACHE_TTL_MS = 60_000;
-// getByIds uses the same window: a document that just rolled over is still in the
-// previous backing index, and a search cannot see a write that has not refreshed.
-const REALTIME_BACKING_INDEX_WINDOW = 2;
 
 const searchCompleted = (response: {
   timed_out?: boolean;
@@ -85,11 +83,10 @@ export class DocumentVersionManager {
   }
 
   private async bulkGetFreshVersions(ids: string[]): Promise<VersionLookup> {
-    const { backingIndexes, writableIndex } = await this.deps.metadataManager.getMetaOrLoad();
-    const realtimeIndexes = backingIndexes
+    const { backingIndexes } = await this.deps.metadataManager.getMetaOrLoad();
+    const indexes = backingIndexes
       .slice(-REALTIME_BACKING_INDEX_WINDOW)
       .concat(this.deps.additionalIndexesToQuery ?? []);
-    const indexes = realtimeIndexes.length > 0 ? realtimeIndexes : [writableIndex];
     const versions: Record<string, Required<DocumentVersionFields>> = {};
     const found = new Set<string>();
     // Present until a read says otherwise. An error doc has no `found` field, so it drops out.

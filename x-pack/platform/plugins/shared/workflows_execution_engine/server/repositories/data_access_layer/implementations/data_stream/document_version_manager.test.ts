@@ -66,6 +66,9 @@ describe('DocumentVersionManager', () => {
         { _id: 'a', _index: OLDER_INDEX, found: false },
         { _id: 'a', _index: NEWER_INDEX, found: false },
         { _id: 'a', _index: LEGACY_INDEX, found: false },
+        { _id: 'b', _index: OLDER_INDEX, found: true, _seq_no: 4, _primary_term: 1 },
+        { _id: 'b', _index: NEWER_INDEX, found: false },
+        { _id: 'b', _index: LEGACY_INDEX, found: false },
       ],
     } as never);
     esClient.search.mockResolvedValue({
@@ -76,7 +79,7 @@ describe('DocumentVersionManager', () => {
       },
     } as never);
 
-    const lookup = await manager.bulkGetVersions(['a']);
+    const lookup = await manager.bulkGetVersions(['a', 'b']);
 
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -86,6 +89,7 @@ describe('DocumentVersionManager', () => {
       })
     );
     expect(lookup.versions.a.index).toBe('.ds-.workflows-executions-ds-000000');
+    expect(lookup.versions.b).toEqual({ index: OLDER_INDEX, seqNo: 4, primaryTerm: 1 });
     expect(lookup.confirmedMissing.size).toBe(0);
   });
 

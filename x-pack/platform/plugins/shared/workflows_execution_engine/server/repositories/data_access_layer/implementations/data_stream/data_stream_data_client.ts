@@ -8,6 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
+import { REALTIME_BACKING_INDEX_WINDOW } from './constants';
 import type { DataStreamMetadataManager } from './data_stream_metadata_manager';
 import type { DocumentVersionManager } from './document_version_manager';
 
@@ -101,7 +102,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
     let backingIndexesForFallback: string[] = [];
     if (uncachedIds.length > 0) {
       const { backingIndexes } = await this.deps.metadataManager.getMetaOrLoad();
-      backingIndexesForFallback = backingIndexes.slice(-2);
+      backingIndexesForFallback = backingIndexes.slice(-REALTIME_BACKING_INDEX_WINDOW);
     }
 
     // For uncached ids, add one mget entry per backing index (last two) and
@@ -326,7 +327,9 @@ export class DataStreamDataClient<TExecution extends { id: string }>
     }
 
     const { backingIndexes } = await this.deps.metadataManager.getMetaOrLoad();
-    const fallbackIndexes = backingIndexes.slice(-2).concat(this.additionalIndexesToQuery);
+    const fallbackIndexes = backingIndexes
+      .slice(-REALTIME_BACKING_INDEX_WINDOW)
+      .concat(this.additionalIndexesToQuery);
 
     const result = new Array<BulkItemResponse>(request.items.length);
     let hasErrors = false;
@@ -486,24 +489,13 @@ export class DataStreamDataClient<TExecution extends { id: string }>
     const preFailed: Array<{ id: string; originalIndex: number; error: estypes.ErrorCause }> = [];
     const pendingIndexes: number[] = [];
 
-    // DataStream requires @timestamp on create. Copy it from the date field.
-    // An upsert becomes a create when the document is not in the data stream. Stamp the
-    // current time only after the lookup confirmed the document is absent. A failed
-    // lookup must not turn a partial write into a second document.
-    const withTimestamp = (
-      item: BulkPlainItem<TExecution>,
-      fallbackToNow = false
-    ): BulkPlainItem<TExecution> => {
+    // DataStream requires @timestamp on create. Copy it from the date field when that
+    // field is present. A plain create without the date field is rejected above.
+    const withTimestamp = (item: BulkPlainItem<TExecution>): BulkPlainItem<TExecution> => {
       if (!this.deps.dateField) return item;
       const ts = item.document[this.deps.dateField];
-      const timestamp =
-        typeof ts === 'string'
-          ? ts
-          : fallbackToNow
-          ? new Date(Date.now()).toISOString()
-          : undefined;
-      if (timestamp === undefined) return item;
-      return { ...item, document: { ...item.document, '@timestamp': timestamp } };
+      if (typeof ts !== 'string') return item;
+      return { ...item, document: { ...item.document, '@timestamp': ts } };
     };
 
     for (let i = 0; i < items.length; i++) {
@@ -554,14 +546,23 @@ export class DataStreamDataClient<TExecution extends { id: string }>
           });
         } else {
           // No version. An upsert becomes a create. Stamp the current time only when the
-          // lookup confirmed the document is absent; a failed lookup leaves @timestamp unset.
+          // lookup confirmed the document is absent and the write has no date field.
           if (item.operation === 'upsert') {
+            const dateValue = this.deps.dateField ? item.document[this.deps.dateField] : undefined;
+            let createItem: BulkPlainItem<TExecution> = item;
+            if (typeof dateValue === 'string') {
+              createItem = withTimestamp(item);
+            } else if (confirmedMissing.has(id) && this.deps.dateField) {
+              createItem = {
+                ...item,
+                document: {
+                  ...item.document,
+                  '@timestamp': new Date(Date.now()).toISOString(),
+                },
+              };
+            }
             sendable.push({
-              item: {
-                ...withTimestamp(item, confirmedMissing.has(id)),
-                operation: 'create',
-                index: this.deps.dataStreamName,
-              },
+              item: { ...createItem, operation: 'create', index: this.deps.dataStreamName },
               originalIndex: i,
             });
           } else {
