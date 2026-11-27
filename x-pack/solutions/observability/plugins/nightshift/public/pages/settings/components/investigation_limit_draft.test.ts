@@ -118,7 +118,7 @@ describe('isInvestigationQuotaDraftValid', () => {
     [1, true],
     [MAX_RUN_LIMIT, true],
     ['', true],
-    [0, false],
+    [0, true],
     [1.5, false],
     [MAX_RUN_LIMIT + 1, false],
     [-3, false],
@@ -206,8 +206,8 @@ describe('isLowerFiniteLimit', () => {
     [10, 11, false],
     [null, 5, true],
     [10, '', false],
-    [10, 0, false],
-    [null, 0, false],
+    [10, 0, true],
+    [null, 0, true],
   ];
 
   it.each(cases)('%s -> %s is lower: %s', (previous, next, expected) => {
@@ -221,9 +221,9 @@ describe('input helpers', () => {
     expect(parseInvestigationLimitDraft('12')).toBe(12);
   });
 
-  it('accepts whole numbers from 1 to the maximum', () => {
-    expect(isValidFiniteInvestigationLimit(1)).toBe(true);
-    expect(isValidFiniteInvestigationLimit(0)).toBe(false);
+  it('accepts whole numbers from 0 to the maximum', () => {
+    expect(isValidFiniteInvestigationLimit(0)).toBe(true);
+    expect(isValidFiniteInvestigationLimit(-1)).toBe(false);
     expect(isValidFiniteInvestigationLimit(null)).toBe(false);
   });
 });

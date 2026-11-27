@@ -20,6 +20,7 @@ export function ApplicationTabToolbar({
   leading,
   filters,
   containerRef,
+  isFiltersOnOwnRow = false,
 }: {
   /** `undefined` until the tab has loaded once. */
   environments: string[] | undefined;
@@ -34,6 +35,8 @@ export function ApplicationTabToolbar({
   filters?: ReactNode;
   /** The positioned element around the row, to measure it or to place what grows over it. */
   containerRef?: Ref<HTMLDivElement>;
+  /** The filters have a row of their own: they fill it, to end where the rows around it do. */
+  isFiltersOnOwnRow?: boolean;
 }) {
   const { environment, setEnvironment } = useEnvironment();
 
@@ -41,9 +44,9 @@ export function ApplicationTabToolbar({
     <div ref={containerRef} css={{ position: 'relative' }}>
       <EuiFlexGroup gutterSize="s" alignItems={leading ? 'flexStart' : 'center'} wrap>
         {leading}
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={isFiltersOnOwnRow}>
           {/* Compressed, as tall as the date picker beside it. */}
-          <EuiFilterGroup compressed>
+          <EuiFilterGroup compressed fullWidth={isFiltersOnOwnRow}>
             <EnvironmentFilter
               environments={environments ?? []}
               selected={environment}

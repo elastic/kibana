@@ -138,7 +138,7 @@ describe('Scout path globs', () => {
       // namespace before the category (matches the second glob form)
       'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/fixtures/data.ts',
       // custom scout_<server> scope
-      'src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/fixtures/index.ts',
+      'x-pack/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/fixtures/index.ts',
     ];
 
     const shouldNotMatch = [

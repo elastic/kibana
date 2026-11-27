@@ -15,9 +15,9 @@ const fixer = (a) => {
 };
 
 /**
- * Calculates the fix of a number, i.e. rounds a number towards 0. For arrays, the function will be applied index-wise to each element.
+ * Calculates the fix of a number, that is, rounds a number toward 0. For arrays, the function will be applied index-wise to each element.
  * @param {(number|number[])} a a number or an array of numbers
- * @return {(number|number[])} The fix of `a`. Returns an array with the the fixes for each element if `a` is an array.
+ * @return {(number|number[])} The fix of `a`. Returns an array with the fixes for each element if `a` is an array.
  *
  * @example
  * fix(1.2) // returns 1

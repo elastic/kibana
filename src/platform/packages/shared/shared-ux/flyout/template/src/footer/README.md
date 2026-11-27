@@ -2,6 +2,8 @@
 
 `FlyoutTemplate.Footer` renders a primary and a secondary action, right-aligned inside `EuiFlyoutFooter`, with the secondary action first. With no actions, the footer is not rendered at all. The template does not add a default Cancel button.
 
+The footer has the flyout's plain background, not `EuiFlyoutFooter`'s subdued one, and a thin top border like the one under the header.
+
 ```tsx
 <FlyoutTemplate.Footer>
   <FlyoutTemplate.Footer.SecondaryAction label="Discard" onClick={onDiscard} />
@@ -47,7 +49,13 @@ Set `variant="ai"` on `SecondaryAction` for an action that hands off to an AI ag
 </FlyoutTemplate.Footer>
 ```
 
-It takes the same props as the default variant, except that `iconType` is limited to the AI icons: `productAgent`, `sparkles`, `aiAssistantLogo`, and `inspect`. `addToChat` is not accepted, because `AiButtonEmpty` replaces the button's text with its own label for that icon, which would override `label`.
+It takes the same props as the default variant, except that `iconType` is limited to the AI icons: `productAgent`, `sparkles`, `aiAssistantLogo`, and `inspect`.
+
+`iconType="addToChat"` is a separate variant. `AiButtonEmpty` supplies the shared Add to chat label and sparkles icon, so `label` is not accepted.
+
+```tsx
+<FlyoutTemplate.Footer.SecondaryAction variant="ai" iconType="addToChat" onClick={onAddToChat} />
+```
 
 ## Primary action menu
 

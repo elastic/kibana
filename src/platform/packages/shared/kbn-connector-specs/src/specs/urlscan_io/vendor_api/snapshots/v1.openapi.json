@@ -1,6 +1,29 @@
 {
   "components": {
     "schemas": {
+      "QuotaPeriod": {
+        "properties": {
+          "limit": {
+            "type": "integer"
+          },
+          "percent": {
+            "type": "number"
+          },
+          "remaining": {
+            "type": "integer"
+          },
+          "used": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "limit",
+          "used",
+          "remaining",
+          "percent"
+        ],
+        "type": "object"
+      },
       "VerdictBrand": {
         "properties": {
           "country": {
@@ -23,6 +46,128 @@
           }
         },
         "type": "object"
+      },
+      "searchResponse": {
+        "properties": {
+          "has_more": {
+            "type": "boolean"
+          },
+          "results": {
+            "items": {
+              "properties": {
+                "_id": {
+                  "type": "string"
+                },
+                "_score": {
+                  "nullable": true,
+                  "type": "number"
+                },
+                "annotations": {
+                  "type": "object"
+                },
+                "brand": {
+                  "items": {
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "canonical": {
+                  "type": "object"
+                },
+                "clipboard": {
+                  "type": "object"
+                },
+                "dom": {
+                  "type": "object"
+                },
+                "files": {
+                  "items": {
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "frames": {
+                  "type": "object"
+                },
+                "image": {
+                  "type": "object"
+                },
+                "labels": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "links": {
+                  "type": "object"
+                },
+                "meta": {
+                  "items": {
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "page": {
+                  "type": "object"
+                },
+                "result": {
+                  "type": "string"
+                },
+                "scanner": {
+                  "type": "object"
+                },
+                "screenshot": {
+                  "type": "string"
+                },
+                "sort": {
+                  "items": {},
+                  "type": "array"
+                },
+                "stats": {
+                  "type": "object"
+                },
+                "submitter": {
+                  "type": "object"
+                },
+                "task": {
+                  "type": "object"
+                },
+                "text": {
+                  "type": "object"
+                },
+                "usertags": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "vectors": {
+                  "type": "object"
+                },
+                "verdicts": {
+                  "type": "object"
+                },
+                "visible": {
+                  "type": "object"
+                },
+                "websockets": {
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "search_date_limit_days": {
+            "type": "integer"
+          },
+          "took": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
       }
     },
     "securitySchemes": {
@@ -38,6 +183,59 @@
   },
   "openapi": "3.0.0",
   "paths": {
+    "/api/v1/quotas": {
+      "get": {
+        "operationId": "getQuotas",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "limits": {
+                      "additionalProperties": true,
+                      "properties": {
+                        "private": {
+                          "properties": {
+                            "day": {
+                              "$ref": "#/components/schemas/QuotaPeriod"
+                            },
+                            "hour": {
+                              "$ref": "#/components/schemas/QuotaPeriod"
+                            },
+                            "minute": {
+                              "$ref": "#/components/schemas/QuotaPeriod"
+                            }
+                          },
+                          "required": [
+                            "day",
+                            "hour",
+                            "minute"
+                          ],
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "private"
+                      ],
+                      "type": "object"
+                    },
+                    "scope": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "scope",
+                    "limits"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/result/{scanId}/": {
       "get": {
         "operationId": "getResult",
@@ -60,6 +258,43 @@
                   "properties": {
                     "data": {
                       "properties": {
+                        "clipboard": {
+                          "items": {
+                            "properties": {
+                              "hash": {
+                                "type": "string"
+                              },
+                              "source": {
+                                "enum": [
+                                  "clipboard-api",
+                                  "execCommand"
+                                ],
+                                "type": "string"
+                              },
+                              "text": {
+                                "type": "string"
+                              },
+                              "textEncoding": {
+                                "enum": [
+                                  "base64"
+                                ],
+                                "type": "string"
+                              },
+                              "truncated": {
+                                "type": "boolean"
+                              },
+                              "ts": {
+                                "type": "number"
+                              },
+                              "url": {
+                                "format": "uri",
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
                         "console": {
                           "items": {
                             "properties": {
@@ -399,6 +634,7 @@
                                       },
                                       "ll": {
                                         "items": {
+                                          "nullable": true,
                                           "type": "number"
                                         },
                                         "type": "array"
@@ -500,6 +736,36 @@
                                             "type": "integer"
                                           },
                                           "signedCertificateTimestampList": {
+                                            "items": {
+                                              "properties": {
+                                                "hashAlgorithm": {
+                                                  "type": "string"
+                                                },
+                                                "logDescription": {
+                                                  "type": "string"
+                                                },
+                                                "logId": {
+                                                  "type": "string"
+                                                },
+                                                "origin": {
+                                                  "type": "string"
+                                                },
+                                                "signatureAlgorithm": {
+                                                  "type": "string"
+                                                },
+                                                "signatureData": {
+                                                  "type": "string"
+                                                },
+                                                "status": {
+                                                  "type": "string"
+                                                },
+                                                "timestamp": {
+                                                  "format": "int64",
+                                                  "type": "integer"
+                                                }
+                                              },
+                                              "type": "object"
+                                            },
                                             "type": "array"
                                           },
                                           "subjectName": {
@@ -910,6 +1176,7 @@
                                   "items": {
                                     "properties": {
                                       "geoip": {
+                                        "nullable": true,
                                         "properties": {
                                           "city": {
                                             "type": "string"
@@ -922,6 +1189,7 @@
                                           },
                                           "ll": {
                                             "items": {
+                                              "nullable": true,
                                               "type": "number"
                                             },
                                             "type": "array"
@@ -1276,6 +1544,7 @@
                                   },
                                   "ll": {
                                     "items": {
+                                      "nullable": true,
                                       "type": "number"
                                     },
                                     "type": "array"
@@ -1770,7 +2039,7 @@
                           "properties": {
                             "brands": {
                               "items": {
-                                "$ref": "#/components/schemas/VerdictBrand"
+                                "type": "string"
                               },
                               "type": "array"
                             },
@@ -1843,6 +2112,151 @@
                     }
                   },
                   "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/scan": {
+      "post": {
+        "operationId": "submitScan",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "country": {
+                    "type": "string"
+                  },
+                  "customagent": {
+                    "type": "string"
+                  },
+                  "overrideSafety": {
+                    "type": "string"
+                  },
+                  "referer": {
+                    "type": "string"
+                  },
+                  "tags": {
+                    "items": {
+                      "maxLength": 30,
+                      "type": "string"
+                    },
+                    "maxItems": 10,
+                    "type": "array"
+                  },
+                  "url": {
+                    "format": "uri",
+                    "type": "string"
+                  },
+                  "visibility": {
+                    "default": "public",
+                    "enum": [
+                      "public",
+                      "unlisted",
+                      "private"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "url"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "country": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "uuid": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "visibility": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/search": {
+      "get": {
+        "operationId": "searchDatasource",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "maximum": 10000,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search_after",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "datasource",
+            "schema": {
+              "enum": [
+                "scans",
+                "hostnames",
+                "incidents",
+                "notifications",
+                "certificates"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "collapse",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/searchResponse"
+                    }
+                  ]
                 }
               }
             }

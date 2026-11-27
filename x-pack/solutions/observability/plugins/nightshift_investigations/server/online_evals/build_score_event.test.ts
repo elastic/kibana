@@ -113,6 +113,40 @@ describe('buildOnlineEvalScoreEvent', () => {
     expect(event.scores[1]).not.toHaveProperty('explanation');
   });
 
+  it('sends only tags from the allowed set even when explanations are off, and drops anything else, such as a well-shaped tag that is not in it', () => {
+    const event = buildOnlineEvalScoreEvent({
+      metadata,
+      results: [
+        llmResult('recovery_checks', [
+          {
+            name: 'checklist',
+            score: 0.5,
+            explanation: 'Free text the flag gates.',
+            metadata: {
+              tags: [
+                'strategy:alert_record:ran',
+                'Not A Keyword',
+                'a customer said this',
+                'service:checkout-prod',
+                'strategy:alert_record:maybe',
+                'strategy',
+                42,
+              ],
+            },
+          },
+          { name: 'plain', score: 1, metadata: { tags: 'strategy:alert_record:ran' } },
+        ]),
+      ],
+      includeExplanations: false,
+    });
+
+    expect(event.scores[0]).toEqual(
+      expect.objectContaining({ tags: ['strategy:alert_record:ran'] })
+    );
+    expect(event.scores[0]).not.toHaveProperty('explanation');
+    expect(event.scores[1]).not.toHaveProperty('tags');
+  });
+
   it('keeps not_applicable apart from evidence_unmet and counts both as skipped', () => {
     const event = buildOnlineEvalScoreEvent({
       metadata,

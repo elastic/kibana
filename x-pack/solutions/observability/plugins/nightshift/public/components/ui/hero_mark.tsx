@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
-import React from 'react';
+import { css, keyframes } from '@emotion/react';
+import React, { type CSSProperties } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NightshiftMarkIcon } from '@kbn/observability-shared-plugin/public';
+import { nightshiftReducedMotionStyles } from '../../common/transition';
 
 export type HeroMarkSeverity = 'critical' | 'high' | 'medium' | 'low';
 
@@ -31,6 +32,21 @@ const HERO_MARK_DOT_COLOR: Record<
   low: 'backgroundFilledNeutral',
 };
 
+/** Soft same-color halo — paints above the hard outline ring. */
+const heroMarkDotGlow = keyframes`
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+    opacity: 0;
+  }
+  /* Hold the peak longer than the fade in/out. */
+  28%,
+  72% {
+    box-shadow: 0 0 7px 2px var(--hero-mark-dot-glow);
+    opacity: 0.5;
+  }
+`;
+
 /** AlertZero-style product mark: bordered circle, paragraph-colored glyph, optional severity dot. */
 export function HeroMark({ severity }: HeroMarkProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
@@ -50,6 +66,8 @@ export function HeroMark({ severity }: HeroMarkProps): React.ReactElement {
         display: inline-flex;
         height: calc(${euiTheme.size.xxl} + ${euiTheme.size.s});
         justify-content: center;
+        /* Glow must paint outside the circle. */
+        overflow: visible;
         position: relative;
         width: calc(${euiTheme.size.xxl} + ${euiTheme.size.s});
       `}
@@ -58,10 +76,9 @@ export function HeroMark({ severity }: HeroMarkProps): React.ReactElement {
       {dotColor && (
         <span
           aria-hidden={true}
+          data-test-subj="nightshiftHeroMarkSeverityDot"
+          style={{ ['--hero-mark-dot-glow']: dotColor } as CSSProperties}
           css={css`
-            background: ${dotColor};
-            border-radius: 50%;
-            box-shadow: 0 0 0 ${euiTheme.border.width.thick} ${euiTheme.colors.textGhost};
             height: ${euiTheme.size.s};
             pointer-events: none;
             position: absolute;
@@ -69,7 +86,33 @@ export function HeroMark({ severity }: HeroMarkProps): React.ReactElement {
             top: 2px;
             width: ${euiTheme.size.s};
           `}
-        />
+        >
+          {/* Solid disc + knockout ring (page fill, not textGhost — ghost stays light in dark mode). */}
+          <span
+            data-test-subj="nightshiftHeroMarkSeverityDotRing"
+            css={css`
+              background: ${dotColor};
+              border-radius: 50%;
+              box-shadow: 0 0 0 ${euiTheme.border.width.thick}
+                ${euiTheme.colors.backgroundBasePlain};
+              inset: 0;
+              position: absolute;
+              z-index: 0;
+            `}
+          />
+          {/* Glow above the outline so the pulse sits on top of the ring. */}
+          <span
+            css={css`
+              animation: ${heroMarkDotGlow} 8s ease-in-out infinite;
+              border-radius: 50%;
+              inset: 0;
+              position: absolute;
+              z-index: 1;
+
+              ${nightshiftReducedMotionStyles}
+            `}
+          />
+        </span>
       )}
     </div>
   );

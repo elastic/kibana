@@ -117,6 +117,31 @@ describe('loadReportHuntContext', () => {
       });
     });
 
+    it('drops non-routable IPs by value even when a legacy doc has no tier or a promotable tier', async () => {
+      esClient.search.mockResolvedValue(
+        withIocs([
+          { type: 'ip', value: '203.0.113.10', tier: 'discriminating' },
+          { type: 'ip', value: '127.0.0.1' },
+          { type: 'ip', value: '10.0.0.5', tier: 'uncertain' },
+          { type: 'ip', value: '::1', tier: 'contextual' },
+        ])
+      );
+      const context = await loadReportHuntContext({
+        esClient,
+        spaceId: 'hunt-a',
+        reportId: 'rpt-1',
+      });
+      expect(context?.iocs).toEqual([{ type: 'ip', value: '203.0.113.10' }]);
+      expect(context?.excluded_iocs).toEqual({
+        count: 3,
+        values: [
+          { type: 'ip', value: '127.0.0.1' },
+          { type: 'ip', value: '10.0.0.5' },
+          { type: 'ip', value: '::1' },
+        ],
+      });
+    });
+
     it('keeps denied code-shaped tokens off the denylist so Tier 2 may still filter on them', async () => {
       esClient.search.mockResolvedValue(
         withIocs([
@@ -202,11 +227,11 @@ describe('loadReportHuntContext', () => {
         withIocs([
           ...Array.from({ length: 100 }, (_, i) => ({
             type: 'ip',
-            value: `10.0.0.${i}`,
+            value: `203.0.${Math.floor(i / 256)}.${i % 256}`,
             tier: 'discriminating',
           })),
           { type: 'domain', value: 'noise.example', tier: 'reference' },
-          { type: 'ip', value: '10.0.0.200', tier: 'discriminating' },
+          { type: 'ip', value: '203.0.113.200', tier: 'discriminating' },
         ])
       );
       const context = await loadReportHuntContext({
@@ -329,7 +354,10 @@ describe('loadReportHuntContext', () => {
           _source: {
             ...reportHit._source,
             extracted: {
-              iocs: Array.from({ length: 150 }, (_, i) => ({ type: 'ip', value: `10.0.0.${i}` })),
+              iocs: Array.from({ length: 150 }, (_, i) => ({
+                type: 'ip',
+                value: `203.0.${Math.floor(i / 256)}.${i % 256}`,
+              })),
               ttps: { techniques: Array.from({ length: 150 }, (_, i) => `T${1000 + i}`) },
             },
           },
@@ -353,7 +381,10 @@ describe('loadReportHuntContext', () => {
             _source: {
               ...reportHit._source,
               extracted: {
-                iocs: Array.from({ length: 150 }, (_, i) => ({ type: 'ip', value: `10.0.0.${i}` })),
+                iocs: Array.from({ length: 150 }, (_, i) => ({
+                  type: 'ip',
+                  value: `203.0.${Math.floor(i / 256)}.${i % 256}`,
+                })),
                 ttps: { techniques: Array.from({ length: 130 }, (_, i) => `T${1000 + i}`) },
               },
             },
@@ -403,7 +434,10 @@ describe('loadReportHuntContext', () => {
               ...reportHit._source,
               extracted: {
                 iocs: [
-                  ...Array.from({ length: 100 }, (_, i) => ({ type: 'ip', value: `10.0.0.${i}` })),
+                  ...Array.from({ length: 100 }, (_, i) => ({
+                    type: 'ip',
+                    value: `203.0.${Math.floor(i / 256)}.${i % 256}`,
+                  })),
                   { type: 'user', value: 'dev-user' },
                 ],
                 ttps: { techniques: ['T1078.004'] },
@@ -495,7 +529,10 @@ describe('loadReportHuntContext', () => {
             ...reportHit._source,
             extracted: {
               iocs: [
-                ...Array.from({ length: 102 }, (_, i) => ({ type: 'ip', value: `10.0.0.${i}` })),
+                ...Array.from({ length: 102 }, (_, i) => ({
+                  type: 'ip',
+                  value: `203.0.${Math.floor(i / 256)}.${i % 256}`,
+                })),
                 { type: 'url', value: 'https://example.test/' + 'a'.repeat(2048) },
               ],
               ttps: { techniques: ['T1078.004'] },
@@ -670,18 +707,22 @@ describe('loadReportHuntContext', () => {
       expect(context?.extraction_pending).toBe(true);
     });
 
-    it.each(['workflow_v4', 'workflow_v4_rejected', 'kev', 'text_indicator_list'])(
-      'is not pending when the method is %s',
-      async (extraction_method) => {
-        esClient.search.mockResolvedValue(withMethod({ extraction_method }));
-        const context = await loadReportHuntContext({
-          esClient,
-          spaceId: 'hunt-a',
-          reportId: 'rpt-1',
-        });
-        expect(context?.extraction_pending).toBe(false);
-      }
-    );
+    it.each([
+      'enrich_workflow',
+      'workflow_v4',
+      'enrich_workflow_rejected',
+      'workflow_v4_rejected',
+      'kev',
+      'text_indicator_list',
+    ])('is not pending when the method is %s', async (extraction_method) => {
+      esClient.search.mockResolvedValue(withMethod({ extraction_method }));
+      const context = await loadReportHuntContext({
+        esClient,
+        spaceId: 'hunt-a',
+        reportId: 'rpt-1',
+      });
+      expect(context?.extraction_pending).toBe(false);
+    });
   });
 
   it('scopes the lookup to the acting space', async () => {

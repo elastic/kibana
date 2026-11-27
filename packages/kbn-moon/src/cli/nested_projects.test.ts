@@ -11,16 +11,27 @@ import { findNestedProjects } from './nested_projects';
 
 describe('findNestedProjects', () => {
   it('returns projects nested inside another project', () => {
-    expect(findNestedProjects(['src/a', 'src/a/b', 'src/a/b/c', 'src/ab'], [])).toEqual([
+    expect(findNestedProjects(['src/a', 'src/a/b', 'src/a/b/c', 'src/ab'])).toEqual([
       'src/a -> src/a/b',
       'src/a -> src/a/b/c',
       'src/a/b -> src/a/b/c',
     ]);
   });
 
-  it('ignores allowlisted ancestors', () => {
-    expect(findNestedProjects(['src/a', 'src/a/b', 'src/c', 'src/c/d'], ['src/a'])).toEqual([
-      'src/c -> src/c/d',
+  it('reports nesting under formerly allowlisted ancestors', () => {
+    expect(
+      findNestedProjects([
+        'src/platform/packages/shared/kbn-esql-resource-browser',
+        'src/platform/packages/shared/kbn-esql-resource-browser/test_plugin',
+        'src/platform/test',
+        'src/platform/test/test_plugin',
+        'x-pack/platform/test',
+        'x-pack/platform/test/workflows_inbound_hub/plugins/inbound_hub_connector',
+      ])
+    ).toEqual([
+      'src/platform/packages/shared/kbn-esql-resource-browser -> src/platform/packages/shared/kbn-esql-resource-browser/test_plugin',
+      'src/platform/test -> src/platform/test/test_plugin',
+      'x-pack/platform/test -> x-pack/platform/test/workflows_inbound_hub/plugins/inbound_hub_connector',
     ]);
   });
 });

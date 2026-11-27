@@ -23,6 +23,9 @@
   "/api/actions/connectors": {
     "get": "get-actions-connectors"
   },
+  "/api/actions/events/{connector_type_id}/{connector_id}": {
+    "post": "post-actions-events-connector-type-id-connector-id"
+  },
   "/api/agent_builder/a2a/{agentId}": {
     "post": "post-agent-builder-a2a-agentid"
   },
@@ -46,17 +49,25 @@
     "put": "put-agent-builder-agents-id-access-control"
   },
   "/api/agent_builder/conversations": {
-    "get": "get-agent-builder-conversations"
+    "get": "get-agent-builder-conversations",
+    "post": "post-agent-builder-conversations"
   },
   "/api/agent_builder/conversations/{conversation_id}": {
     "get": "get-agent-builder-conversations-conversation-id",
     "delete": "delete-agent-builder-conversations-conversation-id"
+  },
+  "/api/agent_builder/conversations/{conversation_id}/_add_events": {
+    "post": "post-agent-builder-conversations-conversation-id-add-events"
+  },
+  "/api/agent_builder/conversations/{conversation_id}/access_control": {
+    "put": "put-agent-builder-conversations-conversation-id-access-control"
   },
   "/api/agent_builder/conversations/{conversation_id}/attachments": {
     "get": "get-agent-builder-conversations-conversation-id-attachments",
     "post": "post-agent-builder-conversations-conversation-id-attachments"
   },
   "/api/agent_builder/conversations/{conversation_id}/attachments/{attachment_id}": {
+    "get": "get-agent-builder-conversations-conversation-id-attachments-attachment-id",
     "put": "put-agent-builder-conversations-conversation-id-attachments-attachment-id",
     "delete": "delete-agent-builder-conversations-conversation-id-attachments-attachment-id",
     "patch": "patch-agent-builder-conversations-conversation-id-attachments-attachment-id"
@@ -171,6 +182,140 @@
     "get": "get-alerting-rules-backfill-id",
     "delete": "delete-alerting-rules-backfill-id"
   },
+  "/api/alerting/v2/action_policies": {
+    "get": "get-alerting-v2-action-policies",
+    "post": "post-alerting-v2-action-policies"
+  },
+  "/api/alerting/v2/action_policies/_bulk_delete": {
+    "post": "post-alerting-v2-action-policies-bulk-delete"
+  },
+  "/api/alerting/v2/action_policies/_bulk_disable": {
+    "post": "post-alerting-v2-action-policies-bulk-disable"
+  },
+  "/api/alerting/v2/action_policies/_bulk_enable": {
+    "post": "post-alerting-v2-action-policies-bulk-enable"
+  },
+  "/api/alerting/v2/action_policies/_bulk_snooze": {
+    "post": "post-alerting-v2-action-policies-bulk-snooze"
+  },
+  "/api/alerting/v2/action_policies/_bulk_unsnooze": {
+    "post": "post-alerting-v2-action-policies-bulk-unsnooze"
+  },
+  "/api/alerting/v2/action_policies/_bulk_update_api_key": {
+    "post": "post-alerting-v2-action-policies-bulk-update-api-key"
+  },
+  "/api/alerting/v2/action_policies/{id}": {
+    "get": "get-alerting-v2-action-policies-id",
+    "put": "put-alerting-v2-action-policies-id",
+    "delete": "delete-alerting-v2-action-policies-id",
+    "patch": "patch-alerting-v2-action-policies-id"
+  },
+  "/api/alerting/v2/action_policies/{id}/_disable": {
+    "post": "post-alerting-v2-action-policies-id-disable"
+  },
+  "/api/alerting/v2/action_policies/{id}/_enable": {
+    "post": "post-alerting-v2-action-policies-id-enable"
+  },
+  "/api/alerting/v2/action_policies/{id}/_snooze": {
+    "post": "post-alerting-v2-action-policies-id-snooze"
+  },
+  "/api/alerting/v2/action_policies/{id}/_unsnooze": {
+    "post": "post-alerting-v2-action-policies-id-unsnooze"
+  },
+  "/api/alerting/v2/action_policies/{id}/_update_api_key": {
+    "post": "post-alerting-v2-action-policies-id-update-api-key"
+  },
+  "/api/alerting/v2/alerts/_bulk_ack": {
+    "post": "post-alerting-v2-alerts-bulk-ack"
+  },
+  "/api/alerting/v2/alerts/_bulk_activate": {
+    "post": "post-alerting-v2-alerts-bulk-activate"
+  },
+  "/api/alerting/v2/alerts/_bulk_assign": {
+    "post": "post-alerting-v2-alerts-bulk-assign"
+  },
+  "/api/alerting/v2/alerts/_bulk_deactivate": {
+    "post": "post-alerting-v2-alerts-bulk-deactivate"
+  },
+  "/api/alerting/v2/alerts/_bulk_tag": {
+    "post": "post-alerting-v2-alerts-bulk-tag"
+  },
+  "/api/alerting/v2/alerts/_bulk_unack": {
+    "post": "post-alerting-v2-alerts-bulk-unack"
+  },
+  "/api/alerting/v2/alerts/{id}/_ack": {
+    "post": "post-alerting-v2-alerts-id-ack"
+  },
+  "/api/alerting/v2/alerts/{id}/_activate": {
+    "post": "post-alerting-v2-alerts-id-activate"
+  },
+  "/api/alerting/v2/alerts/{id}/_assign": {
+    "post": "post-alerting-v2-alerts-id-assign"
+  },
+  "/api/alerting/v2/alerts/{id}/_deactivate": {
+    "post": "post-alerting-v2-alerts-id-deactivate"
+  },
+  "/api/alerting/v2/alerts/{id}/_tag": {
+    "post": "post-alerting-v2-alerts-id-tag"
+  },
+  "/api/alerting/v2/alerts/{id}/_unack": {
+    "post": "post-alerting-v2-alerts-id-unack"
+  },
+  "/api/alerting/v2/execution_history/action_policies": {
+    "get": "get-alerting-v2-execution-history-action-policies"
+  },
+  "/api/alerting/v2/execution_history/rules": {
+    "get": "get-alerting-v2-execution-history-rules"
+  },
+  "/api/alerting/v2/rules": {
+    "get": "get-alerting-v2-rules",
+    "post": "post-alerting-v2-rules"
+  },
+  "/api/alerting/v2/rules/_bulk_create": {
+    "post": "post-alerting-v2-rules-bulk-create"
+  },
+  "/api/alerting/v2/rules/_bulk_delete": {
+    "post": "post-alerting-v2-rules-bulk-delete"
+  },
+  "/api/alerting/v2/rules/_bulk_disable": {
+    "post": "post-alerting-v2-rules-bulk-disable"
+  },
+  "/api/alerting/v2/rules/_bulk_enable": {
+    "post": "post-alerting-v2-rules-bulk-enable"
+  },
+  "/api/alerting/v2/rules/_bulk_get": {
+    "post": "post-alerting-v2-rules-bulk-get"
+  },
+  "/api/alerting/v2/rules/_bulk_update_api_key": {
+    "post": "post-alerting-v2-rules-bulk-update-api-key"
+  },
+  "/api/alerting/v2/rules/_delete_by_query": {
+    "post": "post-alerting-v2-rules-delete-by-query"
+  },
+  "/api/alerting/v2/rules/_disable_by_query": {
+    "post": "post-alerting-v2-rules-disable-by-query"
+  },
+  "/api/alerting/v2/rules/_enable_by_query": {
+    "post": "post-alerting-v2-rules-enable-by-query"
+  },
+  "/api/alerting/v2/rules/_update_api_key_by_query": {
+    "post": "post-alerting-v2-rules-update-api-key-by-query"
+  },
+  "/api/alerting/v2/rules/{id}": {
+    "get": "get-alerting-v2-rules-id",
+    "put": "put-alerting-v2-rules-id",
+    "delete": "delete-alerting-v2-rules-id",
+    "patch": "patch-alerting-v2-rules-id"
+  },
+  "/api/alerting/v2/rules/{id}/_disable": {
+    "post": "post-alerting-v2-rules-id-disable"
+  },
+  "/api/alerting/v2/rules/{id}/_enable": {
+    "post": "post-alerting-v2-rules-id-enable"
+  },
+  "/api/alerting/v2/rules/{id}/_run": {
+    "post": "post-alerting-v2-rules-id-run"
+  },
   "/api/apm/agent_keys": {
     "post": "createAgentKey"
   },
@@ -276,6 +421,16 @@
   "/api/cases/{caseId}/alerts": {
     "get": "getCaseAlertsDefaultSpace"
   },
+  "/api/cases/{caseId}/attachments": {
+    "get": "findCaseAttachmentsDefaultSpace",
+    "post": "createCaseAttachmentDefaultSpace",
+    "delete": "deleteCaseAttachmentsDefaultSpace"
+  },
+  "/api/cases/{caseId}/attachments/{attachmentId}": {
+    "get": "getCaseAttachmentDefaultSpace",
+    "put": "replaceCaseAttachmentDefaultSpace",
+    "delete": "deleteCaseAttachmentDefaultSpace"
+  },
   "/api/cases/{caseId}/comments": {
     "post": "addCaseCommentDefaultSpace",
     "delete": "deleteCaseCommentsDefaultSpace",
@@ -313,6 +468,15 @@
   "/api/cases/configure/connectors/_find": {
     "get": "findCaseConnectorsDefaultSpace"
   },
+  "/api/cases/field_definitions": {
+    "get": "getCaseFieldDefinitionsDefaultSpace",
+    "post": "createCaseFieldDefinitionDefaultSpace"
+  },
+  "/api/cases/field_definitions/{field_definition_id}": {
+    "get": "getCaseFieldDefinitionDefaultSpace",
+    "put": "updateCaseFieldDefinitionDefaultSpace",
+    "delete": "deleteCaseFieldDefinitionDefaultSpace"
+  },
   "/api/cases/fields": {
     "get": "getApplicableFieldsDefaultSpace"
   },
@@ -323,19 +487,49 @@
     "get": "getCaseTagsDefaultSpace"
   },
   "/api/cases/templates": {
-    "get": "getCaseTemplatesDefaultSpace"
+    "get": "getCaseTemplatesDefaultSpace",
+    "post": "createCaseTemplateDefaultSpace"
   },
   "/api/cases/templates/{template_id}": {
-    "get": "getCaseTemplateDefaultSpace"
+    "get": "getCaseTemplateDefaultSpace",
+    "put": "updateCaseTemplateDefaultSpace",
+    "delete": "deleteCaseTemplateDefaultSpace"
+  },
+  "/api/chat/message": {
+    "post": "post-chat-message"
+  },
+  "/api/context_engine/ai_index": {
+    "get": "get-context-engine-ai-index",
+    "post": "post-context-engine-ai-index"
+  },
+  "/api/context_engine/ai_index/_query": {
+    "post": "post-context-engine-ai-index-query"
+  },
+  "/api/context_engine/ai_index/{aiIndexId}": {
+    "get": "get-context-engine-ai-index-aiindexid",
+    "put": "put-context-engine-ai-index-aiindexid",
+    "delete": "delete-context-engine-ai-index-aiindexid"
+  },
+  "/api/context_engine/ai_index/{aiIndexId}/_describe": {
+    "get": "get-context-engine-ai-index-aiindexid-describe"
+  },
+  "/api/context_engine/memory/_forget": {
+    "post": "post-context-engine-memory-forget"
+  },
+  "/api/context_engine/memory/_remember": {
+    "post": "post-context-engine-memory-remember"
+  },
+  "/api/context_engine/memory/_save_event": {
+    "post": "post-context-engine-memory-save-event"
   },
   "/api/dashboards": {
-    "get": "get-dashboards-redirect",
-    "post": "create-dashboard-redirect"
+    "get": "search-dashboards",
+    "post": "create-dashboard"
   },
   "/api/dashboards/{id}": {
-    "get": "get-dashboard-redirect",
-    "put": "update-dashboard-redirect",
-    "delete": "delete-dashboard-redirect"
+    "get": "get-dashboard",
+    "put": "upsert-dashboard",
+    "delete": "delete-dashboard"
   },
   "/api/data_views": {
     "get": "getAllDataViewsDefault"
@@ -369,6 +563,15 @@
   },
   "/api/data_views/swap_references/_preview": {
     "post": "previewSwapDataViewsDefault"
+  },
+  "/api/data_views/v2": {
+    "get": "get-data-views-v2",
+    "post": "post-data-views-v2"
+  },
+  "/api/data_views/v2/{id}": {
+    "get": "get-data-views-v2-id",
+    "put": "put-data-views-v2-id",
+    "delete": "delete-data-views-v2-id"
   },
   "/api/detection_engine/attacks/assignees": {
     "post": "SetAttacksAssignees"
@@ -445,6 +648,15 @@
   },
   "/api/detection_engine/tags": {
     "get": "ReadTags"
+  },
+  "/api/discover_sessions": {
+    "get": "search-discover-sessions",
+    "post": "create-discover-session"
+  },
+  "/api/discover_sessions/{id}": {
+    "get": "get-discover-session",
+    "put": "upsert-discover-session",
+    "delete": "delete-discover-session"
   },
   "/api/encrypted_saved_objects/_rotate_key": {
     "post": "rotateEncryptionKey"
@@ -724,6 +936,9 @@
   "/api/fleet/agents/{agentId}/request_diagnostics": {
     "post": "post-fleet-agents-agentid-request-diagnostics"
   },
+  "/api/fleet/agents/{agentId}/restart": {
+    "post": "post-fleet-agents-agentid-restart"
+  },
   "/api/fleet/agents/{agentId}/rollback": {
     "post": "post-fleet-agents-agentid-rollback"
   },
@@ -759,6 +974,9 @@
   },
   "/api/fleet/agents/bulk_request_diagnostics": {
     "post": "post-fleet-agents-bulk-request-diagnostics"
+  },
+  "/api/fleet/agents/bulk_restart": {
+    "post": "post-fleet-agents-bulk-restart"
   },
   "/api/fleet/agents/bulk_rollback": {
     "post": "post-fleet-agents-bulk-rollback"
@@ -800,8 +1018,23 @@
   "/api/fleet/cloud_connectors/{cloudConnectorId}/usage": {
     "get": "get-fleet-cloud-connectors-cloudconnectorid-usage"
   },
+  "/api/fleet/cloud_onboarding_deployments": {
+    "get": "get-fleet-cloud-onboarding-deployments",
+    "post": "post-fleet-cloud-onboarding-deployments"
+  },
+  "/api/fleet/cloud_onboarding_deployments/{id}": {
+    "get": "get-fleet-cloud-onboarding-deployments-id",
+    "put": "put-fleet-cloud-onboarding-deployments-id",
+    "delete": "delete-fleet-cloud-onboarding-deployments-id"
+  },
+  "/api/fleet/cloud_onboarding_deployments/connector/{connectorId}": {
+    "get": "get-fleet-cloud-onboarding-deployments-connector-connectorid"
+  },
   "/api/fleet/data_streams": {
     "get": "get-fleet-data-streams"
+  },
+  "/api/fleet/data_streams/data": {
+    "get": "get-fleet-data-streams-data"
   },
   "/api/fleet/enrollment_api_keys": {
     "get": "get-fleet-enrollment-api-keys",
@@ -920,6 +1153,9 @@
   },
   "/api/fleet/health_check": {
     "post": "post-fleet-health-check"
+  },
+  "/api/fleet/iac_provisioner/callbacks/{callbackId}": {
+    "post": "receive-provisioning-callback"
   },
   "/api/fleet/kubernetes": {
     "get": "get-fleet-kubernetes"
@@ -1113,6 +1349,45 @@
   "/api/observability_ai_assistant/chat/complete": {
     "post": "observability-ai-assistant-chat-complete"
   },
+  "/api/observability/slos": {
+    "get": "findSlosOp",
+    "post": "createSloOp"
+  },
+  "/api/observability/slos/_bulk_delete": {
+    "post": "bulkDeleteOp"
+  },
+  "/api/observability/slos/_bulk_delete/{taskId}": {
+    "get": "bulkDeleteStatusOp"
+  },
+  "/api/observability/slos/_bulk_purge_rollup": {
+    "post": "deleteRollupDataOp"
+  },
+  "/api/observability/slos/_bulk_snapshot": {
+    "post": "bulkSnapshotOp"
+  },
+  "/api/observability/slos/_definitions": {
+    "get": "getDefinitionsOp"
+  },
+  "/api/observability/slos/_delete_instances": {
+    "post": "deleteSloInstancesOp"
+  },
+  "/api/observability/slos/{id}": {
+    "get": "getSloOp",
+    "put": "updateSloOp",
+    "delete": "deleteSloOp"
+  },
+  "/api/observability/slos/{id}/_reset": {
+    "post": "resetSloOp"
+  },
+  "/api/observability/slos/{id}/_snapshot": {
+    "get": "getSnapshotOp"
+  },
+  "/api/observability/slos/{id}/disable": {
+    "post": "disableSloOp"
+  },
+  "/api/observability/slos/{id}/enable": {
+    "post": "enableSloOp"
+  },
   "/api/osquery/history": {
     "get": "OsqueryGetUnifiedHistory"
   },
@@ -1165,14 +1440,15 @@
   "/api/pinned_event": {
     "patch": "PersistPinnedEventRoute"
   },
+  "/api/profiling/setup/es_resources": {
+    "get": "get-profiling-setup-es-resources",
+    "post": "post-profiling-setup-es-resources"
+  },
   "/api/risk_score/engine/dangerously_delete_data": {
     "delete": "CleanUpRiskEngine"
   },
   "/api/risk_score/engine/saved_object/configure": {
     "patch": "ConfigureRiskEngineSavedObject"
-  },
-  "/api/risk_score/engine/schedule_now": {
-    "post": "ScheduleRiskEngineNow"
   },
   "/api/risk_score/history": {
     "get": "GetRiskScoreHistory"
@@ -1284,6 +1560,12 @@
   "/api/security/entity_store/entities/bulk": {
     "put": "put-security-entity-store-entities-bulk"
   },
+  "/api/security/entity_store/history_snapshot/disable": {
+    "put": "put-security-entity-store-history-snapshot-disable"
+  },
+  "/api/security/entity_store/history_snapshot/enable": {
+    "put": "put-security-entity-store-history-snapshot-enable"
+  },
   "/api/security/entity_store/install": {
     "post": "post-security-entity-store-install"
   },
@@ -1316,6 +1598,9 @@
   },
   "/api/security/entity_store/uninstall": {
     "post": "post-security-entity-store-uninstall"
+  },
+  "/api/security/entity_store/update_api_key": {
+    "post": "post-security-entity-store-update-api-key"
   },
   "/api/security/role": {
     "get": "get-security-role"
@@ -1422,8 +1707,14 @@
     "get": "get-synthetic-monitors",
     "post": "post-synthetic-monitors"
   },
+  "/api/synthetics/monitors/_bulk_create": {
+    "post": "post-synthetic-monitors-bulk-create"
+  },
   "/api/synthetics/monitors/_bulk_delete": {
     "post": "delete-synthetic-monitors"
+  },
+  "/api/synthetics/monitors/_bulk_update": {
+    "put": "put-synthetic-monitors-bulk-update"
   },
   "/api/synthetics/monitors/{id}": {
     "get": "get-synthetic-monitor",
@@ -1501,14 +1792,23 @@
     "get": "get-uptime-settings",
     "put": "put-uptime-settings"
   },
+  "/api/vega": {
+    "get": "get-vega",
+    "post": "post-vega"
+  },
+  "/api/vega/{id}": {
+    "get": "get-vega-id",
+    "put": "put-vega-id",
+    "delete": "delete-vega-id"
+  },
   "/api/visualizations": {
-    "get": "get-visualizations-redirect",
-    "post": "create-visualization-redirect"
+    "get": "search-visualizations",
+    "post": "create-visualization"
   },
   "/api/visualizations/{id}": {
-    "get": "get-visualization-redirect",
-    "put": "update-visualization-redirect",
-    "delete": "delete-visualization-redirect"
+    "get": "get-visualization",
+    "put": "upsert-visualization",
+    "delete": "delete-visualization"
   },
   "/api/workflows": {
     "get": "get-workflows",
@@ -1538,6 +1838,9 @@
   },
   "/api/workflows/executions/{executionId}/step/{stepExecutionId}": {
     "get": "get-workflows-executions-executionid-step-stepexecutionid"
+  },
+  "/api/workflows/executions/{executionId}/steps": {
+    "get": "get-workflows-executions-executionid-steps"
   },
   "/api/workflows/executions/{executionId}/steps/{stepId}/resume/external": {
     "get": "get-workflows-executions-executionid-steps-stepid-resume-external",
@@ -1590,43 +1893,7 @@
   "/api/workflows/workflow/{workflowId}/executions/steps": {
     "get": "get-workflows-workflow-workflowid-executions-steps"
   },
-  "/s/{spaceId}/api/observability/slos": {
-    "get": "findSlosOp",
-    "post": "createSloOp"
-  },
-  "/s/{spaceId}/api/observability/slos/_bulk_delete": {
-    "post": "bulkDeleteOp"
-  },
-  "/s/{spaceId}/api/observability/slos/_bulk_delete/{taskId}": {
-    "get": "bulkDeleteStatusOp"
-  },
-  "/s/{spaceId}/api/observability/slos/_bulk_purge_rollup": {
-    "post": "deleteRollupDataOp"
-  },
-  "/s/{spaceId}/api/observability/slos/_bulk_snapshot": {
-    "post": "bulkSnapshotOp"
-  },
-  "/s/{spaceId}/api/observability/slos/_delete_instances": {
-    "post": "deleteSloInstancesOp"
-  },
-  "/s/{spaceId}/api/observability/slos/{sloId}": {
-    "get": "getSloOp",
-    "put": "updateSloOp",
-    "delete": "deleteSloOp"
-  },
-  "/s/{spaceId}/api/observability/slos/{sloId}/_reset": {
-    "post": "resetSloOp"
-  },
-  "/s/{spaceId}/api/observability/slos/{sloId}/_snapshot": {
-    "get": "getSnapshotOp"
-  },
-  "/s/{spaceId}/api/observability/slos/{sloId}/disable": {
-    "post": "disableSloOp"
-  },
-  "/s/{spaceId}/api/observability/slos/{sloId}/enable": {
-    "post": "enableSloOp"
-  },
-  "/s/{spaceId}/internal/observability/slos/_definitions": {
-    "get": "getDefinitionsOp"
+  "/api/workflows/workflow/executions": {
+    "get": "get-workflows-workflow-executions"
   }
 }

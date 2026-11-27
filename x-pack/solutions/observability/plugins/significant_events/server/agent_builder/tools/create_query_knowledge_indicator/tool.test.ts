@@ -254,7 +254,7 @@ describe('ki_query_create tool', () => {
     expect(reported).not.toHaveProperty('knowledge_indicator_id');
   });
 
-  it('keeps a caller-supplied id in failure telemetry', async () => {
+  it('omits a caller-supplied id from failure telemetry', async () => {
     jest.mocked(assertSignificantEventsAccess).mockResolvedValue(undefined);
     const tool = createQueryKnowledgeIndicatorTool({
       getScopedClients: createScopedClients({
@@ -267,9 +267,10 @@ describe('ki_query_create tool', () => {
 
     await invokeHandler(tool as never, { ...queryParams, id: 'query-1' }, createMockToolContext());
 
-    expect(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).toHaveBeenCalledWith(
-      expect.objectContaining({ success: false, knowledge_indicator_id: 'query-1' })
-    );
+    const [[reported]] = jest.mocked(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).mock
+      .calls;
+    expect(reported).toEqual(expect.objectContaining({ success: false }));
+    expect(reported).not.toHaveProperty('knowledge_indicator_id');
   });
 
   it('does not let a Nightshift reader create a query KI', async () => {
@@ -287,7 +288,8 @@ describe('ki_query_create tool', () => {
 
     expect(queryClient.upsertQuery).not.toHaveBeenCalled();
     expect(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).toHaveBeenCalledWith(
-      expect.objectContaining({ ki_kind: 'query', success: false })
+      expect.objectContaining({ ki_kind: 'query', success: false }),
+      expect.anything()
     );
   });
 });

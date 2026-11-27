@@ -6,7 +6,7 @@
  */
 
 import type { ConnectorContractUnion } from '@kbn/workflows';
-import { getAllConnectors } from '@kbn/workflows-management-plugin/common/schema';
+import { getAllConnectors, getStepExposure } from '@kbn/workflows-management-plugin/common/schema';
 import {
   prefetchConnectors,
   prefetchStepDefinitions,
@@ -15,9 +15,11 @@ import {
 
 jest.mock('@kbn/workflows-management-plugin/common/schema', () => ({
   getAllConnectors: jest.fn().mockReturnValue([]),
+  getStepExposure: jest.fn().mockReturnValue('open'),
 }));
 
 const getAllConnectorsMock = getAllConnectors as jest.MockedFunction<typeof getAllConnectors>;
+const getStepExposureMock = jest.mocked(getStepExposure);
 
 const buildApi = (
   overrides: Partial<{
@@ -36,6 +38,8 @@ const buildApi = (
 beforeEach(() => {
   getAllConnectorsMock.mockReset();
   getAllConnectorsMock.mockReturnValue([]);
+  getStepExposureMock.mockReset();
+  getStepExposureMock.mockReturnValue('open');
 });
 
 describe('prefetch helpers', () => {
@@ -142,6 +146,64 @@ describe('prefetch helpers', () => {
           category: 'elasticsearch',
         })
       );
+    });
+
+    it('keeps internal steps and excludes managed-only steps', async () => {
+      const createStep = (type: string) =>
+        ({
+          type,
+          summary: type,
+          description: type,
+          paramsSchema: {},
+          outputSchema: {},
+        } as unknown as ConnectorContractUnion);
+
+      getAllConnectorsMock.mockReturnValue([
+        createStep('custom.internal'),
+        createStep('custom.managedOnly'),
+      ]);
+      getStepExposureMock.mockImplementation((stepType: string) => {
+        if (stepType === 'custom.internal') return 'internal';
+        if (stepType === 'custom.managedOnly') return 'managed_only';
+        return 'open';
+      });
+
+      const result = await prefetchStepDefinitions({
+        api: buildApi(),
+        spaceId: 'default',
+        request: {} as any,
+      });
+
+      const ids = result.map((d) => d.id);
+      expect(ids).toContain('custom.internal');
+      expect(ids).not.toContain('custom.managedOnly');
+    });
+
+    it('does not let a dynamic connector of the same type bring back a managed-only step', async () => {
+      getStepExposureMock.mockImplementation((stepType: string) =>
+        stepType === 'custom.managedOnly' ? 'managed_only' : 'open'
+      );
+
+      const result = await prefetchStepDefinitions({
+        api: buildApi({
+          getAvailableConnectors: jest.fn().mockResolvedValue({
+            connectorTypes: {
+              '.custom': {
+                instances: [],
+                subActions: [{ name: 'managedOnly' }, { name: 'open' }],
+                enabled: true,
+              },
+            },
+            totalConnectors: 1,
+          }),
+        }),
+        spaceId: 'default',
+        request: {} as any,
+      });
+
+      const ids = result.map((d) => d.id);
+      expect(ids).toContain('custom.open');
+      expect(ids).not.toContain('custom.managedOnly');
     });
   });
 

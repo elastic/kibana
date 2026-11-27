@@ -11,9 +11,15 @@ import { encode } from '@kbn/rison';
 import { encodeOverviewFilters } from '../../../common/overview_filters_param';
 import type { ApplicationOverviewResponse } from '../../../common/types/overview';
 import { getOtelOverview } from './otel/get_otel_overview';
-import { APPLICATION_OVERVIEW_ENDPOINT, overviewRouteRepository } from './route';
+import { getOtelOverviewKpis } from './otel/get_otel_overview_kpis';
+import {
+  APPLICATION_OVERVIEW_ENDPOINT,
+  APPLICATION_OVERVIEW_KPIS_ENDPOINT,
+  overviewRouteRepository,
+} from './route';
 
 jest.mock('./otel/get_otel_overview');
+jest.mock('./otel/get_otel_overview_kpis');
 
 const mockedOtel = jest.mocked(getOtelOverview);
 
@@ -35,16 +41,16 @@ const runHandler = ({
   query = { start: START, end: END },
 }: {
   serviceName?: string;
-  // As the schema parses it: the percentile is a number by now.
+  // As the schema parses it: the percentile is a number by now, and the time zone defaults to UTC.
   query?: { start: string; end: string; environment?: string; percentile?: number } & Partial<
-    Record<'filters' | 'kuery', string>
+    Record<'filters' | 'kuery' | 'timeZone', string>
   >;
 } = {}) => {
   const handler = overviewRouteRepository[APPLICATION_OVERVIEW_ENDPOINT].handler as unknown as (
     resources: unknown
   ) => Promise<ApplicationOverviewResponse>;
   return handler({
-    params: { path: { serviceName }, query },
+    params: { path: { serviceName }, query: { timeZone: 'UTC', ...query } },
     context: {
       core: Promise.resolve({
         elasticsearch: { client: { asCurrentUser: esClient } },
@@ -107,8 +113,20 @@ describe('GET /internal/digital_experience/applications/{serviceName}/overview',
     );
   });
 
+  it('passes the time zone', async () => {
+    await runHandler({ query: { start: START, end: END, timeZone: 'America/New_York' } });
+
+    expect(mockedOtel).toHaveBeenCalledWith(
+      expect.objectContaining({
+        histogram: expect.objectContaining({ timeZone: 'America/New_York' }),
+      })
+    );
+  });
+
   it('filters by the selected environment, and by none when it is left out', async () => {
-    await runHandler({ query: { start: START, end: END, environment: 'production' } });
+    await runHandler({
+      query: { start: START, end: END, environment: 'production', timeZone: 'UTC' },
+    });
 
     expect(mockedOtel).toHaveBeenCalledWith(expect.objectContaining({ environment: 'production' }));
 
@@ -311,5 +329,86 @@ describe('GET /internal/digital_experience/applications/{serviceName}/overview',
     expect(schema.safeParse({ serviceName: 'x'.repeat(1025) }).success).toBe(false);
     expect(schema.safeParse({ serviceName: '' }).success).toBe(false);
     expect(schema.safeParse({}).success).toBe(false);
+  });
+});
+
+describe('GET /internal/digital_experience/applications/{serviceName}/overview/kpis', () => {
+  const route = overviewRouteRepository[APPLICATION_OVERVIEW_KPIS_ENDPOINT];
+  const kpisQuerySchema = () =>
+    (
+      route.params as unknown as {
+        shape: {
+          query: {
+            safeParse: (query: unknown) => { success: boolean; data?: { percentile?: number } };
+          };
+        };
+      }
+    ).shape.query;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.mocked(getOtelOverviewKpis).mockResolvedValue({} as never);
+  });
+
+  it('searches with the filters, the KQL and the percentile of the Overview', async () => {
+    const handler = route.handler as unknown as (resources: unknown) => Promise<unknown>;
+    const filters = encodeOverviewFilters({ browser: include('Chrome'), pageUrl: exclude('/a') });
+
+    await handler({
+      params: {
+        path: { serviceName: 'shop' },
+        query: {
+          start: START,
+          end: END,
+          environment: 'production',
+          filters,
+          kuery: 'user.id : "u-1"',
+          percentile: 95,
+        },
+      },
+      context: {
+        core: Promise.resolve({
+          elasticsearch: { client: { asCurrentUser: esClient } },
+          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+        }),
+      },
+      request: { events: { aborted$: NEVER } },
+      logger: loggingSystemMock.createLogger(),
+    });
+
+    expect(getOtelOverviewKpis).toHaveBeenCalledWith(
+      expect.objectContaining({
+        serviceName: 'shop',
+        start: Date.parse(START),
+        end: Date.parse(END),
+        environment: 'production',
+        filters: { browser: include('Chrome'), pageUrl: exclude('/a') },
+        kuery: expect.objectContaining({ bool: expect.anything() }),
+        percentile: 95,
+      })
+    );
+  });
+
+  it('takes the percentiles the Overview offers, and the page filters', () => {
+    const schema = kpisQuerySchema();
+
+    expect(schema.safeParse({ start: START, end: END, percentile: '95' }).data?.percentile).toBe(
+      95
+    );
+    expect(schema.safeParse({ start: START, end: END, percentile: '42' }).success).toBe(false);
+    expect(
+      schema.safeParse({
+        start: START,
+        end: END,
+        filters: encodeOverviewFilters({ pageContains: include('/checkout') }),
+      }).success
+    ).toBe(true);
+    expect(schema.safeParse({ start: END, end: START }).success).toBe(false);
+  });
+
+  it('requires the Digital Experience and APM privileges, like the Overview', () => {
+    expect(route.security).toEqual({
+      authz: { requiredPrivileges: ['read_digital_experience', 'apm'] },
+    });
   });
 });

@@ -1,0 +1,112 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
+import type { Template, TemplateBody } from '@kbn/workflows-library';
+
+import { LibraryBundleReader } from './library_bundle_reader';
+import type { LibraryHealth } from './library_cache';
+import { LibraryFetcher } from './library_fetcher';
+import type { LibrarySource } from './library_source';
+import { LibraryTelemetry } from './telemetry/library_telemetry';
+import type { WorkflowsManagementConfig } from '../config';
+
+interface LibraryServiceDeps {
+  config: WorkflowsManagementConfig;
+  logger: Logger;
+  kibanaVersion: string;
+  isServerless: boolean;
+  analytics: Pick<AnalyticsServiceSetup, 'reportEvent'>;
+}
+
+export interface TemplateFilters {
+  solution?: string;
+  category?: string;
+  search?: string;
+}
+
+/**
+ * Entry point used by route handlers. Owns a {@link LibrarySource} for
+ * retrieval and applies in-memory filtering on top of the catalog the source
+ * returns. The source is chosen from config: a `bundlePath` selects the local
+ * {@link LibraryBundleReader} (air-gapped deployments), otherwise the HTTP
+ * {@link LibraryFetcher} (the default CDN path). Keeping filter logic here
+ * (instead of inside the source) keeps each source focused on retrieval; the
+ * service is the natural home for business-level read concerns like
+ * solution/category/search filters.
+ *
+ * The service also owns the library's {@link LibraryTelemetry}: it reports
+ * catalog and template body failures itself, and routes report what only they
+ * know (install outcomes) through `telemetry`.
+ */
+export class LibraryService {
+  readonly telemetry: LibraryTelemetry;
+  private readonly source: LibrarySource;
+
+  constructor(deps: LibraryServiceDeps) {
+    const logger = deps.logger.get('library');
+    // The telemetry reads the service only when it reports, after construction.
+    this.telemetry = new LibraryTelemetry({ analytics: deps.analytics, logger, library: this });
+    const onFailure = this.telemetry.reportCatalogFailed;
+    const { bundlePath, registryUrl, ttlMs } = deps.config.library;
+    this.source = bundlePath
+      ? new LibraryBundleReader({
+          bundlePath,
+          kibanaVersion: deps.kibanaVersion,
+          isServerless: deps.isServerless,
+          logger,
+          onFailure,
+        })
+      : new LibraryFetcher({
+          registryUrl,
+          kibanaVersion: deps.kibanaVersion,
+          isServerless: deps.isServerless,
+          ttlMs,
+          logger,
+          onFailure,
+        });
+  }
+
+  async listTemplates(filters?: TemplateFilters): Promise<Template[]> {
+    const templates = await this.source.listTemplates();
+    return filterTemplates(templates, filters);
+  }
+
+  async getTemplate(slug: string): Promise<TemplateBody> {
+    return this.source.getTemplate(slug);
+  }
+
+  getHealth(): LibraryHealth {
+    return this.source.getHealth();
+  }
+
+  /** The last validated catalog, without fetching or filtering; `undefined` until the first successful load. */
+  getCachedTemplates(): Template[] | undefined {
+    return this.source.getCachedTemplates();
+  }
+}
+
+function filterTemplates(templates: Template[], filters?: TemplateFilters): Template[] {
+  if (!filters) return templates;
+  const search = filters.search?.trim().toLowerCase();
+
+  return templates.filter((t) => {
+    if (filters.solution !== undefined) {
+      const solutions = t.solutions ?? [];
+      const isCrossSolution = solutions.length === 0;
+      if (!isCrossSolution && !solutions.includes(filters.solution)) return false;
+    }
+    if (filters.category !== undefined && !t.categories.includes(filters.category)) {
+      return false;
+    }
+    if (search) {
+      const haystack = [t.name, t.description, ...t.categories].join(' ').toLowerCase();
+      if (!haystack.includes(search)) return false;
+    }
+    return true;
+  });
+}

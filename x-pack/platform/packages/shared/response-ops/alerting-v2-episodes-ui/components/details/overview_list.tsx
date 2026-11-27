@@ -79,7 +79,7 @@ export const AlertEpisodeOverviewList = ({
       data-test-subj="alertingV2EpisodeDetailsOverviewList"
       compressed
       type="responsiveColumn"
-      columnWidths={['auto', '1fr']}
+      columnWidths={['auto', 'minmax(0, 1fr)']}
       columnGutterSize="m"
       css={css`
         & > dt,

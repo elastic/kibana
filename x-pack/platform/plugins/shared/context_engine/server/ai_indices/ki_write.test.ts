@@ -8,8 +8,9 @@
 import { errors } from '@elastic/elasticsearch';
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { KiPartialFields } from '../../common/step_types/ki';
 import { kiIdQuery, REVISION_TIE_WINDOW } from './ki_get';
-import { buildKiApiWriter, restoreKi, softDeleteKi, updateKi } from './ki_write';
+import { buildKiApiWriter, isPersonEdited, restoreKi, softDeleteKi, updateKi } from './ki_write';
 import { KiConflictError, KiDeletedError, KiNotFoundError, KiValidationError } from './errors';
 
 const storedKi = { type: 'index_metadata', title: 'logs-* index profile', id: 'ki-1' };
@@ -66,6 +67,33 @@ describe('buildKiApiWriter', () => {
       uri: 'api://context_engine.ki.restore',
       metadata: { space_id: 'default' },
     });
+  });
+});
+
+describe('isPersonEdited', () => {
+  const workflowWriter = { uri: 'workflow://wf-0', metadata: {} };
+
+  it('is true once a person edited the KI, even if automation wrote it since', () => {
+    expect(
+      isPersonEdited({
+        attributes: { 'memory.edited_by': apiWriter.uri },
+        governance: { provenance: { updated_by: workflowWriter } },
+      })
+    ).toBe(true);
+  });
+
+  it('is false when the update API wrote the KI without marking it edited', () => {
+    expect(isPersonEdited({ governance: { provenance: { updated_by: apiWriter } } })).toBe(false);
+  });
+
+  it('is false for KIs only automation, deletes or restores wrote', () => {
+    expect(isPersonEdited({ governance: { provenance: { updated_by: workflowWriter } } })).toBe(
+      false
+    );
+    expect(isPersonEdited({ governance: { provenance: { updated_by: deleteWriter } } })).toBe(
+      false
+    );
+    expect(isPersonEdited(undefined)).toBe(false);
   });
 });
 
@@ -225,6 +253,50 @@ describe('updateKi', () => {
     expect(esClient.index).not.toHaveBeenCalled();
   });
 
+  it('marks a person edit in the attributes when the update changes what the KI says', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
+      update: jest.fn().mockResolvedValue({ result: 'updated' }),
+    } as unknown as ElasticsearchClient;
+
+    await updateKi(esClient, {
+      aiIndexId: 'my-ai-index',
+      dest: indexDest,
+      kiId: 'ki-1',
+      ki: { title: 'Renamed', tags: ['ops'], attributes: { tier: 'gold' } },
+      writer: apiWriter,
+      personEdit: true,
+    });
+
+    const { doc } = (esClient.update as jest.Mock).mock.calls[0][0];
+    expect(doc.governance).toEqual({ provenance: { updated_by: apiWriter } });
+    expect(doc.attributes).toEqual({
+      tier: 'gold',
+      'memory.edited_by': apiWriter.uri,
+      'memory.edited_at': doc.updated_at,
+    });
+  });
+
+  it('does not record a person edit when only tags or expiry change', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
+      update: jest.fn().mockResolvedValue({ result: 'updated' }),
+    } as unknown as ElasticsearchClient;
+
+    await updateKi(esClient, {
+      aiIndexId: 'my-ai-index',
+      dest: indexDest,
+      kiId: 'ki-1',
+      ki: { title: storedKi.title, tags: ['ops'], expires_at: null },
+      writer: apiWriter,
+      personEdit: true,
+    });
+
+    const { doc } = (esClient.update as jest.Mock).mock.calls[0][0];
+    expect(doc.governance).toEqual({ provenance: { updated_by: apiWriter } });
+    expect(doc).not.toHaveProperty('attributes');
+  });
+
   it('writes when an array field is narrowed, not treating it as a noop', async () => {
     const storedWithTags = { ...storedKi, tags: ['keep', 'remove'] };
     const esClient = {
@@ -322,6 +394,70 @@ describe('updateKi', () => {
       expect.objectContaining({ id: 'ki-1', if_seq_no: 9, if_primary_term: 1 }),
       expect.anything()
     );
+  });
+
+  it('rejects a user_id change', async () => {
+    const esClient = {
+      search: jest
+        .fn()
+        .mockResolvedValue(
+          searchHit('ai-index-idx-my-ai-index', { ...storedKi, user_id: 'alice' })
+        ),
+      update: jest.fn(),
+    } as unknown as ElasticsearchClient;
+
+    const thrown = await updateKi(esClient, {
+      aiIndexId: 'my-ai-index',
+      dest: indexDest,
+      kiId: 'ki-1',
+      ki: { content: 'Updated', user_id: 'bob' } as KiPartialFields,
+      writer: apiWriter,
+    }).catch((e) => e);
+
+    expect(thrown).toBeInstanceOf(KiValidationError);
+    expect(esClient.update).not.toHaveBeenCalled();
+  });
+
+  it('ignores a null user_id', async () => {
+    const esClient = {
+      search: jest
+        .fn()
+        .mockResolvedValue(
+          searchHit('ai-index-idx-my-ai-index', { ...storedKi, user_id: 'alice' })
+        ),
+      update: jest.fn().mockResolvedValue({ result: 'updated' }),
+    } as unknown as ElasticsearchClient;
+
+    await updateKi(esClient, {
+      aiIndexId: 'my-ai-index',
+      dest: indexDest,
+      kiId: 'ki-1',
+      ki: { content: 'Updated', user_id: null } as unknown as KiPartialFields,
+      writer: apiWriter,
+    });
+
+    expect((esClient.update as jest.Mock).mock.calls[0][0].doc).not.toHaveProperty('user_id');
+  });
+
+  it('accepts the stored user_id', async () => {
+    const esClient = {
+      search: jest
+        .fn()
+        .mockResolvedValue(
+          searchHit('ai-index-idx-my-ai-index', { ...storedKi, user_id: 'alice' })
+        ),
+      update: jest.fn().mockResolvedValue({ result: 'updated' }),
+    } as unknown as ElasticsearchClient;
+
+    const result = await updateKi(esClient, {
+      aiIndexId: 'my-ai-index',
+      dest: indexDest,
+      kiId: 'ki-1',
+      ki: { content: 'Updated', user_id: 'alice' } as KiPartialFields,
+      writer: apiWriter,
+    });
+
+    expect(result).toEqual({ id: 'ki-1', result: 'updated' });
   });
 
   it('throws ValidationError when the KI is ambiguous across backing indices and no index is pinned', async () => {

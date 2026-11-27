@@ -24,8 +24,9 @@ const isUnicodeRegExp = (pattern: string): boolean => {
   }
 };
 
-// Leading inline flags, as in Java's and Python's `(?i)^[a-f]+$`; JavaScript only scopes them.
-const LEADING_FLAGS = /^\(\?([ims]+)\)/;
+// Leading inline flags, as in Java's and Python's `(?i)^[a-f]+$`, or after the anchor in Java's
+// `^(?i)[a-f]+$` (AWS's SSM); JavaScript only scopes them.
+const LEADING_FLAGS = /^(\^?)\(\?([ims]+)\)/;
 
 const CLASS_ESCAPE_LETTERS = new Set('dDwWsS');
 
@@ -34,14 +35,14 @@ const CLASS_ESCAPE_LETTERS = new Set('dDwWsS');
  * `\_` that vendor specs commonly use, and ranges from or to a class escape such as `[\w-_]`
  * (AWS's CloudWatch Logs). Drops the backslash from those escapes, escapes a hyphen next to a
  * class escape, which then means itself as without the flag, and scopes leading inline flags
- * such as `(?i)` over the rest of the pattern.
+ * such as `(?i)`, also when they follow a `^` anchor, over the rest of the pattern.
  */
 export const toUnicodePattern = (source: string): string => {
   if (isUnicodeRegExp(source)) {
     return source;
   }
   const flags = LEADING_FLAGS.exec(source);
-  const pattern = flags ? `(?${flags[1]}:${source.slice(flags[0].length)})` : source;
+  const pattern = flags ? `(?${flags[2]}:${flags[1]}${source.slice(flags[0].length)})` : source;
   if (isUnicodeRegExp(pattern)) {
     return pattern;
   }

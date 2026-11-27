@@ -8,10 +8,12 @@
  */
 
 import { diag } from '@opentelemetry/api';
+import type { ExporterMetrics } from '@opentelemetry/otlp-exporter-base';
 import type { LogRecordExporter } from '@opentelemetry/sdk-logs';
 
 type ReadableLogRecords = Parameters<LogRecordExporter['export']>[0];
 type ExportResultCallback = Parameters<LogRecordExporter['export']>[1];
+type LogExporterMetrics = Pick<ExporterMetrics<ReadableLogRecords>, 'startExport'>;
 
 /** `ExportResultCode.SUCCESS` from `@opentelemetry/core` (not a direct dependency). */
 const EXPORT_RESULT_SUCCESS = 0;
@@ -80,6 +82,10 @@ interface PendingRetry {
  * Callers must configure the batch processor's `exportTimeoutMillis` above `maxElapsedTimeMs`.
  * Timers are unref'd; `shutdown()` aborts pending retries and `forceFlush()` runs them now.
  *
+ * The `otel.sdk.exporter.*` metrics are recorded here, once per export operation with the
+ * outcome of its final attempt, as semconv requires. The delegate must not record them itself
+ * (construct it without a meter provider), or every attempt is counted as its own operation.
+ *
  * @internal
  */
 export class RetryingLogRecordExporter implements LogRecordExporter {
@@ -88,12 +94,21 @@ export class RetryingLogRecordExporter implements LogRecordExporter {
 
   constructor(
     private readonly delegate: LogRecordExporter,
-    private readonly maxElapsedTimeMs: number
+    private readonly maxElapsedTimeMs: number,
+    private readonly metrics: LogExporterMetrics
   ) {}
 
   public export(logs: ReadableLogRecords, resultCallback: ExportResultCallback): void {
     const deadline = Date.now() + this.maxElapsedTimeMs;
     let nextBackoffMs = INITIAL_BACKOFF_MS;
+    const finishExport = this.metrics.startExport(logs);
+    const finish: ExportResultCallback = (result) => {
+      // Like the SDK's delegate, a failure without an error is recorded as `export_failed`.
+      finishExport(
+        result.code === EXPORT_RESULT_SUCCESS ? undefined : result.error ?? 'export_failed'
+      );
+      resultCallback(result);
+    };
 
     const attempt = (): void => {
       this.delegate.export(logs, (result) => {
@@ -102,7 +117,7 @@ export class RetryingLogRecordExporter implements LogRecordExporter {
           this.isShutdown ||
           !isRetryableExportError(result.error)
         ) {
-          resultCallback(result);
+          finish(result);
           return;
         }
 
@@ -114,7 +129,7 @@ export class RetryingLogRecordExporter implements LogRecordExporter {
           diag.warn(
             `OTLP log export still failing after retry budget of ${this.maxElapsedTimeMs}ms, dropping batch of ${logs.length} log records: ${result.error}`
           );
-          resultCallback(result);
+          finish(result);
           return;
         }
 
@@ -128,7 +143,7 @@ export class RetryingLogRecordExporter implements LogRecordExporter {
           abort: () => {
             clearTimeout(timer);
             this.pendingRetries.delete(pending);
-            resultCallback(result);
+            finish(result);
           },
         };
         this.pendingRetries.add(pending);

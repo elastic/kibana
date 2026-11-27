@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Acl, AclEntry, AclGrant, StoredAcl } from '../acl';
+import type { Acl, AclEntry, AclGeneral, AclGrant, StoredAcl } from '../acl';
 import { toObjectDecision, type AclDecision } from '../evaluation';
-import { compareLevels, type GeneralAccessLevel } from '../levels';
+import { compareLevels, type GeneralAccess } from '../levels';
 import type { AccessPolicy } from '../policy';
 import {
   getPrincipalKey,
@@ -35,10 +35,10 @@ export const MAX_ACL_ENTRIES = 100;
  */
 export interface InitialAccess {
   /**
-   * General access. It has to be a level the type allows for general access, and the type's
+   * General access. Its value has to be one the type allows for general access, and the type's
    * default applies when it's left out.
    */
-  general_access?: GeneralAccessLevel;
+  general?: AclGeneral;
   /**
    * Grants to named principals, each listed once and at most {@link MAX_ACL_ENTRIES} of them.
    * There are none when it's left out. A grant to the caller counts toward the limit, and is then
@@ -55,7 +55,7 @@ export type AclChange =
       /** Replace general access and the entries, and keep the owner. */
       kind: 'replace';
       /** The new general access. */
-      general_access: GeneralAccessLevel;
+      general: AclGeneral;
       /** The new entries, which replace every current entry. */
       entries: AclGrant[];
     }
@@ -63,7 +63,7 @@ export type AclChange =
       /** Make the caller the owner of an object without an ACL. */
       kind: 'claim';
       /** General access for the claimed object. The type's default applies when it's left out. */
-      general_access?: GeneralAccessLevel;
+      general?: AclGeneral;
     }
   | {
       /** Hand the object over to a new owner. */
@@ -149,7 +149,7 @@ export const prepareInitialAcl = ({
 
   const generalAccess = validateGeneralAccess(
     policy,
-    requested?.general_access ?? policy.defaultGeneralAccessLevel
+    requested?.general?.access ?? policy.defaultGeneralAccess
   );
 
   const entries = validateEntries(policy, requested?.entries ?? [], principal).map(
@@ -157,7 +157,7 @@ export const prepareInitialAcl = ({
   );
 
   return {
-    next: { version: 1, owner: principal, general_access: generalAccess, entries },
+    next: { version: 1, owner: principal, general: { access: generalAccess }, entries },
     principalsToCheck: entries.map(({ type, id }) => ({ type, id })),
   };
 };
@@ -220,7 +220,7 @@ export const prepareAclChange = ({
     case 'replace':
       return prepareReplace(policy, current, decision, change, now);
     case 'claim':
-      return prepareClaim(policy, decision, principal, change.general_access);
+      return prepareClaim(policy, decision, principal, change.general?.access);
     case 'transfer':
       return prepareTransfer(policy, current, decision, change.owner, now);
   }
@@ -269,7 +269,7 @@ const prepareReplace = (
 
   const isRepair = decision.state === 'invalid';
   const currentGrants = new Map(currentEntries.map((entry) => [getPrincipalKey(entry), entry]));
-  const generalAccess = validateGeneralAccess(policy, change.general_access);
+  const generalAccess = validateGeneralAccess(policy, change.general.access);
 
   const principalsToCheck: Principal[] = isRepair ? [owner] : [];
   const entries = validateEntries(policy, change.entries, owner).map((entry): AclEntry => {
@@ -281,7 +281,7 @@ const prepareReplace = (
   });
 
   return {
-    next: { version: 1, owner, general_access: generalAccess, entries },
+    next: { version: 1, owner, general: { access: generalAccess }, entries },
     principalsToCheck,
   };
 };
@@ -304,7 +304,7 @@ const prepareClaim = (
   policy: AccessPolicy,
   decision: AclDecision,
   principal: Principal | undefined,
-  generalAccess: GeneralAccessLevel | undefined
+  generalAccess: GeneralAccess | undefined
 ): PreparedAclChange => {
   if (decision.state !== 'absent') {
     throw new AclChangeError('conflict', 'The object already has an ACL.');
@@ -321,10 +321,9 @@ const prepareClaim = (
     next: {
       version: 1,
       owner: principal,
-      general_access: validateGeneralAccess(
-        policy,
-        generalAccess ?? policy.defaultGeneralAccessLevel
-      ),
+      general: {
+        access: validateGeneralAccess(policy, generalAccess ?? policy.defaultGeneralAccess),
+      },
       entries: [],
     },
     principalsToCheck: [],
@@ -365,13 +364,13 @@ const prepareTransfer = (
   requireOperation(decision, 'transfer');
   validatePrincipal(newOwner);
 
-  const { general_access: generalAccess, entries } = readEditableAcl(policy, current);
+  const { general, entries } = readEditableAcl(policy, current);
   const newOwnerKey = getPrincipalKey(newOwner);
   return {
     next: {
       version: 1,
       owner: { type: newOwner.type, id: newOwner.id },
-      general_access: generalAccess,
+      general,
       entries: entries
         .filter(
           (entry) =>
@@ -387,8 +386,8 @@ const prepareTransfer = (
 /**
  * Refuses general access that the type doesn't allow, and returns the level otherwise.
  */
-const validateGeneralAccess = (policy: AccessPolicy, level: GeneralAccessLevel) => {
-  if (!policy.generalAccessLevels.includes(level)) {
+const validateGeneralAccess = (policy: AccessPolicy, level: GeneralAccess) => {
+  if (!policy.generalAccess.includes(level)) {
     throw new AclChangeError('bad_request', `General access "${level}" is not allowed.`);
   }
   return level;
@@ -441,8 +440,8 @@ const validateEntries = (
     }
     seen.add(key);
 
-    if (!policy.entryLevels.includes(access)) {
-      throw new AclChangeError('bad_request', `Access level "${access}" cannot be granted.`);
+    if (!policy.entryAccess.includes(access)) {
+      throw new AclChangeError('bad_request', `Access "${access}" cannot be granted.`);
     }
 
     if (key !== ownerKey) {
@@ -458,8 +457,7 @@ const validateEntries = (
  */
 const isDefaultAccess = (policy: AccessPolicy, requested: InitialAccess) =>
   (requested.entries?.length ?? 0) === 0 &&
-  (requested.general_access ?? policy.defaultGeneralAccessLevel) ===
-    policy.defaultGeneralAccessLevel;
+  (requested.general?.access ?? policy.defaultGeneralAccess) === policy.defaultGeneralAccess;
 
 /**
  * Refuses a caller who can't perform the operation, as `toObjectDecision` decides: `not_found`

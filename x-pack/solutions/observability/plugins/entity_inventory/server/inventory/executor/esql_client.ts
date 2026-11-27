@@ -10,15 +10,15 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLColumn } from '@kbn/es-types';
 import type { GeneratedQuery } from '../generator';
 import { esqlResultsToRows } from './esql_results_to_rows';
-import type { InventoryRow } from '../../../common';
+import type {
+  EsqlRequestBody,
+  InventoryRow,
+  QueryExecutionStats,
+  QueryShardStats,
+} from '../../../common';
 
-export interface EsqlStats {
-  /** Cluster time in milliseconds, not wall time. */
-  took: number | null;
-  /** Documents Elasticsearch visited, not matched. */
-  documentsFound: number | null;
-  /** Field values Elasticsearch read. */
-  valuesLoaded: number | null;
+/** The execution metadata of one response and the number of rows it returned. */
+export interface EsqlStats extends Omit<QueryExecutionStats, 'isPartial'> {
   rowCount: number;
 }
 
@@ -30,16 +30,56 @@ export interface EsqlQueryResult {
   stats: EsqlStats;
 }
 
-/** `EsqlQueryResponse` lacks the stats Elasticsearch writes on every ES|QL response. */
+/**
+ * `EsqlQueryResponse` lacks the stats Elasticsearch writes on every ES|QL response that sets
+ * `include_execution_metadata`.
+ */
 interface EsqlQueryResponseWithStats extends estypes.EsqlQueryResponse {
   documents_found?: number;
   values_loaded?: number;
+  rows_emitted?: number;
+  cpu_nanos?: number;
+  driver_nanos?: number;
+  bytes_read?: number;
 }
+
+type ShardCount = 'successful' | 'skipped' | 'failed';
+
+const sumShards = (shards: estypes.EsqlEsqlShardInfo[], key: ShardCount): number | null => {
+  const counts = shards.flatMap((shard) => (shard[key] === undefined ? [] : [shard[key]]));
+  return counts.length === 0 ? null : counts.reduce((sum, count) => sum + count, 0);
+};
+
+/** Sums the shard counts of every cluster; null when no cluster reports shards. */
+const toShardStats = (
+  clusters: estypes.EsqlEsqlClusterInfo | undefined
+): QueryShardStats | null => {
+  const shards = Object.values(clusters?.details ?? {}).flatMap(({ _shards: clusterShards }) =>
+    clusterShards ? [clusterShards] : []
+  );
+  if (shards.length === 0) {
+    return null;
+  }
+  return {
+    total: shards.reduce((sum, { total }) => sum + total, 0),
+    successful: sumShards(shards, 'successful'),
+    skipped: sumShards(shards, 'skipped'),
+    failed: sumShards(shards, 'failed'),
+  };
+};
 
 /** Options for {@link executeEsql}. */
 export interface ExecuteEsqlOptions {
   signal?: AbortSignal;
 }
+
+/** Builds the `POST /_query` body for one generated query; the only place that body is built. */
+export const toEsqlRequestBody = ({ esql, params }: GeneratedQuery): EsqlRequestBody => ({
+  query: esql,
+  params,
+  // `drop_null_columns` stays off so every plan returns the same column list.
+  include_execution_metadata: true,
+});
 
 /**
  * Runs one generated query with its named parameters sent as request parameters, never
@@ -47,12 +87,11 @@ export interface ExecuteEsqlOptions {
  */
 export const executeEsql = async (
   client: ElasticsearchClient,
-  { esql, params }: GeneratedQuery,
+  query: GeneratedQuery,
   { signal }: ExecuteEsqlOptions = {}
 ): Promise<EsqlQueryResult> => {
-  // `drop_null_columns` stays off so every plan returns the same column list.
   const rawResponse: EsqlQueryResponseWithStats = await client.esql.query(
-    { query: esql, params, include_execution_metadata: true },
+    toEsqlRequestBody(query),
     { signal }
   );
 
@@ -67,6 +106,11 @@ export const executeEsql = async (
       took: rawResponse.took ?? null,
       documentsFound: rawResponse.documents_found ?? null,
       valuesLoaded: rawResponse.values_loaded ?? null,
+      rowsEmitted: rawResponse.rows_emitted ?? null,
+      cpuNanos: rawResponse.cpu_nanos ?? null,
+      driverNanos: rawResponse.driver_nanos ?? null,
+      bytesRead: rawResponse.bytes_read ?? null,
+      shards: toShardStats(rawResponse._clusters),
       rowCount: rows.length,
     },
   };

@@ -8,13 +8,13 @@
 export const DEFAULT_TIME_RANGE = { from: 'now-24h', to: 'now' } as const;
 
 /**
- * Default values for all dashboard state fields except project_routing.
+ * Default values for all dashboard state fields except project_routing, time_range and
+ * refresh_interval, so applying an attachment without them keeps the dashboard's own.
  */
 export const EMPTY_DASHBOARD_STATE = Object.freeze({
   title: '',
   description: '',
   panels: [],
-  time_range: DEFAULT_TIME_RANGE,
   query: { expression: '', language: 'kql' as const },
   filters: [],
   options: {
@@ -27,7 +27,6 @@ export const EMPTY_DASHBOARD_STATE = Object.freeze({
     sync_tooltips: false,
   },
   pinned_panels: [],
-  refresh_interval: { pause: true, value: 0 },
   tags: [],
   access_control: {},
 });

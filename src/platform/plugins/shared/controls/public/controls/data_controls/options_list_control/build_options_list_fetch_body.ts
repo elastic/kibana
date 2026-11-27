@@ -12,8 +12,8 @@ import type {
   OptionsListSelection,
   OptionsListSortingType,
 } from '@kbn/controls-schemas';
-import { ControlValuesSource } from '@kbn/controls-constants';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { getFilterableFieldSpec } from '@kbn/data-source';
+import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import type { FetchContext } from '@kbn/presentation-publishing';
 
 import { isValidSearch } from '../../../../common/options_list/is_valid_search';
@@ -39,10 +39,60 @@ export type BuildOptionsListFetchBodyResult =
       response: OptionsListSuccessResponse | Pick<OptionsListSuccessResponse, 'suggestions'>;
     };
 
-export function buildOptionsListFetchBody({
-  valuesSource,
+interface SharedFetchBodyArgs {
+  dataSource?: FilterableSource;
+  fetchContext: FetchContext;
+  useGlobalFilters: boolean | undefined;
+  searchString: string;
+  sort: OptionsListSortingType;
+  searchTechnique: OptionsListSearchTechnique;
+  selectedOptions: OptionsListSelection[];
+  ignoreValidations: boolean | undefined;
+}
+
+export function buildEsqlFetchBody({
   esqlQuery,
-  dataViews,
+  dataSource,
+  fetchContext,
+  useGlobalFilters,
+  searchString,
+  sort,
+  searchTechnique,
+  selectedOptions,
+  ignoreValidations,
+}: SharedFetchBodyArgs & { esqlQuery?: string }): BuildOptionsListFetchBodyResult {
+  if (!esqlQuery) {
+    return { outcome: 'empty', response: { suggestions: [] } };
+  }
+
+  const timeRange = getFetchContextTimeRange(fetchContext, useGlobalFilters);
+
+  const body: OptionsListESQLFetchBody = {
+    kind: 'esql',
+    esql: esqlQuery,
+    timeRange,
+    filter: buildESQLPreFilter({
+      fetchContext,
+      useGlobalFilters,
+      dataSource,
+      timeRange,
+      esqlQuery,
+    }),
+    sort,
+    searchString,
+    searchTechnique,
+    selectedOptions,
+    esqlVariables: fetchContext.esqlVariables,
+    ignoreValidations,
+    isReload: fetchContext.isReload,
+    projectRouting: fetchContext.projectRouting,
+  };
+
+  return { outcome: 'fetch', body, showLoadingSuggestions: false };
+}
+
+export function buildDslFetchBody({
+  dataSource,
   field,
   fetchContext,
   useGlobalFilters,
@@ -53,81 +103,38 @@ export function buildOptionsListFetchBody({
   runPastTimeout,
   selectedOptions,
   ignoreValidations,
-}: {
-  valuesSource: ControlValuesSource;
-  esqlQuery?: string;
-  dataViews?: DataView[];
-  field?: DataViewField;
-  fetchContext: FetchContext;
-  useGlobalFilters: boolean | undefined;
-  searchString: string;
-  sort: OptionsListSortingType;
-  searchTechnique: OptionsListSearchTechnique;
+}: SharedFetchBodyArgs & {
+  field?: FilterableField;
   requestSize: number;
   runPastTimeout: boolean;
-  selectedOptions: OptionsListSelection[];
-  ignoreValidations: boolean | undefined;
 }): BuildOptionsListFetchBodyResult {
-  if (valuesSource === ControlValuesSource.ESQL) {
-    if (!esqlQuery) {
-      return { outcome: 'empty', response: { suggestions: [] } };
-    }
-
-    const timeRange = getFetchContextTimeRange(fetchContext, useGlobalFilters);
-    const dataView = dataViews?.[0];
-
-    const body: OptionsListESQLFetchBody = {
-      kind: 'esql',
-      esql: esqlQuery,
-      timeRange,
-      filter: buildESQLPreFilter({
-        fetchContext,
-        useGlobalFilters,
-        dataView,
-        timeRange,
-        esqlQuery,
-      }),
-      sort,
-      searchString,
-      searchTechnique,
-      selectedOptions,
-      esqlVariables: fetchContext.esqlVariables,
-      ignoreValidations,
-      isReload: fetchContext.isReload,
-      projectRouting: fetchContext.projectRouting,
-    };
-
-    return { outcome: 'fetch', body, showLoadingSuggestions: false };
-  }
-
-  const dataView = dataViews?.[0];
   if (
-    !dataView ||
+    !dataSource ||
     !field ||
     !isValidSearch({ searchString, fieldType: field.type, searchTechnique })
   ) {
     return { outcome: 'empty', response: { suggestions: [], totalCardinality: 0 } };
   }
 
-  const filters = buildOptionsListDashboardFilters(dataView, fetchContext, useGlobalFilters);
+  const filters = buildOptionsListDashboardFilters(dataSource, fetchContext, useGlobalFilters);
 
   return {
     outcome: 'fetch',
     showLoadingSuggestions: true,
     body: {
       kind: 'dsl',
-      index: dataView.getIndexPattern(),
+      index: dataSource.title,
       sort,
       searchString,
       runPastTimeout,
       searchTechnique,
       selectedOptions,
       fieldName: field.name,
-      fieldSpec: field.toSpec(),
+      fieldSpec: getFilterableFieldSpec(field),
       size: requestSize,
       ignoreValidations,
       filters,
-      runtimeFieldMap: dataView.toSpec?.(false).runtimeFieldMap,
+      runtimeFieldMap: dataSource.toSpec?.(false).runtimeFieldMap,
       isReload: fetchContext.isReload,
       projectRouting: fetchContext.projectRouting,
     },

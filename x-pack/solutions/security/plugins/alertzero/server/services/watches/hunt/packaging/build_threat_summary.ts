@@ -74,9 +74,19 @@ export const buildThreatSummary = ({
   /** Gaps of a retired run, named after the extract so a rule author sees what was not searched. */
   unsearched?: DedupedCoverageGaps;
 }): string => {
+  const prefix = unsearched ? `Not searched by Hunt Watch (${gapCountPhrase(unsearched)}): ` : '';
+  const described = unsearched
+    ? describeGaps(unsearched, MAX_UNSEARCHED_CHARS - prefix.length)
+    : undefined;
+  const unsearchedLine = described ? `${prefix}${described}` : undefined;
+
   if (hasConfirmedHit) {
     const story = hypothesis ?? evidenceQuote ?? report?.title ?? fallbackTitle ?? '';
-    return truncateAtWord(story, MAX_THREAT_SUMMARY_CHARS);
+    if (!unsearchedLine) {
+      return truncateAtWord(story, MAX_THREAT_SUMMARY_CHARS);
+    }
+    const kept = truncateAtWord(story, MAX_THREAT_SUMMARY_CHARS - unsearchedLine.length - 1);
+    return kept ? `${kept}\n${unsearchedLine}` : unsearchedLine;
   }
 
   const extract = buildReportExtract({ report, techniqueIds });
@@ -85,14 +95,9 @@ export const buildThreatSummary = ({
   if (thin && report?.bodyText) {
     lines.push(truncateAtWord(report.bodyText, BODY_LEAD_IN_CHARS));
   }
-  const prefix = unsearched ? `Not searched by Hunt Watch (${gapCountPhrase(unsearched)}): ` : '';
-  const described = unsearched
-    ? describeGaps(unsearched, MAX_UNSEARCHED_CHARS - prefix.length)
-    : undefined;
-  if (!described) {
+  if (!unsearchedLine) {
     return truncateAtWord(lines.join('\n'), MAX_THREAT_SUMMARY_CHARS);
   }
-  const unsearchedLine = `${prefix}${described}`;
   const story = truncateAtWord(
     lines.join('\n'),
     MAX_THREAT_SUMMARY_CHARS - unsearchedLine.length - 1

@@ -50,8 +50,7 @@ export class AlertRuleFromVisAction implements Action<Context> {
     const { apiIsOfType, hasBlockingError } = await import('@kbn/presentation-publishing');
     const isLensApi = apiIsOfType(embeddable, LENS_EMBEDDABLE_TYPE);
     if (!isLensApi || hasBlockingError(embeddable)) return false;
-    const query = embeddable.query$.getValue();
-    return Boolean(query && 'esql' in query);
+    return embeddable.esql$.getValue().length > 0;
   }
 
   public getDisplayName = () =>

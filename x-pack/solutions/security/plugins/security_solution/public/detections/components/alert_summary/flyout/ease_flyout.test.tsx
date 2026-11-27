@@ -17,9 +17,10 @@ import { TAKE_ACTION_BUTTON_TEST_ID } from './components/take_action_button';
 import { mockDataAsNestedObject } from '../../../../flyout/document_details/shared/mocks/mock_data_as_nested_object';
 import { mockSearchHit } from '../../../../flyout/document_details/shared/mocks/mock_search_hit';
 
-jest.mock('../../../../common/hooks/use_ai_connectors', () => ({
-  useAIConnectors: jest.fn().mockReturnValue({
-    aiConnectors: [
+jest.mock('@kbn/inference-connectors', () => ({
+  ...jest.requireActual('@kbn/inference-connectors'),
+  useLoadConnectors: jest.fn().mockReturnValue({
+    data: [
       {
         id: 'test-connector-id',
         name: 'Test Connector',
@@ -27,7 +28,6 @@ jest.mock('../../../../common/hooks/use_ai_connectors', () => ({
       },
     ],
     isLoading: false,
-    error: null,
   }),
 }));
 

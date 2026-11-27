@@ -68,6 +68,7 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import type { DashboardMountContextProps } from './dashboard_app/types';
 import type { DashboardListingTab } from './dashboard_listing/types';
@@ -87,7 +88,10 @@ import { setupUrlForwarding } from './dashboard_app/url/setup_url_forwarding';
 import type { FindDashboardsService } from './dashboard_client';
 import { DASHBOARD_DURATION_START_MARK } from './dashboard_api/telemetry/dashboard_duration_start_mark';
 import { dashboardSavedEventSchema } from './dashboard_api/telemetry/report_dashboard_saved';
-import { DASHBOARD_SAVED_EVENT } from './utils/telemetry_constants';
+import {
+  DASHBOARD_PANEL_SELECTION_STARTED_EVENT,
+  DASHBOARD_SAVED_EVENT,
+} from './utils/telemetry_constants';
 import type { DashboardApi } from './dashboard_api/types';
 
 export interface DashboardSetupDependencies {
@@ -151,6 +155,12 @@ export interface DashboardStart {
    * The API of the loaded dashboard rendered with `publishAsAppClientApi`, if any.
    */
   dashboardAppClientApi$: PublishingSubject<DashboardApi | undefined>;
+
+  /**
+   * Checks whether two dashboard states are equal.
+   * Panel and pinned panel configs are compared with the comparators provided by their embeddable definitions.
+   */
+  areEqual: (a: DashboardState, b: DashboardState) => Promise<boolean>;
 }
 
 export class DashboardPlugin
@@ -180,6 +190,10 @@ export class DashboardPlugin
     core.analytics.registerEventType({
       eventType: DASHBOARD_SAVED_EVENT,
       schema: dashboardSavedEventSchema,
+    });
+    core.analytics.registerEventType({
+      eventType: DASHBOARD_PANEL_SELECTION_STARTED_EVENT,
+      schema: {},
     });
 
     // Lazy-load via @kbn/change-history-ui/telemetry to avoid pulling React UI into page-load bundle.
@@ -417,6 +431,13 @@ export class DashboardPlugin
         return findService;
       },
       dashboardAppClientApi$,
+      areEqual: async (a: DashboardState, b: DashboardState) => {
+        const { areEqual } = await import('./dashboard_renderer/dashboard_module');
+        return areEqual(a, b, async (type: string, embeddableState: object) => {
+          const definition = await plugins.embeddable.getEmbeddableDefinition(type);
+          return definition?.getComparators?.(embeddableState);
+        });
+      },
     };
   }
 

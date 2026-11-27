@@ -2,7 +2,7 @@
   "type": "shared-browser",
   "id": "@kbn/elastic-assistant-shared-state",
   "owner": [
-    "@elastic/security-threat-hunting"
+    "@elastic/security-investigations"
   ],
   "group": "platform",
   "visibility": "shared"

@@ -15,7 +15,7 @@ import type {
   EventHit,
   TimelineEqlResponse,
 } from '@kbn/securitysolution-timeline-search-strategy';
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '@kbn/timelines-plugin/common/constants';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import { inspectStringifyObject } from '../../../utils/build_query';
 import { formatTimelineData } from '../factory/helpers/format_timeline_data';
 

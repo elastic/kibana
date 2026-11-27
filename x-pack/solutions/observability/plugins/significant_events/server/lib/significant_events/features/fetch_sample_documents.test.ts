@@ -14,6 +14,7 @@ import type { FeatureWithFilter } from '@kbn/significant-events-schema';
 import { getEsqlColumnSchema, getSampleDocumentsEsql } from '@kbn/ai-tools';
 import { getDiverseSampleDocuments } from '@kbn/nightshift-ai';
 import { fetchSampleDocuments } from './fetch_sample_documents';
+import { MAX_ENTITY_FILTER_COMPARISONS } from './get_entity_filters';
 
 jest.mock('@kbn/ai-tools', () => ({
   getEsqlColumnSchema: jest.fn(),
@@ -31,6 +32,13 @@ const getEntityFilteredCall = () =>
   getSampleDocumentsEsqlMock.mock.calls.find(([params]) => params.whereCondition)?.[0];
 const getRandomCall = () =>
   getSampleDocumentsEsqlMock.mock.calls.find(([params]) => !params.whereCondition)?.[0];
+
+const TIMESTAMP_COLUMN = { name: '@timestamp', type: 'date' };
+
+const COUNT_RESPONSE = (total: number) => ({
+  columns: [{ name: 'total', type: 'long' }],
+  values: [[total]],
+});
 
 const createHit = (id: string): SearchHit<Record<string, unknown>> => ({
   _index: '',
@@ -68,6 +76,7 @@ const logger = {
 describe('fetchSampleDocuments', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    getEsqlColumnSchemaMock.mockResolvedValue([TIMESTAMP_COLUMN]);
   });
 
   it('rejects invalid sampling ratios', async () => {
@@ -101,8 +110,153 @@ describe('fetchSampleDocuments', () => {
     ).rejects.toThrow('must be <= 1');
   });
 
+  it('rejects with a 400 that explains the missing @timestamp and samples nothing', async () => {
+    // The narrowed probe drops a column no index maps; the full schema still resolves, so the
+    // source is at fault, whatever its WHERE matches.
+    getEsqlColumnSchemaMock
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ name: 'message', type: 'text' }]);
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+
+    await expect(
+      fetchSampleDocuments({
+        esClient,
+        index: 'logs.test-default',
+        start: 100,
+        end: 200,
+        features: [],
+        logger,
+        size: 5,
+        entityFilteredRatio: 0,
+        diverseRatio: 0.5,
+        maxEntityFilters: 10,
+        samplingTimeoutMs: 30_000,
+        iteration: 1,
+      })
+    ).rejects.toMatchObject({
+      statusCode: 400,
+      message:
+        'Cannot sample [logs.test-default]: The query must return a [@timestamp] column. Nightshift reads every source over time windows on it.',
+    });
+    expect(getSampleDocumentsEsqlMock).not.toHaveBeenCalled();
+    expect(getDiverseSampleDocumentsMock).not.toHaveBeenCalled();
+  });
+
+  it('returns an empty sample without sampling when a wildcard matches no index yet', async () => {
+    // Nothing resolves behind the wildcard: not even the full schema has a column, and no rows.
+    getEsqlColumnSchemaMock.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockResponse(COUNT_RESPONSE(0));
+
+    const result = await fetchSampleDocuments({
+      esClient,
+      index: 'logs.test-default',
+      start: 100,
+      end: 200,
+      features: [],
+      logger,
+      size: 5,
+      entityFilteredRatio: 0,
+      diverseRatio: 0,
+      maxEntityFilters: 10,
+      samplingTimeoutMs: 30_000,
+      iteration: 1,
+    });
+
+    expect(result.documents).toEqual([]);
+    expect(getSampleDocumentsEsqlMock).not.toHaveBeenCalled();
+    expect(getDiverseSampleDocumentsMock).not.toHaveBeenCalled();
+  });
+
+  it('rejects with a 400 a source whose index holds documents but maps no field', async () => {
+    // An empty schema looks like a missing index; only the row count shows the documents.
+    getEsqlColumnSchemaMock.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockResponse(COUNT_RESPONSE(1));
+
+    await expect(
+      fetchSampleDocuments({
+        esClient,
+        index: 'logs.test-default',
+        start: 100,
+        end: 200,
+        features: [],
+        logger,
+        size: 5,
+        entityFilteredRatio: 0,
+        diverseRatio: 0,
+        maxEntityFilters: 10,
+        samplingTimeoutMs: 30_000,
+        iteration: 1,
+      })
+    ).rejects.toMatchObject({
+      statusCode: 400,
+      message:
+        'Cannot sample [logs.test-default]: The query must return a [@timestamp] column. Nightshift reads every source over time windows on it.',
+    });
+    expect(getSampleDocumentsEsqlMock).not.toHaveBeenCalled();
+  });
+
+  it('samples normally when the first index appears between the two column probes', async () => {
+    getEsqlColumnSchemaMock
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([TIMESTAMP_COLUMN, { name: 'message', type: 'text' }]);
+    getSampleDocumentsEsqlMock.mockResolvedValueOnce({ hits: [createHit('random-1')], total: 1 });
+
+    const result = await fetchSampleDocuments({
+      esClient: elasticsearchServiceMock.createElasticsearchClient(),
+      index: 'logs.test-default',
+      start: 100,
+      end: 200,
+      features: [],
+      logger,
+      size: 5,
+      entityFilteredRatio: 0,
+      diverseRatio: 0,
+      maxEntityFilters: 10,
+      samplingTimeoutMs: 30_000,
+      iteration: 1,
+    });
+
+    expect(result.documents.map((document) => document._id)).toEqual(['random-1']);
+  });
+
+  it('filters on entity fields that only the second column probe reports', async () => {
+    getEsqlColumnSchemaMock
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([TIMESTAMP_COLUMN, { name: 'service.name', type: 'keyword' }]);
+    getSampleDocumentsEsqlMock.mockImplementation(async ({ whereCondition }) => ({
+      hits: [createHit(whereCondition ? 'entity-1' : 'random-1')],
+      total: 1,
+    }));
+
+    const result = await fetchSampleDocuments({
+      esClient: elasticsearchServiceMock.createElasticsearchClient(),
+      index: 'logs.test-default',
+      start: 100,
+      end: 200,
+      features: [
+        createFeature({
+          id: 'checkout',
+          updatedAt: '2026-01-02T00:00:00.000Z',
+          field: 'service.name',
+          value: 'checkout',
+        }),
+      ],
+      logger,
+      size: 10,
+      entityFilteredRatio: 0.5,
+      diverseRatio: 0,
+      maxEntityFilters: 1,
+      samplingTimeoutMs: 30_000,
+      iteration: 1,
+    });
+
+    expect(result.hasFilteredDocuments).toBe(true);
+  });
+
   it('rejects with a 400 that explains the missing index when nothing exists to sample', async () => {
-    getSampleDocumentsEsqlMock.mockRejectedValueOnce(
+    getEsqlColumnSchemaMock.mockRejectedValueOnce(
       new Error(
         'verification_exception\n\tRoot causes:\n\t\tverification_exception: Unknown index [test]'
       )
@@ -165,6 +319,44 @@ describe('fetchSampleDocuments', () => {
     expect(result.hasFilteredDocuments).toBe(false);
   });
 
+  it('reports omitted filters when none fit the query budget', async () => {
+    const feature = {
+      ...createFeature({
+        id: 'oversized',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+        field: 'service.name',
+        value: 'checkout',
+      }),
+      filter: {
+        and: Array.from({ length: MAX_ENTITY_FILTER_COMPARISONS + 1 }, (_, i) => ({
+          field: 'service.name',
+          eq: `service-${i}`,
+        })),
+      },
+    } as FeatureWithFilter;
+    getSampleDocumentsEsqlMock.mockResolvedValueOnce({
+      hits: [createHit('random-1')],
+      total: 1,
+    });
+
+    const result = await fetchSampleDocuments({
+      esClient: {} as ElasticsearchClient,
+      index: 'logs.test-default',
+      start: 100,
+      end: 200,
+      features: [feature],
+      logger,
+      size: 5,
+      entityFilteredRatio: 0.4,
+      diverseRatio: 0,
+      maxEntityFilters: 10,
+      samplingTimeoutMs: 30_000,
+      iteration: 1,
+    });
+
+    expect(result).toMatchObject({ totalFilters: 1, filtersCapped: true });
+  });
+
   it('filters on mapped fields without SET unmapped_fields and leaves the random arm unfiltered', async () => {
     const esClient = {} as ElasticsearchClient;
     const features = [
@@ -183,6 +375,7 @@ describe('fetchSampleDocuments', () => {
     ];
 
     getEsqlColumnSchemaMock.mockResolvedValueOnce([
+      TIMESTAMP_COLUMN,
       { name: 'host.name', type: 'keyword' },
       { name: 'service.name', type: 'keyword' },
     ]);
@@ -217,7 +410,7 @@ describe('fetchSampleDocuments', () => {
     );
     expect(entityFilteredCall).not.toHaveProperty('unmappedFields');
     expect(BasicPrettyPrinter.print(entityFilteredCall.whereCondition!)).toBe(
-      '(`service.name` != "checkout" OR `service.name` IS NULL)'
+      '((`service.name` NOT IN ("checkout")) OR `service.name` IS NULL)'
     );
 
     expect(getDiverseSampleDocumentsMock).toHaveBeenCalledWith({
@@ -228,6 +421,7 @@ describe('fetchSampleDocuments', () => {
       size: 6,
       iteration: 1,
       logger,
+      signal: expect.any(AbortSignal),
     });
     expect(getRandomCall()).toEqual({
       esClient,
@@ -244,6 +438,63 @@ describe('fetchSampleDocuments', () => {
     ]);
     expect(result.filtersCapped).toBe(true);
     expect(result.hasFilteredDocuments).toBe(true);
+    expect(getEsqlColumnSchemaMock).toHaveBeenCalledTimes(1);
+    expect(getEsqlColumnSchemaMock).toHaveBeenCalledWith(
+      expect.objectContaining({ fields: ['@timestamp', 'service.name'] })
+    );
+  });
+
+  it('excludes grouped values with NOT IN and joins slots with AND', async () => {
+    const features = [
+      createFeature({
+        id: 'checkout',
+        updatedAt: '2026-01-02T00:00:00.000Z',
+        field: 'service.name',
+        value: 'checkout',
+      }),
+      createFeature({
+        id: 'cart',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+        field: 'service.name',
+        value: 'cart',
+      }),
+      createFeature({
+        id: 'host',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+        field: 'host.name',
+        value: 'host-a',
+      }),
+    ];
+
+    getEsqlColumnSchemaMock.mockResolvedValueOnce([
+      TIMESTAMP_COLUMN,
+      { name: 'service.name', type: 'keyword' },
+      { name: 'host.name', type: 'keyword' },
+    ]);
+    getSampleDocumentsEsqlMock.mockImplementation(async ({ whereCondition }) => ({
+      hits: [createHit(whereCondition ? 'entity-1' : 'random-1')],
+      total: 1,
+    }));
+
+    const result = await fetchSampleDocuments({
+      esClient: {} as ElasticsearchClient,
+      index: 'logs.test-default',
+      start: 100,
+      end: 200,
+      features,
+      logger,
+      size: 5,
+      entityFilteredRatio: 0.4,
+      diverseRatio: 0,
+      maxEntityFilters: 2,
+      samplingTimeoutMs: 30_000,
+      iteration: 2,
+    });
+
+    expect(BasicPrettyPrinter.print(getEntityFilteredCall()!.whereCondition!)).toBe(
+      '((`service.name` NOT IN ("checkout", "cart")) OR `service.name` IS NULL) AND ((`host.name` NOT IN ("host-a")) OR `host.name` IS NULL)'
+    );
+    expect(result.filtersCapped).toBe(false);
   });
 
   it('skips entity filters on fields the source does not map or cannot compare', async () => {
@@ -270,6 +521,7 @@ describe('fetchSampleDocuments', () => {
     ];
 
     getEsqlColumnSchemaMock.mockResolvedValueOnce([
+      TIMESTAMP_COLUMN,
       { name: 'http.status', type: 'unsupported' },
       { name: 'service.name', type: 'keyword' },
     ]);
@@ -294,8 +546,92 @@ describe('fetchSampleDocuments', () => {
     });
 
     expect(BasicPrettyPrinter.print(getEntityFilteredCall()!.whereCondition!)).toBe(
-      '(`service.name` != "checkout" OR `service.name` IS NULL)'
+      '((`service.name` NOT IN ("checkout")) OR `service.name` IS NULL)'
     );
+  });
+
+  it('backfills unused entity-filtered slots with diverse documents before random ones', async () => {
+    getEsqlColumnSchemaMock.mockResolvedValueOnce([
+      TIMESTAMP_COLUMN,
+      { name: 'service.name', type: 'keyword' },
+    ]);
+    getSampleDocumentsEsqlMock.mockImplementation(async ({ whereCondition }) => ({
+      hits: whereCondition
+        ? [createHit('entity-1')]
+        : Array.from({ length: 10 }, (_, i) => createHit(`random-${i + 1}`)),
+      total: 10,
+    }));
+    getDiverseSampleDocumentsMock.mockResolvedValueOnce({
+      hits: Array.from({ length: 6 }, (_, i) => createHit(`diverse-${i + 1}`)),
+    });
+
+    const { documents } = await fetchSampleDocuments({
+      esClient: {} as ElasticsearchClient,
+      index: 'logs.test-default',
+      start: 100,
+      end: 200,
+      features: [
+        createFeature({
+          id: 'feature-1',
+          updatedAt: '2026-01-02T00:00:00.000Z',
+          field: 'service.name',
+          value: 'checkout',
+        }),
+      ],
+      logger,
+      size: 10,
+      entityFilteredRatio: 0.4,
+      diverseRatio: 0.2,
+      maxEntityFilters: 10,
+      samplingTimeoutMs: 30_000,
+      iteration: 3,
+    });
+
+    expect(documents.map((document) => document._id)).toEqual([
+      'entity-1',
+      'diverse-1',
+      'diverse-2',
+      'diverse-3',
+      'diverse-4',
+      'diverse-5',
+      'random-1',
+      'random-2',
+      'random-3',
+      'random-4',
+    ]);
+  });
+
+  it('aborts a stalled diverse arm at the sampling timeout and keeps the random documents', async () => {
+    getSampleDocumentsEsqlMock.mockResolvedValueOnce({
+      hits: [createHit('random-1')],
+      total: 1,
+    });
+    getDiverseSampleDocumentsMock.mockImplementationOnce(
+      ({ signal }) =>
+        new Promise((_, reject) => {
+          signal?.addEventListener('abort', () => reject(signal.reason));
+        })
+    );
+
+    const result = await fetchSampleDocuments({
+      esClient: {} as ElasticsearchClient,
+      index: 'logs.test-default',
+      start: 100,
+      end: 200,
+      features: [],
+      logger,
+      size: 5,
+      entityFilteredRatio: 0,
+      diverseRatio: 0.4,
+      maxEntityFilters: 10,
+      samplingTimeoutMs: 10,
+      iteration: 1,
+    });
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Diverse sampling query failed')
+    );
+    expect(result.documents.map((document) => document._id)).toEqual(['random-1']);
   });
 
   it('falls back to random documents when entity-filtered ES|QL sampling fails', async () => {
@@ -309,7 +645,10 @@ describe('fetchSampleDocuments', () => {
       }),
     ];
 
-    getEsqlColumnSchemaMock.mockResolvedValueOnce([{ name: 'service.name', type: 'keyword' }]);
+    getEsqlColumnSchemaMock.mockResolvedValueOnce([
+      TIMESTAMP_COLUMN,
+      { name: 'service.name', type: 'keyword' },
+    ]);
     getSampleDocumentsEsqlMock.mockImplementation(async ({ whereCondition }) => {
       if (whereCondition) {
         throw new Error('verification_exception');
@@ -335,6 +674,42 @@ describe('fetchSampleDocuments', () => {
     expect(logger.warn).toHaveBeenCalledWith(
       'Entity-filtered sampling query failed: verification_exception'
     );
+    expect(result.documents.map((document) => document._id)).toEqual(['random-1']);
+    expect(result.hasFilteredDocuments).toBe(false);
+  });
+
+  it('keeps sampling without the entity arm when the column probe fails', async () => {
+    const features = [
+      createFeature({
+        id: 'feature-1',
+        updatedAt: '2026-01-02T00:00:00.000Z',
+        field: 'service.name',
+        value: 'checkout',
+      }),
+    ];
+
+    getEsqlColumnSchemaMock.mockRejectedValueOnce(new Error('Request timed out'));
+    getSampleDocumentsEsqlMock.mockResolvedValue({ hits: [createHit('random-1')], total: 1 });
+
+    const result = await fetchSampleDocuments({
+      esClient: {} as ElasticsearchClient,
+      index: 'logs.test-default',
+      start: 100,
+      end: 200,
+      features,
+      logger,
+      size: 5,
+      entityFilteredRatio: 0.4,
+      diverseRatio: 0,
+      maxEntityFilters: 10,
+      samplingTimeoutMs: 30_000,
+      iteration: 1,
+    });
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Column probe failed, sampling without it:')
+    );
+    expect(getEntityFilteredCall()).toBeUndefined();
     expect(result.documents.map((document) => document._id)).toEqual(['random-1']);
     expect(result.hasFilteredDocuments).toBe(false);
   });

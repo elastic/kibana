@@ -163,6 +163,7 @@ export class EsqlSource implements DataSourceBase {
   private readonly columns: readonly Column[];
   private filterableSource?: FilterableSource;
   private readonly columnsByName: ReadonlyMap<string, Column>;
+  private readonly emptyColumnNames: readonly string[];
 
   private constructor({
     id,
@@ -184,6 +185,7 @@ export class EsqlSource implements DataSourceBase {
     this.resultColumns = resultColumns;
     this.columns = resultColumns.map(columnFromDatatableColumn);
     this.columnsByName = new Map(this.columns.map((c) => [c.name, c]));
+    this.emptyColumnNames = resultColumns.filter(({ isNull }) => isNull).map(({ name }) => name);
     this.fields = this.columns.map(columnToFieldBase);
   }
 
@@ -343,6 +345,11 @@ export class EsqlSource implements DataSourceBase {
     return this.columnsByName.get(name);
   }
 
+  /** Names of the result columns without values. They stay in {@link getColumns} but are missing from the rows. */
+  public getEmptyColumnNames(): readonly string[] {
+    return this.emptyColumnNames;
+  }
+
   public isTimeBased(): boolean {
     return !!this.timeFieldName;
   }
@@ -394,17 +401,22 @@ export class EsqlSource implements DataSourceBase {
    */
   public async toFilterableSource(http?: HttpStart): Promise<FilterableSource> {
     const dataset = await this.getDatasetSource(http);
-    dataset.filterableSource ??= {
-      kind: this.kind,
-      id: dataset.datasetId,
-      title: dataset.title,
-      name: dataset.name,
-      timeFieldName: dataset.timeFieldName,
-      fields: Object.values(
+    if (!dataset.filterableSource) {
+      const fields = Object.values(
         buildFilterableFieldSpecs(dataset.getColumns(), dataset.timeFieldName)
-      ).map((field) => ({ ...field, filterable: isFilterable(field) })),
-      isTimeBased: () => dataset.isTimeBased(),
-    };
+      ).map((field) => ({ ...field, filterable: isFilterable(field) }));
+      const fieldsByName = new Map(fields.map((field) => [field.name, field]));
+      dataset.filterableSource = {
+        kind: this.kind,
+        id: dataset.datasetId,
+        title: dataset.title,
+        name: dataset.name,
+        timeFieldName: dataset.timeFieldName,
+        fields,
+        getFieldByName: (name) => fieldsByName.get(name),
+        isTimeBased: () => dataset.isTimeBased(),
+      };
+    }
     return dataset.filterableSource;
   }
 

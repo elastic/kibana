@@ -707,12 +707,14 @@ export class Server {
     await this.plugins.start(this.coreStart);
 
     await this.http.start();
+    this.status.setReady(true);
 
     return this.coreStart;
   }
 
   public async stop() {
     this.log.debug('stopping server');
+    this.status.setReady(false);
 
     this.coreApp.stop();
     this.httpRateLimiter.stop();

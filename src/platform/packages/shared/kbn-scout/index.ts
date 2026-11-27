@@ -128,3 +128,5 @@ export {
   OTEL_TEST_PROJECT_ID,
 } from './src/servers/configs/config_sets/security_audit_otel/shared';
 export { KIBANA_TLS_ORIGIN } from './src/servers/configs/config_sets/shared/tls_origin';
+
+export { getAgentBuilderSmokeEisModels } from './src/servers/configs/config_sets/agent_builder_smoke/eis_models';

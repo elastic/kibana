@@ -55,13 +55,25 @@ describe('embeddable', () => {
   it('accepts null context', () => {
     const expression = fn(null, args, {} as any);
 
-    expect(expression.input.filters).toEqual([]);
+    expect(expression.filters).toEqual([]);
   });
 
   it('accepts filter context', () => {
     const expression = fn(filterContext, args, {} as any);
     const embeddableFilters = getQueryFilters(filterContext.and);
 
-    expect(expression.input.filters).toEqual(embeddableFilters);
+    expect(expression.filters).toEqual(embeddableFilters);
+  });
+
+  it('keeps the filters stored in the embeddable config apart from the workpad filters', () => {
+    const panelFilters = [{ meta: { key: 'panel-field' }, query: { match_all: {} } }];
+    const expression = fn(
+      filterContext,
+      { ...args, config: encode({ ...config, filters: panelFilters }) },
+      {} as any
+    );
+
+    expect(expression.input.filters).toEqual(panelFilters);
+    expect(expression.filters).toEqual(getQueryFilters(filterContext.and));
   });
 });

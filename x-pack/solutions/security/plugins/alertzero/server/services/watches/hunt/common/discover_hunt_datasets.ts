@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { joinRemoteCluster, splitRemoteCluster } from '../../../../../common/remote_cluster';
+import { HUNT_RESOLVE_INDEX_OPTIONS } from './hunt_resolve_index_options';
 
 export interface DiscoveredDataset {
   /** Searchable glob for Tier 1/2, e.g. 'logs-okta.system-*' */
@@ -107,11 +108,18 @@ export const discoverHuntDatasets = async ({
   patterns,
   logger,
   resolved,
+  unsearchableStreams,
 }: {
   esClient: ElasticsearchClient;
   patterns: string[];
   logger?: Logger;
   resolved?: ResolvedDataStreams;
+  /**
+   * Streams the caller cannot search. They are never offered as a dataset or a search pattern,
+   * but they still count when a dataset is narrowed against its siblings, so dropping one does
+   * not widen a readable sibling's pattern onto indices it did not cover before.
+   */
+  unsearchableStreams?: ReadonlySet<string>;
 }): Promise<DiscoveredDataset[]> => {
   let dataStreamNames: string[];
   try {
@@ -124,8 +132,7 @@ export const discoverHuntDatasets = async ({
       resolved ??
       (await esClient.indices.resolveIndex({
         name: patterns,
-        allow_no_indices: true,
-        expand_wildcards: ['open'],
+        ...HUNT_RESOLVE_INDEX_OPTIONS,
       }));
     dataStreamNames = response.data_streams
       .map((stream) => stream.name)
@@ -139,6 +146,7 @@ export const discoverHuntDatasets = async ({
     throw err;
   }
 
+  const searchable = (stream: string) => !unsearchableStreams?.has(stream);
   const byPattern = new Map<string, DiscoveredDataset>();
   const clusterOf = new Map<DiscoveredDataset, string | undefined>();
   for (const name of dataStreamNames) {
@@ -188,24 +196,28 @@ export const discoverHuntDatasets = async ({
       entry.search_patterns = [entry.index_pattern];
       continue;
     }
-    if (entry.data_streams.length > MAX_NAMESPACE_PATTERNS_PER_DATASET) {
+    const searchableNamespaces = entry.data_streams.filter(searchable).length;
+    if (searchableNamespaces > MAX_NAMESPACE_PATTERNS_PER_DATASET) {
       entry.search_patterns = [entry.index_pattern];
       logger?.warn(
         `Hunt dataset discovery keeps ${entry.index_pattern} for ${
           entry.dataset
-        } despite sibling dataset(s) ${siblings.map((other) => other.dataset).join(', ')}: ${
-          entry.data_streams.length
-        } namespaces exceed the ${MAX_NAMESPACE_PATTERNS_PER_DATASET} per-namespace patterns a scope may carry`
+        } despite sibling dataset(s) ${siblings
+          .map((other) => other.dataset)
+          .join(
+            ', '
+          )}: ${searchableNamespaces} namespaces exceed the ${MAX_NAMESPACE_PATTERNS_PER_DATASET} per-namespace patterns a scope may carry`
       );
       continue;
     }
-    entry.search_patterns = entry.data_streams.map((stream) => `${stream}*`);
+    const readable = entry.data_streams.filter(searchable);
+    entry.search_patterns = readable.map((stream) => `${stream}*`);
     // Residual case no wildcard can isolate: a sibling whose dataset name extends one of
     // this entry's full stream names (`windows-default` beside stream `logs-windows-default`).
     // Concrete stream names are not an option, since Tier 1's hit bar globs required
     // patterns against dated backing indices and Tier 2's allowlist probe needs a
     // wildcard, so the pattern stays and the overlap is made visible instead.
-    for (const stream of entry.data_streams) {
+    for (const stream of readable) {
       const parsed = parseDataStreamName(stream);
       const leaking = parsed
         ? siblings.filter((other) =>
@@ -222,5 +234,11 @@ export const discoverHuntDatasets = async ({
     }
   }
 
-  return datasets.sort((a, b) => a.index_pattern.localeCompare(b.index_pattern));
+  return datasets
+    .filter((entry) => entry.data_streams.some(searchable))
+    .map((entry) => ({
+      ...entry,
+      data_streams: entry.data_streams.filter(searchable),
+    }))
+    .sort((a, b) => a.index_pattern.localeCompare(b.index_pattern));
 };

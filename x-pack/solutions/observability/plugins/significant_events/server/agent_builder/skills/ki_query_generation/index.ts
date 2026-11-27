@@ -9,6 +9,7 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
 import type { Logger } from '@kbn/core/server';
+import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { GetScopedClients } from '../../../routes/types';
 import type { SignificantEventsServer } from '../../../types';
 import { createGetFeaturesTool } from './get_features/tool';
@@ -27,10 +28,11 @@ export interface KIQueryGenerationSkillOptions {
   getScopedClients: GetScopedClients;
   server: Pick<SignificantEventsServer, 'security'>;
   logger: Logger;
+  telemetry: EbtTelemetryClient;
 }
 
 export const createKIQueryGenerationSkill = (options: KIQueryGenerationSkillOptions) => {
-  const { getScopedClients, server, logger } = options;
+  const { getScopedClients, server, logger, telemetry } = options;
 
   return defineSkillType({
     id: KI_QUERY_GENERATION_SKILL_ID,
@@ -46,11 +48,13 @@ export const createKIQueryGenerationSkill = (options: KIQueryGenerationSkillOpti
         getScopedClients,
         server,
         logger: logger.get('ki_features_get_tool'),
+        telemetry,
       }),
       createValidateQueriesTool({
         getScopedClients,
         server,
         logger: logger.get('ki_queries_validate_tool'),
+        telemetry,
       }),
     ],
   });

@@ -6,15 +6,24 @@
  */
 
 import { context, propagation } from '@opentelemetry/api';
-import { AsyncHooksContextManager } from '@opentelemetry/context-async-hooks';
-import { BAGGAGE_TRACKING_BEACON_KEY, BAGGAGE_TRACKING_BEACON_VALUE } from '@kbn/inference-tracing';
-import { withEvalsEvaluatorSpan, withEvalsTaskSpan } from './tracing';
+import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
+import {
+  BAGGAGE_TRACKING_BEACON_KEY,
+  BAGGAGE_TRACKING_BEACON_VALUE,
+  withActiveInferenceSpan,
+} from '@kbn/inference-tracing';
+import { withEvalsEvaluatorSpan, withEvalsJudgeChildSpan, withEvalsTaskSpan } from './tracing';
+
+jest.mock('@kbn/inference-tracing', () => ({
+  ...jest.requireActual('@kbn/inference-tracing'),
+  withActiveInferenceSpan: jest.fn((_name, _opts, cb) => cb()),
+}));
 
 describe('withEvalsTaskSpan', () => {
-  let contextManager: AsyncHooksContextManager;
+  let contextManager: AsyncLocalStorageContextManager;
 
   beforeEach(() => {
-    contextManager = new AsyncHooksContextManager();
+    contextManager = new AsyncLocalStorageContextManager();
     contextManager.enable();
     context.setGlobalContextManager(contextManager);
   });
@@ -51,10 +60,10 @@ describe('withEvalsTaskSpan', () => {
 });
 
 describe('withEvalsEvaluatorSpan', () => {
-  let contextManager: AsyncHooksContextManager;
+  let contextManager: AsyncLocalStorageContextManager;
 
   beforeEach(() => {
-    contextManager = new AsyncHooksContextManager();
+    contextManager = new AsyncLocalStorageContextManager();
     contextManager.enable();
     context.setGlobalContextManager(contextManager);
   });
@@ -83,6 +92,29 @@ describe('withEvalsEvaluatorSpan', () => {
   it('propagates errors thrown by the judge', async () => {
     await expect(
       withEvalsEvaluatorSpan('correctness', async () => {
+        throw new Error('judge failed');
+      })
+    ).rejects.toThrow('judge failed');
+  });
+});
+
+describe('withEvalsJudgeChildSpan', () => {
+  it('runs the judge in an inference span named after the evaluator', async () => {
+    const run = jest.fn().mockResolvedValue('graded');
+
+    await expect(withEvalsJudgeChildSpan('conclusion_quality', run)).resolves.toBe('graded');
+
+    expect(withActiveInferenceSpan).toHaveBeenCalledWith(
+      'judge · conclusion_quality',
+      { attributes: { 'evaluator.name': 'conclusion_quality' } },
+      expect.any(Function)
+    );
+    expect(run).toHaveBeenCalledTimes(1);
+  });
+
+  it('propagates errors thrown by the judge', async () => {
+    await expect(
+      withEvalsJudgeChildSpan('conclusion_quality', async () => {
         throw new Error('judge failed');
       })
     ).rejects.toThrow('judge failed');

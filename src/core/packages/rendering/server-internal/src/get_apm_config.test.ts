@@ -8,6 +8,7 @@
  */
 
 import {
+  getBrowserTracingConfigurationMock,
   getConfigurationMock,
   agentMock,
   shouldInstrumentClientMock,
@@ -64,6 +65,24 @@ describe('getApmConfig', () => {
       expect.objectContaining({
         pageLoadTransactionName: '/login',
       })
+    );
+  });
+
+  it('leaves fetch and xhr instrumentation on when EDOT Browser is disabled', () => {
+    getBrowserTracingConfigurationMock.mockReturnValue(undefined);
+
+    expect(getApmConfig('/path')).not.toHaveProperty('disableInstrumentations');
+  });
+
+  it('disables fetch and xhr instrumentation when EDOT Browser is enabled', () => {
+    getBrowserTracingConfigurationMock.mockReturnValue({ url: 'https://otlp.example.com' });
+    getConfigurationMock.mockReturnValue({
+      ...defaultApmConfig,
+      disableInstrumentations: ['click', 'fetch'],
+    });
+
+    expect(getApmConfig('/path')).toEqual(
+      expect.objectContaining({ disableInstrumentations: ['click', 'fetch', 'xmlhttprequest'] })
     );
   });
 

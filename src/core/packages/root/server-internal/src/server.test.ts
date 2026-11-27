@@ -307,6 +307,10 @@ test('runs services on "start"', async () => {
   await server.start();
 
   expect(mockHttpService.start).toHaveBeenCalledTimes(1);
+  expect(mockStatusService.setReady).toHaveBeenCalledWith(true);
+  expect(mockHttpService.start.mock.invocationCallOrder[0]).toBeLessThan(
+    mockStatusService.setReady.mock.invocationCallOrder[0]
+  );
   expect(mockSavedObjectsService.start).toHaveBeenCalledTimes(1);
   expect(mockUiSettingsService.start).toHaveBeenCalledTimes(1);
   expect(mockMetricsService.start).toHaveBeenCalledTimes(1);
@@ -353,6 +357,10 @@ test('stops services on "stop"', async () => {
 
   await server.stop();
 
+  expect(mockStatusService.setReady).toHaveBeenCalledWith(false);
+  expect(mockStatusService.setReady.mock.invocationCallOrder[0]).toBeLessThan(
+    mockHttpService.stop.mock.invocationCallOrder[0]
+  );
   expect(mockEventLoopWatchdogService.stop).toHaveBeenCalledTimes(1);
   // Stops before logging, so its last log line is still written.
   expect(mockEventLoopWatchdogService.stop.mock.invocationCallOrder[0]).toBeLessThan(

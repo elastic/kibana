@@ -65,7 +65,6 @@ const walkStructure = (
       }
     }
     if (item.kind === 'container') walkStructure(item.body, visit);
-    if (item.kind === 'step' && item.attached) walkStructure(item.attached, visit);
     for (const lane of item.lanes) {
       visit.lane(item.id, lane.head);
       walkStructure(lane.items, visit);

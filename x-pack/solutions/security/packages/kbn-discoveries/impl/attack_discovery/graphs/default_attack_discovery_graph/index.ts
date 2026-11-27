@@ -20,6 +20,7 @@ import {
   getRetrieveAnonymizedDocsOrGenerateEdge,
 } from '../../../lib/langchain/output_chunking';
 import { NodeType } from '../../../lib/langchain/constants';
+import { withGraphNodeSpan } from '../../../lib/langchain/tracing/with_graph_node_span';
 import { getCombinedAttackDiscoveryPrompt } from './prompts/get_combined_attack_discovery_prompt';
 import { responseIsHallucinated } from './helpers/response_is_hallucinated';
 import { getRetrieveAnonymizedAlertsNode } from './nodes/retriever';
@@ -118,9 +119,12 @@ export const getDefaultAttackDiscoveryGraph = ({
 
     // create the graph:
     const graph = new StateGraph(graphState)
-      .addNode(NodeType.RETRIEVE_ANONYMIZED_DOCS_NODE, retrieveAnonymizedAlertsNode)
-      .addNode(NodeType.GENERATE_NODE, generateNode)
-      .addNode(NodeType.REFINE_NODE, refineNode)
+      .addNode(
+        NodeType.RETRIEVE_ANONYMIZED_DOCS_NODE,
+        withGraphNodeSpan(NodeType.RETRIEVE_ANONYMIZED_DOCS_NODE, retrieveAnonymizedAlertsNode)
+      )
+      .addNode(NodeType.GENERATE_NODE, withGraphNodeSpan(NodeType.GENERATE_NODE, generateNode))
+      .addNode(NodeType.REFINE_NODE, withGraphNodeSpan(NodeType.REFINE_NODE, refineNode))
       .addConditionalEdges(START, retrieveAnonymizedAlertsOrGenerateEdge, {
         generate: NodeType.GENERATE_NODE,
         retrieve_anonymized_docs: NodeType.RETRIEVE_ANONYMIZED_DOCS_NODE,

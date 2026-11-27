@@ -37,6 +37,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
   const getClusterSettingsFn = router.getMockApiFn('cluster.getSettings');
   const getSnapshotFn = router.getMockApiFn('snapshot.get');
   const verifyRepoFn = router.getMockApiFn('snapshot.verifyRepository');
+  const cleanupRepoFn = router.getMockApiFn('snapshot.cleanupRepository');
   const nodesInfoFn = router.getMockApiFn('nodes.info');
 
   beforeAll(() => {
@@ -246,6 +247,42 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
 
       const expectedResponse = {
         verification: { valid: false, error: mockEsResponse },
+      };
+
+      await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
+    });
+  });
+
+  describe('cleanupHandler()', () => {
+    const name = 'fooRepository';
+
+    const mockRequest: RequestMock = {
+      method: 'post',
+      path: addBasePath('repositories/{name}/cleanup'),
+      params: {
+        name,
+      },
+    };
+
+    it('should return repository cleanup response if returned from ES', async () => {
+      const mockEsResponse = { results: { deleted_bytes: 0, deleted_blobs: 0 } };
+      cleanupRepoFn.mockResolvedValue(mockEsResponse);
+
+      const expectedResponse = {
+        cleanup: { cleaned: true, response: mockEsResponse },
+      };
+
+      await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
+    });
+
+    it('should return repository cleanup error if rejected by ES', async () => {
+      const reason = 'Cannot cleanup [fooRepository] - a snapshot is currently running';
+      cleanupRepoFn.mockRejectedValueOnce({
+        meta: { body: { status: 500, error: { root_cause: [{ reason }] } } },
+      });
+
+      const expectedResponse = {
+        cleanup: { cleaned: false, error: { statusCode: 500, cause: [reason] } },
       };
 
       await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });

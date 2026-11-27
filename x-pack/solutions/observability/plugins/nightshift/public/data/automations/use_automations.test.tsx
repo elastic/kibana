@@ -14,6 +14,8 @@ import { INVESTIGATION_QUOTAS_QUERY_KEY } from '../query_keys';
 import { useKibana } from '../../hooks/use_kibana';
 import {
   AUTOMATIONS_QUERY_KEY,
+  useAutomationRunsInRange,
+  useAutomationsRunCounts,
   useAutomationsRunsInRange,
   useAutomationRunActivity,
   useCreateAutomation,
@@ -39,7 +41,7 @@ const renderWithClient = <T,>(hook: () => T) => {
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
-  return { ...renderHook(hook, { wrapper }), invalidateQueries };
+  return { ...renderHook(hook, { wrapper }), invalidateQueries, queryClient };
 };
 
 describe('use_automations', () => {
@@ -97,6 +99,155 @@ describe('use_automations', () => {
         signal: null,
       }
     );
+  });
+
+  it('requests exact run counts with one POST per 100 automations and merges them', async () => {
+    investigationsFetch.mockImplementation((_endpoint, { params }) =>
+      Promise.resolve({
+        counts: Object.fromEntries(
+          params.body.ids.map((id: string) => [
+            id,
+            { succeeded: 1, running: 0, failed: 0, skipped: 0 },
+          ])
+        ),
+      })
+    );
+    const ids = Array.from({ length: 101 }, (_, i) => `a${i}`);
+    const { result } = renderWithClient(() =>
+      useAutomationsRunCounts(ids, '2026-10-01T00:00:00.000Z', '2026-10-02T00:00:00.000Z')
+    );
+
+    await waitFor(() => expect(Object.keys(result.current ?? {})).toHaveLength(101));
+    expect(investigationsFetch).toHaveBeenCalledTimes(2);
+    expect(investigationsFetch).toHaveBeenCalledWith(
+      'POST /internal/nightshift/automations/run_counts',
+      expect.objectContaining({
+        params: {
+          body: {
+            ids: ids.slice(100),
+            startedAfter: '2026-10-01T00:00:00.000Z',
+            startedBefore: '2026-10-02T00:00:00.000Z',
+          },
+        },
+      })
+    );
+  });
+
+  it('fetches every remaining page of runs and keeps first-page totals', async () => {
+    const run = (id: string) => ({
+      id,
+      status: 'succeeded',
+      startedAt: '2026-10-01T00:00:00.000Z',
+    });
+    investigationsFetch.mockImplementation((_endpoint, { params }) =>
+      Promise.resolve({
+        runs:
+          params.query.page === 1
+            ? Array.from({ length: 100 }, (_, i) => run(`r${i}`))
+            : [run('last')],
+        total: 101,
+        usedToday: params.query.page === 1 ? 7 : 0,
+      })
+    );
+    const { result } = renderWithClient(() =>
+      useAutomationRunsInRange('a', '2026-10-01T00:00:00.000Z', '2026-10-02T00:00:00.000Z')
+    );
+
+    await waitFor(() => expect(result.current.runs).toHaveLength(101));
+    expect(investigationsFetch).toHaveBeenCalledTimes(2);
+    expect(result.current.usedToday).toBe(7);
+    expect(result.current.total).toBe(101);
+  });
+
+  it('stops fetching runs after a page fails and keeps the runs already loaded', async () => {
+    investigationsFetch.mockImplementation((_endpoint, { params }) =>
+      params.query.page === 1
+        ? Promise.resolve({
+            runs: Array.from({ length: 100 }, (_, i) => ({
+              id: `r${i}`,
+              status: 'succeeded',
+              startedAt: '2026-10-01T00:00:00.000Z',
+            })),
+            total: 250,
+            usedToday: 0,
+          })
+        : Promise.reject(new Error('boom'))
+    );
+    const { result } = renderWithClient(() =>
+      useAutomationRunsInRange('a', '2026-10-01T00:00:00.000Z', '2026-10-02T00:00:00.000Z')
+    );
+
+    await waitFor(() => expect(investigationsFetch).toHaveBeenCalledTimes(2));
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+
+    expect(investigationsFetch).toHaveBeenCalledTimes(2);
+    expect(result.current.runs).toHaveLength(100);
+  });
+
+  it('resumes loading the remaining runs after retry succeeds', async () => {
+    let failPageTwo = true;
+    investigationsFetch.mockImplementation((_endpoint, { params }) => {
+      const { page } = params.query;
+      if (page === 2 && failPageTwo) return Promise.reject(new Error('boom'));
+      return Promise.resolve({
+        runs: Array.from({ length: page === 1 ? 100 : 1 }, (_, i) => ({
+          id: `p${page}-${i}`,
+          status: 'succeeded',
+          startedAt: '2026-10-01T00:00:00.000Z',
+        })),
+        total: 101,
+        usedToday: 0,
+      });
+    });
+    const { result } = renderWithClient(() =>
+      useAutomationRunsInRange('a', '2026-10-01T00:00:00.000Z', '2026-10-02T00:00:00.000Z')
+    );
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(result.current.runs).toHaveLength(100);
+
+    failPageTwo = false;
+    act(() => {
+      result.current.retry();
+    });
+
+    await waitFor(() => expect(result.current.runs).toHaveLength(101));
+    expect(result.current.isError).toBe(false);
+  });
+
+  it('retries a failed refresh after every page has loaded', async () => {
+    let failRefresh = false;
+    investigationsFetch.mockImplementation(() =>
+      failRefresh
+        ? Promise.reject(new Error('boom'))
+        : Promise.resolve({
+            runs: [{ id: 'r1', status: 'succeeded', startedAt: '2026-10-01T00:00:00.000Z' }],
+            total: 1,
+            usedToday: 0,
+          })
+    );
+    const { result, queryClient } = renderWithClient(() =>
+      useAutomationRunsInRange('a', '2026-10-01T00:00:00.000Z', '2026-10-02T00:00:00.000Z')
+    );
+    await waitFor(() => expect(result.current.runs).toHaveLength(1));
+
+    failRefresh = true;
+    await act(async () => {
+      await queryClient.invalidateQueries();
+    });
+    await waitFor(() => expect(result.current.isError).toBe(true));
+
+    failRefresh = false;
+    const callsBeforeRetry = investigationsFetch.mock.calls.length;
+    act(() => {
+      result.current.retry();
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(false));
+    expect(investigationsFetch.mock.calls.length).toBeGreaterThan(callsBeforeRetry);
+    expect(result.current.runs).toHaveLength(1);
   });
 
   it('creates an automation, shows a toast, and refreshes the list', async () => {

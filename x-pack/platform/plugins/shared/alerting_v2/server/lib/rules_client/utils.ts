@@ -6,14 +6,16 @@
  */
 
 import Boom from '@hapi/boom';
-import { isEqual } from 'lodash';
+import { isEqual, mapValues, pick } from 'lodash';
 import type {
   CreateRuleData,
   CreateRuleDataInput,
+  PutRuleData,
+  RuleChangeHistorySnapshot,
   RuleResponse,
   UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
-import { treeifyError } from '@kbn/zod/v4';
+import { lazySchema, treeifyError, z } from '@kbn/zod/v4';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import {
   createRuleDataBaseSchema,
@@ -22,11 +24,15 @@ import {
   isLifecycleConfigAllowedForKind,
   isLifecycleConfigPresentForKind,
   isRecoveryConditionUsableWithBreach,
+  isReasonAllowedForKind,
   isRoutingTagsAllowedForKind,
+  REASON_SIGNAL_RULE_MESSAGE,
+  putRuleDataSchema,
   REQUIRE_DISTINGUISHABLE_ABSENCE_MESSAGE,
   ROUTING_TAGS_SIGNAL_RULE_MESSAGE,
   isRecoveryTransitionConsistentWithStrategy,
   recoveryStrategy,
+  ruleResponseSchema,
   validateComposedEsqlQuery,
   type ImmutableRuleField,
 } from '@kbn/alerting-v2-schemas';
@@ -251,6 +257,7 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     ...toStoredLifecycle(data),
     state_transition: data.state_transition,
     grouping: data.grouping,
+    reason: data.reason,
     artifacts: data.artifacts,
     ...fields,
   };
@@ -308,6 +315,7 @@ const toPatchableRuleData = (attrs: RuleSavedObjectAttributes): CreateRuleDataIn
   no_data: attrs.no_data,
   state_transition: toApiStateTransition(attrs.state_transition),
   grouping: toApiGrouping(attrs.grouping),
+  reason: attrs.reason,
   artifacts: toApiArtifacts(attrs.artifacts),
 });
 
@@ -367,6 +375,8 @@ export function buildUpdateRuleAttributes(
     no_data: next.no_data,
     state_transition: next.state_transition,
     grouping: next.grouping,
+    // Carried through even for signal rules: `validateMergedRuleAttributes` rejects that case.
+    reason: next.reason,
     artifacts: patchArray(updateData.artifacts, existingAttrs.artifacts),
     // `enabled` is never writable via update — lifecycle transitions are owned exclusively by
     // enableRule/disableRule, so the stored value is preserved.
@@ -407,6 +417,12 @@ export function validateMergedRuleAttributes(
     {
       valid: isRoutingTagsAllowedForKind(attrs),
       message: ROUTING_TAGS_SIGNAL_RULE_MESSAGE,
+      code: ALERTING_ERROR_CODES.INVALID_SIGNAL_RULE,
+      details: { rule_id: ruleId, rule_kind: attrs.kind },
+    },
+    {
+      valid: isReasonAllowedForKind(attrs),
+      message: REASON_SIGNAL_RULE_MESSAGE,
       code: ALERTING_ERROR_CODES.INVALID_SIGNAL_RULE,
       details: { rule_id: ruleId, rule_kind: attrs.kind },
     },
@@ -490,6 +506,7 @@ export function transformRuleSoAttributesToRuleApiResponse(
     no_data: attrs.no_data,
     state_transition: toApiStateTransition(attrs.state_transition),
     grouping: toApiGrouping(attrs.grouping),
+    reason: attrs.reason,
     artifacts: toApiArtifacts(attrs.artifacts),
     enabled: attrs.enabled,
     created_by: attrs.createdBy,
@@ -498,3 +515,15 @@ export function transformRuleSoAttributesToRuleApiResponse(
     updated_at: attrs.updatedAt,
   };
 }
+
+/** Returns the configuration part of a change-history snapshot, shaped as a PUT rule body. */
+export const toRestoreRuleData = (snapshot: RuleChangeHistorySnapshot): PutRuleData =>
+  pick(snapshot, putRuleDataSchema.keyof().options);
+
+/**
+ * Rejects a change-history snapshot with a top-level field that is not a rule response field,
+ * which a restore would otherwise drop. Field values are not checked.
+ */
+export const ruleSnapshotFieldsSchema = lazySchema(() =>
+  z.strictObject(mapValues(ruleResponseSchema.shape, () => z.unknown().optional()))
+);

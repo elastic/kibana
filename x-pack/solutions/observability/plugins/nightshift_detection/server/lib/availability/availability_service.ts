@@ -14,13 +14,7 @@ import { CoreStart } from '@kbn/core-di-server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { NIGHTSHIFT_DETECTION_TIERED_FEATURE } from '../../../common/constants';
-
-/** Requirements in evaluation order; the first unmet one is the reason reported. */
-export type TAvailabilityUnavailableReason =
-  | 'feature_flag'
-  | 'project_type'
-  | 'pricing_tier'
-  | 'license';
+import type { AvailabilityUnavailableReason } from '../../../common/tick';
 
 /**
  * Decides whether the detection engine may run on this deployment. Same requirements as
@@ -46,7 +40,7 @@ export class AvailabilityService {
   }
 
   /** The first unmet requirement, or `undefined` when the engine is available. */
-  public async getUnavailableReason(): Promise<TAvailabilityUnavailableReason | undefined> {
+  public async getUnavailableReason(): Promise<AvailabilityUnavailableReason | undefined> {
     if (!(await this.isFeatureFlagEnabled())) {
       return 'feature_flag';
     }

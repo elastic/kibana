@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import { useObservedHostFields } from './use_observed_host_fields';
-import { mockObservedHostData } from '../../../../../flyout/entity_details/mocks';
+import { mockObservedHostData } from '../../../shared/mocks';
 import { TestProviders } from '../../../../../common/mock';
 
 describe('useObservedHostFields', () => {

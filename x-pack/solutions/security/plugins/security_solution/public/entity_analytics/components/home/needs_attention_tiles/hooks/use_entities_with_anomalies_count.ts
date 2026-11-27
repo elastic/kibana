@@ -15,11 +15,8 @@ import { isMissingIndexError } from '../../is_missing_index_error';
 import { useTileQueryInputs } from './use_tile_query_inputs';
 import { EMPTY_ENTITY_IDS } from '../data';
 import { buildEntitiesWithAnomaliesCountQuery } from '../queries/entities_with_anomalies_query';
-import {
-  EMPTY_ENTITY_FILTERS,
-  type EntityFilters,
-  type TimeRange,
-} from '../../entities_grid/common';
+import type { TimeRange } from '../../queries/time_range';
+import { EMPTY_ENTITY_FILTERS, type EntityFilters } from '../../entities_grid/common';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 import { isTileQueryTimeout, retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
 

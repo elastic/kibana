@@ -48,11 +48,11 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
   };
   const customIcons = [];
   const properties = {
-    fillColor: {
+    fill_color: {
       type: STYLE_TYPE.STATIC,
       options: {},
     },
-    lineColor: {
+    line_color: {
       type: STYLE_TYPE.DYNAMIC,
       options: {
         field: {
@@ -61,11 +61,11 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
         },
       },
     },
-    iconSize: {
+    icon_size: {
       type: STYLE_TYPE.DYNAMIC,
       options: {
-        minSize: 1,
-        maxSize: 10,
+        min_size: 1,
+        max_size: 10,
         field: { name: previousFieldName, origin: FIELD_ORIGIN.SOURCE },
       },
     },
@@ -103,7 +103,7 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
       expect(hasChanges).toBe(true);
       expect(nextStyleDescriptor.properties[VECTOR_STYLES.LINE_COLOR]).toEqual({
         options: {
-          color: '#009490',
+          color: '#008c72',
         },
         type: 'STATIC',
       });
@@ -172,8 +172,8 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
       });
       expect(nextStyleDescriptor.properties[VECTOR_STYLES.ICON_SIZE]).toEqual({
         options: {
-          minSize: 1,
-          maxSize: 10,
+          min_size: 1,
+          max_size: 10,
           field: {
             name: 'someOtherField',
             origin: FIELD_ORIGIN.SOURCE,

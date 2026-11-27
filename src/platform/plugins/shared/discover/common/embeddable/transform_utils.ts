@@ -8,9 +8,13 @@
  */
 
 import type { DiscoverSessionTabAttributes } from '@kbn/saved-search-plugin/server';
-import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
+import type { DiscoverSessionTab, SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { extractTabs, SavedSearchType } from '@kbn/saved-search-plugin/common';
-import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
+import {
+  injectReferences,
+  parseSearchSourceJSON,
+  type SerializedSearchSourceFields,
+} from '@kbn/data-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { DiscoverTabType } from '@kbn/discover-session-constants';
 import type {
@@ -144,12 +148,9 @@ export function fromStoredSearchEmbeddableByValue(
     ...otherAttrs
   } = storedState;
   const [tab] = attributes.tabs ?? extractTabs(attributes).tabs;
-  const apiTab = fromStoredTab(tab.attributes, references);
-  // Saved Metrics settings only apply to an ES|QL tab; other tabs use the default type.
-  const typedTab: DiscoverSessionApiEmbeddableTab =
-    tab.attributes.tabTypeState && isDiscoverSessionEsqlTab(apiTab)
-      ? { ...apiTab, ...fromStoredTabTypeState(tab.attributes.tabTypeState) }
-      : { ...apiTab, type: DiscoverTabType.Default };
+  const { searchSourceJSON } = tab.attributes.kibanaSavedObjectMeta;
+  const searchSource = injectReferences(parseSearchSourceJSON(searchSourceJSON), references);
+  const typedTab = fromStoredEmbeddableTab(tab.attributes, searchSource);
   const embeddableOverrides = fromStoredTableSettings(storedState);
   const { hide_title, hide_border } = storedState;
 
@@ -207,18 +208,20 @@ export const fromStoredTableSettings = (
   ...(storedState.sampleSize && { sample_size: Math.max(10, storedState.sampleSize) }),
 });
 
-function fromStoredTab(
-  tab: DiscoverSessionTabAttributes,
-  references: SavedObjectReference[] = []
-): DiscoverSessionApiTabBase {
-  const { searchSourceJSON } = tab.kibanaSavedObjectMeta;
-  const searchSourceValues = parseSearchSourceJSON(searchSourceJSON);
-  const searchSource = injectReferences(searchSourceValues, references);
-  return {
+/** Converts a stored tab and its SearchSource, with references inlined, to a by-value panel tab. */
+export function fromStoredEmbeddableTab(
+  tab: DiscoverSessionTab | DiscoverSessionTabAttributes,
+  searchSource: SerializedSearchSourceFields
+): DiscoverSessionApiEmbeddableTab {
+  const apiTab: DiscoverSessionApiTabBase = {
     ...fromStoredSearchAndTable(tab, searchSource),
     // The panel API preserves sample_size for ES|QL as well as Classic tabs.
     ...fromStoredTableSettings(tab),
   };
+  // Saved Metrics settings only apply to an ES|QL tab; other tabs use the default type.
+  return tab.tabTypeState && isDiscoverSessionEsqlTab(apiTab)
+    ? { ...apiTab, ...fromStoredTabTypeState(tab.tabTypeState) }
+    : { ...apiTab, type: DiscoverTabType.Default };
 }
 
 export function toStoredTab(apiTab: DiscoverSessionApiTabBase): {

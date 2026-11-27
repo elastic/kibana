@@ -34,6 +34,7 @@ const createServiceAccountsStartMock = (): jest.MockedObjectDeep<CoreServiceAcco
     delete: jest.fn(),
     bindWorkload: jest.fn(),
     unbindWorkload: jest.fn(),
+    bulkUpdateWorkloadBindings: jest.fn().mockResolvedValue([]),
     getWorkloadBinding: jest.fn().mockResolvedValue(null),
     getWorkloadServiceAccountSummary: jest.fn().mockResolvedValue(null),
     withScopedRequestForWorkload: jest.fn(),
@@ -79,6 +80,12 @@ const createStartMock = (): SecurityStartMock => {
       getRedactedSessionId: jest.fn().mockResolvedValue(undefined),
       apiKeys: apiKeysMock.create(),
     }),
+    authz: lazyObject({
+      uiam: lazyObject({
+        canViewBillingDetails: jest.fn().mockResolvedValue(false),
+        canInviteOrganizationMembers: jest.fn().mockResolvedValue(false),
+      }),
+    }),
     audit: auditServiceMock.create(),
     serviceAccounts: createServiceAccountsStartMock(),
   });
@@ -119,6 +126,12 @@ const createInternalStartMock = (): InternalSecurityStartMock => {
       getRedactedSessionId: jest.fn().mockResolvedValue(undefined),
       apiKeys: apiKeysMock.create(),
     }),
+    authz: lazyObject({
+      uiam: lazyObject({
+        canViewBillingDetails: jest.fn().mockResolvedValue(false),
+        canInviteOrganizationMembers: jest.fn().mockResolvedValue(false),
+      }),
+    }),
     audit: auditServiceMock.create(),
     serviceAccounts: lazyObject({
       asScopedToPlugin: jest.fn().mockImplementation(createServiceAccountsStartMock),
@@ -154,6 +167,12 @@ const createRequestHandlerContextMock = () => {
           invalidate: jest.fn(),
           convert: jest.fn(),
         },
+      }),
+    }),
+    authz: lazyObject({
+      uiam: lazyObject({
+        canViewBillingDetails: jest.fn().mockResolvedValue(false),
+        canInviteOrganizationMembers: jest.fn().mockResolvedValue(false),
       }),
     }),
     audit: lazyObject({

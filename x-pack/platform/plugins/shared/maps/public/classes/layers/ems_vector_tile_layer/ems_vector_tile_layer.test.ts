@@ -130,6 +130,35 @@ describe('EmsVectorTileLayer', () => {
     });
   });
 
+  describe('_namespaceImageProperty', () => {
+    const layer = new EmsVectorTileLayer({
+      source: { getSpriteNamespacePrefix: () => 'ems/dark' } as unknown as EMSTMSSource,
+      layerDescriptor: {} as unknown as EMSVectorTileLayerDescriptor,
+    });
+
+    test('should namespace a plain image id', () => {
+      expect(layer._namespaceImageProperty('circle-11')).toBe('ems/dark/circle-11');
+    });
+
+    test('should namespace image ids in zoom function stops and keep empty ones', () => {
+      expect(
+        layer._namespaceImageProperty({
+          base: 1,
+          stops: [
+            [0, 'circle-11'],
+            [9, ''],
+          ],
+        })
+      ).toEqual({
+        base: 1,
+        stops: [
+          [0, 'ems/dark/circle-11'],
+          [9, ''],
+        ],
+      });
+    });
+  });
+
   describe('getLocale', () => {
     test('should set locale to none for existing layers where locale is not defined', () => {
       const layer = new EmsVectorTileLayer({

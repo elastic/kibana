@@ -66,55 +66,57 @@ describe('createRemoteElasticsearchUnitDestination', () => {
     });
   });
 
-  it('fixed, same raw name on every filled signal: one unscoped index', () => {
+  it('fixed, one signal: a telemetry-scoped index', () => {
     const node = createRemoteElasticsearchUnitDestination({
       ...base,
       auto: false,
-      logsIndex: 'shared-idx',
-      metricsIndex: 'shared-idx',
+      logsIndex: 'logs-billing.otel-default',
+      metricsIndex: '',
       tracesIndex: '',
       docsIndex: '',
     });
-    expect(node.supported_telemetry).toEqual(['logs', 'metrics']);
+    expect(node.supported_telemetry).toEqual(['logs']);
     expect(node.config).toEqual([
       endpointEntry,
-      { name: 'index', value: 'shared-idx' },
+      { name: 'index', value: 'logs-billing.otel-default', telemetry: ['logs'] },
       credentialEntry,
     ]);
   });
 
-  it('fixed, different names: one scoped index per filled signal', () => {
+  it('fixed: one telemetry-scoped index per filled signal', () => {
     const node = createRemoteElasticsearchUnitDestination({
       ...base,
       auto: false,
-      logsIndex: 'a',
+      logsIndex: 'logs-billing.otel-default',
       metricsIndex: '',
-      tracesIndex: 'b',
+      tracesIndex: 'traces-billing.otel-prod',
       docsIndex: '',
     });
     expect(node.supported_telemetry).toEqual(['logs', 'traces']);
     expect(node.config).toEqual([
       endpointEntry,
-      { name: 'index', value: 'a', telemetry: ['logs'] },
-      { name: 'index', value: 'b', telemetry: ['traces'] },
+      { name: 'index', value: 'logs-billing.otel-default', telemetry: ['logs'] },
+      { name: 'index', value: 'traces-billing.otel-prod', telemetry: ['traces'] },
       credentialEntry,
     ]);
   });
 
-  it('fixed, docs with the shared OTel name: docs keeps its own scoped entry', () => {
+  it('fixed, OTel signals plus docs: docs gets its own scoped entry', () => {
     const node = createRemoteElasticsearchUnitDestination({
       ...base,
       auto: false,
-      logsIndex: 'shared-idx',
-      metricsIndex: 'shared-idx',
-      tracesIndex: 'shared-idx',
-      docsIndex: 'shared-idx',
+      logsIndex: 'logs-billing.otel-default',
+      metricsIndex: 'metrics-billing.otel-default',
+      tracesIndex: 'traces-billing.otel-default',
+      docsIndex: 'accounting-2026',
     });
     expect(node.supported_telemetry).toEqual(['logs', 'metrics', 'traces', 'docs']);
     expect(node.config).toEqual([
       endpointEntry,
-      { name: 'index', value: 'shared-idx' },
-      { name: 'index', value: 'shared-idx', telemetry: ['docs'] },
+      { name: 'index', value: 'logs-billing.otel-default', telemetry: ['logs'] },
+      { name: 'index', value: 'metrics-billing.otel-default', telemetry: ['metrics'] },
+      { name: 'index', value: 'traces-billing.otel-default', telemetry: ['traces'] },
+      { name: 'index', value: 'accounting-2026', telemetry: ['docs'] },
       credentialEntry,
     ]);
   });
@@ -261,40 +263,34 @@ describe('remote Elasticsearch view model', () => {
   it.each([
     ['auto', { auto: true, logsIndex: '', metricsIndex: '', tracesIndex: '', docsIndex: '' }, {}],
     [
-      'one name',
-      {
-        auto: false,
-        logsIndex: 'shared-idx',
-        metricsIndex: 'shared-idx',
-        tracesIndex: '',
-        docsIndex: '',
-      },
-      { logs: 'shared-idx', metrics: 'shared-idx' },
+      'one signal',
+      { auto: false, logsIndex: 'logs-a.otel-b', metricsIndex: '', tracesIndex: '', docsIndex: '' },
+      { logs: 'logs-a.otel-b' },
     ],
     [
-      'different names',
+      'two signals',
       {
         auto: false,
-        logsIndex: 'logs-a-b',
+        logsIndex: 'logs-a.otel-b',
         metricsIndex: '',
-        tracesIndex: 'traces-a-b',
+        tracesIndex: 'traces-a.otel-b',
         docsIndex: '',
       },
-      { logs: 'logs-a-b', traces: 'traces-a-b' },
+      { logs: 'logs-a.otel-b', traces: 'traces-a.otel-b' },
     ],
     [
-      'shared name plus docs',
+      'OTel signals plus docs',
       {
         auto: false,
-        logsIndex: 'shared-idx',
-        metricsIndex: 'shared-idx',
-        tracesIndex: 'shared-idx',
+        logsIndex: 'logs-a.otel-b',
+        metricsIndex: 'metrics-a.otel-b',
+        tracesIndex: 'traces-a.otel-b',
         docsIndex: 'accounting-2026',
       },
       {
-        logs: 'shared-idx',
-        metrics: 'shared-idx',
-        traces: 'shared-idx',
+        logs: 'logs-a.otel-b',
+        metrics: 'metrics-a.otel-b',
+        traces: 'traces-a.otel-b',
         docs: 'accounting-2026',
       },
     ],

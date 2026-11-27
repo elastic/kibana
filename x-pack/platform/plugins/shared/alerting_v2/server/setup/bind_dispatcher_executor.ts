@@ -23,6 +23,10 @@ import {
   ApplyThrottlingStep,
   DispatchStep,
 } from '../lib/dispatcher/steps';
+import {
+  DispatcherTelemetry,
+  DispatcherTelemetryToken,
+} from '../lib/dispatcher/otel/dispatcher_telemetry';
 
 export const bindDispatcherExecutionServices = ({ bind }: ContainerModuleLoadOptions) => {
   /**
@@ -42,6 +46,9 @@ export const bindDispatcherExecutionServices = ({ bind }: ContainerModuleLoadOpt
   bind(DispatcherExecutionStepsToken).to(ApplyAlreadyNotifiedStep);
   bind(DispatcherExecutionStepsToken).to(ApplyThrottlingStep);
   bind(DispatcherExecutionStepsToken).to(DispatchStep);
+
+  bind(DispatcherTelemetry).toSelf().inSingletonScope();
+  bind(DispatcherTelemetryToken).toService(DispatcherTelemetry);
 
   bind(DispatcherPipeline).toSelf();
 };

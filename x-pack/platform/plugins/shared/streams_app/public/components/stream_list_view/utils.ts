@@ -30,7 +30,7 @@ export interface EnrichedStream extends ListStreamDetail {
   retentionMs: number;
   ingestionRate: number;
   storageBytes: number;
-  type: 'wired' | 'classic' | 'query';
+  type: 'wired' | 'classic';
   children?: EnrichedStream[];
 }
 
@@ -177,9 +177,6 @@ export function asTrees(streams: ListStreamDetail[]): StreamTree[] {
 const getStreamType = (stream: Streams.all.Definition): EnrichedStream['type'] => {
   if (Streams.ClassicStream.Definition.is(stream)) {
     return 'classic';
-  }
-  if (Streams.QueryStream.Definition.is(stream)) {
-    return 'query';
   }
   return 'wired';
 };

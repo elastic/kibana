@@ -15,6 +15,7 @@ import {
   getConfiguredSources,
   getSourceDisplaySignals,
   selectableSignalsForSourceType,
+  sourceConnectedDestinationIds,
   sourceTypeSelectsSignals,
   telemetryForSelectedSignals,
   withUnitSources,
@@ -158,6 +159,72 @@ describe('source models', () => {
       expect(connectedDestinations(storedUnit)).toBe(connectedDestinations(storedUnit));
       expect(connectedDestinations(changed)).not.toBe(connectedDestinations(storedUnit));
       expect(connectedDestinations(changed)).toEqual({});
+    });
+  });
+
+  describe('sourceConnectedDestinationIds', () => {
+    const idsOf = (unit: StreamsUnit.GetResponse) =>
+      [...sourceConnectedDestinationIds(unit)].sort();
+
+    it('includes a destination a source reaches through a processing node', () => {
+      expect(idsOf(storedUnit)).toEqual(['es-prod']);
+    });
+
+    it('leaves out a destination fed only by a processing node with no source', () => {
+      const unit: StreamsUnit.GetResponse = {
+        ...storedUnit,
+        unit: {
+          ...storedUnit.unit,
+          pipelines: [
+            {
+              id: 'main',
+              supported_telemetry: ['logs'],
+              config: [
+                { name: 'processors', value: ['add-env'] },
+                { name: 'destinations', value: ['es-prod'] },
+              ],
+            },
+          ],
+        },
+      };
+
+      expect(idsOf(unit)).toEqual([]);
+    });
+
+    it('includes destinations fed by source types the UI does not manage', () => {
+      const unit: StreamsUnit.GetResponse = {
+        unit: {
+          sources: [
+            { id: 'syslog-input', type: 'syslog', supported_telemetry: ['logs'] },
+            { id: 'esql-input', type: 'esql_query', supported_telemetry: ['logs'] },
+          ],
+          destinations: [
+            { id: 'es-a', type: 'debug', supported_telemetry: ['logs'] },
+            { id: 'es-b', type: 'debug', supported_telemetry: ['logs'] },
+          ],
+          pipelines: [
+            {
+              id: 'from-syslog',
+              supported_telemetry: ['logs'],
+              config: [
+                { name: 'sources', value: ['syslog-input'] },
+                { name: 'destinations', value: ['es-a'] },
+              ],
+            },
+            {
+              id: 'from-esql',
+              supported_telemetry: ['logs'],
+              config: [
+                { name: 'sources', value: ['esql-input'] },
+                { name: 'destinations', value: ['es-b'] },
+              ],
+            },
+          ],
+        },
+        ui_metadata: {},
+      };
+
+      expect(idsOf(unit)).toEqual(['es-a', 'es-b']);
     });
   });
 

@@ -24,6 +24,7 @@ import { SOURCE_ESQL_RULES } from '../sources/source_esql_rules';
 import type { MaintenanceStateReader, SourceToolDeps } from '../sources/source_tool_deps';
 import { toSourceSummary } from '../sources/source_summary';
 import { formatSourceToolError } from '../sources/source_tool_error';
+import { reportToolFailure } from '../tool_failure';
 import { NIGHTSHIFT_SOURCE_UPDATE_TOOL_ID } from '../tool_ids';
 
 const sourceUpdateSchema = lazySchema(() => {
@@ -58,6 +59,7 @@ export const createSourceUpdateTool = ({
   getScopedClients,
   server,
   logger,
+  telemetry,
   maintenanceService,
 }: SourceToolDeps & {
   maintenanceService: MaintenanceStateReader;
@@ -145,14 +147,17 @@ export const createSourceUpdateTool = ({
     logger,
     requireSourceChangePrivilege: true,
   }),
-  handler: async ({ source: slugOrId, enabled, ...changes }, { request }) =>
+  handler: async ({ source: slugOrId, enabled, ...changes }, { request, runContext }) =>
     runSourceTool({
       action: 'update source',
       privilege: 'changeSources',
+      toolId: NIGHTSHIFT_SOURCE_UPDATE_TOOL_ID,
       request,
+      runContext,
       getScopedClients,
       server,
       logger,
+      telemetry,
       run: async ({ sourcesClient }) => {
         const changedFields = withoutUndefined(changes);
         const hasContentChanges = Object.keys(changedFields).length > 0;
@@ -181,9 +186,17 @@ export const createSourceUpdateTool = ({
             }
             // The other changes are saved already, so report them rather than a plain failure.
             const reason = formatSourceToolError(error);
-            logger.error(
-              `Failed to update source ${current.id}: setting enabled failed: ${reason}`
-            );
+            reportToolFailure({
+              error,
+              toolId: NIGHTSHIFT_SOURCE_UPDATE_TOOL_ID,
+              errorLogMessage: `Failed to update source: setting enabled failed: ${reason}`,
+              // The source resolved, so no argument caused this.
+              inputRejected: false,
+              logger,
+              telemetry,
+              request,
+              runContext,
+            });
             enabledChangeFailed = {
               requested: enabled,
               message: `The other changes were saved, but setting enabled to ${enabled} failed: ${reason}. The enabled state of the source is unknown and the \`enabled\` value in this result may be out of date. Call source_get to check it.`,

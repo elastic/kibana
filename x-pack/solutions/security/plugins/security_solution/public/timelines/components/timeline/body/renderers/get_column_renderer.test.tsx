@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { mockTimelineData } from '../../../../../common/mock';
@@ -17,7 +17,6 @@ import { getEmptyValue } from '../../../../../common/components/empty_value';
 import { columnRenderers } from '.';
 import { getColumnRenderer } from './get_column_renderer';
 import { getValues, findItem, deleteItemIdx } from './helpers';
-import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { defaultUdtHeaders } from '../column_headers/default_headers';
 
@@ -34,25 +33,9 @@ jest.mock('@elastic/eui', () => {
 describe('get_column_renderer', () => {
   let nonSuricata: TimelineNonEcsData[];
   const _id = mockTimelineData[0]._id;
-  const mount = useMountAppended();
 
   beforeEach(() => {
     nonSuricata = cloneDeep(mockTimelineData[0].data);
-  });
-
-  test('renders correctly against snapshot', () => {
-    const columnName = 'event.severity';
-    const columnRenderer = getColumnRenderer(columnName, columnRenderers, nonSuricata);
-    const column = columnRenderer.renderColumn({
-      columnName,
-      eventId: _id,
-      values: getValues(columnName, nonSuricata),
-      field: defaultUdtHeaders[1],
-      scopeId: TimelineId.test,
-    });
-
-    const wrapper = shallow(<span>{column}</span>);
-    expect(wrapper).toMatchSnapshot();
   });
 
   test('should render event severity when dealing with data that is not suricata', () => {
@@ -65,12 +48,12 @@ describe('get_column_renderer', () => {
       field: defaultUdtHeaders[1],
       scopeId: TimelineId.test,
     });
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <span>{column}</span>
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('3');
+    expect(container).toHaveTextContent(/^3$/);
   });
 
   test('should render empty value when dealing with an empty value of user', () => {
@@ -85,12 +68,12 @@ describe('get_column_renderer', () => {
       field: defaultUdtHeaders[7],
       scopeId: TimelineId.test,
     });
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <span>{column}</span>
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual(getEmptyValue());
+    expect(container).toHaveTextContent(new RegExp(`^${getEmptyValue()}$`));
   });
 
   test('should render empty value when dealing with an unknown column name', () => {
@@ -103,11 +86,11 @@ describe('get_column_renderer', () => {
       field: defaultUdtHeaders[7],
       scopeId: TimelineId.test,
     });
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <span>{column}</span>
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual(getEmptyValue());
+    expect(container).toHaveTextContent(new RegExp(`^${getEmptyValue()}$`));
   });
 });

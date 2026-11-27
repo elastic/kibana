@@ -8,6 +8,7 @@
  */
 import type {
   ESQLAst,
+  ESQLAstItem,
   ESQLCommandOption,
   ESQLSource,
   ESQLAstAllCommands,
@@ -17,6 +18,7 @@ import type { ICommandCallbacks, ICommandContext } from '../types';
 import { getAvailableMetadataFields, isValidMetadataField } from '../options/metadata';
 import { getMessageFromId } from '../../definitions/utils';
 import { validateSources } from '../../definitions/utils/validation/sources';
+import { findNamedSubqueryForSource } from '../../definitions/utils/named_subqueries';
 import type { ESQLMessage } from '../../definitions/types';
 
 export const validate = (
@@ -46,7 +48,11 @@ export const validate = (
       );
     }
   }
-  const sources = command.args.filter((arg) => isSource(arg)) as ESQLSource[];
+  const args: ESQLAstItem[] = command.args;
+  const sources = args.filter(
+    (arg): arg is ESQLSource =>
+      isSource(arg) && !findNamedSubqueryForSource(arg, context?.namedSubqueries ?? [])
+  );
   // Use "Unknown data source" only at root FROM; in subqueries use "Unknown index"
   const isRootFrom = Array.isArray(ast) && ast.length > 0 && ast[0] === command;
   messages.push(...validateSources(sources, context, { useGenericDataSourceError: isRootFrom }));

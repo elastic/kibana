@@ -29,7 +29,6 @@ import {
   removeDeviceControl,
   removeLinuxDnsEvents,
   removeLinuxRansomware,
-  isLinuxRansomwareProtectionEnabled,
   removeRegistryCredentialHardening,
   setCustomYaraSignatures,
   setProtectionModeAndPopup,
@@ -763,22 +762,6 @@ describe('Policy Config helpers', () => {
 
       expect(removeLinuxRansomware(policy).linux).not.toHaveProperty('ransomware');
     });
-  });
-
-  describe('isLinuxRansomwareProtectionEnabled', () => {
-    it.each([
-      [true, true, true],
-      [true, false, false],
-      [false, true, false],
-      [false, false, false],
-    ])(
-      'linuxRansomwareProtection: %s, perOsPolicySettings: %s returns %s',
-      (linuxRansomwareProtection, perOsPolicySettings, expected) => {
-        expect(
-          isLinuxRansomwareProtectionEnabled({ linuxRansomwareProtection, perOsPolicySettings })
-        ).toBe(expected);
-      }
-    );
   });
 
   describe('setProtectionModeAndPopup', () => {

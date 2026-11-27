@@ -6,16 +6,13 @@
  */
 
 import type { NotificationsStart } from '@kbn/core/public';
-import { attachmentDataToDashboardState } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
-import { previewAttachmentInDashboard } from './dashboard_integration/preview_attachment';
+import type { DashboardLocator } from './dashboard_integration/open_in_dashboard_app';
 import {
-  toDashboardLocatorParams,
-  type DashboardLocator,
-} from './dashboard_integration/open_in_dashboard_app';
-import { APPLY_AGENT_CHANGES_ERROR_TITLE } from './dashboard_integration/apply_agent_changes';
-import { handleEditInDashboard } from './handle_edit_in_dashboard';
+  APPLY_AGENT_CHANGES_ERROR_TITLE,
+  showAttachment,
+} from './dashboard_integration/show_attachment';
 
 interface HandlePreviewParams {
   attachment: DashboardAttachment;
@@ -28,13 +25,11 @@ interface HandlePreviewParams {
   openCanvas?: () => void;
 }
 
-/** Previews the attachment, showing an error toast when it can't be opened. */
-export const handlePreview = (params: HandlePreviewParams): Promise<void> =>
-  openPreview(params).catch((error: Error) => {
-    params.toasts.addError(error, { title: APPLY_AGENT_CHANGES_ERROR_TITLE });
-  });
-
-const openPreview = async ({
+/**
+ * Previews the attachment in the Dashboard app when the user can edit it there, otherwise in the
+ * canvas, showing an error toast when it can't be opened.
+ */
+export const handlePreview = async ({
   attachment,
   dashboardApi,
   canWriteDashboards,
@@ -44,34 +39,21 @@ const openPreview = async ({
   checkSavedDashboardExist,
   openCanvas,
 }: HandlePreviewParams): Promise<void> => {
-  // sidebar in dashboard experience - synchronize dashboard app to attachment
-  if (dashboardApi && canWriteDashboards) {
-    return previewAttachmentInDashboard({
+  const canShowInDashboardApp =
+    canWriteDashboards && (dashboardApi !== undefined || (isSidebar && dashboardLocator));
+  if (!canShowInDashboardApp) {
+    openCanvas?.();
+    return;
+  }
+  try {
+    await showAttachment({
       attachment,
-      dashboardApi,
+      api: dashboardApi,
       dashboardLocator,
       toasts,
       checkSavedDashboardExist,
     });
+  } catch (error) {
+    toasts.addError(error, { title: APPLY_AGENT_CHANGES_ERROR_TITLE });
   }
-
-  // sidebar preview - open dashboard in sidebar if possible, otherwise open canvas preview
-  if (isSidebar && dashboardLocator && canWriteDashboards) {
-    const dashboardState = attachmentDataToDashboardState(attachment.data);
-    return handleEditInDashboard({
-      locator: dashboardLocator,
-      getExistingDashboardId: async () => {
-        if (!attachment.origin) {
-          return undefined;
-        }
-
-        const exists = await checkSavedDashboardExist(attachment.origin);
-        return exists ? attachment.origin : undefined;
-      },
-      dashboardLocatorParams: toDashboardLocatorParams(dashboardState),
-    });
-  }
-
-  // full screen - open canvas
-  openCanvas?.();
 };

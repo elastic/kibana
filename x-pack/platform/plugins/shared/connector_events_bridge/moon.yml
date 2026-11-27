@@ -20,7 +20,7 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/actions-plugin'
   - '@kbn/actions-utils'
-  - '@kbn/workflows'
+  - '@kbn/connector-topics'
   - '@kbn/workflows-extensions'
   - '@kbn/core-http-server-mocks'
   - '@kbn/core-spaces-common'

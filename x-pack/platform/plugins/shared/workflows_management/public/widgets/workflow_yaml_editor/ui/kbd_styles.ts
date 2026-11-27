@@ -1,0 +1,17 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { UseEuiTheme } from '@elastic/eui';
+import type { CSSObject } from '@emotion/react';
+
+export const kbdStyles = ({ euiTheme }: UseEuiTheme): CSSObject => ({
+  borderColor: euiTheme.colors.borderBaseSubdued,
+  borderRadius: euiTheme.border.radius.small,
+  borderWidth: euiTheme.border.width.thin,
+  borderStyle: 'solid',
+  padding: `${euiTheme.size.xxs} ${euiTheme.size.xs}`,
+});

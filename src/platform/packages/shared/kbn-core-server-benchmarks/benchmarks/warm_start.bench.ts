@@ -52,6 +52,7 @@ export default async (): Promise<BenchmarkRunnable> => {
         log,
         port: kbnPort,
         esPort: esPort!,
+        isolatedConfig: true,
       });
 
       await stopGracefully(firstKbnProc.proc, { log, name: 'kibana' });
@@ -63,6 +64,7 @@ export default async (): Promise<BenchmarkRunnable> => {
         log,
         port: kbnPort,
         esPort: esPort!,
+        isolatedConfig: true,
       });
 
       kbnProc = proc;

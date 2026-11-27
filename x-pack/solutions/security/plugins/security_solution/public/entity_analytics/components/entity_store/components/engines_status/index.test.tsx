@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { EngineStatus } from '.';
-import { TestProviders } from '@kbn/timelines-plugin/public/mock';
+import { TestProviders } from '../../../../../common/mock/timeline';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
 
 const mockUseEntityStore = jest.fn();

@@ -98,6 +98,30 @@ describe('AlertTriage', () => {
     });
   });
 
+  describe('dropWhere', () => {
+    it('removes matching alerts from both the dispatchable and suppressed sets', () => {
+      const initial = AlertTriage.partition(
+        [
+          createAlert({ alert_id: 'e1' }),
+          createAlert({ alert_id: 'e2' }),
+          createAlert({ alert_id: 'e3' }),
+          createAlert({ alert_id: 'e4' }),
+        ],
+        (alert) =>
+          alert.alert_id === 'e3' || alert.alert_id === 'e4'
+            ? { reason: 'ack', action_subtype: 'ack' }
+            : undefined
+      );
+
+      const result = initial.dropWhere(
+        ({ alert_id: alertId }) => alertId === 'e2' || alertId === 'e4'
+      );
+
+      expect(result.dispatchable.map(({ alert_id: alertId }) => alertId)).toEqual(['e1']);
+      expect(result.suppressed.map(({ alert_id: alertId }) => alertId)).toEqual(['e3']);
+    });
+  });
+
   describe('dispatchable accessors', () => {
     const triage = AlertTriage.partition(
       [
@@ -107,10 +131,6 @@ describe('AlertTriage', () => {
       ],
       () => undefined
     );
-
-    it('exposes unique dispatchable alert ids', () => {
-      expect(triage.dispatchableAlertIds()).toEqual(['e1', 'e2']);
-    });
 
     it('exposes unique non-null dispatchable rule ids', () => {
       expect(triage.dispatchableRuleIds()).toEqual(['r1']);

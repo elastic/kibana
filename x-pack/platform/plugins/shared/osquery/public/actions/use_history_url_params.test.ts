@@ -77,6 +77,12 @@ describe('parseHistoryUrlParams', () => {
     expect(result.sources).toEqual(['live', 'rule', 'scheduled']);
   });
 
+  it('restores the workflow source filter from the URL', () => {
+    const result = parseHistoryUrlParams('?sources=workflow');
+
+    expect(result.sources).toEqual(['workflow']);
+  });
+
   it('returns empty sources for completely invalid values', () => {
     const result = parseHistoryUrlParams('?sources=invalid,bad');
 
@@ -279,6 +285,20 @@ describe('useHistoryUrlParams', () => {
 
     expect(result.current.filters.q).toBe('fromUrl');
     expect(getHistoryFilters()).toContain('q=fromUrl');
+  });
+
+  it('keeps legacy sources and persists them alongside the workflow option', () => {
+    const { result } = renderWithRouter('/history?sources=live,rule,scheduled');
+
+    expect(result.current.filters.sources).toEqual(['live', 'rule', 'scheduled']);
+    expect(getHistoryFilters()).toContain('sources=live,rule,scheduled');
+
+    act(() => {
+      result.current.setFilter('sources', ['workflow']);
+    });
+
+    expect(result.current.filters.sources).toEqual(['workflow']);
+    expect(getHistoryFilters()).toContain('sources=workflow');
   });
 
   it('stores empty string when all filters are at defaults', () => {

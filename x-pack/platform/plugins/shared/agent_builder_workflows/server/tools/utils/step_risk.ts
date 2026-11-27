@@ -49,7 +49,6 @@ const HANDWRITTEN_RISKS: ReadonlyMap<string, StepRisk> = new Map(
     waitForApproval: SAFE,
     switch: SAFE,
     parallel: SAFE,
-    merge: SAFE,
     'loop.break': SAFE,
     'loop.continue': SAFE,
     'workflow.output': SAFE,
@@ -64,6 +63,13 @@ const HANDWRITTEN_RISKS: ReadonlyMap<string, StepRisk> = new Map(
     'cases.deleteObservable': DESTRUCTIVE,
     'cases.deleteAttachments': DESTRUCTIVE,
     'cases.bulkDeleteObservables': DESTRUCTIVE,
+    'security.findEndpointArtifacts': SAFE,
+    'security.searchIntegrationKnowledge': SAFE,
+    'security.resolveEndpointHosts': SAFE,
+    'security.getEndpointHostDiagnostics': SAFE,
+    'security.getEndpointPackageStatus': SAFE,
+    'security.getEndpointInventoryCounts': SAFE,
+    'security.finalizeTroubleshootingDiagnosis': SAFE,
   })
 );
 

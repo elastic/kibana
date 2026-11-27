@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiFlexGroup, EuiMarkdownFormat, EuiPanel } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiMarkdownFormat } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
@@ -25,11 +25,11 @@ export const ViewKiContentPanel = ({ content }: ViewKiContentPanelProps) => {
       data-test-subj="contextViewKiContentPanel"
     >
       {hasContent ? (
-        <EuiPanel hasBorder paddingSize="l" data-test-subj="contextViewKiContent">
+        <div data-test-subj="contextViewKiContent">
           <div data-test-subj="contextViewKiMarkdownRendered">
-            <EuiMarkdownFormat textSize="s">{content}</EuiMarkdownFormat>
+            <EuiMarkdownFormat textSize="m">{content}</EuiMarkdownFormat>
           </div>
-        </EuiPanel>
+        </div>
       ) : (
         <EuiEmptyPrompt
           iconType="document"

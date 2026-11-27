@@ -43,7 +43,8 @@ import type { ReadAccess } from '../grid_columns';
 import { useEntityAnalyticsUrlState } from '../hooks/use_entity_analytics_url_state';
 import { useGridLoadTelemetry } from '../hooks/use_grid_load_telemetry';
 import { RISK_SCORE_NORM_FIELD } from '../common';
-import type { RowsMode, SortDir, TimeRange } from '../common';
+import type { TimeRange } from '../../queries/time_range';
+import type { RowsMode, SortDir } from '../common';
 
 const gridContainerCss = css`
   block-size: 100%;

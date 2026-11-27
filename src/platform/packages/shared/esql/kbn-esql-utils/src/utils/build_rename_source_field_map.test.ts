@@ -60,6 +60,21 @@ describe('buildRenameSourceFieldMap', () => {
     });
   });
 
+  it.each([
+    'FROM logs | RENAME service.name AS name | DESCRIBE',
+    'FROM logs | RENAME service.name AS name | DESCRIBE | RENAME name AS label',
+    'FROM logs | RENAME service.name AS name | STATS name = COUNT(*)',
+    'LET x = (FROM logs | RENAME service.name AS name | DESCRIBE); FROM x',
+  ])('invalidates a rename when a command defines a new value under the same name: %s', (query) => {
+    expect(buildRenameSourceFieldMap(query)).toEqual(new Map());
+  });
+
+  it('preserves a rename when only the sibling branch returns the field', () => {
+    const query =
+      'FROM logs | RENAME extension AS name | FORK (EVAL name = "temporary" | DROP name) (KEEP name)';
+    expect(resolve('name', query)).toBe('extension');
+  });
+
   describe('EVAL and synthetic columns', () => {
     it('does not unwind through EVAL output that only appears as the old side of RENAME', () => {
       const query =
@@ -162,6 +177,54 @@ describe('buildRenameSourceFieldMap', () => {
         'FROM kibana_sample_data_logs | FORK (EVAL c = bytes) (EVAL f = agent.keyword) | KEEP c, f';
       expect(resolve('c', query)).toBe('bytes');
       expect(resolve('f', query)).toBe('agent.keyword');
+    });
+  });
+
+  describe('nested pipelines', () => {
+    it('preserves rename provenance through an identity EVAL', () => {
+      const query = 'FROM (FROM logs | EVAL bytes = bytes | RENAME bytes AS size)';
+
+      expect(buildRenameSourceFieldMap(query)).toEqual(new Map([['size', 'bytes']]));
+    });
+
+    it.each([
+      'FROM (FROM logs | EVAL bytes = bytes | EVAL bytes = bytes * 2) | RENAME bytes AS size',
+      'FROM (FROM logs | EVAL bytes = bytes) | EVAL bytes = bytes * 2 | RENAME bytes AS size',
+    ])('does not preserve an identity EVAL overwritten by a computed EVAL: %s', (query) => {
+      expect(buildRenameSourceFieldMap(query)).toEqual(new Map());
+    });
+
+    it('preserves an alias captured before an outer computed EVAL', () => {
+      const query =
+        'FROM (FROM logs | EVAL bytes = bytes) | EVAL saved = bytes | EVAL bytes = bytes * 2 | RENAME saved AS size';
+
+      expect(resolve('size', query)).toBe('bytes');
+    });
+
+    it.each([
+      'FROM (FROM logs | RENAME bytes AS size | RENAME size AS total)',
+      'FROM logs | FORK (RENAME bytes AS size | RENAME size AS total) (LIMIT 1)',
+    ])('resolves nested RENAME chains to the source field: %s', (query) => {
+      expect(resolve('total', query)).toBe('bytes');
+    });
+
+    it.each([
+      'FROM (FROM logs | RENAME bytes AS size | EVAL size = size * 2)',
+      'FROM logs | FORK (RENAME bytes AS size | EVAL size = size * 2) (LIMIT 1)',
+    ])('does not resolve a nested RENAME overwritten by EVAL: %s', (query) => {
+      expect(resolve('size', query)).toBe('size');
+    });
+  });
+
+  describe('LET bindings', () => {
+    it('resolves a RENAME inside a referenced binding to the source field', () => {
+      const query = 'LET a = (FROM logs | RENAME bytes AS size); FROM a';
+      expect(resolve('size', query)).toBe('bytes');
+    });
+
+    it('does not resolve a binding RENAME that the binding later shadows', () => {
+      const query = 'LET a = (FROM logs | RENAME bytes AS size | EVAL size = size * 2); FROM a';
+      expect(resolve('size', query)).toBe('size');
     });
   });
 

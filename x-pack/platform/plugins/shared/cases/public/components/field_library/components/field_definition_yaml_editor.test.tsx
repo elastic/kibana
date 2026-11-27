@@ -14,7 +14,7 @@ const mockEditor = { fake: 'editor' };
 
 jest.mock('../../templates_v2/components/template_yaml_editor', () => {
   // jest.mock factories are hoisted above imports, so React must be required locally.
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const ReactLocal = require('react');
   return {
     TemplateYamlEditorBase: ({

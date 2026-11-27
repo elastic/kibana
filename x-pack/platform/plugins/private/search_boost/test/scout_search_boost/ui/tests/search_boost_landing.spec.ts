@@ -6,7 +6,12 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { NO_SEARCH_BOOST_ROLE, SEARCH_BOOST_READ_ROLE, test } from '../fixtures';
+import {
+  ONLY_READ_BOOST_PROFILES_ROLE,
+  ONLY_READ_BOOST_RULES_ROLE,
+  SEARCH_BOOST_READ_ROLE,
+} from '../../common/roles';
+import { test } from '../fixtures';
 
 test.describe('Search boost landing', { tag: ['@local-serverless-vectordb'] }, () => {
   test('a user with read access opens the landing from the nav link', async ({
@@ -32,16 +37,21 @@ test.describe('Search boost landing', { tag: ['@local-serverless-vectordb'] }, (
     });
   });
 
-  test('a user without the feature privilege does not see the nav link', async ({
-    browserAuth,
-    pageObjects,
-  }) => {
-    const { searchBoost } = pageObjects;
-    await browserAuth.loginWithCustomRole(NO_SEARCH_BOOST_ROLE);
-    await searchBoost.gotoHome();
-    await searchBoost.openDataManagementNav();
+  for (const [privilege, role] of [
+    ['read_boost_profiles', ONLY_READ_BOOST_PROFILES_ROLE],
+    ['read_boost_rules', ONLY_READ_BOOST_RULES_ROLE],
+  ] as const) {
+    test(`a user with only ${privilege} does not see the nav link`, async ({
+      browserAuth,
+      pageObjects,
+    }) => {
+      const { searchBoost } = pageObjects;
+      await browserAuth.loginWithCustomRole(role);
+      await searchBoost.gotoHome();
+      await searchBoost.openDataManagementNav();
 
-    await expect(searchBoost.esqlViewsNavItem).toBeVisible();
-    await expect(searchBoost.searchBoostNavItem).toBeHidden();
-  });
+      await expect(searchBoost.esqlViewsNavItem).toBeVisible();
+      await expect(searchBoost.searchBoostNavItem).toBeHidden();
+    });
+  }
 });

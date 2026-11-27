@@ -47,5 +47,6 @@ export const registerSolutionNavigation = async (services: Services) => {
     title: SOLUTION_NAME,
     icon: 'logoSecurity',
     navigationTree$,
+    ownerPluginId: 'securitySolutionEss',
   });
 };

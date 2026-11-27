@@ -6,10 +6,13 @@
  */
 
 import type { FieldBrowserOptions } from '@kbn/response-ops-alerts-fields-browser';
-import type { EuiDataGridCellValueElementProps, EuiDataGridControlColumn } from '@elastic/eui';
+import type {
+  EuiDataGridCellValueElementProps,
+  EuiDataGridControlColumn,
+  EuiThemeComputed,
+} from '@elastic/eui';
 import type { ComponentType } from 'react';
 import React from 'react';
-import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import type { SortColumnTable } from '@kbn/securitysolution-data-table';
 import { addBuildingBlockStyle, getPageRowIndex } from '@kbn/securitysolution-data-table';
 import type { EsHitRecord } from '@kbn/discover-utils';
@@ -47,7 +50,7 @@ export interface TransformColumnsProps {
   onSelectPage: OnSelectAll;
   pageSize: number;
   sort: SortColumnTable[];
-  theme: EuiTheme;
+  theme: EuiThemeComputed;
   setEventsLoading: SetEventsLoading;
   setEventsDeleted: SetEventsDeleted;
   rawEvents: Array<EsHitRecord>;

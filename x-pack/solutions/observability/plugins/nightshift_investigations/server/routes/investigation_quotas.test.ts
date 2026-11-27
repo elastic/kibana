@@ -42,11 +42,12 @@ describe('investigationQuotasUpdateBodySchema', () => {
     expect(accepts({ enabled: true, limits: { total_investigation: MAX_RUN_LIMIT } })).toBe(true);
   });
 
-  it('rejects a limit of 0, because null is the only way to remove a limit', () => {
-    expect(accepts({ limits: { manual_investigation: 0 } })).toBe(false);
+  it('accepts a limit of 0, which denies every start', () => {
+    expect(accepts({ limits: { manual_investigation: 0 } })).toBe(true);
   });
 
-  it('rejects limits that are not whole numbers or above the maximum', () => {
+  it('rejects limits that are negative, not whole numbers or above the maximum', () => {
+    expect(accepts({ limits: { manual_investigation: -1 } })).toBe(false);
     expect(accepts({ limits: { manual_investigation: 1.5 } })).toBe(false);
     expect(accepts({ limits: { manual_investigation: MAX_RUN_LIMIT + 1 } })).toBe(false);
   });

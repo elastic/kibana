@@ -6,9 +6,10 @@
  */
 
 import { Validator } from '@cfworker/json-schema';
+import { mapValues, memoize } from 'lodash';
 import type { ApiTarget } from '@kbn/agent-builder-common';
 import { loadSchemaClosure } from './schema_closure';
-import { isRecord } from './types';
+import { ROUTING_LOCATION_KEY, isRecord } from './types';
 
 export interface ParamsValidationError {
   path: string;
@@ -36,28 +37,54 @@ const validatorCache: Record<ApiTarget, Map<object, Promise<Validator>>> = {
   kibana: new Map(),
 };
 
+// Memoized so a schema keeps mapping to the same copy, which is what the validator cache is keyed on.
+const withoutBodyValidation = memoize(
+  (schema: Record<string, unknown>): Record<string, unknown> => {
+    if (!isRecord(schema.properties)) {
+      return schema;
+    }
+    return {
+      ...schema,
+      properties: mapValues(schema.properties, (spec) =>
+        isRecord(spec) && spec[ROUTING_LOCATION_KEY] === 'body' ? {} : spec
+      ),
+    };
+  }
+);
+
+export interface GetValidatorOptions {
+  /**
+   * Accept any value for the params sent in the request body. Whether they are present when
+   * required is still checked, and so is every path and query param.
+   */
+  skipBodyValidation?: boolean;
+}
+
 /**
  * Builds the params validator for an API, memoized per `input` schema so the shared
  * referenced files are only loaded once per API.
  *
  * @param target - Backend the API belongs to.
  * @param schema - The API's `input` JSON Schema.
+ * @param options - Which parts of the schema to leave unvalidated.
  * @returns A validator returning one error per problem found, empty when the params are valid.
  * @throws {Error} when the schema, or a schema it references, cannot be loaded.
  */
 export const getValidator = async (
   target: ApiTarget,
-  schema: Record<string, unknown>
+  schema: Record<string, unknown>,
+  { skipBodyValidation = false }: GetValidatorOptions = {}
 ): Promise<ParamsValidator> => {
   const cache = validatorCache[target];
+  const validatedSchema = skipBodyValidation ? withoutBodyValidation(schema) : schema;
 
-  let pending = cache.get(schema);
+  let pending = cache.get(validatedSchema);
   if (!pending) {
-    pending = buildValidator(target, schema).catch((error) => {
-      cache.delete(schema);
+    pending = buildValidator(target, validatedSchema).catch((error) => {
+      cache.delete(validatedSchema);
       throw error;
     });
-    cache.set(schema, pending);
+    cache.set(validatedSchema, pending);
   }
 
   const validator = await pending;

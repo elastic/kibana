@@ -55,13 +55,13 @@ export const OsqueryGetUnifiedHistoryRequestQuery = lazySchema(() =>
       .optional()
       .describe('Comma-separated list of user IDs to filter live query history.'),
     /**
-     * Comma-separated list of source types to include. Valid values are `live`, `rule`, and `scheduled`.
+     * Comma-separated list of source types to include. Valid values are `live`, `rule`, `scheduled`, and `workflow`.
      */
     sourceFilters: z
       .string()
       .optional()
       .describe(
-        'Comma-separated list of source types to include. Valid values are `live`, `rule`, and `scheduled`.'
+        'Comma-separated list of source types to include. Valid values are `live`, `rule`, `scheduled`, and `workflow`.'
       ),
     /**
      * The start of the time range filter (ISO 8601).

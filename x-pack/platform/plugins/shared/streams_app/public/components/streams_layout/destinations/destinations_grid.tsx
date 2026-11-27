@@ -90,6 +90,7 @@ interface DestinationsGridProps {
   resolvedIndicesStatus: ResolvedIndicesStatus;
   resolvedIndicesError?: ResolvedIndicesError;
   destinationDetailRefs: ReadonlyMap<string, DestinationDetailActorRef>;
+  sourceConnectedDestinationIds: ReadonlySet<string>;
   onShowDestinationDetail: (destinationId: string, viewerId: string) => void;
   onHideDestinationDetail: (destinationId: string, viewerId: string) => void;
   hasActiveFilters: boolean;
@@ -134,6 +135,7 @@ export const DestinationsGrid = ({
   resolvedIndicesStatus,
   resolvedIndicesError,
   destinationDetailRefs,
+  sourceConnectedDestinationIds,
   onShowDestinationDetail,
   onHideDestinationDetail,
   hasActiveFilters,
@@ -192,6 +194,7 @@ export const DestinationsGrid = ({
       resolvedIndicesStatus={resolvedIndicesStatus}
       resolvedIndicesError={resolvedIndicesError}
       destinationDetailRefs={destinationDetailRefs}
+      sourceConnectedDestinationIds={sourceConnectedDestinationIds}
       onShowDestinationDetail={onShowDestinationDetail}
       onHideDestinationDetail={onHideDestinationDetail}
       hasActiveFilters={hasActiveFilters}
@@ -214,6 +217,7 @@ interface DestinationsGridBodyContextValue {
   resolvedIndicesStatus: ResolvedIndicesStatus;
   resolvedIndicesError?: ResolvedIndicesError;
   destinationDetailRefs: ReadonlyMap<string, DestinationDetailActorRef>;
+  sourceConnectedDestinationIds: ReadonlySet<string>;
   onShowDestinationDetail: (destinationId: string, viewerId: string) => void;
   onHideDestinationDetail: (destinationId: string, viewerId: string) => void;
 }
@@ -243,6 +247,7 @@ const DestinationsGridBody = ({
     resolvedIndicesStatus,
     resolvedIndicesError,
     destinationDetailRefs,
+    sourceConnectedDestinationIds,
     onShowDestinationDetail,
     onHideDestinationDetail,
   } = context;
@@ -303,6 +308,8 @@ const DestinationsGridBody = ({
                     indices={resolvedIndicesByDestination.get(destination.id) ?? NO_INDICES}
                     indicesStatus={resolvedIndicesStatus}
                     indicesError={resolvedIndicesError}
+                    hasConnectedSource={sourceConnectedDestinationIds.has(destination.id)}
+                    showMapLink
                     destinationDetailRef={destinationDetailRefs.get(destination.id)}
                     onShowDestinationDetail={onShowDestinationDetail}
                     onHideDestinationDetail={onHideDestinationDetail}
@@ -331,6 +338,7 @@ const DestinationsGridTable = ({
   resolvedIndicesStatus,
   resolvedIndicesError,
   destinationDetailRefs,
+  sourceConnectedDestinationIds,
   onShowDestinationDetail,
   onHideDestinationDetail,
   hasActiveFilters,
@@ -446,6 +454,7 @@ const DestinationsGridTable = ({
       resolvedIndicesStatus,
       resolvedIndicesError,
       destinationDetailRefs,
+      sourceConnectedDestinationIds,
       onShowDestinationDetail,
       onHideDestinationDetail,
     }),
@@ -456,6 +465,7 @@ const DestinationsGridTable = ({
       resolvedIndicesStatus,
       resolvedIndicesError,
       destinationDetailRefs,
+      sourceConnectedDestinationIds,
       onShowDestinationDetail,
       onHideDestinationDetail,
     ]

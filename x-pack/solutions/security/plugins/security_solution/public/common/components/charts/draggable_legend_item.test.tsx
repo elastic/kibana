@@ -60,6 +60,7 @@ describe('DraggableLegendItem', () => {
             class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <span
+              aria-hidden="true"
               color="${legendItem.color}"
               data-euiicon-type="dot"
             />

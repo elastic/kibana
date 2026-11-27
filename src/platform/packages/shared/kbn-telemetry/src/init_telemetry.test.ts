@@ -26,9 +26,14 @@ jest.mock('@kbn/apm-config-loader', () => {
   };
 });
 
+jest.mock('@opentelemetry/resources', () => {
+  const actual = jest.requireActual('@opentelemetry/resources');
+  return { ...actual, resourceFromAttributes: jest.fn(actual.resourceFromAttributes) };
+});
+
 import { REPO_ROOT, PKG_JSON } from '@kbn/repo-info';
 import { ApmConfiguration } from '@kbn/apm-config-loader/src/config';
-import { resources } from '@elastic/opentelemetry-node/sdk';
+import { resourceFromAttributes } from '@opentelemetry/resources';
 import { initTelemetry } from '..';
 
 describe('initTelemetry', () => {
@@ -37,7 +42,7 @@ describe('initTelemetry', () => {
   });
 
   describe('APM and OTel conflict detection', () => {
-    test('throws when APM is active (default) and OTel tracing is enabled', () => {
+    test('does not throw when APM uses the OTel-derived default and OTel tracing is enabled', () => {
       const apmConfig = new ApmConfiguration(
         REPO_ROOT,
         { telemetry: { tracing: { enabled: true, sample_rate: 1, exporters: [] } } },
@@ -47,9 +52,17 @@ describe('initTelemetry', () => {
       const { loadConfiguration } = jest.requireMock('@kbn/apm-config-loader');
       loadConfiguration.mockImplementationOnce(() => apmConfig);
 
-      expect(() => initTelemetry([], REPO_ROOT, false, 'test-service')).toThrow(
-        'Elastic APM and OpenTelemetry tracing cannot be enabled simultaneously.'
-      );
+      const originalElasticApmActive = process.env.ELASTIC_APM_ACTIVE;
+      delete process.env.ELASTIC_APM_ACTIVE;
+      try {
+        expect(() => initTelemetry([], REPO_ROOT, false, 'test-service')).not.toThrow();
+      } finally {
+        if (originalElasticApmActive === undefined) {
+          delete process.env.ELASTIC_APM_ACTIVE;
+        } else {
+          process.env.ELASTIC_APM_ACTIVE = originalElasticApmActive;
+        }
+      }
     });
 
     test('throws when APM is explicitly active and OTel tracing is enabled', () => {
@@ -116,7 +129,7 @@ describe('initTelemetry', () => {
       loadConfiguration.mockImplementationOnce(() => apmConfig);
       getConfiguration.mockImplementationOnce(() => apmConfig.getConfig('test-service'));
 
-      const resourceFromAttributesSpy = jest.spyOn(resources, 'resourceFromAttributes');
+      const resourceFromAttributesSpy = jest.mocked(resourceFromAttributes);
 
       initTelemetry([], REPO_ROOT, false, 'test-service');
 
@@ -143,7 +156,7 @@ describe('initTelemetry', () => {
         environment: 'staging',
       }));
 
-      const resourceFromAttributesSpy = jest.spyOn(resources, 'resourceFromAttributes');
+      const resourceFromAttributesSpy = jest.mocked(resourceFromAttributes);
 
       initTelemetry([], REPO_ROOT, false, 'my-worker');
 
@@ -169,7 +182,7 @@ describe('initTelemetry', () => {
         },
       }));
 
-      const resourceFromAttributesSpy = jest.spyOn(resources, 'resourceFromAttributes');
+      const resourceFromAttributesSpy = jest.mocked(resourceFromAttributes);
 
       initTelemetry([], REPO_ROOT, false, 'test-service');
 

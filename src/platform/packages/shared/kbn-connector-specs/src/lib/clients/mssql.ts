@@ -25,6 +25,34 @@ export const PROXY_NOT_SUPPORTED_MESSAGE =
   'the SQL Server (TDS) protocol cannot be tunnelled through an HTTP(S) forward proxy. ' +
   "Add the connector's host to xpack.actions.proxyBypassHosts to allow a direct connection.";
 
+interface PooledTdsConnection {
+  closed?: boolean;
+  hasError?: boolean;
+  reset(callback: (err?: Error | null) => void): void;
+}
+
+// mssql never resets a pooled connection between requests, so a BEGIN TRAN, USE or SET from one call would carry
+// into the next (locks held, writes silently rolled back, reads from the wrong database). tarn runs `validate` on
+// every borrow of an idle connection, so resetting here gives each request a clean session. A failed reset marks
+// the connection invalid and the pool replaces it. tarn awaits the result (its typings only declare a boolean).
+const resetOnAcquire = (connection: PooledTdsConnection): boolean =>
+  new Promise<boolean>((resolve) => {
+    if (!connection || connection.closed || connection.hasError) {
+      resolve(false);
+      return;
+    }
+    connection.reset((err) => resolve(!err));
+  }) as unknown as boolean;
+
+// True only for a bare IPv6 literal. The URL parser validates IPv6 strictly; node's `net` is not allowed in this package.
+const isIPv6Literal = (host: string): boolean => {
+  try {
+    return new URL(`http://[${host}]`).hostname !== '';
+  } catch {
+    return false;
+  }
+};
+
 export const mssqlClientType: ClientTypeSpec<ConnectionPool> = {
   id: 'mssql',
 
@@ -42,7 +70,9 @@ export const mssqlClientType: ClientTypeSpec<ConnectionPool> = {
     const { timeout, maxContentLength } = ctx.networkSettings.getResponseSettings();
 
     // Merges the global xpack.actions.ssl settings with any matching customHostSettings entry for this host.
-    const tls = ctx.platform.buildTlsOptions([{ hostname: host, port }], ctx.logger);
+    // The lookup key is a URL (https://<host>:<port>), so an IPv6 literal must be bracketed to match its entry.
+    const tlsHostname = isIPv6Literal(host) ? `[${host}]` : host;
+    const tls = ctx.platform.buildTlsOptions([{ hostname: tlsHostname, port }], ctx.logger);
     if (tls.checkServerIdentity) {
       // tedious only exposes trustServerCertificate, so "certificate" mode (chain without hostname) cannot be honored.
       ctx.logger.warn(
@@ -61,10 +91,11 @@ export const mssqlClientType: ClientTypeSpec<ConnectionPool> = {
       password,
       connectionTimeout: timeout,
       requestTimeout: timeout,
-      pool: { max: 5, min: 0, idleTimeoutMillis: 30000 },
+      pool: { max: 5, min: 0, idleTimeoutMillis: 30000, validate: resetOnAcquire },
       options: {
-        // Azure SQL rejects unencrypted connections, so encryption is not configurable.
-        encrypt: true,
+        // Azure SQL rejects unencrypted connections, so it never sets `ssl`. Self-managed SQL Server can opt out
+        // with `config.ssl: 'disabled'` (as MySQL does); anything else keeps encryption on.
+        encrypt: ctx.config?.ssl !== 'disabled',
         trustServerCertificate: tls.rejectUnauthorized === false,
         cryptoCredentialsDetails: {
           ...(tls.ca ? { ca: tls.ca } : {}),

@@ -14,6 +14,7 @@ import {
   METADATA_UNITED_INDEX,
   METADATA_UNITED_TRANSFORM,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
+import { buildBaseEndpointMetadataFilter } from '@kbn/security-solution-plugin/common/endpoint/utils/endpoint_metadata_filter';
 
 const POLL_INTERVAL_MS = 5_000;
 
@@ -29,6 +30,12 @@ export async function waitForEndpointPackage(
   const start = Date.now();
   log.info('Waiting for endpoint package to be installed...');
 
+  let packageInstalled = false;
+  // A failed transform is not terminal: Kibana's metadata health task force-stops
+  // and restarts it, so keep polling and only report the details on timeout.
+  let lastFailure: string | undefined;
+  let lastStates = 'no transforms reported';
+
   while (Date.now() - start < maxWaitMs) {
     try {
       const response = await kbnClient.request<{ item: { status: string } }>({
@@ -37,45 +44,50 @@ export async function waitForEndpointPackage(
       });
 
       if (response.data.item.status === 'installed') {
+        packageInstalled = true;
         log.info('Endpoint package is installed. Verifying transforms are started...');
 
-        const statsResponse = await esClient.transform.getTransformStats({
+        const { transforms } = await esClient.transform.getTransformStats({
           transform_id: 'endpoint*',
         });
 
-        const stoppedTransforms = statsResponse.transforms.filter((t) => t.state === 'stopped');
+        const failedTransforms = transforms.filter((t) => t.state === 'failed');
+        lastFailure = failedTransforms.length
+          ? failedTransforms.map((t) => `${t.id}: ${t.reason ?? 'no reason reported'}`).join('; ')
+          : undefined;
 
-        for (const t of stoppedTransforms) {
-          log.info(`Restarting stopped transform: ${t.id}`);
-          try {
-            await esClient.transform.startTransform({ transform_id: t.id });
-          } catch (e) {
-            log.debug(`Failed to restart transform ${t.id}: ${e}`);
+        // With a failed transform in the same stats, skip the restarts: a hanging
+        // start request must not delay the next poll, which re-reads the stats.
+        if (!lastFailure) {
+          for (const t of transforms.filter((tr) => tr.state === 'stopped')) {
+            log.info(`Restarting stopped transform: ${t.id}`);
+            try {
+              await esClient.transform.startTransform({ transform_id: t.id });
+            } catch (e) {
+              log.debug(`Failed to restart transform ${t.id}: ${e}`);
+            }
           }
         }
 
-        const hasCurrentTransform = statsResponse.transforms.some((t) =>
+        const hasCurrentTransform = transforms.some((t) =>
           t.id.startsWith(metadataTransformPrefix)
         );
-        const hasUnitedTransform = statsResponse.transforms.some((t) =>
+        const hasUnitedTransform = transforms.some((t) =>
           t.id.startsWith(METADATA_UNITED_TRANSFORM)
         );
         const allStarted =
-          statsResponse.transforms.length > 0 &&
-          statsResponse.transforms.every((t) => t.state === 'started' || t.state === 'indexing');
+          transforms.length > 0 &&
+          transforms.every((t) => t.state === 'started' || t.state === 'indexing');
 
         if (hasCurrentTransform && hasUnitedTransform && allStarted) {
-          log.info(
-            `All endpoint transforms are running (${statsResponse.transforms.length} total)`
-          );
+          log.info(`All endpoint transforms are running (${transforms.length} total)`);
           return;
         }
 
-        log.debug(
-          `Waiting for endpoint transforms (current=${hasCurrentTransform}, united=${hasUnitedTransform}): ${statsResponse.transforms
-            .map((t) => `${t.id}=${t.state}`)
-            .join(', ')}`
-        );
+        lastStates = `current=${hasCurrentTransform}, united=${hasUnitedTransform}: ${transforms
+          .map((t) => `${t.id}=${t.state}`)
+          .join(', ')}`;
+        log.debug(`Waiting for endpoint transforms (${lastStates})`);
       } else {
         log.debug(`Endpoint package status: ${response.data.item.status}`);
       }
@@ -86,7 +98,14 @@ export async function waitForEndpointPackage(
     await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
   }
 
-  throw new Error(`Timed out waiting for endpoint package to be installed after ${maxWaitMs}ms`);
+  if (!packageInstalled) {
+    throw new Error(`Timed out waiting for endpoint package to be installed after ${maxWaitMs}ms`);
+  }
+  throw new Error(
+    `Timed out after ${maxWaitMs}ms waiting for endpoint transforms; ${
+      lastFailure ? `last failure: ${lastFailure}` : `last observed states (${lastStates})`
+    }`
+  );
 }
 
 export async function waitForTransformPropagation(
@@ -99,6 +118,11 @@ export async function waitForTransformPropagation(
   const start = Date.now();
   let lastCounts = { metadataCurrent: 0, metadataUnited: 0 };
   const seededQuery = { prefix: { 'agent.id': agentIdPrefix } };
+  // A half-merged united doc matches the prefix but not the base filter the
+  // lookup tools apply, so the first scenarios would see an empty inventory.
+  const seededUnitedQuery = {
+    bool: { filter: [seededQuery, buildBaseEndpointMetadataFilter()] },
+  };
   log.info(
     `Waiting for transform propagation: metadataCurrent >= ${expectedCounts.metadataCurrent}, metadataUnited >= ${expectedCounts.metadataUnited}`
   );
@@ -113,7 +137,7 @@ export async function waitForTransformPropagation(
         }),
         esClient.count({
           index: METADATA_UNITED_INDEX,
-          query: seededQuery,
+          query: seededUnitedQuery,
           ignore_unavailable: true,
         }),
       ]);
@@ -160,6 +184,8 @@ interface ExtraDocument {
 export interface EndpointScenario {
   agentId: string;
   hostName: string;
+  /** IP addresses written to endpoint metadata for exact-IP target resolution. */
+  hostIp?: string[];
   os: {
     name: string;
     version: string;
@@ -349,11 +375,23 @@ const createIsolationActionResponseDocument = ({
   },
 });
 
+/**
+ * Writes one host as Endpoint and Fleet would: a metadata doc and an agent doc
+ * sharing `agent.id`.
+ *
+ * The agent doc carries `updated_at` because the `metadata_united` transform
+ * syncs on it; without it the host is merged from the Endpoint side only and
+ * the lookup tools (which require both) never see it. The metadata doc must
+ * not carry the key: `metrics-endpoint.metadata_current` maps it as an alias of
+ * `event.ingested`, and the `metadata_current` transform fails permanently
+ * ("Cannot write to a field alias") when it copies the key through.
+ */
 export async function seedScenario(clients: SeedClients, scenario: EndpointScenario) {
   const now = new Date().toISOString();
   const {
     agentId,
     hostName,
+    hostIp,
     os,
     policyName,
     policyStatus,
@@ -382,7 +420,7 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
         namespace: 'default',
       },
       agent: { id: agentId, type: 'endpoint', version: agentVersion },
-      host: { name: hostName, hostname: hostName, os },
+      host: { name: hostName, hostname: hostName, ...(hostIp ? { ip: hostIp } : {}), os },
       Endpoint: {
         status: endpointStatus,
         policy: { applied: { status: policyStatus, name: policyName, id: policyId } },
@@ -406,7 +444,7 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
     document: {
       '@timestamp': now,
       agent: { id: agentId, version: agentVersion },
-      local_metadata: { host: { name: hostName } },
+      local_metadata: { host: { name: hostName, ...(hostIp ? { ip: hostIp } : {}) } },
       active: true,
       enrolled_at: now,
       last_checkin: lastCheckin ?? now,
@@ -416,6 +454,7 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
       ...(agentPackages ? { packages: agentPackages } : {}),
       policy_revision_idx: 1,
       policy_id: policyId,
+      updated_at: now,
     },
   });
 

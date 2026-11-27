@@ -21,6 +21,7 @@ import {
   SETTINGS_TAB_IDS,
 } from '@kbn/nightshift-shared';
 import { NIGHTSHIFT_APP_ROUTE } from '../../common/constants';
+import { getNightshiftPageBackground } from '../common/page_background';
 import {
   DETECTION_PAGE_TITLE,
   KNOWLEDGE_PAGE_TITLE,
@@ -28,21 +29,22 @@ import {
   SETTINGS_PAGE_TITLE,
   SOURCES_PAGE_TITLE,
 } from '../components/app_header';
-import { useKibana } from '../hooks/use_kibana';
-import { useDeveloperMode } from '../hooks/use_developer_mode';
 import { useIntroBannerDismissal } from '../components/use_intro_banner_dismissal';
 import { useSignificantEventsAvailability } from '../data/availability/use_significant_events_availability';
-import { useOnboardingVisibility } from '../pages/landing/onboarding/use_onboarding_visibility';
 import {
   isNightshiftSetUp,
   useInvestigatorServiceAccount,
 } from '../data/service_accounts/use_investigator_service_account';
+import { useDeveloperMode } from '../hooks/use_developer_mode';
+import { useIsMobile, usePageSectionPaddingSize } from '../hooks/use_is_mobile';
+import { useKibana } from '../hooks/use_kibana';
 import {
   DETECTION_TAB_IDS,
   isDetectionTabId,
   isDeveloperModeTab,
 } from '../pages/detection/detection_tabs';
 import { KNOWLEDGE_TAB_IDS } from '../pages/knowledge/knowledge_tabs';
+import { useOnboardingVisibility } from '../pages/landing/onboarding/use_onboarding_visibility';
 
 /** Onboarding has a second column for the "Get started" card. */
 const ONBOARDING_MAX_WIDTH = '1040px';
@@ -79,7 +81,7 @@ const getCenteredLoadingFallback = (testSubject: string) => (
 );
 
 const getPageSectionLoadingFallback = (testSubject: string) => (
-  <EuiPageTemplate.Section component="div" restrictWidth={false}>
+  <EuiPageTemplate.Section component="div" color="transparent" restrictWidth={false}>
     <EuiLoadingSpinner size="xl" data-test-subj={testSubject} />
   </EuiPageTemplate.Section>
 );
@@ -160,6 +162,8 @@ export const DetectionRoute = ({
 
 export function NightshiftPage(): React.ReactElement | null {
   const { euiTheme } = useEuiTheme();
+  const isMobile = useIsMobile();
+  const sectionPaddingSize = usePageSectionPaddingSize();
   const {
     application,
     executionContext,
@@ -272,7 +276,6 @@ export function NightshiftPage(): React.ReactElement | null {
     onboardingFinishedSpace === spaceBasePath ||
     onboardingFinishedSpacesThisLoad.has(spaceBasePath);
   const introBannerDismissal = useIntroBannerDismissal();
-  const [introBannerVisible, setIntroBannerVisible] = useState<boolean | undefined>();
   // All five onboarding steps replace the usual header actions, including First automation.
   const hidesHeaderActions = isOnboarding || onboarding.isLoading;
 
@@ -299,10 +302,6 @@ export function NightshiftPage(): React.ReactElement | null {
   const isSetupPending = requiresSetup && serviceAccount.isLoading;
   const needsSetup =
     requiresSetup && serviceAccount.isSuccess && !isNightshiftSetUp(serviceAccount.data);
-  const showExploreLiveExample =
-    !isSetupPending &&
-    (needsSetup || (isOnboarding && !onboarding.isLoading)) &&
-    introBannerVisible === false;
   useBreadcrumbs(
     [
       {
@@ -365,6 +364,12 @@ export function NightshiftPage(): React.ReactElement | null {
     return null;
   }
 
+  const isDetectionWorkspaceFixedHeight = isDetectionPage && !isMobile;
+  const pageBackground = getNightshiftPageBackground(euiTheme.colors);
+  const pageBackgroundCss = css`
+    background: ${pageBackground};
+  `;
+
   // Until the space is set up, every page shows the regular onboarding, which starts at its
   // "Enable Elastic nightshift" step, for everyone: only admins can complete it.
   if (isSetupPending || needsSetup) {
@@ -372,10 +377,15 @@ export function NightshiftPage(): React.ReactElement | null {
       <ObservabilityPageTemplate
         data-test-subj="nightshiftPage"
         restrictWidth={false}
-        pageSectionProps={{ paddingSize: 'none' }}
+        pageSectionProps={{ paddingSize: 'none', css: pageBackgroundCss }}
       >
-        <NightshiftAppHeader page="landing" showExploreLiveExample={showExploreLiveExample} />
-        <EuiPageTemplate.Section component="div" restrictWidth={ONBOARDING_MAX_WIDTH}>
+        <NightshiftAppHeader page="landing" />
+        <EuiPageTemplate.Section
+          component="div"
+          color="transparent"
+          restrictWidth={ONBOARDING_MAX_WIDTH}
+          paddingSize={sectionPaddingSize}
+        >
           {isSetupPending ? (
             <EuiFlexGroup justifyContent="center" data-test-subj="nightshiftSetupLoading">
               <EuiLoadingSpinner size="xl" />
@@ -384,7 +394,6 @@ export function NightshiftPage(): React.ReactElement | null {
             <SetupNightshiftOnboarding
               onFinish={finishOnboarding}
               introBannerDismissal={introBannerDismissal}
-              onIntroBannerVisibilityChange={setIntroBannerVisible}
             />
           )}
         </EuiPageTemplate.Section>
@@ -392,21 +401,12 @@ export function NightshiftPage(): React.ReactElement | null {
     );
   }
 
-  const isHomePage =
-    !isSettingsPage &&
-    !isKnowledgePage &&
-    !isSourcesPage &&
-    !isDetectionPage &&
-    !canUseAutomationsPage &&
-    !isOnboarding &&
-    !onboarding.isLoading;
-
   return (
     <ObservabilityPageTemplate
       data-test-subj="nightshiftPage"
       restrictWidth={false}
       css={
-        isDetectionPage
+        isDetectionWorkspaceFixedHeight
           ? css`
               height: 100%;
               min-height: 0;
@@ -416,12 +416,17 @@ export function NightshiftPage(): React.ReactElement | null {
       }
       pageSectionProps={{
         paddingSize: 'none',
-        ...(isDetectionPage
+        css: css`
+          background: ${pageBackground};
+          ${isDetectionWorkspaceFixedHeight
+            ? `
+            min-height: 0;
+            overflow: hidden;
+          `
+            : ''}
+        `,
+        ...(isDetectionWorkspaceFixedHeight
           ? {
-              css: css`
-                min-height: 0;
-                overflow: hidden;
-              `,
               contentProps: {
                 css: css`
                   display: flex;
@@ -431,17 +436,6 @@ export function NightshiftPage(): React.ReactElement | null {
                   height: 100%;
                 `,
               },
-            }
-          : {}),
-        ...(isHomePage
-          ? {
-              css: css`
-                background: linear-gradient(
-                  ${euiTheme.colors.backgroundBasePlain},
-                  ${euiTheme.colors.backgroundBaseSubdued},
-                  ${euiTheme.colors.backgroundBasePlain}
-                );
-              `,
             }
           : {}),
       }}
@@ -487,7 +481,6 @@ export function NightshiftPage(): React.ReactElement | null {
         <>
           <NightshiftAppHeader
             page={canUseAutomationsPage ? 'automations' : 'landing'}
-            showExploreLiveExample={showExploreLiveExample}
             onKnowledgeClick={navigateToKnowledge}
             knowledgeHref={knowledgeHref}
             onSettingsClick={
@@ -522,7 +515,8 @@ export function NightshiftPage(): React.ReactElement | null {
           />
           <EuiPageTemplate.Section
             component="div"
-            color={isHomePage ? 'transparent' : undefined}
+            color="transparent"
+            paddingSize={sectionPaddingSize}
             restrictWidth={
               canUseAutomationsPage
                 ? false
@@ -543,7 +537,6 @@ export function NightshiftPage(): React.ReactElement | null {
                 automationsHref={canUseAutomations ? automationsHref : undefined}
                 onFinish={finishOnboarding}
                 introBannerDismissal={introBannerDismissal}
-                onIntroBannerVisibilityChange={setIntroBannerVisible}
               />
             ) : onboarding.isLoading ? (
               <EuiFlexGroup justifyContent="center" data-test-subj="nightshiftOnboardingLoading">

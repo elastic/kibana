@@ -120,11 +120,19 @@ Public repositories clone without credentials:
 git clone --depth 1 --filter=blob:none https://github.com/{owner}/{repo}.git
 ```
 
-For a private repository, pass the token as a header instead of embedding it in the URL, and never
-echo it:
+For a private repository, run the same command with the GitHub connector's id as `connector_id`.
+git gets the token from the sandbox's credential helper; never put the token in the URL or echo
+it. Run later `git fetch` or `git pull` in the clone with `connector_id` too:
+
+```bash
+git clone --depth 1 --filter=blob:none https://github.com/{owner}/{repo}.git
+```
+
+If git still asks for a username, pass the header explicitly:
 
 ```bash
 git -c http.extraHeader="Authorization: Basic $(printf 'x-access-token:%s' "${CONNECTOR_HEADER_AUTHORIZATION#* }" | base64 | tr -d '\n')" \
   clone --depth 1 --filter=blob:none https://github.com/{owner}/{repo}.git
 ```
+
 Use `--depth 100` when you need some history; a full clone only when the API cannot answer.

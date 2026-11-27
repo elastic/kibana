@@ -7,7 +7,6 @@
 
 import { get, isObject } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
-import type { ExperimentalFeatures } from '../../experimental_features';
 import { CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS } from '../service/policy/custom_yara_signatures';
 import {
   DefaultPolicyNotificationMessage,
@@ -451,18 +450,8 @@ export const removeLinuxDnsEvents = (policy: PolicyConfig): PolicyConfig => {
 };
 
 /**
- * Linux ransomware protection is configurable only from the per-OS policy form, so it is
- * enabled only when both feature flags are on.
- */
-export const isLinuxRansomwareProtectionEnabled = ({
-  linuxRansomwareProtection,
-  perOsPolicySettings,
-}: Pick<ExperimentalFeatures, 'linuxRansomwareProtection' | 'perOsPolicySettings'>): boolean =>
-  linuxRansomwareProtection && perOsPolicySettings;
-
-/**
  * Returns a copy of the passed `PolicyConfig` with Linux ransomware protection and its user
- * notification removed. Used when `isLinuxRansomwareProtectionEnabled` is false.
+ * notification removed. Used when the `linuxRansomwareProtection` experimental feature is off.
  */
 export const removeLinuxRansomware = (policy: PolicyConfig): PolicyConfig => {
   // The policy may come from an unvalidated API payload, so tolerate a malformed `linux` branch.
@@ -486,19 +475,9 @@ export const removeLinuxRansomware = (policy: PolicyConfig): PolicyConfig => {
 };
 
 /**
- * AI Data Collection is configurable only from the per-OS policy form, so it is enabled only when
- * both feature flags are on.
- */
-export const isAiDataCollectionEnabled = ({
-  endpointAiDataCollection,
-  perOsPolicySettings,
-}: Pick<ExperimentalFeatures, 'endpointAiDataCollection' | 'perOsPolicySettings'>): boolean =>
-  endpointAiDataCollection && perOsPolicySettings;
-
-/**
  * Returns a copy of the passed `PolicyConfig` with the `ai_data_collection` block removed from
  * every OS, so the policy leaves AI event enrichment unset (treated as disabled by Endpoint). Used
- * when `isAiDataCollectionEnabled` is false.
+ * when the `endpointAiDataCollection` experimental feature is off.
  */
 export const removeAiDataCollection = (policy: PolicyConfig): PolicyConfig => {
   const { ai_data_collection: windowsAiDataCollection, ...windows } = policy.windows;
@@ -629,11 +608,12 @@ export const setProtectionModeAndPopup = ({
 
 export const setBehaviorReputationService = (
   policy: PolicyConfig,
-  value: boolean
+  value: boolean,
+  osList: readonly (keyof UIPolicyConfig)[] = ['windows', 'mac', 'linux']
 ): PolicyConfig => {
-  policy.windows.behavior_protection.reputation_service = value;
-  policy.mac.behavior_protection.reputation_service = value;
-  policy.linux.behavior_protection.reputation_service = value;
+  forEachCouplingOs(osList, (os) => {
+    policy[os].behavior_protection.reputation_service = value;
+  });
   return policy;
 };
 
@@ -827,33 +807,20 @@ export const setDeviceControlSwitch = (policy: PolicyConfig, value: boolean): Po
 
 export const setDeviceControlUsbStorage = (
   policy: PolicyConfig,
-  value: DeviceControlAccessLevel
+  value: DeviceControlAccessLevel,
+  osList: readonly ('windows' | 'mac')[] = ['windows', 'mac']
 ): PolicyConfig => {
-  if (!policy.windows.device_control) {
-    policy.windows.device_control = { enabled: true, usb_storage: value };
-  } else {
-    policy.windows.device_control.usb_storage = value;
-  }
+  for (const os of osList) {
+    const deviceControl = policy[os].device_control;
+    if (!deviceControl) {
+      policy[os].device_control = { enabled: true, usb_storage: value };
+    } else {
+      deviceControl.usb_storage = value;
+    }
 
-  if (!policy.mac.device_control) {
-    policy.mac.device_control = { enabled: true, usb_storage: value };
-  } else {
-    policy.mac.device_control.usb_storage = value;
-  }
-
-  if (value === DeviceControlAccessLevel.deny_all) {
-    if (policy.windows.popup.device_control) {
-      policy.windows.popup.device_control.enabled = true;
-    }
-    if (policy.mac.popup.device_control) {
-      policy.mac.popup.device_control.enabled = true;
-    }
-  } else {
-    if (policy.windows.popup.device_control) {
-      policy.windows.popup.device_control.enabled = false;
-    }
-    if (policy.mac.popup.device_control) {
-      policy.mac.popup.device_control.enabled = false;
+    const popup = policy[os].popup.device_control;
+    if (popup) {
+      popup.enabled = value === DeviceControlAccessLevel.deny_all;
     }
   }
 

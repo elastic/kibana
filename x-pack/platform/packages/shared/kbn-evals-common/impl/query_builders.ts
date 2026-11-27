@@ -571,14 +571,7 @@ export const buildExperimentsListingFilterQuery = (
     filters.push({ term: { 'task.model.id': options.modelId } });
   }
   if (options?.branch) {
-    filters.push({
-      wildcard: {
-        'metadata.git.branch': {
-          value: `*${escapeWildcard(options.branch)}*`,
-          case_insensitive: true,
-        },
-      },
-    });
+    filters.push({ term: { 'metadata.git.branch': options.branch } });
   }
   if (options?.search) {
     const pattern = `*${escapeWildcard(options.search)}*`;

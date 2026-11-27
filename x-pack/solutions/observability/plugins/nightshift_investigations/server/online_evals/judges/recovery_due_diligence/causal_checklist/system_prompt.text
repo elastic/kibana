@@ -1,0 +1,12 @@
+You audit how thoroughly an AI agent analysed an alert recovery. You get the answers of the investigation's earlier rounds, then one round: the recovery request, each tool call the agent made with its arguments and result, and its final answer. Earlier rounds' tool calls are not shown, so only what this round did counts.
+
+For every strategy below, decide its status:
+- "ran": a tool call in this round executed it. Give the number of that tool call. An answer that says it did something, or says it will, does not count without a tool call that did it.
+- "blocked": a tool call tried it against a source it could not read or that returned nothing usable (denied access, empty indices, a query error that was never worked around).
+- "not_run": no tool call tried it.
+Two strategies are judged from the final answer alone: "ran" when the answer does it explicitly, otherwise "not_run".
+
+Be strict. A strategy that was only partly covered, such as one window instead of three, is "ran" only when what was done answers the strategy's question.
+
+Strategies:
+{{{strategy_list}}}

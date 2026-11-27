@@ -40,12 +40,24 @@ const summarizeQueries = (
 ): Array<Pick<QueryDiagnostic, 'indexPattern' | 'engine' | 'rowCount'>> =>
   queries.map(({ indexPattern, engine, rowCount }) => ({ indexPattern, engine, rowCount }));
 
+// Every probe and query error in the response, probes first.
+const sourceErrors = ({
+  probes,
+  queries,
+}: Pick<ListResponse, 'probes' | 'queries'>): SourceError[] =>
+  [...probes, ...queries].flatMap(({ error }) => (error === null ? [] : [error]));
+
+interface SourceError {
+  kind: 'failed' | 'unusable';
+  status: number | null;
+  reason: string;
+}
+
 interface ListResponse {
   columns: Array<{ name: string; kind: string }>;
   rows: Array<Record<string, unknown>>;
   provenance: Record<string, Record<string, string>>;
   truncated: boolean;
-  took: number;
   queries: Array<{
     indexPattern: string;
     engine: string;
@@ -54,8 +66,9 @@ interface ListResponse {
     took: number | null;
     documentsFound: number | null;
     rowCount: number;
+    error: SourceError | null;
   }>;
-  errors: Array<{ indexPattern: string; status: number | null; reason: string }>;
+  probes: Array<{ indexPattern: string; error: SourceError | null }>;
   unavailableColumns: Array<{ column: string; indexPattern: string; field: string }>;
 }
 
@@ -104,7 +117,10 @@ apiTest.describe(
           last_seen: '2026-11-01T10:01:00.000Z',
         });
         expect(body.truncated).toBe(false);
-        expect(body.errors).toStrictEqual([]);
+        expect(body.probes.map(({ indexPattern }) => indexPattern).sort()).toStrictEqual(
+          [OTEL_PATTERN, STATE_PATTERN].sort()
+        );
+        expect(sourceErrors(body)).toStrictEqual([]);
         expect(body.unavailableColumns).toStrictEqual(UID_UNAVAILABLE_PER_OTEL_PLAN);
       }
     );
@@ -141,9 +157,6 @@ apiTest.describe(
         });
         // The OpenTelemetry time-series index holds no 2026-11-01 documents, so its `TS` plan reads none.
         expect(body.queries.map(({ rowCount }) => rowCount)).toStrictEqual([3, 0, 3]);
-        expect(typeof body.took).toBe('number');
-        expect('unsupportedMetrics' in body).toBe(false);
-        expect('documentFilterWarnings' in body).toBe(false);
       }
     );
 
@@ -157,7 +170,8 @@ apiTest.describe(
         );
 
         expect(response).toHaveStatusCode(200);
-        const { columns, rows, errors, unavailableColumns }: ListResponse = response.body;
+        const body: ListResponse = response.body;
+        const { columns, rows, unavailableColumns } = body;
 
         expect(unavailableColumns).toStrictEqual(UID_UNAVAILABLE_PER_OTEL_PLAN);
         expect(columns.find(({ name }) => name === 'k8s.deployment.uid')).toStrictEqual({
@@ -165,13 +179,13 @@ apiTest.describe(
           kind: 'attribute',
         });
         expect(rows.map((row) => row['k8s.deployment.uid'])).toStrictEqual([null, null, null]);
-        // An unmapped attribute leaves its plans usable, so nothing is reported in `errors`.
-        expect(errors).toStrictEqual([]);
+        // An unmapped attribute leaves its plans usable, so no query has an error.
+        expect(sourceErrors(body)).toStrictEqual([]);
       }
     );
 
     apiTest(
-      'returns the columns in column order, the same as the types route',
+      'returns the columns in column order, the same names and kinds as the types route',
       async ({ apiClient }) => {
         const response = await postList(apiClient, WINDOW);
         const typesResponse = await apiClient.get(TYPES_PATH, {
@@ -197,7 +211,11 @@ apiTest.describe(
           { name: 'k8s.deployment.uid', kind: 'attribute' },
           { name: 'last_seen', kind: 'last_seen' },
         ]);
-        expect(columns).toStrictEqual(types.find(({ type }) => type === 'k8s.deployment')?.columns);
+        expect(columns).toStrictEqual(
+          types
+            .find(({ type }) => type === 'k8s.deployment')
+            ?.columns.map(({ name, kind }) => ({ name, kind }))
+        );
       }
     );
 
@@ -287,7 +305,8 @@ apiTest.describe(
         );
 
         expect(response).toHaveStatusCode(200);
-        const { rows, errors, queries }: ListResponse = response.body;
+        const body: ListResponse = response.body;
+        const { rows, queries } = body;
 
         expect(rows).toStrictEqual([
           {
@@ -303,7 +322,7 @@ apiTest.describe(
             last_seen: '2026-11-05T14:01:00.000Z',
           },
         ]);
-        expect(errors).toStrictEqual([]);
+        expect(sourceErrors(body)).toStrictEqual([]);
         expect(summarizeQueries(queries)).toStrictEqual([
           { indexPattern: STATE_PATTERN, engine: 'FROM', rowCount: 0 },
           { indexPattern: OTEL_PATTERN, engine: 'TS', rowCount: 1 },
@@ -324,7 +343,8 @@ apiTest.describe(
         );
 
         expect(response).toHaveStatusCode(200);
-        const { rows, truncated, errors, queries }: ListResponse = response.body;
+        const body: ListResponse = response.body;
+        const { rows, truncated, queries } = body;
 
         expect(
           rows.map(
@@ -353,7 +373,7 @@ apiTest.describe(
           },
         ]);
         expect(truncated).toBe(false);
-        expect(errors).toStrictEqual([]);
+        expect(sourceErrors(body)).toStrictEqual([]);
         // Two rows per plan: `FROM` leaves out the time-series index (it would return tsds-only as
         // a third row) and `TS` reads only it (it would return standard-only).
         expect(summarizeQueries(queries)).toStrictEqual([
@@ -377,13 +397,14 @@ apiTest.describe(
         );
 
         expect(response).toHaveStatusCode(200);
-        const { rows, errors, queries }: ListResponse = response.body;
+        const body: ListResponse = response.body;
+        const { rows, queries } = body;
 
         expect(rows.map((row) => row['entity.id'])).toStrictEqual([
           'k8s.deployment:aliased/kept-standard',
           'k8s.deployment:aliased/kept-tsds',
         ]);
-        expect(errors).toStrictEqual([]);
+        expect(sourceErrors(body)).toStrictEqual([]);
         expect(summarizeQueries(queries)).toStrictEqual([
           { indexPattern: STATE_PATTERN, engine: 'FROM', rowCount: 0 },
           { indexPattern: OTEL_PATTERN, engine: 'TS', rowCount: 1 },
@@ -492,9 +513,9 @@ apiTest.describe(
         });
 
         expect(response).toHaveStatusCode(200);
-        const { rows, errors }: ListResponse = response.body;
-        expect(rows.map((row) => row['entity.id']).sort()).toStrictEqual(DEPLOYMENT_IDS);
-        expect(errors).toStrictEqual([]);
+        const body: ListResponse = response.body;
+        expect(body.rows.map((row) => row['entity.id']).sort()).toStrictEqual(DEPLOYMENT_IDS);
+        expect(sourceErrors(body)).toStrictEqual([]);
       }
     );
 
@@ -513,15 +534,19 @@ apiTest.describe(
         });
 
         expect(response).toHaveStatusCode(200);
-        const { rows, errors, truncated }: ListResponse = response.body;
-        // Elasticsearch drops the indices the user cannot read, so every plan reads nothing usable;
-        // each is reported in `errors`, and that is not truncation.
+        const { rows, queries, truncated }: ListResponse = response.body;
+        // Elasticsearch drops the indices the user cannot read, so no probe finds a time-series
+        // index and each source's one `FROM` plan reads nothing usable; each query carries an
+        // `unusable` error, and that is not truncation.
         expect(rows).toStrictEqual([]);
-        expect(errors).toStrictEqual(
+        expect(queries.map(({ indexPattern, error }) => ({ indexPattern, error }))).toStrictEqual(
           [STATE_PATTERN, OTEL_PATTERN].map((indexPattern) => ({
             indexPattern,
-            status: null,
-            reason: `no readable index behind "${indexPattern}" maps @timestamp`,
+            error: {
+              kind: 'unusable',
+              status: null,
+              reason: `no readable index behind "${indexPattern}" maps @timestamp`,
+            },
           }))
         );
         expect(truncated).toBe(false);

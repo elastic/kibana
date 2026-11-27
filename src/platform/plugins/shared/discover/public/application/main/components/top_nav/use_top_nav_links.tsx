@@ -47,7 +47,7 @@ import {
 import { useProfileAccessor } from '../../../../context_awareness';
 import {
   internalStateActions,
-  selectTabSavedSearchByValueAttributes,
+  selectTabEmbeddableTab,
   useCurrentDataView,
   useCurrentTabSelector,
   useCurrentTabDataStateContainer,
@@ -123,8 +123,8 @@ export const useTopNavLinks = ({
       )
       .map((ruleType) => ruleType.id);
 
-  const transferBackToEditor = useCallback(async () => {
-    const byValueState = await selectTabSavedSearchByValueAttributes({
+  const transferBackToEditor = useCallback(() => {
+    const tab = selectTabEmbeddableTab({
       tabId: currentTab.id,
       getState,
       runtimeStateManager,
@@ -133,7 +133,7 @@ export const useTopNavLinks = ({
 
     services.embeddableEditor.transferBackToEditor(TransferAction.SaveByValue, {
       state: {
-        byValueState,
+        tab,
         controlGroupState: currentTab.attributes.controlGroupState,
       },
     });
@@ -368,9 +368,9 @@ export const useTopNavLinks = ({
             }),
         testId: 'discoverSaveButton',
         iconType: isEmbeddedEditor ? 'checkCircleFill' : 'save',
-        run: async () => {
+        run: () => {
           if (isEmbeddedEditor && services.embeddableEditor.isByValueEditor()) {
-            await transferBackToEditor();
+            transferBackToEditor();
           } else {
             onOpenSaveModal();
           }

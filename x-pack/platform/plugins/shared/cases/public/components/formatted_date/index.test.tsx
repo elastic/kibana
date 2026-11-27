@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mount, shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import React from 'react';
 
 import { useDateFormat, useTimeZone } from '../../common/lib/kibana';
@@ -30,169 +30,173 @@ describe('formatted_date', () => {
   });
 
   describe('PreferenceFormattedDate', () => {
-    test('renders correctly against snapshot', () => {
-      mockUseDateFormat.mockImplementation(() => '');
-      const wrapper = mount(<PreferenceFormattedDate value={isoDate} />);
-
-      expect(wrapper).toMatchSnapshot();
-    });
-
     test('it renders the date with the default configuration', () => {
-      const wrapper = mount(<PreferenceFormattedDate value={isoDate} />);
+      const { container } = render(<PreferenceFormattedDate value={isoDate} />);
 
-      expect(wrapper.text()).toEqual('Feb 25, 2019 @ 22:27:05.000');
+      expect(container.textContent).toEqual('Feb 25, 2019 @ 22:27:05.000');
     });
 
     test('it renders a UTC ISO8601 date string supplied when no date format configuration exists', () => {
       mockUseDateFormat.mockImplementation(() => '');
-      const wrapper = mount(<PreferenceFormattedDate value={isoDate} />);
+      const { container } = render(<PreferenceFormattedDate value={isoDate} />);
 
-      expect(wrapper.text()).toEqual('2019-02-25T22:27:05Z');
+      expect(container.textContent).toEqual('2019-02-25T22:27:05Z');
     });
 
     test('it renders the correct timezone when a non-UTC configuration exists', () => {
       mockUseTimeZone.mockImplementation(() => 'America/Denver');
-      const wrapper = mount(<PreferenceFormattedDate value={isoDate} />);
+      const { container } = render(<PreferenceFormattedDate value={isoDate} />);
 
-      expect(wrapper.text()).toEqual('Feb 25, 2019 @ 15:27:05.000');
+      expect(container.textContent).toEqual('Feb 25, 2019 @ 15:27:05.000');
     });
 
     test('it renders the date with a user-defined format', () => {
       mockUseDateFormat.mockImplementation(() => 'MMM-DD-YYYY');
-      const wrapper = mount(<PreferenceFormattedDate value={isoDate} />);
+      const { container } = render(<PreferenceFormattedDate value={isoDate} />);
 
-      expect(wrapper.text()).toEqual('Feb-25-2019');
+      expect(container.textContent).toEqual('Feb-25-2019');
     });
 
     test('it strips down milliseconds when stripMs is passed', () => {
       const date = new Date('2022-01-27T10:30:00.000Z');
 
-      const wrapper = mount(<PreferenceFormattedDate value={date} stripMs={true} />);
+      const { container } = render(<PreferenceFormattedDate value={date} stripMs={true} />);
 
-      expect(wrapper.text()).toEqual('Jan 27, 2022 @ 10:30:00');
+      expect(container.textContent).toEqual('Jan 27, 2022 @ 10:30:00');
     });
 
     test('it strips down milliseconds when stripMs is passed and user-defined format is used', () => {
       const date = new Date('2022-01-27T10:30:00.000Z');
       mockUseDateFormat.mockImplementation(() => 'HH:mm:ss.SSS');
 
-      const wrapper = mount(<PreferenceFormattedDate value={date} stripMs={true} />);
+      const { container } = render(<PreferenceFormattedDate value={date} stripMs={true} />);
 
-      expect(wrapper.text()).toEqual('10:30:00');
+      expect(container.textContent).toEqual('10:30:00');
     });
   });
 
   describe('FormattedDate', () => {
     test('it renders against a numeric epoch', () => {
-      const wrapper = mount(<FormattedDate fieldName="@timestamp" value={1559079339000} />);
-      expect(wrapper.text()).toEqual('May 28, 2019 @ 21:35:39.000');
+      const { container } = render(<FormattedDate fieldName="@timestamp" value={1559079339000} />);
+      expect(container.textContent).toEqual('May 28, 2019 @ 21:35:39.000');
     });
 
     test('it renders against a string epoch', () => {
-      const wrapper = mount(<FormattedDate fieldName="@timestamp" value={'1559079339000'} />);
-      expect(wrapper.text()).toEqual('May 28, 2019 @ 21:35:39.000');
+      const { container } = render(
+        <FormattedDate fieldName="@timestamp" value={'1559079339000'} />
+      );
+      expect(container.textContent).toEqual('May 28, 2019 @ 21:35:39.000');
     });
 
     test('it renders against a ISO string', () => {
-      const wrapper = mount(
+      const { container } = render(
         <FormattedDate fieldName="@timestamp" value={'2019-05-28T22:04:49.957Z'} />
       );
-      expect(wrapper.text()).toEqual('May 28, 2019 @ 22:04:49.957');
+      expect(container.textContent).toEqual('May 28, 2019 @ 22:04:49.957');
     });
 
     test('it renders against an empty string as an empty string placeholder', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <FormattedDate fieldName="@timestamp" value={''} />
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(getEmptyString());
+      expect(container.textContent).toEqual(getEmptyString());
     });
 
     test('it renders against an null as a EMPTY_VALUE', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <FormattedDate fieldName="@timestamp" value={null} />
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(getEmptyValue());
+      expect(container.textContent).toEqual(getEmptyValue());
     });
 
     test('it renders against an undefined as a EMPTY_VALUE', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <FormattedDate fieldName="@timestamp" value={undefined} />
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(getEmptyValue());
+      expect(container.textContent).toEqual(getEmptyValue());
     });
 
     test('it renders against an invalid date time as just the string its self', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <FormattedDate fieldName="@timestamp" value={'Rebecca Evan Braden'} />
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual('Rebecca Evan Braden');
+      expect(container.textContent).toEqual('Rebecca Evan Braden');
     });
   });
 
   describe('FormattedRelativePreferenceDate', () => {
-    test('renders time over an hour correctly against snapshot', () => {
-      const wrapper = shallow(<FormattedRelativePreferenceDate value={isoDateString} />);
-      expect(wrapper.find('[data-test-subj="preference-time"]').exists()).toBe(true);
+    test('renders time over an hour as a preference formatted date', () => {
+      const { container } = render(
+        <TestProviders>
+          <FormattedRelativePreferenceDate value={isoDateString} />
+        </TestProviders>
+      );
+
+      expect(container.textContent).toBe('Feb 25, 2019 @ 22:27:05.000');
     });
 
-    test('renders time under an hour correctly against snapshot', () => {
+    test('renders time under an hour as a relative date', () => {
       const timeTwelveMinutesAgo = new Date(new Date().getTime() - 12 * 60 * 1000).toISOString();
-      const wrapper = shallow(<FormattedRelativePreferenceDate value={timeTwelveMinutesAgo} />);
+      const { container } = render(
+        <TestProviders>
+          <FormattedRelativePreferenceDate value={timeTwelveMinutesAgo} />
+        </TestProviders>
+      );
 
-      expect(wrapper.find('[data-test-subj="relative-time"]').exists()).toBe(true);
+      expect(container.textContent).toBe('12 minutes ago');
     });
 
     test('renders empty string value correctly', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <FormattedRelativePreferenceDate value={''} />
         </TestProviders>
       );
 
-      expect(wrapper.text()).toBe(getEmptyString());
+      expect(container.textContent).toBe(getEmptyString());
     });
 
     test('renders undefined value correctly', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <FormattedRelativePreferenceDate />
         </TestProviders>
       );
 
-      expect(wrapper.text()).toBe(getEmptyValue());
+      expect(container.textContent).toBe(getEmptyValue());
     });
 
     test('renders null value correctly', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <FormattedRelativePreferenceDate value={null} />
         </TestProviders>
       );
 
-      expect(wrapper.text()).toBe(getEmptyValue());
+      expect(container.textContent).toBe(getEmptyValue());
     });
 
     test('strips down the time milliseconds when stripMs is passed', () => {
       const date = new Date('2022-01-27T10:30:00.000Z');
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <FormattedRelativePreferenceDate stripMs={true} value={date.toISOString()} />
         </TestProviders>
       );
 
-      expect(wrapper.text()).toBe('Jan 27, 2022 @ 10:30:00');
+      expect(container.textContent).toBe('Jan 27, 2022 @ 10:30:00');
     });
   });
 });

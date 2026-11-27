@@ -19,10 +19,9 @@ export interface SettingsUIDependencies {
   };
 }
 
-export interface SettingsConfig {
+export interface SettingsDefinition {
   name: string;
   title: string;
-  description: (deps: SettingsUIDependencies) => string | React.ReactNode;
   learnMoreLink?: string;
   schema: z.ZodTypeAny;
   api_field: {
@@ -37,4 +36,8 @@ export interface SettingsConfig {
   type?: 'yaml';
   /** Custom label for boolean checkbox (default: "Enable") */
   checkboxLabel?: string;
+}
+
+export interface SettingsConfig extends SettingsDefinition {
+  description: (deps: SettingsUIDependencies) => string | React.ReactNode;
 }

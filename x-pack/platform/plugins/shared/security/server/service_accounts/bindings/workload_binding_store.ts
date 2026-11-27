@@ -9,9 +9,12 @@ import type { estypes } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
 import type { Logger, SavedObjectsClientContract, SavedObjectsFindOptions } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
-import type { ServiceAccountWorkloadBinding } from '@kbn/core-security-server';
+import type {
+  ServiceAccountWorkloadBinder,
+  ServiceAccountWorkloadBinding,
+} from '@kbn/core-security-server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
 
@@ -20,13 +23,67 @@ import {
   getWorkloadBindingId,
   SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
 } from './binding_saved_object';
-import { getDetailedErrorMessage } from '../../errors';
+import { getDetailedErrorMessage, toErrorStatusCode } from '../../errors';
 
 /** Pages of this size are walked when listing every workload bound to a service account. */
 const FIND_PAGE_SIZE = 100;
 
 const BOUND_AT_FIELD = `${SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE}.attributes.boundAt`;
 const BINDING_KEY_FIELD = `${SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE}.attributes.bindingKey`;
+const PLUGIN_ID_FIELD = `${SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE}.attributes.pluginId`;
+const WORKLOAD_TYPE_FIELD = `${SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE}.attributes.workloadType`;
+const BINDER_TYPE_FIELD = `${SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE}.attributes.boundBy.type`;
+const SERVICE_ACCOUNT_ID_FIELD = `${SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE}.attributes.serviceAccountId`;
+
+/**
+ * How many buckets each terms aggregation in the summary returns. It is well above the number of
+ * plugins, workload types and binder types today, so no bucket is dropped.
+ */
+const SUMMARY_TERMS_SIZE = 100;
+
+/** The number of bindings for one workload type of one plugin. */
+export interface WorkloadTypeBindingCount {
+  pluginId: string;
+  workloadType: string;
+  count: number;
+}
+
+/** Every binding in every space, counted for usage telemetry. */
+export interface WorkloadBindingSummary {
+  /** Workloads bound to a service account, across every plugin and space. */
+  total: number;
+  /** Accounts with at least one binding. */
+  serviceAccounts: number;
+  /** Binding counts for each workload type of each plugin. */
+  byWorkload: WorkloadTypeBindingCount[];
+  /** Binding counts by who bound the workload: a user, an API key or a service account. */
+  byBinderType: { user: number; api_key: number; service_account: number };
+}
+
+type StringTermsAggregate<SubAggregations = {}> = estypes.AggregationsTermsAggregateBase<
+  estypes.AggregationsStringTermsBucketKeys & SubAggregations
+>;
+
+interface WorkloadBindingSummaryAggregations {
+  byPlugin: StringTermsAggregate<{ byWorkloadType: StringTermsAggregate }>;
+  byBinderType: StringTermsAggregate;
+  serviceAccounts: estypes.AggregationsCardinalityAggregate;
+}
+
+type BinderType = ServiceAccountWorkloadBinder['type'];
+const BINDER_TYPES: readonly string[] = [
+  'user',
+  'api_key',
+  'service_account',
+] as const satisfies readonly BinderType[];
+const isBinderType = (value: string): value is BinderType => BINDER_TYPES.includes(value);
+
+const toBuckets = <Bucket>(
+  aggregate: estypes.AggregationsTermsAggregateBase<Bucket> | undefined
+): Bucket[] => {
+  const buckets = aggregate?.buckets;
+  return Array.isArray(buckets) ? buckets : [];
+};
 
 /** One page of the stale binding sweep, unverified. */
 export interface WorkloadBindingSweepPage {
@@ -62,6 +119,38 @@ const toBinding = (attributes: WorkloadBindingAttributes): ServiceAccountWorkloa
   boundAt: attributes.boundAt,
 });
 
+/** The outcome of writing one binding in a bulk write. */
+export type WorkloadBindingWriteOutcome<T> =
+  | { ok: true; value: T }
+  | { ok: false; error: Boom.Boom };
+
+/**
+ * A per-object saved objects error, as the bulk APIs report it, as the error it stands for. Most
+ * are reported as plain `{ message, statusCode }`, but some are the original error itself, such as
+ * a failed create schema validation. Those are kept as they are, so their status and their saved
+ * objects error type survive for a caller that checks them.
+ */
+const toBoom = (error: { message: string; statusCode: number }): Boom.Boom => {
+  if (Boom.isBoom(error)) {
+    return error;
+  }
+
+  const { message, statusCode } = error;
+  return new Boom.Boom(message, { statusCode: toErrorStatusCode(statusCode) });
+};
+
+/**
+ * The one space a bulk write addresses. A bulk write is one request to one namespace, so bindings
+ * of several spaces cannot share it.
+ */
+const getSingleSpaceId = (bindings: ReadonlyArray<{ spaceId: string }>): string => {
+  const [{ spaceId }] = bindings;
+  if (bindings.some((binding) => binding.spaceId !== spaceId)) {
+    throw new Error('A bulk write of workload bindings must address a single space.');
+  }
+  return spaceId;
+};
+
 /**
  * Persistence for workload bindings.
  */
@@ -79,21 +168,82 @@ export class WorkloadBindingStore {
   }
 
   /**
-   * Writes the binding, replacing any existing one for the same coordinates. Re-binding a workload
-   * to a different service account is the same call as binding it for the first time.
+   * Writes the bindings, replacing any existing one for the same coordinates. Re-binding a
+   * workload to a different service account is the same write as binding it for the first time.
+   * Every binding must be in the same space, since they are written with one request.
+   *
+   * Resolves one outcome per binding, in the order given: a binding that could not be written
+   * fails on its own and leaves the others written. Rejects when the write as a whole fails. A
+   * rejection does not always mean nothing was written: a request that timed out or lost its
+   * connection may have written some, all or none of the bindings.
    */
-  async set(
-    attributes: Omit<WorkloadBindingAttributes, 'bindingKey'>
-  ): Promise<ServiceAccountWorkloadBinding> {
-    const id = getWorkloadBindingId(attributes);
+  async bulkSet(
+    attributes: ReadonlyArray<Omit<WorkloadBindingAttributes, 'bindingKey'>>
+  ): Promise<Array<WorkloadBindingWriteOutcome<ServiceAccountWorkloadBinding>>> {
+    if (attributes.length === 0) {
+      return [];
+    }
 
-    await this.client.create<WorkloadBindingAttributes>(
-      SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
-      { ...attributes, bindingKey: id },
-      { id, namespace: attributes.spaceId, overwrite: true, refresh: 'wait_for' }
+    const { saved_objects: savedObjects } = await this.client.bulkCreate<WorkloadBindingAttributes>(
+      attributes.map((binding) => {
+        const id = getWorkloadBindingId(binding);
+        return {
+          type: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
+          id,
+          attributes: { ...binding, bindingKey: id },
+        };
+      }),
+      { namespace: getSingleSpaceId(attributes), overwrite: true, refresh: 'wait_for' }
     );
 
-    return toBinding(attributes);
+    return attributes.map((binding, index) => {
+      const result = savedObjects[index];
+      if (!result) {
+        return { ok: false, error: Boom.internal('The binding write reported no result.') };
+      }
+      return isSavedObjectErrorResult(result)
+        ? { ok: false, error: toBoom(result.error) }
+        : { ok: true, value: toBinding(binding) };
+    });
+  }
+
+  /**
+   * Removes the bindings, which must all be in the same space. Resolves one outcome per binding,
+   * in the order given, with whether there was a binding to remove: removing one that is already
+   * gone is not an error, since the caller's desired end state has been reached either way.
+   * Rejects when the delete as a whole fails. As with {@link bulkSet}, a rejection after the
+   * request was sent may have removed some, all or none of the bindings.
+   */
+  async bulkDelete(
+    coordinates: readonly WorkloadBindingCoordinates[]
+  ): Promise<Array<WorkloadBindingWriteOutcome<boolean>>> {
+    if (coordinates.length === 0) {
+      return [];
+    }
+
+    const { statuses } = await this.client.bulkDelete(
+      coordinates.map((binding) => ({
+        type: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
+        id: getWorkloadBindingId(binding),
+      })),
+      { namespace: getSingleSpaceId(coordinates), refresh: 'wait_for' }
+    );
+
+    return coordinates.map((_binding, index) => {
+      const status = statuses[index];
+      if (status?.success) {
+        return { ok: true, value: true };
+      }
+      if (status?.error?.statusCode === 404) {
+        return { ok: true, value: false };
+      }
+      return {
+        ok: false,
+        error: status?.error
+          ? toBoom(status.error)
+          : Boom.internal('The binding delete reported no status.'),
+      };
+    });
   }
 
   /**
@@ -262,6 +412,68 @@ export class WorkloadBindingStore {
       ])
     );
   }
+
+  /**
+   * Summarizes every binding in every space, for usage telemetry. Not integrity-verified, so the
+   * counts can include bindings that would fail verification.
+   */
+  async summarize(): Promise<WorkloadBindingSummary> {
+    const { aggregations } = await this.client.find<
+      WorkloadBindingAttributes,
+      WorkloadBindingSummaryAggregations
+    >({
+      type: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
+      perPage: 0,
+      namespaces: [ALL_NAMESPACES_STRING],
+      aggs: {
+        byPlugin: {
+          terms: { field: PLUGIN_ID_FIELD, size: SUMMARY_TERMS_SIZE },
+          aggs: {
+            byWorkloadType: { terms: { field: WORKLOAD_TYPE_FIELD, size: SUMMARY_TERMS_SIZE } },
+          },
+        },
+        byBinderType: { terms: { field: BINDER_TYPE_FIELD, size: SUMMARY_TERMS_SIZE } },
+        // The highest threshold ES allows. Counts below it are close to exact.
+        serviceAccounts: {
+          cardinality: { field: SERVICE_ACCOUNT_ID_FIELD, precision_threshold: 40_000 },
+        },
+      },
+    });
+
+    const pluginBuckets = toBuckets(aggregations?.byPlugin);
+    const byWorkload = pluginBuckets.flatMap(({ key: pluginId, byWorkloadType }) =>
+      toBuckets(byWorkloadType).map(
+        ({ key: workloadType, doc_count: count }): WorkloadTypeBindingCount => ({
+          pluginId: String(pluginId),
+          workloadType: String(workloadType),
+          count,
+        })
+      )
+    );
+
+    const byBinderType: WorkloadBindingSummary['byBinderType'] = {
+      user: 0,
+      api_key: 0,
+      service_account: 0,
+    };
+    for (const { key, doc_count: count } of toBuckets(aggregations?.byBinderType)) {
+      const binderType = String(key);
+      if (isBinderType(binderType)) {
+        byBinderType[binderType] = count;
+      }
+    }
+
+    return {
+      // From the buckets, not the hit total, which stops at 10,000.
+      total:
+        pluginBuckets.reduce((sum, { doc_count: count }) => sum + count, 0) +
+        (aggregations?.byPlugin.sum_other_doc_count ?? 0),
+      serviceAccounts: aggregations?.serviceAccounts.value ?? 0,
+      byWorkload,
+      byBinderType,
+    };
+  }
+
   /**
    * Reads one page of the stale binding sweep: bindings made before `cutoff`, ordered by their
    * binding key and starting after `afterKey`. Not integrity-verified. Each page is its own query,

@@ -170,6 +170,56 @@ describe('Browser platform', () => {
       expect(getPlatform()).toBe('other');
     });
 
+    it('should fall back to userAgent when userAgentData.platform is empty', async () => {
+      Object.defineProperty(global, 'navigator', {
+        value: {
+          userAgentData: { platform: '' },
+          userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
+          platform: 'Win32',
+        },
+        configurable: true,
+      });
+
+      const { isMac, isWindows, getPlatform } = await import('./platform');
+
+      expect(isMac).toBe(true);
+      expect(isWindows).toBe(false);
+      expect(getPlatform()).toBe('mac');
+    });
+
+    it('should fall back to navigator.platform when userAgentData.platform and userAgent are empty', async () => {
+      Object.defineProperty(global, 'navigator', {
+        value: {
+          userAgentData: { platform: '' },
+          userAgent: '',
+          platform: 'MacIntel',
+        },
+        configurable: true,
+      });
+
+      const { isMac, getPlatform } = await import('./platform');
+
+      expect(isMac).toBe(true);
+      expect(getPlatform()).toBe('mac');
+    });
+
+    it('should trust a non-empty userAgentData.platform over a Macintosh user agent', async () => {
+      Object.defineProperty(global, 'navigator', {
+        value: {
+          userAgentData: { platform: 'Linux' },
+          userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
+          platform: 'MacIntel',
+        },
+        configurable: true,
+      });
+
+      const { isMac, isLinux, getPlatform } = await import('./platform');
+
+      expect(isMac).toBe(false);
+      expect(isLinux).toBe(true);
+      expect(getPlatform()).toBe('linux');
+    });
+
     it('should handle undefined navigator', async () => {
       Object.defineProperty(global, 'navigator', {
         value: undefined,

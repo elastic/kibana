@@ -83,6 +83,8 @@
     "@kbn/agentic-investigations-plugin",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-http-server-mocks",
-    "@kbn/std"
+    "@kbn/std",
+    "@kbn/user-profile-components",
+    "@kbn/core-security-common"
   ]
 }

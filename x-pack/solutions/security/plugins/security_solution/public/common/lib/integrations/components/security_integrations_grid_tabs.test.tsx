@@ -7,6 +7,7 @@
 import React from 'react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react';
 
+import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import type { SecurityIntegrationsGridTabsProps } from './security_integrations_grid_tabs';
 import { SecurityIntegrationsGridTabs } from './security_integrations_grid_tabs';
 import * as module from '@kbn/fleet-plugin/public';
@@ -18,6 +19,7 @@ import {
 import { INTEGRATION_TABS } from '../configs/integration_tabs_configs';
 import { mockReportLinkClick } from '../hooks/__mocks__/mocks';
 import type { AvailablePackages } from './with_available_packages';
+import { APP_UI_ID, ONBOARDING_PATH } from '../../../../../common/constants';
 
 jest.mock('../hooks/integration_context');
 jest.mock('../hooks/use_stored_state');
@@ -31,7 +33,14 @@ jest.mock('../../kibana', () => ({
 
 const mockPackageList = jest.fn<
   React.JSX.Element,
-  Array<{ showSearchTools?: boolean; searchTerm: string; list: unknown[] }>
+  Array<{
+    showSearchTools?: boolean;
+    searchTerm: string;
+    list: unknown[];
+    collectionReturnLocation?: { appId: string; path: string };
+    onCollectionClick?: (card: IntegrationCardItem) => void;
+    onCollectionVariantClick?: (member: IntegrationCardItem) => void;
+  }>
 >(() => <div data-test-subj="packageList" />);
 
 jest.mock('@kbn/fleet-plugin/public');
@@ -164,6 +173,33 @@ describe('IntegrationsCardGridTabsComponent', () => {
       expect(mockPackageList.mock.calls[0][0].list).toEqual([
         expect.objectContaining({ id: 'placeholder:auto_import' }),
       ]);
+    });
+  });
+
+  describe('collection tiles', () => {
+    const renderGrid = async () => {
+      render(<SecurityIntegrationsGridTabs {...props} />, { wrapper: TestProviders });
+      await waitFor(() => expect(mockPackageList).toHaveBeenCalled());
+      return mockPackageList.mock.calls[0][0];
+    };
+
+    it('makes the Fleet grid return to the onboarding page from the collection chooser', async () => {
+      const gridProps = await renderGrid();
+
+      expect(gridProps.collectionReturnLocation).toEqual({
+        appId: APP_UI_ID,
+        path: ONBOARDING_PATH,
+      });
+    });
+
+    it('tracks clicks on a collection tile and on its variants', async () => {
+      const gridProps = await renderGrid();
+
+      gridProps.onCollectionClick?.({ id: 'collection:nginx' } as IntegrationCardItem);
+      gridProps.onCollectionVariantClick?.({ id: 'epr:nginx_otel' } as IntegrationCardItem);
+
+      expect(mockReportLinkClick).toHaveBeenCalledWith('card_collection:nginx');
+      expect(mockReportLinkClick).toHaveBeenCalledWith('card_epr:nginx_otel');
     });
   });
 });

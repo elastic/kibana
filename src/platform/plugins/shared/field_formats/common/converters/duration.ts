@@ -19,6 +19,7 @@ import {
   DEFAULT_DURATION_OUTPUT_FORMAT,
   DURATION_INPUT_FORMATS,
   DURATION_OUTPUT_FORMATS,
+  DURATION_SUB_MILLISECOND_UNITS,
   getDurationUnitInSeconds,
 } from '../constants/duration_formats';
 import { asPrettyString } from '../utils';
@@ -128,7 +129,10 @@ const units = [
   { seconds: 60, method: 'asMinutes' },
   { seconds: 1, method: 'asSeconds' },
   { seconds: 0.001, method: 'asMilliseconds' },
+  { seconds: 0.000001, method: 'asMicroseconds' },
+  { seconds: 0.000000001, method: 'asNanoseconds' },
 ];
+const PRECISE_UNIT_FORMATS = [...DURATION_OUTPUT_FORMATS, ...DURATION_SUB_MILLISECOND_UNITS];
 
 function formatDurationHumanPrecise(
   duration: moment.Duration,
@@ -142,16 +146,15 @@ function formatDurationHumanPrecise(
   const valueInSeconds = Math.abs(signedSeconds);
 
   const getUnitText = (method: string) => {
-    const type = DURATION_OUTPUT_FORMATS.find(({ method: methodT }) => method === methodT);
+    const type = PRECISE_UNIT_FORMATS.find(({ method: methodT }) => method === methodT);
     return useShortSuffix ? type?.shortText : type?.text.toLowerCase();
   };
 
-  for (const unit of units) {
-    const unitValue = valueInSeconds / unit.seconds;
-    if (unitValue >= 1 || unit === units[units.length - 1]) {
-      // Pick the first unit whose magnitude is at least 1, or milliseconds as the last fallback.
-      const prefix = signedSeconds < 0 ? '-' : '';
-      return prefix + unitValue.toFixed(outputPrecision) + includeSpace + getUnitText(unit.method);
-    }
-  }
+  if (valueInSeconds === 0) return '0';
+
+  const unit =
+    units.find(({ seconds }) => valueInSeconds / seconds >= 1) ?? units[units.length - 1];
+  const prefix = signedSeconds < 0 ? '-' : '';
+  const unitValue = valueInSeconds / unit.seconds;
+  return prefix + unitValue.toFixed(outputPrecision) + includeSpace + getUnitText(unit.method);
 }

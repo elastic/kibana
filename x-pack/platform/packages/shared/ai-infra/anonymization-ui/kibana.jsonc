@@ -3,7 +3,7 @@
   "id": "@kbn/anonymization-ui",
   "owner": [
     "@elastic/workchat-eng",
-    "@elastic/security-threat-hunting"
+    "@elastic/security-investigations"
   ],
   "group": "platform",
   "visibility": "shared"

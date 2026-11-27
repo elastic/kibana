@@ -8,6 +8,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import type { ReactElement } from 'react';
+import type { KeysOfUnion } from 'type-fest';
 import { copyPersistentState } from '../../reducers/copy_persistent_state';
 import type { IField } from '../fields/field';
 import type { FieldFormatter, LAYER_TYPE } from '../../../common/constants';
@@ -16,23 +17,27 @@ import type {
   Attribution,
   DataFilters,
   DataRequestMeta,
+  DiscriminatedSourceDescriptor,
   StyleDescriptor,
   Timeslice,
 } from '../../../common/descriptor_types';
 import type { IStyle } from '../styles/style';
 import type { LICENSED_FEATURES } from '../../licensed_features';
 
-export type OnSourceChangeArgs = {
-  propName: string;
+export type OnSourceChangeArgs<TSourceDescriptor = DiscriminatedSourceDescriptor> = {
+  // Key of TSourceDescriptor
+  propName: KeysOfUnion<TSourceDescriptor>;
   value: unknown;
   newLayerType?: LAYER_TYPE;
 };
 
-export type SourceEditorArgs = {
+export type SourcePropName = OnSourceChangeArgs['propName'];
+
+export type SourceEditorArgs<TSourceDescriptor> = {
   currentLayerType: string;
   hasSpatialJoins: boolean;
   numberOfJoins: number;
-  onChange: (...args: OnSourceChangeArgs[]) => Promise<void>;
+  onChange: (...args: Array<OnSourceChangeArgs<TSourceDescriptor>>) => Promise<void>;
   onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void;
   style: IStyle;
 };
@@ -43,7 +48,7 @@ export type ImmutableSourceProperty = {
   link?: string;
 };
 
-export interface ISource {
+export interface ISource<TSourceDescriptor = Record<string, unknown>> {
   getDisplayName(): Promise<string>;
   getType(): string;
   /*
@@ -59,9 +64,11 @@ export interface ISource {
   isTimeAware(): Promise<boolean>;
   getImmutableProperties(dataFilters: DataFilters): Promise<ImmutableSourceProperty[]>;
   getAttributionProvider(): (() => Promise<Attribution[]>) | null;
-  renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null;
+  renderSourceSettingsEditor(
+    sourceEditorArgs: SourceEditorArgs<TSourceDescriptor>
+  ): ReactElement<any> | null;
   supportsFitToBounds(): Promise<boolean>;
-  cloneDescriptor(): object;
+  cloneDescriptor(): TSourceDescriptor;
   getApplyGlobalQuery(): boolean;
   getApplyGlobalTime(): boolean;
   getApplyForceRefresh(): boolean;
@@ -73,14 +80,16 @@ export interface ISource {
   getUpdateDueToTimeslice(prevMeta: DataRequestMeta, timeslice?: Timeslice): boolean;
 }
 
-export class AbstractSource implements ISource {
-  readonly _descriptor: object;
+export class AbstractSource<TSourceDescriptor = Record<string, unknown>>
+  implements ISource<TSourceDescriptor>
+{
+  readonly _descriptor: TSourceDescriptor;
 
-  constructor(descriptor: object) {
+  constructor(descriptor: TSourceDescriptor) {
     this._descriptor = descriptor;
   }
 
-  cloneDescriptor(): object {
+  cloneDescriptor(): TSourceDescriptor {
     return copyPersistentState(this._descriptor);
   }
 
@@ -116,7 +125,9 @@ export class AbstractSource implements ISource {
     return false;
   }
 
-  renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null {
+  renderSourceSettingsEditor(
+    sourceEditorArgs: SourceEditorArgs<TSourceDescriptor>
+  ): ReactElement<any> | null {
     return null;
   }
 

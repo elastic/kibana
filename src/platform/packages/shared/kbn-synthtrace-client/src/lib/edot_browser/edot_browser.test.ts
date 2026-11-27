@@ -24,8 +24,8 @@ import {
   type EdotBrowserSite,
 } from '.';
 
-const LOGS_INDEX = 'logs-generic.otel-default';
-const TRACES_INDEX = 'traces-generic.otel-default';
+const LOGS_INDEX = 'logs-browser.otel-default';
+const TRACES_INDEX = 'traces-browser.otel-default';
 const TIMESTAMP = new Date('2026-10-16T12:00:00.000Z').getTime();
 
 const resourceTimings = {
@@ -128,6 +128,16 @@ describe('edotBrowser', () => {
 
     it('tells the engine of a browser, which decides how it writes stack traces', () => {
       const engineOf = (profile: BrowserProfile) => createClient('s', profile).browserEngine;
+
+      expect(engineOf(BROWSER_PROFILES.chromeMacos)).toBe('chromium');
+      expect(engineOf(BROWSER_PROFILES.edgeWindows)).toBe('chromium');
+      expect(engineOf(BROWSER_PROFILES.firefoxLinux)).toBe('firefox');
+      expect(engineOf(BROWSER_PROFILES.safariIos)).toBe('webkit');
+    });
+
+    it('tells the engine of a browser that is not identified from its user agent', () => {
+      const engineOf = (profile: BrowserProfile) =>
+        createClient('s', edotBrowser.withoutBrowserDetails(profile)).browserEngine;
 
       expect(engineOf(BROWSER_PROFILES.chromeMacos)).toBe('chromium');
       expect(engineOf(BROWSER_PROFILES.edgeWindows)).toBe('chromium');
@@ -385,6 +395,47 @@ describe('edotBrowser', () => {
       });
     });
 
+    it('writes frustration signals with the distro logger, without a severity', () => {
+      const click = { pageX: 120.4, pageY: 480, tagName: 'BUTTON', cssSelector: '#pay' };
+      const url = 'https://shop.example.com/checkout';
+      const [rage] = client
+        .frustration({ kind: 'rage_click', clickCount: 5, url, ...click })
+        .serialize();
+      const [error] = client
+        .frustration({
+          kind: 'error_click',
+          exception: { type: 'TypeError', message: 'x is undefined' },
+          url,
+          ...click,
+        })
+        .serialize();
+      const [dead] = client
+        .frustration({ kind: 'dead_click', url, ...click, cssSelector: undefined })
+        .serialize();
+
+      expect(rage).toMatchObject({
+        _index: LOGS_INDEX,
+        event_name: 'elastic.frustration.rage_click',
+        scope: { name: '@elastic/opentelemetry-browser' },
+      });
+      expect(rage).not.toHaveProperty('severity_number');
+      expect(rage.attributes).toEqual({
+        'browser.css_selector': '#pay',
+        'browser.tag_name': 'BUTTON',
+        'browser.page.x': 120,
+        'browser.page.y': 480,
+        'url.full': url,
+        'elastic.frustration.click_count': 5,
+      });
+      expect(error.attributes).toMatchObject({
+        'exception.type': 'TypeError',
+        'exception.message': 'x is undefined',
+      });
+      expect(error.attributes).not.toHaveProperty(['elastic.frustration.click_count']);
+      expect(dead.event_name).toBe('elastic.frustration.dead_click');
+      expect(dead.attributes).not.toHaveProperty(['browser.css_selector']);
+    });
+
     it('writes exceptions with ERROR severity', () => {
       const [doc] = client
         .exception({ type: 'TypeError', message: 'x is undefined', stacktrace: 'TypeError: ...' })
@@ -571,6 +622,42 @@ describe('edotBrowser', () => {
         expect(attributes).not.toHaveProperty(['session.previous_id'])
       );
     });
+
+    it('stamps the user on logs and spans like setUser()', () => {
+      const signals = (userClient: ReturnType<typeof createClient>) => [
+        ...userClient.exception({ type: 'Error', message: 'boom', stacktrace: '' }).serialize(),
+        ...userClient
+          .httpRequest({ method: 'GET', url: 'https://api.example.com/', statusCode: 200 })
+          .serialize(),
+      ];
+      const anonymous = createClient('session-1');
+      const signedIn = anonymous.withUser({
+        id: 'usr_1',
+        email: 'ada@example.com',
+        fullName: 'Ada Lovelace',
+        account: 'acme',
+      });
+
+      signals(signedIn).forEach(({ attributes }) =>
+        expect(attributes).toMatchObject({
+          'session.id': 'session-1',
+          'user.id': 'usr_1',
+          'user.email': 'ada@example.com',
+          'user.full_name': 'Ada Lovelace',
+          'elastic.user.account': 'acme',
+        })
+      );
+      signals(signedIn.withUser({ id: 'usr_2' })).forEach(({ attributes }) => {
+        expect(attributes).toMatchObject({ 'user.id': 'usr_2' });
+        expect(attributes).not.toHaveProperty(['user.email']);
+      });
+      // `clearUser()`, and the client it came from, which is unchanged
+      [signedIn.withUser(), anonymous].forEach((userClient) =>
+        signals(userClient).forEach(({ attributes }) =>
+          expect(attributes).not.toHaveProperty(['user.id'])
+        )
+      );
+    });
   });
 
   describe('planDocuments', () => {
@@ -592,6 +679,9 @@ describe('edotBrowser', () => {
           slowdown: 1,
           reportExceptions: true,
           reportResourceTimings: true,
+          reportPageRoutes: true,
+          impatience: 1,
+          persistentHits: new Map(),
         },
         { pageViews, dwell: DWELL, hardNavigationRate }
       );
@@ -665,6 +755,8 @@ describe('edotBrowser', () => {
       end,
       reportExceptions,
       reportResourceTimings,
+      reportPageRoutes,
+      frustrationRandom,
     }: {
       seed?: number;
       pageViews?: number;
@@ -677,6 +769,8 @@ describe('edotBrowser', () => {
       end?: number;
       reportExceptions?: boolean;
       reportResourceTimings?: boolean;
+      reportPageRoutes?: boolean;
+      frustrationRandom?: () => number;
     } = {}) =>
       edotBrowser
         .session({
@@ -688,6 +782,8 @@ describe('edotBrowser', () => {
           dwell,
           reportExceptions,
           reportResourceTimings,
+          reportPageRoutes,
+          frustrationRandom,
           random: seededRandom(seed),
         })
         .flatMap((event) => event.serialize());
@@ -826,9 +922,7 @@ describe('edotBrowser', () => {
       );
       expect([...vitals].sort()).toEqual(['cls', 'fcp', 'inp', 'lcp', 'ttfb']);
       expect(spans.length).toBeGreaterThan(0);
-      expect(spans.map((span) => span._index)).toEqual(
-        spans.map(() => 'traces-generic.otel-default')
-      );
+      expect(spans.map((span) => span._index)).toEqual(spans.map(() => TRACES_INDEX));
     });
 
     it('only reports INP for documents with interactions', () => {
@@ -982,6 +1076,211 @@ describe('edotBrowser', () => {
           expect(clickTimes).toContain(vital('inp')?.['@timestamp']);
         }
       }
+    });
+
+    it('reports frustration signals only with a source of its own, leaving the rest as it is', () => {
+      const frustrationOf = (docs: EdotBrowserDocument[]) =>
+        docs.filter(
+          (doc) => 'event_name' in doc && String(doc.event_name).startsWith('elastic.frustration.')
+        );
+      const sessions = Array.from({ length: 50 }, (_, seed) => ({
+        without: createSession({ seed, health: HEALTH_PROFILES.critical }),
+        with: createSession({
+          seed,
+          health: HEALTH_PROFILES.critical,
+          frustrationRandom: seededRandom(seed + 100),
+        }),
+      }));
+      const kinds = new Set(
+        sessions.flatMap((session) =>
+          frustrationOf(session.with).map((doc) => ('event_name' in doc ? doc.event_name : ''))
+        )
+      );
+
+      expect([...kinds].sort()).toEqual([
+        'elastic.frustration.dead_click',
+        'elastic.frustration.error_click',
+        'elastic.frustration.rage_click',
+      ]);
+      sessions.forEach((session) => {
+        expect(frustrationOf(session.without)).toEqual([]);
+        if (frustrationOf(session.with).length === 0) {
+          expect(session.with).toEqual(session.without);
+        }
+      });
+    });
+
+    describe('frustration causes', () => {
+      const PRODUCT = 'https://shop.example.com/product';
+      const pageWith = (clickTargets: EdotBrowserSite['pages'][number]['clickTargets']) => ({
+        ...SITE,
+        pages: [{ path: '/product', clickTargets }],
+      });
+      const sessionsOf = (
+        site: EdotBrowserSite,
+        {
+          count = 200,
+          profile,
+          health,
+        }: { count?: number; profile?: BrowserProfile; health?: HealthProfile } = {}
+      ) =>
+        Array.from({ length: count }, (_, seed) =>
+          createSession({
+            seed,
+            site,
+            profile,
+            health,
+            pageViews: 3,
+            frustrationRandom: seededRandom(seed + 1_000),
+          })
+        );
+      const signalsOf = (docs: EdotBrowserDocument[], kind: string, selector?: string) =>
+        docs.filter(
+          (doc) =>
+            'event_name' in doc &&
+            doc.event_name === `elastic.frustration.${kind}` &&
+            (selector === undefined || doc.attributes?.['browser.css_selector'] === selector)
+        );
+      const clicksOn = (docs: EdotBrowserDocument[], selector: string) =>
+        docs.filter(
+          (doc) =>
+            'event_name' in doc &&
+            doc.event_name === 'browser.user_action.click' &&
+            doc.attributes?.['browser.css_selector'] === selector
+        ).length;
+      const addToCart = {
+        tagName: 'BUTTON',
+        cssSelector: '#add-to-cart',
+        request: { method: 'POST', url: `${PRODUCT}/cart` },
+      };
+
+      it('rage-clicks slow responses far more than fast ones', () => {
+        const rageShare = (latencyFactor: number) => {
+          const docs = sessionsOf(
+            pageWith([{ ...addToCart, request: { ...addToCart.request, latencyFactor } }])
+          ).flat();
+          return signalsOf(docs, 'rage_click').length / clicksOn(docs, '#add-to-cart');
+        };
+
+        expect(rageShare(20)).toBeGreaterThan(5 * rageShare(0.1));
+      });
+
+      it('dead-clicks only elements that do not react, more on small screens', () => {
+        const site = pageWith([
+          { tagName: 'A', cssSelector: 'a.link' },
+          addToCart,
+          { tagName: 'SPAN', cssSelector: 'span.price', deadClickRate: 0.3 },
+        ]);
+        const desktop = sessionsOf(site).flat();
+        const mobile = sessionsOf(site, { profile: BROWSER_PROFILES.safariIos }).flat();
+        const deadShare = (docs: EdotBrowserDocument[]) =>
+          signalsOf(docs, 'dead_click', 'span.price').length / clicksOn(docs, 'span.price');
+
+        expect(signalsOf(desktop, 'dead_click', 'a.link')).toEqual([]);
+        expect(signalsOf(desktop, 'dead_click', '#add-to-cart')).toEqual([]);
+        expect(deadShare(desktop)).toBeGreaterThan(0.1);
+        expect(deadShare(mobile)).toBeGreaterThan(deadShare(desktop));
+      });
+
+      it('reports the exception an element throws on its error clicks, and retries the click', () => {
+        const exception = { type: 'TypeError', message: 'variant is undefined', rate: 1 };
+        const broken = sessionsOf(pageWith([{ ...addToCart, exceptions: [exception] }])).flat();
+        const working = sessionsOf(pageWith([addToCart])).flat();
+        const errorClicks = signalsOf(broken, 'error_click', '#add-to-cart');
+
+        expect(errorClicks.length).toBeGreaterThan(100);
+        errorClicks.forEach(({ attributes }) => {
+          expect(attributes).toMatchObject({
+            'exception.type': 'TypeError',
+            'exception.message': 'variant is undefined',
+          });
+        });
+        expect(clicksOn(broken, '#add-to-cart')).toBeGreaterThan(
+          1.5 * clicksOn(working, '#add-to-cart')
+        );
+      });
+
+      it('hits a session with a persistent exception on every click or on none', () => {
+        const hitsOf = (persistent: boolean) => {
+          const exception = { type: 'TypeError', message: 'sku', rate: 0.3, persistent };
+          const site = pageWith([{ ...addToCart, exceptions: [exception] }]);
+          // Without rage bursts, every click is one attempt
+          return Array.from({ length: 200 }, (_, seed) => {
+            const docs = createSession({ seed, site, pageViews: 3 });
+            return {
+              clicks: clicksOn(docs, '#add-to-cart'),
+              thrown: docs.filter(
+                (doc) =>
+                  'event_name' in doc &&
+                  doc.event_name === 'exception' &&
+                  doc.attributes?.['exception.message'] === 'sku'
+              ).length,
+            };
+          }).filter(({ clicks }) => clicks > 1);
+        };
+        const persistent = hitsOf(true);
+        const hitShare = (sessions: Array<{ thrown: number }>) =>
+          sessions.filter(({ thrown }) => thrown > 0).length / sessions.length;
+
+        expect(persistent.length).toBeGreaterThan(50);
+        persistent.forEach(({ clicks, thrown }) => expect([0, clicks]).toContain(thrown));
+        expect(hitShare(persistent)).toBeGreaterThan(0.1);
+        expect(hitShare(persistent)).toBeLessThan(hitShare(hitsOf(false)));
+      });
+
+      it('words failed fetches and property reads the way each browser engine does', () => {
+        const offline = { ...HEALTH_PROFILES.healthy, networkErrorRate: 1 };
+        const messagesOf = (profile: BrowserProfile) =>
+          new Set(
+            sessionsOf(pageWith([addToCart]), { count: 20, profile, health: offline })
+              .flat()
+              .filter((doc) => 'event_name' in doc && doc.event_name === 'exception')
+              .map((doc) => doc.attributes?.['exception.message'])
+          );
+
+        expect(messagesOf(BROWSER_PROFILES.chromeMacos)).toContain('Failed to fetch');
+        expect(messagesOf(BROWSER_PROFILES.firefoxLinux)).toContain(
+          'NetworkError when attempting to fetch resource.'
+        );
+        expect(messagesOf(BROWSER_PROFILES.safariIos)).toContain('Load failed');
+        expect(
+          edotBrowser
+            .readPropertyErrors({ variable: 'variant', property: 'sku' }, { type: 'TypeError' })
+            .map(({ message, engines }) => [engines, message])
+        ).toEqual([
+          [['chromium'], "Cannot read properties of undefined (reading 'sku')"],
+          [['firefox'], 'can\'t access property "sku", variant is undefined'],
+          [['webkit'], "undefined is not an object (evaluating 'variant.sku')"],
+        ]);
+      });
+
+      it('picks pages and elements by weight', () => {
+        const site: EdotBrowserSite = {
+          ...SITE,
+          pages: [
+            {
+              path: '/popular',
+              weight: 9,
+              clickTargets: [
+                { tagName: 'A', cssSelector: 'a.often', weight: 9 },
+                { tagName: 'A', cssSelector: 'a.rarely' },
+              ],
+            },
+            { path: '/rare' },
+          ],
+        };
+        const docs = sessionsOf(site, { count: 100 }).flat();
+        const views = (path: string) =>
+          docs.filter(
+            (doc) =>
+              'event_name' in doc &&
+              doc.event_name === 'browser.navigation' &&
+              doc.attributes?.['url.full'] === `https://shop.example.com${path}`
+          ).length;
+
+        expect(views('/popular')).toBeGreaterThan(4 * views('/rare'));
+        expect(clicksOn(docs, 'a.often')).toBeGreaterThan(4 * clicksOn(docs, 'a.rarely'));
+      });
     });
 
     it('writes timings as 0 for phases that did not happen, and with a fractional part otherwise', () => {
@@ -1164,6 +1463,32 @@ describe('edotBrowser', () => {
 
       it('sends nothing for a site without GET requests', () => {
         expect(idleTab({ ...SITE, pages: [{ path: '/' }] })).toEqual([]);
+      });
+    });
+
+    it('stamps the user from the page load where the user signs in', () => {
+      const { documents, events } = edotBrowser.sessionWithDocuments({
+        end: TIMESTAMP,
+        client: createClient('abc'),
+        site: SITE,
+        health: HEALTH_PROFILES.healthy,
+        pageViews: 3,
+        hardNavigationRate: 1,
+        random: seededRandom(1),
+        signIn: { user: { id: 'usr_1' }, atDocument: 1 },
+      });
+      const docs = events.flatMap((event) => event.serialize());
+      const [firstLoad, secondLoad] = documents.map(({ start }) => start);
+
+      expect(documents.length).toBeGreaterThan(1);
+      docs.forEach((doc) => {
+        const at = Number(doc['@timestamp']);
+        if (at < secondLoad) {
+          expect(at).toBeGreaterThanOrEqual(firstLoad);
+          expect(doc.attributes).not.toHaveProperty(['user.id']);
+        } else {
+          expect(doc.attributes?.['user.id']).toBe('usr_1');
+        }
       });
     });
 
@@ -1483,6 +1808,78 @@ describe('edotBrowser', () => {
       });
     });
 
+    describe('page routes', () => {
+      const ROUTED_SITE: EdotBrowserSite = {
+        ...SITE,
+        pages: [
+          { path: '/' },
+          {
+            path: '/products/trail-shoes',
+            route: '/products/{slug}',
+            requests: [{ method: 'GET', url: '/api/products/trail-shoes' }],
+          },
+          { path: '/orders/48213' },
+        ],
+      };
+      const ROUTES: Record<string, string> = {
+        '/': '/',
+        '/products/trail-shoes': '/products/{slug}',
+        '/orders/48213': '/orders/{id}',
+      };
+      const routedSession = (reportPageRoutes?: boolean) =>
+        createSession({ site: ROUTED_SITE, pageViews: 12, reportPageRoutes });
+      const templateOf = (doc: ReturnType<typeof createSession>[number]) =>
+        doc.attributes?.['url.template'];
+      const isEvent = (doc: ReturnType<typeof createSession>[number], name: string) =>
+        'event_name' in doc && doc.event_name === name;
+
+      it('adds the route of the page to the logs, the one the app tells or the inferred one', () => {
+        const pageLoads = routedSession().filter((doc) =>
+          isEvent(doc, 'browser.navigation_timing')
+        );
+
+        expect(pageLoads.length).toBeGreaterThan(0);
+        pageLoads.forEach((doc) => {
+          const { pathname } = new URL(String(doc.attributes?.['url.full']));
+          expect(templateOf(doc)).toBe(ROUTES[pathname]);
+        });
+      });
+
+      it('adds it to the logs that carry no URL too, and to nothing but routes of the site', () => {
+        const logs = routedSession().filter((doc) => 'event_name' in doc && doc.event_name);
+        const webVitals = logs.filter((doc) => isEvent(doc, 'browser.web_vital'));
+
+        expect(webVitals.length).toBeGreaterThan(0);
+        logs
+          .filter((doc) => !isEvent(doc, 'browser.resource_timing'))
+          .forEach((doc) => expect(Object.values(ROUTES)).toContain(templateOf(doc)));
+      });
+
+      it('leaves resource timings and client spans without it', () => {
+        const docs = routedSession();
+        const timings = docs.filter((doc) => isEvent(doc, 'browser.resource_timing'));
+        const spans = docs.filter((doc) => 'kind' in doc && doc.kind === 'Client');
+
+        expect(timings.length).toBeGreaterThan(0);
+        expect(spans.length).toBeGreaterThan(0);
+        [...timings, ...spans].forEach((doc) => expect(templateOf(doc)).toBeUndefined());
+      });
+
+      it('writes no route when the app does not report them, and nothing else changes', () => {
+        const withRoutes = routedSession();
+        const withoutRoutes = routedSession(false);
+        const withoutTemplate = ({ attributes = {}, ...doc }: (typeof withRoutes)[number]) => ({
+          ...doc,
+          attributes: Object.fromEntries(
+            Object.entries(attributes).filter(([key]) => key !== 'url.template')
+          ),
+        });
+
+        withoutRoutes.forEach((doc) => expect(templateOf(doc)).toBeUndefined());
+        expect(withRoutes.map(withoutTemplate)).toEqual(withoutRoutes.map(withoutTemplate));
+      });
+    });
+
     describe('resources', () => {
       const resourceUrls = (docs: ReturnType<typeof createSession>) =>
         docs
@@ -1615,6 +2012,30 @@ describe('edotBrowser', () => {
         // The p95 is far above the median with a tail, and about like the profile's without
         expect(spread(plain)).toBeLessThan(3);
         expect(spread(tailed)).toBeGreaterThan(6);
+      });
+
+      it('fails the requests sent during an outage of the endpoint, and only those', () => {
+        const spans = spansOf(siteWith({ method: 'GET', url: '/api/a' }), 50);
+        const times = spans.map((span) => Number(span['@timestamp'])).sort((a, b) => a - b);
+        const outage = {
+          start: times[Math.floor(times.length / 3)],
+          end: times[Math.floor((2 * times.length) / 3)],
+          failureRate: 1,
+          failureStatusCodes: [418],
+        };
+        // Network errors have no status
+        const statusesSent = (during: boolean) =>
+          spansOf(siteWith({ method: 'GET', url: '/api/a', outages: [outage] }), 50)
+            .filter((span) => {
+              const time = Number(span['@timestamp']);
+              return (time >= outage.start && time < outage.end) === during;
+            })
+            .map((span) => span.attributes['http.response.status_code'])
+            .filter((status) => status !== undefined);
+
+        expect(new Set(statusesSent(true))).toEqual(new Set([418]));
+        expect(statusesSent(false)).not.toContain(418);
+        expect(statusesSent(false).length).toBeGreaterThan(0);
       });
     });
 

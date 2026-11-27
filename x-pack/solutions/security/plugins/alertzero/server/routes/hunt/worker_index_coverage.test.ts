@@ -124,6 +124,33 @@ describe('registerHuntWorkerIndexCoverageRoute', () => {
     );
   });
 
+  it('hands the filtered universe and the skipped list to the coverage read', async () => {
+    const { handler, context } = makeDeps();
+    const withSetting = {
+      ...context,
+      core: Promise.resolve({
+        uiSettings: {
+          client: {
+            get: jest.fn().mockResolvedValue(['logs-*', '.alerts-security.alerts-default']),
+          },
+        },
+      }),
+    };
+
+    await handler(
+      withSetting,
+      httpServerMock.createKibanaRequest(),
+      httpServerMock.createResponseFactory()
+    );
+
+    expect(resolveMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        indexPatterns: ['logs-*'],
+        policySkippedPatterns: ['.alerts-security.alerts-default'],
+      })
+    );
+  });
+
   it('tells the coverage read whether cross-project search is on', async () => {
     const off = makeDeps();
     await off.handler(

@@ -14,7 +14,6 @@ import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import { DELETED_SECURITY_SOLUTION_DATA_VIEW } from '@kbn/timelines-plugin/common/constants';
 import type {
   BeatFields,
   FieldInfo,
@@ -22,6 +21,7 @@ import type {
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
 } from '@kbn/securitysolution-timeline-search-strategy';
+import { DELETED_SECURITY_SOLUTION_DATA_VIEW } from '../../../../../common/constants';
 import type { StartPlugins } from '../../../../plugin_contract';
 import { parseOptions } from './parse_options';
 
@@ -41,7 +41,7 @@ export const indexFieldsProvider = (
 > => {
   // require the fields once we actually need them, rather than ahead of time, and pass
   // them to createFieldItem to reduce the amount of work done as much as possible
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const beatFields: BeatFields = require('../../utils/beat_schema/fields.json').fieldsBeat;
 
   return {

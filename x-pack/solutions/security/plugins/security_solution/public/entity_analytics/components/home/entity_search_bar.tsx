@@ -11,8 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SiemSearchBar } from '../../../common/components/search_bar';
 import { InputsModelId } from '../../../common/store/inputs/constants';
-import { TIME_RANGE_OPTIONS } from './entities_grid';
-import type { TimeRange } from './entities_grid';
+import { TIME_RANGE_OPTIONS, type TimeRange } from './queries/time_range';
 
 const TIME_RANGE_LEGEND = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.timeRange.legend',

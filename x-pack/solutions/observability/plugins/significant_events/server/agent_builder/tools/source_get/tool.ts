@@ -27,6 +27,7 @@ export const createSourceGetTool = ({
   getScopedClients,
   server,
   logger,
+  telemetry,
 }: SourceToolDeps): BuiltinToolDefinition<typeof sourceGetSchema> => ({
   id: NIGHTSHIFT_SOURCE_GET_TOOL_ID,
   type: ToolType.builtin,
@@ -53,14 +54,17 @@ export const createSourceGetTool = ({
   schema: sourceGetSchema,
   tags: ['nightshift'],
   availability: createSignificantEventsAvailability({ server, logger }),
-  handler: async ({ source: slugOrId }, { request }) =>
+  handler: async ({ source: slugOrId }, { request, runContext }) =>
     runSourceTool({
       action: 'get source',
       privilege: 'read',
+      toolId: NIGHTSHIFT_SOURCE_GET_TOOL_ID,
       request,
+      runContext,
       getScopedClients,
       server,
       logger,
+      telemetry,
       run: async ({ sourcesClient }) => {
         const { id } = await resolveSource(sourcesClient, slugOrId);
         const { source, health } = await sourcesClient.get(id);

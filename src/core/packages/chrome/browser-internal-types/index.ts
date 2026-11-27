@@ -37,6 +37,17 @@ import type {
   ProjectNavigationLinks,
 } from '@kbn/core-chrome-browser';
 
+/**
+ * Cross-plugin navigation references collected from a solution nav tree.
+ * @internal
+ */
+export interface NavTreeDependencies {
+  /** Id of the plugin that registered the solution nav tree. */
+  ownerPluginId: string;
+  /** `link` targets referenced by the tree (app ids or deep-link ids). */
+  linkTargets: string[];
+}
+
 /** @internal */
 export type InternalChromeSetup = ChromeSetup;
 
@@ -163,14 +174,31 @@ export interface InternalChromeStart extends ChromeStart {
     registerCustomizeNavigationHandler(handler: () => void): void;
 
     /**
-     * Attach hover lists to an existing project-nav deep link.
-     * Does not require project chrome style; unused until project nav renders.
-     * Primary and footer hover only; not attached in More.
+     * Attach supplementary lists to an existing project-nav deep link.
+     * Does not require project chrome style; unused until project nav renders. The lists render in
+     * primary and footer hover popovers and, for panel openers, the existing side panel. They do
+     * not create a side panel or render in More.
      */
     registerNavigationLinks(links: ProjectNavigationLinks): void;
 
-    /** Registered hover lists. Live updates. */
+    /** Registered supplementary navigation lists. Live updates. */
     getRegisteredNavigationLinks$(): Observable<readonly ProjectNavigationLinks[]>;
+
+    /**
+     * Register a solution nav tree so Core can track the cross-plugin `link` references it
+     * declares when nav-dependency collection is enabled. No-op otherwise. Called by the
+     * navigation plugin for every tree that provides an `ownerPluginId`.
+     */
+    registerNavTreeDependencies(
+      ownerPluginId: string,
+      navigationTree$: Observable<NavigationTreeDefinition>
+    ): void;
+
+    /**
+     * Return the latest cross-plugin navigation references collected from all registered solution
+     * nav trees. Empty when collection is disabled. Consumed by the navigation-dependency snapshot.
+     */
+    getNavTreeDependencies(): NavTreeDependencies[];
   };
 
   /** Persistent chrome controls, including getters for Chrome-owned renderers. */

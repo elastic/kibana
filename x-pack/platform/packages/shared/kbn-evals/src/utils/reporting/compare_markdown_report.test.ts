@@ -9,21 +9,62 @@ import type { ComparisonResult } from '@kbn/evals-common';
 import { PARAMETRIC_UPGRADE_MIN_PAIRS } from '@kbn/evals-common';
 import { formatMarkdownCompareReport } from './compare_markdown_report';
 
+const side = (mean: number, stability: number | null = 0) => ({
+  mean,
+  used: 10,
+  missing: 0,
+  stability,
+});
+
 const makeResult = (overrides: Partial<ComparisonResult> = {}): ComparisonResult => ({
   datasetId: 'ds-1',
   datasetName: 'Dataset One',
   evaluatorName: 'Criteria',
   sampleSize: 10,
-  meanTarget: 0.8,
-  meanBaseline: 0.7,
+  target: side(0.8),
+  baseline: side(0.7),
   pValue: 0.03,
   direction: 'maximize',
   metricType: 'continuous_bounded',
   hypothesisTest: { id: 'wilcoxon_signed_rank', method: 'exact', statistic: 5 },
+  repetitionWarning: false,
   ...overrides,
 });
 
 describe('formatMarkdownCompareReport', () => {
+  describe('merge gate verdict', () => {
+    const firstLine = (
+      regressionGateVerdict: Parameters<
+        typeof formatMarkdownCompareReport
+      >[0]['regressionGateVerdict']
+    ) =>
+      formatMarkdownCompareReport({
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
+        results: [makeResult()],
+        regressionGateVerdict,
+      }).split('\n')[0];
+
+    it('leads with a regression and how to override it', () => {
+      expect(firstLine({ state: 'regression', summary: 'goal_pass 0.55 → 0.32 (p<0.001)' })).toBe(
+        '**Merge gate: regression.** goal_pass 0.55 → 0.32 (p<0.001). Fix it, or add the `evals:accept-regression` label to merge anyway.'
+      );
+    });
+
+    it('leads with a pass or an inconclusive result', () => {
+      expect(
+        firstLine({ state: 'pass', summary: 'no regression in goal_pass (0.55 → 0.53)' })
+      ).toBe('**Merge gate: passed.** No regression in goal_pass (0.55 → 0.53).');
+      expect(firstLine({ state: 'inconclusive', summary: 'baseline is 5 days old' })).toBe(
+        '**Merge gate: not enforced.** The comparison is inconclusive: baseline is 5 days old.'
+      );
+    });
+
+    it('is omitted when the suite has no gate', () => {
+      expect(firstLine(undefined)).toBe('**PR run**: exp-a | **Baseline (main)**: exp-b');
+    });
+  });
+
   it('renders a basic comparison table', () => {
     const output = formatMarkdownCompareReport({
       targetExperimentId: 'exp-a',
@@ -166,7 +207,57 @@ describe('formatMarkdownCompareReport', () => {
     expect(output).not.toContain('Refresh baseline');
   });
 
+  it('shows the stability and marks rows with uneven repetitions', () => {
+    const report = (results: ComparisonResult[]) =>
+      formatMarkdownCompareReport({
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
+        results,
+      });
+    const even = makeResult({
+      evaluatorName: 'Even',
+      target: side(0.8, 0.06),
+      baseline: side(0.7, 0.03),
+    });
+
+    const lines = report([
+      even,
+      makeResult({ evaluatorName: 'Uneven', repetitionWarning: true }),
+    ]).split('\n');
+    expect(lines).toContain(
+      '> **Warning**: in rows marked N*, some examples have a different number of valid repetitions in the two runs, or null scores.'
+    );
+    expect(lines.find((line) => line.includes('| Even |'))).toMatch(
+      /\| Even \| 10 \|.*\| 0\.06 \/ 0\.03 \|$/
+    );
+    expect(lines.find((line) => line.includes('| Uneven |'))).toContain('| Uneven | 10* |');
+
+    const unmeasured = { target: side(0.8, null), baseline: side(0.7, null) };
+    const oneSide = makeResult({ evaluatorName: 'One side', baseline: side(0.7, null) });
+    expect(
+      report([oneSide, makeResult(unmeasured)])
+        .split('\n')
+        .find((line) => line.includes('| One side |'))
+    ).toMatch(/\| 0\.00 \/ - \|$/);
+
+    const hidden = report([makeResult(unmeasured)]);
+    expect(hidden).not.toMatch(/stability/i);
+    expect(hidden).toContain('| Sig | Outcome |\n| --- |');
+  });
+
   describe('skipped pairs', () => {
+    it('names the slices left out of a median comparison', () => {
+      const output = formatMarkdownCompareReport({
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
+        results: [makeResult()],
+        rejectedSlices: ['dataset-1 / Latency'],
+      });
+
+      expect(output).toContain('Left out of the median comparison');
+      expect(output).toContain('dataset-1 / Latency');
+    });
+
     it('shows a note when skippedMissingPairs > 0', () => {
       const output = formatMarkdownCompareReport({
         targetExperimentId: 'exp-a',
@@ -175,7 +266,7 @@ describe('formatMarkdownCompareReport', () => {
         skippedMissingPairs: 5,
       });
 
-      expect(output).toContain('5 unpaired (ran in only one experiment)');
+      expect(output).toContain('5 unpaired');
       expect(output).toContain('Comparison may be incomplete');
     });
 
@@ -200,7 +291,7 @@ describe('formatMarkdownCompareReport', () => {
         skippedNullScores: 2,
       });
 
-      expect(output).toContain('4 unpaired (ran in only one experiment)');
+      expect(output).toContain('4 unpaired');
       expect(output).toContain('2 null scores');
     });
 
@@ -232,9 +323,7 @@ describe('formatMarkdownCompareReport', () => {
       const output = formatMarkdownCompareReport({
         targetExperimentId: 'exp-a',
         baselineExperimentId: 'exp-b',
-        results: [
-          makeResult({ meanTarget: 0.8, meanBaseline: 0.7, pValue: 0.03, direction: 'maximize' }),
-        ],
+        results: [makeResult({ pValue: 0.03, direction: 'maximize' })],
       });
       const dataRow = output.split('\n').find((l) => l.includes('Criteria'));
       expect(dataRow).toContain('Improvement');
@@ -245,7 +334,12 @@ describe('formatMarkdownCompareReport', () => {
         targetExperimentId: 'exp-a',
         baselineExperimentId: 'exp-b',
         results: [
-          makeResult({ meanTarget: 0.6, meanBaseline: 0.8, pValue: 0.03, direction: 'maximize' }),
+          makeResult({
+            target: side(0.6),
+            baseline: side(0.8),
+            pValue: 0.03,
+            direction: 'maximize',
+          }),
         ],
       });
       const dataRow = output.split('\n').find((l) => l.includes('Criteria'));
@@ -257,7 +351,12 @@ describe('formatMarkdownCompareReport', () => {
         targetExperimentId: 'exp-a',
         baselineExperimentId: 'exp-b',
         results: [
-          makeResult({ meanTarget: 100, meanBaseline: 150, pValue: 0.03, direction: 'minimize' }),
+          makeResult({
+            target: side(100),
+            baseline: side(150),
+            pValue: 0.03,
+            direction: 'minimize',
+          }),
         ],
       });
       const dataRow = output.split('\n').find((l) => l.includes('Criteria'));
@@ -279,9 +378,7 @@ describe('formatMarkdownCompareReport', () => {
       const output = formatMarkdownCompareReport({
         targetExperimentId: 'exp-a',
         baselineExperimentId: 'exp-b',
-        results: [
-          makeResult({ meanTarget: 0.8, meanBaseline: 0.7, pValue: 0.5, direction: 'maximize' }),
-        ],
+        results: [makeResult({ pValue: 0.5, direction: 'maximize' })],
       });
       const dataRow = output.split('\n').find((l) => l.includes('Criteria'));
       expect(dataRow).not.toContain('Improvement');

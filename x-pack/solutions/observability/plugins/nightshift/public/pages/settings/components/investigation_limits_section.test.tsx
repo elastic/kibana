@@ -212,13 +212,17 @@ describe('InvestigationLimitsSection', () => {
     );
   });
 
-  it('does not accept a limit of 0 in the input', () => {
+  it('saves a typed 0 as a limit of 0', async () => {
     renderForm();
 
     fireEvent.change(input('automatic_investigation'), { target: { value: '0' } });
+    expect(input('automatic_investigation')).toHaveValue(0);
+    fireEvent.click(saveButton());
+    fireEvent.click(await screen.findByRole('button', { name: 'Save lower limits' }));
 
-    expect(input('automatic_investigation')).toHaveValue(30);
-    expect(screen.queryByTestId('streams-significant-events-settings-bottom-bar')).toBeNull();
+    await waitFor(() =>
+      expect(mockSave).toHaveBeenCalledWith({ limits: { automatic_investigation: 0 } })
+    );
   });
 
   it('keeps the inputs while the last finite limit is cleared', () => {
@@ -281,7 +285,7 @@ describe('InvestigationLimitsSection', () => {
 
     fireEvent.change(input('automatic_investigation'), { target: { value: '1.5' } });
 
-    expect(screen.getByText(/Enter a whole number from 1 to/)).toBeInTheDocument();
+    expect(screen.getByText(/Enter a whole number from 0 to/)).toBeInTheDocument();
     expect(saveButton()).toBeDisabled();
     expect(mockSave).not.toHaveBeenCalled();
   });

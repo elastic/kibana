@@ -7,8 +7,8 @@
 
 import type {
   ConversationOriginType,
-  RoundCompleteEvent,
   SurfacePayload,
+  VersionedAttachment,
 } from '@kbn/agent-builder-common';
 import type { AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
@@ -22,9 +22,9 @@ import { slackSurface } from './slack';
 import type { SurfaceRenderer } from './types';
 
 export interface SurfacesService {
-  /** Renders the round's surface payload, or resolves to nothing when unavailable or rendering fails. */
+  /** Renders a response message for its surface, or resolves to nothing when unavailable or rendering fails. */
   renderPayload(
-    event: RoundCompleteEvent,
+    response: { message: string; attachments: VersionedAttachment[] },
     options: { originType?: ConversationOriginType; agentId: string } & AttachmentFormatContext
   ): Promise<SurfacePayload | undefined>;
 }
@@ -58,7 +58,7 @@ export class SurfacesServiceImpl implements SurfacesService {
   }
 
   async renderPayload(
-    { data: { round, attachments = [] } }: RoundCompleteEvent,
+    { message, attachments }: { message: string; attachments: VersionedAttachment[] },
     {
       originType,
       agentId,
@@ -77,7 +77,7 @@ export class SurfacesServiceImpl implements SurfacesService {
       const kibanaUrl = getPublicKibanaUrl(this.basePath, this.cloud, spaceId);
 
       const composition = await buildComposition({
-        round,
+        message,
         attachments,
         attachmentsService: this.attachmentsService,
         context: { request, spaceId, agentId },

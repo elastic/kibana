@@ -10,7 +10,7 @@ import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
 import { isObjectLike } from 'lodash';
 
-import type { RegistryConnectionErrorType } from '../../common/types';
+import type { AgentVersionBlock, RegistryConnectionErrorType } from '../../common/types';
 import type { BreakingChangesLog } from '../../common/services/changelog_utils';
 
 import { FleetError } from '../../common/errors';
@@ -77,6 +77,11 @@ export class RegistryResponseError extends RegistryError {
 export class PackageInvalidDeploymentMode extends FleetError {}
 export class PackageFipsIncompatibleError extends FleetError {}
 export class PackageOutdatedError extends FleetError {}
+/**
+ * An update by query stopped before it went through all of its documents: it was cancelled for
+ * running too long, or it timed out. The documents it did update stay updated.
+ */
+export class UpdateByQueryIncompleteError extends FleetError {}
 export class PackageBreakingChangesNotAcknowledgedError extends FleetError {
   constructor(message: string, breakingChanges: BreakingChangesLog) {
     super(message);
@@ -238,6 +243,19 @@ export class AgentRollbackError extends FleetError {
 }
 export class PackagePolicyIneligibleForUpgradeError extends FleetError {}
 export class PackagePolicyValidationError extends FleetError {}
+export class PackagePolicyAgentVersionIncompatibleError extends FleetError {
+  constructor(
+    message: string,
+    public readonly agentVersionBlock: AgentVersionBlock,
+    public readonly operation: 'upgrade' | 'add'
+  ) {
+    super(message);
+    this.attributes = {
+      type: 'agent_version_incompatible',
+      agent_version_block: agentVersionBlock,
+    };
+  }
+}
 export class PackagePolicyNameExistsError extends FleetError {}
 export class BundledPackageLocationNotFoundError extends FleetError {}
 
