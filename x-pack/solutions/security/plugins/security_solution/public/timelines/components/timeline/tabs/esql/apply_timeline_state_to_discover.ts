@@ -21,6 +21,8 @@ import type { TimeRange } from '@kbn/es-query';
  * timeline was on screen, so seeding Redux alone is not enough — the timeline's state has to be
  * in the URL before Discover reads it. Writing both keeps the ES|QL tab derived from the
  * timeline rather than from whatever the previous timeline left behind.
+ *
+ * Without a `timeRange`, the range in the URL and the timefilter are left as they are.
  */
 export const applyTimelineStateToDiscover = async ({
   stateContainer,
@@ -29,18 +31,22 @@ export const applyTimelineStateToDiscover = async ({
 }: {
   stateContainer: ExtendedDiscoverStateContainer;
   appState: DiscoverAppState;
-  timeRange: TimeRange;
+  timeRange?: TimeRange;
 }): Promise<void> => {
   const { internalState, injectCurrentTab, internalActions, stateStorage } = stateContainer;
 
-  internalState.dispatch(
-    injectCurrentTab(internalActions.updateGlobalState)({ globalState: { timeRange } })
-  );
+  if (timeRange) {
+    internalState.dispatch(
+      injectCurrentTab(internalActions.updateGlobalState)({ globalState: { timeRange } })
+    );
+  }
   internalState.dispatch(injectCurrentTab(internalActions.setAppState)({ appState }));
   // Replaces `_a` with the app state set above, dropping any keys the previous timeline left there.
   await internalState.dispatch(
     injectCurrentTab(internalActions.updateAppStateAndReplaceUrl)({ appState })
   );
+
+  if (!timeRange) return;
 
   // `updateGlobalState` only writes Redux's copy of the range, and no Discover action exposed to
   // consumers writes the URL copy. Without this the restored range is discarded the moment

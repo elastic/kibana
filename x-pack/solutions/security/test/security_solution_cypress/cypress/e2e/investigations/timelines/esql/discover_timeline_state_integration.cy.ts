@@ -15,6 +15,7 @@ import {
 import { ALERTS_URL } from '../../../../urls/navigation';
 import {
   DISCOVER_CONTAINER,
+  DISCOVER_DATA_VIEW_SWITCHER,
   GET_DISCOVER_DATA_GRID_CELL_HEADER,
   TIMELINE_DISCOVER_TAB,
 } from '../../../../screens/discover';
@@ -123,6 +124,7 @@ describe(
             cy.intercept('POST', '**/internal/search/esql_async').as(ESQL_QUERY_REQ);
             goToEsqlTab();
             cy.get(LOADING_INDICATOR).should('not.exist');
+            cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('not.exist');
             cy.wait(`@${ESQL_QUERY_REQ}`, { timeout: ESQL_QUERY_REQ_TIMEOUT });
             verifyDiscoverEsqlQuery(esqlQuery);
             // Assert the time range before the columns: the columns only render once the query

@@ -21,6 +21,7 @@ import type { ComponentType, FC, PropsWithChildren } from 'react';
 import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createDiscoverServicesMock } from '@kbn/discover-plugin/public/__mocks__/services';
+import type { ExtendedDiscoverStateContainer } from '@kbn/discover-plugin/public';
 import { createMockDiscoverStateContainer } from './mocks/discover_in_timeline_provider';
 
 const discoverServices = createDiscoverServicesMock();
@@ -233,7 +234,7 @@ describe('useDiscoverInTimelineActions', () => {
 
       await result.current.resetDiscoverAppState(savedSearchMock.id);
 
-      expect(result.current.timelineRestorePending.current).toBe(false);
+      expect(result.current.timelineRestorePending.current).toBeNull();
     });
     it('should defer the restore to the ES|QL tab when it holds no state container', async () => {
       // The tab releases its container when it unmounts, so there is nothing to restore into.
@@ -247,7 +248,34 @@ describe('useDiscoverInTimelineActions', () => {
       expect(
         startServicesMock.customDataService.query.timefilter.timefilter.setTime
       ).not.toHaveBeenCalled();
-      expect(result.current.timelineRestorePending.current).toBe(true);
+      expect(result.current.timelineRestorePending.current).toBe('opened');
+    });
+    it('should keep the restore pending when the ES|QL tab releases its container mid-restore', async () => {
+      // Opening a timeline switches it to the Query tab, which unmounts the ES|QL tab while the
+      // saved search is still being fetched.
+      const containerRef: { current: ExtendedDiscoverStateContainer | undefined } = {
+        current: createMockDiscoverStateContainer(discoverServices),
+      };
+      (startServicesMock.savedSearch.get as jest.Mock).mockImplementationOnce(async () => {
+        containerRef.current = undefined;
+        return savedSearchMock;
+      });
+      const { result } = renderHook(() => useDiscoverInTimelineActions(containerRef), {
+        wrapper: getTestProviderWithCustomState(),
+      });
+
+      await result.current.resetDiscoverAppState(savedSearchMock.id);
+
+      expect(result.current.timelineRestorePending.current).toBe('opened');
+    });
+    it('should record a restore of the timeline the URL points at as such', async () => {
+      const { result } = renderHook(() => useDiscoverInTimelineActions({ current: undefined }), {
+        wrapper: getTestProviderWithCustomState(),
+      });
+
+      await result.current.resetDiscoverAppState(savedSearchMock.id, { isRestoringFromUrl: true });
+
+      expect(result.current.timelineRestorePending.current).toBe('fromUrl');
     });
   });
   describe('updateSavedSearch', () => {

@@ -16,7 +16,7 @@ export const useDiscoverInTimelineActions = () => {
     resetDiscoverAppState: jest.fn().mockResolvedValue(true),
     updateSavedSearch: jest.fn(),
     getAppStateFromSavedSearch: jest.fn(),
-    timelineRestorePending: { current: false },
+    timelineRestorePending: { current: null },
     defaultDiscoverAppState: {
       query: {
         query: '',

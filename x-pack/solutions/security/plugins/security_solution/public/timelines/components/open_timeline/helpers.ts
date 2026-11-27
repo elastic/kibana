@@ -290,6 +290,8 @@ export const formatTimelineResponseToModel = (
 export interface QueryTimelineById {
   activeTimelineTab?: TimelineTabs;
   duplicate?: boolean;
+  /* The timeline is the one the URL points at, so the Discover state in the URL is its own */
+  isRestoringFromUrl?: boolean;
   timelineId?: string;
   timelineType?: TimelineType;
   onError?: TimelineErrorCallback;
@@ -307,6 +309,7 @@ export const useQueryTimelineById = () => {
   return ({
     activeTimelineTab = TimelineTabs.query,
     duplicate = false,
+    isRestoringFromUrl = false,
     timelineId,
     timelineType,
     onError,
@@ -342,7 +345,7 @@ export const useQueryTimelineById = () => {
               : [],
         },
       });
-      resetDiscoverAppState();
+      resetDiscoverAppState(undefined, { isRestoringFromUrl });
     } else {
       return Promise.resolve(resolveTimeline(timelineId))
         .then((result) => {
@@ -384,7 +387,7 @@ export const useQueryTimelineById = () => {
               // No need to do that again.
               preventSettingQuery: true,
             });
-            return resetDiscoverAppState(timeline.savedSearchId);
+            return resetDiscoverAppState(timeline.savedSearchId, { isRestoringFromUrl });
           }
         })
         .catch((error) => {

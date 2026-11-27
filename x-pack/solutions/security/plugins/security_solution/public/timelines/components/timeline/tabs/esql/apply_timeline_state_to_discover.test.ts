@@ -102,4 +102,17 @@ describe('applyTimelineStateToDiscover', () => {
 
     expect(services.timefilter.setTime).toHaveBeenCalledWith(PREVIOUS_TIMELINE_TIME_RANGE);
   });
+
+  it('leaves the time range in the URL alone when given none', async () => {
+    const { stateContainer, services, tabId, initializeSingleTab, stateStorageContainer } =
+      await setup();
+
+    await applyTimelineStateToDiscover({ stateContainer, appState: restoredAppState });
+
+    expect(stateStorageContainer.get(GLOBAL_STATE_URL_KEY)).toEqual(
+      expect.objectContaining({ time: PREVIOUS_TIMELINE_TIME_RANGE })
+    );
+    await initializeSingleTab({ tabId, skipWaitForDataFetching: true });
+    expect(services.timefilter.setTime).toHaveBeenCalledWith(PREVIOUS_TIMELINE_TIME_RANGE);
+  });
 });

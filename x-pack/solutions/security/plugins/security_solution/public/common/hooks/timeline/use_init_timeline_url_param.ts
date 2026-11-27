@@ -29,6 +29,7 @@ export const useInitTimelineFromUrlParam = () => {
         queryTimelineById({
           activeTimelineTab: initialState.activeTab,
           duplicate: false,
+          isRestoringFromUrl: true,
           timelineId: initialState.id,
           openTimeline: initialState.isOpen,
           savedSearchId: initialState.savedSearchId,

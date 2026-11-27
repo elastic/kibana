@@ -16,7 +16,8 @@ import { useQuery } from '@kbn/react-query';
 import { isEqualWith } from 'lodash';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { useDispatch } from 'react-redux';
-import { APP_STATE_URL_KEY } from '@kbn/discover-plugin/common';
+import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
+import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '@kbn/discover-plugin/common';
 import { PageScope } from '../../../../../data_view_manager/constants';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { updateSavedSearchId } from '../../../../store/actions';
@@ -193,13 +194,13 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
           discoverAppState) ??
         defaultDiscoverAppState;
 
-      // A different timeline was opened while this tab was unmounted, so it never got the chance
-      // to restore. The timeline is the source of truth for its own ES|QL tab: a restored
-      // timeline gets its saved session's state, a timeline without one gets the default. This
-      // deliberately wins over leftover Discover URL state, which belongs to the previously
-      // opened timeline and would otherwise be restored in its place — silently, since the two
-      // often share a query.
-      const isTimelineRestore = timelineRestorePending.current;
+      // The timeline was restored while this tab could not apply it. When a different timeline
+      // was opened, the Discover URL state belongs to the previously opened one and would
+      // otherwise be restored in its place — silently, since the two often share a query — so the
+      // timeline's saved session, or the default, wins over it. When the timeline the URL points
+      // at was restored, the URL state is this timeline's own and is kept.
+      const pendingRestore = timelineRestorePending.current;
+      timelineRestorePending.current = null;
 
       // Nothing of this timeline's own session is at stake: the URL carries no app state, or the
       // tab holds no ES|QL query yet. Seeding it from the timeline cannot lose in-session work.
@@ -207,19 +208,21 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
         !stateContainer.stateStorage.get(APP_STATE_URL_KEY) ||
         !(stateContainer.getCurrentTab().appState.query as { esql?: string })?.esql;
 
-      if (isTimelineRestore || hasNoEsqlStateToPreserve) {
-        timelineRestorePending.current = false;
+      // Only a restore takes the saved session's range, and a restore from the URL only when the
+      // URL carries none of its own. Otherwise Discover keeps the range in the URL or, failing
+      // that, the one the ES|QL search already runs against: on a remount, the user's latest.
+      const takesSavedTimeRange =
+        pendingRestore === 'opened' ||
+        (pendingRestore === 'fromUrl' &&
+          !stateContainer.stateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY)?.time);
+
+      if (pendingRestore === 'opened' || hasNoEsqlStateToPreserve) {
         await applyTimelineStateToDiscover({
           stateContainer,
           appState: finalAppState,
-          timeRange:
-            savedSearchAppState?.savedSearch.timeRange ??
-            // Only a restore may fall back to the default range. Remounting the same timeline
-            // must keep the range the user is looking at, which lives in the data service the
-            // ES|QL search reads from rather than in the saved session.
-            (isTimelineRestore
-              ? defaultDiscoverTimeRange
-              : discoverDataService.query.timefilter.timefilter.getTime()),
+          timeRange: takesSavedTimeRange
+            ? savedSearchAppState?.savedSearch.timeRange ?? defaultDiscoverTimeRange
+            : undefined,
         });
       }
 
@@ -253,7 +256,6 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       timelineId,
       initializeLocalSavedSearch,
       timelineRestorePending,
-      discoverDataService,
     ]
   );
 

@@ -11,10 +11,12 @@ import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '@kbn/discover-plugin/co
 import type { CustomizationCallback } from '@kbn/discover-plugin/public/customizations/types';
 import type { DiscoverContainerProps } from '@kbn/discover-plugin/public';
 import type { DiscoverAppState } from '@kbn/discover-plugin/public/application/main/state_management/redux';
-import { TestProviders } from '../../../../../common/mock';
+import type { SavedSearch } from '@kbn/saved-search-plugin/common';
+import { createMockStore, mockGlobalState, TestProviders } from '../../../../../common/mock';
 import { createStartServicesMock } from '../../../../../common/lib/kibana/kibana_react.mock';
 import type { DiscoverInTimelineContextType } from '../../../../../common/components/discover_in_timeline/context';
 import { DiscoverInTimelineContext } from '../../../../../common/components/discover_in_timeline/context';
+import type { TimelineRestore } from '../../../../../common/components/discover_in_timeline/use_discover_in_timeline_actions';
 import { defaultDiscoverTimeRange } from '../../../../../common/components/discover_in_timeline/use_discover_in_timeline_actions';
 import DiscoverTabContent from '.';
 import { TimelineId } from '../../../../../../common/types';
@@ -36,14 +38,43 @@ const IN_SESSION_TIME_RANGE = {
 
 const DEFAULT_APP_STATE: DiscoverAppState = { query: { esql: '' }, columns: [] };
 
+/** The timeline's saved Discover session, older than what the user has on screen. */
+const SAVED_SESSION_APP_STATE: DiscoverAppState = {
+  query: { esql: 'from logs-* | limit 10' },
+  columns: ['host.name'],
+};
+const SAVED_SESSION_TIME_RANGE = { from: 'now-7d', to: 'now', mode: 'relative' as const };
+const SAVED_SESSION_ID = 'saved-session-id';
+const SAVED_SESSION = {
+  id: SAVED_SESSION_ID,
+  timeRange: SAVED_SESSION_TIME_RANGE,
+} as unknown as SavedSearch;
+
+const createStoreWithSavedSession = () =>
+  createMockStore({
+    ...mockGlobalState,
+    timeline: {
+      ...mockGlobalState.timeline,
+      timelineById: {
+        ...mockGlobalState.timeline.timelineById,
+        [TimelineId.test]: {
+          ...mockGlobalState.timeline.timelineById[TimelineId.test],
+          savedSearchId: SAVED_SESSION_ID,
+        },
+      },
+    },
+  });
+
 const renderEsqlTab = async ({
   timelineRestorePending,
   urlAppState = IN_SESSION_APP_STATE,
   currentTabAppState = IN_SESSION_APP_STATE,
+  hasSavedSession = false,
 }: {
-  timelineRestorePending: boolean;
+  timelineRestorePending: TimelineRestore | null;
   urlAppState?: DiscoverAppState;
   currentTabAppState?: DiscoverAppState;
+  hasSavedSession?: boolean;
 }) => {
   const discoverState = await createTimelineDiscoverTestState({
     urlAppState,
@@ -56,10 +87,7 @@ const renderEsqlTab = async ({
     <div data-test-subj="discover-container" />
   ));
   startServices.discover = { ...startServices.discover, DiscoverContainer };
-  // The range the ES|QL search actually runs against, which is what the user is looking at.
-  startServices.customDataService.query.timefilter.timefilter.getTime = jest
-    .fn()
-    .mockReturnValue(IN_SESSION_TIME_RANGE);
+  startServices.savedSearch.get = jest.fn().mockResolvedValue(SAVED_SESSION);
 
   const restorePendingRef = { current: timelineRestorePending };
   const contextValue = {
@@ -68,13 +96,18 @@ const renderEsqlTab = async ({
     resetDiscoverAppState: jest.fn(),
     updateSavedSearch: jest.fn(),
     initializeLocalSavedSearch: jest.fn(),
-    getAppStateFromSavedSearch: jest.fn(),
+    getAppStateFromSavedSearch: jest
+      .fn()
+      .mockReturnValue({ savedSearch: SAVED_SESSION, appState: SAVED_SESSION_APP_STATE }),
     defaultDiscoverAppState: DEFAULT_APP_STATE,
     timelineRestorePending: restorePendingRef,
   } as unknown as DiscoverInTimelineContextType;
 
   render(
-    <TestProviders startServices={startServices}>
+    <TestProviders
+      startServices={startServices}
+      store={hasSavedSession ? createStoreWithSavedSession() : undefined}
+    >
       <DiscoverInTimelineContext.Provider value={contextValue}>
         <DiscoverTabContent timelineId={TimelineId.test} />
       </DiscoverInTimelineContext.Provider>
@@ -112,7 +145,7 @@ describe('Discover Tab Content', () => {
   // restore, throwing away unsaved queries and moving the time range back to `now-15m`.
   describe('remounting for the timeline already on screen', () => {
     it('leaves the state Discover holds alone', async () => {
-      const { stateStorageContainer } = await renderEsqlTab({ timelineRestorePending: false });
+      const { stateStorageContainer } = await renderEsqlTab({ timelineRestorePending: null });
 
       expect(stateStorageContainer.get(APP_STATE_URL_KEY)).toEqual(IN_SESSION_APP_STATE);
       expect(stateStorageContainer.get(GLOBAL_STATE_URL_KEY)).toEqual(
@@ -122,7 +155,7 @@ describe('Discover Tab Content', () => {
 
     it('keeps the time range the ES|QL search runs against when it has to seed the tab', async () => {
       const { stateStorageContainer } = await renderEsqlTab({
-        timelineRestorePending: false,
+        timelineRestorePending: null,
         // Nothing of this timeline's own session is in the URL, so seeding it cannot lose work —
         // but the range the user is looking at still has to survive.
         urlAppState: { columns: ['stale'] },
@@ -133,12 +166,45 @@ describe('Discover Tab Content', () => {
         expect.objectContaining({ time: IN_SESSION_TIME_RANGE })
       );
     });
+
+    it('keeps the live time range over the saved session one when it seeds the tab from it', async () => {
+      const { stateStorageContainer } = await renderEsqlTab({
+        timelineRestorePending: null,
+        hasSavedSession: true,
+        urlAppState: { columns: ['stale'] },
+        currentTabAppState: { columns: ['stale'] },
+      });
+
+      expect(stateStorageContainer.get(APP_STATE_URL_KEY)).toEqual(
+        expect.objectContaining({ columns: SAVED_SESSION_APP_STATE.columns })
+      );
+      expect(stateStorageContainer.get(GLOBAL_STATE_URL_KEY)).toEqual(
+        expect.objectContaining({ time: IN_SESSION_TIME_RANGE })
+      );
+    });
+  });
+
+  // A page reload restores the timeline in the URL before Discover has mounted, so its restore is
+  // still pending when the tab mounts — but the Discover state in the URL is this timeline's own.
+  describe('mounting after the timeline the URL points at was restored', () => {
+    it('keeps its unsaved ES|QL work from the URL over the saved session', async () => {
+      const { stateStorageContainer, restorePendingRef } = await renderEsqlTab({
+        timelineRestorePending: 'fromUrl',
+        hasSavedSession: true,
+      });
+
+      expect(stateStorageContainer.get(APP_STATE_URL_KEY)).toEqual(IN_SESSION_APP_STATE);
+      expect(stateStorageContainer.get(GLOBAL_STATE_URL_KEY)).toEqual(
+        expect.objectContaining({ time: IN_SESSION_TIME_RANGE })
+      );
+      expect(restorePendingRef.current).toBeNull();
+    });
   });
 
   describe('mounting after a different timeline was opened', () => {
     it('replaces the state the previous timeline left behind', async () => {
       const { stateStorageContainer, restorePendingRef } = await renderEsqlTab({
-        timelineRestorePending: true,
+        timelineRestorePending: 'opened',
       });
 
       expect(stateStorageContainer.get(APP_STATE_URL_KEY)).toEqual(
@@ -148,7 +214,21 @@ describe('Discover Tab Content', () => {
         expect.objectContaining({ time: defaultDiscoverTimeRange })
       );
       // Consumed, so the next remount of this timeline is not treated as a restore.
-      expect(restorePendingRef.current).toBe(false);
+      expect(restorePendingRef.current).toBeNull();
+    });
+
+    it('restores the saved session state and time range of the opened timeline', async () => {
+      const { stateStorageContainer } = await renderEsqlTab({
+        timelineRestorePending: 'opened',
+        hasSavedSession: true,
+      });
+
+      expect(stateStorageContainer.get(APP_STATE_URL_KEY)).toEqual(
+        expect.objectContaining(SAVED_SESSION_APP_STATE)
+      );
+      expect(stateStorageContainer.get(GLOBAL_STATE_URL_KEY)).toEqual(
+        expect.objectContaining({ time: SAVED_SESSION_TIME_RANGE })
+      );
     });
   });
 
