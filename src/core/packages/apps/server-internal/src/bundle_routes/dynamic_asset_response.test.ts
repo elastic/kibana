@@ -7,13 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import mockFs from 'mock-fs';
+import { mkdtempSync, rmSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
 import { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 import { createDynamicAssetHandler } from './dynamic_asset_response';
 
+let bundlesPath: string;
+
 function getHandler(args?: Partial<Parameters<typeof createDynamicAssetHandler>[0]>) {
   return createDynamicAssetHandler({
-    bundlesPath: '/test',
+    bundlesPath,
     publicPath: '/public',
     fileHashCache: {
       get: jest.fn(),
@@ -25,8 +29,12 @@ function getHandler(args?: Partial<Parameters<typeof createDynamicAssetHandler>[
   });
 }
 
+beforeEach(() => {
+  bundlesPath = mkdtempSync(join(tmpdir(), 'dynamic-asset-response-'));
+});
+
 afterEach(() => {
-  mockFs.restore();
+  rmSync(bundlesPath, { recursive: true, force: true });
 });
 it('returns 403 if the path requested does not match bundle path', async () => {
   const handler = getHandler();
@@ -40,8 +48,7 @@ it('returns 403 if the path requested does not match bundle path', async () => {
 
 it('returns 404 if the file does not exist', async () => {
   const handler = getHandler();
-  mockFs({}); // no files
-  const filePath = '/test/abc.js';
+  const filePath = join(bundlesPath, 'abc.js');
   const result = await handler(
     {} as any,
     { params: { path: filePath }, headers: { 'accept-encoding': '*' } } as any,
@@ -53,10 +60,8 @@ it('returns 404 if the file does not exist', async () => {
 describe('headers', () => {
   it('returns the expected headers', async () => {
     const handler = getHandler();
-    const filePath = '/test/abc.js';
-    mockFs({
-      [filePath]: Buffer.from('test'),
-    });
+    const filePath = join(bundlesPath, 'abc.js');
+    writeFileSync(filePath, 'test');
     const result = await handler(
       {} as any,
       { params: { path: filePath }, headers: { 'accept-encoding': 'br' } } as any,
@@ -66,14 +71,13 @@ describe('headers', () => {
       'cache-control': 'public, max-age=31536000, immutable',
       'content-type': 'application/javascript; charset=utf-8',
     });
+    result.payload.destroy();
   });
 
   it('returns the expected headers when not in dist mode', async () => {
     const handler = getHandler({ isDist: false });
-    const filePath = '/test/abc.js';
-    mockFs({
-      [filePath]: Buffer.from('test'),
-    });
+    const filePath = join(bundlesPath, 'abc.js');
+    writeFileSync(filePath, 'test');
     const result = await handler(
       {} as any,
       { params: { path: filePath }, headers: { 'accept-encoding': '*' } } as any,
@@ -84,5 +88,6 @@ describe('headers', () => {
       'content-type': 'application/javascript; charset=utf-8',
       etag: expect.stringMatching(/^[a-f0-9]{64}-\/public/i),
     });
+    result.payload.destroy();
   });
 });

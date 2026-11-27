@@ -23,7 +23,7 @@ jest.mock('./v2', () => {
   };
 });
 
-import mockFs from 'mock-fs';
+import { createFsError, mockCgroupFiles, readFileMock } from './cgroup_files.test.mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { OsCgroupMetricsCollector } from '.';
 import type { Logger } from '@kbn/logging';
@@ -38,39 +38,38 @@ describe('OsCgroupMetricsCollector', () => {
     collector = new OsCgroupMetricsCollector({ logger });
   });
   afterEach(() => {
-    mockFs.restore();
+    readFileMock.mockReset();
     jest.clearAllMocks();
   });
 
   it('returns empty object when no cgroup file present', async () => {
-    mockFs({
-      '/proc/self': {
-        /** empty directory */
-      },
-    });
+    mockCgroupFiles({});
 
     expect(await collector.collect()).toEqual({});
     expect(logger.error).not.toHaveBeenCalled();
   });
 
   it('returns empty object and logs error on an EACCES error', async () => {
-    mockFs({
-      '/proc/self/cgroup': `
+    // Every file under /sys/fs/cgroup is unreadable.
+    readFileMock.mockImplementation(async (path) => {
+      if (path === '/proc/self/cgroup') {
+        return Buffer.from(`
 123:memory:/groupname
 123:cpu:/groupname
 123:cpuacct:/groupname
-      `,
-      '/sys/fs/cgroup': mockFs.directory({ mode: parseInt('0000', 8) }),
+      `);
+      }
+      throw createFsError('EACCES', 'permission denied', String(path));
     });
 
     expect(await collector.collect()).toEqual({});
     expect(logger.error).toHaveBeenCalledWith(
-      "cgroup metrics could not be read due to error: [Error: EACCES, permission denied '/sys/fs/cgroup/cpuacct/groupname/cpuacct.usage']"
+      "cgroup metrics could not be read due to error: [Error: EACCES: permission denied, open '/sys/fs/cgroup/cpuacct/groupname/cpuacct.usage']"
     );
   });
 
   it('delegates correctly to the v1 implementation', async () => {
-    mockFs({
+    mockCgroupFiles({
       '/proc/self/cgroup': `123:memory:/groupname
 123:cpu:/groupname
 123:cpuacct:/groupname`,
@@ -87,7 +86,7 @@ describe('OsCgroupMetricsCollector', () => {
   });
 
   it('delegates correctly to the v2 implementation', async () => {
-    mockFs({
+    mockCgroupFiles({
       '/proc/self/cgroup': `0::/groupname`,
     });
 
@@ -99,7 +98,7 @@ describe('OsCgroupMetricsCollector', () => {
   });
 
   it('passes through overrides', async () => {
-    mockFs({
+    mockCgroupFiles({
       '/proc/self/cgroup': `0:test:/groupname`,
     });
 

@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import mockFs from 'mock-fs';
+import { mockCgroupFiles, readFileMock } from './cgroup_files.test.mocks';
 import { gatherV1CgroupMetrics } from './v1';
 
 describe('gatherV1CgroupMetrics', () => {
-  afterEach(() => mockFs.restore());
+  afterEach(() => readFileMock.mockReset());
 
   it('collects cgroup data', async () => {
-    mockFs({
+    mockCgroupFiles({
       '/proc/self/cgroup': `
 123:memory:/groupname
 123:cpu:/groupname

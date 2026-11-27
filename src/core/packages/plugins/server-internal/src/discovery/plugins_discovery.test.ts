@@ -9,15 +9,21 @@
 
 // must be before mocks imports to avoid conflicting with `REPO_ROOT` accessor.
 import { REPO_ROOT } from '@kbn/repo-info';
-import { mockPackage, scanPluginSearchPathsMock } from './plugins_discovery.test.mocks';
-import mockFs from 'mock-fs';
+import {
+  mockPackage,
+  mockReadFileErrors,
+  scanPluginSearchPathsMock,
+} from './plugins_discovery.test.mocks';
+import { randomUUID } from 'crypto';
+import { mkdirSync, rmSync, symlinkSync } from 'fs';
+import { tmpdir } from 'os';
 import { getEnvOptions, rawConfigServiceMock } from '@kbn/config-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Package } from '@kbn/repo-packages';
 
 import { firstValueFrom, from } from 'rxjs';
 import { map, toArray } from 'rxjs';
-import { resolve } from 'path';
+import { join, resolve } from 'path';
 import { ConfigService, Env } from '@kbn/config';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { NodeInfo } from '@kbn/core-node-server';
@@ -26,6 +32,7 @@ import { PluginType } from '@kbn/core-base-common';
 import type { PluginsConfigType } from '../plugins_config';
 import { PluginsConfig, config } from '../plugins_config';
 import type { InstanceInfo } from '../plugin_context';
+import { writeFileTree } from '../test_helpers/file_tree';
 import { discover } from './plugins_discovery';
 
 jest.mock('@kbn/repo-packages', () => ({
@@ -48,6 +55,9 @@ const pluginManifestFromPluginPackageMock: jest.Mock = jest.requireMock(
   './plugin_manifest_from_plugin_package'
 ).pluginManifestFromPluginPackage;
 
+const TMP_DIR = join(tmpdir(), `plugins-discovery-${randomUUID()}`);
+const KIBANA_ROOT = join(TMP_DIR, 'kibana');
+
 function getMockPackage(id: string, group: string = 'platform') {
   const relativePath = `packages/${id}`;
   return {
@@ -63,7 +73,7 @@ function getMockPackage(id: string, group: string = 'platform') {
       oss: false,
     }),
     getGroup: () => group,
-    directory: resolve(REPO_ROOT, relativePath),
+    directory: resolve(KIBANA_ROOT, relativePath),
     normalizedRepoRelativeDir: relativePath,
   } as Package;
 }
@@ -105,12 +115,6 @@ const Plugins = {
     }),
   }),
   missingManifest: () => ({}),
-  inaccessibleManifest: () => ({
-    'kibana.json': mockFs.file({
-      mode: 0, // 0000,
-      content: JSON.stringify({ id: 'plugin', version: '1' }),
-    }),
-  }),
   missingOwnerAttribute: () => ({
     'kibana.json': JSON.stringify({
       id: 'foo',
@@ -162,10 +166,11 @@ const packageMock = {
     distributable: true,
     number: 1,
     sha: '',
+    date: '2023-05-15T23:12:09.000Z',
   },
 };
 
-const pluginDir = (...segments: string[]) => resolve(REPO_ROOT, 'plugins', ...segments);
+const pluginDir = (...segments: string[]) => resolve(KIBANA_ROOT, 'plugins', ...segments);
 const manifestPath = (...pluginPath: string[]) => resolve(pluginDir(...pluginPath), 'kibana.json');
 
 describe('plugins discovery system', () => {
@@ -178,6 +183,7 @@ describe('plugins discovery system', () => {
   let coreContext: CoreContext;
 
   beforeEach(async () => {
+    mkdirSync(TMP_DIR, { mode: 0o700 });
     logger = loggingSystemMock.create();
 
     mockPackage.raw = packageMock;
@@ -196,11 +202,12 @@ describe('plugins discovery system', () => {
     };
 
     env = Env.createDefault(
-      REPO_ROOT,
+      KIBANA_ROOT,
       getEnvOptions({
         cliArgs: { envName: 'development' },
         repoPackages: [],
-      })
+      }),
+      packageMock
     );
 
     configService = new ConfigService(
@@ -219,19 +226,12 @@ describe('plugins discovery system', () => {
 
     pluginConfig = await firstValueFrom(configService.atPath<PluginsConfigType>('plugins'));
 
-    // jest relies on the filesystem to get sourcemaps when using console.log
-    // which breaks with the mocked FS, see https://github.com/tschaub/mock-fs/issues/234
-    // hijacking logging to process.stdout as a workaround for this suite.
-    jest.spyOn(console, 'log').mockImplementation((...args) => {
-      process.stdout.write(args + '\n');
-    });
-
     jest.clearAllMocks();
   });
 
   afterEach(() => {
-    mockFs.restore();
-    // restore the console.log behavior
+    rmSync(TMP_DIR, { recursive: true, force: true });
+    mockReadFileErrors.clear();
     jest.clearAllMocks();
   });
 
@@ -243,15 +243,12 @@ describe('plugins discovery system', () => {
       nodeInfo,
     });
 
-    mockFs(
-      {
-        [pluginDir('plugin_a')]: Plugins.valid('pluginA'),
-        [pluginDir('plugin_b')]: Plugins.valid('pluginB'),
-        [pluginDir(`plugin_c`)]: Plugins.valid('pluginC'),
-        [pluginDir(`plugin_d`)]: Plugins.validPreboot('pluginD'),
-      },
-      { createCwd: false }
-    );
+    writeFileTree(TMP_DIR, {
+      [pluginDir('plugin_a')]: Plugins.valid('pluginA'),
+      [pluginDir('plugin_b')]: Plugins.valid('pluginB'),
+      [pluginDir(`plugin_c`)]: Plugins.valid('pluginC'),
+      [pluginDir(`plugin_d`)]: Plugins.validPreboot('pluginD'),
+    });
 
     const plugins = await firstValueFrom(plugin$.pipe(toArray()));
     const pluginNames = plugins.map((plugin) => plugin.name);
@@ -270,17 +267,14 @@ describe('plugins discovery system', () => {
       nodeInfo,
     });
 
-    mockFs(
-      {
-        [pluginDir(`plugin_a`)]: Plugins.invalid(),
-        [pluginDir(`plugin_b`)]: Plugins.incomplete(),
-        [pluginDir(`plugin_c`)]: Plugins.incompatible(),
-        [pluginDir(`plugin_d`)]: Plugins.incompatibleType('pluginD'),
-        [pluginDir(`plugin_ad`)]: Plugins.missingManifest(),
-        [pluginDir(`plugin_e`)]: Plugins.missingOwnerAttribute(),
-      },
-      { createCwd: false }
-    );
+    writeFileTree(TMP_DIR, {
+      [pluginDir(`plugin_a`)]: Plugins.invalid(),
+      [pluginDir(`plugin_b`)]: Plugins.incomplete(),
+      [pluginDir(`plugin_c`)]: Plugins.incompatible(),
+      [pluginDir(`plugin_d`)]: Plugins.incompatibleType('pluginD'),
+      [pluginDir(`plugin_ad`)]: Plugins.missingManifest(),
+      [pluginDir(`plugin_e`)]: Plugins.missingOwnerAttribute(),
+    });
 
     const plugins = await plugin$.pipe(toArray()).toPromise();
     expect(plugins).toHaveLength(0);
@@ -329,7 +323,7 @@ describe('plugins discovery system', () => {
     );
   });
 
-  it('return errors when the plugin search path is not accessible', async () => {
+  it('return errors when the plugin search path cannot be read', async () => {
     const { plugin$, error$ } = discover({
       config: new PluginsConfig(pluginConfig, env),
       coreContext,
@@ -337,17 +331,9 @@ describe('plugins discovery system', () => {
       nodeInfo,
     });
 
-    mockFs(
-      {
-        [pluginDir('.')]: mockFs.directory({
-          mode: 0, // 0000
-          items: {
-            plugin_a: Plugins.valid('pluginA'),
-          },
-        }),
-      },
-      { createCwd: false }
-    );
+    writeFileTree(TMP_DIR, {
+      [pluginDir('.')]: 'not a directory',
+    });
 
     const plugins = await plugin$.pipe(toArray()).toPromise();
     expect(plugins).toHaveLength(0);
@@ -362,7 +348,7 @@ describe('plugins discovery system', () => {
     const srcPluginsPath = pluginDir('.');
     expect(errors).toEqual(
       expect.arrayContaining([
-        `Error: EACCES, permission denied '${srcPluginsPath}' (invalid-search-path, ${srcPluginsPath})`,
+        `Error: ENOTDIR: not a directory, scandir '${srcPluginsPath}' (invalid-search-path, ${srcPluginsPath})`,
       ])
     );
   });
@@ -375,8 +361,6 @@ describe('plugins discovery system', () => {
       nodeInfo,
     });
 
-    mockFs({}, { createCwd: false });
-
     const plugins = await plugin$.pipe(toArray()).toPromise();
     expect(plugins).toHaveLength(0);
 
@@ -390,7 +374,7 @@ describe('plugins discovery system', () => {
     const srcPluginsPath = pluginDir('.');
     expect(errors).toEqual(
       expect.arrayContaining([
-        `Error: ENOENT, no such file or directory '${srcPluginsPath}' (invalid-search-path, ${srcPluginsPath})`,
+        `Error: ENOENT: no such file or directory, scandir '${srcPluginsPath}' (invalid-search-path, ${srcPluginsPath})`,
       ])
     );
   });
@@ -403,14 +387,16 @@ describe('plugins discovery system', () => {
       nodeInfo,
     });
 
-    mockFs(
-      {
-        [pluginDir(`plugin_a`)]: {
-          ...Plugins.inaccessibleManifest(),
-          nested_plugin: Plugins.valid('nestedPlugin'),
-        },
+    writeFileTree(TMP_DIR, {
+      [pluginDir(`plugin_a`)]: {
+        'kibana.json': JSON.stringify({ id: 'plugin', version: '1' }),
+        nested_plugin: Plugins.valid('nestedPlugin'),
       },
-      { createCwd: false }
+    });
+    const errorPath = manifestPath('plugin_a');
+    mockReadFileErrors.set(
+      errorPath,
+      Object.assign(new Error(`EACCES: permission denied, open '${errorPath}'`), { code: 'EACCES' })
     );
 
     const plugins = await plugin$.pipe(toArray()).toPromise();
@@ -423,10 +409,9 @@ describe('plugins discovery system', () => {
       )
       .toPromise();
 
-    const errorPath = manifestPath('plugin_a');
     expect(errors).toEqual(
       expect.arrayContaining([
-        `Error: EACCES, permission denied '${errorPath}' (missing-manifest, ${errorPath})`,
+        `Error: EACCES: permission denied, open '${errorPath}' (missing-manifest, ${errorPath})`,
       ])
     );
   });
@@ -439,16 +424,13 @@ describe('plugins discovery system', () => {
       nodeInfo,
     });
 
-    mockFs(
-      {
-        [pluginDir(`plugin_a`)]: Plugins.valid('pluginA'),
-        [pluginDir(`sub1/plugin_b`)]: Plugins.valid('pluginB'),
-        [pluginDir(`sub1/sub2/plugin_c`)]: Plugins.valid('pluginC'),
-        [pluginDir(`sub1/sub2/plugin_d`)]: Plugins.validPreboot('pluginD'),
-        [pluginDir(`sub1/sub2/plugin_e`)]: Plugins.incomplete(),
-      },
-      { createCwd: false }
-    );
+    writeFileTree(TMP_DIR, {
+      [pluginDir(`plugin_a`)]: Plugins.valid('pluginA'),
+      [pluginDir(`sub1/plugin_b`)]: Plugins.valid('pluginB'),
+      [pluginDir(`sub1/sub2/plugin_c`)]: Plugins.valid('pluginC'),
+      [pluginDir(`sub1/sub2/plugin_d`)]: Plugins.validPreboot('pluginD'),
+      [pluginDir(`sub1/sub2/plugin_e`)]: Plugins.incomplete(),
+    });
 
     const plugins = await firstValueFrom(plugin$.pipe(toArray()));
     const pluginNames = plugins.map((plugin) => plugin.name);
@@ -484,15 +466,12 @@ describe('plugins discovery system', () => {
       nodeInfo,
     });
 
-    mockFs(
-      {
-        [pluginDir(`plugin_a`)]: {
-          ...Plugins.valid('pluginA'),
-          nested_plugin: Plugins.valid('nestedPlugin'),
-        },
+    writeFileTree(TMP_DIR, {
+      [pluginDir(`plugin_a`)]: {
+        ...Plugins.valid('pluginA'),
+        nested_plugin: Plugins.valid('nestedPlugin'),
       },
-      { createCwd: false }
-    );
+    });
 
     const plugins = await firstValueFrom(plugin$.pipe(toArray()));
     const pluginNames = plugins.map((plugin) => plugin.name);
@@ -508,17 +487,14 @@ describe('plugins discovery system', () => {
       nodeInfo,
     });
 
-    mockFs(
-      {
-        [pluginDir(`sub1/plugin`)]: Plugins.valid('plugin1'),
-        [pluginDir(`sub1/sub2/plugin`)]: Plugins.valid('plugin2'),
-        [pluginDir(`sub1/sub2/sub3/plugin`)]: Plugins.valid('plugin3'),
-        [pluginDir(`sub1/sub2/sub3/sub4/plugin`)]: Plugins.valid('plugin4'),
-        [pluginDir(`sub1/sub2/sub3/sub4/sub5/plugin`)]: Plugins.valid('plugin5'),
-        [pluginDir(`sub1/sub2/sub3/sub4/sub5/sub6/plugin`)]: Plugins.valid('plugin6'),
-      },
-      { createCwd: false }
-    );
+    writeFileTree(TMP_DIR, {
+      [pluginDir(`sub1/plugin`)]: Plugins.valid('plugin1'),
+      [pluginDir(`sub1/sub2/plugin`)]: Plugins.valid('plugin2'),
+      [pluginDir(`sub1/sub2/sub3/plugin`)]: Plugins.valid('plugin3'),
+      [pluginDir(`sub1/sub2/sub3/sub4/plugin`)]: Plugins.valid('plugin4'),
+      [pluginDir(`sub1/sub2/sub3/sub4/sub5/plugin`)]: Plugins.valid('plugin5'),
+      [pluginDir(`sub1/sub2/sub3/sub4/sub5/sub6/plugin`)]: Plugins.valid('plugin6'),
+    });
 
     const plugins = await firstValueFrom(plugin$.pipe(toArray()));
     const pluginNames = plugins.map((plugin) => plugin.name);
@@ -539,19 +515,14 @@ describe('plugins discovery system', () => {
 
     const pluginFolder = pluginDir('../ext-plugins');
 
-    mockFs(
-      {
-        [pluginDir(`.`)]: mockFs.symlink({
-          path: pluginFolder,
-        }),
-        [pluginFolder]: {
-          plugin_a: Plugins.valid('pluginA'),
-          plugin_b: Plugins.valid('pluginB'),
-          plugin_c: Plugins.validPreboot('pluginC'),
-        },
+    writeFileTree(TMP_DIR, {
+      [pluginFolder]: {
+        plugin_a: Plugins.valid('pluginA'),
+        plugin_b: Plugins.valid('pluginB'),
+        plugin_c: Plugins.validPreboot('pluginC'),
       },
-      { createCwd: false }
-    );
+    });
+    symlinkSync(pluginFolder, pluginDir(`.`));
 
     const plugins = await firstValueFrom(plugin$.pipe(toArray()));
     const pluginNames = plugins.map((plugin) => plugin.name);
@@ -744,20 +715,17 @@ describe('plugins discovery system', () => {
     });
 
     it('returns the plugins in a deterministic order', async () => {
-      mockFs(
-        {
-          [`${REPO_ROOT}/src/plugins/plugin_a`]: Plugins.valid('pluginA'),
-          [`${REPO_ROOT}/plugins/plugin_b`]: Plugins.valid('pluginB'),
-          [`${REPO_ROOT}/x-pack/plugins/plugin_c`]: Plugins.valid('pluginC'),
-        },
-        { createCwd: false }
-      );
+      writeFileTree(TMP_DIR, {
+        [`${KIBANA_ROOT}/src/plugins/plugin_a`]: Plugins.valid('pluginA'),
+        [`${KIBANA_ROOT}/plugins/plugin_b`]: Plugins.valid('pluginB'),
+        [`${KIBANA_ROOT}/x-pack/plugins/plugin_c`]: Plugins.valid('pluginC'),
+      });
 
       scanPluginSearchPathsMock.mockReturnValue(
         from([
-          `${REPO_ROOT}/src/plugins/plugin_a`,
-          `${REPO_ROOT}/plugins/plugin_b`,
-          `${REPO_ROOT}/x-pack/plugins/plugin_c`,
+          `${KIBANA_ROOT}/src/plugins/plugin_a`,
+          `${KIBANA_ROOT}/plugins/plugin_b`,
+          `${KIBANA_ROOT}/x-pack/plugins/plugin_c`,
         ])
       );
 
@@ -783,9 +751,9 @@ describe('plugins discovery system', () => {
       // second pass
       scanPluginSearchPathsMock.mockReturnValue(
         from([
-          `${REPO_ROOT}/plugins/plugin_b`,
-          `${REPO_ROOT}/x-pack/plugins/plugin_c`,
-          `${REPO_ROOT}/src/plugins/plugin_a`,
+          `${KIBANA_ROOT}/plugins/plugin_b`,
+          `${KIBANA_ROOT}/x-pack/plugins/plugin_c`,
+          `${KIBANA_ROOT}/src/plugins/plugin_a`,
         ])
       );
 

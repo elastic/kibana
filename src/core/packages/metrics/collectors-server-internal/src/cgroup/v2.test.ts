@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import mockFs from 'mock-fs';
+import { mockCgroupFiles, readFileMock } from './cgroup_files.test.mocks';
 import { gatherV2CgroupMetrics } from './v2';
 
 describe('gatherV2CgroupMetrics', () => {
-  afterEach(() => mockFs.restore());
+  afterEach(() => readFileMock.mockReset());
 
   it('collects default cgroup data for "root"', async () => {
-    mockFs({
+    mockCgroupFiles({
       '/proc/self/cgroup': `0::/`,
       '/sys/fs/cgroup/cpu.max': 'max 100000', // "max" is a special no-value value
       '/sys/fs/cgroup/cpu.stat': `usage_usec 185247
@@ -53,7 +53,7 @@ throttled_usec 123123`,
   });
 
   it('collects default cgroup data', async () => {
-    mockFs({
+    mockCgroupFiles({
       '/proc/self/cgroup': `0::/mypath`,
       '/sys/fs/cgroup/mypath/cpu.max': '111 100000',
       '/sys/fs/cgroup/mypath/cpu.stat': `usage_usec 185247

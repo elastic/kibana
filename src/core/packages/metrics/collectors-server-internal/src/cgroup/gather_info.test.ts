@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import mockFs from 'mock-fs';
+import { mockCgroupFiles, readFileMock } from './cgroup_files.test.mocks';
 import { gatherInfo } from './gather_info';
 
 describe('gatherInfo', () => {
-  afterEach(() => mockFs.restore());
+  afterEach(() => readFileMock.mockReset());
 
   test('parse cgroup file entries', async () => {
-    mockFs({
+    mockCgroupFiles({
       '/proc/self/cgroup': `0:controller:/path
       1:controller2,controller3:/otherpath`,
     });
@@ -30,12 +30,12 @@ describe('gatherInfo', () => {
   });
 
   test('detect cgroup version', async () => {
-    mockFs({
+    mockCgroupFiles({
       '/proc/self/cgroup': `0:controller:/path
       1:controller2,controller3:/otherpath`,
     });
     expect(await gatherInfo()).toMatchObject({ v2: false });
-    mockFs({
+    mockCgroupFiles({
       '/proc/self/cgroup': `
 
       0::/path
@@ -46,12 +46,12 @@ describe('gatherInfo', () => {
   });
 
   test('missing cgroup file', async () => {
-    mockFs({});
+    mockCgroupFiles({});
     await expect(gatherInfo()).rejects.toMatchObject({ code: 'ENOENT' });
   });
 
   test('invalid cgroup file', async () => {
-    mockFs({
+    mockCgroupFiles({
       '/proc/self/cgroup': `invalid`,
     });
     await expect(gatherInfo()).resolves.toEqual({ data: {}, v2: false });

@@ -7,24 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import mockFs from 'mock-fs';
+import { randomUUID } from 'crypto';
+import { mkdirSync, rmSync, symlinkSync } from 'fs';
+import { tmpdir } from 'os';
+import { join, resolve } from 'path';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { toArray } from 'rxjs';
-import { resolve } from 'path';
+import { writeFileTree } from '../test_helpers/file_tree';
 import { scanPluginSearchPaths } from './scan_plugin_search_paths';
 import type { PluginDiscoveryError } from './plugin_discovery_error';
 import { firstValueFrom } from 'rxjs';
 
-const KIBANA_ROOT = process.cwd();
+const TMP_DIR = join(tmpdir(), `scan-plugin-search-paths-${randomUUID()}`);
+const KIBANA_ROOT = join(TMP_DIR, 'kibana');
 
 const Plugins = {
   missingManifest: () => ({}),
-  inaccessibleManifest: () => ({
-    'kibana.json': mockFs.file({
-      mode: 0, // 0000,
-      content: JSON.stringify({ id: 'plugin', version: '1' }),
-    }),
-  }),
   valid: (id: string) => ({
     'kibana.json': JSON.stringify({
       id,
@@ -48,20 +46,12 @@ describe('scanPluginSearchPaths', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(async () => {
+    mkdirSync(TMP_DIR, { mode: 0o700 });
     logger = loggingSystemMock.createLogger();
-
-    // jest relies on the filesystem to get sourcemaps when using console.log
-    // which breaks with the mocked FS, see https://github.com/tschaub/mock-fs/issues/234
-    // hijacking logging to process.stdout as a workaround for this suite.
-    jest.spyOn(console, 'log').mockImplementation((...args) => {
-      process.stdout.write(args + '\n');
-    });
   });
 
   afterEach(() => {
-    mockFs.restore();
-    // restore the console.log behavior
-    jest.restoreAllMocks();
+    rmSync(TMP_DIR, { recursive: true, force: true });
   });
 
   const extract = (
@@ -74,14 +64,11 @@ describe('scanPluginSearchPaths', () => {
   };
 
   it('discovers plugins in the search locations', async () => {
-    mockFs(
-      {
-        [`${KIBANA_ROOT}/src/plugins/plugin_a`]: Plugins.valid('pluginA'),
-        [`${KIBANA_ROOT}/plugins/plugin_b`]: Plugins.valid('pluginB'),
-        [`${KIBANA_ROOT}/x-pack/plugins/plugin_c`]: Plugins.valid('pluginC'),
-      },
-      { createCwd: false }
-    );
+    writeFileTree(TMP_DIR, {
+      [`${KIBANA_ROOT}/src/plugins/plugin_a`]: Plugins.valid('pluginA'),
+      [`${KIBANA_ROOT}/plugins/plugin_b`]: Plugins.valid('pluginB'),
+      [`${KIBANA_ROOT}/x-pack/plugins/plugin_c`]: Plugins.valid('pluginC'),
+    });
 
     const pluginOrErrors$ = scanPluginSearchPaths(scanPaths, logger);
     const { paths, errors } = extract(await firstValueFrom(pluginOrErrors$.pipe(toArray())));
@@ -99,13 +86,10 @@ describe('scanPluginSearchPaths', () => {
   });
 
   it('ignores folder if the manifest is missing', async () => {
-    mockFs(
-      {
-        [`${KIBANA_ROOT}/src/plugins/plugin_a`]: Plugins.valid('pluginA'),
-        [`${KIBANA_ROOT}/src/plugins/plugin_b`]: Plugins.missingManifest(),
-      },
-      { createCwd: false }
-    );
+    writeFileTree(TMP_DIR, {
+      [`${KIBANA_ROOT}/src/plugins/plugin_a`]: Plugins.valid('pluginA'),
+      [`${KIBANA_ROOT}/src/plugins/plugin_b`]: Plugins.missingManifest(),
+    });
 
     const pluginOrErrors$ = scanPluginSearchPaths([`${KIBANA_ROOT}/src/plugins`], logger);
     const { paths, errors } = extract(await firstValueFrom(pluginOrErrors$.pipe(toArray())));
@@ -116,18 +100,10 @@ describe('scanPluginSearchPaths', () => {
     expect(paths).toEqual([`${KIBANA_ROOT}/src/plugins/plugin_a`]);
   });
 
-  it('return errors when the plugin search path is not accessible', async () => {
-    mockFs(
-      {
-        [`${KIBANA_ROOT}/src/plugins`]: mockFs.directory({
-          mode: 0, // 0000
-          items: {
-            plugin_a: Plugins.valid('pluginA'),
-          },
-        }),
-      },
-      { createCwd: false }
-    );
+  it('return errors when the plugin search path cannot be read', async () => {
+    writeFileTree(TMP_DIR, {
+      [`${KIBANA_ROOT}/src/plugins`]: 'not a directory',
+    });
 
     const pluginOrErrors$ = scanPluginSearchPaths([`${KIBANA_ROOT}/src/plugins`], logger);
     const { paths, errors } = extract(await firstValueFrom(pluginOrErrors$.pipe(toArray())));
@@ -138,21 +114,18 @@ describe('scanPluginSearchPaths', () => {
     const srcPluginsPath = resolve(KIBANA_ROOT, 'src', 'plugins');
     expect(errors.map((e) => e.toString())).toEqual(
       expect.arrayContaining([
-        `Error: EACCES, permission denied '${srcPluginsPath}' (invalid-search-path, ${srcPluginsPath})`,
+        `Error: ENOTDIR: not a directory, scandir '${srcPluginsPath}' (invalid-search-path, ${srcPluginsPath})`,
       ])
     );
   });
 
   it('discovers plugins in nested directories', async () => {
-    mockFs(
-      {
-        [`${KIBANA_ROOT}/src/plugins/plugin_a`]: Plugins.valid('pluginA'),
-        [`${KIBANA_ROOT}/src/plugins/sub1/plugin_b`]: Plugins.valid('pluginB'),
-        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/plugin_c`]: Plugins.valid('pluginC'),
-        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/plugin_d`]: Plugins.valid('pluginD'),
-      },
-      { createCwd: false }
-    );
+    writeFileTree(TMP_DIR, {
+      [`${KIBANA_ROOT}/src/plugins/plugin_a`]: Plugins.valid('pluginA'),
+      [`${KIBANA_ROOT}/src/plugins/sub1/plugin_b`]: Plugins.valid('pluginB'),
+      [`${KIBANA_ROOT}/src/plugins/sub1/sub2/plugin_c`]: Plugins.valid('pluginC'),
+      [`${KIBANA_ROOT}/src/plugins/sub1/sub2/plugin_d`]: Plugins.valid('pluginD'),
+    });
 
     const pluginOrErrors$ = scanPluginSearchPaths([`${KIBANA_ROOT}/src/plugins`], logger);
     const { paths, errors } = extract(await firstValueFrom(pluginOrErrors$.pipe(toArray())));
@@ -161,7 +134,7 @@ describe('scanPluginSearchPaths', () => {
     expect(paths).toHaveLength(4);
 
     expect(paths).toEqual(
-      expect.objectContaining([
+      expect.arrayContaining([
         `${KIBANA_ROOT}/src/plugins/plugin_a`,
         `${KIBANA_ROOT}/src/plugins/sub1/plugin_b`,
         `${KIBANA_ROOT}/src/plugins/sub1/sub2/plugin_c`,
@@ -171,15 +144,12 @@ describe('scanPluginSearchPaths', () => {
   });
 
   it('does not discover plugins nested inside another plugin', async () => {
-    mockFs(
-      {
-        [`${KIBANA_ROOT}/src/plugins/plugin_a`]: {
-          ...Plugins.valid('pluginA'),
-          nested_plugin: Plugins.valid('nestedPlugin'),
-        },
+    writeFileTree(TMP_DIR, {
+      [`${KIBANA_ROOT}/src/plugins/plugin_a`]: {
+        ...Plugins.valid('pluginA'),
+        nested_plugin: Plugins.valid('nestedPlugin'),
       },
-      { createCwd: false }
-    );
+    });
 
     const pluginOrErrors$ = scanPluginSearchPaths([`${KIBANA_ROOT}/src/plugins`], logger);
     const { paths, errors } = extract(await firstValueFrom(pluginOrErrors$.pipe(toArray())));
@@ -191,18 +161,14 @@ describe('scanPluginSearchPaths', () => {
   });
 
   it('stops scanning when reaching `maxDepth`', async () => {
-    mockFs(
-      {
-        [`${KIBANA_ROOT}/src/plugins/sub1/plugin`]: Plugins.valid('plugin1'),
-        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/plugin`]: Plugins.valid('plugin2'),
-        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/sub3/plugin`]: Plugins.valid('plugin3'),
-        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/sub3/sub4/plugin`]: Plugins.valid('plugin4'),
-        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/sub3/sub4/sub5/plugin`]: Plugins.valid('plugin5'),
-        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/sub3/sub4/sub5/sub6/plugin`]:
-          Plugins.valid('plugin6'),
-      },
-      { createCwd: false }
-    );
+    writeFileTree(TMP_DIR, {
+      [`${KIBANA_ROOT}/src/plugins/sub1/plugin`]: Plugins.valid('plugin1'),
+      [`${KIBANA_ROOT}/src/plugins/sub1/sub2/plugin`]: Plugins.valid('plugin2'),
+      [`${KIBANA_ROOT}/src/plugins/sub1/sub2/sub3/plugin`]: Plugins.valid('plugin3'),
+      [`${KIBANA_ROOT}/src/plugins/sub1/sub2/sub3/sub4/plugin`]: Plugins.valid('plugin4'),
+      [`${KIBANA_ROOT}/src/plugins/sub1/sub2/sub3/sub4/sub5/plugin`]: Plugins.valid('plugin5'),
+      [`${KIBANA_ROOT}/src/plugins/sub1/sub2/sub3/sub4/sub5/sub6/plugin`]: Plugins.valid('plugin6'),
+    });
 
     const pluginOrErrors$ = scanPluginSearchPaths([`${KIBANA_ROOT}/src/plugins`], logger);
     const { paths, errors } = extract(await firstValueFrom(pluginOrErrors$.pipe(toArray())));
@@ -224,18 +190,14 @@ describe('scanPluginSearchPaths', () => {
   it('works with symlinks', async () => {
     const pluginFolder = resolve(KIBANA_ROOT, '..', 'ext-plugins');
 
-    mockFs(
-      {
-        [`${KIBANA_ROOT}/plugins`]: mockFs.symlink({
-          path: '../ext-plugins',
-        }),
-        [pluginFolder]: {
-          plugin_a: Plugins.valid('pluginA'),
-          plugin_b: Plugins.valid('pluginB'),
-        },
+    writeFileTree(TMP_DIR, {
+      [pluginFolder]: {
+        plugin_a: Plugins.valid('pluginA'),
+        plugin_b: Plugins.valid('pluginB'),
       },
-      { createCwd: false }
-    );
+    });
+    mkdirSync(KIBANA_ROOT);
+    symlinkSync('../ext-plugins', `${KIBANA_ROOT}/plugins`);
 
     const pluginOrErrors$ = scanPluginSearchPaths([`${KIBANA_ROOT}/plugins`], logger);
     const { paths, errors } = extract(await firstValueFrom(pluginOrErrors$.pipe(toArray())));
