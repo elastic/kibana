@@ -228,7 +228,13 @@ pivot:
     'Other': 'release_note_area:other'
 
   # Product definitions with labels (optional).
+  # A PR with neither of the first two labels gets both products from products.default.
+  # A PR with one of them reaches only that product's release notes.
   products:
+    'kibana':
+      - 'release_note:stateful'
+    'cloud-serverless':
+      - 'release_note:serverless'
     'observability':
       - 'Feature:Observability Home'
       - 'Feature:SLO'

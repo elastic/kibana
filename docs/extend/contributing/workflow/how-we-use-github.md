@@ -171,6 +171,8 @@ it's notable and affects our users) and which section it appears in. For example
 - `release_note:fix`: Specifies a bug fix and adds the PR to the Bug fixes section in the release notes.
 - `release_note:plugin_api_changes`: Specifies changes to the plugin API and adds the PR to the Plugin API changes page in the Developer Guide.
 - `release_note:skip`: Omits the PR from release notes.
+- `release_note:stateful`: Limits the PR to the {{kib}} release notes. Omit it, together with `release_note:serverless`, when the change applies to both.
+- `release_note:serverless`: Limits the PR to the Serverless release notes. Omit it, together with `release_note:stateful`, when the change applies to both.
 
 The following labels are related to backporting PRs:
 
@@ -201,6 +203,8 @@ PRs that are included in release notes must have clear and concise titles and de
 The `release-notes` GitHub workflow (`.github/workflows/release-notes.yml`) runs on every PR and drives the process. It uses the rules in `docs/changelog.yml`, which map labels to the entry type, area, and product. To include your PR in release notes:
 
 1. Add a type label to your PR, which are prefixed by `release_note:`, such as `release_note:fix`, `release_note:enhancement`, or `release_note:feature`. Use `release_note:skip` to leave the PR out of the release notes. Team and feature labels set the area and product (for example, a `Team:` label for a solution implies both {{kib}} and Serverless).
+    - If the change applies to both {{kib}} and Serverless, add neither `release_note:stateful` nor `release_note:serverless`. The entry then appears in both sets of release notes.
+    - If the change applies to only one, add `release_note:stateful` or `release_note:serverless`.
 2. If desired, provide a custom paragraph within the PR description under a `Release note:` or `## Release note` header. This text will be included verbatim in the generated changelog, and this is the place to provide a clear, user-focused summary of your changes.
 3. The `release-notes / validate` check runs automatically when the PR is opened, updated, edited, labeled, or unlabeled, as well as when a Draft is marked Ready for Review. This check fails when:
     - the type label is missing or ambiguous
