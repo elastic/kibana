@@ -111,6 +111,9 @@ export const kafkaKerberosAuthType = {
   Password: 'password',
 } as const;
 
+// The longest Kerberos username (principal) accepted, by the API and by the form.
+export const KAFKA_KERBEROS_USERNAME_MAX_LENGTH = 256;
+
 export const kafkaPartitionType = {
   Random: 'random',
   RoundRobin: 'round_robin',
@@ -152,6 +155,27 @@ export const otlpCompressionType = {
   Zstd: 'zstd',
   None: 'none',
 } as const;
+
+/** How an OTLP output authenticates with an endpoint that is not the managed OTLP endpoint. */
+export const otlpAuthType = {
+  // `Authorization: <scheme> <credential>`
+  AuthHeader: 'auth_header',
+  // `<name>: <credential>`
+  CustomHeader: 'custom_header',
+} as const;
+
+export const otlpAuthScheme = {
+  ApiKey: 'api_key',
+  BearerToken: 'bearer_token',
+} as const;
+
+/** The literal prefix of the `Authorization` header of each scheme. */
+export const OTLP_AUTH_SCHEME_PREFIX: Readonly<Record<ValueOf<typeof otlpAuthScheme>, string>> = {
+  [otlpAuthScheme.ApiKey]: 'ApiKey',
+  [otlpAuthScheme.BearerToken]: 'Bearer',
+};
+
+export const OTLP_AUTHORIZATION_HEADER = 'Authorization';
 
 // snappy and zstd are gRPC-only; HTTP/protobuf only supports gzip and none
 export const OTLP_GRPC_ONLY_COMPRESSION_TYPES: ReadonlyArray<string> = [

@@ -103,7 +103,7 @@ export const RuleSummaryFlyout = ({
     onViewChangeHistory,
   });
 
-  const kindLabel = rule ? RULE_KIND_LABELS[rule.kind] ?? rule.kind : undefined;
+  const kindLabel = rule ? (RULE_KIND_LABELS[rule.kind] ?? rule.kind) : undefined;
   const enabledLabel = rule?.enabled
     ? i18n.translate('xpack.alertingV2.ruleSummaryFlyout.enabled', {
         defaultMessage: 'Enabled',

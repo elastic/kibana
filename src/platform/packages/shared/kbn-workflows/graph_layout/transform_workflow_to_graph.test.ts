@@ -19,7 +19,7 @@ const minimal = (overrides: Partial<WorkflowYaml> = {}): WorkflowYaml =>
     triggers: [{ type: 'manual', enabled: true }],
     steps: [],
     ...overrides,
-  } as unknown as WorkflowYaml);
+  }) as unknown as WorkflowYaml;
 
 describe('transformWorkflowToGraph', () => {
   it('returns empty graph for undefined workflow', () => {

@@ -288,6 +288,7 @@ describe('Outputs preconfiguration', () => {
             auth_type: 'keytab',
             config_path: '/etc/krb5.conf',
             keytab: '/etc/kafka.keytab',
+            username: 'kafka',
             realm: 'EXAMPLE.COM',
           },
         },
@@ -1662,6 +1663,7 @@ describe('Outputs preconfiguration', () => {
         auth_type: 'keytab',
         config_path: '/etc/krb5.conf',
         keytab: '/etc/kafka.keytab',
+        username: 'kafka',
         realm: 'EXAMPLE.COM',
       };
       const kerberosOutput = (fields: Record<string, unknown> = {}) =>
@@ -1675,7 +1677,7 @@ describe('Outputs preconfiguration', () => {
           auth_type: 'kerberos',
           kerberos,
           ...fields,
-        } as any);
+        }) as any;
 
       it('should create the output when Kerberos is allowed', async () => {
         const soClient = savedObjectsClientMock.create();
@@ -1746,7 +1748,7 @@ describe('Outputs preconfiguration', () => {
           oauth2: { client_id: 'my-client', token_url: 'https://idp.example.com/oauth2/token' },
           secrets: { oauth2: { client_secret: 'secretClientSecret' } },
           ...fields,
-        } as any);
+        }) as any;
 
       it('should create the output when OAuth2 is allowed', async () => {
         const soClient = savedObjectsClientMock.create();
@@ -1877,7 +1879,7 @@ describe('Outputs preconfiguration', () => {
           type: 'kafka',
           hosts: ['kafka.co:80'],
           secrets,
-        } as any);
+        }) as any;
 
       it('should not update the output if its nested secrets did not change', async () => {
         const soClient = savedObjectsClientMock.create();

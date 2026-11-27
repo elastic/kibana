@@ -9,7 +9,10 @@
 
 /** Thrown when connect failed after a transport-level fetch error (ECONNRESET, ECONNREFUSED, undici socket/timeouts). */
 export class McpConnectionTransportError extends Error {
-  constructor(public readonly code: string, cause: unknown) {
+  constructor(
+    public readonly code: string,
+    cause: unknown
+  ) {
     super(cause instanceof Error ? cause.message : String(cause), { cause });
     this.name = 'McpConnectionTransportError';
   }

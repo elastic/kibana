@@ -53,4 +53,4 @@ export const useFetchWorkflows = (_params?: { query: string; isEnabled?: boolean
     isLoading: false,
     isError: false,
     refetch: async () => ({}),
-  } as UseQueryResult<WorkflowListDto, Error>);
+  }) as UseQueryResult<WorkflowListDto, Error>;

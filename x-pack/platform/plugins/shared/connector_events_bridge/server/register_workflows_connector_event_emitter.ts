@@ -160,8 +160,9 @@ async function resumeHitlFromSlackAction(
 }
 
 /**
- * Registers the Phase 1 Workflows emitter on the Actions inbound hub.
- * Forwards the ingest-built last-saver request; never invents a space-only request.
+ * Registers the Workflows emitter on the Actions inbound hub until a workflow
+ * definition can carry an identity. Forwards the ingest-built last-saver request;
+ * never invents a space-only request.
  */
 export function registerWorkflowsConnectorEventEmitter({
   actions,

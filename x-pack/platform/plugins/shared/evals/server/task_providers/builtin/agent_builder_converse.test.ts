@@ -25,7 +25,7 @@ const buildContext = (
     getInferenceClient: jest.fn(),
     callKibanaApi,
     ...overrides,
-  } as unknown as EvalsTaskContext);
+  }) as unknown as EvalsTaskContext;
 
 describe('agentBuilder.converse task provider', () => {
   it('returns the round trace id and the agent message', async () => {

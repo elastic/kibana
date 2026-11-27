@@ -47,13 +47,14 @@ export interface SetupDeps {
 type ClientType<T> = T extends 'global'
   ? UiSettingsGlobalClient
   : T extends 'namespace'
-  ? UiSettingsClient
-  : never;
+    ? UiSettingsClient
+    : never;
 
 /** @internal */
-export class UiSettingsService
-  implements CoreService<InternalUiSettingsServiceSetup, InternalUiSettingsServiceStart>
-{
+export class UiSettingsService implements CoreService<
+  InternalUiSettingsServiceSetup,
+  InternalUiSettingsServiceStart
+> {
   private readonly log: Logger;
   private readonly config$: Observable<UiSettingsConfigType>;
   private readonly isDist: boolean;

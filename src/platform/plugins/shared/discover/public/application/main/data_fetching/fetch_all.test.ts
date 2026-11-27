@@ -391,13 +391,14 @@ describe('test fetchAll', () => {
       ]);
     });
 
-    test('should handle exceptions', async () => {
+    test('should keep loaded rows and toast when loading more fails', async () => {
       const collectDocuments = subjectCollector(subjects.documents$);
       const collectMain = subjectCollector(subjects.main$);
+      const error = new Error('This query failed');
 
       const mockPagination = {
         hasNextPage: () => true,
-        nextPage: jest.fn().mockRejectedValue({ msg: 'This query failed' }),
+        nextPage: jest.fn().mockRejectedValue(error),
         getAllPages: jest.fn(),
       };
 
@@ -406,8 +407,7 @@ describe('test fetchAll', () => {
         result: initialRecords,
         pagination: mockPagination,
       });
-      fetchMoreDocuments(deps);
-      await waitForNextTick();
+      await fetchMoreDocuments(deps);
 
       expect(await collectDocuments()).toEqual([
         { fetchStatus: FetchStatus.UNINITIALIZED },
@@ -432,13 +432,35 @@ describe('test fetchAll', () => {
         {
           fetchStatus: FetchStatus.UNINITIALIZED,
         },
-        {
-          error: {
-            msg: 'This query failed',
-          },
-          fetchStatus: 'error',
-        },
       ]);
+      expect(deps.services.data.search.showError).toHaveBeenCalledTimes(1);
+      expect(deps.services.data.search.showError).toHaveBeenCalledWith(error);
+    });
+
+    test('should keep loaded rows without an error toast when loading more is aborted', async () => {
+      const mockPagination = {
+        hasNextPage: () => true,
+        nextPage: jest.fn().mockRejectedValue(new Error('The query was canceled')),
+        getAllPages: jest.fn(),
+      };
+
+      subjects.documents$.next({
+        fetchStatus: FetchStatus.COMPLETE,
+        result: initialRecords,
+        pagination: mockPagination,
+      });
+
+      const fetching = fetchMoreDocuments(deps);
+      deps.abortController.abort(AbortReason.CANCELED);
+      await fetching;
+
+      expect(subjects.documents$.getValue()).toEqual({
+        fetchStatus: FetchStatus.COMPLETE,
+        result: initialRecords,
+        interceptedWarnings: undefined,
+        pagination: mockPagination,
+      });
+      expect(deps.services.data.search.showError).not.toHaveBeenCalled();
     });
 
     test('should swallow abort errors', async () => {

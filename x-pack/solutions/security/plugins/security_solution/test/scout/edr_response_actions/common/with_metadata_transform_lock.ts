@@ -16,11 +16,20 @@ const STALE_AFTER_MS = 2 * 60_000;
 const RETRY_INTERVAL_MS = 1_000;
 
 /**
- * Serializes this suite's metadata seeding so two workers cannot force-stop the shared transform.
- * Remove this once current-time seeds no longer call stopMetadataTransforms.
+ * Serializes this suite's metadata seeding, and the isolation writes and waits that need the shared
+ * metadata transform running, so one worker cannot force-stop that transform, or write metadata,
+ * while another seeds or waits on it.
+ * Not reentrant: `fn` must not take the lock again. With `acquireTimeoutMs`, waiting for the lock
+ * fails after that long instead of waiting indefinitely.
+ * Remove this only when both are true: current-time seeds no longer call stopMetadataTransforms,
+ * and the endpoint package's `metadata_current` transform no longer skips metadata docs that
+ * become searchable late (https://github.com/elastic/kibana/issues/306353).
  */
-export const withMetadataTransformLock = async <T>(fn: () => Promise<T>): Promise<T> => {
-  const token = await acquireLock();
+export const withMetadataTransformLock = async <T>(
+  fn: () => Promise<T>,
+  { acquireTimeoutMs }: { acquireTimeoutMs?: number } = {}
+): Promise<T> => {
+  const token = await acquireLock(acquireTimeoutMs);
   const heartbeat = startHeartbeat(token);
 
   try {
@@ -31,8 +40,9 @@ export const withMetadataTransformLock = async <T>(fn: () => Promise<T>): Promis
   }
 };
 
-const acquireLock = async (): Promise<string> => {
+const acquireLock = async (timeoutMs = Number.POSITIVE_INFINITY): Promise<string> => {
   const token = `${process.pid}:${Date.now()}:${randomUUID()}`;
+  const deadline = Date.now() + timeoutMs;
 
   for (;;) {
     try {
@@ -42,6 +52,12 @@ const acquireLock = async (): Promise<string> => {
       if (!isSystemError(error, 'EEXIST')) {
         throw error;
       }
+    }
+
+    if (Date.now() >= deadline) {
+      throw new Error(
+        `Timed out after ${Math.round(timeoutMs / 1_000)}s waiting for the metadata-transform lock`
+      );
     }
 
     const removed = await stealIfStale();

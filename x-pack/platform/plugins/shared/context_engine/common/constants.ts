@@ -35,6 +35,9 @@ export const SPACE_SPEND_PATH = `${INTERNAL_API_PATH}/spend`;
  * `PATCH`, `DELETE` and `_restore` still reach it.
  */
 export const AI_INDEX_KI_GROUPS_PATH = `${AI_INDEX_KI_LIST_PATH}/_groups`;
+/** A static segment wins over `{kiId}`, so `GET` can't read a KI whose id is exactly `_histogram`. */
+export const AI_INDEX_KI_HISTOGRAM_PATH = `${AI_INDEX_KI_LIST_PATH}/_histogram`;
+export const KI_HISTOGRAM_DAYS = 30;
 export const SESSION_EVENTS_SAVE_PATH = `${PUBLIC_API_PATH}/memory/_save_event`;
 export const SESSION_MEMORY_FORGET_PATH = `${PUBLIC_API_PATH}/memory/_forget`;
 export const SESSION_MEMORY_REMEMBER_PATH = `${PUBLIC_API_PATH}/memory/_remember`;
@@ -186,6 +189,9 @@ export const MAX_IMPROVEMENT_RATIONALE_LENGTH = 4096;
 
 /** Advanced setting that gates the Context Engine feedback loop. */
 export const CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID = 'contextEngine:feedbackLoopEnabled';
+
+/** Temporary advanced setting that shows the AI index setup wizard while its steps are built. */
+export const CONTEXT_ENGINE_SETUP_WIZARD_ENABLED_SETTING_ID = 'contextEngine:setupWizardEnabled';
 
 /** Task Manager type, id, and schedule for the global signal-generation task. */
 export const SIGNAL_GENERATOR_TASK_TYPE = 'contextEngine:signalGenerator';

@@ -7,6 +7,7 @@
 
 import type { ComposerQuery } from '@elastic/esql';
 import { mobileColumn, resultColumn } from '../../../common/mobile/fields';
+import { withRelease } from '../../../common/mobile/releases';
 import { MAX_ENVIRONMENTS } from '../constants';
 
 /** The most used combinations of the environment fields to read; `toEnvironments` caps the names. */
@@ -26,12 +27,6 @@ export const withOsCounts = (query: ComposerQuery): ComposerQuery =>
   query.pipe`STATS ${resultColumn('sessions')} = COUNT_DISTINCT(${mobileColumn('sessionId')})
       BY ${resultColumn('osName')} = ${mobileColumn('osName')}, ${resultColumn('platform')}`
     .pipe`SORT ${resultColumn('sessions')} DESC`.pipe`LIMIT ${MAX_OS_ROWS}`;
-
-/** Documents with a release: an empty `service.version` names none. */
-const withRelease = (query: ComposerQuery): ComposerQuery =>
-  query.pipe`WHERE ${mobileColumn('serviceVersion')} IS NOT NULL AND ${mobileColumn(
-    'serviceVersion'
-  )} != ""`;
 
 /** The sessions per release, most first (then the higher release), up to `limit`. */
 export const withReleaseCounts = (query: ComposerQuery, limit: number): ComposerQuery =>

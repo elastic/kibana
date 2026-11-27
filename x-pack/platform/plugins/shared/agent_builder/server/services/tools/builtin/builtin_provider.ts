@@ -24,21 +24,23 @@ import type {
 } from '../tool_types/definitions';
 import { isDisabledDefinition } from '../tool_types/definitions';
 import { convertTool } from './converter';
-import { ToolAvailabilityCache } from './availability_cache';
+import type { AvailabilityCache } from '../../common/availability_cache';
 
-export const createBuiltinProviderFn =
-  ({
-    registry,
-    toolTypes,
-    uiSettings,
-    savedObjects,
-  }: {
-    registry: BuiltinToolRegistry;
-    toolTypes: AnyToolTypeDefinition[];
-    uiSettings: UiSettingsServiceStart;
-    savedObjects: SavedObjectsServiceStart;
-  }): ToolProviderFn<true> =>
-  async ({ request, space }) => {
+export const createBuiltinProviderFn = ({
+  registry,
+  toolTypes,
+  uiSettings,
+  savedObjects,
+  availabilityCache,
+}: {
+  registry: BuiltinToolRegistry;
+  toolTypes: AnyToolTypeDefinition[];
+  uiSettings: UiSettingsServiceStart;
+  savedObjects: SavedObjectsServiceStart;
+  /** Owned by the caller, so that availability results are reused across requests. */
+  availabilityCache: AvailabilityCache;
+}): ToolProviderFn<true> => {
+  return async ({ request, space }) => {
     return createBuiltinToolProvider({
       registry,
       toolTypes,
@@ -46,8 +48,10 @@ export const createBuiltinProviderFn =
       space,
       uiSettings,
       savedObjects,
+      availabilityCache,
     });
   };
+};
 
 export const createBuiltinToolProvider = ({
   registry,
@@ -56,6 +60,7 @@ export const createBuiltinToolProvider = ({
   space,
   uiSettings,
   savedObjects,
+  availabilityCache,
 }: {
   registry: BuiltinToolRegistry;
   toolTypes: AnyToolTypeDefinition[];
@@ -63,13 +68,17 @@ export const createBuiltinToolProvider = ({
   space: string;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
+  availabilityCache: AvailabilityCache;
 }): ReadonlyToolProvider => {
   const definitionMap = toolTypes
     .filter((def) => !isDisabledDefinition(def))
-    .reduce((map, def) => {
-      map[def.toolType] = def as ToolTypeDefinition | BuiltinToolTypeDefinition;
-      return map;
-    }, {} as Record<ToolType, ToolTypeDefinition | BuiltinToolTypeDefinition>);
+    .reduce(
+      (map, def) => {
+        map[def.toolType] = def as ToolTypeDefinition | BuiltinToolTypeDefinition;
+        return map;
+      },
+      {} as Record<ToolType, ToolTypeDefinition | BuiltinToolTypeDefinition>
+    );
 
   const context = { spaceId: space, request };
   let schemaContext: ToolSchemaContext | undefined;
@@ -80,7 +89,6 @@ export const createBuiltinToolProvider = ({
     };
     return schemaContext;
   };
-  const availabilityCache = new ToolAvailabilityCache();
 
   return {
     id: 'builtin',

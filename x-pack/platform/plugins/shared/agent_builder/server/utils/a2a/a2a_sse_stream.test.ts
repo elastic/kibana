@@ -24,7 +24,7 @@ const collect = (
 };
 
 const buildResponse = (id: number, result: object): JSONRPCResponse =>
-  ({ jsonrpc: '2.0', id, result } as unknown as JSONRPCResponse);
+  ({ jsonrpc: '2.0', id, result }) as unknown as JSONRPCResponse;
 
 const buildLogger = () => ({ debug: jest.fn(), error: jest.fn() });
 

@@ -22,7 +22,7 @@ const searchResponse = (aggregations: unknown) =>
     _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
     hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
     aggregations,
-  } as any);
+  }) as any;
 
 const policyBucket = ({
   key,

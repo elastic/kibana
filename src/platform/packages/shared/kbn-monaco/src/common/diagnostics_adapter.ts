@@ -37,7 +37,10 @@ export class DiagnosticsAdapter {
 
   public validation$ = this.validation.asObservable();
 
-  constructor(private langId: string, private worker: WorkerAccessor) {
+  constructor(
+    private langId: string,
+    private worker: WorkerAccessor
+  ) {
     const onModelAdd = (model: monaco.editor.IModel): void => {
       let handle: any;
 

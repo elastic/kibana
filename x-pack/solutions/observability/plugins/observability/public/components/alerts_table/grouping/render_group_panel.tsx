@@ -66,7 +66,7 @@ const InstanceIdGroupContent = React.memo<{
         <EuiFlexItem grow={false} style={{ display: 'contents' }}>
           <EuiTitle size="xs">
             <h5 className="eui-textTruncate">
-              {isUngrouped ? ungrouped : instanceId ?? '--'}
+              {isUngrouped ? ungrouped : (instanceId ?? '--')}
               &nbsp;
               {isUngrouped && (
                 <EuiIconTip

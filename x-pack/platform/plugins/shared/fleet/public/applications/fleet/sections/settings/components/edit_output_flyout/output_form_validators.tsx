@@ -8,6 +8,16 @@
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
+import { KAFKA_KERBEROS_USERNAME_MAX_LENGTH } from '../../../../../../../common/constants';
+import {
+  findOtlpAuthHeaderConflict,
+  isValidOtlpAuthCredential,
+  isValidOtlpGrpcMetadataKey,
+  isValidOtlpHeaderName,
+  OTLP_AUTH_CREDENTIAL_MAX_LENGTH,
+  OTLP_HEADER_NAME_MAX_LENGTH,
+} from '../../../../../../../common/services/otlp_auth';
+
 import { validateSslPathInput, validateSslPathsCombo } from '../ssl_form_validators';
 export { validateSslPathInput, validateSslPathsCombo };
 
@@ -373,12 +383,25 @@ export function validateKafkaKerberosKeytab(value: string) {
 }
 
 export function validateKafkaKerberosUsername(value: string) {
-  return requiredText(
+  const required = requiredText(
     value,
     i18n.translate('xpack.fleet.settings.outputForm.kafkaKerberosUsernameIsRequired', {
       defaultMessage: 'Username is required',
     })
   );
+  if (required) {
+    return required;
+  }
+
+  // the form trims the value before it is sent, so the trimmed length is the one the API checks
+  if (value.trim().length > KAFKA_KERBEROS_USERNAME_MAX_LENGTH) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaKerberosUsernameIsTooLong', {
+        defaultMessage: 'Username must be {maxLength} characters or fewer',
+        values: { maxLength: KAFKA_KERBEROS_USERNAME_MAX_LENGTH },
+      }),
+    ];
+  }
 }
 
 export function validateKafkaKerberosPassword(value: string) {
@@ -764,6 +787,147 @@ export function validateOtlpCount(value: string) {
   }
 }
 
+/**
+ * An optional number that is not negative, such as a multiplier. It accepts the exponent notation
+ * that a saved number such as `1e-7` is loaded with.
+ */
+export function validateOtlpDecimal(value: string) {
+  const decimal = value?.trim() ?? '';
+  if (!decimal) {
+    return;
+  }
+  if (!/^\d+(\.\d+)?([eE][-+]?\d+)?$/.test(decimal) || !Number.isFinite(Number(decimal))) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpDecimalInvalid', {
+        defaultMessage: 'Specify a number, 0 or more',
+      }),
+    ];
+  }
+}
+
+/** Optional metadata keys, separated by commas. The collector compares them case-insensitively. */
+export function validateOtlpMetadataKeys(value: string) {
+  const keys = (value ?? '').split(',').map((key) => key.trim());
+  if (!value?.trim()) {
+    return;
+  }
+  if (keys.some((key) => !key) || keys.some((key) => key.length > 256) || keys.length > 100) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpMetadataKeysInvalid', {
+        defaultMessage: 'Specify up to {max} metadata keys, separated by commas',
+        values: { max: 100 },
+      }),
+    ];
+  }
+  if (new Set(keys.map((key) => key.toLowerCase())).size !== keys.length) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpMetadataKeysDuplicate', {
+        defaultMessage: 'Metadata keys must be unique, whatever their case',
+      }),
+    ];
+  }
+}
+
+/** An optional whole number that is at least 1, such as a number of consumers. */
+export function validateOtlpPositiveCount(value: string) {
+  const count = value?.trim() ?? '';
+  if (!count) {
+    return;
+  }
+  if (!/^\d+$/.test(count) || !Number.isSafeInteger(Number(count)) || Number(count) < 1) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpPositiveCountInvalid', {
+        defaultMessage: 'Specify a whole number, 1 or more',
+      }),
+    ];
+  }
+}
+
+const GO_DURATION_COMPONENT_REGEX = /(\d*)(?:\.(\d*))?(ns|us|µs|μs|ms|s|m|h)/g;
+const GO_DURATION_UNIT_NS: Record<string, number> = {
+  ns: 1,
+  us: 1e3,
+  µs: 1e3,
+  μs: 1e3,
+  ms: 1e6,
+  s: 1e9,
+  m: 60e9,
+  h: 3600e9,
+};
+
+const GO_MAX_INT64 = BigInt('9223372036854775807');
+const GO_FRACTION_OVERFLOW = GO_MAX_INT64 / BigInt(10);
+const GO_FRACTION_MAX = GO_MAX_INT64 + BigInt(1);
+
+/**
+ * The nanoseconds of the fraction of a duration component, as Go's `time.ParseDuration` computes
+ * them: the digits are read until they no longer fit in an int64, and the fraction is converted
+ * with floating-point arithmetic and truncated, so that Fleet and the collector agree.
+ */
+const goFractionNs = (digits: string, unitNs: number) => {
+  let fraction = BigInt(0);
+  let scale = 1;
+  for (const digit of digits) {
+    if (fraction > GO_FRACTION_OVERFLOW) {
+      break;
+    }
+    const next = fraction * BigInt(10) + BigInt(digit);
+    if (next > GO_FRACTION_MAX) {
+      break;
+    }
+    fraction = next;
+    scale *= 10;
+  }
+  return fraction ? Math.trunc(Number(fraction) * (unitNs / scale)) : 0;
+};
+
+/** The nanoseconds of a valid duration, or undefined if it is empty or not a duration. */
+export function parseOtlpDurationNs(value: string): number | undefined {
+  const duration = value?.trim() ?? '';
+  if (!duration || !GO_DURATION_REGEX.test(duration)) {
+    return undefined;
+  }
+  return [...duration.matchAll(GO_DURATION_COMPONENT_REGEX)].reduce(
+    (total, [, whole, fraction = '', unit]) => {
+      const unitNs = GO_DURATION_UNIT_NS[unit];
+      return total + Number(whole || 0) * unitNs + goFractionNs(fraction, unitNs);
+    },
+    0
+  );
+}
+
+/** An optional duration that is more than zero. */
+export function validateOtlpPositiveDuration(value: string) {
+  const error = validateOtlpDuration(value);
+  if (error) {
+    return error;
+  }
+  // the collector truncates a duration to whole nanoseconds, so less than 1ns is zero
+  if (value?.trim() && (parseOtlpDurationNs(value) ?? 0) < 1) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpPositiveDurationInvalid', {
+        defaultMessage: 'Specify a duration longer than zero, such as {examples}',
+        values: { examples: '200ms, 1s' },
+      }),
+    ];
+  }
+}
+
+/** An optional number from 0 to 1. */
+export function validateOtlpRandomizationFactor(value: string) {
+  const error = validateOtlpDecimal(value);
+  if (error) {
+    return error;
+  }
+  if (value?.trim() && Number(value) > 1) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpRandomizationFactorInvalid', {
+        defaultMessage: 'Specify a number from 0 to 1',
+      }),
+    ];
+  }
+}
+
 const OTLP_COMPRESSION_LEVEL_MIN = -2;
 const OTLP_COMPRESSION_LEVEL_MAX = 9;
 
@@ -855,8 +1019,34 @@ export function validateOtlpShortString(value: string) {
   }
 }
 
-export function validateOtlpHeaders(pairs: Array<{ key: string; value: string }>) {
+/**
+ * Validates the headers of the OTLP output. `authHeaderName` is the header that the authentication
+ * sets, which the headers cannot set too.
+ */
+export function validateOtlpHeaders(
+  pairs: Array<{ key: string; value: string }>,
+  authHeaderName?: string
+) {
   const errors = [...(validateKafkaHeaders(pairs) ?? [])];
+
+  if (authHeaderName) {
+    const conflict = findOtlpAuthHeaderConflict(
+      pairs.map(({ key }) => key),
+      authHeaderName
+    );
+    const index = conflict === undefined ? -1 : pairs.findIndex(({ key }) => key === conflict);
+    if (index >= 0) {
+      errors.push({
+        message: i18n.translate('xpack.fleet.settings.outputForm.otlpHeaderSetByAuth', {
+          defaultMessage: 'The {header} header is set by the authentication',
+          values: { header: conflict },
+        }),
+        index,
+        hasKeyError: true,
+        hasValueError: false,
+      });
+    }
+  }
 
   pairs.forEach(({ key, value }, index) => {
     if (key.length > 256 || value.length > 1000) {
@@ -875,3 +1065,64 @@ export function validateOtlpHeaders(pairs: Array<{ key: string; value: string }>
 
   return errors.length ? errors : undefined;
 }
+
+export function validateOtlpAuthHeaderName(value: string) {
+  const name = value?.trim() ?? '';
+  if (!name) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpAuthHeaderNameRequired', {
+        defaultMessage: 'Header name is required',
+      }),
+    ];
+  }
+  if (!isValidOtlpHeaderName(name)) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpAuthHeaderNameInvalid', {
+        defaultMessage:
+          'Header name must be at most {max} characters and only contain letters, digits and {chars}',
+        values: { max: OTLP_HEADER_NAME_MAX_LENGTH, chars: "!#$%&'*+-.^_`|~" },
+      }),
+    ];
+  }
+}
+
+/** The gRPC exporter sends the custom header as metadata, which allows fewer characters. */
+export function validateOtlpAuthGrpcHeaderName(value: string) {
+  if (!isValidOtlpGrpcMetadataKey(value.trim())) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpAuthGrpcHeaderNameInvalid', {
+        defaultMessage:
+          'With gRPC, the header name can only contain letters, digits, "-", "_" and ".", cannot start with "grpc-" or end with "-bin"',
+      }),
+    ];
+  }
+}
+
+export function validateOtlpAuthCredential(value: string) {
+  // the credential is sent trimmed
+  const credential = value?.trim() ?? '';
+  if (!credential) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpAuthCredentialRequired', {
+        defaultMessage: 'Credential is required',
+      }),
+    ];
+  }
+  if (credential.length > OTLP_AUTH_CREDENTIAL_MAX_LENGTH) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpAuthCredentialTooLong', {
+        defaultMessage: 'Credential must be at most {max} characters',
+        values: { max: OTLP_AUTH_CREDENTIAL_MAX_LENGTH },
+      }),
+    ];
+  }
+  if (!isValidOtlpAuthCredential(credential)) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpAuthCredentialInvalid', {
+        defaultMessage: 'Credential cannot contain line breaks or other control characters',
+      }),
+    ];
+  }
+}
+
+export const validateOtlpAuthCredentialSecret = toSecretValidator(validateOtlpAuthCredential);

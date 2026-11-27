@@ -118,6 +118,27 @@ steps:
       workflow-id: ${childWorkflowId}
 `;
 
+/** The dispatched `workflows.failed` event is stored on the handler execution at `context.event`. */
+function getTriggeringExecutionId(context: Record<string, unknown> | undefined) {
+  const event = context?.event as { execution?: { id?: string } } | undefined;
+  return event?.execution?.id;
+}
+
+/** IDs of the `handlerWorkflowId` executions dispatched by the failure of `failedExecutionId`. */
+async function getHandlerExecutionsFor(
+  workflowsApi: WorkflowsApiService,
+  handlerWorkflowId: string,
+  failedExecutionId: string
+): Promise<string[]> {
+  const { results } = await workflowsApi.getExecutions(handlerWorkflowId);
+  const executions = await Promise.all(results.map(({ id }) => workflowsApi.getExecution(id)));
+  return executions.flatMap((execution) =>
+    execution && getTriggeringExecutionId(execution.context) === failedExecutionId
+      ? [execution.id]
+      : []
+  );
+}
+
 async function waitForExecution(
   workflowsApi: WorkflowsApiService,
   executionId: string,
@@ -217,29 +238,25 @@ spaceTest.describe(
     );
 
     spaceTest('filter by workflow name: handler runs when name matches condition', async () => {
-      const { results: initialResults } = await workflowsApi.getExecutions(handlerNameFilterId);
-      const initialCount = initialResults.length;
+      const { workflowExecutionId: failedExecutionId } = await workflowsApi.run(
+        failingWorkflowId,
+        {}
+      );
 
-      await workflowsApi.run(failingWorkflowId, {});
-      const { results: afterMatch } = await waitForConditionOrThrow({
-        action: () => workflowsApi.getExecutions(handlerNameFilterId),
-        condition: ({ results: r }) => r.length >= initialCount + 1,
+      const matchedHandlerExecutions = await waitForConditionOrThrow({
+        action: () => getHandlerExecutionsFor(workflowsApi, handlerNameFilterId, failedExecutionId),
+        condition: (matches) => matches.length > 0,
         interval: 2000,
         timeout: 25_000,
-        errorMessage: ({ results: r }) =>
-          `Name filter handler should have at least ${
-            initialCount + 1
-          } execution(s) after Scout workflow failed, got ${r.length}`,
+        errorMessage: () =>
+          `Name filter handler should have run for failed execution ${failedExecutionId}`,
       });
-      expect(afterMatch.length).toBeGreaterThan(initialCount);
+      expect(matchedHandlerExecutions.length).toBeGreaterThan(0);
     });
 
     spaceTest(
       'filter by workflow name: handler does not run when name does not match',
       async () => {
-        const { results: beforeResults } = await workflowsApi.getExecutions(handlerNameFilterId);
-        const countBefore = beforeResults.length;
-
         const { workflowExecutionId: otherExecutionId } = await workflowsApi.run(
           failingOtherWorkflowId,
           {}
@@ -247,22 +264,25 @@ spaceTest.describe(
         await waitForExecution(workflowsApi, otherExecutionId);
         const quietAfterMs = Date.now() + 5000;
 
-        const { results: finalResults } = await waitForConditionOrThrow({
-          action: () => workflowsApi.getExecutions(handlerNameFilterId),
-          condition: ({ results: r }) => {
-            if (r.length !== countBefore) {
+        const matchedHandlerExecutions = await waitForConditionOrThrow({
+          action: () =>
+            getHandlerExecutionsFor(workflowsApi, handlerNameFilterId, otherExecutionId),
+          condition: (matches) => {
+            if (matches.length > 0) {
               throw new Error(
-                `Name filter handler should stay at ${countBefore} execution(s) after non-Scout workflow failed, got ${r.length}`
+                `Name filter handler should not run for non-Scout workflow, got ${
+                  matches.length
+                } execution(s) for ${otherExecutionId}: ${matches.join(', ')}`
               );
             }
             return Date.now() >= quietAfterMs;
           },
           interval: 1000,
           timeout: 25_000,
-          errorMessage: ({ results: r }) =>
-            `Name filter handler count should remain ${countBefore} after quiet window, last count: ${r.length}`,
+          errorMessage: () =>
+            `Name filter handler stayed clear of execution ${otherExecutionId} but the quiet window never elapsed`,
         });
-        expect(finalResults).toHaveLength(countBefore);
+        expect(matchedHandlerExecutions).toHaveLength(0);
       }
     );
 
@@ -297,9 +317,8 @@ spaceTest.describe(
     spaceTest(
       'async: parent completes immediately while async child fails and emits workflows.failed',
       async () => {
-        const { results: initialHandlerResults } = await workflowsApi.getExecutions(
-          errorHandlerWorkflowId
-        );
+        const { results: initialHandlerResults } =
+          await workflowsApi.getExecutions(errorHandlerWorkflowId);
         const initialHandlerCount = initialHandlerResults.length;
 
         const { workflowExecutionId: parentExecutionId } = await workflowsApi.run(

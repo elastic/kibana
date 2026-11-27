@@ -97,7 +97,7 @@ const mockUnit = async (page: ScoutPage) => {
       body: JSON.stringify(MOCK_UNIT),
     });
   });
-  await page.route('**/internal/streams/unit/*/_resolve_indices', async (route) => {
+  await page.route('**/internal/streams/unit/*/_resolve_indices?**', async (route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',

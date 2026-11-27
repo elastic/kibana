@@ -15,7 +15,10 @@ export class FunctionsPage {
   public datacenterPUEField: Locator;
   public perCPUWattX86Field: Locator;
   public saveChangesButton: Locator;
-  constructor(public readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    public readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.co2PerKWHField = this.page.getByTestId(
       'management-settings-editField-profiling.co2PerKWH'
     );
@@ -65,8 +68,11 @@ export class FunctionsPage {
   }
 
   async clickTopNFunctionsActionButton(rowIndex: number) {
-    const firstRowSelector = `[data-grid-row-index="${rowIndex}"] [data-test-subj="dataGridRowCell"] .euiButtonIcon`;
-    await this.page.locator(firstRowSelector).click();
+    const firstRowSelector = `[data-grid-row-index="${rowIndex}"] [data-test-subj="dataGridRowCell"]`;
+    await this.page
+      .locator(firstRowSelector)
+      .getByTestId('profilingTopNFunctionsGridButton')
+      .click();
   }
 
   async getNoDataPrompt() {
@@ -87,7 +93,10 @@ export class FunctionsPage {
   }
 
   async clickFirstRowActionButton(firstRowSelector: string) {
-    await this.page.locator(`${firstRowSelector} .euiButtonIcon`).click();
+    await this.page
+      .locator(firstRowSelector)
+      .getByTestId('profilingTopNFunctionsGridButton')
+      .click();
     await this.page.getByText('Frame information').waitFor({ state: 'visible' });
     await this.page.getByText('Impact estimates').waitFor({ state: 'visible' });
   }

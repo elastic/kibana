@@ -49,9 +49,12 @@ interface DigitalExperienceStartDeps {
   security?: SecurityPluginStart;
 }
 
-export class Plugin
-  implements PluginType<void, void, DigitalExperienceSetupDeps, DigitalExperienceStartDeps>
-{
+export class Plugin implements PluginType<
+  void,
+  void,
+  DigitalExperienceSetupDeps,
+  DigitalExperienceStartDeps
+> {
   private readonly logger: Logger;
   private readonly config: DigitalExperienceConfig;
 

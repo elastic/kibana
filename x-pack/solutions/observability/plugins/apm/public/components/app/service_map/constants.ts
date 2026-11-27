@@ -33,6 +33,9 @@ export const MIN_ZOOM = 0.2;
 /** Maximum zoom level the user can pan/zoom to */
 export const MAX_ZOOM = 3;
 
+/** Highest zoom when the view moves to a group that was just opened, so a small group is not blown up */
+export const OPENED_GROUP_MAX_ZOOM = 1;
+
 /** Duration of the fit view animation in milliseconds */
 export const FIT_VIEW_DURATION = 200;
 

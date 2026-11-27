@@ -25,7 +25,7 @@ import type {
 } from '@kbn/fleet-plugin/public';
 import type { ObservabilityOnboardingAppServices } from '../..';
 
-type UseGetSettingsQueryType = typeof import('@kbn/fleet-plugin/public')['useGetSettingsQuery'];
+type UseGetSettingsQueryType = (typeof import('@kbn/fleet-plugin/public'))['useGetSettingsQuery'];
 
 interface FleetHooks {
   useAvailablePackages: AvailablePackagesHookType;

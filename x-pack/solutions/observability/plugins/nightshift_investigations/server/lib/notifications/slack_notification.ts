@@ -91,6 +91,8 @@ export const slackNotificationHandler: NotificationHandler = {
           data && typeof data === 'object' && 'externalConversationId' in data
             ? data.externalConversationId
             : undefined;
+        const workspace =
+          data && typeof data === 'object' && 'workspace' in data ? data.workspace : undefined;
         return {
           status: 'sent',
           message_ts: messageTs,
@@ -98,6 +100,9 @@ export const slackNotificationHandler: NotificationHandler = {
           externalConversationId.length > 0 &&
           externalConversationId.length <= 500
             ? { external_conversation_id: externalConversationId }
+            : {}),
+          ...(typeof workspace === 'string' && workspace.length > 0 && workspace.length <= 500
+            ? { workspace }
             : {}),
           sent_at: new Date().toISOString(),
           channel:

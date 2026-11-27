@@ -49,7 +49,7 @@ const buildDefinition = ({
   });
 
 const attachmentOf = (data: unknown): EntityAttachment =>
-  ({ id: 'a', type: 'security.entity', data } as unknown as EntityAttachment);
+  ({ id: 'a', type: 'security.entity', data }) as unknown as EntityAttachment;
 
 describe('createEntityAttachmentDefinition', () => {
   describe('getActionButtons (Preview button)', () => {

@@ -68,8 +68,8 @@ const renderWith = (
       typeof value === 'string' && value.startsWith('${{')
         ? evaluate(value, scope)
         : typeof value === 'string'
-        ? engine.parseAndRenderSync(value, scope)
-        : value,
+          ? engine.parseAndRenderSync(value, scope)
+          : value,
     ])
   );
 

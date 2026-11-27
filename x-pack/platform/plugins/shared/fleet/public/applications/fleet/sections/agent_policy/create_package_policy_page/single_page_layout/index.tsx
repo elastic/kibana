@@ -461,7 +461,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     addIntegrationFlyoutProps?.updateHasErrors(
       Boolean(
         packageInfo &&
-          (formState === 'INVALID' || hasAgentPolicyError || isAgentVersionAcknowledgementMissing)
+        (formState === 'INVALID' || hasAgentPolicyError || isAgentVersionAcknowledgementMissing)
       )
     );
   }, [
@@ -533,8 +533,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           queryParamsPolicyId
             ? [queryParamsPolicyId]
             : defaultPolicyData?.policy_ids
-            ? defaultPolicyData?.policy_ids
-            : []
+              ? defaultPolicyData?.policy_ids
+              : []
         }
       />
     ),
@@ -589,12 +589,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   }
   const { getAgentlessStatusForPackage } = useAgentless();
   const { isAgentless, isDefaultDeploymentMode } = getAgentlessStatusForPackage(packageInfo);
-  const enableSimplifiedAgentlessUX = ExperimentalFeaturesService.get().enableSimplifiedAgentlessUX;
   const { enableIntegrationTileClickToAdd } = ExperimentalFeaturesService.get();
 
   const useCheckableCardsForSetupTechnologySelector = useMemo(() => {
-    return !replaceDefineStepView && enableSimplifiedAgentlessUX && isDefaultDeploymentMode;
-  }, [replaceDefineStepView, enableSimplifiedAgentlessUX, isDefaultDeploymentMode]);
+    return !replaceDefineStepView && isDefaultDeploymentMode;
+  }, [replaceDefineStepView, isDefaultDeploymentMode]);
 
   const replaceStepConfigurePackagePolicy =
     replaceDefineStepView && packageInfo?.name ? (

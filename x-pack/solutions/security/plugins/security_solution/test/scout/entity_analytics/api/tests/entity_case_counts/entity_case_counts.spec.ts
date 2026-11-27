@@ -41,7 +41,7 @@ const buildEntityAttachment = (entityId: string) =>
     attachmentId: entityId,
     metadata: { entityName: entityId, entityType: 'host' },
     owner: SECURITY_SOLUTION_OWNER,
-  } as unknown as CommentParams);
+  }) as unknown as CommentParams;
 
 interface CaseOptions {
   entityId?: string;

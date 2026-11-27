@@ -331,7 +331,7 @@ export const getPrivateLocationAgentStats: SyntheticsRestApiRouteFactory<
             const usedMemoryMib =
               hostMetrics?.usedMib != null && totalMemoryMib != null
                 ? Math.min(hostMetrics.usedMib, totalMemoryMib)
-                : hostMetrics?.usedMib ?? null;
+                : (hostMetrics?.usedMib ?? null);
             return {
               host: meta.host,
               lastCheckin: meta.lastCheckin,
@@ -347,7 +347,7 @@ export const getPrivateLocationAgentStats: SyntheticsRestApiRouteFactory<
               lastCheckinMessage: meta.lastCheckinMessage,
               platform: meta.platform,
               tags: meta.tags,
-              monitorsAssigned: isShardingActive ? assignmentCounts.get(meta.agentId) ?? 0 : null,
+              monitorsAssigned: isShardingActive ? (assignmentCounts.get(meta.agentId) ?? 0) : null,
               complete: meta.complete,
             };
           })

@@ -228,6 +228,40 @@ describe('AddElasticsearchDataPanel', () => {
   });
 });
 
+describe('picked sources that are not added yet', () => {
+  it.each([
+    [
+      'AddElasticsearchDataPanel',
+      AddElasticsearchDataPanel,
+      'mockToggleIndex-logs-*',
+      esqlSelectedSource('FROM logs-*'),
+    ],
+    [
+      'AddConnectorsPanel',
+      AddConnectorsPanel,
+      'mockToggleConnector-github',
+      connectorSource('connector-github'),
+    ],
+  ])('%s reports them, and none once it closes', (_name, Panel, toggleTestSubj, picked) => {
+    const onPendingChange = jest.fn();
+    const { unmount } = renderWithProviders(
+      <Panel
+        savedSources={[]}
+        onAdd={jest.fn()}
+        onClose={jest.fn()}
+        isSaving={false}
+        onPendingChange={onPendingChange}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId(toggleTestSubj));
+    expect(onPendingChange).toHaveBeenLastCalledWith([picked]);
+
+    unmount();
+    expect(onPendingChange).toHaveBeenLastCalledWith([]);
+  });
+});
+
 describe('AddConnectorsPanel', () => {
   afterEach(() => {
     jest.clearAllMocks();

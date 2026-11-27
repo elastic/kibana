@@ -145,7 +145,7 @@ keep the old shape: a missing setting renders as nothing (Alert Triage renders t
 `undefined`), and a removed level renders as is, which the child workflows reject on every run:
 
 ```yaml
-# rule_tuning_worker.yaml, the sweep Rule Tuning dispatches
+# tuning_sweep.yaml, the sweep Rule Tuning dispatches
 autonomy_level:
   type: string
   enum: [manual, assisted]

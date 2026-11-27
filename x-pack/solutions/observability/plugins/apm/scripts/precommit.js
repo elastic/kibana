@@ -24,7 +24,12 @@ const tasks = new Listr(
   [
     {
       title: 'Lint',
-      task: () => execa('node', [resolve(__dirname, 'eslint.js')], execaOpts),
+      task: () =>
+        execa(
+          'node',
+          [resolve(__dirname, '../../../../../scripts/lint.js'), resolve(__dirname, '..')],
+          execaOpts
+        ),
     },
     {
       title: 'Typescript',

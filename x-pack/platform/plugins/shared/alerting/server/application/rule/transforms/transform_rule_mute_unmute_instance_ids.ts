@@ -34,7 +34,7 @@ export const transformMuteUnmuteRequestToRuleAttributes = ({
         const savedRule = savedRules.find((rule) => rule.id === paramRule.id);
         const existingInstanceIds =
           savedRule && !isSavedObjectErrorResult(savedRule)
-            ? savedRule.attributes.mutedInstanceIds ?? []
+            ? (savedRule.attributes.mutedInstanceIds ?? [])
             : [];
         const newAttributes = instanceIdCalculator({
           existingInstanceIds,

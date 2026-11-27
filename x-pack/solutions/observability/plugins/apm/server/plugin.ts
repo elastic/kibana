@@ -24,6 +24,7 @@ import { registerAssistantFunctions } from './assistant_functions';
 import { registerDeprecations } from './deprecations';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
 import { createApmTelemetry } from './lib/apm_telemetry';
+import { setupRum } from './lib/rum/setup_rum';
 import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
 import {
   APM_RULE_TYPE_ALERT_CONTEXT,
@@ -56,11 +57,15 @@ import { registerDataProviders } from './agent_builder/data_provider/register_da
 import { registerServiceMapAgentBuilder } from './agent_builder/register_service_map';
 import { registerServiceMapEmbeddableTransforms } from './lib/embeddables/register_service_map_embeddable_transforms';
 
-export class APMPlugin
-  implements Plugin<APMPluginSetup, void, APMPluginSetupDependencies, APMPluginStartDependencies>
-{
+export class APMPlugin implements Plugin<
+  APMPluginSetup,
+  void,
+  APMPluginSetupDependencies,
+  APMPluginStartDependencies
+> {
   private currentConfig?: APMConfig;
   private logger?: Logger;
+  private stopRum?: () => void;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -77,6 +82,12 @@ export class APMPlugin
 
     const currentConfig = this.initContext.config.get<APMConfig>();
     this.currentConfig = currentConfig;
+    this.stopRum = setupRum(
+      core,
+      plugins.taskManager,
+      currentConfig.managedRumEnabled,
+      logger.get('rum')
+    );
 
     if (
       plugins.taskManager &&
@@ -299,5 +310,7 @@ export class APMPlugin
     });
   }
 
-  public stop() {}
+  public stop() {
+    this.stopRum?.();
+  }
 }

@@ -13,5 +13,4 @@ export interface StreamsSpecificEvaluationWorkerFixtures {
 }
 
 export interface StreamsEvaluationWorkerFixtures
-  extends EvaluationWorkerFixtures,
-    StreamsSpecificEvaluationWorkerFixtures {}
+  extends EvaluationWorkerFixtures, StreamsSpecificEvaluationWorkerFixtures {}

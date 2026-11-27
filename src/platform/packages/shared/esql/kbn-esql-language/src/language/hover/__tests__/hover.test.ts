@@ -58,10 +58,16 @@ describe('getHoverItem()', () => {
     describe('ccq mode', () => {
       for (const mode of ENRICH_MODES) {
         test(mode.name, async () => {
-          await assertGetHoverItem(`from a | enrich _${mode.name}:policy`, `_${mode.name}`, [
+          const expected = [
+            '**Indexes**: enrichIndex1',
+            '**Matching field**: otherStringField',
+            '**Fields**: otherField, yetAnotherField, yet-special-field',
             modeDescription,
             `**${mode.name}**: ${mode.description}`,
-          ]);
+          ];
+          const statement = `from a | enrich _${mode.name}:policy`;
+          await assertGetHoverItem(statement, `_${mode.name}`, expected);
+          await assertGetHoverItem(statement, 'policy', expected);
         });
       }
     });

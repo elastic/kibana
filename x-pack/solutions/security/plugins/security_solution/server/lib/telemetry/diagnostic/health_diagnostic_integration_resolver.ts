@@ -24,7 +24,10 @@ export interface IntegrationResolver {
 }
 
 export class IntegrationResolverImpl implements IntegrationResolver {
-  constructor(private readonly packageService: PackageService, private readonly logger: Logger) {}
+  constructor(
+    private readonly packageService: PackageService,
+    private readonly logger: Logger
+  ) {}
 
   async resolve(queries: HealthDiagnosticQuery[]): Promise<ResolvedQuery[]> {
     const needsFleet = queries.some(

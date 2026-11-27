@@ -196,7 +196,7 @@ export class AlertEventsClient {
         status: episodeStatus,
         previousStatus,
         // An inactive alert reports no severity, even when the writer sent one.
-        severity: episodeStatus === alertEpisodeStatus.inactive ? null : event.severity ?? null,
+        severity: episodeStatus === alertEpisodeStatus.inactive ? null : (event.severity ?? null),
       });
     }
 

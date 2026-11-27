@@ -112,9 +112,8 @@ const createAutoAbortedAPMClientV2 = (
 
 // fetcher functions can return undefined OR a promise. Previously we had a more simple type
 // but it led to issues when using object destructuring with default values
-type InferResponseType<TReturn> = Exclude<TReturn, undefined> extends Promise<infer TResponseType>
-  ? TResponseType
-  : unknown;
+type InferResponseType<TReturn> =
+  Exclude<TReturn, undefined> extends Promise<infer TResponseType> ? TResponseType : unknown;
 
 export interface UseFetcherOptions {
   preservePreviousData?: boolean;

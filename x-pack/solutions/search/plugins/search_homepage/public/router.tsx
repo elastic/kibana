@@ -12,9 +12,19 @@ import {
   GettingStartedRedirect,
   hasVisitedGettingStarted,
 } from './components/getting_started_redirect';
+import { IntegratedHomeApp } from './components/search_homepage/integrated_home_app';
 import { SearchHomepagePage } from './components/search_homepage/search_homepage';
+import { useKibana } from './hooks/use_kibana';
 
 export const HomepageRouter = () => {
+  const {
+    services: { elasticsearchHome },
+  } = useKibana();
+
+  if (elasticsearchHome.useIntegratedOnboardingEnabled()) {
+    return <IntegratedHomeApp />;
+  }
+
   return (
     <Routes>
       <Route

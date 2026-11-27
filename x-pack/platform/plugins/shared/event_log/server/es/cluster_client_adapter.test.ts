@@ -2749,9 +2749,8 @@ describe('queryEventsBySavedObjectsSearchAfter', () => {
     });
 
     test('should return properly formatted response', async () => {
-      const response = await clusterClientAdapter.queryEventsBySavedObjectsSearchAfter(
-        defaultQuery
-      );
+      const response =
+        await clusterClientAdapter.queryEventsBySavedObjectsSearchAfter(defaultQuery);
 
       expect(response).toEqual({
         data: [

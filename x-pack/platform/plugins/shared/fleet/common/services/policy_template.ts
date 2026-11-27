@@ -349,7 +349,7 @@ export const getPolicyTemplateDataStreamPaths = (
   policyTemplate: RegistryPolicyTemplate
 ): string[] =>
   isIntegrationPolicyTemplate(policyTemplate)
-    ? policyTemplate.data_streams ?? []
+    ? (policyTemplate.data_streams ?? [])
     : [createDefaultDatasetName(packageInfo, policyTemplate)];
 
 /**

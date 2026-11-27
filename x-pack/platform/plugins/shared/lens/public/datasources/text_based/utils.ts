@@ -181,17 +181,22 @@ export const isNumeric = (column: TextBasedLayerColumn | DatatableColumn) =>
 export const isNotNumeric = (column: TextBasedLayerColumn | DatatableColumn) => !isNumeric(column);
 
 export function resolveTextBasedColumnType(
-  column: TextBasedLayerColumn,
+  column: Pick<TextBasedLayerColumn, 'meta'>,
   activeColumn?: DatatableColumn
 ): DataType {
   return (activeColumn?.meta?.type ?? column.meta?.type) as DataType;
 }
 
+export const isNumericMetric = ({
+  dataType,
+  isBucketed,
+}: Pick<OperationMetadata, 'dataType' | 'isBucketed'>) => dataType === 'number' && !isBucketed;
+
 /**
- * Whether the layer has at least one numeric column, resolved against the Query Result Type
- * overlay when `activeColumns` is available, and falling back to the persisted column type otherwise.
+ * Whether the layer has at least one numeric metric column, resolved against the Query Result Type
+ * overlay when `activeColumns` is available, and falling back to the persisted column otherwise.
  */
-export function hasNumericColumn(
+export function hasNumericMetricColumn(
   columns: TextBasedLayerColumn[],
   activeColumns?: DatatableColumn[]
 ): boolean {
@@ -199,24 +204,27 @@ export function hasNumericColumn(
     ? new Map(activeColumns.map((activeColumn) => [activeColumn.id, activeColumn]))
     : undefined;
 
-  return columns.some(
-    (column) =>
-      resolveTextBasedColumnType(column, activeColumnById?.get(column.columnId)) === 'number'
+  return columns.some((column) =>
+    isNumericMetric(operationFromColumn(column, activeColumnById?.get(column.columnId)))
   );
 }
 
 /**
- * Derives the type-shaped operation metadata (dataType, isBucketed, scale) from a single
- * resolved Query Result Type from activeData, so these fields never disagree with each other.
+ * Derives the type-shaped operation metadata (dataType, isBucketed, scale) from a column,
+ * resolved against activeData when available, so these fields never disagree with each other.
  */
-export function operationFromDataType(
-  dataType: DataType
+export function operationFromColumn(
+  column: Pick<TextBasedLayerColumn, 'meta'>,
+  activeColumn?: DatatableColumn
 ): Pick<OperationMetadata, 'dataType' | 'isBucketed' | 'scale'> {
+  const dataType = resolveTextBasedColumnType(column, activeColumn);
   switch (dataType) {
     case 'date':
       return { dataType, isBucketed: true, scale: 'interval' };
     case 'number':
-      return { dataType, isBucketed: false, scale: 'ratio' };
+      return (activeColumn ?? column).meta?.esMeta?.bucket !== undefined
+        ? { dataType, isBucketed: true, scale: 'interval' }
+        : { dataType, isBucketed: false, scale: 'ratio' };
     default:
       return { dataType, isBucketed: true, scale: 'ordinal' };
   }
@@ -236,9 +244,11 @@ export function canColumnBeDroppedInMetricDimension(
 export function canColumnBeUsedBeInMetricDimension(
   hasNumberColumn: boolean,
   columnCount: number,
-  selectedColumnType?: string
+  selectedOperation: Pick<OperationMetadata, 'dataType' | 'isBucketed'>
 ): boolean {
-  return !hasNumberColumn || columnCount >= MAX_NUM_OF_COLUMNS || selectedColumnType === 'number';
+  return (
+    !hasNumberColumn || columnCount >= MAX_NUM_OF_COLUMNS || isNumericMetric(selectedOperation)
+  );
 }
 
 export function mergeLayer({

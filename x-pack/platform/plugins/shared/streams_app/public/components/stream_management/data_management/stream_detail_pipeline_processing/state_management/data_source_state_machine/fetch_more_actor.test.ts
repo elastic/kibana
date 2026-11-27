@@ -105,7 +105,7 @@ describe('fetch_more_actor', () => {
         enabled: true,
         query: { language: 'kuery', query: '' },
         ...overrides,
-      } as EnrichmentDataSourceWithUIAttributes);
+      }) as EnrichmentDataSourceWithUIAttributes;
 
     it('returns empty string for non-kql data sources', () => {
       const ds = {

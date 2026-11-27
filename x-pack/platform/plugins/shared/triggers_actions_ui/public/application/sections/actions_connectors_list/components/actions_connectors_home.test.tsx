@@ -27,7 +27,7 @@ jest.mock('@elastic/eui', () => {
   return {
     ...actual,
     EuiIcon: ({ type, ...props }: { type?: React.ElementType; [key: string]: unknown }) =>
-      ReactActual.createElement(typeof type === 'string' ? 'span' : type ?? 'span', props),
+      ReactActual.createElement(typeof type === 'string' ? 'span' : (type ?? 'span'), props),
   };
 });
 

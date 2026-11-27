@@ -63,7 +63,7 @@ If a method already exists in any of the above, call it. Do not duplicate it in 
 - Avoid manual retry
 - Use `waitFor()` in page objects and `expect(…).toBeVisible()` in specs — this is the UI best-practice **Keep assertions explicit in tests, not hidden in page objects** (`docs/extend/testing/ui-best-practices.md#keep-assertions-explicit-in-tests-not-hidden-in-page-objects`): no `expect()` in POs; assertions stay in specs
 - **Static locators are `readonly` fields, not getters.** Assign them in the constructor. Use a method only when the locator needs an argument or a dynamic selector. Do not add a getter that only returns a locator (`docs/extend/testing/ui-best-practices.md#use-existing-page-objects-to-interact-with-the-kibana-ui`; `.agents/skills/scout-ui-testing/SKILL.md` Page objects)
-- Fix eslint issues
+- Fix lint issues (`node scripts/lint --fix <files>`, then `node scripts/oxfmt <files>`)
 - Don't run tests unless I explicitly ask for it
 - Use `@local-stateful-classic` tag for stateful tests; don't worry about cloud portability
 - Remove legacy FTRs and their configs (only in the current approved batch, after **S6**)
@@ -83,7 +83,7 @@ After execute, and again after review, walk **only newly created** specs, helper
 
 On new code, a documented Playwright or Scout rule is **blocker/major. Fix it. Do not put it on S5.**
 
-- Treat Playwright lint **errors and warnings** on new Scout files as must-fix (`plugin:playwright/recommended` and the Scout override in `.eslintrc.js`). Auto-fix is not enough if warnings remain. Especially `playwright/no-conditional-in-test`, `playwright/no-conditional-expect`, `playwright/no-nth-methods`, `playwright/prefer-web-first-assertions`.
+- Treat Playwright lint **errors and warnings** on new Scout files as must-fix (the `plugin:playwright/recommended` rules and Scout overrides in `.oxlint/playwright.mts`). Auto-fix is not enough if warnings remain. Especially `playwright/no-conditional-in-test`, `playwright/no-conditional-expect`, `playwright/no-nth-methods`, `playwright/prefer-web-first-assertions`.
 - Specs stay linear (`docs/extend/testing/ui-best-practices.md#avoid-conditional-logic-in-page-objects`). Do not branch in the test body or around assertions. Parameterize only if each case stays linear; otherwise split tests or move the branch into a helper.
 - Use APIs and fixtures for setup and teardown when the UI is not what the test is asserting (`#prefer-kibana-apis-over-ui-for-setup-and-teardown`).
 - Keep the existing Lens rules: assertions in specs / `waitFor` in new POs; readonly locators; no redundant waits; no manual retry or `poll()` bandage.
@@ -147,7 +147,7 @@ Update the plan if the user pushes back. Repeat **S1** until they approve.
 
 ### 2. Execute one batch (after S1 / S7)
 
-Follow the migrate skill’s execute path for **only the approved batch**: convert tests, place files under the Scout module, map FTR services/POs/hooks to Scout fixtures, split `loadTestFile` suites, typecheck, fix eslint.
+Follow the migrate skill’s execute path for **only the approved batch**: convert tests, place files under the Scout module, map FTR services/POs/hooks to Scout fixtures, split `loadTestFile` suites, typecheck, fix lint.
 
 Reuse: follow **Where to reuse Lens page objects**. Prefer adding a method on the matching **local** split PO (`workspace`, `dimensions`, …) over shared `lens_app`. Invent nothing that already exists. Apply best practices only to the new method — leave existing methods untouched.
 
@@ -203,7 +203,7 @@ node scripts/playwright test --project local --workers=1 \
 - If Playwright fails because browsers are missing, `unset PLAYWRIGHT_BROWSERS_PATH` and retry (use the machine Playwright cache, not a sandbox path).
 - Sequential Lens configs exist because they change server-wide feature flags; do not run those specs on the parallel config.
 
-If failures: fix them following Lens rules (deterministic first-pass failures do not need **S4**). Shared PO edits still need **S3**. After every fix: eslint, typecheck on the touched packages, then re-run **only if the user still wants runs**.
+If failures: fix them following Lens rules (deterministic first-pass failures do not need **S4**). Shared PO edits still need **S3**. After every fix: lint, typecheck on the touched packages, then re-run **only if the user still wants runs**.
 
 Stop and ask when the blocker is a source bug, missing instrumentation, or genuinely unstable product behavior.
 
@@ -241,7 +241,7 @@ Only after the current batch has followed the rules (code + review; plus run/30�
 - Prefer parallel-safe isolation, resilient cleanup, minimal privileges.
 - UI tests assert interaction + rendering. Avoid exact computed values unless UI behavior depends on them.
 - Keep the diff focused on this batch. No unrelated refactors.
-- Run scoped checks as needed (`type_check`, eslint, `node scripts/check.js --scope=…`) — these are not Playwright test runs.
+- Run scoped checks as needed (`type_check`, `node scripts/lint`, `node scripts/check.js --scope=…`) — these are not Playwright test runs.
 
 ## Success criteria
 

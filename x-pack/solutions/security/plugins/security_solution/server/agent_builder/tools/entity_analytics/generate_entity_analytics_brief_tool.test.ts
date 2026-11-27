@@ -104,7 +104,7 @@ describe('createGenerateBriefTool', () => {
     const mlWith = (jobsSummary: jest.Mock) =>
       ({
         jobServiceProvider: jest.fn().mockReturnValue({ jobsSummary }),
-      } as unknown as MlPluginSetup);
+      }) as unknown as MlPluginSetup;
 
     it('gives the brief no job service without the ML plugin', async () => {
       expect((await run()).jobService).toBeUndefined();

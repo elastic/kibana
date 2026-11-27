@@ -187,7 +187,7 @@ export const scanHostTool = (
                       message:
                         'The action is queued and will execute if the endpoint reconnects before the action expires (two weeks); after that it will not run.',
                     }
-                  : summarizeActionErrors(actionDetails.errors) ?? {}),
+                  : (summarizeActionErrors(actionDetails.errors) ?? {})),
                 hosts: actionDetails.hosts,
                 comment,
               },

@@ -203,10 +203,13 @@ export class DataViewMgmtService {
 
     const fieldRecords = dataView.fields
       .filter((field) => !field.scripted)
-      .reduce((acc, field) => {
-        acc[field.name] = field;
-        return acc;
-      }, {} as Record<string, DataViewField>);
+      .reduce(
+        (acc, field) => {
+          acc[field.name] = field;
+          return acc;
+        },
+        {} as Record<string, DataViewField>
+      );
 
     const fields = Object.values(fieldRecords);
     const indexedFieldTypes = new Set<string>();

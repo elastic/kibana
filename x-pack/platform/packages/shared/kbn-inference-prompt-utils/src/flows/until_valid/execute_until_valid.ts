@@ -40,7 +40,7 @@ export function executeUntilValid<
   TToolCallbacks extends ToolCallbacksOfToolOptions<ToolOptionsOfPrompt<TPrompt>>,
   TFinalToolChoice extends ToolChoice<ToolNamesOf<ToolOptionsOfPrompt<TPrompt>>> | undefined =
     | ToolChoice<ToolNamesOf<ToolOptionsOfPrompt<TPrompt>>>
-    | undefined
+    | undefined,
 >(
   options: UnboundPromptOptions<TPrompt> &
     UntilValidPromptOptions & { prompt: TPrompt } & {

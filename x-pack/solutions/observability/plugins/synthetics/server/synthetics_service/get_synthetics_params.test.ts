@@ -10,7 +10,7 @@ import { getSyntheticsParams } from './get_synthetics_params';
 import { mockEncryptedSO } from './utils/mocks';
 
 const getServer = (encryptedSavedObjects: ReturnType<typeof mockEncryptedSO>) =>
-  ({ encryptedSavedObjects } as unknown as SyntheticsServerSetup);
+  ({ encryptedSavedObjects }) as unknown as SyntheticsServerSetup;
 
 describe('getSyntheticsParams', () => {
   it('returns the params for all spaces', async () => {

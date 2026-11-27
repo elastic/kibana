@@ -28,15 +28,12 @@ import type {
 
 const DEFAULT_SPACE_ID = 'default';
 
-export class EntityInventoryPlugin
-  implements
-    Plugin<
-      EntityInventoryPluginSetup,
-      EntityInventoryPluginStart,
-      EntityInventorySetupDependencies,
-      EntityInventoryStartDependencies
-    >
-{
+export class EntityInventoryPlugin implements Plugin<
+  EntityInventoryPluginSetup,
+  EntityInventoryPluginStart,
+  EntityInventorySetupDependencies,
+  EntityInventoryStartDependencies
+> {
   private readonly logger: Logger;
   private readonly isDev: boolean;
 

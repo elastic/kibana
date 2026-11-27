@@ -40,6 +40,7 @@ import {
   removePackFromPolicy,
   makePackKey,
   resolveSharedPackagePolicyShard,
+  resolveSharedIntegrationOverdelivery,
   validatePackScheduleFields,
   resolvePackScheduleForUpdate,
   buildScheduleResponseSlice,
@@ -146,16 +147,16 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         const gatedQueries: Record<string, PackQueryInput> | undefined = isRruleFeatureEnabled
           ? (rawQueries as Record<string, PackQueryInput> | undefined)
           : rawQueries
-          ? (mapValues(rawQueries, (rawQuery) => {
-              const {
-                schedule_type: _scheduleType,
-                rrule_schedule: _rruleSchedule,
-                ...rest
-              } = rawQuery as PackQueryInput;
+            ? (mapValues(rawQueries, (rawQuery) => {
+                const {
+                  schedule_type: _scheduleType,
+                  rrule_schedule: _rruleSchedule,
+                  ...rest
+                } = rawQuery as PackQueryInput;
 
-              return rest;
-            }) as Record<string, PackQueryInput>)
-          : undefined;
+                return rest;
+              }) as Record<string, PackQueryInput>)
+            : undefined;
 
         let currentPackSO;
         try {
@@ -486,8 +487,27 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           };
         };
 
+        const buildResponseBody = () => {
+          const data = buildResponseData();
+          // An edit-only update (no enable toggle, no targeting change) also rewrites
+          // every integration that already carries the pack, so warn about those too.
+          const isEditOnly =
+            !targetingChangeRequested &&
+            (enabled == null || enabled === currentPackSO.attributes.enabled);
+          const warnings = data.enabled
+            ? resolveSharedIntegrationOverdelivery(
+                data.policy_ids ?? [],
+                packagePolicies,
+                effectiveShards,
+                isEditOnly ? currentPackagePolicies : []
+              )
+            : [];
+
+          return { data, ...(warnings.length ? { warnings } : {}) };
+        };
+
         if (enabled == null && !currentPackSO.attributes.enabled) {
-          return response.ok({ body: { data: buildResponseData() } });
+          return response.ok({ body: buildResponseBody() });
         }
 
         // The pack SO (source of truth) is already committed. These Fleet writes
@@ -775,7 +795,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         }
 
         return response.ok({
-          body: { data: buildResponseData() },
+          body: buildResponseBody(),
         });
       }
     );

@@ -109,7 +109,7 @@ const makeServer = () =>
         },
       },
     },
-  } as unknown as DiscoveryHandlerParams['server']);
+  }) as unknown as DiscoveryHandlerParams['server'];
 
 // Handler tests call the route function directly (no Zod transform), so dates
 // must already be `Date` instances — matching `makeIsoDateFromString` output.
@@ -344,7 +344,7 @@ describe('getDiscoveryQueriesRoute source resolution', () => {
       getSpaceId: jest.fn().mockResolvedValue('default'),
       server: makeServer(),
       logger: { warn: jest.fn() },
-    } as unknown as DiscoveryHandlerParams);
+    }) as unknown as DiscoveryHandlerParams;
 
   it('lists streams then searches when query is set and sourceIds is omitted', async () => {
     await discoveryQueriesRoute.handler(
@@ -631,7 +631,7 @@ describe('generateQueriesRoute', () => {
         get: jest.fn().mockReturnValue({ warn: jest.fn(), debug: jest.fn(), trace: jest.fn() }),
       },
       telemetry: {},
-    } as unknown as GenerateHandlerParams);
+    }) as unknown as GenerateHandlerParams;
 
   it('retains valid run ids and rejects blank or overlong run ids during route validation', () => {
     const parsed = strictGenerateParams.safeParse({

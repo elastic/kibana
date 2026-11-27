@@ -194,7 +194,7 @@ export const triggerInvestigationStepDefinition = (
         significantEventData?.workflow_execution_id
       )?.slice(0, MAX_ID_LENGTH);
       const title =
-        input.title && input.title !== subjectId ? input.title : alertTitle ?? input.title;
+        input.title && input.title !== subjectId ? input.title : (alertTitle ?? input.title);
       const notifyLimitReached = (reason: LimitNoticeReason) =>
         notifyInvestigationLimitReached({
           getSoClient: () => getAutomationsSoClient(request, spaceId),
@@ -220,7 +220,7 @@ export const triggerInvestigationStepDefinition = (
               summary: toSubjectSummary(input, execution.triggeredBy, event),
             },
             title,
-            trigger_type: isManualAutomationRun ? 'manual' : input.trigger_type ?? 'automatic',
+            trigger_type: isManualAutomationRun ? 'manual' : (input.trigger_type ?? 'automatic'),
             message: input.message,
             instructions:
               input.instructions ??

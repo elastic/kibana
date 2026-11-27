@@ -78,9 +78,12 @@ export interface LensServerPluginSetup {
   ) => void;
 }
 
-export class LensServerPlugin
-  implements Plugin<LensServerPluginSetup, {}, PluginSetupContract, PluginStartContract>
-{
+export class LensServerPlugin implements Plugin<
+  LensServerPluginSetup,
+  {},
+  PluginSetupContract,
+  PluginStartContract
+> {
   private customVisualizationMigrations: CustomVisualizationMigrations = {};
   private readonly logger: Logger;
 
@@ -135,7 +138,10 @@ export class LensServerPlugin
     core
       .getStartServices()
       .then(async ([{ featureFlags }]) => {
-        const flags = await fetchLensFeatureFlags(featureFlags);
+        const flags = await fetchLensFeatureFlags(
+          featureFlags,
+          this.initializerContext.env.mode.dev
+        );
         builder.setEnabled(flags.apiFormat);
 
         // Need to wait for feature flags to be set before registering transforms

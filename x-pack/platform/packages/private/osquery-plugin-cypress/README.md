@@ -132,4 +132,4 @@ Remember that minimizing the number of times the web page is loaded, we minimize
 
 ## Linting
 
-Optional linting rules for Cypress and linting setup can be found [here](https://github.com/cypress-io/eslint-plugin-cypress#usage)
+Cypress lint rules from [`eslint-plugin-cypress`](https://github.com/cypress-io/eslint-plugin-cypress) run through oxlint and are configured in `.oxlint/cypress.mts`. Add this directory there to enable them, and run `node scripts/lint <paths>` to check.

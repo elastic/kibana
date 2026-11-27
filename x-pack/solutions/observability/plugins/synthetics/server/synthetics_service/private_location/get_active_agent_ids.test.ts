@@ -32,7 +32,7 @@ const makeServer = (service?: { manifestUrl?: string; devUrl?: string }): Synthe
       authc: { apiKeys: { validate: jest.fn().mockResolvedValue(true) } },
     },
     logger: loggerMock.create(),
-  } as unknown as SyntheticsServerSetup);
+  }) as unknown as SyntheticsServerSetup;
 
 const withServiceConfig = () => makeServer({ manifestUrl: 'https://example' });
 

@@ -10,6 +10,8 @@ import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { RenderMode } from '@kbn/expressions-plugin/common';
 import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import { toExpression } from '@kbn/interpreter';
+import type { Observable } from 'rxjs';
+import type { XYOverlay } from '@kbn/expression-xy-plugin/common';
 import { noop } from 'lodash';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { CellValueContext } from '@kbn/embeddable-plugin/public';
@@ -57,6 +59,7 @@ interface GetExpressionRendererPropsParams {
   addUserMessages: (messages: UserMessage[]) => void;
   forceDSL?: boolean;
   getDisplayOptions: () => VisualizationDisplayOptions;
+  overlays$?: Observable<readonly XYOverlay[]>;
 }
 
 async function getExpressionFromDocument(
@@ -159,6 +162,7 @@ export async function getExpressionRendererParams(
     searchContext,
     forceDSL,
     getDisplayOptions,
+    overlays$,
   }: GetExpressionRendererPropsParams
 ): Promise<{
   params: ExpressionWrapperProps | null;
@@ -222,7 +226,7 @@ export async function getExpressionRendererParams(
       abortController,
       hasCompatibleActions: buildHasCompatibleActions(api, services),
       getCompatibleCellValueActions: buildGetCompatibleCellValueActions(api, services),
-      variables: getVariables(api, state),
+      variables: getVariables(api, state, overlays$),
       style: state.style,
       className: state.className,
       noPadding: getDisplayOptions().noPadding,

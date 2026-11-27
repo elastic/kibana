@@ -74,9 +74,9 @@ export const buildTemplateFromWizardData = ({
             })
           )
         : wizardData.logistics.lifecycle
-        ? serializeAsESLifecycle(wizardData.logistics.lifecycle)
-        : undefined,
-      ...(dataStreamOptions && { data_stream_options: dataStreamOptions }),
+          ? serializeAsESLifecycle(wizardData.logistics.lifecycle)
+          : undefined,
+      ...(isDataStreamTemplate && dataStreamOptions && { data_stream_options: dataStreamOptions }),
     },
     ignoreMissingComponentTemplates: initialTemplate.ignoreMissingComponentTemplates,
   };

@@ -26,7 +26,7 @@ import type { ActionFixture, QueryOperation, VendorApiFixtures } from './fixture
 import { toResponseFixtures } from './fixtures';
 import type { GeneratedInputs, RejectedInput } from './generate_action_inputs';
 import { generateActionInputs } from './generate_action_inputs';
-import type { ManifestCall } from '../manifest';
+import type { ManifestCall, ManifestOperation } from '../manifest';
 import { matchesPathTemplate } from '../manifest';
 import { errorMessage } from '../values';
 
@@ -54,8 +54,10 @@ export class NoUsableAuthTypeError extends Error {
   }
 }
 
-export interface RecordActionsOptions
-  extends Omit<ContractContextOptions, 'specs' | 'fixtures' | 'recordings' | 'trackFields'> {
+export interface RecordActionsOptions extends Omit<
+  ContractContextOptions,
+  'specs' | 'fixtures' | 'recordings' | 'trackFields'
+> {
   /** The vendor specs by source name, as in the manifest's `sources`. */
   readonly specs: Readonly<Record<string, OpenApiDocument | GraphQLSpec | McpSpec>>;
   readonly fixtures?: VendorApiFixtures;
@@ -98,6 +100,8 @@ export type RecordingFinding =
       readonly kind: 'request-violation';
       readonly action: string;
       readonly request: string;
+      /** The operation the emulator matched the request to, when it matched one. */
+      readonly operation?: ManifestOperation;
       readonly violations: readonly Violation[];
     }
   /** The OAuth scopes the auth type requests don't cover an operation the action calls. */
@@ -445,6 +449,9 @@ export const recordActions = async ({
           kind: 'request-violation',
           action,
           request,
+          ...(matched?.source !== undefined && 'method' in matched
+            ? { operation: { source: matched.source, method: matched.method, path: matched.path } }
+            : {}),
           violations: requestViolations,
         });
       }

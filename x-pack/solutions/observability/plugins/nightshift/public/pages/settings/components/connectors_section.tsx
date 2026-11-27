@@ -7,7 +7,9 @@
 
 import React, { useState } from 'react';
 import { EuiButton, EuiSpacer } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import {
   ManageConnectorsLink,
   SandboxConnectorsTable,
@@ -37,6 +39,10 @@ export function ConnectorsSection(): React.ReactElement {
             iconType="plus"
             onClick={() => setIsAdding(true)}
             data-test-subj="nightshiftAddConnectorButton"
+            {...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.OPEN_ADD_CONNECTOR,
+              element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+            })}
           >
             {i18n.translate('xpack.nightshift.settings.connectors.addButton', {
               defaultMessage: 'Add connector',

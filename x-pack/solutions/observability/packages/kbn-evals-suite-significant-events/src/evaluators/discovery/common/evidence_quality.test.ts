@@ -16,7 +16,7 @@ import {
 const createJudge = () => {
   const evaluate = jest.fn(async () => ({ score: 1, explanation: 'judged' }));
   const criteriaFn = jest.fn(
-    () => ({ name: 'criteria', kind: 'LLM', direction: 'maximize', evaluate } as Evaluator)
+    () => ({ name: 'criteria', kind: 'LLM', direction: 'maximize', evaluate }) as Evaluator
   );
   return { criteriaFn, evaluate };
 };

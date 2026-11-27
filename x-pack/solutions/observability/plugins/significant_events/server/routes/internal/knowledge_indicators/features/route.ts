@@ -412,10 +412,10 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
         'delete' in op
           ? op.delete.id
           : 'exclude' in op
-          ? op.exclude.id
-          : 'restore' in op
-          ? op.restore.id
-          : op.durability.id;
+            ? op.exclude.id
+            : 'restore' in op
+              ? op.restore.id
+              : op.durability.id;
       const kiOp: KIBulkOperation =
         'delete' in op ? { delete: { type: 'feature', id: op.delete.id } } : op;
       opsByUuid.set(id, kiOp);

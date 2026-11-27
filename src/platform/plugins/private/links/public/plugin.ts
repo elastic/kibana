@@ -43,9 +43,12 @@ export interface LinksStartDependencies {
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
 }
 
-export class LinksPlugin
-  implements Plugin<void, void, LinksSetupDependencies, LinksStartDependencies>
-{
+export class LinksPlugin implements Plugin<
+  void,
+  void,
+  LinksSetupDependencies,
+  LinksStartDependencies
+> {
   constructor() {}
 
   public setup(core: CoreSetup<LinksStartDependencies>, plugins: LinksSetupDependencies) {
@@ -118,7 +121,7 @@ export class LinksPlugin
                 const { getLinksClient } = await import('./links_client');
                 return await getLinksClient().search(request);
               },
-            } as VisualizationClient<typeof LINKS_LIBRARY_TYPE, StoredLinksState>),
+            }) as VisualizationClient<typeof LINKS_LIBRARY_TYPE, StoredLinksState>,
           toListItem(
             linkItem: Omit<SOWithMetadata<StoredLinksState>, 'attributes'> & {
               attributes: { title: string; description?: string }; // make title and description required

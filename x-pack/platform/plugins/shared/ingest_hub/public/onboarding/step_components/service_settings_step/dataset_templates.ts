@@ -27,7 +27,7 @@ function offersTemplatesSwitch(service: AwsServiceMatrixEntry, vars: ServiceVars
     const dsVars = vars?.varsByDataStream[dsId];
     const inputs =
       dsVars?.enabledInputs ??
-      (dsView.defaultEnabledInputs?.length ? dsView.defaultEnabledInputs : dsView.inputs ?? []);
+      (dsView.defaultEnabledInputs?.length ? dsView.defaultEnabledInputs : (dsView.inputs ?? []));
     return inputs.some((input) =>
       offersDatasetTemplates(dsView, input, dsVars?.varsByInput[input])
     );

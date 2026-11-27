@@ -134,9 +134,10 @@ const mergeInto =
         ...absorbed.flatMap(({ references }) =>
           (references ?? []).filter(({ relation }) => relation === 'derived_from')
         ),
-        ...absorbed.map(
-          ({ id }): DreamedKiReference => ({ uri: kiUri(id), relation: 'supersedes' })
-        ),
+        ...absorbed.map(({ id }): DreamedKiReference => ({
+          uri: kiUri(id),
+          relation: 'supersedes',
+        })),
       ]),
     };
   };
@@ -301,13 +302,11 @@ export const resolveMaintenanceChanges = (
       tombstones: absorbed.map(({ id }) => id),
       changes: [
         { id: survivor.id, change: 'merged', reason },
-        ...absorbed.map(
-          ({ id }): MaintenanceChange => ({
-            id,
-            change: 'superseded',
-            reason: `Merged into ${survivor.id}: ${reason}`,
-          })
-        ),
+        ...absorbed.map(({ id }): MaintenanceChange => ({
+          id,
+          change: 'superseded',
+          reason: `Merged into ${survivor.id}: ${reason}`,
+        })),
       ],
     };
     groups.push(group);

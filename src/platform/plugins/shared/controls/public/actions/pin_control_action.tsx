@@ -42,11 +42,11 @@ type PinnableControlApi = HasType &
 const compatibilityCheck = (api: unknown | null): api is PinnableControlApi =>
   Boolean(
     apiHasType(api) &&
-      apiHasUniqueId(api) &&
-      apiCanBePinned(api) &&
-      apiCanAccessViewMode(api) &&
-      apiHasParentApi(api) &&
-      apiCanPinPanels(api.parentApi)
+    apiHasUniqueId(api) &&
+    apiCanBePinned(api) &&
+    apiCanAccessViewMode(api) &&
+    apiHasParentApi(api) &&
+    apiCanPinPanels(api.parentApi)
   );
 
 export class PinControlAction

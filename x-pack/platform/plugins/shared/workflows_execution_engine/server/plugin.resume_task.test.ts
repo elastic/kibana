@@ -682,7 +682,7 @@ describe('workflow:resume task runner event fields', () => {
         retryAt: null,
         status: TaskStatus.Running,
         ownerId: 'kibana-instance-id',
-      } as ConcreteTaskInstance);
+      }) as ConcreteTaskInstance;
 
     const createRunnerFor = (taskType: string, workflowRunId: string, id: string) =>
       taskDefinitions[taskType]!.createTaskRunner(
@@ -951,19 +951,21 @@ describe('workflow:resume task runner event fields', () => {
         state: Record<string, unknown>,
         withScopedRequest: jest.Mock
       ) =>
-        taskDefinitions[WORKFLOW_RESUME_TASK_TYPE].createTaskRunner(
-          taskManagerMock.createRunContext({
-            taskInstance: {
-              ...taskManagerMock.createTask(),
-              id: getWorkflowImmediateResumeTaskId(workflowRunId),
-              attempts,
-              state,
-              params: { workflowRunId, spaceId: 'default' },
-            },
-            fakeRequest: undefined,
-            runAs: { withScopedRequest },
-          })
-        ).run();
+        taskDefinitions[WORKFLOW_RESUME_TASK_TYPE]
+          .createTaskRunner(
+            taskManagerMock.createRunContext({
+              taskInstance: {
+                ...taskManagerMock.createTask(),
+                id: getWorkflowImmediateResumeTaskId(workflowRunId),
+                attempts,
+                state,
+                params: { workflowRunId, spaceId: 'default' },
+              },
+              fakeRequest: undefined,
+              runAs: { withScopedRequest },
+            })
+          )
+          .run();
 
       const deferred = await claim(
         2,

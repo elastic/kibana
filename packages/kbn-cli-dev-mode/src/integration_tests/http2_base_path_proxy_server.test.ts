@@ -39,7 +39,8 @@ describe('Http2BasePathProxyServer', () => {
 
     config = {
       protocol: 'http2',
-      host: '127.0.0.1',
+      // must match a SAN in the test cert; http2-wrapper verifies the session origin against it
+      host: 'localhost',
       port: 10012,
       shutdownTimeout: moment.duration(30, 'seconds'),
       keepaliveTimeout: 1000,
@@ -79,7 +80,7 @@ describe('Http2BasePathProxyServer', () => {
     } else {
       basePath = proxyServer.basePath;
     }
-    proxySupertest = supertest(`https://127.0.0.1:${proxyConfig.port}`, { http2: true });
+    proxySupertest = supertest(`https://localhost:${proxyConfig.port}`, { http2: true });
   });
 
   afterEach(async () => {

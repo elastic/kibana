@@ -7,10 +7,18 @@
 
 import type { FilterValue } from '../../../../../common/filter_values';
 import type { OverviewFilterOptions } from '../../../../../common/overview_filters';
-import { countSelectedValues, limitFilters, visibleFilters } from './overview_filters';
+import {
+  countSelectedValues,
+  groupFilterPills,
+  limitFilters,
+  visibleFilters,
+} from './overview_filters';
 
 const include = (...values: string[]): FilterValue[] =>
   values.map((value) => ({ value, exclude: false }));
+
+const exclude = (...values: string[]): FilterValue[] =>
+  values.map((value) => ({ value, exclude: true }));
 
 const NAMES = ['browser', 'os', 'appVersion', 'country', 'pageUrl'] as const;
 
@@ -91,5 +99,45 @@ describe('countSelectedValues', () => {
       countSelectedValues({ browser: include('Chrome', 'Firefox'), device: include('iPhone') })
     ).toBe(3);
     expect(countSelectedValues({})).toBe(0);
+  });
+});
+
+describe('groupFilterPills', () => {
+  it('gives a filter one pill for all its values', () => {
+    expect(groupFilterPills({ browser: include('Chrome', 'Edge', 'Safari') })).toEqual([
+      { name: 'browser', exclude: false, values: ['Chrome', 'Edge', 'Safari'] },
+    ]);
+  });
+
+  it('keeps the included and the excluded values of a filter on pills of their own', () => {
+    expect(
+      groupFilterPills({ browser: [...exclude('Safari'), ...include('Chrome', 'Edge')] })
+    ).toEqual([
+      { name: 'browser', exclude: false, values: ['Chrome', 'Edge'] },
+      { name: 'browser', exclude: true, values: ['Safari'] },
+    ]);
+  });
+
+  it('follows the order of the filters, and skips those with no value', () => {
+    expect(
+      groupFilterPills({ pageUrl: include('/cart'), os: exclude('Linux'), browser: [] })
+    ).toEqual([
+      { name: 'os', exclude: true, values: ['Linux'] },
+      { name: 'pageUrl', exclude: false, values: ['/cart'] },
+    ]);
+  });
+
+  it('gives none while no filter has a value', () => {
+    expect(groupFilterPills({})).toEqual([]);
+  });
+
+  it('gives each value a pill of its own when split', () => {
+    expect(
+      groupFilterPills({ browser: [...include('Chrome', 'Edge'), ...exclude('Safari')] }, true)
+    ).toEqual([
+      { name: 'browser', exclude: false, values: ['Chrome'] },
+      { name: 'browser', exclude: false, values: ['Edge'] },
+      { name: 'browser', exclude: true, values: ['Safari'] },
+    ]);
   });
 });

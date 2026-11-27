@@ -14,6 +14,7 @@ import {
   clearESQLSourceInfoCache,
   ESQL_SOURCE_INFO_CACHE_TTL,
   getESQLAdHocDataviewId,
+  type ESQLSourceInfoColumn,
 } from '@kbn/esql-utils';
 import { EsqlSource } from './esql_source';
 
@@ -555,7 +556,7 @@ describe('EsqlSource', () => {
       (http.post as jest.Mock).mock.calls.map((call) => call[0] as string);
 
     const createHttp = (overrides?: {
-      sourceInfo?: { columns: Array<{ name: string; esType: string }> };
+      sourceInfo?: { columns: Array<ESQLSourceInfoColumn> };
       timeField?: string;
       sourceInfoError?: Error;
     }): HttpStart => {
@@ -614,6 +615,30 @@ describe('EsqlSource', () => {
       expect(source.getColumns()).toEqual([
         { name: 'avg_bytes', type: 'number', esType: 'double', source: 'esql-result' },
       ]);
+    });
+
+    it('keeps the column metadata of the LIMIT 0 schema as esMeta', async () => {
+      const bucket = { interval: 1000 };
+      const http = createHttp({
+        timeField: '@timestamp',
+        sourceInfo: {
+          columns: [
+            { name: 'count', esType: 'long' },
+            { name: 'b', esType: 'double', columnMeta: { bucket } },
+          ],
+        },
+      });
+
+      const source = await EsqlSource.create({
+        query:
+          'FROM logs-http-bucket-* | STATS count = COUNT(*) BY b = BUCKET(bytes, 20, 0, 20000)',
+        http,
+        timeFieldName: '@timestamp',
+      });
+
+      const [countColumn, bucketColumn] = source.resultColumns;
+      expect(countColumn.meta.esMeta).toBeUndefined();
+      expect(bucketColumn.meta.esMeta).toEqual({ bucket });
     });
 
     it('skips source_info when resultColumns is already provided', async () => {
@@ -734,7 +759,7 @@ describe('EsqlSource', () => {
         post: jest.fn(async (path: string) =>
           path === TIMEFIELD_ROUTE ? { timeField: '@timestamp' } : { columns: [] }
         ),
-      } as unknown as HttpStart);
+      }) as unknown as HttpStart;
 
     it('skips the time field request when set to false', async () => {
       const http = createHttp();
@@ -799,7 +824,7 @@ describe('EsqlSource', () => {
         post: jest.fn(async (path: string) =>
           path === TIMEFIELD_ROUTE ? { timeField: '@timestamp' } : { columns: [] }
         ),
-      } as unknown as HttpStart);
+      }) as unknown as HttpStart;
 
     it('resolves the time field without requesting the schema', async () => {
       const http = createHttp();
@@ -884,7 +909,7 @@ describe('EsqlSource', () => {
                 ],
               }
         ),
-      } as unknown as HttpStart);
+      }) as unknown as HttpStart;
 
     const bodyPostedTo = (http: HttpStart, route: string) =>
       JSON.parse(
@@ -928,7 +953,7 @@ describe('EsqlSource', () => {
           const { query } = JSON.parse(body) as { query: string };
           return { columns: (schemas[query] ?? []).map((name) => ({ name, esType: 'keyword' })) };
         }),
-      } as unknown as HttpStart);
+      }) as unknown as HttpStart;
 
     const names = (columns: ReadonlyArray<{ name: string }>) => columns.map(({ name }) => name);
 

@@ -18,7 +18,7 @@ const state = (overrides: Partial<DashboardState> = {}): DashboardState =>
     description: 'Overview',
     panels: [],
     ...overrides,
-  } as DashboardState);
+  }) as DashboardState;
 
 const getComparators = async () => undefined;
 
@@ -28,7 +28,7 @@ const testPanel = (overrides: Record<string, unknown> = {}) =>
     grid: { x: 0, y: 0, w: 12, h: 8 },
     config: { title: 'Count' },
     ...overrides,
-  } as DashboardPanel);
+  }) as DashboardPanel;
 
 const pinnedPanel = (title = 'Host', id?: string) =>
   getControlsSchema().parse({

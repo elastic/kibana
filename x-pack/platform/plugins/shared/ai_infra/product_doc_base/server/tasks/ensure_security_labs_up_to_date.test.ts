@@ -47,7 +47,7 @@ describe('EnsureSecurityLabsUpToDate task', () => {
           logger,
           taskManager: taskManagerStart,
           packageInstaller: { ensureSecurityLabsUpToDate, getRepositoryVersion },
-        } as unknown as InternalServices),
+        }) as unknown as InternalServices,
     });
     const definition =
       taskManager.registerTaskDefinitions.mock.calls[0][0][

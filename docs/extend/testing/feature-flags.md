@@ -26,7 +26,7 @@ Use `apiServices.core.settings()` to toggle feature flags while the server is ru
 ::::::{note}
 Feature flag overrides are **server-wide**: they apply to the entire Kibana instance, not to a single space or worker. In [parallel suites](./parallelism.md) all workers share the same server, so a flag set by one worker is visible to every other worker. For parallel tests, enable flags in the **[global setup hook](./global-setup-hook.md)** so they are set once before any worker starts.
 
-The `@kbn/eslint/scout_no_core_settings_in_space_test` ESLint rule warns when `apiServices.core.settings(...)` is called inside `spaceTest` scope (directly, in `spaceTest.describe`/`beforeAll`/`afterAll`/`step`, etc.), since that scope runs in parallel across spaces sharing the same server.
+The `@kbn/eslint/scout_no_core_settings_in_space_test` lint rule warns when `apiServices.core.settings(...)` is called inside `spaceTest` scope (directly, in `spaceTest.describe`/`beforeAll`/`afterAll`/`step`, etc.), since that scope runs in parallel across spaces sharing the same server.
 ::::::
 
 Scout CI lanes run multiple Playwright configs against the same Kibana and Elasticsearch servers. A feature-flag override left behind by one config can affect tests in the next. Always restore the expected configuration in teardown.
@@ -73,21 +73,26 @@ For sequential suites you can enable flags in `beforeAll` and reset them in `aft
 import { tags } from '@kbn/scout';
 import { test } from '../fixtures';
 
-test.describe('Browse integration', { tag: tags.stateful.classic }, () => {
+test.describe('Fleet OTLP output', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ apiServices }) => {
     await apiServices.core.settings({
-      'xpack.fleet.experimentalFeatures': { newBrowseIntegrationUx: true },
+      'feature_flags.overrides': {
+        'fleet.enableOtlpOutput': true,
+      },
     });
   });
 
   test.afterAll(async ({ apiServices }) => {
     await apiServices.core.settings({
-      'xpack.fleet.experimentalFeatures': { newBrowseIntegrationUx: false },
+      'feature_flags.overrides': {
+        'fleet.enableOtlpOutput': false,
+      },
     });
   });
 
-  test('loads the page', async ({ pageObjects, browserAuth }) => {
-    await browserAuth.loginAsPrivilegedUser();
+  test('can create an OTLP output', async ({ page, browserAuth }) => {
+    await browserAuth.loginAsAdmin();
+    await page.gotoApp('fleet');
     // ...
   });
 });

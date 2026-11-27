@@ -60,7 +60,7 @@ describe('wikiOptimizeStepDefinition', () => {
       abortSignal: new AbortController().signal,
       stepId: 'optimize_wiki',
       stepType: 'nightshift.wikiOptimize',
-    } as never);
+    }) as never;
 
   it('optimizes with the request-scoped ES client', async () => {
     const definition = wikiOptimizeStepDefinition({

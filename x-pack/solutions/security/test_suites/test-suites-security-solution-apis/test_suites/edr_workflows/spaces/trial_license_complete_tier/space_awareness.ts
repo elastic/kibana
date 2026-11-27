@@ -58,6 +58,9 @@ Loading endpoint data into space_b`);
 
       log.info(`Done with loading of endpoint data into space_b`);
 
+      // Loading space_b recreates the transforms that back united metadata for both spaces.
+      await endpointTestresources.ensureUnitedMetadata([dataSpaceA, dataSpaceB]);
+
       log.verbose(
         `mocked data loaded:\nSPACE A:\n${JSON.stringify(
           dataSpaceA,

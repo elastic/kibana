@@ -18,7 +18,7 @@ const buildConfig = (timeout?: string): PluginConfig =>
         timeout,
       },
     },
-  } as PluginConfig);
+  }) as PluginConfig;
 
 describe('RuleExecutorTaskDefinition', () => {
   describe('resolveTimeout', () => {

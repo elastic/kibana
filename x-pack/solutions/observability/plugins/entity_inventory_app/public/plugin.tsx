@@ -25,15 +25,12 @@ import type {
 import { ENTITY_INVENTORY_APP_NAME } from './application/constants';
 import { ENTITY_INVENTORY_PAGES, ENTITY_INVENTORY_TITLE } from './pages';
 
-export class EntityInventoryAppPlugin
-  implements
-    Plugin<
-      EntityInventoryAppPublicSetup,
-      EntityInventoryAppPublicStart,
-      EntityInventoryAppSetupDependencies,
-      EntityInventoryAppStartDependencies
-    >
-{
+export class EntityInventoryAppPlugin implements Plugin<
+  EntityInventoryAppPublicSetup,
+  EntityInventoryAppPublicStart,
+  EntityInventoryAppSetupDependencies,
+  EntityInventoryAppStartDependencies
+> {
   constructor(
     private readonly initializerContext: PluginInitializerContext<EntityInventoryAppPublicConfig>
   ) {}

@@ -17,22 +17,99 @@ export interface TracesCharts {
   readonly expectedTitles: readonly string[];
   getChartTitle(title: string): Locator;
   getChartError(title: string): Locator;
+  readonly latencyMapToggle: Locator;
+  readonly healthMetricsToggle: Locator;
+  readonly latencyMap: Locator;
+  readonly latencyMapLayer: Locator;
+  readonly latencyMapLegend: Locator;
+  readonly latencyMapSelectionBar: Locator;
+  readonly latencyMapClearSelection: Locator;
+  readonly latencyMapDurationGroups: Locator;
+  /** The details of the cell under the pointer: its bounds and counts. */
+  readonly latencyMapCellDetails: Locator;
+  /** One entry of the suggestions dropdown, by the operation's name. */
+  latencyMapSuggestion(name: string): Locator;
+  readonly latencyMapOperationBadge: Locator;
+  /** The nth entry of the duration-groups dropdown. */
+  latencyMapDurationGroup(n: number): Locator;
+  /** The nth duration band marker right of the plot. */
+  latencyMapBand(n: number): Locator;
+  /** Moves the pointer over the map, which calibrates its geometry as any real use does. */
+  hoverLatencyMap(at?: { x: number; y: number }): Promise<void>;
+  /** Waits until the map has drawn its cells and takes pointer input. */
+  waitForLatencyMapReady(): Promise<void>;
+  /** Draws a selection by dragging between two fractions of the map's plot area. */
+  dragLatencyMapSelection(
+    from?: { x: number; y: number },
+    to?: { x: number; y: number }
+  ): Promise<void>;
+  /** Clicks one cell of the map, at a fraction of the plot area. */
+  clickLatencyMapCell(at?: { x: number; y: number }): Promise<void>;
 }
 
 export function createTracesCharts(page: ScoutPage): TracesCharts {
   const redMetricsCharts = page.testSubj.locator('metricsExperienceGrid');
+  const latencyMapLayer = page.testSubj.locator('traceLatencyMapLayer');
+
+  const layerPoint = async (fraction: { x: number; y: number }) => {
+    const box = await latencyMapLayer.boundingBox();
+    if (!box) throw new Error('The latency map layer is not visible');
+    return { x: box.x + box.width * fraction.x, y: box.y + box.height * fraction.y };
+  };
 
   return {
     redMetricsCharts,
     legendItems: redMetricsCharts.locator('[data-testid="echLegendItemLabel"]'),
     expectedTitles: RED_METRICS_CHART_TITLES,
-    getChartTitle: (title: string): Locator => redMetricsCharts.getByText(title),
+    // Exact: "Latency" must not match the "Latency map" view toggle in the same grid.
+    getChartTitle: (title: string): Locator => redMetricsCharts.getByText(title, { exact: true }),
     getChartError: (title: string): Locator => {
       const headingTestSubj = `embeddablePanelHeading-${title.replace(/\s/g, '')}`;
       return redMetricsCharts
         .locator('[data-test-subj="embeddablePanel"]')
         .filter({ has: page.testSubj.locator(headingTestSubj) })
         .locator('[data-test-subj="embeddable-lens-failure"]');
+    },
+    latencyMapToggle: page.testSubj.locator('tracesLatencyMapToggle'),
+    healthMetricsToggle: page.testSubj.locator('tracesHealthMetricsToggle'),
+    latencyMap: page.testSubj.locator('traceLatencyMap'),
+    latencyMapLayer,
+    latencyMapLegend: page.testSubj.locator('traceLatencyMapLegend'),
+    latencyMapSelectionBar: page.testSubj.locator('traceLatencyMapSelectionBar'),
+    latencyMapClearSelection: page.testSubj.locator('traceLatencyMapClearSelection'),
+    latencyMapDurationGroups: page.testSubj.locator('traceLatencyMapDurationGroups'),
+    latencyMapCellDetails: page.testSubj.locator('traceLatencyMapCellDetails'),
+    latencyMapSuggestion: (name: string) =>
+      page.testSubj.locator('traceLatencyMapSuggestions').getByText(name),
+    latencyMapOperationBadge: page.testSubj.locator('traceLatencyMapOperationBadge'),
+    latencyMapDurationGroup: (n: number) =>
+      page.testSubj.locator(`traceLatencyMapDurationGroup-${n}`),
+    latencyMapBand: (n: number) => page.testSubj.locator(`traceLatencyMapBand-${n}`),
+    hoverLatencyMap: async (at = { x: 0.5, y: 0.5 }) => {
+      const box = await latencyMapLayer.boundingBox();
+      if (!box) throw new Error('The latency map layer is not visible');
+      const point = { x: box.x + box.width * at.x, y: box.y + box.height * at.y };
+      // From outside the chart, in steps: the chart reads the pointer from its moves, and
+      // a pointer already sitting on the point would not move.
+      await page.mouse.move(box.x - 10, box.y - 10);
+      await page.mouse.move(point.x, point.y, { steps: 5 });
+    },
+    waitForLatencyMapReady: async () => {
+      await latencyMapLayer.waitFor({ state: 'visible' });
+      await page.testSubj.locator('traceLatencyMapLoading').waitFor({ state: 'hidden' });
+    },
+    dragLatencyMapSelection: async (from = { x: 0.25, y: 0.25 }, to = { x: 0.75, y: 0.75 }) => {
+      const start = await layerPoint(from);
+      const end = await layerPoint(to);
+      await page.mouse.move(start.x, start.y);
+      await page.mouse.down();
+      // In steps, so the overlay sees the drag grow rather than one jump.
+      await page.mouse.move(end.x, end.y, { steps: 10 });
+      await page.mouse.up();
+    },
+    clickLatencyMapCell: async (at = { x: 0.5, y: 0.5 }) => {
+      const point = await layerPoint(at);
+      await page.mouse.click(point.x, point.y);
     },
   };
 }

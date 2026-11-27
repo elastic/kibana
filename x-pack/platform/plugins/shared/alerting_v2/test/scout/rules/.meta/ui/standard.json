@@ -1,5 +1,5 @@
 {
-  "sha1": "fc648410f80a2473d85a4bdfa7eb9b56c695b479",
+  "sha1": "9a04add2525c6ab8cebd0f1b2043d0db61b59b19",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -472,6 +472,22 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rules_list_privileges.spec.ts",
         "line": 33,
         "column": 76
+      }
+    },
+    {
+      "id": "c02b7b7d60f470f-7204bf1e8048b10",
+      "title": "Rules list - sticky app header keeps the page heading pinned while the rules list scrolls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rules_list_sticky_header.spec.ts",
+        "line": 53,
+        "column": 69
       }
     },
     {

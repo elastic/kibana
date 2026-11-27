@@ -22,15 +22,12 @@ import type {
   StartDeps,
 } from './types';
 
-export class ExpressionPartitionVisPlugin
-  implements
-    Plugin<
-      ExpressionPartitionVisPluginSetup,
-      ExpressionPartitionVisPluginStart,
-      SetupDeps,
-      StartDeps
-    >
-{
+export class ExpressionPartitionVisPlugin implements Plugin<
+  ExpressionPartitionVisPluginSetup,
+  ExpressionPartitionVisPluginStart,
+  SetupDeps,
+  StartDeps
+> {
   public setup(core: CoreSetup, { expressions }: SetupDeps) {
     expressions.registerFunction(partitionLabelsFunction);
     expressions.registerFunction(pieVisFunction);

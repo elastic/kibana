@@ -66,7 +66,7 @@ const createMockLogger = (): Logger =>
     error: jest.fn(),
     info: jest.fn(),
     warn: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 const createDeferred = <T>() => {
   let resolve: (value: T) => void = () => {};
@@ -253,6 +253,98 @@ describe('executeDashboardUpsert', () => {
 
     expect(result.failures).toEqual([]);
     expect(result.dashboardData.description).toBe('');
+  });
+
+  describe('dashboard settings', () => {
+    const dashboardWithSettings: DashboardAttachmentData = {
+      title: 'Title',
+      panels: [],
+      options: { use_margins: false, sync_cursor: false },
+    };
+
+    it('merges options over the existing options', async () => {
+      const result = await executeDashboardUpsert({
+        dashboardData: dashboardWithSettings,
+        upsert: { options: { hide_panel_borders: true, sync_cursor: true } },
+        logger,
+      });
+
+      expect(result.failures).toEqual([]);
+      expect(result.dashboardData.options).toEqual({
+        use_margins: false,
+        sync_cursor: true,
+        hide_panel_borders: true,
+      });
+    });
+
+    it('sets options on a dashboard without options', async () => {
+      const result = await executeDashboardUpsert({
+        dashboardData: { title: 'Title', panels: [] },
+        upsert: { options: { hide_panel_titles: true } },
+        logger,
+      });
+
+      expect(result.failures).toEqual([]);
+      expect(result.dashboardData.options).toEqual({ hide_panel_titles: true });
+    });
+
+    it('leaves a dashboard without options unchanged when the call sets no option', async () => {
+      const dashboardData: DashboardAttachmentData = { title: 'Title', panels: [] };
+
+      const result = await executeDashboardUpsert({
+        dashboardData,
+        upsert: { options: {} },
+        logger,
+      });
+
+      expect(result.dashboardData).toEqual(dashboardData);
+    });
+
+    it('keeps the settings a call leaves out', async () => {
+      const result = await executeDashboardUpsert({
+        dashboardData: dashboardWithSettings,
+        upsert: { title: 'Renamed' },
+        logger,
+      });
+
+      expect(result.dashboardData).toEqual({ ...dashboardWithSettings, title: 'Renamed' });
+    });
+
+    it.each([
+      [
+        'turns tooltip sync off with cursor sync',
+        { sync_cursor: true, sync_tooltips: true },
+        { sync_cursor: false },
+        { sync_cursor: false, sync_tooltips: false },
+      ],
+      [
+        'keeps tooltip sync off while cursor sync stays off',
+        { sync_cursor: false },
+        { sync_tooltips: true },
+        { sync_cursor: false, sync_tooltips: false },
+      ],
+      [
+        'turns off tooltip sync stored without cursor sync on any options change',
+        { sync_cursor: false, sync_tooltips: true },
+        { hide_panel_titles: true },
+        { sync_cursor: false, sync_tooltips: false, hide_panel_titles: true },
+      ],
+      [
+        'turns tooltip sync on while cursor sync is on by default',
+        {},
+        { sync_tooltips: true },
+        { sync_tooltips: true },
+      ],
+    ])('%s', async (_, storedOptions, requestedOptions, expectedOptions) => {
+      const result = await executeDashboardUpsert({
+        dashboardData: { title: 'Title', panels: [], options: storedOptions },
+        upsert: { options: requestedOptions },
+        logger,
+      });
+
+      expect(result.failures).toEqual([]);
+      expect(result.dashboardData.options).toEqual(expectedOptions);
+    });
   });
 
   it('starts from an empty dashboard when no dashboard data is given', async () => {
@@ -1830,8 +1922,8 @@ describe('executeDashboardUpsert', () => {
               type === 'custom_content'
                 ? CUSTOM_CONTENT_EMBEDDABLE_TYPE
                 : type === 'vega'
-                ? VEGA_VIS_TYPE
-                : LENS_EMBEDDABLE_TYPE,
+                  ? VEGA_VIS_TYPE
+                  : LENS_EMBEDDABLE_TYPE,
             config: { updated: true },
           })
         );
@@ -2603,6 +2695,14 @@ describe('executeDashboardUpsert', () => {
       });
 
       expect(result.success).toBe(false);
+    });
+
+    it('keeps an unknown options key for the validator', () => {
+      const result = upsertDashboardSchema.parse({
+        options: { hide_borders: true, hide_panel_titles: true },
+      });
+
+      expect(result.options).toEqual({ hide_borders: true, hide_panel_titles: true });
     });
   });
 });

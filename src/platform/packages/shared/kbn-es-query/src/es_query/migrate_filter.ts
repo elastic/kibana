@@ -27,8 +27,8 @@ function isDeprecatedMatchPhraseFilter(filter: Filter): filter is DeprecatedMatc
   const fieldName = Object.keys((filter.match || filter.query?.match) ?? {})[0];
   return Boolean(
     fieldName &&
-      (get(filter, ['query', 'match', fieldName, 'type']) === 'phrase' ||
-        get(filter, ['match', fieldName, 'type']) === 'phrase')
+    (get(filter, ['query', 'match', fieldName, 'type']) === 'phrase' ||
+      get(filter, ['match', fieldName, 'type']) === 'phrase')
   );
 }
 

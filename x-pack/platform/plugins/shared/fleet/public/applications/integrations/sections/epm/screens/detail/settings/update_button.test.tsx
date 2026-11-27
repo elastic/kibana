@@ -259,7 +259,7 @@ describe('UpdateButton agent version incompatibility', () => {
       hasErrors: false,
       diff: [{ id, name: `${id}-name` }, {}],
       ...(block ? { agent_version_block: block } : {}),
-    } as never);
+    }) as never;
 
   beforeEach(() => {
     jest.clearAllMocks();

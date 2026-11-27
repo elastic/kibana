@@ -65,7 +65,7 @@ const mockedGetAvailability = jest.mocked(getProvisioningCallbackAvailability);
 const buildContext = () =>
   ({
     fleet: Promise.resolve({ internalSoClient: {} }),
-  } as any);
+  }) as any;
 
 const buildRequest = (body: Record<string, unknown>) =>
   httpServerMock.createKibanaRequest({ body });
@@ -470,6 +470,11 @@ const mockedAppContext = jest.mocked(appContextService);
 const PAYLOAD = {
   role_arn: 'arn:aws:iam::123456789012:role/ElasticWorkloadIdentity-abc',
   stack_arn: 'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic/uuid-1',
+  origin_proof: {
+    region: 'us-east-1',
+    headers: { Authorization: 'AWS4-HMAC-SHA256 ...', 'x-elastic-callback-id': 'cb-1' },
+    body: 'Action=GetCallerIdentity&Version=2011-06-15',
+  },
 };
 
 const ITEM: CloudConnectorCallback = {
@@ -483,7 +488,7 @@ const ITEM: CloudConnectorCallback = {
 };
 
 const realmUser = () =>
-  ({ username: 'elastic', authentication_type: 'realm' } as unknown as AuthenticatedUser);
+  ({ username: 'elastic', authentication_type: 'realm' }) as unknown as AuthenticatedUser;
 
 const buildCallbackContext = (spaceId = 'default') =>
   ({
@@ -491,7 +496,7 @@ const buildCallbackContext = (spaceId = 'default') =>
       spaceId,
       internalSoClient: {},
     }),
-  } as any);
+  }) as any;
 
 describe('Provisioning callback handlers', () => {
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
@@ -851,6 +856,24 @@ describe('Provisioning callback handlers', () => {
       mockedService.receive.mockResolvedValue({ outcome: 'invalid', message: 'mismatch' });
       await receive(withToken);
       expect(response.badRequest).toHaveBeenCalledWith({ body: { message: 'mismatch' } });
+    });
+
+    it('answers 401 without the reason when the proof of the sending account does not verify, and logs the reason', async () => {
+      const logger = loggingSystemMock.createLogger();
+      mockedAppContext.getLogger.mockReturnValue(logger);
+      mockedService.receive.mockResolvedValue({
+        outcome: 'unverified',
+        reason: 'account_mismatch',
+      });
+
+      await receive(withToken);
+
+      expect(response.unauthorized).toHaveBeenCalledWith({
+        body: { message: 'The report was not signed from the account of what it reports' },
+      });
+      expect(loggingSystemMock.collect(logger).info).toEqual([
+        ['Provisioning callback report [id=cb-1] outcome=unverified reason=account_mismatch'],
+      ]);
     });
   });
 });

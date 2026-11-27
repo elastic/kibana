@@ -154,9 +154,8 @@ export class VegaPlugin implements Plugin<void, void> {
     setUsageCollectionStart(deps.usageCollection);
 
     deps.uiActions.registerActionAsync(ADD_VEGA_EMBEDDABLE_ACTION_ID, async () => {
-      const { getAddVegaEmbeddableAction } = await import(
-        './embeddable/add_vega_embeddable_action'
-      );
+      const { getAddVegaEmbeddableAction } =
+        await import('./embeddable/add_vega_embeddable_action');
       return getAddVegaEmbeddableAction(core);
     });
     deps.uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_VEGA_EMBEDDABLE_ACTION_ID);

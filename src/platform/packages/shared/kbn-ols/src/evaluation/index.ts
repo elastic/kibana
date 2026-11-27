@@ -10,9 +10,11 @@
 export {
   evaluateAcl,
   generalAccessPermits,
+  getOperationsAtAccess,
   isRestricted,
   toObjectDecision,
   type AclDecision,
   type AclObjectDecision,
   type EvaluateAclParams,
 } from './evaluate_acl';
+export { ObjectAccessError, type ObjectAccessErrorCode } from './object_access_error';

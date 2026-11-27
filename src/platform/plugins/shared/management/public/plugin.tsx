@@ -68,15 +68,12 @@ interface ManagementStartDependencies {
   cps?: CPSPluginStart;
 }
 
-export class ManagementPlugin
-  implements
-    Plugin<
-      ManagementSetup,
-      ManagementStart,
-      ManagementSetupDependencies,
-      ManagementStartDependencies
-    >
-{
+export class ManagementPlugin implements Plugin<
+  ManagementSetup,
+  ManagementStart,
+  ManagementSetupDependencies,
+  ManagementStartDependencies
+> {
   private readonly managementSections = new ManagementSectionsService();
 
   /** Latest `visibleIn$` emission per app; takes precedence over the registered `visibleIn`. */
