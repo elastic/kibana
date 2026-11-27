@@ -15,6 +15,7 @@ import { isAutomationWorkflowMissing } from '../../lib/automations/is_automation
 import { automationCompletionSchema } from '../../lib/automations/schemas';
 import { validateScheduledAutomation } from '../../lib/automations/validate_scheduled_automation';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
+import { assertValidWorkflowYaml, invalidWorkflowMessage } from './assert_valid_workflow_yaml';
 
 export const repairAutomationRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'POST /internal/nightshift/automations/{id}/repair',
@@ -76,30 +77,15 @@ export const repairAutomationRoute = createNightshiftInvestigationsServerRoute({
       updatedAt: new Date().toISOString(),
     };
     validateScheduledAutomation(automation);
-    const replacement = await workflows.management.createWorkflow(
-      {
-        yaml: generateWorkflowYaml({
-          automationId: id,
-          automation,
-          serviceAccountId,
-          universalAlerts: isUniversalAlertingAvailable(),
-        }),
-      },
-      spaceId,
-      request
-    );
-    try {
-      await soClient.update<NightshiftAutomationAttributes>(
-        NIGHTSHIFT_AUTOMATION_SO_TYPE,
-        id,
-        {
-          workflowId: replacement.id,
-          isEnabled: false,
-          updatedAt: automation.updatedAt,
-        },
-        { version: existing.version }
-      );
-    } catch (error) {
+    const yaml = generateWorkflowYaml({
+      automationId: id,
+      automation,
+      serviceAccountId,
+      universalAlerts: isUniversalAlertingAvailable(),
+    });
+    await assertValidWorkflowYaml({ management: workflows.management, yaml, spaceId, request });
+    const replacement = await workflows.management.createWorkflow({ yaml }, spaceId, request);
+    const removeReplacement = async () => {
       try {
         const result = await workflows.management.deleteWorkflows(
           [replacement.id],
@@ -112,6 +98,24 @@ export const repairAutomationRoute = createNightshiftInvestigationsServerRoute({
           `Could not remove disabled replacement ${replacement.id} for automation ${id} in space ${spaceId}`
         );
       }
+    };
+    if (!replacement.valid) {
+      await removeReplacement();
+      throw badRequest(invalidWorkflowMessage());
+    }
+    try {
+      await soClient.update<NightshiftAutomationAttributes>(
+        NIGHTSHIFT_AUTOMATION_SO_TYPE,
+        id,
+        {
+          workflowId: replacement.id,
+          isEnabled: false,
+          updatedAt: automation.updatedAt,
+        },
+        { version: existing.version }
+      );
+    } catch (error) {
+      await removeReplacement();
       throw error;
     }
     return { id, ...automation, workflowId: replacement.id };

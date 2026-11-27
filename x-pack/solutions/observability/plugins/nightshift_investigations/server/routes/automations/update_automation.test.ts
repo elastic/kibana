@@ -17,7 +17,10 @@ const { handler, params } = updateAutomationRoute['PUT /internal/nightshift/auto
 const soClient = { get: jest.fn(), update: jest.fn() };
 const getAutomationsSoClient = jest.fn().mockReturnValue(soClient);
 const updateWorkflow = jest.fn();
-const getWorkflowsManagement = jest.fn().mockReturnValue({ management: { updateWorkflow } });
+const validateWorkflow = jest.fn();
+const getWorkflowsManagement = jest
+  .fn()
+  .mockReturnValue({ management: { updateWorkflow, validateWorkflow } });
 
 const existing = {
   name: 'Triage',
@@ -53,7 +56,9 @@ beforeEach(() => {
   jest.resetAllMocks();
   checkChannelBound.mockResolvedValue(true);
   getAutomationsSoClient.mockReturnValue(soClient);
-  getWorkflowsManagement.mockReturnValue({ management: { updateWorkflow } });
+  getWorkflowsManagement.mockReturnValue({ management: { updateWorkflow, validateWorkflow } });
+  validateWorkflow.mockResolvedValue({ valid: true, diagnostics: [] });
+  updateWorkflow.mockResolvedValue({ valid: true, validationErrors: [] });
   serviceAccountService = createServiceAccountService();
   soClient.get.mockResolvedValue({ attributes: existing });
 });
@@ -314,6 +319,36 @@ it('rejects clearing instructions on a saved scheduled automation', async () => 
   });
   expect(updateWorkflow).not.toHaveBeenCalled();
   expect(soClient.update).not.toHaveBeenCalled();
+});
+
+it('rejects an invalid workflow before writing it and keeps the automation', async () => {
+  validateWorkflow.mockResolvedValue({
+    valid: false,
+    diagnostics: [
+      { severity: 'error', message: 'bad liquid' },
+      { severity: 'warning', message: 'just a warning' },
+    ],
+  });
+  await expect(call({ name: 'Changed' })).rejects.toMatchObject({
+    message: 'The automation workflow is not valid: bad liquid.',
+    output: { statusCode: 400 },
+  });
+  expect(updateWorkflow).not.toHaveBeenCalled();
+  expect(soClient.update).not.toHaveBeenCalled();
+});
+
+it('does not turn a failing validation lookup into a client error', async () => {
+  const lookupError = new Error('es down');
+  validateWorkflow.mockRejectedValue(lookupError);
+  await expect(call({ name: 'Changed' })).rejects.toBe(lookupError);
+  expect(updateWorkflow).not.toHaveBeenCalled();
+});
+
+it('pauses an automation whose backing workflow is already invalid', async () => {
+  updateWorkflow.mockResolvedValue({ valid: false, validationErrors: ['already invalid'] });
+  await call({ isEnabled: false });
+  expect(validateWorkflow).not.toHaveBeenCalled();
+  expect(soClient.update).toHaveBeenCalled();
 });
 
 it('disables a scheduled automation through the normal workflow update', async () => {

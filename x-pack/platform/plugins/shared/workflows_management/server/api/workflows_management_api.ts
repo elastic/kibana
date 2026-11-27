@@ -1940,17 +1940,22 @@ export class WorkflowsManagementApi {
 
   /**
    * Backs `POST /api/workflows/validate`, which reports and does not gate. Set `isManaged` only
-   * for the stored YAML of a managed workflow; the route never sets it.
+   * for the stored YAML of a managed workflow; the route never sets it. Set both include flags to
+   * false to apply only the checks that saving enforces.
    */
   public async validateWorkflow(
     yaml: string,
     spaceId: string,
     request: KibanaRequest,
-    { isManaged = false }: { isManaged?: boolean } = {}
+    {
+      isManaged = false,
+      includeVariableRules = true,
+      includeEsqlRules = true,
+    }: { isManaged?: boolean; includeVariableRules?: boolean; includeEsqlRules?: boolean } = {}
   ): Promise<ValidateWorkflowResponseDto> {
     return this.workflowsService.validateWorkflow(yaml, spaceId, request, {
-      includeVariableRules: true,
-      includeEsqlRules: true,
+      includeVariableRules,
+      includeEsqlRules,
       isManaged,
     });
   }

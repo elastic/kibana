@@ -22,6 +22,7 @@ import { isElasticAppSlackChannelCompletion } from '../../lib/automations/slack_
 import { validateSlackChannelsBound } from '../../lib/automations/validate_slack_channels_bound';
 import { validateThreadCompletion } from '../../lib/automations/validate_thread_completion';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
+import { assertValidWorkflowYaml } from './assert_valid_workflow_yaml';
 import { triggerRowSchema } from './trigger_row_schema';
 
 const applyChanges = <T extends object>(
@@ -144,22 +145,30 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
 
     // Update the workflow first — if it fails, the SO is left unchanged so reads stay consistent.
     if (existing.attributes.workflowId) {
+      const { workflowId } = existing.attributes;
+      const { management } = workflowsManagement;
+      let yaml: string | undefined;
       try {
-        await workflowsManagement.management.updateWorkflow(
-          existing.attributes.workflowId,
-          pauseOnly
-            ? { enabled: false }
-            : {
-                yaml: generateWorkflowYaml({
-                  automationId: params.path.id,
-                  automation: merged,
-                  serviceAccountId,
-                  universalAlerts: isUniversalAlertingAvailable(),
-                }),
-              },
+        yaml = pauseOnly
+          ? undefined
+          : generateWorkflowYaml({
+              automationId: params.path.id,
+              automation: merged,
+              serviceAccountId,
+              universalAlerts: isUniversalAlertingAvailable(),
+            });
+      } catch (err) {
+        throw badRequest(`Failed to update backing workflow: ${err.message}`);
+      }
+      if (yaml) await assertValidWorkflowYaml({ management, yaml, spaceId, request });
+      try {
+        const result = await management.updateWorkflow(
+          workflowId,
+          yaml ? { yaml } : { enabled: false },
           spaceId,
           request
         );
+        if (yaml && !result.valid) throw new Error(result.validationErrors.join(', '));
       } catch (err) {
         if (err instanceof WorkflowNotFoundError) {
           if (!pauseOnly) {

@@ -17,8 +17,10 @@ const { handler, params } = createAutomationRoute['POST /internal/nightshift/aut
 const soClient = { create: jest.fn(), update: jest.fn(), delete: jest.fn() };
 const getAutomationsSoClient = jest.fn().mockReturnValue(soClient);
 const createWorkflow = jest.fn();
+const deleteWorkflows = jest.fn();
+const validateWorkflow = jest.fn();
 const getWorkflowsManagement = jest.fn().mockReturnValue({
-  management: { createWorkflow, deleteWorkflows: jest.fn() },
+  management: { createWorkflow, deleteWorkflows, validateWorkflow },
 });
 
 const body = {
@@ -53,7 +55,10 @@ beforeEach(() => {
   registeredChecker = checkChannelBound;
   serviceAccountService = createServiceAccountService();
   soClient.create.mockResolvedValue({ id: 'automation-1' });
-  createWorkflow.mockResolvedValue({ id: 'workflow-1' });
+  soClient.delete.mockResolvedValue(undefined);
+  createWorkflow.mockResolvedValue({ id: 'workflow-1', valid: true });
+  deleteWorkflows.mockResolvedValue({ failures: [] });
+  validateWorkflow.mockResolvedValue({ valid: true, diagnostics: [] });
 });
 
 it('creates a disabled automation by default', async () => {
@@ -118,6 +123,47 @@ it('removes the automation when the workflow cannot be created', async () => {
 
   await expect(call()).rejects.toThrow('Failed to create backing workflow: invalid yaml');
   expect(soClient.delete).toHaveBeenCalledWith('nightshift-automation', 'automation-1');
+});
+
+it('rejects an invalid workflow before creating it and removes the automation', async () => {
+  validateWorkflow.mockResolvedValue({
+    valid: false,
+    diagnostics: [{ severity: 'error', message: 'bad liquid' }],
+  });
+
+  await expect(call()).rejects.toMatchObject({
+    message: 'The automation workflow is not valid: bad liquid.',
+    output: { statusCode: 400 },
+  });
+  expect(createWorkflow).not.toHaveBeenCalled();
+  expect(soClient.delete).toHaveBeenCalledWith('nightshift-automation', 'automation-1');
+});
+
+it('keeps the validation 400 when removing the automation fails', async () => {
+  validateWorkflow.mockResolvedValue({
+    valid: false,
+    diagnostics: [{ severity: 'error', message: 'bad liquid' }],
+  });
+  soClient.delete.mockRejectedValue(new Error('so down'));
+
+  await expect(call()).rejects.toMatchObject({ output: { statusCode: 400 } });
+});
+
+it('removes the automation and the stored workflow when the workflow is invalid', async () => {
+  createWorkflow.mockResolvedValue({ id: 'workflow-1', valid: false });
+
+  await expect(call()).rejects.toMatchObject({ output: { statusCode: 400 } });
+  expect(soClient.delete).toHaveBeenCalledWith('nightshift-automation', 'automation-1');
+  expect(deleteWorkflows).toHaveBeenCalledWith(['workflow-1'], 'default', expect.anything());
+  expect(soClient.update).not.toHaveBeenCalled();
+});
+
+it('still rejects with 400 when cleanup of an invalid workflow throws', async () => {
+  createWorkflow.mockResolvedValue({ id: 'workflow-1', valid: false });
+  soClient.delete.mockRejectedValue(new Error('so down'));
+  deleteWorkflows.mockRejectedValue(new Error('workflows down'));
+
+  await expect(call()).rejects.toMatchObject({ output: { statusCode: 400 } });
 });
 
 describe('request validation', () => {
