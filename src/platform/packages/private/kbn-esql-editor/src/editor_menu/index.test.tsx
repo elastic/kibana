@@ -25,6 +25,9 @@ jest.mock('./help_popover', () => {
         'data-test-subj': 'esql-help-popover-button',
         'data-hide-recommended': String(Boolean(props.hideRecommendedQueries)),
       }),
+    HelpMenuContent: () =>
+      ReactActual.createElement('div', { 'data-test-subj': 'esql-help-menu-content' }),
+    HelpDocsFlyout: () => null,
   };
 });
 
@@ -68,6 +71,43 @@ describe('ESQLMenu', () => {
 
   afterEach(() => {
     localStorage.clear();
+  });
+
+  describe('when collapseActions is set', () => {
+    it('keeps only the first three actions inline and moves the rest under an ellipsis button', async () => {
+      await renderMenu(
+        { collapseActions: true, onPrettifyQuery: jest.fn(), enableCreateView: true },
+        { currentQuery: 'FROM logs-*' }
+      );
+
+      expect(screen.getByTestId('ESQLEditor-toggleWordWrap')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Create view' })).toBeInTheDocument();
+      expect(screen.queryByTestId('ESQLEditor-toggle-starred-query-icon')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ESQLEditor-toggle-query-history-icon')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('esql-help-popover-button')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('ESQLEditor-more-actions'));
+
+      const panel = await screen.findByTestId('ESQLEditor-more-actions-panel');
+      expect(within(panel).getByTestId('ESQLEditor-toggle-starred-query-icon')).toBeInTheDocument();
+      expect(within(panel).getByTestId('ESQLEditor-toggle-query-history-icon')).toBeInTheDocument();
+      expect(screen.queryByTestId('esql-help-menu-content')).not.toBeInTheDocument();
+
+      // help is nested: it opens as its own panel inside the same menu
+      fireEvent.click(within(panel).getByTestId('esql-help-popover-button'));
+      expect(await screen.findByTestId('esql-help-menu-content')).toBeInTheDocument();
+    });
+
+    it('does not render the ellipsis button when everything fits', async () => {
+      await renderMenu({ collapseActions: true, hideHistory: true });
+      expect(screen.queryByTestId('ESQLEditor-more-actions')).not.toBeInTheDocument();
+    });
+  });
+
+  it('does not collapse actions by default', async () => {
+    await renderMenu();
+    expect(screen.queryByTestId('ESQLEditor-more-actions')).not.toBeInTheDocument();
+    expect(screen.getByTestId('ESQLEditor-toggle-query-history-icon')).toBeInTheDocument();
   });
 
   it('does not render the visor (search) button by default when the editor is not inline', async () => {

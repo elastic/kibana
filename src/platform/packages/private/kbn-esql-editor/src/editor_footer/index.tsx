@@ -47,6 +47,8 @@ interface EditorFooterProps {
   resizableContainerHeight: number;
   editorIsInline?: boolean;
   isSpaceReduced?: boolean;
+  /** Moves all but the first few footer actions under an ellipsis button (narrow containers) */
+  collapseMenuActions?: boolean;
   displayDocumentationAsFlyout?: boolean;
   dataErrorsControl?: DataErrorsControl;
   starredQueriesService: EsqlStarredQueriesService | null;
@@ -66,6 +68,7 @@ export const EditorFooter = memo(function EditorFooter({
   onPrettifyQuery,
   editorIsInline,
   isSpaceReduced,
+  collapseMenuActions,
   resizableContainerButton,
   resizableContainerHeight,
   isHistoryOpen,
@@ -153,6 +156,7 @@ export const EditorFooter = memo(function EditorFooter({
                 onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
                 onPrettifyQuery={onPrettifyQuery}
                 enableCreateView={enableCreateView}
+                collapseActions={collapseMenuActions}
               />
               {displayDocumentationAsFlyout && (
                 <>
