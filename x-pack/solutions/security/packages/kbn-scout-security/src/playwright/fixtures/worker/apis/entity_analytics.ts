@@ -35,6 +35,7 @@ export type IndexEntityStoreEntryOptions = (
 ) & {
   /** Writes a risk score and a first seen time of now, as risk scoring and extraction would. */
   risk?: EntityStoreEntryRisk;
+  resolvedTo?: string;
 };
 
 export interface EntityAnalyticsApiService {
@@ -159,7 +160,10 @@ export const getEntityAnalyticsApiService = ({
           const entityNamespace =
             options.entityType === 'user' ? { namespace: options.namespace } : {};
           const now = new Date().toISOString();
-          const { risk } = options;
+          const { risk, resolvedTo } = options;
+          const entityResolution = resolvedTo
+            ? { relationships: { resolution: { resolved_to: resolvedTo } } }
+            : {};
           const entityRisk = risk
             ? {
                 lifecycle: { first_seen: now },
@@ -179,6 +183,7 @@ export const getEntityAnalyticsApiService = ({
                 name: entityName,
                 ...entityNamespace,
                 ...entityRisk,
+                ...entityResolution,
                 EngineMetadata: { Type: entityType },
               },
               ...entityFields,

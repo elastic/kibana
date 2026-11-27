@@ -34,6 +34,24 @@ export class EntityAnalyticsHomePage {
       .filter({ has: this.page.getByText(entityName, { exact: true }) });
   }
 
+  /** The chevron of a resolved row that has records to list; rows of one record have none. */
+  expandToggle(entityName: string): Locator {
+    return this.gridRow(entityName).locator('[data-test-subj="eaGridExpandToggle"]');
+  }
+
+  /** Groups the grid by a field, e.g. `entity.EngineMetadata.Type` for Entity type. */
+  async groupBy(field: string): Promise<void> {
+    await this.page.testSubj.click('group-selector-dropdown');
+    await this.page.testSubj.click(`panel-${field}`);
+  }
+
+  /** The header of a group-by bucket, by its label. */
+  groupBucket(label: string): Locator {
+    return this.page.testSubj
+      .locator('group-panel-toggle')
+      .filter({ hasText: new RegExp(`^${label}$`, 'i') });
+  }
+
   /** Clicks a tile and waits for it to report the new filter state. */
   async toggleTile(id: string, { selected }: { selected: boolean }): Promise<void> {
     const tile = this.tile(id);
