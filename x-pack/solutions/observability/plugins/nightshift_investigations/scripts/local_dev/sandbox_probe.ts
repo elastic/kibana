@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { readFileSync } from 'fs';
 import * as grpc from '@grpc/grpc-js';
 import type { SandboxConnection } from './secrets';
 
@@ -19,9 +20,15 @@ export const probeSandboxCredential = ({
   host,
   port,
   apiKey,
+  certificateAuthorities,
 }: SandboxConnection): Promise<SandboxProbeResult> =>
   new Promise((resolve) => {
-    const client = new grpc.Client(`${host}:${port}`, grpc.credentials.createSsl());
+    const client = new grpc.Client(
+      `${host}:${port}`,
+      grpc.credentials.createSsl(
+        certificateAuthorities ? readFileSync(certificateAuthorities) : undefined
+      )
+    );
     const metadata = new grpc.Metadata();
     metadata.set('authorization', `ApiKey ${apiKey}`);
     client.makeUnaryRequest(

@@ -52,3 +52,15 @@ export const ORCA_SANDBOX_ALLOWED_HOSTS: readonly string[] = ['github.com'];
 
 export const MANAGED_BLOCK_START = '# >>> nightshift local-dev (managed by setup_local_dev.js) >>>';
 export const MANAGED_BLOCK_END = '# <<< nightshift local-dev (managed by setup_local_dev.js) <<<';
+
+/**
+ * River sessions hold no real credential. Kibana calls sandbox-api at its real host through the River
+ * daemon's HTTPS proxy (`grpc_proxy`), trusting the proxy's CA, and River's control plane attaches
+ * the real sandbox-api key and substitutes the ORCA key for its placeholder on the way out. The
+ * address must match what River's `RIVER_SANDBOX_API_ADDRESS` lists.
+ */
+/** Placeholders River replaces. Neither grants anything inside the session. */
+export const RIVER_SANDBOX_API_KEY_PLACEHOLDER = 'river-relay';
+export const RIVER_ORCA_KEY_PLACEHOLDER = 'river-secret:orca-es';
+/** The ORCA cluster, for River mode, which cannot read the evals secret that names it. */
+export const ORCA_URL = 'https://nightshift-orca.es.us-west2.gcp.elastic-cloud.com:443';

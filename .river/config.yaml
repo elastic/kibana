@@ -1,3 +1,10 @@
+# Pulled into the prepared image during the River bake, which holds the registry
+# credential only for the pull. Sessions have no registry credential, so
+# `pnpm es serverless` uses these local copies (see maybePullDockerImage).
+images:
+  - docker.elastic.co/kibana-ci/elasticsearch-serverless:latest-verified
+  - docker.elastic.co/kibana-ci/uiam:latest-verified
+  - docker.elastic.co/kibana-ci/uiam-azure-cosmos-emulator:latest-verified
 services:
   elasticsearch:
     # Services can't declare dependency ordering, so wait for bootstrap to link
