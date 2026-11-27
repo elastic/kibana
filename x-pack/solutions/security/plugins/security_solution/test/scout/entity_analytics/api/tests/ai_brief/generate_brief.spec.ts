@@ -29,7 +29,7 @@ import {
   buildScope,
   ensureLatestEntitiesIndex,
   getBriefResult,
-  getBriefTemplate,
+  getBriefViewModel,
   getSubmitBriefRequests,
   mockBriefRound,
   type BriefToolResult,
@@ -55,11 +55,15 @@ apiTest.describe(
     let spaceConnectorId: string;
     let spaceLlmProxy: LlmProxy;
 
-    /** The brief tool's result, the HTML it posted to the conversation, and the agent's reply. */
+    /** The brief tool's result, captured data, and agent reply. */
     const askForBrief = async (
       apiClient: ApiClientFixture,
       scope: EntityAnalyticsScope
-    ): Promise<{ result: BriefToolResult; template: string; reply: string }> => {
+    ): Promise<{
+      result: BriefToolResult;
+      viewModel: ReturnType<typeof getBriefViewModel>;
+      reply: string;
+    }> => {
       const response = await apiClient.post<ConverseResponseBody>('api/agent_builder/converse', {
         headers,
         responseType: 'json',
@@ -75,7 +79,7 @@ apiTest.describe(
       );
       return {
         result: getBriefResult(response.body),
-        template: getBriefTemplate(conversation.body),
+        viewModel: getBriefViewModel(conversation.body),
         reply: response.body.response.message,
       };
     };
@@ -144,7 +148,7 @@ apiTest.describe(
     apiTest('posts a brief with one priority from the tile entities', async ({ apiClient }) => {
       mockBriefRound(llmProxy, buildDraft(SEEDED_USER_ID));
 
-      const { result, template, reply } = await askForBrief(
+      const { result, viewModel, reply } = await askForBrief(
         apiClient,
         buildScope(
           {
@@ -178,14 +182,16 @@ apiTest.describe(
       expect(reply).toContain(result.brief_tag);
       expect(reply).toContain(result.entity_table_tag);
 
-      // The conversation holds the brief as an inline visualization.
-      expect(template).toContain(SEEDED_USER_ID);
-      expect(template).toContain('+3');
-      expect(template).toContain('No comparison');
-      // An unavailable count has nothing to say, so it gets no tile.
-      expect(template).not.toContain('<div class="count-label">Entities with anomalies');
-      expect(template).toContain('Entities with anomalies (data couldn&#39;t be loaded)');
-      expect(template).toContain(`Start with ${SEEDED_USER_ID}.`);
+      expect(viewModel.priorities[0].entityId).toBe(SEEDED_USER_ID);
+      expect(viewModel.counts.find(({ tileId }) => tileId === 'entitiesWithAlerts')).toMatchObject({
+        value: 14,
+        delta: 3,
+      });
+      expect(
+        viewModel.counts.find(({ tileId }) => tileId === 'entitiesWithAnomalies')
+      ).toBeUndefined();
+      expect(viewModel.notChecked.unreadable).toContain('Entities with anomalies');
+      expect(viewModel.recommendation).toBe(`Start with ${SEEDED_USER_ID}.`);
 
       const submitRequests = getSubmitBriefRequests(llmProxy);
       expect(submitRequests).toHaveLength(1);
@@ -200,7 +206,7 @@ apiTest.describe(
       async ({ apiClient }) => {
         mockBriefRound(llmProxy);
 
-        const { result, template } = await askForBrief(
+        const { result, viewModel } = await askForBrief(
           apiClient,
           buildScope({
             entitiesWithAlerts: {
@@ -216,10 +222,8 @@ apiTest.describe(
 
         expect(getSubmitBriefRequests(llmProxy)).toHaveLength(0);
         expect(result.entity_table_tag).toBeUndefined();
-        expect(template).toContain('Nothing in this view is flagged');
-        // The summary states it, so the brief has no Priorities section repeating it.
-        expect(template).not.toContain('No entity in this view has enough evidence to prioritize');
-        expect(template).not.toContain('<h2>Entities to investigate first</h2>');
+        expect(viewModel.summary).toBe('Nothing in this view is flagged as needing attention.');
+        expect(viewModel.priorities).toHaveLength(0);
       }
     );
 
@@ -250,7 +254,7 @@ apiTest.describe(
       const [submitRequest] = getSubmitBriefRequests(spaceLlmProxy);
       expect(submitRequest).toContain(SPACE_USER_ID);
       expect(submitRequest).not.toContain(SEEDED_USER_ID);
-      const template = getBriefTemplate(
+      const viewModel = getBriefViewModel(
         (
           await apiClient.get<Conversation>(
             `s/${SPACE_ID}/api/agent_builder/conversations/${response.body.conversation_id}`,
@@ -258,8 +262,8 @@ apiTest.describe(
           )
         ).body
       );
-      expect(template).toContain(SPACE_USER_ID);
-      expect(template).not.toContain(SEEDED_USER_ID);
+      expect(viewModel.priorities.map(({ entityId }) => entityId)).toContain(SPACE_USER_ID);
+      expect(viewModel.priorities.map(({ entityId }) => entityId)).not.toContain(SEEDED_USER_ID);
     });
   }
 );

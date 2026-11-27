@@ -80,8 +80,6 @@ describe('createGenerateBriefTool', () => {
     const run = async (ml?: MlPluginSetup) => {
       mockCheckPrivileges.mockResolvedValueOnce({ hasAllRequested: true });
       generateBriefMock.mockResolvedValueOnce({
-        html: '<p></p>',
-        height: 300,
         viewModel: { summary: 'Summary.', priorities: [] },
         priorityCount: 0,
       } as unknown as Awaited<ReturnType<typeof generateBrief>>);
@@ -99,6 +97,13 @@ describe('createGenerateBriefTool', () => {
         attachmentId: 'view',
         scope: { period: '7d', capturedAt: '2026-10-14T12:00:00.000Z', tiles: {} },
       }).handler({}, context);
+      expect(context.attachments.add).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'security.entity_analytics_ai_brief_result',
+          data: { summary: 'Summary.', priorities: [] },
+          readonly: true,
+        })
+      );
       return { context, jobService: generateBriefMock.mock.calls[0][0].jobService };
     };
     const mlWith = (jobsSummary: jest.Mock) =>
