@@ -373,6 +373,8 @@
       "@kbn/config-mocks/*": ["./src/platform/packages/private/kbn-config-mocks/*"],
       "@kbn/config-schema": ["./src/platform/packages/shared/kbn-config-schema"],
       "@kbn/config-schema/*": ["./src/platform/packages/shared/kbn-config-schema/*"],
+      "@kbn/connector-catalog-epr-plugin": ["./x-pack/platform/plugins/shared/connector_catalog_epr"],
+      "@kbn/connector-catalog-epr-plugin/*": ["./x-pack/platform/plugins/shared/connector_catalog_epr/*"],
       "@kbn/connector-cli": ["./src/platform/packages/shared/kbn-connector-cli"],
       "@kbn/connector-cli/*": ["./src/platform/packages/shared/kbn-connector-cli/*"],
       "@kbn/connector-emulate": ["./src/platform/packages/shared/kbn-connector-emulate"],

@@ -1010,6 +1010,9 @@ importers:
       '@kbn/config-schema':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-config-schema
+      '@kbn/connector-catalog-epr-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/shared/connector_catalog_epr
       '@kbn/connector-events-bridge-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/connector_events_bridge
@@ -9553,6 +9556,8 @@ importers:
   x-pack/platform/plugins/shared/cloud: {}
 
   x-pack/platform/plugins/shared/cloud_connect: {}
+
+  x-pack/platform/plugins/shared/connector_catalog_epr: {}
 
   x-pack/platform/plugins/shared/connector_events_bridge: {}
 
