@@ -23,6 +23,8 @@ describe('createInvestigationIocsAttachmentType', () => {
     ],
     ips: [{ value: '185.220.101.42:443', comment: 'TLS, contacted from WKSTN-RECV01' }],
     file_paths: [{ value: 'C:\\Users\\Public\\update.dll' }],
+    registry_keys: [{ value: 'HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\\Updater' }],
+    mutex: [{ value: 'Global\\AcmeRansom-7F3A', comment: 'created by svc.exe on SRV-DC01' }],
     ransom_note: [{ value: 'C:\\Users\\Public\\Desktop\\README_RESTORE.txt' }],
     encryption_marker: [{ value: '.locked', comment: 'e.g. ntds.dit.locked' }],
     malicious_commands: [{ value: 'vssadmin delete shadows /all /quiet' }],
@@ -89,6 +91,8 @@ describe('createInvestigationIocsAttachmentType', () => {
         expect(representation.value).toContain('SHA256:');
         expect(representation.value).toContain('IP addresses:');
         expect(representation.value).toContain('File paths:');
+        expect(representation.value).toContain('Registry keys:');
+        expect(representation.value).toContain('Mutexes:');
         expect(representation.value).toContain('Malicious command lines:');
         expect(representation.value).toContain('Ransom notes:');
         expect(representation.value).toContain('Encryption markers:');
@@ -136,6 +140,8 @@ describe('createInvestigationIocsAttachmentType', () => {
     it('documents every category and forbids normalizing the values', () => {
       const description = attachmentType.getAgentDescription?.();
       expect(description).toContain('compromised_identities');
+      expect(description).toContain('registry_keys');
+      expect(description).toContain('mutex');
       expect(description).toContain('encryption_marker');
       expect(description).toContain('never widen, defang, or normalize');
     });

@@ -17,6 +17,8 @@ export const INVESTIGATION_IOC_CATEGORIES = [
   'shas',
   'ips',
   'file_paths',
+  'registry_keys',
+  'mutex',
   'malicious_commands',
   'ransom_note',
   'encryption_marker',
