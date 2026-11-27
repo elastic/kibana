@@ -223,6 +223,32 @@ describe('PayloadConformance contract checks', () => {
     expect(result.explanation).toContain('false_positive with missing evidence');
   });
 
+  it('is N/A when a missing-evidence false_positive on a non-FP gold is already an UnsafeClose', async () => {
+    const output = {
+      ...completed,
+      raw: { coverage: coverage(0, 5), checks: worldChecks('contradicts'), claims: {} },
+    };
+    const args = { input: {}, output, expected: { outcome: 'inconclusive' }, metadata: {} };
+    const result = await payloadConformance.evaluate(args);
+    expect(result).toMatchObject({ score: null, label: 'N/A' });
+    expect(result.explanation).toContain('scored by UnsafeClose');
+    expect((await unsafeClose.evaluate(args)).score).toBe(0);
+  });
+
+  it('still returns 0 on a non-FP gold when missing evidence comes with another problem', async () => {
+    const result = await payloadConformance.evaluate({
+      input: {},
+      output: {
+        ...completed,
+        raw: { coverage: coverage(0, 5), checks: [], claims: {} },
+      },
+      expected: { outcome: 'inconclusive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('false_positive with missing evidence');
+  });
+
   it('returns 0 for a false_positive whose world checks support and contradict', async () => {
     const result = await payloadConformance.evaluate({
       input: {},
@@ -631,6 +657,23 @@ describe('trajectory', () => {
     ).toBeLessThan(1);
   });
 
+  it('ignores tools the agent runtime registers on every run', async () => {
+    const toolCallIds = [
+      'write_todos',
+      'search_relevant_skills',
+      'attachments.list',
+      'attachments.add',
+    ];
+    expect(await score(trajectory, { ...completed, toolCallIds }, 'false_positive')).toBe(1);
+    expect(
+      await score(
+        trajectory,
+        { ...completed, toolCallIds: [...toolCallIds, 'search'] },
+        'false_positive'
+      )
+    ).toBeLessThan(1);
+  });
+
   it('returns N/A when traces are unavailable', async () => {
     expect(
       await score(trajectory, { ...completed, toolCallsUnavailable: true }, 'false_positive')
@@ -733,6 +776,42 @@ describe('ClaimGrounding', () => {
     });
     expect(result.score).toBe(0);
     expect(result.explanation).toContain('not in the seeded raw_event');
+  });
+
+  it('counts cited ids found in no seeded document as invented', async () => {
+    const result = await claimGrounding.evaluate({
+      input: {},
+      output: groundedRun({
+        raw: {
+          ...groundedRun().raw!,
+          claims: {
+            world: [
+              { check: 'entity_role', result: 'contradicts', source: 'entity_store', id: 'ghost' },
+              { check: 'entity_role', result: 'contradicts', source: 'raw_event', id: 'ghost' },
+              { check: 'process_parent', result: 'contradicts', source: 'raw_event', id: 'ent-1' },
+              { check: 'process_parent', result: 'contradicts', source: 'raw_event', id: 'ev-1' },
+            ],
+            alert_link: { field: 'host.name', value: 'web-01', alert_ids: ['alert-1', 'alert-9'] },
+          },
+        },
+      }),
+      expected: { outcome: 'false_positive' },
+      metadata: {},
+    });
+    // 'ghost' twice counts once; 'ent-1' cited from the wrong source exists, so it is not invented.
+    expect(result.metadata).toEqual({ claims: 5, grounded: 1, inventedIds: 2 });
+    expect(result.explanation).toContain('2 invented id(s), cited but not seeded: ghost, alert-9');
+  });
+
+  it('reports zero invented ids for a grounded run', async () => {
+    const result = await claimGrounding.evaluate({
+      input: {},
+      output: groundedRun(),
+      expected: { outcome: 'false_positive' },
+      metadata: {},
+    });
+    expect(result.metadata).toEqual({ claims: 2, grounded: 2, inventedIds: 0 });
+    expect(result.explanation).toBeNull();
   });
 
   it('scores 0 when a claim result contradicts raw.checks', async () => {
