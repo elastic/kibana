@@ -22,7 +22,11 @@ import {
   VIEW_CONTROLLER_SCOPE,
   resourceAttributeField,
 } from '../../../common/otel_data';
-import { MOBILE_MAX_CRASH_DELAY_HOURS, SESSIONS_MAX_SESSION_HOURS } from '../../../common/sessions';
+import {
+  MOBILE_MAX_CRASH_DELAY_HOURS,
+  MOBILE_MAX_OBSERVED_CRASH_AGE_DAYS,
+  SESSIONS_MAX_SESSION_HOURS,
+} from '../../../common/sessions';
 import { SESSION_ATTRIBUTE_FIELDS } from '../../../common/session_attribute_fields';
 import {
   NULLIFY_UNMAPPED_FIELDS,
@@ -99,12 +103,21 @@ const {
 export const MOBILE_REBUILD_HOURS = SESSIONS_MAX_SESSION_HOURS + MOBILE_MAX_CRASH_DELAY_HOURS;
 
 /**
+ * An observed time that is a crash's time: at most `MOBILE_MAX_OBSERVED_CRASH_AGE_DAYS` before it
+ * was sent, so not unset, e.g. an exporter's zero.
+ */
+const isObservedCrashTime = (observedTime: string) =>
+  `${observedTime} + ${MOBILE_MAX_OBSERVED_CRASH_AGE_DAYS} days >= @timestamp`;
+
+/**
  * A crash sent later than `MOBILE_MAX_CRASH_DELAY_HOURS`: its session's rebuild could start after its
- * other events, and the partial summary would replace the full one.
+ * other events, and the partial summary would replace the full one. A crash whose observed time is
+ * unset is kept, at the time it was sent.
  */
 const LATE_CRASH = `COALESCE(${OTEL_EVENT_NAME} IN (${texts(
   CRASH_EVENTS
-)}) AND TO_DATETIME(${OTEL_OBSERVED_TIMESTAMP}) < @timestamp - ${MOBILE_MAX_CRASH_DELAY_HOURS} hours, false)`;
+)}) AND TO_DATETIME(${OTEL_OBSERVED_TIMESTAMP}) < @timestamp - ${MOBILE_MAX_CRASH_DELAY_HOURS} hours
+  AND ${isObservedCrashTime(`TO_DATETIME(${OTEL_OBSERVED_TIMESTAMP})`)}, false)`;
 
 const SDK_LANGUAGE = resourceAttributeField(TELEMETRY_SDK_LANGUAGE);
 
@@ -139,7 +152,7 @@ const MOBILE_SESSION_STATS: Stat[] = [
  * One row per session of `sessionIds`, rebuilt from its events since `?rebuild_from`: its counts,
  * times and latest attributes. A crash counts at the time it happened, the earlier of its two
  * times: EDOT iOS sends it on the next launch with only its observed time set to the crash. An
- * observed time from before a crash can be sent late, e.g. an exporter's zero, is ignored.
+ * unset observed time, e.g. an exporter's zero, is ignored, as the Crashes tab ignores it.
  */
 export const mobileSessionSummaryQuery: SummaryQueryOf = (
   { changedTo, rebuildFrom },
@@ -158,7 +171,9 @@ ${mobileSessionEvents('rebuild_from', 'changed_to')}
        ${ATTRIBUTE_RANK},
        ${SEEN_EVALS.join(',\n       ')}
 | EVAL observed_time = TO_DATETIME(${OTEL_OBSERVED_TIMESTAMP})
-| EVAL event_time = CASE(is_crash AND observed_time + ${MOBILE_MAX_CRASH_DELAY_HOURS} hours >= @timestamp, LEAST(@timestamp, observed_time), @timestamp)
+| EVAL event_time = CASE(is_crash AND ${isObservedCrashTime(
+    'observed_time'
+  )}, LEAST(@timestamp, observed_time), @timestamp)
 | STATS ${renderStats(MOBILE_SESSION_STATS, '        ')}
   BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD}
 | EVAL ${ATTRIBUTE_EVALS.join(',\n       ')}
