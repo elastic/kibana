@@ -65,6 +65,11 @@ interface FieldDefinitionFlyoutProps {
   }) => void;
   onClose: () => void;
   isSaving?: boolean;
+  /**
+   * For surfaces that only manage global fields: the field is always global and the
+   * "Apply to all cases" setting is not offered.
+   */
+  isGlobalOnly?: boolean;
 }
 
 export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
@@ -73,13 +78,16 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
   onSave,
   onClose,
   isSaving = false,
+  isGlobalOnly = false,
 }) => {
   const isEditing = !!fieldDefinition;
   const flyoutTitleId = useGeneratedHtmlId();
 
   const [description, setDescription] = useState(fieldDefinition?.description ?? '');
   const [definition, setDefinition] = useState(fieldDefinition?.definition ?? EXAMPLE_FIELD_YAML);
-  const [isGlobal, setApplyToAllCases] = useState(fieldDefinition?.isGlobal ?? false);
+  const [isGlobal, setApplyToAllCases] = useState(
+    isGlobalOnly || (fieldDefinition?.isGlobal ?? false)
+  );
 
   const definitionRef = useRef(definition);
   definitionRef.current = definition;
@@ -264,15 +272,17 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
             />
           </EuiFormRow>
           <EuiSpacer size="m" />
-          <EuiToolTip content={i18n.APPLY_TO_ALL_CASES_HELP_TEXT}>
-            <EuiCheckbox
-              id="fieldDefinitionApplyToAllCases"
-              label={i18n.APPLY_TO_ALL_CASES_LABEL}
-              checked={isGlobal}
-              onChange={(e) => setApplyToAllCases(e.target.checked)}
-              data-test-subj="fieldDefinitionApplyToAllCasesCheckbox"
-            />
-          </EuiToolTip>
+          {isGlobalOnly ? null : (
+            <EuiToolTip content={i18n.APPLY_TO_ALL_CASES_HELP_TEXT}>
+              <EuiCheckbox
+                id="fieldDefinitionApplyToAllCases"
+                label={i18n.APPLY_TO_ALL_CASES_LABEL}
+                checked={isGlobal}
+                onChange={(e) => setApplyToAllCases(e.target.checked)}
+                data-test-subj="fieldDefinitionApplyToAllCasesCheckbox"
+              />
+            </EuiToolTip>
+          )}
           <EuiSpacer size="l" />
           <EuiFormRow
             label={i18n.FIELD_DEFINITION_YAML_LABEL}

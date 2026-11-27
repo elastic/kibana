@@ -80,6 +80,8 @@ import { registerCaseWorkflowTriggers } from './workflows/triggers';
 import { registerCasesWorkflowEventBridge } from './workflows/triggers/event_bridge';
 import { CasesWorkflowRunService } from './workflows/execution/service';
 import { initUiSettings } from './ui_settings';
+import { setupInvestigations } from './investigations';
+import type { InvestigationsSetup } from './investigations';
 
 export class CasePlugin implements Plugin<
   CasesServerSetup,
@@ -102,6 +104,7 @@ export class CasePlugin implements Plugin<
   private casesEventBus?: CasesEventBus;
   private readonly closeReasonValidators: Map<string, CloseReasonValidator> = new Map();
   private casesAnalyticsV2Service?: CasesAnalyticsV2Service;
+  private investigations?: InvestigationsSetup;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.caseConfig = initializerContext.config.get<ConfigType>();
@@ -258,9 +261,29 @@ export class CasePlugin implements Plugin<
         }
       : undefined;
 
+    this.investigations = this.caseConfig.investigations.enabled
+      ? setupInvestigations({
+          core,
+          config: this.caseConfig,
+          logger: this.logger,
+          getCasesClient: (request, options) => getCasesClient('agent_builder')(request, options),
+          getSpaceId,
+          agentBuilder: plugins.agentBuilder,
+          workflowRun:
+            workflowRunService && getWorkflowRunContext && plugins.workflowsManagement
+              ? {
+                  service: workflowRunService,
+                  management: plugins.workflowsManagement.management,
+                  getWorkflowRunContext,
+                }
+              : undefined,
+        })
+      : undefined;
+
     registerRoutes({
       router,
       routes: [
+        ...(this.investigations?.routes ?? []),
         ...getExternalRoutes({
           isServerless: this.isServerless,
           docLinks: core.docLinks,
@@ -338,7 +361,8 @@ export class CasePlugin implements Plugin<
           attachmentsEnabled: this.caseConfig.attachments?.enabled === true,
           templatesEnabled: this.caseConfig.templates?.enabled === true,
         },
-        this.logger
+        this.logger,
+        this.investigations
       );
     }
 
@@ -360,6 +384,7 @@ export class CasePlugin implements Plugin<
 
   public start(core: CoreStart, plugins: CasesServerStartDependencies): CasesServerStart {
     this.logger.debug(`Starting Case Workflow`);
+    void this.investigations?.start(core);
 
     if (plugins.taskManager) {
       scheduleCasesTelemetryTask(plugins.taskManager, this.logger);

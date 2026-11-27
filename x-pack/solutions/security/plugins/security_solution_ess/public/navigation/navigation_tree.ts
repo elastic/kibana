@@ -60,6 +60,10 @@ export const createNavigationTree = (
             icon: 'warning',
             link: securityLink(SecurityPageName.alerts),
           },
+      {
+        link: 'investigations' as AppDeepLinkId,
+        icon: 'folderOpen',
+      },
       ...getWorkflowsNavPanel(services),
       ...(!alertZeroEnabled && showAgentBuilder ? [agentBuilderLink] : []),
       ...(alertZeroEnabled || showAgentBuilder ? [contextEngineLink] : []),

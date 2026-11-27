@@ -1,0 +1,565 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useCallback, useMemo, useState } from 'react';
+import {
+  EuiBadge,
+  EuiButton,
+  EuiCallOut,
+  EuiContextMenu,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiPopover,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { css } from '@emotion/react';
+import type {
+  Actor,
+  InvestigationRecord,
+  RecordCounters,
+} from '../../../../common/investigations/types';
+import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
+import { getName } from '../../../components/user_profiles/display_name';
+import { RUN_WORKFLOW } from '../../../components/workflows/translations';
+import { useCanRunCaseWorkflow } from '../../../components/workflows/use_run_case_workflow';
+import { useInvestigationsNavigation, useRecord, useUpdateRecord } from '../../hooks';
+import { useInvestigationsServices } from '../../services';
+import { ICONS } from '../../icons';
+import { ActorAvatar, ActorBadge } from '../shared/actor_badge';
+import { VerdictBadge, getEffectiveVerdict } from '../shared/verdict_badge';
+import * as sharedI18n from '../shared/translations';
+import type { OpenModal } from '../modals/modal_props';
+import * as modalsI18n from '../modals/translations';
+import { useExternalTicketMenuItems } from '../external_ticket';
+import type { TicketMenuItem } from '../external_ticket';
+import { AgeCell } from '../queue/age_cell';
+import { AssigneesControl } from './assignees_control';
+import { PriorityControl } from './priority_control';
+import { StatusControl } from './status_control';
+import { EditableTitle, TagsControl } from './title_tags_controls';
+import * as i18n from './translations';
+
+const MAX_VISIBLE_PARTICIPANTS = 5;
+const SECURITY_APP_ID = 'securitySolutionUI';
+
+const getCasePath = (caseId: string): string => `/cases/${encodeURIComponent(caseId)}`;
+
+export interface ScopeSummary {
+  text: string;
+  suspected: string | null;
+}
+
+/**
+ * Hosts and identities in scope, from the record counters. Suspected entities are counted apart,
+ * taken from hosts first.
+ */
+export const getScopeSummary = (counters: RecordCounters): ScopeSummary => {
+  const suspected = counters.entities_suspected;
+  const totalHosts = counters.entities_by_type.host ?? 0;
+  const totalIdentities =
+    (counters.entities_by_type.user ?? 0) + (counters.entities_by_type.nhi ?? 0);
+  const suspectedHosts = Math.min(suspected, totalHosts);
+  const hosts = totalHosts - suspectedHosts;
+  const identities = Math.max(0, totalIdentities - (suspected - suspectedHosts));
+
+  const parts: string[] = [];
+  if (hosts > 0) parts.push(i18n.HOSTS(hosts));
+  if (identities > 0) parts.push(i18n.IDENTITIES(identities));
+
+  return {
+    text: parts.length > 0 ? parts.join(', ') : i18n.NOTHING_IN_SCOPE,
+    suspected: suspected > 0 ? i18n.SUSPECTED(suspected) : null,
+  };
+};
+
+const getParticipants = (record: InvestigationRecord): Actor[] => {
+  const seen = new Set<string>();
+  const all: Actor[] = [];
+  [...record.participants, ...(record.owner ? [record.owner] : [])].forEach((actor) => {
+    const key = `${actor.type}:${actor.id}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      all.push(actor);
+    }
+  });
+  return all;
+};
+
+const MetaItem: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
+  <EuiFlexItem grow={false}>
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs" color="subdued">
+          {label}
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{children}</EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlexItem>
+);
+MetaItem.displayName = 'MetaItem';
+
+const ParticipantsStack: React.FC<{ actors: Actor[] }> = ({ actors }) => {
+  const { euiTheme } = useEuiTheme();
+  const visible = actors.slice(0, MAX_VISIBLE_PARTICIPANTS);
+  const hidden = actors.length - visible.length;
+
+  return (
+    <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+      {visible.map((actor, index) => (
+        <EuiFlexItem
+          key={`${actor.type}:${actor.id}`}
+          grow={false}
+          css={css`
+            margin-inline-start: ${index === 0 ? 0 : `-${euiTheme.size.xs}`};
+            border-radius: 50%;
+            box-shadow: 0 0 0 ${euiTheme.border.width.thick} ${euiTheme.colors.emptyShade};
+          `}
+        >
+          <ActorAvatar actor={actor} />
+        </EuiFlexItem>
+      ))}
+      {hidden > 0 ? (
+        <EuiFlexItem grow={false}>
+          <EuiText
+            size="xs"
+            color="subdued"
+            css={css`
+              margin-inline-start: ${euiTheme.size.xs};
+            `}
+          >
+            {i18n.PARTICIPANTS_MORE(hidden)}
+          </EuiText>
+        </EuiFlexItem>
+      ) : null}
+    </EuiFlexGroup>
+  );
+};
+ParticipantsStack.displayName = 'ParticipantsStack';
+
+/** Shown on a record that was merged away: points to the primary investigation. */
+const MergedIntoCallout: React.FC<{ primaryId: string }> = ({ primaryId }) => {
+  const { getRecordPath, getHref, goToRecord } = useInvestigationsNavigation();
+  const { data } = useRecord(primaryId);
+  const displayId = data?.record.display_id;
+
+  return (
+    <EuiCallOut
+      size="s"
+      color="warning"
+      iconType={ICONS.merge}
+      title={
+        <EuiLink
+          href={getHref(getRecordPath(primaryId))}
+          onClick={(event: React.MouseEvent) => {
+            event.preventDefault();
+            goToRecord(primaryId);
+          }}
+          data-test-subj="investigationMergedIntoLink"
+        >
+          {displayId
+            ? modalsI18n.HEADER_MERGED_INTO(displayId)
+            : modalsI18n.HEADER_MERGED_INTO_UNKNOWN}
+        </EuiLink>
+      }
+      data-test-subj="investigationMergedIntoCallout"
+    >
+      {modalsI18n.HEADER_MERGED_BODY}
+    </EuiCallOut>
+  );
+};
+MergedIntoCallout.displayName = 'MergedIntoCallout';
+
+/** A lock badge on a restricted record, with its assignees. Click it to open the access settings. */
+const RestrictedBadge: React.FC<{ assigneeUids: string[]; onClick: () => void }> = ({
+  assigneeUids,
+  onClick,
+}) => {
+  const { data: profiles } = useBulkGetUserProfiles({ uids: assigneeUids });
+  const names = assigneeUids.map((uid) => getName(profiles?.get(uid)?.user));
+
+  return (
+    <EuiToolTip
+      title={modalsI18n.HEADER_RESTRICTED_TOOLTIP_TITLE}
+      content={
+        <ul data-test-subj="investigationRestrictedPeople">
+          {names.map((name, index) => (
+            <li key={assigneeUids[index]}>{name}</li>
+          ))}
+        </ul>
+      }
+    >
+      <EuiBadge
+        color="hollow"
+        iconType={ICONS.restricted}
+        onClick={onClick}
+        onClickAriaLabel={modalsI18n.HEADER_RESTRICTED_BADGE_ARIA(names.join(', '))}
+        data-test-subj="investigationRestrictedBadge"
+      >
+        {modalsI18n.HEADER_RESTRICTED_BADGE}
+      </EuiBadge>
+    </EuiToolTip>
+  );
+};
+RestrictedBadge.displayName = 'RestrictedBadge';
+
+interface ActionPanelsOptions {
+  hasDetermination: boolean;
+  hasType: boolean;
+  isClosed: boolean;
+  isMerged: boolean;
+  isRestricted: boolean;
+  canRunWorkflow: boolean;
+  ticketItems: TicketMenuItem[];
+  openModal: OpenModal;
+  openAsCase: () => void;
+  closeMenu: () => void;
+}
+
+/**
+ * The Take action menu. Memoized so a record refresh while the menu is open does not rebuild the
+ * menu items under the user's pointer.
+ */
+const useActionPanels = ({
+  hasDetermination,
+  hasType,
+  isClosed,
+  isMerged,
+  isRestricted,
+  canRunWorkflow,
+  ticketItems,
+  openModal,
+  openAsCase,
+  closeMenu,
+}: ActionPanelsOptions): EuiContextMenuPanelDescriptor[] =>
+  useMemo(() => {
+    const choose = (name: Parameters<OpenModal>[0]) => () => {
+      closeMenu();
+      openModal(name);
+    };
+
+    return [
+      {
+        id: 0,
+        title: i18n.ACTIONS_MENU_TITLE,
+        items: [
+          {
+            name: hasDetermination ? i18n.EDIT_DETERMINATION : i18n.SET_DETERMINATION,
+            icon: ICONS.verdict,
+            onClick: choose('determination'),
+            'data-test-subj': 'investigationActionDetermination',
+          },
+          {
+            name: i18n.OPEN_AS_CASE,
+            icon: ICONS.case,
+            onClick: () => {
+              closeMenu();
+              openAsCase();
+            },
+            'data-test-subj': 'investigationActionOpenAsCase',
+          },
+          {
+            name: i18n.GENERATE_REPORT,
+            icon: ICONS.report,
+            onClick: choose('report'),
+            'data-test-subj': 'investigationActionReport',
+          },
+          {
+            name: i18n.MERGE,
+            icon: ICONS.merge,
+            onClick: choose('merge'),
+            disabled: isMerged,
+            'data-test-subj': 'investigationActionMerge',
+          },
+          {
+            name: hasType ? i18n.CHANGE_TYPE : i18n.APPLY_TYPE,
+            icon: ICONS.template,
+            onClick: choose('changeType'),
+            disabled: isMerged,
+            'data-test-subj': 'investigationActionChangeType',
+          },
+          ...(canRunWorkflow
+            ? [
+                {
+                  name: RUN_WORKFLOW,
+                  icon: ICONS.runWorkflow,
+                  onClick: choose('runWorkflow'),
+                  'data-test-subj': 'investigationActionRunWorkflow',
+                },
+              ]
+            : []),
+          ...ticketItems,
+          {
+            name: isRestricted ? modalsI18n.HEADER_MAKE_VISIBLE : modalsI18n.HEADER_RESTRICT_ACCESS,
+            icon: ICONS.restricted,
+            onClick: choose('restrict'),
+            'data-test-subj': 'investigationActionRestrict',
+          },
+          ...(isMerged
+            ? []
+            : [
+                isClosed
+                  ? {
+                      name: i18n.REOPEN_INVESTIGATION,
+                      icon: ICONS.refresh,
+                      onClick: choose('reopen'),
+                      'data-test-subj': 'investigationActionReopen',
+                    }
+                  : {
+                      name: i18n.CLOSE_INVESTIGATION,
+                      icon: ICONS.check,
+                      onClick: choose('close'),
+                      'data-test-subj': 'investigationActionClose',
+                    },
+              ]),
+        ],
+      },
+    ];
+  }, [
+    hasDetermination,
+    hasType,
+    isClosed,
+    isMerged,
+    isRestricted,
+    canRunWorkflow,
+    ticketItems,
+    openModal,
+    openAsCase,
+    closeMenu,
+  ]);
+
+export interface DetailHeaderProps {
+  record: InvestigationRecord;
+  openModal: OpenModal;
+}
+
+export const DetailHeader: React.FC<DetailHeaderProps> = ({ record, openModal }) => {
+  const { euiTheme } = useEuiTheme();
+  const { application } = useInvestigationsServices();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { mutate: updateRecord, isLoading: isTakingOwnership } = useUpdateRecord(record.id, {
+    successMessage: i18n.TAKE_OWNERSHIP_SUCCESS,
+  });
+
+  const isClosed = record.status === 'closed';
+  const isMerged = Boolean(record.merged_into);
+  const isRestricted = record.access.mode === 'restricted';
+  const canRunWorkflow = useCanRunCaseWorkflow();
+  const verdict = getEffectiveVerdict(record);
+  const scope = getScopeSummary(record.counters);
+  const flag = record.fields.flag_keyword;
+  const originIcon =
+    record.origin.type === 'agent' || record.origin.type === 'automation'
+      ? ICONS.agent
+      : record.origin.type === 'rule'
+      ? ICONS.rule
+      : ICONS.user;
+
+  const closeMenu = useCallback(() => setIsMenuOpen(false), []);
+  const caseId = record.case_id;
+  const openAsCase = useCallback(() => {
+    void application.navigateToApp(SECURITY_APP_ID, { path: getCasePath(caseId) });
+  }, [application, caseId]);
+  const ticketItems = useExternalTicketMenuItems(ICONS.upload, closeMenu);
+  const panels = useActionPanels({
+    hasDetermination: Boolean(record.analyst_verdict ?? record.human_verdict),
+    hasType: Boolean(record.template_id),
+    isClosed,
+    isMerged,
+    isRestricted,
+    canRunWorkflow,
+    ticketItems,
+    openModal,
+    openAsCase,
+    closeMenu,
+  });
+
+  return (
+    <header
+      css={css`
+        flex: 0 0 auto;
+        padding-block: ${euiTheme.size.m};
+      `}
+      data-test-subj="investigationHeader"
+    >
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        alignItems="flexStart"
+        gutterSize="m"
+        responsive={false}
+      >
+        <EuiFlexItem
+          css={css`
+            min-width: 0;
+          `}
+        >
+          <EditableTitle record={record} isDisabled={isMerged} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            aria-label={i18n.TAKE_ACTION}
+            isOpen={isMenuOpen}
+            closePopover={() => setIsMenuOpen(false)}
+            panelPaddingSize="none"
+            anchorPosition="downRight"
+            button={
+              <EuiButton
+                color="text"
+                iconType={ICONS.chevronDown}
+                iconSide="right"
+                onClick={() => setIsMenuOpen((open) => !open)}
+                aria-haspopup="menu"
+                aria-expanded={isMenuOpen}
+                data-test-subj="investigationTakeAction"
+              >
+                {i18n.TAKE_ACTION}
+              </EuiButton>
+            }
+          >
+            <EuiContextMenu initialPanelId={0} panels={panels} />
+          </EuiPopover>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      {record.merged_into ? (
+        <div
+          css={css`
+            margin-block-start: ${euiTheme.size.s};
+          `}
+        >
+          <MergedIntoCallout primaryId={record.merged_into} />
+        </div>
+      ) : null}
+
+      <EuiFlexGroup
+        wrap
+        alignItems="center"
+        gutterSize="m"
+        responsive={false}
+        css={css`
+          margin-block-start: ${euiTheme.size.s};
+        `}
+        data-test-subj="investigationMeta"
+      >
+        <EuiFlexItem grow={false}>
+          <StatusControl record={record} openModal={openModal} isDisabled={isMerged} />
+        </EuiFlexItem>
+        {typeof flag === 'string' && flag.length > 0 ? (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="warning" data-test-subj="investigationFlagBadge">
+              {flag}
+            </EuiBadge>
+          </EuiFlexItem>
+        ) : null}
+        {isRestricted ? (
+          <EuiFlexItem grow={false}>
+            <RestrictedBadge
+              assigneeUids={record.assignees}
+              onClick={() => openModal('restrict')}
+            />
+          </EuiFlexItem>
+        ) : null}
+        <MetaItem label={i18n.OWNER}>
+          {record.owner ? (
+            <ActorBadge actor={record.owner} compact />
+          ) : (
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s" color={euiTheme.colors.textWarning}>
+                  <strong>{i18n.UNASSIGNED}</strong>
+                </EuiText>
+              </EuiFlexItem>
+              {isClosed ? null : (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    size="s"
+                    fill
+                    isLoading={isTakingOwnership}
+                    onClick={() => updateRecord({ owner: { self: true } })}
+                    data-test-subj="investigationTakeOwnership"
+                  >
+                    {i18n.TAKE_OWNERSHIP}
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          )}
+        </MetaItem>
+        <MetaItem label={i18n.ASSIGNEES}>
+          <AssigneesControl record={record} isDisabled={isMerged} />
+        </MetaItem>
+        <MetaItem label={i18n.VERDICT}>
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <VerdictBadge
+                label={verdict.label}
+                verdict={verdict.classification}
+                source={verdict.source}
+              />
+            </EuiFlexItem>
+            {verdict.source ? (
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  {verdict.source === 'analyst'
+                    ? sharedI18n.VERDICT_SOURCE_ANALYST
+                    : sharedI18n.VERDICT_SOURCE_AGENT}
+                </EuiText>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
+        </MetaItem>
+        <MetaItem label={i18n.PRIORITY}>
+          <PriorityControl record={record} isDisabled={isMerged} />
+        </MetaItem>
+        <MetaItem label={i18n.TAGS}>
+          <TagsControl record={record} isDisabled={isMerged} />
+        </MetaItem>
+        <MetaItem label={i18n.PARTICIPANTS}>
+          <ParticipantsStack actors={getParticipants(record)} />
+        </MetaItem>
+        <MetaItem label={i18n.AGE}>
+          <EuiText size="s">
+            <strong>
+              <AgeCell record={record} />
+            </strong>
+          </EuiText>
+        </MetaItem>
+        <MetaItem label={i18n.SCOPE}>
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <strong>{scope.text}</strong>
+              </EuiText>
+            </EuiFlexItem>
+            {scope.suspected ? (
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color={euiTheme.colors.textWarning}>
+                  {scope.suspected}
+                </EuiText>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
+        </MetaItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadge
+            color="hollow"
+            iconType={originIcon}
+            title={i18n.ORIGIN_LABEL}
+            data-test-subj="investigationOriginChip"
+          >
+            {record.origin.label}
+          </EuiBadge>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </header>
+  );
+};
+DetailHeader.displayName = 'DetailHeader';

@@ -22,6 +22,9 @@ import { casesAnalyticsSkill } from './skills/cases_analytics_skill';
 import { createCaseAttachmentType } from './attachments/case_attachment_type';
 import { createCasesAttachmentType } from './attachments/cases_attachment_type';
 import { createCasesToolAvailability } from './utils/get_cases_tool_availability';
+import type { InvestigationsSetup } from '../investigations';
+import { createInvestigationTools } from './tools/investigation_tools';
+import { registerInvestigationDigestHook } from './hooks/investigation_digest_hook';
 
 /**
  * Registers all Cases agent builder tools:
@@ -49,9 +52,16 @@ export function registerCasesAgentBuilderTools(
     attachmentsEnabled,
     templatesEnabled,
   }: { analyticsV2Enabled: boolean; attachmentsEnabled: boolean; templatesEnabled: boolean },
-  logger: Logger
+  logger: Logger,
+  investigations?: InvestigationsSetup
 ): void {
   const availability = createCasesToolAvailability(coreSetup, logger);
+  if (investigations) {
+    for (const tool of createInvestigationTools(investigations.getServiceForRequest)) {
+      agentBuilder.tools.register({ ...tool, availability } as Parameters<typeof agentBuilder.tools.register>[0]);
+    }
+    registerInvestigationDigestHook(agentBuilder, investigations, logger);
+  }
   agentBuilder.tools.register({
     ...searchCasesTool(coreSetup, getCasesClient),
     availability,

@@ -27,13 +27,13 @@ export const getCasesBaseKibanaFeatureV3 = ({
     ),
     order: 1100,
     category: DEFAULT_APP_CATEGORIES.security,
-    app: [CASES_FEATURE_ID, 'kibana'],
+    app: [CASES_FEATURE_ID, 'investigations', 'kibana'],
     catalogue: [APP_ID],
     cases: [APP_ID],
     privileges: {
       all: {
         api: apiTags.default.all,
-        app: [CASES_FEATURE_ID, 'kibana'],
+        app: [CASES_FEATURE_ID, 'investigations', 'kibana'],
         catalogue: [APP_ID],
         cases: {
           create: [APP_ID],
@@ -49,7 +49,7 @@ export const getCasesBaseKibanaFeatureV3 = ({
       },
       read: {
         api: apiTags.default.read,
-        app: [CASES_FEATURE_ID, 'kibana'],
+        app: [CASES_FEATURE_ID, 'investigations', 'kibana'],
         catalogue: [APP_ID],
         cases: {
           read: [APP_ID],
