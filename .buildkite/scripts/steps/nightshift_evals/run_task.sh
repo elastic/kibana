@@ -10,7 +10,6 @@ NIGHTSHIFT_EVAL_TASK="${NIGHTSHIFT_EVAL_TASK:?NIGHTSHIFT_EVAL_TASK is required}"
 NIGHTSHIFT_EVAL_CONNECTOR_ID="${NIGHTSHIFT_EVAL_CONNECTOR_ID:-}"
 NIGHTSHIFT_EVAL_ARGS="${NIGHTSHIFT_EVAL_ARGS:-}"
 NIGHTSHIFT_EVAL_DOWNLOADS="${NIGHTSHIFT_EVAL_DOWNLOADS:-[]}"
-NIGHTSHIFT_UV_VERSION="${NIGHTSHIFT_UV_VERSION:-0.9.5}"
 
 source .buildkite/scripts/common/util.sh
 source .buildkite/scripts/steps/nightshift_evals/common.sh
@@ -47,10 +46,7 @@ echo "--- Bootstrap Kibana"
 .buildkite/scripts/bootstrap.sh
 
 echo "--- Install uv ${NIGHTSHIFT_UV_VERSION}"
-export UV_INSTALL_DIR="$TMP_DIR/uv-bin"
-export UV_UNMANAGED_INSTALL="$UV_INSTALL_DIR"
-curl -LsSf "https://astral.sh/uv/${NIGHTSHIFT_UV_VERSION}/install.sh" | sh
-export PATH="$UV_INSTALL_DIR:$PATH"
+nightshift_install_uv "$TMP_DIR/uv-bin"
 
 echo "--- Clone nightshift-evals"
 nightshift_clone
