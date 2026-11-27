@@ -538,7 +538,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               if (isGenerating$.getValue()) isGenerating$.next(false);
               getTelemetry().trackAgentUpdateApplied({
                 hasEsqlQuery: Boolean(data.esql_query),
-                esqlQueryCount: readContextQueries(data).length,
+                esqlQueryCount: esqlQueries$.getValue().length,
                 templateSizeBytes: data.panel_template.length,
               });
             });

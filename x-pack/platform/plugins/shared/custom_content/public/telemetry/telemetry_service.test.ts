@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AnalyticsServiceStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { CustomContentTelemetryService } from './telemetry_service';
 import {
   CUSTOM_CONTENT_AGENT_UPDATE_APPLIED,
@@ -14,10 +14,9 @@ import {
 } from './event_types';
 
 describe('CustomContentTelemetryService', () => {
-  const reportEvent = jest.fn();
-  const service = new CustomContentTelemetryService({
-    reportEvent,
-  } as unknown as AnalyticsServiceStart);
+  const { analytics } = coreMock.createStart();
+  const { reportEvent } = analytics;
+  const service = new CustomContentTelemetryService(analytics);
 
   beforeEach(() => reportEvent.mockClear());
 
