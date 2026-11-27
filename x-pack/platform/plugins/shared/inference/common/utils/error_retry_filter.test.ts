@@ -9,6 +9,7 @@ import {
   createInferenceInternalError,
   createInferenceProviderError,
   createInferenceRequestAbortedError,
+  createInferenceRequestError,
 } from '@kbn/inference-common';
 import { getRetryFilter } from './error_retry_filter';
 import { createToolValidationError } from '../chat_complete/errors';
@@ -57,6 +58,11 @@ describe('retry filter', () => {
       const error = new Error('error');
       expect(isRecoverable(error)).toBe(false);
     });
+
+    it('returns false for request errors', () => {
+      const error = createInferenceRequestError('bad request', 400);
+      expect(isRecoverable(error)).toBe(false);
+    });
   });
 
   describe(`'all' retry filter`, () => {
@@ -71,6 +77,11 @@ describe('retry filter', () => {
     it('returns true for standard errors', () => {
       const error = new Error('error');
       expect(retryAll(error)).toBe(true);
+    });
+
+    it('returns false for request errors, which are deterministic and cannot succeed on retry', () => {
+      const error = createInferenceRequestError('bad request', 400);
+      expect(retryAll(error)).toBe(false);
     });
   });
 });
