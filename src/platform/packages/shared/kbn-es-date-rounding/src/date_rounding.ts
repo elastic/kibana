@@ -170,11 +170,7 @@ const skipAlignedBuckets = (
 };
 
 /** First instant after the Elasticsearch date bucket that contains `timestamp`. */
-const bucketEnd = (
-  timestamp: number,
-  rounding: DateRounding,
-  timeZone: IanaTimeZone
-): number => {
+const bucketEnd = (timestamp: number, rounding: DateRounding, timeZone: IanaTimeZone): number => {
   const periods = offsetPeriods(timeZone);
   if (rounding.kind === 'fixed') {
     const width = rounding.widthMs;
