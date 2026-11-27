@@ -8,7 +8,9 @@ autoInstallPeers: false
 strictPeerDependencies: false
 dedupePeerDependents: true
 verifyDepsBeforeRun: false
-storeDir: .pnpm-store
+# No storeDir: pnpm's default per-user store is shared by every checkout and git
+# worktree, so new worktrees install without downloading. CI keeps the store in
+# the workspace via pnpm_config_store_dir in .buildkite/scripts/common/env.sh.
 
 # Dependency build-script gate (formerly @kbn/yarn-install-scripts). pnpm runs a
 # dependency's install/postinstall only when it's set true below. strictDepBuilds
