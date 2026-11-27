@@ -98,6 +98,57 @@ describe('GraphQL specs', () => {
     ]);
   });
 
+  it('serves a vendor schema that breaks the GraphQL spec away from what is called', async () => {
+    // New Relic's NerdGraph deprecates fields of a type whose interface doesn't deprecate its own,
+    // which `validate` would otherwise refuse before it even looks at the document.
+    const invalid: GraphQLSpec = {
+      format: 'graphql',
+      sdl: `
+        type Query {
+          board(id: ID!): Board
+        }
+        interface Node {
+          id: ID!
+        }
+        type Board implements Node {
+          id: ID! @deprecated(reason: "Use key")
+          name: String!
+        }
+      `,
+      endpoints: [ENDPOINT],
+    };
+    const { fetch: mockFetch } = createEmulatorFetch({ specs: { vendor: invalid } });
+
+    const response = await post(mockFetch, { query: `query { board(id: "1") { name } }` });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ data: { board: { name: 'string' } } });
+  });
+
+  it('still rejects a document the schema does not allow, on such a schema', async () => {
+    const invalid: GraphQLSpec = {
+      format: 'graphql',
+      sdl: `
+        type Query {
+          board(id: ID!): Board
+        }
+        interface Node {
+          id: ID!
+        }
+        type Board implements Node {
+          id: ID! @deprecated(reason: "Use key")
+          name: String!
+        }
+      `,
+      endpoints: [ENDPOINT],
+    };
+    const { fetch: mockFetch } = createEmulatorFetch({ specs: { vendor: invalid } });
+
+    const response = await post(mockFetch, { query: `query { board(id: "1") { missing } }` });
+
+    expect(response.status).toBe(400);
+  });
+
   it('marks mutations as not read-only', async () => {
     const { fetch: mockFetch, calls } = createEmulatorFetch({ specs: [spec] });
 

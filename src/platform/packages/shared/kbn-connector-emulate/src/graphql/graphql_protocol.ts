@@ -214,7 +214,14 @@ const rejected = (
 const builtSchemas = new Map<string, GraphQLSchema>();
 
 const buildCachedSchema = (sdl: string): GraphQLSchema => {
-  const schema = builtSchemas.get(sdl) ?? buildSchema(sdl);
+  // The snapshot is the vendor's schema as published, and some of them break the GraphQL spec in
+  // corners no connector touches: New Relic's NerdGraph deprecates fields of types implementing an
+  // interface whose own fields aren't. Validating the schema here would fail every action over a
+  // defect in an unrelated type, so only the connector's own documents are validated against it,
+  // as `normalizeSdl` in the recorder already assumes.
+  // `assumeValid` also stops `validate` asserting the schema before checking a document, which it
+  // does on every call; the document itself is still validated against the schema in full.
+  const schema = builtSchemas.get(sdl) ?? buildSchema(sdl, { assumeValid: true });
   builtSchemas.set(sdl, schema);
   return schema;
 };
