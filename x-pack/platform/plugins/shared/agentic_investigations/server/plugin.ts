@@ -145,6 +145,7 @@ export class AgenticInvestigationsPlugin
     agentBuilder.callbacks.registerConversationResolver(
       createThreadConversationResolver({
         getSubjectsService: () => this.requireSubjectsService(),
+        getConversationClient: (request) => this.getConversationClient(request),
       })
     );
 

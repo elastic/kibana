@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isBoom } from '@hapi/boom';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { ConversationOriginType } from '@kbn/agent-builder-common';
 import type { SubjectsService } from './subjects_service';
@@ -13,10 +14,14 @@ import { createThreadConversationResolver } from './thread_conversation_resolver
 const THREAD_KEY = 'slack:T1:C1:1700000000.000100';
 const request = httpServerMock.createKibanaRequest();
 
-const setup = ({ holder }: { holder?: string } = {}) => {
+const setup = ({ holder, readable = true }: { holder?: string; readable?: boolean } = {}) => {
   const findClaimHolder = jest.fn().mockResolvedValue(holder);
+  const bulkGet = jest.fn(async (ids: string[]) =>
+    readable ? new Map(ids.map((id) => [id, { id }])) : new Map()
+  );
   const resolve = createThreadConversationResolver({
     getSubjectsService: () => ({ findClaimHolder } as unknown as SubjectsService),
+    getConversationClient: async () => ({ bulkGet } as never),
   });
   const resolveThread = () =>
     resolve({
@@ -24,7 +29,7 @@ const setup = ({ holder }: { holder?: string } = {}) => {
       spaceId: 'default',
       request,
     });
-  return { resolveThread, findClaimHolder };
+  return { resolveThread, findClaimHolder, bulkGet };
 };
 
 describe('createThreadConversationResolver', () => {
@@ -39,9 +44,21 @@ describe('createThreadConversationResolver', () => {
   });
 
   it('leaves a thread no investigation claimed to the next resolver', async () => {
-    const { resolveThread } = setup();
+    const { resolveThread, bulkGet } = setup();
 
     await expect(resolveThread()).resolves.toBeUndefined();
+    expect(bulkGet).not.toHaveBeenCalled();
+  });
+
+  it('refuses with a user-facing 404 when the claiming investigation is deleted or unreadable', async () => {
+    const { resolveThread, bulkGet } = setup({ holder: 'investigation-1', readable: false });
+
+    const error = await resolveThread().catch((e) => e);
+
+    expect(bulkGet).toHaveBeenCalledWith(['investigation-1']);
+    expect(isBoom(error) && error.output.statusCode).toBe(404);
+    expect(error.output.headers['x-elastic-user-facing-error']).toBe('true');
+    expect(error.message).toBe("This investigation isn't available.");
   });
 
   it('fails the turn when the claim lookup fails', async () => {
