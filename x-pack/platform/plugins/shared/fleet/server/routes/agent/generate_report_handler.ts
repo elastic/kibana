@@ -19,7 +19,7 @@ import type { FleetRequestHandler, PostGenerateAgentsReportRequestSchema } from 
 import { appContextService } from '../../services/app_context';
 import { buildAgentStatusRuntimeField } from '../../services/agents/build_status_runtime_field';
 import { FleetError } from '../../errors';
-import { _joinFilters, getSpaceAwarenessFilterForAgents } from '../../services/agents/crud';
+import { _joinAgentFilters, getSpaceAwarenessFilterForAgents } from '../../services/agents/crud';
 
 type HandleResponseFunc = Parameters<ReportingStart['handleGenerateSystemReportRequest']>[2];
 
@@ -123,10 +123,10 @@ const getReportParams = async (
   const agentsQuery = Array.isArray(agents)
     ? `agent.id:(${agents.map((id) => `"${escapeQuotes(id)}"`).join(' or ')})`
     : agents;
-  // _joinFilters parses each filter into its own AST and combines them with an explicit
+  // _joinAgentFilters parses each filter into its own AST and combines them with an explicit
   // `and` node. This prevents a user-supplied OR from escaping the namespace predicate
   // through KQL operator precedence (AND binds tighter than OR).
-  const kueryNode = _joinFilters([...spaceFilter, agentsQuery]);
+  const kueryNode = _joinAgentFilters([...spaceFilter, agentsQuery]);
   if (!kueryNode) {
     throw new FleetError('Unable to build report filter');
   }

@@ -51,6 +51,7 @@ import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
 import { PIPELINE_CONFIG_RUNTIME_FIELD } from './build_pipeline_config_runtime_field';
 import { SIGNALS_RUNTIME_FIELD } from './build_signals_runtime_field';
 import { getLatestAvailableAgentVersion } from './versions';
+import { restrictAgentFreeTextSearch } from './free_text_kuery';
 
 const INACTIVE_AGENT_CONDITION = `status:inactive`;
 
@@ -128,6 +129,16 @@ export function _joinFilters(
   } catch (err) {
     throw new FleetError(`Kuery is malformed: ${err.message}`);
   }
+}
+
+/**
+ * Joins agent kuery filters like {@link _joinFilters}, with free text terms restricted to agent fields.
+ */
+export function _joinAgentFilters(
+  filters: Array<string | undefined | KueryNode>
+): KueryNode | undefined {
+  const kueryNode = _joinFilters(filters);
+  return kueryNode ? restrictAgentFreeTextSearch(kueryNode) : undefined;
 }
 
 export function removeSOAttributes(kuery: string) {
@@ -225,7 +236,7 @@ export async function getAgentTags(
     filters.push(ENROLLED_AGENT_CONDITION);
   }
 
-  const kueryNode = _joinFilters(filters);
+  const kueryNode = _joinAgentFilters(filters);
   const query = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
   const runtimeFields = {
     ...(await buildAgentStatusRuntimeField(soClient)),
@@ -404,7 +415,7 @@ export async function getAgentsByKuery(
     filters.push('active:true');
   }
 
-  const kueryNode = _joinFilters(filters);
+  const kueryNode = _joinAgentFilters(filters);
   const runtimeFields = {
     ...(shouldIncludeStatusRuntimeField ? await buildAgentStatusRuntimeField(soClient) : {}),
     ...SIGNALS_RUNTIME_FIELD,
@@ -641,7 +652,7 @@ export async function fetchAllAgentsByKuery(
   if (showInactive === false) {
     filters.push(shouldIncludeStatusRuntimeField ? ACTIVE_AGENT_CONDITION : 'active:true');
   }
-  const kueryNode = _joinFilters(filters);
+  const kueryNode = _joinAgentFilters(filters);
   const query = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
   const runtimeFields = {
     ...(shouldIncludeStatusRuntimeField ? await buildAgentStatusRuntimeField(soClient) : {}),

@@ -32,8 +32,9 @@ import {
 
 import { DEFAULT_NAMESPACES_FILTER } from '../spaces/agent_namespaces';
 
-import { getAgentById, removeSOAttributes } from './crud';
+import { assertAgentFieldsAreMapped, getAgentById, removeSOAttributes } from './crud';
 import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
+import { restrictAgentFreeTextSearch } from './free_text_kuery';
 
 interface AggregationsStatusTermsBucketKeys extends AggregationsTermsBucketBase {
   key: AgentStatus;
@@ -87,8 +88,9 @@ export async function getAgentStatusForAgentPolicy(
   }
 
   if (filterKuery) {
+    assertAgentFieldsAreMapped(undefined, filterKuery);
     const kueryAsElasticsearchQuery = toElasticsearchQuery(
-      fromKueryExpression(removeSOAttributes(filterKuery))
+      restrictAgentFreeTextSearch(fromKueryExpression(removeSOAttributes(filterKuery)))
     );
     clauses.push(kueryAsElasticsearchQuery);
   }
