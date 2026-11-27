@@ -561,6 +561,30 @@ describe('getEuidDslFilterBasedOnEntityRecord', () => {
     });
   });
 
+  describe('multi-valued record fields', () => {
+    it('host: filters on the lowest value, like the document-based builder', () => {
+      const result = getEuidDslFilterBasedOnEntityRecord(getBuiltInEntityDefinition('host'), {
+        host: { id: ['host-b', 'host-a'] },
+      });
+
+      expect(result).toEqual({ bool: { filter: [{ term: { 'host.id': 'host-a' } }] } });
+    });
+
+    it('user: skips an empty first value of an identity field', () => {
+      const result = getEuidDslFilterBasedOnEntityRecord(getBuiltInEntityDefinition('user'), {
+        entity: { namespace: 'local' },
+        user: { name: 'alice' },
+        host: { id: ['', 'hid'] },
+      });
+
+      const filter = result?.bool?.filter;
+      expect(filter).toEqual(
+        expect.arrayContaining([{ term: { 'user.name': 'alice' } }, { term: { 'host.id': 'hid' } }])
+      );
+      expect(filter).not.toContainEqual({ term: { 'host.id': '' } });
+    });
+  });
+
   describe('user (trusts resolved entity.namespace, reverse-maps source clause)', () => {
     it('okta: filters on user.email and okta source values, without re-deriving namespace', () => {
       const result = getEuidDslFilterBasedOnEntityRecord(getBuiltInEntityDefinition('user'), {

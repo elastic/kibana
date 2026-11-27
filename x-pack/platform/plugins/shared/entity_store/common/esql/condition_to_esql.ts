@@ -17,7 +17,28 @@ import {
 } from '@kbn/streamlang';
 import { referenceField } from './cast';
 import type { CastFieldOptions } from './cast';
-import { escapeEsqlStringLiteral, esqlIsNotNullOrEmpty } from './strings';
+import { escapeEsqlStringLiteral, esqlIdentityValue, esqlIsNotNullOrEmpty } from './strings';
+
+export interface EntityStoreConditionOptions extends CastFieldOptions {
+  /**
+   * Compare `eq`, `neq` and `IN` on a string on the field's identity value, like `__euid_min`
+   * (Painless) and `getFieldValue` (in-memory) do. A plain comparison is NULL on a multi-valued
+   * field. Leave it off for `WHERE` filters: the reduction hides the field from Lucene.
+   * @default false
+   */
+  reduceMultiValued?: boolean;
+}
+
+/** The field reference a string comparison reads: its identity value, or the plain reference. */
+function comparedField(
+  field: string,
+  value: unknown,
+  options?: EntityStoreConditionOptions
+): string {
+  return options?.reduceMultiValued && typeof value === 'string'
+    ? esqlIdentityValue(field, options)
+    : referenceField(field, options);
+}
 
 /**
  * Drop-in wrapper around the streamlang `conditionToESQL` that optimizes two patterns:
@@ -27,8 +48,8 @@ import { escapeEsqlStringLiteral, esqlIsNotNullOrEmpty } from './strings';
  *    canonical example — eliminating 18 per-row scalar guards in the ES|QL planner.
  *
  * 2. `isNotEmpty` AND pattern `{and: [{field: X, exists: true}, {field: X, neq: ''}]}`
- *    into `castField(X) IS NOT NULL AND castField(X) != ""`, which the planner can push
- *    down more efficiently.
+ *    into `esqlIsNotNullOrEmpty(X)`, which reduces a multi-valued field to its identity value
+ *    first (a plain `!= ""` is null on a multi-valued field).
  *
  * All other condition shapes are rendered by our own leaf emitter so every field reference
  * is wrapped with the appropriate cast from the singleton field type registry — this prevents
@@ -36,7 +57,7 @@ import { escapeEsqlStringLiteral, esqlIsNotNullOrEmpty } from './strings';
  */
 export function entityStoreConditionToESQL(
   condition: Condition,
-  options?: CastFieldOptions
+  options?: EntityStoreConditionOptions
 ): string {
   if (isAlwaysCondition(condition)) {
     return 'TRUE';
@@ -98,7 +119,10 @@ function getNotEmptyField(condition: Condition): string | null {
 /**
  * Returns null when IN optimization is not possible
  */
-function buildInClauseOrNull(conditions: Condition[], options?: CastFieldOptions): string | null {
+function buildInClauseOrNull(
+  conditions: Condition[],
+  options?: EntityStoreConditionOptions
+): string | null {
   if (conditions.length < 2) {
     // only 1 condition, let it fall through to the leaf emitter
     return null;
@@ -123,7 +147,7 @@ function buildInClauseOrNull(conditions: Condition[], options?: CastFieldOptions
 
   const [field] = fieldSet;
   const inList = (values as string[]).map((v) => `"${escapeEsqlStringLiteral(v)}"`).join(', ');
-  return `${referenceField(field, options)} IN (${inList})`;
+  return `${comparedField(field, values[0], options)} IN (${inList})`;
 }
 
 function valueToEsql(v: string | number | boolean): string {
@@ -136,7 +160,10 @@ function valueToEsql(v: string | number | boolean): string {
   return String(v);
 }
 
-function renderLeafCondition(condition: FilterCondition, options?: CastFieldOptions): string {
+function renderLeafCondition(
+  condition: FilterCondition,
+  options?: EntityStoreConditionOptions
+): string {
   const { field } = condition;
   const casted = referenceField(field, options);
 
@@ -145,11 +172,11 @@ function renderLeafCondition(condition: FilterCondition, options?: CastFieldOpti
   }
 
   if ('eq' in condition && condition.eq !== undefined) {
-    return `${casted} == ${valueToEsql(condition.eq)}`;
+    return `${comparedField(field, condition.eq, options)} == ${valueToEsql(condition.eq)}`;
   }
 
   if ('neq' in condition && condition.neq !== undefined) {
-    return `${casted} != ${valueToEsql(condition.neq)}`;
+    return `${comparedField(field, condition.neq, options)} != ${valueToEsql(condition.neq)}`;
   }
 
   if ('gt' in condition && condition.gt !== undefined) {

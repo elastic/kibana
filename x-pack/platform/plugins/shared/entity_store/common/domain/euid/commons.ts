@@ -41,6 +41,40 @@ function isEmpty(value: any): boolean {
   return value === undefined || value === null || value === '';
 }
 
+/**
+ * Compares two strings by Unicode code point, the order Elasticsearch sorts keywords in (UTF-8 byte
+ * order). Plain `<` compares UTF-16 code units, which differs for characters outside the BMP.
+ */
+export function compareCodePoints(a: string, b: string): number {
+  const length = Math.min(a.length, b.length);
+  for (let i = 0; i < length; i++) {
+    if (a.charCodeAt(i) !== b.charCodeAt(i)) {
+      // At the first differing unit, `codePointAt` yields the full code point, or the low surrogate
+      // when the high surrogates match. Both order the same way as code points.
+      return (a.codePointAt(i) ?? 0) < (b.codePointAt(i) ?? 0) ? -1 : 1;
+    }
+  }
+  return a.length - b.length;
+}
+
+/**
+ * All non-empty values of a field, in the order they appear. An empty string, null, or a nested
+ * object or array is not a value.
+ */
+export function getFieldValues(doc: any, field: string): string[] {
+  const flattenedValue = doc[field];
+  const fieldInObject = isEmpty(flattenedValue) ? get(doc, field) : flattenedValue;
+  const values = Array.isArray(fieldInObject) ? fieldInObject : [fieldInObject];
+  return values
+    .filter((value) => !isEmpty(value) && typeof value !== 'object')
+    .map((value) => String(value));
+}
+
+/**
+ * The value a field contributes to an entity id: its lowest non-empty value by code point, or
+ * undefined when it has none. A multi-valued field is reduced the same way in ES|QL
+ * (`esqlIdentityValue`) and Painless (`__euid_min`), so every path picks the same value.
+ */
 export function getFieldValue(doc: any, field: string): string | undefined {
   const flattenedValue = doc[field];
   const fieldInObject = isEmpty(flattenedValue) ? get(doc, field) : flattenedValue;
@@ -49,18 +83,7 @@ export function getFieldValue(doc: any, field: string): string | undefined {
     return undefined;
   }
 
-  // In theory we should not have multi valued fields.
-  // However, it can still happen that elasticsearch
-  // client returns an array of values.
-  if (Array.isArray(fieldInObject)) {
-    if (fieldInObject.length === 0) {
-      return undefined;
-    }
-    const first = fieldInObject[0];
-    return first !== undefined && first !== null ? String(first) : undefined;
-  }
-
-  if (typeof fieldInObject === 'object') {
+  if (!Array.isArray(fieldInObject) && typeof fieldInObject === 'object') {
     throw new Error(
       `Field ${field} is an object, can't convert to value (value: ${JSON.stringify(
         fieldInObject
@@ -68,7 +91,35 @@ export function getFieldValue(doc: any, field: string): string | undefined {
     );
   }
 
-  return String(fieldInObject);
+  return getFieldValues(doc, field).reduce<string | undefined>(
+    (lowest, value) =>
+      lowest === undefined || compareCodePoints(value, lowest) < 0 ? value : lowest,
+    undefined
+  );
+}
+
+/**
+ * The field's first value. `includes` reads it this way until #20578 changes it.
+ */
+export function getFirstFieldValue(doc: any, field: string): string | undefined {
+  const flattenedValue = doc[field];
+  const fieldInObject = isEmpty(flattenedValue) ? get(doc, field) : flattenedValue;
+  if (Array.isArray(fieldInObject)) {
+    const [first] = fieldInObject;
+    return first !== undefined && first !== null ? String(first) : undefined;
+  }
+  return getFieldValue(doc, field);
+}
+
+/**
+ * The first non-empty value of a field. Entity records are filtered on it. The lowest value is not
+ * safe there: an AWS user's EUID is built from `user.entity.id`, which the record does not store,
+ * and its `user.id` also holds session ids that can sort below the one the EUID came from.
+ */
+export function getFirstNonEmptyFieldValue(doc: any, field: string): string | undefined {
+  const flattenedValue = doc[field];
+  const fieldInObject = isEmpty(flattenedValue) ? get(doc, field) : flattenedValue;
+  return Array.isArray(fieldInObject) ? getFieldValues(doc, field)[0] : getFieldValue(doc, field);
 }
 
 export function getCompositionFields(composition: EuidAttribute[]): string[] {
@@ -116,7 +167,8 @@ export function evaluateStreamlangCondition(doc: any, condition: unknown): boole
       return c.exists === exists;
     }
     if ('includes' in c) {
-      const fieldVal = getFieldValue(doc, c.field);
+      // Reads the first value, not the identity value: #20578 changes `includes` separately.
+      const fieldVal = getFirstFieldValue(doc, c.field);
       if (fieldVal === undefined) return false;
       return String(fieldVal).includes(String(c.includes));
     }
@@ -229,7 +281,8 @@ export function getEffectiveEuidRanking(
 
 export function getFieldsToBeFilteredOn(
   doc: any,
-  euidFields: EuidAttribute[][]
+  euidFields: EuidAttribute[][],
+  readValue: (doc: any, field: string) => string | undefined = getFieldValue
 ): { values: FieldValue; rankingPosition: number } {
   for (let i = 0; i < euidFields.length; i++) {
     const composition = euidFields[i];
@@ -237,7 +290,7 @@ export function getFieldsToBeFilteredOn(
     const composedFieldValues = fieldAttrs.reduce(
       (acc, attr) => ({
         ...acc,
-        [attr.field]: getFieldValue(doc, attr.field),
+        [attr.field]: readValue(doc, attr.field),
       }),
       {}
     );

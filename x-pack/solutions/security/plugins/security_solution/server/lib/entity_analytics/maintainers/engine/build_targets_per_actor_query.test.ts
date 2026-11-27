@@ -382,9 +382,11 @@ describe('buildTargetsPerActorQuery (targets per actor)', () => {
 
     it('builds the actor EUID from user.name + host.id only', () => {
       const query = buildTargetsPerActorQuery(hostScopedStandard, 'default');
-      expect(query).toContain(
-        'actorUserId = CONCAT("user:", TO_STRING(`user.name`), "@", TO_STRING(`host.id`), "@local")'
+      const { evalAssignment } = euid.experimental.getHostScopedUserEuidEsql();
+      expect(evalAssignment).toMatch(
+        /^CONCAT\("user:", .*`user\.name`.*"@", .*`host\.id`.*"@local"\)$/
       );
+      expect(query).toContain(`actorUserId = ${evalAssignment}`);
     });
 
     it('never references user.email — that field belongs to the IDP ranking branch', () => {
@@ -400,16 +402,18 @@ describe('buildTargetsPerActorQuery (targets per actor)', () => {
 
       // `host.id` is the only field either EUID reads, so the actor gate doubles as
       // the target gate — a second host.id check would be dead weight per row.
-      expect(query).toContain(
-        '(`user.name` IS NOT NULL AND `user.name` != "") AND (`host.id` IS NOT NULL AND `host.id` != "")'
-      );
+      const { presenceGate } = euid.experimental.getHostScopedUserEuidEsql();
+      expect(presenceGate).toContain('`user.name` IS NOT NULL');
+      expect(presenceGate).toContain('`host.id` IS NOT NULL');
+      expect(query).toContain(presenceGate);
       expect(query.match(/`host\.id` IS NOT NULL/g)).toHaveLength(1);
     });
 
     it('includes host.id IS NOT NULL gate (requireTargetEntityIdExists host-scoped equivalent)', () => {
       const query = buildTargetsPerActorQuery(hostScopedStandard, 'default');
       expect(query).toContain('`host.id` IS NOT NULL');
-      expect(query).toContain('`host.id` != ""');
+      // Multi-valued and empty values are reduced before the check, as the EUID does.
+      expect(query).toContain('MV_MIN(`host.id`) == ""');
     });
 
     it('ignores customActor.fields — the host-scoped user EUID comes from the entity definition', () => {

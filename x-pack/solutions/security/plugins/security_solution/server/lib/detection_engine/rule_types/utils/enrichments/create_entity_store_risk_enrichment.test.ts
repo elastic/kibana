@@ -362,6 +362,26 @@ describe('createEntityStoreEnrichment', () => {
       expect(enriched._source[ALERT_ENTITY_ID]).toEqual(['host:not-in-store']);
     });
 
+    it('stamps the lowest non-empty value of a multi-valued host.id', async () => {
+      const { euid: actualEuid } = jest.requireActual('@kbn/entity-store/common/euid_helpers');
+      mockGetEuidForSearch.mockImplementation(actualEuid.getEuidFromObjectForSearch);
+      const duplicated = createAlert('1', { host: { id: ['hid-23', 'hid-23'], name: 'n' } });
+      const unordered = createAlert('2', { host: { id: ['b', 'a'], name: 'n' } });
+
+      const result = await createEntityStoreEnrichment({
+        name: 'Host Risk',
+        entityType: 'host',
+        entityStoreCrudClient: makeEntityStoreCrudClient(),
+        logger,
+        events: [duplicated, unordered],
+        enrichmentFields: ['entity.risk.calculated_level'],
+        createEnrichmentFunction: () => enrichFn,
+      });
+
+      expect(applyAll(duplicated, result['1'])._source[ALERT_ENTITY_ID]).toEqual(['host:hid-23']);
+      expect(applyAll(unordered, result['2'])._source[ALERT_ENTITY_ID]).toEqual(['host:a']);
+    });
+
     it('resolves the EUID with the search variant, not the creation gate', async () => {
       // Gating here would leave IdP-namespace entities with no stamp and no enrichment.
       await runHostEnrichment([createAlert('1', { host: { name: 'server1' } })]);

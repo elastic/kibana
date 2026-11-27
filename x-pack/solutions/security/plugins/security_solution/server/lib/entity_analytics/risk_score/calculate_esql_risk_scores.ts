@@ -45,6 +45,7 @@ export const buildEuidRuntimeMappingWithStoredFieldFastPath = (
   const typePrefix = `${entityType}:`;
 
   const source = [
+    euid.painless.preamble,
     `String ___euid_rt_eval(def doc) { ${evalScript} }`,
     `if (doc.containsKey('${ALERT_ENTITY_ID}') && doc['${ALERT_ENTITY_ID}'].size() > 0) {`,
     `  for (def __id : doc['${ALERT_ENTITY_ID}']) {`,

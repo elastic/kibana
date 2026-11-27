@@ -114,7 +114,21 @@ describe('resolveIdentityPlan', () => {
     (_type, definition) => {
       const { groupingFields, presenceFilter } = resolveIdentityPlan(definition);
       const withoutStrings = presenceFilter.replace(/"(?:[^"\\]|\\.)*"/g, '""');
-      const keywords = new Set(['AND', 'OR', 'NOT', 'IS', 'NULL', 'TO_STRING']);
+      const keywords = new Set([
+        'AND',
+        'OR',
+        'NOT',
+        'IS',
+        'NULL',
+        'TO_STRING',
+        // the identity value of a multi-valued field
+        'CASE',
+        'MV_MIN',
+        'MV_FIRST',
+        'MV_SLICE',
+        'MV_SORT',
+        'MV_DEDUPE',
+      ]);
       const identifiers = new Set(
         (withoutStrings.match(/`[^`]+`|[A-Za-z_@][\w.@]*/g) ?? [])
           .map((token) => token.replace(/^`|`$/g, ''))
