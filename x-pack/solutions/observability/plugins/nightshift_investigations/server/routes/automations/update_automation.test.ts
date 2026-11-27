@@ -338,8 +338,9 @@ it('rejects an invalid workflow before writing it and keeps the automation', asy
 });
 
 it('does not turn a failing validation lookup into a client error', async () => {
-  validateWorkflow.mockRejectedValue(new Error('es down'));
-  await expect(call({ name: 'Changed' })).rejects.toThrow('es down');
+  const lookupError = new Error('es down');
+  validateWorkflow.mockRejectedValue(lookupError);
+  await expect(call({ name: 'Changed' })).rejects.toBe(lookupError);
   expect(updateWorkflow).not.toHaveBeenCalled();
 });
 
