@@ -5,15 +5,23 @@
  * 2.0.
  */
 
-import { AppMenu, type ScoutPage } from '@kbn/scout-oblt';
+import { AppMenu, type EuiComboBoxObject, type ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { RULE_DETAILS_TEST_SUBJECTS, BIGGER_TIMEOUT, SHORTER_TIMEOUT } from '../constants';
 
 export class RuleDetailsPage {
   private readonly appMenu: AppMenu;
 
+  /**
+   * The dashboards selector (combobox on edit form)
+   */
+  public readonly dashboardsSelector: EuiComboBoxObject;
+
   constructor(private readonly page: ScoutPage) {
     this.appMenu = new AppMenu(page);
+    this.dashboardsSelector = page.components.comboBox(
+      RULE_DETAILS_TEST_SUBJECTS.DASHBOARDS_SELECTOR
+    );
   }
 
   /**
@@ -160,66 +168,17 @@ export class RuleDetailsPage {
   }
 
   /**
-   * Gets the dashboards selector (combobox on edit form) locator
+   * Selects a dashboard in the related dashboards combobox (on edit form)
    */
-  public get dashboardsSelector() {
-    return this.page.testSubj.locator(RULE_DETAILS_TEST_SUBJECTS.DASHBOARDS_SELECTOR);
-  }
-
-  /**
-   * Gets the combobox options list locator
-   */
-  public get comboboxOptionsList() {
-    return this.page.locator('[data-test-subj*="comboBoxOptionsList"]');
-  }
-
-  /**
-   * Opens the dashboards combobox and returns all available option texts
-   */
-  async getDashboardsOptionsList(): Promise<string[]> {
-    // Click the dashboard selector to open the dropdown
-    await this.dashboardsSelector.click();
-
-    // Wait for the dropdown portal to be created
-    await expect(this.comboboxOptionsList).toBeAttached({ timeout: BIGGER_TIMEOUT });
-
-    // Wait for the loading spinner to disappear if present
-    const spinner = this.comboboxOptionsList.locator('.euiLoadingSpinner');
-    await spinner.waitFor({ state: 'hidden', timeout: SHORTER_TIMEOUT }).catch(() => {
-      // Spinner might not appear if data is cached or loads very quickly
-    });
-
-    // Wait for at least one option to be available
-    await expect(this.comboboxOptionsList.locator('[role="option"]')).not.toHaveCount(0, {
-      timeout: BIGGER_TIMEOUT,
-    });
-
-    // Get the visible text from all options
-    const optionsText = await this.comboboxOptionsList.allTextContents();
-
-    // Close the dropdown
-    await this.page.keyboard.press('Escape');
-
-    return optionsText;
-  }
-
-  /**
-   * Opens the dashboards combobox and returns the options locator
-   */
-  async getDashboardsOptionsLocator() {
-    // Click the dashboard selector to open the dropdown
-    await this.dashboardsSelector.click();
-
-    // Wait for the dropdown portal to be created
-    await expect(this.comboboxOptionsList).toBeAttached({ timeout: BIGGER_TIMEOUT });
-
-    // Wait for the loading spinner to disappear if present
-    const spinner = this.comboboxOptionsList.locator('.euiLoadingSpinner');
-    await spinner.waitFor({ state: 'hidden', timeout: SHORTER_TIMEOUT }).catch(() => {
-      // Spinner might not appear if data is cached or loads very quickly
-    });
-
-    return this.comboboxOptionsList.locator('[role="option"]');
+  async selectRelatedDashboard(dashboardTitle: string) {
+    // EUI closes the combobox popover on any ancestor scroll and only reopens it when the search
+    // value changes, so re-drive the whole open-and-pick attempt until the selection sticks.
+    await expect(async () => {
+      await this.dashboardsSelector.setSelectedOptions([dashboardTitle], {
+        timeout: SHORTER_TIMEOUT,
+      });
+      expect(await this.dashboardsSelector.getSelectedOptions()).toContain(dashboardTitle);
+    }).toPass({ timeout: BIGGER_TIMEOUT, intervals: [1000] });
   }
 
   /**
