@@ -224,5 +224,17 @@ describe('WorkflowPageShareModal', () => {
     expect(await screen.findByTestId('workflowPageShareActionError')).toHaveTextContent(
       'Publishing needs manage_security'
     );
+    expect(screen.getByTestId('workflowPageShareUnpublish')).toHaveFocus();
+  });
+
+  it('stays on the confirmation while the change is running', async () => {
+    const { services } = setup();
+    services.http.post.mockReturnValue(new Promise(() => {}));
+
+    fireEvent.click(await screen.findByTestId('workflowPageShareRotate'));
+    fireEvent.click(screen.getByTestId('workflowPageShareConfirm'));
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+
+    expect(screen.getByTestId('workflowPageShareConfirm-rotate')).toBeInTheDocument();
   });
 });

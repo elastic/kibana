@@ -136,6 +136,12 @@ const ShareActionRow = ({
 
 type Action = 'publish' | 'unpublish' | 'enable' | 'disable' | 'rotate';
 
+/** The button that opens each confirmation, where focus returns after it. */
+const TRIGGER_TEST_SUBJ = {
+  rotate: 'workflowPageShareRotate',
+  unpublish: 'workflowPageShareUnpublish',
+} as const;
+
 /** The server's message for an HTTP error, so a 403 says which privilege is missing. */
 const getErrorMessage = (error: unknown): string =>
   isHttpFetchError(error)
@@ -216,6 +222,9 @@ export const WorkflowPageShareModal = ({
         }
       } catch (error) {
         setActionError(getErrorMessage(error));
+        if (action === 'rotate' || action === 'unpublish') {
+          setFocusTarget({ testSubj: TRIGGER_TEST_SUBJ[action] });
+        }
       } finally {
         // Back to the share view, which shows the new state or the error.
         setConfirming(undefined);
@@ -235,9 +244,9 @@ export const WorkflowPageShareModal = ({
     setFocusTarget({ testSubj: 'workflowPageShareConfirmCancel' });
   };
   const cancelConfirm = () => {
-    setFocusTarget({
-      testSubj: confirming === 'rotate' ? 'workflowPageShareRotate' : 'workflowPageShareUnpublish',
-    });
+    // Escape and the close icon must not leave while the change is still running.
+    if (!confirming || pending !== undefined) return;
+    setFocusTarget({ testSubj: TRIGGER_TEST_SUBJ[confirming] });
     setConfirming(undefined);
   };
 
