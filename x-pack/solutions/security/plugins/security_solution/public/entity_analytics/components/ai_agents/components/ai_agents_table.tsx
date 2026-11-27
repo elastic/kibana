@@ -11,6 +11,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiInMemoryTable,
   EuiText,
   EuiToolTip,
@@ -25,6 +26,7 @@ import { TruncatedBadgeList } from '../../../../flyout_v2/entity/shared/componen
 import { useWatchlistLookup } from '../hooks/use_watchlist_lookup';
 import type { AgentInventoryRow } from '../types';
 import { getAgentDisplayName } from '../utils';
+import { getAgentIconType } from './agent_logo';
 import {
   COLUMN_ACCOUNTS,
   COLUMN_AGENT,
@@ -80,7 +82,17 @@ export const AiAgentsTable = memo(
           field: 'agentName',
           name: COLUMN_AGENT,
           sortable: true,
-          render: (agentName: string) => <strong>{getAgentDisplayName(agentName)}</strong>,
+          width: '150px',
+          render: (agentName: string) => (
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type={getAgentIconType(agentName)} aria-hidden={true} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <strong>{getAgentDisplayName(agentName)}</strong>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
         },
         {
           field: 'hostName',

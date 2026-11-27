@@ -23,6 +23,7 @@ import type {
   AgentRow,
 } from '../../../../entity_analytics/components/ai_agents/types';
 import { getAgentDisplayName } from '../../../../entity_analytics/components/ai_agents/utils';
+import { getAgentIconType } from '../../../../entity_analytics/components/ai_agents/components/agent_logo';
 import { useWatchlistLookup } from '../../../../entity_analytics/components/ai_agents/hooks/use_watchlist_lookup';
 import { UNKNOWN_VERSION } from '../../../../entity_analytics/components/ai_agents/translations';
 import { WatchlistBadges } from './components/watchlist_badges';
@@ -72,7 +73,7 @@ export const AiAgentHeader = memo(
         title={`${getAgentDisplayName(identity.agentName)} · ${identity.userName}@${
           agent?.hostName ?? identity.hostId
         }`}
-        iconType="sparkles"
+        iconType={getAgentIconType(identity.agentName)}
       />
       <EuiSpacer size="xs" />
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
