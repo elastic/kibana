@@ -15,6 +15,7 @@ import {
   getIndexPatternFromESQLQuery,
   getSourceCommandFromESQLQuery,
   hasTransformationalCommand,
+  retrieveMetadataColumns,
 } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 
@@ -95,6 +96,18 @@ export const getExpandedDocLinkability = (
     ? ExpandedDocLinkability.Linkable
     : ExpandedDocLinkability.EsqlMissingMetadata;
 };
+
+/**
+ * Whether the query can restore a record fetched elsewhere: the record carries its own identity,
+ * so the query must read `_id` and `_index` as well.
+ */
+export const canQueryRestoreDoc = (
+  query: Query | AggregateQuery | undefined,
+  doc: DataTableRecord
+): boolean =>
+  getExpandedDocLinkability(query, doc) === ExpandedDocLinkability.Linkable &&
+  (!isOfAggregateQueryType(query) ||
+    ['_id', '_index'].every((field) => retrieveMetadataColumns(query.esql).includes(field)));
 
 /** Returns the shared explanation for a document-link restriction. */
 export const getExpandedDocLinkDisabledReason = (

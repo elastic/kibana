@@ -48,7 +48,8 @@ export interface ContextAwarenessToolkitActions {
   setExpandedDoc?: (record?: DataTableRecord, options?: { initialTabId?: string }) => void;
   /**
    * Fetches the first row of an ES|QL query that differs from the current one (a chart's own
-   * lookup, for example) and opens it in the flyout without a shareable link.
+   * lookup, for example) and opens it in the flyout, with a shareable link only when the current
+   * query finds it again.
    * Resolves to the opened document's ID, or `undefined` when the query returns no rows.
    */
   setExpandedDocByQuery?: (params: {

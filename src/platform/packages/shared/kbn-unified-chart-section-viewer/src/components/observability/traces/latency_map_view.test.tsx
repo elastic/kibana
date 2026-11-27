@@ -335,9 +335,7 @@ describe('TracesLatencyMapView', () => {
     const clicked = view.mapProps.onCellClick!(cell);
     // A filter pill changed: the documents are different now.
     view.rerender({ filters: ['service.name == "checkout"'] });
-    expect(view.actions.setExpandedDocByQuery.mock.lastCall?.[0]?.abortSignal?.aborted).toBe(
-      true
-    );
+    expect(view.actions.setExpandedDocByQuery.mock.lastCall?.[0]?.abortSignal?.aborted).toBe(true);
     resolveLookup('.ds-traces-apm-000001::span-1::');
     await act(() => clicked);
     expect(jest.mocked(LatencyMap).mock.lastCall?.[0].activeCell).toBeUndefined();

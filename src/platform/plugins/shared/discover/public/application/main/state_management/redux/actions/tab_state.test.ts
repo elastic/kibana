@@ -10,7 +10,9 @@
 import { waitFor } from '@testing-library/react';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import {
+  DEFAULT_EXPANDED_DOC_OWNER,
   DEFAULT_TAB_STATE,
+  QUERY_EXPANDED_DOC_OWNER,
   createTabItem,
   type DiscoverAppState,
   internalStateActions,
@@ -327,6 +329,89 @@ describe('tab_state actions', () => {
       );
 
       expect(selectTab(internalState.getState(), tabId).appState).toBe(initialAppState);
+    });
+  });
+
+  describe('setExpandedDocByQuery', () => {
+    const span = { _id: 'span-1', _index: 'traces-a', 'span.name': 'GET /' };
+    const lookupQuery = 'FROM traces-* METADATA _id, _index | LIMIT 1';
+
+    const setupLookup = async ({
+      editorQuery,
+      refetchedRow,
+    }: {
+      editorQuery: string;
+      refetchedRow?: typeof span;
+    }) => {
+      const toolkit = await setup();
+      const toResponse = (row?: typeof span) => ({
+        rawResponse: {
+          columns: Object.keys(span).map((name) => ({ name, type: 'keyword' })),
+          values: row ? [Object.values(row)] : [],
+        },
+      });
+      const esql = jest
+        .spyOn(toolkit.services.data.search, 'esql')
+        .mockImplementation(async ({ query }) =>
+          toResponse(query === lookupQuery ? span : refetchedRow)
+        );
+      toolkit.internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId: toolkit.tabId,
+          appState: { query: { esql: editorQuery } },
+        })
+      );
+      const refetchQueries = () =>
+        esql.mock.calls.map(([{ query }]) => query).filter((query) => query.includes('_id =='));
+      return { ...toolkit, refetchQueries };
+    };
+
+    it('links a document the current query finds again', async () => {
+      const { internalState, tabId, refetchQueries } = await setupLookup({
+        editorQuery: 'FROM traces-* METADATA _id, _index',
+        refetchedRow: span,
+      });
+
+      const openedId = await internalState.dispatch(
+        internalStateActions.setExpandedDocByQuery({ tabId, esqlQueryText: lookupQuery })
+      );
+
+      const tab = selectTab(internalState.getState(), tabId);
+      expect(refetchQueries()).toHaveLength(1);
+      expect(openedId).toBe(tab.expandedDoc?.id);
+      expect(tab.expandedDocOwner).toBe(DEFAULT_EXPANDED_DOC_OWNER);
+      expect(tab.appState.expandedDoc).toEqual({ id: 'span-1', index: 'traces-a' });
+    });
+
+    it('opens without a link a document the current query does not find', async () => {
+      const { internalState, tabId, refetchQueries } = await setupLookup({
+        editorQuery: 'FROM traces-* METADATA _id, _index | WHERE span.name == "other"',
+      });
+
+      await internalState.dispatch(
+        internalStateActions.setExpandedDocByQuery({ tabId, esqlQueryText: lookupQuery })
+      );
+
+      const tab = selectTab(internalState.getState(), tabId);
+      expect(refetchQueries()).toHaveLength(1);
+      expect(tab.expandedDoc?.raw._id).toBe('span-1');
+      expect(tab.expandedDocOwner).toBe(QUERY_EXPANDED_DOC_OWNER);
+      expect(tab.appState.expandedDoc).toBeUndefined();
+    });
+
+    it('skips the refetch when the current query cannot restore links', async () => {
+      const { internalState, tabId, refetchQueries } = await setupLookup({
+        editorQuery: 'FROM traces-*',
+      });
+
+      await internalState.dispatch(
+        internalStateActions.setExpandedDocByQuery({ tabId, esqlQueryText: lookupQuery })
+      );
+
+      const tab = selectTab(internalState.getState(), tabId);
+      expect(refetchQueries()).toHaveLength(0);
+      expect(tab.expandedDocOwner).toBe(QUERY_EXPANDED_DOC_OWNER);
+      expect(tab.appState.expandedDoc).toBeUndefined();
     });
   });
 

@@ -18,7 +18,8 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { esql } from '@elastic/esql';
 import { injectWhereClauseAfterSourceCommand } from '@kbn/esql-utils';
 import { buildSearchBody } from '@kbn/unified-doc-viewer-plugin/public';
-import type { ExpandedDocRef } from '../utils/expanded_doc';
+import { type AggregateQuery, type Query, isOfAggregateQueryType } from '@kbn/es-query';
+import { type ExpandedDocRef, canQueryRestoreDoc, getExpandedDocRef } from '../utils/expanded_doc';
 
 export interface FetchExpandedDocParams {
   ref: ExpandedDocRef;
@@ -26,7 +27,7 @@ export interface FetchExpandedDocParams {
   /** The current query's ES|QL text, or `undefined` when it is a data view query */
   esqlQueryText: string | undefined;
   data: DataPublicPluginStart;
-  abortSignal: AbortSignal;
+  abortSignal?: AbortSignal;
 }
 
 /** Fetches a linked document that is absent from the current results. */
@@ -123,4 +124,35 @@ export const fetchEsqlQueryDoc = async ({
   const id = row._id && row._index ? getDocId({ _index: row._index, _id: row._id }) : esqlQueryText;
 
   return { id, raw: row, flattened: row };
+};
+
+interface RefetchThroughQueryParams {
+  record: DataTableRecord;
+  query: Query | AggregateQuery | undefined;
+  dataView: DataView;
+  data: DataPublicPluginStart;
+  abortSignal?: AbortSignal;
+}
+
+/** Finds a record again through the current query, as restoring its link would. */
+export const refetchThroughQuery = async ({
+  record,
+  query,
+  dataView,
+  data,
+  abortSignal,
+}: RefetchThroughQueryParams): Promise<DataTableRecord | undefined> => {
+  const ref = getExpandedDocRef(record);
+
+  if (!ref || !canQueryRestoreDoc(query, record)) {
+    return undefined;
+  }
+
+  return fetchExpandedDoc({
+    ref,
+    dataView,
+    esqlQueryText: isOfAggregateQueryType(query) ? query.esql : undefined,
+    data,
+    abortSignal,
+  }).catch(() => undefined);
 };
