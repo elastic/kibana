@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewBase } from '@kbn/es-query';
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import type { KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { FieldFormat, FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { HttpStart } from '@kbn/core/public';
 import type { FilterableSource } from './filterable_source';
 
@@ -40,6 +42,15 @@ export interface Column {
   readonly esType?: string;
   readonly source: ColumnSource;
 }
+
+/**
+ * What a formatter needs to know about a field. A `DataViewField`, a `FilterableField` of `source.fields` or
+ * a {@link Column} fit as they are. A `Column` has one Elasticsearch type, `esType`, used when `esTypes` is
+ * missing. `defaultFormatter` is the default of a mapped field, a data view honors it.
+ */
+export type FormatterField = DataViewFieldBase &
+  Pick<FieldSpec, 'defaultFormatter'> &
+  Pick<Column, 'esType'>;
 
 /**
  * Extends {@link DataViewBase} so filter utilities in `@kbn/es-query` accept a `DataSource` directly.
@@ -76,6 +87,13 @@ export interface DataSourceBase extends DataViewBase {
 
   getColumns(): readonly Column[];
   getColumn(name: string): Column | undefined;
+
+  /**
+   * The formatter of the values of a field. A `DataViewSource` answers with the field formats of its
+   * `DataView`, and for a field it knows by name with that field's own metadata; an `EsqlSource` with the
+   * default formatter of the type of the field.
+   */
+  getFormatter(field: FormatterField, fieldFormats: FieldFormatsStartCommon): FieldFormat;
 
   /**
    * Fields that filters and KQL can target. Same as {@link getColumns} for `DataViewSource`;

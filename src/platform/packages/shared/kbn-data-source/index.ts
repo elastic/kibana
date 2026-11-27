@@ -11,6 +11,7 @@ export type {
   Column,
   ColumnSource,
   DataSourceBase,
+  FormatterField,
   DataSourceKind,
   SerializedDataSource,
 } from './src/types';
