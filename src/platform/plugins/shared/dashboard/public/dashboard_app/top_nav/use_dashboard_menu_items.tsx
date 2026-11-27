@@ -359,6 +359,9 @@ export const useDashboardMenuItems = ({
         htmlId: 'dashboardAddTopNavButton',
         // the grid is hidden while required filters are pending, so panels can't register and adding one would hang
         disableButton: disableTopNav || awaitingRequiredFilters,
+        tooltipContent: awaitingRequiredFilters
+          ? topNavStrings.add.awaitingRequiredFiltersTooltip
+          : undefined,
         run: openAddPanelFlyout,
         order: 2,
       } as AppMenuItemType,
