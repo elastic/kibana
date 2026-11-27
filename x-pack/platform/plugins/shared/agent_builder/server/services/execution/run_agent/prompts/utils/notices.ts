@@ -77,8 +77,16 @@ export const formatHandover = ({ message, forceful }: HandoverParams): BaseMessa
 
 /** Renders a recoverable model error as the assistant/user exchange the model sees on its next turn. */
 export const formatRetryNotice = (error: AgentBuilderAgentExecutionError): BaseMessage[] => {
-  // tool not found -> we format that as a tool call returning an error.
   if (isExecutionError(error, AgentExecutionErrorCode.toolNotFound)) {
+    if (!error.meta.toolName.trim()) {
+      return [
+        createAIMessage('...'),
+        createUserMessage(
+          'The tool call was missing a tool name. Please try again using the name of an available tool.'
+        ),
+      ];
+    }
+
     const toolCallId = generateFakeToolCallId();
     const callArgs =
       typeof error.meta.toolArgs === 'string' ? { args: error.meta.toolArgs } : error.meta.toolArgs;

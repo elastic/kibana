@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ChatCompleteOptions, Model } from '@kbn/inference-common';
+import type { ChatCompleteOptions, FunctionCallingMode, Model } from '@kbn/inference-common';
 import type { AnonymizationRule } from '@kbn/ai-anonymization-common';
 import {
   createInferenceInternalError,
@@ -17,6 +17,7 @@ import {
   getConnectorPlatform,
   getConnectorDefaultModel,
   type ChatCompleteCompositeResponse,
+  InferenceConnectorType,
   MessageRole,
 } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
@@ -48,9 +49,11 @@ import {
   resolveInferenceEndpoint,
   handleCancellation,
   handleLifecycleCallbacks,
+  isNativeFunctionCallingSupported,
   retryHoldingTokenCountEvents,
   streamToResponse,
 } from './utils';
+import { isForcedToolChoice, resolveToolChoice } from './utils/forced_tool_choice';
 import type { InferenceCallbackManager } from '../inference_client/callback_manager';
 import { getRetryFilter } from '../../common/utils/error_retry_filter';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
@@ -116,6 +119,10 @@ type SpanModel = Parameters<typeof withChatCompleteSpan>[0]['model'];
 interface ResolvedPipelineContext {
   callbackContext: ChatCompleteCallbackContext;
   getSpanModel: (modelName?: string) => SpanModel | undefined;
+  getToolChoiceModelId: (
+    modelName?: string,
+    functionCalling?: FunctionCallingMode
+  ) => string | undefined;
   /** Inference endpoints can send `{ template }` instead of messages. */
   supportsTemplates: boolean;
   chatComplete: (
@@ -279,6 +286,14 @@ function createChatCompletePipeline({
         template,
       } = callback(callbackContext);
 
+      const toolChoiceForValidation =
+        template && isForcedToolChoice(toolChoice)
+          ? undefined
+          : resolveToolChoice({
+              toolChoice,
+              modelId: context.getToolChoiceModelId(modelName, functionCalling),
+            });
+
       const logTokenUsage = tokenUsageLogger
         ? handleTokenUsageLogging({
             tokenUsageLogger,
@@ -342,7 +357,10 @@ function createChatCompletePipeline({
               sessionId,
               stream,
             }).pipe(
-              chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }),
+              chunksIntoMessage({
+                toolOptions: { toolChoice: toolChoiceForValidation, tools },
+                logger,
+              }),
               deanonymizeMessage(preparedAnonymization, logger)
             )
           ),
@@ -412,7 +430,12 @@ function createChatCompletePipeline({
                 cacheControl,
                 sessionId,
                 stream,
-              }).pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }));
+              }).pipe(
+                chunksIntoMessage({
+                  toolOptions: { toolChoice: toolChoiceForValidation, tools },
+                  logger,
+                })
+              );
             }
           ).pipe(deanonymizeMessage({ ...preparedAnonymization, replacementsId }, logger));
         }),
@@ -527,6 +550,23 @@ function resolveAndCreatePipeline({
                 family: getConnectorFamily(connector),
                 provider: getConnectorProvider(connector),
               }),
+              getToolChoiceModelId: (modelName, functionCalling = 'auto') => {
+                if (
+                  connectorType === InferenceConnectorType.Gemini ||
+                  (connectorType !== InferenceConnectorType.Bedrock &&
+                    (functionCalling === 'simulated' ||
+                      (functionCalling === 'auto' && !isNativeFunctionCallingSupported(connector))))
+                ) {
+                  return undefined;
+                }
+                return (
+                  modelName ??
+                  getConnectorDefaultModel(connector) ??
+                  (connector.type === InferenceConnectorType.Inference
+                    ? connector.config?.inferenceId
+                    : undefined)
+                );
+              },
               supportsTemplates: false,
               chatComplete: (options) => inferenceAdapter.chatComplete({ ...options, executor }),
             };
@@ -596,6 +636,8 @@ async function resolveInferenceEndpointContext({
             provider: endpointMeta.provider,
           } as SpanModel)
         : undefined,
+    getToolChoiceModelId: (modelName, functionCalling) =>
+      functionCalling === 'simulated' ? undefined : endpointMeta.modelId ?? modelName,
     supportsTemplates: true,
     chatComplete: (options) =>
       inferenceEndpointAdapter.chatComplete({

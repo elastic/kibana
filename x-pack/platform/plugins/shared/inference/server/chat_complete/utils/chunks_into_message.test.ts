@@ -24,6 +24,8 @@ describe('chunksIntoMessage', () => {
     error: jest.fn(),
   } as unknown as Logger;
 
+  const emptyToolDelta = { index: 3, toolCallId: '', function: { name: '', arguments: '' } };
+
   it('concatenates content chunks into a single message', async () => {
     const message = await lastValueFrom(
       chunksIntoMessage({ logger, toolOptions: {} })(
@@ -52,6 +54,107 @@ describe('chunksIntoMessage', () => {
       toolCalls: [],
       type: ChatCompletionEventType.ChatCompletionMessage,
     });
+  });
+
+  [ToolChoiceType.required, { function: 'myFunction' }].forEach((toolChoice) => {
+    it(`rejects a completion with only empty tool deltas for ${JSON.stringify(
+      toolChoice
+    )}`, async () => {
+      const message = lastValueFrom(
+        fromEvents({
+          type: ChatCompletionEventType.ChatCompletionChunk,
+          content: '',
+          tool_calls: [emptyToolDelta],
+        }).pipe(
+          chunksIntoMessage({
+            logger,
+            toolOptions: {
+              toolChoice,
+              tools: { myFunction: { description: 'Look up a value' } },
+            },
+          })
+        )
+      );
+
+      await expect(message).rejects.toThrow('The model response is missing a required tool call');
+    });
+  });
+
+  it('preserves an explicit refusal when a tool call is required', async () => {
+    const message = await lastValueFrom(
+      fromEvents({
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        content: '',
+        refusal: 'I cannot fulfill that request.',
+        tool_calls: [emptyToolDelta],
+      }).pipe(
+        chunksIntoMessage({
+          logger,
+          toolOptions: {
+            toolChoice: ToolChoiceType.required,
+            tools: { myFunction: { description: 'Look up a value' } },
+          },
+        })
+      )
+    );
+
+    expect(message).toEqual({
+      type: ChatCompletionEventType.ChatCompletionMessage,
+      content: '',
+      refusal: 'I cannot fulfill that request.',
+      toolCalls: [],
+    });
+  });
+
+  it('ignores an empty tool delta before a valid tool call at the same index', async () => {
+    const toolCall = {
+      index: 3,
+      toolCallId: 'call_1',
+      function: { name: 'myFunction', arguments: '{"foo":"bar"}' },
+    };
+    const events = await lastValueFrom(
+      fromEvents(
+        {
+          type: ChatCompletionEventType.ChatCompletionChunk,
+          content: 'Checking.',
+          tool_calls: [emptyToolDelta],
+        },
+        {
+          type: ChatCompletionEventType.ChatCompletionChunk,
+          content: '',
+          tool_calls: [toolCall],
+        }
+      ).pipe(
+        chunksIntoMessage({
+          logger,
+          toolOptions: {
+            toolChoice: ToolChoiceType.required,
+            tools: { myFunction: { description: 'Look up a value' } },
+          },
+        }),
+        toArray()
+      )
+    );
+
+    expect(events).toEqual([
+      {
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        content: 'Checking.',
+        tool_calls: [],
+      },
+      {
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        content: '',
+        tool_calls: [{ ...toolCall, index: 0 }],
+      },
+      {
+        type: ChatCompletionEventType.ChatCompletionMessage,
+        content: 'Checking.',
+        toolCalls: [
+          { toolCallId: 'call_1', function: { name: 'myFunction', arguments: { foo: 'bar' } } },
+        ],
+      },
+    ]);
   });
 
   it('parses tool calls', async () => {
@@ -414,5 +517,94 @@ describe('chunksIntoMessage', () => {
       ],
       type: ChatCompletionEventType.ChatCompletionMessage,
     });
+  });
+
+  it('gives a tool call the provider sent without an id the same id on its chunk and on the message', async () => {
+    const events = await lastValueFrom(
+      chunksIntoMessage({
+        logger,
+        toolOptions: {
+          toolChoice: ToolChoiceType.auto,
+          tools: {
+            myFunction: {
+              description: 'myFunction',
+              schema: { type: 'object', properties: { foo: { type: 'string' } } },
+            },
+          },
+        },
+      })(
+        fromEvents({
+          content: '',
+          type: ChatCompletionEventType.ChatCompletionChunk,
+          tool_calls: [
+            {
+              index: 0,
+              toolCallId: '',
+              function: { name: 'myFunction', arguments: '{"foo":"bar"}' },
+            },
+          ],
+        })
+      ).pipe(toArray())
+    );
+
+    const chunkToolCallIds = events.flatMap((event) =>
+      event.type === ChatCompletionEventType.ChatCompletionChunk
+        ? event.tool_calls.map((toolCall) => toolCall.toolCallId)
+        : []
+    );
+    const message = events[events.length - 1];
+
+    expect(chunkToolCallIds).toHaveLength(1);
+    expect(chunkToolCallIds[0]).not.toBe('');
+    expect(message).toEqual({
+      content: '',
+      toolCalls: [
+        {
+          function: { name: 'myFunction', arguments: { foo: 'bar' } },
+          toolCallId: chunkToolCallIds[0],
+        },
+      ],
+      type: ChatCompletionEventType.ChatCompletionMessage,
+    });
+  });
+
+  it('generates different tool call ids for two consecutive completions that carry no ids', async () => {
+    const toolOptions = {
+      toolChoice: ToolChoiceType.auto,
+      tools: {
+        myFunction: {
+          description: 'myFunction',
+          schema: { type: 'object' as const, properties: { foo: { type: 'string' as const } } },
+        },
+      },
+    };
+    const idLessCompletion = () =>
+      lastValueFrom(
+        chunksIntoMessage({ logger, toolOptions })(
+          fromEvents({
+            content: '',
+            type: ChatCompletionEventType.ChatCompletionChunk,
+            tool_calls: [
+              {
+                index: 0,
+                toolCallId: '',
+                function: { name: 'myFunction', arguments: '{"foo":"bar"}' },
+              },
+            ],
+          })
+        )
+      );
+
+    const [first, second] = [await idLessCompletion(), await idLessCompletion()];
+
+    if (
+      first.type !== ChatCompletionEventType.ChatCompletionMessage ||
+      second.type !== ChatCompletionEventType.ChatCompletionMessage
+    ) {
+      throw new Error('expected a message event');
+    }
+    expect(first.toolCalls[0].toolCallId).not.toBe('');
+    expect(second.toolCalls[0].toolCallId).not.toBe('');
+    expect(first.toolCalls[0].toolCallId).not.toBe(second.toolCalls[0].toolCallId);
   });
 });

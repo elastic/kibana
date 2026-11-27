@@ -43,7 +43,7 @@ export const supportsForcedToolChoice = (modelId?: string): boolean => {
   return modelKey !== undefined && CLAUDE_MODEL_KEYS_WITH_FORCED_TOOL_CHOICE.has(modelKey);
 };
 
-const isForcedToolChoice = (toolChoice: ToolChoice | undefined): boolean =>
+export const isForcedToolChoice = (toolChoice: ToolChoice | undefined): boolean =>
   toolChoice === ToolChoiceType.required ||
   (typeof toolChoice === 'object' && toolChoice !== null && 'function' in toolChoice);
 
