@@ -64,6 +64,7 @@ export const getDetectionAlertsApiService = ({
       return measurePerformanceAsync(log, 'security.detectionAlerts.waitForAlerts', async () => {
         const deadline = Date.now() + timeout;
         const index = `${DEFAULT_ALERTS_INDEX_PATTERN}${space}`;
+        let lastRetryableError: errors.ElasticsearchClientError | undefined;
 
         while (Date.now() < deadline) {
           try {
@@ -77,6 +78,7 @@ export const getDetectionAlertsApiService = ({
                 term: { 'kibana.alert.rule.name': ruleName },
               },
             });
+            lastRetryableError = undefined;
             if (result.count >= minCount) {
               return result.count;
             }
@@ -86,6 +88,7 @@ export const getDetectionAlertsApiService = ({
             if (!isTransientEsError(error)) {
               throw error;
             }
+            lastRetryableError = error;
             log.debug(
               `waitForAlerts: retrying after transient Elasticsearch error: ${error.message}`
             );
@@ -93,9 +96,14 @@ export const getDetectionAlertsApiService = ({
           await new Promise((resolve) => setTimeout(resolve, WAIT_FOR_ALERTS_POLL_INTERVAL_MS));
         }
 
-        throw new Error(
-          `waitForAlerts timed out after ${timeout}ms: expected >=${minCount} alert(s) for rule "${ruleName}" in space "${space}"`
-        );
+        const timeoutMessage = `waitForAlerts timed out after ${timeout}ms: expected >=${minCount} alert(s) for rule "${ruleName}" in space "${space}"`;
+        if (lastRetryableError) {
+          throw new Error(
+            `${timeoutMessage}; the last poll failed with: ${lastRetryableError.message}`,
+            { cause: lastRetryableError }
+          );
+        }
+        throw new Error(timeoutMessage);
       });
     },
   };
