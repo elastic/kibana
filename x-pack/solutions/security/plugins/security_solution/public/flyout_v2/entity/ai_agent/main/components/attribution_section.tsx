@@ -6,8 +6,17 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText, EuiTextColor } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiIcon,
+  EuiLink,
+  EuiText,
+  EuiTextColor,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { RiskSeverity } from '../../../../../../common/search_strategy';
 import type { DescriptionList } from '../../../../../../common/utility_types';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
 import { EntityIconByType } from '../../../../../entity_analytics/components/entity_store/entity_icon_by_type';
@@ -44,6 +53,12 @@ import {
 } from '../translations';
 
 const HOST_ALERTS_QUERY_ID = 'aiAgentAttributionHostAlerts';
+
+const RiskLevelValue = ({ severity }: { severity: RiskSeverity }) => (
+  <EuiText size="xs">
+    <RiskScoreLevel severity={severity} hideBackgroundColor />
+  </EuiText>
+);
 
 const PersonName = ({ person, onOpen }: { person: AgentPerson; onOpen: OpenRelatedEntity }) => {
   const { primary, email } = person;
@@ -84,11 +99,13 @@ const PersonCard = ({
   people,
   signedInAs,
   rowFacts,
+  sharedAccount,
   onOpen,
 }: {
   people: readonly AgentPerson[];
   signedInAs?: string;
   rowFacts?: AgentStoreContext;
+  sharedAccount?: React.ReactNode;
   onOpen: OpenRelatedEntity;
 }) => {
   const watchlistLookup = useWatchlistLookup();
@@ -142,6 +159,7 @@ const PersonCard = ({
       data-test-subj={AI_AGENT_TEST_IDS.person}
     >
       {others.length > 0 && <OtherAccounts people={others} onOpen={onOpen} />}
+      {sharedAccount}
     </RelatedEntityCard>
   );
 };
@@ -167,7 +185,7 @@ const HostCard = ({
         ]
       : []),
     ...(host?.riskLevel
-      ? [{ title: HOST_RISK_LEVEL, description: <RiskScoreLevel severity={host.riskLevel} /> }]
+      ? [{ title: HOST_RISK_LEVEL, description: <RiskLevelValue severity={host.riskLevel} /> }]
       : []),
   ];
   return (
@@ -216,7 +234,7 @@ const RunsAsCard = ({
           ? [
               {
                 title: USER_RISK_LEVEL,
-                description: <RiskScoreLevel severity={runsAs.riskLevel} />,
+                description: <RiskLevelValue severity={runsAs.riskLevel} />,
               },
             ]
           : []
@@ -255,44 +273,48 @@ export const AttributionSection = memo(
         header={{ title: ATTRIBUTION_TITLE, link }}
         data-test-subj={AI_AGENT_TEST_IDS.attribution}
       >
-        <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
+        <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
           <EuiFlexItem>
             <PersonCard
               people={people}
               signedInAs={signedInAs}
               rowFacts={rowFacts}
+              sharedAccount={
+                otherInstallsOnAccount.length > 0 && (
+                  <EuiFlexItem>
+                    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type="users" size="s" aria-hidden={true} />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs">
+                          <EuiLink
+                            onClick={onShowRelatedAgents}
+                            data-test-subj={AI_AGENT_TEST_IDS.sharedAccountLink}
+                          >
+                            <FormattedMessage
+                              id="xpack.securitySolution.flyout.entityDetails.aiAgent.attribution.sharedAccount"
+                              defaultMessage="Account also signed in on {count, plural, one {# other install} other {# other installs}}"
+                              values={{ count: otherInstallsOnAccount.length }}
+                            />
+                          </EuiLink>
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                )
+              }
               onOpen={onOpen}
             />
           </EuiFlexItem>
+          <EuiHorizontalRule margin="none" />
           <EuiFlexItem>
             <HostCard context={context} identity={identity} onOpen={onOpen} />
           </EuiFlexItem>
+          <EuiHorizontalRule margin="none" />
           <EuiFlexItem>
             <RunsAsCard runsAs={runsAs} identity={identity} onOpen={onOpen} />
           </EuiFlexItem>
-          {otherInstallsOnAccount.length > 0 && (
-            <EuiFlexItem>
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="users" size="s" aria-hidden={true} />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs">
-                    <EuiLink
-                      onClick={onShowRelatedAgents}
-                      data-test-subj={AI_AGENT_TEST_IDS.sharedAccountLink}
-                    >
-                      <FormattedMessage
-                        id="xpack.securitySolution.flyout.entityDetails.aiAgent.attribution.sharedAccount"
-                        defaultMessage="Account also signed in on {count, plural, one {# other install} other {# other installs}}"
-                        values={{ count: otherInstallsOnAccount.length }}
-                      />
-                    </EuiLink>
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
         </EuiFlexGroup>
       </ExpandablePanel>
     );

@@ -11,8 +11,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiSpacer,
   EuiText,
+  EuiTitle,
   type IconType,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DescriptionList } from '../../../../../../common/utility_types';
@@ -61,6 +64,7 @@ export const RelatedEntityCard = memo(
         <EuiText size="xs" color="subdued">
           {caption}
         </EuiText>
+        <EuiSpacer size="xs" />
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiIcon type={iconType} aria-hidden={true} />
@@ -71,13 +75,19 @@ export const RelatedEntityCard = memo(
               min-width: 0;
             `}
           >
-            <EuiText size="s">
-              <strong>{name}</strong>
-            </EuiText>
+            <EuiTitle size="xxs">
+              <h4>{name}</h4>
+            </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
         {subtitle && (
-          <EuiText size="xs" color="subdued">
+          <EuiText
+            size="xs"
+            color="subdued"
+            css={({ euiTheme }: UseEuiTheme) => css`
+              padding-inline-start: ${euiTheme.size.l};
+            `}
+          >
             {subtitle}
           </EuiText>
         )}
