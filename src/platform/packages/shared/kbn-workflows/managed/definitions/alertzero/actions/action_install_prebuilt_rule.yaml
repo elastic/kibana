@@ -76,9 +76,10 @@ steps:
     type: workflow.fail
     if: "${{ steps.find_installed_rule.error == nil and steps.find_installed_rule.output.id != nil }}"
     with:
+      type: NonRetryableError
       message: >-
         The rule "{{ steps.find_installed_rule.output.name }}" was installed after this
-        proposal was created. Approving again won't work, so decline it.
+        proposal was created.
 
   - name: fail_rule_lookup
     type: workflow.fail
@@ -114,10 +115,10 @@ steps:
     type: workflow.fail
     if: "${{ steps.review_rule.output.rules[0].rule_id != inputs.actionInput.rule_id }}"
     with:
+      type: NonRetryableError
       message: >-
         The prebuilt rule {{ inputs.actionInput.rule_id }} is no longer available to
-        install. It may have been removed from the prebuilt rules package. Approving
-        again won't work, so decline it.
+        install. It may have been removed from the prebuilt rules package.
 
   - name: fail_version_changed
     type: workflow.fail
@@ -125,11 +126,11 @@ steps:
       ${{ steps.review_rule.output.rules[0].rule_id == inputs.actionInput.rule_id
         and steps.review_rule.output.rules[0].version != inputs.actionInput.version }}
     with:
+      type: NonRetryableError
       message: >-
         The rule "{{ steps.review_rule.output.rules[0].name }}" is now at version
         {{ steps.review_rule.output.rules[0].version }}, but this proposal was for
-        version {{ inputs.actionInput.version }}. Approving again won't work, so
-        decline it.
+        version {{ inputs.actionInput.version }}.
 
   - name: install_rule
     type: kibana.request
@@ -152,10 +153,10 @@ steps:
     type: workflow.fail
     if: "${{ steps.install_rule.output.summary.skipped > 0 }}"
     with:
+      type: NonRetryableError
       message: >-
         The rule "{{ steps.review_rule.output.rules[0].name | default: inputs.actionInput.rule_id }}"
-        was installed after this proposal was created. Approving again won't work, so
-        decline it.
+        was installed after this proposal was created.
 
   # A fresh install answers with the new saved object, so enable it by uuid.
   - name: enable_installed_rule

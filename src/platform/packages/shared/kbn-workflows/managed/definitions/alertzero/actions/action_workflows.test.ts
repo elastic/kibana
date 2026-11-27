@@ -16,6 +16,7 @@ import {
   ALERTZERO_ACTION_WORKFLOW_IDS,
 } from '..';
 import { createWorkflowLiquidEngine } from '../../../../common/utils';
+import { ACTION_NON_RETRYABLE_ERROR_TYPE } from '../../../action_workflow';
 
 interface YamlStep {
   name: string;
@@ -220,6 +221,16 @@ describe('AlertZero action workflows', () => {
       expect(traceSteps(yaml, context)).toEqual(steps);
     });
 
+    // A deleted or edited rule cannot be enabled by approving again, so the gate must not
+    // re-offer it. A failed read can succeed on a later attempt, so it stays retryable.
+    it.each(['fail_rule_deleted', 'fail_rule_changed'])('fails %s as non-retryable', (name) => {
+      expect(stepByName(yaml, name)?.with?.type).toBe(ACTION_NON_RETRYABLE_ERROR_TYPE);
+    });
+
+    it('leaves a failed rule read retryable', () => {
+      expect(stepByName(yaml, 'fail_rule_read')?.with).not.toHaveProperty('type');
+    });
+
     // The coverage check matched the rule as proposed, so an edit is worth flagging.
     it.each([
       [
@@ -330,9 +341,7 @@ describe('AlertZero action workflows', () => {
       expect(runsStep(yaml, 'fail_install_skipped', context)).toBe(true);
       expect(
         createWorkflowLiquidEngine().parseAndRenderSync(String(fail?.with?.message), context)
-      ).toBe(
-        'The rule "R" was installed after this proposal was created. Approving again won\'t work, so decline it.'
-      );
+      ).toBe('The rule "R" was installed after this proposal was created.');
 
       const names = yaml.steps.map(({ name }) => name);
       expect(names.indexOf('fail_install_skipped')).toBeLessThan(
@@ -340,7 +349,7 @@ describe('AlertZero action workflows', () => {
       );
     });
 
-    it('tells the analyst to decline when the rule is no longer available', () => {
+    it('explains why the rule is no longer available', () => {
       const fail = stepByName(yaml, 'fail_not_available');
       expect(
         createWorkflowLiquidEngine().parseAndRenderSync(String(fail?.with?.message), {
@@ -348,8 +357,23 @@ describe('AlertZero action workflows', () => {
         })
       ).toBe(
         'The prebuilt rule r-1 is no longer available to install. It may have been removed from ' +
-          "the prebuilt rules package. Approving again won't work, so decline it."
+          'the prebuilt rules package.'
       );
+    });
+
+    // A stale target cannot succeed on a later attempt, so the gate must not re-offer it.
+    // A failed lookup or a rule that was not applied can, so those stay retryable.
+    it.each([
+      'fail_already_installed',
+      'fail_not_available',
+      'fail_version_changed',
+      'fail_install_skipped',
+    ])('fails %s as non-retryable', (name) => {
+      expect(stepByName(yaml, name)?.with?.type).toBe(ACTION_NON_RETRYABLE_ERROR_TYPE);
+    });
+
+    it.each(['fail_rule_lookup', 'fail_not_applied'])('leaves %s retryable', (name) => {
+      expect(stepByName(yaml, name)?.with).not.toHaveProperty('type');
     });
 
     it('filters the installation review by the exact signature id', () => {

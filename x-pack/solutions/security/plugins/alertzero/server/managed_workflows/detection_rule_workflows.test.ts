@@ -1232,6 +1232,16 @@ describe('detection rule workflows', () => {
           );
 
           expect(failStep?.name).toBe(expectedFailStep);
+          // A deleted or edited rule never recovers, so the gate must not re-offer it. A failed
+          // read can, so it stays retryable.
+          if (
+            expectedFailStep === 'fail_rule_deleted' ||
+            expectedFailStep === 'fail_rule_changed'
+          ) {
+            expect(failStep?.with?.type).toBe('NonRetryableError');
+          } else if (expectedFailStep === 'fail_rule_read') {
+            expect(failStep?.with).not.toHaveProperty('type');
+          }
           // The rule is only touched after every check has had its chance to stop the run.
           expect(steps.findIndex(({ type }) => type.startsWith('security.'))).toBeGreaterThan(
             steps.findIndex((step) => step === failStep)
