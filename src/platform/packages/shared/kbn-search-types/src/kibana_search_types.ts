@@ -51,6 +51,9 @@ export interface IKibanaSearchResponse<RawResponse = any> {
    */
   isRestored?: boolean;
 
+  /** True when this consumer received a completed response from the browser's search cache. */
+  isCached?: boolean;
+
   /**
    * Indicates whether the search has been saved to a search-session object and long keepAlive was set
    */

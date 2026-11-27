@@ -319,6 +319,11 @@ export const expectSampleSizeFooter = async ({
   await expect.poll(() => dataGrid.getDataGridFooterText()).toContain(String(sampleSize));
 };
 
+/** Selects the request named `name` in the open inspector's request chooser. */
+export const selectInspectorRequest = async (page: ScoutPage, name: string): Promise<void> => {
+  await page.components.comboBox('inspectorRequestChooser').setSelectedOptions([name]);
+};
+
 export const clearStoredQueryMode = async (page: ScoutPage): Promise<void> => {
   await page.evaluate((storageKey) => {
     window.localStorage.removeItem(storageKey);

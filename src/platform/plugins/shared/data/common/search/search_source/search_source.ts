@@ -478,10 +478,11 @@ export class SearchSource {
         }),
         last(undefined, null),
         tap((finalResponse) => {
-          if (finalResponse) {
-            const resp = finalResponse.rawResponse as estypes.SearchResponse<unknown>;
-            requestResponder?.stats(getResponseInspectorStats(resp, this));
-            requestResponder?.ok({ json: finalResponse });
+          if (finalResponse && requestResponder) {
+            const { isCached, ...json } = finalResponse;
+            const resp = json.rawResponse as estypes.SearchResponse<unknown>;
+            requestResponder.stats(getResponseInspectorStats(resp, this));
+            requestResponder.ok({ json, isCached });
           }
         }),
         finalize(() => {

@@ -20,6 +20,7 @@ import {
   RELATIVE_TIME_DEFAULTS,
   goToDashboards,
   refetchDiscover,
+  selectInspectorRequest,
   waitForDiscoverResults,
 } from '../fixtures';
 
@@ -45,8 +46,14 @@ spaceTest.describe('Discover replay cache', { tag: '@local-stateful-classic' }, 
   spaceTest(
     'replays every tab that was loaded before leaving until an explicit refresh',
     async ({ page, pageObjects, network }) => {
-      const { discover, unifiedTabs, collapsibleNav } = pageObjects;
+      const { discover, unifiedTabs, collapsibleNav, inspector } = pageObjects;
       const hitCount = discover.getHitCountLocator();
+      const requestTimeBadge = page.testSubj.locator('inspectorRequestTotalTime');
+      const openDocumentsRequest = async () => {
+        await unifiedTabs.openInspectorForActiveTab();
+        await inspector.openInspectorRequestsView();
+        await selectInspectorRequest(page, 'Documents');
+      };
 
       const firstTabHits = await spaceTest.step('loads a second tab', async () => {
         await refetchDiscover({ page, network, discover }, () => discover.createNewTabAndSearch());
@@ -70,10 +77,16 @@ spaceTest.describe('Discover replay cache', { tag: '@local-stateful-classic' }, 
         );
 
         expect(requestCount).toBe(0);
+        await openDocumentsRequest();
+        await expect(requestTimeBadge).toHaveText(/^\d+ms \(cached\)$/);
+        await inspector.close();
       });
 
       await spaceTest.step('loads fresh results on refresh', async () => {
         await refetchDiscover({ page, network, discover }, () => discover.submitQuery());
+        await openDocumentsRequest();
+        await expect(requestTimeBadge).toHaveText(/^\d+ms$/);
+        await inspector.close();
       });
     }
   );

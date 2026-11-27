@@ -371,7 +371,7 @@ describe('SearchResponseCache', () => {
 
       const finalRes = await cached$!.response$.toPromise();
 
-      expect(finalRes).toStrictEqual(r[r.length - 1]);
+      expect(finalRes).toStrictEqual({ ...r[r.length - 1], isCached: true });
       expect(next).toHaveBeenCalledTimes(1);
     });
 
@@ -390,7 +390,7 @@ describe('SearchResponseCache', () => {
 
       const finalRes = await cached$!.response$.toPromise();
 
-      expect(finalRes).toStrictEqual(r[r.length - 1]);
+      expect(finalRes).toStrictEqual({ ...r[r.length - 1], isCached: true });
       expect(next).toHaveBeenCalledTimes(1);
     });
   });
