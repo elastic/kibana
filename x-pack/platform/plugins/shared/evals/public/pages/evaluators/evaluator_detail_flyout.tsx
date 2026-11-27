@@ -46,6 +46,7 @@ const EVIDENCE_LABELS: Record<JudgeEvidence[number], string> = {
   input: i18n.INPUT_EVIDENCE,
   response: i18n.RESPONSE_EVIDENCE,
   steps: i18n.STEPS_EVIDENCE,
+  transcript: i18n.TRANSCRIPT_EVIDENCE,
 };
 
 const describeScore = (score: LlmJudgeConfig['output']['scores'][number]): string => {

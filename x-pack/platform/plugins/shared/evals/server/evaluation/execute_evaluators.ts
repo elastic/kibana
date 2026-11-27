@@ -19,7 +19,7 @@ import { formatEvidenceSchemaIssues } from '../evaluators/evidence/schema_issues
 import { createTraceAccessor, type TraceAccessorWithSearch } from '../evaluators/trace_accessor';
 import { awaitTraceReady, TraceReadinessError } from '../evaluators/trace_readiness';
 import type { EvidenceRound } from '../evaluators/evidence/types';
-import type { EvaluatorDefinition, TraceAccessor } from '../evaluators/types';
+import type { ConversationEvidence, EvaluatorDefinition, TraceAccessor } from '../evaluators/types';
 import { resolveConnectorModel } from '../lib/resolve_connector_model';
 import { withEvalsJudgeChildSpan } from '../task_providers/tracing';
 import { EvaluationExecutionError } from './evaluation_execution_error';
@@ -36,6 +36,8 @@ export interface ResolvedEvaluator {
 /** A round the caller already holds, graded as is. */
 export interface InMemoryEvidence {
   round: EvidenceRound;
+  /** Every turn, when the round is the last turn of a conversation. */
+  conversation?: ConversationEvidence;
   referenceData?: Record<string, unknown>;
 }
 
@@ -128,8 +130,12 @@ export const executeEvaluators = async (
   options: ExecuteEvaluatorsOptions
 ): Promise<EvaluateResponse['results']> => {
   const { request, evaluators, logger, getInferenceStart } = options;
-  if (options.subject?.mode === 'multi-turn') {
-    throw new EvaluationExecutionError('multi-turn evaluation is not yet supported', 'badRequest');
+  if (
+    options.subject &&
+    options.subject.mode !== 'multi-turn' &&
+    options.subject.traces.length !== 1
+  ) {
+    throw new EvaluationExecutionError('single-turn mode requires exactly one trace', 'badRequest');
   }
 
   for (const { definition, connectorId } of evaluators) {
@@ -143,31 +149,50 @@ export const executeEvaluators = async (
 
   let referenceData: Record<string, unknown> | undefined;
   // Deferred so every input is validated before a trace is polled, which can take seconds.
-  let readRound: () => Promise<{ round: EvidenceRound; traceAccessor?: TraceAccessor }>;
+  let readRound: () => Promise<{
+    round: EvidenceRound;
+    conversation: ConversationEvidence;
+    traceAccessor?: TraceAccessor;
+  }>;
   if (options.evidence) {
-    const { round } = options.evidence;
+    const { round, conversation } = options.evidence;
     ({ referenceData } = options.evidence);
-    readRound = async () => ({ round });
+    readRound = async () => ({
+      round,
+      conversation: conversation ?? { rounds: [round], turnIds: [undefined] },
+    });
   } else {
     const { subject, traceReader } = options;
-    const [{ trace_id: traceId, reference_data: traceReferenceData }] = subject.traces;
-    if (!isValidTraceId(traceId)) {
+    const invalidTrace = subject.traces.find(({ trace_id: traceId }) => !isValidTraceId(traceId));
+    if (invalidTrace) {
       throw new EvaluationExecutionError(
         'Invalid trace_id: must be a 32-character hex string',
         'badRequest'
       );
     }
-    referenceData = traceReferenceData;
-    const traceAccessor = createTraceAccessor({ traceId, esClient: traceReader });
-    readRound = async () => ({
-      round: await readRoundFromTrace({ traceAccessor, subject, logger }),
-      traceAccessor,
-    });
+    // Turn-scoped evaluators grade the last turn, so its reference data and trace are used.
+    const lastTrace = subject.traces[subject.traces.length - 1];
+    referenceData = lastTrace.reference_data;
+    const traceAccessors = subject.traces.map(({ trace_id: traceId }) =>
+      createTraceAccessor({ traceId, esClient: traceReader })
+    );
+    readRound = async () => {
+      const rounds = await Promise.all(
+        traceAccessors.map((traceAccessor) =>
+          readRoundFromTrace({ traceAccessor, subject, logger })
+        )
+      );
+      return {
+        round: rounds[rounds.length - 1],
+        conversation: { rounds, turnIds: subject.traces.map(({ turn_id: turnId }) => turnId) },
+        traceAccessor: traceAccessors[traceAccessors.length - 1],
+      };
+    };
   }
 
   const parsedReferenceData = parseReferenceData(evaluators, referenceData);
 
-  const { round, traceAccessor } = await readRound();
+  const { round, conversation, traceAccessor } = await readRound();
 
   let inferenceStartPromise: Promise<InferenceServerStart> | undefined;
   const getInference = (): Promise<InferenceServerStart> | undefined => {
@@ -259,6 +284,7 @@ export const executeEvaluators = async (
         definition.evaluate({
           trace: traceAccessor,
           round,
+          conversation,
           referenceData: parsedReferenceData.get(definition),
           inferenceClient,
           log: logger,

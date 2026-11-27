@@ -268,11 +268,17 @@ const toMessageArray = (rawValue: unknown): Array<Record<string, unknown>> => {
   );
 };
 
+/**
+ * The text of the first message with `role`, or of the last one when `from` is `last`. A
+ * model's input holds the whole conversation so far, so the current user query is the last
+ * user message in it; on a first turn it is the only one.
+ */
 const getGenAiMessageText = (
   messages: Array<Record<string, unknown>>,
-  role: 'user' | 'assistant'
+  role: 'user' | 'assistant',
+  from: 'first' | 'last' = 'first'
 ): string | undefined => {
-  for (const message of messages) {
+  for (const message of from === 'last' ? [...messages].reverse() : messages) {
     if (message.role !== role) {
       continue;
     }
@@ -341,8 +347,9 @@ const parseMessageFromDocument = (
   }
 
   const messages = toMessageArray(getFieldValue(document, itemSpec.contentField));
-  const role = itemKey === EVIDENCE_ITEM_KEYS.agentResponse ? 'assistant' : 'user';
-  return getGenAiMessageText(messages, role);
+  return itemKey === EVIDENCE_ITEM_KEYS.agentResponse
+    ? getGenAiMessageText(messages, 'assistant')
+    : getGenAiMessageText(messages, 'user', 'last');
 };
 
 const parseMessageValue = (

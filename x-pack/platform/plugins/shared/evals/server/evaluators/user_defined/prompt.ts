@@ -10,6 +10,7 @@ import { createPrompt } from '@kbn/inference-common';
 import type { Prompt, ToolSchema, ToolSchemaType } from '@kbn/inference-common';
 import { z } from '@kbn/zod/v4';
 import type { EvidenceRound } from '../evidence/types';
+import type { ConversationEvidence } from '../types';
 import {
   JUDGE_EVIDENCE_TEMPLATE_VARIABLES,
   type JudgeScoreDefinition,
@@ -19,16 +20,40 @@ import {
 export const JUDGE_TOOL_NAME = 'evaluate';
 
 /**
+ * Renders every turn in order for a judge that grades the whole conversation. Tool calls are
+ * listed by name only, so a long conversation stays readable; `steps` evidence carries the
+ * details of the last turn.
+ */
+export const renderConversationTranscript = ({ rounds, turnIds }: ConversationEvidence): string =>
+  rounds
+    .map((round, index) => {
+      const label = turnIds[index] ? `Turn ${index + 1} (${turnIds[index]})` : `Turn ${index + 1}`;
+      const tools = round.steps
+        .map(({ tool_id: toolId }) => toolId)
+        .filter((toolId): toolId is string => Boolean(toolId));
+      return [
+        `${label}`,
+        `User: ${round.input.message}`,
+        ...(tools.length > 0 ? [`Tool calls: ${tools.join(', ')}`] : []),
+        `Assistant: ${round.response.message}`,
+      ].join('\n');
+    })
+    .join('\n\n');
+
+/**
  * The variables a judge template is rendered with: the evidence it declared,
  * plus each reference-data key under its own name.
  */
 export const buildJudgeInput = ({
   judge,
   round,
+  conversation,
   referenceData,
 }: {
   judge: LlmJudgeConfig;
   round: EvidenceRound;
+  /** Every turn of a multi-turn subject; a single round otherwise. */
+  conversation?: ConversationEvidence;
   referenceData?: Record<string, unknown>;
 }): Record<string, string> => {
   const input: Record<string, string> = {};
@@ -41,6 +66,11 @@ export const buildJudgeInput = ({
   }
   if (judge.evidence.includes('steps')) {
     input[JUDGE_EVIDENCE_TEMPLATE_VARIABLES.steps] = JSON.stringify(round.steps);
+  }
+  if (judge.evidence.includes('transcript')) {
+    input[JUDGE_EVIDENCE_TEMPLATE_VARIABLES.transcript] = renderConversationTranscript(
+      conversation ?? { rounds: [round], turnIds: [undefined] }
+    );
   }
 
   for (const key of judge.reference_data_keys ?? []) {

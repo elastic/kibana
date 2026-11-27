@@ -13,6 +13,7 @@ import {
   API_VERSIONS,
   EVALS_EVALUATE_URL,
   EvaluateRequestBody,
+  MAX_MULTI_TURN_TRACES,
   type EvaluateResponse,
 } from '@kbn/evals-common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -866,7 +867,8 @@ describe('POST /internal/evals/_evaluate', () => {
     );
   });
 
-  it('returns 400 for multi-turn mode', async () => {
+  it('returns 400 when a single-turn subject has more than one trace', async () => {
+    // Only a multi-turn subject reads several traces; a second one here would be ignored.
     const { handler } = setup({
       evaluatorRegistry: buildEvaluatorRegistry([buildEvaluator({ name: 'groundedness' })]),
     });
@@ -876,8 +878,8 @@ describe('POST /internal/evals/_evaluate', () => {
       {
         body: {
           subject: {
-            mode: 'multi-turn',
-            traces: [{ trace_id: 'trace-1' }, { trace_id: 'trace-2' }],
+            mode: 'single-turn',
+            traces: [{ trace_id: 'a'.repeat(32) }, { trace_id: 'b'.repeat(32) }],
           },
           evaluators: [{ name: 'groundedness', connector_id: 'connector-1' }],
         },
@@ -886,20 +888,22 @@ describe('POST /internal/evals/_evaluate', () => {
     );
 
     expect(response.status).toBe(400);
-    expect(response.payload).toEqual({ message: 'multi-turn evaluation is not yet supported' });
+    expect(response.payload).toEqual({ message: 'single-turn mode requires exactly one trace' });
   });
 
-  it('refuses more than one trace at the request boundary', () => {
-    // The handler does not re-check this: the schema is what keeps a second trace from
-    // being silently ignored, so that is where it is asserted.
+  it('bounds the traces of a multi-turn subject at the request boundary', () => {
+    const subject = (count: number) => ({
+      mode: 'multi-turn',
+      traces: Array.from({ length: count }, () => ({ trace_id: 'a'.repeat(32) })),
+    });
+    const evaluators = [{ name: 'groundedness', connector_id: 'connector-1' }];
+
     expect(
-      EvaluateRequestBody.safeParse({
-        subject: {
-          mode: 'single-turn',
-          traces: [{ trace_id: 'trace-1' }, { trace_id: 'trace-2' }],
-        },
-        evaluators: [{ name: 'groundedness', connector_id: 'connector-1' }],
-      }).success
+      EvaluateRequestBody.safeParse({ subject: subject(MAX_MULTI_TURN_TRACES), evaluators }).success
+    ).toBe(true);
+    expect(
+      EvaluateRequestBody.safeParse({ subject: subject(MAX_MULTI_TURN_TRACES + 1), evaluators })
+        .success
     ).toBe(false);
   });
 

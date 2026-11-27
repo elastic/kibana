@@ -78,13 +78,7 @@ export const registerValidateRoute = ({
       },
       async (context, request, response) => {
         const { subject, evaluators } = request.body;
-        if (subject.mode === 'multi-turn') {
-          return response.badRequest({
-            body: { message: 'multi-turn evaluation is not yet supported' },
-          });
-        }
-
-        if (subject.mode === 'single-turn' && subject.traces.length !== 1) {
+        if (subject.mode !== 'multi-turn' && subject.traces.length !== 1) {
           return response.badRequest({
             body: { message: 'single-turn mode requires exactly one trace' },
           });
@@ -108,7 +102,9 @@ export const registerValidateRoute = ({
           resolvedEvaluators.push({ config, definition });
         }
 
-        const [{ trace_id: traceId }] = subject.traces;
+        // A multi-turn subject is checked against its last turn, the one turn-scoped evaluators
+        // grade; the earlier turns are read the same way when the evaluation runs.
+        const { trace_id: traceId } = subject.traces[subject.traces.length - 1];
         if (!isValidTraceId(traceId)) {
           return response.badRequest({
             body: { message: 'Invalid trace_id: must be a 32-character hex string' },

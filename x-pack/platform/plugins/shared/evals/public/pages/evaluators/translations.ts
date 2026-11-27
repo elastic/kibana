@@ -193,6 +193,12 @@ export const RESPONSE_EVIDENCE = i18n.translate('xpack.evals.evaluators.response
 export const STEPS_EVIDENCE = i18n.translate('xpack.evals.evaluators.stepsEvidenceLabel', {
   defaultMessage: 'Tool calls',
 });
+export const TRANSCRIPT_EVIDENCE = i18n.translate(
+  'xpack.evals.evaluators.transcriptEvidenceLabel',
+  {
+    defaultMessage: 'Conversation transcript',
+  }
+);
 export const REFERENCE_DATA_LABEL = i18n.translate(
   'xpack.evals.evaluators.referenceDataKeysLabel',
   { defaultMessage: 'Reference data keys' }
