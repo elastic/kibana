@@ -47,7 +47,7 @@ const extractTactics = (params: RuleParams): Array<{ id: string; name: string }>
 
   const tactics: Array<{ id: string; name: string }> = [];
   for (const { framework, tactic } of threat) {
-    // SIEM readiness is MITRE ATT&CK-only; ATLAS entries are skipped (missing framework counts as ATT&CK, matching the save-path default).
+    // SIEM readiness is MITRE ATT&CK Enterprise-only; ATLAS and ICS entries are skipped (missing framework counts as ATT&CK, matching the save-path default).
     const isAttack = !framework || framework === MITRE_ATTACK_FRAMEWORK;
     if (isAttack && tactic?.id && tactic?.name) {
       tactics.push({ id: tactic.id, name: tactic.name });

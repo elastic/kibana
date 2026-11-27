@@ -181,6 +181,78 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(body.coverage['AML.T0024.002']).to.eql([rule1.id]);
           expect(body.unmapped_rule_ids).to.eql([]);
         });
+
+        it('returns an ICS-only rule under its ICS ids and not as unmapped', async () => {
+          const rule1 = await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({
+              threat: [
+                {
+                  framework: 'MITRE ATT&CK ICS',
+                  tactic: {
+                    id: 'TA0107',
+                    name: 'Inhibit Response Function',
+                    reference: 'https://attack.mitre.org/tactics/TA0107/',
+                  },
+                  technique: [
+                    {
+                      id: 'T1691',
+                      name: 'Block Operational Technology Message',
+                      reference: 'https://attack.mitre.org/techniques/T1691/',
+                      subtechnique: [
+                        {
+                          id: 'T1691.001',
+                          name: 'Command Message',
+                          reference: 'https://attack.mitre.org/techniques/T1691/001/',
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            })
+          );
+
+          const body = await getCoverageOverview(supertest);
+
+          expect(body.coverage.TA0107).to.eql([rule1.id]);
+          expect(body.coverage.T1691).to.eql([rule1.id]);
+          expect(body.coverage['T1691.001']).to.eql([rule1.id]);
+          expect(body.unmapped_rule_ids).to.eql([]);
+          expect(body.invalid_mitre_ids).to.eql({});
+        });
+
+        it('reports an unknown technique labelled as ICS under invalid_mitre_ids.ics and does not mark the rule unmapped', async () => {
+          const rule1 = await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({
+              threat: [
+                {
+                  framework: 'MITRE ATT&CK ICS',
+                  tactic: {
+                    id: 'TA0107',
+                    name: 'Inhibit Response Function',
+                    reference: 'https://attack.mitre.org/tactics/TA0107/',
+                  },
+                  technique: [
+                    {
+                      id: 'T9999',
+                      name: 'Unknown technique',
+                      reference: 'https://attack.mitre.org/techniques/T9999/',
+                    },
+                  ],
+                },
+              ],
+            })
+          );
+
+          const body = await getCoverageOverview(supertest);
+
+          expect(body.invalid_mitre_ids[rule1.id]).to.eql({ ics: ['T9999'] });
+          expect(body.unmapped_rule_ids).to.eql([]);
+        });
       });
 
       describe('with filters', () => {
@@ -871,7 +943,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const body = await getCoverageOverview(supertest);
 
-          expect(body.invalid_mitre_ids[rule.id]).to.eql(['TA9999']);
+          expect(body.invalid_mitre_ids[rule.id]).to.eql({ enterprise: ['TA9999'] });
         });
 
         it('populates invalid_mitre_ids for rules with unknown technique IDs', async () => {
@@ -901,7 +973,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const body = await getCoverageOverview(supertest);
 
-          expect(body.invalid_mitre_ids[rule.id]).to.eql(['T9999']);
+          expect(body.invalid_mitre_ids[rule.id]).to.eql({ enterprise: ['T9999'] });
         });
 
         it('does not add rules with valid MITRE IDs to invalid_mitre_ids', async () => {

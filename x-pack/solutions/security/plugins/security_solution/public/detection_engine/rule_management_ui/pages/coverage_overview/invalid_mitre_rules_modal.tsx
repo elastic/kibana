@@ -20,16 +20,19 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { CoverageOverviewRuleWithInvalidMitre } from '../../../rule_management/model/coverage_overview/dashboard';
+import type { MitreFramework } from '@kbn/security-mitre-attack-common';
+import { THREAT_FRAMEWORK_DISPLAY_NAME } from '@kbn/security-mitre-attack-common';
 import { RuleLink } from '../../components/rules_table/use_columns';
+import type { CoverageOverviewRuleWithFrameworkInvalidMitreIds } from './helpers';
 import { InvalidMitreBadge } from './shared_components/invalid_mitre_badge';
 import * as i18n from './translations';
 
 interface RuleListProps {
-  rules: CoverageOverviewRuleWithInvalidMitre[];
+  rules: CoverageOverviewRuleWithFrameworkInvalidMitreIds[];
+  framework: MitreFramework;
 }
 
-const RuleList = memo(({ rules }: RuleListProps) => (
+const RuleList = memo(({ rules, framework }: RuleListProps) => (
   <EuiFlexGroup direction="column" gutterSize="s">
     {rules.map((rule) => (
       <EuiFlexItem key={rule.id} grow={false}>
@@ -41,7 +44,7 @@ const RuleList = memo(({ rules }: RuleListProps) => (
             <EuiFlexGroup gutterSize="xs" wrap>
               {rule.invalidMitreIds.map((id) => (
                 <EuiFlexItem key={id} grow={false}>
-                  <InvalidMitreBadge id={id} />
+                  <InvalidMitreBadge id={id} framework={framework} />
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>
@@ -54,9 +57,9 @@ const RuleList = memo(({ rules }: RuleListProps) => (
 RuleList.displayName = 'RuleList';
 
 export interface InvalidMitreRulesModalProps {
-  enabledRules: CoverageOverviewRuleWithInvalidMitre[];
-  disabledRules: CoverageOverviewRuleWithInvalidMitre[];
-  framework: string;
+  enabledRules: CoverageOverviewRuleWithFrameworkInvalidMitreIds[];
+  disabledRules: CoverageOverviewRuleWithFrameworkInvalidMitreIds[];
+  framework: MitreFramework;
   onClose: () => void;
 }
 
@@ -76,12 +79,14 @@ export const InvalidMitreRulesModal = memo(
       >
         <EuiModalHeader>
           <EuiModalHeaderTitle id={modalTitleId}>
-            {i18n.INVALID_MITRE_RULES_MODAL_TITLE(framework)}
+            {i18n.INVALID_MITRE_RULES_MODAL_TITLE(THREAT_FRAMEWORK_DISPLAY_NAME[framework])}
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
           <EuiText size="s" color="subdued">
-            <p>{i18n.INVALID_MITRE_RULES_MODAL_DESCRIPTION(framework)}</p>
+            <p>
+              {i18n.INVALID_MITRE_RULES_MODAL_DESCRIPTION(THREAT_FRAMEWORK_DISPLAY_NAME[framework])}
+            </p>
           </EuiText>
           <EuiSpacer size="m" />
 
@@ -91,16 +96,16 @@ export const InvalidMitreRulesModal = memo(
                 <h3>{i18n.INVALID_MITRE_RULES_MODAL_ENABLED_SECTION}</h3>
               </EuiTitle>
               <EuiSpacer size="s" />
-              <RuleList rules={enabledRules} />
+              <RuleList rules={enabledRules} framework={framework} />
               <EuiSpacer size="m" />
               <EuiTitle size="xxs">
                 <h3>{i18n.INVALID_MITRE_RULES_MODAL_DISABLED_SECTION}</h3>
               </EuiTitle>
               <EuiSpacer size="s" />
-              <RuleList rules={disabledRules} />
+              <RuleList rules={disabledRules} framework={framework} />
             </>
           ) : (
-            <RuleList rules={[...enabledRules, ...disabledRules]} />
+            <RuleList rules={[...enabledRules, ...disabledRules]} framework={framework} />
           )}
         </EuiModalBody>
         <EuiModalFooter>

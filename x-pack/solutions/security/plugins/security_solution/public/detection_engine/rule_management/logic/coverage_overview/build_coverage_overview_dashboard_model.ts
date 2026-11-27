@@ -98,12 +98,14 @@ function buildInvalidlyMappedRules(
     disabledRules: [],
   };
 
-  for (const [ruleId, invalidMitreIds] of Object.entries(apiResponse.invalid_mitre_ids)) {
+  for (const [ruleId, invalidMitreIdsByFramework] of Object.entries(
+    apiResponse.invalid_mitre_ids
+  )) {
     addRuleWithInvalidMitreIds(
       invalidlyMappedRules,
       ruleId,
       apiResponse.rules_data[ruleId],
-      invalidMitreIds
+      invalidMitreIdsByFramework
     );
   }
 
@@ -117,7 +119,7 @@ function addRuleWithInvalidMitreIds(
   },
   ruleId: string,
   ruleData: CoverageOverviewRuleAttributes,
-  invalidMitreIds: string[]
+  invalidMitreIdsByFramework: CoverageOverviewRuleWithInvalidMitre['invalidMitreIdsByFramework']
 ): void {
   if (!ruleData) {
     return;
@@ -126,7 +128,7 @@ function addRuleWithInvalidMitreIds(
   const rule: CoverageOverviewRuleWithInvalidMitre = {
     id: ruleId,
     name: ruleData.name,
-    invalidMitreIds,
+    invalidMitreIdsByFramework,
   };
 
   if (ruleData.activity === CoverageOverviewRuleActivity.Enabled) {

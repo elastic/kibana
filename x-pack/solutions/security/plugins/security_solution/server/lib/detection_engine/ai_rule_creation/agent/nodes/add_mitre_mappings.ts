@@ -10,7 +10,10 @@ import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import type { MitreEntitySummaryBuckets, MitreFramework } from '@kbn/security-mitre-attack-common';
-import { MITRE_FRAMEWORKS, THREAT_FRAMEWORK_NAME } from '@kbn/security-mitre-attack-common';
+import {
+  MITRE_FRAMEWORKS_ENABLED_IN_CONSUMERS,
+  THREAT_FRAMEWORK_NAME,
+} from '@kbn/security-mitre-attack-common';
 import type { RuleCreationState } from '../state';
 import { MITRE_MAPPING_SELECTION_PROMPT } from './prompts';
 import { resolveMitreBucketsByFramework } from '../../../mitre/resolve_mitre_buckets';
@@ -47,7 +50,7 @@ export const formatMitreMapping = (
 ): Array<Threat> => {
   const threatMappings: Array<Threat> = [];
 
-  const lookups = MITRE_FRAMEWORKS.flatMap((framework) => {
+  const lookups = MITRE_FRAMEWORKS_ENABLED_IN_CONSUMERS.flatMap((framework) => {
     const buckets = bucketsByFramework[framework];
     if (!buckets) {
       return [];
@@ -168,7 +171,7 @@ export const addMitreMappingsNode = ({
       });
       const bucketsByFramework = await resolveMitreBucketsByFramework(
         mitreDataClient,
-        MITRE_FRAMEWORKS
+        MITRE_FRAMEWORKS_ENABLED_IN_CONSUMERS
       );
       if (Object.keys(bucketsByFramework).length === 0) {
         throw new Error('MITRE data is unavailable');

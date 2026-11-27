@@ -7,11 +7,13 @@
 
 import React, { memo } from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
+import type { MitreFramework } from '@kbn/security-mitre-attack-common';
 import { buildMitreReferenceUrl } from '../../../../../../common/detection_engine/mitre/build_mitre_reference_url';
 import * as i18n from '../translations';
 
 export interface InvalidMitreBadgeProps {
   id: string;
+  framework: MitreFramework;
 }
 
 /**
@@ -19,8 +21,8 @@ export interface InvalidMitreBadgeProps {
  * currently bundled dataset. Links out to the MITRE reference page when the ID
  * maps to a resolvable URL.
  */
-export const InvalidMitreBadge = memo(({ id }: InvalidMitreBadgeProps) => {
-  const href = buildMitreReferenceUrl(id);
+export const InvalidMitreBadge = memo(({ id, framework }: InvalidMitreBadgeProps) => {
+  const href = buildMitreReferenceUrl(id, framework);
 
   if (!href) {
     return (
@@ -31,7 +33,7 @@ export const InvalidMitreBadge = memo(({ id }: InvalidMitreBadgeProps) => {
   }
 
   return (
-    <EuiToolTip content={i18n.INVALID_MITRE_ID_BADGE_TOOLTIP(id)}>
+    <EuiToolTip content={i18n.INVALID_MITRE_ID_BADGE_TOOLTIP(id, framework)}>
       <EuiBadge
         color="warning"
         href={href}

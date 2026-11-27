@@ -15,10 +15,11 @@ import {
 } from '../stix_entities.mock';
 import type { StixBundle } from '../types';
 import { mapTechniques } from './map_techniques';
+import { ENTERPRISE_STIX_SOURCE } from '../stix_sources';
 
 const FRAMEWORK = 'enterprise' as const;
 const FRAMEWORK_VERSION = '18.0';
-const SOURCE_NAME = 'mitre-attack' as const;
+const SOURCE = ENTERPRISE_STIX_SOURCE;
 
 const tactic1 = getMockTacticEntity(); // TA0006, credential-access
 const tactic2 = getMockTacticEntity({
@@ -35,7 +36,7 @@ describe('mapTechniques', () => {
     const technique = getMockTechniqueEntity(); // T1003
     const subtechnique = getMockSubtechniqueEntity(); // T1003.001
     const bundle: StixBundle = { objects: [matrix, tactic1, tactic2, technique, subtechnique] };
-    const result = mapTechniques(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE_NAME);
+    const result = mapTechniques(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE);
     const ids = result.map((t) => t.id);
     expect(ids).toContain('T1003');
     expect(ids).not.toContain('T1003.001');
@@ -49,7 +50,7 @@ describe('mapTechniques', () => {
       ],
     });
     const bundle: StixBundle = { objects: [matrix, tactic1, tactic2, technique] };
-    const result = mapTechniques(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE_NAME);
+    const result = mapTechniques(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE);
     const t1003 = result.find((t) => t.id === 'T1003');
     expect(t1003?.tactic_ids).toEqual(['TA0002', 'TA0006']); // sorted
   });
@@ -62,7 +63,7 @@ describe('mapTechniques', () => {
     const t1003 = getMockTechniqueEntity(); // T1003
     // Add t1002 before t1003 to verify sorting.
     const bundle: StixBundle = { objects: [matrix, tactic1, tactic2, t1002, t1003] };
-    const result = mapTechniques(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE_NAME);
+    const result = mapTechniques(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE);
     expect(result.map((t) => t.id)).toEqual(['T1002', 'T1003']);
   });
 
@@ -80,7 +81,7 @@ describe('mapTechniques', () => {
       target_ref: 'attack-pattern--t1003',
     });
     const bundle: StixBundle = { objects: [matrix, tactic1, tactic2, revoked, successor, rel] };
-    const result = mapTechniques(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE_NAME);
+    const result = mapTechniques(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE);
     const t1002 = result.find((t) => t.id === 'T1002');
     expect(t1002?.revoked).toBe(true);
     expect(t1002?.deprecated).toBe(false);
@@ -94,7 +95,7 @@ describe('mapTechniques', () => {
       x_mitre_deprecated: true,
     });
     const bundle: StixBundle = { objects: [matrix, tactic1, tactic2, deprecated] };
-    const result = mapTechniques(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE_NAME);
+    const result = mapTechniques(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE);
     const t1004 = result.find((t) => t.id === 'T1004');
     expect(t1004?.revoked).toBe(false);
     expect(t1004?.deprecated).toBe(true);

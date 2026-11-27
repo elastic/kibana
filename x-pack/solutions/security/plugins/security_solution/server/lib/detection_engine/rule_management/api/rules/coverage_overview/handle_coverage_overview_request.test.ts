@@ -109,9 +109,45 @@ describe('handleCoverageOverviewRequest', () => {
       deps: { rulesClient: rulesClientMock.create() },
     });
 
-    expect(result.invalid_mitre_ids['rule-bogus-id']).toEqual(
-      expect.arrayContaining([BOGUS_TACTIC_ID, BOGUS_TECHNIQUE_ID])
-    );
+    expect(result.invalid_mitre_ids['rule-bogus-id']).toEqual({
+      enterprise: expect.arrayContaining([BOGUS_TACTIC_ID, BOGUS_TECHNIQUE_ID]),
+    });
+  });
+
+  it('does not fail on ids that match inherited object properties', async () => {
+    const ruleWithPrototypeIds: Rule = {
+      id: 'rule-prototype-ids',
+      name: 'Rule with prototype-like MITRE IDs',
+      enabled: true,
+      params: {
+        threat: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: { id: 'constructor', name: 'Fake Tactic', reference: 'https://example.com' },
+            technique: [
+              { id: '__proto__', name: 'Fake Technique', reference: 'https://example.com' },
+            ],
+          },
+        ],
+      },
+    } as unknown as Rule;
+
+    (findRules as jest.Mock).mockResolvedValueOnce({
+      total: 1,
+      page: 1,
+      perPage: 10000,
+      data: [ruleWithPrototypeIds],
+    });
+
+    const result = await handleCoverageOverviewRequest({
+      params: {},
+      deps: { rulesClient: rulesClientMock.create() },
+    });
+
+    expect(result.coverage.constructor).toEqual(['rule-prototype-ids']);
+    expect(result.invalid_mitre_ids['rule-prototype-ids']).toEqual({
+      enterprise: expect.arrayContaining(['constructor', '__proto__']),
+    });
   });
 
   it('does not add rules with valid MITRE IDs to invalid_mitre_ids', async () => {
@@ -336,9 +372,9 @@ describe('handleCoverageOverviewRequest', () => {
     expect(mockList).toHaveBeenCalledWith({ framework: 'enterprise' });
 
     // Bogus tactic not in the managed buckets → invalid.
-    expect(result.invalid_mitre_ids['rule-bogus']).toEqual(
-      expect.arrayContaining([BOGUS_TACTIC_ID])
-    );
+    expect(result.invalid_mitre_ids['rule-bogus']).toEqual({
+      enterprise: expect.arrayContaining([BOGUS_TACTIC_ID]),
+    });
 
     // Valid IDs are in the managed buckets → not invalid.
     expect(result.invalid_mitre_ids['rule-valid']).toBeUndefined();
@@ -462,6 +498,17 @@ describe('handleCoverageOverviewRequest', () => {
       expect(result.unmapped_rule_ids).toEqual(['rule-mislabelled']);
     });
 
+    it('does not count an AML id labelled as Enterprise in coverage', async () => {
+      const mislabelled = { ...makeAttackThreat(), technique: [{ id: 'AML.T0044', name: 'x' }] };
+      const result = await run([makeRule('rule-mislabelled', [mislabelled])], makeClient(true));
+
+      expect(result.coverage['AML.T0044']).toBeUndefined();
+      expect(result.coverage[VALID_TACTIC_ID]).toEqual(['rule-mislabelled']);
+      expect(result.invalid_mitre_ids['rule-mislabelled']).toEqual({
+        enterprise: ['AML.T0044'],
+      });
+    });
+
     it('flags only ATLAS ids missing from the atlas buckets', async () => {
       const result = await run(
         [
@@ -472,7 +519,9 @@ describe('handleCoverageOverviewRequest', () => {
       );
 
       expect(result.invalid_mitre_ids['rule-valid']).toBeUndefined();
-      expect(result.invalid_mitre_ids['rule-bogus']).toEqual(['AML.T9999']);
+      expect(result.invalid_mitre_ids['rule-bogus']).toEqual({
+        atlas: ['AML.T9999'],
+      });
     });
 
     it('does not flag ATLAS ids when atlas buckets are unavailable but still flags bogus ATT&CK ids', async () => {
@@ -489,7 +538,9 @@ describe('handleCoverageOverviewRequest', () => {
       );
 
       expect(result.invalid_mitre_ids['rule-atlas']).toBeUndefined();
-      expect(result.invalid_mitre_ids['rule-attack']).toEqual([BOGUS_TECHNIQUE_ID]);
+      expect(result.invalid_mitre_ids['rule-attack']).toEqual({
+        enterprise: [BOGUS_TECHNIQUE_ID],
+      });
     });
 
     it('lists a rule with both frameworks under both id sets and not as unmapped', async () => {
@@ -521,6 +572,154 @@ describe('handleCoverageOverviewRequest', () => {
       expect(client.list).toHaveBeenCalledTimes(2);
       expect(client.list).toHaveBeenCalledWith({ framework: 'enterprise' });
       expect(client.list).toHaveBeenCalledWith({ framework: 'atlas' });
+    });
+  });
+  describe('MITRE ATT&CK for ICS', () => {
+    const ICS_TACTIC_ID = 'TA0100';
+    const ICS_TECHNIQUE_ID = 'T0800';
+    const ICS_T1XXX_TECHNIQUE_ID = 'T1701';
+    const ICS_SUBTECHNIQUE_ID = 'T1691.001';
+
+    const makeIcsThreat = (techniqueId = ICS_TECHNIQUE_ID) => ({
+      framework: 'MITRE ATT&CK ICS',
+      tactic: {
+        id: ICS_TACTIC_ID,
+        name: 'Collection',
+        reference: 'https://attack.mitre.org/tactics/TA0100/',
+      },
+      technique: [
+        {
+          id: techniqueId,
+          name: 'ICS technique',
+          reference: `https://attack.mitre.org/techniques/${techniqueId}/`,
+          subtechnique: [
+            {
+              id: ICS_SUBTECHNIQUE_ID,
+              name: 'ICS subtechnique',
+              reference: 'https://attack.mitre.org/techniques/T1691/001/',
+            },
+          ],
+        },
+      ],
+    });
+
+    const makeAttackThreat = (techniqueId = VALID_TECHNIQUE_ID) => ({
+      framework: 'MITRE ATT&CK',
+      tactic: {
+        id: VALID_TACTIC_ID,
+        name: 'Defense Evasion',
+        reference: 'https://attack.mitre.org/tactics/TA0005/',
+      },
+      technique: [
+        {
+          id: techniqueId,
+          name: 'Technique',
+          reference: `https://attack.mitre.org/techniques/${techniqueId}/`,
+        },
+      ],
+    });
+
+    const makeRule = (id: string, threat: unknown[]): Rule =>
+      ({ id, name: id, enabled: true, params: { threat } } as unknown as Rule);
+
+    const enterpriseBuckets = {
+      framework: 'enterprise' as const,
+      tactics: [{ id: VALID_TACTIC_ID }],
+      techniques: [{ id: VALID_TECHNIQUE_ID }, { id: 'T1059' }],
+      subtechniques: [],
+    };
+    const icsBuckets = {
+      framework: 'ics' as const,
+      tactics: [{ id: ICS_TACTIC_ID }],
+      techniques: [{ id: ICS_TECHNIQUE_ID }, { id: ICS_T1XXX_TECHNIQUE_ID }, { id: 'T1691' }],
+      subtechniques: [{ id: ICS_SUBTECHNIQUE_ID }],
+    };
+
+    const makeClient = (icsAvailable: boolean): MitreAttackDataClient => ({
+      list: jest.fn().mockImplementation(async ({ framework }: { framework?: string } = {}) => {
+        if (framework === 'ics') {
+          if (!icsAvailable) {
+            throw new Error('ics unavailable');
+          }
+          return icsBuckets;
+        }
+        return enterpriseBuckets;
+      }),
+      getById: jest.fn(),
+    });
+
+    const run = async (rules: Rule[], mitreDataClient: MitreAttackDataClient) => {
+      (findRules as jest.Mock).mockResolvedValueOnce({
+        total: rules.length,
+        page: 1,
+        perPage: 10000,
+        data: rules,
+      });
+      return handleCoverageOverviewRequest({
+        params: {},
+        deps: { rulesClient: rulesClientMock.create(), mitreDataClient },
+      });
+    };
+
+    it('includes ICS ids in coverage and does not count an ICS-only rule as unmapped', async () => {
+      const result = await run([makeRule('rule-ics', [makeIcsThreat()])], makeClient(true));
+
+      expect(result.coverage[ICS_TACTIC_ID]).toEqual(['rule-ics']);
+      expect(result.coverage[ICS_TECHNIQUE_ID]).toEqual(['rule-ics']);
+      expect(result.coverage[ICS_SUBTECHNIQUE_ID]).toEqual(['rule-ics']);
+      expect(result.unmapped_rule_ids).toEqual([]);
+      expect(result.invalid_mitre_ids).toEqual({});
+    });
+
+    it('accepts a T1xxx id that is a member of the ICS framework', async () => {
+      const result = await run(
+        [makeRule('rule-ics', [makeIcsThreat(ICS_T1XXX_TECHNIQUE_ID)])],
+        makeClient(true)
+      );
+
+      expect(result.coverage[ICS_T1XXX_TECHNIQUE_ID]).toEqual(['rule-ics']);
+      expect(result.invalid_mitre_ids).toEqual({});
+    });
+
+    it('validates the same id separately per framework', async () => {
+      // T1701 is valid under ICS but not in the Enterprise buckets of this fixture.
+      const result = await run(
+        [
+          makeRule('rule-both', [
+            makeAttackThreat(ICS_T1XXX_TECHNIQUE_ID),
+            makeIcsThreat(ICS_T1XXX_TECHNIQUE_ID),
+          ]),
+        ],
+        makeClient(true)
+      );
+
+      expect(result.invalid_mitre_ids['rule-both']).toEqual({
+        enterprise: [ICS_T1XXX_TECHNIQUE_ID],
+      });
+      expect(result.coverage[ICS_T1XXX_TECHNIQUE_ID]).toEqual(['rule-both']);
+    });
+
+    it('reports an ICS-labelled bogus id under invalid_mitre_ids.ics and does not mark the rule unmapped', async () => {
+      const result = await run([makeRule('rule-ics', [makeIcsThreat('T9999')])], makeClient(true));
+
+      expect(result.invalid_mitre_ids['rule-ics']).toEqual({ ics: ['T9999'] });
+      expect(result.coverage.T9999).toEqual(['rule-ics']);
+      expect(result.unmapped_rule_ids).toEqual([]);
+    });
+
+    it('does not flag ICS ids when ics buckets are unavailable', async () => {
+      const result = await run([makeRule('rule-ics', [makeIcsThreat('T9999')])], makeClient(false));
+
+      expect(result.invalid_mitre_ids).toEqual({});
+      expect(result.unmapped_rule_ids).toEqual([]);
+    });
+
+    it('resolves ics buckets when a fetched rule references ICS', async () => {
+      const client = makeClient(true);
+      await run([makeRule('rule-ics', [makeIcsThreat()])], client);
+
+      expect(client.list).toHaveBeenCalledWith({ framework: 'enterprise' });
+      expect(client.list).toHaveBeenCalledWith({ framework: 'ics' });
     });
   });
 });

@@ -16,12 +16,25 @@
  */
 
 /**
- * Identifies which MITRE framework a STIX object belongs to. Appears as
- * `external_references[].source_name` and `kill_chain_phases[].kill_chain_name`.
- * ATLAS bundles may also carry 'mitre-attack' references on techniques that map
- * to ATT&CK; those are secondary and must not be used to resolve ATLAS IDs.
+ * Names MITRE uses to tag STIX objects, in `kill_chain_phases[].kill_chain_name` and
+ * `external_references[].source_name`. ATLAS bundles may also carry 'mitre-attack'
+ * references on techniques that map to ATT&CK; those are secondary and must not be used
+ * to resolve ATLAS IDs.
  */
-export type StixSourceName = 'mitre-attack' | 'mitre-atlas';
+export type StixSourceName = 'mitre-attack' | 'mitre-atlas' | 'mitre-ics-attack';
+
+/**
+ * How one framework's objects are recognized inside its STIX bundle. The two names differ
+ * for ATT&CK for ICS: its techniques use the 'mitre-ics-attack' kill chain, while their
+ * canonical external reference is 'mitre-attack' on most objects and 'mitre-ics-attack' on
+ * some.
+ */
+export interface StixFrameworkSource {
+  /** `kill_chain_phases[].kill_chain_name` carried by the framework's techniques. */
+  readonly killChainName: StixSourceName;
+  /** Accepted `external_references[].source_name` values for the canonical MITRE entry. */
+  readonly sourceNames: readonly StixSourceName[];
+}
 
 /** A STIX bundle: the top-level container holding every entity in a MITRE release. */
 export interface StixBundle {
@@ -60,16 +73,16 @@ export interface StixEntity {
 }
 
 export interface StixExternalReference {
-  /** Source of the reference; 'mitre-attack' (ATT&CK) or 'mitre-atlas' (ATLAS) marks the canonical MITRE entry */
+  /** Source of the reference; 'mitre-attack' (ATT&CK), 'mitre-ics-attack' (ATT&CK for ICS) or 'mitre-atlas' (ATLAS) marks the canonical MITRE entry */
   readonly source_name: string;
-  /** MITRE identifier, e.g. 'T1003', 'TA0006', 'T1003.001' (ATT&CK) or 'AML.T0024.002' (ATLAS) */
+  /** MITRE identifier, e.g. 'T1003', 'TA0006', 'T1003.001' (ATT&CK), 'T0800' (ICS) or 'AML.T0024.002' (ATLAS) */
   readonly external_id?: string;
   /** MITRE URL, e.g. 'https://attack.mitre.org/techniques/T1003/' or 'https://atlas.mitre.org/techniques/AML.T0024' */
   readonly url?: string;
 }
 
 export interface StixKillChainPhase {
-  /** 'mitre-attack' for ATT&CK, 'mitre-atlas' for ATLAS */
+  /** 'mitre-attack' for ATT&CK, 'mitre-ics-attack' for ATT&CK for ICS, 'mitre-atlas' for ATLAS */
   readonly kill_chain_name: string;
   /** Tactic shortname, e.g. 'credential-access'; matches a tactic's x_mitre_shortname */
   readonly phase_name: string;

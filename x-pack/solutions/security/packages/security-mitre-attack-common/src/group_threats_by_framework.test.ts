@@ -8,6 +8,7 @@
 import { groupThreatsByFramework } from './group_threats_by_framework';
 import {
   MITRE_ATLAS_FRAMEWORK,
+  MITRE_ICS_FRAMEWORK,
   MITRE_ATTACK_FRAMEWORK,
   THREAT_FRAMEWORK_DISPLAY_NAME,
 } from './threat_framework';
@@ -49,6 +50,23 @@ describe('groupThreatsByFramework', () => {
     expect(groups[0].threats[0]).toBe(attack);
     expect(groups[1].threats).toEqual([atlas]);
     expect(groups[1].threats[0]).toBe(atlas);
+  });
+
+  it('treats ICS as an unrecognized group labelled with the raw string until consumers enable it', () => {
+    const ics = buildThreat(MITRE_ICS_FRAMEWORK);
+    const attack = buildThreat(MITRE_ATTACK_FRAMEWORK);
+
+    const groups = groupThreatsByFramework([ics, attack]);
+
+    expect(groups).toEqual([
+      {
+        framework: 'enterprise',
+        label: THREAT_FRAMEWORK_DISPLAY_NAME.enterprise,
+        threats: [attack],
+      },
+      { framework: undefined, label: MITRE_ICS_FRAMEWORK, threats: [ics] },
+    ]);
+    expect(groups[1].threats[0]).toBe(ics);
   });
 
   it('places unknown frameworks after known ones in first-seen order with raw labels', () => {

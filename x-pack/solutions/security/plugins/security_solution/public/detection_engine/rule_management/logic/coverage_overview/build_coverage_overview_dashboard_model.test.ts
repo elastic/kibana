@@ -290,7 +290,7 @@ describe('buildCoverageOverviewDashboardModel', () => {
       coverage: {},
       unmapped_rule_ids: [],
       invalid_mitre_ids: {
-        'test-rule-invalid': ['TA9999', 'T9999'],
+        'test-rule-invalid': { enterprise: ['TA9999', 'T9999'] },
       },
       rules_data: {
         'test-rule-invalid': {
@@ -307,7 +307,7 @@ describe('buildCoverageOverviewDashboardModel', () => {
         {
           id: 'test-rule-invalid',
           name: 'Rule with invalid MITRE',
-          invalidMitreIds: ['TA9999', 'T9999'],
+          invalidMitreIdsByFramework: { enterprise: ['TA9999', 'T9999'] },
         },
       ],
       disabledRules: [],
@@ -319,7 +319,7 @@ describe('buildCoverageOverviewDashboardModel', () => {
       coverage: {},
       unmapped_rule_ids: [],
       invalid_mitre_ids: {
-        'test-rule-disabled-invalid': ['T1234.999'],
+        'test-rule-disabled-invalid': { enterprise: ['T1234.999'] },
       },
       rules_data: {
         'test-rule-disabled-invalid': {
@@ -337,7 +337,7 @@ describe('buildCoverageOverviewDashboardModel', () => {
         {
           id: 'test-rule-disabled-invalid',
           name: 'Disabled rule with invalid MITRE',
-          invalidMitreIds: ['T1234.999'],
+          invalidMitreIdsByFramework: { enterprise: ['T1234.999'] },
         },
       ],
     });

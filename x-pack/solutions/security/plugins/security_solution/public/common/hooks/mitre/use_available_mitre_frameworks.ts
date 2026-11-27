@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { DEFAULT_MITRE_FRAMEWORK, MITRE_FRAMEWORKS } from '@kbn/security-mitre-attack-common';
+import {
+  DEFAULT_MITRE_FRAMEWORK,
+  MITRE_FRAMEWORKS_ENABLED_IN_CONSUMERS,
+} from '@kbn/security-mitre-attack-common';
 import type { MitreFramework } from '@kbn/security-mitre-attack-common';
 import { useKibana } from '../../lib/kibana';
 
@@ -15,5 +18,5 @@ const LEGACY_FRAMEWORKS: readonly MitreFramework[] = [DEFAULT_MITRE_FRAMEWORK];
 export const useAvailableMitreFrameworks = (): readonly MitreFramework[] => {
   const { services } = useKibana();
   const isManagedSourceEnabled = services.mitreAttack?.isEnabled ?? false;
-  return isManagedSourceEnabled ? MITRE_FRAMEWORKS : LEGACY_FRAMEWORKS;
+  return isManagedSourceEnabled ? MITRE_FRAMEWORKS_ENABLED_IN_CONSUMERS : LEGACY_FRAMEWORKS;
 };

@@ -6,7 +6,7 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { getMitreFrameworkByThreatName } from '@kbn/security-mitre-attack-common';
+import { isMitreFrameworkEnabledInConsumers } from '@kbn/security-mitre-attack-common';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -62,8 +62,8 @@ export const buildMitreCoverageFromRules = (
     const ruleTactics = new Set<string>();
     const ruleTechniques = new Set<string>();
 
-    const mitreThreats = threat.filter(
-      (threatItem) => getMitreFrameworkByThreatName(threatItem.framework) !== undefined
+    const mitreThreats = threat.filter((threatItem) =>
+      isMitreFrameworkEnabledInConsumers(threatItem.framework)
     );
     for (const threatItem of mitreThreats) {
       const tacticId = threatItem.tactic?.id;

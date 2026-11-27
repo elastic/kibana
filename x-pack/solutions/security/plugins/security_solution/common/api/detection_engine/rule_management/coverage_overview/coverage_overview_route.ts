@@ -84,7 +84,7 @@ export const CoverageOverviewResponse = t.exact(
      */
     coverage: t.record(t.string, NonEmptyArray(t.string)),
     /**
-     * Array of rule ids that have no MITRE ATT&CK threat mapping at all
+     * Array of rule ids that have no MITRE threat mapping at all
      */
     unmapped_rule_ids: t.array(t.string),
     /**
@@ -92,10 +92,12 @@ export const CoverageOverviewResponse = t.exact(
      */
     rules_data: t.record(t.string, CoverageOverviewRuleAttributes),
     /**
-     * Map having ruleId as the key and an array of MITRE ATT&CK IDs (tactic, technique,
-     * or subtechnique) that are not found in the currently bundled MITRE dataset.
-     * Only present for rules that have at least one such invalid ID.
+     * Map having ruleId as the key and, as the value, a map from framework (`enterprise`,
+     * `atlas`, `ics`) to the MITRE IDs of that framework that are not found in its currently
+     * bundled dataset. The same id can be valid under one framework and invalid under
+     * another, so ids are always reported with their framework. Only present for rules that
+     * have at least one such invalid ID, and each rule only lists frameworks that have invalid IDs.
      */
-    invalid_mitre_ids: t.record(t.string, NonEmptyArray(t.string)),
+    invalid_mitre_ids: t.record(t.string, t.record(t.string, NonEmptyArray(t.string))),
   })
 );

@@ -10,6 +10,7 @@ import {
   iterateMitreThreatEntities,
   MITRE_ATTACK_FRAMEWORK,
   MITRE_ATLAS_FRAMEWORK,
+  MITRE_ICS_FRAMEWORK,
 } from './iterate_mitre_threat_entities';
 
 const MITRE_FRAMEWORK = MITRE_ATTACK_FRAMEWORK;
@@ -130,6 +131,29 @@ describe('iterateMitreThreatEntities', () => {
       { type: 'tactic', id: 'AML.TA0000', framework: 'atlas' },
       { type: 'technique', id: 'AML.T0044', framework: 'atlas' },
       { type: 'subtechnique', id: 'AML.T0024.002', framework: 'atlas' },
+    ]);
+  });
+
+  it('yields ICS entities with framework "ics", including T1xxx ids', () => {
+    const threats: Threats = [
+      {
+        framework: MITRE_ICS_FRAMEWORK,
+        tactic: { id: 'TA0100', name: 'Collection', reference: 'http://ta' },
+        technique: [
+          {
+            id: 'T1691',
+            name: 'ICS technique',
+            reference: 'http://t',
+            subtechnique: [{ id: 'T1691.001', name: 'sub', reference: 'http://s' }],
+          },
+        ],
+      },
+    ];
+
+    expect(collect(threats)).toEqual([
+      { type: 'tactic', id: 'TA0100', framework: 'ics' },
+      { type: 'technique', id: 'T1691', framework: 'ics' },
+      { type: 'subtechnique', id: 'T1691.001', framework: 'ics' },
     ]);
   });
 
