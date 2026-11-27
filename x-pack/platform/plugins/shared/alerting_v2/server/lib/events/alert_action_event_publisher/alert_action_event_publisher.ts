@@ -33,7 +33,11 @@ import {
   EPISODE_UNSNOOZED_EVENT_TYPE,
   type AlertActionEvent,
   type AlertActionEventEnvelope,
+  type EpisodeStatusChange,
 } from './events';
+
+/** Status changes of persisted lifecycle actions, keyed by the action document. */
+export type EpisodeStatusChanges = ReadonlyMap<AlertActionDocument, EpisodeStatusChange>;
 
 /**
  * Public contract for the alert-action event publisher.
@@ -52,7 +56,11 @@ import {
  */
 export interface AlertActionEventPublisherContract {
   /** Convenience batch wrapper over the possible emit methods. */
-  emitEpisodeActions(request: KibanaRequest, actions: readonly AlertActionDocument[]): void;
+  emitEpisodeActions(
+    request: KibanaRequest,
+    actions: readonly AlertActionDocument[],
+    statusChanges?: EpisodeStatusChanges
+  ): void;
 }
 
 /**
@@ -86,13 +94,17 @@ export class AlertActionEventPublisher implements AlertActionEventPublisherContr
     this.logger = loggerService.forSubsystem('events');
   }
 
-  public emitEpisodeActions(request: KibanaRequest, actions: readonly AlertActionDocument[]): void {
+  public emitEpisodeActions(
+    request: KibanaRequest,
+    actions: readonly AlertActionDocument[],
+    statusChanges?: EpisodeStatusChanges
+  ): void {
     const context: AlertingPublisherContext = {
       request,
       origin: toEventOrigin('user', request),
     };
     for (const action of actions) {
-      const event = this.buildEvent(action);
+      const event = this.buildEvent(action, statusChanges?.get(action));
       if (event) {
         this.eventBus.publish(event, context);
       }
@@ -106,7 +118,10 @@ export class AlertActionEventPublisher implements AlertActionEventPublisherContr
    * The `assign` action fans out to two distinct events depending on whether
    * an assignee was set (`episode.assigned`) or cleared (`episode.unassigned`).
    */
-  private buildEvent(action: AlertActionDocument): AlertActionEvent | undefined {
+  private buildEvent(
+    action: AlertActionDocument,
+    statusChange?: EpisodeStatusChange
+  ): AlertActionEvent | undefined {
     const envelope = this.buildEnvelopeFromAction(action);
 
     switch (action.action_type) {
@@ -140,13 +155,13 @@ export class AlertActionEventPublisher implements AlertActionEventPublisherContr
         return {
           type: EPISODE_ACTIVATED_EVENT_TYPE,
           ...envelope,
-          payload: { reason: action.reason! },
+          payload: { reason: action.reason!, ...(statusChange ? { statusChange } : {}) },
         };
       case ALERT_EPISODE_ACTION_TYPE.DEACTIVATE:
         return {
           type: EPISODE_DEACTIVATED_EVENT_TYPE,
           ...envelope,
-          payload: { reason: action.reason! },
+          payload: { reason: action.reason!, ...(statusChange ? { statusChange } : {}) },
         };
       default:
         this.logger.warn({

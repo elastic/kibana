@@ -33,12 +33,20 @@ import {
   alertActionActorType,
   type AlertActionDocument,
 } from '../../resources/datastreams/alert_actions';
-import { ALERT_EVENTS_RESOURCE_KEY } from '../../resources/datastreams/alert_events';
+import {
+  ALERT_EVENTS_RESOURCE_KEY,
+  type AlertEpisodeStatus,
+  type AlertEventDocument,
+} from '../../resources/datastreams/alert_events';
 import {
   ResourceManager,
   type ResourceManagerContract,
 } from '../services/resource_service/resource_manager';
-import { AlertActionEventPublisher } from '../events/alert_action_event_publisher/alert_action_event_publisher';
+import {
+  AlertActionEventPublisher,
+  type EpisodeStatusChanges,
+} from '../events/alert_action_event_publisher/alert_action_event_publisher';
+import type { EpisodeStatusChange } from '../events/alert_action_event_publisher/events';
 import { type QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
@@ -79,6 +87,13 @@ type BulkAlertActionError = BulkResponse['errors'][number];
 interface AlertActionBoomData {
   code?: string;
   details?: Record<string, unknown>;
+}
+
+/** A lifecycle action's audit doc, its synthetic `.rule-events` doc and the stored event it was prepared from. */
+interface LifecycleWrite {
+  readonly alertActionDoc: AlertActionDocument;
+  readonly ruleEvent: AlertEventDocument;
+  readonly alertEvent: AlertEventRecord;
 }
 
 /**
@@ -153,6 +168,46 @@ const toStorageActionData = (action: CreateAlertActionBody) => {
 const isLifecycleActionType = (actionType: EpisodeAlertActionType): boolean =>
   actionType === ALERT_EPISODE_ACTION_TYPE.ACTIVATE ||
   actionType === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
+
+const toLifecycleWrite = (
+  { alertActionDoc, ruleEvent }: PreparedAction,
+  alertEvent: AlertEventRecord
+): LifecycleWrite[] => (ruleEvent ? [{ alertActionDoc, ruleEvent, alertEvent }] : []);
+
+/**
+ * Resolves the status changes of the lifecycle writes Elasticsearch accepted,
+ * keyed by their audit doc. `previousStatus` chains per episode in request
+ * order, so a batch naming one episode twice reports each write against the
+ * one before it; a write that leaves the status unchanged is dropped.
+ */
+const toEpisodeStatusChanges = (
+  writes: readonly LifecycleWrite[],
+  persistedDocs: ReadonlySet<Record<string, unknown>>
+): EpisodeStatusChanges => {
+  const statusByEpisode = new Map<string, AlertEpisodeStatus>();
+  const changes = new Map<AlertActionDocument, EpisodeStatusChange>();
+
+  for (const { alertActionDoc, ruleEvent, alertEvent } of writes) {
+    const status = ruleEvent.alert?.status;
+    if (status === undefined || !persistedDocs.has(ruleEvent)) {
+      continue;
+    }
+
+    const { episode_id: episodeId, episode_status: storedStatus } = alertEvent;
+    const previousStatus = statusByEpisode.get(episodeId) ?? storedStatus ?? null;
+    statusByEpisode.set(episodeId, status);
+
+    if (status !== previousStatus) {
+      changes.set(alertActionDoc, {
+        previousStatus,
+        severity: alertEvent.severity ?? null,
+        source: alertEvent.source,
+      });
+    }
+  }
+
+  return changes;
+};
 
 @injectable()
 export class AlertActionsClient {
@@ -255,8 +310,12 @@ export class AlertActionsClient {
       alertActionState: actionStates.get(episodeId) ?? EMPTY_ALERT_ACTION_STATE,
     });
 
-    await this.persistPreparedActions([prepared]);
-    this.eventPublisher.emitEpisodeActions(this.request, [prepared.alertActionDoc]);
+    const persistedDocs = await this.persistPreparedActions([prepared]);
+    this.eventPublisher.emitEpisodeActions(
+      this.request,
+      [prepared.alertActionDoc],
+      toEpisodeStatusChanges(toLifecycleWrite(prepared, alertEvent), persistedDocs)
+    );
   }
 
   /**
@@ -393,10 +452,15 @@ export class AlertActionsClient {
    * `bulkIndexDocsAcrossIndices` is used uniformly so audit-only batches and
    * mixed audit + synthetic `.rule-events` batches share one code path. The
    * `wait_for` refresh ensures the next API/UI read sees the new state.
+   *
+   * Returns the docs Elasticsearch accepted (the same objects passed in), so
+   * callers can tell which synthetic `.rule-events` docs landed.
    */
-  private async persistPreparedActions(prepared: readonly PreparedAction[]): Promise<void> {
+  private async persistPreparedActions(
+    prepared: readonly PreparedAction[]
+  ): Promise<ReadonlySet<Record<string, unknown>>> {
     if (prepared.length === 0) {
-      return;
+      return new Set();
     }
 
     const docs = prepared.flatMap(({ alertActionDoc, ruleEvent }) =>
@@ -414,10 +478,12 @@ export class AlertActionsClient {
       this.resourceManager.ensureResourceReady(ALERT_EVENTS_RESOURCE_KEY),
     ]);
 
-    await this.storageService.bulkIndexDocsAcrossIndices({
+    const { docs: persistedDocs } = await this.storageService.bulkIndexDocsAcrossIndices({
       docs,
       refresh: 'wait_for',
     });
+
+    return new Set(persistedDocs);
   }
 
   /**
@@ -536,6 +602,7 @@ export class AlertActionsClient {
 
     const errors: BulkAlertActionError[] = [];
     const prepared: PreparedAction[] = [];
+    const lifecycleWrites: LifecycleWrite[] = [];
 
     for (const item of items) {
       const alertEvent = eventByEpisodeId.get(item.alert_id);
@@ -565,15 +632,15 @@ export class AlertActionsClient {
       }
 
       try {
-        prepared.push(
-          this.prepareAction({
-            action: item,
-            alertEvent,
-            userProfileUid,
-            docAlertId: alertEvent.episode_id,
-            alertActionState: actionStates.get(item.alert_id) ?? EMPTY_ALERT_ACTION_STATE,
-          })
-        );
+        const preparedAction = this.prepareAction({
+          action: item,
+          alertEvent,
+          userProfileUid,
+          docAlertId: alertEvent.episode_id,
+          alertActionState: actionStates.get(item.alert_id) ?? EMPTY_ALERT_ACTION_STATE,
+        });
+        prepared.push(preparedAction);
+        lifecycleWrites.push(...toLifecycleWrite(preparedAction, alertEvent));
       } catch (error) {
         if (Boom.isBoom(error) && EXPECTED_BULK_ITEM_STATUS_CODES.has(error.output.statusCode)) {
           errors.push(boomToBulkActionError(item.alert_id, error));
@@ -584,10 +651,11 @@ export class AlertActionsClient {
     }
 
     if (prepared.length > 0) {
-      await this.persistPreparedActions(prepared);
+      const persistedDocs = await this.persistPreparedActions(prepared);
       this.eventPublisher.emitEpisodeActions(
         this.request,
-        prepared.map((p) => p.alertActionDoc)
+        prepared.map((p) => p.alertActionDoc),
+        toEpisodeStatusChanges(lifecycleWrites, persistedDocs)
       );
     }
 

@@ -19,6 +19,7 @@ import { RuleTelemetrySubscriber } from '../lib/events/rule_telemetry_subscriber
 import { RuleExecutorEventPublisher } from '../lib/events/rule_executor_event_publisher/rule_executor_event_publisher';
 import { RuleExecutorWorkflowSubscriber } from '../lib/events/rule_executor_workflow_subscriber/rule_executor_workflow_subscriber';
 import { AlertStatusChangedEventPublisher } from '../lib/events/alert_status_changed_event_publisher/alert_status_changed_event_publisher';
+import { AlertStatusChangedUserActionSubscriber } from '../lib/events/alert_status_changed_user_action_subscriber/alert_status_changed_user_action_subscriber';
 import { AlertStatusChangedWorkflowSubscriber } from '../lib/events/alert_status_changed_workflow_subscriber/alert_status_changed_workflow_subscriber';
 import { ActionPolicyEventPublisher } from '../lib/events/action_policy_event_publisher/action_policy_event_publisher';
 import { ActionPolicyTelemetrySubscriber } from '../lib/events/action_policy_telemetry_subscriber/action_policy_telemetry_subscriber';
@@ -61,6 +62,7 @@ export const bindEvents = ({ bind }: ContainerModuleLoadOptions) => {
    */
   bind(AlertStatusChangedEventPublisher).toSelf().inRequestScope();
   bind(AlertStatusChangedWorkflowSubscriber).toSelf();
+  bind(AlertStatusChangedUserActionSubscriber).toSelf();
   bind(AlertStatusChangedOptIns).toSelf();
 
   /**

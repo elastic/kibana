@@ -118,6 +118,42 @@ describe('AlertStatusChangedEventPublisher', () => {
     expect(eventBus.publish).not.toHaveBeenCalled();
   });
 
+  it('does not call a payload builder when no opt-in is enabled', async () => {
+    const { publisher, eventBus, optIns } = createAlertStatusChangedEventPublisher();
+    optIns.register({ isEnabled: jest.fn().mockResolvedValue(false) });
+    const buildPayloads = jest.fn().mockResolvedValue([firstPayload]);
+
+    await publisher.publishAlertStatusChanges(buildPayloads);
+
+    expect(buildPayloads).not.toHaveBeenCalled();
+    expect(eventBus.publish).not.toHaveBeenCalled();
+  });
+
+  it('publishes and notifies the payloads a builder returns when an opt-in is enabled', async () => {
+    const { publisher, eventBus, optIns, request } = createAlertStatusChangedEventPublisher();
+    const onStatusChanges = jest.fn().mockResolvedValue(undefined);
+    optIns.register({ isEnabled: jest.fn().mockResolvedValue(true), onStatusChanges });
+
+    await publisher.publishAlertStatusChanges(async () => [firstPayload]);
+
+    expect(eventBus.publish).toHaveBeenCalledWith(
+      { type: ALERT_STATUS_CHANGED_EVENT_TYPE, payload: firstPayload },
+      { request, origin: { actor: 'user', channel: 'api' } }
+    );
+    expect(onStatusChanges).toHaveBeenCalledWith([firstPayload]);
+  });
+
+  it('publishes and notifies nothing when a builder returns no payloads', async () => {
+    const { publisher, eventBus, optIns } = createAlertStatusChangedEventPublisher();
+    const onStatusChanges = jest.fn().mockResolvedValue(undefined);
+    optIns.register({ isEnabled: jest.fn().mockResolvedValue(true), onStatusChanges });
+
+    await publisher.publishAlertStatusChanges(async () => []);
+
+    expect(eventBus.publish).not.toHaveBeenCalled();
+    expect(onStatusChanges).not.toHaveBeenCalled();
+  });
+
   it('asks the opt-ins once across calls on the same instance', async () => {
     const { publisher, eventBus, optIns } = createAlertStatusChangedEventPublisher();
     const isEnabled = jest.fn().mockResolvedValue(true);
