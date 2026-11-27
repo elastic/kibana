@@ -20,6 +20,7 @@ import { useAlertingV2ExperimentalFeatures } from '../../hooks/use_alerting_v2_e
 import { useNavigateToAgentBuilder } from '../../hooks/use_navigate_to_agent_builder';
 import { RuleCreateOptionsPanel } from '../../components/rule_create_options/rule_create_options_panel';
 import { RuleCreateOptionsFlyout } from '../../components/rule_create_options/rule_create_options_flyout';
+import { useRuleCreateSearch } from '../../hooks/use_rule_create_search';
 import {
   KindFilter,
   RULES_LIST_FEATURES_FIELDS,
@@ -76,6 +77,7 @@ export const RulesListPage = () => {
     closeCreateOptionsFlyout();
     navigateToAgentBuilder();
   };
+  const ruleCreateSearch = useRuleCreateSearch({ onClose: closeCreateOptionsFlyout });
   const onBuildSequenceFromOptionsFlyout = () => {
     closeCreateOptionsFlyout();
     navigateToSequenceBuilder();
@@ -192,6 +194,7 @@ export const RulesListPage = () => {
           onCreateWithAgent={onCreateWithAgentFromOptionsFlyout}
           onCreateThresholdRule={onCreateThresholdRuleFromOptionsFlyout}
           onBuildSequence={showBuildSequence ? onBuildSequenceFromOptionsFlyout : undefined}
+          search={ruleCreateSearch}
         />
       ) : null}
       {flyout}

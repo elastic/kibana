@@ -52,6 +52,13 @@ export const CREATE_WITH_AGENT_INITIAL_PROMPT =
   'Load the rule-authoring skill and help me create a new alerting v2 rule. Ask me what I want to monitor and guide me through the setup.';
 
 /**
+ * Initial message sent to the Agent Builder when the user sends their text from the
+ * create rule search. It embeds the user's request instead of asking what to monitor.
+ */
+export const getCreateRuleWithAgentPrompt = (request: string): string =>
+  `Load the rule-authoring skill and help me create a new alerting v2 rule. This is what I want to monitor: ${request}`;
+
+/**
  * Initial message sent to the Agent Builder when the user clicks "Create with
  * AI Agent" on the Alerting V2 action policies list empty state.
  */

@@ -154,6 +154,7 @@ export { LLM_PROXY_CONNECTOR_NAME } from './llm_proxy';
 export type { AlertingPageObjects } from './page_objects';
 export type { AlertingApp } from './page_objects/alerting_navigation';
 export {
+  mockAgentAnswer,
   mockFinalAnswerRenderingAttachment,
   mockLoadSkill,
   mockTitleGeneration,

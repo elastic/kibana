@@ -37,6 +37,11 @@ export class AgentChatPage {
     this.canvasUnsavedChangesBadge = this.canvas.getByText(UNSAVED_CHANGES_BADGE, { exact: true });
   }
 
+  /** The user's message in the conversation that contains `text`. */
+  userMessageContaining(text: string): Locator {
+    return this.page.testSubj.locator('agentBuilderUserMessageContent').filter({ hasText: text });
+  }
+
   async goto() {
     await this.page.gotoApp(`agent_builder/agents/${agentBuilderDefaultAgentId}/conversations/new`);
     await this.page.testSubj.locator('agentBuilderWelcomePage').waitFor({
