@@ -6,6 +6,7 @@
  */
 
 import type { ComponentType } from 'react';
+import type { RuleBuilderDefinition } from '@kbn/alerting-v2-rule-form';
 import type { AlertingV2AlertsProviderProps } from './application/alerts_provider';
 import type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 import type { AlertingV2PageProps } from './application/composable_pages';
@@ -15,6 +16,10 @@ export type { CreateRuleOptionsFlyoutLegacyItem } from './create_rule_options_fl
 export type { AlertingV2PageProps } from './application/composable_pages';
 export type { AlertingV2AlertsProviderProps } from './application/alerts_provider';
 export type { PrivilegeCheck } from './application/privilege_check_context';
+
+export interface AlertingV2PublicSetup {
+  registerRuleBuilder<TState>(definition: RuleBuilderDefinition<TState>): void;
+}
 
 export interface AlertingV2PublicStart {
   CreateRuleOptionsFlyout: ComponentType<CreateRuleOptionsFlyoutProps>;

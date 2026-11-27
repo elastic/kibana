@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import type { BuilderState, ComposeDiscoverMode } from '@kbn/alerting-v2-rule-form';
-import { RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
+import type {
+  BuilderState,
+  ComposeDiscoverMode,
+  RuleBuilderParseStateArgs,
+} from '@kbn/alerting-v2-rule-form';
 import { getBreachEsqlQuery, getRecoverEsqlQuery } from '@kbn/alerting-v2-schemas';
 import React, { useCallback, useState } from 'react';
+import { ruleBuilderRegistry } from '../rule_builder_registry';
 import type { RuleApiResponse } from '../services/rules_api';
 import {
   ConfirmBuilderToEsqlModal,
@@ -17,14 +21,10 @@ import {
 
 const tryParseBuilderState = (
   type: string,
-  query: string,
-  recoveryQuery?: string
+  args: RuleBuilderParseStateArgs
 ): BuilderState | null => {
-  const definition = RULE_BUILDER_REGISTRY[type];
-  if (definition?.parseState) {
-    return definition.parseState(query, recoveryQuery);
-  }
-  return null;
+  const definition = ruleBuilderRegistry.get(type);
+  return definition ? definition.parseState(args) : null;
 };
 
 interface UseBuilderToEsqlTransitionOptions {
@@ -55,14 +55,17 @@ export const useBuilderToEsqlTransition = ({
       const builderType = rule.metadata.builder.type;
       const query = rule.query ? getBreachEsqlQuery(rule.query) : '';
       const recoveryQuery = rule.query ? getRecoverEsqlQuery(rule.query, rule.recovery) : undefined;
-      const state = query ? tryParseBuilderState(builderType, query, recoveryQuery) : null;
-      if (state && typeof state === 'object') {
-        return {
-          builderType,
-          initialBuilderState: { ...state, timeField: rule.time_field ?? '@timestamp' },
-        };
+      const state = query
+        ? tryParseBuilderState(builderType, {
+            query,
+            recoveryQuery,
+            timeField: rule.time_field ?? '@timestamp',
+          })
+        : null;
+      if (state === null || state === undefined) {
+        return 'esql-fallback';
       }
-      return 'esql-fallback';
+      return { builderType, initialBuilderState: state };
     },
     []
   );

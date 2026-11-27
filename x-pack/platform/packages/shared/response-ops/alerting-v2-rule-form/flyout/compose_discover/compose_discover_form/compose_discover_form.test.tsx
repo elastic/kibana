@@ -21,6 +21,7 @@ import {
   DEFAULT_THRESHOLD_FORM_VALUES,
 } from '../rule_builder/threshold/form_types';
 import { BuilderStateProvider } from '../rule_builder/builder_state_context';
+import { thresholdRuleBuilder } from '../rule_builder/registry';
 import { RuleFormProvider, type RuleFormServices } from '../../../form/contexts';
 import { createMockServices, createTestQueryClient } from '../../../test_utils';
 import type { FormValues } from '../../../form/types';
@@ -247,7 +248,7 @@ describe('step validation', () => {
     });
 
     it('builderCondition does not inherit queryCommitted meetsPrecondition from the ES|QL registry', () => {
-      const builderStep = getSteps(true, 'threshold').steps.find(
+      const builderStep = getSteps(true, 'threshold', thresholdRuleBuilder).steps.find(
         (s) => s.id === 'builderCondition'
       )!;
       expect(builderStep.meetsPrecondition).toBeUndefined();
@@ -255,7 +256,7 @@ describe('step validation', () => {
     });
 
     it('validateStep uses threshold builder validation without queryCommitted', async () => {
-      const builderStep = getSteps(true, 'threshold').steps.find(
+      const builderStep = getSteps(true, 'threshold', thresholdRuleBuilder).steps.find(
         (s) => s.id === 'builderCondition'
       )!;
       const state = createState({ queryCommitted: false });

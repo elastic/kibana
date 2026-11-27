@@ -44,7 +44,7 @@ jest.mock('../../hooks/use_are_agent_builder_skills_available', () => ({
 const onClose = jest.fn();
 const onCreateEsqlRule = jest.fn();
 const onCreateWithAgent = jest.fn();
-const onCreateThresholdRule = jest.fn();
+const onCreateBuilderRule = jest.fn();
 
 const renderFlyout = () =>
   render(
@@ -53,7 +53,7 @@ const renderFlyout = () =>
         onClose={onClose}
         onCreateEsqlRule={onCreateEsqlRule}
         onCreateWithAgent={onCreateWithAgent}
-        onCreateThresholdRule={onCreateThresholdRule}
+        onCreateBuilderRule={onCreateBuilderRule}
       />
     </I18nProvider>
   );
@@ -68,7 +68,7 @@ describe('RuleCreateOptionsFlyout', () => {
     };
   });
 
-  it('renders the flyout with create rule options', () => {
+  it('renders the flyout with create rule options', async () => {
     renderFlyout();
 
     expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
@@ -78,7 +78,7 @@ describe('RuleCreateOptionsFlyout', () => {
     );
     expect(screen.getByText('ES|QL rule')).toBeInTheDocument();
     expect(screen.getByText('With AI Agent')).toBeInTheDocument();
-    expect(screen.getByText('Threshold rule')).toBeInTheDocument();
+    expect(await screen.findByText('Threshold rule')).toBeInTheDocument();
     expect(screen.queryByText(/welcome to the new alerting experience/i)).not.toBeInTheDocument();
   });
 
@@ -91,7 +91,7 @@ describe('RuleCreateOptionsFlyout', () => {
           onClose={onClose}
           onCreateEsqlRule={onCreateEsqlRule}
           onCreateWithAgent={onCreateWithAgent}
-          onCreateThresholdRule={onCreateThresholdRule}
+          onCreateBuilderRule={onCreateBuilderRule}
         />
       </I18nProvider>
     );
@@ -121,7 +121,7 @@ describe('RuleCreateOptionsFlyout', () => {
           onClose={onClose}
           onCreateEsqlRule={onCreateEsqlRule}
           onCreateWithAgent={onCreateWithAgent}
-          onCreateThresholdRule={onCreateThresholdRule}
+          onCreateBuilderRule={onCreateBuilderRule}
         />
       </I18nProvider>
     );
@@ -142,7 +142,7 @@ describe('RuleCreateOptionsFlyout', () => {
           onClose={onClose}
           onCreateEsqlRule={onCreateEsqlRule}
           onCreateWithAgent={onCreateWithAgent}
-          onCreateThresholdRule={onCreateThresholdRule}
+          onCreateBuilderRule={onCreateBuilderRule}
         />
       </I18nProvider>
     );
@@ -177,12 +177,12 @@ describe('RuleCreateOptionsFlyout', () => {
     expect(screen.queryByText('Start from a rule builder')).not.toBeInTheDocument();
   });
 
-  it('calls onCreateThresholdRule when the Threshold rule option is selected', () => {
+  it('calls onCreateBuilderRule when the Threshold rule option is selected', () => {
     renderFlyout();
 
     fireEvent.click(screen.getByRole('button', { name: /threshold rule/i }));
 
-    expect(onCreateThresholdRule).toHaveBeenCalledTimes(1);
+    expect(onCreateBuilderRule).toHaveBeenCalledWith('threshold');
   });
 
   it('renders the AI Agent option disabled and does not fire onCreateWithAgent when agent builder is unavailable', () => {
@@ -196,7 +196,7 @@ describe('RuleCreateOptionsFlyout', () => {
           onClose={onClose}
           onCreateEsqlRule={onCreateEsqlRule}
           onCreateWithAgent={onCreateWithAgent}
-          onCreateThresholdRule={onCreateThresholdRule}
+          onCreateBuilderRule={onCreateBuilderRule}
         />
       </I18nProvider>
     );

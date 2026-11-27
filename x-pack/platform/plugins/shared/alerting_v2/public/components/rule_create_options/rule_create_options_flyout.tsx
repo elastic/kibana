@@ -44,7 +44,7 @@ export interface RuleCreateOptionsFlyoutProps {
   onClose: () => void;
   onCreateEsqlRule: () => void;
   onCreateWithAgent: () => void;
-  onCreateThresholdRule?: () => void;
+  onCreateBuilderRule?: (type: string) => void;
   onBuildSequence?: () => void;
   legacyRuleTypes?: LegacyRuleTypeItem[];
   /**
@@ -64,7 +64,7 @@ export const RuleCreateOptionsFlyout = ({
   onClose,
   onCreateEsqlRule,
   onCreateWithAgent,
-  onCreateThresholdRule,
+  onCreateBuilderRule,
   onBuildSequence,
   legacyRuleTypes,
   historyKey,
@@ -155,7 +155,7 @@ export const RuleCreateOptionsFlyout = ({
           layout="vertical"
           onCreateEsqlRule={onCreateEsqlRule}
           onCreateWithAgent={onCreateWithAgent}
-          onCreateThresholdRule={onCreateThresholdRule}
+          onCreateBuilderRule={onCreateBuilderRule}
           onBuildSequence={onBuildSequence}
           legacyRuleTypes={legacyRuleTypes}
         />

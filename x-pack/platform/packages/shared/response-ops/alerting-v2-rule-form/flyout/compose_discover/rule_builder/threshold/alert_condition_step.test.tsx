@@ -17,7 +17,9 @@ import { useIndexSources } from '../../../../form/hooks/use_index_sources';
 import { useResolveTimeField } from '../../use_resolve_time_field';
 import { RuleFormProvider } from '../../../../form/contexts';
 import { BuilderStateProvider } from '../builder_state_context';
-import { RuleBuilderAlertConditionStep } from './alert_condition_step';
+import { BuilderStepHost } from '../builder_step_host';
+import { thresholdRuleBuilder } from '../registry';
+import type { BuilderStateProps, RuleBuilderStepProps } from '../types';
 import {
   Aggregation,
   Comparator,
@@ -84,6 +86,10 @@ const createState = (overrides: Partial<ComposeDiscoverState> = {}): ComposeDisc
   queryCommitted: true,
   ...overrides,
 });
+
+const RuleBuilderAlertConditionStep = (
+  props: Omit<RuleBuilderStepProps, keyof BuilderStateProps>
+) => <BuilderStepHost definition={thresholdRuleBuilder} {...props} />;
 
 const Wrapper: React.FC<{
   builderState: ThresholdFormValues;
