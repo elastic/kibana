@@ -143,7 +143,9 @@ See "Vendor API artifacts" in the package README for the formats.
   the Discovery document (`…/$discovery/rest?version=v1`).
 - **Exemptions** (`vendor_api_exemptions.json`): only a connector added in this PR may get one, and the
   reason must name why no spec can be recorded (no public spec, a database wire protocol, an MCP server).
-  "Artifacts not recorded yet" is not a reason for a new connector.
+  "Artifacts not recorded yet" is not a reason for a new connector. Check that the `apiType` matches what
+  the connector talks to, and the `category`: `permanent` only when no tooling could record it, otherwise
+  `temporary` with a `blockedBy` issue that is open and would let it be recorded.
 - **Overlay actions** (`overlay.yaml`): each action has a `description` with its evidence, a docs URL and
   what it says, or what the real API did during live testing. Flag an action without one. Be most
   skeptical of actions that *loosen* the spec (remove a `maxLength` or `enum`, make a required field

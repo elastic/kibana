@@ -766,7 +766,27 @@ The folder holds:
 
 Actions run with a connector config sampled from the connector's `schema`, required properties only, so optional settings such as custom base URLs keep their defaults. They run under each auth type in `auth.types`, with placeholder secrets, and the manifest lists the operations reached under any of them, so an action that only some auth types allow (such as Gmail's write actions, which Elastic-managed OAuth refuses) is still recorded.
 
-Connectors that can't have a vendor spec, such as ones that talk to a database driver instead of an HTTP API, are listed in `src/test/vendor_api/vendor_api_exemptions.json`, by `metadata.id` with a reason. Existing connectors without a `vendor_api` folder are simply not recorded yet; [#295688](https://github.com/elastic/kibana/issues/295688) backfills them.
+Connectors that can't have a vendor spec, such as ones that talk to a database driver instead of an HTTP API, are listed in `src/test/vendor_api/vendor_api_exemptions.json`, by `metadata.id`:
+
+```json
+".mysql": {
+  "category": "permanent",
+  "apiType": "database",
+  "reason": "Talks to MySQL through its driver's wire protocol, not an HTTP API"
+},
+".box": {
+  "category": "temporary",
+  "blockedBy": 303330,
+  "apiType": "mcp",
+  "reason": "All actions go through the Box remote MCP server, whose `tools/list` needs authentication"
+}
+```
+
+- `category`: `permanent` when the current tooling can never record the connector (a driver protocol, no outbound requests, a generic connector), or `temporary` when it is expected to be recorded once the elastic/kibana issue in `blockedBy` is done (a spec that needs credentials to fetch, a connector that has to migrate to a published API first).
+- `apiType`: what the connector talks to, or why its vendor publishes nothing to pin, which the coverage report (`--coverage`) shows: `mcp`, `database`, `graphql`, `jsonrpc`, `generic`, `not_an_api_client`, `self_hosted`, `spec_mismatch` or `no_public_spec`.
+- `reason`: free text saying what is missing, for reviewers. Nothing reads it.
+
+The contract test fails on an entry without a category or API type. Existing connectors without a `vendor_api` folder or an exemption are simply not recorded yet.
 
 Recording checks each action's `scope`. A `read` action may only send `GET`, `HEAD` or `OPTIONS`, or call the operations its fixture lists in `queries`, so other tools (such as live verification) can rely on `scope: 'read'` meaning the action changes no vendor state.
 

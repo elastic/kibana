@@ -176,8 +176,16 @@ MCP-native connector calls MCP tools, not operations of an OpenAPI spec, so add 
 `src/platform/packages/shared/kbn-connector-specs/src/test/vendor_api/vendor_api_exemptions.json`, in the PR that adds the connector:
 
 ```json
-".my_connector": "Calls the vendor's hosted MCP server, which has no OpenAPI spec to record against"
+".my_connector": {
+  "category": "temporary",
+  "blockedBy": 303330,
+  "apiType": "mcp",
+  "reason": "Calls the vendor's hosted MCP server, whose `tools/list` needs authentication"
+}
 ```
+
+Use `temporary` with the issue that would let it be recorded, usually #303330 for MCP servers that need
+credentials, or `permanent` if nothing could. The package README lists the categories and API types.
 
 If some actions also call the vendor's REST API directly, record those instead; see "Record the vendor
 API contract" in the skill.
