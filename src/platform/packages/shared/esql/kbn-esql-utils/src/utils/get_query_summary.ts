@@ -251,7 +251,7 @@ const computedColumnsCache = new LRUCache<string, ReadonlySet<string>>({
 });
 
 // The registry does not apply a wildcard in KEEP or DROP to the columns that the query creates, so
-// the output of a query that projects with one is unknown.
+// after one, the columns created before it are unknown.
 const hasWildcardProjection = (command: ESQLAstCommand): boolean =>
   (command.name === 'keep' || command.name === 'drop') &&
   command.args.some((arg) => isColumn(arg) && arg.name.includes('*'));
@@ -261,8 +261,8 @@ const hasWildcardProjection = (command: ESQLAstCommand): boolean =>
  * Each command knows the columns that it leaves (`columnsAfter`), so STATS, KEEP, DROP or RENAME are considered.
  * The fields of the sources are not asked for, so there are no requests and the index fields are not included,
  * except the ones that STATS groups by.
- * A query with syntax errors has no columns, Elasticsearch reports its errors when it runs. A query with a
- * wildcard in KEEP or DROP has none either, as its output is unknown, so the pills are not applied to it.
+ * A query with syntax errors has no columns, Elasticsearch reports its errors when it runs. A wildcard in KEEP or DROP
+ * makes the columns created before it unknown, so they are not included: the pills are not applied for them.
  * @param query The ES|QL query.
  * @returns The names of the columns.
  */
@@ -273,7 +273,7 @@ export async function getComputedColumnsInOutput(query: string): Promise<Readonl
   }
 
   const { root, errors } = parseEsqlCached(query);
-  if (errors.length > 0 || root.commands.some(hasWildcardProjection)) {
+  if (errors.length > 0) {
     return new Set();
   }
 
@@ -289,6 +289,10 @@ export async function getComputedColumnsInOutput(query: string): Promise<Readonl
   const unmappedFieldsStrategy = getUnmappedFieldsStrategy(root.header);
   let columns: ESQLColumnData[] = [];
   for (const command of root.commands) {
+    if (hasWildcardProjection(command)) {
+      columns = [];
+      continue;
+    }
     const columnsAfter = esqlCommandRegistry.getCommandByName(command.name)?.methods.columnsAfter;
     if (columnsAfter) {
       columns = await columnsAfter(
