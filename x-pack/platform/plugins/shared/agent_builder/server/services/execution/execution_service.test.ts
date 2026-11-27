@@ -1922,6 +1922,40 @@ describe('AgentExecutionService', () => {
       expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
     });
 
+    describe('answering prompts with options chosen on a surface', () => {
+      const answerWithKey = () =>
+        service.executeAgent({
+          mode: AgentExecutionMode.conversation,
+          request: httpServerMock.createKibanaRequest(),
+          executionId: 'exec-1',
+          metadata: { execution_idempotency_key: 'Ev123' },
+          params: {
+            agentId: 'agent-1',
+            nextInput: {},
+            promptSelections: ['{"p":"prompt-1","a":true}'],
+          },
+          useTaskManager: true,
+        });
+
+      it('refuses them when the conversation is not waiting for an answer', async () => {
+        mockExecutionClient.peek.mockResolvedValueOnce(undefined);
+
+        await expect(answerWithKey()).rejects.toThrow(/not waiting for an answer/);
+        expect(mockExecutionClient.create).not.toHaveBeenCalled();
+      });
+
+      it('returns the existing execution when the delivery that answered them is replayed', async () => {
+        const existing = { status: ExecutionStatus.completed, eventCount: 3 };
+        mockExecutionClient.peek.mockResolvedValue(existing);
+        mockExecutionClient.create.mockRejectedValueOnce(conflictError());
+
+        const result = await answerWithKey();
+
+        expect(result.executionId).toBe('exec-1');
+        expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
+      });
+    });
+
     it('reports the conversation the existing execution stored, not the one the replay resolved', async () => {
       mockExecutionClient.create.mockRejectedValueOnce(conflictError());
       mockExecutionClient.peek.mockResolvedValueOnce({

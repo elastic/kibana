@@ -7,13 +7,14 @@
 
 import * as isomerSlack from '@elastic/isomer-sdk/slack';
 import { ConversationOriginType } from '@kbn/agent-builder-common';
+import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { IBasePath } from '@kbn/core/server';
 import { isomerPluginMock } from '@kbn/isomer-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AttachmentServiceStart } from '../attachments';
-import { SurfacesServiceImpl } from './surfaces_service';
+import { SurfacesServiceImpl, type SurfaceResponse } from './surfaces_service';
 
 jest.mock('@elastic/isomer-sdk/slack', () => ({
   ...jest.requireActual('@elastic/isomer-sdk/slack'),
@@ -35,10 +36,7 @@ const esqlAttachment: VersionedAttachment = {
   ],
 };
 
-interface Response {
-  message: string;
-  attachments: VersionedAttachment[];
-}
+type Response = SurfaceResponse;
 
 const createResponse = (message: string, attachments: VersionedAttachment[] = []): Response => ({
   message,
@@ -71,6 +69,29 @@ const renderPayload = (
   }).renderPayload(response, { originType: ConversationOriginType.Slack, ...context });
 
 describe('renderPayload', () => {
+  it('asks the prompts of a paused round after its message', async () => {
+    const payload = await renderPayload({
+      ...createResponse('I need your approval.'),
+      prompts: [{ type: AgentPromptType.confirmation, id: 'c1', message: 'Delete the index?' }],
+    });
+
+    expect(payload?.text).toContain('I need your approval.');
+    expect(payload?.text).toContain('Delete the index?');
+    expect(payload?.blocks.at(-1)).toMatchObject({
+      type: 'actions',
+      elements: [{ action_id: 'prompt_response:0' }, { action_id: 'prompt_response:1' }],
+    });
+  });
+
+  it('renders the prompts of a paused round that wrote no message', async () => {
+    const payload = await renderPayload({
+      ...createResponse(''),
+      prompts: [{ type: AgentPromptType.confirmation, id: 'c1', message: 'Delete the index?' }],
+    });
+
+    expect(payload?.text).toContain('Delete the index?');
+  });
+
   it('renders the payload of the round surface', async () => {
     const payload = await renderPayload(createResponse('Hello'));
 

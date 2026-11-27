@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { SurfacesServiceImpl, type SurfacesService } from './surfaces_service';
+export { resolvePromptResponses } from './prompt_responses';
+export {
+  SurfacesServiceImpl,
+  type SurfaceResponse,
+  type SurfacesService,
+} from './surfaces_service';

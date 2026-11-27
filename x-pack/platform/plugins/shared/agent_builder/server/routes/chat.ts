@@ -349,6 +349,15 @@ export const callbackConversePayloadSchema = conversePayloadSchema.extends({
       ),
     })
   ),
+  prompt_selections: schema.maybe(
+    schema.arrayOf(schema.string({ minLength: 1, maxLength: 2000 }), {
+      maxSize: 200,
+      meta: {
+        description:
+          'Answers to the prompts the conversation is paused on, as the values of the buttons and options a reader chose in the `surface_payload` of the paused round. Send them as received. Without them, `input` is read as the answer when the conversation is paused on a single prompt.',
+      },
+    })
+  ),
   callback: schema.object({
     url: schema.string({
       minLength: 1,
@@ -395,6 +404,7 @@ export function registerChatRoutes({
       conversation_id: conversationId,
       execution_id: providedExecutionId,
       origin,
+      prompt_selections: promptSelections,
     } = payload;
 
     const scopeId = conversationId ?? origin?.external_conversation_id ?? '';
@@ -407,6 +417,7 @@ export function registerChatRoutes({
     return {
       useTaskManager: true,
       origin,
+      promptSelections,
       callback: payload.callback,
       executionId,
       metadata: { execution_idempotency_key: executionIdempotencyKey },
