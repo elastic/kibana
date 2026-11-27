@@ -1,5 +1,5 @@
 {
-  "sha1": "014d8c805ed9bea7f31d0d378acef16d4d056100",
+  "sha1": "c6565037be9fd9d05fd7ca04bd0fb6b8a404d664",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -30,6 +30,34 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/api/tests/agent_tamper_protection_tier_access_essentials.spec.ts",
         "line": 55,
         "column": 15
+      }
+    },
+    {
+      "id": "e0fff13e405aa5f-ca658a061aa1dab",
+      "title": "Agent Tamper Protection on agent policies on Security Complete allows enabling tamper protection on an agent policy with Elastic Defend",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/api/tests/agent_tamper_protection_tier_access.spec.ts",
+        "line": 65,
+        "column": 33
+      }
+    },
+    {
+      "id": "e0fff13e405aa5f-6e3ab4c4e3a60b2",
+      "title": "Agent Tamper Protection on agent policies on Security Complete creates an agent policy with tamper protection disabled when it is requested on create",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/api/tests/agent_tamper_protection_tier_access.spec.ts",
+        "line": 83,
+        "column": 44
       }
     },
     {
