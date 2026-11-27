@@ -24,6 +24,10 @@ const PUBLISHED_PR_EMAIL =
   'kibana-ci-access-published-pr@elastic-kibana-ci.iam.gserviceaccount.com';
 const TYPESCRIPT_EMAIL = 'kibana-ci-access-ts-archives@elastic-kibana-ci.iam.gserviceaccount.com';
 const TYPESCRIPT_PR_EMAIL = 'kibana-ci-ts-archives-pr@elastic-kibana-ci.iam.gserviceaccount.com';
+const ES_SNAPSHOT_BUILD_EMAIL =
+  'kibana-ci-es-snapshot-build@elastic-kibana-ci.iam.gserviceaccount.com';
+const ES_SNAPSHOT_PROMOTE_EMAIL =
+  'kibana-ci-es-snapshot-promote@elastic-kibana-ci.iam.gserviceaccount.com';
 const BUCKET = 'kibana-ci-artifacts-us-central1';
 const TOKEN_RESPONSE = 'mock-token-response';
 const QUOTA_ERROR = 'Error code quota_exceeded: [Security Token Service] throttled';
@@ -205,6 +209,23 @@ describe('GCS service account activation', () => {
 
     expect(result.status).toBe(0);
     expect(result.calls[0]).toContain(`--service-account=${expectedEmail}`);
+  });
+
+  it.each([
+    ['kibana-ci-es-snapshot-build', ES_SNAPSHOT_BUILD_EMAIL],
+    ['kibana-ci-es-snapshot-promote', ES_SNAPSHOT_PROMOTE_EMAIL],
+  ])('activates the %s account by name', (account, expectedEmail) => {
+    const result = sandbox.run([account]);
+
+    expect(result.status).toBe(0);
+    expect(result.calls[0]).toContain(`--service-account=${expectedEmail}`);
+  });
+
+  it('requires ES snapshot callers to name their account', () => {
+    const result = sandbox.run(['kibana-ci-es-snapshots-daily']);
+
+    expect(result.status).not.toBe(0);
+    expect(result.calls).toHaveLength(0);
   });
 
   it('mints a new token once the cached one is 30 minutes old', () => {

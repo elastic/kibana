@@ -15,8 +15,8 @@ ACCESS_TOKEN_MAX_AGE_MINUTES=30
 TOKEN_EXCHANGE_ATTEMPTS=5
 
 USAGE="Usage:
-  $0 <bucket|gs://bucket>                  Share one access token per service account for the rest of the job
-  $0 --auto-refresh <bucket|gs://bucket>   Let gcloud refresh credentials itself
+  $0 <bucket|gs://bucket|account>                  Share one access token per service account for the rest of the job
+  $0 --auto-refresh <bucket|gs://bucket|account>   Let gcloud refresh credentials itself
   $0 --unset-impersonation                 Drop the active service account from the gcloud config
   $0 --logout-gcloud                             Also remove this job's credentials"
 
@@ -157,12 +157,6 @@ resolve_service_account() {
   local bucket="${argument#gs://}"
 
   case "$bucket" in
-    "kibana-ci-es-snapshots-daily")
-      echo "kibana-ci-access-es-daily@$GCLOUD_EMAIL_POSTFIX"
-      ;;
-    "kibana-ci-es-snapshots-permanent")
-      echo "kibana-ci-access-es-permanent@$GCLOUD_EMAIL_POSTFIX"
-      ;;
     "kibana-so-types-snapshots")
       echo "kibana-ci-access-so-snapshots@$GCLOUD_EMAIL_POSTFIX"
       ;;
@@ -192,8 +186,8 @@ resolve_service_account() {
     "kibana-ai-assistant-kb-artifacts-dev" | "kibana-ai-assistant-kb-artifacts")
       echo "kibana-ci-access-ai-buckets@$GCLOUD_EMAIL_POSTFIX"
       ;;
-    "kibana-ci-access-chromium-blds")
-      echo "kibana-ci-access-chromium-blds@$GCLOUD_EMAIL_POSTFIX"
+    "kibana-ci-access-chromium-blds" | "kibana-ci-es-snapshot-build" | "kibana-ci-es-snapshot-promote")
+      echo "$bucket@$GCLOUD_EMAIL_POSTFIX"
       ;;
     *)
       echo "No service account is configured for '${bucket}'." >&2
