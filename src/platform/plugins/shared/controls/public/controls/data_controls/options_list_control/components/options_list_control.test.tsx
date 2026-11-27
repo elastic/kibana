@@ -61,25 +61,18 @@ describe('Options list control', () => {
   });
 
   describe('required state', () => {
-    test('exposes aria-required on the combobox when the control is required', () => {
+    test.each([
+      { required: true, expected: 'true' },
+      { required: false, expected: null },
+      { required: undefined, expected: null },
+    ])('sets aria-required to $expected when required is $required', ({ required, expected }) => {
       const contextMock = getOptionsListContextMock();
       contextMock.componentApi.uuid = 'testRequired';
-      contextMock.componentApi.required$ = new BehaviorSubject<boolean | undefined>(true);
+      contextMock.componentApi.required$ = new BehaviorSubject<boolean | undefined>(required);
       const control = mountComponent(contextMock);
-      expect(control.getByTestId('optionsList-control-testRequired')).toHaveAttribute(
-        'aria-required',
-        'true'
-      );
-    });
-
-    test('does not set aria-required when the control is not required', () => {
-      const contextMock = getOptionsListContextMock();
-      contextMock.componentApi.uuid = 'testNotRequired';
-      contextMock.componentApi.required$ = new BehaviorSubject<boolean | undefined>(false);
-      const control = mountComponent(contextMock);
-      expect(control.getByTestId('optionsList-control-testNotRequired')).not.toHaveAttribute(
-        'aria-required'
-      );
+      expect(
+        control.getByTestId('optionsList-control-testRequired').getAttribute('aria-required')
+      ).toBe(expected);
     });
   });
 

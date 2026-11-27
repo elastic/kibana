@@ -9,6 +9,7 @@
 
 import { map } from 'rxjs';
 
+import { apiPublishesRequired } from '@kbn/controls-renderer';
 import { i18n } from '@kbn/i18n';
 import {
   apiCanBePinned,
@@ -38,9 +39,6 @@ type PinnableControlApi = HasType &
   HasUniqueId &
   IsPinnable &
   HasParentApi<PresentationContainer & HasType & CanPinPanels>;
-
-const apiCanSetRequired = (api: unknown): api is { setRequired: (required: boolean) => void } =>
-  typeof (api as { setRequired?: unknown } | null)?.setRequired === 'function';
 
 const compatibilityCheck = (api: unknown | null): api is PinnableControlApi =>
   Boolean(
@@ -96,7 +94,7 @@ export class PinControlAction
     if (embeddable.parentApi.panelIsPinned(embeddable.uuid)) {
       embeddable.parentApi.unpinPanel(embeddable.uuid);
       // only pinned controls can be required, so clear it when the control is unpinned
-      if (apiCanSetRequired(embeddable)) embeddable.setRequired(false);
+      if (apiPublishesRequired(embeddable)) embeddable.setRequired(false);
     } else {
       embeddable.parentApi.pinPanel(embeddable.uuid);
     }

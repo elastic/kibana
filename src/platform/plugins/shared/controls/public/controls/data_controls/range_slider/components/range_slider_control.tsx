@@ -174,7 +174,7 @@ export const RangeSliderControl: FC<Props> = ({
         'data-test-subj': `rangeSlider__${testSubj}`,
         'aria-label': ariaLabel,
         'aria-labelledby': `control-title-${id}`,
-        // Only one bound is needed to satisfy `required`, so describe that instead of marking each input `aria-required`
+        // only one selection is needed for `required`, so describe that instead of marking each input `aria-required`
         'aria-describedby': required ? requiredDescriptionId : undefined,
         id: `controls-range-slider-${id}`,
       };

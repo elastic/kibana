@@ -54,6 +54,7 @@ export interface PublishesFocusedPanelId {
 
 export interface PublishesRequired {
   required$: PublishingSubject<boolean | undefined>;
+  setRequired: (required: boolean) => void;
 }
 
 export interface PublishesLabel {

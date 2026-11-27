@@ -69,12 +69,16 @@ describe('PinControlAction', () => {
   test('clears required when unpinning a control that can be required', async () => {
     const setRequired = jest.fn();
     controlApi.parentApi.panelIsPinned.mockReturnValueOnce(true);
-    await pinControlAction.execute({ embeddable: { ...controlApi, setRequired } });
+    await pinControlAction.execute({
+      embeddable: { ...controlApi, required$: new BehaviorSubject(true), setRequired },
+    });
     expect(setRequired).toHaveBeenCalledWith(false);
 
     setRequired.mockClear();
     controlApi.parentApi.panelIsPinned.mockReturnValueOnce(false);
-    await pinControlAction.execute({ embeddable: { ...controlApi, setRequired } });
+    await pinControlAction.execute({
+      embeddable: { ...controlApi, required$: new BehaviorSubject(true), setRequired },
+    });
     expect(setRequired).not.toHaveBeenCalled();
   });
 });

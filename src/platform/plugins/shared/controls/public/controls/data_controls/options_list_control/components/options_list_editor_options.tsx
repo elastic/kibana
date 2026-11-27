@@ -124,7 +124,7 @@ export const OptionsListEditorOptions = ({
         label={OptionsListStrings.editor.getSelectionOptionsTitle()}
         data-test-subj="optionsListControl__selectionOptionsRadioGroup"
       >
-        <div>
+        <>
           <EuiRadioGroup
             compressed
             options={selectionOptions}
@@ -148,7 +148,7 @@ export const OptionsListEditorOptions = ({
               />
             </>
           )}
-        </div>
+        </>
       </EuiFormRow>
       {compatibleSearchTechniques.length > 1 && (
         <EuiFormRow

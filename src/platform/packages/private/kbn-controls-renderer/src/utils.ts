@@ -13,7 +13,8 @@ export const apiPublishesFocusedPanelId = (api: unknown): api is PublishesFocuse
   Boolean((api as PublishesFocusedPanelId).focusedPanelId$);
 
 export const apiPublishesRequired = (api: unknown): api is PublishesRequired =>
-  Boolean((api as PublishesRequired).required$);
+  Boolean((api as PublishesRequired).required$) &&
+  typeof (api as PublishesRequired).setRequired === 'function';
 
 export const apiPublishesLabel = (api: unknown): api is PublishesLabel =>
   Boolean((api as PublishesLabel).label$);
