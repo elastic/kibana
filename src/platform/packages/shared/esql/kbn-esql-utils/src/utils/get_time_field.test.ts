@@ -9,7 +9,7 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
-import { getESQLTimeField } from './get_time_field';
+import { getESQLTimeField, getResolvedESQLTimeField } from './get_time_field';
 
 describe('getESQLTimeField', () => {
   const createHttp = (timeField = '@timestamp'): HttpStart =>
@@ -72,5 +72,48 @@ describe('getESQLTimeField', () => {
     await getESQLTimeField({ query: query.replace('event.ingested', 'event.created'), http });
 
     expect(http.post).toHaveBeenCalledTimes(2);
+  });
+
+  describe('getResolvedESQLTimeField', () => {
+    it('is not resolved when nothing was requested, without sending a request', async () => {
+      expect(await getResolvedESQLTimeField({ query: 'FROM logs-resolved-none-*' })).toEqual({
+        isResolved: false,
+      });
+    });
+
+    it('returns the time field requested by someone else', async () => {
+      const query = 'FROM logs-resolved-hit-*';
+      await getESQLTimeField({ query, http: createHttp('event.created') });
+
+      expect(await getResolvedESQLTimeField({ query: `${query} | LIMIT 1` })).toEqual({
+        isResolved: true,
+        timeField: 'event.created',
+      });
+    });
+
+    it('is resolved without a time field when the source has none', async () => {
+      const query = 'FROM logs-resolved-empty-*';
+      const http = { post: jest.fn(async () => ({})) } as unknown as HttpStart;
+      await getESQLTimeField({ query, http });
+
+      expect(await getResolvedESQLTimeField({ query })).toEqual({
+        isResolved: true,
+        timeField: undefined,
+      });
+    });
+
+    it('is not resolved when the request failed', async () => {
+      const query = 'FROM logs-resolved-failed-*';
+      const http = {
+        post: jest.fn(async () => {
+          throw new Error('boom');
+        }),
+      } as unknown as HttpStart;
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+      const pending = getESQLTimeField({ query, http });
+
+      expect(await getResolvedESQLTimeField({ query })).toEqual({ isResolved: false });
+      await pending;
+    });
   });
 });

@@ -103,6 +103,7 @@ import { useQueryActions, type PendingReviewActions } from './hooks/use_query_ac
 import { useQueryValidation } from './hooks/use_query_validation';
 import { useEditorConfig } from './hooks/use_editor_config';
 import { useTimePickerPopover } from './hooks/use_time_picker_popover';
+import { useNoTimeFieldWarning } from './hooks/use_no_time_field_warning';
 import { useDataSourceBrowser } from './resource_browser/use_data_source_browser';
 import { useSourcesBadge } from './resource_browser/use_resource_browser_badge';
 
@@ -148,6 +149,7 @@ const ESQLEditorInternal = function ESQLEditor({
   queryStats,
   enableResourceBrowser = false,
   enableCreateView = false,
+  showNoTimeFieldWarning = false,
   onESQLDocsFlyoutVisibilityChanged,
   onVisorNlResultReady,
   editorApiRef,
@@ -715,6 +717,14 @@ const ESQLEditorInternal = function ESQLEditor({
       },
     });
 
+  const noTimeFieldWarnings = useNoTimeFieldWarning({
+    query: query.esql,
+    isEnabled: showNoTimeFieldWarning,
+    isLoading,
+    pickerProjectRouting,
+    esqlFieldsCache,
+  });
+
   const { acceptReview: acceptFixReview, discardReview: discardFixReview } = useSuggestFix({
     editorRef,
     editorModel,
@@ -725,6 +735,11 @@ const ESQLEditorInternal = function ESQLEditor({
     telemetryService,
     onAfterInsert: expandToFitContent,
   });
+
+  const allWarnings = useMemo(
+    () => [...editorMessages.warnings, ...noTimeFieldWarnings],
+    [editorMessages.warnings, noTimeFieldWarnings]
+  );
 
   const focusEditor = useCallback(() => editorRef.current?.focus(), []);
 
@@ -1093,7 +1108,8 @@ const ESQLEditorInternal = function ESQLEditor({
           hideQueryHistory={hideQueryHistory}
           enableCreateView={enableCreateView}
           onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
-          {...editorMessages}
+          errors={editorMessages.errors}
+          warnings={allWarnings}
           onErrorClick={onErrorClick}
         />
       </EditorOutline>

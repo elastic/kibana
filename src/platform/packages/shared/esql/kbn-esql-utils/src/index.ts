@@ -12,7 +12,11 @@ export {
   getESQLAdHocDataviewId,
   getIndexForESQLQuery,
 } from './utils/get_esql_adhoc_dataview';
-export { getESQLTimeField } from './utils/get_time_field';
+export {
+  getESQLTimeField,
+  getResolvedESQLTimeField,
+  type ResolvedESQLTimeField,
+} from './utils/get_time_field';
 export {
   getESQLSourceInfo,
   clearESQLSourceInfoCache,

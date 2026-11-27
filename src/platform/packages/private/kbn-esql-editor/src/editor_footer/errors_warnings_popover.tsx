@@ -25,6 +25,7 @@ import React, { useCallback, useMemo } from 'react';
 import type { MonacoMessage } from '@kbn/code-editor';
 import { filterDataErrors } from '../helpers';
 import type { DataErrorsControl } from '../types';
+import { NO_TIME_FIELD_WARNING_CODE } from '../hooks/use_no_time_field_warning';
 import { DataErrorsSwitch } from './data_errors_switch';
 
 interface TypeConsts {
@@ -109,12 +110,14 @@ function ErrorsWarningsContent({
                     <EuiFlexItem grow={false}>
                       <EuiIcon type={type} color={color} size="s" aria-hidden={true} />
                     </EuiFlexItem>
-                    <EuiFlexItem css={{ whiteSpace: 'nowrap' }}>
-                      {i18n.translate('esqlEditor.query.lineNumber', {
-                        defaultMessage: 'Line {lineNumber}',
-                        values: { lineNumber: item.startLineNumber },
-                      })}
-                    </EuiFlexItem>
+                    {item.code !== NO_TIME_FIELD_WARNING_CODE && (
+                      <EuiFlexItem css={{ whiteSpace: 'nowrap' }}>
+                        {i18n.translate('esqlEditor.query.lineNumber', {
+                          defaultMessage: 'Line {lineNumber}',
+                          values: { lineNumber: item.startLineNumber },
+                        })}
+                      </EuiFlexItem>
+                    )}
                   </EuiFlexGroup>
                 </EuiFlexItem>
                 <EuiFlexItem

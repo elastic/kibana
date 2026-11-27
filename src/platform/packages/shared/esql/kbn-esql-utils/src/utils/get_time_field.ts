@@ -19,6 +19,42 @@ import { getProjectRoutingFromEsqlQuery } from './set_instructions_helpers';
 // they all await the same promise instead of each firing a separate HTTP request.
 const timeFieldCache = new LRUCache<string, Promise<string | undefined>>({ max: 100 });
 
+const getTimeFieldCacheKey = (query: string, projectRouting?: string): string => {
+  const hasTimeParams = parseTimeFieldFromESQLQuery(query) !== undefined;
+  // Preserve LET and subquery structure: the route checks @timestamp on each index separately.
+  const cacheSegment = hasTimeParams ? query : getSourceCommandQueryFromESQLQuery(query);
+  return JSON.stringify([
+    cacheSegment,
+    getProjectRoutingFromEsqlQuery(query) ?? projectRouting ?? null,
+  ]);
+};
+
+export type ResolvedESQLTimeField =
+  | { isResolved: false }
+  | { isResolved: true; timeField: string | undefined };
+
+/**
+ * Reads the time field of a query only if it has already been requested (or is being requested)
+ * by someone else: it never sends a request. `isResolved: false` means nothing is known yet,
+ * which is different from `isResolved: true` with no `timeField` (the source has no time field).
+ */
+export async function getResolvedESQLTimeField({
+  query,
+  projectRouting,
+}: {
+  query: string;
+  projectRouting?: string;
+}): Promise<ResolvedESQLTimeField> {
+  const cacheKey = getTimeFieldCacheKey(query, projectRouting);
+  const cached = timeFieldCache.get(cacheKey);
+  if (cached === undefined) {
+    return { isResolved: false };
+  }
+  const timeField = await cached;
+  // A failed request removes its entry: that is not a source without a time field.
+  return timeFieldCache.has(cacheKey) ? { isResolved: true, timeField } : { isResolved: false };
+}
+
 /**
  * Resolves the time field for an ES|QL query by calling the server-side timefield API.
  * The API performs a local parse for `?_tstart`/`?_tend` params first, then falls back
@@ -43,13 +79,7 @@ export async function getESQLTimeField({
   http?: HttpStart;
   projectRouting?: string;
 }): Promise<string | undefined> {
-  const hasTimeParams = parseTimeFieldFromESQLQuery(query) !== undefined;
-  // Preserve LET and subquery structure: the route checks @timestamp on each index separately.
-  const cacheSegment = hasTimeParams ? query : getSourceCommandQueryFromESQLQuery(query);
-  const cacheKey = JSON.stringify([
-    cacheSegment,
-    getProjectRoutingFromEsqlQuery(query) ?? projectRouting ?? null,
-  ]);
+  const cacheKey = getTimeFieldCacheKey(query, projectRouting);
 
   const cached = timeFieldCache.get(cacheKey);
   if (cached !== undefined) {
