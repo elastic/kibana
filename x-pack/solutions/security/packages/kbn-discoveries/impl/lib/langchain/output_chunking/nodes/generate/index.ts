@@ -18,6 +18,7 @@ import { getCombined } from '../helpers/get_combined';
 import { generationsAreRepeating } from '../helpers/generations_are_repeating';
 import { getUseUnrefinedResults } from './helpers/get_use_unrefined_results';
 import { parseCombinedOrThrow } from '../helpers/parse_combined_or_throw';
+import { partialResponseContainsJson } from '../helpers/partial_response_contains_json';
 import { handleModelRefusal } from '../helpers/handle_model_refusal';
 import type { AttackDiscoveryTemplateCompletion } from '../../../../../attack_discovery/graphs/template_completion';
 
@@ -92,6 +93,23 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
 
       // LOCAL MUTATION:
       partialResponse = extractJson(rawResponse); // remove the surrounding ```json```
+
+      // if the response stopped before any JSON was produced there is nothing to
+      // combine or continue from: combining reasoning prose both breaks parsing
+      // and, fed back on the next (continuation) call, trips input-side content
+      // filters on some models (claude-5.5-opus). Keep the accumulated partial
+      // for the next attempt instead of combining the prose:
+      if (
+        !partialResponseContainsJson({
+          partialResponse,
+          accumulatedJson: combinedGenerations,
+        })
+      ) {
+        combinedResponse = combinedGenerations;
+        throw new Error(
+          'response contains no JSON to continue from (the response may have stopped before the JSON section)'
+        );
+      }
 
       // if the response is hallucinated, discard previous generations and start over:
       if (responseIsHallucinated(partialResponse)) {

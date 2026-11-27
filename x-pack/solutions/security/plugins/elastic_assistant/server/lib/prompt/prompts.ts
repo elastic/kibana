@@ -42,7 +42,7 @@ Analysis Process:
    - LOW severity: Supplementary information unless providing critical links
 
 Output Requirements:
-- Think through the problem step by step. Show your reasoning before the json output section. This is the only output that is allowed outside of the defined json schema.
+- Think through the problem step by step. Explain your analysis before the json output section. This is the only output that is allowed outside of the defined json schema.
 - Provide a narrative summary for each identified attack chain
 - Explain connections between events with concrete evidence
 - Use the special {{ field.name fieldValue }} syntax to reference source data fields. IMPORTANT - LIMIT the details markdown to 2750 characters and summary to 200 characters! This is to prevent hitting output context limits.`;
@@ -60,7 +60,7 @@ Review the JSON output from your initial analysis. Your task is to refine the at
 5. Remove low quality Attack Chains. Attack Chains must demonstrate an attacker progression. Attacks must consist of alerts from more than one rule. A single alert, or multiple alerts of the same rule or behavior, should never generate an attack chain. Include rule names in your reasoning to ensure you follow this requirement.
 
 Output requirements:
-- Think through the problem step by step. Show your reasoning before the JSON output section.
+- Think through the problem step by step. Explain your analysis before the JSON output section.
 - Return your refined analysis using the exact same JSON format as your initial output, applying the same field syntax requirements.
 - Conform exactly to the JSON schema defined earlier
 `;

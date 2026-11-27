@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/core/server';
 import {
   attackDiscoveryRefineTemplateRequest,
   handleModelRefusal,
+  partialResponseContainsJson,
   type AttackDiscoveryTemplateCompletion,
 } from '@kbn/discoveries';
 import type { ZodType } from '@kbn/zod/v4';
@@ -93,6 +94,23 @@ export const getRefineNode = <T extends GraphInsightTypes>({
 
       // LOCAL MUTATION:
       partialResponse = extractJson(rawResponse); // remove the surrounding ```json```
+
+      // if the response stopped before any JSON was produced there is nothing to
+      // combine or continue from: combining reasoning prose both breaks parsing
+      // and, fed back on the next (continuation) call, trips input-side content
+      // filters on some models (claude-5.5-opus). Keep the accumulated partial
+      // for the next attempt instead of combining the prose:
+      if (
+        !partialResponseContainsJson({
+          partialResponse,
+          accumulatedJson: combinedRefinements,
+        })
+      ) {
+        combinedResponse = combinedRefinements;
+        throw new Error(
+          'response contains no JSON to continue from (the response may have stopped before the JSON section)'
+        );
+      }
 
       // if the response is hallucinated, discard it:
       if (responseIsHallucinated(partialResponse)) {

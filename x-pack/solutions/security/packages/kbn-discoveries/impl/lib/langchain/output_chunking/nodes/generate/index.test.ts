@@ -448,4 +448,61 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
       'content filter (finish_reason: content_filter)'
     );
   });
+
+  it('records a parse error instead of feeding prose back when a continuation returns no JSON', async () => {
+    // a continuation whose response stopped before the JSON section: only reasoning prose
+    const proseResponse = '## Reasoning\n\nThe alerts share a host, so the chain is likely causal.';
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+      .invoke as jest.Mock;
+    mockInvoke.mockResolvedValueOnce(proseResponse);
+
+    const generateNode = getGenerateNode({
+      llm: mockLlm,
+      logger: mockLogger,
+      getCombinedPromptFn: getCombinedAttackDiscoveryPrompt,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    const withPreviousGenerations = {
+      ...initialGraphState,
+      combinedGenerations: '{"insights": ',
+      generationAttempts: 1,
+      generations: ['{"insights": '],
+    };
+
+    const state = await generateNode(withPreviousGenerations);
+
+    // the accumulated JSON partial must be preserved untouched: the prose must
+    // never become part of the combined generations, which is exactly what the
+    // next continuation prompt would re-send:
+    expect(state.combinedGenerations).toBe('{"insights": ');
+    expect(state.errors).toHaveLength(1);
+    expect(state.errors[0]).toContain('response contains no JSON to continue from');
+    expect(state.generationAttempts).toBe(2);
+  });
+
+  it('records a parse error when a first response returns only prose', async () => {
+    // prose from a first call is just as unusable to combine and just as unsafe to
+    // feed back later, so the guard is unconditional on the first attempt too:
+    const proseResponse = '## Reasoning\n\nThe alerts share a host, so the chain is likely causal.';
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+      .invoke as jest.Mock;
+    mockInvoke.mockResolvedValueOnce(proseResponse);
+
+    const generateNode = getGenerateNode({
+      llm: mockLlm,
+      logger: mockLogger,
+      getCombinedPromptFn: getCombinedAttackDiscoveryPrompt,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    const state = await generateNode(initialGraphState);
+
+    expect(state.combinedGenerations).toBe('');
+    expect(state.errors).toHaveLength(1);
+    expect(state.errors[0]).toContain('response contains no JSON to continue from');
+    expect(state.generations).toEqual([proseResponse]);
+  });
 });

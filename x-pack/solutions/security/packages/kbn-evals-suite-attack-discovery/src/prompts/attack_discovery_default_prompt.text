@@ -19,7 +19,7 @@ Analysis Process:
    - LOW severity: Supplementary information unless providing critical links
 
 Output Requirements:
-- Think through the problem step by step. Show your reasoning before the json output section. This is the only output that is allowed outside of the defined json schema.
+- Think through the problem step by step. Explain your analysis before the json output section. This is the only output that is allowed outside of the defined json schema.
 - Provide a narrative summary for each identified attack chain
 - Explain connections between events with concrete evidence
 - Use the special {{ field.name fieldValue }} syntax to reference source data fields. IMPORTANT - LIMIT the details markdown to 2750 characters and summary to 200 characters! This is to prevent hitting output context limits.
