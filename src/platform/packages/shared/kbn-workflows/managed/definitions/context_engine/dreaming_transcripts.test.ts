@@ -56,7 +56,9 @@ describe('CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW', () => {
     const workflow = render();
     const dreaming = parse(CONTEXT_ENGINE_DREAMING_WORKFLOW.yamlTemplate(values));
 
-    expect(CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW.id).not.toBe(CONTEXT_ENGINE_DREAMING_WORKFLOW.id);
+    expect(CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW.id).not.toBe(
+      CONTEXT_ENGINE_DREAMING_WORKFLOW.id
+    );
     expect(workflow.name).toBe('Transcript dreaming: support-cases');
     expect(workflow.settings.concurrency).toEqual(dreaming.settings.concurrency);
     expect(workflow.enabled).toBe(false);
