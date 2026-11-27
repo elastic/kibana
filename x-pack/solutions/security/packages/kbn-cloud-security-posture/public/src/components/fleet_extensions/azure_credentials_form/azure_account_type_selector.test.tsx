@@ -446,8 +446,8 @@ describe('AzureAccountTypeSelect', () => {
       // Click the already selected option
       fireEvent.click(organizationRadio);
 
-      // Should still be called since RadioGroup onChange fires regardless
-      expect(mockUpdatePolicy).toHaveBeenCalledTimes(1);
+      // Should not be called since clicking an already checked radio fires no change event
+      expect(mockUpdatePolicy).not.toHaveBeenCalled();
     });
   });
 
