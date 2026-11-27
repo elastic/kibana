@@ -5,8 +5,9 @@ set -euo pipefail
 SLACK_FILE=""
 GITHUB_FILE=""
 NOTIFY_PIPELINE_FILE=""
+REPORT_FILE=""
 cleanup() {
-  rm -f "${SLACK_FILE}" "${GITHUB_FILE}" "${NOTIFY_PIPELINE_FILE}" 2>/dev/null || true
+  rm -f "${SLACK_FILE}" "${GITHUB_FILE}" "${NOTIFY_PIPELINE_FILE}" "${REPORT_FILE}" 2>/dev/null || true
 }
 trap cleanup EXIT
 
@@ -74,7 +75,31 @@ upload_slack_notify() {
 
   echo "--- Uploading suite owner Slack notify pipeline (channel: ${slack_channel})"
   cat "$NOTIFY_PIPELINE_FILE"
-  buildkite-agent pipeline upload "$NOTIFY_PIPELINE_FILE" || echo "WARNING: failed to upload Slack notify pipeline"
+  # The message holds model-written text, which may contain `$`; it must reach Slack as written.
+  buildkite-agent pipeline upload --no-interpolation "$NOTIFY_PIPELINE_FILE" || echo "WARNING: failed to upload Slack notify pipeline"
+}
+
+# append_weekly_score_report <message_file>
+# For suites with `weeklyReport`, appends the weekly quality score report (score changes and an
+# LLM read of the failing examples) to the weekly post. Returns 1 when there is no report, so the
+# caller can keep its default content; a failed report never fails this step.
+append_weekly_score_report() {
+  local message_file="$1"
+  if [[ "${EVAL_NOTIFY_MODE}" != "weekly" || "${EVAL_SUITE_WEEKLY_REPORT:-}" != "true" ]]; then
+    return 1
+  fi
+
+  REPORT_FILE="$(mktemp -t kbn-evals-weekly-report.XXXXXX.md)"
+  echo "--- Building the weekly score report"
+  if ! EVAL_SUITE_ID="$EVAL_SUITE_ID" \
+    EVAL_WEEKLY_REPORT_OUT="$REPORT_FILE" \
+    timeout 900 node x-pack/platform/packages/shared/kbn-evals/scripts/ci/weekly_score_report/build_weekly_score_report.js \
+    || [[ ! -s "$REPORT_FILE" ]]; then
+    echo "WARNING: the weekly score report failed; posting without it"
+    return 1
+  fi
+  printf '\n' >>"$message_file"
+  cat "$REPORT_FILE" >>"$message_file"
 }
 
 all_keys="$(buildkite-agent meta-data keys 2>/dev/null || true)"
@@ -136,16 +161,20 @@ if [[ -z "${failure_keys}" ]]; then
     exit 0
   fi
 
-  models="$(buildkite-agent meta-data get "kbn-evals:connectors:${EVAL_SUITE_ID}" --default '' 2>/dev/null || true)"
-  {
-    printf ':white_check_mark: *%s* — %s (`%s`) passed. Every eval step finished; scores are not checked against a threshold.\n' "$header_label" "$suite_name" "$EVAL_SUITE_ID"
+  printf ':white_check_mark: *%s* — %s (`%s`) passed. Every eval step finished; scores are not checked against a threshold.\n' \
+    "$header_label" "$suite_name" "$EVAL_SUITE_ID" >"$SLACK_FILE"
+  # The report names every model, so the model list is only the fallback.
+  if ! append_weekly_score_report "$SLACK_FILE"; then
+    models="$(buildkite-agent meta-data get "kbn-evals:connectors:${EVAL_SUITE_ID}" --default '' 2>/dev/null || true)"
     if [[ -n "${models}" ]]; then
-      printf '\n*Models:*\n'
-      while IFS= read -r model; do
-        [[ -n "${model}" ]] && printf -- '- `%s`\n' "${model}"
-      done <<<"${models//,/$'\n'}"
+      {
+        printf '\n*Models:*\n'
+        while IFS= read -r model; do
+          [[ -n "${model}" ]] && printf -- '- `%s`\n' "${model}"
+        done <<<"${models//,/$'\n'}"
+      } >>"$SLACK_FILE"
     fi
-  } >"$SLACK_FILE"
+  fi
   upload_slack_notify "$SLACK_FILE" passed
   exit 0
 fi
@@ -236,6 +265,7 @@ fi
 
 # --- Post to Slack --------------------------------------------------------
 if [[ -n "${slack_channel}" && -n "${SLACK_FILE}" && -f "${SLACK_FILE}" ]]; then
+  append_weekly_score_report "$SLACK_FILE" || true
   upload_slack_notify "$SLACK_FILE" hard_failed
 fi
 
