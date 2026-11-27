@@ -15,9 +15,11 @@ import type {
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type { UserProfileData } from '@kbn/core-user-profile-common';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-server';
+import { AclChangeError } from '@kbn/ols';
 
 import { auditServiceMock } from './audit/mocks';
 import { authenticationServiceMock } from './authentication/authentication_service.mock';
+import { scopedOlsServiceMock } from './authorization/ols/scoped_ols_service.mock';
 import { buildSecurityApi, buildUserProfileApi } from './build_delegate_apis';
 import { securityMock } from './mocks';
 import { serviceAccountsServiceMock } from './service_accounts/service_accounts_service.mock';
@@ -46,6 +48,7 @@ describe('buildSecurityApi', () => {
       getAuthc: () => authc,
       getSession: () => session,
       getServiceAccounts: () => serviceAccounts,
+      getOlsService: jest.fn(),
       getUiam: () => uiam,
       audit: auditService,
       config: { uiam: { enabled: false } },
@@ -247,6 +250,7 @@ describe('buildSecurityApi', () => {
         getAuthc: () => authc,
         getSession: () => session,
         getServiceAccounts: () => serviceAccounts,
+        getOlsService: jest.fn(),
         getUiam: () => uiam,
         audit: auditService,
         config,
@@ -270,6 +274,59 @@ describe('buildSecurityApi', () => {
     });
   });
 
+  describe('authz.ols', () => {
+    const buildApiWithOls = (enabled?: boolean) => {
+      const scoped = scopedOlsServiceMock.create();
+      const olsService = { asScoped: jest.fn().mockReturnValue(scoped) };
+      const getOlsService = jest.fn().mockReturnValue(olsService);
+      const securityApi = buildSecurityApi({
+        getAuthc: () => authc,
+        getSession: () => session,
+        getServiceAccounts: () => serviceAccounts,
+        getOlsService,
+        getUiam: () => uiam,
+        audit: auditService,
+        config: enabled === undefined ? {} : { authz: { ols: { enabled } } },
+        logger,
+      });
+      return { securityApi, getOlsService, olsService, scoped };
+    };
+
+    it('is null when OLS is disabled', () => {
+      expect(buildApiWithOls(false).securityApi.authz.ols).toBeNull();
+    });
+
+    it('is null when the setting is not available', () => {
+      expect(buildApiWithOls().securityApi.authz.ols).toBeNull();
+    });
+
+    it('scopes the OLS service lazily when OLS is enabled', () => {
+      const { securityApi, getOlsService, olsService, scoped } = buildApiWithOls(true);
+      expect(getOlsService).not.toHaveBeenCalled();
+
+      const request = httpServerMock.createKibanaRequest();
+      const delegate = securityApi.authz.ols?.asScoped(request);
+      expect(olsService.asScoped).toHaveBeenCalledWith(request);
+
+      const params = { type: 'action', spaceId: 'default', operation: 'use', objects: [] };
+      void delegate?.authorize(params);
+      void delegate?.evaluate({ type: 'action', spaceId: 'default' });
+      expect(scoped.authorizeObjectAccess).toHaveBeenCalledWith(params);
+      expect(scoped.getPermissions).toHaveBeenCalledWith({ type: 'action', spaceId: 'default' });
+    });
+
+    it('reports refused initial access as a bad request', async () => {
+      const { securityApi, scoped } = buildApiWithOls(true);
+      scoped.validateInitialAcl.mockRejectedValue(new AclChangeError('bad_request', 'No.'));
+
+      await expect(
+        securityApi.authz.ols
+          ?.asScoped(httpServerMock.createKibanaRequest())
+          .validateInitialAcl({ type: 'action', spaceId: 'default' })
+      ).rejects.toMatchObject({ message: 'No.', output: { statusCode: 400 } });
+    });
+  });
+
   describe('serviceAccounts.create', () => {
     const params = { name: 'nightshift-relay', roles: ['viewer'] };
 
@@ -280,6 +337,7 @@ describe('buildSecurityApi', () => {
         getAuthc: () => authc,
         getSession: () => session,
         getServiceAccounts,
+        getOlsService: jest.fn(),
         getUiam: () => uiam,
         audit: auditService,
         config: {},
@@ -520,6 +578,7 @@ describe('buildSecurityApi', () => {
           getAuthc: () => authc,
           getSession: () => session,
           getServiceAccounts: () => serviceAccounts,
+          getOlsService: jest.fn(),
           getUiam: () => uiam,
           organizationId: 'org-1',
           audit: auditService,
@@ -589,6 +648,7 @@ describe('buildSecurityApi', () => {
             getAuthc: () => authc,
             getSession: () => session,
             getServiceAccounts: () => serviceAccounts,
+            getOlsService: jest.fn(),
             getUiam: () => uiam,
             audit: auditService,
             config: { uiam: { enabled: true } },
@@ -609,6 +669,7 @@ describe('buildSecurityApi', () => {
           getAuthc: () => authc,
           getSession: () => session,
           getServiceAccounts: () => serviceAccounts,
+          getOlsService: jest.fn(),
           getUiam: () => {
             throw new Error('UIAM service is not available.');
           },
@@ -695,6 +756,7 @@ describe('buildSecurityApi', () => {
           getAuthc: () => authc,
           getSession: () => session,
           getServiceAccounts: () => serviceAccounts,
+          getOlsService: jest.fn(),
           getUiam: () => uiam,
           audit: auditService,
           config: { uiam: { enabled: false } },
@@ -717,6 +779,7 @@ describe('buildSecurityApi', () => {
           getAuthc: () => authc,
           getSession: () => session,
           getServiceAccounts: () => serviceAccounts,
+          getOlsService: jest.fn(),
           getUiam: () => uiam,
           audit: auditService,
           config: {},

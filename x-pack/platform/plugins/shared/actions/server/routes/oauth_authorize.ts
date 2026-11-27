@@ -240,6 +240,8 @@ async function startOAuthAuthorizationFlow(params: {
 
   const actionsClient = (await context.actions).getActionsClient();
   const { actionTypeId: connectorTypeId } = await actionsClient.get({ id: connectorId });
+  // Checked before the connector's OAuth configuration is decrypted.
+  await actionsClient.ensureOAuthAccess(connectorId);
 
   const core = await context.core;
   const currentUser = core.security.authc.getCurrentUser();

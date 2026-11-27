@@ -17,8 +17,16 @@ export interface RuleApiKeyOwnership {
   apiKeyCreatedByUser?: boolean | null;
 }
 
-const cloneKey = async (context: RulesClientContext, name: string): Promise<ResolvedAPIKey> => {
-  return { createdAPIKey: await context.cloneAPIKey(name), isAuthTypeApiKey: false };
+const cloneKey = async (
+  context: RulesClientContext,
+  name: string,
+  refresh?: boolean | 'wait_for'
+): Promise<ResolvedAPIKey> => {
+  const createdAPIKey =
+    refresh === undefined
+      ? await context.cloneAPIKey(name)
+      : await context.cloneAPIKey(name, refresh);
+  return { createdAPIKey, isAuthTypeApiKey: false };
 };
 
 const grantKey = async (
@@ -50,6 +58,12 @@ export const resolveRuleAPIKey = async (
 
   const isApiKeyAuth = context.isAuthenticationTypeAPIKey();
 
+  // With object-level security, a new key is checked against the rule's connectors right away, and
+  // that check finds the key's creator by searching the API key index, so the key has to be
+  // searchable first. Without it, bulk operations skip the refresh: Task Manager reads keys by ID.
+  const grantRefresh = context.ols ? 'wait_for' : refresh;
+  const cloneRefresh = context.ols ? 'wait_for' : undefined;
+
   // The client-level flag and the per-call option both declare the caller's API key as borrowed:
   // the rule must be minted its own key instead of persisting the caller's. The declaration is
   // about the current request, so the rule's existing ownership does not override it: a rule the
@@ -62,11 +76,13 @@ export const resolveRuleAPIKey = async (
   const frameworkManaged = apiKeyOwnership?.apiKeyCreatedByUser === false;
 
   if (callerKeyIsBorrowed) {
-    return cloneKey(context, name);
+    return cloneKey(context, name, cloneRefresh);
   }
 
   if (frameworkManaged) {
-    return isApiKeyAuth ? cloneKey(context, name) : grantKey(context, name, refresh);
+    return isApiKeyAuth
+      ? cloneKey(context, name, cloneRefresh)
+      : grantKey(context, name, grantRefresh);
   }
 
   if (isApiKeyAuth) {
@@ -76,5 +92,5 @@ export const resolveRuleAPIKey = async (
     };
   }
 
-  return grantKey(context, name, refresh);
+  return grantKey(context, name, grantRefresh);
 };

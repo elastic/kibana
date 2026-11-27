@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
+
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { getAuthenticatedPrincipal } from '@kbn/core-security-common';
 import type {
@@ -15,10 +17,12 @@ import type {
 } from '@kbn/core-security-server';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-server';
 import type { Logger } from '@kbn/logging';
+import { AclChangeError } from '@kbn/ols';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 
 import type { InternalAuthenticationServiceStart } from './authentication';
 import { createFakeRequestEnrichment } from './authentication/fake_request_enrichment';
+import type { OlsService } from './authorization/ols/ols_service';
 import type { ServiceAccountsServiceStart } from './service_accounts';
 import type { Session } from './session_management';
 import { getPrintableSessionId } from './session_management';
@@ -35,6 +39,7 @@ export const buildSecurityApi = ({
   getAuthc,
   getSession,
   getServiceAccounts,
+  getOlsService,
   getUiam,
   organizationId,
   audit,
@@ -44,6 +49,7 @@ export const buildSecurityApi = ({
   getAuthc: () => InternalAuthenticationServiceStart;
   getSession: () => Pick<Session, 'getSID'>;
   getServiceAccounts: () => ServiceAccountsServiceStart | null;
+  getOlsService: () => OlsService;
   getUiam: () => Pick<UiamServicePublic, 'checkAuthorization'>;
   /**
    * The Cloud organization this Kibana belongs to, which scopes UIAM's organization resources.
@@ -51,7 +57,11 @@ export const buildSecurityApi = ({
    */
   organizationId?: string;
   audit: AuditServiceSetup;
-  config: { uiam?: { enabled: boolean }; serviceAccounts?: { enabled: boolean } };
+  config: {
+    uiam?: { enabled: boolean };
+    serviceAccounts?: { enabled: boolean };
+    authz?: { ols?: { enabled: boolean } };
+  };
   logger: Logger;
 }): CoreSecurityDelegateContract => {
   const enrichment = createFakeRequestEnrichment(logger.get('fake-request-enrichment'));
@@ -157,6 +167,31 @@ export const buildSecurityApi = ({
                 UIAM_ORGANIZATION_INVITATION_CREATE_ACTION,
                 UIAM_ORGANIZATION_INVITATION_RESOURCE_TYPE
               ),
+          }
+        : null,
+      // The service exists only after start, while the delegate is registered during setup.
+      ols: config.authz?.ols?.enabled
+        ? {
+            asScoped: (request) => {
+              const scoped = getOlsService().asScoped(request);
+              // shortcut: Core's delegate keeps the method names its consumers call until the Core
+              // security delegate slice aligns them with the Security runtime.
+              return {
+                getPrincipal: () => scoped.getPrincipal(),
+                evaluate: (params) => scoped.getPermissions(params),
+                authorize: (params) => scoped.authorizeObjectAccess(params),
+                filterVisible: (params) => scoped.filterVisible(params),
+                getReadFilter: (params) => scoped.getReadFilter(params),
+                // Core documents a bad request error, while the Security runtime throws AclChangeError.
+                validateInitialAcl: async (params) => {
+                  try {
+                    await scoped.validateInitialAcl(params);
+                  } catch (error) {
+                    throw error instanceof AclChangeError ? Boom.badRequest(error.message) : error;
+                  }
+                },
+              };
+            },
           }
         : null,
     },

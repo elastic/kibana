@@ -237,6 +237,12 @@ export class SecurityPlugin
   private fipsServiceSetup?: FipsServiceSetupInternal;
 
   private olsService?: OlsService;
+  private readonly getOlsService = () => {
+    if (!this.olsService) {
+      throw new Error(`olsService is not registered!`);
+    }
+    return this.olsService;
+  };
 
   private elasticsearchUrl?: string;
 
@@ -430,6 +436,8 @@ export class SecurityPlugin
       authz: this.authorizationSetup,
       savedObjects: core.savedObjects,
       getCurrentUser,
+      olsEnabled: config.authz.ols.enabled,
+      getOlsService: this.getOlsService,
     });
 
     this.registerDeprecations(core, license);
@@ -444,6 +452,7 @@ export class SecurityPlugin
         audit: this.auditSetup,
         config,
         logger: this.logger,
+        getOlsService: this.getOlsService,
       })
     ));
     core.userProfile.registerUserProfileDelegate(
@@ -470,6 +479,8 @@ export class SecurityPlugin
       getAnonymousAccessService: this.getAnonymousAccess,
       getUserProfileService: this.getUserProfileService,
       getServiceAccountsService: this.getServiceAccountsService,
+      getOlsService: this.getOlsService,
+      getSpaceId: (request) => spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
       serverlessProjectId: cloud?.serverless?.projectId,
       serverlessProjectType: cloud?.serverless?.projectType,
       analyticsService: this.analyticsService.setup({ analytics: core.analytics }),
@@ -608,9 +619,10 @@ export class SecurityPlugin
       clusterClient,
       authz: this.authorizationSetup!,
       audit: this.auditSetup!,
-      // Core does not expose access policies yet, so no type is protected and the service decides
-      // nothing until the Core security delegate reads them from the Saved Objects type registry.
-      policies: { getAccessPolicy: () => undefined, getAllTypes: () => [] },
+      policies: {
+        getAccessPolicy: (type) => core.savedObjects.getTypeRegistry().getType(type)?.accessPolicy,
+        getAllTypes: () => core.savedObjects.getTypeRegistry().getAllTypes(),
+      },
       userProfiles: this.userProfileStart,
       getAuthenticatedPrincipal: core.security.authc.getPrincipal,
       hasSession: async (request) => !!(await session.getSID(request)),

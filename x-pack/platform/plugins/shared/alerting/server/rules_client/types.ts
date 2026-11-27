@@ -14,6 +14,7 @@ import type {
   ISavedObjectsRepository,
   UiSettingsServiceStart,
   AnalyticsServiceStart,
+  CoreOlsService,
 } from '@kbn/core/server';
 import type { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
 import type {
@@ -91,6 +92,16 @@ export interface RulesClientContext {
     refresh?: boolean | 'wait_for'
   ) => Promise<CreateAPIKeyResult>;
   readonly getActionsClient: () => Promise<ActionsClient>;
+  /**
+   * Returns an actions client that acts as another request in the rules client's space, such as
+   * one authenticated with a rule's API key. Always provided by {@link RulesClientFactory}.
+   */
+  readonly getActionsClientWithRequest?: (request: KibanaRequest) => Promise<ActionsClient>;
+  /**
+   * Object-level security (OLS), `null` when disabled. Always provided by {@link RulesClientFactory};
+   * rule API keys are not checked against connector access when it is absent or `null`.
+   */
+  readonly ols?: CoreOlsService | null;
   readonly actionsAuthorization: ActionsAuthorization;
   readonly getEventLogClient: () => Promise<IEventLogClient>;
   readonly internalSavedObjectsRepository: ISavedObjectsRepository;
@@ -101,7 +112,10 @@ export interface RulesClientContext {
   readonly changeTrackingService?: IScopedChangeTrackingService;
   readonly isAuthenticationTypeAPIKey: () => boolean;
   readonly getAuthenticationAPIKey: (name: string) => CreateAPIKeyResult;
-  readonly cloneAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
+  readonly cloneAPIKey: (
+    name: string,
+    refresh?: boolean | 'wait_for'
+  ) => Promise<CreateAPIKeyResult>;
   readonly cloneApiKeysOnCreate?: boolean;
   /**
    * Synchronously invalidates the ES and/or UIAM API keys belonging to a rule, instead

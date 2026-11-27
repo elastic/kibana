@@ -15,6 +15,7 @@ export const transformCreateConnectorBody = ({
   secrets,
   spec_version: specVersion,
   is_inbound_events_enabled: isInboundEventsEnabled,
+  acl,
 }: CreateConnectorRequestBodyV1): ConnectorCreateParams['action'] => ({
   actionTypeId,
   name,
@@ -22,4 +23,5 @@ export const transformCreateConnectorBody = ({
   secrets,
   ...(specVersion !== undefined ? { specVersion } : {}),
   ...(isInboundEventsEnabled !== undefined ? { isInboundEventsEnabled } : {}),
+  ...(acl ? { acl } : {}),
 });

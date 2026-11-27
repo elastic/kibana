@@ -19,6 +19,7 @@ const createActionsClientMock = () => {
     update: jest.fn(),
     rotateInboundIngress: jest.fn(),
     getAll: jest.fn(),
+    resolveConnectorName: jest.fn(),
     getAllSystemConnectors: jest.fn(),
     getAuthStatus: jest.fn(),
     getConnectorSpec: jest.fn(),
@@ -35,6 +36,9 @@ const createActionsClientMock = () => {
     getAxiosInstance: jest.fn(),
     getSandboxCredentials: jest.fn(),
     evictClientPool: jest.fn(),
+    ensureOAuthAccess: jest.fn(),
+    getRestrictedConnectorIds: jest.fn().mockResolvedValue([]),
+    ensureConnectorsUsable: jest.fn(),
   };
   return mocked;
 };

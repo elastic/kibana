@@ -33,6 +33,8 @@ import { ensureConfigAuthType } from '../../../../lib/ensure_config_auth_type';
 import { ensureNotKibanaManagedAuthType } from '../../../../lib/ensure_not_kibana_managed_auth_type';
 import { inferAuthMode } from '../../../../lib/infer_auth_mode';
 import { resolveConnectorSpecVersion } from '../../../../lib/resolve_connector_spec_version';
+import { getConnectorSpaceId } from '../../../../lib/connector_access';
+import { ACTION_SAVED_OBJECT_TYPE } from '../../../../constants/saved_objects';
 import { validateConnectorId } from '../../../../../common/validate_connector_id';
 import {
   invalidateStoredConnectorEventIdentity,
@@ -78,6 +80,7 @@ async function createConnector({
     secrets,
     specVersion,
     isInboundEventsEnabled: requestedInboundEventsEnabled,
+    acl,
   },
   options,
 }: ConnectorCreateParams): Promise<Connector> {
@@ -161,6 +164,21 @@ async function createConnector({
     validateConnectorId(options.id);
   }
 
+  // Requested access is validated before any side effect, such as the pre-save hook, so that an invalid
+  // request leaves nothing behind. The repository builds the stored ACL in the same write that creates
+  // the connector: it is never created public and restricted later.
+  if (acl) {
+    const ols = context.securityService?.authz.ols;
+    if (!ols) {
+      throw Boom.badRequest('Object-level security (OLS) is disabled.');
+    }
+    await ols.asScoped(context.request).validateInitialAcl({
+      type: ACTION_SAVED_OBJECT_TYPE,
+      spaceId: getConnectorSpaceId(context),
+      requested: acl,
+    });
+  }
+
   const hookServices: HookServices = {
     scopedClusterClient: context.scopedClusterClient,
   };
@@ -235,7 +253,7 @@ async function createConnector({
           hasInboundEventIdentity: Boolean(identityAttributes),
           ...(resolvedSpecVersion !== undefined ? { specVersion: resolvedSpecVersion } : {}),
         },
-        { id }
+        { id, ...(acl ? { initialAcl: acl } : {}) }
       )
   );
 

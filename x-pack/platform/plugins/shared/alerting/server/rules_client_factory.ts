@@ -529,6 +529,13 @@ export class RulesClientFactory {
         }
         return actions.getActionsClientWithRequest(request);
       },
+      async getActionsClientWithRequest(otherRequest: KibanaRequest) {
+        if (isExplicitSpaceOverride) {
+          return actions.getActionsClientWithRequestInSpace(otherRequest, spaceId);
+        }
+        return actions.getActionsClientWithRequest(otherRequest);
+      },
+      ols: securityService.authz.ols,
       async getEventLogClient() {
         if (isExplicitSpaceOverride) {
           return eventLog.getClientWithRequestInSpace(request, spaceId);
@@ -632,7 +639,7 @@ export class RulesClientFactory {
       async invalidateApiKeyNow(params) {
         await factory.invalidateApiKeyNow(params);
       },
-      async cloneAPIKey(name: string) {
+      async cloneAPIKey(name: string, refresh?: boolean | 'wait_for') {
         const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
         // UIAM keys can't be cloned (native ES /_security/api_key/clone rejects essu_ keys),
         // so mint a fresh framework-owned UIAM key instead.
@@ -649,6 +656,7 @@ export class RulesClientFactory {
         const cloneResult = await securityService.authc.apiKeys.cloneAsInternalUser(request, {
           name,
           metadata: { managed: true, kibana: { type: 'alerting_rule' } },
+          ...(refresh !== undefined ? { refresh } : {}),
         });
         if (!cloneResult) {
           throw new Error('API key clone returned null (security feature may be disabled)');

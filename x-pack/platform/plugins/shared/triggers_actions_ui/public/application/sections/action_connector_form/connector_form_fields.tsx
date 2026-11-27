@@ -24,6 +24,7 @@ import { InboundEventsFormSection, OutboundSectionTitle } from './inbound_events
 interface ConnectorFormFieldsProps {
   actionTypeModel: ActionTypeModel | null;
   isEdit: boolean;
+  readOnly?: boolean;
   registerPreSubmitValidator: (validator: ConnectorValidationFunc) => void;
   authMode?: 'shared' | 'per-user';
   /** Optional content rendered under Connector settings (e.g. inbound webhook URL). */
@@ -37,6 +38,7 @@ interface ConnectorFormFieldsProps {
 const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
   actionTypeModel,
   isEdit,
+  readOnly = false,
   registerPreSubmitValidator,
   authMode,
   settingsContent,
@@ -52,7 +54,7 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
     services,
     connectorContext?.services
   );
-  const canSave = hasSaveActionsCapability(capabilities);
+  const canSave = hasSaveActionsCapability(capabilities) && !readOnly;
   const FieldsComponent = actionTypeModel?.actionConnectorFields ?? null;
   const actionTypeId = actionTypeModel?.id;
   const isDual = actionTypeId != null && connectorTypeIsDual(actionTypeId);

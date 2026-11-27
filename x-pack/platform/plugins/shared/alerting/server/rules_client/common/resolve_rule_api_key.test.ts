@@ -310,4 +310,28 @@ describe('resolveRuleAPIKey', () => {
       expect(context.cloneAPIKey).not.toHaveBeenCalled();
     });
   });
+
+  describe('with object-level security', () => {
+    // A new key is checked against the rule's connectors right away, by searching the API key index.
+    const ols = {} as RulesClientContext['ols'];
+
+    test('grants with a refresh, also when the caller skips it', async () => {
+      const context = createMockContext({ ols });
+
+      await resolveRuleAPIKey(context, 'test-rule', true, { refresh: false });
+
+      expect(context.createAPIKey).toHaveBeenCalledWith('test-rule', 'wait_for');
+    });
+
+    test('clones with a refresh', async () => {
+      const context = createMockContext({
+        ols,
+        isAuthenticationTypeAPIKey: jest.fn().mockReturnValue(true),
+      });
+
+      await resolveRuleAPIKey(context, 'test-rule', true, { cloneApiKey: true, refresh: false });
+
+      expect(context.cloneAPIKey).toHaveBeenCalledWith('test-rule', 'wait_for');
+    });
+  });
 });

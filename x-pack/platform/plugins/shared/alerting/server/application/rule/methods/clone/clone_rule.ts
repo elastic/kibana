@@ -19,7 +19,12 @@ import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../..
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { getRuleExecutionStatusPendingAttributes } from '../../../../lib/rule_execution_status';
 import { isDetectionEngineAADRuleType } from '../../../../saved_objects/migrations/utils';
-import { createNewAPIKeySet, createRuleSavedObject } from '../../../../rules_client/lib';
+import {
+  createNewAPIKeySet,
+  createRuleSavedObject,
+  getReferencedConnectorIds,
+  validateNewRuleKeyConnectorAccess,
+} from '../../../../rules_client/lib';
 import { API_KEY_ATTRIBUTES_TO_STRIP } from '../../../../rules_client/common';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
@@ -148,6 +153,12 @@ export async function cloneRule<Params extends RuleParams = never>(
     shouldUpdateApiKey: ruleSavedObject.attributes.enabled,
     errorMessage: 'Error creating rule: could not create API key',
     apiKeyOwnership: { apiKeyCreatedByUser: ruleSavedObject.attributes.apiKeyCreatedByUser },
+  });
+
+  await validateNewRuleKeyConnectorAccess(context, {
+    spaceId: context.spaceId,
+    connectorIds: getReferencedConnectorIds(ruleSavedObject.references),
+    keySet: apiKeyAttributes,
   });
 
   // remove API key attributes from rule SO

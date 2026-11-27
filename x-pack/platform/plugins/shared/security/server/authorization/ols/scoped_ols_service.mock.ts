@@ -19,5 +19,7 @@ export const scopedOlsServiceMock = {
     validateInitialAcl: jest.fn(),
     prepareInitialAcl: jest.fn(),
     authorizeChange: jest.fn(),
+    getPolicy: jest.fn(),
+    getAccessPrivilegeActions: jest.fn().mockReturnValue([]),
   }),
 };
