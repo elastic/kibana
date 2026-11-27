@@ -28,7 +28,6 @@
     "@kbn/test",
     "@kbn/repo-info",
     "@kbn/tooling-log",
-    "@kbn/elastic-assistant-common",
     "@kbn/actions-plugin",
   ]
 }

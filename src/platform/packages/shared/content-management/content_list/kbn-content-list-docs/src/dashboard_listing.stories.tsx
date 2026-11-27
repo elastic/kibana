@@ -379,7 +379,7 @@ const ClientProviderExtensionsList = ({ history }: { history: MockHistory }) => 
             ...recents.sortFields,
           }),
         },
-      } satisfies ContentListClientProviderProps['features']),
+      }) satisfies ContentListClientProviderProps['features'],
     [recents]
   );
 

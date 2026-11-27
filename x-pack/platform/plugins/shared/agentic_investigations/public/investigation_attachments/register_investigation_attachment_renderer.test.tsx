@@ -32,7 +32,7 @@ const register = () => {
   );
   const [type, definition] = addAttachmentType.mock.calls[0] as [
     string,
-    AttachmentUIDefinition<Attachment<'investigation_note', Note>>
+    AttachmentUIDefinition<Attachment<'investigation_note', Note>>,
   ];
   return { type, definition, loadContent };
 };

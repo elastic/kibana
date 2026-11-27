@@ -43,7 +43,8 @@ export interface InternalDocViewerApi {
 }
 
 export interface InternalDocViewerProps
-  extends DocViewRenderProps,
+  extends
+    DocViewRenderProps,
     RefAttributes<InternalDocViewerApi>,
     Pick<AnalyticsServiceStart, 'reportEvent'> {
   docViews: DocView[];

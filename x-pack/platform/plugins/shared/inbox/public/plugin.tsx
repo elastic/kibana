@@ -28,10 +28,12 @@ const APP_TITLE = i18n.translate('xpack.inbox.appTitle', {
   defaultMessage: PLUGIN_NAME,
 });
 
-export class InboxPublicPlugin
-  implements
-    Plugin<InboxPublicSetup, InboxPublicStart, InboxSetupDependencies, InboxStartDependencies>
-{
+export class InboxPublicPlugin implements Plugin<
+  InboxPublicSetup,
+  InboxPublicStart,
+  InboxSetupDependencies,
+  InboxStartDependencies
+> {
   private readonly config: InboxClientConfig;
   private readonly detailRenderers = new Map<string, InboxActionDetailRendererLoader>();
 

@@ -29,4 +29,13 @@ describe('withKpiStats', () => {
       '| STATS docs = COUNT(*), sessions = COUNT_DISTINCT(`attributes.session.id`), users = COUNT_DISTINCT(`resource.attributes.app.installation.id`), exceptions = COUNT(`attributes.exception.type`)'
     );
   });
+
+  it('averages and counts the cold and warm starts in the same STATS', () => {
+    const printed = withKpiStats(mobileDocuments()).print('basic');
+
+    expect(printed).toContain('| EVAL cold_start_ms = CASE(');
+    expect(printed).toContain(
+      'exceptions = COUNT(`attributes.exception.type`), cold_start = AVG(cold_start_ms), cold_starts = COUNT(cold_start_ms), warm_start = AVG(warm_start_ms), warm_starts = COUNT(warm_start_ms)'
+    );
+  });
 });

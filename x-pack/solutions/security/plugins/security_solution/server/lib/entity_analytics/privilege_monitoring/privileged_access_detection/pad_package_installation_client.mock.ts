@@ -10,6 +10,6 @@ import type { PadPackageInstallationClient } from './pad_package_installation_cl
 const createPadPackageInstallationClientMock = () =>
   ({
     init: jest.fn(),
-  } as unknown as jest.Mocked<PadPackageInstallationClient>);
+  }) as unknown as jest.Mocked<PadPackageInstallationClient>;
 
 export const padPackageInstallationClientMock = { create: createPadPackageInstallationClientMock };

@@ -16,7 +16,7 @@ const outputWithLoadedSkills = (skillNames: string[]): TaskOutput =>
       tool_id: 'load_skill',
       params: { skill },
     })),
-  } as unknown as TaskOutput);
+  }) as unknown as TaskOutput;
 
 const run = (output: TaskOutput, expected: Record<string, unknown> | null) =>
   createExpectedSkillEvaluator().evaluate({

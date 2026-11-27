@@ -655,9 +655,9 @@ export const destinationsStateMachine = setup({
       (event.type === 'unit.loaded' || event.type === 'unit.persisted') &&
       Boolean(
         context.selectedDestinationId &&
-          !getConfiguredDestinations(event.unitDefinition).some(
-            ({ id }) => id === context.selectedDestinationId
-          )
+        !getConfiguredDestinations(event.unitDefinition).some(
+          ({ id }) => id === context.selectedDestinationId
+        )
       ),
     // The first unit load is already being resolved. Every later load also refreshes cluster state.
     hasPreviouslyLoadedUnit: ({ context, event }) =>

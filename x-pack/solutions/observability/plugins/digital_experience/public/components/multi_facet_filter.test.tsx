@@ -24,13 +24,18 @@ const BUCKETS = [
 ];
 
 describe('filterPillText', () => {
-  it('names the filter and the value', () => {
-    expect(filterPillText('Browser', { value: 'Chrome', exclude: false })).toBe('Browser: Chrome');
+  it('names the filter and its values', () => {
+    expect(filterPillText({ label: 'Browser', values: ['Chrome'], exclude: false })).toBe(
+      'Browser: Chrome'
+    );
+    expect(filterPillText({ label: 'Browser', values: ['Chrome', 'Edge'], exclude: false })).toBe(
+      'Browser: Chrome, Edge'
+    );
   });
 
-  it('puts "not" before the value of an exclusion', () => {
-    expect(filterPillText('Browser', { value: 'Chrome', exclude: true })).toBe(
-      'Browser: not Chrome'
+  it('puts "NOT" before the filter of an exclusion', () => {
+    expect(filterPillText({ label: 'Browser', values: ['Chrome', 'Edge'], exclude: true })).toBe(
+      'NOT Browser: Chrome, Edge'
     );
   });
 });

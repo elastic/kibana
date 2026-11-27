@@ -30,7 +30,7 @@ describe('create modal', () => {
         color: 'blue',
         managed: false,
       }),
-    } as Partial<ITagsClient> as ITagsClient);
+    }) as Partial<ITagsClient> as ITagsClient;
 
   const defaultProps: React.ComponentProps<typeof CreateTagModal> = {
     onClose: jest.fn(),

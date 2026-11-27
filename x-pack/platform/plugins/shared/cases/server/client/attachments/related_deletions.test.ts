@@ -19,7 +19,7 @@ const asType = (comment: (typeof mockCaseComments)[number], id: string, type: st
     ...comment,
     id,
     attributes: { ...comment.attributes, type },
-  } as unknown as (typeof mockCaseComments)[number]);
+  }) as unknown as (typeof mockCaseComments)[number];
 
 describe('collectRelatedAttachmentIds', () => {
   const parent = asType(mockCaseComments[0], 'parent-1', PARENT_TYPE);

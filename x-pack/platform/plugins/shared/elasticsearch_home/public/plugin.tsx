@@ -10,9 +10,11 @@ import type { CoreStart, Plugin } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { HomePageLoading } from './components/home_page_loading';
 import { ElasticsearchHomeProvider } from './context';
 import { getIntegratedOnboardingEnabled$, useIntegratedOnboardingEnabled } from './feature_flags';
 import type {
+  ElasticsearchHomeAppProps,
   ElasticsearchHomePageProps,
   ElasticsearchHomePublicStart,
   ElasticsearchHomeStartDependencies,
@@ -22,9 +24,19 @@ const LazyHomePage = dynamic(async () => ({
   default: (await import('./home_page')).HomePage,
 }));
 
-export class ElasticsearchHomePlugin
-  implements Plugin<void, ElasticsearchHomePublicStart, {}, ElasticsearchHomeStartDependencies>
-{
+const LazyHomeRoutes = dynamic(
+  async () => ({
+    default: (await import('./home_routes')).HomeRoutes,
+  }),
+  { fallback: <HomePageLoading /> }
+);
+
+export class ElasticsearchHomePlugin implements Plugin<
+  void,
+  ElasticsearchHomePublicStart,
+  {},
+  ElasticsearchHomeStartDependencies
+> {
   public setup() {}
 
   public start(
@@ -44,8 +56,22 @@ export class ElasticsearchHomePlugin
       </QueryClientProvider>
     );
 
+    const HomeApp = (props: ElasticsearchHomeAppProps) => {
+      const { setBreadcrumbs } = props;
+      return (
+        <QueryClientProvider client={queryClient}>
+          <I18nProvider>
+            <ElasticsearchHomeProvider services={services} config={props}>
+              <LazyHomeRoutes setBreadcrumbs={setBreadcrumbs} />
+            </ElasticsearchHomeProvider>
+          </I18nProvider>
+        </QueryClientProvider>
+      );
+    };
+
     return {
       HomePage,
+      HomeApp,
       getIntegratedOnboardingEnabled$: () => getIntegratedOnboardingEnabled$(core.featureFlags),
       useIntegratedOnboardingEnabled: () => useIntegratedOnboardingEnabled(core.featureFlags),
     };

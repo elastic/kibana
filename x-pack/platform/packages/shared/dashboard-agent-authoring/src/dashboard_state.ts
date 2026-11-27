@@ -59,9 +59,8 @@ export const getSectionIdByPanelId = ({
   panels,
 }: Pick<DashboardAttachmentData, 'panels'>): Map<string, string | null> =>
   new Map(
-    panels.flatMap(
-      (widget): Array<[string, string | null]> =>
-        isSection(widget) ? widget.panels.map(({ id }) => [id, widget.id]) : [[widget.id, null]]
+    panels.flatMap((widget): Array<[string, string | null]> =>
+      isSection(widget) ? widget.panels.map(({ id }) => [id, widget.id]) : [[widget.id, null]]
     )
   );
 

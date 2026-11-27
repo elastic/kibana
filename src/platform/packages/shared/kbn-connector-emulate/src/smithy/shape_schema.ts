@@ -82,8 +82,8 @@ const withConstraints = (
     type === 'list' || type === 'set'
       ? ['minItems', 'maxItems']
       : type === 'map'
-      ? ['minProperties', 'maxProperties']
-      : ['minLength', 'maxLength'];
+        ? ['minProperties', 'maxProperties']
+        : ['minLength', 'maxLength'];
   const [minLength, maxLength] = [toNumber(length?.min), toNumber(length?.max)].map((bound) =>
     bound !== undefined && base64 ? base64Length(bound) : bound
   );

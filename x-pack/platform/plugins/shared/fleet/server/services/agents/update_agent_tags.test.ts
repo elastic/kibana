@@ -436,7 +436,7 @@ describe('update_agent_tags', () => {
 
   describe('a batch whose update is incomplete', () => {
     const agentsOf = (count: number) =>
-      Array.from({ length: count }, (_, index) => ({ id: `agent${index}` } as Agent));
+      Array.from({ length: count }, (_, index) => ({ id: `agent${index}` }) as Agent);
     // a batch of the runner, which retries a batch that fails
     const batch = (agentsOfBatch: Agent[], retryCount?: number) =>
       updateTagsBatch(
@@ -879,7 +879,7 @@ describe('update_agent_tags', () => {
         await updateTagsBatch(
           soClient,
           esClient,
-          ids.map((id) => ({ id } as Agent)),
+          ids.map((id) => ({ id }) as Agent),
           {},
           { tagsToAdd: ['new'], tagsToRemove: [], total: ids.length, spaceId: 'myspace' }
         );
@@ -893,7 +893,7 @@ describe('update_agent_tags', () => {
         await updateTagsBatch(
           soClient,
           esClient,
-          ids.map((id) => ({ id } as Agent)),
+          ids.map((id) => ({ id }) as Agent),
           {},
           { tagsToAdd: ['new'], tagsToRemove: [], total: ids.length, spaceId: 'default' }
         );

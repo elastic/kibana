@@ -19,7 +19,7 @@ export function validateParams<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
   Params extends ActionTypeParams = ActionTypeParams,
-  ExecutorResultData = void
+  ExecutorResultData = void,
 >(
   actionType: ActionType<Config, Secrets, Params, ExecutorResultData>,
   value: unknown,
@@ -32,7 +32,7 @@ export function validateConfig<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
   Params extends ActionTypeParams = ActionTypeParams,
-  ExecutorResultData = void
+  ExecutorResultData = void,
 >(
   actionType: ActionType<Config, Secrets, Params, ExecutorResultData>,
   value: unknown,
@@ -45,7 +45,7 @@ export function validateSecrets<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
   Params extends ActionTypeParams = ActionTypeParams,
-  ExecutorResultData = void
+  ExecutorResultData = void,
 >(
   actionType: ActionType<Config, Secrets, Params, ExecutorResultData>,
   value: unknown,
@@ -58,7 +58,7 @@ export function validateConnector<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
   Params extends ActionTypeParams = ActionTypeParams,
-  ExecutorResultData = void
+  ExecutorResultData = void,
 >(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: unknown) {
   if (actionType.validate && actionType.validate.connector) {
     try {
@@ -88,7 +88,7 @@ function validateWithSchema<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
   Params extends ActionTypeParams = ActionTypeParams,
-  ExecutorResultData = void
+  ExecutorResultData = void,
 >(
   actionType: ActionType<Config, Secrets, Params, ExecutorResultData>,
   key: ValidKeys,

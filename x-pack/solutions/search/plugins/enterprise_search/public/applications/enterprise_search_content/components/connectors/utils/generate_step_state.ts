@@ -15,14 +15,14 @@ export const generateStepState = (currentStep: Steps): { [key in Steps]: EuiStep
       currentStep === 'start' || currentStep === 'deployment'
         ? 'incomplete'
         : currentStep === 'configure'
-        ? 'current'
-        : 'complete',
+          ? 'current'
+          : 'complete',
     deployment:
       currentStep === 'deployment'
         ? 'current'
         : currentStep === 'finish' || currentStep === 'configure'
-        ? 'complete'
-        : 'incomplete',
+          ? 'complete'
+          : 'incomplete',
     finish: currentStep === 'finish' ? 'current' : 'incomplete',
     start: currentStep === 'start' ? 'current' : 'complete',
   };

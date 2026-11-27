@@ -127,16 +127,16 @@ export interface SourceRepository<T> {
 export type SourceRepositorySettings<T> = T extends FSRepositoryType
   ? FSRepository['settings']
   : T extends S3RepositoryType
-  ? S3Repository['settings']
-  : T extends HDFSRepositoryType
-  ? HDFSRepository['settings']
-  : T extends AzureRepositoryType
-  ? AzureRepository['settings']
-  : T extends GCSRepositoryType
-  ? GCSRepository['settings']
-  : any & {
-      delegateType: T;
-    };
+    ? S3Repository['settings']
+    : T extends HDFSRepositoryType
+      ? HDFSRepository['settings']
+      : T extends AzureRepositoryType
+        ? AzureRepository['settings']
+        : T extends GCSRepositoryType
+          ? GCSRepository['settings']
+          : any & {
+              delegateType: T;
+            };
 
 export type Repository<T = null> =
   | FSRepository

@@ -45,8 +45,10 @@ export interface CasesContextValue {
   dispatch: CasesContextValueDispatch;
 }
 
-export interface CasesContextProps
-  extends Pick<CasesContextValue, 'owner' | 'permissions' | 'unifiedAttachmentTypeRegistry'> {
+export interface CasesContextProps extends Pick<
+  CasesContextValue,
+  'owner' | 'permissions' | 'unifiedAttachmentTypeRegistry'
+> {
   basePath?: string;
   features?: CasesFeatures;
   releasePhase?: ReleasePhase;

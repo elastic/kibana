@@ -33,7 +33,7 @@ const createMockLocator = (): LocatorPublic<RulesLocatorParams> =>
     navigate: jest.fn().mockResolvedValue(undefined),
     navigateSync: jest.fn(),
     getLocation: jest.fn().mockResolvedValue({ app: 'management', path: '/', state: {} }),
-  } as unknown as LocatorPublic<RulesLocatorParams>);
+  }) as unknown as LocatorPublic<RulesLocatorParams>;
 
 describe('bindLocatorToHost', () => {
   it('injects the bound host into locator calls', () => {

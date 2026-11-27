@@ -22,16 +22,7 @@ import {
   Settings,
   Tooltip,
 } from '@elastic/charts';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiPanel,
-  EuiScreenReaderOnly,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiScreenReaderOnly, EuiText } from '@elastic/eui';
 import { groupBy, sortBy, sortedLastIndex, uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
@@ -42,15 +33,13 @@ import type {
   MobileReleaseRow,
   MobileReleaseSeries,
 } from '../../../../../common/types/mobile';
-import { ChartArea } from '../../../../components/chart_area';
+import { ChartPanel } from '../chart_panel';
 import { PartialBucketsEndzones } from '../../../../components/partial_buckets_endzones';
 import { useFormatters } from '../../../../hooks/use_formatters';
 import { MOBILE_ERROR_RATE_DESCRIPTION, OTHER_RELEASE_LABEL } from '../../../../labels';
 import type { TimeRangeSelect } from '../../../../utils/brush_time_range';
 import { onBrushTimeRange } from '../../../../utils/brush_time_range';
 import { getTimeChartXDomain } from '../../../../utils/histogram_interval';
-
-const CHART_HEIGHT = 240;
 
 const HIDDEN_AXIS_LINES = { tickLine: { visible: false }, axisLine: { visible: false } };
 
@@ -112,47 +101,6 @@ interface ReleaseChartProps {
   histogram: HistogramBuckets;
   colors: ReadonlyMap<string, string>;
   onTimeRangeSelect: TimeRangeSelect;
-}
-
-// A one-line header (an `h3` and an info tip), so both charts' plots line up side by side
-function ChartPanel({
-  title,
-  tooltip,
-  hasData,
-  emptyMessage,
-  'data-test-subj': dataTestSubj,
-  children,
-}: {
-  title: string;
-  tooltip: string;
-  hasData: boolean;
-  emptyMessage: string;
-  'data-test-subj': string;
-  children: ReactNode;
-}) {
-  return (
-    <EuiPanel hasBorder data-test-subj={dataTestSubj}>
-      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h3>{title}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIconTip content={tooltip} type="info" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <ChartArea
-        height={CHART_HEIGHT}
-        isLoading={false}
-        hasData={hasData}
-        emptyMessage={emptyMessage}
-      >
-        {children}
-      </ChartArea>
-    </EuiPanel>
-  );
 }
 
 const markerLabel = (releases: readonly string[]): string =>

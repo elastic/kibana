@@ -5,81 +5,173 @@
  * 2.0.
  */
 
-import type { QueryLink } from '@kbn/significant-events-schema';
-import { groupBy } from 'lodash';
-import type { DetectionSignalGenerator, GenerateResult, GeneratorContext } from '../types';
-import { KNOWN_FAILURES_STRATEGY_ID } from './constants';
-import { getKnownFailureRuleId, getUnwatchableReason } from './known_failure_rule';
-import { toReadings, type MeasuredKnownFailure } from './to_reading';
+import { uniq } from 'lodash';
+import { getErrorMessage } from '../../errors/get_error_message';
+import type {
+  DetectionSignalGenerator,
+  DetectionSignalReading,
+  GenerateResult,
+  GeneratorContext,
+} from '../types';
+import { KNOWN_FAILURES_SETTINGS } from './constants';
+import { getRunWindow } from './known_failure_row';
+import { memoizeDataStart } from './read_data_start';
+import { readMeasuredFailures, type MeasuredKnownFailure } from './read_measured_failures';
+import { readPastReadings } from './read_past_readings';
+import { findRises, type RiseAtMinute } from './rises';
+import { resolveEntity } from './resolve_entity';
+import { toRiseReading, toUnusualMinuteReading } from './to_reading';
+import { findUnusualMinutes, type UnusualMinute } from './unusual_minutes';
+
+const MINUTE_MS = 60_000;
+
+/** What the judgement found for one knowledge indicator. */
+interface JudgedKnownFailure extends MeasuredKnownFailure {
+  unusual: UnusualMinute[];
+  rises: RiseAtMinute[];
+}
 
 /**
- * Reads what the Known failures rules wrote in the window. A rule only measures: every run writes
- * one row with its knowledge indicator's newest per-minute counts, normal level and latest change
- * point. The generator finds which knowledge indicator each rule watches and hands all of the rule's
- * rows to the judgement, since consecutive runs cover different minutes.
+ * Judges what the Known failures rules measured in the window. A rule writes one row per run with
+ * its knowledge indicator's newest per-minute counts, normal level, latest step or trend change and
+ * earlier level. The generator reports each unusual minute, and a rise that still holds, as a
+ * breached reading.
  */
 export class KnownFailuresGenerator implements DetectionSignalGenerator {
   public async generate(context: GeneratorContext): Promise<GenerateResult> {
-    const measured = await readMeasuredFailures(context);
-    const readings = measured.flatMap(toReadings);
+    const { measured, notes, truncated } = await readMeasuredFailures(context);
+    if (measured.length === 0) {
+      return { readings: [], notes, truncated };
+    }
 
-    return { readings, notes: [], truncated: false };
+    const judged = await judgeMeasuredFailures({ context, measured, notes });
+    const breached = judged.filter(({ unusual, rises }) => unusual.length > 0 || rises.length > 0);
+    if (breached.length === 0) {
+      return { readings: [], notes, truncated };
+    }
+
+    // One read for every source with a breach, instead of one per breach.
+    const features = await context.knowledge.listFeatures({
+      sourceIds: uniq(breached.map(({ knowledgeIndicator }) => knowledgeIndicator.source_id)),
+      types: ['entity'],
+    });
+    const sourceTitleById = new Map(context.sources.map(({ id, title }) => [id, title]));
+    const readings = breached.flatMap((failure) =>
+      toReadings({
+        failure,
+        entity: resolveEntity({ knowledgeIndicator: failure.knowledgeIndicator, features }),
+        sourceTitle: sourceTitleById.get(failure.knowledgeIndicator.source_id),
+        cpsEnabled: context.cpsEnabled,
+      })
+    );
+
+    return { readings, notes, truncated };
   }
 }
 
 /**
- * Each watched knowledge indicator with the rows its Known failures rule wrote in the window, newest
- * first. An indicator whose rule wrote nothing in the window is left out.
+ * Runs both checks for every measured knowledge indicator, after reading what earlier ticks
+ * reported for it.
+ *
+ * The rule counts the minutes before a source had any data as zero matches, so a brand new source
+ * would look like a rise. Only when a check finds something, the generator reads when the index's
+ * data begins and checks again without the runs that reach before it. If that read fails, the
+ * finding stands, with a note: a missed failure costs more than one false report.
+ *
+ * This guards a source's start, not a gap: a source back from an outage that emptied the whole
+ * hour before can still be reported. An index silent for the whole lookback reads like a new one,
+ * so its findings are dropped with a note. Telling that gap from a new source would take another
+ * read per finding.
  */
-async function readMeasuredFailures(context: GeneratorContext): Promise<MeasuredKnownFailure[]> {
-  const { spaceId, window, rules, abortSignal } = context;
+async function judgeMeasuredFailures({
+  context,
+  measured,
+  notes,
+}: {
+  context: GeneratorContext;
+  measured: MeasuredKnownFailure[];
+  /** Filled with what the judgement could not do. */
+  notes: string[];
+}): Promise<JudgedKnownFailure[]> {
+  const past = await readPastReadings({ context, measured });
+  const readDataFrom = memoizeDataStart(context);
+  return Promise.all(
+    measured.map(async (failure, index) => {
+      const { measurements } = failure;
+      const { reported, open, reportedRises } = past[index];
+      // The oldest run reaches furthest back, so the data start lookup covers every run's window.
+      const { start } = getRunWindow(measurements[measurements.length - 1]);
+      const judge = (dataFrom?: number) => ({
+        unusual: findUnusualMinutes({ measurements, open, reported, dataFrom }),
+        rises: findRises({ measurements, reported: reportedRises, dataFrom }),
+      });
 
-  // 1. Joins the strategy's enabled rules with the knowledge indicators they watch.
-  const knowledgeIndicatorByRuleId = await readWatchedKnowledgeIndicators(context);
-
-  // 2. Reads the rows those rules wrote in the window, grouped by rule.
-  const rows = await rules.readRows({
-    spaceId,
-    ruleIds: [...knowledgeIndicatorByRuleId.keys()],
-    from: window.from,
-    to: window.to,
-    abortSignal,
-  });
-
-  // The reader returns rows newest first, and grouping keeps that order within each rule.
-  return Object.entries(groupBy(rows, ({ rule_id: ruleId }) => ruleId)).flatMap(
-    ([ruleId, ruleRows]) => {
-      const knowledgeIndicator = knowledgeIndicatorByRuleId.get(ruleId);
-      return knowledgeIndicator ? [{ knowledgeIndicator, rows: ruleRows }] : [];
-    }
+      const unguarded = judge();
+      if (unguarded.unusual.length === 0 && unguarded.rises.length === 0) {
+        return { ...failure, ...unguarded };
+      }
+      const { knowledgeIndicator } = failure;
+      try {
+        // Read from before the window, so an index that was only quiet in the window's first
+        // minutes is not taken for one whose data had not begun.
+        const dataFrom = await readDataFrom({
+          esql: knowledgeIndicator.query.esql.query,
+          from: start - KNOWN_FAILURES_SETTINGS.data_start_lookback_minutes * MINUTE_MS,
+        });
+        const guarded = judge(dataFrom);
+        // Matched by minute, not counted: without an early run's event, a later minute can be
+        // found that the unguarded judgement did not, and would hide one that was dropped.
+        const keptMinutes = new Set(guarded.unusual.map(({ minute }) => minute));
+        const keptRises = new Set(guarded.rises.map(({ lastMinute }) => lastMinute));
+        const dropped =
+          unguarded.unusual.filter(({ minute }) => !keptMinutes.has(minute)).length +
+          unguarded.rises.filter(({ lastMinute }) => !keptRises.has(lastMinute)).length;
+        if (dropped > 0) {
+          notes.push(
+            `dropped ${dropped} finding(s) of knowledge indicator [${
+              knowledgeIndicator.query.id
+            }] measured against minutes before its index's data begins at ${new Date(
+              dataFrom
+            ).toISOString()}: a new source, or one silent for the whole lookback`
+          );
+        }
+        return { ...failure, ...guarded };
+      } catch (error) {
+        // Fail open: a check that found something reports it, though it may be a source warming up.
+        notes.push(
+          `could not tell when the data of knowledge indicator [${
+            knowledgeIndicator.query.id
+          }] begins: ${getErrorMessage(error)}`
+        );
+        return { ...failure, ...unguarded };
+      }
+    })
   );
 }
 
-/**
- * The knowledge indicator each enabled rule watches, by rule id, joined on the id the reconciler
- * gives the indicator's rule. Only the tick's enabled sources are read. A disabled rule, or an
- * indicator without a rule, gives nothing.
- */
-async function readWatchedKnowledgeIndicators({
-  spaceId,
-  sources,
-  knowledge,
-  rules,
+/** The readings of one judged knowledge indicator: its unusual minutes, then its rises. */
+function toReadings({
+  failure,
+  entity,
+  sourceTitle,
   cpsEnabled,
-}: GeneratorContext): Promise<Map<string, QueryLink>> {
-  const [managedRules, queries] = await Promise.all([
-    rules.listManaged({ strategy: KNOWN_FAILURES_STRATEGY_ID }),
-    knowledge.listQueries({ sourceIds: sources.map(({ id }) => id) }),
-  ]);
-  const enabledRuleIds = new Set(managedRules.filter(({ enabled }) => enabled).map(({ id }) => id));
+}: {
+  failure: JudgedKnownFailure;
+  entity: DetectionSignalReading['entity'];
+  sourceTitle?: string;
+  cpsEnabled: boolean;
+}): DetectionSignalReading[] {
+  const { knowledgeIndicator, measurements, unusual, rises } = failure;
+  const context = {
+    knowledgeIndicator,
+    ruleId: measurements[0].rule_id,
+    entity,
+    sourceTitle,
+    cpsEnabled,
+  };
 
-  return new Map(
-    queries
-      .filter((link) => getUnwatchableReason(link) === undefined)
-      .map((query): [string, QueryLink] => [
-        getKnownFailureRuleId({ spaceId, query, cpsEnabled }),
-        query,
-      ])
-      .filter(([ruleId]) => enabledRuleIds.has(ruleId))
-  );
+  return [
+    ...unusual.map((minute) => toUnusualMinuteReading({ ...context, unusual: minute })),
+    ...rises.map(({ rise, lastMinute }) => toRiseReading({ ...context, rise, lastMinute })),
+  ];
 }

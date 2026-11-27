@@ -21,7 +21,7 @@ export interface RecentlyAccessedEntry {
  * `@kbn/recently-accessed` (consumers typically pass that directly).
  */
 export interface RecentlyAccessedHistorySource<
-  Entry extends RecentlyAccessedEntry = RecentlyAccessedEntry
+  Entry extends RecentlyAccessedEntry = RecentlyAccessedEntry,
 > {
   /** Returns the current most-recent-first list of entries. */
   get(): Entry[];

@@ -230,7 +230,7 @@ describe('utils', () => {
             label: `label-${type}`,
             required: true,
             // missing default value
-          } as CustomFieldConfiguration)
+          }) as CustomFieldConfiguration
       );
 
       expect(buildCustomFieldsForRequest(customFieldsConfiguration).length).toEqual(

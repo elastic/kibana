@@ -52,10 +52,10 @@ createToolingLogger.setDefaultLogLevelFromCliFlags = (flags) => {
   createToolingLogger.defaultLogLevel = flags.verbose
     ? 'verbose'
     : flags.debug
-    ? 'debug'
-    : flags.silent
-    ? 'silent'
-    : flags.quiet
-    ? 'error'
-    : 'info';
+      ? 'debug'
+      : flags.silent
+        ? 'silent'
+        : flags.quiet
+          ? 'error'
+          : 'info';
 };

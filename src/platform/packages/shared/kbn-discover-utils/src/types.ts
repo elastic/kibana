@@ -60,7 +60,7 @@ import type { ReactNode } from 'react';
 type FormattedHitPair = readonly [
   fieldDisplayName: string,
   formattedValue: ReactNode,
-  fieldName: string | null // `null` is when number of fields is limited and there is an extra pair about it
+  fieldName: string | null, // `null` is when number of fields is limited and there is an extra pair about it
 ];
 
 /**
@@ -69,7 +69,8 @@ type FormattedHitPair = readonly [
 export type FormattedHit = FormattedHitPair[];
 
 export interface LogDocumentOverview
-  extends LogResourceFields,
+  extends
+    LogResourceFields,
     LogStackTraceFields,
     LogCloudFields,
     LogOtelStackTraceFields,
@@ -138,7 +139,8 @@ export interface LogCloudFields {
 }
 
 export interface TraceDocumentOverview
-  extends TraceFields,
+  extends
+    TraceFields,
     Partial<ServiceFields>,
     Partial<SpanFields>,
     Partial<UserAgentFields>,

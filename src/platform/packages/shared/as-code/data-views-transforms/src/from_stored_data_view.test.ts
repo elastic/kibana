@@ -233,6 +233,22 @@ describe('fromStoredDataViewToAsCodeSavedSchema', () => {
     });
   });
 
+  it('maps namespaces to spaces', () => {
+    expect(
+      fromStoredDataViewToAsCodeSavedSchema({
+        id: 'saved-id',
+        title: 'logs-*',
+        namespaces: ['default', 'marketing'],
+      })
+    ).toEqual(expect.objectContaining({ spaces: ['default', 'marketing'] }));
+  });
+
+  it('omits spaces when namespaces is absent', () => {
+    expect(
+      fromStoredDataViewToAsCodeSavedSchema({ id: 'saved-id', title: 'logs-*' }).spaces
+    ).toBeUndefined();
+  });
+
   it('maps sourceFilters to field_filters', () => {
     expect(
       fromStoredDataViewToAsCodeSavedSchema({

@@ -39,7 +39,7 @@ const createAgent = (overrides: Partial<Agent> = {}): Agent =>
     status: 'online',
     local_metadata: { host: { hostname: 'host-1' } },
     ...overrides,
-  } as Agent);
+  }) as Agent;
 
 const confirm = async (getByTestId: (id: string) => HTMLElement) => {
   await act(async () => {

@@ -426,8 +426,8 @@ export const AlertsDetailsTable = memo(
                 field === 'host.name'
                   ? OPEN_IN_ALERTS_TITLE_HOSTNAME
                   : field === 'service.name'
-                  ? OPEN_IN_ALERTS_TITLE_SERVICENAME
-                  : OPEN_IN_ALERTS_TITLE_USERNAME,
+                    ? OPEN_IN_ALERTS_TITLE_SERVICENAME
+                    : OPEN_IN_ALERTS_TITLE_USERNAME,
               selected_options: [value],
               field_name: field,
             },

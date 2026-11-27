@@ -214,7 +214,7 @@ const setup = (failure?: Failure, persistenceFailures = 0, eventWriteFailure = f
         startedAt: new Date().toISOString(),
       }),
     })) as never,
-    getActions: () => ({ getActionsClientWithRequestInSpace: async () => ({ execute }) } as never),
+    getActions: () => ({ getActionsClientWithRequestInSpace: async () => ({ execute }) }) as never,
     getIsomerRuntime: getTestIsomerRuntime,
     getRoutingClient: async () => routing.client,
     getTriggerEmitter: () => emitter,
@@ -341,7 +341,7 @@ const setup = (failure?: Failure, persistenceFailures = 0, eventWriteFailure = f
                   })),
               }),
             },
-          } as never),
+          }) as never,
       });
       sweepFixture.engine.dependencies.workflowsExtensions.hasStepDefinition.mockReturnValue(true);
       const original =

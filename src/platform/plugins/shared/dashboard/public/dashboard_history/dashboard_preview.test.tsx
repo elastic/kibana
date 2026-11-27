@@ -48,7 +48,7 @@ const getChange = (id: string, snapshot: Partial<DashboardState>): ChangeHistory
     actor: { name: 'Miles M.' },
     action: 'dashboard_update',
     snapshot: { title: `Title ${id}`, panels: [], ...snapshot },
-  } as unknown as ChangeHistoryDetail);
+  }) as unknown as ChangeHistoryDetail;
 
 const panel = (id: string) => ({
   id,

@@ -8,7 +8,6 @@
 import { mobilePanelQuery } from './filters';
 import {
   OTHER_RELEASE_KEY,
-  toEsqlDuration,
   withOtherReleaseStats,
   withReleaseSeries,
   withReleaseStats,
@@ -17,19 +16,6 @@ import {
 
 // A new query each time: `pipe` adds to the query it's called on.
 const query = () => mobilePanelQuery({ serviceName: 'shop-mobile', release: '2.0.0' });
-
-describe('toEsqlDuration', () => {
-  it.each([
-    [{ value: 30, unit: 's' as const }, '30 seconds'],
-    [{ value: 1, unit: 's' as const }, '1 second'],
-    [{ value: 1, unit: 'd' as const }, '1 day'],
-    [{ value: 1, unit: 'w' as const }, '1 week'],
-    [{ value: 1, unit: 'M' as const }, '1 month'],
-    [{ value: 1, unit: 'y' as const }, '1 year'],
-  ])('writes %j as %s', (interval, duration) => {
-    expect(toEsqlDuration(interval)).toBe(duration);
-  });
-});
 
 describe('release queries', () => {
   it('has an "Other" key no release can have: releases without a name are dropped', () => {

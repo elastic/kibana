@@ -261,7 +261,7 @@ export const getInitialDataViewTarget = ({
       : initialAdHocDataViewSpec?.id;
   const dataViewId = isDataViewSource(dataSource)
     ? dataSource.dataViewId
-    : currentDataView?.id ?? initialDataViewId;
+    : (currentDataView?.id ?? initialDataViewId);
 
   return { dataViewId, initialAdHocDataViewSpec };
 };

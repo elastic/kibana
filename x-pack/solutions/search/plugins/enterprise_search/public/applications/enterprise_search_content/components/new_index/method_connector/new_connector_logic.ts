@@ -245,7 +245,7 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
     connectorName: [
       () => [selectors.rawName, selectors.generatedNameData],
       (name: string, generatedName: NewConnectorValues['generatedNameData']) =>
-        name ? name : generatedName?.connectorName ?? '',
+        name ? name : (generatedName?.connectorName ?? ''),
     ],
     isCreateLoading: [
       () => [selectors.createConnectorApiStatus],

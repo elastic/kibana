@@ -1,0 +1,376 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/**
+ * The type of the field an `oasdiff` change is about, read from the snapshot it is in: `string`,
+ * `boolean | string | SlotContentId`, `Features[]`. `oasdiff` names the field by a path through the
+ * operation's schema (`document/allOf[subschema #1]/children/items/…/value`), and this follows
+ * that path in the committed snapshot (for what was removed) or the refreshed one.
+ *
+ * A path that can't be followed, because it goes through an ambiguity or a shape this doesn't
+ * know, gives no type rather than a guess.
+ */
+
+import type { SpecChange } from '../detect_drift';
+import { getAtTokens, localRefToPointer, resolvePathItem, toTokens } from '../../json_pointer';
+import { isRecord } from '../../values';
+import { pathItemOf } from '../locate_operation';
+import { quoted, requestParameterOf } from '../oasdiff_text';
+
+type Json = Record<string, unknown>;
+
+export interface SnapshotDocuments {
+  /** The snapshot as committed. */
+  readonly committed?: unknown;
+  /** The snapshot regenerated from the latest vendor spec. */
+  readonly current?: unknown;
+}
+
+const MAX_DEPTH = 24;
+const MAX_TYPE_DEPTH = 4;
+const MAX_LISTED_TYPES = 6;
+const MAX_TYPE_LENGTH = 80;
+
+const pointer = (document: Json, ref: string): unknown => {
+  const target = localRefToPointer(ref);
+  return target === undefined ? undefined : getAtTokens(document, toTokens(target));
+};
+
+const deref = (document: Json, node: unknown): unknown => {
+  let current = node;
+  for (let depth = 0; depth < MAX_DEPTH; depth++) {
+    if (!isRecord(current) || typeof current.$ref !== 'string') {
+      return current;
+    }
+    current = pointer(document, current.$ref);
+  }
+  return undefined;
+};
+
+const refName = (ref: string): string => decodeURIComponent(ref.slice(ref.lastIndexOf('/') + 1));
+
+/** A path split at the slashes outside brackets: `a/oneOf[#/components/schemas/B]/c`. */
+const splitPath = (path: string): string[] => {
+  const segments: string[] = [];
+  let depth = 0;
+  let start = 0;
+  for (let index = 0; index < path.length; index++) {
+    const char = path[index];
+    if (char === '[') {
+      depth++;
+    } else if (char === ']') {
+      depth = Math.max(0, depth - 1);
+    } else if (char === '/' && depth === 0) {
+      segments.push(path.slice(start, index));
+      start = index + 1;
+    }
+  }
+  segments.push(path.slice(start));
+  return segments.filter((segment) => segment !== '');
+};
+
+const compositionMember = (schema: Json, kind: string, selector: string): unknown => {
+  const members: unknown[] = Array.isArray(schema[kind]) ? schema[kind] : [];
+  if (selector.startsWith('#/')) {
+    return members.find((member) => isRecord(member) && member.$ref === selector);
+  }
+  const index = /^subschema #(\d+)/.exec(selector);
+  return index ? members[Number(index[1]) - 1] : undefined;
+};
+
+const findProperty = (document: Json, schema: unknown, name: string, depth = 0): unknown => {
+  const resolved = deref(document, schema);
+  if (!isRecord(resolved) || depth > MAX_DEPTH) {
+    return undefined;
+  }
+  if (isRecord(resolved.properties) && name in resolved.properties) {
+    return resolved.properties[name];
+  }
+  for (const member of Array.isArray(resolved.allOf) ? resolved.allOf : []) {
+    const found = findProperty(document, member, name, depth + 1);
+    if (found !== undefined) {
+      return found;
+    }
+  }
+  return undefined;
+};
+
+/** Follows `oasdiff`'s path from a schema to the field, or `undefined` when it can't. */
+const walk = (document: Json, root: unknown, segments: readonly string[]): unknown => {
+  let current: unknown = root;
+  for (const segment of segments) {
+    const resolved = deref(document, current);
+    if (!isRecord(resolved)) {
+      return undefined;
+    }
+    const composition = /^(allOf|oneOf|anyOf)\[([\s\S]*)\]$/.exec(segment);
+    if (composition) {
+      // `subschema #49: A -> subschema #50: A` goes through a list inside a list: not followed.
+      current = composition[2].includes('->')
+        ? undefined
+        : compositionMember(resolved, composition[1], composition[2]);
+    } else if (segment === 'items' && resolved.items !== undefined) {
+      current = resolved.items;
+    } else if (segment === 'additionalProperties' && isRecord(resolved.additionalProperties)) {
+      current = resolved.additionalProperties;
+    } else {
+      current = findProperty(document, resolved, segment);
+    }
+    if (current === undefined) {
+      return undefined;
+    }
+  }
+  return current;
+};
+
+const union = (names: readonly string[]): string => {
+  const unique = [...new Set(names)];
+  return unique.length > MAX_LISTED_TYPES
+    ? [...unique.slice(0, MAX_LISTED_TYPES), '…'].join(' | ')
+    : unique.join(' | ');
+};
+
+const typeOf = (document: Json, node: unknown, depth = 0): string => {
+  if (!isRecord(node)) {
+    return 'any';
+  }
+  if (typeof node.$ref === 'string') {
+    return refName(node.$ref);
+  }
+  if (depth > MAX_TYPE_DEPTH) {
+    return 'any';
+  }
+  const nullable = node.nullable === true ? ' | null' : '';
+  const membersOf = (kind: string): string[] =>
+    (Array.isArray(node[kind]) ? node[kind] : []).map((member: unknown) =>
+      typeOf(document, member, depth + 1)
+    );
+  for (const kind of ['oneOf', 'anyOf']) {
+    const names = membersOf(kind);
+    if (names.length > 0) {
+      return `${union(names)}${nullable}`;
+    }
+  }
+  const all = membersOf('allOf');
+  if (all.length > 0) {
+    return `${[...new Set(all)].join(' & ')}${nullable}`;
+  }
+  if (Array.isArray(node.enum) && node.enum.length > 0) {
+    return `${union(node.enum.map(String))}${nullable}`;
+  }
+  if (Array.isArray(node.type)) {
+    return union(node.type.map(String));
+  }
+  if (node.type === 'array') {
+    const items = node.items === undefined ? 'any' : typeOf(document, node.items, depth + 1);
+    return `${items.includes(' ') ? `(${items})` : items}[]${nullable}`;
+  }
+  if (typeof node.type === 'string') {
+    return `${node.type}${nullable}`;
+  }
+  return isRecord(node.properties) ? `object${nullable}` : 'any';
+};
+
+// "(media type: application/xml)", or "to media type `application/xml` of response `200`".
+const MEDIA_TYPE = /\(media type: ([^)]+)\)|media type `([^`]+)`/;
+
+const mediaTypeOf = (text: string, content: Json): string | undefined => {
+  const match = MEDIA_TYPE.exec(text);
+  const named = match?.[1] ?? match?.[2];
+  if (named !== undefined) {
+    // A field of another media type may differ, so none is better than the wrong one.
+    return named in content ? named : undefined;
+  }
+  return Object.keys(content).find((type) => type.includes('json')) ?? Object.keys(content)[0];
+};
+
+const schemaOfContent = (document: Json, holder: unknown, text: string): unknown => {
+  const resolved = deref(document, holder);
+  if (!isRecord(resolved) || !isRecord(resolved.content)) {
+    return undefined;
+  }
+  const type = mediaTypeOf(text, resolved.content);
+  const media = type === undefined ? undefined : resolved.content[type];
+  return isRecord(media) ? media.schema : undefined;
+};
+
+const STATUS = /^(\d{3}|[1-5]XX|default)$/;
+
+const responseOf = (responses: unknown, text: string): unknown => {
+  if (!isRecord(responses)) {
+    return undefined;
+  }
+  // The status is named after "status" or before it; a value or field of that form may come first.
+  const phrase = /status `([^`]+)`|`([^`]+)` status/.exec(text);
+  const said = phrase?.[1] ?? phrase?.[2];
+  const named =
+    said !== undefined && STATUS.test(said)
+      ? said
+      : quoted(text)
+          .filter((name) => STATUS.test(name))
+          .pop();
+  if (named !== undefined) {
+    return responses[named];
+  }
+  const success = Object.keys(responses)
+    .filter((status) => /^2/.test(status))
+    .sort()[0];
+  return success === undefined ? undefined : responses[success];
+};
+
+const VARIANT_RULE = /discriminator-mapping|-(one|any|all)-of-(added|removed)$/;
+
+// A selector that is a whole segment at the end of a path, `…/oneOf[subschema #1]`; one stuck to a
+// property's name, `payload-oneOf[…]`, is part of that name.
+const SELECTOR_TAIL = /(?:^|\/)(?:allOf|oneOf|anyOf)\[[^\]]*\]$/;
+
+// A path that ends in the `allOf` part of a field, `value/items/allOf[subschema #1: entity]`.
+const PART_OF_FIELD = /(?:(?:^|\/)allOf\[[^\]]*\])+$/;
+
+/**
+ * For a path that ends in an `allOf` part, such as the base type a chat extends, the path of what
+ * it is a part of: `value/items/allOf[subschema #1: entity]` as `value`, '' for the body itself.
+ */
+export const ownerOfPart = (path: string): string | undefined =>
+  PART_OF_FIELD.test(path) ? path.replace(PART_OF_FIELD, '') : undefined;
+
+/** The field the change names: for an enum value or a variant, the field they are of. */
+const fieldPathOf = (id: string, names: readonly string[]): string | undefined => {
+  if (/-enum-value-(added|removed)$/.test(id) || VARIANT_RULE.test(id)) {
+    const field = names[1];
+    if (field === undefined || ['oneOf', 'anyOf', 'allOf'].includes(field)) return undefined;
+    // Keys added to a part, such as the base type a chat extends, are not the field's type: that
+    // is the field's own, `value` as a list of chats rather than its items' base.
+    const owner = /discriminator-mapping/.test(id) ? ownerOfPart(field) : undefined;
+    if (owner !== undefined) {
+      return owner === '' ? undefined : owner;
+    }
+    return field;
+  }
+  return names[0];
+};
+
+// The field was dropped from the new spec: its type is the committed one.
+const isFieldRemoval = (id: string): boolean =>
+  /^(request|response)-(optional-|required-)?property-removed$/.test(id) ||
+  id === 'request-parameter-removed';
+
+const lengthened = (type: string): string =>
+  type.length > MAX_TYPE_LENGTH ? `${type.slice(0, MAX_TYPE_LENGTH - 1)}…` : type;
+
+interface Lookup {
+  readonly type?: string;
+  /** For keys added to an `allOf` part, the path of what the part is of: '' for the body. */
+  readonly owner?: string;
+}
+
+const lookupIn = ({ id, text, operation }: SpecChange, document: unknown): Lookup => {
+  if (operation === undefined || !isRecord(document)) {
+    return {};
+  }
+  const separator = operation.indexOf(' ');
+  const pathItem = resolvePathItem(document, pathItemOf(document, operation.slice(separator + 1)));
+  const spec = isRecord(pathItem) ? pathItem[operation.slice(0, separator).toLowerCase()] : null;
+  if (!isRecord(spec)) {
+    return {};
+  }
+  const names = quoted(text);
+
+  if (/parameter/.test(id)) {
+    const parameter = requestParameterOf(text);
+    if (parameter === undefined) {
+      return {};
+    }
+    // The operation's own parameters override those of its path.
+    const parameters = [
+      ...(Array.isArray(spec.parameters) ? spec.parameters : []),
+      ...(isRecord(pathItem) && Array.isArray(pathItem.parameters) ? pathItem.parameters : []),
+    ].map((declared) => deref(document, declared));
+    const found = parameters.find(
+      (candidate) =>
+        isRecord(candidate) &&
+        candidate.in === parameter.location &&
+        candidate.name === parameter.name
+    );
+    return isRecord(found) && found.schema !== undefined
+      ? { type: lengthened(typeOf(document, found.schema)) }
+      : {};
+  }
+
+  // A response header is not in the body, where a property of the same name may be.
+  if (/^response-.*header/.test(id)) {
+    return {};
+  }
+  const root = id.startsWith('response-')
+    ? schemaOfContent(document, responseOf(spec.responses, text), text)
+    : id.startsWith('request-') || id.startsWith('new-')
+      ? schemaOfContent(document, spec.requestBody, text)
+      : undefined;
+  if (root === undefined) {
+    return {};
+  }
+  const ofPart = /discriminator-mapping/.test(id) && ownerOfPart(names[1] ?? '') !== undefined;
+  let field = fieldPathOf(id, names);
+  // The part may be of a variant of an array's items, `value/items/oneOf[…]/allOf[…]`, whose field
+  // is the array: selectors and array steps are taken off in turn, down to a property or the body.
+  // `items` is an array step only when what holds it is an array, as a property may have that name.
+  while (ofPart && field !== undefined) {
+    if (SELECTOR_TAIL.test(field)) {
+      field = field.replace(SELECTOR_TAIL, '') || undefined;
+      continue;
+    }
+    if (!/(^|\/)items$/.test(field)) break;
+    const parent = field.replace(/\/?items$/, '');
+    const holder = deref(document, parent === '' ? root : walk(document, root, splitPath(parent)));
+    if (!isRecord(holder) || (holder.type !== 'array' && holder.items === undefined)) break;
+    field = parent || undefined;
+  }
+  const node = field === undefined ? root : walk(document, root, splitPath(field));
+  if (node === undefined) {
+    return {};
+  }
+  // A new enum value or variant is about what the field is made of, so a named schema is shown
+  // by its values or variants; keys added to a part of it leave the field's own name.
+  const shown =
+    !ofPart && (/-enum-value-(added|removed)$/.test(id) || VARIANT_RULE.test(id))
+      ? deref(document, node)
+      : node;
+  return {
+    type: lengthened(typeOf(document, shown)),
+    ...(ofPart ? { owner: field ?? '' } : {}),
+  };
+};
+
+// A field that is new, or gone, has no type on the other side.
+const isFieldAddition = (id: string): boolean =>
+  /^new-(optional|required)-request-(property|parameter)$/.test(id) ||
+  /^response-(optional|required)-property-added$/.test(id);
+
+/**
+ * The type of the field a change is about, and what it was before when the field was there before:
+ * `type` is read from the refreshed snapshot (the committed one for a field that was removed) and
+ * `typeBefore` from the committed one.
+ */
+export const fieldTypesOf = (
+  change: SpecChange,
+  { committed, current }: SnapshotDocuments
+): { type?: string; typeBefore?: string; owner?: string } => {
+  const after = lookupIn(change, isFieldRemoval(change.id) ? committed : current);
+  const before =
+    isFieldRemoval(change.id) || isFieldAddition(change.id) ? {} : lookupIn(change, committed);
+  const owner = after.owner ?? before.owner;
+  return {
+    ...(after.type === undefined ? {} : { type: after.type }),
+    ...(before.type === undefined ? {} : { typeBefore: before.type }),
+    ...(owner === undefined ? {} : { owner }),
+  };
+};
+
+export const fieldTypeOf = (change: SpecChange, documents: SnapshotDocuments): string | undefined =>
+  fieldTypesOf(change, documents).type;

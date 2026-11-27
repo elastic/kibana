@@ -30,7 +30,7 @@ export const getConnectorEventTopicName = <TEventId extends string>(
  */
 export interface ConnectorEventTopicDefinition<
   TSchema extends z.ZodObject = z.ZodObject,
-  TName extends string = string
+  TName extends string = string,
 > {
   readonly name: TName;
   readonly eventSchema: TSchema;

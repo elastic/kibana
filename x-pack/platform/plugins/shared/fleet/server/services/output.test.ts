@@ -1681,7 +1681,7 @@ describe('Output Service', () => {
           },
           secrets: { kerberos: { password: 'my-password' } },
           ...fields,
-        } as any);
+        }) as any;
 
       beforeEach(() => {
         mockedCheckKafkaKerberosAllowed.mockClear();
@@ -1696,7 +1696,7 @@ describe('Output Service', () => {
         mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
         mockedIsOutputSecretStorageEnabled.mockResolvedValue(true);
         mockedExtractAndWriteOutputSecrets.mockImplementation(
-          async ({ output }) => ({ output, secretReferences: [] } as any)
+          async ({ output }) => ({ output, secretReferences: [] }) as any
         );
       });
 
@@ -1783,7 +1783,7 @@ describe('Output Service', () => {
           },
           secrets: { oauth2: { client_secret: 'my-secret' } },
           ...fields,
-        } as any);
+        }) as any;
 
       beforeEach(() => {
         mockedCheckKafkaOAuth2Allowed.mockClear();
@@ -1797,7 +1797,7 @@ describe('Output Service', () => {
         mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
         mockedIsOutputSecretStorageEnabled.mockResolvedValue(true);
         mockedExtractAndWriteOutputSecrets.mockImplementation(
-          async ({ output }) => ({ output, secretReferences: [] } as any)
+          async ({ output }) => ({ output, secretReferences: [] }) as any
         );
       });
 
@@ -3473,7 +3473,7 @@ describe('Output Service', () => {
           },
           secrets: { kerberos: { password: { id: 'secret-id' } } },
           ...fields,
-        } as any);
+        }) as any;
 
       beforeEach(() => {
         mockedCheckKafkaKerberosAllowed.mockClear();
@@ -3486,7 +3486,7 @@ describe('Output Service', () => {
         mockedIsOutputSecretStorageEnabled.mockResolvedValue(true);
         mockedExtractAndUpdateOutputSecrets.mockImplementation(
           async ({ outputUpdate }) =>
-            ({ outputUpdate, secretReferences: [], secretsToDelete: [] } as any)
+            ({ outputUpdate, secretReferences: [], secretsToDelete: [] }) as any
         );
       });
 
@@ -3654,7 +3654,7 @@ describe('Output Service', () => {
           },
           secrets: { oauth2: { client_secret: { id: 'secret-id' } } },
           ...fields,
-        } as any);
+        }) as any;
 
       beforeEach(() => {
         mockedCheckKafkaOAuth2Allowed.mockClear();
@@ -3667,7 +3667,7 @@ describe('Output Service', () => {
         mockedIsOutputSecretStorageEnabled.mockResolvedValue(true);
         mockedExtractAndUpdateOutputSecrets.mockImplementation(
           async ({ outputUpdate }) =>
-            ({ outputUpdate, secretReferences: [], secretsToDelete: [] } as any)
+            ({ outputUpdate, secretReferences: [], secretsToDelete: [] }) as any
         );
       });
 
@@ -5735,7 +5735,7 @@ describe('Output Service', () => {
         mockedIsOutputSecretStorageEnabled.mockResolvedValue(true);
         mockedExtractAndUpdateOutputSecrets.mockImplementation(
           async ({ outputUpdate }) =>
-            ({ outputUpdate, secretReferences: [], secretsToDelete: [] } as any)
+            ({ outputUpdate, secretReferences: [], secretsToDelete: [] }) as any
         );
       });
 

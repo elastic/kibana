@@ -281,8 +281,8 @@ export const parseSequenceEsql = (
     tracksLastStep || trackedStepIndices.length === 0
       ? { steps, hopWindows, recoveryMode: 'last' }
       : trackedStepIndices.length === steps.length
-      ? { steps, hopWindows, recoveryMode: 'all' }
-      : { steps, hopWindows, recoveryMode: 'custom', recoveryStepIndices: trackedStepIndices };
+        ? { steps, hopWindows, recoveryMode: 'all' }
+        : { steps, hopWindows, recoveryMode: 'custom', recoveryStepIndices: trackedStepIndices };
 
   return isSequenceValid(parsed) ? parsed : null;
 };

@@ -57,14 +57,17 @@ export interface ManagedConsoleExtensionComponentProps<TMeta extends object = an
 /**
  * The Props provided to `ConsoleRegistrationInterface['HeaderActionsComponent']`
  */
-export interface ManagedConsoleHeaderActionsComponentProps<TMeta extends object = any>
-  extends ManagedConsoleExtensionComponentProps<TMeta> {
+export interface ManagedConsoleHeaderActionsComponentProps<
+  TMeta extends object = any,
+> extends ManagedConsoleExtensionComponentProps<TMeta> {
   /** Reports the app menu config the overlay header should render (`undefined` clears it) */
   onMenuChange: (menu: AppMenuConfig | undefined) => void;
 }
 
-export interface RegisteredConsoleClient<TMeta extends object = any>
-  extends Pick<ConsoleRegistrationInterface<TMeta>, 'id' | 'meta'> {
+export interface RegisteredConsoleClient<TMeta extends object = any> extends Pick<
+  ConsoleRegistrationInterface<TMeta>,
+  'id' | 'meta'
+> {
   show(): void;
 
   hide(): void;

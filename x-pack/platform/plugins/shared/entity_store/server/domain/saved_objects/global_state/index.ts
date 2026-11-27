@@ -22,7 +22,7 @@ import { applyOverrides } from '../apply_overrides';
 
 const getLogsExtractionOverrides = (attrs: EntityStoreGlobalStateOverrides) =>
   attrs.defaultsVersion === 'latest'
-    ? attrs.logsExtraction ?? {}
+    ? (attrs.logsExtraction ?? {})
     : getLegacyLogExtractionOverrides(attrs.logsExtraction ?? {});
 
 /** Write-path partial for historySnapshot. `undefined` = leave alone; `null` = clear the field. */

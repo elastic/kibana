@@ -39,7 +39,7 @@ const mockEsClient = (buckets: unknown[]): ElasticsearchClient =>
     search: jest.fn().mockResolvedValue({
       aggregations: { latest_actions: { buckets } },
     }),
-  } as unknown as ElasticsearchClient);
+  }) as unknown as ElasticsearchClient;
 
 describe('getPolicyResponseFailureEvents', () => {
   it('queries metrics-endpoint.policy-* keyed on the provided endpointIds (latest per agent)', async () => {

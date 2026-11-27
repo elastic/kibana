@@ -110,14 +110,14 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   const selectedJob = selectedJobId !== undefined ? mlJobService.getJob(selectedJobId) : undefined;
   const timeSeriesJobs = mlJobService.jobs.filter(isTimeSeriesViewJob);
 
-  const viewableDetector = selectedJob ? getViewableDetectors(selectedJob)[0]?.index ?? 0 : 0;
+  const viewableDetector = selectedJob ? (getViewableDetectors(selectedJob)[0]?.index ?? 0) : 0;
 
   // Next we get globalState and appState information to pass it on as props later.
   // If a job change is going on, we fall back to defaults (as if appState was already cleared),
   // otherwise the page could break.
   const selectedDetectorIndex = isJobChange
     ? viewableDetector
-    : timeSeriesExplorerUrlState?.mlTimeSeriesExplorer?.detectorIndex ?? viewableDetector;
+    : (timeSeriesExplorerUrlState?.mlTimeSeriesExplorer?.detectorIndex ?? viewableDetector);
 
   let autoZoomDuration: number | undefined;
   if (selectedJobId !== undefined && selectedJob !== undefined) {

@@ -436,8 +436,8 @@ export const createWorkflowValidityEvaluator = ({
       audit.unsafe.length > 0
         ? 'run_skipped_external_connector'
         : audit.usesStubConnector && !stubVerified()
-        ? 'run_skipped_unverified_stub'
-        : undefined;
+          ? 'run_skipped_unverified_stub'
+          : undefined;
     if (skipOutcome) {
       detail.outcome = skipOutcome;
       if (audit.unsafe.length > 0) detail.skipped_steps = audit.unsafe;
@@ -523,10 +523,10 @@ export const createWorkflowValidityEvaluator = ({
             status === 'completed'
               ? 'completed'
               : status === 'timed_out'
-              ? 'timed_out'
-              : status === 'skipped'
-              ? 'skipped'
-              : 'failed';
+                ? 'timed_out'
+                : status === 'skipped'
+                  ? 'skipped'
+                  : 'failed';
           terminal = true;
           break;
         }

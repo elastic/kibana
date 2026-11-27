@@ -22,7 +22,7 @@ interface QueryValidationDetail {
  */
 export function createEsqlValidityEvaluator<
   TExample extends Example = Example,
-  TTaskOutput extends TaskOutput = TaskOutput
+  TTaskOutput extends TaskOutput = TaskOutput,
 >(config: {
   queryExtractor: (output: TTaskOutput) => string[];
   scoreOnEmptyQueries?: number;

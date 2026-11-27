@@ -215,7 +215,7 @@ export const DataGrid = <TRow extends object>({
 
   const activeRowIsMounted = Boolean(
     focus.activeCell &&
-      virtualRows.some(({ index }) => tableRows[index]?.id === focus.activeCell?.rowId)
+    virtualRows.some(({ index }) => tableRows[index]?.id === focus.activeCell?.rowId)
   );
   const gridTemplateColumns =
     columns.length > 0 ? `repeat(${columns.length}, minmax(0, 1fr))` : 'none';

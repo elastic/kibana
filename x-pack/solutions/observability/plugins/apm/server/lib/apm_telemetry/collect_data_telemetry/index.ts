@@ -25,42 +25,45 @@ export function collectDataTelemetry({
   logger,
   signal,
 }: CollectTelemetryParams) {
-  return tasks.reduce((prev, task) => {
-    return prev.then(async (data) => {
-      if (signal.aborted) {
-        logger.debug(`Skipping APM telemetry task ${task.name}: collection was aborted`);
-        return data;
-      }
-      logger.debug(`Executing APM telemetry task ${task.name}`);
-      try {
-        const time = process.hrtime();
-        const next = await task.executor({
-          indices,
-          telemetryClient,
-          savedObjectsClient,
-        });
-        const took = process.hrtime(time);
-
-        return merge({}, data, next, {
-          tasks: {
-            [task.name]: {
-              took: {
-                ms: Math.round(took[0] * 1000 + took[1] / 1e6),
-              },
-            },
-          },
-        });
-      } catch (err) {
+  return tasks.reduce(
+    (prev, task) => {
+      return prev.then(async (data) => {
         if (signal.aborted) {
-          logger.debug(`Aborted APM telemetry task ${task.name} while in flight`);
+          logger.debug(`Skipping APM telemetry task ${task.name}: collection was aborted`);
           return data;
         }
-        // catch error and log as debug in production env and warn in dev env
-        const logLevel = isProd ? logger.debug : logger.warn;
-        logLevel.call(logger, `Failed executing the APM telemetry task: "${task.name}"`);
-        logLevel.call(logger, err);
-        return data;
-      }
-    });
-  }, Promise.resolve({} as APMDataTelemetry));
+        logger.debug(`Executing APM telemetry task ${task.name}`);
+        try {
+          const time = process.hrtime();
+          const next = await task.executor({
+            indices,
+            telemetryClient,
+            savedObjectsClient,
+          });
+          const took = process.hrtime(time);
+
+          return merge({}, data, next, {
+            tasks: {
+              [task.name]: {
+                took: {
+                  ms: Math.round(took[0] * 1000 + took[1] / 1e6),
+                },
+              },
+            },
+          });
+        } catch (err) {
+          if (signal.aborted) {
+            logger.debug(`Aborted APM telemetry task ${task.name} while in flight`);
+            return data;
+          }
+          // catch error and log as debug in production env and warn in dev env
+          const logLevel = isProd ? logger.debug : logger.warn;
+          logLevel.call(logger, `Failed executing the APM telemetry task: "${task.name}"`);
+          logLevel.call(logger, err);
+          return data;
+        }
+      });
+    },
+    Promise.resolve({} as APMDataTelemetry)
+  );
 }

@@ -344,8 +344,8 @@ export const runWatchdogWorker = (
       summary.samples === 0
         ? 'empty'
         : diagnosticDir === undefined
-        ? 'no_directory'
-        : admission.admit(profileSignature(summary), wallClockMs());
+          ? 'no_directory'
+          : admission.admit(profileSignature(summary), wallClockMs());
     let path: string | undefined;
     let name: string | undefined;
     if (diagnosticDir && file === 'admitted') {

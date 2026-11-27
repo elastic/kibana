@@ -101,10 +101,13 @@ function getFieldDescriptions(
   flatProps: Record<string, unknown>,
   description: ManagedEntityDefinition
 ): Record<string, EntityField & { value: unknown }> {
-  const allFieldDescriptions = description.extraction.fields.reduce((obj, field) => {
-    obj[field.destination || field.source] = field;
-    return obj;
-  }, {} as Record<string, EntityField>);
+  const allFieldDescriptions = description.extraction.fields.reduce(
+    (obj, field) => {
+      obj[field.destination || field.source] = field;
+      return obj;
+    },
+    {} as Record<string, EntityField>
+  );
 
   const invalid: string[] = [];
   const descriptions: Record<string, EntityField & { value: unknown }> = {};

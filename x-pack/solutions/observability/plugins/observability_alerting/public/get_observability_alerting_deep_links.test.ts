@@ -26,7 +26,7 @@ const capabilities = (features: Record<string, Record<string, boolean>>): Capabi
     management: {},
     catalogue: {},
     ...features,
-  } as Capabilities);
+  }) as Capabilities;
 
 const visibleInById = (caps?: Capabilities): Record<string, AppDeepLinkLocations[] | undefined> =>
   Object.fromEntries(

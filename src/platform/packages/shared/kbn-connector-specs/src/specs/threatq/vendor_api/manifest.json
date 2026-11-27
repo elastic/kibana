@@ -1,0 +1,204 @@
+{
+  "operations": {
+    "addAttribute": [
+      {
+        "method": "post",
+        "path": "/indicators/{indicator_id}/attributes",
+        "source": "rest_api"
+      }
+    ],
+    "addTags": [
+      {
+        "method": "post",
+        "path": "/events/{event_id}/tags",
+        "source": "rest_api"
+      }
+    ],
+    "createAdversary": [
+      {
+        "method": "post",
+        "path": "/adversaries",
+        "source": "rest_api"
+      }
+    ],
+    "createEvent": [
+      {
+        "method": "post",
+        "path": "/events",
+        "source": "rest_api"
+      }
+    ],
+    "createIndicator": [
+      {
+        "method": "post",
+        "path": "/indicators",
+        "source": "rest_api"
+      }
+    ],
+    "createObject": [
+      {
+        "method": "post",
+        "path": "/adversaries",
+        "source": "rest_api"
+      }
+    ],
+    "executePlugin": [
+      {
+        "method": "post",
+        "path": "/plugins/{plugin_id}/execute",
+        "source": "rest_api"
+      }
+    ],
+    "getIndicator": [
+      {
+        "method": "get",
+        "path": "/indicators/{indicator_id}",
+        "source": "rest_api"
+      }
+    ],
+    "getObject": [
+      {
+        "method": "get",
+        "path": "/indicators/{indicator_id}",
+        "source": "rest_api"
+      }
+    ],
+    "getPlugin": [
+      {
+        "method": "get",
+        "path": "/plugins/{plugin_id}",
+        "source": "rest_api"
+      }
+    ],
+    "getRelatedObjects": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "offsetParam": "offset",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "totalPath": "total"
+          },
+          "style": "offset"
+        },
+        "path": "/indicators/{indicator_id}/events",
+        "source": "rest_api"
+      }
+    ],
+    "linkObjects": [
+      {
+        "method": "post",
+        "path": "/indicators/{indicator_id}/events",
+        "source": "rest_api"
+      }
+    ],
+    "listIndicatorStatuses": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "offsetParam": "offset",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "totalPath": "total"
+          },
+          "style": "offset"
+        },
+        "path": "/indicator/statuses",
+        "source": "rest_api"
+      }
+    ],
+    "listIndicatorTypes": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "offsetParam": "offset",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "totalPath": "total"
+          },
+          "style": "offset"
+        },
+        "path": "/indicator/types",
+        "source": "rest_api"
+      }
+    ],
+    "listPlugins": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "offsetParam": "offset",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "totalPath": "total"
+          },
+          "style": "offset"
+        },
+        "path": "/plugins",
+        "source": "rest_api"
+      }
+    ],
+    "searchIndicators": [
+      {
+        "method": "post",
+        "pagination": {
+          "request": {
+            "offsetParam": "offset",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "totalPath": "total"
+          },
+          "style": "offset"
+        },
+        "path": "/indicators/query",
+        "source": "rest_api"
+      }
+    ],
+    "searchObjects": [
+      {
+        "method": "post",
+        "pagination": {
+          "request": {
+            "offsetParam": "offset",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "totalPath": "total"
+          },
+          "style": "offset"
+        },
+        "path": "/{object}/query",
+        "source": "rest_api"
+      }
+    ],
+    "updateIndicatorStatus": [
+      {
+        "method": "put",
+        "path": "/indicators/{indicator_id}",
+        "source": "rest_api"
+      }
+    ]
+  },
+  "sources": {
+    "rest_api": {
+      "apiVersion": "6.16.0",
+      "fetchedAt": "2026-11-18T21:09:19.345Z",
+      "format": "threatq-html",
+      "url": "https://helpcenter.threatq.com/assets/HTML/api/ThreatQ_REST_API_Reference_v6.16.0.html"
+    }
+  }
+}

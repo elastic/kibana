@@ -9,6 +9,9 @@ import { mockTimelineData } from './mock_timeline_data';
 
 const mockEvents = structuredClone(mockTimelineData);
 
+/** The index of the raw hits, for the events of the fixture that have none. */
+export const MOCK_TIMELINE_HIT_INDEX = '.ds-logs-endpoint.events.network-default-2021.09.28-000001';
+
 /*
  * This helps to mock `data.search.search` method to mock the timeline data
  * */
@@ -34,7 +37,15 @@ export const getMockTimelineSearchSubscription = () => {
               activePage: args.pagination.activePage,
               querySize: args.pagination.querySize,
             },
-            rawResponse: {},
+            rawResponse: {
+              hits: {
+                hits: mockEvents.slice(start, end).map(({ _id, _index }) => ({
+                  _id,
+                  _index: _index ?? MOCK_TIMELINE_HIT_INDEX,
+                  _source: {},
+                })),
+              },
+            },
             totalCount: mockEvents.length,
           });
         }, 50);

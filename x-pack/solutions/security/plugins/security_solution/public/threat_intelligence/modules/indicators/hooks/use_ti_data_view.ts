@@ -85,7 +85,7 @@ export const useTIDataView = (): SelectedDataView => {
         },
         browserFields: tiBrowserFields,
         selectedPatterns,
-      } as SelectedDataView),
+      }) as SelectedDataView,
     [tiBrowserFields, dataView, selectedPatterns, status]
   );
 };

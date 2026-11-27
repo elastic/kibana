@@ -100,17 +100,17 @@ function buildVisualizationState(config: GaugeConfig): GaugeVisualizationState {
           ? 'horizontalBullet'
           : 'verticalBullet'
         : layer.styling?.shape.type === 'semi_circle'
-        ? 'semiCircle'
-        : layer.styling?.shape.type
+          ? 'semiCircle'
+          : layer.styling?.shape.type
       : 'horizontalBullet',
     ...convertColorToLensState(layer.metric.color),
     ticksPosition:
-      layer.metric.ticks?.visible === false ? 'hidden' : layer.metric.ticks?.mode ?? 'bands',
+      layer.metric.ticks?.visible === false ? 'hidden' : (layer.metric.ticks?.mode ?? 'bands'),
     ...(layer.metric.title?.visible === false
       ? { labelMajorMode: 'none' }
       : layer.metric.title?.text
-      ? { labelMajorMode: 'custom', labelMajor: layer.metric.title.text }
-      : { labelMajorMode: 'auto' }),
+        ? { labelMajorMode: 'custom', labelMajor: layer.metric.title.text }
+        : { labelMajorMode: 'auto' }),
     labelMinor: layer.metric.subtitle,
   };
 }
@@ -150,10 +150,10 @@ function reverseBuildVisualizationState(
         shape === GAUGE_SHAPES.HORIZONTAL_BULLET
           ? { type: 'bullet', orientation: 'horizontal' }
           : shape === GAUGE_SHAPES.VERTICAL_BULLET
-          ? { type: 'bullet', orientation: 'vertical' }
-          : {
-              type: shape === GAUGE_SHAPES.SEMI_CIRCLE ? 'semi_circle' : shape,
-            },
+            ? { type: 'bullet', orientation: 'vertical' }
+            : {
+                type: shape === GAUGE_SHAPES.SEMI_CIRCLE ? 'semi_circle' : shape,
+              },
     }),
     metric: isEsqlTableTypeDataSource(dataSource)
       ? {
@@ -216,8 +216,8 @@ function reverseBuildVisualizationState(
         visualization.ticksPosition === 'hidden'
           ? { visible: false }
           : visualization.ticksPosition === 'bands'
-          ? { visible: true, mode: 'bands' }
-          : { visible: true, mode: 'auto' };
+            ? { visible: true, mode: 'bands' }
+            : { visible: true, mode: 'auto' };
     }
 
     if (visualization.colorMode === 'palette') {

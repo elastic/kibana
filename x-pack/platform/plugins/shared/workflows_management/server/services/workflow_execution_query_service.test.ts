@@ -109,17 +109,28 @@ describe('WorkflowExecutionQueryService', () => {
       expect(JSON.stringify(must)).not.toContain('workflowId');
     });
 
-    it('leaves the global executions view unfiltered by workflowUid', async () => {
+    it('can return the latest workflow-level execution per workflow ID', async () => {
       mockEsClient.search.mockResolvedValue(emptyResponse as any);
 
       await service.searchExecutionsView(
-        { query: { term: { workflowId: 'wf-1' } }, includeManagedExecutions: true },
+        {
+          query: { terms: { workflowId: ['wf-1', 'wf-2'] } },
+          includeManagedExecutions: true,
+          collapse: 'workflowId',
+          sortField: 'startedAt',
+          sortOrder: 'desc',
+          size: 2,
+        },
         'my-space'
       );
 
       const call = mockEsClient.search.mock.calls[0][0] as any;
       expect(JSON.stringify(call.query)).not.toContain('workflowUid');
-      expect(call.query.bool.must).toContainEqual({ term: { workflowId: 'wf-1' } });
+      expect(call.query.bool.must).toContainEqual({ terms: { workflowId: ['wf-1', 'wf-2'] } });
+      expect(call.query.bool.must_not).toContainEqual({ exists: { field: 'stepId' } });
+      expect(call.collapse).toEqual({ field: 'workflowId' });
+      expect(call.sort).toEqual([{ startedAt: { order: 'desc' } }, { id: 'desc' }]);
+      expect(call.size).toBe(2);
     });
 
     it('hides the previous document runs from the editor and keeps them in the global list', async () => {
@@ -1499,7 +1510,7 @@ describe('WorkflowExecutionQueryService', () => {
           channel: { buckets: channelBuckets },
           respondedBy: { buckets: respondedByBuckets },
         },
-      } as any);
+      }) as any;
 
     it('issues a size:0 aggregation with the listing baseline scope and NO user filters', async () => {
       mockEsClient.search.mockResolvedValueOnce(aggResponse([], []));
@@ -1611,7 +1622,7 @@ describe('WorkflowExecutionQueryService', () => {
         spaceId,
         workflowId: 'workflow-1',
         status: ExecutionStatus.CANCELLED,
-      } as EsWorkflowExecution);
+      }) as EsWorkflowExecution;
 
     it('should read each execution once in a single projected multi-get', async () => {
       mockWorkflowDataClient.getByIds.mockResolvedValue(

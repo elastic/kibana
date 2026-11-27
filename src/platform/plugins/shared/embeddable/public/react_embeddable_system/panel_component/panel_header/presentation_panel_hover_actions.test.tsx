@@ -16,7 +16,7 @@ describe('createClickHandler', () => {
     document.body.innerHTML = '';
   });
 
-  const buildAction = () => ({ execute: jest.fn() } as unknown as Action<EmbeddableApiContext>);
+  const buildAction = () => ({ execute: jest.fn() }) as unknown as Action<EmbeddableApiContext>;
   const context = {} as ActionExecutionContext<EmbeddableApiContext>;
 
   const buildEvent = (currentTarget: HTMLElement) =>
@@ -25,7 +25,7 @@ describe('createClickHandler', () => {
       button: 0,
       defaultPrevented: false,
       preventDefault: jest.fn(),
-    } as unknown as React.MouseEvent);
+    }) as unknown as React.MouseEvent;
 
   it('executes the action', () => {
     const action = buildAction();

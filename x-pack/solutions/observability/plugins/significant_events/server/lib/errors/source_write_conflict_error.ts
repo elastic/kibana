@@ -11,7 +11,10 @@ import { StatusError } from './status_error';
 
 /** A 409 for a write to a source's knowledge, carrying why it was refused in `data.reason`. */
 export class SourceWriteConflictError extends StatusError {
-  constructor(public readonly reason: SourceWriteConflictReason, message: string) {
+  constructor(
+    public readonly reason: SourceWriteConflictReason,
+    message: string
+  ) {
     super(message, 409);
     this.data = { reason };
   }

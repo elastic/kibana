@@ -107,7 +107,7 @@ const makeSecurityMock = (username: string = 'alice') =>
     authc: {
       getCurrentUser: jest.fn().mockReturnValue({ username }),
     },
-  } as any);
+  }) as any;
 
 const makeDeps = (
   clientOverrides?: Partial<ReturnType<typeof makeStorageClient>>,
@@ -1058,7 +1058,7 @@ describe('WorkflowCrudService', () => {
         templateOrigin: {
           templateSlug: 'triage-alerts',
           templateVersion: '1.2.0',
-          templateOrigin: 'install',
+          templateOrigin: 'catalog',
         },
       });
 
@@ -1067,14 +1067,14 @@ describe('WorkflowCrudService', () => {
           document: expect.objectContaining({
             templateSlug: 'triage-alerts',
             templateVersion: '1.2.0',
-            templateOrigin: 'install',
+            templateOrigin: 'catalog',
           }),
         })
       );
       expect(result).toMatchObject({
         templateSlug: 'triage-alerts',
         templateVersion: '1.2.0',
-        templateOrigin: 'install',
+        templateOrigin: 'catalog',
       });
     });
 

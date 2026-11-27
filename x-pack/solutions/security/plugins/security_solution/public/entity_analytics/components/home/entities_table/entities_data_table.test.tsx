@@ -116,7 +116,7 @@ const createMockState = (overrides: Partial<EntityURLStateResult> = {}): EntityU
     pageIndex: 0,
     onChangePage: jest.fn(),
     ...overrides,
-  } as EntityURLStateResult);
+  }) as EntityURLStateResult;
 
 const defaultKibanaServices = {
   uiActions: { getTriggerCompatibleActions: jest.fn(() => []) },

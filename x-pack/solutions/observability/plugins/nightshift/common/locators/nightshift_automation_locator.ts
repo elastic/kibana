@@ -12,9 +12,7 @@ import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common'
 export type NightshiftAutomationLocator = LocatorPublic<NightshiftAutomationLocatorParams>;
 
 /** An automation's details page in the Nightshift app. */
-export class NightshiftAutomationLocatorDefinition
-  implements LocatorDefinition<NightshiftAutomationLocatorParams>
-{
+export class NightshiftAutomationLocatorDefinition implements LocatorDefinition<NightshiftAutomationLocatorParams> {
   public readonly id = NIGHTSHIFT_AUTOMATION_LOCATOR_ID;
 
   public readonly getLocation = async ({ automationId }: NightshiftAutomationLocatorParams) => ({

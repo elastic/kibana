@@ -54,7 +54,11 @@ const okScope: ResolvedHuntScope = {
 };
 
 const model = { connector: { id: 'gpt' } } as unknown as ScopedModel;
-const mitreDataClient = { list: jest.fn() } as unknown as MitreAttackDataClient;
+const mitreDataClient = {
+  list: jest.fn(),
+  getById: jest.fn(),
+  getStatus: jest.fn().mockReturnValue({ status: 'ready' }),
+} as unknown as MitreAttackDataClient;
 const tier2Result: HuntBehaviorResult = {
   status: 'no_behaviors_found',
   has_hit: false,
@@ -86,7 +90,7 @@ const makeDeps = ({
         getInference: () => inference,
         getSearchInferenceEndpoints: () => undefined,
         mitreDataClient,
-      } as unknown as ReturnType<RouteDependencies['getHuntServices']>),
+      }) as unknown as ReturnType<RouteDependencies['getHuntServices']>,
   } as unknown as RouteDependencies);
 
   const uiSettingsClient = { get: jest.fn().mockResolvedValue(true) };
