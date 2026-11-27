@@ -112,6 +112,7 @@ describe('ServiceAccountWorkloadBindings', () => {
       releaseFakeRequest: jest.fn(),
       getFakeRequestPrincipal: jest.fn(),
       delete: jest.fn(),
+      lookupAccountAsInternalUser: jest.fn(),
     };
 
     license = licenseMock.create();
@@ -1013,7 +1014,9 @@ describe('ServiceAccountWorkloadBindings', () => {
         bindings.getServiceAccountSummary(PLUGIN_ID, WORKLOAD_IN_SPACE)
       ).resolves.toEqual(summary);
       expect(store.getVerified).toHaveBeenCalledWith(COORDINATES);
-      expect(backend.getSummary).toHaveBeenCalledWith('service-account-id');
+      expect(backend.getSummary).toHaveBeenCalledWith('service-account-id', {
+        boundAt: '2026-08-21T00:00:00.000Z',
+      });
     });
 
     it('resolves `null` without reading an account when the workload is unbound', async () => {

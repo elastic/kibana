@@ -995,6 +995,108 @@ describe('#serviceAccountAuditEvent', () => {
     `);
   });
 
+  test('creates an unbind event made by Kibana, with its reason and the space of the binding', () => {
+    expect(
+      serviceAccountAuditEvent({
+        action: ServiceAccountAuditAction.WORKLOAD_UNBIND,
+        serviceAccount: { id: 'kibana/nightshift-relay' },
+        workload: { plugin_id: 'workflowsManagement', type: 'workflow', id: 'WORKFLOW_ID' },
+        spaceId: 'marketing',
+        reason: 'workload_missing',
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "service_account_workload_unbind",
+          "category": Array [
+            "iam",
+          ],
+          "outcome": "success",
+          "type": Array [
+            "user",
+            "change",
+          ],
+        },
+        "kibana": Object {
+          "space_id": "marketing",
+          "workload": Object {
+            "id": "WORKFLOW_ID",
+            "plugin_id": "workflowsManagement",
+            "type": "workflow",
+          },
+        },
+        "message": "Kibana has unbound service account [id=kibana/nightshift-relay] from workload [workflowsManagement/workflow/WORKFLOW_ID], because the workload no longer exists",
+        "user": Object {
+          "target": Object {
+            "id": "kibana/nightshift-relay",
+          },
+        },
+      }
+    `);
+  });
+
+  test.each([
+    ['service_account_missing', 'because the service account no longer exists'],
+    [
+      'service_account_recreated',
+      'because the service account was deleted and created again since the bind',
+    ],
+    ['workload_missing', 'because the workload no longer exists'],
+    ['workload_type_unregistered', 'because no plugin registers the workload type any more'],
+  ] as const)('explains the %s reason in the message', (reason, explanation) => {
+    expect(
+      serviceAccountAuditEvent({
+        action: ServiceAccountAuditAction.WORKLOAD_UNBIND,
+        serviceAccount: { id: 'sa-1' },
+        reason,
+      }).message
+    ).toBe(`Kibana has unbound service account [id=sa-1], ${explanation}`);
+  });
+
+  test('names Kibana and the reason in a record written before the unbind', () => {
+    const event = serviceAccountAuditEvent({
+      action: ServiceAccountAuditAction.WORKLOAD_UNBIND,
+      serviceAccount: { id: 'sa-1' },
+      reason: 'workload_missing',
+      outcome: 'unknown',
+    });
+
+    expect(event.message).toBe(
+      'Kibana is unbinding service account [id=sa-1], because the workload no longer exists'
+    );
+    expect(event.event?.outcome).toBe('unknown');
+  });
+
+  test('names Kibana and the reason in a record of a failed unbind', () => {
+    const event = serviceAccountAuditEvent({
+      action: ServiceAccountAuditAction.WORKLOAD_UNBIND,
+      serviceAccount: { id: 'sa-1' },
+      reason: 'service_account_missing',
+      error: new Error('unavailable'),
+    });
+
+    expect(event.message).toBe(
+      'Kibana failed to unbind service account [id=sa-1], because the service account no longer exists'
+    );
+    expect(event.event?.outcome).toBe('failure');
+    expect(event.error).toEqual({ code: 'Error', message: 'unavailable' });
+  });
+
+  test('names Kibana and the reason in a record of an unbind that may have been left behind', () => {
+    expect(
+      serviceAccountAuditEvent({
+        action: ServiceAccountAuditAction.WORKLOAD_UNBIND,
+        serviceAccount: { id: 'sa-1' },
+        reason: 'workload_missing',
+        outcome: 'unknown',
+        error: new Error('unavailable'),
+      }).message
+    ).toBe(
+      'Kibana failed to unbind service account [id=sa-1], which might have been left behind, because the workload no longer exists'
+    );
+  });
+
   test('creates a `success` assume event with the account as the actor', () => {
     expect(
       serviceAccountAuditEvent({

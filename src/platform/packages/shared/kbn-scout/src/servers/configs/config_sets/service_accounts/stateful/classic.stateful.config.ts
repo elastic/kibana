@@ -35,6 +35,10 @@ export const servers: ScoutServerConfig = {
       // The audit log is shared by every spec in this config set, so audit specs match events by
       // the unique account or workload they create.
       ...securityAuditServerArgs,
+      // Lets the stale binding cleanup consider a binding as soon as it exists, so its spec does
+      // not wait out the default day. The task still only runs at its interval or when a spec
+      // asks it to.
+      '--xpack.security.serviceAccounts.bindingCleanup.gracePeriod=0s',
       `--plugin-path=${resolve(REPO_ROOT, 'examples/developer_examples')}`,
       `--plugin-path=${resolve(REPO_ROOT, 'examples/workflows_extensions_example')}`,
       `--plugin-path=${resolve(

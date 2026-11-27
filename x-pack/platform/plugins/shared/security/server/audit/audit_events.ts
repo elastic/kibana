@@ -467,9 +467,28 @@ export interface ServiceAccountAuditEventParams {
    * Recorded in the message only.
    */
   platformAssumers?: readonly string[];
+  /**
+   * Why Kibana itself, not a user, made the change. Set by the stale binding cleanup. Recorded in
+   * the message only, which then names Kibana as the actor.
+   */
+  reason?: ServiceAccountAuditReason;
   outcome?: EcsEvent['outcome'];
   error?: Error;
 }
+
+/** Why the stale binding cleanup removed a binding. */
+export type ServiceAccountAuditReason =
+  | 'service_account_missing'
+  | 'service_account_recreated'
+  | 'workload_missing'
+  | 'workload_type_unregistered';
+
+const serviceAccountAuditReasons: Record<ServiceAccountAuditReason, string> = {
+  service_account_missing: 'the service account no longer exists',
+  service_account_recreated: 'the service account was deleted and created again since the bind',
+  workload_missing: 'the workload no longer exists',
+  workload_type_unregistered: 'no plugin registers the workload type any more',
+};
 
 export function serviceAccountAuditEvent({
   action,
@@ -478,6 +497,7 @@ export function serviceAccountAuditEvent({
   spaceId,
   force,
   platformAssumers,
+  reason,
   outcome,
   error,
 }: ServiceAccountAuditEventParams): AuditEvent {
@@ -516,13 +536,28 @@ export function serviceAccountAuditEvent({
   const [present, progressive, past] = serviceAccountAuditVerbs[action];
   // An error with an `unknown` outcome is a failure whose cleanup could not be confirmed, so the
   // object of the attempt may still exist.
-  const message = error
-    ? `Failed attempt to ${present} ${doc}${
-        outcome === 'unknown' ? ', which might have been left behind' : ''
-      }`
-    : outcome === 'unknown'
-    ? `User is ${progressive} ${doc}`
-    : `User has ${past} ${doc}`;
+  const leftBehindDoc = error && outcome === 'unknown' ? ', which might have been left behind' : '';
+  // A reason means Kibana made the change, whatever the outcome. It stays in every message, so a
+  // record written before the change or for a failed one still says who acted and why.
+  const message =
+    reason !== undefined
+      ? `${
+          error
+            ? `Kibana failed to ${present}`
+            : outcome === 'unknown'
+            ? `Kibana is ${progressive}`
+            : `Kibana has ${past}`
+        } ${doc}${leftBehindDoc}, because ${serviceAccountAuditReasons[reason]}`
+      : error
+      ? `Failed attempt to ${present} ${doc}${leftBehindDoc}`
+      : outcome === 'unknown'
+      ? `User is ${progressive} ${doc}`
+      : `User has ${past} ${doc}`;
+
+  const kibana = {
+    ...(workload ? { workload } : {}),
+    ...(spaceId !== undefined ? { space_id: spaceId } : {}),
+  };
 
   return {
     message,
@@ -534,7 +569,7 @@ export function serviceAccountAuditEvent({
       outcome: outcome ?? (error ? 'failure' : 'success'),
     },
     ...(targetAttributes.length > 0 ? { user: { target } } : {}),
-    ...(workload ? { kibana: { workload } } : {}),
+    ...(Object.keys(kibana).length > 0 ? { kibana } : {}),
     error: error && {
       code: error.name,
       message: error.message,
