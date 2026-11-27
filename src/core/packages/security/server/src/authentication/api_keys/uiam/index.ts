@@ -10,7 +10,7 @@
 export type {
   UiamAPIKeysType,
   GrantUiamAPIKeyParams,
-  CopyUiamAPIKeyParams,
+  GrantOrCloneUiamAPIKeyParams,
   InvalidateUiamAPIKeyParams,
   ConvertUiamAPIKeyResult,
   ConvertUiamAPIKeyResultSuccess,

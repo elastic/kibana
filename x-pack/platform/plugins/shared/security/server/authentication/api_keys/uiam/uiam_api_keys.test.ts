@@ -467,7 +467,7 @@ describe('UiamAPIKeys', () => {
     });
   });
 
-  describe('copy()', () => {
+  describe('grantOrClone()', () => {
     const createMockRequest = (authHeader?: string): KibanaRequest =>
       httpServerMock.createKibanaRequest({
         headers: authHeader ? { authorization: authHeader } : {},
@@ -491,14 +491,18 @@ describe('UiamAPIKeys', () => {
       mockLicense.isEnabled.mockReturnValue(false);
 
       expect(
-        await uiamApiKeys.copy(createMockRequest('ApiKey essu_internal_key'), { name: 'copy-name' })
+        await uiamApiKeys.grantOrClone(createMockRequest('ApiKey essu_internal_key'), {
+          name: 'copy-name',
+        })
       ).toBeNull();
       expect(mockUiam.cloneApiKey).not.toHaveBeenCalled();
       expect(mockUiam.grantApiKey).not.toHaveBeenCalled();
     });
 
     it('throws when the request does not contain an authorization header', async () => {
-      await expect(uiamApiKeys.copy(createMockRequest(), { name: 'copy-name' })).rejects.toThrow(
+      await expect(
+        uiamApiKeys.grantOrClone(createMockRequest(), { name: 'copy-name' })
+      ).rejects.toThrow(
         'Unable to determine if request has UIAM credentials, request does not contain an authorization header'
       );
     });
@@ -540,7 +544,7 @@ describe('UiamAPIKeys', () => {
           },
         ],
       ])('clones %s', async (_, buildRequest) => {
-        const result = await uiamApiKeys.copy(buildRequest(), { name: 'copy-name' });
+        const result = await uiamApiKeys.grantOrClone(buildRequest(), { name: 'copy-name' });
 
         expect(result).toEqual({ id: 'cloned_id', name: 'copy-name', api_key: 'essu_cloned_key' });
         expect(mockUiam.cloneApiKey).toHaveBeenCalledWith('essu_internal_key', 'copy-name');
@@ -548,7 +552,7 @@ describe('UiamAPIKeys', () => {
       });
 
       it('grants from an access token, which is not an API key', async () => {
-        const result = await uiamApiKeys.copy(createMockRequest('Bearer essu_token'), {
+        const result = await uiamApiKeys.grantOrClone(createMockRequest('Bearer essu_token'), {
           name: 'copy-name',
         });
 
@@ -562,7 +566,9 @@ describe('UiamAPIKeys', () => {
 
       it('does not clone a credential that is not a UIAM credential', async () => {
         await expect(
-          uiamApiKeys.copy(createMockRequest('ApiKey regular_api_key_123'), { name: 'copy-name' })
+          uiamApiKeys.grantOrClone(createMockRequest('ApiKey regular_api_key_123'), {
+            name: 'copy-name',
+          })
         ).rejects.toThrow('Cannot grant API key: provided credential is not compatible with UIAM');
 
         expect(mockUiam.cloneApiKey).not.toHaveBeenCalled();
@@ -592,7 +598,7 @@ describe('UiamAPIKeys', () => {
         mockUiam.cloneApiKey.mockRejectedValue(refusal);
 
         const failure = await uiamApiKeys
-          .copy(createMockRequest('ApiKey essu_internal_key'), { name: 'copy-name' })
+          .grantOrClone(createMockRequest('ApiKey essu_internal_key'), { name: 'copy-name' })
           .catch((error: Boom.Boom) => error);
 
         // The caller must not see UIAM's 401 or 403 as if its own credentials were wrong.
@@ -626,7 +632,9 @@ describe('UiamAPIKeys', () => {
         mockUiam.cloneApiKey.mockRejectedValue(failure);
 
         await expect(
-          uiamApiKeys.copy(createMockRequest('ApiKey essu_internal_key'), { name: 'copy-name' })
+          uiamApiKeys.grantOrClone(createMockRequest('ApiKey essu_internal_key'), {
+            name: 'copy-name',
+          })
         ).rejects.toBe(failure);
 
         expect(mockUiam.grantApiKey).not.toHaveBeenCalled();

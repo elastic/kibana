@@ -16,7 +16,7 @@ export type {
   UpdateRestAPIKeyParams,
   UpdateRestAPIKeyWithKibanaPrivilegesParams,
   GrantUiamAPIKeyParams,
-  CopyUiamAPIKeyParams,
+  GrantOrCloneUiamAPIKeyParams,
   InvalidateUiamAPIKeyParams,
   ConvertUiamAPIKeyResult,
   ConvertUiamAPIKeyResultSuccess,

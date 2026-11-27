@@ -36,7 +36,7 @@ interface UiamCreator {
 
 // These tests cannot be run on MKI because we cannot obtain the raw UIAM tokens and spin up Mock IdP
 // plugin, and because they ask UIAM directly who a key belongs to, with the local dev certificate.
-apiTest.describe('[NON-MKI] UIAM API Keys copy', { tag: tags.serverless.all }, () => {
+apiTest.describe('[NON-MKI] UIAM API Keys grant or clone', { tag: tags.serverless.all }, () => {
   let kibanaAgent: Agent;
   let loginForAccessToken: () => Promise<string>;
 
@@ -89,7 +89,7 @@ apiTest.describe('[NON-MKI] UIAM API Keys copy', { tag: tags.serverless.all }, (
 
   const callTestEndpoint = async (
     apiClient: ApiClientFixture,
-    path: 'grant' | 'copy',
+    path: 'grant' | 'grant_or_clone',
     body: { name: string; authcScheme: string; credential: string }
   ) =>
     apiClient.post(`test_endpoints/uiam/api_keys/_${path}`, {
@@ -117,7 +117,7 @@ apiTest.describe('[NON-MKI] UIAM API Keys copy', { tag: tags.serverless.all }, (
       const { creator: sourceCreator } = await authenticateAtUiam(source.apiKey);
       expect(sourceCreator).toStrictEqual(USER_CREATOR);
 
-      const response = await callTestEndpoint(apiClient, 'copy', {
+      const response = await callTestEndpoint(apiClient, 'grant_or_clone', {
         name: 'copy-test-copy',
         authcScheme: 'ApiKey',
         credential: source.apiKey,
@@ -157,7 +157,7 @@ apiTest.describe('[NON-MKI] UIAM API Keys copy', { tag: tags.serverless.all }, (
     async ({ apiClient }) => {
       const accessToken = await loginForAccessToken();
 
-      const response = await callTestEndpoint(apiClient, 'copy', {
+      const response = await callTestEndpoint(apiClient, 'grant_or_clone', {
         name: 'copy-test-from-token',
         authcScheme: 'Bearer',
         credential: accessToken,
@@ -173,7 +173,7 @@ apiTest.describe('[NON-MKI] UIAM API Keys copy', { tag: tags.serverless.all }, (
   apiTest(
     'should copy an external (user-created) API key into an internal key created by a user',
     async ({ apiClient }) => {
-      const response = await callTestEndpoint(apiClient, 'copy', {
+      const response = await callTestEndpoint(apiClient, 'grant_or_clone', {
         name: 'copy-test-from-external-key',
         authcScheme: 'ApiKey',
         credential: MOCK_IDP_UIAM_ORG_ADMIN_API_KEY,
@@ -191,7 +191,7 @@ apiTest.describe('[NON-MKI] UIAM API Keys copy', { tag: tags.serverless.all }, (
 
   apiTest('should keep a copy valid after its source key is invalidated', async ({ apiClient }) => {
     const source = await createSourceKey(apiClient);
-    const response = await callTestEndpoint(apiClient, 'copy', {
+    const response = await callTestEndpoint(apiClient, 'grant_or_clone', {
       name: 'copy-test-outlives-source',
       authcScheme: 'ApiKey',
       credential: source.apiKey,
@@ -219,7 +219,7 @@ apiTest.describe('[NON-MKI] UIAM API Keys copy', { tag: tags.serverless.all }, (
     });
     expect(invalidated).toHaveStatusCode(200);
 
-    const response = await callTestEndpoint(apiClient, 'copy', {
+    const response = await callTestEndpoint(apiClient, 'grant_or_clone', {
       name: 'copy-test-from-revoked',
       authcScheme: 'ApiKey',
       credential: source.apiKey,
@@ -231,7 +231,7 @@ apiTest.describe('[NON-MKI] UIAM API Keys copy', { tag: tags.serverless.all }, (
   });
 
   apiTest('should reject copying a non-UIAM credential', async ({ apiClient }) => {
-    const response = await callTestEndpoint(apiClient, 'copy', {
+    const response = await callTestEndpoint(apiClient, 'grant_or_clone', {
       name: 'copy-test-invalid',
       authcScheme: 'Bearer',
       credential: 'some-invalid-token',

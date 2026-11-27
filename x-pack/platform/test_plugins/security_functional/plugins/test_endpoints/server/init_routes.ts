@@ -1427,15 +1427,15 @@ export function initRoutes(
     }
   );
 
-  // UIAM API Key Copy Route
+  // UIAM API Key Grant Or Clone Route
   router.post(
     {
-      path: '/test_endpoints/uiam/api_keys/_copy',
+      path: '/test_endpoints/uiam/api_keys/_grant_or_clone',
       validate: {
         body: schema.object({
           name: schema.string({ maxLength: 256 }),
-          // Omit both to copy the incoming request's own credential, the way the callers that copy
-          // on behalf of an end user do it.
+          // Omit both to use the incoming request's own credential, the way the callers that grant or
+          // clone on behalf of an end user do it.
           authcScheme: schema.maybe(schema.string({ maxLength: 32 })),
           credential: schema.maybe(schema.string({ maxLength: 4096 })),
         }),
@@ -1462,15 +1462,17 @@ export function initRoutes(
 
         const requestToUse = withCredential(request, { authcScheme, credential });
 
-        const result = await security.authc.apiKeys.uiam.copy(requestToUse, { name });
+        const result = await security.authc.apiKeys.uiam.grantOrClone(requestToUse, { name });
 
         if (!result) {
-          return response.badRequest({ body: { message: 'Failed to copy UIAM API key' } });
+          return response.badRequest({
+            body: { message: 'Failed to grant or clone UIAM API key' },
+          });
         }
 
         return response.ok({ body: result });
       } catch (err) {
-        logger.error(`Failed to copy UIAM API key: ${err}`, err);
+        logger.error(`Failed to grant or clone UIAM API key: ${err}`, err);
         return response.customError({
           statusCode: 500,
           body: { message: err.message },

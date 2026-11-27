@@ -341,7 +341,7 @@ export interface UiamServicePublic {
    * clone keeps the creator of the key it copies. UIAM authenticates the call by Kibana's client
    * certificate alone, so it carries neither the key's authorization nor client authentication. A
    * key that can't be cloned, such as a revoked one, is refused with a 400. The clone has no
-   * expiration of its own: it expires when the key it copies does, and it stays valid when that key
+   * expiration of its own: it expires when the key it clones does, and it stays valid when that key
    * is revoked.
    * @param apiKey The secret of the key to clone.
    * @param description The description of the new key.

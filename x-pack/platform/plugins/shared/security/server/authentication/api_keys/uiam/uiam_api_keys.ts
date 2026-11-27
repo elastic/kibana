@@ -16,8 +16,8 @@ import {
 } from '@kbn/core-security-server';
 import type {
   ConvertUiamAPIKeysResponse,
-  CopyUiamAPIKeyParams,
   GrantAPIKeyResult,
+  GrantOrCloneUiamAPIKeyParams,
   GrantUiamAPIKeyParams,
   InvalidateAPIKeyResult,
   InvalidateUiamAPIKeyParams,
@@ -50,7 +50,7 @@ const CLONE_REFUSAL_STATUS_CODES = new Set([401, 403, 404]);
 
 /**
  * Class responsible for managing UIAM-specific API key operations.
- * This class handles API key grants, copies and invalidations through the UIAM service.
+ * This class handles API key grants, clones and invalidations through the UIAM service.
  */
 export class UiamAPIKeys implements UiamAPIKeysType {
   private readonly logger: Logger;
@@ -160,21 +160,23 @@ export class UiamAPIKeys implements UiamAPIKeysType {
   }
 
   /**
-   * Copies the caller's credential into a new API key that keeps the same creator.
+   * Grants a new internal UIAM API key from the request's credential (a session or an access token),
+   * like `grant`. When the credential is itself a UIAM API key, internal or user-created, it clones
+   * that key instead, so the new key keeps the source key's creator and expiration, and is limited to
+   * the applications of projects.
    *
-   * A UIAM API key, internal or user-created, is cloned. Any other credential (a session or a
-   * token) is granted from, like `grant`. A clone UIAM refuses because of Kibana and not the key (401, 403 or
-   * 404: a client certificate it does not accept, or no clone endpoint) throws a server error: that
-   * is a project configuration problem to fix, not to hide behind a grant that loses the creator.
-   * Any other clone failure, such as a revoked source key, is thrown as it is.
+   * If UIAM refuses the clone because of Kibana and not the key (401, 403 or 404: a client
+   * certificate it does not accept, or no clone endpoint), it throws a server error: that is a
+   * project configuration problem to fix, not to hide behind a grant that loses the creator. Any
+   * other clone failure, such as a revoked source key, is thrown as it is.
    *
-   * @param request The Kibana request carrying the credential to copy.
+   * @param request The Kibana request carrying the credential to grant or clone from.
    * @param params The name of the new API key.
    * @returns The new API key, or null if the license is not enabled.
    */
-  async copy(
+  async grantOrClone(
     request: KibanaRequest,
-    { name }: CopyUiamAPIKeyParams
+    { name }: GrantOrCloneUiamAPIKeyParams
   ): Promise<GrantAPIKeyResult | null> {
     if (!this.license.isEnabled()) {
       return null;
