@@ -31,6 +31,7 @@ export const EPISODE_EVENTS_FIELDS = [
   'duration',
   'triggered_at',
   'severity',
+  'reason',
   'source',
 ] as const;
 
@@ -55,7 +56,8 @@ export const addEpisodeSummaryStats = (query: ComposerQuery): ComposerQuery =>
                 group_hash       = LAST(group_hash, @timestamp),
                 source           = LAST(source, @timestamp),
                 space_id         = LAST(space_id, @timestamp),
-                severity         = LAST(severity, @timestamp)     WHERE status == "breached" AND severity IS NOT NULL
+                severity         = LAST(severity, @timestamp)     WHERE status == "breached" AND severity IS NOT NULL,
+                reason           = LAST(reason, @timestamp)       WHERE reason IS NOT NULL
           BY \`episode.id\``
     .pipe`EVAL @timestamp = last_timestamp, duration = DATE_DIFF("ms", first_timestamp, last_timestamp)`;
 

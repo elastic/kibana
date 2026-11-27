@@ -360,6 +360,13 @@ export const METADATA_LIST_GROUPING_ERROR = i18n.translate(
   }
 );
 
+export const METADATA_LIST_REASON_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.metadataList.reasonLabel',
+  {
+    defaultMessage: 'Reason',
+  }
+);
+
 export const METADATA_LIST_TRIGGERED_LABEL = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.metadataList.triggeredLabel',
   {
