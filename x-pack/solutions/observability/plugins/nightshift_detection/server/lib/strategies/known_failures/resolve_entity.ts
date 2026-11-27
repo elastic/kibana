@@ -1,0 +1,48 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Feature, QueryLink, StreamQuery } from '@kbn/significant-events-schema';
+import type { DetectionSignalReading } from '../types';
+
+/** The feature significant_events keeps for all the services of a source; it names no service. */
+const AGGREGATE_SERVICES_ID_PREFIX = 'services:';
+
+/**
+ * What a Known failures signal is about. A knowledge indicator linked to exactly one service
+ * feature is about that service; anything else is about its source. The context engine will
+ * resolve this per knowledge indicator later.
+ */
+export function resolveEntity({
+  knowledgeIndicator,
+  features,
+}: {
+  knowledgeIndicator: Pick<QueryLink, 'source_id'> & { query: Pick<StreamQuery, 'features'> };
+  /** Entity features; only those of the knowledge indicator's source count. */
+  features: Feature[];
+}): DetectionSignalReading['entity'] {
+  const linked = new Set((knowledgeIndicator.query.features ?? []).map(({ id }) => id));
+  // Feature ids are unique within a source only.
+  const services = features.filter(
+    ({ id, source_id: sourceId, type, subtype }) =>
+      sourceId === knowledgeIndicator.source_id &&
+      linked.has(id) &&
+      type === 'entity' &&
+      subtype === 'service' &&
+      !id.startsWith(AGGREGATE_SERVICES_ID_PREFIX)
+  );
+
+  if (services.length !== 1) {
+    return { type: 'source', name: knowledgeIndicator.source_id };
+  }
+
+  const [service] = services;
+  const name = service.properties.name;
+  return {
+    type: 'service',
+    name: typeof name === 'string' && name ? name : service.title || service.id,
+  };
+}

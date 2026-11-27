@@ -431,7 +431,7 @@ export class WorkflowsService {
 
   public async getDefinitionToStore(
     yaml: string,
-    workflow: { id: string; enabled: boolean },
+    workflow: { id: string; enabled: boolean; managed: boolean },
     spaceId: string,
     request: KibanaRequest
   ): Promise<EsWorkflow['definition'] | null> {
@@ -545,10 +545,11 @@ export class WorkflowsService {
     id: string,
     workflow: Partial<EsWorkflow>,
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options: { isManaged: boolean }
   ): Promise<UpdatedWorkflowResponseDto> {
     await this.ensureInitialized();
-    return this.crudService.updateWorkflow(id, workflow, spaceId, request);
+    return this.crudService.updateWorkflow(id, workflow, spaceId, request, options);
   }
 
   public async restoreWorkflowVersion(
@@ -858,7 +859,7 @@ export class WorkflowsService {
     yaml: string,
     spaceId: string,
     request: KibanaRequest,
-    options: { includeVariableRules: boolean; includeEsqlRules: boolean }
+    options: { includeVariableRules: boolean; includeEsqlRules: boolean; isManaged: boolean }
   ): Promise<ValidateWorkflowResponseDto> {
     await this.ensureInitialized();
     return this.validationService.validateWorkflow(yaml, spaceId, request, options);

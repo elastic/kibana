@@ -8,9 +8,11 @@
  */
 
 import React from 'react';
-import { EuiTab } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiTab } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export const DATA_TEST_SUBJ_PREFIX_TAB = 'settings-tab';
+export const DATA_TEST_SUBJ_TAB_LOADING = 'settings-tab-loading';
 
 /**
  * Props for a {@link Tab} component.
@@ -24,17 +26,32 @@ export interface TabProps {
   onChangeSelectedTab: () => void;
   /** True if the tab is selected, false otherwise. */
   isSelected: boolean;
+  /** True if the tab's settings are loading, which disables the tab. */
+  isLoading?: boolean;
 }
 
 /**
  * Component for rendering a settings tab.
  */
-export const Tab = ({ id, name, onChangeSelectedTab, isSelected }: TabProps) => {
+export const Tab = ({ id, name, onChangeSelectedTab, isSelected, isLoading }: TabProps) => {
   return (
     <EuiTab
       data-test-subj={`${DATA_TEST_SUBJ_PREFIX_TAB}-${id}`}
       onClick={() => onChangeSelectedTab()}
       isSelected={isSelected}
+      disabled={isLoading}
+      append={
+        isLoading && (
+          <EuiLoadingSpinner
+            size="s"
+            data-test-subj={DATA_TEST_SUBJ_TAB_LOADING}
+            aria-label={i18n.translate('management.settings.tabLoadingLabel', {
+              defaultMessage: 'Loading {name}',
+              values: { name },
+            })}
+          />
+        )
+      }
     >
       {name}
     </EuiTab>

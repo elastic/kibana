@@ -18,6 +18,8 @@ export interface RelatedUserAliasResolutionLastRun {
   linksCreated: number;
   cascadeRetargeted: number;
   skippedAmbiguous: number;
+  /** related.user values whose candidate search hit the size cap. */
+  truncatedValues: number;
   cascadesBlocked: number;
   failedGroups: number;
 }

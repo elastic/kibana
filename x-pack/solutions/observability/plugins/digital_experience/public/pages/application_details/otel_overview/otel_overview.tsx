@@ -52,6 +52,7 @@ import { OverviewToolbar } from './components/overview_toolbar';
 import { OverviewTrends } from './components/overview_trends';
 import { TopClicksPanel } from './components/top_clicks_panel';
 import { TopPagesPanel } from './components/top_pages_panel';
+import { VitalsTrendPanel } from './components/vitals_trend_panel';
 import { usePickerOptions } from './hooks/use_picker_options';
 import { EMPTY_USAGE, usageRequestOf } from './utils/usage_request';
 
@@ -174,7 +175,10 @@ function UsageAndErrorsPanels({
   /** Includes the value in a filter, or takes it off when it is included already. */
   onSelectFilter: (name: OverviewFilterName, value: string) => void;
 }) {
-  const { errorsHref, sessionsHref } = useApplicationLinks(serviceName, APPLICATION_SOURCE.otel);
+  const { errorsHref, frustrationHref, sessionsHref } = useApplicationLinks(
+    serviceName,
+    APPLICATION_SOURCE.otel
+  );
   const {
     topPages,
     breakdowns,
@@ -197,27 +201,25 @@ function UsageAndErrorsPanels({
           onRetry={refresh}
         />
       ) : (
-        <EuiFlexGroup gutterSize="m" alignItems="stretch">
-          <EuiFlexItem grow={3}>
-            <TopPagesPanel
-              pages={topPages}
-              isLoading={isLoading}
-              selectedUrls={(filters.pageUrl ?? [])
-                .filter(({ exclude }) => !exclude)
-                .map(({ value }) => value)}
-              onSelectPage={(url) => onSelectFilter('pageUrl', url)}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={2}>
-            <BreakdownsPanel
-              breakdowns={breakdowns}
-              isLoading={isLoading}
-              sessionsHref={sessionsHref}
-              filters={filters}
-              onSelectFilter={onSelectFilter}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        // Full width each: the pages have a column per metric, and the breakdowns one per list.
+        <>
+          <TopPagesPanel
+            pages={topPages}
+            isLoading={isLoading}
+            selectedUrls={(filters.pageUrl ?? [])
+              .filter(({ exclude }) => !exclude)
+              .map(({ value }) => value)}
+            onSelectPage={(url) => onSelectFilter('pageUrl', url)}
+          />
+          <EuiSpacer size="m" />
+          <BreakdownsPanel
+            breakdowns={breakdowns}
+            isLoading={isLoading}
+            sessionsHref={sessionsHref}
+            filters={filters}
+            onSelectFilter={onSelectFilter}
+          />
+        </>
       )}
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m" alignItems="stretch">
@@ -257,6 +259,7 @@ function UsageAndErrorsPanels({
                 frustratedPages={frustratedPages}
                 isLoading={isLoading}
                 sessionsHref={sessionsHref}
+                dashboardHref={frustrationHref}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -278,6 +281,8 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
   const searchParams = useOverviewSearchParams();
   const formatters = useFormatters();
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  // Refresh reloads the Lens chart through this, as its range doesn't change for a relative one.
+  const [lastReloadRequestTime, setLastReloadRequestTime] = useState<number>();
   // In the URL, so a reload or Share keeps it; the application page's header toggles it.
   const { value: compare } = useQueryParam('compare');
   // Separate requests, so the KPIs never wait on the panels below and a failure replaces only its own.
@@ -301,6 +306,7 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
     setFilter(name, toggleFilterValue(filters[name] ?? [], value, false));
 
   const refreshAll = () => {
+    setLastReloadRequestTime(Date.now());
     overview.refresh();
     kpis.refresh();
     usage.refresh();
@@ -385,6 +391,8 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
           onTimeRangeSelect={setTimeRange}
         />
       )}
+      {/* Its own Lens query, so it loads, fails and refreshes apart from the Overview's request. */}
+      <VitalsTrendPanel serviceName={serviceName} lastReloadRequestTime={lastReloadRequestTime} />
       <EuiSpacer size="m" />
       <UsageAndErrorsPanels
         serviceName={serviceName}

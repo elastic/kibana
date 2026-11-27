@@ -53,7 +53,7 @@ const templateInstalledSchema: RootSchema<TemplateInstalledEvent> = {
     type: 'keyword',
     _meta: {
       description:
-        'How the workflow was created from the template: install (setup form), import (template file upload), or remix (Remix with AI)',
+        'How the workflow was created from the template: catalog (installed from a catalog template), import (installed from a template file), or remix (Remix with AI)',
     },
   },
   sourceMode: {
@@ -90,7 +90,7 @@ const templateInstalledSchema: RootSchema<TemplateInstalledEvent> = {
   formFieldCount: {
     type: 'integer',
     _meta: {
-      description: 'Number of fields in the template install form (install and import only)',
+      description: 'Number of fields in the template install form (catalog and import only)',
       optional: true,
     },
   },
@@ -102,7 +102,7 @@ const templateInstalledSchema: RootSchema<TemplateInstalledEvent> = {
     },
     _meta: {
       description:
-        'Connector types of the install form connector fields, required or optional (install only)',
+        'Connector types of the install form connector fields, required or optional (catalog only)',
       optional: true,
     },
   },
@@ -141,7 +141,7 @@ const templateInstalledSchema: RootSchema<TemplateInstalledEvent> = {
     },
     _meta: {
       description:
-        'Install form field names (never values) that failed validation or are missing from the form (install only)',
+        'Install form field names (never values) that failed validation or are missing from the form (catalog only)',
       optional: true,
     },
   },

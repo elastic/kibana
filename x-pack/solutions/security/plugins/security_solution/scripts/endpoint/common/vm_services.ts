@@ -22,17 +22,21 @@ export const DEFAULT_VAGRANTFILE = path.join(__dirname, 'vagrant', 'Vagrantfile'
 
 const MAX_BUFFER = 1024 * 1024 * 5; // 5MB
 
-const destroyVagrantMachine = async (vagrantCwd: string, log: ToolingLog): Promise<void> => {
-  // The install exec timeout should already have released `vagrant ssh`. Stay under the
-  // 10 minute enrolledEndpoint fixture: 3 × 30s plus two 2s pauses.
-  const maxAttempts = 3;
-
+// Defaults suit the creation path, where this clears a stale or absent VM before `vagrant up` --
+// a fast no-op kept under the 10 minute enrolledEndpoint fixture. Destroying a live VM is much
+// slower, so that caller raises the budget. Creation cleanup is best effort; teardown sets `rethrow`
+// so a VM that could not be destroyed is reported to its caller.
+const destroyVagrantMachine = async (
+  vagrantCwd: string,
+  log: ToolingLog,
+  { attemptTimeoutMs = 30_000, maxAttempts = 3, rethrow = false } = {}
+): Promise<void> => {
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       await execa.command('vagrant destroy -f', {
         env: { VAGRANT_CWD: vagrantCwd },
         stdio: ['inherit', 'pipe', 'pipe'],
-        timeout: 30_000,
+        timeout: attemptTimeoutMs,
       });
       return;
     } catch (error) {
@@ -44,6 +48,9 @@ const destroyVagrantMachine = async (vagrantCwd: string, log: ToolingLog): Promi
       );
 
       if (attempt === maxAttempts) {
+        if (rethrow) {
+          throw error;
+        }
         return;
       }
 
@@ -526,14 +533,15 @@ export const createVagrantHostVmClient = (
   };
 
   const destroy = async (): Promise<void> => {
-    // Bounded so a slow halt rejects for the caller to handle instead of hanging past the
-    // 60s `taskTimeout` of the Cypress teardown tasks that destroy endpoint hosts.
-    const destroyResponse = await execa.command(`vagrant destroy -f`, {
-      ...execaOptions,
-      timeout: 30_000,
+    // A live VM teardown has been observed to outlast 60s, so give each attempt double that. When every
+    // attempt fails the rejection is kept: callers use it to know the VM may still exist.
+    await destroyVagrantMachine(VAGRANT_CWD, log, {
+      attemptTimeoutMs: 120_000,
+      maxAttempts: 2,
+      rethrow: true,
     });
 
-    log.debug(`VM [${name}] was destroyed successfully`, destroyResponse);
+    log.debug(`VM [${name}] was destroyed`);
   };
 
   const info = () => {

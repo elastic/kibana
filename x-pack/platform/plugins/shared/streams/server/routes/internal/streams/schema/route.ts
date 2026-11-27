@@ -22,7 +22,10 @@ import { z } from '@kbn/zod/v4';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { SearchHit } from '@kbn/es-types';
 import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
-import type { DocumentWithIgnoredFields } from '@kbn/streams-schema/src/shared/record_types';
+import type {
+  DocumentWithIgnoredFields,
+  IgnoredField,
+} from '@kbn/streams-schema/src/shared/record_types';
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getRoot } from '@kbn/streams-schema/src/shared/hierarchy';
 import { MAX_PRIORITY } from '../../../../lib/streams/index_templates/generate_index_template';
@@ -67,7 +70,7 @@ interface SimulateIngestDoc {
     type: string;
     reason: string;
   };
-  ignored_fields?: string[];
+  ignored_fields?: IgnoredField[];
 }
 
 interface SimulateIngestDocResult {
@@ -260,7 +263,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       simulationError: null,
       documentsWithRuntimeFieldsApplied: simulation.docs.map((doc) => ({
         values: doc.doc._source,
-        ignored_fields: (doc.doc.ignored_fields || []).map((field) => ({ field })),
+        ignored_fields: doc.doc.ignored_fields ?? [],
       })),
     };
   },

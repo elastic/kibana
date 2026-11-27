@@ -1656,6 +1656,7 @@ describe('Alerts Service', () => {
               alertDelay: 0,
             },
             kibanaVersion: '8.8.0',
+            rulesWithoutOrphanedAlerts: new Set(),
           });
         });
 
@@ -1797,6 +1798,7 @@ describe('Alerts Service', () => {
               alertDelay: 0,
             },
             kibanaVersion: '8.8.0',
+            rulesWithoutOrphanedAlerts: new Set(),
           });
 
           expect(result).not.toBe(null);
@@ -1936,6 +1938,7 @@ describe('Alerts Service', () => {
               alertDelay: 0,
             },
             kibanaVersion: '8.8.0',
+            rulesWithoutOrphanedAlerts: new Set(),
           });
 
           expect(result[0]).not.toBe(null);
@@ -2029,6 +2032,7 @@ describe('Alerts Service', () => {
               alertDelay: 0,
             },
             kibanaVersion: '8.8.0',
+            rulesWithoutOrphanedAlerts: new Set(),
           });
 
           expect(result).not.toBe(null);
@@ -2137,7 +2141,14 @@ describe('Alerts Service', () => {
               alertDelay: 0,
             },
             kibanaVersion: '8.8.0',
+            rulesWithoutOrphanedAlerts: new Set(),
           });
+
+          // every client gets the same set, so a rule is cleaned up once per Kibana process
+          const [[firstClientParams], [secondClientParams]] = jest.mocked(AlertsClient).mock.calls;
+          expect(firstClientParams.rulesWithoutOrphanedAlerts).toBe(
+            secondClientParams.rulesWithoutOrphanedAlerts
+          );
 
           expect(result[0]).not.toBe(null);
           expect(result[1]).not.toBe(null);
