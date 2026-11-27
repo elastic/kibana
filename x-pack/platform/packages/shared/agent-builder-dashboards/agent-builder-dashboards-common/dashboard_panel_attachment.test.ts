@@ -56,7 +56,7 @@ describe('getDashboardPanelAttachmentId', () => {
 
 describe('isDashboardPanelAttachment', () => {
   const attachment = (type: string): VersionedAttachment =>
-    ({ id: 'a', type, versions: [], current_version: 1 } as unknown as VersionedAttachment);
+    ({ id: 'a', type, versions: [], current_version: 1 }) as unknown as VersionedAttachment;
 
   it('matches the pointer type only', () => {
     expect(isDashboardPanelAttachment(attachment(DASHBOARD_PANEL_ATTACHMENT_TYPE))).toBe(true);

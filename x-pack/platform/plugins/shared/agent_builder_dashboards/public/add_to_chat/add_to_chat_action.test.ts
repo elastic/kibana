@@ -63,7 +63,7 @@ const createDashboardApi = ({
       from: '2026-01-01T00:00:00.000Z',
       to: '2026-01-02T00:00:00.000Z',
     }),
-  } as unknown as DashboardApi);
+  }) as unknown as DashboardApi;
 
 interface EmbeddableOptions {
   type?: string;
@@ -97,7 +97,7 @@ const linkedDashboardAttachment = (origin: string | undefined): VersionedAttachm
     origin,
     current_version: 1,
     versions: [{ version: 1, data: { title: 'Test', panels: [metricPanel] } }],
-  } as unknown as VersionedAttachment);
+  }) as unknown as VersionedAttachment;
 
 const activeConversation = (attachments: VersionedAttachment[] = []): ActiveConversation => ({
   id: 'conversation-1',
@@ -157,7 +157,7 @@ const createAction = ({
 
 type Action = ReturnType<typeof createAction>['action'];
 const context = (embeddable: unknown) =>
-  ({ embeddable, trigger: { id: ON_OPEN_PANEL_MENU } } as Parameters<Action['execute']>[0]);
+  ({ embeddable, trigger: { id: ON_OPEN_PANEL_MENU } }) as Parameters<Action['execute']>[0];
 const isCompatible = async (action: Action, embeddable: unknown) =>
   action.isCompatible?.(context(embeddable));
 const execute = (action: Action, embeddable: unknown) => action.execute(context(embeddable));

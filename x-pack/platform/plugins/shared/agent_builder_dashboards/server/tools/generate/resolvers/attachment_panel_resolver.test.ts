@@ -209,7 +209,7 @@ describe('createAttachmentPanelResolver with dashboard panel pointers', () => {
   const makeStore = (records: Record<string, unknown>): AttachmentStateManager =>
     ({
       getAttachmentRecord: jest.fn((id: string) => records[id]),
-    } as unknown as AttachmentStateManager);
+    }) as unknown as AttachmentStateManager;
 
   const failureError = (attempt: ReturnType<ReturnType<typeof createAttachmentPanelResolver>>) => {
     if (attempt.type !== 'failure') {

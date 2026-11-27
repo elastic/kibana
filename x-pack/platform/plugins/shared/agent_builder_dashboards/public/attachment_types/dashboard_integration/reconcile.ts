@@ -59,7 +59,7 @@ export interface DashboardAttachmentLink<TAttachment> {
  * to a copy staged from a saved dashboard, since that copy has no origin either.
  */
 export const resolveDashboardAttachmentLink = <
-  TAttachment extends { id: string; origin?: string }
+  TAttachment extends { id: string; origin?: string },
 >({
   api,
   canWriteDashboards,
