@@ -4557,8 +4557,8 @@ importers:
         specifier: 3.3.3
         version: 3.3.3(react@18.2.0)
       copy-to-clipboard:
-        specifier: 3.3.3
-        version: 3.3.3
+        specifier: 4.0.2
+        version: 4.0.2
       core-js:
         specifier: 3.51.0
         version: 3.51.0
@@ -4605,8 +4605,8 @@ importers:
         specifier: 9.0.0
         version: 9.0.0
       dom-to-image-more:
-        specifier: 3.6.0
-        version: 3.6.0
+        specifier: 3.11.0
+        version: 3.11.0
       dompurify:
         specifier: 3.4.17
         version: 3.4.17
@@ -5058,8 +5058,8 @@ importers:
         specifier: 4.1.0
         version: 4.1.0
       type-fest:
-        specifier: 4.41.0
-        version: 4.41.0
+        specifier: 5.10.0
+        version: 5.10.0
       typescript-fsa:
         specifier: 3.0.0
         version: 3.0.0
@@ -6179,7 +6179,7 @@ importers:
         version: 1.64.1
       '@pmmmwh/react-refresh-webpack-plugin':
         specifier: 0.6.3
-        version: 0.6.3(react-refresh@0.19.0)(type-fest@4.41.0)(webpack-hot-middleware@2.26.1)(webpack@5.96.1)
+        version: 0.6.3(react-refresh@0.19.0)(type-fest@5.10.0)(webpack-hot-middleware@2.26.1)(webpack@5.96.1)
       '@redocly/cli':
         specifier: 2.77.0
         version: 2.77.0
@@ -17089,6 +17089,9 @@ packages:
   copy-to-clipboard@3.3.3:
     resolution: {integrity: sha512-2KV8NhB5JqC3ky0r9PMCAZKbUHSwtEo4CwCs0KXgruG43gX5PMqDEBbVU4OUzw2MuAWUfsuFmWvEKG5QRfSnJA==}
 
+  copy-to-clipboard@4.0.2:
+    resolution: {integrity: sha512-gklSft7IuhriZKHKpuoA1fpJSLPNgvUMWMo5BlnzAJm0zNKnznoSv23IjtNqclx8eKi6ZcdvFFzYEER/+U1LoQ==}
+
   core-js-compat@3.50.0:
     resolution: {integrity: sha512-XGpFGbMLHwSt74YLTKho7Ib242qi6O8MSX+sRokV4oz7iKXvQWGYZthjIhjRGMxjzVkAubBO512dKGYcefmX3Q==}
     engines: {node: '>=6.4.0'}
@@ -17825,8 +17828,8 @@ packages:
   dom-serializer@2.0.0:
     resolution: {integrity: sha512-wIkAryiqt/nV5EQKqQpo3SToSOV9J0DnbJqwK7Wv/Trc92zIAYZ4FlMu+JPFW1DfGFt81ZTCGgDEabffXeLyJg==}
 
-  dom-to-image-more@3.6.0:
-    resolution: {integrity: sha512-0BB0M9gRRP7znKBNLRAvNyWnkDIzSgMSDcS7WdPDzPnWhW2YJqxUR/dCHiJ2HdCV3K2rVky5Vba8UF31mvrCuQ==}
+  dom-to-image-more@3.11.0:
+    resolution: {integrity: sha512-qvT580MyiR4wh6q3zNj0fXt0ViDA1y4iCJRkDioy4Ema6N9EOrwdvXT/wuRHh20epPJPvq9xl5ea/y87nYnkug==}
 
   domain-browser@4.22.0:
     resolution: {integrity: sha512-IGBwjF7tNk3cwypFNH/7bfzBcgSCbaMOD3GsaY1AU/JRrnHnYgEM0+9kQt52iZxjNsjBtJYtao146V+f8jFZNw==}
@@ -29722,7 +29725,7 @@ snapshots:
     dependencies:
       playwright: 1.64.1
 
-  '@pmmmwh/react-refresh-webpack-plugin@0.6.3(react-refresh@0.19.0)(type-fest@4.41.0)(webpack-hot-middleware@2.26.1)(webpack@5.96.1)':
+  '@pmmmwh/react-refresh-webpack-plugin@0.6.3(react-refresh@0.19.0)(type-fest@5.10.0)(webpack-hot-middleware@2.26.1)(webpack@5.96.1)':
     dependencies:
       anser: 2.3.5
       core-js-pure: 3.50.0
@@ -29733,7 +29736,7 @@ snapshots:
       source-map: 0.7.6
       webpack: 5.96.1(@swc/core@1.15.40(@swc/helpers@0.5.19))(esbuild@0.28.1)(uglify-js@3.19.3)(webpack-cli@5.1.4)
     optionalDependencies:
-      type-fest: 4.41.0
+      type-fest: 5.10.0
       webpack-hot-middleware: 2.26.1
 
   '@pnpm/config.env-replace@1.1.0': {}
@@ -33366,6 +33369,8 @@ snapshots:
     dependencies:
       toggle-selection: 1.0.6
 
+  copy-to-clipboard@4.0.2: {}
+
   core-js-compat@3.50.0:
     dependencies:
       browserslist: 4.29.5
@@ -34239,7 +34244,7 @@ snapshots:
       domhandler: 5.0.3
       entities: 4.5.0
 
-  dom-to-image-more@3.6.0: {}
+  dom-to-image-more@3.11.0: {}
 
   domain-browser@4.22.0: {}
 
