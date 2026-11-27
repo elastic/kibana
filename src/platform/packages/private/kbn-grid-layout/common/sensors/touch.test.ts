@@ -45,4 +45,27 @@ describe('startTouchInteraction', () => {
     expect(handlers.onEnd).toHaveBeenCalledTimes(1);
     expect(handlers.onMove).not.toHaveBeenCalled();
   });
+
+  it('calls onCancel instead of onEnd on touchcancel and removes all listeners', () => {
+    const { target, handlers, e } = setup();
+    const onCancel = jest.fn();
+    startTouchInteraction({ e, ...handlers, onCancel });
+    target.dispatchEvent(new Event('touchcancel'));
+    target.dispatchEvent(new Event('touchmove'));
+    target.dispatchEvent(new Event('touchend'));
+
+    expect(onCancel).toHaveBeenCalledTimes(1);
+    expect(handlers.onEnd).not.toHaveBeenCalled();
+    expect(handlers.onMove).not.toHaveBeenCalled();
+  });
+
+  it('does not call onCancel on touchend', () => {
+    const { target, handlers, e } = setup();
+    const onCancel = jest.fn();
+    startTouchInteraction({ e, ...handlers, onCancel });
+    target.dispatchEvent(new Event('touchend'));
+
+    expect(handlers.onEnd).toHaveBeenCalledTimes(1);
+    expect(onCancel).not.toHaveBeenCalled();
+  });
 });

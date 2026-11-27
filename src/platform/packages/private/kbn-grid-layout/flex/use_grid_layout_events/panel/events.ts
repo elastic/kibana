@@ -121,6 +121,7 @@ export const useGridLayoutPanelEvents = ({
           onStart,
           onMove,
           onEnd,
+          onCancel,
         });
       } else if (isKeyboardEvent(e)) {
         if (gridLayoutStateManager.activePanelEvent$.getValue()) return; // interaction has already happened, so don't start again

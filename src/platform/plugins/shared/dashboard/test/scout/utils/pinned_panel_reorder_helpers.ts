@@ -31,35 +31,47 @@ export const getPinnedPanel = (page: ScoutPage, title: string): Locator =>
     hasText: title,
   });
 
-/** The rendered bounding box of a pinned panel; throws when it is not rendered. */
-export const getPinnedPanelBox = async (panel: Locator): Promise<Box> => {
-  const box = await panel.boundingBox();
-  if (!box) throw new Error('The pinned panel is not rendered');
+/** The rendered bounding box of a locator; throws when it is not rendered. */
+export const getBox = async (locator: Locator): Promise<Box> => {
+  const box = await locator.boundingBox();
+  if (!box) throw new Error('The element is not rendered');
   return box;
 };
 
 /**
- * Drags the resize handle of a pinned panel horizontally with the real mouse, so the browser's
- * own flex layout (growth, wrapping, handle position) decides the geometry that gets committed.
- * The pointer moves in steps so that the layout reflows between events, like a real drag.
+ * Drags a pinned panel by its move handle with the real mouse and drops it on the left (`before`) or
+ * right (`after`) half of the target pinned panel, which may be on another row. The layout picks the
+ * row from the vertical position and the slot from the horizontal position of the dragged panel's
+ * centre, so the pointer moves by the distance between the two panel centres plus the chosen offset.
+ * The pointer moves in steps so that the layout reacts between events, like a real drag.
  */
-export const dragPinnedPanelResizeHandle = async (
+export const dragPinnedPanelNextTo = async (
   page: ScoutPage,
   panel: Locator,
-  deltaX: number
+  target: Locator,
+  placement: 'before' | 'after'
 ): Promise<void> => {
-  const handle = panel.getByRole('button', { name: 'Resize panel' });
+  const handle = panel.getByRole('button', { name: /^Move control/ });
   await handle.waitFor({ state: 'visible' });
-  const handleBox = await getPinnedPanelBox(handle);
+
+  const [handleBox, panelBox, targetBox] = await Promise.all([
+    getBox(handle),
+    getBox(panel),
+    getBox(target),
+  ]);
+
+  const targetCenterX = targetBox.x + targetBox.width * (placement === 'before' ? 0.25 : 0.75);
+  const deltaX = targetCenterX - (panelBox.x + panelBox.width / 2);
+  const deltaY = targetBox.y + targetBox.height / 2 - (panelBox.y + panelBox.height / 2);
 
   const startX = handleBox.x + handleBox.width / 2;
   const startY = handleBox.y + handleBox.height / 2;
-  const steps = 10;
+  const steps = 15;
 
   await page.mouse.move(startX, startY);
   await page.mouse.down();
   for (let step = 1; step <= steps; step++) {
-    await page.mouse.move(startX + (deltaX * step) / steps, startY);
+    await page.mouse.move(startX + (deltaX * step) / steps, startY + (deltaY * step) / steps);
   }
   await page.mouse.up();
 };

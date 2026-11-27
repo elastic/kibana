@@ -11,7 +11,6 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { EuiThemeProvider } from '@elastic/eui';
 import { act, render, screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 
 import {
   CONTROL_WIDTH_LARGE,
@@ -268,73 +267,24 @@ describe('ControlsRenderer', () => {
     });
   });
 
-  describe('user interaction', () => {
-    const resizeWithKeyboard = async (id: string) => {
-      const handle = within(getPanel(id)).getByLabelText(/resize panel/i);
-      handle.focus();
-      await userEvent.keyboard('[Enter]');
-      await userEvent.keyboard('[ArrowRight]');
-      await userEvent.keyboard('[Enter]');
-    };
+  describe('control resizing', () => {
+    // drag resizing is temporarily disabled in the renderer styles. Resize behavior (keyboard and
+    // pointer) is covered at the FlexLayout layer in `kbn-grid-layout/flex/flex_layout.test.tsx`
+    const getResizeHandle = (id: string) =>
+      within(getPanel(id)).getByLabelText(/resize panel/i);
 
-    it('reports the snapped width as a control width option when a resize is committed', async () => {
-      renderControls(getControls());
-
-      // jsdom has no layout, so one arrow press resizes to a few px, which snaps to the smallest width
-      await resizeWithKeyboard('control1');
-
-      expect(onControlsChanged).toHaveBeenCalledTimes(1);
-      const [{ controls }] = onControlsChanged.mock.calls[0];
-      expect(controls.control1.width).toBe(CONTROL_WIDTH_SMALL);
-      expect(controls.control2).toEqual(getControls().controls.control2);
+    it('keeps the resize handle unavailable in view mode', () => {
+      renderControls(getControls(), getParentApi('view'));
+      expect(getResizeHandle('control1')).not.toBeVisible();
     });
 
-    it('does not report a change when the control is resized back to its current width', async () => {
-      renderControls(getControls({ control1: { width: CONTROL_WIDTH_SMALL } }));
-      await resizeWithKeyboard('control1');
-      expect(onControlsChanged).not.toHaveBeenCalled();
-    });
-
-    it('does not report a change when a resize is cancelled', async () => {
-      renderControls(getControls());
-      within(getPanel('control1'))
-        .getByLabelText(/resize panel/i)
-        .focus();
-      await userEvent.keyboard('[Enter]');
-      await userEvent.keyboard('[ArrowRight]');
-      await userEvent.keyboard('{Escape}');
-
-      expect(onControlsChanged).not.toHaveBeenCalled();
-      expect(getPanel('control1')).toHaveStyle({
-        width: `${CONTROL_WIDTH_PIXELS[CONTROL_WIDTH_MEDIUM]}px`,
-      });
-    });
-
-    it('settles on the parent state after a resize is reported and fed back in', async () => {
-      const initial = getControls();
-      const { rerender } = renderControls(initial);
-      await resizeWithKeyboard('control1');
-
-      const [[resized]] = onControlsChanged.mock.calls;
-      rerender(resized);
-      rerender(resized);
-
-      expect(getPanel('control1')).toHaveStyle({
-        width: `${CONTROL_WIDTH_PIXELS[CONTROL_WIDTH_SMALL]}px`,
-      });
-      expect(onControlsChanged).toHaveBeenCalledTimes(1);
-    });
-
-    it('does not let the user resize in view mode, and allows it once editing starts', async () => {
+    it('keeps the resize handle unavailable in edit mode, and when switching to it', () => {
       const parentApi = getParentApi('view');
       renderControls(getControls(), parentApi);
 
-      await resizeWithKeyboard('control1');
-      expect(onControlsChanged).not.toHaveBeenCalled();
-
       act(() => parentApi.viewMode$.next('edit'));
-      await resizeWithKeyboard('control1');
-      expect(onControlsChanged).toHaveBeenCalledTimes(1);
+      expect(getResizeHandle('control1')).not.toBeVisible();
+      expect(getResizeHandle('control2')).not.toBeVisible();
     });
   });
 });
