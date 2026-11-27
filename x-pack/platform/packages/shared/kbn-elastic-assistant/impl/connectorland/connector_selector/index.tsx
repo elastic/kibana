@@ -58,6 +58,8 @@ export type AIConnector = ActionConnector & {
   apiProvider?: OpenAiProviderType;
   /** When true, this connector represents an Elastic-managed inference endpoint (EIS). */
   isEis?: boolean;
+  /** Set when the server resolved this entry as the global default model (the setting may hold an alias id). */
+  isDefault?: boolean;
 };
 
 interface GroupedConnectors {

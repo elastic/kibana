@@ -55,6 +55,39 @@ describe('useChatComplete', () => {
     expect(typeof result.current.abortStream).toBe('function');
   });
 
+  it('should load the connectors from the elastic_assistant feature by default', () => {
+    renderHook(() => useChatComplete({ connectorId: 'mock-connector-id' }));
+
+    expect(useLoadConnectors).toHaveBeenCalledWith(
+      expect.objectContaining({ featureId: 'elastic_assistant' })
+    );
+  });
+
+  it('should resolve the action type from the connectors of the given feature', async () => {
+    (useLoadConnectors as jest.Mock).mockImplementation(({ featureId }) => ({
+      data:
+        featureId === 'custom_feature'
+          ? [{ id: 'bedrock-connector-id', actionTypeId: '.bedrock' }]
+          : [{ id: 'mock-connector-id', actionTypeId: '.gen-ai' }],
+    }));
+    (postChatComplete as jest.Mock).mockResolvedValue({});
+
+    const { result } = renderHook(() =>
+      useChatComplete({ connectorId: 'bedrock-connector-id', featureId: 'custom_feature' })
+    );
+
+    await act(async () => {
+      await result.current.sendMessage({ message: 'test message', replacements: {} });
+    });
+
+    expect(useLoadConnectors).toHaveBeenCalledWith(
+      expect.objectContaining({ featureId: 'custom_feature' })
+    );
+    expect(postChatComplete).toHaveBeenCalledWith(
+      expect.objectContaining({ actionTypeId: '.bedrock', connectorId: 'bedrock-connector-id' })
+    );
+  });
+
   it('should call postChatComplete when sendMessage is invoked', async () => {
     const mockResponse = { data: 'mock-response' };
     (postChatComplete as jest.Mock).mockResolvedValue(mockResponse);

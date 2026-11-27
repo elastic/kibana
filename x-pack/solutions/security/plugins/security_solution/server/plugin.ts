@@ -69,6 +69,7 @@ import {
 import { initUiSettings } from './ui_settings';
 import { registerDeprecations } from './deprecations';
 import {
+  ALERT_AI_SUMMARY_INFERENCE_FEATURE_ID,
   APP_ID,
   APP_UI_ID,
   DEFAULT_ALERTS_INDEX,
@@ -487,6 +488,15 @@ export class Plugin implements ISecuritySolutionPlugin {
           recommendedEndpoints: [],
         });
       }
+
+      plugins.searchInferenceEndpoints.features.register({
+        parentFeatureId: SECURITY_INFERENCE_PARENT_FEATURE_ID,
+        featureId: ALERT_AI_SUMMARY_INFERENCE_FEATURE_ID,
+        featureName: 'Alert AI Summary',
+        featureDescription: 'Alert AI Summary inference endpoint configuration',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [],
+      });
 
       plugins.searchInferenceEndpoints.features.register({
         parentFeatureId: SECURITY_INFERENCE_PARENT_FEATURE_ID,

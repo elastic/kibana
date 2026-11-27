@@ -243,7 +243,7 @@ describe('GET /internal/search_inference_endpoints/connectors', () => {
     expect(getConnectorList).not.toHaveBeenCalled();
     expect(mockRouter.response.ok).toHaveBeenCalledWith({
       body: {
-        connectors: [defaultConnector],
+        connectors: [{ ...defaultConnector, isDefault: true }],
         soEntryFound: false,
       },
     });
@@ -321,7 +321,7 @@ describe('GET /internal/search_inference_endpoints/connectors', () => {
     expect(getForFeature).not.toHaveBeenCalled();
     expect(mockRouter.response.ok).toHaveBeenCalledWith({
       body: {
-        connectors: [defaultConnector],
+        connectors: [{ ...defaultConnector, isDefault: true }],
         soEntryFound: false,
       },
     });
@@ -345,7 +345,11 @@ describe('GET /internal/search_inference_endpoints/connectors', () => {
     expect(getConnectorById).toHaveBeenCalledWith('default', expect.anything());
     expect(mockRouter.response.ok).toHaveBeenCalledWith({
       body: {
-        connectors: [defaultConnector, { ...recommended, isRecommended: true }, other],
+        connectors: [
+          { ...defaultConnector, isDefault: true },
+          { ...recommended, isRecommended: true },
+          other,
+        ],
         soEntryFound: false,
       },
     });
@@ -368,13 +372,16 @@ describe('GET /internal/search_inference_endpoints/connectors', () => {
 
     expect(mockRouter.response.ok).toHaveBeenCalledWith({
       body: {
-        connectors: [defaultInCatalog, { ...recommended, isRecommended: true }],
+        connectors: [
+          { ...defaultInCatalog, isDefault: true },
+          { ...recommended, isRecommended: true },
+        ],
         soEntryFound: false,
       },
     });
   });
 
-  it('ignores the default connector when soEntryFound is true', async () => {
+  it('does not add the default connector to a saved override that does not contain it', async () => {
     const resolved = inferenceConnector('feature-ep');
     getForFeature.mockResolvedValue({
       endpoints: [resolved],
@@ -382,14 +389,36 @@ describe('GET /internal/search_inference_endpoints/connectors', () => {
       soEntryFound: true,
     });
     getConnectorList.mockResolvedValue([resolved]);
+    getConnectorById.mockResolvedValue(inferenceConnector('default'));
     registerRoute({ defaultConnectorId: 'default' });
 
     await mockRouter.callRoute({ query: { featureId: 'my_feature' } });
 
-    expect(getConnectorById).not.toHaveBeenCalled();
     expect(mockRouter.response.ok).toHaveBeenCalledWith({
       body: {
         connectors: [resolved],
+        soEntryFound: true,
+      },
+    });
+  });
+
+  it('flags the default connector in a saved override that already contains it', async () => {
+    const other = inferenceConnector('other-ep');
+    const defaultInOverride = inferenceConnector('default');
+    getForFeature.mockResolvedValue({
+      endpoints: [other, defaultInOverride],
+      warnings: [],
+      soEntryFound: true,
+    });
+    getConnectorList.mockResolvedValue([other, defaultInOverride]);
+    getConnectorById.mockResolvedValue(defaultInOverride);
+    registerRoute({ defaultConnectorId: 'default' });
+
+    await mockRouter.callRoute({ query: { featureId: 'my_feature' } });
+
+    expect(mockRouter.response.ok).toHaveBeenCalledWith({
+      body: {
+        connectors: [other, { ...defaultInOverride, isDefault: true }],
         soEntryFound: true,
       },
     });
@@ -482,7 +511,7 @@ describe('GET /internal/search_inference_endpoints/connectors', () => {
     expect(getConnectorList).not.toHaveBeenCalled();
     expect(mockRouter.response.ok).toHaveBeenCalledWith({
       body: {
-        connectors: [defaultConnector],
+        connectors: [{ ...defaultConnector, isDefault: true }],
         soEntryFound: false,
       },
     });
