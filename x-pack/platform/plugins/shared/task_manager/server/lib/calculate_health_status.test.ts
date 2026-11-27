@@ -22,6 +22,7 @@ const config = {
     interval: 10000,
   },
   execution_control: {
+    paused_task_ids: [],
     poll_interval: 5000,
   },
   kibanas_per_partition: 2,
@@ -104,6 +105,7 @@ const getStatsWithTimestamp = ({
           execution_control: {
             paused: false,
             paused_task_types: [],
+            paused_task_ids: [],
           },
         },
         status: HealthStatus.OK,

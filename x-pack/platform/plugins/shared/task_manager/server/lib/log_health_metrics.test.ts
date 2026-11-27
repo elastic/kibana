@@ -501,6 +501,7 @@ function getMockMonitoredHealth(overrides = {}): MonitoredHealth {
           execution_control: {
             paused: false,
             paused_task_types: [],
+            paused_task_ids: [],
           },
         },
       },

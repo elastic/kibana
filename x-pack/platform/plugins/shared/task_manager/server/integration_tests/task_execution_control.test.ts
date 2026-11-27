@@ -31,6 +31,7 @@ const config: TaskManagerConfig = {
     interval: 10000,
   },
   execution_control: {
+    paused_task_ids: [],
     poll_interval: EXECUTION_CONTROL_POLL_INTERVAL,
   },
   kibanas_per_partition: 2,

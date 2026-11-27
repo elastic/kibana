@@ -53,6 +53,7 @@ The task_manager can be configured via `taskManager` config options (e.g. `xpack
 - `monitored_stats_required_freshness` - Dictates the _required freshness_ of critical "Hot" stats. Learn More: [./MONITORING](./MONITORING.MD)
 - `monitored_task_execution_thresholds`- Dictates the threshold of failed task executions. Learn More: [./MONITORING](./MONITORING.MD)
 - `unsafe.exclude_task_types` - A list of task types to exclude from running. Supports wildcard usage, such as `namespace:*`. This configuration is experimental, unsupported, and can only be used for temporary debugging purposes because it causes Kibana to behave in unexpected ways.
+- `execution_control.paused_task_ids` - A list of task ids (at most 100) that this Kibana never claims. Not intended for general use. See [Pausing a single task by id](#pausing-a-single-task-by-id).
 - `execution_control.poll_interval` - How often (ms) each Kibana node polls the runtime task execution control (pause/resume) state. Defaults to 5000ms. See [Pausing task execution at runtime](#pausing-task-execution-at-runtime).
 - `invalidate_api_key_task.interval` - Check [API Key Invalidation](#api-key-invalidation) for details.
 - `invalidate_api_key_task.removalDelay` - Check [API Key Invalidation](#api-key-invalidation) for details.
@@ -88,6 +89,21 @@ GET  /internal/task_manager/execution/_status
 ```
 
 While paused, workload/overdue stats grow and the health API may report a degraded status; the current state is exposed at `/api/task_manager/_health` under `stats.configuration.value.execution_control`. Cancelled tasks remain in a `running` state in the index until their `retryAt` and are reclaimed once execution is resumed.
+
+### Pausing a single task by id
+
+To hold back one task without pausing its whole task type (for example one heavy rule or workflow), list its task id in `xpack.task_manager.execution_control.paused_task_ids`. Unlike the runtime pause above, this is static configuration: it takes effect when a node starts and is lifted by removing the id and restarting. It is meant for cases where the routes above are not reachable, such as an Elastic employee applying a per-project configuration override on Serverless.
+
+```yaml
+xpack.task_manager.execution_control.paused_task_ids: ['<task id>']
+```
+
+A paused task id:
+- Is excluded from the claim query on every node that has the setting, so it is never claimed or run. A run already in flight on a node that is being replaced is not cancelled by this setting.
+- Keeps its task document untouched. Task CRUD and the owning application keep working, and `runSoon` does not release it.
+- Is released by removing the id. The task is then overdue and runs once on the next claim cycle; missed intervals are not replayed.
+
+The task id is the saved object id of the task (for a rule, the rule's `scheduledTaskId`, which is normally the rule id). Each node logs the configured ids at startup, and they are exposed at `/api/task_manager/_health` under `stats.configuration.value.execution_control.paused_task_ids`.
 
 ## Task definitions
 

@@ -24,7 +24,7 @@ export type TaskExecutionControlMutator = (current: TaskExecutionControlState) =
 };
 
 interface TaskExecutionControlServiceParams {
-  config: TaskManagerConfig['execution_control'];
+  config: Pick<TaskManagerConfig['execution_control'], 'poll_interval'>;
   savedObjectsRepository: ISavedObjectsRepository;
   logger: Logger;
 }

@@ -47,6 +47,8 @@ export const DEFAULT_KIBANAS_PER_PARTITION = 2;
 export const DEFAULT_EXECUTION_CONTROL_POLL_INTERVAL_MS = 5000; // 5 seconds
 const MIN_EXECUTION_CONTROL_POLL_INTERVAL_MS = 1000; // 1 second
 const MAX_EXECUTION_CONTROL_POLL_INTERVAL_MS = 1000 * 60; // 1 minute
+export const MAX_PAUSED_TASK_IDS = 100;
+const MAX_TASK_ID_LENGTH = 512;
 
 export enum ApiKeyType {
   ES = 'es',
@@ -128,8 +130,16 @@ export const configSchema = schema.object(
         max: MAX_DISCOVERY_INTERVAL_MS,
       }),
     }),
-    /* How often each node polls the runtime task execution control (pause/resume) state. */
     execution_control: schema.object({
+      /* Ids of individual tasks this node never claims. Not designed to be used by most users. */
+      paused_task_ids: schema.arrayOf(
+        schema.string({ minLength: 1, maxLength: MAX_TASK_ID_LENGTH }),
+        {
+          defaultValue: [],
+          maxSize: MAX_PAUSED_TASK_IDS,
+        }
+      ),
+      /* How often each node polls the runtime task execution control (pause/resume) state. */
       poll_interval: schema.number({
         defaultValue: DEFAULT_EXECUTION_CONTROL_POLL_INTERVAL_MS,
         min: MIN_EXECUTION_CONTROL_POLL_INTERVAL_MS,

@@ -26,6 +26,8 @@ export interface TaskClaimerOpts {
   taskStore: TaskStore;
   definitions: TaskTypeDictionary;
   excludedTaskTypes: string[];
+  // Ids of individual tasks that must not be claimed. Defaults to none.
+  excludedTaskIds?: string[];
   taskMaxAttempts: Record<string, number>;
   logger: Logger;
   taskPartitioner: TaskPartitioner;

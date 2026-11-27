@@ -331,6 +331,44 @@ describe('TaskClaiming', () => {
       expect(queriedTypes.some((s) => s.includes('"bar"'))).toBe(false);
     });
 
+    test('excludes the configured task ids from every claim search', async () => {
+      const { taskClaiming, store } = initialiseTestClaiming({
+        storeOpts: {},
+        taskClaimingOpts: { excludedTaskIds: ['held-1', 'held-2'] },
+        hits: [generateFakeTasks(1)],
+      });
+
+      await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
+
+      const searches = store.msearch.mock.calls.flatMap(([calls]) => calls ?? []);
+      expect(searches.length).toBeGreaterThan(0);
+      for (const search of searches) {
+        expect(search.query?.bool?.must_not).toEqual([
+          { ids: { values: ['task:held-1', 'task:held-2'] } },
+        ]);
+      }
+    });
+
+    test('does not add an id exclusion to the claim searches when no task ids are configured', async () => {
+      const { taskClaiming, store } = initialiseTestClaiming({
+        storeOpts: {},
+        taskClaimingOpts: {},
+        hits: [generateFakeTasks(1)],
+      });
+
+      await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
+
+      const searches = store.msearch.mock.calls.flatMap(([calls]) => calls ?? []);
+      expect(searches.length).toBeGreaterThan(0);
+      for (const search of searches) {
+        expect(search.query?.bool?.must_not).toBeUndefined();
+      }
+    });
+
     test('makes calls to APM as expected when markAvailableTasksAsClaimed throws error', async () => {
       const maxAttempts = _.random(2, 43);
       const customMaxAttempts = _.random(44, 100);
