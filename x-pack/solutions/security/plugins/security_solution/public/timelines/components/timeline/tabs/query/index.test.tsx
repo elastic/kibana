@@ -447,6 +447,8 @@ describe('query tab with unified timeline', () => {
     it(
       'should paginate correctly',
       async () => {
+        // one row per page keeps the real leading controls cheap, and they prove the grid passes the right row
+        mockStubControlColumn = false;
         render(
           <TestProviders
             store={createMockStore({
@@ -480,6 +482,19 @@ describe('query tab with unified timeline', () => {
           expect(fetchNotesSpy).toHaveBeenCalledWith([mockTimelineData[2]._id]);
         });
         expect(fetchNotesSpy).toHaveBeenCalledTimes(1);
+
+        // the leading controls of the new page target the event of that page
+        await waitFor(() => {
+          expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+        });
+        fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
+        await waitFor(() => {
+          expect(flyoutApi.openNotes).toHaveBeenCalledWith(
+            expect.objectContaining({
+              hit: expect.objectContaining({ _id: mockTimelineData[2]._id }),
+            })
+          );
+        });
       },
       SPECIAL_TEST_TIMEOUT
     );
