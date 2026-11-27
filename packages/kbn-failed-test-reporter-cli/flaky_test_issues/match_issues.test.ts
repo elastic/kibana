@@ -50,6 +50,17 @@ const ftrIssue = (number: number, filePath: string, name: string) => {
   });
 };
 
+/** Cypress JUnit names repeat the test title, and the classname encodes every dot of the file. */
+const cypressIssue = (number: number, filePath: string, suiteTitle: string, title: string) => {
+  const className = `Security Solution Cypress.${filePath.replace(/\./g, '·')}`;
+  const name = `${suiteTitle} ${title} ${title}`;
+  return githubIssue({
+    number,
+    title: `Failing test: ${className} - ${name}`,
+    body: failedTestBody({ 'test.class': className, 'test.name': name }),
+  });
+};
+
 describe('describeIssue', () => {
   it('reads the suite file, the Scout test id and location, the Jest directory and the test name', () => {
     expect(describeIssue(scoutIssue(1, 'abc-def', 'creates default alert'))).toMatchObject({
@@ -329,6 +340,42 @@ describe('findMatchingIssues', () => {
     expect(related.map(({ issue, match }) => [issue.number, match])).toEqual([
       [30, 'test'],
       [31, 'file'],
+    ]);
+  });
+
+  it('matches Cypress issues, whose test name ends in the test title twice', () => {
+    const filePath = 'x-pack/solutions/security/test/security_solution_cypress/e2e/timeline.cy.ts';
+    const test = { filePath, suiteTitle: 'Timeline', title: 'opens from the alerts table' };
+    const [suite] = groupIntoSuites([flakyTest({ ...test, framework: 'cypress' })]);
+    const issues = [
+      describeIssue(cypressIssue(60, filePath, 'Timeline', 'opens from the alerts table')),
+      // Another test of the suite
+      describeIssue(cypressIssue(61, filePath, 'Timeline', 'closes')),
+      // A hook that failed for the test
+      describeIssue(
+        cypressIssue(
+          62,
+          filePath,
+          'Timeline',
+          '"before each" hook for "opens from the alerts table"'
+        )
+      ),
+    ];
+
+    expect(
+      findMatchingIssues(suite, issues).map(({ issue, match }) => [issue.number, match])
+    ).toEqual([
+      [60, 'test'],
+      [62, 'file'],
+      [61, 'file'],
+    ]);
+
+    // Other frameworks name a test once, so there it is another test
+    const [ftrSuite] = groupIntoSuites([flakyTest({ ...test, framework: 'ftr' })]);
+    expect(findMatchingIssues(ftrSuite, issues).map(({ match }) => match)).toEqual([
+      'file',
+      'file',
+      'file',
     ]);
   });
 
