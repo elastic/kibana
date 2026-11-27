@@ -63,6 +63,7 @@ export const LICENSE_ALLOWED = [
   'new BSD, and MIT',
   '(OFL-1.1 AND MIT)',
   'PSF',
+  'PSF-2.0',
   'Public Domain',
   'Unlicense',
   'WTFPL OR ISC',

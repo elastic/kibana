@@ -9,8 +9,8 @@
 
 import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 
-// ES|QL returns number ranges (e.g. double_range) as "500.0..550.0"
-const getLowerBound = (value: unknown) => Number(String(value).split('..')[0]);
+/** Lower bound of an ES|QL number range such as "500.0..550.0", or the number itself. */
+export const getLowerBound = (value: unknown): number => Number(String(value).split('..')[0]);
 
 /**
  * Sorts rows by the lower bound of a number range column.

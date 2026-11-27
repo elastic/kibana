@@ -33,12 +33,51 @@ export const applicationTabPath = (
   return `${APPLICATIONS_PATH}/${encodeURIComponent(serviceName)}/${tabPath}?${query}`;
 };
 
+export const MOBILE_APPLICATIONS_PATH = 'internal/digital_experience/mobile_applications';
+
+const mobileRoutePath = (
+  serviceName: string,
+  route: string,
+  query: Record<string, string>
+): string => {
+  const search = new URLSearchParams({
+    start: TIME_RANGE.rangeFrom,
+    end: TIME_RANGE.rangeTo,
+    ...query,
+  });
+  return `${MOBILE_APPLICATIONS_PATH}/${encodeURIComponent(serviceName)}/${route}?${search}`;
+};
+
+/** The KPI route of a mobile application in `TIME_RANGE`; `query` adds params or overrides them. */
+export const mobileKpisPath = (serviceName: string, query: Record<string, string> = {}): string =>
+  mobileRoutePath(serviceName, 'kpis', query);
+
+/** The release health route of a mobile application in `TIME_RANGE`. */
+export const mobileReleasesPath = (
+  serviceName: string,
+  query: Record<string, string> = {}
+): string => mobileRoutePath(serviceName, 'releases', query);
+
+/** The crash groups route of a mobile application in `TIME_RANGE`, or one group's with `fingerprint`. */
+export const mobileCrashGroupsPath = (
+  serviceName: string,
+  { fingerprint, ...query }: Record<string, string> = {}
+): string =>
+  mobileRoutePath(
+    serviceName,
+    fingerprint ? `crash_groups/${encodeURIComponent(fingerprint)}` : 'crash_groups',
+    query
+  );
+
 export const APPLICATIONS_IN_TIME_RANGE_PATH = `${APPLICATIONS_PATH}?start=${TIME_RANGE.rangeFrom}&end=${TIME_RANGE.rangeTo}`;
 
 export const SESSIONS_ENABLE_PATH = 'internal/digital_experience/sessions/enable';
+export const SESSIONS_DISABLE_PATH = 'internal/digital_experience/sessions/disable';
+export const SESSIONS_STATUS_PATH = 'internal/digital_experience/sessions/status';
 
 export {
   TIME_ZONE as NEW_YORK_TIME_ZONE,
+  TIME_ZONE_APP,
   TIME_ZONE_ENVIRONMENT,
 } from '../../common/fixtures/time_zone_data';
 

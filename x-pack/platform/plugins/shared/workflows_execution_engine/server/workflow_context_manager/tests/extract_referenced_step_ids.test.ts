@@ -6,7 +6,7 @@
  */
 
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
-import { extractReferencedStepIds } from '../extract_referenced_step_ids';
+import { analyzeConditionString, extractReferencedStepIds } from '../extract_referenced_step_ids';
 
 const makeAtomicNode = (configuration: Record<string, unknown>): GraphNodeUnion =>
   ({
@@ -100,6 +100,22 @@ describe('extractReferencedStepIds', () => {
     expect(extractReferencedStepIds(node)).toBeNull();
   });
 
+  it('should extract a step ID from a literal bracket reference', () => {
+    const node = makeAtomicNode({
+      with: { message: '{{ steps["produce"].output.payload }}' },
+    });
+    expect(extractReferencedStepIds(node)).toEqual(new Set(['produce']));
+  });
+
+  it('should extract a dotted step ID from a literal bracket reference', () => {
+    // Liquid keeps `steps['my.produce']` when the key contains a `.`; the extractor
+    // must not treat that as an empty / truncated path.
+    const node = makeAtomicNode({
+      with: { message: '{{ steps["my.produce"].output.payload }}' },
+    });
+    expect(extractReferencedStepIds(node)).toEqual(new Set(['my.produce']));
+  });
+
   it('should return empty set when no template expressions are present', () => {
     const node = makeAtomicNode({
       with: { message: 'static text', count: 42 },
@@ -183,8 +199,8 @@ describe('extractReferencedStepIds', () => {
 
   it('should extract step ID from an enter-while node with a bare KQL condition', () => {
     // Authoring a while condition as KQL (no {{ }}) is fully supported by
-    // evaluateCondition, but the referenced step must still be discovered so it
-    // can be rehydrated if its output was evicted. Mirrors the enter-if KQL case.
+    // evaluateCondition, but the referenced step must still be discovered so
+    // prepareContext can fetch its output. Mirrors the enter-if KQL case.
     const node = {
       id: 'test-while',
       type: 'enter-while',
@@ -198,8 +214,8 @@ describe('extractReferencedStepIds', () => {
 
   it('should extract step ID from an exit-while node with a bare KQL condition', () => {
     // The exit-while node re-evaluates this condition on every iteration. If the
-    // referenced step is not discovered here, prepareForRead never rehydrates it,
-    // so an evicted source renders blank and the loop exits prematurely.
+    // referenced step is not discovered here, prepareContext never fetches it,
+    // so a dropped output renders blank and the loop exits prematurely.
     const node = {
       id: 'exit-while',
       type: 'exit-while',
@@ -245,5 +261,24 @@ describe('extractReferencedStepIds', () => {
       },
     });
     expect(extractReferencedStepIds(node)).toBeNull();
+  });
+});
+
+describe('analyzeConditionString', () => {
+  it('reads a Liquid step reference and a bare KQL field', () => {
+    expect(analyzeConditionString('{{ steps.producer.output }} == "ok"')).toMatchObject({
+      stepIds: new Set(['producer']),
+      mayReferenceVariables: false,
+    });
+    expect(analyzeConditionString('steps.producer.output.status: "done"').stepIds).toEqual(
+      new Set(['producer'])
+    );
+  });
+
+  it('marks variables references', () => {
+    expect(analyzeConditionString('{{ variables.connector_id }} == "abc"')).toMatchObject({
+      stepIds: new Set(),
+      mayReferenceVariables: true,
+    });
   });
 });

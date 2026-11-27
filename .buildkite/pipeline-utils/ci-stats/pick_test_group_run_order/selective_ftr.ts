@@ -114,6 +114,8 @@ export const FTR_IRRELEVANT_PATHS: readonly string[] = [
   '**/*.webp',
   // Scout (Playwright) test trees never affect FTR, whichever module owns them.
   '**/test/scout{_*,}/**',
+  // Enforced in Build Kibana Distribution; cannot affect FTR runtime.
+  'packages/kbn-rspack-optimizer/limits.yml',
 ];
 
 /**

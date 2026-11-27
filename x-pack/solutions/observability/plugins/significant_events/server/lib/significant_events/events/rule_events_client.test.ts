@@ -49,6 +49,12 @@ const sourceResponse = (rows: MockRow[]): ESQLSearchResponse =>
     ]),
   } as unknown as ESQLSearchResponse);
 
+const dataJsonResponse = (dataJsonRows: string[]): ESQLSearchResponse =>
+  ({
+    columns: [{ name: 'data_json', type: 'keyword' }],
+    values: dataJsonRows.map((dataJson) => [dataJson]),
+  } as unknown as ESQLSearchResponse);
+
 const countResponse = (total: number): ESQLSearchResponse =>
   ({
     columns: [{ name: 'total', type: 'long' }],
@@ -157,6 +163,89 @@ const lastStatusWritten = (client: jest.Mocked<AlertEventsClientApi>) =>
     alert_status: string;
     data: Record<string, unknown>;
   };
+
+describe('findDetectionsWrittenByRun', () => {
+  it('scopes the query to the space, significant events, and workflow execution', async () => {
+    const row: MockRow = {
+      source: ruleEventSource(),
+      dataJson: JSON.stringify({
+        signals: [{ metadata: { detection_id: 'detection-a', rule_uuid: 'rule-a' } }],
+      }),
+    };
+    const { client, query } = createClient(async () => dataJsonResponse([row.dataJson]));
+
+    await expect(
+      client.findDetectionsWrittenByRun({ workflowExecutionId: 'execution-1', limit: 1_000 })
+    ).resolves.toEqual({
+      pairs: [{ detection_id: 'detection-a', rule_uuid: 'rule-a' }],
+      truncated: false,
+    });
+
+    expect(lastQuery(query)).toContain(
+      'WHERE space_id == "default" AND type == "alert" AND source == "elastic.significant_events"'
+    );
+    expect(lastQuery(query)).toContain(
+      'WHERE FIELD_EXTRACT(data, "workflow_execution_id") == "execution-1"'
+    );
+    expect(lastQuery(query)).toContain('EVAL data_json = JSON_EXTRACT(_source, "$.data")');
+    expect(lastQuery(query)).toContain('KEEP data_json');
+    expect(lastQuery(query)).not.toContain('KEEP _source');
+  });
+
+  it('skips an unparseable row and a malformed signal while keeping the valid pairs', async () => {
+    const rows: MockRow[] = [
+      { source: ruleEventSource(), dataJson: '{not json' },
+      {
+        source: ruleEventSource({ group_hash: 'group-hash-2' }),
+        dataJson: JSON.stringify({
+          signals: [
+            { metadata: { detection_id: 'detection-a' } },
+            { metadata: { detection_id: 'detection-b', rule_uuid: 'rule-b' } },
+          ],
+        }),
+      },
+    ];
+    const { client } = createClient(async () =>
+      dataJsonResponse(rows.map(({ dataJson }) => dataJson))
+    );
+
+    await expect(
+      client.findDetectionsWrittenByRun({ workflowExecutionId: 'execution-1', limit: 1_000 })
+    ).resolves.toEqual({
+      pairs: [{ detection_id: 'detection-b', rule_uuid: 'rule-b' }],
+      truncated: false,
+    });
+  });
+
+  it('keeps the first capped rows and marks the result truncated', async () => {
+    const rows: MockRow[] = [
+      {
+        source: ruleEventSource(),
+        dataJson: JSON.stringify({
+          signals: [{ metadata: { detection_id: 'detection-a', rule_uuid: 'rule-a' } }],
+        }),
+      },
+      {
+        source: ruleEventSource({ group_hash: 'group-hash-2' }),
+        dataJson: JSON.stringify({
+          signals: [{ metadata: { detection_id: 'detection-b', rule_uuid: 'rule-b' } }],
+        }),
+      },
+    ];
+    const { client, query } = createClient(async () =>
+      dataJsonResponse(rows.map(({ dataJson }) => dataJson))
+    );
+
+    await expect(
+      client.findDetectionsWrittenByRun({ workflowExecutionId: 'execution-1', limit: 1 })
+    ).resolves.toEqual({
+      pairs: [{ detection_id: 'detection-a', rule_uuid: 'rule-a' }],
+      truncated: true,
+    });
+
+    expect(lastQuery(query)).toContain('LIMIT 2');
+  });
+});
 
 describe('RuleEventsClient', () => {
   describe('updateEventStatus', () => {
@@ -1592,6 +1681,98 @@ describe('RuleEventsClient', () => {
       expect(text).toContain('space_id == "default"');
       expect(text).toContain('group_hash == "group-1"');
       expect(text).toContain('action_type == "deactivate" AND actor.type == "user"');
+    });
+  });
+
+  describe('findLatestBreachedSignals', () => {
+    const latestResponse = (rows: Array<[string, string]>): ESQLSearchResponse =>
+      ({
+        columns: [
+          { name: 'latest', type: 'date' },
+          { name: 'rule.id', type: 'keyword' },
+        ],
+        values: rows.map(([ruleId, latest]) => [latest, ruleId]),
+      } as unknown as ESQLSearchResponse);
+
+    it('returns an empty map without querying when no rules are requested', async () => {
+      const { client, query } = createClient(async () => latestResponse([]));
+
+      const latest = await client.findLatestBreachedSignals({
+        ruleUuids: [],
+        from: '2026-10-01T00:00:00.000Z',
+      });
+
+      expect(latest.size).toBe(0);
+      expect(query).not.toHaveBeenCalled();
+    });
+
+    it('rejects partial results, so a failed shard cannot read as rules with no breach', async () => {
+      const { client, query } = createClient(async () => latestResponse([]));
+
+      await client.findLatestBreachedSignals({
+        ruleUuids: ['rule-A'],
+        from: '2026-10-01T00:00:00.000Z',
+      });
+
+      expect(query).toHaveBeenCalledWith(expect.objectContaining({ allow_partial_results: false }));
+    });
+
+    it('asks for the newest breached signal of each requested rule since the bound', async () => {
+      const { client, query } = createClient(async () => latestResponse([]));
+
+      await client.findLatestBreachedSignals({
+        ruleUuids: ['rule-A', 'rule-B'],
+        from: '2026-10-01T00:00:00.000Z',
+      });
+
+      const { query: q, params } = query.mock.calls[0][0] as {
+        query: string;
+        params: unknown[];
+      };
+      expect(q).toContain('space_id == "default"');
+      expect(q).toContain('type == "signal"');
+      expect(q).toContain('status == "breached"');
+      expect(q).toContain('`rule.id` IN ("rule-A", "rule-B")');
+      expect(q).toContain('@timestamp >= TO_DATETIME(?from)');
+      expect(q).toContain('STATS latest = MAX(@timestamp) BY `rule.id`');
+      expect(params).toEqual([{ from: '2026-10-01T00:00:00.000Z' }]);
+    });
+
+    it('maps each rule to the time of its newest breach, as milliseconds', async () => {
+      const { client } = createClient(async () =>
+        latestResponse([['rule-A', '2026-10-19T11:58:00.000Z']])
+      );
+
+      const latest = await client.findLatestBreachedSignals({
+        ruleUuids: ['rule-A', 'rule-B'],
+        from: '2026-10-19T11:50:00.000Z',
+      });
+
+      expect(latest).toEqual(new Map([['rule-A', Date.parse('2026-10-19T11:58:00.000Z')]]));
+    });
+
+    it('fails when a breach row has an invalid timestamp', async () => {
+      const { client } = createClient(async () => latestResponse([['rule-A', 'not a time']]));
+
+      await expect(
+        client.findLatestBreachedSignals({
+          ruleUuids: ['rule-A'],
+          from: '2026-10-01T00:00:00.000Z',
+        })
+      ).rejects.toThrow('invalid breach row');
+    });
+
+    it('fails when the breach index is missing', async () => {
+      const { client } = createClient(async () => {
+        throw new Error('verification_exception: Unknown index [.rule-events]');
+      });
+
+      await expect(
+        client.findLatestBreachedSignals({
+          ruleUuids: ['rule-A'],
+          from: '2026-10-01T00:00:00.000Z',
+        })
+      ).rejects.toThrow('Unknown index');
     });
   });
 

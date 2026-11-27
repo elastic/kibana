@@ -63,13 +63,6 @@ export function useGetAppendCustomIntegrationsQuery() {
   });
 }
 
-export function useGetReplacementCustomIntegrationsQuery() {
-  return useQuery(['get-replacemenet-custom-integrations'], () => {
-    const customIntegrations = getCustomIntegrations();
-    return customIntegrations.getReplacementCustomIntegrations();
-  });
-}
-
 export function useGetCategoriesQuery(query: GetCategoriesRequest['query'] = {}) {
   return useQuery<GetCategoriesResponse, RequestError>(
     ['categories', query],

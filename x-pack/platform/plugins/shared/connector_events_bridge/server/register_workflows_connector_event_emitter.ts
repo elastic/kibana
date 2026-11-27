@@ -9,8 +9,8 @@ import type {
   ConnectorEventEmitter,
   PluginSetupContract as ActionsPluginSetupContract,
 } from '@kbn/actions-plugin/server';
+import { slack2HitlAction } from '@kbn/connector-topics';
 import type { Logger } from '@kbn/core/server';
-import { HITL_SLACK_ACTION_EVENT_ID } from '@kbn/workflows';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
 import {
@@ -160,8 +160,9 @@ async function resumeHitlFromSlackAction(
 }
 
 /**
- * Registers the Phase 1 Workflows emitter on the Actions inbound hub.
- * Forwards the ingest-built last-saver request; never invents a space-only request.
+ * Registers the Workflows emitter on the Actions inbound hub until a workflow
+ * definition can carry an identity. Forwards the ingest-built last-saver request;
+ * never invents a space-only request.
  */
 export function registerWorkflowsConnectorEventEmitter({
   actions,
@@ -209,7 +210,7 @@ export function registerWorkflowsConnectorEventEmitter({
 
       try {
         const client = await workflowsExtensions.getClient(request);
-        if (eventId === HITL_SLACK_ACTION_EVENT_ID) {
+        if (eventId === slack2HitlAction.name) {
           await resumeHitlFromSlackAction(client, enriched, { configurationUtilities, logger });
           return;
         }

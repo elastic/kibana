@@ -10,11 +10,13 @@
 import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import type { CoreStart } from '@kbn/core/public';
-import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { openLazySystemFlyout } from './open_lazy_system_flyout';
 
-const overlayRef = { close: jest.fn() } as unknown as OverlayRef;
 type OpenSystemFlyout = CoreStart['overlays']['openSystemFlyout'];
+const overlayRef = {
+  close: jest.fn(),
+  setTitle: jest.fn(),
+} as unknown as ReturnType<OpenSystemFlyout>;
 const openSystemFlyout = jest.fn<ReturnType<OpenSystemFlyout>, Parameters<OpenSystemFlyout>>(
   () => overlayRef
 );

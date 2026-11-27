@@ -271,6 +271,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
     runPostDeleteExternalCallbacks: jest.fn(),
     upgrade: jest.fn(),
     getUpgradeDryRunDiff: jest.fn(),
+    getUpgradeDryRunDiffs: jest.fn(),
     enrichPolicyWithDefaultsFromPackage: jest.fn(),
     findAllForAgentPolicy: jest.fn(),
     getSummaryForAgentPolicies: jest.fn(),
@@ -408,7 +409,14 @@ export const createFleetStartContractMock = (): DeeplyMockedKeys<FleetStartContr
 
   const startContract: DeeplyMockedKeys<FleetStartContract> = {
     fleetSetupCompleted: jest.fn(async () => {}),
-    agentless: { enabled: false },
+    agentless: {
+      enabled: false,
+      createRumClient: jest.fn(() => ({
+        isConfigured: jest.fn(() => false),
+        mintToken: jest.fn(),
+        publish: jest.fn(),
+      })),
+    },
     authz: { fromRequest: jest.fn(async (_) => fleetAuthzMock) },
     packageService: createMockPackageService(),
     agentService: createMockAgentService(),

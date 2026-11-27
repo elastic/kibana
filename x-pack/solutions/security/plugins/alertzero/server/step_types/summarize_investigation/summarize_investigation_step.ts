@@ -18,7 +18,7 @@ import {
 export interface SummarizeInvestigationStepDependencies {
   getConversationClient: (request: KibanaRequest) => Promise<InvestigationConversationReader>;
   resolveChatModel: RunInvestigationSummaryDeps['resolveChatModel'];
-  getProposals?: RunInvestigationSummaryDeps['getProposals'];
+  readProposals?: RunInvestigationSummaryDeps['readProposals'];
   logger?: RunInvestigationSummaryDeps['logger'];
 }
 

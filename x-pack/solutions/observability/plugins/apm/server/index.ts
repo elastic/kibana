@@ -61,6 +61,7 @@ const configSchema = schema.object({
   serverlessOnboarding: offeringBasedSchema({
     serverless: schema.boolean({ defaultValue: false }),
   }),
+  managedRumEnabled: schema.boolean({ defaultValue: false }),
   managedServiceUrl: offeringBasedSchema({
     serverless: schema.string({ defaultValue: '' }),
   }),

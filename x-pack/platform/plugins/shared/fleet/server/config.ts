@@ -238,6 +238,7 @@ export const config: PluginConfigDescriptor = {
           api: schema.maybe(
             schema.object({
               url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+              rumUrl: schema.maybe(schema.uri({ scheme: ['https'] })),
               tls: schema.maybe(
                 schema.object({
                   certificate: schema.maybe(schema.string()),

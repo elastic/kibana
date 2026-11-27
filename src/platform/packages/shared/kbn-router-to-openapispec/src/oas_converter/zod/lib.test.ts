@@ -863,11 +863,10 @@ describe('zod', () => {
         expect(outputStr).not.toContain('x-kbn-oas-extensions');
       });
 
-      test('auto-emits discriminator without mapping when a variant lacks meta({ id })', () => {
+      test('omits discriminator when a variant lacks meta({ id })', () => {
         const wired = z4.object({ type: z4.literal('wired'), name: z4.string() }).meta({
           id: 'AutoDiscNoMap_WiredDef',
         });
-        // No .meta({ id }) on this variant — mapping cannot be completed
         const classic = z4.object({ type: z4.literal('classic'), id: z4.number() });
         const streamDef = z4.discriminatedUnion('type', [wired, classic]).meta({
           id: 'AutoDiscNoMap_StreamDefinition',
@@ -876,13 +875,101 @@ describe('zod', () => {
         const body = z4.object({ stream: streamDef });
         const result = convert(body as any);
 
-        expect(result.shared).toHaveProperty('AutoDiscNoMap_StreamDefinition');
         expect(result.shared.AutoDiscNoMap_StreamDefinition).toMatchObject({
-          discriminator: { propertyName: 'type' },
+          oneOf: [
+            { $ref: '#/components/schemas/AutoDiscNoMap_WiredDef' },
+            expect.objectContaining({ type: 'object' }),
+          ],
         });
-        expect(
-          (result.shared.AutoDiscNoMap_StreamDefinition as any).discriminator?.mapping
-        ).toBeUndefined();
+        expect(result.shared.AutoDiscNoMap_StreamDefinition).not.toHaveProperty('discriminator');
+      });
+
+      test('maps every value of an enum discriminator to its variant', () => {
+        const auto = z4.object({ mode: z4.enum(['auto', 'default']) }).meta({
+          id: 'AutoDiscEnum_Auto',
+        });
+        const custom = z4.object({ mode: z4.literal('custom'), value: z4.number() }).meta({
+          id: 'AutoDiscEnum_Custom',
+        });
+        const range = z4.discriminatedUnion('mode', [auto, custom]).meta({
+          id: 'AutoDiscEnum_Range',
+        });
+
+        const result = convert(z4.object({ range }) as any);
+
+        expect(result.shared.AutoDiscEnum_Range).toMatchObject({
+          discriminator: {
+            propertyName: 'mode',
+            mapping: {
+              auto: '#/components/schemas/AutoDiscEnum_Auto',
+              default: '#/components/schemas/AutoDiscEnum_Auto',
+              custom: '#/components/schemas/AutoDiscEnum_Custom',
+            },
+          },
+        });
+      });
+
+      test('maps a nested discriminated union variant', () => {
+        const plain = z4
+          .object({ color: z4.literal('value') })
+          .meta({ id: 'AutoDiscNested_Plain' });
+        const bar = z4
+          .discriminatedUnion('fill', [
+            z4.object({ color: z4.literal('bar'), fill: z4.literal('solid') }),
+            z4.object({ color: z4.literal('bar'), fill: z4.literal('gradient') }),
+          ])
+          .meta({ id: 'AutoDiscNested_Bar' });
+        const column = z4.discriminatedUnion('color', [plain, bar]).meta({
+          id: 'AutoDiscNested_Column',
+        });
+
+        const result = convert(z4.object({ column }) as any);
+
+        expect(result.shared.AutoDiscNested_Column).toMatchObject({
+          discriminator: {
+            propertyName: 'color',
+            mapping: {
+              value: '#/components/schemas/AutoDiscNested_Plain',
+              bar: '#/components/schemas/AutoDiscNested_Bar',
+            },
+          },
+        });
+      });
+
+      test.each([
+        ['optional', z4.literal('value').optional()],
+        ['default', z4.literal('value').default('value')],
+      ])('omits discriminator when a variant makes the property %s', (label, color) => {
+        const plain = z4.object({ color }).meta({ id: `AutoDiscNotRequired_${label}_Plain` });
+        const bar = z4.object({ color: z4.literal('bar'), max: z4.number() }).meta({
+          id: `AutoDiscNotRequired_${label}_Bar`,
+        });
+        const column = z4.discriminatedUnion('color', [plain, bar]).meta({
+          id: `AutoDiscNotRequired_${label}_Column`,
+        });
+
+        const result = convert(z4.object({ column }) as any);
+
+        expect(result.shared[`AutoDiscNotRequired_${label}_Column`]).not.toHaveProperty(
+          'discriminator'
+        );
+      });
+
+      test.each([
+        ['nullable', z4.literal('one').nullable(), z4.literal('two')],
+        ['numeric', z4.literal(1), z4.literal('1')],
+      ])('omits discriminator when a value is not a string (%s)', (label, first, second) => {
+        const a = z4.object({ kind: first }).meta({ id: `AutoDiscNonString_${label}_A` });
+        const b = z4.object({ kind: second }).meta({ id: `AutoDiscNonString_${label}_B` });
+        const union = z4.discriminatedUnion('kind', [a, b]).meta({
+          id: `AutoDiscNonString_${label}_Union`,
+        });
+
+        const result = convert(z4.object({ union }) as any);
+
+        expect(result.shared[`AutoDiscNonString_${label}_Union`]).not.toHaveProperty(
+          'discriminator'
+        );
       });
 
       test('explicit .meta({ openapi }) takes precedence over auto-detection', () => {
