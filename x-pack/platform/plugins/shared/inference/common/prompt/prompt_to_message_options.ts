@@ -6,11 +6,23 @@
  */
 
 import type { Model, Prompt, PromptVersion } from '@kbn/inference-common';
-import { MessageRole } from '@kbn/inference-common';
+import { MessageRole, createInferenceRequestError } from '@kbn/inference-common';
 import type { ChatCompleteOptions } from '@kbn/inference-common';
 import { omitBy, orderBy } from 'lodash';
-import Mustache from 'mustache';
 import { format } from 'util';
+import { renderBoundedMustache } from './bounded_mustache_render';
+import { MustacheRenderLimitError } from './mustache_render_limit_error';
+
+const renderTemplate = (template: string, input: unknown): string => {
+  try {
+    return renderBoundedMustache(template, input);
+  } catch (error) {
+    if (error instanceof MustacheRenderLimitError) {
+      throw createInferenceRequestError(error.message, 400);
+    }
+    throw error;
+  }
+};
 
 enum MatchType {
   default = 0,
@@ -62,7 +74,7 @@ export function promptToMessageOptions(
             role: MessageRole.User as const,
             content:
               'mustache' in template
-                ? Mustache.render(template.mustache.template, validatedInput)
+                ? renderTemplate(template.mustache.template, validatedInput)
                 : template.static.content,
           },
         ];
@@ -70,7 +82,7 @@ export function promptToMessageOptions(
   const system =
     !bestMatch.system || typeof bestMatch.system === 'string'
       ? bestMatch.system
-      : Mustache.render(bestMatch.system.mustache.template, validatedInput);
+      : renderTemplate(bestMatch.system.mustache.template, validatedInput);
 
   return {
     match: bestMatch,
