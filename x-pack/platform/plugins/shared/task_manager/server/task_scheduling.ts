@@ -37,6 +37,11 @@ import { getExecutionId } from './lib/get_execution_id';
 import { credentialMatchesRunAs } from './lib/service_account_credential';
 import type { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
 import {
+  EnsureScheduledOffsetMs,
+  EnsureScheduledResetThresholdSecs,
+  MaxEnsureScheduledOffsetSecs,
+} from './constants';
+import {
   taskManagerClaimNudgeTelemetry,
   type ClaimNudgeSource,
 } from './otel/claim_nudge_telemetry';
@@ -153,6 +158,8 @@ export class TaskScheduling {
   private readonly definitions: TaskTypeDictionary;
   private readonly taskPolling: TaskPollingLifecycle | undefined;
   private readonly claimNudgeService: TaskManagerClaimNudgeService | undefined;
+  private lastEnsureScheduledTime = 0;
+  private lastEnsuredScheduledOffset = 0;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -490,6 +497,7 @@ export class TaskScheduling {
     taskInstance: TaskInstanceWithId,
     options?: ScheduleOptions
   ): Promise<TaskInstanceWithId> {
+    taskInstance = this.applyEnsureScheduledOffset(taskInstance);
     // Scheduling grants the API keys before it writes the task, so scheduling an id that already
     // exists mints a key pair that the version conflict below then throws away. Callers treat this
     // as an idempotent "make sure this exists" and call it on a loop, so check first rather than
@@ -508,6 +516,30 @@ export class TaskScheduling {
       }
       throw err;
     }
+  }
+
+  /**
+   * Sets `runAt` (unless set explicitly or the task has an rrule schedule) to now plus an offset that
+   * grows with each call made within `EnsureScheduledResetThresholdSecs` of the previous one, and
+   * resets once calls are further apart.
+   */
+  private applyEnsureScheduledOffset(taskInstance: TaskInstanceWithId): TaskInstanceWithId {
+    const now = Date.now();
+    if (now - this.lastEnsureScheduledTime < EnsureScheduledResetThresholdSecs * 1000) {
+      this.lastEnsuredScheduledOffset += EnsureScheduledOffsetMs;
+    } else {
+      this.lastEnsuredScheduledOffset = 0;
+    }
+    if (this.lastEnsuredScheduledOffset > MaxEnsureScheduledOffsetSecs * 1000) {
+      this.lastEnsuredScheduledOffset = 0; // reset when we exceed the maximum allowed offset
+    }
+    this.lastEnsureScheduledTime = now;
+
+    // An rrule's first run is derived from the rule itself when `runAt` is not set.
+    if (taskInstance.runAt || taskInstance.schedule?.rrule) {
+      return taskInstance;
+    }
+    return { ...taskInstance, runAt: new Date(now + this.lastEnsuredScheduledOffset) };
   }
 
   private async updateScheduleOfExistingTask(

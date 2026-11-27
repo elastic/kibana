@@ -1,9 +1,61 @@
 {
-  "sha1": "0d147fef96dc6629f43c55d55ac37526955a9eb4",
+  "sha1": "628687a216e7335b3aaa21ed818e71b5a5639388",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "eaca21abd201d47-2b1cfb757958fce",
+      "title": "Task Manager ensureScheduled runAt offset spreads out the runAt of tasks scheduled in a burst",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/ensure_scheduled_offset.spec.ts",
+        "line": 78,
+        "column": 75
+      }
+    },
+    {
+      "id": "eaca21abd201d47-28dc6c206509d4e",
+      "title": "Task Manager ensureScheduled runAt offset resets the offset once calls are further apart than the threshold",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/ensure_scheduled_offset.spec.ts",
+        "line": 93,
+        "column": 25
+      }
+    },
+    {
+      "id": "eaca21abd201d47-42af84be5787317",
+      "title": "Task Manager ensureScheduled runAt offset does not change an explicit runAt, but still counts the call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/ensure_scheduled_offset.spec.ts",
+        "line": 109,
+        "column": 7
+      }
+    },
+    {
+      "id": "eaca21abd201d47-e527be532f9b03e",
+      "title": "Task Manager ensureScheduled runAt offset resets the offset to 0 once it would exceed the maximum",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/ensure_scheduled_offset.spec.ts",
+        "line": 120,
+        "column": 26
+      }
+    },
     {
       "id": "e2c048a8bafe4ea-bf0430867774bc4",
       "title": "Task Manager execution control routes _status: returns not paused by default",
