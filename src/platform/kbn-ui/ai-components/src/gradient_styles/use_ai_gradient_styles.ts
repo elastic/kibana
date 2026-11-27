@@ -155,19 +155,17 @@ const plainLabelCss = (euiTheme: UseEuiTheme['euiTheme'], color: string) => css`
   -webkit-background-clip: initial !important;
   color: ${color} !important;
   -webkit-text-fill-color: currentColor !important;
-
   @media (forced-colors: active) {
-    color: inherit !important;
-    -webkit-text-fill-color: currentColor !important;
+    color: CanvasText !important;
+    -webkit-text-fill-color: CanvasText !important;
   }
-
-  button:disabled & {
+  button:disabled &,
+  a:disabled & {
     color: ${euiTheme.colors.textDisabled} !important;
     -webkit-text-fill-color: ${euiTheme.colors.textDisabled} !important;
-
     @media (forced-colors: active) {
-      color: inherit !important;
-      -webkit-text-fill-color: currentColor !important;
+      color: GrayText !important;
+      -webkit-text-fill-color: GrayText !important;
     }
   }
 `;
