@@ -92,7 +92,9 @@ export const detectionSignalReadingSchema = lazySchema(() =>
     importance: z.number().min(0).max(100),
     /**
      * The ES|QL query that reproduces the reading. Required: the judge cites only rows the engine
-     * ran, and a reading without a query could never be confirmed, only marked inconclusive.
+     * ran, and a reading without a query could never be confirmed, only marked inconclusive. It
+     * carries its own absolute time bounds and never uses `NOW()`, so running it later reads the
+     * window the reading was about.
      */
     evidence_esql: z.string().min(1).max(MAX_TEXT_LENGTH),
     /** A supporting reading may join an open event but never opens one. */

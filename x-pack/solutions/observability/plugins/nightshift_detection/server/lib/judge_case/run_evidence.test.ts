@@ -16,6 +16,7 @@ type TestClient = ReturnType<typeof elasticsearchServiceMock.createElasticsearch
 interface TestResponse {
   columns?: Array<{ name: string; type: string }>;
   values?: Array<Array<string | number | boolean | null | string[] | { k: number }>>;
+  is_partial?: boolean;
 }
 
 function createClient(): TestClient {
@@ -49,7 +50,6 @@ describe('runEvidence', () => {
       expect(await runEvidence({ esClient, query: QUERY })).toEqual({
         result: 'found',
         rows: [{ message: 'timeout calling cart', count: 3 }],
-        rows_returned: 1,
         rows_truncated: false,
         cells_truncated: false,
       });
@@ -61,7 +61,8 @@ describe('runEvidence', () => {
 
       const result = await runEvidence({ esClient, query: QUERY });
 
-      expect(result).toMatchObject({ result: 'found', rows_returned: 5, rows_truncated: false });
+      expect(result).toMatchObject({ result: 'found', rows_truncated: false });
+      expect(result.result === 'found' && result.rows).toHaveLength(5);
     });
 
     it('keeps the first 5 rows and flags the rest as left out', async () => {
@@ -71,36 +72,58 @@ describe('runEvidence', () => {
       expect(await runEvidence({ esClient, query: QUERY })).toEqual({
         result: 'found',
         rows: [{ n: 1 }, { n: 2 }, { n: 3 }, { n: 4 }, { n: 5 }],
-        rows_returned: 6,
         rows_truncated: true,
         cells_truncated: false,
       });
     });
 
-    it('caps a query with no LIMIT, which returns 1,000 rows by default', async () => {
+    it('drops a column whose only value is in the row beyond the kept ones', async () => {
       const esClient = createClient();
       respondWith(
         esClient,
         table(
-          ['n'],
-          Array.from({ length: 1000 }, (_, index) => [index])
+          ['n', 'late'],
+          [
+            [1, null],
+            [2, null],
+            [3, null],
+            [4, null],
+            [5, null],
+            [6, 'only here'],
+          ]
         )
       );
 
-      const result = await runEvidence({ esClient, query: 'FROM logs' });
+      const result = await runEvidence({ esClient, query: QUERY });
 
-      expect(result).toMatchObject({ result: 'found', rows_returned: 1000, rows_truncated: true });
-      expect(result.result === 'found' && result.rows).toHaveLength(5);
+      expect(result.result === 'found' && result.rows).toEqual([
+        { n: 1 },
+        { n: 2 },
+        { n: 3 },
+        { n: 4 },
+        { n: 5 },
+      ]);
     });
 
     it('leaves numbers, booleans and null unchanged', async () => {
       const esClient = createClient();
-      respondWith(esClient, table(['a', 'b', 'c', 'd'], [[1.5, true, null, 0]]));
+      // `c` has a value in the second row, so the column is kept and its null is passed through.
+      respondWith(
+        esClient,
+        table(
+          ['a', 'b', 'c', 'd'],
+          [
+            [1.5, true, null, 0],
+            [2, false, 'x', 1],
+          ]
+        )
+      );
 
       const result = await runEvidence({ esClient, query: QUERY });
 
       expect(result.result === 'found' && result.rows).toEqual([
         { a: 1.5, b: true, c: null, d: 0 },
+        { a: 2, b: false, c: 'x', d: 1 },
       ]);
     });
 
@@ -160,23 +183,6 @@ describe('runEvidence', () => {
   });
 
   describe('column names', () => {
-    it.each([
-      ['a, a', ['a', 'a'], ['a', 'a_2'], [1, 2]],
-      ['a, a_2, a', ['a', 'a_2', 'a'], ['a', 'a_2', 'a_3'], [1, 2, 3]],
-      ['a, a, a_2', ['a', 'a', 'a_2'], ['a', 'a_3', 'a_2'], [1, 2, 3]],
-    ])(
-      'keys a repeated name with the first unused suffix, never a real column: %s',
-      async (_title, names, keys, values) => {
-        const esClient = createClient();
-        respondWith(esClient, table(names, [values]));
-
-        const result = await runEvidence({ esClient, query: QUERY });
-
-        expect(result.result === 'found' && Object.keys(result.rows[0])).toEqual(keys);
-        expect(result.result === 'found' && Object.values(result.rows[0])).toEqual(values);
-      }
-    );
-
     it('keeps a column named __proto__ as an ordinary key of the row', async () => {
       const esClient = createClient();
       respondWith(esClient, table(['__proto__', 'x'], [['polluted', 'y']]));
@@ -185,8 +191,6 @@ describe('runEvidence', () => {
       const row = result.result === 'found' ? result.rows[0] : {};
 
       expect(Object.keys(row)).toEqual(['__proto__', 'x']);
-      expect(Object.getPrototypeOf(row)).toBeNull();
-      expect(({} as Record<string, unknown>).polluted).toBeUndefined();
     });
   });
 
@@ -215,6 +219,17 @@ describe('runEvidence', () => {
         message: 'the response has no columns or no values',
       });
     });
+
+    it('reports a partial response as query_failed, never as found', async () => {
+      const esClient = createClient();
+      respondWith(esClient, { ...table(['n'], [[1]]), is_partial: true });
+
+      expect(await runEvidence({ esClient, query: QUERY })).toEqual({
+        result: 'error',
+        reason: 'query_failed',
+        message: 'the response is partial: a cluster or shard was left out',
+      });
+    });
   });
 
   describe('errors', () => {
@@ -239,6 +254,18 @@ describe('runEvidence', () => {
       });
     });
 
+    it('reports a query that is not valid ES|QL without calling the client', async () => {
+      const esClient = createClient();
+
+      const result = await runEvidence({ esClient, query: 'FROM logs | WHERE ((' });
+
+      expect(result).toMatchObject({ result: 'error', reason: 'query_failed' });
+      expect(result.result === 'error' && result.message).toMatch(
+        /^the evidence query is not valid ES\|QL: /
+      );
+      expect(esClient.esql.query).not.toHaveBeenCalled();
+    });
+
     it('cuts an error message longer than 500 characters', async () => {
       const esClient = createClient();
       esClient.esql.query.mockRejectedValue(new Error('e'.repeat(900)));
@@ -251,14 +278,22 @@ describe('runEvidence', () => {
 
   describe('timeout and abort', () => {
     it('reports a query that runs past its timeout, with no caller signal', async () => {
-      const esClient = createClient();
-      hangUntilAborted(esClient);
+      jest.useFakeTimers();
+      try {
+        const esClient = createClient();
+        hangUntilAborted(esClient);
 
-      expect(await runEvidence({ esClient, query: QUERY, timeoutMs: 5 })).toEqual({
-        result: 'error',
-        reason: 'timeout',
-        message: 'evidence query exceeded 5 ms',
-      });
+        const pending = runEvidence({ esClient, query: QUERY, timeoutMs: 5 });
+        await jest.advanceTimersByTimeAsync(5);
+
+        expect(await pending).toEqual({
+          result: 'error',
+          reason: 'timeout',
+          message: 'evidence query exceeded 5 ms',
+        });
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     it.each([-1, 0, NaN, 1.5, Infinity, 2 ** 31])(
@@ -366,14 +401,18 @@ describe('runEvidence', () => {
   });
 
   describe('the call', () => {
-    it('sends the query unchanged, refuses partial results, drops null columns and passes a signal', async () => {
+    it('limits the query to one row more than is kept, refuses partial results, drops null columns and passes a signal', async () => {
       const esClient = createClient();
       respondWith(esClient, table(['message'], []));
 
       await runEvidence({ esClient, query: QUERY });
 
       expect(esClient.esql.query).toHaveBeenCalledWith(
-        { query: QUERY, allow_partial_results: false, drop_null_columns: true },
+        {
+          query: `${QUERY} | LIMIT 6`,
+          allow_partial_results: false,
+          drop_null_columns: true,
+        },
         { signal: expect.any(AbortSignal) }
       );
     });

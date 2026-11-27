@@ -20,8 +20,9 @@ export const EVIDENCE_MAX_MESSAGE_LENGTH = 500;
 /**
  * Why an evidence query gave no result. Closed so the judge's case and the activity log can tell the
  * three apart without parsing a message.
- * - `query_failed`: Elasticsearch rejected the query, a shard failed, or the response was missing
- *   its `columns` or `values`. A shard failure is an error, never a result with fewer rows.
+ * - `query_failed`: the query is not valid ES|QL, Elasticsearch rejected it, a shard failed, the
+ *   response was partial (a skipped cluster or project), or it was missing its `columns` or
+ *   `values`. A shard failure is an error, never a result with fewer rows.
  * - `timeout`: the query ran longer than its timeout.
  * - `aborted`: the caller's signal fired, for example because the run ended.
  */
@@ -35,7 +36,10 @@ export type EvidenceErrorReason = (typeof EVIDENCE_ERROR_REASONS)[number];
  */
 export type EvidenceCell = string | number | boolean | null;
 
-/** A kept row, keyed by column name; a repeated column name gets a `_<n>` suffix, so no cell is lost. */
+/**
+ * A kept row, keyed by column name. It holds every column with a value in at least one kept row;
+ * ES|QL never returns two columns with the same name.
+ */
 export type EvidenceRow = Record<string, EvidenceCell>;
 
 /** The query returned rows. */
@@ -44,20 +48,17 @@ export interface FoundEvidence {
   /** At most {@link EVIDENCE_MAX_ROWS} rows, the first ones the query returned. */
   rows: EvidenceRow[];
   /**
-   * How many rows the query returned. It is not the number of matches when the query has its own
-   * `LIMIT`, so a query that stopped at its limit reads as that many rows, not as the true total.
+   * The query had more rows than `rows` holds. It is asked for one row more than is kept, so this
+   * says only that there were more, not how many: the counts are on the signal.
    */
-  rows_returned: number;
-  /** Rows beyond {@link EVIDENCE_MAX_ROWS} were left out, so more rows came back than `rows` holds. */
   rows_truncated: boolean;
   /** A cell was cut at {@link EVIDENCE_MAX_CELL_LENGTH} code units, so a value in `rows` is clipped. */
   cells_truncated: boolean;
 }
 
 /**
- * The query ran and returned nothing to read: no rows, or rows whose every cell was null (an
- * aggregate over no matches), which Elasticsearch returns with no columns. A real negative, unlike
- * an error.
+ * The query ran and returned nothing to read: no rows, or kept rows whose every cell was null (an
+ * aggregate over no matches). A real negative, unlike an error.
  */
 export interface EmptyEvidence {
   result: 'empty';

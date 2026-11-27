@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { esql, Parser } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { timeoutSignal } from '@kbn/std';
 import { getErrorMessage } from '../errors/get_error_message';
@@ -19,6 +20,16 @@ import type { EvidenceCell, EvidenceResult, EvidenceRow } from './evidence_types
 /** The largest delay `timeoutSignal` accepts; a larger one throws a `RangeError`. */
 const MAX_TIMEOUT_MS = 2 ** 31 - 1;
 
+/** Rows asked of Elasticsearch: the kept ones plus one, which only says whether there were more. */
+const QUERY_ROW_LIMIT = EVIDENCE_MAX_ROWS + 1;
+
+/** What a run cancelled before or while its query ran gets. */
+const ABORTED: EvidenceResult = {
+  result: 'error',
+  reason: 'aborted',
+  message: 'evidence query aborted',
+};
+
 /**
  * A cell as the response may carry it. The client types a cell as a scalar, but ES|QL also returns
  * arrays for multi-value fields and objects for some types.
@@ -29,12 +40,13 @@ type EsqlCell = EvidenceCell | readonly EsqlCell[] | { readonly [key: string]: E
 interface EsqlTable {
   columns?: Array<{ name: string }>;
   values?: EsqlCell[][];
+  is_partial?: boolean;
 }
 
 export interface RunEvidenceParams {
   /** The client that reads customer data: the space's detection service account. */
   esClient: ElasticsearchClient;
-  /** A signal's `evidence_esql`, run as given. */
+  /** A signal's `evidence_esql`; it runs with one more `LIMIT` than the rows that are kept. */
   query: string;
   /** Stops the query when the run is out of time or cancelled. */
   abortSignal?: AbortSignal;
@@ -56,6 +68,12 @@ const cutText = (text: string, maxLength: number): { text: string; cut: boolean 
   return { text: splitsPair ? kept.slice(0, -1) : kept, cut: true };
 };
 
+const queryFailed = (message: string): EvidenceResult => ({
+  result: 'error',
+  reason: 'query_failed',
+  message: cutText(message, EVIDENCE_MAX_MESSAGE_LENGTH).text,
+});
+
 /** The delay to use: `timeoutSignal` throws for anything but an integer in `0..2^31 - 1`. */
 const resolveTimeoutMs = (timeoutMs: number | undefined): number =>
   timeoutMs !== undefined &&
@@ -64,25 +82,6 @@ const resolveTimeoutMs = (timeoutMs: number | undefined): number =>
   timeoutMs <= MAX_TIMEOUT_MS
     ? timeoutMs
     : EVIDENCE_TIMEOUT_MS;
-
-/**
- * One key per column. A repeated name takes the first `<name>_<n>` (n >= 2) that is not a key yet
- * and is not the name of a later column, so no cell overwrites another.
- */
-const getRowKeys = (names: string[]): string[] => {
-  const taken = new Set<string>();
-  return names.map((name, index) => {
-    const later = names.slice(index + 1);
-    let key = name;
-    let suffix = 2;
-    while (taken.has(key) || (key !== name && later.includes(key))) {
-      key = `${name}_${suffix}`;
-      suffix += 1;
-    }
-    taken.add(key);
-    return key;
-  });
-};
 
 const shapeCell = (value: EsqlCell | undefined): { cell: EvidenceCell; cut: boolean } => {
   if (value === undefined || value === null) {
@@ -99,28 +98,35 @@ const shapeCell = (value: EsqlCell | undefined): { cell: EvidenceCell; cut: bool
 };
 
 const toResult = (table: EsqlTable): EvidenceResult => {
-  const { columns, values } = table;
-  if (!Array.isArray(columns) || !Array.isArray(values)) {
-    return {
-      result: 'error',
-      reason: 'query_failed',
-      message: 'the response has no columns or no values',
-    };
+  const { columns, values, is_partial: isPartial } = table;
+  // A skipped remote cluster or linked project does not fail the query, even with
+  // `allow_partial_results: false`: the response is marked partial instead.
+  if (isPartial) {
+    return queryFailed('the response is partial: a cluster or shard was left out');
   }
-  // With `drop_null_columns`, rows whose every cell is null come back with no columns at all.
-  if (values.length === 0 || columns.length === 0) {
+  if (!Array.isArray(columns) || !Array.isArray(values)) {
+    return queryFailed('the response has no columns or no values');
+  }
+
+  const keptValues = values.slice(0, EVIDENCE_MAX_ROWS);
+  // Elasticsearch drops the columns that are null in every returned row, the extra row included,
+  // so a column with a value only in that row is dropped here.
+  const keptColumns = columns
+    .map(({ name }, index) => ({ name, index }))
+    .filter(({ index }) => keptValues.some((rowValues) => (rowValues[index] ?? null) !== null));
+  // No rows, or rows whose every cell is null, such as an aggregate over no matches.
+  if (keptColumns.length === 0) {
     return { result: 'empty' };
   }
 
-  const keys = getRowKeys(columns.map(({ name }) => name));
   let cellsTruncated = false;
-  const rows = values.slice(0, EVIDENCE_MAX_ROWS).map((rowValues) => {
+  const rows = keptValues.map((rowValues) => {
     // No prototype, so a column named `__proto__` is a key of the row like any other.
     const row: EvidenceRow = Object.create(null);
-    keys.forEach((key, index) => {
+    keptColumns.forEach(({ name, index }) => {
       const { cell, cut } = shapeCell(rowValues[index]);
       cellsTruncated = cellsTruncated || cut;
-      row[key] = cell;
+      row[name] = cell;
     });
     return row;
   });
@@ -128,7 +134,6 @@ const toResult = (table: EsqlTable): EvidenceResult => {
   return {
     result: 'found',
     rows,
-    rows_returned: values.length,
     rows_truncated: values.length > EVIDENCE_MAX_ROWS,
     cells_truncated: cellsTruncated,
   };
@@ -137,8 +142,9 @@ const toResult = (table: EsqlTable): EvidenceResult => {
 /**
  * Runs a signal's evidence query and returns a bounded result: at most {@link EVIDENCE_MAX_ROWS}
  * rows, with cells cut at {@link EVIDENCE_MAX_CELL_LENGTH}. It never throws: a failure, a timeout
- * and an abort are results. The query is run as given and a shard failure fails it, so a result
- * with fewer rows than the query matched never passes for the whole.
+ * and an abort are results. The query asks for one row more than is kept, and a shard failure or
+ * a partial response fails it, so a result with fewer rows than the query matched never passes
+ * for the whole.
  */
 export const runEvidence = async ({
   esClient,
@@ -146,15 +152,15 @@ export const runEvidence = async ({
   abortSignal,
   timeoutMs,
 }: RunEvidenceParams): Promise<EvidenceResult> => {
-  const effectiveTimeoutMs = resolveTimeoutMs(timeoutMs);
-  const aborted: EvidenceResult = {
-    result: 'error',
-    reason: 'aborted',
-    message: 'evidence query aborted',
-  };
   if (abortSignal?.aborted) {
-    return aborted;
+    return ABORTED;
   }
+  // `Parser.parse` never throws; the composer does on a syntax error.
+  const { errors } = Parser.parse(query);
+  if (errors.length > 0) {
+    return queryFailed(`the evidence query is not valid ES|QL: ${errors[0].message}`);
+  }
+  const effectiveTimeoutMs = resolveTimeoutMs(timeoutMs);
 
   // The timeout is its own signal, so a timeout and a cancelled run tell apart by which one fired.
   // The query gets one controller that either of them aborts, not `AbortSignal.any`, which keeps
@@ -167,9 +173,14 @@ export const runEvidence = async ({
     abortSignal?.addEventListener('abort', abortQuery, { once: true });
     timeout.addEventListener('abort', abortQuery, { once: true });
     // Elasticsearch drops the columns that are null in every row before it responds: without a
-    // `KEEP`, a log source returns every mapped field, and most are null in any given minute.
+    // `KEEP`, a log source returns every mapped field, and most are null in any given minute. The
+    // limit keeps both the rows it sends and the columns that survive to what is kept.
     const response: EsqlTable = await esClient.esql.query(
-      { query, allow_partial_results: false, drop_null_columns: true },
+      {
+        query: esql(query).limit(QUERY_ROW_LIMIT).print('basic'),
+        allow_partial_results: false,
+        drop_null_columns: true,
+      },
       { signal: controller.signal }
     );
     return toResult(response);
@@ -177,7 +188,7 @@ export const runEvidence = async ({
     // By which signal fired, not by the error: an abort and a response too large are both
     // `RequestAbortedError`. A cancelled run wins over a timeout.
     if (abortSignal?.aborted) {
-      return aborted;
+      return ABORTED;
     }
     if (timeout.aborted) {
       return {
@@ -186,11 +197,7 @@ export const runEvidence = async ({
         message: `evidence query exceeded ${effectiveTimeoutMs} ms`,
       };
     }
-    return {
-      result: 'error',
-      reason: 'query_failed',
-      message: cutText(getErrorMessage(error), EVIDENCE_MAX_MESSAGE_LENGTH).text,
-    };
+    return queryFailed(getErrorMessage(error));
   } finally {
     // So a query that settles early does not leave the deadline timer, or a listener, behind.
     abortSignal?.removeEventListener('abort', abortQuery);
