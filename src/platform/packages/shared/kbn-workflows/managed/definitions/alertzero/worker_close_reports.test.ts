@@ -27,8 +27,8 @@ import type { YamlStep } from './worker_reports.test_helpers';
  *
  * Workers start reporting one at a time, each in its own change. The guard checks only the
  * workflows a Worker has claimed by adding a report step, and ignores the rest. Each Worker also declares the workflows it reports from in
- * its own `shipped_yaml_contract.<worker>.fixture.ts` in the AlertZero plugin, whose
- * `shipped_yaml_contract.test.ts` fails unless the declared workflows are exactly the ones with a
+ * its own `server/workers/<worker>/shipped_yaml_contract.fixture.ts` in the AlertZero plugin, and
+ * the plugin's `shipped_yaml_contract.test.ts` fails unless the declared workflows are exactly the ones with a
  * report step. So a claimed workflow cannot lose its last report unnoticed, and no shared list
  * changes when a Worker starts reporting. Each Worker's `worker_reports.<worker>.test.ts` then
  * pins every close in its workflows and the report that follows it.

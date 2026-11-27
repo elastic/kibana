@@ -23,23 +23,27 @@ export type {
 } from './constants';
 export { ALERTZERO_TELEMETRY_EVENT_TYPES } from './event_types';
 export type {
-  AlertZeroAdWorkerAnalysisCompletedPayload,
-  AlertZeroAdWorkerHandoffResolvedPayload,
-  AlertZeroAdWorkerReviewStartedPayload,
-  AlertZeroAdWorkerRunCompletedPayload,
-  AlertZeroAlertTriageBatchClassifiedPayload,
-  AlertZeroAlertTriageBatchGroupedPayload,
-  AlertZeroAlertTriageClosureResolvedPayload,
-  AlertZeroEndpointAnalysisCompletedPayload,
   AlertZeroEnvelope,
-  AlertZeroHuntReportCompletedPayload,
-  AlertZeroRuleCoverageReviewCompletedPayload,
-  AlertZeroRuleTuningReviewCompletedPayload,
   AlertZeroTelemetryEventPayloads,
   AlertZeroWorkerInvestigationClosedPayload,
   AlertZeroWorkerInvestigationReopenedPayload,
   AlertZeroWorkerRunCompletedPayload,
 } from './event_types';
+export type {
+  AlertZeroAdWorkerAnalysisCompletedPayload,
+  AlertZeroAdWorkerHandoffResolvedPayload,
+  AlertZeroAdWorkerReviewStartedPayload,
+  AlertZeroAdWorkerRunCompletedPayload,
+} from '../workers/attack_discovery/telemetry';
+export type {
+  AlertZeroAlertTriageBatchClassifiedPayload,
+  AlertZeroAlertTriageBatchGroupedPayload,
+  AlertZeroAlertTriageClosureResolvedPayload,
+} from '../workers/alert_triage/telemetry';
+export type { AlertZeroRuleTuningReviewCompletedPayload } from '../workers/rule_tuning/telemetry';
+export type { AlertZeroRuleCoverageReviewCompletedPayload } from '../workers/rule_coverage/telemetry';
+export type { AlertZeroHuntReportCompletedPayload } from '../workers/continuous_threat_hunt/telemetry';
+export type { AlertZeroEndpointAnalysisCompletedPayload } from '../workers/endpoint_analysis/telemetry';
 export { readTelemetryOptIn } from './read_telemetry_opt_in';
 export { registerAlertZeroTelemetryEvents } from './register_telemetry_events';
 export { createAlertZeroTelemetryReporter, safeReportEvent } from './safe_report_event';

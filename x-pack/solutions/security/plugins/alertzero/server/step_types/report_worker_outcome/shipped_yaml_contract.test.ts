@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { join } from 'path';
 import {
   getWorkflowsWithReportSteps,
   loadWorkerWorkflowContracts,
@@ -14,9 +15,9 @@ import {
 /**
  * The contract between the shipped Worker YAML and the report step's input schema. Each Worker
  * declares the workflows it reports from, with runs that exercise each report, in its own
- * `shipped_yaml_contract.<worker>.fixture.ts` module (`SHIPPED_YAML_CONTRACTS`), and its
- * `shipped_yaml_contract.<worker>.test.ts` validates them. This test finds those modules by file
- * name, so Workers can start reporting in any order without editing a shared list.
+ * `server/workers/<worker>/shipped_yaml_contract.fixture.ts` module (`SHIPPED_YAML_CONTRACTS`),
+ * and the `shipped_yaml_contract.test.ts` next to it validates them. This test finds those modules
+ * by file name, so Workers can start reporting in any order without editing a shared list.
  *
  * The declared workflows are also the ones a Worker claims for the close guard,
  * `worker_close_reports.test.ts` in `@kbn/workflows/managed`: it checks the closes of every
@@ -27,7 +28,7 @@ import {
  * without checking anything.
  */
 
-const contractsLoaded = loadWorkerWorkflowContracts(__dirname);
+const contractsLoaded = loadWorkerWorkflowContracts(join(__dirname, '../../workers'));
 
 describe('shipped Worker reports and the reportWorkerOutcome schema', () => {
   it('covers every AlertZero workflow with a report step, and only those', async () => {

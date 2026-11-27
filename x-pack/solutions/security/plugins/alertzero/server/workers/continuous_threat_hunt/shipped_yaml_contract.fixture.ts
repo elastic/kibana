@@ -11,8 +11,11 @@ import {
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID } from '@kbn/alertzero-common';
-import type { WorkerWorkflowContract } from './shipped_yaml_contract.test_helpers';
-import { CHANGED_STATUS, INVESTIGATION_ID } from './shipped_yaml_contract.test_helpers';
+import type { WorkerWorkflowContract } from '../../step_types/report_worker_outcome/shipped_yaml_contract.test_helpers';
+import {
+  CHANGED_STATUS,
+  INVESTIGATION_ID,
+} from '../../step_types/report_worker_outcome/shipped_yaml_contract.test_helpers';
 
 /**
  * The Continuous Threat Hunt Worker's workflows with report steps, and runs where every report
