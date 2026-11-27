@@ -33,17 +33,6 @@ const renderWriter = (writer: KiGovernanceWriter) => {
 };
 
 describe('ViewKiSidebarWriterProvenance', () => {
-  it('renders parsed workflow URI without agent metadata', () => {
-    renderWriter({ uri: 'workflow://my-wf', metadata: {} });
-
-    expect(screen.getByText('workflow')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'my-wf' })).toHaveAttribute(
-      'href',
-      '/app/workflows/my-wf'
-    );
-    expect(screen.queryByText('agent')).not.toBeInTheDocument();
-  });
-
   it('renders parsed workflow URI with agent metadata', () => {
     renderWriter({
       uri: 'workflow://my-wf',
@@ -58,21 +47,6 @@ describe('ViewKiSidebarWriterProvenance', () => {
       'href',
       '/app/workflows/my-wf'
     );
-  });
-
-  it('renders crawler URI without a link', () => {
-    renderWriter({ uri: 'crawler://sml', metadata: {} });
-
-    expect(screen.getByText('crawler')).toBeInTheDocument();
-    expect(screen.getByText('sml')).toBeInTheDocument();
-    expect(screen.queryByRole('link')).not.toBeInTheDocument();
-  });
-
-  it('renders unparsed URI without agent metadata', () => {
-    renderWriter({ uri: 'not-a-uri', metadata: {} });
-
-    expect(screen.getByText('not-a-uri')).toBeInTheDocument();
-    expect(screen.queryByRole('link')).not.toBeInTheDocument();
   });
 
   it('renders unparsed URI with agent metadata', () => {

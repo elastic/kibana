@@ -19,8 +19,3 @@ const kiFormattedDateSentenceStartFirstLetterClassName = css`
 `;
 
 export const KI_FORMATTED_DATE_SENTENCE_START_CLASS_NAME = `eui-displayInlineBlock ${kiFormattedDateSentenceStartFirstLetterClassName}`;
-
-export const WRITER_URI_PATTERN = /^([^:]+):\/\/(.+)$/;
-
-export const KI_WRITER_URI_SCHEME_WORKFLOW = 'workflow';
-export const KI_WRITER_URI_SCHEME_TOOL = 'tool';

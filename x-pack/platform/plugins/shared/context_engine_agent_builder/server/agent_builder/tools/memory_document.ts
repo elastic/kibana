@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { conversationUri } from '@kbn/context-engine-plugin/common/ki_uri';
 import type { StoredKi } from '@kbn/context-engine-plugin/server/ai_indices/ki_revision';
 
 interface MemoryReference {
@@ -75,7 +76,7 @@ export const createConversationReferences = (
 
   return [
     {
-      uri: `conversation://${conversationId}`,
+      uri: conversationUri(conversationId),
       relation: 'derived_from',
       description: 'The Agent Builder conversation where this memory was recorded.',
     },

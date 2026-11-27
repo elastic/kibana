@@ -5,13 +5,8 @@
  * 2.0.
  */
 
+import type { KiPrivilegeGroup } from '../../common/http_api/knowledge_indicators';
 import { shortHash } from './ids';
-
-export interface KiPrivilegeGroup {
-  space: string;
-  name?: string[];
-  count?: number;
-}
 
 export interface KiPermissions {
   kibana?: { privileges?: KiPrivilegeGroup[] };

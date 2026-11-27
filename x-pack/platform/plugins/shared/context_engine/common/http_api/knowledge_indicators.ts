@@ -83,6 +83,19 @@ export interface KiDocumentReference {
   description?: string;
 }
 
+export interface KiPrivilegeGroup {
+  space: string;
+  name?: string[];
+  count?: number;
+}
+
+export interface KiDocumentPermissions {
+  kibana?: {
+    /** Elasticsearch returns a single object as stored when a document was indexed with one. */
+    privileges?: KiPrivilegeGroup | KiPrivilegeGroup[];
+  };
+}
+
 export interface KiDocument {
   id?: string;
   type?: string;
@@ -96,6 +109,7 @@ export interface KiDocument {
   attributes?: Record<string, KiJsonValue>;
   references?: KiDocumentReference[];
   governance?: KiDocumentGovernance;
+  permissions?: KiDocumentPermissions;
 }
 
 export interface GetKiResponse {

@@ -9,14 +9,11 @@ import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
+import { parseKiUri } from '../../../../../../common/ki_uri';
 import { useKibana } from '../../../../hooks/use_kibana';
 import type { KiGovernanceWriter } from './view_ki_document_helpers';
-import {
-  getKiWriterAgentManageHref,
-  getKiWriterUriHref,
-  getWriterAgentId,
-  parseWriterUri,
-} from './view_ki_writer_helpers';
+import { ViewKiSidebarUriLabel } from './view_ki_uri_label';
+import { getKiWriterAgentManageHref, getWriterAgentId } from './view_ki_writer_helpers';
 
 interface ViewKiSidebarWriterValueProps {
   value: string;
@@ -45,15 +42,11 @@ export const ViewKiSidebarWriterProvenance = ({ writer }: ViewKiSidebarWriterPro
   } = useKibana();
   const { getUrlForApp } = application;
 
-  const parsed = parseWriterUri(writer.uri);
+  const parsed = parseKiUri(writer.uri);
   const agentId = getWriterAgentId(writer.metadata);
   const agentHref = useMemo(
     () => (agentId ? getKiWriterAgentManageHref(getUrlForApp, agentId) : undefined),
     [agentId, getUrlForApp]
-  );
-  const writerHref = useMemo(
-    () => getKiWriterUriHref(getUrlForApp, writer.uri),
-    [getUrlForApp, writer.uri]
   );
 
   if (!writer.uri) {
@@ -68,18 +61,7 @@ export const ViewKiSidebarWriterProvenance = ({ writer }: ViewKiSidebarWriterPro
       })
     : undefined;
 
-  const writerNode = parsed ? (
-    <FormattedMessage
-      id="xpack.contextEngine.viewKi.writerProvenance.schemeDetail"
-      defaultMessage="{scheme} {identifier}"
-      values={{
-        scheme: <span>{parsed.scheme.toLowerCase()}</span>,
-        identifier: <ViewKiSidebarWriterValue value={parsed.identifier} href={writerHref} />,
-      }}
-    />
-  ) : (
-    <ViewKiSidebarWriterValue value={writer.uri} href={writerHref} />
-  );
+  const writerNode = <ViewKiSidebarUriLabel uri={writer.uri} />;
 
   const writerTooltip = parsed
     ? i18n.translate('xpack.contextEngine.viewKi.writerProvenance.schemeTooltip', {

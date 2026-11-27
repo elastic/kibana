@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { RELATIONSHIP_KI_TYPE } from '../../common/dreaming';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
-import { kiUri } from '../dreaming/ids';
+import { kiUri } from '../../common/ki_uri';
 import { isKiDeleted, type StoredKi } from './ki_revision';
 
 const PAGE_SIZE = 500;

@@ -6,6 +6,7 @@
  */
 
 import { createHash } from 'crypto';
+import { kiIdFromUri, kiUri } from '../../common/ki_uri';
 
 const MAX_SLUG_LENGTH = 96;
 const HASH_LENGTH = 16;
@@ -52,14 +53,6 @@ export const relationshipId = (key: string): string => `relationship-${shortHash
 /** The key of a batch of memories. */
 export const batchKeyOf = (memoryIds: Iterable<string>): string =>
   shortHash(...[...memoryIds].sort());
-
-const KI_URI_PREFIX = 'ki://';
-
-/** The URI of a KI in the same AI index. */
-export const kiUri = (kiId: string): string => `${KI_URI_PREFIX}${kiId}`;
-
-export const kiIdFromUri = (uri: string): string | undefined =>
-  uri.startsWith(KI_URI_PREFIX) ? uri.slice(KI_URI_PREFIX.length) : undefined;
 
 /** Memory ids of session memories: the prefix, then the id the memory was saved under. */
 export const SESSION_MEMORY_ID_PREFIX = 'session-memory:';

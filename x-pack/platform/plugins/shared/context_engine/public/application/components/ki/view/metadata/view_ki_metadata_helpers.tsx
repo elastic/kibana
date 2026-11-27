@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiBadgeGroup } from '@elastic/eui';
+import { EuiBadge, EuiBadgeGroup, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { KiDocument } from '../../../../../../common/http_api/knowledge_indicators';
+import type {
+  KiDocument,
+  KiPrivilegeGroup,
+} from '../../../../../../common/http_api/knowledge_indicators';
 import { KiFormattedDate } from '../../shared/ki_formatted_date';
 import type { KiGovernanceView } from './view_ki_document_helpers';
 import { KiMetadataProvenanceRow } from './view_ki_metadata_provenance_row';
 import { KI_FORMATTED_DATE_SENTENCE_START_CLASS_NAME } from '../view_ki_constants';
 import { ViewKiSidebarBreakableText } from './view_ki_sidebar_primitives';
-
 export interface KiMetadataListItem {
   title: string;
   description: React.ReactElement | string;
@@ -24,6 +26,19 @@ export const when = <T,>(condition: boolean, value: () => T): T[] => (condition 
 export const whenDefined = <T,>(value: T | undefined, build: (defined: T) => KiMetadataListItem) =>
   value !== undefined ? [build(value)] : [];
 
+const toPrivilegeList = (
+  privileges: KiPrivilegeGroup | KiPrivilegeGroup[] | undefined
+): KiPrivilegeGroup[] => {
+  if (!privileges) {
+    return [];
+  }
+  return Array.isArray(privileges) ? privileges : [privileges];
+};
+
+const distinctVisibleSpaces = (privileges: KiPrivilegeGroup[]): string[] => [
+  ...new Set(privileges.map((privilege) => privilege.space).filter((space) => space !== '*')),
+];
+
 export const buildKiMetadataListItems = (
   kiId: string,
   document: KiDocument,
@@ -32,6 +47,10 @@ export const buildKiMetadataListItems = (
   const tags = Array.isArray(document.tags) ? document.tags : [];
   const { description, updated_at: updatedAt, expires_at: expiresAt } = document;
   const createdAt = document['@timestamp'];
+  const privileges = toPrivilegeList(document.permissions?.kibana?.privileges);
+  const visibleInAllSpaces =
+    privileges.length === 0 || privileges.some((privilege) => privilege.space === '*');
+  const visibleInSpaces = distinctVisibleSpaces(privileges);
 
   return [
     ...whenDefined(kiId, () => ({
@@ -60,6 +79,31 @@ export const buildKiMetadataListItems = (
       }),
       description: <KiMetadataProvenanceRow at={updatedAt} writer={governance.updatedBy} />,
     })),
+    {
+      title: i18n.translate('xpack.contextEngine.viewKi.metadata.visibleIn', {
+        defaultMessage: 'Visible in spaces',
+      }),
+      description: (
+        <div data-test-subj="contextViewKiVisibleIn">
+          {visibleInAllSpaces ? (
+            i18n.translate('xpack.contextEngine.viewKi.metadata.visibleInAllSpaces', {
+              defaultMessage: 'All spaces',
+            })
+          ) : (
+            <>
+              <EuiSpacer size="xs" />
+              <EuiBadgeGroup>
+                {visibleInSpaces.map((space) => (
+                  <EuiBadge key={space} color="hollow">
+                    {space}
+                  </EuiBadge>
+                ))}
+              </EuiBadgeGroup>
+            </>
+          )}
+        </div>
+      ),
+    },
     ...whenDefined(expiresAt, (at) => ({
       title: i18n.translate('xpack.contextEngine.viewKi.metadata.expiresAt', {
         defaultMessage: 'Expires at',

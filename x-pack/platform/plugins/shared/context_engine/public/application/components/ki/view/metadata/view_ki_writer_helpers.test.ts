@@ -5,30 +5,7 @@
  * 2.0.
  */
 
-import {
-  getKiWriterAgentManageHref,
-  getKiWriterUriHref,
-  getWriterAgentId,
-  parseWriterUri,
-} from './view_ki_writer_helpers';
-
-describe('parseWriterUri', () => {
-  it('parses scheme and identifier', () => {
-    expect(parseWriterUri('workflow://quick-test-metadata-2')).toEqual({
-      scheme: 'workflow',
-      identifier: 'quick-test-metadata-2',
-    });
-    expect(parseWriterUri('tool://platform.context_engine.remember')).toEqual({
-      scheme: 'tool',
-      identifier: 'platform.context_engine.remember',
-    });
-  });
-
-  it('returns undefined for non-uri values', () => {
-    expect(parseWriterUri('not-a-uri')).toBeUndefined();
-    expect(parseWriterUri('workflow://')).toBeUndefined();
-  });
-});
+import { getKiWriterAgentManageHref, getWriterAgentId } from './view_ki_writer_helpers';
 
 describe('getWriterAgentId', () => {
   it('reads agent_id from writer metadata', () => {
@@ -36,26 +13,6 @@ describe('getWriterAgentId', () => {
     expect(getWriterAgentId({ run_id: 'run-1', agent_id: 42 })).toBe('42');
     expect(getWriterAgentId({ run_id: 'run-1', agent_id: '' })).toBeUndefined();
     expect(getWriterAgentId({ run_id: 'run-1' })).toBeUndefined();
-  });
-});
-
-describe('getKiWriterUriHref', () => {
-  const getUrlForApp = (appId: string, options?: { path?: string }) =>
-    `/app/${appId}${options?.path ?? ''}`;
-
-  it('maps workflow and tool URIs to app paths', () => {
-    expect(getKiWriterUriHref(getUrlForApp, 'workflow://quick-test-metadata-2')).toBe(
-      '/app/workflows/quick-test-metadata-2'
-    );
-    expect(getKiWriterUriHref(getUrlForApp, 'tool://platform.context_engine.remember')).toBe(
-      '/app/agent_builder/manage/tools/platform.context_engine.remember'
-    );
-  });
-
-  it('returns undefined for non-linkable schemes', () => {
-    expect(getKiWriterUriHref(getUrlForApp, 'https://example.com/wf')).toBeUndefined();
-    expect(getKiWriterUriHref(getUrlForApp, 'crawler://sml')).toBeUndefined();
-    expect(getKiWriterUriHref(getUrlForApp, 'custom://foo')).toBeUndefined();
   });
 });
 

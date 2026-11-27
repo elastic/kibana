@@ -6,20 +6,39 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
+import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { render, screen, within } from '@testing-library/react';
 import React from 'react';
 import type { KiDocument } from '../../../../../../common/http_api/knowledge_indicators';
+import { useSelectedKi } from '../../../../hooks/use_selected_ki';
 import { ViewKiMetadataPanel } from './view_ki_metadata_panel';
+
+jest.mock('../../../../hooks/use_selected_ki', () => ({
+  useSelectedKi: jest.fn(),
+}));
+
+const mockUseSelectedKi = jest.mocked(useSelectedKi);
 
 const renderPanel = (document: KiDocument) =>
   render(
     <I18nProvider>
       <EuiProvider>
-        <ViewKiMetadataPanel kiId="ki-1" document={document} />
+        <KibanaContextProvider services={coreMock.createStart()}>
+          <ViewKiMetadataPanel kiId="ki-1" document={document} />
+        </KibanaContextProvider>
       </EuiProvider>
     </I18nProvider>
   );
+
+beforeEach(() => {
+  mockUseSelectedKi.mockReturnValue({
+    selectedKi: { kiId: 'ki-1', index: 'idx' },
+    selectKi: jest.fn(),
+    clearSelectedKi: jest.fn(),
+  });
+});
 
 describe('ViewKiMetadataPanel', () => {
   it('renders description when present', () => {
@@ -60,5 +79,20 @@ describe('ViewKiMetadataPanel', () => {
     });
 
     expect(screen.getByTestId('contextViewKiAttributesSection')).toBeInTheDocument();
+  });
+
+  it('renders references section when document has references', () => {
+    renderPanel({
+      references: [{ uri: 'ki://ref-1', relation: 'relates_to' }],
+    });
+
+    expect(screen.getByTestId('contextViewKiReferencesSection')).toBeInTheDocument();
+    expect(screen.getByTestId('contextViewKiReferenceLink')).toBeInTheDocument();
+  });
+
+  it('omits references section when references are empty', () => {
+    renderPanel({ references: [] });
+
+    expect(screen.queryByTestId('contextViewKiReferencesSection')).not.toBeInTheDocument();
   });
 });

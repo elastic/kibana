@@ -219,10 +219,13 @@ const DREAMING_AUTOMATION_WORKFLOW_ID_PREFIXES: readonly string[] = [
   'system-context-engine-relationships-',
 ];
 
+/** Whether a workflow id is one of the workflows dreaming attaches to an AI index. */
+export const isDreamingWorkflowId = (workflowId: string): boolean =>
+  DREAMING_AUTOMATION_WORKFLOW_ID_PREFIXES.some((prefix) => workflowId.startsWith(prefix));
+
 /** Whether an automation is one of the workflows dreaming attaches to an AI index. */
 export const isDreamingAutomation = ({ type, value }: { type: string; value: string }): boolean =>
-  type === 'workflow' &&
-  DREAMING_AUTOMATION_WORKFLOW_ID_PREFIXES.some((prefix) => value.startsWith(prefix));
+  type === 'workflow' && isDreamingWorkflowId(value);
 
 /** Whether a config builds anything at all: at least one fact or entity type. */
 export const dreamingBuildsAnything = (config: DreamingTypesConfig): boolean => {

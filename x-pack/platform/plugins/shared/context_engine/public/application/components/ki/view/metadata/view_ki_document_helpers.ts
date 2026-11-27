@@ -10,11 +10,21 @@ import {
   isKiJsonRecord,
   readKiDocumentLifecycleStatus,
 } from '../../../../../../common/ki_lifecycle_status';
+import { conversationIdFromUri, kiIdFromUri } from '../../../../../../common/ki_uri';
 import type {
   KiJsonValue,
   KiDocument,
+  KiDocumentReference,
 } from '../../../../../../common/http_api/knowledge_indicators';
-import { type KiLifecycleStatus } from '../../../../../../common/step_types/ki';
+import {
+  type KiLifecycleStatus,
+  type KiReferenceRelation,
+} from '../../../../../../common/step_types/ki';
+import {
+  getKiAttributeLabel,
+  isKiDateAttribute,
+  isKiHiddenAttribute,
+} from './view_ki_attribute_labels';
 
 export interface KiGovernanceWriter {
   uri: string;
@@ -89,15 +99,82 @@ export const formatKiJsonValueAsString = (value: KiJsonValue): string => {
   return '';
 };
 
+export type KiReferenceItem =
+  | { kind: 'ki'; id: string; uri: string; description?: string }
+  | { kind: 'conversation'; id: string; uri: string; description?: string }
+  | { kind: 'other'; uri: string; description?: string };
+
+/** Groups references whose relation is missing or not one of the known relations. */
+export const OTHER_REFERENCE_RELATION = 'other';
+
+export interface KiReferenceGroup {
+  relation: KiReferenceRelation | typeof OTHER_REFERENCE_RELATION;
+  items: KiReferenceItem[];
+}
+
+const toKiReferenceItem = (uri: string, description?: string): KiReferenceItem => {
+  const kiId = kiIdFromUri(uri);
+  if (kiId !== undefined) {
+    return { kind: 'ki', id: kiId, uri, description };
+  }
+  const conversationId = conversationIdFromUri(uri);
+  if (conversationId !== undefined) {
+    return { kind: 'conversation', id: conversationId, uri, description };
+  }
+  return { kind: 'other', uri, description };
+};
+
+const REFERENCE_GROUP_ORDER: readonly KiReferenceRelation[] = [
+  'derived_from',
+  'relates_to',
+  'supersedes',
+];
+
+const isKnownRelation = (relation: string | undefined): boolean =>
+  REFERENCE_GROUP_ORDER.some((knownRelation) => knownRelation === relation);
+
+/**
+ * Groups references by relation in a fixed order, followed by an `other` group for references
+ * without a known relation.
+ */
+export const groupKiReferences = (
+  references: Array<KiDocumentReference | null> | undefined
+): KiReferenceGroup[] => {
+  if (!Array.isArray(references)) {
+    return [];
+  }
+  const referencesWithUri = references.filter(
+    (reference): reference is KiDocumentReference =>
+      reference != null && typeof reference.uri === 'string' && reference.uri.length > 0
+  );
+  const knownGroups = REFERENCE_GROUP_ORDER.flatMap((relation) => {
+    const items = referencesWithUri
+      .filter(({ relation: itemRelation }) => itemRelation === relation)
+      .map(({ uri = '', description }) => toKiReferenceItem(uri, description));
+    return items.length > 0 ? [{ relation, items }] : [];
+  });
+  const otherItems = referencesWithUri
+    .filter(({ relation }) => !isKnownRelation(relation))
+    .map(({ uri = '', description }) => toKiReferenceItem(uri, description));
+
+  return otherItems.length > 0
+    ? [...knownGroups, { relation: OTHER_REFERENCE_RELATION, items: otherItems }]
+    : knownGroups;
+};
+
 export const documentAttributesToRows = (
   document: KiDocument
-): Array<{ key: string; value: string }> => {
+): Array<{ key: string; label: string; value: string; isDate: boolean }> => {
   const raw = document.attributes;
   if (!isKiJsonObject(raw)) {
     return [];
   }
-  return Object.entries(raw).map(([key, value]) => ({
-    key,
-    value: formatKiJsonValueAsString(value),
-  }));
+  return Object.entries(raw)
+    .filter(([key]) => !isKiHiddenAttribute(key))
+    .map(([key, value]) => ({
+      key,
+      label: getKiAttributeLabel(key),
+      value: formatKiJsonValueAsString(value),
+      isDate: isKiDateAttribute(key),
+    }));
 };

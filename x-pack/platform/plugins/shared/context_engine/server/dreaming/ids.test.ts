@@ -10,8 +10,6 @@ import {
   entityId,
   factId,
   isMemoryKiId,
-  kiIdFromUri,
-  kiUri,
   memoryIdFromUri,
   memoryUri,
   relationshipId,
@@ -87,11 +85,6 @@ describe('dreaming ids', () => {
     );
   });
 
-  it('round-trips KI URIs', () => {
-    expect(kiIdFromUri(kiUri('mem-1'))).toBe('mem-1');
-    expect(kiIdFromUri('index://logs')).toBeUndefined();
-  });
-
   it('cites each source of memories by a scheme of its own, and reads the citation back', () => {
     for (const [memoryId, uri] of [
       ['session-memory:m-1', 'session-memory://m-1'],
@@ -102,6 +95,7 @@ describe('dreaming ids', () => {
       expect(memoryIdFromUri(uri)).toBe(memoryId);
     }
     expect(memoryIdFromUri('index://logs')).toBeUndefined();
+    expect(memoryIdFromUri('ki://')).toBeUndefined();
   });
 
   it('tells a memory KI of the AI index from a memory read from outside it', () => {
