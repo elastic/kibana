@@ -11,11 +11,17 @@
  *
  * Input: `target/eis_models.json` created by `node scripts/discover_eis_models.js`
  * Output: base64-encoded JSON (default) matching the InferenceEndpointDefinition schema
+ *
+ * By default every discovered model is emitted. `--models` (comma-separated `EVAL_MODEL_GROUPS`
+ * values) keeps only the matching connectors, plus any connector ids listed in `--include`
+ * (judges, the fanout project). CI passes both: the payload travels in an environment variable,
+ * and Linux rejects a single one larger than 128 KiB.
  */
 
 const Fs = require('fs');
 const Path = require('path');
 const { slugifyId } = require('./slugify_id');
+const { parseModelGroups, selectConnectorIds } = require('./connector_matching');
 
 function parseArgs(argv, { defaults = {} } = {}) {
   const out = { ...defaults };
@@ -61,6 +67,40 @@ function die(message) {
   process.exit(1);
 }
 
+function buildEisConnectors(models, connectorIdPrefix = 'eis-') {
+  const connectors = {};
+  for (const m of models) {
+    const inferenceId = m && typeof m === 'object' ? m.inferenceId : undefined;
+    const modelId = m && typeof m === 'object' ? m.modelId : undefined;
+
+    if (typeof inferenceId !== 'string' || typeof modelId !== 'string' || !modelId) {
+      continue;
+    }
+
+    const connectorId = `${connectorIdPrefix}${slugifyId(modelId)}`;
+    connectors[connectorId] = {
+      name: `EIS ${modelId}`,
+      inferenceId,
+      provider: 'elastic',
+      taskType: 'chat_completion',
+      // For selection/metadata only; not used to route requests (inferenceId does that).
+      providerConfig: {
+        model_id: modelId,
+      },
+    };
+  }
+  return connectors;
+}
+
+// No requested model groups (or `all`) keeps every connector, so `--include` alone never narrows.
+function filterEisConnectors(connectors, { modelGroups = [], includeIds = [] } = {}) {
+  if (modelGroups.length === 0 || modelGroups.includes('all')) {
+    return connectors;
+  }
+  const keep = new Set(selectConnectorIds(connectors, [...modelGroups, ...includeIds]));
+  return Object.fromEntries(Object.entries(connectors).filter(([id]) => keep.has(id)));
+}
+
 function main() {
   const argv = parseArgs(process.argv.slice(2), {
     defaults: {
@@ -90,26 +130,16 @@ function main() {
     die(`No EIS models found in ${modelsPath}`);
   }
 
-  const connectors = {};
-  for (const m of models) {
-    const inferenceId = m && typeof m === 'object' ? m.inferenceId : undefined;
-    const modelId = m && typeof m === 'object' ? m.modelId : undefined;
-
-    if (typeof inferenceId !== 'string' || typeof modelId !== 'string' || !modelId) {
-      continue;
-    }
-
-    const connectorId = `${connectorIdPrefix}${slugifyId(modelId)}`;
-    connectors[connectorId] = {
-      name: `EIS ${modelId}`,
-      inferenceId,
-      provider: 'elastic',
-      taskType: 'chat_completion',
-      // For selection/metadata only; not used to route requests (inferenceId does that).
-      providerConfig: {
-        model_id: modelId,
-      },
-    };
+  const connectors = filterEisConnectors(buildEisConnectors(models, connectorIdPrefix), {
+    modelGroups: parseModelGroups(argv.models === 'true' ? '' : argv.models),
+    includeIds: parseModelGroups(argv.include === 'true' ? '' : argv.include),
+  });
+  if (Object.keys(connectors).length === 0) {
+    process.stderr.write(
+      `No EIS connectors matched --models "${argv.models ?? ''}" / --include "${
+        argv.include ?? ''
+      }"; emitting an empty set.\n`
+    );
   }
 
   const json = JSON.stringify(connectors);
@@ -125,4 +155,11 @@ function main() {
   process.stdout.write(`${Buffer.from(json, 'utf8').toString('base64')}\n`);
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = {
+  buildEisConnectors,
+  filterEisConnectors,
+};
