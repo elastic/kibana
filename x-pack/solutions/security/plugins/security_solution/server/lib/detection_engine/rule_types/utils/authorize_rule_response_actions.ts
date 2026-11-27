@@ -41,12 +41,20 @@ export const createResponseActionsParamsAuthorizer = <TParams extends RuleParams
   getOsqueryResponseActionsAuthzChecker,
 }: CreateResponseActionsParamsAuthorizerDeps): RuleTypeParamsAuthorizer<TParams> => ({
   authorize: async (params, { request, spaceId, previousParams }) => {
+    const hasPayloadActions = (params.responseActions?.length ?? 0) > 0;
+    const hasPreviousActions = (previousParams?.responseActions?.length ?? 0) > 0;
+
+    // No point doing validation if there is nothing to validate.
+    if (!hasPayloadActions && !hasPreviousActions) {
+      return;
+    }
+
     const responseActions = params.responseActions?.map(transformAlertToRuleResponseAction);
 
     try {
       await validateRuleResponseActions({
         endpointService: endpointAppContextService,
-        endpointAuthz: await endpointAppContextService.getEndpointAuthz(request),
+        endpointAuthz: await endpointAppContextService.getEndpointAuthz(request, { cache: true }),
         spaceId,
         rulePayload: { response_actions: responseActions },
         // `validateRuleResponseActions` only reads `existingRule.params.responseActions`,
