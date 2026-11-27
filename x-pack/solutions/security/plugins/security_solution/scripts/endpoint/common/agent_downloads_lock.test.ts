@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import {
+import fs, {
   existsSync,
   mkdtempSync,
   readFileSync,
+  renameSync,
   rmSync,
   statSync,
   unlinkSync,
@@ -19,6 +20,10 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { withDownloadLock } from './agent_downloads_service';
+
+/** Lock contents written by this version: `<pid>:<uuid>`. */
+const OWN_LOCK = new RegExp(`^${process.pid}:[0-9a-f-]{36}$`);
+const OTHER_ACQUISITION = `${process.pid}:11111111-1111-4111-8111-111111111111`;
 
 const log = {
   info: jest.fn(),
@@ -40,8 +45,14 @@ describe('withDownloadLock', () => {
   });
 
   afterEach(() => {
+    jest.restoreAllMocks();
     rmSync(directory, { recursive: true, force: true });
   });
+
+  const setMtime = (path: string, msAgo: number) => {
+    const at = new Date(Date.now() - msAgo);
+    utimesSync(path, at, at);
+  };
 
   const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -58,7 +69,7 @@ describe('withDownloadLock', () => {
       { waitMs: 2_000, pollMs: 10 }
     );
 
-    expect(seenPid).toBe(String(process.pid));
+    expect(seenPid).toMatch(OWN_LOCK);
     expect(existsSync(lockPath)).toBe(false);
   });
 
@@ -119,9 +130,8 @@ describe('withDownloadLock', () => {
 
   it('reclaims a lock whose live pid stopped refreshing it', async () => {
     // Own pid, so only the unrefreshed mtime can mark this lock abandoned.
-    writeFileSync(lockPath, String(process.pid));
-    const longAgo = new Date(Date.now() - 60_000);
-    utimesSync(lockPath, longAgo, longAgo);
+    writeFileSync(lockPath, OTHER_ACQUISITION);
+    setMtime(lockPath, 60_000);
 
     let seenPid = '';
     await withDownloadLock(
@@ -133,8 +143,66 @@ describe('withDownloadLock', () => {
       { waitMs: 2_000, pollMs: 10, staleMs: 5_000 }
     );
 
-    expect(seenPid).toBe(String(process.pid));
+    expect(seenPid).toMatch(OWN_LOCK);
     expect(existsSync(lockPath)).toBe(false);
+  });
+
+  it('does not steal a bare-pid lock from older code just because it has no heartbeat', async () => {
+    // Older code writes a bare pid and never refreshes the mtime.
+    writeFileSync(lockPath, String(process.pid));
+    setMtime(lockPath, 60_000);
+
+    await expect(
+      withDownloadLock(log, lockPath, async () => undefined, {
+        waitMs: 100,
+        pollMs: 10,
+        staleMs: 5_000,
+        legacyStaleMs: 120_000,
+      })
+    ).rejects.toThrow(/Timed out waiting for agent download lock/);
+
+    expect(readFileSync(lockPath, 'utf8')).toBe(String(process.pid));
+  });
+
+  it('reclaims a bare-pid lock from older code once it is older than the legacy threshold', async () => {
+    writeFileSync(lockPath, String(process.pid));
+    setMtime(lockPath, 180_000);
+
+    let seenPid = '';
+    await withDownloadLock(
+      log,
+      lockPath,
+      async () => {
+        seenPid = readFileSync(lockPath, 'utf8');
+      },
+      { waitMs: 2_000, pollMs: 10, staleMs: 5_000, legacyStaleMs: 120_000 }
+    );
+
+    expect(seenPid).toMatch(OWN_LOCK);
+  });
+
+  it('keeps a lock that its holder refreshed between the stale check and the removal', async () => {
+    writeFileSync(lockPath, OTHER_ACQUISITION);
+    setMtime(lockPath, 60_000);
+
+    const realRename = fs.renameSync;
+    jest.spyOn(fs, 'renameSync').mockImplementation((from, to) => {
+      // The holder's heartbeat lands just before the waiter moves the lock aside.
+      if (from === lockPath) {
+        setMtime(lockPath, 0);
+      }
+      return realRename(from, to);
+    });
+
+    await expect(
+      withDownloadLock(log, lockPath, async () => undefined, {
+        waitMs: 100,
+        pollMs: 10,
+        staleMs: 5_000,
+      })
+    ).rejects.toThrow(/Timed out waiting for agent download lock/);
+
+    expect(readFileSync(lockPath, 'utf8')).toBe(OTHER_ACQUISITION);
   });
 
   it('refreshes the lock it holds so waiters do not reclaim it', async () => {
@@ -169,21 +237,31 @@ describe('withDownloadLock', () => {
 
   it('aborts the previous holder and leaves the replacement lock alone once its lock is reclaimed', async () => {
     const replacement = '999999';
-    let observedSignal: AbortSignal | undefined;
+    let abortedByHeartbeat = false;
     let assertHeld = () => {};
 
     const holder = withDownloadLock(
       log,
       lockPath,
       async (lock) => {
-        observedSignal = lock.signal;
         assertHeld = lock.assertHeld;
         // Another worker reclaims the lock while this holder is stalled.
         unlinkSync(lockPath);
         writeFileSync(lockPath, replacement);
-        const past = new Date(Date.now() - 60_000);
-        utimesSync(lockPath, past, past);
-        await wait(100);
+        setMtime(lockPath, 60_000);
+        // Only the heartbeat runs while this holder waits, so it alone can abort the signal.
+        await new Promise<void>((resolve) => {
+          const timeout = setTimeout(resolve, 500);
+          lock.signal.addEventListener(
+            'abort',
+            () => {
+              clearTimeout(timeout);
+              resolve();
+            },
+            { once: true }
+          );
+        });
+        abortedByHeartbeat = lock.signal.aborted;
         assertHeld();
       },
       { waitMs: 1_000, pollMs: 10, heartbeatMs: 10, staleMs: 5_000 }
@@ -191,7 +269,7 @@ describe('withDownloadLock', () => {
 
     await expect(holder).rejects.toThrow(/Lost ownership of agent download lock/);
 
-    expect(observedSignal?.aborted).toBe(true);
+    expect(abortedByHeartbeat).toBe(true);
     expect(() => assertHeld()).toThrow(/Lost ownership/);
     // Neither the heartbeat nor the release path touched the replacement lock.
     expect(readFileSync(lockPath, 'utf8')).toBe(replacement);
@@ -227,5 +305,73 @@ describe('withDownloadLock', () => {
     ).rejects.toThrow(/Lost ownership/);
 
     expect(readFileSync(lockPath, 'utf8')).toBe(replacement);
+  });
+
+  it('tells two acquisitions in the same process apart', async () => {
+    let secondLock = '';
+    let releaseSecond = () => {};
+    let second: Promise<void> | undefined;
+
+    await expect(
+      withDownloadLock(
+        log,
+        lockPath,
+        async (first) => {
+          // The first holder stalls long enough for a second call in this process to reclaim it.
+          setMtime(lockPath, 60_000);
+          const secondRunning = new Promise<void>((resolve) => {
+            second = withDownloadLock(
+              log,
+              lockPath,
+              async () => {
+                secondLock = readFileSync(lockPath, 'utf8');
+                resolve();
+                await new Promise<void>((done) => {
+                  releaseSecond = done;
+                });
+              },
+              { waitMs: 1_000, pollMs: 10, heartbeatMs: 10_000, staleMs: 5_000 }
+            );
+          });
+          await secondRunning;
+
+          expect(first.isHeld()).toBe(false);
+          first.assertHeld();
+        },
+        { waitMs: 1_000, pollMs: 10, heartbeatMs: 10_000, staleMs: 5_000 }
+      )
+    ).rejects.toThrow(/Lost ownership/);
+
+    // The first holder's release left the second holder's lock in place.
+    expect(secondLock).toMatch(OWN_LOCK);
+    expect(readFileSync(lockPath, 'utf8')).toBe(secondLock);
+
+    releaseSecond();
+    await second;
+    expect(existsSync(lockPath)).toBe(false);
+  });
+
+  it('does not abort the holder while a waiter has its lock moved aside for a moment', async () => {
+    let aborted = true;
+
+    await withDownloadLock(
+      log,
+      lockPath,
+      async (lock) => {
+        // What `removeStaleDownloadLock` does when the lock turns out to still be live.
+        const aside = `${lockPath}.aside`;
+        renameSync(lockPath, aside);
+        await wait(50);
+        expect(lock.isHeld()).toBe(true);
+        fs.linkSync(aside, lockPath);
+        unlinkSync(aside);
+        await wait(30);
+        aborted = lock.signal.aborted;
+      },
+      { waitMs: 1_000, pollMs: 10, heartbeatMs: 10, staleMs: 5_000 }
+    );
+
+    expect(aborted).toBe(false);
+    expect(existsSync(lockPath)).toBe(false);
   });
 });
