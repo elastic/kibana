@@ -17,9 +17,8 @@ import {
 } from './utils/application_source';
 import { DigitalExperienceLayout } from './application/digital_experience_layout';
 import { useDigitalExperienceParams } from './hooks/use_digital_experience_params';
-import type { ApplicationTabId } from '../common/types/applications';
+import type { ApplicationTabId, ReportTemplateId } from '../common/types/applications';
 import { MAX_CRASH_FINGERPRINT_LENGTH } from '../common/mobile/crash_fingerprint';
-import type { ReportTemplateId } from './pages/reports/report_templates';
 import { ApplicationPage } from './pages/application_details/application_page';
 import { FrustrationPage } from './pages/frustration/frustration_page';
 import { ApplicationsListPage } from './pages/applications_list/applications_list_page';

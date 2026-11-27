@@ -8,39 +8,49 @@
 import { i18n } from '@kbn/i18n';
 import { CORE_WEB_VITAL, getVitalRating } from '../../../common/core_web_vitals';
 import type { CoreWebVital } from '../../../common/core_web_vitals';
-import type { VitalRatings } from '../../../common/types/applications';
+import type { VitalRatings, WebVitals } from '../../../common/types/applications';
+import type { ApplicationOverviewKpisResponse } from '../../../common/types/overview';
+import { isNegligibleChange, type ChangeUnit } from '../../../common/negligible_change';
 import type {
-  ApplicationOverview,
-  ApplicationOverviewKpisResponse,
-} from '../../../common/types/overview';
-import type {
-  ChangeDirection,
   MeasureUnit,
   ScorecardMeasure,
   ScorecardPeriod,
   ScorecardReport,
+  ScorecardVerdict,
 } from '../../../common/types/scorecard';
 
 /** Which direction of change is an improvement; traffic is neither. */
 export type BetterWhen = 'lower' | 'higher' | 'neutral';
 
-/** Changes smaller than this are shown as unchanged, so noise doesn't read as a trend. */
-const UNCHANGED_THRESHOLD = 0.01;
+/** Shares change in percentage points, as on the Overview, and any other measure relatively. */
+const changeUnitOf = (unit: MeasureUnit): ChangeUnit =>
+  unit === 'ratio' ? 'percentagePoints' : 'relative';
 
-const getChange = (value: number | null, previous: number | null): number | null =>
-  value === null || previous === null || previous === 0 ? null : (value - previous) / previous;
+const getChange = (
+  value: number | null,
+  previous: number | null,
+  changeUnit: ChangeUnit
+): number | null => {
+  if (value === null || previous === null) {
+    return null;
+  }
+  if (changeUnit === 'percentagePoints') {
+    return value - previous;
+  }
+  return previous === 0 ? null : (value - previous) / previous;
+};
 
 const getDirection = (
   betterWhen: BetterWhen,
   value: number | null,
-  previous: number | null
-): ChangeDirection => {
+  previous: number | null,
+  changeUnit: ChangeUnit
+): ScorecardVerdict => {
   if (value === null || previous === null) {
     return 'unknown';
   }
-  const relative =
-    previous === 0 ? (value === 0 ? 0 : Infinity) : Math.abs((value - previous) / previous);
-  if (relative < UNCHANGED_THRESHOLD) {
+  // Noise by the Overview's cutoffs, so that both pages call the same change unchanged.
+  if (isNegligibleChange(value, previous, changeUnit)) {
     return 'unchanged';
   }
   if (betterWhen === 'neutral') {
@@ -70,15 +80,16 @@ const toMeasure = ({
   vital,
   ratings,
 }: MeasureInput): ScorecardMeasure => {
-  const change = getChange(value, previous);
+  const changeUnit = changeUnitOf(unit);
   return {
     id,
     label,
     unit,
     value,
     previous,
-    change,
-    direction: getDirection(betterWhen, value, previous),
+    change: getChange(value, previous, changeUnit),
+    changeUnit,
+    direction: getDirection(betterWhen, value, previous, changeUnit),
     rating: vital && value !== null ? getVitalRating(vital, value) : null,
     ratings: ratings ?? null,
   };
@@ -87,8 +98,7 @@ const toMeasure = ({
 const errorsPer100 = (jsErrors: number | null, pageLoads: number | null): number | null =>
   jsErrors === null || !pageLoads ? null : (jsErrors / pageLoads) * 100;
 
-const vitalValue = (overview: ApplicationOverview, vital: CoreWebVital): number | null => {
-  const { webVitals } = overview;
+const vitalValue = (webVitals: WebVitals, vital: CoreWebVital): number | null => {
   switch (vital) {
     case CORE_WEB_VITAL.cls:
       return webVitals.cls.p75;
@@ -120,9 +130,10 @@ const VITAL_ORDER: readonly CoreWebVital[] = ['lcp', 'inp', 'cls', 'fcp', 'ttfb'
 export interface BuildScorecardParams {
   /** The KPIs of the period against the previous one. */
   kpis: ApplicationOverviewKpisResponse;
+  serviceName: string;
   /** The web vitals of the period and of the previous one. */
-  current: ApplicationOverview;
-  previous: ApplicationOverview;
+  webVitals: WebVitals;
+  previousWebVitals: WebVitals;
   environment?: string;
   environments: string[];
   period: ScorecardPeriod;
@@ -133,8 +144,9 @@ export interface BuildScorecardParams {
 /** The scorecard of one application: this period's measures next to the previous period's. */
 export const buildScorecard = ({
   kpis,
-  current,
-  previous,
+  serviceName,
+  webVitals: currentWebVitals,
+  previousWebVitals,
   environment,
   environments,
   period,
@@ -232,15 +244,15 @@ export const buildScorecard = ({
       label: VITAL_LABELS[vital],
       unit: vital === 'cls' ? 'score' : 'ms',
       betterWhen: 'lower',
-      value: vitalValue(current, vital),
-      previous: vitalValue(previous, vital),
+      value: vitalValue(currentWebVitals, vital),
+      previous: vitalValue(previousWebVitals, vital),
       vital,
-      ratings: current.webVitals[vital].ratings,
+      ratings: currentWebVitals[vital].ratings,
     })
   );
 
   return {
-    serviceName: current.serviceName,
+    serviceName,
     ...(environment ? { environment } : {}),
     environments,
     period,

@@ -6,21 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { MeasureUnit } from '../../../../common/types/scorecard';
+import { toComparedValue } from '../../../../common/mobile/kpis';
+import type { ScorecardMeasure } from '../../../../common/types/scorecard';
 import type { Formatters } from '../../../hooks/use_formatters';
-
-const NO_VALUE = '–';
-
-const formatMs = (ms: number, formatDecimal: Formatters['formatDecimal']): string =>
-  ms >= 1000
-    ? i18n.translate('xpack.digitalExperience.report.scorecard.seconds', {
-        defaultMessage: '{value} s',
-        values: { value: formatDecimal(ms / 1000, 2) },
-      })
-    : i18n.translate('xpack.digitalExperience.report.scorecard.milliseconds', {
-        defaultMessage: '{value} ms',
-        values: { value: Math.round(ms) },
-      });
+import { formatChange } from '../../../utils/compared_value';
+import { formatDurationMs } from '../../../utils/format_duration';
 
 /** What the KPI percent format shows as a whole: the smallest share it tells from 0% or 100%. */
 const SMALLEST_SHARE = 0.001;
@@ -46,24 +36,21 @@ const formatShare = (share: number, formatKpiPercent: Formatters['formatKpiPerce
   return formatKpiPercent(share);
 };
 
-/** A measure's value in its unit, with the user's number formats; a dash without one. */
+/** A measure's value in its unit, with the user's number formats. */
 export const formatMeasureValue = (
-  value: number | null,
-  unit: MeasureUnit,
+  value: number,
+  unit: ScorecardMeasure['unit'],
   {
     formatNumber,
     formatDecimal,
     formatKpiPercent,
   }: Pick<Formatters, 'formatNumber' | 'formatDecimal' | 'formatKpiPercent'>
 ): string => {
-  if (value === null) {
-    return NO_VALUE;
-  }
   switch (unit) {
     case 'count':
       return formatNumber(value);
     case 'ms':
-      return formatMs(value, formatDecimal);
+      return formatDurationMs(value);
     case 'score':
       return formatDecimal(value, 3);
     case 'rate':
@@ -73,8 +60,12 @@ export const formatMeasureValue = (
   }
 };
 
-/** The relative change to the previous period with its sign; a dash when there's none. */
+/**
+ * The change of a measure to the previous period as the Overview shows one: relative, or in
+ * percentage points for shares; `undefined` without both values.
+ */
 export const formatMeasureChange = (
-  change: number | null,
-  { formatSignedPercent }: Pick<Formatters, 'formatSignedPercent'>
-): string => (change === null ? NO_VALUE : formatSignedPercent(change));
+  { value, previous, changeUnit }: Pick<ScorecardMeasure, 'value' | 'previous' | 'changeUnit'>,
+  formatters: Pick<Formatters, 'formatSignedNumber' | 'formatSignedPercent'>
+): string | undefined =>
+  formatChange(toComparedValue(value, previous), changeUnit, formatters)?.label;

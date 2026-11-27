@@ -17,10 +17,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
 import type {
-  ChangeDirection,
   ScorecardMeasure,
   ScorecardPeriod,
+  ScorecardVerdict,
 } from '../../../../common/types/scorecard';
 import { ApplicationTabToolbar } from '../../../components/application_tab_toolbar';
 import { LoadErrorPrompt } from '../../../components/load_error_prompt';
@@ -34,7 +35,7 @@ const FETCH_ERROR_TITLE = i18n.translate('xpack.digitalExperience.report.scoreca
   defaultMessage: 'Could not load the scorecard',
 });
 
-const DIRECTION_BADGES: Record<ChangeDirection, { color: string; label: string } | undefined> = {
+const DIRECTION_BADGES: Record<ScorecardVerdict, { color: string; label: string } | undefined> = {
   better: {
     color: 'success',
     label: i18n.translate('xpack.digitalExperience.report.scorecard.better', {
@@ -98,22 +99,23 @@ export function ScorecardReport({ serviceName }: { serviceName: string }) {
     {
       name: COLUMN_LABELS.value,
       align: 'right',
-      render: ({ value, unit }: ScorecardMeasure) => formatMeasureValue(value, unit, formatters),
+      render: ({ value, unit }: ScorecardMeasure) =>
+        value === null ? <EmptyCellValue /> : formatMeasureValue(value, unit, formatters),
     },
     {
       name: COLUMN_LABELS.previous,
       align: 'right',
       render: ({ previous, unit }: ScorecardMeasure) =>
-        formatMeasureValue(previous, unit, formatters),
+        previous === null ? <EmptyCellValue /> : formatMeasureValue(previous, unit, formatters),
     },
     {
       name: COLUMN_LABELS.change,
       align: 'right',
-      render: ({ change, direction }: ScorecardMeasure) => {
-        const badge = DIRECTION_BADGES[direction];
+      render: (measure: ScorecardMeasure) => {
+        const badge = DIRECTION_BADGES[measure.direction];
         return (
           <>
-            {formatMeasureChange(change, formatters)}{' '}
+            {formatMeasureChange(measure, formatters) ?? <EmptyCellValue />}{' '}
             {badge && <EuiBadge color={badge.color}>{badge.label}</EuiBadge>}
           </>
         );

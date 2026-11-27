@@ -5,63 +5,50 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { getPreviousPeriod } from '../../../common/mobile/kpis';
 import type { ScorecardReport } from '../../../common/types/scorecard';
-import { getOtelOverview } from '../../routes/overview/otel/get_otel_overview';
 import { getOtelOverviewKpis } from '../../routes/overview/otel/get_otel_overview_kpis';
-import type { ApplicationSearchParams } from '../../routes/application_tab_route';
-import { createDigitalExperienceTracedEsClient } from '../create_digital_experience_traced_es_client';
+import type { ApplicationSearch } from '../../routes/application_tab_route';
 import { sortEnvironments } from '../helpers/environment';
-import { getHistogramInterval } from '../helpers/time_series';
 import { buildScorecard } from './scorecard';
+import {
+  toWebVitalsResult,
+  webVitalsSearch,
+  type WebVitalsAggregations,
+} from './web_vitals_search';
 
-export type GetScorecardReportParams = ApplicationSearchParams & {
-  client: ElasticsearchClient;
-  logger: Logger;
-  /** Cancels the searches, e.g. when the HTTP request is aborted. */
-  signal?: AbortSignal;
-};
+const WEB_VITALS_SEARCH_SPAN_NAME = 'get_scorecard_web_vitals';
 
 /**
  * The scorecard of an application over `start`-`end`, compared with the period of the same length
- * right before it. The searches run as the user of `client`.
+ * right before it. The searches run as the user of `esClient`.
  */
 export const getScorecardReport = async ({
-  client,
-  logger,
-  signal,
+  esClient,
   ...search
-}: GetScorecardReportParams): Promise<ScorecardReport> => {
-  const { start, end, environment } = search;
+}: ApplicationSearch): Promise<ScorecardReport> => {
+  const { serviceName, start, end, environment } = search;
   const previousPeriod = getPreviousPeriod(start, end);
 
-  // The scorecard has no trend, so the buckets of the overview searches are never read.
-  const overviewOf = (periodStart: number, periodEnd: number) =>
-    getOtelOverview({
-      ...search,
-      esClient: client,
-      start: periodStart,
-      end: periodEnd,
-      histogram: { interval: getHistogramInterval(periodStart, periodEnd), timeZone: 'UTC' },
-      signal,
-    });
+  const webVitalsOf = async (periodStart: number, periodEnd: number) => {
+    const { aggregations } = await esClient.search(
+      WEB_VITALS_SEARCH_SPAN_NAME,
+      webVitalsSearch({ ...search, start: periodStart, end: periodEnd })
+    );
+    return toWebVitalsResult(aggregations as unknown as WebVitalsAggregations | undefined);
+  };
 
   const [kpis, current, previous] = await Promise.all([
-    getOtelOverviewKpis({
-      ...search,
-      esClient: createDigitalExperienceTracedEsClient({ client, logger, abortSignal: signal }),
-    }),
-    overviewOf(start, end),
-    // Up to the last millisecond before `start`: the Overview's range includes both ends, and a
-    // sample at the boundary belongs to the current period only.
-    overviewOf(previousPeriod.start, previousPeriod.end - 1),
+    getOtelOverviewKpis({ ...search, esClient }),
+    webVitalsOf(start, end),
+    webVitalsOf(previousPeriod.start, previousPeriod.end),
   ]);
 
   return buildScorecard({
     kpis,
-    current: current.overview,
-    previous: previous.overview,
+    serviceName,
+    webVitals: current.webVitals,
+    previousWebVitals: previous.webVitals,
     environment,
     // Also those that sent nothing in this period, to tell where a drop in traffic comes from.
     environments: sortEnvironments([...current.environments, ...previous.environments]),

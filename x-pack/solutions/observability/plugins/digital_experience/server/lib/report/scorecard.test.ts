@@ -7,23 +7,10 @@
 
 import { NO_WEB_VITALS } from '../../../common/core_web_vitals';
 import { toComparedValue } from '../../../common/mobile/kpis';
-import type {
-  ApplicationOverview,
-  ApplicationOverviewKpisResponse,
-} from '../../../common/types/overview';
+import type { WebVitals } from '../../../common/types/applications';
+import type { ApplicationOverviewKpisResponse } from '../../../common/types/overview';
 import type { ScorecardMeasure } from '../../../common/types/scorecard';
 import { buildScorecard } from './scorecard';
-
-const overview = (overrides: Partial<ApplicationOverview> = {}): ApplicationOverview => ({
-  serviceName: 'shop',
-  percentile: 75,
-  pageLoads: { count: 1000 },
-  loadTime: { percentileMs: 2000 },
-  webVitals: NO_WEB_VITALS,
-  trend: [],
-  trendHistogram: { interval: { value: 1, unit: 's' }, start: 0, end: 1_000 },
-  ...overrides,
-});
 
 type KpiKey = Exclude<keyof ApplicationOverviewKpisResponse, 'percentile' | 'counts'>;
 type KpiValues = Partial<Record<KpiKey, [number | null, number | null]>>;
@@ -63,11 +50,16 @@ const kpis = (values: KpiValues = {}): ApplicationOverviewKpisResponse => {
 const PERIOD = { start: 2000, end: 3000 };
 const PREVIOUS_PERIOD = { start: 1000, end: 2000 };
 
-const build = (values: KpiValues = {}, current = overview(), previous = overview()) =>
+const build = (
+  values: KpiValues = {},
+  webVitals: WebVitals = NO_WEB_VITALS,
+  previousWebVitals: WebVitals = NO_WEB_VITALS
+) =>
   buildScorecard({
     kpis: kpis(values),
-    current,
-    previous,
+    serviceName: 'shop',
+    webVitals,
+    previousWebVitals,
     environments: [],
     period: PERIOD,
     previousPeriod: PREVIOUS_PERIOD,
@@ -106,8 +98,25 @@ describe('buildScorecard', () => {
     });
   });
 
-  it('shows changes under one percent as unchanged', () => {
-    expect(measure(build({ pageLoads: [1005, 1000] }), 'pageLoads').direction).toBe('unchanged');
+  it('shows changes under the Overview cutoff of two percent as unchanged', () => {
+    expect(measure(build({ pageLoads: [1015, 1000] }), 'pageLoads').direction).toBe('unchanged');
+    expect(measure(build({ pageLoads: [1025, 1000] }), 'pageLoads').direction).toBe('neutral');
+  });
+
+  it('compares shares in percentage points, like the Overview', () => {
+    const report = build({
+      errorFreeSessions: [0.98, 0.99],
+      failedHttpRequests: [0.003, 0.001],
+    });
+
+    expect(measure(report, 'errorFreeSessions')).toMatchObject({
+      changeUnit: 'percentagePoints',
+      direction: 'worse',
+    });
+    expect(measure(report, 'errorFreeSessions').change).toBeCloseTo(-0.01);
+    // Two tenths of a point: noise, though three times the previous share.
+    expect(measure(report, 'failedRequests').direction).toBe('unchanged');
+    expect(measure(report, 'failedRequests').change).toBeCloseTo(0.002);
   });
 
   it('has no relative change from zero, but a rise from zero is worse', () => {
@@ -135,13 +144,11 @@ describe('buildScorecard', () => {
     const ratings = { good: 0.7, needsImprovement: 0.2, poor: 0.1 };
     const report = build(
       {},
-      overview({
-        webVitals: {
-          ...NO_WEB_VITALS,
-          lcp: { p75Ms: 4500, sampleCount: 100, ratings },
-          cls: { p75: 0.05, sampleCount: 100, ratings: null },
-        },
-      })
+      {
+        ...NO_WEB_VITALS,
+        lcp: { p75Ms: 4500, sampleCount: 100, ratings },
+        cls: { p75: 0.05, sampleCount: 100, ratings: null },
+      }
     );
 
     expect(measure(report, 'lcp')).toMatchObject({ rating: 'poor', ratings });
@@ -154,8 +161,9 @@ describe('buildScorecard', () => {
     expect(
       buildScorecard({
         kpis: kpis(),
-        current: overview(),
-        previous: overview(),
+        serviceName: 'shop',
+        webVitals: NO_WEB_VITALS,
+        previousWebVitals: NO_WEB_VITALS,
         environment: 'production',
         environments: ['production'],
         period: PERIOD,

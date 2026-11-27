@@ -30,19 +30,32 @@ describe('formatMeasureValue', () => {
   ] as const)('formats %s as %s', (value, unit, expected) => {
     expect(formatMeasureValue(value, unit, formatters)).toBe(expected);
   });
-
-  it('shows a dash without a value', () => {
-    expect(formatMeasureValue(null, 'count', formatters)).toBe('–');
-  });
 });
 
 describe('formatMeasureChange', () => {
-  it('formats the change with the signed percent format', () => {
-    expect(formatMeasureChange(0.25, formatters)).toBe('+25.0%');
-    expect(formatMeasureChange(-0.1, formatters)).toBe('-10.0%');
+  const signedFormatters = {
+    formatSignedNumber: (value: number) => `${value > 0 ? '+' : ''}${value.toFixed(1)}`,
+    formatSignedPercent: formatters.formatSignedPercent,
+  };
+
+  it('formats a relative change with the signed percent format', () => {
+    expect(
+      formatMeasureChange({ value: 125, previous: 100, changeUnit: 'relative' }, signedFormatters)
+    ).toBe('+25.0%');
   });
 
-  it('shows a dash without a change', () => {
-    expect(formatMeasureChange(null, formatters)).toBe('–');
+  it('formats the change of a share in percentage points, as the Overview does', () => {
+    expect(
+      formatMeasureChange(
+        { value: 0.985, previous: 0.99, changeUnit: 'percentagePoints' },
+        signedFormatters
+      )
+    ).toMatch(/-0\.5/);
+  });
+
+  it('has no change without both values', () => {
+    expect(
+      formatMeasureChange({ value: null, previous: 1, changeUnit: 'relative' }, signedFormatters)
+    ).toBeUndefined();
   });
 });

@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ReportTemplateId } from './report_templates';
+import type { ReportTemplateId } from '../../../common/types/applications';
 import { REPORT_TEMPLATES } from './report_templates';
 
 const DESCRIPTION = i18n.translate('xpack.digitalExperience.reports.description', {

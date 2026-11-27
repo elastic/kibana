@@ -16,6 +16,7 @@ import { APPLICATION_TYPE } from '../../common/application_source';
 import type { ApplicationSource } from '../../common/types/applications';
 import { SHARED_FILTER_NAMES } from '../utils/overview_filters_query';
 import type { SessionsListUrlQuery } from '../utils/sessions_list_query';
+import { SCORECARD_TIME_RANGE } from '../pages/reports/report_templates';
 import { useDigitalExperienceParams } from './use_digital_experience_params';
 import { SESSIONS_FILTER_RTS, useSharedFilters } from './use_shared_filters';
 import { useDigitalExperienceRouter } from './use_digital_experience_router';
@@ -127,7 +128,8 @@ export const useApplicationLinks = (
       scorecardReportHref: toHref(
         router.link('/{serviceName}/reports/scorecard', {
           path: { serviceName },
-          query: reportsQuery,
+          // A week, not whatever the picker holds, usually the last 15 minutes.
+          query: { ...reportsQuery, ...SCORECARD_TIME_RANGE },
         })
       ),
       sessionsHref: (sessionsQuery = {}) =>

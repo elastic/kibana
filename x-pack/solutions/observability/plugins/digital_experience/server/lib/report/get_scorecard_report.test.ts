@@ -5,33 +5,39 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { NO_WEB_VITALS } from '../../../common/core_web_vitals';
 import { toComparedValue } from '../../../common/mobile/kpis';
-import type { ApplicationOverview } from '../../../common/types/overview';
-import { getOtelOverview } from '../../routes/overview/otel/get_otel_overview';
+import type { ApplicationSearch } from '../../routes/application_tab_route';
 import { getOtelOverviewKpis } from '../../routes/overview/otel/get_otel_overview_kpis';
 import { getScorecardReport } from './get_scorecard_report';
 
-jest.mock('../../routes/overview/otel/get_otel_overview');
 jest.mock('../../routes/overview/otel/get_otel_overview_kpis');
 
 const HOUR = 3_600_000;
 
-const overview: ApplicationOverview = {
-  serviceName: 'shop',
-  percentile: 75,
-  pageLoads: { count: 10 },
-  loadTime: { percentileMs: 1000 },
-  webVitals: NO_WEB_VITALS,
-  trend: [],
-  trendHistogram: { interval: { value: 1, unit: 's' }, start: 0, end: 1 },
-};
-
 const compared = toComparedValue(1, 1);
 
+const NO_VITALS = { doc_count: 0, p75: { values: {} }, upToGood: { doc_count: 0 } };
+
+/** A search response that lists `environments` and has no web vital samples. */
+const response = (environments: string[]) => ({
+  aggregations: {
+    environments: { buckets: environments.map((key) => ({ key, doc_count: 1 })) },
+    environmentNames: { buckets: [] },
+    environmentNotDefined: { doc_count: 0 },
+    inEnvironment: {
+      lcp: NO_VITALS,
+      inp: NO_VITALS,
+      cls: NO_VITALS,
+      fcp: NO_VITALS,
+      ttfb: NO_VITALS,
+    },
+  },
+});
+
 describe('getScorecardReport', () => {
+  const search = jest.fn();
+  const esClient = { search } as unknown as ApplicationSearch['esClient'];
+
   beforeEach(() => {
     jest.resetAllMocks();
     jest.mocked(getOtelOverviewKpis).mockResolvedValue({
@@ -43,48 +49,49 @@ describe('getScorecardReport', () => {
       jsErrors: compared,
       failedHttpRequests: compared,
       requestLatency: compared,
-      counts: { sessions: 1, pageLoads: 1 },
+      counts: {},
     } as unknown as Awaited<ReturnType<typeof getOtelOverviewKpis>>);
   });
 
   const run = () =>
-    getScorecardReport({
-      client: elasticsearchServiceMock.createElasticsearchClient(),
-      logger: loggingSystemMock.createLogger(),
-      serviceName: 'shop',
-      start: 10 * HOUR,
-      end: 12 * HOUR,
-    });
+    getScorecardReport({ esClient, serviceName: 'shop', start: 10 * HOUR, end: 12 * HOUR });
 
-  it('searches the previous period up to the millisecond before the current one starts', async () => {
-    jest
-      .mocked(getOtelOverview)
-      .mockResolvedValue({ overview, environments: [], filters: {} } as unknown as Awaited<
-        ReturnType<typeof getOtelOverview>
-      >);
+  it('searches the web vitals of the period and of the one before it, which end where it starts', async () => {
+    search.mockResolvedValue(response([]));
 
     await run();
 
-    const ranges = jest.mocked(getOtelOverview).mock.calls.map(([{ start, end }]) => [start, end]);
+    const ranges = search.mock.calls.map(
+      ([, request]) => request.query.bool.filter[0].range['@timestamp']
+    );
     expect(ranges).toEqual([
-      [10 * HOUR, 12 * HOUR],
-      [8 * HOUR, 10 * HOUR - 1],
+      expect.objectContaining({ gte: 10 * HOUR, lt: 12 * HOUR }),
+      expect.objectContaining({ gte: 8 * HOUR, lt: 10 * HOUR }),
+    ]);
+  });
+
+  it('asks for no page-load percentiles, trend or filter facets', async () => {
+    search.mockResolvedValue(response([]));
+
+    await run();
+
+    const [, request] = search.mock.calls[0];
+    expect(Object.keys(request.aggs).sort()).toEqual(
+      ['environmentNames', 'environmentNotDefined', 'environments', 'inEnvironment'].sort()
+    );
+    expect(Object.keys(request.aggs.inEnvironment.aggs).sort()).toEqual([
+      'cls',
+      'fcp',
+      'inp',
+      'lcp',
+      'ttfb',
     ]);
   });
 
   it('offers the environments of both periods', async () => {
-    jest
-      .mocked(getOtelOverview)
-      .mockResolvedValueOnce({
-        overview,
-        environments: ['production'],
-        filters: {},
-      } as unknown as Awaited<ReturnType<typeof getOtelOverview>>)
-      .mockResolvedValueOnce({
-        overview,
-        environments: ['production', 'staging'],
-        filters: {},
-      } as unknown as Awaited<ReturnType<typeof getOtelOverview>>);
+    search
+      .mockResolvedValueOnce(response(['production']))
+      .mockResolvedValueOnce(response(['production', 'staging']));
 
     const report = await run();
 

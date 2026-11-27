@@ -42,6 +42,7 @@ const REPORT: ScorecardReportData = {
           value: 1200,
           previous: 1000,
           change: 0.2,
+          changeUnit: 'relative',
           direction: 'neutral',
           rating: null,
           ratings: null,
@@ -53,6 +54,7 @@ const REPORT: ScorecardReportData = {
           value: 1500,
           previous: 2000,
           change: -0.25,
+          changeUnit: 'relative',
           direction: 'better',
           rating: null,
           ratings: null,
@@ -70,6 +72,7 @@ const REPORT: ScorecardReportData = {
           value: null,
           previous: null,
           change: null,
+          changeUnit: 'relative',
           direction: 'unknown',
           rating: null,
           ratings: null,
@@ -131,10 +134,11 @@ describe('ScorecardReport', () => {
     expect(within(pageLoads).queryByText('Worse')).not.toBeInTheDocument();
   });
 
-  it('shows a dash for a measure without data', () => {
+  it('shows the empty cell for a measure without data', () => {
     renderReport();
 
-    expect(screen.getByTestId('digitalExperienceScorecardMeasure-inp')).toHaveTextContent('–');
+    const inp = screen.getByTestId('digitalExperienceScorecardMeasure-inp');
+    expect(within(inp).getAllByText('—')).toHaveLength(3);
   });
 
   it('names both periods', () => {

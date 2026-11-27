@@ -6,12 +6,13 @@
  */
 
 import type { VitalRating } from '../core_web_vitals';
+import type { ChangeUnit } from '../negligible_change';
 import type { VitalRatings } from './applications';
 
 export type MeasureUnit = 'count' | 'ms' | 'score' | 'rate' | 'ratio';
 
 /** `neutral` is a change that is neither better nor worse, such as traffic; `unknown` lacks a value. */
-export type ChangeDirection = 'better' | 'worse' | 'unchanged' | 'neutral' | 'unknown';
+export type ScorecardVerdict = 'better' | 'worse' | 'unchanged' | 'neutral' | 'unknown';
 
 export interface ScorecardMeasure {
   id: string;
@@ -19,9 +20,15 @@ export interface ScorecardMeasure {
   unit: MeasureUnit;
   value: number | null;
   previous: number | null;
-  /** Relative change to the previous period, `null` without both values or a previous of zero. */
+  /**
+   * The change to the previous period: relative, or for shares the difference of both (0.01 is one
+   * percentage point), as `changeUnit` says. `null` without both values, or a relative change from
+   * zero.
+   */
   change: number | null;
-  direction: ChangeDirection;
+  changeUnit: ChangeUnit;
+  /** Better, worse or unchanged by the same cutoffs as the Overview's KPIs. */
+  direction: ScorecardVerdict;
   /** Google's rating of a web vital, `null` for the other measures or without a value. */
   rating: VitalRating | null;
   /** Share of samples per rating of a web vital. */

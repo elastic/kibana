@@ -8,7 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import type { ReportTemplateId } from '../../../common/types/applications';
 
-export type { ReportTemplateId };
+/** The range the weekly scorecard opens at: the last seven days up to today, as a schedule has it. */
+export const SCORECARD_TIME_RANGE = { rangeFrom: 'now-7d/d', rangeTo: 'now/d' } as const;
 
 export interface ReportTemplate {
   id: ReportTemplateId;

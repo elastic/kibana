@@ -172,4 +172,16 @@ describe('useApplicationLinks', () => {
     expect(result.current.reportsHref).not.toContain('kuery=');
     expect(result.current.scorecardReportHref).not.toContain('kuery=');
   });
+
+  it('opens the scorecard at the last week, not the range the picker holds', () => {
+    mockSearch('?source=otel&rangeFrom=now-15m&rangeTo=now');
+    mockRouteQuery({ source: 'otel' });
+
+    const { result } = renderHook(() => useApplicationLinks('shop', 'otel'));
+
+    const href = new URL(result.current.scorecardReportHref, 'http://localhost');
+    expect(href.searchParams.get('rangeFrom')).toBe('now-7d/d');
+    expect(href.searchParams.get('rangeTo')).toBe('now/d');
+    expect(result.current.reportsHref).not.toContain('now-7d');
+  });
 });

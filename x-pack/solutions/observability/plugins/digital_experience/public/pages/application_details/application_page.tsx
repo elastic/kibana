@@ -18,6 +18,7 @@ import {
   type ApplicationSource,
   type ApplicationType,
   type ApplicationTabId,
+  type ReportTemplateId,
   type WebApplicationTabId,
 } from '../../../common/types/applications';
 import { useRouteBreadcrumb } from '../../breadcrumbs/use_route_breadcrumb';
@@ -33,7 +34,6 @@ import { APPLICATIONS_LABEL, APPLICATION_TAB_LABELS, COMPARE_LABEL } from '../..
 import { ErrorsTab } from '../errors/errors_tab';
 import { NetworkTab } from '../network/network_tab';
 import { REPORT_TEMPLATES } from '../reports/report_templates';
-import type { ReportTemplateId } from '../reports/report_templates';
 import { ReportsTab } from '../reports/reports_tab';
 import { ScorecardReport } from '../reports/scorecard/scorecard_report';
 import { SessionsTab } from '../sessions/sessions_tab';
