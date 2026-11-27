@@ -116,7 +116,7 @@ export const postFleetServerHost: RequestHandler<
     soClient,
     esClient,
     { ...data, is_preconfigured: false },
-    { id }
+    { id, request }
   );
   await agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(esClient, FleetServerHost.id, {
     isDefault: FleetServerHost.is_default,
@@ -195,7 +195,8 @@ export const putFleetServerHostHandler: RequestHandler<
       soClient,
       esClient,
       request.params.itemId,
-      request.body
+      request.body,
+      { request }
     );
     const body = {
       item,

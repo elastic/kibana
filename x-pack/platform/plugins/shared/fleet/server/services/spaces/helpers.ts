@@ -8,7 +8,7 @@
 import type { SavedObject } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
-import { ALL_SPACES_ID } from '../../../common/constants';
+import { ALL_SPACES_ID, SO_SEARCH_LIMIT } from '../../../common/constants';
 
 import { appContextService } from '../app_context';
 import {
@@ -85,4 +85,26 @@ export function getValidSpaceId(spacedIds?: string[]) {
   const space = spacedIds?.[0];
 
   return space && space !== ALL_SPACES_ID ? space : DEFAULT_SPACE_ID;
+}
+
+/** Ids of all existing spaces, or `*` (global) when space awareness is not enabled. */
+export async function getAllSpaceIds(): Promise<{ spaceIds: Set<string>; truncated: boolean }> {
+  if (!(await isSpaceAwarenessEnabled())) {
+    return { spaceIds: new Set([ALL_SPACES_ID]), truncated: false };
+  }
+  const soClient = appContextService.getInternalUserSOClientForSpaces();
+  const result = await soClient.find<unknown>({
+    type: 'space',
+    fields: [],
+    perPage: SO_SEARCH_LIMIT,
+  });
+  const spaceIds = new Set<string>();
+  for (const so of result.saved_objects) {
+    spaceIds.add(so.id);
+  }
+  // An empty set would skip the privilege check, so fail closed to a global check.
+  if (spaceIds.size === 0) {
+    spaceIds.add(ALL_SPACES_ID);
+  }
+  return { spaceIds, truncated: result.saved_objects.length < result.total };
 }

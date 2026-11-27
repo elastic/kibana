@@ -9,7 +9,11 @@ import type { Settings } from '../../types';
 import { appContextService } from '../app_context';
 import { getSettingsOrUndefined } from '../settings';
 
-import { isSpaceAwarenessEnabled, isSpaceAwarenessMigrationPending } from './helpers';
+import {
+  isSpaceAwarenessEnabled,
+  isSpaceAwarenessMigrationPending,
+  getAllSpaceIds,
+} from './helpers';
 
 jest.mock('../app_context');
 jest.mock('../settings');
@@ -127,5 +131,73 @@ describe('isSpaceAwarenessMigrationPending', () => {
     const res = await isSpaceAwarenessMigrationPending();
 
     expect(res).toBe(false);
+  });
+});
+
+describe('getAllSpaceIds', () => {
+  const mockFind = jest.fn();
+
+  beforeEach(() => {
+    mockFind.mockReset();
+    jest.mocked(appContextService.getExperimentalFeatures).mockReset();
+    jest.mocked(getSettingsOrUndefined).mockReset();
+    jest.mocked(appContextService.getInternalUserSOClientForSpaces).mockReturnValue({
+      find: mockFind,
+    } as any);
+  });
+
+  it('lists the real space objects (ids) when space awareness is enabled', async () => {
+    mockFeatureFlag(true);
+    mockGetSettings({ use_space_awareness_migration_status: 'success' });
+    mockFind.mockResolvedValue({
+      saved_objects: [{ id: 'default' }, { id: 'space1' }, { id: 'space2' }],
+      total: 3,
+    });
+
+    const res = await getAllSpaceIds();
+
+    expect(mockFind).toHaveBeenCalledWith(expect.objectContaining({ type: 'space' }));
+    expect(res).toEqual({ spaceIds: new Set(['default', 'space1', 'space2']), truncated: false });
+  });
+
+  it('returns the global scope (*) without listing spaces when the feature flag is off', async () => {
+    mockFeatureFlag(false);
+
+    const res = await getAllSpaceIds();
+
+    expect(res).toEqual({ spaceIds: new Set(['*']), truncated: false });
+    expect(mockFind).not.toHaveBeenCalled();
+  });
+
+  it('returns the global scope (*) when the flag is on but Fleet has not migrated', async () => {
+    // Legacy policies are still space-agnostic until migration completes, so a global grant is
+    // required even though the feature flag is enabled.
+    mockFeatureFlag(true);
+    mockGetSettings({ use_space_awareness_migration_status: 'pending' });
+
+    const res = await getAllSpaceIds();
+
+    expect(res).toEqual({ spaceIds: new Set(['*']), truncated: false });
+    expect(mockFind).not.toHaveBeenCalled();
+  });
+
+  it('fails closed to a global check when no space can be listed', async () => {
+    mockFeatureFlag(true);
+    mockGetSettings({ use_space_awareness_migration_status: 'success' });
+    mockFind.mockResolvedValue({ saved_objects: [], total: 0 });
+
+    const res = await getAllSpaceIds();
+
+    expect(res.spaceIds).toEqual(new Set(['*']));
+  });
+
+  it('reports truncation when the listing is capped', async () => {
+    mockFeatureFlag(true);
+    mockGetSettings({ use_space_awareness_migration_status: 'success' });
+    mockFind.mockResolvedValue({ saved_objects: [{ id: 'default' }], total: 50000 });
+
+    const res = await getAllSpaceIds();
+
+    expect(res.truncated).toBe(true);
   });
 });

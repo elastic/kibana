@@ -91,7 +91,8 @@ export const putOutputHandler: RequestHandler<
       soClient,
       esClient,
       request.params.outputId,
-      updateBody as UpdateOutput
+      updateBody as UpdateOutput,
+      { fromPreconfiguration: false, request }
     );
     const output = await outputService.get(request.params.outputId);
     await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id, {
@@ -124,7 +125,10 @@ export const postOutputHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const { id, ...newOutput } = request.body;
-  const output = await outputService.create(soClient, esClient, newOutput as NewOutput, { id });
+  const output = await outputService.create(soClient, esClient, newOutput as NewOutput, {
+    id,
+    request,
+  });
   await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id, {
     isDefault: output.is_default,
     isDefaultMonitoring: output.is_default_monitoring,

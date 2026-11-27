@@ -29,6 +29,7 @@ import { SavedObjectsUtils } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import { withSpan } from '@kbn/apm-utils';
@@ -2478,7 +2479,12 @@ class AgentPolicyService {
       });
     const spaceIds = new Set<string>();
     for (const so of result.saved_objects) {
-      for (const ns of so.namespaces ?? []) {
+      // A legacy (space-agnostic) policy has no namespaces and applies to every space.
+      if (!so.namespaces?.length) {
+        spaceIds.add(ALL_SPACES_ID);
+        continue;
+      }
+      for (const ns of so.namespaces) {
         spaceIds.add(ns);
       }
     }

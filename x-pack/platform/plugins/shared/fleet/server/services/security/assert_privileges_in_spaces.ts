@@ -8,8 +8,10 @@
 import type { KibanaRequest } from '@kbn/core/server';
 
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
+
 import { FleetUnauthorizedError } from '../../errors';
 import { appContextService } from '..';
+import { getAllSpaceIds } from '../spaces/helpers';
 
 /**
  * Checks that the caller represented by `request` holds all the given Kibana
@@ -79,5 +81,76 @@ export async function assertPrivilegesInSpaces({
 
   if (!hasAllRequested) {
     throw new FleetUnauthorizedError(errorMessage);
+  }
+}
+
+type SpaceLookup = () => Promise<{ spaceIds: Set<string>; truncated: boolean }>;
+
+function isRbacActive(request: KibanaRequest) {
+  const security = appContextService.getSecurity();
+  return !!security && security.authz.mode.useRbacForRequest(request);
+}
+
+/** A global default applies to every space, so require Fleet privileges in all of them. */
+export async function assertCanManageDefaultSettings(
+  request: KibanaRequest,
+  objectType: string
+): Promise<void> {
+  if (!isRbacActive(request)) {
+    return;
+  }
+  const { spaceIds, truncated } = await getAllSpaceIds();
+  if (truncated) {
+    throw new FleetUnauthorizedError(
+      `Unable to verify authorization for ${objectType}: too many spaces to enumerate`
+    );
+  }
+  await assertPrivilegesInSpaces({
+    request,
+    spaceIds,
+    apiPrivileges: ['fleet-agent-policies-all'],
+    errorMessage: `Insufficient privileges for ${objectType}: global defaults apply to every space and require Fleet agent policy privileges in all spaces`,
+  });
+}
+
+/**
+ * Authorizes a write to a space-agnostic settings object: in every space when it is (or becomes)
+ * the default, otherwise in the spaces of the policies that reference it.
+ */
+export async function assertCanWriteSettingsObject({
+  request,
+  objectType,
+  id,
+  action,
+  isDefault,
+  references,
+}: {
+  request: KibanaRequest;
+  objectType: string;
+  id: string;
+  action: 'update' | 'delete';
+  isDefault: boolean;
+  references: Array<{ getSpaces: SpaceLookup; apiPrivileges: string[] }>;
+}): Promise<void> {
+  if (!isRbacActive(request)) {
+    return;
+  }
+  if (isDefault) {
+    return assertCanManageDefaultSettings(request, objectType);
+  }
+  const results = await Promise.all(references.map(({ getSpaces }) => getSpaces()));
+  if (results.some(({ truncated }) => truncated)) {
+    throw new FleetUnauthorizedError(
+      `Unable to verify ${action} authorization for ${objectType} ${id}: too many agent policies to enumerate`
+    );
+  }
+  const errorMessage = `Insufficient privileges to ${action} ${objectType} ${id}: it is used by agent policies in spaces you are not authorized to access`;
+  for (const [i, { apiPrivileges }] of references.entries()) {
+    await assertPrivilegesInSpaces({
+      request,
+      spaceIds: results[i].spaceIds,
+      apiPrivileges,
+      errorMessage,
+    });
   }
 }

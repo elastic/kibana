@@ -243,6 +243,15 @@ class AppContextService {
     });
   }
 
+  /** Internal client that can list the hidden `space` saved object type. */
+  public getInternalUserSOClientForSpaces() {
+    // soClient as kibana internal users, be careful on how you use it, security is not enabled
+    return appContextService.getSavedObjects().getUnsafeInternalClient({
+      excludedExtensions: [SPACES_EXTENSION_ID],
+      includedHiddenTypes: ['space'],
+    });
+  }
+
   public getInternalUserESClient() {
     if (!this.esClient) {
       throw new Error('Elasticsearch start service not set.');

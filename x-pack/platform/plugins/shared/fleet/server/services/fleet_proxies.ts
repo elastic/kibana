@@ -9,6 +9,7 @@ import type {
   SavedObjectsClientContract,
   SavedObject,
   ElasticsearchClient,
+  KibanaRequest,
 } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { omit } from 'lodash';
@@ -35,6 +36,69 @@ import { appContextService } from './app_context';
 import { fleetServerHostService } from './fleet_server_host';
 import { outputService } from './output';
 import { downloadSourceService } from './download_source';
+import { agentPolicyService } from './agent_policy';
+import { packagePolicyService } from './package_policy';
+import {
+  assertCanManageDefaultSettings,
+  assertPrivilegesInSpaces,
+} from './security/assert_privileges_in_spaces';
+
+/** Authorizes a proxy write against the spaces of every policy using its related objects. */
+async function assertProxyCrossSpacePrivileges(
+  request: KibanaRequest,
+  proxyId: string,
+  related: Awaited<ReturnType<typeof getFleetProxyRelatedSavedObjects>>
+) {
+  const security = appContextService.getSecurity();
+  if (!security || !security.authz.mode.useRbacForRequest(request)) {
+    return;
+  }
+  const { outputs, fleetServerHosts, downloadSources, truncated } = related;
+  if (truncated) {
+    throw new FleetProxyUnauthorizedError(
+      `Unable to verify authorization for proxy ${proxyId}: too many related settings objects to enumerate`
+    );
+  }
+  if (
+    outputs.some((o) => o.is_default || o.is_default_monitoring) ||
+    fleetServerHosts.some((h) => h.is_default) ||
+    downloadSources.some((d) => d.is_default)
+  ) {
+    return assertCanManageDefaultSettings(request, 'proxy');
+  }
+  const lookups = [
+    ...outputs.flatMap((o) => [
+      () => agentPolicyService.getSpacesForPoliciesUsingOutput(o.id),
+      () => packagePolicyService.getSpacesForPoliciesUsingOutput(o.id),
+    ]),
+    ...fleetServerHosts.map(
+      (h) => () => agentPolicyService.getSpacesForPoliciesUsingFleetServerHost(h.id)
+    ),
+    ...downloadSources.map(
+      (d) => () => agentPolicyService.getSpacesForPoliciesUsingDownloadSource(d.id)
+    ),
+  ];
+  const results = await pMap(lookups, (lookup) => lookup(), {
+    concurrency: MAX_CONCURRENT_FLEET_PROXIES_OPERATIONS,
+  });
+  if (results.some((r) => r.truncated)) {
+    throw new FleetProxyUnauthorizedError(
+      `Unable to verify authorization for proxy ${proxyId}: too many agent policies to enumerate`
+    );
+  }
+  const spaceIds = new Set<string>();
+  for (const result of results) {
+    for (const spaceId of result.spaceIds) {
+      spaceIds.add(spaceId);
+    }
+  }
+  await assertPrivilegesInSpaces({
+    request,
+    spaceIds,
+    apiPrivileges: ['fleet-agent-policies-all'],
+    errorMessage: `Insufficient privileges to modify proxy ${proxyId}: it is used by agent policies in spaces you are not authorized to access`,
+  });
+}
 
 function savedObjectToFleetProxy(so: SavedObject<FleetProxySOAttributes>): FleetProxy {
   const { proxy_headers: proxyHeaders, ...rest } = so.attributes;
@@ -139,7 +203,7 @@ export async function deleteFleetProxy(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   id: string,
-  options?: { fromPreconfiguration?: boolean }
+  options?: { fromPreconfiguration?: boolean; request?: KibanaRequest }
 ) {
   const logger = appContextService.getLogger();
   logger.debug(`Deleting fleet proxy ${id}`);
@@ -149,7 +213,14 @@ export async function deleteFleetProxy(
   if (fleetProxy.is_preconfigured && !options?.fromPreconfiguration) {
     throw new FleetProxyUnauthorizedError(`Cannot delete ${id} preconfigured proxy`);
   }
-  const { outputs, fleetServerHosts, downloadSources } = await getFleetProxyRelatedSavedObjects(id);
+
+  // Authorize the set that will be detached.
+  const related = await getFleetProxyRelatedSavedObjects(id);
+  const { outputs, fleetServerHosts, downloadSources } = related;
+
+  if (options?.request && !options.fromPreconfiguration) {
+    await assertProxyCrossSpacePrivileges(options.request, id, related);
+  }
 
   if (
     // download sources cannot be preconfigured
@@ -163,7 +234,14 @@ export async function deleteFleetProxy(
     );
   }
 
-  await updateRelatedSavedObject(soClient, esClient, fleetServerHosts, outputs, downloadSources);
+  await updateRelatedSavedObject(
+    soClient,
+    esClient,
+    id,
+    fleetServerHosts,
+    outputs,
+    downloadSources
+  );
   logger.debug(`Deleted fleet proxy ${id}`);
 
   return await soClient.delete(FLEET_PROXY_SAVED_OBJECT_TYPE, id);
@@ -173,7 +251,7 @@ export async function updateFleetProxy(
   soClient: SavedObjectsClientContract,
   id: string,
   data: Partial<FleetProxy>,
-  options?: { fromPreconfiguration?: boolean }
+  options?: { fromPreconfiguration?: boolean; request?: KibanaRequest }
 ) {
   const logger = appContextService.getLogger();
   logger.debug(`Updating fleet proxy ${id}`);
@@ -181,6 +259,11 @@ export async function updateFleetProxy(
 
   if (data.is_preconfigured && !options?.fromPreconfiguration) {
     throw new FleetProxyUnauthorizedError(`Cannot update ${id} preconfigured proxy`);
+  }
+
+  if (options?.request && !options.fromPreconfiguration) {
+    const related = await getFleetProxyRelatedSavedObjects(id);
+    await assertProxyCrossSpacePrivileges(options.request, id, related);
   }
 
   await soClient.update<FleetProxySOAttributes>(
@@ -228,52 +311,71 @@ export async function bulkGetFleetProxies(
     );
 }
 
+// Detach from a fresh copy, skipping objects reassigned to another proxy since they were listed.
 async function updateRelatedSavedObject(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
+  proxyId: string,
   fleetServerHosts: FleetServerHost[],
   outputs: Output[],
   downloadSources: DownloadSource[]
 ) {
   await pMap(
     fleetServerHosts,
-    (fleetServerHost) =>
-      fleetServerHostService.update(soClient, esClient, fleetServerHost.id, {
+    async ({ id }) => {
+      const fleetServerHost = await fleetServerHostService.get(id);
+      if (fleetServerHost.proxy_id !== proxyId) return;
+      await fleetServerHostService.update(soClient, esClient, id, {
         ...omit(fleetServerHost, 'id'),
         proxy_id: null,
-      }),
+      });
+    },
     { concurrency: MAX_CONCURRENT_FLEET_PROXIES_OPERATIONS }
   );
 
   await pMap(
     outputs,
-    (output) =>
-      outputService.update(soClient, esClient, output.id, {
+    async ({ id }) => {
+      const output = await outputService.get(id);
+      if (output.proxy_id !== proxyId) return;
+      await outputService.update(soClient, esClient, id, {
         ...omit(output, 'id'),
         proxy_id: null,
-      } as Partial<Output>),
+      } as Partial<Output>);
+    },
     { concurrency: MAX_CONCURRENT_FLEET_PROXIES_OPERATIONS }
   );
 
-  await pMap(downloadSources, (downloadSource) =>
-    downloadSourceService.update(soClient, esClient, downloadSource.id, {
+  await pMap(downloadSources, async ({ id }) => {
+    const downloadSource = await downloadSourceService.get(id);
+    if (downloadSource.proxy_id !== proxyId) return;
+    await downloadSourceService.update(soClient, esClient, id, {
       ...omit(downloadSource, 'id'),
       proxy_id: null,
-    })
-  );
+    });
+  });
 }
 
 export async function getFleetProxyRelatedSavedObjects(proxyId: string) {
-  const [{ items: fleetServerHosts }, { items: outputs }, { items: downloadSources }] =
-    await Promise.all([
-      fleetServerHostService.listAllForProxyId(proxyId),
-      outputService.listAllForProxyId(proxyId),
-      downloadSourceService.listAllForProxyId(proxyId),
-    ]);
+  const [
+    { items: fleetServerHosts, total: fleetServerHostsTotal },
+    { items: outputs, total: outputsTotal },
+    { items: downloadSources, total: downloadSourcesTotal },
+  ] = await Promise.all([
+    fleetServerHostService.listAllForProxyId(proxyId),
+    outputService.listAllForProxyId(proxyId),
+    downloadSourceService.listAllForProxyId(proxyId),
+  ]);
+
+  const truncated =
+    fleetServerHosts.length < fleetServerHostsTotal ||
+    outputs.length < outputsTotal ||
+    downloadSources.length < downloadSourcesTotal;
 
   return {
     fleetServerHosts,
     outputs,
     downloadSources,
+    truncated,
   };
 }

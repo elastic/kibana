@@ -10,7 +10,16 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { FleetUnauthorizedError } from '../../errors';
 import { appContextService } from '..';
 
-import { assertPrivilegesInSpaces } from './assert_privileges_in_spaces';
+import { getAllSpaceIds } from '../spaces/helpers';
+
+import {
+  assertPrivilegesInSpaces,
+  assertCanManageDefaultSettings,
+  assertCanWriteSettingsObject,
+} from './assert_privileges_in_spaces';
+
+jest.mock('../spaces/helpers');
+const mockGetAllSpaceIds = getAllSpaceIds as jest.Mock;
 
 // Mutable stubs closed over by the mock factory so tests can override them per-test.
 const mockFns = {
@@ -217,5 +226,98 @@ describe('assertPrivilegesInSpaces', () => {
     expect(mockFns.atSpaces).toHaveBeenCalledWith(['default'], {
       kibana: ['api:integrations-all', 'api:fleet-agent-policies-all'],
     });
+  });
+});
+
+describe('assertCanManageDefaultSettings', () => {
+  beforeEach(() => {
+    mockGetAllSpaceIds.mockResolvedValue({
+      spaceIds: new Set(['space1', 'space2']),
+      truncated: false,
+    });
+  });
+
+  it('requires fleet-agent-policies-all in every existing space', async () => {
+    await expect(assertCanManageDefaultSettings(mockRequest, 'output')).resolves.toBeUndefined();
+
+    expect(mockFns.atSpaces).toHaveBeenCalledWith(['space1', 'space2'], {
+      kibana: ['api:fleet-agent-policies-all'],
+    });
+    expect(mockFns.globally).not.toHaveBeenCalled();
+  });
+
+  it('throws when the caller lacks the privilege in an existing space', async () => {
+    mockFns.atSpaces.mockResolvedValue({ hasAllRequested: false });
+
+    await expect(assertCanManageDefaultSettings(mockRequest, 'Fleet Server host')).rejects.toThrow(
+      FleetUnauthorizedError
+    );
+  });
+
+  it('fails closed when the space listing is truncated', async () => {
+    mockGetAllSpaceIds.mockResolvedValue({ spaceIds: new Set(['default']), truncated: true });
+
+    await expect(assertCanManageDefaultSettings(mockRequest, 'output')).rejects.toThrow(
+      FleetUnauthorizedError
+    );
+    expect(mockFns.atSpaces).not.toHaveBeenCalled();
+  });
+
+  it('is a no-op when RBAC is not active for the request', async () => {
+    mockFns.useRbacForRequest.mockReturnValue(false);
+
+    await expect(
+      assertCanManageDefaultSettings(mockRequest, 'download source')
+    ).resolves.toBeUndefined();
+    expect(mockGetAllSpaceIds).not.toHaveBeenCalled();
+  });
+});
+
+describe('assertCanWriteSettingsObject', () => {
+  const getSpaces = jest.fn();
+  const params = (isDefault: boolean) => ({
+    request: mockRequest,
+    objectType: 'download source',
+    id: 'ds-1',
+    action: 'update' as const,
+    isDefault,
+    references: [{ getSpaces, apiPrivileges: ['fleet-agent-policies-all'] }],
+  });
+
+  beforeEach(() => {
+    getSpaces.mockReset();
+    getSpaces.mockResolvedValue({ spaceIds: new Set(['space-a']), truncated: false });
+    mockGetAllSpaceIds.mockResolvedValue({ spaceIds: new Set(['default']), truncated: false });
+  });
+
+  it('checks the spaces of referencing policies for a non-default object', async () => {
+    await assertCanWriteSettingsObject(params(false));
+
+    expect(mockFns.atSpaces).toHaveBeenCalledWith(['space-a'], expect.any(Object));
+    expect(mockGetAllSpaceIds).not.toHaveBeenCalled();
+  });
+
+  it('checks all spaces, and only all spaces, for a default object', async () => {
+    await assertCanWriteSettingsObject(params(true));
+
+    expect(mockFns.atSpaces).toHaveBeenCalledWith(['default'], expect.any(Object));
+    expect(getSpaces).not.toHaveBeenCalled();
+  });
+
+  it('fails closed when a reference lookup is truncated', async () => {
+    getSpaces.mockResolvedValue({ spaceIds: new Set(['space-a']), truncated: true });
+
+    await expect(assertCanWriteSettingsObject(params(false))).rejects.toThrow(
+      /too many agent policies/
+    );
+    expect(mockFns.atSpaces).not.toHaveBeenCalled();
+  });
+
+  it('skips lookups when RBAC is not active for the request', async () => {
+    mockFns.useRbacForRequest.mockReturnValue(false);
+
+    await assertCanWriteSettingsObject(params(false));
+
+    expect(getSpaces).not.toHaveBeenCalled();
   });
 });

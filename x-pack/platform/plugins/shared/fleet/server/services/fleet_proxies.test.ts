@@ -58,6 +58,15 @@ describe('Fleet proxies service', () => {
     soClientMock.delete.mockReset();
     mockedFleetServerHostService.update.mockReset();
     mockedFleetServerHostService.listAllForProxyId.mockReset();
+    // Related objects still reference the proxy when re-read before detaching.
+    mockedOutputService.get.mockReset();
+    mockedOutputService.get.mockImplementation(
+      async (id) => ({ id, proxy_id: PROXY_IDS.RELATED_PRECONFIGURED } as any)
+    );
+    mockedFleetServerHostService.get.mockReset();
+    mockedFleetServerHostService.get.mockImplementation(
+      async (id) => ({ id, proxy_id: PROXY_IDS.RELATED_PRECONFIGURED } as any)
+    );
     mockedDownloadSourceService.listAllForProxyId.mockImplementation(async () => ({
       items: [],
       total: 0,
@@ -214,6 +223,18 @@ describe('Fleet proxies service', () => {
         fromPreconfiguration: true,
       });
       expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(mockedFleetServerHostService.update).toHaveBeenCalled();
+      expect(soClientMock.delete).toHaveBeenCalled();
+    });
+
+    it('should not detach an object reassigned to another proxy after it was listed', async () => {
+      mockedOutputService.get.mockResolvedValue({ id: 'test', proxy_id: 'other-proxy' } as any);
+
+      await deleteFleetProxy(soClientMock, esClientMock, PROXY_IDS.RELATED_PRECONFIGURED, {
+        fromPreconfiguration: true,
+      });
+
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
       expect(mockedFleetServerHostService.update).toHaveBeenCalled();
       expect(soClientMock.delete).toHaveBeenCalled();
     });

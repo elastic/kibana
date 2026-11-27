@@ -42,7 +42,10 @@ import {
 import { appContextService } from './app_context';
 
 import { agentPolicyService } from './agent_policy';
-import { assertPrivilegesInSpaces } from './security/assert_privileges_in_spaces';
+import {
+  assertCanManageDefaultSettings,
+  assertCanWriteSettingsObject,
+} from './security/assert_privileges_in_spaces';
 import { escapeSearchQueryPhrase } from './saved_object';
 import {
   deleteFleetServerHostsSecrets,
@@ -93,6 +96,27 @@ function savedObjectToFleetServerHost(
   };
 }
 
+function assertCanWriteFleetServerHost(
+  request: KibanaRequest,
+  id: string,
+  action: 'update' | 'delete',
+  isDefault = false
+) {
+  return assertCanWriteSettingsObject({
+    request,
+    objectType: 'Fleet Server host',
+    id,
+    action,
+    isDefault,
+    references: [
+      {
+        getSpaces: () => agentPolicyService.getSpacesForPoliciesUsingFleetServerHost(id),
+        apiPrivileges: ['fleet-agent-policies-all'],
+      },
+    ],
+  });
+}
+
 class FleetServerHostService {
   private get soClient() {
     return appContextService.getInternalUserSOClient();
@@ -111,12 +135,17 @@ class FleetServerHostService {
       overwrite?: boolean;
       fromPreconfiguration?: boolean;
       secretHashes?: Record<string, any>;
+      request?: KibanaRequest;
     }
   ): Promise<FleetServerHost> {
     const logger = appContextService.getLogger();
     const data: FleetServerHostSOAttributes = { ...omit(fleetServerHost, ['ssl', 'secrets']) };
 
     validateFleetSavedObjectId(options?.id);
+
+    if (options?.request && !options.fromPreconfiguration && fleetServerHost.is_default) {
+      await assertCanManageDefaultSettings(options.request, 'Fleet Server host');
+    }
     ensureNoDuplicateSecrets(
       fleetServerHost,
       (options?.fromPreconfiguration || fleetServerHost.is_preconfigured) ?? false
@@ -363,22 +392,7 @@ class FleetServerHostService {
     }
 
     if (options?.request) {
-      const security = appContextService.getSecurity();
-      if (security && security.authz.mode.useRbacForRequest(options.request)) {
-        const { spaceIds, truncated } =
-          await agentPolicyService.getSpacesForPoliciesUsingFleetServerHost(id);
-        if (truncated) {
-          throw new FleetServerHostUnauthorizedError(
-            `Unable to verify delete authorization for Fleet Server host ${id}: too many agent policies to enumerate`
-          );
-        }
-        await assertPrivilegesInSpaces({
-          request: options.request,
-          spaceIds,
-          apiPrivileges: ['fleet-agent-policies-all'],
-          errorMessage: `Insufficient privileges to delete Fleet Server host ${id}: it is used by agent policies in spaces you are not authorized to access`,
-        });
-      }
+      await assertCanWriteFleetServerHost(options.request, id, 'delete');
     }
 
     await agentPolicyService.removeFleetServerHostFromAll(esClient, id, {
@@ -407,6 +421,7 @@ class FleetServerHostService {
        * kept. Set by preconfiguration, for which the Kibana config file is authoritative.
        */
       declaresAllSecrets?: boolean;
+      request?: KibanaRequest;
     }
   ) {
     let secretsToDelete: SecretReference[] = [];
@@ -415,6 +430,16 @@ class FleetServerHostService {
     logger.debug(`Updating fleet server host ${id}`);
 
     const originalItem = await this.get(id);
+
+    // Skipped for preconfiguration, including the internal call that unsets the previous default.
+    if (options?.request && !options.fromPreconfiguration) {
+      await assertCanWriteFleetServerHost(
+        options.request,
+        id,
+        'update',
+        Boolean(originalItem.is_default || data.is_default)
+      );
+    }
     ensureNoDuplicateSecrets(
       data,
       (options?.fromPreconfiguration || originalItem.is_preconfigured) ?? false

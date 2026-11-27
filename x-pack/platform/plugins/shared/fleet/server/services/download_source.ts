@@ -45,7 +45,10 @@ import {
 import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
 import { escapeSearchQueryPhrase } from './saved_object';
-import { assertPrivilegesInSpaces } from './security/assert_privileges_in_spaces';
+import {
+  assertCanManageDefaultSettings,
+  assertCanWriteSettingsObject,
+} from './security/assert_privileges_in_spaces';
 import { getFleetProxy } from './fleet_proxies';
 import {
   extractAndWriteDownloadSourcesSecrets,
@@ -82,6 +85,27 @@ export function savedObjectToDownloadSource(so: SavedObject<DownloadSourceSOAttr
     ...(auth ? { auth: JSON.parse(auth as string) } : {}),
     id: sourceId ?? so.id,
   };
+}
+
+function assertCanWriteDownloadSource(
+  request: KibanaRequest,
+  id: string,
+  action: 'update' | 'delete',
+  isDefault = false
+) {
+  return assertCanWriteSettingsObject({
+    request,
+    objectType: 'download source',
+    id,
+    action,
+    isDefault,
+    references: [
+      {
+        getSpaces: () => agentPolicyService.getSpacesForPoliciesUsingDownloadSource(id),
+        apiPrivileges: ['fleet-agent-policies-all'],
+      },
+    ],
+  });
 }
 
 class DownloadSourceService {
@@ -141,12 +165,16 @@ class DownloadSourceService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     downloadSource: DownloadSourceBase,
-    options?: { id?: string; overwrite?: boolean }
+    options?: { id?: string; overwrite?: boolean; request?: KibanaRequest }
   ): Promise<DownloadSource> {
     const logger = appContextService.getLogger();
     logger.debug(`Creating new download source`);
 
     validateFleetSavedObjectId(options?.id);
+
+    if (options?.request && downloadSource.is_default) {
+      await assertCanManageDefaultSettings(options.request, 'download source');
+    }
     if (options?.id === DEFAULT_DOWNLOAD_SOURCE_REFERENCE) {
       throw new DownloadSourceError(
         `'${DEFAULT_DOWNLOAD_SOURCE_REFERENCE}' is a reserved download source ID and cannot be used.`
@@ -260,7 +288,8 @@ class DownloadSourceService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     id: string,
-    newData: Partial<DownloadSource> & { auth?: DownloadSource['auth'] | null }
+    newData: Partial<DownloadSource> & { auth?: DownloadSource['auth'] | null },
+    options?: { request?: KibanaRequest }
   ) {
     let secretsToDelete: SecretReference[] = [];
 
@@ -268,6 +297,15 @@ class DownloadSourceService {
     logger.debug(`Updating download source ${id}`);
 
     const originalItem = await this.get(id);
+
+    if (options?.request) {
+      await assertCanWriteDownloadSource(
+        options.request,
+        id,
+        'update',
+        Boolean(originalItem.is_default || newData.is_default)
+      );
+    }
     const updateData: Partial<DownloadSourceSOAttributes> = {
       ...omit(newData, ['ssl', 'auth', 'secrets', 'id']),
     };
@@ -462,22 +500,7 @@ class DownloadSourceService {
     }
 
     if (options?.request) {
-      const security = appContextService.getSecurity();
-      if (security && security.authz.mode.useRbacForRequest(options.request)) {
-        const { spaceIds, truncated } =
-          await agentPolicyService.getSpacesForPoliciesUsingDownloadSource(id);
-        if (truncated) {
-          throw new DownloadSourceError(
-            `Unable to verify delete authorization for download source ${id}: too many agent policies to enumerate`
-          );
-        }
-        await assertPrivilegesInSpaces({
-          request: options.request,
-          spaceIds,
-          apiPrivileges: ['fleet-agent-policies-all'],
-          errorMessage: `Insufficient privileges to delete download source ${id}: it is used by agent policies in spaces you are not authorized to access`,
-        });
-      }
+      await assertCanWriteDownloadSource(options.request, id, 'delete');
     }
 
     await agentPolicyService.removeDefaultSourceFromAll(
@@ -550,7 +573,7 @@ class DownloadSourceService {
     const downloadSources = await this.soClient.find<DownloadSourceSOAttributes>({
       type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
       searchFields: ['proxy_id'],
-      search: proxyId,
+      search: escapeSearchQueryPhrase(proxyId),
       perPage: SO_SEARCH_LIMIT,
     });
 

@@ -147,7 +147,10 @@ import {
   getOtlpExporterUpdate,
   validateOtlpSendingQueueSizes,
 } from './utils/managed_otlp';
-import { assertPrivilegesInSpaces } from './security/assert_privileges_in_spaces';
+import {
+  assertCanManageDefaultSettings,
+  assertCanWriteSettingsObject,
+} from './security/assert_privileges_in_spaces';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 
@@ -830,12 +833,21 @@ class OutputService {
       fromPreconfiguration?: boolean;
       overwrite?: boolean;
       secretHashes?: Record<string, any>;
+      request?: KibanaRequest;
     }
   ): Promise<Output> {
     const logger = appContextService.getLogger();
     logger.debug(`Creating new output`);
 
     validateFleetSavedObjectId(options?.id);
+
+    if (
+      options?.request &&
+      !options.fromPreconfiguration &&
+      (output.is_default || output.is_default_monitoring)
+    ) {
+      await assertCanManageDefaultSettings(options.request, 'output');
+    }
 
     await this.assertOtlpOutputAllowed(output, esClient, soClient);
     // preconfigured outputs are checked before they are created, so Fleet setup does not fail
@@ -1241,6 +1253,41 @@ class OutputService {
     return outputSavedObjectToOutput(outputSO);
   }
 
+  // Policies may reference an output by its public id or by the id the request used.
+  private getOutputRefIds(requestId: string, output: Output) {
+    return _.uniq([requestId, output.id]);
+  }
+
+  private assertCanWriteOutput(
+    refIds: string[],
+    request: KibanaRequest,
+    action: 'update' | 'delete',
+    isDefault = false
+  ) {
+    // Only delete rewrites package policies.
+    const packagePolicyPrivileges =
+      action === 'delete'
+        ? ['integrations-all', 'fleet-agent-policies-all']
+        : ['fleet-agent-policies-all'];
+    return assertCanWriteSettingsObject({
+      request,
+      objectType: 'output',
+      id: refIds[0],
+      action,
+      isDefault,
+      references: refIds.flatMap((refId) => [
+        {
+          getSpaces: () => agentPolicyService.getSpacesForPoliciesUsingOutput(refId),
+          apiPrivileges: ['fleet-agent-policies-all'],
+        },
+        {
+          getSpaces: () => packagePolicyService.getSpacesForPoliciesUsingOutput(refId),
+          apiPrivileges: packagePolicyPrivileges,
+        },
+      ]),
+    });
+  }
+
   public async delete(
     id: string,
     {
@@ -1267,52 +1314,23 @@ class OutputService {
       throw new OutputUnauthorizedError(`Default monitoring output ${id} cannot be deleted.`);
     }
 
+    const refIds = this.getOutputRefIds(id, originalOutput);
     if (request) {
-      const security = appContextService.getSecurity();
-      if (security && security.authz.mode.useRbacForRequest(request)) {
-        // Collect agent-policy and package-policy spaces before any mutation.
-        // Fail closed if SO_SEARCH_LIMIT is hit.
-        const [agentPolicySpaces, packagePolicySpaces] = await Promise.all([
-          agentPolicyService.getSpacesForPoliciesUsingOutput(id),
-          packagePolicyService.getSpacesForPoliciesUsingOutput(id),
-        ]);
-        if (agentPolicySpaces.truncated || packagePolicySpaces.truncated) {
-          throw new OutputUnauthorizedError(
-            `Unable to verify delete authorization for output ${id}: too many agent policies to enumerate`
-          );
-        }
-        const errorMessage = `Insufficient privileges to delete output ${id}: it is used by agent policies in spaces you are not authorized to access`;
-        // Agent-policy spaces only need fleet-agent-policies-all.
-        // Package-policy spaces also need integrations-all because removeOutputFromAll
-        // rewrites package policies too. Check them separately so a user with
-        // integrations-all only in the spaces that actually have package policies
-        // is not incorrectly blocked in agent-only spaces.
-        await assertPrivilegesInSpaces({
-          request,
-          spaceIds: agentPolicySpaces.spaceIds,
-          apiPrivileges: ['fleet-agent-policies-all'],
-          errorMessage,
-        });
-        await assertPrivilegesInSpaces({
-          request,
-          spaceIds: packagePolicySpaces.spaceIds,
-          apiPrivileges: ['integrations-all', 'fleet-agent-policies-all'],
-          errorMessage,
-        });
-      }
+      await this.assertCanWriteOutput(refIds, request, 'delete');
     }
 
-    await packagePolicyService.removeOutputFromAll(
-      appContextService.getInternalUserESClient(),
-      id,
-      {
-        force: fromPreconfiguration,
-      }
-    );
-
-    await agentPolicyService.removeOutputFromAll(appContextService.getInternalUserESClient(), id, {
-      force: fromPreconfiguration,
-    });
+    for (const refId of refIds) {
+      await packagePolicyService.removeOutputFromAll(
+        appContextService.getInternalUserESClient(),
+        refId,
+        { force: fromPreconfiguration }
+      );
+      await agentPolicyService.removeOutputFromAll(
+        appContextService.getInternalUserESClient(),
+        refId,
+        { force: fromPreconfiguration }
+      );
+    }
 
     auditLoggingService.writeCustomSoAuditLog({
       action: 'delete',
@@ -1340,6 +1358,7 @@ class OutputService {
       fromPreconfiguration = false,
       secretHashes,
       declaresAllSecrets = false,
+      request,
     }: {
       fromPreconfiguration: boolean;
       secretHashes?: Record<string, any>;
@@ -1348,6 +1367,7 @@ class OutputService {
        * than kept. Set by preconfiguration, for which the Kibana config file is authoritative.
        */
       declaresAllSecrets?: boolean;
+      request?: KibanaRequest;
     } = {
       fromPreconfiguration: false,
     }
@@ -1357,6 +1377,20 @@ class OutputService {
 
     let secretsToDelete: SecretReference[] = [];
     const originalOutput = await this.get(id);
+
+    if (request && !fromPreconfiguration) {
+      await this.assertCanWriteOutput(
+        this.getOutputRefIds(id, originalOutput),
+        request,
+        'update',
+        Boolean(
+          originalOutput.is_default ||
+            originalOutput.is_default_monitoring ||
+            data.is_default ||
+            data.is_default_monitoring
+        )
+      );
+    }
 
     this._validateFieldsAreEditable(originalOutput, data, id, fromPreconfiguration);
     if (
