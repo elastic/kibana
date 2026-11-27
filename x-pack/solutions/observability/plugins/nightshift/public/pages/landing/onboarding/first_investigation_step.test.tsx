@@ -18,7 +18,7 @@ jest.mock('../../../data/investigations/use_start_investigation', () => ({
   useStartInvestigation: () => ({ startInvestigation: mockStartInvestigation, isStarting: false }),
 }));
 jest.mock('./use_onboarding', () => ({
-  useStartOnboardingSuggestions: () => ({ mutate: mockRetry, isLoading: false }),
+  useStartOnboardingSuggestions: () => ({ start: mockRetry, isLoading: false }),
 }));
 jest.mock('../../../components/entities/sandbox_connector/connect_sources_grid', () => ({
   ...jest.requireActual('../../../components/entities/sandbox_connector/connect_sources_grid'),

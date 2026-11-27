@@ -40,6 +40,8 @@ export interface OnboardingSuggestionsExecution {
   started_at?: string;
   finished_at?: string;
   error?: string;
+  /** The assigned connectors have changed since this run, or the run predates connector tracking. */
+  needs_refresh?: boolean;
   /** The suggestions (its outputs), once it succeeded. */
   suggestions?: OnboardingSuggestion[];
 }

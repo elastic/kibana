@@ -289,6 +289,7 @@ describe('createOnboardingClient', () => {
         started_at: '2026-10-08T09:00:00.000Z',
         finished_at: '2026-10-08T09:03:00.000Z',
         error: undefined,
+        needs_refresh: true,
         suggestions: [suggestion],
       },
     });
@@ -302,6 +303,39 @@ describe('createOnboardingClient', () => {
     );
   });
 
+  it.each([
+    ['assignment order changed', ['es', 'github'], ['github', 'es'], false],
+    ['a connector was added', ['es'], ['es', 'github'], true],
+    ['a connector was removed', ['es', 'github'], ['es'], true],
+    ['a connector was replaced', ['es'], ['remote-es'], true],
+  ])('checks whether suggestions need a refresh when %s', async (_, saved, current, expected) => {
+    const { client, request } = setup({
+      executions: [{ id: 'exec-1' }],
+      execution: {
+        id: 'exec-1',
+        status: 'completed',
+        context: { metadata: { nightshiftOnboardingConnectorIds: saved } },
+      },
+      agentConnectorIds: current,
+    });
+
+    expect((await client.get(request)).execution?.needs_refresh).toBe(expected);
+  });
+
+  it('omits the refresh flag when the current connectors cannot be read', async () => {
+    const { client, registry, request } = setup({
+      executions: [{ id: 'exec-1' }],
+      execution: { id: 'exec-1', status: 'completed' },
+    });
+    registry.get.mockRejectedValue(new Error('Could not read the agent'));
+
+    expect(await client.get(request)).toMatchObject({
+      agent_installed: true,
+      execution: { execution_id: 'exec-1', status: 'succeeded' },
+    });
+    expect((await client.get(request)).execution).not.toHaveProperty('needs_refresh');
+  });
+
   it('reports a running execution without suggestions', async () => {
     const { client, request } = setup({
       executions: [{ id: 'exec-1' }],
@@ -313,16 +347,20 @@ describe('createOnboardingClient', () => {
     );
   });
 
-  it('starts the workflow without inputs', async () => {
-    const { client, management, request } = setup();
+  it('starts the workflow with a snapshot of the space’s assigned connectors', async () => {
+    const { client, management, request } = setup({
+      spaceId: 'onboarding',
+      agentConnectorIds: ['es', 'github'],
+    });
 
     expect(await client.start(request)).toEqual({ execution_id: 'exec-2' });
     expect(management.runWorkflow).toHaveBeenCalledWith(
       expect.objectContaining({ id: NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID }),
-      'default',
+      'onboarding',
       {},
       request,
-      'nightshift-onboarding'
+      'nightshift-onboarding',
+      { nightshiftOnboardingConnectorIds: ['es', 'github'] }
     );
   });
 
