@@ -6,5 +6,5 @@
  */
 
 // The menu loads lazily through one shared chunk; see `ui/lazy_actions_menu_popover.tsx`.
-export type { ActionOptionData } from './types';
-export { ActionsMenuPopover } from './ui/actions_menu_popover';
+export { ActionsMenuPopover, useWarmActionsMenu } from './ui/lazy_actions_menu_popover';
+export type { ActionOptionData, ActionsMenuInsertionContext } from './types';

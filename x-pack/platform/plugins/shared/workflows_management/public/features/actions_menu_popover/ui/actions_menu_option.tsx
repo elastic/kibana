@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { getBaseConnectorType } from '@kbn/workflows-ui';
 import { getActionIconTileVariantStyle } from './action_icon_tile.styles';
 import type { componentStyles } from './actions_menu.styles';
+import { ActionsMenuIcon } from './actions_menu_icon';
 import { ActionsMenuAiIcon } from './ai_icon_tile';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { getIconGlyphColor } from '../lib/get_action_options';
@@ -119,7 +120,9 @@ function ActionOptionIcon({
     if (action.iconType === 'sparkles') {
       return <ActionsMenuAiIcon />;
     }
-    return <EuiIcon type={action.iconType} size="m" color={glyphColor} aria-hidden={true} />;
+    return (
+      <ActionsMenuIcon type={action.iconType} size="m" color={glyphColor} aria-hidden={true} />
+    );
   }
   return null;
 }

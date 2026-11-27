@@ -17,6 +17,9 @@ import type {
 export const STEPS_PREFIX = 'Steps: ';
 export const MAX_VISIBLE_STEPS = 7;
 
+/** What the root browse list is offering — drives the section header copy. */
+export type AddGroupContent = 'both' | 'triggers' | 'steps';
+
 interface UseDisplayOptionsArgs {
   options: ActionOptionData[];
   categoryTree?: ActionOptionData[];
@@ -24,6 +27,11 @@ interface UseDisplayOptionsArgs {
   commands?: EditorCommand[];
   jumpToStepEntries?: JumpToStepEntry[];
   currentPath: string[];
+  /**
+   * Root browse header: "Add trigger or step" / "Add trigger" / "Add step".
+   * Defaults to `both` when omitted.
+   */
+  addGroupContent?: AddGroupContent;
 }
 
 export function useDisplayOptions({
@@ -33,6 +41,7 @@ export function useDisplayOptions({
   commands,
   jumpToStepEntries,
   currentPath,
+  addGroupContent,
 }: UseDisplayOptionsArgs): MenuSelectableOption[] {
   return useMemo(
     () =>
@@ -43,8 +52,9 @@ export function useDisplayOptions({
         commands,
         jumpToStepEntries,
         currentPath,
+        addGroupContent,
       }),
-    [options, categoryTree, searchTerm, commands, jumpToStepEntries, currentPath]
+    [options, categoryTree, searchTerm, commands, jumpToStepEntries, currentPath, addGroupContent]
   );
 }
 
@@ -193,6 +203,24 @@ function buildSearchModeOptions({
   return result;
 }
 
+function getAddGroupLabel(content: AddGroupContent): string {
+  switch (content) {
+    case 'triggers':
+      return i18n.translate('workflows.actionsMenu.addTriggerGroupLabel', {
+        defaultMessage: 'Add trigger',
+      });
+    case 'steps':
+      return i18n.translate('workflows.actionsMenu.addStepOnlyGroupLabel', {
+        defaultMessage: 'Add step',
+      });
+    case 'both':
+    default:
+      return i18n.translate('workflows.actionsMenu.addStepGroupLabel', {
+        defaultMessage: 'Add trigger or step',
+      });
+  }
+}
+
 export function buildDisplayOptions({
   options,
   categoryTree,
@@ -200,6 +228,7 @@ export function buildDisplayOptions({
   commands,
   jumpToStepEntries,
   currentPath,
+  addGroupContent = 'both',
 }: UseDisplayOptionsArgs): MenuSelectableOption[] {
   const result: MenuSelectableOption[] = [];
   const term = searchTerm.trim().toLowerCase();
@@ -258,9 +287,7 @@ export function buildDisplayOptions({
   }
 
   result.push({
-    label: i18n.translate('workflows.actionsMenu.addStepGroupLabel', {
-      defaultMessage: 'Add trigger or step',
-    }),
+    label: getAddGroupLabel(addGroupContent),
     isGroupLabel: true,
   });
 

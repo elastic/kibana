@@ -17,6 +17,15 @@ import type { WorkflowEsqlCompletionServices } from './suggestions/workflow_esql
 import type { WorkflowKqlCompletionServices } from './suggestions/workflow_kql_completion_services';
 import { getStepExposure, isDeprecatedStepType } from '../../../../../common/schema';
 import type { WorkflowDetailState } from '../../../../entities/workflows/store';
+import { resolveFocusForLine } from '../../../../entities/workflows/store/workflow_detail/utils/trigger_finder';
+import {
+  isStepFragmentModel,
+  resolveStepFragmentTarget,
+} from '../step_fragment/step_fragment_models';
+import {
+  toFragmentSuggestion,
+  toVirtualPosition,
+} from '../step_fragment/step_fragment_virtual_yaml';
 
 // Unique identifier for the workflow completion provider
 export const WORKFLOW_COMPLETION_PROVIDER_ID = 'workflows-yaml-completion-provider';
@@ -155,11 +164,63 @@ export function getCompletionItemProvider(
   getPropertyHandler?: GetStepPropertyHandler,
   getEsqlServices?: () => WorkflowEsqlCompletionServices
 ): monaco.languages.CompletionItemProvider {
+  /**
+   * Step-fragment editors (the graph panel's YAML tab) show one de-indented step. Autocomplete
+   * runs the same pipeline, against a hidden shadow model holding the full workflow YAML with the
+   * live fragment spliced back into the step's position (see `attachStepFragmentYamlSupport`), so
+   * suggestions see the whole document. Positions and ranges are mapped to and from that virtual
+   * document, and `focusedStepId` is recomputed because the fragment's cursor line does not match
+   * the main editor's cursor.
+   */
+  const provideForStepFragment = async (
+    model: monaco.editor.ITextModel,
+    position: monaco.Position,
+    completionContext: monaco.languages.CompletionContext,
+    token: monaco.CancellationToken
+  ): Promise<monaco.languages.CompletionList> => {
+    const noSuggestions: monaco.languages.CompletionList = { suggestions: [], incomplete: false };
+    const target = resolveStepFragmentTarget(model);
+    if (!target) return noSuggestions;
+
+    const virtualPosition = toVirtualPosition(position, target.virtual);
+    const lookup = target.computed.workflowLookup;
+    const focus = lookup
+      ? resolveFocusForLine(virtualPosition.lineNumber, lookup)
+      : { focusedStepId: undefined, focusedTriggerId: undefined };
+
+    const shadowProvider = getCompletionItemProvider(
+      registry,
+      () => ({ ...getState(), computed: target.computed, ...focus }),
+      getKqlServices,
+      getPropertyHandler,
+      getEsqlServices
+    );
+    const result = await shadowProvider.provideCompletionItems(
+      target.model,
+      new monaco.Position(virtualPosition.lineNumber, virtualPosition.column),
+      completionContext,
+      token
+    );
+    if (!result) return noSuggestions;
+
+    return {
+      ...result,
+      // A command (e.g. "create connector") would act on virtual-document coordinates in the
+      // *main* editor, so drop it rather than mis-apply it.
+      suggestions: result.suggestions
+        .filter((suggestion) => !suggestion.command)
+        .map((suggestion) => toFragmentSuggestion(suggestion, target.virtual)),
+    };
+  };
+
   const provider: monaco.languages.CompletionItemProvider & { __providerId?: string } = {
     // Unique identifier to distinguish our provider from others
     __providerId: WORKFLOW_COMPLETION_PROVIDER_ID,
     triggerCharacters: [...WORKFLOW_TRIGGER_CHARACTERS],
-    provideCompletionItems: async (model, position, completionContext) => {
+    provideCompletionItems: async (model, position, completionContext, token) => {
+      if (isStepFragmentModel(model)) {
+        return provideForStepFragment(model, position, completionContext, token);
+      }
       const editorState = getState();
       const autocompleteContext = buildAutocompleteContext({
         registry,
