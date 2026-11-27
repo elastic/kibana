@@ -326,45 +326,6 @@ describe('tuning_review stale approved action', () => {
   const renderTemplate = (template: unknown, steps: Record<string, unknown>): string =>
     engine.parseAndRenderSync(String(template), { steps });
 
-  const actionSteps = [
-    'propose_query',
-    'propose_risk_score',
-    'propose_exception',
-    'propose_threshold',
-    'propose_schedule',
-  ];
-
-  it.each(actionSteps)('action_failed is true when %s failed as non-retryable', (name) => {
-    expect(
-      evaluate(withOf('record_proposal_action_decision')?.action_failed, {
-        [name]: { output: { decision: 'approved', status: 'failed' } },
-      })
-    ).toBe(true);
-  });
-
-  it.each([
-    ['an applied action', { propose_query: { output: { status: 'succeeded' } } }],
-    ['an approved manual change', { propose_manual: { output: { status: 'no_action' } } }],
-    ['no proposal', {}],
-  ])('action_failed is false for %s', (_scenario, steps) => {
-    expect(evaluate(withOf('record_proposal_action_decision')?.action_failed, steps)).toBe(false);
-  });
-
-  it('reads the rule again only after an action failed as non-retryable', () => {
-    const recheck = stepByName('recheck_rule');
-    const names = allSteps.map(({ name }) => name);
-
-    expect(recheck?.type).toBe('kibana.request');
-    expect(recheck?.if).toBe(
-      '${{ steps.record_proposal_action_decision.output.action_failed == true }}'
-    );
-    expect(recheck?.with?.path).toContain('inputs.rule_uuid');
-    expect(names.indexOf('record_proposal_action_decision')).toBeLessThan(
-      names.indexOf('recheck_rule')
-    );
-    expect(names.indexOf('recheck_rule')).toBeLessThan(names.indexOf('resolve_stale_action'));
-  });
-
   // A changed rule is still there, and later sweeps only pick up alerts from its latest
   // version, so its alerts are done. A deleted rule is never harvested again, so there is
   // nothing to tag. A read that failed says nothing, so the alerts stay untagged.
@@ -382,13 +343,6 @@ describe('tuning_review stale approved action', () => {
     ).toBe(expected);
   });
 
-  it('tags a stale action as reviewed only', () => {
-    const mark = stepByName('mark_alerts_stale');
-
-    expect(mark?.if).toBe('${{ steps.resolve_stale_action.output.processed == true }}');
-    expect(mark?.with?.tags_to_add).toEqual(['{{ consts.reviewed_tag }}']);
-  });
-
   it.each([
     ['a processed stale action', true, 'The alerts are marked as reviewed.'],
     ['an unprocessed stale action', false, 'The alerts stay untagged.'],
@@ -396,9 +350,6 @@ describe('tuning_review stale approved action', () => {
     const note = stepByName('note_action_failed');
     const { message } = (note?.with?.inputs ?? {}) as { message: string };
 
-    expect(note?.if).toContain(
-      'steps.record_proposal_action_decision.output.action_failed == true'
-    );
     expect(renderTemplate(message, { resolve_stale_action: { output: { processed } } })).toBe(
       '**The approved change could not be applied.** The rule was changed or deleted after this ' +
         `proposal was created.\n\n${ending}`

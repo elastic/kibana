@@ -950,10 +950,8 @@ steps:
     on-failure:
       continue: true
 
-  # A stale enable proposal fails as non-retryable, so the gate reports it `approved`
-  # with status `failed`. Its action says only that the rule changed or is gone, so read
-  # the rule again: a 404 means it was deleted. A read that fails some other way says
-  # nothing, so `resolve_outcome` leaves the gap pending for the next sweep.
+  # A stale enable only says the rule changed or is gone, so read it again: a 404 means
+  # it was deleted.
   - name: recheck_rule
     type: kibana.request
     if: "${{ steps.propose_enable.output.status == 'failed' }}"
@@ -974,14 +972,9 @@ steps:
   # `emit_result` all read these flags, so the investigation, the queue write and the
   # report cannot disagree.
   #
-  # An approved action that failed as non-retryable (status `failed`) found its target
-  # stale, and approving again cannot fix that, so it does not count as not applied:
-  # - Install: the rule was installed meanwhile, its version changed, or the package no
-  #   longer has it. Nothing is left to propose, so the gap is done.
-  # - Enable: a rule that was edited since is covered by later sweeps, which only pick up
-  #   alerts from the latest rule version, so the gap is done. A rule that was deleted
-  #   keeps the gap pending, so the next sweep can propose creating a rule. If the re-read
-  #   failed, the gap also stays pending.
+  # An approved action that failed as non-retryable (status `failed`) found its target stale,
+  # so it does not count as not applied. The exception is an enable whose rule was deleted
+  # or could not be re-read: the gap stays pending for the next sweep.
   #
   # `decided` is the no-decision hole for the proposal paths: an expired gate
   # completes with neither `approved` nor `dismissed`. `creation_unreviewed` is the
@@ -1009,8 +1002,6 @@ steps:
           and not (steps.refetch_rule.error == null
             and steps.refetch_rule.output.id != null
             and steps.refetch_rule.output.enabled == true) }}
-      # An approved action that failed as non-retryable. Only `or`, since Liquid has no
-      # operator precedence.
       action_failed: >-
         ${{ steps.propose_enable.output.status == 'failed'
           or steps.propose_install.output.status == 'failed' }}

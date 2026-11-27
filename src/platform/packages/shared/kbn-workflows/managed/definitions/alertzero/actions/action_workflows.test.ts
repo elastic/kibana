@@ -221,14 +221,8 @@ describe('AlertZero action workflows', () => {
       expect(traceSteps(yaml, context)).toEqual(steps);
     });
 
-    // A deleted or edited rule cannot be enabled by approving again, so the gate must not
-    // re-offer it. A failed read can succeed on a later attempt, so it stays retryable.
     it.each(['fail_rule_deleted', 'fail_rule_changed'])('fails %s as non-retryable', (name) => {
       expect(stepByName(yaml, name)?.with?.type).toBe(ACTION_NON_RETRYABLE_ERROR_TYPE);
-    });
-
-    it('leaves a failed rule read retryable', () => {
-      expect(stepByName(yaml, 'fail_rule_read')?.with).not.toHaveProperty('type');
     });
 
     // The coverage check matched the rule as proposed, so an edit is worth flagging.

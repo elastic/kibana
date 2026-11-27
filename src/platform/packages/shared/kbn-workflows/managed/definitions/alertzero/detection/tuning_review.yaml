@@ -1598,8 +1598,6 @@ steps:
           or steps.propose_threshold.output.decision == 'dismissed'
           or steps.propose_schedule.output.decision == 'dismissed'
           or steps.propose_manual.output.decision == 'dismissed' }}
-      # An approved action that failed as non-retryable. Only `or`, since Liquid has no
-      # operator precedence.
       action_failed: >-
         ${{ steps.propose_query.output.status == 'failed'
           or steps.propose_risk_score.output.status == 'failed'
@@ -1607,9 +1605,8 @@ steps:
           or steps.propose_threshold.output.status == 'failed'
           or steps.propose_schedule.output.status == 'failed' }}
 
-  # The action says only that the rule changed or is gone, so read the rule again: a 404
-  # means it was deleted. A read that fails some other way says nothing, so
-  # `resolve_stale_action` leaves the alerts untagged for the next sweep.
+  # The action says only that the rule changed or is gone, so read it again: a 404 means
+  # it was deleted.
   - name: recheck_rule
     type: kibana.request
     if: "${{ steps.record_proposal_action_decision.output.action_failed == true }}"
@@ -1623,9 +1620,8 @@ steps:
     on-failure:
       continue: true
 
-  # A rule that was changed since the proposal is still there, and later sweeps only pick
-  # up alerts from its latest version, so these alerts do not need to stay untagged. A
-  # deleted rule is never harvested again either way, so there is nothing to tag.
+  # Later sweeps only pick up alerts from a changed rule's latest version, so its alerts
+  # can be tagged. A deleted rule is never harvested again, so there is nothing to tag.
   - name: resolve_stale_action
     type: data.set
     with:

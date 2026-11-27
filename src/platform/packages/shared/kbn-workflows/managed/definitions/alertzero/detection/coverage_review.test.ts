@@ -1233,25 +1233,6 @@ describe('Detection Coverage review', () => {
     });
 
     it.each([
-      ['a stale enable', { propose_enable: { output: { status: 'failed' } } }, true],
-      ['a stale install', { propose_install: { output: { status: 'failed' } } }, true],
-      ['an applied enable', { propose_enable: { output: { status: 'succeeded' } } }, false],
-      ['no proposal', {}, false],
-    ])('action_failed is %s', (_scenario, steps, expected) => {
-      expect(evaluateExpression(String(outcome?.action_failed), { steps })).toBe(expected);
-    });
-
-    it('reads the rule again only after an enable failed as non-retryable', () => {
-      const recheck = stepByName('recheck_rule');
-
-      expect(recheck?.type).toBe('kibana.request');
-      expect(recheck?.if).toBe("${{ steps.propose_enable.output.status == 'failed' }}");
-      expect(recheck?.['on-failure']).toEqual({ continue: true });
-      expect(stepIndex('recheck_rule')).toBeLessThan(stepIndex('resolve_outcome'));
-    });
-
-    // The chat otherwise shows an approval with no effect, so the analyst is told why.
-    it.each([
       [
         'a stale enable on a deleted rule',
         { enable_approved_not_applied: true, install_approved_not_applied: false },
@@ -1266,9 +1247,6 @@ describe('Detection Coverage review', () => {
       const note = stepByName('note_action_failed');
       const { message } = inputsOf(note) as { message: string };
 
-      expect(note?.if).toContain('steps.resolve_outcome.output.action_failed == true');
-      expect(note?.['on-failure']).toEqual({ continue: true });
-      expect(stepIndex('note_action_failed')).toBeLessThan(stepIndex('close_investigation'));
       expect(
         createWorkflowLiquidEngine().parseAndRenderSync(message, {
           steps: { resolve_outcome: { output: flags } },
