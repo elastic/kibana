@@ -10,11 +10,14 @@
 import fs from 'fs';
 import path from 'path';
 import { Minimatch } from 'minimatch';
+import { globSync } from 'fast-glob';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { findPackageForPath, getPkgsById } from '@kbn/repo-packages';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   CRITICAL_FILES_SCOUT,
+  SCOUT_TEST_CATEGORIES,
   SCOUT_TESTS_ONLY_EXCLUDE_GLOBS,
   SCOUT_TESTS_ONLY_IGNORE_PATTERNS,
   SCOUT_TESTS_ONLY_SCOPE_GLOBS,
@@ -150,6 +153,55 @@ export const deriveScoutConfigsForFiles = (
   return configs;
 };
 
+const SCOUT_MODULE_CONFIG_GLOB = `test/scout{_*,}/{,*/}{${SCOUT_TEST_CATEGORIES.join(
+  ','
+)}}/{,*.}playwright.config.ts`;
+
+/**
+ * TEMPORARY: the Playwright configs owned by the affected modules, recorded so the
+ * on-merge selective-testing shadow annotation can report them. Returns `undefined` when
+ * resolution fails, so "failed" stays distinguishable from "no configs". Remove together
+ * with the on-merge shadow mode.
+ */
+export const deriveScoutConfigsForModules = (
+  moduleIds: ReadonlySet<string>,
+  repoRoot: string,
+  log: ToolingLog
+): Set<string> | undefined => {
+  if (moduleIds.size === 0) {
+    return new Set();
+  }
+
+  try {
+    const configs = new Set<string>();
+    const pkgsById = getPkgsById(repoRoot);
+
+    for (const moduleId of moduleIds) {
+      const moduleDir = pkgsById.get(moduleId)?.directory;
+      if (moduleDir === undefined || !fs.existsSync(path.join(moduleDir, 'test'))) {
+        continue;
+      }
+
+      for (const absolutePath of globSync(path.join(moduleDir, SCOUT_MODULE_CONFIG_GLOB), {
+        onlyFiles: true,
+      })) {
+        const configPath = path.relative(repoRoot, absolutePath);
+        // A nested package inside the module directory owns its own configs.
+        if (findPackageForPath(repoRoot, configPath)?.id === moduleId) {
+          configs.add(configPath);
+        }
+      }
+    }
+
+    return configs;
+  } catch (error) {
+    // Observability only — this must never change which tests run.
+    const message = error instanceof Error ? error.message : String(error);
+    log.warning(`Selective testing: could not resolve affected Scout configs (${message})`);
+    return undefined;
+  }
+};
+
 /**
  * Outcome of the Scout selective-testing decision. Consumers
  * (`discover-playwright-configs`, `create-test-tracks`) dispatch on `kind` to
@@ -166,7 +218,12 @@ export const deriveScoutConfigsForFiles = (
 export type ScoutTestingScope =
   | { kind: 'full'; reason: 'selective-disabled' | 'critical-files' }
   | { kind: 'tests-only'; affectedConfigPaths: ReadonlySet<string> }
-  | { kind: 'dependency-tree'; affectedModuleIds: ReadonlySet<string> };
+  | {
+      kind: 'dependency-tree';
+      affectedModuleIds: ReadonlySet<string>;
+      /** TEMPORARY: see `deriveScoutConfigsForModules`. */
+      affectedConfigPaths?: ReadonlySet<string>;
+    };
 
 /**
  * Decide which Scout testing scope to apply for a given diff.
@@ -207,10 +264,14 @@ export const resolveScoutTestingScope = (
   }
 
   const affectedModuleIds: ReadonlySet<string> = new Set(codeChanges.affectedModules);
+  const affectedConfigPaths = deriveScoutConfigsForModules(affectedModuleIds, repoRoot, log);
   log.info(
-    `Selective testing: dependency-tree mode — ${affectedModuleIds.size} affected module(s)`
+    `Selective testing: dependency-tree mode — ${affectedModuleIds.size} affected module(s)` +
+      (affectedConfigPaths === undefined
+        ? ''
+        : `, ${affectedConfigPaths.size} affected Playwright config(s)`)
   );
-  return { kind: 'dependency-tree', affectedModuleIds };
+  return { kind: 'dependency-tree', affectedModuleIds, affectedConfigPaths };
 };
 
 /**
@@ -222,8 +283,10 @@ export const resolveScoutTestingScope = (
  *   - `affectedModules` : ALWAYS present (sorted, possibly empty). Used both as
  *                         the dependency-tree filter set AND for generic
  *                         "isAffected" labeling regardless of kind.
- *   - `affectedConfigs` : present only when `kind === 'tests-only'`; the exact
- *                         set of Playwright configs to run.
+ *   - `affectedConfigs` : for `tests-only`, the exact set of Playwright configs to
+ *                         run. For `dependency-tree`, the set owned by the affected
+ *                         modules, recorded for the on-merge shadow annotation
+ *                         (TEMPORARY) and absent when resolution failed.
  */
 export interface SerializedScoutTestingScope {
   kind: ScoutTestingScope['kind'];
@@ -262,6 +325,9 @@ export const serializeScoutTestingScope = (
       return {
         kind: 'dependency-tree',
         affectedModules: sortedModules,
+        ...(scope.affectedConfigPaths === undefined
+          ? {}
+          : { affectedConfigs: Array.from(scope.affectedConfigPaths).sort() }),
       };
   }
 };
