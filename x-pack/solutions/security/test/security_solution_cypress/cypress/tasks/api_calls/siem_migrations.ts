@@ -7,7 +7,7 @@
 
 import { SIEM_DASHBOARD_MIGRATION_STATS_PATH } from '@kbn/security-solution-plugin/common/siem_migrations/dashboards/constants';
 import type { GetDashboardMigrationStatsResponse } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
-import { rootRequest } from './common';
+import { API_HEADERS } from './common';
 import { deleteAllDocuments } from './elasticsearch';
 
 const MIGRATION_INDEX_PREFIX = '.kibana-siem-rule-migrations';
@@ -35,11 +35,15 @@ export const cleanDashboardsMigrationData = () => {
   });
 };
 
+/**
+ * Fetches the dashboard migration stats with the session of the logged-in user, so polling creates no API keys.
+ */
 export const getDashboardMigrationStats = (migrationId: string) =>
-  rootRequest<GetDashboardMigrationStatsResponse>({
+  cy.request<GetDashboardMigrationStatsResponse>({
     method: 'GET',
     url: SIEM_DASHBOARD_MIGRATION_STATS_PATH.replace('{migration_id}', migrationId),
     headers: {
+      ...API_HEADERS,
       'elastic-api-version': '1',
     },
   });
