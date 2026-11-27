@@ -1,0 +1,142 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import assert from 'assert';
+import pMap from 'p-map';
+import { z, lazySchema } from '@kbn/zod/v4';
+import type { EvalsClient, EvaluationDataset } from '@kbn/evals';
+import { MAX_SCORES_PER_QUERY } from '@kbn/evals-common';
+import type { InvestigationExample, InvestigationTaskOutput } from '../types';
+import { orcaRunUnscoredReason } from './report';
+
+/** The experiment `NIGHTSHIFT_ORCA_REGRADE_EXPERIMENT` names. */
+export const resolveOrcaRegradeExperiment = (
+  env: Record<string, string | undefined> = process.env
+): string => {
+  const experimentId = env.NIGHTSHIFT_ORCA_REGRADE_EXPERIMENT?.trim();
+  assert(experimentId, 'NIGHTSHIFT_ORCA_REGRADE_EXPERIMENT must name the experiment to re-grade');
+  return experimentId;
+};
+
+const storedOutputSchema = lazySchema(() =>
+  z.looseObject({ case_id: z.string().min(1), query: z.string() })
+);
+
+export interface StoredOrcaRuns {
+  /** The model that ran the investigations, which must also write any missing report.md. */
+  taskModelId?: string;
+  outputs: ReadonlyMap<string, InvestigationTaskOutput>;
+}
+
+/** Every stored run of an ORCA experiment, keyed by `case_id`, with its full task output. */
+export const loadStoredOrcaRuns = async (
+  client: Pick<
+    EvalsClient,
+    'getExperimentStats' | 'getExperimentDatasetExamples' | 'getExperimentExampleDetails'
+  >,
+  experimentId: string
+): Promise<StoredOrcaRuns> => {
+  const stats = await client.getExperimentStats(experimentId);
+  const datasetIds = [...new Set(stats?.stats.map(({ datasetId }) => datasetId))];
+  assert(stats && datasetIds.length === 1, `Experiment ${experimentId} must have one dataset`);
+  const [datasetId] = datasetIds;
+  assert(stats.totalRepetitions <= 1, 'ORCA runs each task once; re-grade one repetition');
+  const { examples } = await client.getExperimentDatasetExamples(experimentId, datasetId);
+  // The endpoint reads at most this many score documents, so a full read may have dropped runs.
+  const scores = examples.reduce((total, { scores: each }) => total + each.length, 0);
+  assert(
+    scores < MAX_SCORES_PER_QUERY,
+    `Experiment ${experimentId} reached the ${MAX_SCORES_PER_QUERY} score documents the API returns, so some runs may be missing; re-grade a smaller experiment`
+  );
+  const outputs = await pMap(
+    examples,
+    async ({ example_id: exampleId }) => {
+      const details = await client.getExperimentExampleDetails(
+        experimentId,
+        datasetId,
+        exampleId,
+        0
+      );
+      // The run's own output, as the task returned it; only its identity is checked here.
+      return storedOutputSchema.parse(details.task.output) as InvestigationTaskOutput;
+    },
+    { concurrency: 8 }
+  );
+  const byCase = new Map(outputs.map((output) => [output.case_id, output]));
+  assert(byCase.size === outputs.length, `Experiment ${experimentId} repeats a case_id`);
+  return { taskModelId: stats.taskModel?.id, outputs: byCase };
+};
+
+/**
+ * The release's examples for the stored runs, under a dataset of their own: each example's
+ * metadata comes from the pinned release, so runs of an earlier release get its `orca_expected`,
+ * and its question is the one the run was given.
+ */
+export const buildOrcaRegradeDataset = (
+  release: EvaluationDataset<InvestigationExample>,
+  outputs: ReadonlyMap<string, InvestigationTaskOutput>,
+  experimentId: string
+): EvaluationDataset<InvestigationExample> => {
+  const examples = release.examples.flatMap((example) => {
+    const output = outputs.get(example.metadata.case_id);
+    return output ? [{ ...example, input: { ...example.input, question: output.query } }] : [];
+  });
+  const missing = [...outputs.keys()].filter(
+    (caseId) => !examples.some(({ metadata }) => metadata.case_id === caseId)
+  );
+  assert(
+    missing.length === 0,
+    `${release.name} has no task for ${missing.length} stored runs, for example ${missing[0]}`
+  );
+  return {
+    ...release,
+    name: `${release.name}/regrade-${experimentId}`,
+    description: `ORCA's graders on the stored runs of experiment ${experimentId}. ${release.description}`,
+    examples,
+  };
+};
+
+/**
+ * Stores the re-grade dataset and returns it with the stored example ids. The executor writes each
+ * score under its example's id, and the examples still carry the release's, which this dataset does
+ * not have.
+ */
+export const storeOrcaRegradeDataset = async (
+  client: Pick<EvalsClient, 'getDatasetByName' | 'upsertDataset'>,
+  dataset: EvaluationDataset<InvestigationExample>
+): Promise<EvaluationDataset<InvestigationExample>> => {
+  await client.upsertDataset({
+    name: dataset.name,
+    description: dataset.description,
+    tags: dataset.tags,
+    maturity: dataset.maturity,
+    examples: dataset.examples.map(({ input, output, metadata }) => ({ input, output, metadata })),
+  });
+  const stored = await client.getDatasetByName(dataset.name);
+  assert(stored, `ORCA re-grade dataset ${dataset.name} is missing after it was stored`);
+  const idsByCase = new Map(
+    stored.examples.map(({ id, metadata }) => [metadata?.case_id, id] as const)
+  );
+  assert(
+    stored.examples.length === dataset.examples.length &&
+      dataset.examples.every(({ metadata }) => idsByCase.has(metadata.case_id)),
+    `ORCA re-grade dataset ${dataset.name} does not hold exactly the stored runs' cases`
+  );
+  return {
+    ...dataset,
+    examples: dataset.examples.map((example) => ({
+      ...example,
+      id: idsByCase.get(example.metadata.case_id),
+    })),
+  };
+};
+
+/** A stored run from before the report step, whose investigation ORCA can still grade. */
+export const needsOrcaReport = (output: InvestigationTaskOutput): boolean =>
+  output.orca_report_md === undefined &&
+  !output.orca_report_error &&
+  orcaRunUnscoredReason(output) === undefined;

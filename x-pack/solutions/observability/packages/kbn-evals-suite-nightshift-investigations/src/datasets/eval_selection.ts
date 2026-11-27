@@ -25,6 +25,11 @@ export const WIKI_OPTIMIZE_DATASET_ID = 'wiki-optimize';
  * on the Scout server, so it needs its own server. Unset and `all` never select it.
  */
 export const REINFORCEMENT_DATASET_ID = 'reinforcement';
+/**
+ * `NIGHTSHIFT_DATASETS` id that re-grades a stored ORCA experiment, named by
+ * `NIGHTSHIFT_ORCA_REGRADE_EXPERIMENT`, with ORCA's graders. It starts no investigation.
+ */
+export const ORCA_REGRADE_DATASET_ID = 'orcabench-regrade';
 
 /** The CI ORCA shard, whole (`orcabench`) or one slice of it (`orcabench-<index>-of-<count>`). */
 const ORCA_SHARD_ID = /^orcabench(?:-\d+-of-\d+)?$/;
@@ -42,6 +47,7 @@ const STORED_DATASET_IDS: readonly string[] = STORED_DATASETS.map(({ id }) => id
 export interface EvalSelection {
   runInvestigations: boolean;
   runOrca: boolean;
+  runOrcaRegrade: boolean;
   runConnectorProbes: boolean;
   runWikiOptimize: boolean;
   /**
@@ -116,11 +122,31 @@ export const resolveEvalSelection = (
     return {
       runInvestigations: false,
       runOrca: false,
+      runOrcaRegrade: false,
       runConnectorProbes: false,
       runWikiOptimize: false,
       runReinforcement: true,
       storedDatasetIds: [],
     };
+  }
+  if (env.NIGHTSHIFT_DATASETS?.trim() === ORCA_REGRADE_DATASET_ID) {
+    if (!env.NIGHTSHIFT_ORCA_REGRADE_EXPERIMENT?.trim()) {
+      throw new Error(
+        `NIGHTSHIFT_DATASETS=${ORCA_REGRADE_DATASET_ID} requires NIGHTSHIFT_ORCA_REGRADE_EXPERIMENT, the experiment to re-grade`
+      );
+    }
+    return {
+      runInvestigations: false,
+      runOrca: false,
+      runOrcaRegrade: true,
+      runConnectorProbes: false,
+      runWikiOptimize: false,
+      runReinforcement: false,
+      storedDatasetIds: [],
+    };
+  }
+  if (env.NIGHTSHIFT_DATASETS?.split(',').some((id) => id.trim() === ORCA_REGRADE_DATASET_ID)) {
+    throw new Error(`Run ${ORCA_REGRADE_DATASET_ID} on its own`);
   }
   const orca =
     ORCA_SHARD_ID.test(env.EVAL_SHARD_ID ?? '') || env.NIGHTSHIFT_DATASETS?.trim() === 'orcabench';
@@ -134,6 +160,7 @@ export const resolveEvalSelection = (
     return {
       runInvestigations: false,
       runOrca: true,
+      runOrcaRegrade: false,
       runConnectorProbes: false,
       runWikiOptimize: false,
       runReinforcement: false,
@@ -149,6 +176,7 @@ export const resolveEvalSelection = (
     return {
       runInvestigations: false,
       runOrca: false,
+      runOrcaRegrade: false,
       runConnectorProbes: false,
       runWikiOptimize: false,
       runReinforcement: false,
@@ -190,6 +218,7 @@ export const resolveEvalSelection = (
     requiresSandbox(ALL_DATASETS);
     return {
       runOrca: false,
+      runOrcaRegrade: false,
       runInvestigations: true,
       runConnectorProbes: false,
       runWikiOptimize: false,
@@ -212,6 +241,7 @@ export const resolveEvalSelection = (
 
   return {
     runOrca: false,
+    runOrcaRegrade: false,
     runInvestigations,
     runConnectorProbes,
     runWikiOptimize: ids.includes(WIKI_OPTIMIZE_DATASET_ID),

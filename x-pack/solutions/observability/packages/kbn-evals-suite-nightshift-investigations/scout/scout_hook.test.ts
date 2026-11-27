@@ -326,6 +326,21 @@ describe('nightshift-investigations scout hook', () => {
     }
   );
 
+  it('sets up nothing for the ORCA re-grade, whatever shard or knowledge is still exported', () => {
+    const profile = {
+      sandbox: { apiKey: 'key', url: 'not a url' },
+      nightshift: { telemetry: { url: 'https://remote.example.com', apiKey: 'key' } },
+    };
+    const envs: Array<Record<string, string>> = [
+      { NIGHTSHIFT_DATASETS: 'orcabench-regrade' },
+      { NIGHTSHIFT_DATASETS: ' orcabench-regrade ', EVAL_SHARD_ID: 'orcabench-1-of-5' },
+      { NIGHTSHIFT_DATASETS: 'orcabench-regrade', NIGHTSHIFT_KNOWLEDGE: 'memory' },
+    ];
+    for (const env of envs) {
+      expect(runHook(profile, env)).toEqual({ status: 0, stderr: '', output: {} });
+    }
+  });
+
   it('requires sandbox credentials for a connector set', () => {
     const result = runHook({
       nightshift: { telemetry: { url: 'https://remote.example.com', apiKey: 'key' } },

@@ -29,6 +29,13 @@ if ! printf '%s' "$config" | jq -e 'type == "object"' >/dev/null 2>&1; then
   exit 1
 fi
 
+# The ORCA re-grade reads stored runs from Golden and starts no investigation, so it needs no shard,
+# connector set, sandbox or knowledge: Scout starts plain evals_tracing, whatever else is exported.
+if [[ "$(printf '%s' "${NIGHTSHIFT_DATASETS:-}" | tr -d ' ')" == orcabench-regrade ]]; then
+  echo '{}'
+  exit 0
+fi
+
 # Config value at a jq path, ignoring `REPLACE_ME` placeholders.
 config_value() {
   printf '%s' "$config" | jq -r --arg placeholder REPLACE_ME \
