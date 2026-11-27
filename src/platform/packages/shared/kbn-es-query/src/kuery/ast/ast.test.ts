@@ -14,9 +14,16 @@ import {
   toKqlExpression,
 } from './ast';
 import { nodeTypes } from '../node_types';
+import { KQLSyntaxError } from '../kuery_syntax_error';
 import type { DataViewBase } from '../../..';
 import type { KueryNode } from '../types';
 import { fields } from '../../filters/stubs';
+
+// Builds the expected node by hand, so the expectation doesn't go through the parser under test.
+const buildIsNode = (field: string | null, value: KueryNode): KueryNode =>
+  nodeTypes.function.buildNodeWithArgumentNodes('is', [nodeTypes.literal.buildNode(field), value]);
+
+const buildNotNode = (child: KueryNode): KueryNode => nodeTypes.function.buildNode('not', child);
 
 describe('kuery AST API', () => {
   let indexPattern: DataViewBase;
@@ -79,6 +86,147 @@ describe('kuery AST API', () => {
     test('should support spaces after "not"', () => {
       const withSingleSpaces = fromKueryExpression('not foo');
       expect(fromKueryExpression('not      foo')).toEqual(withSingleSpaces);
+    });
+
+    test.each(['cannot connect', 'knot tie', 'CANNOT CONNECT'])(
+      'should treat "not" inside a word in an unquoted value as plain text: %p',
+      (value) => {
+        const literal = nodeTypes.literal.buildNode(value);
+        expect(fromKueryExpression(`foo: ${value}`)).toEqual(buildIsNode('foo', literal));
+        expect(fromKueryExpression(value)).toEqual(buildIsNode(null, literal));
+      }
+    );
+
+    test.each(['*cannot connect*', '*do not touch*', 'do not touch*'])(
+      'should treat "not" inside an unquoted wildcard value as plain text: %p',
+      (value) => {
+        const expected = buildIsNode('foo', nodeTypes.wildcard.buildNode(value));
+        const actual = fromKueryExpression(`foo: ${value}`);
+        expect(actual).toEqual(expected);
+      }
+    );
+
+    test.each(['definitely not the flaky test monster', 'definitely NOT the flaky test monster'])(
+      'should treat a standalone "not" inside an unquoted value as plain text: %p',
+      (value) => {
+        const literal = nodeTypes.literal.buildNode(value);
+        expect(fromKueryExpression(`foo: ${value}`)).toEqual(buildIsNode('foo', literal));
+        expect(fromKueryExpression(value)).toEqual(buildIsNode(null, literal));
+      }
+    );
+
+    test('should treat a standalone "not" inside a list of values as plain text', () => {
+      const expected = buildIsNode('foo', nodeTypes.literal.buildNode('a not b'));
+      const actual = fromKueryExpression('foo: (a not b)');
+      expect(actual).toEqual(expected);
+    });
+
+    test.each<[string, string | null, string]>([
+      ['foo: not', 'foo', 'not'],
+      ['foo: not ', 'foo', 'not'],
+      ['foo: (not )', 'foo', 'not'],
+      ['not', null, 'not'],
+      ['not ', null, 'not'],
+      ['foo: bar not', 'foo', 'bar not'],
+    ])(
+      'should treat a "not" that no clause follows as plain text: %p',
+      (expression, field, value) => {
+        expect(fromKueryExpression(expression)).toEqual(
+          buildIsNode(field, nodeTypes.literal.buildNode(value))
+        );
+      }
+    );
+
+    test('should treat a "not" that no clause follows as plain text after "and"', () => {
+      const response = buildIsNode('response', nodeTypes.literal.buildNode('200'));
+      const not = nodeTypes.literal.buildNode('not');
+
+      expect(fromKueryExpression('response:200 and not ')).toEqual(
+        nodeTypes.function.buildNode('and', [response, buildIsNode(null, not)])
+      );
+      expect(fromKueryExpression('response:(200 and not )')).toEqual(
+        nodeTypes.function.buildNode('and', [response, buildIsNode('response', not)])
+      );
+    });
+
+    test('should negate a "not" that no clause follows when another "not" precedes it', () => {
+      const expected = buildNotNode(buildIsNode('foo', nodeTypes.literal.buildNode('not')));
+      expect(fromKueryExpression('foo: not not')).toEqual(expected);
+      expect(fromKueryExpression('foo: not not ')).toEqual(expected);
+    });
+
+    test.each(['not : foo', 'foo < not '])(
+      'should not read "not" followed by whitespace as a field name or range value: %p',
+      (expression) => {
+        expect(() => fromKueryExpression(expression)).toThrow(KQLSyntaxError);
+      }
+    );
+
+    test('should support "not" at the start of a field value', () => {
+      expect(fromKueryExpression('foo: not the flaky test monster')).toEqual(
+        nodeTypes.function.buildNode(
+          'not',
+          nodeTypes.function.buildNode('is', 'foo', 'the flaky test monster')
+        )
+      );
+      expect(fromKueryExpression('foo: not (the flaky test monster or a bug)')).toEqual(
+        nodeTypes.function.buildNode(
+          'not',
+          nodeTypes.function.buildNode('or', [
+            nodeTypes.function.buildNode('is', 'foo', 'the flaky test monster'),
+            nodeTypes.function.buildNode('is', 'foo', 'a bug'),
+          ])
+        )
+      );
+    });
+
+    test('should support an uppercase "NOT" and a quoted value at the start of a field value', () => {
+      expect(fromKueryExpression('foo: NOT bar')).toEqual(
+        buildNotNode(buildIsNode('foo', nodeTypes.literal.buildNode('bar')))
+      );
+      expect(fromKueryExpression('foo: not "bar"')).toEqual(
+        buildNotNode(buildIsNode('foo', nodeTypes.literal.buildNode('bar', true)))
+      );
+    });
+
+    test('should apply "not" at the start of a field value to that value only', () => {
+      const expected = nodeTypes.function.buildNode('or', [
+        buildNotNode(buildIsNode('foo', nodeTypes.literal.buildNode('bar'))),
+        buildIsNode(null, nodeTypes.literal.buildNode('baz')),
+      ]);
+      const actual = fromKueryExpression('foo: not bar or baz');
+      expect(actual).toEqual(expected);
+    });
+
+    test.each<[string, string | null]>([
+      ['not not bar', null],
+      ['not not foo: bar', 'foo'],
+      ['foo: not not bar', 'foo'],
+      ['foo: (not not bar)', 'foo'],
+    ])('should support a repeated "not": %p', (expression, field) => {
+      expect(fromKueryExpression(expression)).toEqual(
+        buildNotNode(buildNotNode(buildIsNode(field, nodeTypes.literal.buildNode('bar'))))
+      );
+    });
+
+    test.each(['and', 'or'] as const)(
+      'should round-trip a free-text "not" joined with %p',
+      (operator) => {
+        const expected = nodeTypes.function.buildNode(operator, [
+          buildIsNode(null, nodeTypes.literal.buildNode('not')),
+          buildIsNode('foo', nodeTypes.literal.buildNode('x')),
+        ]);
+        expect(fromKueryExpression(toKqlExpression(expected))).toEqual(expected);
+      }
+    );
+
+    test('should still support "not" at the start of a clause in a list of values', () => {
+      const expected = nodeTypes.function.buildNode('or', [
+        nodeTypes.function.buildNode('is', 'foo', 'cannot connect'),
+        nodeTypes.function.buildNode('not', nodeTypes.function.buildNode('is', 'foo', 'bar')),
+      ]);
+      const actual = fromKueryExpression('foo: (cannot connect or not bar)');
+      expect(actual).toEqual(expected);
     });
 
     test('should normalize extra spaces around "and" for field:value followed by another clause', () => {

@@ -18,6 +18,7 @@ import {
   toKqlExpression,
   toQueryStringQuery,
 } from './wildcard';
+import { fromKueryExpression } from '../ast';
 
 describe('kuery node types', () => {
   describe('wildcard', () => {
@@ -107,6 +108,18 @@ describe('kuery node types', () => {
         };
         const result = toKqlExpression(node);
         expect(result).toBe('foo\\*bar*baz');
+      });
+
+      test('should escape a leading "not" so it round-trips as a wildcard', () => {
+        const node: KqlWildcardNode = {
+          type: 'wildcard',
+          value: `not found${KQL_WILDCARD_SYMBOL}`,
+        };
+        const result = toKqlExpression(node);
+        expect(result).toBe('\\u006eot found*');
+        const { function: fn, arguments: args } = fromKueryExpression(`message: ${result}`);
+        expect(fn).toBe('is');
+        expect(args[1]).toEqual(node);
       });
     });
   });

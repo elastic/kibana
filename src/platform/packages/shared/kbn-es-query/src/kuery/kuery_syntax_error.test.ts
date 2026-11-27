@@ -14,7 +14,7 @@ describe('kql syntax errors', () => {
     expect(() => {
       fromKueryExpression('response:');
     }).toThrow(
-      'Expected "(", "{", value, whitespace but end of input found.\n' +
+      'Expected "(", "{", NOT, value, whitespace but end of input found.\n' +
         'response:\n' +
         '---------^'
     );
@@ -38,30 +38,12 @@ describe('kql syntax errors', () => {
     );
   });
 
-  it('should throw an error for a NOT query missing a sub-query', () => {
-    expect(() => {
-      fromKueryExpression('response:200 and not ');
-    }).toThrow(
-      'Expected "(", field name, value but end of input found.\n' +
-        'response:200 and not \n' +
-        '---------------------^'
-    );
-  });
-
-  it('should throw an error for a "missing a sub-query', () => {
-    expect(() => {
-      fromKueryExpression('response:(200 and not )');
-    }).toThrow(
-      'Expected "(", value but ")" found.\n' +
-        'response:(200 and not )\n' +
-        '----------------------^'
-    );
-  });
-
   it('should throw an error for unbalanced quotes', () => {
     expect(() => {
       fromKueryExpression('foo:"ba ');
-    }).toThrow('Expected "(", "{", value, whitespace but """ found.\n' + 'foo:"ba \n' + '----^');
+    }).toThrow(
+      'Expected "(", "{", NOT, value, whitespace but """ found.\n' + 'foo:"ba \n' + '----^'
+    );
   });
 
   it('should throw an error for unescaped quotes in a quoted string', () => {
