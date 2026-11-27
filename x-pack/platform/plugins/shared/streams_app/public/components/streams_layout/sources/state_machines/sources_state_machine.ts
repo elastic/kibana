@@ -8,6 +8,7 @@
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { collectUnitComponentIds } from '@kbn/streams-schema';
 import { and, assign, fromPromise, sendTo, setup, stateIn } from 'xstate';
 import type { ActionArgs, ActorRefFrom, AnyActorRef, MachineImplementationsFrom } from 'xstate';
 import {
@@ -33,6 +34,7 @@ import { createSourceId, getAvailableSourceTypes, type SourceEnvironment } from 
 import { notifyUnitUpdated } from '../../notify_unit_updated';
 import { getFormattedError } from '../../../../util/errors';
 import { removeComponentFromPipelines } from '../../../../services/unit_connections';
+import { withReservedComponents } from '../../../../services/unit_pipeline';
 import type { Unit } from '../../../../services/unit_repository';
 import type {
   ConfiguredSource,
@@ -89,6 +91,7 @@ export interface SourceCreationContext {
 
 export interface SourcesStateContext {
   unitDefinition: Unit;
+  persistedUnitDefinition: Unit;
   metadataBySourceId: Record<string, SourceRuntimeMetadata>;
   apiKeysBySourceId: Record<string, SourceApiKey[]>;
   sourceEnvironment: SourceEnvironment;
@@ -104,15 +107,27 @@ export interface SourcesStateContext {
   parentRef: AnyActorRef;
 }
 
+const getReservedUnitDefinition = ({
+  unitDefinition,
+  persistedUnitDefinition,
+}: Pick<SourcesStateContext, 'unitDefinition' | 'persistedUnitDefinition'>): Unit =>
+  withReservedComponents(unitDefinition, persistedUnitDefinition);
+
 export type SourcesStateEvent =
-  | { type: 'unit.loaded'; unitDefinition: Unit }
+  | { type: 'unit.loaded'; unitDefinition: Unit; persistedUnitDefinition?: Unit }
   | { type: 'unit.save.started' }
   | { type: 'unit.save.finished' }
-  | { type: 'unit.persisted'; sourceIds: string[]; unitDefinition: Unit }
+  | {
+      type: 'unit.persisted';
+      sourceIds: string[];
+      unitDefinition: Unit;
+      persistedUnitDefinition?: Unit;
+    }
   | {
       type: 'unit.persistenceFailed';
       sourceIds: string[];
       unitDefinition: Unit;
+      persistedUnitDefinition?: Unit;
       message: string;
       intent: 'create' | 'delete';
     }
@@ -342,6 +357,7 @@ export const sourcesStateMachine = setup({
       const sourceIds = new Set(getConfiguredSources(event.unitDefinition).map(({ id }) => id));
       return {
         ...sidecars,
+        persistedUnitDefinition: event.persistedUnitDefinition ?? event.unitDefinition,
         hasReceivedUnit: true,
         creationContext: context.creationContext?.createdSource
           ? {
@@ -386,7 +402,7 @@ export const sourcesStateMachine = setup({
       const name = sourceName.trim();
       const id = createSourceId({
         name,
-        existingIds: getUnitSources(context.unitDefinition).map((source) => source.id),
+        existingIds: collectUnitComponentIds(getReservedUnitDefinition(context).unit),
       });
       const unitSource = createUnitSource({
         id,
@@ -617,7 +633,7 @@ export const sourcesStateMachine = setup({
           }
         : {};
     }),
-    storePersistenceError: assign(({ context, event }) => {
+    storePersistenceError: assign(({ event }) => {
       if (event.type !== 'unit.persistenceFailed') {
         return {};
       }
@@ -627,6 +643,7 @@ export const sourcesStateMachine = setup({
       }
       return {
         unitDefinition: event.unitDefinition,
+        persistedUnitDefinition: event.persistedUnitDefinition ?? event.unitDefinition,
         apiKeyError: {
           operation: 'persist' as const,
           sourceId,
@@ -636,7 +653,10 @@ export const sourcesStateMachine = setup({
     }),
     restoreUnitAfterPersistenceFailure: assign(({ context, event }) =>
       event.type === 'unit.persistenceFailed'
-        ? rebuildSourceSidecars(context, event.unitDefinition)
+        ? {
+            ...rebuildSourceSidecars(context, event.unitDefinition),
+            persistedUnitDefinition: event.persistedUnitDefinition ?? event.unitDefinition,
+          }
         : {}
     ),
   },
@@ -645,7 +665,7 @@ export const sourcesStateMachine = setup({
       event.type === 'source.create' &&
       canSubmitSourceForm({
         formData: event.formData,
-        unitDefinition: context.unitDefinition,
+        unitDefinition: getReservedUnitDefinition(context),
         availableSourceTypes: context.availableSourceTypes,
       }),
     isCreatedSource: ({ context, event }) => {
@@ -690,6 +710,7 @@ export const sourcesStateMachine = setup({
   type: 'parallel',
   context: ({ input }) => ({
     unitDefinition: input.unitDefinition,
+    persistedUnitDefinition: input.unitDefinition,
     metadataBySourceId: input.metadataBySourceId,
     apiKeysBySourceId: input.apiKeysBySourceId ?? {},
     sourceEnvironment: input.sourceEnvironment ?? {},

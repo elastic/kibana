@@ -8,6 +8,14 @@
 import { i18n } from '@kbn/i18n';
 import type { DiscardPromptOptions } from '../../hooks/use_discard_confirm';
 
+export const sharedProcessingUnsavedMessage = i18n.translate(
+  'xpack.streams.processingFlyout.sharedProcessingUnsavedMessage',
+  {
+    defaultMessage:
+      'Other connections using this processing have unsaved changes. Save the map before editing the shared processors.',
+  }
+);
+
 export const discardProcessorChangesPromptOptions: DiscardPromptOptions = {
   message: i18n.translate('xpack.streams.processingFlyout.discardProcessor.message', {
     defaultMessage: 'Are you sure you want to discard your changes?',

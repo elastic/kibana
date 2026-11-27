@@ -322,6 +322,16 @@ describe('unit connections', () => {
     ]);
   });
 
+  it('reuses the pipeline ID when reconnecting a source after a disconnect', () => {
+    const saved = connectSourceToDestination(unitWith([]), 'otlp-input', 'es-logs');
+    const origin = source('otlp-input');
+    const staged = disconnectLine(saved, origin, destination('es-logs'));
+    const connected = connectLine(staged, origin, destination('debug-out'));
+
+    expect(connected.unit.pipelines).toHaveLength(1);
+    expect(connected.unit.pipelines[0].id).toBe(saved.unit.pipelines[0].id);
+  });
+
   it('moves one line without wiring the previous source to the new destination', () => {
     const connected = connectSourceToDestination(
       connectSourceToDestination(unitWith([]), 'otlp-input', 'es-logs'),
@@ -933,6 +943,23 @@ describe('unit connections', () => {
   });
 
   describe('isolateSourceLine', () => {
+    it('reserves saved ids for both new pipelines when isolating a shared source line', () => {
+      const staged = unitWith([sharedPipeline()]);
+      const isolated = isolateSourceLine(
+        staged,
+        'otlp-input',
+        'es-logs',
+        new Set(['p-otlp-input'])
+      );
+
+      expect(isolated?.unit.unit.pipelines.map(({ id }) => id)).toEqual([
+        'main',
+        'p-otlp-input-2',
+        'p-otlp-input-3',
+      ]);
+      expect(isolated?.pipelineId).toBe('p-otlp-input-3');
+    });
+
     it('moves one fan-out line onto a pipeline of its own', () => {
       const unit = unitWith([
         {

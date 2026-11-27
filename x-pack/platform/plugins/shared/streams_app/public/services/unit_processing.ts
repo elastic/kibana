@@ -45,6 +45,22 @@ export interface DraftProcessor {
   config: UnitConfigEntry[];
 }
 
+export const toDraftProcessor = ({
+  id,
+  type,
+  name,
+  description,
+  supported_telemetry,
+  config,
+}: UnitProcessor): DraftProcessor => ({
+  id,
+  type,
+  ...(name ? { name } : {}),
+  ...(description ? { description } : {}),
+  supported_telemetry: [...supported_telemetry],
+  config: [...(config ?? [])],
+});
+
 export const PROCESSING_DRAFT_FAILURE = {
   missingSlot: 'missing_slot',
 } as const;
@@ -151,25 +167,35 @@ const updatePipeline = (
 
 const upsertProcessors = (
   unit: Unit,
-  processors: readonly DraftProcessor[]
+  processors: readonly DraftProcessor[],
+  reservedIds?: ReadonlySet<string>
 ): { unit: Unit; ids: string[] } => {
-  const taken = usedComponentIds(unit);
+  const taken = new Set([...usedComponentIds(unit), ...(reservedIds ?? [])]);
   const existing = unit.unit.processors ?? [];
-  const written: UnitProcessor[] = processors.map(
-    ({ id, type, name, description, supported_telemetry, config }) => ({
+  const existingById = new Map(existing.map((processor) => [processor.id, processor]));
+  const written = processors.map((draft): UnitProcessor => {
+    const { id, type, name, description, supported_telemetry, config } = draft;
+    const original = id === undefined ? undefined : existingById.get(id);
+    if (original && isEqual(toDraftProcessor(original), draft)) {
+      return original;
+    }
+    return {
       id: id ?? allocateComponentId(type, taken),
       type,
       ...(name ? { name } : {}),
       ...(description ? { description } : {}),
       supported_telemetry: [...supported_telemetry],
       ...(config.length > 0 ? { config } : {}),
-    })
-  );
+    };
+  });
   const writtenById = new Map(written.map((processor) => [processor.id, processor]));
   const kept = existing.map((processor) => writtenById.get(processor.id) ?? processor);
-  const added = written.filter(({ id }) => !existing.some((processor) => processor.id === id));
+  const added = written.filter(({ id }) => !existingById.has(id));
   return {
-    unit: replaceUnit(unit, { processors: [...kept, ...added] }),
+    unit:
+      unit.unit.processors === undefined && added.length === 0
+        ? unit
+        : replaceUnit(unit, { processors: [...kept, ...added] }),
     ids: written.map(({ id }) => id),
   };
 };
@@ -221,13 +247,17 @@ const dropIdlePipeline = (unit: Unit, pipelineId: string): Unit => {
 export const applyProcessingDraft = (
   unit: Unit,
   ref: ProcessingNodeRef,
-  processors: readonly DraftProcessor[]
+  processors: readonly DraftProcessor[],
+  reservedIds?: ReadonlySet<string>
 ): ProcessingDraftResult => {
   const pipeline = findPipeline(unit, ref.pipelineId);
   if (!pipeline || !isProcessingSlotEditable(unit, ref)) {
     return { ok: false, reason: PROCESSING_DRAFT_FAILURE.missingSlot };
   }
-  const { unit: withProcessors, ids } = upsertProcessors(unit, processors);
+  if (processors.length === 0 && getSlotProcessorIds(unit, ref).length === 0) {
+    return { ok: true, unit, processorIds: [] };
+  }
+  const { unit: withProcessors, ids } = upsertProcessors(unit, processors, reservedIds);
   const next = updatePipeline(withProcessors, ref.pipelineId, (current) =>
     ref.kind === PROCESSING_SLOT_KIND.pipeline
       ? setPipelineProcessors(current, ids)

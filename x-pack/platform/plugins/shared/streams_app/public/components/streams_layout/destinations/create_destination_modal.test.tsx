@@ -43,13 +43,13 @@ type ModalDestinations = React.ComponentProps<typeof CreateDestinationModal>['de
 
 const renderModal = (overrides: Partial<ModalDestinations> = {}) => {
   const createDestination = jest.fn();
-  const unitDefinition = createDefaultUnit();
+  const reservedUnitDefinition = createDefaultUnit();
   const modal = (destinationOverrides: Partial<ModalDestinations>) => (
     <I18nProvider>
       <CreateDestinationModal
         destinations={{
           createDestination,
-          unitDefinition,
+          reservedUnitDefinition,
           isUnitSaving: false,
           isCreatingDestination: false,
           isCreateFailed: false,

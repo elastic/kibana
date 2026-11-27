@@ -16,6 +16,7 @@ import {
   type ProcessingDraftResult,
 } from './unit_processing';
 import { removeComponentFromPipelines } from './unit_connections';
+import { usedComponentIds } from './unit_pipeline';
 
 const draft = (path: string, id?: string): DraftProcessor => ({
   ...(id ? { id } : {}),
@@ -95,6 +96,33 @@ const savedUnit = (result: ProcessingDraftResult): Unit => {
 };
 
 describe('applyProcessingDraft', () => {
+  it('does not reuse a processor id the saved unit still has', () => {
+    const saved = baseUnit(
+      [
+        ...directUnit().unit.pipelines,
+        {
+          id: 'p-other',
+          supported_telemetry: ['logs'],
+          config: [
+            { name: 'sources', value: ['src'] },
+            { name: 'processors', value: ['add-fields-1'] },
+            { name: 'destinations', value: ['other'] },
+          ],
+        },
+      ],
+      [{ id: 'add-fields-1', type: 'add_fields', supported_telemetry: ['logs'] }]
+    );
+    const staged = removeComponentFromPipelines(saved, 'other');
+    const result = applyProcessingDraft(
+      staged,
+      pipelineSlot('p-src'),
+      [draft('team')],
+      usedComponentIds(saved)
+    );
+
+    expect(result).toMatchObject({ ok: true, processorIds: ['add-fields-2'] });
+  });
+
   it("creates a source pipeline's processors slot ahead of its destinations", () => {
     const result = applyProcessingDraft(directUnit(), pipelineSlot('p-src'), [
       draft('team'),

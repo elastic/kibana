@@ -88,9 +88,6 @@ export const createUnitRepository = ({
     }
   },
   persist: async (stagedUnit, secrets) => {
-    // A component save (create a destination, save processing) persists the staged
-    // unit while lines may be unhooked. What comes back is the unit as stored; the
-    // canvas keeps its own staged copy.
     const unit = toPublishedUnit(stagedUnit);
     const response = await streamsRepositoryClient.fetch('PUT /internal/streams/unit/{id}', {
       params: {

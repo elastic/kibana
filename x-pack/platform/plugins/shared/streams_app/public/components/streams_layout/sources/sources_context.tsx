@@ -22,6 +22,7 @@ import {
   type SourcesTablePagination,
   type SourcesTableSortingColumn,
 } from './state_machines/sources_table_state_machine';
+import { withReservedComponents } from '../../../services/unit_pipeline';
 import { createUnitRepository, type Unit } from '../../../services/unit_repository';
 
 export interface SourcesController {
@@ -31,8 +32,8 @@ export interface SourcesController {
   selectedSources: SourceViewModel[];
   isCreateModalOpen: boolean;
   isRefreshingUnit: boolean;
-  /** The unit new sources are validated against. */
   unitDefinition: Unit;
+  reservedUnitDefinition: Unit;
   availableSourceTypes: SourceType[];
   isUnitSaving: boolean;
   createdSource?: SourceViewModel;
@@ -239,6 +240,14 @@ export const useSources = ({
     (state) => state.context.creationContext?.createdSource
   );
   const unitDefinition = useSelector(sourcesActorRef, (state) => state.context.unitDefinition);
+  const persistedUnitDefinition = useSelector(
+    sourcesActorRef,
+    (state) => state.context.persistedUnitDefinition
+  );
+  const reservedUnitDefinition = useMemo(
+    () => withReservedComponents(unitDefinition, persistedUnitDefinition),
+    [unitDefinition, persistedUnitDefinition]
+  );
   const availableSourceTypes = useSelector(
     sourcesActorRef,
     (state) => state.context.availableSourceTypes
@@ -324,6 +333,7 @@ export const useSources = ({
       isCreateModalOpen,
       isRefreshingUnit,
       unitDefinition,
+      reservedUnitDefinition,
       availableSourceTypes,
       isUnitSaving,
       createdSource,
@@ -383,6 +393,7 @@ export const useSources = ({
       sourcesActorRef,
       tableState,
       unitDefinition,
+      reservedUnitDefinition,
     ]
   );
 };

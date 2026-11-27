@@ -184,6 +184,28 @@ export const usedComponentIds = (unit: Unit): Set<string> =>
     ...unit.unit.pipelines.map(({ id }) => id),
   ]);
 
+const appendMissingComponents = <Component extends { id: string }>(
+  staged: readonly Component[],
+  persisted: readonly Component[]
+): Component[] => {
+  const stagedIds = new Set(staged.map(({ id }) => id));
+  return [...staged, ...persisted.filter(({ id }) => !stagedIds.has(id))];
+};
+
+/** Adds saved-only components while preserving staged definitions. */
+export const withReservedComponents = (staged: Unit, persisted: Unit): Unit => {
+  const processors = appendMissingComponents(
+    staged.unit.processors ?? [],
+    persisted.unit.processors ?? []
+  );
+  return replaceUnit(staged, {
+    sources: appendMissingComponents(staged.unit.sources, persisted.unit.sources),
+    destinations: appendMissingComponents(staged.unit.destinations, persisted.unit.destinations),
+    ...(processors.length > 0 ? { processors } : {}),
+    pipelines: appendMissingComponents(staged.unit.pipelines, persisted.unit.pipelines),
+  });
+};
+
 /**
  * Allocates a valid identifier derived from `stem` that is not in `taken`, and
  * marks it taken. With `bareFirst` the stem itself is tried before `-2`, `-3`, …;
@@ -230,7 +252,7 @@ const referencedProcessorIds = (unit: Unit): Set<string> =>
   );
 
 /** Drops processor components among `candidates` that nothing references any more. */
-const removeOrphanedProcessors = (unit: Unit, candidates: Iterable<string>): Unit => {
+export const removeOrphanedProcessors = (unit: Unit, candidates: Iterable<string>): Unit => {
   const referenced = referencedProcessorIds(unit);
   const orphaned = new Set([...candidates].filter((id) => !referenced.has(id)));
   if (orphaned.size === 0 || !unit.unit.processors) {

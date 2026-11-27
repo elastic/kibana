@@ -42,7 +42,7 @@ interface CreateSourceModalProps {
   sources: Pick<
     SourcesController,
     | 'createSource'
-    | 'unitDefinition'
+    | 'reservedUnitDefinition'
     | 'availableSourceTypes'
     | 'isUnitSaving'
     | 'createdSource'
@@ -59,7 +59,7 @@ interface CreateSourceModalProps {
 export const CreateSourceModal = ({ sources, onClose }: CreateSourceModalProps) => {
   const {
     createSource,
-    unitDefinition,
+    reservedUnitDefinition,
     availableSourceTypes,
     isUnitSaving,
     createdSource,
@@ -76,7 +76,7 @@ export const CreateSourceModal = ({ sources, onClose }: CreateSourceModalProps) 
     formErrors: { sourceName: sourceNameError, signals: sourceSignalsError },
     canSubmit,
     selectSourceType,
-  } = useSourceCreationForm({ unitDefinition, availableSourceTypes });
+  } = useSourceCreationForm({ unitDefinition: reservedUnitDefinition, availableSourceTypes });
   const formId = useGeneratedHtmlId({ prefix: 'streamsCreateSourceForm' });
 
   const sourceTypeOptions = useMemo(

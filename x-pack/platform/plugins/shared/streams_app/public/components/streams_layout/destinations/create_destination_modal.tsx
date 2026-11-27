@@ -123,7 +123,7 @@ interface CreateDestinationModalProps {
   destinations: Pick<
     DestinationsController,
     | 'createDestination'
-    | 'unitDefinition'
+    | 'reservedUnitDefinition'
     | 'isUnitSaving'
     | 'apiKeyError'
     | 'persistenceError'
@@ -136,7 +136,7 @@ interface CreateDestinationModalProps {
 export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinationModalProps) => {
   const {
     createDestination,
-    unitDefinition,
+    reservedUnitDefinition,
     isUnitSaving,
     persistenceError,
     apiKeyError,
@@ -167,7 +167,7 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
     formData: { storageKind },
     formErrors: validationErrors,
     canSubmit,
-  } = useDestinationCreationForm({ unitDefinition });
+  } = useDestinationCreationForm({ unitDefinition: reservedUnitDefinition });
   // The destination being saved is already in the unit, so its own name would read as taken.
   const formErrors = isCreatingDestination ? {} : validationErrors;
   const { destinationName: destinationNameError } = formErrors;

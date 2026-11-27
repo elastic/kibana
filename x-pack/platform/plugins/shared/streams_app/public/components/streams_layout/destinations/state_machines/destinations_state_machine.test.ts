@@ -70,9 +70,9 @@ describe('destinationsStateMachine', () => {
     },
   };
 
-  const createS3Destination = () => {
+  const createS3Destination = (destinationName = s3FormData.destinationName) => {
     actor.send({ type: 'modal.openCreate' });
-    actor.send({ type: 'destination.create', formData: s3FormData });
+    actor.send({ type: 'destination.create', formData: { ...s3FormData, destinationName } });
   };
 
   const remoteFormData = (apiKey = REMOTE_KEY): DestinationCreationFormData => ({
@@ -318,6 +318,43 @@ describe('destinationsStateMachine', () => {
     );
     expect(JSON.stringify(node)).not.toContain('AKIA');
     expect(JSON.stringify(node)).not.toContain('shh');
+  });
+
+  describe('creating after a staged deletion', () => {
+    beforeEach(() => {
+      const persistedUnitDefinition = {
+        ...unitDefinition,
+        unit: {
+          ...unitDefinition.unit,
+          destinations: [
+            ...unitDefinition.unit.destinations,
+            {
+              id: 'archive',
+              name: 'Old archive',
+              type: 'elasticsearch',
+              supported_telemetry: ['logs' as const],
+            },
+          ],
+        },
+      };
+      const stagedLoad = { type: 'unit.loaded' as const, unitDefinition, persistedUnitDefinition };
+      actor.send(stagedLoad);
+    });
+
+    it('allocates a new destination id against the saved unit too', () => {
+      createS3Destination('Archive');
+
+      expect(parentSend).toHaveBeenCalledWith(
+        expect.objectContaining({ destinationIds: ['archive-2'] })
+      );
+    });
+
+    it('treats a name the saved unit still uses as taken', () => {
+      createS3Destination('Old archive');
+
+      expect(parentSend).not.toHaveBeenCalled();
+      expect(actor.getSnapshot().matches({ configuring: 'supplyingConfiguration' })).toBe(true);
+    });
   });
 
   it.each(['unit.persisted', 'unit.persistenceFailed'] as const)(

@@ -26,7 +26,7 @@ const renderModal = (availableSourceTypes: SourceType[] = ['otlp']) => {
       <CreateSourceModal
         sources={{
           createSource,
-          unitDefinition: createDefaultUnit(),
+          reservedUnitDefinition: createDefaultUnit(),
           availableSourceTypes,
           isUnitSaving: false,
           isGeneratingApiKey: false,

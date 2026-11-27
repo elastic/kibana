@@ -64,6 +64,7 @@ import { applyLayout, getConnectedNodeIds } from './layout';
 import { getGraphNodeIds, syncCanvasNodeMetadata, syncCanvasEdgeData } from './sync_graph_nodes';
 import { useCanvasKeyboardShortcuts } from './use_canvas_a11y';
 import { useCanvasHistory } from './use_canvas_history';
+import { useCloseRemovedDestinationFlyout } from './use_close_removed_destination_flyout';
 import { useStagedSourceConnectedDestinationIds } from './use_staged_source_connected_destination_ids';
 import { useSyncStatsWithSavedUnit } from './use_sync_stats_with_saved_unit';
 import { IndexInspectFlyout } from '../../../index_inspect/index_inspect_flyout';
@@ -99,6 +100,7 @@ import {
   useCanvasRoutingDiagnostics,
   useCanvasRoutingFlyout,
   useCanvasProcessingFlyout,
+  useCanvasIsProcessingSlotUnsaved,
 } from './state_management';
 import {
   useSourceApiKeyGenerationDeps,
@@ -243,6 +245,7 @@ function StreamsCanvasInner() {
   const routingFlyout = useCanvasRoutingFlyout();
   const routingDiagnostics = useCanvasRoutingDiagnostics();
   const processingFlyout = useCanvasProcessingFlyout();
+  const isProcessingSlotUnsaved = useCanvasIsProcessingSlotUnsaved();
   const nodePositionsRef = useRef(nodePositions);
   useEffect(() => {
     nodePositionsRef.current = nodePositions;
@@ -724,6 +727,16 @@ function StreamsCanvasInner() {
     [canEditConnections, readConnectionOrigin, readConnectionTarget, stageUserEdit, unitDefinition]
   );
 
+  const stageComponentDeletes = useCallback(
+    (sourceIds: readonly string[], destinationIds: readonly string[]): void => {
+      if (isSaving || (sourceIds.length === 0 && destinationIds.length === 0)) {
+        return;
+      }
+      stageUserEdit(withoutDeletedComponents(unitDefinition, sourceIds, destinationIds));
+    },
+    [isSaving, stageUserEdit, unitDefinition]
+  );
+
   const onNodesDelete = useCallback<OnNodesDelete<ClassicCanvasNode>>(
     (deletedNodes) => {
       const removedSourceIds: string[] = [];
@@ -737,17 +750,9 @@ function StreamsCanvasInner() {
           removedDestinationIds.push(node.data.destinationId);
         }
       }
-      if (removedSourceIds.length === 0 && removedDestinationIds.length === 0) {
-        return;
-      }
-      stageUserEdit(
-        withoutDeletedComponents(unitDefinition, removedSourceIds, removedDestinationIds)
-      );
-      if (flyoutName && removedDestinationIds.includes(flyoutName)) {
-        closeFlyout();
-      }
+      stageComponentDeletes(removedSourceIds, removedDestinationIds);
     },
-    [closeFlyout, flyoutName, stageUserEdit, unitDefinition]
+    [stageComponentDeletes]
   );
 
   const onNodeClick = useCallback<NodeMouseHandler<ClassicCanvasNode>>(
@@ -868,6 +873,14 @@ function StreamsCanvasInner() {
     onEnter,
   });
 
+  const stagedDestinationIds = useMemo(() => destinations.map(({ id }) => id), [destinations]);
+  const resolvedFlyoutKind = useCloseRemovedDestinationFlyout({
+    flyoutName,
+    flyoutKind,
+    destinationIds: stagedDestinationIds,
+    closeFlyout,
+  });
+
   // Hold the spinner until the unit, the source environment, and the first
   // unit.loaded sync have settled. Resolved indices refresh in the background.
   const isCanvasLoading =
@@ -893,15 +906,10 @@ function StreamsCanvasInner() {
   }
 
   const flyoutDestination =
-    flyoutName && flyoutKind !== 'index'
+    resolvedFlyoutKind === 'destination'
       ? destinations.find((destination) => destination.id === flyoutName)
       : undefined;
-  const flyoutIndexName =
-    flyoutName && flyoutKind === 'index'
-      ? flyoutName
-      : flyoutName && !flyoutKind && !flyoutDestination
-      ? flyoutName
-      : undefined;
+  const flyoutIndexName = resolvedFlyoutKind === 'index' ? flyoutName : null;
 
   return (
     <div css={canvasColumnStyles}>
@@ -1013,10 +1021,7 @@ function StreamsCanvasInner() {
                   isDeleteDisabled={isSaving}
                   readOnly={readOnly}
                   onIndexClick={openIndexFlyout}
-                  onDelete={() => {
-                    destinationsController.deleteDestination(flyoutDestination.id);
-                    closeFlyout();
-                  }}
+                  onDelete={() => stageComponentDeletes([], [flyoutDestination.id])}
                 />
               ) : (
                 flyoutIndexName && (
@@ -1033,6 +1038,8 @@ function StreamsCanvasInner() {
                   sources={sourcesController}
                   source={selectedSource}
                   onClose={closeSourceFlyout}
+                  onDelete={(id) => stageComponentDeletes([id], [])}
+                  isDeleteDisabled={isSaving}
                   readOnly={readOnly}
                 />
               )}
@@ -1058,6 +1065,7 @@ function StreamsCanvasInner() {
                   key={processingFlyout.ref.sessionId}
                   flyout={processingFlyout}
                   readOnly={readOnly}
+                  isSlotUnsaved={isProcessingSlotUnsaved}
                 />
               ) : null}
               <EuiScreenReaderOnly>
