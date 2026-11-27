@@ -16,10 +16,10 @@ import type { EsqlServerPluginStart } from '../types';
 
 jest.mock('./helpers', () => ({
   resolveConnectorId: jest.fn(),
-  createScopedModel: jest.fn(),
 }));
 
-const { resolveConnectorId, createScopedModel } = jest.requireMock('./helpers');
+const { resolveConnectorId } = jest.requireMock('./helpers');
+const getChatModel = jest.fn();
 
 function buildMocks(
   options: {
@@ -28,7 +28,7 @@ function buildMocks(
     inference?: object | null;
   } = {}
 ) {
-  const { deployment, inference = {} } = options;
+  const { deployment, inference = { getChatModel } } = options;
   const handler = jest.fn();
   const router = {
     post: jest.fn((_, h) => {
@@ -70,9 +70,7 @@ function buildMocks(
 
 const modelReturning = (result: unknown) => {
   const invoke = jest.fn().mockResolvedValue(result);
-  createScopedModel.mockResolvedValue({
-    chatModel: { withStructuredOutput: jest.fn(() => ({ invoke })) },
-  });
+  getChatModel.mockResolvedValue({ withStructuredOutput: jest.fn(() => ({ invoke })) });
   return invoke;
 };
 
@@ -163,9 +161,7 @@ describe('registerExplainErrorRoute', () => {
   it('answers forbidden for a license error', async () => {
     const { handler, requestHandlerContext, request, response } = buildMocks();
     resolveConnectorId.mockResolvedValue('connector-1');
-    createScopedModel.mockRejectedValue(
-      Object.assign(new Error('no license'), { reason: 'license_x' })
-    );
+    getChatModel.mockRejectedValue(Object.assign(new Error('no license'), { reason: 'license_x' }));
 
     await handler(requestHandlerContext, request, response);
 

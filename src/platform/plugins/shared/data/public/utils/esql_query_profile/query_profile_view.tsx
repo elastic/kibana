@@ -20,6 +20,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { ApplicationStart, HttpStart } from '@kbn/core/public';
+import { getConnectorsUrl, readRequestErrorMessage } from '@kbn/esql-utils';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -32,6 +35,8 @@ import { listEsqlInspectorRequests } from './esql_inspector_requests';
 import { loadEsqlQueryProfile } from './profile/load_esql_query_profile';
 import { ProfileSummary } from './profile_summary';
 import { readRequestQuery } from './shared/json_helpers';
+import { FasterQuerySuggestion } from './suggestion/faster_query_suggestion';
+import { useHasEnterpriseLicense } from './suggestion/use_has_enterprise_license';
 import { TimelineTab } from './timeline/timeline_tab';
 
 type TabId = 'timeline' | 'byCommand';
@@ -39,10 +44,6 @@ type TabId = 'timeline' | 'byCommand';
 /** The query of a logged request, or nothing when it has none or an empty one. */
 const readQuery = (request: Request | undefined): string | undefined =>
   readRequestQuery(request?.json) || undefined;
-
-/** The message of a caught error, or the fallback when it has none. */
-const readErrorMessage = (caught: unknown, fallback: string): string =>
-  caught instanceof Error && caught.message ? caught.message : fallback;
 
 const completedRequestTime = (request: Request | undefined): string | undefined => {
   const value = request?.stats?.queryTime?.value;
@@ -87,7 +88,9 @@ interface LoadedProfile {
 const useQueryProfile = (
   search: Pick<ISearchStart, 'esql'>,
   request: Request | undefined,
-  runKey: string
+  runKey: string,
+  /** Whether the results of the run are kept, for the AI suggestion to compare them. */
+  keepResults: boolean
 ): {
   view?: QueryProfileViewModel;
   error?: string;
@@ -98,6 +101,10 @@ const useQueryProfile = (
   const [loaded, setLoaded] = useState<LoadedProfile | undefined>();
   const latestRequest = useRef(request);
   latestRequest.current = request;
+  // Whether the suggestion can be offered is known a moment after the view opens, and the profile
+  // starts at once, so this is read when the response arrives.
+  const latestKeepResults = useRef(keepResults);
+  latestKeepResults.current = keepResults;
   // Once a request was logged this stays true. A refetch of the inspected panel empties the adapter
   // for a moment, and that must not cancel the run that is going on, nor start another one.
   const [hasSeenRequest, setHasSeenRequest] = useState(Boolean(request?.json));
@@ -116,7 +123,12 @@ const useQueryProfile = (
     }
 
     const controller = new AbortController();
-    loadEsqlQueryProfile({ search, requestJson, abortSignal: controller.signal })
+    loadEsqlQueryProfile({
+      search,
+      requestJson,
+      abortSignal: controller.signal,
+      keepResults: () => latestKeepResults.current,
+    })
       .then((view) => {
         if (!controller.signal.aborted) {
           setLoaded({ runKey, request: target, view });
@@ -129,7 +141,7 @@ const useQueryProfile = (
         setLoaded({
           runKey,
           request: target,
-          error: readErrorMessage(
+          error: readRequestErrorMessage(
             caught,
             i18n.translate('data.inspector.queryProfile.unknownErrorMessage', {
               defaultMessage: 'The query profile failed.',
@@ -276,10 +288,20 @@ const ProfileDetails = ({
 export const QueryProfileView = ({
   adapters,
   search,
+  http,
+  licensing,
+  application,
 }: {
   adapters: Adapters;
   search: Pick<ISearchStart, 'esql'>;
+  /** Needed for the AI suggestion. Without it the suggestion is not offered. */
+  http?: Pick<HttpStart, 'post'>;
+  /** Needed to know whether the license allows the AI suggestion. */
+  licensing?: LicensingPluginStart;
+  /** Needed to link to the place where an AI connector is set up. */
+  application?: Pick<ApplicationStart, 'capabilities' | 'getUrlForApp'>;
 }) => {
+  const hasEnterpriseLicense = useHasEnterpriseLicense(licensing);
   const requests = useEsqlRequests(adapters);
   // A refetch logs the requests again with new ids but the same names, so the pick is kept by both.
   const [picked, setPicked] = useState<{ id: string; name: string } | undefined>();
@@ -295,7 +317,8 @@ export const QueryProfileView = ({
   const { view, error, profiledRequest, loading } = useQueryProfile(
     search,
     selected,
-    `${picked?.id ?? ''}:${reloadKey}`
+    `${picked?.id ?? ''}:${reloadKey}`,
+    Boolean(http) && hasEnterpriseLicense
   );
   // The request that was profiled can still be pending when the profile starts, so its time is read
   // from the latest copy of it while it is logged, and from the one taken once it is not.
@@ -390,6 +413,19 @@ export const QueryProfileView = ({
       ) : view ? (
         <>
           <ProfileSummary view={view} />
+          {http && hasEnterpriseLicense && profiledRequest?.json && query ? (
+            <>
+              <EuiSpacer size="m" />
+              <FasterQuerySuggestion
+                http={http}
+                search={search}
+                requestJson={profiledRequest.json}
+                originalQuery={query}
+                originalView={view}
+                connectorsUrl={application ? getConnectorsUrl(application) : undefined}
+              />
+            </>
+          ) : null}
           <ProfileDetails
             view={view}
             heat={heat}

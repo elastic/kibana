@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { ESQLSearchParams } from '@kbn/es-types';
 import type { IEsqlSearchParams } from '@kbn/search-types';
 import type { ISearchStart } from '../../../search';
+import { readResultsOf } from './result_summary';
 import { aggregateEsqlProfile } from './aggregate_esql_profile';
 import type { QueryProfileView } from './types';
 import { isRecord } from '../shared/json_helpers';
@@ -20,10 +21,16 @@ export async function loadEsqlQueryProfile({
   search,
   requestJson,
   abortSignal,
+  keepResults,
 }: {
   search: Pick<ISearchStart, 'esql'>;
   requestJson: object;
   abortSignal: AbortSignal;
+  /**
+   * Asked when the response arrives, and when it says yes the view can summarize the results. The
+   * rows are held for that, so a profile that has no use for them should say no.
+   */
+  keepResults: () => boolean;
 }): Promise<QueryProfileView> {
   if (!isRecord(requestJson) || typeof requestJson.query !== 'string') {
     throw new Error(
@@ -70,5 +77,10 @@ export async function loadEsqlQueryProfile({
     );
   }
 
-  return aggregateEsqlProfile(profile);
+  const view = aggregateEsqlProfile(profile);
+  if (!keepResults()) {
+    return view;
+  }
+  const { columns, values } = rawResponse;
+  return { ...view, readResults: readResultsOf({ columns, values }) };
 }

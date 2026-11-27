@@ -8,7 +8,8 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
-import { EXPLAIN_ERROR_ROUTE, NO_AI_CONNECTOR_ERROR_CODE } from '@kbn/esql-types';
+import { EXPLAIN_ERROR_ROUTE } from '@kbn/esql-types';
+import { toAiRequestFailure } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 
 export interface EsqlErrorExplanation {
@@ -51,33 +52,11 @@ export async function explainEsqlError({
       query: response.query ?? undefined,
     };
   } catch (caught: unknown) {
-    throw new ExplainErrorFailure(readErrorMessage(caught), readErrorCode(caught));
-  }
-}
-
-export class ExplainErrorFailure extends Error {
-  readonly isNoConnector: boolean;
-
-  constructor(message: string, code?: string) {
-    super(message);
-    this.isNoConnector = code === NO_AI_CONNECTOR_ERROR_CODE;
-  }
-}
-
-function readErrorCode(caught: unknown): string | undefined {
-  const code = (caught as { body?: { attributes?: { code?: unknown } } } | undefined)?.body
-    ?.attributes?.code;
-  return typeof code === 'string' ? code : undefined;
-}
-
-function readErrorMessage(caught: unknown): string {
-  const body = (caught as { body?: { message?: unknown } } | undefined)?.body;
-  if (typeof body?.message === 'string' && body.message.length > 0) {
-    return body.message;
-  }
-  return caught instanceof Error && caught.message
-    ? caught.message
-    : i18n.translate('discover.esqlErrorHelp.failedMessage', {
+    throw toAiRequestFailure(
+      caught,
+      i18n.translate('discover.esqlErrorHelp.failedMessage', {
         defaultMessage: 'The AI could not explain this error.',
-      });
+      })
+    );
+  }
 }

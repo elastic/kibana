@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EsqlProfilePlan, ESQLColumn } from '@kbn/es-types';
 import type { esqlProfileResponseSchema } from '@elastic/esql-definitions/profile-schema';
 
 type SchemaProperties = typeof esqlProfileResponseSchema.properties;
@@ -115,6 +116,18 @@ export interface QueryProfileTimeline {
   drivers: TimelineDriver[];
 }
 
+/** What is kept of a result set so two runs can be compared without holding every row. */
+export interface QueryResultsSummary {
+  /** The name and type of every column, since the same values in another type are another result. */
+  columns: Array<Pick<ESQLColumn, 'name' | 'type'>>;
+  rowCount: number;
+  /**
+   * Fingerprints of the rows: one ignoring their order, one in the order they came back. Missing for
+   * a result too large to fingerprint, which is compared by its columns and row count only.
+   */
+  fingerprints?: { unordered: string; ordered: string };
+}
+
 export interface QueryProfileView {
   queryTookMillis?: number;
   planningTookMillis?: number;
@@ -122,9 +135,17 @@ export interface QueryProfileView {
   planningPhases: PlanningPhase[];
   driverCount: number;
   operators: AggregatedOperator[];
+  /** The plans Elasticsearch reports, as text, for the AI to read. */
+  plans: EsqlProfilePlan[];
   /** The source of each plan node that has one, by `planNodeKey` of its node and id. */
   planNodeSources: Record<string, PlanNodeSource>;
   /** True when at least one driver has a usable start and stop. */
   hasTimeline: boolean;
   timeline: QueryProfileTimeline;
+  /**
+   * Summarizes what the profiled run returned, since the profile does not hold rows. Set by the
+   * loader only when it was asked to keep the results, and it does the work on the first call, as
+   * that can take a while for a large result.
+   */
+  readResults?: () => QueryResultsSummary | undefined;
 }

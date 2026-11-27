@@ -22,9 +22,10 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { HttpStart } from '@kbn/core/public';
+import { AiRequestFailure } from '@kbn/esql-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EsqlErrorExplanation } from './explain_esql_error';
-import { ExplainErrorFailure, explainEsqlError } from './explain_esql_error';
+import { explainEsqlError } from './explain_esql_error';
 
 type Stage =
   | { kind: 'idle' }
@@ -84,7 +85,7 @@ export function EsqlErrorHelp({
         setStage({
           kind: 'error',
           message: caught instanceof Error ? caught.message : String(caught),
-          isNoConnector: caught instanceof ExplainErrorFailure && caught.isNoConnector,
+          isNoConnector: caught instanceof AiRequestFailure && caught.isNoConnector,
         });
       }
     }

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -42,6 +43,7 @@ export interface DataSetupDependencies {
 }
 
 export interface DataStartDependencies {
+  licensing?: LicensingPluginStart;
   uiActions: UiActionsStart;
   fieldFormats: FieldFormatsStart;
   dataViews: DataViewsPublicPluginStart;

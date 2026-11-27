@@ -8,6 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ApplicationStart, HttpStart } from '@kbn/core/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { InspectorViewDescription } from '@kbn/inspector-plugin/public';
 import type { ISearchStart } from '../../search';
 import { hasEsqlInspectorRequest } from './esql_inspector_requests';
@@ -17,6 +19,9 @@ import { getQueryProfileViewComponent } from './query_profile_view_wrapper';
 export const getEsqlQueryProfileViewDescription = (
   getStartServices: () => {
     search: ISearchStart;
+    http: HttpStart;
+    licensing?: LicensingPluginStart;
+    application: ApplicationStart;
   }
 ): InspectorViewDescription => ({
   title: i18n.translate('data.inspector.queryProfile.queryProfileTitle', {

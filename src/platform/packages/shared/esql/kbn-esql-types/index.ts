@@ -59,6 +59,7 @@ export {
   ESQL_VIEWS_CAPABILITIES,
   NL_TO_ESQL_ROUTE,
   SUGGEST_FIX_ROUTE,
+  OPTIMIZE_QUERY_ROUTE,
   EXPLAIN_ERROR_ROUTE,
   NO_AI_CONNECTOR_ERROR_CODE,
   SOURCE_INFO_ROUTE,
@@ -79,6 +80,8 @@ export {
   type TelemetryQuerySubmittedProps,
   type TelemetryLatencyProps,
 } from './src/esql_telemetry_types';
+
+export type { OptimizeQueryResponse } from './src/optimize_query_types';
 
 export { type ESQLQueryStats, type ESQLControlsContext } from './src/editor_types';
 export {

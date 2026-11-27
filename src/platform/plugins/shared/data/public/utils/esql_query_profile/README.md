@@ -10,6 +10,8 @@ What it shows:
 - **Timeline:** one lane per driver on a shared clock, with the waits. Click a lane for its details
   and operators.
 - **By command:** the share of the time that belongs to each command of your query.
+- **Suggest a faster query:** asks the AI for a rewrite, and on request runs it and compares its
+  time and its results with the original.
 
 ## Where things are
 
@@ -21,6 +23,7 @@ esql_inspector_requests.ts          which inspector requests are ES|QL
 profile/       the ES profile turned into the view model (no UI)
 timeline/      the Timeline tab and its details panel
 by_command/    the By command tab: which operator belongs to which command
+suggestion/    the AI suggestion, and how its results are compared
 shared/        small helpers used by more than one of the above
 ```
 
@@ -39,6 +42,11 @@ feature folders.
 - **Lists come from the profile schema** that `@elastic/esql-definitions` publishes, not from code
   here (see `profile/profile_schema.ts`). When that package is updated and `profile_schema.test.ts`
   fails, Elasticsearch changed a field the view reads. Check it.
+- **The AI suggestion** needs an enterprise license and an AI connector. It is served by
+  `POST /internal/esql/optimize_query` in the `esql` plugin. The suggestion is only shown, never
+  applied, and it runs only when the user asks.
+- **Results are compared by fingerprint**, so rows are never kept. Decimals are rounded, whole
+  numbers are not, and column types count as well as names.
 - **Request names are the ones the Requests view shows**, numbered when two share a name.
 
 ## Trying it
