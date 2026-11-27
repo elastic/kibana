@@ -17,7 +17,6 @@ import type {
 } from '@kbn/inference-common';
 import { aiAnonymizationSettings } from '@kbn/inference-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
   GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
@@ -42,7 +41,6 @@ import { getUiSettings } from '../common/ui_settings';
 import { getConnectorList } from './util/get_connector_list';
 import { loadDefaultConnector } from './util/load_default_connector';
 import { getConnectorById, getConnectorByIdWithoutClientRequest } from './util/get_connector_by_id';
-import { getInferenceEndpoints } from './util/get_inference_endpoints';
 import { getInferenceEndpointById } from './util/get_inference_endpoint_by_id';
 import { InferenceEndpointIdCache } from './util/inference_endpoint_id_cache';
 import { TokenUsageLogger } from './token_usage';
@@ -379,10 +377,6 @@ export class InferencePlugin
           esClient,
           logger: this.logger,
         });
-      },
-      getInferenceEndpoints: async (taskType?: InferenceTaskType) => {
-        const esClient = core.elasticsearch.client.asInternalUser;
-        return getInferenceEndpoints({ esClient, taskType });
       },
       getInferenceEndpointById: async (inferenceId: string) => {
         const esClient = core.elasticsearch.client.asInternalUser;
