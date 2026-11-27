@@ -6,15 +6,31 @@
  */
 
 import { isImpliedDefaultElserInferenceId } from './is_default_inference_endpoint';
+import { validateInferenceId } from './inference_id';
 import type { ProductName } from './product';
+
+/**
+ * Returns the index name suffix for an inference ID, or an empty string for the implied default
+ * ELSER endpoint.
+ */
+const getInferenceIdSuffix = (inferenceId?: string): string => {
+  if (inferenceId === undefined || isImpliedDefaultElserInferenceId(inferenceId)) {
+    return '';
+  }
+  const error = validateInferenceId(inferenceId);
+  if (error) {
+    throw new Error(error);
+  }
+  return `-${inferenceId}`;
+};
 
 export const productDocIndexPrefix = '.kibana_ai_product_doc';
 export const productDocIndexPattern = `${productDocIndexPrefix}_*`;
 
 export const getProductDocIndexName = (productName: ProductName, inferenceId?: string): string => {
-  return `${productDocIndexPrefix}_${productName.toLowerCase()}${
-    !isImpliedDefaultElserInferenceId(inferenceId) ? `-${inferenceId}` : ''
-  }`;
+  return `${productDocIndexPrefix}_${productName.toLowerCase()}${getInferenceIdSuffix(
+    inferenceId
+  )}`;
 };
 
 /**
@@ -32,9 +48,7 @@ export const securityLabsIndexPattern = `${securityLabsIndexPrefix}*`;
  * Format: .kibana_ai_security_labs[-{inferenceId}]
  */
 export const getSecurityLabsIndexName = (inferenceId?: string): string => {
-  return `${securityLabsIndexPrefix}${
-    !isImpliedDefaultElserInferenceId(inferenceId) ? `-${inferenceId}` : ''
-  }`;
+  return `${securityLabsIndexPrefix}${getInferenceIdSuffix(inferenceId)}`;
 };
 
 /**
@@ -52,7 +66,5 @@ export const openApiSpecIndexPattern = `${openApiSpecIndexPrefix}*`;
  * Format: .kibana_ai_openapi_spec[-{inferenceId}]
  */
 export const getOpenApiSpecIndexName = (inferenceId?: string): string => {
-  return `${openApiSpecIndexPrefix}${
-    !isImpliedDefaultElserInferenceId(inferenceId) ? `-${inferenceId}` : ''
-  }`;
+  return `${openApiSpecIndexPrefix}${getInferenceIdSuffix(inferenceId)}`;
 };
