@@ -130,7 +130,15 @@ export class AgentBuilderApp {
       undefined,
       { timeout: 120_000 }
     );
+    await this.waitForRunToEnd();
     return this.getCurrentConversationIdFromUrl();
+  }
+
+  // The Stop button renders only while the stream is live, so its removal means the run ended.
+  private async waitForRunToEnd() {
+    await this.page.testSubj
+      .locator('agentBuilderConversationInputCancelButton')
+      .waitFor({ state: 'detached', timeout: 120_000 });
   }
 
   async navigateToConversationViaHistory(conversationId: string) {
@@ -161,6 +169,7 @@ export class AgentBuilderApp {
       existingCount,
       { timeout: 120_000 }
     );
+    await this.waitForRunToEnd();
   }
 
   async deleteConversation(conversationId: string) {
