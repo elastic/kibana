@@ -81,8 +81,6 @@ interface IngestEntitiesParams {
   fieldsToIgnore?: string[];
   /** Optional transform applied to each document before indexing (e.g. add @timestamp, reshape for entity type). */
   transformDocument?: IngestEntitiesTransformDocument;
-  /** Use `true` when same-run visibility is required (e.g. LOOKUP JOIN on the latest index); `false` when downstream consumers tolerate the 1 s natural refresh window. */
-  refresh: boolean | 'wait_for';
   /** Called once per document rejected by the ES bulk API. Use to increment an external dropped-docs counter. */
   onDropped?: () => void;
 }
@@ -115,6 +113,9 @@ export interface IngestEntitiesOutcome {
  * When esIdField is provided: uses update with doc_as_upsert (upsert by _id).
  * When esIdField is omitted: uses create and Elasticsearch auto-generates _id.
  *
+ * It does not refresh the index. A caller that needs to read the documents it wrote refreshes the
+ * index itself, once, after its last write.
+ *
  * Returns how many documents were created, updated and left unchanged.
  */
 export async function ingestEntities({
@@ -126,7 +127,6 @@ export async function ingestEntities({
   signal,
   fieldsToIgnore,
   transformDocument,
-  refresh,
   onDropped,
 }: IngestEntitiesParams): Promise<IngestEntitiesOutcome> {
   const options: TransportRequestOptions = {};
@@ -189,8 +189,6 @@ export async function ingestEntities({
     {
       datasource: documentGenerator(),
       index: targetIndex,
-      // Single refresh after all batches complete
-      refreshOnCompletion: refresh ? targetIndex : false,
       flushBytes: BATCH_SIZE,
       concurrency: 1,
       retries: 3,

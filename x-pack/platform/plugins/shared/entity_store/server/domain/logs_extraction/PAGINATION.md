@@ -8,6 +8,8 @@ Three nested loops process raw log documents into aggregated entity rows.
 
 **Inner loop — entity pages**: Each log slice is processed via `buildLogsExtractionEsqlQuery`. Results are paginated by entity id only, up to `docsLimit` entities per query. On later pages `WHERE id > paginationId` runs right after the `EVAL` that computes the id, before `STATS`, so rows of entities that earlier pages already emitted never reach `STATS`, `LOOKUP JOIN` or `postAggFilter`. After `STATS` (or after `postAggFilter` when the definition has one) the query does `SORT entity.EngineMetadata.UntypedId ASC` and `LIMIT docsLimit`. The id is derived only from identity fields, so the order does not change when the query samples.
 
+**Writes**: Each entity page is written to the latest index without a refresh. The pages of a slice cover different entities, so a page never reads what an earlier page wrote. The index is refreshed once, after the last page of the slice, if the slice read any entity row or resumes an interrupted slice. The refresh does not depend on what the writes changed: after a failed refresh, the next run writes the same pages again, and those writes are no-ops that still have to be made searchable. The next slice reads the stored entities through `LOOKUP JOIN`, so it must find this slice's writes searchable, or it would merge against old data and overwrite them. If the refresh fails, or answers with failed shards, the run stops and the checkpoint stays before the slice. The next run reads the slice again, which is safe because the upserts are idempotent.
+
 The probe sampling above only finds slice bounds. Extraction itself samples only in the non-priority process, see [Non-priority adaptive sampling](#non-priority-adaptive-sampling).
 
 ---

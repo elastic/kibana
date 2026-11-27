@@ -189,6 +189,7 @@ interface TestContext {
   client: LogsExtractionClient;
   mockLogger: ReturnType<typeof loggerMock.create>;
   mockEsClient: jest.Mocked<ElasticsearchClient>;
+  mockRefresh: jest.Mock;
   mockDataViewsService: jest.Mocked<DataViewsService>;
   mockEngineDescriptorClient: jest.Mocked<Pick<EngineDescriptorClient, 'findOrThrow' | 'update'>>;
   mockGlobalStateClient: ReturnType<typeof createMockGlobalStateClient>;
@@ -207,9 +208,13 @@ function createTestContext(globalStateOverrides?: GlobalStateLogExtractionOverri
   mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
 
   const mockLogger = loggerMock.create();
+  const mockRefresh = jest
+    .fn()
+    .mockResolvedValue({ _shards: { total: 1, successful: 1, failed: 0 } });
   const mockEsClient = {
     indices: {
       resolveIndex: jest.fn().mockResolvedValue({ indices: [], aliases: [], data_streams: [] }),
+      refresh: mockRefresh,
     },
   } as unknown as jest.Mocked<ElasticsearchClient>;
   const mockDataViewsService = {
@@ -234,6 +239,7 @@ function createTestContext(globalStateOverrides?: GlobalStateLogExtractionOverri
     client,
     mockLogger,
     mockEsClient,
+    mockRefresh,
     mockDataViewsService,
     mockEngineDescriptorClient,
     mockGlobalStateClient,
@@ -322,7 +328,6 @@ describe('LogsExtractionClient', () => {
         targetIndex: expect.stringContaining('.entities.v2.latest.default'),
         logger: expect.any(Object),
         abortController: undefined,
-        refresh: true,
         onDropped: expect.any(Function),
       });
 
@@ -949,6 +954,168 @@ describe('LogsExtractionClient', () => {
       expect(!result.success && result.error).toBe(testError);
       expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('user', {
         error: { message: testError.message, action: 'extractLogs' },
+      });
+    });
+
+    describe('making the writes of a slice searchable', () => {
+      const DOCS_LIMIT = 2;
+      const columns: ESQLSearchResponse['columns'] = [
+        { name: '@timestamp', type: 'date' },
+        { name: HASHED_ID_FIELD, type: 'keyword' },
+        { name: ENGINE_METADATA_UNTYPED_ID_FIELD, type: 'keyword' },
+      ];
+      // A page with as many rows as docsLimit means another page may follow. A shorter one ends the slice.
+      const fullPage: ESQLSearchResponse = {
+        columns,
+        values: [
+          ['2024-01-02T10:00:00.000Z', 'hash1', 'entity1'],
+          ['2024-01-02T10:00:01.000Z', 'hash2', 'entity2'],
+        ],
+      };
+      const shortPage: ESQLSearchResponse = {
+        columns,
+        values: [['2024-01-02T10:00:02.000Z', 'hash3', 'entity3']],
+      };
+      // Fewer sampled rows than the limit: this slice is the last one of the window.
+      const lastSliceProbe = () => mockLogPaginationCursorProbeRow('2024-01-02T10:00:02.000Z', 1);
+      // More rows than the limit: more slices follow.
+      const moreSlicesProbe = () => mockLogPaginationCursorProbeRow('2024-01-02T10:00:01.000Z');
+
+      const setup = () => {
+        const context = createTestContext({ docsLimit: DOCS_LIMIT });
+        context.mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+          createMockEngineDescriptor('user') as Awaited<
+            ReturnType<EngineDescriptorClient['findOrThrow']>
+          >
+        );
+        context.mockDataViewsService.get.mockResolvedValue({
+          getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+        } as any);
+        mockIngestEntities.mockResolvedValue({ created: 1, updated: 0, noop: 0 });
+        return context;
+      };
+
+      it('refreshes the latest index once at the end of a slice, not after every entity page', async () => {
+        const { client: sliceClient, mockRefresh } = setup();
+        mockExecuteEsqlQuery
+          .mockResolvedValueOnce(lastSliceProbe())
+          .mockResolvedValueOnce(fullPage)
+          .mockResolvedValueOnce(shortPage);
+
+        const result = await sliceClient.extractLogs('user');
+
+        expect(result.success).toBe(true);
+        expect(result.success && result.pages).toBe(2);
+        expect(mockIngestEntities).toHaveBeenCalledTimes(2);
+        expect(mockRefresh).toHaveBeenCalledTimes(1);
+        expect(mockRefresh).toHaveBeenCalledWith(
+          { index: expect.stringContaining('.entities.v2.latest.default') },
+          expect.any(Object)
+        );
+        const lastIngest = mockIngestEntities.mock.invocationCallOrder.at(-1)!;
+        expect(mockRefresh.mock.invocationCallOrder[0]).toBeGreaterThan(lastIngest);
+      });
+
+      it('makes slice 1 searchable before slice 2 reads the stored entities', async () => {
+        const { client: sliceClient, mockRefresh } = setup();
+        mockExecuteEsqlQuery
+          .mockResolvedValueOnce(moreSlicesProbe())
+          .mockResolvedValueOnce(shortPage)
+          .mockResolvedValueOnce(lastSliceProbe())
+          .mockResolvedValueOnce(shortPage);
+
+        const result = await sliceClient.extractLogs('user');
+
+        expect(result.success).toBe(true);
+        expect(mockRefresh).toHaveBeenCalledTimes(2);
+        const [, extractSlice1, , extractSlice2] = mockExecuteEsqlQuery.mock.invocationCallOrder;
+        const [refreshSlice1, refreshSlice2] = mockRefresh.mock.invocationCallOrder;
+        expect(refreshSlice1).toBeGreaterThan(extractSlice1);
+        expect(refreshSlice1).toBeLessThan(extractSlice2);
+        expect(refreshSlice2).toBeGreaterThan(extractSlice2);
+      });
+
+      it('refreshes even when write was a no-op, because an earlier failed run may have left writes unrefreshed', async () => {
+        const { client: sliceClient, mockRefresh } = setup();
+        mockIngestEntities.mockResolvedValue({ created: 0, updated: 0, noop: 1 });
+        mockExecuteEsqlQuery
+          .mockResolvedValueOnce(lastSliceProbe())
+          .mockResolvedValueOnce(shortPage);
+
+        const result = await sliceClient.extractLogs('user');
+
+        expect(result.success).toBe(true);
+        expect(mockRefresh).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not refresh when the slice read no entity rows', async () => {
+        const { client: sliceClient, mockRefresh } = setup();
+        mockExecuteEsqlQuery
+          .mockResolvedValueOnce(lastSliceProbe())
+          .mockResolvedValueOnce({ columns, values: [] });
+
+        const result = await sliceClient.extractLogs('user');
+
+        expect(result.success).toBe(true);
+        expect(mockRefresh).not.toHaveBeenCalled();
+      });
+
+      it('stops the run when the refresh fails and does not move the checkpoint past the slice', async () => {
+        const {
+          client: sliceClient,
+          mockRefresh,
+          mockEngineDescriptorClient: descriptor,
+        } = setup();
+        const refreshError = new Error('refresh failed');
+        mockRefresh.mockRejectedValue(refreshError);
+        mockExecuteEsqlQuery
+          .mockResolvedValueOnce(lastSliceProbe())
+          .mockResolvedValueOnce(fullPage)
+          .mockResolvedValueOnce(shortPage);
+
+        const result = await sliceClient.extractLogs('user');
+
+        expect(result.success).toBe(false);
+        expect(!result.success && result.error).toBe(refreshError);
+        expect(descriptor.update).toHaveBeenCalledWith('user', {
+          error: { message: refreshError.message, action: 'extractLogs' },
+        });
+        // Neither the end of the slice nor the end of the run cleared the saved entity cursor, so
+        // the next run reads this slice again.
+        expect(descriptor.update).not.toHaveBeenCalledWith(
+          'user',
+          expect.objectContaining({
+            logExtractionState: expect.objectContaining({ paginationId: null }),
+          })
+        );
+      });
+
+      it('treats a refresh that answers with failed shards as a failed refresh', async () => {
+        const {
+          client: sliceClient,
+          mockRefresh,
+          mockEngineDescriptorClient: descriptor,
+        } = setup();
+        mockRefresh.mockResolvedValue({ _shards: { total: 2, successful: 1, failed: 1 } });
+        mockExecuteEsqlQuery
+          .mockResolvedValueOnce(lastSliceProbe())
+          .mockResolvedValueOnce(fullPage)
+          .mockResolvedValueOnce(shortPage);
+
+        const result = await sliceClient.extractLogs('user');
+
+        expect(result.success).toBe(false);
+        expect(!result.success && result.error).toEqual(
+          expect.objectContaining({ message: expect.stringContaining('failed on 1 of 2 shards') })
+        );
+        // Like any failed refresh: the saved entity cursor is not cleared, so the next run reads
+        // this slice again.
+        expect(descriptor.update).not.toHaveBeenCalledWith(
+          'user',
+          expect.objectContaining({
+            logExtractionState: expect.objectContaining({ paginationId: null }),
+          })
+        );
       });
     });
 
@@ -2104,6 +2271,109 @@ describe('LogsExtractionClient mid-slice resume', () => {
       expect(ingestedIds).toEqual(['entity1', 'entity2', 'entity3']);
     }
   );
+
+  it('after a failed refresh, the next run resumes inside the slice and refreshes once it is done', async () => {
+    setup({ docsLimit: 2 });
+    ctx.mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+      createMockEngineDescriptor('user', { checkpointTimestamp }) as Awaited<
+        ReturnType<EngineDescriptorClient['findOrThrow']>
+      >
+    );
+    const ingestedIds: string[] = [];
+    // In run 1 every row is new. In run 2 the rows that run 1 wrote are identical, so they are no-ops.
+    let isRewrite = false;
+    mockIngestEntities.mockImplementation(async ({ esqlResponse }) => {
+      const idIdx = esqlResponse.columns.findIndex(
+        ({ name }) => name === ENGINE_METADATA_UNTYPED_ID_FIELD
+      );
+      esqlResponse.values.forEach((row) => ingestedIds.push(String(row[idIdx])));
+      const rows = esqlResponse.values.length;
+      return isRewrite
+        ? { created: 0, updated: 0, noop: rows }
+        : { created: rows, updated: 0, noop: 0 };
+    });
+    ctx.mockRefresh.mockRejectedValueOnce(new Error('refresh failed'));
+
+    // Run 1: page 1 is full and persists the cursor. Page 2 is short and is written, so the slice
+    // is done, and then the refresh at the end of the slice fails.
+    mockExecuteEsqlQuery
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeRow(sliceEndTimestamp))
+      .mockResolvedValueOnce({
+        columns: extractionColumns,
+        values: [
+          ['2025-01-15T10:01:00.000Z', 'hash1', 'entity1'],
+          ['2025-01-15T10:02:00.000Z', 'hash2', 'entity2'],
+        ],
+      })
+      .mockResolvedValueOnce({
+        columns: extractionColumns,
+        values: [['2025-01-15T10:03:00.000Z', 'hash3', 'entity3']],
+      });
+
+    const run1 = await ctx.client.extractLogs('user');
+    expect(run1.success).toBe(false);
+
+    // The last state saved is still the cursor of page 1: the slice was not marked as done.
+    const persistedState = ctx.mockEngineDescriptorClient.update.mock.calls
+      .map(([, update]) => update.logExtractionState)
+      .filter(Boolean)
+      .at(-1)!;
+    expect(persistedState).toMatchObject({
+      checkpointTimestamp,
+      paginationId: 'entity2',
+      sliceEndTimestamp,
+    });
+
+    // Run 2 resumes from that state. It reads the last page again and this time the refresh works.
+    isRewrite = true;
+    ctx.mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+      createMockEngineDescriptor('user', {
+        checkpointTimestamp: persistedState.checkpointTimestamp ?? undefined,
+        paginationId: persistedState.paginationId!,
+        sliceEndTimestamp: persistedState.sliceEndTimestamp!,
+      }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
+    );
+    mockExecuteEsqlQuery
+      .mockResolvedValueOnce({
+        columns: extractionColumns,
+        values: [['2025-01-15T10:03:00.000Z', 'hash3', 'entity3']],
+      })
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+      .mockResolvedValueOnce({ columns: extractionColumns, values: [] });
+
+    const run2 = await ctx.client.extractLogs('user');
+    expect(run2.success).toBe(true);
+
+    const resumedQuery = mockExecuteEsqlQuery.mock.calls.at(-3)![0].query;
+    expect(resumedQuery).toContain('> "entity2"');
+    expect(resumedQuery).toContain(`@timestamp <= TO_DATETIME("${sliceEndTimestamp}")`);
+    // The last page of run 1 is written again. That is safe because the upserts are idempotent.
+    expect(ingestedIds).toEqual(['entity1', 'entity2', 'entity3', 'entity3']);
+    // One failed refresh in run 1 and one successful refresh in run 2, although every write of run 2
+    // was a no-op.
+    expect(ctx.mockRefresh).toHaveBeenCalledTimes(2);
+  });
+
+  it('refreshes a resumed slice even when no row is left to write', async () => {
+    ctx.mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+      createMockEngineDescriptor('user', {
+        checkpointTimestamp,
+        paginationId: 'entity-cursor',
+        sliceEndTimestamp,
+      }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
+    );
+    mockExecuteEsqlQuery
+      // The resumed slice has no row after the cursor. Run 1 wrote the last page before it failed.
+      .mockResolvedValueOnce({ columns: extractionColumns, values: [] })
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+      .mockResolvedValueOnce({ columns: extractionColumns, values: [] });
+
+    const result = await ctx.client.extractLogs('user');
+
+    expect(result.success).toBe(true);
+    // Only the resumed slice refreshes. The empty slice that follows has nothing to make searchable.
+    expect(ctx.mockRefresh).toHaveBeenCalledTimes(1);
+  });
 });
 
 const fixedNow = new Date('2025-01-15T12:00:00.000Z');
@@ -2126,6 +2396,7 @@ function createContextWithMode(mode: ExtractionMode) {
   const mockEsClient = {
     indices: {
       resolveIndex: jest.fn().mockResolvedValue({ indices: [], aliases: [], data_streams: [] }),
+      refresh: jest.fn().mockResolvedValue({}),
     },
   } as unknown as jest.Mocked<ElasticsearchClient>;
   const mockDataViewsService = {
@@ -2673,6 +2944,7 @@ describe('LogsExtractionClient sampling wiring', () => {
     const mockEsClient = {
       indices: {
         resolveIndex: jest.fn().mockResolvedValue({ indices: [], aliases: [], data_streams: [] }),
+        refresh: jest.fn().mockResolvedValue({}),
       },
     } as unknown as jest.Mocked<ElasticsearchClient>;
     const mockDataViewsService = {
