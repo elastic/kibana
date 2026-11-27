@@ -59,6 +59,15 @@ describe('dashboard settings evaluator', () => {
     expect(result.score).toBe(1);
   });
 
+  it('passes a requested fast mode', async () => {
+    const result = await evaluateSettings(
+      { esqlApproximation: true },
+      written({ esql_approximation: true })
+    );
+
+    expect(result.score).toBe(1);
+  });
+
   it('fails a requested setting the dashboard did not get', async () => {
     const result = await evaluateSettings(
       hideBorders,
@@ -72,19 +81,25 @@ describe('dashboard settings evaluator', () => {
   it('fails a setting the prompt did not ask for', async () => {
     const result = await evaluateSettings(
       {},
-      written({ options: { hide_panel_titles: true, sync_tooltips: true } })
+      written({
+        options: { hide_panel_titles: true, sync_tooltips: true },
+        esql_approximation: true,
+      })
     );
 
     expect(result.score).toBe(0);
     expect(result.explanation).toContain(
-      'other settings: changed options.hide_panel_titles to true, options.sync_tooltips to true'
+      'other settings: changed options.hide_panel_titles to true, options.sync_tooltips to true, esql_approximation to true'
     );
   });
 
-  it('compares unset options by their defaults', async () => {
+  it('compares unset options and fast mode by their defaults', async () => {
     const result = await evaluateSettings(
       hideBorders,
-      written({ options: { hide_panel_borders: true, use_margins: true, sync_cursor: true } })
+      written({
+        options: { hide_panel_borders: true, use_margins: true, sync_cursor: true },
+        esql_approximation: false,
+      })
     );
 
     expect(result.score).toBe(1);

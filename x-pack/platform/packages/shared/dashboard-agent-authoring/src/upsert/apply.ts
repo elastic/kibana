@@ -36,7 +36,13 @@ const mergeOptions = (
 
 const applyMetadata = (
   dashboardData: DashboardAttachmentData,
-  { title, description, time_range: timeRange, options }: DashboardMetadata
+  {
+    title,
+    description,
+    time_range: timeRange,
+    options,
+    esql_approximation: esqlApproximation,
+  }: DashboardMetadata
 ): DashboardAttachmentData => ({
   ...dashboardData,
   ...(title !== undefined ? { title } : {}),
@@ -45,6 +51,7 @@ const applyMetadata = (
   ...(options !== undefined && Object.keys(options).length > 0
     ? { options: mergeOptions(dashboardData.options, options) }
     : {}),
+  ...(esqlApproximation !== undefined ? { esql_approximation: esqlApproximation } : {}),
 });
 
 const updateSections = (

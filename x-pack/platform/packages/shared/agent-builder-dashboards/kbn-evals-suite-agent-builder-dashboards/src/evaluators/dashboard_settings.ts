@@ -21,11 +21,22 @@ type Settings = Record<string, unknown>;
 const toOptionSettings = (options: object): Settings =>
   Object.fromEntries(Object.entries(options).map(([key, value]) => [`options.${key}`, value]));
 
-/** The settings the dashboard applies, by name. Unset options take the defaults the dashboard merges them over. */
-const getSettings = ({ options }: DashboardAttachmentData): Settings =>
-  toOptionSettings({ ...EMPTY_DASHBOARD_STATE.options, ...options });
+/**
+ * The settings the dashboard applies, by name. Unset options take the defaults the dashboard
+ * merges them over, and unset fast mode is off.
+ */
+const getSettings = ({
+  options,
+  esql_approximation: esqlApproximation,
+}: DashboardAttachmentData): Settings => ({
+  ...toOptionSettings({ ...EMPTY_DASHBOARD_STATE.options, ...options }),
+  esql_approximation: esqlApproximation ?? false,
+});
 
-const getGoldSettings = ({ options = {} }: SettingsGold): Settings => toOptionSettings(options);
+const getGoldSettings = ({ options = {}, esqlApproximation }: SettingsGold): Settings => ({
+  ...toOptionSettings(options),
+  ...(esqlApproximation !== undefined ? { esql_approximation: esqlApproximation } : {}),
+});
 
 const formatValue = (value: unknown): string => JSON.stringify(value) ?? 'unset';
 

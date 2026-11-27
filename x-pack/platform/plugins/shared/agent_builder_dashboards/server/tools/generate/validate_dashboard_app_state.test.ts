@@ -141,12 +141,13 @@ describe('createDashboardAppStateValidator', () => {
       ).toEqual([{ path: ['title'], message: expect.any(String) }]);
     });
 
-    it('accepts the dashboard options the tool writes', () => {
+    it('accepts the dashboard settings the tool writes', () => {
       expect(
         createValidator().validateDashboardFields({
           title: 'Dashboard',
           panels: [],
           options: { hide_panel_borders: true, sync_cursor: true },
+          esql_approximation: true,
         })
       ).toEqual([]);
     });

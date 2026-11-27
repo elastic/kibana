@@ -23,7 +23,7 @@ const inlinePanelKindGuidance = getInlinePanelKindGuidance();
 
 const guidance = `## Dashboard Changes
 
-The ${dashboardTools.generateDashboard} tool applies the changes you describe to the current dashboard (if any). Describe the desired result, keyed by id, rather than steps: \`title\`, \`description\`, \`time_range\`, and \`options\` for dashboard fields, \`sections\`, \`panels\` and \`controls\` to create or update, and \`remove\` for ids to delete. Everything you leave out stays unchanged. See the environment workflow below for how the current dashboard is referenced and how the result is surfaced.
+The ${dashboardTools.generateDashboard} tool applies the changes you describe to the current dashboard (if any). Describe the desired result, keyed by id, rather than steps: \`title\`, \`description\`, \`time_range\`, \`options\`, and \`esql_approximation\` for dashboard fields, \`sections\`, \`panels\` and \`controls\` to create or update, and \`remove\` for ids to delete. Everything you leave out stays unchanged. See the environment workflow below for how the current dashboard is referenced and how the result is surfaced.
 
 ## Improving an Existing Dashboard (Enhance)
 

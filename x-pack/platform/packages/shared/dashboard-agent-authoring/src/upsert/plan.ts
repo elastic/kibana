@@ -61,7 +61,7 @@ export interface NewSection {
 
 export type DashboardMetadata = Pick<
   DashboardUpsert,
-  'title' | 'description' | 'time_range' | 'options'
+  'title' | 'description' | 'time_range' | 'options' | 'esql_approximation'
 >;
 
 /** The changes of one upsert call that can be applied, decided against the original dashboard. */
@@ -436,6 +436,7 @@ export const planUpsert = ({
     description,
     time_range: timeRange,
     options,
+    esql_approximation: esqlApproximation,
     sections = [],
     panels = [],
     controls = [],
@@ -452,7 +453,13 @@ export const planUpsert = ({
   const plannedPanels = planPanels({ original, panels: placement.panels });
 
   return {
-    metadata: { title, description, time_range: timeRange, options },
+    metadata: {
+      title,
+      description,
+      time_range: timeRange,
+      options,
+      esql_approximation: esqlApproximation,
+    },
     sectionUpdates: validItems.sectionUpdates,
     newSections: validItems.newSections,
     panels: plannedPanels.panels,

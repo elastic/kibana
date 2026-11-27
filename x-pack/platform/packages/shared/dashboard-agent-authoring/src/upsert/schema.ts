@@ -77,6 +77,12 @@ export const upsertDashboardSchema = lazySchema(() =>
       .describe(
         'Dashboard-wide display and behavior settings. Set only the keys the user asks to change.'
       ),
+    esql_approximation: z
+      .boolean()
+      .optional()
+      .describe(
+        'Fast mode: ES|QL panels with STATS run with approximate, faster results. Set ONLY when the user asks. false turns it off.'
+      ),
     sections: z
       .array(upsertSectionSchema)
       .max(50)

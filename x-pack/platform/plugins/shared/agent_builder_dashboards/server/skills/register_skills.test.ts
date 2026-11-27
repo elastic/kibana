@@ -66,7 +66,7 @@ describe('registerSkills', () => {
 
   it('keeps the dashboard settings in both enhance modes unless the user asks', () => {
     expect(enhanceGuidance()).toContain(
-      'Neither mode changes the dashboard settings (`options`) unless the user asks.'
+      'Neither mode changes the dashboard settings (`options`, `esql_approximation`) unless the user asks.'
     );
   });
 

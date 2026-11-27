@@ -176,6 +176,7 @@ export interface RequestedFilterGold {
  */
 export interface SettingsGold {
   options?: NonNullable<DashboardAttachmentData['options']>;
+  esqlApproximation?: boolean;
 }
 
 /** A visualization attachment by id, as the visualization skill stores it on the conversation. */
