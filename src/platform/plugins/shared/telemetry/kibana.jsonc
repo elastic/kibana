@@ -11,13 +11,13 @@
     "browser": true,
     "server": true,
     "requiredPlugins": [
-      "telemetryCollectionManager",
-      "usageCollection",
-      "screenshotMode"
+      "telemetryCollectionManager"
     ],
     "optionalPlugins": [
       "home",
-      "security"
+      "screenshotMode",
+      "security",
+      "usageCollection"
     ],
     "requiredBundles": [
       "kibanaUtils"

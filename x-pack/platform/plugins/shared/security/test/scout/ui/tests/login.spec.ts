@@ -70,11 +70,17 @@ test.describe('Security - Login Page', { tag: tags.stateful.classic }, () => {
 
     expect(selectedPluginIds).toContain('core');
     expect(selectedPluginIds).toContain('security');
+    expect(selectedPluginIds).toContain('telemetry');
     expect(requestedPluginIds).toContain('core');
     expect(requestedPluginIds).toContain('security');
+    expect(requestedPluginIds).toContain('telemetry');
     expect(
       requestedPluginIds.filter((pluginId) => !selectedPluginIds.includes(pluginId))
     ).toStrictEqual([]);
+    expect(selectedPluginIds).not.toContain('screenshotMode');
+    expect(selectedPluginIds).not.toContain('usageCollection');
+    expect(requestedPluginIds).not.toContain('screenshotMode');
+    expect(requestedPluginIds).not.toContain('usageCollection');
     expect(requestedPluginIds).not.toContain('dashboard');
     expect(requestedPluginIds).not.toContain('discover');
   });

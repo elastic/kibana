@@ -65,7 +65,7 @@ import { getTelemetryChannelEndpoint } from '../common/telemetry_config';
 import { getTelemetryOptIn, TELEMETRY_OPT_IN_FEATURE_FLAG } from './telemetry_config';
 
 interface TelemetryPluginsDepsSetup {
-  usageCollection: UsageCollectionSetup;
+  usageCollection?: UsageCollectionSetup;
   telemetryCollectionManager: TelemetryCollectionManagerPluginSetup;
 }
 
@@ -244,7 +244,9 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     });
 
     registerTelemetrySavedObject((opts) => savedObjects.registerType(opts));
-    this.registerUsageCollectors(usageCollection);
+    if (usageCollection) {
+      this.registerUsageCollectors(usageCollection);
+    }
 
     config$
       .pipe(

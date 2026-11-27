@@ -54,6 +54,18 @@ describe('TelemetryPlugin', () => {
       });
     });
 
+    it('skips usage collector registration when usageCollection is unavailable', () => {
+      const initializerContext = coreMock.createPluginInitializerContext();
+      const telemetryPlugin = new TelemetryPlugin(initializerContext);
+      const registerUsageCollectors = (telemetryPlugin['registerUsageCollectors'] = jest.fn());
+
+      telemetryPlugin.setup(coreMock.createSetup(), {
+        telemetryCollectionManager: telemetryCollectionManagerPluginMock.createSetupContract(),
+      });
+
+      expect(registerUsageCollectors).not.toHaveBeenCalled();
+    });
+
     describe('EBT shipper registration', () => {
       it('registers the Server telemetry shipper', () => {
         const initializerContext = coreMock.createPluginInitializerContext();
