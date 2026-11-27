@@ -227,14 +227,15 @@ describe('WorkflowPageShareModal', () => {
     expect(screen.getByTestId('workflowPageShareUnpublish')).toHaveFocus();
   });
 
-  it('stays on the confirmation while the change is running', async () => {
-    const { services } = setup();
+  it('closes the modal, not just the confirmation, on Escape while the change runs', async () => {
+    const { services, onClose } = setup();
     services.http.post.mockReturnValue(new Promise(() => {}));
 
     fireEvent.click(await screen.findByTestId('workflowPageShareRotate'));
     fireEvent.click(screen.getByTestId('workflowPageShareConfirm'));
     fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
 
-    expect(screen.getByTestId('workflowPageShareConfirm-rotate')).toBeInTheDocument();
+    expect(onClose).toHaveBeenCalled();
+    expect(screen.queryByTestId('workflowPageShareUrl')).not.toBeInTheDocument();
   });
 });

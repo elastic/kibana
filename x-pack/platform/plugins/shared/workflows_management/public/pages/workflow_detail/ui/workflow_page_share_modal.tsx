@@ -234,18 +234,29 @@ export const WorkflowPageShareModal = ({
     [notifications.toasts, queryClient, queryKey]
   );
 
+  // Runs again on every view or pending change until the target is rendered and enabled:
+  // this app renders without batching, so the target can appear a render later.
   useEffect(() => {
     if (!focusTarget) return;
-    document.querySelector<HTMLElement>(`[data-test-subj="${focusTarget.testSubj}"]`)?.focus();
-  }, [focusTarget]);
+    const target = document.querySelector<HTMLButtonElement>(
+      `[data-test-subj="${focusTarget.testSubj}"]`
+    );
+    if (!target || target.disabled) return;
+    target.focus();
+    setFocusTarget(undefined);
+  }, [focusTarget, confirming, pending, page]);
 
   const startConfirm = (kind: 'rotate' | 'unpublish') => {
     setConfirming(kind);
     setFocusTarget({ testSubj: 'workflowPageShareConfirmCancel' });
   };
   const cancelConfirm = () => {
-    // Escape and the close icon must not leave while the change is still running.
-    if (!confirming || pending !== undefined) return;
+    // While the change runs, the share view could still show the old link, so leave the modal.
+    if (pending !== undefined) {
+      onClose();
+      return;
+    }
+    if (!confirming) return;
     setFocusTarget({ testSubj: TRIGGER_TEST_SUBJ[confirming] });
     setConfirming(undefined);
   };
