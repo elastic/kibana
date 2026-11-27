@@ -6,6 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import type { ConnectorSpecSummary } from '../../../../common/connector_spec';
 import type { GetAllConnectorTypesResponseV1 } from '../../../../common/routes/connector/response';
 import type { ConnectorTypesRequestQueryV1 } from '../../../../common/routes/connector/apis/connector_types';
 import { connectorTypesQuerySchemaV1 } from '../../../../common/routes/connector/apis/connector_types';
@@ -17,7 +18,8 @@ import { transformListTypesResponseV1 } from '../list_types/transforms';
 
 export const listTypesWithSystemRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
-  licenseState: ILicenseState
+  licenseState: ILicenseState,
+  getConnectorSpecSummaries: () => ConnectorSpecSummary[]
 ) => {
   router.get(
     {
@@ -47,8 +49,20 @@ export const listTypesWithSystemRoute = (
           includeSystemActionTypes: true,
         });
 
-        const responseBody: GetAllConnectorTypesResponseV1 =
-          transformListTypesResponseV1(connectorTypes);
+        // Spec-backed types also carry the display data the UI needs, which the registry rows lack.
+        const specs = new Map(getConnectorSpecSummaries().map((spec) => [spec.id, spec]));
+        const responseBody: Array<
+          GetAllConnectorTypesResponseV1[number] & { icon?: string; is_ears_experimental?: boolean }
+        > = transformListTypesResponseV1(connectorTypes).map((type) => {
+          const spec = specs.get(type.id);
+          return spec
+            ? {
+                ...type,
+                ...(spec.icon !== undefined ? { icon: spec.icon } : {}),
+                is_ears_experimental: spec.isEarsExperimental,
+              }
+            : type;
+        });
 
         return res.ok({ body: responseBody });
       })

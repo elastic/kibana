@@ -49,6 +49,8 @@ import type { AxiosInstance } from 'axios';
 import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
 import type { ConnectorSigningKey, CredentialAccessor } from '@kbn/connector-specs';
 import type { SpaceId } from '@kbn/core-spaces-common';
+import type { ConnectorSpecSummary } from '../common/connector_spec';
+import { listSpecSummaries } from './specs_client/lib/list_spec_summaries';
 import { type ActionsConfig, type EnabledConnectorTypes } from './config';
 import { AllowedHosts, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
@@ -219,6 +221,9 @@ export interface PluginStartContract {
   getAllTypes: ActionTypeRegistry['getAllTypes'];
 
   listTypes(featureId?: string): ReturnType<ActionTypeRegistry['list']>;
+
+  /** Summaries of all spec-backed connector types. Needs no request, unlike the ActionsClient. */
+  getConnectorSpecSummaries(): ConnectorSpecSummary[];
 
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
 
@@ -566,6 +571,7 @@ export class ActionsPlugin
       core,
       oauthRateLimiter,
       inboundEvents,
+      getConnectorSpecSummaries: () => listSpecSummaries(this.actionTypeRegistry!),
     });
 
     const setupContract: PluginSetupContract = {
@@ -965,6 +971,7 @@ export class ActionsPlugin
       listTypes: (featureId?: string) => {
         return this.actionTypeRegistry!.list({ featureId, exposeValidation: true });
       },
+      getConnectorSpecSummaries: () => listSpecSummaries(this.actionTypeRegistry!),
       getActionsAuthorizationWithRequest(request: KibanaRequest) {
         return instantiateAuthorization(request);
       },
