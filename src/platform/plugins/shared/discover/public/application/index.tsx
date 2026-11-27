@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { createRoot } from 'react-dom/client';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { AppMountParameters } from '@kbn/core/public';
 import { DiscoverRouter } from './discover_router';
@@ -29,17 +30,34 @@ export const renderApp = ({
 }: RenderAppProps) => {
   const { data, core } = services;
 
-  const unmount = toMountPoint(
+  const app = (
     <DiscoverRouter
       onAppLeave={onAppLeave}
       services={services}
       customizationContext={customizationContext}
-    />,
-    core
-  )(element);
+    />
+  );
+
+  // Read before mounting so each benchmark run uses one root for its entire lifetime.
+  const rootMode =
+    element.ownerDocument.defaultView?.sessionStorage.getItem('discover:benchmark:reactRoot') ===
+    'concurrent'
+      ? 'concurrent'
+      : 'legacy';
+  element.dataset.discoverReactRoot = rootMode;
+
+  let unmount: () => void;
+  if (rootMode === 'concurrent') {
+    const root = createRoot(element);
+    root.render(core.rendering.addContext(app));
+    unmount = () => root.unmount();
+  } else {
+    unmount = toMountPoint(app, core)(element);
+  }
 
   return () => {
     unmount();
+    delete element.dataset.discoverReactRoot;
     data.search.session.clear();
   };
 };
