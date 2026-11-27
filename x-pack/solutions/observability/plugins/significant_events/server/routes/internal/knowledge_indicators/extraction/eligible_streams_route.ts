@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
   OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS,
@@ -26,6 +26,7 @@ import {
   type SourceClassificationResult,
 } from './classify_sources';
 import { reconcileSourceCatalog } from '../reconcile_source_catalog';
+import { selectSupportedCandidates, type UnsupportedSource } from './select_supported_candidates';
 
 const DEFAULT_LOOKBACK_HOURS = 24;
 
@@ -33,7 +34,8 @@ export interface EligibleStreamsResponse {
   candidates: Array<SourceCandidate & { sourceRevision: string }>;
   alreadyRunning: SourceClassificationResult['alreadyRunning'];
   upToDate: SourceCandidate[];
-  unsupported: string[];
+  /** Probed candidates left out because feature identification could not sample them. */
+  unsupported: UnsupportedSource[];
   skipped: SourceCandidate[];
   disabled: SourceClassificationResult['disabled'];
   settings: {
@@ -65,27 +67,30 @@ const eligibleStreamsRoute = createServerRoute({
     access: 'internal',
     summary: 'List sources eligible for KI extraction',
     description:
-      'Classifies sources into eligible candidates, already-running, up-to-date, unsupported, skipped, and disabled buckets based on extraction settings and workflow execution state.',
+      'Classifies sources into eligible candidates, already-running, up-to-date, unsupported, skipped, and disabled buckets based on extraction settings, workflow execution state, and whether the source can be sampled.',
   },
   security: {
     authz: {
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    query: z
-      .object({
-        maxScheduledStreams: NumberFromString.pipe(z.number().positive().optional()),
-        extractionIntervalHours: NumberFromString.pipe(z.number().min(0).optional()),
-        lookbackHours: NumberFromString.pipe(z.number().positive().optional()),
-      })
-      .optional(),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      query: z
+        .object({
+          maxScheduledStreams: NumberFromString.pipe(z.number().int().positive().optional()),
+          extractionIntervalHours: NumberFromString.pipe(z.number().min(0).optional()),
+          lookbackHours: NumberFromString.pipe(z.number().positive().optional()),
+        })
+        .optional(),
+    })
+  ),
   handler: async ({
     params,
     request,
     getScopedClients,
     server,
+    logger,
     workflowClients,
     maintenanceService,
   }): Promise<EligibleStreamsResponse> => {
@@ -96,6 +101,7 @@ const eligibleStreamsRoute = createServerRoute({
 
     const {
       sourcesClient,
+      streamDataEsClient,
       uiSettingsClient,
       licensing,
       getKnowledgeIndicatorClient,
@@ -140,15 +146,20 @@ const eligibleStreamsRoute = createServerRoute({
     const intervalHours =
       query.extractionIntervalHours ?? intervalHoursSetting ?? DEFAULT_EXTRACTION_INTERVAL_HOURS;
 
-    const { alreadyRunning, candidates, upToDate, unsupported, disabled } = classifySources({
+    const { alreadyRunning, candidates, upToDate, disabled } = classifySources({
       sources,
       executions,
       intervalHours,
     });
 
     const availableSlots = Math.max(0, maxStreams - alreadyRunning.length);
-    const toSchedule = candidates.slice(0, availableSlots);
-    const skipped = candidates.slice(availableSlots);
+    const { toSchedule, skipped, unsupported } = await selectSupportedCandidates({
+      candidates,
+      availableSlots,
+      viewNames: new Map(sources.map(({ id, view_name: viewName }) => [id, viewName])),
+      esClient: streamDataEsClient,
+      logger: logger.get('continuous_onboarding', 'eligible'),
+    });
 
     const now = Date.now();
     const start = now - lookbackHours * 3_600_000;

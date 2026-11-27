@@ -25,7 +25,6 @@ export interface SourceClassificationResult {
   alreadyRunning: Array<{ sourceId: string; sourceSlug: string; scheduledAt: string | null }>;
   candidates: SourceCandidate[];
   upToDate: SourceCandidate[];
-  unsupported: string[];
   disabled: Array<Pick<SourceCandidate, 'sourceId' | 'sourceSlug'>>;
 }
 
@@ -101,7 +100,6 @@ export const classifySources = ({
     alreadyRunning,
     candidates: [...neverRun, ...ranCandidates],
     upToDate,
-    unsupported: [],
     disabled,
   };
 };

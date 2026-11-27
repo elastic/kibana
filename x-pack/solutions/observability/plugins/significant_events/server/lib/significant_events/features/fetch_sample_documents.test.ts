@@ -256,7 +256,8 @@ describe('fetchSampleDocuments', () => {
   });
 
   it('rejects with a 400 that explains the missing index when nothing exists to sample', async () => {
-    getEsqlColumnSchemaMock.mockRejectedValueOnce(
+    getEsqlColumnSchemaMock.mockResolvedValueOnce([TIMESTAMP_COLUMN]);
+    getSampleDocumentsEsqlMock.mockRejectedValueOnce(
       new Error(
         'verification_exception\n\tRoot causes:\n\t\tverification_exception: Unknown index [test]'
       )

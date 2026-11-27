@@ -194,7 +194,9 @@ describe('Significant Events run quota workflow contracts', () => {
       'check_budget',
       'exit_if_budget_denied',
     ]);
-    expect(definitions.onboarding.steps.slice(0, 2).map(({ name }) => name)).toEqual([
+    expect(definitions.onboarding.steps.slice(0, 4).map(({ name }) => name)).toEqual([
+      'check_source',
+      'exit_if_cannot_onboard',
       'check_budget',
       'exit_if_budget_denied',
     ]);

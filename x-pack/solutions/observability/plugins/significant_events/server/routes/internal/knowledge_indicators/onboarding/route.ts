@@ -6,7 +6,7 @@
  */
 
 import { omit } from 'lodash';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   MAX_ID_LENGTH,
   KIsOnboardingStep,
@@ -28,6 +28,7 @@ import {
   MAX_SOURCES_PER_QUERY,
   type SignificantEventsKIsOnboardingInputs,
 } from '../../../../lib/workflows/onboarding_workflow_client';
+import { canOnboard } from '../extraction/select_supported_candidates';
 
 const timestampFromString = z
   .string()
@@ -242,6 +243,37 @@ const onboardingStatusRoute = createServerRoute({
   },
 });
 
+const canOnboardRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/{sourceId}/onboarding/_can_onboard',
+  options: {
+    access: 'internal',
+    summary: 'Check whether a source can be onboarded',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
+    },
+  },
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
+    })
+  ),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+  }): Promise<{ canOnboard: boolean; reason?: string }> => {
+    const { licensing, sourcesClient, streamDataEsClient } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing });
+
+    const { source } = await sourcesClient.get(params.path.sourceId);
+    return canOnboard({ index: source.view_name, esClient: streamDataEsClient, logger });
+  },
+});
+
 const onboardingBulkStatusRoute = createServerRoute({
   endpoint: 'POST /internal/streams/onboarding/_bulk_status',
   options: {
@@ -303,5 +335,6 @@ const onboardingBulkStatusRoute = createServerRoute({
 export const internalKIOnboardingRoutes = {
   ...onboardingExecuteRoute,
   ...onboardingStatusRoute,
+  ...canOnboardRoute,
   ...onboardingBulkStatusRoute,
 };
