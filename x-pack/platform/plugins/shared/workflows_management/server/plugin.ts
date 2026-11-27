@@ -41,6 +41,7 @@ import type {
   WorkflowsServerPluginStartDeps,
 } from './types';
 import { registerUISettings } from './ui_settings';
+import { registerRunWorkflowAction } from '../common/custom_app/run_workflow/register';
 import { stepSchemas } from '../common/step_schemas';
 
 export class WorkflowsPlugin implements Plugin<
@@ -71,6 +72,8 @@ export class WorkflowsPlugin implements Plugin<
     plugins: WorkflowsServerPluginSetupDeps
   ) {
     this.logger.debug('Workflows Management: Setup');
+
+    registerRunWorkflowAction();
 
     registerUISettings(core, plugins);
     registerLibraryEventTypes(core.analytics);

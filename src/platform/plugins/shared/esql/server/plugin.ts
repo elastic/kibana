@@ -11,6 +11,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import { schema } from '@kbn/config-schema';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import { registerEsqlEditorCapability } from '../common/custom_app/esql_editor/register';
 import { getDeploymentInfo } from './deployment_info';
 import { getUiSettings } from './ui_settings';
 import { registerRoutes } from './routes';
@@ -42,6 +43,7 @@ export class EsqlServerPlugin implements Plugin<
   ) {
     const { initContext } = this;
 
+    registerEsqlEditorCapability();
     core.uiSettings.register(getUiSettings());
 
     plugins.contentManagement.favorites.registerFavoriteType('esql_query', {

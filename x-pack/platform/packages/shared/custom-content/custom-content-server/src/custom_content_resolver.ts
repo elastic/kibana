@@ -230,6 +230,11 @@ export type CustomContentTemplateResolver = (params: {
    */
   changedQueries?: readonly boolean[];
   existingTemplate?: string;
+  /**
+   * Values for the queries' named parameters (`?name`), as ES|QL takes them. The time range is
+   * always given; this is for a query that also has parameters of its own.
+   */
+  esqlParams?: Array<Record<string, string | number | boolean>>;
   /** The values of the dashboard controls a query may refer to (`?name`), bound when it is sampled. */
   esqlVariables?: ESQLControlVariable[];
 }) => Promise<ResolvedCustomContentTemplate>;
@@ -277,6 +282,7 @@ export const createCustomContentTemplateResolver = ({
     esqlQueries = [],
     changedQueries = [],
     existingTemplate,
+    esqlParams,
     esqlVariables,
   }) => {
     const [esqlQuery, ...additionalEsqlQueries] = esqlQueries;
@@ -284,7 +290,10 @@ export const createCustomContentTemplateResolver = ({
     const sampleQuery = async (query: string, position: number): Promise<SampledData> => {
       try {
         const sampledQuery = appendLimitToQuery(query, SAMPLE_ROW_COUNT);
-        const params = getNamedParams(sampledQuery, SAMPLE_TIME_RANGE, esqlVariables);
+        const params = [
+          ...getNamedParams(sampledQuery, SAMPLE_TIME_RANGE, esqlVariables),
+          ...(esqlParams ?? []),
+        ];
         const result = await esClient.asCurrentUser.esql.query({
           query: sampledQuery,
           ...(params.length ? { params } : {}),

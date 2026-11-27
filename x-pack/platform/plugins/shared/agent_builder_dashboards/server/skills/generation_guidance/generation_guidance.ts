@@ -48,7 +48,7 @@ Each visualization request is authored in a separate context. New-panel authors 
 
 - Lens, Vega, and custom content panels (\`type: "vis"\`, \`"vega"\` or \`"custom_content"\`) are generated server-side from a natural-language \`query\` — this is the only way to make a **new** generated panel.
 - Use \`type: "attachment"\` to place a visualization that \`${platformCoreTools.createVisualization}\` already returned in this conversation. A generated panel would be a **new**, different panel instead.
-- Markdown and ML anomaly panels are authored by value, with their \`type\` and \`config\`. ${panelConfigReferenceGuidance}
+- Markdown, custom app and ML anomaly panels are authored by value, with their \`type\` and \`config\`. ${panelConfigReferenceGuidance}
 
 ## Panel Type Selection
 
