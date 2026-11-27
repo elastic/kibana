@@ -345,9 +345,26 @@ const failedDayCount = (suite: FlakySuite, { thresholds, window }: FlakyTestRepo
   return new Set(days.flatMap((testDays) => [...(testDays?.failed ?? [])])).size;
 };
 
+/** `2 pipelines, 2 branches and 32 PRs` the suite's file failed on; pipelines only for older reports. */
+const failureSpread = ({ byPipeline }: FlakySuite): string | undefined => {
+  const failed = byPipeline.filter(({ failedBuilds }) => failedBuilds > 0);
+  const refs = failed.every(({ failedBranchNames }) => failedBranchNames !== undefined)
+    ? [...new Set(failed.flatMap(({ failedBranchNames }) => failedBranchNames ?? []))]
+    : [];
+  const pullRequests = refs.filter(isPullRequestRef).length;
+  const counts: Array<[count: number, singular: string, pluralForm?: string]> = [
+    [failed.length, 'pipeline'],
+    [refs.length - pullRequests, 'branch', 'branches'],
+    [pullRequests, 'PR'],
+  ];
+  const parts = counts.filter(([count]) => count > 0).map((count) => plural(...count));
+  return parts.length > 0 ? andList(parts) : undefined;
+};
+
 /**
  * `3 tests in the [\`Default status alert\`](…/default_status_alert.spec.ts) suite appear to be
- * flaky. They failed on **2 of the past 7 days**:`, without the days for older reports.
+ * flaky. They failed on **2 of the past 7 days**, across 2 pipelines, 1 branch and 3 PRs:`,
+ * without the days and the counts for older reports.
  */
 const opening = (suite: FlakySuite, report: FlakyTestReport): string => {
   const subject = suite.suiteTitle ?? Path.basename(suite.filePath);
@@ -360,9 +377,11 @@ const opening = (suite: FlakySuite, report: FlakyTestReport): string => {
   if (failedDays === undefined) {
     return `${lead}:`;
   }
+  const spread = failureSpread(suite);
   return (
     `${lead}. ${count === 1 ? 'It' : 'They'} failed on ` +
-    `**${failedDays} of the past ${report.window.lookbackDays}${NBSP}days**:`
+    `**${failedDays} of the past ${report.window.lookbackDays}${NBSP}days**` +
+    `${spread ? `, across ${spread}` : ''}:`
   );
 };
 
