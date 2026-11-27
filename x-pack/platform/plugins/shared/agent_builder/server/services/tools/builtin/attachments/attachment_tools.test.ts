@@ -310,6 +310,36 @@ describe('attachment tools', () => {
       expect(result.results[0].type).toBe(ToolResultType.error);
     });
 
+    it('passes the origin linked after creation to the type formatter', async () => {
+      const originAttachmentsService = {
+        getTypeDefinition: () => ({
+          id: 'linked',
+          validate: (input: unknown) => ({ valid: true, data: input }),
+          format: ({ origin }: Attachment) => ({
+            getRepresentation: () => ({ type: 'text', value: `origin:${origin ?? 'none'}` }),
+          }),
+          isReadonly: true,
+        }),
+      } as any;
+      const originManager = createAttachmentStateManager([], {
+        getTypeDefinition: originAttachmentsService.getTypeDefinition,
+      });
+      const attachment = await originManager.add({ type: 'linked', data: {} });
+      await originManager.updateOrigin(attachment.id, 'my-index');
+
+      const tool = createAttachmentTools({
+        attachmentsService: originAttachmentsService,
+        formatContext,
+      }).find((t) => t.id === attachmentTools.read)!;
+
+      const result = (await tool.handler(
+        { attachment_id: attachment.id },
+        toolContext(originManager)
+      )) as ToolHandlerStandardReturn;
+
+      expect((result.results[0] as any).data.data).toBe('origin:my-index');
+    });
+
     it('returns a small image marker (not base64) for image attachments', async () => {
       const getBase64 = jest.fn(async () => 'BASE64_SHOULD_NOT_APPEAR');
       const imageAttachmentsService = {
