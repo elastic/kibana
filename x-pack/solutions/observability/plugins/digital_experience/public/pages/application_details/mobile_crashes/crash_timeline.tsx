@@ -179,7 +179,13 @@ const columns: Array<EuiBasicTableColumn<TimelineRow>> = [
           {detail && <span title={detail}>{detail}</span>}
         </EuiText>
         {page && (
-          <EuiText size="xs" color="subdued">
+          <EuiText
+            size="xs"
+            color="subdued"
+            className="eui-textTruncate"
+            title={page}
+            data-test-subj="digitalExperienceMobileCrashTimelinePage"
+          >
             {page}
           </EuiText>
         )}

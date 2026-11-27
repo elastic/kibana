@@ -86,7 +86,9 @@ describe('CrashTimeline', () => {
       'title',
       'Start recording'
     );
-    expect(widgetTapRow).toHaveTextContent('Map');
+    expect(
+      within(widgetTapRow).getByTestId('digitalExperienceMobileCrashTimelinePage')
+    ).toHaveAttribute('title', 'Map');
   });
 
   it("names the crash by its type, leaving its message to the flyout's header", () => {
