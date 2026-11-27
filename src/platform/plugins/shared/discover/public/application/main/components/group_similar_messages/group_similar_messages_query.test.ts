@@ -12,16 +12,16 @@ import { getMatchingMessagesQuery, groupSimilarMessages } from './group_similar_
 describe('groupSimilarMessages', () => {
   it('retains the source pipeline and escapes tokens in the matching query', () => {
     const source = 'FROM logs-* | WHERE service.name == "checkout" // selected service';
-    const grouped = groupSimilarMessages(source);
-    expect(getMatchingMessagesQuery(grouped, 'say "hello"')).toEqual(
+    const grouped = groupSimilarMessages(source, 'log text');
+    expect(getMatchingMessagesQuery(grouped, 'log text', 'say "hello"')).toEqual(
       source +
-        '\n  | WHERE MATCH(TO_TEXT(TO_STRING(message)), "say \\"hello\\"", {"auto_generate_synonyms_phrase_query": false, "fuzziness": 0, "operator": "AND"})'
+        '\n  | WHERE MATCH(TO_TEXT(TO_STRING(`log text`)), "say \\"hello\\"", {"auto_generate_synonyms_phrase_query": false, "fuzziness": 0, "operator": "AND"})'
     );
   });
 
   it('leaves other pattern queries to the existing cell action', () => {
     expect(
-      getMatchingMessagesQuery('FROM logs | STATS BY CATEGORIZE(other)', 'error')
+      getMatchingMessagesQuery('FROM logs | STATS BY CATEGORIZE(other)', 'other', 'error')
     ).toBeUndefined();
   });
 });

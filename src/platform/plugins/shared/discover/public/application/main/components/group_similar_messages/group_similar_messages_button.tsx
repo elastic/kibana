@@ -10,6 +10,7 @@
 import React from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getCategorizationField } from '@kbn/aiops-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { hasAggregatingCommand } from '@kbn/esql-utils';
 import useObservable from 'react-use/lib/useObservable';
@@ -44,25 +45,30 @@ export const GroupSimilarMessagesButton = () => {
     !isOfAggregateQueryType(query) ||
     dataSource?.kind !== 'esql' ||
     dataSource.query !== query.esql.trim() ||
-    !dataSource.resultColumns.some(
-      ({ name, meta }) =>
-        name === 'message' && ['text', 'match_only_text', 'keyword'].includes(meta.esType ?? '')
-    ) ||
     hasAggregatingCommand(query.esql)
   ) {
     return null;
   }
 
+  const field = getCategorizationField(
+    dataSource.resultColumns
+      .filter(({ meta }) => meta.esType === 'text' || meta.esType === 'match_only_text')
+      .map(({ name }) => name)
+  );
+  if (!field) {
+    return null;
+  }
+
   const label = i18n.translate('discover.esql.groupSimilarMessages.buttonLabel', {
     defaultMessage: 'Find patterns in {field}',
-    values: { field: 'message' },
+    values: { field },
   });
 
   return (
     <EuiToolTip
       content={i18n.translate('discover.esql.groupSimilarMessages.tooltip', {
         defaultMessage: 'Group {field} by pattern to spot trends and anomalies.',
-        values: { field: 'message' },
+        values: { field },
       })}
     >
       <EuiBadge
@@ -70,7 +76,9 @@ export const GroupSimilarMessagesButton = () => {
         iconType="bulb"
         onClick={() => {
           scopedEBTManager.trackGroupSimilarMessagesClick();
-          dispatch(updateESQLQuery({ queryOrUpdater: groupSimilarMessages }));
+          dispatch(
+            updateESQLQuery({ queryOrUpdater: (esql) => groupSimilarMessages(esql, field) })
+          );
         }}
         onClickAriaLabel={label}
         title=""

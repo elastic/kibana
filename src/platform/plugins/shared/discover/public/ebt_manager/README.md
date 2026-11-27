@@ -162,4 +162,4 @@ These counters are reported with `usageCollection.reportUiCounter('discover', ..
 
 ### Group similar messages
 
-Discover emits `discover_group_similar_messages_click` each time a user clicks **Find patterns in message** in ES|QL results. The event has no payload fields.
+Discover emits `discover_group_similar_messages_click` each time a user clicks **Find patterns in {field}** in ES|QL results. The event has no payload fields.

@@ -54,11 +54,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('groups similar messages and drills back into the filtered results', async () => {
-      const source =
-        'FROM logstash-* | WHERE @message IS NOT NULL | LIMIT 1000 | RENAME @message AS message | KEEP message';
+      const source = 'FROM logstash-* | WHERE @message IS NOT NULL | LIMIT 1000 | KEEP @message';
       await monacoEditor.setCodeEditorValue(source);
       await testSubjects.click('querySubmitButton');
       await discover.waitUntilTabIsLoaded();
+      expect(await testSubjects.getVisibleText('dscGroupSimilarMessagesButton')).to.contain(
+        'Find patterns in @message'
+      );
       await testSubjects.click('dscGroupSimilarMessagesButton');
       await discover.waitUntilTabIsLoaded();
       await unifiedFieldList.waitUntilFieldlistHasCountOfFields(2);

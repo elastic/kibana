@@ -90,13 +90,33 @@ describe('GroupSimilarMessagesButton', () => {
     expect(trackClick).toHaveBeenCalledTimes(1);
   });
 
+  it.each([
+    { columns: ['event.original', 'error.message', 'message'], field: 'message' },
+    { columns: ['event.original', 'error.message'], field: 'error.message' },
+    { columns: ['summary', 'event.original'], field: 'event.original' },
+    { columns: ['_id', 'summary', 'details'], field: 'summary' },
+  ])('groups by $field from the returned text columns', async ({ columns, field }) => {
+    const { toolkit } = await setup({
+      resultColumns: columns.map((name) => createColumn(name, 'match_only_text')),
+    });
+    const button = screen.getByRole('button', { name: `Find patterns in ${field}` });
+    await userEvent.hover(button);
+    expect(
+      await screen.findByText(`Group ${field} by pattern to spot trends and anomalies.`)
+    ).toBeVisible();
+    await userEvent.click(button);
+    expect(toolkit.getCurrentTab().appState.query).toEqual({
+      esql: expect.stringContaining(`CATEGORIZE(${field})`),
+    });
+  });
+
   it('hides the action below the CATEGORIZE license level', async () => {
     await setup({ licenseType: 'basic' });
     expect(screen.queryByTestId('dscGroupSimilarMessagesButton')).not.toBeInTheDocument();
   });
 
   it.each([
-    { resultColumns: [createColumn('error.message', 'text')] },
+    { resultColumns: [createColumn('message', 'keyword'), createColumn('_id', 'text')] },
     { resultColumns: [createColumn('message', 'long')] },
     { sourceEsql: 'FROM other-logs' },
     { fetchStatus: FetchStatus.LOADING },

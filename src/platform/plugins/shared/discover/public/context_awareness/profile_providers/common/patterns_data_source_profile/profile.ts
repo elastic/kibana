@@ -145,6 +145,7 @@ export const createPatternsDataSourceProfileProvider = (
               if (toolkit.actions.updateESQLQuery) {
                 const matchingMessages = getMatchingMessagesQuery(
                   executeContext.query.esql,
+                  categoryField,
                   pattern
                 );
                 if (matchingMessages) {
