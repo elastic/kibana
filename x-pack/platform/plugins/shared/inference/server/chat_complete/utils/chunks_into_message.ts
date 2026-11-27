@@ -16,7 +16,9 @@ import type { Logger } from '@kbn/logging';
 import type { OperatorFunction } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { map, merge, share, toArray } from 'rxjs';
+import { createToolValidationError } from '../../../common/chat_complete/errors';
 import { validateToolCalls } from '../../util/validate_tool_calls';
+import { isForcedToolChoice } from './forced_tool_choice';
 import { mergeChunks } from './merge_chunks';
 import { normalizeToolCallIndexes } from './normalize_tool_call_indexes';
 
@@ -49,6 +51,12 @@ export function chunksIntoMessage<TToolOptions extends ToolOptions>({
           logger.debug(() => `Received completed message: ${JSON.stringify(concatenatedChunk)}`);
 
           const { content, refusal, tool_calls: toolCalls } = concatenatedChunk;
+
+          if (!toolCalls.length && !refusal && isForcedToolChoice(toolOptions.toolChoice)) {
+            throw createToolValidationError('The model response is missing a required tool call', {
+              toolCalls,
+            });
+          }
 
           const validatedToolCalls = validateToolCalls<TToolOptions>({
             ...toolOptions,

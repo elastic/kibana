@@ -24,6 +24,8 @@ describe('chunksIntoMessage', () => {
     error: jest.fn(),
   } as unknown as Logger;
 
+  const emptyToolDelta = { index: 3, toolCallId: '', function: { name: '', arguments: '' } };
+
   it('concatenates content chunks into a single message', async () => {
     const message = await lastValueFrom(
       chunksIntoMessage({ logger, toolOptions: {} })(
@@ -54,6 +56,55 @@ describe('chunksIntoMessage', () => {
     });
   });
 
+  it.each([ToolChoiceType.required, { function: 'myFunction' }])(
+    'rejects a completion with only empty tool deltas when the tool choice is %p',
+    async (toolChoice) => {
+      const message = lastValueFrom(
+        fromEvents({
+          type: ChatCompletionEventType.ChatCompletionChunk,
+          content: '',
+          tool_calls: [emptyToolDelta],
+        }).pipe(
+          chunksIntoMessage({
+            logger,
+            toolOptions: {
+              toolChoice,
+              tools: { myFunction: { description: 'Look up a value' } },
+            },
+          })
+        )
+      );
+
+      await expect(message).rejects.toThrow('The model response is missing a required tool call');
+    }
+  );
+
+  it('preserves an explicit refusal when a tool call is required', async () => {
+    const message = await lastValueFrom(
+      fromEvents({
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        content: '',
+        refusal: 'I cannot fulfill that request.',
+        tool_calls: [emptyToolDelta],
+      }).pipe(
+        chunksIntoMessage({
+          logger,
+          toolOptions: {
+            toolChoice: ToolChoiceType.required,
+            tools: { myFunction: { description: 'Look up a value' } },
+          },
+        })
+      )
+    );
+
+    expect(message).toEqual({
+      type: ChatCompletionEventType.ChatCompletionMessage,
+      content: '',
+      refusal: 'I cannot fulfill that request.',
+      toolCalls: [],
+    });
+  });
+
   it('ignores an empty tool delta before a valid tool call at the same index', async () => {
     const toolCall = {
       index: 3,
@@ -65,7 +116,7 @@ describe('chunksIntoMessage', () => {
         {
           type: ChatCompletionEventType.ChatCompletionChunk,
           content: 'Checking.',
-          tool_calls: [{ index: 3, toolCallId: '', function: { name: '', arguments: '' } }],
+          tool_calls: [emptyToolDelta],
         },
         {
           type: ChatCompletionEventType.ChatCompletionChunk,
@@ -75,7 +126,10 @@ describe('chunksIntoMessage', () => {
       ).pipe(
         chunksIntoMessage({
           logger,
-          toolOptions: { tools: { myFunction: { description: 'Look up a value' } } },
+          toolOptions: {
+            toolChoice: ToolChoiceType.required,
+            tools: { myFunction: { description: 'Look up a value' } },
+          },
         }),
         toArray()
       )
