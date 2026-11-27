@@ -10,6 +10,7 @@ export { DASHBOARD_ATTACHMENT_TYPE } from './constants';
 export {
   panelGridSchema,
   sectionGridSchema,
+  optionsSchema,
   timeRangeSchema,
   dashboardAttachmentDataSchema,
   isSection,

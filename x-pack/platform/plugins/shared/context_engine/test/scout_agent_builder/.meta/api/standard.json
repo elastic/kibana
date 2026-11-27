@@ -1,5 +1,5 @@
 {
-  "sha1": "6d5df425fdd68b15bfc5d212706695de35b12a9e",
+  "sha1": "8b9e2193af806eb9e48b8aa137e87da5cb2677ca",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1192,6 +1192,104 @@
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_write_api.spec.ts",
         "line": 212,
         "column": 11
+      }
+    },
+    {
+      "id": "b523081a6644631-fdb7ff391f5f0b4",
+      "title": "context engine session events API enforces contextEngine:write per space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/session_events.spec.ts",
+        "line": 235,
+        "column": 29
+      }
+    },
+    {
+      "id": "b523081a6644631-0095706d70908f7",
+      "title": "context engine session events API saves events for the caller in the non-default space without manage_memory",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/session_events.spec.ts",
+        "line": 268,
+        "column": 18
+      }
+    },
+    {
+      "id": "b523081a6644631-1ebdb6d454f9de6",
+      "title": "context engine session events API resolves contextEngine:manage_memory in the request space when targeting another user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/session_events.spec.ts",
+        "line": 298,
+        "column": 24
+      }
+    },
+    {
+      "id": "b523081a6644631-a4780551c20607e",
+      "title": "context engine session events API checks AI index existence and Elasticsearch write privileges in the request space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/session_events.spec.ts",
+        "line": 371,
+        "column": 27
+      }
+    },
+    {
+      "id": "efc31e2a69fe03a-2ba319d8267222f",
+      "title": "context engine session memory _forget API enforces contextEngine:write per space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/session_memory.spec.ts",
+        "line": 225,
+        "column": 74
+      }
+    },
+    {
+      "id": "efc31e2a69fe03a-67b0037d6b6d199",
+      "title": "context engine session memory _forget API forgets only the caller memories in the request space without manage_memory",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/session_memory.spec.ts",
+        "line": 258,
+        "column": 23
+      }
+    },
+    {
+      "id": "efc31e2a69fe03a-9ba9860b46cffb7",
+      "title": "context engine session memory _forget API resolves contextEngine:manage_memory in the request space when targeting another user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/session_memory.spec.ts",
+        "line": 314,
+        "column": 23
       }
     }
   ]

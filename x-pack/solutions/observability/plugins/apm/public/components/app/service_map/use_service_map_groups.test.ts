@@ -1,0 +1,228 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { act, renderHook } from '@testing-library/react';
+import type {
+  ServiceMapEdge,
+  ServiceMapGrouping,
+  ServiceMapNode,
+} from '../../../../common/service_map';
+import {
+  createEdgeMarker,
+  getEdgeId,
+  isServiceGroupBoxNode,
+  isServiceGroupNode,
+} from '../../../../common/service_map';
+import { DEFAULT_EDGE_STYLE } from '../../../../common/service_map/constants';
+import { useServiceMapGroupingEnabled } from '../../../hooks/use_service_map_grouping_enabled';
+import { useServiceMapGroups } from './use_service_map_groups';
+
+jest.mock('../../../hooks/use_service_map_grouping_enabled', () => ({
+  useServiceMapGroupingEnabled: jest.fn(),
+}));
+
+const mockedUseServiceMapGroupingEnabled = jest.mocked(useServiceMapGroupingEnabled);
+
+function serviceNode(id: string): ServiceMapNode {
+  return {
+    id,
+    type: 'service',
+    position: { x: 0, y: 0 },
+    data: { id, label: id, isService: true },
+  };
+}
+
+function edge(source: string, target: string): ServiceMapEdge {
+  return {
+    id: getEdgeId(source, target),
+    source,
+    target,
+    type: 'default',
+    style: DEFAULT_EDGE_STYLE,
+    markerEnd: createEdgeMarker(DEFAULT_EDGE_STYLE.stroke),
+    data: { isBidirectional: false },
+  };
+}
+
+describe('useServiceMapGroups', () => {
+  const nodes = [serviceNode('a'), serviceNode('b')];
+  const edges = [edge('a', 'b')];
+
+  /** Would collapse a+b into one square when the flag is on. */
+  const collapsibleGrouping: ServiceMapGrouping = {
+    services: ['a', 'b'],
+    automatic: 'namePrefix',
+    strategies: [
+      {
+        source: 'namePrefix',
+        passes: true,
+        groups: [
+          { id: 'namePrefix:app', kind: 'attribute', attribute: 'namePrefix', value: 'app' },
+        ],
+        assignment: [0, 0],
+      },
+    ],
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('does not collapse when the grouping flag is off, even if serviceGrouping is present', () => {
+    mockedUseServiceMapGroupingEnabled.mockReturnValue(false);
+
+    const { result } = renderHook(() =>
+      useServiceMapGroups({
+        nodes,
+        edges,
+        serviceGrouping: collapsibleGrouping,
+      })
+    );
+
+    expect(result.current.nodes).toBe(nodes);
+    expect(result.current.edges).toBe(edges);
+    expect(result.current.countLine).toBeUndefined();
+  });
+
+  it('passes through when the flag is on but there is no grouping', () => {
+    mockedUseServiceMapGroupingEnabled.mockReturnValue(true);
+
+    const { result } = renderHook(() =>
+      useServiceMapGroups({ nodes, edges, serviceGrouping: undefined })
+    );
+
+    expect(result.current.nodes).toBe(nodes);
+    expect(result.current.edges).toBe(edges);
+    expect(result.current.countLine).toBeUndefined();
+  });
+
+  it('omits the count line when grouping is present but nothing collapses', () => {
+    mockedUseServiceMapGroupingEnabled.mockReturnValue(true);
+    const grouping: ServiceMapGrouping = {
+      services: ['a', 'b'],
+      automatic: 'namePrefix',
+      strategies: [
+        {
+          source: 'namePrefix',
+          passes: true,
+          groups: [
+            { id: 'namePrefix:a', kind: 'attribute', attribute: 'namePrefix', value: 'a' },
+            { id: 'namePrefix:b', kind: 'attribute', attribute: 'namePrefix', value: 'b' },
+          ],
+          // Each service alone → groups of 1 stay as service nodes.
+          assignment: [0, 1],
+        },
+      ],
+    };
+
+    const { result } = renderHook(() =>
+      useServiceMapGroups({ nodes, edges, serviceGrouping: grouping })
+    );
+
+    expect(result.current.nodes).toHaveLength(2);
+    expect(result.current.countLine).toBeUndefined();
+  });
+
+  it('returns a count line when at least one closed group is drawn', () => {
+    mockedUseServiceMapGroupingEnabled.mockReturnValue(true);
+
+    const { result } = renderHook(() =>
+      useServiceMapGroups({
+        nodes,
+        edges,
+        serviceGrouping: collapsibleGrouping,
+      })
+    );
+
+    expect(result.current.countLine).toBe('2 services in 1 group, by name prefix');
+  });
+
+  describe('opening and closing a group', () => {
+    const groupId = 'namePrefix:app';
+
+    it('opens a group as a box around its members, and closes it again', () => {
+      mockedUseServiceMapGroupingEnabled.mockReturnValue(true);
+      const { result } = renderHook(() =>
+        useServiceMapGroups({ nodes, edges, serviceGrouping: collapsibleGrouping })
+      );
+      expect(result.current.nodes.map(({ id }) => id)).toEqual([groupId]);
+
+      act(() => result.current.openGroup(groupId));
+
+      expect(result.current.nodes.map(({ id }) => id)).toEqual([groupId, 'a', 'b']);
+      expect(result.current.nodes.filter(isServiceGroupBoxNode)).toHaveLength(1);
+      expect(result.current.nodes.filter(({ parentId }) => parentId === groupId)).toHaveLength(2);
+
+      act(() => result.current.closeGroup(groupId));
+
+      expect(result.current.nodes.map(({ id }) => id)).toEqual([groupId]);
+      expect(result.current.nodes.filter(isServiceGroupNode)).toHaveLength(1);
+    });
+
+    it('still counts an open group in the count line', () => {
+      mockedUseServiceMapGroupingEnabled.mockReturnValue(true);
+      const { result } = renderHook(() =>
+        useServiceMapGroups({ nodes, edges, serviceGrouping: collapsibleGrouping })
+      );
+
+      act(() => result.current.openGroup(groupId));
+
+      expect(result.current.countLine).toBe('2 services in 1 group, by name prefix');
+    });
+
+    it('keeps the same callbacks across renders', () => {
+      mockedUseServiceMapGroupingEnabled.mockReturnValue(true);
+      const { result, rerender } = renderHook(() =>
+        useServiceMapGroups({ nodes, edges, serviceGrouping: collapsibleGrouping })
+      );
+      const { openGroup, closeGroup } = result.current;
+
+      act(() => openGroup(groupId));
+      rerender();
+
+      expect(result.current.openGroup).toBe(openGroup);
+      expect(result.current.closeGroup).toBe(closeGroup);
+    });
+
+    it('does not group the map again when a group is opened that is already open', () => {
+      mockedUseServiceMapGroupingEnabled.mockReturnValue(true);
+      const { result } = renderHook(() =>
+        useServiceMapGroups({ nodes, edges, serviceGrouping: collapsibleGrouping })
+      );
+      act(() => result.current.openGroup(groupId));
+      const openNodes = result.current.nodes;
+
+      act(() => result.current.openGroup(groupId));
+
+      expect(result.current.nodes).toBe(openNodes);
+    });
+
+    it('does not group the map again when a group is closed that is not open', () => {
+      mockedUseServiceMapGroupingEnabled.mockReturnValue(true);
+      const { result } = renderHook(() =>
+        useServiceMapGroups({ nodes, edges, serviceGrouping: collapsibleGrouping })
+      );
+      const closedNodes = result.current.nodes;
+
+      act(() => result.current.closeGroup(groupId));
+      act(() => result.current.closeGroup('namePrefix:other'));
+
+      expect(result.current.nodes).toBe(closedNodes);
+    });
+
+    it('ignores opening a group while the grouping flag is off', () => {
+      mockedUseServiceMapGroupingEnabled.mockReturnValue(false);
+      const { result } = renderHook(() =>
+        useServiceMapGroups({ nodes, edges, serviceGrouping: collapsibleGrouping })
+      );
+
+      act(() => result.current.openGroup(groupId));
+
+      expect(result.current.nodes).toBe(nodes);
+    });
+  });
+});

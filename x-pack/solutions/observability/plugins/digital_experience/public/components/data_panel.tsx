@@ -80,8 +80,8 @@ export function DataPanel({
 
   return (
     <EuiPanel hasBorder data-test-subj={dataTestSubj}>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart" responsive={false}>
-        <EuiFlexItem>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart" responsive={false} wrap>
+        <EuiFlexItem css={{ minInlineSize: '12rem' }}>
           <EuiTitle size="xs">
             <h2>{title}</h2>
           </EuiTitle>

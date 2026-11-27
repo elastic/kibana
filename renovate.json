@@ -2578,6 +2578,15 @@
       "enabled": true
     },
     {
+      "groupName": "ioredis",
+      "matchDepNames": ["ioredis"],
+      "reviewers": ["team:response-ops"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:ResponseOps"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
       "groupName": "mssql",
       "matchDepNames": ["mssql", "@types/mssql"],
       "reviewers": ["team:response-ops"],
@@ -2611,6 +2620,11 @@
       "addLabels": ["Team:EUI"],
       "minimumReleaseAge": "14 days",
       "enabled": true
+    },
+    {
+      "description": "Replacement PRs rebase on every Renovate run and never pass CI without manual code changes",
+      "matchUpdateTypes": ["replacement"],
+      "enabled": false
     }
   ],
   "customManagers": [

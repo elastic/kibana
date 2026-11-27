@@ -1,5 +1,5 @@
 {
-  "sha1": "e77713758889e41a47b3140ba200b3c780e37c0c",
+  "sha1": "544247f7b9f8c06665d7164e5a605a68405a886f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -52,8 +52,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/api/tests/boost_lists.spec.ts",
-        "line": 125,
-        "column": 28
+        "line": 122,
+        "column": 23
       }
     },
     {
@@ -65,7 +65,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/api/tests/boost_lists.spec.ts",
-        "line": 159,
+        "line": 161,
         "column": 21
       }
     },
@@ -78,7 +78,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/api/tests/boost_lists.spec.ts",
-        "line": 185,
+        "line": 187,
         "column": 53
       }
     },
@@ -91,7 +91,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/api/tests/boost_lists.spec.ts",
-        "line": 185,
+        "line": 187,
         "column": 53
       }
     },
