@@ -75,7 +75,11 @@ export default function ({ getService }: FtrProviderContext) {
         auth: { user: superUser, space: 'space1' },
       });
 
-      expectSnapshot(profiles.map(({ user, data }) => ({ user, data }))).toMatchInline(`
+      const sortedProfiles = [...profiles].sort((a, b) =>
+        a.user.username.localeCompare(b.user.username)
+      );
+
+      expectSnapshot(sortedProfiles.map(({ user, data }) => ({ user, data }))).toMatchInline(`
         Array [
           Object {
             "data": Object {},
