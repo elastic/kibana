@@ -49,10 +49,10 @@ const UNAVAILABLE_COLUMNS = [
 
 const UNSUPPORTED_METRICS = [
   {
-    indexPattern: 'metrics-kubernetes.state_container-*',
+    indexPattern: 'metrics-system.network-*',
     engine: 'FROM' as const,
-    column: 'k8s.container.restarts',
-    field: 'kubernetes.container.status.restarts',
+    column: 'network_bytes',
+    field: 'host.network.bytes',
     agg: 'sum_rate' as const,
   },
 ];

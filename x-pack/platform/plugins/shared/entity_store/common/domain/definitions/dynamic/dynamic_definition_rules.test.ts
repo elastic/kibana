@@ -620,26 +620,12 @@ describe('dynamic definition rules', () => {
       expectRejected(
         withMetrics([
           {
-            indexPattern: 'metrics-kubernetes.state_container-*',
-            metrics: [
-              {
-                name: 'k8s.container.restarts',
-                field: 'kubernetes.container.status.restarts',
-                agg: 'sum_rate',
-                unit: 'count',
-              },
-            ],
+            indexPattern: 'metrics-a-*',
+            metrics: [{ name: 'bytes', field: 'a', agg: 'sum_rate', unit: 'bytes' }],
           },
           {
-            indexPattern: 'metrics-k8sclusterreceiver.otel-*',
-            metrics: [
-              {
-                name: 'k8s.container.restarts',
-                field: 'k8s.container.restarts',
-                agg: 'last',
-                unit: 'count',
-              },
-            ],
+            indexPattern: 'metrics-b-*',
+            metrics: [{ name: 'bytes', field: 'b', agg: 'last', unit: 'bytes' }],
           },
         ]),
         ['dynamic', 'sources', 1, 'metrics', 0, 'name'],

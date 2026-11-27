@@ -70,7 +70,7 @@ describe('toTypeColumns', () => {
           {
             name: 'k8s.container.restarts',
             kind: 'metric',
-            fieldByPlan: { 0: 'kubernetes.container.status.restarts' },
+            fieldByPlan: { 0: 'k8s.container.restarts' },
             agg: 'max',
             unit: 'count',
           },

@@ -28,15 +28,13 @@ describe('list warning copy', () => {
   it('names the metric, aggregation and engine for an unsupported metric', () => {
     expect(
       getUnsupportedMetricText({
-        indexPattern: 'metrics-kubernetes.state_container-*',
+        indexPattern: 'metrics-system.network-*',
         engine: 'FROM',
-        column: 'k8s.container.restarts',
-        field: 'kubernetes.container.status.restarts',
+        column: 'network_bytes',
+        field: 'host.network.bytes',
         agg: 'sum_rate',
       })
-    ).toBe(
-      'k8s.container.restarts (sum_rate) omitted under FROM on metrics-kubernetes.state_container-*'
-    );
+    ).toBe('network_bytes (sum_rate) omitted under FROM on metrics-system.network-*');
   });
 
   it('picks the tip title from which warnings are present', () => {
