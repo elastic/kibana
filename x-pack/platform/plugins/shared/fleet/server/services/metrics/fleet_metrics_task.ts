@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { estypes } from '@elastic/elasticsearch';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type {
   ConcreteTaskInstance,
@@ -127,7 +128,7 @@ export class FleetMetricsTask {
       };
       appContextService
         .getLogger()
-        .trace('Agent status metrics: ' + JSON.stringify(agentStatusDoc));
+        .trace(() => 'Agent status metrics: ' + JSON.stringify(agentStatusDoc));
       await this.esClient.index({
         index: 'metrics-fleet_server.agent_status-default',
         body: agentStatusDoc,
@@ -136,7 +137,7 @@ export class FleetMetricsTask {
 
       if (agentsPerVersion.length === 0) return;
 
-      const operations = [];
+      const operations: estypes.BulkRequest['operations'] = [];
 
       for (const byVersion of agentsPerVersion) {
         const agentVersionsDoc = {
@@ -157,7 +158,9 @@ export class FleetMetricsTask {
         );
       }
 
-      appContextService.getLogger().trace('Agent versions metrics: ' + JSON.stringify(operations));
+      appContextService
+        .getLogger()
+        .trace(() => 'Agent versions metrics: ' + JSON.stringify(operations));
       const resp = await this.esClient.bulk({
         operations,
         refresh: true,

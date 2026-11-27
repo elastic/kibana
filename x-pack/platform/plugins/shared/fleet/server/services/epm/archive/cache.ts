@@ -47,7 +47,7 @@ export const setPackageInfo = ({
   const logger = appContextService.getLogger();
   const key = sharedKey({ name, version });
   logger.debug(`Setting package info to the cache for ${name}-${version}`);
-  logger.trace(JSON.stringify(packageInfo));
+  logger.trace(() => JSON.stringify(packageInfo));
   return packageInfoCache.set(key, packageInfo);
 };
 
