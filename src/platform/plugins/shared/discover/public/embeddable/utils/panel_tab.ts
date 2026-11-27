@@ -7,30 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isUndefined, omitBy, pick } from 'lodash';
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import {
   discoverSessionApiEmbeddableByReferenceConfigSchema,
+  discoverSessionApiEmbeddableByValueConfigSchema,
   type DiscoverSessionApiEmbeddableOverrides,
   type DiscoverSessionApiEmbeddableTab,
 } from '@kbn/as-code-discover-schema';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import { DiscoverTabType } from '@kbn/discover-session-constants';
 import {
   areComparatorsEqual,
   diffComparators,
   type StateComparators,
 } from '@kbn/presentation-publishing';
-import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
+import type { DiscoverSessionInternalData } from '../../../server/api/internal_schema';
 import { fromStoredEmbeddableTab } from '../../../common/embeddable';
-import { migrateLegacyQuery } from '../../../common/migrate_legacy_query';
+import { fromStoredTableSettings, toStoredTab } from '../../../common/embeddable/transform_utils';
 import { getInlineDataView } from '../../../common/session/inline_data_view';
-import { toStoredSearchAndTable } from '../../../common/session/search_and_table_mapping';
 import {
-  omitInlineDataViewIdFromFilters,
-  pinnedFiltersToAppFilters,
-} from '../../../common/session/session_tab_mapping';
+  toStoredSearchAndTable,
+  toStoredSearchSource,
+  type StoredTableSettings,
+} from '../../../common/session/search_and_table_mapping';
+import { omitInlineDataViewIdFromFilters } from '../../../common/session/session_tab_mapping';
 import { toStoredTabTypeState } from '../../../common/session/tab_type_state';
 import { isDiscoverSessionEsqlTab } from '../../../common/session/type_guards';
-import type { SearchEmbeddableSerializedAttributes, SearchEmbeddableSessionTab } from '../types';
+import type {
+  SearchEmbeddablePanelTab,
+  SearchEmbeddableSerializedAttributes,
+  SearchEmbeddableSessionTab,
+} from '../types';
 
 type TableSettings = DiscoverSessionApiEmbeddableOverrides;
 
@@ -50,33 +58,42 @@ const TABLE_SETTING_DEFAULTS: TableSettings = { column_order: [], column_setting
 const getChangedTableSettings = (tab: TableSettings, tableSettings: TableSettings) =>
   diffComparators(TABLE_SETTING_COMPARATORS, tab, tableSettings, TABLE_SETTING_DEFAULTS);
 
-/** Reads a Content Management session tab as a linked panel shows it. */
-export const fromDiscoverSessionTab = (
-  sessionTab: DiscoverSessionTab
-): SearchEmbeddableSessionTab => {
-  const { id, label, serializedSearchSource } = sessionTab;
-  const query = migrateStoredQuery(serializedSearchSource.query);
-  const isEsqlTab = isOfAggregateQueryType(query);
+const [classicTabSchema, esqlTabSchema, metricsTabSchema] =
+  discoverSessionApiEmbeddableByValueConfigSchema.shape.tabs.element.options;
 
-  if (!isEsqlTab && !hasDataView(serializedSearchSource.index)) {
-    return { id, label };
+// Keys come from the panel tab schemas, so session-only fields never reach a panel tab.
+// Like the session API, an ES|QL tab has no sample size, so a panel keeps only its own one.
+const CLASSIC_TAB_KEYS = classicTabSchema.keyof().options;
+const ESQL_TAB_KEYS = esqlTabSchema.omit({ sample_size: true }).keyof().options;
+const METRICS_TAB_KEYS = metricsTabSchema.omit({ sample_size: true }).keyof().options;
+
+/** Reads a session tab returned by the HTTP API as a linked panel shows it. */
+export const fromSessionApiTab = (
+  sessionTab: DiscoverSessionInternalData['tabs'][number]
+): SearchEmbeddableSessionTab => {
+  const { id, label } = sessionTab;
+
+  if (isDiscoverSessionEsqlTab(sessionTab)) {
+    return {
+      id,
+      label,
+      tab:
+        sessionTab.type === DiscoverTabType.Metrics
+          ? pick(sessionTab, METRICS_TAB_KEYS)
+          : pick(sessionTab, ESQL_TAB_KEYS),
+    };
   }
 
-  const searchSource = { ...serializedSearchSource, ...(query && { query }) };
-  // The query decides the tab type, since old sessions can mark a Classic query as text based
-  const panelSearchSource = isEsqlTab ? searchSource : pinnedFiltersToAppFilters(searchSource);
+  const tab = pick(sessionTab, CLASSIC_TAB_KEYS);
 
-  return {
-    id,
-    label,
-    // Like the session API, an ES|QL tab has no sample size, so a panel keeps only its own one
-    tab: fromStoredEmbeddableTab(
-      isEsqlTab ? { ...sessionTab, sampleSize: undefined } : sessionTab,
-      panelSearchSource
-    ),
-    inlineDataViewId: getInlineDataView(panelSearchSource)?.id,
-    ...(!isEsqlTab && { filters: panelSearchSource.filter }),
-  };
+  if (tab.data_source.type === AS_CODE_DATA_VIEW_REFERENCE_TYPE) {
+    return { id, label, tab };
+  }
+
+  // The panel keeps the inline Data View ID apart, so its tab stays in the public format
+  const { id: inlineDataViewId, ...dataSource } = tab.data_source;
+
+  return { id, label, tab: { ...tab, data_source: dataSource }, inlineDataViewId };
 };
 
 /** Converts a panel tab to the attributes the panel searches and renders with. */
@@ -94,24 +111,57 @@ export const toSearchEmbeddableAttributes = (
   };
 };
 
-/** Converts a session tab with a linked panel's overrides to the attributes the panel uses. */
-export const toSessionTabAttributes = (
-  { tab, inlineDataViewId, filters }: SearchEmbeddableSessionTab,
-  overrides?: TableSettings
-): SearchEmbeddableSerializedAttributes => {
-  // Without a Data View, the panel shows a prompt instead of a table
-  if (!tab) {
-    return { serializedSearchSource: {} };
-  }
+/** Reads the panel's table settings in the public panel format. */
+const toPanelTableSettings = (
+  attributes: Partial<SearchEmbeddableSerializedAttributes>
+): TableSettings =>
+  fromStoredTableSettings({
+    columns: attributes.columns,
+    grid: attributes.grid,
+    sort: attributes.sort,
+    rowHeight: attributes.rowHeight,
+    headerRowHeight: attributes.headerRowHeight,
+    rowsPerPage: attributes.rowsPerPage,
+    sampleSize: attributes.sampleSize,
+    density: attributes.density,
+    documentsDisplayMode: attributes.documentsDisplayMode,
+    jsonModeSettings: attributes.jsonModeSettings,
+  });
 
-  const { serializedSearchSource, ...attributes } = toSearchEmbeddableAttributes(
-    applyTableSettingOverrides(tab, overrides),
-    inlineDataViewId
+/** Converts the tab a panel shows to the attributes the panel searches and renders with. */
+export const toPanelTabAttributes = ({
+  tab,
+  inlineDataViewId,
+}: SearchEmbeddablePanelTab): SearchEmbeddableSerializedAttributes =>
+  // Without a Data View, the panel shows a prompt instead of a table
+  tab ? toSearchEmbeddableAttributes(tab, inlineDataViewId) : { serializedSearchSource: {} };
+
+/** Applies the table settings changed on the panel, in the format the grid uses, to a panel tab. */
+export const withTableSettings = (
+  tab: DiscoverSessionApiEmbeddableTab,
+  tableSettings: StoredTableSettings
+): DiscoverSessionApiEmbeddableTab =>
+  // The panel's table settings are complete, so a setting changed to undefined is cleared
+  applyTableSettings(
+    tab,
+    toPanelTableSettings({ ...toSearchEmbeddableAttributes(tab), ...tableSettings })
   );
 
+/** Replaces the query, filters and Data View of a panel tab with those the panel searches with. */
+export const withSearchSource = (
+  tab: DiscoverSessionApiEmbeddableTab,
+  searchSource: SerializedSearchSourceFields
+): SearchEmbeddablePanelTab => {
+  // A Data View that could not be loaded is missing from the SearchSource, so the tab keeps its own
+  const { index = toStoredSearchSource(tab).index } = searchSource;
+  const panelSearchSource = { ...searchSource, index };
+
   return {
-    ...attributes,
-    serializedSearchSource: { ...serializedSearchSource, ...(filters && { filter: filters }) },
+    tab: fromStoredEmbeddableTab(
+      { ...toStoredTab(tab).state, tabTypeState: toStoredTabTypeState(tab) },
+      panelSearchSource
+    ),
+    inlineDataViewId: getInlineDataView(panelSearchSource)?.id,
   };
 };
 
@@ -145,10 +195,10 @@ export const getTableSettingsOverrides = (
   tableSettings: TableSettings
 ): TableSettings =>
   // An override cannot store a cleared setting, so the tab keeps its own value
-  getChangedTableSettings(tab, { ...tab, ...tableSettings });
+  getChangedTableSettings(tab, { ...tab, ...omitBy(tableSettings, isUndefined) });
 
 /** Applies the panel's table settings to a tab, keeping the tab's value of each unchanged one. */
-export const applyTableSettings = (
+const applyTableSettings = (
   tab: DiscoverSessionApiEmbeddableTab,
   tableSettings: TableSettings
 ): DiscoverSessionApiEmbeddableTab => ({ ...tab, ...getChangedTableSettings(tab, tableSettings) });
@@ -165,20 +215,6 @@ export const areTableSettingOverridesEqual = (
     applyTableSettingOverrides(tab, otherOverrides),
     TABLE_SETTING_DEFAULTS
   );
-
-const migrateStoredQuery = (query: SerializedSearchSourceFields['query']) => {
-  // A query saved without a language is Lucene. Old queries can be strings, which the ES|QL check
-  // does not accept.
-  if (!query || (typeof query === 'object' && isOfAggregateQueryType(query))) {
-    return query;
-  }
-
-  return migrateLegacyQuery(query);
-};
-
-// Without a Data View, a Classic tab cannot be converted to the public format
-const hasDataView = (index: SerializedSearchSourceFields['index']) =>
-  typeof index === 'string' ? index.length > 0 : Boolean(index?.title);
 
 const withInlineDataViewId = (
   searchSource: SerializedSearchSourceFields,

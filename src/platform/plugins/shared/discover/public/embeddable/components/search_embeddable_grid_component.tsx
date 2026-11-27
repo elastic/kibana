@@ -45,6 +45,7 @@ import { buildDatatableFromTextBasedGrid } from '../../utils/build_datatable_fro
 import { getGridRequestId } from '../../utils/get_grid_request_id';
 import { isEsqlMode } from '../initialize_fetch';
 import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types';
+import type { StoredTableSettings } from '../../../common/session/search_and_table_mapping';
 import { DiscoverGridEmbeddable, type InlineEditing } from './saved_search_grid';
 import { getSearchEmbeddableDefaults } from '../get_search_embeddable_defaults';
 import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
@@ -81,6 +82,7 @@ interface SavedSearchEmbeddableComponentProps {
   initialDocViewerTabId: string | undefined;
   setExpandedDoc?: (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => void;
   stateManager: SearchEmbeddableStateManager;
+  updateTableSettings: (tableSettings: StoredTableSettings) => void;
   documentViewerFlyoutType?: 'push' | 'overlay';
   autoApplyDiscoverColumnDefaults?: boolean;
   wrapToolbar?: boolean;
@@ -103,6 +105,7 @@ export function SearchEmbeddableGridComponent({
   initialDocViewerTabId,
   setExpandedDoc,
   stateManager,
+  updateTableSettings,
   documentViewerFlyoutType,
   autoApplyDiscoverColumnDefaults = false,
   wrapToolbar = true,
@@ -232,15 +235,11 @@ export function SearchEmbeddableGridComponent({
     dataView,
     dataViews: discoverServices.dataViews,
     setAppState: (params) => {
-      if (params.columns) {
-        stateManager.columns.next(params.columns);
-      }
-      if (params.sort) {
-        stateManager.sort.next(params.sort as SortOrder[]);
-      }
-      if (params.settings) {
-        stateManager.grid.next(params.settings as DiscoverGridSettings);
-      }
+      updateTableSettings({
+        ...(params.columns && { columns: params.columns }),
+        ...(params.sort && { sort: params.sort as SortOrder[] }),
+        ...(params.settings && { grid: params.settings as DiscoverGridSettings }),
+      });
     },
     columns: originalColumns,
     sort,
@@ -333,53 +332,38 @@ export function SearchEmbeddableGridComponent({
       onMoveColumn,
       onRemoveColumn,
       onUpdateRowsPerPage: (newRowsPerPage: number | undefined) => {
-        stateManager.rowsPerPage.next(newRowsPerPage);
+        updateTableSettings({ rowsPerPage: newRowsPerPage });
       },
       onUpdateRowHeight: (newRowHeight: number | undefined) => {
-        stateManager.rowHeight.next(newRowHeight);
+        updateTableSettings({ rowHeight: newRowHeight });
       },
       onUpdateHeaderRowHeight: (newHeaderRowHeight: number | undefined) => {
-        stateManager.headerRowHeight.next(newHeaderRowHeight);
+        updateTableSettings({ headerRowHeight: newHeaderRowHeight });
       },
       onSort: (nextSort: string[][]) => {
         const sortOrderArr: SortOrder[] = [];
         nextSort.forEach((arr) => {
           sortOrderArr.push(arr as SortOrder);
         });
-        stateManager.sort.next(sortOrderArr);
+        updateTableSettings({ sort: sortOrderArr });
       },
       onUpdateSampleSize: (newSampleSize: number | undefined) => {
-        stateManager.sampleSize.next(newSampleSize);
+        updateTableSettings({ sampleSize: newSampleSize });
       },
       onUpdateDataGridDensity: (newDensity: DataGridDensity | undefined) => {
-        stateManager.density.next(newDensity);
+        updateTableSettings({ density: newDensity });
       },
       onUpdateDocumentsDisplayMode: (newDocumentsDisplayMode: DocumentsDisplayMode) => {
-        stateManager.documentsDisplayMode.next(newDocumentsDisplayMode);
+        updateTableSettings({ documentsDisplayMode: newDocumentsDisplayMode });
       },
       onUpdateJsonModeSettings: (newJsonModeSettings: JsonModeSettings) => {
-        stateManager.jsonModeSettings.next(newJsonModeSettings);
+        updateTableSettings({ jsonModeSettings: newJsonModeSettings });
       },
       onResize: (newGridSettings: { columnId: string; width: number | undefined }) => {
-        stateManager.grid.next(onResizeGridColumn(newGridSettings, grid));
+        updateTableSettings({ grid: onResizeGridColumn(newGridSettings, grid) });
       },
     }),
-    [
-      onAddColumn,
-      onSetColumns,
-      onMoveColumn,
-      onRemoveColumn,
-      stateManager.rowsPerPage,
-      stateManager.rowHeight,
-      stateManager.headerRowHeight,
-      stateManager.sort,
-      stateManager.sampleSize,
-      stateManager.density,
-      stateManager.documentsDisplayMode,
-      stateManager.jsonModeSettings,
-      stateManager.grid,
-      grid,
-    ]
+    [onAddColumn, onSetColumns, onMoveColumn, onRemoveColumn, updateTableSettings, grid]
   );
 
   const fetchedSampleSize = useMemo(() => {

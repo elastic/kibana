@@ -48,11 +48,7 @@ import { initializeFetch, isEsqlMode } from './initialize_fetch';
 import { initializeInlineEditingApi } from './initialize_inline_editing_api';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
 import type { SearchEmbeddableApi, SearchEmbeddablePanelApiState } from './types';
-import {
-  deserializeState,
-  getPanelTableSettings,
-  serializeState,
-} from './utils/serialization_utils';
+import { deserializeState, serializeState } from './utils/serialization_utils';
 import { createInMemoryContextAwarenessToolkit } from '../context_awareness';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
 import { isFieldStatsMode } from './utils/is_field_stats_mode';
@@ -129,7 +125,7 @@ export const getSearchEmbeddableFactory = ({
       const timeRangeManager = initializeTimeRangeManager(runtimeState);
       const drilldownsManager = initializeDrilldownsManager(uuid, runtimeState);
       const searchEmbeddable = await initializeSearchEmbeddableApi({
-        initialState: runtimeState,
+        initialTab: runtimeState.panelTab,
         dataLoading$,
         discoverServices,
       });
@@ -137,7 +133,7 @@ export const getSearchEmbeddableFactory = ({
       const serialize = (savedObjectId?: string) =>
         serializeState({
           runtimeState: latestRuntimeState,
-          tableSettings: getPanelTableSettings(searchEmbeddable.stateManager),
+          panelTab: searchEmbeddable.getTab(),
           serializeTitles: titleManager.getLatestState,
           serializeTimeRange: timeRangeManager.getLatestState,
           serializeDynamicActions: drilldownsManager.getLatestState,
@@ -215,8 +211,9 @@ export const getSearchEmbeddableFactory = ({
           latestRuntimeState = nextRuntimeState;
           tabs.splice(0, tabs.length, ...(nextRuntimeState.tabs ?? []));
           defaultState.selected_tab_id = tabs[0]?.id;
+          // The tab is replaced first, so the selected tab change serializes the new tab
+          await searchEmbeddable.reinitializeState(nextRuntimeState.panelTab);
           selectedTabId$.next(nextRuntimeState.selectedTabId);
-          await searchEmbeddable.reinitializeState(nextRuntimeState);
           inlineEditingApi.stopInlineEditing();
         },
       });
@@ -353,7 +350,9 @@ export const getSearchEmbeddableFactory = ({
       const { profileStateRegistry } = discoverServices;
       const toolkit = createInMemoryContextAwarenessToolkit({
         profileStateRegistry,
-        initialProfileState: profileStateRegistry.fromSavedState(runtimeState.tabTypeState),
+        initialProfileState: profileStateRegistry.fromSavedState(
+          searchEmbeddable.api.savedSearch$.getValue().tabTypeState
+        ),
         actions: {
           addFilter: enableFilters ? addFilter : undefined,
           refreshData: () => refreshTrigger$.next(undefined),
@@ -570,6 +569,7 @@ export const getSearchEmbeddableFactory = ({
                           onCancel: inlineEditingApi.cancelInlineTabSelection,
                         }}
                         stateManager={searchEmbeddable.stateManager}
+                        updateTableSettings={searchEmbeddable.updateTableSettings}
                       />
                     </CellActionsProvider>
                   )}

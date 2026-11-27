@@ -32,6 +32,7 @@ import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import { createContextAwarenessMocks } from '../../context_awareness/__mocks__';
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../context_awareness';
 import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types';
+import type { StoredTableSettings } from '../../../common/session/search_and_table_mapping';
 import { SearchEmbeddableGridComponent } from './search_embeddable_grid_component';
 import type { EsqlSource } from '@kbn/data-source';
 import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
@@ -71,6 +72,16 @@ const createStateManager = (): SearchEmbeddableStateManager => ({
   pagination: new BehaviorSubject<IDslPagination | undefined>(undefined),
   isLoadingMore: new BehaviorSubject<boolean>(false),
 });
+
+// Publishes the table settings to the state manager, as the panel does after updating its tab
+const createUpdateTableSettings =
+  (stateManager: SearchEmbeddableStateManager) =>
+  (tableSettings: StoredTableSettings) => {
+    Object.entries(tableSettings).forEach(([key, value]) => {
+      const subject = stateManager[key as keyof StoredTableSettings];
+      (subject as BehaviorSubject<unknown>).next(value);
+    });
+  };
 
 const createSavedSearch = ({
   isEsql,
@@ -223,6 +234,7 @@ describe('SearchEmbeddableGridComponent', () => {
           dataView={dataViewMock}
           esqlSource$={esqlSource$}
           stateManager={stateManager}
+          updateTableSettings={createUpdateTableSettings(stateManager)}
           enableDocumentViewer={true}
           autoApplyDiscoverColumnDefaults={autoApplyDiscoverColumnDefaults}
           showKeyboardShortcuts={showKeyboardShortcuts}
@@ -702,6 +714,7 @@ describe('SearchEmbeddableGridComponent', () => {
           api={api}
           dataView={dataViewMock}
           stateManager={stateManager}
+          updateTableSettings={jest.fn()}
           enableDocumentViewer={true}
           inlineEditing={{
             isActive: false,
@@ -844,6 +857,7 @@ describe('SearchEmbeddableGridComponent', () => {
             api={api}
             dataView={dataViewMock}
             stateManager={stateManager}
+            updateTableSettings={jest.fn()}
             enableDocumentViewer={true}
             inlineEditing={{
               isActive: false,

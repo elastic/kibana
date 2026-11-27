@@ -8,73 +8,16 @@
  */
 
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
-import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
-import { DiscoverTabType } from '@kbn/discover-session-constants';
-import type { IDslPagination } from '@kbn/search-types';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { DiscoverGridSettings, SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import type {
-  SortOrder,
-  DataGridDensity,
-  JsonModeSettings,
-  DocumentsDisplayMode,
-} from '@kbn/unified-data-table';
 import { BehaviorSubject } from 'rxjs';
-import type { EsqlSource } from '@kbn/data-source';
-import { createDiscoverServicesMock } from '../__mocks__/services';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { getPersistedTabMock } from '../application/main/state_management/redux/__mocks__/internal_state.mocks';
 import { initializeInlineEditingApi } from './initialize_inline_editing_api';
-import { fromDiscoverSessionTab, toSessionTabAttributes } from './utils/panel_tab';
-import type { SearchEmbeddableStateManager } from './types';
+import type { SearchEmbeddableSessionTab } from './types';
 
-const defaultServices = createDiscoverServicesMock();
-
-const tab1 = fromDiscoverSessionTab(
-  getPersistedTabMock({
-    dataView: dataViewMock,
-    services: defaultServices,
-    tabId: 'tab-1',
-  })
-);
-
-const tab2 = fromDiscoverSessionTab(
-  getPersistedTabMock({
-    dataView: dataViewMock,
-    services: defaultServices,
-    tabId: 'tab-2',
-  })
-);
-
-const createSearchEmbeddableStateManager = (): SearchEmbeddableStateManager => ({
-  columns: new BehaviorSubject<string[] | undefined>(['message']),
-  resultDataSource: new BehaviorSubject<EsqlSource | undefined>(undefined),
-  grid: new BehaviorSubject<DiscoverGridSettings | undefined>(undefined),
-  rowHeight: new BehaviorSubject<number | undefined>(undefined),
-  headerRowHeight: new BehaviorSubject<number | undefined>(undefined),
-  rowsPerPage: new BehaviorSubject<number | undefined>(undefined),
-  sampleSize: new BehaviorSubject<number | undefined>(100),
-  sort: new BehaviorSubject<SortOrder[] | undefined>(undefined),
-  viewMode: new BehaviorSubject<VIEW_MODE | undefined>(undefined),
-  density: new BehaviorSubject<DataGridDensity | undefined>(undefined),
-  documentsDisplayMode: new BehaviorSubject<DocumentsDisplayMode | undefined>(undefined),
-  jsonModeSettings: new BehaviorSubject<JsonModeSettings | undefined>(undefined),
-  rows: new BehaviorSubject<DataTableRecord[]>([]),
-  totalHitCount: new BehaviorSubject<number | undefined>(undefined),
-  inspectorAdapters: new BehaviorSubject<Record<string, unknown>>({}),
-  pagination: new BehaviorSubject<IDslPagination | undefined>(undefined),
-  isLoadingMore: new BehaviorSubject<boolean>(false),
-});
-
-const createMockSavedSearch = (): SavedSearch => ({
-  searchSource: createSearchSourceMock(),
-  managed: false,
-});
+const tab1: SearchEmbeddableSessionTab = { id: 'tab-1', label: 'Tab 1' };
+const tab2: SearchEmbeddableSessionTab = { id: 'tab-2', label: 'Tab 2' };
 
 const buildSearchEmbeddable = () => ({
-  api: { savedSearch$: new BehaviorSubject(createMockSavedSearch()) },
+  getTab: jest.fn().mockReturnValue(tab1),
   reinitializeState: jest.fn().mockResolvedValue(undefined),
-  stateManager: createSearchEmbeddableStateManager(),
 });
 
 const setupApi = (
@@ -119,33 +62,16 @@ const setupApi = (
 };
 
 describe('initializeInlineEditingApi', () => {
-  it('restores the Metrics profile state snapshot when cancelling a tab preview', async () => {
+  it('restores the tab shown before a cancelled tab preview', async () => {
     const { api, searchEmbeddable, selectedTabId$ } = setupApi();
-    const { savedSearch$ } = searchEmbeddable.api;
-    const tabTypeState: SavedSearch['tabTypeState'] = {
-      type: DiscoverTabType.Metrics,
-      dimensions: ['host.name'],
-      searchTerm: 'cpu',
-      counterAggregation: 'max',
-      gaugeAggregation: 'avg',
-      histogramPercentile: 'p99',
-    };
-    savedSearch$.next({ ...savedSearch$.getValue(), tabTypeState });
 
     await api.startInlineEditing();
     await api.previewInlineTabSelection('tab-2');
-    expect(searchEmbeddable.reinitializeState).toHaveBeenNthCalledWith(
-      1,
-      toSessionTabAttributes(tab2)
-    );
+    expect(searchEmbeddable.reinitializeState).toHaveBeenNthCalledWith(1, tab2);
 
-    savedSearch$.next({ ...savedSearch$.getValue(), tabTypeState: undefined });
     await api.cancelInlineTabSelection();
 
-    expect(searchEmbeddable.reinitializeState).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({ tabTypeState })
-    );
+    expect(searchEmbeddable.reinitializeState).toHaveBeenNthCalledWith(2, tab1);
     expect(selectedTabId$.getValue()).toBe('tab-1');
     expect(api.isInlineEditing$.getValue()).toBe(false);
   });

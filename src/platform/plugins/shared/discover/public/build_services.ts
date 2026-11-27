@@ -86,6 +86,7 @@ import { InitialTabStateService } from './plugin_imports/initial_tab_state_servi
 import {
   createDiscoverSessionClient,
   createDiscoverSessionService,
+  type DiscoverSessionClient,
   type DiscoverSessionService,
 } from './session';
 
@@ -122,6 +123,7 @@ export interface DiscoverServices {
   data: DataPublicPluginStart;
   discoverShared: DiscoverSharedPublicStart;
   discoverFeatureFlags: DiscoverFeatureFlags;
+  discoverSessionClient: DiscoverSessionClient;
   discoverSessionService: DiscoverSessionService;
   docLinks: DocLinksStart;
   embeddable: EmbeddableStart;
@@ -225,8 +227,9 @@ export const buildServices = ({
 }): DiscoverServices => {
   const { usageCollection } = plugins;
   const storage = new Storage(localStorage);
+  const discoverSessionClient = createDiscoverSessionClient(core.http);
   const discoverSessionService = createDiscoverSessionService({
-    apiClient: createDiscoverSessionClient(core.http),
+    apiClient: discoverSessionClient,
     legacyClient: plugins.savedSearch,
     useHttpApi: readBooleanFlag(core, SESSION_HTTP_API_ENABLED_FEATURE_FLAG_KEY, true),
   });
@@ -245,6 +248,7 @@ export const buildServices = ({
     data: plugins.data,
     dataVisualizer: plugins.dataVisualizer,
     discoverShared: plugins.discoverShared,
+    discoverSessionClient,
     discoverSessionService,
     discoverFeatureFlags: {
       getCascadeLayoutEnabled: () =>

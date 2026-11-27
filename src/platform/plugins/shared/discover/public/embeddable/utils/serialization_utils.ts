@@ -8,7 +8,6 @@
  */
 
 import { pick } from 'lodash';
-import type { DiscoverSessionApiEmbeddableOverrides } from '@kbn/as-code-discover-schema';
 import { type SerializedTimeRange, type SerializedTitles } from '@kbn/presentation-publishing';
 import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import type { DiscoverSessionEmbeddableState } from '../../../common/embeddable/types';
@@ -17,22 +16,18 @@ import {
   isDiscoverSessionEmbeddableByReferenceState,
   isSearchEmbeddableLegacyPanelState,
 } from '../../../common/embeddable';
-import { fromStoredTableSettings } from '../../../common/embeddable/transform_utils';
 import type { DiscoverServices } from '../../build_services';
 import { EDITABLE_PANEL_KEYS } from '../constants';
 import type {
   SearchEmbeddableInputState,
+  SearchEmbeddablePanelTab,
   SearchEmbeddableRuntimeState,
-  SearchEmbeddableSerializedAttributes,
-  SearchEmbeddableStateManager,
 } from '../types';
 import {
-  applyTableSettings,
-  fromDiscoverSessionTab,
+  applyTableSettingOverrides,
+  fromSessionApiTab,
   getTableSettingsOverrides,
   toByValuePanelTab,
-  toSearchEmbeddableAttributes,
-  toSessionTabAttributes,
 } from './panel_tab';
 
 export const deserializeState = async ({
@@ -57,13 +52,19 @@ export const deserializeState = async ({
 
   if (isDiscoverSessionEmbeddableByReferenceState(apiState)) {
     const { ref_id: savedObjectId, selected_tab_id: selectedTabId, overrides = {} } = apiState;
-    const session = await discoverServices.savedSearch.getDiscoverSession(savedObjectId);
-    const tabs = session.tabs.map(fromDiscoverSessionTab);
+    // The panel does not read session controls, so their warnings do not apply to it
+    const { data: session } = await discoverServices.discoverSessionClient.get(savedObjectId);
+    const tabs = session.tabs.map(fromSessionApiTab);
     const selectedTab = selectedTabId ? tabs.find(({ id }) => id === selectedTabId) : tabs[0];
 
     return {
-      // A deleted selected tab shows a prompt, so the panel has no tab attributes to show
-      ...(selectedTab && toSessionTabAttributes(selectedTab, overrides)),
+      // A deleted selected tab shows a prompt, so the panel has no tab to show
+      panelTab: selectedTab?.tab
+        ? {
+            tab: applyTableSettingOverrides(selectedTab.tab, overrides),
+            inlineDataViewId: selectedTab.inlineDataViewId,
+          }
+        : {},
       savedObjectId,
       savedObjectTitle: session.title,
       savedObjectDescription: session.description,
@@ -77,50 +78,15 @@ export const deserializeState = async ({
   const [tab] = apiState.tabs;
 
   return {
-    ...toSearchEmbeddableAttributes(tab),
-    tab,
+    panelTab: { tab },
     ...panelState,
     nonPersistedDisplayOptions: serializedState.nonPersistedDisplayOptions,
   };
 };
 
-/** Reads the panel's table settings in the public panel format. */
-export const toPanelTableSettings = (
-  attributes: Partial<SearchEmbeddableSerializedAttributes>
-): DiscoverSessionApiEmbeddableOverrides =>
-  fromStoredTableSettings({
-    columns: attributes.columns,
-    grid: attributes.grid,
-    sort: attributes.sort,
-    rowHeight: attributes.rowHeight,
-    headerRowHeight: attributes.headerRowHeight,
-    rowsPerPage: attributes.rowsPerPage,
-    sampleSize: attributes.sampleSize,
-    density: attributes.density,
-    documentsDisplayMode: attributes.documentsDisplayMode,
-    jsonModeSettings: attributes.jsonModeSettings,
-  });
-
-/** Reads the table settings the panel shows in the public panel format. */
-export const getPanelTableSettings = (
-  stateManager: SearchEmbeddableStateManager
-): DiscoverSessionApiEmbeddableOverrides =>
-  toPanelTableSettings({
-    columns: stateManager.columns.getValue(),
-    grid: stateManager.grid.getValue(),
-    sort: stateManager.sort.getValue(),
-    rowHeight: stateManager.rowHeight.getValue(),
-    headerRowHeight: stateManager.headerRowHeight.getValue(),
-    rowsPerPage: stateManager.rowsPerPage.getValue(),
-    sampleSize: stateManager.sampleSize.getValue(),
-    density: stateManager.density.getValue(),
-    documentsDisplayMode: stateManager.documentsDisplayMode.getValue(),
-    jsonModeSettings: stateManager.jsonModeSettings.getValue(),
-  });
-
 export const serializeState = ({
   runtimeState,
-  tableSettings,
+  panelTab,
   serializeTitles,
   serializeTimeRange,
   serializeDynamicActions,
@@ -128,16 +94,18 @@ export const serializeState = ({
   selectedTabId,
 }: {
   runtimeState: SearchEmbeddableRuntimeState;
-  tableSettings: DiscoverSessionApiEmbeddableOverrides;
+  panelTab: SearchEmbeddablePanelTab;
   serializeTitles: () => SerializedTitles;
   serializeTimeRange: () => SerializedTimeRange;
   serializeDynamicActions: () => SerializedDrilldowns;
   savedObjectId?: string;
   selectedTabId?: string;
 }): DiscoverSessionEmbeddableState => {
-  const selectedSessionTab = runtimeState.tabs?.find(({ id }) => id === selectedTabId);
+  const { tab, inlineDataViewId } = panelTab;
 
   if (savedObjectId) {
+    const sessionTab = runtimeState.tabs?.find(({ id }) => id === selectedTabId)?.tab;
+
     return {
       ...serializeTitles(),
       ...serializeTimeRange(),
@@ -145,15 +113,14 @@ export const serializeState = ({
       ref_id: savedObjectId,
       selected_tab_id: selectedTabId,
       // A deleted tab or one without a Data View shows no table, so the overrides stay as they are
-      overrides: selectedSessionTab?.tab
-        ? getTableSettingsOverrides(selectedSessionTab.tab, tableSettings)
-        : runtimeState.overrides ?? {},
+      overrides:
+        sessionTab && tab
+          ? getTableSettingsOverrides(sessionTab, tab)
+          : runtimeState.overrides ?? {},
     };
   }
 
-  // Unlinking a linked panel turns its selected session tab into the by-value tab
-  const tab = selectedSessionTab ? selectedSessionTab.tab : runtimeState.tab;
-
+  // Unlinking a linked panel turns the session tab it shows into the by-value tab
   if (!tab) {
     throw new Error('The selected tab of this panel no longer exists');
   }
@@ -167,11 +134,6 @@ export const serializeState = ({
     title: title ?? runtimeState.savedObjectTitle,
     description: description ?? runtimeState.savedObjectDescription,
     ...titleOptions,
-    tabs: [
-      toByValuePanelTab(
-        applyTableSettings(tab, tableSettings),
-        selectedSessionTab?.inlineDataViewId
-      ),
-    ],
+    tabs: [toByValuePanelTab(tab, inlineDataViewId)],
   };
 };

@@ -10,9 +10,13 @@
 import { omit, pick } from 'lodash';
 import deepEqual from 'react-fast-compare';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, combineLatest, map, skip } from 'rxjs';
+import { BehaviorSubject, combineLatest, map, skip, Subject } from 'rxjs';
 import type { Adapters } from '@kbn/inspector-plugin/common';
-import type { ISearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type {
+  ISearchSource,
+  SearchSourceFields,
+  SerializedSearchSourceFields,
+} from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type {
@@ -46,9 +50,17 @@ import { resolveEsqlSource } from '../application/main/data_fetching/resolve_esq
 import { EDITABLE_SAVED_SEARCH_KEYS } from '../../common/embeddable/constants';
 import type {
   PublishesWritableSavedSearch,
+  SearchEmbeddablePanelTab,
   SearchEmbeddableSerializedAttributes,
   SearchEmbeddableStateManager,
 } from './types';
+import type { StoredTableSettings } from '../../common/session/search_and_table_mapping';
+import {
+  toPanelTabAttributes,
+  toSearchEmbeddableAttributes,
+  withSearchSource,
+  withTableSettings,
+} from './utils/panel_tab';
 
 const initializeSearchSource = async (
   discoverServices: DiscoverServices,
@@ -128,11 +140,11 @@ const getProjectRoutingOverrides = (query: Query | AggregateQuery | undefined) =
 };
 
 export const initializeSearchEmbeddableApi = async ({
-  initialState,
+  initialTab,
   dataLoading$,
   discoverServices,
 }: {
-  initialState: SearchEmbeddableSerializedAttributes;
+  initialTab: SearchEmbeddablePanelTab;
   dataLoading$: BehaviorSubject<boolean | undefined>;
   discoverServices: DiscoverServices;
 }): Promise<{
@@ -147,9 +159,15 @@ export const initializeSearchEmbeddableApi = async ({
   stateManager: SearchEmbeddableStateManager;
   anyStateChange$: Observable<void>;
   cleanup: () => void;
-  reinitializeState: (lastSaved: SearchEmbeddableSerializedAttributes) => Promise<void>;
+  getTab: () => SearchEmbeddablePanelTab;
+  updateTableSettings: (tableSettings: StoredTableSettings) => void;
+  reinitializeState: (panelTab: SearchEmbeddablePanelTab) => Promise<void>;
   esqlSource$: BehaviorSubject<EsqlSource | undefined>;
 }> => {
+  /** The tab the panel shows, which the subjects below publish */
+  let panelTab = initialTab;
+  const initialState = toPanelTabAttributes(initialTab);
+
   /** We **must** have a search source, so start by initializing it  */
   const { searchSource, dataView, esqlSource } = await initializeSearchSource(
     discoverServices,
@@ -243,30 +261,90 @@ export const initializeSearchEmbeddableApi = async ({
     pick(stateManager, EDITABLE_SAVED_SEARCH_KEYS)
   );
 
+  /** Fires when a change made on the panel updates its tab, but not when a tab is loaded */
+  const tabChange$ = new Subject<void>();
+
+  const setPanelTab = (nextPanelTab: SearchEmbeddablePanelTab) => {
+    panelTab = nextPanelTab;
+    tabChange$.next();
+  };
+
+  const publish = <Value,>(subject: BehaviorSubject<Value>, value: Value) => {
+    if (!deepEqual(subject.getValue(), value)) {
+      subject.next(value);
+    }
+  };
+
+  const publishTableSettings = (state: SearchEmbeddableSerializedAttributes) => {
+    publish(sort$, state.sort);
+    publish(columns$, state.columns);
+    publish(grid$, state.grid);
+    publish(sampleSize$, state.sampleSize);
+    publish(rowsPerPage$, state.rowsPerPage);
+    publish(rowHeight$, state.rowHeight);
+    publish(headerRowHeight$, state.headerRowHeight);
+    publish(density$, state.density);
+    publish(documentsDisplayMode$, state.documentsDisplayMode);
+    publish(jsonModeSettings$, state.jsonModeSettings);
+  };
+
+  const updateTableSettings = (tableSettings: StoredTableSettings) => {
+    const { tab } = panelTab;
+
+    // Without a tab, the panel shows a prompt instead of a table
+    if (!tab) {
+      return;
+    }
+
+    const nextTab = withTableSettings(tab, tableSettings);
+
+    setPanelTab({ ...panelTab, tab: nextTab });
+    publishTableSettings(toSearchEmbeddableAttributes(nextTab));
+  };
+
   /** APIs for updating search source properties */
+  const setSearchSourceField = <Key extends keyof SearchSourceFields>(
+    key: Key,
+    value: SearchSourceFields[Key]
+  ) => {
+    // Reinitializing the panel replaces its SearchSource
+    const currentSearchSource = searchSource$.getValue();
+    const { tab } = panelTab;
+
+    currentSearchSource.setField(key, value);
+
+    if (tab) {
+      setPanelTab(withSearchSource(tab, currentSearchSource.getSerializedFields()));
+    }
+
+    return currentSearchSource;
+  };
+
   const setDataSources = (nextDataViews: DataView[]) => {
-    searchSource.setField('index', nextDataViews[0]);
+    const currentSearchSource = setSearchSourceField('index', nextDataViews[0]);
     dataSources$.next(nextDataViews);
-    searchSource$.next(searchSource);
+    searchSource$.next(currentSearchSource);
   };
 
   const setFilters = (filters: Filter[] | undefined) => {
-    searchSource.setField('filter', filters);
+    const currentSearchSource = setSearchSourceField('filter', filters);
     filters$.next(filters);
-    searchSource$.next(searchSource);
+    searchSource$.next(currentSearchSource);
   };
 
   const setQuery = (query: Query | AggregateQuery | undefined) => {
-    searchSource.setField('query', query);
+    const currentSearchSource = setSearchSourceField('query', query);
     query$.next(query);
-    searchSource$.next(searchSource);
+    searchSource$.next(currentSearchSource);
   };
 
   const setColumns = (columns: string[] | undefined) => {
-    stateManager.columns.next(columns);
+    updateTableSettings({ columns });
   };
 
-  const reinitializeState = async (state: SearchEmbeddableSerializedAttributes) => {
+  const reinitializeState = async (nextPanelTab: SearchEmbeddablePanelTab) => {
+    const state = toPanelTabAttributes(nextPanelTab);
+
     // Trigger dataLoading$ and clear rows$ to show the initial loading state
     dataLoading$.next(true);
     rows$.next([]);
@@ -283,6 +361,9 @@ export const initializeSearchEmbeddableApi = async ({
       previousSourceId
     );
 
+    // A tab the panel cannot load leaves the tab it shows unchanged
+    panelTab = nextPanelTab;
+
     // Ensure all state updates happen synchronously to prevent multiple reloads
     savedSearch$.next({ ...savedSearch$.getValue(), tabTypeState: state.tabTypeState });
     searchSource$.next(newSearchSource);
@@ -295,17 +376,8 @@ export const initializeSearchEmbeddableApi = async ({
 
     query$.next(newQuery);
     filters$.next(newFilters);
-    sort$.next(state.sort);
-    columns$.next(state.columns);
-    grid$.next(state.grid);
-    sampleSize$.next(state.sampleSize);
-    rowsPerPage$.next(state.rowsPerPage);
-    rowHeight$.next(state.rowHeight);
-    headerRowHeight$.next(state.headerRowHeight);
+    publishTableSettings(state);
     savedSearchViewMode$.next(state.viewMode);
-    density$.next(state.density);
-    documentsDisplayMode$.next(state.documentsDisplayMode);
-    jsonModeSettings$.next(state.jsonModeSettings);
   };
 
   /** Keep the saved search in sync with any state changes */
@@ -373,10 +445,9 @@ export const initializeSearchEmbeddableApi = async ({
       setColumns,
     },
     stateManager,
-    anyStateChange$: onAnyStateChange.pipe(
-      skip(1),
-      map(() => undefined)
-    ),
+    anyStateChange$: tabChange$,
+    getTab: () => panelTab,
+    updateTableSettings,
     reinitializeState,
   };
 };
