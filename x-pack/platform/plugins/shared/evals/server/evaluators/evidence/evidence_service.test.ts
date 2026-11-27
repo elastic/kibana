@@ -1246,6 +1246,59 @@ describe('normalizeEvidence', () => {
       ]);
     });
 
+    it('picks the ToolMessage answering the call among other Command update messages', async () => {
+      const buildMessage = (className: string, kwargs: Record<string, unknown>) => ({
+        lc: 1,
+        type: 'constructor',
+        id: ['langchain', 'schema', 'messages', className],
+        kwargs,
+      });
+      const buildCommandResult = (messages: unknown[]): string =>
+        JSON.stringify({ output: { graph: null, update: { messages }, resume: null, goto: [] } });
+      const humanMessage = buildMessage('HumanMessage', { content: 'not a result', type: 'human' });
+      const otherToolMessage = buildMessage('ToolMessage', {
+        content: 'other call',
+        type: 'tool',
+        tool_call_id: 'call-other',
+      });
+      const answeringToolMessage = buildMessage('ToolMessage', {
+        content: 'this call',
+        type: 'tool',
+        tool_call_id: 'call-1',
+      });
+
+      const steps = await normalizeSteps([
+        buildToolSpan(1, {
+          'gen_ai.tool.call.arguments': JSON.stringify({
+            inputs: { q: 1 },
+            kwargs: { tool_call_id: 'call-1' },
+          }),
+          'gen_ai.tool.call.result': buildCommandResult([
+            humanMessage,
+            otherToolMessage,
+            answeringToolMessage,
+          ]),
+        }),
+        buildToolSpan(2, {
+          'gen_ai.tool.call.arguments': JSON.stringify({ inputs: { q: 2 }, kwargs: {} }),
+          'gen_ai.tool.call.result': buildCommandResult([
+            humanMessage,
+            buildMessage('ToolMessage', { content: 'by class name', tool_call_id: 'call-2' }),
+          ]),
+        }),
+      ]);
+
+      expect(steps).toEqual([
+        { tool_call_id: 'call-1', tool_id: 'some_tool', arguments: { q: 1 }, result: 'this call' },
+        {
+          tool_call_id: 'call-2',
+          tool_id: 'some_tool',
+          arguments: { q: 2 },
+          result: 'by class name',
+        },
+      ]);
+    });
+
     it('falls back to the parsed raw value for unrecognized envelopes', async () => {
       const steps = await normalizeSteps([
         buildToolSpan(1, {

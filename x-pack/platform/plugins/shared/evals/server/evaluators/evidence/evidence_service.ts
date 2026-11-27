@@ -374,12 +374,25 @@ const getLangchainKwargs = (value: unknown): Record<string, unknown> | undefined
   return isPlainObject(kwargs) ? kwargs : undefined;
 };
 
-const isLangchainToolMessage = (value: unknown): boolean =>
-  hasOwnProperty(getLangchainKwargs(value), 'content');
+// Every serialized LangChain message has `kwargs.content`, so a ToolMessage is
+// identified by its `kwargs.type` or by the class name that ends its `id` path.
+const isLangchainToolMessage = (value: unknown): boolean => {
+  const kwargs = getLangchainKwargs(value);
+  if (!hasOwnProperty(kwargs, 'content')) {
+    return false;
+  }
+  if (kwargs.type === 'tool') {
+    return true;
+  }
+  return (
+    hasOwnProperty(value, 'id') && Array.isArray(value.id) && value.id.at(-1) === 'ToolMessage'
+  );
+};
 
 // A tool returns either a serialized ToolMessage, or a `Command` whose
-// `update.messages` holds the ToolMessage (e.g. deepagents `write_todos`, `task`).
-const findLangchainToolMessage = (output: unknown): unknown => {
+// `update.messages` holds the ToolMessage (e.g. deepagents `write_todos`, `task`),
+// possibly next to other messages. The one answering this tool call wins.
+const findLangchainToolMessage = (output: unknown, toolCallId: string | undefined): unknown => {
   if (isLangchainToolMessage(output)) {
     return output;
   }
@@ -387,7 +400,14 @@ const findLangchainToolMessage = (output: unknown): unknown => {
     return undefined;
   }
   const { messages } = output.update;
-  return Array.isArray(messages) ? messages.find(isLangchainToolMessage) : undefined;
+  if (!Array.isArray(messages)) {
+    return undefined;
+  }
+  const toolMessages = messages.filter(isLangchainToolMessage);
+  const answering = toolCallId
+    ? toolMessages.find((message) => getLangchainKwargs(message)?.tool_call_id === toolCallId)
+    : undefined;
+  return answering ?? toolMessages[0];
 };
 
 const getLangchainToolMessageContent = (content: unknown): unknown => {
@@ -420,13 +440,12 @@ const parseLangchainEnvelope = (
 
   const inputs = hasOwnProperty(parsedArguments, 'inputs') ? parsedArguments.inputs : undefined;
   const output = hasOwnProperty(parsedResult, 'output') ? parsedResult.output : parsedResult;
-  const toolMessage = findLangchainToolMessage(output);
+  const argumentsToolCallId = getNonEmptyString(getLangchainKwargs(parsedArguments)?.tool_call_id);
+  const toolMessage = findLangchainToolMessage(output, argumentsToolCallId);
   const toolMessageKwargs = getLangchainKwargs(toolMessage);
 
   return {
-    toolCallId:
-      getNonEmptyString(getLangchainKwargs(parsedArguments)?.tool_call_id) ??
-      getNonEmptyString(toolMessageKwargs?.tool_call_id),
+    toolCallId: argumentsToolCallId ?? getNonEmptyString(toolMessageKwargs?.tool_call_id),
     arguments: inputs ?? parsedArguments,
     result: toolMessageKwargs
       ? parseJsonIfPossible(getLangchainToolMessageContent(toolMessageKwargs.content))
