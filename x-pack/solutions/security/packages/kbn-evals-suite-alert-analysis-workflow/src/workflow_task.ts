@@ -90,9 +90,59 @@ export interface AlertAnalysisVerdict {
   toolCallIds?: string[];
   /** True when trace ES was unreachable or the workflow trace id was invalid. */
   toolCallsUnavailable?: boolean;
+  timing: WorkflowTiming;
 }
 
 export type ClassificationMethod = 'agent' | 'prompt';
+
+/**
+ * ISO timestamps the workflow engine recorded, so latency does not depend on tracing being
+ * configured. Any field is absent when the engine did not report it (e.g. a run still going).
+ */
+export interface WorkflowTiming {
+  startedAt?: string;
+  finishedAt?: string;
+  /** Earliest start / latest finish over the classification step's records. */
+  classificationStartedAt?: string;
+  classificationFinishedAt?: string;
+}
+
+const earliest = (timestamps: string[]): string | undefined =>
+  timestamps.length > 0
+    ? timestamps.reduce((a, b) => (Date.parse(b) < Date.parse(a) ? b : a))
+    : undefined;
+
+const latest = (timestamps: string[]): string | undefined =>
+  timestamps.length > 0
+    ? timestamps.reduce((a, b) => (Date.parse(b) > Date.parse(a) ? b : a))
+    : undefined;
+
+/**
+ * The classification step is a span, not a sum of its records: each step yields several records
+ * and a batch makes several model calls, so adding record durations would double count. For one
+ * alert the span is the model call; for a batch it also includes the gaps between calls.
+ *
+ * If any record has started but not finished (the poll gave up mid-call), the end is unknown:
+ * report none rather than the latest finish of the earlier calls, which would understate it.
+ */
+export const readTiming = ({
+  startedAt,
+  finishedAt,
+  stepExecutions,
+}: Pick<WorkflowExecutionDto, 'startedAt' | 'finishedAt' | 'stepExecutions'>): WorkflowTiming => {
+  const steps = stepExecutions.filter(isClassificationStep);
+  const stillRunning = steps.some((step) => step.startedAt && !step.finishedAt);
+  return {
+    startedAt: startedAt || undefined,
+    finishedAt: finishedAt || undefined,
+    classificationStartedAt: earliest(
+      steps.flatMap((step) => (step.startedAt ? [step.startedAt] : []))
+    ),
+    classificationFinishedAt: stillRunning
+      ? undefined
+      : latest(steps.flatMap((step) => (step.finishedAt ? [step.finishedAt] : []))),
+  };
+};
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -309,6 +359,7 @@ export const runAlertAnalysisWorkflow = async ({
     traceId: execution.traceId,
     toolCallIds,
     toolCallsUnavailable: unavailable,
+    timing: readTiming(execution),
   };
 };
 
@@ -317,6 +368,8 @@ export interface AlertAnalysisBatchResult {
   verdicts: Record<string, { classification?: Classification; confidenceScore?: number }>;
   executionId: string;
   executionStatus: ExecutionStatus;
+  traceId?: string;
+  timing: WorkflowTiming;
 }
 
 /** Runs the workflow once over all `alertIds` (it splits them into model calls of up to 50). */
@@ -354,5 +407,11 @@ export const runAlertAnalysisBatch = async ({
       };
     }
   }
-  return { verdicts, executionId: workflowExecutionId, executionStatus: execution.status };
+  return {
+    verdicts,
+    executionId: workflowExecutionId,
+    executionStatus: execution.status,
+    traceId: execution.traceId,
+    timing: readTiming(execution),
+  };
 };

@@ -36,9 +36,11 @@
  *     pre-built context. A prompt has no tools, so the guardrail is not run for it.
  *   - RationaleQuality (LLM): the rationale is grounded in the alert's observable evidence and
  *     names the decision gate / confidence tier it applied.
+ *   - WorkflowLatencySeconds, ClassificationStepLatencySeconds (CODE): from the workflow engine's
+ *     own timestamps, so they need no tracing.
  *
- * Trace-based metrics (latency/tokens) are intentionally omitted for v1; whether the workflow's
- * `ai.agent` conversation emits joinable OTel spans is verified during the runtime gate.
+ * Token metrics stay omitted: whether the workflow's `ai.agent` conversation emits joinable OTel
+ * spans is verified during the runtime gate.
  */
 
 import { randomUUID } from 'crypto';
@@ -55,6 +57,7 @@ import {
   createAlertAnalysisTrajectoryEvaluator,
   validVerdict,
 } from '../src/evaluators';
+import { latencyEvaluators } from '../src/latency_evaluators';
 import { ALERT_ANALYSIS_EVAL_ALERTS } from '../src/synthetic_alerts';
 import { ALERTS_INDEX } from '../src/constants';
 
@@ -149,6 +152,7 @@ evaluate.describe(
             // A prompt has no tools to call, so the zero-tool guardrail only applies to the agent.
             ...(method === 'agent' ? [createAlertAnalysisTrajectoryEvaluator()] : []),
             evaluators.criteria(RATIONALE_CRITERIA),
+            ...latencyEvaluators,
           ]);
 
           await executorClient.runExperiment(

@@ -7,11 +7,15 @@
 
 import type { Evaluator } from '@kbn/evals';
 import type { Classification } from './constants';
+import type { WorkflowTiming } from './workflow_task';
 
 /** What the batch task returns: one prediction per planned alert, in plan order. */
 export interface BatchOutput {
   predictions: Array<{ classification?: Classification }>;
   executionStatus: string;
+  /** Read by the trace-based evaluators. */
+  traceId?: string;
+  timing?: WorkflowTiming;
 }
 
 /** What the batch is graded against, in plan order (same index = same alert); `shapes` names the shape each alert was built from. */
@@ -32,16 +36,31 @@ const ratio = (hits: number, total: number, what: string): Score => ({
   explanation: `${hits}/${total} ${what}`,
 });
 
-const countWhere = (
+/** Alerts named per explanation; the rest collapse into "+N more" to keep result docs small. */
+const MAX_NAMED_ALERTS = 10;
+
+/**
+ * Batch alert ids embed a per-run uuid and are not in the expected output, so alerts are named
+ * `shape#index`: the index is the plan position, identical across runs and models.
+ */
+const nameAlerts = (indices: number[], shapes: string[]): string => {
+  const names = indices.slice(0, MAX_NAMED_ALERTS).map((i) => `${shapes[i]}#${i}`);
+  const rest = indices.length - names.length;
+  return rest > 0 ? `${names.join(', ')}, +${rest} more` : names.join(', ');
+};
+
+/** Plan positions of the alerts labeled `expected`, split by what the model returned for them. */
+const partitionByVerdict = (
   { predictions }: BatchOutput,
   { labels }: BatchExpected,
   expected: Classification,
-  predicted: (p: Classification | undefined) => boolean
-): { hits: number; total: number } => {
+  offending: Classification
+): { total: number; offending: number[]; missing: number[] } => {
   const indices = labels.flatMap((label, i) => (label === expected ? [i] : []));
   return {
-    hits: indices.filter((i) => predicted(predictions[i]?.classification)).length,
     total: indices.length,
+    offending: indices.filter((i) => predictions[i]?.classification === offending),
+    missing: indices.filter((i) => !predictions[i]?.classification),
   };
 };
 
@@ -84,31 +103,37 @@ const METRICS: Record<string, (output: BatchOutput, expected: BatchExpected) => 
   },
 
   // The dangerous error: a true positive marked false_positive would be closed as benign.
-  // 1 minus the share of true positives that were marked false_positive.
+  // 1 minus the share of true positives that were marked false_positive. A true positive with no
+  // verdict is not scored here (BatchCoverage and BatchAccuracy catch it) but is named apart, so
+  // a dropped verdict is not mistaken for a closed one.
   MaliciousNotClosed: (output, expected) => {
-    const { hits, total } = countWhere(
+    const { total, offending, missing } = partitionByVerdict(
       output,
       expected,
       'true_positive',
-      (p) => p === 'false_positive'
+      'false_positive'
     );
+    const closed = offending.length ? `: ${nameAlerts(offending, expected.shapes)}` : '';
+    const dropped = missing.length ? `; no verdict: ${nameAlerts(missing, expected.shapes)}` : '';
     return {
-      score: total === 0 ? null : 1 - hits / total,
-      explanation: `${hits}/${total} true positives marked false_positive`,
+      score: total === 0 ? null : 1 - offending.length / total,
+      explanation: `${offending.length}/${total} true positives marked false_positive${closed}${dropped}`,
     };
   },
 
   // Benign alerts escalated as true_positive: analyst noise, not a missed attack.
   BenignNotEscalated: (output, expected) => {
-    const { hits, total } = countWhere(
+    const { total, offending, missing } = partitionByVerdict(
       output,
       expected,
       'false_positive',
-      (p) => p === 'true_positive'
+      'true_positive'
     );
+    const escalated = offending.length ? `: ${nameAlerts(offending, expected.shapes)}` : '';
+    const dropped = missing.length ? `; no verdict: ${nameAlerts(missing, expected.shapes)}` : '';
     return {
-      score: total === 0 ? null : 1 - hits / total,
-      explanation: `${hits}/${total} false positives marked true_positive`,
+      score: total === 0 ? null : 1 - offending.length / total,
+      explanation: `${offending.length}/${total} false positives marked true_positive${escalated}${dropped}`,
     };
   },
 
