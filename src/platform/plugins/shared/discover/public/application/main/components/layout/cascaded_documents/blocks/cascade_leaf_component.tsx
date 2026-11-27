@@ -8,13 +8,14 @@
  */
 
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { EuiText } from '@elastic/eui';
+import { EuiText, type EuiDataGridCustomBodyProps } from '@elastic/eui';
 import {
   getRenderCustomToolbarWithElements,
   UnifiedDataTable,
   DataLoadingState,
   DataGridDensity,
   type UnifiedDataTableProps,
+  type UnifiedDataTableRenderCustomComparisonToolbar,
   type UnifiedDataTableRenderCustomToolbar,
 } from '@kbn/unified-data-table';
 import { type DataCascadeRowCellProps } from '@kbn/shared-ux-document-data-cascade';
@@ -66,6 +67,16 @@ const getMeasurementKey = (gridUiState?: GridUiState) =>
  * that allows for nested cascade virtualization that's compatible with the EUI Data Grid.
  */
 export const CustomCascadeGridBodyMemoized = React.memo(CustomCascadeGridBody);
+
+/**
+ * The grid body for the comparison of the selected documents of a group, rendered through the same
+ * connected virtualization.
+ */
+export const CustomCascadeComparisonGridBodyMemoized = React.memo(
+  function CustomCascadeComparisonGridBody(props: EuiDataGridCustomBodyProps) {
+    return <CustomCascadeGridBody {...props} view="comparison" />;
+  }
+);
 
 export const ESQLDataCascadeLeafCell = React.memo(
   ({
@@ -164,6 +175,21 @@ export const ESQLDataCascadeLeafCell = React.memo(
       []
     );
 
+    // The comparison grid's toolbar (diff mode, field list, exit) follows the same pattern, so its controls
+    // stay available in the sticky header while the comparison is scrolled through, and keep their state
+    // when they move between the header and the grid.
+    const comparisonToolbarPortalNode = useMemo(
+      () =>
+        createHtmlPortalNode({
+          attributes: {
+            ['data-test-subj']: cascadeToolbarPortalNodeTestSubjAttribute,
+          },
+        }),
+      []
+    );
+
+    const hasRenderedDocumentsRef = useRef(false);
+
     const focusedPortalElement = useRef<HTMLElement | null>(null);
     const onFullScreenChange = useCallback(
       (isFullScreen: boolean) => {
@@ -223,6 +249,17 @@ export const ESQLDataCascadeLeafCell = React.memo(
       [toolbarPortalNode, renderToolbarWithElements, stickyHeaderPortalTarget]
     );
 
+    const renderCustomComparisonToolbar =
+      useCallback<UnifiedDataTableRenderCustomComparisonToolbar>(
+        ({ toolbar }) => (
+          <>
+            <InPortal node={comparisonToolbarPortalNode}>{toolbar}</InPortal>
+            {stickyHeaderPortalTarget === null && <OutPortal node={comparisonToolbarPortalNode} />}
+          </>
+        ),
+        [comparisonToolbarPortalNode, stickyHeaderPortalTarget]
+      );
+
     const gridBodyContext = useMemo<CascadeGridBodyContextValue>(
       () => ({
         data: cellData,
@@ -231,6 +268,8 @@ export const ESQLDataCascadeLeafCell = React.memo(
         rowIndex,
         isFullScreenMode: isCellInFullScreenMode,
         toolbarPortalNode,
+        comparisonToolbarPortalNode,
+        hasRenderedDocumentsRef,
         headerPortalNode,
         stickyHeaderPortalTarget,
         stickyHeaderExtensionPoint,
@@ -244,6 +283,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
         rowIndex,
         isCellInFullScreenMode,
         toolbarPortalNode,
+        comparisonToolbarPortalNode,
         headerPortalNode,
         stickyHeaderPortalTarget,
         stickyHeaderExtensionPoint,
@@ -278,6 +318,8 @@ export const ESQLDataCascadeLeafCell = React.memo(
           renderDocumentView="external"
           setRenderDocumentViewMeta={setRenderDocumentViewMeta}
           renderCustomGridBody={CustomCascadeGridBodyMemoized}
+          renderCustomComparisonGridBody={CustomCascadeComparisonGridBodyMemoized}
+          renderCustomComparisonToolbar={renderCustomComparisonToolbar}
           onFullScreenChange={onFullScreenChange}
           externalCustomRenderers={externalCustomRenderers}
           isPaginationEnabled={false}

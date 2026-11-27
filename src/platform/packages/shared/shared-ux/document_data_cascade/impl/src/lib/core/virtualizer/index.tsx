@@ -45,23 +45,32 @@ const SCROLLING_KEYS = new Set(['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'H
 export const useCascadeVirtualizerRangeExtractor = <G extends GroupNode>({
   rows,
   enableStickyGroupHeader,
+  getRetainedRowIndexes,
 }: VirtualizerRangeExtractorArgs<G>) => {
   return useCallback<NonNullable<UseVirtualizerOptions['rangeExtractor']>>(
     (range) => {
-      if (!enableStickyGroupHeader) {
+      const retainedRowIndexes = (getRetainedRowIndexes?.() ?? []).filter(
+        (index) => index < range.count
+      );
+
+      if (!enableStickyGroupHeader && retainedRowIndexes.length === 0) {
         return defaultRangeExtractor(range);
       }
 
       // Calculate the sticky index to include in the render range
-      const activeStickyIndex = calculateActiveStickyIndex(rows, range.startIndex, true);
+      const activeStickyIndex = enableStickyGroupHeader
+        ? calculateActiveStickyIndex(rows, range.startIndex, true)
+        : null;
 
       const next = new Set(
-        [activeStickyIndex, ...defaultRangeExtractor(range)].filter(Number.isInteger) as number[]
+        [activeStickyIndex, ...retainedRowIndexes, ...defaultRangeExtractor(range)].filter(
+          Number.isInteger
+        ) as number[]
       );
 
       return Array.from(next).sort((a, b) => a - b);
     },
-    [rows, enableStickyGroupHeader]
+    [rows, enableStickyGroupHeader, getRetainedRowIndexes]
   );
 };
 
@@ -89,7 +98,17 @@ export const useCascadeVirtualizer = <G extends GroupNode>({
     })
   );
 
-  const rangeExtractor = useCascadeVirtualizerRangeExtractor({ rows, enableStickyGroupHeader });
+  // Rows whose connected child content has changed stay rendered until the root has measured them,
+  // since their size in the root is stale until then (see `getRowsAwaitingMeasurement`).
+  const getRetainedRowIndexes = useCallback(
+    () => childController.getRowsAwaitingMeasurement(),
+    [childController]
+  );
+  const rangeExtractor = useCascadeVirtualizerRangeExtractor({
+    rows,
+    enableStickyGroupHeader,
+    getRetainedRowIndexes,
+  });
   const getItemKey = useCallback((index: number) => rows[index].id, [rows]);
 
   const instance = useVirtualizer({
@@ -101,9 +120,11 @@ export const useCascadeVirtualizer = <G extends GroupNode>({
     measureElement(element, entry, virtualizer) {
       const index = virtualizer.indexFromElement(element);
       // A detached child is not in normal flow; retain its row's bounds so scrolling cannot unmount it.
-      return childController.isRowDetached(index)
-        ? virtualizer.measurementsCache[index]?.size ?? estimatedRowHeight
-        : measureElement(element, entry, virtualizer);
+      if (childController.isRowDetached(index)) {
+        return virtualizer.measurementsCache[index]?.size ?? estimatedRowHeight;
+      }
+      childController.markRowMeasured(index);
+      return measureElement(element, entry, virtualizer);
     },
     onChange(virtualizer) {
       childController.notifyRootChange();

@@ -40,6 +40,11 @@ export interface DataCascadeUISnapshot<
    * Empty when no children are connected.
    */
   connectedChildren: Readonly<Record<string, ConnectedChildState>>;
+  /**
+   * Scroll anchors of cells that are currently not connected (e.g. a view that was swapped out), kept so
+   * that they restore their position when they connect again.
+   */
+  retainedAnchors: Readonly<Record<string, number>>;
 }
 
 /**
@@ -82,4 +87,9 @@ export interface DataCascadeRestorableState {
     string,
     Pick<ConnectedChildState, 'cellId' | 'scrollAnchorItemIndex'> & { isConnected: boolean }
   >;
+  /**
+   * Scroll anchors of cells that had no connection when the state was captured; restored when the cells
+   * connect again.
+   */
+  retainedAnchors?: Record<string, number>;
 }

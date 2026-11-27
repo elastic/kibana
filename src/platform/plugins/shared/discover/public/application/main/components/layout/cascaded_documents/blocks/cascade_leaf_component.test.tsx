@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useSyncExternalStore } from 'react';
 import type { AggregateQuery } from '@kbn/es-query';
 import { BehaviorSubject } from 'rxjs';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -34,7 +34,11 @@ import {
   CascadedDocumentsProvider,
   type CascadedDocumentsContext,
 } from '../cascaded_documents_provider';
-import { ESQLDataCascadeLeafCell } from './cascade_leaf_component';
+import {
+  CustomCascadeComparisonGridBodyMemoized,
+  CustomCascadeGridBodyMemoized,
+  ESQLDataCascadeLeafCell,
+} from './cascade_leaf_component';
 import type { ESQLDataGroupNode } from './types';
 import {
   CascadedDocumentsFetcher,
@@ -239,6 +243,12 @@ describe('ESQLDataCascadeLeafCell', () => {
     expect(unifiedDataTableProps.rows).toEqual(cellData);
     expect(unifiedDataTableProps.dataSource).toBe(cascadedLeafDataSource);
     expect(unifiedDataTableProps.enableComparisonMode).toBe(true);
+    // stable body components, so that EUI never remounts the bodies
+    expect(unifiedDataTableProps.renderCustomGridBody).toBe(CustomCascadeGridBodyMemoized);
+    expect(unifiedDataTableProps.renderCustomComparisonGridBody).toBe(
+      CustomCascadeComparisonGridBodyMemoized
+    );
+    expect(unifiedDataTableProps.renderCustomComparisonToolbar).toEqual(expect.any(Function));
     expect(unifiedDataTableProps.isPaginationEnabled).toBe(false);
     expect(unifiedDataTableProps.paginationMode).toBe('infinite');
     expect(unifiedDataTableProps.renderDocumentView).toBe('external');
@@ -438,6 +448,157 @@ describe('ESQLDataCascadeLeafCell', () => {
       unifiedDataTableProps.scrollToCell!({ rowIndex: 7, columnIndex: 1, align: 'center' });
 
       expect(mockScrollToIndex).toHaveBeenCalledWith(7, { align: 'auto', behavior: 'auto' });
+    });
+  });
+  describe('comparison of the selected documents', () => {
+    type GridView = 'documents' | 'comparison';
+    type CascadeRootVirtualizer = NonNullable<
+      ReturnType<Parameters<typeof createChildVirtualizerController>[0]['getRootVirtualizer']>
+    >;
+
+    const toolbarProps = {
+      hasRoomForGridControls: true,
+      columnControl: null,
+      columnSortingControl: null,
+      keyboardShortcutsControl: null,
+      displayControl: null,
+      fullScreenControl: null,
+    };
+    const gridBodyProps = {
+      Cell: () => null,
+      visibleColumns: [],
+      visibleRowData: { startRow: 0, endRow: 0, visibleRowCount: 0 },
+      headerRow: <div data-test-subj="gridHeaderRow" />,
+      footerRow: null,
+      gridWidth: 800,
+      setCustomGridBodyProps: jest.fn(),
+    };
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+      mockScrollToIndex.mockClear();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    /**
+     * Renders the leaf with a `UnifiedDataTable` that mounts the toolbar and custom body of the given view,
+     * the way `EuiDataGrid` does.
+     */
+    const renderLeafWithGridParts = (initialView: GridView) => {
+      let view = initialView;
+      const listeners = new Set<() => void>();
+      const subscribe = (listener: () => void) => {
+        listeners.add(listener);
+        return () => listeners.delete(listener);
+      };
+      unifiedDataTableMock.mockImplementation((props) => {
+        const currentView = useSyncExternalStore(subscribe, () => view);
+        const BodyElement =
+          currentView === 'comparison'
+            ? props.renderCustomComparisonGridBody!
+            : props.renderCustomGridBody!;
+        return (
+          <div data-test-subj="gridRoot">
+            {currentView === 'comparison'
+              ? props.renderCustomComparisonToolbar!({
+                  toolbar: <div data-test-subj="comparisonToolbar" />,
+                  toolbarProps,
+                })
+              : props.renderCustomToolbar!({ toolbarProps, gridProps: {} })}
+            <BodyElement {...gridBodyProps} />
+          </div>
+        );
+      });
+
+      const rootVirtualizer = {
+        scrollOffset: 0,
+        scrollElement: document.createElement('div'),
+        measurementsCache: [],
+        cancelScroll: jest.fn(),
+      } as unknown as CascadeRootVirtualizer;
+      const virtualizerController = createChildVirtualizerController({
+        getRootVirtualizer: () => rootVirtualizer,
+      });
+      virtualizerController.markRootStable();
+
+      const extensionPointElement = document.createElement('div');
+      document.body.appendChild(extensionPointElement);
+      const services = createDiscoverServicesMock();
+      const { contextValue } = createContextValue({
+        currentOwner: cellId,
+        ownerBoundSetExpandedDoc: jest.fn(),
+        ownerBoundSetRenderDocumentViewMeta: jest.fn(),
+        services,
+      });
+      render(
+        renderLeafCellWithContext({
+          contextValue,
+          services,
+          virtualizerController,
+          stickyHeaderExtensionPoint: {
+            ...createStickyHeaderExtensionPoint(),
+            extensionPointElement,
+          },
+        }),
+        { wrapper: I18nProvider }
+      );
+      // the staggered activation of the mounted view
+      act(() => {
+        jest.advanceTimersByTime(16);
+      });
+
+      return {
+        extensionPointElement,
+        scrolledIntoView: () =>
+          mockScrollToIndex.mock.calls.some(
+            ([index, options]) => index === 0 && options?.align === 'start'
+          ),
+        showView: (nextView: GridView) => {
+          act(() => {
+            view = nextView;
+            listeners.forEach((listener) => listener());
+          });
+        },
+        cleanup: () => extensionPointElement.remove(),
+      };
+    };
+
+    it('renders the comparison toolbar and headers in the persistent inline host', () => {
+      const { extensionPointElement, showView, cleanup } = renderLeafWithGridParts('documents');
+      try {
+        showView('comparison');
+
+        expect(screen.getByTestId('discoverCascadeComparisonGridBody')).toBeInTheDocument();
+        expect(extensionPointElement).toContainElement(screen.getByTestId('comparisonToolbar'));
+        expect(extensionPointElement).toContainElement(screen.getByTestId('gridHeaderRow'));
+      } finally {
+        cleanup();
+      }
+    });
+
+    it('scrolls the group into view when the comparison replaces the documents', () => {
+      const { scrolledIntoView, showView, cleanup } = renderLeafWithGridParts('documents');
+      try {
+        expect(scrolledIntoView()).toBe(false);
+
+        showView('comparison');
+
+        expect(scrolledIntoView()).toBe(true);
+      } finally {
+        cleanup();
+      }
+    });
+
+    it('keeps the cascade scroll position when an active comparison is mounted again', () => {
+      const { scrolledIntoView, cleanup } = renderLeafWithGridParts('comparison');
+      try {
+        expect(scrolledIntoView()).toBe(false);
+      } finally {
+        cleanup();
+      }
     });
   });
 });

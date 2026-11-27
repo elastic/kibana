@@ -165,15 +165,16 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   }, []);
 
   const connectedChildrenPersistedAnchors = useMemo(() => {
-    if (!initialState?.connectedChildren) return undefined;
+    if (!initialState?.connectedChildren && !initialState?.retainedAnchors) return undefined;
 
-    return Object.entries(initialState.connectedChildren).reduce((acc, [cellId, child]) => {
+    const anchors: Record<string, number | null> = { ...initialState?.retainedAnchors };
+    for (const [cellId, child] of Object.entries(initialState?.connectedChildren ?? {})) {
       if (child.isConnected) {
-        acc[cellId] = child.scrollAnchorItemIndex;
+        anchors[cellId] = child.scrollAnchorItemIndex;
       }
-      return acc;
-    }, {} as Record<string, number | null>);
-  }, [initialState?.connectedChildren]);
+    }
+    return anchors;
+  }, [initialState?.connectedChildren, initialState?.retainedAnchors]);
 
   const [restorationTarget] = useState(() => {
     const row =

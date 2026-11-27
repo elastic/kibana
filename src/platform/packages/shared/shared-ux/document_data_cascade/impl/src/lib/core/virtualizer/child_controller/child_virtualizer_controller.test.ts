@@ -927,6 +927,75 @@ describe('ChildVirtualizerController', () => {
     });
   });
 
+  describe('alternate views of a row', () => {
+    beforeEach(() => {
+      controller.markRootStable();
+    });
+
+    it('activates a connection that replaces an activated one for the same row right away', () => {
+      const documents = controller.connect('cell-a', 2);
+      flushRaf();
+      expect(controller.shouldActivate('cell-a')).toBe(true);
+
+      controller.connect('cell-a/comparison', 2);
+      expect(controller.shouldActivate('cell-a/comparison')).toBe(true);
+
+      documents.disconnect();
+      expect(controller.shouldActivate('cell-a/comparison')).toBe(true);
+    });
+
+    it('restores the persisted position of a connection that replaces another one, with its offset', () => {
+      const documents = controller.connect('cell-a', 2);
+      documents.reportState({ scrollAnchorItemIndex: 12, scrollAnchorItemOffset: 24 });
+      const comparison = controller.connect('cell-a/comparison', 2);
+      documents.disconnect();
+
+      expect(controller.getPersistedAnchor('cell-a')).toBe(12);
+      expect(controller.getPersistedAnchorOffset('cell-a')).toBe(24);
+      expect(Object.fromEntries(controller.getRetainedAnchors())).toEqual({ 'cell-a': 12 });
+
+      controller.connect('cell-a', 2);
+      comparison.disconnect();
+      expect(controller.getRestoreAnchor('cell-a')).toBe(12);
+      expect(controller.getConnectedChildren().get('cell-a')?.scrollAnchorItemOffset).toBe(24);
+      // the cascade itself is not restoring
+      expect(controller.isRestoring).toBe(false);
+
+      controller.finishRestoration('cell-a');
+      expect(controller.getRestoreAnchor('cell-a')).toBeNull();
+    });
+
+    it('does not restore a returning connection that is not replacing another one', () => {
+      const documents = controller.connect('cell-a', 2);
+      documents.reportState({ scrollAnchorItemIndex: 12 });
+      documents.disconnect();
+
+      controller.connect('cell-a', 2);
+      expect(controller.getRestoreAnchor('cell-a')).toBeNull();
+    });
+
+    it('keeps a row awaiting the root measurement from connect or reattach until its last connection is gone', () => {
+      expect(controller.getRowsAwaitingMeasurement()).toEqual([]);
+      const documents = controller.connect('cell-a', 2);
+      expect(controller.getRowsAwaitingMeasurement()).toEqual([2]);
+      controller.markRowMeasured(2);
+      expect(controller.getRowsAwaitingMeasurement()).toEqual([]);
+
+      const comparison = controller.connect('cell-a/comparison', 2);
+      expect(controller.getRowsAwaitingMeasurement()).toEqual([2]);
+      documents.disconnect();
+      // the row still has an attached connection
+      expect(controller.getRowsAwaitingMeasurement()).toEqual([2]);
+      controller.markRowMeasured(2);
+
+      comparison.detachScrollElement();
+      comparison.reattachScrollElement();
+      expect(controller.getRowsAwaitingMeasurement()).toEqual([2]);
+      comparison.disconnect();
+      expect(controller.getRowsAwaitingMeasurement()).toEqual([]);
+    });
+  });
+
   describe('measurements', () => {
     it('isolates heights by cell, data and layout settings', () => {
       const rows = [{ id: 'row' }];
@@ -1007,6 +1076,7 @@ describe('ChildVirtualizerController', () => {
           totalSize: 0,
           totalItemCount: 0,
           scrollAnchorItemIndex: 0,
+          scrollAnchorItemOffset: null,
           isDetached: false,
           hasStabilized: false,
         });
