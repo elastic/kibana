@@ -148,10 +148,9 @@ import {
   validateOtlpSendingQueueSizes,
 } from './utils/managed_otlp';
 import {
-  assertPrivilegesInSpaces,
   assertCanManageDefaultSettings,
+  assertCanWriteSettingsObject,
 } from './security/assert_privileges_in_spaces';
-import { getAllSpaceIds } from './spaces/helpers';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 
@@ -842,15 +841,12 @@ class OutputService {
 
     validateFleetSavedObjectId(options?.id);
 
-    // Creating an output as the global default re-points every agent policy that relies on the
-    // default output, across every space. Outputs are space-agnostic, so require the caller to
-    // hold Fleet privileges in all spaces before letting a space-scoped grant seize the default.
     if (
       options?.request &&
       !options.fromPreconfiguration &&
       (output.is_default || output.is_default_monitoring)
     ) {
-      await this.assertCanManageDefaultOutput(options.request);
+      await assertCanManageDefaultSettings(options.request, 'output');
     }
 
     await this.assertOtlpOutputAllowed(output, esClient, soClient);
@@ -1257,75 +1253,33 @@ class OutputService {
     return outputSavedObjectToOutput(outputSO);
   }
 
-  /**
-   * Editing an output that is (or becomes) the global default re-points every agent policy that
-   * inherits the default. A policy with no explicit output inherits it, and every space — even one
-   * with no policies yet — resolves the default for enrollment, so the affected set is all spaces
-   * that currently exist. Require the caller to hold Fleet privileges in each of them, which still
-   * allows a caller scoped to exactly the spaces that exist while blocking one missing any space.
-   */
-  private async assertCanManageDefaultOutput(request: KibanaRequest) {
-    const security = appContextService.getSecurity();
-    if (!security || !security.authz.mode.useRbacForRequest(request)) {
-      return;
-    }
-    const { spaceIds, truncated } = await getAllSpaceIds();
-    if (truncated) {
-      throw new OutputUnauthorizedError(
-        `Unable to verify authorization to set a global default output: too many spaces to enumerate`
-      );
-    }
-    await assertCanManageDefaultSettings(request, 'output', spaceIds);
-  }
-
-  /**
-   * Fails closed unless the caller holds Fleet privileges in every space that has a policy
-   * using this output. Outputs are space-agnostic saved objects, so a caller granted Fleet
-   * access in a single space could otherwise mutate an output that policies in other spaces
-   * depend on (changing or deleting the global default redirects where those agents ship data).
-   */
-  private async assertOutputCrossSpacePrivileges(
-    id: string,
+  // Policies reference the public output id, which may differ from the saved-object id.
+  private assertCanWriteOutput(
+    output: Output,
     request: KibanaRequest,
-    action: 'update' | 'delete'
+    action: 'update' | 'delete',
+    isDefault = false
   ) {
-    const security = appContextService.getSecurity();
-    if (!security || !security.authz.mode.useRbacForRequest(request)) {
-      return;
-    }
-    // Collect agent-policy and package-policy spaces before any mutation.
-    // Fail closed if SO_SEARCH_LIMIT is hit.
-    const [agentPolicySpaces, packagePolicySpaces] = await Promise.all([
-      agentPolicyService.getSpacesForPoliciesUsingOutput(id),
-      packagePolicyService.getSpacesForPoliciesUsingOutput(id),
-    ]);
-    if (agentPolicySpaces.truncated || packagePolicySpaces.truncated) {
-      throw new OutputUnauthorizedError(
-        `Unable to verify ${action} authorization for output ${id}: too many agent policies to enumerate`
-      );
-    }
-    const errorMessage = `Insufficient privileges to ${action} output ${id}: it is used by agent policies in spaces you are not authorized to access`;
-    // Agent-policy spaces only need fleet-agent-policies-all.
-    // On delete, package-policy spaces also need integrations-all because removeOutputFromAll
-    // rewrites package policies. On update the package policies are not rewritten (only their
-    // parent agent policies are bumped), so integrations-all must not be required there — it
-    // would 403 a Settings admin who legitimately holds Agent policies: All in every space.
-    // Check the two space sets separately so integrations-all is only demanded where relevant.
-    const packagePolicyPrivileges =
-      action === 'delete'
-        ? ['integrations-all', 'fleet-agent-policies-all']
-        : ['fleet-agent-policies-all'];
-    await assertPrivilegesInSpaces({
+    return assertCanWriteSettingsObject({
       request,
-      spaceIds: agentPolicySpaces.spaceIds,
-      apiPrivileges: ['fleet-agent-policies-all'],
-      errorMessage,
-    });
-    await assertPrivilegesInSpaces({
-      request,
-      spaceIds: packagePolicySpaces.spaceIds,
-      apiPrivileges: packagePolicyPrivileges,
-      errorMessage,
+      objectType: 'output',
+      id: output.id,
+      action,
+      isDefault,
+      references: [
+        {
+          getSpaces: () => agentPolicyService.getSpacesForPoliciesUsingOutput(output.id),
+          apiPrivileges: ['fleet-agent-policies-all'],
+        },
+        {
+          getSpaces: () => packagePolicyService.getSpacesForPoliciesUsingOutput(output.id),
+          // Only delete rewrites package policies.
+          apiPrivileges:
+            action === 'delete'
+              ? ['integrations-all', 'fleet-agent-policies-all']
+              : ['fleet-agent-policies-all'],
+        },
+      ],
     });
   }
 
@@ -1356,9 +1310,7 @@ class OutputService {
     }
 
     if (request) {
-      // Use the resolved output id: the request may address the output by its saved-object id,
-      // but policies reference its public id, which is what the space lookups match against.
-      await this.assertOutputCrossSpacePrivileges(originalOutput.id, request, 'delete');
+      await this.assertCanWriteOutput(originalOutput, request, 'delete');
     }
 
     await packagePolicyService.removeOutputFromAll(
@@ -1419,21 +1371,18 @@ class OutputService {
     let secretsToDelete: SecretReference[] = [];
     const originalOutput = await this.get(id);
 
-    // Outputs are space-agnostic: verify cross-space authorization before mutating one that
-    // policies in other spaces rely on. Skipped for preconfiguration (kibana.yml is trusted).
     if (request && !fromPreconfiguration) {
-      // Use the resolved output id (policies reference the public id, not the saved-object id).
-      await this.assertOutputCrossSpacePrivileges(originalOutput.id, request, 'update');
-      // Editing an output that is (or becomes) the global default affects every policy that
-      // inherits the default, in all policy spaces — not only policies that reference it by id.
-      const affectsDefault =
-        originalOutput.is_default ||
-        originalOutput.is_default_monitoring ||
-        data.is_default ||
-        data.is_default_monitoring;
-      if (affectsDefault) {
-        await this.assertCanManageDefaultOutput(request);
-      }
+      await this.assertCanWriteOutput(
+        originalOutput,
+        request,
+        'update',
+        Boolean(
+          originalOutput.is_default ||
+            originalOutput.is_default_monitoring ||
+            data.is_default ||
+            data.is_default_monitoring
+        )
+      );
     }
 
     this._validateFieldsAreEditable(originalOutput, data, id, fromPreconfiguration);

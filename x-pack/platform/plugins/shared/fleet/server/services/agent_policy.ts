@@ -2479,8 +2479,7 @@ class AgentPolicyService {
       });
     const spaceIds = new Set<string>();
     for (const so of result.saved_objects) {
-      // A matched policy with no namespaces is space-agnostic (space awareness disabled): it spans
-      // every space, so it must map to ALL_SPACES to force a global privilege check, not be dropped.
+      // A legacy (space-agnostic) policy has no namespaces and applies to every space.
       if (!so.namespaces?.length) {
         spaceIds.add(ALL_SPACES_ID);
         continue;

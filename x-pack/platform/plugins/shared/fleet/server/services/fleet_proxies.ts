@@ -38,18 +38,12 @@ import { outputService } from './output';
 import { downloadSourceService } from './download_source';
 import { agentPolicyService } from './agent_policy';
 import { packagePolicyService } from './package_policy';
-import { assertPrivilegesInSpaces } from './security/assert_privileges_in_spaces';
-import { getAllSpaceIds } from './spaces/helpers';
+import {
+  assertCanManageDefaultSettings,
+  assertPrivilegesInSpaces,
+} from './security/assert_privileges_in_spaces';
 
-/**
- * Proxies are space-agnostic and are referenced by outputs, Fleet Server hosts and download
- * sources (themselves space-agnostic). Mutating or deleting a proxy redirects traffic for every
- * agent policy that uses one of those objects, across every space. Fail closed unless the caller
- * holds Fleet privileges in all of those spaces.
- *
- * Takes the already-fetched related objects so the caller authorizes against the exact same set it
- * then mutates (no second lookup that could race), and fails closed when that set is incomplete.
- */
+/** Authorizes a proxy write against the spaces of every policy using its related objects. */
 async function assertProxyCrossSpacePrivileges(
   request: KibanaRequest,
   proxyId: string,
@@ -65,14 +59,14 @@ async function assertProxyCrossSpacePrivileges(
       `Unable to verify authorization for proxy ${proxyId}: too many related settings objects to enumerate`
     );
   }
-  // If any related object is itself a global default, policies that inherit the default (and
-  // never reference the object by id) are affected too, in every space. Pull in all spaces for
-  // that case rather than only the explicitly-referencing policies.
-  const relatedDefault =
+  if (
     outputs.some((o) => o.is_default || o.is_default_monitoring) ||
     fleetServerHosts.some((h) => h.is_default) ||
-    downloadSources.some((d) => d.is_default);
-  const lookups: Array<() => Promise<{ spaceIds: Set<string>; truncated: boolean }>> = [
+    downloadSources.some((d) => d.is_default)
+  ) {
+    return assertCanManageDefaultSettings(request, 'proxy');
+  }
+  const lookups = [
     ...outputs.flatMap((o) => [
       () => agentPolicyService.getSpacesForPoliciesUsingOutput(o.id),
       () => packagePolicyService.getSpacesForPoliciesUsingOutput(o.id),
@@ -83,10 +77,7 @@ async function assertProxyCrossSpacePrivileges(
     ...downloadSources.map(
       (d) => () => agentPolicyService.getSpacesForPoliciesUsingDownloadSource(d.id)
     ),
-    ...(relatedDefault ? [() => getAllSpaceIds()] : []),
   ];
-  // Bound concurrency: a proxy shared by many settings objects would otherwise start every
-  // cross-space policy search at once. Matches the limit used by the policy-bump path.
   const results = await pMap(lookups, (lookup) => lookup(), {
     concurrency: MAX_CONCURRENT_FLEET_PROXIES_OPERATIONS,
   });
@@ -223,8 +214,7 @@ export async function deleteFleetProxy(
     throw new FleetProxyUnauthorizedError(`Cannot delete ${id} preconfigured proxy`);
   }
 
-  // Read the related objects once and authorize against that exact set, then detach the same set,
-  // so a reference added between an authorization read and the detach cannot slip through.
+  // Authorize and detach the same set of related objects.
   const related = await getFleetProxyRelatedSavedObjects(id);
   const { outputs, fleetServerHosts, downloadSources } = related;
 
@@ -360,8 +350,6 @@ export async function getFleetProxyRelatedSavedObjects(proxyId: string) {
     downloadSourceService.listAllForProxyId(proxyId),
   ]);
 
-  // True when any related-object listing was capped: the set of settings objects using the proxy
-  // is then incomplete, so callers that authorize against it must fail closed.
   const truncated =
     fleetServerHosts.length < fleetServerHostsTotal ||
     outputs.length < outputsTotal ||

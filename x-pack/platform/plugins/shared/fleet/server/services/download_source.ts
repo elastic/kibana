@@ -46,10 +46,9 @@ import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
 import { escapeSearchQueryPhrase } from './saved_object';
 import {
-  assertPrivilegesInSpaces,
   assertCanManageDefaultSettings,
+  assertCanWriteSettingsObject,
 } from './security/assert_privileges_in_spaces';
-import { getAllSpaceIds } from './spaces/helpers';
 import { getFleetProxy } from './fleet_proxies';
 import {
   extractAndWriteDownloadSourcesSecrets,
@@ -88,23 +87,25 @@ export function savedObjectToDownloadSource(so: SavedObject<DownloadSourceSOAttr
   };
 }
 
-/**
- * Editing a download source that is (or becomes) the global default re-points every agent policy
- * that inherits the default. Every space resolves the default for enrollment, so the affected set
- * is all spaces that currently exist; require the caller to hold Fleet privileges in each of them.
- */
-async function assertCanManageDefaultDownloadSource(request: KibanaRequest) {
-  const security = appContextService.getSecurity();
-  if (!security || !security.authz.mode.useRbacForRequest(request)) {
-    return;
-  }
-  const { spaceIds, truncated } = await getAllSpaceIds();
-  if (truncated) {
-    throw new DownloadSourceError(
-      `Unable to verify authorization to set a global default download source: too many spaces to enumerate`
-    );
-  }
-  await assertCanManageDefaultSettings(request, 'download source', spaceIds);
+function assertCanWriteDownloadSource(
+  request: KibanaRequest,
+  id: string,
+  action: 'update' | 'delete',
+  isDefault = false
+) {
+  return assertCanWriteSettingsObject({
+    request,
+    objectType: 'download source',
+    id,
+    action,
+    isDefault,
+    references: [
+      {
+        getSpaces: () => agentPolicyService.getSpacesForPoliciesUsingDownloadSource(id),
+        apiPrivileges: ['fleet-agent-policies-all'],
+      },
+    ],
+  });
 }
 
 class DownloadSourceService {
@@ -164,17 +165,15 @@ class DownloadSourceService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     downloadSource: DownloadSourceBase,
-    options?: { id?: string; overwrite?: boolean; fromPreconfiguration?: boolean; request?: KibanaRequest }
+    options?: { id?: string; overwrite?: boolean; request?: KibanaRequest }
   ): Promise<DownloadSource> {
     const logger = appContextService.getLogger();
     logger.debug(`Creating new download source`);
 
     validateFleetSavedObjectId(options?.id);
 
-    // Setting a global default download source re-points agent policies in every space.
-    // Download sources are space-agnostic, so require Fleet privileges in all spaces.
-    if (options?.request && !options.fromPreconfiguration && downloadSource.is_default) {
-      await assertCanManageDefaultDownloadSource(options.request);
+    if (options?.request && downloadSource.is_default) {
+      await assertCanManageDefaultSettings(options.request, 'download source');
     }
     if (options?.id === DEFAULT_DOWNLOAD_SOURCE_REFERENCE) {
       throw new DownloadSourceError(
@@ -290,7 +289,7 @@ class DownloadSourceService {
     esClient: ElasticsearchClient,
     id: string,
     newData: Partial<DownloadSource> & { auth?: DownloadSource['auth'] | null },
-    options?: { fromPreconfiguration?: boolean; request?: KibanaRequest }
+    options?: { request?: KibanaRequest }
   ) {
     let secretsToDelete: SecretReference[] = [];
 
@@ -299,30 +298,13 @@ class DownloadSourceService {
 
     const originalItem = await this.get(id);
 
-    // Download sources are space-agnostic: verify cross-space authorization before mutating one
-    // that policies in other spaces rely on. Skipped for preconfiguration (kibana.yml is trusted).
-    if (options?.request && !options.fromPreconfiguration) {
-      const security = appContextService.getSecurity();
-      if (security && security.authz.mode.useRbacForRequest(options.request)) {
-        const { spaceIds, truncated } =
-          await agentPolicyService.getSpacesForPoliciesUsingDownloadSource(id);
-        if (truncated) {
-          throw new DownloadSourceError(
-            `Unable to verify update authorization for download source ${id}: too many agent policies to enumerate`
-          );
-        }
-        await assertPrivilegesInSpaces({
-          request: options.request,
-          spaceIds,
-          apiPrivileges: ['fleet-agent-policies-all'],
-          errorMessage: `Insufficient privileges to update download source ${id}: it is used by agent policies in spaces you are not authorized to access`,
-        });
-        // Editing a download source that is (or becomes) the global default affects every policy
-        // that inherits the default, in all policy spaces — not only policies that reference it.
-        if (originalItem.is_default || newData.is_default) {
-          await assertCanManageDefaultDownloadSource(options.request);
-        }
-      }
+    if (options?.request) {
+      await assertCanWriteDownloadSource(
+        options.request,
+        id,
+        'update',
+        Boolean(originalItem.is_default || newData.is_default)
+      );
     }
     const updateData: Partial<DownloadSourceSOAttributes> = {
       ...omit(newData, ['ssl', 'auth', 'secrets', 'id']),
@@ -518,22 +500,7 @@ class DownloadSourceService {
     }
 
     if (options?.request) {
-      const security = appContextService.getSecurity();
-      if (security && security.authz.mode.useRbacForRequest(options.request)) {
-        const { spaceIds, truncated } =
-          await agentPolicyService.getSpacesForPoliciesUsingDownloadSource(id);
-        if (truncated) {
-          throw new DownloadSourceError(
-            `Unable to verify delete authorization for download source ${id}: too many agent policies to enumerate`
-          );
-        }
-        await assertPrivilegesInSpaces({
-          request: options.request,
-          spaceIds,
-          apiPrivileges: ['fleet-agent-policies-all'],
-          errorMessage: `Insufficient privileges to delete download source ${id}: it is used by agent policies in spaces you are not authorized to access`,
-        });
-      }
+      await assertCanWriteDownloadSource(options.request, id, 'delete');
     }
 
     await agentPolicyService.removeDefaultSourceFromAll(

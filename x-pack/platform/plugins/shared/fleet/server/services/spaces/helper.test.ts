@@ -9,7 +9,11 @@ import type { Settings } from '../../types';
 import { appContextService } from '../app_context';
 import { getSettingsOrUndefined } from '../settings';
 
-import { isSpaceAwarenessEnabled, isSpaceAwarenessMigrationPending, getAllSpaceIds } from './helpers';
+import {
+  isSpaceAwarenessEnabled,
+  isSpaceAwarenessMigrationPending,
+  getAllSpaceIds,
+} from './helpers';
 
 jest.mock('../app_context');
 jest.mock('../settings');

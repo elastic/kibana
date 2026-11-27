@@ -87,21 +87,7 @@ export function getValidSpaceId(spacedIds?: string[]) {
   return space && space !== ALL_SPACES_ID ? space : DEFAULT_SPACE_ID;
 }
 
-/**
- * Returns the ids of every space that currently exists. Used to authorize changes to a global
- * default of a space-agnostic settings object: every space (even one with no agent policies) has
- * enrollment settings that resolve the default Fleet Server host and download source, so a global
- * default change affects all of them. The caller must hold Fleet privileges in each.
- *
- * When space awareness is enabled, the real `space` objects are listed so a caller scoped to
- * exactly the spaces that exist (e.g. only the default space in a deployment that has just that
- * space) is allowed, rather than being forced through a global-only check.
- *
- * When space awareness is disabled, agent policies are space-agnostic (global), so a default
- * change affects them globally and a global privilege grant is required — represented by `*`. This
- * matches how the per-reference lookups treat an agnostic policy, and such deployments only grant
- * the Fleet privilege across all spaces anyway. Fails closed (`truncated: true`) if capped.
- */
+/** Ids of all existing spaces, or `*` (global) when space awareness is not enabled. */
 export async function getAllSpaceIds(): Promise<{ spaceIds: Set<string>; truncated: boolean }> {
   if (!(await isSpaceAwarenessEnabled())) {
     return { spaceIds: new Set([ALL_SPACES_ID]), truncated: false };
@@ -116,8 +102,7 @@ export async function getAllSpaceIds(): Promise<{ spaceIds: Set<string>; truncat
   for (const so of result.saved_objects) {
     spaceIds.add(so.id);
   }
-  // Fail closed to a global check if no space could be listed, rather than passing an empty set
-  // (which would skip the privilege check entirely).
+  // An empty set would skip the privilege check, so fail closed to a global check.
   if (spaceIds.size === 0) {
     spaceIds.add(ALL_SPACES_ID);
   }

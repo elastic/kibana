@@ -2333,7 +2333,9 @@ describe('Agent policy', () => {
         soClient
       );
 
-      const { spaceIds } = await agentPolicyService.getSpacesForPoliciesUsingOutput('output-id-123');
+      const { spaceIds } = await agentPolicyService.getSpacesForPoliciesUsingOutput(
+        'output-id-123'
+      );
 
       expect(spaceIds).toEqual(new Set(['default', 'space-a']));
     });

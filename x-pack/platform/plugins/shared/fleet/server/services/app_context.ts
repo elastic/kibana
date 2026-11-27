@@ -243,10 +243,7 @@ class AppContextService {
     });
   }
 
-  /**
-   * Internal client that can read the `space` saved object type (hidden, owned by the spaces
-   * plugin), so Fleet can enumerate every space for cross-space authorization of global defaults.
-   */
+  /** Internal client that can list the hidden `space` saved object type. */
   public getInternalUserSOClientForSpaces() {
     // soClient as kibana internal users, be careful on how you use it, security is not enabled
     return appContextService.getSavedObjects().getUnsafeInternalClient({
