@@ -1,0 +1,22 @@
+{
+  "type": "plugin",
+  "id": "@kbn/connector-catalog-epr-plugin",
+  "owner": [
+    "@elastic/response-ops"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "description": "PoC: fetches connector spec YAML files from the Elastic Package Registry with plain HTTP, without the Fleet plugin, and registers them through the actions connector catalog.",
+  "plugin": {
+    "id": "connectorCatalogEpr",
+    "browser": false,
+    "server": true,
+    "requiredPlugins": [
+      "actions"
+    ],
+    "configPath": [
+      "xpack",
+      "connectorCatalogEpr"
+    ]
+  }
+}

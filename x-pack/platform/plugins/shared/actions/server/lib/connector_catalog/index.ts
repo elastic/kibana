@@ -23,6 +23,7 @@ export type {
   CatalogActionType,
   CatalogDefinitionRef,
   CatalogRequestOptions,
+  ConnectorCatalogSource,
   ConnectorCatalogStorage,
   StoredCatalogAsset,
   StoredCatalogDefinition,

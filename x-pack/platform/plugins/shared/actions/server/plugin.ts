@@ -147,6 +147,7 @@ import {
   createConnectorCatalogStorage,
   startConnectorCatalog,
   type ConnectorCatalogHandle,
+  type ConnectorCatalogSource,
 } from './lib/connector_catalog';
 
 export interface PluginSetupContract {
@@ -205,6 +206,12 @@ export interface PluginSetupContract {
    * Throws if an emitter is already registered (exactly one emitter is supported).
    */
   registerConnectorEventEmitter(emitter: ConnectorEventEmitter): void;
+
+  /**
+   * Replaces the Elasticsearch catalog storage for the first catalog load.
+   * Throws if a source is already registered (one source per process).
+   */
+  registerConnectorCatalogSource(source: ConnectorCatalogSource): void;
 }
 
 export interface PluginStartContract {
@@ -339,6 +346,7 @@ export class ActionsPlugin
   private connectorUsageReportingTask: ConnectorUsageReportingTask | undefined;
   private connectorLifecycleListeners: ConnectorLifecycleListener[] = [];
   private connectorEventEmitter?: ConnectorEventEmitter;
+  private connectorCatalogSource?: ConnectorCatalogSource;
   /** Topics registered in setup when inbound events are enabled. `start` installs the publisher only when this is set. */
   private connectorEventTopicsByEventId?: ReturnType<typeof registerConnectorEventTopics>;
   private skippedPreconfiguredConnectorIds: Set<string> = new Set();
@@ -651,6 +659,14 @@ export class ActionsPlugin
           );
         }
         this.connectorEventEmitter = emitter;
+      },
+      registerConnectorCatalogSource: (source: ConnectorCatalogSource) => {
+        if (this.connectorCatalogSource !== undefined) {
+          throw new Error(
+            'A connector catalog source is already registered; only one source is supported.'
+          );
+        }
+        this.connectorCatalogSource = source;
       },
     };
     // Kept for start(): catalog types are built with the same setup helpers that stack_connectors uses.
@@ -1253,10 +1269,12 @@ export class ActionsPlugin
     const isEnabled = this.actionsConfig.catalog.enabled;
     const handle = startConnectorCatalog({
       isEnabled,
-      storage: createConnectorCatalogStorage({
-        esClient: core.elasticsearch.client.asInternalUser,
-        logger,
-      }),
+      storage:
+        this.connectorCatalogSource ??
+        createConnectorCatalogStorage({
+          esClient: core.elasticsearch.client.asInternalUser,
+          logger,
+        }),
       actionTypeRegistry: actionTypeRegistry!,
       buildType: (definition) => {
         if (!setupContract) {

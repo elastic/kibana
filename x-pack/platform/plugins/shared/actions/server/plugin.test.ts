@@ -1147,6 +1147,60 @@ describe('Actions Plugin', () => {
           expect(getTypeIds(pluginStart)).not.toContain(SPEC_TYPE_ID);
         });
       });
+
+      describe('catalog source', () => {
+        const createSource = () => ({
+          getManifest: jest.fn().mockResolvedValue({
+            raw: JSON.stringify({ connectors: [{ id: SPEC_TYPE_ID, version: '1.1.0' }] }),
+          }),
+          getDefinitions: jest.fn().mockResolvedValue([
+            {
+              connectorId: SPEC_TYPE_ID,
+              version: '1.1.0',
+              yaml: loadFixture('abuseipdb-1.1.0.yaml'),
+              contentHash: 'sha256:abuseipdb',
+              catalogVersion: '2026.11.1',
+            },
+          ]),
+        });
+
+        it('reads the registered source instead of Elasticsearch', async () => {
+          const source = createSource();
+          const setupContract = await setupPlugin();
+          setupContract.registerConnectorCatalogSource(source);
+
+          const pluginStart = plugin.start(coreStart, pluginsStart);
+          await pluginStart.whenCatalogReady();
+
+          expect(source.getManifest).toHaveBeenCalledTimes(1);
+          expect(source.getDefinitions).toHaveBeenCalledTimes(1);
+          expect(getEsClient().get).not.toHaveBeenCalled();
+          expect(getEsClient().mget).not.toHaveBeenCalled();
+          expect(getTypeIds(pluginStart)).toContain(SPEC_TYPE_ID);
+        });
+
+        it('throws when a second source is registered', async () => {
+          const setupContract = await setupPlugin();
+          setupContract.registerConnectorCatalogSource(createSource());
+
+          expect(() => setupContract.registerConnectorCatalogSource(createSource())).toThrow(
+            'A connector catalog source is already registered; only one source is supported.'
+          );
+        });
+
+        it('does not call the source when the catalog config is off', async () => {
+          const source = createSource();
+          const setupContract = await setupPlugin(undefined, { catalogEnabled: false });
+          setupContract.registerConnectorCatalogSource(source);
+
+          const pluginStart = plugin.start(coreStart, pluginsStart);
+          await pluginStart.whenCatalogReady();
+
+          expect(source.getManifest).not.toHaveBeenCalled();
+          expect(source.getDefinitions).not.toHaveBeenCalled();
+          expect(getTypeIds(pluginStart)).not.toContain(SPEC_TYPE_ID);
+        });
+      });
     });
 
     describe('getActionsClientWithRequest()', () => {
