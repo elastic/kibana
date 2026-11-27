@@ -147,6 +147,7 @@ export {
   buildAlertEvent,
   buildCreateRuleData,
   buildCreateActionPolicyData,
+  buildCreateExternalSourceData,
   buildWorkflowYaml,
 } from '../../builders';
 export * as testData from '../../constants';

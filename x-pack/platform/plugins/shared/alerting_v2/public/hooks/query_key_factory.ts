@@ -9,6 +9,7 @@ import type { WorkflowsSearchParams } from '@kbn/workflows';
 import type { PolicyExecutionOutcomeFilter } from '@kbn/alerting-v2-schemas';
 import type { ListRuleExecutionsUiParams } from './use_fetch_rule_executions';
 import type { MatchRulesUiParams } from './use_fetch_matching_rules';
+import type { FindImportsUiParams } from './use_fetch_imports';
 
 export const ruleKeys = {
   all: ['rule'] as const,
@@ -120,5 +121,6 @@ export const userProfileKeys = {
 
 export const importKeys = {
   all: ['import'] as const,
-  list: () => [...importKeys.all, 'list'] as const,
+  lists: () => [...importKeys.all, 'list'] as const,
+  list: (params: FindImportsUiParams) => [...importKeys.lists(), params] as const,
 };

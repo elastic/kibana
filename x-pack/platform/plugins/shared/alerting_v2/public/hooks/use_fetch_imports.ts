@@ -9,51 +9,84 @@ import { useQuery } from '@kbn/react-query';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
+import { ALERTING_V2_INTERNAL_EXTERNAL_SOURCE_API_PATH } from '@kbn/alerting-v2-constants';
+import type {
+  FindExternalSourcesRequest,
+  FindExternalSourcesResponse,
+  FindExternalSourcesSortField,
+} from '@kbn/alerting-v2-schemas';
+import { assertAllFieldsMapped, type Complete } from '../mapper_types';
 import { importKeys } from './query_key_factory';
 
-const CONNECTORS_API_PATH = '/api/actions/connectors';
-const CUSTOM_WEBHOOK_CONNECTOR_TYPE_ID = '.inboundWebhook';
-
-/** The fields of `GET /api/actions/connectors` that the imports list reads. */
-interface ConnectorResponse {
-  id: string;
-  name: string;
-  connector_type_id: string;
-  is_inbound_events_enabled?: boolean;
+export interface FindImportsUiParams {
+  page: number;
+  perPage: number;
+  search?: string;
+  sortField?: FindExternalSourcesSortField;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface ImportListItem {
-  connectorId: string;
+  id: string;
   name: string;
-  connectorTypeId: string;
+  type: string;
+  connectorId: string;
 }
 
-/**
- * Returns the connectors that receive inbound events in the current space, except custom
- * webhooks. The connectors API cannot filter, so every connector is fetched and filtered here.
- */
-export const fetchImports = async (http: HttpStart): Promise<ImportListItem[]> => {
-  const connectors = await http.get<ConnectorResponse[]>(CONNECTORS_API_PATH);
-  return connectors
-    .filter(
-      ({ connector_type_id: connectorTypeId, is_inbound_events_enabled: isInboundEventsEnabled }) =>
-        isInboundEventsEnabled === true && connectorTypeId !== CUSTOM_WEBHOOK_CONNECTOR_TYPE_ID
-    )
-    .map(({ id, name, connector_type_id: connectorTypeId }) => ({
-      connectorId: id,
-      name,
-      connectorTypeId,
-    }));
+export interface ImportsPage {
+  items: ImportListItem[];
+  total: number;
+}
+
+export const toFindExternalSourcesRequest = ({
+  page,
+  perPage,
+  search,
+  sortField,
+  sortOrder,
+  ...rest
+}: FindImportsUiParams): Complete<FindExternalSourcesRequest> => {
+  assertAllFieldsMapped(rest);
+  return {
+    page,
+    per_page: perPage,
+    search,
+    sort_field: sortField,
+    sort_order: sortOrder,
+    connector_id: undefined,
+    type: undefined,
+  };
 };
 
-/** Loads the imports of the current space: its non-webhook connectors that receive events. */
-export const useFetchImports = () => {
+/** Returns one page of the external sources of the current space from the external source list API. */
+export const fetchImports = async (
+  http: HttpStart,
+  params: FindImportsUiParams
+): Promise<ImportsPage> => {
+  const { items, total } = await http.get<FindExternalSourcesResponse>(
+    ALERTING_V2_INTERNAL_EXTERNAL_SOURCE_API_PATH,
+    { query: toFindExternalSourcesRequest(params) }
+  );
+  return {
+    items: items.map(({ id, type, metadata, connector_id: connectorId }) => ({
+      id,
+      name: metadata.name,
+      type,
+      connectorId,
+    })),
+    total,
+  };
+};
+
+/** Loads one page of the imports of the current space, searched and sorted on the server. */
+export const useFetchImports = (params: FindImportsUiParams) => {
   const http = useService(CoreStart('http'));
   const { toasts } = useService(CoreStart('notifications'));
 
-  return useQuery<ImportListItem[], Error>({
-    queryKey: importKeys.list(),
-    queryFn: () => fetchImports(http),
+  return useQuery<ImportsPage, Error>({
+    queryKey: importKeys.list(params),
+    queryFn: () => fetchImports(http, params),
+    keepPreviousData: true,
     refetchOnWindowFocus: false,
     onError: (error: Error) => {
       toasts.addError(error, {
