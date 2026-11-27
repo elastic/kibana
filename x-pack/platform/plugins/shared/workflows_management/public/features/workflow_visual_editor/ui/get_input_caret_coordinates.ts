@@ -19,39 +19,39 @@ export interface InputCaretCoordinates {
  */
 const MIRROR_STYLE_PROPS = [
   'direction',
-  'boxSizing',
+  'box-sizing',
   'width',
   'height',
-  'overflowX',
-  'overflowY',
-  'borderTopWidth',
-  'borderRightWidth',
-  'borderBottomWidth',
-  'borderLeftWidth',
-  'borderStyle',
-  'paddingTop',
-  'paddingRight',
-  'paddingBottom',
-  'paddingLeft',
-  'fontStyle',
-  'fontVariant',
-  'fontWeight',
-  'fontStretch',
-  'fontSize',
-  'fontSizeAdjust',
-  'lineHeight',
-  'fontFamily',
-  'textAlign',
-  'textTransform',
-  'textIndent',
-  'textDecoration',
-  'letterSpacing',
-  'wordSpacing',
-  'tabSize',
-  'MozTabSize',
-  'whiteSpace',
-  'wordBreak',
-  'wordWrap',
+  'overflow-x',
+  'overflow-y',
+  'border-top-width',
+  'border-right-width',
+  'border-bottom-width',
+  'border-left-width',
+  'border-style',
+  'padding-top',
+  'padding-right',
+  'padding-bottom',
+  'padding-left',
+  'font-style',
+  'font-variant',
+  'font-weight',
+  'font-stretch',
+  'font-size',
+  'font-size-adjust',
+  'line-height',
+  'font-family',
+  'text-align',
+  'text-transform',
+  'text-indent',
+  'text-decoration',
+  'letter-spacing',
+  'word-spacing',
+  'tab-size',
+  '-moz-tab-size',
+  'white-space',
+  'word-break',
+  'word-wrap',
 ] as const;
 
 /**
@@ -80,10 +80,7 @@ export function getInputCaretCoordinates(
   }
 
   for (const prop of MIRROR_STYLE_PROPS) {
-    // Style declaration keys match the camelCase list above.
-    (mirror.style as unknown as Record<string, string>)[prop] = computed[
-      prop as keyof CSSStyleDeclaration
-    ] as string;
+    mirror.style.setProperty(prop, computed.getPropertyValue(prop));
   }
 
   mirror.textContent = element.value.substring(0, position);

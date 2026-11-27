@@ -77,7 +77,7 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
   );
 
   const { colors } = euiTheme;
-  // TODO: switch to xxs when available
+  // `xs` is the smallest shadow size EUI offers.
   const nodeShadow = useEuiShadow('xs', { border: 'none' });
   const displayLabel = deslugifyStepName(label);
   const targetHandlePos = node.targetPosition ?? Position.Top;

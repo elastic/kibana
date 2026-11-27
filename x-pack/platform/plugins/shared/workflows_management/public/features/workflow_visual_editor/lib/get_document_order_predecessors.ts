@@ -27,8 +27,8 @@ const isFallbackSlot = ({ kind }: StepChildSlot): boolean =>
  * they may have run. Steps inside an `on-failure` or `iteration-on-failure` fallback keep the
  * body of the step that failed. Used by the data-reference picker Steps group.
  *
- * TODO: extend for foreach.item and branch-local context so nested
- * scope matches runtime availability, not only document order.
+ * Known limit: this is document order only. It does not model `foreach.item` or branch-local
+ * context, so nested scope can differ from what the runtime makes available.
  */
 export const getDocumentOrderPredecessors = (
   steps: ReadonlyArray<unknown> | undefined,

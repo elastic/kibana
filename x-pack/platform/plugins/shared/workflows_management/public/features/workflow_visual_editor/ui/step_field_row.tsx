@@ -692,7 +692,7 @@ export function StepFieldRow({
               isInvalid={isInvalid}
               onBlur={accuseIfInvalid}
               onDraftErrorChange={setDraftError}
-              // TODO: ES|QL keeps its specialized editor — no expand here.
+              // ES|QL keeps its specialized editor, so there is no expand sub-flyout.
               onExpand={field.language === 'esql' ? undefined : onExpand}
               fixedOnly={fixedOnly}
             />

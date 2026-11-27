@@ -153,7 +153,7 @@ const resolveOutputSchema = (
   if (connector?.outputSchema) {
     return connector.outputSchema as z.ZodType;
   }
-  // TODO: output schemas — many actions lack declared outputs.
+  // Many actions declare no output schema.
   return z.unknown();
 };
 
@@ -388,7 +388,7 @@ const buildStepEntities = (
 
     let children: DataReferenceItem[];
     if (isOpaqueSchema(outputSchema)) {
-      // TODO: output schemas — opaque insertable object until catalog fills shapes.
+      // An action without a declared output shape is offered as one opaque, insertable object.
       children = [
         pathLeafItem({
           path: outputPath,

@@ -76,6 +76,6 @@ export function resolveCatalogDisplayName(input: CatalogDisplayNameInput): strin
     if (candidate) return candidate;
   }
 
-  // TODO: missing display names — content task for the action-registry owner
+  // An action without a registered display name falls back to its prettified type.
   return prettifyStepTypeDisplayName(type);
 }

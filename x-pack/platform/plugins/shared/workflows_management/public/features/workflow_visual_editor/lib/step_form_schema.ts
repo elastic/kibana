@@ -1090,13 +1090,13 @@ export const validateStepField = (field: StepFormField, value: unknown): string 
   }
 
   if (field.kind === 'boolean' && typeof value !== 'boolean' && !isReference) {
-    // TODO: surface schema-specific boolean messages when a zod issue code is available
+    // The message is generic: the zod issue code carries nothing more specific for a boolean.
     return i18n.translate('workflows.stepConfigPanel.validation.invalidValue', {
       defaultMessage: 'Invalid value',
     });
   }
 
-  // TODO: pattern / format messages when StepFormField carries schema constraints
+  // No pattern / format messages: StepFormField does not carry the schema's constraints.
 
   return undefined;
 };

@@ -85,8 +85,7 @@ type ParametersMode = 'form' | 'yaml';
 
 /**
  * Write JSON-Schema-shaped `inputs` onto the trigger fragment.
- * // TODO: confirm inputs schema shape — `required` is a parent-level
- * array; required means the caller must supply a non-empty value.
+ * `required` is a parent-level array (JSON Schema), not a per-property flag.
  */
 const writeManualInputs = (
   fragment: string,
@@ -99,7 +98,6 @@ const writeManualInputs = (
   if (named.length === 0) {
     doc.contents.delete('inputs');
   } else {
-    // TODO: confirm inputs schema shape
     doc.set('inputs', doc.createNode(schemaPropertiesToJsonSchema(named)));
   }
   return doc.toString({ indent, lineWidth: 0 });

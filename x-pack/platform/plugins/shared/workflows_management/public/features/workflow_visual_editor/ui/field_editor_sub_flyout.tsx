@@ -396,8 +396,8 @@ export function FieldEditorSubFlyout({
                 // Prefer a text caret over the default DnD pointer while hovering
                 // the editor — reinforces the insertion-point affordance.
                 cursor: isDragOver ? 'text' : undefined,
-                // TODO: needs last-run execution data — reserve a third
-                // pane here later without reflowing the tree + editor.
+                // Room for a third pane (last-run execution data) later, without reflowing the
+                // tree + editor.
               }}
             >
               <div

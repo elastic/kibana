@@ -17,7 +17,7 @@
  */
 export function stepSupportsErrorHandling(stepType: string | undefined): boolean {
   if (!stepType) return false;
-  // Flow-control / composite — deferred with the canvas error-port TODO.
+  // Flow-control / composite: not offered yet (see the TODO above).
   if (
     stepType === 'if' ||
     stepType === 'foreach' ||

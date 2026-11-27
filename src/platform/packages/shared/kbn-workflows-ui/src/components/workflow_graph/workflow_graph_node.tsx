@@ -205,7 +205,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
   } = node.data;
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
-  // TODO: switch to xxs when available
+  // `xs` is the smallest shadow size EUI offers.
   // Keep the panel on Border Plain; the shadow mixin otherwise overlays a subdued ring in dark mode.
   const nodeShadow = useEuiShadow('xs', { border: 'none' });
   const isTriggerNode = isTrigger || TRIGGER_STEP_TYPES.has(stepType);
