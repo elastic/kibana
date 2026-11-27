@@ -8,12 +8,14 @@
 import type { ConversationRound, ToolCallStep } from '@kbn/agent-builder-common';
 import {
   ToolResultType,
+  isAskUserQuestionStep,
   isDeliveredMessageStep,
   isInterimAnswerStep,
   isReasoningStep,
   isToolCallStep,
 } from '@kbn/agent-builder-common';
 import type { SessionEventInput } from '@kbn/context-engine-plugin/server';
+import { materializeAskUserQuestionToolCall } from '../../services/execution/run_agent/utils/ask_user_question_tool_call';
 
 type ToolSessionEvent = Extract<SessionEventInput, { type: 'tool' }>;
 
@@ -34,6 +36,36 @@ export const roundToSessionEvents = (round: ConversationRound): SessionEventInpu
   const base = { turn_id: round.id, event_at: round.started_at };
   const events: SessionEventInput[] = [];
 
+  const pushToolCall = ({
+    toolCallId,
+    toolName,
+    args,
+    result,
+    status,
+  }: {
+    toolCallId: string;
+    toolName: string;
+    args: unknown;
+    result: unknown;
+    status: ToolSessionEvent['status'];
+  }) => {
+    events.push({
+      ...base,
+      id: `${round.id}:tool_call:${toolCallId}`,
+      type: 'assistant',
+      tool_calls: [{ id: toolCallId, name: toolName, args: toJson(args) }],
+    });
+    events.push({
+      ...base,
+      id: `${round.id}:tool:${toolCallId}`,
+      type: 'tool',
+      tool_call_id: toolCallId,
+      tool_name: toolName,
+      result: toJson(result),
+      status,
+    });
+  };
+
   if (round.input.message) {
     events.push({ ...base, id: `${round.id}:user`, type: 'user', content: round.input.message });
   }
@@ -49,21 +81,27 @@ export const roundToSessionEvents = (round: ConversationRound): SessionEventInpu
       return;
     }
     if (isToolCallStep(step)) {
-      const { tool_call_id: toolCallId, tool_id: toolId, params, results } = step;
-      events.push({
-        ...base,
-        id: `${round.id}:tool_call:${toolCallId}`,
-        type: 'assistant',
-        tool_calls: [{ id: toolCallId, name: toolId, args: toJson(params) }],
-      });
-      events.push({
-        ...base,
-        id: `${round.id}:tool:${toolCallId}`,
-        type: 'tool',
-        tool_call_id: toolCallId,
-        tool_name: toolId,
-        result: toJson(results),
+      pushToolCall({
+        toolCallId: step.tool_call_id,
+        toolName: step.tool_id,
+        args: step.params,
+        result: step.results,
         status: toolStatus(step),
+      });
+      return;
+    }
+    if (isAskUserQuestionStep(step) && step.answers !== undefined) {
+      const { toolCallId, toolName, args, content } = materializeAskUserQuestionToolCall({
+        promptId: step.prompt_id,
+        questions: step.questions,
+        answers: step.answers,
+      });
+      pushToolCall({
+        toolCallId,
+        toolName,
+        args,
+        result: JSON.parse(content),
+        status: 'successful',
       });
       return;
     }

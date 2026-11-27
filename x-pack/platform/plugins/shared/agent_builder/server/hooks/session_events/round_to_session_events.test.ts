@@ -21,6 +21,7 @@ import {
   createInterimAnswerStep,
   createModelReasoningStep,
   createRelevantSkillsStep,
+  internalTools,
 } from '@kbn/agent-builder-common';
 import { roundToSessionEvents } from './round_to_session_events';
 
@@ -171,10 +172,72 @@ describe('roundToSessionEvents', () => {
       })
     );
 
-    expect(call).toHaveProperty('tool_calls', [
-      { id: 'call-1', name: 'platform.core.search', args: { query: 'logs' } },
-    ]);
-    expect(result).toHaveProperty('result', [okResult]);
+    expect(call).toStrictEqual({
+      ...base,
+      seq: 1,
+      id: 'round-1:tool_call:call-1',
+      type: 'assistant',
+      tool_calls: [{ id: 'call-1', name: 'platform.core.search', args: { query: 'logs' } }],
+    });
+    expect(result).toStrictEqual({
+      ...base,
+      seq: 2,
+      id: 'round-1:tool:call-1',
+      type: 'tool',
+      tool_call_id: 'call-1',
+      tool_name: 'platform.core.search',
+      result: [okResult],
+      status: 'successful',
+    });
+  });
+
+  it('maps an answered question to a tool call and the reply of the user', () => {
+    const question = {
+      question: 'Which index?',
+      options: [{ label: 'logs' }, { label: 'metrics' }],
+      multi_select: false,
+    };
+    const events = roundToSessionEvents(
+      createRound({
+        steps: [
+          createAskUserQuestionStep({
+            prompt_id: 'prompt-1',
+            questions: [question],
+            answers: [{ custom: 'The audit one' }],
+          }),
+        ],
+      })
+    );
+
+    expect(events).toEqual(
+      withSeq([
+        userEvent,
+        {
+          ...base,
+          id: 'round-1:tool_call:prompt-1',
+          type: 'assistant',
+          tool_calls: [
+            {
+              id: 'prompt-1',
+              name: internalTools.askUserQuestion,
+              args: { questions: [question] },
+            },
+          ],
+        },
+        {
+          ...base,
+          id: 'round-1:tool:prompt-1',
+          type: 'tool',
+          tool_call_id: 'prompt-1',
+          tool_name: internalTools.askUserQuestion,
+          result: {
+            answers: [{ question: 'Which index?', selected_options: [], custom: 'The audit one' }],
+          },
+          status: 'successful',
+        },
+        answerEvent,
+      ])
+    );
   });
 
   it('maps a reasoning step and skips transient and empty ones', () => {
