@@ -111,6 +111,15 @@ export class DiscoverPlugin
   ): DiscoverSetup {
     const baseUrl = core.http.basePath.prepend('/app/discover');
 
+    // Lazy-load via @kbn/change-history-ui/telemetry to avoid pulling React UI into page-load bundle.
+    void import('@kbn/change-history-ui/telemetry')
+      .then(({ registerChangeHistoryTelemetryEvents }) => {
+        registerChangeHistoryTelemetryEvents(core.analytics);
+      })
+      .catch(() => {
+        // Telemetry registration must not break plugin setup.
+      });
+
     if (plugins.share) {
       const useHash = core.uiSettings.get('state:storeInSessionStorage');
 

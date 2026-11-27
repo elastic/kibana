@@ -15,6 +15,17 @@ import {
 } from '@kbn/core/server';
 import { SavedSearchType, type StoredDiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
+import { recordSessionChange } from '../change_history/utils';
+
+interface HistoryOptions {
+  /** The history version restored by this write. */
+  restoredFrom?: number;
+}
+
+interface UpdateHistoryOptions extends HistoryOptions {
+  /** The session as it was before the update, when the caller already read it. */
+  previousSession?: SavedObject<DiscoverSessionAttributes>;
+}
 
 /** Resolves a session and returns the headers needed for alias redirects and conflicts. */
 export const resolveStoredDiscoverSession = async (
@@ -71,14 +82,19 @@ export const getStoredDiscoverSession = async (
 export const createStoredDiscoverSession = async (
   requestContext: RequestHandlerContext,
   { attributes, references }: StoredDiscoverSession,
-  id?: string
+  id?: string,
+  { restoredFrom }: HistoryOptions = {}
 ): Promise<SavedObject<DiscoverSessionAttributes>> => {
   const { core } = await requestContext.resolve(['core']);
 
-  return core.savedObjects.client.create<DiscoverSessionAttributes>(SavedSearchType, attributes, {
-    id,
-    references,
-  });
+  const created = await core.savedObjects.client.create<DiscoverSessionAttributes>(
+    SavedSearchType,
+    attributes,
+    { id, references }
+  );
+  await recordSessionChange({ requestContext, type: 'create', session: created, restoredFrom });
+
+  return created;
 };
 
 /**
@@ -88,9 +104,12 @@ export const createStoredDiscoverSession = async (
 export const updateStoredDiscoverSession = async (
   requestContext: RequestHandlerContext,
   id: string,
-  { attributes, references }: StoredDiscoverSession
+  { attributes, references }: StoredDiscoverSession,
+  { restoredFrom, previousSession }: UpdateHistoryOptions = {}
 ): Promise<SavedObject<DiscoverSessionAttributes>> => {
   const { core } = await requestContext.resolve(['core']);
+
+  const previous = previousSession ? undefined : await getStoredDiscoverSession(requestContext, id);
 
   await core.savedObjects.client.update<DiscoverSessionAttributes>(
     SavedSearchType,
@@ -99,7 +118,19 @@ export const updateStoredDiscoverSession = async (
     { references, mergeAttributes: false }
   );
 
-  return core.savedObjects.client.get<DiscoverSessionAttributes>(SavedSearchType, id);
+  const updated = await core.savedObjects.client.get<DiscoverSessionAttributes>(
+    SavedSearchType,
+    id
+  );
+  await recordSessionChange({
+    requestContext,
+    type: 'update',
+    session: updated,
+    previousSession: previousSession ?? previous,
+    restoredFrom,
+  });
+
+  return updated;
 };
 
 /**
@@ -117,6 +148,7 @@ export const deleteStoredDiscoverSession = async (
   );
 
   await core.savedObjects.client.delete(SavedSearchType, id);
+  await recordSessionChange({ requestContext, type: 'delete', session: savedObject });
 
   return savedObject;
 };

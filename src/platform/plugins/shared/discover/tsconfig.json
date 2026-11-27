@@ -176,7 +176,9 @@
     "@kbn/core-http-browser",
     "@kbn/core-http-browser-mocks",
     "@kbn/discover-session-constants",
-    "@kbn/esql-browser"
+    "@kbn/esql-browser",
+    "@kbn/change-history",
+    "@kbn/change-history-ui"
   ],
   "exclude": ["target/**/*"]
 }

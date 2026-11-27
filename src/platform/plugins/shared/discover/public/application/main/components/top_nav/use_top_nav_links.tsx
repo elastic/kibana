@@ -25,6 +25,7 @@ import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import useObservable from 'react-use/lib/useObservable';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { useI18n } from '@kbn/i18n-react';
+import { useChangeHistoryModal } from '@kbn/change-history-ui';
 import {
   isAlertingV2AvailableInSolution,
   shouldShowAlertingV2CreateRuleFlyout,
@@ -41,6 +42,7 @@ import {
   getOpenSearchAppMenuItem,
   getShareAppMenuItem,
   getInspectAppMenuItem,
+  getHistoryAppMenuItem,
   getBackgroundSearchFlyout,
   enhanceAppMenuItemWithRunAction,
 } from './app_menu_actions';
@@ -98,6 +100,7 @@ export const useTopNavLinks = ({
   onOpenSaveAsModal,
 }: UseTopNavLinksParams): UseTopNavLinksResult => {
   const intl = useI18n();
+  const { openModal: openChangeHistory } = useChangeHistoryModal();
   const dispatch = useInternalStateDispatch();
   const getState = useInternalStateGetState();
   const subscribe = useInternalStateSubscribe();
@@ -294,6 +297,10 @@ export const useTopNavLinks = ({
       });
     }
 
+    if (persistedDiscoverSession?.id && !services.embeddableEditor.isEmbeddedEditor()) {
+      items.push(getHistoryAppMenuItem({ onOpenHistory: openChangeHistory }));
+    }
+
     items.push(getInspectAppMenuItem({ onOpenInspector: openInspector }));
 
     const firstTabScopedMenuItem = items
@@ -326,6 +333,7 @@ export const useTopNavLinks = ({
     isDataViewMode,
     openInspector,
     persistedDiscoverSession,
+    openChangeHistory,
     hasUnsavedChanges,
     totalHitsState,
     intl,

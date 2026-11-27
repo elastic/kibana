@@ -46,10 +46,15 @@ export const upsertDiscoverSession = async (
     return { body: toApiResponse(created), operation: 'create' };
   }
 
-  const updated = await updateStoredDiscoverSession(requestContext, id, {
-    attributes: assignStoredInlineDataViewIds(attributes, existing.attributes),
-    references,
-  });
+  const updated = await updateStoredDiscoverSession(
+    requestContext,
+    id,
+    {
+      attributes: assignStoredInlineDataViewIds(attributes, existing.attributes),
+      references,
+    },
+    { previousSession: existing }
+  );
 
   return { body: toApiResponse(updated), operation: 'update' };
 };
