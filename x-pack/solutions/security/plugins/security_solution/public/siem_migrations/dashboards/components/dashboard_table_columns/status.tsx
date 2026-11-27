@@ -9,10 +9,13 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiHorizontalRule, EuiText } from '@elastic/eui';
 import type { DashboardMigrationDashboard } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
-import { MigrationTranslationResult } from '../../../../../common/siem_migrations/constants';
+import {
+  MigrationTranslationResult,
+  SiemMigrationStatus,
+} from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
 import type { TableColumn } from './constants';
-import { StatusBadge } from '../status_badge';
+import { StatusBadge } from '../../../common/components/status_badge';
 import { TableHeader } from '../../../common/components';
 import { convertTranslationResultIntoText } from '../../../common/utils/translation_results';
 
@@ -61,7 +64,10 @@ export const createStatusColumn = (): TableColumn => {
     render: (_, dashboard: DashboardMigrationDashboard) => (
       <StatusBadge
         data-test-subj={`translationStatus-${dashboard.translation_result ?? dashboard.status}`}
-        dashboard={dashboard}
+        isInstalled={!!dashboard.elastic_dashboard?.id}
+        isFailed={dashboard.status === SiemMigrationStatus.FAILED}
+        translationResult={dashboard.translation_result}
+        failedMessage={dashboard.comments?.[0]?.message}
       />
     ),
     sortable: true,

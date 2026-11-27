@@ -85,17 +85,22 @@ describe('StatusBadge', () => {
       expect(screen.getByText('Not translated')).toBeInTheDocument();
     });
 
-    it('should show the result in a tooltip', async () => {
-      renderBadge({ translationResult: 'partial' });
+    it.each([
+      ['full', 'Translated'],
+      ['partial', 'Partially translated'],
+      ['untranslatable', 'Not translated'],
+    ] as const)(
+      'should show the %s result in a tooltip as "%s"',
+      async (translationResult, label) => {
+        renderBadge({ translationResult });
 
-      hoverBadge();
+        hoverBadge();
 
-      await waitFor(() =>
-        expect(screen.getByTestId('translationStatusTooltip')).toHaveTextContent(
-          'Partially translated'
-        )
-      );
-    });
+        await waitFor(() =>
+          expect(screen.getByTestId('translationStatusTooltip')).toHaveTextContent(label)
+        );
+      }
+    );
 
     it('should use the given test subject on the badge', () => {
       renderBadge({ translationResult: 'full', 'data-test-subj': 'translationStatus-full' });

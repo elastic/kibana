@@ -8,11 +8,14 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiHorizontalRule, EuiText } from '@elastic/eui';
-import { MigrationTranslationResult } from '../../../../../common/siem_migrations/constants';
+import {
+  MigrationTranslationResult,
+  SiemMigrationStatus,
+} from '../../../../../common/siem_migrations/constants';
 import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 import type { TableColumn } from './constants';
-import { StatusBadge } from '../status_badge';
+import { StatusBadge } from '../../../common/components/status_badge';
 import { TableHeader } from '../../../common/components';
 import { convertTranslationResultIntoText } from '../../../common/utils';
 
@@ -61,7 +64,10 @@ export const createStatusColumn = (): TableColumn => {
     render: (_, rule: RuleMigrationRule) => (
       <StatusBadge
         data-test-subj={`translationStatus-${rule.translation_result ?? rule.status}`}
-        migrationRule={rule}
+        isInstalled={!!rule.elastic_rule?.id}
+        isFailed={rule.status === SiemMigrationStatus.FAILED}
+        translationResult={rule.translation_result}
+        failedMessage={rule.comments?.[0]?.message}
       />
     ),
     sortable: true,
