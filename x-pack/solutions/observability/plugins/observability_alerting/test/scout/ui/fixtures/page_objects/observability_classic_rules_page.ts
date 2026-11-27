@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header/test_subjects';
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
 import { OBSERVABILITY_ALERTING_BASE_PATH } from '@kbn/deeplinks-observability';
 import { OBSERVABILITY_ALERTING_RULES_V1_PATH } from '../../../../../public/constants';

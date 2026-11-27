@@ -26,7 +26,6 @@
     "@kbn/repo-info",
     "@kbn/es",
     "@kbn/data-views-plugin",
-    "@kbn/test-jest-helpers"
   ],
   "exclude": [
     "target/**/*",

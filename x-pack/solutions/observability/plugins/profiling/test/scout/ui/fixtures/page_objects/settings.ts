@@ -6,7 +6,7 @@
  */
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header/test_subjects';
 import { EXTENDED_TIMEOUT } from '..';
 
 export class ProfilingSettingsPage {

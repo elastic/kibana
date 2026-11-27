@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { PROJECT_ROUTING } from '@kbn/cps-utils';
+import { PROJECT_ROUTING } from '@kbn/cps-common';
 import type { KbnClient } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';

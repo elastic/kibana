@@ -31,7 +31,6 @@ dependsOn:
   - '@kbn/repo-info'
   - '@kbn/es'
   - '@kbn/data-views-plugin'
-  - '@kbn/test-jest-helpers'
 tags:
   - test-helper
   - package

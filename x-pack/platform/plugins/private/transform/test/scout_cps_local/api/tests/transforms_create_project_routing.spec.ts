@@ -8,7 +8,7 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { MOCK_IDP_UIAM_PROJECT_ID2 } from '@kbn/mock-idp-utils';
-import { PROJECT_ROUTING } from '@kbn/cps-utils';
+import { PROJECT_ROUTING } from '@kbn/cps-common';
 import type { CookieHeader } from '@kbn/scout';
 import type { TransformApiService } from '../../../scout/api/services/transform_api_service';
 import {

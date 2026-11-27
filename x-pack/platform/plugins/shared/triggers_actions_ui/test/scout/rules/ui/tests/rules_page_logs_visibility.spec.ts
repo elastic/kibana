@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header/test_subjects';
 import { expect } from '@kbn/scout/ui';
 import { test, ACTIONS_ONLY_ROLE, RULES_V1_AND_V2_READ_ROLE } from '../fixtures';
 import { setAlertingV2Enabled } from '../../../common/ui/fixtures/alerting_v2_setting';

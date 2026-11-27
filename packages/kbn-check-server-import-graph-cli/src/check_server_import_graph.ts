@@ -10,17 +10,12 @@
 import Fs from 'fs';
 import Path from 'path';
 
-import { ImportLocator } from '@kbn/import-locator';
 import { ImportResolver } from '@kbn/import-resolver';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getPackages } from '@kbn/repo-packages';
 import type { ToolingLog } from '@kbn/tooling-log';
 
-import {
-  walkServerImportGraph,
-  type ImportTarget,
-  type Violation,
-} from './walk_server_import_graph';
+import { checkImportGraph } from './check_import_graph';
 
 /**
  * Node modules that must never be loaded by the Kibana server. Matched against the resolved node
@@ -38,8 +33,6 @@ export const BANNED_NODE_MODULES: ReadonlySet<string> = new Set([
   '@reduxjs/toolkit',
   'redux-toolkit-v1',
 ]);
-
-const relative = (absolute: string): string => Path.relative(REPO_ROOT, absolute);
 
 /** Every plugin `server/index.ts` plus `@kbn/core/server`. */
 const findEntryPaths = (resolver: ImportResolver): string[] => {
@@ -61,30 +54,6 @@ const findEntryPaths = (resolver: ImportResolver): string[] => {
   return entries;
 };
 
-const reportViolations = (log: ToolingLog, violations: Violation[]): void => {
-  log.error(
-    `${violations.length} banned import(s) are reachable from the Kibana server entry points:`
-  );
-  for (const { importer, nodeModule, request, chain } of violations) {
-    log.write('');
-    log.write(
-      `  ${relative(importer)} imports ${nodeModule} (\`${request}\`) and is loaded by the server:`
-    );
-    chain.forEach((file, index) => {
-      log.write(`    ${'  '.repeat(index)}${index === 0 ? '' : '→ '}${relative(file)}`);
-    });
-  }
-  log.write('');
-  log.write(
-    '  Fix: move the browser-only code out of the module the server imports, for example out of a ' +
-      '`common/` or package barrel into a module that only browser code imports.'
-  );
-  log.write(
-    '  Type-only usage is fine as long as it is spelled `import type`. Lazy `import()` does not help: ' +
-      'the walk follows it, because server code should not load these packages at all.'
-  );
-};
-
 export interface CheckOptions {
   log: ToolingLog;
   /** Absolute paths to start from instead of every server entry point in the repo. */
@@ -103,39 +72,17 @@ export const checkServerImportGraph = async ({
   bannedNodeModules = BANNED_NODE_MODULES,
 }: CheckOptions): Promise<boolean> => {
   const resolver = ImportResolver.create(REPO_ROOT);
-  const locator = new ImportLocator({ ignoreTypeOnly: true });
-  const entryPaths = entryPathsOverride ?? findEntryPaths(resolver);
-
-  const getImports = (file: string): ImportTarget[] => {
-    const targets: ImportTarget[] = [];
-    for (const request of locator.get(file, Fs.readFileSync(file, 'utf8'))) {
-      const result = resolver.resolve(request, Path.dirname(file));
-      if (result?.type !== 'file') {
-        continue;
-      }
-      targets.push(
-        result.nodeModule && !resolver.isRepoPkg(result.nodeModule)
-          ? { request, kind: 'node_module', name: result.nodeModule }
-          : { request, kind: 'source', absolute: result.absolute }
-      );
-    }
-    return targets;
-  };
-
-  const { violations, fileCount } = walkServerImportGraph({
-    entryPaths,
-    getImports,
+  return checkImportGraph({
+    log,
+    resolver,
+    entryPaths: entryPathsOverride ?? findEntryPaths(resolver),
     bannedNodeModules,
+    runtime: 'server',
+    fix: [
+      'Fix: move the browser-only code out of the module the server imports, for example out of a ' +
+        '`common/` or package barrel into a module that only browser code imports.',
+      'Type-only usage is fine as long as it is spelled `import type`. Lazy `import()` does not help: ' +
+        'the walk follows it, because server code should not load these packages at all.',
+    ],
   });
-
-  if (violations.length > 0) {
-    reportViolations(log, violations);
-    return false;
-  }
-
-  log.success(
-    `${fileCount} source files reachable from ${entryPaths.length} server entry points; ` +
-      `no imports of ${[...bannedNodeModules].join(', ')}`
-  );
-  return true;
 };

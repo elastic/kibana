@@ -9,7 +9,7 @@
 
 import { test, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header/test_subjects';
 import { ES_ARCHIVE, KBN_ARCHIVE } from '../constants';
 
 test.describe('Kibana Overview - Page Header', { tag: tags.stateful.classic }, () => {

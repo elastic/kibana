@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header/test_subjects';
 import type { Locator, ScoutPage } from '@kbn/scout';
 
 const LICENSE_MANAGEMENT_APP_PATH = 'management/stack/license_management';

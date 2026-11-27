@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header/test_subjects';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export function CrossClusterReplicationPageProvider({ getService }: FtrProviderContext) {
