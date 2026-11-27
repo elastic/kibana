@@ -88,14 +88,35 @@ describe('GcsFileSystem updateArchive', () => {
     superUpdateArchive.mockRestore();
   });
 
-  it('skips the upload when the commit archive already exists', async () => {
-    mockExeca.mockResolvedValue({});
+  const commitPath = 'gs://ci-typescript-archives/ts_type_check/commits/abc';
+
+  it('skips the upload when the commit archive and its metadata already exist', async () => {
+    mockExeca.mockResolvedValue({ stdout: '{"commitSha":"abc"}' });
 
     await new GcsFileSystem(createLog()).updateArchive({ files: ['a.d.ts'], sha: 'abc' });
 
     expect(mockExeca).toHaveBeenCalledWith(
       'gcloud',
-      ['storage', 'ls', 'gs://ci-typescript-archives/ts_type_check/commits/abc/archive.tar.gz'],
+      ['storage', 'ls', `${commitPath}/archive.tar.gz`],
+      expect.anything()
+    );
+    expect(mockExeca.mock.calls.map(([, [, action]]) => action)).not.toContain('cp');
+    expect(superUpdateArchive).not.toHaveBeenCalled();
+  });
+
+  it('writes only the missing metadata when an earlier upload stopped after the archive', async () => {
+    mockExeca.mockImplementation(async (_command: string, [, action]: string[]) => {
+      if (action === 'cat') {
+        throw new Error('not found');
+      }
+      return {};
+    });
+
+    await new GcsFileSystem(createLog()).updateArchive({ files: ['a.d.ts'], sha: 'abc' });
+
+    expect(mockExeca).toHaveBeenCalledWith(
+      'gcloud',
+      ['storage', 'cp', expect.any(String), `${commitPath}/metadata.json`],
       expect.anything()
     );
     expect(superUpdateArchive).not.toHaveBeenCalled();
