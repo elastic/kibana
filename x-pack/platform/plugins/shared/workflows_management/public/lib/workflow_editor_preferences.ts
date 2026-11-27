@@ -21,9 +21,20 @@ export const getStoredEditorView = (): WorkflowEditorView | undefined => {
   return value === 'graph' || value === 'yaml' ? value : undefined;
 };
 
-/** Persists the current editor view to localStorage. */
+const editorViewListeners = new Set<() => void>();
+
+/** Calls `listener` whenever the stored editor view is changed from this page; returns the unsubscribe. */
+export const subscribeToStoredEditorView = (listener: () => void): (() => void) => {
+  editorViewListeners.add(listener);
+  return () => {
+    editorViewListeners.delete(listener);
+  };
+};
+
+/** Persists the current editor view to localStorage and tells everyone showing it. */
 export const setStoredEditorView = (view: WorkflowEditorView): void => {
   storage.set(EDITOR_VIEW_KEY, view);
+  editorViewListeners.forEach((listener) => listener());
 };
 
 /** Returns the last-persisted graph direction, or `undefined` when unset / invalid. */

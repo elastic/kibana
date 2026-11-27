@@ -116,4 +116,29 @@ steps:
 
     expect(result).toContain('enabled: false'); // Uses enabledValue, not workflow.enabled
   });
+
+  it('removes the description key when set to empty string', () => {
+    const yaml = 'name: Test\ndescription: Keep me\nsteps: []';
+    const result = updateWorkflowYamlFields(yaml, { description: '' });
+
+    expect(result).not.toContain('description');
+    expect(result).toContain('name: Test');
+  });
+
+  it('writes an empty tags array when tags are cleared', () => {
+    const yaml = 'name: Test\ntags:\n  - alpha\nsteps: []';
+    const result = updateWorkflowYamlFields(yaml, { tags: [] });
+
+    expect(result).toMatch(/tags: \[\]/);
+    expect(result).not.toContain('alpha');
+    expect(result).toContain('name: Test');
+  });
+
+  it('removing an empty description keeps the rest of the YAML byte for byte', () => {
+    const longMessage = 'word '.repeat(40).trim();
+    const rest = `name: Test\nsteps:\n    - name: a\n      type: console\n      with:\n          message: ${longMessage}\n`;
+    const yaml = `description: Keep me\n${rest}`;
+
+    expect(updateWorkflowYamlFields(yaml, { description: '' })).toBe(rest);
+  });
 });

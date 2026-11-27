@@ -10,7 +10,10 @@ import type { WorkflowYaml } from '@kbn/workflows';
 import { isGraphBuildError, WorkflowGraph } from '@kbn/workflows/graph';
 import { parseWorkflowYamlForAutocomplete } from '@kbn/workflows-yaml';
 import { buildWorkflowLookup } from './build_workflow_lookup';
-import { correctYamlSyntax } from '../../../../../../common/lib/yaml';
+import {
+  correctYamlSyntax,
+  getMultiLineScalarContinuationLines,
+} from '../../../../../../common/lib/yaml';
 import type { ComputedData, GraphBuildErrorInfo } from '../types';
 
 export const performComputation = (
@@ -34,8 +37,12 @@ export const performComputation = (
   const lineCounter = new LineCounter();
   const yamlDoc = YAML.parseDocument(yamlString, { lineCounter, keepSourceTokens: true });
 
-  // use corrected yaml for schema parsing
-  const correctedYamlString = correctYamlSyntax(yamlString);
+  // use corrected yaml for schema parsing; the text of a multi-line scalar is content, so the
+  // line-based correction must not read its lines as `key: value`
+  const correctedYamlString = correctYamlSyntax(
+    yamlString,
+    getMultiLineScalarContinuationLines(yamlDoc, lineCounter)
+  );
   // Build workflow lookup
   const lookup = buildWorkflowLookup(yamlDoc, lineCounter);
 

@@ -29,6 +29,7 @@ export {
   SCHEDULED_INTERVAL_ERROR,
   SCHEDULED_INTERVAL_PATTERN,
 } from './scheduled_trigger_schema';
+export { timezoneNames } from './timezone_names';
 
 export const TriggerSchema = lazySchema(() =>
   z.discriminatedUnion('type', [
