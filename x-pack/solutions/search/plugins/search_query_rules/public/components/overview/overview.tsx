@@ -10,7 +10,11 @@ import React, { useMemo, useState } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderMenu } from '@kbn/app-header';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_TITLE } from '../../../common';
@@ -19,8 +23,6 @@ import { useFetchQueryRulesSets } from '../../hooks/use_fetch_query_rules_sets';
 import { EmptyPrompt } from '../empty_prompt/empty_prompt';
 import { ErrorPrompt } from '../error_prompt/error_prompt';
 import { isPermissionError } from '../../utils/query_rules_utils';
-import queryRulesBackground from '../../assets/query-rule-background.svg';
-import queryRulesBackgroundDark from '../../assets/query-rule-background-dark.svg';
 import { QueryRulesSets } from '../query_rules_sets/query_rules_sets';
 import { CreateRulesetModal } from './create_ruleset_modal';
 
@@ -31,7 +33,6 @@ import { useQueryRulesBreadcrumbs } from '../../hooks/use_query_rules_breadcrumb
 
 export const QueryRulesOverview = () => {
   const usageTracker = useUsageTracker();
-  const { colorMode } = useEuiTheme();
   useQueryRulesBreadcrumbs();
 
   const { data: queryRulesData, isInitialLoading, isError, error } = useFetchQueryRulesSets();
@@ -55,19 +56,6 @@ export const QueryRulesOverview = () => {
     [usageTracker]
   );
 
-  const backgroundProps = css({
-    backgroundImage: `url(${
-      colorMode === 'DARK' ? queryRulesBackgroundDark : queryRulesBackground
-    })`,
-    backgroundSize: 'contain',
-    backgroundRepeat: 'no-repeat',
-    height: '100%',
-    width: '100%',
-    justifyItems: 'center',
-    alignContent: 'center',
-    backgroundPosition: 'center center',
-  });
-
   return (
     <QueryRulesPageTemplate restrictWidth={false}>
       {!isInitialLoading && !isError && queryRulesData?._meta.totalItemCount !== 0 && (
@@ -83,10 +71,9 @@ export const QueryRulesOverview = () => {
       <KibanaPageTemplate.Section
         restrictWidth
         contentProps={{
-          css:
-            !isInitialLoading && !isError && queryRulesData?._meta.totalItemCount !== 0
-              ? undefined
-              : backgroundProps,
+          css: css({
+            height: '100%',
+          }),
         }}
       >
         {isCreateModalVisible && (
@@ -104,7 +91,14 @@ export const QueryRulesOverview = () => {
           <QueryRulesSets />
         )}
         {!isInitialLoading && queryRulesData && queryRulesData._meta.totalItemCount === 0 && (
-          <EuiFlexGroup justifyContent="center" alignItems="center" direction="column">
+          <EuiFlexGroup
+            justifyContent="center"
+            alignItems="center"
+            direction="column"
+            css={css({
+              height: '75%',
+            })}
+          >
             <EuiFlexItem>
               <EmptyPrompt
                 getStartedAction={() => {
