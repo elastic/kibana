@@ -18,7 +18,6 @@ import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-
 import type { InternalSetupServices, InternalStartServices } from '../../services';
 import { getUserFromRequest } from '../../services/utils';
 import type { AgentBuilderStartDependencies } from '../../types';
-import { getCurrentSpaceId } from '../../utils/spaces';
 import { roundToSessionEvents } from './round_to_session_events';
 
 export interface RegisterSessionEventsHookDeps {
@@ -45,7 +44,7 @@ const saveRound = async (
     return;
   }
 
-  const { uiSettings, savedObjects, spaces, conversations } = getInternalServices();
+  const { uiSettings, savedObjects, conversations } = getInternalServices();
   const experimentalFeaturesEnabled = await uiSettings
     .asScopedToClient(savedObjects.getScopedClient(request))
     .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
@@ -73,13 +72,13 @@ const saveRound = async (
     return;
   }
 
-  const sessionEventsService = contextEngine.getSessionEventsService();
-  const space = getCurrentSpaceId({ request, spaces });
+  const sessionMemoryClient = contextEngine.getSessionMemoryClient(request);
 
-  const { results } = await sessionEventsService.saveEvents(
-    { space, userId: user.id },
-    { sessionId: conversationId, aiIndexIds, events: roundToSessionEvents(round) }
-  );
+  const { results } = await sessionMemoryClient.saveEvents({
+    sessionId: conversationId,
+    aiIndexIds,
+    events: roundToSessionEvents(round),
+  });
 
   const failedCount = results.filter(({ status }) => status === 'failed').length;
   if (failedCount > 0) {

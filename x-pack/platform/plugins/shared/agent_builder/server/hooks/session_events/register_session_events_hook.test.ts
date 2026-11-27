@@ -61,12 +61,11 @@ const setup = ({ withContextEngine = true }: { withContextEngine?: boolean } = {
   const getConversation = jest.fn().mockResolvedValue({});
   const getScopedClientAsUser = jest.fn().mockResolvedValue({ get: getConversation });
   const saveEvents = jest.fn().mockResolvedValue({ results: [] });
-  const getSpaceId = jest.fn().mockReturnValue('my-space');
+  const getSessionMemoryClient = jest.fn().mockReturnValue({ saveEvents });
 
   const internalServices = {
     uiSettings: { asScopedToClient: () => ({ get: getSetting }) },
     savedObjects: { getScopedClient: jest.fn() },
-    spaces: { spacesService: { getSpaceId } },
     conversations: { getScopedClientAsUser },
   } as unknown as InternalStartServices;
 
@@ -74,9 +73,7 @@ const setup = ({ withContextEngine = true }: { withContextEngine?: boolean } = {
     security: {},
     elasticsearch: { client: { asScoped: () => ({ asCurrentUser: {} }) } },
   };
-  const startDeps = withContextEngine
-    ? { contextEngine: { getSessionEventsService: () => ({ saveEvents }) } }
-    : {};
+  const startDeps = withContextEngine ? { contextEngine: { getSessionMemoryClient } } : {};
   const getStartServices = jest
     .fn()
     .mockResolvedValue([
@@ -107,6 +104,7 @@ const setup = ({ withContextEngine = true }: { withContextEngine?: boolean } = {
     getSetting,
     getConversation,
     getScopedClientAsUser,
+    getSessionMemoryClient,
     saveEvents,
   };
 };
@@ -124,10 +122,20 @@ describe('registerSessionEventsHook', () => {
     expect(mode).toBe(HookExecutionMode.nonBlocking);
   });
 
-  it('saves the round with the conversation, user, space and AI indices', async () => {
-    const { handler, saveEvents, getSetting, getScopedClientAsUser, getConversation } = setup();
+  it('saves the round as the request with the conversation and AI indices', async () => {
+    const {
+      handler,
+      saveEvents,
+      getSetting,
+      getScopedClientAsUser,
+      getConversation,
+      getSessionMemoryClient,
+    } = setup();
+    const context = createContext();
 
-    await handler(createContext());
+    await handler(context);
+
+    expect(getSessionMemoryClient).toHaveBeenCalledWith(context.request);
 
     expect(getSetting).toHaveBeenCalledWith(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
     expect(getScopedClientAsUser).toHaveBeenCalledWith(
@@ -135,14 +143,11 @@ describe('registerSessionEventsHook', () => {
     );
     expect(getConversation).toHaveBeenCalledWith(CONVERSATION_ID);
     expect(saveEvents).toHaveBeenCalledTimes(1);
-    expect(saveEvents).toHaveBeenCalledWith(
-      { space: 'my-space', userId: PROFILE_UID },
-      {
-        sessionId: CONVERSATION_ID,
-        aiIndexIds: ['elastic', 'team-notes'],
-        events: roundToSessionEvents(round),
-      }
-    );
+    expect(saveEvents).toHaveBeenCalledWith({
+      sessionId: CONVERSATION_ID,
+      aiIndexIds: ['elastic', 'team-notes'],
+      events: roundToSessionEvents(round),
+    });
   });
 
   describe('does not save', () => {
