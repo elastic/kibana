@@ -7,6 +7,8 @@
 
 import { EuiContextMenu, EuiSplitButton, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
+import type { EbtClickAttrs } from '@kbn/ebt-click';
 import { useBoolean } from '@kbn/react-hooks';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -26,6 +28,7 @@ export interface ContextMenuSplitButtonProps {
   /** Shown on the primary action when it is disabled (e.g. pause reason). */
   primaryDisabledTooltip?: ReactNode;
   primaryDataTestSubj?: string;
+  primaryEbt?: EbtClickAttrs;
 
   secondaryAriaLabel: string;
   isSecondaryDisabled?: boolean;
@@ -50,6 +53,7 @@ export const ContextMenuSplitButton = ({
   isPrimaryLoading,
   primaryDisabledTooltip,
   primaryDataTestSubj,
+  primaryEbt,
   secondaryAriaLabel,
   isSecondaryDisabled,
   secondaryDataTestSubj,
@@ -106,6 +110,7 @@ export const ContextMenuSplitButton = ({
         isLoading={isPrimaryLoading}
         iconType={primaryIconType}
         data-test-subj={primaryDataTestSubj}
+        {...(primaryEbt && getEbtProps(primaryEbt))}
         // Preserve focusability so the pause/disabled tooltip can show on hover.
         hasAriaDisabled={Boolean(isPrimaryDisabled && primaryDisabledTooltip)}
         tooltipProps={

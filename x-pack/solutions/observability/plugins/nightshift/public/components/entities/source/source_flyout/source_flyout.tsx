@@ -27,6 +27,7 @@ import {
 } from '@elastic/eui';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { ESQLLangEditor } from '@kbn/esql/public';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import {
   MAX_SOURCE_DESCRIPTION_LENGTH,
@@ -43,6 +44,11 @@ import { useIsMobile } from '../../../../hooks/use_is_mobile';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useSourcesApi } from '../../../../data/sources/use_sources_api';
 import { getFormattedError } from '../../../../common/errors';
+import {
+  NIGHTSHIFT_EBT_ACTIONS,
+  NIGHTSHIFT_EBT_DETAILS,
+  NIGHTSHIFT_EBT_ELEMENTS,
+} from '../../../../common/ebt_constants';
 import { ConfirmSourceActionModal } from '../confirm_source_action_modal';
 import { SourcePreview } from './source_preview';
 import { useSourceQueryValidation } from './use_source_query_validation';
@@ -71,6 +77,13 @@ interface SourceFlyoutProps {
 // Title, description and tags limits are checked before sending, so a 400 from the sources
 // API is about the query (parse, allowed commands, the one-type check, or the `LIMIT 0` probe).
 const isBadRequest = (error: unknown) => isHttpFetchError(error) && error.response?.status === 400;
+
+const enabledToggleEbt = (enabled: boolean) =>
+  getEbtProps({
+    action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_SOURCE,
+    element: NIGHTSHIFT_EBT_ELEMENTS.SOURCE_FLYOUT,
+    detail: enabled ? NIGHTSHIFT_EBT_DETAILS.ENABLE : NIGHTSHIFT_EBT_DETAILS.DISABLE,
+  });
 
 export function SourceFlyout({
   source,
@@ -375,6 +388,8 @@ export function SourceFlyout({
                             label={ENABLED_LABEL}
                             checked={field.value}
                             onChange={(event) => field.onChange(event.target.checked)}
+                            {...enabledToggleEbt(field.value)}
+                            labelProps={{ className: undefined, ...enabledToggleEbt(field.value) }}
                           />
                         </EuiFormRow>
                       )}
@@ -411,6 +426,10 @@ export function SourceFlyout({
                 isLoading={formState.isSubmitting}
                 isDisabled={!canSave}
                 onClick={save}
+                {...getEbtProps({
+                  action: NIGHTSHIFT_EBT_ACTIONS.SAVE_SOURCE,
+                  element: NIGHTSHIFT_EBT_ELEMENTS.SOURCE_FLYOUT,
+                })}
               >
                 {source || initialValues ? SAVE_LABEL : onSubmit ? ADD_LABEL : CREATE_LABEL}
               </EuiButton>

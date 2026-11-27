@@ -18,6 +18,7 @@ import {
   EuiLoadingSpinner,
   EuiSwitch,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import {
   SignificantEventsWorkflowStatus,
@@ -25,6 +26,11 @@ import {
 } from '@kbn/significant-events-schema';
 import React, { useState } from 'react';
 import { useIsCpsMultiProject } from '@kbn/cps-utils';
+import {
+  NIGHTSHIFT_EBT_ACTIONS,
+  NIGHTSHIFT_EBT_DETAILS,
+  NIGHTSHIFT_EBT_ELEMENTS,
+} from '../../common/ebt_constants';
 import { useKibana } from '../../hooks/use_kibana';
 import { KnowledgeIndicatorsColumn } from './knowledge_indicators_column';
 import { QueriesColumn } from './queries_column';
@@ -160,6 +166,11 @@ export function SourcesTable({
           checked={enabled}
           disabled={!canChangeSources || pendingEnabledSourceId === source.id}
           onChange={(event) => onToggleSourceEnabled(source, event.target.checked)}
+          {...getEbtProps({
+            action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_SOURCE,
+            element: NIGHTSHIFT_EBT_ELEMENTS.SOURCES_TABLE,
+            detail: enabled ? NIGHTSHIFT_EBT_DETAILS.DISABLE : NIGHTSHIFT_EBT_DETAILS.ENABLE,
+          })}
         />
       ),
     },

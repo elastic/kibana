@@ -6,9 +6,11 @@
  */
 
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import React from 'react';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 
 /** Destructive row actions that ask for confirmation first. */
 export type SourceAction = 'delete';
@@ -86,6 +88,11 @@ export function ConfirmSourceActionModal({
       onConfirm={onConfirm}
       cancelButtonText={CANCEL_LABEL}
       confirmButtonText={confirmLabel}
+      confirmButtonProps={getEbtProps({
+        action: NIGHTSHIFT_EBT_ACTIONS.CONFIRM_SOURCE_ACTION,
+        element: NIGHTSHIFT_EBT_ELEMENTS.SOURCE_ACTION_CONFIRM_MODAL,
+        detail: action,
+      })}
       buttonColor="danger"
       defaultFocusedButton="cancel"
       isLoading={isLoading}
