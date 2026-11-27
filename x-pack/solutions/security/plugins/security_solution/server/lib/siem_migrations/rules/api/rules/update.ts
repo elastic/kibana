@@ -84,7 +84,7 @@ export const registerSiemRuleMigrationsUpdateRulesRoute = (
 
               await siemMigrationAuditLogger.logUpdateRules({ migrationId, ids });
 
-              await ruleMigrationsClient.data.items.update(transformedRuleToUpdate);
+              await ruleMigrationsClient.data.items.update(migrationId, transformedRuleToUpdate);
 
               return res.ok({ body: { updated: true } });
             } catch (error) {
