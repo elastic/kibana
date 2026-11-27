@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentInventoryRow, InventoryPerson } from '../types';
+import type { AgentActivityProfile, AgentInventoryRow, InventoryPerson } from '../types';
 
 export const mockPerson = (
   overrides: Partial<InventoryPerson> & { entityId: string }
@@ -13,6 +13,17 @@ export const mockPerson = (
   name: overrides.entityId,
   emails: [],
   watchlistIds: [],
+  ...overrides,
+});
+
+export const mockActivityProfile = (
+  overrides: Partial<AgentActivityProfile> = {}
+): AgentActivityProfile => ({
+  sessions: 0,
+  activeDays: 0,
+  unattendedSessions: 0,
+  permissionBypassSessions: 0,
+  computedAt: '2026-11-27T00:00:00.000Z',
   ...overrides,
 });
 

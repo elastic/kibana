@@ -86,6 +86,21 @@ Object {
     "entity.EngineMetadata.UntypedId": Object {
       "type": "keyword",
     },
+    "entity.attributes.ai_agent_activity.active_days": Object {
+      "type": "long",
+    },
+    "entity.attributes.ai_agent_activity.computed_at": Object {
+      "type": "date",
+    },
+    "entity.attributes.ai_agent_activity.permission_bypass_sessions": Object {
+      "type": "long",
+    },
+    "entity.attributes.ai_agent_activity.sessions": Object {
+      "type": "long",
+    },
+    "entity.attributes.ai_agent_activity.unattended_sessions": Object {
+      "type": "long",
+    },
     "entity.attributes.ai_agent_context.computed_at": Object {
       "type": "date",
     },
@@ -648,6 +663,6 @@ Object {
       "type": "keyword",
     },
   },
-  "version": 3,
+  "version": 4,
 }
 `;

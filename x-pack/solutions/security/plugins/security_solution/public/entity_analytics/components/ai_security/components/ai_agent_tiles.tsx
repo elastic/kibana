@@ -24,8 +24,8 @@ import {
   TILE_NEW_INSTALLS_TITLE,
   TILE_PERSON_WATCHLISTS_DESCRIPTION,
   TILE_PERSON_WATCHLISTS_TITLE,
-  TILE_RUNS_AS_ROOT_DESCRIPTION,
-  TILE_RUNS_AS_ROOT_TITLE,
+  TILE_RUNS_UNATTENDED_DESCRIPTION,
+  TILE_RUNS_UNATTENDED_TITLE,
   TILE_UNSANCTIONED_DESCRIPTION,
   TILE_UNSANCTIONED_TITLE,
 } from '../translations';
@@ -43,7 +43,10 @@ const TILE_TEXT: Readonly<Record<AiAgentTileId, { title: string; description: st
     description: TILE_HIGH_IMPACT_HOSTS_DESCRIPTION,
   },
   newInstalls: { title: TILE_NEW_INSTALLS_TITLE, description: TILE_NEW_INSTALLS_DESCRIPTION },
-  runsAsRoot: { title: TILE_RUNS_AS_ROOT_TITLE, description: TILE_RUNS_AS_ROOT_DESCRIPTION },
+  runsUnattended: {
+    title: TILE_RUNS_UNATTENDED_TITLE,
+    description: TILE_RUNS_UNATTENDED_DESCRIPTION,
+  },
 };
 
 export interface AiAgentTilesProps {

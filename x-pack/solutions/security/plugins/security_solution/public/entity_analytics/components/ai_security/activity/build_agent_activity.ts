@@ -6,13 +6,23 @@
  */
 
 import type { AgentIdentity } from '../types';
-import { firstString, isMockRow, toBoolean, toNumber, toStringArray } from '../utils';
+import { firstString, isMockRow, toNumber, toStringArray } from '../utils';
+import { mergeProcessEvents } from '../../../../../common/entity_analytics/ai_security/activity/process_records';
+import {
+  getLaunchMode,
+  getOwnRootResolver,
+  getRunAlertIds,
+  getRunStatus,
+  hasPermissionBypass,
+  MAX_PARENT_DEPTH,
+  parseHeadlessPrompt,
+  RUN_END_MARGIN_MS,
+} from '../../../../../common/entity_analytics/ai_security/activity/session_rules';
 import type {
   ActivitySection,
   ActivityStep,
   AgentActivity,
   AgentRun,
-  LaunchMode,
   ModelUsage,
   OtelMatch,
   OtelRecord,
@@ -20,13 +30,26 @@ import type {
   ProcessStep,
   RunAlertRecord,
   RunReach,
-  RunStatus,
   SideEffects,
 } from './types';
 
-/** A descendant can outlive the agent process, so a run's window reaches a little past its last step. */
-export const RUN_END_MARGIN_MS = 5 * 60_000;
-const MAX_PARENT_DEPTH = 100;
+export {
+  mergeProcessEvents,
+  toEndedProcessIds,
+  toProcessEndTimes,
+  toProcessEvent,
+  toRunAlert,
+} from '../../../../../common/entity_analytics/ai_security/activity/process_records';
+export {
+  getLaunchMode,
+  getOwnRootResolver,
+  getRunAlertIds,
+  getRunStatus,
+  hasPermissionBypass,
+  parseHeadlessPrompt,
+  RUN_END_MARGIN_MS,
+  RUNNING_CAP_MS,
+} from '../../../../../common/entity_analytics/ai_security/activity/session_rules';
 
 /**
  * Commands the agents run for themselves at start-up and before each Bash tool call (lab, plan.md).
@@ -53,15 +76,6 @@ const SETUP_COMMAND_MARKERS: readonly string[] = [
   'grep -E code|cursor',
   '/etc/debuginfod',
 ];
-
-/** A root with no end event reads as running for this long, then as "no end event since". */
-export const RUNNING_CAP_MS = 24 * 3_600_000;
-
-/** Launch flags that turn permission prompts off, by product (Claude CLI docs, Cursor CLI docs). */
-const PERMISSION_BYPASS_FLAGS: Readonly<Record<string, readonly string[]>> = {
-  claude_code: ['--dangerously-skip-permissions', '--permission-mode=bypassPermissions'],
-  cursor: ['--force', '--yolo'],
-};
 
 /**
  * The agent's own state and service traffic, ignored on the agent's own process only. A command
@@ -90,38 +104,6 @@ const TOOL_SHELL_PATH_MARKERS: readonly string[] = ['/tmp/claude-', '/.claude/sh
 
 type EsqlRecord = Record<string, unknown>;
 
-/** Reads one process start event from an ES|QL row. */
-export const toProcessEvent = (row: EsqlRecord): ProcessRecord | undefined => {
-  const entityId = firstString(row['process.entity_id']);
-  const timestamp = firstString(row['@timestamp']);
-  if (!entityId || !timestamp) return undefined;
-  return {
-    entityId,
-    timestamp,
-    documentId: firstString(row._id),
-    index: firstString(row._index),
-    pid: toNumber(row['process.pid']),
-    endpointAgentId: firstString(row['agent.id']),
-    parentEntityId: firstString(row['process.parent.entity_id']),
-    ancestry: toStringArray(row['process.Ext.ancestry']),
-    name: firstString(row['process.name']),
-    executable: firstString(row['process.executable']),
-    commandLine: firstString(row['process.command_line']),
-    unorderedArgs: toStringArray(row['process.args']),
-    workingDirectory: firstString(row['process.working_directory']),
-    userName: firstString(row['user.name']),
-    sessionId: firstString(row['process.ai_agent.session_id']),
-    email: firstString(row['process.ai_agent.email']),
-    isDescendant: toBoolean(row['process.ai_agent.is_descendant']) ?? false,
-    entryLeaderEntityId: firstString(row['process.entry_leader.entity_id']),
-    entryLeaderStart: firstString(row['process.entry_leader.start']),
-    entryLeaderName: firstString(row['process.entry_leader.name']),
-    entryMetaType: firstString(row['process.entry_leader.entry_meta.type']),
-    interactive: toBoolean(row['process.interactive']),
-    hasExec: toStringArray(row['event.action']).includes('exec'),
-  };
-};
-
 export const toSideEffects = (rows: readonly EsqlRecord[]): Map<string, SideEffects> =>
   new Map(
     rows.flatMap((row) => {
@@ -142,37 +124,6 @@ export const toSideEffects = (rows: readonly EsqlRecord[]): Map<string, SideEffe
     })
   );
 
-/** Entity IDs of the agent's processes that have an end event. */
-export const toEndedProcessIds = (rows: readonly EsqlRecord[]): Set<string> =>
-  new Set(rows.map((row) => firstString(row['process.entity_id'])).filter(isString));
-
-/** When each of the agent's processes ended, by entity ID. */
-export const toProcessEndTimes = (rows: readonly EsqlRecord[]): Map<string, string> =>
-  new Map(
-    rows.flatMap((row) => {
-      const entityId = firstString(row['process.entity_id']);
-      const endedAt = firstString(row.ended_at);
-      return entityId && endedAt ? [[entityId, endedAt] as const] : [];
-    })
-  );
-
-export const toRunAlert = (row: EsqlRecord): RunAlertRecord | undefined => {
-  const id = firstString(row._id);
-  const timestamp = firstString(row['@timestamp']);
-  if (!id || !timestamp) return undefined;
-  return {
-    id,
-    timestamp,
-    eventTime: firstString(row['kibana.alert.original_time']),
-    processEntityId: firstString(row['process.entity_id']),
-    parentEntityId: firstString(row['process.parent.entity_id']),
-    ancestry: toStringArray(row['process.Ext.ancestry']),
-    entryLeaderEntityId: firstString(row['process.entry_leader.entity_id']),
-  };
-};
-
-const isString = (value: string | undefined): value is string => !!value;
-
 export const toOtelRecord = (row: EsqlRecord): OtelRecord | undefined => {
   const timestamp = firstString(row['@timestamp']);
   if (!timestamp) return undefined;
@@ -191,108 +142,6 @@ export const toOtelRecord = (row: EsqlRecord): OtelRecord | undefined => {
     outputTokens: toNumber(row['gen_ai.usage.output_tokens']),
     isMock: isMockRow(row),
   };
-};
-
-/**
- * Merges a process's fork and exec events. The exec carries the process's own command line, and
- * any event may carry the session ID, which Claude sets after start-up.
- */
-export const mergeProcessEvents = (
-  events: readonly ProcessRecord[]
-): Map<string, ProcessRecord> => {
-  const merged = new Map<string, ProcessRecord>();
-  for (const event of events) {
-    const existing = merged.get(event.entityId);
-    merged.set(event.entityId, existing ? mergeTwo(existing, event) : event);
-  }
-  return merged;
-};
-
-const mergeTwo = (first: ProcessRecord, second: ProcessRecord): ProcessRecord => {
-  const primary = second.hasExec && !first.hasExec ? second : first;
-  const secondary = primary === second ? first : second;
-  return {
-    entityId: primary.entityId,
-    timestamp: first.timestamp < second.timestamp ? first.timestamp : second.timestamp,
-    documentId: primary.documentId ?? secondary.documentId,
-    index: primary.index ?? secondary.index,
-    pid: primary.pid ?? secondary.pid,
-    endpointAgentId: primary.endpointAgentId ?? secondary.endpointAgentId,
-    parentEntityId: primary.parentEntityId ?? secondary.parentEntityId,
-    ancestry: primary.ancestry.length > 0 ? primary.ancestry : secondary.ancestry,
-    name: primary.name ?? secondary.name,
-    executable: primary.executable ?? secondary.executable,
-    commandLine: primary.commandLine ?? secondary.commandLine,
-    args: primary.args ?? secondary.args,
-    unorderedArgs:
-      primary.unorderedArgs.length > 0 ? primary.unorderedArgs : secondary.unorderedArgs,
-    workingDirectory: primary.workingDirectory ?? secondary.workingDirectory,
-    userName: primary.userName ?? secondary.userName,
-    sessionId: primary.sessionId ?? secondary.sessionId,
-    email: primary.email ?? secondary.email,
-    isDescendant: primary.isDescendant,
-    entryLeaderEntityId: primary.entryLeaderEntityId ?? secondary.entryLeaderEntityId,
-    entryLeaderStart: primary.entryLeaderStart ?? secondary.entryLeaderStart,
-    entryLeaderName: primary.entryLeaderName ?? secondary.entryLeaderName,
-    entryMetaType: primary.entryMetaType ?? secondary.entryMetaType,
-    interactive: primary.interactive ?? secondary.interactive,
-    hasExec: first.hasExec || second.hasExec,
-  };
-};
-
-export const getLaunchMode = ({ entryMetaType, interactive }: ProcessRecord): LaunchMode => {
-  if (entryMetaType === 'init') return 'scheduled';
-  if (interactive === true) return 'interactive';
-  if (entryMetaType) return 'scripted';
-  return 'unknown';
-};
-
-const PRINT_FLAGS: readonly string[] = ['-p', '--print'];
-
-/**
- * The prompt of a headless launch (`claude -p "<prompt>"`, `cursor-agent -p "<prompt>"`). Ordered
- * arguments are read first. Without them the command line is used, which has no quoting, so the
- * prompt is taken up to the next flag.
- */
-export const parseHeadlessPrompt = (
-  args: readonly string[] | undefined,
-  commandLine: string | undefined
-): { readonly isHeadless: boolean; readonly prompt?: string } => {
-  if (args && args.length > 0) {
-    const index = args.findIndex((arg) => PRINT_FLAGS.includes(arg));
-    if (index >= 0) {
-      const next = args[index + 1];
-      return { isHeadless: true, prompt: next && !next.startsWith('-') ? next : undefined };
-    }
-    return { isHeadless: false };
-  }
-  if (!commandLine) return { isHeadless: false };
-  const match = commandLine.match(/(?:^|\s)(?:-p|--print)(?:\s+(.*?))?(?=\s--?[a-zA-Z]|$)/);
-  if (!match) return { isHeadless: false };
-  const prompt = match[1]?.trim();
-  return { isHeadless: true, prompt: prompt && !prompt.startsWith('-') ? prompt : undefined };
-};
-
-/**
- * The root was launched with permission prompts off. Sorted arguments lose the pairing of
- * `--permission-mode` with its value, so for those both arguments being present is enough.
- */
-export const hasPermissionBypass = (agentName: string, root: ProcessRecord): boolean => {
-  const flags = PERMISSION_BYPASS_FLAGS[agentName] ?? [];
-  const isOrdered = !!root.args && root.args.length > 0;
-  const isSorted = !isOrdered && root.unorderedArgs.length > 0;
-  const tokens =
-    (isOrdered ? root.args : isSorted ? root.unorderedArgs : root.commandLine?.split(/\s+/)) ?? [];
-  const checksMode = flags.includes('--permission-mode=bypassPermissions');
-  return tokens.some(
-    (token, index) =>
-      flags.includes(token) ||
-      (checksMode &&
-        token === '--permission-mode' &&
-        (isSorted
-          ? tokens.includes('bypassPermissions')
-          : tokens[index + 1] === 'bypassPermissions'))
-  );
 };
 
 const normalisePath = (path: string): string => path.replace(/\\/g, '/').replace(/\/+$/, '');
@@ -364,33 +213,6 @@ export const buildRunReach = (
   };
 };
 
-/** Running or not, from the root's end event, calculated when the activity is read. */
-export const getRunStatus = (
-  root: ProcessRecord,
-  endedProcessIds: ReadonlySet<string> | undefined,
-  now: number
-): RunStatus | undefined => {
-  if (!endedProcessIds) return undefined;
-  if (endedProcessIds.has(root.entityId)) return { kind: 'ended' };
-  return now - new Date(root.timestamp).getTime() > RUNNING_CAP_MS
-    ? { kind: 'stale', since: root.timestamp }
-    : { kind: 'running' };
-};
-
-/** Alerts on a process of the run: the process itself, or a descendant of one by ancestry. */
-export const getRunAlertIds = (
-  processIds: ReadonlySet<string>,
-  alerts: readonly RunAlertRecord[]
-): string[] =>
-  alerts
-    .filter(
-      ({ processEntityId, parentEntityId, ancestry }) =>
-        (!!processEntityId && processIds.has(processEntityId)) ||
-        (!!parentEntityId && processIds.has(parentEntityId)) ||
-        ancestry.some((id) => processIds.has(id))
-    )
-    .map(({ id }) => id);
-
 export const isSetupProcess = (process: ProcessRecord): boolean => {
   if (!process.isDescendant) return false;
   if (process.name && SETUP_PROCESS_NAMES.has(process.name)) return true;
@@ -403,21 +225,6 @@ const addMs = (timestamp: string, ms: number): string =>
 
 const sortByTime = <T extends { readonly timestamp: string }>(items: readonly T[]): T[] =>
   [...items].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
-
-/** Finds the launch an agent process belongs to: its oldest ancestor that is also the agent's own. */
-export const getOwnRootResolver = (
-  own: ReadonlyMap<string, ProcessRecord>
-): ((entityId: string) => string) => {
-  return (entityId: string): string => {
-    let current = entityId;
-    for (let depth = 0; depth < MAX_PARENT_DEPTH; depth++) {
-      const parent = own.get(current)?.parentEntityId;
-      if (!parent || !own.has(parent) || parent === current) return current;
-      current = parent;
-    }
-    return current;
-  };
-};
 
 interface RunDraft {
   readonly root: ProcessRecord;

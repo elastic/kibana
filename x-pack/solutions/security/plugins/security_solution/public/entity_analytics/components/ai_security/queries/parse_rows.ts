@@ -6,7 +6,9 @@
  */
 
 import { getAiAgentContextFieldPath } from '@kbn/entity-store/common/domain/definitions/ai_agent_context';
+import { getAiAgentActivityFieldPath } from '@kbn/entity-store/common/domain/definitions/ai_agent_activity';
 import type {
+  AgentActivityProfile,
   AgentAlert,
   AgentRow,
   AgentStoreContext,
@@ -72,6 +74,22 @@ export const toAgentStoreContext = (row: EsqlRecord): AgentStoreContext | undefi
   };
 };
 
+/** The sessions the AI agent activity maintainer counted, or undefined before its first run. */
+export const toAgentActivityProfile = (row: EsqlRecord): AgentActivityProfile | undefined => {
+  const computedAt = firstString(row[getAiAgentActivityFieldPath('computed_at')]);
+  const sessions = toNumber(row[getAiAgentActivityFieldPath('sessions')]);
+  if (!computedAt || sessions === undefined) return undefined;
+  return {
+    sessions,
+    activeDays: toNumber(row[getAiAgentActivityFieldPath('active_days')]),
+    unattendedSessions: toNumber(row[getAiAgentActivityFieldPath('unattended_sessions')]),
+    permissionBypassSessions: toNumber(
+      row[getAiAgentActivityFieldPath('permission_bypass_sessions')]
+    ),
+    computedAt,
+  };
+};
+
 /**
  * Reads an agent row. The identity comes from the row's fields, falling back to the install ID, so
  * a row written before a field was retained still shows.
@@ -107,6 +125,7 @@ export const toAgentRow = (row: EsqlRecord): AgentRow | undefined => {
     dependsOnIds: toStringArray(row['entity.relationships.depends_on.ids']),
     dataSources: toStringArray(row['entity.source']),
     storeContext: toAgentStoreContext(row),
+    activityProfile: toAgentActivityProfile(row),
   };
 };
 

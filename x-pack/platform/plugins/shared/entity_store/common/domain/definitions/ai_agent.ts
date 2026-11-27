@@ -16,6 +16,8 @@ import {
 import { managedValue, newestValue } from './field_retention_operations';
 import type { AiAgentContext } from './ai_agent_context';
 import { AI_AGENT_CONTEXT_FIELD_TYPES, getAiAgentContextFieldPath } from './ai_agent_context';
+import type { AiAgentActivity } from './ai_agent_activity';
+import { AI_AGENT_ACTIVITY_FIELD_TYPES, getAiAgentActivityFieldPath } from './ai_agent_activity';
 
 /**
  * Only the agent's own events create or update an agent. A descendant can run as another OS user
@@ -110,6 +112,13 @@ export const aiAgentEntityDefinition: ManagedEntityDefinitionWithoutId & {
         managedValue({
           destination: getAiAgentContextFieldPath(key),
           mapping: { type: AI_AGENT_CONTEXT_FIELD_TYPES[key] },
+        })
+      ),
+      // Written by the AI agent activity maintainer, never by extraction or the CRUD API.
+      ...(Object.keys(AI_AGENT_ACTIVITY_FIELD_TYPES) as Array<keyof AiAgentActivity>).map((key) =>
+        managedValue({
+          destination: getAiAgentActivityFieldPath(key),
+          mapping: { type: AI_AGENT_ACTIVITY_FIELD_TYPES[key] },
         })
       ),
     ],

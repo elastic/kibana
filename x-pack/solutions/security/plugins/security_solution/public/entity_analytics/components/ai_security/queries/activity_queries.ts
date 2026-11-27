@@ -20,68 +20,19 @@ import {
   getEndpointProcessIndex,
 } from '../constants';
 import type { AgentIdentity } from '../types';
-import { agentOwnEventsFilter } from './agent_queries';
+import {
+  agentOwnEventsFilter,
+  inRange,
+  PROCESS_COLUMNS,
+  PROCESS_START_FILTER,
+} from '../../../../../common/entity_analytics/ai_security/activity/own_process_queries';
 
-/**
- * Process start columns. `process.ai_agent.session_id` is unmapped in released Endpoint packages,
- * which is why every activity query sets `unmapped_fields` to nullify.
- */
-export const PROCESS_COLUMNS = [
-  '@timestamp',
-  '_id',
-  '_index',
-  'event.action',
-  'agent.id',
-  'process.entity_id',
-  'process.pid',
-  'process.parent.entity_id',
-  'process.Ext.ancestry',
-  'process.name',
-  'process.executable',
-  'process.command_line',
-  'process.args',
-  'process.working_directory',
-  'user.name',
-  'process.ai_agent.session_id',
-  'process.ai_agent.email',
-  'process.ai_agent.is_descendant',
-  'process.entry_leader.entity_id',
-  'process.entry_leader.start',
-  'process.entry_leader.name',
-  'process.entry_leader.entry_meta.type',
-  'process.interactive',
-] as const;
+export {
+  buildOwnProcessesQuery,
+  PROCESS_COLUMNS,
+} from '../../../../../common/entity_analytics/ai_security/activity/own_process_queries';
 
 const ACTIVITY_MAX_RUN_ALERTS = 500;
-
-const PROCESS_START = '(MV_CONTAINS(event.action, "exec") OR MV_CONTAINS(event.action, "fork"))';
-
-/** Events from `from`, up to `to` when given. */
-const inRange = (from: string, to?: string): string =>
-  [
-    `@timestamp >= ${escapeStringValue(from)}`,
-    ...(to ? [`@timestamp <= ${escapeStringValue(to)}`] : []),
-  ].join(' AND ');
-
-/**
- * Start events of the agent's own processes: the launches and the agent's own re-execs, newest
- * first so a busy install loses its oldest sessions rather than its newest. This is the sessions
- * read: it carries no commands, so it stays small.
- */
-export const buildOwnProcessesQuery = (
-  namespace: string,
-  identity: AgentIdentity,
-  from: string,
-  to?: string
-): string =>
-  [
-    SET_UNMAPPED_NULLIFY,
-    `FROM ${getEndpointProcessIndex(namespace)} METADATA _id, _index`,
-    `| WHERE ${agentOwnEventsFilter(identity)} AND ${PROCESS_START} AND ${inRange(from, to)}`,
-    `| KEEP ${PROCESS_COLUMNS.join(', ')}`,
-    '| SORT @timestamp DESC',
-    `| LIMIT ${ACTIVITY_MAX_PROCESS_EVENTS}`,
-  ].join('\n');
 
 /**
  * When each of the agent's own processes ended, newest first. Defend can put fork, exec and end on
@@ -122,7 +73,7 @@ export const buildDescendantProcessesQuery = (
     `| WHERE process.ai_agent.name == ${escapeStringValue(agentName)}`,
     `  AND host.id == ${escapeStringValue(hostId)}`,
     '  AND process.ai_agent.is_descendant == true',
-    `  AND ${PROCESS_START} AND ${inRange(from, to)}`,
+    `  AND ${PROCESS_START_FILTER} AND ${inRange(from, to)}`,
     `| KEEP ${PROCESS_COLUMNS.join(', ')}`,
     '| SORT @timestamp DESC',
     `| LIMIT ${ACTIVITY_MAX_PROCESS_EVENTS}`,

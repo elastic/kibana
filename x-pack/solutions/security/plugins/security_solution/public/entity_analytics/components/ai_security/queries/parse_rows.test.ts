@@ -6,7 +6,13 @@
  */
 
 import { getAiAgentContextFieldPath } from '@kbn/entity-store/common/domain/definitions/ai_agent_context';
-import { toAgentRow, toAgentStoreContext, toInventoryPerson } from './parse_rows';
+import { getAiAgentActivityFieldPath } from '@kbn/entity-store/common/domain/definitions/ai_agent_activity';
+import {
+  toAgentActivityProfile,
+  toAgentRow,
+  toAgentStoreContext,
+  toInventoryPerson,
+} from './parse_rows';
 import { ENTITY_ROW_COLUMNS } from './agent_queries';
 
 const entityId = 'ai_agent:claude_code@host-1@ec2-user';
@@ -51,6 +57,49 @@ describe('toAgentStoreContext', () => {
   });
 });
 
+const activityColumns = {
+  [getAiAgentActivityFieldPath('sessions')]: 30,
+  [getAiAgentActivityFieldPath('active_days')]: 29,
+  [getAiAgentActivityFieldPath('unattended_sessions')]: 30,
+  [getAiAgentActivityFieldPath('permission_bypass_sessions')]: 1,
+  [getAiAgentActivityFieldPath('computed_at')]: '2026-11-27T10:00:00.000Z',
+};
+
+describe('toAgentActivityProfile', () => {
+  it('reads the sessions the activity maintainer counted', () => {
+    expect(toAgentActivityProfile(activityColumns)).toEqual({
+      sessions: 30,
+      activeDays: 29,
+      unattendedSessions: 30,
+      permissionBypassSessions: 1,
+      computedAt: '2026-11-27T10:00:00.000Z',
+    });
+  });
+
+  it('keeps 0 sessions, which means installed but idle', () => {
+    expect(
+      toAgentActivityProfile({
+        ...activityColumns,
+        [getAiAgentActivityFieldPath('sessions')]: 0,
+        [getAiAgentActivityFieldPath('active_days')]: 0,
+        [getAiAgentActivityFieldPath('unattended_sessions')]: 0,
+      })
+    ).toEqual(expect.objectContaining({ sessions: 0, activeDays: 0, unattendedSessions: 0 }));
+  });
+
+  it('is undefined before the maintainer has run, so the table shows no value rather than 0', () => {
+    const unmapped = Object.fromEntries(Object.keys(activityColumns).map((key) => [key, null]));
+    expect(toAgentActivityProfile(unmapped)).toBeUndefined();
+    expect(toAgentActivityProfile({})).toBeUndefined();
+    expect(
+      toAgentActivityProfile({
+        ...activityColumns,
+        [getAiAgentActivityFieldPath('sessions')]: null,
+      })
+    ).toBeUndefined();
+  });
+});
+
 describe('toAgentRow', () => {
   it("keeps the agent's own watchlists and its store context", () => {
     const row = toAgentRow({
@@ -64,6 +113,13 @@ describe('toAgentRow', () => {
 
   it('has no store context on a row the maintainer has not reached', () => {
     expect(toAgentRow({ 'entity.id': entityId })?.storeContext).toBeUndefined();
+  });
+
+  it('keeps the activity profile, or none before the activity maintainer has run', () => {
+    expect(toAgentRow({ 'entity.id': entityId, ...activityColumns })?.activityProfile).toEqual(
+      expect.objectContaining({ sessions: 30, unattendedSessions: 30 })
+    );
+    expect(toAgentRow({ 'entity.id': entityId })?.activityProfile).toBeUndefined();
   });
 });
 
@@ -96,5 +152,9 @@ describe('toInventoryPerson', () => {
 describe('ENTITY_ROW_COLUMNS', () => {
   it('keeps every ai_agent_context field', () => {
     expect(ENTITY_ROW_COLUMNS).toEqual(expect.arrayContaining(Object.keys(contextColumns)));
+  });
+
+  it('keeps every ai_agent_activity field', () => {
+    expect(ENTITY_ROW_COLUMNS).toEqual(expect.arrayContaining(Object.keys(activityColumns)));
   });
 });

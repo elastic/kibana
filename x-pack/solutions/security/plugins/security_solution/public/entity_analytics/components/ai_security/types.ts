@@ -36,6 +36,20 @@ export interface AgentRow extends AgentIdentity {
   readonly dataSources: readonly string[];
   /** Facts the AI agent context maintainer copies onto the row. Absent until it has run. */
   readonly storeContext?: AgentStoreContext;
+  /** Sessions in the last 30 days, from the AI agent activity maintainer. Absent until it has run. */
+  readonly activityProfile?: AgentActivityProfile;
+}
+
+/** `entity.attributes.ai_agent_activity`: the agent's sessions over the last 30 days. */
+export interface AgentActivityProfile {
+  /** Launches of the agent, the same unit the flyout's Agent activity tab counts. 0 means idle. */
+  readonly sessions: number;
+  /** UTC days with at least one session start. */
+  readonly activeDays?: number;
+  /** Sessions launched by a schedule or a script. */
+  readonly unattendedSessions?: number;
+  readonly permissionBypassSessions?: number;
+  readonly computedAt: string;
 }
 
 /** `entity.attributes.ai_agent_context`: facts about related entities, kept on the agent row. */

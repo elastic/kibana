@@ -14,7 +14,7 @@ export const AI_AGENT_TILE_IDS = [
   'personWatchlists',
   'highImpactHosts',
   'newInstalls',
-  'runsAsRoot',
+  'runsUnattended',
 ] as const;
 export type AiAgentTileId = (typeof AI_AGENT_TILE_IDS)[number];
 
@@ -49,10 +49,15 @@ export const matchesTile = (
       const firstSeen = row.firstSeen ? new Date(row.firstSeen).getTime() : NaN;
       return Number.isFinite(firstSeen) && now - firstSeen <= NEW_INSTALL_WINDOW_MS;
     }
-    case 'runsAsRoot':
-      return row.userName === 'root';
+    case 'runsUnattended':
+      return (row.activityProfile?.unattendedSessions ?? 0) > 0;
   }
 };
+
+/** Sort value for "Sessions (30d)": rows the activity maintainer hasn't reached sort below 0. */
+export const getSessionsSortValue = ({
+  activityProfile,
+}: Pick<AgentInventoryRow, 'activityProfile'>): number => activityProfile?.sessions ?? -1;
 
 const pad = (value: number, length: number): string =>
   String(Math.max(0, Math.round(value))).padStart(length, '0');

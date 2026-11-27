@@ -27,9 +27,9 @@ import { CRITICALITY_LEVEL_TITLE } from '../../asset_criticality/translations';
 import { TruncatedBadgeList } from '../../../../flyout_v2/entity/shared/components/entity_source_value';
 import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
 import { useWatchlistLookup } from '../hooks/use_watchlist_lookup';
-import type { AgentInventoryRow, SignedInAccount } from '../types';
+import type { AgentActivityProfile, AgentInventoryRow, SignedInAccount } from '../types';
 import { getAccountEmails, getAccountLabel, getAgentDisplayName } from '../utils';
-import { getAgentRiskSortValue, isUnsanctioned } from './agent_filters';
+import { getAgentRiskSortValue, getSessionsSortValue, isUnsanctioned } from './agent_filters';
 import { getAgentIconType } from './agent_logo';
 import {
   COLUMN_AGENT,
@@ -39,10 +39,13 @@ import {
   COLUMN_HOST,
   COLUMN_LAST_SEEN,
   COLUMN_RUNS_AS,
+  COLUMN_SESSIONS,
+  COLUMN_SESSIONS_TOOLTIP,
   COLUMN_SIGNED_IN_AS,
   COLUMN_WATCHLISTS,
   HOST_CRITICALITY_TOOLTIP,
   OPEN_FLYOUT,
+  SESSIONS_ACTIVE_DAYS,
   UNSANCTIONED_BADGE,
   UNSANCTIONED_BADGE_TOOLTIP,
   WATCHLISTS_OVERFLOW_TITLE,
@@ -97,6 +100,24 @@ const CriticalityDot = ({ level }: { level: CriticalityLevelWithUnassigned }) =>
         aria-label={title}
         data-test-subj="aiAgentsTableHostCriticality"
       />
+    </EuiToolTip>
+  );
+};
+
+/** Sessions in the last 30 days, with active days in a tooltip. Empty until the maintainer runs. */
+const SessionsCell = ({ profile }: { profile?: AgentActivityProfile }) => {
+  if (profile?.activeDays == null) {
+    return (
+      <span data-test-subj="aiAgentsTableSessions">
+        {profile ? profile.sessions : getEmptyTagValue()}
+      </span>
+    );
+  }
+  return (
+    <EuiToolTip content={SESSIONS_ACTIVE_DAYS(profile.activeDays)}>
+      <span tabIndex={0} data-test-subj="aiAgentsTableSessions">
+        {profile.sessions}
+      </span>
     </EuiToolTip>
   );
 };
@@ -217,7 +238,7 @@ export const AiAgentsTable = memo(
           field: 'lastSeen',
           name: COLUMN_LAST_SEEN,
           sortable: true,
-          width: '104px',
+          width: '128px',
           render: (value: string | undefined) =>
             value ? (
               <span className="eui-textNoWrap">
@@ -229,6 +250,14 @@ export const AiAgentsTable = memo(
             ) : (
               getEmptyTagValue()
             ),
+        },
+        {
+          field: 'activityProfile',
+          name: COLUMN_SESSIONS,
+          nameTooltip: { content: COLUMN_SESSIONS_TOOLTIP },
+          sortable: getSessionsSortValue,
+          width: '152px',
+          render: (profile: AgentActivityProfile | undefined) => <SessionsCell profile={profile} />,
         },
         {
           field: 'alertCount',

@@ -10,7 +10,11 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import type { AgentInventoryRow } from '../types';
 import { AiAgentsTable, AI_AGENTS_TABLE_TEST_ID } from './ai_agents_table';
-import { mockInventoryRow as row, mockPerson } from './test_utils';
+import {
+  mockActivityProfile as activityProfile,
+  mockInventoryRow as row,
+  mockPerson,
+} from './test_utils';
 
 const UNSANCTIONED_ID = 'unsanctioned-ai-agents-watchlist-id-default';
 
@@ -127,6 +131,53 @@ describe('AiAgentsTable', () => {
     expect(rowIds()).toEqual(['aiAgentsTableRow-older', 'aiAgentsTableRow-newer']);
     fireEvent.click(screen.getByRole('button', { name: /Last seen/ }));
     expect(rowIds()).toEqual(['aiAgentsTableRow-newer', 'aiAgentsTableRow-older']);
+  });
+
+  it('shows sessions in the last 30 days, 0 for an idle install and empty before the maintainer runs', () => {
+    renderTable([
+      row({
+        entityId: 'busy',
+        activityProfile: activityProfile({ sessions: 30, activeDays: 29 }),
+      }),
+      row({ entityId: 'idle', activityProfile: activityProfile({ sessions: 0 }) }),
+      row({ entityId: 'not-computed' }),
+    ]);
+    expect(screen.getAllByText('Sessions (30d)').length).toBeGreaterThan(0);
+    const sessions = (entityId: string) =>
+      within(screen.getByTestId(`aiAgentsTableRow-${entityId}`)).queryByTestId(
+        'aiAgentsTableSessions'
+      );
+    expect(sessions('busy')).toHaveTextContent(/^30$/);
+    expect(sessions('idle')).toHaveTextContent(/^0$/);
+    expect(sessions('not-computed')).toHaveTextContent(/^—$/);
+  });
+
+  it('shows active days out of 30 in the sessions tooltip', async () => {
+    renderTable([
+      row({ entityId: 'busy', activityProfile: activityProfile({ sessions: 30, activeDays: 29 }) }),
+    ]);
+    fireEvent.mouseOver(screen.getByTestId('aiAgentsTableSessions'));
+    expect(await screen.findByText('Active on 29 of 30 days')).toBeInTheDocument();
+  });
+
+  it('sorts by sessions, with installs the maintainer has not reached below idle ones', () => {
+    renderTable([
+      row({ entityId: 'idle', activityProfile: activityProfile({ sessions: 0 }) }),
+      row({ entityId: 'not-computed', riskScore: 90 }),
+      row({ entityId: 'busy', activityProfile: activityProfile({ sessions: 30 }) }),
+    ]);
+    fireEvent.click(screen.getByRole('button', { name: /Sessions \(30d\)/ }));
+    expect(rowIds()).toEqual([
+      'aiAgentsTableRow-not-computed',
+      'aiAgentsTableRow-idle',
+      'aiAgentsTableRow-busy',
+    ]);
+    fireEvent.click(screen.getByRole('button', { name: /Sessions \(30d\)/ }));
+    expect(rowIds()).toEqual([
+      'aiAgentsTableRow-busy',
+      'aiAgentsTableRow-idle',
+      'aiAgentsTableRow-not-computed',
+    ]);
   });
 
   it("shows the resolved person's name, and the raw email when no person row exists", () => {

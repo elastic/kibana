@@ -70,13 +70,13 @@ export const TILE_NEW_INSTALLS_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.entityAnalytics.aiSecurity.tiles.newInstalls.description',
   { defaultMessage: 'Installs first seen this week' }
 );
-export const TILE_RUNS_AS_ROOT_TITLE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.aiSecurity.tiles.runsAsRoot.title',
-  { defaultMessage: 'Running as root' }
+export const TILE_RUNS_UNATTENDED_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.aiSecurity.tiles.runsUnattended.title',
+  { defaultMessage: 'Runs unattended' }
 );
-export const TILE_RUNS_AS_ROOT_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.aiSecurity.tiles.runsAsRoot.description',
-  { defaultMessage: 'The OS user is root' }
+export const TILE_RUNS_UNATTENDED_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.aiSecurity.tiles.runsUnattended.description',
+  { defaultMessage: 'Scheduled or scripted sessions in the last 30 days' }
 );
 
 export const INSTALLS_SHOWN = (shown: number, total: number) =>
@@ -197,6 +197,22 @@ export const COLUMN_ALERTS = i18n.translate(
     defaultMessage: 'Open alerts',
   }
 );
+export const COLUMN_SESSIONS = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.aiSecurity.columns.sessions',
+  { defaultMessage: 'Sessions (30d)' }
+);
+export const COLUMN_SESSIONS_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.aiSecurity.columns.sessionsTooltip',
+  {
+    defaultMessage:
+      'Times the agent was launched in the last 30 days, updated hourly. 0 means installed but idle.',
+  }
+);
+export const SESSIONS_ACTIVE_DAYS = (activeDays: number) =>
+  i18n.translate('xpack.securitySolution.entityAnalytics.aiSecurity.sessionsActiveDays', {
+    defaultMessage: 'Active on {activeDays} of 30 days',
+    values: { activeDays },
+  });
 export const COLUMN_AGENT_RISK = i18n.translate(
   'xpack.securitySolution.entityAnalytics.aiSecurity.columns.agentRisk',
   { defaultMessage: 'Agent risk' }

@@ -47,6 +47,21 @@ Object {
         "entity.EngineMetadata.UntypedId": Object {
           "type": "keyword",
         },
+        "entity.attributes.ai_agent_activity.active_days": Object {
+          "type": "long",
+        },
+        "entity.attributes.ai_agent_activity.computed_at": Object {
+          "type": "date",
+        },
+        "entity.attributes.ai_agent_activity.permission_bypass_sessions": Object {
+          "type": "long",
+        },
+        "entity.attributes.ai_agent_activity.sessions": Object {
+          "type": "long",
+        },
+        "entity.attributes.ai_agent_activity.unattended_sessions": Object {
+          "type": "long",
+        },
         "entity.attributes.ai_agent_context.computed_at": Object {
           "type": "date",
         },
@@ -422,6 +437,21 @@ Object {
         "entity.EngineMetadata.UntypedId": Object {
           "type": "keyword",
         },
+        "entity.attributes.ai_agent_activity.active_days": Object {
+          "type": "long",
+        },
+        "entity.attributes.ai_agent_activity.computed_at": Object {
+          "type": "date",
+        },
+        "entity.attributes.ai_agent_activity.permission_bypass_sessions": Object {
+          "type": "long",
+        },
+        "entity.attributes.ai_agent_activity.sessions": Object {
+          "type": "long",
+        },
+        "entity.attributes.ai_agent_activity.unattended_sessions": Object {
+          "type": "long",
+        },
         "entity.attributes.ai_agent_context.computed_at": Object {
           "type": "date",
         },
@@ -744,9 +774,7 @@ Object {
 }
 `;
 
-exports[
-  `built-in definition Elasticsearch assets (backward compatibility) generic latest component template 1`
-] = `
+exports[`built-in definition Elasticsearch assets (backward compatibility) generic latest component template 1`] = `
 Object {
   "name": "entities-v2-generic_default-latest@platform",
   "template": Object {
@@ -1161,9 +1189,7 @@ Object {
 }
 `;
 
-exports[
-  `built-in definition Elasticsearch assets (backward compatibility) generic updates component template 1`
-] = `
+exports[`built-in definition Elasticsearch assets (backward compatibility) generic updates component template 1`] = `
 Object {
   "name": "entities-v2-generic_default-updates@platform",
   "template": Object {
@@ -1572,9 +1598,7 @@ Object {
 }
 `;
 
-exports[
-  `built-in definition Elasticsearch assets (backward compatibility) history snapshot index template 1`
-] = `
+exports[`built-in definition Elasticsearch assets (backward compatibility) history snapshot index template 1`] = `
 Object {
   "_meta": Object {
     "description": "Index template for history snapshot indices managed by the Elastic Entity Store",
@@ -1640,9 +1664,7 @@ Object {
 }
 `;
 
-exports[
-  `built-in definition Elasticsearch assets (backward compatibility) host latest component template 1`
-] = `
+exports[`built-in definition Elasticsearch assets (backward compatibility) host latest component template 1`] = `
 Object {
   "name": "entities-v2-host_default-latest@platform",
   "template": Object {
@@ -2114,9 +2136,7 @@ Object {
 }
 `;
 
-exports[
-  `built-in definition Elasticsearch assets (backward compatibility) host updates component template 1`
-] = `
+exports[`built-in definition Elasticsearch assets (backward compatibility) host updates component template 1`] = `
 Object {
   "name": "entities-v2-host_default-updates@platform",
   "template": Object {
@@ -2579,9 +2599,7 @@ Object {
 }
 `;
 
-exports[
-  `built-in definition Elasticsearch assets (backward compatibility) latest index template 1`
-] = `
+exports[`built-in definition Elasticsearch assets (backward compatibility) latest index template 1`] = `
 Object {
   "_meta": Object {
     "description": "Index template for indices managed by the Elastic Entity Model's entity discovery framework for the latest dataset",
@@ -2612,7 +2630,7 @@ Object {
   "template": Object {
     "mappings": Object {
       "_meta": Object {
-        "latestMappingsVersion": 3,
+        "latestMappingsVersion": 4,
         "mappingsVersion": 1,
       },
       "date_detection": false,
@@ -2649,9 +2667,7 @@ Object {
 }
 `;
 
-exports[
-  `built-in definition Elasticsearch assets (backward compatibility) service latest component template 1`
-] = `
+exports[`built-in definition Elasticsearch assets (backward compatibility) service latest component template 1`] = `
 Object {
   "name": "entities-v2-service_default-latest@platform",
   "template": Object {
@@ -3024,9 +3040,7 @@ Object {
 }
 `;
 
-exports[
-  `built-in definition Elasticsearch assets (backward compatibility) service updates component template 1`
-] = `
+exports[`built-in definition Elasticsearch assets (backward compatibility) service updates component template 1`] = `
 Object {
   "name": "entities-v2-service_default-updates@platform",
   "template": Object {
@@ -3390,9 +3404,7 @@ Object {
 }
 `;
 
-exports[
-  `built-in definition Elasticsearch assets (backward compatibility) user latest component template 1`
-] = `
+exports[`built-in definition Elasticsearch assets (backward compatibility) user latest component template 1`] = `
 Object {
   "name": "entities-v2-user_default-latest@platform",
   "template": Object {
@@ -3797,9 +3809,7 @@ Object {
 }
 `;
 
-exports[
-  `built-in definition Elasticsearch assets (backward compatibility) user updates component template 1`
-] = `
+exports[`built-in definition Elasticsearch assets (backward compatibility) user updates component template 1`] = `
 Object {
   "name": "entities-v2-user_default-updates@platform",
   "template": Object {

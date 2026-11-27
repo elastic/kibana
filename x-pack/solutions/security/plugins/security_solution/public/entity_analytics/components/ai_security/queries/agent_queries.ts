@@ -11,6 +11,10 @@ import {
   AI_AGENT_CONTEXT_FIELD_TYPES,
 } from '@kbn/entity-store/common/domain/definitions/ai_agent_context';
 import {
+  AI_AGENT_ACTIVITY_FIELD,
+  AI_AGENT_ACTIVITY_FIELD_TYPES,
+} from '@kbn/entity-store/common/domain/definitions/ai_agent_activity';
+import {
   getAlertsIndex,
   getEntityAlias,
   SET_UNMAPPED_NULLIFY,
@@ -54,6 +58,7 @@ export const ENTITY_ROW_COLUMNS = [
   'user.full_name',
   'entity.attributes.mfa_enabled',
   ...Object.keys(AI_AGENT_CONTEXT_FIELD_TYPES).map((key) => `${AI_AGENT_CONTEXT_FIELD}.${key}`),
+  ...Object.keys(AI_AGENT_ACTIVITY_FIELD_TYPES).map((key) => `${AI_AGENT_ACTIVITY_FIELD}.${key}`),
 ] as const;
 
 const ACCOUNT_EMAILS_FIELD = 'entity.relationships.acts_on_behalf_of.raw_identifiers.user.email';

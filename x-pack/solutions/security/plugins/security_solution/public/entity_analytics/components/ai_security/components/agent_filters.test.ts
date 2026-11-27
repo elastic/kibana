@@ -10,10 +10,15 @@ import type { AgentStoreContext } from '../types';
 import {
   filterBySearch,
   getAgentRiskSortValue,
+  getSessionsSortValue,
   matchesTile,
   type TileContext,
 } from './agent_filters';
-import { mockInventoryRow as row, mockPerson } from './test_utils';
+import {
+  mockActivityProfile as activityProfile,
+  mockInventoryRow as row,
+  mockPerson,
+} from './test_utils';
 
 const context: TileContext = {
   unsanctionedWatchlistId: 'unsanctioned-ai-agents-watchlist-id-gen-demo',
@@ -91,9 +96,28 @@ describe('matchesTile', () => {
     );
   });
 
-  it('finds installs running as root', () => {
-    expect(matchesTile('runsAsRoot', row({ entityId: 'a', userName: 'root' }), context)).toBe(true);
-    expect(matchesTile('runsAsRoot', row({ entityId: 'b' }), context)).toBe(false);
+  it('finds installs with a scheduled or scripted session, and not those the maintainer missed', () => {
+    const unattended = (unattendedSessions: number | undefined, sessions = 5) =>
+      matchesTile(
+        'runsUnattended',
+        row({ entityId: 'a', activityProfile: activityProfile({ sessions, unattendedSessions }) }),
+        context
+      );
+    expect(unattended(30, 30)).toBe(true);
+    expect(unattended(1)).toBe(true);
+    expect(unattended(0)).toBe(false);
+    expect(unattended(undefined)).toBe(false);
+    expect(matchesTile('runsUnattended', row({ entityId: 'b', userName: 'root' }), context)).toBe(
+      false
+    );
+  });
+});
+
+describe('getSessionsSortValue', () => {
+  it('sorts an idle install above one the activity maintainer has not reached', () => {
+    expect(getSessionsSortValue({ activityProfile: activityProfile({ sessions: 12 }) })).toBe(12);
+    expect(getSessionsSortValue({ activityProfile: activityProfile({ sessions: 0 }) })).toBe(0);
+    expect(getSessionsSortValue({ activityProfile: undefined })).toBe(-1);
   });
 });
 
