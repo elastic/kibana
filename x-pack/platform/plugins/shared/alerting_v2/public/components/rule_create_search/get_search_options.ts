@@ -49,13 +49,11 @@ export const getSearchOptions = (sections: RuleCreateSearchSections): RuleCreate
       data: { sectionId, isLoading: isLoading && visibleItems.length === 0, headerAction },
     };
 
-    const itemOptions = visibleItems.map(
-      (item): RuleCreateSearchOption => ({
-        key: `item:${sectionId}:${item.id}`,
-        label: item.title,
-        data: { sectionId, item },
-      })
-    );
+    const itemOptions = visibleItems.map((item): RuleCreateSearchOption => ({
+      key: `item:${sectionId}:${item.id}`,
+      label: item.title,
+      data: { sectionId, item },
+    }));
 
     return [groupLabel, ...itemOptions];
   });
