@@ -392,19 +392,17 @@ describe('tuning_review stale approved action', () => {
   it.each([
     ['a processed stale action', true, 'The alerts are marked as reviewed.'],
     ['an unprocessed stale action', false, 'The alerts stay untagged.'],
-  ])('journals the action error for %s', (_scenario, processed, ending) => {
+  ])('journals why a stale action did nothing for %s', (_scenario, processed, ending) => {
     const note = stepByName('note_action_failed');
     const { message } = (note?.with?.inputs ?? {}) as { message: string };
 
     expect(note?.if).toContain(
       'steps.record_proposal_action_decision.output.action_failed == true'
     );
-    expect(
-      renderTemplate(message, {
-        propose_exception: { output: { executionError: 'The rule was changed.' } },
-        resolve_stale_action: { output: { processed } },
-      })
-    ).toBe(`**The approved change could not be applied.** The rule was changed.\n\n${ending}`);
+    expect(renderTemplate(message, { resolve_stale_action: { output: { processed } } })).toBe(
+      '**The approved change could not be applied.** The rule was changed or deleted after this ' +
+        `proposal was created.\n\n${ending}`
+    );
   });
 
   it.each([

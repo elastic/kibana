@@ -68,9 +68,6 @@ outputs:
     type: string
   - name: decision
     type: string
-  # Set only when a non-retryable action failure settles the proposal as failed.
-  - name: executionError
-    type: string
 
 steps:
   - name: authorize_decision
@@ -253,7 +250,6 @@ steps:
               proposalId: '{{ variables.proposal_id }}'
               status: failed
               decision: approved
-              executionError: '{{ variables.action_error_message }}'
 
       - name: output_action_failed
         type: workflow.output

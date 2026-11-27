@@ -1036,8 +1036,7 @@ steps:
           and steps.gap.output.ready != true }}
 
   # An approved action that found its target stale tells the analyst why nothing changed,
-  # since the chat would otherwise show an approval with no effect. The error is cut to
-  # 2000 characters: `system-alertzero-journal-note` rejects messages over 8000.
+  # since the chat would otherwise show an approval with no effect.
   - name: note_action_failed
     type: workflow.execute
     if: >-
@@ -1052,7 +1051,7 @@ steps:
         author_name: "{{ consts.author_name }}"
         conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
         message: |-
-          **The approved action could not be applied.** {{ steps.propose_enable.output.executionError | default: steps.propose_install.output.executionError | truncate: 2000 }}
+          **The approved action could not be applied.** The rule changed, was deleted, or is no longer available since this proposal was created.
 
           {% if steps.resolve_outcome.output.enable_approved_not_applied == true or steps.resolve_outcome.output.install_approved_not_applied == true %}The gap stays pending, and the next sweep checks it again.{% else %}Nothing was changed, and the gap will not be checked again.{% endif %}
 

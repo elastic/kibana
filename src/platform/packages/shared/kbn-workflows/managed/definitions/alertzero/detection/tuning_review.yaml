@@ -1712,8 +1712,7 @@ steps:
       tags_to_add:
         - "{{ consts.reviewed_tag }}"
 
-  # The chat otherwise shows an approval with no effect, so the analyst is told why. The
-  # error is cut to 2000 characters: `system-alertzero-journal-note` rejects messages over 8000.
+  # The chat otherwise shows an approval with no effect, so the analyst is told why.
   - name: note_action_failed
     type: workflow.execute
     if: >-
@@ -1728,7 +1727,7 @@ steps:
         author_name: "{{ consts.author_name }}"
         conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
         message: |-
-          **The approved change could not be applied.** {{ steps.propose_query.output.executionError | default: steps.propose_risk_score.output.executionError | default: steps.propose_exception.output.executionError | default: steps.propose_threshold.output.executionError | default: steps.propose_schedule.output.executionError | truncate: 2000 }}
+          **The approved change could not be applied.** The rule was changed or deleted after this proposal was created.
 
           {% if steps.resolve_stale_action.output.processed == true %}The alerts are marked as reviewed.{% else %}The alerts stay untagged.{% endif %}
 

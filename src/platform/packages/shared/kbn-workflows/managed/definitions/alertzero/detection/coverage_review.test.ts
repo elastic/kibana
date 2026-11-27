@@ -1262,7 +1262,7 @@ describe('Detection Coverage review', () => {
         { enable_approved_not_applied: false, install_approved_not_applied: false },
         'Nothing was changed, and the gap will not be checked again.',
       ],
-    ])('journals the stale action error for %s', (_scenario, flags, ending) => {
+    ])('journals why a stale action did nothing for %s', (_scenario, flags, ending) => {
       const note = stepByName('note_action_failed');
       const { message } = inputsOf(note) as { message: string };
 
@@ -1271,12 +1271,12 @@ describe('Detection Coverage review', () => {
       expect(stepIndex('note_action_failed')).toBeLessThan(stepIndex('close_investigation'));
       expect(
         createWorkflowLiquidEngine().parseAndRenderSync(message, {
-          steps: {
-            propose_enable: { output: { executionError: 'The rule was deleted.' } },
-            resolve_outcome: { output: flags },
-          },
+          steps: { resolve_outcome: { output: flags } },
         })
-      ).toBe(`**The approved action could not be applied.** The rule was deleted.\n\n${ending}`);
+      ).toBe(
+        '**The approved action could not be applied.** The rule changed, was deleted, or is no ' +
+          `longer available since this proposal was created.\n\n${ending}`
+      );
     });
 
     it('closes an approved stale action as other, not resolved', () => {
