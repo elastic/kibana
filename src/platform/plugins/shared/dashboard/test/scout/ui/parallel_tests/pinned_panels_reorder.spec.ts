@@ -17,8 +17,6 @@ import {
   getSavedPinnedPanels,
 } from '../../utils/pinned_panel_reorder_helpers';
 
-const DATA_VIEW_ID = 'pinned-panels-reorder-logstash';
-
 // Four medium pinned panels need ~1.6k px, so at this width they always wrap onto several rows,
 // whether the side navigation is docked or collapsed
 const VIEWPORT = { width: 1180, height: 900 };
@@ -30,11 +28,11 @@ const PINNED_PANEL_TITLES = {
   fourth: 'Reorder fourth',
 };
 
-const buildPinnedPanel = (title: string, grow: boolean) => ({
+const buildPinnedPanel = (title: string, grow: boolean, dataViewId: string) => ({
   type: 'options_list_control' as const,
   width: 'medium' as const,
   grow,
-  config: { title, data_view_id: DATA_VIEW_ID, field_name: 'geo.src' },
+  config: { title, data_view_id: dataViewId, field_name: 'geo.src' },
 });
 
 const getSavedTitles = async (
@@ -47,19 +45,26 @@ const getSavedTitles = async (
 };
 
 let dashboardId = '';
+// data view IDs must be unique across spaces, so use the generated ID instead of a fixed one
+let dataViewId = '';
+// creating the data view sets it as the default when none exists, so remember what to restore
+let previousDefaultIndex: unknown;
 
 // Focus: reordering pinned panels with the real move handle and the browser's own flex layout,
 // across rows that wrap, and persisting the new order when the dashboard is saved
 spaceTest.describe('Dashboard pinned panels reorder', { tag: tags.stateful.classic }, () => {
-  spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
+  spaceTest.beforeAll(async ({ apiServices, kbnClient, scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
+    previousDefaultIndex = await kbnClient.uiSettings.get('defaultIndex', {
+      space: scoutSpace.id,
+    });
 
-    await apiServices.dataViews.create({
-      id: DATA_VIEW_ID,
+    const { data: dataView } = await apiServices.dataViews.create({
       title: 'logstash-*',
       timeFieldName: '@timestamp',
       spaceId: scoutSpace.id,
     });
+    dataViewId = dataView.id;
   });
 
   spaceTest.beforeEach(async ({ apiServices, browserAuth, page, scoutSpace }) => {
@@ -68,10 +73,10 @@ spaceTest.describe('Dashboard pinned panels reorder', { tag: tags.stateful.class
       {
         title: 'Pinned panels reorder',
         pinned_panels: [
-          buildPinnedPanel(PINNED_PANEL_TITLES.first, false),
-          buildPinnedPanel(PINNED_PANEL_TITLES.growing, true),
-          buildPinnedPanel(PINNED_PANEL_TITLES.third, false),
-          buildPinnedPanel(PINNED_PANEL_TITLES.fourth, false),
+          buildPinnedPanel(PINNED_PANEL_TITLES.first, false, dataViewId),
+          buildPinnedPanel(PINNED_PANEL_TITLES.growing, true, dataViewId),
+          buildPinnedPanel(PINNED_PANEL_TITLES.third, false, dataViewId),
+          buildPinnedPanel(PINNED_PANEL_TITLES.fourth, false, dataViewId),
         ],
         panels: [],
       },
@@ -83,6 +88,13 @@ spaceTest.describe('Dashboard pinned panels reorder', { tag: tags.stateful.class
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
+
+    // cleaning the saved objects deletes the data view but not the default index setting
+    if (typeof previousDefaultIndex === 'string') {
+      await scoutSpace.uiSettings.set({ defaultIndex: previousDefaultIndex });
+    } else {
+      await scoutSpace.uiSettings.unset('defaultIndex');
+    }
   });
 
   spaceTest(
