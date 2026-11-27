@@ -135,7 +135,7 @@ describe('useEntityFromStore', () => {
         ({
           ...hostRecord('host-1'),
           entity: { id: 'host-1', name: 'host-1', type: 'host', lifecycle },
-        } as unknown as EntityStoreRecord);
+        }) as unknown as EntityStoreRecord;
       const lastSeenFor = async (lifecycle: Record<string, string>) => {
         mockFetchEntitiesListV2.mockResolvedValue({ records: [withLifecycle(lifecycle)] });
         const { result } = renderHook(
