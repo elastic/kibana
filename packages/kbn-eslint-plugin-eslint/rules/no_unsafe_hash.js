@@ -19,7 +19,7 @@ const ALLOWED_UNSAFE_HASHES = [
     algorithms: ['sha1'],
   },
   {
-    path: 'x-pack/platform/test/cases_api_integration/common/plugins/cases/server/routes.ts',
+    path: 'x-pack/platform/test_plugins/security_investigations/cases_api_integration/cases/server/routes.ts',
     algorithms: ['sha1'],
   },
 ];

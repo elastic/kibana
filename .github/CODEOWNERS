@@ -62,12 +62,13 @@ packages/kbn-cli-dev-mode @elastic/kibana-operations
 packages/kbn-dependency-ownership @elastic/kibana-security
 packages/kbn-dependency-usage @elastic/kibana-security
 packages/kbn-docs-utils @elastic/kibana-operations
-packages/kbn-eslint-config @elastic/kibana-operations
 packages/kbn-eslint-plugin-alerting-v2 @elastic/rna-project-team
+packages/kbn-eslint-plugin-compat @elastic/kibana-operations
 packages/kbn-eslint-plugin-disable @elastic/kibana-operations
 packages/kbn-eslint-plugin-eslint @elastic/kibana-operations
 packages/kbn-eslint-plugin-i18n @elastic/kibana-operations
 packages/kbn-eslint-plugin-imports @elastic/kibana-operations
+packages/kbn-eslint-plugin-kbn-monaco @elastic/appex-sharedux
 packages/kbn-eslint-plugin-kbn-ui @elastic/appex-sharedux
 packages/kbn-eslint-plugin-telemetry @elastic/kibana-core
 packages/kbn-extract-plugin-translations @elastic/kibana-core
@@ -677,6 +678,7 @@ src/platform/packages/shared/kbn-opentelemetry-utils @elastic/kibana-core
 src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-defend-workflows
 src/platform/packages/shared/kbn-otel-demo @elastic/streams-ui
 src/platform/packages/shared/kbn-otel-semantic-conventions @elastic/streams-ui
+src/platform/packages/shared/kbn-oxfmt @elastic/kibana-operations
 src/platform/packages/shared/kbn-palettes @elastic/kibana-dashboards
 src/platform/packages/shared/kbn-profiler @elastic/observability-ui
 src/platform/packages/shared/kbn-profiling-utils @elastic/obs-signals-logs-team
@@ -2152,7 +2154,6 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/dev-tools @elastic/kibana-operations
 /catalog-info.yaml @elastic/kibana-operations @elastic/kibana-tech-leads
 /.devcontainer/ @elastic/kibana-operations
-/.eslintrc.js @elastic/kibana-operations
 /.eslintignore @elastic/kibana-operations
 /src/platform/packages/shared/kbn-lazy-object @elastic/kibana-operations @elastic/observability-ui
 
@@ -2405,6 +2406,7 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 /typings/ @elastic/kibana-core
 /src/platform/test/analytics @elastic/kibana-core
 /src/platform/packages/shared/kbn-jest/src/setup/mocks.kbn_i18n_react.js @elastic/kibana-core
+/packages/kbn-eslint-plugin-imports/src/helpers/core_private_importers.ts @elastic/kibana-core
 /src/platform/packages/shared/kbn-jest/src/setup/mocks.vega.js @elastic/kibana-dashboards
 /x-pack/platform/test/saved_objects_field_count/ @elastic/kibana-core
 /x-pack/platform/test/serverless/**/test_suites/saved_objects_management/ @elastic/kibana-core
@@ -2483,7 +2485,7 @@ packages/kbn-eslint-plugin-eslint/rules/no_unsafe_hash.js @elastic/kibana-securi
 /.github/workflows/codeql-pr.yml @elastic/kibana-security
 /.github/workflows/evaluate-dependency-health.yml @elastic/kibana-security
 /.github/workflows/index-dependency-usage.yml @elastic/kibana-security
-/src/dev/eslint/security_eslint_rule_tests.ts @elastic/kibana-security
+/src/dev/oxlint/security_lint_rule_tests.ts @elastic/kibana-security
 /src/core/packages/core/server/integration_tests/config/check_dynamic_config.test.ts @elastic/kibana-security
 /src/core/packages/core/server/integration_tests/exposed_config_keys/ @elastic/kibana-security
 /src/platform/plugins/shared/telemetry/server/config/telemetry_labels.ts @elastic/kibana-security
@@ -3993,6 +3995,9 @@ pnpm-workspace.yaml @elastic/kibana-operations
 .pnpmfile.cjs @elastic/kibana-operations
 
 /knip.jsonc @elastic/kibana-security
+
+# Lint overrides
+/.oxlint/eui.mts @elastic/eui-team
 
 # Auto-generated Scout test metadata has no owner so the automated update PRs are auto-approved.
 /**/scout/.meta/**

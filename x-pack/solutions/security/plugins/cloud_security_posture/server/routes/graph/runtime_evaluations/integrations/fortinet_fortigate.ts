@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import type { IntegrationEvaluations } from "../types";

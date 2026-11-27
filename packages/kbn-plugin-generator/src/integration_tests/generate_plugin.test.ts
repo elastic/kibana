@@ -44,7 +44,6 @@ it('generates a classic plugin by default', async () => {
 
   expect(paths.sort((a, b) => a.localeCompare(b))).toMatchInlineSnapshot(`
     Array [
-      <absolute path>/plugins/foo/.eslintrc.js,
       <absolute path>/plugins/foo/.gitignore,
       <absolute path>/plugins/foo/.i18nrc.json,
       <absolute path>/plugins/foo/common/index.ts,
@@ -101,7 +100,6 @@ it('generates a classic plugin without UI', async () => {
 
   expect(paths.sort((a, b) => a.localeCompare(b))).toMatchInlineSnapshot(`
     Array [
-      <absolute path>/plugins/bar/.eslintrc.js,
       <absolute path>/plugins/bar/.gitignore,
       <absolute path>/plugins/bar/.i18nrc.json,
       <absolute path>/plugins/bar/common/index.ts,
@@ -134,7 +132,6 @@ it('generates a classic plugin without server plugin', async () => {
 
   expect(paths.sort((a, b) => a.localeCompare(b))).toMatchInlineSnapshot(`
     Array [
-      <absolute path>/plugins/baz/.eslintrc.js,
       <absolute path>/plugins/baz/.gitignore,
       <absolute path>/plugins/baz/.i18nrc.json,
       <absolute path>/plugins/baz/common/index.ts,
@@ -168,7 +165,6 @@ it('generates a DI plugin with --di', async () => {
 
   expect(paths.sort((a, b) => a.localeCompare(b))).toMatchInlineSnapshot(`
     Array [
-      <absolute path>/plugins/foo/.eslintrc.js,
       <absolute path>/plugins/foo/.gitignore,
       <absolute path>/plugins/foo/.i18nrc.json,
       <absolute path>/plugins/foo/common/index.ts,
@@ -221,7 +217,6 @@ it('generates a DI plugin without UI', async () => {
 
   expect(paths.sort((a, b) => a.localeCompare(b))).toMatchInlineSnapshot(`
     Array [
-      <absolute path>/plugins/bar/.eslintrc.js,
       <absolute path>/plugins/bar/.gitignore,
       <absolute path>/plugins/bar/.i18nrc.json,
       <absolute path>/plugins/bar/common/index.ts,
@@ -257,7 +252,6 @@ it('generates a DI plugin without server plugin', async () => {
 
   expect(paths.sort((a, b) => a.localeCompare(b))).toMatchInlineSnapshot(`
     Array [
-      <absolute path>/plugins/baz/.eslintrc.js,
       <absolute path>/plugins/baz/.gitignore,
       <absolute path>/plugins/baz/.i18nrc.json,
       <absolute path>/plugins/baz/common/index.ts,
