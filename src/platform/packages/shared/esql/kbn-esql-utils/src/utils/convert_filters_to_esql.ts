@@ -27,6 +27,7 @@ import {
   getPhraseFilterField,
   getPhraseFilterValue,
   getFilterField,
+  isEsqlFilter,
   BooleanRelation,
 } from '@kbn/es-query';
 import { sanitazeESQLInput } from './sanitaze_input';
@@ -53,6 +54,13 @@ export const convertFiltersToESQLExpression = (filters: Filter[]): FilterTransla
       continue;
     }
 
+    // These filters are on columns that the query creates, so they can't be used in a WHERE after
+    // the source command, where the columns do not exist yet. See `convertEsqlFiltersToESQLExpression`
+    if (isEsqlFilter(filter)) {
+      untranslatableFilters.push(filter);
+      continue;
+    }
+
     const negate = filter.meta?.negate ?? false;
     const expression = translateSingleFilter(filter, negate);
 
@@ -73,6 +81,53 @@ export const convertFiltersToESQLExpression = (filters: Filter[]): FilterTransla
     esqlExpression: translatedExpressions.join(' AND '),
     untranslatableFilters,
   };
+};
+
+/**
+ * Converts the filters on the columns that an ES|QL query creates (`kind: 'esql'`) to a WHERE expression
+ * for the end of that query, where the columns exist. The other filters are ignored.
+ * The match operator is not used as it can't be used on the columns that a query creates.
+ */
+export const convertEsqlFiltersToESQLExpression = (filters: Filter[]): string => {
+  const expressions: string[] = [];
+
+  for (const filter of filters) {
+    if (!isEsqlFilter(filter) || filter.meta?.disabled) {
+      continue;
+    }
+
+    const expression = translateEsqlFilter(filter, filter.meta?.negate ?? false);
+    if (expression) {
+      expressions.push(expression);
+    }
+  }
+
+  return expressions.join(' AND ');
+};
+
+const translateEsqlFilter = (filter: Filter, negate: boolean): string | null => {
+  const field = filter.meta?.key;
+  if (!field) {
+    return null;
+  }
+
+  if (isExistsFilter(filter)) {
+    return translateExistsFilter(filter, negate);
+  }
+
+  let expression: string | null = null;
+  if (isPhrasesFilter(filter)) {
+    expression = translatePhrasesFilter(filter, 'exact');
+  } else if (isPhraseFilter(filter)) {
+    expression = translatePhraseFilter(filter, 'exact');
+  }
+  if (!expression || !negate) {
+    return expression;
+  }
+
+  // The NOT of ES|QL drops the rows without a value, but a negated DSL filter keeps the documents
+  // without the field, so the rows without a value are kept
+  return `(${escapeFieldName(field)} IS NULL OR NOT (${expression}))`;
 };
 
 const translateSingleFilter = (filter: Filter, negate: boolean): string | null => {
@@ -120,33 +175,92 @@ const wrapWithNot = (expression: string | null, negate: boolean): string | null 
   return negate ? `NOT (${expression})` : expression;
 };
 
-const translatePhraseFilter = (filter: PhraseFilter): string | null => {
+/**
+ * A number as a double literal, for the values of an array. A big integer written without a decimal point or an
+ * exponent is a long, or an unsigned_long when it does not fit in a long, and an array needs all its values to
+ * have the same type.
+ */
+const formatDoubleLiteral = (value: number): string => {
+  const text = String(value);
+  return /[.e]/i.test(text) ? text : `${text}.0`;
+};
+
+/**
+ * Checks that a column, that can have several values, has any of the values, like the phrases filters of DSL.
+ * An operator like IN evaluates to null on a multivalued column, and MV_INTERSECTS needs the same type on both
+ * sides. The type of the column is not known, so the numbers are compared as doubles and the other values as
+ * strings, which works for any type of column.
+ * There is one call for all the values of a type, as Elasticsearch rejects an expression with too many
+ * parentheses, which a chain of checks with one per value reaches with a few hundred values.
+ */
+const getMultiValueCheck = (
+  escapedField: string,
+  values: Array<string | number | boolean>
+): string => {
+  const strings = values.filter((value): value is string => typeof value === 'string');
+  const numbers = values.filter((value): value is number => typeof value === 'number');
+  const booleans = values.filter((value): value is boolean => typeof value === 'boolean');
+  const formatValues = (valuesToFormat: Array<string | number | boolean>) =>
+    valuesToFormat.map(formatESQLValue).join(', ');
+
+  const checks: string[] = [];
+  if (strings.length) {
+    checks.push(`MV_INTERSECTS(TO_STRING(${escapedField}), [${formatValues(strings)}])`);
+  }
+  if (numbers.length) {
+    checks.push(
+      `MV_INTERSECTS(TO_DOUBLE(${escapedField}), [${numbers.map(formatDoubleLiteral).join(', ')}])`
+    );
+  }
+  if (booleans.length) {
+    checks.push(`MV_INTERSECTS(${escapedField}, [${formatValues(booleans)}])`);
+  }
+  return checks.length === 1 ? checks[0] : `(${checks.join(' OR ')})`;
+};
+
+/**
+ * `match` uses the match operator, that works on the fields of the index right after the source command.
+ * `exact` is for the columns that a query creates, where the match operator can't be used.
+ */
+type PhraseTranslationMode = 'match' | 'exact';
+
+const translatePhraseFilter = (
+  filter: PhraseFilter,
+  mode: PhraseTranslationMode = 'match'
+): string | null => {
   const field = getPhraseFilterField(filter);
   if (!field) {
     return null;
   }
 
   const value = getPhraseFilterValue(filter);
-  if (value === undefined || value === null) {
+  if (!isESQLLiteral(value)) {
     return null;
   }
 
   const escapedField = escapeFieldName(field);
-  return `${escapedField} : ${formatESQLValue(value)}`;
+  return `${escapedField} ${mode === 'exact' ? '==' : ':'} ${formatESQLValue(value)}`;
 };
 
-const translatePhrasesFilter = (filter: PhrasesFilter): string | null => {
+const translatePhrasesFilter = (
+  filter: PhrasesFilter,
+  mode: PhraseTranslationMode = 'match'
+): string | null => {
   const field = filter.meta?.key;
   if (!field) {
     return null;
   }
 
   const values = filter.meta?.params;
-  if (!Array.isArray(values) || values.length === 0) {
+  if (!Array.isArray(values) || values.length === 0 || !values.every(isESQLLiteral)) {
     return null;
   }
 
   const escapedField = escapeFieldName(field);
+
+  if (mode === 'exact') {
+    return getMultiValueCheck(escapedField, values);
+  }
 
   if (values.length === 1) {
     return `${escapedField} : ${formatESQLValue(values[0])}`;
@@ -260,6 +374,15 @@ const formatRangeValue = (value: string | number): string => {
   }
   return escapeStringValue(value);
 };
+
+/**
+ * The values of the filters can come from the URL or from a saved object, and they are written into the
+ * query, so only the ones that can be a literal are accepted. Anything else would be written as it is.
+ */
+const isESQLLiteral = (value: unknown): value is string | number | boolean =>
+  typeof value === 'string' ||
+  typeof value === 'boolean' ||
+  (typeof value === 'number' && Number.isFinite(value));
 
 const formatESQLValue = (value: string | number | boolean): string => {
   if (typeof value === 'string') {

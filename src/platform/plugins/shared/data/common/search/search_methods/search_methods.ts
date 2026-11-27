@@ -11,7 +11,12 @@ import { lastValueFrom, takeWhile } from 'rxjs';
 import { castArray } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { buildEsQuery, isOfQueryType, type EsQueryConfig } from '@kbn/es-query';
-import { fixESQLQueryWithVariables, getEsqlInspectorStats, getNamedParams } from '@kbn/esql-utils';
+import {
+  appendEsqlFiltersToESQLQuery,
+  fixESQLQueryWithVariables,
+  getEsqlInspectorStats,
+  getNamedParams,
+} from '@kbn/esql-utils';
 import type {
   ISearchMethods,
   IDslSearchParams,
@@ -589,7 +594,8 @@ export class SearchMethodsService implements ISearchMethods {
 
     return {
       ...params,
-      query: esqlQuery,
+      // Named params come from the query as written, as a pill value could contain a `?param` text
+      query: await appendEsqlFiltersToESQLQuery(esqlQuery, kibanaFilters),
       params: namedParams.length ? namedParams : undefined,
       filter: this.mergeEsqlFilters(contextFilter, params.filter),
     };

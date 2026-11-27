@@ -9,7 +9,10 @@
 
 import type { Filter, CombinedFilter } from '@kbn/es-query';
 import { BooleanRelation, FILTERS } from '@kbn/es-query';
-import { convertFiltersToESQLExpression } from './convert_filters_to_esql';
+import {
+  convertEsqlFiltersToESQLExpression,
+  convertFiltersToESQLExpression,
+} from './convert_filters_to_esql';
 
 describe('convertFiltersToESQLExpression', () => {
   describe('empty and disabled filters', () => {
@@ -443,6 +446,170 @@ describe('convertFiltersToESQLExpression', () => {
       const result = convertFiltersToESQLExpression([filter]);
       expect(result.esqlExpression).toBe('');
       expect(result.untranslatableFilters).toEqual([]);
+    });
+  });
+});
+
+describe('ES|QL filters', () => {
+  const esqlFilter: Filter = {
+    meta: { kind: 'esql', key: 'size', type: FILTERS.PHRASE, params: { query: 'big' } },
+    query: { match_phrase: { size: 'big' } },
+  };
+  const getPhrases = (params: unknown, meta: Partial<Filter['meta']> = {}): Filter => ({
+    meta: { kind: 'esql', key: 'size', type: FILTERS.PHRASES, params, ...meta } as Filter['meta'],
+    query: {},
+  });
+  const regularFilter: Filter = {
+    meta: { key: 'host', type: FILTERS.PHRASE, params: { query: 'a' } },
+    query: { match_phrase: { host: 'a' } },
+  };
+
+  it('are not translated for the WHERE after the source command, as the column does not exist there', () => {
+    expect(convertFiltersToESQLExpression([regularFilter, esqlFilter])).toEqual({
+      esqlExpression: '`host` : "a"',
+      untranslatableFilters: [esqlFilter],
+    });
+  });
+
+  describe('convertEsqlFiltersToESQLExpression', () => {
+    it('does not use the match operator, which does not work on columns that a query creates', () => {
+      expect(convertEsqlFiltersToESQLExpression([esqlFilter])).toBe('`size` == "big"');
+    });
+
+    describe('several values', () => {
+      it('checks them with MV_INTERSECTS, as an operator like IN evaluates to null on a multivalued column', () => {
+        expect(convertEsqlFiltersToESQLExpression([getPhrases(['a', 'b'])])).toBe(
+          'MV_INTERSECTS(TO_STRING(`size`), ["a", "b"])'
+        );
+      });
+
+      it('matches any of the values, like the phrases filters of DSL, and not all of them', () => {
+        const expression = convertEsqlFiltersToESQLExpression([getPhrases(['a', 'b'])]);
+
+        // MV_CONTAINS would need all of them, so a column that has only one of them would not match
+        expect(expression).toContain('MV_INTERSECTS');
+        expect(expression).not.toContain('MV_CONTAINS');
+      });
+
+      it('does not grow with the number of values, as Elasticsearch rejects an expression with too many parentheses', () => {
+        const values = Array.from({ length: 10000 }, (_, index) => `value-${index}`);
+        const expression = convertEsqlFiltersToESQLExpression([getPhrases(values)]);
+
+        expect(expression.match(/\(/g)).toHaveLength(2);
+        expect(expression).toContain('"value-9999"');
+      });
+
+      it('compares the numbers as doubles, as MV_INTERSECTS needs the same type and the one of the column is not known', () => {
+        expect(convertEsqlFiltersToESQLExpression([getPhrases([1, 2.5])])).toBe(
+          'MV_INTERSECTS(TO_DOUBLE(`size`), [1.0, 2.5])'
+        );
+      });
+
+      it('writes every number as a double literal, as a big integer would make the array an unsigned_long one that does not accept a negative number', () => {
+        // 2 ** 63 does not fit in a long, so without a decimal point ES|QL takes it as an unsigned_long
+        expect(convertEsqlFiltersToESQLExpression([getPhrases([-1, 2 ** 63])])).toBe(
+          'MV_INTERSECTS(TO_DOUBLE(`size`), [-1.0, 9223372036854776000.0])'
+        );
+        expect(convertEsqlFiltersToESQLExpression([getPhrases([1e21, 1.5e-7, 0])])).toBe(
+          'MV_INTERSECTS(TO_DOUBLE(`size`), [1e+21, 1.5e-7, 0.0])'
+        );
+      });
+
+      it('compares the booleans as they are', () => {
+        expect(convertEsqlFiltersToESQLExpression([getPhrases([true, false])])).toBe(
+          'MV_INTERSECTS(`size`, [true, false])'
+        );
+      });
+
+      it('has a check for each type of value, as an array of ES|QL has one type', () => {
+        expect(convertEsqlFiltersToESQLExpression([getPhrases(['a', 1, false, 'b'])])).toBe(
+          '(MV_INTERSECTS(TO_STRING(`size`), ["a", "b"]) OR MV_INTERSECTS(TO_DOUBLE(`size`), [1.0]) OR MV_INTERSECTS(`size`, [false]))'
+        );
+      });
+    });
+
+    it('keeps the rows without a value when negating, as a negated DSL filter keeps the documents without the field', () => {
+      expect(
+        convertEsqlFiltersToESQLExpression([
+          { ...esqlFilter, meta: { ...esqlFilter.meta, negate: true } },
+        ])
+      ).toBe('(`size` IS NULL OR NOT (`size` == "big"))');
+      expect(convertEsqlFiltersToESQLExpression([getPhrases(['a', 'b'], { negate: true })])).toBe(
+        '(`size` IS NULL OR NOT (MV_INTERSECTS(TO_STRING(`size`), ["a", "b"])))'
+      );
+    });
+
+    it('translates exists filters', () => {
+      const exists = {
+        meta: { kind: 'esql' as const, type: FILTERS.EXISTS, key: 'size' },
+        query: { exists: { field: 'size' } },
+      };
+
+      expect(convertEsqlFiltersToESQLExpression([exists])).toBe('`size` IS NOT NULL');
+      expect(
+        convertEsqlFiltersToESQLExpression([{ ...exists, meta: { ...exists.meta, negate: true } }])
+      ).toBe('`size` IS NULL');
+    });
+
+    it('joins several filters with AND', () => {
+      expect(
+        convertEsqlFiltersToESQLExpression([
+          esqlFilter,
+          {
+            ...esqlFilter,
+            meta: { ...esqlFilter.meta, key: 'c' },
+            query: { match_phrase: { c: 3 } },
+          },
+        ])
+      ).toBe('`size` == "big" AND `c` == 3');
+    });
+
+    it('ignores the disabled filters and the ones that are not ES|QL ones', () => {
+      expect(
+        convertEsqlFiltersToESQLExpression([
+          regularFilter,
+          { ...esqlFilter, meta: { ...esqlFilter.meta, disabled: true } },
+        ])
+      ).toBe('');
+    });
+
+    describe('values that are not literals', () => {
+      // The values come from the URL or a saved object and they are written into the query,
+      // so anything but a string, a finite number or a boolean must not be written
+      const injection = '1) | KEEP secret_field | WHERE (1';
+
+      it.each([
+        ['an array in a list of values', getPhrases([[injection]])],
+        ['an object in a list of values', getPhrases([{ a: 1 }])],
+        ['null in a list of values', getPhrases([null])],
+        ['NaN in a list of values', getPhrases([NaN])],
+        [
+          'an array as the value',
+          { ...esqlFilter, query: { match_phrase: { size: [injection] } } },
+        ],
+        ['an object as the value', { ...esqlFilter, query: { match_phrase: { size: { a: 1 } } } }],
+        ['Infinity as the value', { ...esqlFilter, query: { match_phrase: { size: Infinity } } }],
+      ])('does not translate %s', (_, filter) => {
+        expect(convertEsqlFiltersToESQLExpression([filter])).toBe('');
+      });
+
+      it('escapes the strings', () => {
+        expect(
+          convertEsqlFiltersToESQLExpression([
+            { ...esqlFilter, query: { match_phrase: { size: 'a"b | KEEP x' } } },
+          ])
+        ).toBe('`size` == "a\\"b | KEEP x"');
+      });
+
+      it('does not translate them with the match operator either', () => {
+        // not an ES|QL filter, so it is translated with the match operator
+        const matchPhrases = getPhrases([[injection]], { kind: undefined });
+
+        expect(convertFiltersToESQLExpression([matchPhrases])).toEqual({
+          esqlExpression: '',
+          untranslatableFilters: [matchPhrases],
+        });
+      });
     });
   });
 });

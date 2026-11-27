@@ -8,74 +8,17 @@
  */
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { i18n } from '@kbn/i18n';
 
-const buildFilterDrilldownMessage = ({
-  columnNamesToExplain,
-  allColumnsNeedExplanation,
-}: {
-  columnNamesToExplain: string[];
-  allColumnsNeedExplanation: boolean;
-}) => {
-  const count = columnNamesToExplain.length;
-
-  if (allColumnsNeedExplanation) {
-    return i18n.translate(
-      'chartExpressionsCommon.computedColumn.filterDrilldownDisabledDescription',
-      {
-        defaultMessage:
-          "You can't apply a filter or drill down {count, plural, one {from this value because it relies on a field} other {from these values because they rely on fields}} created at query time.",
-        values: { count },
-      }
-    );
-  }
-
-  const names = columnNamesToExplain.map((n) => `'${n}'`).join(', ');
-  return i18n.translate(
-    'chartExpressionsCommon.computedColumn.partialFilterDrilldownDisabledDescription',
-    {
-      defaultMessage:
-        "You can't apply a filter or drill down from {names} because {count, plural, one {it relies on a field} other {they rely on fields}} created at query time.",
-      values: { names, count },
-    }
-  );
-};
-
-const isNonFilterableComputedColumn = (column: DatatableColumn): boolean => {
-  if (column.isComputedColumn !== true) {
-    return false;
-  }
-  return column.meta?.sourceParams?.isSourceFieldFilterable !== true;
-};
+/**
+ * A column that the ES|QL query creates is filtered with an ES|QL filter, that is applied to the queries
+ * that have the column. A date column is not, as the time range is what is changed for it.
+ */
+const isUnfilterableComputedDateColumn = (column: DatatableColumn): boolean =>
+  column.isComputedColumn === true &&
+  column.meta?.sourceParams?.isSourceFieldFilterable !== true &&
+  column.meta.type === 'date';
 
 export const isFilterableColumnSet = (columns: Array<DatatableColumn | undefined>): boolean => {
   const defined = columns.filter((c): c is DatatableColumn => c != null);
-  return !defined.some((col) => isNonFilterableComputedColumn(col));
-};
-
-/**
- * Returns the warning message to show when filterable chart columns are computed ES|QL fields
- * that cannot be used for filtering.
- */
-export const getFilterDrilldownWarningMessage = (
-  columns: Array<DatatableColumn | undefined>
-): string | undefined => {
-  const defined = columns.filter((c): c is DatatableColumn => c != null);
-  if (defined.length === 0) {
-    return undefined;
-  }
-
-  // Suppress the message for date columns (product decision).
-  const columnNamesToExplain = defined
-    .filter((col) => isNonFilterableComputedColumn(col) && col.meta.type !== 'date')
-    .map((col) => col.name);
-
-  if (columnNamesToExplain.length === 0) {
-    return undefined;
-  }
-
-  return buildFilterDrilldownMessage({
-    columnNamesToExplain,
-    allColumnsNeedExplanation: columnNamesToExplain.length === defined.length,
-  });
+  return !defined.some(isUnfilterableComputedDateColumn);
 };

@@ -87,7 +87,7 @@ export class ExploreChangePointGridInDiscoverAction implements Action<Embeddable
     }
 
     await this.locator.navigate(
-      getChangePointGridDiscoverLocatorParams({
+      await getChangePointGridDiscoverLocatorParams({
         esql: target.esql,
         searchContext: target.searchContext,
         parentApi: embeddable.parentApi,

@@ -822,7 +822,6 @@
     "changePointChartViewer.lens.focusedView": "In einem neuen Discover-Tab öffnen",
     "changePointChartViewer.lens.focusedViewLabel": "Fokussierte Ansicht",
     "changePointChartViewer.pagination.ariaLabel": "Seitennummerierung der Änderungspunkt-Diagramme",
-    "chartExpressionsCommon.computedColumn.partialFilterDrilldownDisabledDescription": "Sie können von {names} aus keinen Filter anwenden oder detailliertere Informationen abrufen, da {count, plural, one {it relies on a field} other {sie von Feldern abhängen}}, die zur Abfragezeit erstellt wurden.",
     "chartExpressionsCommon.function.findAccessorOrFail.error.accessor": "Der angegebene Spaltenname oder Index ist ungültig: {accessor}",
     "charts.colormaps.bluesText": "Blues",
     "charts.colormaps.greensText": "Grüne",

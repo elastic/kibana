@@ -27,7 +27,6 @@
     "@kbn/chart-icons",
     "@kbn/chart-expressions-common",
     "@kbn/cell-actions",
-    "@kbn/css-utils",
     "@kbn/react-kibana-context-render",
     "@kbn/core-rendering-browser",
     "@kbn/palettes",
@@ -35,7 +34,6 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/field-formats-common",
     "@kbn/visualizations-common",
-    "@kbn/visualizations-components",
     "@kbn/palettes-components"
   ],
   "exclude": [

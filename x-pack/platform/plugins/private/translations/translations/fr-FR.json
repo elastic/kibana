@@ -821,8 +821,6 @@
     "changePointChartViewer.lens.focusedView": "Ouvrir dans un nouvel onglet Discover",
     "changePointChartViewer.lens.focusedViewLabel": "Vue ciblée",
     "changePointChartViewer.pagination.ariaLabel": "Pagination des graphiques de points de changement",
-    "chartExpressionsCommon.computedColumn.filterDrilldownDisabledDescription": "Vous ne pouvez pas appliquer un filtre ni effectuer une analyse approfondie {count, plural, one {from this value because it relies on a field} other {à partir de ces valeurs, car elles reposent sur des champs}} créés au moment de la requête.",
-    "chartExpressionsCommon.computedColumn.partialFilterDrilldownDisabledDescription": "Vous ne pouvez pas appliquer de filtre ni effectuer une analyse approfondie à partir de {names}, car {count, plural, one {it relies on a field} other {ils reposent sur des champs}} créés au moment de la requête.",
     "chartExpressionsCommon.function.findAccessorOrFail.error.accessor": "Le nom de colonne ou l'index fourni n'est pas valide : {accessor}",
     "charts.colormaps.bluesText": "Bleus",
     "charts.colormaps.greensText": "Verts",

@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ESQLAstCommand } from '@elastic/esql/types';
 import { Parser } from '@elastic/esql';
 import { esqlCommandRegistry } from '@kbn/esql-language';
+import { parseEsqlCached } from './parse_esql_cached';
 
 /**
  * Injects a WHERE clause immediately after the source command (FROM/TS/etc.) of an ES|QL query.
@@ -34,6 +36,39 @@ export function injectWhereClauseAfterSourceCommand(esql: string, whereExpressio
   if (!sourceCommand) {
     return esql;
   }
-  const insertAt = sourceCommand.location.max + 1;
-  return `${esql.slice(0, insertAt)}\n| WHERE ${whereExpression}${esql.slice(insertAt)}`;
+  return injectWhereClauseAfterCommand(esql, sourceCommand, whereExpression);
 }
+
+// the commands that only order or limit the rows, so they don't change the columns
+const TRAILING_COMMANDS = ['sort', 'limit'];
+
+/**
+ * Injects a WHERE clause before the SORT and LIMIT commands that end the query, so they apply to the
+ * rows that match, instead of the WHERE filtering the rows that they kept. When the query does not end
+ * with them, the WHERE goes at the end of the query.
+ */
+export function injectWhereClauseBeforeTrailingSortAndLimit(
+  esql: string,
+  whereExpression: string
+): string {
+  if (!whereExpression.trim()) {
+    return esql;
+  }
+  const { root } = parseEsqlCached(esql);
+  const lastCommand = [...root.commands]
+    .reverse()
+    .find(({ name }) => !TRAILING_COMMANDS.includes(name));
+  if (!lastCommand) {
+    return esql;
+  }
+  return injectWhereClauseAfterCommand(esql, lastCommand, whereExpression);
+}
+
+const injectWhereClauseAfterCommand = (
+  esql: string,
+  command: ESQLAstCommand,
+  whereExpression: string
+): string => {
+  const insertAt = command.location.max + 1;
+  return `${esql.slice(0, insertAt)}\n| WHERE ${whereExpression}${esql.slice(insertAt)}`;
+};

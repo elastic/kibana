@@ -10,9 +10,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type { EuiContextMenuPanelDescriptor, UseEuiTheme } from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { LegendAction, SeriesIdentifier } from '@elastic/charts';
 import { useLegendAction } from '@elastic/charts';
 import type { Datatable } from '@kbn/expressions-plugin/public';
@@ -20,11 +19,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
 import type { IInterpreterRenderEvent } from '@kbn/expressions-plugin/common';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
-import {
-  isFilterableColumnSet,
-  getFilterDrilldownWarningMessage,
-} from '@kbn/chart-expressions-common';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { isFilterableColumnSet } from '@kbn/chart-expressions-common';
 import type { PartitionVisParams } from '../../common/types';
 import type { CellValueAction, ColumnCellValueActions, FilterEvent } from '../types';
 import { getSeriesValueColumnIndex, getFilterPopoverTitle } from './filter_helpers';
@@ -45,26 +40,6 @@ const filterOutValueLabel = i18n.translate(
 
 const hasFilterCellAction = (actions: CellValueAction[]) => {
   return actions.some(({ type }) => type === FILTER_CELL_ACTION_TYPE);
-};
-
-const footerMessageStyles = {
-  root: ({ euiTheme }: UseEuiTheme) =>
-    css`
-      padding: ${euiTheme.size.m};
-      color: ${euiTheme.colors.textSubdued};
-      border-block-start: ${euiTheme.border.thin};
-      margin-block: ${euiTheme.size.s} -${euiTheme.size.s};
-      margin-inline: -${euiTheme.size.s};
-    `,
-};
-
-const PopoverFooterMessage = ({ message }: { message: string }) => {
-  const styles = useMemoCss(footerMessageStyles);
-  return (
-    <div css={styles.root} data-test-subj="legendFilterFooterMessage">
-      {message}
-    </div>
-  );
 };
 
 export const getLegendActions = (
@@ -90,11 +65,8 @@ export const getLegendActions = (
     // column may be undefined when columnIndex === -1; the early return below ensures it is
     // non-null for the rest of the component.
     const column = columnIndex !== -1 ? visData.columns[columnIndex] : undefined;
-    // isComputedColumnFilterable gates the disabled state below; warningMessage is
-    // display-only and can be suppressed (e.g. for dates) without affecting it.
+    // The columns that the query creates are filtered with an ES|QL filter, except the date ones
     const isComputedColumnFilterable = !isEsqlMode || !column || isFilterableColumnSet([column]);
-    const warningMessage =
-      isEsqlMode && column ? getFilterDrilldownWarningMessage([column]) : undefined;
 
     useEffect(() => {
       if (!canFilter || !filterData || !isComputedColumnFilterable) {
@@ -123,28 +95,6 @@ export const getLegendActions = (
     const compatibleCellActions = columnCellValueActions[columnIndex] ?? [];
 
     const panelItems: EuiContextMenuPanelDescriptor['items'] = [];
-
-    if (!isComputedColumnFilterable && warningMessage) {
-      panelItems.push(
-        {
-          name: filterForValueLabel,
-          'data-test-subj': `legend-${title}-filterIn`,
-          icon: <EuiIcon type="plusCircle" size="m" aria-hidden={true} />,
-          disabled: true,
-          onClick: () => {},
-        },
-        {
-          name: filterOutValueLabel,
-          'data-test-subj': `legend-${title}-filterOut`,
-          icon: <EuiIcon type="minusCircle" size="m" aria-hidden={true} />,
-          disabled: true,
-          onClick: () => {},
-        },
-        {
-          renderItem: () => <PopoverFooterMessage message={warningMessage} />,
-        }
-      );
-    }
 
     if (
       isComputedColumnFilterable &&

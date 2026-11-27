@@ -8,15 +8,19 @@
  */
 
 import type { ESQLAstCommand, ESQLAstQueryExpression } from '@elastic/esql/types';
-import { Parser } from '@elastic/esql';
+import { Parser, isColumn } from '@elastic/esql';
 import {
   esqlCommandRegistry,
   getNamedSubqueries,
+  getUnmappedFieldsStrategy,
+  type ESQLColumnData,
   type ESQLCommandSummary,
   type ESQLCommandSummaryContext,
   type FieldSummary,
+  type IAdditionalFields,
   type NamedSubquery,
 } from '@kbn/esql-language';
+import { LRUCache } from 'lru-cache';
 import { parseEsqlCached } from './parse_esql_cached';
 
 function processCommand(
@@ -236,4 +240,72 @@ export function getSummaryPerCommand(
  */
 export function isComputedColumn(fieldName: string, summary: ESQLCommandSummary): boolean {
   return summary.newColumns.has(fieldName) || Boolean(summary.metadataColumns?.has(fieldName));
+}
+
+// The columns depend only on the query, so they are reused while the query is the same.
+// Like the parsed queries, the cache is bounded by the characters of the queries.
+const computedColumnsCache = new LRUCache<string, ReadonlySet<string>>({
+  max: 50,
+  maxSize: 50_000,
+  sizeCalculation: (_columns, query) => Math.max(1, query.length),
+});
+
+// The registry does not apply a wildcard in KEEP or DROP to the columns that the query creates, so
+// after one, the columns created before it are unknown.
+const hasWildcardProjection = (command: ESQLAstCommand): boolean =>
+  (command.name === 'keep' || command.name === 'drop') &&
+  command.args.some((arg) => isColumn(arg) && arg.name.includes('*'));
+
+/**
+ * Returns the columns that the query creates (EVAL, STATS, DISSECT, ...) and that are part of its output.
+ * Each command knows the columns that it leaves (`columnsAfter`), so STATS, KEEP, DROP or RENAME are considered.
+ * The fields of the sources are not asked for, so there are no requests and the index fields are not included,
+ * except the ones that STATS groups by.
+ * A query with syntax errors has no columns, Elasticsearch reports its errors when it runs. A wildcard in KEEP or DROP
+ * makes the columns created before it unknown, so they are not included: the pills are not applied for them.
+ * @param query The ES|QL query.
+ * @returns The names of the columns.
+ */
+export async function getComputedColumnsInOutput(query: string): Promise<ReadonlySet<string>> {
+  const cached = computedColumnsCache.get(query);
+  if (cached) {
+    return cached;
+  }
+
+  const { root, errors } = parseEsqlCached(query);
+  if (errors.length > 0) {
+    return new Set();
+  }
+
+  const noFields = async () => [];
+  const additionalFields: IAdditionalFields = {
+    fromJoin: noFields,
+    fromEnrich: noFields,
+    fromFrom: noFields,
+    fromPromql: noFields,
+    namedSubqueries: getNamedSubqueries(root.header),
+  };
+
+  const unmappedFieldsStrategy = getUnmappedFieldsStrategy(root.header);
+  let columns: ESQLColumnData[] = [];
+  for (const command of root.commands) {
+    if (hasWildcardProjection(command)) {
+      columns = [];
+      continue;
+    }
+    const columnsAfter = esqlCommandRegistry.getCommandByName(command.name)?.methods.columnsAfter;
+    if (columnsAfter) {
+      columns = await columnsAfter(
+        command,
+        columns,
+        query,
+        additionalFields,
+        unmappedFieldsStrategy
+      );
+    }
+  }
+
+  const computedColumns: ReadonlySet<string> = new Set(columns.map(({ name }) => name));
+  computedColumnsCache.set(query, computedColumns);
+  return computedColumns;
 }

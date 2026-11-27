@@ -53,6 +53,8 @@ const mapFilter = (
   if (comparators.disabled) cleaned.disabled = filter.meta?.disabled;
   if (comparators.alias) cleaned.alias = filter.meta?.alias;
   if (comparators.group) cleaned.group = filter.meta?.group;
+  // a filter on a column that an ES|QL query creates is not the DSL filter of a field with the same name
+  cleaned.kind = filter.meta?.kind;
 
   return cleaned;
 };

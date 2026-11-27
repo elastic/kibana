@@ -822,8 +822,6 @@
     "changePointChartViewer.lens.focusedView": "Abrir em uma nova aba do Discover",
     "changePointChartViewer.lens.focusedViewLabel": "Visão focada",
     "changePointChartViewer.pagination.ariaLabel": "Paginação dos gráficos de pontos de mudança",
-    "chartExpressionsCommon.computedColumn.filterDrilldownDisabledDescription": "Você não pode aplicar um filtro ou aprofundar {count, plural, one {from this value because it relies on a field} other {a partir desses valores porque eles dependem de campos}} criados na hora da consulta.",
-    "chartExpressionsCommon.computedColumn.partialFilterDrilldownDisabledDescription": "Você não pode aplicar um filtro ou aprofundar a partir de {names} porque {count, plural, one {it relies on a field} other {eles dependem de campos}} criados na hora da consulta.",
     "chartExpressionsCommon.function.findAccessorOrFail.error.accessor": "O nome da coluna ou índice fornecido é inválido: {accessor}",
     "charts.colormaps.bluesText": "Azuis",
     "charts.colormaps.greensText": "Verdes",

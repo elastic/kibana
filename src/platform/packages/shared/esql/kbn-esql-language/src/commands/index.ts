@@ -9,7 +9,15 @@
 
 // Command registry - the main command registry instance and related utilities
 export * from './registry';
-export type { ESQLCommandSummary, ESQLCommandSummaryContext, FieldSummary } from './registry/types';
+export type {
+  ESQLColumnData,
+  ESQLCommandSummary,
+  ESQLCommandSummaryContext,
+  FieldSummary,
+} from './registry/types';
+export type { IAdditionalFields } from './registry/registry';
+export { UnmappedFieldsStrategy } from './registry/types';
+export { getUnmappedFieldsStrategy } from './definitions/utils/settings';
 
 // Command definitions - constants, types, and utilities for defining commands
 export * from './definitions/constants';

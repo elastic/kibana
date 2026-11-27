@@ -8,19 +8,9 @@
  */
 
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { dataPluginMock } from '../../mocks';
 import { setIndexPatterns, setSearchService } from '../../services';
-import { EsqlSource, getOrRegisterEsqlDataView } from '@kbn/data-source';
-
-jest.mock('@kbn/data-source', () => ({
-  ...jest.requireActual('@kbn/data-source'),
-  getOrRegisterEsqlDataView: jest.fn(),
-}));
-
-const mockGetOrRegisterEsqlDataView = getOrRegisterEsqlDataView as jest.MockedFunction<
-  typeof getOrRegisterEsqlDataView
->;
+import { EsqlSource } from '@kbn/data-source';
 
 import {
   createFiltersFromValueClickAction,
@@ -223,25 +213,35 @@ describe('createFiltersFromClickEvent', () => {
 
     describe('raw columns (createFilterFromRawColumnsESQL)', () => {
       const mockFieldByName = jest.fn();
-      const mockDataView = createStubDataView({
-        spec: {
-          id: 'mock-dataview-id',
-          title: 'logs*',
-        },
-      });
-
-      mockDataView.getFieldByName = mockFieldByName;
+      // the source of the dataset, which is what the filters are built from. It is not a data view
+      const mockToFilterableSource = jest.fn();
+      const mockSource = { toFilterableSource: mockToFilterableSource } as unknown as EsqlSource;
       let createSourceSpy: jest.SpyInstance;
+      let resolveDatasetSpy: jest.SpyInstance;
 
       afterEach(() => {
         createSourceSpy.mockRestore();
+        resolveDatasetSpy.mockRestore();
       });
 
       beforeEach(() => {
         mockFieldByName.mockReset();
-        mockGetOrRegisterEsqlDataView.mockReset();
-        mockGetOrRegisterEsqlDataView.mockResolvedValue(mockDataView);
-        createSourceSpy = jest.spyOn(EsqlSource, 'create').mockResolvedValue({} as EsqlSource);
+        mockToFilterableSource.mockReset();
+        mockToFilterableSource.mockResolvedValue({
+          kind: 'esql',
+          id: 'mock-dataset-id',
+          title: 'logs*',
+          fields: [],
+          getFieldByName: mockFieldByName,
+          isTimeBased: () => false,
+        });
+        createSourceSpy = jest.spyOn(EsqlSource, 'create').mockResolvedValue(mockSource);
+        resolveDatasetSpy = jest.spyOn(EsqlSource, 'resolveDataset').mockResolvedValue({
+          datasetId: 'mock-dataset-id',
+          title: 'logs*',
+          timeFieldName: undefined,
+          projectRouting: undefined,
+        });
 
         table.columns[0] = {
           name: 'message',
@@ -308,7 +308,7 @@ describe('createFiltersFromClickEvent', () => {
         expect(filter).toEqual([
           {
             meta: {
-              index: 'mock-dataview-id',
+              index: 'mock-dataset-id',
               negate: true,
             },
             query: {
@@ -340,17 +340,38 @@ describe('createFiltersFromClickEvent', () => {
         expect(filter[0].meta.negate).toBeFalsy();
       });
 
-      test('returns no filters when a computed column name matches sourceField and an index field with that name exists', async () => {
+      test('creates an ES|QL filter, not a DSL one, for a computed column named like an index field', async () => {
         table.columns[0].isComputedColumn = true;
 
         const filter = await createFilterESQL(table, 0, 0);
 
-        expect(mockGetOrRegisterEsqlDataView).not.toHaveBeenCalled();
-        expect(createSourceSpy).not.toHaveBeenCalled();
-        expect(filter).toEqual([]);
+        expect(filter).toHaveLength(1);
+        expect(filter[0].meta.kind).toBe('esql');
+        expect(filter[0].query).toEqual({ match_phrase: { message: expect.anything() } });
       });
 
-      test('returns no filters for that same computed column even after it is given a custom Lens label', async () => {
+      test('uses the id of the dataset for the filter of a computed column, without asking for its schema', async () => {
+        table.columns[0].isComputedColumn = true;
+
+        const filter = await createFilterESQL(table, 0, 0);
+
+        expect(filter[0].meta.index).toBe('mock-dataset-id');
+        expect(resolveDatasetSpy).toHaveBeenCalledWith(
+          expect.objectContaining({ query: 'FROM logs*' })
+        );
+        // the schema of the dataset is not needed, so it is not requested
+        expect(createSourceSpy).not.toHaveBeenCalled();
+        expect(mockToFilterableSource).not.toHaveBeenCalled();
+      });
+
+      test('does not create a filter for a computed date column', async () => {
+        table.columns[0].isComputedColumn = true;
+        table.columns[0].meta!.type = 'date';
+
+        expect(await createFilterESQL(table, 0, 0)).toEqual([]);
+      });
+
+      test('targets the query column, not the custom Lens label, for a computed column', async () => {
         // Renaming the dimension via the Appearance section only changes column.name/label; it
         // must not make an EVAL-computed column look like a genuine RENAME of the real field.
         table.columns[0].isComputedColumn = true;
@@ -358,9 +379,9 @@ describe('createFiltersFromClickEvent', () => {
 
         const filter = await createFilterESQL(table, 0, 0);
 
-        expect(mockGetOrRegisterEsqlDataView).not.toHaveBeenCalled();
-        expect(createSourceSpy).not.toHaveBeenCalled();
-        expect(filter).toEqual([]);
+        expect(filter).toHaveLength(1);
+        expect(filter[0].meta.kind).toBe('esql');
+        expect(filter[0].query).toEqual({ match_phrase: { message: expect.anything() } });
       });
 
       test('still creates a filter for a genuinely RENAMEd column, even with a custom Lens label', async () => {
@@ -430,7 +451,7 @@ describe('createFiltersFromClickEvent', () => {
           table.rows[0]['1-1'] = value;
         };
 
-        test('takes the DataView of the dataset from the ES|QL source, not from field caps', async () => {
+        test('takes the source of the dataset from the ES|QL source, not from field caps', async () => {
           useColumnOf('meow', 'geo.dest', 'US');
           mockFieldByName.mockReturnValue({ name: 'geo.dest', filterable: true });
 
@@ -439,7 +460,7 @@ describe('createFiltersFromClickEvent', () => {
           expect(createSourceSpy).toHaveBeenCalledWith(
             expect.objectContaining({ query: 'FROM meow' })
           );
-          expect(mockGetOrRegisterEsqlDataView).toHaveBeenCalledTimes(1);
+          expect(mockToFilterableSource).toHaveBeenCalledTimes(1);
         });
 
         test('creates a phrase filter for any output column of a view', async () => {
@@ -453,14 +474,22 @@ describe('createFiltersFromClickEvent', () => {
           ]);
         });
 
-        test('does not create a filter for a column the query computes on top of a view', async () => {
+        test('creates an ES|QL filter for a column the query computes on top of a view', async () => {
           useColumnOf('meow', 'foo', 'USx');
           table.columns[0].isComputedColumn = true;
           mockFieldByName.mockReturnValue(undefined);
 
           const filter = await createFilterESQL(table, 0, 0);
 
-          expect(filter).toEqual([]);
+          expect(filter).toHaveLength(1);
+          expect(filter[0].meta.kind).toBe('esql');
+          expect(filter[0].meta.index).toBe('mock-dataset-id');
+          expect(filter[0].query).toEqual({ match_phrase: { foo: 'USx' } });
+          // the view is the FROM target of the dataset
+          expect(resolveDatasetSpy).toHaveBeenCalledWith(
+            expect.objectContaining({ query: 'FROM meow' })
+          );
+          expect(createSourceSpy).not.toHaveBeenCalled();
         });
 
         test('does not create a filter for a field the dataset does not have', async () => {

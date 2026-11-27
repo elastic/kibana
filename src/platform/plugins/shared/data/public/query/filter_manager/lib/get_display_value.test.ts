@@ -78,6 +78,32 @@ describe('getDisplayValueFromFilter', () => {
     );
   });
 
+  it('does not throw for an ES|QL filter on a column that is not a field of the data view', () => {
+    const filter = {
+      ...phraseFilter,
+      meta: { ...phraseFilter.meta, key: 'size_class', kind: 'esql' as const },
+      query: { match_phrase: { size_class: 'large' } },
+    };
+    expect(getDisplayValueFromFilter(filter, [stubIndexPattern])).toBe('ios');
+  });
+
+  it('does not use the type of a field with the same name as the column of an ES|QL filter', () => {
+    // `bytes` is a number in the data view, but the filter is on a column of a query that has the same name
+    const emptyValueFilter = {
+      ...phraseFilter,
+      meta: { ...phraseFilter.meta, key: 'bytes', value: undefined, params: { query: '' } },
+      query: { match_phrase: { bytes: '' } },
+    };
+
+    expect(getDisplayValueFromFilter(emptyValueFilter, [stubIndexPattern])).toBe('0');
+    expect(
+      getDisplayValueFromFilter(
+        { ...emptyValueFilter, meta: { ...emptyValueFilter.meta, kind: 'esql' as const } },
+        [stubIndexPattern]
+      )
+    ).not.toBe('0');
+  });
+
   it('does not throw if the data view is not found', () => {
     const filter = {
       ...phraseFilter,

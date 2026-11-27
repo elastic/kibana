@@ -191,6 +191,63 @@ describe('open in discover action', () => {
     expect(globalThis.open).toHaveBeenCalledWith(discoverUrl, '_blank');
   });
 
+  it('navigates to discover for an ES|QL chart and applies the filters on its created columns at the end of the query', async () => {
+    const viewUnderlyingDataArgs = {
+      dataViewSpec: { id: 'index-pattern-id' },
+      timeRange: {},
+      filters: [
+        {
+          meta: { type: 'phrase', key: 'host.name', params: { query: 'web-1' } },
+          query: { match_phrase: { 'host.name': 'web-1' } },
+        },
+        {
+          meta: { kind: 'esql', type: 'phrase', key: 'size', params: { query: 1 } },
+          query: { match_phrase: { size: 1 } },
+        },
+      ],
+      query: {
+        esql: 'FROM logs | EVAL size = 1 | STATS c = COUNT(*) BY size | SORT c DESC | LIMIT 10',
+      },
+      esqlControls: undefined,
+      columns: [],
+    };
+
+    const embeddable = {
+      ...compatibleEmbeddableApi,
+      getViewUnderlyingDataArgs: jest.fn(() => viewUnderlyingDataArgs),
+      isTextBasedLanguage: jest.fn(() => true),
+    };
+
+    const locator = {
+      getRedirectUrl: jest.fn(() => 'https://discover-redirect-url'),
+    } as unknown as DiscoverAppLocator;
+
+    globalThis.open = jest.fn();
+
+    await createOpenInDiscoverAction(
+      locator,
+      {
+        get: () => ({
+          isTimeBased: () => true,
+          toSpec: () => ({ id: 'index-pattern-id' }),
+        }),
+      } as unknown as DataViewsService,
+      true
+    ).execute({
+      embeddable,
+    } as ActionExecutionContext<EmbeddableApiContext>);
+
+    // the regular filter goes after the source command, where the index fields exist. The filter on
+    // the column that the query creates goes after the command that outputs it, before the SORT and LIMIT
+    expect(locator.getRedirectUrl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          esql: 'FROM logs\n| WHERE `host.name` : "web-1" | EVAL size = 1 | STATS c = COUNT(*) BY size\n| WHERE `size` == 1 | SORT c DESC | LIMIT 10',
+        },
+      })
+    );
+  });
+
   it('navigates to discover for an ES|QL chart and translates the dashboard KQL into a KQL(...) clause', async () => {
     const viewUnderlyingDataArgs = {
       dataViewSpec: { id: 'index-pattern-id' },

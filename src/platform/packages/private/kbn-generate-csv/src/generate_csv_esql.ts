@@ -17,6 +17,7 @@ import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { type Filter, buildEsQuery, extractTimeRange } from '@kbn/es-query';
 import {
   parseTimeFieldFromESQLQuery,
+  appendEsqlFiltersToESQLQuery,
   appendLimitToQuery,
   getNamedParams,
   fixESQLQueryWithVariables,
@@ -131,9 +132,15 @@ export class CsvESQLGenerator {
         getEsQueryConfig(this.clients.uiSettings as Parameters<typeof getEsQueryConfig>[0])
       );
 
+    // The filters on columns that the query creates can't be in the DSL filter, they are part of the query
+    const queryWithFilters = await appendEsqlFiltersToESQLQuery(esqlQuery, currentFilters ?? []);
+
     const searchParams: IKibanaSearchRequest<ESQLSearchParams> = {
       params: {
-        query: esqlQuery && maxRows ? appendLimitToQuery(esqlQuery, maxRows) : esqlQuery,
+        query:
+          queryWithFilters && maxRows
+            ? appendLimitToQuery(queryWithFilters, maxRows)
+            : queryWithFilters,
         filter,
         // locale can be used for number/date formatting
         locale: i18n.getLocale(),
