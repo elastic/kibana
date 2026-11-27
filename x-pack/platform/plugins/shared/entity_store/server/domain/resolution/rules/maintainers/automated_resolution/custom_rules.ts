@@ -113,17 +113,18 @@ const priorStateIfDefinitionUnchanged = (
   return { lastProcessedTimestamp: previous.lastProcessedTimestamp, lastRun: previous.lastRun };
 };
 
-// A rule missing from the list is only pruned once a read by id confirms it's
-// gone, so a run that can't see the rules never wipes their saved progress.
-const pruneDeletedRules = async (
-  { ruleStates, resolutionRulesClient, logger }: RunCustomRulesDeps,
-  customRules: CustomResolutionRule[]
-): Promise<void> => {
-  const live = new Set(customRules.map(({ id }) => customRuleStateKey(id)));
-  const missing = Object.keys(ruleStates).filter(
-    (key) => key.startsWith(CUSTOM_RULE_STATE_KEY_PREFIX) && !live.has(key)
+// Saved progress is pruned once a read by id confirms the rule is gone. That
+// read is realtime, where the rule listing is an eventually consistent search
+// that can also fail outright, and a run that can't read a rule keeps its state.
+const pruneDeletedRules = async ({
+  ruleStates,
+  resolutionRulesClient,
+  logger,
+}: RunCustomRulesDeps): Promise<void> => {
+  const customStateKeys = Object.keys(ruleStates).filter((key) =>
+    key.startsWith(CUSTOM_RULE_STATE_KEY_PREFIX)
   );
-  for (const stateKey of missing) {
+  for (const stateKey of customStateKeys) {
     const id = stateKey.slice(CUSTOM_RULE_STATE_KEY_PREFIX.length);
     try {
       if ((await resolutionRulesClient.getCustomRule(id)) === undefined) {
@@ -147,6 +148,8 @@ const pruneDeletedRules = async (
 export async function runCustomResolutionRules(deps: RunCustomRulesDeps): Promise<void> {
   const { resolutionRulesClient, logger, signal } = deps;
 
+  await pruneDeletedRules(deps);
+
   let customRules: CustomResolutionRule[];
   try {
     customRules = await resolutionRulesClient.getCustomRules();
@@ -156,8 +159,6 @@ export async function runCustomResolutionRules(deps: RunCustomRulesDeps): Promis
     );
     return;
   }
-
-  await pruneDeletedRules(deps, customRules);
 
   const remainingMs = deps.deadline - Date.now();
   if (remainingMs <= 0) {
