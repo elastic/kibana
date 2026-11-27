@@ -316,6 +316,47 @@ describe('createExecuteApiTool', () => {
     expect(data.message).toContain(internalTools.discoverApis);
   });
 
+  it.each([
+    [true, 'Did you mean: cluster.health?'],
+    [false, undefined],
+  ])(
+    'suggests close identifiers for an unknown API only when discovery is enabled (%s)',
+    async (discoveryEnabled, expectedSuggestion) => {
+      mockGetRegistries.mockResolvedValue({
+        elasticsearch: {
+          ...createRegistry(esLoadApi),
+          manifest: [
+            {
+              id: 'cluster.health',
+              name: 'health',
+              namespace: 'cluster',
+              description: 'Get the cluster health status',
+              namespaceFile: 'cluster',
+              destructive: false,
+              readOnly: true,
+            },
+          ],
+        },
+        kibana: createRegistry(kibanaLoadApi),
+      });
+      esLoadApi.mockRejectedValue(new UnknownApiError('cluster.healht'));
+
+      const tool = createExecuteApiTool({ selfClient, discoveryEnabled });
+      const result = (await tool.handler(
+        { target: 'elasticsearch', api: 'cluster.healht', params: {} },
+        agentBuilderMocks.tools.createHandlerContext()
+      )) as ToolHandlerStandardReturn;
+
+      const { message } = result.results[0].data as ErrorResultData;
+      if (expectedSuggestion) {
+        expect(message).toContain(expectedSuggestion);
+      } else {
+        expect(message).not.toContain('Did you mean');
+        expect(message).not.toContain('cluster.health');
+      }
+    }
+  );
+
   describe('when API discovery is disabled', () => {
     it('never points the model at the discovery tool from its description', () => {
       const tool = createExecuteApiTool({ selfClient, discoveryEnabled: false });
