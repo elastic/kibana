@@ -298,7 +298,7 @@ export interface CreateThreadRequest {
   threadId: string;
   /** Where the copy of the parent's history ends; see `cutIndexForThread`. */
   cutEventId?: string;
-  highlight?: { text: string };
+  input?: string;
   title?: string;
 }
 

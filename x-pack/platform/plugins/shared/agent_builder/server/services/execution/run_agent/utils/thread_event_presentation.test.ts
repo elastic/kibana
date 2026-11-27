@@ -26,7 +26,7 @@ const threadStarted: ThreadStartedEvent = {
   type: TimelineEventType.threadStarted,
   created_at: T1,
   actor,
-  data: { parent_conversation_id: 'parent' },
+  data: {},
 };
 
 const threadCreated: ThreadCreatedEvent = {
@@ -34,7 +34,7 @@ const threadCreated: ThreadCreatedEvent = {
   type: TimelineEventType.threadCreated,
   created_at: T1,
   actor,
-  data: { thread_id: 'thread' },
+  data: { conversation_id: 'thread' },
 };
 
 describe('formatThreadEvent', () => {

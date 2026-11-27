@@ -72,12 +72,12 @@ apiTest.describe(
         const threadId = uuidv4();
 
         const created = await asAdmin.post(THREAD_PATH(parentId), {
-          body: { client_thread_id: threadId, title: 'Side question' },
+          body: { conversation_id: threadId, title: 'Side question' },
           responseType: 'json',
         });
         expect(created).toHaveStatusCode(200);
 
-        const { thread_id: createdId, execution_id: executionId } =
+        const { conversation_id: createdId, execution_id: executionId } =
           created.body as CreateThreadResponse;
         expect(createdId).toBe(threadId);
         expect(executionId).toBeUndefined();
@@ -99,7 +99,7 @@ apiTest.describe(
         const threadCreated = (parent.body as GetConversationResponse).events?.find(
           ({ type, data }) =>
             type === TimelineEventType.threadCreated &&
-            (data as { thread_id: string }).thread_id === threadId
+            (data as { conversation_id: string }).conversation_id === threadId
         );
         expect(threadCreated).toBeDefined();
       }
@@ -107,30 +107,30 @@ apiTest.describe(
 
     apiTest('a resend returns the same thread and records it once', async ({ asAdmin }) => {
       const threadId = uuidv4();
-      const body = { client_thread_id: threadId };
+      const body = { conversation_id: threadId };
 
       expect(await asAdmin.post(THREAD_PATH(parentId), { body })).toHaveStatusCode(200);
       const resent = await asAdmin.post(THREAD_PATH(parentId), { body, responseType: 'json' });
       expect(resent).toHaveStatusCode(200);
-      expect((resent.body as CreateThreadResponse).thread_id).toBe(threadId);
+      expect((resent.body as CreateThreadResponse).conversation_id).toBe(threadId);
 
       const parent = await asAdmin.get(CONVERSATION_PATH(parentId), { responseType: 'json' });
       const recorded = (parent.body as GetConversationResponse).events?.filter(
         ({ type, data }) =>
           type === TimelineEventType.threadCreated &&
-          (data as { thread_id: string }).thread_id === threadId
+          (data as { conversation_id: string }).conversation_id === threadId
       );
       expect(recorded).toHaveLength(1);
     });
 
-    apiTest('starts the first run on the highlight', async ({ asAdmin }) => {
+    apiTest('starts the first run on the input', async ({ asAdmin }) => {
       const threadId = uuidv4();
       await setupAgentDirectAnswer({ proxy: llmProxy, title: 'Thread', response: 'Disk full' });
 
       const created = await asAdmin.post(THREAD_PATH(parentId), {
         body: {
-          client_thread_id: threadId,
-          highlight: { text: 'Why is the disk full?' },
+          conversation_id: threadId,
+          input: 'Why is the disk full?',
           connector_id: connectorId,
         },
         responseType: 'json',
@@ -155,24 +155,24 @@ apiTest.describe(
       const emptyId = (empty.body as CreateConversationResponse).id;
 
       const created = await asAdmin.post(THREAD_PATH(emptyId), {
-        body: { client_thread_id: uuidv4() },
+        body: { conversation_id: uuidv4() },
       });
       expect(created).toHaveStatusCode(200);
     });
 
     apiTest('refuses to start a thread from a thread', async ({ asAdmin }) => {
       const threadId = uuidv4();
-      await asAdmin.post(THREAD_PATH(parentId), { body: { client_thread_id: threadId } });
+      await asAdmin.post(THREAD_PATH(parentId), { body: { conversation_id: threadId } });
 
       const nested = await asAdmin.post(THREAD_PATH(threadId), {
-        body: { client_thread_id: uuidv4() },
+        body: { conversation_id: uuidv4() },
       });
       expect(nested).toHaveStatusCode(400);
     });
 
     apiTest('answers 404 for a missing parent', async ({ asAdmin }) => {
       const missing = await asAdmin.post(THREAD_PATH(uuidv4()), {
-        body: { client_thread_id: uuidv4() },
+        body: { conversation_id: uuidv4() },
       });
       expect(missing).toHaveStatusCode(404);
     });
@@ -181,7 +181,7 @@ apiTest.describe(
       'answers 400 for a cut at an event that is not a message or an end',
       async ({ asAdmin }) => {
         const badCut = await asAdmin.post(THREAD_PATH(parentId), {
-          body: { client_thread_id: uuidv4(), cut_event_id: 'not-an-event' },
+          body: { conversation_id: uuidv4(), cut_event_id: 'not-an-event' },
         });
         expect(badCut).toHaveStatusCode(400);
       }
@@ -192,7 +192,7 @@ apiTest.describe(
 
       try {
         const off = await asAdmin.post(THREAD_PATH(parentId), {
-          body: { client_thread_id: uuidv4() },
+          body: { conversation_id: uuidv4() },
         });
         expect(off).toHaveStatusCode(404);
       } finally {

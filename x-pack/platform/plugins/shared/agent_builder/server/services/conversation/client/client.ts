@@ -1223,7 +1223,7 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   async createThread(
-    { parentId, threadId, cutEventId, highlight, title }: CreateThreadRequest,
+    { parentId, threadId, cutEventId, input, title }: CreateThreadRequest,
     { source }: ConversationWriteOptions
   ): Promise<CreateThreadResult> {
     const parent = fromEs(
@@ -1244,11 +1244,7 @@ class ConversationClientImpl implements ConversationClient {
       type: TimelineEventType.threadStarted,
       created_at: new Date().toISOString(),
       actor,
-      data: {
-        parent_conversation_id: parentId,
-        ...(resolvedCutEventId ? { cut_event_id: resolvedCutEventId } : {}),
-        ...(highlight ? { highlight } : {}),
-      },
+      data: {},
     };
 
     let created = true;
@@ -1291,9 +1287,9 @@ class ConversationClientImpl implements ConversationClient {
       created_at: threadStarted.created_at,
       actor,
       data: {
-        thread_id: threadId,
+        conversation_id: threadId,
         ...(resolvedCutEventId ? { cut_event_id: resolvedCutEventId } : {}),
-        ...(highlight ? { highlight } : {}),
+        ...(input ? { input } : {}),
       },
     };
 

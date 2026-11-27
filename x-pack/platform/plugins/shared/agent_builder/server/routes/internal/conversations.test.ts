@@ -566,7 +566,7 @@ describe('registerInternalConversationRoutes - _thread', () => {
       method: 'post',
       path: THREAD_PATH,
       params: { parent_id: 'parent-1' },
-      body: { client_thread_id: THREAD_ID, ...body },
+      body: { conversation_id: THREAD_ID, ...body },
     });
 
   beforeEach(() => {
@@ -617,7 +617,7 @@ describe('registerInternalConversationRoutes - _thread', () => {
     expect(createThread).not.toHaveBeenCalled();
   });
 
-  it('creates an empty thread without a run when there is no highlight', async () => {
+  it('creates an empty thread without a run when there is no input', async () => {
     const response = await routeHandler(
       createMockContext() as any,
       createRequest({ cut_event_id: 'r1::user_message' }),
@@ -629,13 +629,13 @@ describe('registerInternalConversationRoutes - _thread', () => {
       { source: 'http_api' }
     );
     expect(maybeExecuteAgent).not.toHaveBeenCalled();
-    expect(response.payload).toEqual({ thread_id: THREAD_ID, conversation: thread });
+    expect(response.payload).toEqual({ conversation_id: THREAD_ID, conversation: thread });
   });
 
-  it('starts the first run on the highlight, without browser tools', async () => {
+  it('starts the first run on the input, without browser tools', async () => {
     const response = await routeHandler(
       createMockContext() as any,
-      createRequest({ highlight: { text: 'Why this host?' }, connector_id: 'connector-1' }),
+      createRequest({ input: 'Why this host?', connector_id: 'connector-1' }),
       kibanaResponseFactory
     );
 
@@ -650,7 +650,7 @@ describe('registerInternalConversationRoutes - _thread', () => {
     });
     expect(params.browserApiTools).toBeUndefined();
     expect(useTaskManager).toBe(true);
-    expect(response.payload).toMatchObject({ thread_id: THREAD_ID, execution_id: 'exec-1' });
+    expect(response.payload).toMatchObject({ conversation_id: THREAD_ID, execution_id: 'exec-1' });
   });
 
   it('starts no second run on a resend and returns the run in progress', async () => {
@@ -661,11 +661,11 @@ describe('registerInternalConversationRoutes - _thread', () => {
 
     const response = await routeHandler(
       createMockContext() as any,
-      createRequest({ highlight: { text: 'Why this host?' } }),
+      createRequest({ input: 'Why this host?' }),
       kibanaResponseFactory
     );
 
     expect(maybeExecuteAgent).not.toHaveBeenCalled();
-    expect(response.payload).toMatchObject({ thread_id: THREAD_ID, execution_id: 'exec-1' });
+    expect(response.payload).toMatchObject({ conversation_id: THREAD_ID, execution_id: 'exec-1' });
   });
 });

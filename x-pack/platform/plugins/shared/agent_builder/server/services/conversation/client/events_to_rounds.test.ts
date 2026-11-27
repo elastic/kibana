@@ -396,7 +396,7 @@ describe('eventsToRounds — interrupted executions', () => {
       createdAt: T0,
     });
     // attach the pause state naming both calls to the terminal
-    const terminated = pausedTerminal[pausedTerminal.length - 1] as TimelineEvent & {
+    const terminated = pausedTerminal[pausedTerminal.length - 1] as {
       data: Record<string, unknown>;
     };
     terminated.data = { ...terminated.data, state: pauseState(['tc1', 'tc2']) };
@@ -434,7 +434,7 @@ describe('eventsToRounds — interrupted executions', () => {
       outcome: { type: 'prompt_requested', prompts: [] },
       createdAt: T0,
     });
-    const terminated = pausedTerminal[pausedTerminal.length - 1] as TimelineEvent & {
+    const terminated = pausedTerminal[pausedTerminal.length - 1] as {
       data: Record<string, unknown>;
     };
     terminated.data = { ...terminated.data, state: pauseState(['tc1']) };
@@ -480,7 +480,7 @@ describe('eventsToRounds — interrupted executions', () => {
       outcome: { type: 'prompt_requested', prompts: [] },
       createdAt: T0,
     });
-    const terminated = pausedTerminal[pausedTerminal.length - 1] as TimelineEvent & {
+    const terminated = pausedTerminal[pausedTerminal.length - 1] as {
       data: Record<string, unknown>;
     };
     terminated.data = { ...terminated.data, state: pauseState(['tc1']) };

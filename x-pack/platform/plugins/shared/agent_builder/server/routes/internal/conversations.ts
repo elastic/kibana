@@ -395,17 +395,13 @@ export function registerInternalConversationRoutes({
           parent_id: schema.string({ maxLength: CONVERSATION_ID_MAX_LENGTH }),
         }),
         body: schema.object({
-          client_thread_id: schema.string({
+          conversation_id: schema.string({
             minLength: 36,
             maxLength: 36,
             validate: (value) => (isUuid(value) ? undefined : 'must be a UUID'),
           }),
           cut_event_id: schema.maybe(schema.string({ maxLength: CONVERSATION_ID_MAX_LENGTH })),
-          highlight: schema.maybe(
-            schema.object({
-              text: schema.string({ minLength: 1, maxLength: CHAT_MESSAGE_MAX_LENGTH }),
-            })
-          ),
+          input: schema.maybe(schema.string({ minLength: 1, maxLength: CHAT_MESSAGE_MAX_LENGTH })),
           title: schema.maybe(schema.string({ maxLength: CONVERSATION_TITLE_MAX_LENGTH })),
           trigger: schema.maybe(
             schema.oneOf([
@@ -430,9 +426,9 @@ export function registerInternalConversationRoutes({
           getInternalServices();
         const { parent_id: parentId } = request.params;
         const {
-          client_thread_id: threadId,
+          conversation_id: threadId,
           cut_event_id: cutEventId,
-          highlight,
+          input,
           title,
           trigger,
           ...runSettings
@@ -440,14 +436,14 @@ export function registerInternalConversationRoutes({
 
         const client = await conversationsService.getScopedClient({ request });
         const { thread, created } = await client.createThread(
-          { parentId, threadId, cutEventId, highlight, title },
+          { parentId, threadId, cutEventId, input, title },
           { source: 'http_api' }
         );
 
-        if (!created || !highlight) {
+        if (!created || !input) {
           return response.ok<CreateThreadResponse>({
             body: {
-              thread_id: threadId,
+              conversation_id: threadId,
               ...(thread.active_execution
                 ? { execution_id: thread.active_execution.execution_id }
                 : {}),
@@ -461,7 +457,7 @@ export function registerInternalConversationRoutes({
             ...runSettings,
             agent_id: thread.agent_id,
             conversation_id: threadId,
-            input: highlight.text,
+            input,
             trigger_mode: trigger ?? ChatTriggerMode.Always,
             _execution_mode: 'task_manager',
           },
@@ -471,7 +467,7 @@ export function registerInternalConversationRoutes({
 
         return response.ok<CreateThreadResponse>({
           body: {
-            thread_id: threadId,
+            conversation_id: threadId,
             ...(executionId ? { execution_id: executionId } : {}),
             conversation: await client.getThread(threadId),
           },

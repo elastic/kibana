@@ -87,9 +87,11 @@ export interface AddConversationEventsResponse {
 }
 
 export interface CreateThreadRequest {
-  client_thread_id: string;
+  /** The new thread's id, chosen by the client so a resent request finds the same thread. */
+  conversation_id: string;
   cut_event_id?: string;
-  highlight?: { text: string };
+  /** The thread's first user message. */
+  input?: string;
   title?: string;
   trigger?: 'always' | 'never';
   connector_id?: string | null;
@@ -99,7 +101,7 @@ export interface CreateThreadRequest {
 }
 
 export interface CreateThreadResponse {
-  thread_id: string;
+  conversation_id: string;
   /** The first run, or on a resend the run still in progress. */
   execution_id?: string;
   conversation: ConversationWithPermissions;

@@ -220,12 +220,8 @@ export type AgentMessageEvent = BaseTimelineEvent<
 /** A message that starts a run or is read by the next one, whoever posted it. */
 export type MessageEvent = UserMessageEvent | AgentMessageEvent;
 
-export interface ThreadStartedEventData {
-  parent_conversation_id: string;
-  /** The parent event the copied history ends at, absent when the parent had no history. */
-  cut_event_id?: string;
-  highlight?: { text: string };
-}
+/** A pure marker: the thread's link to its parent lives on the conversation. */
+export type ThreadStartedEventData = Record<string, never>;
 /** The first event of a thread's own history, after the events copied from its parent. */
 export type ThreadStartedEvent = BaseTimelineEvent<
   TimelineEventType.threadStarted,
@@ -233,9 +229,11 @@ export type ThreadStartedEvent = BaseTimelineEvent<
 >;
 
 export interface ThreadCreatedEventData {
-  thread_id: string;
+  /** The thread's conversation id. */
+  conversation_id: string;
   cut_event_id?: string;
-  highlight?: { text: string };
+  /** The thread's first user message. */
+  input?: string;
 }
 /** Written on the parent when a thread is started from it. */
 export type ThreadCreatedEvent = BaseTimelineEvent<
