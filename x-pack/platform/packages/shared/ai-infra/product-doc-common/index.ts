@@ -30,6 +30,11 @@ export {
   openApiSpecIndexPattern,
   getOpenApiSpecIndexName,
 } from './src/indices';
+export {
+  INFERENCE_ID_MAX_LENGTH,
+  isValidInferenceId,
+  validateInferenceId,
+} from './src/inference_id';
 export type { ProductDocumentationAttributes } from './src/documents';
 export { resolveContentTitle, stripSiteSuffix } from './src/content_title';
 export {
