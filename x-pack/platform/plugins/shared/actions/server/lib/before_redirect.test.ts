@@ -38,7 +38,7 @@ const redirect = (
   const { hostname } = new URL(toUrl);
   const headers: Record<string, string> = { ...credentialHeaders, ...safeHeaders };
   fn({ hostname, href: toUrl, headers }, responseDetails, {
-    headers: {},
+    headers: { ...headers },
     method: 'GET',
     url: fromUrl,
   });
@@ -148,6 +148,33 @@ describe('getBeforeRedirectFn', () => {
       crossOrigin: true,
       headersRemoved: true,
     });
+  });
+
+  test('counts headers that follow-redirects removed before the hook ran', () => {
+    const hook = getBeforeRedirectFn(configurationUtilities, logger, '.webhook');
+    // follow-redirects has already dropped Authorization from the next request's headers.
+    const headers: Record<string, string> = { ...safeHeaders };
+
+    hook(
+      { hostname: 'evil.example.org', href: 'https://evil.example.org/a', headers },
+      responseDetails,
+      {
+        headers: {
+          Host: 'api.example.com',
+          Authorization: 'Bearer confidential-value',
+          ...safeHeaders,
+        },
+        method: 'GET',
+        url: 'https://api.example.com/a',
+      }
+    );
+
+    expect(recordConnectorRedirect).toHaveBeenCalledWith(
+      expect.objectContaining({ crossOrigin: true, headersRemoved: true })
+    );
+    const [message] = logger.debug.mock.calls[0];
+    expect(message).toContain('Authorization');
+    expect(message).not.toContain('Host');
   });
 
   test('does not record a redirect to a host that is not allowed', () => {

@@ -48,12 +48,16 @@ export const isSameOriginRedirect = (fromUrl: unknown, toUrl: unknown): boolean 
 };
 
 /**
+ * Returns the names of the headers that are not safe to send to another origin.
+ */
+export const getCrossOriginUnsafeHeaderNames = (headers: Record<string, unknown>): string[] =>
+  Object.keys(headers).filter((name) => !CROSS_ORIGIN_SAFE_HEADERS.has(name.toLowerCase()));
+
+/**
  * Deletes every header that is not safe to send to another origin and returns the removed names.
  */
 export const removeCrossOriginUnsafeHeaders = (headers: Record<string, unknown>): string[] => {
-  const removed = Object.keys(headers).filter(
-    (name) => !CROSS_ORIGIN_SAFE_HEADERS.has(name.toLowerCase())
-  );
+  const removed = getCrossOriginUnsafeHeaderNames(headers);
   for (const name of removed) {
     delete headers[name];
   }

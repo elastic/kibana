@@ -9,7 +9,11 @@ import type { AxiosRequestConfig } from 'axios';
 import type { Logger } from '@kbn/core/server';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import { recordConnectorRedirect } from './connector_metrics';
-import { isSameOriginRedirect, removeCrossOriginUnsafeHeaders } from './redirect_headers';
+import {
+  getCrossOriginUnsafeHeaderNames,
+  isSameOriginRedirect,
+  removeCrossOriginUnsafeHeaders,
+} from './redirect_headers';
 
 interface RedirectOptions {
   hostname?: unknown;
@@ -23,6 +27,7 @@ interface RedirectResponseDetails {
 
 interface RedirectRequestDetails {
   url?: string;
+  headers?: Record<string, unknown>;
 }
 
 /**
@@ -51,7 +56,17 @@ export const getBeforeRedirectFn = (
     configurationUtilities.ensureHostnameAllowed(hostname);
 
     const crossOrigin = !isSameOriginRedirect(requestDetails?.url, href);
-    const removed = crossOrigin && headers != null ? removeCrossOriginUnsafeHeaders(headers) : [];
+    // follow-redirects already strips Authorization and Cookie from `headers` on a cross-host hop,
+    // so the removed names come from the previous request's headers. Node sets Host per request.
+    const previousHeaders = requestDetails?.headers ?? headers ?? {};
+    const removed = crossOrigin
+      ? getCrossOriginUnsafeHeaderNames(previousHeaders).filter(
+          (name) => name.toLowerCase() !== 'host'
+        )
+      : [];
+    if (crossOrigin && headers != null) {
+      removeCrossOriginUnsafeHeaders(headers);
+    }
 
     recordConnectorRedirect({
       connectorType,
