@@ -641,6 +641,12 @@ const matchesFilters = (
   ) {
     return false;
   }
+  if (
+    filters.assignee &&
+    !(metadata.assignees ?? []).some((assignee) => filters.assignee?.includes(assignee))
+  ) {
+    return false;
+  }
   const createdAt = Date.parse(conversation.created_at);
   if (filters.created_after && !(createdAt >= Date.parse(filters.created_after))) {
     return false;

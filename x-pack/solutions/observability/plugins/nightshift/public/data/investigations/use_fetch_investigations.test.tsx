@@ -122,6 +122,19 @@ describe('useFetchInvestigations', () => {
     await waitFor(() => expect(result.current.investigations).toEqual([open]));
   });
 
+  it('asks only for the investigations assigned to a user when given one', async () => {
+    const { result } = renderHook(
+      () => useFetchInvestigations({ inProgress: false, status: 'open', assignee: 'u_me' }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => expect(result.current.investigations.length).toBeGreaterThan(0));
+    expect(httpGet).toHaveBeenCalledWith(
+      '/internal/investigations/investigations',
+      expect.objectContaining({ query: expect.objectContaining({ assignee: 'u_me' }) })
+    );
+  });
+
   it('leaves running investigations out of the severity sections', async () => {
     const { result } = renderHook(
       () => useFetchInvestigations({ inProgress: false, severities: ['high'] }),

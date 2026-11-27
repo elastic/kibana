@@ -102,17 +102,20 @@ const toSectionState = ({
 
 export const useInvestigationSections = ({
   query,
+  assignee,
   updatedAfter,
   updatedBefore,
 }: {
   query?: string;
+  /** A user profile uid: only investigations assigned to this user. */
+  assignee?: string;
   /** Only investigations last modified within this window (ISO 8601). */
   updatedAfter?: string;
   updatedBefore?: string;
 } = {}): InvestigationSectionsResult => {
   const updatedWindow = { updatedAfter, updatedBefore };
   // Changing any filter starts a different list, so it is not a finished investigation.
-  const filterKey = JSON.stringify([query, updatedAfter, updatedBefore]);
+  const filterKey = JSON.stringify([query, assignee, updatedAfter, updatedBefore]);
   const { http, agenticInvestigations } = useKibana().services;
 
   // A running investigation's `updated_at` does not move with tool calls, so a window ending at
@@ -122,6 +125,7 @@ export const useInvestigationSections = ({
   const inProgress = useFetchInvestigations({
     inProgress: true,
     query,
+    assignee,
     ...inProgressWindow,
     refetchInterval: IN_PROGRESS_REFETCH_INTERVAL_MS,
   });
@@ -130,14 +134,30 @@ export const useInvestigationSections = ({
   const activeInvestigationCount = inProgress.matchTotal;
   const hasActiveInvestigations = activeInvestigationCount > 0;
 
-  const critical = useFetchInvestigations({ ...tierSection('critical'), query, ...updatedWindow });
-  const high = useFetchInvestigations({ ...tierSection('high'), query, ...updatedWindow });
-  const medium = useFetchInvestigations({ ...tierSection('medium'), query, ...updatedWindow });
-  const low = useFetchInvestigations({ ...tierSection('low'), query, ...updatedWindow });
+  const critical = useFetchInvestigations({
+    ...tierSection('critical'),
+    query,
+    assignee,
+    ...updatedWindow,
+  });
+  const high = useFetchInvestigations({
+    ...tierSection('high'),
+    query,
+    assignee,
+    ...updatedWindow,
+  });
+  const medium = useFetchInvestigations({
+    ...tierSection('medium'),
+    query,
+    assignee,
+    ...updatedWindow,
+  });
+  const low = useFetchInvestigations({ ...tierSection('low'), query, assignee, ...updatedWindow });
   const notRated = useFetchInvestigations({
     inProgress: false,
     severities: ['none'],
     query,
+    assignee,
     ...updatedWindow,
   });
 
@@ -145,11 +165,14 @@ export const useInvestigationSections = ({
     inProgress: false,
     status: 'closed',
     query,
+    assignee,
     ...updatedWindow,
   });
 
   const hasSearchQuery = Boolean(query?.trim());
+  // The counts are scoped like the lists: the same window, and the same assignee.
   const severityCountsTimeQuery = {
+    ...(assignee ? { assignee } : {}),
     ...(updatedAfter ? { updated_after: updatedAfter } : {}),
     ...(updatedBefore ? { updated_before: updatedBefore } : {}),
   };
@@ -162,6 +185,7 @@ export const useInvestigationSections = ({
       ...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY,
       'severityCounts',
       query,
+      assignee,
       updatedAfter,
       updatedBefore,
     ],
@@ -187,6 +211,7 @@ export const useInvestigationSections = ({
     queryKey: [
       ...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY,
       'severityCountsBaseline',
+      assignee,
       updatedAfter,
       updatedBefore,
     ],

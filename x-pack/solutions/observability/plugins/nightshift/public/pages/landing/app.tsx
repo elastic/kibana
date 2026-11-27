@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
   EuiButton,
+  EuiButtonGroup,
   EuiCallOut,
   EuiFieldSearch,
   EuiFlexGroup,
@@ -25,6 +26,7 @@ import { useQueryClient } from '@kbn/react-query';
 import type { Severity } from '@kbn/nightshift-investigations-plugin/common';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
+import { useCurrentUserProfileUid } from '../../hooks/use_current_user_profile_uid';
 import { useKibana } from '../../hooks/use_kibana';
 import { isHttpNotFoundError } from '../../common/http_error';
 import {
@@ -46,6 +48,8 @@ import { InvestigationSeverityTiles } from '../../components/entities/investigat
 import { NightshiftTimeRangePicker } from '../../components/ui/time_range_picker';
 import { useFlyoutShareUrlCustomAction } from '../../components/ui/flyout_share_url_button';
 import {
+  getNightshiftMineFromSearch,
+  setNightshiftMineParam,
   buildNightshiftInvestigationFlyoutShareUrl,
   clearNightshiftInvestigationIdParam,
   getNightshiftInvestigationIdFromSearch,
@@ -126,6 +130,10 @@ export function NightshiftApp({
     trimmedSearchQuery,
     INVESTIGATIONS_SEARCH_DEBOUNCE_MS
   );
+  // "My investigations": only those assigned to the current user, kept in the URL like the search.
+  const isMine = useMemo(() => getNightshiftMineFromSearch(search), [search]);
+  const currentUserProfileUid = useCurrentUserProfileUid();
+  const assignee = isMine ? currentUserProfileUid : undefined;
   const rawSeverity = useMemo(() => getNightshiftSeverityFromSearch(search), [search]);
   const activeSeverity: Severity | undefined = useMemo(
     () => (isSeverity(rawSeverity) ? rawSeverity : undefined),
@@ -152,6 +160,7 @@ export function NightshiftApp({
     refetchAll,
   } = useInvestigationSections({
     query: debouncedSearchQuery,
+    assignee,
     updatedAfter: updatedWindow.updatedAfter,
     updatedBefore: updatedWindow.updatedBefore,
   });
@@ -269,6 +278,15 @@ export function NightshiftApp({
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const params = new URLSearchParams(history.location.search);
       setNightshiftSearchQueryParam(params, truncateInvestigationsSearch(e.target.value));
+      history.replace({ search: params.toString() });
+    },
+    [history]
+  );
+
+  const handleScopeChange = useCallback(
+    (id: string) => {
+      const params = new URLSearchParams(history.location.search);
+      setNightshiftMineParam(params, id === 'mine');
       history.replace({ search: params.toString() });
     },
     [history]
@@ -490,6 +508,38 @@ export function NightshiftApp({
             isClearable
             fullWidth
             compressed
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {/* Two buttons, as incident tools show them: all of them, or only mine. */}
+          <EuiButtonGroup
+            legend={i18n.translate('xpack.nightshift.investigations.scopeLegend', {
+              defaultMessage: 'Show all investigations or only mine',
+            })}
+            data-test-subj="nightshiftHomepageScope"
+            buttonSize="compressed"
+            color="text"
+            type="single"
+            idSelected={isMine ? 'mine' : 'all'}
+            onChange={handleScopeChange}
+            options={[
+              {
+                id: 'all',
+                label: i18n.translate('xpack.nightshift.investigations.allInvestigationsButton', {
+                  defaultMessage: 'All investigations',
+                }),
+                'data-test-subj': 'nightshiftHomepageAllInvestigationsScope',
+              },
+              {
+                id: 'mine',
+                label: i18n.translate('xpack.nightshift.investigations.myInvestigationsButton', {
+                  defaultMessage: 'My investigations',
+                }),
+                'data-test-subj': 'nightshiftHomepageMyInvestigations',
+                // The assignee is the user's profile uid: without one there is nothing to match.
+                isDisabled: currentUserProfileUid === undefined,
+              },
+            ]}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

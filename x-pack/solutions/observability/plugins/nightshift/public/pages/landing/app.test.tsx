@@ -18,6 +18,7 @@ import { NightshiftApp } from './app';
 import type { InvestigationSectionState } from '../../data/investigations/use_investigation_sections';
 import { useInvestigationSections } from '../../data/investigations/use_investigation_sections';
 import { NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY } from '../../data/investigations/use_fetch_investigations';
+import { useCurrentUserProfileUid } from '../../hooks/use_current_user_profile_uid';
 import { useKibana } from '../../hooks/use_kibana';
 import { useDetectionSetupBanner } from './use_detection_setup_banner';
 
@@ -26,6 +27,9 @@ jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
   useStatusSignal: jest.fn(),
 }));
 jest.mock('../../hooks/use_kibana');
+jest.mock('../../hooks/use_current_user_profile_uid', () => ({
+  useCurrentUserProfileUid: jest.fn(),
+}));
 jest.mock('@kbn/ebt-tools/react');
 jest.mock('../../components/entities/investigation/use_investigation_assignees', () => ({
   useInvestigationAssignees: () => () => null,
@@ -50,6 +54,7 @@ jest.mock('../../components/ui/time_range_picker', () => ({
 
 const mockUseInvestigationSections = useInvestigationSections as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
+const mockUseCurrentUserProfileUid = useCurrentUserProfileUid as jest.Mock;
 const mockUsePageReady = usePageReady as jest.Mock;
 const mockUseDetectionSetupBanner = useDetectionSetupBanner as jest.Mock;
 
@@ -234,6 +239,7 @@ function renderApp({
 describe('NightshiftApp', () => {
   beforeEach(() => {
     refetchAll.mockClear();
+    mockUseCurrentUserProfileUid.mockReturnValue('u_me');
     reportEvent.mockClear();
     scrollTo.mockClear();
     mockUsePageReady.mockClear();
@@ -306,6 +312,41 @@ describe('NightshiftApp', () => {
     } finally {
       jest.useRealTimers();
     }
+  });
+
+  it("limits the homepage to the current user's investigations with the My investigations button", () => {
+    renderApp();
+    const mine = () => screen.getByTestId('nightshiftHomepageMyInvestigations');
+    const all = () => screen.getByTestId('nightshiftHomepageAllInvestigationsScope');
+    const isOn = (button: HTMLElement) => button.getAttribute('aria-pressed') === 'true';
+    expect(isOn(all())).toBe(true);
+    expect(isOn(mine())).toBe(false);
+    expect(mockUseInvestigationSections).toHaveBeenLastCalledWith(
+      expect.objectContaining({ assignee: undefined })
+    );
+
+    fireEvent.click(mine());
+
+    expect(screen.getByTestId('locationProbe')).toHaveTextContent('mine=true');
+    expect(isOn(mine())).toBe(true);
+    expect(mockUseInvestigationSections).toHaveBeenLastCalledWith(
+      expect.objectContaining({ assignee: 'u_me' })
+    );
+
+    fireEvent.click(all());
+    expect(screen.getByTestId('locationProbe')).not.toHaveTextContent('mine');
+    expect(isOn(all())).toBe(true);
+  });
+
+  it('starts on My investigations from the link, and disables the button without a profile', () => {
+    renderApp({ initialEntries: ['/?mine=true'] });
+    expect(mockUseInvestigationSections).toHaveBeenLastCalledWith(
+      expect.objectContaining({ assignee: 'u_me' })
+    );
+
+    mockUseCurrentUserProfileUid.mockReturnValue(undefined);
+    renderApp();
+    expect(screen.getAllByTestId('nightshiftHomepageMyInvestigations').at(-1)).toBeDisabled();
   });
 
   it('offers a refresh button next to the time range', () => {
