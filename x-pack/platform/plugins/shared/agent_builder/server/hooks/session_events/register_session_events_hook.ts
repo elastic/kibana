@@ -67,8 +67,8 @@ const saveRound = async (
   }
 
   const conversationClient = await conversations.getScopedClientAsUser({ request, user });
-  const conversation = (await conversationClient.bulkGet([conversationId])).get(conversationId);
-  if (!conversation || isSharedConversation(conversation.access_control)) {
+  const conversation = await conversationClient.get(conversationId);
+  if (isSharedConversation(conversation.access_control)) {
     return;
   }
 

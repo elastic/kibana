@@ -58,8 +58,8 @@ const setup = ({ withContextEngine = true }: { withContextEngine?: boolean } = {
   logger.get.mockReturnValue(hookLogger);
 
   const getSetting = jest.fn().mockResolvedValue(true);
-  const bulkGetConversations = jest.fn().mockResolvedValue(new Map([[CONVERSATION_ID, {}]]));
-  const getScopedClientAsUser = jest.fn().mockResolvedValue({ bulkGet: bulkGetConversations });
+  const getConversation = jest.fn().mockResolvedValue({});
+  const getScopedClientAsUser = jest.fn().mockResolvedValue({ get: getConversation });
   const saveEvents = jest.fn().mockResolvedValue({ results: [] });
   const getSessionMemoryClient = jest.fn().mockReturnValue({ saveEvents });
 
@@ -102,7 +102,7 @@ const setup = ({ withContextEngine = true }: { withContextEngine?: boolean } = {
     handler: handler as (context: AfterExecutionHookContext) => Promise<void>,
     hookLogger,
     getSetting,
-    bulkGetConversations,
+    getConversation,
     getScopedClientAsUser,
     getSessionMemoryClient,
     saveEvents,
@@ -128,7 +128,7 @@ describe('registerSessionEventsHook', () => {
       saveEvents,
       getSetting,
       getScopedClientAsUser,
-      bulkGetConversations,
+      getConversation,
       getSessionMemoryClient,
     } = setup();
     const context = createContext();
@@ -141,7 +141,7 @@ describe('registerSessionEventsHook', () => {
     expect(getScopedClientAsUser).toHaveBeenCalledWith(
       expect.objectContaining({ user: expect.objectContaining({ id: PROFILE_UID }) })
     );
-    expect(bulkGetConversations).toHaveBeenCalledWith([CONVERSATION_ID]);
+    expect(getConversation).toHaveBeenCalledWith(CONVERSATION_ID);
     expect(saveEvents).toHaveBeenCalledTimes(1);
     expect(saveEvents).toHaveBeenCalledWith({
       sessionId: CONVERSATION_ID,
@@ -202,12 +202,12 @@ describe('registerSessionEventsHook', () => {
     });
 
     it('when Context Engine is not available', async () => {
-      const { handler, bulkGetConversations } = setup({ withContextEngine: false });
+      const { handler, getConversation } = setup({ withContextEngine: false });
 
       await handler(createContext());
 
       expect(getUserFromRequestMock).not.toHaveBeenCalled();
-      expect(bulkGetConversations).not.toHaveBeenCalled();
+      expect(getConversation).not.toHaveBeenCalled();
     });
 
     it.each([
@@ -215,45 +215,30 @@ describe('registerSessionEventsHook', () => {
       ['a user identified by realm', 'realm:["native","native1","chris"]'],
       ['a user without an id', undefined],
     ])('for %s', async (_label, id) => {
-      const { handler, saveEvents, bulkGetConversations } = setup();
+      const { handler, saveEvents, getConversation } = setup();
       getUserFromRequestMock.mockResolvedValue({ id, username: 'chris', isAdmin: false });
 
       await handler(createContext());
 
-      expect(bulkGetConversations).not.toHaveBeenCalled();
+      expect(getConversation).not.toHaveBeenCalled();
       expect(saveEvents).not.toHaveBeenCalled();
-    });
-
-    it('when the conversation is not found', async () => {
-      const { handler, saveEvents, bulkGetConversations, hookLogger } = setup();
-      bulkGetConversations.mockResolvedValue(new Map());
-
-      await handler(createContext());
-
-      expect(saveEvents).not.toHaveBeenCalled();
-      expect(hookLogger.warn).not.toHaveBeenCalled();
     });
 
     it('when the conversation is shared with everyone', async () => {
-      const { handler, saveEvents, bulkGetConversations, hookLogger } = setup();
-      bulkGetConversations.mockResolvedValue(
-        new Map([
-          [
-            CONVERSATION_ID,
-            { access_control: { access_mode: ConversationAccessControlMode.Public, entries: [] } },
-          ],
-        ])
-      );
+      const { handler, saveEvents, getConversation, hookLogger } = setup();
+      getConversation.mockResolvedValue({
+        access_control: { access_mode: ConversationAccessControlMode.Public, entries: [] },
+      });
 
       await handler(createContext());
 
-      expect(bulkGetConversations).toHaveBeenCalledWith([CONVERSATION_ID]);
+      expect(getConversation).toHaveBeenCalledWith(CONVERSATION_ID);
       expect(saveEvents).not.toHaveBeenCalled();
       expect(hookLogger.warn).not.toHaveBeenCalled();
     });
 
     it('when the conversation is shared with named users', async () => {
-      const { handler, saveEvents, bulkGetConversations, hookLogger } = setup();
+      const { handler, saveEvents, getConversation, hookLogger } = setup();
       const accessControl: ConversationAccessControl = {
         access_mode: ConversationAccessControlMode.Private,
         entries: [
@@ -265,13 +250,11 @@ describe('registerSessionEventsHook', () => {
           },
         ],
       };
-      bulkGetConversations.mockResolvedValue(
-        new Map([[CONVERSATION_ID, { access_control: accessControl }]])
-      );
+      getConversation.mockResolvedValue({ access_control: accessControl });
 
       await handler(createContext());
 
-      expect(bulkGetConversations).toHaveBeenCalledWith([CONVERSATION_ID]);
+      expect(getConversation).toHaveBeenCalledWith(CONVERSATION_ID);
       expect(saveEvents).not.toHaveBeenCalled();
       expect(hookLogger.warn).not.toHaveBeenCalled();
     });
@@ -306,8 +289,8 @@ describe('registerSessionEventsHook', () => {
     });
 
     it('logs a warning when the conversation cannot be read', async () => {
-      const { handler, saveEvents, bulkGetConversations, hookLogger } = setup();
-      bulkGetConversations.mockRejectedValue(new Error('not found'));
+      const { handler, saveEvents, getConversation, hookLogger } = setup();
+      getConversation.mockRejectedValue(new Error('not found'));
 
       await expect(handler(createContext())).resolves.toBeUndefined();
 
