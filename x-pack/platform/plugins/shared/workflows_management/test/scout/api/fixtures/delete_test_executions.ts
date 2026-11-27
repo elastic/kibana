@@ -22,13 +22,13 @@ const EXECUTION_STORAGE_TARGETS = [
 ] as const;
 
 const resolveExistingExecutionTargets = async (esClient: EsClient): Promise<string[]> => {
-  const targets = await Promise.all(
-    EXECUTION_STORAGE_TARGETS.map(async (index) => {
-      const exists = await esClient.indices.exists({ index });
-      return exists ? index : undefined;
-    })
-  );
-  return targets.filter((index): index is string => index !== undefined);
+  const existing: string[] = [];
+  for (const index of EXECUTION_STORAGE_TARGETS) {
+    if (await esClient.indices.exists({ index })) {
+      existing.push(index);
+    }
+  }
+  return existing;
 };
 
 /** Removes unsaved execution documents created by this suite. */
