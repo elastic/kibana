@@ -335,6 +335,8 @@ export const createDashboardAddToChatAction = (
           canWriteDashboards,
           attachments: conversationDashboards,
           isStagedFromSavedDashboard: stagedDashboards.isStagedFromSavedDashboard,
+          isOtherDashboardPointerTarget: (attachmentId) =>
+            stagedDashboards.isOtherDashboardPointerTarget(attachmentId, dashboardApi),
         });
         const sent = link.attachment ? undefined : await findSentAttachment(conversationDashboards);
         return { conversation, link, sent };

@@ -56,7 +56,8 @@ export interface DashboardAttachmentLink<TAttachment> {
 /**
  * Finds the attachment whose origin is the open dashboard (none for an unsaved one). Dashboards the
  * agent can't change in place, e.g. managed ones, are never linked. An unsaved dashboard never links
- * to a copy staged from a saved dashboard, since that copy has no origin either.
+ * to a copy staged from a saved dashboard, since that copy has no origin either, nor to another
+ * dashboard a panel pointer points at, so staging it never changes what the pointer shows.
  */
 export const resolveDashboardAttachmentLink = <
   TAttachment extends { id: string; origin?: string },
@@ -65,11 +66,13 @@ export const resolveDashboardAttachmentLink = <
   canWriteDashboards,
   attachments,
   isStagedFromSavedDashboard,
+  isOtherDashboardPointerTarget,
 }: {
   api: DashboardApi;
   canWriteDashboards: boolean;
   attachments: readonly TAttachment[];
   isStagedFromSavedDashboard: (attachmentId: string) => boolean;
+  isOtherDashboardPointerTarget: (attachmentId: string) => boolean;
 }): DashboardAttachmentLink<TAttachment> => {
   if (!canWriteDashboards || !canApplyAgentChangesInPlace(api)) {
     return { linkable: false, origin: undefined, attachment: undefined };
@@ -80,7 +83,9 @@ export const resolveDashboardAttachmentLink = <
     origin,
     attachment: attachments.find(
       ({ id, origin: attachmentOrigin }) =>
-        attachmentOrigin === origin && (origin !== undefined || !isStagedFromSavedDashboard(id))
+        attachmentOrigin === origin &&
+        (origin !== undefined ||
+          (!isStagedFromSavedDashboard(id) && !isOtherDashboardPointerTarget(id)))
     ),
   };
 };

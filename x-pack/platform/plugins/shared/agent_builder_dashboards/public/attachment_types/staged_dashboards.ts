@@ -23,6 +23,8 @@ export interface StagedDashboards {
   isStagedFromSavedDashboard: (attachmentId: string) => boolean;
   /** Records that a panel pointer staged in the chat input points at the attachment. */
   addPointerTarget: (attachmentId: string) => void;
+  /** Whether a panel pointer points at the attachment staged from a dashboard other than this one. */
+  isOtherDashboardPointerTarget: (attachmentId: string, api: DashboardApi) => boolean;
   /**
    * The draft id to stage the dashboard under. Another dashboard staged under the current draft
    * keeps it only when a panel pointer points at it, so this one gets a new draft id; otherwise
@@ -51,6 +53,11 @@ export const createStagedDashboards = (): StagedDashboards => {
   const isStagedFrom = (attachmentId: string, api: DashboardApi): boolean =>
     dashboardKeyByAttachmentId.get(attachmentId) === keyByApi.get(api);
 
+  const isOtherDashboardPointerTarget = (attachmentId: string, api: DashboardApi): boolean =>
+    pointerTargets.has(attachmentId) &&
+    dashboardKeyByAttachmentId.has(attachmentId) &&
+    !isStagedFrom(attachmentId, api);
+
   return {
     add: (attachmentId, api) => {
       dashboardKeyByAttachmentId.set(attachmentId, getKey(api));
@@ -72,13 +79,10 @@ export const createStagedDashboards = (): StagedDashboards => {
     addPointerTarget: (attachmentId) => {
       pointerTargets.add(attachmentId);
     },
+    isOtherDashboardPointerTarget,
     getDraftId: (draftAttachmentId, api) => {
       const { current } = draftAttachmentId;
-      return pointerTargets.has(current) &&
-        dashboardKeyByAttachmentId.has(current) &&
-        !isStagedFrom(current, api)
-        ? draftAttachmentId.next()
-        : current;
+      return isOtherDashboardPointerTarget(current, api) ? draftAttachmentId.next() : current;
     },
   };
 };

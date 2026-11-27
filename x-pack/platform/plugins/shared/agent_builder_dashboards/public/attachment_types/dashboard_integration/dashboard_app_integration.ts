@@ -121,6 +121,8 @@ export const registerDashboardAppIntegration = ({
       canWriteDashboards,
       attachments: attachments ?? [],
       isStagedFromSavedDashboard: stagedDashboards.isStagedFromSavedDashboard,
+      isOtherDashboardPointerTarget: (attachmentId) =>
+        stagedDashboards.isOtherDashboardPointerTarget(attachmentId, api),
     });
     const isNewConversation = !conversationId;
     // another dashboard staged under the draft id keeps it, e.g. for a panel pointer to it

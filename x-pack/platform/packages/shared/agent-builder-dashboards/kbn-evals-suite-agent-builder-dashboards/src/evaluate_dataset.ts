@@ -187,18 +187,19 @@ export function createEvaluateDataset({
   esClient: EsClient;
   log: ToolingLog;
 }): EvaluateDataset {
+  /** The dashboards to score, read from `snapshot` when given, else from the conversation now. */
   const readDashboards = async (
     last: AgentBuilderClientResponse,
     steps: Array<Record<string, unknown>>,
-    seeded: boolean
+    seeded: boolean,
+    snapshot?: Conversation
   ): Promise<Pick<DashboardAgentTaskOutput, 'before' | 'dashboard'>> => {
     const writtenId = getLastWrittenDashboardId(steps);
     if (!last.conversationId || (!writtenId && !seeded)) {
       return {};
     }
-    const conversation = await agentBuilderClient.getConversation<Conversation>(
-      last.conversationId
-    );
+    const conversation =
+      snapshot ?? (await agentBuilderClient.getConversation<Conversation>(last.conversationId));
     const { first: before } = seeded
       ? readDashboardVersions(conversation, SEEDED_DASHBOARD_ID)
       : { first: undefined };
@@ -325,7 +326,13 @@ export function createEvaluateDataset({
         : {}),
       openingPrompts: opening.prompts,
       openingToolIds: getToolIds({ errors: [], messages: [], steps: opening.steps }),
-      ...(await readDashboards(last, steps, seededDashboard !== undefined)),
+      // the later message is scored on its own, so the requested edits are scored before it
+      ...(await readDashboards(
+        answered,
+        answeredSteps,
+        seededDashboard !== undefined,
+        beforeLaterMessage
+      )),
     };
   };
 
