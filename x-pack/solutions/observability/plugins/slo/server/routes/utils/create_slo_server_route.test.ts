@@ -14,6 +14,7 @@ import {
   SLOIdConflict,
   SLONotFound,
   SLOOperationTimeout,
+  SLOResourcesNotInstalled,
   SLOTemplateNotFound,
   SecurityException,
 } from '../../errors';
@@ -61,6 +62,7 @@ describe('handleSLOError', () => {
     [new SLOIdConflict('conflict'), 409],
     [new SecurityException('forbidden'), 403],
     [new SLOOperationTimeout('timeout'), 503],
+    [new SLOResourcesNotInstalled('resources not installed'), 503],
     [new SLOError('bad request'), 400],
   ])('maps %p to a %p response', (error, statusCode) => {
     const boom = handleSLOError(error);

@@ -44,8 +44,10 @@ export class AnnotationListingPage {
    * the tab body is in place.
    */
   async goto() {
-    await this.page.gotoApp('visualize', { hash: '/annotations' });
-    await this.contentList.searchBox.waitFor({ state: 'visible' });
+    await this.page.gotoApp('visualize', {
+      hash: '/annotations',
+      readyWhen: this.contentList.searchBox,
+    });
   }
 
   async selectTag(tagName: string) {

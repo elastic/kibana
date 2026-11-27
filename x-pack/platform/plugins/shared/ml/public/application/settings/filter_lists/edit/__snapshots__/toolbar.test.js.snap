@@ -75,6 +75,7 @@ exports[`EditFilterListToolbar renders the toolbar with no items selected 1`] = 
               >
                 Add item
                 <span
+                  aria-hidden="true"
                   color="inherit"
                   data-euiicon-type="chevronSingleDown"
                 />
@@ -179,6 +180,7 @@ exports[`EditFilterListToolbar renders the toolbar with one item selected 1`] = 
               >
                 Add item
                 <span
+                  aria-hidden="true"
                   color="inherit"
                   data-euiicon-type="chevronSingleDown"
                 />

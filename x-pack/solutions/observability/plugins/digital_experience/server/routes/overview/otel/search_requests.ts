@@ -91,7 +91,7 @@ export const logsSearch = ({
       environment,
       {
         pageLoads: {
-          // The web vitals, errors and clicks carry no page URL yet, so only page loads have a page.
+          // The web vitals carry no URL, so only page loads have the URL text to match.
           filter: {
             bool: {
               filter: [

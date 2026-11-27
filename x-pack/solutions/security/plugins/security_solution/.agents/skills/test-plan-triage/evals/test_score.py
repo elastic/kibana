@@ -157,6 +157,27 @@ class CheckTest(unittest.TestCase):
             ["answer language 'en', expected 'es'", "answer does not contain '2026-10-01'", "answer has no **Question:** line"],
         )
 
+    def test_suggested_level_text(self):
+        expected = {**EXPECTED_YES, "answer": {"suggested_level_text": "[elastic/kibana#100]"}}
+        self.assertEqual(score.check(expected, "with", write_run(self.work, YES_ANSWER)), [])
+        expected = {**EXPECTED_YES, "answer": {"suggested_level_text": "one functionality"}}
+        failures = score.check(expected, "with", write_run(self.work, YES_ANSWER))
+        self.assertEqual(failures, ["suggested level does not start with 'one functionality'"])
+
+    def test_suggested_level_excludes(self):
+        expected = {**EXPECTED_YES, "answer": {"suggested_level_excludes": ["standalone"]}}
+        self.assertEqual(score.check(expected, "with", write_run(self.work, YES_ANSWER)), [])
+        expected = {**EXPECTED_YES, "answer": {"suggested_level_excludes": ["elastic/kibana#100"]}}
+        failures = score.check(expected, "with", write_run(self.work, YES_ANSWER))
+        self.assertEqual(failures, ["suggested level names ['elastic/kibana#100']"])
+
+    def test_hierarchy_mentions(self):
+        expected = {**EXPECTED_YES, "answer": {"hierarchy_mentions": "elastic/kibana#100"}}
+        self.assertEqual(score.check(expected, "with", write_run(self.work, YES_ANSWER)), [])
+        expected = {**EXPECTED_YES, "answer": {"hierarchy_mentions": "(umbrella)"}}
+        failures = score.check(expected, "with", write_run(self.work, YES_ANSWER))
+        self.assertEqual(failures, ["hierarchy does not mention '(umbrella)'"])
+
     def test_untouched(self):
         expected = {**EXPECTED_YES, "untouched": ["elastic/kibana#999"]}
         failures = score.check(expected, "with", write_run(self.work, YES_ANSWER, requests="api repos/elastic/kibana/issues/999\n"))

@@ -152,13 +152,13 @@ describe('getApplyDreamRelationshipsStepDefinition', () => {
       [customer.id]: {
         ...customer,
         permissions: team,
-        references: [{ uri: 'trace://round-1', relation: 'derived_from' }],
+        references: [{ uri: 'session://round-1', relation: 'derived_from' }],
       },
       [montreal.id]: {
         ...montreal,
         permissions: team,
         references: [
-          { uri: 'trace://round-1', relation: 'derived_from' },
+          { uri: 'session://round-1', relation: 'derived_from' },
           { uri: 'session-memory://m-9', relation: 'derived_from' },
         ],
       },
@@ -216,7 +216,7 @@ describe('getApplyDreamRelationshipsStepDefinition', () => {
         references: [
           { uri: `ki://${customer.id}`, relation: 'relates_to', description: 'from' },
           { uri: `ki://${montreal.id}`, relation: 'relates_to', description: 'to' },
-          { uri: 'trace://round-1', relation: 'derived_from' },
+          { uri: 'session://round-1', relation: 'derived_from' },
         ],
       })
     );

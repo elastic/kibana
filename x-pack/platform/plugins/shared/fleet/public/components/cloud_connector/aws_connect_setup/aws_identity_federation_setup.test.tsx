@@ -318,7 +318,7 @@ describe('AwsIdentityFederationSetup', () => {
     });
   });
 
-  describe('without integrations (static template flow, as used by AwsConnectSetup)', () => {
+  describe('without integrations (static template flow)', () => {
     beforeEach(() => {
       // No connectors yet, so the New Identity tab is the initial tab.
       mockGetConnectors({ data: [] });

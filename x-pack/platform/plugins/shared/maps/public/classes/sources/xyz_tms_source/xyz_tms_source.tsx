@@ -26,7 +26,7 @@ export const sourceTitle = i18n.translate('xpack.maps.source.ems_xyzTitle', {
   defaultMessage: 'Tile Map Service',
 });
 
-export class XYZTMSSource extends AbstractSource implements IRasterSource {
+export class XYZTMSSource extends AbstractSource<XYZTMSSourceDescriptor> implements IRasterSource {
   static type = SOURCE_TYPES.EMS_XYZ;
 
   readonly _descriptor: XYZTMSSourceDescriptor;

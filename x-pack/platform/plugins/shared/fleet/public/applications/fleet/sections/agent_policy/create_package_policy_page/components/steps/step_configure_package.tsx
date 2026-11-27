@@ -35,7 +35,7 @@ import type {
   RegistryInput,
 } from '../../../../../types';
 import { Loading } from '../../../../../components';
-import { doesPackageHaveIntegrations, ExperimentalFeaturesService } from '../../../../../services';
+import { doesPackageHaveIntegrations } from '../../../../../services';
 
 import type { PackagePolicyValidationResults, VarGroupSelection } from '../../services';
 import { isInputCompatibleWithVarGroupSelections } from '../../services';
@@ -148,11 +148,9 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
               );
 
             const isSingleInput = isSinglePolicyTemplate && inputsToRender.length === 1;
-            //  Enable simplified agentless UX for single input/datastreams integrations
+            //  Simplified agentless UX for single input/datastreams integrations
             const isSingleInputAndStreams =
-              ExperimentalFeaturesService.get().enableSimplifiedAgentlessUX &&
-              isSingleInput &&
-              inputsToRender[0].packagePolicyInput.streams.length <= 1;
+              isSingleInput && inputsToRender[0].packagePolicyInput.streams.length <= 1;
 
             return (
               <React.Fragment key={policyTemplate.name}>

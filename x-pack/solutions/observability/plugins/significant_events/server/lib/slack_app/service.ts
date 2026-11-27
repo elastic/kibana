@@ -814,6 +814,26 @@ export class SlackAppService {
     return { relayClient, tenantKey: connection.tenantKey };
   }
 
+  async isChannelBound(request: KibanaRequest, channelId: string): Promise<boolean> {
+    try {
+      const { relayClient, tenantKey } = await this.requireConnectedTenant(request);
+      return await relayClient.isChannelBound(tenantKey, channelId);
+    } catch (error) {
+      if (error instanceof SlackAppUnavailableError) return false;
+      const details =
+        error instanceof RelayRequestError
+          ? [`status ${error.statusCode}`, ...(error.reason ? [`reason ${error.reason}`] : [])]
+          : [];
+      this.logger.warn(
+        `Could not check the binding of Slack channel ${channelId}: ${[
+          ...details,
+          this.toErrorMessage(error),
+        ].join(', ')}`
+      );
+      throw error;
+    }
+  }
+
   async bindChannel(request: KibanaRequest, channelId: string): Promise<void> {
     const { relayClient, tenantKey } = await this.requireConnectedTenant(request);
     await relayClient.bind(tenantKey, channelId);

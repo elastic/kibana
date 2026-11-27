@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EdotLog } from '../edot_shared/edot_log';
 import type { OtelLogDocument } from '../otel_logs';
 import type { Serializable } from '../serializable';
 import type {
@@ -19,6 +20,7 @@ import type {
 import type { EdotBrowserSpanDocument } from './edot_browser_span';
 import { sample, type Distribution, type HealthProfile } from './health_profiles';
 import { between, pick, pickWeighted, randomHex } from '../edot_shared/random';
+import { inferPageRoute, RESOURCE_TIMING_EVENT, URL_TEMPLATE } from './page_route';
 import { resourceTimings } from './resource_timings';
 import { createSeededRandom } from '../utils/seeded_random';
 
@@ -153,6 +155,12 @@ export type EdotBrowserRatedException = EdotBrowserExceptionTemplate & {
 
 export interface EdotBrowserPage {
   path: string;
+  /**
+   * The route the app tells EDOT Browser about with `setPageRoute()` or the `pageRoute` option,
+   * like `/products/{name}`, written as `url.template`. Without it the route is inferred from the
+   * path, which only replaces ID-like segments with `{id}`.
+   */
+  route?: string;
   /** How often users visit the page compared to the other ones of the site, 1 when unset. */
   weight?: number;
   resources?: readonly EdotBrowserResource[];
@@ -197,6 +205,11 @@ export type EdotBrowserSessionOptions = SessionAnchor & {
    * resources, so they take as long: only the timing entries are left out.
    */
   reportResourceTimings?: boolean;
+  /**
+   * Whether the logs carry the route of the page as `url.template`, true when unset. Turn it off to
+   * simulate an SDK that doesn't add page routes, or an app that sets `pageRoute: false`.
+   */
+  reportPageRoutes?: boolean;
   /**
    * The user signs in during the session: page loads from `atDocument` on (counted from 0) carry
    * the user, like an app that calls `setUser()` after its login page. A session with fewer page
@@ -415,6 +428,7 @@ interface SessionContext {
   slowdown: number;
   reportExceptions: boolean;
   reportResourceTimings: boolean;
+  reportPageRoutes: boolean;
   frustrationRandom?: () => number;
   /**
    * Multiplies how often the user rage-clicks, drawn from `frustrationRandom` once per session:
@@ -1171,6 +1185,24 @@ const frustrationEvents = (
     ].map((event) => event.timestamp(time));
   });
 
+/**
+ * Adds the route of the page to the logs, like EDOT Browser's log processor does when a record is
+ * emitted. Client spans don't get it, since on them `url.template` would be the template of the
+ * request, and neither do the resource timings, which describe a request as well.
+ */
+const withPageRoute = (
+  { reportPageRoutes }: SessionContext,
+  { path, route = inferPageRoute(path) }: EdotBrowserPage,
+  events: EdotBrowserEvent[]
+): EdotBrowserEvent[] =>
+  reportPageRoutes
+    ? events.map((event) =>
+        event instanceof EdotLog && event.fields.event_name !== RESOURCE_TIMING_EVENT
+          ? event.addAttributes({ [URL_TEMPLATE]: route })
+          : event
+      )
+    : events;
+
 /** An SPA route change, which the navigation instrumentation reports as a soft navigation. */
 const routeChange = (
   { client, site }: SessionContext,
@@ -1257,12 +1289,15 @@ const simulateDocument = (
   const visits = pageViews.map((view) => interactWithPage(ctx, document, view));
   const clickTimes = visits.flatMap((visit) => visit.clickTimes);
 
+  // The document is hidden on the page the user left it on
+  const { page: lastPage } = pageViews[pageViews.length - 1];
+
   return {
     events: [
-      ...events,
-      ...routeChanges.map((view) => routeChange(ctx, view)),
-      ...visits.flatMap((visit) => visit.events),
-      ...hideDocument(ctx, document, clickTimes, hiddenAt),
+      ...withPageRoute(ctx, loadView.page, events),
+      ...routeChanges.flatMap((view) => withPageRoute(ctx, view.page, [routeChange(ctx, view)])),
+      ...visits.flatMap((visit, index) => withPageRoute(ctx, pageViews[index].page, visit.events)),
+      ...withPageRoute(ctx, lastPage, hideDocument(ctx, document, clickTimes, hiddenAt)),
     ],
     info: {
       url: toUrl(ctx.site, loadView.page.path),
@@ -1312,6 +1347,7 @@ export const sessionWithDocuments = (
     resumed = false,
     reportExceptions = true,
     reportResourceTimings = true,
+    reportPageRoutes = true,
     signIn,
     frustrationRandom,
     random = Math.random,
@@ -1327,6 +1363,7 @@ export const sessionWithDocuments = (
     slowdown: client.isMobile ? MOBILE_SLOWDOWN : 1,
     reportExceptions,
     reportResourceTimings,
+    reportPageRoutes,
     frustrationRandom,
     impatience: frustrationRandom
       ? MIN_IMPATIENCE + IMPATIENCE_SPREAD * frustrationRandom() ** 3
@@ -1352,7 +1389,9 @@ export const sessionWithDocuments = (
     events: [
       // The distro announces a new session when the page loads
       ...(client.hasSession && !resumed && documents.length > 0
-        ? [client.sessionStart().timestamp(start)]
+        ? withPageRoute(ctx, documents[0].pageViews[0].page, [
+            client.sessionStart().timestamp(start),
+          ])
         : []),
       ...simulated.flatMap(({ events }) => events),
     ],
@@ -1403,6 +1442,8 @@ export const idleTab = ({
     slowdown: client.isMobile ? MOBILE_SLOWDOWN : 1,
     reportExceptions,
     reportResourceTimings,
+    // The page the tab shows is not known
+    reportPageRoutes: false,
     impatience: 1,
     persistentHits: new Map(),
   };

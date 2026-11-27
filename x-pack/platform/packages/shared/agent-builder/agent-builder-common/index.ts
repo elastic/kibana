@@ -612,6 +612,11 @@ export {
   type ReferencedContentRefineIssue,
   collectReferencedContentRefineIssues,
 } from './skills';
+export {
+  type ConversationStarter,
+  MAX_CONVERSATION_STARTERS,
+  CONVERSATION_STARTER_LABEL_MAX_LENGTH,
+} from './conversation_starters';
 export * from './telemetry';
 export {
   getLatestVersion,
