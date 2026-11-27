@@ -1,0 +1,75 @@
+name: Rebuild data transforms
+description: data.map with item and index, nested $map, data.set, data.parseJson, filter, find and aggregate.
+tags:
+  - scout
+  - graph-rebuild
+consts:
+  count: 3
+  people:
+    - name: Ada
+      age: 36
+      team: core
+    - name: Grace
+      age: 29
+      team: core
+    - name: Linus
+      age: 41
+      team: infra
+  groups:
+    - team: core
+      members:
+        - name: Ada
+        - name: Grace
+    - team: infra
+      members:
+        - name: Linus
+triggers:
+  - type: manual
+steps:
+  - name: label_people
+    type: data.map
+    items: "${{ consts.people }}"
+    with:
+      fields:
+        label: "${{ item.name }}"
+        position: "${{ index }}"
+  - name: members_by_team
+    type: data.map
+    items: "${{ consts.groups }}"
+    with:
+      fields:
+        team: "${{ item.team }}"
+        members:
+          $map:
+            items: "${{ item.members }}"
+            item: member
+          name: "${{ member.name }}"
+  - name: seasoned
+    type: data.filter
+    items: "${{ consts.people }}"
+    with:
+      condition: "item.age > 30"
+  - name: first_core
+    type: data.find
+    items: "${{ consts.people }}"
+    with:
+      condition: "item.team == 'core'"
+  - name: per_team
+    type: data.aggregate
+    items: "${{ consts.people }}"
+    with:
+      group_by:
+        - team
+      metrics:
+        - name: people
+          operation: count
+      # The form always writes the schema default, so the fixture states it.
+      order: asc
+  - name: settings
+    type: data.set
+    with:
+      threshold: 3
+      source: "${{ steps.label_people.output }}"
+  - name: parsed
+    type: data.parseJson
+    source: '{"count": {{ consts.count }}, "tags": ["a", "b"]}'

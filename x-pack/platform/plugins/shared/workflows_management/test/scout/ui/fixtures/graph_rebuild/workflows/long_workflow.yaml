@@ -1,0 +1,362 @@
+name: Rebuild a long workflow
+description: Forty-five heavy steps in one workflow, built one after another in the same page, to catch memory growth in the builder.
+tags:
+  - scout
+  - graph-rebuild
+consts:
+  records:
+    - id: 1
+      label: first
+      score: 10
+      team: core
+    - id: 2
+      label: second
+      score: 20
+      team: infra
+triggers:
+  - type: manual
+steps:
+  - name: map_1
+    type: data.map
+    items: "${{ consts.records }}"
+    with:
+      fields:
+        id: "${{ item.id }}"
+        label: "${{ item.label }}"
+        score: "${{ item.score }}"
+        team: "${{ item.team }}"
+        position: "${{ index }}"
+  - name: set_1
+    type: data.set
+    with:
+      round: 1
+      source: "${{ steps.map_1.output }}"
+      label: "round 1"
+      limit: 10
+      enabled: true
+  - name: log_1
+    type: console
+    with:
+      message: "round 1 of 15 done, {{ steps.set_1.output.round }}"
+
+  - name: map_2
+    type: data.map
+    items: "${{ consts.records }}"
+    with:
+      fields:
+        id: "${{ item.id }}"
+        label: "${{ item.label }}"
+        score: "${{ item.score }}"
+        team: "${{ item.team }}"
+        position: "${{ index }}"
+  - name: set_2
+    type: data.set
+    with:
+      round: 2
+      source: "${{ steps.map_2.output }}"
+      label: "round 2"
+      limit: 10
+      enabled: true
+  - name: log_2
+    type: console
+    with:
+      message: "round 2 of 15 done, {{ steps.set_2.output.round }}"
+
+  - name: map_3
+    type: data.map
+    items: "${{ consts.records }}"
+    with:
+      fields:
+        id: "${{ item.id }}"
+        label: "${{ item.label }}"
+        score: "${{ item.score }}"
+        team: "${{ item.team }}"
+        position: "${{ index }}"
+  - name: set_3
+    type: data.set
+    with:
+      round: 3
+      source: "${{ steps.map_3.output }}"
+      label: "round 3"
+      limit: 10
+      enabled: true
+  - name: log_3
+    type: console
+    with:
+      message: "round 3 of 15 done, {{ steps.set_3.output.round }}"
+
+  - name: map_4
+    type: data.map
+    items: "${{ consts.records }}"
+    with:
+      fields:
+        id: "${{ item.id }}"
+        label: "${{ item.label }}"
+        score: "${{ item.score }}"
+        team: "${{ item.team }}"
+        position: "${{ index }}"
+  - name: set_4
+    type: data.set
+    with:
+      round: 4
+      source: "${{ steps.map_4.output }}"
+      label: "round 4"
+      limit: 10
+      enabled: true
+  - name: log_4
+    type: console
+    with:
+      message: "round 4 of 15 done, {{ steps.set_4.output.round }}"
+
+  - name: map_5
+    type: data.map
+    items: "${{ consts.records }}"
+    with:
+      fields:
+        id: "${{ item.id }}"
+        label: "${{ item.label }}"
+        score: "${{ item.score }}"
+        team: "${{ item.team }}"
+        position: "${{ index }}"
+  - name: set_5
+    type: data.set
+    with:
+      round: 5
+      source: "${{ steps.map_5.output }}"
+      label: "round 5"
+      limit: 10
+      enabled: true
+  - name: log_5
+    type: console
+    with:
+      message: "round 5 of 15 done, {{ steps.set_5.output.round }}"
+
+  - name: map_6
+    type: data.map
+    items: "${{ consts.records }}"
+    with:
+      fields:
+        id: "${{ item.id }}"
+        label: "${{ item.label }}"
+        score: "${{ item.score }}"
+        team: "${{ item.team }}"
+        position: "${{ index }}"
+  - name: set_6
+    type: data.set
+    with:
+      round: 6
+      source: "${{ steps.map_6.output }}"
+      label: "round 6"
+      limit: 10
+      enabled: true
+  - name: log_6
+    type: console
+    with:
+      message: "round 6 of 15 done, {{ steps.set_6.output.round }}"
+
+  - name: map_7
+    type: data.map
+    items: "${{ consts.records }}"
+    with:
+      fields:
+        id: "${{ item.id }}"
+        label: "${{ item.label }}"
+        score: "${{ item.score }}"
+        team: "${{ item.team }}"
+        position: "${{ index }}"
+  - name: set_7
+    type: data.set
+    with:
+      round: 7
+      source: "${{ steps.map_7.output }}"
+      label: "round 7"
+      limit: 10
+      enabled: true
+  - name: log_7
+    type: console
+    with:
+      message: "round 7 of 15 done, {{ steps.set_7.output.round }}"
+
+  - name: map_8
+    type: data.map
+    items: "${{ consts.records }}"
+    with:
+      fields:
+        id: "${{ item.id }}"
+        label: "${{ item.label }}"
+        score: "${{ item.score }}"
+        team: "${{ item.team }}"
+        position: "${{ index }}"
+  - name: set_8
+    type: data.set
+    with:
+      round: 8
+      source: "${{ steps.map_8.output }}"
+      label: "round 8"
+      limit: 10
+      enabled: true
+  - name: log_8
+    type: console
+    with:
+      message: "round 8 of 15 done, {{ steps.set_8.output.round }}"
+
+  - name: map_9
+    type: data.map
+    items: "${{ consts.records }}"
+    with:
+      fields:
+        id: "${{ item.id }}"
+        label: "${{ item.label }}"
+        score: "${{ item.score }}"
+        team: "${{ item.team }}"
+        position: "${{ index }}"
+  - name: set_9
+    type: data.set
+    with:
+      round: 9
+      source: "${{ steps.map_9.output }}"
+      label: "round 9"
+      limit: 10
+      enabled: true
+  - name: log_9
+    type: console
+    with:
+      message: "round 9 of 15 done, {{ steps.set_9.output.round }}"
+
+  - name: map_10
+    type: data.map
+    items: "${{ consts.records }}"
+    with:
+      fields:
+        id: "${{ item.id }}"
+        label: "${{ item.label }}"
+        score: "${{ item.score }}"
+        team: "${{ item.team }}"
+        position: "${{ index }}"
+  - name: set_10
+    type: data.set
+    with:
+      round: 10
+      source: "${{ steps.map_10.output }}"
+      label: "round 10"
+      limit: 10
+      enabled: true
+  - name: log_10
+    type: console
+    with:
+      message: "round 10 of 15 done, {{ steps.set_10.output.round }}"
+
+  - name: map_11
+    type: data.map
+    items: "${{ consts.records }}"
+    with:
+      fields:
+        id: "${{ item.id }}"
+        label: "${{ item.label }}"
+        score: "${{ item.score }}"
+        team: "${{ item.team }}"
+        position: "${{ index }}"
+  - name: set_11
+    type: data.set
+    with:
+      round: 11
+      source: "${{ steps.map_11.output }}"
+      label: "round 11"
+      limit: 10
+      enabled: true
+  - name: log_11
+    type: console
+    with:
+      message: "round 11 of 15 done, {{ steps.set_11.output.round }}"
+
+  - name: map_12
+    type: data.map
+    items: "${{ consts.records }}"
+    with:
+      fields:
+        id: "${{ item.id }}"
+        label: "${{ item.label }}"
+        score: "${{ item.score }}"
+        team: "${{ item.team }}"
+        position: "${{ index }}"
+  - name: set_12
+    type: data.set
+    with:
+      round: 12
+      source: "${{ steps.map_12.output }}"
+      label: "round 12"
+      limit: 10
+      enabled: true
+  - name: log_12
+    type: console
+    with:
+      message: "round 12 of 15 done, {{ steps.set_12.output.round }}"
+
+  - name: map_13
+    type: data.map
+    items: "${{ consts.records }}"
+    with:
+      fields:
+        id: "${{ item.id }}"
+        label: "${{ item.label }}"
+        score: "${{ item.score }}"
+        team: "${{ item.team }}"
+        position: "${{ index }}"
+  - name: set_13
+    type: data.set
+    with:
+      round: 13
+      source: "${{ steps.map_13.output }}"
+      label: "round 13"
+      limit: 10
+      enabled: true
+  - name: log_13
+    type: console
+    with:
+      message: "round 13 of 15 done, {{ steps.set_13.output.round }}"
+
+  - name: map_14
+    type: data.map
+    items: "${{ consts.records }}"
+    with:
+      fields:
+        id: "${{ item.id }}"
+        label: "${{ item.label }}"
+        score: "${{ item.score }}"
+        team: "${{ item.team }}"
+        position: "${{ index }}"
+  - name: set_14
+    type: data.set
+    with:
+      round: 14
+      source: "${{ steps.map_14.output }}"
+      label: "round 14"
+      limit: 10
+      enabled: true
+  - name: log_14
+    type: console
+    with:
+      message: "round 14 of 15 done, {{ steps.set_14.output.round }}"
+
+  - name: map_15
+    type: data.map
+    items: "${{ consts.records }}"
+    with:
+      fields:
+        id: "${{ item.id }}"
+        label: "${{ item.label }}"
+        score: "${{ item.score }}"
+        team: "${{ item.team }}"
+        position: "${{ index }}"
+  - name: set_15
+    type: data.set
+    with:
+      round: 15
+      source: "${{ steps.map_15.output }}"
+      label: "round 15"
+      limit: 10
+      enabled: true
+  - name: log_15
+    type: console
+    with:
+      message: "round 15 of 15 done, {{ steps.set_15.output.round }}"
