@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { COLUMN_GAP, ROW_GAP } from './canvas_constants';
+import {
+  COLUMN_GAP,
+  NODE_HEIGHT_BY_TYPE,
+  ROUTING_RULE_ROW_HEIGHT,
+  ROW_GAP,
+} from './canvas_constants';
 import { applyLayout, getConnectedNodeIds, layoutGraph } from './layout';
-import { DESTINATION_NODE_TYPE, SOURCE_NODE_TYPE } from './types';
+import { DESTINATION_NODE_TYPE, ROUTING_NODE_TYPE, SOURCE_NODE_TYPE } from './types';
 
 describe('layoutGraph', () => {
   it('returns an empty map for no nodes', () => {
@@ -78,6 +83,50 @@ describe('layoutGraph', () => {
     expect(positions.get('s1')!.x).toBe(0);
     expect(positions.get('s2')!.x).toBe(0);
     expect(positions.get('d1')!.x).toBe(COLUMN_GAP);
+  });
+
+  describe('routing rules', () => {
+    const routing = {
+      id: 'routing',
+      type: ROUTING_NODE_TYPE,
+      data: { rules: [{}, {}, {}] },
+    };
+    const nodes = [
+      { id: 'source', type: SOURCE_NODE_TYPE },
+      routing,
+      { id: 'metrics', type: DESTINATION_NODE_TYPE },
+      { id: 'traces', type: DESTINATION_NODE_TYPE },
+      { id: 'logs', type: DESTINATION_NODE_TYPE },
+    ];
+    const edges = [
+      { source: 'source', target: 'routing' },
+      { source: 'routing', sourceHandle: 'rule-0', target: 'logs' },
+      { source: 'routing', sourceHandle: 'rule-1', target: 'metrics' },
+      { source: 'routing', sourceHandle: 'rule-2', target: 'traces' },
+    ];
+
+    it.each([
+      ['in rule order', edges],
+      ['in reverse order', [...edges].reverse()],
+    ])('stacks the targets of the rules top to bottom when the edges come %s', (_, input) => {
+      const positions = layoutGraph(nodes, input);
+
+      expect(positions.get('logs')!.y).toBeLessThan(positions.get('metrics')!.y);
+      expect(positions.get('metrics')!.y).toBeLessThan(positions.get('traces')!.y);
+    });
+
+    it('makes room for the extra rows of a routing node with several rules', () => {
+      const positions = layoutGraph(nodes, edges);
+      const routingTop = positions.get('routing')!.y;
+      const routingBottom =
+        routingTop + NODE_HEIGHT_BY_TYPE[ROUTING_NODE_TYPE] + 2 * ROUTING_RULE_ROW_HEIGHT;
+
+      // The routing node is centered on its three targets rather than overlapping other flows.
+      expect(routingTop).toBeGreaterThanOrEqual(0);
+      expect(routingBottom).toBeLessThanOrEqual(
+        positions.get('traces')!.y + NODE_HEIGHT_BY_TYPE[DESTINATION_NODE_TYPE]
+      );
+    });
   });
 
   it('stacks a destination with no source below the connected destinations', () => {

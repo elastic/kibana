@@ -73,6 +73,8 @@ export const SOURCE_NODE_HEIGHT = 102;
 export const DESTINATION_NODE_HEIGHT = 106;
 /** A routing card with a single rule. Each extra rule adds a row. */
 export const ROUTING_NODE_HEIGHT = 96;
+// One extra rule row: 24 of text line height, 16 of padding and a 2 border.
+export const ROUTING_RULE_ROW_HEIGHT = 42;
 // Two lines of stats (40) plus the card's padding and border (18).
 export const PROCESSING_NODE_HEIGHT = 58;
 
