@@ -404,6 +404,26 @@ describe('ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW', () => {
 // persist step. A workflow that omits it makes scheduled runs leak discoveries
 // into the ad-hoc index (where they wrongly appear on the main Attack Discovery
 // page), so lock the wiring in for every validation workflow that persists.
+describe('ATTACK_DISCOVERY_GENERATION_WORKFLOW', () => {
+  const generationParsed = parse(ATTACK_DISCOVERY_GENERATION_WORKFLOW.yaml) as ParsedWorkflow;
+
+  it('documents the size input as read but not acted upon', () => {
+    const { size } = getManualInputsProperties(generationParsed) as {
+      size: { description: string };
+    };
+
+    expect(size.description).toContain('read but not');
+  });
+
+  it('does not forward size to the generate step', () => {
+    const step = generationParsed.steps?.find(
+      (s) => s.type === 'security.attack-discovery.generate'
+    );
+
+    expect(step?.with).not.toHaveProperty('size');
+  });
+});
+
 describe('validation workflows forward source into the persist step', () => {
   const getPersistStepSourceInput = (
     definition: ManagedWorkflowDefinition & { yaml: string }
