@@ -164,9 +164,7 @@ spaceTest.describe(
           await pageObjects.dataGrid.waitForDocTableRendered();
 
           await expect(page.testSubj.locator('globalToastList')).toBeHidden();
-          await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(
-            sourceIndex
-          );
+          await pageObjects.discover.expectSelectedDataView(sourceIndex);
           await expectSearchSourceAlertUpdatedResults(pageObjects, sourceDataViewId);
         });
       }

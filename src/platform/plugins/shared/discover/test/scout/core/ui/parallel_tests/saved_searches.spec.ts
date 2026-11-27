@@ -88,9 +88,7 @@ spaceTest.describe(
       `should unselect saved search when navigating to a 'new'`,
       async ({ pageObjects, page }) => {
         await pageObjects.discover.goto({ queryMode: 'classic' });
-        await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(
-          testData.ECOMMERCE_DATA_VIEW
-        );
+        await pageObjects.discover.expectSelectedDataView(testData.ECOMMERCE_DATA_VIEW);
         await pageObjects.filterBar.addFilter({
           ...filterFieldAndValue,
           operator: 'is',
@@ -118,30 +116,22 @@ spaceTest.describe(
 
         // create new search
         await pageObjects.discover.clickNewSearch();
-        await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(
-          testData.ECOMMERCE_DATA_VIEW
-        );
+        await pageObjects.discover.expectSelectedDataView(testData.ECOMMERCE_DATA_VIEW);
         await assertNoFilterAndEmptyQuery(filterFieldAndValue, pageObjects, page);
 
         // change data view
         await pageObjects.discover.selectDataView(testData.DEFAULT_DATA_VIEW);
-        await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(
-          testData.DEFAULT_DATA_VIEW
-        );
+        await pageObjects.discover.expectSelectedDataView(testData.DEFAULT_DATA_VIEW);
         await assertNoFilterAndEmptyQuery(filterFieldAndValue, pageObjects, page);
 
         // change data view again
         await pageObjects.discover.selectDataView(testData.ECOMMERCE_DATA_VIEW);
-        await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(
-          testData.ECOMMERCE_DATA_VIEW
-        );
+        await pageObjects.discover.expectSelectedDataView(testData.ECOMMERCE_DATA_VIEW);
         await assertNoFilterAndEmptyQuery(filterFieldAndValue, pageObjects, page);
 
         // create new search again
         await pageObjects.discover.clickNewSearch();
-        await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(
-          testData.ECOMMERCE_DATA_VIEW
-        );
+        await pageObjects.discover.expectSelectedDataView(testData.ECOMMERCE_DATA_VIEW);
       }
     );
   }

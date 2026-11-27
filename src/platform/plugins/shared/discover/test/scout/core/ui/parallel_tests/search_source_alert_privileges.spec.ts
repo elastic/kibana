@@ -95,7 +95,7 @@ spaceTest.describe(
         await pageObjects.insightsAndAlerting.viewRuleInDiscover();
         await pageObjects.discover.waitUntilSearchingHasFinished();
         await pageObjects.dataGrid.waitForDocTableRendered();
-        await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(sourceIndex);
+        await pageObjects.discover.expectSelectedDataView(sourceIndex);
         await expect.poll(() => pageObjects.discover.getHitCountInt()).toBe(1);
       }
     );
