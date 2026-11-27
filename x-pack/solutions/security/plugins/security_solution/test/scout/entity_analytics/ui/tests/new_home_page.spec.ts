@@ -109,6 +109,8 @@ test.describe('Entity analytics new home page', { tag: [...tags.stateful.classic
 
     await test.step('only the entity with several records has an expander', async () => {
       await expect(entityAnalyticsHomePage.expandToggle(RESOLVED_HOST)).toBeVisible();
+
+      await expect(entityAnalyticsHomePage.gridRow(OTHER_HOST)).toBeVisible();
       await expect(entityAnalyticsHomePage.expandToggle(OTHER_HOST)).toBeHidden();
     });
 
