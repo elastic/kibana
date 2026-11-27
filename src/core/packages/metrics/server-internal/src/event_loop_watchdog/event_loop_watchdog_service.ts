@@ -22,6 +22,7 @@ import {
   skipWhile,
   take,
   timer,
+  Subject,
   type Observable,
   type Subscription,
 } from 'rxjs';
@@ -29,12 +30,14 @@ import type { Logger } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import { ServiceStatusLevels, type ServiceStatus } from '@kbn/core-status-common';
+import type { EventLoopBlock } from '@kbn/core-metrics-server';
 import {
   OPS_CONFIG_PATH,
   type OpsConfigType,
   type OpsConfigEventLoopWatchdogProfiling,
 } from '../ops_config';
 import { EventLoopWatchdog } from './event_loop_watchdog';
+import type { ReadExecutionContext } from './execution_context_reader';
 import { resolveDiagnosticDir } from './resolve_diagnostic_dir';
 import { resolveWorkerLogging, type LoggingConfigSubset } from './resolve_worker_logging';
 import { RUNNING_FALLBACK_MS, RUNNING_GRACE_MS } from './constants';
@@ -46,6 +49,12 @@ export const EVENT_LOOP_WATCHDOG_PROFILING_FEATURE_FLAGS = {
   background_tasks: 'core.eventLoopWatchdog.profiling.backgroundTasks.enabled',
   ui: 'core.eventLoopWatchdog.profiling.ui.enabled',
 } as const satisfies Record<'background_tasks' | 'ui', string>;
+/**
+ * Turns the sampling of execution contexts during blocks on and off at runtime; sampling also
+ * requires the watchdog flag. Off by default.
+ */
+export const EVENT_LOOP_WATCHDOG_CONTEXT_SAMPLING_FEATURE_FLAG =
+  'core.eventLoopWatchdog.executionContextSampling.enabled';
 const LOGGER_CONTEXT = ['metrics', 'event_loop_watchdog'] as const;
 
 export interface EventLoopWatchdogSetupDeps {
@@ -55,6 +64,8 @@ export interface EventLoopWatchdogSetupDeps {
   nodeRoles: readonly string[];
   /** Same value as main-thread log lines carry in `service.version`. */
   serviceVersion: string;
+  /** Returns the execution context of the running code, which is sampled during a block. */
+  readExecutionContext?: ReadExecutionContext;
 }
 
 export interface EventLoopWatchdogStartDeps {
@@ -72,12 +83,23 @@ export class EventLoopWatchdogService {
   private nodeRoles: readonly string[] = [];
   private subscription?: Subscription;
   private overall$?: Observable<ServiceStatus>;
+  private readonly blocks$ = new Subject<EventLoopBlock>();
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get(...LOGGER_CONTEXT);
   }
 
-  public async setup({ status, nodeRoles, serviceVersion }: EventLoopWatchdogSetupDeps) {
+  /** Emits each block the watchdog detects, once it has ended. Usable before `setup()`. */
+  public getBlocks$(): Observable<EventLoopBlock> {
+    return this.blocks$.asObservable();
+  }
+
+  public async setup({
+    status,
+    nodeRoles,
+    serviceVersion,
+    readExecutionContext,
+  }: EventLoopWatchdogSetupDeps) {
     this.overall$ = status.overall$;
     this.nodeRoles = nodeRoles;
     const { configService } = this.coreContext;
@@ -109,6 +131,8 @@ export class EventLoopWatchdogService {
         cooldownMs: perPhaseMs('cooldown'),
         diagnosticDir: profiling.dir ?? resolveDiagnosticDir(),
       },
+      readExecutionContext,
+      onBlock: (block) => this.blocks$.next(block),
     });
   }
 
@@ -118,8 +142,9 @@ export class EventLoopWatchdogService {
       throw new Error('EventLoopWatchdogService#setup() must be called before #start()');
     }
     // Flag values arrive asynchronously and in any order. The worker uses the current profiling
-    // state at launch; later changes take effect without restarting it.
+    // and sampling state at launch; later changes take effect without restarting it.
     const profiling = this.followProfilingFlags(featureFlags, watchdog);
+    const contextSampling = this.followContextSamplingFlag(featureFlags, watchdog);
     // `enabled` is the flag's fallback: it applies where no provider or override sets the flag.
     this.subscription = featureFlags
       .getBooleanValue$(EVENT_LOOP_WATCHDOG_FEATURE_FLAG, this.enabledFallback)
@@ -152,6 +177,7 @@ export class EventLoopWatchdogService {
       });
 
     this.subscription.add(profiling);
+    this.subscription.add(contextSampling);
 
     // Startup ends once Kibana is first available plus a grace period, or after a while regardless.
     const available$ = (this.overall$ ?? EMPTY).pipe(
@@ -201,6 +227,30 @@ export class EventLoopWatchdogService {
         skipWhile((enabled) => !enabled)
       )
       .subscribe((enabled) => watchdog.setProfiling(enabled));
+  }
+
+  /**
+   * The sampling flag defaults to off. Changing it updates sampling without restarting the
+   * watchdog worker.
+   */
+  private followContextSamplingFlag(
+    featureFlags: EventLoopWatchdogStartDeps['featureFlags'],
+    watchdog: EventLoopWatchdog
+  ): Subscription {
+    const flag = EVENT_LOOP_WATCHDOG_CONTEXT_SAMPLING_FEATURE_FLAG;
+    return featureFlags
+      .getBooleanValue$(flag, false)
+      .pipe(
+        // A failed flag counts as off.
+        catchError((error) => {
+          this.logFailure('error', `Sampling flag ${flag} failed, treating it as off`, error);
+          return of(false);
+        }),
+        distinctUntilChanged(),
+        // Sampling starts off, so there's nothing to apply until the flag is first on.
+        skipWhile((enabled) => !enabled)
+      )
+      .subscribe((enabled) => watchdog.setContextSampling(enabled));
   }
 
   private logFailure(level: 'warn' | 'error', message: string, error: Error): void {

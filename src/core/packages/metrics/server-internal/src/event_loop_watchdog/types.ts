@@ -8,6 +8,7 @@
  */
 
 import type { LogMeta } from '@kbn/logging';
+import type { EventLoopBlockContexts } from '@kbn/core-metrics-server';
 import type { WorkerLoggingConfig } from '@kbn/core-threads-server-internal';
 import type { BlockStatsSnapshot } from './block_stats';
 import type { ProfileSummary } from './profile_summary';
@@ -52,6 +53,8 @@ export interface BlockLogMeta extends LogMeta {
       suppressedBlocks: number;
       /** True when the block was still ongoing at log time; `blockedMs` is its length so far. */
       ongoing: boolean;
+      /** What was running during the block, when its execution context was sampled. */
+      contexts?: EventLoopBlockContexts;
     };
   };
 }
@@ -145,6 +148,29 @@ export interface FileCounts {
   writeFailed: number;
 }
 
+/** Execution context sampling counts for a stats period. */
+export interface ContextSamplingStats {
+  /** Blocks that ended with at least one sample. */
+  sampledBlocks: number;
+  /**
+   * Samples requested. More of these than `samples` means some weren't answered before their
+   * block ended, as when the main thread is inside one long native call.
+   */
+  requested: number;
+  /** Samples answered while their block was still ongoing. */
+  samples: number;
+  /** Blocks whose sampling failed; such a block isn't sampled further. */
+  failed: number;
+  /**
+   * Time from requesting each of the `samples` until its answer, summed, in milliseconds. A
+   * sample waits for the main thread to reach a point where V8 can interrupt it, then runs the
+   * reader there; a block's first sample also opens the inspector session.
+   */
+  answerMs: number;
+  /** Largest such time for a single sample, in milliseconds. */
+  maxAnswerMs: number;
+}
+
 export interface StatsLogMeta extends LogMeta {
   kibana: {
     event_loop_watchdog: {
@@ -157,6 +183,7 @@ export interface StatsLogMeta extends LogMeta {
           /** Where profile files are written, while profiling is on; capture lines only give the file name. */
           diagnosticDir?: string;
         };
+        contextSampling: ContextSamplingStats;
       };
     };
   };

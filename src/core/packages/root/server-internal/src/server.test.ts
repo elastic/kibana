@@ -18,6 +18,7 @@ import {
   mockUiSettingsService,
   mockRenderingService,
   mockMetricsService,
+  mockEventLoopBlocks$,
   mockEventLoopWatchdogService,
   mockStatusService,
   mockLoggingService,
@@ -218,9 +219,43 @@ test('sets up the event loop watchdog after the status service', async () => {
     status: mockStatusService.setup.mock.results[0].value,
     nodeRoles: ['background_tasks', 'ui'],
     serviceVersion: env.packageInfo.version,
+    readExecutionContext: expect.any(Function),
   });
   expect(mockStatusService.setup.mock.invocationCallOrder[0]).toBeLessThan(
     mockEventLoopWatchdogService.setup.mock.invocationCallOrder[0]
+  );
+});
+
+test('lets the event loop watchdog read the execution context of the running code', async () => {
+  // The same config object serves every path: this also turns the execution context service on.
+  mockConfigService.atPath.mockReturnValue(
+    new BehaviorSubject({ lifecycle: { disablePreboot: false }, enabled: true })
+  );
+  const server = new Server(rawConfigService, env, logger);
+
+  await server.preboot();
+  await server.setup();
+
+  const [{ readExecutionContext }] = mockEventLoopWatchdogService.setup.mock.calls[0];
+  const [{ executionContext }] = mockHttpService.setup.mock.calls[0];
+  const task = { type: 'task manager', name: 'run example', id: 'task-1' };
+  expect(readExecutionContext()).toBeUndefined();
+  expect(executionContext.withContext(task, () => readExecutionContext())).toEqual(task);
+  expect(
+    executionContext.withContext(task, () =>
+      executionContext.withContext({ type: 'alert', id: 'rule-1' }, () => readExecutionContext())
+    )
+  ).toEqual({ ...task, child: { type: 'alert', id: 'rule-1' } });
+});
+
+test("exposes the event loop watchdog's blocks through the metrics service", async () => {
+  const server = new Server(rawConfigService, env, logger);
+
+  await server.preboot();
+  await server.setup();
+
+  expect(mockMetricsService.setup).toHaveBeenCalledWith(
+    expect.objectContaining({ eventLoopBlocks$: mockEventLoopBlocks$ })
   );
 });
 

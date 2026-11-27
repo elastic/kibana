@@ -11,9 +11,16 @@ import fsPromises from 'node:fs/promises';
 import type { ManagedWorker, ManagedWorkerOptions } from '@kbn/core-threads-server-internal';
 import { createManagedWorker } from '@kbn/core-threads-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
-import { EventLoopWatchdog } from './event_loop_watchdog';
+import { EventLoopWatchdog, type EventLoopWatchdogParams } from './event_loop_watchdog';
+import { uninstallExecutionContextReader } from './execution_context_reader';
 import type { WatchdogWorkerData } from './types';
-import { HEARTBEAT_INTERVAL_MS, Slot, WATCHDOG_WORKER_NAME } from './constants';
+import {
+  BLOCK_MESSAGE_KEY,
+  CONTEXT_READER_KEY,
+  HEARTBEAT_INTERVAL_MS,
+  Slot,
+  WATCHDOG_WORKER_NAME,
+} from './constants';
 import { PROFILING_DIR_MAX_LENGTH } from './sanitize';
 
 jest.mock('@kbn/core-threads-server-internal', () => ({ createManagedWorker: jest.fn() }));
@@ -45,7 +52,10 @@ describe('EventLoopWatchdog', () => {
         createWorker.mock.calls[call][0] as ManagedWorkerOptions<WatchdogWorkerData>
       ).workerData!.shared
     );
-  const create = ({ diagnosticDir }: { diagnosticDir?: string } = profiling) =>
+  const create = (
+    { diagnosticDir }: { diagnosticDir?: string } = profiling,
+    overrides: Partial<EventLoopWatchdogParams> = {}
+  ) =>
     new EventLoopWatchdog({
       logger,
       thresholdsMs: { starting: 300, running: 200 },
@@ -53,6 +63,7 @@ describe('EventLoopWatchdog', () => {
       logging,
       profiling: { ...profiling, diagnosticDir },
       workerEntry: '/entry.js',
+      ...overrides,
     });
 
   beforeEach(() => {
@@ -245,6 +256,105 @@ describe('EventLoopWatchdog', () => {
       expect(profilingLines()).toEqual([ON, OFF]);
       resolveStop();
       await stopped;
+    });
+  });
+
+  describe('execution context sampling', () => {
+    const task = { type: 'task manager', name: 'run alerting:example', id: 'task-1' };
+    const readExecutionContext = () => task;
+    const reader = () => Reflect.get(globalThis, Symbol.for(CONTEXT_READER_KEY));
+
+    // A test that leaves its watchdog running leaves the reader too.
+    afterEach(() => uninstallExecutionContextReader());
+
+    const ON = 'Event loop watchdog execution context sampling on';
+    const OFF = 'Event loop watchdog execution context sampling off';
+    const samplingLines = () =>
+      logger.info.mock.calls
+        .map(([message]) => message)
+        .filter((message) => String(message).includes('execution context sampling'));
+
+    it('starts with sampling off and no reader installed', () => {
+      create(profiling, { readExecutionContext }).start();
+      expect(slots()[Slot.contextSampling]).toBe(0n);
+      expect(reader()).toBeUndefined();
+      expect(samplingLines()).toEqual([]);
+    });
+
+    it('turns sampling on and off without restarting the worker', () => {
+      const watchdog = create(profiling, { readExecutionContext });
+      watchdog.start();
+      watchdog.setContextSampling(true);
+      expect(slots()[Slot.contextSampling]).toBe(1n);
+      expect(reader()()).toEqual(task);
+      watchdog.setContextSampling(true);
+      watchdog.setContextSampling(false);
+      expect(slots()[Slot.contextSampling]).toBe(0n);
+      expect(reader()).toBeUndefined();
+      expect(samplingLines()).toEqual([ON, OFF]);
+      expect(createWorker).toHaveBeenCalledTimes(1);
+      expect(worker.stop).not.toHaveBeenCalled();
+    });
+
+    it("leaves sampling off when it can't read the execution context", () => {
+      const watchdog = create();
+      watchdog.start();
+      watchdog.setContextSampling(true);
+      expect(slots()[Slot.contextSampling]).toBe(0n);
+      expect(reader()).toBeUndefined();
+      expect(samplingLines()).toEqual([]);
+    });
+
+    it('removes the reader when the worker stops', async () => {
+      const watchdog = create(profiling, { readExecutionContext });
+      watchdog.start();
+      watchdog.setContextSampling(true);
+      const stopped = watchdog.stop();
+      expect(reader()).toBeUndefined();
+      expect(samplingLines()).toEqual([ON, OFF]);
+      resolveStop();
+      await stopped;
+    });
+
+    it('carries sampling over to a worker started later', async () => {
+      const watchdog = create(profiling, { readExecutionContext });
+      watchdog.setContextSampling(true);
+      expect(reader()).toBeUndefined();
+      expect(samplingLines()).toEqual([]);
+      watchdog.start();
+      expect(slots()[Slot.contextSampling]).toBe(1n);
+      const stopped = watchdog.stop();
+      resolveStop();
+      await stopped;
+      watchdog.start();
+      expect(slots(1)[Slot.contextSampling]).toBe(1n);
+      expect(reader()()).toEqual(task);
+      expect(samplingLines()).toEqual([ON, OFF, ON]);
+    });
+  });
+
+  describe('ended blocks', () => {
+    const block = { startedAt: 1_700_000_000_000, blockedMs: 5_200, phase: 'running' as const };
+
+    it("passes the worker's ended blocks to onBlock", () => {
+      const onBlock = jest.fn();
+      create(profiling, { onBlock }).start();
+      options().onMessage?.({ [BLOCK_MESSAGE_KEY]: block });
+      expect(onBlock.mock.calls).toEqual([[block]]);
+    });
+
+    it('ignores other messages', () => {
+      const onBlock = jest.fn();
+      create(profiling, { onBlock }).start();
+      options().onMessage?.('unrelated');
+      options().onMessage?.(null);
+      options().onMessage?.({ block });
+      expect(onBlock).not.toHaveBeenCalled();
+    });
+
+    it("doesn't need a listener", () => {
+      create().start();
+      expect(() => options().onMessage?.({ [BLOCK_MESSAGE_KEY]: block })).not.toThrow();
     });
   });
 

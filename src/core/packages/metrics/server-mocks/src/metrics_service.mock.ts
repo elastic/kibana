@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, EMPTY } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   MetricsService,
@@ -39,6 +39,7 @@ const createInternalSetupContractMock = () => {
   const setupContract: jest.Mocked<InternalMetricsServiceSetup> = lazyObject({
     collectionInterval: 30000,
     getEluMetrics$: jest.fn().mockReturnValue(lowEluMetrics$),
+    getEventLoopBlocks$: jest.fn().mockReturnValue(EMPTY),
     getOpsMetrics$: jest.fn().mockReturnValue(
       new BehaviorSubject({
         collected_at: new Date('2020-01-01 01:00:00'),

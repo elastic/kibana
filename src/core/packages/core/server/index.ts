@@ -518,6 +518,10 @@ export type {
   MetricsServiceStart,
   IntervalHistogram,
   IEventLoopDelaysMonitor,
+  EventLoopBlock,
+  EventLoopBlockContexts,
+  EventLoopBlockContextSamples,
+  EventLoopBlockExecutionContext,
 } from '@kbn/core-metrics-server';
 export { EventLoopDelaysMonitor } from '@kbn/core-metrics-collectors-server-internal';
 

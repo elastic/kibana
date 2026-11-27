@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Subject } from 'rxjs';
+import type { EventLoopBlock } from '@kbn/core/server';
 import { TaskManagerPlugin } from './plugin';
 import { KibanaDiscoveryService } from './kibana_discovery_service';
 
@@ -160,6 +162,57 @@ describe('TaskManagerPlugin', () => {
       expect((logger.warn as jest.Mock).mock.calls[0][0]).toBe(
         'Disabling authentication for background task utilization API'
       );
+    });
+
+    describe('event loop blocks', () => {
+      const blockedByTask: EventLoopBlock = {
+        startedAt: 1_700_000_000_000,
+        blockedMs: 6_000,
+        phase: 'running',
+        contexts: {
+          samples: 10,
+          withoutContext: 0,
+          top: [
+            { context: { type: 'task manager', name: 'run example', id: 'task-1' }, samples: 10 },
+          ],
+        },
+      };
+      const setupWithBlocks = (backgroundTasks: boolean) => {
+        const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>(
+          pluginInitializerContextParams
+        );
+        pluginInitializerContext.node.roles.backgroundTasks = backgroundTasks;
+        const blocks$ = new Subject<EventLoopBlock>();
+        const coreSetup = coreMock.createSetup();
+        coreSetup.metrics.getEventLoopBlocks$.mockReturnValue(blocks$);
+        const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
+        taskManagerPlugin.setup(coreSetup, { usageCollection: undefined });
+        const { warn } = jest.mocked(pluginInitializerContext.logger.get());
+        return { taskManagerPlugin, blocks$, warn };
+      };
+
+      test('logs a block of the event loop against the task that ran in it', () => {
+        const { blocks$, warn } = setupWithBlocks(true);
+        blocks$.next(blockedByTask);
+        expect(warn).toHaveBeenCalledWith(
+          'event loop blocked for 6000 ms by task example task-1 (10 of 10 samples)',
+          { tags: ['example', 'example task-1', 'event-loop-blocked-by-task'] }
+        );
+      });
+
+      test('does not follow event loop blocks if node.roles.backgroundTasks is false', () => {
+        const { blocks$, warn } = setupWithBlocks(false);
+        expect(blocks$.observed).toBe(false);
+        blocks$.next(blockedByTask);
+        expect(warn).not.toHaveBeenCalled();
+      });
+
+      test('stops following event loop blocks when the plugin stops', async () => {
+        const { taskManagerPlugin, blocks$ } = setupWithBlocks(true);
+        expect(blocks$.observed).toBe(true);
+        await taskManagerPlugin.stop();
+        expect(blocks$.observed).toBe(false);
+      });
     });
   });
 

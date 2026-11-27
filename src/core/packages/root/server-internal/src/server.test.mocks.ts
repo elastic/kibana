@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EMPTY } from 'rxjs';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { pluginServiceMock } from '@kbn/core-plugins-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
@@ -104,7 +105,9 @@ jest.doMock('@kbn/core-node-server-internal', () => ({
 }));
 
 export const mockMetricsService = metricsServiceMock.create();
+export const mockEventLoopBlocks$ = EMPTY;
 export const mockEventLoopWatchdogService = {
+  getBlocks$: jest.fn(() => mockEventLoopBlocks$),
   setup: jest.fn().mockResolvedValue(undefined),
   start: jest.fn(),
   stop: jest.fn().mockResolvedValue(undefined),

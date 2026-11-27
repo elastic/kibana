@@ -59,6 +59,11 @@ export interface ManagedWorkerOptions<TData = unknown> {
   readonly readyTimeoutMs?: number;
   /** Interval of the worker's heap usage reports. Defaults to 60s. */
   readonly healthIntervalMs?: number;
+  /**
+   * Called on the main thread with each message the entry posts to its parent port. A worker that
+   * was stopped or replaced no longer delivers messages.
+   */
+  onMessage?(message: unknown): void;
   /** Called when a worker goes away without `stop()`; `stop()` resolving is the stopped signal. */
   onExit?(info: ManagedWorkerExitInfo): void;
   /**

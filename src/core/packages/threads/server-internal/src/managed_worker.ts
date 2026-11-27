@@ -131,7 +131,13 @@ class ManagedWorkerHandle<TData> implements ManagedWorker {
         this.handleExit(exitCode, failure, failureError);
       });
       worker.on('message', (message: unknown) => {
-        if (this.worker === worker && isControlMessage(message)) this.handleMessage(message);
+        if (this.worker !== worker) return;
+        if (isControlMessage(message)) {
+          this.handleMessage(message);
+          return;
+        }
+        const { onMessage } = this.options;
+        if (onMessage) this.notify('onMessage', () => onMessage(message));
       });
       this.readyTimer = setTimeout(() => {
         // Defer the decision so a `ready` queued behind a blocked main thread is handled first.
@@ -252,7 +258,7 @@ class ManagedWorkerHandle<TData> implements ManagedWorker {
   }
 
   // A throwing consumer callback must not become an uncaught exception on the main thread.
-  private notify(callback: 'onExit' | 'onExhausted', run: () => void): void {
+  private notify(callback: 'onExit' | 'onExhausted' | 'onMessage', run: () => void): void {
     try {
       run();
     } catch (error) {

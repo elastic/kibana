@@ -98,6 +98,40 @@ describe('createManagedWorker', () => {
     await handle.stop();
   });
 
+  it("passes the entry's messages to onMessage, but not its own control messages", async () => {
+    const onMessage = jest.fn();
+    const handle = createManagedWorker(options({ onMessage }));
+    handle.start();
+    const [worker] = MockWorker.instances;
+    worker.ready();
+    worker.emit('message', { __kbnManagedWorker: 'health', heapUsed: 1234 });
+    worker.emit('message', { block: 1 });
+    expect(onMessage.mock.calls).toEqual([[{ block: 1 }]]);
+
+    await handle.stop();
+    worker.emit('message', { block: 2 });
+    expect(onMessage).toHaveBeenCalledTimes(1);
+  });
+
+  it('logs a throwing onMessage instead of throwing on the main thread', async () => {
+    const handle = createManagedWorker(
+      options({
+        onMessage: () => {
+          throw new Error('consumer failed');
+        },
+      })
+    );
+    handle.start();
+    const [worker] = MockWorker.instances;
+    worker.ready();
+    expect(() => worker.emit('message', { block: 1 })).not.toThrow();
+    expect(logger.error).toHaveBeenCalledWith(
+      'Worker diagnostic onMessage failed: consumer failed'
+    );
+    expect(handle.status().state).toBe('running');
+    await handle.stop();
+  });
+
   it('restarts after an unexpected exit and ignores stale exit events', async () => {
     const opts = options();
     const handle = createManagedWorker(opts);
