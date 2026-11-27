@@ -17,6 +17,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { dashboard, header, timePicker } = getPageObjects(['dashboard', 'header', 'timePicker']);
   const pieChart = getService('pieChart');
   const browser = getService('browser');
+  const retry = getService('retry');
+
+  const getBackedUpTimeRangeFrom = async (dashboardId: string): Promise<string | undefined> => {
+    const backup = await browser.getSessionStorageItem('dashboardStateManagerPanels');
+    const backupBySpace: Record<
+      string,
+      Record<string, { time_range?: { from?: string } }>
+    > = JSON.parse(backup ?? '{}');
+    return backupBySpace.default?.[dashboardId]?.time_range?.from;
+  };
 
   describe('dashboard time', () => {
     before(async function () {
@@ -110,6 +120,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const currentUrl = await browser.getCurrentUrl();
         const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
         const id = await dashboard.getDashboardIdFromCurrentUrl();
+
+        // Unmounting the dashboard cancels the debounced backup write, so it has to land first.
+        await retry.waitFor('unsaved time range to be backed up to session storage', async () => {
+          return (await getBackedUpTimeRangeFrom(id)) === 'now-1h';
+        });
 
         await dashboard.gotoDashboardLandingPage();
 
