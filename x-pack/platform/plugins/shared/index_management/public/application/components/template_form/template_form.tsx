@@ -322,6 +322,9 @@ export const TemplateForm = ({
             <StepLogisticsContainer
               isEditing={isEditing}
               isLegacy={indexTemplate._kbnMeta.isLegacy}
+              hasDataStreamOptions={Boolean(
+                dataStreamOptions && Object.keys(dataStreamOptions).length > 0
+              )}
             />
           </FormWizardStep>
 
