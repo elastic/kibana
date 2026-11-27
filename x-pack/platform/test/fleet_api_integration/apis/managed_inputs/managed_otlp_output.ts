@@ -334,6 +334,49 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(body.message).to.contain('Invalid header name');
       });
+
+      it('stores the Azure client secret as a secret and only returns its reference', async () => {
+        const auth = {
+          type: 'azure',
+          azure_auth_method: 'service_principal',
+          tenant_id: 'test-tenant',
+          client_id: 'test-client',
+        };
+        const { body } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-azure-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://otlp.example.com:4318', protocol: 'http/protobuf' },
+            auth,
+            secrets: { auth: { azure_client_secret: 'test-client-secret' } },
+          })
+          .expect(200);
+
+        expect(body.item.auth).to.eql(auth);
+        const clientSecretId: string = body.item.secrets?.auth?.azure_client_secret?.id;
+        expect(clientSecretId).to.be.a('string');
+        const clientSecret = await getSecretById(clientSecretId);
+        expect((clientSecret._source as Record<string, string>).value).to.be('test-client-secret');
+      });
+
+      it('returns 400 when the Azure authentication is set on a gRPC output', async () => {
+        const { body } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-azure-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'otlp.example.com:4317', protocol: 'grpc' },
+            auth: { type: 'azure', azure_auth_method: 'managed_identity' },
+          })
+          .expect(400);
+
+        expect(body.message).to.contain(
+          'auth.type "azure" requires otlp_exporter.protocol "http/protobuf"'
+        );
+      });
     });
 
     describe('PUT /api/fleet/outputs/{id}', () => {
@@ -1040,7 +1083,11 @@ export default function (providerContext: FtrProviderContext) {
             .set('kbn-xsrf', 'xxxx')
             .send({ name: `otlp-compile-auth-${uuidv4()}`, type: 'otlp', ...output })
             .expect(200);
-          return { id: body.item.id as string, credentialId: body.item.secrets.auth.credential.id };
+          return {
+            id: body.item.id as string,
+            credentialId: body.item.secrets?.auth?.credential?.id as string,
+            clientSecretId: body.item.secrets?.auth?.azure_client_secret?.id as string,
+          };
         };
 
         const createOtelPolicy = async (outputId: string) => {
@@ -1193,6 +1240,101 @@ export default function (providerContext: FtrProviderContext) {
             endpoint: 'otlp.example.com:4317',
           });
           expect(publishedPolicy.secret_references).to.eql([]);
+        });
+
+        it('compiles the Azure service principal extension with a reference to the client secret', async () => {
+          const { id: outputId, clientSecretId } = await createOutput({
+            otlp_exporter: { endpoint: 'https://otlp.example.com:4318', protocol: 'http/protobuf' },
+            auth: {
+              type: 'azure',
+              azure_auth_method: 'service_principal',
+              tenant_id: 'test-tenant',
+              client_id: 'test-client',
+              scopes: ['https://monitor.azure.com/.default'],
+            },
+            secrets: { auth: { azure_client_secret: 'test-client-secret' } },
+          });
+          const { data: publishedPolicy } = await getPublishedPolicy(
+            await createOtelPolicy(outputId)
+          );
+
+          const extensionId = `azure_auth/${outputId}`;
+          expect(publishedPolicy.extensions[extensionId]).to.eql({
+            service_principal: {
+              tenant_id: 'test-tenant',
+              client_id: 'test-client',
+              client_secret: `$co.elastic.secret{${clientSecretId}}`,
+            },
+            scopes: ['https://monitor.azure.com/.default'],
+          });
+          expect(publishedPolicy.service.extensions).to.contain(extensionId);
+          expect(publishedPolicy.exporters[`otlphttp/${outputId}`]).to.eql({
+            endpoint: 'https://otlp.example.com:4318',
+            auth: { authenticator: extensionId },
+          });
+          expect(publishedPolicy.secret_references).to.eql([{ id: clientSecretId }]);
+          // the client secret value never reaches the policy
+          expect(JSON.stringify(publishedPolicy)).not.to.contain('test-client-secret');
+        });
+
+        it('compiles the Azure managed identity extension without any secret', async () => {
+          const { id: outputId } = await createOutput({
+            otlp_exporter: { endpoint: 'https://otlp.example.com:4318', protocol: 'http/protobuf' },
+            auth: {
+              type: 'azure',
+              azure_auth_method: 'managed_identity',
+              client_id: 'test-client',
+            },
+          });
+          const fullPolicy = await getFullPolicy(await createOtelPolicy(outputId));
+
+          const extensionId = `azure_auth/${outputId}`;
+          expect(fullPolicy.extensions[extensionId]).to.eql({
+            managed_identity: { client_id: 'test-client' },
+          });
+          expect(fullPolicy.service.extensions).to.contain(extensionId);
+          expect(fullPolicy.exporters[`otlphttp/${outputId}`].auth).to.eql({
+            authenticator: extensionId,
+          });
+          expect(fullPolicy.secret_references).to.eql([]);
+        });
+
+        it('replaces the header with the Azure extension when the authentication switches to Azure', async () => {
+          const { id: outputId, credentialId } = await createOutput({
+            otlp_exporter: { endpoint: 'https://otlp.example.com:4318', protocol: 'http/protobuf' },
+            auth: { type: 'auth_header', scheme: 'api_key' },
+            secrets: { auth: { credential: 'test-credential-value' } },
+          });
+          const policyId = await createOtelPolicy(outputId);
+          const { revision_idx: previousRevision } = await getPublishedPolicy(policyId);
+
+          const { body: updateBody } = await supertest
+            .put(`/api/fleet/outputs/${outputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              auth: {
+                type: 'azure',
+                azure_auth_method: 'service_principal',
+                tenant_id: 'test-tenant',
+                client_id: 'test-client',
+              },
+              secrets: { auth: { azure_client_secret: 'test-client-secret' } },
+            })
+            .expect(200);
+          const clientSecretId: string = updateBody.item.secrets.auth.azure_client_secret.id;
+          // the credential of the header is not used anymore
+          expect(updateBody.item.secrets.auth.credential).to.be(undefined);
+          await expectSecretDeleted(credentialId);
+
+          const { revision_idx: revision, data: publishedPolicy } = await getPublishedPolicy(
+            policyId
+          );
+          expect(revision).to.be.greaterThan(previousRevision);
+          expect(publishedPolicy.exporters[`otlphttp/${outputId}`]).to.eql({
+            endpoint: 'https://otlp.example.com:4318',
+            auth: { authenticator: `azure_auth/${outputId}` },
+          });
+          expect(publishedPolicy.secret_references).to.eql([{ id: clientSecretId }]);
         });
       });
 

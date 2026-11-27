@@ -350,6 +350,36 @@ function getMockedSoClient(
         });
       }
 
+      case outputIdToUuid('existing-otlp-output-with-insecure-tls'): {
+        return mockOutputSO('existing-otlp-output-with-insecure-tls', {
+          type: 'otlp',
+          is_default: false,
+          otlp_exporter: {
+            endpoint: 'https://otel.example.com:4318',
+            protocol: 'http/protobuf',
+            tls: { insecure_skip_verify: true },
+          },
+        });
+      }
+
+      case outputIdToUuid('existing-otlp-output-with-azure-auth'): {
+        return mockOutputSO('existing-otlp-output-with-azure-auth', {
+          type: 'otlp',
+          is_default: false,
+          otlp_exporter: {
+            endpoint: 'https://otel.example.com:4318',
+            protocol: 'http/protobuf',
+          },
+          auth: {
+            type: 'azure',
+            azure_auth_method: 'service_principal',
+            tenant_id: 'tenant',
+            client_id: 'client',
+          },
+          secrets: { auth: { azure_client_secret: { id: 'client-secret-id' } } },
+        });
+      }
+
       case outputIdToUuid('existing-otlp-output-with-secret'): {
         return mockOutputSO('existing-otlp-output-with-secret', {
           type: 'otlp',
@@ -644,6 +674,36 @@ function getMockedEncryptedSoClient() {
           },
           auth: { type: 'auth_header', scheme: 'api_key' },
           secrets: { auth: { credential: { id: 'credential-secret-id' } } },
+        });
+      }
+
+      case outputIdToUuid('existing-otlp-output-with-insecure-tls'): {
+        return mockOutputSO('existing-otlp-output-with-insecure-tls', {
+          type: 'otlp',
+          is_default: false,
+          otlp_exporter: {
+            endpoint: 'https://otel.example.com:4318',
+            protocol: 'http/protobuf',
+            tls: { insecure_skip_verify: true },
+          },
+        });
+      }
+
+      case outputIdToUuid('existing-otlp-output-with-azure-auth'): {
+        return mockOutputSO('existing-otlp-output-with-azure-auth', {
+          type: 'otlp',
+          is_default: false,
+          otlp_exporter: {
+            endpoint: 'https://otel.example.com:4318',
+            protocol: 'http/protobuf',
+          },
+          auth: {
+            type: 'azure',
+            azure_auth_method: 'service_principal',
+            tenant_id: 'tenant',
+            client_id: 'client',
+          },
+          secrets: { auth: { azure_client_secret: { id: 'client-secret-id' } } },
         });
       }
 
@@ -2142,6 +2202,63 @@ describe('Output Service', () => {
               { id: 'output-test' }
             )
           ).rejects.toThrow('secrets.auth.credential is required when auth is set');
+        });
+
+        it('stores the Azure client secret as a secret', async () => {
+          const soClient = getMockedSoClient();
+          const auth = {
+            type: 'azure' as const,
+            azure_auth_method: 'service_principal' as const,
+            tenant_id: 'tenant',
+            client_id: 'client',
+          };
+          const otlpExporter = {
+            endpoint: 'https://otel.example.com:4318',
+            protocol: 'http/protobuf' as const,
+          };
+          mockedExtractAndWriteOutputSecrets.mockResolvedValueOnce({
+            output: {
+              ...newOtlpOutput,
+              otlp_exporter: otlpExporter,
+              auth,
+              secrets: { auth: { azure_client_secret: { id: 'client-secret-id' } } },
+            },
+          } as any);
+
+          await outputService.create(
+            soClient,
+            esClientMock,
+            {
+              ...newOtlpOutput,
+              otlp_exporter: otlpExporter,
+              auth,
+              secrets: { auth: { azure_client_secret: ' my-secret\n' } },
+            },
+            { id: 'output-test' }
+          );
+
+          expect(mockedExtractAndWriteOutputSecrets.mock.lastCall![0].output.secrets).toEqual({
+            auth: { azure_client_secret: 'my-secret' },
+          });
+          expect(soClient.create).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.objectContaining({
+              auth,
+              secrets: { auth: { azure_client_secret: { id: 'client-secret-id' } } },
+            }),
+            expect.anything()
+          );
+        });
+
+        it('rejects an Azure authentication with the gRPC protocol', async () => {
+          await expect(
+            outputService.create(
+              getMockedSoClient(),
+              esClientMock,
+              { ...newOtlpOutput, auth: { type: 'azure', azure_auth_method: 'managed_identity' } },
+              { id: 'output-test' }
+            )
+          ).rejects.toThrow('auth.type "azure" requires otlp_exporter.protocol "http/protobuf"');
         });
 
         it('rejects a header that the authentication sets', async () => {
@@ -5522,6 +5639,169 @@ describe('Output Service', () => {
               auth: { type: 'auth_header', scheme: 'api_key' },
             })
           ).rejects.toThrow('secrets.auth.credential is required when auth is set');
+        });
+
+        describe('Azure', () => {
+          const servicePrincipal = {
+            type: 'azure' as const,
+            azure_auth_method: 'service_principal' as const,
+            tenant_id: 'tenant',
+            client_id: 'client',
+          };
+          const httpExporter = {
+            endpoint: 'https://otel.example.com:4318',
+            protocol: 'http/protobuf' as const,
+          };
+
+          it('keeps the stored client secret when the update does not touch it', async () => {
+            await outputService.update(
+              getMockedSoClient({}),
+              esClientMock,
+              'existing-otlp-output-with-azure-auth',
+              { auth: { ...servicePrincipal, client_id: 'other-client' } }
+            );
+
+            expect(
+              mockedExtractAndUpdateOutputSecrets.mock.lastCall![0].outputUpdate.secrets
+            ).toEqual({ auth: { azure_client_secret: { id: 'client-secret-id' } } });
+          });
+
+          it('removes the client secret and the service principal settings when switching to a managed identity', async () => {
+            const soClient = getMockedSoClient({});
+
+            await outputService.update(
+              soClient,
+              esClientMock,
+              'existing-otlp-output-with-azure-auth',
+              { auth: { type: 'azure', azure_auth_method: 'managed_identity' } }
+            );
+
+            expect(
+              mockedExtractAndUpdateOutputSecrets.mock.lastCall![0].outputUpdate.secrets
+            ).toBeUndefined();
+            expect(soClient.update).toHaveBeenCalledWith(
+              expect.anything(),
+              expect.anything(),
+              expect.objectContaining({
+                auth: {
+                  type: 'azure',
+                  azure_auth_method: 'managed_identity',
+                  tenant_id: null,
+                  client_id: null,
+                },
+              })
+            );
+          });
+
+          it('removes the stored credential when switching from a header to Azure', async () => {
+            await outputService.update(
+              getMockedSoClient({}),
+              esClientMock,
+              'existing-otlp-output-with-auth',
+              {
+                otlp_exporter: httpExporter,
+                auth: servicePrincipal,
+                secrets: { auth: { azure_client_secret: 'my-secret' } },
+              }
+            );
+
+            expect(
+              mockedExtractAndUpdateOutputSecrets.mock.lastCall![0].outputUpdate.secrets
+            ).toEqual({ auth: { azure_client_secret: 'my-secret' } });
+          });
+
+          it('rejects switching to Azure while the protocol is gRPC', async () => {
+            await expect(
+              outputService.update(
+                getMockedSoClient({}),
+                esClientMock,
+                'existing-otlp-output-with-auth',
+                { auth: { type: 'azure', azure_auth_method: 'managed_identity' } }
+              )
+            ).rejects.toThrow('auth.type "azure" requires otlp_exporter.protocol "http/protobuf"');
+          });
+
+          it('rejects switching the protocol to gRPC while Azure is stored', async () => {
+            await expect(
+              outputService.update(
+                getMockedSoClient({}),
+                esClientMock,
+                'existing-otlp-output-with-azure-auth',
+                { otlp_exporter: { endpoint: 'otel.example.com:4317', protocol: 'grpc' } }
+              )
+            ).rejects.toThrow('auth.type "azure" requires otlp_exporter.protocol "http/protobuf"');
+          });
+
+          it('rejects an endpoint that is not https while Azure is stored', async () => {
+            await expect(
+              outputService.update(
+                getMockedSoClient({}),
+                esClientMock,
+                'existing-otlp-output-with-azure-auth',
+                {
+                  otlp_exporter: {
+                    endpoint: 'http://otel.example.com:4318',
+                    protocol: 'http/protobuf',
+                  },
+                }
+              )
+            ).rejects.toThrow('auth.type "azure" requires https endpoints');
+          });
+
+          it('rejects Azure when the stored TLS settings skip the certificate verification', async () => {
+            await expect(
+              outputService.update(
+                getMockedSoClient({}),
+                esClientMock,
+                'existing-otlp-output-with-insecure-tls',
+                {
+                  // the update only changes another TLS setting: the stored one is kept
+                  otlp_exporter: {
+                    ...httpExporter,
+                    tls: { ca_pem: 'ca' },
+                  },
+                  auth: { type: 'azure', azure_auth_method: 'managed_identity' },
+                }
+              )
+            ).rejects.toThrow('cannot be set together with otlp_exporter.tls.insecure_skip_verify');
+          });
+
+          it('accepts Azure once the update stops skipping the certificate verification', async () => {
+            await outputService.update(
+              getMockedSoClient({}),
+              esClientMock,
+              'existing-otlp-output-with-insecure-tls',
+              {
+                otlp_exporter: { ...httpExporter, tls: { insecure_skip_verify: false } },
+                auth: { type: 'azure', azure_auth_method: 'managed_identity' },
+              }
+            );
+          });
+
+          it('rejects switching to a header without a new credential', async () => {
+            await expect(
+              outputService.update(
+                getMockedSoClient({}),
+                esClientMock,
+                'existing-otlp-output-with-azure-auth',
+                { auth: { type: 'auth_header', scheme: 'api_key' } }
+              )
+            ).rejects.toThrow('secrets.auth.credential is required when auth is set');
+          });
+
+          it('rejects the reference to the stored client secret as the credential', async () => {
+            await expect(
+              outputService.update(
+                getMockedSoClient({}),
+                esClientMock,
+                'existing-otlp-output-with-azure-auth',
+                {
+                  auth: { type: 'auth_header', scheme: 'api_key' },
+                  secrets: { auth: { credential: { id: 'client-secret-id' } } },
+                } as any
+              )
+            ).rejects.toThrow('secrets.auth.credential must be a new value');
+          });
         });
 
         it('rejects a stored authentication when the endpoint changes to the managed OTLP endpoint', async () => {
