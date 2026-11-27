@@ -75,7 +75,7 @@ describe('MaintenanceWindowsPage', () => {
 
     expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Maintenance Windows');
     expect(getByTestId(APP_HEADER_TEST_SUBJECTS.description)).toHaveTextContent(
-      'Suppress rule notifications for scheduled periods of time.'
+      'Schedule periods when notifications stop.'
     );
     expect(await findByTestId('mw-create-button')).toHaveTextContent('Create window');
     expect(getByTestId('maintenance-windows-list')).toBeInTheDocument();

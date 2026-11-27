@@ -85,9 +85,31 @@ export const RULE_CELL_RULE_ID_COPIED = i18n.translate(
 );
 
 export const SUPPRESSED_BY_MAINTENANCE_WINDOW = i18n.translate(
-  'xpack.alertingV2EpisodesUi.suppressedCell.suppressedByMWBadge',
+  'xpack.alertingV2EpisodesUi.suppressedCell.maintenanceWindowBadgeLabel',
   {
-    defaultMessage: 'Suppressed by maintenance window',
+    defaultMessage: 'Maintenance window',
+  }
+);
+
+export const SUPPRESSED_BY_MAINTENANCE_WINDOW_TOOLTIP = i18n.translate(
+  'xpack.alertingV2EpisodesUi.suppressedCell.maintenanceWindowBadgeTooltip',
+  {
+    defaultMessage: 'A maintenance window stopped notifications for this alert.',
+  }
+);
+
+export const MAINTENANCE_WINDOW_INFO_BUTTON_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.suppressedCell.maintenanceWindowInfoButtonLabel',
+  {
+    defaultMessage: 'About maintenance windows',
+  }
+);
+
+/** Shown instead of the linked description when the user can't open Maintenance Windows. */
+export const UNIVERSAL_ALERTING_MAINTENANCE_WINDOW_DESCRIPTION = i18n.translate(
+  'xpack.alertingV2EpisodesUi.suppressedCell.universalAlertingMaintenanceWindowDescription',
+  {
+    defaultMessage: 'Universal Alerting applies maintenance windows when it sends notifications.',
   }
 );
 
@@ -306,7 +328,7 @@ export const EPISODES_LIST_COLUMN_SOURCE = i18n.translate(
 export const EPISODES_LIST_COLUMN_SUPPRESSED = i18n.translate(
   'xpack.alertingV2EpisodesUi.episodes.columns.suppressed',
   {
-    defaultMessage: 'Suppressed',
+    defaultMessage: 'Notifications',
   }
 );
 

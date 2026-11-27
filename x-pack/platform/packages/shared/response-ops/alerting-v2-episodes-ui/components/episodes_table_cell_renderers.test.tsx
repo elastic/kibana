@@ -9,6 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
+import { getRouterLinkProps } from '@kbn/router-utils';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import { CLASSIC_EPISODE_SOURCE_ID } from '../classic_alerts/constants';
 import { EMPTY_VALUE } from '../constants';
@@ -872,30 +873,86 @@ describe('EpisodeRuleCell', () => {
 });
 
 describe('EpisodeSuppressedCell', () => {
-  const renderCell = (maintenanceWindowIds: string[] | undefined) =>
+  const renderCell = (
+    maintenanceWindowIds: string[] | undefined,
+    fields: Record<string, unknown> = {},
+    maintenanceWindowsLinkProps?: ReturnType<typeof getRouterLinkProps>
+  ) =>
     renderWithI18n(
       <EpisodeSuppressedCell
         {...baseCellProps}
         columnId="suppressed"
-        row={makeRow({ maintenance_window_ids: maintenanceWindowIds })}
+        row={makeRow({ maintenance_window_ids: maintenanceWindowIds, ...fields })}
+        maintenanceWindowsLinkProps={maintenanceWindowsLinkProps}
       />
     );
 
-  it('shows that the alert was suppressed by a maintenance window, without listing any', () => {
+  it('shows that a maintenance window affected notifications, without listing any', () => {
     renderCell(['mw-1', 'mw-2']);
 
-    expect(screen.getByText('Suppressed by maintenance window')).toBeInTheDocument();
+    expect(screen.getByText('Maintenance window')).toBeInTheDocument();
     expect(screen.queryByText('mw-1', { exact: false })).not.toBeInTheDocument();
+  });
+
+  it('explains the maintenance window badge in a tooltip on hover', async () => {
+    const user = userEvent.setup();
+    renderCell(['mw-1']);
+
+    await user.hover(screen.getByTestId('episodeSuppressedCell'));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      'A maintenance window stopped notifications for this alert.'
+    );
   });
 
   it.each([
     ['the field is absent', undefined],
     ['the field is empty', []],
-  ])('renders the empty value when %s', (_name, maintenanceWindowIds) => {
-    const { container } = renderCell(maintenanceWindowIds);
+  ])('renders a plain empty value for Classic alerts when %s', (_name, ids) => {
+    const { container } = renderCell(ids, { source_id: CLASSIC_EPISODE_SOURCE_ID });
 
     expect(container).toHaveTextContent(EMPTY_VALUE);
-    expect(screen.queryByText('Suppressed by maintenance window')).not.toBeInTheDocument();
+    expect(screen.queryByText('Maintenance window')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('episodeSuppressedCellInfoButton')).not.toBeInTheDocument();
+  });
+
+  it('opens a popover that links to Maintenance Windows when the empty value is clicked', async () => {
+    const user = userEvent.setup();
+    const navigate = jest.fn();
+    renderCell(
+      undefined,
+      {},
+      getRouterLinkProps({ href: '/app/management/maintenanceWindows', onClick: navigate })
+    );
+
+    const button = screen.getByRole('button', { name: 'About maintenance windows' });
+    expect(button).toHaveTextContent(EMPTY_VALUE);
+
+    await user.click(button);
+
+    expect(await screen.findByTestId('episodeSuppressedCellInfoPopover')).toHaveTextContent(
+      'Universal Alerting applies maintenance windows when it sends notifications. To see which windows were active, go to Maintenance Windows.'
+    );
+    const link = screen.getByRole('link', { name: 'Maintenance Windows' });
+    expect(link).toHaveAttribute('href', '/app/management/maintenanceWindows');
+
+    fireEvent.click(link);
+
+    expect(navigate).toHaveBeenCalled();
+  });
+
+  it('leaves out the Maintenance Windows link when the user cannot open the page', async () => {
+    const user = userEvent.setup();
+    renderCell(undefined);
+
+    await user.click(screen.getByRole('button', { name: 'About maintenance windows' }));
+
+    const popover = await screen.findByTestId('episodeSuppressedCellInfoPopover');
+    expect(popover).toHaveTextContent(
+      'Universal Alerting applies maintenance windows when it sends notifications.'
+    );
+    expect(popover).not.toHaveTextContent('Maintenance Windows');
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
   });
 });
 

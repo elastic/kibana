@@ -154,7 +154,7 @@ describe('useAlertingEpisodesDataView', () => {
     expect(mockDataView.addRuntimeField).toHaveBeenCalledWith('suppressed', {
       type: 'keyword',
       script: { source: "emit('')" },
-      customLabel: 'Suppressed',
+      customLabel: 'Notifications',
     });
   });
 

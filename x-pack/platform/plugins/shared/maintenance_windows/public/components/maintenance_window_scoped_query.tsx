@@ -17,6 +17,7 @@ export interface MaintenanceWindowScopedQueryProps {
   query: string;
   filters: Filter[];
   errors?: string[];
+  helpText?: React.ReactNode;
   isLoading?: boolean;
   isEnabled?: boolean;
   onQueryChange: (query: string) => void;
@@ -30,6 +31,7 @@ export const MaintenanceWindowScopedQuery = React.memo(
       query,
       filters,
       errors = [],
+      helpText,
       isLoading,
       isEnabled = true,
       onQueryChange,
@@ -72,7 +74,12 @@ export const MaintenanceWindowScopedQuery = React.memo(
     return (
       <EuiFlexGroup data-test-subj="maintenanceWindowScopeQuery" direction="column">
         <EuiFlexItem>
-          <EuiFormRow fullWidth isInvalid={errors.length !== 0} error={errors[0]}>
+          <EuiFormRow
+            fullWidth
+            isInvalid={errors.length !== 0}
+            error={errors[0]}
+            helpText={helpText}
+          >
             <AlertsSearchBar
               appName={PLUGIN.getI18nName(i18n)}
               ruleTypeIds={ruleTypeIds}

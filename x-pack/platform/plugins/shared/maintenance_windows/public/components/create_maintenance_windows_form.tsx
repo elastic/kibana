@@ -40,6 +40,11 @@ import { KbnWarningCallout } from '@kbn/ui-callout';
 import moment from 'moment';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { isScopedQueryErrorAttributes } from '../../common';
+import type { StopNotificationsModalCopy } from '../helpers/get_stop_notifications_modal_copy';
+import {
+  getScopeFilterState,
+  getStopNotificationsModalCopy,
+} from '../helpers/get_stop_notifications_modal_copy';
 import { useArchiveMaintenanceWindow } from '../hooks/use_archive_maintenance_window';
 import { useCreateMaintenanceWindow } from '../hooks/use_create_maintenance_window';
 import { useGetRuleTypes } from '../hooks/use_get_rule_types';
@@ -48,6 +53,7 @@ import * as i18n from '../translations';
 import { useKibana, useUiSetting } from '../utils/kibana_react';
 import { EpisodeMatcherInput } from './episode_matcher_input';
 import { DatePickerRangeField } from './fields/date_picker_range_field';
+import { FilterHelpText } from './filter_help_text';
 import { useMaintenanceWindowScope } from './hooks/use_maintenance_window_scope';
 import { MaintenanceWindowScopedQuery } from './maintenance_window_scoped_query';
 import type { FormProps } from './schema';
@@ -77,6 +83,11 @@ const TIMEZONE_OPTIONS = UI_TIMEZONE_OPTIONS.map((timezoneOption) => ({
   label: timezoneOption,
 })) ?? [{ label: 'UTC' }];
 
+// The server sends the full parser message: the error, the query, and a caret line. Only the
+// first line reads well under a form field.
+const getFilterErrorDetail = (message?: string): string | undefined =>
+  message?.split('\n')[0]?.trim() || undefined;
+
 const transformQueryFilters = (filtersToTransform: Filter[]): Filter[] => {
   return filtersToTransform.map((filter) => {
     const { $state, meta, ...rest } = filter;
@@ -101,7 +112,8 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
   const [defaultEndDateValue] = useState<string>(moment().add(30, 'minutes').toISOString());
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isSaveWithoutScopeModalVisible, setIsSaveWithoutScopeModalVisible] = useState(false);
-  const [applyToAllAlertsModalBody, setApplyToAllAlertsModalBody] = useState<string | null>(null);
+  const [stopNotificationsModal, setStopNotificationsModal] =
+    useState<StopNotificationsModalCopy | null>(null);
   const userConfirmedSaveWithoutScopeRef = useRef(false);
   const userConfirmedApplyToAllAlertsRef = useRef(false);
   const { defaultTimezone } = useDefaultTimezone();
@@ -127,11 +139,12 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       const { attributes } = error.body ?? {};
 
       if (isScopedQueryErrorAttributes(attributes)) {
-        for (const { scope } of attributes.scopeErrors) {
+        for (const { scope, message } of attributes.scopeErrors) {
+          const syntaxError = i18n.getFilterSyntaxError(getFilterErrorDetail(message));
           if (scope === 'alertingV2') {
-            setAlertingV2Errors([i18n.CREATE_FORM_ALERTING_V2_QUERY_INVALID_ERROR_MESSAGE]);
+            setAlertingV2Errors([syntaxError]);
           } else {
-            setAlertingV1Errors([i18n.CREATE_FORM_SCOPED_QUERY_INVALID_ERROR_MESSAGE]);
+            setAlertingV1Errors([syntaxError]);
           }
         }
       }
@@ -187,18 +200,16 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
           : null
         : undefined;
 
-      const enabledScopes = [alertingV1.enabled, alertingV2.enabled].filter(Boolean);
-      const enabledFilters = [v1Payload, v2Payload].filter(Boolean);
+      const stopNotificationsModalCopy = getStopNotificationsModalCopy(
+        getScopeFilterState(alertingV1.enabled, v1Payload),
+        getScopeFilterState(alertingV2.enabled, v2Payload)
+      );
 
-      if (enabledFilters.length < enabledScopes.length) {
+      if (stopNotificationsModalCopy) {
         if (userConfirmedApplyToAllAlertsRef.current) {
           userConfirmedApplyToAllAlertsRef.current = false;
         } else {
-          setApplyToAllAlertsModalBody(
-            enabledFilters.length === 0
-              ? i18n.APPLY_TO_ALL_ALERTS_MODAL_BODY
-              : i18n.APPLY_TO_ALL_ALERTS_SCOPED_MODAL_BODY
-          );
+          setStopNotificationsModal(stopNotificationsModalCopy);
           return;
         }
       }
@@ -389,7 +400,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
           <EuiSpacer size="s" />
           <ScopeSection
             title={i18n.ALERTS_SCOPE_TITLE}
-            description={i18n.ALERTS_SCOPE_DESCRIPTION}
+            description={i18n.SCOPE_SWITCH_DESCRIPTION}
             switchLabel={i18n.ALERTS_SCOPE_TITLE}
             switchChecked={alertingV1.enabled}
             onSwitchChange={alertingV1.onToggle}
@@ -405,12 +416,20 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
               errors={alertingV1.errors}
               onQueryChange={alertingV1.onKqlChange}
               onFiltersChange={alertingV1.onFiltersChange}
+              helpText={
+                <FilterHelpText
+                  text={i18n.CLASSIC_FILTER_HELP_TEXT}
+                  linkLabel={i18n.KQL_SYNTAX_LINK}
+                  href={services.docLinks.links.query.kueryQuerySyntax}
+                  data-test-subj="maintenanceWindowClassicFilterHelpText"
+                />
+              }
             />
           </ScopeSection>
           {isUniversalAlertingEnabled && (
             <ScopeSection
               title={i18n.ALERTING_V2_SCOPE_TITLE}
-              description={i18n.ALERTING_V2_SCOPE_DESCRIPTION}
+              description={i18n.SCOPE_SWITCH_DESCRIPTION}
               switchLabel={i18n.ALERTING_V2_SCOPE_TITLE}
               switchChecked={alertingV2.enabled}
               onSwitchChange={alertingV2.onToggle}
@@ -421,6 +440,14 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
                 fullWidth
                 isInvalid={alertingV2.errors.length !== 0}
                 error={alertingV2.errors[0]}
+                helpText={
+                  <FilterHelpText
+                    text={i18n.UNIVERSAL_FILTER_HELP_TEXT}
+                    linkLabel={i18n.ALERT_FIELD_REFERENCE_LINK}
+                    href={services.docLinks.links.alerting.universalAlertingFieldReference}
+                    data-test-subj="maintenanceWindowUniversalFilterHelpText"
+                  />
+                }
               >
                 <EpisodeMatcherInput
                   value={alertingV2.kql}
@@ -475,22 +502,22 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             <p>{i18n.SAVE_WITHOUT_SCOPES_MODAL_SUBTITLE}</p>
           </EuiConfirmModal>
         )}
-        {applyToAllAlertsModalBody !== null && (
+        {stopNotificationsModal !== null && (
           <EuiConfirmModal
             aria-labelledby={applyToAllAlertsModalTitleId}
-            title={i18n.APPLY_TO_ALL_ALERTS_MODAL_TITLE}
+            title={stopNotificationsModal.title}
             titleProps={{ id: applyToAllAlertsModalTitleId }}
-            onCancel={() => setApplyToAllAlertsModalBody(null)}
+            onCancel={() => setStopNotificationsModal(null)}
             onConfirm={() => {
               userConfirmedApplyToAllAlertsRef.current = true;
-              setApplyToAllAlertsModalBody(null);
+              setStopNotificationsModal(null);
               form.submit();
             }}
             cancelButtonText={i18n.CANCEL}
-            confirmButtonText={i18n.APPLY_TO_ALL_ALERTS_MODAL_CONFIRM}
+            confirmButtonText={i18n.STOP_ALL_NOTIFICATIONS_MODAL_CONFIRM}
             data-test-subj="applyToAllAlertsConfirmModal"
           >
-            <p>{applyToAllAlertsModalBody}</p>
+            <p>{stopNotificationsModal.body}</p>
           </EuiConfirmModal>
         )}
         <EuiFlexItem grow={false}>
