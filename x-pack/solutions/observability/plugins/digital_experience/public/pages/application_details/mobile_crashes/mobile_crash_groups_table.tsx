@@ -58,7 +58,7 @@ const CRASH_LABEL = i18n.translate('xpack.digitalExperience.mobile.crashes.table
 
 const CRASH_TOOLTIP = i18n.translate('xpack.digitalExperience.mobile.crashes.table.crashTooltip', {
   defaultMessage:
-    '"New in" marks a group only the newest release had in the {days, plural, one {# day} other {# days}} before the end of the time range, or in the whole range when it is longer. Groups of iOS crash reports are never marked: their frames are unsymbolicated addresses, which each build changes.',
+    '"New in" marks a group only the newest release had in the {days, plural, one {# day} other {# days}} before the end of the time range, or in the whole range when it is longer. Groups with an unsymbolicated iOS crash report are never marked: its frames are addresses, which each build changes. Other iOS crashes, such as a SIGKILL without a report, can be.',
   values: { days: CRASH_NEW_LOOKBACK_DAYS },
 });
 
