@@ -36,4 +36,24 @@ describe('ResultsCheck', () => {
     expect(colorOf(otherOrder, false)).toBe(success);
     expect(colorOf(otherOrder, true)).not.toBe(success);
   });
+
+  it('says in words, not only in color, that the order of a sorted query changed', () => {
+    const textOf = (isSorted: boolean): string => {
+      const { unmount } = render(
+        <EuiProvider>
+          <I18nProvider>
+            <ResultsCheck verdict={otherOrder} isSorted={isSorted} />
+          </I18nProvider>
+        </EuiProvider>
+      );
+      const { textContent } = screen.getByTestId('esqlQueryProfileResultsCheck');
+      unmount();
+      return textContent ?? '';
+    };
+
+    expect(textOf(false)).toBe('Same results: 2 rows, in a different order.');
+    expect(textOf(true)).toBe(
+      'The same 2 rows, but in a different order. The original query sorts its output, so this is not an equivalent query.'
+    );
+  });
 });

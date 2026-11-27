@@ -298,7 +298,8 @@ export function FasterQuerySuggestion({
   connectorsUrl?: string;
 }) {
   const [stage, setStage] = useState<Stage>({ kind: 'idle' });
-  // Only a command of the query itself can sort its output, not one inside a subquery.
+  // Only a SORT of the query itself counts. One inside a FORK branch or a subquery is left out on
+  // purpose: it is rare, and the prompt already forbids a rewrite to change a sort.
   const isSorted = useMemo(
     () => splitQueryCommands(originalQuery).some(({ name }) => name === 'SORT'),
     [originalQuery]

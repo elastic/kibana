@@ -659,7 +659,11 @@ describe('QueryProfileView faster query suggestion', () => {
 
   const setup = (
     suggestedResponse: { columns: object[]; values: unknown[][] },
-    { hasEnterprise = true, hasHttp = true }: { hasEnterprise?: boolean; hasHttp?: boolean } = {}
+    {
+      hasEnterprise = true,
+      hasHttp = true,
+      originalQuery = ORIGINAL,
+    }: { hasEnterprise?: boolean; hasHttp?: boolean; originalQuery?: string } = {}
   ) => {
     const application = {
       capabilities: {
@@ -677,7 +681,7 @@ describe('QueryProfileView faster query suggestion', () => {
     const post = jest.fn();
     const requests = new RequestAdapter();
     logRequest(requests, 'Documents', {
-      query: ORIGINAL,
+      query: originalQuery,
       time_zone: 'UTC',
       include_execution_metadata: true,
     });
@@ -722,6 +726,19 @@ describe('QueryProfileView faster query suggestion', () => {
     );
     expect(screen.getByTestId('esqlQueryProfileResultsCheck')).toHaveTextContent(
       'Same results: 2 rows, in a different order.'
+    );
+  });
+
+  it('says the order changed for a query that sorts its output, and not for one that does not', async () => {
+    const reordered = { columns, values: [[2], [1]] };
+    const { post } = setup(reordered, { originalQuery: `${ORIGINAL} | SORT x` });
+    post.mockResolvedValue({ query: SUGGESTED, reason: 'Only x is needed.' });
+
+    await userEvent.click(await screen.findByTestId('esqlQueryProfileSuggest'));
+    await userEvent.click(await screen.findByTestId('esqlQueryProfileProfileSuggestion'));
+
+    expect(await screen.findByTestId('esqlQueryProfileResultsCheck')).toHaveTextContent(
+      'The original query sorts its output, so this is not an equivalent query.'
     );
   });
 

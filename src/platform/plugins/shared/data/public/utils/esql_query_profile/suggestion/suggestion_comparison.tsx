@@ -16,12 +16,20 @@ import { formatChange, formatDurationMillis } from '../shared/profile_format';
 import type { QueryProfileView } from '../profile/types';
 
 /** Says in words how the results of the suggestion compare with the original's. */
-const describeVerdict = (verdict: ResultsVerdict): string => {
+const describeVerdict = (verdict: ResultsVerdict, isSorted: boolean): string => {
   switch (verdict.kind) {
     case 'same':
-      return verdict.sameOrder
-        ? i18n.translate('data.inspector.queryProfile.sameResultsLabel', {
-            defaultMessage: 'Same results: {rowCount, plural, one {# row} other {# rows}}.',
+      if (verdict.sameOrder) {
+        return i18n.translate('data.inspector.queryProfile.sameResultsLabel', {
+          defaultMessage: 'Same results: {rowCount, plural, one {# row} other {# rows}}.',
+          values: { rowCount: verdict.rowCount },
+        });
+      }
+      // Said in words as well as in color, since the order is part of the results of a sorted query.
+      return isSorted
+        ? i18n.translate('data.inspector.queryProfile.sameRowsSortedOtherOrderLabel', {
+            defaultMessage:
+              'The same {rowCount, plural, one {# row} other {# rows}}, but in a different order. The original query sorts its output, so this is not an equivalent query.',
             values: { rowCount: verdict.rowCount },
           })
         : i18n.translate('data.inspector.queryProfile.sameResultsOtherOrderLabel', {
@@ -95,7 +103,7 @@ export function ResultsCheck({
       color={describeColor(verdict, isSorted)}
       data-test-subj="esqlQueryProfileResultsCheck"
     >
-      <strong>{describeVerdict(verdict)}</strong>
+      <strong>{describeVerdict(verdict, isSorted)}</strong>
     </EuiText>
   );
 }
