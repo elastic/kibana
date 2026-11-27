@@ -699,16 +699,31 @@
           },
           {
             "in": "query",
-            "name": "access_token",
+            "name": "upload_protocol",
             "schema": {
               "type": "string"
             }
           },
           {
             "in": "query",
-            "name": "callback",
+            "name": "fields",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
             }
           },
           {
@@ -726,38 +741,16 @@
           },
           {
             "in": "query",
-            "name": "oauth_token",
+            "name": "access_token",
             "schema": {
               "type": "string"
             }
           },
           {
             "in": "query",
-            "name": "quotaUser",
+            "name": "callback",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "upload_protocol",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "key",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "prettyPrint",
-            "schema": {
-              "default": "true",
-              "type": "boolean"
             }
           },
           {
@@ -773,7 +766,14 @@
           },
           {
             "in": "query",
-            "name": "fields",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
             "schema": {
               "type": "string"
             }
@@ -798,53 +798,10 @@
           },
           {
             "in": "query",
-            "name": "eventName",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "orgUnitID",
             "schema": {
               "default": "",
               "pattern": "(id:[a-z0-9]+)",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "actorIpAddress",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "agentInfoFilter",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "statusFilter",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "applicationInfoFilter",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "startTime",
-            "schema": {
-              "pattern": "(\\d\\d\\d\\d)-(\\d\\d)-(\\d\\d)T(\\d\\d):(\\d\\d):(\\d\\d)(?:\\.(\\d+))?(?:(Z)|([-+])(\\d\\d):(\\d\\d))",
               "type": "string"
             }
           },
@@ -858,9 +815,51 @@
           },
           {
             "in": "query",
-            "name": "customerId",
+            "name": "startTime",
             "schema": {
-              "pattern": "C.+|my_customer",
+              "pattern": "(\\d\\d\\d\\d)-(\\d\\d)-(\\d\\d)T(\\d\\d):(\\d\\d):(\\d\\d)(?:\\.(\\d+))?(?:(Z)|([-+])(\\d\\d):(\\d\\d))",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "resourceDetailsFilter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "agentInfoFilter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "deviceFilter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "eventName",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "actorIpAddress",
+            "schema": {
               "type": "string"
             }
           },
@@ -881,9 +880,24 @@
           },
           {
             "in": "query",
-            "name": "includeSensitiveData",
+            "name": "applicationInfoFilter",
             "schema": {
-              "type": "boolean"
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customerId",
+            "schema": {
+              "pattern": "C.+|my_customer",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "statusFilter",
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -896,23 +910,9 @@
           },
           {
             "in": "query",
-            "name": "pageToken",
+            "name": "includeSensitiveData",
             "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "resourceDetailsFilter",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "deviceFilter",
-            "schema": {
-              "type": "string"
+              "type": "boolean"
             }
           }
         ],

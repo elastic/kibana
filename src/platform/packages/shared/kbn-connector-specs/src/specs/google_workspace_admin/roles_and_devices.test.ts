@@ -91,7 +91,7 @@ describe('Google Workspace Admin role assignments and mobile devices', () => {
       await expect(
         run('listRoleAssignments', ctx, { userKey: 'nobody@example.com' })
       ).rejects.toThrow(
-        'User nobody@example.com is not a user of this Google Workspace account (Google answered "Invalid user id").'
+        'nobody@example.com is not a user or group of this Google Workspace account (Google answered "Invalid user id").'
       );
       expect(request).toHaveBeenCalledTimes(1);
     });
@@ -115,6 +115,67 @@ describe('Google Workspace Admin role assignments and mobile devices', () => {
       [{ userKey: 'jdoe@example.com', roleId: ' ' }, true],
     ])('input %j is accepted: %s', (input, expected) => {
       expect(accepts('listRoleAssignments', input)).toBe(expected);
+    });
+  });
+
+  describe('listRoles', () => {
+    const SUPER_ADMIN = {
+      kind: 'admin#directory#role',
+      etag: '"e1"',
+      roleId: '91447453409034240',
+      roleName: '_SEED_ADMIN_ROLE',
+      roleDescription: 'Super Admin',
+      isSuperAdminRole: true,
+      isSystemRole: true,
+      rolePrivileges: [{ privilegeName: 'SUPER_ADMIN', serviceId: '01ci93xb3tmzyin' }],
+    };
+
+    it('reads the roles of my_customer and returns short records without the privilege list', async () => {
+      const { ctx, request } = createContext();
+      request.mockResolvedValue({
+        status: 200,
+        data: { kind: 'admin#directory#roles', items: [SUPER_ADMIN], nextPageToken: 'next-1' },
+      });
+      expect(await run('listRoles', ctx, {})).toEqual({
+        items: [
+          {
+            roleId: '91447453409034240',
+            roleName: '_SEED_ADMIN_ROLE',
+            roleDescription: 'Super Admin',
+            isSuperAdminRole: true,
+            isSystemRole: true,
+          },
+        ],
+        nextPageToken: 'next-1',
+      });
+      expect(sent(request)).toEqual({
+        method: 'GET',
+        url: `${DIRECTORY}/customer/my_customer/roles`,
+        params: { maxResults: 100 },
+        data: undefined,
+      });
+    });
+
+    it('passes the customer, page size and page token, and returns no token on the last page', async () => {
+      const { ctx, request } = createContext();
+      request.mockResolvedValue({ status: 200, data: {} });
+      expect(
+        await run('listRoles', ctx, { customer: 'C01abc23d', maxResults: 5, pageToken: 'p2' })
+      ).toEqual({ items: [] });
+      expect(sent(request)).toMatchObject({
+        url: `${DIRECTORY}/customer/C01abc23d/roles`,
+        params: { maxResults: 5, pageToken: 'p2' },
+      });
+    });
+
+    it.each([
+      [{ maxResults: 100 }, true],
+      [{ maxResults: 101 }, false],
+      [{ maxResults: 0 }, false],
+      [{ customer: 'not a customer' }, false],
+      [{ customer: '  ' }, true],
+    ])('input %j is accepted: %s', (input, expected) => {
+      expect(accepts('listRoles', input)).toBe(expected);
     });
   });
 
@@ -201,6 +262,16 @@ describe('Google Workspace Admin role assignments and mobile devices', () => {
   });
 
   describe('actionMobileDevice', () => {
+    it('names both causes when Google answers 500, as it does for an unknown resourceId', async () => {
+      const { ctx, request } = createContext();
+      request.mockRejectedValue(googleError(500, 'Internal error encountered.', 'backendError'));
+      await expect(
+        run('actionMobileDevice', ctx, { resourceId: 'AFiQxQ8unknown', action: 'block' })
+      ).rejects.toThrow(
+        'Google answered 500 for mobile device AFiQxQ8unknown. Google gives this answer for a resourceId that is not a managed device of this account as well as for a server fault'
+      );
+    });
+
     it.each([
       ['block', 'block'],
       ['wipe', 'admin_remote_wipe'],
@@ -244,6 +315,8 @@ describe('Google Workspace Admin role assignments and mobile devices', () => {
     });
 
     it.each([
+      [{ resourceId: 'A'.repeat(256), action: 'block' }, true],
+      [{ resourceId: 'A'.repeat(257), action: 'block' }, false],
       [{ resourceId: 'a', action: 'approve' }, false],
       [{ resourceId: 'a', action: 'admin_remote_wipe' }, false],
       [{ resourceId: 'a/b', action: 'block' }, false],

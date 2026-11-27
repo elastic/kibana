@@ -64,7 +64,10 @@ export const run = (
 export const accepts = (name: keyof typeof GoogleWorkspaceAdmin.actions, input: unknown) =>
   GoogleWorkspaceAdmin.actions[name].input.safeParse(input).success;
 
-/** The request config the handler sent, without the fixed timeout and redirect settings. */
+/**
+ * The request config the handler sent, without the timeout and redirect settings (createContext
+ * sets no Actions timeout, so the connector's own timeout applies).
+ */
 export const sent = (request: jest.Mock, call = 0) => {
   const { timeout, maxRedirects, ...rest } = request.mock.calls[call][0];
   expect(timeout).toBe(REQUEST_TIMEOUT_MS);

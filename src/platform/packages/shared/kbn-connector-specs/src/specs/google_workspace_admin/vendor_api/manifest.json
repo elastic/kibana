@@ -23,6 +23,11 @@
     ],
     "invalidateVerificationCodes": [
       {
+        "method": "get",
+        "path": "/admin/directory/v1/users/{userKey}/verificationCodes",
+        "source": "directory"
+      },
+      {
         "method": "post",
         "path": "/admin/directory/v1/users/{userKey}/verificationCodes/invalidate",
         "source": "directory"
@@ -125,6 +130,24 @@
         "source": "directory"
       }
     ],
+    "listRoles": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "pageToken",
+            "sizeParam": "maxResults"
+          },
+          "response": {
+            "itemsPath": "items",
+            "nextPath": "nextPageToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/admin/directory/v1/customer/{customer}/roles",
+        "source": "directory"
+      }
+    ],
     "listUserTokens": [
       {
         "method": "get",
@@ -187,6 +210,11 @@
         "source": "directory"
       },
       {
+        "method": "get",
+        "path": "/admin/directory/v1/users/{userKey}/asps",
+        "source": "directory"
+      },
+      {
         "method": "delete",
         "path": "/admin/directory/v1/users/{userKey}/asps/{codeId}",
         "source": "directory"
@@ -236,13 +264,13 @@
   "sources": {
     "directory": {
       "apiVersion": "directory_v1",
-      "fetchedAt": "2026-11-23T17:43:17.122Z",
+      "fetchedAt": "2026-11-27T11:35:25.498Z",
       "format": "discovery",
       "url": "https://admin.googleapis.com/$discovery/rest?version=directory_v1"
     },
     "reports": {
       "apiVersion": "reports_v1",
-      "fetchedAt": "2026-11-23T17:43:17.671Z",
+      "fetchedAt": "2026-11-27T11:35:26.136Z",
       "format": "discovery",
       "url": "https://admin.googleapis.com/$discovery/rest?version=reports_v1"
     }

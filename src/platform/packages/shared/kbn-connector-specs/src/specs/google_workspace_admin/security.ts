@@ -90,7 +90,7 @@ export const securityActions = {
     isTool: false,
     scope: 'destroy',
     description:
-      "Revoke a user's OAuth grant for one third-party app by clientId, cutting that app's access to the account. Returns status revoked, or notFound when Google reports no grant for that clientId; an unknown user fails. Google may also accept a clientId the user never granted, so revoked does not prove a grant existed.",
+      "Revoke a user's OAuth grant for one third-party app by clientId, cutting that app's access to the account. Returns status revoked, or notFound when Google reports no grant for that clientId; an unknown user fails. Google also accepts a clientId the user never granted, so revoked does not prove a grant existed.",
     input: RevokeUserTokenInputSchema,
     handler: async (ctx, input: RevokeUserTokenInput) => ({
       userKey: input.userKey,
@@ -152,9 +152,10 @@ export const securityActions = {
     isTool: false,
     scope: 'destroy',
     description:
-      'Invalidate all current 2-step verification backup codes of a user, for example when they may be exposed. The user needs new codes afterwards. Returns invalidated true, also when the user had no valid codes.',
+      'Invalidate all current 2-step verification backup codes of a user, for example when they may be exposed. The user needs new codes afterwards. Returns invalidated true and status invalidated, or status noValidCodes when the user had no valid codes left (nothing to invalidate).',
     input: UserKeyInputSchema,
     handler: async (ctx, input: UserKeyInput) => {
+      let status: 'invalidated' | 'noValidCodes' = 'invalidated';
       try {
         await googleRequest(ctx, {
           method: 'POST',
@@ -170,8 +171,9 @@ export const securityActions = {
         ) {
           throw error;
         }
+        status = 'noValidCodes';
       }
-      return { userKey: input.userKey, invalidated: true };
+      return { userKey: input.userKey, invalidated: true, status };
     },
   },
 } satisfies ConnectorSpec['actions'];

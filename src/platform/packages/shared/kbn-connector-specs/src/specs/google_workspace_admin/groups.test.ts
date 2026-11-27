@@ -88,8 +88,8 @@ describe('Google Workspace Admin group actions', () => {
       [{ userKey: 'jdoe@example.com', query: 'email:admins*' }, false],
       [{ userKey: ' ', query: 'email:admins*' }, true],
       [{ userKey: 'jdoe@example.com', query: ' ' }, true],
-      [{ maxResults: 201 }, false],
-      [{ maxResults: 200 }, true],
+      [{ maxResults: 101 }, false],
+      [{ maxResults: 100 }, true],
     ])('input %j is accepted: %s', (input, expected) => {
       expect(accepts('listGroups', input)).toBe(expected);
     });

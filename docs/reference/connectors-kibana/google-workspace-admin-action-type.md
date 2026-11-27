@@ -13,7 +13,7 @@ The Google Workspace Admin connector lets AI agents in **Agent Builder** query t
 
 - Read audit events, such as sign-ins, admin changes, and OAuth grants
 - Look up users and their third-party app grants, app passwords, and 2-Step Verification backup codes
-- Review group memberships, admin role assignments, and managed mobile devices
+- Review group memberships, admin roles and who holds them, and managed mobile devices
 
 ::::{note}
 This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release. Actions marked _(not yet available)_ are not exposed to agents. Until workflow support is added, you can only run them through the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
@@ -33,7 +33,7 @@ Google Workspace Admin connectors have no URL setting: Google has one Admin SDK 
 
 Authentication
 :   Select one of the following:
-    - **OAuth 2.0 authorization code** (recommended): Enter the **Client ID** and **Client secret** of an OAuth web application client, then authorize the connector as a Workspace administrator. The connector requests the scopes listed in [Required permissions](#google-workspace-admin-required-permissions) and refreshes the access token automatically.
+    - **OAuth 2.0 authorization code** (recommended): Enter the **Client ID** and **Client secret** of an OAuth web application client, then authorize the connector as a Workspace administrator. The connector requests the scopes listed in [Required permissions](#google-workspace-admin-required-permissions) and refreshes the access token automatically. With **Personal credentials**, each {{kib}} user authorizes the connector with their own Workspace administrator account, and actions run with that user's authorization. A user who hasn't authorized it gets an error that asks them to complete the OAuth authorization.
     - **Bearer token**: Enter an OAuth 2.0 access token of a Workspace administrator with the scopes listed in [Required permissions](#google-workspace-admin-required-permissions). Google access tokens expire after about one hour, so the connector stops working until you enter a new token. Use this option for short tests.
 
 ### Required permissions [google-workspace-admin-required-permissions]
@@ -58,14 +58,14 @@ The administrator who authorizes the connector, or whose token you enter, also n
 | `admin.directory.user.security` | Users: Manage user security | `signOutUser`, `listUserTokens`, `revokeUserToken`, `listAppPasswords`, `revokeAppPasswords`, `listVerificationCodes`, `invalidateVerificationCodes` |
 | `admin.directory.group`, `admin.directory.group.member` | Groups: Read | `listGroups`, `listGroupMembers` |
 | `admin.directory.group`, `admin.directory.group.member` | Groups: Update | `addGroupMember`, `removeGroupMember` |
-| `admin.directory.rolemanagement.readonly` | Admin roles: Read | `listRoleAssignments` |
+| `admin.directory.rolemanagement.readonly` | Admin roles: Read | `listRoleAssignments`, `listRoles` |
 | `admin.directory.device.mobile.action` | Services: Mobile device management: Manage devices and settings | `listMobileDevices`, `actionMobileDevice` |
 
 A missing scope or privilege makes the action fail with HTTP 403 and a message that says so.
 
 ## Test connectors [google-workspace-admin-action-configuration]
 
-**Test connector** reads one user of the account. It checks the access token, the `admin.directory.user` scope, and the administrator's privilege to read users.
+**Test connector** reads one user of the account. It checks the access token, the `admin.directory.user` scope, and the administrator's privilege to read users. The test fails when the response isn't a Directory API user list, for example an HTML page from a proxy.
 
 ## Connector actions [google-workspace-admin-connector-actions]
 
@@ -79,11 +79,11 @@ Every list action except `listUserTokens`, `listAppPasswords`, and `listVerifica
 :   List audit events of one application, optionally narrowed to one user, actor IP address, event name, event-parameter filter, or time range. Returns `items` and `nextPageToken`.
     - `applicationName` (required): The application, for example `login`, `admin`, `token`, `user_accounts`, `drive`, `mobile`, or `saml`. Also accepted (every application of the Google Reports API, lowercase as listed): `access_transparency`, `calendar`, `chat`, `gcp`, `gmail`, `gplus`, `groups`, `groups_enterprise`, `jamboard`, `meet`, `rules`, `context_aware_access`, `chrome`, `data_studio`, `keep`, `vault`, `gemini_in_workspace_apps`, `classroom`, `assignments`, `cloud_search`, `tasks`, `data_migration`, `meet_hardware`, `directory_sync`, `ldap`, `profile`, `access_evaluation`, `admin_data_action`, `contacts`, `takeout`, `graduation`, `voice`, `chrome_sync`, `workspace_studio`, and `gemini_notebook`.
     - `userKey` (optional): The primary email or user ID of one user. Defaults to `all`.
-    - `startTime`, `endTime` (optional): The time range in RFC 3339 format, for example `2026-11-01T00:00:00Z`.
+    - `startTime`, `endTime` (optional): The time range in RFC 3339 format, for example `2026-11-01T00:00:00Z`. `startTime` must be in the past and before `endTime`. For `gmail`, both are required and can be at most 30 days apart.
     - `eventName` (optional): An event name, for example `login_failure`.
-    - `filters` (optional): Comma-separated event-parameter conditions with `==`, `<>`, `<`, `<=`, `>`, or `>=`, for example `login_type==exchange`.
-    - `actorIpAddress` (optional): The IP address of the user who performed the action.
-    - `maxResults` (optional): Page size, 1–1,000. Defaults to 100.
+    - `filters` (optional): Comma-separated event-parameter conditions with `==`, `<>`, `<`, `<=`, `>`, or `>=`, for example `login_type==exchange`. Each parameter can appear once.
+    - `actorIpAddress` (optional): The IPv4 or IPv6 address of the user who performed the action.
+    - `maxResults` (optional): Page size, 1–50. Defaults to 25. One login event is about 1 KB, so a small page keeps the result within what an agent can read.
     - `pageToken` (optional): `nextPageToken` from the previous page.
 
 ### Users [google-workspace-admin-users]
@@ -94,11 +94,11 @@ Every list action except `listUserTokens`, `listAppPasswords`, and `listVerifica
     - `domain` (optional): Only users of this domain.
     - `query` (optional): A user search query, for example `isSuspended=true` or `orgUnitPath=/Sales`. `lastLoginTime` isn't a search field, and Google rejects a query that uses it with HTTP 400. To find users by last sign-in, filter the returned `lastLoginTime` values.
     - `orderBy` (optional): `email`, `familyName`, or `givenName`.
-    - `maxResults` (optional): Page size, 1–500. Defaults to 100.
+    - `maxResults` (optional): Page size, 1–100. Defaults to 100. The limit keeps one page within what an agent can read.
     - `pageToken` (optional): `nextPageToken` from the previous page.
 
 `getUser`
-:   Get the full directory record of one user, including suspension status and reason, organizational unit, 2-step verification enrollment and enforcement, last sign-in time, admin flags, and recovery email and phone.
+:   Get the full directory record of one user, including suspension status and reason, organizational unit, 2-Step Verification enrollment and enforcement, last sign-in time, admin flags, and recovery email and phone.
     - `userKey` (required): The user.
     - `projection` (optional): `basic` (default) or `full`. `full` adds custom schema fields.
     - `viewType` (optional): `admin_view` (default) or `domain_public`.
@@ -116,17 +116,17 @@ Every list action except `listUserTokens`, `listAppPasswords`, and `listVerifica
     - `userKey` (required): The user.
 
 `updateUser` _(not yet available)_
-:   Update selected fields of a user. Only the fields you set change; set at least one. Returns `id`, `primaryEmail`, `orgUnitPath`, `changePasswordAtNextLogin`, `recoveryEmail`, and `recoveryPhone` as Google's answer contains them, with `null` for a field that the answer leaves out, and `updatedFields`, the fields that were sent.
+:   Update selected fields of a user. Only the fields you set change; set at least one. Returns `id`, `primaryEmail`, `orgUnitPath`, `changePasswordAtNextLogin`, `recoveryEmail`, `recoveryPhone`, and `updatedFields`. A field that is empty or that Google's response leaves out is `null`. `updatedFields` lists the fields the connector sent.
     - `userKey` (required): The user.
     - `orgUnitPath` (optional): The full organizational unit path, starting with `/`, for example `/Quarantine`.
     - `changePasswordAtNextLogin` (optional): Whether the user must change the password at the next sign-in.
-    - `recoveryEmail` (optional): The recovery email address.
-    - `recoveryPhone` (optional): The recovery phone in E.164 format, for example `+16505550100`.
+    - `recoveryEmail` (optional): The recovery email address, or `null` to remove the current one, for example a recovery address that an attacker added.
+    - `recoveryPhone` (optional): The recovery phone in E.164 format, for example `+16505550100`, or `null` to remove it.
 
 ### Account security [google-workspace-admin-security]
 
 `listUserTokens`
-:   List the third-party apps a user granted OAuth access to. Returns `items`, each with `clientId`, `displayText`, and `scopes`.
+:   List the third-party apps a user granted OAuth access to. Returns `items`, each including `clientId`, `displayText`, and `scopes`.
     - `userKey` (required): The user.
 
 `revokeUserToken` _(not yet available)_
@@ -135,7 +135,7 @@ Every list action except `listUserTokens`, `listAppPasswords`, and `listVerifica
     - `clientId` (required): The app's OAuth client ID, from `listUserTokens`.
 
 `listAppPasswords`
-:   List a user's app passwords. Returns `items`, each with `codeId`, `name`, `creationTime`, and `lastTimeUsed`.
+:   List a user's app passwords. Returns `items`, each including `codeId`, `name`, `creationTime`, and `lastTimeUsed`.
     - `userKey` (required): The user.
 
 `revokeAppPasswords` _(not yet available)_
@@ -144,26 +144,26 @@ Every list action except `listUserTokens`, `listAppPasswords`, and `listVerifica
     - `codeId` (required): The app password's code ID, from `listAppPasswords`.
 
 `listVerificationCodes`
-:   Count the 2-step verification backup codes that are valid for a user. Returns `count` and one entry with `userId` per code. The action never returns the code values.
+:   Count the 2-Step Verification backup codes that are valid for a user. Returns `count` and one entry with `userId` per code. The action never returns the code values.
     - `userKey` (required): The user.
 
 `invalidateVerificationCodes` _(not yet available)_
-:   Invalidate all current 2-step verification backup codes of a user, for example, when they might be exposed. The user needs new codes afterward. Returns `userKey` and `invalidated: true`, also when the user had no valid codes. Google rejects that case with HTTP 400, for example on a repeat call; the connector then reads the user's codes and succeeds when none is valid.
+:   Invalidate all current 2-Step Verification backup codes of a user, for example when they might be exposed. The user needs new codes afterward. Returns `userKey`, `invalidated: true`, and `status`: `invalidated`, or `noValidCodes` when the user had no valid codes left. Google rejects that case, such as a repeat call, with HTTP 400; the connector then reads the user's codes and returns `noValidCodes` when none is valid.
     - `userKey` (required): The user.
 
 ### Groups [google-workspace-admin-groups]
 
 `listGroups`
-:   List groups of the account or of one domain, or only the groups a user belongs to. Returns `nextPageToken` and `groups`, each with `id`, `email`, `name`, `description`, and `directMembersCount`.
-    - `userKey` (optional): Only the groups this user or group is a member of. Can't be combined with `customer` or `query`.
+:   List groups of the account or of one domain, or only the groups a user belongs to. Returns `nextPageToken` and `groups`, each including `id`, `email`, `name`, `description`, and `directMembersCount`.
+    - `userKey` (optional): Only the groups this user is a member of, given as the email or user ID. Can't be combined with `customer` or `query`.
     - `customer` (optional): The customer ID, or `my_customer`. Used when neither `userKey` nor `domain` is set.
     - `domain` (optional): Only groups of this domain.
     - `query` (optional): A group search query, for example `email:admins*`. Can't be combined with `userKey`.
-    - `maxResults` (optional): Page size, 1–200. Defaults to 100.
+    - `maxResults` (optional): Page size, 1–100. Defaults to 100. The limit keeps one page within what an agent can read.
     - `pageToken` (optional): `nextPageToken` from the previous page.
 
 `listGroupMembers`
-:   List members of a group with `email`, `role`, `type`, and `status`. Returns `members` and `nextPageToken`.
+:   List members of a group. Returns `members`, each including `email`, `role`, `type`, and `status`, and `nextPageToken`.
     - `groupKey` (required): The group.
     - `roles` (optional): Only members with these roles: `OWNER`, `MANAGER`, `MEMBER`.
     - `includeDerivedMembership` (optional): Include members of nested groups. Defaults to `false`.
@@ -177,19 +177,25 @@ Every list action except `listUserTokens`, `listAppPasswords`, and `listVerifica
     - `role` (optional): `MEMBER` (default), `MANAGER`, or `OWNER`.
 
 `removeGroupMember` _(not yet available)_
-:   Remove a user or group from a group. Returns `groupKey`, `memberKey`, and `status`: `removed`, or `notMember` when it isn't a member. The action fails when the group doesn't exist.
+:   Remove a user or group from a group. Returns `groupKey`, `memberKey`, and `status`: `removed`, or `notMember` when `memberKey` isn't a member of the group. The action fails when the group doesn't exist.
     - `groupKey` (required): The group.
     - `memberKey` (required): The email, alias, or ID of the member to remove.
 
 ### Admin roles [google-workspace-admin-roles]
 
 `listRoleAssignments`
-:   List admin role assignments, optionally for one user or one role. Returns `nextPageToken` and `items`, each with `roleAssignmentId`, `roleId`, `assignedTo`, `assigneeType`, `scopeType`, and `orgUnitId`.
+:   List admin role assignments, optionally for one user or one role. Returns `nextPageToken` and `items`, each including `roleAssignmentId`, `roleId`, `assignedTo`, `assigneeType`, `scopeType`, and `orgUnitId`. To get the name of a `roleId`, use `listRoles`.
     - `customer` (optional): The customer ID, or `my_customer` (default).
-    - `userKey` (optional): Only the assignments of this user. Can't be combined with `roleId`. A `userKey` that isn't a user of the account fails with a message that says so.
+    - `userKey` (optional): Only the assignments of this user or group: the primary email, an alias email, or the user or group ID. Can't be combined with `roleId`. A `userKey` that isn't a user or group of the account fails with a message that says so.
     - `roleId` (optional): Only the assignments of this numeric role ID. Can't be combined with `userKey`.
     - `includeIndirectRoleAssignments` (optional): Include roles held through groups. Requires `userKey`.
     - `maxResults` (optional): Page size, 1–200. Defaults to 100.
+    - `pageToken` (optional): `nextPageToken` from the previous page.
+
+`listRoles`
+:   List the admin roles of the account, for example to find which `roleId` values from `listRoleAssignments` are super admin roles. Returns `nextPageToken` and `items`, each with `roleId`, `roleName`, `roleDescription`, `isSuperAdminRole`, and `isSystemRole`. The privileges of each role aren't returned.
+    - `customer` (optional): The customer ID, or `my_customer` (default).
+    - `maxResults` (optional): Page size, 1–100. Defaults to 100.
     - `pageToken` (optional): `nextPageToken` from the previous page.
 
 ### Mobile devices [google-workspace-admin-devices]
@@ -204,24 +210,25 @@ Every list action except `listUserTokens`, `listAppPasswords`, and `listVerifica
     - `pageToken` (optional): `nextPageToken` from the previous page.
 
 `actionMobileDevice` _(not yet available)_
-:   Apply an action to a managed mobile device. A wipe can't be undone. Returns `resourceId`, `action`, and `status: requested`.
+:   Apply an action to a managed mobile device. A wipe can't be undone. To unblock a blocked device, approve it in the Google Admin console. Returns `resourceId`, `action`, and `status: requested`. Google answers a `resourceId` that isn't a managed device of the account with HTTP 500, so the error asks you to check the `resourceId` with `listMobileDevices`.
     - `customerId` (optional): The customer ID, or `my_customer` (default).
     - `resourceId` (required): The device's `resourceId`, from `listMobileDevices`.
-    - `action` (required): `block`, `wipe`, or `account_wipe`.
+    - `action` (required): `block`, `wipe`, or `account_wipe`. `wipe` erases the whole device and `account_wipe` removes the work account from it; neither can be undone.
 
 ## Usage notes [google-workspace-admin-usage-notes]
 
-- The connector sends every request to `https://admin.googleapis.com` and doesn't retry failed calls. An error keeps the HTTP status and, on a rate limit, Google's `Retry-After` value, so you can decide when to run the action again.
-- Google answers a malformed or outdated `pageToken` with HTTP 503 instead of HTTP 400. The error then asks you to check `pageToken`. Pass the `nextPageToken` of the previous page of the same request.
+- The connector sends every request to `https://admin.googleapis.com` and doesn't retry failed calls. An error includes the HTTP status and, for a rate limit, Google's `Retry-After` value, so you can decide when to run the action again.
+- Google returns HTTP 503 instead of HTTP 400 for a malformed or outdated `pageToken`. The error then asks you to check `pageToken`. Pass the `nextPageToken` of the previous page of the same request.
 - After a server error or a timeout, a change might already be applied, so read the current state before you run an action that changes data again.
-- Each request times out after 30 seconds.
+- Each request times out after 30 seconds, or after the {{kib}} actions timeout when that is shorter.
+- Actions that change data reject unknown input fields, so a mistyped field fails instead of being ignored. The connector removes leading and trailing spaces from user, group, customer, client, and device IDs before it validates them.
 - A response larger than `xpack.actions.maxResponseContentLength` (1 MB by default) fails with an error that says so. Request a smaller page with `maxResults`, narrow the query, or raise the setting.
 
 ## Connector networking configuration [google-workspace-admin-connector-networking-configuration]
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
-If you restrict `xpack.actions.allowedHosts`, allow `admin.googleapis.com` for the actions and `oauth2.googleapis.com` for the OAuth token exchange.
+If you restrict `xpack.actions.allowedHosts`, allow `admin.googleapis.com` for the actions, and `accounts.google.com` and `oauth2.googleapis.com` for the OAuth authorization and token exchange.
 
 ## Get API credentials [google-workspace-admin-api-credentials]
 
@@ -234,6 +241,8 @@ If you restrict `xpack.actions.allowedHosts`, allow `admin.googleapis.com` for t
    ```text
    https://<your-kibana-host>/api/actions/connector/_oauth_callback
    ```
+
+   {{kib}} builds this URI from `server.publicBaseUrl`. Set it in `kibana.yml` to the URL you open {{kib}} with, or authorization fails with "Kibana public URL not configured".
 
 4. Copy the **Client ID** and **Client secret**.
 5. In {{kib}}, create the connector and select **OAuth 2.0 authorization code**. In the **Client ID** and **Client secret** fields, enter the values you copied.

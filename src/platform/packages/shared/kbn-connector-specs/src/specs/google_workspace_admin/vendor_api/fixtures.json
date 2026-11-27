@@ -1,4 +1,35 @@
 {
+  "invalidateVerificationCodes": {
+    "responses": [
+      {
+        "source": "directory",
+        "method": "POST",
+        "path": "/admin/directory/v1/users/{userKey}/verificationCodes/invalidate",
+        "status": 400,
+        "body": {
+          "error": {
+            "code": 400,
+            "message": "Invalid Input",
+            "errors": [
+              {
+                "reason": "invalid"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "source": "directory",
+        "method": "GET",
+        "path": "/admin/directory/v1/users/{userKey}/verificationCodes",
+        "status": 200,
+        "body": {
+          "kind": "admin#directory#verificationCodesList",
+          "items": []
+        }
+      }
+    ]
+  },
   "removeGroupMember": {
     "responses": [
       {
@@ -6,18 +37,78 @@
         "method": "DELETE",
         "path": "/admin/directory/v1/groups/{groupKey}/members/{memberKey}",
         "status": 404,
-        "body": { "error": { "code": 404, "message": "Resource Not Found: memberKey", "errors": [{ "reason": "notFound" }] } }
+        "body": {
+          "error": {
+            "code": 404,
+            "message": "Resource Not Found: memberKey",
+            "errors": [
+              {
+                "reason": "notFound"
+              }
+            ]
+          }
+        }
       }
     ]
   },
   "revokeAppPasswords": {
+    "input": [
+      {
+        "codeId": 404
+      },
+      {
+        "codeId": 7
+      }
+    ],
     "responses": [
       {
         "source": "directory",
         "method": "DELETE",
         "path": "/admin/directory/v1/users/{userKey}/asps/{codeId}",
+        "when": {
+          "path": {
+            "codeId": "404"
+          }
+        },
         "status": 404,
-        "body": { "error": { "code": 404, "message": "Resource Not Found: codeId", "errors": [{ "reason": "notFound" }] } }
+        "body": {
+          "error": {
+            "code": 404,
+            "message": "Resource Not Found: userKey",
+            "errors": [
+              {
+                "reason": "notFound"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "source": "directory",
+        "method": "DELETE",
+        "path": "/admin/directory/v1/users/{userKey}/asps/{codeId}",
+        "status": 400,
+        "body": {
+          "error": {
+            "code": 400,
+            "message": "Invalid Input",
+            "errors": [
+              {
+                "reason": "invalid"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "source": "directory",
+        "method": "GET",
+        "path": "/admin/directory/v1/users/{userKey}/asps",
+        "status": 200,
+        "body": {
+          "kind": "admin#directory#asps",
+          "items": []
+        }
       }
     ]
   },
@@ -28,7 +119,17 @@
         "method": "DELETE",
         "path": "/admin/directory/v1/users/{userKey}/tokens/{clientId}",
         "status": 404,
-        "body": { "error": { "code": 404, "message": "Resource Not Found: clientId", "errors": [{ "reason": "notFound" }] } }
+        "body": {
+          "error": {
+            "code": 404,
+            "message": "Resource Not Found: userKey",
+            "errors": [
+              {
+                "reason": "notFound"
+              }
+            ]
+          }
+        }
       }
     ]
   }

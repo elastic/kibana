@@ -16,7 +16,7 @@ describe('Google Workspace Admin audit activities', () => {
   });
 
   describe('listActivities', () => {
-    it('reads the events of all users by default with page size 100', async () => {
+    it('reads the events of all users by default with page size 25', async () => {
       const { ctx, request } = createContext();
       request.mockResolvedValue({
         status: 200,
@@ -38,7 +38,7 @@ describe('Google Workspace Admin audit activities', () => {
       expect(sent(request)).toEqual({
         method: 'GET',
         url: `${REPORTS}/activity/users/all/applications/login`,
-        params: { maxResults: 100 },
+        params: { maxResults: 25 },
         data: undefined,
       });
       expect(result).toEqual({
@@ -64,7 +64,7 @@ describe('Google Workspace Admin audit activities', () => {
         eventName: 'authorize',
         filters: '   ',
         actorIpAddress: '203.0.113.7',
-        maxResults: 1000,
+        maxResults: 50,
         pageToken: 'A:2',
       });
       expect(sent(request)).toEqual({
@@ -75,7 +75,7 @@ describe('Google Workspace Admin audit activities', () => {
           endTime: '2026-11-02T00:00:00.000+05:30',
           eventName: 'authorize',
           actorIpAddress: '203.0.113.7',
-          maxResults: 1000,
+          maxResults: 50,
           pageToken: 'A:2',
         },
         data: undefined,
@@ -96,7 +96,76 @@ describe('Google Workspace Admin audit activities', () => {
       [{ applicationName: 'login', endTime: 'yesterday' }, false],
       [{ applicationName: 'unknown_app' }, false],
       [{ applicationName: 'LOGIN' }, false],
-      [{ applicationName: 'login', maxResults: 1001 }, false],
+      [{ applicationName: 'login', maxResults: 50 }, true],
+      [{ applicationName: 'login', startTime: '2999-01-01T00:00:00Z' }, false],
+      [{ applicationName: 'login', startTime: '2020-01-01T00:00:00Z' }, true],
+      [
+        { applicationName: 'login', filters: 'login_type==exchange,login_type==google_password' },
+        false,
+      ],
+      [{ applicationName: 'login', filters: 'login_type==exchange,is_second_factor==true' }, true],
+      [
+        {
+          applicationName: 'login',
+          startTime: '2026-11-02T00:00:00Z',
+          endTime: '2026-11-01T00:00:00Z',
+        },
+        false,
+      ],
+      [
+        {
+          applicationName: 'login',
+          startTime: '2026-11-01T00:00:00Z',
+          endTime: '2026-11-01T00:00:00Z',
+        },
+        false,
+      ],
+      [
+        {
+          applicationName: 'login',
+          startTime: '2026-11-01T00:00:00Z',
+          endTime: '2026-11-01T00:00:01Z',
+        },
+        true,
+      ],
+      [{ applicationName: 'login', startTime: '2026-11-01T00:00:00Z', endTime: '  ' }, true],
+      [{ applicationName: 'gmail' }, false],
+      [{ applicationName: 'gmail', startTime: '2026-11-01T00:00:00Z' }, false],
+      [
+        {
+          applicationName: 'gmail',
+          startTime: '2026-10-01T00:00:00Z',
+          endTime: '2026-10-31T00:00:00Z',
+        },
+        true,
+      ],
+      [
+        {
+          applicationName: 'gmail',
+          startTime: '2026-10-01T00:00:00Z',
+          endTime: '2026-10-31T00:00:01Z',
+        },
+        false,
+      ],
+      [
+        {
+          applicationName: 'gmail',
+          startTime: '2026-10-01T00:00:00+05:30',
+          endTime: '2026-10-30T18:30:00Z',
+        },
+        true,
+      ],
+      [
+        {
+          applicationName: 'gmail',
+          startTime: '2026-10-01T00:00:00+05:30',
+          endTime: '2026-10-30T18:30:01Z',
+        },
+        false,
+      ],
+      [{ applicationName: 'login', maxResults: 51 }, false],
+      [{ applicationName: 'login', userKey: '  jdoe@example.com  ' }, true],
+      [{ applicationName: 'login', userKey: 'jdoe @example.com' }, false],
       [{ applicationName: 'login', filters: 'f'.repeat(1025) }, false],
       [{ applicationName: 'login', filters: 'login_type' }, false],
       [{ applicationName: 'login', filters: 'login_type==exchange,' }, false],
@@ -152,7 +221,14 @@ describe('Google Workspace Admin audit activities', () => {
       'workspace_studio',
       'gemini_notebook',
     ])('accepts the Reports API application %s', (applicationName) => {
-      expect(accepts('listActivities', { applicationName })).toBe(true);
+      // gmail also needs a time range (checked in the input cases above), so give every one a range.
+      expect(
+        accepts('listActivities', {
+          applicationName,
+          startTime: '2026-11-01T00:00:00Z',
+          endTime: '2026-11-02T00:00:00Z',
+        })
+      ).toBe(true);
     });
 
     it('offers exactly the 42 applications of the Reports API, in their exact case', () => {

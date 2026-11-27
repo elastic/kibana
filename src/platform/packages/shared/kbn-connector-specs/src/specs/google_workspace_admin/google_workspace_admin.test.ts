@@ -19,6 +19,7 @@ const READ_TOOLS = [
   'listGroups',
   'listMobileDevices',
   'listRoleAssignments',
+  'listRoles',
   'listUserTokens',
   'listUsers',
   'listVerificationCodes',
@@ -136,6 +137,38 @@ describe('GoogleWorkspaceAdmin', () => {
     });
   });
 
+  describe('write action inputs', () => {
+    const VALID: Record<string, Record<string, unknown>> = {
+      suspendUser: { userKey: 'jdoe@example.com' },
+      unsuspendUser: { userKey: 'jdoe@example.com' },
+      signOutUser: { userKey: 'jdoe@example.com' },
+      updateUser: { userKey: 'jdoe@example.com', orgUnitPath: '/Quarantine' },
+      revokeUserToken: { userKey: 'jdoe@example.com', clientId: 'abc.apps.googleusercontent.com' },
+      revokeAppPasswords: { userKey: 'jdoe@example.com', codeId: 1 },
+      invalidateVerificationCodes: { userKey: 'jdoe@example.com' },
+      addGroupMember: { groupKey: 'team@example.com', email: 'jdoe@example.com' },
+      removeGroupMember: { groupKey: 'team@example.com', memberKey: 'jdoe@example.com' },
+      actionMobileDevice: { resourceId: 'AFiQxQ8abc', action: 'block' },
+    };
+
+    it('covers every action that is not a tool', () => {
+      const writes = Object.entries(GoogleWorkspaceAdmin.actions)
+        .filter(([, action]) => action.isTool === false)
+        .map(([name]) => name)
+        .sort();
+      expect(Object.keys(VALID).sort()).toEqual(writes);
+    });
+
+    it.each(Object.entries(VALID))(
+      '%s rejects an unknown field instead of dropping it',
+      (name, input) => {
+        const schema = GoogleWorkspaceAdmin.actions[name].input;
+        expect(schema.safeParse(input).success).toBe(true);
+        expect(schema.safeParse({ ...input, suspendd: true }).success).toBe(false);
+      }
+    );
+  });
+
   describe('test handler', () => {
     it('reads one user of my_customer', async () => {
       const { ctx, request } = createContext();
@@ -148,6 +181,24 @@ describe('GoogleWorkspaceAdmin', () => {
         params: { customer: 'my_customer', maxResults: 1 },
         data: undefined,
       });
+    });
+
+    it('reports usersVisible false for a users list without users', async () => {
+      const { ctx, request } = createContext();
+      request.mockResolvedValue({ status: 200, data: { kind: 'admin#directory#users' } });
+      expect(await GoogleWorkspaceAdmin.test.handler(ctx)).toEqual({ usersVisible: false });
+    });
+
+    it.each([
+      ['an HTML page', '<html><body>Sign in</body></html>'],
+      ['an empty body', ''],
+      ['an object that is no users list', { status: 'ok' }],
+    ])('fails when a 200 answer is %s', async (_name, data) => {
+      const { ctx, request } = createContext();
+      request.mockResolvedValue({ status: 200, data });
+      await expect(GoogleWorkspaceAdmin.test.handler(ctx)).rejects.toThrow(
+        'Google Workspace returned an unexpected answer to the user list request'
+      );
     });
 
     it('fails on a rejected token', async () => {

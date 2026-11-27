@@ -68,7 +68,7 @@ describe('Google Workspace Admin user actions', () => {
         domain: 'example.com',
         query: 'isSuspended=true',
         orderBy: 'email',
-        maxResults: 500,
+        maxResults: 100,
         pageToken: 'tok',
       });
       expect(sent(request).params).toEqual({
@@ -76,7 +76,7 @@ describe('Google Workspace Admin user actions', () => {
         query: 'isSuspended=true',
         orderBy: 'email',
         projection: 'basic',
-        maxResults: 500,
+        maxResults: 100,
         pageToken: 'tok',
       });
       expect(result).toEqual({ users: [] });
@@ -95,8 +95,8 @@ describe('Google Workspace Admin user actions', () => {
 
     it.each([
       [{ maxResults: 0 }, false],
-      [{ maxResults: 501 }, false],
-      [{ maxResults: 500 }, true],
+      [{ maxResults: 101 }, false],
+      [{ maxResults: 100 }, true],
       [{ customer: 'C01abc23d' }, true],
       [{ customer: 'acme' }, false],
       [{ orderBy: 'lastLoginTime' }, false],
@@ -193,6 +193,26 @@ describe('Google Workspace Admin user actions', () => {
       expect(result).toEqual({ id: USER.id, primaryEmail: 'jdoe@example.com', suspended: false });
     });
 
+    it('reports suspended null when the Google answer leaves the field out', async () => {
+      const { ctx, request } = createContext();
+      request.mockResolvedValue({
+        status: 200,
+        data: { id: USER.id, primaryEmail: USER.primaryEmail },
+      });
+      expect(await run('unsuspendUser', ctx, { userKey: 'jdoe@example.com' })).toEqual({
+        id: USER.id,
+        primaryEmail: USER.primaryEmail,
+        suspended: null,
+      });
+    });
+
+    it('suspendUser trims the userKey before it checks and sends it', async () => {
+      const { ctx, request } = createContext();
+      request.mockResolvedValue({ status: 200, data: { ...USER, suspended: true } });
+      await run('suspendUser', ctx, { userKey: '  jdoe@example.com  ' });
+      expect(sent(request).url).toBe(`${DIRECTORY}/users/jdoe%40example.com`);
+    });
+
     it('suspendUser returns the same result on a repeated call', async () => {
       const { ctx, request } = createContext();
       request.mockResolvedValue({
@@ -274,6 +294,32 @@ describe('Google Workspace Admin user actions', () => {
   });
 
   describe('updateUser', () => {
+    it('sends null to remove a recovery email and phone', async () => {
+      const { ctx, request } = createContext();
+      // Google answers a cleared field with an empty string (seen live).
+      const cleared = { ...USER, recoveryEmail: '', recoveryPhone: '' };
+      request.mockResolvedValue({ status: 200, data: cleared });
+      const result = await run('updateUser', ctx, {
+        userKey: 'jdoe@example.com',
+        recoveryEmail: null,
+        recoveryPhone: null,
+      });
+      // Google ignores null here (seen live); the empty string is what clears the value.
+      expect(sent(request).data).toEqual({ recoveryEmail: '', recoveryPhone: '' });
+      expect(result).toMatchObject({
+        recoveryEmail: null,
+        recoveryPhone: null,
+        updatedFields: ['recoveryEmail', 'recoveryPhone'],
+      });
+    });
+
+    it('counts a null recovery field as a field to change', () => {
+      expect(accepts('updateUser', { userKey: 'jdoe@example.com', recoveryEmail: null })).toBe(
+        true
+      );
+      expect(accepts('updateUser', { userKey: 'jdoe@example.com', recoveryEmail: '' })).toBe(false);
+    });
+
     it('sends only the given fields and keeps every other field of the user', async () => {
       const { ctx, request } = createContext();
       request.mockResolvedValue({ status: 200, data: { ...USER, orgUnitPath: '/Quarantine' } });

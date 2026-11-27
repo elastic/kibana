@@ -59,6 +59,21 @@ const DEVICE_SUMMARY_FIELDS = [
   'firstSync',
 ] as const;
 
+const ROLE_SUMMARY_FIELDS = [
+  'roleId',
+  'roleName',
+  'roleDescription',
+  'isSuperAdminRole',
+  'isSystemRole',
+] as const;
+
+/**
+ * The short record listRoles returns for one admin role. rolePrivileges is left out: a system
+ * role lists every privilege it grants, which would make one page too large for an agent.
+ */
+export const toRoleSummary = (role: unknown): GoogleRecord =>
+  pick(asRecord(role), ROLE_SUMMARY_FIELDS);
+
 /** The short record listMobileDevices returns for one device. */
 export const toDeviceSummary = (device: unknown): GoogleRecord =>
   pick(asRecord(device), DEVICE_SUMMARY_FIELDS);

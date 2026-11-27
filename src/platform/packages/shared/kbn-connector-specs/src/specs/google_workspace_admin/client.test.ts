@@ -11,6 +11,7 @@ import {
   GoogleWorkspaceApiError,
   REQUEST_TIMEOUT_MS,
   arrayField,
+  effectiveTimeout,
   compactParams,
   directoryPath,
   googleRequest,
@@ -101,6 +102,20 @@ describe('Google Workspace Admin client', () => {
         timeout: REQUEST_TIMEOUT_MS,
         maxRedirects: 0,
       });
+    });
+
+    it.each([
+      ['a lower Actions timeout', 10_000, 10_000],
+      ['a higher Actions timeout', 120_000, REQUEST_TIMEOUT_MS],
+      ['no Actions timeout', undefined, REQUEST_TIMEOUT_MS],
+      ['a zero Actions timeout', 0, REQUEST_TIMEOUT_MS],
+    ])('caps the request timeout with %s', async (_name, configured, expected) => {
+      const { ctx, request } = createContext();
+      Object.assign(ctx.client, { defaults: { timeout: configured } });
+      request.mockResolvedValue({ status: 200, data: {} });
+      await googleRequest(ctx, get());
+      expect(request.mock.calls[0][0].timeout).toBe(expected);
+      expect(effectiveTimeout(configured)).toBe(expected);
     });
 
     it.each([

@@ -52,7 +52,7 @@ const setSuspended = async (ctx: ActionContext, userKey: string, suspended: bool
   return {
     id: user.id,
     primaryEmail: user.primaryEmail,
-    suspended: user.suspended ?? suspended,
+    suspended: user.suspended ?? null,
     ...(suspended ? { suspensionReason: user.suspensionReason ?? null } : {}),
   };
 };
@@ -145,12 +145,16 @@ export const userActions = {
     isTool: false,
     scope: 'destroy',
     description:
-      'Change selected fields of a user: org unit path, require a password change at next sign-in, recovery email, or recovery phone. Only the fields given are changed; at least one is required. Returns the values in the Google answer (null for a field the answer leaves out) and updatedFields, the fields that were sent.',
+      'Change selected fields of a user: org unit path, require a password change at next sign-in, recovery email, or recovery phone; set recoveryEmail or recoveryPhone to null to remove one, for example a recovery address an attacker added. Only the fields given are changed; at least one is required. Returns the values in the Google answer (null for a field the answer leaves out) and updatedFields, the fields that were sent.',
     input: UpdateUserInputSchema,
     handler: async (ctx, input: UpdateUserInput) => {
       const { userKey, ...fields } = input;
       const changes = Object.fromEntries(
-        Object.entries(fields).filter(([, value]) => value !== undefined)
+        Object.entries(fields)
+          .filter(([, value]) => value !== undefined)
+          // Google ignores null for recoveryEmail and recoveryPhone and keeps the old value (seen
+          // live, although users.update documents null as clearing); an empty string clears them.
+          .map(([key, value]) => [key, value === null ? '' : value])
       );
       const user = await updateUserFields(ctx, userKey, changes);
       return {
@@ -158,8 +162,9 @@ export const userActions = {
         primaryEmail: user.primaryEmail,
         orgUnitPath: user.orgUnitPath ?? null,
         changePasswordAtNextLogin: user.changePasswordAtNextLogin ?? null,
-        recoveryEmail: user.recoveryEmail ?? null,
-        recoveryPhone: user.recoveryPhone ?? null,
+        // A cleared value comes back as an empty string: report it as null, like a missing one.
+        recoveryEmail: user.recoveryEmail || null,
+        recoveryPhone: user.recoveryPhone || null,
         updatedFields: Object.keys(changes),
       };
     },

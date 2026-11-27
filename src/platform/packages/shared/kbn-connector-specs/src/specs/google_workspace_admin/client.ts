@@ -16,8 +16,14 @@ export const API_URL = 'https://admin.googleapis.com';
 export const DIRECTORY_PATH = '/admin/directory/v1';
 export const REPORTS_PATH = '/admin/reports/v1';
 
-/** Per-request timeout. */
+/** Per-request timeout, lowered to the Actions timeout when that one is shorter. */
 export const REQUEST_TIMEOUT_MS = 30_000;
+
+/** The smaller of the connector's own timeout and the configured Actions timeout, when one is set. */
+export const effectiveTimeout = (configuredMs: unknown): number =>
+  typeof configuredMs === 'number' && configuredMs > 0
+    ? Math.min(REQUEST_TIMEOUT_MS, configuredMs)
+    : REQUEST_TIMEOUT_MS;
 
 /**
  * The parts of Google's HTTP response the actions executor reads from a failed call: the status,
@@ -172,7 +178,7 @@ export const googleRequest = async <T>(
       url: `${API_URL}${options.path}`,
       params: options.params,
       data: options.data,
-      timeout: REQUEST_TIMEOUT_MS,
+      timeout: effectiveTimeout(ctx.client.defaults?.timeout),
       // Google does not redirect API calls; never carry the token to another host.
       maxRedirects: 0,
     });

@@ -272,7 +272,7 @@ describe('Google Workspace Admin account security actions', () => {
       request.mockResolvedValue({ status: 204, data: '' });
       expect(
         await run('invalidateVerificationCodes', ctx, { userKey: 'jdoe@example.com' })
-      ).toEqual({ userKey: 'jdoe@example.com', invalidated: true });
+      ).toEqual({ userKey: 'jdoe@example.com', invalidated: true, status: 'invalidated' });
       expect(sent(request)).toEqual({
         method: 'POST',
         url: `${DIRECTORY}/users/jdoe%40example.com/verificationCodes/invalidate`,
@@ -287,7 +287,7 @@ describe('Google Workspace Admin account security actions', () => {
       await run('invalidateVerificationCodes', ctx, { userKey: 'jdoe@example.com' });
       expect(
         await run('invalidateVerificationCodes', ctx, { userKey: 'jdoe@example.com' })
-      ).toEqual({ userKey: 'jdoe@example.com', invalidated: true });
+      ).toEqual({ userKey: 'jdoe@example.com', invalidated: true, status: 'invalidated' });
     });
 
     it('succeeds when Google answers 400 and the user has no valid codes left', async () => {
@@ -297,9 +297,17 @@ describe('Google Workspace Admin account security actions', () => {
         .mockRejectedValueOnce(googleError(400, 'Invalid Input'))
         .mockResolvedValueOnce({ status: 200, data: {} });
       const input = { userKey: 'jdoe@example.com' };
-      const expected = { userKey: 'jdoe@example.com', invalidated: true };
-      expect(await run('invalidateVerificationCodes', ctx, input)).toEqual(expected);
-      expect(await run('invalidateVerificationCodes', ctx, input)).toEqual(expected);
+      // Same keys on both branches; status tells the no-op apart.
+      expect(await run('invalidateVerificationCodes', ctx, input)).toEqual({
+        userKey: 'jdoe@example.com',
+        invalidated: true,
+        status: 'invalidated',
+      });
+      expect(await run('invalidateVerificationCodes', ctx, input)).toEqual({
+        userKey: 'jdoe@example.com',
+        invalidated: true,
+        status: 'noValidCodes',
+      });
       expect(sent(request, 2)).toMatchObject({
         method: 'GET',
         url: `${DIRECTORY}/users/jdoe%40example.com/verificationCodes`,

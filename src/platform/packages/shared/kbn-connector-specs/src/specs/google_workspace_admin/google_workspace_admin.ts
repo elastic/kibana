@@ -32,15 +32,17 @@ import {
   REPORTS_PATH,
   withoutBookkeeping,
 } from './client';
-import { toDeviceSummary } from './format';
+import { toDeviceSummary, toRoleSummary } from './format';
 import { groupActions } from './groups';
 import { securityActions } from './security';
 import {
   ActionMobileDeviceInputSchema,
+  DEFAULT_ACTIVITY_PAGE_SIZE,
   DEFAULT_PAGE_SIZE,
   ListActivitiesInputSchema,
   ListMobileDevicesInputSchema,
   ListRoleAssignmentsInputSchema,
+  ListRolesInputSchema,
   MOBILE_DEVICE_ACTIONS,
 } from './types';
 import type {
@@ -48,6 +50,7 @@ import type {
   ListActivitiesInput,
   ListMobileDevicesInput,
   ListRoleAssignmentsInput,
+  ListRolesInput,
 } from './types';
 import { userActions } from './users';
 
@@ -73,7 +76,7 @@ export const GoogleWorkspaceAdmin: ConnectorSpec = {
     displayName: 'Google Workspace Admin',
     description: i18n.translate('connectorSpecs.googleWorkspaceAdmin.metadata.description', {
       defaultMessage:
-        'Investigate and contain Google Workspace accounts, groups and devices with the Admin SDK',
+        'Search audit events and investigate or contain Google Workspace users, groups and devices with the Admin SDK',
     }),
     // New third party connectors default to an enterprise license by policy. The floor
     // the actions plugin enforces is gold; raise this only, never lower it below gold.
@@ -145,7 +148,7 @@ export const GoogleWorkspaceAdmin: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        'List audit events of one application (login, admin, token, user_accounts, drive, mobile and others), optionally narrowed to one user, actor IP address, event name, event-parameter filter or time range. Use it to find suspicious sign-ins, admin changes or OAuth grants. Returns items and nextPageToken when more pages exist.',
+        'List audit events of one application (login, admin, token, user_accounts, drive, mobile and others), optionally narrowed to one user, actor IP address, event name, event-parameter filter or time range. Use it to find suspicious sign-ins, admin changes or OAuth grants. Narrow with startTime and eventName rather than reading many pages. Returns items and nextPageToken when more pages exist.',
       input: ListActivitiesInputSchema,
       handler: async (ctx, input: ListActivitiesInput) => {
         const userKey = nonBlank(input.userKey) ?? 'all';
@@ -160,7 +163,7 @@ export const GoogleWorkspaceAdmin: ConnectorSpec = {
             eventName: nonBlank(input.eventName),
             filters: nonBlank(input.filters),
             actorIpAddress: nonBlank(input.actorIpAddress),
-            maxResults: input.maxResults ?? DEFAULT_PAGE_SIZE,
+            maxResults: input.maxResults ?? DEFAULT_ACTIVITY_PAGE_SIZE,
             pageToken: nonBlank(input.pageToken),
           }),
           target: userKey === 'all' ? 'Application or user' : `User ${userKey}`,
@@ -181,7 +184,7 @@ export const GoogleWorkspaceAdmin: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        'List admin role assignments of the Workspace account, optionally for one user or one role (not both), to audit who holds admin privileges. Returns items (roleAssignmentId, roleId, assignedTo, assigneeType, scopeType, orgUnitId) and nextPageToken when more pages exist.',
+        'List admin role assignments of the Workspace account, optionally for one user or one role (not both), to audit who holds admin privileges. Returns items (roleAssignmentId, roleId, assignedTo, assigneeType, scopeType, orgUnitId) and nextPageToken when more pages exist. Use listRoles to turn a roleId into its role name.',
       input: ListRoleAssignmentsInputSchema,
       handler: async (ctx, input: ListRoleAssignmentsInput) => {
         const userKey = nonBlank(input.userKey);
@@ -200,7 +203,7 @@ export const GoogleWorkspaceAdmin: ConnectorSpec = {
           // Google answers 400 "Invalid user id" for a userKey that is no user of the account (seen live).
           if (userKey && isBadRequest(error) && /invalid user id/i.test((error as Error).message)) {
             throw new GoogleWorkspaceApiError(
-              `User ${userKey} is not a user of this Google Workspace account (Google answered "Invalid user id"). Use the primary email or user ID of an existing user.`,
+              `${userKey} is not a user or group of this Google Workspace account (Google answered "Invalid user id"). Use the primary email, alias email, or ID of an existing user or group.`,
               400
             );
           }
@@ -209,6 +212,31 @@ export const GoogleWorkspaceAdmin: ConnectorSpec = {
         const token = nextPageToken(data);
         return {
           items: arrayField<GoogleRecord>(data, 'items').map(withoutBookkeeping),
+          ...(token ? { nextPageToken: token } : {}),
+        };
+      },
+    },
+
+    listRoles: {
+      isTool: true,
+      scope: 'read',
+      description:
+        'List the admin roles of the Workspace account with roleId, roleName, roleDescription, isSuperAdminRole and isSystemRole, to name the roleId values that listRoleAssignments returns, for example to spot super admin assignments. Privilege lists are left out. Returns items and nextPageToken when more pages exist.',
+      input: ListRolesInputSchema,
+      handler: async (ctx, input: ListRolesInput) => {
+        const customer = customerOrDefault(input.customer);
+        const { data } = await googleRequest<unknown>(ctx, {
+          method: 'GET',
+          path: directoryPath('customer', customer, 'roles'),
+          params: compactParams({
+            maxResults: input.maxResults ?? DEFAULT_PAGE_SIZE,
+            pageToken: nonBlank(input.pageToken),
+          }),
+          target: `Customer ${customer}`,
+        });
+        const token = nextPageToken(data);
+        return {
+          items: arrayField(data, 'items').map(toRoleSummary),
           ...(token ? { nextPageToken: token } : {}),
         };
       },
@@ -247,7 +275,7 @@ export const GoogleWorkspaceAdmin: ConnectorSpec = {
       isTool: false,
       scope: 'destroy',
       description:
-        'Apply an action to a managed mobile device by its resourceId: block, wipe or account_wipe. A wipe cannot be undone. Returns status requested.',
+        'Apply an action to a managed mobile device by its resourceId: block, wipe or account_wipe. A wipe cannot be undone, and a blocked device is unblocked only by approving it in the Google Admin console. Returns status requested.',
       input: ActionMobileDeviceInputSchema,
       handler: async (ctx, input: ActionMobileDeviceInput) => {
         const customerId = customerOrDefault(input.customerId);
@@ -263,6 +291,18 @@ export const GoogleWorkspaceAdmin: ConnectorSpec = {
           ),
           data: { action: MOBILE_DEVICE_ACTIONS[input.action] },
           target: `Mobile device ${input.resourceId}`,
+        }).catch((error: unknown) => {
+          // Google answers an unknown resourceId with 500 "Internal error encountered" (seen live),
+          // not 404, so a 500 here names both causes instead of only a vendor fault.
+          if (error instanceof GoogleWorkspaceApiError && error.status === 500) {
+            throw new GoogleWorkspaceApiError(
+              `Google answered 500 for mobile device ${input.resourceId}. Google gives this answer for a resourceId that is not a managed device of this account as well as for a server fault: check the resourceId with listMobileDevices. If the device is listed, the action may have been applied: read its status before you repeat the action.`,
+              500,
+              error.reason,
+              error.response?.headers['retry-after']
+            );
+          }
+          throw error;
         });
         return { resourceId: input.resourceId, action: input.action, status: 'requested' };
       },
@@ -278,16 +318,13 @@ export const GoogleWorkspaceAdmin: ConnectorSpec = {
     '- Start from an email: call `getUser` for suspension, 2-step verification, org unit, admin flags and last sign-in.',
     '- Sign-in investigation: `listActivities` with applicationName login and userKey set to the email; narrow with startTime, endTime, eventName (for example login_failure or suspicious_login) or actorIpAddress.',
     '- OAuth app review: `listUserTokens` for one user, or `listActivities` with applicationName token for grants across the account.',
-    '- Privilege review: `listRoleAssignments` with userKey, and `listGroups` with userKey for group memberships; `listGroupMembers` shows who is in a privileged group.',
+    '- Privilege review: `listRoleAssignments` with userKey, then `listRoles` to name each roleId (isSuperAdminRole marks super admin); `listGroups` with userKey for group memberships; `listGroupMembers` shows who is in a privileged group.',
     '- Devices: `listMobileDevices` with query email:user@example.com gives each device resourceId and status.',
-    '- Every list returns nextPageToken when more results exist: pass it as pageToken with the same filters to read the next page.',
+    '- listActivities, listUsers, listGroups, listGroupMembers, listRoleAssignments, listRoles and listMobileDevices return nextPageToken when more results exist: pass it as pageToken with the same filters to read the next page.',
     '',
     '### Gotchas',
-    '- listGroups: userKey cannot be combined with customer or query.',
-    '- listRoleAssignments: userKey cannot be combined with roleId.',
-    '- listUsers: lastLoginTime is not a search field; filter on the returned lastLoginTime instead.',
-    '- listVerificationCodes returns only how many backup codes are valid, never the codes.',
     '- A 403 that is not a rate limit or quota error means the authorized administrator lacks the scope or admin privilege for that call; do not retry it.',
+    '- A device with status BLOCKED stays blocked until an administrator approves it again in the Google Admin console; no action here unblocks it.',
   ].join('\n'),
 
   test: {
@@ -302,6 +339,14 @@ export const GoogleWorkspaceAdmin: ConnectorSpec = {
         params: { customer: 'my_customer', maxResults: 1 },
         target: 'Customer my_customer',
       });
+      // A 200 that is not a Directory users list (an HTML page, a proxy reply, an empty body)
+      // means the request never reached the Directory API: fail instead of reporting Connected.
+      const body = typeof data === 'object' && data !== null ? (data as GoogleRecord) : undefined;
+      if (!body || (body.kind !== 'admin#directory#users' && !Array.isArray(body.users))) {
+        throw new GoogleWorkspaceApiError(
+          'Google Workspace returned an unexpected answer to the user list request, not a Directory API users list. Check xpack.actions proxy settings and that the token is a Google access token.'
+        );
+      }
       return { usersVisible: arrayField(data, 'users').length > 0 };
     },
   },
