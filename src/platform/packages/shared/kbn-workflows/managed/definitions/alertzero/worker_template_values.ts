@@ -62,40 +62,6 @@ export const renderScheduledWorkerYaml = (
     values.scheduleInterval
   );
 
-/**
- * Worker-specific settings are stored under `extras`, mirroring the Worker settings API, so a
- * settings save re-renders YAML and the per-space Worker can pass them to the sweep. The shape is
- * declared once, in `RuleTuningWorkerExtras` in `@kbn/alertzero-common`; this mirrors it for typing.
- */
-export interface RuleTuningWorkerTemplateValues extends ScheduledWorkerTemplateValues {
-  extras: {
-    analysisWindowDays: number;
-    fpCountThreshold: number;
-    fpRateThresholdPct: number;
-  };
-}
-
-export const renderRuleTuningWorkerYaml = (
-  yaml: string,
-  values: RuleTuningWorkerTemplateValues
-): string =>
-  // JSON is a YAML flow mapping, so the whole object lands under consts in one substitution.
-  renderScheduledWorkerYaml(yaml, values).replaceAll(
-    '__WORKER_EXTRAS__',
-    JSON.stringify(values.extras)
-  );
-
-export interface AlertTriageWorkerTemplateValues extends ScheduledWorkerTemplateValues {
-  extras: {
-    autoCloseConfidenceScoreMinThreshold: number;
-    budgetPerHour: number;
-    lookbackHours: number;
-    minSeverity: 'low' | 'medium' | 'high' | 'critical';
-    excludeBuildingBlocks: boolean;
-    excludedRuleTags: readonly string[];
-  };
-}
-
 const SCHEDULE_INTERVAL_PATTERN = /^([1-9][0-9]*)([mhd])$/;
 const MINUTES_PER_UNIT = { m: 1, h: 60, d: 1440 } as const;
 
@@ -107,58 +73,3 @@ export const scheduleIntervalToMinutes = (interval: string): number => {
   }
   return Number(match[1]) * MINUTES_PER_UNIT[match[2] as keyof typeof MINUTES_PER_UNIT];
 };
-
-/** One day's retrieval. Also the hard ceiling: a longer interval does not raise it. */
-const ATTACK_DISCOVERY_ALERTS_PER_DAY = 10_000;
-/** One batch. Shorter intervals stay at a single batch rather than a partial one. */
-const ATTACK_DISCOVERY_MIN_ALERTS = 100;
-const MINUTES_PER_DAY = 24 * 60;
-
-/**
- * Alerts one Attack Discovery run may retrieve, prorated to its schedule interval.
- * 10,000 per 24h, at least 100, and never more than 10,000.
- */
-export const attackDiscoveryMaxAlerts = (interval: string): number => {
-  const prorated = Math.floor(
-    (ATTACK_DISCOVERY_ALERTS_PER_DAY * scheduleIntervalToMinutes(interval)) / MINUTES_PER_DAY
-  );
-  return Math.min(ATTACK_DISCOVERY_ALERTS_PER_DAY, Math.max(ATTACK_DISCOVERY_MIN_ALERTS, prorated));
-};
-
-export const renderAttackDiscoveryWorkerYaml = (
-  yaml: string,
-  values: ScheduledWorkerTemplateValues
-): string =>
-  renderScheduledWorkerYaml(yaml, values).replaceAll(
-    '__WORKER_MAX_ALERTS__',
-    String(attackDiscoveryMaxAlerts(values.scheduleInterval))
-  );
-
-export const renderAlertTriageWorkerYaml = (
-  yaml: string,
-  values: AlertTriageWorkerTemplateValues
-): string =>
-  renderScheduledWorkerYaml(yaml, values)
-    // JSON is a YAML flow mapping, so the whole object lands under consts in one substitution. A
-    // function replacement keeps `$` sequences in free-form rule tags (`$$`, `$&`, `$'`) literal.
-    .replaceAll('__WORKER_EXTRAS__', () => JSON.stringify(values.extras))
-    .replaceAll(
-      '__WORKER_SCHEDULE_INTERVAL_MINUTES__',
-      String(scheduleIntervalToMinutes(values.scheduleInterval))
-    );
-
-export interface RuleCoverageWorkerTemplateValues extends ScheduledWorkerTemplateValues {
-  extras: {
-    lookbackDays: number;
-    maxGapsPerRun: number;
-  };
-}
-
-export const renderRuleCoverageWorkerYaml = (
-  yaml: string,
-  values: RuleCoverageWorkerTemplateValues
-): string =>
-  renderScheduledWorkerYaml(yaml, values).replaceAll(
-    '__WORKER_EXTRAS__',
-    JSON.stringify(values.extras)
-  );
