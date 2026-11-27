@@ -508,6 +508,16 @@ describe('HistorySnapshotClient', () => {
         expect(mockDeleteIndex).not.toHaveBeenCalled();
       });
 
+      it('fails the cycle instead of keeping the run when deleting the partial copy fails', async () => {
+        stopAfterStart();
+        mockPollTaskUntil.mockResolvedValueOnce({ status: 'pending' });
+        mockDeleteIndex.mockRejectedValueOnce(new Error('delete failed'));
+
+        const result = await client.runHistorySnapshot({ deadline: Date.now() + 1000 });
+
+        expect(result).toEqual({ ok: false, error: expect.any(Error) });
+      });
+
       it('does not start a missing task again and deletes its partial copy', async () => {
         stopAfterStart();
         mockPollTaskUntil.mockResolvedValueOnce({ status: 'missing' });

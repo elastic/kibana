@@ -487,9 +487,13 @@ export class HistorySnapshotClient {
 
     // A disable that arrives during the run cannot see an Elasticsearch task that is not in the task
     // state yet, so check before each step that starts or keeps one.
-    const stopIfDisabled = async (): Promise<RunHistorySnapshotResult | undefined> => {
-      const { historySnapshot } = await this.globalStateClient.findOrThrow();
-      if (historySnapshot?.status === 'started') {
+    const stopIfDisabled = async (
+      tolerateReadFailure = false
+    ): Promise<RunHistorySnapshotResult | undefined> => {
+      const globalState = await this.globalStateClient.findOrThrow().catch((err) => {
+        if (!tolerateReadFailure) throw err;
+      });
+      if (!globalState || globalState.historySnapshot?.status === 'started') {
         return undefined;
       }
       this.logger.info('History snapshot was disabled during the run, cancelling it');
@@ -510,7 +514,7 @@ export class HistorySnapshotClient {
 
       if (poll.status === 'pending') {
         // A failed read must not drop the run: the Elasticsearch task is still going.
-        const stopped = await stopIfDisabled().catch(() => undefined);
+        const stopped = await stopIfDisabled(true);
         return stopped ?? { ok: true, inProgress: true, run };
       }
 
