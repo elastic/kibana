@@ -45,15 +45,25 @@ export interface DataGridVirtualizationOptions {
   };
 }
 
+/** How the grid's scroll viewport gets its height. */
+export type DataGridViewport =
+  /** Fills the height of its container, which needs a height of its own, up to the screen height. */
+  | { readonly mode: 'fill' }
+  /** Has a fixed height in pixels. */
+  | { readonly mode: 'fixed'; readonly height: number };
+
+const FILL_VIEWPORT: DataGridViewport = { mode: 'fill' };
+
 export interface DataGridProps<TRow extends object> {
   ariaLabel: string;
   columns: ReadonlyArray<DataGridColumn<TRow>>;
   rows: readonly TRow[];
   getRowId: (row: TRow) => string;
-  height: number;
+  viewport?: DataGridViewport;
   virtualization?: DataGridVirtualizationOptions;
   apiRef?: React.Ref<DataGridApi | null>;
   className?: string;
+  'data-test-subj'?: string;
 }
 
 const assertUniqueIds = (ids: readonly string[], subject: string): void => {
@@ -74,10 +84,11 @@ export const DataGrid = <TRow extends object>({
   columns,
   rows,
   getRowId,
-  height,
+  viewport = FILL_VIEWPORT,
   virtualization,
   apiRef,
   className,
+  'data-test-subj': dataTestSubj,
 }: DataGridProps<TRow>): React.ReactElement => {
   if (ariaLabel.trim().length === 0) {
     throw new Error('DataGrid requires a non-empty accessible name.');
@@ -153,11 +164,12 @@ export const DataGrid = <TRow extends object>({
       return false;
     }
     try {
-      const offset = rowVirtualizer.getOffsetForIndex(rowIndex, 'auto')?.[0];
-      if (offset === undefined) {
+      if (rowVirtualizer.getOffsetForIndex(rowIndex, 'auto') === undefined) {
         return false;
       }
-      rowVirtualizer.scrollToOffset(offset);
+      // Scrolling to the index, not to its current offset, keeps the row in view while the rows
+      // before it are measured for the first time and change size.
+      rowVirtualizer.scrollToIndex(rowIndex, { align: 'auto' });
       return true;
     } catch {
       return false;
@@ -206,7 +218,7 @@ export const DataGrid = <TRow extends object>({
     rangeExtractor: extractRowRange,
     scrollMargin: headerHeight,
     scrollPaddingStart: headerHeight,
-    initialRect: { width: 0, height },
+    initialRect: { width: 0, height: viewport.mode === 'fixed' ? viewport.height : 0 },
   });
   rowVirtualizerRef.current = rowVirtualizer;
   const virtualRows = rowVirtualizer.getVirtualItems();
@@ -300,8 +312,12 @@ export const DataGrid = <TRow extends object>({
           aria-colcount={columns.length}
           aria-rowcount={headerGroups.length + tableRows.length}
           className={className}
-          css={styles.grid}
-          style={{ blockSize: height, scrollPaddingBlockStart: headerHeight }}
+          data-test-subj={dataTestSubj}
+          css={viewport.mode === 'fill' ? [styles.grid, styles.fillViewport] : styles.grid}
+          style={{
+            blockSize: viewport.mode === 'fixed' ? viewport.height : undefined,
+            scrollPaddingBlockStart: headerHeight,
+          }}
           onFocus={onGridFocus}
           onKeyDownCapture={onGridKeyDownCapture}
           onKeyDown={onGridKeyDown}

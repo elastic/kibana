@@ -31,6 +31,7 @@ export const DOC_HIDE_TIME_COLUMN_SETTING = 'doc_table:hideTimeColumn';
 export const FIELDS_LIMIT_SETTING = 'fields:popularLimit';
 export const HIDE_ANNOUNCEMENTS = 'hideAnnouncements';
 export const IS_ESQL_DEFAULT_FEATURE_FLAG_KEY = 'discover.isEsqlDefault';
+export const KBN_DATA_GRID_ENABLED_FEATURE_FLAG_KEY = 'discover.kbnDataGridEnabled';
 export const MAX_DOC_FIELDS_DISPLAYED = 'discover:maxDocFieldsDisplayed';
 export const MODIFY_COLUMNS_ON_SWITCH = 'discover:modifyColumnsOnSwitch';
 export const ROW_HEIGHT_OPTION = 'discover:rowHeightOption';

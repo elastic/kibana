@@ -240,12 +240,12 @@ describe('DataGrid keyboard and logical focus', () => {
 
     await expectFocus('Name 2');
     expect(virtualizerTestHarness.getOffsetForIndex).toHaveBeenLastCalledWith(2, 'auto');
-    expect(virtualizerTestHarness.scrollToOffset).toHaveBeenLastCalledWith(80);
+    expect(virtualizerTestHarness.scrollToIndex).toHaveBeenLastCalledWith(2, { align: 'auto' });
 
     await user.keyboard('{ArrowUp}');
     await expectFocus('Name 1');
     expect(virtualizerTestHarness.getOffsetForIndex).toHaveBeenLastCalledWith(1, 'auto');
-    expect(virtualizerTestHarness.scrollToOffset).toHaveBeenLastCalledWith(40);
+    expect(virtualizerTestHarness.scrollToIndex).toHaveBeenLastCalledWith(1, { align: 'auto' });
   });
 
   it('focuses an off-screen semantic command target and fails missing targets explicitly', async () => {
@@ -294,7 +294,7 @@ describe('DataGrid keyboard and logical focus', () => {
     });
     expect(document.activeElement).toBe(activeCell);
     expect(activeCell.getAttribute('tabindex')).toBe('0');
-    expect(virtualizerTestHarness.scrollToOffset).not.toHaveBeenCalled();
+    expect(virtualizerTestHarness.scrollToIndex).not.toHaveBeenCalled();
     await waitFor(() =>
       expect(screen.getByRole('status').textContent).toContain(
         'Could not move to the requested grid cell.'

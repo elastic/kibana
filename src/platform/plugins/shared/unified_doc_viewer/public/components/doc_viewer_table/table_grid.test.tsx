@@ -25,6 +25,7 @@ jest.mock('@elastic/eui', () => ({
 jest.mock('../../plugin', () => ({
   getUnifiedDocViewerServices: () => ({
     toasts: {},
+    core: { featureFlags: { useBooleanValue: (_flagName: string, fallback: boolean) => fallback } },
   }),
 }));
 

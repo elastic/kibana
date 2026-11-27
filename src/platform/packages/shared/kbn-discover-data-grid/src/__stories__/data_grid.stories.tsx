@@ -102,7 +102,7 @@ const ConfigurableDataGrid = ({ rowCount, columnCount, height }: ConfigurableDat
       columns={configurableColumns}
       rows={configurableRows}
       getRowId={getConfigurableRowId}
-      height={height}
+      viewport={{ mode: 'fixed', height }}
       virtualization={{ rows: { estimatedHeight: 40, overscan: 5 } }}
     />
   );
@@ -151,7 +151,7 @@ const LinkDataGrid = ({ height }: { height: number }) => (
       columns={linkColumns}
       rows={linkRows}
       getRowId={getLinkRowId}
-      height={height}
+      viewport={{ mode: 'fixed', height }}
     />
     <EuiSpacer size="s" />
     <EuiButton size="s">After grid</EuiButton>
@@ -169,7 +169,7 @@ const meta = {
     columns,
     rows,
     getRowId: (row) => row.id,
-    height: 480,
+    viewport: { mode: 'fixed', height: 480 },
     virtualization: {
       rows: {
         estimatedHeight: 40,
@@ -182,6 +182,25 @@ const meta = {
 export default meta;
 
 export const Default: StoryObj<typeof meta> = {};
+
+export const FillsContainer: StoryObj<typeof meta> = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'With the default `fill` viewport, the grid takes the height of its container, which needs a height of its own, such as the 360px one in this story.',
+      },
+    },
+  },
+  decorators: [
+    (Story) => (
+      <div css={{ blockSize: 360 }}>
+        <Story />
+      </div>
+    ),
+  ],
+  render: (args) => <ExampleDataGrid {...args} viewport={{ mode: 'fill' }} />,
+};
 
 export const ConfigurableSize: StoryObj<typeof ConfigurableDataGrid> = {
   args: {

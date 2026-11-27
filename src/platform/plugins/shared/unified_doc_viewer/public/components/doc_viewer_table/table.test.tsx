@@ -8,10 +8,10 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import { render } from '@elastic/eui/lib/test/rtl';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { buildDataTableRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord, KBN_DATA_GRID_ENABLED_FEATURE_FLAG_KEY } from '@kbn/discover-utils';
 import { EsqlSource } from '@kbn/data-source';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -603,5 +603,54 @@ describe('DocViewerTable', () => {
         });
       });
     });
+  });
+});
+
+describe('DocViewerTable grid renderer selector', () => {
+  const { featureFlags } = mockUnifiedDocViewerServices.core;
+
+  const setKbnDataGridEnabled = (isEnabled: boolean) => {
+    jest
+      .mocked(featureFlags.useBooleanValue)
+      .mockImplementation((flagName, fallback) =>
+        flagName === KBN_DATA_GRID_ENABLED_FEATURE_FLAG_KEY ? isEnabled : fallback
+      );
+  };
+
+  afterEach(() => {
+    jest.mocked(featureFlags.useBooleanValue).mockImplementation((_, fallback) => fallback);
+    storage.clear();
+  });
+
+  // The EuiDataGrid renderer puts the test subject on a section that contains the grid, while the
+  // @kbn/discover-data-grid renderer puts it on the grid element itself.
+  const expectTestSubjectToContainGrid = () => {
+    expect(
+      within(screen.getByTestId('UnifiedDocViewerTableGrid')).getByRole('grid', {
+        name: 'Field values',
+      })
+    ).toBeVisible();
+  };
+
+  it('renders the EuiDataGrid renderer by default', () => {
+    setupComponent();
+
+    expectTestSubjectToContainGrid();
+  });
+
+  it('renders the EuiDataGrid renderer when the feature flag is disabled', () => {
+    setKbnDataGridEnabled(false);
+    setupComponent();
+
+    expectTestSubjectToContainGrid();
+  });
+
+  it('renders the @kbn/discover-data-grid renderer when the feature flag is enabled', () => {
+    setKbnDataGridEnabled(true);
+    setupComponent();
+
+    expect(screen.getByTestId('UnifiedDocViewerTableGrid')).toBe(
+      screen.getByRole('grid', { name: 'Field values' })
+    );
   });
 });

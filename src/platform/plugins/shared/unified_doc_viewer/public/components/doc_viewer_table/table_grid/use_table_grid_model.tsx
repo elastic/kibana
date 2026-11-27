@@ -155,6 +155,8 @@ export const useTableGridModel = ({
         actions: fieldCellActions,
         renderCell: (context) =>
           renderCell ? renderCell(context) : renderDefaultCell(context, false),
+        getTextValue: ({ row }) =>
+          row.displayNameOverride ?? row.dataViewField?.displayName ?? row.name,
         renderDetails,
         getDetailsWarning: ({ row }) =>
           getFilterExistsDisabledWarning({
@@ -172,6 +174,7 @@ export const useTableGridModel = ({
         actions: fieldValueCellActions,
         renderCell: (context) =>
           renderCell ? renderCell(context) : renderDefaultCell(context, false),
+        getTextValue: ({ row }) => row.formattedAsText ?? '',
         renderDetails,
         getDetailsWarning: ({ row }) =>
           getFilterInOutPairDisabledWarning({
