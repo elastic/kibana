@@ -98,7 +98,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                           tabindex="-1"
                         >
                           <span
-                            class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                            class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                             data-test-subj="render-content-host.id"
                           >
                             <span
@@ -186,7 +186,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-host.ip"
                   >
                     <span
@@ -260,7 +260,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-host.mac"
                   >
                     <span
@@ -305,7 +305,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-host.os.platform"
                   >
                     <span
@@ -359,7 +359,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-host.os.name"
                   >
                     <span
@@ -404,7 +404,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-host.os.family"
                   >
                     <span
@@ -449,7 +449,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-host.os.version"
                   >
                     <span
@@ -494,7 +494,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-host.architecture"
                   >
                     <span
@@ -548,7 +548,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-cloud.provider"
                   >
                     <span
@@ -593,7 +593,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-cloud.region"
                   >
                     <span
@@ -638,7 +638,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-cloud.instance.id"
                   >
                     <span
@@ -683,7 +683,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-cloud.machine.type"
                   >
                     <span
@@ -791,7 +791,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                           tabindex="-1"
                         >
                           <span
-                            class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                            class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                             data-test-subj="render-content-host.id"
                           >
                             <span
@@ -879,7 +879,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-host.ip"
                   >
                     <span
@@ -953,7 +953,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-host.mac"
                   >
                     <span
@@ -998,7 +998,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-host.os.platform"
                   >
                     <span
@@ -1052,7 +1052,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-host.os.name"
                   >
                     <span
@@ -1097,7 +1097,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-host.os.family"
                   >
                     <span
@@ -1142,7 +1142,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-host.os.version"
                   >
                     <span
@@ -1187,7 +1187,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-host.architecture"
                   >
                     <span
@@ -1241,7 +1241,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-cloud.provider"
                   >
                     <span
@@ -1286,7 +1286,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-cloud.region"
                   >
                     <span
@@ -1331,7 +1331,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-cloud.instance.id"
                   >
                     <span
@@ -1376,7 +1376,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-cloud.machine.type"
                   >
                     <span

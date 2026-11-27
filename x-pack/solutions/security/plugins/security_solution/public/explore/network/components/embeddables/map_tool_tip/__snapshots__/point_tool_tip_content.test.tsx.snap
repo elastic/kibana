@@ -35,7 +35,7 @@ exports[`PointToolTipContent renders correctly against snapshot 1`] = `
                     tabindex="-1"
                   >
                     <span
-                      class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                      class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                       data-test-subj="render-content-host.name"
                     >
                       <span

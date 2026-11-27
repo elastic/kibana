@@ -19,10 +19,27 @@ import { defaultRowRenderers } from '../../../timelines/components/timeline/body
 import type { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import type { RenderCellValueProps } from './render_cell_value';
 import { CellValue } from './render_cell_value';
-import { AlertTableCellContextProvider } from './cell_value_context';
+import { AlertTableCellContextProvider as CellContextProvider } from './cell_value_context';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { PageScope } from '../../../data_view_manager/constants';
+import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 
 jest.mock('../../../common/lib/kibana');
+
+// Keeps the real implementation, but lets the tests look at the props the cell renderer receives
+jest.mock('../../../timelines/components/timeline/cell_rendering/default_cell_renderer', () => {
+  const actual = jest.requireActual(
+    '../../../timelines/components/timeline/cell_rendering/default_cell_renderer'
+  );
+  return { ...actual, DefaultCellRenderer: jest.fn(actual.DefaultCellRenderer) };
+});
+
+const mockDefaultCellRenderer = DefaultCellRenderer as unknown as jest.Mock;
+
+/** Retrieves the data view the way the alerts table does, and hands it to the provider */
+const AlertTableCellContextProvider = (
+  props: Omit<React.ComponentProps<typeof CellContextProvider>, 'dataViewState'>
+) => <CellContextProvider {...props} dataViewState={useDataView(props.sourcererScope)} />;
 
 describe('RenderCellValue', () => {
   const columnId = '@timestamp';
@@ -103,6 +120,67 @@ describe('RenderCellValue', () => {
     const { getByText } = render(<RenderCellValueComponent {...defaultProps} />);
 
     expect(getByText('Nov 5, 2018 @ 19:03:25.937')).toBeInTheDocument();
+  });
+
+  describe('scopeId given to the cell renderer', () => {
+    beforeEach(() => {
+      mockDefaultCellRenderer.mockClear();
+    });
+
+    it('is the id of the table, not the data view scope of the page', () => {
+      render(<RenderCellValueComponent {...defaultProps} />);
+
+      // RenderCellValueComponent renders the cell with pageScope = PageScope.alerts and tableType = TableId.test
+      expect(mockDefaultCellRenderer).toHaveBeenCalled();
+      mockDefaultCellRenderer.mock.calls.forEach(([props]) => {
+        expect(props.scopeId).toBe(TableId.test);
+        expect(props.scopeId).not.toBe(PageScope.alerts);
+      });
+    });
+
+    it.each([
+      TableId.alertsOnAlertsPage,
+      TableId.alertsOnRuleDetailsPage,
+      TableId.alertsOnCasePage,
+    ])('is %s when the cell is rendered in that table', (tableType) => {
+      render(
+        <TestProviders>
+          <DragDropContextWrapper browserFields={mockBrowserFields}>
+            <AlertTableCellContextProvider tableId={tableType} sourcererScope={PageScope.alerts}>
+              <CellValue {...defaultProps} pageScope={PageScope.alerts} tableType={tableType} />
+            </AlertTableCellContextProvider>
+          </DragDropContextWrapper>
+        </TestProviders>
+      );
+
+      expect(mockDefaultCellRenderer).toHaveBeenCalled();
+      mockDefaultCellRenderer.mock.calls.forEach(([props]) => {
+        expect(props.scopeId).toBe(tableType);
+      });
+    });
+
+    it('does not depend on the data view scope of the page', () => {
+      render(
+        <TestProviders>
+          <DragDropContextWrapper browserFields={mockBrowserFields}>
+            <AlertTableCellContextProvider
+              tableId={TableId.test}
+              sourcererScope={PageScope.default}
+            >
+              <CellValue
+                {...defaultProps}
+                pageScope={PageScope.default}
+                tableType={TableId.alertsOnAlertsPage}
+              />
+            </AlertTableCellContextProvider>
+          </DragDropContextWrapper>
+        </TestProviders>
+      );
+
+      mockDefaultCellRenderer.mock.calls.forEach(([props]) => {
+        expect(props.scopeId).toBe(TableId.alertsOnAlertsPage);
+      });
+    });
   });
 
   it('renders flattened object fields as JSON strings instead of [object Object]', () => {

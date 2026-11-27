@@ -218,7 +218,8 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     enableIpDetailsFlyout: true,
     onRuleChange,
   });
-  const { dataView } = useDataView(pageScope);
+  const dataViewState = useDataView(pageScope);
+  const { dataView } = dataViewState;
   const browserFields = useBrowserFields(dataView);
   const runtimeMappings = useMemo(() => dataView.getRuntimeMappings(), [dataView]);
 
@@ -635,7 +636,11 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     <FullWidthFlexGroupTable gutterSize="none">
       <StatefulEventContext.Provider value={activeStatefulEventContext}>
         <EuiDataGridContainer hideLastPage={false}>
-          <AlertTableCellContextProvider tableId={tableType} sourcererScope={pageScope}>
+          <AlertTableCellContextProvider
+            tableId={tableType}
+            sourcererScope={pageScope}
+            dataViewState={dataViewState}
+          >
             <ResponseOpsAlertsTable<SecurityAlertsTableContext>
               key={isEventRenderedView ? 'eventRenderedView' : 'defaultView'}
               ref={alertsTableRef}

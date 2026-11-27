@@ -18,6 +18,7 @@ import { defaultRowRenderers } from '../../../../timelines/components/timeline/b
 import { getAlertsPreviewDefaultModel } from '../../../../detections/components/alerts_table/default_config';
 import { DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { TimeframePreviewOptions } from '../../../common/types';
@@ -44,6 +45,7 @@ const RulePreviewAlertsTableComponent: React.FC<RulePreviewAlertsTableProps> = (
   const { uiSettings } = useKibana().services;
   const license = useLicense();
   const { globalFullScreen } = useGlobalFullScreen();
+  const dataViewState = useDataView(PageScope.alerts);
 
   const startDate = useMemo(
     () => timeframeOptions.timeframeStart.toISOString(),
@@ -87,7 +89,11 @@ const RulePreviewAlertsTableComponent: React.FC<RulePreviewAlertsTableProps> = (
   }, [uiSettings, indexPattern, previewId]);
 
   return (
-    <AlertTableCellContextProvider tableId={TableId.rulePreview} sourcererScope={PageScope.alerts}>
+    <AlertTableCellContextProvider
+      tableId={TableId.rulePreview}
+      sourcererScope={PageScope.alerts}
+      dataViewState={dataViewState}
+    >
       <div
         css={css({
           height: globalFullScreen ? '100%' : undefined,

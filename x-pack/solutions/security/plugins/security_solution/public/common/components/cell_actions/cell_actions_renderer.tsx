@@ -14,6 +14,7 @@ import { TimelineId } from '../../../../common/types';
 import type { SecurityCellActionsData } from '.';
 import { CellActionsMode, SecurityCellActions, SecurityCellActionType } from '.';
 import { getSourcererScopeId } from '../../../helpers';
+import { useCellActionsDataView } from './data_view_context';
 import { TimelineContext } from '../../../timelines/components/timeline/context';
 import { TruncatableText } from '../truncatable_text';
 import { TableContext } from '../events_viewer/shared';
@@ -104,6 +105,10 @@ export const CellActionsRenderer = React.memo<CellActionsRendererProps>(
       [scopeId, tableIdFind, timelineIdFind]
     );
 
+    // An already loaded data view, if one was provided for this scope (e.g. by the alerts table), so that
+    // each cell does not retrieve it again.
+    const dataView = useCellActionsDataView(sourcererScopeId);
+
     const data = useMemo<SecurityCellActionsData>(() => {
       if (queryValue) {
         return { value: queryValue, field };
@@ -162,6 +167,7 @@ export const CellActionsRenderer = React.memo<CellActionsRendererProps>(
         data={data}
         disabledActionTypes={disabledActionTypes}
         sourcererScopeId={sourcererScopeId}
+        dataView={dataView}
         metadata={{ scopeId }}
       >
         {content}
