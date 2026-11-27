@@ -13781,6 +13781,8 @@ paths:
                           base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                           breach:
                             segment: WHERE avg_cpu > 0.9
+                        reason:
+                          template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                         recovery:
                           strategy: no_breach
                         schedule:
@@ -13924,6 +13926,8 @@ paths:
                     base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                     breach:
                       segment: WHERE avg_cpu > 0.9
+                  reason:
+                    template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                   recovery:
                     strategy: no_breach
                   schedule:
@@ -13968,6 +13972,8 @@ paths:
                       base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                       breach:
                         segment: WHERE avg_cpu > 0.9
+                    reason:
+                      template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                     recovery:
                       strategy: no_breach
                     schedule:
@@ -14122,6 +14128,8 @@ paths:
                         base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                         breach:
                           segment: WHERE avg_cpu > 0.9
+                      reason:
+                        template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                       recovery:
                         strategy: no_breach
                       schedule:
@@ -14153,6 +14161,8 @@ paths:
                         base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                         breach:
                           segment: WHERE avg_cpu > 0.9
+                      reason:
+                        template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                       recovery:
                         strategy: no_breach
                       schedule:
@@ -14199,6 +14209,8 @@ paths:
                           base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                           breach:
                             segment: WHERE avg_cpu > 0.9
+                        reason:
+                          template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                         recovery:
                           strategy: no_breach
                         schedule:
@@ -14237,6 +14249,8 @@ paths:
                           base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                           breach:
                             segment: WHERE avg_cpu > 0.9
+                        reason:
+                          template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                         recovery:
                           strategy: no_breach
                         schedule:
@@ -14761,6 +14775,8 @@ paths:
                           base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                           breach:
                             segment: WHERE avg_cpu > 0.9
+                        reason:
+                          template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                         recovery:
                           strategy: no_breach
                         schedule:
@@ -15639,6 +15655,8 @@ paths:
                       base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                       breach:
                         segment: WHERE avg_cpu > 0.9
+                    reason:
+                      template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                     recovery:
                       strategy: no_breach
                     schedule:
@@ -15822,6 +15840,8 @@ paths:
                       base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                       breach:
                         segment: WHERE avg_cpu > 0.9
+                    reason:
+                      template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                     recovery:
                       strategy: no_breach
                     schedule:
@@ -15998,6 +16018,8 @@ paths:
                     base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                     breach:
                       segment: WHERE avg_cpu > 0.9
+                  reason:
+                    template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                   recovery:
                     strategy: no_breach
                   schedule:
@@ -16042,6 +16064,8 @@ paths:
                       base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                       breach:
                         segment: WHERE avg_cpu > 0.9
+                    reason:
+                      template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                     recovery:
                       strategy: no_breach
                     schedule:
@@ -16090,6 +16114,8 @@ paths:
                       base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                       breach:
                         segment: WHERE avg_cpu > 0.9
+                    reason:
+                      template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                     recovery:
                       strategy: no_breach
                     schedule:
@@ -16258,6 +16284,8 @@ paths:
                       base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                       breach:
                         segment: WHERE avg_cpu > 0.9
+                    reason:
+                      template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                     recovery:
                       strategy: no_breach
                     schedule:
@@ -16444,6 +16472,8 @@ paths:
                       base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                       breach:
                         segment: WHERE avg_cpu > 0.9
+                    reason:
+                      template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                     recovery:
                       strategy: no_breach
                     schedule:
@@ -74790,6 +74820,12 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/Security_Osquery_API_SortOrderOrUndefined'
+        - description: Set to `true` to include `effective_policy_ids` for each pack. Reads Fleet integrations, so leave it unset when you do not need it.
+          in: query
+          name: withEffectivePolicyIds
+          required: false
+          schema:
+            type: boolean
       responses:
         '200':
           content:
@@ -74802,6 +74838,8 @@ paths:
                       - created_at: '2025-02-26T13:37:30.452Z'
                         created_by: elastic
                         description: My pack
+                        effective_policy_ids:
+                          - my_policy_id
                         enabled: true
                         name: my_pack
                         queries:
@@ -74950,6 +74988,12 @@ paths:
           required: true
           schema:
             $ref: '#/components/schemas/Security_Osquery_API_PackId'
+        - description: Set to `true` to include `effective_policy_ids`. Reads Fleet integrations, so leave it unset when you do not need it.
+          in: query
+          name: withEffectivePolicyIds
+          required: false
+          schema:
+            type: boolean
       responses:
         '200':
           content:
@@ -74962,6 +75006,8 @@ paths:
                       created_at: '2025-02-26T13:37:30.452Z'
                       created_by: elastic
                       description: My pack
+                      effective_policy_ids:
+                        - my_policy_id
                       enabled: true
                       name: my_pack
                       policy_ids:
@@ -158946,6 +158992,18 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data'
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
+        reason:
+          additionalProperties: false
+          description: Alert reason configuration. Only allowed when kind is "alert". `template` is the alert reason template, for example "CPU on {{data.host.name}} was {{data.cpu_pct}}%." Whitespace is preserved. Empty or whitespace-only templates are rejected. Omit to leave it unset. Null is not accepted.
+          type: object
+          properties:
+            template:
+              description: Alert reason template.
+              maxLength: 1024
+              minLength: 1
+              type: string
+          required:
+            - template
         recovery:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery'
         schedule:
@@ -159360,6 +159418,18 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data'
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
+        reason:
+          additionalProperties: false
+          description: Alert reason configuration. Only allowed when kind is "alert". `template` is the alert reason template, for example "CPU on {{data.host.name}} was {{data.cpu_pct}}%." Whitespace is preserved. Empty or whitespace-only templates are rejected. Omit to leave it unset. Null is not accepted.
+          type: object
+          properties:
+            template:
+              description: Alert reason template.
+              maxLength: 1024
+              minLength: 1
+              type: string
+          required:
+            - template
         recovery:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery'
         schedule:
@@ -159482,6 +159552,18 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data'
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
+        reason:
+          additionalProperties: false
+          description: Alert reason configuration. Only allowed when kind is "alert". `template` is the alert reason template, for example "CPU on {{data.host.name}} was {{data.cpu_pct}}%." Whitespace is preserved. Empty or whitespace-only templates are rejected. Omit to leave it unset on create or clear it when replacing an existing rule. Null is not accepted.
+          type: object
+          properties:
+            template:
+              description: Alert reason template.
+              maxLength: 1024
+              minLength: 1
+              type: string
+          required:
+            - template
         recovery:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery'
         schedule:
@@ -160024,6 +160106,18 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data'
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
+        reason:
+          additionalProperties: false
+          description: Alert reason configuration. Only allowed when kind is "alert". `template` is the alert reason template, for example "CPU on {{data.host.name}} was {{data.cpu_pct}}%." Whitespace is preserved. Empty or whitespace-only templates are rejected. Absent when no reason template is set.
+          type: object
+          properties:
+            template:
+              description: Alert reason template.
+              maxLength: 1024
+              minLength: 1
+              type: string
+          required:
+            - template
         recovery:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery'
         schedule:
@@ -160291,6 +160385,19 @@ components:
           nullable: true
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query_patch'
+        reason:
+          additionalProperties: false
+          description: Alert reason configuration. Only allowed when kind is "alert". `template` is the alert reason template, for example "CPU on {{data.host.name}} was {{data.cpu_pct}}%." Whitespace is preserved. Empty or whitespace-only templates are rejected. Omit to preserve the current value; send null to clear it.
+          nullable: true
+          type: object
+          properties:
+            template:
+              description: Alert reason template.
+              maxLength: 1024
+              minLength: 1
+              type: string
+          required:
+            - template
         recovery:
           allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery'
@@ -214748,6 +214855,29 @@ components:
           required:
             - saved_object_id
             - name
+        warnings:
+          description: Additional agent policies receiving this enabled pack through a shared integration.
+          items:
+            type: object
+            properties:
+              additional_policy_ids:
+                items:
+                  type: string
+                type: array
+              code:
+                enum:
+                  - shared_integration_overdelivery
+                type: string
+              package_policy_id:
+                type: string
+              package_policy_name:
+                type: string
+            required:
+              - code
+              - package_policy_id
+              - package_policy_name
+              - additional_policy_ids
+          type: array
       required:
         - data
     Security_Osquery_API_CreateSavedQueryRequestBody:
@@ -215304,6 +215434,11 @@ components:
               type: string
             description:
               $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
+            effective_policy_ids:
+              description: Agent policies that receive this pack through Fleet, including those that share an Osquery Manager integration with a selected agent policy. Returned only when the request sets `withEffectivePolicyIds=true`, and absent when Fleet state is unavailable.
+              items:
+                type: string
+              type: array
             enabled:
               $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
             interval:
@@ -215400,6 +215535,11 @@ components:
                 type: string
               description:
                 $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
+              effective_policy_ids:
+                description: Agent policies that receive this pack through Fleet, including those that share an Osquery Manager integration with a selected agent policy. Returned only when the request sets `withEffectivePolicyIds=true`, and absent when Fleet state is unavailable.
+                items:
+                  type: string
+                type: array
               enabled:
                 $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
               interval:
@@ -216424,6 +216564,29 @@ components:
             version:
               description: The pack version number.
               type: integer
+        warnings:
+          description: Additional agent policies receiving this enabled pack through a shared integration.
+          items:
+            type: object
+            properties:
+              additional_policy_ids:
+                items:
+                  type: string
+                type: array
+              code:
+                enum:
+                  - shared_integration_overdelivery
+                type: string
+              package_policy_id:
+                type: string
+              package_policy_name:
+                type: string
+            required:
+              - code
+              - package_policy_id
+              - package_policy_name
+              - additional_policy_ids
+          type: array
     Security_Osquery_API_UpdateSavedQueryRequestBody:
       example:
         id: updated_my_saved_query_name

@@ -12,6 +12,7 @@
     "configPath": ["xpack", "nightshiftDetection"],
     "requiredPlugins": [
       "alertingVTwo",
+      "data",
       "significantEvents",
       "nightshiftSources",
       "licensing",
@@ -19,7 +20,7 @@
       "workflowsExtensions",
       "workflowsManagement"
     ],
-    "optionalPlugins": ["cloud", "cps"],
+    "optionalPlugins": ["cloud", "cps", "share"],
     "requiredBundles": []
   }
 }

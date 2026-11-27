@@ -51,9 +51,6 @@ export const CLIENT_REGISTRATION_EXCEPTIONS: readonly string[] = [
   'alertzero.triage.tagPatternKeys',
   'hunt.packageReport',
 
-  // @elastic/alertzero-common-layer — proposals
-  'proposals.getLatestRevision',
-
   // @elastic/context-eng — context_engine
   'context-engine.applyDreamChanges',
   'context-engine.applyDreamRelationships',

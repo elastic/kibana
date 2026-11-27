@@ -31,13 +31,17 @@
             "format": "uuid",
             "type": "string"
           },
+          "result": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
           "state": {
             "enum": [
-              "pending",
               "started",
               "succeeded",
-              "failed",
-              "retrying"
+              "failed"
             ],
             "type": "string"
           }
@@ -68,8 +72,67 @@
         ],
         "type": "object"
       },
-      "Handler_typesMessage": {
+      "Handler_typesMatchedExclusionV0": {
         "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "scope": {
+            "enum": [
+              "exclusion",
+              "detection_exclusion",
+              "dlp_exclusion",
+              "rule_exclusion",
+              "link_analysis_exclusion"
+            ],
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Handler_typesMessageActionV0": {
+        "properties": {
+          "action_id": {
+            "type": "string"
+          },
+          "action_name": {
+            "type": "string"
+          },
+          "action_type": {
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "rule_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "user_id": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Handler_typesMessageDetailsV0": {
+        "properties": {
+          "actions_taken": {
+            "items": {
+              "$ref": "#/components/schemas/Handler_typesMessageActionV0"
+            },
+            "type": "array"
+          },
           "canonical_id": {
             "type": "string"
           },
@@ -77,9 +140,18 @@
             "format": "date-time",
             "type": "string"
           },
+          "delivered": {
+            "type": "boolean"
+          },
           "external_id": {
             "nullable": true,
             "type": "string"
+          },
+          "flagged_rules": {
+            "items": {
+              "$ref": "#/components/schemas/Handler_typesFlaggedRuleV0"
+            },
+            "type": "array"
           },
           "forward_recipients": {
             "items": {
@@ -89,6 +161,10 @@
           },
           "forwarded_at": {
             "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "header_message_id": {
             "nullable": true,
             "type": "string"
           },
@@ -102,6 +178,12 @@
           },
           "mailbox": {
             "$ref": "#/components/schemas/Handler_typesMailbox"
+          },
+          "matched_exclusions": {
+            "items": {
+              "$ref": "#/components/schemas/Handler_typesMatchedExclusionV0"
+            },
+            "type": "array"
           },
           "message_source_id": {
             "format": "uuid",
@@ -127,6 +209,10 @@
           "sender": {
             "$ref": "#/components/schemas/Handler_typesSender"
           },
+          "state": {
+            "nullable": true,
+            "type": "string"
+          },
           "subject": {
             "type": "string"
           }
@@ -135,11 +221,118 @@
           "canonical_id",
           "created_at",
           "id",
+          "mailbox",
           "message_source_id",
           "recipients",
           "sender",
           "subject"
         ],
+        "type": "object"
+      },
+      "Handler_typesMessageGroupDetailsV0": {
+        "properties": {
+          "asa_dlp_verdict": {
+            "nullable": true,
+            "type": "string"
+          },
+          "asa_verdict": {
+            "nullable": true,
+            "type": "string"
+          },
+          "attack_score_verdict": {
+            "nullable": true,
+            "type": "string"
+          },
+          "classification": {
+            "nullable": true,
+            "type": "string"
+          },
+          "flagged_rules": {
+            "items": {
+              "$ref": "#/components/schemas/Handler_typesFlaggedRuleV0"
+            },
+            "type": "array"
+          },
+          "id": {
+            "type": "string"
+          },
+          "matched_exclusions": {
+            "items": {
+              "$ref": "#/components/schemas/Handler_typesMatchedExclusionV0"
+            },
+            "type": "array"
+          },
+          "message_auto_quarantines": {
+            "items": {
+              "$ref": "#/components/schemas/Handler_typesMessageGroupEventAutoQuarantine"
+            },
+            "type": "array"
+          },
+          "message_links_clicked": {
+            "items": {
+              "$ref": "#/components/schemas/Handler_typesMessageGroupEventLinksClickedV0"
+            },
+            "type": "array"
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/Handler_typesMessagePreviewV0"
+            },
+            "type": "array"
+          },
+          "organization_id": {
+            "type": "string"
+          },
+          "review_comment": {
+            "nullable": true,
+            "type": "string"
+          },
+          "review_label": {
+            "nullable": true,
+            "type": "string"
+          },
+          "review_status": {
+            "nullable": true,
+            "type": "string"
+          },
+          "state": {
+            "nullable": true,
+            "type": "string"
+          },
+          "user_reports": {
+            "items": {
+              "$ref": "#/components/schemas/Handler_typesMessageReportV0"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "Handler_typesMessageGroupEventAutoQuarantine": {
+        "properties": {
+          "completed_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "mailbox_display_name": {
+            "nullable": true,
+            "type": "string"
+          },
+          "mailbox_email_address": {
+            "nullable": true,
+            "type": "string"
+          },
+          "mailbox_external_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "message_id": {
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "Handler_typesMessageGroupEventLinkClick": {
@@ -188,6 +381,18 @@
       },
       "Handler_typesMessageGroupV0": {
         "properties": {
+          "asa_dlp_verdict": {
+            "nullable": true,
+            "type": "string"
+          },
+          "asa_verdict": {
+            "nullable": true,
+            "type": "string"
+          },
+          "attack_score_verdict": {
+            "nullable": true,
+            "type": "string"
+          },
           "classification": {
             "nullable": true,
             "type": "string"
@@ -200,6 +405,12 @@
           },
           "id": {
             "type": "string"
+          },
+          "matched_exclusions": {
+            "items": {
+              "$ref": "#/components/schemas/Handler_typesMatchedExclusionV0"
+            },
+            "type": "array"
           },
           "message_links_clicked": {
             "items": {
@@ -246,12 +457,24 @@
       },
       "Handler_typesMessagePreviewV0": {
         "properties": {
+          "actions_taken": {
+            "items": {
+              "$ref": "#/components/schemas/Handler_typesMessageActionV0"
+            },
+            "type": "array"
+          },
           "created_at": {
             "format": "date-time",
             "type": "string"
           },
           "delivered": {
             "type": "boolean"
+          },
+          "flagged_rules": {
+            "items": {
+              "$ref": "#/components/schemas/Handler_typesFlaggedRuleV0"
+            },
+            "type": "array"
           },
           "forward_recipients": {
             "items": {
@@ -264,11 +487,22 @@
             "nullable": true,
             "type": "string"
           },
+          "header_message_id": {
+            "nullable": true,
+            "type": "string"
+          },
           "id": {
+            "format": "uuid",
             "type": "string"
           },
           "mailbox": {
             "$ref": "#/components/schemas/Handler_typesMailbox"
+          },
+          "matched_exclusions": {
+            "items": {
+              "$ref": "#/components/schemas/Handler_typesMatchedExclusionV0"
+            },
+            "type": "array"
           },
           "read_at": {
             "format": "date-time",
@@ -289,11 +523,16 @@
           "sender": {
             "$ref": "#/components/schemas/Handler_typesSender"
           },
+          "state": {
+            "nullable": true,
+            "type": "string"
+          },
           "subject": {
             "type": "string"
           }
         },
         "required": [
+          "created_at",
           "id",
           "mailbox",
           "recipients",
@@ -1219,7 +1458,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Handler_typesMessageGroupV0"
+                  "$ref": "#/components/schemas/Handler_typesMessageGroupDetailsV0"
                 }
               }
             }
@@ -1262,7 +1501,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Handler_typesMessage"
+                  "$ref": "#/components/schemas/Handler_typesMessageDetailsV0"
                 }
               }
             }

@@ -176,7 +176,9 @@ export const NewConversationPrompt: React.FC<{}> = () => {
   const [sizerEl, setSizerEl] = useState<HTMLSpanElement | null>(null);
   const fitsOnOneLine = useNowrapFitsContainer(headingEl, sizerEl);
   const wrapAndCenter = !fitsOnOneLine;
-  const { starters, source, onSelect, isDisabled } = useConversationStarters();
+  const { starters, source, onSelect, isDisabled } = useConversationStarters({
+    solution: spaceSolution,
+  });
   const hasStarters = starters.length > 0;
 
   const greeting = greetingMessage ?? (
