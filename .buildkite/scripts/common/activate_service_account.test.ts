@@ -204,26 +204,28 @@ describe('GCS service account activation', () => {
     ['ci-artifacts.kibana.dev', 'kibana-storybooks-from-pr', PUBLISHED_PR_EMAIL],
     ['ci-typescript-archives', 'kibana-pull-request', TYPESCRIPT_PR_EMAIL],
     ['ci-typescript-archives', 'kibana-on-merge', TYPESCRIPT_EMAIL],
-    [
-      'kibana-ci-es-snapshots-daily',
-      'kibana-elasticsearch-snapshot-build',
-      ES_SNAPSHOT_BUILD_EMAIL,
-    ],
-    [
-      'kibana-ci-es-snapshots-daily',
-      'kibana-elasticsearch-snapshot-promote',
-      ES_SNAPSHOT_PROMOTE_EMAIL,
-    ],
-    [
-      'kibana-ci-es-snapshots-permanent',
-      'kibana-elasticsearch-snapshot-promote',
-      ES_SNAPSHOT_PROMOTE_EMAIL,
-    ],
   ])('selects scoped access to %s for %s', (bucket, pipelineSlug, expectedEmail) => {
     const result = sandbox.run([bucket], { BUILDKITE_PIPELINE_SLUG: pipelineSlug });
 
     expect(result.status).toBe(0);
     expect(result.calls[0]).toContain(`--service-account=${expectedEmail}`);
+  });
+
+  it.each([
+    ['kibana-ci-es-snapshot-build', ES_SNAPSHOT_BUILD_EMAIL],
+    ['kibana-ci-es-snapshot-promote', ES_SNAPSHOT_PROMOTE_EMAIL],
+  ])('activates the %s account by name', (account, expectedEmail) => {
+    const result = sandbox.run([account]);
+
+    expect(result.status).toBe(0);
+    expect(result.calls[0]).toContain(`--service-account=${expectedEmail}`);
+  });
+
+  it('requires ES snapshot callers to name their account', () => {
+    const result = sandbox.run(['kibana-ci-es-snapshots-daily']);
+
+    expect(result.status).not.toBe(0);
+    expect(result.calls).toHaveLength(0);
   });
 
   it('mints a new token once the cached one is 30 minutes old', () => {

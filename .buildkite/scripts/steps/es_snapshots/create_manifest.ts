@@ -105,7 +105,7 @@ interface ManifestEntry {
 
       echo '--- Upload files to GCS'
       # Archive upload can outlive the 60-minute shared token; impersonation refreshes it.
-      .buildkite/scripts/common/activate_service_account.sh --auto-refresh ${BASE_BUCKET_DAILY}
+      .buildkite/scripts/common/activate_service_account.sh --auto-refresh kibana-ci-es-snapshot-build
       # Composite uploads write and delete temporary objects outside archives/, which the create-only account can't.
       export CLOUDSDK_STORAGE_PARALLEL_COMPOSITE_UPLOAD_ENABLED=False
       cd "${destination}"

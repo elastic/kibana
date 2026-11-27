@@ -95,7 +95,7 @@ function getExpectedSnapshotBucket(version: string, id: string) {
       `
       set -euo pipefail
       # Recursive archive copy can outlive the 60-minute shared token; gcloud refreshes it.
-      ${projectRoot}/.buildkite/scripts/common/activate_service_account.sh --auto-refresh ${BASE_BUCKET_PERMANENT}
+      ${projectRoot}/.buildkite/scripts/common/activate_service_account.sh --auto-refresh kibana-ci-es-snapshot-promote
       cp manifest.json manifest-latest-verified.json
       gcloud storage cp --cache-control="no-cache, max-age=0, no-transform" manifest-latest-verified.json gs://${BASE_BUCKET_DAILY}/${version}/
       rm manifest.json
