@@ -304,7 +304,7 @@ export const COLLECTION_GAPS: Readonly<Record<GapId, CollectionGap>> = {
     title: i18n.translate(
       'xpack.securitySolution.entityAnalytics.aiAgents.gaps.noAgentRisk.title',
       {
-        defaultMessage: 'Risk scoring does not score ai_agent',
+        defaultMessage: 'Released risk scoring does not score ai_agent',
       }
     ),
     blocks: i18n.translate(
