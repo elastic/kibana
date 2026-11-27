@@ -8,6 +8,8 @@ import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { waitFor, act, renderHook } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
+import qs from 'query-string';
 import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import { useDiscoverInTimelineActions } from './use_discover_in_timeline_actions';
 import type { Filter } from '@kbn/es-query';
@@ -276,6 +278,81 @@ describe('useDiscoverInTimelineActions', () => {
       await result.current.resetDiscoverAppState(savedSearchMock.id, { isRestoringFromUrl: true });
 
       expect(result.current.timelineRestorePending.current).toBe('fromUrl');
+    });
+    it('should not leave a restore pending when the saved search cannot be fetched while the ES|QL tab is mounted', async () => {
+      // A marker left behind would make the next Query to ES|QL switch replace the in-session state.
+      (startServicesMock.savedSearch.get as jest.Mock).mockRejectedValueOnce(
+        new Error('Saved search not found')
+      );
+      const { result } = renderTestHook();
+
+      await result.current.resetDiscoverAppState(savedSearchMock.id);
+
+      expect(result.current.timelineRestorePending.current).toBeNull();
+    });
+    it('should leave a newer restore alone when an older one resumes after it', async () => {
+      let resolveOlderFetch: (savedSearch: SavedSearch) => void = () => {};
+      (startServicesMock.savedSearch.get as jest.Mock).mockImplementationOnce(
+        () =>
+          new Promise<SavedSearch>((resolve) => {
+            resolveOlderFetch = resolve;
+          })
+      );
+      const containerRef: { current: ExtendedDiscoverStateContainer | undefined } = {
+        current: createMockDiscoverStateContainer(discoverServices),
+      };
+      const { result } = renderHook(() => useDiscoverInTimelineActions(containerRef), {
+        wrapper: getTestProviderWithCustomState(),
+      });
+
+      const olderRestore = result.current.resetDiscoverAppState(savedSearchMock.id);
+      // Another timeline is opened from the Query tab, then its ES|QL tab mounts: the tab
+      // publishes its container before it reads the pending restore.
+      containerRef.current = undefined;
+      await result.current.resetDiscoverAppState('another-saved-search-id');
+      containerRef.current = createMockDiscoverStateContainer(discoverServices);
+      resolveOlderFetch(savedSearchMock);
+      await olderRestore;
+
+      expect(result.current.timelineRestorePending.current).toBe('opened');
+      expect(
+        startServicesMock.customDataService.query.timefilter.timefilter.setTime
+      ).not.toHaveBeenCalled();
+    });
+    describe('while the ES|QL tab is not mounted', () => {
+      const urlWithDiscoverState =
+        '/timelines?_a=(query:(esql:previous))&_g=(time:(from:now-1y,to:now))&timeline=(id:next)';
+
+      it('should drop the Discover state of the previous timeline from the URL when another one is opened', async () => {
+        // Otherwise a reload before the tab mounts restores the opened timeline from the URL,
+        // with the previous timeline's query and time range.
+        const history = createMemoryHistory({ initialEntries: [urlWithDiscoverState] });
+        const { result } = renderHook(
+          () => useDiscoverInTimelineActions({ current: undefined }, history),
+          { wrapper: getTestProviderWithCustomState() }
+        );
+
+        await result.current.resetDiscoverAppState(savedSearchMock.id);
+
+        expect(qs.parse(history.location.search)).toEqual({ timeline: '(id:next)' });
+      });
+      it('should keep the Discover state in the URL when restoring the timeline the URL points at', async () => {
+        const history = createMemoryHistory({ initialEntries: [urlWithDiscoverState] });
+        const { result } = renderHook(
+          () => useDiscoverInTimelineActions({ current: undefined }, history),
+          { wrapper: getTestProviderWithCustomState() }
+        );
+
+        await result.current.resetDiscoverAppState(savedSearchMock.id, {
+          isRestoringFromUrl: true,
+        });
+
+        expect(qs.parse(history.location.search)).toEqual({
+          _a: '(query:(esql:previous))',
+          _g: '(time:(from:now-1y,to:now))',
+          timeline: '(id:next)',
+        });
+      });
     });
   });
   describe('updateSavedSearch', () => {
