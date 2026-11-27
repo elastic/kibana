@@ -40,12 +40,19 @@ export interface DreamingSetupDraft {
   buildConfig: () => DreamingTemplateConfig | undefined;
 }
 
-export const useDreamingSetupDraft = (): DreamingSetupDraft => {
+interface DreamingSetupDraftOptions {
+  /** Picks the first template until the user picks one. Off: nothing is picked at first. */
+  preselectFirst?: boolean;
+}
+
+export const useDreamingSetupDraft = ({
+  preselectFirst = true,
+}: DreamingSetupDraftOptions = {}): DreamingSetupDraft => {
   const { templates, isLoading, error } = useDreamingTemplates();
   const [pickedId, setPickedId] = useState<string>();
   const [editedSummary, setSummary] = useState<string>();
   const [edited, setEdited] = useState<{ id: string; draft: DreamingConfigDraft }>();
-  const selectedId = pickedId ?? templates[0]?.id;
+  const selectedId = pickedId ?? (preselectFirst ? templates[0]?.id : undefined);
   const isCustom = selectedId === CUSTOM_TEMPLATE_ID;
   const selected = isCustom ? undefined : templates.find(({ id }) => id === selectedId);
 

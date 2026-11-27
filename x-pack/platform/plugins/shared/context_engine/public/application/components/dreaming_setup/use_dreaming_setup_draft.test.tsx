@@ -60,6 +60,22 @@ describe('useDreamingSetupDraft', () => {
     expect(result.current.canApply).toBe(true);
   });
 
+  it('picks nothing until the user picks, when asked not to preselect', () => {
+    const { result } = renderHook(() => useDreamingSetupDraft({ preselectFirst: false }));
+
+    expect(result.current.selectedId).toBeUndefined();
+    expect(result.current.draft).toBeUndefined();
+    expect(result.current.summary).toBe('');
+    expect(result.current.canApply).toBe(false);
+
+    act(() => {
+      result.current.select('legal_assistant');
+    });
+
+    expect(result.current.selectedId).toBe('legal_assistant');
+    expect(result.current.draft).toEqual(draftOf(LEGAL.dreaming, { entitiesEnabled: false }));
+  });
+
   it('switches templates and resets an edited summary', () => {
     const { result } = renderHook(() => useDreamingSetupDraft());
 

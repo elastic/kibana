@@ -17,10 +17,10 @@ const descriptionHelpText = i18n.translate('xpack.contextEngine.aiIndexDescripti
 });
 
 const descriptionPlaceholder = i18n.translate(
-  'xpack.contextEngine.aiIndexDescription.placeholder',
+  'xpack.contextEngine.aiIndexDescription.placeholderKnowledgeDocuments',
   {
     defaultMessage:
-      'Describe what this AI index is for and the information its Knowledge Indicators contain. Include example questions they should help answer and any known gaps in that information.',
+      'Describe what this AI index is for and the information its knowledge documents contain. Include example questions they should help answer and any known gaps in that information.',
   }
 );
 
@@ -33,6 +33,9 @@ interface AiIndexDescriptionFieldProps {
   onChange: (value: string) => void;
   error?: string;
   warning?: string;
+  isDisabled?: boolean;
+  /** Set to false where the surrounding layout already explains the field. */
+  hasHelpText?: boolean;
   'data-test-subj': string;
 }
 
@@ -41,13 +44,17 @@ export const AiIndexDescriptionField = ({
   onChange,
   error,
   warning,
+  isDisabled = false,
+  hasHelpText = true,
   'data-test-subj': dataTestSubj,
 }: AiIndexDescriptionFieldProps) => (
   <EuiFormRow
     fullWidth
     isInvalid={error !== undefined}
     error={error}
-    helpText={error === undefined ? warning ?? descriptionHelpText : undefined}
+    helpText={
+      error === undefined ? warning ?? (hasHelpText ? descriptionHelpText : undefined) : undefined
+    }
   >
     <EuiTextArea
       fullWidth
@@ -56,6 +63,7 @@ export const AiIndexDescriptionField = ({
       onChange={(event) => onChange(event.target.value)}
       maxLength={getTextInputHardMaxLength(MAX_AI_INDEX_DESCRIPTION_LENGTH)}
       isInvalid={error !== undefined}
+      disabled={isDisabled}
       data-test-subj={dataTestSubj}
       placeholder={descriptionPlaceholder}
       aria-label={descriptionAriaLabel}

@@ -49,3 +49,10 @@ export const loadErrorTitle = i18n.translate(
     defaultMessage: 'Unable to load the examples',
   }
 );
+
+export const startFromLabel = i18n.translate(
+  'xpack.contextEngine.aiIndexDetail.dreaming.setup.startFrom',
+  {
+    defaultMessage: 'Start from',
+  }
+);
