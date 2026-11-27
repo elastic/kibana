@@ -22,17 +22,37 @@ dependsOn:
   - '@kbn/alerting-v2-schemas'
   - '@kbn/cloud-plugin'
   - '@kbn/config-schema'
+  - '@kbn/cps'
+  - '@kbn/cps-server-utils'
   - '@kbn/core'
   - '@kbn/core-di'
   - '@kbn/core-di-server'
-  - '@kbn/core-pricing-common'
-  - '@kbn/core-plugins-server'
+  - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/core-http-server'
+  - '@kbn/core-plugins-server'
+  - '@kbn/core-spaces-common'
+  - '@kbn/core-pricing-common'
   - '@kbn/core-test-helpers-kbn-server'
+  - '@kbn/data-plugin'
+  - '@kbn/deeplinks-analytics'
+  - '@kbn/discover-plugin'
+  - '@kbn/es-query'
+  - '@kbn/es-types'
   - '@kbn/licensing-plugin'
   - '@kbn/lock-manager'
   - '@kbn/nightshift-shared'
+  - '@kbn/nightshift-sources-plugin'
+  - '@kbn/scout-oblt'
+  - '@kbn/search-types'
+  - '@kbn/share-plugin'
+  - '@kbn/significant-events-plugin'
+  - '@kbn/significant-events-schema'
   - '@kbn/spaces-plugin'
+  - '@kbn/std'
+  - '@kbn/ui-callout'
+  - '@kbn/workflows'
+  - '@kbn/workflows-extensions'
+  - '@kbn/workflows-management-plugin'
   - '@kbn/zod'
 tags:
   - plugin
@@ -41,9 +61,12 @@ tags:
   - private
   - jest-unit-tests
   - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
+    - public/**/*
     - server/**/*
+    - test/scout*/**/*
     - '!target/**/*'
 tasks: {}

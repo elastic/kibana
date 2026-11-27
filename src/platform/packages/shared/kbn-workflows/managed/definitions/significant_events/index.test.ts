@@ -17,7 +17,6 @@ import { convertToWorkflowGraph } from '../../../graph';
 
 interface WorkflowJsonSchema {
   type?: string;
-  enum?: string[];
   description?: string;
   properties?: Record<string, WorkflowJsonSchema>;
   items?: WorkflowJsonSchema;
@@ -80,7 +79,7 @@ const featuresIdentification = parse(
 
 describe('significant events persistence workflow contracts', () => {
   it('bumps managed workflow versions for the bulk persistence contract', () => {
-    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(30);
+    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(32);
     expect(SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW.version).toBe(4);
   });
 
@@ -264,7 +263,7 @@ describe('significant events persistence workflow contracts', () => {
     );
   });
 
-  it('stamps discovery detections only from reported completed outcomes', () => {
+  it('dedupes reported rule uuids and stamps only when a rule count is above zero', () => {
     expect(requireStep(discovery, 'compute_written_rule_uuids').with?.written_rule_uuids).toContain(
       '| default: [] | uniq'
     );

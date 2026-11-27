@@ -1,0 +1,38 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/**
+ * This was generated based on x-pack/platform/plugins/shared/stack_connectors/common/d3security/schema.ts
+ * and will be deprecated once connectors will expose their schemas
+ */
+
+import { lazySchema, z } from '@kbn/zod/v4';
+
+// D3 Security connector parameter schema for run action
+export const D3SecurityRunParamsSchema = lazySchema(() =>
+  z.object({
+    body: z.string().optional(),
+    severity: z.string().optional().describe('Severity level: high, medium, low, or empty'),
+    eventType: z.string().optional().describe('Type of event to create'),
+  })
+);
+
+// D3 Security connector parameter schema for test action
+export const D3SecurityTestParamsSchema = lazySchema(() =>
+  z.object({
+    body: z.string().optional(),
+    severity: z.string().optional().describe('Severity level: high, medium, low, or empty'),
+    eventType: z.string().optional().describe('Type of event to create'),
+  })
+);
+
+// D3 Security connector response schema
+export const D3SecurityResponseSchema = lazySchema(() =>
+  z.object({
+    refid: z.string(),
+  })
+);

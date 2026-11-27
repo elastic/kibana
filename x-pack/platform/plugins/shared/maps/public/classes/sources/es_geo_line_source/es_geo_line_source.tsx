@@ -123,7 +123,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     return this._descriptor.geoField;
   }
 
-  renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {
+  renderSourceSettingsEditor({ onChange }: SourceEditorArgs<ESGeoLineSourceDescriptor>) {
     return (
       <UpdateSourceEditor
         bucketsName={this.getBucketsName()}

@@ -129,6 +129,25 @@ describe('optimizeTaskStateForFlapping', () => {
       ).toEqual(['5']);
     });
 
+    test('keeps flapping alerts until their flapping value is recalculated', () => {
+      const flappingAlert = new Alert('6', {
+        meta: { flapping: true, flappingHistory: new Array(20).fill(false) },
+      });
+      const stoppedFlappingAlert = new Alert('7', {
+        meta: { flapping: false, flappingHistory: new Array(20).fill(false) },
+      });
+
+      expect(
+        getRecoveredAlertIdsToStopTracking(
+          {
+            '6': flappingAlert,
+            '7': stoppedFlappingAlert,
+          },
+          1000
+        )
+      ).toEqual(['7']);
+    });
+
     test('includes alerts over the max limit even if they would stay tracked', () => {
       expect(
         getRecoveredAlertIdsToStopTracking(

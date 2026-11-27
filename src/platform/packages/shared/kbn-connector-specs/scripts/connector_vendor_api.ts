@@ -15,27 +15,43 @@ import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { timeoutSignal } from '@kbn/std';
 import { getCodeOwnersEntries, getOwningTeamsForPath } from '@kbn/code-owners';
-import type { DriftReportEntry } from '../src/test/vendor_api/detect_drift';
-import { detectDrift } from '../src/test/vendor_api/detect_drift';
+import type { DriftReportEntry } from '../src/test/vendor_api/drift/detect_drift';
+import { detectDrift } from '../src/test/vendor_api/drift/detect_drift';
 import {
   findConnector,
   findVendorApiDirectory,
   listConnectors,
 } from '../src/test/vendor_api/find_connector';
-import { createGhIssueTracker } from '../src/test/vendor_api/gh_issue_tracker';
-import { inspectVendorApi } from '../src/test/vendor_api/inspect_vendor_api';
-import type { MarkdownSourceFormat, ProtocolFormat } from '../src/test/vendor_api/manifest';
 import {
+  collectCoverage,
+  serializeCoverage,
+} from '../src/test/vendor_api/connector_coverage/collect_coverage';
+import { createGhIssueTracker } from '../src/test/vendor_api/drift/gh_issue_tracker';
+import { inspectVendorApi } from '../src/test/vendor_api/inspect/inspect_vendor_api';
+import type {
+  AglioSourceFormat,
+  MarkdownSourceFormat,
+  ProtocolFormat,
+} from '../src/test/vendor_api/manifest';
+import {
+  aglioSourceFormatSchema,
   markdownSourceFormatSchema,
   protocolSourceFormatSchema,
   SOURCE_NAME_PATTERN,
 } from '../src/test/vendor_api/manifest';
-import { createSpecCache } from '../src/test/vendor_api/spec_cache';
-import { surfaceDrift } from '../src/test/vendor_api/surface_drift';
-import { updateVendorApi } from '../src/test/vendor_api/update_vendor_api';
+import { createSpecCache } from '../src/test/vendor_api/spec/spec_cache';
+import { surfaceDrift } from '../src/test/vendor_api/drift/surface_drift';
+import { updateVendorApi } from '../src/test/vendor_api/record/update_vendor_api';
 
 const SPEC_CACHE = path.join(REPO_ROOT, 'data', 'connector_vendor_api');
 const DRIFT_REPORT = path.join(REPO_ROOT, 'target', 'connector_vendor_api', 'drift.json');
+const COVERAGE_REPORT = path.join(REPO_ROOT, 'target', 'connector_vendor_api', 'coverage.ndjson');
+const COVERAGE_JSON_REPORT = path.join(
+  REPO_ROOT,
+  'target',
+  'connector_vendor_api',
+  'coverage.json'
+);
 const DRIFT_SUMMARY = path.join(REPO_ROOT, 'target', 'connector_vendor_api', 'drift_summary.json');
 // A vendor that doesn't answer fails its own fetch, not the whole run.
 const FETCH_TIMEOUT_MS = 120_000;
@@ -54,17 +70,27 @@ const parseNamed = (option: string, flag: string, value: string): [string, strin
   return [name, flag.slice(separator + 1)];
 };
 
-const parseFormat = (flag: string): [string, MarkdownSourceFormat | ProtocolFormat] => {
+const parseFormat = (
+  flag: string
+): [string, MarkdownSourceFormat | AglioSourceFormat | ProtocolFormat] => {
   const [name, format] = parseNamed('format', flag, 'format');
-  const options = [...markdownSourceFormatSchema.options, ...protocolSourceFormatSchema.options];
-  const parsed = markdownSourceFormatSchema.or(protocolSourceFormatSchema).safeParse(format);
+  const options = [
+    ...markdownSourceFormatSchema.options,
+    ...aglioSourceFormatSchema.options,
+    ...protocolSourceFormatSchema.options,
+  ];
+  const parsed = markdownSourceFormatSchema
+    .or(aglioSourceFormatSchema)
+    .or(protocolSourceFormatSchema)
+    .safeParse(format);
   if (!parsed.success) {
     throw createFlagError(`--format takes ${options.join(', ')}, got "${format}"`);
   }
   return [name, parsed.data];
 };
 
-// Repeated `--pages name=prefix` and `--endpoint name=url` flags add up to one list per source.
+// Repeated `--pages name=prefix`, `--endpoint name=url` and `--tool name=url` flags add up to one
+// list per source.
 const groupByName = (option: string, value: string, flags: readonly string[]) => {
   const groups: Record<string, string[]> = {};
   for (const flag of flags) {
@@ -104,8 +130,47 @@ run(
     );
     const pages = groupByName('pages', 'prefix', flagsReader.arrayOfStrings('pages') ?? []);
     const endpoints = groupByName('endpoint', 'url', flagsReader.arrayOfStrings('endpoint') ?? []);
+    const tools = groupByName('tool', 'url', flagsReader.arrayOfStrings('tool') ?? []);
+    const captureFiles = Object.fromEntries(
+      (flagsReader.arrayOfStrings('capture') ?? []).map((flag) =>
+        parseNamed('capture', flag, 'file')
+      )
+    );
+    const notes = Object.fromEntries(
+      (flagsReader.arrayOfStrings('note') ?? []).map((flag) => parseNamed('note', flag, 'text'))
+    );
+    const captureFlagsGiven = Object.keys(captureFiles).length + Object.keys(notes).length > 0;
     const now = () => new Date();
     const cache = createSpecCache({ directory: SPEC_CACHE, fetchText, refresh, now, log });
+
+    if (flagsReader.boolean('json') && !flagsReader.boolean('coverage')) {
+      throw createFlagError('--json only applies to --coverage');
+    }
+
+    if (flagsReader.boolean('coverage')) {
+      // --surface reads --report, where --coverage writes it, so running both would
+      // overwrite the drift report instead of surfacing it.
+      if (
+        check ||
+        refresh ||
+        flagsReader.boolean('inspect') ||
+        flagsReader.boolean('drift') ||
+        flagsReader.boolean('surface')
+      ) {
+        throw createFlagError(
+          '--coverage reads the committed artifacts and writes only the report'
+        );
+      }
+      const asJson = flagsReader.boolean('json');
+      const documents = await collectCoverage(REPO_ROOT);
+      const reportPath = path.resolve(
+        flagsReader.string('report') ?? (asJson ? COVERAGE_JSON_REPORT : COVERAGE_REPORT)
+      );
+      await fs.mkdir(path.dirname(reportPath), { recursive: true });
+      await fs.writeFile(reportPath, serializeCoverage(documents, { asJson }));
+      log.success(`Wrote the coverage of ${documents.length} connector(s) to ${reportPath}`);
+      return;
+    }
 
     if (flagsReader.boolean('surface')) {
       const reportPath = path.resolve(flagsReader.string('report') ?? DRIFT_REPORT);
@@ -149,8 +214,19 @@ run(
     }
 
     if (flagsReader.boolean('drift')) {
-      if (check || refresh || flagsReader.boolean('inspect') || Object.keys(sources).length > 0) {
-        throw createFlagError('--drift always fetches the latest specs and writes no artifacts');
+      const sourceFlagsGiven = [sources, formats, pages, endpoints, tools].some(
+        (flags) => Object.keys(flags).length > 0
+      );
+      if (
+        check ||
+        refresh ||
+        flagsReader.boolean('inspect') ||
+        sourceFlagsGiven ||
+        captureFlagsGiven
+      ) {
+        throw createFlagError(
+          '--drift always fetches the latest specs of the manifest sources and writes no artifacts'
+        );
       }
       const driftedId = flagsReader.string('connector');
       const connectors = driftedId
@@ -189,6 +265,11 @@ run(
       if (check) {
         throw createFlagError('--inspect checks nothing; leave out --check');
       }
+      if (captureFlagsGiven) {
+        throw createFlagError(
+          '--inspect skips captured sources and writes no snapshots; record with --capture and --note instead'
+        );
+      }
       const inspectedId = flagsReader.string('connector');
       const directory = inspectedId ? await findVendorApiDirectory(inspectedId) : undefined;
       const { output, manifestUpdated, problems } = await inspectVendorApi({
@@ -217,6 +298,22 @@ run(
     }
 
     const id = flagsReader.requiredString('connector');
+    if (check && captureFlagsGiven) {
+      throw createFlagError('--check writes nothing, so it takes no --capture or --note');
+    }
+    const captures = Object.fromEntries(
+      await Promise.all(
+        Object.entries(captureFiles).map(async ([name, file]) => {
+          try {
+            return [name, await fs.readFile(path.resolve(file), 'utf8')] as const;
+          } catch (error) {
+            throw createFlagError(
+              `--capture ${name}=${file}: ${error instanceof Error ? error.message : String(error)}`
+            );
+          }
+        })
+      )
+    );
     const { connector, directory } = await findConnector(id);
     if (Object.keys(sources).length === 0 && !existsSync(path.join(directory, 'manifest.json'))) {
       throw createFlagError(
@@ -230,6 +327,9 @@ run(
       formats,
       pages,
       endpoints,
+      tools,
+      captures,
+      notes,
       refresh,
       check,
       fetchText: cache.fetchText,
@@ -266,6 +366,8 @@ run(
       With --drift, compares the committed artifacts with the vendor's latest specs and reports
       what changed, without writing them. With --surface, files or updates a GitHub issue per
       connector of that report that needs one, and closes those of connectors healthy again.
+      With --coverage, writes one JSON document per connector (API type, emulator and drift
+      coverage) as NDJSON, or as one JSON array with --json, from the committed artifacts.
 
       Fetched specs are kept in data/connector_vendor_api, so a spec inspected before writing a
       connector is the one it is recorded against. --refresh fetches them again.`,
@@ -276,6 +378,9 @@ run(
         'format',
         'pages',
         'endpoint',
+        'tool',
+        'capture',
+        'note',
         'operation',
         'grep',
         'depth',
@@ -283,19 +388,27 @@ run(
         'github-repo',
         'summary',
       ],
-      boolean: ['refresh', 'check', 'inspect', 'drift', 'surface', 'dry-run'],
+      boolean: ['refresh', 'check', 'inspect', 'drift', 'surface', 'coverage', 'json', 'dry-run'],
       help: `
-        --connector  Connector metadata.id, for example datadog or .datadog (required unless --inspect
-                     or --drift)
+        --connector  Connector metadata.id, for example datadog or .datadog (required unless --inspect,
+                     --drift, --surface or --coverage)
         --source     name=url of a vendor spec to add or move; repeatable. Loads every source.
         --format     name=format of a source that is a Markdown API reference, whose url is its
-                     llms.txt index: databricks-markdown or brave-markdown. Or graphql, whose url
-                     serves SDL or an introspection result, or mcp, whose url serves a tools/list
-                     result. Kept in manifest.json.
+                     llms.txt index: databricks-markdown or brave-markdown. Or one that is an Aglio
+                     page, whose url is that page: threatq-html. Or graphql, whose url serves SDL
+                     or an introspection result, or mcp, whose url serves a tools/list result.
+                     Kept in manifest.json.
         --endpoint   name=url the connector calls for a graphql or mcp source; repeatable. Kept in
                      manifest.json.
         --pages      name=prefix of the reference pages to fetch, absolute or relative to the
                      index, such as an API group's folder; repeatable. Kept in manifest.json.
+        --tool       name=url of one tool document of an mcp source, absolute or relative to its
+                     url, for a vendor that publishes a document per tool rather than a tools/list
+                     result; repeatable. Kept in manifest.json.
+        --capture    name=file of a document the source's url only serves with credentials, fetched
+                     by hand. Records against it, replaces the source's snapshot and marks the
+                     source captured, so it is never fetched; needs a note
+        --note       name=text of the source's note in manifest.json, such as what capturing it took
         --refresh    Fetch every source URL again, instead of using the specs fetched before
         --check     Write nothing; fail if artifacts would change or problems are found
         --inspect    List the operations of the --source specs, or of the connector's manifest
@@ -310,10 +423,16 @@ run(
                      oasdiff on the PATH), actions recorded against both, and whether that needs
                      a refresh or an issue. Writes nothing but the report
         --report     With --drift, where to write the JSON report; with --surface, where to read it
-                     (default target/connector_vendor_api/drift.json)
+                     (default target/connector_vendor_api/drift.json). With --coverage, where to
+                     write it (default target/connector_vendor_api/coverage.ndjson, or coverage.json
+                     with --json)
         --surface    Turn the --report into GitHub issues in --github-repo, with gh and its
                      GITHUB_TOKEN, and write a summary listing the connectors to refresh
         --github-repo  With --surface, the repository of the issues, for example elastic/kibana
+        --coverage   Write one document per connector with its direction, API type, emulator and
+                     drift coverage, read from the committed artifacts; needs no network
+        --json       With --coverage, write all the documents as one JSON array instead of one
+                     document per line (NDJSON)
         --dry-run    With --surface, read the issues but only log what would be written
         --summary    With --surface, where to write the summary
                      (default target/connector_vendor_api/drift_summary.json)

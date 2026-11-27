@@ -16,6 +16,7 @@ import type { AlertsFilter, RuleAlertData } from '../types';
 import { DEFAULT_FLAPPING_SETTINGS, RecoveredActionGroup } from '../types';
 import {
   ALERT_ACTION_GROUP,
+  ALERT_CASE_IDS,
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_DURATION,
   ALERT_END,
@@ -49,6 +50,7 @@ import {
   ALERT_TRACKED,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
   EVENT_ACTION,
   EVENT_KIND,
   SPACE_IDS,
@@ -90,6 +92,7 @@ import {
 import type { KibanaRequest } from '@kbn/core/server';
 import { rule } from './lib/test_fixtures';
 import { RUNTIME_MAINTENANCE_WINDOW_ID_FIELD } from './lib/get_summarized_alerts_query';
+import { MAX_ORPHANED_ALERTS_PER_RUN } from './lib/untrack_orphaned_alerts';
 import { DEFAULT_MAX_ALERTS } from '../config';
 import * as RetryTransientEsErrorsModule from '../lib/retry_transient_es_errors';
 
@@ -738,6 +741,265 @@ describe('Alerts Client', () => {
 
           retrySpy.mockRestore();
         });
+
+        describe('untracking orphaned alerts', () => {
+          const orphanedAlertIndex = '.internal.alerts-test.alerts-default-000001';
+          // written before the tracked field existed and unknown to the task state
+          const orphanedAlert = {
+            ...fetchedAlert1,
+            [ALERT_INSTANCE_ID]: 'orphan',
+            [ALERT_UUID]: 'orphan-uuid',
+          };
+          const getSearchResponse = (
+            hits: Array<{ _id: string; _source: Record<string, unknown> }>
+          ) => ({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq' as const, value: hits.length },
+              hits: hits.map((hit) => ({
+                _index: orphanedAlertIndex,
+                _seq_no: 41,
+                _primary_term: 665,
+                ...hit,
+              })),
+            },
+          });
+          const orphanedAlertsResponse = getSearchResponse([
+            { _id: 'orphan-uuid', _source: orphanedAlert },
+          ]);
+          const executionOpts = { ...defaultExecutionOpts, shouldUntrackOrphanedAlerts: true };
+          let spy: jest.SpyInstance;
+
+          beforeEach(() => {
+            spy = jest
+              .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
+              .mockImplementation(() => mockLegacyAlertsClient);
+          });
+
+          afterEach(() => {
+            spy.mockRestore();
+          });
+
+          test('should untrack active alert documents that are not tracked and not in task state', async () => {
+            clusterClient.search
+              .mockResolvedValueOnce(getSearchResponse([]))
+              .mockResolvedValueOnce(orphanedAlertsResponse);
+
+            const alertsClient = new AlertsClient(alertsClientParams);
+            await alertsClient.initializeExecution(executionOpts);
+
+            expect(clusterClient.search).toHaveBeenCalledTimes(2);
+            expect(clusterClient.search).toHaveBeenNthCalledWith(
+              2,
+              expect.objectContaining({
+                size: MAX_ORPHANED_ALERTS_PER_RUN,
+                seq_no_primary_term: true,
+                query: {
+                  bool: {
+                    filter: [
+                      { term: { [ALERT_RULE_UUID]: '1' } },
+                      { term: { [ALERT_STATUS]: 'active' } },
+                    ],
+                    must_not: [{ term: { [ALERT_TRACKED]: true } }],
+                  },
+                },
+              })
+            );
+            expect(clusterClient.bulk).toHaveBeenCalledTimes(1);
+            expect(clusterClient.bulk).toHaveBeenCalledWith({
+              operations: [
+                {
+                  index: {
+                    _id: 'orphan-uuid',
+                    _index: orphanedAlertIndex,
+                    if_seq_no: 41,
+                    if_primary_term: 665,
+                    require_alias: false,
+                  },
+                },
+                {
+                  ...orphanedAlert,
+                  [ALERT_STATUS]: 'untracked',
+                  [ALERT_END]: date,
+                  [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z', lte: date },
+                  [ALERT_TRACKED]: false,
+                },
+              ],
+            });
+            expect(logger.warn).toHaveBeenCalledWith(
+              `Untracked 1 orphaned active alert document(s) ${ruleInfo}`,
+              logTags
+            );
+          });
+
+          test('should keep orphaned alert documents away from the task state and the rule executor', async () => {
+            clusterClient.search
+              .mockResolvedValueOnce(getSearchResponse([]))
+              .mockResolvedValueOnce(orphanedAlertsResponse);
+
+            const alertsClient = new AlertsClient(alertsClientParams);
+            await alertsClient.initializeExecution(executionOpts);
+
+            // the state is passed on as it came in: the orphan is not restored into it
+            expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith(executionOpts);
+            expect(alertsClient.isTrackedAlert('orphan')).toBe(false);
+          });
+
+          test('should exclude the alert documents the run has loaded and the ones in task state', async () => {
+            clusterClient.search
+              // tracked alerts query
+              .mockResolvedValueOnce(
+                getSearchResponse([
+                  { _id: 'abc', _source: { ...fetchedAlert1, [ALERT_TRACKED]: true } },
+                  {
+                    _id: 'not-in-state',
+                    _source: {
+                      ...fetchedAlert1,
+                      [ALERT_INSTANCE_ID]: '3',
+                      [ALERT_UUID]: 'not-in-state',
+                      [ALERT_TRACKED]: true,
+                    },
+                  },
+                ])
+              )
+              // lookup of the task state UUID that the tracked alerts query did not return
+              .mockResolvedValueOnce(getSearchResponse([]))
+              // orphaned alerts query
+              .mockResolvedValueOnce(getSearchResponse([]));
+
+            const alertsClient = new AlertsClient(alertsClientParams);
+            await alertsClient.initializeExecution({
+              ...executionOpts,
+              activeAlertsFromState: { '1': trackedAlert1Raw, '2': trackedAlert2Raw },
+            });
+
+            expect(clusterClient.search).toHaveBeenCalledTimes(3);
+            expect(clusterClient.search.mock.calls[2][0]).toEqual(
+              expect.objectContaining({
+                query: {
+                  bool: expect.objectContaining({
+                    must_not: [
+                      { term: { [ALERT_TRACKED]: true } },
+                      { ids: { values: ['abc', 'not-in-state', 'def'] } },
+                    ],
+                  }),
+                },
+              })
+            );
+            expect(clusterClient.bulk).not.toHaveBeenCalled();
+          });
+
+          test('should not look for orphaned alert documents unless the caller asks for it', async () => {
+            clusterClient.search.mockResolvedValueOnce(getSearchResponse([]));
+
+            const alertsClient = new AlertsClient(alertsClientParams);
+            await alertsClient.initializeExecution(defaultExecutionOpts);
+
+            expect(clusterClient.search).toHaveBeenCalledTimes(1);
+            expect(clusterClient.bulk).not.toHaveBeenCalled();
+          });
+
+          test('should look for orphaned alert documents once per rule when the cleanup completed', async () => {
+            const rulesWithoutOrphanedAlerts = new Set<string>();
+            const params = { ...alertsClientParams, rulesWithoutOrphanedAlerts };
+            clusterClient.search
+              .mockResolvedValueOnce(getSearchResponse([]))
+              .mockResolvedValueOnce(orphanedAlertsResponse);
+
+            await new AlertsClient(params).initializeExecution(executionOpts);
+
+            expect(clusterClient.search).toHaveBeenCalledTimes(2);
+            expect(rulesWithoutOrphanedAlerts).toEqual(new Set(['default:1']));
+
+            await new AlertsClient(params).initializeExecution(executionOpts);
+
+            // only the tracked alerts query ran again
+            expect(clusterClient.search).toHaveBeenCalledTimes(3);
+            expect(clusterClient.bulk).toHaveBeenCalledTimes(1);
+          });
+
+          test('should look for orphaned alert documents again when the cleanup did not complete', async () => {
+            const rulesWithoutOrphanedAlerts = new Set<string>();
+            const params = { ...alertsClientParams, rulesWithoutOrphanedAlerts };
+            clusterClient.search
+              .mockResolvedValueOnce(getSearchResponse([]))
+              .mockResolvedValueOnce(orphanedAlertsResponse);
+            clusterClient.bulk.mockResponseOnce({
+              errors: true,
+              took: 1,
+              items: [
+                {
+                  index: {
+                    _index: orphanedAlertIndex,
+                    _id: 'orphan-uuid',
+                    status: 409,
+                    error: { type: 'version_conflict_engine_exception', reason: 'conflict' },
+                  },
+                },
+              ],
+            });
+
+            await new AlertsClient(params).initializeExecution(executionOpts);
+
+            expect(rulesWithoutOrphanedAlerts.size).toEqual(0);
+            expect(logger.warn).toHaveBeenCalledWith(
+              `Failed to untrack 1 orphaned active alert document(s) ${ruleInfo}: version_conflict_engine_exception`,
+              logTags
+            );
+
+            await new AlertsClient(params).initializeExecution(executionOpts);
+
+            expect(clusterClient.search).toHaveBeenCalledTimes(4);
+            expect(rulesWithoutOrphanedAlerts).toEqual(new Set(['default:1']));
+          });
+
+          test('should not fail the run when looking for orphaned alert documents fails', async () => {
+            clusterClient.search
+              .mockResolvedValueOnce(getSearchResponse([]))
+              .mockRejectedValueOnce(new Error('search failed!'));
+
+            const alertsClient = new AlertsClient(alertsClientParams);
+            await expect(alertsClient.initializeExecution(executionOpts)).resolves.toBeUndefined();
+
+            expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith(executionOpts);
+            expect(logger.warn).toHaveBeenCalledWith(
+              `Error untracking orphaned active alert documents ${ruleInfo} - search failed!`,
+              logTags
+            );
+            expect(logger.error).not.toHaveBeenCalled();
+          });
+
+          test('should not look for orphaned alert documents when the rule type does not write alerts', async () => {
+            const alertsClient = new AlertsClient({
+              ...alertsClientParams,
+              ruleType: {
+                ...alertsClientParams.ruleType,
+                alerts: {
+                  context: 'test',
+                  mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
+                  shouldWrite: false,
+                },
+              },
+            });
+            await alertsClient.initializeExecution(executionOpts);
+
+            expect(clusterClient.search).toHaveBeenCalledTimes(1);
+            expect(clusterClient.bulk).not.toHaveBeenCalled();
+          });
+
+          test('should not look for orphaned alert documents when the rule type does not recover alerts', async () => {
+            const alertsClient = new AlertsClient({
+              ...alertsClientParams,
+              ruleType: { ...alertsClientParams.ruleType, autoRecoverAlerts: false },
+            });
+            await alertsClient.initializeExecution(executionOpts);
+
+            expect(clusterClient.search).not.toHaveBeenCalled();
+            expect(clusterClient.bulk).not.toHaveBeenCalled();
+          });
+        });
       });
 
       describe('persistAlerts()', () => {
@@ -1053,6 +1315,75 @@ describe('Alerts Client', () => {
             request: fakeRequest,
             ruleTypeCategory: 'test',
             spaceId: 'space1',
+          });
+        });
+
+        test('should reactivate the recovered alert doc of an alert that task state still has as active', async () => {
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 1 },
+              hits: [
+                {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: getRecoveredIndexedAlertDoc({
+                    [ALERT_UUID]: 'abc',
+                    [ALERT_WORKFLOW_STATUS]: 'acknowledged',
+                    [ALERT_WORKFLOW_TAGS]: ['investigating'],
+                    [ALERT_CASE_IDS]: ['case-1'],
+                  }),
+                },
+              ],
+            },
+          });
+
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            activeAlertsFromState: {
+              '1': trackedAlert1Raw,
+            },
+          });
+
+          alertsClient.factory().create('1').scheduleActions('default');
+
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          expect(clusterClient.bulk).toHaveBeenCalledWith({
+            index: '.alerts-test.alerts-default',
+            refresh: 'wait_for',
+            require_alias: !useDataStreamForAlerts,
+            body: [
+              {
+                index: {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  if_seq_no: 41,
+                  if_primary_term: 665,
+                  require_alias: false,
+                },
+              },
+              getOngoingIndexedAlertDoc({
+                [ALERT_UUID]: 'abc',
+                [ALERT_STATE_NAMESPACE]: { foo: true },
+                [ALERT_WORKFLOW_STATUS]: 'acknowledged',
+                [ALERT_WORKFLOW_TAGS]: ['investigating'],
+                [ALERT_CASE_IDS]: ['case-1'],
+              }),
+            ],
           });
         });
 
@@ -1685,7 +2016,91 @@ describe('Alerts Client', () => {
             Record<string, unknown>
           >;
           const orphanDoc = bulkBody.find((item) => item[ALERT_UUID] === 'orphan-uuid');
-          expect(orphanDoc).toEqual(expect.objectContaining({ [ALERT_TRACKED]: false }));
+          // only tracked changes: the document was already closed
+          expect(orphanDoc).toEqual({ ...orphanAlert, [ALERT_TRACKED]: false });
+        });
+
+        test('should untrack active tracked AAD docs that are not in the working set', async () => {
+          // Two active documents for the same alert instance. Only the most recently started
+          // one is restored into the task state, so the older one is left without an owner.
+          const restoredAlert = {
+            ...fetchedAlert1,
+            [ALERT_INSTANCE_ID]: 'duplicated',
+            [ALERT_UUID]: 'newer-uuid',
+            [ALERT_TRACKED]: true,
+          };
+          const leftoverAlert = {
+            ...restoredAlert,
+            [ALERT_UUID]: 'older-uuid',
+            [ALERT_START]: '2023-03-27T12:27:28.159Z',
+            [ALERT_TIME_RANGE]: { gte: '2023-03-27T12:27:28.159Z' },
+          };
+
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 2 },
+              hits: [
+                {
+                  _id: 'older-uuid',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: leftoverAlert,
+                },
+                {
+                  _id: 'newer-uuid',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 42,
+                  _primary_term: 665,
+                  _source: restoredAlert,
+                },
+              ],
+            },
+          });
+
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          const bulkBody = clusterClient.bulk.mock.calls[0][0].body as Array<
+            Record<string, unknown>
+          >;
+          expect(bulkBody).toContainEqual({
+            index: {
+              _id: 'older-uuid',
+              _index: '.internal.alerts-test.alerts-default-000001',
+              if_seq_no: 41,
+              if_primary_term: 665,
+              require_alias: false,
+            },
+          });
+          expect(bulkBody.find((item) => item[ALERT_UUID] === 'older-uuid')).toEqual({
+            ...leftoverAlert,
+            [ALERT_STATUS]: 'untracked',
+            [ALERT_END]: date,
+            [ALERT_TIME_RANGE]: { gte: '2023-03-27T12:27:28.159Z', lte: date },
+            [ALERT_TRACKED]: false,
+          });
+          // the restored document is not reported by the rule, so it recovers as usual
+          expect(bulkBody.find((item) => item[ALERT_UUID] === 'newer-uuid')).toEqual(
+            expect.objectContaining({ [ALERT_STATUS]: 'recovered' })
+          );
+          expect(logger.warn).toHaveBeenCalledWith(
+            `Untracking 1 active alert document(s) that this run does not track ${ruleInfo}: duplicated`,
+            logTags
+          );
         });
 
         test('should recover still-active tracked AAD docs that are missing from task state', async () => {

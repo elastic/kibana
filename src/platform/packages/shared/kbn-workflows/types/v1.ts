@@ -17,6 +17,7 @@ import {
 import type { DotKeysOf, DotObject, JsonValue, RecursivePartial } from '@kbn/utility-types';
 import { lazySchema, z } from '@kbn/zod/v4';
 import type { WorkflowAccessSubject, WorkflowPermissions } from '../common/access_control';
+import { WORKFLOW_TEMPLATE_ORIGINS } from '../common/constants';
 import type { StepDeprecationInfo } from '../spec/deprecated_step_metadata';
 import type {
   SerializedError,
@@ -147,6 +148,13 @@ export interface WorkflowExecutionExecutedByUser {
   profileUid?: string;
 }
 
+/** One ancestor in a sub-workflow chain, and how it invoked the next run down. */
+export interface ExecutionChainHop {
+  readonly executionId: string;
+  readonly invocation: 'sync' | 'async';
+  readonly workflowId: string;
+}
+
 export interface EsWorkflowExecution {
   spaceId: string;
   id: string;
@@ -157,6 +165,9 @@ export interface EsWorkflowExecution {
   billable?: boolean | null;
   originManagedWorkflowId?: string | null;
   managedVersion?: number | null;
+  templateSlug?: string | null;
+  templateVersion?: string | null;
+  templateOrigin?: WorkflowTemplateOrigin | null;
   /** Workflow document lifetime. Absent for a test run that has no saved workflow. */
   workflowUid?: string;
   isTestRun: boolean;
@@ -206,6 +217,12 @@ export interface EsWorkflowExecution {
   eventChainVisitedWorkflowIds?: string[];
   /** Trigger dispatch id from event-driven scheduling (`context.metadata.eventId`), when set */
   dispatchEventId?: string;
+  /**
+   * Every run above this one in a sub-workflow chain, root first and direct parent last.
+   * Indexed copy of `context.executionChain`, so the runs below any run can be queried.
+   * Absent on top-level runs and on child runs created before the field existed.
+   */
+  executionChain?: ExecutionChainHop[];
   /**
    * Aggregated LLM token usage across all token-consuming steps in this
    * execution, accumulated incrementally as each step finishes. Absent when no
@@ -386,6 +403,9 @@ export interface WorkflowStepExecutionListDto {
 
 // TODO: convert to actual elastic document spec
 
+export const WorkflowTemplateOriginSchema = lazySchema(() => z.enum(WORKFLOW_TEMPLATE_ORIGINS));
+export type WorkflowTemplateOrigin = z.infer<typeof WorkflowTemplateOriginSchema>;
+
 export const EsWorkflowSchema = lazySchema(() =>
   z.object({
     id: z.string(),
@@ -397,6 +417,10 @@ export const EsWorkflowSchema = lazySchema(() =>
     billable: z.boolean().nullable().optional(),
     originManagedWorkflowId: z.string().nullable().optional(),
     managedVersion: z.number().nullable().optional(),
+    /** Workflow Template library slug, or `custom` for a template outside the catalog. */
+    templateSlug: z.string().nullable().optional(),
+    templateVersion: z.string().nullable().optional(),
+    templateOrigin: WorkflowTemplateOriginSchema.nullable().optional(),
     workflowUid: z.string().optional(),
     tags: z.array(z.string()),
     createdAt: z.date(),
@@ -517,6 +541,9 @@ export interface WorkflowDetailDto extends WorkflowAccessSubject {
   definitionHash?: string | null;
   originManagedWorkflowId?: string | null;
   managedVersion?: number | null;
+  templateSlug?: string | null;
+  templateVersion?: string | null;
+  templateOrigin?: WorkflowTemplateOrigin | null;
   workflowUid?: string;
   lifecycle?: 'static' | 'dynamic' | null;
   createdAt: string;
@@ -548,6 +575,9 @@ export interface WorkflowListItemDto extends WorkflowAccessSubject {
   enabled: boolean;
   managed?: boolean;
   managedBy?: string | null;
+  templateSlug?: string | null;
+  templateVersion?: string | null;
+  templateOrigin?: WorkflowTemplateOrigin | null;
   definition: WorkflowYaml | null;
   createdAt: string;
   history?: WorkflowExecutionHistoryModel[];
@@ -574,6 +604,9 @@ export interface WorkflowExecutionEngineModel
     | 'billable'
     | 'originManagedWorkflowId'
     | 'managedVersion'
+    | 'templateSlug'
+    | 'templateVersion'
+    | 'templateOrigin'
     | 'version'
     | 'workflowUid'
   > {

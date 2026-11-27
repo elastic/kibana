@@ -24,9 +24,9 @@ import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type {
   EventFormOption,
   EventFormSelection,
+  PerOsSupplementalEventFormOption,
   ProtectionField,
-} from '../components/event_collection_card';
-import type { PerOsSupplementalEventFormOption } from './event_collection_options';
+} from './event_collection_options';
 import {
   SUPPLEMENTAL_GROUP_LABEL,
   LINUX_EVENT_OPTIONS,

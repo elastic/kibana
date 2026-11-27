@@ -15,7 +15,7 @@ import type {
 
 export const mockProfiles: BoostProfile[] = [
   {
-    name: '_performant_indices',
+    name: 'default_indices',
     is_builtin: true,
     type: 'indices',
     min_boost: 1,
@@ -25,12 +25,12 @@ export const mockProfiles: BoostProfile[] = [
     pinned: true,
   },
   {
-    name: '_performant_data_streams',
+    name: 'default_data_streams_7d',
     is_builtin: true,
     type: 'data_streams',
-    recent: { min_boost: 1, max_boost: 1, max_age: '365d' },
-    standard: { min_boost: 1, max_boost: 1, max_age: '365d' },
-    background: { min_boost: 0, max_boost: 0.5 },
+    recent: { min_boost: 1, max_boost: 1, max_age: '7d' },
+    standard: { min_boost: 1, max_boost: 1, max_age: '7d' },
+    background: { min_boost: 1, max_boost: 1 },
   },
   {
     name: 'catalog-fast',
@@ -71,56 +71,51 @@ const THIRTY_DAYS: DataRetention = {
 
 export const mockRules: BoostRuleListItem[] = [
   {
-    name: '_default_indices',
+    name: 'default_indices',
     index_pattern: '*',
-    boost_profile: '_performant_indices',
+    boost_profile: 'default_indices',
     priority: -100,
     is_builtin: true,
     type: 'indices',
     matches: [
       {
         name: 'catalog-products',
-        isHidden: false,
         outrankedByRuleName: 'catalog',
         storageSizeInBytes: 1_200_000_000,
       },
       {
         name: 'catalog-reviews',
-        isHidden: false,
         outrankedByRuleName: 'catalog',
         storageSizeInBytes: 340_000_000,
       },
-      { name: 'customers', isHidden: false, storageSizeInBytes: 52_000_000 },
-      { name: 'orders', isHidden: false, storageSizeInBytes: 8_400_000_000 },
-      { name: '.kibana-observability-ai-assistant', isHidden: true, storageSizeInBytes: 1_200_000 },
-      { name: '.internal-alerts', isHidden: true, storageSizeInBytes: 640_000 },
+      { name: 'customers', storageSizeInBytes: 52_000_000 },
+      { name: 'orders', storageSizeInBytes: 8_400_000_000 },
+      { name: '.kibana-observability-ai-assistant', storageSizeInBytes: 1_200_000 },
+      { name: '.internal-alerts', storageSizeInBytes: 640_000 },
     ],
   },
   {
-    name: '_default_data_streams',
+    name: 'default_data_streams',
     index_pattern: '*',
-    boost_profile: '_performant_data_streams',
+    boost_profile: 'default_data_streams_7d',
     priority: -100,
     is_builtin: true,
     type: 'data_streams',
     matches: [
       {
         name: 'logs-nginx-default',
-        isHidden: false,
         outrankedByRuleName: 'web-logs',
         storageSizeInBytes: 21_000_000_000,
         retention: THIRTY_DAYS,
       },
       {
         name: 'logs-apache-default',
-        isHidden: false,
         outrankedByRuleName: 'apache-logs',
         storageSizeInBytes: 7_500_000_000,
         retention: { type: 'infinite' },
       },
       {
         name: 'metrics-system-default',
-        isHidden: false,
         storageSizeInBytes: 3_100_000_000,
         retention: { type: 'disabled' },
       },
@@ -134,8 +129,8 @@ export const mockRules: BoostRuleListItem[] = [
     is_builtin: false,
     type: 'indices',
     matches: [
-      { name: 'catalog-products', isHidden: false, storageSizeInBytes: 1_200_000_000 },
-      { name: 'catalog-reviews', isHidden: false, storageSizeInBytes: 340_000_000 },
+      { name: 'catalog-products', storageSizeInBytes: 1_200_000_000 },
+      { name: 'catalog-reviews', storageSizeInBytes: 340_000_000 },
     ],
   },
   {
@@ -148,13 +143,11 @@ export const mockRules: BoostRuleListItem[] = [
     matches: [
       {
         name: 'logs-nginx-default',
-        isHidden: false,
         storageSizeInBytes: 21_000_000_000,
         retention: THIRTY_DAYS,
       },
       {
         name: 'logs-apache-default',
-        isHidden: false,
         outrankedByRuleName: 'apache-logs',
         storageSizeInBytes: 7_500_000_000,
         retention: { type: 'infinite' },
@@ -171,7 +164,6 @@ export const mockRules: BoostRuleListItem[] = [
     matches: [
       {
         name: 'logs-apache-default',
-        isHidden: false,
         storageSizeInBytes: 7_500_000_000,
         retention: { type: 'infinite' },
       },
@@ -198,9 +190,7 @@ export const createMockRules = (count: number): BoostRuleListItem[] =>
       priority: index,
       is_builtin: false,
       type: 'indices',
-      matches: [
-        { name: `index-${id}-a`, isHidden: false, storageSizeInBytes: (index + 1) * 1_000_000 },
-      ],
+      matches: [{ name: `index-${id}-a`, storageSizeInBytes: (index + 1) * 1_000_000 }],
     };
   });
 
@@ -214,11 +204,8 @@ const RETENTIONS: DataRetention[] = [
 export const createMockMatches = (type: BoostProfileType, count: number): BoostRuleMatch[] =>
   Array.from({ length: count }, (_, index) => {
     const id = String(index + 1).padStart(2, '0');
-    const isHidden = index % 8 === 7;
-    const name = type === 'data_streams' ? `logs-app-${id}` : `products-${id}`;
     return {
-      name: isHidden ? `.${name}` : name,
-      isHidden,
+      name: type === 'data_streams' ? `logs-app-${id}` : `products-${id}`,
       storageSizeInBytes: (((index * 37) % 50) + 1) * 100_000_000,
       ...(type === 'data_streams' && { retention: RETENTIONS[index % RETENTIONS.length] }),
     };

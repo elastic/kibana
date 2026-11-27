@@ -1,0 +1,102 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/** Scales a median absolute deviation to a standard deviation for normally distributed values. */
+export const MAD_SCALE = 1.4826;
+
+/** Id of the Known failures strategy; stamped on its signals and its rules' ownership tags. */
+export const KNOWN_FAILURES_STRATEGY_ID = 'known_failures';
+
+/**
+ * Every tunable of Known failures, in one place for the learning loop. The minutes and the schedule
+ * are compiled into the rule, so tuning one gives the rules new ids and the reconciler replaces
+ * them. The judgement settings, from `quiet_period_minutes` on, are only read by the generator.
+ */
+export const KNOWN_FAILURES_SETTINGS = {
+  /**
+   * Closed minutes the rule counts, one bucket per minute, for its change point. Over 60 minutes
+   * `CHANGE_POINT` found neither a doubling nor a slow climb on the replay, and over 120 or 180 it
+   * lost the climb.
+   */
+  window_minutes: 360,
+  /**
+   * Newest minutes the rule returns counts for. Two more than `rule_every_minutes`, so a run that
+   * starts late, or the first run of a replaced rule, leaves no minute unread, and a minute whose
+   * documents arrived late is counted again. The overlap only covers a run up to two minutes late: a
+   * skipped run leaves three minutes that no row counts.
+   */
+  newest_minutes: 7,
+  /** Minutes before the newest ones that give the knowledge indicator's normal level. */
+  baseline_minutes: 60,
+  /** Last minutes whose median says whether a rise since the latest change point still holds. */
+  recent_minutes: 15,
+  /**
+   * Oldest minutes of the window whose median is the earlier level. A climb too slow for
+   * `CHANGE_POINT` to call a step or trend still shows as the last minutes standing above it.
+   */
+  earlier_minutes: 240,
+  /**
+   * Closed minutes left out at the end of the window, because their documents may still be
+   * arriving. A minute read half full looks like a drop.
+   */
+  end_margin_minutes: 1,
+  /** How often the rule runs, which is also how often the strategy reads its rows. */
+  rule_every_minutes: 5,
+  /**
+   * Minutes without a breached signal after which an event may close. Twice the schedule: a lasting
+   * rise is reported once per run, so a shorter period would close its event between runs.
+   */
+  quiet_period_minutes: 10,
+  /**
+   * Minutes before a run's window the data start lookup reads from. A first document before the
+   * window means the source had data when the window began, so its first minutes are only quiet,
+   * and the minutes of a sparse index with no line in them are not taken for minutes without data.
+   */
+  data_start_lookback_minutes: 60,
+  /** The baseline check of the prototype: when a minute's count is unusual for the hour before it. */
+  baseline: {
+    /** Scaled median absolute deviations above the median. */
+    mad_k: 3,
+    /** Fewest extra matches that count as unusual, so a flat hour does not flag one extra line. */
+    min_delta: 3,
+    /** Standard deviations of the count floor, which widens with the indicator's burstiness. */
+    count_noise_k: 3,
+    /** Most the count floor widens for burstiness, so one huge burst cannot hide everything. */
+    max_dispersion: 25,
+    /**
+     * Times the median-and-deviation cut above which a minute of the hour is a spike, left out of
+     * the mean and spread the count floor is built on.
+     */
+    trim_factor: 4,
+  },
+  /**
+   * When an unusual minute opens an event. A single unusual minute does only when it is far above
+   * the threshold, so a real spike is not delayed; otherwise a second one is needed within these
+   * minutes. On the replay this took bursty noise from 9 and 13 false events to 0 and 1.
+   */
+  confirmation: {
+    within_minutes: 3,
+    /** How many times the threshold a single minute must reach to open an event on its own. */
+    spike_factor: 2,
+  },
+  /** When the latest step or trend change is a rise that still holds. */
+  lasting_rise: {
+    max_pvalue: 0.05,
+    /** Fewest minutes before the change, so the level before it is measured, not guessed. */
+    min_before_minutes: 10,
+    /** Fewest extra matches a minute the rise must add, whatever the level before it. */
+    min_rise: 3,
+  },
+  /** When the last minutes stand above the window's oldest hours without a change point. */
+  slow_rise: {
+    /**
+     * Times the lasting rise's smallest rise the climb must reach. Higher, because a median of 15
+     * minutes against one of four hours is noisier than the levels around a change point.
+     */
+    factor: 2,
+  },
+} as const;

@@ -6,7 +6,10 @@
  */
 
 import { applicationsRouteRepository } from './applications/route';
+import { applicationsIngestRouteRepository } from './applications/ingest/route';
 import { errorsRouteRepository } from './errors/route';
+import { mobileCrashesRouteRepository } from './mobile/crashes/route';
+import { mobileRouteRepository } from './mobile/route';
 import { networkRouteRepository } from './network/route';
 import { overviewRouteRepository } from './overview/route';
 import { sessionsRouteRepository } from './sessions/route';
@@ -15,6 +18,9 @@ import { savedViewsRouteRepository } from './views/route';
 
 export const getGlobalDigitalExperienceServerRouteRepository = () => ({
   ...applicationsRouteRepository,
+  ...applicationsIngestRouteRepository,
+  ...mobileRouteRepository,
+  ...mobileCrashesRouteRepository,
   ...overviewRouteRepository,
   ...usageRouteRepository,
   ...errorsRouteRepository,

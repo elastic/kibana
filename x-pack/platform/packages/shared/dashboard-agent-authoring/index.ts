@@ -27,7 +27,9 @@ export {
   getConfigPanelReferences,
   getInlinePanelKindGuidance,
   getPanelTypeSelection,
-  getRendererEmbeddableType,
+  getRequestPanelEmbeddableType,
+  getVegaSpecText,
+  isRequestPanelType,
   parseVegaSpec,
   requiresRegisteredSchema,
 } from './src/panels';
@@ -37,6 +39,7 @@ export type {
   CustomContentPanelEditRequest,
   CustomContentPanelResolutionRequest,
   PanelKindExecutors,
+  RequestPanelType,
   ResolvePanelContent,
   VisPanelResolutionRequest,
 } from './src/panels';

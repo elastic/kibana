@@ -7,6 +7,52 @@
 
 import type { SourceFilter } from '../../../common/api/unified_history/types';
 import { buildLiveActionsQuery } from './query_live_actions_dsl';
+import { resolveSource } from './resolve_source';
+
+interface TestClause {
+  term?: Record<string, string | { value: string }>;
+  exists?: { field: string };
+  bool?: {
+    filter?: TestClause[];
+    must_not?: TestClause | TestClause[];
+    should?: TestClause[];
+    minimum_should_match?: number;
+  };
+}
+
+const matchesClause = (
+  clause: TestClause,
+  document: Record<string, string | string[] | undefined>
+): boolean => {
+  if (clause.term) {
+    return Object.entries(clause.term).every(([field, term]) => {
+      const expected = typeof term === 'string' ? term : term.value;
+      const value = document[field];
+
+      return Array.isArray(value) ? value.includes(expected) : value === expected;
+    });
+  }
+
+  if (clause.exists) {
+    const value = document[clause.exists.field];
+
+    return Array.isArray(value) ? value.length > 0 : value != null;
+  }
+
+  if (clause.bool) {
+    const { filter = [], must_not = [], should = [], minimum_should_match } = clause.bool;
+    const excluded = Array.isArray(must_not) ? must_not : [must_not];
+    const minimum = minimum_should_match ?? (should.length > 0 && filter.length === 0 ? 1 : 0);
+
+    return (
+      filter.every((child) => matchesClause(child, document)) &&
+      excluded.every((child) => !matchesClause(child, document)) &&
+      should.filter((child) => matchesClause(child, document)).length >= minimum
+    );
+  }
+
+  throw new Error('Unsupported test clause');
+};
 
 const getFilters = (result: ReturnType<typeof buildLiveActionsQuery>) => {
   const query = result.body.query as Record<string, unknown>;
@@ -247,57 +293,56 @@ describe('buildLiveActionsQuery', () => {
   });
 
   describe('activeFilters (source type filtering)', () => {
-    test('adds must_not exists alert_ids filter when only "live" is selected', () => {
-      const activeFilters = new Set<SourceFilter>(['live']);
-      const result = buildLiveActionsQuery({ pageSize: 20, spaceId: 'default', activeFilters });
-      const filters = getFilters(result);
+    const sources = ['live', 'rule', 'workflow'] as const;
+    const documents = [undefined, 'workflow', 'other'].flatMap((originType) =>
+      [undefined, [], ['alert-1'], ['alert-1', 'alert-2']].map((alertIds) => ({
+        type: 'INPUT_ACTION',
+        input_type: 'osquery',
+        space_id: 'default',
+        'origin.type': originType,
+        alert_ids: alertIds,
+      }))
+    );
 
-      expect(filters).toContainEqual({
-        bool: { must_not: { exists: { field: 'alert_ids' } } },
-      });
+    test('each live row matches exactly one source filter and its resolved source', () => {
+      for (const document of documents) {
+        const matching = sources.filter((source) => {
+          const filters = getFilters(
+            buildLiveActionsQuery({
+              pageSize: 20,
+              spaceId: 'default',
+              activeFilters: new Set([source]),
+            })
+          ) as TestClause[];
+
+          return filters.every((clause) => matchesClause(clause, document));
+        });
+        expect(matching).toEqual([resolveSource({ fields: document }).toLowerCase()]);
+      }
     });
 
-    test('adds exists alert_ids filter when only "rule" is selected', () => {
-      const activeFilters = new Set<SourceFilter>(['rule']);
-      const result = buildLiveActionsQuery({ pageSize: 20, spaceId: 'default', activeFilters });
-      const filters = getFilters(result);
+    test.each([1, 2, 3, 4, 5, 6, 7])('ORs selected source clauses for subset %s', (mask) => {
+      const selected = sources.filter((source, index) => Math.floor(mask / 2 ** index) % 2 === 1);
+      const filters = getFilters(
+        buildLiveActionsQuery({
+          pageSize: 20,
+          spaceId: 'default',
+          activeFilters: new Set<SourceFilter>([...selected, 'scheduled']),
+        })
+      ) as TestClause[];
+      for (const document of documents) {
+        expect(filters.every((clause) => matchesClause(clause, document))).toBe(
+          selected.some((source) => source === resolveSource({ fields: document }).toLowerCase())
+        );
+      }
 
-      expect(filters).toContainEqual({ exists: { field: 'alert_ids' } });
+      if (mask === 7) expect(filters).toHaveLength(3);
     });
 
-    test('does not add alert_ids filter when both "live" and "rule" are selected', () => {
-      const activeFilters = new Set<SourceFilter>(['live', 'rule']);
-      const result = buildLiveActionsQuery({ pageSize: 20, spaceId: 'default', activeFilters });
-      const filters = getFilters(result);
-
-      const alertIdFilters = filters.filter(
-        (f) =>
-          typeof f === 'object' &&
-          f !== null &&
-          (('exists' in f &&
-            (f as Record<string, unknown>).exists != null &&
-            typeof (f as Record<string, unknown>).exists === 'object' &&
-            'field' in ((f as Record<string, unknown>).exists as Record<string, unknown>) &&
-            ((f as Record<string, unknown>).exists as Record<string, unknown>).field ===
-              'alert_ids') ||
-            JSON.stringify(f).includes('alert_ids'))
+    test('does not add a source clause when activeFilters is undefined', () => {
+      expect(getFilters(buildLiveActionsQuery({ pageSize: 20, spaceId: 'default' }))).toHaveLength(
+        3
       );
-      expect(alertIdFilters).toHaveLength(0);
-    });
-
-    test('does not add alert_ids filter when activeFilters is undefined', () => {
-      const result = buildLiveActionsQuery({ pageSize: 20, spaceId: 'default' });
-      const filters = getFilters(result);
-
-      expect(filters.some((f) => JSON.stringify(f).includes('alert_ids'))).toBe(false);
-    });
-
-    test('does not add alert_ids filter when activeFilters contains all three sources', () => {
-      const activeFilters = new Set<SourceFilter>(['live', 'rule', 'scheduled']);
-      const result = buildLiveActionsQuery({ pageSize: 20, spaceId: 'default', activeFilters });
-      const filters = getFilters(result);
-
-      expect(filters.some((f) => JSON.stringify(f).includes('alert_ids'))).toBe(false);
     });
   });
 });

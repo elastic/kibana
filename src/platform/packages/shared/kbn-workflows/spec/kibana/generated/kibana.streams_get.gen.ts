@@ -47,9 +47,9 @@ Fetches a stream definition and associated dashboards<br/><br/>[Required authori
     bodyParams: [],
   },
   paramsSchema: z.object({
-    ...getShapeAt(get_streams_name_request, 'body'),
-    ...getShapeAt(get_streams_name_request, 'path'),
     ...getShapeAt(get_streams_name_request, 'query'),
+    ...getShapeAt(get_streams_name_request, 'path'),
+    ...getShapeAt(get_streams_name_request, 'body'),
     fetcher: KibanaFetcherConfigSchema,
     ...KibanaStepMetaSchema,
   }),
