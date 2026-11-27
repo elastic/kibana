@@ -296,6 +296,12 @@ never reused: the next commit re-runs the suite, so a noisy result can clear.
 
 ##### Pinned-baseline regression report
 
+> **Experimental**: `regressionReportGates` and `--report-gates` are a temporary path and
+> will be replaced by an extended `regressionGate`
+> ([elastic/search-team#17503](https://github.com/elastic/search-team/issues/17503)). Do not
+> adopt them in new suites; a suite cannot carry both configs. `--baseline-pinned` and the
+> pinning workflow below are not affected by that change.
+
 A regression suite can compare PR runs against a pinned baseline instead of the latest run on
 `main`: an immutable snapshot of one blessed execution's scores, stored on the evaluations
 cluster. Set `pinnedBaseline` on the suite entry, and optionally `regressionReportGates` to
@@ -328,9 +334,11 @@ deliberately:
 - Pinning an already-pinned execution re-promotes its stored snapshot: that is the rollback
   path after a bad pin.
 
-Flip `pinnedBaseline` on only after the first baseline is pinned for each of the suite's
-models; until then every labeled PR would get a "No pinned baseline" note instead of a
-comparison.
+Until a baseline is pinned for each of the suite's models, a labeled PR gets a
+"No pinned baseline" note instead of a comparison. A suite may ship with the flag on before
+its first pin only when its runs are gated on the owner (as `agent-builder-regression` is:
+label-triggered, with the owner seeding the baselines before announcing the suite);
+otherwise flip `pinnedBaseline` on in a follow-up once the first pin exists.
 
 #### Per-spec model groups
 

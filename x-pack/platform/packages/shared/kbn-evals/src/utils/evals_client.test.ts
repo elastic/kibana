@@ -329,7 +329,7 @@ describe('EvalsClient', () => {
     );
   });
 
-  it('getExperimentScores throws rather than hand back a truncated subset', async () => {
+  it('getExperimentScores keeps the lenient contract by default: subset on truncation, [] on failure', async () => {
     const kbnClient = createMockKbnClient();
     const log = createLog();
     kbnClient.request.mockResolvedValue(
@@ -340,20 +340,35 @@ describe('EvalsClient', () => {
     );
     const client = new EvalsClient(kbnClient, log);
 
-    // A subset must not degrade to [] either: empty reads as "the run exported nothing".
-    await expect(client.getExperimentScores('experiment-123')).rejects.toThrow(
-      /refusing to compare a subset/
-    );
+    // Polling specs and advisory reads were written against this contract.
+    await expect(client.getExperimentScores('experiment-123')).resolves.toHaveLength(1);
+    expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('per-query cap'));
+
+    kbnClient.request.mockRejectedValue(new Error('socket hang up'));
+    await expect(client.getExperimentScores('experiment-123')).resolves.toEqual([]);
   });
 
-  it('getExperimentScores rethrows request failures instead of returning []', async () => {
+  it('getExperimentScores with requireComplete throws on truncation and read failures', async () => {
     const kbnClient = createMockKbnClient();
     const log = createLog();
-    kbnClient.request.mockRejectedValue(new Error('socket hang up'));
+    kbnClient.request.mockResolvedValue(
+      asKbnResponse({
+        scores: [createScoreDocument('example-1')],
+        total: MAX_SCORES_PER_QUERY + 1,
+      })
+    );
     const client = new EvalsClient(kbnClient, log);
 
-    await expect(client.getExperimentScores('experiment-123')).rejects.toThrow('socket hang up');
-    expect(log.error).toHaveBeenCalledWith(expect.stringContaining('socket hang up'));
+    // Gated evidence: a truncated read must not degrade to a subset, and a failed read
+    // must not degrade to [], which reads as "the run exported nothing".
+    await expect(
+      client.getExperimentScores('experiment-123', undefined, { requireComplete: true })
+    ).rejects.toThrow(/refusing to compare a subset/);
+
+    kbnClient.request.mockRejectedValue(new Error('socket hang up'));
+    await expect(
+      client.getExperimentScores('experiment-123', undefined, { requireComplete: true })
+    ).rejects.toThrow('socket hang up');
   });
 
   it('upsertDataset posts to the upsert route', async () => {

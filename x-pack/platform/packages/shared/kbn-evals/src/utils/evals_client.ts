@@ -283,7 +283,12 @@ export class EvalsClient {
 
   async getExperimentScores(
     experimentId: string,
-    options?: GetExperimentFilters
+    options?: GetExperimentFilters,
+    // Strictness is opt-in: pinned-baseline comparisons gate verdicts on these scores,
+    // so there a truncated or failed read must be an error. Everything else (polling
+    // specs, advisory reads, branch-mode comparisons) keeps the lenient contract of
+    // "best effort, [] on failure" it was written against.
+    { requireComplete = false }: { requireComplete?: boolean } = {}
   ): Promise<EvaluationScoreDocument[]> {
     try {
       const response = await this.kbnClient.request({
@@ -296,26 +301,31 @@ export class EvalsClient {
       });
       const parsed = GetEvaluationExperimentScoresResponse.parse(getResponseData(response));
 
-      // A subset must never pass as the evidence: a comparison (and its regression
-      // verdict) computed over a truncated read looks complete and can pass wrongly.
+      // A subset must never pass as gated evidence: a regression verdict computed over
+      // a truncated read looks complete and can pass wrongly.
       if (parsed.total > parsed.scores.length) {
-        throw new Error(
+        const message =
           `Experiment ${experimentId} has ${parsed.total} scores but the scores API returned ` +
-            `${parsed.scores.length} (over the ${MAX_SCORES_PER_QUERY} per-query cap); refusing ` +
-            `to compare a subset.`
-        );
+          `${parsed.scores.length} (over the ${MAX_SCORES_PER_QUERY} per-query cap)`;
+        if (requireComplete) {
+          throw new Error(`${message}; refusing to compare a subset.`);
+        }
+        this.log.warning(`${message}; continuing with the returned subset.`);
       }
 
       return parsed.scores;
     } catch (error: unknown) {
-      // Rethrow rather than degrade to []: an empty result reads as "the run exported
-      // nothing", which sends callers down the wrong path when the read itself failed.
       this.log.error(
         `Failed to retrieve scores for experiment ID ${experimentId}: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
-      throw error;
+      // An empty result reads as "the run exported nothing", which sends a gating
+      // caller down the wrong path when the read itself failed.
+      if (requireComplete) {
+        throw error;
+      }
+      return [];
     }
   }
 

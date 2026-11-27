@@ -52,7 +52,10 @@ export const pinBaselineCmd: Command<void> = {
     const suiteId = flagsReader.string('suite');
     const executionId = flagsReader.string('execution-id');
     const reason = flagsReader.string('reason');
-    const expectedScores = flagsReader.number('expect-scores');
+    // Parsed strictly from the raw string: FlagsReader.number would treat
+    // `--expect-scores=` (an empty shell variable) as unset and accept numeric
+    // prefixes like "20scores", both of which silently weaken the count guard.
+    const expectedScoresRaw = flagsReader.string('expect-scores');
     const spaceIds = readSpaceIdsFlag(flagsReader) ?? getSpaceIdsFromEnv();
     const pinnedBy =
       flagsReader.string('pinned-by') ??
@@ -63,11 +66,14 @@ export const pinBaselineCmd: Command<void> = {
     if (!suiteId || !executionId) {
       throw createFlagError('--suite and --execution-id are required.');
     }
-    if (
-      expectedScores !== undefined &&
-      (!Number.isInteger(expectedScores) || expectedScores <= 0)
-    ) {
-      throw createFlagError('--expect-scores must be a positive integer.');
+    let expectedScores: number | undefined;
+    if (expectedScoresRaw !== undefined) {
+      if (!/^[1-9][0-9]*$/.test(expectedScoresRaw.trim())) {
+        throw createFlagError(
+          `--expect-scores must be a positive integer, got "${expectedScoresRaw}".`
+        );
+      }
+      expectedScores = Number(expectedScoresRaw.trim());
     }
 
     const evaluationsKbnUrl = process.env.EVAL_KBN_URL;
@@ -110,25 +116,17 @@ export const pinBaselineCmd: Command<void> = {
     }
 
     if (expectedScores === undefined) {
-      // Advisory only: the pin already succeeded, so a failed live read must not turn
-      // a published baseline into a failed command.
-      try {
-        const liveScores = await evalsClient.getExperimentScores(executionId, {
-          suiteId,
-          executionId,
-        });
-        if (liveScores.length > 0 && liveScores.length !== baseline.score_count) {
-          log.warning(
-            `The execution has ${liveScores.length} live score(s) but the pinned snapshot holds ` +
-              `${baseline.score_count}. A re-pin promotes the stored snapshot untouched; if the ` +
-              `live scores are the intended baseline, pin a fresh execution instead.`
-          );
-        }
-      } catch (error) {
+      // Advisory only, and the lenient read contract ([] on failure) keeps it that way:
+      // a failed live read must not turn a published baseline into a failed command.
+      const liveScores = await evalsClient.getExperimentScores(executionId, {
+        suiteId,
+        executionId,
+      });
+      if (liveScores.length > 0 && liveScores.length !== baseline.score_count) {
         log.warning(
-          `Could not read the live scores to sanity-check the snapshot count: ${
-            error instanceof Error ? error.message : String(error)
-          }`
+          `The execution has ${liveScores.length} live score(s) but the pinned snapshot holds ` +
+            `${baseline.score_count}. A re-pin promotes the stored snapshot untouched; if the ` +
+            `live scores are the intended baseline, pin a fresh execution instead.`
         );
       }
     }

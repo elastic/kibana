@@ -477,7 +477,12 @@ export const compareCmd: Command<void> = {
     let baselineExperimentScores;
     try {
       [targetExperimentScores, baselineExperimentScores] = await Promise.all([
-        evalsClient.getExperimentScores(targetExperimentId, targetFilter),
+        // In pinned mode the target read must be complete or fail: the verdict gates on
+        // it. Elsewhere the lenient contract stays (a failed read degrades to "no
+        // scores", as before this report existed).
+        evalsClient.getExperimentScores(targetExperimentId, targetFilter, {
+          requireComplete: Boolean(pinnedBaselineId),
+        }),
         // A pinned baseline's scores live in the pinned-baselines snapshot, which
         // outlives the retention on the scores data stream.
         pinnedBaselineId
@@ -488,7 +493,9 @@ export const compareCmd: Command<void> = {
       if (!pinnedBaselineId) {
         throw error;
       }
-      const message = `The pinned baseline's scores could not be read: ${
+      // Covers both sides of the read: the underlying error names the experiment or
+      // baseline that failed, so don't blame the snapshot for a failed target read.
+      const message = `The scores needed for the pinned comparison could not be read: ${
         error instanceof Error ? error.message : String(error)
       }`;
       abortComparison('⚠️ Pinned-baseline comparison unavailable', message);
