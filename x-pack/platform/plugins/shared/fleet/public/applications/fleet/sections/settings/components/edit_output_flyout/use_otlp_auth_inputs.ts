@@ -23,7 +23,10 @@ import {
   otlpProtocol,
 } from '../../../../../../../common/constants';
 
-import { sendsToManagedOtlpHost } from '../../../../../../../common/services/otlp_auth';
+import {
+  isOtlpHttpsUrlWithHost,
+  sendsToManagedOtlpHost,
+} from '../../../../../../../common/services/otlp_auth';
 
 import { useInput, useSecretInput } from '../../../../hooks';
 
@@ -192,18 +195,6 @@ export const getSelectedOtlpAuthHeaderName = (inputs: OtlpAuthInputs): string | 
     : OTLP_AUTHORIZATION_HEADER;
 };
 
-/** The `https://` prefix is checked on the raw value: the URL parser repairs `https:/host`. */
-const isHttpsUrlWithHost = (endpoint: string): boolean => {
-  if (!/^https:\/\//i.test(endpoint)) {
-    return false;
-  }
-  try {
-    return new URL(endpoint).hostname !== '';
-  } catch {
-    return false;
-  }
-};
-
 /**
  * Why the exporter cannot be authenticated with Azure, if it cannot: the `azure_auth` extension
  * only authenticates HTTP requests, and the bearer token must only be sent over verified TLS.
@@ -218,7 +209,7 @@ export const getOtlpAzureAuthError = (
         'Azure authentication requires the HTTP/Protobuf protocol. Select HTTP/Protobuf, or another authentication type.',
     });
   }
-  if (endpoints.some((endpoint) => !isHttpsUrlWithHost(endpoint.trim()))) {
+  if (endpoints.some((endpoint) => !isOtlpHttpsUrlWithHost(endpoint.trim()))) {
     return i18n.translate('xpack.fleet.settings.editOutputFlyout.otlpAzureAuthHttpsError', {
       defaultMessage: 'Azure authentication requires https:// endpoints.',
     });
