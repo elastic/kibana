@@ -7,7 +7,7 @@
 
 import type { FunctionComponent } from 'react';
 import React, { useMemo } from 'react';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { DefaultItemAction, EuiBasicTableColumn } from '@elastic/eui';
 import { EuiButton, EuiInMemoryTable, EuiTextBlockTruncate } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
@@ -96,18 +96,26 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
         name: mainTranslations.columns.dataSets.actions,
         width: '8%',
         actions: [
+          ...(discoverLocator
+            ? [
+                {
+                  name: mainTranslations.columns.dataSets.discoverAction,
+                  description: mainTranslations.columns.dataSets.discoverAction,
+                  type: 'icon',
+                  icon: 'productDiscover',
+                  color: 'text',
+                  onClick: (item: DataSetListRow) =>
+                    discoverLocator.navigateSync({
+                      query: { esql: getDatasetEsqlQuery(item.name) },
+                    }),
+                  'data-test-subj': 'dataSetsSetsDiscoverButton',
+                } satisfies DefaultItemAction<DataSetListRow>,
+              ]
+            : []),
           {
-            render: (item, enabled) => (
+            render: (item: DataSetListRow, enabled: boolean) => (
               <DatasetRowActions
                 disabled={!enabled}
-                onOpenInDiscover={
-                  discoverLocator
-                    ? () =>
-                        discoverLocator.navigateSync({
-                          query: { esql: getDatasetEsqlQuery(item.name) },
-                        })
-                    : undefined
-                }
                 onEdit={() => history.push(getEditDatasetPath(item.name))}
                 onDelete={() => onDelete(item)}
               />

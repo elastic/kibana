@@ -21,14 +21,12 @@ const translations = mainTranslations.columns.dataSets;
 
 export interface DatasetRowActionsProps {
   disabled?: boolean;
-  onOpenInDiscover?: () => void;
   onEdit: () => void;
   onDelete: () => void;
 }
 
 export const DatasetRowActions: FunctionComponent<DatasetRowActionsProps> = ({
   disabled = false,
-  onOpenInDiscover,
   onEdit,
   onDelete,
 }) => {
@@ -36,68 +34,53 @@ export const DatasetRowActions: FunctionComponent<DatasetRowActionsProps> = ({
   const closeMenu = () => setIsMenuOpen(false);
 
   return (
-    <>
-      {onOpenInDiscover && (
-        <EuiToolTip content={translations.discoverAction} disableScreenReaderOutput>
+    <EuiPopover
+      aria-label={translations.moreActions}
+      button={
+        <EuiToolTip content={translations.moreActions} disableScreenReaderOutput>
           <EuiButtonIcon
-            onClick={onOpenInDiscover}
+            iconType="ellipsis"
+            color="text"
             isDisabled={disabled}
             hasAriaDisabled
-            iconType="productDiscover"
-            color="text"
-            aria-label={translations.discoverAction}
-            data-test-subj="dataSetsSetsDiscoverButton"
+            aria-label={translations.moreActions}
+            onClick={() => setIsMenuOpen((open) => !open)}
+            data-test-subj="dataSetsSetsActionsButton"
           />
         </EuiToolTip>
-      )}
-      <EuiPopover
-        aria-label={translations.moreActions}
-        button={
-          <EuiToolTip content={translations.moreActions} disableScreenReaderOutput>
-            <EuiButtonIcon
-              iconType="ellipsis"
-              color="text"
-              isDisabled={disabled}
-              hasAriaDisabled
-              aria-label={translations.moreActions}
-              onClick={() => setIsMenuOpen((open) => !open)}
-              data-test-subj="dataSetsSetsActionsButton"
-            />
-          </EuiToolTip>
-        }
-        isOpen={isMenuOpen}
-        closePopover={closeMenu}
-        panelPaddingSize="none"
-        anchorPosition="leftCenter"
-      >
-        <EuiContextMenuPanel
-          items={[
-            <EuiContextMenuItem
-              key="edit"
-              icon="pencil"
-              onClick={() => {
-                closeMenu();
-                onEdit();
-              }}
-              data-test-subj="dataSetsSetsEditButton"
-            >
-              {translations.editAction}
-            </EuiContextMenuItem>,
-            <EuiContextMenuItem
-              key="delete"
-              icon="trash"
-              color="danger"
-              onClick={() => {
-                closeMenu();
-                onDelete();
-              }}
-              data-test-subj="dataSetsSetsDeleteIconButton"
-            >
-              {translations.deleteAction}
-            </EuiContextMenuItem>,
-          ]}
-        />
-      </EuiPopover>
-    </>
+      }
+      isOpen={isMenuOpen}
+      closePopover={closeMenu}
+      panelPaddingSize="none"
+      anchorPosition="leftCenter"
+    >
+      <EuiContextMenuPanel
+        items={[
+          <EuiContextMenuItem
+            key="edit"
+            icon="pencil"
+            onClick={() => {
+              closeMenu();
+              onEdit();
+            }}
+            data-test-subj="dataSetsSetsEditButton"
+          >
+            {translations.editAction}
+          </EuiContextMenuItem>,
+          <EuiContextMenuItem
+            key="delete"
+            icon="trash"
+            color="danger"
+            onClick={() => {
+              closeMenu();
+              onDelete();
+            }}
+            data-test-subj="dataSetsSetsDeleteIconButton"
+          >
+            {translations.deleteAction}
+          </EuiContextMenuItem>,
+        ]}
+      />
+    </EuiPopover>
   );
 };
