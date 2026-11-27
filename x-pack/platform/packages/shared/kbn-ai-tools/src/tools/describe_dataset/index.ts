@@ -20,6 +20,7 @@ export async function describeDataset({
   end,
   index,
   kql,
+  sampleSize,
   signal,
 }: {
   esClient: ElasticsearchClient;
@@ -27,6 +28,7 @@ export async function describeDataset({
   end: number;
   index: string | string[];
   kql?: string;
+  sampleSize?: number;
   signal?: AbortSignal;
 }) {
   const deadline = signal ? undefined : timeoutSignal(DEFAULT_ESQL_QUERY_TIMEOUT_MS);
@@ -47,6 +49,7 @@ export async function describeDataset({
         start,
         end,
         kql,
+        sampleSize,
         abortSignal: requestSignal,
       }),
       runEsqlPopulationCount({

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createHash, type Hash } from 'crypto';
 import { castArray, sortBy } from 'lodash';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { getFlattenedObject } from '@kbn/std';
@@ -21,6 +22,10 @@ export function mergeSampleDocumentsWithSchema({
 }): DocumentAnalysis {
   const valueDocCountsByField = new Map<string, Map<string | number | boolean, number>>();
   const docsWithValueByField = new Map<string, number>();
+  const fingerprintByField = new Map<
+    string,
+    { values: Hash; partition: Hash; classes: Map<string, number> }
+  >();
 
   const samples = hits.map((hit) => ({
     ...hit.fields,
@@ -33,7 +38,7 @@ export function mergeSampleDocumentsWithSchema({
     })
   );
 
-  for (const document of samples) {
+  for (const [documentIndex, document] of samples.entries()) {
     const fieldsWithValuesInDocument = new Set<string>();
 
     Object.entries(document).forEach(([field, rawValue]) => {
@@ -51,6 +56,22 @@ export function mergeSampleDocumentsWithSchema({
 
       const uniqueValues = new Set<string | number | boolean>(values);
       fieldsWithValuesInDocument.add(field);
+
+      let fingerprint = fingerprintByField.get(field);
+      if (!fingerprint) {
+        fingerprint = {
+          values: createHash('sha256'),
+          partition: createHash('sha256'),
+          classes: new Map(),
+        };
+        fingerprintByField.set(field, fingerprint);
+      }
+      const documentValues = Array.from(uniqueValues, String).sort().join('\0');
+      if (!fingerprint.classes.has(documentValues)) {
+        fingerprint.classes.set(documentValues, fingerprint.classes.size);
+      }
+      fingerprint.values.update(`${documentIndex}\0${documentValues}\n`);
+      fingerprint.partition.update(`${documentIndex}:${fingerprint.classes.get(documentValues)}\n`);
 
       let valueDocCounts = valueDocCountsByField.get(field);
       if (!valueDocCounts) {
@@ -96,6 +117,8 @@ export function mergeSampleDocumentsWithSchema({
       cardinality: valueDocCounts.size > 0 ? valueDocCounts.size : null,
       values: sortedValues,
       documentsWithValue: docsWithValue,
+      fingerprint: fingerprintByField.get(name)?.values.digest('hex'),
+      partition: fingerprintByField.get(name)?.partition.digest('hex'),
     };
   });
 
