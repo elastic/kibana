@@ -13,6 +13,7 @@ import { mobileRouteRepository } from './mobile/route';
 import { networkRouteRepository } from './network/route';
 import { overviewRouteRepository } from './overview/route';
 import { sessionsRouteRepository } from './sessions/route';
+import { sessionsSettingsRouteRepository } from './sessions/settings_route';
 import { usageRouteRepository } from './usage/route';
 import { savedViewsRouteRepository } from './views/route';
 
@@ -27,6 +28,7 @@ export const getGlobalDigitalExperienceServerRouteRepository = () => ({
   ...networkRouteRepository,
   ...sessionsRouteRepository,
   ...savedViewsRouteRepository,
+  ...sessionsSettingsRouteRepository,
 });
 
 export type DigitalExperienceServerRouteRepository = ReturnType<

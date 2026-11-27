@@ -155,11 +155,11 @@ Array [
     "taskType": "alerting_v2:alert_actions_cleanup",
   },
   Object {
-    "cost": 4,
+    "cost": 10,
     "taskType": "digital_experience:mobile-sessions-summaries",
   },
   Object {
-    "cost": 4,
+    "cost": 10,
     "taskType": "digital_experience:sessions-summaries",
   },
   Object {

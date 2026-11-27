@@ -25,9 +25,11 @@ import { DigitalExperienceLocatorDefinition } from '../common/locator';
 import type { DigitalExperienceConfig } from './config';
 import { registerDigitalExperienceFeature } from './register_feature';
 import { getGlobalDigitalExperienceServerRouteRepository } from './routes/get_global_digital_experience_route_repository';
+import { sessionsSettingsSavedObjectType } from './saved_objects';
 import { savedViewSavedObjectType } from './saved_objects/saved_view';
 import { SESSIONS_PLATFORMS } from './services/sessions/sessions_platforms';
 import { createSessionsSetUpBackoff } from './services/sessions/sessions_set_up_backoff';
+import { createSessionsSettingsGetter } from './services/sessions/sessions_settings';
 import { registerSessionsTask } from './services/sessions/sessions_task';
 
 interface DigitalExperienceSetupDeps {
@@ -64,6 +66,7 @@ export class Plugin
     registerDigitalExperienceFeature(plugins.features);
     // Always registered, not behind a setting, so the saved objects check sees the type.
     core.savedObjects.registerType(savedViewSavedObjectType);
+    core.savedObjects.registerType(sessionsSettingsSavedObjectType);
     // A short URL names its locator, and the server looks it up to create one.
     plugins.share.url.locators.create(new DigitalExperienceLocatorDefinition());
 
@@ -74,6 +77,13 @@ export class Plugin
       taskManager.registerCanEncryptedSavedObjects(encryptedSavedObjects.canEncrypt);
     }
 
+    // kibana.yml's settings are the defaults; the ones saved in the app win.
+    const getSessionsSettings = createSessionsSettingsGetter({
+      core,
+      defaults: this.config.sessions,
+      logger: this.logger,
+    });
+
     const { buildFlavor } = this.initializerContext.env.packageInfo;
     registerRoutes({
       core,
@@ -83,7 +93,8 @@ export class Plugin
         plugins: { apmDataAccess: plugins.apmDataAccess },
         isServerless: buildFlavor === 'serverless',
         isUxEnabled: plugins.ux !== undefined,
-        sessionsSettings: this.config.sessions,
+        sessionsSettingsDefaults: this.config.sessions,
+        getSessionsSettings,
         sessionsSetUpBackoff: createSessionsSetUpBackoff(),
         getSessionsServices: async () => {
           const [, pluginsStart] = await core.getStartServices();
@@ -98,13 +109,14 @@ export class Plugin
     });
 
     if (taskManager) {
+      // Every platform's task runs with the same settings.
       SESSIONS_PLATFORMS.forEach((platform) =>
         registerSessionsTask({
           platform,
           core,
           logger: this.logger,
           taskManager,
-          settings: this.config.sessions,
+          getSettings: getSessionsSettings,
         })
       );
     }

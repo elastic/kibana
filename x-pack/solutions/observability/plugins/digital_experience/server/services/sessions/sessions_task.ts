@@ -17,6 +17,7 @@ import type {
 import {
   MOBILE_SESSIONS_RECONCILE_HOURS,
   MOBILE_SESSIONS_RECONCILE_INTERVAL_MINUTES,
+  SESSIONS_MAX_CONCURRENCY,
   type SessionsSettings,
 } from '../../../common/sessions';
 import { describeError } from '../../lib/helpers/errors';
@@ -87,12 +88,6 @@ type ReconcileState = Pick<
   SessionsTaskState,
   'reconcileFrom' | 'reconcileUntil' | 'reconcileWindowMs' | 'lastReconcileStartedAt'
 >;
-
-/** The sessions settings the task runs with. */
-export interface SessionsTaskSettings extends SessionsSettings {
-  /** Summary queries run at once. */
-  concurrency: number;
-}
 
 export interface RunSessionsTaskParams {
   platform: SessionsPlatform;
@@ -382,8 +377,7 @@ const TASK_COST_MB: ReadonlyArray<[TaskCost, number]> = [
 /**
  * What a run costs Task Manager, which budgets a node's capacity by it: the cheapest cost whose
  * memory covers the summary queries in flight, so one is an ordinary task, the default of two a
- * large one, and up to the maximum of four an extra large one. A task type's cost is fixed at
- * registration, so it follows the configured concurrency rather than a single run's.
+ * large one, and up to the maximum of four an extra large one.
  */
 export const taskCostOf = (concurrency: number): TaskCost => {
   const mb = concurrency * MB_PER_SUMMARY_QUERY;
@@ -394,19 +388,22 @@ export const taskCostOf = (concurrency: number): TaskCost => {
  * Registers the task that builds a platform's session summaries with ES|QL. It runs with the API
  * key Task Manager granted on behalf of the user who enabled sessions, never as the internal user,
  * so it only summarizes what that user can read. Only the index template is the internal user's.
+ * It reads its settings at the start of every run, so settings saved in the app apply from the
+ * next.
  */
 export const registerSessionsTask = ({
   platform,
   core,
   logger,
   taskManager,
-  settings,
+  getSettings,
 }: {
   platform: SessionsPlatform;
   core: CoreSetup;
   logger: Logger;
   taskManager: TaskManagerSetupContract;
-  settings: SessionsTaskSettings;
+  /** The settings saved in the app over kibana.yml's; never fails. */
+  getSettings: () => Promise<SessionsSettings>;
 }): void => {
   const stateSchema = platform.reconcile ? reconcilingStateSchemaV1 : stateSchemaV1;
   taskManager.registerTaskDefinitions({
@@ -416,11 +413,14 @@ export const registerSessionsTask = ({
       // A run starts no window after 45s and stops one after 4m; this only stops one stuck on a
       // query.
       timeout: '5m',
-      cost: taskCostOf(settings.concurrency),
+      // The concurrency can change from the app without a restart, while a task type's cost is
+      // fixed here, so it budgets for the most the settings allow.
+      cost: taskCostOf(SESSIONS_MAX_CONCURRENCY),
       stateSchemaByVersion: { 1: { schema: stateSchema, up: (state) => state } },
       createTaskRunner: ({ taskInstance, signal, fakeRequest }) => ({
         run: async () => {
           const [coreStart] = await core.getStartServices();
+          const { frequency, concurrency } = await getSettings();
           const result = await runSessionsTask({
             platform,
             state: taskInstance.state,
@@ -432,13 +432,9 @@ export const registerSessionsTask = ({
             signal,
             logger,
             now: Date.now(),
-            concurrency: settings.concurrency,
+            concurrency,
           });
-          return withConfiguredInterval(
-            result,
-            taskInstance.schedule?.interval,
-            settings.frequency
-          );
+          return withConfiguredInterval(result, taskInstance.schedule?.interval, frequency);
         },
       }),
     },

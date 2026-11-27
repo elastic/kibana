@@ -198,7 +198,7 @@ const statusRoute = createDigitalExperienceServerRoute({
   handler: async ({
     context,
     request,
-    sessionsSettings,
+    getSessionsSettings,
     getSessionsServices,
     sessionsSetUpBackoff,
     isServerless,
@@ -210,7 +210,7 @@ const statusRoute = createDigitalExperienceServerRoute({
       // The tasks and their state only; no session data is read with the internal user.
       status = await getSessionsStatusResponse({
         taskManager,
-        settings: sessionsSettings,
+        settings: await getSessionsSettings(),
         canManage: await canManageSessionsInAllSpaces(authz, request),
       });
     } catch (error) {
@@ -270,7 +270,7 @@ const enableRoute = createDigitalExperienceServerRoute({
   handler: async ({
     context,
     request,
-    sessionsSettings,
+    getSessionsSettings,
     getSessionsServices,
     sessionsSetUpBackoff,
     isServerless,
@@ -282,11 +282,12 @@ const enableRoute = createDigitalExperienceServerRoute({
       throw internal(NO_TASK_MANAGER_MESSAGE);
     }
     const canManage = await canManageSessionsInAllSpaces(authz, request);
+    const settings = await getSessionsSettings();
     const getStatus = async () => {
       try {
         return await getSessionsStatusResponse({
           taskManager,
-          settings: sessionsSettings,
+          settings,
           canManage,
         });
       } catch (error) {
@@ -313,7 +314,7 @@ const enableRoute = createDigitalExperienceServerRoute({
         request,
         taskManager,
         canEncrypt,
-        settings: sessionsSettings,
+        settings,
         isServerless,
         logger,
         platforms,
@@ -343,7 +344,7 @@ const disableRoute = createDigitalExperienceServerRoute({
   handler: async ({
     context,
     request,
-    sessionsSettings,
+    getSessionsSettings,
     getSessionsServices,
     logger,
   }): Promise<SessionsStatusResponse> => {
@@ -373,7 +374,7 @@ const disableRoute = createDigitalExperienceServerRoute({
     try {
       return await getSessionsStatusResponse({
         taskManager,
-        settings: sessionsSettings,
+        settings: await getSessionsSettings(),
         canManage: true,
       });
     } catch (error) {
