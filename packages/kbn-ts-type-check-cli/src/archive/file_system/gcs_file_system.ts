@@ -13,7 +13,7 @@ import { pipeline } from 'stream/promises';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import execa from 'execa';
-import { GCS_BUCKET_URI } from '../constants';
+import { COMMITS_PATH, GCS_BUCKET_URI } from '../constants';
 import { createArchiveExtractor, getTarCreateArgs, resolveTarEnvironment } from './utils';
 import { AbstractFileSystem } from './abstract_file_system';
 import type { ArchiveMetadata } from './types';
@@ -26,6 +26,16 @@ export class GcsFileSystem extends AbstractFileSystem {
 
   protected getPath(archiveId: string): string {
     return join(GCS_BUCKET_URI, archiveId);
+  }
+
+  // Commit archives are write-once in GCS, so a rebuild of an archived commit must not re-upload.
+  public async updateArchive(options: Parameters<AbstractFileSystem['updateArchive']>[0]) {
+    const { prNumber, sha } = options;
+    if (!prNumber && (await this.hasArchive(this.getArchivePath(join(COMMITS_PATH, sha))))) {
+      this.log.info(`TypeScript build artifacts for ${sha} are already archived, skipping upload.`);
+      return;
+    }
+    await super.updateArchive(options);
   }
 
   protected async archive(archivePath: string, fileListPath: string): Promise<void> {

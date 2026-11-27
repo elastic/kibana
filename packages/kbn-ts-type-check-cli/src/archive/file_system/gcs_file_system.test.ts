@@ -10,6 +10,7 @@
 import { PassThrough } from 'stream';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import execa from 'execa';
+import { AbstractFileSystem } from './abstract_file_system';
 import { GcsFileSystem } from './gcs_file_system';
 
 jest.mock('execa', () => ({
@@ -72,5 +73,50 @@ describe('GcsFileSystem archive streaming', () => {
     await expect(pending).rejects.toBe(failure);
     expect(tar.kill).toHaveBeenCalledWith('SIGKILL');
     expect(gcloud.kill).toHaveBeenCalledWith('SIGKILL');
+  });
+});
+
+describe('GcsFileSystem updateArchive', () => {
+  const superUpdateArchive = jest.spyOn(AbstractFileSystem.prototype, 'updateArchive');
+
+  beforeEach(() => {
+    mockExeca.mockReset();
+    superUpdateArchive.mockReset().mockResolvedValue(undefined);
+  });
+
+  afterAll(() => {
+    superUpdateArchive.mockRestore();
+  });
+
+  it('skips the upload when the commit archive already exists', async () => {
+    mockExeca.mockResolvedValue({});
+
+    await new GcsFileSystem(createLog()).updateArchive({ files: ['a.d.ts'], sha: 'abc' });
+
+    expect(mockExeca).toHaveBeenCalledWith(
+      'gcloud',
+      ['storage', 'ls', 'gs://ci-typescript-archives/ts_type_check/commits/abc/archive.tar.gz'],
+      expect.anything()
+    );
+    expect(superUpdateArchive).not.toHaveBeenCalled();
+  });
+
+  it('uploads a new commit archive', async () => {
+    mockExeca.mockRejectedValue(new Error('not found'));
+
+    await new GcsFileSystem(createLog()).updateArchive({ files: ['a.d.ts'], sha: 'abc' });
+
+    expect(superUpdateArchive).toHaveBeenCalledTimes(1);
+  });
+
+  it('always uploads pull request archives', async () => {
+    await new GcsFileSystem(createLog()).updateArchive({
+      files: ['a.d.ts'],
+      sha: 'abc',
+      prNumber: '123',
+    });
+
+    expect(mockExeca).not.toHaveBeenCalled();
+    expect(superUpdateArchive).toHaveBeenCalledTimes(1);
   });
 });
