@@ -78,9 +78,14 @@ const document = (
     ...fields,
   } as ConnectorCoverageDocument);
 
-const drift = (connector: string, coverage: Partial<DriftCoverage> = {}): ConnectorDrift =>
+const drift = (
+  connector: string,
+  coverage: Partial<DriftCoverage> = {},
+  sources: ConnectorDrift['sources'] = { rest: { status: 'unchanged' } }
+): ConnectorDrift =>
   ({
     connector,
+    sources,
     coverage: {
       trackedActions: 2,
       totalActions: 3,
@@ -90,6 +95,8 @@ const drift = (connector: string, coverage: Partial<DriftCoverage> = {}): Connec
       ...coverage,
     },
   } as ConnectorDrift);
+
+const pinned = { followingSources: [], pinnedSources: ['mcp'] };
 
 const documents = [
   document('.github'),
@@ -111,7 +118,7 @@ describe('summarizeDriftCoverage', () => {
   it('combines the coverage of every connector with the drift of the recorded ones', () => {
     const report: DriftReportEntry[] = [
       drift('.github'),
-      drift('.box', { followingSources: [], pinnedSources: ['mcp'], totalActions: 4 }),
+      drift('.box', { ...pinned, totalActions: 4 }, { mcp: { status: 'pinned' } }),
       { connector: '.zoom', error: 'unreachable' },
     ];
 
@@ -126,46 +133,68 @@ describe('summarizeDriftCoverage', () => {
         checked: 2,
         failed: 1,
         detectVendorChanges: 1,
+        pinnedOnly: 1,
+        unreachable: 0,
+        withoutCoverage: 0,
         trackedActions: 4,
-        // From the coverage report's total_actions: 3 for .github, 5 for .box
-        checkedActions: 8,
+        checkedActions: 7,
         allActions: 32,
       },
       connectors: [
-        expect.objectContaining({ connector: '.box', totalActions: 5, pinnedSources: ['mcp'] }),
-        expect.objectContaining({ connector: '.github', totalActions: 3 }),
+        expect.objectContaining({ connector: '.box', pinnedSources: ['mcp'] }),
+        expect.objectContaining({ connector: '.github' }),
       ],
     });
   });
 
-  it('leaves out connectors from reports written before coverage existed', () => {
-    const old = { connector: '.github' } as ConnectorDrift;
+  // A saved report may come from another checkout, where the connector declared other actions
+  it("takes both of a connector's action counts from the drift report", () => {
+    const { connectors } = summarizeDriftCoverage(documents, [
+      drift('.box', { trackedActions: 5, totalActions: 5 }),
+    ]);
 
-    expect(summarizeDriftCoverage(documents, [old]).connectors).toEqual([]);
+    expect(connectors).toEqual([
+      expect.objectContaining({ connector: '.box', trackedActions: 5, totalActions: 5 }),
+    ]);
+  });
+
+  it("doesn't count a connector whose source couldn't be fetched as detecting changes", () => {
+    const { totals, connectors } = summarizeDriftCoverage(documents, [
+      drift('.github', {}, { rest: { status: 'unreachable', error: '503' } }),
+    ]);
+
+    expect(totals).toMatchObject({ checked: 1, detectVendorChanges: 0, unreachable: 1 });
+    expect(connectors[0].unreachableSources).toEqual(['rest']);
+  });
+
+  it('counts the connectors of a report written before coverage existed as checked', () => {
+    const old = { connector: '.github', sources: {} } as ConnectorDrift;
+
+    const { totals, connectors } = summarizeDriftCoverage(documents, [old]);
+
+    expect(connectors).toEqual([]);
+    expect(totals).toMatchObject({ checked: 1, withoutCoverage: 1, detectVendorChanges: 0 });
   });
 });
 
 describe('renderCoverageAnnotation', () => {
   it('states the totals and folds a row per checked connector', () => {
     const markdown = renderCoverageAnnotation(
-      summarizeDriftCoverage(documents, [
-        drift('.github'),
-        drift('.box', { followingSources: [], pinnedSources: ['mcp'] }),
-      ])
+      summarizeDriftCoverage(documents, [drift('.github'), drift('.box', pinned)])
     );
 
     expect(markdown).toContain(
       '**Coverage:** 2 of 5 connectors recorded, 2 exempt (1 permanent, 1 temporary) and 1 neither.'
     );
     expect(markdown).toContain(
-      'Of the 2 connectors checked, 1 can detect a vendor change; the other only has pinned sources. They track 4 of their 8 actions; all connectors together declare 32 actions.'
+      'Of the 2 connectors checked, 1 can detect a vendor change (1 only has pinned sources). They track 4 of their 6 actions; all connectors together declare 32 actions.'
     );
-    expect(markdown).toContain('| `.box` | 2 of 5 | — | `mcp` | 1 |');
+    expect(markdown).toContain('| `.box` | 2 of 3 | — | `mcp` | 1 |');
     expect(markdown).toContain('| `.github` | 2 of 3 | `rest` | — | 1 |');
     expect(markdown).toContain('<details><summary>Coverage per connector</summary>');
   });
 
-  it('says how many connectors could not be checked, and leaves out pinned ones when none are', () => {
+  it('says how many connectors could not be checked, with no exceptions when there are none', () => {
     const markdown = renderCoverageAnnotation(
       summarizeDriftCoverage(documents, [drift('.github'), { connector: '.box', error: 'x' }])
     );
@@ -174,19 +203,26 @@ describe('renderCoverageAnnotation', () => {
     expect(markdown).toContain('1 can detect a vendor change. They track');
   });
 
-  it('counts the connectors that only have pinned sources', () => {
-    const pinned = { followingSources: [], pinnedSources: ['mcp'] };
+  it('marks sources that could not be fetched', () => {
+    const markdown = renderCoverageAnnotation(
+      summarizeDriftCoverage(documents, [
+        drift('.github', {}, { rest: { status: 'unreachable', error: '503' } }),
+      ])
+    );
 
-    expect(
-      renderCoverageAnnotation(
-        summarizeDriftCoverage(documents, [drift('.github', pinned), drift('.box', pinned)])
-      )
-    ).toContain('0 can detect a vendor change; the other 2 only have pinned sources.');
+    expect(markdown).toContain(
+      "0 can detect a vendor change (1 had a source that couldn't be fetched)."
+    );
+    expect(markdown).toContain('| `.github` | 2 of 3 | `rest` (unreachable) | — | 1 |');
   });
 
-  it('has no table when no connector was checked', () => {
-    expect(renderCoverageAnnotation(summarizeDriftCoverage(documents, []))).not.toContain(
-      '<details>'
+  it('says the actions are unknown for a report without coverage, and has no table', () => {
+    const markdown = renderCoverageAnnotation(
+      summarizeDriftCoverage(documents, [{ connector: '.github', sources: {} } as ConnectorDrift])
     );
+
+    expect(markdown).toContain('(1 comes from a report without coverage)');
+    expect(markdown).toContain('Their actions are unknown, as the report has no coverage;');
+    expect(markdown).not.toContain('<details>');
   });
 });

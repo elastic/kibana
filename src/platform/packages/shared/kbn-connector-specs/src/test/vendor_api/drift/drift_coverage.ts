@@ -9,7 +9,7 @@
 
 import type { ConnectorCoverageDocument } from '../connector_coverage/connector_coverage';
 import type { VendorApiManifest } from '../manifest';
-import type { ActionDrift, DriftReportEntry } from './detect_drift';
+import type { ActionDrift, ConnectorDrift, DriftReportEntry } from './detect_drift';
 
 /** How much of a recorded connector the drift check covers. */
 export interface DriftCoverage {
@@ -18,7 +18,7 @@ export interface DriftCoverage {
    * reaches them. The others only make requests no spec describes, or none at all.
    */
   readonly trackedActions: number;
-  /** Every action the connector declares. */
+  /** Every action the connector declares, as the coverage report's `total_actions` counts them. */
   readonly totalActions: number;
   /** Sources fetched from the vendor on every run, so a change to them is noticed. */
   readonly followingSources: readonly string[];
@@ -55,11 +55,20 @@ export interface CoverageTotals {
   readonly checked: number;
   /** Connectors the drift check couldn't run on. */
   readonly failed: number;
-  /** Checked connectors with at least one source that follows the vendor. */
+  /**
+   * Checked connectors whose sources that follow the vendor were all fetched this run, so a
+   * change to them would have been noticed.
+   */
   readonly detectVendorChanges: number;
-  /** Tracked actions of the checked connectors. */
+  /** Checked connectors with only pinned sources, which can't notice a change. */
+  readonly pinnedOnly: number;
+  /** Checked connectors a source of which couldn't be fetched this run. */
+  readonly unreachable: number;
+  /** Checked connectors whose drift entry has no coverage, from a report written before it. */
+  readonly withoutCoverage: number;
+  /** Tracked actions of the checked connectors that have coverage. */
   readonly trackedActions: number;
-  /** Every action of the checked connectors. */
+  /** Every action of the checked connectors that have coverage. */
   readonly checkedActions: number;
   /** Every action of every connector, recorded or not. */
   readonly allActions: number;
@@ -67,34 +76,43 @@ export interface CoverageTotals {
 
 export interface ConnectorCoverageRow extends DriftCoverage {
   readonly connector: string;
+  /** Sources that follow the vendor but couldn't be fetched this run. */
+  readonly unreachableSources: readonly string[];
 }
 
 export interface DriftCoverageSummary {
   readonly totals: CoverageTotals;
-  /** One row per connector the drift check ran on, by connector id. */
+  /** One row per checked connector with coverage, by connector id. */
   readonly connectors: readonly ConnectorCoverageRow[];
 }
 
+const isChecked = (entry: DriftReportEntry): entry is ConnectorDrift => !('error' in entry);
+
+const unreachableSourcesOf = ({ sources }: ConnectorDrift): string[] =>
+  Object.keys(sources)
+    .filter((name) => sources[name].status === 'unreachable')
+    .sort();
+
 /**
  * Combines the coverage report, which describes every connector, with a drift report, which
- * describes the recorded ones it checked. The total number of actions comes from the coverage
- * report's `total_actions`, and the tracked ones from the drift report.
+ * describes the recorded ones it checked. Both of a connector's action counts come from the drift
+ * report, so they describe the same checkout even when the report was saved earlier; the total
+ * across all connectors comes from the coverage report's `total_actions`.
  */
 export const summarizeDriftCoverage = (
   documents: readonly ConnectorCoverageDocument[],
   report: readonly DriftReportEntry[]
 ): DriftCoverageSummary => {
-  const totalActionsOf = new Map(
-    documents.map(({ connector_id: id, total_actions: total }) => [id, total])
-  );
-  const connectors = report
+  const checked = report.filter(isChecked);
+  const unreachable = checked.filter((entry) => unreachableSourcesOf(entry).length > 0);
+  const connectors = checked
     .flatMap((entry): ConnectorCoverageRow[] =>
-      'coverage' in entry && entry.coverage
+      entry.coverage
         ? [
             {
               connector: entry.connector,
               ...entry.coverage,
-              totalActions: totalActionsOf.get(entry.connector) ?? entry.coverage.totalActions,
+              unreachableSources: unreachableSourcesOf(entry),
             },
           ]
         : []
@@ -115,10 +133,15 @@ export const summarizeDriftCoverage = (
         ({ exemption_category: category }) => category === 'temporary'
       ).length,
       unrecorded: documents.length - recorded - exempt.length,
-      checked: connectors.length,
-      failed: report.filter((entry) => 'error' in entry).length,
-      detectVendorChanges: connectors.filter(({ followingSources }) => followingSources.length > 0)
-        .length,
+      checked: checked.length,
+      failed: report.length - checked.length,
+      detectVendorChanges: connectors.filter(
+        ({ followingSources, unreachableSources }) =>
+          followingSources.length > 0 && unreachableSources.length === 0
+      ).length,
+      pinnedOnly: connectors.filter(({ followingSources }) => followingSources.length === 0).length,
+      unreachable: unreachable.length,
+      withoutCoverage: checked.length - connectors.length,
       trackedActions: sum(connectors.map(({ trackedActions }) => trackedActions)),
       checkedActions: sum(connectors.map(({ totalActions }) => totalActions)),
       allActions: sum(documents.map(({ total_actions: total }) => total)),
@@ -130,15 +153,35 @@ export const summarizeDriftCoverage = (
 const plural = (count: number, one: string, many = `${one}s`) =>
   `${count} ${count === 1 ? one : many}`;
 
-const pinnedOnly = (count: number) => {
-  if (count === 0) return '';
-  return count === 1
-    ? '; the other only has pinned sources'
-    : `; the other ${count} only have pinned sources`;
-};
+const sourceList = (names: readonly string[], unreachable: readonly string[] = []) =>
+  names.length > 0
+    ? names
+        .map((name) => `\`${name}\`${unreachable.includes(name) ? ' (unreachable)' : ''}`)
+        .join(', ')
+    : '—';
 
-const sourceList = (names: readonly string[]) =>
-  names.length > 0 ? names.map((name) => `\`${name}\``).join(', ') : '—';
+const checkedSentence = (totals: CoverageTotals): string => {
+  const verb = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
+  const exceptions = [
+    totals.pinnedOnly > 0
+      ? `${verb(totals.pinnedOnly, 'only has', 'only have')} pinned sources`
+      : '',
+    totals.unreachable > 0 ? `${totals.unreachable} had a source that couldn't be fetched` : '',
+    totals.withoutCoverage > 0
+      ? `${verb(totals.withoutCoverage, 'comes', 'come')} from a report without coverage`
+      : '',
+  ].filter(Boolean);
+  const actions =
+    totals.checked > totals.withoutCoverage
+      ? ` They track ${totals.trackedActions} of their ${plural(totals.checkedActions, 'action')};`
+      : ' Their actions are unknown, as the report has no coverage;';
+  return (
+    `Of the ${plural(totals.checked, 'connector')} checked, ${totals.detectVendorChanges} can ` +
+    `detect a vendor change${exceptions.length > 0 ? ` (${exceptions.join('; ')})` : ''}.` +
+    `${actions} all connectors together declare ${plural(totals.allActions, 'action')}.` +
+    (totals.failed > 0 ? ` ${plural(totals.failed, 'connector')} couldn't be checked.` : '')
+  );
+};
 
 /** Markdown for the build annotation: the totals, then a folded table per connector. */
 export const renderCoverageAnnotation = ({ totals, connectors }: DriftCoverageSummary): string => {
@@ -147,11 +190,7 @@ export const renderCoverageAnnotation = ({ totals, connectors }: DriftCoverageSu
       `${totals.exempt} exempt (${totals.permanentExemptions} permanent, ` +
       `${totals.temporaryExemptions} temporary) and ${totals.unrecorded} neither.`,
     '',
-    `Of the ${plural(totals.checked, 'connector')} checked, ${totals.detectVendorChanges} can ` +
-      `detect a vendor change${pinnedOnly(totals.checked - totals.detectVendorChanges)}. They ` +
-      `track ${totals.trackedActions} of their ${plural(totals.checkedActions, 'action')}; ` +
-      `all connectors together declare ${plural(totals.allActions, 'action')}.` +
-      (totals.failed > 0 ? ` ${plural(totals.failed, 'connector')} couldn't be checked.` : ''),
+    checkedSentence(totals),
   ];
   if (connectors.length === 0) {
     return `${lines.join('\n')}\n`;
@@ -170,10 +209,12 @@ export const renderCoverageAnnotation = ({ totals, connectors }: DriftCoverageSu
         totalActions,
         followingSources,
         pinnedSources,
+        unreachableSources,
         unmatchedRequests,
       }) =>
         `| \`${connector}\` | ${trackedActions} of ${totalActions} | ${sourceList(
-          followingSources
+          followingSources,
+          unreachableSources
         )} | ${sourceList(pinnedSources)} | ${unmatchedRequests} |`
     ),
     '',

@@ -42,6 +42,7 @@ import {
 import { createSpecCache } from '../src/test/vendor_api/spec/spec_cache';
 import { surfaceDrift } from '../src/test/vendor_api/drift/surface_drift';
 import { updateVendorApi } from '../src/test/vendor_api/record/update_vendor_api';
+import { errorMessage } from '../src/test/vendor_api/values';
 
 const SPEC_CACHE = path.join(REPO_ROOT, 'data', 'connector_vendor_api');
 const DRIFT_REPORT = path.join(REPO_ROOT, 'target', 'connector_vendor_api', 'drift.json');
@@ -198,8 +199,12 @@ run(
         ),
         buildUrl: process.env.BUILDKITE_BUILD_URL,
         // Read from the committed artifacts, as --coverage does, so the summary can say what
-        // share of the repository's connectors and actions the check covers.
-        coverageDocuments: await collectCoverage(REPO_ROOT),
+        // share of the repository's connectors and actions the check covers. It only adds to
+        // the summary, so failing to read it must not stop the issues from being surfaced.
+        coverageDocuments: await collectCoverage(REPO_ROOT).catch((error) => {
+          log.warning(`Leaving coverage out of the summary: ${errorMessage(error)}`);
+          return undefined;
+        }),
         log,
       });
       const summaryPath = path.resolve(flagsReader.string('summary') ?? DRIFT_SUMMARY);
