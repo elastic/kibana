@@ -33,7 +33,6 @@ import { getSyntheticsCertsFacetsRoute } from './certs/get_certificates_facets';
 import { getSyntheticsSuggestionsRoute } from './suggestions/suggestions_route';
 import { getAgentPoliciesRoute } from './settings/private_locations/get_agent_policies';
 import { inspectSyntheticsMonitorRoute } from './monitor_cruds/inspect_monitor';
-import { deletePackagePolicyRoute } from './monitor_cruds/delete_integration';
 import { createJourneyScreenshotRoute } from './pings/journey_screenshots';
 import { createJourneyScreenshotBlocksRoute } from './pings/journey_screenshot_blocks';
 import { createLastSuccessfulCheckRoute } from './pings/last_successful_check';
@@ -111,7 +110,6 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   createJourneyScreenshotBlocksRoute,
   createNetworkEventsRoute,
   createJourneyScreenshotRoute,
-  deletePackagePolicyRoute,
   getLocationMonitors,
   getSyntheticsFilters,
   inspectSyntheticsMonitorRoute,

@@ -7,8 +7,9 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { FleetStartServices } from '@kbn/fleet-plugin/public';
-import { EuiButton, EuiCallOut } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiLink } from '@elastic/eui';
 import type { PackagePolicyEditExtensionComponentProps } from '@kbn/fleet-plugin/public';
 import type { PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -43,7 +44,7 @@ export const getMonitorRefFromVars = (
  */
 export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtensionComponentProps>(
   ({ policy: currentPolicy, newPolicy, onChange }) => {
-    const { application } = useKibana().services;
+    const { application, docLinks, share } = useKibana<FleetStartServices>().services;
 
     const { package: pkg } = newPolicy;
 
@@ -53,7 +54,7 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
       });
     }, [application, pkg?.name, pkg?.version]);
 
-    const locators = useKibana<FleetStartServices>().services?.share?.url?.locators;
+    const locators = share?.url?.locators;
     const currentInput = currentPolicy.inputs.find((input) => input.enabled === true);
     const vars = currentInput?.streams.find((stream) =>
       Object.values(DataStream).includes(stream.data_stream.dataset as DataStream)
@@ -64,14 +65,35 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
     const url = useEditMonitorLocator({
       configId,
       monitorSpaces,
-      packagePolicyId: currentPolicy.id,
       locators,
     });
+
+    const troubleshootingDocUrl = docLinks?.links?.synthetics?.deleteAbandonedPackagePolicy;
 
     if (currentPolicy.is_managed) {
       return (
         <EuiCallOut announceOnMount>
           <p data-test-subj="syntheticsManagedPolicyCallout">{EDIT_IN_SYNTHETICS_DESC}</p>
+          {troubleshootingDocUrl && (
+            <p>
+              <FormattedMessage
+                id="xpack.uptime.editPackagePolicy.abandonedPolicyTroubleshootingDescription"
+                defaultMessage="If the corresponding monitor no longer exists, refer to <link>Synthetics troubleshooting</link> for how to remove an abandoned package policy."
+                values={{
+                  link: (chunks) => (
+                    <EuiLink
+                      data-test-subj="syntheticsAbandonedPolicyDocsLink"
+                      href={troubleshootingDocUrl}
+                      target="_blank"
+                      external
+                    >
+                      {chunks}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </p>
+          )}
           <EuiButton isLoading={!url} href={url} data-test-subj="syntheticsEditMonitorButton">
             {EDIT_IN_SYNTHETICS_LABEL}
           </EuiButton>
