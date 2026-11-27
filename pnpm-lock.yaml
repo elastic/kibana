@@ -4410,8 +4410,8 @@ importers:
         specifier: 2.12.0
         version: 2.12.0(react-redux@9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1))(react@18.2.0)
       '@slack/webhook':
-        specifier: 7.0.6
-        version: 7.0.6(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
+        specifier: 8.0.2
+        version: 8.0.2
       '@smithy/eventstream-codec':
         specifier: 4.5.2
         version: 4.5.2
@@ -14204,13 +14204,13 @@ packages:
   '@sinonjs/samsam@10.0.2':
     resolution: {integrity: sha512-8lVwD1Df1BmzoaOLhMcGGcz/Jyr5QY2KSB75/YK1QgKzoabTeLdIVyhXNZK9ojfSKSdirbXqdbsXXqP9/Ve8+A==}
 
-  '@slack/types@2.22.0':
-    resolution: {integrity: sha512-sZ9lIgJhPX2qft/tKWiklFlc0o1FWeI7QtciZJfW1+ErH1eGGHvOZ8e73sleTCFEFJp1q/R0WeS8Oa7AsiDprg==}
-    engines: {node: '>= 12.13.0', npm: '>= 6.12.0'}
+  '@slack/types@3.3.1':
+    resolution: {integrity: sha512-F4JJd1SY5Nro1O6O4izMrBv0/IOpr+a8GGewr23tnP8zO1t9mWFLBjpNPv6nxuxhhw4JVRM9CPltBnLkZj7Ucw==}
+    engines: {node: '>= 20', npm: '>=9.6.4'}
 
-  '@slack/webhook@7.0.6':
-    resolution: {integrity: sha512-RvNCcOjNbzl5uQ2TZsbTJ+A+5ptoWMwnyd/W4lKzeXFToIwebeaZiuntcP0usmhZHj1LH9H1T9WN6Bt1B/DLyg==}
-    engines: {node: '>= 18', npm: '>= 8.6.0'}
+  '@slack/webhook@8.0.2':
+    resolution: {integrity: sha512-gBPlV9W6zfP4qcijX47Ni5GznbZ8Q7oZYnCQMGkOGnEHPny+gR1xpjaUdafSwGNEVKjHtW39+A2Upzg1GPHyVg==}
+    engines: {node: '>= 20', npm: '>=9.6.4'}
 
   '@smithy/core@3.41.1':
     resolution: {integrity: sha512-24LyiHSY0R/MLcbTylurWXU6Uy4lzI6KJgsdzxkNnjT9/OLWc2zGPb/3k5AM1f0vcgCGrExanUG339t+TBiIrA==}
@@ -15213,6 +15213,9 @@ packages:
 
   '@types/retry@0.12.0':
     resolution: {integrity: sha512-wWKOClTTiizcZhXnPY4wikVAwmdYHp8q6DmC+EJUzAMsycb7HB32Kh9RN4+0gExjmPmZSAQjgURXIGATPegAvA==}
+
+  '@types/retry@0.12.5':
+    resolution: {integrity: sha512-3xSjTp3v03X/lSQLkczaN9UIEwJMoMCA1+Nb5HfbJEQWogdeQIyVtTvxPXDQjZ5zws8rFQfVfRdz03ARihPJgw==}
 
   '@types/seedrandom@3.0.8':
     resolution: {integrity: sha512-TY1eezMU2zH2ozQoAFAQFOPpvP15g+ZgSfTZt31AUUH/Rxtnz3H+A/Sv1Snw2/amp//omibc+AEkTaA8KUeOLQ==}
@@ -30184,16 +30187,15 @@ snapshots:
       '@sinonjs/commons': 3.0.1
       type-detect: 4.1.0
 
-  '@slack/types@2.22.0': {}
+  '@slack/types@3.3.1': {}
 
-  '@slack/webhook@7.0.6(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)':
+  '@slack/webhook@8.0.2':
     dependencies:
-      '@slack/types': 2.22.0
+      '@slack/types': 3.3.1
       '@types/node': 24.10.13
-      axios: 1.20.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
-    transitivePeerDependencies:
-      - debug
-      - supports-color
+      '@types/retry': 0.12.5
+      p-retry: 4.6.2
+      retry: 0.13.1
 
   '@smithy/core@3.41.1':
     dependencies:
@@ -31386,6 +31388,8 @@ snapshots:
   '@types/resolve@1.20.6': {}
 
   '@types/retry@0.12.0': {}
+
+  '@types/retry@0.12.5': {}
 
   '@types/seedrandom@3.0.8': {}
 
