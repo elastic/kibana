@@ -319,6 +319,61 @@ describe('useDiscoverInTimelineActions', () => {
         startServicesMock.customDataService.query.timefilter.timefilter.setTime
       ).not.toHaveBeenCalled();
     });
+    it('should keep the restore pending for an ES|QL tab that mounted while the saved search could not be fetched', async () => {
+      let rejectFetch: (error: Error) => void = () => {};
+      (startServicesMock.savedSearch.get as jest.Mock).mockImplementationOnce(
+        () =>
+          new Promise<SavedSearch>((_resolve, reject) => {
+            rejectFetch = reject;
+          })
+      );
+      const containerRef: { current: ExtendedDiscoverStateContainer | undefined } = {
+        current: createMockDiscoverStateContainer(discoverServices),
+      };
+      const { result } = renderHook(() => useDiscoverInTimelineActions(containerRef), {
+        wrapper: getTestProviderWithCustomState(),
+      });
+
+      const restore = result.current.resetDiscoverAppState(savedSearchMock.id);
+      // The tab publishes its container before it reads the pending restore.
+      containerRef.current = createMockDiscoverStateContainer(discoverServices);
+      rejectFetch(new Error('Saved search not found'));
+      await restore;
+
+      expect(result.current.timelineRestorePending.current).toBe('opened');
+    });
+    it('should leave the Discover state in the URL alone after a move to another history entry', async () => {
+      // The destination timeline is resolved before its own restore starts, so this restore is
+      // not superseded yet when it resumes, but the URL is no longer the opened timeline's.
+      let resolveFetch: (savedSearch: SavedSearch) => void = () => {};
+      (startServicesMock.savedSearch.get as jest.Mock).mockImplementationOnce(
+        () =>
+          new Promise<SavedSearch>((resolve) => {
+            resolveFetch = resolve;
+          })
+      );
+      const containerRef: { current: ExtendedDiscoverStateContainer | undefined } = {
+        current: createMockDiscoverStateContainer(discoverServices),
+      };
+      const history = createMemoryHistory({ initialEntries: ['/timelines?timeline=(id:opened)'] });
+      const { result } = renderHook(() => useDiscoverInTimelineActions(containerRef, history), {
+        wrapper: getTestProviderWithCustomState(),
+      });
+
+      const restore = result.current.resetDiscoverAppState(savedSearchMock.id);
+      containerRef.current = undefined;
+      history.push(
+        '/timelines?_a=(query:(esql:destination))&_g=(time:(from:now-1y,to:now))&timeline=(id:destination)'
+      );
+      resolveFetch(savedSearchMock);
+      await restore;
+
+      expect(qs.parse(history.location.search)).toEqual({
+        _a: '(query:(esql:destination))',
+        _g: '(time:(from:now-1y,to:now))',
+        timeline: '(id:destination)',
+      });
+    });
     describe('while the ES|QL tab is not mounted', () => {
       const urlWithDiscoverState =
         '/timelines?_a=(query:(esql:previous))&_g=(time:(from:now-1y,to:now))&timeline=(id:next)';

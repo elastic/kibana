@@ -11,7 +11,7 @@ import type { SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
 import type { History } from 'history';
 import { isEqualWith } from 'lodash';
 import qs from 'query-string';
-import { useMemo, useCallback, useRef } from 'react';
+import { useMemo, useCallback, useEffect, useRef } from 'react';
 import type { RefObject } from 'react';
 import { useDispatch, useStore } from 'react-redux';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
@@ -103,6 +103,17 @@ export const useDiscoverInTimelineActions = (
   // Identifies the latest restore. Each one awaits the saved search and Discover, so an older one
   // can resume after a newer one took over the marker and the container.
   const latestRestoreRequest = useRef(0);
+  // Counts the moves to another history entry (Back, Forward, links). The URL state syncing
+  // rewrites the current entry in place with `REPLACE`, which is not counted.
+  const historyNavigations = useRef(0);
+
+  useEffect(
+    () =>
+      history?.listen((_location, action) => {
+        if (action !== 'REPLACE') historyNavigations.current += 1;
+      }),
+    [history]
+  );
 
   const queryClient = useQueryClient();
 
@@ -170,6 +181,7 @@ export const useDiscoverInTimelineActions = (
     ) => {
       const restoreRequest = ++latestRestoreRequest.current;
       const isSuperseded = () => latestRestoreRequest.current !== restoreRequest;
+      const historyNavigationsAtStart = historyNavigations.current;
 
       // The ES|QL tab publishes its state container while it is mounted and releases it when it
       // is not. Opening a timeline switches it to the Query tab, which can release the container
@@ -180,15 +192,19 @@ export const useDiscoverInTimelineActions = (
       const deferToTabMount = () => {
         // After a different timeline was opened, the Discover state in the URL is the previous
         // timeline's. A reload before the tab mounts restores this timeline from the URL, which
-        // would then take the previous timeline's query and time range as its own.
-        if (!isRestoringFromUrl) dropDiscoverUrlState();
+        // would then take the previous timeline's query and time range as its own. After a move
+        // to another history entry, the URL state is the destination's and is left to it.
+        if (!isRestoringFromUrl && historyNavigations.current === historyNavigationsAtStart) {
+          dropDiscoverUrlState();
+        }
       };
 
       if (newSavedSearchId) {
         // Applying the default state below would empty the redux copy of the Discover state and
         // move the timefilter to `now-15m`, even though the caller asked for a session to be
         // restored. Leave both alone and let the tab restore itself when it mounts.
-        if (!discoverStateContainer.current) {
+        const containerAtStart = discoverStateContainer.current;
+        if (!containerAtStart) {
           deferToTabMount();
           return;
         }
@@ -246,11 +262,12 @@ export const useDiscoverInTimelineActions = (
           timelineRestorePending.current = null;
         } catch (e) {
           if (isSuperseded()) return;
-          // With the tab still mounted, nothing is left for its next mount to restore: a marker
-          // left behind would make a plain Query to ES|QL switch replace the in-session state.
-          if (discoverStateContainer.current) {
+          // With the same tab still mounted, nothing is left for its next mount to restore: a
+          // marker left behind would make a plain Query to ES|QL switch replace the in-session
+          // state. A tab that mounted during the fetch reads the marker itself.
+          if (discoverStateContainer.current === containerAtStart) {
             timelineRestorePending.current = null;
-          } else {
+          } else if (!discoverStateContainer.current) {
             deferToTabMount();
           }
         }
