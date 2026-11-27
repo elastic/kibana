@@ -67,7 +67,7 @@ test.describe(
       await browserAuth.loginAsAdmin();
     });
 
-    test('GuardDuty agentless: the shared form keeps Save blocked while attachment is pending', async ({
+    test('GuardDuty agentless: the shared form keeps Save disabled until an identity is chosen', async ({
       page,
     }) => {
       await mockPackagePoliciesEmpty(page);
