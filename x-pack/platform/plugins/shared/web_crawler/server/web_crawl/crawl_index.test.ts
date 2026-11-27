@@ -7,17 +7,29 @@
 
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import type { WebCrawlIndexMeta } from './crawl_index';
-import { createCrawlIndex, getIndexPrivileges, readCrawlIndexState } from './crawl_index';
+import {
+  IncompatibleCrawlIndexError,
+  addCrawlFields,
+  createCrawlIndex,
+  getIndexPrivileges,
+  readCrawlIndexMappings,
+} from './crawl_index';
 
 const INDEX_NAME = 'web-crawl-example.com';
 
-const INDEX_META: WebCrawlIndexMeta = { url: 'https://example.com/' };
+const CRAWL_FIELDS = {
+  depth: { type: 'integer' as const },
+  crawl_id: { type: 'keyword' as const },
+  crawl_scope: { type: 'keyword' as const },
+  crawled_at: { type: 'date' as const },
+  url_host: { type: 'keyword' as const },
+  url_path: { type: 'keyword' as const },
+};
 
 const createEsError = (statusCode: number) =>
   Object.assign(new Error(`status ${statusCode}`), { statusCode });
 
-describe('readCrawlIndexState', () => {
+describe('readCrawlIndexMappings', () => {
   let esClient: ElasticsearchClientMock;
 
   beforeEach(() => {
@@ -26,51 +38,23 @@ describe('readCrawlIndexState', () => {
 
   it('reports a missing index on a 404 and rethrows other errors', async () => {
     esClient.indices.getMapping.mockRejectedValueOnce(createEsError(404));
-    await expect(readCrawlIndexState(esClient, INDEX_NAME)).resolves.toEqual({
-      exists: false,
-      isCrawlIndex: false,
-    });
+    await expect(readCrawlIndexMappings(esClient, INDEX_NAME)).resolves.toBeUndefined();
 
     esClient.indices.getMapping.mockRejectedValueOnce(createEsError(403));
-    await expect(readCrawlIndexState(esClient, INDEX_NAME)).rejects.toThrow('status 403');
+    await expect(readCrawlIndexMappings(esClient, INDEX_NAME)).rejects.toThrow('status 403');
   });
 
-  it.each([
-    ['has no mapping metadata', { properties: { title: { type: 'text' as const } } }],
-    ['has metadata that does not come from a crawl', { _meta: { managed_by: 'something else' } }],
-  ])('does not take an existing index that %s for a crawl index', async (_, mappings) => {
-    esClient.indices.getMapping.mockResolvedValue({ [INDEX_NAME]: { mappings } });
-
-    await expect(readCrawlIndexState(esClient, INDEX_NAME)).resolves.toEqual({
-      exists: true,
-      isCrawlIndex: false,
-    });
-  });
-
-  it('does not take an alias for a crawl index, even when it points at one', async () => {
-    await createCrawlIndex(esClient, INDEX_NAME, INDEX_META);
-    const [{ mappings }] = esClient.indices.create.mock.calls[0];
+  it('returns the mappings of every index behind the name', async () => {
     esClient.indices.getMapping.mockResolvedValue({
-      [INDEX_NAME]: { mappings: mappings ?? {} },
-      'other-index': { mappings: {} },
+      'docs-1': { mappings: { properties: { title: { type: 'text' } } } },
+      'docs-2': { mappings: {} },
     });
 
-    await expect(readCrawlIndexState(esClient, 'crawl-alias')).resolves.toEqual({
-      exists: true,
-      isCrawlIndex: false,
-    });
-  });
-
-  it('recognises the index that a crawl created', async () => {
-    await createCrawlIndex(esClient, INDEX_NAME, INDEX_META);
-    const [{ mappings }] = esClient.indices.create.mock.calls[0];
-    esClient.indices.getMapping.mockResolvedValue({ [INDEX_NAME]: { mappings: mappings ?? {} } });
-
-    await expect(readCrawlIndexState(esClient, INDEX_NAME)).resolves.toEqual({
-      exists: true,
-      isCrawlIndex: true,
-    });
-    expect(esClient.indices.getMapping).toHaveBeenCalledWith({ index: INDEX_NAME });
+    await expect(readCrawlIndexMappings(esClient, 'docs')).resolves.toEqual([
+      { properties: { title: { type: 'text' } } },
+      {},
+    ]);
+    expect(esClient.indices.getMapping).toHaveBeenCalledWith({ index: 'docs' });
   });
 });
 
@@ -81,32 +65,69 @@ describe('createCrawlIndex', () => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
   });
 
-  it('creates the index with the crawl metadata and every field of a crawled page', async () => {
-    await createCrawlIndex(esClient, INDEX_NAME, INDEX_META);
+  it('creates the index with every field of a crawled page, and nothing else', async () => {
+    await createCrawlIndex(esClient, INDEX_NAME);
 
     expect(esClient.indices.create).toHaveBeenCalledTimes(1);
     expect(esClient.indices.create).toHaveBeenCalledWith({
       index: INDEX_NAME,
       mappings: {
-        _meta: { web_crawl: INDEX_META },
         properties: {
           url: { type: 'keyword' },
           title: { type: 'text' },
           description: { type: 'text' },
           content: { type: 'text', copy_to: 'content_semantic' },
           content_semantic: { type: 'semantic_text' },
-          depth: { type: 'integer' },
-          crawl_id: { type: 'keyword' },
-          crawled_at: { type: 'date' },
-          crawl_scope: { type: 'keyword' },
-          url_host: { type: 'keyword' },
-          url_path: { type: 'keyword' },
           url_path_dir1: { type: 'keyword' },
           url_path_dir2: { type: 'keyword' },
           url_path_dir3: { type: 'keyword' },
+          ...CRAWL_FIELDS,
         },
       },
     });
+  });
+});
+
+describe('addCrawlFields', () => {
+  let esClient: ElasticsearchClientMock;
+
+  beforeEach(() => {
+    esClient = elasticsearchServiceMock.createElasticsearchClient();
+  });
+
+  it('adds only the fields the index does not have', async () => {
+    const { depth, crawl_id: crawlId, ...missing } = CRAWL_FIELDS;
+
+    await addCrawlFields(esClient, INDEX_NAME, [
+      { properties: { title: { type: 'text' }, depth: { type: 'long' }, crawl_id: crawlId } },
+    ]);
+
+    expect(esClient.indices.putMapping).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.putMapping).toHaveBeenCalledWith({
+      index: INDEX_NAME,
+      properties: missing,
+    });
+  });
+
+  it('leaves an index that has them all alone', async () => {
+    await addCrawlFields(esClient, INDEX_NAME, [{ properties: CRAWL_FIELDS }]);
+
+    expect(esClient.indices.putMapping).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['another type', { type: 'text' as const }, 'text'],
+    ['an object', { properties: {} }, 'object'],
+  ])('refuses an index that maps one of them as %s', async (_, urlPath, type) => {
+    await expect(
+      addCrawlFields(esClient, INDEX_NAME, [{ properties: { ...CRAWL_FIELDS, url_path: urlPath } }])
+    ).rejects.toThrow(
+      new IncompatibleCrawlIndexError(
+        `Index ${INDEX_NAME} maps url_path as ${type}, and a crawl needs it to be keyword`
+      )
+    );
+
+    expect(esClient.indices.putMapping).not.toHaveBeenCalled();
   });
 });
 

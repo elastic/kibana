@@ -8,17 +8,23 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-const WEB_CRAWL_META_KEY = 'web_crawl';
+type CrawlFieldType = 'integer' | 'keyword' | 'date';
 
-/** Marks an index as created by a crawl, so a crawl never writes into an index it does not own. */
-export interface WebCrawlIndexMeta {
-  url: string;
-}
+// The fields purging relies on. A crawl adds them to an index it did not create.
+const CRAWL_FIELDS: Record<string, { type: CrawlFieldType }> = {
+  depth: { type: 'integer' },
+  crawl_id: { type: 'keyword' },
+  crawl_scope: { type: 'keyword' },
+  crawled_at: { type: 'date' },
+  url_host: { type: 'keyword' },
+  url_path: { type: 'keyword' },
+};
 
-export interface CrawlIndexState {
-  exists: boolean;
-  isCrawlIndex: boolean;
-}
+const COMPATIBLE_TYPES: Record<CrawlFieldType, string[]> = {
+  integer: ['integer', 'long', 'short', 'byte'],
+  keyword: ['keyword'],
+  date: ['date', 'date_nanos'],
+};
 
 const CRAWL_INDEX_PROPERTIES: Record<string, estypes.MappingProperty> = {
   url: { type: 'keyword' },
@@ -26,31 +32,25 @@ const CRAWL_INDEX_PROPERTIES: Record<string, estypes.MappingProperty> = {
   description: { type: 'text' },
   content: { type: 'text', copy_to: 'content_semantic' },
   content_semantic: { type: 'semantic_text' },
-  depth: { type: 'integer' },
-  crawl_id: { type: 'keyword' },
-  crawled_at: { type: 'date' },
-  crawl_scope: { type: 'keyword' },
-  url_host: { type: 'keyword' },
-  url_path: { type: 'keyword' },
   url_path_dir1: { type: 'keyword' },
   url_path_dir2: { type: 'keyword' },
   url_path_dir3: { type: 'keyword' },
+  ...CRAWL_FIELDS,
 };
 
-export const readCrawlIndexState = async (
+export class IncompatibleCrawlIndexError extends Error {}
+
+/** The mappings of the indices behind a name, or `undefined` when there is none. */
+export const readCrawlIndexMappings = async (
   esClient: ElasticsearchClient,
   indexName: string
-): Promise<CrawlIndexState> => {
+): Promise<estypes.MappingTypeMapping[] | undefined> => {
   try {
-    const mappings = await esClient.indices.getMapping({ index: indexName });
-    // An alias or a data stream answers with the indices behind it, under their own names.
-    const indexMeta = Object.hasOwn(mappings, indexName)
-      ? mappings[indexName].mappings._meta
-      : undefined;
-    return { exists: true, isCrawlIndex: indexMeta?.[WEB_CRAWL_META_KEY] !== undefined };
+    const indices = await esClient.indices.getMapping({ index: indexName });
+    return Object.values(indices).map(({ mappings }) => mappings);
   } catch (error) {
     if (error?.statusCode === 404) {
-      return { exists: false, isCrawlIndex: false };
+      return undefined;
     }
     throw error;
   }
@@ -58,13 +58,41 @@ export const readCrawlIndexState = async (
 
 export const createCrawlIndex = async (
   esClient: ElasticsearchClient,
-  indexName: string,
-  meta: WebCrawlIndexMeta
+  indexName: string
 ): Promise<void> => {
   await esClient.indices.create({
     index: indexName,
-    mappings: { _meta: { [WEB_CRAWL_META_KEY]: meta }, properties: CRAWL_INDEX_PROPERTIES },
+    mappings: { properties: CRAWL_INDEX_PROPERTIES },
   });
+};
+
+/**
+ * Adds the fields purging relies on to an existing index, and leaves every other field to its
+ * owner. Throws an `IncompatibleCrawlIndexError` when one of them is mapped as another type.
+ */
+export const addCrawlFields = async (
+  esClient: ElasticsearchClient,
+  indexName: string,
+  mappings: estypes.MappingTypeMapping[]
+): Promise<void> => {
+  const missing: Record<string, estypes.MappingProperty> = {};
+  for (const [field, property] of Object.entries(CRAWL_FIELDS)) {
+    for (const { properties = {} } of mappings) {
+      const existing = properties[field];
+      if (!existing) {
+        missing[field] = property;
+      } else if (!COMPATIBLE_TYPES[property.type].includes(existing.type ?? 'object')) {
+        throw new IncompatibleCrawlIndexError(
+          `Index ${indexName} maps ${field} as ${
+            existing.type ?? 'object'
+          }, and a crawl needs it to be ${property.type}`
+        );
+      }
+    }
+  }
+  if (Object.keys(missing).length > 0) {
+    await esClient.indices.putMapping({ index: indexName, properties: missing });
+  }
 };
 
 /** Works for missing indices too. */
