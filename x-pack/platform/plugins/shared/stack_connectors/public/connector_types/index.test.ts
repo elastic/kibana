@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { typeToPathMap } from '@elastic/eui/lib/components/icon/icon_map';
+import { typeToPathMap } from '@elastic/eui/es/components/icon/icon_map';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
 import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';

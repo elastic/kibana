@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/es/test/rtl';
 
 import { Assignees } from './assignees';
 import { TestProviders } from '../../../../common/mock';

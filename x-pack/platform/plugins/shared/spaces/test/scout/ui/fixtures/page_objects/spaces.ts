@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CHROME_HEADER_TEST_SUBJECTS } from '@kbn/core-chrome-browser-components';
+import { CHROME_HEADER_TEST_SUBJECTS } from '@kbn/core-chrome-browser-components/test_subjects';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { KibanaUrl, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';

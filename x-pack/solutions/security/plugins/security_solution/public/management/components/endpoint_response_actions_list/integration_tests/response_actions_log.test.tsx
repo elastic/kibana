@@ -9,7 +9,7 @@ import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import { waitFor, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/es/test/rtl';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import {
   type AppContextTestRender,

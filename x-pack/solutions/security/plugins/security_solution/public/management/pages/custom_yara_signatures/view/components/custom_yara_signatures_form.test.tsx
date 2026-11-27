@@ -8,7 +8,7 @@
 import React from 'react';
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/es/test/rtl';
 import type { IHttpFetchError } from '@kbn/core/public';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';

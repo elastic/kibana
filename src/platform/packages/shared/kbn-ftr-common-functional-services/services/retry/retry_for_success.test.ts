@@ -9,7 +9,7 @@
 
 import { retryForSuccess } from './retry_for_success';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
-import * as testJestHelpers from '@kbn/test-jest-helpers';
+import * as delayModule from './delay';
 
 describe('Retry for success', () => {
   it(`should log failures and run the recovery callback`, async () => {
@@ -40,7 +40,7 @@ describe('Retry for success', () => {
     `);
   });
   it('should call delay with initialDelay if initialDelay is provided', async () => {
-    const delaySpy = jest.spyOn(testJestHelpers, 'delay').mockResolvedValue(undefined);
+    const delaySpy = jest.spyOn(delayModule, 'delay').mockResolvedValue(undefined);
     const log = new ToolingLog();
     const block = async () => 42;
     const initialDelay = 1234;

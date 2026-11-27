@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/repo-info'
   - '@kbn/repo-packages'
   - '@kbn/tooling-log'
+  - '@kbn/scout-info'
 tags:
   - shared-server
   - package

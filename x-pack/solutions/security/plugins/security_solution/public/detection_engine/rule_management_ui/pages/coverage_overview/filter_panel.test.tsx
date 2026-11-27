@@ -8,7 +8,7 @@
 import { fireEvent, render, within } from '@testing-library/react';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/es/test/rtl';
 
 import { TestProviders } from '../../../../common/mock';
 import { CoverageOverviewFiltersPanel } from './filters_panel';

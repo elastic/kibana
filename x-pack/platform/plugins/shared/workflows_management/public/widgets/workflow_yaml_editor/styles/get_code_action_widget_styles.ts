@@ -6,7 +6,7 @@
  */
 
 import { euiShadow, type UseEuiTheme } from '@elastic/eui';
-import productAgentSvg from '@elastic/eui/lib/components/icon/svgs/product_agent.svg';
+import productAgentSvg from '@elastic/eui/es/components/icon/svgs/product_agent.svg';
 import { css } from '@emotion/react';
 import { FIX_WITH_AI_LABEL } from '../lib/fix_with_ai_label';
 

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen } from '@elastic/eui/lib/test/rtl';
+import { screen } from '@elastic/eui/es/test/rtl';
 import { render } from '../../../../utils/test_helper';
 import { SectionContainer } from './section_container';
 

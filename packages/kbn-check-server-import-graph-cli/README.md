@@ -29,3 +29,9 @@ Plugin `server/index.ts` files load their plugin class with `await import('./plu
 ## Fixing a violation
 
 The reported chain starts at a server entry point and ends at the file that imports the browser-only module. The fix is almost always in the middle: a barrel (`common/index.ts`, a package `index.ts`) that re-exports both pure and browser-only code. Move the browser-only code into its own module that only browser code imports, or give the server a pure subpath to import. Rebuilding browser values from theme tokens on the server is rarely the right answer.
+
+## Test runners
+
+The same command also walks from every FTR config in `.buildkite/ftr-manifests` and every file under a Scout root. FTR and Scout run in Node, which can't load EUI's ESM build ([elastic/eui#9751](https://github.com/elastic/eui/pull/9751)), so `@elastic/eui` must not be reachable from them. The walk also follows the literal paths FTR loads test files from (`require.resolve('./x')`, `resolve(__dirname, './x')`).
+
+To fix a violation, import the constant (usually a test subject) from an entry point without React or EUI, like the package `test_subjects.ts`.

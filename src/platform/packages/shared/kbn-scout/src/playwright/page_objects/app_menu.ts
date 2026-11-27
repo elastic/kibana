@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
+import { APP_MENU_TEST_SUBJECTS } from '@kbn/app-header/test_subjects';
 import type { Locator } from 'playwright/test';
 import type { ScoutPage } from '..';
 

@@ -16,7 +16,7 @@ import {
   BUTTON_NEXT_TEST_SUBJ,
   COUNTER_TEST_SUBJ,
   HIGHLIGHT_CLASS_NAME,
-} from '@kbn/data-grid-in-table-search';
+} from '@kbn/data-grid-in-table-search/constants';
 import type {
   WebElementWrapper,
   CustomCheerioStatic,

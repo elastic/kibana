@@ -6,7 +6,7 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
-import { APP_MENU_TEST_SUBJECTS, getAppMenuItemTestSubj } from '@kbn/app-header';
+import { APP_MENU_TEST_SUBJECTS, getAppMenuItemTestSubj } from '@kbn/app-header/test_subjects';
 import type { ProfilingSchema } from '@kbn/profiling-utils';
 import { EXTENDED_TIMEOUT } from '..';
 

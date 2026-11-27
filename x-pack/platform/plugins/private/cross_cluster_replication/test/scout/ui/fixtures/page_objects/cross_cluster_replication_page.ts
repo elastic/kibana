@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header/test_subjects';
 import type { Locator, ScoutPage } from '@kbn/scout';
 
 const CCR_FOLLOWER_INDICES_PATH = 'management/data/cross_cluster_replication/follower_indices';

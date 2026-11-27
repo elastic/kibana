@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { waitForEuiPopoverClose, waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverClose, waitForEuiPopoverOpen } from '@elastic/eui/es/test/rtl';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ApiEndpointId } from '../../../common/api_endpoints';
 import { MoreEndpointsPopover } from './more_endpoints_popover';

@@ -10,7 +10,7 @@
 import type { WebDriver, WebElement } from 'selenium-webdriver';
 import { By, until } from 'selenium-webdriver';
 
-import { delay } from '@kbn/test-jest-helpers';
+import { setTimeout as delay } from 'timers/promises';
 import type { Browsers } from './remote/browsers';
 import type { FtrProviderContext } from './ftr_provider_context';
 import { WebElementWrapper } from './web_element_wrapper';

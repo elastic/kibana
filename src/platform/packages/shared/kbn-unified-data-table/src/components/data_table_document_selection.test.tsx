@@ -9,7 +9,7 @@
 
 import type { DataTableCompareToolbarBtn } from './data_table_document_selection';
 import React from 'react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/es/test/rtl';
 import userEvent from '@testing-library/user-event';
 import {
   buildSelectedDocsState,

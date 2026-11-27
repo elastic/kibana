@@ -52,7 +52,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { servicesMock } from '../../__mocks__/services';
 import { useColumns } from '../hooks/use_data_grid_columns';
 import { UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS } from '../hooks/use_full_screen_watcher';
-import { waitForEuiPopoverClose, waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverClose, waitForEuiPopoverOpen } from '@elastic/eui/es/test/rtl';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 

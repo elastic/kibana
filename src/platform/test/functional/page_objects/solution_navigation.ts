@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
-import { CHROME_HEADER_TEST_SUBJECTS } from '@kbn/core-chrome-browser-components';
+import { CHROME_HEADER_TEST_SUBJECTS } from '@kbn/core-chrome-browser-components/test_subjects';
 
 type NavigationId = string;
 

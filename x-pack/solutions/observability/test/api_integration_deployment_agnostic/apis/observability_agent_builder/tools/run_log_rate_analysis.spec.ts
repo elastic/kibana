@@ -13,7 +13,10 @@ import {
   LOG_RATE_ANALYSIS_SPIKE_DEVIATION_WINDOW,
   LOG_RATE_ANALYSIS_SPIKE_DATA_STREAM,
 } from '@kbn/synthtrace';
-import { LOG_RATE_ANALYSIS_TYPE, type LogRateAnalysisType } from '@kbn/aiops-log-rate-analysis';
+import {
+  LOG_RATE_ANALYSIS_TYPE,
+  type LogRateAnalysisType,
+} from '@kbn/aiops-log-rate-analysis/log_rate_analysis_type';
 import type { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ErrorResult } from '@kbn/agent-builder-common';
 import { OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools/run_log_rate_analysis/tool';

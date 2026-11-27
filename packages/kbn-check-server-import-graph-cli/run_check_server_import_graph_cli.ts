@@ -11,26 +11,24 @@ import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 
 import { checkServerImportGraph } from './src/check_server_import_graph';
+import { checkTestRunnerImportGraph } from './src/check_test_runner_import_graph';
 
 run(
   async ({ log, flagsReader }) => {
     const modules = flagsReader.arrayOfStrings('module');
-    const passed = await checkServerImportGraph({
-      log,
-      bannedNodeModules: modules?.length ? new Set(modules) : undefined,
-    });
+    const bannedNodeModules = modules?.length ? new Set(modules) : undefined;
+    const server = await checkServerImportGraph({ log, bannedNodeModules });
+    const testRunners = await checkTestRunnerImportGraph({ log, bannedNodeModules });
 
-    if (!passed) {
-      throw createFailError(
-        'Banned node modules are reachable from the Kibana server. See the errors above.'
-      );
+    if (!server || !testRunners) {
+      throw createFailError('Banned node modules are reachable. See the errors above.');
     }
   },
   {
     usage: 'node scripts/check_server_import_graph [--module <name>]...',
     description:
-      'Statically walks the import graph from every server entry point and fails when a banned ' +
-      'node module (`BANNED_NODE_MODULES` by default) is reachable from it.',
+      'Statically walks the import graph from every server entry point, FTR config and Scout file ' +
+      'and fails when a banned node module is reachable from it.',
     flags: {
       string: ['module'],
       help: `

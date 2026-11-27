@@ -9,6 +9,6 @@
 // names, which `index.test.ts` needs to validate registered `iconClass` values.
 // The public `ICON_TYPES` export is unusable here: jest resolves `@elastic/eui`
 // to the `test-env` build, where that array is empty.
-declare module '@elastic/eui/lib/components/icon/icon_map' {
+declare module '@elastic/eui/es/components/icon/icon_map' {
   export const typeToPathMap: Record<string, unknown>;
 }

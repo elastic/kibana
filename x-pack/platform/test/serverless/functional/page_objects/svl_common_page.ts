@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CHROME_HEADER_TEST_SUBJECTS } from '@kbn/core-chrome-browser-components';
+import { CHROME_HEADER_TEST_SUBJECTS } from '@kbn/core-chrome-browser-components/test_subjects';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 interface LoginWithRoleOptions {

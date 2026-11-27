@@ -16,14 +16,14 @@ import {
 } from './synthetics_policy_edit_extension_wrapper';
 
 // ensures that fields appropriately match to their label
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
-  ...jest.requireActual('@elastic/eui/lib/services/accessibility/html_id_generator'),
+jest.mock('@elastic/eui/es/services/accessibility/html_id_generator', () => ({
+  ...jest.requireActual('@elastic/eui/es/services/accessibility/html_id_generator'),
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
 
 // ensures that fields appropriately match to their label
-jest.mock('@elastic/eui/lib/services/accessibility', () => ({
-  ...jest.requireActual('@elastic/eui/lib/services/accessibility'),
+jest.mock('@elastic/eui/es/services/accessibility', () => ({
+  ...jest.requireActual('@elastic/eui/es/services/accessibility'),
   useGeneratedHtmlId: () => `id-${Math.random()}`,
 }));
 

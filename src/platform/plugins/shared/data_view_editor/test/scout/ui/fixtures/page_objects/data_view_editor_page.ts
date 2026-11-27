@@ -9,7 +9,7 @@
 
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header/test_subjects';
 
 // Detail page URL after a data view is saved: /app/management/kibana/dataViews/dataView/<id>
 export const DATA_VIEW_DETAIL_URL_PATTERN = /\/management\/kibana\/dataViews\/.+/;

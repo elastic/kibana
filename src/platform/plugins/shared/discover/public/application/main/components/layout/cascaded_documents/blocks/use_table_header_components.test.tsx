@@ -12,7 +12,7 @@ import { renderHook, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@elastic/eui';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/es/test/rtl';
 import type { CascadedDocumentsContext } from '../cascaded_documents_provider';
 import type { RenderViewModeToggleOptions } from '../../../../../../components/view_mode_toggle';
 import {
