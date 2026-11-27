@@ -16,6 +16,7 @@ import {
   withCrashGroup,
   withCrashTypes,
   withLatestCrash,
+  withStoredCrashGroup,
   type CrashBreakdownName,
   type CrashBreakdownRow,
   type LatestCrashRow,
@@ -125,9 +126,14 @@ export const getCrashGroup = async ({
   end,
   environment,
 }: GetCrashGroupParams): Promise<Omit<MobileCrashGroupDetailResponse, 'isPartial'>> => {
+  // A key SHA256 can't print is only ever stored, so its group has no computed crash to look for.
+  const storedOnly = !canBeComputedFingerprint(fingerprint);
   // `pipe` appends to the query it's called on, so each query starts from its own.
   const groupCrashes = (types?: ReadonlyArray<string | null>) => {
     const crashes = crashEvents({ ...filters, start, end });
+    if (storedOnly) {
+      return withStoredCrashGroup(crashes, fingerprint);
+    }
     return withCrashGroup(
       withCrashFingerprint(types ? withCrashTypes(crashes, types) : crashes),
       fingerprint
@@ -150,9 +156,7 @@ export const getCrashGroup = async ({
     const typed = crashType === undefined ? undefined : await latestOf([crashType]);
     return typed && !typed[RESULT_COLUMNS.storedFingerprint] ? typed : latestOf();
   };
-  // A key SHA256 can't print is only ever stored, so its group has no computed crash to look for.
-  const storedOnly = !canBeComputedFingerprint(fingerprint);
-  const latestRow = storedOnly ? await latestOf([]) : await typedLatest();
+  const latestRow = storedOnly ? await latestOf() : await typedLatest();
   if (!latestRow) {
     const none: CrashBreakdown = { top: [], other: 0 };
     return {
@@ -166,13 +170,7 @@ export const getCrashGroup = async ({
   const latestCrash = toCrash(latestRow);
   // The group's computed crashes have the latest one's type when its fingerprint was computed too,
   // so the breakdowns only fingerprint the crashes of that type, and the stored ones.
-  const breakdownTypes = (): Array<string | null> | undefined => {
-    if (storedOnly) {
-      return [];
-    }
-    return latestRow[RESULT_COLUMNS.storedFingerprint] ? undefined : [latestCrash.type];
-  };
-  const types = breakdownTypes();
+  const types = latestRow[RESULT_COLUMNS.storedFingerprint] ? undefined : [latestCrash.type];
   const breakdown = (name: CrashBreakdownName) =>
     runEsql<CrashBreakdownRow>(
       esClient,

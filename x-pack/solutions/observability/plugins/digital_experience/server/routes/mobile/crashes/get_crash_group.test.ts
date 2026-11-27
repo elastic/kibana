@@ -470,7 +470,7 @@ describe('getCrashGroup', () => {
     ['the type the app knows', 'SIGTRAP'],
     ['no type from the app', undefined],
   ])(
-    'fingerprints only stored crashes for a key no crash can compute, with %s',
+    'matches the stored fingerprint, computing none, for a key no crash can compute, with %s',
     async (_, crashType) => {
       const { client, esClient } = createTracedEsClientMock();
       client.esql.query.mockImplementation(async ({ query }) =>
@@ -494,11 +494,11 @@ describe('getCrashGroup', () => {
       expect(requests.filter(({ query }) => query.includes('LIMIT 1 |'))).toHaveLength(1);
       // The latest crash and the three breakdowns.
       expect(requests).toHaveLength(4);
-      requests.forEach(({ query }) =>
-        expect(query).toContain(
-          'WHERE `attributes.elastic.error.grouping_key` IS NOT NULL | EVAL fingerprint'
-        )
-      );
+      requests.forEach(({ query, params }) => {
+        expect(query).toContain('| WHERE `attributes.elastic.error.grouping_key` == ?fingerprint');
+        expect(query).not.toContain('SHA256');
+        expect(params).toEqual(expect.arrayContaining([{ fingerprint: 'ingest-fingerprint' }]));
+      });
     }
   );
 });

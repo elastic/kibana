@@ -17,6 +17,7 @@ import {
   withCrashTypes,
   withLatestCrash,
   withReleaseSightings,
+  withStoredCrashGroup,
 } from './crash_groups';
 
 const START = Date.parse('2021-01-18T12:00:00.000Z');
@@ -164,6 +165,17 @@ describe('crash group detail', () => {
 
     expect(query).toContain('| WHERE fingerprint == ?fingerprint');
     expect(params).toEqual(expect.arrayContaining([{ fingerprint: 'abc' }]));
+  });
+
+  it("keeps a stored group's crashes by their stored fingerprint, computing none", () => {
+    const { query, params } = withStoredCrashGroup(
+      crashEvents({ serviceName: 'ride-ios', start: START, end: END }),
+      'ingest-fingerprint'
+    ).toRequest();
+
+    expect(query).toContain('| WHERE `attributes.elastic.error.grouping_key` == ?fingerprint');
+    expect(query).not.toContain('SHA256');
+    expect(params).toEqual(expect.arrayContaining([{ fingerprint: 'ingest-fingerprint' }]));
   });
 
   it('reads the crash that happened last with its stack trace and session', () => {

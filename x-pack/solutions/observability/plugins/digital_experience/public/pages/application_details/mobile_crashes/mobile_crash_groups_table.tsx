@@ -6,14 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiInMemoryTable,
-  EuiLink,
-  EuiText,
-} from '@elastic/eui';
+import { EuiBadge, EuiInMemoryTable, EuiLink, EuiScreenReaderOnly, EuiText } from '@elastic/eui';
 import type { Criteria, EuiBasicTableColumn, PropertySort } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
@@ -88,7 +81,18 @@ const NEW_IN_RELEASE_TOOLTIP = i18n.translate(
   }
 );
 
+const NEW_IN_RELEASE_LABEL = i18n.translate(
+  'xpack.digitalExperience.mobile.crashes.table.newInRelease',
+  { defaultMessage: 'New in release' }
+);
+
 const PAGE_SIZE = 10;
+
+/** Wide enough for a fully qualified type, e.g. "java.lang.IllegalArgumentException". */
+const CRASH_COLUMN_WIDTH = '24em';
+
+/** Wide enough for the badge of a release, e.g. "New in 4.12.0". */
+const NEW_IN_COLUMN_WIDTH = '9em';
 
 /** Wide enough for a release and how long ago, e.g. "4.12.0 · 23 hours ago". */
 const SEEN_COLUMN_WIDTH = '13em';
@@ -152,36 +156,22 @@ export function MobileCrashGroupsTable({
       field: 'type',
       name: CRASH_LABEL,
       nameTooltip: { content: CRASH_TOOLTIP },
-      render: (type: string | null, { fingerprint, message, newInRelease }: MobileCrashGroup) => (
+      width: CRASH_COLUMN_WIDTH,
+      minWidth: CRASH_COLUMN_WIDTH,
+      render: (type: string | null, { fingerprint, message }: MobileCrashGroup) => (
         <div className="eui-textTruncate">
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            {/* Shrinks below its text, so a long type ends in an ellipsis before the badge. */}
-            <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
-              <EuiLink
-                className="eui-textTruncate"
-                title={type ?? UNKNOWN_ERROR_TYPE_LABEL}
-                onClick={() => onSelect(fingerprint)}
-                data-test-subj="digitalExperienceMobileCrashGroup"
-                {...getEbtProps({
-                  action: EBT_CLICK_ACTIONS.VIEW_ERROR,
-                  element: MOBILE_CRASHES_EBT_ELEMENTS.CRASH_GROUP,
-                })}
-              >
-                {type ?? UNKNOWN_ERROR_TYPE_LABEL}
-              </EuiLink>
-            </EuiFlexItem>
-            {newInRelease && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge
-                  color="warning"
-                  title={NEW_IN_RELEASE_TOOLTIP}
-                  data-test-subj="digitalExperienceMobileCrashGroupNew"
-                >
-                  {newInReleaseLabel(newInRelease)}
-                </EuiBadge>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+          <EuiLink
+            className="eui-textTruncate"
+            title={type ?? UNKNOWN_ERROR_TYPE_LABEL}
+            onClick={() => onSelect(fingerprint)}
+            data-test-subj="digitalExperienceMobileCrashGroup"
+            {...getEbtProps({
+              action: EBT_CLICK_ACTIONS.VIEW_ERROR,
+              element: MOBILE_CRASHES_EBT_ELEMENTS.CRASH_GROUP,
+            })}
+          >
+            {type ?? UNKNOWN_ERROR_TYPE_LABEL}
+          </EuiLink>
           {message && (
             <EuiText size="xs" color="subdued" className="eui-textTruncate" title={message}>
               {message}
@@ -189,6 +179,27 @@ export function MobileCrashGroupsTable({
           )}
         </div>
       ),
+    },
+    {
+      field: 'newInRelease',
+      name: (
+        <EuiScreenReaderOnly>
+          <span>{NEW_IN_RELEASE_LABEL}</span>
+        </EuiScreenReaderOnly>
+      ),
+      width: NEW_IN_COLUMN_WIDTH,
+      minWidth: NEW_IN_COLUMN_WIDTH,
+      className: 'eui-textNoWrap',
+      render: (newInRelease: string | null) =>
+        newInRelease && (
+          <EuiBadge
+            color="warning"
+            title={NEW_IN_RELEASE_TOOLTIP}
+            data-test-subj="digitalExperienceMobileCrashGroupNew"
+          >
+            {newInReleaseLabel(newInRelease)}
+          </EuiBadge>
+        ),
     },
     {
       field: 'users',
@@ -217,6 +228,7 @@ export function MobileCrashGroupsTable({
       name: FIRST_SEEN_LABEL,
       nameTooltip: { content: FIRST_SEEN_TOOLTIP },
       width: SEEN_COLUMN_WIDTH,
+      minWidth: SEEN_COLUMN_WIDTH,
       className: 'eui-textNoWrap',
       sortable: ({ firstSeen }: MobileCrashGroup) => firstSeen.time,
       render: (firstSeen: CrashGroupSeen) => <Seen seen={firstSeen} />,
@@ -225,6 +237,7 @@ export function MobileCrashGroupsTable({
       field: 'lastSeen',
       name: LAST_SEEN_LABEL,
       width: SEEN_COLUMN_WIDTH,
+      minWidth: SEEN_COLUMN_WIDTH,
       className: 'eui-textNoWrap',
       sortable: ({ lastSeen }: MobileCrashGroup) => lastSeen.time,
       render: (lastSeen: CrashGroupSeen) => <Seen seen={lastSeen} />,
@@ -244,6 +257,8 @@ export function MobileCrashGroupsTable({
         items={crashGroups}
         itemId="fingerprint"
         columns={columns}
+        tableLayout="auto"
+        scrollableInline
         sorting={{ sort }}
         // A second click reverses the order rather than dropping it.
         allowNeutralSort={false}

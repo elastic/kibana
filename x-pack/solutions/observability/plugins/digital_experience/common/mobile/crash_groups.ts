@@ -272,6 +272,10 @@ export interface CrashGroupHistoryRow {
 export const withCrashGroup = (query: ComposerQuery, fingerprint: string): ComposerQuery =>
   query.pipe`WHERE ${resultColumn('fingerprint')} == ${{ fingerprint }}`;
 
+/** The crashes of a group whose key only a stored fingerprint can have, without fingerprinting. */
+export const withStoredCrashGroup = (query: ComposerQuery, fingerprint: string): ComposerQuery =>
+  query.pipe`WHERE ${mobileColumn('exceptionFingerprint')} == ${{ fingerprint }}`;
+
 /**
  * A group's latest crash, with its stack trace and session: the one that happened last, which a
  * crash sent days later need not be.
