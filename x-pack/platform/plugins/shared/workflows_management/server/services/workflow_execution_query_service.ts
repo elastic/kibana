@@ -1056,14 +1056,13 @@ export class WorkflowExecutionQueryService {
     if (!stepExecutionIds?.length) {
       return this.searchStepExecutionByStepId(executionId, stepId, spaceId);
     }
+    const isOfThisStep = (step: EsWorkflowStepExecution) =>
+      step.stepId === stepId && step.workflowRunId === executionId && step.spaceId === spaceId;
     const candidates = await this.getStepExecutionsInBatches(stepExecutionIds, {
       sourceIncludes: ['id', 'stepId', 'startedAt', 'workflowRunId', 'spaceId'],
     });
     const ids = candidates
-      .filter(
-        (step) =>
-          step.stepId === stepId && step.workflowRunId === executionId && step.spaceId === spaceId
-      )
+      .filter(isOfThisStep)
       .sort(byStartedAtDesc)
       .map(({ id }) => id);
     let newest: EsWorkflowStepExecution | undefined;
@@ -1071,7 +1070,12 @@ export class WorkflowExecutionQueryService {
       const { items } = await this.deps.stepExecutionsDataClient.getByIds(
         ids.slice(start, start + STEP_EXECUTIONS_BATCH_SIZE)
       );
-      const steps = items.map(({ document }) => document).sort(byStartedAtDesc);
+      // Each read resolves ids across backing and legacy indices again, so it can return a copy
+      // of another run or space.
+      const steps = items
+        .map(({ document }) => document)
+        .filter(isOfThisStep)
+        .sort(byStartedAtDesc);
       newest ??= steps[0];
       const withOutput = steps.find(({ output }) => output != null);
       if (withOutput) return withOutput;

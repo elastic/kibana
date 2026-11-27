@@ -939,6 +939,60 @@ describe('WorkflowExecutionQueryService', () => {
       expect(mockStepDataClient.getByIds).toHaveBeenCalledTimes(1);
     });
 
+    it('drops a full document of another step, execution or space that the second read resolves', async () => {
+      mockStepDataClient.getByIds
+        .mockResolvedValueOnce(
+          createMockGetExecutionsByIdsResponse([
+            step('se-1', 'gate', '2026-01-01T00:00:01.000Z'),
+            step('se-2', 'gate', '2026-01-01T00:00:02.000Z'),
+            step('se-3', 'gate', '2026-01-01T00:00:03.000Z'),
+            step('se-4', 'gate', '2026-01-01T00:00:04.000Z'),
+          ])
+        )
+        .mockResolvedValueOnce(
+          createMockGetExecutionsByIdsResponse([
+            step('se-1', 'gate', '2026-01-01T00:00:01.000Z', { output: { a: 1 } }),
+            step('se-2', 'other', '2026-01-01T00:00:02.000Z', { output: { a: 2 } }),
+            step('se-3', 'gate', '2026-01-01T00:00:03.000Z', {
+              workflowRunId: 'other-exec',
+              output: { a: 3 },
+            }),
+            step('se-4', 'gate', '2026-01-01T00:00:04.000Z', {
+              spaceId: 'other-space',
+              output: { a: 4 },
+            }),
+          ])
+        );
+
+      await expect(
+        service.getStepExecutionByStepId(
+          {
+            executionId: 'exec-1',
+            stepId: 'gate',
+            stepExecutionIds: ['se-1', 'se-2', 'se-3', 'se-4'],
+          },
+          'default'
+        )
+      ).resolves.toMatchObject({ id: 'se-1', output: { a: 1 } });
+    });
+
+    it('returns null when every full document belongs to another step, execution or space', async () => {
+      mockStepDataClient.getByIds
+        .mockResolvedValueOnce(createMockGetExecutionsByIdsResponse([step('se-1', 'gate', 's')]))
+        .mockResolvedValueOnce(
+          createMockGetExecutionsByIdsResponse([
+            step('se-1', 'gate', 's', { workflowRunId: 'other-exec' }),
+          ])
+        );
+
+      await expect(
+        service.getStepExecutionByStepId(
+          { executionId: 'exec-1', stepId: 'gate', stepExecutionIds: ['se-1'] },
+          'default'
+        )
+      ).resolves.toBeNull();
+    });
+
     it('reads a long run in batches of 1000, newest first, and stops at the first output', async () => {
       const stepExecutionIds = Array.from({ length: 2500 }, (_, i) => `se-${i}`);
       const startedAt = (id: string) => String(Number(id.slice(3))).padStart(4, '0');
