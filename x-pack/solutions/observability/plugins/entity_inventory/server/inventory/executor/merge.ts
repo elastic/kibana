@@ -15,7 +15,7 @@ import { hasValue, isNewer, lastSeenInstant } from './utils';
 // Map, not an object whose inherited members would read as values; objects are built at the end.
 interface EntityState {
   row: Map<string, ESQLValue>;
-  /** Attribute column to the index pattern of the source that supplied its value. */
+  /** Attribute or metric column to the index pattern of the source that supplied its value. */
   provenance: Map<string, string>;
   lastSeen: number | null;
   /** Attribute column to the `last_seen` of the row that supplied its value. */
@@ -52,10 +52,14 @@ const mergeInto = (
       }
       return;
     }
-    // Metrics, id, and identity: first non-null in plan order; null never clobbers.
+    // Metrics, id, and identity: first non-null in plan order; null never clobbers. Only a metric
+    // records the index pattern of its plan in provenance.
     if (kind === 'metric' || kind === 'id' || kind === 'identity') {
       if (!hasValue(current)) {
         state.row.set(name, value);
+        if (kind === 'metric') {
+          state.provenance.set(name, indexPattern);
+        }
       }
     }
   });
@@ -64,7 +68,9 @@ const mergeInto = (
 /**
  * Merges every plan's rows by `entity.id` in plan order: attributes from the row with the newest
  * `last_seen`, metrics / `entity.id` / identity first non-null in plan order, `last_seen` newest;
- * a null never replaces a value. Provenance is recorded for attributes only.
+ * a null never replaces a value. Provenance maps each attribute and metric column to the index
+ * pattern of the plan whose row supplied the value; `entity.id`, identity fields and `last_seen`
+ * have none.
  */
 export const mergeRows = (results: PlanResult[], columns: OutputColumn[]): MergeResult => {
   const orderedPlans = [...results].sort((a, b) => a.plan.index - b.plan.index);

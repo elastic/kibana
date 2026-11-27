@@ -128,11 +128,11 @@ describe('mergeRows', () => {
       columns
     );
     expect(rows[0].cpu).toBe(0.1);
-    expect(provenance.a).not.toHaveProperty('cpu');
+    expect(provenance.a.cpu).toBe('pattern-0');
   });
 
   it('does not let a null metric clobber an earlier value', () => {
-    const { rows } = mergeRows(
+    const { rows, provenance } = mergeRows(
       [
         result(0, [{ 'entity.id': 'a', cpu: 0.4, last_seen: '2026-01-01T00:00:00.000Z' }]),
         result(1, [{ 'entity.id': 'a', cpu: null, last_seen: '2026-01-02T00:00:00.000Z' }]),
@@ -140,6 +140,23 @@ describe('mergeRows', () => {
       columns
     );
     expect(rows[0].cpu).toBe(0.4);
+    expect(provenance.a.cpu).toBe('pattern-0');
+  });
+
+  it('records metric provenance as the pattern of the plan that supplied the value, apart from the attributes', () => {
+    const { rows, provenance } = mergeRows(
+      [
+        result(0, [
+          { 'entity.id': 'a', os: 'linux', cpu: null, last_seen: '2026-01-02T00:00:00.000Z' },
+        ]),
+        result(1, [
+          { 'entity.id': 'a', os: 'mac', cpu: 0.7, last_seen: '2026-01-01T00:00:00.000Z' },
+        ]),
+      ],
+      columns
+    );
+    expect(rows[0]).toMatchObject({ os: 'linux', cpu: 0.7 });
+    expect(provenance).toEqual({ a: { os: 'pattern-0', cpu: 'pattern-1' } });
   });
 
   it('takes the newest last_seen', () => {

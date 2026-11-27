@@ -20,7 +20,7 @@ export interface SourceProbe {
  * name the pattern exactly as the author wrote it.
  */
 export interface QueryPlan {
-  /** Position in plan order, 0-based; the stable key for provenance. */
+  /** Position in plan order, 0-based; the order the merge reads plans in. */
   index: number;
   /** The source of the definition the plan came from. */
   sourceIndex: number;

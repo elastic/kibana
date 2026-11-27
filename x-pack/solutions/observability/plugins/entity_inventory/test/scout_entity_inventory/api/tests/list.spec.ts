@@ -139,11 +139,16 @@ apiTest.describe(
 
         expect(Object.keys(body.provenance).sort()).toStrictEqual(DEPLOYMENT_IDS);
         // Both sources report cart-api with last_seen 10:01:00; on that tie every attribute comes from
-        // the Agent source, whose plan is listed first.
+        // the Agent source, whose plan is listed first. available and desired are non-null in the
+        // Agent `FROM` plan, which comes before both OpenTelemetry plans; only the OpenTelemetry
+        // source declares restarts.
         expect(body.provenance[CART_API_ID]).toStrictEqual({
           'k8s.cluster.name': STATE_PATTERN,
           'k8s.deployment.paused': STATE_PATTERN,
           'k8s.deployment.label.app': STATE_PATTERN,
+          'k8s.deployment.available': STATE_PATTERN,
+          'k8s.deployment.desired': STATE_PATTERN,
+          'k8s.container.restarts': OTEL_PATTERN,
         });
         expect(
           body.queries.map(({ indexPattern, engine }) => ({ indexPattern, engine }))

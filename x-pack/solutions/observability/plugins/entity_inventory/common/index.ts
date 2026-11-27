@@ -22,7 +22,7 @@ export type ESQLValue = estypes.FieldValue | estypes.FieldValue[];
 /** One row keyed by column name; a column the row does not carry is absent. */
 export type InventoryRow = Record<string, ESQLValue>;
 
-/** Entity id to attribute column to the index pattern of the source that supplied the value. */
+/** Entity id to attribute or metric column to the index pattern of the source that supplied the value. */
 export type Provenance = Record<string, Record<string, string>>;
 
 /** A failed query against one source, safe to return to the caller. */
@@ -183,7 +183,7 @@ export interface ListResponse {
   columns: InventoryTypeColumn[];
   /** Every row carries every column, null where no source produced a value. */
   rows: InventoryRow[];
-  /** For each returned row's `entity.id`, the index pattern that supplied each attribute value. */
+  /** For each returned row's `entity.id`, the index pattern that supplied each attribute and metric value. */
   provenance: Provenance;
   /** True only when the row limit left rows out; a failed or partial plan is reported in `errors`. */
   truncated: boolean;
