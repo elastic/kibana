@@ -475,6 +475,15 @@ export const ConnectorIconsMap: Map<
   ],
 
   [
+    '.google_workspace_admin',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconGoogleWorkspaceAdmin" */ './specs/google_workspace_admin/icon'
+        )
+    ),
+  ],
+  [
     '.sentinelone2',
     lazy(
       () => import(/* webpackChunkName: "connectorIconSentinelone2" */ './specs/sentinelone/icon')

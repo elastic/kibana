@@ -1,0 +1,105 @@
+overlay: 1.0.0
+info:
+  title: Google Admin SDK Directory API corrections
+  version: 1.0.0
+actions:
+  - target: >-
+      $.paths['/admin/directory/v1/users/{userKey}/tokens/{clientId}','/admin/directory/v1/users/{userKey}/asps/{codeId}','/admin/directory/v1/groups/{groupKey}/members/{memberKey}'].delete.responses
+    description: >-
+      Discovery documents declare only the success response. Google APIs answer a request for a
+      resource that does not exist with HTTP 404 and the standard error envelope
+      {"error": {"code": 404, "message": ..., "errors": [{"reason": "notFound"}]}}, as
+      https://cloud.google.com/apis/design/errors#http_mapping describes (NOT_FOUND maps to 404).
+      Live checks: an unknown userKey answered 404 "Resource Not Found: userKey", and an unknown
+      group answered 404. The connector reads a 404 on these deletes as "already gone" only after
+      it has read the user or group and found it.
+    update:
+      '404':
+        description: The user, group, grant, app password or member does not exist.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: object
+                  properties:
+                    code:
+                      type: integer
+                    message:
+                      type: string
+                    errors:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          reason:
+                            type: string
+                          message:
+                            type: string
+                          domain:
+                            type: string
+  - target: >-
+      $.paths['/admin/directory/v1/users/{userKey}/asps/{codeId}'].delete.responses
+    description: >-
+      Live check: Google answered an unknown codeId of an existing user with HTTP 400
+      "Invalid Input" in the standard error envelope, not 404. The connector then lists the
+      user's app passwords and returns notFound when the codeId is not among them.
+    update:
+      '400':
+        description: The codeId is not an app password of this user.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: object
+                  properties:
+                    code:
+                      type: integer
+                    message:
+                      type: string
+                    errors:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          reason:
+                            type: string
+                          message:
+                            type: string
+                          domain:
+                            type: string
+  - target: >-
+      $.paths['/admin/directory/v1/users/{userKey}/verificationCodes/invalidate'].post.responses
+    description: >-
+      Live check: on a user with no valid backup codes (for example a repeated call) Google
+      answered HTTP 400 "Invalid Input" in the standard error envelope. The connector then lists
+      the user's codes and reports noValidCodes when none is valid.
+    update:
+      '400':
+        description: The user has no valid backup verification codes.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: object
+                  properties:
+                    code:
+                      type: integer
+                    message:
+                      type: string
+                    errors:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          reason:
+                            type: string
+                          message:
+                            type: string
+                          domain:
+                            type: string

@@ -102,4 +102,5 @@ export * from './specs/microsoft_defender_for_endpoint/microsoft_defender_for_en
 export * from './specs/redis/redis';
 export * from './specs/sentinelone/sentinelone';
 export * from './specs/microsoft_sql_server/microsoft_sql_server';
+export { GoogleWorkspaceAdmin } from './specs/google_workspace_admin/google_workspace_admin';
 export * from './specs/trend_vision_one/trend_vision_one';
