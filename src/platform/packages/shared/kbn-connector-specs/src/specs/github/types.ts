@@ -22,8 +22,15 @@ export type ListToolsInput = z.infer<typeof ListToolsInputSchema>;
 export const SearchCodeInputSchema = lazySchema(() =>
   z.object({
     query: z.string().min(1).max(2000).describe('GitHub code search query'),
-    page: z.number().optional().default(1).describe('Page number (1-based)'),
-    perPage: z.number().optional().default(10).describe('Results per page (max 100)'),
+    page: z.number().int().min(1).optional().default(1).describe('Page number (1-based)'),
+    perPage: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .optional()
+      .default(10)
+      .describe('Results per page (1-100, default 10)'),
   })
 );
 export type SearchCodeInput = z.infer<typeof SearchCodeInputSchema>;
@@ -31,8 +38,15 @@ export type SearchCodeInput = z.infer<typeof SearchCodeInputSchema>;
 export const SearchRepositoriesInputSchema = lazySchema(() =>
   z.object({
     query: z.string().min(1).max(2000).describe('GitHub repository search query'),
-    page: z.number().optional().default(1).describe('Page number (1-based)'),
-    perPage: z.number().optional().default(10).describe('Results per page (max 100)'),
+    page: z.number().int().min(1).optional().default(1).describe('Page number (1-based)'),
+    perPage: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .optional()
+      .default(10)
+      .describe('Results per page (1-100, default 10)'),
   })
 );
 export type SearchRepositoriesInput = z.infer<typeof SearchRepositoriesInputSchema>;
@@ -46,15 +60,31 @@ export const SearchIssuesInputSchema = lazySchema(() =>
       .default('desc')
       .describe('Sort direction: "asc" or "desc" (default "desc")'),
     sort: z
-      .string()
-      .max(50)
+      .enum([
+        'comments',
+        'reactions',
+        'reactions-+1',
+        'reactions--1',
+        'reactions-smile',
+        'reactions-thinking_face',
+        'reactions-heart',
+        'reactions-tada',
+        'interactions',
+        'created',
+        'updated',
+      ])
       .optional()
       .default('created')
-      .describe(
-        'Field to sort results by: "comments", "reactions", "reactions-+1", "reactions--1", "reactions-smile", "reactions-thinking_face", "reactions-heart", "reactions-tada", "interactions", "created", or "updated" (default "created")'
-      ),
-    page: z.number().optional().default(1).describe('Page number (1-based)'),
-    perPage: z.number().optional().default(10).describe('Results per page (max 100)'),
+      .describe('Field to sort results by (default "created")'),
+    page: z.number().int().min(1).optional().default(1).describe('Page number (1-based)'),
+    perPage: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .optional()
+      .default(10)
+      .describe('Results per page (1-100, default 10)'),
   })
 );
 export type SearchIssuesInput = z.infer<typeof SearchIssuesInputSchema>;
@@ -68,15 +98,31 @@ export const SearchPullRequestsInputSchema = lazySchema(() =>
       .default('desc')
       .describe('Sort direction: "asc" or "desc" (default "desc")'),
     sort: z
-      .string()
-      .max(50)
+      .enum([
+        'comments',
+        'reactions',
+        'reactions-+1',
+        'reactions--1',
+        'reactions-smile',
+        'reactions-thinking_face',
+        'reactions-heart',
+        'reactions-tada',
+        'interactions',
+        'created',
+        'updated',
+      ])
       .optional()
       .default('created')
-      .describe(
-        'Field to sort results by: "comments", "reactions", "reactions-+1", "reactions--1", "reactions-smile", "reactions-thinking_face", "reactions-heart", "reactions-tada", "interactions", "created", or "updated" (default "created")'
-      ),
-    page: z.number().optional().default(1).describe('Page number (1-based)'),
-    perPage: z.number().optional().default(10).describe('Results per page (max 100)'),
+      .describe('Field to sort results by (default "created")'),
+    page: z.number().int().min(1).optional().default(1).describe('Page number (1-based)'),
+    perPage: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .optional()
+      .default(10)
+      .describe('Results per page (1-100, default 10)'),
   })
 );
 export type SearchPullRequestsInput = z.infer<typeof SearchPullRequestsInputSchema>;
@@ -84,8 +130,15 @@ export type SearchPullRequestsInput = z.infer<typeof SearchPullRequestsInputSche
 export const SearchUsersInputSchema = lazySchema(() =>
   z.object({
     query: z.string().min(1).max(2000).describe('GitHub user search query'),
-    page: z.number().optional().default(1).describe('Page number (1-based)'),
-    perPage: z.number().optional().default(10).describe('Results per page (max 100)'),
+    page: z.number().int().min(1).optional().default(1).describe('Page number (1-based)'),
+    perPage: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .optional()
+      .default(10)
+      .describe('Results per page (1-100, default 10)'),
   })
 );
 export type SearchUsersInput = z.infer<typeof SearchUsersInputSchema>;
@@ -99,7 +152,14 @@ export const ListIssuesInputSchema = lazySchema(() =>
       .optional()
       .default('open')
       .describe('Filter by state: "open", "closed", or "all" (default "open")'),
-    first: z.number().optional().default(10).describe('Number of results to return'),
+    perPage: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .optional()
+      .default(10)
+      .describe('Results per page (1-100, default 10)'),
     after: z
       .string()
       .max(2048)
@@ -118,12 +178,15 @@ export const ListPullRequestsInputSchema = lazySchema(() =>
       .optional()
       .default('open')
       .describe('Filter by state: "open", "closed", or "all" (default "open")'),
-    first: z.number().optional().default(10).describe('Number of results to return'),
-    after: z
-      .string()
-      .max(2048)
+    page: z.number().int().min(1).optional().default(1).describe('Page number (1-based)'),
+    perPage: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
       .optional()
-      .describe('Cursor for pagination (endCursor from previous response)'),
+      .default(10)
+      .describe('Results per page (1-100, default 10)'),
   })
 );
 export type ListPullRequestsInput = z.infer<typeof ListPullRequestsInputSchema>;
@@ -133,12 +196,15 @@ export const ListCommitsInputSchema = lazySchema(() =>
     owner: z.string().min(1).max(200).describe('Repository owner (user or org)'),
     repo: z.string().min(1).max(200).describe('Repository name'),
     sha: z.string().max(200).optional().describe('Branch name or commit SHA to start listing from'),
-    first: z.number().optional().default(10).describe('Number of results to return'),
-    after: z
-      .string()
-      .max(2048)
+    page: z.number().int().min(1).optional().default(1).describe('Page number (1-based)'),
+    perPage: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
       .optional()
-      .describe('Cursor for pagination (endCursor from previous response)'),
+      .default(10)
+      .describe('Results per page (1-100, default 10)'),
   })
 );
 export type ListCommitsInput = z.infer<typeof ListCommitsInputSchema>;
@@ -147,12 +213,15 @@ export const ListBranchesInputSchema = lazySchema(() =>
   z.object({
     owner: z.string().min(1).max(200).describe('Repository owner (user or org)'),
     repo: z.string().min(1).max(200).describe('Repository name'),
-    first: z.number().optional().default(10).describe('Number of results to return'),
-    after: z
-      .string()
-      .max(2048)
+    page: z.number().int().min(1).optional().default(1).describe('Page number (1-based)'),
+    perPage: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
       .optional()
-      .describe('Cursor for pagination (endCursor from previous response)'),
+      .default(10)
+      .describe('Results per page (1-100, default 10)'),
   })
 );
 export type ListBranchesInput = z.infer<typeof ListBranchesInputSchema>;
@@ -161,12 +230,15 @@ export const ListReleasesInputSchema = lazySchema(() =>
   z.object({
     owner: z.string().min(1).max(200).describe('Repository owner (user or org)'),
     repo: z.string().min(1).max(200).describe('Repository name'),
-    first: z.number().optional().default(10).describe('Number of results to return'),
-    after: z
-      .string()
-      .max(2048)
+    page: z.number().int().min(1).optional().default(1).describe('Page number (1-based)'),
+    perPage: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
       .optional()
-      .describe('Cursor for pagination (endCursor from previous response)'),
+      .default(10)
+      .describe('Results per page (1-100, default 10)'),
   })
 );
 export type ListReleasesInput = z.infer<typeof ListReleasesInputSchema>;
@@ -175,12 +247,15 @@ export const ListTagsInputSchema = lazySchema(() =>
   z.object({
     owner: z.string().min(1).max(200).describe('Repository owner (user or org)'),
     repo: z.string().min(1).max(200).describe('Repository name'),
-    first: z.number().optional().default(10).describe('Number of results to return'),
-    after: z
-      .string()
-      .max(2048)
+    page: z.number().int().min(1).optional().default(1).describe('Page number (1-based)'),
+    perPage: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
       .optional()
-      .describe('Cursor for pagination (endCursor from previous response)'),
+      .default(10)
+      .describe('Results per page (1-100, default 10)'),
   })
 );
 export type ListTagsInput = z.infer<typeof ListTagsInputSchema>;
