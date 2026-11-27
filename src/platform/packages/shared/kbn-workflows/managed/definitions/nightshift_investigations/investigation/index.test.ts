@@ -111,7 +111,11 @@ describe('Nightshift investigation workflow', () => {
         data: { content: string };
       }>;
       expect(rest).toEqual([]);
-      expect(attachment).toMatchObject({ id: 'investigation_context', type: 'text' });
+      expect(attachment).toMatchObject({
+        id: 'investigation_context',
+        type: 'text',
+        description: 'Investigation context',
+      });
       expect(attachment).not.toHaveProperty('hidden');
       expect(JSON.parse(attachment.data.content)).toEqual(context);
     });

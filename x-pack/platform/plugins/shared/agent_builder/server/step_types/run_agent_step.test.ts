@@ -457,6 +457,19 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     expect(res.error?.message).toContain('aborted');
   });
 
+  it('keeps an attachment description through input validation', () => {
+    const attachment = {
+      id: 'notes',
+      type: 'text',
+      description: 'Investigation context',
+      data: { content: '{}' },
+    };
+
+    expect(InputSchema.parse({ message: 'hello', attachments: [attachment] }).attachments).toEqual([
+      attachment,
+    ]);
+  });
+
   it('propagates attachments to execution service nextInput', async () => {
     const attachments = [
       {

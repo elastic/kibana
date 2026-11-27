@@ -194,7 +194,7 @@ steps:
       # in the message.
       attachments: >-
         ${{ inputs.context | json | json
-        | prepend: '[{"id":"investigation_context","type":"text","data":{"content":'
+        | prepend: '[{"id":"investigation_context","type":"text","description":"Investigation context","data":{"content":'
         | append: '}' | append: '}]'
         | json_parse
         | where_exp: 'attachment', 'inputs.context.size > 0 and inputs.context.source != "alert"' }}
