@@ -1,0 +1,57 @@
+requestBody:
+  content:
+    application/json:
+      examples: {}
+responses:
+  '200':
+    content:
+      application/json:
+        examples:
+          defaultGlobalSettingsResponse:
+            summary: Global SLO settings that were never saved
+            value:
+              sliRetention:
+                enabled: false
+                periodDays: 365
+                updatedAt: null
+                effective:
+                  enabled: false
+                  periodDays: 365
+                  source: default
+          configOverrideGlobalSettingsResponse:
+            summary: Saved global SLO settings overridden in kibana.yml
+            value:
+              sliRetention:
+                enabled: false
+                periodDays: 400
+                updatedAt: '2026-11-20T10:00:00.000Z'
+                effective:
+                  enabled: true
+                  periodDays: 200
+                  source: config
+  '401':
+    description: Unauthorized response
+    content:
+      application/json:
+        schema:
+          $ref: ../oas_error_schemas.yaml#/401_response
+        examples:
+          unauthorizedExample:
+            summary: Unauthorized
+            value:
+              statusCode: 401
+              error: Unauthorized
+              message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+  '403':
+    description: Forbidden response
+    content:
+      application/json:
+        schema:
+          $ref: ../oas_error_schemas.yaml#/403_response
+        examples:
+          forbiddenExample:
+            summary: Missing the SLO privilege in some spaces
+            value:
+              statusCode: 403
+              error: Forbidden
+              message: 'Global SLO settings require the SLO "All" privilege in all spaces'

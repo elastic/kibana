@@ -98,3 +98,8 @@ export {
   createGroupedApmSummaryDoc,
   createGroupedSummaryDoc,
 } from './slo_test_data';
+export {
+  GLOBAL_SETTINGS_PATH,
+  createGlobalSettingsStore,
+  type GlobalSettingsStore,
+} from './global_settings';

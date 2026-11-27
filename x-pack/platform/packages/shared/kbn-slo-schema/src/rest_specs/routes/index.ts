@@ -33,3 +33,4 @@ export * from './health_scan';
 export * from './search_slo_definitions';
 export * from './get_grouped_stats';
 export * from './composite_slo';
+export * from './global_settings';
