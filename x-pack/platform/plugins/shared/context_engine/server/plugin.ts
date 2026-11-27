@@ -63,6 +63,8 @@ import { installImprovementsIndexTemplate } from './improvements/storage';
 import { BackgroundWriteTracker } from './session_memory/background_write_tracker';
 import { createSessionMemoryService } from './session_memory/service';
 import { createSessionEventsService } from './session_events/service';
+import type { SessionMemoryClientDeps } from './session_memory_client/client';
+import { createSessionMemoryClient } from './session_memory_client/client';
 import { SignalsService } from './signals/service';
 import type { SignalsServiceApi } from './signals/service';
 import { registerSignalGeneratorTaskDefinition, scheduleSignalGenerator } from './tasks';
@@ -417,12 +419,12 @@ export class ContextEnginePlugin
         isMemoryEnabled: () => this.isGlobalMemoryEnabled(),
         checkReadPrivilege: checkContextEnginePrivilege(apiPrivileges.readContextEngine),
         getSessionMemoryService: async () => {
-          const [, , contextEngineStart] = await coreSetup.getStartServices();
-          return contextEngineStart.getSessionMemoryService();
+          const [coreStart] = await coreSetup.getStartServices();
+          return createSessionMemoryService(coreStart.elasticsearch.client.asInternalUser);
         },
         getSessionEventsService: async () => {
-          const [, , contextEngineStart] = await coreSetup.getStartServices();
-          return contextEngineStart.getSessionEventsService();
+          const [coreStart] = await coreSetup.getStartServices();
+          return createSessionEventsService(coreStart.elasticsearch.client.asInternalUser);
         },
       },
     });
@@ -463,35 +465,12 @@ export class ContextEnginePlugin
       getWorkflows: () => this.workflowsManagementApiPromise,
     });
 
-    registerSessionEventsRoutes({
-      router,
-      getSpaces: async () => {
-        const [, startDeps] = await coreSetup.getStartServices();
-        return startDeps.spaces;
-      },
-      getSessionEventsService: async () => {
-        const [, , contextEngineStart] = await coreSetup.getStartServices();
-        return contextEngineStart.getSessionEventsService();
-      },
-      getAiIndexService,
-      isMemoryEnabled,
-    });
-
-    registerSessionMemoryRoutes({
-      router,
-      getSpaces: async () => {
-        const [, startDeps] = await coreSetup.getStartServices();
-        return startDeps.spaces;
-      },
-      getSessionMemoryService: async () => {
-        const [, , contextEngineStart] = await coreSetup.getStartServices();
-        return contextEngineStart.getSessionMemoryService();
-      },
-      getAiIndexService,
-      isMemoryEnabled,
-      backgroundWrites: this.rememberWriteTracker,
-      logger: this.logger.get('session_memory'),
-    });
+    const getSessionMemoryClient = async (request: KibanaRequest) => {
+      const [, , contextEngineStart] = await coreSetup.getStartServices();
+      return contextEngineStart.getSessionMemoryClient(request);
+    };
+    registerSessionEventsRoutes({ router, getSessionMemoryClient });
+    registerSessionMemoryRoutes({ router, getSessionMemoryClient });
 
     return {
       registerAiIndex: (id, properties) => this.aiIndexRegistry.register(id, properties),
@@ -577,8 +556,16 @@ export class ContextEnginePlugin
       sources: [createWorkflowExecutionsSpendSource({ getEsClient: () => internalEsClient })],
     });
 
-    const sessionMemoryService = createSessionMemoryService(this.esClient);
-    const sessionEventsService = createSessionEventsService(this.esClient);
+    const sessionMemoryClientDeps: SessionMemoryClientDeps = {
+      core: coreStart,
+      authz: startDeps.security.authz,
+      spaces: startDeps.spaces,
+      aiIndexService,
+      sessionEvents: createSessionEventsService(this.esClient),
+      sessionMemory: createSessionMemoryService(this.esClient),
+      backgroundWrites: this.rememberWriteTracker,
+      logger: this.logger.get('session_memory'),
+    };
 
     const improvementsLogger = this.logger.get('improvements');
     this.createImprovementsService = (esClient: ElasticsearchClient, spaceId: string) =>
@@ -653,8 +640,8 @@ export class ContextEnginePlugin
       getAiIndexDataReadService: (params) => createAiIndexDataReadService(params),
       getSignalsService: () => signalsService,
       getImprovementsService: (esClient, spaceId) => createImprovementsService(esClient, spaceId),
-      getSessionMemoryService: () => sessionMemoryService,
-      getSessionEventsService: () => sessionEventsService,
+      getSessionMemoryClient: (request) =>
+        createSessionMemoryClient(sessionMemoryClientDeps, request),
     };
   }
 
