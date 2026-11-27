@@ -29,7 +29,7 @@ export const esqlGenerationDataset: Array<Example<{ question: string }, { query:
       question: `I want to see an ES|QL query for metrics-apm-*, filtering on metricset.name:transaction and metricset.interval:1m, showing the average duration (via transaction.duration.us), in 50 buckets.`,
     },
     output: {
-      query: `FROM metrics-apm-*\n| WHERE metricset.name == "transaction" AND metricset.interval == "1m"\n| EVAL bucket = BUCKET(@timestamp, 50, "2024-04-02T00:00:00.000Z", "2024-04-03T00:00:00.000Z")\n| STATS avg_duration = AVG(transaction.duration.us) BY bucket`,
+      query: `FROM metrics-apm-*\n| WHERE metricset.name == "transaction" AND metricset.interval == "1m"\n| STATS avg_duration = AVG(transaction.duration.us) BY bucket = BUCKET(@timestamp, 50, "2024-04-02T00:00:00.000Z", "2024-04-03T00:00:00.000Z")`,
     },
   },
   {
@@ -37,7 +37,7 @@ export const esqlGenerationDataset: Array<Example<{ question: string }, { query:
       question: `I want to show a list of services with APM data. My data is in \`traces-apm-*\`. I want to show the average transaction duration, the success rate (by dividing event.outcome:failure by event.outcome:failure+success), and total amount of requests. As a time range, select the last 24 hours. Just show me the ES|QL query.`,
     },
     output: {
-      query: `FROM traces-apm-*\n| WHERE @timestamp >= NOW() - 24 hours\n| EVAL successful = CASE(event.outcome == "success", 1, 0),\n  failed = CASE(event.outcome == "failure", 1, 0)\n| STATS success_rate = AVG(successful), \n  avg_duration = AVG(transaction.duration), \n  total_requests = COUNT(transaction.id) BY service.name`,
+      query: `FROM traces-apm-*\n| WHERE @timestamp >= NOW() - 24 hours\n| EVAL successful = CASE(event.outcome == "success", 1, 0),\n  failed = CASE(event.outcome == "failure", 1, 0)\n| STATS success_rate = AVG(successful), \n  avg_duration = AVG(transaction.duration.us), \n  total_requests = COUNT(transaction.id) BY service.name`,
     },
   },
   {
@@ -77,7 +77,13 @@ export const esqlGenerationDataset: Array<Example<{ question: string }, { query:
       question: `From employees, I want to sort the documents by salary, and then return 10 results per page, and then see the second page. Show me an ES|QL query.`,
     },
     output: {
-      query: `Pagination is not supported`,
+      // ES|QL has no OFFSET/SKIP, so "the second page of 10, sorted by
+      // salary" is only expressible as "read up to the end of the requested
+      // page and let the client skip the first page". The prose gold this
+      // example used to carry ("Pagination is not supported") is not a query
+      // at all: both query evaluators failed to execute it, so the example
+      // scored 0 on every model regardless of the answer.
+      query: `FROM employees-*\n| SORT salary ASC\n| LIMIT 20`,
     },
   },
   {
@@ -101,7 +107,7 @@ export const esqlGenerationDataset: Array<Example<{ question: string }, { query:
       question: `Generate an ES|QL query that will search for the following use case: \nLocating Suspicious Concatenated Strings in Logs (Possible Script or Malware)`,
     },
     output: {
-      query: `FROM logs-*\n| WHERE CONCAT("evil", "payload") IN log.message\n| KEEP log.message`,
+      query: `FROM logs-*\n| WHERE log.message RLIKE ".*evilpayload.*"\n| KEEP log.message`,
     },
   },
   {
@@ -109,7 +115,7 @@ export const esqlGenerationDataset: Array<Example<{ question: string }, { query:
       question: `Generate an ES|QL query that will filter for file creation events. Count the number of file interactions by the process interacting with the file, and the host name. From the process name field, parse and output two new fields that represent the process and the process extension separately. Calculate the length of the process name and filter for events where the length is greater than 15 characters. Sort the result based on the process length and filecount in descending order. Limit the results to the top 10.`,
     },
     output: {
-      query: `from logs-*\n| where event.category == "file" and event.action == "creation"\n| stats filecount = count(file.name) by process.name,host.name\n| dissect process.name "%{process}.%{extension}" \n| eval proclength = length(process.name)\n| where proclength > 10 \n| sort filecount,proclength desc\n| limit 10 \n| keep host.name,process.name,filecount,process,extension,fullproc,proclength`,
+      query: `from logs-*\n| where event.category == "file" and event.action == "creation"\n| stats filecount = count(file.name) by process.name,host.name\n| dissect process.name "%{process}.%{extension}" \n| eval proclength = length(process.name)\n| where proclength > 15 \n| sort proclength desc,filecount desc\n| limit 10 \n| keep host.name,process.name,filecount,process,extension,proclength`,
     },
   },
   {
@@ -149,7 +155,7 @@ export const esqlGenerationDataset: Array<Example<{ question: string }, { query:
       question: `Generate an ES|QL query that will search for the following use case: \nLocating Suspicious Outbound Connections`,
     },
     output: {
-      query: `FROM logs-*\n| WHERE destination.port NOT IN (80, 443) and direction == "outbound"\n| KEEP source.ip, destination.ip, destination.port`,
+      query: `FROM logs-*\n| WHERE destination.port NOT IN (80, 443) and network.direction == "outbound"\n| KEEP source.ip, destination.ip, destination.port`,
     },
   },
   {
@@ -157,7 +163,7 @@ export const esqlGenerationDataset: Array<Example<{ question: string }, { query:
       question: `Generate an ES|QL query that will parse the DNS registered domain from a DNS query, count the number distinct DNS queries being made per DNS registered domain and filter for when the distinct count is greater than 5. The query should sort the results by the distinct count of queries in descending order.`,
     },
     output: {
-      query: `from logs-*\n| grok dns.question.name "%{DATA}\\\\.%{GREEDYDATA:dns.question.registered_domain:string}"\n| stats unique_queries = count_distinct(dns.question.name) by dns.question.registered_domain, process.name\n| where unique_queries > 5\n| sort unique_queries desc`,
+      query: `from logs-*\n| grok dns.question.name "%{DATA}\\\\.%{GREEDYDATA:dns.question.registered_domain:string}"\n| stats unique_queries = count_distinct(dns.question.name) by dns.question.registered_domain\n| where unique_queries > 5\n| sort unique_queries desc`,
     },
   },
   {
@@ -165,7 +171,7 @@ export const esqlGenerationDataset: Array<Example<{ question: string }, { query:
       question: `Generate an ES|QL query that will search for the following use case: \nUncovering Connections to Non-Standard SSH Ports Outside of Local Network`,
     },
     output: {
-      query: `FROM logs-*\n| WHERE CIDR_MATCH(ip, "10.0.0.0/8", "192.168.0.0/16")\n| DISSECT user_agent "%{browser_name}/%{browser_version} (%{os_name}; %{os_version})"`,
+      query: `FROM logs-*\n| WHERE destination.port NOT IN (22) AND NOT CIDR_MATCH(destination.ip, "10.0.0.0/8", "192.168.0.0/16")\n| KEEP source.ip, destination.ip, destination.port`,
     },
   },
   {
@@ -197,7 +203,7 @@ export const esqlGenerationDataset: Array<Example<{ question: string }, { query:
       question: `Generate an ES|QL query that will search for the following use case: \nDetecting Potential Beaconing Activity`,
     },
     output: {
-      query: `FROM logs-*\n| STATS domain_requests = COUNT(url.domain) by source.ip, domain\n| WHERE domain_requests > 100\n| KEEP source.ip, url.domain`,
+      query: `FROM logs-*\n| STATS domain_requests = COUNT(url.domain) by source.ip, url.domain\n| WHERE domain_requests > 100\n| KEEP source.ip, url.domain`,
     },
   },
   {
@@ -213,7 +219,7 @@ export const esqlGenerationDataset: Array<Example<{ question: string }, { query:
       question: `Generate an ES|QL query that will search for the following use case: \nIdentifying Potential PowerShell Exploits`,
     },
     output: {
-      query: `FROM logs-*\n| WHERE process.name == "powershell.exe" and process.command_line RLIKE ".*EncodedCommand.*"\n| KEEP host.name, user.name, command_line, @timestamp`,
+      query: `FROM logs-*\n| WHERE process.name == "powershell.exe" and command_line RLIKE ".*EncodedCommand.*"\n| KEEP host.name, user.name, command_line, @timestamp`,
     },
   },
   {

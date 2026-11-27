@@ -125,6 +125,7 @@ export const logsIndexCreateRequest: IndicesCreateRequest = {
       event: {
         properties: {
           action: { type: 'keyword' },
+          category: { type: 'keyword' },
           code: { type: 'long' },
         },
       },
@@ -183,6 +184,7 @@ export const logsIndexCreateRequest: IndicesCreateRequest = {
       url: {
         properties: {
           domain: { type: 'keyword' },
+          path: { type: 'keyword' },
         },
       },
       user: {
