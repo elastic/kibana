@@ -123,17 +123,27 @@ export const createSkillLoadedEvaluator = (skillName: string) => ({
 
 const MAX_EVIDENCE_ESQL_CALLS = 3;
 
-// An ungrouped STATS over zero matches still returns one row, holding 0, so a row alone is not a match.
-const isEmptyCell = (cell: unknown): boolean =>
-  cell === null || cell === undefined || cell === 0 || cell === '' || cell === false;
+// An ES|QL aggregate without BY returns one row even over zero matches (COUNT is 0, the others are
+// null). A grouped aggregate returns no rows over zero matches, and a projected event row is a match
+// whatever its values are, so `false` or `0` in an event field must still count.
+const isUngroupedAggregate = (query: string | undefined): boolean =>
+  (query ?? '')
+    .split('|')
+    .map((command) => command.trim())
+    .some((command) => /^STATS\b/i.test(command) && !/\bBY\b/i.test(command));
 
-const hasMatchingRow = (data: unknown): boolean =>
-  ((data as { values?: unknown[][] } | undefined)?.values ?? []).some((row) =>
-    row.some((cell) => !isEmptyCell(cell))
+const hasMatchingRow = (data: unknown): boolean => {
+  const { query, values = [] } = (data ?? {}) as { query?: string; values?: unknown[][] };
+  if (!isUngroupedAggregate(query)) {
+    return values.length > 0;
+  }
+  return values.some((row) =>
+    row.some((cell) => cell !== null && cell !== undefined && cell !== 0 && cell !== '')
   );
+};
 
 /**
- * CODE evaluator: 1 when the agent ran at least one ES|QL query that returned a row with data, and ran
+ * CODE evaluator: 1 when the agent ran at least one ES|QL query that found at least one event, and ran
  * at most three ES|QL queries. Checks the evidence step from the tool steps, not from the answer. The
  * tool returns an `esql_results` entry even when `values` is empty, and an ungrouped aggregate over
  * zero matches returns a row of zeros, so a search over the wrong time window must not count as
