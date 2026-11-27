@@ -100,7 +100,9 @@ export class InferenceClientLlm extends LLM<BaseLanguageModelCallOptions> {
         ...(this.#model ? { modelName: this.#model } : {}),
         ...(this.#timeout ? { timeout: this.#timeout } : {}),
         ...(this.#systemPrompt ? { system: this.#systemPrompt } : {}),
-        ...(this.#telemetryMetadata ? { metadata: this.#telemetryMetadata } : {}),
+        ...(this.#telemetryMetadata
+          ? { metadata: { connectorTelemetry: this.#telemetryMetadata } }
+          : {}),
       });
 
       throwIfModelRefusal({
