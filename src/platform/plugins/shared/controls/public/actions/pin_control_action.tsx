@@ -94,7 +94,7 @@ export class PinControlAction
     if (embeddable.parentApi.panelIsPinned(embeddable.uuid)) {
       embeddable.parentApi.unpinPanel(embeddable.uuid);
       // only pinned controls can be required, so clear it when the control is unpinned
-      if (apiPublishesRequired(embeddable)) embeddable.setRequired(false);
+      if (apiPublishesRequired(embeddable)) embeddable.setRequired(undefined);
     } else {
       embeddable.parentApi.pinPanel(embeddable.uuid);
     }

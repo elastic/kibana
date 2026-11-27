@@ -61,6 +61,7 @@ export const DashboardViewport = () => {
 
   const classes = classNames('dshDashboardViewport', {
     'dshDashboardViewport--empty': panelCount === 0 && sectionCount === 0,
+    'dshDashboardViewport--awaitingFilters': awaitingRequired,
     'dshDashboardViewport--print': viewMode === 'print',
     'dshDashboardViewport--panelExpanded': Boolean(expandedPanelId),
   });
@@ -120,7 +121,11 @@ const dashboardViewportStyles = {
   }),
   viewport: {
     width: '100%',
-    height: '100%',
+    // only the empty and awaiting-filters screens fill the viewport; a grid must size to its panels, otherwise
+    // reports capture a stretched container
+    '&.dshDashboardViewport--empty, &.dshDashboardViewport--awaitingFilters': {
+      height: '100%',
+    },
     '&.dshDashboardViewport--panelExpanded': {
       flex: 1,
     },
