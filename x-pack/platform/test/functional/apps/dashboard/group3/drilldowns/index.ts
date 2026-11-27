@@ -29,8 +29,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    loadTestFile(require.resolve('./dashboard_to_dashboard_drilldown'));
-    loadTestFile(require.resolve('./dashboard_to_url_drilldown'));
     // Requires xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled
     // setting set in kibana.yml to work (not enabled by default)
     loadTestFile(require.resolve('./explore_data_panel_action'));

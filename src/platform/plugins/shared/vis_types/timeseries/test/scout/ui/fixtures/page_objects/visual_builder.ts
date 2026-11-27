@@ -9,6 +9,7 @@
 
 import type { DebugState } from '@elastic/charts';
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { getChartDebugState, waitForChartRenderComplete } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 type PanelType = 'timeSeries' | 'metric' | 'topN' | 'table' | 'gauge' | 'markdown';
@@ -86,13 +87,10 @@ export class VisualBuilder {
   readonly indexPatternSelectionModeSwitch: Locator;
   readonly chartCanvas: Locator;
   private readonly preview: Locator;
-  private readonly chartStatus: Locator;
-  private readonly renderedChartStatus: Locator;
   private readonly indexPatternSelectionModePopover: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.editor = this.page.testSubj.locator('tvbVisEditor');
-    this.timeSeriesChart = this.page.locator('.tvbVisTimeSeries');
     this.chartLegend = this.page.locator('.echLegend');
     this.legendItems = this.page.locator('.echLegendItem');
     this.seriesEditors = this.page.locator('.tvbSeriesEditor');
@@ -100,10 +98,7 @@ export class VisualBuilder {
     this.colorPickerPopover = this.page.testSubj.locator('euiColorPickerPopover');
     this.chartCanvas = this.page.locator(cssAt(REPEATED_CSS.chartCanvas, 0));
     this.preview = this.page.testSubj.locator('visualizationLoader');
-    this.chartStatus = this.page.locator('.tvbVisTimeSeries .echChartStatus');
-    this.renderedChartStatus = this.page.locator(
-      '.tvbVisTimeSeries .echChartStatus[data-ech-render-complete="true"]'
-    );
+    this.timeSeriesChart = this.page.locator('.tvbVisTimeSeries');
     this.indexPatternSelectionModeSwitch = this.page.testSubj.locator(
       'switchIndexPatternSelectionMode'
     );
@@ -118,7 +113,7 @@ export class VisualBuilder {
 
   /** Waits for the Time Series preview to complete a render pass. */
   async waitForChartRenderComplete() {
-    await this.renderedChartStatus.waitFor({ state: 'attached', timeout: RENDER_TIMEOUT });
+    await waitForChartRenderComplete(this.timeSeriesChart, { timeout: RENDER_TIMEOUT });
   }
 
   /** Re-runs the query from the global search bar. */
@@ -491,14 +486,7 @@ export class VisualBuilder {
    * `enableElasticChartDebug()` to have run before the page was loaded.
    */
   async getChartDebugState(): Promise<DebugState> {
-    await this.waitForChartRenderComplete();
-    const debugJson = await this.chartStatus.getAttribute('data-ech-debug-state');
-    if (!debugJson) {
-      throw new Error(
-        'Elastic charts debugState not found — call enableElasticChartDebug() before navigation'
-      );
-    }
-    return JSON.parse(debugJson) as DebugState;
+    return getChartDebugState<DebugState>(this.timeSeriesChart, { timeout: RENDER_TIMEOUT });
   }
 
   // ============================================================

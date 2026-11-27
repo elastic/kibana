@@ -8,6 +8,7 @@
 import type { DebugState } from '@elastic/charts';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type { ApiServicesFixture } from '@kbn/scout';
+import { enableElasticChartDebug, getChartDebugState as getEchartsDebugState } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 import { spaceTest, testData } from '../fixtures';
@@ -104,14 +105,7 @@ async function getChartDebugState(
   await dashboard.waitForPanelsToLoad(1);
 
   const chart = page.testSubj.locator('xyVisChart');
-  await chart.locator('.echChartStatus[data-ech-render-complete="true"]').waitFor({
-    state: 'attached',
-    timeout: 30_000,
-  });
-
-  const chartStatus = chart.locator('.echChartStatus');
-  const debugJson = await chartStatus.getAttribute('data-ech-debug-state');
-  return JSON.parse(debugJson ?? '{}') as DebugState;
+  return getEchartsDebugState<DebugState>(chart, { timeout: 30_000 });
 }
 
 function areAllEpochMilliseconds(values: unknown[]): boolean {
@@ -132,9 +126,7 @@ spaceTest.describe(
 
     spaceTest.beforeEach(async ({ browserAuth, context }) => {
       await browserAuth.loginAsPrivilegedUser();
-      await context.addInitScript(() => {
-        (window as unknown as { _echDebugStateFlag?: boolean })._echDebugStateFlag = true;
-      });
+      await enableElasticChartDebug(context);
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {

@@ -6,6 +6,7 @@
  */
 
 import type { PageObjects } from '@kbn/scout';
+import { enableElasticChartDebug } from '@kbn/scout';
 
 import {
   DATA_TEST_SUBJECTS,
@@ -16,10 +17,7 @@ import {
   getImportedDashboardId,
   type ImportedSavedObject,
 } from '../../../common/ui/fixtures/saved_object_helpers';
-import {
-  enableElasticChartDebug,
-  type ElasticChartDebugContext,
-} from '../../../common/ui/fixtures/helpers';
+import type { ElasticChartDebugContext } from '../../../common/ui/fixtures/helpers';
 
 interface LogstashOpenInLensSetupContext {
   savedObjects?: {
