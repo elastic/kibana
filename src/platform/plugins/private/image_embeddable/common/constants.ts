@@ -13,3 +13,9 @@ export const IMAGE_EMBEDDABLE_TYPE = 'image';
 export const ADD_IMAGE_EMBEDDABLE_ACTION_ID = 'create_image_embeddable';
 export const IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS = [ON_CLICK_IMAGE, ON_OPEN_PANEL_MENU];
 export const DEFAULT_OBJECT_FIT = 'contain'; // CSS spec defaults to fill but embeddable has historically defaulted to contain
+
+// Inline images are stored in the dashboard saved object, so their size is capped (~512 KB of image data once base64 encoded)
+export const MAX_IMAGE_URL_LENGTH = 700000;
+// Only raster formats are allowed inline. SVG is intentionally excluded.
+export const DATA_IMAGE_URL_PATTERN =
+  /^data:image\/(?:png|jpe?g|gif|webp);base64,[A-Za-z0-9+/]+={0,2}$/;
