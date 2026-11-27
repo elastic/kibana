@@ -687,6 +687,46 @@ describe('reportFlakySuiteIssues', () => {
       expect(next.closeAsDuplicate).toHaveBeenCalledWith(43, 1042);
     });
 
+    it('closes the Cypress per-test issue of a flaky test, whose name repeats the test title', async () => {
+      const filePath =
+        'x-pack/solutions/security/test/security_solution_cypress/e2e/timeline.cy.ts';
+      const cypressTestIssue = (number: number, name: string) => {
+        const className = `Security Solution Cypress.${filePath.replace(/\./g, '·')}`;
+        return githubIssue({
+          number,
+          title: `Failing test: ${className} - ${name}`,
+          body: updateIssueMetadata('A test failed on a tracked branch', {
+            'test.class': className,
+            'test.name': name,
+          }),
+        });
+      };
+      const hook = '"before each" hook for "opens"';
+      const github = createGithubApi([
+        cypressTestIssue(43, 'Timeline opens opens'),
+        cypressTestIssue(44, `Timeline ${hook} ${hook}`),
+      ]);
+
+      const summary = await run(github, {
+        report: flakyReport([
+          flakyTest({ framework: 'cypress', filePath, suiteTitle: 'Timeline', title: 'opens' }),
+        ]),
+        ...replacing,
+      });
+
+      const [title, body] = github.createIssue.mock.calls[0];
+      expect(title).toBe('Flaky Cypress suite: Timeline');
+      expect(body).toContain('| #43 |');
+      // the hook's issue is about another failure: it stays open
+      expect(body).toContain('Possibly related: #44.');
+      expect(github.closeAsDuplicate.mock.calls).toEqual([[43, 1900]]);
+      expect(github.addIssueComment.mock.calls).toEqual([[43, replacedIssueComment(900)]]);
+      expect(summary.actions[0]).toMatchObject({
+        action: 'created',
+        replaced: [{ number: 43, state: 'closed' }],
+      });
+    });
+
     it('leaves per-test issues alone without the option', async () => {
       const github = createGithubApi([suiteIssue(42), scoutTestIssue(43, 'pw-1')]);
 

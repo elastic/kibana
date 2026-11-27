@@ -191,7 +191,13 @@ export const candidateIssues = (suite: MatchableSuite, index: IssueIndex): Issue
 const namesTest = (testName: string, suite: MatchableSuite): boolean =>
   suite.tests.some(({ title }) => {
     const full = suite.suiteTitle ? `${suite.suiteTitle} ${title}` : title;
-    return testName === full || testName.endsWith(` ${full}`) || testName === title;
+    return (
+      testName === full ||
+      testName.endsWith(` ${full}`) ||
+      testName === title ||
+      // Cypress JUnit names end in the test title twice
+      (suite.framework === 'cypress' && testName === `${full} ${title}`)
+    );
   });
 
 /** Suite issues first, then strongest match, open before closed, newest first. */

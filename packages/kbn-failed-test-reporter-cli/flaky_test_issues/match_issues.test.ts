@@ -50,6 +50,16 @@ const ftrIssue = (number: number, filePath: string, name: string) => {
   });
 };
 
+/** The classname of a Cypress issue encodes every dot of the file. */
+const cypressIssue = (number: number, filePath: string, name: string) => {
+  const className = `Security Solution Cypress.${filePath.replace(/\./g, '·')}`;
+  return githubIssue({
+    number,
+    title: `Failing test: ${className} - ${name}`,
+    body: failedTestBody({ 'test.class': className, 'test.name': name }),
+  });
+};
+
 describe('describeIssue', () => {
   it('reads the suite file, the Scout test id and location, the Jest directory and the test name', () => {
     expect(describeIssue(scoutIssue(1, 'abc-def', 'creates default alert'))).toMatchObject({
@@ -330,6 +340,81 @@ describe('findMatchingIssues', () => {
       [30, 'test'],
       [31, 'file'],
     ]);
+  });
+
+  it('matches Cypress issues, whose test name ends in the test title once or twice', () => {
+    const filePath = 'x-pack/solutions/security/test/security_solution_cypress/e2e/timeline.cy.ts';
+    const title = 'opens from the alerts table';
+    const [suite] = groupIntoSuites([
+      flakyTest({ framework: 'cypress', filePath, suiteTitle: 'Timeline', title }),
+    ]);
+    const hook = `"before each" hook for "${title}"`;
+    const related = findMatchingIssues(suite, [
+      // The JUnit transformer appends the title once more
+      describeIssue(cypressIssue(60, filePath, `Timeline ${title} ${title}`)),
+      // The title once, as other frameworks name a test
+      describeIssue(cypressIssue(61, filePath, `Timeline ${title}`)),
+      // Another test of the suite
+      describeIssue(cypressIssue(62, filePath, 'Timeline closes closes')),
+      // A hook that failed for the test
+      describeIssue(cypressIssue(63, filePath, `Timeline ${hook} ${hook}`)),
+      // The same test name in another file
+      describeIssue(cypressIssue(64, 'x-pack/other/e2e/other.cy.ts', `Timeline ${title} ${title}`)),
+    ]);
+
+    expect(related.map(({ issue, match }) => [issue.number, match])).toEqual([
+      [61, 'test'],
+      [60, 'test'],
+      [63, 'file'],
+      [62, 'file'],
+    ]);
+  });
+
+  it('keeps a Cypress issue to its suite when another suite title ends in the same words', () => {
+    const filePath = 'x-pack/solutions/security/test/security_solution_cypress/e2e/timeline.cy.ts';
+    const test = { framework: 'cypress' as const, filePath, title: 'loads' };
+    const [timeline, investigations] = groupIntoSuites([
+      flakyTest({ ...test, testId: 'a-loads', suiteTitle: 'Timeline', failedBuilds: 9 }),
+      flakyTest({
+        ...test,
+        testId: 'b-loads',
+        suiteTitle: 'Investigations Timeline',
+        failedBuilds: 5,
+      }),
+    ]);
+    const issues = [
+      describeIssue(cypressIssue(70, filePath, 'Timeline loads loads')),
+      describeIssue(cypressIssue(71, filePath, 'Investigations Timeline loads loads')),
+    ];
+    const matchesOf = (suite: typeof timeline) =>
+      findMatchingIssues(suite, issues).map(({ issue, match }) => [issue.number, match]);
+
+    expect(matchesOf(timeline)).toEqual([
+      [70, 'test'],
+      [71, 'file'],
+    ]);
+    expect(matchesOf(investigations)).toEqual([
+      [71, 'test'],
+      [70, 'file'],
+    ]);
+  });
+
+  it('takes a repeated test title for another test outside Cypress', () => {
+    const [suite] = groupIntoSuites([
+      flakyTest({
+        framework: 'jest',
+        filePath: 'src/plugins/a/format.test.ts',
+        suiteTitle: 'Formatting',
+        title: 'hello',
+      }),
+    ]);
+    const related = findMatchingIssues(suite, [
+      describeIssue(jestIssue(80, 'src/plugins/a', 'Formatting hello')),
+      // A test titled `hello hello`
+      describeIssue(jestIssue(81, 'src/plugins/a', 'Formatting hello hello')),
+    ]);
+
+    expect(related.map(({ issue, match }) => [issue.number, match])).toEqual([[80, 'test']]);
   });
 
   it('matches by test and file name when the file moved since the issue was filed', () => {
