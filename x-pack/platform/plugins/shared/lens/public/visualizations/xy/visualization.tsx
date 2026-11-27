@@ -414,12 +414,10 @@ export const getXyVisualization = ({
     }
   },
 
-  hasLayerSettings({ state, layerId: currentLayerId, frame }) {
+  hasLayerSettings({ state, layerId: currentLayerId }) {
     const layer = state.layers?.find(({ layerId }) => layerId === currentLayerId);
     return {
-      // the only annotation layer setting (ignore global filters) only affects query-based
-      // annotations, which are not supported on ES|QL charts
-      data: Boolean(layer && isAnnotationsLayer(layer) && !isEsqlChart(frame.datasourceLayers)),
+      data: Boolean(layer && isAnnotationsLayer(layer)),
       appearance: false,
     };
   },

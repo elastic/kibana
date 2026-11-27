@@ -79,7 +79,7 @@ describe('hasUnsupportedAnnotations', () => {
     ).toBe(false);
   });
 
-  it('returns true when any annotation layer contains a query-based annotation', () => {
+  it('returns false for query-based annotations, which are converted separately', () => {
     expect(
       hasUnsupportedAnnotations({
         layers: [
@@ -91,7 +91,7 @@ describe('hasUnsupportedAnnotations', () => {
           },
         ],
       })
-    ).toBe(true);
+    ).toBe(false);
   });
 
   it.each([
@@ -194,6 +194,41 @@ describe('useEsqlConversionCheck', () => {
         ],
       })
     );
+  });
+
+  it.each([
+    [
+      'an annotation library group',
+      { annotationGroupId: 'saved-group' },
+      'annotation_library_not_supported',
+    ],
+    [
+      'a query annotation layer with a missing data view',
+      { ignoreGlobalFilters: true, indexPatternId: 'missing' },
+      'query_annotation_data_view_not_found',
+    ],
+  ] as const)('shows the specific tooltip for %s', (_, layerOverrides, expectedReason) => {
+    generateEsqlQueryMock.mockReturnValue(esqlSuccess);
+    const visualization = {
+      ...hookParams.visualization,
+      state: {
+        layers: [
+          {
+            layerId: 'annotations',
+            layerType: 'annotations',
+            annotations: [queryAnnotation],
+            ...layerOverrides,
+          },
+        ],
+      },
+    };
+
+    const { result } = renderHook(() =>
+      useEsqlConversionCheck(true, { ...hookParams, visualization }, hookServices)
+    );
+
+    expect(result.current.isConvertToEsqlButtonDisabled).toBe(true);
+    expect(result.current.convertToEsqlButtonTooltip).toBe(getFailureTooltipText(expectedReason));
   });
 
   it.each(['average', 'formula'])(

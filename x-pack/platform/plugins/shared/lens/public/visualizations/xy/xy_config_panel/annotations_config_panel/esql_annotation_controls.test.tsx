@@ -1,0 +1,264 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import type { ESQLLangEditor } from '@kbn/esql/public';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { EsqlEventAnnotationConfig } from '@kbn/event-annotation-common';
+import type { ESQLDataGridAttrs } from '../../../../app_plugin/shared/edit_on_the_fly/helpers';
+import { EsqlAnnotationControls } from './esql_annotation_controls';
+
+jest.mock('@kbn/esql-datagrid/public', () => ({
+  ESQLDataGrid: () => <div data-test-subj="esql-data-grid" />,
+}));
+
+jest.mock('@kbn/esql/public', () => ({
+  ESQLLangEditor: (props: React.ComponentProps<typeof ESQLLangEditor>) => {
+    const controllerRef = React.useRef<AbortController>();
+    return (
+      <>
+        <textarea
+          aria-label="Query"
+          value={props.query.esql}
+          onChange={(event) => props.onTextLangQueryChange({ esql: event.target.value })}
+        />
+        <button
+          onClick={() => {
+            controllerRef.current = new AbortController();
+            props.onTextLangQuerySubmit(props.query, controllerRef.current);
+          }}
+        >
+          Run
+        </button>
+        <button onClick={() => controllerRef.current?.abort()}>Cancel</button>
+        {props.isLoading && <span>Loading</span>}
+        {props.errors?.map((error) => (
+          <span role="alert" key={error.message}>
+            {error.message}
+          </span>
+        ))}
+      </>
+    );
+  },
+}));
+
+interface FetchResult {
+  columns: DatatableColumn[];
+  timeField?: string;
+}
+
+const columns: DatatableColumn[] = [
+  { id: 'time-id', name: 'time', meta: { type: 'date' } },
+  { id: 'version-id', name: 'version', meta: { type: 'string' } },
+];
+const annotation: EsqlEventAnnotationConfig = {
+  id: 'deployments',
+  type: 'esql',
+  query: { esql: 'FROM deployments | KEEP time, version' },
+  key: { type: 'point_in_time' },
+  timeColumn: 'time',
+  textColumn: 'version',
+  label: 'Deployments',
+  color: '#FF0000',
+  lineWidth: 3,
+};
+const nextQuery = 'FROM deployments | WHERE version IS NOT NULL | KEEP time, version';
+
+const submitQuery = () => {
+  fireEvent.change(screen.getByLabelText('Query'), { target: { value: nextQuery } });
+  fireEvent.click(screen.getByText('Run'));
+};
+
+const renderControls = ({
+  onColumnsChange,
+  fetchResults,
+}: {
+  onColumnsChange?: (columns: DatatableColumn[] | undefined) => void;
+  fetchResults?: React.ComponentProps<typeof EsqlAnnotationControls>['fetchResults'];
+} = {}) => {
+  const fetchColumns = jest
+    .fn<Promise<FetchResult>, [typeof annotation.query, AbortSignal]>()
+    .mockResolvedValue({ columns, timeField: '@timestamp' });
+  const onChange = jest.fn();
+  const props = { annotation, onChange, fetchColumns, onColumnsChange, fetchResults };
+  const rendered = render(<EsqlAnnotationControls {...props} />);
+  return { ...rendered, props, fetchColumns, onChange };
+};
+
+describe('EsqlAnnotationControls', () => {
+  it('loads saved query columns without resubmitting annotation state', async () => {
+    const { fetchColumns, onChange } = renderControls();
+
+    await waitFor(() => expect(screen.queryByText('Loading')).not.toBeInTheDocument());
+
+    expect(fetchColumns).toHaveBeenCalledWith(annotation.query, expect.any(AbortSignal));
+    expect(
+      within(screen.getByLabelText('Target date field')).getByRole('option', { name: 'time' })
+    ).toBeInTheDocument();
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('reports the loaded columns so text decoration can offer them', async () => {
+    const onColumnsChange = jest.fn();
+    renderControls({ onColumnsChange });
+
+    await waitFor(() => expect(onColumnsChange).toHaveBeenLastCalledWith(columns));
+  });
+
+  it('reports no columns until the saved query has run, so bound fields are not flagged meanwhile', async () => {
+    const onColumnsChange = jest.fn();
+    renderControls({ onColumnsChange });
+
+    expect(onColumnsChange).toHaveBeenNthCalledWith(1, undefined);
+    expect(screen.getByLabelText('Target date field')).not.toHaveAttribute('aria-invalid', 'true');
+    await waitFor(() => expect(onColumnsChange).toHaveBeenLastCalledWith(columns));
+    expect(screen.getByLabelText('Target date field')).not.toHaveAttribute('aria-invalid', 'true');
+  });
+
+  it('flags bound fields as missing once the columns failed to load', async () => {
+    const fetchColumns = jest.fn().mockRejectedValue(new Error('Invalid query'));
+    render(
+      <EsqlAnnotationControls
+        annotation={annotation}
+        onChange={jest.fn()}
+        fetchColumns={fetchColumns}
+      />
+    );
+
+    await waitFor(() =>
+      expect(screen.getByLabelText('Target date field')).toHaveAttribute('aria-invalid', 'true')
+    );
+  });
+
+  describe('query results accordion', () => {
+    const gridAttrs = {
+      rows: [['2026-01-01'], ['2026-01-02']],
+      columns,
+    } as unknown as ESQLDataGridAttrs;
+
+    it('shows the results of the saved query in an accordion below the editor, like data layers', async () => {
+      const fetchResults = jest.fn().mockResolvedValue(gridAttrs);
+      renderControls({ fetchResults });
+
+      expect(await screen.findByText('ES|QL Query Results')).toBeInTheDocument();
+      expect(fetchResults).toHaveBeenCalledWith(annotation.query, expect.any(AbortController));
+      // the row count badge, with the grid itself only rendered once the accordion opens
+      expect(within(screen.getByTestId('ESQLQueryResults')).getByText('2')).toBeInTheDocument();
+      expect(screen.queryByTestId('esql-data-grid')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByText('ES|QL Query Results'));
+      expect(await screen.findByTestId('esql-data-grid')).toBeInTheDocument();
+    });
+
+    it('shows no accordion when no results fetcher is supplied', async () => {
+      renderControls();
+      await waitFor(() => expect(screen.queryByText('Loading')).not.toBeInTheDocument());
+
+      expect(screen.queryByText('ES|QL Query Results')).not.toBeInTheDocument();
+    });
+
+    it('hides the accordion when the results request fails', async () => {
+      const fetchResults = jest.fn().mockRejectedValue(new Error('boom'));
+      renderControls({ fetchResults });
+
+      await waitFor(() => expect(fetchResults).toHaveBeenCalled());
+      expect(screen.queryByText('ES|QL Query Results')).not.toBeInTheDocument();
+    });
+  });
+
+  it('commits a submitted query only after success and preserves edits made while loading', async () => {
+    const { props, fetchColumns, onChange, rerender } = renderControls();
+    await waitFor(() => expect(screen.queryByText('Loading')).not.toBeInTheDocument());
+    let resolveColumns = (result: FetchResult) => {};
+    fetchColumns.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveColumns = resolve;
+        })
+    );
+
+    submitQuery();
+    expect(onChange).not.toHaveBeenCalled();
+    rerender(
+      <EsqlAnnotationControls {...props} annotation={{ ...annotation, label: 'New label' }} />
+    );
+    await act(async () => resolveColumns({ columns, timeField: '@timestamp' }));
+
+    expect(onChange).toHaveBeenCalledWith({
+      ...annotation,
+      label: 'New label',
+      query: { esql: nextQuery },
+      timeField: '@timestamp',
+    });
+  });
+
+  it('keeps the last accepted configuration and columns when a submitted query fails', async () => {
+    const { fetchColumns, onChange } = renderControls();
+    await waitFor(() => expect(screen.queryByText('Loading')).not.toBeInTheDocument());
+    fetchColumns.mockRejectedValueOnce(new Error('Invalid query'));
+
+    submitQuery();
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Invalid query');
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.getByLabelText('Target date field')).toHaveValue('time');
+    expect(
+      within(screen.getByLabelText('Target date field')).getByRole('option', { name: 'time' })
+    ).toBeInTheDocument();
+  });
+
+  it('does not commit a cancelled query even if its request resolves', async () => {
+    const { fetchColumns, onChange } = renderControls();
+    await waitFor(() => expect(screen.queryByText('Loading')).not.toBeInTheDocument());
+    let resolveColumns = (result: FetchResult) => {};
+    fetchColumns.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveColumns = resolve;
+        })
+    );
+
+    submitQuery();
+    fireEvent.click(screen.getByText('Cancel'));
+    expect(fetchColumns.mock.calls[1][1].aborted).toBe(true);
+    await act(async () => resolveColumns({ columns, timeField: '@timestamp' }));
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.queryByText('Loading')).not.toBeInTheDocument();
+  });
+
+  it('refreshes columns after fetch-context changes without overwriting an unsubmitted draft', async () => {
+    const { props, rerender } = renderControls();
+    await waitFor(() => expect(screen.queryByText('Loading')).not.toBeInTheDocument());
+    fireEvent.change(screen.getByLabelText('Query'), { target: { value: nextQuery } });
+    const fetchColumns = jest.fn().mockResolvedValue({ columns, timeField: '@timestamp' });
+
+    rerender(<EsqlAnnotationControls {...props} fetchColumns={fetchColumns} />);
+    await waitFor(() => expect(screen.queryByText('Loading')).not.toBeInTheDocument());
+
+    expect(fetchColumns).toHaveBeenCalledWith(annotation.query, expect.any(AbortSignal));
+    expect(screen.getByLabelText('Query')).toHaveValue(nextQuery);
+  });
+
+  it('aborts metadata requests when the annotation editor unmounts', () => {
+    const fetchColumns = jest
+      .fn<Promise<FetchResult>, [typeof annotation.query, AbortSignal]>()
+      .mockImplementation(() => new Promise(() => {}));
+    const { unmount } = render(
+      <EsqlAnnotationControls
+        annotation={annotation}
+        onChange={jest.fn()}
+        fetchColumns={fetchColumns}
+      />
+    );
+
+    unmount();
+
+    expect(fetchColumns.mock.calls[0][1].aborted).toBe(true);
+  });
+});

@@ -23,6 +23,8 @@ import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 
 import {
+  annotationConversionFailureToReason,
+  convertQueryAnnotationsToEsql,
   generateEsqlQuery,
   getFailureTooltipText,
   isEsqlQuerySuccess,
@@ -61,8 +63,8 @@ const getConvertibleLayerName = (layerId: string): string =>
 
 /**
  * Detects annotation layers that cannot be represented by an ES|QL visualization.
- * Query annotations rely on data views, while by-reference annotation groups are
- * rejected by the ES|QL schema even when every event in the group is manual.
+ * By-reference annotation groups are rejected by the ES|QL schema even when every
+ * event in the group is manual. Query annotations are converted separately.
  *
  * The state is intentionally probed structurally instead of via `XYVisualizationState`
  * and `isAnnotationsLayer`: this hook is visualization-agnostic (`visualization.state`
@@ -83,10 +85,19 @@ export const hasUnsupportedAnnotations = (visualizationState: unknown): boolean 
       __lastSaved?: unknown;
     }) =>
       layer?.layerType === layerTypes.ANNOTATIONS &&
-      (layer.annotationGroupId !== undefined ||
-        layer.__lastSaved !== undefined ||
-        (Array.isArray(layer.annotations) && layer.annotations.some(isQueryAnnotationConfig)))
+      (layer.annotationGroupId !== undefined || layer.__lastSaved !== undefined)
   );
+};
+
+const hasQueryAnnotations = (visualizationState: unknown, layerId: string): boolean => {
+  const layers = (visualizationState as { layers?: unknown })?.layers;
+  if (!Array.isArray(layers)) {
+    return false;
+  }
+  const layer = layers.find((candidate: { layerId?: string }) => candidate?.layerId === layerId) as
+    | { annotations?: EventAnnotationConfig[] }
+    | undefined;
+  return Boolean(layer?.annotations?.some(isQueryAnnotationConfig));
 };
 
 const makeNonConvertibleLayer = (
@@ -147,9 +158,9 @@ export const useEsqlConversionCheck = (
       return getEsqlConversionDisabledSettings('saved_to_library_not_supported');
     }
 
-    // Guard: query-based annotations require data views and are not yet supported on ES|QL charts
+    // Guard: annotation library groups are not supported on ES|QL charts
     if (hasUnsupportedAnnotations(state)) {
-      return getEsqlConversionDisabledSettings('query_annotations_not_supported');
+      return getEsqlConversionDisabledSettings('annotation_library_not_supported');
     }
 
     // Detect trendline layer from metric visualization state
@@ -203,7 +214,11 @@ export const useEsqlConversionCheck = (
       }
 
       if (layerType !== layerTypes.DATA) {
-        convertibleLayers.push(makeNonConvertibleLayer(layerId, layerType));
+        convertibleLayers.push({
+          ...makeNonConvertibleLayer(layerId, layerType),
+          // query annotations are converted to ES|QL annotations; other helper layers stay as-is
+          isConvertibleToEsql: hasQueryAnnotations(state, layerId),
+        });
         continue;
       }
 
@@ -296,10 +311,21 @@ export const useEsqlConversionCheck = (
       ? [...convertibleDataLayers, trendlineResult.layer]
       : convertibleDataLayers;
 
+    const annotationsConversion = convertQueryAnnotationsToEsql(
+      visualization.state,
+      framePublicAPI.dataViews.indexPatterns
+    );
+    if (!annotationsConversion.ok) {
+      return getEsqlConversionDisabledSettings(
+        annotationConversionFailureToReason[annotationsConversion.reason]
+      );
+    }
+    const visualizationState = annotationsConversion.state;
+
     const newAttributes = convertFormBasedToTextBasedLayer({
       layersToConvert,
       attributes,
-      visualizationState: visualization.state,
+      visualizationState,
       datasourceStates,
       framePublicAPI,
     });

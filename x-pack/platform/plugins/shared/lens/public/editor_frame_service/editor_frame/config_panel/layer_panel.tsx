@@ -1029,6 +1029,8 @@ export function LayerPanel(props: LayerPanelProps) {
                       removeLayer: props.onRemoveLayer,
                       panelRef,
                       isInlineEditing,
+                      esqlVariables,
+                      isApproximate,
                     }}
                   />
                   {activeVisualization.DimensionEditorAdditionalSectionComponent && (

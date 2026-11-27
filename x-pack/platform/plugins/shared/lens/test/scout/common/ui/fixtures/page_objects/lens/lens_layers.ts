@@ -6,6 +6,7 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { WAIT_FOR_FUNCTION_TIMEOUT_MS } from './lens_editor_helpers';
 
 /**
@@ -190,6 +191,19 @@ export class LensLayers {
       throw new Error(`Layer tab not found at index ${index}`);
     }
     await tab.hover();
+  }
+
+  /** Sets "Use global filters" in the active layer's settings flyout, then closes it. */
+  async setUseGlobalFilters(enabled: boolean) {
+    await this.page.testSubj.click('lnsLayerSettings');
+    const toggle = this.page.testSubj.locator('lns-layerSettings-ignoreGlobalFilters');
+    await toggle.waitFor({ state: 'visible' });
+    if ((await toggle.getAttribute('aria-checked')) !== String(enabled)) {
+      await toggle.click();
+    }
+    await expect(toggle).toHaveAttribute('aria-checked', String(enabled));
+    await this.page.testSubj.click('lns-indexPattern-dimensionContainerBack');
+    await this.page.testSubj.locator('lnsLayerSettingsFlyout').waitFor({ state: 'hidden' });
   }
 
   /** Returns the number of layers in the Lens editor (unified-tabs row is hidden for a single layer). */

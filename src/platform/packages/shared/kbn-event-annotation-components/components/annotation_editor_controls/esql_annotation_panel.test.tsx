@@ -1,0 +1,157 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React from 'react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { EsqlEventAnnotationConfig } from '@kbn/event-annotation-common';
+import { ConfigPanelEsqlAnnotation } from './esql_annotation_panel';
+
+const columns: DatatableColumn[] = [
+  { id: 'start-id', name: 'start', meta: { type: 'date' } },
+  { id: 'end-id', name: 'end', meta: { type: 'date' } },
+  { id: 'version-id', name: 'version', meta: { type: 'string' } },
+  { id: 'duration-id', name: 'duration', meta: { type: 'number' } },
+];
+
+const annotation: EsqlEventAnnotationConfig = {
+  id: 'deployments',
+  type: 'esql',
+  query: { esql: 'FROM deployments | KEEP start, end, version, duration' },
+  key: { type: 'point_in_time' },
+  timeColumn: 'start',
+  textColumn: 'version',
+  extraColumns: ['duration'],
+  label: 'Deployments',
+  color: '#FF0000',
+  icon: 'triangle',
+  lineStyle: 'dashed',
+  lineWidth: 3,
+  textVisibility: true,
+};
+
+const renderPanel = (
+  currentAnnotation: EsqlEventAnnotationConfig = annotation,
+  resultColumns = columns,
+  queryResults?: React.ReactNode,
+  isLoadingColumns = false
+) => {
+  const onChange = jest.fn();
+  const rendered = render(
+    <ConfigPanelEsqlAnnotation
+      annotation={currentAnnotation}
+      columns={resultColumns}
+      onChange={onChange}
+      queryEditor={<div data-test-subj="annotation-query-editor" />}
+      queryResults={queryResults}
+      isLoadingColumns={isLoadingColumns}
+    />
+  );
+  return { ...rendered, onChange };
+};
+
+describe('ConfigPanelEsqlAnnotation', () => {
+  it('renders the supplied editor and restricts time selections to date result columns', () => {
+    renderPanel();
+
+    expect(screen.getByTestId('annotation-query-editor')).toBeInTheDocument();
+    expect(
+      within(screen.getByLabelText('Target date field'))
+        .getAllByRole('option')
+        .map((option) => option.textContent)
+    ).toEqual(['Select a field', 'start', 'end']);
+    expect(screen.queryByLabelText('Text field')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('End date field')).not.toBeInTheDocument();
+  });
+
+  it('renders the query results slot directly after the query editor', () => {
+    renderPanel(annotation, columns, <div data-test-subj="annotation-query-results" />);
+
+    const editor = screen.getByTestId('annotation-query-editor');
+    expect(editor.nextElementSibling).toBe(screen.getByTestId('annotation-query-results'));
+  });
+
+  it('uses result names rather than datatable IDs and preserves the query and appearance', () => {
+    const { onChange } = renderPanel();
+
+    fireEvent.change(screen.getByLabelText('Target date field'), { target: { value: 'end' } });
+    expect(onChange).toHaveBeenLastCalledWith({ ...annotation, timeColumn: 'end' });
+  });
+
+  it('does not render a text field in the placement section for ranges; the label field lives in Appearance', () => {
+    renderPanel({ ...annotation, key: { type: 'range' }, endTimeColumn: 'end' });
+
+    expect(screen.queryByLabelText('Text field')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Label field')).not.toBeInTheDocument();
+  });
+
+  it('edits the end column of a range without changing its fill or query', () => {
+    const range: EsqlEventAnnotationConfig = {
+      id: 'maintenance',
+      type: 'esql',
+      query: annotation.query,
+      key: { type: 'range' },
+      timeColumn: 'start',
+      endTimeColumn: 'end',
+      label: 'Maintenance',
+      color: '#FF00001A',
+      outside: true,
+    };
+    const { onChange } = renderPanel(range);
+
+    fireEvent.change(screen.getByLabelText('End date field'), { target: { value: 'start' } });
+    expect(onChange).toHaveBeenCalledWith({ ...range, endTimeColumn: 'start' });
+  });
+
+  it('explains the chart time range limitation only while the time range switch is on', () => {
+    const hint = /Ranges that started before the chart time range are not shown/;
+    const { unmount } = renderPanel(annotation);
+    expect(screen.queryByText(hint)).not.toBeInTheDocument();
+    unmount();
+
+    renderPanel({
+      ...annotation,
+      key: { type: 'range' },
+      endTimeColumn: 'end',
+    } as EsqlEventAnnotationConfig);
+    expect(screen.getByText(hint)).toBeInTheDocument();
+  });
+
+  it('retains missing bindings and reports errors instead of choosing another column', () => {
+    const { onChange } = renderPanel(annotation, [columns[1]]);
+
+    expect(screen.getByLabelText('Target date field')).toHaveValue('start');
+    expect(screen.getByLabelText('Target date field')).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getAllByText(/is missing or has an incompatible type/)).toHaveLength(1);
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('does not flag saved bindings as missing while the columns are still loading', () => {
+    renderPanel(annotation, [], undefined, true);
+
+    const timeField = screen.getByLabelText('Target date field');
+    expect(timeField).toHaveValue('start');
+    expect(timeField).not.toHaveAttribute('aria-invalid', 'true');
+    expect(screen.queryByText(/is missing or has an incompatible type/)).not.toBeInTheDocument();
+  });
+
+  it('flags the same bindings once the loaded columns do not contain them', () => {
+    renderPanel(annotation, [], undefined, false);
+
+    expect(screen.getByLabelText('Target date field')).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getAllByText(/is missing or has an incompatible type/)).toHaveLength(1);
+  });
+
+  it('reports an incompatible time column even when the result still contains its name', () => {
+    renderPanel(annotation, [{ ...columns[0], meta: { type: 'number' } }, ...columns.slice(1)]);
+
+    expect(screen.getByLabelText('Target date field')).toHaveValue('start');
+    expect(screen.getByLabelText('Target date field')).toHaveAttribute('aria-invalid', 'true');
+  });
+});

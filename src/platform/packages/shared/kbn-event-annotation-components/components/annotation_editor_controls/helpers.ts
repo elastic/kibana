@@ -17,8 +17,28 @@ import type {
   PointInTimeEventAnnotationConfig,
   QueryPointEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
-import { AUTO_ANNOTATION_COLOR, isAutoAnnotationColor } from '@kbn/event-annotation-common';
+import {
+  AUTO_ANNOTATION_COLOR,
+  isAutoAnnotationColor,
+  isEsqlAnnotationConfig,
+} from '@kbn/event-annotation-common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { DataType, FieldOption, FieldOptionValue } from '@kbn/visualization-ui-components';
 import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '../..';
+
+/** ES|QL result columns as field picker options; the result has no data view to read fields from. */
+export const getColumnFieldOptions = (
+  columns: DatatableColumn[],
+  optionTestSubjPrefix: string
+): Array<FieldOption<FieldOptionValue>> =>
+  columns.map(({ name, meta }) => ({
+    label: name,
+    // Same cast as the ES|QL data layer field pickers; the icon falls back for other types
+    value: { type: 'field', field: name, dataType: meta.type as DataType },
+    exists: true,
+    compatible: true,
+    'data-test-subj': `${optionTestSubjPrefix}${name}`,
+  }));
 
 export const defaultAnnotationLabel = i18n.translate(
   'eventAnnotationComponents.xyChart.defaultAnnotationLabel',
@@ -48,7 +68,62 @@ export const toLineAnnotationColor = (color?: string) => {
   return chroma(transparentize(color, 1)).hex().toUpperCase();
 };
 
-export const sanitizeProperties = (annotation: EventAnnotationConfig) => {
+interface AnnotationAppearance {
+  label: string;
+  color?: string;
+}
+
+interface AnnotationAppearanceOverrides {
+  label: string;
+  color: string;
+}
+
+/** Label and color overrides for turning a range annotation into a point annotation. */
+export const getRangeToPointOverrides = ({
+  label,
+  color,
+}: AnnotationAppearance): AnnotationAppearanceOverrides => ({
+  label: label === defaultRangeAnnotationLabel ? defaultAnnotationLabel : label,
+  color: toLineAnnotationColor(color),
+});
+
+/** Label and color overrides for turning a point annotation into a range annotation. */
+export const getPointToRangeOverrides = ({
+  label,
+  color,
+}: AnnotationAppearance): AnnotationAppearanceOverrides => ({
+  label: label === defaultAnnotationLabel ? defaultRangeAnnotationLabel : label,
+  color: toRangeAnnotationColor(color),
+});
+
+export const sanitizeProperties = (annotation: EventAnnotationConfig): EventAnnotationConfig => {
+  if (isEsqlAnnotationConfig(annotation)) {
+    const common = pick(annotation, [
+      'type',
+      'id',
+      'label',
+      'query',
+      'timeField',
+      'timeColumn',
+      'textColumn',
+      'extraColumns',
+      'color',
+      'isHidden',
+    ]);
+    if ('endTimeColumn' in annotation) {
+      return {
+        ...common,
+        key: { type: 'range' },
+        endTimeColumn: annotation.endTimeColumn,
+        outside: annotation.outside,
+      };
+    }
+    return {
+      ...common,
+      key: { type: 'point_in_time' },
+      ...pick(annotation, ['icon', 'lineStyle', 'lineWidth', 'textVisibility']),
+    };
+  }
   if (isRangeAnnotationConfig(annotation)) {
     const rangeAnnotation: RangeEventAnnotationConfig = pick(annotation, [
       'type',

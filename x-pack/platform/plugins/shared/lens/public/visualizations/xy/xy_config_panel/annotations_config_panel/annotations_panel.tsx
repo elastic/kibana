@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { AnnotationEditorControls } from '@kbn/event-annotation-components';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
+import type { AggregateQuery } from '@kbn/es-query';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { getESQLQueryColumns, getESQLTimeField } from '@kbn/esql-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import moment from 'moment';
@@ -23,8 +26,11 @@ import type {
 } from '@kbn/lens-common';
 import { LENS_APP_NAME } from '../../../../../common/constants';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS, isEsqlChart } from '../../../../utils';
+import { getTimeRangeFilter } from '../../../../app_plugin/shared/edit_on_the_fly/get_time_range_filter';
 import { updateLayer } from '../../toolbar';
 import { isDataLayer } from '../../visualization_helpers';
+import { getGridAttrs } from '../../../../app_plugin/shared/edit_on_the_fly/helpers';
+import { EsqlAnnotationControls } from './esql_annotation_controls';
 
 export const AnnotationsPanel = (
   props: VisualizationDimensionEditorProps<XYVisualizationState> & {
@@ -68,12 +74,13 @@ export const AnnotationsPanel = (
     [localLayer, localState, index, setState, accessor]
   );
 
-  // ES|QL charts do not expose data views: restrict the editor to manual annotations
   const hideQueryBasedControls = isEsqlChart(frame.datasourceLayers);
+  const [esqlColumns, setEsqlColumns] = useState<DatatableColumn[]>();
 
   const [currentDataView, setCurrentDataView] = useState<DataView>();
 
   useEffect(() => {
+    if (hideQueryBasedControls) return;
     const updateDataView = async () => {
       let dataView: DataView | undefined;
       const availableIds = await props.dataViewsService.getIds();
@@ -89,9 +96,58 @@ export const AnnotationsPanel = (
     };
 
     updateDataView();
-  }, [frame.dataViews.indexPatterns, localLayer.indexPatternId, props.dataViewsService]);
+  }, [
+    hideQueryBasedControls,
+    frame.dataViews.indexPatterns,
+    localLayer.indexPatternId,
+    props.dataViewsService,
+  ]);
 
   const queryInputServices = useKibana<LensAppServices>().services;
+  const { data, http, uiSettings } = queryInputServices;
+  const { esqlVariables, isApproximate = false } = props;
+  // Read through a ref: columns do not depend on the time range, so changing it must not
+  // refetch. The range is only needed to bind ?_tstart/?_tend if the query uses them.
+  const timeRangeRef = useRef({ from: frame.absDateRange.fromDate, to: frame.absDateRange.toDate });
+  timeRangeRef.current = { from: frame.absDateRange.fromDate, to: frame.absDateRange.toDate };
+  const fetchColumns = useCallback(
+    async (query: AggregateQuery, abortSignal: AbortSignal) => {
+      // The time field is resolved first: TBUCKET queries fail to run without a time filter on it
+      const timeField = await getESQLTimeField({ query: query.esql, http });
+      const columns = await getESQLQueryColumns({
+        esqlQuery: query.esql,
+        search: data.search.search,
+        signal: abortSignal,
+        timeRange: timeRangeRef.current,
+        filter: getTimeRangeFilter({
+          timeRange: timeRangeRef.current,
+          timeFieldName: timeField,
+          uiSettings,
+        }),
+        variables: esqlVariables,
+        includeColumnMetadata: true,
+      });
+      return { columns, timeField };
+    },
+    [data.search.search, http, uiSettings, esqlVariables]
+  );
+
+  const ignoreGlobalFilters = Boolean(localLayer.ignoreGlobalFilters);
+  const fetchResults = useCallback(
+    (query: AggregateQuery, abortController: AbortController) =>
+      getGridAttrs(
+        query,
+        [],
+        data,
+        http,
+        uiSettings,
+        abortController,
+        esqlVariables,
+        isApproximate,
+        ignoreGlobalFilters
+      ),
+    [data, http, uiSettings, esqlVariables, isApproximate, ignoreGlobalFilters]
+  );
 
   if (!currentAnnotation) {
     throw new Error('Annotation not found... this should never happen!');
@@ -104,6 +160,25 @@ export const AnnotationsPanel = (
         onAnnotationChange={(newAnnotation) => setAnnotation(newAnnotation)}
         dataView={currentDataView}
         hideQueryBasedControls={hideQueryBasedControls}
+        esql={
+          hideQueryBasedControls
+            ? {
+                columns: esqlColumns ?? [],
+                isLoadingColumns: esqlColumns === undefined,
+                renderControls: (annotation, onChange) => (
+                  <EsqlAnnotationControls
+                    key={annotation.id}
+                    annotation={annotation}
+                    onChange={onChange}
+                    fetchColumns={fetchColumns}
+                    onColumnsChange={setEsqlColumns}
+                    fetchResults={fetchResults}
+                    isApproximate={isApproximate}
+                  />
+                ),
+              }
+            : undefined
+        }
         getDefaultRangeEnd={(rangeStart) =>
           getEndTimestamp(
             props.datatableUtilities,
