@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { useEditWatchlistFormState } from './use_watchlist_form_state_edit';
 import { useGetWatchlistFormData } from './use_get_watchlist_form_data';
 
@@ -23,7 +23,6 @@ describe('useEditWatchlistFormState', () => {
   beforeEach(() => {
     mockUseGetWatchlistFormData.mockReturnValue({
       initialWatchlist: undefined,
-      ruleBasedSourceIds: undefined,
       indexSourceWithMissingApiKey: undefined,
     });
   });
@@ -34,6 +33,25 @@ describe('useEditWatchlistFormState', () => {
     expect(mockUseGetWatchlistFormData).toHaveBeenCalledWith('wl-1');
     expect(result.current.watchlistId).toBe('wl-1');
     expect(result.current.isEditMode).toBe(true);
+  });
+
+  it('reports whether the data sources differ from the ones that were loaded', () => {
+    mockUseGetWatchlistFormData.mockReturnValue({
+      initialWatchlist: {
+        name: 'wl',
+        riskModifier: 1,
+        managed: false,
+        entitySources: [{ type: 'store', name: 'wl-store', queryRule: 'a: b' }],
+      },
+      indexSourceWithMissingApiKey: undefined,
+    });
+    const { result } = renderHook(() => useEditWatchlistFormState({ watchlistId: 'wl-1' }));
+
+    act(() => result.current.setWatchlistField('name', 'renamed'));
+    expect(result.current.hasEntitySourceChanges).toBe(false);
+
+    act(() => result.current.setWatchlistField('entitySources', []));
+    expect(result.current.hasEntitySourceChanges).toBe(true);
   });
 
   it('disables save when the id is missing', () => {

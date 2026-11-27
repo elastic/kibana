@@ -28,7 +28,6 @@ const mockUseWatchlistMutations = useWatchlistMutations as jest.Mock;
 const formState = (overrides: Record<string, unknown> = {}) => ({
   watchlist: { name: 'my watchlist', description: '', riskModifier: 1.5, managed: false },
   watchlistId: undefined,
-  ruleBasedSourceIds: {},
   indexSourceWithMissingApiKey: undefined,
   isEditMode: false,
   isDisabled: false,

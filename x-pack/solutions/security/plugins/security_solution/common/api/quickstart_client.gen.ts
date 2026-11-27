@@ -3766,7 +3766,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Updates the name, description, risk modifier, or managed status of an existing entity analytics watchlist.
+   * Updates the name, description, risk modifier, or managed status of an existing entity analytics watchlist. Optionally also sets its rule-based data sources in the same request
    */
   async updateWatchlist(props: UpdateWatchlistProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdateWatchlist`);

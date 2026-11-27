@@ -97,7 +97,6 @@ describe('useGetWatchlistFormData', () => {
     });
 
     expect(result.current.initialWatchlist).toBeNull();
-    expect(result.current.ruleBasedSourceIds).toEqual({});
   });
 
   it('fetches and transforms watchlist data with rule-based sources', async () => {
@@ -130,12 +129,6 @@ describe('useGetWatchlistFormData', () => {
       'store',
       'index',
     ]);
-
-    // ruleBasedSourceIds should map type → id
-    expect(result.current.ruleBasedSourceIds).toEqual({
-      store: 'src-store-1',
-      index: 'src-index-1',
-    });
   });
 
   it('returns empty entitySources when only integration sources exist', async () => {
@@ -154,30 +147,6 @@ describe('useGetWatchlistFormData', () => {
 
     // No rule-based sources → entitySources should be undefined
     expect(result.current.initialWatchlist?.entitySources).toBeUndefined();
-    expect(result.current.ruleBasedSourceIds).toEqual({});
-  });
-
-  it('builds ruleBasedSourceIds only for sources with id and type', async () => {
-    mockGetWatchlist.mockResolvedValue(watchlistResponse);
-    mockListWatchlistEntitySources.mockResolvedValue({
-      sources: [
-        storeSource,
-        { type: 'index', name: 'no-id-source', enabled: true }, // Missing ID
-      ],
-    });
-
-    const { result } = renderHook(() => useGetWatchlistFormData('wl-1'), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => {
-      expect(result.current.initialWatchlist).not.toBeNull();
-    });
-
-    // Only the store source with an ID should be in the map
-    expect(result.current.ruleBasedSourceIds).toEqual({
-      store: 'src-store-1',
-    });
   });
 
   it('returns the index source as indexSourceWithMissingApiKey when it has no apiKeyId', async () => {
@@ -212,10 +181,10 @@ describe('useGetWatchlistFormData', () => {
     });
 
     // The index source is still loaded (positive anchor), it just is not flagged as missing a key.
-    expect(result.current.ruleBasedSourceIds).toEqual({
-      store: 'src-store-1',
-      index: 'src-index-1',
-    });
+    expect(result.current.initialWatchlist?.entitySources?.map((s) => s.type)).toEqual([
+      'store',
+      'index',
+    ]);
     expect(result.current.indexSourceWithMissingApiKey).toBeUndefined();
   });
 });

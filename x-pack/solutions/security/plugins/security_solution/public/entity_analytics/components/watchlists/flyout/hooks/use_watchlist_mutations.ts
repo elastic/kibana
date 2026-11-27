@@ -6,26 +6,24 @@
  */
 
 import type { CreateWatchlistRequestBodyInput } from '../../../../../../common/api/entity_analytics/watchlists/management/create.gen';
-import type { SourceType } from './rule_based_source_helpers';
 import { useCreateWatchlist } from './use_create_watchlist';
 import { useUpdateWatchlist } from './use_update_watchlist';
 
 export interface UseWatchlistMutationsParams {
   watchlist: CreateWatchlistRequestBodyInput;
   watchlistId?: string;
-  /** Maps source type ('store' | 'index') → persisted entity-source ID. */
-  ruleBasedSourceIds: Partial<Record<SourceType, string>>;
   spaceId?: string;
   isEditMode: boolean;
+  hasEntitySourceChanges?: boolean;
   onSuccess: () => void;
 }
 
 export const useWatchlistMutations = ({
   watchlist,
   watchlistId,
-  ruleBasedSourceIds,
   spaceId,
   isEditMode,
+  hasEntitySourceChanges,
   onSuccess,
 }: UseWatchlistMutationsParams) => {
   const createMutation = useCreateWatchlist({
@@ -35,9 +33,9 @@ export const useWatchlistMutations = ({
   });
   const updateMutation = useUpdateWatchlist({
     watchlistId,
-    ruleBasedSourceIds,
     watchlist,
     spaceId,
+    hasEntitySourceChanges,
     onSuccess,
   });
 

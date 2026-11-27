@@ -20,6 +20,10 @@ import { WATCHLISTS_URL } from '../../../../../../common/entity_analytics/watchl
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
 import { WatchlistConfigClient } from '../watchlist_config';
+import { WatchlistEntitySourceClient } from '../../entity_sources/infra';
+import { syncWatchlistInBackground } from '../../entity_sources/entity_sources_service';
+import { getWatchlistSavedObjectClient } from '../../shared/utils';
+import { updateWatchlistWithSources } from '../update_watchlist_with_sources';
 import {
   buildWatchlistApiCallSuccessFields,
   reportWatchlistApiCallError,
@@ -28,7 +32,9 @@ import {
 export const updateWatchlistRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger,
-  telemetrySender: ITelemetryEventsSender
+  telemetrySender: ITelemetryEventsSender,
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
+  hasEncryptionKey: EntityAnalyticsRoutesDeps['hasEncryptionKey']
 ) => {
   router.versioned
     .put({
@@ -56,16 +62,51 @@ export const updateWatchlistRoute = (
           try {
             const secSol = await context.securitySolution;
             const core = await context.core;
+            const namespace = secSol.getSpaceId();
+            const soClient = getWatchlistSavedObjectClient(core);
+            const esClient = core.elasticsearch.client.asCurrentUser;
 
             const watchlistClient = new WatchlistConfigClient({
-              namespace: secSol.getSpaceId(),
-              soClient: core.savedObjects.client,
-              esClient: core.elasticsearch.client.asCurrentUser,
+              namespace,
+              soClient,
+              esClient,
               logger,
             });
+            const sourceClient = new WatchlistEntitySourceClient({
+              soClient,
+              namespace,
+              getStartServices,
+              esClient,
+              logger,
+              hasEncryptionKey,
+            });
             const { id } = request.params;
-            // update returns attributes only, need to fetch full object for response
-            const updated = await watchlistClient.update(id, request.body);
+            const { entitySources, ...watchlist } = request.body;
+
+            const { watchlist: updated, shouldSync } = await updateWatchlistWithSources({
+              soClient,
+              watchlistClient,
+              sourceClient,
+              request,
+              logger,
+              watchlistId: id,
+              watchlist,
+              entitySources,
+            });
+
+            // if the sources were not updated, we don't need to sync
+            if (shouldSync) {
+              void syncWatchlistInBackground({
+                watchlistId: id,
+                logContext: 'WatchlistUpdate',
+                esClient,
+                soClient,
+                logger,
+                namespace,
+                getStartServices,
+                hasEncryptionKey,
+              });
+            }
 
             telemetrySender.reportEBT(
               WATCHLIST_API_CALL_EVENT,

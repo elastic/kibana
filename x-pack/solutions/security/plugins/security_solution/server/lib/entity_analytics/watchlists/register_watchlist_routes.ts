@@ -35,7 +35,7 @@ export const registerWatchlistRoutes = ({
   watchlistsPrivilegesRoute(router, logger, getStartServices);
   listWatchlistsRoute(router, logger, getStartServices, hasEncryptionKey);
   searchWatchlistIndicesRoute(router, logger);
-  updateWatchlistRoute(router, logger, telemetrySender);
+  updateWatchlistRoute(router, logger, telemetrySender, getStartServices, hasEncryptionKey);
   registerEntitySourceRoutes(router, logger, getStartServices, hasEncryptionKey);
   syncWatchlistRoute(router, logger, getStartServices, hasEncryptionKey);
   csvUploadRoute({ router, logger, getStartServices });

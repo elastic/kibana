@@ -24,7 +24,7 @@ import type {
 import { nodeBuilder } from '@kbn/es-query';
 import type { WatchlistObject } from '../../../../../common/api/entity_analytics/watchlists/management/common.gen';
 import type { MonitoringEntitySource } from '../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
-import { validateWatchlistUpdate } from './validation';
+import { assertWatchlistNameIsAvailable, validateWatchlistUpdate } from './validation';
 import { getIndexForWatchlist } from '../entities/utils';
 import { generateWatchlistEntityIndexMappings } from '../entities/mappings';
 import { watchlistConfigTypeName } from './saved_object/watchlist_config_type';
@@ -109,13 +109,25 @@ export const createWatchlistValidationError = (
 export class WatchlistConfigClient {
   constructor(private readonly deps: WatchlistConfigClientDeps) {}
 
+  /**
+   * Creates a watchlist and its backing index.
+   *
+   * The name must be unique in the space and must not be a reserved system name (409 otherwise).
+   * System flows that own the name, such as prebuilt installation, pass `skipNameValidation`.
+   */
   async create(
     attrs: SetOptional<WatchlistSavedObjectAttributes, 'managed'>,
-    options?: { id?: string }
+    options?: { id?: string; skipNameValidation?: boolean }
   ): Promise<WatchlistObject> {
+    const name = attrs.name.trim();
+
+    if (!options?.skipNameValidation) {
+      await assertWatchlistNameIsAvailable(this.deps.soClient, name);
+    }
+
     const so = await this.deps.soClient.create<WatchlistSavedObjectAttributes>(
       watchlistConfigTypeName,
-      { ...attrs, managed: attrs.managed ?? false },
+      { ...attrs, name, managed: attrs.managed ?? false },
       { id: options?.id, refresh: 'wait_for' }
     );
 
@@ -150,10 +162,14 @@ export class WatchlistConfigClient {
   async update(id: string, attrs: WatchlistUpdateAttrs): Promise<WatchlistObject> {
     const existing = await this.get(id);
 
-    validateWatchlistUpdate(id, attrs, existing);
+    await validateWatchlistUpdate({ soClient: this.deps.soClient, id, attrs, existing });
 
     const existingAttrs = omitWatchlistMeta(existing);
     const attrsNoMeta = omitWatchlistMeta(attrs);
+    // Only a new name is trimmed. An unchanged name is kept as stored
+    if (attrsNoMeta.name !== undefined && attrsNoMeta.name !== existing.name) {
+      attrsNoMeta.name = attrsNoMeta.name.trim();
+    }
     const update: Partial<WatchlistSavedObjectAttributes> = {
       ...existingAttrs,
       ...attrsNoMeta,

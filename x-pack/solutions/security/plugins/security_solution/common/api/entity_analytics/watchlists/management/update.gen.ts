@@ -16,6 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+import { DateRange } from '../data_source/common.gen';
 import { WatchlistObject } from './common.gen';
 
 export const UpdateWatchlistRequestParams = lazySchema(() =>
@@ -51,6 +52,44 @@ export const UpdateWatchlistRequestBody = lazySchema(() =>
      * Indicates if the watchlist is managed by the system
      */
     managed: z.boolean().optional().describe('Indicates if the watchlist is managed by the system'),
+    /**
+     * The rule-based data sources (entity store or index) the watchlist should have after the update, at most one of each type. Omit it to leave the data sources as they are; an empty array removes them. A watchlist that is not managed can have only one rule-based source in this array; its integration sources are not counted and are not changed. An entity store source requires a non-empty `queryRule`. An index source requires Elasticsearch `read` privileges on its `indexPattern` (and encrypted saved objects to be configured on self-managed deployments), and accepts a `range`; `range` is ignored for entity store sources. Managed data sources are not changed.
+     */
+    entitySources: z
+      .array(
+        z
+          .object({
+            type: z.enum(['index', 'store']),
+            name: z.string().max(256),
+            indexPattern: z.string().max(1000).optional(),
+            enabled: z.boolean().optional(),
+            /**
+             * Field used to query the entity store for index-type sources
+             */
+            identifierField: z
+              .string()
+              .max(256)
+              .optional()
+              .describe('Field used to query the entity store for index-type sources'),
+            /**
+             * KQL query. For an index source, it filters the documents read from the index pattern. For an entity store source, it filters the entity store and is required.
+             */
+            queryRule: z
+              .string()
+              .max(4096)
+              .optional()
+              .describe(
+                'KQL query. For an index source, it filters the documents read from the index pattern. For an entity store source, it filters the entity store and is required.'
+              ),
+            range: DateRange.optional(),
+          })
+          .strict()
+      )
+      .max(2)
+      .optional()
+      .describe(
+        'The rule-based data sources (entity store or index) the watchlist should have after the update, at most one of each type. Omit it to leave the data sources as they are; an empty array removes them. A watchlist that is not managed can have only one rule-based source in this array; its integration sources are not counted and are not changed. An entity store source requires a non-empty `queryRule`. An index source requires Elasticsearch `read` privileges on its `indexPattern` (and encrypted saved objects to be configured on self-managed deployments), and accepts a `range`; `range` is ignored for entity store sources. Managed data sources are not changed.'
+      ),
   })
 );
 export type UpdateWatchlistRequestBody = z.infer<typeof UpdateWatchlistRequestBody>;

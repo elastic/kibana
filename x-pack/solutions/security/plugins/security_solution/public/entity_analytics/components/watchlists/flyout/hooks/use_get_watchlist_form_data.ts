@@ -11,7 +11,6 @@ import type { CreateWatchlistRequestBodyInput } from '../../../../../../common/a
 import type { GetWatchlistResponse } from '../../../../../../common/api/entity_analytics/watchlists/management/get.gen';
 import type { MonitoringEntitySource } from '../../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import { useEntityAnalyticsRoutes } from '../../../../api/api';
-import type { SourceType } from './rule_based_source_helpers';
 
 export type WatchlistFormValues = CreateWatchlistRequestBodyInput;
 
@@ -71,22 +70,6 @@ export const useGetWatchlistFormData = (watchlistId?: string) => {
     [entitySourcesQuery.data]
   );
 
-  /**
-   * Maps source type → persisted ID so the mutation layer knows whether to
-   * create or update each source independently.
-   * A server-side upsert endpoint for entity sources would remove the need
-   * for this client side mapping. Issue here: https://github.com/elastic/security-team/issues/14466?issue=elastic%7Csecurity-team%7C16659
-   */
-  const ruleBasedSourceIds = useMemo<Partial<Record<SourceType, string>>>(() => {
-    const map: Partial<Record<SourceType, string>> = {};
-    for (const s of ruleBasedSources) {
-      if (s.id && (s.type === 'index' || s.type === 'store')) {
-        map[s.type] = s.id;
-      }
-    }
-    return map;
-  }, [ruleBasedSources]);
-
   const initialWatchlist = useMemo(() => {
     if (!watchlistQuery.data) {
       return null;
@@ -101,7 +84,6 @@ export const useGetWatchlistFormData = (watchlistId?: string) => {
 
   return {
     initialWatchlist,
-    ruleBasedSourceIds,
     indexSourceWithMissingApiKey,
     isLoading: watchlistQuery.isLoading || entitySourcesQuery.isLoading,
     isError: watchlistQuery.isError || entitySourcesQuery.isError,

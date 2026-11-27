@@ -785,7 +785,7 @@ Updates the details of an existing monitored privileged user by their document I
       .send(props.body as object);
   },
   /**
-   * Updates the name, description, risk modifier, or managed status of an existing entity analytics watchlist.
+   * Updates the name, description, risk modifier, or managed status of an existing entity analytics watchlist. Optionally also sets its rule-based data sources in the same request
    */
   updateWatchlist(props: UpdateWatchlistProps, kibanaSpace: string = 'default') {
     return supertest
