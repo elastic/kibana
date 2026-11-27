@@ -142,8 +142,6 @@ const StubbedUnifiedTimelineBody = ({
   </>
 );
 
-// The sidebar tests never look at the table, so they stub it and keep the real sidebar.
-// The `mock` prefix lets the factory below read the flag.
 let mockStubTimelineTable = false;
 
 jest.mock('../../unified_components/data_table', () => {
@@ -447,7 +445,6 @@ describe('query tab with unified timeline', () => {
     it(
       'should paginate correctly',
       async () => {
-        // one row per page keeps the real leading controls cheap, and they prove the grid passes the right row
         mockStubControlColumn = false;
         render(
           <TestProviders
@@ -477,13 +474,11 @@ describe('query tab with unified timeline', () => {
           expect(screen.getByTestId('pagination-button-2')).toHaveAttribute('aria-current', 'page');
         });
 
-        // the grid tells the tab which page it shows, and the tab loads the notes of that page only
         await waitFor(() => {
           expect(fetchNotesSpy).toHaveBeenCalledWith([mockTimelineData[2]._id]);
         });
         expect(fetchNotesSpy).toHaveBeenCalledTimes(1);
 
-        // the leading controls of the new page target the event of that page
         await waitFor(() => {
           expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
         });
@@ -491,7 +486,13 @@ describe('query tab with unified timeline', () => {
         await waitFor(() => {
           expect(flyoutApi.openNotes).toHaveBeenCalledWith(
             expect.objectContaining({
-              hit: expect.objectContaining({ _id: mockTimelineData[2]._id }),
+              hit: expect.objectContaining({
+                _id: mockTimelineData[2]._id,
+                raw: expect.objectContaining({
+                  _id: mockTimelineData[2]._id,
+                  _index: MOCK_TIMELINE_HIT_INDEX,
+                }),
+              }),
             })
           );
         });
@@ -591,12 +592,10 @@ describe('query tab with unified timeline', () => {
           </TestProviders>
         );
 
-        // 1 row per page: the notes of the first event only
         await waitFor(() => {
           expect(fetchNotesSpy).toHaveBeenCalledWith([mockTimelineData[0]._id]);
         });
 
-        // 2 rows per page: the notes of both events are fetched again
         fetchNotesSpy.mockClear();
         act(() => {
           store.dispatch(
@@ -1193,7 +1192,6 @@ describe('query tab with unified timeline', () => {
       'should allow pinning when event has notes but notes are not attached in current timeline',
       async () => {
         useStubbedGrid();
-        // no note is attached to the current timeline, so the event can be pinned
         const stateWithoutAttachedNotes = structuredClone(mockState);
         stateWithoutAttachedNotes.timeline.timelineById[TimelineId.test].eventIdToNoteIds = {};
         const store = createMockStore(stateWithoutAttachedNotes);
