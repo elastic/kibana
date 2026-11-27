@@ -77,7 +77,7 @@ export type {
   FeatureFlagsStart,
   FeatureFlagsSetup,
 } from '@kbn/core-feature-flags-server';
-export { defineTopic } from '@kbn/core-pubsub-server';
+export { defineTopic, PUBSUB_MAX_ID_LENGTH } from '@kbn/core-pubsub-server';
 export type {
   PubSubEvent,
   PubSubEventInit,
@@ -251,6 +251,7 @@ export type {
   IsAuthenticated,
   AuthStatus,
   GetAuthHeaders,
+  IAuthHeadersStorage,
   IContextContainer,
   HttpAuth,
   HttpServerInfo,
@@ -262,6 +263,15 @@ export type {
   HttpSelfResponse,
   HttpSelfScopedClient,
   HttpSelfService,
+  HttpSelfCredentialRefresher,
+  HttpSelfCredentialRefresherNotHandledResult,
+  HttpSelfCredentialRefresherOptions,
+  HttpSelfCredentialRefresherRejectParams,
+  HttpSelfCredentialRefresherRejectResult,
+  HttpSelfCredentialRefresherReplaceParams,
+  HttpSelfCredentialRefresherReplaceResult,
+  HttpSelfCredentialRefresherResult,
+  HttpSelfCredentialRefresherToolkit,
   HttpSelfUnauthorizedErrorHandler,
   HttpSelfUnauthorizedErrorHandlerNotHandledResult,
   HttpSelfUnauthorizedErrorHandlerOptions,
@@ -319,6 +329,7 @@ export type {
   SharedGlobalConfig,
   MakeUsageFromSchema,
   ExposedToBrowserDescriptor,
+  PluginInitialization,
 } from '@kbn/core-plugins-server';
 export type {
   PluginsServiceSetup,

@@ -34,6 +34,7 @@ type EventsWriteItemResult =
       written: false;
       reason:
         | 'existing_active_event'
+        | 'rule_held_by_event'
         | 'bulk_error'
         | 'duplicate_in_batch'
         | 'superseded'

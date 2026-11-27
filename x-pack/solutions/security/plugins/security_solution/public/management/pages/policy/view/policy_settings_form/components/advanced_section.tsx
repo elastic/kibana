@@ -116,12 +116,10 @@ const SHOW = i18n.translate('xpack.securitySolution.endpoint.policy.advanced.sho
 
 export interface AdvancedSectionProps extends PolicyFormComponentCommonProps {
   omitKeys?: readonly string[];
-  /** When true, the show/hide control is full width with a chevron. Defaults to the inline button. */
-  fullWidthToggle?: boolean;
 }
 
 export const AdvancedSection = memo<AdvancedSectionProps>(
-  ({ policy, mode, onChange, omitKeys, fullWidthToggle, 'data-test-subj': dataTestSubj }) => {
+  ({ policy, mode, onChange, omitKeys, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const advancedSettingsId = useId();
     const [showAdvancedPolicy, setShowAdvancedPolicy] = useState<boolean>(false);
@@ -162,17 +160,10 @@ export const AdvancedSection = memo<AdvancedSectionProps>(
           onClick={handleAdvancedSettingsButtonClick}
           aria-expanded={showAdvancedPolicy}
           aria-controls={showAdvancedPolicy ? advancedSettingsId : undefined}
-          {...(fullWidthToggle
-            ? {
-                iconType: showAdvancedPolicy
-                  ? ('chevronSingleUp' as const)
-                  : ('chevronSingleDown' as const),
-                // EuiButtonEmpty exposes no fullWidth prop (only `flush`/`size`), so the
-                // supported composition point is EUI's css prop. The chevron is what tests
-                // assert on; no styling-free class is added purely as a selector.
-                css: { width: '100%', justifyContent: 'center' },
-              }
-            : {})}
+          iconType={showAdvancedPolicy ? 'chevronSingleUp' : 'chevronSingleDown'}
+          // EuiButtonEmpty exposes no fullWidth prop (only `flush`/`size`), so the supported
+          // composition point is EUI's css prop.
+          css={{ width: '100%', justifyContent: 'center' }}
         >
           <FormattedMessage
             id="xpack.securitySolution.endpoint.policy.advanced.showHideButtonLabel"

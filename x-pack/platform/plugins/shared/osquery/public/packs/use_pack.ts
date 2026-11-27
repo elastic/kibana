@@ -6,6 +6,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
+import { buildPath } from '@kbn/core-http-browser';
 import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import type { PackItem } from './types';
@@ -13,14 +14,20 @@ import type { PackItem } from './types';
 interface UsePack {
   packId?: string;
   skip?: boolean;
+  /** Also load `effective_policy_ids`; costs a scan of every Osquery integration. */
+  withEffectivePolicyIds?: boolean;
 }
 
-export const usePack = ({ packId, skip = false }: UsePack) => {
+export const usePack = ({ packId, skip = false, withEffectivePolicyIds = false }: UsePack) => {
   const { http } = useKibana().services;
 
   return useQuery<{ data: PackItem }, unknown, PackItem>(
-    ['pack', { packId }],
-    () => http.get(`/api/osquery/packs/${packId}`, { version: API_VERSIONS.public.v1 }),
+    ['pack', { packId, withEffectivePolicyIds }],
+    () =>
+      http.get(buildPath('/api/osquery/packs/{packId}', { packId }), {
+        version: API_VERSIONS.public.v1,
+        ...(withEffectivePolicyIds && { query: { withEffectivePolicyIds: 'true' } }),
+      }),
     {
       select: (response) => response?.data,
       keepPreviousData: true,

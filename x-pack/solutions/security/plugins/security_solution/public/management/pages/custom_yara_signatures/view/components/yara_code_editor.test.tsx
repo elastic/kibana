@@ -9,7 +9,7 @@ import React from 'react';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { monaco } from '@kbn/code-editor';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
-import { YARA_LANG_ID, YARA_THEME_ID } from '../../yara_language';
+import { YARA_LANG_ID } from '../../yara_language';
 import { YaraCodeEditor } from './yara_code_editor';
 
 const mockCodeEditor = jest.fn((props: CodeEditorProps) => <div>{props.value}</div>);
@@ -58,7 +58,6 @@ describe('YaraCodeEditor', () => {
         fitToContent: undefined,
         isCopyable: undefined,
         options: expect.objectContaining({
-          theme: YARA_THEME_ID,
           readOnly: false,
           domReadOnly: false,
         }),

@@ -76,7 +76,10 @@ describe('createAttachmentPanelResolver', () => {
 
     expect(resolve('att-1')).toEqual({
       type: 'success',
-      panelContent: { type: VEGA_VIS_TYPE, config: { spec: '{"$schema":"vega-lite"}' } },
+      panelContent: {
+        type: VEGA_VIS_TYPE,
+        config: { spec: { format: 'hjson', value: '{"$schema":"vega-lite"}' } },
+      },
     });
   });
 
@@ -101,6 +104,7 @@ describe('createAttachmentPanelResolver', () => {
           esql_query: ['FROM logs | STATS count() BY host'],
         },
       },
+      heightHint: 420,
     });
   });
 

@@ -58,6 +58,7 @@ if (showHelp) {
         --skip-docker-cloud-fips             {dim Don't build the docker cloud fips image}
         --skip-docker-contexts               {dim Don't produce docker image contexts}
         --skip-docker-fips                   {dim Don't build the docker fips image}
+        --skip-docker-image-archive          {dim Don't save built docker images as .tar.gz archives}
         --skip-docker-serverless             {dim Don't build the docker serverless image}
         --skip-docker-ubi                    {dim Don't build the docker ubi image}
         --skip-docker-wolfi                  {dim Don't build the docker wolfi image}

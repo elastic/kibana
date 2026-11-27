@@ -53,15 +53,15 @@ apiTest.describe(
       apiClient: ApiClientFixture,
       desired: {
         enabled?: boolean;
-        limits?: Partial<Record<RunQuotaGroup, number>>;
+        limits?: Partial<Record<RunQuotaGroup, number | null>>;
       }
     ): Promise<RunQuotaSnapshot> => {
       const current = await readSnapshot(apiClient);
       const limits = Object.fromEntries(
-        Object.entries(desired.limits ?? {}).filter(
-          ([group, limit]) => current.limits[group as RunQuotaGroup] !== limit
-        )
-      ) as Partial<Record<RunQuotaGroup, number>>;
+        Object.entries(desired.limits ?? {})
+          .filter(([group, limit]) => current.limits[group as RunQuotaGroup] !== (limit ?? 0))
+          .map(([group, limit]) => [group, group === 'investigation' && limit === 0 ? null : limit])
+      ) as Partial<Record<RunQuotaGroup, number | null>>;
       const body = {
         ...(desired.enabled !== undefined && desired.enabled !== current.enabled
           ? { enabled: desired.enabled }
@@ -96,7 +96,8 @@ apiTest.describe(
     ): Promise<void> => {
       const response = await consume(apiClient, body);
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual({ allowed: true });
+      expect(response.body).toMatchObject({ allowed: true });
+      expect(typeof (response.body as { limit: unknown }).limit).toBe('number');
     };
 
     apiTest.beforeAll(async ({ samlAuth }) => {
@@ -128,7 +129,7 @@ apiTest.describe(
         const response = await consume(apiClient, { group: 'detection' });
 
         expect(response).toHaveStatusCode(200);
-        expect(response.body).toStrictEqual({ allowed: true });
+        expect(response.body).toStrictEqual({ allowed: true, limit: 0 });
         const after = await readSnapshot(apiClient);
         expect(after.enabled).toBe(false);
         expect(after.limits.detection).toBe(0);
@@ -155,7 +156,7 @@ apiTest.describe(
       const response = await consume(apiClient, { group: 'ki_extraction' });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual({ allowed: false });
+      expect(response.body).toStrictEqual({ allowed: false, limit: finiteLimit });
       const after = await readSnapshot(apiClient);
       expect(after.counts.ki_extraction).toBe(before.counts.ki_extraction);
     });
@@ -167,7 +168,7 @@ apiTest.describe(
         if (before.counts.investigation === 0) {
           await updateSettings(apiClient, {
             enabled: false,
-            limits: { investigation: 0 },
+            limits: { investigation: null },
           });
           await consumeAllowed(apiClient, { group: 'investigation' });
           before = await readSnapshot(apiClient);
@@ -181,7 +182,7 @@ apiTest.describe(
         const response = await consume(apiClient, { group: 'investigation' });
 
         expect(response).toHaveStatusCode(200);
-        expect(response.body).toStrictEqual({ allowed: false });
+        expect(response.body).toStrictEqual({ allowed: false, limit: finiteLimit });
         const after = await readSnapshot(apiClient);
         expect(after.counts.investigation).toBe(before.counts.investigation);
       }

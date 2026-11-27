@@ -7,14 +7,7 @@
 
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
-import {
-  EuiComboBox,
-  EuiFormErrorText,
-  EuiSelect,
-  EuiSwitch,
-  EuiText,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiComboBox, EuiFormErrorText, EuiSelect, EuiSwitch } from '@elastic/eui';
 import {
   ALERT_TRIAGE_DEFAULT_EXTRAS,
   EXCLUDED_RULE_TAG_MAX_LENGTH,
@@ -54,29 +47,6 @@ const SEVERITY_OPTIONS: Array<{ value: AlertTriageWorkerExtras['minSeverity']; t
 
 const SEVERITY_SELECT_WIDTH_PX = 160;
 
-const DETAIL_MAX_WIDTH_PX = 480;
-
-/** Longer explanation shown under a control, where the wide column has room for it. */
-const SettingDetail: React.FC<{ id: string; children: React.ReactNode }> = ({ id, children }) => (
-  <EuiText
-    size="xs"
-    color="subdued"
-    css={css`
-      max-width: ${DETAIL_MAX_WIDTH_PX}px;
-      margin-top: 8px;
-    `}
-  >
-    <p
-      id={id}
-      css={css`
-        margin: 0;
-      `}
-    >
-      {children}
-    </p>
-  </EuiText>
-);
-
 /**
  * Watch-owned controls for the Alert Triage Worker's extras. Every change hands the complete
  * `extras` object back to the page draft.
@@ -87,10 +57,6 @@ export const AlertTriageSettings: WorkerCustomSettingsComponent = ({
   onExtrasChange,
 }) => {
   const extras = readAlertTriageExtras(settings);
-  const confidenceDetailId = useGeneratedHtmlId({ prefix: 'alertZeroConfidenceDetail' });
-  const severityDetailId = useGeneratedHtmlId({ prefix: 'alertZeroSeverityDetail' });
-  const buildingBlocksDetailId = useGeneratedHtmlId({ prefix: 'alertZeroBuildingBlocksDetail' });
-  const ruleTagsDetailId = useGeneratedHtmlId({ prefix: 'alertZeroRuleTagsDetail' });
   const [tagError, setTagError] = useState<string>();
 
   return (
@@ -98,6 +64,7 @@ export const AlertTriageSettings: WorkerCustomSettingsComponent = ({
       <SettingRow
         label={i18n.MINIMUM_CONFIDENCE_SCORE_LABEL}
         labelHelp={i18n.MINIMUM_CONFIDENCE_SCORE_HELP_TEXT}
+        labelTooltip={i18n.MINIMUM_CONFIDENCE_SCORE_DETAIL_TEXT}
         data-test-subj="alertZeroMinimumConfidenceScoreRow"
       >
         <MinimumConfidenceScoreField
@@ -107,13 +74,11 @@ export const AlertTriageSettings: WorkerCustomSettingsComponent = ({
             onExtrasChange({ ...extras, autoCloseConfidenceScoreMinThreshold })
           }
         />
-        <SettingDetail id={confidenceDetailId}>
-          {i18n.MINIMUM_CONFIDENCE_SCORE_DETAIL_TEXT}
-        </SettingDetail>
       </SettingRow>
       <SettingRow
         label={i18n.MINIMUM_SEVERITY_LABEL}
         labelHelp={i18n.MINIMUM_SEVERITY_HELP_TEXT}
+        labelTooltip={i18n.MINIMUM_SEVERITY_DETAIL_TEXT}
         data-test-subj="alertZeroMinimumSeverityRow"
       >
         {/* The width sits on a wrapper: EUI places the chevron against the wrapper, not the <select>. */}
@@ -135,15 +100,13 @@ export const AlertTriageSettings: WorkerCustomSettingsComponent = ({
               })
             }
             aria-label={i18n.MINIMUM_SEVERITY_LABEL}
-            aria-describedby={severityDetailId}
             data-test-subj="alertZeroMinimumSeveritySelect"
           />
         </div>
-        <SettingDetail id={severityDetailId}>{i18n.MINIMUM_SEVERITY_DETAIL_TEXT}</SettingDetail>
       </SettingRow>
       <SettingRow
         label={i18n.EXCLUDE_BUILDING_BLOCKS_LABEL}
-        labelHelp={i18n.EXCLUDE_BUILDING_BLOCKS_HELP_TEXT}
+        labelTooltip={i18n.EXCLUDE_BUILDING_BLOCKS_DETAIL_TEXT}
         data-test-subj="alertZeroExcludeBuildingBlocksRow"
       >
         <EuiSwitch
@@ -155,16 +118,13 @@ export const AlertTriageSettings: WorkerCustomSettingsComponent = ({
           onChange={({ target }) =>
             onExtrasChange({ ...extras, excludeBuildingBlocks: target.checked })
           }
-          aria-describedby={buildingBlocksDetailId}
           data-test-subj="alertZeroExcludeBuildingBlocksSwitch"
         />
-        <SettingDetail id={buildingBlocksDetailId}>
-          {i18n.EXCLUDE_BUILDING_BLOCKS_DETAIL_TEXT}
-        </SettingDetail>
       </SettingRow>
       <SettingRow
         label={i18n.EXCLUDED_RULE_TAGS_LABEL}
         labelHelp={i18n.EXCLUDED_RULE_TAGS_HELP_TEXT}
+        labelTooltip={i18n.EXCLUDED_RULE_TAGS_DETAIL_TEXT}
         data-test-subj="alertZeroExcludedRuleTagsRow"
       >
         <EuiComboBox
@@ -197,7 +157,6 @@ export const AlertTriageSettings: WorkerCustomSettingsComponent = ({
             onExtrasChange({ ...extras, excludedRuleTags: options.map(({ label }) => label) })
           }
           aria-label={i18n.EXCLUDED_RULE_TAGS_LABEL}
-          aria-describedby={ruleTagsDetailId}
           data-test-subj="alertZeroExcludedRuleTagsInput"
         />
         {tagError !== undefined && (
@@ -205,7 +164,6 @@ export const AlertTriageSettings: WorkerCustomSettingsComponent = ({
             {tagError}
           </EuiFormErrorText>
         )}
-        <SettingDetail id={ruleTagsDetailId}>{i18n.EXCLUDED_RULE_TAGS_DETAIL_TEXT}</SettingDetail>
       </SettingRow>
     </>
   );

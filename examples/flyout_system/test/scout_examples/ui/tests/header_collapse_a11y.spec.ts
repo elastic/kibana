@@ -143,25 +143,34 @@ test.describe(
         expect(await app.isFocusWithin(flyout)).toBe(true);
       });
 
-      test(`collapsing the ${form} header dismisses the badge overflow popover`, async ({
+      test(`an open badge overflow popover keeps the ${form} header expanded`, async ({
         page,
         pageObjects,
       }) => {
         const app = pageObjects.flyoutSystem;
         const session = app.session(form);
         const flyout = await app.openFlyout(form, session);
+        const region = app.collapsibleRegion(form, session);
 
         const overflow = app.badgeOverflow(form, session);
         await overflow.click();
         const popover = page.getByRole('dialog', { name: 'Show 2 more badges' });
         await expect(popover).toBeVisible();
 
+        // The panel is portalled, so collapsing would leave it floating over a hidden trigger.
         await app.wheelOverHeader(form, session, WHEEL_DELTA);
-        await expect(app.collapsibleRegion(form, session)).toHaveAttribute('aria-hidden', 'true');
+        await app.waitForCollapseEvaluation(form, session);
+        await expect(region).not.toHaveAttribute('aria-hidden', 'true');
+        await expect(popover).toBeVisible();
 
-        // The panel is portalled, so nothing else would take it down once its anchor goes inert,
-        // leaving the badges floating over a control that is no longer there.
+        await page.keyboard.press('Escape');
         await expect(popover).toBeHidden();
+
+        // Once the popover is closed, the next scroll collapses the header. Scroll back up first,
+        // since a body already scrolled to its end would not scroll, or collapse, any further.
+        await app.wheelOverHeader(form, session, -WHEEL_DELTA);
+        await app.wheelOverHeader(form, session, WHEEL_DELTA);
+        await expect(region).toHaveAttribute('aria-hidden', 'true');
         expect(await app.isFocusWithin(flyout)).toBe(true);
       });
 

@@ -52,4 +52,8 @@ export const LazyDataViewPicker = React.lazy(() => import('./data_view_picker/da
 
 export const LazyFieldPicker = React.lazy(() => import('./field_picker/field_picker'));
 
+export { EmbeddableEditorPreview } from './embeddable_editor_preview';
+
+export { ManagedEditorFooter } from './managed_editor_footer';
+
 export type * from './types';

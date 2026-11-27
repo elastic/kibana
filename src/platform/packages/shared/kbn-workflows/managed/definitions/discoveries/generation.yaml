@@ -95,6 +95,18 @@ triggers:
             This ID is read but not acted upon by this workflow.
             The _generate endpoint handles validation orchestration.
           type: string
+        plugin_id:
+          description: |
+            Optional token-usage attribution (`feature_id` in the token-usage index)
+            for the generation model calls. Leave unset to keep them untagged.
+          type: string
+          maxLength: 256
+        aggregate_by:
+          description: |
+            Optional parent feature id the generation model calls' token usage also
+            aggregates under. Only meaningful with `plugin_id`.
+          type: string
+          maxLength: 256
         replacements:
           additionalProperties: true
           description: Initial anonymization replacements
@@ -116,7 +128,9 @@ steps:
     with:
       additional_context: ${{ inputs.additional_context }}
       alerts: ${{ inputs.additional_alerts }}
+      aggregate_by: ${{ inputs.aggregate_by }}
       api_config: ${{ inputs.api_config }}
+      plugin_id: ${{ inputs.plugin_id }}
       replacements: ${{ inputs.replacements }}
   # Validation is handled outside this workflow by the _generate endpoint,
   # which invokes the alert retrieval, generation, and validation workflows sequentially.

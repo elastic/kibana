@@ -28,14 +28,19 @@ dependsOn:
   - '@kbn/react-field'
   - '@kbn/storybook'
   - '@kbn/ui-actions-plugin'
+  - '@kbn/ui-callout'
   - '@kbn/shared-ux-button-toolbar'
   - '@kbn/calculate-width-from-char-count'
   - '@kbn/field-utils'
+  - '@kbn/embeddable-plugin'
+  - '@kbn/presentation-publishing'
+  - '@kbn/es-query'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
+  - jest-unit-tests
 fileGroups:
   src:
     - public/**/*

@@ -66,11 +66,11 @@ export default function searchSolutionNavigation({
         },
         {
           link: { deepLinkId: 'discover' },
-          pageTestSubject: 'noDataViewsPrompt',
+          pageTestSubject: 'discoverLayoutResizableContainer',
         },
         {
           link: { deepLinkId: 'dashboards' },
-          pageTestSubject: 'noDataViewsPrompt',
+          pageTestSubject: 'dashboardLandingPage',
         },
         {
           link: { deepLinkId: 'searchGettingStarted' },

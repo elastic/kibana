@@ -7,6 +7,8 @@ source .buildkite/scripts/common/env.sh
 
 .buildkite/scripts/bootstrap.sh
 
+load_cloud_deploy_credentials
+
 # Get PR number
 if [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
   PR_NUMBER="$GITHUB_PR_NUMBER"
@@ -70,7 +72,7 @@ export ES_NODE_DETAILS
 echo "--- Get Deployment Credentials"
 
 VAULT_TOKEN_BAK="$VAULT_TOKEN"
-VAULT_TOKEN=$(VAULT_ADDR=$LEGACY_VAULT_ADDR vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
+VAULT_TOKEN=$(legacy_vault_token)
 VAULT_ADDR=$LEGACY_VAULT_ADDR vault login -no-print "$VAULT_TOKEN"
 
 LEGACY_DEPLOY_PATH="secret/kibana-issues/dev/cloud-deploy/$CLOUD_DEPLOYMENT_NAME"

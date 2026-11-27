@@ -12,11 +12,15 @@ import type {
 } from '../chat_complete/callback_api';
 import { promptToMessageOptions } from '../../common/prompt/prompt_to_message_options';
 
+// A client bound to a feature calls with a `featureId` in place of the `connectorId`.
+type ServerPromptOptions = PromptOptions & { featureId?: string };
+
 export function createPromptApi(opts: { callbackApi: ChatCompleteApiWithCallback }): PromptAPI;
 export function createPromptApi({ callbackApi }: { callbackApi: ChatCompleteApiWithCallback }) {
-  return (options: PromptOptions) => {
+  return (options: ServerPromptOptions) => {
     const {
       connectorId,
+      featureId,
       stream,
       abortSignal,
       prompt,
@@ -49,7 +53,13 @@ export function createPromptApi({ callbackApi }: { callbackApi: ChatCompleteApiW
     };
 
     return callbackApi(
-      { connectorId, stream, abortSignal, retryConfiguration, maxRetries },
+      {
+        ...(featureId !== undefined ? { featureId } : { connectorId }),
+        stream,
+        abortSignal,
+        retryConfiguration,
+        maxRetries,
+      },
       callback
     );
   };

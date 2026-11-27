@@ -18,9 +18,9 @@ jest.mock('react-use/lib/useSessionStorage', () => jest.fn());
 jest.mock('@kbn/fleet-plugin/public', () => ({
   useGetPackageInfoByKeyQuery: jest.fn(),
   pagePathGetters: {
-    integration_details_policies: ({ pkgkey }: { pkgkey: string }) => [
+    integrations_installed: ({ viewInstances }: { viewInstances?: string }) => [
       '/app/integrations',
-      `/detail/${pkgkey}/policies`,
+      `/installed?viewInstances=${viewInstances}`,
     ],
   },
 }));
@@ -75,6 +75,7 @@ const mockUseAwsOverviewDashboardUrl = useAwsOverviewDashboardUrl as jest.Mock;
 function setupMocks({
   deploymentMethod = 'managed_integration' as 'managed_integration' | 'agent_based' | 'ecf',
   selectedServiceIds = [] as string[],
+  awsServicesMap = new Map() as Map<string, { packageName: string }>,
   packageData = undefined as object | undefined,
   overviewHref = undefined as string | undefined,
 } = {}) {
@@ -87,7 +88,7 @@ function setupMocks({
       deployErrors: {},
     },
     deploymentMethod,
-    awsServicesMap: new Map(),
+    awsServicesMap,
     updateDetectAndReviewStep: jest.fn(),
   });
   mockUseSessionStorage.mockReturnValue([
@@ -185,28 +186,39 @@ describe('DetectAndReviewStep', () => {
       expect(screen.getByTestId('detectAndReviewStep-continueButton')).toBeInTheDocument();
     });
 
-    it('links to the versionless AWS Policies tab before package info loads', () => {
-      setupMocks({ packageData: undefined });
-      renderStep();
-      expect(screen.getByTestId('detectAndReviewStep-finishButton')).toHaveAttribute(
-        'href',
-        '/base/app/integrations/detail/aws/policies'
-      );
-    });
-
-    it('keeps the versionless href when an older package version is installed', () => {
+    it('links to the instances of the aws package on Installed integrations', () => {
       setupMocks({
-        packageData: {
-          item: {
-            version: '3.0.0',
-            installationInfo: { version: '2.5.0', installed_kibana: [], installed_es: [] },
-          },
-        },
+        selectedServiceIds: ['cloudtrail', 'bedrock'],
+        awsServicesMap: new Map([
+          ['cloudtrail', { packageName: 'aws' }],
+          ['bedrock', { packageName: 'aws_bedrock' }],
+        ]),
       });
       renderStep();
       expect(screen.getByTestId('detectAndReviewStep-finishButton')).toHaveAttribute(
         'href',
-        '/base/app/integrations/detail/aws/policies'
+        '/base/app/integrations/installed?viewInstances=aws'
+      );
+    });
+
+    it('links to the instances of the deployed package when the session does not cover aws', () => {
+      setupMocks({
+        selectedServiceIds: ['bedrock'],
+        awsServicesMap: new Map([['bedrock', { packageName: 'aws_bedrock' }]]),
+      });
+      renderStep();
+      expect(screen.getByTestId('detectAndReviewStep-finishButton')).toHaveAttribute(
+        'href',
+        '/base/app/integrations/installed?viewInstances=aws_bedrock'
+      );
+    });
+
+    it('falls back to the aws package before the services are known', () => {
+      setupMocks();
+      renderStep();
+      expect(screen.getByTestId('detectAndReviewStep-finishButton')).toHaveAttribute(
+        'href',
+        '/base/app/integrations/installed?viewInstances=aws'
       );
     });
 

@@ -22,7 +22,7 @@ jest.mock('./use_kibana', () => ({
   useKibana: () => ({
     dependencies: {
       start: {
-        data: { search: { search: jest.fn() } },
+        data: { search: { esql: jest.fn() } },
         streams: { streamsRepositoryClient: { fetch: jest.fn() } },
       },
     },

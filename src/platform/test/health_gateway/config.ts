@@ -30,7 +30,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
         '--env.name=development',
-        `--plugin-path=${path.resolve(__dirname, 'plugins/status')}`,
+        `--plugin-path=${path.resolve(__dirname, '../../test_plugins/health_gateway/status')}`,
       ],
     },
   };

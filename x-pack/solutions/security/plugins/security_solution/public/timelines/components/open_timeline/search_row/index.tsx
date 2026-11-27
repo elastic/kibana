@@ -13,7 +13,7 @@ import {
   EuiSearchBar,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import * as i18n from '../translations';
@@ -21,14 +21,14 @@ import type { OpenTimelineProps } from '../types';
 
 const SearchRowContainer = styled.div`
   &:not(:last-child) {
-    margin-bottom: ${(props) => props.theme.eui.euiSizeL};
+    margin-bottom: ${(props) => props.theme.euiTheme.size.l};
   }
 `;
 
 SearchRowContainer.displayName = 'SearchRowContainer';
 
 const SearchRowFlexGroup = styled(EuiFlexGroup)`
-  margin-bottom: ${(props) => props.theme.eui.euiSizeXS};
+  margin-bottom: ${(props) => props.theme.euiTheme.size.xs};
 `;
 
 SearchRowFlexGroup.displayName = 'SearchRowFlexGroup';

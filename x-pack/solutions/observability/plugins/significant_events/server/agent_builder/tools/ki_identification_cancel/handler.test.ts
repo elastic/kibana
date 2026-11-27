@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -27,6 +28,7 @@ describe('cancelKiIdentificationToolHandler', () => {
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
       managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
       telemetry,
+      logger: loggerMock.create(),
       getSourcesClient,
     });
     const request = httpServerMock.createKibanaRequest();
@@ -58,6 +60,7 @@ describe('cancelKiIdentificationToolHandler', () => {
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
       managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
       telemetry,
+      logger: loggerMock.create(),
       getSourcesClient,
     });
     const request = httpServerMock.createKibanaRequest();

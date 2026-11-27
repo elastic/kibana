@@ -1,3 +1,9 @@
 # Search Homepage
 
 The Search Homepage is a shared homepage for elasticsearch users.
+
+It registers the `/app/elasticsearch/home` app and renders the shared home page from the
+`elasticsearchHome` plugin with the Elasticsearch banner, telemetry prefix and storage prefix from
+`public/home_config.ts`. Before the page mounts, it redirects to Getting Started the first time a
+user opens the home page in a browser, whatever the deployment's data or license. Getting Started
+records the visit in `localStorage`, as Vector DB does with its onboarding.

@@ -1,0 +1,418 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { randomUUID } from 'crypto';
+import { execFileSync } from 'child_process';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
+import { dirname, join } from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { MessageRole } from '@kbn/inference-common';
+import { buildReplay } from './replay';
+import {
+  INVESTIGATOR_PROMPT_PATH,
+  createGenerationCache,
+  createWriteupTask,
+  fillKnowledge,
+  loadPromptArm,
+  RESPONSE_STYLE_PATH,
+  baselinePromptSpec,
+  chooseBaseline,
+  resolvePromptCommit,
+  replayReply,
+} from './task';
+import type { WriteupExample } from './types';
+
+const example: WriteupExample = {
+  input: {
+    rounds: [
+      {
+        input: { message: 'Why did checkout fail?' },
+        steps: [
+          {
+            type: 'tool_call',
+            tool_id: 'nightshift_sandbox_bash',
+            tool_call_id: 'c1',
+            params: {},
+            results: [{ data: '127 errors' }],
+          },
+        ],
+      },
+    ],
+    round_index: 0,
+  },
+  output: { recorded_reply: 'Payment failed.' },
+  metadata: { case_id: 'case/r1', conversation_case_id: 'case', round_index: 0 },
+};
+
+const REPLY = 'Payment DNS lookups failed, so checkout returned errors for an hour.';
+const reply = (content: string) => ({ content, toolCalls: [] });
+const call = (name: string, args: Record<string, unknown> = {}) => ({
+  content: '',
+  toolCalls: [{ toolCallId: `t-${name}`, function: { name, arguments: args } }],
+});
+
+const fakeClient = (responses: unknown[]) => {
+  const chatComplete = jest.fn();
+  for (const r of responses) {
+    if (r instanceof Error) chatComplete.mockRejectedValueOnce(r);
+    else chatComplete.mockResolvedValueOnce(r);
+  }
+  return { chatComplete };
+};
+
+describe('replayReply', () => {
+  const replay = buildReplay(example.input.rounds, 0, 'prompt');
+
+  it('returns the first reply with text', async () => {
+    const client = fakeClient([reply(REPLY)]);
+    await expect(replayReply(client, replay)).resolves.toEqual({ reply: REPLY, extra_calls: [] });
+    expect(client.chatComplete).toHaveBeenCalledWith(
+      expect.objectContaining({ system: 'prompt', toolChoice: 'auto' })
+    );
+  });
+
+  it('acknowledges recording calls, answers queries with no new results, then takes the reply', async () => {
+    const client = fakeClient([
+      call('agentic_investigations_set_hypotheses'),
+      call('nightshift_sandbox_bash'),
+      reply(REPLY),
+    ]);
+    const out = await replayReply(client, replay);
+    expect(out).toEqual({
+      reply: REPLY,
+      extra_calls: ['agentic_investigations_set_hypotheses', 'nightshift_sandbox_bash'],
+      // Kept with their results, so a judge sees what the reply did before it was sent.
+      extra_turns: [
+        {
+          name: 'agentic_investigations_set_hypotheses',
+          args: expect.any(Object),
+          result: { result: 'ok' },
+        },
+        {
+          name: 'nightshift_sandbox_bash',
+          args: expect.any(Object),
+          result: { result: 'No new results.' },
+        },
+      ],
+    });
+    const { messages } = client.chatComplete.mock.calls[2][0];
+    const toolMessages = messages.filter((m: { role: string }) => m.role === MessageRole.Tool);
+    expect(toolMessages.at(-2).response).toEqual({ result: 'ok' });
+    // Nothing that names the replay, which came back in replies as narration.
+    expect(toolMessages.at(-1).response).toEqual({ result: 'No new results.' });
+  });
+
+  it('offers attachments.add and keeps what the model attached', async () => {
+    const client = fakeClient([
+      call('attachments_add', { type: 'text', data: { content: '| a | b |' } }),
+      reply(`${REPLY}\n<render_attachment id="replay-attachment-1"/>`),
+    ]);
+    const out = await replayReply(client, replay);
+    expect(Object.keys(client.chatComplete.mock.calls[0][0].tools)).toContain('attachments_add');
+    expect(out.attachments).toEqual([
+      { id: 'replay-attachment-1', type: 'text', content: '| a | b |' },
+    ]);
+    const { messages } = client.chatComplete.mock.calls[1][0];
+    expect(messages.at(-1).response).toEqual({
+      attachment_id: 'replay-attachment-1',
+      type: 'text',
+      version: 1,
+    });
+  });
+
+  it('takes a short reply as it is; the gates judge its length', async () => {
+    const client = fakeClient([reply('No customers were charged.')]);
+    await expect(replayReply(client, replay)).resolves.toEqual({
+      reply: 'No customers were charged.',
+      extra_calls: [],
+    });
+  });
+
+  it('retries an empty reply and a failed call, then gives up with the last error', async () => {
+    const client = fakeClient([reply(''), new Error('gateway 502'), reply('')]);
+    await expect(replayReply(client, replay, { retryDelayMs: 0 })).resolves.toEqual({
+      extra_calls: [],
+      error: 'empty reply',
+    });
+    expect(client.chatComplete).toHaveBeenCalledTimes(3);
+  });
+});
+
+describe('createWriteupTask', () => {
+  const arm = { label: 'current', prompt: 'prompt', hash: 'h1' };
+  // The cache writes through @kbn/fs, so each test gets its own volume under data/.
+  const volumes: string[] = [];
+  const testCache = () => {
+    const volume = `nightshift_writeup/test-cache-${randomUUID()}`;
+    volumes.push(volume);
+    return createGenerationCache(volume);
+  };
+  afterAll(() => {
+    for (const volume of volumes)
+      rmSync(join(REPO_ROOT, 'data', volume), { recursive: true, force: true });
+  });
+
+  it('rewrites the reply under the current and baseline prompts and caches each sample', async () => {
+    const cache = testCache();
+    const client = fakeClient([
+      reply(REPLY),
+      reply(`${REPLY} Baseline.`),
+      reply(`${REPLY} Again.`),
+      reply(`${REPLY} Again base.`),
+    ]);
+    const task = createWriteupTask({
+      inferenceClient: client,
+      connectorId: 'model',
+      arm,
+      baseline: { label: 'main', prompt: 'old prompt', hash: 'h0' },
+      cache,
+    });
+    const first = await task(example);
+    expect(first).toMatchObject({
+      case_id: 'case/r1',
+      round_index: 0,
+      reply_type: 'wrapup',
+      question: 'Why did checkout fail?',
+      recorded_reply: 'Payment failed.',
+      prompt_hash: 'h1',
+      baseline: { prompt_hash: 'h0' },
+    });
+    expect([first.reply, first.baseline?.reply].sort()).toEqual(
+      [REPLY, `${REPLY} Baseline.`].sort()
+    );
+    // A second repetition is a new sample, so it generates again.
+    const second = await task(example);
+    expect(second.cached).toBeUndefined();
+    expect(client.chatComplete).toHaveBeenCalledTimes(4);
+
+    // A fresh task (a re-run) reads both samples from the cache.
+    const rerun = createWriteupTask({
+      inferenceClient: fakeClient([]),
+      connectorId: 'model',
+      arm,
+      baseline: { label: 'main', prompt: 'old prompt', hash: 'h0' },
+      cache,
+    });
+    await expect(rerun(example)).resolves.toMatchObject({ reply: first.reply, cached: true });
+  });
+
+  it('tries a round once more when it ends without a reply', async () => {
+    // Three empty answers end a try without a reply; the second try replies.
+    const client = fakeClient([reply(''), reply(''), reply(''), reply(REPLY)]);
+    const task = createWriteupTask({ inferenceClient: client, connectorId: 'model', arm });
+    await expect(task(example)).resolves.toMatchObject({ reply: REPLY, retried: true });
+    expect(client.chatComplete).toHaveBeenCalledTimes(4);
+
+    // Only once: a second miss counts as missing.
+    const never = fakeClient(Array(6).fill(reply('')));
+    const out = await createWriteupTask({ inferenceClient: never, connectorId: 'model', arm })(
+      example
+    );
+    expect(out).toMatchObject({ error: 'empty reply' });
+    expect(out.reply).toBeUndefined();
+    expect(never.chatComplete).toHaveBeenCalledTimes(6);
+  });
+
+  it('generates again when the replayed conversation changes under the same case ID', async () => {
+    const cache = testCache();
+    const run = (ex: WriteupExample, text: string) =>
+      createWriteupTask({
+        inferenceClient: fakeClient([reply(text)]),
+        connectorId: 'model',
+        arm,
+        cache,
+      })(ex);
+    await run(example, REPLY);
+    const changed: WriteupExample = {
+      ...example,
+      input: {
+        ...example.input,
+        rounds: [{ ...example.input.rounds[0], input: { message: 'Why did payment fail?' } }],
+      },
+    };
+    await expect(run(changed, `${REPLY} New.`)).resolves.toMatchObject({ reply: `${REPLY} New.` });
+  });
+});
+
+describe('fillKnowledge', () => {
+  const section = '<knowledge_wiki>\nRead it.\n</knowledge_wiki>\n\n';
+  it('fills the knowledge section and leaves memory and decision trees out', () => {
+    expect(
+      fillKnowledge(
+        'Start.\n{{knowledge_wiki_section}}{{semantic_memory_section}}{{decision_trees_section}}',
+        section
+      )
+    ).toBe('Start.\n\n<knowledge_wiki>\nRead it.\n</knowledge_wiki>\n');
+  });
+
+  it('fills a prompt from before the Wiki rename, load step included', () => {
+    expect(
+      fillKnowledge(
+        '1. Read the guide.{{cortex_load_step}}{{decision_trees_load_step}} Then start.\n</x>\n{{knowledge_cortex_section}}',
+        section
+      )
+    ).toBe(
+      '1. Read the guide. Also read the Knowledge Cortex — see <knowledge_cortex>. Then start.\n</x>\n' +
+        '\n<knowledge_wiki>\nRead it.\n</knowledge_wiki>\n'
+    );
+  });
+});
+
+describe('loadPromptArm', () => {
+  it('reads the working tree prompt by default, or a file', () => {
+    const root = mkdtempSync(join(tmpdir(), 'writeup-root-'));
+    const promptFile = join(root, 'prompt.md');
+    writeFileSync(promptFile, 'file prompt');
+    expect(loadPromptArm(promptFile, root)).toMatchObject({
+      label: 'prompt.md',
+      prompt: 'file prompt',
+    });
+    expect(() => loadPromptArm(undefined, root)).toThrow(
+      INVESTIGATOR_PROMPT_PATH.split('/').at(-1)
+    );
+  });
+
+  it('reads a git ref at the commit it names now, and says which', () => {
+    const root = mkdtempSync(join(tmpdir(), 'writeup-git-'));
+    const git = (...args: string[]) =>
+      execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], {
+        cwd: root,
+        encoding: 'utf8',
+      }).trim();
+    const commitPrompt = (text: string) => {
+      mkdirSync(dirname(join(root, INVESTIGATOR_PROMPT_PATH)), { recursive: true });
+      writeFileSync(join(root, INVESTIGATOR_PROMPT_PATH), text);
+      git('add', '.');
+      git('commit', '-q', '-m', text);
+      return git('rev-parse', 'HEAD');
+    };
+    git('init', '-q');
+    const base = commitPrompt('main prompt');
+    git('update-ref', 'refs/remotes/origin/main', base);
+    const head = commitPrompt('branch prompt');
+
+    expect(loadPromptArm('HEAD~1', root)).toMatchObject({
+      label: `HEAD~1@${base.slice(0, 10)}`,
+      prompt: 'main prompt',
+    });
+    expect(resolvePromptCommit('merge-base', root)).toBe(base);
+    expect(loadPromptArm('merge-base', root).prompt).toBe('main prompt');
+    expect(loadPromptArm('HEAD', root).label).toBe(`HEAD@${head.slice(0, 10)}`);
+    expect(() => resolvePromptCommit('no-such-ref', root)).toThrow();
+    rmSync(root, { recursive: true, force: true });
+  });
+
+  it('prefers upstream/main for merge-base, so a stale fork main adds no prompt change', () => {
+    const root = mkdtempSync(join(tmpdir(), 'writeup-upstream-'));
+    const git = (...args: string[]) =>
+      execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], {
+        cwd: root,
+        encoding: 'utf8',
+      }).trim();
+    const commitPrompt = (text: string) => {
+      mkdirSync(dirname(join(root, INVESTIGATOR_PROMPT_PATH)), { recursive: true });
+      writeFileSync(join(root, INVESTIGATOR_PROMPT_PATH), text);
+      git('add', '.');
+      git('commit', '-q', '-m', text);
+      return git('rev-parse', 'HEAD');
+    };
+    git('init', '-q');
+    const forkMain = commitPrompt('old main prompt');
+    const upstreamMain = commitPrompt("someone else's prompt change");
+    git('update-ref', 'refs/remotes/origin/main', forkMain);
+    commitPrompt('branch prompt');
+
+    expect(resolvePromptCommit('merge-base', root)).toBe(forkMain);
+    git('update-ref', 'refs/remotes/upstream/main', upstreamMain);
+    expect(resolvePromptCommit('merge-base', root)).toBe(upstreamMain);
+    expect(loadPromptArm('merge-base', root).prompt).toBe("someone else's prompt change");
+    rmSync(root, { recursive: true, force: true });
+  });
+
+  it('fetches a baseline commit the clone lacks without making a full clone shallow', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'writeup-fetch-'));
+    const origin = join(tmp, 'origin');
+    const clone = join(tmp, 'clone');
+    const gitIn = (cwd: string, ...args: string[]) =>
+      execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], {
+        cwd,
+        encoding: 'utf8',
+      }).trim();
+    mkdirSync(origin);
+    // resolvePromptCommit fetches 40-character ids, so pin SHA-1 whatever init.defaultObjectFormat is.
+    gitIn(origin, 'init', '-q', '--object-format=sha1');
+    gitIn(origin, 'config', 'uploadpack.allowAnySHA1InWant', 'true');
+    gitIn(origin, 'commit', '-q', '--allow-empty', '-m', 'first');
+    gitIn(tmp, 'clone', '-q', `file://${origin}`, clone);
+    // A commit the clone never saw, on no branch, like a PR's merge base after main moved on.
+    gitIn(origin, 'commit', '-q', '--allow-empty', '-m', 'second');
+    const missing = gitIn(origin, 'rev-parse', 'HEAD');
+    gitIn(origin, 'reset', '-q', '--hard', 'HEAD~1');
+
+    expect(resolvePromptCommit(missing, clone)).toBe(missing);
+    expect(gitIn(clone, 'rev-parse', '--is-shallow-repository')).toBe('false');
+    rmSync(tmp, { recursive: true, force: true });
+  });
+
+  it('skips a baseline that reaches the model as the same prompt, even with a different hash', () => {
+    const current = { label: 'current', prompt: 'Investigate.\nReply briefly.', hash: 'h1' };
+    // Differs only in a placeholder the replay strips, so the arms' hashes differ but the model
+    // would see the same prompt twice.
+    const sameForModel = {
+      label: 'merge-base@abc',
+      prompt: 'Investigate.{{decision_trees_load_step}}\nReply briefly.',
+      hash: 'h2',
+    };
+    expect(chooseBaseline(current, sameForModel)).toEqual({
+      noBaseline:
+        'Baseline merge-base@abc renders to the same replay prompt as current, so the head to head was skipped.',
+    });
+    const changed = { ...sameForModel, prompt: 'Investigate.\nReply at length.' };
+    expect(chooseBaseline(current, changed)).toEqual({ baseline: changed });
+    expect(chooseBaseline(current, undefined)).toEqual({});
+  });
+
+  it('compares a PR build against its merge base unless a baseline is set', () => {
+    const pr = { GITHUB_PR_NUMBER: '306343', PR_MERGE_BASE: 'abc123' };
+    expect(baselinePromptSpec(pr)).toBe('abc123');
+    expect(baselinePromptSpec({ PR_MERGE_BASE: 'abc123' })).toBeUndefined();
+    expect(baselinePromptSpec({})).toBeUndefined();
+    expect(baselinePromptSpec({ ...pr, NIGHTSHIFT_WRITEUP_BASELINE_PROMPT: 'origin/main' })).toBe(
+      'origin/main'
+    );
+    expect(baselinePromptSpec({ ...pr, NIGHTSHIFT_WRITEUP_BASELINE_PROMPT: ' ' })).toBeUndefined();
+  });
+
+  it('fills the reply rules from the same place as the prompt', () => {
+    const root = mkdtempSync(join(tmpdir(), 'writeup-style-'));
+    const git = (...args: string[]) =>
+      execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], {
+        cwd: root,
+        encoding: 'utf8',
+      }).trim();
+    const write = (path: string, text: string) => {
+      mkdirSync(dirname(join(root, path)), { recursive: true });
+      writeFileSync(join(root, path), text);
+    };
+    git('init', '-q');
+    // Before the split: the rules are inline and there's no placeholder.
+    write(INVESTIGATOR_PROMPT_PATH, 'Method.\nInline style.\n');
+    git('add', '.');
+    git('commit', '-q', '-m', 'inline');
+    write(INVESTIGATOR_PROMPT_PATH, 'Method.\n{{response_style_section}}\n');
+    write(RESPONSE_STYLE_PATH, 'Committed style.\n');
+    git('add', '.');
+    git('commit', '-q', '-m', 'split');
+    write(RESPONSE_STYLE_PATH, 'Edited style.\n');
+
+    expect(loadPromptArm(undefined, root).prompt).toBe('Method.\nEdited style.\n');
+    expect(loadPromptArm('HEAD', root).prompt).toBe('Method.\nCommitted style.\n');
+    expect(loadPromptArm('HEAD~1', root).prompt).toBe('Method.\nInline style.\n');
+    rmSync(root, { recursive: true, force: true });
+  });
+});

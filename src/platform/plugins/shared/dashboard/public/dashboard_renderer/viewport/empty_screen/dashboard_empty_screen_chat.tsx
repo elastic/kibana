@@ -22,7 +22,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { uiActionsService } from '../../../services/kibana_services';
+import { coreServices, uiActionsService } from '../../../services/kibana_services';
 import {
   OPEN_DASHBOARD_CHAT_ACTION_ID,
   type OpenDashboardChatActionContext,
@@ -48,14 +48,22 @@ const promptSuggestions = [
 ] as const;
 
 export const openDashboardChat = async (initialMessage?: string) => {
-  const action: Action<OpenDashboardChatActionContext> = await uiActionsService.getAction(
-    OPEN_DASHBOARD_CHAT_ACTION_ID
-  );
+  try {
+    const action: Action<OpenDashboardChatActionContext> = await uiActionsService.getAction(
+      OPEN_DASHBOARD_CHAT_ACTION_ID
+    );
 
-  await action.execute({
-    ...(initialMessage !== undefined ? { initialMessage } : {}),
-    trigger: { id: OPEN_DASHBOARD_CHAT_ACTION_ID },
-  });
+    await action.execute({
+      ...(initialMessage !== undefined ? { initialMessage } : {}),
+      trigger: { id: OPEN_DASHBOARD_CHAT_ACTION_ID },
+    });
+  } catch (error) {
+    coreServices.notifications.toasts.addError(error, {
+      title: i18n.translate('dashboard.emptyScreen.openChatErrorTitle', {
+        defaultMessage: 'Unable to open chat',
+      }),
+    });
+  }
 };
 
 export const DashboardEmptyScreenChat = () => (

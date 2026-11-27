@@ -203,6 +203,26 @@ describe('AgentlessPackagePoliciesTable', () => {
     });
   });
 
+  it('links the name of a policy managed by a cloud onboarding instance to the onboarding flow', async () => {
+    const renderer = createIntegrationsTestRendererMock();
+    renderer.startServices.featureFlags.useBooleanValue.mockReturnValue(true);
+    renderer.startServices.application.getUrlForApp.mockImplementation(
+      (appId, { path = '' } = {}) => `/app/${appId}${path}`
+    );
+    const [row] = defaultProps.packagePolicies;
+    const result = renderer.render(
+      <AgentlessPackagePoliciesTable
+        {...defaultProps}
+        packagePolicies={[
+          { ...row, packagePolicy: { ...row.packagePolicy, onboarding_deployment_id: 'deploy-1' } },
+        ]}
+      />
+    );
+
+    const nameLink = await result.findByTestId('agentlessIntegrationNameLink');
+    expect(nameLink).toHaveAttribute('href', '/app/onboarding/aws?deploymentId=deploy-1');
+  });
+
   it('appends the isAgentless hint to edit links when the agentless policies UI is enabled', async () => {
     const renderer = createIntegrationsTestRendererMock();
     const result = renderer.render(<AgentlessPackagePoliciesTable {...defaultProps} />);

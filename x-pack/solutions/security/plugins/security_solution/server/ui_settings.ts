@@ -35,6 +35,7 @@ import { DefaultClosingReasonSchema } from '../common/types';
 import {
   APP_ID,
   DATA_STREAM_NAMESPACES_DEFAULT_SETTING,
+  DEFEND_CONFIGURATION_TROUBLESHOOTING_UNIVERSAL_SKILL_SETTING,
   DEFAULT_ALERT_TAGS_KEY,
   DEFAULT_ALERT_TAGS_VALUE,
   DEFAULT_ANOMALY_SCORE,
@@ -58,7 +59,6 @@ import {
   ENABLE_CLOUD_CONNECTOR_SETTING,
   ENABLE_SIEM_READINESS_SETTING,
   ENABLE_DE_HEALTH_UI_SETTING,
-  ENABLE_NEW_FLYOUT_SETTING,
   ENABLE_NEWS_FEED_SETTING,
   ENABLE_RULE_CHANGES_HISTORY_SETTING,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
@@ -370,27 +370,6 @@ export const initUiSettings = (
         technicalPreview: true,
       },
     }),
-    ...(!experimentalFeatures.newFlyoutSystemDisabled && {
-      [ENABLE_NEW_FLYOUT_SETTING]: {
-        name: i18n.translate('xpack.securitySolution.uiSettings.enableNewFlyoutLabel', {
-          defaultMessage: 'Enable new flyout',
-        }),
-        description: i18n.translate(
-          'xpack.securitySolution.uiSettings.enableNewFlyoutDescription',
-          {
-            defaultMessage:
-              '<p>Enables the new flyout system for document details in Security Solution.</p>',
-            values: { p: (chunks) => `<p>${chunks}</p>` },
-          }
-        ),
-        type: 'boolean',
-        value: true,
-        category: [APP_ID],
-        requiresPageReload: true,
-        schema: schema.boolean(),
-        solutionViews: ['classic', 'security'],
-      },
-    }),
     // TODO(rule-changes-history GA): remove this setting and its call sites (including alerting `log_rule_changes.ts`)
     ...(experimentalFeatures.ruleChangesHistoryEnabled && {
       [ENABLE_RULE_CHANGES_HISTORY_SETTING]: {
@@ -618,6 +597,30 @@ export const initUiSettings = (
         { maxSize: Object.values(gapReasonType).length }
       ),
     },
+    ...(experimentalFeatures.automaticTroubleshootingUniversalSkill && {
+      [DEFEND_CONFIGURATION_TROUBLESHOOTING_UNIVERSAL_SKILL_SETTING]: {
+        name: i18n.translate(
+          'xpack.securitySolution.uiSettings.defendConfigurationTroubleshootingUniversalSkillLabel',
+          {
+            defaultMessage: 'Automatic Troubleshooting universal skill',
+          }
+        ),
+        description: i18n.translate(
+          'xpack.securitySolution.uiSettings.defendConfigurationTroubleshootingUniversalSkillDescription',
+          {
+            defaultMessage:
+              'Makes the Automatic Troubleshooting universal skill available in Agent Builder. Controlled by a feature flag.',
+          }
+        ),
+        type: 'boolean',
+        value: true,
+        readonly: true,
+        readonlyMode: 'ui',
+        category: [APP_ID],
+        schema: schema.boolean(),
+        solutionViews: ['classic', 'security'],
+      },
+    }),
     ...getAlertAnalysisWorkflowSettings(),
     ...getDefaultValueReportSettings(),
     ...(experimentalFeatures.extendedRuleExecutionLoggingEnabled

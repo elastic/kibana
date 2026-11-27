@@ -12,6 +12,7 @@
     "./jest_setup.ts"
   ],
   "kbn_references": [
+    "@kbn/data-source",
     "@kbn/core",
     "@kbn/embeddable-plugin",
     "@kbn/dashboard-plugin",

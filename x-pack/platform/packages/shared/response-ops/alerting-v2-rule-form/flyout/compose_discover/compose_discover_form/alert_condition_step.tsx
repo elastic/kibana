@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getEsqlColumns } from '@kbn/esql-utils';
 import { EuiComboBox, EuiFormRow, EuiSelect, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { getRuleProjectRouting } from '../../../utils/get_rule_project_routing';
 import type { ComposeDiscoverAction, ComposeDiscoverState } from '../types';
 import type { FormValues } from '../../../form/types';
 import { EsqlQuerySummarySection, getEsqlSummaryState } from './esql_query_summary_section';
@@ -78,6 +79,7 @@ export function AlertConditionStep({
       const cols = await getEsqlColumns({
         esqlQuery: committedQuery,
         search: services.data.search.search,
+        projectRouting: getRuleProjectRouting(committedQuery, services.cps),
       });
       return cols.map((c) => c.name);
     },

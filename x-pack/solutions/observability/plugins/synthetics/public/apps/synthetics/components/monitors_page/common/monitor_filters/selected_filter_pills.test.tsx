@@ -84,6 +84,16 @@ describe('SelectedFilterPills', () => {
     expect(handleFilterChange).toHaveBeenCalledWith('tags', undefined, false);
   });
 
+  it('removes the schedule whose label was clicked', () => {
+    useGetUrlParamsSpy.mockReturnValue(mockUrlParams({ schedules: ['10m', '10s'] }));
+
+    const { getByRole } = render(<SelectedFilterPills handleFilterChange={handleFilterChange} />);
+
+    fireEvent.click(getByRole('button', { name: 'Remove Frequency filter Every 10 seconds' }));
+
+    expect(handleFilterChange).toHaveBeenCalledWith('schedules', ['10m'], false);
+  });
+
   it('hides the row when the only selected field is excluded', () => {
     useGetUrlParamsSpy.mockReturnValue(mockUrlParams({ schedules: ['3'] }));
 

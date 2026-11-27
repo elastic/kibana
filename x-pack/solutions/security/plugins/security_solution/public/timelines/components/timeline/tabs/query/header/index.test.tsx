@@ -11,10 +11,9 @@ import { mockIndexPattern } from '../../../../../../common/mock';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { mockDataProviders } from '../../../data_providers/mock/mock_data_providers';
-import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import { QueryTabHeader } from '.';
 import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../../../common/api/timeline';
-import { waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { TimelineId, TimelineTabs } from '../../../../../../../common/types';
 import { useShouldShowAlertsOnlyMigrationMessage } from '../hooks/use_show_alerts_only_migration_message';
 import { CALLOUT_TEST_ID } from './migration_message_callout';
@@ -35,14 +34,12 @@ jest.mock('../../../data_providers', () => ({
 
 describe('Header', () => {
   const indexPattern = mockIndexPattern;
-  const mount = useMountAppended();
-  const getWrapper = async (childrenComponent: JSX.Element) => {
-    const wrapper = mount(childrenComponent);
+  const renderHeader = async (childrenComponent: JSX.Element) => {
+    const result = render(childrenComponent);
     await waitFor(() => {
-      wrapper.update();
-      expect(wrapper.find('[data-test-subj="timelineHeader"]').exists()).toBe(true);
+      expect(screen.getByTestId('timelineHeader')).toBeInTheDocument();
     });
-    return wrapper;
+    return result;
   };
   const props = {
     activeTab: TimelineTabs.query,
@@ -69,13 +66,13 @@ describe('Header', () => {
   describe('QueryTabHeader', () => {
     test('should render the data providers when show is true', async () => {
       const testProps = { ...props, show: true };
-      const wrapper = await getWrapper(
+      await renderHeader(
         <TestProviders>
           <QueryTabHeader {...testProps} />
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="dataProviders"]').exists()).toEqual(true);
+      expect(screen.getByTestId('dataProviders')).toBeInTheDocument();
     });
 
     test('should render the unauthorized call out providers', async () => {
@@ -85,13 +82,13 @@ describe('Header', () => {
         showCallOutUnauthorizedMsg: true,
       };
 
-      const wrapper = await getWrapper(
+      await renderHeader(
         <TestProviders>
           <QueryTabHeader {...testProps} />
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="timelineCallOutUnauthorized"]').exists()).toEqual(true);
+      expect(screen.getByTestId('timelineCallOutUnauthorized')).toBeInTheDocument();
     });
 
     test('should render the unauthorized call out with correct icon', async () => {
@@ -101,15 +98,17 @@ describe('Header', () => {
         showCallOutUnauthorizedMsg: true,
       };
 
-      const wrapper = await getWrapper(
+      await renderHeader(
         <TestProviders>
           <QueryTabHeader {...testProps} />
         </TestProviders>
       );
 
       expect(
-        wrapper.find('[data-test-subj="timelineCallOutUnauthorized"]').first().prop('iconType')
-      ).toEqual('warning');
+        screen
+          .getByTestId('timelineCallOutUnauthorized')
+          .querySelector('[data-euiicon-type="warning"]')
+      ).toBeInTheDocument();
     });
 
     test('should render the unauthorized call out with correct message', async () => {
@@ -119,15 +118,13 @@ describe('Header', () => {
         showCallOutUnauthorizedMsg: true,
       };
 
-      const wrapper = await getWrapper(
+      await renderHeader(
         <TestProviders>
           <QueryTabHeader {...testProps} />
         </TestProviders>
       );
 
-      expect(
-        wrapper.find('[data-test-subj="timelineCallOutUnauthorized"]').first().prop('title')
-      ).toEqual(
+      expect(screen.getByTestId('timelineCallOutUnauthorized').textContent).toEqual(
         'You can use Timeline to investigate events, but you do not have the required permissions to save timelines for future use. If you need to save timelines, contact your Kibana administrator.'
       );
     });
@@ -140,13 +137,13 @@ describe('Header', () => {
         status: TimelineStatusEnum.immutable,
       };
 
-      const wrapper = await getWrapper(
+      await renderHeader(
         <TestProviders>
           <QueryTabHeader {...testProps} />
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="timelineImmutableCallOut"]').exists()).toEqual(true);
+      expect(screen.getByTestId('timelineImmutableCallOut')).toBeInTheDocument();
     });
 
     test('should render the immutable timeline call out with correct icon', async () => {
@@ -157,15 +154,17 @@ describe('Header', () => {
         status: TimelineStatusEnum.immutable,
       };
 
-      const wrapper = await getWrapper(
+      await renderHeader(
         <TestProviders>
           <QueryTabHeader {...testProps} />
         </TestProviders>
       );
 
       expect(
-        wrapper.find('[data-test-subj="timelineImmutableCallOut"]').first().prop('iconType')
-      ).toEqual('warning');
+        screen
+          .getByTestId('timelineImmutableCallOut')
+          .querySelector('[data-euiicon-type="warning"]')
+      ).toBeInTheDocument();
     });
 
     test('should render the immutable timeline call out with correct message', async () => {
@@ -176,15 +175,13 @@ describe('Header', () => {
         status: TimelineStatusEnum.immutable,
       };
 
-      const wrapper = await getWrapper(
+      await renderHeader(
         <TestProviders>
           <QueryTabHeader {...testProps} />
         </TestProviders>
       );
 
-      expect(
-        wrapper.find('[data-test-subj="timelineImmutableCallOut"]').first().prop('title')
-      ).toEqual(
+      expect(screen.getByTestId('timelineImmutableCallOut').textContent).toEqual(
         'This prebuilt timeline template cannot be modified. To make changes, please duplicate this template and make modifications to the duplicate template.'
       );
     });
@@ -193,12 +190,12 @@ describe('Header', () => {
   test('should render the migration callout', async () => {
     (useShouldShowAlertsOnlyMigrationMessage as jest.Mock).mockReturnValue(true);
 
-    const wrapper = await getWrapper(
+    await renderHeader(
       <TestProviders>
         <QueryTabHeader {...props} />
       </TestProviders>
     );
 
-    expect(wrapper.find(`[data-test-subj="${CALLOUT_TEST_ID}"]`).exists()).toEqual(true);
+    expect(screen.getByTestId(CALLOUT_TEST_ID)).toBeInTheDocument();
   });
 });

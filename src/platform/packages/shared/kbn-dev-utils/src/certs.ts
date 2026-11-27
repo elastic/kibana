@@ -33,6 +33,36 @@ export const RELAY_KEY_PATH = resolve(__dirname, '../certs/relay.key');
 export const RELAY_CERT_PATH = resolve(__dirname, '../certs/relay.crt');
 export const RELAY_P12_PATH = resolve(__dirname, '../certs/relay.p12');
 export const RELAY_P12_PASSWORD = 'storepass';
+export const PKI_INTERMEDIATE_CA_CERT_PATH = resolve(__dirname, '../certs/pki_intermediate_ca.crt');
+export const PKI_INTERMEDIATE_CA_2_CERT_PATH = resolve(
+  __dirname,
+  '../certs/pki_intermediate_ca_2.crt'
+);
+export const PKI_INTERMEDIATE_CLIENT_CERT_PATH = resolve(
+  __dirname,
+  '../certs/pki_intermediate_client.crt'
+);
+export const PKI_INTERMEDIATE_CLIENT_KEY_PATH = resolve(
+  __dirname,
+  '../certs/pki_intermediate_client.key'
+);
+export const PKI_INTERMEDIATE_2_CLIENT_CERT_PATH = resolve(
+  __dirname,
+  '../certs/pki_intermediate_2_client.crt'
+);
+export const PKI_INTERMEDIATE_2_CLIENT_KEY_PATH = resolve(
+  __dirname,
+  '../certs/pki_intermediate_2_client.key'
+);
+export const PKI_UNTRUSTED_CA_CERT_PATH = resolve(__dirname, '../certs/pki_untrusted_ca.crt');
+export const PKI_UNTRUSTED_CLIENT_CERT_PATH = resolve(
+  __dirname,
+  '../certs/pki_untrusted_client.crt'
+);
+export const PKI_UNTRUSTED_CLIENT_KEY_PATH = resolve(
+  __dirname,
+  '../certs/pki_untrusted_client.key'
+);
 
 /** Serverless project types, as `xpack.cloud.serverless.project_type` names them. */
 export type KbnServerlessProjectType = 'search' | 'observability' | 'security' | 'vectordb';

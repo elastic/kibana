@@ -450,7 +450,10 @@ export const registerRoutes = (
       path: AGENT_POLICY_API_ROUTES.FULL_INFO_PATTERN,
       security: {
         authz: {
-          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENT_POLICIES.READ],
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+            FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
+          ],
         },
       },
       summary: `Get a full agent policy`,
@@ -490,7 +493,15 @@ export const registerRoutes = (
         authz: {
           requiredPrivileges: [
             {
-              anyRequired: [FLEET_API_PRIVILEGES.AGENT_POLICIES.READ, FLEET_API_PRIVILEGES.SETUP],
+              anyRequired: [
+                {
+                  allOf: [
+                    FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+                    FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
+                  ],
+                },
+                FLEET_API_PRIVILEGES.SETUP,
+              ],
             },
           ],
         },

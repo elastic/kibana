@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
 import type {
   AiIndexProperties,
+  AiIndexSaveWarning,
   GetAiIndexResponse,
   PutAiIndexResponse,
 } from '../../../common/http_api/ai_indices';
@@ -17,8 +19,34 @@ import { getErrorMessage } from '../utils/get_error_message';
 import { contextEngineQueryKeys } from './query_keys';
 import { useKibana } from './use_kibana';
 
+const MAX_WARNINGS_SHOWN = 3;
+const MAX_WARNING_SOURCE_LENGTH = 60;
+
+const describeWarnings = (warnings: AiIndexSaveWarning[]): string => {
+  const shown = warnings.slice(0, MAX_WARNINGS_SHOWN).map(({ source, message }) => {
+    const value = source.value.replace(/\s+/g, ' ').trim();
+    const label =
+      value.length > MAX_WARNING_SOURCE_LENGTH
+        ? `${value.slice(0, MAX_WARNING_SOURCE_LENGTH - 1)}…`
+        : value;
+    return `${label}: ${message}${/[.!?]$/.test(message) ? '' : '.'}`;
+  });
+  const more = warnings.length - shown.length;
+  return more > 0
+    ? [
+        ...shown,
+        i18n.translate('xpack.contextEngine.saveAiIndexField.moreWarnings', {
+          defaultMessage: 'And {count} more.',
+          values: { count: more },
+        }),
+      ].join(' ')
+    : shown.join(' ');
+};
+
 interface UseSaveAiIndexFieldOptions<TValue> {
   errorTitle: string;
+  /** Titles the warning toast shown when the save went through but part of what it sets off did not. */
+  warningTitle?: string;
   buildProperties: (aiIndex: GetAiIndexResponse, value: TValue) => AiIndexProperties;
 }
 
@@ -46,6 +74,7 @@ export const toProperties = ({
  */
 export const useSaveAiIndexField = <TValue>({
   errorTitle,
+  warningTitle,
   buildProperties,
 }: UseSaveAiIndexFieldOptions<TValue>) => {
   const {
@@ -60,8 +89,11 @@ export const useSaveAiIndexField = <TValue>({
   >({
     mutationFn: ({ aiIndex, value }) =>
       putAiIndex(http, { aiIndexId: aiIndex.id, properties: buildProperties(aiIndex, value) }),
-    onSuccess: () => {
+    onSuccess: ({ warnings }) => {
       queryClient.invalidateQueries({ queryKey: contextEngineQueryKeys.aiIndex.list() });
+      if (warningTitle && warnings && warnings.length > 0) {
+        notifications.toasts.addWarning({ title: warningTitle, text: describeWarnings(warnings) });
+      }
     },
     onError: (error) => {
       const toastMessage = getErrorMessage(error);

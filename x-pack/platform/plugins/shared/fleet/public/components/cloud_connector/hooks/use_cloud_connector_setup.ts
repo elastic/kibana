@@ -25,7 +25,9 @@ import {
   isAzureCloudConnectorVars,
   isGcpCloudConnectorVars,
   updateInputVarsWithCredentials,
+  isAwsCredentials,
   isCloudConnectorNameValid,
+  isRoleArnInvalid,
 } from '../utils';
 import {
   AWS_CLOUD_CONNECTOR_FIELD_NAMES,
@@ -214,11 +216,18 @@ export const useCloudConnectorSetup = (
 
       // Use shared validation utility for name validation
       const isNameValid = isCloudConnectorNameValid(credentials.name);
+      const isAws = isAwsCredentials(credentials);
+      const isRoleArnValid = !isAws || !isRoleArnInvalid(credentials.roleArn);
+
+      // The form keeps showing what was typed; the policy stores the value the server validates.
+      const credentialsToStore = isAws
+        ? { ...credentials, roleArn: credentials.roleArn?.trim() }
+        : credentials;
 
       // Update credentials in vars
       const updatedInputVars = updateInputVarsWithCredentials(
         currentVars as PackagePolicyConfigRecord,
-        credentials
+        credentialsToStore
       );
 
       // Create updated policy with vars at the correct location
@@ -237,7 +246,7 @@ export const useCloudConnectorSetup = (
 
       updatePolicy({
         updatedPolicy,
-        isValid: isNameValid ? undefined : false,
+        isValid: isNameValid && isRoleArnValid ? undefined : false,
       });
 
       setNewConnectionCredentials(credentials);

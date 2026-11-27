@@ -63,7 +63,8 @@ export function buildWorkflowLookup(
   yamlDocument: YAML.Document,
   lineCounter: LineCounter
 ): WorkflowLookup {
-  const steps: Record<string, StepInfo> = {};
+  // No prototype, so a step named `__proto__` is stored like any other name.
+  const steps: Record<string, StepInfo> = Object.create(null);
 
   if (!YAML.isMap(yamlDocument?.contents)) {
     return {
@@ -164,7 +165,7 @@ export function inspectStep(
   // return, so a copy is made only for each step found.
   path: Array<string | number> = []
 ): Record<string, StepInfo> {
-  const result: Record<string, StepInfo> = {};
+  const result: Record<string, StepInfo> = Object.create(null);
 
   let stepId: string | undefined;
   let stepType: string | undefined;

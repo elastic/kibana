@@ -54,13 +54,6 @@ export const ENTITY_ANALYTICS_SETTINGS = i18n.translate(
   }
 );
 
-export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING = i18n.translate(
-  'xpack.securitySolution.navigation.privilegedUserMonitoring',
-  {
-    defaultMessage: 'Privileged user monitoring',
-  }
-);
-
 export const HOSTS = i18n.translate('xpack.securitySolution.navigation.hosts', {
   defaultMessage: 'Hosts',
 });

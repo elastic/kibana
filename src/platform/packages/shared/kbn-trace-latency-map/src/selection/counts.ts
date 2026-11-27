@@ -1,0 +1,106 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { DurationStats, LatencyMapSelection } from '../types';
+import { LATENCY_MAP_ROWS, durationToRow } from '../query/duration_rows';
+import type { LatencyGrid } from '../query/parse';
+import { timeToEdge } from '../query/time_grid';
+import type { TimeGrid } from '../query/time_grid';
+
+/** Below this share of a cell, the overlap is rounding, not a cell the selection takes part of. */
+const NEGLIGIBLE = 1e-6;
+
+const overlap = (aStart: number, aEnd: number, bStart: number, bEnd: number) =>
+  Math.max(0, Math.min(aEnd, bEnd) - Math.max(aStart, bStart));
+
+export interface SelectionCounts {
+  spans: number;
+  failed: number;
+  /**
+   * The selection does not follow the edges of the cells, as when the map was resized or its range
+   * changed after the selection was made. Cells it covers in part count in part.
+   */
+  estimated: boolean;
+}
+
+/**
+ * The spans in a selection, from the cells of the map and the selection's own bounds, which are what
+ * the host's condition uses. A cell covered in part counts for the share of its time and of its
+ * duration row that the selection covers (the row in the map's own scale, log below the p99), so a
+ * selection that no longer lines up with the cells is still counted over its own bounds. Over
+ * cell edges the count is exact.
+ */
+export function getSelectionCounts({
+  grid,
+  timeGrid,
+  stats,
+  selection,
+}: {
+  grid: LatencyGrid;
+  timeGrid: TimeGrid;
+  stats: DurationStats;
+  selection: LatencyMapSelection;
+}): SelectionCounts {
+  // Edges are measured so that the first and the last column, which may reach past the range, are
+  // as wide as the data they have: a selection over all of such a column covers all of it.
+  const fromEdge = timeToEdge(timeGrid, Date.parse(selection.from));
+  const toEdge = timeToEdge(timeGrid, Date.parse(selection.to));
+  const rowOf = (duration: number) =>
+    Math.min(LATENCY_MAP_ROWS, Math.max(0, durationToRow(duration, stats)));
+  // The bottom row reads everything below it too: a minimum of 0 starts at its floor.
+  const lowRow = selection.minDuration <= 0 ? 0 : rowOf(selection.minDuration);
+  const highRow = rowOf(selection.maxDuration);
+
+  const totals = [...grid.cells.values()].reduce(
+    (sum, cell) => {
+      const share =
+        overlap(fromEdge, toEdge, cell.xi, cell.xi + 1) *
+        overlap(lowRow, highRow, cell.yi, cell.yi + 1);
+      if (share < NEGLIGIBLE) return sum;
+      return {
+        spans: sum.spans + cell.spans * share,
+        failed: sum.failed + cell.failed * share,
+        // A cell partially covered makes the counts an estimate.
+        estimated: sum.estimated || share < 1 - NEGLIGIBLE,
+      };
+    },
+    { spans: 0, failed: 0, estimated: false }
+  );
+  const spans = Math.round(totals.spans);
+  const failed = Math.round(totals.failed);
+  // A selection about failures selects the failed spans only.
+  return selection.failedOnly
+    ? { spans: failed, failed: 0, estimated: totals.estimated }
+    : { spans, failed, estimated: totals.estimated };
+}
+
+/** The spans and failures of the whole map. */
+export function getGridTotals(grid: LatencyGrid): { spans: number; failed: number } {
+  return [...grid.cells.values()].reduce(
+    (sum, cell) => ({ spans: sum.spans + cell.spans, failed: sum.failed + cell.failed }),
+    { spans: 0, failed: 0 }
+  );
+}
+
+/**
+ * Whether a region is about failures: they concentrate in it, with at least a tenth of its
+ * spans failed and at least three times the failure rate of the rest of the map. A selection
+ * drawn over such a region is marked failed only, saving the switch for the common intent.
+ */
+export function isFailureRegion(
+  region: { spans: number; failed: number },
+  map: { spans: number; failed: number }
+): boolean {
+  if (region.spans <= 0 || region.failed / region.spans < 0.1) return false;
+  const restSpans = map.spans - region.spans;
+  // A region covering the whole map has nothing outside it to concentrate against.
+  if (restSpans <= 0) return false;
+  const restRate = Math.max(0, map.failed - region.failed) / restSpans;
+  return region.failed / region.spans >= 3 * restRate;
+}

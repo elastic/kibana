@@ -94,8 +94,16 @@ const FORM_VIEW_LABEL = i18n.translate('xpack.alertingV2.composeDiscover.editMod
   defaultMessage: 'Form view',
 });
 
+const FORM_VIEW_TOOLTIP = i18n.translate('xpack.alertingV2.composeDiscover.editMode.formTooltip', {
+  defaultMessage: 'Edit in the form',
+});
+
 const YAML_VIEW_LABEL = i18n.translate('xpack.alertingV2.composeDiscover.editMode.yaml', {
   defaultMessage: 'YAML view',
+});
+
+const YAML_VIEW_TOOLTIP = i18n.translate('xpack.alertingV2.composeDiscover.editMode.yamlTooltip', {
+  defaultMessage: 'Edit in YAML',
 });
 
 const YAML_MODE_BADGE_LABEL = i18n.translate('xpack.alertingV2.composeDiscover.yamlMode.badge', {
@@ -155,22 +163,53 @@ const BUILDER_VIEW_LABEL = i18n.translate(
   { defaultMessage: 'Builder view' }
 );
 
+const BUILDER_VIEW_TOOLTIP = i18n.translate(
+  'xpack.alertingV2.composeDiscover.builderMode.builderViewTooltip',
+  { defaultMessage: 'Editing in the builder' }
+);
+
 const ESQL_VIEW_LABEL = i18n.translate('xpack.alertingV2.composeDiscover.builderMode.esqlView', {
   defaultMessage: 'ES|QL view',
 });
+
+// Permanence is confirmed in ConfirmBuilderToEsqlModal; keep the tooltip short.
+const ESQL_VIEW_TOOLTIP = i18n.translate(
+  'xpack.alertingV2.composeDiscover.builderMode.esqlViewTooltip',
+  { defaultMessage: 'Switch to raw ES|QL' }
+);
 
 const BUILDER_MODE_LEGEND = i18n.translate('xpack.alertingV2.composeDiscover.builderMode.legend', {
   defaultMessage: 'Edit mode selection',
 });
 
 const BUILDER_MODE_OPTIONS = [
-  { id: 'builder', label: BUILDER_VIEW_LABEL, iconType: 'table' },
-  { id: 'esql', label: ESQL_VIEW_LABEL, iconType: 'kqlFunction' },
+  {
+    id: 'builder',
+    label: BUILDER_VIEW_LABEL,
+    iconType: 'table',
+    toolTipContent: BUILDER_VIEW_TOOLTIP,
+  },
+  {
+    id: 'esql',
+    label: ESQL_VIEW_LABEL,
+    iconType: 'kqlFunction',
+    toolTipContent: ESQL_VIEW_TOOLTIP,
+  },
 ];
 
 const EDIT_MODE_OPTIONS = [
-  { id: 'form', label: FORM_VIEW_LABEL, iconType: 'table' },
-  { id: 'yaml', label: YAML_VIEW_LABEL, iconType: 'code' },
+  {
+    id: 'form',
+    label: FORM_VIEW_LABEL,
+    iconType: 'table',
+    toolTipContent: FORM_VIEW_TOOLTIP,
+  },
+  {
+    id: 'yaml',
+    label: YAML_VIEW_LABEL,
+    iconType: 'code',
+    toolTipContent: YAML_VIEW_TOOLTIP,
+  },
 ];
 
 const getQuerySandboxTitle = (isBuilderMode: boolean) =>
@@ -407,9 +446,6 @@ export function ComposeDiscoverFlyout({
     }
     wasChildOpenRef.current = uiState.childOpen;
   }, [uiState.childOpen]);
-
-  // Registered once here so providers persist across Sandbox open/close cycles.
-  useEsqlAutocomplete(baseServices);
 
   const [initialParsedState] = useState<BuilderState | null>(() => {
     if (!builderType || initialBuilderState !== undefined || !inlineResult.query) return null;
@@ -758,6 +794,7 @@ export function ComposeDiscoverFlyout({
     http: baseServices.http,
     dataViews: baseServices.dataViews,
     search: baseServices.data.search.search,
+    projectRouting: baseServices.cps?.cpsManager?.getDefaultProjectRouting(),
   });
 
   /*
@@ -833,6 +870,10 @@ export function ComposeDiscoverFlyout({
    */
   const { onAlertEditorMount, onRecoveryEditorMount, onBaseEditorMount, onSingleEditorMount } =
     useSandboxEditorMounts({ baseQuery: sandboxQuery.base, services: baseServices });
+
+  // Registered once here so providers persist across Sandbox open/close cycles.
+  // The query being edited gives the sources lookup its project routing.
+  useEsqlAutocomplete(baseServices, uiState.childOpen ? sandboxQuery.base : watchedQuery?.base);
 
   const isAlertRef = useRef(isAlert);
   isAlertRef.current = isAlert;

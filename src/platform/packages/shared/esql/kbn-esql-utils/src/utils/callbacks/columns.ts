@@ -44,12 +44,14 @@ export const getEsqlColumns = async ({
   variables,
   signal,
   timeRange,
+  projectRouting,
 }: {
   search: ISearchGeneric;
   esqlQuery?: string;
   variables?: ESQLControlVariable[];
   signal?: AbortSignal;
   timeRange?: TimeRange;
+  projectRouting?: string;
 }): Promise<ESQLFieldWithMetadata[]> => {
   if (esqlQuery) {
     try {
@@ -60,6 +62,7 @@ export const getEsqlColumns = async ({
         variables: variables ?? [],
         signal,
         timeRange,
+        projectRouting,
       });
       return columns.map(({ name, type, original_types: originalTypes }) =>
         toFieldWithMetadata(name, type, originalTypes)

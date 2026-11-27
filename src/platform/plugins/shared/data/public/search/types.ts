@@ -65,6 +65,10 @@ export interface ISearchStart extends ISearchMethods {
    * {@link ISearchGeneric}
    */
   search: ISearchGeneric;
+  /** Checks whether the session has at least one completed response available for replay. */
+  hasResponseCacheForSession: (sessionId: string) => boolean;
+  /** Evicts a session's cached responses without canceling active searches. */
+  evictResponseCacheForSession: (sessionId: string) => void;
   /**
    * Show toast for caught error
    * @param e Error

@@ -36,7 +36,11 @@ export async function runBulkDelete(
   const promises = params.list.map(async (sloId) => {
     return limiter(async () => {
       try {
-        await deleteSLO.execute(sloId, { skipRuleDeletion: true, skipDataDeletion: true });
+        await deleteSLO.execute(sloId, {
+          skipRuleDeletion: true,
+          skipDataDeletion: true,
+          bulk: true,
+        });
       } catch (err) {
         return {
           id: sloId,

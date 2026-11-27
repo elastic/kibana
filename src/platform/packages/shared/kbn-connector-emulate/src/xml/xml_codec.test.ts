@@ -1,0 +1,241 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { fromXml, isBareXmlValue, isXmlMediaType, toXml } from './xml_codec';
+
+const document = {
+  openapi: '3.0.3',
+  components: {
+    schemas: {
+      Owner: {
+        type: 'object',
+        xml: { name: 'Owner' },
+        properties: { id: { type: 'string', xml: { name: 'ID' } } },
+      },
+      Listing: {
+        type: 'object',
+        xml: { name: 'ListBucketResult', namespace: 'http://s3.amazonaws.com/doc/2006-03-01/' },
+        properties: {
+          version: { type: 'string', xml: { attribute: true } },
+          name: { type: 'string', xml: { name: 'Name' } },
+          truncated: { type: 'boolean', xml: { name: 'IsTruncated' } },
+          count: { type: 'integer' },
+          ratio: { anyOf: [{ type: 'number' }, { type: 'string', enum: ['NaN'] }] },
+          // A wrapped list of `member` elements, a flattened one, and a list of lists.
+          tags: {
+            type: 'array',
+            xml: { wrapped: true },
+            items: { type: 'string', xml: { name: 'member' } },
+          },
+          contents: {
+            type: 'array',
+            xml: { name: 'Contents', wrapped: false },
+            items: { allOf: [{ $ref: '#/components/schemas/Owner' }], xml: { name: 'Contents' } },
+          },
+          grid: {
+            type: 'array',
+            xml: { wrapped: true },
+            items: {
+              type: 'array',
+              xml: { name: 'row' },
+              items: { type: 'integer', xml: { name: 'cell' } },
+            },
+          },
+          labels: {
+            type: 'object',
+            additionalProperties: { type: 'string' },
+            'x-smithy-xml-map': { key: 'Key', value: 'Value' },
+          },
+          owner: { $ref: '#/components/schemas/Owner' },
+        },
+      },
+    },
+  },
+};
+const schema = { $ref: '#/components/schemas/Listing' };
+
+const xml = [
+  '<?xml version="1.0" encoding="UTF-8"?>',
+  '<ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/" version="2">',
+  '  <!-- a comment -->',
+  '  <Name>logs</Name>',
+  '  <IsTruncated>false</IsTruncated>',
+  '  <count>2</count>',
+  '  <ratio>NaN</ratio>',
+  '  <tags><member>a</member><member>b</member></tags>',
+  '  <Contents><ID>1</ID></Contents>',
+  '  <Contents><ID>2</ID></Contents>',
+  '  <grid><row><cell>1</cell><cell>2</cell></row><row><cell>3</cell></row></grid>',
+  '  <labels><entry><Key>env</Key><Value>prod</Value></entry></labels>',
+  '  <owner><ID>me</ID></owner>',
+  '  <unmodeled>ignored</unmodeled>',
+  '</ListBucketResult>',
+].join('\n');
+
+const value = {
+  version: '2',
+  name: 'logs',
+  truncated: false,
+  count: 2,
+  ratio: 'NaN',
+  tags: ['a', 'b'],
+  contents: [{ id: '1' }, { id: '2' }],
+  grid: [[1, 2], [3]],
+  labels: { env: 'prod' },
+  owner: { id: 'me' },
+};
+
+describe('xml codec', () => {
+  it('reads elements, attributes, lists, maps and scalars as the schema describes them', () => {
+    expect(fromXml(xml, schema, document)).toEqual({ value });
+  });
+
+  it('writes the value back as the same document', () => {
+    const written = toXml(value, schema, document);
+
+    expect(written).toBe(
+      '<ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/" version="2">' +
+        '<Name>logs</Name><IsTruncated>false</IsTruncated><count>2</count><ratio>NaN</ratio>' +
+        '<tags><member>a</member><member>b</member></tags>' +
+        '<Contents><ID>1</ID></Contents><Contents><ID>2</ID></Contents>' +
+        '<grid><row><cell>1</cell><cell>2</cell></row><row><cell>3</cell></row></grid>' +
+        '<labels><entry><Key>env</Key><Value>prod</Value></entry></labels>' +
+        '<owner><ID>me</ID></owner></ListBucketResult>'
+    );
+    expect(fromXml(written, schema, document)).toEqual({ value });
+  });
+
+  it('escapes text and attributes, and leaves values that fit no type as text', () => {
+    const written = toXml({ name: 'a<b & "c"', version: '"1"', count: 1 }, schema, document);
+
+    expect(written).toContain('version="&quot;1&quot;"');
+    expect(written).toContain('<Name>a&lt;b &amp; "c"</Name>');
+    expect(
+      fromXml('<ListBucketResult><count>two</count></ListBucketResult>', schema, document)
+    ).toEqual({
+      value: { count: 'two' },
+    });
+  });
+
+  it('reports documents that are not XML', () => {
+    expect(fromXml('<ListBucketResult>', schema, document)).toEqual({
+      error: expect.stringContaining('Unclosed root tag'),
+    });
+  });
+
+  it.each([
+    ['application/xml', true],
+    ['text/xml', true],
+    ['application/atom+xml', true],
+    ['application/json', false],
+    ['application/xml-dtd', false],
+  ])('recognizes %s as XML: %s', (mediaType, expected) => {
+    expect(isXmlMediaType(mediaType)).toBe(expected);
+  });
+});
+
+describe('xml codec: unions, alternatives and bare values', () => {
+  const alternatives = {
+    openapi: '3.0.3',
+    components: {
+      schemas: {
+        Location: { type: 'string', enum: ['us-west-2'], xml: { name: 'LocationConstraint' } },
+        NoSuchBucket: {
+          type: 'object',
+          properties: { message: { type: 'string', xml: { name: 'Message' } } },
+        },
+        AccessDenied: {
+          type: 'object',
+          properties: {
+            message: { type: 'string', xml: { name: 'Message' } },
+            host: { type: 'string', xml: { name: 'HostId' } },
+          },
+        },
+        Errors: {
+          anyOf: [
+            { $ref: '#/components/schemas/NoSuchBucket' },
+            { $ref: '#/components/schemas/AccessDenied' },
+          ],
+          xml: { name: 'Error' },
+        },
+        Choice: {
+          type: 'object',
+          xml: { name: 'Choice' },
+          oneOf: [
+            { type: 'object', properties: { a: { type: 'string' } } },
+            { type: 'object', properties: { b: { type: 'string' } } },
+          ],
+        },
+        Nested: {
+          type: 'object',
+          xml: { name: 'Wrapper' },
+          oneOf: [
+            {
+              type: 'object',
+              properties: { item: { type: 'object', properties: { a: { type: 'string' } } } },
+            },
+            {
+              type: 'object',
+              properties: { item: { type: 'object', properties: { b: { type: 'string' } } } },
+            },
+          ],
+        },
+      },
+    },
+  };
+  const errors = { $ref: '#/components/schemas/Errors' };
+
+  it('reads and writes `anyOf` structures, such as several modeled errors with one status', () => {
+    const error = { message: 'gone', host: 'h1' };
+    const written = toXml(error, errors, alternatives);
+
+    expect(written).toBe('<Error><Message>gone</Message><HostId>h1</HostId></Error>');
+    expect(fromXml(written, errors, alternatives)).toEqual({ value: error });
+  });
+
+  it('keeps every member a union element has, so validation can reject more than one', () => {
+    expect(
+      fromXml(
+        '<Choice><a>1</a><b>2</b></Choice>',
+        { $ref: '#/components/schemas/Choice' },
+        alternatives
+      )
+    ).toEqual({ value: { a: '1', b: '2' } });
+  });
+
+  it('keeps the fields union members share a property for', () => {
+    expect(
+      fromXml(
+        '<Wrapper><item><a>1</a></item></Wrapper>',
+        { $ref: '#/components/schemas/Nested' },
+        alternatives
+      )
+    ).toEqual({ value: { item: { a: '1' } } });
+    expect(
+      fromXml(
+        '<Wrapper><item><a>1</a><b>2</b></item></Wrapper>',
+        { $ref: '#/components/schemas/Nested' },
+        alternatives
+      )
+    ).toEqual({ value: { item: { a: '1', b: '2' } } });
+  });
+
+  it('tells bare scalar values from XML text', () => {
+    const location = { $ref: '#/components/schemas/Location' };
+
+    expect(isBareXmlValue('us-west-2', location, alternatives)).toBe(true);
+    expect(
+      isBareXmlValue('<LocationConstraint>us-west-2</LocationConstraint>', location, alternatives)
+    ).toBe(false);
+    expect(isBareXmlValue('us-west-2', errors, alternatives)).toBe(false);
+    expect(toXml('us-west-2', location, alternatives)).toBe(
+      '<LocationConstraint>us-west-2</LocationConstraint>'
+    );
+  });
+});

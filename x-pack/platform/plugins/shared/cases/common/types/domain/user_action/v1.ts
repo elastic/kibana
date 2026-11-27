@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { UserSchema } from '../user/v1';
 import {
   ActionSourceSchema,
   ActionSourceTypes,
+  PersistedActionSourceSchema,
   isActionSource,
   isHeaderActionSource,
   toActionSource,
@@ -48,21 +49,30 @@ export { StatusUserActionSchema } from './status/v1';
 export {
   ActionSourceSchema,
   ActionSourceTypes,
+  PersistedActionSourceSchema,
   isActionSource,
   isHeaderActionSource,
   toActionSource,
 };
-export type { ActionSource, ActionSourceType } from './source/v1';
+export type { ActionSource, ActionSourceType, PersistedActionSource } from './source/v1';
 
 export type { UserActionType, UserActionAction } from './action/v1';
 
-const UserActionCommonAttributesSchema = z.object({
-  created_at: z.string(),
-  created_by: UserSchema,
-  owner: z.string(),
-  action: UserActionActionsSchema,
-  source: ActionSourceSchema.nullable().optional(),
-});
+const UserActionCommonAttributesSchema = lazySchema(() =>
+  z.object({
+    created_at: z.string(),
+    created_by: UserSchema,
+    owner: z.string(),
+    action: UserActionActionsSchema,
+    source: PersistedActionSourceSchema.nullable().optional(),
+  })
+);
+
+const UserActionCommonWriteAttributesSchema = lazySchema(() =>
+  UserActionCommonAttributesSchema.extend({
+    source: ActionSourceSchema.nullable().optional(),
+  })
+);
 
 /**
  * This should only be used for the getAll route and it should be removed when the route is removed
@@ -122,6 +132,10 @@ export const CaseUserActionBasicSchema = UserActionPayloadSchema.and(
 
 export const CaseUserActionWithoutReferenceIdsSchema = UserActionsWithoutIdsSchema.and(
   UserActionCommonAttributesSchema
+);
+
+export const CaseUserActionWithoutReferenceIdsWriteSchema = lazySchema(() =>
+  UserActionsWithoutIdsSchema.and(UserActionCommonWriteAttributesSchema)
 );
 
 /**

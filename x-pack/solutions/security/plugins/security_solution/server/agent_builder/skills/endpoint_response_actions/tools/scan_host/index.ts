@@ -6,6 +6,7 @@
  */
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -14,6 +15,7 @@ import type { EndpointAppContextService } from '../../../../../endpoint/endpoint
 import { SCAN_TOOL_ID } from '../..';
 import {
   buildResponseActionComment,
+  formatForConfirmationCard,
   MAX_ACTION_COMMENT_LENGTH,
   MAX_FILE_PATH_LENGTH,
   dispatchErrorResult,
@@ -21,65 +23,7 @@ import {
   waitForActionCompletion,
 } from '../types';
 import { hostTargetFields, requireHostTarget } from '../services/resolve_target';
-import { buildDispatchConfirmation, prepareDispatch } from '../services/dispatch_action';
-
-// Code points that are invisible or misleading when rendered inside the
-// confirmation card's Markdown code span: control characters (C0, DEL, C1 — a
-// newline inside a code span renders as a space, so `/tmp/a\nb` would display
-// as `/tmp/a b` while the real path is what gets dispatched), bidi controls
-// (RTLO U+202E can visually reverse a filename — a spoofing vector on an
-// approval card), zero-width characters, and the backtick that would break the
-// code span itself. Everything else — including backslashes in Windows paths —
-// is left exactly as typed.
-const INVISIBLE_PATH_CODE_POINTS = new Set<number>([
-  0x200e,
-  0x200f, // LRM, RLM
-  ...range(0x202a, 0x202e), // bidi LRE..PDF, incl. RTLO
-  ...range(0x2066, 0x2069), // bidi LRI..PDI
-  0x200b,
-  0x200c,
-  0x200d, // zero-width space, ZWNJ, ZWJ
-  0xfeff, // BOM / zero-width no-break space
-]);
-
-function range(from: number, to: number): number[] {
-  return Array.from({ length: to - from + 1 }, (_, i) => from + i);
-}
-
-function isControlCodePoint(cp: number): boolean {
-  return cp <= 0x1f || cp === 0x7f || (cp >= 0x80 && cp <= 0x9f);
-}
-
-function escapeForCodeSpan(cp: number): string {
-  if (cp === 0x0a) return '\\n';
-  if (cp === 0x0d) return '\\r';
-  if (cp === 0x09) return '\\t';
-  return `\\u{${cp.toString(16).toUpperCase().padStart(4, '0')}}`;
-}
-
-/**
- * Renders a tool path for the human confirmation card: wrapped in plain double
- * quotes (so leading/trailing whitespace stays visible) with every invisible or
- * misleading code point shown as an escape. Ordinary characters — including
- * backslashes in Windows paths — are kept literal; the dispatched path is never
- * altered by this helper.
- */
-export function formatPathForConfirmation(path: string): string {
-  let formatted = '';
-  for (const ch of path) {
-    const cp = ch.codePointAt(0) ?? ch.charCodeAt(0);
-    if (
-      isControlCodePoint(cp) ||
-      cp === 0x60 /* backtick breaks the code span */ ||
-      INVISIBLE_PATH_CODE_POINTS.has(cp)
-    ) {
-      formatted += escapeForCodeSpan(cp);
-    } else {
-      formatted += ch;
-    }
-  }
-  return `"${formatted}"`;
-}
+import { prepareDispatch } from '../services/dispatch_action';
 
 const scanHostSchema = z
   .object({
@@ -106,8 +50,8 @@ const scanHostSchema = z
  * Malware scan action. `scan` only detects malware on the provided path using
  * the endpoint's existing Elastic Defend policy — it does not execute or modify
  * anything on the host. It is nonetheless classified as a write action and
- * therefore always requires an explicit human confirmation step before the
- * skill dispatches it (see the skill system instructions).
+ * therefore always requires an explicit human confirmation step: the handler
+ * asks the analyst before it dispatches.
  */
 export const scanHostTool = (
   endpointAppContextService: EndpointAppContextService
@@ -115,42 +59,8 @@ export const scanHostTool = (
   return {
     id: SCAN_TOOL_ID,
     type: ToolType.builtin,
-    description: `Scans a file or folder path on a host (identified by hostname, or by agent ID when several endpoints share the hostname) for malware using the endpoint's existing Elastic Defend policy. The action is dispatched through the Elastic Defend Response Actions service. Requires explicit analyst confirmation before dispatch.`,
+    description: `Scans a file or folder path on a host (identified by hostname, exact IP address, or agent ID; retry ambiguous_hostname or ambiguous_ip with the selected agent ID) for malware using the endpoint's existing Elastic Defend policy. The action is dispatched through the Elastic Defend Response Actions service. Requires explicit analyst confirmation before dispatch.`,
     schema: scanHostSchema,
-    // HITL gate enforced by the framework, not skill prose: the runner prompts
-    // the analyst for confirmation before every dispatch.
-    confirmation: {
-      askUser: 'always',
-      getConfirmation: async ({ toolParams, context }) =>
-        buildDispatchConfirmation(
-          {
-            action: 'scan',
-            params: {
-              hostName: toolParams.hostName as string | undefined,
-              agentId: toolParams.agentId as string | undefined,
-            },
-            context,
-            endpointAppContextService,
-            requiredPrivilege: 'canWriteScanOperations',
-          },
-          {
-            title: 'Run malware scan?',
-            color: 'warning',
-            confirmText: 'Run scan',
-            comment: toolParams.comment as string | undefined,
-            describe: (host) => {
-              // Quoted with invisible characters escaped so what the analyst
-              // approves is exactly what gets dispatched (see
-              // `formatPathForConfirmation`).
-              const shownPath =
-                typeof toolParams.path === 'string'
-                  ? formatPathForConfirmation(toolParams.path)
-                  : 'the specified path';
-              return `This will scan \`${shownPath}\` on ${host} for malware.`;
-            },
-          }
-        ),
-    },
     handler: async (params, context) => {
       const { logger, request, runContext, spaceId } = context;
       // Set just before the client call: from there on a throw does not mean
@@ -159,15 +69,54 @@ export const scanHostTool = (
       try {
         const requestedHostName = params.hostName as string | undefined;
         const requestedAgentId = params.agentId as string | undefined;
+        const requestedIp = params.ip as string | undefined;
         const path = params.path as string;
         const comment = params.comment as string | undefined;
 
         const prepared = await prepareDispatch({
           action: 'scan',
-          params: { hostName: requestedHostName, agentId: requestedAgentId },
+          params: { hostName: requestedHostName, ip: requestedIp, agentId: requestedAgentId },
+          args: { path, comment },
           context,
           endpointAppContextService,
           requiredPrivilege: 'canWriteScanOperations',
+          confirmation: {
+            title: i18n.translate(
+              'xpack.securitySolution.endpointResponseActionsSkill.confirmation.scan.title',
+              {
+                defaultMessage: 'Run malware scan?',
+              }
+            ),
+            color: 'warning',
+            confirmText: i18n.translate(
+              'xpack.securitySolution.endpointResponseActionsSkill.confirmation.scan.confirmText',
+              {
+                defaultMessage: 'Run scan',
+              }
+            ),
+            comment: params.comment as string | undefined,
+            describe: (host) => {
+              // Quoted with invisible characters escaped so what the analyst
+              // approves is exactly what gets dispatched (see
+              // `formatForConfirmationCard`).
+              const shownPath =
+                typeof params.path === 'string'
+                  ? formatForConfirmationCard(params.path)
+                  : i18n.translate(
+                      'xpack.securitySolution.endpointResponseActionsSkill.confirmation.scan.unspecifiedPath',
+                      {
+                        defaultMessage: 'the specified path',
+                      }
+                    );
+              return i18n.translate(
+                'xpack.securitySolution.endpointResponseActionsSkill.confirmation.scan.message',
+                {
+                  defaultMessage: 'This will scan `{path}` on {host} for malware.',
+                  values: { path: shownPath, host },
+                }
+              );
+            },
+          },
         });
         if (prepared.kind === 'result') {
           return prepared.result;
@@ -204,17 +153,19 @@ export const scanHostTool = (
           { hosts: { [endpointIds[0]]: { name: hostName } } }
         );
 
-        // The dispatch above returns the action's write-time snapshot
-        // (almost always `pending` — the endpoint agent hasn't checked in
-        // yet). Poll until Elastic Defend reports completion so the chat
-        // response reflects the actual outcome, not just "dispatched".
-        const actionDetails = await waitForActionCompletion(
-          endpointAppContextService,
-          spaceId,
-          dispatchedAction.id,
-          logger,
-          dispatchedAction
-        );
+        // Offline write actions are durably queued. Polling cannot complete
+        // until the endpoint reconnects, so return the write-time snapshot and
+        // action ID immediately; online scans still wait for the real outcome.
+        const actionDetails =
+          target.endpoint.status === 'offline'
+            ? dispatchedAction
+            : await waitForActionCompletion(
+                endpointAppContextService,
+                spaceId,
+                dispatchedAction.id,
+                logger,
+                dispatchedAction
+              );
 
         return {
           results: [
@@ -230,9 +181,13 @@ export const scanHostTool = (
                 actionId: actionDetails.id,
                 status: actionDetails.status,
                 wasSuccessful: actionDetails.wasSuccessful,
-                // Why a failed action failed (bounded); without it the model
-                // sees only `status: failed`.
-                ...(summarizeActionErrors(actionDetails.errors) ?? {}),
+                ...(target.endpoint.status === 'offline'
+                  ? {
+                      queued: true,
+                      message:
+                        'The action is queued and will execute if the endpoint reconnects before the action expires (two weeks); after that it will not run.',
+                    }
+                  : summarizeActionErrors(actionDetails.errors) ?? {}),
                 hosts: actionDetails.hosts,
                 comment,
               },

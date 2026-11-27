@@ -15,14 +15,14 @@ apiTest.describe(
   () => {
     let headers: Record<string, string>;
 
-    apiTest.beforeAll(async ({ requestAuth, sloHostsDataForge }) => {
-      await sloHostsDataForge.setup();
+    apiTest.beforeAll(async ({ apiServices, requestAuth }) => {
+      await apiServices.slo.deleteAllSLOs();
       const { apiKeyHeader } = await requestAuth.getApiKey('admin');
       headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
     });
 
-    apiTest.afterAll(async ({ sloHostsDataForge }) => {
-      await sloHostsDataForge.teardown();
+    apiTest.afterAll(async ({ apiServices }) => {
+      await apiServices.slo.deleteAllSLOs();
     });
 
     apiTest('successfully processes the list of SLOs', async ({ apiClient }) => {
@@ -52,7 +52,7 @@ apiTest.describe(
           });
           return status.statusCode === 200 && status.body.isDone === true;
         },
-        { timeoutMs: 120_000, intervalMs: 2000, label: 'bulk delete task completion' }
+        { timeoutMs: 120_000, label: 'bulk delete task completion' }
       );
 
       const status = await apiClient.get(`api/observability/slos/_bulk_delete/${taskId}`, {

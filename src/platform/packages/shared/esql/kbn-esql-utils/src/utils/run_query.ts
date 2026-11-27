@@ -10,21 +10,22 @@
 import { i18n } from '@kbn/i18n';
 import dateMath from '@kbn/datemath';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { ProjectRouting, TimeRange } from '@kbn/es-query';
-import { getTimeZoneFromSettings } from '@kbn/es-query';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ESQLColumn, ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
 import { lastValueFrom } from 'rxjs';
-import { type ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { getESQLQueryVariables } from './query_parsing_helpers';
+import { hasNamedParam } from './has_named_param';
+import { getGeoPrecisionParams, type GeoPrecisionParams } from './geo_precision_params';
 
-export const hasStartEndParams = (query: string) => /\?_tstart|\?_tend/i.test(query);
+export const hasStartEndParams = (query: string) =>
+  hasNamedParam(query, '_tstart') || hasNamedParam(query, '_tend');
 
 export const getStartEndParams = (query: string, time?: TimeRange) => {
-  const startNamedParams = /\?_tstart/i.test(query);
-  const endNamedParams = /\?_tend/i.test(query);
+  const startNamedParams = hasNamedParam(query, '_tstart');
+  const endNamedParams = hasNamedParam(query, '_tend');
   if (time && (startNamedParams || endNamedParams)) {
     const timeParams = {
       start: startNamedParams ? dateMath.parse(time.from)?.toISOString() : undefined,
@@ -45,9 +46,15 @@ export const getStartEndParams = (query: string, time?: TimeRange) => {
 export const getNamedParams = (
   query: string,
   timeRange?: TimeRange,
-  variables?: ESQLControlVariable[]
+  variables?: ESQLControlVariable[],
+  geoPrecision?: GeoPrecisionParams
 ) => {
-  const namedParams: ESQLSearchParams['params'] = getStartEndParams(query, timeRange);
+  const namedParams: ESQLSearchParams['params'] = [
+    ...getStartEndParams(query, timeRange),
+    ...(geoPrecision
+      ? getGeoPrecisionParams(query, geoPrecision.zoom, geoPrecision.resolution)
+      : []),
+  ];
   if (variables?.length) {
     const usedVariables = new Set(getESQLQueryVariables(query));
     variables
@@ -85,6 +92,7 @@ export async function getESQLQueryColumnsRaw({
   timeRange,
   variables,
   includeColumnMetadata,
+  projectRouting,
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
@@ -94,9 +102,11 @@ export async function getESQLQueryColumnsRaw({
   timeRange?: TimeRange;
   variables?: ESQLControlVariable[];
   includeColumnMetadata?: boolean;
+  projectRouting?: ProjectRouting;
 }): Promise<ESQLColumn[]> {
   try {
-    const namedParams = getNamedParams(esqlQuery, timeRange, variables);
+    // Columns are resolved with `LIMIT 0`, so any valid precision works.
+    const namedParams = getNamedParams(esqlQuery, timeRange, variables, { zoom: 0 });
     const response = await lastValueFrom(
       search(
         {
@@ -111,6 +121,7 @@ export async function getESQLQueryColumnsRaw({
         {
           abortSignal: signal,
           strategy: 'esql_async',
+          ...(projectRouting !== undefined ? { projectRouting } : {}),
         }
       )
     );
@@ -183,108 +194,4 @@ export async function getESQLQueryColumns({
       })
     );
   }
-}
-
-// The parameters getESQLResults sends to the ES|QL search. Exported so callers that display the
-// request (for example in Inspector) show exactly what is sent.
-export function getEsqlSearchParams({
-  esqlQuery,
-  filter,
-  dropNullColumns,
-  timeRange,
-  variables,
-  timezone,
-  includeColumnMetadata,
-}: {
-  esqlQuery: string;
-  filter?: unknown;
-  dropNullColumns?: boolean;
-  timeRange?: TimeRange;
-  variables?: ESQLControlVariable[];
-  timezone?: string;
-  includeColumnMetadata?: boolean;
-}) {
-  const namedParams = getNamedParams(esqlQuery, timeRange, variables);
-  return {
-    ...(filter ? { filter } : {}),
-    query: esqlQuery,
-    ...(dropNullColumns ? { dropNullColumns: true } : {}),
-    ...(namedParams.length ? { params: namedParams } : {}),
-    ...(timezone ? { time_zone: getTimeZoneFromSettings(timezone) } : {}),
-    ...(includeColumnMetadata ? { settings: { column_metadata: true } } : {}),
-  };
-}
-
-// Returns the table as being returned by the _query endpoint
-// Based on the search api from the data plugin
-export async function getESQLResults({
-  esqlQuery,
-  search,
-  signal,
-  filter,
-  dropNullColumns,
-  timeRange,
-  variables,
-  timezone,
-  executionContext,
-  approximation,
-  projectRouting,
-  includeColumnMetadata,
-}: {
-  esqlQuery: string;
-  search: ISearchGeneric;
-  signal?: AbortSignal;
-  filter?: unknown;
-  dropNullColumns?: boolean;
-  timeRange?: TimeRange;
-  variables?: ESQLControlVariable[];
-  timezone?: string;
-  executionContext?: KibanaExecutionContext;
-  approximation?: boolean;
-  projectRouting?: ProjectRouting;
-  includeColumnMetadata?: boolean;
-}): Promise<{
-  response: ESQLSearchResponse;
-  params: ESQLSearchParams;
-}> {
-  const result = await lastValueFrom(
-    search(
-      {
-        params: getEsqlSearchParams({
-          esqlQuery,
-          filter,
-          dropNullColumns,
-          timeRange,
-          variables,
-          timezone,
-          includeColumnMetadata,
-        }),
-      },
-      {
-        abortSignal: signal,
-        strategy: 'esql_async',
-        ...(executionContext ? { executionContext } : {}),
-        ...(approximation !== undefined ? { approximation } : {}),
-        ...(projectRouting !== undefined ? { projectRouting } : {}),
-      }
-    )
-  );
-
-  const rawResponse = result.rawResponse as unknown as ESQLSearchResponse;
-
-  // Normalize response.values: if all arrays are empty, convert to single empty array
-  const normalizedValues =
-    rawResponse.values && rawResponse.values.every((row) => Array.isArray(row) && row.length === 0)
-      ? []
-      : rawResponse.values;
-
-  const response = {
-    ...rawResponse,
-    values: normalizedValues,
-  };
-
-  return {
-    response,
-    params: result.requestParams as unknown as ESQLSearchParams,
-  };
 }

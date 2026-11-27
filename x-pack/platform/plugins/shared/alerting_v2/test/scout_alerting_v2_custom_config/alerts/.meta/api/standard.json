@@ -1,0 +1,34 @@
+{
+  "sha1": "28a00675d91a384eb881ef3291039dda2e349cdf",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "3c51a47056790a0-785c4ff4e5a35d1",
+      "title": "Alert action EBT telemetry reports a single ack",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/alerts/api/tests/ebt_telemetry.spec.ts",
+        "line": 46,
+        "column": 49
+      }
+    },
+    {
+      "id": "3c51a47056790a0-9e701bde0fa6b58",
+      "title": "Alert action EBT telemetry reports a bulk ack as one event per alert",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/alerts/api/tests/ebt_telemetry.spec.ts",
+        "line": 72,
+        "column": 27
+      }
+    }
+  ]
+}

@@ -11,7 +11,7 @@ import type { XYBrushEvent } from '@elastic/charts';
 import { EuiPanel, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { maybe } from '../../../../common/utils/maybe';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';

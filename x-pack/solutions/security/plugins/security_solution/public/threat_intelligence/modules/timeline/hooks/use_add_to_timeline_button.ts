@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { useKibana } from '../../../../common/lib/kibana';
+import { getAddToTimelineButton } from '../../../../timelines/components/add_to_timeline/get_add_to_timeline_button';
 
-export const useAddToTimelineButton = () => {
-  return useKibana().services.timelines.getHoverActions().getAddToTimelineButton;
-};
+export const useAddToTimelineButton = () => getAddToTimelineButton;

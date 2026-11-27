@@ -266,6 +266,8 @@ gh issue view <number> --repo <owner>/<repo> --json number,title,body,comments
 
 Fall back to GitHub MCP if unavailable. For each sub-issue: read the full title, body, all comments, all images, and all URLs. Apply the same context-gathering process recursively. Treat sub-issue content as first-class context — as important as the main issue.
 
+<!-- test-plan-triage (references/hierarchy.md) labels the highest ancestor and relies on this recursive read to cover the issues below it; if you change it, update that skill. -->
+
 For each sub-issue, check its comments for an existing test plan (body starts with `<!-- test-plan-generated -->`). If found, store as **sub-issue test plan for #<number>**. Collect all of them — they will be used in Step 2 to avoid duplication.
 
 Do not proceed to the pull requests section until all sub-issues have been fully read.

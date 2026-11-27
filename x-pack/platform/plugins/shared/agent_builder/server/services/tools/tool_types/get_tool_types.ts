@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
@@ -20,18 +21,20 @@ export const getToolTypeDefinitions = ({
   security,
   actions,
   indexSearchDeps,
+  logger,
 }: {
   workflowsManagement?: WorkflowsServerPluginSetup;
   security: SecurityPluginStart | undefined;
   actions: ActionsPluginStart;
   indexSearchDeps: IndexSearchToolTypeDeps;
+  logger: Logger;
 }): AnyToolTypeDefinition[] => {
   const toolTypes: AnyToolTypeDefinition<any, any, any>[] = [
     getBuiltinToolType(),
     getEsqlToolType(),
     getIndexSearchToolType(indexSearchDeps),
     getWorkflowToolType({ workflowsManagement, security }),
-    getMcpToolType({ actions }),
+    getMcpToolType({ actions, logger }),
   ];
   return toolTypes;
 };

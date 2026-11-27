@@ -9,8 +9,11 @@ import { syncParamsSettingsParamsRoute } from './settings/params/sync_global_par
 import { syncParamsSyntheticsParamsRoute } from './settings/params/sync_global_params';
 import {
   getSecretConnectionsRoute,
+  getAffectedMonitorsRoute,
+  previewAffectedMonitorsRoute,
   saveSecretConnectionRoute,
   deleteSecretConnectionRoute,
+  testSecretConnectionRoute,
 } from './settings/secret_connection/secret_connection';
 import { getFleetSecretStorageStatusRoute } from './settings/secret_connection/fleet_secret_storage';
 import { cleanupPrivateLocationRoute } from './settings/private_locations/cleanup_private_locations';
@@ -43,7 +46,6 @@ import { getSyntheticsSuggestionsRoute } from './suggestions/suggestions_route';
 import { getSyntheticsFieldSuggestionsRoute } from './suggestions/field_suggestions_route';
 import { getAgentPoliciesRoute } from './settings/private_locations/get_agent_policies';
 import { inspectSyntheticsMonitorRoute } from './monitor_cruds/inspect_monitor';
-import { deletePackagePolicyRoute } from './monitor_cruds/delete_integration';
 import { createJourneyScreenshotRoute } from './pings/journey_screenshots';
 import { createJourneyScreenshotBlocksRoute } from './pings/journey_screenshot_blocks';
 import { createLastSuccessfulCheckRoute } from './pings/last_successful_check';
@@ -133,7 +135,6 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   createJourneyScreenshotBlocksRoute,
   createNetworkEventsRoute,
   createJourneyScreenshotRoute,
-  deletePackagePolicyRoute,
   getLocationMonitors,
   getSyntheticsFilters,
   inspectSyntheticsMonitorRoute,
@@ -160,8 +161,11 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   resetPrivateLocationRoute,
   syncParamsSyntheticsParamsRoute,
   getSecretConnectionsRoute,
+  getAffectedMonitorsRoute,
+  previewAffectedMonitorsRoute,
   saveSecretConnectionRoute,
   deleteSecretConnectionRoute,
+  testSecretConnectionRoute,
   getFleetSecretStorageStatusRoute,
   syncParamsSettingsParamsRoute,
   getMonitorsHealthRoute,

@@ -318,7 +318,7 @@ describe('searchDsl/getSortParams', () => {
           { field: 'type', order: 'asc' },
           { field: 'title', order: 'asc' },
         ])
-      ).toThrowError(/Unable to sort multiple types by field title/);
+      ).toThrow(/Unable to sort multiple types by field title/);
     });
 
     it('rejects an unknown field in the list', () => {
@@ -327,7 +327,7 @@ describe('searchDsl/getSortParams', () => {
           { field: 'title', order: 'asc' },
           { field: 'missing', order: 'asc' },
         ])
-      ).toThrowError(/Unknown sort field missing/);
+      ).toThrow(/Unknown sort field missing/);
     });
 
     it('rejects a duplicate field', () => {
@@ -336,7 +336,7 @@ describe('searchDsl/getSortParams', () => {
           { field: 'title', order: 'asc' },
           { field: 'title', order: 'desc' },
         ])
-      ).toThrowError(/Duplicate sort field title/);
+      ).toThrow(/Duplicate sort field title/);
     });
 
     it('rejects an empty field name', () => {
@@ -344,7 +344,7 @@ describe('searchDsl/getSortParams', () => {
         getSortingParams(MAPPINGS, 'saved', undefined, undefined, undefined, [
           { field: '', order: 'asc' },
         ])
-      ).toThrowError(/non-empty field/);
+      ).toThrow(/non-empty field/);
     });
 
     it('rejects more than the maximum number of fields', () => {
@@ -355,7 +355,7 @@ describe('searchDsl/getSortParams', () => {
 
       expect(() =>
         getSortingParams(MAPPINGS, 'saved', undefined, undefined, undefined, overLimit)
-      ).toThrowError(new RegExp(`more than ${MAX_FIND_SORT_FIELDS} fields`));
+      ).toThrow(new RegExp(`more than ${MAX_FIND_SORT_FIELDS} fields`));
     });
 
     it('rejects combining sort with sortField or sortOrder', () => {
@@ -363,12 +363,12 @@ describe('searchDsl/getSortParams', () => {
         getSortingParams(MAPPINGS, 'saved', 'title', undefined, undefined, [
           { field: 'type', order: 'asc' },
         ])
-      ).toThrowError(/cannot be combined with sortField or sortOrder/);
+      ).toThrow(/cannot be combined with sortField or sortOrder/);
       expect(() =>
         getSortingParams(MAPPINGS, 'saved', undefined, 'desc', undefined, [
           { field: 'type', order: 'asc' },
         ])
-      ).toThrowError(/cannot be combined with sortField or sortOrder/);
+      ).toThrow(/cannot be combined with sortField or sortOrder/);
     });
 
     it('rejects _id because Elasticsearch disables fielddata on it', () => {
@@ -377,10 +377,8 @@ describe('searchDsl/getSortParams', () => {
           { field: 'title', order: 'desc' },
           { field: '_id', order: 'asc' },
         ])
-      ).toThrowError(/Cannot sort by _id/);
-      expect(() => getSortingParams(MAPPINGS, 'saved', '_id', 'asc')).toThrowError(
-        /Cannot sort by _id/
-      );
+      ).toThrow(/Cannot sort by _id/);
+      expect(() => getSortingParams(MAPPINGS, 'saved', '_id', 'asc')).toThrow(/Cannot sort by _id/);
     });
 
     it('rejects _shard_doc unless a point in time is open', () => {
@@ -388,8 +386,8 @@ describe('searchDsl/getSortParams', () => {
         getSortingParams(MAPPINGS, 'saved', undefined, undefined, undefined, [
           { field: '_shard_doc', order: 'asc' },
         ])
-      ).toThrowError(/_shard_doc requires a point in time/);
-      expect(() => getSortingParams(MAPPINGS, 'saved', '_shard_doc', 'asc')).toThrowError(
+      ).toThrow(/_shard_doc requires a point in time/);
+      expect(() => getSortingParams(MAPPINGS, 'saved', '_shard_doc', 'asc')).toThrow(
         /_shard_doc requires a point in time/
       );
     });

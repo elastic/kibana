@@ -8,7 +8,6 @@ import type React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldSpec } from '@kbn/data-plugin/common';
-import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { SessionViewStart } from '@kbn/session-view-plugin/public';
 import type { EuiIconProps } from '@elastic/eui';
 import type { BoolQuery } from '@kbn/es-query';
@@ -17,7 +16,6 @@ import type { EuiVarsColors } from './hooks/use_eui_theme';
 
 export interface StartPlugins {
   data: DataPublicPluginStart;
-  timelines: TimelinesUIStart;
   sessionView: SessionViewStart;
 }
 

@@ -38,7 +38,7 @@ export const createSiemMigrationsMock = () => {
       getMissingResources: jest.fn(),
       getIntegrations: jest.fn(),
       addRuleToMigration: jest.fn(),
-      telemetry: createTelemetryServiceMock(),
+      telemetry: { ...createTelemetryServiceMock(), reportTranslatedItemUpdate: jest.fn() },
       api: {
         getMissingResources: jest.fn(),
       },
@@ -56,6 +56,21 @@ export const createSiemMigrationsMock = () => {
       deleteMigration: jest.fn(),
       api: {
         getDashboardMigrationMissingResources: jest.fn(),
+      },
+    },
+
+    workflows: {
+      ...commonMocks,
+      addWorkflowsToMigration: jest.fn(),
+      createWorkflowMigration: jest.fn(),
+      startWorkflowMigration: jest.fn(),
+      stopWorkflowMigration: jest.fn(),
+      getMigrationsStats: jest.fn(),
+      deleteMigration: jest.fn(),
+      isWorkflowsUiEnabled: jest.fn(),
+      api: {
+        getWorkflowMigrationStats: jest.fn(),
+        updateWorkflowMigration: jest.fn(),
       },
     },
   };

@@ -7,7 +7,6 @@
 
 import type { ReactNode } from 'react';
 import React, { lazy, useCallback, useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import {
@@ -27,10 +26,8 @@ import { useFlyoutSessionContext } from '../session_context';
 import { useFlyoutV2UrlWriter } from '../shared/url_state/flyout_v2_url_writer';
 import {
   FLYOUT_DESCRIPTOR_KIND,
-  decodeFlyoutV2UrlParam,
   urlParamKeyForHistoryKey,
 } from '../shared/url_state/flyout_v2_url_param';
-import type { FlyoutDescriptor } from '../shared/url_state/flyout_v2_url_param';
 
 // Lazy-loaded so consumers of this hook don't statically pull the IOC flyout graph into their
 // bundle; the chunk only loads when the flyout is actually opened.
@@ -77,26 +74,17 @@ export interface IocFlyoutApi {
  * (`flyoutProviders` + `overlays.openSystemFlyout`), the flyout properties, and building the
  * `IOCDetails` record from the indicator, so call sites don't repeat them.
  *
- * This API only ever opens the NEW flyout. It does not know about the legacy expandable flyout:
- * callers remain responsible for gating on `useIsNewFlyoutEnabled()` and falling back to the
- * legacy flyout when it is off.
- *
  * Must be used within the Security Solution app shell (Redux store + router + Kibana services).
  */
 export const useIocFlyoutApi = (): IocFlyoutApi => {
-  const history = useHistory();
   const { session: sessionMode, historyKey } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const openFlyout = useOpenFlyout();
   const urlParamKey = urlParamKeyForHistoryKey(historyKey);
-  const { writeOnOpen, buildOnClose } = useFlyoutV2UrlWriter(urlParamKey, historyKey);
-
-  const readFirstDescriptor = useCallback((): FlyoutDescriptor | null => {
-    if (!history?.location) return null;
-    const raw = new URLSearchParams(history.location.search).get(urlParamKey);
-    const stack = decodeFlyoutV2UrlParam(raw);
-    return stack?.[0] ?? null;
-  }, [history, urlParamKey]);
+  const { writeOnOpen, buildOnClose, readRootDescriptor } = useFlyoutV2UrlWriter(
+    urlParamKey,
+    historyKey
+  );
 
   const open = useCallback(
     (
@@ -161,7 +149,7 @@ export const useIocFlyoutApi = (): IocFlyoutApi => {
 
   const openIocFlyoutAsChild = useCallback(
     (params: OpenIocFlyoutParams) => {
-      const parentDescriptor = readFirstDescriptor();
+      const parentDescriptor = readRootDescriptor();
       writeOnOpen(
         {
           kind: FLYOUT_DESCRIPTOR_KIND.ioc,
@@ -179,7 +167,7 @@ export const useIocFlyoutApi = (): IocFlyoutApi => {
         params.origin
       );
     },
-    [open, buildContent, getTitle, readFirstDescriptor, writeOnOpen, buildOnClose]
+    [open, buildContent, getTitle, readRootDescriptor, writeOnOpen, buildOnClose]
   );
 
   return useMemo(

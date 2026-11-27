@@ -11,28 +11,45 @@ import {
   VISUALIZATION_ATTACHMENT_TYPE,
   getEffectiveRenderer,
   isCustomContentVisualization,
+  readAttachmentQueries,
+  type VegaConfig,
   type VisualizationAttachmentData,
+  type VisualizationRenderer,
 } from '@kbn/agent-builder-visualizations-common';
-import { toEsqlQueryState } from '@kbn/custom-content-common';
 import {
+  getRequestPanelEmbeddableType,
   type PanelContent,
   type PanelContentAttempt,
-  getRendererEmbeddableType,
+  type RequestPanelType,
 } from '@kbn/dashboard-agent-authoring';
+
+const PANEL_TYPE_BY_RENDERER: Readonly<Record<VisualizationRenderer, RequestPanelType>> = {
+  lens: 'vis',
+  vega: 'vega',
+  custom_content: 'custom_content',
+};
 
 /** Maps a stored visualization payload onto the embeddable that renders it. */
 const toPanelContent = (data: VisualizationAttachmentData): PanelContent => {
-  const type = getRendererEmbeddableType(getEffectiveRenderer(data));
+  const renderer = getEffectiveRenderer(data);
+  const type = getRequestPanelEmbeddableType(PANEL_TYPE_BY_RENDERER[renderer]);
 
   // Custom content stores markup rather than a chart config, so its panel config is rebuilt.
   if (isCustomContentVisualization(data)) {
+    const esqlQueries = readAttachmentQueries(data);
     return {
       type,
       config: {
         template: data.visualization.template,
-        esql_query: toEsqlQueryState(data.esql),
+        esql_query: esqlQueries.length ? esqlQueries : undefined,
       },
     };
+  }
+
+  // Vega attachments store the spec as text; the native `vega` panel takes `{ format, value }`.
+  if (renderer === 'vega') {
+    const { spec, ...vegaConfig } = data.visualization as VegaConfig;
+    return { type, config: { ...vegaConfig, spec: { format: 'hjson', value: spec } } };
   }
 
   return { type, config: data.visualization };
@@ -69,6 +86,10 @@ export const createAttachmentPanelResolver = ({
       return fail(`Attachment "${attachmentId}" has no readable visualization data.`);
     }
 
-    return { type: 'success', panelContent: toPanelContent(data) };
+    return {
+      type: 'success',
+      panelContent: toPanelContent(data),
+      ...(isCustomContentVisualization(data) ? { heightHint: data.visualization.height } : {}),
+    };
   };
 };

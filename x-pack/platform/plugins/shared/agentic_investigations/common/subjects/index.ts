@@ -19,6 +19,7 @@ export {
 
 export {
   MAX_SUBJECT_SNAPSHOT_LENGTH,
+  MAX_VIA_LABEL_LENGTH,
   alertSubjectSnapshotSchema,
   investigationSubjectInputSchema,
   investigationSubjectInputsSchema,
@@ -28,6 +29,8 @@ export {
   investigationSubjectTypeSchema,
   slackSeenEventSchema,
   slackThreadSubjectSchema,
+  subjectLocatorSchema,
+  subjectViaSchema,
 } from './subject';
 
 export type {
@@ -39,4 +42,6 @@ export type {
   InvestigationSubjectType,
   SlackSeenEvent,
   SlackThreadSubject,
+  SubjectLocator,
+  SubjectVia,
 } from './subject';

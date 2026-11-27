@@ -37,8 +37,11 @@ export const collectNamedResponses = (
   fixtures: readonly ResponseFixture[] = [],
   recordings: readonly Recording[] = []
 ): NamedResponse[] => [
+  // The response engine rejects named fixtures that give a sequence instead.
   ...fixtures.flatMap(({ operation, response }) =>
-    isNamedOperationRef(operation) ? [{ origin: 'fixture' as const, operation, response }] : []
+    isNamedOperationRef(operation) && response !== undefined
+      ? [{ origin: 'fixture' as const, operation, response }]
+      : []
   ),
   // Error responses are kept in recordings for tests that ask for them, not served by default.
   ...recordings

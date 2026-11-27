@@ -620,6 +620,26 @@ describe('artifacts lists', () => {
       );
     });
 
+    test('it should release the event loop between Custom YARA Signatures', async () => {
+      const events: string[] = [];
+      mockValidateYaraRule.mockImplementation(async (ruleText) => {
+        events.push(`validate ${ruleText}`);
+        setImmediate(() => events.push(`event loop after ${ruleText}`));
+        return createYaraValidateResult([{}]);
+      });
+
+      await convertYaraRulesToEndpointFormat(
+        [getCustomYaraExceptionItem('rule First'), getCustomYaraExceptionItem('rule Second')],
+        'v1'
+      );
+
+      expect(events).toEqual([
+        'validate rule First',
+        'event loop after rule First',
+        'validate rule Second',
+      ]);
+    });
+
     test('it should copy meta.arch into arch_context', async () => {
       mockValidateYaraRule.mockResolvedValue(
         createYaraValidateResult([{ arch: MetaArchValue.X86 }])

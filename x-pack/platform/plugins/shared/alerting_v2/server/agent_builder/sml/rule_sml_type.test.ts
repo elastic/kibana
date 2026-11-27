@@ -297,6 +297,20 @@ describe('createRuleSmlType', () => {
       expect(result?.data).toEqual(expect.objectContaining({ id: 'rule-1', kind: 'alert' }));
     });
 
+    it('sets the attachment origin to the raw rule id instead of the SML origin URI', async () => {
+      getRule.mockResolvedValueOnce({
+        ...baseRuleResponse,
+        id: 'rule-1',
+      });
+
+      const result = await buildDefinition().toAttachment(
+        buildSmlDocument(),
+        buildToAttachmentContext()
+      );
+
+      expect(result?.origin).toBe('rule-1');
+    });
+
     it('returns undefined when getRule throws', async () => {
       getRule.mockRejectedValueOnce(new Error('not found'));
 
@@ -329,6 +343,35 @@ describe('createRuleSmlType', () => {
 
       expect(result).toBeUndefined();
       expect(getRule).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('searchByTitle', () => {
+    const search = (title: string) =>
+      buildDefinition().searchByTitle!({ title, size: 5 }, buildToAttachmentContext());
+
+    let findRules: jest.Mock;
+
+    beforeEach(() => {
+      findRules = jest.fn().mockResolvedValue({
+        items: [{ id: 'rule-1', metadata: { name: 'High CPU' } }, { id: 'rule-2' }],
+      });
+      rulesClient = { findRules } as unknown as RulesClient;
+    });
+
+    it('searches rules by the title and maps the results', async () => {
+      expect(await search('cpu')).toEqual([
+        { originId: 'rule-1', title: 'High CPU' },
+        { originId: 'rule-2', title: 'rule-2' },
+      ]);
+      expect(findRules).toHaveBeenCalledWith({ search: 'cpu', perPage: 5 });
+    });
+
+    it('returns nothing when Alerting v2 is disabled', async () => {
+      getIsAlertingV2Enabled.mockResolvedValue(false);
+
+      expect(await search('cpu')).toEqual([]);
+      expect(findRules).not.toHaveBeenCalled();
     });
   });
 });

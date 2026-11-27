@@ -45,6 +45,12 @@ export type ResumeRoundParams = BaseConverseParams & {
   prompts: Record<string, PromptResponse>;
 };
 
+export interface AttachToExecutionParams {
+  signal?: AbortSignal;
+  conversationId: string;
+  executionId: string;
+}
+
 /**
  * Wire payload for `converse()` with `conversation_id` narrowed to required. Every
  * Agent Builder UI caller passes a client-generated UUID before chat fires.
@@ -99,6 +105,23 @@ export class ChatService {
   }
 
   /**
+   * Attaches to an execution already running for a conversation: replays its events from the
+   * start, then follows it live, reconnecting once per dropped connection like `chat()` does.
+   *
+   * Unlike `chat()` and `resume()` the events are not published to the events service. A replay
+   * would hand other plugins events they may already have acted on, and the client cannot tell
+   * where the replay ends and the live tail begins.
+   */
+  attachToExecution({ signal, executionId }: AttachToExecutionParams): Observable<ChatEvent> {
+    return streamWithReattach({
+      connect: () => this.reattach(executionId, 0, signal),
+      reattach: (offset) => this.reattach(executionId, offset, signal),
+      parse: parseChatEvents(),
+      signal,
+    });
+  }
+
+  /**
    * Append a user message to an existing conversation without running the agent.
    */
   sendUserMessage({
@@ -148,18 +171,7 @@ export class ChatService {
           rawResponse: true,
           body: JSON.stringify(payload),
         }),
-      reattach: (offset) =>
-        this.http.get(
-          buildPath(`${internalApiPath}/executions/{executionId}/reattach`, {
-            executionId: payload.execution_id,
-          }),
-          {
-            signal,
-            asResponse: true,
-            rawResponse: true,
-            query: { offset },
-          }
-        ),
+      reattach: (offset) => this.reattach(payload.execution_id, offset, signal),
       parse: parseChatEvents(),
       signal,
     }).pipe(
@@ -167,6 +179,18 @@ export class ChatService {
         eventsService: this.events,
         conversationId: payload.conversation_id,
       })
+    );
+  }
+
+  private reattach(executionId: string, offset: number, signal: AbortSignal | undefined) {
+    return this.http.get(
+      buildPath(`${internalApiPath}/executions/{executionId}/reattach`, { executionId }),
+      {
+        signal,
+        asResponse: true,
+        rawResponse: true,
+        query: { offset },
+      }
     );
   }
 }

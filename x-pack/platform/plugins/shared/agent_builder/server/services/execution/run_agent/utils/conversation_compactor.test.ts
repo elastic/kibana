@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { BaseMessage } from '@langchain/core/messages';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import {
   ConversationRoundStepType,
+  ToolOrigin,
   ToolResultType,
   createInjectedContextStep,
   createPreExecutionWorkflowStep,
@@ -22,7 +24,8 @@ import type {
   ToolCallStep,
 } from '@kbn/agent-builder-common';
 import { processedCustomEventFixture, timelineFromRounds } from '../../../../test_utils/timeline';
-import { createToolResultStoreMock } from '../../../../test_utils/runner';
+import { createToolManagerMock, createToolResultStoreMock } from '../../../../test_utils/runner';
+import { createMockedExecutableTool } from '../../../../test_utils/tools';
 import type { CurrentRun, ToolRenderStateMap } from '../transient_state';
 import type { ProcessedConversation } from './prepare_conversation';
 import type { ProcessedTimelineEvent } from './context_timeline';
@@ -646,5 +649,52 @@ describe('compactContext injected context', () => {
 
     expect(result?.summary.summarized_up_to).toEqual({ round_id: 'current', tool_call_id: 'x1' });
     expect(requestText(invoke, 0)).toContain('HOOK_NOTE');
+  });
+});
+
+describe('compactContext dynamic tools snapshot', () => {
+  const dynamicTool = (id: string) => ({
+    ...createMockedExecutableTool({
+      id,
+      description: `${id} description`,
+      getSchema: () => z.object({ query: z.string() }),
+    }),
+    origin: ToolOrigin.registry,
+  });
+
+  const compactWith = (toolManager: ReturnType<typeof createToolManagerMock>) => {
+    const { deps } = setup();
+    return compactContext(
+      {
+        conversation: bigHistory(),
+        run: run([call('x1')]),
+        tailCapTokens: 20_000,
+        fallbackOnFailure: false,
+      },
+      { ...deps, toolManager }
+    );
+  };
+
+  it('snapshots the registered dynamic tool definitions onto the summary', async () => {
+    const toolManager = createToolManagerMock();
+    toolManager.listDynamicTools.mockReturnValue([dynamicTool('dyn.a'), dynamicTool('dyn.b')]);
+
+    const result = await compactWith(toolManager);
+
+    expect(result?.summary.dynamic_tools).toEqual([
+      {
+        tool_id: 'dyn.a',
+        description: 'dyn.a description',
+        parameters: expect.objectContaining({ required: ['query'] }),
+      },
+      expect.objectContaining({ tool_id: 'dyn.b', description: 'dyn.b description' }),
+    ]);
+  });
+
+  it('leaves the field out when no dynamic tool is registered', async () => {
+    const result = await compactWith(createToolManagerMock());
+
+    expect(result?.summary).toBeDefined();
+    expect(result?.summary).not.toHaveProperty('dynamic_tools');
   });
 });

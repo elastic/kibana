@@ -168,6 +168,7 @@ outputs:
     - agent_id
     - impacted_entities
     - missing_alert_ids
+    - conversation_ids
   properties:
     verdicts:
       type: array
@@ -252,6 +253,15 @@ outputs:
         should treat a non-empty list as a partial result — the run still completes
         so matched verdicts are not discarded, but missing ids need retry or
         Investigation follow-up.
+      maxItems: 1000
+      items:
+        type: string
+        maxLength: 512
+    conversation_ids:
+      type: array
+      description: >
+        Agent Builder conversations the run created, one per batch. Always present
+        (empty when the prompt path ran or Create conversation is off).
       maxItems: 1000
       items:
         type: string
@@ -464,6 +474,9 @@ steps:
       impacted_entities: []
       # Alert ids with no agent verdict (apply_verdicts no-match branch).
       missing_alert_ids: []
+      # One { conversation_id, alert_ids } entry per batch that created a conversation. The notes
+      # are written after every batch has run, so each alert looks up its own batch here.
+      batch_conversations: []
 
   # ---------------------------------------------------------------------------
   # Read this space's configuration at run time
@@ -1618,6 +1631,9 @@ steps:
               - alertzero_template_models
               - "{{ variables.connector_id_by_feature }}"
             create-conversation: "${{ variables.create_conversation }}"
+            # Without this the conversation is private to the workflow's run-as identity, and the
+            # analyst who started the run cannot open the link written on the verdict note.
+            public-conversation: "${{ variables.create_conversation }}"
             # The default maxResponseContentLength (1 MB) is too small for a 50-alert batch.
             # Azure OpenAI's buffered response for all verdicts can exceed 1 MB; Bedrock bypasses
             # this via the AWS SDK so the limit only affects OpenAI-family connectors.
@@ -1712,11 +1728,31 @@ steps:
               batch_result_input_tokens: "${{ steps.runAgent_step.output.metadata.usage.inputTokens | default: steps.runPrompt_step.output.metadata.usage.inputTokens | default: 0 }}"
               batch_result_output_tokens: "${{ steps.runAgent_step.output.metadata.usage.outputTokens | default: steps.runPrompt_step.output.metadata.usage.outputTokens | default: 0 }}"
               batch_result_connector_id: "{{ steps.runAgent_step.output.metadata.usage.connectorId | default: steps.runPrompt_step.output.metadata.usage.connectorId | default: '' }}"
+              # Empty on the prompt path and when conversation creation is off: no conversation exists.
+              batch_result_conversation_id: "{{ steps.runAgent_step.output.conversation_id | default: '' }}"
 
           - name: count_batch_result_verdicts
             type: data.set
             with:
               batch_result_verdict_count: "${{ variables.batch_result_verdicts | size }}"
+
+          # Once per batch, before the verdict check: a batch that returned no verdicts still
+          # created a conversation, and its alerts' error notes link to it.
+          - name: collect_batch_conversation_id
+            type: if
+            condition: "${{ variables.batch_result_conversation_id != '' }}"
+            steps:
+              - name: build_batch_conversation_entry
+                type: data.set
+                with:
+                  batch_conversation_entry:
+                    conversation_id: "{{ variables.batch_result_conversation_id }}"
+                    alert_ids: "${{ foreach.item | map: '_id' }}"
+
+              - name: push_batch_conversation_id
+                type: data.set
+                with:
+                  batch_conversations: "${{ variables.batch_conversations | push: variables.batch_conversation_entry }}"
 
           # -------------------------------------------------------------------
           # Collect this batch's verdicts
@@ -1945,6 +1981,10 @@ steps:
               # does not reliably shadow the value the previous iteration set. A count is always a
               # concrete number, so an alert with no verdict can never inherit its predecessor's.
               alert_verdict_count: "${{ variables.all_verdicts | where: 'id', foreach.item._id | size }}"
+              # The conversation of the batch this alert was classified in. Counted for the same
+              # reason as the verdict: the id of the previous alert must not leak into this one.
+              alert_conversation_count: "${{ variables.batch_conversations | where_exp: 'b', 'b.alert_ids contains foreach.item._id' | size }}"
+              alert_conversation_id: "{{ variables.batch_conversations | where_exp: 'b', 'b.alert_ids contains foreach.item._id' | map: 'conversation_id' | first }}"
 
           - name: check_alert_verdict_exists
             type: if
@@ -1978,6 +2018,9 @@ steps:
                         Error: the batch this alert was analyzed in returned no verdict for it.
                         {% if variables.investigation_conversation_id != '' %}
                         - Investigation: [{{ variables.investigation_conversation_id }}](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ variables.investigation_conversation_id }})
+                        {%- endif %}
+                        {% if variables.alert_conversation_count > 0 -%}
+                        - Conversation: [{{ variables.alert_conversation_id }}](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ variables.alert_conversation_id }})
                         {%- endif %}
                   headers:
                     kbn-xsrf: string
@@ -2030,6 +2073,9 @@ steps:
                             - Tag prefix: {{ variables.tag_prefix }}
                             - Connector: {{ variables.resolved_connector_id | default: variables.connector_id }}
                             - Analyzed in a batch of up to {{ consts.batch_size }} alerts
+                            {% if variables.alert_conversation_count > 0 -%}
+                            - Conversation: [{{ variables.alert_conversation_id }}](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ variables.alert_conversation_id }})
+                            {%- endif %}
                             {% if variables.auto_close_enabled -%}
                             - Auto-close confidence range: {{ variables.auto_close_confidence_score_min_threshold }} to {{ variables.auto_close_confidence_score_max_threshold }}
                             {%- endif %}
@@ -2325,3 +2371,5 @@ steps:
       impacted_entities: "${{ variables.impacted_entities }}"
       # Alert ids the agent omitted; empty when every analyzed alert got a verdict.
       missing_alert_ids: "${{ variables.missing_alert_ids }}"
+      # Conversations the batches created. Empty on the prompt path and when Create conversation is off.
+      conversation_ids: "${{ variables.batch_conversations | map: 'conversation_id' }}"

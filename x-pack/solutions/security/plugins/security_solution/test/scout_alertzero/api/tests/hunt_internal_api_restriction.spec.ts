@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { HUNT_THREAT_INTEL_SUPPLY_URL } from '@kbn/alertzero-common';
+import {
+  HUNT_THREAT_INTEL_SUPPLY_URL,
+  HUNT_WORKER_INDEX_COVERAGE_URL,
+} from '@kbn/alertzero-common';
 import { expect } from '@kbn/scout-security/api';
 import { apiTest } from '../fixtures';
 
@@ -34,6 +37,22 @@ apiTest.describe(
         expect((response.body as { message?: string }).message).toContain(
           'is not available with the current configuration'
         );
+      }
+    );
+
+    apiTest(
+      'returns 400 on the worker coverage route when an admin omits the internal-origin header',
+      async ({ samlAuth, apiClient }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+        const response = await apiClient.get(HUNT_WORKER_INDEX_COVERAGE_URL, {
+          headers: {
+            ...cookieHeader,
+            'kbn-xsrf': 'true',
+            'elastic-api-version': '1',
+          },
+          responseType: 'json',
+        });
+        expect(response.statusCode).toBe(400);
       }
     );
   }

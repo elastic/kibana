@@ -88,3 +88,19 @@ test('updates the existing comment when the PR raises a limit by 15% or more', a
   assert.equal(calls.updated[0].id, STALE_COMMENT.id);
   assert.match(calls.updated[0].body, /\| `alertzero` \| 1,000 \| 1,150 \| \+15\.0% \|/);
 });
+
+test('includes hyphenated keys when they raise a limit by 15% or more', async () => {
+  const { github, calls } = createGithub({
+    files: [LIMITS_PATH],
+    contentByRef: {
+      base: limitsYml({ alertzero: 1000, 'shared-plugins': 1000 }),
+      head: limitsYml({ alertzero: 1000, 'shared-plugins': 1150 }),
+    },
+    comments: [STALE_COMMENT],
+  });
+
+  await run({ github, context });
+
+  assert.equal(calls.updated.length, 1);
+  assert.match(calls.updated[0].body, /\| `shared-plugins` \| 1,000 \| 1,150 \| \+15\.0% \|/);
+});

@@ -117,6 +117,31 @@ describe('loadReportHuntContext', () => {
       });
     });
 
+    it('drops non-routable IPs by value even when a legacy doc has no tier or a promotable tier', async () => {
+      esClient.search.mockResolvedValue(
+        withIocs([
+          { type: 'ip', value: '203.0.113.10', tier: 'discriminating' },
+          { type: 'ip', value: '127.0.0.1' },
+          { type: 'ip', value: '10.0.0.5', tier: 'uncertain' },
+          { type: 'ip', value: '::1', tier: 'contextual' },
+        ])
+      );
+      const context = await loadReportHuntContext({
+        esClient,
+        spaceId: 'hunt-a',
+        reportId: 'rpt-1',
+      });
+      expect(context?.iocs).toEqual([{ type: 'ip', value: '203.0.113.10' }]);
+      expect(context?.excluded_iocs).toEqual({
+        count: 3,
+        values: [
+          { type: 'ip', value: '127.0.0.1' },
+          { type: 'ip', value: '10.0.0.5' },
+          { type: 'ip', value: '::1' },
+        ],
+      });
+    });
+
     it('keeps denied code-shaped tokens off the denylist so Tier 2 may still filter on them', async () => {
       esClient.search.mockResolvedValue(
         withIocs([
@@ -202,11 +227,11 @@ describe('loadReportHuntContext', () => {
         withIocs([
           ...Array.from({ length: 100 }, (_, i) => ({
             type: 'ip',
-            value: `10.0.0.${i}`,
+            value: `203.0.${Math.floor(i / 256)}.${i % 256}`,
             tier: 'discriminating',
           })),
           { type: 'domain', value: 'noise.example', tier: 'reference' },
-          { type: 'ip', value: '10.0.0.200', tier: 'discriminating' },
+          { type: 'ip', value: '203.0.113.200', tier: 'discriminating' },
         ])
       );
       const context = await loadReportHuntContext({
@@ -329,7 +354,10 @@ describe('loadReportHuntContext', () => {
           _source: {
             ...reportHit._source,
             extracted: {
-              iocs: Array.from({ length: 150 }, (_, i) => ({ type: 'ip', value: `10.0.0.${i}` })),
+              iocs: Array.from({ length: 150 }, (_, i) => ({
+                type: 'ip',
+                value: `203.0.${Math.floor(i / 256)}.${i % 256}`,
+              })),
               ttps: { techniques: Array.from({ length: 150 }, (_, i) => `T${1000 + i}`) },
             },
           },
@@ -353,7 +381,10 @@ describe('loadReportHuntContext', () => {
             _source: {
               ...reportHit._source,
               extracted: {
-                iocs: Array.from({ length: 150 }, (_, i) => ({ type: 'ip', value: `10.0.0.${i}` })),
+                iocs: Array.from({ length: 150 }, (_, i) => ({
+                  type: 'ip',
+                  value: `203.0.${Math.floor(i / 256)}.${i % 256}`,
+                })),
                 ttps: { techniques: Array.from({ length: 130 }, (_, i) => `T${1000 + i}`) },
               },
             },
@@ -403,7 +434,10 @@ describe('loadReportHuntContext', () => {
               ...reportHit._source,
               extracted: {
                 iocs: [
-                  ...Array.from({ length: 100 }, (_, i) => ({ type: 'ip', value: `10.0.0.${i}` })),
+                  ...Array.from({ length: 100 }, (_, i) => ({
+                    type: 'ip',
+                    value: `203.0.${Math.floor(i / 256)}.${i % 256}`,
+                  })),
                   { type: 'user', value: 'dev-user' },
                 ],
                 ttps: { techniques: ['T1078.004'] },
@@ -495,7 +529,10 @@ describe('loadReportHuntContext', () => {
             ...reportHit._source,
             extracted: {
               iocs: [
-                ...Array.from({ length: 102 }, (_, i) => ({ type: 'ip', value: `10.0.0.${i}` })),
+                ...Array.from({ length: 102 }, (_, i) => ({
+                  type: 'ip',
+                  value: `203.0.${Math.floor(i / 256)}.${i % 256}`,
+                })),
                 { type: 'url', value: 'https://example.test/' + 'a'.repeat(2048) },
               ],
               ttps: { techniques: ['T1078.004'] },
@@ -670,18 +707,22 @@ describe('loadReportHuntContext', () => {
       expect(context?.extraction_pending).toBe(true);
     });
 
-    it.each(['workflow_v4', 'workflow_v4_rejected', 'kev', 'text_indicator_list'])(
-      'is not pending when the method is %s',
-      async (extraction_method) => {
-        esClient.search.mockResolvedValue(withMethod({ extraction_method }));
-        const context = await loadReportHuntContext({
-          esClient,
-          spaceId: 'hunt-a',
-          reportId: 'rpt-1',
-        });
-        expect(context?.extraction_pending).toBe(false);
-      }
-    );
+    it.each([
+      'enrich_workflow',
+      'workflow_v4',
+      'enrich_workflow_rejected',
+      'workflow_v4_rejected',
+      'kev',
+      'text_indicator_list',
+    ])('is not pending when the method is %s', async (extraction_method) => {
+      esClient.search.mockResolvedValue(withMethod({ extraction_method }));
+      const context = await loadReportHuntContext({
+        esClient,
+        spaceId: 'hunt-a',
+        reportId: 'rpt-1',
+      });
+      expect(context?.extraction_pending).toBe(false);
+    });
   });
 
   it('scopes the lookup to the acting space', async () => {
@@ -697,5 +738,102 @@ describe('loadReportHuntContext', () => {
     await expect(
       loadReportHuntContext({ esClient, spaceId: 'hunt-b', reportId: 'rpt-1' })
     ).resolves.toBeNull();
+  });
+  describe('the coverage ledger from earlier hunts', () => {
+    const withEvidence = (evidence: unknown) =>
+      respond([{ ...reportHit, _source: { ...reportHit._source, evidence } }]);
+
+    it('carries the techniques this space already searched', async () => {
+      esClient.search.mockResolvedValue(
+        withEvidence([{ space_id: 'hunt-a', hunted_technique_ids: ['T1078.004', 'T1098.001'] }])
+      );
+
+      const context = await loadReportHuntContext({
+        esClient,
+        spaceId: 'hunt-a',
+        reportId: 'rpt-1',
+      });
+
+      expect(context?.already_searched_technique_ids).toEqual(['T1078.004', 'T1098.001']);
+    });
+
+    it("never reads another space's ledger", async () => {
+      esClient.search.mockResolvedValue(
+        withEvidence([
+          { space_id: 'hunt-b', hunted_technique_ids: ['T1078.004'] },
+          { space_id: 'hunt-a', hunted_technique_ids: ['T1098.001'] },
+        ])
+      );
+
+      const context = await loadReportHuntContext({
+        esClient,
+        spaceId: 'hunt-a',
+        reportId: 'rpt-1',
+      });
+
+      expect(context?.already_searched_technique_ids).toEqual(['T1098.001']);
+    });
+
+    it('is empty when the report has no evidence or no ledger in this space', async () => {
+      const read = () => loadReportHuntContext({ esClient, spaceId: 'hunt-a', reportId: 'rpt-1' });
+
+      expect((await read())?.already_searched_technique_ids).toEqual([]);
+
+      esClient.search.mockResolvedValue(withEvidence([{ space_id: 'hunt-a' }]));
+      expect((await read())?.already_searched_technique_ids).toEqual([]);
+    });
+
+    it('drops ledger entries that are not valid technique ids', async () => {
+      esClient.search.mockResolvedValue(
+        withEvidence([
+          { space_id: 'hunt-a', hunted_technique_ids: ['T1078.004', '', 'T'.repeat(33)] },
+        ])
+      );
+
+      const context = await loadReportHuntContext({
+        esClient,
+        spaceId: 'hunt-a',
+        reportId: 'rpt-1',
+      });
+
+      expect(context?.already_searched_technique_ids).toEqual(['T1078.004']);
+    });
+
+    it('carries the techniques this space still owes, and only its own', async () => {
+      esClient.search.mockResolvedValue(
+        withEvidence([
+          { space_id: 'hunt-b', pending_technique_ids: ['T1078.004'] },
+          { space_id: 'hunt-a', pending_technique_ids: ['T1098.001', '', 'T'.repeat(33)] },
+        ])
+      );
+
+      const context = await loadReportHuntContext({
+        esClient,
+        spaceId: 'hunt-a',
+        reportId: 'rpt-1',
+      });
+
+      expect(context?.pending_technique_ids).toEqual(['T1098.001']);
+    });
+
+    it('has no pending techniques when the report records none', async () => {
+      expect(
+        (await loadReportHuntContext({ esClient, spaceId: 'hunt-a', reportId: 'rpt-1' }))
+          ?.pending_technique_ids
+      ).toEqual([]);
+    });
+
+    it('asks the index for the ledger fields', async () => {
+      await loadReportHuntContext({ esClient, spaceId: 'hunt-a', reportId: 'rpt-1' });
+      const source = (esClient.search as unknown as jest.Mock).mock.calls[0][0]._source;
+
+      expect(source).toEqual(
+        expect.arrayContaining([
+          'evidence.space_id',
+          'evidence.hunted_technique_ids',
+          'evidence.pending_technique_ids',
+        ])
+      );
+    });
   });
 });

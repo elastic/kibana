@@ -37,6 +37,7 @@ describe('CspRouter', () => {
   const securityContext: CspSecuritySolutionContext = {
     getFiltersGlobalComponent: jest.fn(),
     getSpyRouteComponent: () => () => <div data-test-subj="mockedSpyRoute" />,
+    useOpenFindingInSystemFlyout: jest.fn(),
   };
 
   let history: MemoryHistory;

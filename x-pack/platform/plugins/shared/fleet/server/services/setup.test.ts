@@ -23,6 +23,7 @@ import { getPreconfiguredDeleteUnenrolledAgentsSettingFromConfig } from './preco
 import { _runSetupWithLock, setupFleet } from './setup';
 import { isPackageInstalled } from './epm/packages/install';
 import { upgradeAgentPolicySchemaVersion } from './setup/upgrade_agent_policy_schema_version';
+import { removeDeniedAgentPolicyOverrides } from './setup/remove_denied_agent_policy_overrides';
 import { createCCSIndexPatterns } from './setup/fleet_synced_integrations';
 import { getSpaceAwareSaveobjectsClients } from './epm/kibana/assets/saved_objects';
 import { outputService } from './output';
@@ -51,6 +52,7 @@ jest.mock('./epm/elasticsearch/template/install', () => {
 jest.mock('./backfill_agentless');
 jest.mock('./epm/packages/install');
 jest.mock('./setup/upgrade_agent_policy_schema_version');
+jest.mock('./setup/remove_denied_agent_policy_overrides');
 jest.mock('./setup/fleet_synced_integrations');
 jest.mock('./epm/kibana/assets/saved_objects');
 
@@ -147,6 +149,21 @@ describe('setupFleet', () => {
       isInitialized: true,
       nonFatalErrors: [],
     });
+  });
+
+  it('should not fail setup when removing denied agent policy overrides fails', async () => {
+    const soClient = getMockedSoClient();
+    (removeDeniedAgentPolicyOverrides as jest.Mock).mockRejectedValueOnce(
+      new Error('point in time failed')
+    );
+
+    const result = await setupFleet(soClient, esClient);
+
+    expect(result.isInitialized).toBe(true);
+    expect(result.nonFatalErrors).toHaveLength(1);
+    expect((result.nonFatalErrors[0] as { error: Error }).error.message).toBe(
+      'point in time failed'
+    );
   });
 
   it('should call ensureDefaultOutputs during setup', async () => {

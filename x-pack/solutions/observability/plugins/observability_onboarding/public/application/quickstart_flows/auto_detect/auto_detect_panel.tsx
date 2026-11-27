@@ -15,7 +15,7 @@ import {
   type AssetDetailsLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
 import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { ObservabilityOnboardingPricingFeature } from '../../../../common/pricing_features';
 import { getAutoDetectCommand } from './get_auto_detect_command';
 import { useOnboardingFlow } from './use_onboarding_flow';

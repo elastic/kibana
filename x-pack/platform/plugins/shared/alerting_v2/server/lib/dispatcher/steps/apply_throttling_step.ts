@@ -23,6 +23,7 @@ import type {
   LastNotifiedInfo,
   LastNotifiedRecord,
 } from '../types';
+import { effectiveThrottleStrategyOf } from '../throttle_strategy';
 
 @injectable()
 export class ApplyThrottlingStep implements DispatcherStep {
@@ -41,7 +42,7 @@ export class ApplyThrottlingStep implements DispatcherStep {
       alreadyNotified = [],
       policies = PolicyCatalog.empty(),
       triage = AlertTriage.empty(),
-      input,
+      input: { startedAt, signal },
     } = state;
     const { dispatchable } = triage;
 
@@ -57,14 +58,15 @@ export class ApplyThrottlingStep implements DispatcherStep {
     const lastNotifiedMap = await this.fetchLastNotifiedTimestamps(
       groups,
       policies,
-      input.startedAt
+      startedAt,
+      signal
     );
 
     const { dispatch, throttled } = applyThrottling(
       groups,
       policies,
       lastNotifiedMap,
-      input.startedAt,
+      startedAt,
       logger
     );
 
@@ -81,7 +83,8 @@ export class ApplyThrottlingStep implements DispatcherStep {
   private async fetchLastNotifiedTimestamps(
     groups: readonly ActionGroup[],
     policies: PolicyCatalog,
-    startedAt: Date
+    startedAt: Date,
+    signal: AbortSignal
   ): Promise<Map<ActionGroupId, LastNotifiedInfo>> {
     const lookups = groups.flatMap(({ id, policyId }) => {
       const policy = policies.get(policyId);
@@ -104,7 +107,9 @@ export class ApplyThrottlingStep implements DispatcherStep {
         }))
     );
     const responses = await Promise.all(
-      requests.map((request) => this.queryService.executeQueryRows<LastNotifiedRecord>(request))
+      requests.map((request) =>
+        this.queryService.executeQuery<LastNotifiedRecord>({ ...request, abortSignal: signal })
+      )
     );
     const records = responses.flat();
 
@@ -172,9 +177,6 @@ function createInvalidIntervalReporter(
   };
 }
 
-const throttleStrategyOf = ({ throttle, grouping }: ActionPolicy) =>
-  throttle?.strategy ?? (grouping.mode === 'per_alert' ? 'on_status_change' : 'time_interval');
-
 // An invalid interval keeps the full lookup so `shouldDispatch` still reports it.
 const intervalMsOrInfinity = (interval: string): number => {
   try {
@@ -190,7 +192,7 @@ const intervalMsOrInfinity = (interval: string): number => {
  * decision: a group whose last record is older than its interval dispatches either way.
  */
 function notifiedLookbackMs(policy: ActionPolicy): number | undefined {
-  const strategy = throttleStrategyOf(policy);
+  const strategy = effectiveThrottleStrategyOf(policy);
   const interval = policy.throttle?.interval;
   if (strategy === 'every_time') return undefined;
   if (policy.grouping.mode !== 'per_alert') {
@@ -209,7 +211,7 @@ function shouldDispatch(
   if (!lastRecord) return true;
 
   const { mode } = policy.grouping;
-  const strategy = throttleStrategyOf(policy);
+  const strategy = effectiveThrottleStrategyOf(policy);
 
   if (strategy === 'every_time') return true;
 

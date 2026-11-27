@@ -48,7 +48,8 @@ const renderCallout = (
   entityEnginePrivileges: EntityAnalyticsPrivileges | undefined,
   leadGenerationPrivileges?: EntityAnalyticsPrivileges,
   anomalyPrivileges?: EntityAnalyticsPrivileges,
-  alertsIndexPrivileges?: Record<string, Record<string, boolean>>
+  alertsIndexPrivileges?: Record<string, Record<string, boolean>>,
+  alertsFeatureMissing?: boolean
 ) =>
   render(
     <TestProviders>
@@ -58,6 +59,7 @@ const renderCallout = (
         leadGenerationPrivileges={leadGenerationPrivileges}
         anomalyPrivileges={anomalyPrivileges}
         alertsIndexPrivileges={alertsIndexPrivileges}
+        alertsFeatureMissing={alertsFeatureMissing}
         id="entity-analytics-home"
       />
     </TestProviders>
@@ -107,6 +109,19 @@ describe('EntityAnalyticsReadPrivilegesCallout', () => {
 
     expect(screen.getByText(CALLOUT_TITLE)).toBeInTheDocument();
     expect(screen.getByText(alertsIndex)).toBeInTheDocument();
+  });
+
+  it('renders nothing when the alerts index has read but lacks the privileges the page does not use', () => {
+    renderCallout(ALL_PRIVILEGES_GRANTED, makeEntityEnginePrivileges({}), undefined, undefined, {
+      '.alerts-security.alerts-default': {
+        read: true,
+        view_index_metadata: false,
+        write: false,
+        maintenance: false,
+      },
+    });
+
+    expect(screen.queryByText(CALLOUT_TITLE)).not.toBeInTheDocument();
   });
 
   it('shows callout when entity store index is missing read privilege', () => {
@@ -227,6 +242,33 @@ describe('EntityAnalyticsReadPrivilegesCallout', () => {
 
     expect(screen.getByText(CALLOUT_TITLE)).toBeInTheDocument();
     expect(screen.getByText('Machine Learning')).toBeInTheDocument();
+  });
+
+  it('shows callout when the Alerts feature privilege is missing', () => {
+    renderCallout(
+      ALL_PRIVILEGES_GRANTED,
+      makeEntityEnginePrivileges({}),
+      undefined,
+      undefined,
+      undefined,
+      true
+    );
+
+    expect(screen.getByText(CALLOUT_TITLE)).toBeInTheDocument();
+    expect(screen.getByText('Alerts')).toBeInTheDocument();
+  });
+
+  it('renders nothing when the Alerts feature privilege is not reported missing', () => {
+    renderCallout(
+      ALL_PRIVILEGES_GRANTED,
+      makeEntityEnginePrivileges({}),
+      undefined,
+      undefined,
+      undefined,
+      false
+    );
+
+    expect(screen.queryByText(CALLOUT_TITLE)).not.toBeInTheDocument();
   });
 
   it('renders nothing when anomaly ML kibana privilege is granted', () => {

@@ -23,7 +23,6 @@ import {
   EUI_TABLE_PAGINATION_PAGE_SIZE_OPTION,
   REMOVE_ENTITY_BUTTON_ARIA,
   RESOLUTION_GROUP_LINK,
-  RESOLUTION_GROUP_TAB,
   RESOLUTION_GROUP_TAB_CONTENT,
   RESOLUTION_GROUP_TABLE,
   RESOLUTION_SECTION,
@@ -86,20 +85,19 @@ export const openEntityFlyoutFromHomeByName = (entityName: string) => {
 };
 
 /**
- * Click the "Resolution group" link inside the right-panel ResolutionSection
- * to open the left panel pre-selected on the resolution tab. Waits for the
- * tab content to render before returning so chained interactions are safe.
+ * Click the "Resolution group" link inside the entity flyout's ResolutionSection
+ * to open the Resolution group tool flyout. Waits for the tool content to
+ * render before returning so chained interactions are safe.
  *
  * Scrolls to the section first: with `entityAnalyticsAnomalyDetails` enabled,
- * the right panel renders an Anomalies section above ResolutionSection (even
+ * the entity flyout renders an Anomalies section above ResolutionSection (even
  * when the entity has no anomalies), which can push it below the flyout's
  * initially-visible scroll area.
  */
-export const openResolutionTabFromRightPanel = () => {
+export const openResolutionGroupTool = () => {
   cy.get(RESOLUTION_SECTION).scrollIntoView();
   cy.get(RESOLUTION_SECTION).should('be.visible');
   cy.get(RESOLUTION_GROUP_LINK).click();
-  cy.get(RESOLUTION_GROUP_TAB).should('be.visible');
   cy.get(RESOLUTION_GROUP_TAB_CONTENT).should('be.visible');
 };
 
@@ -141,9 +139,12 @@ export const clickAddOnSearchRow = (entityName: string) => {
  * Click the remove (cross) button on the group-table row whose Entity name
  * cell contains `entityName`. The button is disabled for the primary entity
  * (tooltip "Cannot remove primary entity"); the spec asserts that separately.
+ * Scoped to the Resolution group tool: the entity flyout's read-only
+ * ResolutionSection renders the same table without remove buttons.
  */
 export const clickRemoveOnGroupRow = (entityName: string) => {
-  cy.get(RESOLUTION_GROUP_TABLE)
+  cy.get(RESOLUTION_GROUP_TAB_CONTENT)
+    .find(RESOLUTION_GROUP_TABLE)
     .find(EUI_BASIC_TABLE_ROW)
     .contains(EUI_BASIC_TABLE_ROW, entityName)
     .find(`button[aria-label="${REMOVE_ENTITY_BUTTON_ARIA}"]`)

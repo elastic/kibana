@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Feature, StreamQuery } from '@kbn/significant-events-schema';
+import type { AggregatedFeature, Feature, StreamQuery } from '@kbn/significant-events-schema';
 
 export type SearchKnowledgeIndicatorsKind = 'feature' | 'query';
 
@@ -58,11 +58,16 @@ export interface SearchKnowledgeIndicatorsOutput {
   next_page: number | null;
 }
 
+export interface TopologySeedResolution {
+  featureIds: string[];
+  selectedFeatureUuids: string[];
+}
+
 export type KnowledgeIndicator = KnowledgeIndicatorFeature | KnowledgeIndicatorQuery;
 
 export interface KnowledgeIndicatorFeature {
   kind: 'feature';
-  feature: Feature;
+  feature: AggregatedFeature;
 }
 
 export interface KnowledgeIndicatorQuery {

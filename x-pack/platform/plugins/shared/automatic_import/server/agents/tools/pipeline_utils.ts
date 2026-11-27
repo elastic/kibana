@@ -88,6 +88,58 @@ export const stripBoilerplateFields = (
   return result;
 };
 
+const VALID_FIELD_NAME_SEGMENT = /^[a-z0-9_]+$/;
+
+/**
+ * Converts an arbitrary key (camelCase, free text, punctuation) into a lowercase snake_case name.
+ */
+export const toSnakeCase = (segment: string): string =>
+  segment
+    .replace(/([a-z0-9])([A-Z])/g, '$1_$2')
+    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+
+/**
+ * Returns one error per custom-namespaced field whose name is not lowercase snake_case,
+ * each with the corrected field path to rename to when one can be derived safely.
+ */
+export const validateCustomFieldNames = (
+  fieldPaths: Iterable<string>,
+  customFieldPrefix: string
+): string[] => {
+  const allPaths = new Set(fieldPaths);
+  const errors: string[] = [];
+
+  for (const fieldPath of allPaths) {
+    if (fieldPath.startsWith(customFieldPrefix)) {
+      const segments = fieldPath.substring(customFieldPrefix.length).split('.');
+      const invalid = segments.filter((segment) => !VALID_FIELD_NAME_SEGMENT.test(segment));
+      if (invalid.length > 0) {
+        const converted = segments.map(toSnakeCase);
+        const suggestedPath = converted.every((segment) => segment.length > 0)
+          ? `${customFieldPrefix}${converted.join('.')}`
+          : undefined;
+        const advice =
+          suggestedPath === undefined
+            ? 'No usable name is left after conversion; choose a descriptive snake_case name.'
+            : allPaths.has(suggestedPath)
+            ? `'${suggestedPath}' already exists: merge the two fields or choose a distinct snake_case name.`
+            : `Rename it to '${suggestedPath}'.`;
+        errors.push(
+          `Field '${fieldPath}' is not a valid custom field name: '${invalid.join(
+            "', '"
+          )}' must be lowercase snake_case (letters, digits and underscores only). ${advice} ` +
+            `If the name comes from log content (e.g. a kv key that is free text), fix the parsing instead of using the text as a field name.`
+        );
+      }
+    }
+  }
+
+  return errors;
+};
+
 export interface SimulationResults {
   failedSamples: FailedSample[];
   successfulDocuments: Array<Record<string, unknown>>;
@@ -114,6 +166,41 @@ export const flattenDoc = (obj: Record<string, unknown>, prefix = ''): Record<st
     }
   }
   return result;
+};
+
+/**
+ * Lists every field path in a document in dot notation, descending into arrays of objects
+ * (the structure the package field generator also expands) while keeping primitive arrays as leaves.
+ */
+export const collectFieldPaths = (obj: Record<string, unknown>, prefix = ''): string[] => {
+  const paths: string[] = [];
+  for (const [key, value] of Object.entries(obj)) {
+    if (!isUnsafeProperty(key)) {
+      const path = prefix ? `${prefix}.${key}` : key;
+      if (Array.isArray(value)) {
+        const objectItems = value.filter(
+          (item): item is Record<string, unknown> =>
+            item != null && typeof item === 'object' && !Array.isArray(item)
+        );
+        if (objectItems.length > 0) {
+          const childPaths = new Set<string>();
+          for (const item of objectItems) {
+            for (const childPath of collectFieldPaths(item, path)) {
+              childPaths.add(childPath);
+            }
+          }
+          paths.push(...childPaths);
+        } else {
+          paths.push(path);
+        }
+      } else if (value != null && typeof value === 'object') {
+        paths.push(...collectFieldPaths(value as Record<string, unknown>, path));
+      } else {
+        paths.push(path);
+      }
+    }
+  }
+  return paths;
 };
 
 export const processSimulationResults = (

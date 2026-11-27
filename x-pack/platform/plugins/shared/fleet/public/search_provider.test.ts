@@ -677,7 +677,7 @@ describe('Package search provider', () => {
             ],
           }),
           ...['One', 'Two', 'Three', 'Four', 'Five'].map((n) =>
-            makePackage(`kafka_${n.toLowerCase()}`, `Stream ${n}`, { group: 'kafka' })
+            makePackage(`docker_${n.toLowerCase()}`, `Stream ${n}`, { group: 'docker' })
           ),
           // A group with a single package is not a collection
           makePackage('redis', 'Redis', { group: 'redis' }),
@@ -709,11 +709,13 @@ describe('Package search provider', () => {
           collectionTilesEnabled = true,
           search,
           maxResults = 100,
+          items = packages,
         }: {
           onboardingEnabled?: boolean;
           collectionTilesEnabled?: boolean;
           search: { term?: string; types?: string[] };
           maxResults?: number;
+          items?: GetPackagesResponse['items'];
         }) => {
           ExperimentalFeaturesService.init({
             ...allowedExperimentalValues,
@@ -724,7 +726,7 @@ describe('Package search provider', () => {
           (start.application.getUrlForApp as jest.Mock).mockImplementation(
             (app: string, options?: { path?: string }) => `/app/${app}${options?.path ?? ''}`
           );
-          mockSendGetPackages.mockReturnValue(Promise.resolve({ data: { items: packages } }));
+          mockSendGetPackages.mockReturnValue(Promise.resolve({ data: { items } }));
           setupMock.getStartServices.mockResolvedValue([start, {}, {}] as any);
 
           return firstValueFrom(
@@ -792,14 +794,38 @@ describe('Package search provider', () => {
 
             expect(result).toEqual(
               expect.objectContaining({
-                id: 'collection:kafka',
+                id: 'collection:docker',
                 meta: {
                   trailingLabel: 'Collection of 5',
                   description:
-                    'Stream One, Stream Two, Stream Three, and 2 more are part of the Kafka collection',
+                    'Stream One, Stream Two, Stream Three, and 2 more are part of the Docker collection',
                 },
               })
             );
+          });
+
+          test('uses the icon of the member named after the group, whatever the order', async () => {
+            const results = await find({
+              search: { term: 'iis' },
+              items: [
+                makePackage('iis_otel_input', 'IIS (OpenTelemetry)', {
+                  group: 'iis',
+                  icons: [{ type: 'image/svg+xml', src: '/img/otel.svg', path: '' }],
+                }),
+                makePackage('iis', 'IIS (ECS)', {
+                  group: 'iis',
+                  version: '1.24.10',
+                  icons: [{ type: 'image/svg+xml', src: '/img/iis.svg', path: '' }],
+                }),
+              ],
+            });
+
+            expect(results).toEqual([
+              expect.objectContaining({
+                id: 'collection:iis',
+                icon: '/api/fleet/epm/packages/iis/1.24.10/img/iis.svg',
+              }),
+            ]);
           });
 
           test('a group with a single package stays a regular result', async () => {
@@ -831,7 +857,7 @@ describe('Package search provider', () => {
           expect(ids(results)).toEqual([
             'aws-onboarding',
             'collection:nginx',
-            'collection:kafka',
+            'collection:docker',
             'redis',
             'sample',
           ]);
@@ -840,7 +866,7 @@ describe('Package search provider', () => {
         test('collections do not use up maxResults', async () => {
           const results = await find({ search: { types: ['integration'] }, maxResults: 3 });
 
-          expect(ids(results)).toEqual(['aws-onboarding', 'collection:nginx', 'collection:kafka']);
+          expect(ids(results)).toEqual(['aws-onboarding', 'collection:nginx', 'collection:docker']);
         });
       });
     });

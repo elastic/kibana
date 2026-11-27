@@ -7,11 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { omit } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { initializeTrackPanel } from './track_panel';
 import type { DashboardChildren } from './layout_manager/types';
 import type { ViewMode } from '@kbn/presentation-publishing';
+import { reportPanelSelectionStarted } from './telemetry/report_panel_selection_started';
+
+jest.mock('./telemetry/report_panel_selection_started', () => ({
+  reportPanelSelectionStarted: jest.fn(),
+}));
 
 const buildChild = (
   uuid: string,
@@ -360,6 +366,142 @@ describe('track panel', () => {
       wolfRelated$.next(['moose']);
       expect(blurApi.blurredPanelIds$.value).toEqual(['raven']);
       blurCleanup();
+    });
+  });
+
+  describe('panel selection', () => {
+    const setupSelectionTest = (childIds: string[] = ['panel1', 'panel2', 'panel3']) => {
+      const children$ = new BehaviorSubject<DashboardChildren>(
+        Object.fromEntries(childIds.map((id) => [id, buildChild(id)]))
+      );
+      const viewMode$ = new BehaviorSubject<ViewMode>('edit');
+      const { api: selectionApi, cleanup: selectionCleanup } = initializeTrackPanel(
+        async () => undefined,
+        children$,
+        viewMode$
+      );
+      return { children$, viewMode$, selectionApi, selectionCleanup };
+    };
+
+    it('toggles a panel in and out of the selection', () => {
+      const { selectionApi, selectionCleanup } = setupSelectionTest();
+
+      selectionApi.togglePanelSelection('panel1');
+      selectionApi.togglePanelSelection('panel2');
+      expect(selectionApi.selectedPanelIds$.value).toEqual(['panel1', 'panel2']);
+
+      selectionApi.togglePanelSelection('panel1');
+      expect(selectionApi.selectedPanelIds$.value).toEqual(['panel2']);
+      selectionCleanup();
+    });
+
+    it('adds panels to the selection without duplicates', () => {
+      const { selectionApi, selectionCleanup } = setupSelectionTest();
+      selectionApi.togglePanelSelection('panel1');
+
+      selectionApi.addPanelsToSelection(['panel1', 'panel2']);
+
+      expect(selectionApi.selectedPanelIds$.value).toEqual(['panel1', 'panel2']);
+      selectionCleanup();
+    });
+
+    it('does not emit when adding panels that are already selected', () => {
+      const { selectionApi, selectionCleanup } = setupSelectionTest();
+      selectionApi.addPanelsToSelection(['panel1', 'panel2']);
+      const listener = jest.fn();
+      const subscription = selectionApi.selectedPanelIds$.subscribe(listener);
+      listener.mockClear();
+
+      selectionApi.addPanelsToSelection(['panel2']);
+
+      expect(listener).not.toHaveBeenCalled();
+      subscription.unsubscribe();
+      selectionCleanup();
+    });
+
+    it('clears the selection when leaving edit mode', () => {
+      const { viewMode$, selectionApi, selectionCleanup } = setupSelectionTest();
+      selectionApi.addPanelsToSelection(['panel1', 'panel2']);
+
+      viewMode$.next('view');
+
+      expect(selectionApi.selectedPanelIds$.value).toEqual([]);
+      selectionCleanup();
+    });
+
+    it('drops only the removed panels from the selection', () => {
+      const { children$, selectionApi, selectionCleanup } = setupSelectionTest();
+      selectionApi.addPanelsToSelection(['panel1', 'panel2', 'panel3']);
+
+      children$.next(omit(children$.value, 'panel2'));
+
+      expect(selectionApi.selectedPanelIds$.value).toEqual(['panel1', 'panel3']);
+      selectionCleanup();
+    });
+
+    it('empties the selection when cleared', () => {
+      const { selectionApi, selectionCleanup } = setupSelectionTest();
+      selectionApi.addPanelsToSelection(['panel1', 'panel2']);
+
+      selectionApi.clearSelectedPanels();
+
+      expect(selectionApi.selectedPanelIds$.value).toEqual([]);
+      selectionCleanup();
+    });
+
+    describe('selection started telemetry', () => {
+      beforeEach(() => {
+        (reportPanelSelectionStarted as jest.Mock).mockClear();
+      });
+
+      it('does not report before any panel is selected', () => {
+        const { selectionCleanup } = setupSelectionTest();
+
+        expect(reportPanelSelectionStarted).not.toHaveBeenCalled();
+        selectionCleanup();
+      });
+
+      it('reports only once while the selection stays non-empty', () => {
+        const { selectionApi, selectionCleanup } = setupSelectionTest();
+
+        selectionApi.togglePanelSelection('panel1');
+        selectionApi.togglePanelSelection('panel2');
+        selectionApi.addPanelsToSelection(['panel3']);
+        selectionApi.togglePanelSelection('panel3');
+        selectionApi.togglePanelSelection('panel2');
+
+        expect(reportPanelSelectionStarted).toHaveBeenCalledTimes(1);
+        selectionCleanup();
+      });
+
+      it('reports once when several panels are selected at once (marquee, select all)', () => {
+        const { selectionApi, selectionCleanup } = setupSelectionTest();
+
+        selectionApi.addPanelsToSelection(['panel1', 'panel2']);
+
+        expect(reportPanelSelectionStarted).toHaveBeenCalledTimes(1);
+        selectionCleanup();
+      });
+
+      it('reports again when selecting after the selection was cleared', () => {
+        const { selectionApi, selectionCleanup } = setupSelectionTest();
+
+        selectionApi.togglePanelSelection('panel1');
+        selectionApi.clearSelectedPanels();
+        selectionApi.togglePanelSelection('panel2');
+
+        expect(reportPanelSelectionStarted).toHaveBeenCalledTimes(2);
+        selectionCleanup();
+      });
+
+      it('stops reporting after cleanup', () => {
+        const { selectionApi, selectionCleanup } = setupSelectionTest();
+        selectionCleanup();
+
+        selectionApi.togglePanelSelection('panel1');
+
+        expect(reportPanelSelectionStarted).not.toHaveBeenCalled();
+      });
     });
   });
 });

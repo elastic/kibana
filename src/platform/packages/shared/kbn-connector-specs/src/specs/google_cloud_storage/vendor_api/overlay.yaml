@@ -1,0 +1,14 @@
+overlay: 1.0.0
+info:
+  title: Google Cloud Storage and Resource Manager API corrections
+  version: 1.0.0
+actions:
+  - target: $.paths['/v1/projects'].get.security
+    description: >-
+      https://docs.cloud.google.com/resource-manager/reference/rest/v1/projects/list lists
+      `cloudplatformprojects.readonly`, which the connector requests, among the scopes that allow
+      this operation; the Discovery document only lists `cloud-platform` and
+      `cloud-platform.read-only`.
+    update:
+      - Oauth2:
+          - https://www.googleapis.com/auth/cloudplatformprojects.readonly

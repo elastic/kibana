@@ -9,6 +9,7 @@ import { brandSpaceId } from '@kbn/core-spaces-common';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { IsomerPluginStart } from '@kbn/isomer-plugin/server';
 import type { NotificationPhase } from './notification_routing';
 import { repliesUnderCallerMessage } from './notification_routing';
 import type { NotificationRoutingClient } from './notification_routing_client';
@@ -26,6 +27,7 @@ export interface InvestigationNotificationDeps {
   investigationLocator: Pick<InvestigationLocator, 'getRedirectUrl'>;
   getInvestigationsClient: GetInvestigationsClient;
   getActions: () => ActionsPluginStart | undefined;
+  getIsomerRuntime: IsomerPluginStart['getRuntime'];
   getRoutingClient: (
     request: KibanaRequest,
     spaceId: string,
@@ -34,15 +36,51 @@ export interface InvestigationNotificationDeps {
   ) => Promise<NotificationRoutingClient>;
 }
 
-/** Sends a lifecycle phase using the workflow's authenticated request and persisted routing. */
+export interface InvestigationNotificationSource {
+  request: KibanaRequest;
+  spaceId: string;
+  executionId: string;
+  kibanaUrl: string;
+  logger: Pick<Logger, 'warn'>;
+  abortSignal: AbortSignal;
+}
+
+/** Sends a phase for the workflow step's own execution. */
 export const sendInvestigationNotifications = async (
+  deps: InvestigationNotificationDeps,
+  context: Pick<StepHandlerContext, 'contextManager' | 'logger' | 'abortSignal'>,
+  params: Parameters<typeof sendInvestigationNotificationsForExecution>[2]
+): Promise<DeliverInvestigationNotificationsResult> => {
+  const request = context.contextManager.getFakeRequest();
+  const {
+    kibanaUrl,
+    execution: { id: executionId },
+    workflow: { spaceId },
+  } = context.contextManager.getContext();
+  return sendInvestigationNotificationsForExecution(
+    deps,
+    {
+      request,
+      spaceId,
+      executionId,
+      kibanaUrl,
+      logger: context.logger,
+      abortSignal: context.abortSignal,
+    },
+    params
+  );
+};
+
+/** Sends a phase for the explicitly authorized source execution. */
+export const sendInvestigationNotificationsForExecution = async (
   {
     investigationLocator,
     getInvestigationsClient,
     getActions,
+    getIsomerRuntime,
     getRoutingClient,
   }: InvestigationNotificationDeps,
-  context: Pick<StepHandlerContext, 'contextManager' | 'logger' | 'abortSignal'>,
+  context: InvestigationNotificationSource,
   {
     investigationId,
     phase,
@@ -55,12 +93,7 @@ export const sendInvestigationNotifications = async (
     onTerminalPhaseSelected?: () => Promise<void>;
   }
 ): Promise<DeliverInvestigationNotificationsResult> => {
-  const request = context.contextManager.getFakeRequest();
-  const {
-    kibanaUrl,
-    execution: { id: executionId },
-    workflow: { spaceId },
-  } = context.contextManager.getContext();
+  const { request, spaceId, executionId, kibanaUrl } = context;
   const client = getInvestigationsClient(request, spaceId);
   const { investigation, conversationId, workflowId, notificationDestinations } =
     await client.getInvestigationExecutionContext(investigationId, executionId);
@@ -79,6 +112,7 @@ export const sendInvestigationNotifications = async (
       kibanaUrl
     ).toString(),
     logger: context.logger,
+    getIsomerRuntime,
     getExecute: async () => {
       const actions = getActions();
       if (!actions) {
@@ -106,6 +140,7 @@ export const sendInvestigationNotifications = async (
     routingClient,
     investigationId,
     executionId,
+    title: investigation.title,
     logger: context.logger,
   });
   return result;
@@ -121,12 +156,14 @@ const claimRootSlackThreads = async ({
   routingClient,
   investigationId,
   executionId,
+  title,
   logger,
 }: {
   client: ReturnType<GetInvestigationsClient>;
   routingClient: NotificationRoutingClient;
   investigationId: string;
   executionId: string;
+  title: string;
   logger: Pick<Logger, 'warn'>;
 }): Promise<void> => {
   const routing = await routingClient.get().catch((error: unknown) => {
@@ -165,7 +202,9 @@ const claimRootSlackThreads = async ({
         investigationId,
         externalConversationId: rootPost.external_conversation_id,
         channel: destination.thread.channel,
-        threadTs: destination.thread.thread_ts,
+        threadTs: rootPost.message_ts ?? destination.thread.thread_ts,
+        workspace: rootPost.workspace,
+        summary: title,
       });
     } catch (error) {
       logger.warn(

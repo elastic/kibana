@@ -10,7 +10,11 @@ import { useLocation } from 'react-router-dom';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 
 import { splitPkgKey } from '../../../../../../../common/services';
-import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID } from '../../../../constants';
+import {
+  PLUGIN_ID,
+  INTEGRATIONS_PLUGIN_ID,
+  INTEGRATION_POLICIES_ON_SAVE_QUERY_PARAMS,
+} from '../../../../constants';
 import { pkgKeyFromPackageInfo } from '../../../../services';
 import { useStartServices, useLink, useIntraAppState } from '../../../../hooks';
 import type { CreatePackagePolicyRouteState, OnSaveQueryParamKeys } from '../../../../types';
@@ -63,7 +67,11 @@ export const useCancelAddPackagePolicy = (params: UseCancelParams) => {
       return getUrlForApp(returnAppId, { path: returnPath });
     }
 
-    if (from === 'installed-integrations' || from === 'copy-from-installed-integrations') {
+    if (
+      from === 'installed-integrations' ||
+      from === 'copy-from-installed-integrations' ||
+      from === 'upgrade-from-installed-integrations'
+    ) {
       return `${getHref('integrations_installed', {})}?viewPolicies=${splitPkgKey(pkgkey).pkgName}`;
     }
 
@@ -129,7 +137,11 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
               openEnrollmentFlyout: { policyIdAsValue: true },
             };
           } else {
-            onSaveQueryParams = routeState?.onSaveQueryParams;
+            // Routes reached without route state (e.g. the integration catalog tile linking
+            // straight to the add integration page) still need the policies table to open the
+            // enrollment flyout, so fall back to the same params the integration details page sets.
+            onSaveQueryParams =
+              routeState?.onSaveQueryParams ?? INTEGRATION_POLICIES_ON_SAVE_QUERY_PARAMS;
           }
         }
         // Otherwise, navigate to the policy's first agent policy details page

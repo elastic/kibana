@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-
-import { useKibana } from '../../../../common/lib/kibana';
+import { getLastUpdated } from '@kbn/securitysolution-timeline-components';
 
 interface FixedWidthLastUpdatedContainerProps {
   updatedAt: number;
@@ -15,9 +14,8 @@ interface FixedWidthLastUpdatedContainerProps {
 
 export const LastUpdatedContainer = React.memo<FixedWidthLastUpdatedContainerProps>(
   ({ updatedAt }) => {
-    const { timelines } = useKibana().services;
     return updatedAt > 0 ? (
-      <span data-test-subj="last-updated-container">{timelines.getLastUpdated({ updatedAt })}</span>
+      <span data-test-subj="last-updated-container">{getLastUpdated({ updatedAt })}</span>
     ) : null;
   }
 );

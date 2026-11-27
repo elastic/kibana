@@ -7,9 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('@opentelemetry/exporter-trace-otlp-grpc');
-jest.mock('@opentelemetry/exporter-trace-otlp-http');
-jest.mock('@opentelemetry/exporter-trace-otlp-proto');
+jest.mock('@opentelemetry/exporter-trace-otlp-grpc', () => ({
+  OTLPTraceExporter: jest.fn(),
+}));
+jest.mock('@opentelemetry/exporter-trace-otlp-http', () => ({
+  OTLPTraceExporter: jest.fn(),
+}));
+jest.mock('@opentelemetry/exporter-trace-otlp-proto', () => ({
+  OTLPTraceExporter: jest.fn(),
+}));
 
 import { OTLPTraceExporter as OTLPTraceExporterGRPC } from '@opentelemetry/exporter-trace-otlp-grpc';
 import { OTLPTraceExporter as OTLPTraceExporterHTTP } from '@opentelemetry/exporter-trace-otlp-http';
@@ -25,6 +31,43 @@ const BASE_CONFIG = {
   url: 'http://localhost:4317',
   scheduled_delay: 1000,
 };
+
+const ACTUAL_EXPORTERS = [
+  {
+    protocol: 'gRPC',
+    create: () => {
+      const { OTLPTraceExporter } = jest.requireActual<
+        typeof import('@opentelemetry/exporter-trace-otlp-grpc')
+      >('@opentelemetry/exporter-trace-otlp-grpc');
+      return new OTLPTraceExporter({ url: BASE_CONFIG.url });
+    },
+  },
+  {
+    protocol: 'HTTP',
+    create: () => {
+      const { OTLPTraceExporter } = jest.requireActual<
+        typeof import('@opentelemetry/exporter-trace-otlp-http')
+      >('@opentelemetry/exporter-trace-otlp-http');
+      return new OTLPTraceExporter({ url: BASE_CONFIG.url });
+    },
+  },
+  {
+    protocol: 'HTTP/protobuf',
+    create: () => {
+      const { OTLPTraceExporter } = jest.requireActual<
+        typeof import('@opentelemetry/exporter-trace-otlp-proto')
+      >('@opentelemetry/exporter-trace-otlp-proto');
+      return new OTLPTraceExporter({ url: BASE_CONFIG.url });
+    },
+  },
+] as const;
+
+describe('real exporter compatibility', () => {
+  it.each(ACTUAL_EXPORTERS)('constructs the $protocol exporter', async ({ create }) => {
+    const exporter = create();
+    await expect(exporter.shutdown()).resolves.toBeUndefined();
+  });
+});
 
 describe('OTLPSpanProcessor', () => {
   beforeEach(() => {

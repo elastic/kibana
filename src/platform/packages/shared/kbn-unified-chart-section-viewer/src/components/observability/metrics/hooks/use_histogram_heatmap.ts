@@ -15,6 +15,7 @@ import {
   createHistogramDistributionQuery,
   firstNonNullable,
   getMetricUniqueKey,
+  resolveMetricUnit,
 } from '../../../../common/utils';
 import { isHistogramMetric } from '../../../../common/utils/histogram_metric';
 import { useFeatureFlag } from '../../../../hooks/use_feature_flag';
@@ -28,9 +29,12 @@ export interface UseHistogramHeatmapParams {
   histogramBounds: HistogramBoundsByMetricKey;
   histogramBoundsLoading: boolean;
   whereStatements?: readonly string[];
+  metadataFields?: readonly string[];
   originalSource?: string;
   histogramVisualization: HistogramVisualization;
   description?: string;
+  seriesColor: string;
+  backgroundColor: string;
 }
 
 export interface HistogramHeatmapState {
@@ -47,9 +51,12 @@ export const useHistogramHeatmap = ({
   histogramBounds,
   histogramBoundsLoading,
   whereStatements,
+  metadataFields,
   originalSource,
   histogramVisualization,
   description,
+  seriesColor,
+  backgroundColor,
 }: UseHistogramHeatmapParams): HistogramHeatmapState => {
   const isHeatmapsEnabled = useFeatureFlag(
     FEATURE_FLAGS.IS_HEATMAPS_ENABLED,
@@ -83,9 +90,10 @@ export const useHistogramHeatmap = ({
       metricItem,
       bounds,
       whereStatements,
+      metadataFields,
       originalSource,
     });
-  }, [shouldRenderHistogram, bounds, metricItem, whereStatements, originalSource]);
+  }, [shouldRenderHistogram, bounds, metricItem, whereStatements, metadataFields, originalSource]);
 
   const heatmapConfig = useMemo(
     () =>
@@ -94,9 +102,19 @@ export const useHistogramHeatmap = ({
             query: distributionQuery,
             title: metricItem.metricName,
             description,
+            seriesColor,
+            backgroundColor,
+            unit: resolveMetricUnit(metricItem.metricName, [...metricItem.units]),
           })
         : undefined,
-    [distributionQuery, metricItem.metricName, description]
+    [
+      distributionQuery,
+      metricItem.metricName,
+      metricItem.units,
+      description,
+      seriesColor,
+      backgroundColor,
+    ]
   );
 
   return { shouldRenderHistogram, boundsError, distributionQuery, heatmapConfig };

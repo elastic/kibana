@@ -1,0 +1,79 @@
+{
+  "summary": "Developer platform. Content includes API docs, guides, and architecture decisions. The assistant uses it to help developers find endpoints, follow patterns and understand how the system fits together.",
+  "rationale": "Developer docs describe an API and the system behind it. Connecting endpoints to the resources they operate on, the credentials they need and the components that serve them, and components to what they depend on, lets the assistant explain both how to call something and what happens behind it.",
+  "dreaming": {
+    "instructions": "Record what developers need to build on the platform: what each endpoint does, the conventions every request follows, how the system is built, how authentication works, and the limits that apply. Keep exact methods, paths, status codes, header names and limits.\n\nSkip:\n- Deprecated endpoints or removed features.\n- Internal implementation details not exposed in the API.\n- Draft specifications not yet released to developers.",
+    "facts": [
+      {
+        "type": "endpoint",
+        "description": "What an endpoint does and returns, such as \"POST /v2/documents creates a new document, returns 201\"."
+      },
+      {
+        "type": "pattern",
+        "description": "A convention requests follow, such as \"all mutations require idempotency key in X-Request-Id header\"."
+      },
+      {
+        "type": "architecture",
+        "description": "How the system is built, such as \"uses event sourcing with Kafka for async processing\"."
+      },
+      {
+        "type": "auth",
+        "description": "How callers authenticate, such as \"API keys scoped per organization, passed in Authorization header\"."
+      },
+      {
+        "type": "limit",
+        "description": "A size, rate or count limit, such as \"max payload size is 10MB, max batch size is 100 items\"."
+      }
+    ],
+    "entities": {
+      "nodes": [
+        {
+          "type": "api_endpoint",
+          "description": "An HTTP endpoint, by method and path.",
+          "attributes": [
+            "method",
+            "path",
+            "version"
+          ]
+        },
+        {
+          "type": "resource",
+          "description": "A kind of object the API manages, such as documents or users."
+        },
+        {
+          "type": "component",
+          "description": "A service, queue or store in the architecture, such as Kafka.",
+          "attributes": [
+            "technology"
+          ]
+        },
+        {
+          "type": "credential",
+          "description": "A way to authenticate, such as an API key or OAuth token.",
+          "attributes": [
+            "scope",
+            "header"
+          ]
+        }
+      ]
+    },
+    "relationships": [
+      {
+        "type": "operates_on",
+        "description": "An endpoint reads or changes a resource."
+      },
+      {
+        "type": "requires",
+        "description": "An endpoint needs a credential."
+      },
+      {
+        "type": "served_by",
+        "description": "An endpoint is served by a component."
+      },
+      {
+        "type": "depends_on",
+        "description": "A component depends on another component."
+      }
+    ]
+  }
+}

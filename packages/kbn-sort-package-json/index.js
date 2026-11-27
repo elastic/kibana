@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import sorter from 'sort-package-json';
+import { sorter } from './sorter';
 
 /**
  * @param {string | Record<string, any>} json

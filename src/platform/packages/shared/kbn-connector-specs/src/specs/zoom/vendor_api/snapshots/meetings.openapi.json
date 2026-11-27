@@ -1,0 +1,2221 @@
+{
+  "components": {
+    "securitySchemes": {
+      "openapi_authorization": {
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "title": "Meetings API"
+  },
+  "openapi": "3.0.0",
+  "paths": {
+    "/meetings/{meetingId}": {
+      "get": {
+        "operationId": "meeting",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meetingId",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "occurrence_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "show_previous_occurrences",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "agenda": {
+                      "maxLength": 2000,
+                      "type": "string"
+                    },
+                    "assistant_id": {
+                      "type": "string"
+                    },
+                    "chat_join_url": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "creation_source": {
+                      "enum": [
+                        "other",
+                        "open_api",
+                        "web_portal",
+                        "zoom_scheduler"
+                      ],
+                      "type": "string"
+                    },
+                    "duration": {
+                      "type": "integer"
+                    },
+                    "dynamic_host_key": {
+                      "type": "string"
+                    },
+                    "encrypted_password": {
+                      "type": "string"
+                    },
+                    "h323_password": {
+                      "type": "string"
+                    },
+                    "host_email": {
+                      "format": "email",
+                      "type": "string"
+                    },
+                    "host_id": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "format": "int64",
+                      "type": "integer"
+                    },
+                    "join_url": {
+                      "type": "string"
+                    },
+                    "occurrences": {
+                      "items": {
+                        "properties": {
+                          "duration": {
+                            "type": "integer"
+                          },
+                          "occurrence_id": {
+                            "type": "string"
+                          },
+                          "start_time": {
+                            "format": "date-time",
+                            "type": "string"
+                          },
+                          "status": {
+                            "enum": [
+                              "available",
+                              "deleted"
+                            ],
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "password": {
+                      "minimum": 8,
+                      "type": "string"
+                    },
+                    "pmi": {
+                      "type": "string"
+                    },
+                    "pre_schedule": {
+                      "default": false,
+                      "type": "boolean"
+                    },
+                    "pstn_password": {
+                      "type": "string"
+                    },
+                    "recurrence": {
+                      "properties": {
+                        "end_date_time": {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        "end_times": {
+                          "default": 1,
+                          "maximum": 60,
+                          "type": "integer"
+                        },
+                        "monthly_day": {
+                          "default": 1,
+                          "type": "integer"
+                        },
+                        "monthly_week": {
+                          "enum": [
+                            -1,
+                            1,
+                            2,
+                            3,
+                            4
+                          ],
+                          "type": "integer"
+                        },
+                        "monthly_week_day": {
+                          "enum": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7
+                          ],
+                          "type": "integer"
+                        },
+                        "repeat_interval": {
+                          "type": "integer"
+                        },
+                        "type": {
+                          "enum": [
+                            1,
+                            2,
+                            3
+                          ],
+                          "type": "integer"
+                        },
+                        "weekly_days": {
+                          "default": "1",
+                          "enum": [
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "type"
+                      ],
+                      "type": "object"
+                    },
+                    "registration_url": {
+                      "type": "string"
+                    },
+                    "sensitivity_label_id": {
+                      "type": "string"
+                    },
+                    "settings": {
+                      "properties": {
+                        "additional_data_center_regions": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "allow_host_control_participant_mute_state": {
+                          "type": "boolean"
+                        },
+                        "allow_multiple_devices": {
+                          "type": "boolean"
+                        },
+                        "allow_participants_to_transcribe_meetings_with_my_notes": {
+                          "properties": {
+                            "enable": {
+                              "type": "boolean"
+                            },
+                            "participant_scope": {
+                              "enum": [
+                                "organization",
+                                "all"
+                              ],
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "alternative_host_manage_cloud_recording": {
+                          "type": "boolean"
+                        },
+                        "alternative_host_manage_meeting_summary": {
+                          "type": "boolean"
+                        },
+                        "alternative_host_update_polls": {
+                          "type": "boolean"
+                        },
+                        "alternative_hosts": {
+                          "type": "string"
+                        },
+                        "alternative_hosts_email_notification": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "approval_type": {
+                          "default": 2,
+                          "enum": [
+                            0,
+                            1,
+                            2
+                          ],
+                          "type": "integer"
+                        },
+                        "approved_or_denied_countries_or_regions": {
+                          "properties": {
+                            "approved_list": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "denied_list": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "enable": {
+                              "type": "boolean"
+                            },
+                            "method": {
+                              "enum": [
+                                "approve",
+                                "deny"
+                              ],
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "audio": {
+                          "default": "both",
+                          "enum": [
+                            "both",
+                            "telephony",
+                            "voip",
+                            "thirdParty"
+                          ],
+                          "type": "string"
+                        },
+                        "audio_conference_info": {
+                          "maxLength": 2048,
+                          "type": "string"
+                        },
+                        "authentication_domains": {
+                          "type": "string"
+                        },
+                        "authentication_exception": {
+                          "items": {
+                            "properties": {
+                              "email": {
+                                "format": "email",
+                                "type": "string"
+                              },
+                              "join_url": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "authentication_name": {
+                          "type": "string"
+                        },
+                        "authentication_option": {
+                          "type": "string"
+                        },
+                        "auto_add_recording_to_video_management": {
+                          "properties": {
+                            "channels": {
+                              "items": {
+                                "properties": {
+                                  "channel_id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "channel_id"
+                                ],
+                                "type": "object"
+                              },
+                              "maxItems": 5,
+                              "minItems": 1,
+                              "type": "array"
+                            },
+                            "enable": {
+                              "default": false,
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "enable"
+                          ],
+                          "type": "object"
+                        },
+                        "auto_recording": {
+                          "default": "none",
+                          "enum": [
+                            "local",
+                            "cloud",
+                            "none"
+                          ],
+                          "type": "string"
+                        },
+                        "auto_start_ai_companion_questions": {
+                          "default": false,
+                          "type": "boolean"
+                        },
+                        "auto_start_deepfake_detection": {
+                          "type": "boolean"
+                        },
+                        "auto_start_meeting_summary": {
+                          "default": false,
+                          "type": "boolean"
+                        },
+                        "breakout_room": {
+                          "properties": {
+                            "enable": {
+                              "type": "boolean"
+                            },
+                            "rooms": {
+                              "items": {
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "participants": {
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "type": "array"
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "calendar_type": {
+                          "enum": [
+                            1,
+                            2
+                          ],
+                          "type": "integer"
+                        },
+                        "close_registration": {
+                          "default": false,
+                          "type": "boolean"
+                        },
+                        "cn_meeting": {
+                          "default": false,
+                          "deprecated": true,
+                          "type": "boolean"
+                        },
+                        "contact_email": {
+                          "type": "string"
+                        },
+                        "contact_name": {
+                          "type": "string"
+                        },
+                        "continuous_meeting_chat": {
+                          "properties": {
+                            "auto_add_invited_external_users": {
+                              "deprecated": true,
+                              "type": "boolean"
+                            },
+                            "auto_add_meeting_participants": {
+                              "deprecated": true,
+                              "type": "boolean"
+                            },
+                            "channel_id": {
+                              "type": "string"
+                            },
+                            "enable": {
+                              "type": "boolean"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "custom_keys": {
+                          "items": {
+                            "properties": {
+                              "key": {
+                                "maxLength": 64,
+                                "type": "string"
+                              },
+                              "value": {
+                                "maxLength": 256,
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "maxItems": 10,
+                          "type": "array"
+                        },
+                        "device_testing": {
+                          "default": false,
+                          "type": "boolean"
+                        },
+                        "disable_participant_video": {
+                          "default": false,
+                          "type": "boolean"
+                        },
+                        "disable_recording_control": {
+                          "default": "none",
+                          "enum": [
+                            "none",
+                            "all"
+                          ],
+                          "type": "string"
+                        },
+                        "email_in_attendee_report": {
+                          "type": "boolean"
+                        },
+                        "email_notification": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "encryption_type": {
+                          "enum": [
+                            "enhanced_encryption",
+                            "e2ee"
+                          ],
+                          "type": "string"
+                        },
+                        "enforce_login": {
+                          "deprecated": true,
+                          "type": "boolean"
+                        },
+                        "enforce_login_domains": {
+                          "deprecated": true,
+                          "type": "string"
+                        },
+                        "focus_mode": {
+                          "type": "boolean"
+                        },
+                        "global_dial_in_countries": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "global_dial_in_numbers": {
+                          "items": {
+                            "properties": {
+                              "city": {
+                                "type": "string"
+                              },
+                              "country": {
+                                "type": "string"
+                              },
+                              "country_name": {
+                                "type": "string"
+                              },
+                              "number": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "enum": [
+                                  "toll",
+                                  "tollfree"
+                                ],
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "host_pause_stop_recording": {
+                          "type": "boolean"
+                        },
+                        "host_save_video_order": {
+                          "type": "boolean"
+                        },
+                        "host_video": {
+                          "type": "boolean"
+                        },
+                        "in_meeting": {
+                          "default": false,
+                          "deprecated": true,
+                          "type": "boolean"
+                        },
+                        "internal_meeting": {
+                          "default": false,
+                          "type": "boolean"
+                        },
+                        "jbh_time": {
+                          "enum": [
+                            0,
+                            5,
+                            10,
+                            15
+                          ],
+                          "type": "integer"
+                        },
+                        "join_before_host": {
+                          "default": false,
+                          "type": "boolean"
+                        },
+                        "language_interpretation": {
+                          "properties": {
+                            "enable": {
+                              "type": "boolean"
+                            },
+                            "interpreters": {
+                              "items": {
+                                "properties": {
+                                  "email": {
+                                    "format": "email",
+                                    "type": "string"
+                                  },
+                                  "interpreter_languages": {
+                                    "type": "string"
+                                  },
+                                  "languages": {
+                                    "deprecated": true,
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "meeting_authentication": {
+                          "type": "boolean"
+                        },
+                        "meeting_invitees": {
+                          "items": {
+                            "properties": {
+                              "email": {
+                                "format": "email",
+                                "type": "string"
+                              },
+                              "internal_user": {
+                                "default": false,
+                                "type": "boolean"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "mute_upon_entry": {
+                          "default": false,
+                          "type": "boolean"
+                        },
+                        "participant_focused_meeting": {
+                          "default": false,
+                          "type": "boolean"
+                        },
+                        "participant_video": {
+                          "type": "boolean"
+                        },
+                        "prevent_screen_capture": {
+                          "type": "boolean"
+                        },
+                        "private_meeting": {
+                          "type": "boolean"
+                        },
+                        "push_change_to_calendar": {
+                          "default": false,
+                          "type": "boolean"
+                        },
+                        "question_and_answer": {
+                          "properties": {
+                            "allow_anonymous_questions": {
+                              "type": "boolean"
+                            },
+                            "allow_submit_questions": {
+                              "type": "boolean"
+                            },
+                            "attendees_can_comment": {
+                              "type": "boolean"
+                            },
+                            "attendees_can_upvote": {
+                              "type": "boolean"
+                            },
+                            "enable": {
+                              "type": "boolean"
+                            },
+                            "question_visibility": {
+                              "enum": [
+                                "answered",
+                                "all"
+                              ],
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "registrants_confirmation_email": {
+                          "type": "boolean"
+                        },
+                        "registrants_email_notification": {
+                          "type": "boolean"
+                        },
+                        "registration_type": {
+                          "default": 1,
+                          "enum": [
+                            1,
+                            2,
+                            3
+                          ],
+                          "type": "integer"
+                        },
+                        "request_permission_to_unmute_participants": {
+                          "type": "boolean"
+                        },
+                        "resources": {
+                          "items": {
+                            "properties": {
+                              "permission_level": {
+                                "default": "editor",
+                                "enum": [
+                                  "editor",
+                                  "commenter",
+                                  "viewer"
+                                ],
+                                "type": "string"
+                              },
+                              "resource_id": {
+                                "type": "string"
+                              },
+                              "resource_type": {
+                                "enum": [
+                                  "whiteboard"
+                                ],
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "show_join_info": {
+                          "type": "boolean"
+                        },
+                        "show_share_button": {
+                          "type": "boolean"
+                        },
+                        "sign_language_interpretation": {
+                          "properties": {
+                            "enable": {
+                              "type": "boolean"
+                            },
+                            "interpreters": {
+                              "items": {
+                                "properties": {
+                                  "email": {
+                                    "format": "email",
+                                    "type": "string"
+                                  },
+                                  "sign_language": {
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              "maximum": 20,
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "summary_template_id": {
+                          "type": "string"
+                        },
+                        "use_pmi": {
+                          "type": "boolean"
+                        },
+                        "waiting_room": {
+                          "default": false,
+                          "type": "boolean"
+                        },
+                        "waiting_room_options": {
+                          "properties": {
+                            "mode": {
+                              "enum": [
+                                "follow_setting",
+                                "custom"
+                              ],
+                              "type": "string"
+                            },
+                            "who_goes_to_waiting_room": {
+                              "enum": [
+                                "everyone",
+                                "users_not_in_account",
+                                "users_not_in_account_or_whitelisted_domains",
+                                "users_not_on_invite",
+                                "users_not_in_org"
+                              ],
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "mode"
+                          ],
+                          "type": "object"
+                        },
+                        "watermark": {
+                          "default": false,
+                          "type": "boolean"
+                        },
+                        "who_can_ask_questions": {
+                          "enum": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                          ],
+                          "type": "integer"
+                        },
+                        "who_will_receive_summary": {
+                          "enum": [
+                            1,
+                            2,
+                            3,
+                            4
+                          ],
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "start_time": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "start_url": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "enum": [
+                        "waiting",
+                        "started"
+                      ],
+                      "type": "string"
+                    },
+                    "template_id": {
+                      "type": "string"
+                    },
+                    "timezone": {
+                      "type": "string"
+                    },
+                    "topic": {
+                      "type": "string"
+                    },
+                    "tracking_fields": {
+                      "items": {
+                        "properties": {
+                          "field": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "type": "string"
+                          },
+                          "visible": {
+                            "type": "boolean"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "type": {
+                      "default": 2,
+                      "enum": [
+                        1,
+                        2,
+                        3,
+                        4,
+                        8,
+                        10
+                      ],
+                      "type": "integer"
+                    },
+                    "uuid": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {},
+          "404": {},
+          "429": {}
+        },
+        "security": [
+          {
+            "openapi_authorization": []
+          }
+        ]
+      }
+    },
+    "/meetings/{meetingId}/recordings": {
+      "get": {
+        "operationId": "recordingGet",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meetingId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include_fields",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ttl",
+            "required": false,
+            "schema": {
+              "maximum": 604800,
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "allOf": [
+                        {
+                          "properties": {
+                            "account_id": {
+                              "type": "string"
+                            },
+                            "auto_delete": {
+                              "type": "boolean"
+                            },
+                            "auto_delete_date": {
+                              "type": "string"
+                            },
+                            "duration": {
+                              "type": "integer"
+                            },
+                            "external_storage_addr": {
+                              "type": "string"
+                            },
+                            "host_id": {
+                              "type": "string"
+                            },
+                            "id": {
+                              "type": "integer"
+                            },
+                            "instance_id": {
+                              "type": "string"
+                            },
+                            "rc_meeting_zone_name": {
+                              "type": "string"
+                            },
+                            "rc_zone": {
+                              "type": "string"
+                            },
+                            "recording_count": {
+                              "type": "integer"
+                            },
+                            "recording_play_passcode": {
+                              "type": "string"
+                            },
+                            "service_name": {
+                              "type": "string"
+                            },
+                            "start_time": {
+                              "format": "date-time",
+                              "type": "string"
+                            },
+                            "topic": {
+                              "type": "string"
+                            },
+                            "total_size": {
+                              "format": "int64",
+                              "type": "integer"
+                            },
+                            "type": {
+                              "enum": [
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                                "99",
+                                "96"
+                              ],
+                              "type": "string"
+                            },
+                            "uuid": {
+                              "type": "string"
+                            },
+                            "zone_instance_id": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        {
+                          "allOf": [
+                            {
+                              "properties": {
+                                "recording_files": {
+                                  "items": {
+                                    "allOf": [
+                                      {
+                                        "properties": {
+                                          "deleted_time": {
+                                            "type": "string"
+                                          },
+                                          "download_url": {
+                                            "type": "string"
+                                          },
+                                          "file_extension": {
+                                            "enum": [
+                                              "MP4",
+                                              "M4A",
+                                              "TXT",
+                                              "VTT",
+                                              "CSV",
+                                              "JSON",
+                                              "JPG"
+                                            ],
+                                            "type": "string"
+                                          },
+                                          "file_path": {
+                                            "type": "string"
+                                          },
+                                          "file_size": {
+                                            "type": "number"
+                                          },
+                                          "file_type": {
+                                            "enum": [
+                                              "MP4",
+                                              "M4A",
+                                              "CHAT",
+                                              "TRANSCRIPT",
+                                              "CSV",
+                                              "TB",
+                                              "CC",
+                                              "CHAT_MESSAGE",
+                                              "SUMMARY"
+                                            ],
+                                            "type": "string"
+                                          },
+                                          "id": {
+                                            "type": "string"
+                                          },
+                                          "meeting_id": {
+                                            "type": "string"
+                                          },
+                                          "play_url": {
+                                            "type": "string"
+                                          },
+                                          "recording_end": {
+                                            "type": "string"
+                                          },
+                                          "recording_start": {
+                                            "type": "string"
+                                          },
+                                          "recording_type": {
+                                            "enum": [
+                                              "shared_screen_with_speaker_view(CC)",
+                                              "shared_screen_with_speaker_view",
+                                              "shared_screen_with_gallery_view",
+                                              "active_speaker",
+                                              "gallery_view",
+                                              "shared_screen",
+                                              "audio_only",
+                                              "audio_transcript",
+                                              "chat_file",
+                                              "poll",
+                                              "host_video",
+                                              "closed_caption",
+                                              "timeline",
+                                              "thumbnail",
+                                              "audio_interpretation",
+                                              "summary",
+                                              "summary_next_steps",
+                                              "summary_smart_chapters",
+                                              "sign_interpretation",
+                                              "production_studio"
+                                            ],
+                                            "type": "string"
+                                          },
+                                          "status": {
+                                            "enum": [
+                                              "completed"
+                                            ],
+                                            "type": "string"
+                                          }
+                                        },
+                                        "type": "object"
+                                      }
+                                    ]
+                                  },
+                                  "type": "array"
+                                }
+                              },
+                              "type": "object"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "download_access_token": {
+                          "type": "string"
+                        },
+                        "password": {
+                          "type": "string"
+                        },
+                        "recording_play_passcode": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "properties": {
+                            "participant_audio_files": {
+                              "items": {
+                                "allOf": [
+                                  {
+                                    "properties": {
+                                      "download_url": {
+                                        "type": "string"
+                                      },
+                                      "file_name": {
+                                        "type": "string"
+                                      },
+                                      "file_path": {
+                                        "type": "string"
+                                      },
+                                      "file_size": {
+                                        "type": "number"
+                                      },
+                                      "file_type": {
+                                        "type": "string"
+                                      },
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "play_url": {
+                                        "type": "string"
+                                      },
+                                      "recording_end": {
+                                        "format": "date-time",
+                                        "type": "string"
+                                      },
+                                      "recording_start": {
+                                        "format": "date-time",
+                                        "type": "string"
+                                      },
+                                      "status": {
+                                        "enum": [
+                                          "completed"
+                                        ],
+                                        "type": "string"
+                                      }
+                                    },
+                                    "type": "object"
+                                  }
+                                ]
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {},
+          "404": {},
+          "429": {}
+        },
+        "security": [
+          {
+            "openapi_authorization": []
+          }
+        ]
+      }
+    },
+    "/meetings/{meetingId}/registrants": {
+      "get": {
+        "operationId": "meetingRegistrants",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meetingId",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "occurrence_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "default": "approved",
+              "enum": [
+                "pending",
+                "approved",
+                "denied"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 30,
+              "maximum": 300,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_number",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "next_page_token",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "allOf": [
+                        {
+                          "properties": {
+                            "next_page_token": {
+                              "type": "string"
+                            },
+                            "page_count": {
+                              "type": "integer"
+                            },
+                            "page_number": {
+                              "default": 1,
+                              "deprecated": true,
+                              "type": "integer"
+                            },
+                            "page_size": {
+                              "default": 30,
+                              "maximum": 300,
+                              "type": "integer"
+                            },
+                            "total_records": {
+                              "type": "integer"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        {
+                          "properties": {
+                            "registrants": {
+                              "items": {
+                                "allOf": [
+                                  {
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "type": "object"
+                                  },
+                                  {
+                                    "allOf": [
+                                      {
+                                        "properties": {
+                                          "address": {
+                                            "type": "string"
+                                          },
+                                          "city": {
+                                            "type": "string"
+                                          },
+                                          "comments": {
+                                            "type": "string"
+                                          },
+                                          "country": {
+                                            "type": "string"
+                                          },
+                                          "custom_questions": {
+                                            "items": {
+                                              "properties": {
+                                                "title": {
+                                                  "type": "string"
+                                                },
+                                                "value": {
+                                                  "maxLength": 128,
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "type": "object"
+                                            },
+                                            "type": "array"
+                                          },
+                                          "email": {
+                                            "format": "email",
+                                            "maxLength": 128,
+                                            "type": "string"
+                                          },
+                                          "first_name": {
+                                            "maxLength": 64,
+                                            "type": "string"
+                                          },
+                                          "industry": {
+                                            "type": "string"
+                                          },
+                                          "job_title": {
+                                            "type": "string"
+                                          },
+                                          "last_name": {
+                                            "maxLength": 64,
+                                            "type": "string"
+                                          },
+                                          "no_of_employees": {
+                                            "enum": [
+                                              "",
+                                              "1-20",
+                                              "21-50",
+                                              "51-100",
+                                              "101-250",
+                                              "251-500",
+                                              "501-1,000",
+                                              "1,001-5,000",
+                                              "5,001-10,000",
+                                              "More than 10,000"
+                                            ],
+                                            "type": "string"
+                                          },
+                                          "org": {
+                                            "type": "string"
+                                          },
+                                          "phone": {
+                                            "type": "string"
+                                          },
+                                          "purchasing_time_frame": {
+                                            "enum": [
+                                              "",
+                                              "Within a month",
+                                              "1-3 months",
+                                              "4-6 months",
+                                              "More than 6 months",
+                                              "No timeframe"
+                                            ],
+                                            "type": "string"
+                                          },
+                                          "role_in_purchase_process": {
+                                            "enum": [
+                                              "",
+                                              "Decision Maker",
+                                              "Evaluator/Recommender",
+                                              "Influencer",
+                                              "Not involved"
+                                            ],
+                                            "type": "string"
+                                          },
+                                          "state": {
+                                            "type": "string"
+                                          },
+                                          "status": {
+                                            "enum": [
+                                              "approved",
+                                              "denied",
+                                              "pending"
+                                            ],
+                                            "type": "string"
+                                          },
+                                          "zip": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "email",
+                                          "first_name"
+                                        ],
+                                        "type": "object"
+                                      }
+                                    ],
+                                    "type": "object"
+                                  },
+                                  {
+                                    "properties": {
+                                      "create_time": {
+                                        "format": "date-time",
+                                        "type": "string"
+                                      },
+                                      "join_url": {
+                                        "format": "string",
+                                        "type": "string"
+                                      },
+                                      "participant_pin_code": {
+                                        "format": "int64",
+                                        "type": "integer"
+                                      },
+                                      "status": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "type": "object"
+                                  }
+                                ]
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      ],
+                      "title": "Registration List",
+                      "type": "object"
+                    }
+                  ],
+                  "title": "Registration List"
+                }
+              }
+            }
+          },
+          "400": {},
+          "404": {},
+          "429": {}
+        },
+        "security": [
+          {
+            "openapi_authorization": []
+          }
+        ]
+      }
+    },
+    "/past_meetings/{meetingId}": {
+      "get": {
+        "operationId": "pastMeetingDetails",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meetingId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "dept": {
+                      "type": "string"
+                    },
+                    "duration": {
+                      "type": "integer"
+                    },
+                    "end_time": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "has_meeting_summary": {
+                      "type": "boolean"
+                    },
+                    "host_id": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "format": "int64",
+                      "type": "integer"
+                    },
+                    "participants_count": {
+                      "type": "integer"
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "start_time": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "topic": {
+                      "type": "string"
+                    },
+                    "total_minutes": {
+                      "type": "integer"
+                    },
+                    "type": {
+                      "enum": [
+                        0,
+                        1,
+                        2,
+                        3,
+                        4,
+                        7,
+                        8
+                      ],
+                      "type": "integer"
+                    },
+                    "user_email": {
+                      "format": "email",
+                      "type": "string"
+                    },
+                    "user_name": {
+                      "type": "string"
+                    },
+                    "uuid": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {},
+          "404": {},
+          "429": {}
+        },
+        "security": [
+          {
+            "openapi_authorization": []
+          }
+        ]
+      }
+    },
+    "/past_meetings/{meetingId}/participants": {
+      "get": {
+        "operationId": "pastMeetingParticipants",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meetingId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 30,
+              "maximum": 300,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "next_page_token",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "next_page_token": {
+                      "type": "string"
+                    },
+                    "page_count": {
+                      "type": "integer"
+                    },
+                    "page_size": {
+                      "default": 30,
+                      "maximum": 300,
+                      "type": "integer"
+                    },
+                    "participants": {
+                      "items": {
+                        "properties": {
+                          "duration": {
+                            "type": "integer"
+                          },
+                          "failover": {
+                            "type": "boolean"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "internal_user": {
+                            "default": false,
+                            "type": "boolean"
+                          },
+                          "join_time": {
+                            "format": "date-time",
+                            "type": "string"
+                          },
+                          "leave_time": {
+                            "format": "date-time",
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "registrant_id": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "enum": [
+                              "in_meeting",
+                              "in_waiting_room"
+                            ],
+                            "type": "string"
+                          },
+                          "user_email": {
+                            "type": "string"
+                          },
+                          "user_id": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "total_records": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {},
+          "404": {},
+          "429": {}
+        },
+        "security": [
+          {
+            "openapi_authorization": []
+          }
+        ]
+      }
+    },
+    "/users/{userId}/meetings": {
+      "get": {
+        "operationId": "meetings",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "required": false,
+            "schema": {
+              "default": "scheduled",
+              "enum": [
+                "scheduled",
+                "live",
+                "upcoming",
+                "upcoming_meetings",
+                "previous_meetings"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 30,
+              "maximum": 300,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "next_page_token",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_number",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "timezone",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "properties": {
+                        "next_page_token": {
+                          "type": "string"
+                        },
+                        "page_count": {
+                          "type": "integer"
+                        },
+                        "page_number": {
+                          "default": 1,
+                          "type": "integer"
+                        },
+                        "page_size": {
+                          "default": 30,
+                          "maximum": 300,
+                          "type": "integer"
+                        },
+                        "total_records": {
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    {
+                      "properties": {
+                        "meetings": {
+                          "items": {
+                            "allOf": [
+                              {
+                                "properties": {
+                                  "agenda": {
+                                    "type": "string"
+                                  },
+                                  "created_at": {
+                                    "format": "date-time",
+                                    "type": "string"
+                                  },
+                                  "duration": {
+                                    "type": "integer"
+                                  },
+                                  "host_id": {
+                                    "type": "string"
+                                  },
+                                  "id": {
+                                    "format": "int64",
+                                    "type": "integer"
+                                  },
+                                  "join_url": {
+                                    "type": "string"
+                                  },
+                                  "pmi": {
+                                    "type": "string"
+                                  },
+                                  "start_time": {
+                                    "format": "date-time",
+                                    "type": "string"
+                                  },
+                                  "timezone": {
+                                    "type": "string"
+                                  },
+                                  "topic": {
+                                    "type": "string"
+                                  },
+                                  "type": {
+                                    "enum": [
+                                      1,
+                                      2,
+                                      3,
+                                      8
+                                    ],
+                                    "type": "integer"
+                                  },
+                                  "uuid": {
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              }
+                            ]
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {},
+          "403": {},
+          "404": {},
+          "429": {}
+        },
+        "security": [
+          {
+            "openapi_authorization": []
+          }
+        ]
+      }
+    },
+    "/users/{userId}/recordings": {
+      "get": {
+        "operationId": "recordingsList",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 30,
+              "maximum": 300,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "next_page_token",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "mc",
+            "required": false,
+            "schema": {
+              "default": "false",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "trash",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "trash_type",
+            "required": false,
+            "schema": {
+              "default": "meeting_recordings",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "meeting_id",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "zra_status",
+            "required": false,
+            "schema": {
+              "default": "all",
+              "enum": [
+                "all",
+                "added",
+                "not_added",
+                "processing"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "recording_source_type",
+            "required": false,
+            "schema": {
+              "default": "null",
+              "enum": [
+                "cloud_recording_only",
+                "my_notes_recording_only"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "properties": {
+                        "from": {
+                          "format": "date",
+                          "type": "string"
+                        },
+                        "to": {
+                          "format": "date",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    {
+                      "properties": {
+                        "next_page_token": {
+                          "type": "string"
+                        },
+                        "page_count": {
+                          "type": "integer"
+                        },
+                        "page_size": {
+                          "default": 30,
+                          "maximum": 300,
+                          "type": "integer"
+                        },
+                        "total_records": {
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    {
+                      "properties": {
+                        "meetings": {
+                          "items": {
+                            "allOf": [
+                              {
+                                "allOf": [
+                                  {
+                                    "properties": {
+                                      "account_id": {
+                                        "type": "string"
+                                      },
+                                      "auto_delete": {
+                                        "type": "boolean"
+                                      },
+                                      "auto_delete_date": {
+                                        "type": "string"
+                                      },
+                                      "duration": {
+                                        "type": "integer"
+                                      },
+                                      "external_storage_addr": {
+                                        "type": "string"
+                                      },
+                                      "host_id": {
+                                        "type": "string"
+                                      },
+                                      "id": {
+                                        "type": "integer"
+                                      },
+                                      "instance_id": {
+                                        "type": "string"
+                                      },
+                                      "rc_zone": {
+                                        "type": "string"
+                                      },
+                                      "recording_count": {
+                                        "type": "integer"
+                                      },
+                                      "recording_play_passcode": {
+                                        "type": "string"
+                                      },
+                                      "service_name": {
+                                        "type": "string"
+                                      },
+                                      "share_url": {
+                                        "type": "string"
+                                      },
+                                      "start_time": {
+                                        "format": "date-time",
+                                        "type": "string"
+                                      },
+                                      "topic": {
+                                        "type": "string"
+                                      },
+                                      "total_size": {
+                                        "format": "int64",
+                                        "type": "integer"
+                                      },
+                                      "type": {
+                                        "enum": [
+                                          "1",
+                                          "2",
+                                          "3",
+                                          "4",
+                                          "5",
+                                          "6",
+                                          "7",
+                                          "8",
+                                          "9",
+                                          "99",
+                                          "96"
+                                        ],
+                                        "type": "string"
+                                      },
+                                      "uuid": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "type": "object"
+                                  },
+                                  {
+                                    "allOf": [
+                                      {
+                                        "properties": {
+                                          "recording_files": {
+                                            "items": {
+                                              "allOf": [
+                                                {
+                                                  "properties": {
+                                                    "deleted_time": {
+                                                      "type": "string"
+                                                    },
+                                                    "download_url": {
+                                                      "type": "string"
+                                                    },
+                                                    "file_extension": {
+                                                      "enum": [
+                                                        "MP4",
+                                                        "M4A",
+                                                        "TXT",
+                                                        "VTT",
+                                                        "CSV",
+                                                        "JSON",
+                                                        "JPG"
+                                                      ],
+                                                      "type": "string"
+                                                    },
+                                                    "file_path": {
+                                                      "type": "string"
+                                                    },
+                                                    "file_size": {
+                                                      "type": "number"
+                                                    },
+                                                    "file_type": {
+                                                      "enum": [
+                                                        "MP4",
+                                                        "M4A",
+                                                        "CHAT",
+                                                        "TRANSCRIPT",
+                                                        "CSV",
+                                                        "TB",
+                                                        "CC",
+                                                        "CHAT_MESSAGE",
+                                                        "SUMMARY"
+                                                      ],
+                                                      "type": "string"
+                                                    },
+                                                    "id": {
+                                                      "type": "string"
+                                                    },
+                                                    "meeting_id": {
+                                                      "type": "string"
+                                                    },
+                                                    "play_url": {
+                                                      "type": "string"
+                                                    },
+                                                    "recording_end": {
+                                                      "type": "string"
+                                                    },
+                                                    "recording_start": {
+                                                      "type": "string"
+                                                    },
+                                                    "recording_type": {
+                                                      "enum": [
+                                                        "shared_screen_with_speaker_view(CC)",
+                                                        "shared_screen_with_speaker_view",
+                                                        "shared_screen_with_gallery_view",
+                                                        "active_speaker",
+                                                        "gallery_view",
+                                                        "shared_screen",
+                                                        "audio_only",
+                                                        "audio_transcript",
+                                                        "chat_file",
+                                                        "poll",
+                                                        "host_video",
+                                                        "closed_caption",
+                                                        "timeline",
+                                                        "thumbnail",
+                                                        "audio_interpretation",
+                                                        "summary",
+                                                        "summary_next_steps",
+                                                        "summary_smart_chapters",
+                                                        "sign_interpretation",
+                                                        "production_studio"
+                                                      ],
+                                                      "type": "string"
+                                                    },
+                                                    "status": {
+                                                      "enum": [
+                                                        "completed"
+                                                      ],
+                                                      "type": "string"
+                                                    }
+                                                  },
+                                                  "type": "object"
+                                                }
+                                              ]
+                                            },
+                                            "type": "array"
+                                          }
+                                        },
+                                        "type": "object"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {},
+          "404": {},
+          "429": {}
+        },
+        "security": [
+          {
+            "openapi_authorization": []
+          }
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.zoom.us/v2"
+    }
+  ]
+}

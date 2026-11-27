@@ -36,7 +36,7 @@ import {
   showMoreLabel,
 } from './translations';
 import { ConversationQueueSkeleton } from './conversation_queue_skeleton';
-import { ConversationCard, type ConversationsActionsGroupProps } from '../conversation_card';
+import { ConversationCard } from '../conversation_card';
 import { ConversationCardCompact } from '../conversation_card/conversation_card_compact';
 import { type BaseActionsProps } from '../actions';
 import { ShowMoreFooter } from '../show_more_footer';
@@ -71,7 +71,6 @@ interface ConversationQueueProps {
   onOpenChat: (id: Investigation['id']) => void;
   /** When false, cards are inert and their chat control and menu are disabled. Defaults to true. */
   canOpenInvestigationDetails?: boolean;
-  onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'];
   /** A function, not a value: the URL is per-card and only the caller can resolve it. */
   getChatHref?: (id: Investigation['id']) => string | undefined;
   /** How a decided row was settled; per-card, like `getChatHref`. */
@@ -126,7 +125,6 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     isFiltered = false,
     onClickAction,
     onClickCard,
-    onClickRecommendedAction,
     onOpenChat,
     canOpenInvestigationDetails = true,
     getChatHref,
@@ -204,7 +202,6 @@ export const ConversationQueue = memo<ConversationQueueProps>(
             onClickCard,
             onOpenChat,
             canOpenInvestigationDetails,
-            onClickRecommendedAction,
             chatHref: getChatHref?.(investigation.id),
             canManageEscalations,
             canCloseInvestigation,

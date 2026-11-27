@@ -21,7 +21,7 @@ const mockUseCustomContentHtml = useCustomContentHtml as jest.MockedFunction<
 const defaultProps = {
   services: {} as CustomContentRendererServices,
   embeddableId: 'panel-1',
-  esqlQuery: undefined,
+  esqlQueries: [],
   timeRange: undefined,
   generationVersion: 0,
   savedTemplate: '<p>hi</p>',
@@ -50,6 +50,20 @@ describe('CustomContentComponent', () => {
   it('marks its root as a shared item so reporting can count it', () => {
     const { container } = render(<CustomContentComponent {...defaultProps} />);
     expect(container.querySelector('[data-shared-item]')).not.toBeNull();
+  });
+
+  it('keeps a 200px floor on the panel and its iframe container by default', () => {
+    const { container } = render(<CustomContentComponent {...defaultProps} />);
+    const root = container.querySelector('[data-shared-item]');
+    expect(root).toHaveStyle({ minHeight: '200px' });
+    expect(container.querySelector('iframe')?.parentElement).toHaveStyle({ minHeight: '200px' });
+  });
+
+  it('lets the host lower the floor on the panel and its iframe container', () => {
+    const { container } = render(<CustomContentComponent {...defaultProps} minHeight={0} />);
+    const root = container.querySelector('[data-shared-item]');
+    expect(root).toHaveStyle({ minHeight: '0' });
+    expect(container.querySelector('iframe')?.parentElement).toHaveStyle({ minHeight: '0' });
   });
 
   it('reports loading state to the panel', () => {

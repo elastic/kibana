@@ -74,6 +74,9 @@ export const MAX_BULK_ITEMS = 100;
 /** Maximum length for human-readable name fields (rule name, action policy name). */
 export const MAX_NAME_LENGTH = 256;
 
+/** Maximum length for a rule builder type. Enforced by the rule write schemas and by `registerBuilderType`. */
+export const MAX_BUILDER_TYPE_LENGTH = 64;
+
 /**
  * Maximum length for episode attachment display labels (`episode.label`).
  * Sized for `{ruleName} alert for {groupName}` where each name is at most
@@ -83,6 +86,9 @@ export const MAX_EPISODE_LABEL_LENGTH = MAX_NAME_LENGTH * 2 + 32;
 
 /** Maximum length for human-readable description fields (rule description, action policy description). */
 export const MAX_DESCRIPTION_LENGTH = 1024;
+
+/** Maximum length of an alert reason template. */
+export const MAX_REASON_TEMPLATE_LENGTH = 1024;
 
 /** Maximum length for an external alert `fingerprint`, the caller's own series key. */
 export const MAX_FINGERPRINT_LENGTH = 1024;
@@ -112,6 +118,9 @@ export const MAX_ARTIFACT_DATA_LENGTH = MAX_ARTIFACT_DATA_BYTES;
 
 /** Maximum number of destinations per action policy. */
 export const ACTION_POLICY_MAX_DESTINATIONS = 10;
+
+/** Maximum number of alerts in a test notification payload. */
+export const ACTION_POLICY_TEST_MAX_ALERTS = 100;
 
 /** Maximum number of items any list endpoint returns per page. */
 export const MAX_PER_PAGE = 100;

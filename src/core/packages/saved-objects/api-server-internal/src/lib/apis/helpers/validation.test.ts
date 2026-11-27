@@ -150,7 +150,7 @@ describe('Saved Objects type validation helper', () => {
         typeMigrationVersion: modelVirtualVersion,
         attributes: { foo: 'hi', count: 'lots' },
       });
-      expect(() => helper.validateObjectForUpdate(typeWithUpdate, data)).toThrowError(
+      expect(() => helper.validateObjectForUpdate(typeWithUpdate, data)).toThrow(
         /\[attributes.count\]: expected value of type \[number\]/
       );
     });
@@ -160,7 +160,7 @@ describe('Saved Objects type validation helper', () => {
         typeMigrationVersion: modelVirtualVersion,
         attributes: { foo: 'hi' },
       });
-      expect(() => helper.validateObjectForUpdate(typeWithUpdate, data)).toThrowError(
+      expect(() => helper.validateObjectForUpdate(typeWithUpdate, data)).toThrow(
         /\[attributes.count\]/
       );
     });
@@ -206,9 +206,9 @@ describe('Saved Objects type validation helper', () => {
         expect(() =>
           helper.validateObjectForUpdate(olderUpdateType, v2Doc({ title: 'Ops' }))
         ).not.toThrow();
-        expect(() =>
-          helper.validateObjectForUpdate(olderUpdateType, v2Doc({ title: 1 }))
-        ).toThrowError(/\[attributes.title\]: expected value of type \[string\]/);
+        expect(() => helper.validateObjectForUpdate(olderUpdateType, v2Doc({ title: 1 }))).toThrow(
+          /\[attributes.title\]: expected value of type \[string\]/
+        );
       });
     });
   });

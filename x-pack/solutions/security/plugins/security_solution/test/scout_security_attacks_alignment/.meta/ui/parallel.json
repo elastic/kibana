@@ -1,5 +1,5 @@
 {
-  "sha1": "9d9fa589a86a06d4dbd6357fca8bef2c11324b57",
+  "sha1": "884f20b3ab92a7fc1ce55cf2b9cb2bc7fa8974a9",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -27,8 +27,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_cases.spec.ts",
-        "line": 178,
-        "column": 15
+        "line": 169,
+        "column": 9
       }
     },
     {
@@ -43,7 +43,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_cases.spec.ts",
-        "line": 294,
+        "line": 286,
         "column": 24
       }
     },
@@ -59,7 +59,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_cases.spec.ts",
-        "line": 481,
+        "line": 473,
         "column": 26
       }
     },
@@ -75,7 +75,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_flyout.spec.ts",
-        "line": 38,
+        "line": 31,
         "column": 20
       }
     },
@@ -91,8 +91,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_flyout.spec.ts",
-        "line": 47,
-        "column": 33
+        "line": 40,
+        "column": 7
       }
     },
     {

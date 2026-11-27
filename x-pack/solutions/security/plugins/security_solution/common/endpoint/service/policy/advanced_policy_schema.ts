@@ -1309,7 +1309,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.utilization_limits.cpu',
       {
         defaultMessage:
-          'Restrict Endpoint CPU usage to a percentage of the total system CPU. The range is 20-100%. Values under 20 are ignored and trigger a policy warning. Default: 50.',
+          'Restrict Endpoint CPU usage to a percentage of the total system CPU. For 9.4.9+, 9.5.6+ and 9.6+, the range is 1-100%, but the effective limit is never below 20% of the first 32 CPUs. For earlier versions, the range is 20-100%. Values outside the range are ignored and trigger a policy warning. Default: 100.',
       }
     ),
   },
@@ -1320,7 +1320,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.utilization_limits.cpu',
       {
         defaultMessage:
-          'Restrict Endpoint CPU usage to a percentage of the total system CPU. The range is 20-100%. Values under 20 are ignored and trigger a policy warning. Default: 50.',
+          'Restrict Endpoint CPU usage to a percentage of the total system CPU. For 9.4.9+, 9.5.6+ and 9.6+, the range is 1-100%, but the effective limit is never below 20% of the first 32 CPUs. For earlier versions, the range is 20-100%. Values outside the range are ignored and trigger a policy warning. Default: 50.',
       }
     ),
   },
@@ -3001,7 +3001,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.memory_protection.user_yara_rescan_interval_seconds',
       {
         defaultMessage:
-          'Specify the interval, in seconds, at which memory is re-scanned using custom YARA signatures.',
+          'Specify the interval, in seconds, at which memory is re-scanned using custom YARA signatures. Default: 86400',
       }
     ),
     license: 'enterprise',
@@ -3013,7 +3013,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.memory_protection.user_yara_rescan_interval_seconds',
       {
         defaultMessage:
-          'Specify the interval, in seconds, at which memory is re-scanned using custom YARA signatures.',
+          'Specify the interval, in seconds, at which memory is re-scanned using custom YARA signatures. Default: 86400',
       }
     ),
     license: 'enterprise',
@@ -3025,7 +3025,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.user_yara_rescan_interval_seconds',
       {
         defaultMessage:
-          'Specify the interval, in seconds, at which memory is re-scanned using custom YARA signatures.',
+          'Specify the interval, in seconds, at which memory is re-scanned using custom YARA signatures. Default: 86400',
       }
     ),
     license: 'enterprise',

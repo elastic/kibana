@@ -8,6 +8,7 @@
 // / <reference types="cypress" />
 
 import type { CasePostRequest } from '@kbn/cases-plugin/common';
+import AdmZip from 'adm-zip';
 import execa from 'execa';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -15,11 +16,6 @@ import { REPO_ROOT } from '@kbn/repo-info';
 // This is a Cypress module and only used by Cypress, so disabling "should" be safe
 // eslint-disable-next-line import/no-nodejs-modules
 import { mkdir } from 'node:fs/promises';
-import type { IndexedEndpointHeartbeats } from '../../../../common/endpoint/data_loaders/index_endpoint_hearbeats';
-import {
-  deleteIndexedEndpointHeartbeats,
-  indexEndpointHeartbeats,
-} from '../../../../common/endpoint/data_loaders/index_endpoint_hearbeats';
 import { getHostVmClient } from '../../../../scripts/endpoint/common/vm_services';
 import { setupStackServicesUsingCypressConfig } from './common';
 import type { KibanaKnownUserAccounts } from '../common/constants';
@@ -230,20 +226,6 @@ export const dataLoaders = (
       });
     },
 
-    indexEndpointHeartbeats: async (options: { count?: number; unbilledCount?: number }) => {
-      const { esClient, log } = await setupStackServicesUsingCypressConfig(config);
-      return (await indexEndpointHeartbeats(esClient, log, options.count, options.unbilledCount))
-        .data;
-    },
-
-    deleteIndexedEndpointHeartbeats: async (
-      data: IndexedEndpointHeartbeats['data']
-    ): Promise<null> => {
-      const { esClient } = await stackServicesPromise;
-      await deleteIndexedEndpointHeartbeats(esClient, data);
-      return null;
-    },
-
     indexEndpointRuleAlerts: async (options: { endpointAgentId: string; count?: number }) => {
       const { esClient, log, kbnClient } = await stackServicesPromise;
       return (
@@ -405,19 +387,6 @@ export const dataLoadersForRealEndpoints = (
       return null;
     },
 
-    uploadFileToEndpoint: async ({
-      hostname,
-      srcPath,
-      destPath = '.',
-    }: {
-      hostname: string;
-      srcPath: string;
-      destPath: string;
-    }): Promise<null> => {
-      await getHostVmClient(hostname).transfer(srcPath, destPath);
-      return null;
-    },
-
     installPackagesOnEndpoint: async ({
       hostname,
       packages,
@@ -436,18 +405,17 @@ export const dataLoadersForRealEndpoints = (
       return null;
     },
 
-    readZippedFileContentOnEndpoint: async ({
-      hostname,
+    readZippedFileContent: async ({
       path,
       password,
     }: {
-      hostname: string;
       path: string;
       password?: string;
     }): Promise<string> => {
-      return (
-        await getHostVmClient(hostname).exec(`unzip -p ${password ? `-P ${password} ` : ''}${path}`)
-      ).stdout;
+      return new AdmZip(path)
+        .getEntries()
+        .map((entry) => entry.getData(password).toString('utf8'))
+        .join('');
     },
 
     stopEndpointHost: async (hostName) => {

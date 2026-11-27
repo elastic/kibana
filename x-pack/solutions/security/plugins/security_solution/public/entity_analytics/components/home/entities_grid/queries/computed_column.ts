@@ -16,6 +16,7 @@ import {
 import {
   ESQL_MAX_QUERY_LENGTH,
   ESQL_MAX_RESULT_ROWS,
+  SET_UNMAPPED_NULLIFY,
   buildLookupJoinClause,
   buildRowFieldsSteps,
   buildSortSuffix,
@@ -25,6 +26,7 @@ import {
   fetchInChunks,
 } from './esql';
 import type { ColumnQuerySpec, EnrichedFields, SortPageContext } from './types';
+import { isMissingIndexError } from '../../is_missing_index_error';
 
 /** Each column writes its own queries, since each needs a different trick to be fast. */
 export interface ComputedColumn {
@@ -72,6 +74,7 @@ const buildEmptyRowsQuery = (
   limit: number,
   afterId: string | null = null
 ): string[] => [
+  SET_UNMAPPED_NULLIFY,
   ...buildEntitiesInViewSteps(args),
   ...(valueIds.length ? [`| WHERE NOT ${ENTITY_ID_FIELD} IN (${toList(valueIds)})`] : []),
   ...(afterId != null ? [`| WHERE ${ENTITY_ID_FIELD} > ${escapeStringValue(afterId)}`] : []),
@@ -203,6 +206,7 @@ const fetchSearchedPage = async (
   ctx: SortPageContext
 ): Promise<Row[]> => {
   const matches = await ctx.runQuery([
+    SET_UNMAPPED_NULLIFY,
     ...buildEntitiesInViewSteps(args),
     `| LIMIT ${MAX_ROWS + 1}`,
     ...buildRowFieldsSteps(args),
@@ -216,17 +220,24 @@ const fetchSearchedPage = async (
   );
 };
 
-export const fetchComputedColumnSortPage = (
+export const fetchComputedColumnSortPage = async (
   column: ComputedColumn,
   args: QueryArgs,
   ctx: SortPageContext
 ): Promise<Row[]> => {
-  // searchExpression is KQL and can't go after STATS or LOOKUP JOIN
-  if (args.searchExpression) return fetchSearchedPage(column, args, ctx);
+  try {
+    // searchExpression is KQL and can't go after STATS or LOOKUP JOIN
+    if (args.searchExpression) return await fetchSearchedPage(column, args, ctx);
 
-  return isEmptyFirst(column, args)
-    ? fetchPageEmptyFirst(column, args, ctx)
-    : fetchPageEmptyLast(column, args, ctx);
+    return await (isEmptyFirst(column, args)
+      ? fetchPageEmptyFirst(column, args, ctx)
+      : fetchPageEmptyLast(column, args, ctx));
+  } catch (error) {
+    // No index for the column yet (a space that has never run a detection rule has no alerts
+    // index): every entity's value is empty, as for Anomalies without ML jobs.
+    if (isMissingIndexError(error)) return fetchEmptyColumnSortPage(column, args, ctx);
+    throw error;
+  }
 };
 
 /** A column without data anywhere: every entity in view is empty, so they come by id. */

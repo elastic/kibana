@@ -13,6 +13,7 @@ import {
   ConversationRoundStepType,
   createAskUserQuestionStep,
   internalTools,
+  createModelReasoningStep,
 } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import {
@@ -21,8 +22,9 @@ import {
 } from '@kbn/agent-builder-common/agents/prompts';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import {
+  extractReasoningContent,
   extractTextContent,
-  extractToolCallsWithReasoning,
+  extractToolCallsWithIntent,
   toolIdentifierFromToolCall,
 } from '@kbn/agent-builder-genai-utils/langchain';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
@@ -76,6 +78,7 @@ export const processResearchResponse = (
   { cycle, toolManager }: { cycle: number; toolManager: ToolManager }
 ): ResearchTurn => {
   const text = extractTextContent(message);
+  const modelReasoning = extractReasoningContent(message);
 
   if (!message.tool_calls?.length) {
     // same branch order as before: any text is a handover; no text is an empty response
@@ -91,20 +94,30 @@ export const processResearchResponse = (
       };
     }
     return {
-      stepUpdates: [],
+      stepUpdates: modelReasoning
+        ? [stepUpdates.append(createModelReasoningStep({ reasoning: modelReasoning }))]
+        : [],
       outcome: { type: 'handover', message: text, forceful: false },
       renderState: {},
       pendingToolCallIds: [],
     };
   }
 
-  // strips `_reasoning` out of the args into `reasoning`
-  const toolCalls = extractToolCallsWithReasoning(message);
+  // strips `_intent` out of the args into `intent`
+  const toolCalls = extractToolCallsWithIntent(message);
   const toolCallGroupId = uuidv4();
   const updates: RunStepUpdate[] = [];
   const renderState: ToolRenderStateUpdate = {};
   const seen = new Set<string>();
   const mapping = toolManager.getToolIdMapping();
+
+  if (modelReasoning) {
+    updates.push(
+      stepUpdates.append(
+        createModelReasoningStep({ reasoning: modelReasoning, tool_call_group_id: toolCallGroupId })
+      )
+    );
+  }
 
   if (text.trim().length > 0) {
     updates.push(
@@ -123,18 +136,6 @@ export const processResearchResponse = (
     const toolId = toolIdentifierFromToolCall(toolCall, mapping);
     const isBrowser = toolId.startsWith(BROWSER_TOOL_PREFIX);
     const isDedicated = TOOLS_WITH_DEDICATED_STEP_LIFECYCLE.has(toolId);
-
-    if (toolCall.reasoning && toolCall.reasoning.trim().length > 0) {
-      updates.push(
-        stepUpdates.append(
-          reasoningStep({
-            reasoning: toolCall.reasoning,
-            tool_call_id: toolCall.toolCallId,
-            tool_call_group_id: toolCallGroupId,
-          })
-        )
-      );
-    }
 
     // Every call gets a step so the ToolNode reply — including a schema-validation error for a
     // dedicated-lifecycle tool such as ask_user_question — always has something to resolve and
@@ -157,6 +158,7 @@ export const processResearchResponse = (
       tool_call_group_id: toolCallGroupId,
       tool_origin: meta?.origin,
       tool_type: meta?.type,
+      ...(toolCall.intent ? { intent: toolCall.intent } : {}),
     };
     updates.push(stepUpdates.appendToolCall(step));
 

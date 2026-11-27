@@ -18,7 +18,7 @@
 /**
  * Full automated_triaging.yaml (~15 logical steps across nested foreach).
  * alert trigger, nested foreach, kibana.request, ES search, AI call, host isolation.
- * Source: src/platform/plugins/shared/workflows_management/common/examples/automated_triaging.yaml
+ * Source: x-pack/platform/plugins/shared/workflows_management/common/examples/automated_triaging.yaml
  */
 export const automatedTriagingYaml = `version: '1'
 name: 🔒 AD - Automated Triaging

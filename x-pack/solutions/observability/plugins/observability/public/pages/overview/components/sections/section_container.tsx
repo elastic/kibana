@@ -33,6 +33,7 @@ interface Props {
   initialIsOpen?: boolean;
   appLink?: AppLink;
   showExperimentalBadge?: boolean;
+  hasInnerPanel?: boolean;
 }
 
 export function SectionContainer({
@@ -42,10 +43,12 @@ export function SectionContainer({
   hasError,
   initialIsOpen = true,
   showExperimentalBadge = false,
+  hasInnerPanel = true,
 }: Props) {
   const { http } = useKibana().services;
   const euiAccordionId = useGeneratedHtmlId({ prefix: 'euiAccordion' });
   const prependBasePath = appLink?.prependBasePath !== undefined ? appLink?.prependBasePath : true;
+  const content = hasError ? <ErrorPanel /> : children;
 
   return (
     <EuiPanel color="subdued">
@@ -87,7 +90,13 @@ export function SectionContainer({
       >
         <>
           <EuiSpacer size="s" />
-          <EuiPanel hasBorder={true}>{hasError ? <ErrorPanel /> : <>{children}</>}</EuiPanel>
+          {hasInnerPanel ? (
+            <EuiPanel hasBorder={true} data-test-subj="o11ySectionContainerPanel">
+              {content}
+            </EuiPanel>
+          ) : (
+            content
+          )}
         </>
       </EuiAccordion>
     </EuiPanel>

@@ -45,7 +45,7 @@ export type AnomalySourceDescriptor = SerializableRecord & {
   type: SOURCE_TYPES.ES_ML_ANOMALIES;
 };
 
-export class AnomalySource implements IVectorSource {
+export class AnomalySource implements IVectorSource<AnomalySourceDescriptor> {
   static mlResultsService: MlApi['results'];
   static mlLocator?: LocatorPublic<SerializableRecord>;
 
@@ -229,7 +229,9 @@ export class AnomalySource implements IVectorSource {
     return true;
   }
 
-  renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null {
+  renderSourceSettingsEditor({
+    onChange,
+  }: SourceEditorArgs<AnomalySourceDescriptor>): ReactElement<any> | null {
     return (
       <UpdateAnomalySourceEditor
         onChange={onChange}

@@ -33,6 +33,7 @@ import {
 } from '../lib/rule_executor/otel/rule_execution_telemetry';
 import { DirectorStep } from '../lib/rule_executor/steps/director_step';
 import { StoreAlertEventsStep } from '../lib/rule_executor/steps/store_alert_events';
+import { PublishAlertStatusChangesStep } from '../lib/rule_executor/steps/publish_alert_status_changes_step';
 import {
   EmittedCountersRecorder,
   MetricCollectorFactory,
@@ -46,11 +47,11 @@ export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) 
   /**
    * Middlewares
    */
-  bind(CancellationBoundaryMiddleware).toSelf().inSingletonScope();
-  bind(ApmMiddleware).toSelf().inSingletonScope();
-  bind(ErrorHandlingMiddleware).toSelf().inSingletonScope();
-  bind(RuleExecutionTelemetryMiddleware).toSelf().inSingletonScope();
-  bind(MetricsMiddleware).toSelf().inSingletonScope();
+  bind(CancellationBoundaryMiddleware).toSelf();
+  bind(ApmMiddleware).toSelf();
+  bind(ErrorHandlingMiddleware).toSelf();
+  bind(RuleExecutionTelemetryMiddleware).toSelf();
+  bind(MetricsMiddleware).toSelf();
 
   /**
    * Middleware list via multi-injection.
@@ -59,41 +60,40 @@ export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) 
    * be bound last so it observes true per-step emissions before any other
    * middleware transforms them.
    */
-  bind(RuleExecutionMiddlewaresToken).to(CancellationBoundaryMiddleware).inSingletonScope();
-  bind(RuleExecutionMiddlewaresToken).to(ApmMiddleware).inSingletonScope();
-  bind(RuleExecutionMiddlewaresToken).to(ErrorHandlingMiddleware).inSingletonScope();
-  bind(RuleExecutionMiddlewaresToken).to(RuleExecutionTelemetryMiddleware).inSingletonScope();
-  bind(RuleExecutionMiddlewaresToken).to(MetricsMiddleware).inSingletonScope();
+  bind(RuleExecutionMiddlewaresToken).to(CancellationBoundaryMiddleware);
+  bind(RuleExecutionMiddlewaresToken).to(ApmMiddleware);
+  bind(RuleExecutionMiddlewaresToken).to(ErrorHandlingMiddleware);
+  bind(RuleExecutionMiddlewaresToken).to(RuleExecutionTelemetryMiddleware);
+  bind(RuleExecutionMiddlewaresToken).to(MetricsMiddleware);
 
   /**
    * OTel telemetry (one meter per process)
    */
-  bind(RuleExecutionTelemetry).toSelf().inSingletonScope();
+  bind(RuleExecutionTelemetry).toSelf();
   bind(RuleExecutionTelemetryToken).toService(RuleExecutionTelemetry);
 
   /**
    * Metrics collection primitives.
    */
-  bind(MetricCollectorFactoryToken)
-    .toDynamicValue(() => new MetricCollectorFactory())
-    .inSingletonScope();
-  bind(MetricRecorderToken).to(EmittedCountersRecorder).inSingletonScope();
-  bind(MetricRecorderToken).to(PersistedRuleEventsRecorder).inSingletonScope();
+  bind(MetricCollectorFactoryToken).toConstantValue(new MetricCollectorFactory());
+  bind(MetricRecorderToken).to(EmittedCountersRecorder);
+  bind(MetricRecorderToken).to(PersistedRuleEventsRecorder);
 
   /**
    * Rule execution steps via multi-injection.
    * Binding order defines execution order.
    */
-  bind(RuleExecutionStepsToken).to(WaitForResourcesStep).inSingletonScope();
+  bind(RuleExecutionStepsToken).to(WaitForResourcesStep);
   bind(RuleExecutionStepsToken).to(FetchRuleStep).inRequestScope();
-  bind(RuleExecutionStepsToken).to(ValidateRuleStep).inSingletonScope();
+  bind(RuleExecutionStepsToken).to(ValidateRuleStep);
   bind(RuleExecutionStepsToken).to(FetchActiveGroupsStep).inRequestScope();
   bind(RuleExecutionStepsToken).to(ExecuteRuleQueryStep).inRequestScope();
-  bind(RuleExecutionStepsToken).to(CreateAlertEventsStep).inSingletonScope();
+  bind(RuleExecutionStepsToken).to(CreateAlertEventsStep);
   bind(RuleExecutionStepsToken).to(ClassifyAbsentGroupsStep).inRequestScope();
-  bind(RuleExecutionStepsToken).to(DirectorStep).inSingletonScope();
-  bind(RuleExecutionStepsToken).to(SuppressRedundantNoDataEventsStep).inSingletonScope();
-  bind(RuleExecutionStepsToken).to(StoreAlertEventsStep).inSingletonScope();
+  bind(RuleExecutionStepsToken).to(DirectorStep);
+  bind(RuleExecutionStepsToken).to(SuppressRedundantNoDataEventsStep);
+  bind(RuleExecutionStepsToken).to(StoreAlertEventsStep);
+  bind(RuleExecutionStepsToken).to(PublishAlertStatusChangesStep).inRequestScope();
 
   bind(RuleExecutionPipeline).toSelf().inRequestScope();
 };

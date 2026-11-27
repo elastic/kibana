@@ -459,6 +459,44 @@ describe('EsqlSource', () => {
     });
   });
 
+  describe('getEmptyColumnNames', () => {
+    it('returns the names of the columns marked as empty, in column order', async () => {
+      const source = await EsqlSource.create({
+        query: 'FROM logs-*',
+        resultColumns: [
+          { ...makeColumn('empty_a', 'string'), isNull: true },
+          makeColumn('host', 'string'),
+          { ...makeColumn('empty_b', 'string'), isNull: true },
+        ],
+      });
+
+      expect(source.getEmptyColumnNames()).toEqual(['empty_a', 'empty_b']);
+    });
+
+    it('returns an empty list when no column is empty', async () => {
+      const source = await EsqlSource.create({
+        query: 'FROM logs-*',
+        resultColumns: [makeColumn('host', 'string')],
+      });
+
+      expect(source.getEmptyColumnNames()).toEqual([]);
+    });
+
+    it('follows the columns given to withColumns', async () => {
+      const original = await EsqlSource.create({
+        query: 'FROM logs-*',
+        resultColumns: [makeColumn('host', 'string')],
+      });
+      const updated = original.withColumns([
+        makeColumn('host', 'string'),
+        { ...makeColumn('empty', 'string'), isNull: true },
+      ]);
+
+      expect(original.getEmptyColumnNames()).toEqual([]);
+      expect(updated.getEmptyColumnNames()).toEqual(['empty']);
+    });
+  });
+
   describe('withColumns', () => {
     it('returns a new instance with the same identity and updated result columns', async () => {
       const originalCols = [makeColumn('message', 'string')];
@@ -829,6 +867,54 @@ describe('EsqlSource', () => {
       await EsqlSource.create({ query: 'FROM no-poison', http });
 
       expect(postedPathsOf(http)).toContain(SOURCE_INFO_ROUTE);
+    });
+  });
+
+  describe('forDataset', () => {
+    // Like the real route, the time field is only found when the query itself names it.
+    const createHttp = (timeField?: string) =>
+      ({
+        post: jest.fn(async (path: string, { body }: { body: string }) =>
+          path === TIMEFIELD_ROUTE
+            ? { timeField: JSON.parse(body).query.includes('?_tstart') ? timeField : undefined }
+            : {
+                columns: [
+                  { name: 'sale_date', esType: 'date' },
+                  { name: 'amount', esType: 'long' },
+                ],
+              }
+        ),
+      } as unknown as HttpStart);
+
+    const bodyPostedTo = (http: HttpStart, route: string) =>
+      JSON.parse(
+        (http.post as jest.Mock).mock.calls.find(([path]) => path === route)?.[1].body ?? '{}'
+      );
+
+    it('takes the time field the whole query names and the schema from the source command alone', async () => {
+      const http = createHttp('sale_date');
+      const query =
+        'FROM for-dataset-sales | WHERE sale_date >= ?_tstart | STATS total = SUM(amount)';
+
+      const source = await EsqlSource.forDataset({ query, http });
+
+      expect(bodyPostedTo(http, SOURCE_INFO_ROUTE).query).toBe('FROM for-dataset-sales');
+      expect(source.timeFieldName).toBe('sale_date');
+      // The query names the time field, so there is nothing to look up.
+      expect(postedPathsOf(http)).not.toContain(TIMEFIELD_ROUTE);
+    });
+
+    it('asks for the schema with the project routing of the query over the one of the picker', async () => {
+      const http = createHttp();
+
+      const source = await EsqlSource.forDataset({
+        query: 'SET project_routing = "_alias:project-a"; FROM for-dataset-routing | LIMIT 1',
+        projectRouting: 'project-b',
+        http,
+      });
+
+      expect(source.projectRouting).toBe('_alias:project-a');
+      expect(bodyPostedTo(http, SOURCE_INFO_ROUTE).projectRouting).toBe('_alias:project-a');
     });
   });
 

@@ -122,6 +122,7 @@ apiTest.describe(
         expect(resourceMetadataUrl!.pathname).toBe(
           `/.well-known/oauth-protected-resource/${MCP_ENDPOINT}`
         );
+        expect(response.headers.get('www-authenticate')).not.toContain('error=');
 
         const body = await response.json();
         expect(body).toStrictEqual({

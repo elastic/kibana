@@ -22,8 +22,12 @@ export const transformConnectorResponse = (
     isConnectorTypeDeprecated,
     authMode,
     isInboundEventsEnabled,
+    specVersion,
   }: Connector,
-  { includeInboundEventsField }: { includeInboundEventsField: boolean }
+  {
+    includeInboundEventsField,
+    includeSpecVersionField,
+  }: { includeInboundEventsField: boolean; includeSpecVersionField: boolean }
 ): ConnectorResponseV1 => ({
   id,
   name,
@@ -38,4 +42,5 @@ export const transformConnectorResponse = (
   ...(includeInboundEventsField && isInboundEventsEnabled !== undefined
     ? { is_inbound_events_enabled: isInboundEventsEnabled }
     : {}),
+  ...(includeSpecVersionField && specVersion !== undefined ? { spec_version: specVersion } : {}),
 });

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { IconType } from '@elastic/eui';
+
 /**
  * Release stage of a visualization type
  */
@@ -18,8 +20,8 @@ export type VisualizationStage = 'experimental' | 'beta' | 'production';
 export interface VisualizationListItem {
   /** Optional error message if the visualization failed to load */
   error?: string;
-  /** Icon identifier for the visualization type */
-  icon?: string;
+  /** Icon of the visualization type: an EUI icon name or an icon component */
+  icon?: IconType;
   /** Image URL for custom visualization type icons */
   image?: string;
   /** Release stage of the visualization type */

@@ -7,22 +7,25 @@
 
 import type {
   ConversationOriginType,
-  RoundCompleteEvent,
   SurfacePayload,
+  VersionedAttachment,
 } from '@kbn/agent-builder-common';
-import type { AttachmentSurfaceCompositionContext } from '@kbn/agent-builder-server/attachments';
+import type { AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { IBasePath } from '@kbn/core/server';
 import type { IsomerPluginStart } from '@kbn/isomer-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentServiceStart } from '../attachments';
+import { getPublicKibanaUrl } from '../../utils/get_kibana_url';
 import { buildComposition } from './composition';
 import { slackSurface } from './slack';
 import type { SurfaceRenderer } from './types';
 
 export interface SurfacesService {
-  /** Renders the round's surface payload, or resolves to nothing when unavailable or rendering fails. */
+  /** Renders a response message for its surface, or resolves to nothing when unavailable or rendering fails. */
   renderPayload(
-    event: RoundCompleteEvent,
-    options: { originType?: ConversationOriginType } & AttachmentSurfaceCompositionContext
+    response: { message: string; attachments: VersionedAttachment[] },
+    options: { originType?: ConversationOriginType; agentId: string } & AttachmentFormatContext
   ): Promise<SurfacePayload | undefined>;
 }
 
@@ -30,29 +33,38 @@ export class SurfacesServiceImpl implements SurfacesService {
   private readonly attachmentsService: AttachmentServiceStart;
   private readonly logger: Logger;
   private readonly isomer: IsomerPluginStart;
+  private readonly basePath: IBasePath;
+  private readonly cloud: CloudSetup | undefined;
   private readonly surfaceRenderers: SurfaceRenderer[] = [slackSurface];
 
   constructor({
     attachmentsService,
     logger,
     isomer,
+    basePath,
+    cloud,
   }: {
     attachmentsService: AttachmentServiceStart;
     logger: Logger;
     isomer: IsomerPluginStart;
+    basePath: IBasePath;
+    cloud: CloudSetup | undefined;
   }) {
     this.attachmentsService = attachmentsService;
     this.logger = logger;
     this.isomer = isomer;
+    this.basePath = basePath;
+    this.cloud = cloud;
   }
 
   async renderPayload(
-    { data: { round, attachments = [] } }: RoundCompleteEvent,
+    { message, attachments }: { message: string; attachments: VersionedAttachment[] },
     {
       originType,
+      agentId,
       request,
       spaceId,
-    }: { originType?: ConversationOriginType } & AttachmentSurfaceCompositionContext
+    }: { originType?: ConversationOriginType; agentId: string } & AttachmentFormatContext
   ): Promise<SurfacePayload | undefined> {
     const renderer = this.surfaceRenderers.find(({ id }) => id === originType);
 
@@ -62,17 +74,20 @@ export class SurfacesServiceImpl implements SurfacesService {
 
     try {
       const runtime = await this.isomer.getRuntime();
+      const kibanaUrl = getPublicKibanaUrl(this.basePath, this.cloud, spaceId);
 
       const composition = await buildComposition({
-        round,
+        message,
         attachments,
         attachmentsService: this.attachmentsService,
-        context: { request, spaceId },
+        context: { request, spaceId, agentId },
         logger: this.logger,
         runtime,
       });
 
-      return composition.body.length > 0 ? renderer.render(composition, runtime) : undefined;
+      return composition.body.length > 0
+        ? renderer.render(composition, runtime, { baseUrl: kibanaUrl })
+        : undefined;
     } catch (error) {
       this.logger.error(`Failed to render the ${renderer.id} surface payload: ${error.message}`);
 

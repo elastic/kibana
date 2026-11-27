@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import type { EntityDefinitionWithoutId } from '@kbn/entity-store/common';
 import {
   INVENTORY_DEFINITION_FIXTURES,
+  entityIdFixture,
   hostLikeFixture,
   k8sDeploymentFixture,
   k8sNodeFixture,
+  rankedEntityIdFixture,
 } from '../__fixtures__/definitions';
 import { InventoryDefinitionError } from './errors';
 import { resolveIdentityPlan } from './identity';
@@ -26,6 +29,37 @@ describe('resolveIdentityPlan', () => {
     [hostLikeFixture.type, hostLikeFixture, ['host.id', 'host.name']],
   ] as const)('resolves the grouping fields of %s', (_type, definition, groupingFields) => {
     expect(resolveIdentityPlan(definition).groupingFields).toEqual(groupingFields);
+  });
+
+  it.each([
+    [
+      k8sDeploymentFixture.type,
+      k8sDeploymentFixture,
+      [['kubernetes.namespace', 'kubernetes.deployment.name']],
+    ],
+    [k8sNodeFixture.type, k8sNodeFixture, [['kubernetes.node.name']]],
+    [hostLikeFixture.type, hostLikeFixture, [['host.id'], ['host.name']]],
+  ] as const)(
+    'lists the identity compositions of %s as field lists',
+    (_type, definition, compositions) => {
+      expect(resolveIdentityPlan(definition).compositions).toEqual(compositions);
+    }
+  );
+
+  // The store rejects a conditional branch at registration; the inventory does not re-check it.
+  it('takes the compositions of a ranking without an unconditional branch from the store', () => {
+    const definition: EntityDefinitionWithoutId = {
+      ...hostLikeFixture,
+      identityField: {
+        ...hostLikeFixture.identityField,
+        euidRanking: {
+          branches: [
+            { when: { field: 'host.id', exists: true }, ranking: [[{ field: 'host.id' }]] },
+          ],
+        },
+      },
+    };
+    expect(resolveIdentityPlan(definition).compositions).toEqual([['host.id']]);
   });
 
   it.each([
@@ -54,6 +88,24 @@ describe('resolveIdentityPlan', () => {
     'reads the helper columns of %s from the id evaluation',
     (_type, definition, names) => {
       expect(resolveIdentityPlan(definition).helperColumns).toEqual(names);
+    }
+  );
+
+  it.each(
+    [entityIdFixture, rankedEntityIdFixture].map((definition) => [definition.type, definition])
+  )(
+    'gives %s a raw column of entity.id, which the id evaluation overwrites',
+    (_type, definition) => {
+      expect(resolveIdentityPlan(definition).rawIdentityColumns).toEqual(
+        new Map([['entity.id', 'raw:entity.id']])
+      );
+    }
+  );
+
+  it.each(INVENTORY_DEFINITION_FIXTURES.map((definition) => [definition.type, definition]))(
+    'gives %s no raw column when the id evaluation overwrites no grouping field',
+    (_type, definition) => {
+      expect(resolveIdentityPlan(definition).rawIdentityColumns.size).toBe(0);
     }
   );
 

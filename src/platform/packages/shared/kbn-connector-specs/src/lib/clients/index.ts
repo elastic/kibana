@@ -12,6 +12,7 @@ import type { ClientTypeSpecs } from './client_registry';
 import { mongodbClientType } from './mongodb_client_type';
 import { mssqlClientType } from './mssql';
 import { mysqlClientType } from './mysql';
+import { redisClientType } from './redis';
 
 export type {
   ClientTypeSpec,
@@ -30,4 +31,5 @@ export const clientTypes: ClientTypeSpecs = {
   mongodb: mongodbClientType,
   mssql: mssqlClientType,
   mysql: mysqlClientType,
+  redis: redisClientType,
 };

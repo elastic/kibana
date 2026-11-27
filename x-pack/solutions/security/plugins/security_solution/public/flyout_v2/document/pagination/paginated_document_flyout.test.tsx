@@ -50,6 +50,27 @@ describe('PaginatedDocumentFlyout', () => {
     );
   });
 
+  it('writes the history title reported by the wrapper into the store', () => {
+    const store = createPaginationStore();
+    act(() => {
+      store.setState({
+        flyoutDocumentIndex: 0,
+        flyoutDocumentId: 'alert-1',
+        flyoutDocumentIndexName: 'index-1',
+      });
+    });
+    renderWithStore(store);
+    const { onHistoryTitleResolved } = mockDocumentFlyoutWrapper.mock.calls.at(-1)?.[0] as {
+      onHistoryTitleResolved: (title: string) => void;
+    };
+
+    act(() => {
+      onHistoryTitleResolved('Alert: rule A');
+    });
+
+    expect(store.getSnapshot().flyoutHistoryTitle).toBe('Alert: rule A');
+  });
+
   it('shows a loading state instead of the previous document while the next id is unresolved', () => {
     const store = createPaginationStore();
     act(() => {

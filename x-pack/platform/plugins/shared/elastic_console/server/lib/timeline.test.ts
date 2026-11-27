@@ -10,6 +10,7 @@ import {
   ConversationRoundStepType,
   EventActorType,
   TimelineEventType,
+  TimelineTriggerType,
   ToolResultType,
   type ConversationEvent,
   type ConversationRound,
@@ -393,6 +394,31 @@ describe('reconcileEvents', () => {
     expect(index).toBeGreaterThan(-1);
     expect(events[index - 1].id).toBe('early::execution_terminated');
     expect(events[index + 1].id).toBe('late::user_message');
+  });
+
+  it('keeps the stored agent_message of a regenerated round, and its run keeps that trigger type', () => {
+    const round = createRound({ id: 'r1' });
+    const reportActor = { type: EventActorType.agent, id: 'child-agent', username: 'child-agent' };
+    const storedEvents = eventsFromRounds([round], ctx).map((event) =>
+      event.id === 'r1::user_message'
+        ? { ...event, type: TimelineEventType.agentMessage, actor: reportActor }
+        : event
+    );
+
+    const events = reconcileEvents({
+      storedEvents,
+      rounds: [round],
+      visibleRoundIds: new Set(['r1']),
+      ctx,
+    });
+
+    expect(events.find((event) => event.id === 'r1::user_message')).toMatchObject({
+      type: TimelineEventType.agentMessage,
+      actor: reportActor,
+    });
+    expect(events.find((event) => event.id === 'r1::execution_started')).toMatchObject({
+      data: { trigger_type: TimelineTriggerType.agentMessage },
+    });
   });
 
   it('keeps a stored HITL block untouched when the caller submits its flat round', () => {

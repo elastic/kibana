@@ -8,13 +8,10 @@
 import { pageObjects as svlPlatformPageObjects } from '@kbn/test-suites-xpack-platform/serverless/functional/page_objects';
 import { searchSharedPageObjects } from '../../../page_objects';
 import { SvlSearchLandingPageProvider } from './svl_search_landing_page';
-import { SvlSearchConnectorsPageProvider } from './svl_search_connectors_page';
-
 export const pageObjects = {
   ...svlPlatformPageObjects,
   // Search Solution shared FTR page objects
   ...searchSharedPageObjects,
   // Search Solution serverless FTR page objects
-  svlSearchConnectorsPage: SvlSearchConnectorsPageProvider,
   svlSearchLandingPage: SvlSearchLandingPageProvider,
 };

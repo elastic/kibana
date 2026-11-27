@@ -108,14 +108,15 @@ export interface InjectedMetadata {
   };
   externalUrl: { policy: InjectedMetadataExternalUrlPolicy[] };
   apmConfig: Record<string, unknown> | null;
+  edotBrowserConfig: { url: string; headers?: Record<string, string> } | null;
   uiPlugins: InjectedMetadataPlugin[];
   legacyMetadata: {
     uiSettings: {
-      defaults: Record<string, any>; // unreferencing UiSettingsParams here
+      defaults: Record<string, any>; // unreferencing UiSettingsRuntimeEntry here
       user: Record<string, any>; // unreferencing UserProvidedValues here
     };
     globalUiSettings: {
-      defaults: Record<string, any>; // unreferencing UiSettingsParams here
+      defaults: Record<string, any>; // unreferencing UiSettingsRuntimeEntry here
       user: Record<string, any>; // unreferencing UserProvidedValues here
     };
   };

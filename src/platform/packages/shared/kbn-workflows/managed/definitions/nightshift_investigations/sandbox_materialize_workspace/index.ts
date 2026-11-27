@@ -15,7 +15,7 @@ export const NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID =
 
 /**
  * Pre-execution workflow that allocates the investigator sandbox once, then
- * writes Cortex, Semantic Memory, and the decision trees into that workspace in
+ * writes Wiki, Semantic Memory, and the decision trees into that workspace in
  * parallel.
  *
  * Agent Builder's beforeAgent hook runs `workflow_ids` on every execution;

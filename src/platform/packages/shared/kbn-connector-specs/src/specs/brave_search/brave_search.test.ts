@@ -109,7 +109,7 @@ describe('BraveSearchConnector', () => {
       await BraveSearchConnector.actions.webSearch.handler(mockContext, {
         q: 'test query',
         count: 10,
-        offset: 10,
+        offset: 9,
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(
@@ -118,7 +118,7 @@ describe('BraveSearchConnector', () => {
           params: {
             q: 'test query',
             count: 10,
-            offset: 10,
+            offset: 9,
           },
           headers: {
             Accept: 'application/json',
@@ -126,6 +126,13 @@ describe('BraveSearchConnector', () => {
           },
         }
       );
+    });
+
+    it('accepts an offset of up to 9 pages and rejects anything above it', () => {
+      const { input } = BraveSearchConnector.actions.webSearch;
+
+      expect(input.parse({ q: 'test query', offset: 9 })).toMatchObject({ offset: 9 });
+      expect(() => input.parse({ q: 'test query', offset: 10 })).toThrow();
     });
 
     it('should handle response with no web results', async () => {

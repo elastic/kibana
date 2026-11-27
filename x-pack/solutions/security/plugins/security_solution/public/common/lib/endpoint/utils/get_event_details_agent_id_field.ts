@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-search-strategy';
 import { parseEcsFieldPath } from './parse_ecs_field_path';
 import { getAlertDetailsFieldValue } from './get_event_details_field_values';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';

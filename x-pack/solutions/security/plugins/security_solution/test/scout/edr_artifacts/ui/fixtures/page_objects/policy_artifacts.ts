@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout-security';
+import { euiSelectors } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 import { TRUSTED_APP_HASH } from '../artifact_tabs_test_data';
 
@@ -82,6 +83,8 @@ export class PolicyArtifactsPage {
   readonly blocklistOperatorSelect: Locator;
   readonly blocklistValueInput: Locator;
   readonly blocklistValuesInput: Locator;
+  readonly eventFiltersValueInput: Locator;
+  readonly eventFiltersValueOptionsList: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.emptyUnexisting = this.page.testSubj.locator('policy-artifacts-empty-unexisting');
@@ -114,6 +117,22 @@ export class PolicyArtifactsPage {
     );
     this.blocklistValueInput = this.page.testSubj.locator('blocklist-form-value-input');
     this.blocklistValuesInput = this.page.testSubj.locator('blocklist-form-values-input');
+    this.eventFiltersValueInput = this.page.testSubj
+      .locator('valuesAutocompleteMatch')
+      .getByRole('combobox');
+    // EUI renders the options list in a portal, outside the combo box.
+    this.eventFiltersValueOptionsList = this.page.locator(
+      euiSelectors.comboBox.optionsListFor('valuesAutocompleteMatch')
+    );
+  }
+
+  eventFiltersValueOptions(): Locator {
+    return this.eventFiltersValueOptionsList.getByRole('option');
+  }
+
+  /** EUI shows this hint only once the list has loaded and no option matches `value`. */
+  eventFiltersValueNoMatchHint(value: string): Locator {
+    return this.eventFiltersValueOptionsList.getByText(`Add ${value} as a custom option`);
   }
 
   criteria(selector: string): Locator {
@@ -187,25 +206,29 @@ export class PolicyArtifactsPage {
     await this.page.testSubj.locator(fields.description).fill(description);
   }
 
-  async fillCreateForm(kind: PolicyArtifactKind) {
+  /**
+   * Fills the create form with the type's default condition. `name` overrides
+   * the default title for suites that need a unique item per test.
+   */
+  async fillCreateForm(kind: PolicyArtifactKind, name?: string) {
     switch (kind) {
       case 'trustedApps':
-        await this.fillTrustedAppsForm();
+        await this.fillTrustedAppsForm(name);
         return;
       case 'eventFilters':
-        await this.fillEventFiltersForm();
+        await this.fillEventFiltersForm(name);
         return;
       case 'blocklists':
-        await this.fillBlocklistForm();
+        await this.fillBlocklistForm(name);
         return;
       case 'hostIsolationExceptions':
-        await this.fillHostIsolationExceptionsForm();
+        await this.fillHostIsolationExceptionsForm(name);
         return;
       case 'trustedDevices':
-        await this.fillTrustedDevicesForm();
+        await this.fillTrustedDevicesForm(name);
         return;
       case 'endpointExceptions':
-        await this.fillEndpointExceptionsForm();
+        await this.fillEndpointExceptionsForm(name);
     }
   }
 
@@ -220,10 +243,10 @@ export class PolicyArtifactsPage {
     await combo.setSelectedOptions([value], { timeout: 10_000 });
   }
 
-  private async fillTrustedAppsForm() {
+  private async fillTrustedAppsForm(name = 'Trusted application name') {
     await this.fillNameAndDescription(
       'trustedApps',
-      'Trusted application name',
+      name,
       'This is the trusted application description'
     );
     await this.page.testSubj
@@ -237,23 +260,62 @@ export class PolicyArtifactsPage {
       .fill(TRUSTED_APP_HASH.toUpperCase());
   }
 
-  private async fillEventFiltersForm() {
-    await this.fillNameAndDescription(
-      'eventFilters',
-      'Event filter name',
-      'This is the event filter description'
-    );
+  private async fillEventFiltersForm(name = 'Event filter name') {
+    await this.fillNameAndDescription('eventFilters', name, 'This is the event filter description');
     await this.fillComboBox('fieldAutocompleteComboBox', '@timestamp');
     await this.fillComboBox('valuesAutocompleteMatch', '1234', true);
     await this.page.testSubj.locator('eventFilters-form-description-input').click();
   }
 
-  private async fillBlocklistForm() {
-    await this.fillNameAndDescription(
-      'blocklists',
-      'Blocklist name',
-      'This is the blocklist description'
-    );
+  /**
+   * Swaps the field of the single event filters condition in the open
+   * flyout; the builder clears the old value when the field changes.
+   */
+  async replaceEventFiltersCondition(field: string, value: string) {
+    // The form shows a loader until the field list loads. Driving the combo
+    // before it renders makes the helper clear the field first, and the
+    // builder then re-fills the edited item's original field.
+    await this.page.testSubj.locator('fieldAutocompleteComboBox').waitFor({ state: 'visible' });
+    await this.fillComboBox('fieldAutocompleteComboBox', field);
+    await this.fillComboBox('valuesAutocompleteMatch', value, true);
+    await this.page.testSubj.locator('eventFilters-form-description-input').click();
+  }
+
+  /**
+   * Types at the end of the event filters condition value with real key
+   * presses. The combo box shows the selected value as plain text, so the
+   * typed text appends to it; the EUI helper clears the input first.
+   */
+  async typeInEventFiltersValue(text: string) {
+    await this.openEventFiltersValueList();
+    await this.eventFiltersValueInput.press('End');
+    await this.eventFiltersValueInput.pressSequentially(text);
+  }
+
+  /**
+   * Focusing the combo box opens its list and re-focuses the input on the
+   * next frame, which moves the caret; keys sent before that land elsewhere.
+   */
+  private async openEventFiltersValueList() {
+    await this.eventFiltersValueInput.click();
+    await this.eventFiltersValueOptionsList.waitFor({ state: 'visible' });
+  }
+
+  async pressInEventFiltersValue(key: string) {
+    await this.eventFiltersValueInput.press(key);
+  }
+
+  /**
+   * Empties the event filters condition value with select-all and Backspace,
+   * as a user does: the builder renders this combo box without a clear button.
+   */
+  async clearEventFiltersValue() {
+    await this.eventFiltersValueInput.press('ControlOrMeta+A');
+    await this.eventFiltersValueInput.press('Backspace');
+  }
+
+  private async fillBlocklistForm(name = 'Blocklist name') {
+    await this.fillNameAndDescription('blocklists', name, 'This is the blocklist description');
     await this.blocklistFieldSelect.click();
     await this.page.testSubj.locator('blocklist-form-file.hash.*').click();
     await this.fillComboBox('blocklist-form-values-input', TRUSTED_APP_HASH.toUpperCase(), true);
@@ -341,19 +403,19 @@ export class PolicyArtifactsPage {
     await this.page.testSubj.locator('blocklist-form-name-input').click();
   }
 
-  private async fillHostIsolationExceptionsForm() {
+  private async fillHostIsolationExceptionsForm(name = 'Host Isolation exception name') {
     await this.fillNameAndDescription(
       'hostIsolationExceptions',
-      'Host Isolation exception name',
+      name,
       'This is the host isolation exception description'
     );
     await this.page.testSubj.locator('hostIsolationExceptions-form-ip-input').fill('1.1.1.1');
   }
 
-  private async fillTrustedDevicesForm() {
+  private async fillTrustedDevicesForm(name = 'Trusted device name') {
     await this.fillNameAndDescription(
       'trustedDevices',
-      'Trusted device name',
+      name,
       'This is the trusted device description'
     );
     // OS is an EuiComboBox; field is an EuiSuperSelect. Both render options in
@@ -365,10 +427,10 @@ export class PolicyArtifactsPage {
     await this.fillComboBox('trustedDevices-form-entry0valueField', 'test-host', true);
   }
 
-  private async fillEndpointExceptionsForm() {
+  private async fillEndpointExceptionsForm(name = 'Endpoint exception name') {
     await this.fillNameAndDescription(
       'endpointExceptions',
-      'Endpoint exception name',
+      name,
       'This is the endpoint exception description'
     );
     await this.fillComboBox('fieldAutocompleteComboBox', 'agent.version');

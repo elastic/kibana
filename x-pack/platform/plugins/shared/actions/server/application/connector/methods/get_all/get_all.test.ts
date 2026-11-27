@@ -416,6 +416,7 @@ describe('getAll()', () => {
           return {
             sandboxSupportedAuthTypes: ['bearer', 'oauth_authorization_code'],
             isSystemActionType: false,
+            getSandboxHosts: () => ['api.github.com'],
           };
         }
         return { sandboxSupportedAuthTypes: [], isSystemActionType: false };
@@ -465,12 +466,63 @@ describe('getAll()', () => {
       actionTypeRegistry.get = jest.fn((id: string) => ({
         sandboxSupportedAuthTypes: id === '.github' ? ['bearer'] : [],
         isSystemActionType: false,
+        getSandboxHosts: () => ['api.github.com'],
       })) as unknown as ActionTypeRegistry['get'];
 
       const result = await actionsClient.getAll({ sandboxCapableOnly: true });
 
       expect(result.map(({ id }) => id)).toEqual(['pre-github']);
       expect(result[0]).not.toHaveProperty('config');
+    });
+
+    test('leaves out a sandbox-capable connector whose sandbox hosts are all invalid', async () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 2,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: 'http-valid',
+            type: 'action',
+            attributes: {
+              name: 'Valid host',
+              actionTypeId: '.http',
+              isMissingSecrets: false,
+              config: { url: 'https://api.example.com' },
+            },
+            score: 1,
+            references: [],
+          },
+          {
+            id: 'http-ipv6',
+            type: 'action',
+            attributes: {
+              name: 'IPv6 host',
+              actionTypeId: '.http',
+              isMissingSecrets: false,
+              config: { url: 'https://[::1]:9200' },
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      });
+      scopedClusterClient.asInternalUser.search.mockResponse(
+        // @ts-expect-error not full search response
+        { aggregations: { 'http-valid': { doc_count: 0 }, 'http-ipv6': { doc_count: 0 } } }
+      );
+      actionTypeRegistry.has = jest.fn(() => true);
+      actionTypeRegistry.get = jest.fn(() => ({
+        isSandboxCapable: () => true,
+        isSystemActionType: false,
+        getSandboxHosts: ({ config }: { config: Record<string, unknown> }) => [
+          new URL(config.url as string).hostname,
+        ],
+      })) as unknown as ActionTypeRegistry['get'];
+
+      const result = await actionsClient.getAll({ sandboxCapableOnly: true });
+
+      expect(result.map(({ id }) => id)).toEqual(['http-valid']);
     });
 
     test('get system actions correctly', async () => {
@@ -1513,6 +1565,78 @@ describe('getAll()', () => {
       const connectorWithoutAuthMode = result.find((c) => c.id === 'testWithoutAuthMode');
       expect(connectorWithoutAuthMode).toBeDefined();
       expect(connectorWithoutAuthMode!.authMode).toBe('shared');
+    });
+
+    test('returns the pinned specVersion of saved object connectors', async () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 2,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: 'pinned',
+            type: 'action',
+            attributes: {
+              name: 'pinned',
+              actionTypeId: '.abuseipdb',
+              isMissingSecrets: false,
+              config: {},
+              specVersion: '1.3',
+            },
+            score: 1,
+            references: [],
+          },
+          {
+            id: 'unpinned',
+            type: 'action',
+            attributes: {
+              name: 'unpinned',
+              actionTypeId: '.abuseipdb',
+              isMissingSecrets: false,
+              config: {},
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      });
+      scopedClusterClient.asInternalUser.search.mockResponse({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { hits: [] },
+        aggregations: {
+          pinned: { doc_count: 0 },
+          unpinned: { doc_count: 0 },
+        },
+      });
+
+      actionsClient = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        authTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        inMemoryConnectors: [],
+        connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+      });
+
+      const result = await actionsClient.getAll();
+
+      const pinnedConnector = result.find(({ id }) => id === 'pinned');
+      const unpinnedConnector = result.find(({ id }) => id === 'unpinned');
+      expect(pinnedConnector?.specVersion).toBe('1.3');
+      expect(unpinnedConnector).toBeDefined();
+      expect(unpinnedConnector).not.toHaveProperty('specVersion');
     });
 
     test('always includes authMode in results', async () => {

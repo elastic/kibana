@@ -14407,6 +14407,38 @@ if (sourceFilePath === 'authorization.ts') {
                 "api:securitySolution-readBlocklist",
                 "ui:siemV5/readBlocklist",
               ],
+              "custom_yara_signatures_all": Array [
+                "login:",
+                "api:lists-all",
+                "api:exceptions-read",
+                "api:exceptions-all",
+                "api:lists-read",
+                "api:lists-summary",
+                "api:securitySolution-writeCustomYaraSignatures",
+                "api:securitySolution-readCustomYaraSignatures",
+                "saved_object:exception-list-agnostic/bulk_get",
+                "saved_object:exception-list-agnostic/get",
+                "saved_object:exception-list-agnostic/find",
+                "saved_object:exception-list-agnostic/open_point_in_time",
+                "saved_object:exception-list-agnostic/close_point_in_time",
+                "saved_object:exception-list-agnostic/create",
+                "saved_object:exception-list-agnostic/bulk_create",
+                "saved_object:exception-list-agnostic/update",
+                "saved_object:exception-list-agnostic/bulk_update",
+                "saved_object:exception-list-agnostic/delete",
+                "saved_object:exception-list-agnostic/bulk_delete",
+                "saved_object:exception-list-agnostic/share_to_space",
+                "ui:siemV5/writeCustomYaraSignatures",
+                "ui:siemV5/readCustomYaraSignatures",
+              ],
+              "custom_yara_signatures_read": Array [
+                "login:",
+                "api:lists-read",
+                "api:exceptions-read",
+                "api:lists-summary",
+                "api:securitySolution-readCustomYaraSignatures",
+                "ui:siemV5/readCustomYaraSignatures",
+              ],
               "endpoint_exceptions_all": Array [
                 "login:",
                 "api:lists-all",
@@ -15906,8 +15938,34 @@ if (sourceFilePath === 'authorization.ts') {
         expect(discoverV2?.hidden).not.to.be(true);
         expect(dashboardV2?.category?.id).to.be('securitySolution');
         expect(discoverV2?.category?.id).to.be('securitySolution');
-        expect(discoverV2?.order).to.be(1101);
-        expect(dashboardV2?.order).to.be(1102);
+        // This suite runs on the Complete tier, where `serverless.security.complete.yml` places them
+        // after the AlertZero and Agent Builder features.
+        expect(discoverV2?.order).to.be(1108);
+        expect(dashboardV2?.order).to.be(1109);
+      });
+
+      it('places AlertZero, Agentic investigations and Proposals under Security in role management', async () => {
+        const { body } = await supertestWithoutAuth
+          .get('/api/features')
+          .set(svlCommonApi.getInternalRequestHeader())
+          .set(adminCredentials)
+          .expect(200);
+
+        const features = body as Array<{
+          id: string;
+          hidden?: boolean;
+          order?: number;
+          category?: { id: string };
+        }>;
+        const expectedOrder = { alertzero: 1101, agenticInvestigations: 1102, proposals: 1103 };
+
+        for (const [featureId, order] of Object.entries(expectedOrder)) {
+          const feature = features.find(({ id }) => id === featureId);
+          expect(feature).not.to.be(undefined);
+          expect(feature?.hidden).not.to.be(true);
+          expect(feature?.category?.id).to.be('securitySolution');
+          expect(feature?.order).to.be(order);
+        }
       });
 
       it('does not expose alerting v2 feature privileges', async () => {

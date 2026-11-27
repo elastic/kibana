@@ -38,6 +38,15 @@ const STATUS_CONFIG: Record<ServiceChipState, { color: string; label: React.Reac
       />
     ),
   },
+  unverified: {
+    color: 'subdued',
+    label: (
+      <FormattedMessage
+        id="xpack.ingestHub.detectAndReviewStep.serviceStatus.unverified"
+        defaultMessage="Data check unavailable for this output"
+      />
+    ),
+  },
   timeout: {
     color: 'warning',
     label: (

@@ -33,7 +33,6 @@ import {
   generateOutputSchemaString,
   generateParameterTypes,
   generateParamsSchemaString,
-  getEslintrcForGeneratedCode,
   getLicenseHeader,
   getRequestSchemaName,
   getResponseSchemaName,
@@ -73,11 +72,6 @@ function saveEsConnectors(contracts: ContractMeta[]) {
         'utf8'
       );
     }
-    fs.writeFileSync(
-      Path.resolve(ES_GENERATED_OUTPUT_FOLDER_PATH, '.eslintrc.json'),
-      JSON.stringify(getEslintrcForGeneratedCode(), null, 2),
-      'utf8'
-    );
     console.log(
       `✅ ${contracts.length} Elasticsearch connectors generated in ${formatDuration(
         startedAt,
@@ -214,7 +208,7 @@ async function generateZodSchemas(contracts: ContractMeta[]) {
     const zodSchemas = fs.readFileSync(zodPath, 'utf8');
     fs.writeFileSync(
       zodPath,
-      zodSchemas.replace(/import { z } from 'zod\/v4';/, "import { z } from '@kbn/zod/v4';"),
+      zodSchemas.replace(/import { z } from 'zod(?:\/v4)?';/, "import { z } from '@kbn/zod/v4';"),
       'utf8'
     );
     console.log(

@@ -107,7 +107,10 @@ describe('registerSignificantEventsSkills', () => {
     const featureIdentificationSkill = agentBuilder.skills.register.mock.calls.find(
       ([skill]) => skill.id === FEATURE_IDENTIFICATION_SKILL_ID
     )![0];
-    expect(featureIdentificationSkill.experimental).toBe(true);
+    // Internal skill: out of the user-facing library, but gated only by the Nightshift availability,
+    // not by the `agentBuilder:experimentalFeatures` setting.
+    expect(featureIdentificationSkill.hidden).toBe(true);
+    expect(featureIdentificationSkill.experimental).toBeUndefined();
     // `getInlineTools` is declared as MaybePromise, and the skill's own implementation is sync.
     expect(await featureIdentificationSkill.getInlineTools!()).toEqual(
       expect.arrayContaining([expect.objectContaining({ id: FINALIZE_FEATURES_TOOL_ID })])

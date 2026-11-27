@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { EuiCallOut, EuiFlyoutBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
@@ -16,6 +16,7 @@ import {
 import { FLYOUT_V2_PAGINATION_QUERY_ERROR_TEST_ID } from '../main/components/test_ids';
 import { DocumentFlyoutWrapper } from '../main/document_flyout_wrapper';
 import { useFlyoutPagination } from './use_flyout_pagination';
+import { usePaginationStore } from './context';
 
 const QUERY_ERROR = i18n.translate(
   'xpack.securitySolution.flyoutV2.document.pagination.queryError',
@@ -48,6 +49,11 @@ export interface PaginatedDocumentFlyoutProps {
  */
 export const PaginatedDocumentFlyout = memo(
   ({ renderCellActions, onAlertUpdated }: PaginatedDocumentFlyoutProps) => {
+    const store = usePaginationStore();
+    const onHistoryTitleResolved = useCallback(
+      (title: string) => store?.setState({ flyoutHistoryTitle: title }),
+      [store]
+    );
     const { flyoutDocumentId, flyoutDocumentIndexName, flyoutDocumentIndex, hasFlyoutQueryError } =
       useFlyoutPagination();
 
@@ -83,6 +89,7 @@ export const PaginatedDocumentFlyout = memo(
         indexName={flyoutDocumentIndexName ?? undefined}
         renderCellActions={renderCellActions}
         onAlertUpdated={onAlertUpdated}
+        onHistoryTitleResolved={onHistoryTitleResolved}
       />
     );
   }

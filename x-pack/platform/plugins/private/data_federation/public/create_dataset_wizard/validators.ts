@@ -9,15 +9,7 @@ import { validateIndexNameRules } from '../../common';
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 
 export const validateDatasetName =
-  ({
-    existingDataSetNames,
-    isEditMode,
-    datasetNameToEdit,
-  }: {
-    existingDataSetNames: readonly string[];
-    isEditMode: boolean;
-    datasetNameToEdit: string;
-  }) =>
+  (existingDataSetNames: readonly string[]) =>
   (value: string): true | string => {
     if (!value) {
       return createDatasetWizardStrings.nameRequired;
@@ -28,13 +20,9 @@ export const validateDatasetName =
       return nameValidation.message;
     }
 
-    const isDuplicate = existingDataSetNames.some((n) => {
-      if (isEditMode && n === datasetNameToEdit) {
-        return false;
-      }
-      return n === value;
-    });
-    return isDuplicate ? createDatasetWizardStrings.nameAlreadyExists : true;
+    return existingDataSetNames.includes(value)
+      ? createDatasetWizardStrings.nameAlreadyExists
+      : true;
   };
 
 export const validateResource = (value: string): true | string => {

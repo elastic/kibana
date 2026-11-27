@@ -7,7 +7,8 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { BaseMessage } from '@langchain/core/messages';
-import { isPreExecutionWorkflowStep } from '@kbn/agent-builder-common';
+import { isDeliveredMessageStep, isPreExecutionWorkflowStep } from '@kbn/agent-builder-common';
+import { createUserMessage } from '@kbn/agent-builder-genai-utils/langchain';
 import type { ToolResultStore } from '@kbn/agent-builder-server/runner';
 import type { HandoverParams, PromptImageResolver } from '../prompts/types';
 import type { CurrentRun } from '../transient_state';
@@ -28,6 +29,7 @@ import {
 } from './filestore_substitution';
 import {
   standaloneEventToLangchain,
+  standaloneUserMessageToLangchain,
   formatUserInput,
   noticeRendererFor,
   prepareMessages,
@@ -35,6 +37,7 @@ import {
   roundOutcomeMessage,
   roundOutcomeNotice,
 } from './to_langchain_messages';
+import { formatDeliveredMessageNotice } from '../prompts/utils/notices';
 import {
   createPreExecutionWorkflowContextMessage,
   renderCurrentRun,
@@ -114,10 +117,14 @@ export const renderVisibleContext = async (
 ): Promise<BaseMessage[]> => {
   const view = buildContextView({ conversation, run, conversationTimestamp }, deps);
   const notices = noticeRendererFor(conversation);
+  // the answer agent has no tools, so it should not get dynamic tool definitions
+  const dynamicToolDefinitions =
+    phase === 'research' ? run.compactionSummary?.dynamic_tools : undefined;
   const history = await prepareMessages({
     conversation,
     roundResultTransformer: view.historyTransformer,
     compactionSummary: run.compactionSummary,
+    dynamicToolDefinitions,
     visibility: view.visibility,
     conversationTimestamp,
     attachmentNotices: notices,
@@ -135,20 +142,22 @@ export const renderVisibleContext = async (
 };
 
 /**
- * The current run's workflow model context stays with the current request when the summary covers
- * its cycle.
+ * What stays with the current request when the summary covers its cycle: the run's workflow model
+ * context and the steers it read. Pinned once, here, so the per-cycle units never carry them.
  */
 const pinnedCurrentRunMessages = (
   { steps }: CurrentRun,
   { currentFromStep }: ContextVisibility
 ): BaseMessage[] =>
-  steps
-    .slice(0, currentFromStep)
-    .flatMap((step) =>
-      isPreExecutionWorkflowStep(step) && step.model_context
-        ? [createPreExecutionWorkflowContextMessage(step.model_context)]
-        : []
-    );
+  steps.slice(0, currentFromStep).flatMap((step) => {
+    if (isPreExecutionWorkflowStep(step) && step.model_context) {
+      return [createPreExecutionWorkflowContextMessage(step.model_context)];
+    }
+    if (isDeliveredMessageStep(step)) {
+      return [createUserMessage(formatDeliveredMessageNotice(step))];
+    }
+    return [];
+  });
 
 /**
  * One unit of the visible context, rendered as it is sent (images aside), except for the attachment
@@ -164,13 +173,7 @@ export const renderUnit = async (
 ): Promise<BaseMessage[]> => {
   const notices = noticeRendererFor(conversation, { withTypeInstructions: false });
   if (unit.kind === 'message') {
-    return [
-      formatUserInput({
-        input: unit.entry.userMessage.data,
-        timestamp: unit.entry.userMessage.created_at,
-        notices,
-      }),
-    ];
+    return [standaloneUserMessageToLangchain(unit.entry.userMessage, notices)];
   }
   if (unit.kind === 'standalone_event') {
     return [standaloneEventToLangchain(unit.entry.event)];

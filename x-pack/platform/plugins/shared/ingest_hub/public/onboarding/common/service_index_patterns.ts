@@ -19,7 +19,7 @@ const OTELCOL_INPUT = 'otelcol';
  *
  * OTel entries (`dataFormat === 'otel'`) use service-specific OTel data streams:
  * - ECF OTel log services (`ecfLogType` set): dataset is `aws.<ecfLogType>.otel`, type is `logs`.
- *   ECF has no namespace, so these always use `*`.
+ *   The OTel ECF template takes no namespace, so these always use `*`.
  * - OTel input packages (e.g. `aws_cloudwatch_input_otel`): dataset and type are read from
  *   the `data_stream.dataset` / `data_stream.type` variable defaults in `varDefsByInput`.
  *

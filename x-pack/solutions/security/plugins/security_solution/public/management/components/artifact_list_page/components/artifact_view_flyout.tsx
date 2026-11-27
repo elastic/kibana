@@ -17,6 +17,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiIconTip,
   EuiPanel,
   EuiPopover,
   EuiSpacer,
@@ -52,6 +53,7 @@ import {
 } from '../../context_menu_with_router_support';
 import { ArtifactOperatingSystemBadges } from './artifact_os_badges';
 import { ArtifactViewPolicyAssignment } from './artifact_view_policy_assignment';
+import { ArtifactViewComments } from './artifact_view_comments';
 import { ARTIFACT_CARD_ACTION_LABELS } from '../translations';
 
 export const ARTIFACT_VIEW_FLYOUT_LABELS = Object.freeze({
@@ -82,6 +84,10 @@ export const ARTIFACT_VIEW_FLYOUT_LABELS = Object.freeze({
   viewFlyoutPolicyAssignmentNoneLabel: i18n.translate(
     'xpack.securitySolution.artifactListPage.viewFlyoutPolicyAssignmentNoneLabel',
     { defaultMessage: 'Applied to 0 policies.' }
+  ),
+  viewFlyoutCommentsTitle: i18n.translate(
+    'xpack.securitySolution.artifactListPage.viewFlyoutCommentsTitle',
+    { defaultMessage: 'Comments' }
   ),
   viewFlyoutTakeActionButtonLabel: i18n.translate(
     'xpack.securitySolution.artifactListPage.viewFlyoutTakeActionButtonLabel',
@@ -122,10 +128,14 @@ interface ArtifactViewFlyoutBaseProps {
   labels?: Partial<ArtifactViewFlyoutLabels>;
   /** Renders the artifact-specific definition. Receives the full artifact item. */
   ViewModeComponent: React.ComponentType<ArtifactViewModeComponentProps>;
+  /** When set, an info icon next to the policy assignment title shows this text in a tooltip. */
+  policyAssignmentInfoTooltip?: string;
   /** When false, no edit actions can be taken. Defaults to true. */
   allowCardEditAction?: boolean;
   /** When false, the footer omits Delete. Defaults to true. */
   allowCardDeleteAction?: boolean;
+  /** When true, the body ends with the artifact's comments. Defaults to false. */
+  showComments?: boolean;
   /** Opens edit or delete the same way the simple table does. */
   onTakeAction?: ArtifactViewFlyoutTakeAction;
   onClose: () => void;
@@ -156,9 +166,11 @@ export const ArtifactViewFlyout = memo<ArtifactViewFlyoutProps>(
     size,
     labels: _labels,
     ViewModeComponent,
+    policyAssignmentInfoTooltip,
     showEnabledSwitch = false,
     allowCardEditAction = true,
     allowCardDeleteAction = true,
+    showComments = false,
     onTakeAction,
     onEnabledChangeRefresh,
     onClose,
@@ -232,9 +244,11 @@ export const ArtifactViewFlyout = memo<ArtifactViewFlyoutProps>(
               apiClient={apiClient}
               labels={labels}
               showEnabledSwitch={showEnabledSwitch}
+              showComments={showComments}
               allowCardEditAction={allowCardEditAction}
               onEnabledChangeRefresh={handleEnabledChangeRefresh}
               ViewModeComponent={ViewModeComponent}
+              policyAssignmentInfoTooltip={policyAssignmentInfoTooltip}
               data-test-subj={dataTestSubj}
             />
           )}
@@ -304,9 +318,11 @@ const ArtifactViewFlyoutBody = memo<{
   apiClient: ExceptionsListApiClient;
   labels: ArtifactViewFlyoutLabels;
   showEnabledSwitch: boolean;
+  showComments: boolean;
   allowCardEditAction: boolean;
   onEnabledChangeRefresh?: () => Promise<void>;
   ViewModeComponent: React.ComponentType<ArtifactViewModeComponentProps>;
+  policyAssignmentInfoTooltip?: string;
   'data-test-subj'?: string;
 }>(
   ({
@@ -314,9 +330,11 @@ const ArtifactViewFlyoutBody = memo<{
     apiClient,
     labels,
     showEnabledSwitch,
+    showComments,
     allowCardEditAction,
     onEnabledChangeRefresh,
     ViewModeComponent,
+    policyAssignmentInfoTooltip,
     'data-test-subj': dataTestSubj,
   }) => {
     const { euiTheme } = useEuiTheme();
@@ -403,17 +421,41 @@ const ArtifactViewFlyoutBody = memo<{
         <ViewModeComponent item={item} />
 
         <EuiSpacer size="l" />
-        <EuiTitle size="xs">
-          <h3 data-test-subj={getTestId('policyAssignmentTitle')}>
-            {labels.viewFlyoutPolicyAssignmentTitle}
-          </h3>
-        </EuiTitle>
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h3 data-test-subj={getTestId('policyAssignmentTitle')}>
+                {labels.viewFlyoutPolicyAssignmentTitle}
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          {policyAssignmentInfoTooltip && (
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                type="info"
+                content={policyAssignmentInfoTooltip}
+                iconProps={{ 'data-test-subj': getTestId('policyAssignmentInfoTooltip') }}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
         <EuiSpacer size="s" />
         <ArtifactViewPolicyAssignment
           item={item}
           labels={labels}
           data-test-subj={getTestId('policyAssignment')}
         />
+
+        {showComments && (
+          <>
+            <EuiSpacer size="l" />
+            <EuiTitle size="xs">
+              <h3 data-test-subj={getTestId('commentsTitle')}>{labels.viewFlyoutCommentsTitle}</h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <ArtifactViewComments comments={item.comments} data-test-subj={getTestId('comments')} />
+          </>
+        )}
       </>
     );
   }

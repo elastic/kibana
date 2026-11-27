@@ -21,6 +21,9 @@ describe('CoreVitalItem', () => {
   const thresholds = { bad: '0.25', good: '0.1' };
   const loading = false;
   const helpLabel = 'sample help label';
+  const legendShare = new RegExp(
+    `^(${LEGEND_GOOD_LABEL}|${LEGEND_NEEDS_IMPROVEMENT_LABEL}|${LEGEND_POOR_LABEL})-`
+  );
 
   it('renders if value is truthy', () => {
     const { getByText, getByTestId } = render(
@@ -43,10 +46,11 @@ describe('CoreVitalItem', () => {
   });
 
   it('renders loading state when loading is truthy', () => {
-    const { queryByText, getByText } = render(
+    const { queryByText, getByText, getAllByText, queryAllByTestId } = render(
       <CoreVitalItem
         title={title}
         value={value}
+        rating="poor"
         ranks={[85, 10, 5]}
         loading={true}
         thresholds={thresholds}
@@ -56,6 +60,23 @@ describe('CoreVitalItem', () => {
 
     expect(queryByText(value)).not.toBeInTheDocument();
     expect(getByText('--')).toBeInTheDocument();
+    expect(getAllByText(/\(\u2011\u2011%\)$/)).toHaveLength(3);
+    expect(queryAllByTestId(legendShare)).toEqual([]);
+  });
+
+  it('does not invent a distribution when ranks are missing', () => {
+    const { getByText, queryAllByTestId } = render(
+      <CoreVitalItem
+        title={title}
+        value={value}
+        loading={loading}
+        thresholds={thresholds}
+        helpLabel={helpLabel}
+      />
+    );
+
+    expect(getByText(value)).toBeInTheDocument();
+    expect(queryAllByTestId(legendShare)).toEqual([]);
   });
 
   it('renders no data UI if value is falsey and loading is falsey', () => {

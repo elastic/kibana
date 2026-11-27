@@ -19,7 +19,24 @@ import {
   getAllCloudConnectorVarNames,
   type VarGroupSelection,
 } from '../../../../../../../common/services/cloud_connectors';
+import {
+  hasConfiguredVarValue,
+  shouldShowVar,
+} from '../../../../../../../common/services/var_group_helpers';
 import type { RegistryVarGroup } from '../../../../types';
+
+/**
+ * Options for computing policy effects.
+ */
+export interface PolicyUpdateOptions {
+  /**
+   * Skip effects that would turn a previously enabled capability off
+   * (currently the cloud-connector deactivation). Used when selections are
+   * persisted without an explicit user choice, so loading a page cannot
+   * silently remove e.g. `cloud_connector_id`; activation effects still apply.
+   */
+  skipDeactivation?: boolean;
+}
 
 /**
  * Handler function type for computing policy effects based on var_group selections.
@@ -28,7 +45,8 @@ import type { RegistryVarGroup } from '../../../../types';
 export type PolicyUpdateHandler = (
   packagePolicy: NewPackagePolicy,
   varGroupSelections: VarGroupSelection,
-  varGroups: RegistryVarGroup[]
+  varGroups: RegistryVarGroup[],
+  options?: PolicyUpdateOptions
 ) => Partial<NewPackagePolicy> | null;
 
 // Registry of effect handlers for extensibility
@@ -187,7 +205,8 @@ function clearInputStreamVars(
 export const updateCloudConnectorPolicy: PolicyUpdateHandler = (
   packagePolicy,
   varGroupSelections,
-  varGroups
+  varGroups,
+  options
 ) => {
   const cloudConnectorOption = getCloudConnectorOption(varGroups, varGroupSelections);
   const supportFlagVar = packagePolicy.vars
@@ -199,9 +218,12 @@ export const updateCloudConnectorPolicy: PolicyUpdateHandler = (
     // Only update if supports_cloud_connector flag or the var need to change.
     // cloud_connector_id is intentionally NOT checked here — once set by
     // CloudConnectorSetup it must be preserved across unrelated var_group changes.
+    // The var is `undefined` on a new policy (bool vars without a manifest default),
+    // and it is required by the var_group, so `undefined` must count as needing an
+    // update — otherwise the root flag being true already would leave it unset.
     if (
       packagePolicy.supports_cloud_connector !== true ||
-      (currentVarValue !== undefined && currentVarValue !== true)
+      (supportFlagVar !== undefined && currentVarValue !== true)
     ) {
       return {
         supports_cloud_connector: true,
@@ -213,8 +235,10 @@ export const updateCloudConnectorPolicy: PolicyUpdateHandler = (
         ...buildSupportsCloudConnectorsVarsUpdate(packagePolicy.vars, true),
       };
     }
-  } else {
-    // Cloud connector not selected - clear the flags and cloud connector vars
+  } else if (!options?.skipDeactivation) {
+    // Cloud connector not selected - clear the flags and cloud connector vars.
+    // Skipped when persisting derived selections without an explicit user
+    // choice: loading the page must not silently turn the connector off.
     if (
       packagePolicy.supports_cloud_connector === true ||
       packagePolicy.cloud_connector_id !== undefined ||
@@ -248,6 +272,82 @@ export function registerPolicyUpdateHandler(handler: PolicyUpdateHandler): void 
 }
 
 /**
+ * Builds a stream-vars update that clears the populated values of a stream-level
+ * var_group's deselected options.
+ *
+ * Stream-level var_groups are new, so clearing on a selection change cannot disturb
+ * existing behaviour; package-level credential groups keep today's secret-ref-only
+ * clearing in `updateCloudConnectorPolicy`.
+ *
+ * Vars shared with the newly selected option are kept. When the caller also
+ * passes all of the stream's var_groups and the post-change selections, vars
+ * shared with another group's selected option are kept too: `shouldShowVar`
+ * shows a var when any group's selected option lists it, so clearing it here
+ * would wipe a field the form still displays. Any populated value is
+ * cleared, whatever its type — a `multi: true` array (e.g. a list of log group
+ * names) or a number/boolean belonging to a deselected option would otherwise
+ * still reach the compiled agent template, the same leak this PR fixes for
+ * strings. Values that count as unpopulated (`''`, `[]`, `false`, `undefined`,
+ * `null`) are left alone: they are indistinguishable from an unset var, and
+ * `false` in particular is a migration default, not evidence of configuration
+ * (same rule as `hasConfiguredVarValue`, which inference uses). Secret-ref
+ * values are objects, so they count as populated and are cleared too. Cleared
+ * vars are unset (value `undefined`, the same state a fresh var has) rather
+ * than emptied to `''`, so a required var in the newly selected option is
+ * still treated as missing by validation when the user switches back without
+ * filling it in. Returns undefined when nothing needs clearing.
+ */
+export function buildStreamVarGroupVarsUpdate(
+  streamVars: PackagePolicyConfigRecord | undefined,
+  varGroup: RegistryVarGroup,
+  previousOptionName: string | undefined,
+  newOptionName: string,
+  varGroups?: RegistryVarGroup[],
+  varGroupSelections?: VarGroupSelection
+): PackagePolicyConfigRecord | undefined {
+  if (!streamVars || previousOptionName === newOptionName) return undefined;
+
+  const selectedOption = varGroup.options.find((option) => option.name === newOptionName);
+  if (!selectedOption) return undefined;
+
+  const selectedVars = new Set(selectedOption.vars);
+  const deselectedVarNames = new Set<string>();
+  for (const option of varGroup.options) {
+    if (option.name === newOptionName) continue;
+    for (const name of option.vars) {
+      if (!selectedVars.has(name)) {
+        deselectedVarNames.add(name);
+      }
+    }
+  }
+  if (deselectedVarNames.size === 0) return undefined;
+
+  // A var counts as deselected only when no selected option on the stream uses
+  // it. Without the full context, the single-group rule above applies.
+  const clearedVarNames =
+    varGroups && varGroupSelections
+      ? new Set(
+          [...deselectedVarNames].filter(
+            (name) => !shouldShowVar(name, varGroups, varGroupSelections)
+          )
+        )
+      : deselectedVarNames;
+  if (clearedVarNames.size === 0) return undefined;
+
+  let changed = false;
+  const updated = { ...streamVars };
+  for (const name of clearedVarNames) {
+    const entry = updated[name];
+    if (!entry) continue;
+    if (hasConfiguredVarValue(entry)) {
+      updated[name] = { ...entry, value: undefined };
+      changed = true;
+    }
+  }
+  return changed ? updated : undefined;
+}
+
+/**
  * Compute all policy effects based on the current var_group selections.
  * Aggregates results from all registered handlers (e.g., setting
  * supports_cloud_connector and supports_cloud_connectors var).
@@ -255,7 +355,8 @@ export function registerPolicyUpdateHandler(handler: PolicyUpdateHandler): void 
 export function buildVarGroupPolicyUpdates(
   packagePolicy: NewPackagePolicy,
   varGroupSelections: VarGroupSelection,
-  varGroups: RegistryVarGroup[] | undefined
+  varGroups: RegistryVarGroup[] | undefined,
+  options?: PolicyUpdateOptions
 ): Partial<NewPackagePolicy> | null {
   if (!varGroups || varGroups.length === 0) {
     return null;
@@ -265,7 +366,7 @@ export function buildVarGroupPolicyUpdates(
   let hasEffects = false;
 
   for (const handler of policyUpdateHandlers) {
-    const effects = handler(packagePolicy, varGroupSelections, varGroups);
+    const effects = handler(packagePolicy, varGroupSelections, varGroups, options);
     if (effects) {
       combinedEffects = { ...combinedEffects, ...effects };
       hasEffects = true;

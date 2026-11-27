@@ -11,6 +11,7 @@ import expect from '@kbn/expect';
 import type SuperTest from 'supertest';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrService } from './ftr_provider_context';
 
 /**
@@ -60,6 +61,7 @@ export class SearchService extends FtrService {
         .post(`${spaceUrl}/internal/search/${strategy}`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set('kbn-xsrf', 'true')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(options)
         .expect(200);
     });
@@ -72,6 +74,7 @@ export class SearchService extends FtrService {
       const resp = await supertest
         .post(`${spaceUrl}/internal/search/${strategy}/${body.id}`)
         .set('kbn-xsrf', 'true')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .send(options)
         .expect(200);

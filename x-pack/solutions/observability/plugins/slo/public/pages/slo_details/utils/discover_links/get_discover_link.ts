@@ -15,10 +15,10 @@ import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
   ALL_VALUE,
   is,
-  apmTransactionDurationIndicatorSchemaZod,
-  apmTransactionErrorRateIndicatorSchemaZod,
-  kqlCustomIndicatorSchemaZod,
-  kqlWithFiltersSchemaZod,
+  apmTransactionDurationIndicatorSchema,
+  apmTransactionErrorRateIndicatorSchema,
+  kqlCustomIndicatorSchema,
+  kqlWithFiltersSchema,
 } from '@kbn/slo-schema';
 import { esql } from '@elastic/esql';
 import { isEmpty } from 'lodash';
@@ -48,7 +48,7 @@ export function createDiscoverLocator({
   const indicatorType = slo.indicator.type;
   switch (indicatorType) {
     case 'sli.apm.transactionDuration':
-      if (is(apmTransactionDurationIndicatorSchemaZod, slo.indicator)) {
+      if (is(apmTransactionDurationIndicatorSchema, slo.indicator)) {
         const { totalQuery } = getApmLatencyQueries(slo.indicator, esQueryConfig);
         filters.push({
           $state: { store: FilterStateStore.APP_STATE },
@@ -63,7 +63,7 @@ export function createDiscoverLocator({
       }
       break;
     case 'sli.apm.transactionErrorRate':
-      if (is(apmTransactionErrorRateIndicatorSchemaZod, slo.indicator)) {
+      if (is(apmTransactionErrorRateIndicatorSchema, slo.indicator)) {
         const { goodQuery, badQuery, totalQuery } = getApmAvailabilityQueries(
           slo.indicator,
           esQueryConfig
@@ -104,7 +104,7 @@ export function createDiscoverLocator({
       }
       break;
     case 'sli.kql.custom':
-      if (is(kqlCustomIndicatorSchemaZod, slo.indicator)) {
+      if (is(kqlCustomIndicatorSchema, slo.indicator)) {
         const { goodQuery, badQuery, totalQuery } = getCustomKqlQueries(
           slo.indicator,
           esQueryConfig
@@ -177,12 +177,12 @@ export function createDiscoverLocator({
     'timestampField' in slo.indicator.params ? slo.indicator.params.timestampField : '@timestamp';
 
   // Add the filters from the main query filter as discover filters
-  if (is(kqlWithFiltersSchemaZod, slo.indicator.params.filter)) {
+  if (is(kqlWithFiltersSchema, slo.indicator.params.filter)) {
     slo.indicator.params.filter.filters.forEach((f: Filter) => filters.push(f));
   }
 
   // Add the kql filter from the main query filter as discover kql query
-  const filterKuery = is(kqlWithFiltersSchemaZod, slo.indicator.params.filter)
+  const filterKuery = is(kqlWithFiltersSchema, slo.indicator.params.filter)
     ? slo.indicator.params.filter.kqlQuery
     : slo.indicator.params.filter;
 

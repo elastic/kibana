@@ -40,17 +40,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cspSecurity.restoreDefaultUser();
     });
 
-    // Blocked by https://github.com/elastic/kibana/issues/184621
-    it.skip('Access with valid user role', async () => {
-      await cspSecurity.logout();
-      await cspSecurity.login('csp_read_user');
-      await benchmark.navigateToBenchnmarkPage();
-      expect(await benchmark.benchmarkPage.doesBenchmarkTableExists());
-    });
-
-    // Blocked by https://github.com/elastic/kibana/issues/184621
-    it.skip('Access with invalid user role', async () => {});
-
     // The entire describe block bellow should move to rule.ts byt the page test is blocked by:
     // FLAKY: https://github.com/elastic/kibana/issues/178413
     describe('Access with custom roles - rule page', async () => {
@@ -74,9 +63,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         expect(await rule.rulePage.toggleBulkActionButton());
       });
-
-      // Blocked by https://github.com/elastic/kibana/issues/184621
-      it.skip('Access with invalid user role', async () => {});
     });
   });
 }

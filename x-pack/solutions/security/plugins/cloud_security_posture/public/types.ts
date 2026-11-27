@@ -12,7 +12,6 @@ import type { DataPublicPluginSetup } from '@kbn/data-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { FleetSetup } from '@kbn/fleet-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type {
   FindingMisconfigurationFlyoutContentProps,
   FindingMisconfigurationFlyoutFooterProps,
@@ -27,13 +26,6 @@ import type {
 } from '@kbn/cloud-security-posture';
 import type { CspRouterProps } from './application/csp_router';
 import type { CloudSecurityPosturePageId } from './common/navigation/types';
-
-export interface UseOnCloseParams {
-  /**
-   * Function to call when the event is dispatched
-   */
-  callback: (id: string) => void;
-}
 
 /**
  * The cloud security posture's public plugin setup interface.
@@ -94,14 +86,11 @@ export interface CspSecuritySolutionContext {
     pageName: CloudSecurityPosturePageId;
     state?: Record<string, string | undefined>;
   }>;
-  useExpandableFlyoutApi?: () => ExpandableFlyoutApi;
-  useOnExpandableFlyoutClose?: ({ callback }: UseOnCloseParams) => void;
   /**
    * Returns openers that render a finding as a primary "system flyout" (the security solution's
-   * v2 flyout), or `undefined` when the new flyout system is disabled. When available, the
-   * findings pages open these instead of the legacy expandable-flyout panels.
+   * v2 flyout). The findings pages use these to open a finding's details.
    */
-  useOpenFindingInSystemFlyout?: () => OpenFindingInSystemFlyout | undefined;
+  useOpenFindingInSystemFlyout: () => OpenFindingInSystemFlyout;
 }
 
 /**

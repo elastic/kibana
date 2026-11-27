@@ -36,6 +36,8 @@ interface DeploymentSummaryProps {
   agentInfoByServiceId?: Record<string, ServiceAgentInfo>;
   deploymentMethod: DeploymentMethod;
   receivingCount: number;
+  /** Services whose data goes to an output outside the local cluster, left out of the count. */
+  unverifiedCount?: number;
   totalCount: number;
 }
 
@@ -47,6 +49,7 @@ export function DeploymentSummary({
   agentInfoByServiceId,
   deploymentMethod,
   receivingCount,
+  unverifiedCount = 0,
   totalCount,
 }: DeploymentSummaryProps) {
   const summaryFields = useDeploymentSummary(deploymentMethod);
@@ -143,13 +146,24 @@ export function DeploymentSummary({
               </>
             )}
 
-            <EuiText size="s" color="subdued">
-              <FormattedMessage
-                id="xpack.ingestHub.detectAndReviewStep.deploymentSummary.receivingCount"
-                defaultMessage="{receiving} of {total} services receiving data"
-                values={{ receiving: receivingCount, total: totalCount }}
-              />
-            </EuiText>
+            {totalCount > unverifiedCount && (
+              <EuiText size="s" color="subdued">
+                <FormattedMessage
+                  id="xpack.ingestHub.detectAndReviewStep.deploymentSummary.receivingCount"
+                  defaultMessage="{receiving} of {total} services receiving data"
+                  values={{ receiving: receivingCount, total: totalCount - unverifiedCount }}
+                />
+              </EuiText>
+            )}
+            {unverifiedCount > 0 && (
+              <EuiText size="s" color="subdued">
+                <FormattedMessage
+                  id="xpack.ingestHub.detectAndReviewStep.deploymentSummary.unverifiedCount"
+                  defaultMessage="Data from {count, plural, one {# service} other {# services}} goes to an output outside this cluster, so it cannot be checked here."
+                  values={{ count: unverifiedCount }}
+                />
+              </EuiText>
+            )}
             <EuiSpacer size="m" />
 
             <EuiFlexGroup wrap gutterSize="s">

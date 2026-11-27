@@ -118,11 +118,6 @@ export const STREAM_TYPE_WIRED_LABEL = i18n.translate(
   { defaultMessage: 'Wired' }
 );
 
-export const STREAM_TYPE_QUERY_LABEL = i18n.translate(
-  'xpack.streams.streamsTreeTable.streamTypeFilter.queryLabel',
-  { defaultMessage: 'Query' }
-);
-
 export const DATA_QUALITY_FILTER_LABEL = i18n.translate(
   'xpack.streams.streamsTreeTable.dataQualityFilter.label',
   { defaultMessage: 'Data quality' }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as t from 'io-ts';
+import type { z } from '@kbn/zod';
 import type {
   budgetingMethodSchema,
   groupSummarySchema,
@@ -14,10 +14,10 @@ import type {
   timeWindowTypeSchema,
 } from '../schema';
 
-type BudgetingMethod = t.OutputOf<typeof budgetingMethodSchema>;
-type TimeWindowType = t.OutputOf<typeof timeWindowTypeSchema>;
-type GroupSummary = t.TypeOf<typeof groupSummarySchema>;
-type Objective = t.OutputOf<typeof objectiveSchema>;
-type Status = t.OutputOf<typeof statusSchema>;
+type BudgetingMethod = z.input<typeof budgetingMethodSchema>;
+type TimeWindowType = z.input<typeof timeWindowTypeSchema>;
+type GroupSummary = z.output<typeof groupSummarySchema>;
+type Objective = z.input<typeof objectiveSchema>;
+type Status = z.input<typeof statusSchema>;
 
 export type { BudgetingMethod, GroupSummary, Objective, Status, TimeWindowType };

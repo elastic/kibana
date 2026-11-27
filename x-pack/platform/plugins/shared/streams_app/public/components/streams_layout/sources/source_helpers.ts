@@ -109,7 +109,13 @@ export const resolveSourceCapabilities = ({
   } else if (type === 'es_prometheus_remote_write') {
     endpoint = elasticsearchUrl ? `${elasticsearchUrl}/_prometheus/api/v1/write` : undefined;
   } else if (type === 'async_bulk' && managedInputUrl) {
-    endpoint = `${managedInputUrl}/_es/_bulk`;
+    const sourceInputUrl = `${managedInputUrl}/inputs/elasticsearch/${sourceId}`;
+    endpoint = `${sourceInputUrl}/_bulk`;
+    // `<target>` is a literal placeholder for the fallback index.
+    endpoints = [
+      { id: 'bulk', url: endpoint },
+      { id: 'bulkTarget', url: `${sourceInputUrl}/<target>/_bulk` },
+    ];
   } else if (type === 'otlp' && managedInputUrl) {
     endpoint = `${managedInputUrl}/inputs/otlp/${sourceId}`;
     const selectedSignals =

@@ -11,10 +11,11 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { HUNT_REPORTS_INDEX } from '../../../../../common/constants';
 import { buildHuntSpaceFilterTerms } from './space_filter';
 import { buildHuntInvestigationConversationId } from './hunt_investigation_id';
+import { MIN_HUNT_RELEVANCE, NOTHING_TO_HUNT_FILTER } from './nothing_to_hunt_filter';
 
 export interface CandidateQueryParams {
   trigger: 'manual' | 'scheduled';
-  /** For manual bypass: hunt exactly these report ids (bypasses hunt-once gate, still requires hunt-usable and excludes open proposals). */
+  /** For manual bypass: hunt exactly these report ids (bypasses the hunt-once and nothing-to-hunt gates, still requires hunt-usable and excludes open proposals). */
   report_ids?: string[];
   spaceId: string;
   /** 1-10, default 10. */
@@ -57,6 +58,19 @@ const OVERFETCH_MULTIPLIER = 3;
  */
 const MAX_SELECTION_PAGES = 5;
 
+/** Whether the report's evidence element for this space says an earlier hunt left it partly unsearched. */
+const hasPendingCoverage = (source: unknown, spaceId: string): boolean => {
+  const evidence = (source as { evidence?: unknown } | undefined)?.evidence;
+  const elements = Array.isArray(evidence) ? evidence : [evidence];
+  return elements.some(
+    (element) =>
+      typeof element === 'object' &&
+      element !== null &&
+      (element as { space_id?: unknown }).space_id === spaceId &&
+      (element as { coverage_pending?: unknown }).coverage_pending === true
+  );
+};
+
 /**
  * Both callers below must fail closed: an empty result would read as "nothing
  * to hunt" and hide a broken index or store behind a clean 200.
@@ -94,6 +108,128 @@ const assertCompleteAnswer = (
   }
 };
 
+/**
+ * The clauses only a scheduled sweep applies, kept together so the held-back count can reuse
+ * exactly the ones the selection used.
+ */
+const buildScheduledClauses = (
+  spaceId: string,
+  lookbackDays: number
+): {
+  notHunted: estypes.QueryDslQueryContainer;
+  nothingToHunt: estypes.QueryDslQueryContainer;
+  inLookback: estypes.QueryDslQueryContainer;
+} => {
+  const lookbackRange = { gte: `now-${lookbackDays}d` };
+  return {
+    notHunted: {
+      bool: {
+        must_not: [
+          {
+            nested: {
+              path: 'evidence',
+              query: {
+                bool: {
+                  filter: [
+                    { term: { 'evidence.space_id': spaceId } },
+                    { exists: { field: 'evidence.last_hunted_at' } },
+                  ],
+                  must_not: [{ term: { 'evidence.coverage_pending': true } }],
+                },
+              },
+            },
+          },
+        ],
+      },
+    },
+    nothingToHunt: {
+      bool: {
+        filter: [NOTHING_TO_HUNT_FILTER],
+        must_not: [
+          {
+            nested: {
+              path: 'evidence',
+              query: {
+                bool: {
+                  filter: [
+                    { term: { 'evidence.space_id': spaceId } },
+                    { term: { 'evidence.coverage_pending': true } },
+                  ],
+                },
+              },
+            },
+          },
+        ],
+      },
+    },
+    inLookback: {
+      bool: {
+        minimum_should_match: 1,
+        should: [
+          { range: { 'content.published_at': lookbackRange } },
+          {
+            bool: {
+              filter: [{ range: { '@timestamp': lookbackRange } }],
+              must_not: [{ exists: { field: 'content.published_at' } }],
+            },
+          },
+        ],
+      },
+    },
+  };
+};
+
+/**
+ * The held-back count runs before the selection is returned, so it gets one short attempt. A
+ * stalled count must not hold the already-selected reports past the caller's own timeout.
+ */
+const HELD_BACK_COUNT_TIMEOUT_MS = 5_000;
+
+/**
+ * Tells an operator how many reports the nothing-to-hunt gate kept out of this sweep. Best effort:
+ * the selection is already made, so a failed or partial count is a warning and never fails the
+ * sweep. A sweep that held nothing back says so at debug only.
+ */
+const logHeldBackCount = async (
+  esClient: ElasticsearchClient,
+  logger: Logger,
+  spaceId: string,
+  filter: estypes.QueryDslQueryContainer[]
+): Promise<void> => {
+  try {
+    const { count, _shards: shards } = await esClient.count(
+      {
+        index: HUNT_REPORTS_INDEX,
+        ignore_unavailable: false,
+        query: { bool: { filter } },
+      },
+      { requestTimeout: HELD_BACK_COUNT_TIMEOUT_MS, maxRetries: 0 }
+    );
+    const failedShards = shards?.failed ?? 0;
+    if (failedShards > 0) {
+      logger.warn(
+        `build_candidate_query: could not count reports held back as nothing to hunt. ` +
+          `${failedShards} of ${shards?.total} shards failed on the count`
+      );
+      return;
+    }
+    const message =
+      `build_candidate_query: space=${spaceId} ${count} report(s) held back: nothing to hunt ` +
+      `(relevance below ${MIN_HUNT_RELEVANCE}, no indicators, no techniques)`;
+    if (count > 0) {
+      logger.info(message);
+    } else {
+      logger.debug(message);
+    }
+  } catch (err) {
+    logger.warn(
+      `build_candidate_query: could not count reports held back as nothing to hunt. ${
+        (err as Error).message
+      }`
+    );
+  }
+};
+
 export const buildCandidateQuery = async (
   esClient: ElasticsearchClient,
   logger: Logger,
@@ -107,6 +243,8 @@ export const buildCandidateQuery = async (
   const namedIds =
     trigger === 'manual' && report_ids && report_ids.length > 0 ? report_ids : undefined;
 
+  const scheduledClauses = buildScheduledClauses(spaceId, lookbackDays);
+
   const filterClauses: estypes.QueryDslQueryContainer[] = [
     buildHuntSpaceFilterTerms(spaceId),
     HUNT_USABLE_FILTER,
@@ -117,8 +255,8 @@ export const buildCandidateQuery = async (
     // hunt-usable bar above and the open-proposal guard below still apply.
     filterClauses.push({ ids: { values: namedIds } });
   } else {
-    // Scheduled trigger: the gate is two clauses, usable (above) and never hunted in
-    // this space (below).
+    // Scheduled trigger: the gate is four clauses, usable (above), never hunted in this space,
+    // not nothing-to-hunt, and published inside the lookback (all below).
     //
     // Hunt outcomes live in the per-space nested `evidence[]` array on
     // `.kibana-threat-reports` (mapping v30 merged the former top-level
@@ -127,52 +265,48 @@ export const buildCandidateQuery = async (
     // on `feedback.last_hunted_at` matches nothing and the `must_not` would
     // always pass, letting every sweep re-hunt the whole pool. The nested form
     // below is the only one that actually gates.
-    filterClauses.push({
-      bool: {
-        must_not: [
-          {
-            nested: {
-              path: 'evidence',
-              query: {
-                bool: {
-                  filter: [
-                    { term: { 'evidence.space_id': spaceId } },
-                    { exists: { field: 'evidence.last_hunted_at' } },
-                  ],
-                },
-              },
-            },
-          },
-        ],
-      },
-    });
+    //
+    // A hunted report is retired unless it is flagged `coverage_pending`: an earlier run searched
+    // only part of it (techniques past the generation budget, or a transient gap) and recorded the
+    // rest as still to do. A report without the flag, including every one hunted before the flag
+    // existed, stays retired. A pending report is still subject to the publish-date lookback below,
+    // on purpose: with no attempt counter, the window is what stops a report whose gap never clears
+    // from being retried forever. The hunt narrative says so.
+    filterClauses.push(scheduledClauses.notHunted);
+
+    // A report enrich scored as unlikely to have anything to hunt is not selected, unless an earlier
+    // run left it pending a retry in this space. Named ids skip this so an analyst can still replay it.
+    filterClauses.push({ bool: { must_not: [scheduledClauses.nothingToHunt] } });
 
     // Publish-date lookback. `should` with `minimum_should_match: 1` lets a report with
     // `content.published_at` be judged on it alone, while a report without one falls back
     // to ingest time. The fallback is permanent, not a migration shim: it covers documents
     // ingested before the field existed and RSS entries whose feed gave no date, which
     // never get the field. Named ids skip this clause so an analyst can replay an old report.
-    const lookbackRange = { gte: `now-${lookbackDays}d` };
-    filterClauses.push({
-      bool: {
-        minimum_should_match: 1,
-        should: [
-          { range: { 'content.published_at': lookbackRange } },
-          {
-            bool: {
-              filter: [{ range: { '@timestamp': lookbackRange } }],
-              must_not: [{ exists: { field: 'content.published_at' } }],
-            },
-          },
-        ],
-      },
-    });
+    filterClauses.push(scheduledClauses.inLookback);
   }
 
+  // A report that ended retryable keeps its rank, so ranking alone would hand it the same
+  // top slot every sweep and a handful of stuck reports would crowd out every new one.
+  // Fewer retries sorts first: a retry only takes a slot no unhunted report wants. The
+  // `unmapped_type` keeps an index the mapping migration has not reached yet sortable,
+  // rather than failing the whole sweep.
+  //
   // `corroborated_rank_score` is nested under `evidence` too, so it needs a nested
   // sort bound to this space's element. Sorting it as a top-level field silently
   // does nothing. `rank_score` is genuinely top level and sorts as written.
   const sort: estypes.SortCombinations[] = [
+    {
+      'evidence.hunt_retry_count': {
+        order: 'asc',
+        missing: 0,
+        unmapped_type: 'integer',
+        nested: {
+          path: 'evidence',
+          filter: { term: { 'evidence.space_id': spaceId } },
+        },
+      },
+    },
     {
       'evidence.corroborated_rank_score': {
         order: 'desc',
@@ -206,7 +340,8 @@ export const buildCandidateQuery = async (
         // is.
         ignore_unavailable: false,
         track_total_hits: true,
-        _source: false,
+        // Only the per-space ledger flag, which decides whether an open Proposal parks the report.
+        _source: ['evidence.space_id', 'evidence.coverage_pending'],
         sort,
         query: {
           bool: {
@@ -280,6 +415,11 @@ export const buildCandidateQuery = async (
     const pageIds = (response.hits.hits ?? [])
       .map((h) => h._id)
       .filter((id): id is string => typeof id === 'string');
+    const coveragePendingIds = new Set(
+      (response.hits.hits ?? [])
+        .filter((h) => hasPendingCoverage(h._source, spaceId))
+        .map((h) => h._id)
+    );
 
     if (page === 0) {
       // Read before any id exclusion narrows it, so `total` keeps meaning every report
@@ -292,8 +432,12 @@ export const buildCandidateQuery = async (
 
     for (const id of pageIds) {
       examined.push(id);
+      // A report an earlier run left partly unsearched is resumed even with a Proposal open:
+      // the Investigation is one per (space, report), and a finding on a subject that already has
+      // a live Proposal converges onto it rather than minting a second.
       if (
         openProposalConversationIds &&
+        !coveragePendingIds.has(id) &&
         openProposalConversationIds.has(
           buildHuntInvestigationConversationId({ spaceId, reportId: id })
         )
@@ -345,6 +489,16 @@ export const buildCandidateQuery = async (
   const examinedIds = new Set(examined);
   const skippedFromSearch = skipped.filter(({ id }) => examinedIds.has(id)).length;
   const truncated = ids.length < total - skippedFromSearch;
+
+  if (!namedIds) {
+    await logHeldBackCount(esClient, logger, spaceId, [
+      buildHuntSpaceFilterTerms(spaceId),
+      HUNT_USABLE_FILTER,
+      scheduledClauses.notHunted,
+      scheduledClauses.inLookback,
+      scheduledClauses.nothingToHunt,
+    ]);
+  }
 
   logger.debug(
     `build_candidate_query: trigger=${trigger} space=${spaceId} ids=${ids.length} skipped=${skipped.length} total=${total} truncated=${truncated}`

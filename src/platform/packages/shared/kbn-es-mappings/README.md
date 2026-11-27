@@ -24,6 +24,10 @@ const textMapping = mappings.text();
 const keywordMapping = mappings.keyword();
 // Result: { type: 'keyword', ignore_above: 1024 }
 
+// Wildcard field (no default ignore_above, so set one for long values)
+const wildcardMapping = mappings.wildcard({ ignore_above: 1024 });
+// Result: { type: 'wildcard', ignore_above: 1024 }
+
 // Date field
 const dateMapping = mappings.date();
 const dateNanosMapping = mappings.dateNanos();

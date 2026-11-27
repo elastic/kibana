@@ -6,7 +6,12 @@
  */
 
 import type { AwsServiceMatrixEntry } from '../aws_service_matrix';
-import { deploysAsPolicy, getEffectiveNamespace } from './effective_namespace';
+import {
+  deploysAsPolicy,
+  followsGlobalNamespace,
+  getEcfStackNamespace,
+  getEffectiveNamespace,
+} from './effective_namespace';
 
 describe('getEffectiveNamespace', () => {
   it('prefers the instance namespace over the global one', () => {
@@ -46,6 +51,71 @@ describe('deploysAsPolicy', () => {
     expect(deploysAsPolicy(service([{ method: 'ecf' }]), 'managed_integration')).toBe(false);
     expect(
       deploysAsPolicy(service([{ method: 'managed_integration' }]), 'managed_integration')
+    ).toBe(false);
+  });
+});
+
+describe('getEcfStackNamespace', () => {
+  const ecfService = (fields: Record<string, unknown> = {}) =>
+    ({
+      deploymentMethods: [{ method: 'ecf' }],
+      ecfLogType: 'cloudtrail',
+      ...fields,
+    } as unknown as AwsServiceMatrixEntry);
+
+  it('is the namespace the unified stack was launched with', () => {
+    expect(
+      getEcfStackNamespace(ecfService(), [
+        { family: 'otel' },
+        { family: 'unified', namespace: 'prod' },
+      ])
+    ).toBe('prod');
+  });
+
+  it('is the template default before the stack is launched or when it has no namespace', () => {
+    expect(getEcfStackNamespace(ecfService())).toBe('default');
+    expect(getEcfStackNamespace(ecfService(), [{ family: 'unified' }])).toBe('default');
+  });
+
+  it('is undefined for the OTel and CrowdStrike templates, which take no namespace', () => {
+    expect(getEcfStackNamespace(ecfService({ ecfDedicatedTemplate: 'otel' }))).toBeUndefined();
+    expect(
+      getEcfStackNamespace(ecfService({ ecfDedicatedTemplate: 'crowdstrike_fdr' }))
+    ).toBeUndefined();
+  });
+
+  it('is undefined for a service that does not deploy through ECF', () => {
+    expect(
+      getEcfStackNamespace({ deploymentMethods: [] } as unknown as AwsServiceMatrixEntry)
+    ).toBeUndefined();
+  });
+});
+
+describe('followsGlobalNamespace', () => {
+  const ecfService = (fields: Record<string, unknown> = {}) =>
+    ({
+      deploymentMethods: [{ method: 'ecf' }],
+      ecfLogType: 'cloudtrail',
+      ...fields,
+    } as unknown as AwsServiceMatrixEntry);
+
+  it('is true for a service deployed as a policy', () => {
+    expect(followsGlobalNamespace(ecfService(), 'agent_based')).toBe(true);
+  });
+
+  it('is true for a service on the unified ECF template', () => {
+    expect(followsGlobalNamespace(ecfService(), 'managed_integration')).toBe(true);
+  });
+
+  it('is false for services on the OTel and CrowdStrike templates', () => {
+    expect(
+      followsGlobalNamespace(ecfService({ ecfDedicatedTemplate: 'otel' }), 'managed_integration')
+    ).toBe(false);
+    expect(
+      followsGlobalNamespace(
+        ecfService({ ecfDedicatedTemplate: 'crowdstrike_fdr' }),
+        'managed_integration'
+      )
     ).toBe(false);
   });
 });

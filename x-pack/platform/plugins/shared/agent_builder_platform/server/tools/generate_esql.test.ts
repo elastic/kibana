@@ -9,7 +9,7 @@ import { platformCoreTools, ToolResultType } from '@kbn/agent-builder-common';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { generateEsqlTool } from './generate_esql';
-import { resolveToolSchema } from './test_utils';
+import { createSchemaContext, resolveToolSchema } from './test_utils';
 
 jest.mock('@kbn/agent-builder-genai-utils', () => {
   const actual = jest.requireActual('@kbn/agent-builder-genai-utils');
@@ -36,8 +36,9 @@ const createHandlerContext = () =>
 const run = async ({
   includeFrozen,
   includeFrozenByDefault = false,
-}: { includeFrozen?: boolean; includeFrozenByDefault?: boolean } = {}) => {
-  const tool = generateEsqlTool();
+  isServerless,
+}: { includeFrozen?: boolean; includeFrozenByDefault?: boolean; isServerless?: boolean } = {}) => {
+  const tool = generateEsqlTool({ isServerless });
   const schema = await resolveToolSchema(tool, includeFrozenByDefault);
   const result = (await tool.handler(
     schema.parse({ query: 'total sales', include_frozen: includeFrozen }),
@@ -152,6 +153,24 @@ describe('generateEsqlTool', () => {
       expect(generateEsqlMock).toHaveBeenCalledWith(
         expect.objectContaining({ includeFrozen: false })
       );
+    });
+
+    describe('in serverless', () => {
+      it('does not expose include_frozen or read the space setting', async () => {
+        const context = createSchemaContext(true);
+        const schema = await generateEsqlTool({ isServerless: true }).getSchema(context);
+
+        expect(schema.shape).not.toHaveProperty('include_frozen');
+        expect(context.uiSettings.get).not.toHaveBeenCalled();
+      });
+
+      it('excludes frozen tier indices even when include_frozen is passed', async () => {
+        await run({ includeFrozen: true, includeFrozenByDefault: true, isServerless: true });
+
+        expect(generateEsqlMock).toHaveBeenCalledWith(
+          expect.objectContaining({ includeFrozen: false })
+        );
+      });
     });
   });
 });

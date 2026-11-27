@@ -360,7 +360,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
    * @param MetadataGenerator
    */
   constructor(
-    seed: string | seedrandom.prng = Math.random().toString(),
+    seed: string | seedrandom.PRNG = Math.random().toString(),
     MetadataGenerator: typeof EndpointMetadataGenerator = EndpointMetadataGenerator
   ) {
     super(seed);
@@ -666,7 +666,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
           }
         : {}),
       // disabling naming-convention to accommodate external field
-      // eslint-disable-next-line @typescript-eslint/naming-convention
+      // eslint-disable-next-line @kbn/compat/typescript-naming-convention
       Memory_protection: {
         feature: isShellcode ? 'shellcode_thread' : 'signature',
         self_injection: true,

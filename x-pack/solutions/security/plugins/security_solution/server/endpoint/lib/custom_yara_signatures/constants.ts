@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-/**
- * Maximum YARA rule text size stored in the value field.
- * Upper-bounded by Elasticsearch `keyword` (32766 UTF-8 bytes). Reused as
- * `schema.string()` `maxLength` for greppable input bounds: JS string length is
- * always ≤ UTF-8 byte length, so ASCII can still use the full 32766 bytes.
- * Multi-byte content is constrained by `validateYaraRuleContentByteLength`.
- */
-export const MAX_YARA_RULE_CONTENT_BYTE_LENGTH = 32766;
+export { MAX_YARA_RULE_CONTENT_BYTE_LENGTH } from '../../../../common/endpoint/service/artifacts/constants';
 
 /**
  * Safe client-facing message when libyara/WASM throws. Do not interpolate engine internals.

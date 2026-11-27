@@ -119,7 +119,7 @@ describe('Console nested SQL lexer rules', () => {
         };
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const isolatedNestedSql = require('./nested_sql');
       const rules = isolatedNestedSql.buildSqlRules();
 

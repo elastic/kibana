@@ -31,6 +31,7 @@ import { createUrlSyncObservables } from '../../utils/create_url_sync_observable
 import { createTabPersistableStateObservable } from '../../utils/create_tab_persistable_state_observable';
 import { createSearchSessionRestorationDataProvider } from '../../utils/create_search_session_restoration_data_provider';
 import { getFieldsToReset } from '../../utils/profile_app_state_defaults';
+import { isReplayedLoad } from '../../utils/is_replayed_load';
 import {
   createDataViewDataSource,
   DataSourceType,
@@ -276,13 +277,21 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
         runtimeStateManager,
       }),
       {
-        isDisabled: () =>
-          services.capabilities.discover_v2.storeSearchSession
+        isDisabled: () => {
+          // The config outlives the tab until the next tab enables storage, e.g. after "New"
+          const dataRequestParams = getCurrentTab()?.dataRequestParams;
+
+          if (dataRequestParams && isReplayedLoad(dataRequestParams)) {
+            return { disabled: true, reasonText: '' };
+          }
+
+          return services.capabilities.discover_v2.storeSearchSession
             ? { disabled: false }
             : {
                 disabled: true,
                 reasonText: noSearchSessionStorageCapabilityMessage,
-              },
+              };
+        },
       }
     );
 

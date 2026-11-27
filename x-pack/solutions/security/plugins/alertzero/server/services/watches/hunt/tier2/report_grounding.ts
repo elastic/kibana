@@ -38,17 +38,29 @@ const stripFraming = (value: string): string =>
     .replace(/^(?:\.\.\.|…)\s*|\s*(?:\.\.\.|…)$/g, '')
     .trim();
 
+/** Keep only letters and digits, so a quote that differs from the report only in punctuation or typography still matches. */
+const toWords = (value: string): string =>
+  value
+    .normalize('NFKC')
+    .toLowerCase()
+    .replace(/[^\p{L}\p{M}\p{N}]+/gu, ' ')
+    .trim();
+
 /**
- * True when `quote` appears in `text`. An internal ellipsis is treated as a gap in a
- * sequence: every segment must appear, in order, so a genuinely truncated verbatim
- * quote still verifies while a fabrication stitched from unrelated fragments does not.
+ * True when the words of `quote` appear in `text`, ignoring punctuation. An ellipsis is
+ * treated as a gap in a sequence: every segment must appear, in order, so a genuinely
+ * truncated verbatim quote still verifies while a fabrication stitched from unrelated
+ * fragments does not.
  */
 export const isEvidenceQuoteGrounded = (quote: string, text: string): boolean => {
-  const haystack = normalize(text);
-  const segments = stripFraming(quote)
-    .split(/\s*(?:\.\.\.|…)\s*/)
-    .map(normalize)
-    .filter((segment) => segment.length > 0);
+  // Padding every side with a space makes matches whole words: `successful` must not
+  // match inside `successfully`.
+  const haystack = ` ${toWords(text)} `;
+  const segments = quote
+    .split(/\.\.\.|…/)
+    .map(toWords)
+    .filter((segment) => segment.length > 0)
+    .map((segment) => ` ${segment} `);
   if (segments.length === 0) {
     return false;
   }
@@ -65,7 +77,8 @@ export const isEvidenceQuoteGrounded = (quote: string, text: string): boolean =>
     if (at === -1) {
       return false;
     }
-    searchFrom = at + segment.length;
+    // Resume on the closing space so the next segment can share it.
+    searchFrom = at + segment.length - 1;
   }
   return true;
 };
@@ -755,4 +768,70 @@ export const assertEsqlGroundedInReport = (
       ? 'query carries a report value but no predicate searches the document for it (negated, compared against a value the query supplied itself, or one alternative among ungrounded branches)'
       : 'query filters on no value drawn from the report (no matching IOC or report literal in a filtering predicate)',
   };
+};
+
+/** A filter clause the mapper can match retained row values against (read-side only). */
+export interface HuntFilterClause {
+  column: string;
+  operator: '==' | 'in' | 'like';
+  literals: string[];
+}
+
+const columnArgOf = (fn: ESQLFunction): string | undefined => {
+  for (const arg of fn.args) {
+    if (Array.isArray(arg)) {
+      for (const nested of arg) {
+        const name = columnNameOf(nested);
+        if (name) return name;
+      }
+      continue;
+    }
+    const name = columnNameOf(arg);
+    if (name) return name;
+  }
+  return undefined;
+};
+
+const collectFilterClauses = (node: ESQLAstNode | ESQLAstNode[], out: HuntFilterClause[]): void => {
+  if (Array.isArray(node)) {
+    for (const child of node) collectFilterClauses(child, out);
+    return;
+  }
+  const fn = asFunction(node);
+  if (!fn) return;
+  const operator = fn.name.toLowerCase();
+  if (operator === 'and' || operator === 'or') {
+    for (const arg of fn.args) collectFilterClauses(arg, out);
+    return;
+  }
+  // rlike / match / : intentionally yield no literals; attribution cannot compare them to a value.
+  if (operator === '==' || operator === 'like') {
+    const column = columnArgOf(fn);
+    const literals = literalsOf(fn.args);
+    if (column && literals.length > 0) {
+      out.push({ column, operator, literals });
+    }
+    return;
+  }
+  if (operator === 'in') {
+    const column = columnArgOf(fn);
+    const literals = listValuesOf(fn.args);
+    if (column && literals && literals.length > 0) {
+      out.push({ column, operator: 'in', literals });
+    }
+  }
+};
+
+/**
+ * Flatten filter predicates into comparable clauses for hit attribution. Does not rewrite the
+ * query. Nested AND/OR are expanded; each `==` / `IN` / `LIKE` leaf becomes one clause.
+ */
+export const clausesOf = (query: string): HuntFilterClause[] => {
+  const { root, errors } = Parser.parse(query);
+  if (errors.length > 0) return [];
+  const out: HuntFilterClause[] = [];
+  for (const predicate of allFilterPredicates(root)) {
+    collectFilterClauses(predicate, out);
+  }
+  return out;
 };

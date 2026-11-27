@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ScoutTestTarget, targetAttributes } from '@kbn/scout-info';
+import { elasticCloudTargetFromEnv, ScoutTestTarget, targetAttributes } from '@kbn/scout-info';
 import type { ScoutTestRunInfo } from './event';
 
 /**
@@ -28,5 +28,6 @@ export const buildScoutTargetInfo = (
     type: testTarget?.location || defaultLocation,
     mode: testTarget?.tagWithoutLocation || 'unknown',
     attributes: targetAttributes.current(),
+    elastic_cloud: elasticCloudTargetFromEnv(),
   };
 };

@@ -28,7 +28,7 @@
     "@kbn/rule-registry-plugin",
     "@kbn/session-view-plugin",
     "@kbn/i18n",
-    "@kbn/timelines-plugin",
+    "@kbn/securitysolution-timeline-components",
     "@kbn/es-query",
     "@kbn/ui-theme",
     "@kbn/i18n-react",

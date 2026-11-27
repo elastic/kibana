@@ -8,7 +8,7 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { BoundInferenceClient, InferenceClient } from '@kbn/inference-common';
+import type { BoundInferenceClient } from '@kbn/inference-common';
 import {
   aiAnonymizationSettings,
   parseLegacyAnonymizationRules,
@@ -16,7 +16,6 @@ import {
 } from '@kbn/ai-anonymization-common';
 import type { AnonymizationFailureMode, AnonymizationRule } from '@kbn/ai-anonymization-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
   GEN_AI_SETTINGS_INFERENCE_STREAMING,
@@ -31,8 +30,10 @@ import {
 import { registerRoutes } from './routes';
 import type { InferenceConfig } from './config';
 import type {
+  FeatureEndpointResolver,
   InferenceBoundClientCreateOptions,
   InferenceClientCreateOptions,
+  InferenceServerClient,
   InferenceServerSetup,
   InferenceServerStart,
   InferenceSetupDependencies,
@@ -41,10 +42,10 @@ import type {
 import { getConnectorList } from './util/get_connector_list';
 import { loadDefaultConnector } from './util/load_default_connector';
 import { getConnectorById, getConnectorByIdWithoutClientRequest } from './util/get_connector_by_id';
-import { getInferenceEndpoints } from './util/get_inference_endpoints';
 import { getInferenceEndpointById } from './util/get_inference_endpoint_by_id';
 import { InferenceEndpointIdCache } from './util/inference_endpoint_id_cache';
 import { shouldStreamInferenceEndpoint } from './util/should_stream_inference_endpoint';
+import { resolveFeatureEndpointOrThrow } from './util/resolve_feature_endpoint';
 import { TokenUsageLogger } from './token_usage';
 import { installTokenUsageDashboard } from './dashboard';
 
@@ -131,6 +132,7 @@ export class InferencePlugin
   private regexWorker?: RegexWorkerService;
   private endpointIdCache: InferenceEndpointIdCache;
   private tokenUsageLogger: TokenUsageLogger;
+  private featureEndpointResolver?: FeatureEndpointResolver;
 
   constructor(context: PluginInitializerContext<InferenceConfig>) {
     this.logger = context.logger.get();
@@ -156,7 +158,14 @@ export class InferencePlugin
       logger: this.logger,
     });
 
-    return {};
+    return {
+      registerFeatureEndpointResolver: (resolver) => {
+        if (this.featureEndpointResolver) {
+          throw new Error('A feature endpoint resolver is already registered');
+        }
+        this.featureEndpointResolver = resolver;
+      },
+    };
   }
 
   start(core: CoreStart, pluginsStart: InferenceStartDependencies): InferenceServerStart {
@@ -183,6 +192,12 @@ export class InferencePlugin
       const savedObjectsImporter = core.savedObjects.createImporter(internalClient);
       await installTokenUsageDashboard(savedObjectsImporter, this.logger);
     };
+
+    // Apply mapping changes to an existing data stream at startup, so that during a rolling upgrade
+    // the mappings are in place before any node writes documents with new fields.
+    this.tokenUsageLogger.updateExistingDataStream().catch((e) => {
+      this.logger.error(`Failed to update token usage data stream: ${e.message}`);
+    });
 
     installDashboardIfTokenUsageTrackingEnabled().catch((e) => {
       this.logger.error(`Failed to install token usage dashboard: ${e.message}`);
@@ -257,9 +272,14 @@ export class InferencePlugin
       const legacySettingsPromise = anonymizationEnabled
         ? undefined
         : readLegacyAnonymizationSettings(request);
+      const anonymizationRulesPromise = createAnonymizationRulesPromise(
+        request,
+        legacySettingsPromise
+      );
+      void anonymizationRulesPromise.catch(() => {});
       return {
         namespace,
-        anonymizationRulesPromise: createAnonymizationRulesPromise(request, legacySettingsPromise),
+        anonymizationRulesPromise,
         regexWorker: (() => {
           if (!this.regexWorker) {
             this.logger.error(
@@ -338,6 +358,11 @@ export class InferencePlugin
     const createStreamingResolver = (request: KibanaRequest) =>
       createInferenceStreamingResolver({ core, logger: this.logger, request });
 
+    const createFeatureEndpointResolver = (request: KibanaRequest) => {
+      const resolver = this.featureEndpointResolver;
+      return resolver ? (featureId: string) => resolver(featureId, request) : undefined;
+    };
+
     return {
       getClient: <T extends InferenceClientCreateOptions>(options: T) => {
         return createInferenceClient({
@@ -353,15 +378,15 @@ export class InferencePlugin
           getDefaultConnectorId: createDefaultConnectorIdGetter(options.request),
           resolveConnectorId: createConnectorIdResolver(options.request),
           shouldStreamInferenceEndpoint: createStreamingResolver(options.request),
-        }) as T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
+          resolveFeatureEndpoint: createFeatureEndpointResolver(options.request),
+        }) as T extends InferenceBoundClientCreateOptions
+          ? BoundInferenceClient
+          : InferenceServerClient;
       },
 
       getChatModel: async (options) => {
         return createChatModel({
-          request: options.request,
-          connectorId: options.connectorId,
-          chatModelOptions: options.chatModelOptions,
-          callbacks: options.callbacks,
+          ...options,
           ...getAnonymizationOptions(options.request),
           actions: pluginsStart.actions,
           regexWorker: this.regexWorker!,
@@ -374,6 +399,23 @@ export class InferencePlugin
           getDefaultConnectorId: createDefaultConnectorIdGetter(options.request),
           resolveConnectorId: createConnectorIdResolver(options.request),
           shouldStreamInferenceEndpoint: createStreamingResolver(options.request),
+          resolveFeatureEndpoint: createFeatureEndpointResolver(options.request),
+        });
+      },
+
+      resolveFeatureConnector: async (featureId: string, request: KibanaRequest) => {
+        // Only the connector is exposed: the endpoint's `reasoning` applies on each
+        // `chatComplete({ featureId })` call, and `temperature` stays a caller option.
+        const { connectorId } = await resolveFeatureEndpointOrThrow({
+          featureId,
+          resolveFeatureEndpoint: createFeatureEndpointResolver(request),
+        });
+        return getConnectorById({
+          connectorId,
+          actions: pluginsStart.actions,
+          request,
+          esClient: core.elasticsearch.client.asScoped(request).asCurrentUser,
+          logger: this.logger,
         });
       },
 
@@ -424,10 +466,6 @@ export class InferencePlugin
           esClient,
           logger: this.logger,
         });
-      },
-      getInferenceEndpoints: async (taskType?: InferenceTaskType) => {
-        const esClient = core.elasticsearch.client.asInternalUser;
-        return getInferenceEndpoints({ esClient, taskType });
       },
       getInferenceEndpointById: async (inferenceId: string) => {
         const esClient = core.elasticsearch.client.asInternalUser;

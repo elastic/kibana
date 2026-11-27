@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { i18n } from '@kbn/i18n';
 import {
@@ -24,12 +24,9 @@ import {
 } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React from 'react';
-import {
-  BottomBarActions,
-  useEditableSettings,
-  useUiTracker,
-} from '@kbn/observability-shared-plugin/public';
+import { BottomBarActions, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
+import { SettingDefinitionsLoadError, useEditableSettings } from '@kbn/management-settings-hooks';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useProfilingPluginSetting } from '../../../../hooks/use_profiling_integration_setting';
 
@@ -53,9 +50,11 @@ const SETTINGS_KEYS = [
   apmTraceLogsDefaultColumns,
 ];
 
+const SETTINGS_KEYS_WITH_PROFILING = [...SETTINGS_KEYS, apmEnableTransactionProfiling];
+
 function getApmSettingsKeys(isProfilingPluginEnabled: boolean) {
   if (isProfilingPluginEnabled) {
-    SETTINGS_KEYS.push(...[apmEnableTransactionProfiling]);
+    return SETTINGS_KEYS_WITH_PROFILING;
   }
 
   return SETTINGS_KEYS;
@@ -70,17 +69,28 @@ export function GeneralSettings() {
     (application.capabilities.apm['settings:save'] as boolean);
   const isProfilingPluginEnabled = useProfilingPluginSetting();
   const apmSettingsKeys = getApmSettingsKeys(isProfilingPluginEnabled);
-  const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
-    useEditableSettings(apmSettingsKeys);
+  const {
+    fields,
+    isLoading,
+    loadError,
+    retry,
+    handleFieldChange,
+    unsavedChanges,
+    saveAll,
+    isSaving,
+    cleanUnsavedChanges,
+  } = useEditableSettings({
+    settingsKeys: apmSettingsKeys,
+    settingsClient: settings.client,
+    metadataClient: settings.metadata,
+    scope: 'namespace',
+  });
 
   async function handleSave() {
     try {
-      const reloadPage = Object.keys(unsavedChanges).some((key) => {
-        return fields[key].requiresPageReload;
-      });
-      await saveAll();
+      const { requiresReload } = await saveAll();
       trackApmEvent({ metric: 'general_settings_save' });
-      if (reloadPage) {
+      if (requiresReload) {
         window.location.reload();
       }
     } catch (e) {
@@ -99,6 +109,20 @@ export function GeneralSettings() {
   return (
     <>
       <EuiSpacer />
+      {isLoading && (
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" data-test-subj="apmGeneralSettingsLoading" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+      {loadError && (
+        <SettingDefinitionsLoadError
+          error={loadError}
+          onRetry={retry}
+          data-test-subj="apmGeneralSettingsLoadError"
+        />
+      )}
       {apmSettingsKeys.map((settingKey) => {
         const field = fields[settingKey];
         if (!field) {

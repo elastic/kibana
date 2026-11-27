@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import type { ReactWrapper, ComponentType } from 'enzyme';
-import { mount } from 'enzyme';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import copy from 'copy-to-clipboard';
 
 import { useKibana } from '../../common/lib/kibana';
-import { TestProviders } from '../../common/mock';
+import { renderWithTestingProviders } from '../../common/mock';
 import { UserActionCopyLink } from './copy_link';
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
@@ -30,25 +30,21 @@ const props = {
 };
 
 describe('UserActionCopyLink ', () => {
-  let wrapper: ReactWrapper;
-
-  beforeAll(() => {
-    wrapper = mount(<UserActionCopyLink {...props} />, {
-      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
-    });
-  });
-
   beforeEach(() => {
     jest.clearAllMocks();
     useKibanaMock().services.application.getUrlForApp = mockGetUrlForApp;
   });
 
   it('it renders', async () => {
-    expect(wrapper.find(`[data-test-subj="copy-link-${props.id}"]`).first().exists()).toBeTruthy();
+    renderWithTestingProviders(<UserActionCopyLink {...props} />);
+
+    expect(screen.getByTestId(`copy-link-${props.id}`)).toBeInTheDocument();
   });
 
   it('calls copy clipboard correctly', async () => {
-    wrapper.find(`[data-test-subj="copy-link-${props.id}"]`).first().simulate('click');
+    renderWithTestingProviders(<UserActionCopyLink {...props} />);
+
+    await userEvent.click(screen.getByTestId(`copy-link-${props.id}`));
     expect(copy).toHaveBeenCalledWith('/app/security/cases/test');
   });
 });

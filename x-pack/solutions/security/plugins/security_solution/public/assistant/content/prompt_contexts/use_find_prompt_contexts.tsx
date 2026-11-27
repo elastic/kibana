@@ -12,7 +12,7 @@ import type { FindSecurityAIPromptsRequestQuery } from '@kbn/elastic-assistant-c
 import { DATA_QUALITY_SUGGESTED_USER_PROMPT } from '@kbn/ecs-data-quality-dashboard';
 import { EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS } from '../../../detection_engine/common/translations';
 import { EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE } from '../prompts/user/translations';
-import { ASSET_INVENTORY_ENTITY_PROMPT } from '../../../flyout/entity_details/shared/translations';
+import { ASSET_INVENTORY_ENTITY_PROMPT } from '../../../flyout_v2/entity/shared/translations';
 import {
   DATA_QUALITY_DASHBOARD_CATEGORY,
   getPromptContexts,

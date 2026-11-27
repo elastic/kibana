@@ -65,6 +65,19 @@ describe('AddToCase', () => {
     );
   });
 
+  it('hands the success handler to the case modal', () => {
+    const onSuccess = jest.fn();
+    render(
+      <TestProvidersComponent>
+        <AddToCase entity={ENTITY} onClick={mockOnClick} onSuccess={onSuccess} />
+      </TestProvidersComponent>
+    );
+
+    expect(
+      mockUseKibana().services.cases.hooks.useCasesAddToExistingCaseModal
+    ).toHaveBeenCalledWith({ onSuccess });
+  });
+
   it('forwards the test subject', () => {
     render(
       <TestProvidersComponent>

@@ -156,7 +156,7 @@ export interface Panel {
   markdown?: string;
   markdown_css?: string;
   markdown_less?: string;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   markdown_openLinksInNewTab: number;
   markdown_scrollbars: number;
   markdown_vertical_align?: string;

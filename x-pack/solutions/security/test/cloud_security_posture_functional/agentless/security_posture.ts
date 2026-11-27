@@ -47,13 +47,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.clickOptionButton(KSPM_RADIO_OPTION);
       await pageObjects.header.waitUntilLoadingHasFinished();
 
-      const hasSetupTechnologySelector = await testSubjects.exists(
-        SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ
-      );
-      const hasAgentBased = await testSubjects.exists(POLICY_NAME_FIELD);
+      await testSubjects.existOrFail(POLICY_NAME_FIELD);
 
-      expect(hasSetupTechnologySelector).to.be(false);
-      expect(hasAgentBased).to.be(true);
+      expect(await testSubjects.exists(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ)).to.be(false);
     });
 
     it(`should show cnvm without agentless option`, async () => {
@@ -66,13 +62,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.clickOptionButton(CNVM_RADIO_OPTION);
       await pageObjects.header.waitUntilLoadingHasFinished();
 
-      const hasSetupTechnologySelector = await testSubjects.exists(
-        SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ
-      );
-      const hasAgentBased = await testSubjects.exists(POLICY_NAME_FIELD);
+      await testSubjects.existOrFail(POLICY_NAME_FIELD);
 
-      expect(hasSetupTechnologySelector).to.be(false);
-      expect(hasAgentBased).to.be(true);
+      expect(await testSubjects.exists(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ)).to.be(false);
     });
 
     it(`should show cspm with agentless option`, async () => {
@@ -84,13 +76,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.clickOptionButton(CSPM_RADIO_OPTION);
       await pageObjects.header.waitUntilLoadingHasFinished();
 
-      const hasSetupTechnologySelector = await testSubjects.exists(
-        SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ
-      );
-      const hasAgentBased = await testSubjects.exists(POLICY_NAME_FIELD);
+      await testSubjects.existOrFail(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
 
-      expect(hasSetupTechnologySelector).to.be(true);
-      expect(hasAgentBased).to.be(false);
+      expect(await testSubjects.exists(POLICY_NAME_FIELD)).to.be(false);
     });
 
     it(`should show an invalid form state when agentless is default and switching between cloud providers`, async () => {

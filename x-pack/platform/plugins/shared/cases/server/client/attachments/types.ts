@@ -26,10 +26,10 @@ export interface AddArgs {
    */
   comment: UnifiedAttachmentPayload;
   /**
-   * Optional pre-generated saved object id. The internal POST /attachments route
-   * supplies this so it can locate the created attachment in the returned case.
+   * Overrides the attachmentType reported on the cases.attachmentsAdded workflow trigger.
+   * Defaults to the type of `comment`.
    */
-  id?: string;
+  triggerAttachmentType?: string;
 }
 
 export interface BulkCreateArgs {

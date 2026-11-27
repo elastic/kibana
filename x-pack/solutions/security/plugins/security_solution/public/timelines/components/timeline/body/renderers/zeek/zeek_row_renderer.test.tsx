@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
-import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import { zeekRowRenderer } from './zeek_row_renderer';
 import { TimelineId } from '../../../../../../../common/types/timeline';
 
@@ -29,7 +28,6 @@ jest.mock('@elastic/eui', () => {
 jest.mock('../../../../../../common/components/link_to');
 
 describe('zeek_row_renderer', () => {
-  const mount = useMountAppended();
   let nonZeek: Ecs;
   let zeek: Ecs;
 
@@ -38,14 +36,21 @@ describe('zeek_row_renderer', () => {
     zeek = cloneDeep(mockTimelineData[13].ecs);
   });
 
-  test('renders correctly against snapshot', () => {
+  test('renders the row details for a zeek datum', () => {
     const children = zeekRowRenderer.renderRow({
-      data: nonZeek,
+      data: zeek,
       scopeId: TimelineId.test,
     });
 
-    const wrapper = shallow(<span>{children}</span>);
-    expect(wrapper).toMatchSnapshot();
+    const { container } = render(
+      <TestProviders>
+        <span>{children}</span>
+      </TestProviders>
+    );
+
+    expect(container).toHaveTextContent('Connection attempt rejected');
+    expect(container).toHaveTextContent('185.176.26.101:44059');
+    expect(container).toHaveTextContent('207.154.238.205:11568');
   });
 
   test('should return false if not a zeek datum', () => {
@@ -61,13 +66,13 @@ describe('zeek_row_renderer', () => {
       data: zeek,
       scopeId: TimelineId.test,
     });
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <span>{children}</span>
       </TestProviders>
     );
 
-    const extractEuiIconText = removeExternalLinkText(wrapper.text()).replaceAll(
+    const extractEuiIconText = removeExternalLinkText(container.textContent).replaceAll(
       'External link',
       ''
     );

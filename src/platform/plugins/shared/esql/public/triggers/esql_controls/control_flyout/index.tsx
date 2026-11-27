@@ -23,7 +23,7 @@ import {
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { getValuesFromQueryField } from '@kbn/esql-utils';
 import { getVariableNamePrefix } from '@kbn/esql-controls-utils';
-import type { ISearchGeneric } from '@kbn/search-types';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { monaco } from '@kbn/code-editor';
 import { ValueControlForm } from './value_control_form';
 import { Header, ControlType, VariableName, Footer } from './shared_form_components';
@@ -40,7 +40,7 @@ import {
 } from './helpers';
 
 interface ESQLControlsFlyoutProps {
-  search: ISearchGeneric;
+  search: DataPublicPluginStart['search'];
   initialVariableType: ESQLVariableType;
   queryString: string;
   esqlVariables: ESQLControlVariable[];
@@ -247,7 +247,7 @@ export function ESQLControlsFlyout({
         queryString={queryString}
         setControlState={setControlState}
         initialState={initialState}
-        search={search}
+        search={search.search}
         cursorPosition={cursorPosition}
         currentApp={currentApp}
       />

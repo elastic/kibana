@@ -7,7 +7,7 @@
 
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { HistogramIndicator } from '@kbn/slo-schema';
-import { is, histogramIndicatorSchemaZod } from '@kbn/slo-schema';
+import { is, histogramIndicatorSchema } from '@kbn/slo-schema';
 import { TransformGenerator, getElasticsearchQueryOrThrow, parseIndex } from '.';
 import {
   SLI_DESTINATION_INDEX_NAME,
@@ -22,7 +22,7 @@ import { getFilterRange, getTimesliceTargetComparator } from './common';
 
 export class HistogramTransformGenerator extends TransformGenerator {
   public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
-    if (!is(histogramIndicatorSchemaZod, slo.indicator)) {
+    if (!is(histogramIndicatorSchema, slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
 

@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { TaskManagerStartContract, RunContext } from '@kbn/task-manager-plugin/server';
 import type { CoreStart, ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { LicenseCheckState, LicenseType } from '@kbn/licensing-types';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
@@ -34,6 +34,7 @@ import { createWorkflowTriggerEmitter } from '../../workflow/create_workflow_tri
 const ENTITY_MAINTAINER_LICENSE_CHECK_VALID = 'valid' as const satisfies LicenseCheckState;
 
 export interface ExecuteMaintainerRunParams {
+  setCustomTaskRunEventFields?: RunContext['setCustomTaskRunEventFields'];
   status: Partial<EntityMaintainerStatus>;
   request: KibanaRequest;
   taskId: string;
@@ -120,6 +121,7 @@ export async function executeMaintainerRun({
   workflowsExtensions,
   analytics,
   logger,
+  setCustomTaskRunEventFields,
 }: ExecuteMaintainerRunParams): Promise<{ state: EntityMaintainerStatus } | null> {
   if (status.taskStatus === EntityMaintainerTaskStatus.STOPPED) {
     logger.debug(`Entity maintainer task is stopped, skipping run`);
@@ -181,6 +183,7 @@ export async function executeMaintainerRun({
     },
     run: () =>
       runEntityMaintainerTask({
+        setCustomTaskRunEventFields,
         status: maintainerStatus,
         fakeRequest: request,
         logger: taskLogger,
@@ -219,6 +222,7 @@ export async function persistMaintainerState({
 }
 
 export async function runEntityMaintainerTask({
+  setCustomTaskRunEventFields,
   status,
   fakeRequest,
   logger,
@@ -235,6 +239,7 @@ export async function runEntityMaintainerTask({
   analytics,
   telemetryClient,
 }: {
+  setCustomTaskRunEventFields?: RunContext['setCustomTaskRunEventFields'];
   status: EntityMaintainerStatus;
   fakeRequest: KibanaRequest;
   logger: Logger;
@@ -291,6 +296,7 @@ export async function runEntityMaintainerTask({
     }
     logger.debug(`Executing run`);
     status.state = await run({
+      setCustomTaskRunEventFields,
       status: { ...status },
       signal,
       logger,

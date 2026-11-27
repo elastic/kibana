@@ -15,6 +15,7 @@ import {
   getModelEOLDate,
   getModelReleaseDate,
   getProviderKeyForCreator,
+  getTaskTypeCategoryLabel,
 } from '../../utils/eis_utils';
 import {
   EIS_END_OF_LIFE_SORT_FIELD,
@@ -79,7 +80,7 @@ export const EisTable = ({ onViewModelDetails }: EisTableProps) => (
       data-test-subj="eisTableType"
       render={(item: ContentListItem) => {
         const { categories } = toGroupedModel(item);
-        return categories.length > 0 ? categories.join(', ') : '--';
+        return categories.length > 0 ? categories.map(getTaskTypeCategoryLabel).join(', ') : '--';
       }}
     />
     <Column

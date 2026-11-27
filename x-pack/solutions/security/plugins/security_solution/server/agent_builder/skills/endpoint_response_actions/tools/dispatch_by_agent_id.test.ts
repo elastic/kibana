@@ -6,6 +6,7 @@
  */
 
 import {
+  isToolHandlerInterruptReturn,
   isToolHandlerStandardReturn,
   type ToolHandlerContext,
   type ToolHandlerReturn,
@@ -25,28 +26,38 @@ import { unisolateHostTool } from './unisolate_host';
 
 jest.mock('../../../../endpoint/services/actions', () => {
   const original = jest.requireActual('../../../../endpoint/services/actions');
-  return { ...original, getActionDetailsById: jest.fn() };
+  return {
+    ...original,
+    getActionDetailsById: jest.fn(),
+    getActionListByStatus: jest.fn().mockResolvedValue({ data: [] }),
+  };
 });
 
 const mockGetActionDetailsById = getActionDetailsById as jest.Mock;
 
-// Tool-call state, as `run_tool.ts` scopes it: the confirmation card records the
-// approved target here and the handler reads it back after the analyst confirms.
+// Tool-call state, as `run_tool.ts` scopes it: the confirmation the handler asks
+// for records the approved target here and the handler reads it back once the
+// analyst confirms.
 const toolCallState: { value?: unknown } = { value: undefined };
+const confirmationStatus: { value: 'unprompted' | 'accepted' | 'rejected' } = {
+  value: 'unprompted',
+};
+const mockAskForConfirmation = jest.fn((opts: Record<string, unknown>) => ({ prompt: opts }));
 
 const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
 const mockContext = {
-  callContext: { callSource: 'agent' },
+  callContext: { callSource: 'agent', toolCallId: 'call-test-1' },
   logger: mockLogger,
   request: httpServerMock.createKibanaRequest(),
-  // Tool-call state as the runner scopes it (`run_tool.ts`): the confirmation
-  // card records the target the analyst was shown here, and the handler reads it
-  // back once the call is confirmed.
   stateManager: {
     getState: () => toolCallState.value,
     setState: (state: unknown) => {
       toolCallState.value = state;
     },
+  },
+  prompts: {
+    checkConfirmationStatus: () => ({ status: confirmationStatus.value }),
+    askForConfirmation: mockAskForConfirmation,
   },
   runContext: {
     runId: 'run-test-1',
@@ -61,19 +72,38 @@ const results = (result: unknown) => {
   return (result as ToolHandlerStandardReturn).results;
 };
 
-// The runner builds the confirmation card and then runs the handler with the same
-// tool-call state; dispatching steps replay both phases so the handler sees the
+// The handler asks for the analyst's confirmation and the runner re-runs it once
+// they answer; dispatching steps replay both phases so the handler sees the
 // target the analyst was shown.
 async function confirmThenDispatch(
   tool: ReturnType<Case['build']>,
   toolParams: Record<string, unknown>
 ) {
-  const getConfirmation = tool.confirmation?.getConfirmation;
-  if (!getConfirmation) {
-    throw new Error(`${tool.id} has no confirmation to build`);
+  confirmationStatus.value = 'unprompted';
+  const prompted = await tool.handler(toolParams, mockContext);
+  if (!isToolHandlerInterruptReturn(prompted)) {
+    return prompted;
   }
 
-  await getConfirmation({ toolParams, context: mockContext });
+  confirmationStatus.value = 'accepted';
+
+  return tool.handler(toolParams, mockContext);
+}
+
+// The card the handler asks the analyst to confirm for these params.
+async function cardFor(tool: ReturnType<Case['build']>, toolParams: Record<string, unknown>) {
+  confirmationStatus.value = 'unprompted';
+  const prompted = await tool.handler(toolParams, mockContext);
+  if (!isToolHandlerInterruptReturn(prompted)) {
+    throw new Error('Expected a confirmation prompt');
+  }
+
+  return mockAskForConfirmation.mock.calls[0][0] as { message: string; id: string };
+}
+
+// An analyst-approved call: the handler runs again with the confirmation accepted.
+async function runApproved(tool: ReturnType<Case['build']>, toolParams: Record<string, unknown>) {
+  confirmationStatus.value = 'accepted';
 
   return tool.handler(toolParams, mockContext);
 }
@@ -84,6 +114,8 @@ interface Case {
   action: string;
   build: typeof isolateHostTool;
   extraParams: Record<string, unknown>;
+  // Whether the analyst confirms the dispatch. Running processes only reads.
+  gated: boolean;
   privilege:
     | 'canIsolateHost'
     | 'canUnIsolateHost'
@@ -99,6 +131,7 @@ const CASES: Case[] = [
     action: 'isolate',
     build: isolateHostTool,
     extraParams: {},
+    gated: true,
   },
   {
     label: 'unisolate_host',
@@ -107,6 +140,7 @@ const CASES: Case[] = [
     action: 'unisolate',
     build: unisolateHostTool,
     extraParams: {},
+    gated: true,
   },
   {
     label: 'scan_host',
@@ -115,6 +149,7 @@ const CASES: Case[] = [
     action: 'scan',
     build: scanHostTool as unknown as typeof isolateHostTool,
     extraParams: { path: '/tmp/x' },
+    gated: true,
   },
   {
     label: 'running_processes',
@@ -123,13 +158,21 @@ const CASES: Case[] = [
     action: 'running-processes',
     build: getRunningProcessesTool,
     extraParams: {},
+    gated: false,
   },
 ];
 
 describe.each(CASES)(
   '$label: dispatch by agent ID',
-  ({ clientMethod, action, build, extraParams, privilege }) => {
+  ({ clientMethod, action, build, extraParams, privilege, gated }) => {
     jest.setTimeout(20000);
+
+    // Tests of the confirmation card exist only for the tools that show one.
+    const itGated = (name: string, fn: () => Promise<void>) => {
+      if (gated) {
+        it(name, fn);
+      }
+    };
 
     let service: EndpointAppContextService;
     let client: Record<string, jest.Mock>;
@@ -141,6 +184,7 @@ describe.each(CASES)(
     beforeEach(() => {
       jest.clearAllMocks();
       toolCallState.value = undefined;
+      confirmationStatus.value = 'unprompted';
       service = createMockEndpointAppContext().service;
       getHostMetadataList = jest.fn().mockResolvedValue({ data: [], total: 0 });
       jest.spyOn(service, 'getEndpointMetadataService').mockImplementation((() => ({
@@ -196,6 +240,7 @@ describe.each(CASES)(
       );
       const ambiguous = first[0].data as Record<string, unknown>;
       expect(ambiguous.reason).toBe('ambiguous_hostname');
+      expect(mockAskForConfirmation).not.toHaveBeenCalled();
       expect(client[clientMethod]).not.toHaveBeenCalled();
       expect(ambiguous.message).toContain('agentId');
       const candidateIds = (ambiguous.candidates as Array<{ agentId: string }>).map(
@@ -259,92 +304,57 @@ describe.each(CASES)(
       );
     });
 
-    it('records the resolved agent as the confirmed target when the card names a host', async () => {
+    itGated(
+      'records the resolved agent as the confirmed target when the card names a host',
+      async () => {
+        const tool = build(service);
+
+        await cardFor(tool, { hostName: 'dup-host', agentId: 'agent-b', ...extraParams });
+
+        // The displayed arguments travel with the confirmation: scan records
+        // its `path`; tools called without a `comment` record none.
+        const recordedArgs = 'path' in extraParams ? { path: extraParams.path } : undefined;
+        expect(toolCallState.value).toEqual({
+          kind: 'confirmed',
+          action,
+          agentId: 'agent-b',
+          ...(recordedArgs ? { args: recordedArgs } : {}),
+        });
+      }
+    );
+
+    itGated(
+      'does not dispatch when the host now resolves to a different agent than the confirmed one',
+      async () => {
+        listAgents.mockResolvedValueOnce({
+          agents: [{ id: 'agent-b', status: 'online', packages: ['endpoint'] }],
+        });
+        const tool = build(service);
+
+        await cardFor(tool, { hostName: 'dup-host', ...extraParams });
+
+        // The confirmed agent goes offline and another agent answers to the same
+        // hostname, so the handler's own walk would pick a host the card never
+        // named.
+        listAgents.mockResolvedValue({
+          agents: [{ id: 'agent-a', status: 'online', packages: ['endpoint'] }],
+        });
+
+        const out = results(await runApproved(tool, { hostName: 'dup-host', ...extraParams }));
+
+        expect(out[0].type).toBe('error');
+        expect((out[0].data as Record<string, unknown>).error).toBe('invalid_argument');
+        expect((out[0].data as Record<string, unknown>).message).toEqual(
+          expect.stringContaining('changed after the analyst confirmed it')
+        );
+        expect(client[clientMethod]).not.toHaveBeenCalled();
+      }
+    );
+
+    itGated('does not dispatch a call that carries no confirmation at all', async () => {
       const tool = build(service);
 
-      await tool.confirmation?.getConfirmation?.({
-        toolParams: { hostName: 'dup-host', agentId: 'agent-b', ...extraParams },
-        context: mockContext,
-      });
-
-      expect(toolCallState.value).toEqual({ kind: 'confirmed', action, agentId: 'agent-b' });
-    });
-
-    it('records a refusal, not a target, when the card reports the action will be refused', async () => {
-      getAgent.mockRejectedValue(new Error('fleet search failed'));
-      const tool = build(service);
-
-      await tool.confirmation?.getConfirmation?.({
-        toolParams: { agentId: 'agent-b', ...extraParams },
-        context: mockContext,
-      });
-
-      expect(toolCallState.value).toEqual({
-        kind: 'refused',
-        action,
-        reason: expect.stringContaining('fleet search failed'),
-      });
-    });
-
-    it('does not dispatch when the analyst approves a card that said the action would be refused', async () => {
-      // The preflight cannot read the target, so the card the analyst is shown
-      // reports a refusal and names no host.
-      getAgent.mockRejectedValueOnce(new Error('fleet search failed'));
-      const tool = build(service);
-
-      const card = await tool.confirmation?.getConfirmation?.({
-        toolParams: { agentId: 'agent-b', ...extraParams },
-        context: mockContext,
-      });
-      expect(card?.message).toContain('will be refused');
-
-      // By the time the approval comes back the service has recovered and the
-      // handler resolves the target cleanly — but the approved card never named
-      // it, so the failure must not turn into a dispatch.
-      const out = results(await tool.handler({ agentId: 'agent-b', ...extraParams }, mockContext));
-
-      expect(out[0].type).toBe('error');
-      expect((out[0].data as Record<string, unknown>).error).toBe('invalid_argument');
-      expect((out[0].data as Record<string, unknown>).message).toEqual(
-        expect.stringContaining('reported that the action would be refused')
-      );
-      expect(client[clientMethod]).not.toHaveBeenCalled();
-    });
-
-    it('does not dispatch when the host now resolves to a different agent than the confirmed one', async () => {
-      listAgents.mockResolvedValueOnce({
-        agents: [{ id: 'agent-b', status: 'online', packages: ['endpoint'] }],
-      });
-      const tool = build(service);
-
-      await tool.confirmation?.getConfirmation?.({
-        toolParams: { hostName: 'dup-host', ...extraParams },
-        context: mockContext,
-      });
-
-      // The confirmed agent goes offline and another agent answers to the same
-      // hostname, so the handler's own walk would pick a host the card never
-      // named.
-      listAgents.mockResolvedValue({
-        agents: [{ id: 'agent-a', status: 'online', packages: ['endpoint'] }],
-      });
-
-      const out = results(
-        await tool.handler({ hostName: 'dup-host', ...extraParams }, mockContext)
-      );
-
-      expect(out[0].type).toBe('error');
-      expect((out[0].data as Record<string, unknown>).error).toBe('invalid_argument');
-      expect((out[0].data as Record<string, unknown>).message).toEqual(
-        expect.stringContaining('changed after the analyst confirmed it')
-      );
-      expect(client[clientMethod]).not.toHaveBeenCalled();
-    });
-
-    it('does not dispatch a call that carries no confirmation at all', async () => {
-      const tool = build(service);
-
-      const out = results(await tool.handler({ agentId: 'agent-b', ...extraParams }, mockContext));
+      const out = results(await runApproved(tool, { agentId: 'agent-b', ...extraParams }));
 
       expect(out[0].type).toBe('error');
       expect((out[0].data as Record<string, unknown>).message).toEqual(
@@ -352,6 +362,162 @@ describe.each(CASES)(
       );
       expect(client[clientMethod]).not.toHaveBeenCalled();
     });
+
+    itGated(
+      'does not dispatch when a confirmed call is replayed with different arguments',
+      async () => {
+        // The card is the human gate on the whole request, its displayed
+        // arguments included: a resumed call reusing the confirmed tool-call
+        // state but swapping the comment (or, for scan, the path) must not
+        // inherit the approval.
+        const tool = build(service);
+
+        await cardFor(tool, { agentId: 'agent-b', comment: 'first reason', ...extraParams });
+        expect(toolCallState.value).toEqual(
+          expect.objectContaining({
+            kind: 'confirmed',
+            args: expect.objectContaining({ comment: 'first reason' }),
+          })
+        );
+
+        const out = results(
+          await runApproved(tool, { agentId: 'agent-b', comment: 'swapped reason', ...extraParams })
+        );
+
+        expect(out[0].type).toBe('error');
+        const data = out[0].data as Record<string, unknown>;
+        expect(data.error).toBe('invalid_argument');
+        expect(data.message).toEqual(
+          expect.stringContaining('differ from the ones the analyst confirmed')
+        );
+        expect(client[clientMethod]).not.toHaveBeenCalled();
+      }
+    );
+
+    itGated(
+      'does not dispatch when the replayed scan path differs from the confirmed one',
+      async () => {
+        // `path` is the argument that decides what the endpoint scans, so a
+        // resumed call swapping it must not inherit the approval — the card
+        // the analyst saw named the other path.
+        const tool = build(service);
+        const pathA = 'path' in extraParams ? (extraParams.path as string) : undefined;
+        if (!pathA) return;
+
+        await cardFor(tool, { agentId: 'agent-b', ...extraParams });
+        expect(toolCallState.value).toEqual(
+          expect.objectContaining({
+            kind: 'confirmed',
+            args: expect.objectContaining({ path: pathA }),
+          })
+        );
+
+        const out = results(
+          await runApproved(tool, { agentId: 'agent-b', ...extraParams, path: '/tmp/other' })
+        );
+
+        expect(out[0].type).toBe('error');
+        const data = out[0].data as Record<string, unknown>;
+        expect(data.error).toBe('invalid_argument');
+        expect(data.message).toEqual(
+          expect.stringContaining('differ from the ones the analyst confirmed')
+        );
+        expect(client[clientMethod]).not.toHaveBeenCalled();
+      }
+    );
+
+    itGated(
+      'refuses when the privilege is revoked between the card and the approved resume',
+      async () => {
+        // The recheck after approval is the part that catches a role change
+        // while the card sat waiting: the call must not dispatch.
+        const tool = build(service);
+        service.getEndpointAuthz = jest
+          .fn()
+          .mockResolvedValueOnce(getEndpointAuthzInitialStateMock({}))
+          .mockResolvedValue(getEndpointAuthzInitialStateMock({ [privilege]: false }));
+
+        await cardFor(tool, { agentId: 'agent-b', ...extraParams });
+
+        const out = results(await runApproved(tool, { agentId: 'agent-b', ...extraParams }));
+
+        expect(out[0].type).toBe('error');
+        expect((out[0].data as Record<string, unknown>).error).toBe('insufficient_privileges');
+        expect(client[clientMethod]).not.toHaveBeenCalled();
+      }
+    );
+
+    itGated(
+      'reports the no-op instead of dispatching when the host already reached the requested state while the card waited',
+      async () => {
+        // Between the card and the approval another path isolated (or
+        // released) the host: the resume must report the no-op, not dispatch
+        // a second action toward a state the host is already in.
+        if (action !== 'isolate' && action !== 'unisolate') return;
+        const tool = build(service);
+        const isolated = action === 'isolate';
+
+        await cardFor(tool, { agentId: 'agent-b', ...extraParams });
+
+        getHostMetadataList.mockResolvedValue({
+          data: [
+            {
+              host: { hostname: 'dup-host' },
+              metadata: {
+                agent: { id: 'agent-b' },
+                elastic: { agent: { id: 'agent-b' } },
+                Endpoint: { state: { isolation: isolated } },
+              },
+              host_status: 'healthy',
+            },
+          ],
+          total: 1,
+        });
+
+        const out = results(await runApproved(tool, { agentId: 'agent-b', ...extraParams }));
+
+        expect(out[0].type).not.toBe('error');
+        expect(out[0].data).toMatchObject({ noOp: true, isolated });
+        expect(client[clientMethod]).not.toHaveBeenCalled();
+      }
+    );
+
+    it('dispatches when the replayed arguments are the ones that were confirmed', async () => {
+      const tool = build(service);
+
+      const out = results(
+        await confirmThenDispatch(tool, {
+          agentId: 'agent-b',
+          comment: 'triage note',
+          ...extraParams,
+        })
+      );
+
+      const data = out[0].data as Record<string, unknown>;
+      expect(data.found).not.toBe(false);
+      expect(client[clientMethod]).toHaveBeenCalledTimes(1);
+      expect(client[clientMethod].mock.calls[0][0]).toEqual(
+        expect.objectContaining({ endpoint_ids: ['agent-b'] })
+      );
+    });
+
+    if (!gated) {
+      it('dispatches in one call, without asking the analyst to confirm', async () => {
+        const tool = build(service);
+
+        const out = results(
+          await tool.handler({ agentId: 'agent-b', ...extraParams }, mockContext)
+        );
+
+        expect(mockAskForConfirmation).not.toHaveBeenCalled();
+        expect(toolCallState.value).toBeUndefined();
+        expect(out[0].type).not.toBe('error');
+        expect(client[clientMethod]).toHaveBeenCalledTimes(1);
+        expect(client[clientMethod].mock.calls[0][0]).toEqual(
+          expect.objectContaining({ endpoint_ids: ['agent-b'] })
+        );
+      });
+    }
 
     it('refuses a hostName that does not match the Fleet hostname of the agentId, instead of acting on the agent', async () => {
       const tool = build(service);
@@ -368,18 +534,22 @@ describe.each(CASES)(
       expect(client[clientMethod]).not.toHaveBeenCalled();
     });
 
-    it('renders the confirmation card from the resolved Fleet host, not the hostName the model supplied', async () => {
-      const tool = build(service);
+    itGated(
+      'renders the confirmation card from the resolved Fleet host, not the hostName the model supplied',
+      async () => {
+        const tool = build(service);
 
-      const card = await tool.confirmation?.getConfirmation?.({
-        toolParams: { hostName: 'dup-host', agentId: 'agent-b', ...extraParams },
-        context: mockContext,
-      });
+        const card = await cardFor(tool, {
+          hostName: 'dup-host',
+          agentId: 'agent-b',
+          ...extraParams,
+        });
 
-      expect(card?.message).toContain('dup-host');
-      expect(card?.message).toContain('agent-b');
-      expect(client[clientMethod]).not.toHaveBeenCalled();
-    });
+        expect(card.message).toContain('dup-host');
+        expect(card.message).toContain('agent-b');
+        expect(client[clientMethod]).not.toHaveBeenCalled();
+      }
+    );
 
     it('accepts the short Defend hostname of an agent whose Fleet hostname is the FQDN', async () => {
       // Agent policy hostname format is FQDN: Fleet names the agent
@@ -458,87 +628,168 @@ describe.each(CASES)(
       expect(client[clientMethod]).not.toHaveBeenCalled();
     });
 
-    it('does not present an approvable card when the hostName and agentId name different hosts', async () => {
+    it('refuses without a confirmation card when the hostName and agentId name different hosts', async () => {
       const tool = build(service);
 
-      const card = await tool.confirmation?.getConfirmation?.({
-        toolParams: { hostName: 'web-01', agentId: 'agent-b', ...extraParams },
-        context: mockContext,
-      });
+      const out = results(
+        await tool.handler({ hostName: 'web-01', agentId: 'agent-b', ...extraParams }, mockContext)
+      );
 
-      expect(card?.message).toContain('will be refused');
-      expect(card?.message).toContain("'web-01'");
-      expect(card?.message).toContain("'dup-host'");
-      expect(card?.message).not.toContain('agent ID agent-b)**');
+      const data = out[0].data as Record<string, unknown>;
+      expect(out[0].type).toBe('error');
+      expect(data.error).toBe('invalid_argument');
+      expect(String(data.message)).toContain("'web-01'");
+      expect(mockAskForConfirmation).not.toHaveBeenCalled();
+      expect(client[clientMethod]).not.toHaveBeenCalled();
     });
 
-    it('tells the analyst up front when the agent cannot be resolved, instead of asking them to confirm a no-op', async () => {
+    it('returns the not-found result without a confirmation card when the agent cannot be resolved', async () => {
       getAgent.mockResolvedValue({ id: 'agent-b', packages: ['system'] });
       const tool = build(service);
 
-      const card = await tool.confirmation?.getConfirmation?.({
-        toolParams: { agentId: 'agent-b', ...extraParams },
-        context: mockContext,
-      });
+      const out = results(await tool.handler({ agentId: 'agent-b', ...extraParams }, mockContext));
 
-      expect(card?.message).toContain('will be refused');
-      expect(card?.message).toContain('agent-b');
+      expect((out[0].data as Record<string, unknown>).reason).toBe('endpoint_not_found');
+      expect(mockAskForConfirmation).not.toHaveBeenCalled();
+      expect(client[clientMethod]).not.toHaveBeenCalled();
     });
 
-    it('fails before the prompt when the analyst lacks the endpoint privilege', async () => {
+    it('refuses before the prompt when the analyst lacks the endpoint privilege', async () => {
       service.getEndpointAuthz = jest
         .fn()
         .mockResolvedValue(getEndpointAuthzInitialStateMock({ [privilege]: false }));
       const tool = build(service);
 
-      const card = await tool.confirmation?.getConfirmation?.({
-        toolParams: { agentId: 'agent-b', ...extraParams },
-        context: mockContext,
-      });
+      const out = results(await tool.handler({ agentId: 'agent-b', ...extraParams }, mockContext));
 
-      expect(card?.message).toContain('will be refused');
-      expect(card?.message).toContain(privilege);
+      const data = out[0].data as Record<string, unknown>;
+      expect(out[0].type).toBe('error');
+      expect(data.error).toBe('insufficient_privileges');
+      expect(data.privilege).toBe(privilege);
+      expect(mockAskForConfirmation).not.toHaveBeenCalled();
+      expect(client[clientMethod]).not.toHaveBeenCalled();
     });
 
-    it('returns a refusal card, not a rejected call, when the privilege read fails', async () => {
+    it('returns an error result without a confirmation card when the privilege read fails', async () => {
       service.getEndpointAuthz = jest
         .fn()
         .mockRejectedValue(new Error('kibana system unavailable'));
       const tool = build(service);
 
-      const card = await tool.confirmation?.getConfirmation?.({
-        toolParams: { agentId: 'agent-b', ...extraParams },
-        context: mockContext,
-      });
+      const out = results(await tool.handler({ agentId: 'agent-b', ...extraParams }, mockContext));
 
-      expect(card?.message).toContain('will be refused');
-      expect(card?.message).toContain('kibana system unavailable');
-    });
-
-    it('returns a refusal card, not a rejected call, when the target lookup fails', async () => {
-      getAgent.mockRejectedValue(new Error('fleet search failed'));
-      const tool = build(service);
-
-      const card = await tool.confirmation?.getConfirmation?.({
-        toolParams: { agentId: 'agent-b', ...extraParams },
-        context: mockContext,
-      });
-
-      expect(card?.message).toContain('will be refused');
-      expect(card?.message).toContain('fleet search failed');
+      const data = out[0].data as Record<string, unknown>;
+      expect(out[0].type).toBe('error');
+      expect(String(data.message)).toContain('kibana system unavailable');
+      expect(mockAskForConfirmation).not.toHaveBeenCalled();
       expect(client[clientMethod]).not.toHaveBeenCalled();
     });
 
-    it('shows the model-written comment on the card, since it is logged under the analyst', async () => {
+    it('returns an error result without a confirmation card when the target lookup fails', async () => {
+      getAgent.mockRejectedValue(new Error('fleet search failed'));
       const tool = build(service);
 
-      const card = await tool.confirmation?.getConfirmation?.({
-        toolParams: { agentId: 'agent-b', comment: 'Per ticket SEC-42', ...extraParams },
-        context: mockContext,
-      });
+      const out = results(await tool.handler({ agentId: 'agent-b', ...extraParams }, mockContext));
 
-      expect(card?.message).toContain('Per ticket SEC-42');
+      const data = out[0].data as Record<string, unknown>;
+      expect(out[0].type).toBe('error');
+      expect(String(data.message)).toContain('fleet search failed');
+      expect(mockAskForConfirmation).not.toHaveBeenCalled();
+      expect(client[clientMethod]).not.toHaveBeenCalled();
     });
+
+    itGated(
+      'shows the model-written comment on the card, since it is logged under the analyst',
+      async () => {
+        const tool = build(service);
+
+        const card = await cardFor(tool, {
+          agentId: 'agent-b',
+          comment: 'Per ticket SEC-42',
+          ...extraParams,
+        });
+
+        expect(card.message).toContain('Per ticket SEC-42');
+      }
+    );
+
+    // The LangChain adapter reports `unknown` as the tool call id when the
+    // model provider returned none. Every such call would share one prompt id
+    // and one state slot, so an approval for one could be read as an approval
+    // for another: no card, and no dispatch even if a confirmation is on file.
+    itGated(
+      'shows no card and dispatches nothing when the tool call has no usable id',
+      async () => {
+        const tool = build(service);
+        const unidentified = {
+          ...mockContext,
+          callContext: { ...mockContext.callContext, toolCallId: 'unknown' },
+        } as unknown as ToolHandlerContext;
+
+        const prompted = await tool.handler({ agentId: 'agent-b', ...extraParams }, unidentified);
+        expect(isToolHandlerInterruptReturn(prompted)).toBe(false);
+        expect(mockAskForConfirmation).not.toHaveBeenCalled();
+
+        // An approval on file for that id must not authorise the call either.
+        confirmationStatus.value = 'accepted';
+        const out = results(
+          await tool.handler({ agentId: 'agent-b', ...extraParams }, unidentified)
+        );
+
+        expect(out[0].type).toBe('error');
+        expect((out[0].data as Record<string, unknown>).error).toBe('invalid_argument');
+        expect((out[0].data as Record<string, unknown>).message).toEqual(
+          expect.stringContaining('no unique id')
+        );
+        expect(client[clientMethod]).not.toHaveBeenCalled();
+      }
+    );
+
+    // The hostname is endpoint-reported (`host.name`, `host.hostname`), not
+    // model-authored: a machine can be named anything, and the card places the
+    // name in a bold span, so an unescaped name would restructure the approval
+    // card the analyst is asked to trust.
+    itGated(
+      'shows an endpoint-reported hostname that carries Markdown as plain text, not as structure',
+      async () => {
+        getAgent.mockResolvedValue({
+          id: 'agent-b',
+          status: 'online',
+          packages: ['endpoint'],
+          local_metadata: {
+            host: { name: 'web-01** [approved by CISO](https://evil.example)' },
+          },
+        });
+        getHostMetadataList.mockResolvedValue({
+          data: [{ host: { hostname: 'web-01** [approved by CISO](https://evil.example)' } }],
+          total: 1,
+        });
+        const tool = build(service);
+
+        const card = await cardFor(tool, { agentId: 'agent-b', ...extraParams });
+
+        expect(card.message).toContain('web-01\\*\\* \\[approved by CISO\\]');
+        expect(card.message).not.toContain('[approved by CISO](');
+        expect(card.message).not.toContain('** [');
+      }
+    );
+
+    itGated(
+      'binds the confirmation to the tool call id, so a resumed call dispatches under the same id',
+      async () => {
+        const tool = build(service);
+
+        const out = results(
+          await confirmThenDispatch(tool, { agentId: 'agent-b', ...extraParams })
+        );
+
+        expect(mockAskForConfirmation.mock.calls[0][0]).toMatchObject({
+          id: `${action}.confirm.call-test-1`,
+        });
+        expect(client[clientMethod]).toHaveBeenCalledTimes(1);
+        expect(out[0].type).not.toBe('error');
+      }
+    );
 
     it.each(['user', 'mcp', 'unknown'] as const)(
       'refuses a %s call source without dispatching, so the confirmation gate cannot be bypassed',
@@ -592,20 +843,17 @@ describe.each(CASES)(
       expect(client[clientMethod]).not.toHaveBeenCalled();
     });
 
-    it('tells the analyst up front when securitySolution access is missing', async () => {
+    it('refuses before the prompt when securitySolution access is missing', async () => {
       service.getEndpointAuthz = jest
         .fn()
         .mockResolvedValue(getEndpointAuthzInitialStateMock({ canReadSecuritySolution: false }));
       const tool = build(service);
 
-      const card = await tool.confirmation?.getConfirmation?.({
-        toolParams: { agentId: 'agent-b', ...extraParams },
-        context: mockContext,
-      });
+      const out = results(await tool.handler({ agentId: 'agent-b', ...extraParams }, mockContext));
 
-      expect(card?.message).toContain('will be refused');
-      expect(card?.message).toContain('canReadSecuritySolution');
-      expect(toolCallState.value).toEqual(expect.objectContaining({ kind: 'refused', action }));
+      expect((out[0].data as Record<string, unknown>).privilege).toBe('canReadSecuritySolution');
+      expect(mockAskForConfirmation).not.toHaveBeenCalled();
+      expect(toolCallState.value).toBeUndefined();
     });
 
     it.each(['unenrolled', 'uninstalled'])(
@@ -619,13 +867,6 @@ describe.each(CASES)(
         });
         const tool = build(service);
 
-        const card = await tool.confirmation?.getConfirmation?.({
-          toolParams: { agentId: 'agent-b', ...extraParams },
-          context: mockContext,
-        });
-        expect(card?.message).toContain('will be refused');
-        expect(card?.message).toContain('agent-b');
-
         const out = results(
           await tool.handler({ agentId: 'agent-b', ...extraParams }, mockContext)
         );
@@ -633,6 +874,7 @@ describe.each(CASES)(
         expect(data.found).toBe(false);
         expect(data.reason).toBe('endpoint_not_active');
         expect(data.agentId).toBe('agent-b');
+        expect(mockAskForConfirmation).not.toHaveBeenCalled();
         expect(client[clientMethod]).not.toHaveBeenCalled();
       }
     );
@@ -667,26 +909,24 @@ describe.each(CASES)(
       );
     });
 
-    it('labels the host by agent ID, never by the model-supplied hostName, when Fleet records no name', async () => {
-      getAgent.mockResolvedValue({ id: 'agent-b', status: 'online', packages: ['endpoint'] });
-      const tool = build(service);
+    itGated(
+      'labels the host by agent ID, never by the model-supplied hostName, when Fleet records no name',
+      async () => {
+        getAgent.mockResolvedValue({ id: 'agent-b', status: 'online', packages: ['endpoint'] });
+        const tool = build(service);
+        const params = { hostName: 'attacker-chosen-name', agentId: 'agent-b', ...extraParams };
 
-      const card = await tool.confirmation?.getConfirmation?.({
-        toolParams: { hostName: 'attacker-chosen-name', agentId: 'agent-b', ...extraParams },
-        context: mockContext,
-      });
-      expect(card?.message).not.toContain('attacker-chosen-name');
-      expect(card?.message).toContain('agent-b');
+        const card = await cardFor(tool, params);
+        expect(card.message).not.toContain('attacker-chosen-name');
+        expect(card.message).toContain('agent-b');
 
-      await tool.handler(
-        { hostName: 'attacker-chosen-name', agentId: 'agent-b', ...extraParams },
-        mockContext
-      );
-      const [payload, metadata] = client[clientMethod].mock.calls[0];
-      expect(JSON.stringify(payload)).not.toContain('attacker-chosen-name');
-      expect(JSON.stringify(metadata)).not.toContain('attacker-chosen-name');
-      expect(metadata).toEqual({ hosts: { 'agent-b': { name: 'agent-b' } } });
-    });
+        await runApproved(tool, params);
+        const [payload, metadata] = client[clientMethod].mock.calls[0];
+        expect(JSON.stringify(payload)).not.toContain('attacker-chosen-name');
+        expect(JSON.stringify(metadata)).not.toContain('attacker-chosen-name');
+        expect(metadata).toEqual({ hosts: { 'agent-b': { name: 'agent-b' } } });
+      }
+    );
 
     it('includes why the action failed in the result', async () => {
       mockGetActionDetailsById.mockResolvedValue({
@@ -738,6 +978,57 @@ describe.each(CASES)(
       expect(String(data.message)).not.toContain('may already have been sent');
       expect(data.actionMayHaveBeenSent).toBeUndefined();
     });
+
+    itGated('does not dispatch a confirmed replay whose scan path alone changed', async () => {
+      // The comment-swap case is covered above; this locks the other
+      // displayed argument: a resume that swaps only scan's `path` (same
+      // comment, same target) must not inherit the approval.
+      if (!('path' in extraParams)) {
+        return;
+      }
+      const tool = build(service);
+
+      await cardFor(tool, { agentId: 'agent-b', ...extraParams, path: '/tmp/first' });
+      expect(toolCallState.value).toEqual(
+        expect.objectContaining({ args: expect.objectContaining({ path: '/tmp/first' }) })
+      );
+
+      const out = results(
+        await runApproved(tool, { agentId: 'agent-b', ...extraParams, path: '/tmp/second' })
+      );
+
+      expect(out[0].type).toBe('error');
+      const data = out[0].data as Record<string, unknown>;
+      expect(data.error).toBe('invalid_argument');
+      expect(data.message).toEqual(
+        expect.stringContaining('differ from the ones the analyst confirmed')
+      );
+      expect(String(data.message)).toContain('path');
+      expect(client[clientMethod]).not.toHaveBeenCalled();
+    });
+
+    itGated(
+      're-checks access after the card is shown and refuses a revoked privilege on resume',
+      async () => {
+        const tool = build(service);
+
+        await cardFor(tool, { agentId: 'agent-b', ...extraParams });
+
+        // The analyst's access is revoked between the card and the resume: the
+        // approval must not outlive the privilege it was granted under.
+        Object.assign(service, {
+          getEndpointAuthz: jest
+            .fn()
+            .mockResolvedValue(getEndpointAuthzInitialStateMock({ [privilege]: false })),
+        });
+
+        const out = results(await runApproved(tool, { agentId: 'agent-b', ...extraParams }));
+
+        expect(out[0].type).toBe('error');
+        expect((out[0].data as Record<string, unknown>).error).toBe('insufficient_privileges');
+        expect(client[clientMethod]).not.toHaveBeenCalled();
+      }
+    );
 
     it('keeps the dispatched action ID when every completion read fails', async () => {
       jest.useFakeTimers();

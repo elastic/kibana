@@ -1,5 +1,5 @@
 {
-  "sha1": "8ac52c8ef064d6b0624497ed47f61cd60f9c3022",
+  "sha1": "5c10bbc03c68e923df9a0abfee7dfa1a3cf9acb2",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -20,7 +20,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/kql_telemetry.spec.ts",
-        "line": 53,
+        "line": 54,
         "column": 43
       }
     },
@@ -40,8 +40,28 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/kql_telemetry.spec.ts",
-        "line": 53,
+        "line": 54,
         "column": 43
+      }
+    },
+    {
+      "id": "641219711c48a84-1489d4f5d11c352",
+      "title": "KQL telemetry API should reject an unauthenticated request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/kql_telemetry.spec.ts",
+        "line": 64,
+        "column": 18
       }
     },
     {
@@ -60,8 +80,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/kql_telemetry.spec.ts",
-        "line": 80,
-        "column": 5
+        "line": 89,
+        "column": 42
       }
     },
     {
@@ -80,8 +100,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/kql_telemetry.spec.ts",
-        "line": 80,
-        "column": 5
+        "line": 89,
+        "column": 42
       }
     },
     {
@@ -100,8 +120,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/kql_telemetry.spec.ts",
-        "line": 80,
-        "column": 5
+        "line": 89,
+        "column": 42
       }
     },
     {
@@ -120,8 +140,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/kql_telemetry.spec.ts",
-        "line": 80,
-        "column": 5
+        "line": 89,
+        "column": 42
       }
     },
     {
@@ -140,8 +160,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/kql_telemetry.spec.ts",
-        "line": 80,
-        "column": 5
+        "line": 89,
+        "column": 42
       }
     },
     {
@@ -645,6 +665,20 @@
       }
     },
     {
+      "id": "4a974bedd6571c4-5517d0ff8e63591",
+      "title": "eql search strategy - long polling (SNAPSHOT only) holds a poll open until the search completes when pollLength is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/eql_long_poll.spec.ts",
+        "line": 32,
+        "column": 79
+      }
+    },
+    {
       "id": "349fe9ef5d1e262-49614f01c7b7b82",
       "title": "es search strategy - post, delete and error handling should return 200 when correctly formatted searches are provided",
       "expectedStatus": "passed",
@@ -849,6 +883,22 @@
       }
     },
     {
+      "id": "0faec1c28709e23-8d2bd49e9ed36c2",
+      "title": "ese search - long polling (SNAPSHOT only) holds a poll open until the search completes when pollLength is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_long_poll.spec.ts",
+        "line": 38,
+        "column": 7
+      }
+    },
+    {
       "id": "d31b6baf5ea7a72-e563cb6fd7a2342",
       "title": "ese search - post async (SNAPSHOT only) should return 200 with search id and partial response if wait_for_completion_timeout is not long enough",
       "expectedStatus": "passed",
@@ -1044,6 +1094,34 @@
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_rollup.spec.ts",
         "line": 53,
         "column": 28
+      }
+    },
+    {
+      "id": "3a19570ef837c26-88ab07c422e46cb",
+      "title": "esql_async search strategy - long polling (SNAPSHOT only) holds a poll open until the search completes when pollLength is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/esql_async_long_poll.spec.ts",
+        "line": 33,
+        "column": 72
+      }
+    },
+    {
+      "id": "ee41a98c9010d40-5183a0735b023cb",
+      "title": "sql search strategy - long polling (SNAPSHOT only) holds a poll open until the search completes when pollLength is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/sql_long_poll.spec.ts",
+        "line": 33,
+        "column": 72
       }
     },
     {

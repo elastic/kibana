@@ -19,6 +19,7 @@ import type { TaskExecutionControlService } from '../execution_control';
 export type { MonitoringStats, RawMonitoringStats } from './monitoring_stats_stream';
 export {
   HealthStatus,
+  isEsBackpressureActive,
   summarizeMonitoringStats,
   createAggregators,
   createMonitoringStatsStream,

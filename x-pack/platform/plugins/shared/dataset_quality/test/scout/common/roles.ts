@@ -27,7 +27,7 @@ export const noAccessRole: KibanaRole = {
 export const readOnlyRole: KibanaRole = {
   elasticsearch: {
     cluster: [],
-    indices: [{ names: ['logs-*-*'], privileges: ['read'] }],
+    indices: [{ names: ['logs-*-*'], privileges: ['read', 'view_index_metadata'] }],
   },
   kibana: [],
 };

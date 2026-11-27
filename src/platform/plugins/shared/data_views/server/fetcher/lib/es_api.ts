@@ -9,6 +9,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ExpandWildcard, MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import { castArray } from 'lodash';
 import type { QueryDslQueryContainer } from '../../../common/types';
 import { convertEsError } from './errors';
 
@@ -54,6 +55,16 @@ interface FieldCapsApiParams {
   abortSignal?: AbortSignal;
   projectRouting?: string;
 }
+
+const getMissingRemoteAlias = (error: {
+  body?: { error?: { root_cause?: Array<{ type?: string; reason?: string }> } };
+}) =>
+  error.body?.error?.root_cause
+    ?.find(
+      ({ type }) =>
+        type === 'no_such_remote_cluster_exception' || type === 'no_matching_project_exception'
+    )
+    ?.reason?.match(/^(?:no such remote cluster|No such project): \[([^\]]+)\]/)?.[1];
 
 /**
  *  Call the fieldCaps API for a list of indices.
@@ -107,6 +118,21 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
       error.message.startsWith('cluster_block_exception')
     ) {
       return { body: { indices: [], fields: {} } };
+    }
+    // ES fails the whole request for a missing cluster or project, so retry without its patterns.
+    // TODO: remove once https://github.com/elastic/elasticsearch/issues/163130 is resolved
+    const missingRemoteAlias = getMissingRemoteAlias(error);
+    if (missingRemoteAlias) {
+      const patterns = castArray(indices).flatMap((pattern) => pattern.split(','));
+      const remainingPatterns = patterns.filter(
+        (pattern) => !pattern.replace(/^-/, '').startsWith(`${missingRemoteAlias}:`)
+      );
+      if (remainingPatterns.length > 0 && remainingPatterns.length < patterns.length) {
+        return callFieldCapsApi({ ...params, indices: remainingPatterns });
+      }
+      if (fieldCapsOptions.allow_no_indices) {
+        return { body: { indices: [], fields: {} } };
+      }
     }
     throw convertEsError(indices, error);
   }

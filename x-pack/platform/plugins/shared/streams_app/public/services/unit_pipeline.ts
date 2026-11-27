@@ -46,6 +46,96 @@ export const readRoutes = (config: PipelineConfig): RouteRule[] =>
   config.flatMap((entry) => (entry.name === PIPELINE_ENTRY.routes ? entry.value : []));
 
 /**
+ * One rule of a pipeline's routing: the route at `ruleIndex`, which counts
+ * across all of the pipeline's `routes` entries in declaration order.
+ */
+export interface RouteRuleRef {
+  pipelineId: string;
+  ruleIndex: number;
+}
+
+export const isSameRule = (left: RouteRuleRef, right: RouteRuleRef): boolean =>
+  left.pipelineId === right.pipelineId && left.ruleIndex === right.ruleIndex;
+
+/** The route at `routeIndex`, with the telemetry selector of the `routes` entry it sits in. */
+export const readRouteAt = (
+  config: PipelineConfig,
+  routeIndex: number
+): { route: RouteRule; entryTelemetry?: UnitSignal[] } | undefined => {
+  let offset = 0;
+  for (const entry of config) {
+    if (entry.name !== PIPELINE_ENTRY.routes) {
+      continue;
+    }
+    if (routeIndex < offset + entry.value.length) {
+      return { route: entry.value[routeIndex - offset], entryTelemetry: entry.telemetry };
+    }
+    offset += entry.value.length;
+  }
+  return undefined;
+};
+
+/**
+ * Rewrites the route at `routeIndex`, which counts across all `routes`
+ * entries, in the entry it sits in, so every entry keeps its own rules and
+ * telemetry selector. A pipeline without that route comes back unchanged.
+ */
+export const mapRouteAt = (
+  pipeline: UnitPipeline,
+  routeIndex: number,
+  update: (route: RouteRule) => RouteRule
+): UnitPipeline => {
+  let offset = 0;
+  return {
+    ...pipeline,
+    config: pipeline.config.map((entry): PipelineConfigEntry => {
+      if (entry.name !== PIPELINE_ENTRY.routes) {
+        return entry;
+      }
+      const local = routeIndex - offset;
+      offset += entry.value.length;
+      if (local < 0 || local >= entry.value.length) {
+        return entry;
+      }
+      return {
+        ...entry,
+        value: entry.value.map((route, index) => (index === local ? update(route) : route)),
+      };
+    }),
+  };
+};
+
+export const pipelineHasSources = (config: PipelineConfig): boolean =>
+  config.some((entry) => entry.name === PIPELINE_ENTRY.sources);
+
+export const pipelineUsesRoutes = (config: PipelineConfig): boolean =>
+  config.some((entry) => entry.name === PIPELINE_ENTRY.routes);
+
+export const pipelineHasProcessors = (config: PipelineConfig): boolean =>
+  config.some((entry) => entry.name === PIPELINE_ENTRY.processors && entry.value.length > 0);
+
+/** Ids of the pipelines some route of `pipelines` delegates to. */
+export const delegatedPipelineIds = (pipelines: readonly UnitPipeline[]): Set<string> =>
+  new Set(
+    pipelines.flatMap(({ config }) =>
+      readRoutes(config).flatMap((route) => (isDelegatingRoute(route) ? route.pipelines : []))
+    )
+  );
+
+/** Pipelines whose routes delegate to `pipelineId`, with the rules that do. */
+export const delegatingRules = (
+  pipelines: readonly UnitPipeline[],
+  pipelineId: string
+): Array<{ pipeline: UnitPipeline; ruleIndex: number }> =>
+  pipelines.flatMap((pipeline) =>
+    readRoutes(pipeline.config).flatMap((route, ruleIndex) =>
+      isDelegatingRoute(route) && route.pipelines.includes(pipelineId)
+        ? [{ pipeline, ruleIndex }]
+        : []
+    )
+  );
+
+/**
  * Whether `sources`, `destinations` or `routes` are split into telemetry-scoped
  * entries. Line edits merge the entries of one name, so these pipelines are
  * left as they are.
@@ -67,6 +157,18 @@ export const intersectSignals = (
   signals: readonly UnitSignal[],
   subset: readonly UnitSignal[] | undefined
 ): UnitSignal[] => (subset ? signals.filter((signal) => subset.includes(signal)) : [...signals]);
+
+/** The narrower of two optional telemetry selectors; an unset selector selects every signal. */
+export const narrowSelectors = (
+  left: readonly UnitSignal[] | undefined,
+  right: readonly UnitSignal[] | undefined
+): UnitSignal[] | undefined => {
+  if (left && right) {
+    return intersectSignals(left, right);
+  }
+  const selector = left ?? right;
+  return selector ? [...selector] : undefined;
+};
 
 export const replaceUnit = (unit: Unit, configuration: Partial<UnitConfiguration>): Unit => ({
   ...unit,
@@ -119,9 +221,6 @@ export const allocateComponentId = (
   }
 };
 
-const hasSources = (pipeline: UnitPipeline): boolean =>
-  pipeline.config.some((entry) => entry.name === PIPELINE_ENTRY.sources);
-
 const referencedProcessorIds = (unit: Unit): Set<string> =>
   new Set(
     unit.unit.pipelines.flatMap(({ config }) => [
@@ -142,10 +241,14 @@ const removeOrphanedProcessors = (unit: Unit, candidates: Iterable<string>): Uni
   });
 };
 
-const reachablePipelineIds = (pipelines: readonly UnitPipeline[]): Set<string> => {
+/** Pipelines reached from `fromIds`, themselves included, through route delegation. */
+export const delegatedFrom = (
+  pipelines: readonly UnitPipeline[],
+  fromIds: readonly string[]
+): Set<string> => {
   const byId = new Map(pipelines.map((pipeline) => [pipeline.id, pipeline]));
   const reachable = new Set<string>();
-  const queue = pipelines.filter(hasSources).map(({ id }) => id);
+  const queue = [...fromIds];
   while (queue.length > 0) {
     const id = queue.shift();
     if (id === undefined || reachable.has(id)) {
@@ -162,6 +265,13 @@ const reachablePipelineIds = (pipelines: readonly UnitPipeline[]): Set<string> =
   return reachable;
 };
 
+/** Pipelines some source feeds, directly or through route delegation. */
+export const reachablePipelineIds = (pipelines: readonly UnitPipeline[]): Set<string> =>
+  delegatedFrom(
+    pipelines,
+    pipelines.filter(({ config }) => pipelineHasSources(config)).map(({ id }) => id)
+  );
+
 /** Drops route delegations to pipelines that no longer exist, and routes left without targets. */
 const dropMissingDelegations = (
   pipeline: UnitPipeline,
@@ -177,7 +287,10 @@ const dropMissingDelegations = (
         return [route];
       }
       const remaining = route.pipelines.filter((id) => pipelineIds.has(id));
-      return remaining.length > 0 ? [{ ...route, pipelines: remaining }] : [];
+      // A rule that was already unconnected keeps waiting to be reconnected.
+      return remaining.length > 0 || route.pipelines.length === 0
+        ? [{ ...route, pipelines: remaining }]
+        : [];
     });
     return routes.length > 0 ? [{ ...entry, value: routes }] : [];
   }),

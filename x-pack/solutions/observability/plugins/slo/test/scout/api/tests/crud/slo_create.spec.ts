@@ -7,7 +7,12 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import { getSLOSummaryTransformId, getSLOTransformId } from '../../../../../common/constants';
+import type { CreateSLOInput } from '@kbn/slo-schema';
+import {
+  getSLOPipelineId,
+  getSLOSummaryTransformId,
+  getSLOTransformId,
+} from '../../../../../common/constants';
 import {
   apiTest,
   createSloTransformAssertions,
@@ -57,8 +62,8 @@ apiTest.describe(
     let transformHelper: SloTransformAssertions;
     let headers: Record<string, string>;
 
-    apiTest.beforeAll(async ({ apiClient, esClient, samlAuth, requestAuth, sloHostsDataForge }) => {
-      await sloHostsDataForge.setup();
+    apiTest.beforeAll(async ({ apiClient, apiServices, esClient, samlAuth, requestAuth }) => {
+      await apiServices.slo.deleteAllSLOs();
       const { apiKeyHeader } = await requestAuth.getApiKey('admin');
       headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
       transformHelper = createSloTransformAssertions(apiClient, esClient, async () =>
@@ -66,10 +71,10 @@ apiTest.describe(
       );
     });
 
-    apiTest.afterAll(async ({ kbnClient, sloHostsDataForge }) => {
+    apiTest.afterAll(async ({ apiServices, kbnClient }) => {
       await kbnClient.spaces.delete('space1').catch(() => {});
       await kbnClient.spaces.delete('space2').catch(() => {});
-      await sloHostsDataForge.teardown();
+      await apiServices.slo.deleteAllSLOs();
     });
 
     apiTest('creates a new slo and transforms', async ({ apiClient }) => {
@@ -221,93 +226,15 @@ apiTest.describe(
       }
     );
 
-    apiTest('creates instanceId for SLOs with multi groupBy', async ({ apiClient, esClient }) => {
-      apiTest.setTimeout(210_000);
-      const apiResponse = await apiClient.post('api/observability/slos', {
-        headers,
-        body: {
-          ...DEFAULT_SLO,
-          groupBy: ['system.network.name', 'event.dataset'],
-        },
-        responseType: 'json',
-      });
-      expect(apiResponse).toHaveStatusCode(200);
-      const id = apiResponse.body.id as string;
-
-      await pollUntilTrue(
-        async () => {
-          const response = await esClient.search(getRollupDataEsQuery(id));
-          const hits = (
-            response as { aggregations?: { last_doc?: { hits?: { hits?: unknown[] } } } }
-          ).aggregations?.last_doc?.hits?.hits;
-          const src = hits?.[0] as { _source?: { slo?: { instanceId?: string } } } | undefined;
-          return src?._source?.slo?.instanceId === 'eth1,system.network';
-        },
-        { timeoutMs: 180_000, intervalMs: 3000 }
-      );
-    });
-
-    apiTest('creates instanceId for SLOs with single groupBy', async ({ apiClient, esClient }) => {
-      apiTest.setTimeout(210_000);
-      const apiResponse = await apiClient.post('api/observability/slos', {
-        headers,
-        body: {
-          ...DEFAULT_SLO,
-          groupBy: 'system.network.name',
-        },
-        responseType: 'json',
-      });
-      expect(apiResponse).toHaveStatusCode(200);
-      const id = apiResponse.body.id as string;
-
-      await pollUntilTrue(
-        async () => {
-          const response = await esClient.search(getRollupDataEsQuery(id));
-          const hits = (
-            response as { aggregations?: { last_doc?: { hits?: { hits?: unknown[] } } } }
-          ).aggregations?.last_doc?.hits?.hits;
-          const src = hits?.[0] as { _source?: { slo?: { instanceId?: string } } } | undefined;
-          return src?._source?.slo?.instanceId === 'eth1';
-        },
-        { timeoutMs: 180_000, intervalMs: 3000 }
-      );
-    });
-
-    apiTest('creates instanceId for SLOs without groupBy ([])', async ({ apiClient, esClient }) => {
-      apiTest.setTimeout(330_000);
-      const apiResponse = await apiClient.post('api/observability/slos', {
-        headers,
-        body: {
-          ...DEFAULT_SLO,
-          groupBy: [],
-        },
-        responseType: 'json',
-      });
-      expect(apiResponse).toHaveStatusCode(200);
-      const id = apiResponse.body.id as string;
-
-      await pollUntilTrue(
-        async () => {
-          const response = await esClient.search(getRollupDataEsQuery(id));
-          const hits = (
-            response as { aggregations?: { last_doc?: { hits?: { hits?: unknown[] } } } }
-          ).aggregations?.last_doc?.hits?.hits;
-          const src = hits?.[0] as { _source?: { slo?: { instanceId?: string } } } | undefined;
-          return src?._source?.slo?.instanceId === '*';
-        },
-        { timeoutMs: 300_000, intervalMs: 3000 }
-      );
-    });
-
     apiTest(
-      'creates instanceId for SLOs without groupBy (["*"])',
+      'writes rollup documents with the instanceId through the transform and pipeline',
       async ({ apiClient, esClient }) => {
         apiTest.setTimeout(210_000);
         const apiResponse = await apiClient.post('api/observability/slos', {
           headers,
           body: {
             ...DEFAULT_SLO,
-            groupBy: ['*'],
+            groupBy: ['system.network.name', 'event.dataset'],
           },
           responseType: 'json',
         });
@@ -321,37 +248,65 @@ apiTest.describe(
               response as { aggregations?: { last_doc?: { hits?: { hits?: unknown[] } } } }
             ).aggregations?.last_doc?.hits?.hits;
             const src = hits?.[0] as { _source?: { slo?: { instanceId?: string } } } | undefined;
-            return src?._source?.slo?.instanceId === '*';
+            return src?._source?.slo?.instanceId === 'eth1,system.network';
           },
-          { timeoutMs: 180_000, intervalMs: 3000 }
+          { timeoutMs: 180_000 }
         );
       }
     );
 
-    apiTest('creates instanceId for SLOs without groupBy ("")', async ({ apiClient, esClient }) => {
-      apiTest.setTimeout(210_000);
-      const apiResponse = await apiClient.post('api/observability/slos', {
-        headers,
-        body: {
-          ...DEFAULT_SLO,
-          groupBy: '',
-        },
-        responseType: 'json',
-      });
-      expect(apiResponse).toHaveStatusCode(200);
-      const id = apiResponse.body.id as string;
+    const instanceIdCases: Array<{
+      title: string;
+      groupBy: CreateSLOInput['groupBy'];
+      groupings?: Record<string, string>;
+      expectedInstanceId: string;
+    }> = [
+      {
+        title: 'multi groupBy',
+        groupBy: ['system.network.name', 'event.dataset'],
+        groupings: { 'system.network.name': 'eth1', 'event.dataset': 'system.network' },
+        expectedInstanceId: 'eth1,system.network',
+      },
+      {
+        title: 'single groupBy',
+        groupBy: 'system.network.name',
+        groupings: { 'system.network.name': 'eth1' },
+        expectedInstanceId: 'eth1',
+      },
+      { title: 'groupBy []', groupBy: [], expectedInstanceId: '*' },
+      { title: 'groupBy ["*"]', groupBy: ['*'], expectedInstanceId: '*' },
+      { title: 'groupBy ""', groupBy: '', expectedInstanceId: '*' },
+    ];
 
-      await pollUntilTrue(
-        async () => {
-          const response = await esClient.search(getRollupDataEsQuery(id));
-          const hits = (
-            response as { aggregations?: { last_doc?: { hits?: { hits?: unknown[] } } } }
-          ).aggregations?.last_doc?.hits?.hits;
-          const src = hits?.[0] as { _source?: { slo?: { instanceId?: string } } } | undefined;
-          return src?._source?.slo?.instanceId === '*';
-        },
-        { timeoutMs: 180_000, intervalMs: 3000 }
+    for (const { title, groupBy, groupings, expectedInstanceId } of instanceIdCases) {
+      apiTest(
+        `installs a rollup pipeline that computes the instanceId for ${title}`,
+        async ({ apiClient, esClient }) => {
+          const apiResponse = await apiClient.post('api/observability/slos', {
+            headers,
+            body: { ...DEFAULT_SLO, groupBy },
+            responseType: 'json',
+          });
+          expect(apiResponse).toHaveStatusCode(200);
+          const id = apiResponse.body.id as string;
+
+          const { docs } = await esClient.ingest.simulate({
+            id: getSLOPipelineId(id, 1),
+            docs: [
+              {
+                _index: 'simulated-rollup',
+                _id: 'simulated-doc',
+                _source: {
+                  '@timestamp': new Date().toISOString(),
+                  ...(groupings ? { slo: { groupings } } : {}),
+                },
+              },
+            ],
+          });
+
+          expect(docs[0].doc?._source?.slo?.instanceId).toBe(expectedInstanceId);
+        }
       );
-    });
+    }
   }
 );

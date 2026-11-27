@@ -218,7 +218,7 @@ management: {
 }
 ```
 
-Install is invoked by the plugin via [`installStatic`](server/managed_workflows/install_static.ts), which loops over `AD_WORKFLOW_IDS` and asks `workflowsExtensions.initManagedWorkflowsClient('discoveries')` to install each one into the global workflow space. Reconciliation, version upgrades, and orphan cleanup are owned by the platform's managed-workflow framework — not by this plugin.
+Install is invoked by the plugin via [`installStatic`](server/managed_workflows/install_static.ts), which asks `workflowsExtensions.initManagedWorkflowsClient('discoveries')` to install every ID in `AD_WORKFLOW_IDS` into the global workflow space with one `installMany` call. Reconciliation, version upgrades, and orphan cleanup are owned by the platform's managed-workflow framework — not by this plugin.
 
 **Navigation note.** Managed workflows are hidden from the Workflows UI list view by default. Navigate directly by URL, e.g.:
 

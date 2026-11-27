@@ -1,13 +1,17 @@
 ---
 navigation_title: AI Connector
+description: "Documentation for the deprecated AI Connector, used to send requests to LLM services from Kibana through the Elasticsearch Inference API."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/bedrock-action-type.html
 applies_to:
-  stack: preview 9.2
-  serverless: preview
+  stack: preview 9.2, deprecated 9.5
+  serverless: deprecated
 ---
 
 # AI connector
+
+:::{include} _snippets/deprecated-llm-connector-note.md
+:::
 
 The AI Connector uses the [Inference API](docs-content://explore-analyze/elastic-inference/inference-api.md) to connect to third-party Large Language Model (LLM) services to enable AI-powered {{kib}} features such as AI Assistant. It can connect with LLM services including Amazon Bedrock, Azure, Google Gemini, and OpenAI. It can also connect with models you've enabled in Elastic Inference Service (EIS). 
 
@@ -20,6 +24,11 @@ The AI Connector uses the [Inference API](docs-content://explore-analyze/elastic
 
 
 ## Set up an AI connector
+
+```{applies_to}
+stack: preview 9.2-9.4, deprecated =9.5, removed 9.6+
+serverless: unavailable
+```
 
 1. Use the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md) to find the **Connectors** page.
 2. Click **+ Create connector**. Select **AI Connector**.

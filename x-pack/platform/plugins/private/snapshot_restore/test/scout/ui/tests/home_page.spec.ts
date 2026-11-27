@@ -6,7 +6,6 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
 import {
@@ -14,7 +13,10 @@ import {
   ensureSnapshotRepository,
 } from '../fixtures/snapshot_repository_helpers';
 
-test.describe('Snapshot & Restore — home page', { tag: tags.stateful.classic }, () => {
+// Local only: cleanup needs a repository no one else writes to, and ECH has no node-local
+// `path.repo` — its managed `found-snapshots` repository continuously accrues SLM snapshots, and
+// Elasticsearch refuses `_cleanup` while any snapshot is in progress.
+test.describe('Snapshot & Restore — home page', { tag: ['@local-stateful-classic'] }, () => {
   let repository: ManagedSnapshotRepository | undefined;
 
   test.afterEach(async ({ kbnClient }) => {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RuleKind } from '@kbn/alerting-v2-schemas';
 import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
@@ -47,7 +48,7 @@ interface FetchedRule {
   id: string;
   name: string;
   groupingFields: string[];
-  kind: 'alert' | 'signal';
+  kind: RuleKind;
 }
 
 interface CanvasContentProps {
@@ -223,16 +224,24 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
           .filter((s) => s.rules.length > 0);
 
         const hopWindows = [...prev.hopWindows];
-        if (removedIdx !== -1 && nextSteps.length < prev.steps.length) {
+        const stepWasRemoved = removedIdx !== -1 && nextSteps.length < prev.steps.length;
+        if (stepWasRemoved) {
           const hopToRemove = removedIdx > 0 ? removedIdx - 1 : 0;
           hopWindows.splice(hopToRemove, 1);
         }
+
+        const recoveryStepIndices =
+          stepWasRemoved && prev.recoveryStepIndices
+            ? prev.recoveryStepIndices
+                .filter((i) => i !== removedIdx)
+                .map((i) => (i > removedIdx ? i - 1 : i))
+            : prev.recoveryStepIndices;
 
         return {
           ...prev,
           steps: nextSteps,
           hopWindows: hopWindows.slice(0, Math.max(0, nextSteps.length - 1)),
-          recoveryStepIndices: [Math.max(0, nextSteps.length - 1)],
+          recoveryStepIndices,
         };
       });
     },
@@ -252,7 +261,7 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
   const addRuleToStep = useCallback(
     (
       stepId: string,
-      payload: { id: string; name: string; groupingFields: string[]; kind: 'alert' | 'signal' }
+      payload: { id: string; name: string; groupingFields: string[]; kind: RuleKind }
     ) => {
       setSeqValues((prev) => ({
         ...prev,
@@ -302,7 +311,7 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
           id: string;
           name: string;
           groupingFields: string[];
-          kind: 'alert' | 'signal';
+          kind: RuleKind;
         };
         setSeqValues((prev) => {
           if (prev.steps.some((s) => s.rules.some((r) => r.ruleId === id))) return prev;
@@ -319,7 +328,6 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
               0,
               nextSteps.length - 1
             ),
-            recoveryStepIndices: [nextSteps.length - 1],
           };
         });
       } catch {
@@ -333,7 +341,11 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
     () =>
       seqValues.steps.map((step) => ({
         stepId: step.id,
-        rules: step.rules.map((r) => ({ ruleId: r.ruleId, ruleName: r.ruleName ?? r.ruleId })),
+        rules: step.rules.map((r) => ({
+          ruleId: r.ruleId,
+          ruleName: r.ruleName ?? r.ruleId,
+          isMissing: r.isMissing,
+        })),
         operator: step.operator,
       })),
     [seqValues.steps]

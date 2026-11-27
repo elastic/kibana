@@ -23,11 +23,11 @@ const getRegisteredSetting = (isServerless: boolean) => {
 };
 
 describe('registerUiSettings', () => {
-  it('registers the data federation UI setting as global, disabled by default', () => {
+  it('registers the data federation UI setting as global, enabled by default', () => {
     expect(getRegisteredSetting(false)).toEqual(
       expect.objectContaining({
         category: ['dataFederation'],
-        value: false,
+        value: true,
         schema: expect.any(Object),
         requiresPageReload: true,
         technicalPreview: true,

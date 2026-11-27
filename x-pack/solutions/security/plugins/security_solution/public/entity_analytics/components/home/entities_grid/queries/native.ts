@@ -7,6 +7,10 @@
 
 import { escapeStringValue } from '@kbn/esql-utils';
 import {
+  CRITICALITY_LEVELS,
+  getCriticalityRank,
+} from '../../../../../../common/entity_analytics/entity_store/resolution_group_values';
+import {
   CRITICALITY_FIELD,
   ENTITY_ID_FIELD,
   RESOLUTION_RISK_SCORE_FIELD,
@@ -23,6 +27,7 @@ import {
 } from './entities_in_view';
 import {
   ENTITY_TYPE_FILTER,
+  SET_UNMAPPED_NULLIFY,
   buildFilterClause,
   buildRowFieldsSteps,
   buildSortSuffix,
@@ -33,11 +38,7 @@ import {
   getSortedPage,
   toList,
 } from './esql';
-import {
-  CRITICALITY_LEVELS,
-  buildResolvedEntityRowSteps,
-  getCriticalitySortRank,
-} from './resolved_entities';
+import { buildResolvedEntityRowSteps } from './resolved_entities';
 import type { ColumnQuerySpec, EsqlRunner, SortPageContext } from './types';
 
 const fetchSortedByField = (args: QueryArgs, { runQuery }: SortPageContext) => {
@@ -73,6 +74,7 @@ const buildSortedByFieldQuery = (
   sortField: string = args.sort.field,
   condition?: string
 ): string[] => [
+  SET_UNMAPPED_NULLIFY,
   ...buildEntitiesInViewSteps(args),
   ...buildFilterClause(condition),
   ...buildSortSuffix(sortField, args.sort.direction, args.pageSize + 1),
@@ -117,6 +119,7 @@ const buildCriticalityLevelQuery = (
   level: string | null,
   limit: number
 ): string[] => [
+  SET_UNMAPPED_NULLIFY,
   ...buildEntitiesInViewSteps(args),
   level == null
     ? `| WHERE ${CRITICALITY_FIELD} IS NULL OR NOT ${CRITICALITY_FIELD} IN (${toList(
@@ -133,6 +136,7 @@ const buildResolvedEntitiesWithAliasesQuery = (
   args: QueryArgs,
   targetIds?: readonly string[]
 ): string[] => [
+  SET_UNMAPPED_NULLIFY,
   `FROM ${getEntityAlias(args.namespace)}`,
   `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NOT NULL`,
   ...buildFilterClause(targetIds && `${RESOLVED_TO_FIELD} IN (${toList(targetIds)})`),
@@ -145,7 +149,7 @@ const buildResolvedEntitiesWithAliasesQuery = (
 
 /** Criticality sorts by its rank, every other field by its value. */
 const getNativeSortValue = (row: Row, field: string): SortValue =>
-  field === CRITICALITY_FIELD ? getCriticalitySortRank(row[field]) : getSortValue(row, field);
+  field === CRITICALITY_FIELD ? getCriticalityRank(row[field]) : getSortValue(row, field);
 
 /** The resolved entities the search matches, and one more to tell there are too many to read by id. */
 const buildSearchedTargetIdsQuery = (args: QueryArgs): string[] => [

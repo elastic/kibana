@@ -88,11 +88,13 @@ const mergeInputs = (subjects: InvestigationSubjectInput[]): InvestigationSubjec
 const definedFields = ({
   summary,
   triggerType,
+  via,
   snapshot,
   slack,
 }: InvestigationSubjectInput): Partial<SubjectDocument> => ({
   ...(summary !== undefined && { summary }),
   ...(triggerType !== undefined && { triggerType }),
+  ...(via !== undefined && { via }),
   ...(snapshot !== undefined && { snapshot }),
   ...(slack !== undefined && { slack }),
 });
@@ -243,6 +245,19 @@ export class SubjectsService {
     const subjects = await this.deps.documents.deleteAllInSpace(spaceId);
     const claims = await this.deps.claims.deleteAllInSpace(spaceId);
     return { subjects, claims };
+  }
+
+  /** Releases the claims of a new investigation whose start failed before it ran. */
+  async releaseClaims({
+    spaceId,
+    conversationId,
+  }: {
+    spaceId: string;
+    conversationId: string;
+  }): Promise<void> {
+    assertBoundedId(spaceId, 'spaceId');
+    assertBoundedId(conversationId, 'conversationId');
+    await this.deps.claims.release({ spaceId, conversationId });
   }
 
   /** Maintenance: removes the subject claims the given investigations hold in the space. */

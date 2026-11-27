@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 // Shape copied from `@kbn/significant-events-schema` (#293532) so every investigation entity
 // shares one evidence format. The significant-events copy is removed once Nightshift reads
@@ -80,10 +80,12 @@ export type EvidenceChartAnnotation = z.infer<typeof evidenceChartAnnotationSche
  * One observation supporting a claim an investigation makes. Self-contained: a Markdown
  * description, a static chart, or both, so it works for data that is not in the local cluster.
  */
-export const investigationEvidenceSchema = z.object({
-  /** Markdown: what was observed and why it matters. With a chart, only what the chart doesn't show. */
-  description: z.string().max(MAX_EVIDENCE_TEXT_LENGTH).optional(),
-  /** Static chart visualizing the observation. */
-  chart: evidenceChartSchema.optional(),
-});
+export const investigationEvidenceSchema = lazySchema(() =>
+  z.object({
+    /** Markdown: what was observed and why it matters. With a chart, only what the chart doesn't show. */
+    description: z.string().max(MAX_EVIDENCE_TEXT_LENGTH).optional(),
+    /** Static chart visualizing the observation. */
+    chart: evidenceChartSchema.optional(),
+  })
+);
 export type InvestigationEvidence = z.infer<typeof investigationEvidenceSchema>;

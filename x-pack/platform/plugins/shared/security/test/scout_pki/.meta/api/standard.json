@@ -1,0 +1,22 @@
+{
+  "sha1": "7e4713700fed3fb480364752ffec49aba4d8207b",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "4a423e7fbed846d-bfb6174af7d9c9d",
+      "title": "PKI authentication with an intermediate client CA logs in when the client sends its intermediate CA",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_pki/api/tests/pki_intermediate_chain.spec.ts",
+        "line": 32,
+        "column": 23
+      }
+    }
+  ]
+}

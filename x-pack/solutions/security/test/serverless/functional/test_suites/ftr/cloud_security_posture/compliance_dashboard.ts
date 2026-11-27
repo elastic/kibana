@@ -35,6 +35,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       cluster_id: 'Upper case cluster id',
       data_stream: {
         dataset: 'cloud_security_posture.findings',
+        namespace: 'default',
+        type: 'logs',
       },
     },
   ];
@@ -65,8 +67,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Kubernetes Dashboard', () => {
-      // dashboard-summary-section element not rendered in test environment
-      it.skip('displays accurate summary compliance score', async () => {
+      it('displays accurate summary compliance score', async () => {
         await pageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async () => {
           const scoreElement = await dashboard.getKubernetesComplianceScore();

@@ -33,6 +33,7 @@ export const subjectStorageSettings = {
       subjectId: types.keyword({}),
       summary: types.text({}),
       triggerType: types.keyword({}),
+      via: types.object({ enabled: false }),
       snapshot: types.object({ enabled: false }),
       slack: types.object({
         properties: {

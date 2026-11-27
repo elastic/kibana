@@ -21,9 +21,10 @@ import type {
   CheckPrivilegesWithRequest,
 } from '@kbn/security-plugin-types-server';
 
-import type { WorkloadBindingStore } from './bindings';
+import type { WorkloadBindingStore, WorkloadBindingSummary } from './bindings';
 import type { EnsureClusterPrivilegeParams } from './cluster_privilege';
 import { ensureClusterPrivilege } from './cluster_privilege';
+import { getOperationErrorType, serviceAccountsMetrics } from './metrics';
 import type { ServiceAccountsBackend } from './types';
 import type { SecurityLicense } from '../../common';
 import { ServiceAccountAuditAction, serviceAccountAuditEvent } from '../audit';
@@ -67,6 +68,12 @@ export interface ServiceAccountsManagementApi {
    */
   countBoundWorkloads(serviceAccountIds: string[]): Promise<Map<string, number>>;
 
+  /**
+   * Summarizes every binding in every space, for usage telemetry. There is no privilege check,
+   * and the bindings aren't verified.
+   */
+  summarizeBoundWorkloads(): Promise<WorkloadBindingSummary>;
+
   /** Deletes the account, unless workloads are still bound to it and `force` is not set. */
   delete(
     request: KibanaRequest,
@@ -99,15 +106,19 @@ interface BlockingBinding {
 const toBoundWorkload = (
   { pluginId, workloadType, workloadId }: ServiceAccountWorkloadBinding,
   typeName: string | undefined,
-  { title, href }: ResolvedServiceAccountWorkload
-): ServiceAccountBoundWorkload => ({
-  pluginId,
-  workloadType,
-  workloadId,
-  displayName: title ?? workloadId,
-  ...(typeName !== undefined && { typeName }),
-  ...(href !== undefined && { href }),
-});
+  resolved: ResolvedServiceAccountWorkload | undefined
+): ServiceAccountBoundWorkload => {
+  const { title, href } =
+    resolved?.status === 'present' ? resolved : { title: undefined, href: undefined };
+  return {
+    pluginId,
+    workloadType,
+    workloadId,
+    displayName: title ?? workloadId,
+    ...(typeName !== undefined && { typeName }),
+    ...(href !== undefined && { href }),
+  };
+};
 
 export class ServiceAccountsManagement implements ServiceAccountsManagementApi {
   private readonly logger: Logger;
@@ -140,6 +151,10 @@ export class ServiceAccountsManagement implements ServiceAccountsManagementApi {
     return await this.store.countByServiceAccountIds(serviceAccountIds);
   }
 
+  async summarizeBoundWorkloads(): Promise<WorkloadBindingSummary> {
+    return await this.store.summarize();
+  }
+
   async listWorkloads(
     request: KibanaRequest,
     serviceAccountId: string
@@ -150,6 +165,33 @@ export class ServiceAccountsManagement implements ServiceAccountsManagementApi {
   }
 
   async delete(
+    request: KibanaRequest,
+    serviceAccountId: string,
+    options: DeleteServiceAccountOptions
+  ): Promise<DeleteServiceAccountResult> {
+    let result: DeleteServiceAccountResult;
+    try {
+      result = await this.deleteAccount(request, serviceAccountId, options);
+    } catch (e) {
+      serviceAccountsMetrics.recordOperation({
+        operation: 'delete',
+        backend: this.backend.type,
+        errorType: getOperationErrorType(e),
+      });
+      throw e;
+    }
+
+    // A delete that bound workloads stopped is counted as a failure of its own type, so it is not
+    // mistaken for a delete that failed upstream.
+    serviceAccountsMetrics.recordOperation({
+      operation: 'delete',
+      backend: this.backend.type,
+      ...(result.deleted ? {} : { errorType: 'bound_workloads' }),
+    });
+    return result;
+  }
+
+  private async deleteAccount(
     request: KibanaRequest,
     serviceAccountId: string,
     { force }: DeleteServiceAccountOptions
@@ -238,7 +280,7 @@ export class ServiceAccountsManagement implements ServiceAccountsManagementApi {
       toBoundWorkload(
         binding,
         this.workloadTypes.getWorkloadTypeName(binding.pluginId, binding.workloadType),
-        (verified && resolved.get(binding)) || {}
+        verified ? resolved.get(binding) : undefined
       )
     );
   }
@@ -253,7 +295,9 @@ export class ServiceAccountsManagement implements ServiceAccountsManagementApi {
 
     try {
       const resolved = await this.workloadTypes.resolveBoundWorkloads(bindings);
-      return new Map(bindings.map((binding, index) => [binding, resolved[index] ?? {}]));
+      return new Map(
+        bindings.map((binding, index) => [binding, resolved[index] ?? { status: 'unknown' }])
+      );
     } catch (e) {
       this.logger.warn(
         `Unable to resolve ${bindings.length} bound workload(s): ${getDetailedErrorMessage(e)}`

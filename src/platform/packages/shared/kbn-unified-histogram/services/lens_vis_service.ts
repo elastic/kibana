@@ -873,6 +873,7 @@ export class LensVisService {
         attributes: enrichLensAttributesWithTablesData({
           attributes: visContext.attributes,
           table,
+          esqlQuery: query.esql,
         }),
       };
     }

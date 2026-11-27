@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { z } from '@kbn/zod/v4';
+import type { Logger } from '@kbn/core/server';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type {
   BuiltinToolDefinition,
@@ -26,45 +26,55 @@ import {
   proposalOriginSchema,
 } from '@kbn/proposals-common';
 import type { ProposalPrivilegesChecker } from '../services/check_proposal_privileges';
+import { createProposalCreator, DEFAULT_PROPOSAL_WAIT } from '../services/create_proposal';
 import type { ProposalsService } from '../services/proposals_service';
 
-export const createProposalToolSchema = z.object({
-  title: z
-    .string()
-    .min(1)
-    .max(MAX_TITLE_LENGTH)
-    .describe('Short plain-text label naming the proposed action, no Markdown.'),
-  comment: createProposalRequestSchema.shape.comment
-    .min(1)
-    .describe(
-      'What to do and why, as Markdown for the analyst who carries it out: the concrete steps, commands or config changes, and the findings that support them.'
+export const createProposalToolSchema = lazySchema(() =>
+  z.object({
+    title: z
+      .string()
+      .min(1)
+      .max(MAX_TITLE_LENGTH)
+      .describe('Short plain-text label naming the proposed action, no Markdown.'),
+    comment: createProposalRequestSchema.shape.comment
+      .min(1)
+      .describe(
+        'What to do and why, as Markdown for the analyst who carries it out: the concrete steps, commands or config changes, and the findings that support them.'
+      ),
+    origin: proposalOriginSchema.describe(
+      'The feature you are working for, as named in your instructions. It routes the proposal to that feature\'s queue; use "agent_builder" when none applies.'
     ),
-  origin: proposalOriginSchema.describe(
-    'The feature you are working for, as named in your instructions. It routes the proposal to that feature\'s queue; use "agent_builder" when none applies.'
-  ),
-  impact: proposalImpactSchema
-    .optional()
-    .describe('How disruptive carrying out the action is. Defaults to "low".'),
-  confidence: proposalConfidenceSchema
-    .optional()
-    .describe(
-      'How strongly the findings support that this action resolves the issue. Defaults to "medium".'
+    impact: proposalImpactSchema
+      .optional()
+      .describe('How disruptive carrying out the action is. Defaults to "low".'),
+    confidence: proposalConfidenceSchema
+      .optional()
+      .describe(
+        'How strongly the findings support that this action resolves the issue. Defaults to "medium".'
+      ),
+    category: proposalCategorySchema
+      .optional()
+      .describe('Grouping for the decision queue, when your instructions name one.'),
+    actionWorkflowId: createProposalRequestSchema.shape.actionWorkflowId.describe(
+      'Id of an action workflow that carries the action out once the analyst approves it, when your instructions list one that fits. Omit for a step the analyst carries out themselves.'
     ),
-  category: proposalCategorySchema
-    .optional()
-    .describe('Grouping for the decision queue, when your instructions name one.'),
-});
+    actionInput: createProposalRequestSchema.shape.actionInput.describe(
+      "The action workflow's single input object, filled to match the input schema listed for it. Only with actionWorkflowId."
+    ),
+  })
+);
 
 export type CreateProposalToolParams = z.infer<typeof createProposalToolSchema>;
 
 const DESCRIPTION =
   'Propose an action for a human to decide, in the current conversation. ' +
-  'The proposal runs nothing: the analyst carries it out and approves or dismisses it. ' +
+  'Without actionWorkflowId the proposal runs nothing: the analyst carries it out and approves or dismisses it. ' +
+  'With actionWorkflowId, approving it runs that action workflow with actionInput. ' +
   'Create one proposal per distinct action, and only for concrete steps (a command, a config change, a code fix, a rollback), not general advice. ' +
   'The proposal card is added to the conversation for the analyst; returns the proposal id once it exists.';
 
 /** How long the tool waits for the gate workflow to create the proposal before it answers. */
-export const DEFAULT_PROPOSAL_WAIT = { timeoutMs: 5000, intervalMs: 500 } as const;
+export { DEFAULT_PROPOSAL_WAIT };
 
 export const PROPOSAL_PENDING_NOTE =
   'The proposal is being created; its card will appear in the conversation. Do not create it again.';
@@ -81,16 +91,17 @@ const getToolConversationId = ({ runContext }: Pick<ToolHandlerContext, 'runCont
 const errorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 /**
- * `proposals.create`: an agent proposes an action without an action workflow, in the
- * conversation it runs in. Like any Worker, it starts the managed gate workflow
- * (`system-create-proposal`) as the caller rather than writing the proposal itself, because a
- * proposal's decision is only ever recorded behind its gate. The gate's create step indexes the
- * proposal and attaches its `platform.proposal` card through the public attachment client, which
- * needs the caller to own the conversation. The tool waits briefly for the proposal to exist.
- * Each call leaves one gate execution parked until the analyst decides or the proposal expires.
+ * `proposals.create`: an agent proposes an action, optionally carried out by an action workflow
+ * once approved, in the conversation it runs in.
+ *
+ * A to-do (`category: 'todo'`) is written straight to the index and decided by the service, so
+ * the tool answers with the proposal itself and nothing stays parked. Every other category goes
+ * through the managed gate workflow (`system-create-proposal`) as the caller, because a decision
+ * that executes an action is only ever recorded behind its gate; the tool then waits briefly for
+ * the gate's create step to index the proposal, and one execution stays parked until the analyst
+ * decides or the proposal expires. Either path attaches the `platform.proposal` card through the
+ * public attachment client, which needs the caller to own the conversation.
  */
 export const createProposalTool = ({
   getProposalsService,
@@ -105,28 +116,12 @@ export const createProposalTool = ({
   logger: Logger;
   wait?: { timeoutMs: number; intervalMs: number };
 }): BuiltinToolDefinition<typeof createProposalToolSchema> => {
-  const assertAvailable = async (request: KibanaRequest): Promise<void> => {
-    if (!getWorkflowsApi().isWorkflowsAvailable) {
-      throw new Error('Workflows are not available, so proposals cannot be created');
-    }
-    // In-process, so the route's `security.authz` does not apply.
-    await privileges.assertCanManage(request);
-  };
-
-  const waitForProposal = async (workflowExecutionId: string, spaceId: string) => {
-    const deadline = Date.now() + wait.timeoutMs;
-    do {
-      const proposal = await getProposalsService().findByWorkflowExecutionId(
-        workflowExecutionId,
-        spaceId
-      );
-      if (proposal) {
-        return proposal;
-      }
-      await sleep(wait.intervalMs);
-    } while (Date.now() < deadline);
-    return undefined;
-  };
+  const { create, assertAvailable } = createProposalCreator({
+    getProposalsService,
+    getWorkflowsApi,
+    privileges,
+    wait,
+  });
 
   return {
     id: PROPOSALS_CREATE_TOOL_ID,
@@ -163,7 +158,7 @@ export const createProposalTool = ({
       },
     },
     handler: async (
-      { title, comment, origin, impact, confidence, category },
+      { title, comment, origin, impact, confidence, category, actionWorkflowId, actionInput },
       { request, spaceId, runContext }
     ) => {
       const conversationId = getToolConversationId({ runContext });
@@ -178,25 +173,21 @@ export const createProposalTool = ({
       }
 
       try {
-        await assertAvailable(request);
-        const { workflowExecutionId } = await getWorkflowsApi().executeWorkflow({
-          workflowId: CREATE_PROPOSAL_WORKFLOW_ID,
-          spaceId,
+        const { workflowExecutionId, proposal } = await create({
           request,
-          inputs: {
-            conversationId,
+          spaceId,
+          conversationId,
+          proposal: {
             title,
             comment,
             origin,
-            ...(impact !== undefined && { impact }),
-            ...(confidence !== undefined && { confidence }),
-            ...(category !== undefined && { category }),
+            impact,
+            confidence,
+            category,
+            actionWorkflowId,
+            actionInput,
           },
-          // The gate parks on the analyst's decision; only its start is awaited.
-          waitForCompletion: false,
         });
-
-        const proposal = await waitForProposal(workflowExecutionId, spaceId);
         if (!proposal) {
           return {
             results: [
@@ -215,7 +206,10 @@ export const createProposalTool = ({
               proposal_id: proposal.id,
               title: proposal.title,
               status: proposal.status,
-              workflow_execution_id: workflowExecutionId,
+              // Absent for a to-do: no gate was started for it.
+              ...(workflowExecutionId !== undefined && {
+                workflow_execution_id: workflowExecutionId,
+              }),
             }),
           ],
         };

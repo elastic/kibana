@@ -14,7 +14,7 @@ import { useKibana } from '../../lib/kibana';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useAppToastsMock } from '../../hooks/use_app_toasts.mock';
 import { createStartServicesMock } from '../../lib/kibana/kibana_react.mock';
-import { TestProviders } from '../../mock';
+import { createReactQueryWrapper } from '../../mock/create_react_query_wrapper';
 
 jest.mock('../../lib/kibana');
 jest.mock('../../hooks/use_app_toasts');
@@ -39,7 +39,7 @@ describe('useGetCurrentUserProfile hook', () => {
     const userProfiles = useKibana().services.security.userProfiles;
     const spyOnUserProfiles = jest.spyOn(userProfiles, 'getCurrent');
     const { result } = renderHook(() => useGetCurrentUserProfile(), {
-      wrapper: TestProviders,
+      wrapper: createReactQueryWrapper(),
     });
     await waitFor(() => expect(result.current.isLoading).toEqual(false));
 

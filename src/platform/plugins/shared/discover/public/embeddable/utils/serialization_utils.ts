@@ -7,31 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit, pick } from 'lodash';
-import deepEqual from 'react-fast-compare';
+import { pick } from 'lodash';
+import type { DiscoverSessionApiEmbeddableOverrides } from '@kbn/as-code-discover-schema';
 import { type SerializedTimeRange, type SerializedTitles } from '@kbn/presentation-publishing';
-import { type SavedSearch, toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
-import type {
-  EditableSavedSearchAttributes,
-  SearchEmbeddableByReferenceState,
-  SearchEmbeddablePanelApiState,
-  StoredSearchEmbeddableByValueState,
-} from '../../../common/embeddable/types';
+import type { DiscoverSessionEmbeddableState } from '../../../common/embeddable/types';
 import {
   fromStoredSearchEmbeddable,
-  fromStoredSearchEmbeddableByRef,
-  fromStoredSearchEmbeddableByValue,
   isDiscoverSessionEmbeddableByReferenceState,
   isSearchEmbeddableLegacyPanelState,
-  toStoredSearchEmbeddableByValue,
 } from '../../../common/embeddable';
-import { toStoredTableSettings } from '../../../common/session/search_and_table_mapping';
-import { EDITABLE_SAVED_SEARCH_KEYS } from '../../../common/embeddable/constants';
+import { fromStoredTableSettings } from '../../../common/embeddable/transform_utils';
 import type { DiscoverServices } from '../../build_services';
 import { EDITABLE_PANEL_KEYS } from '../constants';
-import type { SearchEmbeddableInputState, SearchEmbeddableRuntimeState } from '../types';
-import { isTabDeleted } from './is_tab_deleted';
+import type {
+  SearchEmbeddableInputState,
+  SearchEmbeddableRuntimeState,
+  SearchEmbeddableSerializedAttributes,
+  SearchEmbeddableStateManager,
+} from '../types';
+import {
+  applyTableSettings,
+  fromDiscoverSessionTab,
+  getTableSettingsOverrides,
+  toByValuePanelTab,
+  toSearchEmbeddableAttributes,
+  toSessionTabAttributes,
+} from './panel_tab';
 
 export const deserializeState = async ({
   serializedState,
@@ -40,151 +42,136 @@ export const deserializeState = async ({
   serializedState: SearchEmbeddableInputState;
   discoverServices: DiscoverServices;
 }): Promise<SearchEmbeddableRuntimeState> => {
-  const panelState = pick(serializedState, EDITABLE_PANEL_KEYS);
   const apiState = isSearchEmbeddableLegacyPanelState(serializedState)
     ? fromStoredSearchEmbeddable(serializedState)
     : serializedState;
+  // A legacy panel can keep its title and description only in its attributes, also when Dashboard
+  // merges a tab returned from Discover over it
+  const legacyAttributes = 'attributes' in serializedState ? serializedState.attributes : undefined;
+  const {
+    title = legacyAttributes?.title,
+    description = legacyAttributes?.description,
+    ...otherPanelState
+  } = pick(serializedState, EDITABLE_PANEL_KEYS);
+  const panelState = { ...otherPanelState, title, description };
 
   if (isDiscoverSessionEmbeddableByReferenceState(apiState)) {
-    // by reference
-    const { ref_id: savedObjectId, selected_tab_id: selectedTabId } = apiState;
-    const { getDiscoverSession } = discoverServices.savedSearch;
-    const session = await getDiscoverSession(savedObjectId);
-    const selectedTab = selectedTabId
-      ? session.tabs.find((t) => t.id === selectedTabId)
-      : undefined;
-    const resolvedTab = selectedTab ?? session.tabs[0];
-    const isSelectedTabDeleted = Boolean(selectedTabId && !selectedTab);
-    const resolvedSelectedTabId = isSelectedTabDeleted ? selectedTabId : resolvedTab?.id;
-    const savedObjectOverride = toStoredTableSettings(apiState.overrides ?? {});
-
-    // Build runtime state from the resolved tab's attributes
-    // ignore the time range from the tab - only global time range + panel time range matter
-    // Panel overrides replace the resolved tab's values wholesale, so an override can drop entries
-    // (e.g. a removed grid column or sort field). jsonModeSettings is the exception: it partial-
-    // merges with the source, so overriding only one JSON display option keeps the others.
-    const runtimeSavedSearchState = isSelectedTabDeleted
-      ? {}
-      : {
-          ...omit(resolvedTab, 'timeRange'),
-          ...savedObjectOverride,
-          ...(savedObjectOverride.jsonModeSettings && {
-            jsonModeSettings: {
-              ...resolvedTab?.jsonModeSettings,
-              ...savedObjectOverride.jsonModeSettings,
-            },
-          }),
-        };
+    const { ref_id: savedObjectId, selected_tab_id: selectedTabId, overrides = {} } = apiState;
+    const session = await discoverServices.savedSearch.getDiscoverSession(savedObjectId);
+    const tabs = session.tabs.map(fromDiscoverSessionTab);
+    const selectedTab = selectedTabId ? tabs.find(({ id }) => id === selectedTabId) : tabs[0];
 
     return {
-      ...runtimeSavedSearchState,
+      // A deleted selected tab shows a prompt, so the panel has no tab attributes to show
+      ...(selectedTab && toSessionTabAttributes(selectedTab, overrides)),
       savedObjectId,
       savedObjectTitle: session.title,
       savedObjectDescription: session.description,
-      selectedTabId: resolvedSelectedTabId,
-      tabs: session.tabs,
-
-      // Overwrite SO state with dashboard state for title, description, etc.
+      selectedTabId: selectedTab?.id ?? selectedTabId,
+      tabs,
+      overrides,
       ...panelState,
-    };
-  } else {
-    // by value
-    const [tab] = apiState.tabs;
-    const savedObjectOverride = toStoredTableSettings(tab ?? {});
-    const { byValueToSavedSearch } = discoverServices.savedSearch;
-
-    const { state: storedState, references } = toStoredSearchEmbeddableByValue(apiState);
-    const savedSearch = await byValueToSavedSearch(
-      { attributes: { ...storedState.attributes, references } },
-      true
-    );
-
-    const { tabs, ...savedSearchWithoutTabs } = savedSearch;
-
-    return {
-      ...savedSearchWithoutTabs,
-      ...panelState,
-      ...savedObjectOverride,
-      nonPersistedDisplayOptions: serializedState.nonPersistedDisplayOptions,
     };
   }
+
+  const [tab] = apiState.tabs;
+
+  return {
+    ...toSearchEmbeddableAttributes(tab),
+    tab,
+    ...panelState,
+    nonPersistedDisplayOptions: serializedState.nonPersistedDisplayOptions,
+  };
 };
 
+/** Reads the panel's table settings in the public panel format. */
+export const toPanelTableSettings = (
+  attributes: Partial<SearchEmbeddableSerializedAttributes>
+): DiscoverSessionApiEmbeddableOverrides =>
+  fromStoredTableSettings({
+    columns: attributes.columns,
+    grid: attributes.grid,
+    sort: attributes.sort,
+    rowHeight: attributes.rowHeight,
+    headerRowHeight: attributes.headerRowHeight,
+    rowsPerPage: attributes.rowsPerPage,
+    sampleSize: attributes.sampleSize,
+    density: attributes.density,
+    documentsDisplayMode: attributes.documentsDisplayMode,
+    jsonModeSettings: attributes.jsonModeSettings,
+  });
+
+/** Reads the table settings the panel shows in the public panel format. */
+export const getPanelTableSettings = (
+  stateManager: SearchEmbeddableStateManager
+): DiscoverSessionApiEmbeddableOverrides =>
+  toPanelTableSettings({
+    columns: stateManager.columns.getValue(),
+    grid: stateManager.grid.getValue(),
+    sort: stateManager.sort.getValue(),
+    rowHeight: stateManager.rowHeight.getValue(),
+    headerRowHeight: stateManager.headerRowHeight.getValue(),
+    rowsPerPage: stateManager.rowsPerPage.getValue(),
+    sampleSize: stateManager.sampleSize.getValue(),
+    density: stateManager.density.getValue(),
+    documentsDisplayMode: stateManager.documentsDisplayMode.getValue(),
+    jsonModeSettings: stateManager.jsonModeSettings.getValue(),
+  });
+
 export const serializeState = ({
-  uuid,
-  initialState,
-  savedSearch,
+  runtimeState,
+  tableSettings,
   serializeTitles,
   serializeTimeRange,
   serializeDynamicActions,
   savedObjectId,
   selectedTabId,
 }: {
-  uuid: string;
-  initialState: SearchEmbeddableRuntimeState;
-  savedSearch: SavedSearch;
+  runtimeState: SearchEmbeddableRuntimeState;
+  tableSettings: DiscoverSessionApiEmbeddableOverrides;
   serializeTitles: () => SerializedTitles;
   serializeTimeRange: () => SerializedTimeRange;
   serializeDynamicActions: () => SerializedDrilldowns;
   savedObjectId?: string;
   selectedTabId?: string;
-}): SearchEmbeddablePanelApiState => {
-  const searchSource = savedSearch.searchSource;
-  const searchSourceJSON = JSON.stringify(searchSource.getSerializedFields());
-  const savedSearchAttributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
+}): DiscoverSessionEmbeddableState => {
+  const selectedSessionTab = runtimeState.tabs?.find(({ id }) => id === selectedTabId);
 
   if (savedObjectId) {
-    const isSelectedTabDeleted = isTabDeleted(selectedTabId, initialState.tabs ?? []);
-
-    const selectedTab = selectedTabId
-      ? initialState.tabs?.find((tab) => tab.id === selectedTabId)
-      : undefined;
-
-    let overwriteState: EditableSavedSearchAttributes;
-
-    if (isSelectedTabDeleted || !selectedTab) {
-      overwriteState = pick(initialState, EDITABLE_SAVED_SEARCH_KEYS);
-    } else {
-      const editableAttributesBackup = pick(selectedTab, EDITABLE_SAVED_SEARCH_KEYS);
-      const [{ attributes }] = savedSearchAttributes.tabs;
-
-      // only save the current state that is **different** than the saved object state
-      overwriteState = EDITABLE_SAVED_SEARCH_KEYS.reduce((prev, key) => {
-        if (deepEqual(attributes[key], editableAttributesBackup[key])) {
-          return prev;
-        }
-        return { ...prev, [key]: attributes[key] };
-      }, {});
-    }
-
-    const stored: SearchEmbeddableByReferenceState = {
+    return {
       ...serializeTitles(),
       ...serializeTimeRange(),
       ...serializeDynamicActions?.(),
-      ...overwriteState,
-      ...(selectedTabId !== undefined && { selectedTabId }),
-      savedObjectId,
+      ref_id: savedObjectId,
+      selected_tab_id: selectedTabId,
+      // A deleted tab or one without a Data View shows no table, so the overrides stay as they are
+      overrides: selectedSessionTab?.tab
+        ? getTableSettingsOverrides(selectedSessionTab.tab, tableSettings)
+        : runtimeState.overrides ?? {},
     };
-    return fromStoredSearchEmbeddableByRef(stored);
+  }
+
+  // Unlinking a linked panel turns its selected session tab into the by-value tab
+  const tab = selectedSessionTab ? selectedSessionTab.tab : runtimeState.tab;
+
+  if (!tab) {
+    throw new Error('The selected tab of this panel no longer exists');
   }
 
   const { title, description, ...titleOptions } = serializeTitles() ?? {};
 
-  const serializedTitles = {
-    title: title || initialState.savedObjectTitle,
-    description: description || initialState.savedObjectDescription,
-  };
-
-  const stored: StoredSearchEmbeddableByValueState = {
+  return {
     ...serializeTimeRange(),
     ...serializeDynamicActions?.(),
-    ...serializedTitles,
+    // An empty panel title is shown as empty, so only a missing one falls back to the session
+    title: title ?? runtimeState.savedObjectTitle,
+    description: description ?? runtimeState.savedObjectDescription,
     ...titleOptions,
-    attributes: {
-      ...savedSearchAttributes,
-      ...(serializedTitles.title && { title: serializedTitles.title }),
-      ...(serializedTitles.description && { description: serializedTitles.description }),
-    },
+    tabs: [
+      toByValuePanelTab(
+        applyTableSettings(tab, tableSettings),
+        selectedSessionTab?.inlineDataViewId
+      ),
+    ],
   };
-  return fromStoredSearchEmbeddableByValue(stored, []);
 };

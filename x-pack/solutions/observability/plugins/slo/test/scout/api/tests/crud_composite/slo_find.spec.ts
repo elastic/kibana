@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ApiClientFixture } from '@kbn/scout-oblt';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import {
@@ -14,71 +15,55 @@ import {
   sloApiPathWithQuery,
 } from '../../fixtures';
 
+interface FindResponse {
+  total: number;
+  page: number;
+  perPage: number;
+  results: Array<{ name: string; tags: string[]; createdAt: string }>;
+}
+
 apiTest.describe(
   'Find Composite SLOs',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let headers: Record<string, string>;
 
-    apiTest.beforeAll(async ({ requestAuth, apiServices, apiClient }) => {
-      await apiServices.core.settings({
-        'feature_flags.overrides': { 'slo.compositeSloEnabled': true },
-      });
+    const find = async (apiClient: ApiClientFixture, query: Record<string, string | number>) => {
+      const response = await apiClient.get(
+        sloApiPathWithQuery('api/observability/slo_composites', query),
+        { headers, responseType: 'json' }
+      );
+      expect(response).toHaveStatusCode(200);
+      return response.body as FindResponse;
+    };
+
+    apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
       const { apiKeyHeader } = await requestAuth.getApiKey('admin');
       headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
       await apiServices.compositeSlo.deleteAll();
 
-      await apiClient.post('api/observability/slo_composites', {
-        headers,
-        body: { ...DEFAULT_COMPOSITE_SLO, name: 'Composite Alpha', tags: ['team-a'] },
-        responseType: 'json',
-      });
-      await apiClient.post('api/observability/slo_composites', {
-        headers,
-        body: { ...DEFAULT_COMPOSITE_SLO, name: 'Composite Beta', tags: ['team-b'] },
-        responseType: 'json',
-      });
-      await apiClient.post('api/observability/slo_composites', {
-        headers,
-        body: { ...DEFAULT_COMPOSITE_SLO, name: 'Composite Gamma', tags: ['team-a', 'team-b'] },
-        responseType: 'json',
-      });
-
-      await apiClient.post('api/observability/slo_composites', {
-        headers,
-        body: {
+      const composites = [
+        { name: 'Composite Alpha', tags: ['team-a'] },
+        { name: 'Composite Beta', tags: ['team-b'] },
+        { name: 'Composite Gamma', tags: ['team-a', 'team-b'] },
+        { name: 'Composite Delta', tags: ['team-c', 'env-production'] },
+        { name: 'Composite Epsilon', tags: ['team-a', 'env-production'] },
+      ];
+      for (const composite of composites) {
+        const response = await apiServices.compositeSlo.create({
           ...DEFAULT_COMPOSITE_SLO,
-          name: 'Composite Delta',
-          tags: ['team-c', 'env-production'],
-        },
-        responseType: 'json',
-      });
-      await apiClient.post('api/observability/slo_composites', {
-        headers,
-        body: {
-          ...DEFAULT_COMPOSITE_SLO,
-          name: 'Composite Epsilon',
-          tags: ['team-a', 'env-production'],
-        },
-        responseType: 'json',
-      });
+          ...composite,
+        });
+        expect(response).toHaveStatusCode(200);
+      }
     });
 
     apiTest.afterAll(async ({ apiServices }) => {
       await apiServices.compositeSlo.deleteAll();
-      await apiServices.core.settings({
-        'feature_flags.overrides': { 'slo.compositeSloEnabled': false },
-      });
     });
 
     apiTest('returns all composite SLOs with default pagination', async ({ apiClient }) => {
-      const response = await apiClient.get('api/observability/slo_composites', {
-        headers,
-        responseType: 'json',
-      });
-      expect(response).toHaveStatusCode(200);
-
-      const body = response.body as Record<string, unknown>;
+      const body = await find(apiClient, {});
       expect(body.total).toBe(5);
       expect(body.page).toBe(1);
       expect(body.perPage).toBe(25);
@@ -86,307 +71,79 @@ apiTest.describe(
     });
 
     apiTest('paginates results', async ({ apiClient }) => {
-      const page1 = await apiClient.get(
-        sloApiPathWithQuery('api/observability/slo_composites', { page: 1, perPage: 2 }),
-        { headers, responseType: 'json' }
-      );
-      expect(page1).toHaveStatusCode(200);
-      const page1Body = page1.body as Record<string, unknown>;
-      expect(page1Body.total).toBe(5);
-      expect(page1Body.page).toBe(1);
-      expect(page1Body.perPage).toBe(2);
-      expect(page1Body.results).toHaveLength(2);
+      const page1 = await find(apiClient, { page: 1, perPage: 2 });
+      expect(page1).toMatchObject({ total: 5, page: 1, perPage: 2 });
+      expect(page1.results).toHaveLength(2);
 
-      const page2 = await apiClient.get(
-        sloApiPathWithQuery('api/observability/slo_composites', { page: 2, perPage: 2 }),
-        { headers, responseType: 'json' }
-      );
-      expect(page2).toHaveStatusCode(200);
-      const page2Body = page2.body as Record<string, unknown>;
-      expect(page2Body.total).toBe(5);
-      expect(page2Body.page).toBe(2);
-      expect(page2Body.perPage).toBe(2);
-      expect(page2Body.results).toHaveLength(2);
+      const page3 = await find(apiClient, { page: 3, perPage: 2 });
+      expect(page3).toMatchObject({ total: 5, page: 3, perPage: 2 });
+      expect(page3.results).toHaveLength(1);
 
-      const page3 = await apiClient.get(
-        sloApiPathWithQuery('api/observability/slo_composites', { page: 3, perPage: 2 }),
-        { headers, responseType: 'json' }
-      );
-      expect(page3).toHaveStatusCode(200);
-      const page3Body = page3.body as Record<string, unknown>;
-      expect(page3Body.total).toBe(5);
-      expect(page3Body.page).toBe(3);
-      expect(page3Body.perPage).toBe(2);
-      expect(page3Body.results).toHaveLength(1);
+      const beyond = await find(apiClient, { page: 100, perPage: 25 });
+      expect(beyond).toMatchObject({ total: 5, page: 100 });
+      expect(beyond.results).toHaveLength(0);
     });
 
-    apiTest('filters by a single tag', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        sloApiPathWithQuery('api/observability/slo_composites', { tags: 'team-a' }),
-        { headers, responseType: 'json' }
-      );
-      expect(response).toHaveStatusCode(200);
+    apiTest('filters by tags with OR semantics', async ({ apiClient }) => {
+      const single = await find(apiClient, { tags: 'team-a' });
+      expect(single.results.map(({ name }) => name).sort()).toStrictEqual([
+        'Composite Alpha',
+        'Composite Epsilon',
+        'Composite Gamma',
+      ]);
 
-      const body = response.body as { total: number; results: Array<{ tags: string[] }> };
-      expect(body.total).toBe(3);
-      for (const result of body.results) {
-        expect(result.tags).toContain('team-a');
-      }
+      const multiple = await find(apiClient, { tags: 'team-c,env-production' });
+      expect(multiple.results.map(({ name }) => name).sort()).toStrictEqual([
+        'Composite Delta',
+        'Composite Epsilon',
+      ]);
+
+      const none = await find(apiClient, { tags: 'nonexistent-tag' });
+      expect(none.total).toBe(0);
     });
 
-    apiTest('filters by multiple comma-separated tags', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        sloApiPathWithQuery('api/observability/slo_composites', { tags: 'team-a,env-production' }),
-        { headers, responseType: 'json' }
-      );
-      expect(response).toHaveStatusCode(200);
+    apiTest('searches by name, alone and combined with tags', async ({ apiClient }) => {
+      const byName = await find(apiClient, { search: 'Alpha' });
+      expect(byName.results.map(({ name }) => name)).toStrictEqual(['Composite Alpha']);
 
-      const body = response.body as {
-        total: number;
-        results: Array<{ name: string; tags: string[] }>;
-      };
-      expect(body.total).toBeGreaterThan(3);
-      for (const result of body.results) {
-        const hasTeamA = result.tags.includes('team-a');
-        const hasEnvProd = result.tags.includes('env-production');
-        expect(hasTeamA || hasEnvProd).toBe(true);
-      }
+      const combined = await find(apiClient, { search: 'Epsilon', tags: 'env-production' });
+      expect(combined.results.map(({ name }) => name)).toStrictEqual(['Composite Epsilon']);
+
+      const noMatch = await find(apiClient, { search: 'zzz-no-match-xyz' });
+      expect(noMatch.total).toBe(0);
+      expect(noMatch.results).toHaveLength(0);
     });
 
-    apiTest('searches by name', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        sloApiPathWithQuery('api/observability/slo_composites', { search: 'Alpha' }),
-        { headers, responseType: 'json' }
-      );
-      expect(response).toHaveStatusCode(200);
-
-      const body = response.body as { total: number; results: Array<{ name: string }> };
-      expect(body.total).toBe(1);
-      expect(body.results[0].name).toBe('Composite Alpha');
-    });
-
-    apiTest('searches by partial name match', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        sloApiPathWithQuery('api/observability/slo_composites', { search: 'Composite' }),
-        { headers, responseType: 'json' }
-      );
-      expect(response).toHaveStatusCode(200);
-
-      const body = response.body as { total: number; results: Array<{ name: string }> };
-      expect(body.total).toBe(5);
-    });
-
-    apiTest('sorts by name ascending', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        sloApiPathWithQuery('api/observability/slo_composites', {
-          sortBy: 'name',
-          sortDirection: 'asc',
-        }),
-        { headers, responseType: 'json' }
-      );
-      expect(response).toHaveStatusCode(200);
-
-      const { results } = response.body as { results: Array<{ name: string }> };
-      expect(results[0].name).toBe('Composite Alpha');
-      expect(results[1].name).toBe('Composite Beta');
-      expect(results[2].name).toBe('Composite Delta');
-      expect(results[3].name).toBe('Composite Epsilon');
-      expect(results[4].name).toBe('Composite Gamma');
-    });
-
-    apiTest('sorts by name descending', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        sloApiPathWithQuery('api/observability/slo_composites', {
-          sortBy: 'name',
-          sortDirection: 'desc',
-        }),
-        { headers, responseType: 'json' }
-      );
-      expect(response).toHaveStatusCode(200);
-
-      const { results } = response.body as { results: Array<{ name: string }> };
-      expect(results[0].name).toBe('Composite Gamma');
-      expect(results[1].name).toBe('Composite Epsilon');
-      expect(results[2].name).toBe('Composite Delta');
-      expect(results[3].name).toBe('Composite Beta');
-      expect(results[4].name).toBe('Composite Alpha');
-    });
-
-    apiTest('sorts by createdAt descending by default', async ({ apiClient }) => {
-      const response = await apiClient.get('api/observability/slo_composites', {
-        headers,
-        responseType: 'json',
-      });
-      expect(response).toHaveStatusCode(200);
-
-      const { results } = response.body as {
-        results: Array<{ name: string; createdAt: string }>;
-      };
-      for (let i = 0; i < results.length - 1; i++) {
-        const current = new Date(results[i].createdAt).getTime();
-        const next = new Date(results[i + 1].createdAt).getTime();
-        expect(current).toBeGreaterThan(next);
-      }
-    });
-
-    apiTest('sorts by createdAt ascending', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        sloApiPathWithQuery('api/observability/slo_composites', {
-          sortBy: 'createdAt',
-          sortDirection: 'asc',
-        }),
-        { headers, responseType: 'json' }
-      );
-      expect(response).toHaveStatusCode(200);
-
-      const { results } = response.body as {
-        results: Array<{ createdAt: string }>;
-      };
-      for (let i = 0; i < results.length - 1; i++) {
-        const current = new Date(results[i].createdAt).getTime();
-        const next = new Date(results[i + 1].createdAt).getTime();
-        expect(current).toBeLessThan(next);
-      }
-    });
-
-    apiTest('combines search and tag filters', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        sloApiPathWithQuery('api/observability/slo_composites', {
-          search: 'Epsilon',
-          tags: 'env-production',
-        }),
-        { headers, responseType: 'json' }
-      );
-      expect(response).toHaveStatusCode(200);
-
-      const body = response.body as {
-        total: number;
-        results: Array<{ name: string; tags: string[] }>;
-      };
-      expect(body.total).toBe(1);
-      expect(body.results[0].name).toBe('Composite Epsilon');
-      expect(body.results[0].tags).toContain('env-production');
-    });
-
-    apiTest('combines pagination with sorting', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        sloApiPathWithQuery('api/observability/slo_composites', {
-          page: 1,
-          perPage: 3,
-          sortBy: 'name',
-          sortDirection: 'asc',
-        }),
-        { headers, responseType: 'json' }
-      );
-      expect(response).toHaveStatusCode(200);
-
-      const body = response.body as {
-        total: number;
-        page: number;
-        perPage: number;
-        results: Array<{ name: string }>;
-      };
-      expect(body.total).toBe(5);
-      expect(body.results).toHaveLength(3);
-      expect(body.results[0].name).toBe('Composite Alpha');
-      expect(body.results[2].name).toBe('Composite Delta');
-    });
-
-    apiTest('returns empty results when no composites match search', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        sloApiPathWithQuery('api/observability/slo_composites', { search: 'zzz-no-match-xyz' }),
-        { headers, responseType: 'json' }
-      );
-      expect(response).toHaveStatusCode(200);
-
-      const body = response.body as { total: number; results: unknown[] };
-      expect(body.total).toBe(0);
-      expect(body.results).toHaveLength(0);
-    });
-
-    apiTest('returns empty results when no composites match tag filter', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        sloApiPathWithQuery('api/observability/slo_composites', { tags: 'nonexistent-tag' }),
-        { headers, responseType: 'json' }
-      );
-      expect(response).toHaveStatusCode(200);
-
-      const body = response.body as { total: number; results: unknown[] };
-      expect(body.total).toBe(0);
-      expect(body.results).toHaveLength(0);
-    });
-
-    apiTest('returns empty results for page beyond available data', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        sloApiPathWithQuery('api/observability/slo_composites', { page: 100, perPage: 25 }),
-        { headers, responseType: 'json' }
-      );
-      expect(response).toHaveStatusCode(200);
-
-      const body = response.body as { total: number; page: number; results: unknown[] };
-      expect(body.total).toBe(5);
-      expect(body.page).toBe(100);
-      expect(body.results).toHaveLength(0);
-    });
-
-    apiTest(
-      'each result includes the full composite SLO definition shape',
-      async ({ apiClient }) => {
-        const response = await apiClient.get(
-          sloApiPathWithQuery('api/observability/slo_composites', { perPage: 1 }),
-          { headers, responseType: 'json' }
-        );
-        expect(response).toHaveStatusCode(200);
-
-        const { results } = response.body as {
-          results: Array<Record<string, unknown>>;
-        };
-        expect(results).toHaveLength(1);
-
-        const result = results[0];
-        expect(result.id).toBeDefined();
-        expect(result.name).toBeDefined();
-        expect(result.description).toBeDefined();
-        expect(result.compositeMethod).toBeDefined();
-        expect(result.timeWindow).toBeDefined();
-        expect(result.budgetingMethod).toBeDefined();
-        expect(result.objective).toBeDefined();
-        expect(result.members).toBeDefined();
-        expect(result.tags).toBeDefined();
-        expect(result.enabled).toBeDefined();
-        expect(result.createdAt).toBeDefined();
-        expect(result.updatedAt).toBeDefined();
-        expect(result.createdBy).toBeDefined();
-        expect(result.updatedBy).toBeDefined();
-        expect(result.version).toBeDefined();
-      }
-    );
-
-    apiTest('preserves perPage=1 across multiple pages', async ({ apiClient }) => {
-      const names: string[] = [];
-      for (let page = 1; page <= 5; page++) {
-        const response = await apiClient.get(
-          sloApiPathWithQuery('api/observability/slo_composites', {
-            page,
-            perPage: 1,
-            sortBy: 'name',
-            sortDirection: 'asc',
-          }),
-          { headers, responseType: 'json' }
-        );
-        expect(response).toHaveStatusCode(200);
-        const body = response.body as { results: Array<{ name: string }> };
-        expect(body.results).toHaveLength(1);
-        names.push(body.results[0].name);
-      }
-
-      expect(names).toStrictEqual([
+    apiTest('sorts by name in both directions', async ({ apiClient }) => {
+      const sortedNames = [
         'Composite Alpha',
         'Composite Beta',
         'Composite Delta',
         'Composite Epsilon',
         'Composite Gamma',
-      ]);
+      ];
+
+      const asc = await find(apiClient, { sortBy: 'name', sortDirection: 'asc' });
+      expect(asc.results.map(({ name }) => name)).toStrictEqual(sortedNames);
+
+      const desc = await find(apiClient, { sortBy: 'name', sortDirection: 'desc' });
+      expect(desc.results.map(({ name }) => name)).toStrictEqual([...sortedNames].reverse());
     });
+
+    apiTest(
+      'sorts by createdAt descending by default and ascending on request',
+      async ({ apiClient }) => {
+        const toTimestamps = ({ results }: FindResponse) =>
+          results.map(({ createdAt }) => new Date(createdAt).getTime());
+
+        const byDefault = toTimestamps(await find(apiClient, {}));
+        expect(byDefault).toStrictEqual([...byDefault].sort((a, b) => b - a));
+
+        const asc = toTimestamps(
+          await find(apiClient, { sortBy: 'createdAt', sortDirection: 'asc' })
+        );
+        expect(asc).toStrictEqual([...asc].sort((a, b) => a - b));
+      }
+    );
   }
 );

@@ -32,6 +32,10 @@ import {
 } from '../../../../rules_client/tests/test_helpers';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import {
+  bulkMigrateLegacyActions,
+  deleteLegacyActionsForRules,
+} from '../../../../rules_client/lib';
 import { alertsServiceMock } from '../../../../alerts_service/alerts_service.mock';
 import { RecoveredActionGroup } from '../../../../../common';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
@@ -39,6 +43,17 @@ import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_a
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
+
+jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => ({
+  bulkMigrateLegacyActions: jest.fn(),
+}));
+
+jest.mock(
+  '../../../../rules_client/lib/siem_legacy_actions/transform_and_delete_legacy_actions',
+  () => ({
+    deleteLegacyActionsForRules: jest.fn(),
+  })
+);
 
 jest.mock('../get_schedule_frequency', () => ({
   validateScheduleLimit: jest.fn(),
@@ -75,6 +90,7 @@ beforeEach(() => {
       } as unknown as BulkUpdateTaskResult)
   );
   (auditLogger.log as jest.Mock).mockClear();
+  (bulkMigrateLegacyActions as jest.Mock).mockResolvedValue([]);
 });
 
 setGlobalDate();
@@ -360,6 +376,21 @@ describe('bulkEnableRules', () => {
     expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
   });
 
+  test('should delete the migrated legacy actions only for the rules that were saved', async () => {
+    (bulkMigrateLegacyActions as jest.Mock).mockResolvedValue(['id1', 'id2']);
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: [enabledRuleForBulkOps1, savedObjectWith500Error],
+    });
+
+    await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
+
+    expect(deleteLegacyActionsForRules).toHaveBeenCalledTimes(1);
+    expect(deleteLegacyActionsForRules).toHaveBeenCalledWith(expect.anything(), ['id1']);
+    expect(
+      (unsecuredSavedObjectsClient.bulkCreate as jest.Mock).mock.invocationCallOrder[0]
+    ).toBeLessThan((deleteLegacyActionsForRules as jest.Mock).mock.invocationCallOrder[0]);
+  });
+
   test('should enable two rules and return right actions', async () => {
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: [enabledRuleForBulkOpsWithActions1, enabledRuleForBulkOpsWithActions2],
@@ -581,6 +612,52 @@ describe('bulkEnableRules', () => {
       taskIdsFailedToBeEnabled: [],
       total: 2,
     });
+  });
+
+  test('skips a rule and records an error when the rule type params authorizer denies its persisted params', async () => {
+    // Simulates params persisted through a path that skips the authorizer (e.g. import).
+    const persistedParams = { responseActions: [{ actionTypeId: '.endpoint' }] };
+    const disabledRuleWithPrivilegedParams: SavedObject<RawRule> = {
+      ...disabledRule1,
+      attributes: { ...disabledRule1.attributes, params: persistedParams },
+    } as unknown as SavedObject<RawRule>;
+
+    mockCreatePointInTimeFinderAsInternalUser({
+      saved_objects: [disabledRuleWithPrivilegedParams, disabledRule2],
+    });
+
+    const authorizeParams = jest
+      .fn()
+      .mockImplementation((params: unknown) =>
+        params === persistedParams
+          ? Promise.reject(new Error('Unauthorized to enable a privileged param'))
+          : Promise.resolve()
+      );
+    (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValue({
+      id: 'fakeType',
+      authorize: { params: { authorize: authorizeParams } },
+    });
+
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: [enabledRuleForBulkOps2],
+    });
+
+    const result = await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
+
+    expect(authorizeParams).toHaveBeenCalledWith(
+      persistedParams,
+      expect.objectContaining({ request: rulesClientParams.request })
+    );
+    expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      [expect.objectContaining({ id: 'id2' })],
+      { overwrite: true }
+    );
+    expect(result.errors).toEqual([
+      {
+        message: 'Unauthorized to enable a privileged param',
+        rule: { id: 'id1', name: 'fakeName' },
+      },
+    ]);
   });
 
   test('should return both rules if one is already enabled and one is disabled when bulk enable is based on ids', async () => {

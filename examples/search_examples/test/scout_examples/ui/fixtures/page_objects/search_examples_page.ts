@@ -8,6 +8,7 @@
  */
 
 import type { EuiComboBoxObject, Locator, PageObjects, ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import {
   APP_ID,
   DATA_VIEW,
@@ -79,6 +80,13 @@ export class SearchExamplesPage {
   async gotoSearchSessions(): Promise<void> {
     await this.page.gotoApp(`${APP_ID}/search-sessions`);
     await this.page.testSubj.locator('dataViewSelector').waitFor({ state: 'visible' });
+    // EUI hides selected options, so typing before the app's defaults land finds none.
+    await expect
+      .poll(() => this.dataViewSelector.getSelectedOptions().then(({ length }) => length))
+      .toBeGreaterThan(0);
+    await expect
+      .poll(() => this.searchMetricField.getSelectedOptions().then(({ length }) => length))
+      .toBeGreaterThan(0);
   }
 
   async gotoSqlSearch(): Promise<void> {

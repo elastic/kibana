@@ -119,6 +119,78 @@ describe('ServiceAccountsTable', () => {
     expect(screen.queryByText('Actions')).not.toBeInTheDocument();
   });
 
+  it('shows all roles directly when an account has three roles', () => {
+    renderTable({
+      serviceAccounts: [{ ...firstAccount, roles: ['role-1', 'role-2', 'role-3'] }],
+    });
+
+    const displayedRoles = screen.getByTestId('serviceAccountDisplayedRoles');
+    expect(within(displayedRoles).getAllByText(/role-/)).toHaveLength(3);
+    expect(screen.queryByTestId('serviceAccountMoreRoles')).not.toBeInTheDocument();
+  });
+
+  it('keeps a long role list in a scrollable popover', async () => {
+    const roles = Array.from({ length: 50 }, (_, index) => `role-${index + 1}`);
+    renderTable({ serviceAccounts: [{ ...firstAccount, roles }] });
+
+    const displayedRoles = screen.getByTestId('serviceAccountDisplayedRoles');
+    expect(within(displayedRoles).getAllByText(/role-/)).toHaveLength(3);
+    const moreRoles = screen.getByTestId('serviceAccountMoreRoles');
+    expect(moreRoles).toHaveTextContent('+47 more');
+    expect(moreRoles).toHaveAccessibleName('Show all 50 roles for nightshift-relay');
+    expect(screen.queryByTestId('serviceAccountAllRoles')).not.toBeInTheDocument();
+
+    fireEvent.click(moreRoles);
+
+    const allRoles = await screen.findByTestId('serviceAccountAllRoles');
+    expect(within(allRoles).getAllByText(/role-/)).toHaveLength(50);
+    expect(within(allRoles).getByText('role-50')).toBeInTheDocument();
+    expect(allRoles).toHaveStyle({ overflowY: 'auto' });
+    expect(allRoles).toHaveAccessibleName('Roles for nightshift-relay');
+    act(() => allRoles.focus());
+    expect(allRoles).toHaveFocus();
+  });
+
+  it.each([
+    [{ type: 'user' as const, username: 'operator' }, 'operator'],
+    [
+      {
+        type: 'api_key' as const,
+        variant: 'stack' as const,
+        apiKeyId: 'key-1',
+        apiKeyName: 'deploy',
+        displayName: 'Night Operator',
+      },
+      'deploy (Night Operator)',
+    ],
+    [
+      {
+        type: 'api_key' as const,
+        variant: 'stack' as const,
+        apiKeyId: 'key-1',
+        displayName: 'ada',
+      },
+      'API key key-1 (ada)',
+    ],
+    [
+      {
+        type: 'api_key' as const,
+        variant: 'uiam' as const,
+        apiKeyId: 'key-1',
+        apiKeyName: 'deploy',
+      },
+      'deploy',
+    ],
+    [
+      { type: 'service_account' as const, serviceAccountId: 'kibana/automation' },
+      'kibana/automation',
+    ],
+  ])('names the creator %j as %s', (createdBy, label) => {
+    renderTable({ serviceAccounts: [{ ...firstAccount, createdBy }] });
+
+    expect(screen.getByText(label)).toBeVisible();
+  });
+
   it('marks only disabled accounts', () => {
     renderTable();
 
@@ -178,10 +250,7 @@ describe('ServiceAccountsTable', () => {
 
   it('explains a workload count that could not be taken on keyboard focus', async () => {
     renderTable();
-    const row = screen.getByRole('row', { name: /incident-responder/ });
-    const cells = within(row).getAllByRole('cell');
-    const workloadCell = cells[cells.length - 1];
-    const unavailableCount = within(workloadCell).getByText('—');
+    const unavailableCount = screen.getByTestId('serviceAccountWorkloadCountUnavailable');
 
     expect(unavailableCount).toHaveAttribute('tabindex', '0');
     act(() => unavailableCount.focus());
@@ -193,26 +262,14 @@ describe('ServiceAccountsTable', () => {
   });
 
   describe('workload counts', () => {
-    const getWorkloadCell = (name: string) => {
-      const cells = within(screen.getByRole('row', { name: new RegExp(name) })).getAllByRole(
-        'cell'
-      );
-      return cells[cells.length - 1];
-    };
-
     it('opens the workloads of a bound account from its View link', () => {
       const onViewWorkloads = jest.fn();
       renderTable({ onViewWorkloads });
 
-      const workloadCell = getWorkloadCell('nightshift-relay');
-      expect(within(workloadCell).getByTestId('serviceAccountWorkloadCount')).toHaveTextContent(
-        '3'
-      );
-      fireEvent.click(
-        within(workloadCell).getByRole('button', {
-          name: 'View the workloads bound to nightshift-relay',
-        })
-      );
+      expect(screen.getByTestId('serviceAccountWorkloadCount')).toHaveTextContent('3');
+      const viewWorkloads = screen.getByTestId('serviceAccountViewWorkloads');
+      expect(viewWorkloads).toHaveAccessibleName('View the workloads bound to nightshift-relay');
+      fireEvent.click(viewWorkloads);
 
       expect(onViewWorkloads).toHaveBeenCalledWith(firstAccount);
     });
@@ -223,11 +280,8 @@ describe('ServiceAccountsTable', () => {
         serviceAccounts: [{ ...secondAccount, workloadCount: 0 }],
       });
 
-      const workloadCell = getWorkloadCell('incident-responder');
-      expect(within(workloadCell).getByTestId('serviceAccountWorkloadCount')).toHaveTextContent(
-        '0'
-      );
-      expect(within(workloadCell).queryByTestId('serviceAccountViewWorkloads')).toBeNull();
+      expect(screen.getByTestId('serviceAccountWorkloadCount')).toHaveTextContent('0');
+      expect(screen.queryByTestId('serviceAccountViewWorkloads')).toBeNull();
     });
 
     it('shows no View link when viewing is not offered', () => {

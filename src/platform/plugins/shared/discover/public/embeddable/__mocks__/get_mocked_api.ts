@@ -24,6 +24,7 @@ import type {
   JsonModeSettings,
   DocumentsDisplayMode,
 } from '@kbn/unified-data-table';
+import type { IDslPagination } from '@kbn/search-types';
 
 export const getMockedSearchApi = ({
   searchSource,
@@ -38,7 +39,7 @@ export const getMockedSearchApi = ({
     api: {
       uuid: 'testEmbeddable',
       savedObjectId$: new BehaviorSubject<string | undefined>(undefined),
-      dataViews$: new BehaviorSubject<DataView[] | undefined>([
+      dataSources$: new BehaviorSubject<DataView[] | undefined>([
         searchSource.getField('index') ?? dataViewMock,
       ]),
       title$: new BehaviorSubject<string | undefined>(undefined),
@@ -73,6 +74,8 @@ export const getMockedSearchApi = ({
       totalHitCount: new BehaviorSubject<number | undefined>(0),
       resultDataSource: new BehaviorSubject<EsqlSource | undefined>(undefined),
       inspectorAdapters: new BehaviorSubject<Adapters>({}),
+      pagination: new BehaviorSubject<IDslPagination | undefined>(undefined),
+      isLoadingMore: new BehaviorSubject<boolean>(false),
     },
     setters: {
       setDataLoading: (dataLoading: boolean | undefined) => dataLoading$.next(dataLoading),

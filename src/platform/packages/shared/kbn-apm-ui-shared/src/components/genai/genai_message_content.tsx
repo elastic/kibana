@@ -71,7 +71,7 @@ function GenAiMessageBlockContent({ block, role, toolNamesById }: BlockProps) {
       const name = block.id ? toolNamesById.get(block.id) : undefined;
       return (
         <GenAiToolCard
-          iconType="returnKey"
+          iconType="return"
           name={name}
           id={block.id}
           copyText={toCopyJson({ id: block.id, name, response: block.response })}

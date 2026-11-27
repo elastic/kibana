@@ -20,8 +20,8 @@ export interface Suggestion {
 export interface AutocompleteSelectorProps {
   value?: string;
   onChange?: (value: string) => void;
-  label?: string;
-  helpText?: string;
+  label?: React.ReactNode;
+  helpText?: React.ReactNode;
   placeholder?: string;
   disabled?: boolean;
   compressed?: boolean;

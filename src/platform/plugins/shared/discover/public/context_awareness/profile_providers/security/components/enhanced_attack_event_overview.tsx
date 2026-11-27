@@ -7,27 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import type { ProfileProviderServices } from '../../profile_provider_services';
+import type {
+  DocViewRenderProps,
+  DocViewRestorableStateProps,
+} from '@kbn/unified-doc-viewer/types';
+import type { SecuritySolutionAttackFlyoutOverviewTabFeature } from '@kbn/discover-shared-plugin/public';
 
 const noop = () => {};
 
-export interface EnhancedAttackEventOverviewProps extends DocViewRenderProps {
-  providerServices: ProfileProviderServices;
+export interface EnhancedAttackEventOverviewProps
+  extends DocViewRenderProps,
+    DocViewRestorableStateProps {
+  overviewTab?: SecuritySolutionAttackFlyoutOverviewTabFeature;
   refreshData?: () => void;
 }
 
 export const EnhancedAttackEventOverview = ({
   hit,
-  providerServices,
+  overviewTab,
   refreshData,
   ...docViewProps
 }: EnhancedAttackEventOverviewProps) => {
-  const attackFlyoutOverviewTabFeature = providerServices.discoverShared.features.registry.getById(
-    'security-solution-attack-flyout-overview-tab'
-  );
   const handleAttackUpdated = refreshData ?? noop;
 
-  const render = attackFlyoutOverviewTabFeature?.render;
-  return render ? render({ hit, ...docViewProps, onAttackUpdated: handleAttackUpdated }) : null;
+  return overviewTab
+    ? overviewTab.render({ hit, ...docViewProps, onAttackUpdated: handleAttackUpdated })
+    : null;
 };

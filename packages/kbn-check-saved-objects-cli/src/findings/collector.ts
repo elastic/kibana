@@ -8,7 +8,12 @@
  */
 
 import { ListrError } from 'listr2';
-import { RULE_IDS, type SavedObjectsCheckFinding } from './types';
+import {
+  RULE_DOCS_ANCHORS,
+  RULE_IDS,
+  type SavedObjectsCheckFinding,
+  type SavedObjectsCheckReportFinding,
+} from './types';
 import { isSavedObjectsCheckError } from './error';
 
 export class FindingsCollector {
@@ -55,14 +60,14 @@ export class FindingsCollector {
    *
    * Merge strategy per field:
    * - `baselineUrl` / `serverlessBaselineUrl`: accumulate both links.
-   * - `fixHint` / `docsAnchor`: first non-null value wins. Both occurrences should
-   *   carry identical hints (same rule, same type), but if one is absent the other
+   * - `fixHint`: first non-null value wins. Both occurrences should carry
+   *   identical hints (same rule, same type), but if one is absent the other
    *   is used rather than silently discarding it.
    *
    * Deduplication key: ruleId + typeName + message.
    */
-  getFindings(): SavedObjectsCheckFinding[] {
-    const seen = new Map<string, SavedObjectsCheckFinding>();
+  getFindings(): SavedObjectsCheckReportFinding[] {
+    const seen = new Map<string, SavedObjectsCheckReportFinding>();
     for (const f of this.findings) {
       const key = `${f.ruleId}:${f.typeName ?? ''}:${f.message}`;
       const existing = seen.get(key);
@@ -70,10 +75,9 @@ export class FindingsCollector {
         existing.baselineUrl ??= f.baselineUrl;
         existing.serverlessBaselineUrl ??= f.serverlessBaselineUrl;
         existing.fixHint ??= f.fixHint;
-        existing.docsAnchor ??= f.docsAnchor;
         existing.details ??= f.details;
       } else {
-        seen.set(key, { ...f });
+        seen.set(key, { ...f, docsAnchor: RULE_DOCS_ANCHORS[f.ruleId] });
       }
     }
     return [...seen.values()];

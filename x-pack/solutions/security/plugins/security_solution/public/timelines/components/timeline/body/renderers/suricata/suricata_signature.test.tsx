@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { TestProviders } from '../../../../../../common/mock';
-import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import {
   SuricataSignature,
   Tokens,
@@ -28,68 +28,71 @@ jest.mock('@elastic/eui', () => {
 });
 
 describe('SuricataSignature', () => {
-  const mount = useMountAppended();
-
   describe('rendering', () => {
     test('it renders the default SuricataSignature', () => {
-      const wrapper = shallow(
-        <SuricataSignature
-          scopeId="test"
-          id="doc-id-123"
-          signatureId={123}
-          signature="ET SCAN ATTACK Hello"
-        />
+      render(
+        <TestProviders>
+          <SuricataSignature
+            scopeId="test"
+            id="doc-id-123"
+            signatureId={123}
+            signature="ET SCAN ATTACK Hello"
+          />
+        </TestProviders>
       );
-      expect(wrapper).toMatchSnapshot();
+      expect(screen.getByText('123')).toBeInTheDocument();
+      expect(screen.getByText('ET')).toBeInTheDocument();
+      expect(screen.getByText('SCAN')).toBeInTheDocument();
+      expect(screen.getByText('ATTACK')).toBeInTheDocument();
+      expect(screen.getByText('Hello')).toBeInTheDocument();
     });
   });
 
   describe('Tokens', () => {
     test('should render empty if tokens are empty', () => {
-      const wrapper = shallow(<Tokens tokens={[]} />);
-      expect(wrapper.children().length).toEqual(0);
+      const { container } = render(<Tokens tokens={[]} />);
+      expect(container).toBeEmptyDOMElement();
     });
 
     test('should render a single if it is present', () => {
-      const wrapper = mount(
+      const { container } = render(
         <div>
           <Tokens tokens={['ET']} />
         </div>
       );
-      expect(wrapper.text()).toEqual('ET');
+      expect(container).toHaveTextContent(/^ET$/);
     });
 
     test('should render the multiple tokens if they are present', () => {
-      const wrapper = mount(
+      const { container } = render(
         <div>
           <Tokens tokens={['ET', 'SCAN']} />
         </div>
       );
-      expect(wrapper.text()).toEqual('ETSCAN');
+      expect(container).toHaveTextContent(/^ETSCAN$/);
     });
   });
 
   describe('SignatureId', () => {
     test('it renders the default SuricataSignature', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <SignatureId signatureId={123} scopeId="test" />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('123');
+      expect(container).toHaveTextContent(/^123$/);
     });
 
-    test('it renders a tooltip for the signature field', () => {
-      const wrapper = mount(
+    test('it renders a tooltip for the signature field', async () => {
+      render(
         <TestProviders>
           <SignatureId signatureId={123} scopeId="test" />
         </TestProviders>
       );
 
-      expect(
-        wrapper.find('[data-test-subj="suricata.eve.alert.signature_id-tooltip"]').first().props()
-          .content
-      ).toEqual(SURICATA_SIGNATURE_ID_FIELD_NAME);
+      await userEvent.hover(screen.getByText('123'));
+
+      expect(await screen.findByText(SURICATA_SIGNATURE_ID_FIELD_NAME)).toBeInTheDocument();
     });
   });
 });

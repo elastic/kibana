@@ -8,6 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
+import { getGcpIdToken } from '../../auth_types/gcp_jwt_helpers';
 import { GcpCloudFunctionsConnector } from './gcp_cloud_functions';
 
 jest.mock('../../auth_types/gcp_jwt_helpers', () => {
@@ -87,6 +88,27 @@ describe('GcpCloudFunctionsConnector', () => {
   });
 
   describe('invoke action', () => {
+    it('should exchange the ID token with the context fetch when one is set', async () => {
+      const fetchTestOnly = jest.fn();
+      mockClient.get.mockResolvedValue({
+        status: 200,
+        data: { uri: 'https://my-function-abc123-ew.a.run.app' },
+      });
+      mockClient.post.mockResolvedValue({ status: 200, data: {}, headers: {} });
+
+      await GcpCloudFunctionsConnector.actions.invoke.handler(
+        { ...mockContext, fetchTestOnly },
+        { functionName: 'my-function' }
+      );
+
+      expect(getGcpIdToken).toHaveBeenCalledWith(
+        'test@my-gcp-project.iam.gserviceaccount.com',
+        expect.any(String),
+        'https://my-function-abc123-ew.a.run.app',
+        fetchTestOnly
+      );
+    });
+
     it('should resolve service URL and invoke with an ID token', async () => {
       mockClient.get.mockResolvedValue({
         status: 200,

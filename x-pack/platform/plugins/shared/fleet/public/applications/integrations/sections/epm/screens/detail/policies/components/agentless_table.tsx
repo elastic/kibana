@@ -39,6 +39,7 @@ import {
   useStartServices,
   useBulkGetAgentlessPolicyThroughput,
   useDiscoverLocator,
+  useOnboardingInstanceUrl,
 } from '../../../../../../hooks';
 import { getAgentlessThroughputIndexPatterns } from '../../../../../../../../../common/services';
 import { removeVersionSuffixFromPolicyId } from '../../../../../../../../../common/services/version_specific_policies_utils';
@@ -86,6 +87,7 @@ export const AgentlessPackagePoliciesTable = ({
   const { notifications } = core;
   const authz = useAuthz();
   const { getHref } = useLink();
+  const getOnboardingInstanceUrl = useOnboardingInstanceUrl();
   const canReadAgents = authz.fleet.readAgents;
 
   // Collect ids for non-connector policies only; connectors don't ingest via agents
@@ -240,11 +242,18 @@ export const AgentlessPackagePoliciesTable = ({
                 editParams.set(IS_AGENTLESS_QUERY_PARAM, 'true');
               }
               const editQueryString = editParams.toString();
+              // A policy managed by a cloud onboarding instance is edited in the onboarding flow.
+              const onboardingInstanceUrl =
+                packagePolicy.onboarding_deployment_id &&
+                getOnboardingInstanceUrl(packagePolicy.onboarding_deployment_id);
               return (
                 <EuiLink
                   className="eui-textTruncate"
                   data-test-subj="agentlessIntegrationNameLink"
-                  href={`${editHref}${editQueryString ? `?${editQueryString}` : ''}`}
+                  href={
+                    onboardingInstanceUrl ||
+                    `${editHref}${editQueryString ? `?${editQueryString}` : ''}`
+                  }
                 >
                   {packagePolicy.name}
                 </EuiLink>

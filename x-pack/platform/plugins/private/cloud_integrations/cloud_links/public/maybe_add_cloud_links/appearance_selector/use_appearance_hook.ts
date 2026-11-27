@@ -54,18 +54,6 @@ export const useAppearance = ({
       title: i18n.translate('xpack.cloudLinks.userMenuLinks.appearance.successNotificationTitle', {
         defaultMessage: 'Appearance settings updated',
       }),
-      pageReloadText: i18n.translate(
-        'xpack.cloudLinks.userMenuLinks.appearance.successNotificationText',
-        {
-          defaultMessage: 'Reload the page to see the changes',
-        }
-      ),
-    },
-    pageReloadChecker: (prev, next) => {
-      const hasChangedDarkMode = prev?.userSettings?.darkMode !== next.userSettings?.darkMode;
-      const hasChangedContrastMode =
-        prev?.userSettings?.contrastMode !== next.userSettings?.contrastMode;
-      return hasChangedDarkMode || hasChangedContrastMode;
     },
   });
 

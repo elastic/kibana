@@ -6,18 +6,22 @@
  */
 
 import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
+import { getConversationOwnerFilter } from '../../lib/data_stream/get_conversation_owner_filter';
 
 export interface DeleteAllConversationsParams {
   esClient: ElasticsearchClient;
   conversationIndex: string;
   logger: Logger;
+  authenticatedUser: AuthenticatedUser;
   excludedIds?: string[];
 }
+
 export const deleteAllConversations = async ({
   esClient,
   conversationIndex,
   logger,
+  authenticatedUser,
   excludedIds = [],
 }: DeleteAllConversationsParams): Promise<DeleteByQueryResponse | undefined> => {
   try {
@@ -27,6 +31,7 @@ export const deleteAllConversations = async ({
           must: {
             match_all: {},
           },
+          filter: getConversationOwnerFilter(authenticatedUser),
           must_not: {
             ids: {
               values: excludedIds,
@@ -39,10 +44,6 @@ export const deleteAllConversations = async ({
       refresh: true,
     });
 
-    if (!response.deleted && response.deleted === 0) {
-      logger.error('No conversations have been deleted.');
-      throw Error('No conversations have been deleted.');
-    }
     return response;
   } catch (err) {
     logger.error(`Error deleting all conversations: ${err}`);

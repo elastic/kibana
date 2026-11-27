@@ -59,6 +59,8 @@ function buildVisualizationState(config: HeatmapConfig): HeatmapVisualizationSta
       ? fromColorByValueAPIToLensState(layer.metric.color, LENS_HEATMAP_DEFAULT_COLOR_STEPS)
       : undefined;
   const xAxisLabelRotation = axisLabelOrientationCompat.toState(layer.axis?.x?.labels?.orientation);
+  // Without a `y` dimension, the Y axis settings are ignored.
+  const yAxis = layer.y ? layer.axis?.y : undefined;
 
   return {
     layerId: DEFAULT_LAYER_ID,
@@ -72,14 +74,14 @@ function buildVisualizationState(config: HeatmapConfig): HeatmapVisualizationSta
       isCellLabelVisible: layer.styling?.cells?.labels?.visible ?? false,
       isXAxisLabelVisible: layer.axis?.x?.labels?.visible ?? true,
       isXAxisTitleVisible: layer.axis?.x?.title?.visible ?? false,
-      isYAxisLabelVisible: layer.axis?.y?.labels?.visible ?? true,
-      isYAxisTitleVisible: layer.axis?.y?.title?.visible ?? false,
+      isYAxisLabelVisible: yAxis?.labels?.visible ?? true,
+      isYAxisTitleVisible: yAxis?.title?.visible ?? false,
       ...stripUndefined<HeatmapGridConfigResult>({
         xTitle: layer.axis?.x?.title?.text,
-        yTitle: layer.axis?.y?.title?.text,
+        yTitle: yAxis?.title?.text,
         xAxisLabelRotation,
         xSortPredicate: layer.axis?.x?.sort,
-        ySortPredicate: layer.axis?.y?.sort,
+        ySortPredicate: yAxis?.sort,
       }),
     },
     legend: {

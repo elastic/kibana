@@ -116,6 +116,7 @@ components:
         - settings
         - settingsRevision
         - workflowId
+        - workflowOutdated
         - blockingReasons
       properties:
         id:
@@ -155,6 +156,15 @@ components:
             Id of this Worker's installed per-space workflow. Null when that workflow has not
             been installed yet. The client uses it to open the workflow's Executions tab and
             does not derive it from the Worker id.
+        workflowOutdated:
+          type: boolean
+          description: >-
+            True when this space's installed workflow is not what the current code would install
+            for its stored settings: its rendered YAML or definition version differs, or the
+            template no longer renders for those settings. False when the workflow is not
+            installed, is disabled or invalid, or is not managed by AlertZero. Enabling a disabled
+            workflow does not reinstall it, so a stale one reads true once enabled. Does not
+            affect `state` or `blockingReasons`; an outdated Worker still runs.
         blockingReasons:
           type: array
           items:

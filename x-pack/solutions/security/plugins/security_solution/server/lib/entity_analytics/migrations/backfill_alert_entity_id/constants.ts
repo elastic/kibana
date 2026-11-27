@@ -41,13 +41,10 @@ export const RUN_INTERVAL_MS = 5 * 60 * 1_000;
 export const MIN_RUN_INTERVAL_MS = 30 * 1_000;
 
 /**
- * 30 days, matching the risk engine's default scoring window.
- *
- * Each space's window comes from its own `configuration.range`, which the risk engine API accepts
- * unbounded — a space could ask for `now-1y`. This caps how far back any backfill reaches, so the
- * volume of alerts it touches stays predictable however a space is configured.
+ * 60 days: how far back the backfill reaches in every space, matching the Entity Analytics
+ * homepage window.
  */
-export const MAX_LOOKBACK_MS = 30 * 24 * 60 * 60 * 1_000;
+export const BACKFILL_LOOKBACK_MS = 60 * 24 * 60 * 60 * 1_000;
 
 /**
  * Alerts a single update-by-query may rewrite before it finishes and is reissued.

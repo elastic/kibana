@@ -117,10 +117,12 @@ const NodeDetail = ({
   investigationId,
   data,
   selectedActionIndex,
+  isRunning,
 }: {
   investigationId: string;
   data: HypothesisTreeNodeData;
   selectedActionIndex: number | null;
+  isRunning: boolean;
 }): React.ReactElement | null => {
   switch (data.kind) {
     case 'trigger':
@@ -137,7 +139,7 @@ const NodeDetail = ({
         <>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              <HypothesisStatusBadge status={status} />
+              <HypothesisStatusBadge status={status} isRunning={isRunning} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued">
@@ -203,6 +205,7 @@ const HypothesisTreeCanvas = ({ input }: { input: HypothesisTreeInput }): React.
           ...data,
           isSelected: id === selectedNode?.id,
           isDimmed: selectedPath !== undefined && !selectedPath.nodeIds.has(id),
+          isRunning,
           selectedActionIndex:
             id === HYPOTHESIS_TREE_NODE_IDS.actions && id === selectedNode?.id
               ? selectedActionIndex
@@ -210,7 +213,7 @@ const HypothesisTreeCanvas = ({ input }: { input: HypothesisTreeInput }): React.
         },
       }));
     });
-  }, [positioned, selectedActionIndex, selectedNode?.id, selectedPath, setNodes]);
+  }, [isRunning, positioned, selectedActionIndex, selectedNode?.id, selectedPath, setNodes]);
 
   const edges = useMemo<HypothesisTreeFlowEdge[]>(
     () =>
@@ -433,6 +436,7 @@ const HypothesisTreeCanvas = ({ input }: { input: HypothesisTreeInput }): React.
                 investigationId={input.id}
                 data={selectedNode.data}
                 selectedActionIndex={selectedActionIndex}
+                isRunning={isRunning}
               />
             </EuiPanel>
           </Panel>
