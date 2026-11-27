@@ -17,6 +17,7 @@ import {
 import type { AiIndexItem, AiIndexType } from '../../common/http_api/ai_indices';
 import { buildAiIndexReadFilter } from '../../common/space_filter';
 import { applyLimit } from './apply_limit';
+import { AiIndexThrottledError } from './errors';
 import { probeAiIndices, type ProbedAiIndex } from './filter_readable_ai_indices';
 import { applyKiLifecycle } from './ki_lifecycle';
 import { searchAiIndices, type SearchAiIndicesParams } from './search';
@@ -266,6 +267,47 @@ describe('searchAiIndices', () => {
 
       await expect(resultSources()).resolves.toEqual([['ki-1', 'plain']]);
       expect(esqlRequest().query).toMatch(/^FROM "ai-index-idx-plain" METADATA/);
+    });
+
+    it('skips legacy index-pattern destinations before probing', async () => {
+      givenAiIndices(
+        PLAIN,
+        aiIndex('wildcard', 'index', 'ai-index-idx-logs-*'),
+        aiIndex('multi', 'index', 'ai-index-idx-a,ai-index-idx-b')
+      );
+
+      await searchAiIndices(baseParams);
+
+      expect(probeAiIndicesMock).toHaveBeenCalledWith({
+        esClient,
+        aiIndices: [PLAIN],
+        logger,
+      });
+      expect(esqlRequest().query).toMatch(/^FROM "ai-index-idx-plain" METADATA/);
+    });
+
+    it('returns nothing without probing when only legacy pattern destinations exist', async () => {
+      givenAiIndices(aiIndex('wildcard', 'index', 'ai-index-idx-logs-*'));
+
+      await expect(searchAiIndices(baseParams)).resolves.toEqual([]);
+      expect(probeAiIndicesMock).not.toHaveBeenCalled();
+      expect(esClient.esql.query).not.toHaveBeenCalled();
+    });
+
+    it('throws AiIndexThrottledError when any readability probe returns 429', async () => {
+      givenAiIndices(PLAIN, OTHER_PLAIN);
+      givenProbes(
+        { aiIndex: PLAIN },
+        {
+          aiIndex: OTHER_PLAIN,
+          failure: { reason: 'too many requests', privilege: false, throttled: true },
+        }
+      );
+
+      await expect(searchAiIndices(baseParams)).rejects.toEqual(
+        new AiIndexThrottledError('too many requests')
+      );
+      expect(esClient.esql.query).not.toHaveBeenCalled();
     });
   });
 

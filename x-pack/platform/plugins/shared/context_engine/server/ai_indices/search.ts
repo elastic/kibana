@@ -8,10 +8,12 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
+import { isIndexPattern } from '../../common/ai_index_dest';
 import { MAX_AI_INDEX_QUERY_LIMIT } from '../../common/constants';
 import type { AiIndexItem, QueryAiIndicesResponse } from '../../common/http_api/ai_indices';
 import type { KiJsonValue } from '../../common/http_api/knowledge_indicators';
 import { isKiJsonObject } from '../../common/ki_lifecycle_status';
+import { AiIndexThrottledError } from './errors';
 import { probeAiIndices, type ProbedAiIndex } from './filter_readable_ai_indices';
 import { executeAiIndexQuery } from './query';
 import type { AiIndexService } from './service';
@@ -124,11 +126,18 @@ export const searchAiIndices = async ({
 
   const registry = await aiIndexService.list(spaceId);
   const requested = aiIndexIds === undefined ? undefined : new Set(aiIndexIds);
-  const selected = requested ? registry.filter(({ id }) => requested.has(id)) : registry;
+  const selected = registry.filter(
+    ({ id, dest }) => (requested === undefined || requested.has(id)) && !isIndexPattern(dest.value)
+  );
   if (selected.length === 0) {
     return [];
   }
   const probed = await probeReadable({ esClient, aiIndices: selected, logger });
+
+  const throttled = probed.find(({ failure }) => failure?.throttled);
+  if (throttled?.failure) {
+    throw new AiIndexThrottledError(throttled.failure.reason);
+  }
 
   const targetsByDest = new Map<string, AiIndexItem>();
   for (const { aiIndex, failure, missing } of probed) {

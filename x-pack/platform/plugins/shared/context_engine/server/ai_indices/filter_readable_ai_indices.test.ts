@@ -93,6 +93,47 @@ describe('probeAiIndices', () => {
     expect(result[0]).not.toHaveProperty('missing');
     expect(logger.debug).not.toHaveBeenCalled();
   });
+
+  it('marks per-item and shard-level 429 failures as throttled', async () => {
+    msearch.mockResolvedValue({
+      responses: [
+        failed(429, 'es_rejected_execution_exception', 'too many requests'),
+        ok({
+          _shards: {
+            ...shards,
+            total: 2,
+            successful: 1,
+            failed: 1,
+            failures: [
+              {
+                status: 'TOO_MANY_REQUESTS',
+                reason: { type: 'es_rejected_execution_exception', reason: 'overloaded' },
+              },
+            ],
+          },
+        }),
+        failed(403, 'security_exception', 'unauthorized'),
+      ],
+    });
+
+    const result = await probeAiIndices({
+      ...params,
+      aiIndices: ['rejected', 'shard-throttled', 'forbidden'].map((id) => aiIndex(id)),
+    });
+
+    expect(result.map(({ aiIndex: { id }, failure }) => ({ id, failure }))).toEqual([
+      {
+        id: 'rejected',
+        failure: { reason: 'too many requests', privilege: false, throttled: true },
+      },
+      {
+        id: 'shard-throttled',
+        failure: { reason: '1 shard(s) failed', privilege: false, throttled: true },
+      },
+      { id: 'forbidden', failure: { reason: 'unauthorized', privilege: true } },
+    ]);
+    expect(result[2].failure).not.toHaveProperty('throttled');
+  });
 });
 
 describe('filterReadableAiIndices', () => {

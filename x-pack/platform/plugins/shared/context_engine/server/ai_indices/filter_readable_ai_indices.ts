@@ -18,7 +18,7 @@ interface ProbeAiIndicesParams {
 export interface ProbedAiIndex {
   aiIndex: AiIndexItem;
   /** Absent when readable. `privilege` is true for a refusal, false for unavailability. */
-  failure?: { reason: string; privilege: boolean };
+  failure?: { reason: string; privilege: boolean; throttled?: boolean };
   missing?: boolean;
 }
 
@@ -50,6 +50,15 @@ const failureReason = (item: MsearchResponseItem): string | undefined => {
 const isPrivilegeFailure = (item: MsearchResponseItem): boolean =>
   'error' in item && item.status === 403 && item.error.type === 'security_exception';
 
+const isThrottledFailure = (item: MsearchResponseItem): boolean =>
+  ('error' in item && item.status === 429) ||
+  (!('error' in item) &&
+    (item._shards.failures?.some(
+      ({ status, reason }) =>
+        status === 'TOO_MANY_REQUESTS' || reason.type === 'es_rejected_execution_exception'
+    ) ??
+      false));
+
 /**
  * Probes whether the caller can read each AI Index's backing index: one `msearch` as the caller,
  * one probe per entry. A backing index that does not exist yet is readable: the entry was just
@@ -79,7 +88,14 @@ export const probeAiIndices = async ({
       return { aiIndex };
     }
     logger.debug(`AI index '${aiIndex.id}' is not readable: ${reason}`);
-    return { aiIndex, failure: { reason, privilege: isPrivilegeFailure(response) } };
+    return {
+      aiIndex,
+      failure: {
+        reason,
+        privilege: isPrivilegeFailure(response),
+        ...(isThrottledFailure(response) ? { throttled: true } : {}),
+      },
+    };
   });
 };
 

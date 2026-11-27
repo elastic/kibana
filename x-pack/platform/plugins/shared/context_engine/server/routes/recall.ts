@@ -24,6 +24,7 @@ import {
 import type { RecallIncludeEntry } from '../../common/http_api/recall';
 import { validateNonBlank } from '../../common/validation';
 import type { AiIndexDataReadServiceApi } from '../ai_indices/data_read_service';
+import { AiIndexThrottledError } from '../ai_indices/errors';
 import { needsMemoryEnabled, validateRecallIncludeEntry } from '../recall/include';
 import type { RecallService } from '../recall/service';
 import type { GetAiIndexDataReadServiceParams } from '../types';
@@ -226,6 +227,12 @@ export const registerRecallRoutes = ({
             return response.customError({
               statusCode: 429,
               body: { message: formatEsError(error) },
+            });
+          }
+          if (error instanceof AiIndexThrottledError) {
+            return response.customError({
+              statusCode: 429,
+              body: { message: error.message },
             });
           }
           logger.error(error instanceof Error ? error.stack ?? error.message : String(error));

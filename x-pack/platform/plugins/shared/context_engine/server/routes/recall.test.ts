@@ -30,6 +30,7 @@ import {
 import { apiPrivileges } from '../../common/features';
 import type { RecallJsonResponse } from '../../common/http_api/recall';
 import type { AiIndexDataReadServiceApi } from '../ai_indices/data_read_service';
+import { AiIndexThrottledError } from '../ai_indices/errors';
 import type { RecallService } from '../recall/service';
 import type { GetAiIndexDataReadServiceParams } from '../types';
 import { MANAGE_MEMORY_REQUIRED_MESSAGE } from './memory_user';
@@ -384,6 +385,18 @@ describe('recall routes', () => {
       expect(response.customError).toHaveBeenCalledWith({
         statusCode: 429,
         body: { message: 'es_rejected_execution_exception: too many requests' },
+      });
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('returns 429 for a throttled readability probe without logging an error', async () => {
+      service.recall.mockRejectedValueOnce(new AiIndexThrottledError('too many requests'));
+
+      await callRoute(aiIndexBody);
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 429,
+        body: { message: 'too many requests' },
       });
       expect(logger.error).not.toHaveBeenCalled();
     });
