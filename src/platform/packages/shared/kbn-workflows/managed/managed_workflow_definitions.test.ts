@@ -24,6 +24,8 @@ import {
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
   ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
+  CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_WORKFLOW_ID,
+  CODE_INTELLIGENCE_OTEL_CLASSIFICATION_WORKFLOW_ID,
   CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
   CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
   CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID,
@@ -48,6 +50,8 @@ import CONTEXT_ENGINE_TRANSCRIPT_DREAMING_YAML from './definitions/context_engin
 import CONTEXT_ENGINE_TRANSCRIPT_DREAMING_BATCH_YAML from './definitions/context_engine/dreaming_transcripts_batch.yaml';
 import CONTEXT_ENGINE_MAINTENANCE_YAML from './definitions/context_engine/maintenance.yaml';
 import CONTEXT_ENGINE_RELATIONSHIPS_YAML from './definitions/context_engine/relationships.yaml';
+import CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_YAML from './definitions/code_intelligence/classify_logging_candidates.yaml';
+import CODE_INTELLIGENCE_OTEL_CLASSIFICATION_YAML from './definitions/code_intelligence/classify_otel_candidates.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { isDynamicValue, isLiquidTagValue, isVariableValue } from '../common/utils';
 import { visitNestedSteps } from '../definition/definition_utils';
@@ -72,6 +76,12 @@ type YamlTemplateManagedWorkflowDefinition = ManagedWorkflowDefinition & {
 };
 
 const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
+  [CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_WORKFLOW_ID]: {
+    connectorId: 'code-intelligence-connector',
+  },
+  [CODE_INTELLIGENCE_OTEL_CLASSIFICATION_WORKFLOW_ID]: {
+    connectorId: 'code-intelligence-connector',
+  },
   [EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID]: { serviceAccountId: 'example-account' },
   [NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID]: { serviceAccountId: 'kibana/nightshift_agent' },
   [NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID]: {
@@ -296,6 +306,16 @@ it.each([
     CONTEXT_ENGINE_TRANSCRIPT_DREAMING_BATCH_WORKFLOW_ID,
     CONTEXT_ENGINE_TRANSCRIPT_DREAMING_BATCH_YAML,
     '6:7dd0638a',
+  ],
+  [
+    CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_WORKFLOW_ID,
+    CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_YAML,
+    '9:9b7aaee6',
+  ],
+  [
+    CODE_INTELLIGENCE_OTEL_CLASSIFICATION_WORKFLOW_ID,
+    CODE_INTELLIGENCE_OTEL_CLASSIFICATION_YAML,
+    '7:620c2476',
   ],
 ] as const)(
   'requires bumping %s definition.version together with the fingerprint of its render inputs',
