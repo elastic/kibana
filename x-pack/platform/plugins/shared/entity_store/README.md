@@ -6,10 +6,10 @@ Central place for Entities management and logs extraction.
 
 Each entity type has a Task Manager task that reads source logs with ES|QL and upserts entities into `.entities.v2.latest.{namespace}`.
 
-| Task type | Runs for | Default cadence |
-|---|---|---|
-| `entity_store:v2:extract_entity_task:{type}` | every type | user and host `1m`, service `10m`, generic `30m` |
-| `entity_store:v2:extract_entity_non_priority_task:user` | user; scheduled always, does work only with the dual-process flag on | same as user, `1m` |
+| Task type                                               | Runs for                                                             | Default cadence                                  |
+| ------------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------ |
+| `entity_store:v2:extract_entity_task:{type}`            | every type                                                           | user and host `1m`, service `10m`, generic `30m` |
+| `entity_store:v2:extract_entity_non_priority_task:user` | user; scheduled always, does work only with the dual-process flag on | same as user, `1m`                               |
 
 ### Dual-process extraction
 
@@ -117,11 +117,11 @@ interface RegisterEntityMaintainerConfig {
 - **interval** - Cron-like interval at which the task runs (e.g. `5m`, `1h`).
 - **initialState** - Initial state object for the maintainer, used on the first run before any `setup` or `run` has executed.
 - **run** - Required. Called on every run (including the first). Must return the current state it manages.
-- **setup** - Optional. If provided, it runs once before the first `run`. Useful for one-time initialization. 
+- **setup** - Optional. If provided, it runs once before the first `run`. Useful for one-time initialization.
 
 ### Scheduling and namespaces
 
-The framework schedules all registered maintainers when the Entity Store is installed for a given space. 
+The framework schedules all registered maintainers when the Entity Store is installed for a given space.
 The framework is **namespace aware**: each Kibana space gets its own task instance per maintainer (e.g. one task per `id` per namespace). Registration is global, scheduling is per namespace at install time.
 
 ### Run and setup behavior
@@ -218,15 +218,18 @@ dynamic: {
 - Sources: 1 to 16. A source is one index pattern (no commas or whitespace, at most 256 characters); several patterns are several sources. The same pattern may appear on several sources with different filters.
 - `filter`: optional opaque ES|QL boolean expression narrowing the source to this type's documents, at most 2000 characters. It is validated for length only; where it goes in the query is the generator's job.
 - Attributes: at most 32 per source. `name` is a field path such as `host.arch` or `os.type`, under the same rule as `field` but at most 64 characters, so a column can carry the OpenTelemetry semantic convention name while each source reads its own field. It is the output column and the merge key across sources, and is unique within a source. `field` is a literal field path (dot-separated segments of letters, digits, `_`, `@` and `-`; no wildcards, expressions, quoting or whitespace; at most 512 characters).
+- Metrics: at most 32 per source (how many metrics that source declares). Same `name` / `field` rules as attributes. Required `agg` is one of `avg`, `min`, `max`, `sum`, `count`, `count_distinct`, `last`, `sum_rate`, `max_rate`, `avg_rate`, `min_rate`. Optional `filter` (same opaque ES|QL boolean length rule as the source filter), `scale` / `offset` (finite; not on `count` / `count_distinct`; `offset` not on `*_rate`, which have a true zero), and `unit` (`percent` | `ratio` | `bytes` | `ms` | `s` | `count`). There is no per-metric `label` and no `index_mode` / engine key: the inventory generator chooses classic vs TSDB ES|QL after probing. Empty `metrics: []` is allowed and means no metrics.
+- Query plans: each plan is a concurrent query. A source gives one plan group per distinct canonical metric filter and one for its unfiltered metrics (a source without metrics is one group), and each group runs under `TS` and `FROM` at most. The block is rejected when its sources can expand to more than 32 plans, counting filters by their canonical ES|QL text, so `state=="idle"` and `state == "idle"` are one group, as the generator merges them (a filter that does not parse is counted as written). The generator checks the real count after probing.
 - `valueLabels`: optional map from raw values (stringified) to canonical labels, at most 64 entries, keys and labels 1 to 256 characters. Unmapped values pass through.
 - `displayLabels`: optional list of `{ name, label }` at the root of the block, the user-facing text of an identity field or an attribute under its output `name`. A `name` is a literal field path of at most 512 characters, the same rule as an identity field and wider than the 64 characters of an attribute `name`. It is unique in the list, and must be an identity field or an attribute of some source. A `label` is 1 to 256 characters, and the list has at most 520 entries. It is presentation only: the inventory's generator never reads it, and it labels the columns of the inventory's `types` response. `valueLabels` labels the values of an attribute; `displayLabels` labels the attribute itself.
 - `suggestedFilters`: optional list of the columns the inventory offers as dropdown filters, in display order. At most 16, none repeated, each the `name` of an attribute declared by some source or an identity field (such as a namespace that is part of the identity), but not `entity.id`, the id column of the output. A name is a literal field path of at most 512 characters, the same rule as an identity field.
-- Unknown keys are rejected on the block, each source, each attribute and each display label. Bounds are denial-of-service limits for HTTP input, not design limits.
+- Unknown keys are rejected on the block, each source, each attribute, each metric and each display label. Bounds are denial-of-service limits for HTTP input, not design limits.
 
-Four whole-definition rules apply only when `dynamic` is present, at both `entitySchema` and registration:
+Whole-definition rules apply only when `dynamic` is present, at both `entitySchema` and registration:
 
 - Servable identity: `identityField` is a single literal field, or one unconditional ranking branch of literal fields and separators whose `documentsFilter` is exactly the derived presence filter, with no field evaluations, no `skipTypePrepend` and at most eight distinct fields. The built-in `host` identity fits; `user` does not.
-- No attribute `field` may be an identity field.
+- No attribute or metric `field` may be an identity field.
+- No metric `field` or `name` may be an identity field, `entity.id`, or `last_seen`. Metric `name` may also not be any attribute name of the definition. The same metric `name` on several sources must keep the same `agg` and the same `unit` (`avg` ≠ `max`, `sum_rate` ≠ `last`).
 - Every display label `name` is an identity field or an attribute of some source.
 - Every suggested filter is an identity field or an attribute of some source, but not `entity.id`.
 

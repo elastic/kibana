@@ -6,8 +6,10 @@
  */
 
 import type { ESQLColumn } from '@kbn/es-types';
+import type { UnavailableColumn } from '../../../common';
 import { LAST_SEEN_COLUMN } from '../generator';
 import type { IdentityPlan, OutputColumn } from '../generator';
+import { listMetricsUnsupportedOnEngine } from '../generator/metrics/utils';
 import { noIdentityCompositionReason, noReadableIndexReason } from '../reasons';
 import type { PlanResult } from './types';
 
@@ -32,11 +34,11 @@ import type { PlanResult } from './types';
 // (observed on 9.6, not documented), so "mapped" is the only question; whether a field is indexed
 // does not matter.
 
-/** Whether a plan's result can be used, and which of its attribute fields no index maps. */
+/** Whether a plan's result can be used, and which of its attribute/metric columns no index maps. */
 export interface PlanAvailability {
   usable: boolean;
   reason?: string;
-  unavailableFields: string[];
+  unavailableColumns: UnavailableColumn[];
 }
 
 // Under `unmapped_fields="nullify"` a field mapped in no index the query read comes back typed
@@ -46,18 +48,26 @@ const isMapped = (columns: ESQLColumn[], name: string): boolean => {
   return column !== undefined && column.type !== 'null';
 };
 
-const unavailableAttributeFields = (
+// One entry per column, not per field: a rate omitted under FROM can share its field with a
+// computed metric, and only the computed one is unmapped; the rate is in `unsupportedMetrics`.
+const listUnavailableColumns = (
   { plan, columns: resultColumns }: PlanResult,
   columns: OutputColumn[]
-): string[] => {
-  const fields = columns.flatMap(({ name, kind, fieldByPlan }) => {
+): UnavailableColumn[] => {
+  const unsupportedMetricNames = new Set(
+    listMetricsUnsupportedOnEngine(plan.metrics, plan.engine).map(({ name }) => name)
+  );
+  return columns.flatMap(({ name, kind, fieldByPlan }): UnavailableColumn[] => {
     const field = fieldByPlan?.[plan.index];
-    if (kind !== 'attribute' || field === undefined) {
+    if (field === undefined) {
       return [];
     }
-    return isMapped(resultColumns, name) ? [] : [field];
+    const isSourceColumn =
+      kind === 'attribute' || (kind === 'metric' && !unsupportedMetricNames.has(name));
+    return isSourceColumn && !isMapped(resultColumns, name)
+      ? [{ column: name, indexPattern: plan.indexPattern, field }]
+      : [];
   });
-  return [...new Set(fields)];
 };
 
 /**
@@ -73,13 +83,13 @@ export const interpretPlanResult = (
     plan: { indexPattern },
     columns: resultColumns,
   } = result;
-  const unavailableFields = unavailableAttributeFields(result, columns);
+  const unavailableColumns = listUnavailableColumns(result, columns);
 
   if (!isMapped(resultColumns, LAST_SEEN_COLUMN)) {
     return {
       usable: false,
       reason: noReadableIndexReason(indexPattern),
-      unavailableFields,
+      unavailableColumns,
     };
   }
 
@@ -87,12 +97,12 @@ export const interpretPlanResult = (
     fields.every((field) => isMapped(resultColumns, rawIdentityColumns.get(field) ?? field))
   );
   if (usable) {
-    return { usable, unavailableFields };
+    return { usable, unavailableColumns };
   }
   const wanted = compositions.map((fields) => fields.join(' + ')).join(', ');
   return {
     usable,
     reason: noIdentityCompositionReason(indexPattern, wanted),
-    unavailableFields,
+    unavailableColumns,
   };
 };

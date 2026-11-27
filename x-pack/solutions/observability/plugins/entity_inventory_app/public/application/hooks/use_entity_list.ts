@@ -32,6 +32,7 @@ export const INITIAL_LIST_RESPONSE: ListResponse = {
   },
   errors: [],
   unavailableColumns: [],
+  unsupportedMetrics: [],
 };
 
 export type EntityListResult = FetchResult<ListResponse>;

@@ -27,15 +27,23 @@ const getDefaultColumnLabel = (name: string): string | undefined => {
 
 /**
  * The columns of a type for the `types` response: each column's label is the definition's display
- * label for its name, else the default of a generated column, else none.
+ * label for its name, else the default of a generated column, else none. A metric column also
+ * carries the `agg` it is computed with and the `unit` the definition declared, so the client can
+ * format its values.
  */
 export const toTypeColumns = (
   columns: OutputColumn[],
   displayLabels: readonly DynamicDisplayLabel[] = []
 ): InventoryTypeColumn[] => {
   const authored = new Map(displayLabels.map(({ name, label }) => [name, label]));
-  return columns.map(({ name, kind }) => {
+  return columns.map(({ name, kind, agg, unit }) => {
     const label = authored.get(name) ?? getDefaultColumnLabel(name);
-    return label === undefined ? { name, kind } : { name, kind, label };
+    return {
+      name,
+      kind,
+      ...(label !== undefined ? { label } : {}),
+      ...(agg !== undefined ? { agg } : {}),
+      ...(unit !== undefined ? { unit } : {}),
+    };
   });
 };

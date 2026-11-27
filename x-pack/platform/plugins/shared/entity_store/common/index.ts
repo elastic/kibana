@@ -145,10 +145,16 @@ export type { EntityDefinitionManagedBy } from './domain/definitions/entity_sche
 export type {
   DynamicAttribute,
   DynamicDisplayLabel,
+  DynamicMetric,
+  DynamicMetricAgg,
+  DynamicMetricUnit,
   DynamicSource,
 } from './domain/definitions/dynamic';
 export {
   MAX_FIELD_PATH_LENGTH,
+  MAX_QUERY_PLANS,
+  METRIC_AGGS,
+  METRIC_UNITS,
   getIdentityCompositions,
   getIdentityFields,
   getPresenceFilter,

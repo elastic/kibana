@@ -8,9 +8,9 @@
         "hidden": false
       },
       "index_patterns": [
-        "metrics-kubernetes.state_deployment-*"
+        "metrics-kubernetes.state_deployment-default"
       ],
-      "name": "metrics-kubernetes.state_deployment",
+      "name": "entity-inventory-scout-state-deployment",
       "priority": 200,
       "template": {
         "mappings": {
@@ -90,7 +90,7 @@
       "index_patterns": [
         "metrics-k8sclusterreceiver.otel-default"
       ],
-      "name": "metrics-k8sclusterreceiver.otel",
+      "name": "entity-inventory-scout-k8sclusterreceiver-otel",
       "priority": 200,
       "template": {
         "mappings": {
@@ -152,6 +152,13 @@
                       "type": "long"
                     },
                     "desired": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "container": {
+                  "properties": {
+                    "restarts": {
                       "type": "long"
                     }
                   }
@@ -236,6 +243,18 @@
                   "time_series_metric": "gauge"
                 }
               }
+            },
+            "container": {
+              "properties": {
+                "name": {
+                  "type": "keyword",
+                  "time_series_dimension": true
+                },
+                "restarts": {
+                  "type": "long",
+                  "time_series_metric": "gauge"
+                }
+              }
             }
           }
         }
@@ -247,7 +266,8 @@
         "routing_path": [
           "k8s.cluster.name",
           "k8s.namespace.name",
-          "k8s.deployment.name"
+          "k8s.deployment.name",
+          "k8s.container.name"
         ],
         "time_series": {
           "start_time": "2026-11-05T00:00:00.000Z",
@@ -333,6 +353,13 @@
                   "type": "long"
                 },
                 "desired": {
+                  "type": "long"
+                }
+              }
+            },
+            "container": {
+              "properties": {
+                "restarts": {
                   "type": "long"
                 }
               }
@@ -432,6 +459,14 @@
                   "time_series_metric": "gauge"
                 }
               }
+            },
+            "container": {
+              "properties": {
+                "restarts": {
+                  "type": "long",
+                  "time_series_metric": "gauge"
+                }
+              }
             }
           }
         }
@@ -448,6 +483,92 @@
         "time_series": {
           "start_time": "2026-11-07T00:00:00.000Z",
           "end_time": "2026-11-08T00:00:00.000Z"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "metrics-kubernetes.state_deployment-tsds",
+    "mappings": {
+      "dynamic": false,
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "metricset": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            }
+          }
+        },
+        "orchestrator": {
+          "properties": {
+            "cluster": {
+              "properties": {
+                "name": {
+                  "type": "keyword",
+                  "time_series_dimension": true
+                }
+              }
+            }
+          }
+        },
+        "kubernetes": {
+          "properties": {
+            "namespace": {
+              "type": "keyword",
+              "time_series_dimension": true
+            },
+            "labels": {
+              "properties": {
+                "app": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "deployment": {
+              "properties": {
+                "name": {
+                  "type": "keyword",
+                  "time_series_dimension": true
+                },
+                "paused": {
+                  "type": "boolean"
+                },
+                "replicas": {
+                  "properties": {
+                    "available": {
+                      "type": "long",
+                      "time_series_metric": "gauge"
+                    },
+                    "desired": {
+                      "type": "long",
+                      "time_series_metric": "gauge"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "mode": "time_series",
+        "routing_path": [
+          "orchestrator.cluster.name",
+          "kubernetes.namespace",
+          "kubernetes.deployment.name"
+        ],
+        "time_series": {
+          "start_time": "2026-11-09T00:00:00.000Z",
+          "end_time": "2026-11-10T00:00:00.000Z"
         }
       }
     }

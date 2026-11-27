@@ -27,6 +27,7 @@ const LIST_RESPONSE: ListResponse = {
   timings: TIMINGS_FIXTURE,
   errors: ERRORS_FIXTURE,
   unavailableColumns: [{ column: 'os', indexPattern: 'logs-*', field: 'host.os.name' }],
+  unsupportedMetrics: [],
 };
 
 const REQUEST = { from: '2026-11-19T10:00:00.000Z', to: '2026-11-19T10:15:00.000Z' };

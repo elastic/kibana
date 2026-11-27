@@ -13,23 +13,33 @@ import {
   MAX_FIELD_PATH_LENGTH,
   MAX_FILTER_LENGTH,
   MAX_INDEX_PATTERN_LENGTH,
+  MAX_METRICS_PER_SOURCE,
   MAX_SOURCES,
   MAX_SUGGESTED_FILTERS,
   MAX_VALUE_LABEL_LENGTH,
   MAX_VALUE_LABELS,
   dynamicAttributeSchema,
   dynamicBlockSchema,
+  dynamicMetricSchema,
   dynamicSourceSchema,
   isLiteralFieldPath,
   literalFieldPathSchema,
   type DynamicAttribute,
   type DynamicDisplayLabel,
+  type DynamicMetric,
   type DynamicSource,
 } from './dynamic_block_schema';
 
 const attribute = (overrides: Partial<DynamicAttribute> = {}): DynamicAttribute => ({
   name: 'os_name',
   field: 'host.os.name',
+  ...overrides,
+});
+
+const metric = (overrides: Partial<DynamicMetric> = {}): DynamicMetric => ({
+  name: 'system.cpu.utilization',
+  field: 'system.cpu.utilization',
+  agg: 'last',
   ...overrides,
 });
 
@@ -298,6 +308,50 @@ describe('dynamicBlockSchema', () => {
     it('rejects an unknown key on an attribute', () => {
       expect(dynamicAttributeSchema.safeParse({ ...attribute(), label: 'OS' }).success).toBe(false);
     });
+
+    it('rejects a per-metric label', () => {
+      expect(dynamicMetricSchema.safeParse({ ...metric(), label: 'CPU' }).success).toBe(false);
+    });
+
+    it('rejects index_mode on a metric', () => {
+      expect(
+        dynamicMetricSchema.safeParse({ ...metric(), index_mode: 'time_series' }).success
+      ).toBe(false);
+    });
+  });
+
+  describe('metrics', () => {
+    it('accepts dual-source last for the same metric name', () => {
+      const result = dynamicBlockSchema.safeParse({
+        sources: [
+          source({
+            indexPattern: 'metrics-hostmetricsreceiver.otel-*',
+            metrics: [
+              metric({
+                filter: 'state == "idle"',
+                scale: -1,
+                offset: 1,
+                unit: 'percent',
+              }),
+            ],
+          }),
+          source({
+            filter: 'metricset.name == "cpu"',
+            metrics: [
+              metric({
+                field: 'system.cpu.total.norm.pct',
+                unit: 'percent',
+              }),
+            ],
+          }),
+        ],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('treats empty metrics like absent metrics', () => {
+      expect(dynamicSourceSchema.safeParse(source({ metrics: [] })).success).toBe(true);
+    });
   });
 });
 
@@ -307,6 +361,14 @@ describe('dynamicSourceSchema', () => {
       expect(dynamicSourceSchema.safeParse(source({ indexPattern: 'metrics-*' })).success).toBe(
         true
       );
+    });
+
+    it('accepts a data stream name without a wildcard', () => {
+      expect(
+        dynamicSourceSchema.safeParse(
+          source({ indexPattern: 'metrics-hostmetricsreceiver.otel-default' })
+        ).success
+      ).toBe(true);
     });
 
     it('rejects a comma-separated list', () => {
@@ -380,6 +442,90 @@ describe('dynamicSourceSchema', () => {
       expect(issuePaths(result)).toEqual([['attributes', 2, 'name']]);
       expect(result.error?.issues[0].message).toMatch(/unique within a source/);
     });
+  });
+
+  describe('metrics', () => {
+    it(`accepts ${MAX_METRICS_PER_SOURCE} metrics`, () => {
+      const metrics = Array.from({ length: MAX_METRICS_PER_SOURCE }, (_, index) =>
+        metric({ name: `m${index}`, field: `f.${index}` })
+      );
+      expect(dynamicSourceSchema.safeParse(source({ metrics })).success).toBe(true);
+    });
+
+    it(`rejects ${MAX_METRICS_PER_SOURCE + 1} metrics`, () => {
+      const metrics = Array.from({ length: MAX_METRICS_PER_SOURCE + 1 }, (_, index) =>
+        metric({ name: `m${index}`, field: `f.${index}` })
+      );
+      expect(dynamicSourceSchema.safeParse(source({ metrics })).success).toBe(false);
+    });
+
+    it('rejects a duplicate metric name with a path to the duplicate', () => {
+      const result = dynamicSourceSchema.safeParse(
+        source({
+          metrics: [
+            metric({ name: 'cpu', field: 'a' }),
+            metric({ name: 'mem', field: 'b' }),
+            metric({ name: 'cpu', field: 'c' }),
+          ],
+        })
+      );
+      expect(result.success).toBe(false);
+
+      expect(issuePaths(result)).toEqual([['metrics', 2, 'name']]);
+    });
+
+    it('rejects a metric name that matches an attribute in the same source', () => {
+      const result = dynamicSourceSchema.safeParse(
+        source({
+          attributes: [attribute({ name: 'cpu', field: 'host.cpu' })],
+          metrics: [metric({ name: 'cpu', field: 'system.cpu.utilization' })],
+        })
+      );
+      expect(result.success).toBe(false);
+      expect(issuePaths(result)).toEqual([['metrics', 0, 'name']]);
+    });
+  });
+});
+
+describe('dynamicMetricSchema', () => {
+  it.each(['last', 'avg', 'sum_rate', 'count_distinct'] as const)('accepts agg %s', (agg) => {
+    expect(dynamicMetricSchema.safeParse(metric({ agg })).success).toBe(true);
+  });
+
+  it('rejects an unknown agg', () => {
+    expect(dynamicMetricSchema.safeParse(metric({ agg: 'percentile' as 'last' })).success).toBe(
+      false
+    );
+  });
+
+  it('rejects scale on count', () => {
+    expect(dynamicMetricSchema.safeParse(metric({ agg: 'count', scale: 2 })).success).toBe(false);
+  });
+
+  it('rejects offset on count_distinct', () => {
+    expect(
+      dynamicMetricSchema.safeParse(metric({ agg: 'count_distinct', offset: 1 })).success
+    ).toBe(false);
+  });
+
+  it('rejects offset on a rate but allows scale', () => {
+    expect(dynamicMetricSchema.safeParse(metric({ agg: 'sum_rate', scale: 8 })).success).toBe(true);
+    expect(dynamicMetricSchema.safeParse(metric({ agg: 'sum_rate', offset: 1 })).success).toBe(
+      false
+    );
+  });
+
+  it('rejects non-finite scale', () => {
+    expect(dynamicMetricSchema.safeParse(metric({ scale: Number.NaN })).success).toBe(false);
+    expect(dynamicMetricSchema.safeParse(metric({ scale: Number.POSITIVE_INFINITY })).success).toBe(
+      false
+    );
+  });
+
+  it('rejects a free-text unit outside the closed set', () => {
+    expect(dynamicMetricSchema.safeParse(metric({ unit: 'widgets' as 'count' })).success).toBe(
+      false
+    );
   });
 });
 

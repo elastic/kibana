@@ -15,6 +15,7 @@ import {
   type EntityDefinitionWithoutId,
 } from '../../../../common/domain/definitions/entity_schema';
 import { assertDynamicDefinitionRules } from '../../../../common/domain/definitions/dynamic';
+import { assertQueryPlanBudget } from './query_plan_budget';
 
 /** A definition as accepted by the registry: any valid definition with a required `managedBy`. */
 export type RegistrableEntityDefinition = Omit<EntityDefinitionWithoutId, 'managedBy'> & {
@@ -38,7 +39,8 @@ const registrableEntityDefinitionSchema = entityDefinitionObjectSchema
   .omit({ id: true })
   .extend({ managedBy: EntityDefinitionManagedBy })
   .strict()
-  .superRefine(assertDynamicDefinitionRules);
+  .superRefine(assertDynamicDefinitionRules)
+  .superRefine(assertQueryPlanBudget);
 
 const formatSchemaIssues = (error: z.ZodError): string =>
   error.issues

@@ -69,6 +69,7 @@ const smallList = (rows: InventoryRow[]): ListResponse => ({
   },
   errors: [],
   unavailableColumns: [],
+  unsupportedMetrics: [],
 });
 
 const NAME_COLUMN_ID = 'host.name';
@@ -123,6 +124,7 @@ const WIDGET_LIST: ListResponse = {
   },
   errors: [],
   unavailableColumns: [],
+  unsupportedMetrics: [],
 };
 
 const renderWidgetTable = (

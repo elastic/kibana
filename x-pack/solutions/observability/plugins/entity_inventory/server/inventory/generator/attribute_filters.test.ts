@@ -29,6 +29,7 @@ const labelledPlan: QueryPlan = {
   attributes: [
     { name: 'phase', field: 'k8s.pod.phase', valueLabels: { '2': 'running', '3': 'pending' } },
   ],
+  metrics: [],
 };
 const labelledColumns: OutputColumn[] = [
   { name: 'phase', kind: 'attribute', fieldByPlan: { 0: 'k8s.pod.phase' } },

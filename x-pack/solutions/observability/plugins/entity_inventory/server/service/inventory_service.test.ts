@@ -453,6 +453,7 @@ describe('InventoryService.list', () => {
       truncated: false,
       errors: [],
       unavailableColumns: [],
+      unsupportedMetrics: [],
     });
   });
 
@@ -472,7 +473,50 @@ describe('InventoryService.list', () => {
       types: [type],
     } = await service.listTypes();
 
-    expect(columns).toEqual(type.columns.map(({ name, kind }) => ({ name, kind })));
+    expect(columns).toEqual(type.columns.map(({ label, ...rest }) => rest));
+  });
+
+  it('returns metric columns in definition order when a filtered metric is declared before an unfiltered one', async () => {
+    const withFilteredMetricFirst = {
+      ...k8sNodeFixture,
+      dynamic: {
+        sources: [
+          {
+            indexPattern: OTEL_PATTERN,
+            metrics: [
+              {
+                name: 'cpu_idle',
+                field: 'system.cpu.utilization',
+                agg: 'last' as const,
+                filter: 'state == "idle"',
+              },
+              { name: 'memory', field: 'system.memory.utilization', agg: 'last' as const },
+            ],
+          },
+        ],
+      },
+    };
+    const { service, esClient } = createService([withFilteredMetricFirst]);
+    answerByPattern(esClient, {
+      [OTEL_PATTERN]: esqlResponse(
+        ['entity.id', 'kubernetes.node.name', 'cpu_idle', 'memory', 'last_seen'],
+        []
+      ),
+    });
+
+    const { columns } = await service.list({
+      type: withFilteredMetricFirst.type,
+      window: WINDOW,
+      limit: 10,
+    });
+    const {
+      types: [type],
+    } = await service.listTypes();
+
+    const metricNames = (names: Array<{ name: string; kind: string }>) =>
+      names.filter(({ kind }) => kind === 'metric').map(({ name }) => name);
+    expect(metricNames(type.columns)).toEqual(['cpu_idle', 'memory']);
+    expect(metricNames(columns)).toEqual(['cpu_idle', 'memory']);
   });
 
   it.each([
@@ -615,6 +659,97 @@ describe('InventoryService.list', () => {
     expect(response.columns.find(({ name }) => name === 'resource_id')).toEqual({
       name: 'resource_id',
       kind: 'attribute',
+    });
+  });
+
+  it('lists only the computed metric in unavailableColumns when a rate omitted under FROM shares its unmapped field', async () => {
+    const withRateOnSharedField = {
+      ...k8sNodeFixture,
+      dynamic: {
+        sources: [
+          {
+            indexPattern: OTEL_PATTERN,
+            metrics: [
+              { name: 'network_bytes', field: 'host.network.bytes', agg: 'last' as const },
+              { name: 'network_rate', field: 'host.network.bytes', agg: 'sum_rate' as const },
+            ],
+          },
+        ],
+      },
+    };
+    const { service, esClient } = createService([withRateOnSharedField]);
+    answerByPattern(esClient, {
+      [OTEL_PATTERN]: esqlResponse(
+        ['entity.id', 'kubernetes.node.name', 'network_bytes', 'last_seen'],
+        [],
+        { nullTyped: ['network_bytes'] }
+      ),
+    });
+
+    const response = await service.list({
+      type: withRateOnSharedField.type,
+      window: WINDOW,
+      limit: 10,
+    });
+
+    expect(response.unsupportedMetrics).toEqual([
+      {
+        indexPattern: OTEL_PATTERN,
+        engine: 'FROM',
+        column: 'network_rate',
+        field: 'host.network.bytes',
+        agg: 'sum_rate',
+      },
+    ]);
+    expect(response.unavailableColumns).toEqual([
+      { column: 'network_bytes', indexPattern: OTEL_PATTERN, field: 'host.network.bytes' },
+    ]);
+  });
+
+  it('lists rates omitted under FROM in unsupportedMetrics on list and plan', async () => {
+    const withRate = {
+      ...k8sNodeFixture,
+      dynamic: {
+        sources: [
+          {
+            indexPattern: OTEL_PATTERN,
+            metrics: [
+              { name: 'cpu', field: 'system.cpu.pct', agg: 'last' as const },
+              { name: 'network_bytes', field: 'host.network.bytes', agg: 'sum_rate' as const },
+            ],
+          },
+        ],
+      },
+    };
+    const { service, esClient } = createService([withRate]);
+    answerByPattern(
+      esClient,
+      {
+        [OTEL_PATTERN]: esqlResponse(
+          ['entity.id', 'kubernetes.node.name', 'cpu', 'network_bytes', 'last_seen'],
+          []
+        ),
+      },
+      { timeSeries: [OTEL_PATTERN] }
+    );
+
+    const list = await service.list({ type: withRate.type, window: WINDOW, limit: 10 });
+    const plan = await service.plan({ type: withRate.type, window: WINDOW, limit: 10 });
+
+    expect(list.unsupportedMetrics).toEqual([
+      {
+        indexPattern: OTEL_PATTERN,
+        engine: 'FROM',
+        column: 'network_bytes',
+        field: 'host.network.bytes',
+        agg: 'sum_rate',
+      },
+    ]);
+    expect(plan.unsupportedMetrics).toEqual(list.unsupportedMetrics);
+    expect(list.columns.find(({ name }) => name === 'network_bytes')).toEqual({
+      name: 'network_bytes',
+      kind: 'metric',
+      agg: 'sum_rate',
     });
   });
 

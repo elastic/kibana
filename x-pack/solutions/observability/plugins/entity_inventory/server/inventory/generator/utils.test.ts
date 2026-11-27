@@ -13,6 +13,7 @@ const planOf = (engine: QueryPlan['engine']): QueryPlan => ({
   sourceIndex: 0,
   indexPattern: 'metrics-example-*',
   attributes: [],
+  metrics: [],
   engine,
 });
 

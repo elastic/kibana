@@ -28,6 +28,7 @@ const LIST_RESPONSE: ListResponse = {
   },
   errors: [],
   unavailableColumns: [],
+  unsupportedMetrics: [],
 };
 
 const setup = () => {

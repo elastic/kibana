@@ -50,6 +50,9 @@
           "uid": "uid-checkout-cart-api",
           "available": 3,
           "desired": 3
+        },
+        "container": {
+          "restarts": 4
         }
       }
     }
@@ -108,6 +111,9 @@
           "uid": "uid-checkout-payments",
           "available": 2,
           "desired": 3
+        },
+        "container": {
+          "restarts": 2
         }
       }
     }
@@ -166,6 +172,9 @@
           "uid": "uid-platform-ingress",
           "available": 1,
           "desired": 1
+        },
+        "container": {
+          "restarts": 0
         }
       }
     }
@@ -224,6 +233,9 @@
           "uid": "uid-checkout-cart-api",
           "available": 3,
           "desired": 3
+        },
+        "container": {
+          "restarts": 5
         }
       }
     }
@@ -282,6 +294,9 @@
           "uid": "uid-checkout-payments",
           "available": 2,
           "desired": 3
+        },
+        "container": {
+          "restarts": 1
         }
       }
     }
@@ -340,6 +355,9 @@
           "uid": "uid-platform-ingress",
           "available": 1,
           "desired": 1
+        },
+        "container": {
+          "restarts": 0
         }
       }
     }
@@ -365,6 +383,9 @@
           "uid": "uid-streaming-tsds-shared",
           "available": 4,
           "desired": 5
+        },
+        "container": {
+          "restarts": 10
         }
       }
     }
@@ -389,6 +410,9 @@
           "uid": "uid-streaming-tsds-shared",
           "available": 5,
           "desired": 5
+        },
+        "container": {
+          "restarts": 12
         }
       }
     }
@@ -413,6 +437,9 @@
           "uid": "uid-streaming-tsds-only",
           "available": 2,
           "desired": 5
+        },
+        "container": {
+          "restarts": 7
         }
       }
     }
@@ -438,6 +465,9 @@
           "uid": "uid-streaming-standard-only",
           "available": 1,
           "desired": 5
+        },
+        "container": {
+          "restarts": 3
         }
       }
     }
@@ -462,6 +492,9 @@
           "uid": "uid-timeseries-ts-window",
           "available": 1,
           "desired": 2
+        },
+        "container": {
+          "restarts": 6
         }
       }
     }
@@ -486,6 +519,9 @@
           "uid": "uid-timeseries-ts-window",
           "available": 2,
           "desired": 2
+        },
+        "container": {
+          "restarts": 8
         }
       }
     }
@@ -510,6 +546,9 @@
           "uid": "uid-aliased-kept-standard",
           "available": 1,
           "desired": 1
+        },
+        "container": {
+          "restarts": 9
         }
       }
     }
@@ -534,6 +573,9 @@
           "uid": "uid-aliased-dropped-standard",
           "available": 1,
           "desired": 1
+        },
+        "container": {
+          "restarts": 9
         }
       }
     }
@@ -558,6 +600,9 @@
           "uid": "uid-aliased-kept-tsds",
           "available": 2,
           "desired": 2
+        },
+        "container": {
+          "restarts": 11
         }
       }
     }
@@ -582,6 +627,194 @@
           "uid": "uid-aliased-dropped-tsds",
           "available": 2,
           "desired": 2
+        },
+        "container": {
+          "restarts": 11
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-k8sclusterreceiver.otel-tsds",
+    "source": {
+      "@timestamp": "2026-11-05T16:00:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "gauges"
+        },
+        "deployment": {
+          "name": "restarts-drop",
+          "uid": "uid-gauges-restarts-drop",
+          "available": 2,
+          "desired": 2
+        },
+        "container": {
+          "restarts": 9
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-k8sclusterreceiver.otel-tsds",
+    "source": {
+      "@timestamp": "2026-11-05T16:01:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "gauges"
+        },
+        "deployment": {
+          "name": "restarts-drop",
+          "uid": "uid-gauges-restarts-drop",
+          "available": 2,
+          "desired": 2
+        },
+        "container": {
+          "restarts": 9
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-k8sclusterreceiver.otel-tsds",
+    "source": {
+      "@timestamp": "2026-11-05T16:02:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "gauges"
+        },
+        "deployment": {
+          "name": "restarts-drop",
+          "uid": "uid-gauges-restarts-drop",
+          "available": 1,
+          "desired": 1
+        },
+        "container": {
+          "restarts": 4
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-k8sclusterreceiver.otel-tsds",
+    "source": {
+      "@timestamp": "2026-11-05T17:00:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "gauges"
+        },
+        "deployment": {
+          "name": "two-containers",
+          "uid": "uid-gauges-two-containers"
+        },
+        "container": {
+          "name": "app",
+          "restarts": 1
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-k8sclusterreceiver.otel-tsds",
+    "source": {
+      "@timestamp": "2026-11-05T17:01:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "gauges"
+        },
+        "deployment": {
+          "name": "two-containers",
+          "uid": "uid-gauges-two-containers"
+        },
+        "container": {
+          "name": "app",
+          "restarts": 3
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-k8sclusterreceiver.otel-tsds",
+    "source": {
+      "@timestamp": "2026-11-05T17:00:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "gauges"
+        },
+        "deployment": {
+          "name": "two-containers",
+          "uid": "uid-gauges-two-containers"
+        },
+        "container": {
+          "name": "sidecar",
+          "restarts": 4
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-k8sclusterreceiver.otel-tsds",
+    "source": {
+      "@timestamp": "2026-11-05T17:01:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "gauges"
+        },
+        "deployment": {
+          "name": "two-containers",
+          "uid": "uid-gauges-two-containers"
+        },
+        "container": {
+          "name": "sidecar",
+          "restarts": 9
         }
       }
     }

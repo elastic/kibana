@@ -63,6 +63,33 @@ describe('toTypeColumns', () => {
     result.forEach((column) => expect(column).not.toHaveProperty('label'));
   });
 
+  it('carries the agg and the unit of a metric column, with its label', () => {
+    expect(
+      toTypeColumns(
+        [
+          {
+            name: 'k8s.container.restarts',
+            kind: 'metric',
+            fieldByPlan: { 0: 'kubernetes.container.status.restarts' },
+            agg: 'max',
+            unit: 'count',
+          },
+          { name: 'cpu', kind: 'metric', fieldByPlan: { 0: 'system.cpu.pct' }, agg: 'last' },
+        ],
+        [{ name: 'k8s.container.restarts', label: 'Restarts' }]
+      )
+    ).toEqual([
+      {
+        name: 'k8s.container.restarts',
+        kind: 'metric',
+        label: 'Restarts',
+        agg: 'max',
+        unit: 'count',
+      },
+      { name: 'cpu', kind: 'metric', agg: 'last' },
+    ]);
+  });
+
   it('never returns the source fields of an attribute', () => {
     toTypeColumns(columns).forEach((column) => expect(column).not.toHaveProperty('fieldByPlan'));
   });

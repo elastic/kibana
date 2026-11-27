@@ -16,6 +16,7 @@ const plan: QueryPlan = {
   indexPattern: 'p',
   engine: 'FROM',
   attributes: [],
+  metrics: [],
 };
 
 const result = (types: Record<string, string>): PlanResult => ({
@@ -53,7 +54,7 @@ describe('interpretPlanResult', () => {
         identity,
         outputColumns
       )
-    ).toEqual({ usable: true, unavailableFields: [] });
+    ).toEqual({ usable: true, unavailableColumns: [] });
   });
 
   it('is unusable when last_seen is null', () => {
@@ -66,7 +67,7 @@ describe('interpretPlanResult', () => {
     ).toEqual({
       usable: false,
       reason: 'no readable index behind "p" maps @timestamp',
-      unavailableFields: [],
+      unavailableColumns: [],
     });
   });
 
@@ -76,8 +77,47 @@ describe('interpretPlanResult', () => {
         result({ 'host.id': 'keyword', os: 'keyword', last_seen: 'date' }),
         identity,
         outputColumns
-      ).unavailableFields
-    ).toEqual(['host.ip']);
+      ).unavailableColumns
+    ).toEqual([{ column: 'ip', indexPattern: 'p', field: 'host.ip' }]);
+  });
+
+  it('treats an unmapped metric field as unavailable, but not a rate omitted under FROM', () => {
+    const fromPlan: QueryPlan = {
+      ...plan,
+      engine: 'FROM',
+      metrics: [
+        { name: 'cpu', field: 'system.cpu.pct', agg: 'last' },
+        { name: 'bytes', field: 'host.network.bytes', agg: 'sum_rate' },
+      ],
+    };
+    const metricColumns: OutputColumn[] = [
+      ...outputColumns,
+      { name: 'cpu', kind: 'metric', fieldByPlan: { 1: 'system.cpu.pct' }, agg: 'last' },
+      {
+        name: 'bytes',
+        kind: 'metric',
+        fieldByPlan: { 1: 'host.network.bytes' },
+        agg: 'sum_rate',
+      },
+    ];
+    expect(
+      interpretPlanResult(
+        {
+          plan: fromPlan,
+          columns: [
+            { name: 'host.id', type: 'keyword' },
+            { name: 'host.name', type: 'keyword' },
+            { name: 'os', type: 'keyword' },
+            { name: 'ip', type: 'ip' },
+            { name: 'cpu', type: 'null' },
+            { name: 'last_seen', type: 'date' },
+          ],
+          rows: [],
+        },
+        identity,
+        metricColumns
+      ).unavailableColumns
+    ).toEqual([{ column: 'cpu', indexPattern: 'p', field: 'system.cpu.pct' }]);
   });
 
   it('is unusable when last_seen is absent', () => {
@@ -116,7 +156,7 @@ describe('interpretPlanResult', () => {
       usable: false,
       reason:
         'no index behind "p" maps every field of an identity composition (host.id + host.name, host.hostname)',
-      unavailableFields: [],
+      unavailableColumns: [],
     });
   });
 
@@ -130,7 +170,7 @@ describe('interpretPlanResult', () => {
     ).toBe(true);
   });
 
-  it('lists the plan field of each null attribute it carries, under its own field name', () => {
+  it('lists each null attribute column it carries, with the field this plan reads', () => {
     expect(
       interpretPlanResult(
         result({
@@ -143,10 +183,16 @@ describe('interpretPlanResult', () => {
         identity,
         outputColumns
       )
-    ).toEqual({ usable: true, unavailableFields: ['os.name', 'host.ip'] });
+    ).toEqual({
+      usable: true,
+      unavailableColumns: [
+        { column: 'os', indexPattern: 'p', field: 'os.name' },
+        { column: 'ip', indexPattern: 'p', field: 'host.ip' },
+      ],
+    });
   });
 
-  it('lists unavailable fields of an unusable plan too, once each', () => {
+  it('lists unavailable columns of an unusable plan too, one per column sharing a field', () => {
     const columns: OutputColumn[] = [
       { name: 'os', kind: 'attribute', fieldByPlan: { 1: 'os.name' } },
       { name: 'os_again', kind: 'attribute', fieldByPlan: { 1: 'os.name' } },
@@ -161,7 +207,10 @@ describe('interpretPlanResult', () => {
     ).toEqual({
       usable: false,
       reason: 'no index behind "p" maps every field of an identity composition (host.id)',
-      unavailableFields: ['os.name'],
+      unavailableColumns: [
+        { column: 'os', indexPattern: 'p', field: 'os.name' },
+        { column: 'os_again', indexPattern: 'p', field: 'os.name' },
+      ],
     });
   });
 
@@ -178,12 +227,12 @@ describe('interpretPlanResult', () => {
     expect(entityIdResult('null')).toEqual({
       usable: false,
       reason: 'no index behind "p" maps every field of an identity composition (entity.id)',
-      unavailableFields: [],
+      unavailableColumns: [],
     });
   });
 
   it('is usable when the raw column of an entity.id identity is mapped', () => {
-    expect(entityIdResult('keyword')).toEqual({ usable: true, unavailableFields: [] });
+    expect(entityIdResult('keyword')).toEqual({ usable: true, unavailableColumns: [] });
   });
 
   it('is usable through a ranked composition when the entity.id raw column is null', () => {

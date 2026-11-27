@@ -97,6 +97,10 @@ export const EntityDataGrid = ({
     () => new Map(shownColumns.map(({ name, kind }) => [name, kind])),
     [shownColumns]
   );
+  const columnUnits = useMemo(
+    () => new Map(shownColumns.map(({ name, unit }) => [name, unit])),
+    [shownColumns]
+  );
   const columns = useMemo<EuiDataGridColumn[]>(
     () =>
       shownColumns.map((column) => ({
@@ -132,11 +136,12 @@ export const EntityDataGrid = ({
         <EntityCell
           value={row[columnId]}
           kind={columnKinds.get(columnId)}
+          unit={columnUnits.get(columnId)}
           dateFormat={dateFormat}
         />
       );
     },
-    [sortedRows, columnKinds, dateFormat]
+    [sortedRows, columnKinds, columnUnits, dateFormat]
   );
 
   const toolbarVisibility = useMemo<EuiDataGridToolBarVisibilityOptions>(

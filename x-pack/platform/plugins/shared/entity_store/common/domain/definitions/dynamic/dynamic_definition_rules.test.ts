@@ -11,7 +11,11 @@ import { MAX_DYNAMIC_IDENTITY_FIELDS, type DynamicBlock } from './dynamic_block_
 import { isNotEmptyCondition } from '../common_fields';
 import {
   DISPLAY_LABEL_RULE,
+  METRIC_CONSISTENCY_RULE,
+  METRIC_NAME_RULE,
   NO_IDENTITY_ATTRIBUTE_RULE,
+  NO_IDENTITY_METRIC_RULE,
+  RESERVED_ENTITY_ID_FIELD,
   RESERVED_LAST_SEEN_FIELD,
   SERVABLE_IDENTITY_RULE,
   SUGGESTED_FILTER_RULE,
@@ -457,6 +461,238 @@ describe('dynamic definition rules', () => {
         withSuggestedFilters(hostIdentity, ['os_name', 'missing']),
         ['dynamic', 'suggestedFilters', 1],
         SUGGESTED_FILTER_RULE
+      );
+    });
+  });
+
+  describe('metrics rules', () => {
+    const withMetrics = (sources: DynamicBlock['sources']) =>
+      definition(hostIdentity, { dynamic: { sources } });
+
+    it('rejects a metric field that is an identity field', () => {
+      expectRejected(
+        withMetrics([
+          {
+            indexPattern: 'metrics-a-*',
+            metrics: [{ name: 'cpu', field: 'host.name', agg: 'last' }],
+          },
+        ]),
+        ['dynamic', 'sources', 0, 'metrics', 0, 'field'],
+        NO_IDENTITY_METRIC_RULE
+      );
+    });
+
+    it('rejects entity.id as a metric field', () => {
+      expectRejected(
+        withMetrics([
+          {
+            indexPattern: 'metrics-a-*',
+            metrics: [{ name: 'cpu', field: RESERVED_ENTITY_ID_FIELD, agg: 'last' }],
+          },
+        ]),
+        ['dynamic', 'sources', 0, 'metrics', 0, 'field'],
+        METRIC_NAME_RULE
+      );
+    });
+
+    it('rejects last_seen as a metric field', () => {
+      expectRejected(
+        withMetrics([
+          {
+            indexPattern: 'metrics-a-*',
+            metrics: [{ name: 'cpu', field: RESERVED_LAST_SEEN_FIELD, agg: 'last' }],
+          },
+        ]),
+        ['dynamic', 'sources', 0, 'metrics', 0, 'field'],
+        METRIC_NAME_RULE
+      );
+    });
+    it('rejects a metric name that collides with an attribute on another source', () => {
+      expectRejected(
+        withMetrics([
+          {
+            indexPattern: 'metrics-a-*',
+            attributes: [{ name: 'available', field: 'k8s.deployment.available' }],
+          },
+          {
+            indexPattern: 'metrics-b-*',
+            metrics: [
+              { name: 'available', field: 'kubernetes.deployment.replicas.available', agg: 'last' },
+            ],
+          },
+        ]),
+        ['dynamic', 'sources', 1, 'metrics', 0, 'name'],
+        METRIC_NAME_RULE
+      );
+    });
+
+    it('rejects a reserved metric name', () => {
+      expectRejected(
+        withMetrics([
+          {
+            indexPattern: 'metrics-a-*',
+            metrics: [{ name: RESERVED_ENTITY_ID_FIELD, field: 'host.cpu', agg: 'last' }],
+          },
+        ]),
+        ['dynamic', 'sources', 0, 'metrics', 0, 'name'],
+        METRIC_NAME_RULE
+      );
+    });
+
+    it('rejects last_seen as a metric name', () => {
+      expectRejected(
+        withMetrics([
+          {
+            indexPattern: 'metrics-a-*',
+            metrics: [{ name: RESERVED_LAST_SEEN_FIELD, field: 'host.cpu', agg: 'last' }],
+          },
+        ]),
+        ['dynamic', 'sources', 0, 'metrics', 0, 'name'],
+        METRIC_NAME_RULE
+      );
+    });
+
+    it('rejects a metric name that is an identity field', () => {
+      expectRejected(
+        withMetrics([
+          {
+            indexPattern: 'metrics-a-*',
+            metrics: [{ name: 'host.name', field: 'system.cpu.utilization', agg: 'last' }],
+          },
+        ]),
+        ['dynamic', 'sources', 0, 'metrics', 0, 'name'],
+        METRIC_NAME_RULE
+      );
+    });
+
+    it('rejects the same metric name with incompatible aggs across sources (avg vs last)', () => {
+      expectRejected(
+        withMetrics([
+          {
+            indexPattern: 'metrics-a-*',
+            metrics: [{ name: 'cpu', field: 'a', agg: 'last', unit: 'percent' }],
+          },
+          {
+            indexPattern: 'metrics-b-*',
+            metrics: [{ name: 'cpu', field: 'b', agg: 'avg', unit: 'percent' }],
+          },
+        ]),
+        ['dynamic', 'sources', 1, 'metrics', 0, 'name'],
+        METRIC_CONSISTENCY_RULE
+      );
+    });
+
+    it('rejects the same metric name with avg vs max across sources', () => {
+      expectRejected(
+        withMetrics([
+          {
+            indexPattern: 'metrics-a-*',
+            metrics: [{ name: 'cpu', field: 'a', agg: 'avg', unit: 'percent' }],
+          },
+          {
+            indexPattern: 'metrics-b-*',
+            metrics: [{ name: 'cpu', field: 'b', agg: 'max', unit: 'percent' }],
+          },
+        ]),
+        ['dynamic', 'sources', 1, 'metrics', 0, 'name'],
+        METRIC_CONSISTENCY_RULE
+      );
+    });
+
+    it('rejects sum_rate vs max_rate on the same metric name', () => {
+      expectRejected(
+        withMetrics([
+          {
+            indexPattern: 'metrics-a-*',
+            metrics: [{ name: 'bytes', field: 'a', agg: 'sum_rate', unit: 'bytes' }],
+          },
+          {
+            indexPattern: 'metrics-b-*',
+            metrics: [{ name: 'bytes', field: 'b', agg: 'max_rate', unit: 'bytes' }],
+          },
+        ]),
+        ['dynamic', 'sources', 1, 'metrics', 0, 'name'],
+        METRIC_CONSISTENCY_RULE
+      );
+    });
+
+    it('rejects sum_rate vs last on the same metric name', () => {
+      expectRejected(
+        withMetrics([
+          {
+            indexPattern: 'metrics-kubernetes.state_container-*',
+            metrics: [
+              {
+                name: 'k8s.container.restarts',
+                field: 'kubernetes.container.status.restarts',
+                agg: 'sum_rate',
+                unit: 'count',
+              },
+            ],
+          },
+          {
+            indexPattern: 'metrics-k8sclusterreceiver.otel-*',
+            metrics: [
+              {
+                name: 'k8s.container.restarts',
+                field: 'k8s.container.restarts',
+                agg: 'last',
+                unit: 'count',
+              },
+            ],
+          },
+        ]),
+        ['dynamic', 'sources', 1, 'metrics', 0, 'name'],
+        METRIC_CONSISTENCY_RULE
+      );
+    });
+
+    it('rejects the same metric name with different units across sources', () => {
+      expectRejected(
+        withMetrics([
+          {
+            indexPattern: 'metrics-a-*',
+            metrics: [{ name: 'cpu', field: 'a', agg: 'last', unit: 'percent' }],
+          },
+          {
+            indexPattern: 'metrics-b-*',
+            metrics: [{ name: 'cpu', field: 'b', agg: 'last', unit: 'ratio' }],
+          },
+        ]),
+        ['dynamic', 'sources', 1, 'metrics', 0, 'name'],
+        METRIC_CONSISTENCY_RULE
+      );
+    });
+
+    it('rejects the same metric name when only one source sets unit', () => {
+      expectRejected(
+        withMetrics([
+          {
+            indexPattern: 'metrics-a-*',
+            metrics: [{ name: 'cpu', field: 'a', agg: 'last', unit: 'percent' }],
+          },
+          {
+            indexPattern: 'metrics-b-*',
+            metrics: [{ name: 'cpu', field: 'b', agg: 'last' }],
+          },
+        ]),
+        ['dynamic', 'sources', 1, 'metrics', 0, 'name'],
+        METRIC_CONSISTENCY_RULE
+      );
+    });
+
+    it('accepts the same metric name with the same agg and unit across sources', () => {
+      expectAccepted(
+        withMetrics([
+          {
+            indexPattern: 'metrics-a-*',
+            metrics: [{ name: 'cpu', field: 'a', agg: 'last', unit: 'percent' }],
+          },
+          {
+            indexPattern: 'metrics-b-*',
+            metrics: [{ name: 'cpu', field: 'b', agg: 'last', unit: 'percent' }],
+          },
+        ])
       );
     });
   });

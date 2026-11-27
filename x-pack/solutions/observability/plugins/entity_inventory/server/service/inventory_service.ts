@@ -21,6 +21,7 @@ import type {
   QueryExecutionStats,
   SourceError,
   UnavailableColumn,
+  UnsupportedMetric,
 } from '../../common';
 import { InventoryTypeDefinitionError } from '../inventory/errors/inventory_type_definition_error';
 import { InventoryTypeNotFoundError } from '../inventory/errors/inventory_type_not_found_error';
@@ -48,6 +49,7 @@ import {
   resolveIdentityPlan,
 } from '../inventory/generator';
 import type { GeneratedQuery, IdentityPlan, OutputColumn, QueryPlan } from '../inventory/generator';
+import { listSkippedMetricsOnPlan } from '../inventory/generator/metrics/utils';
 import type { ListAttributeValuesRequest, ListRequest } from '../inventory/types';
 import { partialRowsReason } from '../inventory/reasons';
 import { listAttributeValues } from './list_attribute_values';
@@ -66,18 +68,6 @@ interface ListPlan {
   /** Wall time of the concurrent probes, in fractional milliseconds. */
   probesMs: number;
 }
-
-const toUnavailableColumns = (
-  { index, indexPattern }: QueryPlan,
-  unavailableFields: string[],
-  columns: OutputColumn[]
-): UnavailableColumn[] =>
-  columns.flatMap(({ name, fieldByPlan }) => {
-    const field = fieldByPlan?.[index];
-    return field !== undefined && unavailableFields.includes(field)
-      ? [{ column: name, indexPattern, field }]
-      : [];
-  });
 
 type ExecutionStats = Omit<QueryExecutionStats, 'isPartial'>;
 
@@ -154,7 +144,15 @@ const toProbeDiagnostic = (indexPattern: string, probe: ProbeResult): ListProbeD
 };
 
 const toResponseColumns = (columns: OutputColumn[]): InventoryTypeColumn[] =>
-  columns.map(({ name, kind }) => ({ name, kind }));
+  columns.map(({ name, kind, agg, unit }) => ({
+    name,
+    kind,
+    ...(agg !== undefined ? { agg } : {}),
+    ...(unit !== undefined ? { unit } : {}),
+  }));
+
+const unsupportedMetricsForPlans = (plans: QueryPlan[]): UnsupportedMetric[] =>
+  plans.flatMap((plan) => listSkippedMetricsOnPlan(plan));
 
 const restrictProvenance = (provenance: Provenance, rows: InventoryRow[]): Provenance =>
   Object.fromEntries(
@@ -239,7 +237,11 @@ export class InventoryService {
           reason: partialRowsReason(),
         });
       }
-      const { usable, reason, unavailableFields } = interpretPlanResult(result, identity, columns);
+      const {
+        usable,
+        reason,
+        unavailableColumns: planUnavailableColumns,
+      } = interpretPlanResult(result, identity, columns);
       if (!usable) {
         errors.push({
           indexPattern: plan.indexPattern,
@@ -248,7 +250,7 @@ export class InventoryService {
         });
         return [];
       }
-      unavailableColumns.push(...toUnavailableColumns(plan, unavailableFields, columns));
+      unavailableColumns.push(...planUnavailableColumns);
       return [{ ...result, rows: applyValueLabels(rows, plan) }];
     });
 
@@ -277,6 +279,7 @@ export class InventoryService {
       },
       errors,
       unavailableColumns,
+      unsupportedMetrics: unsupportedMetricsForPlans(plans),
     };
   };
 
@@ -316,6 +319,7 @@ export class InventoryService {
         request: toEsqlRequestBody(queries[position]),
       })),
       errors: probeErrors,
+      unsupportedMetrics: unsupportedMetricsForPlans(plans),
     };
   };
 
@@ -407,7 +411,11 @@ export class InventoryService {
     const identityPlan = resolveIdentityPlan(definition);
     const columns = buildColumns(
       definition,
-      sources.map(({ attributes }, index) => ({ index, attributes: attributes ?? [] })),
+      sources.map(({ attributes, metrics }, index) => ({
+        index,
+        attributes: attributes ?? [],
+        metrics: metrics ?? [],
+      })),
       identityPlan
     );
     return {

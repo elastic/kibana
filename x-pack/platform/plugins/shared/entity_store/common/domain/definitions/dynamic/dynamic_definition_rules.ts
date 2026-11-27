@@ -8,7 +8,12 @@
 import { isEqual } from 'lodash';
 import type { z } from '@kbn/zod/v4';
 import type { Condition } from '@kbn/streamlang';
-import { isLiteralFieldPath, MAX_DYNAMIC_IDENTITY_FIELDS } from './dynamic_block_schema';
+import {
+  isLiteralFieldPath,
+  MAX_DYNAMIC_IDENTITY_FIELDS,
+  type DynamicMetric,
+  type DynamicSource,
+} from './dynamic_block_schema';
 import { ENTITY_ID_FIELD, isNotEmptyCondition } from '../common_fields';
 import type {
   CalculatedEntityIdentity,
@@ -19,6 +24,12 @@ import type {
 
 /** Name of the rule that an attribute of a `dynamic` source may not read an identity field. */
 export const NO_IDENTITY_ATTRIBUTE_RULE = 'attributes are not identity fields';
+/** Name of the rule that a metric of a `dynamic` source may not read an identity field. */
+export const NO_IDENTITY_METRIC_RULE = 'metrics are not identity fields';
+/** Name of the rule that metric output names stay off reserved inventory columns and attributes. */
+export const METRIC_NAME_RULE = 'metric names';
+/** Name of the rule that the same metric name keeps the same agg and unit across sources. */
+export const METRIC_CONSISTENCY_RULE = 'metric consistency across sources';
 /** Name of the rule that a display label is for an attribute of a source or an identity field. */
 export const DISPLAY_LABEL_RULE = 'display labels are identity fields or attributes';
 /** Name of the rule that a suggested filter is an attribute of a source or an identity field. */
@@ -28,6 +39,8 @@ export const SERVABLE_IDENTITY_RULE = 'servable identity';
 
 /** Column the inventory writes the last-seen timestamp to, so no identity field may take its name. */
 export const RESERVED_LAST_SEEN_FIELD = 'last_seen';
+/** Column the inventory writes the entity id to, so no metric may take its name. */
+export const RESERVED_ENTITY_ID_FIELD = 'entity.id';
 
 type DefinitionWithDynamic = Pick<EntityDefinitionWithoutId, 'identityField' | 'dynamic'>;
 
@@ -140,11 +153,99 @@ const checkCalculatedIdentity = (
   }
 };
 
+const checkMetricNamesAndFields = (
+  sources: readonly DynamicSource[],
+  identityFields: ReadonlySet<string>,
+  attributeNames: ReadonlySet<string>,
+  addIssue: (path: PropertyKey[], message: string) => void
+): Map<string, { agg: DynamicMetric['agg']; unit: DynamicMetric['unit']; path: PropertyKey[] }> => {
+  const firstByName = new Map<
+    string,
+    { agg: DynamicMetric['agg']; unit: DynamicMetric['unit']; path: PropertyKey[] }
+  >();
+
+  sources.forEach((source, sourceIndex) => {
+    (source.metrics ?? []).forEach((metric, metricIndex) => {
+      const namePath: PropertyKey[] = [
+        'dynamic',
+        'sources',
+        sourceIndex,
+        'metrics',
+        metricIndex,
+        'name',
+      ];
+      const fieldPath: PropertyKey[] = [
+        'dynamic',
+        'sources',
+        sourceIndex,
+        'metrics',
+        metricIndex,
+        'field',
+      ];
+
+      if (identityFields.has(metric.field)) {
+        addIssue(
+          fieldPath,
+          `${NO_IDENTITY_METRIC_RULE}: "${metric.field}" is an identity field; every row already carries it`
+        );
+      }
+      if (metric.field === RESERVED_LAST_SEEN_FIELD || metric.field === RESERVED_ENTITY_ID_FIELD) {
+        addIssue(
+          fieldPath,
+          `${METRIC_NAME_RULE}: "${metric.field}" is a reserved inventory column and cannot be a metric field`
+        );
+      }
+      if (identityFields.has(metric.name)) {
+        addIssue(
+          namePath,
+          `${METRIC_NAME_RULE}: "${metric.name}" is an identity field and cannot be a metric column`
+        );
+      }
+      if (metric.name === RESERVED_LAST_SEEN_FIELD || metric.name === RESERVED_ENTITY_ID_FIELD) {
+        addIssue(
+          namePath,
+          `${METRIC_NAME_RULE}: "${metric.name}" is a reserved inventory column and cannot be a metric`
+        );
+      }
+      if (attributeNames.has(metric.name)) {
+        addIssue(
+          namePath,
+          `${METRIC_NAME_RULE}: "${metric.name}" is already an attribute of a source; move it off attributes before declaring it as a metric`
+        );
+      }
+
+      const prior = firstByName.get(metric.name);
+      if (!prior) {
+        firstByName.set(metric.name, {
+          agg: metric.agg,
+          unit: metric.unit,
+          path: namePath,
+        });
+        return;
+      }
+      if (prior.agg !== metric.agg || prior.unit !== metric.unit) {
+        addIssue(
+          namePath,
+          `${METRIC_CONSISTENCY_RULE}: metric "${
+            metric.name
+          }" must keep the same agg and the same unit on every source (first seen as agg "${
+            prior.agg
+          }"${prior.unit !== undefined ? ` unit "${prior.unit}"` : ' with no unit'})`
+        );
+      }
+    });
+  });
+
+  return firstByName;
+};
+
 /**
  * Whole-definition rules for a definition carrying `dynamic`: its identity must be servable as
- * ES|QL `BY` keys, no attribute may read an identity field, every display label is for an
- * attribute or an identity field, and every suggested filter is an attribute or an identity
- * field. A definition without `dynamic` is never checked.
+ * ES|QL `BY` keys, no attribute or metric may read an identity field, metric names stay off
+ * attributes and reserved columns, the same metric name keeps the same agg and unit
+ * across sources, every display label is for an attribute or an identity field, and every
+ * suggested filter is an attribute or an identity field. A definition without `dynamic` is never
+ * checked.
  */
 export const assertDynamicDefinitionRules = (
   definition: DefinitionWithDynamic,
@@ -190,6 +291,7 @@ export const assertDynamicDefinitionRules = (
   const attributeNames = new Set(
     dynamic.sources.flatMap(({ attributes = [] }) => attributes.map(({ name }) => name))
   );
+  checkMetricNamesAndFields(dynamic.sources, identityFields, attributeNames, addIssue);
   (dynamic.displayLabels ?? []).forEach(({ name }, index) => {
     if (!attributeNames.has(name) && !identityFields.has(name)) {
       addIssue(

@@ -16,5 +16,4 @@ export { generateListQueries } from './list_query';
 export { generateAttributeValuesQueries, ATTRIBUTE_VALUE_COLUMN } from './attribute_values_query';
 export type { AttributeSelections } from './attribute_filters';
 export { buildProbeQuery } from './probe_query';
-export { MAX_QUERY_PLANS } from './types';
 export type { GeneratedQuery, QueryPlan, SourceProbe, TimeWindow } from './types';
