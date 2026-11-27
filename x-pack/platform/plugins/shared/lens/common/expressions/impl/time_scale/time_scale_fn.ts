@@ -43,10 +43,14 @@ export function getTimeBounds(timeRange: TimeRange, timeZone?: string, getForceN
     // https://github.com/moment/moment-timezone/blob/2448cdcbe15875bc22ddfbc184794d0a6b568b90/moment-timezone.js#L603
     // @ts-expect-error because is not part of the exposed types unfortunately
     const currentDefaultTimeZone = moment.defaultZone?.name;
-    safelySetTimeZone(timeZone);
-    const timeBounds = calculateBounds(timeRange, { forceNow: getForceNow?.() });
-    safelySetTimeZone(currentDefaultTimeZone);
-    return timeBounds;
+    try {
+      safelySetTimeZone(timeZone);
+      return calculateBounds(timeRange, { forceNow: getForceNow?.() });
+    } finally {
+      // restore unconditionally: when no default zone was set before (e.g. on the server),
+      // passing undefined resets moment to the local timezone
+      moment.tz.setDefault(currentDefaultTimeZone);
+    }
   } else {
     return calculateBounds(timeRange, { forceNow: getForceNow?.() });
   }
