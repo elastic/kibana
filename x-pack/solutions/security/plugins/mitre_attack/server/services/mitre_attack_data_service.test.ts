@@ -398,7 +398,7 @@ describe('MitreAttackDataService', () => {
                 version: '1',
               }
         ),
-      }) as SavedObjectsBulkResponse<MitreEntity>;
+      } as SavedObjectsBulkResponse<MitreEntity>);
     let resolveRepair!: (value: SavedObjectsBulkResponse<MitreEntity>) => void;
     savedObjectsRepository.bulkCreate
       .mockResolvedValueOnce(toResponse(['TA0002']))
