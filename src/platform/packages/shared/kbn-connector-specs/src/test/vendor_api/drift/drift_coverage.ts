@@ -88,10 +88,17 @@ export interface DriftCoverageSummary {
 
 const isChecked = (entry: DriftReportEntry): entry is ConnectorDrift => !('error' in entry);
 
-const unreachableSourcesOf = ({ sources }: ConnectorDrift): string[] =>
+const sourcesWith = ({ sources }: ConnectorDrift, status: string): string[] =>
   Object.keys(sources)
-    .filter((name) => sources[name].status === 'unreachable')
+    .filter((name) => sources[name].status === status)
     .sort();
+
+const unreachableSourcesOf = (entry: ConnectorDrift): string[] => sourcesWith(entry, 'unreachable');
+
+// Read from the source statuses, which every report has, rather than from `coverage`, which
+// reports written before it lack. A captured source is reported as `pinned`.
+const followsVendor = (entry: ConnectorDrift): boolean =>
+  Object.keys(entry.sources).length > sourcesWith(entry, 'pinned').length;
 
 /**
  * Combines the coverage report, which describes every connector, with a drift report, which
@@ -135,11 +142,12 @@ export const summarizeDriftCoverage = (
       unrecorded: documents.length - recorded - exempt.length,
       checked: checked.length,
       failed: report.length - checked.length,
-      detectVendorChanges: connectors.filter(
-        ({ followingSources, unreachableSources }) =>
-          followingSources.length > 0 && unreachableSources.length === 0
+      detectVendorChanges: checked.filter(
+        (entry) => followsVendor(entry) && unreachableSourcesOf(entry).length === 0
       ).length,
-      pinnedOnly: connectors.filter(({ followingSources }) => followingSources.length === 0).length,
+      pinnedOnly: checked.filter(
+        (entry) => Object.keys(entry.sources).length > 0 && !followsVendor(entry)
+      ).length,
       unreachable: unreachable.length,
       withoutCoverage: checked.length - connectors.length,
       trackedActions: sum(connectors.map(({ trackedActions }) => trackedActions)),
@@ -167,18 +175,24 @@ const checkedSentence = (totals: CoverageTotals): string => {
       ? `${verb(totals.pinnedOnly, 'only has', 'only have')} pinned sources`
       : '',
     totals.unreachable > 0 ? `${totals.unreachable} had a source that couldn't be fetched` : '',
-    totals.withoutCoverage > 0
-      ? `${verb(totals.withoutCoverage, 'comes', 'come')} from a report without coverage`
-      : '',
   ].filter(Boolean);
+  const unknown =
+    totals.withoutCoverage > 0
+      ? ` (the report has no action counts for ${plural(totals.withoutCoverage, 'connector')})`
+      : '';
   const actions =
     totals.checked > totals.withoutCoverage
-      ? ` They track ${totals.trackedActions} of their ${plural(totals.checkedActions, 'action')};`
-      : ' Their actions are unknown, as the report has no coverage;';
+      ? ` They track ${totals.trackedActions} of their ${plural(
+          totals.checkedActions,
+          'action'
+        )}${unknown}.`
+      : ' The report has no action counts for them.';
+  // The drift report may have been saved from another checkout, so the repository's total is
+  // named as this checkout's rather than read as a superset of the checked connectors' actions.
   return (
     `Of the ${plural(totals.checked, 'connector')} checked, ${totals.detectVendorChanges} can ` +
     `detect a vendor change${exceptions.length > 0 ? ` (${exceptions.join('; ')})` : ''}.` +
-    `${actions} all connectors together declare ${plural(totals.allActions, 'action')}.` +
+    `${actions} The connectors in this checkout declare ${plural(totals.allActions, 'action')}.` +
     (totals.failed > 0 ? ` ${plural(totals.failed, 'connector')} couldn't be checked.` : '')
   );
 };
