@@ -123,13 +123,21 @@ export function createQuantitativeGroundednessEvaluator(): Evaluator {
       if (!groundednessAnalysis) {
         return {
           score: null,
-          label: 'unavailable',
+          label: 'error',
           explanation: 'No groundedness analysis available',
           metadata: metadata ?? undefined,
         };
       }
 
       const score = calculateGroundednessScore(groundednessAnalysis);
+      if (score === null) {
+        return {
+          score: null,
+          label: 'error',
+          explanation: 'Groundedness analysis has no claim analysis to score',
+          metadata: { ...(metadata ?? {}), groundednessAnalysis },
+        };
+      }
       const summaryText = groundednessAnalysis.summary_verdict;
 
       return {

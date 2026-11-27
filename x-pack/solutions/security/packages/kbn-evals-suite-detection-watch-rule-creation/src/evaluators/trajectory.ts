@@ -181,7 +181,8 @@ const trajectoryEvaluator = (
     if (!trajectory.available) {
       return {
         score: null,
-        label: 'unavailable',
+        // Trace/export failure, not a deliberate skip: count it in error stats.
+        label: 'error',
         explanation: trajectory.explanation,
         metadata: undefined,
       };

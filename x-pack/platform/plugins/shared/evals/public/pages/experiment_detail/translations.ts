@@ -120,6 +120,12 @@ export const COLUMN_MEAN = i18n.translate('xpack.evals.experimentDetail.columns.
   defaultMessage: 'Mean',
 });
 
+export const getMeanErrorCountLabel = (count: number) =>
+  i18n.translate('xpack.evals.experimentDetail.columns.meanErrorCount', {
+    defaultMessage: '{count, plural, one {# error} other {# errors}}',
+    values: { count },
+  });
+
 export const COLUMN_MEDIAN = i18n.translate('xpack.evals.experimentDetail.columns.median', {
   defaultMessage: 'Median',
 });

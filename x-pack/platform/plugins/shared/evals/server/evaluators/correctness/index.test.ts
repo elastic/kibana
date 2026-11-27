@@ -82,6 +82,45 @@ describe('correctness evaluator', () => {
     ]);
   });
 
+  it('scores null/error for every metric when the judge output has no analysis array', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const { esClient } = createEsClient();
+    const traceAccessor = createTraceAccessor({ traceId, esClient });
+    const promptMock = jest.fn().mockResolvedValue({
+      toolCalls: [
+        {
+          function: {
+            arguments: {
+              summary: {
+                factual_accuracy_summary: 'ACCURATE',
+                relevance_summary: 'RELEVANT',
+                sequence_accuracy_summary: 'MATCH',
+              },
+            },
+          },
+        },
+      ],
+    });
+
+    const result = await correctnessEvaluator.evaluate({
+      trace: traceAccessor,
+      round: {
+        input: { message: 'What is the payment status?' },
+        response: { message: 'Payment service is healthy.' },
+        steps: [],
+      },
+      referenceData: { expected: 'Payment service is healthy.' },
+      inferenceClient: { prompt: promptMock } as unknown as BoundInferenceClient,
+      log: logger,
+    });
+
+    expect(result.scores.map((score) => [score.name, score.score, score.label])).toEqual([
+      ['factuality', null, 'error'],
+      ['relevance', null, 'error'],
+      ['sequence_accuracy', null, 'error'],
+    ]);
+  });
+
   it('throws when inferenceClient is not provided', async () => {
     const logger = loggingSystemMock.createLogger();
     const { esClient } = createEsClient();

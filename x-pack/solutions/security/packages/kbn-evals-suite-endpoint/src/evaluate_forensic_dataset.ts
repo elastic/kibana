@@ -99,6 +99,7 @@ export const wrapSkillInvocationForDistractors = (
       result.label === 'potentially_incomplete' ||
       result.label === 'error' ||
       result.label === 'unavailable' ||
+      result.label === 'skipped' ||
       result.metadata?.incomplete === true
     ) {
       return result;

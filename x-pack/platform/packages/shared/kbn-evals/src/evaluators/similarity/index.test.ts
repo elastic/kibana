@@ -56,11 +56,36 @@ describe('createSimilarityEvaluator', () => {
     expect(result.score).toBe(1.0);
   });
 
-  it('handles one empty string', async () => {
+  it('returns a null error score when there is no expected output to compare against', async () => {
     const result = await evaluator.evaluate({
       input: {},
       output: 'some text here',
       expected: '',
+      metadata: null,
+    });
+
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('error');
+    expect(result.explanation).toBe('No expected output to compare against.');
+  });
+
+  it('scores 0 when the output is empty but an expected output exists', async () => {
+    const result = await evaluator.evaluate({
+      input: {},
+      output: '',
+      expected: 'some text here',
+      metadata: null,
+    });
+
+    expect(result.score).toBe(0.0);
+    expect(result.label).toBe('dissimilar');
+  });
+
+  it('scores 0 when the task produced a null output but an expected output exists', async () => {
+    const result = await evaluator.evaluate({
+      input: {},
+      output: null,
+      expected: { answer: 'x' },
       metadata: null,
     });
 
@@ -125,7 +150,7 @@ describe('createSimilarityEvaluator', () => {
     expect(result.score).toBeCloseTo(1.0);
   });
 
-  it('handles undefined expected gracefully', async () => {
+  it('returns a null error score for undefined expected', async () => {
     const result = await evaluator.evaluate({
       input: {},
       output: 'some text',
@@ -133,8 +158,8 @@ describe('createSimilarityEvaluator', () => {
       metadata: null,
     });
 
-    expect(result.score).toBe(0.0);
-    expect(result.label).toBe('dissimilar');
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('error');
   });
 
   it('handles both null expected and output', async () => {

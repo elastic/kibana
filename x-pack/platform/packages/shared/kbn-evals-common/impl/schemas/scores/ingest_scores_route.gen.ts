@@ -64,6 +64,15 @@ export const IngestScoresRequestBody = lazySchema(() =>
             trace_id: z.string().max(256).optional(),
             repetition_index: z.number().int(),
             output: z.object({}).catchall(z.unknown()).optional(),
+            /**
+             * Why the task produced no output. Present only when the task threw.
+             */
+            error: z
+              .object({
+                message: z.string().max(1024),
+              })
+              .describe('Why the task produced no output. Present only when the task threw.')
+              .optional(),
           }),
           evaluator: z.object({
             name: z.string().max(256),

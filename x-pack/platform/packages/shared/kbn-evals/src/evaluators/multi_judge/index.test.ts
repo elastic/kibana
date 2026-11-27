@@ -177,6 +177,8 @@ describe('createMultiJudgeEvaluator', () => {
 
       const result = await evaluator.evaluate(defaultParams);
       expect(result.score).toBeNull();
+      expect(result.label).toBe('error');
+      expect(result.explanation).toBe('No judges returned valid scores.');
     });
   });
 });

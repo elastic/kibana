@@ -157,8 +157,9 @@ interface IrMetricSpec {
 }
 
 /**
- * Wraps metric computation into an Evaluator, handling extractor errors and
- * missing ground truth uniformly ({ score: null, label: 'unavailable' }).
+ * Wraps metric computation into an Evaluator. Extractor failures yield
+ * { score: null, label: 'error' }; missing ground truth yields
+ * { score: null, label: 'skipped' }.
  */
 function createIrMetricEvaluator<TOutput, TReferenceOutput>(
   config: IrEvaluatorConfig<TOutput, TReferenceOutput>,
@@ -176,7 +177,7 @@ function createIrMetricEvaluator<TOutput, TReferenceOutput>(
       } catch (error) {
         return {
           score: null,
-          label: 'unavailable',
+          label: 'error',
           explanation: `${spec.name} evaluation failed: ${
             error instanceof Error ? error.message : String(error)
           }`,
@@ -186,7 +187,7 @@ function createIrMetricEvaluator<TOutput, TReferenceOutput>(
       if (!metrics) {
         return {
           score: null,
-          label: 'unavailable',
+          label: 'skipped',
           explanation: `No ground truth available for ${spec.name} evaluation`,
         };
       }

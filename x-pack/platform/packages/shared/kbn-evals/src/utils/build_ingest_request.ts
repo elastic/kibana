@@ -86,6 +86,7 @@ function buildScorePayload(event: EvaluationCompleteEvent): IngestScore {
       repetition_index: taskRun.repetition,
       ...(taskRun.traceId != null && { trace_id: taskRun.traceId }),
       ...(taskOutput && { output: taskOutput }),
+      ...(taskRun.taskError && { error: { message: taskRun.taskError.message } }),
     },
     evaluator: {
       name: evaluationRun.name,
