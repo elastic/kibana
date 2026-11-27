@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import type { UseMutationOptions } from '@kbn/react-query';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
@@ -17,11 +18,13 @@ import { pagePathGetters } from '../common/page_paths';
 import { PACKS_ID } from './constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import type { PackSavedObject, ClearableExecutionDefaults } from './types';
+import type { SharedIntegrationWarning } from '../../common/api/packs/shared_integration_warning';
+import { addSharedIntegrationWarningToasts } from './shared_integration_warning_toast';
 
 interface UseUpdatePackProps {
   withRedirect?: boolean;
   options?: UseMutationOptions<
-    { data: PackSavedObject },
+    { data: PackSavedObject; warnings?: SharedIntegrationWarning[] },
     { body: { message: string; error: string } },
     Omit<Partial<PackSavedObject>, 'min_osquery_version' | 'result_type' | 'platform'> &
       ClearableExecutionDefaults & { id: string }
@@ -31,14 +34,21 @@ interface UseUpdatePackProps {
 export const useUpdatePack = ({ withRedirect, options }: UseUpdatePackProps) => {
   const queryClient = useQueryClient();
   const {
-    application: { navigateToApp },
+    application: { navigateToApp, getUrlForApp },
     http,
     notifications: { toasts },
+    analytics,
+    i18n: i18nStart,
+    theme,
   } = useKibana().services;
+  const startServices = useMemo(
+    () => ({ analytics, i18n: i18nStart, theme }),
+    [analytics, i18nStart, theme]
+  );
   const setErrorToast = useErrorToast();
 
   return useMutation<
-    { data: PackSavedObject },
+    { data: PackSavedObject; warnings?: SharedIntegrationWarning[] },
     { body: { message: string; error: string } },
     Omit<Partial<PackSavedObject>, 'min_osquery_version' | 'result_type' | 'platform'> &
       ClearableExecutionDefaults & { id: string }
@@ -69,6 +79,15 @@ export const useUpdatePack = ({ withRedirect, options }: UseUpdatePackProps) => 
             },
           })
         );
+        addSharedIntegrationWarningToasts({
+          warnings: response?.warnings,
+          packId: id,
+          toasts,
+          queryClient,
+          getUrlForApp,
+          navigateToApp,
+          startServices,
+        });
       },
       ...options,
     }

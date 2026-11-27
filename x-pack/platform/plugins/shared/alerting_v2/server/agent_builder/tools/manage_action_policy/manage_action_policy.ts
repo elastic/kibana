@@ -56,7 +56,8 @@ export interface ManageActionPolicyToolDeps {
   validateWorkflow?: (
     yaml: string,
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { isManaged?: boolean }
   ) => Promise<ValidateWorkflowResponseDto>;
 }
 
