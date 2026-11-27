@@ -1,0 +1,26 @@
+# Choose the analysis
+
+| Question | Analysis |
+| --- | --- |
+| Which entities are unlike the rest of this population, and there are no labels? | Outlier detection |
+| What number will this be? Response time, delay minutes, a score. | Regression |
+| Which class is this? Delayed or not, workout type, malicious or benign. | Classification |
+| What is unusual over time, or what broke? | Anomaly detection. Stop. Do not create a data frame analytics job. |
+
+Outlier detection compares each row with the rest of this dataset using distance and density. It does not learn a probability model and it does not update as new rows arrive. The default expects about 5 in 100 rows to be unusual. The score is from 0 to 1 and is relative to the rows in that job. A new row can change which older rows look unusual, so a later look is a new job over the whole source.
+
+Classification predicts at most 100 classes. Fewer classes finish faster. The default class objective is `maximize_minimum_recall`, which keeps rare classes from being ignored. Use `maximize_accuracy` only when the classes are balanced and the user wants overall accuracy.
+
+Regression default loss is mean squared error. Use `msle` when the target is positive and long-tailed (prices, populations). Use `huber` when a few target values are extreme and should not dominate.
+
+Supervised jobs need labels on the rows used for training. Documents missing the dependent variable are not used to train. They can still receive a prediction.
+
+After a job finishes, new documents are not scored until you create a new job or deploy the trained model. This skill does not create an inference pipeline. Tell the user that deploy is the next step when they want continuous scoring.
+
+## Business context
+
+- Security, one row per host or user, no labels: outlier detection on counts and volumes. Do not put the entity id in the analyzed fields.
+- Security, labeled malicious or benign: classification. Exclude fields that are the label written a second way.
+- Observability, predict a latency or bytes value: regression. If the question is "when did this spike", use anomaly detection.
+- "What drives this number?": regression with `num_top_feature_importance_values` set to a handful of the strongest fields, such as 4, and at most 30. The fields that matter for one row can differ from the totals for the whole dataset. Importance is association inside the model, not a controlled cause.
+- A category the business treats as close (Ride and VirtualRide) can be an acceptable confusion. A category the business treats as different (ride and walk) cannot. Say which off-diagonal cells matter before calling the model good.

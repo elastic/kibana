@@ -8,3 +8,6 @@
 export const ANOMALY_SWIMLANE_ATTACHMENT_TYPE = 'ml.anomaly_swimlane' as const;
 export const ANOMALY_CHARTS_ATTACHMENT_TYPE = 'ml.anomaly_charts' as const;
 export const SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE = 'ml.single_metric_viewer' as const;
+export const DFA_TOTAL_FEATURE_IMPORTANCE_ATTACHMENT_TYPE =
+  'ml.dfa_total_feature_importance' as const;
+export const DFA_SCATTERPLOT_MATRIX_ATTACHMENT_TYPE = 'ml.dfa_scatterplot_matrix' as const;

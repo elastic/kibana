@@ -46,6 +46,9 @@ describe('isAllowedBuiltinAttachment', () => {
     expect(isAllowedBuiltinAttachment('ml.anomaly_swimlane')).toBe(true);
     expect(isAllowedBuiltinAttachment('ml.anomaly_charts')).toBe(true);
     expect(isAllowedBuiltinAttachment('ml.single_metric_viewer')).toBe(true);
+    expect(isAllowedBuiltinAttachment('ml.dfa_total_feature_importance')).toBe(true);
+    expect(isAllowedBuiltinAttachment('ml.dfa_scatterplot_matrix')).toBe(true);
+    expect(isAllowedBuiltinAttachment('ml.dfa_confusion_matrix')).toBe(false);
     expect(isAllowedBuiltinAttachment('platform.proposal')).toBe(true);
     expect(isAllowedBuiltinAttachment('investigation_impact')).toBe(true);
     expect(isAllowedBuiltinAttachment('investigation_subject')).toBe(true);
