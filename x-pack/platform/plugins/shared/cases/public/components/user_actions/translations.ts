@@ -208,10 +208,10 @@ const ACTION_SOURCE_KIND_LABELS: Record<ActionSourceType, string> = {
 export const getActionSourceKindLabel = (type: ActionSourceType): string =>
   ACTION_SOURCE_KIND_LABELS[type];
 
-export const MORE_ACTIVITIES = (count: number) =>
-  i18n.translate('xpack.cases.caseView.userActions.moreActivities', {
+export const SHOW_MORE_ACTIVITIES = (count: number) =>
+  i18n.translate('xpack.cases.caseView.userActions.showMoreActivitiesButton', {
     values: { count },
-    defaultMessage: '{count} more {count, plural, =1 {activity} other {activities}}',
+    defaultMessage: 'Show {count} more {count, plural, =1 {activity} other {activities}}',
   });
 
 export const SHOW_MORE_ACTIVITIES_ARIA = i18n.translate(
