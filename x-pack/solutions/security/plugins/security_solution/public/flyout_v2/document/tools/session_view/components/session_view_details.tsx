@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Process, ProcessEvent } from '@kbn/session-view-plugin/common';
 import type { CellActionRenderer } from '../../../../shared/components/cell_actions';
 import { useFlyoutApi } from '../../../../use_flyout_api';
-import { PREFIX } from '../../../../../flyout/shared/test_ids';
+import { PREFIX } from '../../../../shared/test_ids';
 import { type CustomProcess } from '../context';
 import { AlertsTab } from './alerts_tab';
 import { MetadataTab } from './metadata_tab';

@@ -16,7 +16,7 @@ import {
   TABLE_TAB_SETTING_HIDE_ALERT_FIELDS_TEST_ID,
   TABLE_TAB_SETTING_HIDE_EMPTY_FIELDS_TEST_ID,
   TABLE_TAB_SETTING_HIGHLIGHTED_FIELDS_ONLY_TEST_ID,
-} from '../../../../flyout/document_details/right/components/test_ids';
+} from '../../../shared/components/test_ids';
 import { TableTab } from './table_tab';
 import { noopCellActionRenderer } from '../../../shared/components/cell_actions';
 
@@ -55,7 +55,7 @@ jest.mock('@kbn/entity-store/public', () => ({
   useEntityStoreEuidApi: () => null,
 }));
 
-jest.mock('../../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => ({
+jest.mock('../../../shared/hooks/use_entity_from_store', () => ({
   useEntityFromStore: () => ({
     entity: null,
     entityRecord: null,

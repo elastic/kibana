@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PREFIX } from '../../../flyout/shared/test_ids';
+import { PREFIX } from '../../../flyout_v2/shared/test_ids';
 
 export const RESOLUTION_SECTION_TEST_ID = `${PREFIX}ResolutionSection` as const;
 export const RESOLUTION_GROUP_LINK_TEST_ID = `${PREFIX}ResolutionGroupLink` as const;

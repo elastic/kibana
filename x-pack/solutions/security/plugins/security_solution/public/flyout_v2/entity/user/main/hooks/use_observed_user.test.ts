@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react';
 import { useObservedUser } from './use_observed_user';
 import { useObservedUserDetails } from '../../../../../explore/users/containers/users/observed_details';
 import { useFirstLastSeen } from '../../../../../common/containers/use_first_last_seen';
-import type { EntityFromStoreResult } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { EntityFromStoreResult } from '../../../../shared/hooks/use_entity_from_store';
 import type { UserItem } from '../../../../../../common/search_strategy';
 
 jest.mock('../../../../../explore/users/containers/users/observed_details', () => ({

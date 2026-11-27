@@ -79,11 +79,11 @@ import { PageLoader } from '../../../../common/components/page_loader';
 import {
   useEntityFromStore,
   type EntityStoreRecord,
-} from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+} from '../../../../flyout_v2/shared/hooks/use_entity_from_store';
 import { ObservedDataSection as HostObservedDataSection } from '../../../../flyout_v2/entity/shared/components/observed_data_section';
 import { HOST_PANEL_OBSERVED_HOST_QUERY_ID } from '../../../../flyout_v2/entity/host/main/constants';
 import { useObservedHost } from '../../../../flyout_v2/entity/host/main/hooks/use_observed_host';
-import { buildRiskScoreStateFromEntityRecord } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
+import { buildRiskScoreStateFromEntityRecord } from '../../../../flyout_v2/shared/utils/entity_store_risk_utils';
 import { NO_CORRESPONDING_ENTITY_EXISTS } from '../../../../flyout_v2/entity/shared/translations';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import type { Entity } from '../../../../../common/api/entity_analytics';

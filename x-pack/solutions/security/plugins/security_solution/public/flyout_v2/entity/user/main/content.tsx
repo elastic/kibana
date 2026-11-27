@@ -24,8 +24,8 @@ import type { RiskScoreState } from '../../../../entity_analytics/api/hooks/use_
 import type { EntityRiskScoresState } from '../../../../entity_analytics/api/hooks/use_entity_risk_scores';
 import { EntityIdentifierFields, EntityType } from '../../../../../common/entity_analytics/types';
 import { USER_PANEL_OBSERVED_USER_QUERY_ID } from './constants';
-import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
+import type { EntityDetailsPath } from '../../../shared/components/left_panel_header';
+import type { IdentityFields } from '../../../shared/utils/document_utils';
 import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
 import type { EntityRiskScore, UserItem } from '../../../../../common/search_strategy';
 import { VisualizationsSection } from '../../shared/components/visualizations_section';
@@ -35,7 +35,7 @@ import {
   AnomaliesSection,
   EMPTY_ANOMALY_OVERVIEW,
 } from '../../../../entity_analytics/components/anomalies/anomalies_section';
-import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { EntityStoreRecord } from '../../../shared/hooks/use_entity_from_store';
 
 export type ObservedUserData = Omit<ObservedEntityData<UserItem>, 'anomalies'> & {
   entityRecord?: EntityStoreRecord | null;

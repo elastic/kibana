@@ -13,7 +13,7 @@ import type { SearchHit } from '../../../../../../common/search_strategy';
 import {
   type GetFieldsData,
   useGetFieldsData,
-} from '../../../../../flyout/document_details/shared/hooks/use_get_fields_data';
+} from '../../../../../flyout_v2/shared/hooks/use_get_fields_data';
 import type { RunTimeMappings } from '../../../../../../common/api/search_strategy';
 import { useTimelineEventsDetails } from '../../../../../timelines/containers/details';
 

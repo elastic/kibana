@@ -10,7 +10,7 @@ import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { isString } from 'lodash/fp';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
-import { useEntityFromStore } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import { useEntityFromStore } from '../../../../../flyout_v2/shared/hooks/use_entity_from_store';
 import { EntityType } from '../../../../../../common/search_strategy';
 import { EntityDetailsLink } from '../../../../../common/components/links';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';

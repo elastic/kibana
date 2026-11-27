@@ -10,7 +10,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { useEntityFlyoutOverrides } from './use_entity_flyout_overrides';
 import { useEntityFlyoutApi } from '../../entity/use_entity_flyout_api';
 import { OpenFlyoutLink } from '../components/open_flyout_link';
-import { CspInsightLeftPanelSubTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { CspInsightLeftPanelSubTab } from '../components/left_panel_header';
 import { EntityType } from '../../../../common/entity_analytics/types';
 
 jest.mock('../../entity/use_entity_flyout_api');

@@ -8,8 +8,8 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
-import { DocumentDetailsContext } from '../../../../../flyout/document_details/shared/context';
-import { mockContextValue } from '../../../../../flyout/document_details/shared/mocks/mock_context';
+import { DocumentDetailsContext } from '../../../../shared/context/document_details_context';
+import { mockContextValue } from '../../../../shared/mocks/mock_context';
 import {
   CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TABLE_TEST_ID,
   CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID,

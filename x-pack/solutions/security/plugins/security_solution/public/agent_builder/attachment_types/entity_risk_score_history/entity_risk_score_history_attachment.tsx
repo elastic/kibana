@@ -20,7 +20,7 @@ import { APP_UI_ID } from '../../../../common/constants';
 import {
   EntityDetailsLeftPanelTab,
   RiskScoreLeftPanelSubTab,
-} from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+} from '../../../flyout_v2/shared/components/left_panel_header';
 import {
   buildEntityLeftPanel,
   buildEntityRightPanel,

@@ -13,7 +13,7 @@ import { EVENT_KIND } from '@kbn/rule-data-utils';
 import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-search-strategy';
 import { DocumentSummarySection } from './document_summary_section';
 import { EventKind } from '../constants/event_kinds';
-import { useEventDetails } from '../../../../flyout/document_details/shared/hooks/use_event_details';
+import { useEventDetails } from '../../../shared/hooks/use_event_details';
 import { getRawData } from '../../../../assistant/helpers';
 import { AI_SUMMARY_SECTION_TEST_ID } from './test_ids';
 

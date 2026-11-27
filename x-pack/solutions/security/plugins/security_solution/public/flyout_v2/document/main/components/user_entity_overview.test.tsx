@@ -19,8 +19,8 @@ import {
   ENTITIES_USER_OVERVIEW_MISCONFIGURATIONS_TEST_ID,
   ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID,
 } from './test_ids';
-import { mockContextValue } from '../../../../flyout/document_details/shared/mocks/mock_context';
-import { mockDataFormattedForFieldBrowser } from '../../../../flyout/document_details/shared/mocks/mock_data_formatted_for_field_browser';
+import { mockContextValue } from '../../../shared/mocks/mock_context';
+import { mockDataFormattedForFieldBrowser } from '../../../shared/mocks/mock_data_formatted_for_field_browser';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';

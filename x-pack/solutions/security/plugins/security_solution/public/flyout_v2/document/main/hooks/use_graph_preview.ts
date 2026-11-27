@@ -16,9 +16,9 @@ import {
   isGraphSupportedRuntimeMappingsIntegration,
 } from '@kbn/cloud-security-posture-common';
 import { ALL_ENTITY_TYPES, useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { getField, getFieldArray } from '../../../../flyout/document_details/shared/utils';
+import { getField, getFieldArray } from '../../../shared/utils/document_utils';
 import { useHasGraphVisualizationLicense } from '../../../../common/hooks/use_has_graph_visualization_license';
-import { useIsEntityStoreV2Available } from '../../../../flyout/shared/hooks/use_is_entity_store_v2_available';
+import { useIsEntityStoreV2Available } from '../../../shared/hooks/use_is_entity_store_v2_available';
 import { useEntityStoreStatus } from '../../../../entity_analytics/components/entity_store/hooks/use_entity_store';
 
 export interface UseGraphPreviewParams {

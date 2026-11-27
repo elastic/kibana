@@ -47,7 +47,7 @@ import { getSeverityColor } from '../../../detections/components/alerts_kpis/sev
 import { SeverityBadge } from '../../../common/components/severity_badge';
 import { FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../common/types';
 import { useNonClosedAlerts } from '../../hooks/use_non_closed_alerts';
-import { useEntityFromStore } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import { useEntityFromStore } from '../../../flyout_v2/shared/hooks/use_entity_from_store';
 import {
   combineEntityGroupFilters,
   getEntityGroupRecords,

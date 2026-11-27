@@ -11,7 +11,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { AISummarySection } from './ai_summary_section';
 import { AI_SUMMARY_SECTION_TEST_ID } from './test_ids';
-import { useEventDetails } from '../../../../flyout/document_details/shared/hooks/use_event_details';
+import { useEventDetails } from '../../../shared/hooks/use_event_details';
 import { getRawData } from '../../../../assistant/helpers';
 
 const MOCK_DOCUMENT_SUMMARY_SECTION_STUB_TEST_ID = 'document-summary-section-stub';
@@ -31,7 +31,7 @@ jest.mock('./document_summary_section', () => ({
   },
 }));
 
-jest.mock('../../../../flyout/document_details/shared/hooks/use_event_details', () => ({
+jest.mock('../../../shared/hooks/use_event_details', () => ({
   useEventDetails: jest.fn(),
 }));
 

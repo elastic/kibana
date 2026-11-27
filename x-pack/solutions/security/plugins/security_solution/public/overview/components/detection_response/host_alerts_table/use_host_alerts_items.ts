@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
+import type { IdentityFields } from '../../../../flyout_v2/shared/utils/document_utils';
 import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_safety_helpers';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';

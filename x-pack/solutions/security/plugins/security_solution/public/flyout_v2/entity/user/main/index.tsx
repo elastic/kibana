@@ -27,12 +27,12 @@ import {
   type GraphEntryPoint,
 } from '../../../../common/lib/telemetry';
 import { getGraphEntryPoint } from '../../../shared/utils/get_graph_entry_point';
-import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import type { EntityDetailsPath } from '../../../shared/components/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
   RiskScoreLeftPanelSubTab,
-} from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+} from '../../../shared/components/left_panel_header';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { Header } from './header';
 import { Content } from './content';
@@ -43,19 +43,19 @@ import { EntityType } from '../../../../../common/entity_analytics/types';
 import {
   buildRiskScoreStateFromEntityRecord,
   getHeaderRiskLevel,
-} from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
+} from '../../../shared/utils/entity_store_risk_utils';
 import { useNewEntityAnalyticsPage } from '../../../../entity_analytics/hooks/use_new_entity_analytics_page';
 import { isEntityGroupView } from '../../shared/utils/entity_store_group_utils';
 import {
   useEntityFromStore,
   type EntityStoreRecord,
-} from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+} from '../../../shared/hooks/use_entity_from_store';
 import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../../common/constants';
 import {
   mergeLegacyIdentityWhenStoreEntityMissing,
   type IdentityFields,
-} from '../../../../flyout/document_details/shared/utils';
+} from '../../../shared/utils/document_utils';
 import { USER_PANEL_RISK_SCORE_QUERY_ID } from './constants';
 import { useEntityPanelTabs, TABLE_TAB_ID } from '../../shared/hooks/use_entity_panel_tabs';
 import { EntityPanelHeaderTabs } from '../../shared/components/entity_panel_tabs';

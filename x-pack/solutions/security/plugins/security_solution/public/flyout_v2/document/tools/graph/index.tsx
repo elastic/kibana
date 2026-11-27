@@ -18,7 +18,7 @@ import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { DocumentToolsFlyoutHeader } from '../../../shared/components/document_tools_flyout_header';
 import { GRAPH_TITLE } from '../../../shared/constants/flyout_titles';
 import type { CellActionRenderer } from '../../../shared/components/cell_actions';
-import { PREFIX } from '../../../../flyout/shared/test_ids';
+import { PREFIX } from '../../../shared/test_ids';
 import { EventKind } from '../../main/constants/event_kinds';
 import { GraphVisualization } from './components/graph_visualization';
 import { useGraphPreview } from '../../main/hooks/use_graph_preview';

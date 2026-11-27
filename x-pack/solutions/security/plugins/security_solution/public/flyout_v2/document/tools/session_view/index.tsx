@@ -15,7 +15,7 @@ import { DocumentToolsFlyoutHeader } from '../../../shared/components/document_t
 import type { CellActionRenderer } from '../../../shared/components/cell_actions';
 import type { SessionViewConfig } from '../../../../../common/types/session_view';
 import { useFlyoutApi } from '../../../use_flyout_api';
-import { PREFIX } from '../../../../flyout/shared/test_ids';
+import { PREFIX } from '../../../shared/test_ids';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useSessionViewConfig } from './hooks/use_session_view_config';

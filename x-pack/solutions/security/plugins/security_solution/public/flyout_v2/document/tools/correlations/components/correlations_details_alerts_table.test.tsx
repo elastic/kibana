@@ -15,7 +15,7 @@ import {
 import { getColumns } from '../utils/get_columns';
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
 import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
-import { mockContextValue } from '../../../../../flyout/document_details/shared/mocks/mock_context';
+import { mockContextValue } from '../../../../shared/mocks/mock_context';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useAlertsPrivileges } from '../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 

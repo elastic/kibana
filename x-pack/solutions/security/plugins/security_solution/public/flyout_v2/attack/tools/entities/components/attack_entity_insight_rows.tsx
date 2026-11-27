@@ -8,20 +8,18 @@
 import React, { memo, useMemo } from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { useEntityFromStore } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
-import { HostDetails } from '../../../../../flyout/document_details/left/components/host_details';
-import { UserDetails } from '../../../../../flyout/document_details/left/components/user_details';
-import type { GetFieldsData } from '../../../../../flyout/document_details/shared/hooks/use_get_fields_data';
+import { useEntityFromStore } from '../../../../shared/hooks/use_entity_from_store';
+import { HostDetails } from '../../../../shared/components/entities/host_details';
+import { UserDetails } from '../../../../shared/components/entities/user_details';
+import type { GetFieldsData } from '../../../../shared/hooks/use_get_fields_data';
 import {
   createGetFieldsDataFromAlertSource,
   resolveHostNameForEntityInsightsWithFallback,
   resolveUserNameForEntityInsightsWithFallback,
   type IdentityFields,
-} from '../../../../../flyout/document_details/shared/utils';
+} from '../../../../shared/utils/document_utils';
 import type { AttackEntityListEntry } from '../hooks/use_attack_entities_lists';
-import type { CspInsightLeftPanelSubTab } from '../../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import type { EntityTableLinkRenderer } from '../../../../../flyout/entity_details/shared/components/entity_table/types';
-import type { EntitySectionOverrides } from '../../../../../flyout/document_details/left/components/entities_details';
+import type { EntitySectionOverrides } from '../../../../shared/components/entities/entities_details';
 
 const resolveUserDisplayForEntities = (
   identityFields: IdentityFields | undefined,
@@ -48,29 +46,13 @@ export interface AttackInsightsRowBaseProps extends AttackEntityListEntry {
    */
   renderIpLink?: (ip: string) => React.ReactNode;
   /**
-   * When provided, opens the entity flyout using the v2 system-flyout pattern instead of
-   * the expandable-flyout preview panel. Wire this from the attack Entities tool.
+   * The row calls this factory with the entity-store-resolved display name and entity ID, then
+   * forwards the resulting overrides (onPreviewEntity / onShowDetailsPanel / linkRenderer) to
+   * `HostDetails`/`UserDetails`. This ensures the flyout callbacks receive the store-resolved
+   * identity (not raw identity fields), which is required for correct alert and insight queries
+   * when Entity Store v2 is on.
    */
-  onPreviewEntity?: () => void;
-  /**
-   * When provided, opens the CSP detail panel (alerts / misconfigurations / vulnerabilities)
-   * using the v2 system-flyout pattern. Wire this from the attack Entities tool.
-   */
-  onShowDetailsPanel?: (subTab: CspInsightLeftPanelSubTab) => void;
-  /**
-   * When provided, wraps related-entity cell values in the Related table using this renderer
-   * instead of the v1 PreviewLink. Wire this from the attack Entities tool.
-   */
-  linkRenderer?: EntityTableLinkRenderer;
-  /**
-   * When provided, the row calls this factory with the entity-store-resolved display name and
-   * entity ID, then uses the resulting overrides for onPreviewEntity / onShowDetailsPanel /
-   * linkRenderer. This ensures the flyout callbacks receive the store-resolved identity (not raw
-   * identity fields), which is required for correct alert and insight queries when Entity Store
-   * v2 is on. Takes priority over individually-provided onPreviewEntity / onShowDetailsPanel /
-   * linkRenderer props.
-   */
-  buildEntityOverrides?: (opts: { name: string; entityId?: string }) => EntitySectionOverrides;
+  buildEntityOverrides: (opts: { name: string; entityId?: string }) => EntitySectionOverrides;
 }
 
 /**
@@ -78,17 +60,7 @@ export interface AttackInsightsRowBaseProps extends AttackEntityListEntry {
  * (document fields + entity store) so headers use host.name, not raw EUID / entity.id.
  */
 export const AttackHostInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
-  ({
-    identityFields,
-    sampleSource,
-    timestamp,
-    scopeId,
-    renderIpLink,
-    onPreviewEntity,
-    onShowDetailsPanel,
-    linkRenderer,
-    buildEntityOverrides,
-  }) => {
+  ({ identityFields, sampleSource, timestamp, scopeId, renderIpLink, buildEntityOverrides }) => {
     const euidApi = useEntityStoreEuidApi();
 
     const getFieldsData = useMemo(
@@ -122,14 +94,10 @@ export const AttackHostInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
     const hostDisplayName = hostEntityFromStore.entityRecord?.entity?.name ?? resolvedHostName;
     const hostEntityStoreId = hostEntityFromStore.entityRecord?.entity?.id;
 
-    // Must be called before the early return (rules of hooks). When buildEntityOverrides is
-    // provided it uses the store-resolved name/id so callbacks query the same identity as
-    // AlertCountInsight. When null/undefined, the row falls back to the individual props.
+    // Must be called before the early return (rules of hooks). Uses the store-resolved name/id so
+    // callbacks query the same identity as AlertCountInsight.
     const resolvedOverrides = useMemo(
-      () =>
-        buildEntityOverrides != null
-          ? buildEntityOverrides({ name: hostDisplayName ?? '', entityId: hostEntityStoreId })
-          : undefined,
+      () => buildEntityOverrides({ name: hostDisplayName ?? '', entityId: hostEntityStoreId }),
       [buildEntityOverrides, hostDisplayName, hostEntityStoreId]
     );
 
@@ -145,9 +113,9 @@ export const AttackHostInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
         scopeId={scopeId}
         isAttackDetails={true}
         renderIpLink={renderIpLink}
-        onPreviewEntity={resolvedOverrides?.onPreviewEntity ?? onPreviewEntity}
-        onShowDetailsPanel={resolvedOverrides?.onShowDetailsPanel ?? onShowDetailsPanel}
-        linkRenderer={resolvedOverrides?.linkRenderer ?? linkRenderer}
+        onPreviewEntity={resolvedOverrides.onPreviewEntity}
+        onShowDetailsPanel={resolvedOverrides.onShowDetailsPanel}
+        linkRenderer={resolvedOverrides.linkRenderer}
         hostEntityFromStoreResult={hostEntityFromStore}
       />
     );
@@ -160,17 +128,7 @@ AttackHostInsightsRow.displayName = 'AttackHostInsightsRow';
  * One user row for Attack Details entities tab: mirrors {@link EntitiesDetails} user resolution.
  */
 export const AttackUserInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
-  ({
-    identityFields,
-    sampleSource,
-    timestamp,
-    scopeId,
-    renderIpLink,
-    onPreviewEntity,
-    onShowDetailsPanel,
-    linkRenderer,
-    buildEntityOverrides,
-  }) => {
+  ({ identityFields, sampleSource, timestamp, scopeId, renderIpLink, buildEntityOverrides }) => {
     const euidApi = useEntityStoreEuidApi();
 
     const getFieldsData = useMemo(
@@ -200,14 +158,10 @@ export const AttackUserInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
     const userDisplayName = userEntityFromStore.entityRecord?.entity?.name ?? resolvedUserName;
     const userEntityStoreId = userEntityFromStore.entityRecord?.entity?.id;
 
-    // Must be called before the early return (rules of hooks). When buildEntityOverrides is
-    // provided it uses the store-resolved name/id so callbacks query the same identity as
-    // AlertCountInsight.
+    // Must be called before the early return (rules of hooks). Uses the store-resolved name/id so
+    // callbacks query the same identity as AlertCountInsight.
     const resolvedOverrides = useMemo(
-      () =>
-        buildEntityOverrides != null
-          ? buildEntityOverrides({ name: userDisplayName ?? '', entityId: userEntityStoreId })
-          : undefined,
+      () => buildEntityOverrides({ name: userDisplayName ?? '', entityId: userEntityStoreId }),
       [buildEntityOverrides, userDisplayName, userEntityStoreId]
     );
 
@@ -223,9 +177,9 @@ export const AttackUserInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
         scopeId={scopeId}
         isAttackDetails={true}
         renderIpLink={renderIpLink}
-        onPreviewEntity={resolvedOverrides?.onPreviewEntity ?? onPreviewEntity}
-        onShowDetailsPanel={resolvedOverrides?.onShowDetailsPanel ?? onShowDetailsPanel}
-        linkRenderer={resolvedOverrides?.linkRenderer ?? linkRenderer}
+        onPreviewEntity={resolvedOverrides.onPreviewEntity}
+        onShowDetailsPanel={resolvedOverrides.onShowDetailsPanel}
+        linkRenderer={resolvedOverrides.linkRenderer}
       />
     );
   }

@@ -34,7 +34,7 @@ jest.mock('../../../../timelines/containers/details', () => ({
   useTimelineEventsDetails: jest.fn(),
 }));
 
-jest.mock('../../../../flyout/document_details/shared/hooks/use_get_fields_data', () => ({
+jest.mock('../../../shared/hooks/use_get_fields_data', () => ({
   useGetFieldsData: () => ({ getFieldsData: () => null }),
 }));
 

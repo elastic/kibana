@@ -16,7 +16,7 @@ import { useShouldShowGraph } from '../hooks/use_should_show_graph';
 import {
   EntityDetailsLeftPanelTab,
   type EntityDetailsPath,
-} from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+} from '../../../shared/components/left_panel_header';
 import type { GraphEntryPoint } from '../../../../common/lib/telemetry';
 import { EntityGraphPreviewContainer } from './entity_graph_preview_container';
 

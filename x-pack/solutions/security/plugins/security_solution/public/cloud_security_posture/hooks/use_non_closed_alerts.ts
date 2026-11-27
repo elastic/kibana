@@ -10,7 +10,7 @@ import type { ESBoolQuery } from '../../../common/typed_json';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsByStatus } from '../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import type { ParsedAlertsData } from '../../overview/components/detection_response/alerts_by_status/types';
-import type { EntityStoreRecord } from '../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { EntityStoreRecord } from '../../flyout_v2/shared/hooks/use_entity_from_store';
 
 export const useNonClosedAlerts = ({
   identityFields,

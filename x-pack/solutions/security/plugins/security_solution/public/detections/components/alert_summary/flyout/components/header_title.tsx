@@ -11,14 +11,14 @@ import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RELATED_INTEGRATION } from '../../../../constants';
 import { IntegrationIcon } from './integration_icon';
-import { useBasicDataFromDetailsData } from '../../../../../flyout/document_details/shared/hooks/use_basic_data_from_details_data';
+import { useBasicDataFromDetailsData } from '../../../../../flyout_v2/shared/hooks/use_basic_data_from_details_data';
 import { FlyoutTitle } from '../../../../../flyout_v2/shared/components/flyout_title';
 import { DocumentSeverity } from '../../../../../flyout_v2/document/main/components/severity';
 import { RiskScore } from '../../../../../flyout_v2/document/main/components/risk_score';
 import { FlyoutHeaderBlock } from '../../../../../flyout_v2/shared/components/flyout_header_block';
 import { PreferenceFormattedDate } from '../../../../../common/components/formatted_date';
 import { getAlertTitle } from '../../../../../flyout_v2/document/main/utils/get_header_title';
-import { getField } from '../../../../../flyout/document_details/shared/utils';
+import { getField } from '../../../../../flyout_v2/shared/utils/document_utils';
 import { useEaseDetailsContext } from '../context';
 
 export const HEADER_TITLE_TEST_ID = 'ease-alert-flyout-header-title';

@@ -49,8 +49,8 @@ import { EntityHighlightsSettings } from './entity_highlights_settings';
 import { EntityHighlightsResult } from './entity_highlights_result';
 import type { Entity } from '../../../../../common/api/entity_analytics';
 import { INFERENCE_CONNECTOR_CLUSTER_PRIVILEGE } from '../../../../../common/inference_connector/constants';
-import { buildEntitySummaryStalenessEntitySnapshot } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
-import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import { buildEntitySummaryStalenessEntitySnapshot } from '../../../../flyout_v2/shared/utils/entity_store_risk_utils';
+import type { EntityStoreRecord } from '../../../../flyout_v2/shared/hooks/use_entity_from_store';
 import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 
 export const EntityHighlightsAccordion: React.FC<{

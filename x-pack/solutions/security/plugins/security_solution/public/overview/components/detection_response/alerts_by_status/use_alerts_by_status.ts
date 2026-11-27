@@ -17,8 +17,8 @@ import { useQueryAlerts } from '../../../../detections/containers/detection_engi
 import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useUiSetting } from '../../../../common/lib/kibana';
-import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
-import { useEntityFromStore } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { EntityStoreRecord } from '../../../../flyout_v2/shared/hooks/use_entity_from_store';
+import { useEntityFromStore } from '../../../../flyout_v2/shared/hooks/use_entity_from_store';
 import {
   combineEntityGroupFilters,
   getEntityGroupRecords,

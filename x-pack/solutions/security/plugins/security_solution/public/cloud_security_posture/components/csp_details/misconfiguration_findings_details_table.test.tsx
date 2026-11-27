@@ -13,7 +13,7 @@ import { EntityIdentifierFields } from '../../../../common/entity_analytics/type
 import { useMisconfigurationFindings } from '@kbn/cloud-security-posture';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useUiSetting } from '../../../common/lib/kibana';
-import { useEntityFromStore } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import { useEntityFromStore } from '../../../flyout_v2/shared/hooks/use_entity_from_store';
 
 const TARGET_RECORD = { entity: { id: 'host:target' }, host: { name: 'my-host' } };
 const ALIAS_RECORD = { entity: { id: 'host:alias' }, host: { name: 'alias-host' } };
@@ -67,7 +67,7 @@ jest.mock('../../../common/lib/kibana', () => ({
   useKibana: jest.fn().mockReturnValue({ services: {} }),
 }));
 
-jest.mock('../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => ({
+jest.mock('../../../flyout_v2/shared/hooks/use_entity_from_store', () => ({
   useEntityFromStore: jest.fn().mockReturnValue({ entityRecord: null, isLoading: false }),
 }));
 

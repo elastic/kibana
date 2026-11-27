@@ -17,7 +17,7 @@ import {
 import { SuppressedAlerts } from './suppressed_alerts';
 import { isSuppressionRuleInGA } from '../../../../../common/detection_engine/utils';
 
-jest.mock('../../../../flyout/document_details/shared/context');
+jest.mock('../../../shared/context/document_details_context');
 jest.mock('../../../../../common/detection_engine/utils', () => ({
   isSuppressionRuleInGA: jest.fn().mockReturnValue(false),
 }));

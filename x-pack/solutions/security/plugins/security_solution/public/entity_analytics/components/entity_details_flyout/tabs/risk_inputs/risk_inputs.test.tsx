@@ -13,7 +13,7 @@ import { EXPAND_ALERT_TEST_ID, RiskInputsTab } from './risk_inputs_tab';
 import { alertInputDataMock } from '../../mocks';
 import { RiskSeverity } from '../../../../../../common/search_strategy';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
-import { RiskScoreLeftPanelSubTab } from '../../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { RiskScoreLeftPanelSubTab } from '../../../../../flyout_v2/shared/components/left_panel_header';
 
 const mockUseRiskContributingAlerts = jest
   .fn()
@@ -128,7 +128,7 @@ jest.mock('../../../../hooks/use_new_entity_analytics_page', () => ({
 
 const mockUseEntityFromStore = jest.fn().mockReturnValue({ entityRecord: null });
 
-jest.mock('../../../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => ({
+jest.mock('../../../../../flyout_v2/shared/hooks/use_entity_from_store', () => ({
   useEntityFromStore: (params: unknown) => mockUseEntityFromStore(params),
 }));
 

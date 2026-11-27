@@ -13,7 +13,7 @@ import { type CellActionRenderer } from '../../../shared/components/cell_actions
 import { EventKind } from '../constants/event_kinds';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
-import { PREFIX } from '../../../../flyout/shared/test_ids';
+import { PREFIX } from '../../../shared/test_ids';
 import { ExpandableSection } from '../../../shared/components/expandable_section';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { ThreatIntelligenceOverview } from './threat_intelligence_overview';

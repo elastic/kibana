@@ -26,7 +26,7 @@ import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { buildHostNamesFilter } from '../../../../../common/search_strategy';
 import type { HostEntity } from '../../../../../common/api/entity_analytics';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
-import { getRiskFromEntityRecord } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
+import { getRiskFromEntityRecord } from '../../../shared/utils/entity_store_risk_utils';
 import { PreferenceFormattedDateFromPrimitive } from '../../../../common/components/formatted_date';
 import type { DescriptionList } from '../../../../../common/utility_types';
 import { EntityType } from '../../../../../common/entity_analytics/types';
@@ -35,13 +35,13 @@ import { DescriptionListStyled } from '../../../../common/components/page';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
+import type { IdentityFields } from '../../../shared/utils/document_utils';
 import {
   getField,
   isRiskSeverity,
   mergeLegacyIdentityWhenStoreEntityMissing,
   normalizeRiskLevel,
-} from '../../../../flyout/document_details/shared/utils';
+} from '../../../shared/utils/document_utils';
 import {
   noopCellActionRenderer,
   type CellActionRenderer,

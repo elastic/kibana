@@ -14,7 +14,7 @@ import type { UseAlertsByStatusProps } from './use_alerts_by_status';
 import { useAlertsByStatus, ENTITY_ID_FIELD } from './use_alerts_by_status';
 import { useUiSetting } from '../../../../common/lib/kibana';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { useEntityFromStore } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import { useEntityFromStore } from '../../../../flyout_v2/shared/hooks/use_entity_from_store';
 
 const dateNow = new Date('2022-04-08T12:00:00.000Z').valueOf();
 const mockDateNow = jest.fn().mockReturnValue(dateNow);
@@ -44,7 +44,7 @@ jest.mock('../../../../common/containers/use_global_time', () => {
   };
 });
 
-jest.mock('../../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => ({
+jest.mock('../../../../flyout_v2/shared/hooks/use_entity_from_store', () => ({
   useEntityFromStore: jest.fn(() => ({
     entity: null,
     entityRecord: null,
