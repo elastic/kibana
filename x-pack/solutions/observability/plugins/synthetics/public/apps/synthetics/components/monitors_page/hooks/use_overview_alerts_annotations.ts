@@ -13,6 +13,7 @@ import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { ObservabilityDataViews } from '@kbn/exploratory-view-plugin/public';
 import type { AnnotationLayerConfig } from '@kbn/exploratory-view-plugin/public';
 import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';
+import type { AnnotationClickDatum } from '@kbn/charts-plugin/public';
 import {
   SYNTHETICS_STATUS_RULE,
   SYNTHETICS_TLS_RULE,
@@ -94,7 +95,7 @@ export function useOverviewAlertsAnnotations(): AnnotationLayerConfig[] | undefi
       // annotation layer (no request, no error, no markers). `error.type`
       // is aggregatable but only holds a coarse category (e.g. "io",
       // "validate") that isn't informative on its own.
-      extraFields: ['monitor.name', 'kibana.alert.reason', 'kibana.alert.duration.us'],
+      extraFields: [MONITOR_NAME_FIELD, 'kibana.alert.reason', 'kibana.alert.duration.us'],
     };
 
     return [
@@ -116,6 +117,24 @@ export function useOverviewAlertsAnnotations(): AnnotationLayerConfig[] | undefi
     ];
   }, [alertsDataView, kqlClauses, euiTheme.colors.accent, spaceReady]);
 }
+
+const MONITOR_NAME_FIELD = 'monitor.name';
+
+/**
+ * KQL scoping the Alerts app to the monitors behind a clicked alert marker, or
+ * `undefined` when the click carries none. Uses `monitor.name` (unique per
+ * space) because it's already fetched for the tooltip; adding `monitor.id`
+ * would put a raw id row in every tooltip, since Lens shows each extra field.
+ */
+export const getClickedAlertsKuery = (annotations: AnnotationClickDatum[]): string | undefined => {
+  const names = new Set(
+    annotations.flatMap(({ extras }) => {
+      const name = extras?.[MONITOR_NAME_FIELD];
+      return typeof name === 'string' && name ? [name] : [];
+    })
+  );
+  return names.size ? kqlValuesClause(MONITOR_NAME_FIELD, [...names]) : undefined;
+};
 
 const alertsAnnotationLabel = i18n.translate(
   'xpack.synthetics.overview.activity.alertsAnnotationLabel',
