@@ -107,16 +107,25 @@ export abstract class AbstractFileSystem {
     return undefined;
   }
 
-  public async updateArchive(options: {
-    files: string[];
-    sha: string;
-    prNumber?: string;
-    cacheInvalidationFiles?: string[];
-  }) {
-    const archiveId = options.prNumber
-      ? join(PULL_REQUESTS_PATH, options.prNumber.toString())
-      : join(COMMITS_PATH, options.sha);
+  public async updateArchive(options: UpdateArchiveOptions) {
+    const archiveId = this.getArchiveId(options);
+    const metadata = await this.createMetadata(options);
+    const fileListPath = await this.writeFileList(options.files);
 
+    const archivePath = this.getArchivePath(archiveId);
+
+    this.log.info(`Writing archive to ${archivePath}`);
+
+    await this.archive(archivePath, fileListPath);
+
+    await this.writeMetadata(this.getMetadataPath(archiveId), metadata);
+  }
+
+  protected getArchiveId({ prNumber, sha }: UpdateArchiveOptions) {
+    return prNumber ? join(PULL_REQUESTS_PATH, prNumber.toString()) : join(COMMITS_PATH, sha);
+  }
+
+  protected async createMetadata(options: UpdateArchiveOptions): Promise<ArchiveMetadata> {
     // Calculate file hashes if cache invalidation files are provided
     const fileHashes =
       options.cacheInvalidationFiles && options.cacheInvalidationFiles.length > 0
@@ -130,20 +139,17 @@ export abstract class AbstractFileSystem {
         )
       : undefined;
 
-    const metadata: ArchiveMetadata = {
+    return {
       commitSha: options.sha,
       prNumber: options.prNumber,
       fileHashes: fileHashesForMetadata,
     };
-
-    const fileListPath = await this.writeFileList(options.files);
-
-    const archivePath = this.getArchivePath(archiveId);
-
-    this.log.info(`Writing archive to ${archivePath}`);
-
-    await this.archive(archivePath, fileListPath);
-
-    await this.writeMetadata(this.getMetadataPath(archiveId), metadata);
   }
+}
+
+export interface UpdateArchiveOptions {
+  files: string[];
+  sha: string;
+  prNumber?: string;
+  cacheInvalidationFiles?: string[];
 }

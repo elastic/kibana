@@ -15,7 +15,7 @@ import type { SomeDevLog } from '@kbn/some-dev-log';
 import execa from 'execa';
 import { GCS_BUCKET_URI } from '../constants';
 import { createArchiveExtractor, getTarCreateArgs, resolveTarEnvironment } from './utils';
-import { AbstractFileSystem } from './abstract_file_system';
+import { AbstractFileSystem, type UpdateArchiveOptions } from './abstract_file_system';
 import type { ArchiveMetadata } from './types';
 import { join } from './utils';
 
@@ -26,6 +26,24 @@ export class GcsFileSystem extends AbstractFileSystem {
 
   protected getPath(archiveId: string): string {
     return join(GCS_BUCKET_URI, archiveId);
+  }
+
+  // Commit archives are write-once in GCS, so a rebuild of an archived commit must not re-upload.
+  public async updateArchive(options: UpdateArchiveOptions) {
+    const { prNumber, sha } = options;
+    const archiveId = this.getArchiveId(options);
+    if (prNumber || !(await this.hasArchive(this.getArchivePath(archiveId)))) {
+      await super.updateArchive(options);
+      return;
+    }
+
+    const metadataPath = this.getMetadataPath(archiveId);
+    if (await this.readMetadata(metadataPath)) {
+      this.log.info(`TypeScript build artifacts for ${sha} are already archived, skipping upload.`);
+    } else {
+      this.log.warning(`TypeScript archive for ${sha} has no metadata, writing it.`);
+      await this.writeMetadata(metadataPath, await this.createMetadata(options));
+    }
   }
 
   protected async archive(archivePath: string, fileListPath: string): Promise<void> {
