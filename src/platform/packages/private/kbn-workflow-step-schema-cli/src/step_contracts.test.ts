@@ -58,6 +58,22 @@ describe('step contracts', () => {
         'source has an invalid step id "../ns.step"'
       );
     });
+
+    it('throws on an unknown exposure, so the check cannot miss a change to it', () => {
+      expect(() =>
+        parseStepContract({ ...createContract('ns.step'), exposure: 'partners_only' }, 'source')
+      ).toThrow(
+        'source has an unknown exposure "partners_only", expected one of "open", "internal", "managed_only".'
+      );
+    });
+
+    it('throws on an unknown stability', () => {
+      expect(() =>
+        parseStepContract({ ...createContract('ns.step'), stability: 'experimental' }, 'source')
+      ).toThrow(
+        'source has an unknown stability "experimental", expected one of "tech_preview", "beta", "stable".'
+      );
+    });
   });
 
   describe('serializeStepContract', () => {

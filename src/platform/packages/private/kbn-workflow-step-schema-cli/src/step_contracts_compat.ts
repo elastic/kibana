@@ -9,12 +9,17 @@
 
 import { parseOasdiff, type OasdiffEntry } from '@kbn/api-contracts';
 import { isObject } from './schema_helpers';
-import { serializeCanonicalJson, type StepContract } from './step_contracts';
+import {
+  serializeCanonicalJson,
+  type StepContract,
+  type StepContractExposure,
+} from './step_contracts';
 import type { JsonObject, JsonValue } from './types';
 
-/** A breaking change to a step contract that workflows-eng accepted. */
+/** Breaking changes to step contracts that workflows-eng accepted. */
 export interface StepContractsAllowlistEntry {
-  stepId: string;
+  /** The steps it applies to. Steps that share a schema break together, so it can list them all. */
+  stepIds: string[];
   /** The rule of the change, such as `response-required-property-removed`. Any rule when omitted. */
   rule?: string;
   reason: string;
@@ -46,7 +51,13 @@ export type OpenApiDiffRunner = (base: JsonObject, head: JsonObject) => OasdiffE
 export const STEP_REMOVED_RULE = 'step-removed';
 export const STEP_EXPOSURE_NARROWED_RULE = 'step-exposure-narrowed';
 
-const EXPOSURE_RANK: Readonly<Record<string, number>> = { open: 0, internal: 1, managed_only: 2 };
+// Typed by the exposures a contract can hold, so adding one to STEP_EXPOSURES fails the type
+// check until it's ranked here.
+const EXPOSURE_RANK: Readonly<Record<StepContractExposure, number>> = {
+  open: 0,
+  internal: 1,
+  managed_only: 2,
+};
 
 const DEFINITIONS_REF_PREFIX = '#/definitions/';
 const COMPONENTS_REF_PREFIX = '#/components/schemas/';
@@ -357,9 +368,7 @@ const findMetadataChanges = (base: StepContract, head: StepContract | undefined)
       },
     ];
   }
-  const baseRank = EXPOSURE_RANK[base.exposure];
-  const headRank = EXPOSURE_RANK[head.exposure];
-  if (baseRank === undefined || headRank === undefined || headRank <= baseRank) {
+  if (EXPOSURE_RANK[head.exposure] <= EXPOSURE_RANK[base.exposure]) {
     return [];
   }
   const description = `The exposure changed from \`${base.exposure}\` to \`${head.exposure}\`.`;
@@ -387,7 +396,8 @@ const classify = (
     return { ...change, disposition: 'report_only', note: reportOnlyReason };
   }
   const entry = allowlist.find(
-    ({ stepId, rule }) => stepId === change.stepId && (rule === undefined || rule === change.rule)
+    ({ stepIds, rule }) =>
+      stepIds.includes(change.stepId) && (rule === undefined || rule === change.rule)
   );
   return entry
     ? { ...change, disposition: 'allowlisted', note: entry.reason }
@@ -472,36 +482,61 @@ export const parseStepContractsAllowlist = (
     throw new Error(`${source} is not a step contracts allowlist: expected an "entries" array`);
   }
   return entries.map((entry, index) => {
-    const { stepId, rule, reason } = isObject(entry) ? entry : {};
+    const { stepIds, rule, reason } = isObject(entry) ? entry : {};
     if (
-      typeof stepId !== 'string' ||
+      !Array.isArray(stepIds) ||
+      stepIds.length === 0 ||
+      !stepIds.every((id) => typeof id === 'string') ||
       typeof reason !== 'string' ||
       (rule !== undefined && typeof rule !== 'string')
     ) {
       throw new Error(
-        `${source}: entry ${index} needs a string "stepId" and "reason", and an optional string "rule"`
+        `${source}: entry ${index} needs a non-empty "stepIds" array of ids, a string "reason", and an optional string "rule"`
       );
     }
-    return { stepId, reason, ...(rule === undefined ? {} : { rule }) };
+    return {
+      stepIds: stepIds.filter((id): id is string => typeof id === 'string'),
+      reason,
+      ...(rule === undefined ? {} : { rule }),
+    };
   });
 };
 
-const entryKey = ({ stepId, rule, reason }: StepContractsAllowlistEntry): string =>
+const entryKey = (stepId: string, { rule, reason }: StepContractsAllowlistEntry): string =>
   JSON.stringify([stepId, rule ?? null, reason]);
 
 /**
- * The allowlist entries the pull request adds. Only those apply, so an entry can't let a later
- * breaking change of the same step through.
+ * The allowlist entries the pull request adds, with only the steps it adds to them. Only those
+ * apply, so an entry can't let a later breaking change of the same step through, even when a
+ * later pull request adds another step to it.
  */
 export const getAddedAllowlistEntries = (
   base: StepContractsAllowlistEntry[],
   head: StepContractsAllowlistEntry[]
 ): StepContractsAllowlistEntry[] => {
-  const baseKeys = new Set(base.map(entryKey));
-  return head.filter((entry) => !baseKeys.has(entryKey(entry)));
+  const baseKeys = new Set(
+    base.flatMap((entry) => entry.stepIds.map((stepId) => entryKey(stepId, entry)))
+  );
+  return head.flatMap((entry) => {
+    const stepIds = entry.stepIds.filter((stepId) => !baseKeys.has(entryKey(stepId, entry)));
+    return stepIds.length > 0 ? [{ ...entry, stepIds }] : [];
+  });
 };
 
 const escapeCell = (text: string): string => text.replace(/\|/g, '\\|').replace(/\n/g, ' ');
+
+// An allowlist entry that accepts every blocking change, for the author to complete. It names
+// the rule only when all of them share it.
+const formatAllowlistEntry = (blocking: StepContractChange[]): string[] => {
+  const rules = new Set(blocking.map(({ rule }) => rule));
+  const [rule] = rules;
+  const entry = {
+    stepIds: [...new Set(blocking.map(({ stepId }) => stepId))].sort(),
+    ...(rules.size === 1 ? { rule } : {}),
+    reason: 'Why the change is intended, with a link to the issue',
+  };
+  return ['```json', JSON.stringify(entry, null, 2), '```'];
+};
 
 const formatTable = (changes: StepContractChange[], withNote: boolean): string[] => [
   withNote ? '| Step | Change | Rule | Note |' : '| Step | Change | Rule |',
@@ -543,6 +578,10 @@ export const formatStepContractsReport = (
         `Make the change compatible, or, if it's intended, ask workflows-eng to accept it with an entry in \`${allowlistPath}\` (see [Step contract check](${docsLink})).`,
       '',
       ...formatTable(blocking, false),
+      '',
+      'An entry that accepts all of them:',
+      '',
+      ...formatAllowlistEntry(blocking),
       ''
     );
   }

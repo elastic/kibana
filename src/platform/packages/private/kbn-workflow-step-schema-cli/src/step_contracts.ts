@@ -18,10 +18,22 @@ import type { JsonObject, JsonValue } from './types';
  * (`include_contracts=true`) and as its committed `<id>.json` file stores it. The schemas
  * are JSON Schema in the OpenAPI 3.0 dialect.
  */
+/**
+ * The exposures a contract can hold: the `StepExposure` values of the workflows_extensions
+ * plugin, which this package can't import. A contract with another value fails to parse, so a
+ * new value has to be added here, and ranked by the compatibility check, before steps use it.
+ */
+export const STEP_EXPOSURES = ['open', 'internal', 'managed_only'] as const;
+export type StepContractExposure = (typeof STEP_EXPOSURES)[number];
+
+/** The stabilities a contract can hold: the `StabilityLevel` values of `@kbn/workflows`. */
+export const STEP_STABILITIES = ['tech_preview', 'beta', 'stable'] as const;
+export type StepContractStability = (typeof STEP_STABILITIES)[number];
+
 export interface StepContract {
   id: string;
-  stability: string;
-  exposure: string;
+  stability: StepContractStability;
+  exposure: StepContractExposure;
   deprecation?: JsonObject;
   input: JsonObject;
   config?: JsonObject;
@@ -39,6 +51,12 @@ const CONTRACT_FILE_EXTENSION = '.json';
 const STEP_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_.-]*$/;
 
 const isString = (value: JsonValue | undefined): value is string => typeof value === 'string';
+
+const isOneOf = <T extends string>(values: readonly T[], value: string): value is T =>
+  (values as readonly string[]).includes(value);
+
+const formatValues = (values: readonly string[]): string =>
+  values.map((value) => `"${value}"`).join(', ');
 
 /** Checks that a JSON value is a step contract. `source` names it in the error. */
 export const parseStepContract = (value: JsonValue, source: string): StepContract => {
@@ -59,6 +77,22 @@ export const parseStepContract = (value: JsonValue, source: string): StepContrac
   }
   if (!STEP_ID_PATTERN.test(id)) {
     throw new Error(`${source} has an invalid step id "${id}"`);
+  }
+  // Fails closed: the compatibility check can't tell whether a change to an unknown value breaks
+  // workflows.
+  if (!isOneOf(STEP_EXPOSURES, exposure)) {
+    throw new Error(
+      `${source} has an unknown exposure "${exposure}", expected one of ${formatValues(
+        STEP_EXPOSURES
+      )}. A new exposure needs to be added to STEP_EXPOSURES and EXPOSURE_RANK in @kbn/workflow-step-schema-cli.`
+    );
+  }
+  if (!isOneOf(STEP_STABILITIES, stability)) {
+    throw new Error(
+      `${source} has an unknown stability "${stability}", expected one of ${formatValues(
+        STEP_STABILITIES
+      )}. A new stability needs to be added to STEP_STABILITIES in @kbn/workflow-step-schema-cli.`
+    );
   }
   if (
     (deprecation !== undefined && !isObject(deprecation)) ||

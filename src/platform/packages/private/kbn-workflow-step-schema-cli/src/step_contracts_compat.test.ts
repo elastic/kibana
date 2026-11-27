@@ -347,8 +347,8 @@ describe('compareStepContracts', () => {
       base: [createContract('ns.a'), createContract('ns.b'), createContract('ns.c')],
       head: [createContract('ns.c')],
       allowlist: [
-        { stepId: 'ns.a', rule: 'step-removed', reason: 'Replaced by ns.c' },
-        { stepId: 'ns.b', reason: 'Never released' },
+        { stepIds: ['ns.a'], rule: 'step-removed', reason: 'Replaced by ns.c' },
+        { stepIds: ['ns.b'], reason: 'Never released' },
       ],
     });
 
@@ -370,10 +370,36 @@ describe('compareStepContracts', () => {
     const { changes } = compare({
       base: [createContract('ns.a')],
       head: [],
-      allowlist: [{ stepId: 'ns.a', rule: 'response-required-property-removed', reason: 'reason' }],
+      allowlist: [
+        { stepIds: ['ns.a'], rule: 'response-required-property-removed', reason: 'reason' },
+      ],
     });
 
     expect(changes).toEqual([expect.objectContaining({ disposition: 'blocking' })]);
+  });
+
+  it('accepts the same breaking change of every step an allowlist entry lists', () => {
+    const base = ['ns.a', 'ns.b', 'ns.c'].map((id) => createContract(id));
+    const { changes } = compare({
+      base,
+      head: base.map((contract) => ({ ...contract, output: { type: 'object' } })),
+      entries: ['ns.a', 'ns.b', 'ns.c'].map((id) =>
+        createEntry(id, 'response-required-property-removed', 3)
+      ),
+      allowlist: [
+        {
+          stepIds: ['ns.a', 'ns.b'],
+          rule: 'response-required-property-removed',
+          reason: 'Shared schema',
+        },
+      ],
+    });
+
+    expect(changes.map(({ stepId, disposition }) => [stepId, disposition])).toEqual([
+      ['ns.a', 'allowlisted'],
+      ['ns.b', 'allowlisted'],
+      ['ns.c', 'blocking'],
+    ]);
   });
 });
 
@@ -395,29 +421,43 @@ describe('allowlist', () => {
       parseStepContractsAllowlist(
         {
           entries: [
-            { stepId: 'ns.a', rule: 'step-removed', reason: 'reason' },
-            { stepId: 'ns.b', reason: 'reason' },
+            { stepIds: ['ns.a'], rule: 'step-removed', reason: 'reason' },
+            { stepIds: ['ns.b', 'ns.c'], reason: 'reason' },
           ],
         },
         'source'
       )
     ).toEqual([
-      { stepId: 'ns.a', rule: 'step-removed', reason: 'reason' },
-      { stepId: 'ns.b', reason: 'reason' },
+      { stepIds: ['ns.a'], rule: 'step-removed', reason: 'reason' },
+      { stepIds: ['ns.b', 'ns.c'], reason: 'reason' },
     ]);
   });
 
   it('throws on an entry without a reason', () => {
-    expect(() => parseStepContractsAllowlist({ entries: [{ stepId: 'ns.a' }] }, 'source')).toThrow(
-      'source: entry 0 needs a string "stepId" and "reason"'
-    );
+    expect(() =>
+      parseStepContractsAllowlist({ entries: [{ stepIds: ['ns.a'] }] }, 'source')
+    ).toThrow('source: entry 0 needs a non-empty "stepIds" array of ids, a string "reason"');
+  });
+
+  it('throws on an entry without steps', () => {
+    expect(() =>
+      parseStepContractsAllowlist({ entries: [{ stepIds: [], reason: 'reason' }] }, 'source')
+    ).toThrow('source: entry 0 needs a non-empty "stepIds" array of ids');
   });
 
   it('applies only the entries added since the base', () => {
-    const existing = { stepId: 'ns.a', rule: 'step-removed', reason: 'Old change' };
-    const added = { stepId: 'ns.a', reason: 'New change' };
+    const existing = { stepIds: ['ns.a'], rule: 'step-removed', reason: 'Old change' };
+    const added = { stepIds: ['ns.a'], reason: 'New change' };
 
     expect(getAddedAllowlistEntries([existing], [existing, added])).toEqual([added]);
+  });
+
+  it('applies an existing entry only to the steps added to it since the base', () => {
+    const existing = { stepIds: ['ns.a'], reason: 'Shared schema' };
+
+    expect(
+      getAddedAllowlistEntries([existing], [{ stepIds: ['ns.a', 'ns.b'], reason: 'Shared schema' }])
+    ).toEqual([{ stepIds: ['ns.b'], reason: 'Shared schema' }]);
   });
 });
 
@@ -467,6 +507,42 @@ describe('formatStepContractsReport', () => {
     expect(report).toContain('| `ns.a` | Removed \\| gone | `step-removed` |');
     expect(report).toContain('| `ns.b` | Narrowed | `step-exposure-narrowed` | Keeps working |');
     expect(report).toContain('New steps: `ns.new`');
+  });
+
+  it('suggests an allowlist entry for the breaking changes, with their rule when they share one', () => {
+    const removed = (stepId: string, rule = 'step-removed') => ({
+      stepId,
+      rule,
+      description: 'Removed',
+      disposition: 'blocking' as const,
+    });
+    const entryOf = (report: string) =>
+      JSON.parse(report.slice(report.indexOf('```json') + 7, report.lastIndexOf('```')));
+
+    expect(
+      entryOf(
+        formatStepContractsReport(
+          { addedSteps: [], unapprovedSteps: [], changes: [removed('ns.b'), removed('ns.a')] },
+          options
+        )
+      )
+    ).toEqual({
+      stepIds: ['ns.a', 'ns.b'],
+      rule: 'step-removed',
+      reason: expect.any(String),
+    });
+    expect(
+      entryOf(
+        formatStepContractsReport(
+          {
+            addedSteps: [],
+            unapprovedSteps: [],
+            changes: [removed('ns.a'), removed('ns.a', 'step-exposure-narrowed')],
+          },
+          options
+        )
+      )
+    ).toEqual({ stepIds: ['ns.a'], reason: expect.any(String) });
   });
 
   it('says when there is nothing to report', () => {

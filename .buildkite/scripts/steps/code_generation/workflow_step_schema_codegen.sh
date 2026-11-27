@@ -14,8 +14,11 @@ SYNC_PIPELINE="kibana-workflow-step-schema-sync"
 
 # Only the sync PR (and the on-merge trigger that starts it) writes GENERATED_DIR;
 # feature PRs never commit it, so concurrent PRs cannot conflict on it. Feature PRs
-# do commit STEP_CONTRACTS_DIR: it has one file per step, so two PRs only conflict
-# when they change the same step.
+# do commit STEP_CONTRACTS_DIR: it has one file per step, so two PRs conflict when
+# they change the same steps. A schema that several steps share is copied into each of
+# their files (about 30 cases.* steps embed the case schema), so changing it touches
+# all of them. The files are generated, so a conflict is resolved by taking either
+# side: CI rewrites them.
 if [[ -n "${MERGE_QUEUE_TARGET_BRANCH:-}" ]]; then
   MODE="merge-queue"
 elif [[ "${GITHUB_PR_OWNER:-}" == "elastic" && "${GITHUB_PR_BRANCH:-}" == "${SYNC_BRANCH_PREFIX}"* ]]; then
@@ -111,7 +114,7 @@ case "$MODE" in
     if has_changes "$STEP_CONTRACTS_DIR"; then
       git status --porcelain --untracked-files=all -- "$STEP_CONTRACTS_DIR"
       buildkite-agent annotate \
-        "The committed workflow step contracts don't match the registered steps, probably because another PR changed the same steps. Merge the target branch into the PR so its CI updates them." \
+        "The committed workflow step contracts don't match the registered steps, probably because another PR changed the same steps or a schema they share. Merge the target branch into the PR so its CI updates them." \
         --style error --context workflow-step-contracts || true
       exit 1
     fi

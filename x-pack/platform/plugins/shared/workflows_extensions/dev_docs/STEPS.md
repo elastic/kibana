@@ -1198,7 +1198,7 @@ Workflows depend on the contract of each custom step: the input and config a wor
 
    A contract holds the step's `id`, `stability` (`tech_preview` when the definition omits it), `exposure` (`open` when omitted), `deprecation`, and the JSON Schema of its `input` and `config`, as a workflow writes them (a field with a default is optional), and of its `output`, as later steps read it. The step's label, description, documentation and handler aren't part of the contract, so changing them doesn't change the file. The descriptions of the schema fields are.
 
-2. **CI updates the files**: When your change adds a step or changes a contract, CI commits the updated files to your PR. One file per step means PRs that change different steps don't conflict. The directory has no code owner, so a compatible contract change needs no extra review.
+2. **CI updates the files**: When your change adds a step or changes a contract, CI commits the updated files to your PR. One file per step means PRs that change different steps don't conflict. A schema that several steps share is copied into each of their files, though: about 30 `cases.*` steps embed the case schema, so changing it changes all of their files, and two PRs that change it conflict on all of them. The files are generated, so resolve a conflict by taking either side; CI rewrites them. The directory has no code owner, so a compatible contract change needs no extra review.
 
 3. **New steps need approval**: Every registered step must be listed in `x-pack/platform/plugins/shared/workflows_extensions/contracts/approved_steps.json`, which workflows-eng owns. See [Adding a New Step](#adding-a-new-step).
 
@@ -1226,7 +1226,7 @@ If a breaking change is intended (for example, the step was never released, or y
 {
   "entries": [
     {
-      "stepId": "my-namespace.myCustomStep",
+      "stepIds": ["my-namespace.myCustomStep"],
       "rule": "response-required-property-removed",
       "reason": "The field was never set: https://github.com/elastic/kibana/issues/123456"
     }
@@ -1234,7 +1234,9 @@ If a breaking change is intended (for example, the step was never released, or y
 }
 ```
 
-`rule` is the rule the annotation shows for the change. Omit it to accept every breaking change of the step. An entry only applies in the PR that adds it, so it can't let a later breaking change of the same step through.
+`rule` is the rule the annotation shows for the change. Omit it to accept every breaking change of the steps. When a change to a shared schema breaks several steps, list them all in one entry. The annotation suggests an entry for the breaking changes it lists, with their rule when they share one.
+
+An entry only applies in the PR that adds it, so it can't let a later breaking change of the same steps through. Adding a step to an existing entry only accepts the changes of that step.
 
 ### Running the Check Locally
 
