@@ -4,11 +4,16 @@
   "owners": ["@elastic/contextual-security-apps", "@elastic/security-entity-analytics"],
   "paths": [
     "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/maintainers/**",
-    "x-pack/solutions/security/plugins/entity_store/server/domain/entity_maintainers/**",
-    "x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/**",
+    "x-pack/platform/plugins/shared/entity_store/server/domain/entity_maintainers/**",
+    "x-pack/platform/plugins/shared/entity_store/server/tasks/entity_maintainers/**",
+    "x-pack/platform/plugins/shared/entity_store/server/routes/apis/entity_maintainers/**",
+    "x-pack/platform/plugins/shared/entity_store/server/domain/relationships/**",
+    "x-pack/platform/plugins/shared/entity_store/server/infra/elasticsearch/**",
+    "x-pack/platform/plugins/shared/entity_store/common/entity_maintainers.ts",
+    "x-pack/platform/plugins/shared/entity_store/common/domain/entity_metadata/**",
     "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/**",
-    "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/maintainers/**",
-    "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/fixtures/maintainers/**"
+    "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/fixtures/maintainers/**",
+    "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/maintainers/**"
   ],
   "files": [
     {
