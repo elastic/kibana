@@ -59,3 +59,9 @@ export interface ConnectorCatalogStorage {
   createAsset(asset: StoredCatalogAsset): Promise<{ created: boolean }>;
   replaceManifest(manifest: StoredCatalogManifest): Promise<void>;
 }
+
+/** A read-only definition source for the first catalog load. */
+export type ConnectorCatalogSource = Pick<
+  ConnectorCatalogStorage,
+  'getManifest' | 'getDefinitions'
+>;

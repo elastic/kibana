@@ -60,6 +60,7 @@ describeWithEpr('EPR client without Fleet (live EPR)', () => {
       'kibana_connector_specs-1.0.0/connector_specs/alienvault/1.0.yaml',
     ]);
     expect(specs[0].spec).toMatchObject({ id: '.alienvault', version: '1.0' });
+    expect(specs[0].yaml).toContain('id: .alienvault');
   });
 
   it('downloads version 1.1.0 and finds both spec versions, with 1.0 unchanged', async () => {

@@ -24,6 +24,8 @@ export interface ConnectorSpecFile {
   connectorType: string;
   specVersion: string;
   yamlBytes: number;
+  /** Raw YAML text, needed by the actions catalog loader. */
+  yaml: string;
   spec: Record<string, unknown>;
 }
 
@@ -39,8 +41,8 @@ interface EprSearchItem {
 // and the lint-clean variant under "img/connector_specs/".
 const SPEC_PATH_REGEX = /^[^/]+\/(?:img\/)?connector_specs\/([^/]+)\/([^/]+)\.ya?ml$/;
 
-const getOk = async (url: string): Promise<Response> => {
-  const response = await fetch(url);
+const getOk = async (url: string, signal?: AbortSignal): Promise<Response> => {
+  const response = await fetch(url, { signal });
   if (!response.ok) {
     throw new Error(`GET ${url} failed with status ${response.status}`);
   }
@@ -52,10 +54,12 @@ export const listPackageVersions = async ({
   registryUrl,
   packageName,
   kibanaVersion,
+  signal,
 }: {
   registryUrl: string;
   packageName: string;
   kibanaVersion?: string;
+  signal?: AbortSignal;
 }): Promise<EprPackageVersion[]> => {
   const url = new URL(`${registryUrl}/search`);
   url.searchParams.set('package', packageName);
@@ -64,7 +68,7 @@ export const listPackageVersions = async ({
   if (kibanaVersion) {
     url.searchParams.set('kibana.version', kibanaVersion);
   }
-  const response = await getOk(url.toString());
+  const response = await getOk(url.toString(), signal);
   const items = (await response.json()) as EprSearchItem[];
   return items.map(({ name, version, download, signature_path: signaturePath, conditions }) => ({
     name,
@@ -76,8 +80,12 @@ export const listPackageVersions = async ({
 };
 
 /** Downloads a file from the EPR as a Buffer. */
-export const downloadBuffer = async (registryUrl: string, path: string): Promise<Buffer> => {
-  const response = await getOk(`${registryUrl}${path}`);
+export const downloadBuffer = async (
+  registryUrl: string,
+  path: string,
+  signal?: AbortSignal
+): Promise<Buffer> => {
+  const response = await getOk(`${registryUrl}${path}`, signal);
   return Buffer.from(await response.arrayBuffer());
 };
 
@@ -147,12 +155,14 @@ export const readConnectorSpecs = async (zip: Buffer): Promise<ConnectorSpecFile
     const match = SPEC_PATH_REGEX.exec(path);
     if (match) {
       const [, connectorType, specVersion] = match;
+      const yaml = content.toString('utf8');
       specs.push({
         path,
         connectorType,
         specVersion,
         yamlBytes: content.length,
-        spec: parseYaml(content.toString('utf8')) as Record<string, unknown>,
+        yaml,
+        spec: parseYaml(yaml) as Record<string, unknown>,
       });
     }
   }

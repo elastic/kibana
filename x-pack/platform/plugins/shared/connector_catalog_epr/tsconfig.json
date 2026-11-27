@@ -10,6 +10,8 @@
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/repo-info",
+    "@kbn/actions-plugin",
+    "@kbn/core-logging-server-mocks",
   ],
   "exclude": [
     "target/**/*",

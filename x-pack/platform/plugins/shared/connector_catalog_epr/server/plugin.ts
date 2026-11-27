@@ -9,6 +9,8 @@ import { readFile } from 'fs/promises';
 import { performance } from 'perf_hooks';
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
+import { createEprCatalogSource } from './catalog_source';
 import type { ConnectorCatalogEprConfig } from './config';
 import {
   downloadBuffer,
@@ -17,7 +19,13 @@ import {
   verifyZipSignature,
 } from './epr_client';
 
-export class ConnectorCatalogEprPlugin implements Plugin {
+export interface ConnectorCatalogEprPluginSetupDeps {
+  actions: ActionsPluginSetupContract;
+}
+
+export class ConnectorCatalogEprPlugin
+  implements Plugin<void, void, ConnectorCatalogEprPluginSetupDeps>
+{
   private readonly logger: Logger;
   private readonly config: ConnectorCatalogEprConfig;
   private readonly kibanaVersion: string;
@@ -28,7 +36,15 @@ export class ConnectorCatalogEprPlugin implements Plugin {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, plugins: ConnectorCatalogEprPluginSetupDeps) {
+    plugins.actions.registerConnectorCatalogSource(
+      createEprCatalogSource({
+        config: this.config,
+        kibanaVersion: this.kibanaVersion,
+        logger: this.logger,
+      })
+    );
+
     const router = core.http.createRouter();
     router.get(
       {

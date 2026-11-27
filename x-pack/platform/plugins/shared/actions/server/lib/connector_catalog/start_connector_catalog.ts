@@ -10,7 +10,7 @@ import type { ActionTypeRegistry } from '../../action_type_registry';
 import { getErrorMessage } from './get_error_message';
 import { CATALOG_START_LOAD_TIMEOUT_MS } from './constants';
 import { loadCatalogConnectorTypes } from './load_catalog_connector_types';
-import type { CatalogActionType, ConnectorCatalogStorage, StoredCatalogDefinition } from './types';
+import type { CatalogActionType, ConnectorCatalogSource, StoredCatalogDefinition } from './types';
 
 export interface ConnectorCatalogHandle {
   /** Resolves when the load is done, failed, timed out, or skipped. Never rejects. */
@@ -22,7 +22,7 @@ export interface ConnectorCatalogHandle {
 interface StartConnectorCatalogDeps {
   /** The catalog config. With false, nothing is read or written. */
   isEnabled: boolean;
-  storage: Pick<ConnectorCatalogStorage, 'getManifest' | 'getDefinitions'>;
+  storage: ConnectorCatalogSource;
   actionTypeRegistry: Pick<ActionTypeRegistry, 'has' | 'register'>;
   buildType: (definition: StoredCatalogDefinition) => CatalogActionType;
   logger: Logger;
