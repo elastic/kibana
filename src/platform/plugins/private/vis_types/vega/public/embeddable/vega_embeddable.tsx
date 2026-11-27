@@ -72,7 +72,6 @@ import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from 
 import type { VegaRenderDescriptor, VegaSpec } from '../data_model/types';
 import { parseSpec } from '../lib/editor_spec';
 import {
-  NO_ESQL_SOURCES,
   resolveVegaDataSources,
   resolveVegaEsqlSources,
   type VegaEsqlSources,
@@ -124,14 +123,6 @@ interface ResolvedSpec {
 
 const resolveSpec = (spec: VegaEditableState['spec']): ResolvedSpec => {
   const parsed = parseSpec(spec);
-  if (!parsed) {
-    return {
-      spec,
-      parsed,
-      esqlSources: Promise.resolve(NO_ESQL_SOURCES),
-      dataSources: Promise.resolve([]),
-    };
-  }
   const esqlSources = resolveVegaEsqlSources(parsed);
   return { spec, parsed, esqlSources, dataSources: resolveVegaDataSources(parsed, esqlSources) };
 };

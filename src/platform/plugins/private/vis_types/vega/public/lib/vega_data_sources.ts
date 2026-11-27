@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse } from 'hjson';
 import { compact, isPlainObject, uniq, uniqBy } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { EsqlSource, type FilterableSource } from '@kbn/data-source';
 import { getSourceCommandQueryFromESQLQuery } from '@kbn/esql-utils';
 import { getDataViews, getHttp } from '../services';
+import { parseSpec } from './editor_spec';
 import { CONSTANTS } from '../data_model/types';
 import type { UrlObject, VegaSpec } from '../data_model/types';
 
@@ -55,26 +55,20 @@ const collectDataUrls = (node: unknown, parentKey?: string, accumulator: UrlObje
   return accumulator;
 };
 
-const resolveEsqlSource = async (query: string): Promise<EsqlSource | undefined> => {
+const resolveEsqlQuery = async (query: string) => {
   // A query without a source command (e.g. `ROW`) reads no dataset.
   if (!getSourceCommandQueryFromESQLQuery(query)) return undefined;
   try {
-    return await EsqlSource.forDataset({ query, http: getHttp() });
-  } catch {
-    return undefined;
-  }
-};
-
-const toFilterableSource = async (source: EsqlSource): Promise<FilterableSource | undefined> => {
-  try {
-    return await source.toFilterableSource(getHttp());
+    const http = getHttp();
+    const source = await EsqlSource.forDataset({ query, http });
+    return { source, filterableSource: await source.toFilterableSource(http) };
   } catch {
     return undefined;
   }
 };
 
 /** Resolves the ES|QL data urls of a spec. A query that fails to resolve is left out, the others stay. */
-export const resolveVegaEsqlSources = async (spec: VegaSpec): Promise<VegaEsqlSources> => {
+export const resolveVegaEsqlSources = async (spec?: VegaSpec): Promise<VegaEsqlSources> => {
   const queries = uniq(
     collectDataUrls(spec)
       .filter(isEsqlDataUrl)
@@ -82,25 +76,16 @@ export const resolveVegaEsqlSources = async (spec: VegaSpec): Promise<VegaEsqlSo
   );
   if (!queries.length) return NO_ESQL_SOURCES;
 
-  const sources = await Promise.all(queries.map(resolveEsqlSource));
-  const sourcesByQuery = new Map(queries.map((query, index) => [query, sources[index]]));
-  const filterableSources = await Promise.all(compact(sources).map(toFilterableSource));
+  const resolved = await Promise.all(queries.map(resolveEsqlQuery));
+  const sourcesByQuery = new Map(queries.map((query, index) => [query, resolved[index]?.source]));
 
   return {
-    filterableSources: uniqBy(compact(filterableSources), 'id'),
+    filterableSources: uniqBy(
+      compact(resolved).map(({ filterableSource }) => filterableSource),
+      'id'
+    ),
     getSource: (query) => sourcesByQuery.get(query),
   };
-};
-
-/** {@link resolveVegaEsqlSources} of the text of a spec; a spec that doesn't parse has none. */
-export const resolveVegaEsqlSourcesOfText = async (specText: string): Promise<VegaEsqlSources> => {
-  let spec: VegaSpec;
-  try {
-    spec = parse(specText, { legacyRoot: false, keepWsc: true });
-  } catch {
-    return NO_ESQL_SOURCES;
-  }
-  return resolveVegaEsqlSources(spec);
 };
 
 const findIndexDataView = async (index: string): Promise<DataView[]> => {
@@ -116,7 +101,7 @@ const findIndexDataView = async (index: string): Promise<DataView[]> => {
  * data urls. `esqlSources` are the already resolved ES|QL sources of the spec, when the caller holds them.
  */
 export const resolveVegaDataSources = async (
-  spec: VegaSpec,
+  spec?: VegaSpec,
   esqlSources?: Promise<VegaEsqlSources>
 ): Promise<FilterableSource[]> => {
   const indexes = collectDataUrls(spec).flatMap(({ index }) =>
@@ -129,15 +114,13 @@ export const resolveVegaDataSources = async (
   return uniqBy([...indexDataViews.flat(), ...filterableSources], 'id');
 };
 
+// The text of a spec is HJSON or JSON, which HJSON also parses.
+const parseSpecText = (specText: string) => parseSpec({ format: 'hjson', value: specText });
+
+/** {@link resolveVegaEsqlSources} of the text of a spec; a spec that doesn't parse has none. */
+export const resolveVegaEsqlSourcesOfText = (specText: string): Promise<VegaEsqlSources> =>
+  resolveVegaEsqlSources(parseSpecText(specText));
+
 /** {@link resolveVegaDataSources} of the text of a spec; a spec that doesn't parse has none. */
-export const resolveVegaDataSourcesOfText = async (
-  specText: string
-): Promise<FilterableSource[]> => {
-  let spec: VegaSpec;
-  try {
-    spec = parse(specText, { legacyRoot: false, keepWsc: true });
-  } catch {
-    return [];
-  }
-  return resolveVegaDataSources(spec);
-};
+export const resolveVegaDataSourcesOfText = (specText: string): Promise<FilterableSource[]> =>
+  resolveVegaDataSources(parseSpecText(specText));
