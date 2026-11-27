@@ -22,7 +22,8 @@ export interface GroundednessAnalysis {
       | 'PARTIALLY_SUPPORTED'
       | 'CONTRADICTED'
       | 'NOT_FOUND'
-      | 'UNGROUNDED_BUT_DISCLOSED';
+      | 'UNGROUNDED_BUT_DISCLOSED'
+      | 'NON_FACTUAL';
     evidence:
       | {
           tool_call_id: string | undefined;
