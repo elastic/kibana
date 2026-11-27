@@ -1947,6 +1947,41 @@ describe('metric visualization', () => {
   });
 
   describe('#getUserMessages', () => {
+    it('warns that only the first row is used for a multi-row ES|QL metric without a breakdown', () => {
+      const datasource = createMockDatasource();
+      datasource.publicAPIMock.isTextBasedLanguage.mockReturnValue(true);
+      const frame = createMockFramePublicAPI({
+        datasourceLayers: { first: datasource.publicAPIMock },
+        activeData: {
+          first: {
+            type: 'datatable',
+            columns: [
+              { id: 'avg_bytes', name: 'avg_bytes', meta: { type: 'number' } },
+              { id: 'total', name: 'total', meta: { type: 'number' } },
+            ],
+            rows: [
+              { avg_bytes: 10, total: null },
+              { avg_bytes: null, total: 42 },
+            ],
+          },
+        },
+      });
+      const state: MetricVisualizationState = {
+        layerId: 'first',
+        layerType: 'data',
+        metricAccessor: 'total',
+      };
+
+      expect(visualization.getUserMessages!(state, { frame })).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            severity: 'warning',
+            shortMessage: expect.stringMatching(/only the first row is used/i),
+          }),
+        ])
+      );
+    });
+
     it('returns error for non numeric primary metric if maxAccessor exists', () => {
       const frame = createMockFramePublicAPI({
         activeData: generateActiveData([
