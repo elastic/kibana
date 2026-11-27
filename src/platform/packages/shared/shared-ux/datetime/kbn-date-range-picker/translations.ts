@@ -276,7 +276,7 @@ export const settingsPanelTexts = {
     'sharedUXPackages.dateRangePicker.settingsPanel.timePrecisionMilliseconds',
     { defaultMessage: 'Milliseconds' }
   ),
-  timePrecisionNone: i18n.translate(
+  timePrecisionMinutes: i18n.translate(
     'sharedUXPackages.dateRangePicker.settingsPanel.timePrecisionNone',
     { defaultMessage: 'Minutes' }
   ),

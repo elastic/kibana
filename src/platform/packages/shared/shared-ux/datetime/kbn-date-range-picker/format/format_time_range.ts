@@ -33,12 +33,12 @@ import type { TimePrecision, TimeRange, TimeRangeFormatOptions, TimeUnit } from 
  * Trims a moment format string to the requested sub-minute precision.
  * - `'ms'`  — keep everything (seconds + milliseconds).
  * - `'s'`   — strip `.SSS`.
- * - `'none'`— strip `:ss.SSS` (and `:ss`).
+ * - `'m'`   — strip `:ss.SSS` (and `:ss`).
  */
 export function applyTimePrecision(format: string, precision: TimePrecision = 's'): string {
   if (precision === 'ms') return format;
   if (precision === 's') return format.replace(/[.,]SSS/g, '');
-  // 'none' — strip seconds (and any trailing milliseconds)
+  // 'm' — strip seconds (and any trailing milliseconds)
   return format.replace(/:ss[.,]SSS/g, '').replace(/:ss/g, '');
 }
 

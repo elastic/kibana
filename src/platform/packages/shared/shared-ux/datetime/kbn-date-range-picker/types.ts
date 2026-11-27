@@ -145,7 +145,7 @@ export interface AutoRefreshSettings {
 }
 
 /** Controls sub-minute precision shown in absolute timestamps. */
-export type TimePrecision = 's' | 'ms' | 'none';
+export type TimePrecision = 's' | 'ms' | 'm';
 
 /** User-facing settings exposed by the date range picker settings panel. */
 export interface DateRangePickerSettings {
@@ -159,7 +159,7 @@ export interface DateRangePickerSettings {
    * Controls sub-minute precision shown in absolute timestamps.
    * - `'s'` — show seconds (default behaviour when omitted).
    * - `'ms'` — show seconds and milliseconds.
-   * - `'none'` — show only hours and minutes.
+   * - `'m'` — show only hours and minutes.
    *
    * When set, a toggle is shown in the Settings panel. When omitted the
    * toggle is hidden and seconds are shown by default.

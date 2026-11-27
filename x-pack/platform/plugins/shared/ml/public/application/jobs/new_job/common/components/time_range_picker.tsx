@@ -19,7 +19,7 @@ const WIDTH = '512px';
 
 const DEFAULT_DATE_RANGE_PICKER_SETTINGS: DateRangePickerSettings = {
   roundRelativeTime: false,
-  timePrecision: 'none',
+  timePrecision: 'm',
 };
 
 export interface TimeRange {

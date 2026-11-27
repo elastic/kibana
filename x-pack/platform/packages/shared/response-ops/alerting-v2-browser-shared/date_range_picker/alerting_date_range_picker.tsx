@@ -33,7 +33,7 @@ import { LegacyDateRangePicker } from './legacy_date_range_picker';
 
 const DEFAULT_DATE_PICKER_SETTINGS: DateRangePickerSettings = {
   roundRelativeTime: false,
-  timePrecision: 'none',
+  timePrecision: 'm',
 };
 
 const DEFAULT_AUTO_REFRESH: AutoRefreshSettings = {

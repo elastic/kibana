@@ -323,7 +323,7 @@ describe('TimeWindowButtons', () => {
     const start = '2025-01-01T00:00:00.000Z';
     const end = '2025-01-01T23:59:59.999Z';
 
-    it.each(['none', 's'] as const)(
+    it.each(['m', 's'] as const)(
       'keeps millisecond precision in the applied range when the display precision is %s',
       async (timePrecision) => {
         const { onChange } = renderPicker({

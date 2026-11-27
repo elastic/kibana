@@ -34,7 +34,7 @@ export const PreviewTimePicker = ({
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const [settings, setSettings] = useState<DateRangePickerSettings>({
     roundRelativeTime: false,
-    timePrecision: 'none',
+    timePrecision: 'm',
   });
   // Like the search bar, so the user's saved presets show here too.
   const { presets, onPresetSave, onPresetDelete } = useDateRangePickerPresets({

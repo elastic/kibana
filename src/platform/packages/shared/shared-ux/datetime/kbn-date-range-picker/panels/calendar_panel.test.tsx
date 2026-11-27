@@ -312,7 +312,7 @@ describe('CalendarPanel', () => {
   });
 
   describe('timePrecision', () => {
-    it.each(['none', 's'] as const)(
+    it.each(['m', 's'] as const)(
       'keeps the full day up to 23:59:59.999 when the display precision is %s',
       async (timePrecision) => {
         mockUseDateRangePickerContext.mockReturnValue({
@@ -336,7 +336,7 @@ describe('CalendarPanel', () => {
     it('does not truncate the existing range when converting to absolute text on mount', () => {
       mockUseDateRangePickerContext.mockReturnValue({
         ...makeContext([DATE_TYPE_ABSOLUTE, DATE_TYPE_ABSOLUTE]),
-        transformOptions: { ...defaultTransformOptions, timePrecision: 'none' },
+        transformOptions: { ...defaultTransformOptions, timePrecision: 'm' },
       });
       renderWithEuiTheme(<CalendarPanel />);
 
@@ -416,7 +416,7 @@ describe('CalendarPanel', () => {
     it('calls onPresetSave with a precision-aware display label when Save as preset is checked', async () => {
       mockUseDateRangePickerContext.mockReturnValue({
         ...makeContextNoDates(),
-        transformOptions: { ...defaultTransformOptions, timePrecision: 'none' },
+        transformOptions: { ...defaultTransformOptions, timePrecision: 'm' },
       });
       renderWithEuiTheme(<CalendarPanel />);
 
@@ -425,7 +425,7 @@ describe('CalendarPanel', () => {
       await clickDay(15);
       await user.click(screen.getByRole('button', { name: 'Apply' }));
 
-      // 'none' precision drops the seconds, and the label is display-only (uses the → delimiter).
+      // 'm' precision drops the seconds, and the label is display-only (uses the → delimiter).
       expect(onPresetSave).toHaveBeenCalledWith(
         expect.objectContaining({
           label: expect.stringMatching(/^Feb 10(?:, 2026)?, 00:00 → Feb 15(?:, 2026)?, 23:59$/),

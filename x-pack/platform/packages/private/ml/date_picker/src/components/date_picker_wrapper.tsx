@@ -52,7 +52,7 @@ const autoRefreshOnlyPickerStyles = css`
 
 const DEFAULT_DATE_RANGE_PICKER_SETTINGS: DateRangePickerSettings = {
   roundRelativeTime: false,
-  timePrecision: 'none',
+  timePrecision: 'm',
 };
 
 const toPresetItems = (ranges: TimeRange[]): PresetItem[] =>
