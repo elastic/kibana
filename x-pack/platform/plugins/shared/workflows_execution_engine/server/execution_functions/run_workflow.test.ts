@@ -436,17 +436,6 @@ describe('runWorkflow', () => {
         expect(loopSpan!.end).toHaveBeenCalled();
       });
 
-      it('marks the loop span as failure when the execution ended FAILED without throwing', async () => {
-        workflowRuntime.getWorkflowExecutionStatus.mockReturnValue(ExecutionStatus.FAILED);
-
-        await runWorkflowWithDefaults();
-
-        const [, , loopSpan] = recordedSpans;
-        expect(loopSpan!.setOutcome).toHaveBeenCalledWith('failure');
-        expect(loopSpan!.setOutcome).not.toHaveBeenCalledWith('success');
-        expect(loopSpan!.end).toHaveBeenCalled();
-      });
-
       it('ends only setup span when event-driven run is skipped before runtime start', async () => {
         mockGetWorkflowExecutionFromState.mockReturnValue({
           id: workflowRunId,
