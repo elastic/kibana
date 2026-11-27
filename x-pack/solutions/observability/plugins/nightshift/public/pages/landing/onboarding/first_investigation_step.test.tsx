@@ -128,7 +128,7 @@ describe('OnboardingFirstInvestigationStep', () => {
       ).toEqual(['Step 5', 'Step 4', 'Step 3', 'Step 2']);
     });
 
-    it('shows a skeleton of three suggestions above the sources and the compose card', () => {
+    it('shows a skeleton of three suggestions above the compose card and the sources', () => {
       renderStep({ execution_id: 'e1', status: 'running' });
 
       const skeleton = screen.getByTestId('nightshiftOnboardingSuggestionsSkeleton');
@@ -137,8 +137,8 @@ describe('OnboardingFirstInvestigationStep', () => {
       ).toHaveLength(3);
       const sources = screen.getByTestId('nightshiftOnboardingConnectSources');
       const compose = screen.getByTestId('nightshiftOnboardingCompose');
-      expect(skeleton.compareDocumentPosition(sources)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-      expect(sources.compareDocumentPosition(compose)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+      expect(skeleton.compareDocumentPosition(compose)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+      expect(compose.compareDocumentPosition(sources)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     });
 
     it('keeps the sources and the typed question in place when the suggestions arrive', () => {

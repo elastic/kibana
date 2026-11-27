@@ -235,6 +235,7 @@ export function OnboardingFirstInvestigationStep({
           </EuiPanel>
         )}
       </div>
+      {compose}
       <section data-test-subj="nightshiftOnboardingConnectSources">
         <EuiTitle size="xs">
           <h4>{CONNECT_SOURCES_TITLE}</h4>
@@ -245,7 +246,6 @@ export function OnboardingFirstInvestigationStep({
           filter={isAdditionalType}
         />
       </section>
-      {compose}
     </div>
   );
 }
