@@ -29,6 +29,15 @@ const shardedSuites = suites.filter((suite) => (suite.shards?.length ?? 0) > 0);
 // front keeps the id and the key identical, with no transform to reason about.
 const STEP_KEY_SAFE_ID = /^[a-z0-9]+(?:[_-][a-z0-9]+)*$/;
 
+// A shard split across agents, `<base>-<index>-of-<count>`: every slice runs the same spec files
+// and the suite picks its part of the examples from the id.
+const SLICE_SHARD_ID = /^(.+)-(\d+)-of-(\d+)$/;
+
+const isOneShardSliced = (shardIds: string[]): boolean => {
+  const bases = new Set(shardIds.map((id) => SLICE_SHARD_ID.exec(id)?.[1]));
+  return bases.size === 1 && !bases.has(undefined);
+};
+
 describe('evals.suites.json shards', () => {
   it('gives every shard an id that survives step-key slugification, unique within its suite', () => {
     const problems: string[] = [];
@@ -85,7 +94,7 @@ describe('evals.suites.json shards', () => {
     expect(problems).toEqual([]);
   });
 
-  it('never lists the same spec file in two shards of a suite', () => {
+  it('never lists the same spec file in two shards of a suite, except slices of one shard', () => {
     const problems = shardedSuites.flatMap(({ id: suiteId, shards = [] }) => {
       const owners = new Map<string, string[]>();
 
@@ -96,8 +105,98 @@ describe('evals.suites.json shards', () => {
       }
 
       return [...owners]
-        .filter(([, shardIds]) => shardIds.length > 1)
+        .filter(([, shardIds]) => shardIds.length > 1 && !isOneShardSliced(shardIds))
         .map(([specFile, shardIds]) => `${suiteId}: "${specFile}" is in [${shardIds.join(', ')}]`);
+    });
+
+    expect(problems).toEqual([]);
+  });
+
+  it('gives fanoutConcurrency and shardStepTimeoutInMinutes a positive integer when set', () => {
+    // run_suite.sh writes them into the fanout YAML as is, so a bad value only fails at upload.
+    const problems = suites.flatMap((suite) =>
+      (['fanoutConcurrency', 'shardStepTimeoutInMinutes'] as const)
+        .filter((field) => {
+          const value = suite[field];
+          return value !== undefined && (!Number.isInteger(value) || value < 1);
+        })
+        .map((field) => `${suite.id}: ${field} is ${suite[field]}`)
+    );
+
+    expect(problems).toEqual([]);
+  });
+
+  it('gives concurrency groups names that are already step-key safe', () => {
+    // run_suite.sh slugifies the name into the group key, so `a b` and `a-b` would share a queue.
+    const problems = suites.flatMap(({ id, concurrencyGroups = {} }) =>
+      Object.keys(concurrencyGroups)
+        .filter((group) => !STEP_KEY_SAFE_ID.test(group))
+        .map((group) => `${id}: concurrency group "${group}" is not lowercase [a-z0-9_-]`)
+    );
+
+    expect(problems).toEqual([]);
+  });
+
+  it('gives every slice of a shard the same spec files', () => {
+    // A slice that lists other specs would leave part of the sliced specs' examples unrun.
+    const problems = shardedSuites.flatMap(({ id: suiteId, shards = [] }) => {
+      const specsByBase = new Map<string, Set<string>>();
+      for (const { id, specFiles = [] } of shards) {
+        const base = SLICE_SHARD_ID.exec(id)?.[1];
+        if (!base) continue;
+        specsByBase.set(
+          base,
+          (specsByBase.get(base) ?? new Set()).add([...specFiles].sort().join(' '))
+        );
+      }
+      return [...specsByBase]
+        .filter(([, specLists]) => specLists.size > 1)
+        .map(([base]) => `${suiteId}: slices of "${base}" list different spec files`);
+    });
+
+    expect(problems).toEqual([]);
+  });
+
+  it('only names concurrency groups the suite defines, each with a positive limit', () => {
+    // Every suite, not only sharded ones: a step that runs the whole suite takes its tightest group.
+    const problems = suites.flatMap(({ id: suiteId, shards = [], concurrencyGroups = {} }) => [
+      ...Object.entries(concurrencyGroups)
+        .filter(([, limit]) => !Number.isInteger(limit) || limit < 1)
+        .map(([group, limit]) => `${suiteId}: concurrency group "${group}" has limit ${limit}`),
+      ...shards
+        .filter(
+          ({ concurrencyGroup }) => concurrencyGroup && !(concurrencyGroup in concurrencyGroups)
+        )
+        .map(
+          ({ id, concurrencyGroup }) =>
+            `${suiteId}: shard "${id}" names undefined concurrency group "${concurrencyGroup}"`
+        ),
+    ]);
+
+    expect(problems).toEqual([]);
+  });
+
+  it('numbers the slices of a shard 1 to count, each once', () => {
+    const problems = shardedSuites.flatMap(({ id: suiteId, shards = [] }) => {
+      const slicesByBase = new Map<string, Array<{ index: number; count: number }>>();
+      for (const { id } of shards) {
+        const match = SLICE_SHARD_ID.exec(id);
+        if (!match) continue;
+        const [, base, index, count] = match;
+        slicesByBase.set(base, [
+          ...(slicesByBase.get(base) ?? []),
+          { index: Number(index), count: Number(count) },
+        ]);
+      }
+      return [...slicesByBase].flatMap(([base, slices]) => {
+        const [{ count }] = slices;
+        const indices = slices.map(({ index }) => index).sort((left, right) => left - right);
+        const expected = Array.from({ length: count }, (_, position) => position + 1);
+        return slices.every((slice) => slice.count === count) &&
+          indices.join(',') === expected.join(',')
+          ? []
+          : [`${suiteId}: slices of "${base}" are not 1-of-${count} through ${count}-of-${count}`];
+      });
     });
 
     expect(problems).toEqual([]);
@@ -281,10 +380,30 @@ describe('Nightshift CI coverage', () => {
     expect(suite?.shards?.map(({ id }) => id)).toEqual([
       'customer0-golden',
       'customer0-connector-probes',
-      'orcabench',
+      'orcabench-1-of-5',
+      'orcabench-2-of-5',
+      'orcabench-3-of-5',
+      'orcabench-4-of-5',
+      'orcabench-5-of-5',
       'reinforcement',
     ]);
-    const files = suite?.shards?.flatMap(({ specFiles }) => specFiles) ?? [];
+    // Every shard of one model can run at once, and the shards that run 16 sandbox investigations
+    // each are capped together across builds, so overlapping PR runs can't overload the pool.
+    const shardsByGroup = new Map<string | undefined, number>();
+    for (const { concurrencyGroup } of suite?.shards ?? []) {
+      shardsByGroup.set(concurrencyGroup, (shardsByGroup.get(concurrencyGroup) ?? 0) + 1);
+    }
+    for (const [group, count] of shardsByGroup) {
+      const limit = group ? suite?.concurrencyGroups?.[group] : suite?.fanoutConcurrency;
+      expect(limit).toBeGreaterThanOrEqual(count);
+    }
+    expect(
+      suite?.shards
+        ?.filter(({ concurrencyGroup }) => concurrencyGroup === 'sandbox-heavy')
+        .map(({ id }) => id)
+    ).toEqual(['customer0-golden', 'customer0-connector-probes']);
+    expect(suite?.concurrencyGroups).toEqual({ 'sandbox-heavy': 2 });
+    const files = [...new Set(suite?.shards?.flatMap(({ specFiles }) => specFiles) ?? [])];
     expect(files).toEqual([
       'evals/investigation/stored.spec.ts',
       'evals/connector_probe/stored.spec.ts',

@@ -65,6 +65,7 @@ steps:
         prbot:update required
         security/snyk (Application Experience)
         buildkite/docs-build-pr
+        evals gate
     agents:
       image: family/kibana-minimal-ubuntu-2604
       imageProject: elastic-images-prod

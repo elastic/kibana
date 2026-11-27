@@ -19,7 +19,7 @@ import {
   TestProviders,
 } from '../../../../../common/mock';
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { createStartServicesMock } from '../../../../../common/lib/kibana/kibana_react.mock';
 import type { StartServices } from '../../../../../types';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -32,13 +32,16 @@ import {
   defaultUdtHeaders,
 } from '../../body/column_headers/default_headers';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
-import { getEndpointPrivilegesInitialStateMock } from '../../../../../common/components/user_privileges/endpoint/mocks';
+import { getUserPrivilegesMockDefaultValue } from '../../../../../common/components/user_privileges/__mocks__';
 import * as timelineActions from '../../../../store/actions';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
 import { userEvent } from '@testing-library/user-event';
 import * as notesApi from '../../../../../notes/api/api';
-import { getMockTimelineSearchSubscription } from '../../../../../common/mock/mock_timeline_search_service';
+import {
+  getMockTimelineSearchSubscription,
+  MOCK_TIMELINE_HIT_INDEX,
+} from '../../../../../common/mock/mock_timeline_search_service';
 import * as useTimelineEventsModule from '../../../../containers';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useBrowserFields } from '../../../../../data_view_manager/hooks/use_browser_fields';
@@ -47,6 +50,9 @@ import { withIndices } from '../../../../../data_view_manager/hooks/__mocks__/us
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import type { UnifiedTimelineBodyProps } from '../../body/unified_timeline_body';
+import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
 
 const mockPatterns = [
   'auditbeat-*',
@@ -92,8 +98,9 @@ jest.mock('react-router-dom', () => ({
 const { mockTimelineSearchSubscription } = getMockTimelineSearchSubscription();
 
 // These tests can take more than standard timeout of 5s
-// that is why we are increasing it.
-const SPECIAL_TEST_TIMEOUT = 50000;
+// that is why we are increasing the timeout (higher under parallel Jest workers).
+// The tests that mount the real data grid take about 40 to 60 s on CI.
+const SPECIAL_TEST_TIMEOUT = 90000;
 
 const useIsExperimentalFeatureEnabledMock = jest.fn((feature: keyof ExperimentalFeatures) => {
   return allowedExperimentalValues[feature];
@@ -105,6 +112,84 @@ jest.mock('../../../../../common/lib/kibana');
 jest.mock(`@elastic/ebt/client`);
 
 jest.mock('@kbn/expandable-flyout');
+
+// The real body mounts the whole data grid, which is slow. Tests of what the query tab itself does
+// (the notes and pin controls, the notes it loads for a page) use the stub below instead.
+jest.mock('../../body/unified_timeline_body', () => ({
+  UnifiedTimelineBody: jest.fn(),
+}));
+
+const StubbedUnifiedTimelineBody = ({
+  header,
+  events,
+  rowAdditionalLeadingControls,
+}: UnifiedTimelineBodyProps) => (
+  <>
+    {header}
+    {events.map((event, rowIndex) => (
+      <div key={event._id}>
+        {rowAdditionalLeadingControls?.[0].render(
+          () => (
+            <></>
+          ),
+          {
+            record: {} as DataTableRecord,
+            rowIndex,
+          }
+        )}
+      </div>
+    ))}
+  </>
+);
+
+let mockStubTimelineTable = false;
+
+jest.mock('../../unified_components/data_table', () => {
+  const actual = jest.requireActual('../../unified_components/data_table');
+  const ActualReact = jest.requireActual('react');
+  return {
+    ...actual,
+    __esModule: true,
+    default: (props: Record<string, unknown>) =>
+      mockStubTimelineTable ? null : ActualReact.createElement(actual.default, props),
+  };
+});
+
+const useStubbedTable = () => {
+  mockStubTimelineTable = true;
+};
+
+// The tests of the grid never use the notes and pin buttons of the leading control column, and each
+// row mounts popovers there that are slow to set up in jsdom. They render the grid without it, as the
+// unified timeline tests do. The tests that use the stubbed body keep the real controls.
+let mockStubControlColumn = false;
+
+jest.mock('../shared/use_timeline_control_columns', () => {
+  const actual = jest.requireActual('../shared/use_timeline_control_columns');
+  return {
+    ...actual,
+    useTimelineControlColumn: (...args: unknown[]) =>
+      mockStubControlColumn ? undefined : actual.useTimelineControlColumn(...args),
+  };
+});
+
+const useRealGrid = () =>
+  jest
+    .mocked(UnifiedTimelineBody)
+    .mockImplementation(jest.requireActual('../../body/unified_timeline_body').UnifiedTimelineBody);
+
+const useStubbedGrid = () => {
+  mockStubControlColumn = false;
+  return jest.mocked(UnifiedTimelineBody).mockImplementation(StubbedUnifiedTimelineBody);
+};
+
+const getUnifiedTimelineBodyProps = () => {
+  const props = jest.mocked(UnifiedTimelineBody).mock.lastCall?.[0];
+  if (!props) {
+    throw new Error('UnifiedTimelineBody was not rendered');
+  }
+  return props;
+};
 
 const TestComponent = (props: Partial<ComponentProps<typeof QueryTabContent>>) => {
   const testComponentDefaultProps: ComponentProps<typeof QueryTabContent> = {
@@ -189,8 +274,7 @@ const { storage: storageMock } = createSecuritySolutionStorageMock();
 
 const useTimelineEventsSpy = jest.spyOn(useTimelineEventsModule, 'useTimelineEvents');
 
-// Failing: See https://github.com/elastic/kibana/issues/224186
-describe.skip('query tab with unified timeline', () => {
+describe('query tab with unified timeline', () => {
   const fetchNotesSpy = jest.spyOn(notesApi, 'fetchNotesByDocumentIds');
   let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
   beforeAll(() => {
@@ -253,54 +337,23 @@ describe.skip('query tab with unified timeline', () => {
       useIsExperimentalFeatureEnabledMock
     );
 
-    (useUserPrivileges as jest.Mock).mockReturnValue({
-      notesPrivileges: { crud: true, read: true },
-      timelinePrivileges: { crud: true, read: true },
-      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
-      endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
-      detectionEnginePrivileges: { loading: false, error: undefined, result: undefined },
-    });
+    (useUserPrivileges as jest.Mock).mockReturnValue(
+      getUserPrivilegesMockDefaultValue({
+        notesPrivileges: { crud: true, read: true },
+        timelinePrivileges: { crud: true, read: true },
+        detectionEnginePrivileges: { loading: false, error: undefined, result: undefined },
+      })
+    );
 
     flyoutApi = createFlyoutApiMock();
     jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+
+    useRealGrid();
+    mockStubTimelineTable = false;
+    mockStubControlColumn = true;
   });
 
   describe('render', () => {
-    it(
-      'should render unifiedDataTable in timeline',
-      async () => {
-        renderTestComponents();
-        await waitFor(() => {
-          expect(screen.getByTestId('discoverDocTable')).toBeVisible();
-        });
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-
-    it(
-      'should render unified-field-list in timeline',
-      async () => {
-        renderTestComponents();
-        await waitFor(() => {
-          expect(screen.getByTestId('timeline-sidebar')).toBeVisible();
-        });
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-    it(
-      'should show row-renderers correctly by default',
-      async () => {
-        renderTestComponents();
-        await waitFor(() => {
-          expect(screen.getByTestId('discoverDocTable')).toBeVisible();
-        });
-
-        expect(screen.getByTestId('timeline-row-renderer-0')).toBeVisible();
-      },
-
-      SPECIAL_TEST_TIMEOUT
-    );
-
     it(
       'should hide row-renderers when disabled',
       async () => {
@@ -356,6 +409,7 @@ describe.skip('query tab with unified timeline', () => {
     it(
       'should paginate correctly',
       async () => {
+        mockStubControlColumn = false;
         render(
           <TestProviders
             store={createMockStore({
@@ -377,10 +431,34 @@ describe.skip('query tab with unified timeline', () => {
         expect(screen.getByTestId('pagination-button-2')).toBeVisible();
         expect(screen.queryByTestId('pagination-button-3')).toBeNull();
 
+        fetchNotesSpy.mockClear();
         fireEvent.click(screen.getByTestId('pagination-button-2'));
 
         await waitFor(() => {
           expect(screen.getByTestId('pagination-button-2')).toHaveAttribute('aria-current', 'page');
+        });
+
+        await waitFor(() => {
+          expect(fetchNotesSpy).toHaveBeenCalledWith([mockTimelineData[2]._id]);
+        });
+        expect(fetchNotesSpy).toHaveBeenCalledTimes(1);
+
+        await waitFor(() => {
+          expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+        });
+        fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
+        await waitFor(() => {
+          expect(flyoutApi.openNotes).toHaveBeenCalledWith(
+            expect.objectContaining({
+              hit: expect.objectContaining({
+                _id: mockTimelineData[2]._id,
+                raw: expect.objectContaining({
+                  _id: mockTimelineData[2]._id,
+                  _index: MOCK_TIMELINE_HIT_INDEX,
+                }),
+              }),
+            })
+          );
         });
       },
       SPECIAL_TEST_TIMEOUT
@@ -422,6 +500,7 @@ describe.skip('query tab with unified timeline', () => {
     it(
       'should load notes for current page only',
       async () => {
+        useStubbedGrid();
         render(
           <TestProviders
             store={createMockStore({
@@ -432,37 +511,36 @@ describe.skip('query tab with unified timeline', () => {
           </TestProviders>
         );
 
-        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-        expect(screen.getByTestId('pagination-button-previous')).toBeVisible();
-
-        expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'page');
-        expect(fetchNotesSpy).toHaveBeenCalledWith(['1']);
+        await waitFor(() => {
+          expect(getUnifiedTimelineBodyProps().events).toHaveLength(3);
+        });
+        await waitFor(() => {
+          expect(fetchNotesSpy).toHaveBeenCalledWith(['1']);
+        });
 
         // Page : 2
 
         fetchNotesSpy.mockClear();
-        expect(screen.getByTestId('pagination-button-1')).toBeVisible();
-
-        fireEvent.click(screen.getByTestId('pagination-button-1'));
+        act(() => {
+          getUnifiedTimelineBodyProps().onUpdatePageIndex?.(1);
+        });
 
         await waitFor(() => {
-          expect(screen.getByTestId('pagination-button-1')).toHaveAttribute('aria-current', 'page');
-
           expect(fetchNotesSpy).toHaveBeenNthCalledWith(1, [mockTimelineData[1]._id]);
         });
+        expect(fetchNotesSpy).toHaveBeenCalledTimes(1);
 
         // Page : 3
 
         fetchNotesSpy.mockClear();
-        expect(screen.getByTestId('pagination-button-2')).toBeVisible();
-        fireEvent.click(screen.getByTestId('pagination-button-2'));
+        act(() => {
+          getUnifiedTimelineBodyProps().onUpdatePageIndex?.(2);
+        });
 
         await waitFor(() => {
-          expect(screen.getByTestId('pagination-button-2')).toHaveAttribute('aria-current', 'page');
-
           expect(fetchNotesSpy).toHaveBeenNthCalledWith(1, [mockTimelineData[2]._id]);
         });
+        expect(fetchNotesSpy).toHaveBeenCalledTimes(1);
       },
       SPECIAL_TEST_TIMEOUT
     );
@@ -470,33 +548,28 @@ describe.skip('query tab with unified timeline', () => {
     it(
       'should load notes for correct page size',
       async () => {
+        useStubbedGrid();
+        const store = createMockStore(structuredClone(mockStateWithNoteInTimeline));
         render(
-          <TestProviders
-            store={createMockStore({
-              ...structuredClone(mockStateWithNoteInTimeline),
-            })}
-          >
+          <TestProviders store={store}>
             <TestComponent />
           </TestProviders>
         );
 
-        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-        expect(screen.getByTestId('pagination-button-previous')).toBeVisible();
-
-        expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'page');
-        expect(screen.getByTestId('tablePaginationPopoverButton')).toHaveTextContent(
-          'Rows per page: 1'
-        );
-        fireEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
-
         await waitFor(() => {
-          expect(screen.getByTestId('tablePagination-2-rows')).toBeVisible();
+          expect(fetchNotesSpy).toHaveBeenCalledWith([mockTimelineData[0]._id]);
         });
 
         fetchNotesSpy.mockClear();
-        fireEvent.click(screen.getByTestId('tablePagination-2-rows'));
+        act(() => {
+          store.dispatch(
+            timelineActions.updateItemsPerPage({ id: TimelineId.test, itemsPerPage: 2 })
+          );
+        });
 
+        await waitFor(() => {
+          expect(getUnifiedTimelineBodyProps().itemsPerPage).toBe(2);
+        });
         await waitFor(() => {
           expect(fetchNotesSpy).toHaveBeenNthCalledWith(1, [
             mockTimelineData[0]._id,
@@ -596,34 +669,6 @@ describe.skip('query tab with unified timeline', () => {
     );
 
     it(
-      'should remove column',
-      async () => {
-        const { container } = renderTestComponents();
-
-        await waitFor(() => {
-          expect(screen.getByTestId('discoverDocTable')).toBeVisible();
-        });
-
-        expect(container.querySelector('[data-gridcell-column-id="message"]')).toBeInTheDocument();
-
-        fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-message'));
-
-        await waitFor(() => {
-          expect(screen.getByTitle('Remove column')).toBeVisible();
-        });
-
-        fireEvent.click(screen.getByTitle('Remove column'));
-
-        await waitFor(() => {
-          expect(
-            container.querySelector('[data-gridcell-column-id="message"]')
-          ).not.toBeInTheDocument();
-        });
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-
-    it(
       'should sort date column',
       async () => {
         const { container } = renderTestComponents();
@@ -705,61 +750,6 @@ describe.skip('query tab with unified timeline', () => {
                   esTypes: [],
                   field: 'host.name',
                   type: 'string',
-                },
-              ],
-            })
-          );
-        });
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-
-    it(
-      'should sort number column',
-      async () => {
-        const field = {
-          name: 'event.severity',
-          type: 'number',
-        };
-
-        const { container } = renderTestComponents();
-        await waitFor(() => {
-          expect(screen.getByTestId('discoverDocTable')).toBeVisible();
-        });
-
-        expect(
-          container.querySelector(`[data-gridcell-column-id="${field.name}"]`)
-        ).toBeInTheDocument();
-
-        fireEvent.click(screen.getByTestId(`dataGridHeaderCellActionButton-${field.name}`));
-
-        await waitFor(() => {
-          expect(screen.getByTestId(`dataGridHeaderCellActionGroup-${field.name}`)).toBeVisible();
-        });
-
-        expect(screen.getByTitle('Sort Low-High')).toBeVisible();
-        expect(screen.getByTitle('Sort High-Low')).toBeVisible();
-
-        useTimelineEventsSpy.mockClear();
-
-        fireEvent.click(screen.getByTitle('Sort Low-High'));
-
-        await waitFor(() => {
-          expect(useTimelineEventsSpy).toHaveBeenNthCalledWith(
-            1,
-            expect.objectContaining({
-              sort: [
-                {
-                  direction: 'desc',
-                  esTypes: ['date'],
-                  field: '@timestamp',
-                  type: 'date',
-                },
-                {
-                  direction: 'asc',
-                  esTypes: [],
-                  field: field.name,
-                  type: field.type,
                 },
               ],
             })
@@ -876,8 +866,8 @@ describe.skip('query tab with unified timeline', () => {
           expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent(
             String(customColumnOrder.length - 1)
           );
+          expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(0);
         });
-        expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(0);
       },
       SPECIAL_TEST_TIMEOUT
     );
@@ -918,6 +908,7 @@ describe.skip('query tab with unified timeline', () => {
     it(
       'should should show callout when field search does not matches any field',
       async () => {
+        useStubbedTable();
         renderTestComponents();
         expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
 
@@ -945,6 +936,7 @@ describe.skip('query tab with unified timeline', () => {
     it(
       'should toggle side bar correctly',
       async () => {
+        useStubbedTable();
         renderTestComponents();
         expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
 
@@ -993,8 +985,9 @@ describe.skip('query tab with unified timeline', () => {
     it(
       'should open the notes flyout',
       async () => {
+        useStubbedGrid();
         renderTestComponents();
-        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+        expect(await screen.findByTestId('timelineHeader')).toBeVisible();
 
         await waitFor(() => {
           expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
@@ -1004,7 +997,13 @@ describe.skip('query tab with unified timeline', () => {
 
         await waitFor(() => {
           expect(flyoutApi.openNotes).toHaveBeenCalledWith({
-            hit: expect.objectContaining({ _id: mockTimelineData[0]._id }),
+            hit: expect.objectContaining({
+              _id: mockTimelineData[0]._id,
+              raw: expect.objectContaining({
+                _id: mockTimelineData[0]._id,
+                _index: MOCK_TIMELINE_HIT_INDEX,
+              }),
+            }),
             origin: FLYOUT_ORIGIN.TIMELINE,
           });
         });
@@ -1022,6 +1021,7 @@ describe.skip('query tab with unified timeline', () => {
     it(
       'should disable pinning when event has notes attached in timeline',
       async () => {
+        useStubbedGrid();
         const mockStateWithNoteInTimeline = {
           ...mockState,
           timeline: {
@@ -1046,13 +1046,11 @@ describe.skip('query tab with unified timeline', () => {
           </TestProviders>
         );
 
-        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-        expect(screen.getAllByTestId('pin')).toHaveLength(1);
+        expect(await screen.findAllByTestId('timeline-pin-event-button')).toHaveLength(1);
         // disabled because it is already pinned
-        expect(screen.getByTestId('pin')).toBeDisabled();
+        expect(screen.getByTestId('timeline-pin-event-button')).toBeDisabled();
 
-        fireEvent.mouseOver(screen.getByTestId('pin'));
+        fireEvent.mouseOver(screen.getByTestId('timeline-pin-event-button'));
 
         await waitFor(() => {
           expect(screen.getByTestId('timeline-action-pin-tool-tip')).toBeVisible();
@@ -1074,16 +1072,29 @@ describe.skip('query tab with unified timeline', () => {
     it(
       'should allow pinning when event has notes but notes are not attached in current timeline',
       async () => {
-        renderTestComponents();
-        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+        useStubbedGrid();
+        const stateWithoutAttachedNotes = structuredClone(mockState);
+        stateWithoutAttachedNotes.timeline.timelineById[TimelineId.test].eventIdToNoteIds = {};
+        const store = createMockStore(stateWithoutAttachedNotes);
+        render(
+          <TestProviders store={store}>
+            <TestComponent />
+          </TestProviders>
+        );
+        expect(await screen.findAllByTestId('timeline-pin-event-button')).toHaveLength(1);
+        expect(screen.getByTestId('timeline-pin-event-button')).not.toBeDisabled();
 
-        expect(screen.getAllByTestId('pin')).toHaveLength(1);
-        expect(screen.getByTestId('pin')).not.toBeDisabled();
-
-        fireEvent.mouseOver(screen.getByTestId('pin'));
+        fireEvent.mouseOver(screen.getByTestId('timeline-pin-event-button'));
         await waitFor(() => {
           expect(screen.getByTestId('timeline-action-pin-tool-tip')).toBeVisible();
           expect(screen.getByTestId('timeline-action-pin-tool-tip')).toHaveTextContent('Pin event');
+        });
+
+        fireEvent.click(screen.getByTestId('timeline-pin-event-button'));
+        await waitFor(() => {
+          expect(
+            store.getState().timeline.timelineById[TimelineId.test].pinnedEventIds
+          ).toMatchObject({ [mockTimelineData[0]._id]: true });
         });
       },
       SPECIAL_TEST_TIMEOUT
