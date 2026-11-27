@@ -12,12 +12,12 @@ import type {
   BoostRuleListItem,
   BoostRuleMatch,
 } from '../../common/types';
+import type { TargetDetails } from './target_details';
 
 /** What `GET _boost/explain` says about an index or data stream. */
 export interface BoostExplanation {
   name: string;
   type: BoostProfileType;
-  isHidden: boolean;
   /** The rules that match it, highest ranked first. The first one applies. */
   matchedRuleNames: string[];
 }
@@ -29,16 +29,17 @@ export interface BoostExplanation {
 export const getRuleListItems = (
   rules: BoostRule[],
   profiles: BoostProfile[],
-  explanations: BoostExplanation[]
+  explanations: BoostExplanation[],
+  details: Map<string, TargetDetails> = new Map()
 ): BoostRuleListItem[] => {
   const matchesByRule = new Map(rules.map(({ name }): [string, BoostRuleMatch[]] => [name, []]));
 
-  explanations.forEach(({ name, isHidden, matchedRuleNames }) => {
+  explanations.forEach(({ name, matchedRuleNames }) => {
     const [appliedRuleName] = matchedRuleNames;
     matchedRuleNames.forEach((ruleName) => {
       matchesByRule.get(ruleName)?.push({
         name,
-        isHidden,
+        ...details.get(name),
         outrankedByRuleName: ruleName === appliedRuleName ? undefined : appliedRuleName,
       });
     });

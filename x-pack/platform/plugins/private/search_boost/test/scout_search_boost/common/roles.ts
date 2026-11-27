@@ -22,6 +22,22 @@ export const SEARCH_BOOST_READ_ROLE = roleWithClusterPrivileges([
   'read_boost_rules',
 ]);
 
+// `monitor` makes Index Management available, so match names link to it.
+export const SEARCH_BOOST_READ_WITH_INDEX_MANAGEMENT_ROLE = roleWithClusterPrivileges([
+  'read_boost_profiles',
+  'read_boost_rules',
+  'monitor',
+]);
+
+// `delete_index` adds "Delete data stream" to Index Management's flyout, only for the test's data stream.
+export const SEARCH_BOOST_READ_DELETE_DATA_STREAMS_ROLE: KibanaRole = {
+  elasticsearch: {
+    cluster: ['read_boost_profiles', 'read_boost_rules', 'monitor'],
+    indices: [...INDICES_READ, { names: ['*-stream-deletable'], privileges: ['delete_index'] }],
+  },
+  kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
+};
+
 export const SEARCH_BOOST_MANAGE_ROLE = roleWithClusterPrivileges([
   'read_boost_profiles',
   'read_boost_rules',

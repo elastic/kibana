@@ -88,6 +88,36 @@ export const myStepCommonDefinition: CommonStepDefinition = {
 };
 ```
 
+#### Step Exposure
+
+Some steps exist only to support the managed workflows your plugin installs. The optional `exposure` field on the common definition tells the workflow editor and the server which workflows the step is meant for:
+
+| | `open` (default) | `internal` | `managed_only` |
+|---|---|---|---|
+| Use it when | Any workflow can use the step | The step supports your managed workflows, but users may use it in their own workflows at their own risk | The step supports your managed workflows, and no other workflow should use it |
+| Managed workflows | Valid | Valid | Valid |
+| Other workflows | Valid | Valid, with a warning in the editor | Error: saving the YAML stores the workflow as invalid, so it can't be enabled or run, and test runs are refused |
+| Actions menu and autocomplete | Suggested | Not suggested | Not suggested |
+| Editor hover | Step documentation | "Internal" badge and a note, then the step documentation | "Internal" badge and a note, then the step documentation |
+| AI authoring tools | Returned | Returned | Not returned |
+
+```typescript
+export const myStepCommonDefinition: CommonStepDefinition = {
+  id: MyStepTypeId,
+  inputSchema: InputSchema,
+  outputSchema: OutputSchema,
+  exposure: 'internal', // or 'managed_only'; omit it for 'open'
+};
+```
+
+`exposure` is part of `CommonStepDefinition`, not of `BaseStepDefinition` from `@kbn/workflows`, because only steps registered here have one; built-in steps are always `open`. If your common definition is typed as `BaseStepDefinition`, change it to `CommonStepDefinition`. Setting `exposure` on the server and public definitions instead works only if both set the same value: the editor reads the public one, and the AI authoring tools read the server one.
+
+The server checks `managed_only` every time it validates YAML to save or run it: when a workflow is created, updated, cloned or imported, from the editor or through the API, and before a test run or an inline run (`executeWorkflow` with `yaml`). YAML that was never saved, like an inline run, isn't managed, so your plugin can't run your `managed_only` steps inline either. The check only looks at whether the workflow is managed, not at which plugin installed it. The `internal` warning is only shown by the editor.
+
+The exposure is up to the step owner. Before restricting an existing step, check whether user workflows already use it: they start showing the warning (`internal`) or the error (`managed_only`). Workflows that already use a step you make `managed_only` keep running, because the server doesn't revalidate stored workflows. The next time someone saves their YAML, they're stored as invalid and turned off.
+
+The step still has to be registered on both the server and the client: the editor needs the public definition to validate managed workflows that use it.
+
 ### Step 2: Implement Server-Side Definition
 
 Server-side custom steps use one of two definition helpers:
@@ -1242,4 +1272,4 @@ Step "my-namespace.myCustomStep" is registered on the server but not on the clie
 
 ### Temporary Exceptions
 
-Steps that were registered on the server only before this check existed are listed in `test/scout/ui/fixtures/client_registration_exceptions.ts`, tracked in [#305608](https://github.com/elastic/kibana/issues/305608). **Do not add new entries** — register the public definition instead. When you register one of those steps on the client, remove it from the list in the same PR; the test fails on an exception for a step that is already registered on both sides.
+Steps that were registered on the server only before this check existed are listed in `test/scout/ui/fixtures/client_registration_exceptions.ts`, tracked in [#305608](https://github.com/elastic/kibana/issues/305608). **Do not add new entries** — register the public definition instead. When you register one of those steps on the client, remove it from the list in the same PR; the test fails on an exception for a step that is already registered on both sides. If the step only exists to support your managed workflows, consider setting its `exposure` to `internal` or `managed_only` in the same PR (see [Step Exposure](#step-exposure)).

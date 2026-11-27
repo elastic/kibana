@@ -48,6 +48,11 @@ describe('buildHistogramHeatmapConfig', () => {
       value: 'count',
       xAxis: 'TBUCKET(100)',
       breakdown: 'bucket',
+      breakdownFormat: {
+        compactValues: true,
+        format: 'number',
+        decimals: 0,
+      },
       legend: { show: false },
       axisLabel: { xAxis: true, yAxis: true },
       color: {
@@ -56,6 +61,26 @@ describe('buildHistogramHeatmapConfig', () => {
         steps: expect.any(Array),
       },
       ySort: 'desc',
+    });
+  });
+
+  it('formats the bucket column with the metric unit and leaves the cell as a count', () => {
+    const config = buildHistogramHeatmapConfig({
+      query,
+      title: 'latency',
+      seriesColor,
+      backgroundColor,
+      unit: 'ms',
+    });
+
+    expect(config.value).toBe('count');
+    expect(config.format).toBeUndefined();
+    expect(config.breakdownFormat).toEqual({
+      compactValues: true,
+      format: 'duration',
+      fromUnit: 'milliseconds',
+      toUnit: 'humanizePrecise',
+      decimals: 0,
     });
   });
 

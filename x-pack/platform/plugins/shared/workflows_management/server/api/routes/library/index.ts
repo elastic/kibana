@@ -20,6 +20,7 @@ export function registerLibraryRoutes(deps: RouteDependencies) {
     logger: deps.logger,
     kibanaVersion: deps.workflowsService.kibanaVersion,
     isServerless: Boolean(deps.workflowsService.plugins.serverless),
+    analytics: deps.analytics,
   });
 
   registerGetTemplatesRoute(deps, libraryService);

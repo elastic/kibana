@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat } from '@elastic/eui';
+import type { ReactNode } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiPanel, EuiStat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SessionListKpis } from '../../../../common/sessions';
 import type { Formatters } from '../../../hooks/use_formatters';
@@ -37,7 +38,13 @@ export function SessionsKpis({
         })
       : undefined;
 
-  const items = [
+  const items: Array<{
+    id: string;
+    title: string;
+    description: string;
+    hint?: string;
+    subtitle?: ReactNode;
+  }> = [
     {
       id: 'total',
       title: withValue(total, formatNumber),
@@ -60,6 +67,18 @@ export function SessionsKpis({
         defaultMessage: 'Sessions with failed requests',
       }),
       subtitle: shareOf(kpis?.sessionsWithFailedRequests),
+    },
+    {
+      id: 'withFrustration',
+      title: withValue(kpis?.sessionsWithFrustration, formatNumber),
+      description: i18n.translate('xpack.digitalExperience.sessions.kpis.withFrustrationLabel', {
+        defaultMessage: 'Frustrated sessions',
+      }),
+      hint: i18n.translate('xpack.digitalExperience.sessions.kpis.withFrustrationHint', {
+        defaultMessage:
+          'Sessions with a rage, dead or error click. Needs EDOT Browser with frustration detection.',
+      }),
+      subtitle: shareOf(kpis?.sessionsWithFrustration),
     },
     {
       id: 'medianDuration',
@@ -89,12 +108,20 @@ export function SessionsKpis({
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj="digitalExperienceSessionsKpis">
       <EuiFlexGroup gutterSize="l" wrap responsive={false}>
-        {items.map(({ id, title, description, subtitle }) => (
+        {items.map(({ id, title, description, hint, subtitle }) => (
           <EuiFlexItem key={id} css={{ minWidth: 140 }}>
             <EuiStat
               data-test-subj={`digitalExperienceSessionsKpi-${id}`}
               title={title}
-              description={description}
+              description={
+                hint ? (
+                  <>
+                    {description} <EuiIconTip content={hint} type="info" size="s" />
+                  </>
+                ) : (
+                  description
+                )
+              }
               titleSize="s"
               isLoading={isLoading && !kpis}
             >

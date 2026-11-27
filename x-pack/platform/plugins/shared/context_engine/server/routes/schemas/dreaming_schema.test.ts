@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { dreamingConfigSchema } from './dreaming_schema';
+import {
+  dreamingConfigSchema,
+  dreamingResponseSchema,
+  getDreamingResponseSchema,
+  runDreamingResponseSchema,
+} from './dreaming_schema';
 
 const config = {
   enabled: true,
@@ -97,5 +102,106 @@ describe('dreamingConfigSchema', () => {
     expect(() =>
       dreamingConfigSchema.validate({ ...config, instructions: 'x'.repeat(8193) })
     ).toThrow();
+  });
+
+  describe('maintenance', () => {
+    const maintenance = {
+      enabled: true,
+      mode: 'apply',
+      schedule: { interval: '12h' },
+      neighbors: 8,
+      sweep_size: 500,
+    };
+
+    it('accepts a full maintenance config as it is', () => {
+      expect(dreamingConfigSchema.validate({ ...config, maintenance })).toEqual({
+        ...config,
+        maintenance,
+      });
+    });
+
+    it('accepts maintenance with only enabled set', () => {
+      expect(dreamingConfigSchema.validate({ ...config, maintenance: { enabled: false } })).toEqual(
+        { ...config, maintenance: { enabled: false } }
+      );
+    });
+
+    it('rejects an unknown mode', () => {
+      expect(() =>
+        dreamingConfigSchema.validate({ ...config, maintenance: { ...maintenance, mode: 'auto' } })
+      ).toThrow();
+    });
+
+    it.each([
+      ['neighbors', 0],
+      ['neighbors', 21],
+      ['neighbors', 2.5],
+      ['sweep_size', 0],
+      ['sweep_size', 1001],
+      ['sweep_size', 10.5],
+    ])('rejects %s of %d', (field, value) => {
+      expect(() =>
+        dreamingConfigSchema.validate({
+          ...config,
+          maintenance: { ...maintenance, [field]: value },
+        })
+      ).toThrow();
+    });
+
+    it('rejects an interval shorter than the floor', () => {
+      expect(() =>
+        dreamingConfigSchema.validate({
+          ...config,
+          maintenance: { ...maintenance, schedule: { interval: '5m' } },
+        })
+      ).toThrow('Must be at least 15 minutes.');
+    });
+
+    it('rejects maintenance switched on when there is nothing to maintain', () => {
+      expect(() =>
+        dreamingConfigSchema.validate({ enabled: false, maintenance: { enabled: true } })
+      ).toThrow('Maintenance needs at least one fact or entity type to maintain.');
+    });
+  });
+});
+
+describe('dreamingResponseSchema', () => {
+  it('accepts dreaming with workflow ids', () => {
+    const schema = dreamingResponseSchema();
+    const body = { dreaming: { enabled: false }, workflow_ids: [] };
+    expect(schema.validate(body)).toEqual(body);
+  });
+});
+
+describe('getDreamingResponseSchema', () => {
+  const schema = getDreamingResponseSchema();
+
+  it('accepts dreaming with workflow ids', () => {
+    const body = {
+      dreaming: { enabled: false },
+      workflow_ids: [],
+    };
+    expect(schema.validate(body)).toEqual(body);
+  });
+
+  it('accepts attached workflow ids', () => {
+    const body = {
+      dreaming: { enabled: true, facts: [{ type: 'note' }] },
+      workflow_ids: ['system-context-engine-dreaming-support'],
+    };
+    expect(schema.validate(body)).toEqual(body);
+  });
+});
+
+describe('runDreamingResponseSchema', () => {
+  const schema = runDreamingResponseSchema();
+
+  it('accepts started executions, failures, and skipped workflows', () => {
+    const body = {
+      executions: [{ workflow_id: 'wf-1', execution_id: 'exec-1' }],
+      failed: ['wf-2'],
+      skipped: ['wf-3'],
+    };
+    expect(schema.validate(body)).toEqual(body);
   });
 });

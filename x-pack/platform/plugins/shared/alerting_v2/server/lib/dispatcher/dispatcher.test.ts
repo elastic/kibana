@@ -175,7 +175,11 @@ function buildDispatcherService(deps: {
     ),
     new FetchSuppressionsStep(deps.queryService),
     new ApplySuppressionStep(),
-    new HydrateAlertDataStep(deps.queryService),
+    new HydrateAlertDataStep(
+      deps.queryService,
+      createDispatcherConfigService(),
+      createDispatcherTelemetryMock()
+    ),
     new FetchRulesStep(deps.rulesSoService),
     new ApplyMaintenanceWindowStep(deps.maintenanceWindowService),
     new FetchPoliciesStep(deps.npSoService),

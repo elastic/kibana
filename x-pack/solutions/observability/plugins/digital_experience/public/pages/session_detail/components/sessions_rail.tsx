@@ -91,6 +91,11 @@ const signalLabel = (signal: SessionSignal): string => {
         defaultMessage: '{count} failed',
         values: { count: signal.count },
       });
+    case 'frustration':
+      return i18n.translate('xpack.digitalExperience.sessionDetail.rail.frustration', {
+        defaultMessage: '{count, plural, one {# frustration signal} other {# frustration signals}}',
+        values: { count: signal.count },
+      });
     case 'bounced':
       return i18n.translate('xpack.digitalExperience.sessionDetail.rail.bounced', {
         defaultMessage: 'Bounced',

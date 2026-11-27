@@ -67,7 +67,6 @@ const smallList = (rows: InventoryRow[]): ListResponse => ({
     processingMs: 0,
     totalMs: 0,
   },
-  errors: [],
   unavailableColumns: [],
 });
 
@@ -95,6 +94,7 @@ const WIDGET_TYPE: InventoryType = {
   name: 'Widget',
   identityFields: ['widget.name'],
   columns: WIDGET_COLUMNS,
+  suggestedFilters: [],
   sources: [{ indexPattern: 'metrics-widget-*' }],
 };
 
@@ -120,7 +120,6 @@ const WIDGET_LIST: ListResponse = {
     processingMs: 0,
     totalMs: 0,
   },
-  errors: [],
   unavailableColumns: [],
 };
 

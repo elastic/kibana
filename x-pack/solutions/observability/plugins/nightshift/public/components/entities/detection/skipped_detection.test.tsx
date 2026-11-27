@@ -26,8 +26,8 @@ describe('SkippedDetectionBadge', () => {
   it('explains why on hover, and when it was checked', async () => {
     renderBadge({
       reason: 'still_breaching',
-      probe_has_rows: true,
-      probe_window_minutes: 20,
+      rule_breached: true,
+      breach_window_minutes: 10,
       event_title: 'Checkout — request failures',
       stored_verdict: 'confirms',
       checked_at: '2026-10-16T09:30:00.000Z',
@@ -36,7 +36,7 @@ describe('SkippedDetectionBadge', () => {
     fireEvent.mouseOver(screen.getByTestId('nightshiftSkippedDetectionBadge'));
 
     expect(await screen.findByText('Skipped: no new analysis needed')).toBeInTheDocument();
-    expect(screen.getByText(/The rule still matches \(last 20 min\)/)).toBeInTheDocument();
+    expect(screen.getByText(/The rule recorded a breach \(last 10 min\)/)).toBeInTheDocument();
     expect(
       screen.getByText(/"Checkout — request failures" already records it as breaching/)
     ).toBeInTheDocument();

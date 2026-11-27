@@ -7,6 +7,7 @@
 
 import type { EsClient, KbnClient } from '@kbn/scout-oblt';
 import {
+  MOBILE_SESSIONS_INDEX,
   MOBILE_SESSIONS_INDEX_PATTERN,
   MOBILE_SESSIONS_INDEX_TEMPLATE_NAME,
   MOBILE_SESSIONS_TASK_ID,
@@ -16,10 +17,21 @@ import {
   SESSIONS_TASK_ID,
   type SessionsStatus,
 } from '../../../../common/sessions';
-import { OTEL_APPS } from './constants';
+import { OTEL_APPS, SERVICE_NAME, STAGING_ENVIRONMENT } from './constants';
 
 /** The application of the mock sessions. */
 export const SESSIONS_APP = OTEL_APPS.shop;
+
+/**
+ * The other EDOT Browser applications of the applications list, a session each, in the
+ * environments they have in the mock OTel data.
+ */
+const LIST_APPLICATIONS: ReadonlyArray<{ service: string; environment: string | null }> = [
+  { service: OTEL_APPS.checkout, environment: 'production' },
+  { service: OTEL_APPS.docs, environment: STAGING_ENVIRONMENT },
+  { service: OTEL_APPS.blog, environment: null },
+  { service: SERVICE_NAME, environment: 'production' },
+];
 
 /**
  * The mock sessions are from the last day: the summaries task deletes summaries that ended more
@@ -41,6 +53,16 @@ export const DETAILED_SESSION = {
 
 /** Sessions with JS errors: the detailed one and `dx-session-02`. */
 export const SESSIONS_WITH_JS_ERRORS = 2;
+
+/** The one session with frustration: two rage clicks and a dead click on `FRUSTRATED_TARGET`. */
+export const FRUSTRATED_SESSION = {
+  index: 3,
+  id: 'dx-session-04',
+  rageClicks: 2,
+  deadClicks: 1,
+} as const;
+
+export const FRUSTRATED_TARGET = '#pay';
 
 /** Sessions on Firefox: every third one. */
 export const FIREFOX_SESSIONS = 4;
@@ -67,9 +89,14 @@ export const sessionJourney = (index: number): string[] => {
 const summaryOf = (
   sessionsStartMs: number,
   index: number,
-  { id = sessionId(index), environment = 'production' }: { id?: string; environment?: string } = {}
+  {
+    id = sessionId(index),
+    environment = 'production',
+    service = SESSIONS_APP,
+  }: { id?: string; environment?: string | null; service?: string } = {}
 ) => {
   const isDetailed = index === 0;
+  const isFrustrated = index === FRUSTRATED_SESSION.index;
   const startMs = sessionStartOffsetMs(index);
   const durationMs = isDetailed ? 150 * SECOND_MS : (index + 1) * 10 * SECOND_MS;
   const errorCount = index < SESSIONS_WITH_JS_ERRORS ? index + 1 : 0;
@@ -81,7 +108,7 @@ const summaryOf = (
     : { browser: 'Chrome', browser_version: '130', os: 'macOS' };
   return {
     session: { id },
-    service: { name: SESSIONS_APP },
+    service: { name: service },
     start_time: at(sessionsStartMs, startMs),
     end_time: at(sessionsStartMs, startMs + durationMs),
     duration_ms: durationMs,
@@ -95,6 +122,14 @@ const summaryOf = (
     environment,
     // The detailed session's raw events have one click.
     click_count: isDetailed ? 1 : index,
+    rage_click_count: isFrustrated ? FRUSTRATED_SESSION.rageClicks : 0,
+    dead_click_count: isFrustrated ? FRUSTRATED_SESSION.deadClicks : 0,
+    error_click_count: 0,
+    frustration_count: isFrustrated
+      ? FRUSTRATED_SESSION.rageClicks + FRUSTRATED_SESSION.deadClicks
+      : 0,
+    frustration_targets: isFrustrated ? [FRUSTRATED_TARGET] : [],
+    frustration_pages: isFrustrated ? [journey[1]] : [],
     bounced: false,
     entry_page: journey[0],
     exit_page: journey[journey.length - 1],
@@ -163,17 +198,24 @@ const enableSessions = async (kbnClient: KbnClient): Promise<void> => {
 };
 
 /**
- * Sets sessions up as the system user, then writes the mock summaries straight to the sessions
- * index. The summaries task never rewrites them: their raw events have no
+ * Sets sessions up as the system user, then writes the mock summaries, and a session of each other
+ * application of the list, straight to the sessions index. The summaries task never rewrites them: their raw events have no
  * `telemetry.sdk.language`, which it filters on.
  */
 export const ingestSessionsData = async (esClient: EsClient, kbnClient: KbnClient) => {
   const sessionsStartMs = Date.now() - DAY_MS;
   await enableSessions(kbnClient);
 
-  const summaries = Array.from({ length: SESSION_COUNT }, (_, index) =>
-    summaryOf(sessionsStartMs, index)
-  );
+  const summaries = [
+    ...Array.from({ length: SESSION_COUNT }, (_, index) => summaryOf(sessionsStartMs, index)),
+    ...LIST_APPLICATIONS.map(({ service, environment }) =>
+      summaryOf(sessionsStartMs, SESSION_COUNT, {
+        id: `dx-session-${service}`,
+        environment,
+        service,
+      })
+    ),
+  ];
   const { errors, items } = await esClient.bulk({
     refresh: 'wait_for',
     operations: [
@@ -284,7 +326,8 @@ const ownedSessionIds = ({ idPrefix, count }: OwnedSessions): string[] => {
 /** What `setUpOwnedSessions` created, so `deleteOwnedSessions` removes only that. */
 export interface OwnedSessionsSetup {
   createdTask: boolean;
-  createdIndex: boolean;
+  /** The indices that did not exist before, which it deletes by name. */
+  createdIndices: string[];
   createdTemplate: boolean;
 }
 
@@ -295,7 +338,13 @@ export const setUpOwnedSessions = async (
 ): Promise<OwnedSessionsSetup> => {
   const setup: OwnedSessionsSetup = {
     createdTask: !(await areSessionsInstalled(kbnClient)),
-    createdIndex: !(await esClient.indices.exists({ index: SESSIONS_INDEX })),
+    createdIndices: (
+      await Promise.all(
+        [SESSIONS_INDEX, MOBILE_SESSIONS_INDEX].map(async (index) =>
+          (await esClient.indices.exists({ index })) ? [] : [index]
+        )
+      )
+    ).flat(),
     createdTemplate: !(await esClient.indices.existsIndexTemplate({
       name: SESSIONS_INDEX_TEMPLATE_NAME,
     })),
@@ -306,19 +355,14 @@ export const setUpOwnedSessions = async (
   return setup;
 };
 
-/** Writes `sessions` from a day ago, resolving to when the first one starts. */
-export const ingestOwnedSessions = async (
+const indexOwnedSessions = async (
   esClient: EsClient,
-  sessions: OwnedSessions
-): Promise<number> => {
-  const sessionsStartMs = Date.now() - DAY_MS;
+  summaries: ReadonlyArray<ReturnType<typeof summaryOf>>
+): Promise<void> => {
   const { errors, items } = await esClient.bulk({
     refresh: 'wait_for',
-    operations: ownedSessionIds(sessions).flatMap((id, index) => {
-      return [
-        { index: { _index: SESSIONS_INDEX, _id: id } },
-        summaryOf(sessionsStartMs, index, { id, environment: sessions.environment }),
-      ];
+    operations: summaries.flatMap((summary) => {
+      return [{ index: { _index: SESSIONS_INDEX, _id: summary.session.id } }, summary];
     }),
   });
   if (errors) {
@@ -327,7 +371,42 @@ export const ingestOwnedSessions = async (
     });
     throw new Error(`Could not ingest the owned sessions: ${JSON.stringify(failure)}`);
   }
+};
+
+/** Writes `sessions` from a day ago, resolving to when the first one starts. */
+export const ingestOwnedSessions = async (
+  esClient: EsClient,
+  sessions: OwnedSessions
+): Promise<number> => {
+  const sessionsStartMs = Date.now() - DAY_MS;
+  await indexOwnedSessions(
+    esClient,
+    ownedSessionIds(sessions).map((id, index) => {
+      return summaryOf(sessionsStartMs, index, { id, environment: sessions.environment });
+    })
+  );
   return sessionsStartMs;
+};
+
+/** Writes one session of `sessions` with a single page load at each of `startTimes`. */
+export const ingestOwnedSessionsAt = async (
+  esClient: EsClient,
+  sessions: OwnedSessions,
+  startTimes: readonly number[]
+): Promise<void> => {
+  const ids = ownedSessionIds(sessions);
+  await indexOwnedSessions(
+    esClient,
+    startTimes.map((startMs, index) => {
+      return {
+        ...summaryOf(startMs - sessionStartOffsetMs(index), index, {
+          id: ids[index],
+          environment: sessions.environment,
+        }),
+        page_load_count: 1,
+      };
+    })
+  );
 };
 
 /**
@@ -349,8 +428,8 @@ export const deleteOwnedSessions = async (
   if (setup?.createdTask) {
     await removeSessionsTask(kbnClient);
   }
-  if (setup?.createdIndex) {
-    await deleteSessionsIndices(esClient);
+  if (setup && setup.createdIndices.length > 0) {
+    await esClient.indices.delete({ index: setup.createdIndices }, { ignore: [404] });
   }
   if (setup?.createdTemplate) {
     await deleteSessionsTemplate(esClient);

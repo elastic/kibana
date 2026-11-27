@@ -26,6 +26,18 @@ const mockStepDefinitions: PublicStepDefinition[] = [
     label: 'No Doc Step',
     description: 'A step without documentation details',
   } as unknown as PublicStepDefinition,
+  {
+    id: 'custom.internalStep',
+    label: 'Internal Step',
+    description: 'A step for managed workflows',
+    exposure: 'internal',
+  } as unknown as PublicStepDefinition,
+  {
+    id: 'custom.managedOnlyStep',
+    label: 'Managed-only Step',
+    description: 'A step for managed workflows only',
+    exposure: 'managed_only',
+  } as unknown as PublicStepDefinition,
 ];
 
 jest.mock('../../../../../common/step_schemas', () => ({
@@ -116,6 +128,39 @@ describe('CustomMonacoStepHandler', () => {
 
       expect(result).toBeNull();
     });
+
+    it('should not show the internal badge for open steps', async () => {
+      const stepContext = createMockStepContext();
+      const context = createMockHoverContext('custom.myStep', stepContext);
+      const result = await handler.generateHoverContent(context);
+
+      expect(result?.value).not.toContain('alt="Internal"');
+    });
+
+    it.each([
+      [
+        'custom.internalStep',
+        'This step is meant for managed workflows. You can use it in custom workflows at your own risk',
+      ],
+      [
+        'custom.managedOnlyStep',
+        "This step is meant for managed workflows and can't be used in custom workflows.",
+      ],
+    ])(
+      'should show the internal badge next to the stability badge, then the description, for %s',
+      async (stepType, description) => {
+        const stepContext = createMockStepContext({ stepType });
+        const context = createMockHoverContext(stepType, stepContext);
+        const result = await handler.generateHoverContent(context);
+        const value = result?.value ?? '';
+        const [badgeLine] = value.split('\n');
+
+        expect(badgeLine).toContain('alt="Tech preview"');
+        expect(badgeLine).toContain('alt="Internal"');
+        expect(value).toContain(`_${description}`);
+        expect(value.indexOf(description)).toBeLessThan(value.indexOf('**Workflow step**'));
+      }
+    );
   });
 
   describe('getExamples', () => {

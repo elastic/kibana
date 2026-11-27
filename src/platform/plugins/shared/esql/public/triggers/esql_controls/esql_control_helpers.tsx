@@ -8,10 +8,9 @@
  */
 import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { CoreStart } from '@kbn/core/public';
-import type { ISearchGeneric } from '@kbn/search-types';
 import {
   type ESQLControlVariable,
   type ESQLVariableType,
@@ -26,7 +25,7 @@ import { ESQLControlsFlyout } from './control_flyout';
 interface Context {
   queryString: string;
   core: CoreStart;
-  search: ISearchGeneric;
+  search: DataPublicPluginStart['search'];
   timefilter: TimefilterContract;
   variableType: ESQLVariableType;
   esqlVariables: ESQLControlVariable[];

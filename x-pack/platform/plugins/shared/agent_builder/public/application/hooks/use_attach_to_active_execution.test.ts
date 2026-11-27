@@ -74,7 +74,10 @@ describe('useAttachToActiveExecution', () => {
 
   it('does nothing while this copy of the UI already streams the conversation', () => {
     const { mutateAttach, setState } = setup();
-    setState({ executionId: 'exec-1', activeStreams: new Map([['conv-1', { type: 'send' }]]) });
+    setState({
+      executionId: 'exec-1',
+      activeStreams: new Map([['conv-1', { type: 'send', streamId: 'stream-1' }]]),
+    });
 
     renderHook(() => useAttachToActiveExecution());
 

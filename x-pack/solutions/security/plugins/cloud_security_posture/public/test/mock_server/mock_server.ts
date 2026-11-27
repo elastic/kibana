@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import type { SetupServer } from 'msw/node';
-import { setupServer } from 'msw/node';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { CoreStart } from '@kbn/core/public';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import { indexPatternFieldEditorPluginMock as dataViewFieldEditorMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
 import SearchBar from '@kbn/unified-search-plugin/public/search_bar/search_bar';
-import type { JsonBodyType } from 'msw';
-import { http, HttpResponse } from 'msw';
+import type { JsonBodyType, RequestHandler } from 'msw';
+import { getResponse, http, HttpResponse } from 'msw';
 import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
 import { defaultHandlers } from './handlers';
 import { getMockDependencies } from '../fixtures/get_mock_dependencies';
@@ -37,46 +35,69 @@ jest.mock('rxjs', () => {
 // Set the default timeout for all mock server tests to 30 seconds
 jest.setTimeout(10 * 3000);
 
+export interface MockServer {
+  use: (...handlers: RequestHandler[]) => void;
+  resetHandlers: () => void;
+  fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+
 /**
  * Setup a mock server with the default handlers
  * @param debug - If true, log all requests to the console
  * @returns The mock server
  */
-export const setupMockServer = ({ debug = false }: { debug?: boolean } = {}) => {
-  const server = setupServer(...defaultHandlers);
+export const setupMockServer = ({ debug = false }: { debug?: boolean } = {}): MockServer => {
+  let handlers: RequestHandler[] = [...defaultHandlers];
 
-  if (debug) {
-    // Debug: log all requests to the console
-    server.events.on('request:start', async ({ request }) => {
-      const payload = await request.clone().text();
-      // eslint-disable-next-line no-console
-      console.log('MSW intercepted request:', request.method, request.url, payload);
-    });
-    server.events.on('response:mocked', async ({ request, response }) => {
-      const body = await response.json();
-      // eslint-disable-next-line no-console
-      console.log(
-        '%s %s received %s %s %s',
-        request.method,
-        request.url,
-        response.status,
-        response.statusText,
-        JSON.stringify(body, null, 2)
-      );
-    });
-  }
-  return server;
+  return {
+    use: (...overrides) => {
+      handlers = [...overrides, ...handlers];
+    },
+    resetHandlers: () => {
+      handlers = [...defaultHandlers];
+    },
+    fetch: async (input, init) => {
+      const request =
+        input instanceof Request
+          ? new Request(input, init)
+          : new Request(new URL(input, window.location.href), init);
+      const response = await getResponse(handlers, request);
+
+      if (!response) {
+        throw new Error(`Unhandled mock server request: ${request.method} ${request.url}`);
+      }
+
+      if (debug) {
+        // eslint-disable-next-line no-console
+        console.log(
+          '%s %s received %s %s',
+          request.method,
+          request.url,
+          response.status,
+          await response.clone().text()
+        );
+      }
+
+      return response;
+    },
+  };
 };
 
 /**
- * This function wraps beforeAll, afterAll and beforeEach for setup MSW server into a single call.
+ * This function wraps beforeAll, afterAll and beforeEach for setup the mock server into a single call.
  * That makes the describe code further down easier to read and makes
  * sure we don't forget the handlers. Can easily be shared between tests.
- * @param server - The MSW server instance, created with setupMockServer
+ * @param server - The mock server instance, created with setupMockServer
  */
-export const startMockServer = (server: SetupServer) => {
-  beforeAll(() => server.listen({ onUnhandledRequest: 'warn' }));
-  afterAll(() => server.close());
+export const startMockServer = (server: MockServer) => {
+  let fetchSpy: jest.SpyInstance;
+
+  beforeAll(() => {
+    fetchSpy = jest
+      .spyOn(globalThis, 'fetch')
+      .mockImplementation((input, init) => server.fetch(input, init));
+  });
+  afterAll(() => fetchSpy.mockRestore());
   beforeEach(() => {
     server.resetHandlers();
   });

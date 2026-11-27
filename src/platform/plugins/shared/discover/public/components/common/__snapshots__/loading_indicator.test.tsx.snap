@@ -39,6 +39,7 @@ exports[`Loading indicator elastic renders correctly 1`] = `
         role="progressbar"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="logoElastic"
         />
       </span>

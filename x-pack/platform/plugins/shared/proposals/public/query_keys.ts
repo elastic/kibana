@@ -13,7 +13,8 @@ export const queryKeys = {
     /** Distinct from `list`: that one is always `status: 'pending'`, this one is every status. */
     forConversation: (conversationId: string) =>
       [...queryKeys.proposals.all, 'conversation', conversationId] as const,
-    detail: (id: string | undefined) => [...queryKeys.proposals.all, 'detail', id] as const,
+    details: ['proposals', 'detail'] as const,
+    detail: (id: string | undefined) => [...queryKeys.proposals.details, id] as const,
   },
   userProfiles: {
     all: ['proposals', 'userProfiles'] as const,

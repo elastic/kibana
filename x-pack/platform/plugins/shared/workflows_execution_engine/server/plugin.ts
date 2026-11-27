@@ -10,6 +10,7 @@ import Boom from '@hapi/boom';
 import isEqual from 'lodash/isEqual';
 import omit from 'lodash/omit';
 import { AsyncLocalStorage } from 'node:async_hooks';
+import type { Subscription } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import type {
   CoreSetup,
@@ -56,6 +57,7 @@ import { completeIdentityFailureCleanup } from './execution_functions/complete_i
 import { finalizeWorkflowIdentityFailure } from './execution_functions/finalize_workflow_identity_failure';
 import { handlePostExecutionLoop } from './execution_functions/handle_post_execution_loop';
 import { resumeWaitingWorkflowExecution } from './execution_functions/resume_waiting_workflow_execution';
+import { isExecutionStorageSource, WORKFLOWS_EXECUTION_STORAGE_SOURCE_FLAG } from './feature_flags';
 import { buildWorkflowExecutionDocument } from './lib/build_workflow_execution_document';
 import { checkLicense } from './lib/check_license';
 import { ensureWorkflowsDataStreamsRolledOver } from './lib/data_streams/ensure_data_streams_rolled_over';
@@ -94,7 +96,10 @@ import {
   refuseDelegatedIdentityWorkflow,
   refuseStandaloneDelegatedIdentityRun,
 } from './refuse_standalone_delegated_identity';
-import { createDataClientBundle, type DataClientBundle } from './repositories/data_access_layer';
+import {
+  createDataClientBundle,
+  type DeferredDataClientBundle,
+} from './repositories/data_access_layer';
 import { LogsRepository } from './repositories/logs_repository';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
@@ -229,7 +234,8 @@ export class WorkflowsExecutionEnginePlugin
   /** Set in start(); used by task runners to pass parent-resume into run/resume without exposing it on the public plugin contract. */
   private internalResumeWorkflowExecutionHandler?: InternalResumeWorkflowExecution;
 
-  private dataClientBundle!: DataClientBundle;
+  private dataClientBundle!: DeferredDataClientBundle;
+  private storageSourceSubscription?: Subscription;
 
   private createScopedRepositories(): {
     workflowExecutionRepository: WorkflowExecutionRepository;
@@ -1459,6 +1465,24 @@ export class WorkflowsExecutionEnginePlugin
     }
 
     void this.dataClientBundle.initStart(coreStart);
+    this.storageSourceSubscription?.unsubscribe();
+    this.storageSourceSubscription = coreStart.featureFlags
+      .getStringValue$<string>(WORKFLOWS_EXECUTION_STORAGE_SOURCE_FLAG, this.config.storage.source)
+      .subscribe((source) => {
+        if (!isExecutionStorageSource(source)) {
+          this.logger.warn(
+            `Ignoring unsupported workflow execution storage source "${source}" from the ${WORKFLOWS_EXECUTION_STORAGE_SOURCE_FLAG} feature flag`
+          );
+          return;
+        }
+
+        void this.dataClientBundle.switchSource(source).catch((error: unknown) => {
+          const message = error instanceof Error ? error.message : String(error);
+          this.logger.error(
+            `Failed to switch workflow execution storage source to "${source}": ${message}`
+          );
+        });
+      });
 
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     void ensureWorkflowsDataStreamsRolledOver(this.logger.get('data-stream-rollover'), esClient);
@@ -2436,6 +2460,8 @@ export class WorkflowsExecutionEnginePlugin
   }
 
   public stop() {
+    this.storageSourceSubscription?.unsubscribe();
+    this.storageSourceSubscription = undefined;
     setWorkflowExecutionFinishedPublisher(undefined);
     setConcurrencyGroupLock(undefined);
     void this.dataClientBundle.stop();

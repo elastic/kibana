@@ -28,6 +28,15 @@ interface WorkflowAccountScope extends WorkflowScope {
   workflowIds?: readonly ManagedWorkflowId[];
 }
 
+/** The id of a managed workflow's document installed in a space. */
+export const getWorkflowDocumentId = ({
+  workflowId,
+  spaceId,
+}: {
+  workflowId: ManagedWorkflowId;
+  spaceId: string;
+}): string => `${workflowId}-${spaceId}`;
+
 /**
  * Installs the managed workflows of a space bound to its service account, and turns them on. It
  * knows nothing of what any workflow does: which ones exist is `DETECTION_WORKFLOW_IDS`.
@@ -41,17 +50,6 @@ export class WorkflowInstaller {
     private readonly workflowsManagement: WorkflowsServerPluginSetup,
     @inject(CoreLogger) private readonly logger: Logger
   ) {}
-
-  /** The id of the workflow document installed in a space. */
-  private static getDocumentId({
-    workflowId,
-    spaceId,
-  }: {
-    workflowId: ManagedWorkflowId;
-    spaceId: string;
-  }) {
-    return `${workflowId}-${spaceId}`;
-  }
 
   /**
    * Installs every workflow in a space, bound to `serviceAccountId`, and leaves it off:
@@ -143,7 +141,7 @@ export class WorkflowInstaller {
     spaceId,
     workflowId,
   }: WorkflowScope & { workflowId: ManagedWorkflowId }): Promise<boolean> {
-    const documentId = WorkflowInstaller.getDocumentId({ workflowId, spaceId });
+    const documentId = getWorkflowDocumentId({ workflowId, spaceId });
 
     try {
       const wasEnabled =
@@ -176,7 +174,7 @@ export class WorkflowInstaller {
     for (const workflowId of workflowIds) {
       try {
         await this.workflowsManagement.management.updateWorkflow(
-          WorkflowInstaller.getDocumentId({ workflowId, spaceId }),
+          getWorkflowDocumentId({ workflowId, spaceId }),
           { enabled: false },
           spaceId,
           request
@@ -198,7 +196,7 @@ export class WorkflowInstaller {
     workflowId,
   }: WorkflowAccountScope & { workflowId: ManagedWorkflowId }): Promise<void> {
     const document = await this.workflowsManagement.management.getWorkflow(
-      WorkflowInstaller.getDocumentId({ workflowId, spaceId }),
+      getWorkflowDocumentId({ workflowId, spaceId }),
       spaceId,
       request
     );

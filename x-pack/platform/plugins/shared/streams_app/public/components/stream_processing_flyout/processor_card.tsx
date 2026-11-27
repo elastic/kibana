@@ -20,8 +20,9 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { DragHandle, useDragHandle } from '../draggable_steps';
+import { ROUTING_SIGNAL_LABELS } from '../stream_routing_flyout/signal_labels';
 import { ProcessorContextMenu } from './processor_context_menu';
-import { summarizeProcessor } from './processor_summary';
+import { describeProcessor, summarizeProcessor } from './processor_summary';
 import type { ProcessingDiagnostic } from '../../services/unit_diagnostics';
 import type { ProcessingStep } from './state_management/processing_flyout_machine';
 
@@ -60,6 +61,7 @@ export function ProcessorCard({
   const isDragEnabled = useDragHandle() !== null;
   const title = displayName.toUpperCase();
   const description = step.processor.description ?? summarizeProcessor(step.processor);
+  const fullDescription = step.processor.description ?? describeProcessor(step.processor);
 
   return (
     <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
@@ -150,13 +152,23 @@ export function ProcessorCard({
               ) : null}
               {step.status !== 'saved' ? (
                 <EuiFlexItem grow={false}>
-                  <EuiBadge data-test-subj="streamsProcessingFlyoutStepUnsaved">
+                  <EuiBadge color="warning" data-test-subj="streamsProcessingFlyoutStepUnsaved">
                     {i18n.translate('xpack.streams.processingFlyout.card.unsaved', {
                       defaultMessage: 'Unsaved',
                     })}
                   </EuiBadge>
                 </EuiFlexItem>
               ) : null}
+              {step.processor.supported_telemetry.map((signal) => (
+                <EuiFlexItem key={signal} grow={false}>
+                  <EuiBadge
+                    color="default"
+                    data-test-subj={`streamsProcessingFlyoutStepSignal-${signal}`}
+                  >
+                    {ROUTING_SIGNAL_LABELS[signal]}
+                  </EuiBadge>
+                </EuiFlexItem>
+              ))}
               <EuiFlexItem grow={false}>
                 <ProcessorContextMenu
                   isDisabled={!editable}
@@ -181,19 +193,35 @@ export function ProcessorCard({
             padding: ${euiTheme.size.xs} ${euiTheme.size.s};
           `}
         >
-          <EuiText
-            size="xs"
-            color="subdued"
-            title={description}
-            css={css`
-              font-style: italic;
-              font-family: ${euiTheme.font.familyCode};
-              ${euiTextTruncate()}
-            `}
-            data-test-subj="streamsProcessingFlyoutStepSummary"
+          <EuiToolTip
+            display="block"
+            position="top"
+            content={
+              <span
+                css={css`
+                  font-family: ${euiTheme.font.familyCode};
+                  overflow-wrap: anywhere;
+                `}
+                data-test-subj="streamsProcessingFlyoutStepSummaryTooltip"
+              >
+                {fullDescription}
+              </span>
+            }
           >
-            {description}
-          </EuiText>
+            <EuiText
+              size="xs"
+              color="subdued"
+              tabIndex={0}
+              css={css`
+                font-style: italic;
+                font-family: ${euiTheme.font.familyCode};
+                ${euiTextTruncate()}
+              `}
+              data-test-subj="streamsProcessingFlyoutStepSummary"
+            >
+              {description}
+            </EuiText>
+          </EuiToolTip>
         </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>

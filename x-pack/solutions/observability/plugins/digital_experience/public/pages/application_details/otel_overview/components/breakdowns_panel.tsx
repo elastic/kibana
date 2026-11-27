@@ -29,6 +29,9 @@ import { DataPanel } from '../../../../components/data_panel';
 import { BROWSER_LABEL, DEVICE_LABEL, OPERATING_SYSTEM_LABEL } from '../../../../labels';
 import { FILTER_EBT_ELEMENTS } from './overview_filter_labels';
 
+/** The least width of a breakdown beside the others. */
+const BREAKDOWN_CSS = { minInlineSize: 220 };
+
 const TITLE = i18n.translate('xpack.digitalExperience.overview.breakdowns.title', {
   defaultMessage: 'Browsers, operating systems and devices',
 });
@@ -172,30 +175,41 @@ export function BreakdownsPanel({
       showInstrumentationDocs
       data-test-subj="digitalExperienceOverviewBreakdowns"
     >
-      <Breakdown
-        label={BROWSER_LABEL}
-        items={toItems(
-          browsers,
-          'browser',
-          APPLICATION_OVERVIEW_EBT_ELEMENTS.BROWSER_SESSIONS_LINK
-        )}
-        total={totalPageLoads}
-        data-test-subj="digitalExperienceOverviewBrowsers"
-      />
-      <EuiSpacer size="m" />
-      <Breakdown
-        label={OPERATING_SYSTEM_LABEL}
-        items={toItems(operatingSystems, 'os', APPLICATION_OVERVIEW_EBT_ELEMENTS.OS_SESSIONS_LINK)}
-        total={totalPageLoads}
-        data-test-subj="digitalExperienceOverviewOperatingSystems"
-      />
-      <EuiSpacer size="m" />
-      <Breakdown
-        label={DEVICE_LABEL}
-        items={toItems(devices, 'device')}
-        total={totalPageLoads}
-        data-test-subj="digitalExperienceOverviewDevices"
-      />
+      {/* Side by side while the panel is wide enough, stacked otherwise, whatever the window. */}
+      <EuiFlexGroup gutterSize="xl" wrap>
+        <EuiFlexItem css={BREAKDOWN_CSS}>
+          <Breakdown
+            label={BROWSER_LABEL}
+            items={toItems(
+              browsers,
+              'browser',
+              APPLICATION_OVERVIEW_EBT_ELEMENTS.BROWSER_SESSIONS_LINK
+            )}
+            total={totalPageLoads}
+            data-test-subj="digitalExperienceOverviewBrowsers"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem css={BREAKDOWN_CSS}>
+          <Breakdown
+            label={OPERATING_SYSTEM_LABEL}
+            items={toItems(
+              operatingSystems,
+              'os',
+              APPLICATION_OVERVIEW_EBT_ELEMENTS.OS_SESSIONS_LINK
+            )}
+            total={totalPageLoads}
+            data-test-subj="digitalExperienceOverviewOperatingSystems"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem css={BREAKDOWN_CSS}>
+          <Breakdown
+            label={DEVICE_LABEL}
+            items={toItems(devices, 'device')}
+            total={totalPageLoads}
+            data-test-subj="digitalExperienceOverviewDevices"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </DataPanel>
   );
 }

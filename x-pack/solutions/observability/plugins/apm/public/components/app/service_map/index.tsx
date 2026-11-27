@@ -35,7 +35,7 @@ import { DisabledPrompt } from './disabled_prompt';
 import { SloOverviewFlyout, useSloOverviewFlyout } from '../../shared/slo_overview_flyout';
 import { useServiceMap } from './use_service_map';
 import { useServiceMapBadges } from './use_service_map_badges';
-import { useServiceMapClosedGroups } from './use_service_map_closed_groups';
+import { useServiceMapGroups } from './use_service_map_groups';
 import { ServiceMapGraph } from './graph';
 import { ServiceMapSloFlyoutProvider } from '../../shared/service_map/service_map_slo_flyout_context';
 import { useServiceMapSearchContext } from './service_map_search_context';
@@ -182,7 +182,9 @@ export function ServiceMap({
     nodes: nodesForGraph,
     edges: edgesForGraph,
     countLine: groupingCountLine,
-  } = useServiceMapClosedGroups({
+    openGroup,
+    closeGroup,
+  } = useServiceMapGroups({
     nodes: nodesWithBadges,
     edges: data.edges,
     serviceGrouping: data.serviceGrouping,
@@ -307,6 +309,8 @@ export function ServiceMap({
               isFullscreen={isFullscreen}
               onToggleFullscreen={onToggleFullscreen}
               groupingCountLine={isLoading ? undefined : groupingCountLine}
+              onOpenGroup={openGroup}
+              onCloseGroup={closeGroup}
             />
           </div>
         </EuiPanel>

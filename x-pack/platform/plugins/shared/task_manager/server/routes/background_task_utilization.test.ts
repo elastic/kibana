@@ -46,7 +46,6 @@ describe('backgroundTaskUtilizationRoute', () => {
       logger,
       taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
-      kibanaVersion: '8.0',
       kibanaIndexName: '.kibana',
       getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
       usageCounter: mockUsageCounter,
@@ -78,7 +77,6 @@ describe('backgroundTaskUtilizationRoute', () => {
         ...getTaskManagerConfig(),
         unsafe: { exclude_task_types: [], authenticate_background_task_utilization: false },
       },
-      kibanaVersion: '8.0',
       kibanaIndexName: '.kibana',
       getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
       usageCounter: mockUsageCounter,
@@ -108,7 +106,6 @@ describe('backgroundTaskUtilizationRoute', () => {
       logger,
       taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
-      kibanaVersion: '8.0',
       kibanaIndexName: 'foo',
       getClusterClient: () => Promise.resolve(mockClusterClient),
       usageCounter: mockUsageCounter,
@@ -123,7 +120,7 @@ describe('backgroundTaskUtilizationRoute', () => {
         {
           application: `kibana-foo`,
           resources: ['*'],
-          privileges: [`api:8.0:taskManager`],
+          privileges: [`api:manage_taskManager`],
         },
       ],
     });
@@ -146,7 +143,6 @@ describe('backgroundTaskUtilizationRoute', () => {
       logger,
       taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
-      kibanaVersion: '8.0',
       kibanaIndexName: 'foo',
       getClusterClient: () => Promise.resolve(mockClusterClient),
       usageCounter: mockUsageCounter,
@@ -161,7 +157,7 @@ describe('backgroundTaskUtilizationRoute', () => {
         {
           application: `kibana-foo`,
           resources: ['*'],
-          privileges: [`api:8.0:taskManager`],
+          privileges: [`api:manage_taskManager`],
         },
       ],
     });
@@ -190,7 +186,6 @@ describe('backgroundTaskUtilizationRoute', () => {
       logger,
       taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
-      kibanaVersion: '8.0',
       kibanaIndexName: 'foo',
       getClusterClient: () => Promise.resolve(mockClusterClient),
     });
@@ -216,7 +211,6 @@ describe('backgroundTaskUtilizationRoute', () => {
         ...getTaskManagerConfig(),
         unsafe: { exclude_task_types: [], authenticate_background_task_utilization: false },
       },
-      kibanaVersion: '8.0',
       kibanaIndexName: 'foo',
       getClusterClient: () => Promise.resolve(mockClusterClient),
       usageCounter: mockUsageCounter,
@@ -240,7 +234,6 @@ describe('backgroundTaskUtilizationRoute', () => {
       logger,
       taskManagerId: id,
       config: getTaskManagerConfig(),
-      kibanaVersion: '8.0',
       kibanaIndexName: '.kibana',
       getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
       usageCounter: mockUsageCounter,

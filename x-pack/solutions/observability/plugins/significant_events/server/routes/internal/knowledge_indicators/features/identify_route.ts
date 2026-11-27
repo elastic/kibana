@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { z, lazySchema } from '@kbn/zod/v4';
+import { isRequestAbortedError } from '@kbn/agent-builder-common';
 import { resolveNightshiftModelForRequest, type InferenceDocument } from '@kbn/nightshift-ai';
 import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import { isInferenceProviderError } from '@kbn/inference-common';
@@ -37,7 +38,19 @@ import { installFeatureIdentificationAgent } from '../../../../agent_builder/age
 import { getWorkflowExecutionIdFromRequest } from '../../../../lib/telemetry/ebt/workflow_execution_id';
 import { trackTelemetryBestEffort } from '../../../../lib/telemetry/track_telemetry_best_effort';
 import { createSignificantEventsAvailability } from '../../../../agent_builder/tools/significant_events_availability';
-import { identifyMetricsEntities } from '../../../../lib/significant_events/metrics/identify_metrics_entities';
+import {
+  buildMetricsSourceQuery,
+  getMetricsDatasets,
+  identifyMetricsEntities,
+} from '../../../../lib/significant_events/metrics/identify_metrics_entities';
+import {
+  buildMeasurementDefinitions,
+  getApplicableSignalTemplates,
+  isMetricsTypeKnowledgeIndicator,
+} from '../../../../lib/significant_events/metrics/signals/build_measurement_definitions';
+import { checkSignalFields } from '../../../../lib/significant_events/metrics/signals/check_signal_fields';
+import { runDefinitionPreviews } from '../../../../lib/significant_events/metrics/signals/run_definition_previews';
+import { SIGNAL_TEMPLATES } from '../../../../lib/significant_events/metrics/signals/signal_templates';
 
 const getSerializedByteLength = (value: unknown) =>
   Buffer.byteLength(JSON.stringify(value), 'utf8');
@@ -305,11 +318,17 @@ const identifyInferredFeaturesRoute = createServerRoute({
 
       return { ...result, connectorId };
     } catch (error) {
-      routeLogger.error(
-        `Inferred feature identification failed for source [${sourceId}]: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
+      const canceled = isRequestAbortedError(error);
+
+      if (canceled) {
+        routeLogger.debug(`Inferred feature identification canceled for source [${sourceId}]`);
+      } else {
+        routeLogger.error(
+          `Inferred feature identification failed for source [${sourceId}]: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
 
       trackTelemetryBestEffort({
         logger: routeLogger,
@@ -330,7 +349,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
                 has_filtered_documents: hasFilteredDocuments,
               },
               Date.now() - now,
-              { state: 'failure' }
+              { state: canceled ? 'canceled' : 'failure' }
             ),
             request
           ),
@@ -463,6 +482,79 @@ const identifyMetricsEntitiesRoute = createServerRoute({
   },
 });
 
+const getMetricsDefinitionsRoute = createServerRoute({
+  endpoint: 'GET /internal/nightshift/sources/{sourceId}/metrics/definitions',
+  options: {
+    access: 'internal',
+    summary: 'Build measurement definitions for a metrics source',
+    timeout: { idleSocket: 300_000 },
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
+    },
+  },
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
+      query: z.object({
+        preview: z
+          .enum(['true', 'false'])
+          .optional()
+          .transform((value) => value === 'true'),
+      }),
+    })
+  ),
+  handler: async ({ params, request, getScopedClients, server }) => {
+    const scopedClients = await getScopedClients({ request });
+    const { streamDataEsClient, sourcesClient, licensing } = scopedClients;
+
+    await assertSignificantEventsAccess({ server, licensing });
+    await sourcesClient.assertReadable(params.path.sourceId);
+
+    const { source } = await sourcesClient.get(params.path.sourceId);
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
+    const requestSignal = getRequestAbortSignal(request);
+    const [{ hits: features }, datasets] = await Promise.all([
+      kiClient.getFeatures(source.id),
+      getMetricsDatasets({
+        esClient: streamDataEsClient,
+        sourceQuery: buildMetricsSourceQuery(source.esql),
+        signal: requestSignal,
+      }),
+    ]);
+    const typeKIs = features.filter(isMetricsTypeKnowledgeIndicator);
+    const templates = getApplicableSignalTemplates(typeKIs, SIGNAL_TEMPLATES);
+    const fieldPresence = await checkSignalFields({
+      esClient: streamDataEsClient,
+      esql: source.esql,
+      datasets,
+      templates,
+      signal: requestSignal,
+    });
+
+    const result = buildMeasurementDefinitions({
+      esql: source.esql,
+      typeKIs,
+      templates,
+      fieldPresence,
+    });
+    if (!params.query.preview) {
+      return { definitions: result.definitions, skipped: result.skipped };
+    }
+
+    return {
+      definitions: await runDefinitionPreviews({
+        esClient: streamDataEsClient,
+        definitions: result.definitions,
+        previewPlans: result.previewPlans,
+        signal: requestSignal,
+      }),
+      skipped: result.skipped,
+    };
+  },
+});
+
 const shouldIdentifyRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{sourceId}/features/_should_identify',
   options: {
@@ -508,5 +600,6 @@ export const internalIdentifyKIFeaturesRoutes = {
   ...identifyInferredFeaturesRoute,
   ...identifyComputedFeaturesRoute,
   ...identifyMetricsEntitiesRoute,
+  ...getMetricsDefinitionsRoute,
   ...shouldIdentifyRoute,
 };
