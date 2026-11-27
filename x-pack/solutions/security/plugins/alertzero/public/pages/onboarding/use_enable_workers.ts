@@ -79,7 +79,21 @@ export const useEnableWorkers = (
         ? [{ name: workerName(id, workerById.get(id)?.name), error: account.error }]
         : [];
     });
-    const idsToPatch = idsToUpdate.filter((id) => accounts.get(id)?.ok !== false);
+    // The list is refetched between presses, so a worker already on with its account kept is not
+    // re-sent. Turning off is always sent: `enabled: false` cannot tell "wanted off" from "failed".
+    const isAlreadySaved = (id: string) => {
+      const account = accounts.get(id);
+      return (
+        workerEnabled[id] === true &&
+        workerById.get(id)?.enabled === true &&
+        account?.ok === true &&
+        account.serviceAccountId === boundAccountIds.get(id) &&
+        !account.replacedBound
+      );
+    };
+    const idsToPatch = idsToUpdate.filter(
+      (id) => accounts.get(id)?.ok !== false && !isAlreadySaved(id)
+    );
 
     // Direct http.patch calls instead of useUpdateWorker so no replaceWorkerInList
     // fires per-PATCH. LandingPage's showQueue guard must only react to real server
