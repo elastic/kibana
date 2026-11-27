@@ -30,6 +30,7 @@ export interface ConnectorSpecWireResponse {
     icon?: string;
     docs_url?: string;
     is_technical_preview?: boolean;
+    spec_version?: string;
   };
   schema: Record<string, unknown>;
   is_testable: boolean;
@@ -60,6 +61,7 @@ export function transformConnectorSpecResponse(
     supported_feature_ids: supportedFeatureIds,
     docs_url: docsUrl,
     is_technical_preview: isTechnicalPreview,
+    spec_version: specVersion,
     icon,
     description,
     id,
@@ -72,6 +74,7 @@ export function transformConnectorSpecResponse(
       description,
       minimumLicense: minimumLicense as ConnectorMetadata['minimumLicense'],
       supportedFeatureIds: supportedFeatureIds as ConnectorMetadata['supportedFeatureIds'],
+      ...(specVersion !== undefined ? { specVersion } : {}),
       ...(icon !== undefined ? { icon } : {}),
       ...(docsUrl !== undefined ? { docsUrl } : {}),
       ...(isTechnicalPreview !== undefined ? { isTechnicalPreview } : {}),

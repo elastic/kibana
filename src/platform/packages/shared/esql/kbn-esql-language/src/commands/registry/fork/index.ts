@@ -26,7 +26,7 @@ export const forkCommand = {
   name: Commands.FORK,
   methods: forkCommandMethods,
   metadata: {
-    description: i18n.translate('kbn-esql-language.esql.definitions.forkDoc', {
+    description: i18n.translate('esqlLanguage.esql.definitions.forkDoc', {
       defaultMessage: 'Forks the stream.',
     }),
     declaration: 'FORK (<processing_commands>) (<processing_commands>) ... (<processing_commands>)',

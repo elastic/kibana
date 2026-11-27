@@ -92,7 +92,7 @@ export const Zoom: ConnectorSpec = {
   metadata: {
     id: '.zoom',
     displayName: 'Zoom',
-    description: i18n.translate('core.kibanaConnectorSpecs.zoom.metadata.description', {
+    description: i18n.translate('connectorSpecs.zoom.metadata.description', {
       defaultMessage: 'Access meetings, recordings, transcripts, and participants in Zoom',
     }),
     minimumLicense: 'enterprise',
@@ -468,7 +468,7 @@ export const Zoom: ConnectorSpec = {
   ].join('\n'),
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.zoom.test.description', {
+    description: i18n.translate('connectorSpecs.zoom.test.description', {
       defaultMessage: 'Verifies Zoom connection by checking API access',
     }),
     handler: async (ctx) => {

@@ -6,7 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { PluginInitializerContext, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
 import { createRuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher.mock';
@@ -15,7 +15,10 @@ import { createRulesSavedObjectService } from '../services/rules_saved_object_se
 import { createUserService } from '../services/user_service/user_service.mock';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { ArtifactTypeRegistry, registerBuiltinArtifactTypes } from '../artifact_types';
+import { createRuleChangesHistoryClientMock } from '../rule_changes_history/rule_changes_history_client.mock';
+import { BuilderTypeRegistry, registerBuiltinBuilderTypes } from '../builder_types';
 import { RulesClient } from './rules_client';
+import { createConfigServiceMock } from '../services/config_service/config_service.mock';
 
 export function createRulesClient(): {
   rulesClient: RulesClient;
@@ -30,6 +33,8 @@ export function createRulesClient(): {
   const { loggerService } = createLoggerService();
   const artifactTypeRegistry = new ArtifactTypeRegistry();
   registerBuiltinArtifactTypes(artifactTypeRegistry);
+  const builderTypeRegistry = new BuilderTypeRegistry();
+  registerBuiltinBuilderTypes(builderTypeRegistry);
 
   const config = {
     enabled: true,
@@ -37,23 +42,20 @@ export function createRulesClient(): {
     rules: { minimumScheduleInterval: '1m', maxScheduledPerMinute: 400 },
   } as PluginConfig;
 
-  const pluginConfigAccessor = {
-    get: () => config,
-  } as unknown as PluginInitializerContext<PluginConfig>['config'];
-
   const rulesClient = new RulesClient(
     request,
     rulesSavedObjectService,
     taskManager,
     userService,
     'default',
-    pluginConfigAccessor,
+    createConfigServiceMock(config),
     rulesSavedObjectService,
     ruleEventPublisher,
     loggerService,
     artifactTypeRegistry,
-    'user',
-    {}
+    { actor: 'user', options: {} },
+    createRuleChangesHistoryClientMock(),
+    builderTypeRegistry
   );
 
   return { rulesClient, mockSavedObjectsClient, ruleEventPublisher };

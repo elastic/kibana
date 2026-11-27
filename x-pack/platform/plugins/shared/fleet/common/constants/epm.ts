@@ -32,6 +32,14 @@ export const FLEET_CLOUD_DEFEND_PACKAGE = 'cloud_defend';
 export const FLEET_CLOUD_BEAT_PACKAGE = 'cloudbeat';
 export const FLEET_CONNECTORS_PACKAGE = 'elastic_connectors';
 
+/**
+ * Packages that are not FIPS compatible but do not declare `fips_compatible: false` in their manifest,
+ * so the generic policy template check cannot detect them.
+ * Remove an entry once a version of the package flagging all its templates as `fips_compatible: false`
+ * is published and older versions are no longer relevant.
+ */
+export const FIPS_INCOMPATIBLE_PACKAGES: readonly string[] = [FLEET_CONNECTORS_PACKAGE];
+
 export const GLOBAL_DATA_TAG_EXCLUDED_INPUTS = new Set<string>([
   FLEET_APM_PACKAGE,
   `pf-host-agent`,
@@ -155,3 +163,6 @@ export const OTEL_COLLECTOR_INPUT_TYPE = 'otelcol';
 
 /** Observability catalogue filters. Fleet's serverless default and Add Data Browse all both use this list. */
 export const OBLT_DEFAULT_CATEGORIES: readonly string[] = ['opentelemetry', 'observability'];
+
+export const ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION =
+  'When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.';

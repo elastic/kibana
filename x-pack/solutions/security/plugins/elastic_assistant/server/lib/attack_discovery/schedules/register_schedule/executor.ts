@@ -110,8 +110,12 @@ export const attackDiscoveryScheduleExecutor = async ({
 
   const resourceName = getResourceName(ANONYMIZATION_FIELDS_RESOURCE);
   const index = getIndexTemplateAndPattern(resourceName, spaceId).alias;
+  // The anonymization fields index is Kibana-owned configuration, so it is read with the internal
+  // user, as the AI Assistant `_find` route does. The rule's `asCurrentUser` client would require
+  // the schedule's owner to hold index privileges on it. The alerting wrapper keeps the rule's
+  // abort signal, request timeout and search metrics.
   const result = await findDocuments<EsAnonymizationFieldsSchema>({
-    esClient,
+    esClient: scopedClusterClient.asInternalUser,
     page: 1,
     perPage: 1000,
     index,

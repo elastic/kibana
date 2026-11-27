@@ -16,6 +16,9 @@ const planSweepInputFor = (intervalMinutes: number) =>
     budget_per_hour: 1300,
     interval_minutes: intervalMinutes,
     lookback_hours: 24,
+    min_severity: 'low',
+    exclude_building_blocks: false,
+    excluded_rule_tags: [],
     headroom: { status: 'ok', in_flight: 0, slots: 10 },
   });
 

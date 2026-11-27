@@ -5,16 +5,22 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { serializeConnectorSpec } from '@kbn/connector-specs/src/lib/serialize_connector_spec';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
-import type { GetConnectorSpecParams } from './types';
+import {
+  DEFAULT_CONNECTOR_SPEC_VERSION,
+  createUnknownSpecVersionError,
+  resolveConnectorSpecVersion,
+} from '../../../../lib/resolve_connector_spec_version';
+import { getRegisteredSpec } from '../../../../specs_client/lib/get_registered_spec';
+import { serializeSpecDetail } from '../../../../specs_client/lib/serialize_spec_detail';
+import type { GetConnectorSpecParams, GetConnectorSpecResult } from './types';
 
 export async function getConnectorSpecAsJsonSchema({
   context,
   id,
+  specVersion,
   configurationUtilities,
-}: GetConnectorSpecParams) {
+}: GetConnectorSpecParams): Promise<GetConnectorSpecResult> {
   try {
     await context.authorization.ensureAuthorized({ operation: 'get' });
   } catch (error) {
@@ -27,38 +33,40 @@ export async function getConnectorSpecAsJsonSchema({
     throw error;
   }
 
-  const spec = context.actionTypeRegistry.getSpec(id);
+  const registered = getRegisteredSpec(context.actionTypeRegistry, id);
+  const actionType = context.actionTypeRegistry.get(id);
 
-  if (!spec) {
-    throw Boom.notFound(`Spec for connector type "${id}" not found.`);
+  const hasSpecVersions = configurationUtilities.isCatalogEnabled() && actionType?.specs?.size! > 0;
+  if (
+    !hasSpecVersions &&
+    specVersion !== undefined &&
+    specVersion !== DEFAULT_CONNECTOR_SPEC_VERSION
+  ) {
+    throw createUnknownSpecVersionError(specVersion, id);
   }
 
-  try {
-    const webhookSettings = configurationUtilities.getWebhookSettings();
-    const isPfxEnabled = webhookSettings.ssl.pfx.enabled;
-    const isEarsEnabled = configurationUtilities.isEarsEnabled();
-    const isEarsExperimentalEnabled = configurationUtilities.isEarsExperimentalEnabled();
-    const serialized = serializeConnectorSpec(spec, {
-      isPfxEnabled,
-      isEarsEnabled,
-      isEarsExperimentalEnabled,
-    });
-    return {
-      metadata: serialized.metadata,
-      schema: serialized.schema,
-      isTestable: Boolean(spec.test.enabled),
-      actions: Object.entries(spec.actions).map(([name, def]) => ({
-        name,
-        isTool: Boolean(def.isTool),
-        ...(def.description !== undefined ? { description: def.description } : {}),
-        ...(def.scope !== undefined ? { scope: def.scope } : {}),
-      })),
-    };
-  } catch (error) {
-    throw new Error(
-      `Failed to serialize connector spec: ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
-  }
+  const { resolvedSpecVersion, selectedSpec } = hasSpecVersions
+    ? resolveConnectorSpecVersion({ actionType, specVersion, configurationUtilities })
+    : { resolvedSpecVersion: undefined, selectedSpec: registered.spec };
+
+  const spec = selectedSpec ?? registered.spec;
+  const detail = serializeSpecDetail({ ...registered, spec }, configurationUtilities);
+
+  return {
+    metadata: { ...spec.metadata, specVersion: resolvedSpecVersion },
+    schema: detail.formSchema,
+    isTestable: detail.isTestable,
+    authTypeIds: detail.authTypeIds,
+    hasInboundEvents: detail.hasInboundEvents,
+    isInboundOnly: detail.isInboundOnly,
+    isEarsExperimental: detail.isEarsExperimental,
+    ...(detail.skill !== undefined ? { skill: detail.skill } : {}),
+    actions: detail.actions.map(({ name, isTool, description, scope, inputSchema }) => ({
+      name,
+      isTool,
+      ...(description !== undefined ? { description } : {}),
+      scope,
+      inputSchema,
+    })),
+  };
 }

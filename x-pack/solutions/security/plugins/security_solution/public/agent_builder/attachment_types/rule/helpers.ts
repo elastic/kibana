@@ -36,13 +36,27 @@ export const getRuleIdFromAttachment = (
   attachment: Pick<RuleAttachment, 'origin'>
 ): string | undefined => attachment.origin ?? undefined;
 
-// A saved rule's own id when the payload carries it: `origin` is either that id or, for rule
-// coverage, the human-readable `rule_id`, and the rule flyout looks rules up by saved-object id.
+// A saved rule's own id when the payload carries it, else `origin`. `origin` is the saved-object
+// id, but conversations saved before that change can still hold the human-readable `rule_id`
+// there, and the rule flyout looks rules up by saved-object id.
 export const getSavedRuleId = (attachment: RuleAttachment): string | undefined =>
   parseRuleFromAttachment(attachment)?.id ?? getRuleIdFromAttachment(attachment);
 
+// Must match the attachment id `attach_draft` uses in detection/coverage_rule_creation.yaml.
+export const RULE_DRAFT_ATTACHMENT_ID = 'rule-draft';
+
+export const isRuleDraftAttachment = (attachment: Pick<RuleAttachment, 'id'>): boolean =>
+  attachment.id === RULE_DRAFT_ATTACHMENT_ID;
+
 export const getRuleAttachmentIntent = (attachment: RuleAttachment): RuleAttachmentIntent =>
   attachment.origin ? 'update' : 'create';
+
+export const isLatestAttachmentVersion = (
+  attachment: Pick<RuleAttachment, 'versionData'>
+): boolean => {
+  const { versionData } = attachment;
+  return !versionData || versionData.version === versionData.versionCount;
+};
 
 export const parseRuleFromAttachment = (attachment: RuleAttachment): RuleResponse | null => {
   const text = attachment?.data?.text;

@@ -8,7 +8,10 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
 
-import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import {
+  AgentlessAgentRestrictionError,
+  HostedAgentPolicyRestrictionRelatedError,
+} from '../../errors';
 import { invalidateAPIKeys } from '../api_keys';
 
 import { appContextService } from '../app_context';
@@ -75,6 +78,66 @@ describe('unenroll', () => {
       ).rejects.toThrow(HostedAgentPolicyRestrictionRelatedError);
       // does not call ES update
       expect(esClient.update).toHaveBeenCalledTimes(0);
+    });
+
+    it('cannot unenroll an agentless agent by default', async () => {
+      const { soClient, esClient, agentInAgentlessDoc } = createClientMock();
+      esClient.search.mockResponse({ hits: { hits: [agentInAgentlessDoc] } } as any);
+      await expect(unenrollAgent(soClient, esClient, agentInAgentlessDoc._id)).rejects.toThrow(
+        AgentlessAgentRestrictionError
+      );
+      await expect(
+        unenrollAgent(soClient, esClient, agentInAgentlessDoc._id, { revoke: true })
+      ).rejects.toThrow(AgentlessAgentRestrictionError);
+      expect(esClient.update).toHaveBeenCalledTimes(0);
+    });
+
+    it('can unenroll an agentless agent with force=true', async () => {
+      const { soClient, esClient, agentInAgentlessDoc } = createClientMock();
+      esClient.search.mockResponse({ hits: { hits: [agentInAgentlessDoc] } } as any);
+      await unenrollAgent(soClient, esClient, agentInAgentlessDoc._id, {
+        force: true,
+        revoke: true,
+      });
+      expect(esClient.update).toHaveBeenCalledTimes(1);
+      const calledWith = esClient.update.mock.calls[0];
+      expect(calledWith[0]?.id).toBe(agentInAgentlessDoc._id);
+      expect(calledWith[0] as estypes.UpdateRequest).toHaveProperty('doc.unenrolled_at');
+    });
+
+    it('sets the unenrolled reason when force unenrolling with a reason', async () => {
+      const { soClient, esClient, agentInAgentlessDoc } = createClientMock();
+      esClient.search.mockResponse({ hits: { hits: [agentInAgentlessDoc] } } as any);
+      await unenrollAgent(soClient, esClient, agentInAgentlessDoc._id, {
+        force: true,
+        revoke: true,
+        unenrolledReason: 'agentless',
+      });
+      const calledWith = esClient.update.mock.calls[0];
+      expect(calledWith[0] as estypes.UpdateRequest).toHaveProperty(
+        'doc.unenrolled_reason',
+        'agentless'
+      );
+    });
+
+    it('does not set an unenrolled reason by default', async () => {
+      const { soClient, esClient, agentInAgentlessDoc } = createClientMock();
+      esClient.search.mockResponse({ hits: { hits: [agentInAgentlessDoc] } } as any);
+      await unenrollAgent(soClient, esClient, agentInAgentlessDoc._id, {
+        force: true,
+        revoke: true,
+      });
+      const calledWith = esClient.update.mock.calls[0];
+      expect(calledWith[0] as estypes.UpdateRequest).not.toHaveProperty('doc.unenrolled_reason');
+    });
+
+    it('can unenroll an agentless agent with skipAgentlessValidation=true', async () => {
+      const { soClient, esClient, agentInAgentlessDoc } = createClientMock();
+      esClient.search.mockResponse({ hits: { hits: [agentInAgentlessDoc] } } as any);
+      await unenrollAgent(soClient, esClient, agentInAgentlessDoc._id, {
+        skipAgentlessValidation: true,
+      });
+      expect(esClient.update).toHaveBeenCalledTimes(1);
     });
 
     it('can unenroll from hosted agent policy with force=true', async () => {
@@ -152,6 +215,41 @@ describe('unenroll', () => {
       expect(calledWithActionResults.operations?.[1]).toEqual(expectedObject);
     });
 
+    it('cannot unenroll an agentless agent by default', async () => {
+      const { soClient, esClient, agentInRegularDoc, agentInAgentlessDoc } = createClientMock();
+      esClient.search.mockResponse({
+        hits: { hits: [agentInRegularDoc, agentInAgentlessDoc] },
+      } as any);
+
+      await unenrollAgents(soClient, esClient, {
+        agentIds: [agentInRegularDoc._id, agentInAgentlessDoc._id],
+      });
+
+      const calledWith = esClient.bulk.mock.calls[0][0];
+      const ids = (calledWith as estypes.BulkRequest)?.operations
+        ?.filter((i: any) => i.update !== undefined)
+        .map((i: any) => i.update._id);
+      expect(ids).toEqual([agentInRegularDoc._id]);
+    });
+
+    it('can unenroll an agentless agent with force=true', async () => {
+      const { soClient, esClient, agentInRegularDoc, agentInAgentlessDoc } = createClientMock();
+      esClient.search.mockResponse({
+        hits: { hits: [agentInRegularDoc, agentInAgentlessDoc] },
+      } as any);
+
+      await unenrollAgents(soClient, esClient, {
+        agentIds: [agentInRegularDoc._id, agentInAgentlessDoc._id],
+        force: true,
+      });
+
+      const calledWith = esClient.bulk.mock.calls[0][0];
+      const ids = (calledWith as estypes.BulkRequest)?.operations
+        ?.filter((i: any) => i.update !== undefined)
+        .map((i: any) => i.update._id);
+      expect(ids).toEqual([agentInRegularDoc._id, agentInAgentlessDoc._id]);
+    });
+
     it('force unenroll updates in progress unenroll actions', async () => {
       const { soClient, esClient, agentInRegularDoc, agentInRegularDoc2 } = createClientMock();
       esClient.search.mockReset();
@@ -216,12 +314,11 @@ describe('unenroll', () => {
         }
 
         if (request?.index === AGENT_ACTIONS_RESULTS_INDEX) {
+          // the agents that already have a result come back as aggregation buckets, so that
+          // several results for one agent cannot crowd another agent's out of a page of hits
           return {
-            hits: {
-              hits: [
-                { _source: { action_id: 'other-action1', agent_id: 'agent-in-regular-policy' } },
-              ],
-            },
+            hits: { hits: [] },
+            aggregations: { agent_ids: { buckets: [{ key: 'agent-in-regular-policy' }] } },
           };
         }
 

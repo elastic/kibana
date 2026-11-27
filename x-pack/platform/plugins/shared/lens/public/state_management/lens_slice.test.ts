@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EnhancedStore } from 'redux-toolkit-v1';
+import type { EnhancedStore } from '@reduxjs/toolkit';
 import type { Query } from '@kbn/es-query';
 import type { LensRootStore } from '.';
 import {
@@ -17,7 +17,7 @@ import {
   updateVisualizationState,
   removeOrClearLayer,
   addLayer,
-  selectTriggerApplyChanges,
+  selectApplyChangesCounter,
   selectChangesApplied,
   removeDimension,
   setLayerDefaultDimension,
@@ -87,15 +87,15 @@ describe('lensSlice', () => {
 
         store.dispatch(applyChanges());
 
-        expect(selectTriggerApplyChanges(store.getState())).toBe(true);
+        expect(selectApplyChangesCounter(store.getState())).toBe(1);
       });
 
-      it('does not apply changes if auto-apply enabled', () => {
+      it('increments the apply counter independently when auto-apply enabled', () => {
         expect(store.getState().lens.autoApplyDisabled).toBeUndefined();
 
         store.dispatch(applyChanges());
 
-        expect(selectTriggerApplyChanges(store.getState())).toBe(false);
+        expect(selectApplyChangesCounter(store.getState())).toBe(1);
       });
 
       it('sets changes-applied flag', () => {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { mlApiTest as apiTest } from '../../fixtures';
 import { runSetupModuleTest } from '../../fixtures/setup_module_helpers';
 import type { SetupModuleTestData } from '../../fixtures/setup_module_helpers';
@@ -44,10 +45,9 @@ const testDataList: SetupModuleTestData[] = [
   },
 ];
 
-// TODO: Add @cloud-stateful-classic once ECH custom-role support lands (see get_filters.spec.ts TODO).
 apiTest.describe(
   'setup_module: sample data modules with startDatafeed true',
-  { tag: '@local-stateful-classic' },
+  { tag: tags.stateful.classic },
   () => {
     apiTest.beforeAll(async ({ esArchiver, apiServices }) => {
       await esArchiver.loadIfNeeded(

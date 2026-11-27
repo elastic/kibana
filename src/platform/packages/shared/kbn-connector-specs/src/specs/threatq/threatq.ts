@@ -84,10 +84,10 @@ const configSchema = lazySchema(() =>
         );
       }, 'Enter an HTTPS instance URL, optionally ending in /api, without credentials, query parameters, or a fragment.')
       .meta({
-        label: i18n.translate('core.kibanaConnectorSpecs.threatq.config.urlLabel', {
+        label: i18n.translate('connectorSpecs.threatq.config.urlLabel', {
           defaultMessage: 'ThreatQ URL',
         }),
-        helpText: i18n.translate('core.kibanaConnectorSpecs.threatq.config.urlHelpText', {
+        helpText: i18n.translate('connectorSpecs.threatq.config.urlHelpText', {
           defaultMessage:
             'HTTPS URL of your hosted or on-premises ThreatQ instance, for example https://threatq.example.com. The instance must be reachable from Kibana.',
         }),
@@ -98,10 +98,10 @@ const configSchema = lazySchema(() =>
       .max(200)
       .optional()
       .meta({
-        label: i18n.translate('core.kibanaConnectorSpecs.threatq.config.defaultSourceLabel', {
+        label: i18n.translate('connectorSpecs.threatq.config.defaultSourceLabel', {
           defaultMessage: 'Default source',
         }),
-        helpText: i18n.translate('core.kibanaConnectorSpecs.threatq.config.defaultSourceHelp', {
+        helpText: i18n.translate('connectorSpecs.threatq.config.defaultSourceHelp', {
           defaultMessage:
             'Optional source name, for example Elastic Security. Applied to object and attribute writes that accept sources when the action omits them.',
         }),
@@ -142,7 +142,7 @@ export const ThreatQ: ConnectorSpec = {
   metadata: {
     id: '.threatq',
     displayName: 'ThreatQ',
-    description: i18n.translate('core.kibanaConnectorSpecs.threatq.metadata.description', {
+    description: i18n.translate('connectorSpecs.threatq.metadata.description', {
       defaultMessage:
         'Search and enrich ThreatQ intelligence, update indicators, link objects, and run plugin actions',
     }),
@@ -158,12 +158,12 @@ export const ThreatQ: ConnectorSpec = {
         defaults: { tokenEndpointAuthMethod: 'client_secret_basic', tokenType: 'Bearer' },
         overrides: {
           fields: { tokenUrl: tokenUrlSchema },
-          label: i18n.translate('core.kibanaConnectorSpecs.threatq.auth.oauthLabel', {
+          label: i18n.translate('connectorSpecs.threatq.auth.oauthLabel', {
             defaultMessage: 'OAuth 2.0 API credentials',
           }),
           meta: {
             tokenUrl: {
-              helpText: i18n.translate('core.kibanaConnectorSpecs.threatq.auth.tokenUrlHelp', {
+              helpText: i18n.translate('connectorSpecs.threatq.auth.tokenUrlHelp', {
                 defaultMessage:
                   'Your ThreatQ instance URL followed by /api/token. Generate API credentials with the ThreatQ CLI, or contact support for a hosted instance.',
               }),
@@ -177,26 +177,26 @@ export const ThreatQ: ConnectorSpec = {
         defaults: { usernameField: 'email', requestBodyFormat: 'json', tokenType: 'Bearer' },
         overrides: {
           fields: { tokenUrl: tokenUrlSchema },
-          label: i18n.translate('core.kibanaConnectorSpecs.threatq.auth.userLabel', {
+          label: i18n.translate('connectorSpecs.threatq.auth.userLabel', {
             defaultMessage: 'User authentication',
           }),
           meta: {
             tokenUrl: {
-              helpText: i18n.translate('core.kibanaConnectorSpecs.threatq.auth.userTokenUrlHelp', {
+              helpText: i18n.translate('connectorSpecs.threatq.auth.userTokenUrlHelp', {
                 defaultMessage: 'Your ThreatQ instance URL followed by /api/token.',
               }),
             },
             username: {
-              label: i18n.translate('core.kibanaConnectorSpecs.threatq.auth.emailLabel', {
+              label: i18n.translate('connectorSpecs.threatq.auth.emailLabel', {
                 defaultMessage: 'Email',
               }),
             },
             clientId: {
               sensitive: true,
-              label: i18n.translate('core.kibanaConnectorSpecs.threatq.auth.apiPasswordLabel', {
+              label: i18n.translate('connectorSpecs.threatq.auth.apiPasswordLabel', {
                 defaultMessage: 'API password',
               }),
-              helpText: i18n.translate('core.kibanaConnectorSpecs.threatq.auth.apiPasswordHelp', {
+              helpText: i18n.translate('connectorSpecs.threatq.auth.apiPasswordHelp', {
                 defaultMessage:
                   'The API password from an administrator user profile in ThreatQ. This is separate from an OAuth client ID.',
               }),
@@ -211,13 +211,10 @@ export const ThreatQ: ConnectorSpec = {
         overrides: {
           meta: {
             token: {
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.threatq.auth.bearerTokenHelpText',
-                {
-                  defaultMessage:
-                    'A ThreatQ access token without the Bearer prefix. Replace it when it expires. OAuth 2.0 API credentials and user authentication renew tokens automatically.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.threatq.auth.bearerTokenHelpText', {
+                defaultMessage:
+                  'A ThreatQ access token without the Bearer prefix. Replace it when it expires. OAuth 2.0 API credentials and user authentication renew tokens automatically.',
+              }),
             },
           },
         },
@@ -233,14 +230,11 @@ export const ThreatQ: ConnectorSpec = {
       input: SearchIndicatorsInputSchema,
       description:
         'Search indicators with ThreatQ criteria and filters for value, type, status, or score. Use this to check an IOC before enrichment. Returns one page with the original data and total fields.',
-      handler: async (
-        ctx,
-        { criteria, filters, fields, with: relationships, ...params }: SearchIndicatorsInput
-      ) =>
+      handler: async (ctx, { criteria, filters, fields, ...params }: SearchIndicatorsInput) =>
         request(ctx, {
           method: 'POST',
           url: '/indicators/query',
-          params: { ...params, with: relationships?.join(',') },
+          params,
           data: { criteria, filters, fields },
         }),
     },
@@ -252,25 +246,12 @@ export const ThreatQ: ConnectorSpec = {
         'Search the Threat Library by object type, including reports, malware, events, and adversaries. Returns the original result envelope, including total and nextCursorMark when present.',
       handler: async (
         ctx,
-        {
-          objectType,
-          criteria,
-          filters,
-          fields,
-          with: relationships,
-          cursorMark,
-          offset,
-          ...params
-        }: SearchObjectsInput
+        { objectType, criteria, filters, fields, cursorMark, offset, ...params }: SearchObjectsInput
       ) =>
         request(ctx, {
           method: 'POST',
           url: `/${objectType}/query`,
-          params: {
-            ...params,
-            ...(cursorMark ? { cursorMark } : { offset }),
-            with: relationships?.join(','),
-          },
+          params: { ...params, ...(cursorMark ? { cursorMark } : { offset }) },
           data: { criteria, filters, fields },
         }),
     },
@@ -407,13 +388,40 @@ export const ThreatQ: ConnectorSpec = {
       scope: 'write',
       input: AddTagsInputSchema,
       description:
-        'Add tags to an existing ThreatQ object, including custom object types. Use this to label investigation findings. Returns the tag records.',
-      handler: async (ctx, { objectType, objectId, tags }: AddTagsInput) =>
-        request(ctx, {
-          method: 'POST',
-          url: `/${objectType}/${objectId}/tags`,
-          data: tags.map((name) => ({ name })),
-        }),
+        'Add tags to an existing ThreatQ object, including custom object types. Use this to label investigation findings. Sends one request per tag and, if one fails, reports the tags already added and those not. Returns total and the tag records.',
+      handler: async (ctx, { objectType, objectId, tags }: AddTagsInput) => {
+        // ThreatQ takes one tag, `{ "name": "Tag Name" }`, per request.
+        const added: JsonValue[] = [];
+        for (const [index, name] of tags.entries()) {
+          let result: JsonValue;
+          try {
+            result = await request(ctx, {
+              method: 'POST',
+              url: `/${objectType}/${objectId}/tags`,
+              data: { name },
+            });
+          } catch (error) {
+            // Earlier tags are already on the object, so say which, to keep a retry from sending them again.
+            const quoted = (names: readonly string[]) => names.map((tag) => `"${tag}"`).join(', ');
+            const done = tags.slice(0, index);
+            throw new Error(
+              `${error instanceof Error ? error.message : String(error)} Failed on tag "${name}". ${
+                done.length > 0 ? `Already added: ${quoted(done)}.` : 'No tags were added.'
+              } Not added: ${quoted(tags.slice(index))}.`
+            );
+          }
+          const data =
+            typeof result === 'object' && result !== null && !Array.isArray(result)
+              ? result.data
+              : undefined;
+          if (Array.isArray(data)) {
+            added.push(...data);
+          } else if (data !== undefined) {
+            added.push(data);
+          }
+        }
+        return { total: added.length, data: added };
+      },
     },
     createObject: {
       isTool: false,
@@ -453,7 +461,8 @@ export const ThreatQ: ConnectorSpec = {
       description:
         'List installed ThreatQ plugins (operations), including their IDs and enabled state. Use getPlugin next to discover action names and supported object types. Returns one page of plugins and total.',
       handler: async (ctx, input: Pagination) =>
-        request(ctx, { method: 'GET', url: '/plugins', params: input }),
+        // The reference requires forceRefresh; `N` lists without running a plugin sync.
+        request(ctx, { method: 'GET', url: '/plugins', params: { ...input, forceRefresh: 'N' } }),
     },
     getPlugin: {
       isTool: true,
@@ -492,7 +501,7 @@ export const ThreatQ: ConnectorSpec = {
   skill: [
     '## ThreatQ investigation',
     '',
-    'Search an alert indicator, then use getIndicator to read its score, status, attributes, and sources.',
+    'Search an alert indicator, then use getIndicator to read its score, status, attributes, and sources. The search actions do not take with. To choose which related objects to read, use getIndicator, getObject, or getRelatedObjects and their with parameter.',
     'Use getRelatedObjects to find linked indicators, events, or adversaries; use getObject to read each result.',
     'For report details, use report. For report searches, use the endpoint name supported by the instance (the API reference lists reports). The with relationship names vary by ThreatQ version and installed object definitions.',
     'Use the IDs returned by listIndicatorStatuses and listIndicatorTypes before creating or updating indicators.',

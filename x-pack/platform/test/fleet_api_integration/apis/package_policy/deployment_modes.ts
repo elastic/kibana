@@ -106,7 +106,7 @@ export default function (providerContext: FtrProviderContext) {
         if (agentlessAgentPolicyId) {
           await supertest
             .post(`/api/fleet/agent_policies/delete`)
-            .send({ agentPolicyId: agentlessAgentPolicyId })
+            .send({ agentPolicyId: agentlessAgentPolicyId, force: true })
             .set('kbn-xsrf', 'xxxx')
             .expect(200);
         }

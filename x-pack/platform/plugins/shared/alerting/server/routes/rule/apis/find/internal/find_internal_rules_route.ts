@@ -65,6 +65,7 @@ export const findInternalRulesRoute = (
 
         const findResult = await rulesClient.find({
           options,
+          allowPartialResults: body.allow_partial_results ?? false,
         });
 
         const responseBody: FindRulesInternalResponseV1 = transformFindRulesInternalResponseV1(

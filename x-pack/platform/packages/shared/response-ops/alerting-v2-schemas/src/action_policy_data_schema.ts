@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
-import { durationSchema, queryIntSchema } from './common';
+import { z, lazySchema } from '@kbn/zod/v4';
+import {
+  durationSchema,
+  entityIdSchema,
+  ACTION_POLICY_ID_NOTE,
+  futureIsoDateTime,
+  queryIntSchema,
+} from './common';
 import { bulkByIdsSchema } from './bulk_operation_schema';
 import {
   ACTION_POLICY_MAX_DESTINATIONS,
@@ -19,6 +25,7 @@ import {
   MAX_KQL_LENGTH,
   MAX_NAME_LENGTH,
   MAX_PER_PAGE,
+  MAX_SEARCH_LENGTH,
 } from './constants';
 import {
   POLICY_MATCHER_DESCRIPTION,
@@ -54,6 +61,30 @@ export const actionPolicyDestinationSchema = lazySchema(() =>
     .discriminatedUnion('type', [workflowActionPolicyDestinationSchema])
     .describe('An action policy destination configuration.')
     .meta({ id: 'alerting_action_policy_destination' })
+);
+
+const actionPolicyDestinationsSchema = lazySchema(() =>
+  z
+    .array(actionPolicyDestinationSchema)
+    .min(1, 'At least one destination must be provided')
+    .max(ACTION_POLICY_MAX_DESTINATIONS)
+    .superRefine((destinations, ctx) => {
+      const seen = new Set<string>();
+      destinations.forEach((destination, index) => {
+        const key = `${destination.type}:${destination.id}`;
+        if (seen.has(key)) {
+          ctx.addIssue({
+            code: 'custom',
+            message: `Each destination can appear at most once; ${destination.type} [${destination.id}] is repeated`,
+            path: [index],
+          });
+        }
+        seen.add(key);
+      });
+    })
+    .describe(
+      'The list of destinations. At least one is required. Each one can appear at most once.'
+    )
 );
 
 const GROUPING_MODE_COPY = {
@@ -225,8 +256,8 @@ export type ActionPolicyDestination = z.infer<typeof actionPolicyDestinationSche
 export const snoozeActionPolicyBodySchema = lazySchema(() =>
   z
     .object({
-      snoozed_until: isoDateTime().describe(
-        'The ISO datetime until which the action policy should be snoozed.'
+      snoozed_until: futureIsoDateTime().describe(
+        'The ISO datetime until which the action policy should be snoozed. Must be in the future. A past or current instant is rejected with 400.'
       ),
     })
     .strict()
@@ -243,8 +274,8 @@ export type SnoozeActionPolicyBody = z.infer<typeof snoozeActionPolicyBodySchema
 export const bulkSnoozeActionPoliciesBodySchema = lazySchema(() =>
   bulkByIdsSchema
     .extend({
-      snoozed_until: isoDateTime().describe(
-        'The ISO datetime until which the targeted action policies should be snoozed.'
+      snoozed_until: futureIsoDateTime().describe(
+        'The ISO datetime until which the targeted action policies should be snoozed. Must be in the future. A past or current instant is rejected with 400.'
       ),
     })
     .strict()
@@ -275,25 +306,42 @@ const actionPolicyDescriptionSchema = lazySchema(() =>
     .describe(ACTION_POLICY_DESCRIPTION_DESCRIPTION)
 );
 
-const createActionPolicyDataBaseSchema = lazySchema(() =>
+const ENABLED_DESCRIPTIONS = {
+  create:
+    'Whether the action policy is enabled. Defaults to `true` when omitted. A disabled policy is saved but is not applied to alerts until you enable it.',
+  put: 'Whether the action policy is enabled. Unlike the other fields in this body, omitting it does not clear it. When the request creates the policy it defaults to `true`. When the request replaces an existing policy, omitting it keeps the current state and supplying it enables or disables the policy, the same as `_enable` or `_disable`. A disabled policy is saved but is not applied to alerts until you enable it.',
+} as const;
+
+type ActionPolicyWriteApi = keyof typeof ENABLED_DESCRIPTIONS;
+
+/**
+ * Optional with no default because "omitted" means `true` on create and the stored value on replace.
+ */
+const enabledSchema = (api: ActionPolicyWriteApi) =>
+  z.boolean().optional().describe(ENABLED_DESCRIPTIONS[api]);
+
+const buildActionPolicyDataBaseSchema = (api: ActionPolicyWriteApi) =>
   z
     .object({
       name: actionPolicyNameSchema,
       description: actionPolicyDescriptionSchema.optional(),
-      destinations: z
-        .array(actionPolicyDestinationSchema)
-        .min(1, 'At least one destination must be provided')
-        .max(ACTION_POLICY_MAX_DESTINATIONS)
-        .describe('The list of destinations. At least one is required.'),
+      destinations: actionPolicyDestinationsSchema,
       matcher: policyMatcherSchema.optional().describe(POLICY_MATCHER_DESCRIPTION),
       grouping: actionPolicyGroupingSchema.optional().describe(GROUPING_DESCRIPTION),
       throttle: throttleSchema.optional().describe(THROTTLE_DESCRIPTION),
+      enabled: enabledSchema(api),
     })
-    .strict()
-);
+    .strict();
 
 export const createActionPolicyDataSchema = lazySchema(() =>
-  createActionPolicyDataBaseSchema
+  buildActionPolicyDataBaseSchema('create')
+    .extend({
+      id: entityIdSchema
+        .optional()
+        .describe(
+          `The action policy ID. If omitted, Kibana generates one. If a policy with this ID already exists, the request returns a 409 error. ${ACTION_POLICY_ID_NOTE}`
+        ),
+    })
     .check(validateGroupingModeAndStrategy)
     .meta({ id: 'alerting_new_action_policy' })
 );
@@ -303,11 +351,16 @@ export type CreateActionPolicyDataInput = z.input<typeof createActionPolicyDataS
 
 /**
  * Request body schema for `PUT /api/alerting/v2/action_policies/{id}`: the create-action-policy
- * data, unchanged. Lifecycle state is not part of any write body — a replace creates the policy
- * enabled and otherwise preserves the stored value, and `_enable`/`_disable` own the transition.
+ * data.
+ *
+ * `enabled` is deliberately the only field on PUT that is kept when omitted. Every other field
+ * follows replace semantics and is cleared when absent. It is lifecycle state, not definition: on
+ * create it defaults to `true`, on replace omitting it keeps the stored value and supplying it
+ * applies the same transition as `_enable` / `_disable`. The default lives in the client, not here,
+ * because "omitted" means different things on create and replace. PATCH does not accept it.
  */
 export const putActionPolicyDataSchema = lazySchema(() =>
-  createActionPolicyDataBaseSchema
+  buildActionPolicyDataBaseSchema('put')
     .check(validateGroupingModeAndStrategy)
     .meta({ id: 'alerting_put_action_policy' })
 );
@@ -328,12 +381,7 @@ export const updateActionPolicyDataSchema = lazySchema(() =>
     .object({
       name: actionPolicyNameSchema.optional(),
       description: actionPolicyDescriptionSchema.nullable().optional(),
-      destinations: z
-        .array(actionPolicyDestinationSchema)
-        .min(1, 'At least one destination must be provided')
-        .max(ACTION_POLICY_MAX_DESTINATIONS)
-        .optional()
-        .describe('The list of destinations. At least one is required.'),
+      destinations: actionPolicyDestinationsSchema.optional(),
       matcher: policyMatcherPatchSchema
         .nullable()
         .optional()
@@ -367,15 +415,18 @@ export const findActionPoliciesRequestSchema = lazySchema(() =>
         .describe('The number of action policies to return per page. Defaults to 20.'),
       filter: z
         .string()
+        .trim()
+        .min(1)
         .max(MAX_KQL_LENGTH)
         .optional()
         .describe(
-          'A KQL filter to apply to the action policies. Supported fields: id, name, description, enabled.'
+          'A KQL filter to apply to the action policies. Supported fields: id, name, description, enabled. Cannot be empty. Omit it to list every action policy.'
         ),
       search: z
         .string()
+        .trim()
         .min(1)
-        .max(256)
+        .max(MAX_SEARCH_LENGTH)
         .optional()
         .describe('A text string to search across action policy fields.'),
       sort_field: findActionPoliciesSortFieldSchema

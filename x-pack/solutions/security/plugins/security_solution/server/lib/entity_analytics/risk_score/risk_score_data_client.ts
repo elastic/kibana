@@ -8,7 +8,6 @@
 import type {
   AggregationsCalendarInterval,
   ClusterPutComponentTemplateRequest,
-  MappingDynamicMapping,
   Metadata,
 } from '@elastic/elasticsearch/lib/api/types';
 import {
@@ -21,7 +20,6 @@ import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@k
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import {
   getIndexPatternDataStream,
-  getTransformOptions,
   mappingComponentName,
   nameSpaceAwareMappingsComponentName,
   riskScoreFieldMap,
@@ -34,16 +32,10 @@ import {
   getRiskScoreLatestIndex,
   getRiskScoreTimeSeriesIndex,
 } from '../../../../common/entity_analytics/risk_engine';
-import {
-  createTransform,
-  deleteTransform,
-  stopTransform,
-  getLatestTransformId,
-} from '../utils/transforms';
+import { deleteTransform, getLatestTransformId } from '../utils/transforms';
 import { getRiskInputsIndex } from './get_risk_inputs_index';
 
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
-import { retryTransientEsErrors } from '../utils/retry_transient_es_errors';
 import type { RiskScoreHistoryEntry } from '../../../../common/api/entity_analytics/risk_engine';
 import { RiskScoreAuditActions } from './audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
@@ -380,40 +372,6 @@ export class RiskScoreDataClient {
   }
 
   /**
-   * @deprecated This is for the legacy risk engine and will be removed when 9.4 mode is default.
-   */
-  public async initLegacyTransforms() {
-    const namespace = this.options.namespace;
-    const esClient = this.options.esClient;
-
-    try {
-      await this.createOrUpdateRiskScoreLatestIndex();
-
-      const indexPatterns = getIndexPatternDataStream(namespace);
-      const transformId = getLatestTransformId(namespace);
-      await createTransform({
-        esClient,
-        logger: this.options.logger,
-        transform: {
-          transform_id: transformId,
-          ...getTransformOptions({
-            dest: getRiskScoreLatestIndex(namespace),
-            source: [indexPatterns.alias],
-            namespace: this.options.namespace,
-          }),
-        },
-      });
-    } catch (error) {
-      this.options.logger.error(
-        `Error initializing legacy risk engine transforms: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-      throw error;
-    }
-  }
-
-  /**
    * Deletes all resources created by init().
    * It returns an array of errors that occurred during the deletion.
    *
@@ -470,98 +428,6 @@ export class RiskScoreDataClient {
       .catch(addError);
 
     return errors;
-  }
-
-  /**
-   * Ensures that configuration migrations for risk score indices are seamlessly handled across Kibana upgrades.
-   *
-   * Upgrades:
-   * - Migrating to 8.12+ requires a change to the risk score latest transform index's 'dynamic' setting to ensure that
-   * unmapped fields are allowed within stored documents.
-   *
-   */
-  public async upgradeIfNeeded() {
-    const desiredDynamicValue = 'false';
-    const currentDynamicValue = await this.getRiskScoreLatestIndexDynamicConfiguration();
-    if (currentDynamicValue !== desiredDynamicValue) {
-      await this.setRiskScoreLatestIndexDynamicConfiguration(desiredDynamicValue);
-    }
-  }
-
-  private async getRiskScoreLatestIndexDynamicConfiguration(): Promise<string | undefined> {
-    const riskScoreLatestIndexName = getRiskScoreLatestIndex(this.options.namespace);
-    const riskScoreLatestIndexResponse = await retryTransientEsErrors(
-      () => this.options.esClient.indices.get({ index: riskScoreLatestIndexName }),
-      { logger: this.options.logger }
-    );
-    return riskScoreLatestIndexResponse[riskScoreLatestIndexName]?.mappings?.dynamic?.toString();
-  }
-
-  /**
-   * Sets the risk score latest index's 'dynamic' mapping property to the desired value.
-   * @throws Error if the index does not exist.
-   */
-  private async setRiskScoreLatestIndexDynamicConfiguration(dynamic: MappingDynamicMapping) {
-    return retryTransientEsErrors(
-      () =>
-        this.options.esClient.indices.putMapping({
-          index: getRiskScoreLatestIndex(this.options.namespace),
-          dynamic,
-        }),
-      { logger: this.options.logger }
-    );
-  }
-
-  public copyTimestampToEventIngestedForRiskScore = (abortSignal?: AbortSignal) => {
-    return this.options.esClient.updateByQuery(
-      {
-        index: getRiskScoreLatestIndex(this.options.namespace),
-        conflicts: 'proceed',
-        ignore_unavailable: true,
-        allow_no_indices: true,
-        query: {
-          bool: {
-            must_not: {
-              exists: {
-                field: 'event.ingested',
-              },
-            },
-          },
-        },
-        script: {
-          source: 'ctx._source.event.ingested = ctx._source.@timestamp',
-          lang: 'painless',
-        },
-      },
-      {
-        requestTimeout: '5m',
-        retryOnTimeout: true,
-        maxRetries: 2,
-        signal: abortSignal,
-      }
-    );
-  };
-
-  public async reinstallTransform() {
-    const esClient = this.options.esClient;
-    const namespace = this.options.namespace;
-    const transformId = getLatestTransformId(namespace);
-    const indexPatterns = getIndexPatternDataStream(namespace);
-
-    await stopTransform({ esClient, logger: this.options.logger, transformId });
-    await deleteTransform({ esClient, logger: this.options.logger, transformId });
-    await createTransform({
-      esClient,
-      logger: this.options.logger,
-      transform: {
-        transform_id: transformId,
-        ...getTransformOptions({
-          dest: getRiskScoreLatestIndex(namespace),
-          source: [indexPatterns.alias],
-          namespace: this.options.namespace,
-        }),
-      },
-    });
   }
 }
 

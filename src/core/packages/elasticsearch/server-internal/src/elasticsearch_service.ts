@@ -133,16 +133,30 @@ export class ElasticsearchService
     const pollLifetime = new AbortController();
     this.stop$.subscribe(() => pollLifetime.abort());
 
+    this.log.debug('Checking Elasticsearch version');
+    const healthCheckInterval = config.healthCheckDelay.asMilliseconds();
     const esNodesCompatibility$ = pollEsNodesVersion({
       kibanaVersion: this.kibanaVersion,
       ignoreVersionMismatch: config.ignoreVersionMismatch,
-      healthCheckInterval: config.healthCheckDelay.asMilliseconds(),
-      healthCheckFailureInterval: config.healthCheckFailureInterval?.asMilliseconds(),
-      healthCheckStartupInterval: config.healthCheckStartupDelay.asMilliseconds(),
+      healthCheckInterval,
+      // An unset or zero failure or startup delay falls back to the regular delay.
+      healthCheckFailureInterval:
+        config.healthCheckFailureInterval?.asMilliseconds() || healthCheckInterval,
+      healthCheckStartupInterval:
+        config.healthCheckStartupDelay.asMilliseconds() || healthCheckInterval,
       healthCheckRetry: config.healthCheckRetry,
-      log: this.log,
       internalClient: this.client.asInternalUser,
       signal: pollLifetime.signal,
+    });
+
+    // The poll emits only changes, so each incompatibility is logged once.
+    esNodesCompatibility$.subscribe({
+      next: ({ isCompatible, message }) => {
+        if (!isCompatible && message) {
+          this.log.error(message);
+        }
+      },
+      error: (error) => this.log.error(error),
     });
 
     // On serverless, Elastic runs both clocks, so a skew is not the user's to fix.

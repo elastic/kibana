@@ -140,8 +140,8 @@ export interface CellDecorationFillConfig {
    * baseline inside the domain (e.g. the 25th percentile) leaves part of the
    * track empty before the fill begins.
    *
-   * Not configurable from the editor yet; exposed for the as-code API and
-   * agentic configuration, and consumed by the renderer when present.
+   * Not configurable from the editor or the as-code API, and the as-code export does not carry it.
+   * The renderer honors it when present.
    */
   baseline?: number;
 }

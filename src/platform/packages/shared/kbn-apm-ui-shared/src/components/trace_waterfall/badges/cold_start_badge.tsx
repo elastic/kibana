@@ -11,12 +11,10 @@ import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
+export const COLD_START_BADGE_LABEL = i18n.translate('apmUiShared.traceWaterfall.coldstartBadge', {
+  defaultMessage: 'cold start',
+});
+
 export function ColdStartBadge() {
-  return (
-    <EuiBadge color="warning">
-      {i18n.translate('apmUiShared.traceWaterfall.coldstartBadge', {
-        defaultMessage: 'cold start',
-      })}
-    </EuiBadge>
-  );
+  return <EuiBadge color="warning">{COLD_START_BADGE_LABEL}</EuiBadge>;
 }

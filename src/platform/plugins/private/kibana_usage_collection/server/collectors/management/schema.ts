@@ -148,10 +148,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'securitySolution:enableNewFlyout': {
-    type: 'boolean',
-    _meta: { description: 'Allows users to enable/disable the new flyout system.' },
-  },
   'securitySolution:enableAssetCriticality': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -182,10 +178,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'securitySolution:enableAlertsAndAttacksAlignment': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'securitySolution:enableAttackDiscoveryWorkflows': {
     type: 'boolean',
     _meta: { description: 'Enables Attack Discovery Workflows for this space.' },
@@ -193,6 +185,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'securitySolution:enableRuleChangesHistory': {
     type: 'boolean',
     _meta: { description: 'Allows users to enable/disable Rule Changes History.' },
+  },
+  'securitySolution:enableAlertZero': {
+    type: 'boolean',
+    _meta: { description: 'Enables AlertZero for this space.' },
   },
   'search:includeFrozen': {
     type: 'boolean',
@@ -587,6 +583,16 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
         'Whether the agent can browse the full Elasticsearch and Kibana API surface to discover operations.',
     },
   },
+  'agentBuilder:threads': {
+    type: 'boolean',
+    _meta: { description: 'Whether Agent Builder threads are enabled.' },
+  },
+  'agentBuilder:includeFrozenByDefault': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether built-in Agent Builder tools include frozen tier data by default.',
+    },
+  },
   'agentBuilder:deductiveEnabled': {
     type: 'boolean',
     _meta: { description: 'Whether the external Deductive AI agent execution path is enabled.' },
@@ -841,22 +847,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable Content packs in Streams',
     },
   },
-  'observability:streamsEnableQueryStreams': {
-    type: 'boolean',
-    _meta: {
-      description: 'Enable Query streams in Streams',
-    },
-  },
   'observability:streamsEnableWiredStreamViews': {
     type: 'boolean',
     _meta: {
       description: 'Enable ES|QL views for wired streams',
-    },
-  },
-  'observability:streamsEnableDraftStreams': {
-    type: 'boolean',
-    _meta: {
-      description: 'Enable draft streams with read-time ES|QL views',
     },
   },
   'observability:streamsEnableCanvas': {

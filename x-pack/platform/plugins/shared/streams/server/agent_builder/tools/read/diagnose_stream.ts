@@ -123,22 +123,6 @@ export const createDiagnoseStreamTool = ({
       const esClient = scopedClusterClient.asCurrentUser;
       const definition = await streamsClient.getStream(name);
 
-      if (!Streams.ingest.all.Definition.is(definition)) {
-        return {
-          results: [
-            {
-              type: ToolResultType.other,
-              data: {
-                stream: name,
-                stream_type: 'query',
-                health: 'not_applicable' as const,
-                note: 'Query streams are read-only ES|QL views. They do not have processing pipelines or failure stores. Check the source streams referenced by this query instead.',
-              },
-            },
-          ],
-        };
-      }
-
       const streamType = Streams.WiredStream.Definition.is(definition) ? 'wired' : 'classic';
 
       const timeRange = time_range || '24h';

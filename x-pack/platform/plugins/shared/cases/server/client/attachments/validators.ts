@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type { z } from '@kbn/zod/v4';
-import { UnifiedAttachmentBoundsSchema } from '../../../common/types/api_zod/attachment/v2';
+import { UnifiedAttachmentBoundsSchema } from '../../../common/types/api/attachment/v2';
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import { isTypeAllowedForOwner } from '../../../common/utils/attachments';
 import type { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';

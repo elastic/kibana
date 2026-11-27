@@ -64,7 +64,7 @@ export const AlertTimelineChart = ({
 
   return (
     <div
-      aria-label={i18n.translate('xpack.alertingV2.alertTimeline.chart.ariaLabel', {
+      aria-label={i18n.translate('xpack.alertingV2EpisodesUi.alertTimeline.chart.ariaLabel', {
         defaultMessage: 'Alert activity timeline chart',
       })}
       data-test-subj="alertTimelineChart"

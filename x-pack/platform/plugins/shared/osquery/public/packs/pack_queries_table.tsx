@@ -158,7 +158,7 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
       >
         <EuiButtonIcon
           color="danger"
-          // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
+          // eslint-disable-next-line @kbn/compat/react-jsx-no-bind, react-perf/jsx-no-new-function-as-prop
           onClick={() => onDeleteClick && onDeleteClick(item)}
           iconType="trash"
           aria-label={i18n.translate('xpack.osquery.pack.queriesTable.deleteActionAriaLabel', {
@@ -185,8 +185,8 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
         disableScreenReaderOutput
       >
         <EuiButtonIcon
-          color="primary"
-          // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
+          color="text"
+          // eslint-disable-next-line @kbn/compat/react-jsx-no-bind, react-perf/jsx-no-new-function-as-prop
           onClick={() => onEditClick && onEditClick(item)}
           iconType="pencil"
           aria-label={i18n.translate('xpack.osquery.pack.queriesTable.editActionAriaLabel', {

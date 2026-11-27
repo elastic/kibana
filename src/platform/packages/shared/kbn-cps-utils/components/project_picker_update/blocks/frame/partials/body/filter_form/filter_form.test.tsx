@@ -294,16 +294,18 @@ describe('ProjectPickerFilterForm', () => {
 
   it('clears a submit validation error when a field changes', async () => {
     const user = userEvent.setup();
-    renderForm({
-      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
-    });
-
-    await fillFilterForm(user, { tagName: '_type', tagValue: 'security' });
+    mockFetchProjectsByRouting.mockResolvedValue({ origin: null, linkedProjects: [] });
+    renderForm(
+      { filterExpressions: createFilterExpressions([[envStagingExpression]]) },
+      { filterId: envStagingKey }
+    );
 
     await user.click(screen.getByTestId('projectPickerFilterFormCreateBtn'));
 
     expect(
-      screen.getByText('This filter already exists. Change the filter or edit the existing one.')
+      await screen.findByText(
+        'No projects match this filter. Adjust so at least one project is included in your search.'
+      )
     ).toBeInTheDocument();
 
     mockFetchProjectsByRouting.mockResolvedValue({
@@ -315,13 +317,15 @@ describe('ProjectPickerFilterForm', () => {
     await selectOption(user, 'is not');
 
     expect(
-      screen.queryByText('This filter already exists. Change the filter or edit the existing one.')
+      screen.queryByText(
+        'No projects match this filter. Adjust so at least one project is included in your search.'
+      )
     ).not.toBeInTheDocument();
     expect(within(screen.getByTestId('comboBoxInput')).getByRole('combobox')).not.toHaveAttribute(
       'aria-invalid',
       'true'
     );
-    expect(defaultActions.addFilterExpression).not.toHaveBeenCalled();
+    expect(defaultActions.updateFilterExpression).not.toHaveBeenCalled();
   });
 
   it('clears the selected value when switching to an exists operator and can submit', async () => {

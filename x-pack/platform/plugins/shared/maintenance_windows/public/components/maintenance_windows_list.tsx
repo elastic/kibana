@@ -201,7 +201,10 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
     const actions: Array<EuiBasicTableColumn<MaintenanceWindowUI>> = useMemo(
       () => [
         {
-          name: '',
+          name: i18n.TABLE_ACTIONS,
+          align: 'right',
+          width: '8%',
+          minWidth: '6em',
           render: (item: MaintenanceWindowUI) => {
             return (
               <TableActionsPopover

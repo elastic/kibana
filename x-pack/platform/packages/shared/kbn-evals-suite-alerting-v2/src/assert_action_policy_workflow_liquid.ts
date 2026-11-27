@@ -209,3 +209,34 @@ export const assertActionPolicyWorkflowLiquid = (
 
   return { variables, workflow, yaml: workflowYaml };
 };
+
+// Loop aliases (`{% for alert in ... %}`, `foreach.item`) are local Liquid variables that
+// `scanForTemplateVariables` does not report, so match the output tags directly.
+const ALERT_URL_OUTPUT_PATTERN = /\{\{-?[^}]*\balert_url\b[^}]*-?\}\}/;
+
+const collectStrings = (value: unknown): string[] => {
+  if (typeof value === 'string') {
+    return [value];
+  }
+  if (Array.isArray(value)) {
+    return value.flatMap(collectStrings);
+  }
+  if (typeof value === 'object' && value !== null) {
+    return Object.values(value).flatMap(collectStrings);
+  }
+  return [];
+};
+
+/** Asserts that the notification workflow renders each alert's `alert_url` details link. */
+export const assertActionPolicyWorkflowLinksAlertDetails = (workflow: ParsedWorkflow): void => {
+  const linksAlertDetails = collectStrings(workflow.steps).some((value) =>
+    ALERT_URL_OUTPUT_PATTERN.test(value)
+  );
+  if (!linksAlertDetails) {
+    throw new Error(
+      'Generated workflow does not render an alert details link. ' +
+        'Each dispatched alert carries an absolute `alert_url`; notification steps should ' +
+        'render it (e.g. `{{ alert.alert_url }}` inside `{% for alert in inputs.payload.alerts %}`).'
+    );
+  }
+};

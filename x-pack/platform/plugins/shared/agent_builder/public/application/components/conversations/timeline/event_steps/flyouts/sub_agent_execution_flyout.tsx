@@ -20,6 +20,7 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { EuiStepStatus } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
@@ -48,10 +49,26 @@ const executionIdLabel = i18n.translate(
   { defaultMessage: 'Execution ID' }
 );
 
+const getStepStatus = ({
+  hasError,
+  isStopped,
+  isLoading,
+}: {
+  hasError: boolean;
+  isStopped: boolean;
+  isLoading: boolean;
+}): EuiStepStatus => {
+  if (hasError) return 'danger';
+  if (isStopped) return 'incomplete';
+  if (isLoading) return 'loading';
+  return 'complete';
+};
+
 interface SubAgentExecutionFlyoutProps {
   executionId: string;
   params?: Record<string, unknown>;
   isCompleted?: boolean;
+  isStopped?: boolean;
   onBack?: () => void;
   onClose: () => void;
 }
@@ -60,6 +77,7 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
   executionId,
   params,
   isCompleted = false,
+  isStopped = false,
   onBack,
   onClose,
 }) => {
@@ -86,6 +104,7 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
   const displayMessage = response?.message ?? streamingMessage;
   const isRunning = !response && !error;
   const hasError = Boolean(error);
+  const isRunStopped = isStopped && isRunning;
 
   const euiSteps = [
     ...(params
@@ -99,20 +118,18 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
       : []),
     {
       title: executionLabel,
-      status: (hasError ? 'danger' : isRunning && !isCompleted ? 'loading' : 'complete') as
-        | 'danger'
-        | 'loading'
-        | 'complete',
-      children: <EventSteps steps={executionSteps} />,
+      status: getStepStatus({
+        hasError,
+        isStopped: isRunStopped,
+        isLoading: isRunning && !isCompleted,
+      }),
+      children: <EventSteps steps={executionSteps} isAborted={isStopped} />,
     },
     ...(!isRunning || displayMessage
       ? [
           {
             title: resultLabel,
-            status: (hasError ? 'danger' : isRunning ? 'loading' : 'complete') as
-              | 'danger'
-              | 'loading'
-              | 'complete',
+            status: getStepStatus({ hasError, isStopped: isRunStopped, isLoading: isRunning }),
             children: (
               <>
                 {hasError ? (
@@ -178,6 +195,7 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
       {liveNestedStep && (
         <ToolResponseFlyout
           step={liveNestedStep}
+          isAborted={isStopped}
           onClose={isEmbeddedContext ? onClose : closeNestedStep}
           onBack={isEmbeddedContext ? closeNestedStep : undefined}
         />

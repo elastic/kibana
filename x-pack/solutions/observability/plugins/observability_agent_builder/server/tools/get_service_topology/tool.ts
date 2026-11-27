@@ -96,7 +96,7 @@ export function createGetServiceTopologyTool({
 
 Returns:
 - \`connections\`: source/target nodes with RED metrics. Each service node has a \`service.name\` field; external dependency nodes have a \`span.destination.service.resource\` field.
-- \`nodeMetadata\` (best-effort, may be absent): per-service badge data keyed by service name. Each entry may contain \`alertsCount\`, \`sloStatus\`, \`sloCount\`, \`anomalySeverity\`, \`anomalyScore\`. Pass this field through verbatim when building an \`observability.service-map\` attachment.
+- \`nodeMetadata\` (best-effort, may be absent): per-service badge data keyed by service name. Each entry may contain \`alertsCount\`, \`sloStatus\`, \`sloCount\`, \`anomalySeverity\`, \`anomalyScore\`. Pass this field through verbatim when building an \`observability.service-map\` attachment. When building that attachment, also set \`serviceName\` to the focal service and \`timeRange\` to the \`start\`/\`end\` used for this call (and \`environment\` when one applies) so the interactive map can scope its drill-down views.
 
 Supports downstream, upstream, or both directions.
 

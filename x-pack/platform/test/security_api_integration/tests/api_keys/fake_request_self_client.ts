@@ -39,7 +39,11 @@ export default function ({ getService }: FtrProviderContext) {
         .send({ apiKey: apiKey.encoded })
         .expect(200);
 
-      expect(body).to.eql({ username: authenticatedUser.username, hasManage: true });
+      expect(body).to.eql({
+        username: authenticatedUser.username,
+        hasManage: true,
+        receivedHeaders: { clientAuthentication: 'absent', attestation: false },
+      });
 
       await supertest
         .post('/test_endpoints/self_client/fake_request')

@@ -9,6 +9,7 @@ import {
   getSmlOriginId,
   getSmlOriginUri,
   smlEntryId,
+  parseSmlEntryId,
   smlEntryIdFromOriginUri,
   smlOriginUriFromEntryId,
 } from './sml_origin';
@@ -63,5 +64,19 @@ describe('entry ids', () => {
   it('round-trips between origin uri and entry id', () => {
     expect(smlEntryIdFromOriginUri('esql://my-query:v2/step1')).toBe('esql:my-query:v2/step1');
     expect(smlOriginUriFromEntryId('esql:my-query:v2/step1')).toBe('esql://my-query:v2/step1');
+  });
+});
+
+describe('parseSmlEntryId', () => {
+  it('splits an entry id into its type and origin id', () => {
+    expect(parseSmlEntryId('dashboard:dash-1')).toEqual({ type: 'dashboard', originId: 'dash-1' });
+  });
+
+  it('keeps colons in the origin id', () => {
+    expect(parseSmlEntryId('workflow:a:b')).toEqual({ type: 'workflow', originId: 'a:b' });
+  });
+
+  it.each(['dashboard', 'dashboard:', ':dash-1', ''])('returns undefined for %p', (entryId) => {
+    expect(parseSmlEntryId(entryId)).toBeUndefined();
   });
 });

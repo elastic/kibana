@@ -87,15 +87,17 @@ export const buildEntitiesSearchBody = (
   } else if (range) {
     must.push({ range: { '@timestamp': { gte: range.start, lte: range.end } } });
   }
-  if (queryRule) {
-    must.push(toElasticsearchQuery(fromKueryExpression(queryRule)));
-  }
 
   const entitiesComposite = {
     size: pageSize,
     sources: [{ euid: { terms: { field: EUID_RUNTIME_FIELD } } }],
     ...(afterKey ? { after: afterKey } : {}),
   };
+
+  const latestDocSort: estypes.Sort = [
+    { '@timestamp': { order: 'desc' } },
+    { _seq_no: { order: 'desc' } },
+  ];
 
   return {
     size: 0,
@@ -108,19 +110,31 @@ export const buildEntitiesSearchBody = (
     aggs: {
       entities: {
         composite: entitiesComposite,
-        ...(syncMarker
-          ? {
-              aggs: {
-                latest_doc: {
-                  top_hits: {
-                    size: 1,
-                    sort: [{ '@timestamp': { order: 'desc' as const } }],
-                    _source: [...ENTITY_NAME_SOURCE_FIELDS],
+        aggs: {
+          latest_doc: {
+            top_hits: {
+              size: 1,
+              sort: latestDocSort,
+              _source: [...ENTITY_NAME_SOURCE_FIELDS],
+            },
+          },
+          ...(queryRule
+            ? {
+                latest_matching_doc: {
+                  filter: toElasticsearchQuery(fromKueryExpression(queryRule)),
+                  aggs: {
+                    doc: {
+                      top_hits: {
+                        size: 1,
+                        sort: latestDocSort,
+                        _source: false,
+                      },
+                    },
                   },
                 },
-              },
-            }
-          : {}),
+              }
+            : {}),
+        },
       },
     },
   };

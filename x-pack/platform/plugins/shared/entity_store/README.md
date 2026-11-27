@@ -31,9 +31,19 @@ Each process keeps its own cursor, status and error on the engine descriptor (`l
 5. Per-type overrides (`logExtractionConfig`), set with `logExtraction` on internal `PUT /internal/security/entity_store/{entityType}`
 6. Non-priority overrides (`nonPriorityLogExtractionConfig`, incl. `samplingRate`), set with `nonPriorityOverride` on the same route
 
-`null` clears a field, so it falls back to the layer below. Arrays such as `additionalIndexPatterns` replace the lower layer, they do not merge. For non-priority, layers 4 and 5 cannot set the cap behaviour (`NON_PRIORITY_EXCLUSIVE_FIELDS`); only layer 6 can. Every other field, including the volume fields (`maxLogsPerPage`, `maxTimeWindowSize`, `maxLogsPerWindow`, `docsLimit`), is shared and reaches non-priority from layers 4/5 like any other config field; layer 6 remains available as a ceiling for an operator who wants non-priority to diverge intentionally.
+`null` clears a field, so it falls back to the layer below. Arrays such as `additionalIndexPatterns` replace the lower layer, they do not merge. For non-priority, layers 4 and 5 cannot set the volume fields (`NON_PRIORITY_EXCLUSIVE_FIELDS`); only layer 6 can.
 
 Pagination, sampling, the volume cap and crash recovery are described in [server/domain/logs_extraction/PAGINATION.md](server/domain/logs_extraction/PAGINATION.md).
+
+## Changing the latest index mappings
+
+Templates only apply to indices created after an edit, so an installed `.entities.v2.latest.{namespace}-00001` does not get new fields from the component templates. When a definition field with a `mapping` is added, bump `LATEST_INDEX_MAPPINGS_VERSION` (`common/domain/entity_index.ts`) in the same change. Removing a field also needs a bump for the guard test, but the migration never removes a field from an existing index: it only refreshes the templates and the version in `_meta`. The guard test in `server/domain/asset_manager/latest_index_mappings.test.ts` snapshots the version together with all the properties, so it fails on any change of the properties until you bump the version and update the snapshot.
+
+On every Kibana start, the `entity_store:v2:latest_index_mappings_migration` task checks each installed space. If the `latestMappingsVersion` in the index `_meta` is lower than the constant, it refreshes the component and index templates and runs `putMapping` with the fields that are missing from the existing index and the new `_meta`. It never re-applies settings (the index is `index.mode: lookup`) and does not change `MAPPING_VERSION`, which is the index-name suffix. The migration only adds fields: a field that already exists with a different type is not changed, and is logged as one warning when that space is migrated (the version is still bumped, so it is not repeated on every start). Changing a field type needs a reindex, not a version bump. A failed `putMapping` fails that space, which is logged with its namespace; the task is retried, and again on the next start, because the version in `_meta` is only written by a successful `putMapping`. If every failed space gets a 400, 401 or 403, retrying cannot help, so the task is marked unrecoverable and not retried within that start: Task Manager deletes the failed one-shot task and the next start schedules it again. Mixed or transient failures are still retried (`maxAttempts` 3).
+
+Not migrated and not covered by the guard test: `dynamic_templates`, `date_detection` and the ECS component template.
+
+Queries that read a newly added field from the entities index must tolerate an index that has not been migrated yet. `SET unmapped_fields="nullify"` is not enough once a `STATS` or `KEEP` precedes a `LOOKUP JOIN`. Add the field to `LATEST_INDEX_ADDED_FIELDS` (`common/domain/latest_index_added_fields.ts`) together with the version bump: both the logs extraction query and the entities grid put the `| EVAL <field> = TO_STRING(null)` placeholder before their join from that list (`getUnmappedLatestFieldPlaceholders`), and a guard test checks that every listed field is a `keyword` in the latest index mappings. Delete an entry once every install is past its version.
 
 ## Entity AI Summary — index privileges
 
@@ -200,19 +210,25 @@ dynamic: {
       ],
     },
   ],
+  displayLabels: [{ name: 'namespace', label: 'Namespace' }],
+  suggestedFilters: ['namespace', 'phase'],
 },
 ```
 
 - Sources: 1 to 16. A source is one index pattern (no commas or whitespace, at most 256 characters); several patterns are several sources. The same pattern may appear on several sources with different filters.
 - `filter`: optional opaque ES|QL boolean expression narrowing the source to this type's documents, at most 2000 characters. It is validated for length only; where it goes in the query is the generator's job.
-- Attributes: at most 32 per source. `name` (`^[a-z][a-z0-9_]*$`, at most 64 characters) is the output column and the merge key across sources, and is unique within a source. `field` is a literal field path (dot-separated segments of letters, digits, `_`, `@` and `-`; no wildcards, expressions, quoting or whitespace; at most 512 characters).
+- Attributes: at most 32 per source. `name` is a field path such as `host.arch` or `os.type`, under the same rule as `field` but at most 64 characters, so a column can carry the OpenTelemetry semantic convention name while each source reads its own field. It is the output column and the merge key across sources, and is unique within a source. `field` is a literal field path (dot-separated segments of letters, digits, `_`, `@` and `-`; no wildcards, expressions, quoting or whitespace; at most 512 characters).
 - `valueLabels`: optional map from raw values (stringified) to canonical labels, at most 64 entries, keys and labels 1 to 256 characters. Unmapped values pass through.
-- Unknown keys are rejected on the block, each source and each attribute. Bounds are denial-of-service limits for HTTP input, not design limits.
+- `displayLabels`: optional list of `{ name, label }` at the root of the block, the user-facing text of an identity field or an attribute under its output `name`. A `name` is a literal field path of at most 512 characters, the same rule as an identity field and wider than the 64 characters of an attribute `name`. It is unique in the list, and must be an identity field or an attribute of some source. A `label` is 1 to 256 characters, and the list has at most 520 entries. It is presentation only: the inventory's generator never reads it, and it labels the columns of the inventory's `types` response. `valueLabels` labels the values of an attribute; `displayLabels` labels the attribute itself.
+- `suggestedFilters`: optional list of the columns the inventory offers as dropdown filters, in display order. At most 16, none repeated, each the `name` of an attribute declared by some source or an identity field (such as a namespace that is part of the identity), but not `entity.id`, the id column of the output. A name is a literal field path of at most 512 characters, the same rule as an identity field.
+- Unknown keys are rejected on the block, each source, each attribute and each display label. Bounds are denial-of-service limits for HTTP input, not design limits.
 
-Two whole-definition rules apply only when `dynamic` is present, at both `entitySchema` and registration:
+Four whole-definition rules apply only when `dynamic` is present, at both `entitySchema` and registration:
 
 - Servable identity: `identityField` is a single literal field, or one unconditional ranking branch of literal fields and separators whose `documentsFilter` is exactly the derived presence filter, with no field evaluations, no `skipTypePrepend` and at most eight distinct fields. The built-in `host` identity fits; `user` does not.
 - No attribute `field` may be an identity field.
+- Every display label `name` is an identity field or an attribute of some source.
+- Every suggested filter is an identity field or an attribute of some source, but not `entity.id`.
 
 ### Type names
 

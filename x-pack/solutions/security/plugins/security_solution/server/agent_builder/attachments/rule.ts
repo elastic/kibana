@@ -14,6 +14,7 @@ import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
+import { DETECTION_WATCH_RULE_ATTACHMENT_IDS } from '../../../common/agent_builder/detection_watch_rule_attachments';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { readRules } from '../../lib/detection_engine/rule_management/logic/detection_rules_client/read_rules';
 import { transform } from '../../lib/detection_engine/rule_management/utils/utils';
@@ -33,6 +34,10 @@ export const ruleAttachmentDataSchema = lazySchema(() =>
 
 const DETECTION_RULE_SKILL_NAME_ID = 'detection-rule-edit';
 const INVESTIGATE_RULE_SKILL_NAME_ID = 'investigate-rule';
+const PROPOSAL_MANAGEMENT_SKILL_NAME_ID = 'proposal-management';
+const DETECTION_WATCH_RULE_ATTACHMENT_IDS_TEXT = DETECTION_WATCH_RULE_ATTACHMENT_IDS.map(
+  (attachmentId) => `\`${attachmentId}\``
+).join(' or ');
 
 export type RuleAttachmentData = z.infer<typeof ruleAttachmentDataSchema>;
 
@@ -70,18 +75,20 @@ export const createRuleAttachmentType = (
     // investigate-rule.resolve_rule_attachment after the user picks a rule from find-security-rules —
     // the framework calls this once to populate the card from the live rule.
     //
-    // `origin` is a detection rule signature (`rule_id`), so we look the rule up by `ruleId` (not the
-    // saved-object `id`). The full transformed rule — including `rule_id` and `id` — is stored in
-    // `text`: the investigate-rule skill reads those identifiers back out of the attachment to query
-    // the rule's alerts (`kibana.alert.rule.rule_id` / `.uuid`), and `origin` is not visible to skills.
+    // `origin` is the rule's saved-object `id`, never the `rule_id` signature: the rule card reads it
+    // as the saved-object id for Update rule, View rule, Apply to rule form and its saved-rule diff.
+    // Callers that only have a `rule_id` look the rule up first. The full transformed rule —
+    // including `rule_id` and `id` — is stored in `text`: the investigate-rule skill reads those
+    // identifiers back out of the attachment to query the rule's alerts
+    // (`kibana.alert.rule.rule_id` / `.uuid`), and `origin` is not visible to skills.
     resolve: async (origin: string, context: AttachmentResolveContext) => {
       const [, startPlugins] = await core.getStartServices();
       const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(context.request);
-      const rule = await readRules({ rulesClient, id: undefined, ruleId: origin });
+      const rule = await readRules({ rulesClient, id: origin, ruleId: undefined });
       const transformed = rule ? transform(rule) : null;
       if (!transformed) {
-        logger.warn(`Failed to resolve rule attachment for rule_id "${origin}"`);
-        throw new Error(`Rule with rule_id "${origin}" was not found`);
+        logger.warn(`Failed to resolve rule attachment for rule id "${origin}"`);
+        throw new Error(`Rule with id "${origin}" was not found`);
       }
       return {
         text: JSON.stringify(transformed),
@@ -104,9 +111,22 @@ SECURITY RULE DATA:
 ---
 Complete in order:
 
-1. When asked to modify, update, or create a detection rule, ALWAYS read the ${DETECTION_RULE_SKILL_NAME_ID} skill from the skills/security/rules directory.
+1. When asked to modify, update, or create a detection rule, ALWAYS read the ${DETECTION_RULE_SKILL_NAME_ID} skill from the skills/security/rules directory. If this attachment's id is ${DETECTION_WATCH_RULE_ATTACHMENT_IDS_TEXT}, follow "Detection Watch rule attachments" below instead.
 2. When asked why the rule is noisy or generating false positives, ALWAYS read the ${INVESTIGATE_RULE_SKILL_NAME_ID} skill from the skills/security/rules directory.
-3. Use the available tools to research, create, or edit the rule and provide a response.`;
+3. Use the available tools to research, create, or edit the rule and provide a response.
+
+---
+Detection Watch rule attachments:
+
+The Rule Tuning and Rule Coverage workers add a rule attachment with the id ${DETECTION_WATCH_RULE_ATTACHMENT_IDS_TEXT} to their investigations. The rule of such an attachment changes only through proposals that the user approves or dismisses. Do NOT edit such an attachment, and do NOT offer to. When asked to change its rule:
+
+1. Read the proposal attachments in the conversation and find those with \`Status: pending\`. There is usually one, and there can be none.
+2. If a pending proposal makes the same kind of change as the user asks for, revise that proposal with the ${PROPOSAL_MANAGEMENT_SKILL_NAME_ID} skill. Do not guess which fields the proposal's action accepts: make the call and see whether it is accepted.
+3. If step 2 does not apply, or the call is rejected, change nothing. Step 2 does not apply when no proposal is pending, when the pending one says "No automated action", or when its \`actionInput\` describes a different kind of change (for example it adds an exception and the user wants a query change). Then tell the user, in two or three short sentences:
+   - You did not make the change. This is an investigation, and in an investigation a rule changes only through a proposal that the user approves.
+   - The user can ask you to adjust a proposal that changes the rule, once one is generated. If a pending proposal already changes the rule and did not accept this change, say instead that this proposal can't include it.
+
+Write for a security analyst, in plain words. Do NOT mention attachments, attachment ids, "No automated action", \`actionInput\`, skills or tools, and do NOT announce what you are about to read or load.`;
       return description;
     },
   };

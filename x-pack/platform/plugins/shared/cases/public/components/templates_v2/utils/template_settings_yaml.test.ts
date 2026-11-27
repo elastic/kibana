@@ -7,7 +7,7 @@
 
 import { parse as parseYaml } from 'yaml';
 import { ConnectorTypes } from '../../../../common/types/domain';
-import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
+import type { CaseConnectorWithoutName } from '../../../../common/types/domain/connector/v1';
 import {
   getTemplateSettingsAndConnectorFromYaml,
   mergeTemplateDefinition,

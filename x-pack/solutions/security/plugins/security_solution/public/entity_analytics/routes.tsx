@@ -22,7 +22,6 @@ import {
 } from '../../common/constants';
 import { EntityAnalyticsManagementPage } from './pages/entity_analytics_management_page';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
-import { EntityAnalyticsPrivilegedUserMonitoringPage } from './pages/entity_analytics_privileged_user_monitoring_page';
 import { EntityAnalyticsHomePage } from './pages/entity_analytics_home_page';
 import { EntityAnalyticsNewHomePage } from './pages/entity_analytics_new_home_page';
 import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
@@ -98,34 +97,28 @@ const EntityAnalyticsEntityStoreRedirectContainer: React.FC = React.memo(() => {
 EntityAnalyticsEntityStoreRedirectContainer.displayName =
   'EntityAnalyticsEntityStoreRedirectContainer';
 
-// ---- Privileged user monitoring routes ----
-const EntityAnalyticsPrivilegedUserMonitoringWrapper = () => (
-  <PluginTemplateWrapper>
-    <EntityAnalyticsPrivilegedUserMonitoringPage />
-  </PluginTemplateWrapper>
-);
-
+// ---- Privileged user monitoring redirect route ----
 const EntityAnalyticsPrivilegedUserMonitoringContainer: React.FC = React.memo(() => {
-  const isEntityStoreV2Enabled = useIsExperimentalFeatureEnabled('entityAnalyticsEntityStoreV2');
+  const isWatchlistsEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsWatchlistEnabled');
+  // The Watchlists tab only renders when the flag is on, so fall back to the management landing page.
+  const redirectPathname = isWatchlistsEnabled
+    ? `${ENTITY_ANALYTICS_MANAGEMENT_PATH}/watchlists`
+    : ENTITY_ANALYTICS_MANAGEMENT_PATH;
 
   return (
     <Routes>
       <Route
         path={ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH}
         exact
-        render={({ location }) =>
-          isEntityStoreV2Enabled ? (
-            <Redirect
-              to={{
-                ...location,
-                pathname: ENTITY_ANALYTICS_MANAGEMENT_PATH,
-                search: location.search,
-              }}
-            />
-          ) : (
-            <EntityAnalyticsPrivilegedUserMonitoringWrapper />
-          )
-        }
+        render={({ location }) => (
+          <Redirect
+            to={{
+              ...location,
+              pathname: redirectPathname,
+              search: location.search,
+            }}
+          />
+        )}
       />
       <Route component={NotFoundPage} />
     </Routes>
@@ -140,7 +133,7 @@ const EntityAnalyticsHomePageContainer: React.FC = React.memo(() => {
   const { featureFlags } = useKibana().services;
   const isNewHomePageEnabled = featureFlags.useBooleanValue(
     USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG,
-    false
+    true
   );
 
   const PageComponent = isNewHomePageEnabled ? EntityAnalyticsNewHomePage : EntityAnalyticsHomePage;
@@ -151,7 +144,7 @@ const EntityAnalyticsHomePageContainer: React.FC = React.memo(() => {
         path={ENTITY_ANALYTICS_HOME_PAGE_PATH}
         exact
         render={() => (
-          <PluginTemplateWrapper>
+          <PluginTemplateWrapper paddingSize={isNewHomePageEnabled ? 'none' : undefined}>
             <PageComponent />
           </PluginTemplateWrapper>
         )}
@@ -186,10 +179,7 @@ export const routes = [
   },
   {
     path: ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
-    component: withSecurityRoutePageWrapper(
-      EntityAnalyticsPrivilegedUserMonitoringContainer,
-      SecurityPageName.entityAnalyticsPrivilegedUserMonitoring
-    ),
+    component: EntityAnalyticsPrivilegedUserMonitoringContainer,
   },
   {
     path: ENTITY_ANALYTICS_HOME_PAGE_PATH,

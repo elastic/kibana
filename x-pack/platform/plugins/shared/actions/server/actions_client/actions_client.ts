@@ -6,7 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import url from 'url';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { i18n } from '@kbn/i18n';
@@ -305,14 +304,17 @@ export class ActionsClient {
 
   public async getConnectorSpec({
     id,
+    specVersion,
     configurationUtilities,
   }: {
     id: string;
+    specVersion?: string;
     configurationUtilities: ActionsConfigurationUtilities;
   }) {
     return getConnectorSpecAsJsonSchema({
       context: this.context,
       id,
+      specVersion,
       configurationUtilities,
     });
   }
@@ -428,13 +430,14 @@ export class ActionsClient {
     }
 
     // Verify that token url contains a hostname and uses https
-    const parsedUrl = url.parse(
-      options.tokenUrl,
-      false /* parseQueryString */,
-      true /* slashesDenoteHost */
-    );
+    let parsedUrl: URL | undefined;
+    try {
+      parsedUrl = new URL(options.tokenUrl);
+    } catch (err) {
+      parsedUrl = undefined;
+    }
 
-    if (!parsedUrl.hostname) {
+    if (!parsedUrl?.hostname) {
       throw Boom.badRequest(`Token URL must contain hostname`);
     }
 
@@ -735,8 +738,9 @@ export class ActionsClient {
   public async listTypes({
     featureId,
     includeSystemActionTypes = false,
+    sandboxCapableOnly = false,
   }: ListTypesParams = {}): Promise<ConnectorType[]> {
-    return listTypes(this.context, { featureId, includeSystemActionTypes });
+    return listTypes(this.context, { featureId, includeSystemActionTypes, sandboxCapableOnly });
   }
 
   public isActionTypeEnabled(

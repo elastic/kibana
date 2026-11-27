@@ -132,7 +132,11 @@ export const LazyPackageCard = lazy(() =>
 );
 
 export { useGetDataStreams } from './hooks/use_request/data_stream';
-export { useGetPackagesQuery, useGetPackageInfoByKeyQuery } from './hooks/use_request/epm';
+export {
+  useGetPackagesQuery,
+  useGetPackageInfoByKeyQuery,
+  useGetEpmDatastreams,
+} from './hooks/use_request/epm';
 export { useGetSettingsQuery } from './hooks/use_request/settings';
 export {
   sendCreateAgentlessPolicy,
@@ -161,7 +165,11 @@ export type {
   CreateCloudOnboardingDeploymentRequest,
   UpdateCloudOnboardingDeploymentRequest,
 } from '../common/types/rest_spec/cloud_onboarding_deployment';
-export { sendGetPackageInfoByKey, sendGetPackageInfoByKeyForRq } from './hooks/use_request/epm';
+export {
+  sendGetPackageInfoByKey,
+  sendGetPackageInfoByKeyForRq,
+  sendUpdatePackage,
+} from './hooks/use_request/epm';
 export {
   sendUpdatePackagePolicy,
   sendDeletePackagePolicy,
@@ -178,6 +186,12 @@ export type {
 export { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../common/types/rest_spec/iac_provisioner';
 export { useLink } from './hooks/use_link';
 export { NamespaceComboBox } from './components/namespace_combo_box';
+export { useOutputs } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/hooks';
+export { useGetOutputs } from './hooks/use_request/outputs';
+export { PackagePolicyOutputSelect } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_output_select';
+export type { PackagePolicyOutputSelectProps } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_output_select';
+export { PackagePolicyConditionField } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_condition_field';
+export type { PackagePolicyConditionFieldProps } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_condition_field';
 
 // Cloud Connector Setup - lazy loaded component for external plugins
 export const LazyCloudConnectorSetup = lazy(() =>
@@ -188,28 +202,12 @@ export const LazyCloudConnectorSetup = lazy(() =>
 export type { CloudConnectorSetupProps } from './components/cloud_connector';
 export { CLOUD_CONNECTOR_GCP_ASSET_INVENTORY_REUSABLE_MIN_VERSION } from './components/cloud_connector/constants';
 
-// AWS Connect Setup - auth method picker (Identity Federation + Static keys + Temporary keys) for external plugins
-// TODO: LazyAwsConnectSetup appears to have no active external callers. Consider consolidating
-// AwsAuthTypeSelector with ingest_hub's CredentialMethodSelector in a follow-up cleanup.
-// Track: https://github.com/elastic/ingest-dev/issues/9576
-export const LazyAwsConnectSetup = lazy(() =>
-  import('./components/cloud_connector').then((module) => ({
-    default: module.AwsConnectSetup,
-  }))
-);
+// AWS credential types shared by the standalone AWS auth components below
 export type {
-  AwsConnectSetupProps,
-  AwsAuthType,
   AwsStaticKeyCredentials,
   AwsTemporaryKeyCredentials,
   CloudSetupForCloudConnector,
 } from './components/cloud_connector';
-export {
-  AWS_AUTH_TYPE_SELECTOR_TEST_SUBJ,
-  AWS_AUTH_TYPE_IF_CARD_TEST_SUBJ,
-  AWS_AUTH_TYPE_STATIC_KEYS_CARD_TEST_SUBJ,
-  AWS_AUTH_TYPE_TEMPORARY_KEYS_CARD_TEST_SUBJ,
-} from './components/cloud_connector/aws_connect_setup/test_subjects';
 
 // AWS Static Keys Form — standalone credential form for cross-plugin use
 export const LazyAwsStaticKeysForm = lazy(() =>
@@ -307,6 +305,44 @@ export { useGetEnrollmentAPIKeysQuery } from './hooks/use_request/enrollment_api
 // /internal/ URL path. Do NOT change to internal.v1 ('1') — it returns 400 Unsupported version.
 // See: fleet/server/routes/agent_policy/index.ts ~line 308.
 export { sendCreateAgentPolicyWithPackagePolicies } from './hooks/use_request/agent_policy';
+export { sendGetPackagePolicies } from './hooks/use_request/package_policy';
 
 // Package policy creation — used by the existing-agent-policy path in ingest_hub
 export { sendCreatePackagePolicyForRq as sendCreatePackagePolicy } from './hooks/use_request/package_policy';
+
+// Agents of a set of agent policies and the incoming-data check — used by step 4 to resolve the
+// deployed agents and detect data per agent (immune to a customised data_stream.dataset).
+export { useAgentsForPolicyIds } from './hooks/use_agents_for_policy_ids';
+export { sendGetAgentIncomingData } from './hooks/use_request/agents';
+
+// Agent status badge — the same badge the Managed integrations table renders: the agent's health,
+// or Pending while there is no agent yet.
+export const LazyAgentStatusBadge = lazy(() =>
+  import('./components/agent_status_badge').then((m) => ({ default: m.AgentStatusBadge }))
+);
+export type { AgentStatusBadgeProps } from './components/agent_status_badge';
+
+// Agentless flyouts — step 4 opens these from a service status chip.
+export const LazyAgentlessStatusDetailsFlyout = lazy(() =>
+  import('./components/agentless_status_details_flyout').then((m) => ({
+    default: m.AgentlessStatusDetailsFlyout,
+  }))
+);
+export type { AgentlessStatusDetailsFlyoutProps } from './components/agentless_status_details_flyout';
+export const LazyAgentlessEnrollmentFlyout = lazy(() =>
+  import('./components/agentless_enrollment_flyout').then((m) => ({
+    default: m.AgentlessEnrollmentFlyout,
+  }))
+);
+export type { AgentlessEnrollmentFlyoutProps } from './components/agentless_enrollment_flyout';
+
+// Worst unit status of a package policy on an agent — lets step 4 judge an agent by the
+// integration it deployed rather than by unrelated integrations on the same agent.
+export {
+  getComponentAlertLevel,
+  getPackagePolicyUnitSummary,
+} from './components/agentless_status_details_flyout/component_alert_level';
+export type {
+  ComponentAlertLevel,
+  PackagePolicyUnitSummary,
+} from './components/agentless_status_details_flyout/component_alert_level';

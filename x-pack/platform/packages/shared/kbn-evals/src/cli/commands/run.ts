@@ -8,12 +8,15 @@
 import { spawn } from 'child_process';
 import type { Command } from '@kbn/dev-cli-runner';
 import {
+  promptForProfile,
   readConcurrencyFlag,
   readSpaceIdsFlag,
   resolveEvalSuite,
   resolveEvaluationConnectorId,
   resolveProfileEnvOverrides,
 } from '../run_helpers';
+import { formatProfilesSummary, PROFILE_FLAG_NAMES } from '../profiles';
+import { isTTY } from '../prompts';
 import { buildPlaywrightArgs } from './playwright_args';
 
 const formatEnvPrefix = (overrides: Record<string, string>, redactedKeys: ReadonlySet<string>) =>
@@ -54,8 +57,7 @@ export const runSuiteCmd: Command<void> = {
       'grep',
       'grep-invert',
       'profile',
-      'datasets-profile',
-      'export-profile',
+      ...PROFILE_FLAG_NAMES,
       'trace-es-url',
       'trace-es-api-key',
       'evaluations-kbn-url',
@@ -70,7 +72,18 @@ export const runSuiteCmd: Command<void> = {
 
     const { suite, resolvedConfigPath } = await resolveEvalSuite(repoRoot, log, flagsReader);
 
-    const evaluationConnectorId = await resolveEvaluationConnectorId(repoRoot, log, flagsReader);
+    // Same profile choice as `start`, so the profile's default judge is available here too.
+    const profile =
+      flagsReader.string('profile') ??
+      (isTTY() ? await promptForProfile(repoRoot, log) : undefined);
+
+    const evaluationConnectorId = await resolveEvaluationConnectorId(
+      repoRoot,
+      log,
+      flagsReader,
+      suite,
+      profile
+    );
 
     const envOverrides: Record<string, string> = {
       EVAL_CONNECTOR_ID: evaluationConnectorId,
@@ -80,17 +93,17 @@ export const runSuiteCmd: Command<void> = {
       envOverrides.EVAL_SUITE_ID = suite.id;
     }
 
-    const { datasetsProfile, exportProfile, profileEnvOverrides, suiteScoutEnv } =
+    const { evaluationsKbnProfile, tracingProfile, profileEnvOverrides, suiteScoutEnv } =
       await resolveProfileEnvOverrides({
         repoRoot,
         log,
         flagsReader,
-        profile: flagsReader.string('profile') ?? undefined,
+        profile,
         suite,
       });
     Object.assign(envOverrides, profileEnvOverrides, suiteScoutEnv);
 
-    log.info(`Profiles: datasets=${datasetsProfile ?? 'config'} export=${exportProfile ?? 'none'}`);
+    log.info(`Profiles: ${formatProfilesSummary({ evaluationsKbnProfile, tracingProfile })}`);
 
     const repetitions = flagsReader.string('repetitions');
     if (repetitions) {

@@ -12,7 +12,7 @@ export default createServerlessFeatureFlagTestConfig<typeof services>({
   services,
   serverlessProject: 'oblt',
   testFiles: [require.resolve('./oblt.evals.feature_flag.index.ts')],
-  kbnServerArgs: ['--xpack.evals.enabled=true'],
+  kbnServerArgs: ['--xpack.evals.enabled=true', '--xpack.evals.mode=full'],
   junit: {
     reportName: 'Serverless Observability - Evals API Integration Tests',
   },

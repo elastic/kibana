@@ -72,4 +72,22 @@ describe('UserActionPropertyActions', () => {
     expect(result.current.showDeletionModal).toBe(false);
     expect(onDelete).toHaveBeenCalled();
   });
+
+  it('forwards the options on confirm with options', async () => {
+    const { result } = renderHook(
+      () => useDeletePropertyAction<{ includeRelated: boolean }>({ onDelete }),
+      { wrapper: TestProviders }
+    );
+
+    act(() => {
+      result.current.onModalOpen();
+    });
+
+    act(() => {
+      result.current.onConfirmWithOptions({ includeRelated: false });
+    });
+
+    expect(result.current.showDeletionModal).toBe(false);
+    expect(onDelete).toHaveBeenCalledWith({ includeRelated: false });
+  });
 });

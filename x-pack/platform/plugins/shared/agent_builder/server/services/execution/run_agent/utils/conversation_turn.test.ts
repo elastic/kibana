@@ -9,7 +9,6 @@ import {
   ConversationRoundStatus,
   ConversationRoundStepType,
   ToolResultType,
-  isTodosStep,
   type ConversationRoundStep,
   type ReasoningStep,
   type ToolCallStep,
@@ -35,11 +34,9 @@ import {
   pausedThenInterruptedResumeTimeline,
   promptResponseEvent,
 } from '../../../../test_utils/timeline';
-import { roundsToEvents } from '../../../conversation/client/rounds_to_events';
 import * as eventsToRoundsModule from '../../../conversation/client/events_to_rounds';
 import { eventsToRounds } from '../../../conversation/client/events_to_rounds';
 import { isPendingResumeConversation } from '../../utils/conversations';
-import { applyStepUpdates, stepUpdates } from '../step_state';
 import { foldConversationTurns, getPendingTurn } from './conversation_turn';
 
 const actor = { type: EventActorType.agent, id: 'agent' } as const;
@@ -120,11 +117,6 @@ const reasoning = (text: string): ReasoningStep => ({
   type: ConversationRoundStepType.reasoning,
   reasoning: text,
 });
-const todos = (content: string) => ({
-  type: ConversationRoundStepType.updateTodos,
-  todos: [{ content, status: 'pending' }],
-});
-
 const pendingCall: ToolCallStep = {
   type: ConversationRoundStepType.toolCall,
   tool_call_id: 'c1',
@@ -197,7 +189,7 @@ describe('foldConversationTurns', () => {
     ).toEqual([]);
   });
 
-  it('folds a resume execution into its turn: resolves the pending call with delta progression, applies answers, replaces todos', () => {
+  it('folds a resume execution into its turn: resolves the pending call with delta progression, applies answers', () => {
     const question = {
       type: ConversationRoundStepType.askUserQuestion,
       prompt_id: 'p1',
@@ -209,7 +201,6 @@ describe('foldConversationTurns', () => {
       started('s1', 'r1', 'u1'),
       step('st1', 'r1', 0, pendingCall),
       step('st2', 'r1', 1, question),
-      step('st3', 'r1', 2, todos('a')),
       terminated('t1', 'r1', {
         type: 'prompt_requested',
         prompts: [
@@ -223,8 +214,7 @@ describe('foldConversationTurns', () => {
       }),
       started('s2', 'r1_1', 'pr1', TimelineTriggerType.promptResponse),
       step('st4', 'r1_1', 0, { ...pendingCall, results, progression: [{ message: 'p1' }] }),
-      step('st5', 'r1_1', 1, todos('b')),
-      step('st6', 'r1_1', 2, reasoning('after')),
+      step('st5', 'r1_1', 1, reasoning('after')),
       terminated(
         't2',
         'r1_1',
@@ -244,14 +234,12 @@ describe('foldConversationTurns', () => {
       ConversationRoundStepType.toolCall,
       ConversationRoundStepType.askUserQuestion,
       ConversationRoundStepType.reasoning,
-      ConversationRoundStepType.updateTodos,
     ]);
     expect(turn.steps[0]).toMatchObject({
       results,
       progression: [{ message: 'p0' }, { message: 'p1' }],
     });
     expect(turn.steps[1]).toMatchObject({ answers: [{ choice: [0] }] });
-    expect(turn.steps[3]).toMatchObject({ todos: [{ content: 'b' }] });
   });
 
   it('ignores a resume whose prompt_response does not point at a known terminated event', () => {
@@ -267,46 +255,6 @@ describe('foldConversationTurns', () => {
     expect(turns).toHaveLength(1);
     expect(turns[0].steps).toEqual([]);
     expect(turns[0].terminated?.id).toBe('t1');
-  });
-
-  it('keeps only the latest todos step when a legacy merged round carried several', () => {
-    // A rounds-only conversation whose last round was paused and resumed once without a
-    // todo_write on the resume: `mergeRounds` left two todos steps in `round.steps`.
-    const legacyConversation = createEmptyConversation({
-      rounds: [
-        createRound({
-          id: 'r1',
-          status: ConversationRoundStatus.awaitingPrompt,
-          pending_prompts: [
-            { id: 'confirm', type: AgentPromptType.confirmation, title: 't', message: 'm' },
-          ],
-          steps: [
-            reasoning('one'),
-            todos('v1'),
-            pendingCall,
-            reasoning('two'),
-            todos('v2'),
-          ] as ConversationRoundStep[],
-        }),
-      ],
-    });
-
-    const turn = foldConversationTurns(roundsToEvents(legacyConversation)).at(-1)!;
-    expect(turn.steps.filter(isTodosStep)).toHaveLength(1);
-    expect(turn.steps.at(-1)).toMatchObject({
-      type: ConversationRoundStepType.updateTodos,
-      todos: [{ content: 'v2' }],
-    });
-    expect(turn.steps.map((s) => s.type)).toEqual([
-      ConversationRoundStepType.reasoning,
-      ConversationRoundStepType.toolCall,
-      ConversationRoundStepType.reasoning,
-      ConversationRoundStepType.updateTodos,
-    ]);
-    // and a later graph update that does not touch todos keeps v2
-    expect(
-      applyStepUpdates(turn.steps, [stepUpdates.append(reasoning('after'))]).at(-1)
-    ).toMatchObject({ todos: [{ content: 'v2' }] });
   });
 
   it('exposes pending prompts for a paused turn', () => {

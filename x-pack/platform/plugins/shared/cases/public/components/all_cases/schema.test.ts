@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { omit, pick } from 'lodash';
 import { DEFAULT_CASES_TABLE_STATE } from '../../containers/constants';
-import { AllCasesURLQueryParamsRt, validateSchema } from './schema';
+import { AllCasesURLQueryParamsSchema, validateSchema } from './schema';
 
 describe('Schema', () => {
   const supportedFilterOptions = pick(DEFAULT_CASES_TABLE_STATE.filterOptions, [
@@ -27,15 +26,16 @@ describe('Schema', () => {
     ...DEFAULT_CASES_TABLE_STATE.queryParams,
   };
 
-  describe('AllCasesURLQueryParamsRt', () => {
-    it('decodes correctly with defaults', () => {
-      const [params, errors] = validateNonExact(defaultState, AllCasesURLQueryParamsRt);
-
-      expect(params).toEqual(defaultState);
-      expect(errors).toEqual(null);
+  describe('AllCasesURLQueryParamsSchema', () => {
+    it('parses correctly with defaults', () => {
+      const result = AllCasesURLQueryParamsSchema.safeParse(defaultState);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data).toEqual(defaultState);
+      }
     });
 
-    it('decodes correctly with values', () => {
+    it('parses correctly with values', () => {
       const state = {
         assignees: ['elastic'],
         tags: ['a', 'b'],
@@ -52,48 +52,49 @@ describe('Schema', () => {
         perPage: 20,
       };
 
-      const [params, errors] = validateNonExact(state, AllCasesURLQueryParamsRt);
-
-      expect(params).toEqual(state);
-      expect(errors).toEqual(null);
-    });
-
-    it('does not throws an error when missing fields', () => {
-      for (const [key] of Object.entries(defaultState)) {
-        const stateWithoutKey = omit(defaultState, key);
-        const [params, errors] = validateNonExact(stateWithoutKey, AllCasesURLQueryParamsRt);
-
-        expect(params).toEqual(stateWithoutKey);
-        expect(errors).toEqual(null);
+      const result = AllCasesURLQueryParamsSchema.safeParse(state);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data).toEqual(state);
       }
     });
 
-    it('removes unknown properties', () => {
-      const [params, errors] = validateNonExact({ page: 10, foo: 'bar' }, AllCasesURLQueryParamsRt);
+    it('does not throw when missing fields', () => {
+      for (const [key] of Object.entries(defaultState)) {
+        const stateWithoutKey = omit(defaultState, key);
+        const result = AllCasesURLQueryParamsSchema.safeParse(stateWithoutKey);
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data).toEqual(stateWithoutKey);
+        }
+      }
+    });
 
-      expect(params).toEqual({ page: 10 });
-      expect(errors).toEqual(null);
+    it('strips unknown properties', () => {
+      const result = AllCasesURLQueryParamsSchema.safeParse({ page: 10, foo: 'bar' });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data).toEqual({ page: 10 });
+      }
     });
 
     it.each(['status', 'severity', 'sortOrder', 'sortField', 'page', 'perPage'])(
-      'throws if %s has invalid value',
+      'fails if %s has invalid value',
       (key) => {
-        const [params, errors] = validateNonExact({ [key]: 'foo' }, AllCasesURLQueryParamsRt);
-
-        expect(params).toEqual(null);
-        expect(errors).toEqual(`Invalid value "foo" supplied to "${key}"`);
+        const result = AllCasesURLQueryParamsSchema.safeParse({ [key]: 'foo' });
+        expect(result.success).toBe(false);
       }
     );
   });
 
   describe('validateSchema', () => {
     it('validates schema correctly', () => {
-      const params = validateSchema(defaultState, AllCasesURLQueryParamsRt);
+      const params = validateSchema(defaultState, AllCasesURLQueryParamsSchema);
       expect(params).toEqual(defaultState);
     });
 
-    it('throws an error if the schema is not valid', () => {
-      const params = validateSchema({ severity: 'foo' }, AllCasesURLQueryParamsRt);
+    it('returns null if the schema is not valid', () => {
+      const params = validateSchema({ severity: 'foo' }, AllCasesURLQueryParamsSchema);
       expect(params).toEqual(null);
     });
   });

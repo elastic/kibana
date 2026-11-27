@@ -15,12 +15,14 @@ import { AgentAvatar } from '../../common/agent_avatar';
 import { AuthorHeader } from './author_header';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { EventSteps } from './event_steps/event_steps';
+import { groupSteps } from './event_steps/group_steps';
 import { AgentResponse } from './agent_response';
 import { executionTerminatedToResponse } from './items/execution_terminated_event';
 import { ExecutionFailedEvent } from './items/execution_failed_event';
 import { ExecutionAbortedEvent } from './items/execution_aborted_event';
 import { PendingPrompts } from './items/pending_prompts';
 import type { AgentTurnItem } from './types';
+import { TURN_COLUMN_GUTTER, turnAvatarColumnWidth } from './turn_content_inset';
 import {
   isCompletedTurn,
   isFailedTurn,
@@ -52,8 +54,8 @@ const renderContent = (
   const { executionId } = item;
   if (isFailedTurn(item) || isAbortedTurn(item)) {
     return (
-      <EuiFlexGroup direction="column" gutterSize="s">
-        {item.steps.length > 0 && (
+      <EuiFlexGroup direction="column" gutterSize="m">
+        {groupSteps(item.steps).length > 0 && (
           <EuiFlexItem grow={false}>
             <EventSteps
               steps={item.steps}
@@ -115,7 +117,7 @@ const renderContent = (
   );
 };
 
-export const AgentTurn: React.FC<AgentTurnProps> = ({
+const AgentTurnComponent: React.FC<AgentTurnProps> = ({
   item,
   agent,
   conversationAttachments,
@@ -127,13 +129,17 @@ export const AgentTurn: React.FC<AgentTurnProps> = ({
   const isLoading = status === 'running' || isResuming;
 
   const avatarColumnStyles = css`
-    min-inline-size: ${euiTheme.size.l};
+    min-inline-size: ${turnAvatarColumnWidth(euiTheme)};
+  `;
+
+  const contentColumnStyles = css`
+    min-inline-size: 0;
   `;
 
   const content = renderContent(item, conversationId, conversationAttachments);
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+    <EuiFlexGroup gutterSize={TURN_COLUMN_GUTTER} alignItems="flexStart" responsive={false}>
       {/* The column keeps its width while the agent definition is still loading. */}
       <EuiFlexItem
         grow={false}
@@ -146,7 +152,7 @@ export const AgentTurn: React.FC<AgentTurnProps> = ({
           agent && <AgentAvatar agent={agent} size="s" iconSize="l" />
         )}
       </EuiFlexItem>
-      <EuiFlexItem grow={true}>
+      <EuiFlexItem grow={true} css={contentColumnStyles}>
         <EuiFlexGroup direction="column" gutterSize="s">
           {agent && (
             <EuiFlexItem grow={false}>
@@ -164,3 +170,6 @@ export const AgentTurn: React.FC<AgentTurnProps> = ({
     </EuiFlexGroup>
   );
 };
+
+export const AgentTurn = React.memo(AgentTurnComponent);
+AgentTurn.displayName = 'AgentTurn';

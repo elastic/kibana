@@ -20,7 +20,7 @@ import {
   type AlertSeverity,
 } from '@kbn/rule-data-utils';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
-import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
+import { parseDuration, RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import type { IBasePath, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
@@ -108,7 +108,7 @@ export const createCustomThresholdExecutor = ({
       startedAt,
       executionId,
       spaceId,
-      rule: { id: ruleId },
+      rule: { id: ruleId, schedule },
       getTimeRange,
     } = options;
 
@@ -187,7 +187,8 @@ export const createCustomThresholdExecutor = ({
       esQueryConfig,
       runtimeMappings,
       state.lastRunTimestamp,
-      previousMissingGroups
+      previousMissingGroups,
+      parseDuration(schedule.interval)
     );
 
     const alertResults = criterionResults.map((r) => r.evaluations);

@@ -40,6 +40,10 @@ export interface TestUserData {
   organizationId: string;
   projectType: string;
   applicationRoles: string[];
+  /** Built-in UIAM organization roles, see `buildMockIdpUiamRoleAssignments`. */
+  organizationRoleIds?: string[];
+  /** Built-in UIAM project roles, see `buildMockIdpUiamRoleAssignments`. */
+  projectRoles?: string[];
 }
 
 /**
@@ -85,6 +89,7 @@ interface PersistableApiKey {
   id: string;
   hash: string;
   creator: string;
+  creator_type: 'user';
   organization_id: string;
   expiration: string;
   role_assignments: {
@@ -108,6 +113,8 @@ function createUserDocument(userData: TestUserData): PersistableUser {
     organizationId: userData.organizationId,
     projectType: userData.projectType,
     applicationRoles: userData.applicationRoles,
+    organizationRoleIds: userData.organizationRoleIds,
+    projectRoles: userData.projectRoles,
   });
   return {
     id: userData.userId,
@@ -286,6 +293,8 @@ function createApiKeyDocument(apiKeyData: TestApiKeyData): PersistableApiKey {
     id: API_KEY_ID,
     hash: '{SSHA-256}$yY06GoiBnlS/V2kNqWOTlh7OplBxIayo9C5wa5J5FxM=$OdktViokHd1IPPxULCSW4WEuxsY1ploVNbDsISwrLyk=',
     creator: apiKeyData.creator,
+    // UIAM no longer infers the creator type from the creator id and fails to read a key without it.
+    creator_type: 'user',
     organization_id: apiKeyData.organizationId,
     // Set expiration to 1 year in the future for testing purposes.
     expiration: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),

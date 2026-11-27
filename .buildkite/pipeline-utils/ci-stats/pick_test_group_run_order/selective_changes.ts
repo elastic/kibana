@@ -7,32 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { execFileSync } from 'node:child_process';
 import { listChangedFiles } from '../../affected-packages/strategy_git.ts';
-import { getKibanaDir } from '../../get_kibana_dir.ts';
+import { FULL_SHA_PATTERN, git } from '../../git.ts';
+
+export type SelectionBaseKind = 'pr' | 'merge-queue' | 'on-merge';
+
+const BASE_SOURCE: Record<SelectionBaseKind, string> = {
+  pr: 'GITHUB_PR_MERGE_BASE',
+  'merge-queue': 'BUILDKITE_MERGE_QUEUE_BASE_COMMIT',
+  'on-merge': 'on-merge-selection base',
+};
 
 /** Lists changed files since the selection base; throws on Git or validation errors. */
 export const resolveSelectiveTestingChanges = (
   selectionBase: string | undefined,
-  isMergeQueue: boolean
+  kind: SelectionBaseKind
 ): string[] => {
-  const source = isMergeQueue ? 'BUILDKITE_MERGE_QUEUE_BASE_COMMIT' : 'GITHUB_PR_MERGE_BASE';
+  const source = BASE_SOURCE[kind];
+  const isPinned = kind !== 'pr';
   console.log(`Selective testing base: ${source}=${selectionBase || '(unset)'}`);
 
   if (!selectionBase) {
     throw new Error(`${source} is not set`);
   }
-  // Reject moving refs such as "main"; merge groups must use the pinned commit from their event.
-  if (isMergeQueue && !/^[a-f0-9]{40}$/i.test(selectionBase)) {
+  // Reject moving refs such as "main"; pinned bases must be the exact commit from their source.
+  if (isPinned && !FULL_SHA_PATTERN.test(selectionBase)) {
     throw new Error(`${source} must be a full commit SHA`);
   }
 
-  const git = (args: string[]): string =>
-    execFileSync('git', args, {
-      cwd: getKibanaDir(),
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'pipe'],
-    }).trim();
   const head = git(['rev-parse', '--verify', 'HEAD^{commit}']);
   const requestedBase = git([
     'rev-parse',
@@ -41,10 +43,10 @@ export const resolveSelectiveTestingChanges = (
     `${selectionBase}^{commit}`,
   ]);
 
-  // PR refs can resolve to an earlier common ancestor, but a merge group's base
-  // must stay fixed so the comparison excludes earlier queued PRs.
+  // PR refs can resolve to an earlier common ancestor, but a pinned base
+  // must stay fixed so the comparison excludes changes outside its range.
   const base = git(['merge-base', requestedBase, head]);
-  if (isMergeQueue && base !== requestedBase) {
+  if (isPinned && base !== requestedBase) {
     throw new Error(`${source}=${requestedBase} is not an ancestor of HEAD=${head}`);
   }
 

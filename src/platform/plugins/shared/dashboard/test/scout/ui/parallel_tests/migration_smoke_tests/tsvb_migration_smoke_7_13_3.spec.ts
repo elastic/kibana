@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import { findImportedSavedObjectId, spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   ensureIndexPatternFromExport,
-  findImportedSavedObjectId,
   getDashboardPanels,
 } from '../../../utils/migration_smoke_helpers';
 import {

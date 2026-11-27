@@ -1,5 +1,5 @@
 {
-  "sha1": "715ca746a5fddc8a73c9b5e9d44b99d14e53b212",
+  "sha1": "76b66f8cbd909ae65350fae384258b36f55f84ba",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -26,8 +26,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/accessibility.spec.ts",
-        "line": 55,
-        "column": 61
+        "line": 52,
+        "column": 7
       }
     },
     {
@@ -39,8 +39,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/accessibility.spec.ts",
-        "line": 58,
-        "column": 8
+        "line": 55,
+        "column": 34
       }
     },
     {
@@ -52,8 +52,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/accessibility.spec.ts",
-        "line": 62,
-        "column": 8
+        "line": 59,
+        "column": 67
       }
     },
     {
@@ -65,8 +65,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/accessibility.spec.ts",
-        "line": 64,
-        "column": 23
+        "line": 62,
+        "column": 13
       }
     },
     {
@@ -78,8 +78,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/accessibility.spec.ts",
-        "line": 68,
-        "column": 56
+        "line": 65,
+        "column": 58
       }
     },
     {
@@ -91,8 +91,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/accessibility.spec.ts",
-        "line": 71,
-        "column": 13
+        "line": 69,
+        "column": 5
       }
     },
     {
@@ -104,8 +104,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/accessibility.spec.ts",
-        "line": 74,
-        "column": 73
+        "line": 73,
+        "column": 13
       }
     },
     {
@@ -455,7 +455,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/uptime_security.spec.ts",
-        "line": 54,
+        "line": 56,
         "column": 57
       }
     },
@@ -468,7 +468,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/uptime_security.spec.ts",
-        "line": 96,
+        "line": 100,
         "column": 7
       }
     },

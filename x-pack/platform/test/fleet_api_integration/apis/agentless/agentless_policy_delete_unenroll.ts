@@ -18,7 +18,6 @@ import { cleanFleetIndices } from '../space_awareness/helpers';
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const es = getService('es');
-  const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
 
   describe('fleet_agentless_policy_delete_unenroll', () => {
@@ -45,9 +44,9 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-      await cleanFleetIndices(es);
+      // Gate on Fleet setup instead of wiping its preconfigured state, which nothing recreates.
       await apiClient.setup();
+      await cleanFleetIndices(es);
 
       policyId = uuidv4();
       agentId = `agent-agentless-${policyId}`;
@@ -101,7 +100,11 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      // The happy path already deleted the policy, so a 404 here is expected.
+      await supertest
+        .delete(`/api/fleet/managed_integrations/${policyId}?force=true`)
+        .set('kbn-xsrf', 'xxxx')
+        .send();
       await cleanFleetIndices(es);
     });
 

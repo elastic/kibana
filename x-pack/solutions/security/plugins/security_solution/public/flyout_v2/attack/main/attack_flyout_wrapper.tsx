@@ -12,7 +12,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
-import { useAttackDetails } from '../../../flyout/attack_details/hooks/use_attack_details';
+import { useAttackDetails } from './hooks/use_attack_details';
 import { AttackFlyout } from '.';
 
 const FETCH_ERROR = i18n.translate('xpack.securitySolution.flyoutV2.attack.wrapper.fetchError', {

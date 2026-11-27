@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-// Mirrors Fleet's hasVersionSuffix/removeVersionSuffixFromPolicyId (not exported
-// from @kbn/fleet-plugin's common entry point). Only strips a trailing
-// #<major>.<minor>, since a custom policy id may legitimately contain a
-// non-version "#" (e.g. `policy#123`).
-const VERSION_SUFFIX_PATTERN = /#\d+\.\d+$/;
+import { removeVersionSuffixFromPolicyId } from '@kbn/fleet-plugin/common';
 
+// Strips the suffix that Fleet adds to the policy id of an agent: `#<major>.<minor>` for a version
+// specific policy and `#sentinel` for the sentinel policy version. A custom policy id may legitimately
+// contain a non-version "#" (e.g. `policy#123`), which is left alone.
 export const stripPolicyIdVersionSuffix = (policyId: string): string =>
-  VERSION_SUFFIX_PATTERN.test(policyId) ? policyId.slice(0, policyId.lastIndexOf('#')) : policyId;
+  removeVersionSuffixFromPolicyId(policyId);

@@ -9,8 +9,13 @@ jest.mock('timers/promises');
 import { setTimeout } from 'timers/promises';
 import { loggerMock } from '@kbn/logging-mocks';
 import { errors as EsErrors } from '@elastic/elasticsearch';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
-import { retryTransientEsErrors } from './retry';
+import {
+  REQUEST_RETRY_OPTIONS,
+  ignoreAlreadyExistsAfterAmbiguousFailure,
+  retryTransientEsErrors,
+} from './retry';
 
 const setTimeoutMock = setTimeout as jest.Mock<
   ReturnType<typeof setTimeout>,
@@ -54,8 +59,92 @@ describe('retryTransientErrors', () => {
     });
 
     expect(await retryTransientEsErrors(esCallMock)).toEqual('success');
-    expect(setTimeoutMock.mock.calls).toEqual([[2000], [4000], [8000], [16000]]);
+    expect(setTimeoutMock.mock.calls.map(([delay]) => delay)).toEqual([2000, 4000, 8000, 16000]);
     expect(esCallMock).toHaveBeenCalledTimes(5);
+  });
+
+  it('gives up after 5 retries by default', async () => {
+    const error = new EsErrors.ConnectionError('foo');
+    const esCallMock = jest.fn().mockRejectedValue(error);
+
+    await expect(retryTransientEsErrors(esCallMock)).rejects.toBe(error);
+    expect(esCallMock).toHaveBeenCalledTimes(6);
+    expect(setTimeoutMock.mock.calls.map(([delay]) => delay)).toEqual([
+      2000, 4000, 8000, 16000, 32000,
+    ]);
+  });
+
+  it('uses the provided retry options', async () => {
+    const error = new EsErrors.ConnectionError('foo');
+    const esCallMock = jest.fn().mockRejectedValue(error);
+
+    await expect(
+      retryTransientEsErrors(esCallMock, { retryOptions: REQUEST_RETRY_OPTIONS })
+    ).rejects.toBe(error);
+    expect(esCallMock).toHaveBeenCalledTimes(3);
+    expect(setTimeoutMock.mock.calls.map(([delay]) => delay)).toEqual([1000, 2000]);
+  });
+
+  it('caps the backoff delay', async () => {
+    const error = new EsErrors.ConnectionError('foo');
+    const esCallMock = jest.fn().mockRejectedValue(error);
+
+    await expect(
+      retryTransientEsErrors(esCallMock, {
+        retryOptions: { maxRetries: 4, initialDelayMs: 1000, maxDelayMs: 3000 },
+      })
+    ).rejects.toBe(error);
+    expect(setTimeoutMock.mock.calls.map(([delay]) => delay)).toEqual([1000, 2000, 3000, 3000]);
+  });
+
+  it('does not call the operation when the signal is already aborted', async () => {
+    const controller = new AbortController();
+    controller.abort();
+    const esCallMock = jest.fn().mockResolvedValue('success');
+
+    await expect(
+      retryTransientEsErrors(esCallMock, { signal: controller.signal })
+    ).rejects.toThrow();
+    expect(esCallMock).not.toHaveBeenCalled();
+  });
+
+  it('passes the signal to the backoff timer', async () => {
+    const controller = new AbortController();
+    const esCallMock = jest
+      .fn()
+      .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+      .mockResolvedValue('success');
+
+    await retryTransientEsErrors(esCallMock, { signal: controller.signal });
+    expect(setTimeoutMock).toHaveBeenCalledWith(2000, undefined, { signal: controller.signal });
+  });
+
+  it('stops retrying when the signal is aborted during the backoff', async () => {
+    const controller = new AbortController();
+    const abortError = new Error('aborted');
+    setTimeoutMock.mockImplementationOnce(async () => {
+      controller.abort();
+      throw abortError;
+    });
+    const esCallMock = jest.fn().mockRejectedValue(new EsErrors.ConnectionError('foo'));
+
+    await expect(retryTransientEsErrors(esCallMock, { signal: controller.signal })).rejects.toBe(
+      abortError
+    );
+    expect(esCallMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not retry once the signal is aborted', async () => {
+    const controller = new AbortController();
+    const esCallMock = jest.fn(async () => {
+      controller.abort();
+      throw new EsErrors.ConnectionError('foo');
+    });
+
+    await expect(
+      retryTransientEsErrors(esCallMock, { signal: controller.signal })
+    ).rejects.toThrow();
+    expect(esCallMock).toHaveBeenCalledTimes(1);
   });
 
   it('retries each supported error type', async () => {
@@ -83,5 +172,94 @@ describe('retryTransientErrors', () => {
     const esCallMock = jest.fn().mockRejectedValueOnce(error).mockResolvedValue('success');
     await expect(retryTransientEsErrors(esCallMock)).rejects.toThrow(error);
     expect(esCallMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('ignoreAlreadyExistsAfterAmbiguousFailure', () => {
+  const alreadyExistsError = new EsErrors.ResponseError(
+    elasticsearchClientMock.createApiResponse({
+      statusCode: 400,
+      body: {
+        error: {
+          type: 'resource_already_exists_exception',
+          reason: 'Transform with id [slo-id-1] already exists',
+        },
+      },
+    })
+  );
+  const upgradingError = new EsErrors.ResponseError(
+    elasticsearchClientMock.createApiResponse({
+      statusCode: 409,
+      body: {
+        error: {
+          type: 'status_exception',
+          reason: 'Cannot create new Transform while the Transform feature is upgrading.',
+        },
+      },
+    })
+  );
+
+  it.each([
+    ['TimeoutError', new EsErrors.TimeoutError('timeout')],
+    ['ConnectionError', new EsErrors.ConnectionError('connection reset')],
+    [
+      '504 response',
+      new EsErrors.ResponseError({ statusCode: 504, meta: {} as any, warnings: [] }),
+    ],
+  ])('resolves when the resource already exists after a %s', async (_, ambiguousError) => {
+    const esCall = ignoreAlreadyExistsAfterAmbiguousFailure(
+      jest.fn().mockRejectedValueOnce(ambiguousError).mockRejectedValueOnce(alreadyExistsError)
+    );
+
+    await expect(esCall()).rejects.toBe(ambiguousError);
+    await expect(esCall()).resolves.toBeUndefined();
+  });
+
+  it.each([
+    [
+      'NoLivingConnectionsError',
+      new EsErrors.NoLivingConnectionsError('no living connection', {
+        warnings: [],
+        meta: {} as any,
+      }),
+    ],
+    [
+      '429 response',
+      new EsErrors.ResponseError({ statusCode: 429, meta: {} as any, warnings: [] }),
+    ],
+  ])(
+    'rejects when the resource already exists after a %s, since it was never applied',
+    async (_, unappliedError) => {
+      const esCall = ignoreAlreadyExistsAfterAmbiguousFailure(
+        jest.fn().mockRejectedValueOnce(unappliedError).mockRejectedValueOnce(alreadyExistsError)
+      );
+
+      await expect(esCall()).rejects.toBe(unappliedError);
+      await expect(esCall()).rejects.toBe(alreadyExistsError);
+    }
+  );
+
+  it('rejects when the resource already exists on the first attempt', async () => {
+    const esCall = ignoreAlreadyExistsAfterAmbiguousFailure(
+      jest.fn().mockRejectedValue(alreadyExistsError)
+    );
+    await expect(esCall()).rejects.toBe(alreadyExistsError);
+  });
+
+  it('rejects other errors after an ambiguous failure', async () => {
+    const esCall = ignoreAlreadyExistsAfterAmbiguousFailure(
+      jest
+        .fn()
+        .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+        .mockRejectedValueOnce(upgradingError)
+    );
+
+    await expect(esCall()).rejects.toThrow('timeout');
+    await expect(esCall()).rejects.toBe(upgradingError);
+  });
+
+  it('resolves with the operation result on success', async () => {
+    const esCall = ignoreAlreadyExistsAfterAmbiguousFailure(jest.fn().mockResolvedValue('success'));
+    await expect(esCall()).resolves.toEqual('success');
   });
 });

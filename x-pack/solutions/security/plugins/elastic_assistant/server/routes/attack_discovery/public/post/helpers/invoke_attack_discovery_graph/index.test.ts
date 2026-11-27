@@ -18,11 +18,17 @@ import { getAttackDiscoveryPrompts } from '../../../../../../lib/attack_discover
 import { throwIfErrorCountsExceeded } from '../throw_if_error_counts_exceeded';
 import { throwIfInvalidAnonymization } from '../throw_if_invalid_anonymization';
 
-jest.mock('@kbn/langchain/server', () => ({
-  ActionsClientLlm: jest.fn(),
-  InferenceClientLlm: jest.fn(),
-  getLangSmithTracer: jest.fn().mockReturnValue([]),
-}));
+jest.mock('@kbn/langchain/server', () => {
+  const { isModelRefusalError, throwIfModelRefusal } = jest.requireActual('@kbn/langchain/server');
+
+  return {
+    ActionsClientLlm: jest.fn(),
+    InferenceClientLlm: jest.fn(),
+    getLangSmithTracer: jest.fn().mockReturnValue([]),
+    isModelRefusalError,
+    throwIfModelRefusal,
+  };
+});
 
 jest.mock('../../../../../../lib/attack_discovery/graphs/default_attack_discovery_graph', () => ({
   getDefaultAttackDiscoveryGraph: jest.fn(),
@@ -176,6 +182,48 @@ describe('invokeAttackDiscoveryGraph', () => {
       anonymizedAlerts: [{ pageContent: 'Test Doc' }],
       attackDiscoveries: [{ title: 'Test Insight' }],
     });
+  });
+
+  it('caps a template connector at 100 alerts and forwards the connector timeout', async () => {
+    const chatComplete = jest.fn().mockResolvedValue({ content: '{}' });
+    const apiConfig: ApiConfig = {
+      actionTypeId: '.inference',
+      connectorId: 'daybreak',
+    };
+    logger = {
+      debug: jest.fn(),
+      warn: jest.fn(),
+    } as unknown as Logger;
+
+    await invokeAttackDiscoveryGraph({
+      actionsClient,
+      alertsIndexPattern: 'alerts-*',
+      anonymizationFields: [{ id: 'mock-id', field: '_id', allowed: true }],
+      apiConfig,
+      connectorTimeout: 600_000,
+      esClient,
+      inferenceClient: {
+        chatComplete,
+        getConnectorById: jest.fn().mockResolvedValue({
+          metadata: { capabilities: { templates: { policy: 'required' } } },
+        }),
+      } as unknown as InferenceClient,
+      latestReplacements: {},
+      logger,
+      onNewReplacements: jest.fn(),
+      savedObjectsClient,
+      size: 500,
+    });
+
+    expect(getDefaultAttackDiscoveryGraph).toHaveBeenCalledWith(
+      expect.objectContaining({ size: 100 })
+    );
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('omitting 400 of 500'));
+
+    const completeWithTemplate = (getDefaultAttackDiscoveryGraph as jest.Mock).mock.calls[0][0]
+      .completeWithTemplate as (request: { alerts: string[]; phase: string }) => Promise<string>;
+    await completeWithTemplate({ alerts: ['alert'], phase: 'generate' });
+    expect(chatComplete).toHaveBeenCalledWith(expect.objectContaining({ timeout: 600_000 }));
   });
 
   it('throws if throwIfErrorCountsExceeded throws', async () => {

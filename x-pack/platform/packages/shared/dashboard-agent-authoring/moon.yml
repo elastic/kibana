@@ -21,9 +21,12 @@ dependsOn:
   - '@kbn/agent-builder-dashboards-common'
   - '@kbn/agent-builder-visualizations-common'
   - '@kbn/as-code-dashboard-schema'
+  - '@kbn/dashboard-constants'
+  - '@kbn/ui-theme'
   - '@kbn/controls-constants'
   - '@kbn/custom-content-common'
   - '@kbn/dashboard-markdown-schemas'
+  - '@kbn/esql-types'
   - '@kbn/esql-utils'
   - '@kbn/field-types'
   - '@kbn/lens-common'
@@ -41,6 +44,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

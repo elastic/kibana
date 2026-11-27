@@ -108,6 +108,39 @@ describe('ExecutionHistoryClient', () => {
       );
     });
 
+    it('defaults from to 24 hours before now when the caller omits it', async () => {
+      const { client, findRuleExecutions } = createMocks();
+      const now = Date.parse('2026-06-02T12:00:00.000Z');
+      const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(now);
+      try {
+        await client.listRuleExecutions(baseArgs());
+      } finally {
+        nowSpy.mockRestore();
+      }
+      expect(findRuleExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({ from: '2026-06-01T12:00:00.000Z' })
+      );
+    });
+
+    it('defaults from to 24 hours before to when the caller passes to but omits from', async () => {
+      const { client, findRuleExecutions } = createMocks();
+      const to = '2026-06-02T12:00:00.000Z';
+
+      await client.listRuleExecutions({ ...baseArgs(), to });
+
+      expect(findRuleExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({ from: '2026-06-01T12:00:00.000Z', to })
+      );
+    });
+
+    it('keeps an explicit from instead of the default window', async () => {
+      const { client, findRuleExecutions } = createMocks();
+      await client.listRuleExecutions(baseArgs({ from: '2020-01-01T00:00:00.000Z' }));
+      expect(findRuleExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({ from: '2020-01-01T00:00:00.000Z' })
+      );
+    });
+
     it('echoes the service response back to the caller verbatim', async () => {
       const { client, findRuleExecutions } = createMocks();
       findRuleExecutions.mockResolvedValue({
@@ -141,7 +174,7 @@ describe('ExecutionHistoryClient', () => {
         expect.objectContaining({ ruleIds: ['rule-a', 'rule-b'] })
       );
       expect(findRuleExecutions.mock.calls[0][0]).not.toHaveProperty('search');
-      expect(result.searchMatches).toEqual({ rules: 2, isTruncated: false });
+      expect(result.searchMatches).toEqual({ ruleCount: 2, isTruncated: false });
     });
 
     it('also matches a search that is a rule id', async () => {
@@ -226,7 +259,7 @@ describe('ExecutionHistoryClient', () => {
         total: 0,
         page: 2,
         perPage: 25,
-        searchMatches: { rules: 0, isTruncated: false },
+        searchMatches: { ruleCount: 0, isTruncated: false },
       });
     });
 
@@ -248,7 +281,7 @@ describe('ExecutionHistoryClient', () => {
 
       const result = await client.listRuleExecutions(baseArgs({ search: 'cpu' }));
 
-      expect(result.searchMatches).toEqual({ rules: 501, isTruncated: true });
+      expect(result.searchMatches).toEqual({ ruleCount: 501, isTruncated: true });
     });
 
     it('logs a warning and finds nothing when the user cannot read rules', async () => {

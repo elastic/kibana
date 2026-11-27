@@ -23,6 +23,9 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import type { ConnectorSpec } from '../../connector_spec';
 
+// OTX documents no indicator length limit; URL indicators returned by getPulse can exceed 2048 characters.
+const MAX_INDICATOR_LENGTH = 8192;
+
 export const AlienVaultOTXConnector: ConnectorSpec = {
   metadata: {
     id: '.alienvault-otx',
@@ -59,7 +62,7 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
               'FileHash-SHA256',
             ])
             .describe('Indicator type'),
-          indicator: z.string().max(2048).describe('Indicator value'),
+          indicator: z.string().max(MAX_INDICATOR_LENGTH).describe('Indicator value'),
           section: z
             .string()
             .max(50)
@@ -171,7 +174,7 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
               'FileHash-SHA256',
             ])
             .describe('Indicator type'),
-          indicator: z.string().max(2048).describe('Indicator value'),
+          indicator: z.string().max(MAX_INDICATOR_LENGTH).describe('Indicator value'),
         })
       ),
       handler: async (ctx, input) => {

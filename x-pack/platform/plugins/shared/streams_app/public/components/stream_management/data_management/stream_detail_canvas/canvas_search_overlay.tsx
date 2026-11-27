@@ -61,7 +61,7 @@ export function CanvasSearchOverlay({ flow }: CanvasSearchOverlayProps) {
           </h2>
         }
         body={i18n.translate('xpack.streams.canvas.search.noMatchesDescription', {
-          defaultMessage: 'Adjust your search to see more of the canvas.',
+          defaultMessage: 'Adjust your search to see more of the map.',
         })}
       />
     </div>

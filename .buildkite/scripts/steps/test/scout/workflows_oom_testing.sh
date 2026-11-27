@@ -4,7 +4,7 @@ set -euo pipefail
 
 source .buildkite/scripts/steps/functional/common.sh
 
-CONFIG_PATH="src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/playwright.config.ts"
+CONFIG_PATH="x-pack/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/playwright.config.ts"
 
 echo "--- Workflow Schema OOM Prevention Test"
 echo "Config: $CONFIG_PATH"

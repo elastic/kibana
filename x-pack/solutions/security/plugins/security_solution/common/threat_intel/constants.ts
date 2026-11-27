@@ -70,26 +70,26 @@ export const GLOBAL_SPACE_ID = '*' as const;
  */
 export const MAX_URL_LENGTH = 2048;
 
-export const FETCH_ADAPTER_TYPES = ['rss', 'text_indicator_list', 'kev'] as const;
+export const FETCH_ADAPTER_TYPES = ['rss', 'kev'] as const;
 export type FetchAdapterType = (typeof FETCH_ADAPTER_TYPES)[number];
 
 /**
  * Stable document ids for the fixed, code-authoritative source catalog. Keep in
  * sync with `DEFAULT_SOURCES` in server setup seeding.
+ *
+ * CISA KEV is not in the MVP catalog: Continuous Threat Hunt has no Tier 1 path for
+ * pure vulnerability intel yet, so the feed would ingest reports nothing can hunt. The
+ * `kev` adapter stays registered so re-adding the id here (plus its URL and seed row)
+ * is the whole change when that hunt path lands.
  */
 export const APPROVED_CATALOG_SOURCE_IDS = [
-  'kev:cisa-known-exploited-vulnerabilities',
   'vendor_api:elastic-security-labs',
-  'rss:mandiant-research',
-  'rss:unit42',
-  'rss:talos',
-  'rss:crowdstrike',
   'rss:cisa-alerts',
-  'text_indicator_list:maltrail-cobaltstrike',
-  'rss:aws-security',
-  'rss:aws-security-bulletins',
-  'rss:fortiguard-advisories',
-  'rss:fortiguard-threat-signal',
+  'rss:uk-ncsc',
+  'rss:cert-fr-alerts',
+  'rss:cert-fr-threats',
+  'rss:cert-eu-advisories',
+  'rss:cert-eu-threat-intelligence',
 ] as const;
 
 export const APPROVED_SOURCE_IDS: ReadonlySet<string> = new Set(APPROVED_CATALOG_SOURCE_IDS);

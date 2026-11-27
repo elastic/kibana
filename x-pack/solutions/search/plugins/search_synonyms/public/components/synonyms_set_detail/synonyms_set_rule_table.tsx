@@ -146,7 +146,7 @@ export const SynonymsSetRuleTable = ({ synonymsSetId = '' }: { synonymsSetId: st
             defaultMessage: 'Delete',
           }),
           description: i18n.translate(
-            'xpack.searchSynonyms.synonymsSetTable.actions.deleteDescription',
+            'xpack.searchSynonyms.synonymsSetRuleTable.actions.deleteDescription',
             {
               defaultMessage: 'Delete synonym rule',
             }
@@ -166,7 +166,7 @@ export const SynonymsSetRuleTable = ({ synonymsSetId = '' }: { synonymsSetId: st
             defaultMessage: 'Edit',
           }),
           description: i18n.translate(
-            'xpack.searchSynonyms.synonymsSetTable.actions.editDescription',
+            'xpack.searchSynonyms.synonymsSetRuleTable.actions.editDescription',
             {
               defaultMessage: 'Edit synonym rule',
             }
@@ -274,7 +274,7 @@ export const SynonymsSetRuleTable = ({ synonymsSetId = '' }: { synonymsSetId: st
               setPageIndex(page.index);
               setPageSize(page.size);
             }}
-            tableCaption={i18n.translate('xpack.searchSynonyms.synonymsSetTable.tableCaption', {
+            tableCaption={i18n.translate('xpack.searchSynonyms.synonymsSetRuleTable.tableCaption', {
               defaultMessage: 'Synonym rules',
             })}
           />

@@ -1,0 +1,60 @@
+/* The renderer's tokens carry no subdued text or tint, so they are mixed from its text color. */
+.brief{--subdued:color-mix(in srgb,var(--cc-color-text) 75%,transparent);--tint:color-mix(in srgb,var(--cc-color-text) 7%,transparent);max-width:736px;font:14px/1.5 var(--cc-font-family);color:var(--cc-color-text);font-variant-numeric:tabular-nums}
+.brief *{box-sizing:border-box}
+.brief h1,.brief h2,.brief h3,.brief p,.brief ol,.brief figure{margin:0}
+/* The type scale: h1, then h2 and the entity name, then h3, then the small subdued text of details and notes. */
+.brief h1{margin:4px 0 12px;font-size:20px;line-height:1.25}
+.brief h2,.brief .name{font-size:16px;font-weight:600;line-height:1.3}
+.brief h3{font-size:14px;font-weight:600;line-height:20px}
+.brief .meta{font-size:12px;line-height:16px;color:var(--subdued);overflow-wrap:anywhere}
+.brief .meta strong{font-weight:600}
+.brief h2 .meta{font-weight:400}
+.brief .meta>span:not(:last-child)::after{content:' ·'}
+.brief .eyebrow{margin-bottom:4px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--cc-color-primary)}
+.brief .header{padding-bottom:24px;border-bottom:1px solid var(--cc-color-border)}
+.brief .section{margin-top:24px}
+.brief h2{margin-bottom:8px}
+/* A card is a bordered panel. */
+.brief .count,.brief .priority{border:1px solid var(--cc-color-border);border-radius:calc(var(--cc-radius) * 3);background:var(--cc-color-surface)}
+/* A badge is a pill, hollow or tinted by a status. */
+.brief .badge{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 9px;border-radius:24px;font-size:12px;font-weight:500;line-height:18px;white-space:nowrap;background:var(--tint);color:var(--subdued)}
+.brief .hollow{border:1px solid var(--cc-color-border);background:var(--cc-color-surface);color:var(--cc-color-text)}
+/* EUI's badge colors for the light and dark theme. The renderer has no tokens for the green, orange and yellow ones, so they are written out like the criticality dots. */
+.brief .success{background:light-dark(#C9F3E3,#0D362B);color:light-dark(#09724D,#24C292)}
+.brief .risk{background:light-dark(#FFDEBF,#4A221C);color:light-dark(#9E3A16,#FF995E)}
+.brief .warning{background:light-dark(#FDE9B5,#3D3014);color:light-dark(#825803,#FCD883)}
+.brief .danger{background:color-mix(in srgb,var(--cc-color-danger) 15%,transparent);color:var(--cc-color-danger)}
+.brief .neutral{background:color-mix(in srgb,var(--cc-color-primary) 12%,transparent);color:var(--cc-color-primary)}
+/* The counts mirror the page's Needs-attention tiles: title and description top-left, value and change bottom-right. */
+.brief .counts{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-top:12px}
+.brief .count{display:flex;flex-direction:column;align-items:flex-end;padding:12px}
+.brief .count-label,.brief .count-description{align-self:stretch;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.2}
+.brief .count-label{font-size:13px;font-weight:600}
+.brief .count-description{margin-top:6px;font-size:12px;color:var(--subdued)}
+.brief .count-value{margin-top:auto;padding-top:16px;font-size:28px;font-weight:600;line-height:1.2}
+.brief .flat{font-size:11px;line-height:1.2;color:var(--subdued)}
+.brief .priorities{display:flex;flex-direction:column;gap:8px;margin-top:12px;padding:0;list-style:none}
+.brief .priority{display:grid;grid-template-columns:24px 1fr;gap:12px;padding:12px 16px}
+/* Everything after the rank and the title row spans under the title. */
+.brief .priority>:nth-child(n+3){grid-column:2/-1}
+.brief .rank{display:flex;align-items:center;justify-content:center;width:24px;height:24px;margin-top:2px;border-radius:50%;background:var(--cc-color-primary);color:var(--cc-color-surface);font-size:12px;font-weight:600}
+.brief .head{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.brief .name{overflow-wrap:anywhere}
+.brief .badges{display:flex;flex-wrap:wrap;gap:6px;max-width:100%}
+.brief .block{display:flex;flex-direction:column;gap:4px}
+/* The page's criticality colours: EUI's severity colours, which the card's tokens don't carry. */
+.brief .dot{flex:none;width:8px;height:8px;border-radius:50%;background:#E3E8F2}
+.brief .dot[data-level=extreme_impact]{background:#EE4C48}
+.brief .dot[data-level=high_impact]{background:#FF995E}
+.brief .dot[data-level=medium_impact]{background:#FCD883}
+.brief .dot[data-level=low_impact]{background:#B5E5F2}
+.brief .chart{padding-top:16px;border-top:1px solid var(--cc-color-border)}
+.brief .chart figcaption{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:4px;font-size:12px}
+.brief .chart figcaption span{font-weight:500}
+.brief .chart svg{display:block;color:var(--cc-color-primary)}
+.brief .chart line{stroke:var(--cc-color-border);stroke-dasharray:3 3}
+.brief .chart text{font-size:11px;fill:var(--subdued)}
+.brief .chart .strong{font-weight:600;fill:var(--cc-color-text)}
+.brief .chart polygon{fill:currentColor;opacity:.08}
+.brief .chart polyline{fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round}
+.brief .chart circle{fill:currentColor}

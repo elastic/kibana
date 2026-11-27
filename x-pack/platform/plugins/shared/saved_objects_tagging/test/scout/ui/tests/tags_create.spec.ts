@@ -43,11 +43,14 @@ test.describe('Tags management create', { tag: tags.stateful.classic }, () => {
     expect(newTag?.description).toBe('I just added this tag');
   });
 
-  test('shows errors when validation fails', async ({ pageObjects }) => {
+  test('shows errors without resizing the modal', async ({ page, pageObjects }) => {
     const { tagManagement } = pageObjects;
     const { tagModal } = tagManagement;
 
     await tagModal.openCreate();
+    const modal = page.getByRole('dialog', { name: 'Create tag' });
+    const initialHeight = await modal.evaluate((element) => element.clientHeight);
+
     await tagModal.fillForm({
       name: 'a',
       description: 'The name will fail validation',
@@ -61,6 +64,11 @@ test.describe('Tags management create', { tag: tags.stateful.classic }, () => {
     const errors = await tagModal.getValidationErrors();
     expect(errors.name).toBeDefined();
     expect(errors.color).toBeUndefined();
+    await expect(modal).toHaveJSProperty('clientHeight', initialHeight);
+
+    await tagModal.fillForm({ color: '#zz' });
+    await expect.poll(async () => (await tagModal.getValidationErrors()).color).toBeDefined();
+    await expect(modal).toHaveJSProperty('clientHeight', initialHeight);
   });
 
   test('creates a tag after fixing validation errors', async ({ pageObjects }) => {

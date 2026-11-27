@@ -1,0 +1,126 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { act, renderHook } from '@testing-library/react';
+import { useHistory, useLocation } from 'react-router-dom';
+import { ENVIRONMENT_ALL_VALUE } from '@kbn/apm-types';
+import { useApplicationType } from './use_application_type';
+import { useDigitalExperienceParams } from './use_digital_experience_params';
+import { useEnvironment } from './use_environment';
+import { useQueryParam } from './use_query_param';
+import { useSourceFilter } from './use_source_filter';
+
+jest.mock('react-router-dom', () => ({ useHistory: jest.fn(), useLocation: jest.fn() }));
+jest.mock('./use_digital_experience_params');
+
+const push = jest.fn();
+
+const mockRoute = (query: Record<string, string>, search = '') => {
+  jest
+    .mocked(useDigitalExperienceParams)
+    .mockReturnValue({ path: {}, query } as unknown as ReturnType<
+      typeof useDigitalExperienceParams
+    >);
+  jest.mocked(useHistory).mockReturnValue({ push } as unknown as ReturnType<typeof useHistory>);
+  jest
+    .mocked(useLocation)
+    .mockReturnValue({ pathname: '/', search, hash: '' } as ReturnType<typeof useLocation>);
+};
+
+beforeEach(() => jest.clearAllMocks());
+
+describe('useQueryParam', () => {
+  it('reads the param, undefined when unset or empty', () => {
+    mockRoute({ environment: 'production' });
+    expect(renderHook(() => useQueryParam('environment')).result.current.value).toBe('production');
+
+    mockRoute({ environment: '' });
+    expect(renderHook(() => useQueryParam('environment')).result.current.value).toBeUndefined();
+  });
+
+  it('sets the param and keeps the others', () => {
+    mockRoute({}, '?rangeFrom=now-15m&rangeTo=now');
+    const { result } = renderHook(() => useQueryParam('environment'));
+
+    act(() => result.current.setValue('production'));
+
+    // Sorted like the router's links, which the breadcrumbs compare with the URL.
+    expect(push).toHaveBeenCalledWith(
+      expect.objectContaining({ search: 'environment=production&rangeFrom=now-15m&rangeTo=now' })
+    );
+  });
+
+  it('removes the param for undefined', () => {
+    mockRoute({ sourceFilter: 'otel' }, '?rangeFrom=now-15m&sourceFilter=otel');
+    const { result } = renderHook(() => useQueryParam('sourceFilter'));
+
+    act(() => result.current.setValue(undefined));
+
+    expect(push).toHaveBeenCalledWith(expect.objectContaining({ search: 'rangeFrom=now-15m' }));
+  });
+
+  it("reads the mobile page's filters from the application's route", () => {
+    mockRoute({ release: '2.0.0' });
+    expect(renderHook(() => useQueryParam('release')).result.current.value).toBe('2.0.0');
+    expect(useDigitalExperienceParams).toHaveBeenCalledWith('/{serviceName}');
+  });
+});
+
+describe('useApplicationType', () => {
+  const search = '?platformFilter=ios&rangeFrom=now-15m&sourceFilter=classic';
+
+  it('reads the tab', () => {
+    mockRoute({ applicationType: 'mobile' });
+    expect(renderHook(() => useApplicationType()).result.current.applicationType).toBe('mobile');
+  });
+
+  it('clears the web source filter on the mobile tab, in the same history entry', () => {
+    mockRoute({}, search);
+    const { result } = renderHook(() => useApplicationType());
+
+    act(() => result.current.setApplicationType('mobile'));
+
+    expect(push).toHaveBeenCalledTimes(1);
+    expect(push).toHaveBeenCalledWith(
+      expect.objectContaining({
+        search: 'applicationType=mobile&platformFilter=ios&rangeFrom=now-15m',
+      })
+    );
+  });
+
+  it('clears the mobile platform filter on the web tab', () => {
+    mockRoute({}, search);
+    const { result } = renderHook(() => useApplicationType());
+
+    act(() => result.current.setApplicationType('web'));
+
+    expect(push).toHaveBeenCalledWith(
+      expect.objectContaining({
+        search: 'applicationType=web&rangeFrom=now-15m&sourceFilter=classic',
+      })
+    );
+  });
+});
+
+describe('useEnvironment', () => {
+  it('reads the environment', () => {
+    mockRoute({ environment: 'production' });
+    expect(renderHook(() => useEnvironment()).result.current.environment).toBe('production');
+  });
+
+  it('reads ENVIRONMENT_ALL as all environments', () => {
+    mockRoute({ environment: ENVIRONMENT_ALL_VALUE });
+    expect(renderHook(() => useEnvironment()).result.current.environment).toBeUndefined();
+  });
+});
+
+describe('useSourceFilter', () => {
+  it('reads the source filter', () => {
+    mockRoute({ sourceFilter: 'otel' });
+    expect(renderHook(() => useSourceFilter()).result.current.sourceFilter).toBe('otel');
+  });
+});

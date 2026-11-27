@@ -137,9 +137,8 @@ test.describe('Onboarding — downstream step invalidation', { tag: tags.statefu
     const settingsIndicator = page.testSubj.locator('onboardingStepIndicator-service-settings');
     await expect(settingsIndicator).toHaveAttribute('data-step-status', 'complete');
 
-    await page.testSubj.locator('deploymentMethodCard-editButton').click();
-    await page.testSubj.locator('editDeploymentMethodModal-select').selectOption('agent_based');
-    await page.testSubj.locator('editDeploymentMethodModal-saveButton').click();
+    await page.testSubj.locator('deploymentMethodCard-agent_based').click();
+    await page.testSubj.locator('confirmModalConfirmButton').click();
 
     await expect(settingsIndicator).toHaveAttribute('data-step-status', 'incomplete');
   });

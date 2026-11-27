@@ -1,0 +1,12 @@
+{
+  "info": {
+    "title": "Google Docs API"
+  },
+  "openapi": "3.0.3",
+  "paths": {},
+  "servers": [
+    {
+      "url": "https://docs.googleapis.com"
+    }
+  ]
+}

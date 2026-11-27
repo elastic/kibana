@@ -81,7 +81,9 @@ import type { ScoutTestFixtures, ScoutWorkerFixtures, ScoutPage } from '@kbn/sco
 
 class MyPluginPage {
   constructor(private readonly page: ScoutPage) {}
-  async goto() { await this.page.gotoApp('myPlugin'); }
+  async goto() {
+    await this.page.gotoApp('myPlugin', { readyWhen: this.page.testSubj.locator('myPluginPage') });
+  }
 }
 
 interface ExtendedFixtures extends ScoutTestFixtures {
@@ -117,6 +119,7 @@ test('creates and verifies a dashboard', async ({ pageObjects, page }) => {
 - Don’t use `page.waitForTimeout`. Wait on a page-ready signal (loading indicator hidden, container visible, `expect.poll` on element counts).
 - **Bind the wait to the _terminal_ signal the assertion reads**, not an earlier step. Guarding the click, dismissing one toast, or waiting on one intermediate render while the asserted element still races is the top reason a wait-based flake fix recurs.
 - **Wait on the rendered outcome; if there's no element, expose one.** Prefer `expect(locator).toBeVisible()` on the element that shows the data. When nothing renders to wait on, add an app-side DOM signal (`data-test-subj` / `data-loaded` attribute) — it reflects the committed render (a response resolving ≠ the DOM updated) and doesn't couple to the endpoint. Prefer mocking/seeding when the flake is data arrival. Use `page.waitForResponse(...)` (armed *before* the action) only as a last resort for a no-UI gate (a background write or setup precondition); it's unreliable when several requests hit the same endpoint (e.g. a dashboard).
+- **Gate navigation on the app's ready element:** in page object `goto()`, use `gotoApp(app, { readyWhen: <app's ready locator> })`. It resolves on `commit` and makes that locator the single readiness gate (30s by default; raise `readyTimeout` with a comment only for slow apps). Keep the default `gotoApp()` (waits for `load`) when the test asserts a redirect or URL. Don't hand-wire `waitUntil: 'commit'` / `'domcontentloaded'` plus a separate wait, and never use `'networkidle'`.
 - **Poll a read, never an action:** re-query _inside_ `expect.poll`/`toPass` (a handle captured once still goes stale); never re-fire a `click`/type/`goto`/request inside the loop — that hides an actionability bug rather than fixing it.
 - When an explicit wait is needed, prefer `locator.waitFor({ state: 'visible' })` over a bare `locator.waitFor()`. The two are equivalent (`visible` is the default state), but stating it keeps the intent explicit and consistent with RTL-style readiness checks.
 - If selectors aren’t stable, add `data-test-subj` (Scout uses it as the `testIdAttribute`).

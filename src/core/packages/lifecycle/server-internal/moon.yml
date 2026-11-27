@@ -46,6 +46,7 @@ dependsOn:
   - '@kbn/core-pricing-server'
   - '@kbn/core-di-internal'
   - '@kbn/core-data-streams-server'
+  - '@kbn/core-pubsub-server-internal'
   - '@kbn/core-user-activity-server-internal'
   - '@kbn/core-user-storage-server'
 tags:
@@ -59,6 +60,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

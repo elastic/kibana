@@ -16,15 +16,17 @@ export const createRouteContextMock = ({
   settingEnabled = true,
   subscription = 'available',
   hasRequiredDependencies = true,
+  isSpaceSupported = true,
   manageSecurity = true,
 }: {
   settingEnabled?: boolean;
   subscription?: SubscriptionAvailability;
   hasRequiredDependencies?: boolean;
+  isSpaceSupported?: boolean;
   manageSecurity?: boolean;
 } = {}): AlertZeroRequestHandlerContext =>
   ({
-    alertzero: Promise.resolve({ subscription, hasRequiredDependencies }),
+    alertzero: Promise.resolve({ subscription, hasRequiredDependencies, isSpaceSupported }),
     core: Promise.resolve({
       uiSettings: { client: { get: jest.fn().mockResolvedValue(settingEnabled) } },
       elasticsearch: {

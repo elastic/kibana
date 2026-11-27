@@ -98,7 +98,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
 
       if (!rulesetData) {
         return response.notFound({
-          body: i18n.translate('xpack.search.rules.api.routes.rulesetNotFoundErrorMessage', {
+          body: i18n.translate('xpack.queryRules.rules.api.routes.rulesetNotFoundErrorMessage', {
             defaultMessage: 'Ruleset not found',
           }),
         });
@@ -180,10 +180,13 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       if (isExisting && !forceWrite) {
         return response.customError({
           statusCode: 409,
-          body: i18n.translate('xpack.search.rules.api.routes.rulesetAlreadyExistsErrorMessage', {
-            defaultMessage: `Ruleset {rulesetId} already exists. Use forceWrite=true to overwrite it.`,
-            values: { rulesetId },
-          }),
+          body: i18n.translate(
+            'xpack.queryRules.rules.api.routes.rulesetAlreadyExistsErrorMessage',
+            {
+              defaultMessage: `Ruleset {rulesetId} already exists. Use forceWrite=true to overwrite it.`,
+              values: { rulesetId },
+            }
+          ),
         });
       }
       const result = await putRuleset(asCurrentUser, rulesetId, rules);
@@ -474,7 +477,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       }
       return response.customError({
         statusCode: 409,
-        body: i18n.translate('xpack.search.rules.api.routes.generateRuleIdErrorMessage', {
+        body: i18n.translate('xpack.queryRules.rules.api.routes.generateRuleIdErrorMessage', {
           defaultMessage: 'Failed to generate a unique rule ID after 100 attempts.',
         }),
       });

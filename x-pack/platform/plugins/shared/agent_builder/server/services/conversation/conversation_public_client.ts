@@ -41,6 +41,7 @@ export const createConversationPublicClient = ({
     get: client.get.bind(client),
     bulkGet: client.bulkGet.bind(client),
     list: client.list.bind(client),
+    delete: async (conversationId) => client.delete(conversationId),
     search: client.search.bind(client),
     addEvents: ({ conversationId, events }) =>
       client.addCustomEvents({ id: conversationId, events }, { source }),
@@ -89,6 +90,7 @@ export const createConversationPublicClient = ({
       const { conversation, changedFields } = await client.patchMetadata(conversationId, updates, {
         access: options?.access ?? 'converse',
         source,
+        refresh: options?.refresh,
       });
       return { conversation, changedFields };
     },

@@ -20,7 +20,7 @@ import { queryKeys } from '../constants';
 import { useLicense } from './use_license';
 
 const ERROR_TITLE = i18n.translate(
-  'xpack.triggersActionsUI.alertsTable.api.bulkGetMaintenanceWindow.errorTitle',
+  'xpack.responseOpsAlertsTable.alertsTable.api.bulkGetMaintenanceWindow.errorTitle',
   {
     defaultMessage: 'Error fetching maintenance windows data',
   }

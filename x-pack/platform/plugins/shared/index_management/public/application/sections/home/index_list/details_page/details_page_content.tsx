@@ -253,7 +253,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
           label: i18n.translate('xpack.idxMgmt.indexDetails.manageIndexMenuLabel', {
             defaultMessage: 'Manage index',
           }),
-          iconType: 'managementApp' as const,
+          iconType: 'gear' as const,
           items: manageIndexItems,
           isLoading: isManageIndexLoading,
           testId: 'indexActionsContextMenuButton',

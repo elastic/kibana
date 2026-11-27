@@ -433,8 +433,8 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
     const condition = this.randomChoice([
       'condition: true',
       'condition: false',
-      'strings: $a = "test_string" condition: $a',
-      'strings: $bbb = /00 ae 53 ff/ condition: all of them',
+      'strings: $a = "test_string"\n  condition: $a',
+      'strings: $bbb = /00 ae 53 ff/\n  condition: all of them',
     ]);
 
     return `rule Generated_Yara_Rule_${this.randomString(5)} {

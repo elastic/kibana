@@ -39,7 +39,7 @@ export const enrichFields: ESQLFieldWithMetadata[] = [
   { name: 'yetAnotherField', type: 'double', userDefined: false },
 ];
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
+// eslint-disable-next-line @kbn/compat/typescript-naming-convention
 export const unsupported_field: ESQLFieldWithMetadata[] = [
   { name: 'unsupported_field', type: 'unsupported', userDefined: false },
 ];

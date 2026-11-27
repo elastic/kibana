@@ -14,6 +14,7 @@ import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { TestProviders } from '../../../common/mock';
 import { DocumentFlyoutWrapper } from './document_flyout_wrapper';
+import { getDocumentHistoryTitle } from './utils/get_header_title';
 
 jest.mock('@kbn/unified-doc-viewer-plugin/public');
 jest.mock('../../../data_view_manager/hooks/use_data_view');
@@ -128,6 +129,24 @@ describe('DocumentFlyoutWrapper', () => {
 
     expect(queryByTestId('document-overview-wrapper-loading')).not.toBeInTheDocument();
     expect(getByTestId('documentFlyoutStub')).toBeInTheDocument();
+  });
+
+  it('reports the history title of the resolved document', () => {
+    const hit = createHit('doc-id');
+    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, hit, jest.fn()]);
+    const onHistoryTitleResolved = jest.fn();
+
+    renderDocumentFlyoutWrapper({ onHistoryTitleResolved });
+
+    expect(onHistoryTitleResolved).toHaveBeenCalledWith(getDocumentHistoryTitle(hit));
+  });
+
+  it('does not report a history title while the document is loading', () => {
+    const onHistoryTitleResolved = jest.fn();
+
+    renderDocumentFlyoutWrapper({ onHistoryTitleResolved });
+
+    expect(onHistoryTitleResolved).not.toHaveBeenCalled();
   });
 
   it('renders DocumentFlyout when document is found', () => {

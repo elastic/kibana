@@ -17,15 +17,14 @@ import {
   EuiToolTip,
   RIGHT_ALIGNMENT,
   euiPaletteColorBlind,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { useLoadConnectors } from '@kbn/inference-connectors';
 import type { RoundModelUsageStats } from '@kbn/agent-builder-common';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { getModelColor } from './model_colors';
+import { formatCompactNumber } from '../../../../utils/format_compact_number';
+import { getModelColors } from './model_colors';
 
 const labels = {
   tableCaption: i18n.translate('xpack.agentBuilder.response.metadataPopover.byModel.tableCaption', {
@@ -40,17 +39,16 @@ const labels = {
   tokensSent: i18n.translate('xpack.agentBuilder.response.metadataPopover.byModel.tokensSent', {
     defaultMessage: 'Tokens sent',
   }),
-  tokensSentWithCache: i18n.translate(
-    'xpack.agentBuilder.response.metadataPopover.byModel.tokensSentWithCache',
-    { defaultMessage: 'Tokens sent (cached)' }
-  ),
   tokensReceived: i18n.translate(
     'xpack.agentBuilder.response.metadataPopover.byModel.tokensReceived',
     { defaultMessage: 'Tokens received' }
   ),
-  tokensReceivedWithReasoning: i18n.translate(
-    'xpack.agentBuilder.response.metadataPopover.byModel.tokensReceivedWithReasoning',
-    { defaultMessage: 'Tokens received (reasoning)' }
+  cachedSuffix: i18n.translate('xpack.agentBuilder.response.metadataPopover.byModel.cachedSuffix', {
+    defaultMessage: '(cached)',
+  }),
+  reasoningSuffix: i18n.translate(
+    'xpack.agentBuilder.response.metadataPopover.byModel.reasoningSuffix',
+    { defaultMessage: '(reasoning)' }
   ),
   allModels: i18n.translate('xpack.agentBuilder.response.metadataPopover.byModel.allModels', {
     defaultMessage: 'All models',
@@ -73,8 +71,6 @@ interface ModelRow {
 }
 
 const MODEL_PALETTE = euiPaletteColorBlind().filter((_, index) => index % 2 === 0);
-
-const formatCompactNumber = (value: number): string => numeral(value).format('0.[0]a');
 
 const removeCreatorPrefix = (name: string, creator?: string): string => {
   if (!creator) {
@@ -99,29 +95,32 @@ const ReportedTokens: React.FC<{ value?: number }> = ({ value }) =>
     <>{formatCompactNumber(value)}</>
   );
 
-const useCellPaddingStyles = () => {
-  const { euiTheme } = useEuiTheme();
-  return css({ paddingBlock: euiTheme.size.s });
-};
+const noWrapStyles = css({ whiteSpace: 'nowrap' });
+const rightAlignedNoWrapStyles = css({ whiteSpace: 'nowrap', textAlign: 'right' });
 
-const Cell: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
-  const paddingStyles = useCellPaddingStyles();
-  return (
-    <EuiText size="s" css={paddingStyles}>
-      {children}
-    </EuiText>
-  );
-};
+const TextCell: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
+  <EuiText size="xs" css={noWrapStyles}>
+    {children}
+  </EuiText>
+);
 
-const wrappingHeaderStyles = css({ whiteSpace: 'normal' });
-const rightAlignedHeaderStyles = css({ whiteSpace: 'normal', textAlign: 'right' });
+interface HeaderCellProps {
+  isRightAligned?: boolean;
+  subLabel?: string;
+  hasSecondLine?: boolean;
+}
 
-const HeaderCell: React.FC<React.PropsWithChildren<{ isRightAligned?: boolean }>> = ({
+const HeaderCell: React.FC<React.PropsWithChildren<HeaderCellProps>> = ({
   children,
   isRightAligned = false,
+  subLabel,
+  hasSecondLine = false,
 }) => (
-  <EuiText size="s" css={isRightAligned ? rightAlignedHeaderStyles : wrappingHeaderStyles}>
+  <EuiText size="xs" css={isRightAligned ? rightAlignedNoWrapStyles : noWrapStyles}>
     <strong>{children}</strong>
+    {hasSecondLine && (
+      <div aria-hidden={!subLabel}>{subLabel ? <strong>{subLabel}</strong> : <>&nbsp;</>}</div>
+    )}
   </EuiText>
 );
 
@@ -131,65 +130,74 @@ const truncatedTextStyles = css({
   whiteSpace: 'nowrap',
 });
 
+const nameContainerStyles = css({ flexGrow: 1, width: 0, minWidth: 0 });
+const shrinkableStyles = css({ minWidth: 0 });
+
 const ModelName: React.FC<{ label: string; tooltip: string; color: string }> = ({
   label,
   tooltip,
   color,
-}) => {
-  const paddingStyles = useCellPaddingStyles();
-  return (
+}) => (
+  <div css={nameContainerStyles}>
     <EuiToolTip content={tooltip} display="block">
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} css={paddingStyles}>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiIcon type="dot" color={color} aria-hidden="true" />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="s" css={truncatedTextStyles}>
+        <EuiFlexItem css={shrinkableStyles}>
+          <EuiText size="xs" css={truncatedTextStyles}>
             {label}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiToolTip>
-  );
-};
+  </div>
+);
 
 const getColumns = (
   hasCache: boolean,
-  hasReasoning: boolean
+  hasReasoning: boolean,
+  hasSecondHeaderLine: boolean
 ): Array<EuiBasicTableColumn<ModelRow>> => [
   {
     field: 'label',
-    name: <HeaderCell>{labels.model}</HeaderCell>,
-    width: '36%',
+    name: <HeaderCell hasSecondLine={hasSecondHeaderLine}>{labels.model}</HeaderCell>,
+    width: '100%',
     render: (label: string, { color, fullName }: ModelRow) =>
       color ? (
         <ModelName label={label} tooltip={fullName ?? label} color={color} />
       ) : (
-        <Cell>{label}</Cell>
+        <TextCell>{label}</TextCell>
       ),
   },
   {
     field: 'llmCalls',
-    name: <HeaderCell isRightAligned>{labels.llmCalls}</HeaderCell>,
-    width: '13%',
+    name: (
+      <HeaderCell isRightAligned hasSecondLine={hasSecondHeaderLine}>
+        {labels.llmCalls}
+      </HeaderCell>
+    ),
     align: RIGHT_ALIGNMENT,
     render: (llmCalls: number) => (
-      <Cell>
+      <TextCell>
         <strong>{formatCompactNumber(llmCalls)}</strong>
-      </Cell>
+      </TextCell>
     ),
   },
   {
     field: 'inputTokens',
     name: (
-      <HeaderCell isRightAligned>
-        {hasCache ? labels.tokensSentWithCache : labels.tokensSent}
+      <HeaderCell
+        isRightAligned
+        subLabel={hasCache ? labels.cachedSuffix : undefined}
+        hasSecondLine={hasSecondHeaderLine}
+      >
+        {labels.tokensSent}
       </HeaderCell>
     ),
-    width: '30%',
     align: RIGHT_ALIGNMENT,
     render: (inputTokens: number, { cachedInputTokens }: ModelRow) => (
-      <Cell>
+      <TextCell>
         <strong>{formatCompactNumber(inputTokens)}</strong>
         {hasCache && (
           <>
@@ -199,20 +207,23 @@ const getColumns = (
             </EuiTextColor>
           </>
         )}
-      </Cell>
+      </TextCell>
     ),
   },
   {
     field: 'outputTokens',
     name: (
-      <HeaderCell isRightAligned>
-        {hasReasoning ? labels.tokensReceivedWithReasoning : labels.tokensReceived}
+      <HeaderCell
+        isRightAligned
+        subLabel={hasReasoning ? labels.reasoningSuffix : undefined}
+        hasSecondLine={hasSecondHeaderLine}
+      >
+        {labels.tokensReceived}
       </HeaderCell>
     ),
-    width: '21%',
     align: RIGHT_ALIGNMENT,
     render: (outputTokens: number, { reasoningTokens }: ModelRow) => (
-      <Cell>
+      <TextCell>
         <strong>{formatCompactNumber(outputTokens)}</strong>
         {hasReasoning && (
           <>
@@ -222,7 +233,7 @@ const getColumns = (
             </EuiTextColor>
           </>
         )}
-      </Cell>
+      </TextCell>
     ),
   },
 ];
@@ -241,7 +252,10 @@ export const ExecutionMetadataByModel: React.FC<ExecutionMetadataByModelProps> =
 
   const hasCache = modelUsage.cached_input_tokens !== undefined;
   const hasReasoning = modelUsage.reasoning_tokens !== undefined;
-  const columns = useMemo(() => getColumns(hasCache, hasReasoning), [hasCache, hasReasoning]);
+  const columns = useMemo(
+    () => getColumns(hasCache, hasReasoning, hasCache || hasReasoning),
+    [hasCache, hasReasoning]
+  );
 
   const rows = useMemo<ModelRow[]>(() => {
     const connectors = modelUsage.connectors ?? [];
@@ -256,6 +270,8 @@ export const ExecutionMetadataByModel: React.FC<ExecutionMetadataByModelProps> =
       model?: string;
     }) => model ?? connectorId;
 
+    const colors = getModelColors(connectors.map(getKey), MODEL_PALETTE);
+
     return [
       {
         key: 'all',
@@ -266,7 +282,7 @@ export const ExecutionMetadataByModel: React.FC<ExecutionMetadataByModelProps> =
         outputTokens: modelUsage.output_tokens,
         reasoningTokens: modelUsage.reasoning_tokens,
       },
-      ...connectors.map((connector) => {
+      ...connectors.map((connector, index) => {
         const aiConnector = aiConnectorsById.get(connector.connector_id);
         return {
           key: connector.connector_id,
@@ -274,7 +290,7 @@ export const ExecutionMetadataByModel: React.FC<ExecutionMetadataByModelProps> =
             ? removeCreatorPrefix(aiConnector.name, aiConnector.metadata?.display?.model_creator)
             : getKey(connector),
           fullName: aiConnector?.name,
-          color: getModelColor(getKey(connector), MODEL_PALETTE),
+          color: colors[index],
           llmCalls: connector.llm_calls,
           inputTokens: connector.input_tokens,
           cachedInputTokens: connector.cached_input_tokens,
@@ -290,7 +306,7 @@ export const ExecutionMetadataByModel: React.FC<ExecutionMetadataByModelProps> =
       tableCaption={labels.tableCaption}
       items={rows}
       columns={columns}
-      tableLayout="fixed"
+      tableLayout="auto"
       compressed
       rowProps={({ key }) => ({ 'data-test-subj': `executionMetadataModelRow-${key}` })}
       data-test-subj="executionMetadataByModelTable"

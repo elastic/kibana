@@ -29,6 +29,11 @@ dependsOn:
   - '@kbn/core-http-server-internal'
   - '@kbn/core-http-server-mocks'
   - '@kbn/core-http-router-server-mocks'
+  - '@kbn/core-http-server'
+  - '@kbn/core-saved-objects-api-server'
+  - '@kbn/core-saved-objects-server'
+  - '@kbn/core-saved-objects-api-server-mocks'
+  - '@kbn/core-saved-objects-server-mocks'
 tags:
   - shared-server
   - package
@@ -40,6 +45,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

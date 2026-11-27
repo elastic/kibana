@@ -22,7 +22,6 @@ dependsOn:
   - '@kbn/licensing-plugin'
   - '@kbn/features-plugin'
   - '@kbn/security-plugin'
-  - '@kbn/file-upload-plugin'
   - '@kbn/es-ui-shared-plugin'
   - '@kbn/kibana-react-plugin'
   - '@kbn/management-plugin'
@@ -59,6 +58,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -67,6 +67,4 @@ fileGroups:
     - test/scout/**/*
     - __jest__/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

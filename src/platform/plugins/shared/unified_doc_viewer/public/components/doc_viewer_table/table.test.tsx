@@ -12,6 +12,7 @@ import { screen } from '@testing-library/react';
 import { render } from '@elastic/eui/lib/test/rtl';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
+import { EsqlSource } from '@kbn/data-source';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { generateEsHits } from '@kbn/discover-utils/src/__mocks__';
@@ -433,6 +434,73 @@ describe('DocViewerTable', () => {
       expect(screen.getByText('message')).toBeInTheDocument();
       expect(screen.queryByText('optional.field')).toBeNull();
       expect(screen.queryByText('another.nullable')).toBeNull();
+    });
+  });
+
+  describe('ES|QL all-null columns', () => {
+    const makeColumn = (name: string, isNull: boolean): EsqlSource['resultColumns'][number] => ({
+      id: name,
+      name,
+      meta: { type: 'string' },
+      isNull,
+    });
+
+    const setupEsqlComponent = async (nullColumnNames: string[]) => {
+      const user = userEvent.setup();
+      const dataSource = await EsqlSource.create({
+        query: `FROM sparse-${nullColumnNames.join('-')}`,
+        resultColumns: [
+          makeColumn('message', false),
+          ...nullColumnNames.map((name) => makeColumn(name, true)),
+        ],
+        timeFieldName: '@timestamp',
+      });
+      const esqlHit = buildDataTableRecord(
+        { _id: '1', _index: 'sparse', message: 'hello' } as never,
+        dataView
+      );
+      esqlHit.flattened = { message: 'hello' };
+
+      render(
+        <IntlProvider locale="en">
+          <DocViewerTable
+            dataView={dataView}
+            dataSource={dataSource}
+            hit={esqlHit}
+            textBasedHits={[esqlHit]}
+            columns={[]}
+          />
+        </IntlProvider>
+      );
+
+      return { user };
+    };
+
+    beforeEach(() => {
+      storage.clear();
+    });
+
+    it('should list an all-null column that is missing from the row, and hide it when hiding null values', async () => {
+      const { user } = await setupEsqlComponent(['empty.field']);
+
+      expect(screen.getByText('message')).toBeInTheDocument();
+      expect(screen.getByText('empty.field')).toBeInTheDocument();
+
+      await user.click(screen.getByTestId('unifiedDocViewerHideNullValuesSwitch'));
+
+      expect(screen.getByText('message')).toBeInTheDocument();
+      expect(screen.queryByText('empty.field')).toBeNull();
+    });
+
+    it('should list an all-null column named like an Object.prototype property', async () => {
+      const { user } = await setupEsqlComponent(['constructor']);
+
+      expect(screen.getByText('constructor')).toBeInTheDocument();
+      expect(screen.queryByText(/native code/)).toBeNull();
+
+      await user.click(screen.getByTestId('unifiedDocViewerHideNullValuesSwitch'));
+
+      expect(screen.queryByText('constructor')).toBeNull();
     });
   });
 

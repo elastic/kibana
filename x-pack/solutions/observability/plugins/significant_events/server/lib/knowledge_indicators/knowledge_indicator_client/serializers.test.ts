@@ -8,7 +8,13 @@
 import type { FeatureUpsert, StreamQuery } from '@kbn/significant-events-schema';
 import { computeFeatureUuid } from '@kbn/significant-events-schema';
 import { computeRuleId } from '../helpers/compute_rule_id';
-import { fromStoredFeature, fromStoredQuery, toStoredFeature, toStoredQuery } from './serializers';
+import {
+  fromStoredFeature,
+  fromStoredQuery,
+  toStoredFeature,
+  toStoredQuery,
+  toTombstone,
+} from './serializers';
 
 const SPACE = 'marketing';
 const SOURCE_ID = 'logs.test';
@@ -108,14 +114,14 @@ describe('toStoredFeature', () => {
     expect(stored).not.toHaveProperty('stream.name');
   });
 
-  it('labels the search embedding with the source', () => {
+  it('keeps the source out of the search embedding', () => {
     const stored = toStoredFeature({
       sourceId: SOURCE_ID,
       feature: makeFeature(),
       includeEmbedding: true,
     });
 
-    expect(stored.search_embedding).toContain(`Source: ${SOURCE_ID}`);
+    expect(stored.search_embedding).not.toContain(`Source: ${SOURCE_ID}`);
   });
 
   it('round-trips the source id onto the feature', () => {
@@ -126,5 +132,21 @@ describe('toStoredFeature', () => {
     });
 
     expect(fromStoredFeature(stored).source_id).toBe(SOURCE_ID);
+  });
+});
+
+describe('revision_id', () => {
+  it('is derived from the identity fields on every revision document', () => {
+    const feature = toStoredFeature({
+      sourceId: SOURCE_ID,
+      feature: makeFeature(),
+      includeEmbedding: false,
+    });
+    const query = storeQuery(makeQuery());
+    const tombstone = toTombstone(SOURCE_ID, { id: 'q-1', type: 'query' });
+
+    expect(feature.revision_id).toBe(`${feature.id}:${feature['@timestamp']}`);
+    expect(query.revision_id).toBe(`q-1:${query['@timestamp']}`);
+    expect(tombstone.revision_id).toBe(`q-1:${tombstone['@timestamp']}`);
   });
 });

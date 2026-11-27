@@ -18,6 +18,16 @@ import { toStoredDataView } from './to_stored_data_view';
 import type { DataViewSpec } from '@kbn/data-views-types';
 
 describe('toStoredDataView', () => {
+  it('returns a DataViewSpec, not a string, for an inline spec', () => {
+    const dataView: AsCodeDataViewSpec = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'my-index-*',
+    };
+    // type assertion: no narrowing needed because the overload returns DataViewSpec
+    const result: DataViewSpec = toStoredDataView(dataView);
+    expect(result).toEqual({ title: 'my-index-*' });
+  });
+
   it('converts data_view_reference data_source to string id', () => {
     const dataView: AsCodeDataViewReference = {
       type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
@@ -213,6 +223,35 @@ describe('toStoredDataView', () => {
           rt: { count: 5 },
         },
       });
+    });
+
+    it('maps spaces to namespaces', () => {
+      const dataView: AsCodeSavedDataView = {
+        id: 'dv-1',
+        index_pattern: 'logs-*',
+        spaces: ['default', 'marketing'],
+      };
+
+      expect(toStoredDataView(dataView)).toEqual(
+        expect.objectContaining({ namespaces: ['default', 'marketing'] })
+      );
+    });
+
+    it('maps spaces to namespaces when the saved data view has no id', () => {
+      const dataView: AsCodeSavedDataView = {
+        index_pattern: 'logs-*',
+        spaces: ['marketing'],
+      };
+
+      expect(toStoredDataView(dataView)).toEqual(
+        expect.objectContaining({ namespaces: ['marketing'] })
+      );
+    });
+
+    it('omits namespaces when spaces is undefined', () => {
+      const dataView: AsCodeSavedDataView = { id: 'dv-1', index_pattern: 'logs-*' };
+
+      expect(toStoredDataView(dataView)).not.toHaveProperty('namespaces');
     });
 
     it('maps field_filters to sourceFilters', () => {

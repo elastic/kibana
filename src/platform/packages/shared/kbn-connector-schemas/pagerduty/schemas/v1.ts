@@ -66,38 +66,32 @@ export const ParamsSchema = lazySchema(() =>
           if (!date.isValid()) {
             ctx.addIssue({
               code: 'custom',
-              message: i18n.translate(
-                'xpack.stackConnectors.pagerduty.invalidTimestampErrorMessage',
-                {
-                  defaultMessage: `error parsing timestamp "{timestamp}"`,
-                  values: {
-                    timestamp,
-                  },
-                }
-              ),
+              message: i18n.translate('connectors.pagerduty.invalidTimestampErrorMessage', {
+                defaultMessage: `error parsing timestamp "{timestamp}"`,
+                values: {
+                  timestamp,
+                },
+              }),
             });
             return;
           }
         } catch (err) {
           ctx.addIssue({
             code: 'custom',
-            message: i18n.translate(
-              'xpack.stackConnectors.pagerduty.timestampParsingFailedErrorMessage',
-              {
-                defaultMessage: `error parsing timestamp "{timestamp}": {message}`,
-                values: {
-                  timestamp,
-                  message: err.message,
-                },
-              }
-            ),
+            message: i18n.translate('connectors.pagerduty.timestampParsingFailedErrorMessage', {
+              defaultMessage: `error parsing timestamp "{timestamp}": {message}`,
+              values: {
+                timestamp,
+                message: err.message,
+              },
+            }),
           });
         }
       }
       if (eventAction && EVENT_ACTIONS_WITH_REQUIRED_DEDUPKEY.has(eventAction) && !dedupKey) {
         ctx.addIssue({
           code: 'custom',
-          message: i18n.translate('xpack.stackConnectors.pagerduty.missingDedupkeyErrorMessage', {
+          message: i18n.translate('connectors.pagerduty.missingDedupkeyErrorMessage', {
             defaultMessage: `DedupKey is required when eventAction is "{eventAction}"`,
             values: { eventAction },
           }),

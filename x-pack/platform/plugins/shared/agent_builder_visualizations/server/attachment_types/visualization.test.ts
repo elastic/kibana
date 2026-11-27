@@ -50,11 +50,22 @@ describe('createVisualizationAttachmentType resolve()', () => {
     expect(resolveMock).toHaveBeenCalledWith('lens', 'viz-1');
     expect(result).toEqual({
       renderer: 'lens',
-      query: 'viz-1',
+      query: 'My Visualization',
       visualization: { type: 'xy', layers: [] },
       chart_type: 'xy',
       esql: 'FROM logs',
     });
+  });
+
+  it('falls back to the saved object id as the query when the visualization has no title', async () => {
+    resolveMock.mockResolvedValue({
+      saved_object: { attributes: {}, references: [] },
+      outcome: 'exactMatch',
+    });
+
+    const result = await createVisualizationAttachmentType().resolve!('viz-1', createContext());
+
+    expect(result?.query).toBe('viz-1');
   });
 
   it('omits chart_type when the Lens API type is outside the supported vocabulary', async () => {
@@ -96,5 +107,36 @@ describe('createVisualizationAttachmentType resolve()', () => {
     const result = await createVisualizationAttachmentType().resolve!('viz-1', createContext());
 
     expect(result).toBeUndefined();
+  });
+});
+
+describe('createVisualizationAttachmentType format()', () => {
+  const describeAttachment = async (data: Record<string, unknown>): Promise<string> => {
+    const definition = createVisualizationAttachmentType();
+    const formatted = await definition.format(
+      { id: 'att-1', type: 'visualization', data } as never,
+      { request: {}, spaceId: 'default' } as never
+    );
+    const representation = await formatted.getRepresentation!();
+    return (representation as { type: 'text'; value: string }).value;
+  };
+
+  const customContent = { renderer: 'custom_content', query: 'a board', visualization: {} };
+
+  it('says a panel without queries is static', async () => {
+    expect(await describeAttachment(customContent)).toContain('ES|QL: none (static content)');
+  });
+
+  it('names each query of a panel with several by the way the template reads it', async () => {
+    const value = await describeAttachment({ ...customContent, esql: ['FROM a', 'FROM b'] });
+
+    expect(value).toContain('ES|QL, read by the template as rows: FROM a');
+    expect(value).toContain('ES|QL, read by the template as queries[1].rows: FROM b');
+  });
+
+  it('reads a query saved as a single string, as before a panel could have several', async () => {
+    expect(await describeAttachment({ ...customContent, esql: 'FROM legacy' })).toContain(
+      'ES|QL: FROM legacy'
+    );
   });
 });

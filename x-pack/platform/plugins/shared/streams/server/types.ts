@@ -46,6 +46,10 @@ import type {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
 } from '@kbn/search-inference-endpoints/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import type { StreamsConfig } from '../common/config';
 
 export interface StreamsServer {
@@ -89,6 +93,7 @@ export interface StreamsPluginSetupDependencies {
   features: FeaturesPluginSetup;
   usageCollection: UsageCollectionSetup;
   fieldsMetadata: FieldsMetadataServerSetup;
+  taskManager: TaskManagerSetupContract;
   cloud?: CloudSetup;
   globalSearch?: GlobalSearchPluginSetup;
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
@@ -106,6 +111,7 @@ export interface StreamsPluginStartDependencies {
   ruleRegistry: RuleRegistryPluginStart;
   fieldsMetadata: FieldsMetadataServerStart;
   console: ConsoleServerStart;
+  taskManager: TaskManagerStartContract;
   agentBuilder?: AgentBuilderPluginStart;
   agentBuilderSml?: AgentBuilderSmlPluginStart;
   spaces?: SpacesPluginStart;

@@ -8,14 +8,20 @@
 import React from 'react';
 import { EuiCheckbox, EuiFormRow } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
+import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
 import { i18nMessages } from '../i18n';
 import type { IncludeFrozenFormData } from '../types/tool_form_types';
 
 export const IncludeFrozenField = () => {
+  const { isServerless } = useAgentBuilderServices();
   const {
     control,
     formState: { errors },
   } = useFormContext<IncludeFrozenFormData>();
+
+  if (isServerless) {
+    return null;
+  }
 
   return (
     <EuiFormRow

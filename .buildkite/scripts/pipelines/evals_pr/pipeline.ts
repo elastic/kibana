@@ -16,12 +16,14 @@
         ] */
 
 import { getEvalPipeline } from '../../../pipelines/evals/eval_pipeline.ts';
-import { emitPipeline, getPipeline } from '#pipeline-utils';
+import { emitPipeline } from '#pipeline-utils';
+import { postBuildSteps, renderSteps } from '#pipeline-utils/step-library';
 
 // Forwarded by the trigger from kibana-pull-request; re-selects the same suites/models.
 const GITHUB_PR_LABELS = process.env.GITHUB_PR_LABELS ?? '';
 
-// Short-circuits when KIBANA_BUILD_ID reuses the PR artifact; kept so `depends_on: build` resolves.
+// The build step is skipped when KIBANA_BUILD_ID reuses the PR artifact, as in kibana-pull-request;
+// a skipped step still satisfies `depends_on: build`.
 const preludeSteps = [
   `  - label: ':construction_worker: Pre-Build'`,
   `    key: pre_build`,
@@ -41,8 +43,9 @@ const preludeSteps = [
   `    key: build`,
   `    depends_on: pre_build`,
   `    command: .buildkite/scripts/steps/build_kibana.sh`,
-  // timeout/retry only bite on the rare fallback rebuild (expired artifact / manual trigger
-  // with no KIBANA_BUILD_ID) so it fails cleanly instead of hanging on the small agent.
+  `    if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"`,
+  // timeout/retry only bite on a manual trigger with no KIBANA_BUILD_ID, so it fails cleanly
+  // instead of hanging on the small agent.
   `    timeout_in_minutes: 90`,
   `    agents:`,
   `      image: family/kibana-ubuntu-2404`,
@@ -58,7 +61,7 @@ const preludeSteps = [
 // Reuse kibana-pull-request's canonical Post-Build (trailing `wait` + post_build.sh on a light
 // k8s/sparse agent) so it can't drift. The wait must be last — run_suite.sh uploads each suite's
 // fanout as a separate group that inserts before it.
-const postludeSteps = getPipeline('.buildkite/pipelines/pull_request/post_build.yml');
+const postludeSteps = renderSteps(postBuildSteps());
 
 const evalsGroup = getEvalPipeline(GITHUB_PR_LABELS);
 

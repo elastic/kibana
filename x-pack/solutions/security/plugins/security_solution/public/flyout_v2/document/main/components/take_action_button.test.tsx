@@ -538,13 +538,13 @@ describe('<TakeActionButton />', () => {
     );
   });
 
-  it('should call useRunDocumentWorkflowPanel with the document and closePopover', () => {
+  it('should call useRunDocumentWorkflowPanel with the document id and closePopover', () => {
     const hit = createMockHit({ 'event.kind': 'event' });
     renderTakeActionButton({ ...defaultProps, hit });
 
     expect(mockUseRunDocumentWorkflowPanel).toHaveBeenCalledWith(
       expect.objectContaining({
-        documents: [expect.objectContaining({ _id: 'test-id', _index: 'test-index' })],
+        documentIds: [{ _id: 'test-id', _index: 'test-index' }],
       })
     );
   });

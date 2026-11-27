@@ -6,89 +6,179 @@
  */
 
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
+import type { PanelContent } from '../resolve_panel';
 import {
-  findConfigPanelType,
-  findPanelRenderer,
-  type EditPanelRequestInput,
-  type PanelRequestInput,
+  buildConfigPanelContent,
+  findPanelKind,
+  isConfigPanelContent,
+  type PanelRequestContent,
   type PanelResolutionRequest,
+  type UpsertPanelContent,
 } from './registry';
 
-/** Error for a panel that cannot be edited with a request. */
-export const getPanelEditError = ({ id, type }: AttachmentPanel): string => {
-  const configPanelType = findConfigPanelType(type);
-  return configPanelType
-    ? `Panel "${id}" is a ${configPanelType.label} panel. Edit it with source: "config", type: "${configPanelType.type}".`
-    : `Panel "${id}" with type "${type}" is not supported for inline editing.`;
+/**
+ * Error for content that cannot edit the existing panel: it targets another kind or is an
+ * attachment, or the panel is one its kind cannot edit (`canEdit`) or of an unknown type, which are
+ * replaced only after the user confirms. Undefined when the content can edit the panel.
+ */
+const getPanelEditError = (
+  content: UpsertPanelContent,
+  existingPanel: AttachmentPanel
+): string | undefined => {
+  const { id, type } = existingPanel;
+  const replaceHint = `To replace it with another kind of panel, remove "${id}" and add the new panel with a new id in the same call.`;
+  const confirmReplaceHint = `Tell the user it cannot be edited, and replace it only after they confirm: then remove "${id}" and add the new panel with a new id in the same call.`;
+  const kind = findPanelKind(type);
+  if (kind?.canEdit && !kind.canEdit(existingPanel)) {
+    return `Panel "${id}" is a ${
+      kind.uneditableDescription ?? `${kind.label} panel`
+    }, so it cannot be edited. ${confirmReplaceHint}`;
+  }
+  if (!kind) {
+    return `Panel "${id}" with type "${type}" cannot be edited. ${confirmReplaceHint}`;
+  }
+  if (content.type === 'attachment') {
+    return `Panel "${id}" already exists, and attachments only add new panels. To replace it with the attachment, remove "${id}" and add the attachment with a new id in the same call.`;
+  }
+  if (content.type === kind.type) {
+    return undefined;
+  }
+  return `Panel "${id}" is a ${kind.label} panel. Edit it with type: "${kind.type}". ${replaceHint}`;
 };
 
-/**
- * Builds the resolution request for a request edit. Lens and Vega edits may
- * omit the renderer, which the existing panel then decides. Custom content
- * edits must name it: without it the edit is parsed as a Lens edit, which lacks
- * custom content's fields. An explicit renderer that disagrees with the panel
- * fails instead of being rewritten. This is the only place an edit's renderer is
- * decided; the resolvers trust the one on the request.
- */
-export const toEditResolutionRequest = (
-  panelInput: EditPanelRequestInput,
+type ResolutionRequestResult = { request: PanelResolutionRequest } | { error: string };
+
+const removeAllExcludesDataQueriesError = (id: string): string =>
+  `Panel "${id}" cannot combine \`removeAllQueries\`, which removes every query, with \`dataQueries\`.`;
+
+const getStoredQueries = (panel: AttachmentPanel): string[] =>
+  (panel.config as { esql_query?: string[] }).esql_query ?? [];
+
+/** Maps request content for a new panel onto the resolution request of its kind. */
+const toCreationResolutionRequest = (
+  content: PanelRequestContent,
+  id: string
+): ResolutionRequestResult => {
+  if (content.type === 'custom_content') {
+    const { type, query, dataQueries, removeAllQueries } = content;
+    if (query === undefined || (!dataQueries && !removeAllQueries)) {
+      const missing = [
+        ...(query === undefined ? ['`query`'] : []),
+        ...(!dataQueries && !removeAllQueries
+          ? [
+              '`dataQueries` (for a panel with live data) or `removeAllQueries: true` (for static content with no data)',
+            ]
+          : []),
+      ];
+      return { error: `Panel "${id}" is new. Provide ${missing.join(' and ')} to create it.` };
+    }
+    if (dataQueries && removeAllQueries) {
+      return { error: removeAllExcludesDataQueriesError(id) };
+    }
+    const empty = dataQueries?.findIndex(
+      (dataQuery) => !dataQuery.description?.trim() && !dataQuery.esql?.trim()
+    );
+    if (empty !== undefined && empty !== -1) {
+      return {
+        error: `Data query ${
+          empty + 1
+        } of the new panel "${id}" needs a \`description\` or an \`esql\` query.`,
+      };
+    }
+    return { request: { type, nlQuery: query, dataQueries, removeAllQueries } };
+  }
+
+  const { type, query, index, esql, chartType } = content;
+  if (type === 'vis' && chartType === undefined) {
+    return {
+      error: `Panel "${id}" is new. Provide \`chartType\` to create a Lens panel.`,
+    };
+  }
+  return { request: { type, nlQuery: query, index, esql, chartType } };
+};
+
+/** Builds the resolution request for request content that edits a panel of the same kind (see `getPanelEditError`). */
+const toEditResolutionRequest = (
+  content: PanelRequestContent,
   existingPanel: AttachmentPanel
-): { request: PanelResolutionRequest } | { error: string } => {
-  const renderer = findPanelRenderer(existingPanel.type);
-  if (!renderer) {
-    return { error: getPanelEditError(existingPanel) };
-  }
-  if (panelInput.renderer && panelInput.renderer !== renderer) {
-    return {
-      error: `Panel "${existingPanel.id}" with type "${existingPanel.type}" cannot be edited with renderer: "${panelInput.renderer}". Use renderer: "${renderer}".`,
-    };
+): ResolutionRequestResult => {
+  const base = { existingPanel };
+
+  if (content.type === 'custom_content') {
+    const { type, query, dataQueries, removeAllQueries } = content;
+    if (dataQueries && removeAllQueries) {
+      return { error: removeAllExcludesDataQueriesError(existingPanel.id) };
+    }
+    if (query === undefined && !dataQueries && !removeAllQueries) {
+      return {
+        error: `Panel "${existingPanel.id}" edit needs \`query\`, \`dataQueries\` or \`removeAllQueries\`.`,
+      };
+    }
+    const existingCount = getStoredQueries(existingPanel).length;
+    const changesWhatIsShown = dataQueries?.some(
+      (dataQuery, position) => Boolean(dataQuery.description?.trim()) || position >= existingCount
+    );
+    if (query === undefined && changesWhatIsShown) {
+      return {
+        error: `Panel "${existingPanel.id}" edit needs \`query\` when a data query has a \`description\` or adds a query: say how the panel should now use the data.`,
+      };
+    }
+    return { request: { ...base, type, nlQuery: query, dataQueries, removeAllQueries } };
   }
 
-  const base = {
-    operationType: 'edit_panels' as const,
-    identifier: panelInput.panelId,
-    existingPanel,
-  };
-
-  if (panelInput.renderer === 'custom_content') {
-    const { query, esql } = panelInput;
-    return { request: { ...base, renderer: panelInput.renderer, nlQuery: query, esql } };
-  }
-  if (renderer === 'custom_content') {
-    return {
-      error: `Panel "${existingPanel.id}" is a custom content panel. Edit it with source: "request", renderer: "custom_content".`,
-    };
-  }
-
-  const { query, esql, chartType, preserveESQL } = panelInput;
+  const { type, query, index, esql, chartType, preserveESQL } = content;
   return {
     request: {
       ...base,
-      renderer,
+      type,
       nlQuery: query,
+      index,
       esql,
       chartType,
       preserveESQL,
-      applyChartRules: panelInput.renderer === 'vega' ? undefined : panelInput.applyChartRules,
+      applyChartRules: content.type === 'vis' ? content.applyChartRules : undefined,
     },
   };
 };
 
-/** Maps a new-panel request input onto the resolution request for its renderer. */
-export const toCreationResolutionRequest = ({
-  operationType,
-  panelInput,
-}: {
-  operationType: 'add_section' | 'add_panels';
-  panelInput: PanelRequestInput;
-}): PanelResolutionRequest => {
-  const { query, esql } = panelInput;
-  const base = { operationType, identifier: query, nlQuery: query, esql };
+/** Where a panel's new content comes from; resolving it is left to the upsert. */
+export type PanelContentSource =
+  | { source: 'config'; panelContent: PanelContent }
+  | { source: 'attachment'; attachmentId: string }
+  | { source: 'request'; request: PanelResolutionRequest };
 
-  if (panelInput.renderer === 'custom_content') {
-    return { ...base, renderer: panelInput.renderer };
+/**
+ * Plans where a panel item's content comes from: an edit of the existing panel, which the content
+ * must match in kind, or a new panel.
+ */
+export const planPanelContent = ({
+  id,
+  content,
+  existingPanel,
+}: {
+  id: string;
+  content: UpsertPanelContent;
+  existingPanel?: AttachmentPanel;
+}): PanelContentSource | { error: string } => {
+  const editError = existingPanel && getPanelEditError(content, existingPanel);
+  if (editError) {
+    return { error: editError };
   }
 
-  const { renderer, index, chartType } = panelInput;
-  return { ...base, renderer, index, chartType };
+  if (isConfigPanelContent(content)) {
+    const { type, config } = content;
+    const panelContent = buildConfigPanelContent(type, config);
+    return 'error' in panelContent
+      ? { error: `Panel "${id}": ${panelContent.error}` }
+      : { source: 'config', panelContent };
+  }
+
+  if (content.type === 'attachment') {
+    return { source: 'attachment', attachmentId: content.attachment_id };
+  }
+
+  const result = existingPanel
+    ? toEditResolutionRequest(content, existingPanel)
+    : toCreationResolutionRequest(content, id);
+  return 'error' in result ? result : { source: 'request', request: result.request };
 };

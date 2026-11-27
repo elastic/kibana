@@ -16,7 +16,7 @@ import {
 } from './action_policy_oas_shared_examples';
 
 export const SNOOZE_ACTION_POLICY_REQUEST: SnoozeActionPolicyBody = {
-  snoozed_until: '2026-01-16T12:00:00.000Z',
+  snoozed_until: '2099-01-16T12:00:00.000Z',
 };
 
 export const snoozeActionPolicyOasExamples = (): AlertingOasOperationObject =>

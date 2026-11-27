@@ -27,7 +27,10 @@ export const completionChunkToLangchain = (chunk: ChatCompletionChunkEvent): AIM
     };
   });
 
-  const additionalKwargs = chunk.refusal ? { refusal: chunk.refusal } : {};
+  const additionalKwargs = {
+    ...(chunk.refusal ? { refusal: chunk.refusal } : {}),
+    ...(chunk.reasoning ? { reasoning_content: chunk.reasoning } : {}),
+  };
 
   return new AIMessageChunk({
     content: chunk.content,

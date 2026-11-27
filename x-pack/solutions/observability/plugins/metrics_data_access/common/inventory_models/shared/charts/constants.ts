@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { LegendValue } from '@elastic/charts';
-import type { XYLegendValue } from '@kbn/chart-expressions-common';
+import { ChartLegendValue, type XYLegendValue } from '@kbn/chart-expressions-common';
 import type { LensXYConfigBase } from '@kbn/lens-embeddable-utils';
 
 // Metric labels are defined in a Lens-free module so consumers (e.g. the
@@ -31,10 +30,10 @@ export const DEFAULT_XY_LEGEND: Pick<LensXYConfigBase, 'legend'> = {
   },
 };
 export const DEFAULT_LEGEND_STATS: XYLegendValue[] = [
-  LegendValue.Average,
-  LegendValue.Min,
-  LegendValue.Max,
-  LegendValue.LastNonNullValue,
+  ChartLegendValue.Average,
+  ChartLegendValue.Min,
+  ChartLegendValue.Max,
+  ChartLegendValue.LastNonNullValue,
 ];
 
 export const DEFAULT_XY_YBOUNDS: Pick<LensXYConfigBase, 'yBounds'> = {

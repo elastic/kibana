@@ -14,7 +14,7 @@ import type {
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
 } from '@kbn/slo-schema';
-import { apmTransactionDurationIndicatorSchema } from '@kbn/slo-schema';
+import { is, apmTransactionDurationIndicatorSchema } from '@kbn/slo-schema';
 import type {
   APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE,
   APM_ALERTING_LATENCY_CHART_EMBEDDABLE,
@@ -55,7 +55,7 @@ export function APMEmbeddableRoot({
   const groupingInput = getInputFromGroupings(slo);
   const indicator = slo.indicator;
 
-  const kuery = isKueryFilter ? filter : undefined;
+  const kuery = isKueryFilter ? filter : filter?.kqlQuery;
   const allFilters =
     !isKueryFilter && filter?.filters
       ? [...filter?.filters, ...groupingInput.filters]
@@ -71,7 +71,7 @@ export function APMEmbeddableRoot({
     environment: environment !== '*' ? environment : undefined,
     rangeFrom: dataTimeRange.from.toISOString(),
     rangeTo: dataTimeRange.to.toISOString(),
-    latencyThresholdInMicroseconds: apmTransactionDurationIndicatorSchema.is(indicator)
+    latencyThresholdInMicroseconds: is(apmTransactionDurationIndicatorSchema, indicator)
       ? indicator.params.threshold * 1000
       : undefined,
     kuery,

@@ -28,6 +28,9 @@ export const registerEvalsPublicWorkflowSteps = (
     import('./steps').then((m) => m.ingestScoresPublicStep)
   );
   workflowsExtensions.registerStepDefinition(() =>
+    import('./steps').then((m) => m.persistOnlineScoresPublicStep)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
     import('./steps').then((m) => m.evaluateExamplePublicStep)
   );
   workflowsExtensions.registerStepDefinition(() =>

@@ -14,6 +14,7 @@ import type {
 } from '@kbn/core/public';
 import type { PropsWithChildren } from 'react';
 import React, { createContext, useContext, useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ClientPluginsSetup, ClientPluginsStart } from '../../../plugin';
 import { CLIENT_DEFAULTS, CONTEXT_DEFAULTS } from '../../../../common/constants';
@@ -29,7 +30,6 @@ export interface SyntheticsAppProps {
   basePath: string;
   canSave: boolean;
   coreStart: CoreStart;
-  darkMode: boolean;
   i18n: I18nStart;
   isApmAvailable: boolean;
   isInfraAvailable: boolean;
@@ -98,8 +98,9 @@ export const SyntheticsSettingsContextProvider: React.FC<PropsWithChildren<Synth
     isDev,
     isServerless,
     isCCSEnabled,
-    darkMode,
+    coreStart,
   } = props;
+  const { darkMode } = useObservable(coreStart.theme.theme$, coreStart.theme.getTheme());
 
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 

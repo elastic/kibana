@@ -50,7 +50,6 @@ describe('registerSkills - endpoint response actions', () => {
       endpointResponseActionsSkill: true,
     },
     getStartServices: coreMock.createSetup().getStartServices,
-    kibanaVersion: '9.0.0',
     logger: loggerMock.create(),
     ml: undefined,
     options: { endpointAppContextService: createMockEndpointAppContext().service },
@@ -79,6 +78,29 @@ describe('registerSkills - endpoint response actions', () => {
 
     expect(registeredSkillIds(agentBuilder)).not.toContain(ENDPOINT_RESPONSE_ACTIONS_SKILL_ID);
   });
+
+  it.each([
+    [true, false, true],
+    [true, true, false],
+    [false, false, false],
+  ])(
+    'registers the old troubleshooting skill with legacy=%s universal=%s: %s',
+    async (automaticTroubleshootingSkill, automaticTroubleshootingUniversalSkill, registered) => {
+      const agentBuilder = createAllowListEnforcingAgentBuilder();
+      const opts = buildOpts(agentBuilder);
+      await registerSkills({
+        ...opts,
+        experimentalFeatures: {
+          ...opts.experimentalFeatures,
+          automaticTroubleshootingSkill,
+          automaticTroubleshootingUniversalSkill,
+        },
+      });
+      expect(registeredSkillIds(agentBuilder).includes('automatic_troubleshooting')).toBe(
+        registered
+      );
+    }
+  );
 
   it('uses a skill id that is on the agent-builder built-in allow-list', () => {
     // Guards against drift between the id this plugin registers and the Agent

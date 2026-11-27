@@ -19,7 +19,7 @@ import { createSiemMigrationAvailability } from '../common/availability';
 import { hasRuleMigrationPrivileges } from '../common/privileges';
 import { createToolErrorResult, createMissingPrivilegeError } from '../common/tool_results';
 import { SIEM_MIGRATION_STOP_RULE_MIGRATION_TOOL_ID } from './tool_ids';
-import { RULE_MIGRATION_SKILLS } from '../../../skills/siem_migration/rules/skill_ids';
+import { RULE_MIGRATION_SKILLS } from '../../../skills/siem_migration/rules/skill_catalog';
 import { MigrationId } from '../common/schemas';
 
 const schema = lazySchema(() =>
@@ -54,7 +54,7 @@ export const stopRuleMigrationTool = (
 
 Returns { stopped: boolean }.
 
-See the ${RULE_MIGRATION_SKILLS.STOP} skill for the full workflow.`,
+See the ${RULE_MIGRATION_SKILLS.STOP.id} skill for the full workflow.`,
     schema,
     tags: ['security', 'siem-migration', 'rules'],
     handler: async ({ migration_id: migrationId }, { request }) => {

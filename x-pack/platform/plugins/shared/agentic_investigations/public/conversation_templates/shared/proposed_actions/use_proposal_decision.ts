@@ -8,16 +8,26 @@
 import { useCallback } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { PROPOSALS_UI_CAPABILITY_DECIDE, type ApproveProposalRequest } from '@kbn/proposals-common';
+import {
+  PROPOSALS_UI_CAPABILITY_DECIDE,
+  type ApproveProposalRequest,
+  type Proposal,
+} from '@kbn/proposals-common';
 import type { DeclineParams } from '@kbn/proposals-ui';
 import {
+  isDecisionShown,
   useApproveProposal,
   useDismissProposal,
   useIsApprovingProposal,
   useIsDecliningProposal,
+  useIsReopeningProposal,
+  useReopenProposal,
 } from '@kbn/proposals-plugin/public';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useCurrentUserProfile } from '../../../user_profiles';
+
+/** The part of the proposal that shows whether its decision is visible in this row's data. */
+type ProposalDecisionData = Pick<Proposal, 'decision' | 'status' | 'supersededBy'>;
 
 export interface ProposalDecision {
   /** The caller lacks the proposals decide capability. */
@@ -26,20 +36,29 @@ export interface ProposalDecision {
   currentActorName?: string;
   approve: (actionInput: ApproveProposalRequest['actionInput']) => Promise<unknown>;
   dismiss: (params: DeclineParams) => Promise<unknown>;
+  /** Marks a to-do proposal that was marked as applied as not applied. */
+  reopen: () => Promise<unknown>;
+  isReopening: boolean;
 }
 
 /**
  * Approving or declining one proposed action: the capability check, the mutations, and the
  * submitting state scoped to this proposal, shared by every place an investigation decides one.
  */
-export const useProposalDecision = (proposalId: string): ProposalDecision => {
+export const useProposalDecision = (
+  proposalId: string,
+  proposal: ProposalDecisionData | undefined
+): ProposalDecision => {
   const {
     services: { application },
   } = useKibana<CoreStart>();
   const { mutateAsync: approveProposal } = useApproveProposal();
   const { mutateAsync: dismissProposal } = useDismissProposal();
-  const isApproving = useIsApprovingProposal(proposalId);
-  const isDeclining = useIsDecliningProposal(proposalId);
+  const { mutateAsync: reopenProposal } = useReopenProposal();
+  const isReopening = useIsReopeningProposal(proposalId);
+  const decisionShown = isDecisionShown(proposal);
+  const isApproving = useIsApprovingProposal(proposalId, decisionShown);
+  const isDeclining = useIsDecliningProposal(proposalId, decisionShown);
   const { data: currentUserProfile } = useCurrentUserProfile();
 
   const approve = useCallback(
@@ -53,11 +72,18 @@ export const useProposalDecision = (proposalId: string): ProposalDecision => {
     [dismissProposal, proposalId]
   );
 
+  const reopen = useCallback(
+    () => reopenProposal({ id: proposalId }),
+    [reopenProposal, proposalId]
+  );
+
   return {
     readOnly: application.capabilities.proposals?.[PROPOSALS_UI_CAPABILITY_DECIDE] !== true,
     isSubmitting: isApproving ? 'applying' : isDeclining ? 'declining' : undefined,
     currentActorName: currentUserProfile ? getUserDisplayName(currentUserProfile.user) : undefined,
     approve,
     dismiss,
+    reopen,
+    isReopening,
   };
 };

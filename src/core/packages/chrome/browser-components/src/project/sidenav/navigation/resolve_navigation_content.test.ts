@@ -11,7 +11,7 @@ import type { NavigationTreeDefinitionUI, ProjectNavigationLinks } from '@kbn/co
 import { filter, firstValueFrom, of, Subject, throwError } from 'rxjs';
 import type { MenuItem } from '@kbn/ui-side-navigation/types';
 import {
-  attachPopoverSections,
+  attachSupplementarySections,
   joinNavigationContent,
   resolveLinksContent,
   type NavigationItemsSnapshot,
@@ -97,12 +97,13 @@ const resolveNonEmpty = async (registration: ProjectNavigationLinks) => {
   return resolved;
 };
 
-describe('attachPopoverSections', () => {
+describe('attachSupplementarySections', () => {
   it('attaches lists to primary and footer hover, not More', async () => {
     const resolved = await resolveNonEmpty(createRegistration());
-    const attached = attachPopoverSections(createNavigationItems(createMenuItem('dashboards')), [
-      resolved,
-    ]);
+    const attached = attachSupplementarySections(
+      createNavigationItems(createMenuItem('dashboards')),
+      [resolved]
+    );
 
     const recents = [
       {
@@ -119,31 +120,34 @@ describe('attachPopoverSections', () => {
       },
     ];
 
-    expect(attached.navItems.primaryItems[0].popoverSections).toEqual(recents);
-    expect(attached.navItems.footerItems[0].popoverSections).toEqual(recents);
-    expect(attached.navItems.overflowItems?.[0].popoverSections).toBeUndefined();
+    expect(attached.navItems.primaryItems[0].supplementarySections).toEqual(recents);
+    expect(attached.navItems.footerItems[0].supplementarySections).toEqual(recents);
+    expect(attached.navItems.overflowItems?.[0].supplementarySections).toBeUndefined();
   });
 
   it('attaches multiple lists in registration order', () => {
-    const attached = attachPopoverSections(createNavigationItems(createMenuItem('dashboards')), [
-      {
-        nodeId: 'dashboards',
-        lists: [
-          {
-            id: 'recentlyViewed',
-            title: 'Recently viewed',
-            items: [{ id: 'dash-1', href: '/app/dashboards#/dash-1', label: 'One' }],
-          },
-          {
-            id: 'favorites',
-            title: 'Favorites',
-            items: [{ id: 'dash-2', href: '/app/dashboards#/dash-2', label: 'Two' }],
-          },
-        ],
-      },
-    ]);
+    const attached = attachSupplementarySections(
+      createNavigationItems(createMenuItem('dashboards')),
+      [
+        {
+          nodeId: 'dashboards',
+          lists: [
+            {
+              id: 'recentlyViewed',
+              title: 'Recently viewed',
+              items: [{ id: 'dash-1', href: '/app/dashboards#/dash-1', label: 'One' }],
+            },
+            {
+              id: 'favorites',
+              title: 'Favorites',
+              items: [{ id: 'dash-2', href: '/app/dashboards#/dash-2', label: 'Two' }],
+            },
+          ],
+        },
+      ]
+    );
 
-    expect(attached.navItems.primaryItems[0].popoverSections).toEqual([
+    expect(attached.navItems.primaryItems[0].supplementarySections).toEqual([
       {
         id: 'recentlyViewed',
         label: 'Recently viewed',
@@ -159,16 +163,31 @@ describe('attachPopoverSections', () => {
     ]);
   });
 
-  it('v1 skips a node that already has sections', async () => {
+  it('keeps structural sections and attaches supplementary sections to a panel opener', async () => {
     const resolved = await resolveNonEmpty(createRegistration());
     const existing = [{ id: 'static', items: [{ id: 'child', label: 'Child', href: '/child' }] }];
-    const attached = attachPopoverSections(
+    const attached = attachSupplementarySections(
       createNavigationItems(createMenuItem('dashboards', existing)),
       [resolved]
     );
 
-    expect(attached.navItems.primaryItems[0].popoverSections).toBeUndefined();
-    expect(attached.navItems.primaryItems[0].sections).toEqual(existing);
+    expect(attached.navItems.primaryItems[0].sections).toBe(existing);
+    expect(attached.navItems.primaryItems[0].supplementarySections).toEqual([
+      {
+        id: 'recentlyViewed',
+        label: 'Recently viewed',
+        items: [
+          {
+            id: 'recentlyViewed:dash-1',
+            href: '/app/dashboards#/dash-1',
+            label: 'One',
+          },
+        ],
+        isPaginated: true,
+      },
+    ]);
+    expect(attached.navItems.overflowItems?.[0].sections).toBe(existing);
+    expect(attached.navItems.overflowItems?.[0].supplementarySections).toBeUndefined();
   });
 });
 
@@ -204,7 +223,7 @@ describe('joinNavigationContent', () => {
   });
 
   const labels = (state: { navItems: NavigationItems['navItems'] }) =>
-    state.navItems.primaryItems[0].popoverSections?.[0].items[0].label;
+    state.navItems.primaryItems[0].supplementarySections?.[0].items[0].label;
 
   it('reattaches onto the last converted items when only lists emit', () => {
     const links$ = new Subject<ResolvedLinksSnapshot>();

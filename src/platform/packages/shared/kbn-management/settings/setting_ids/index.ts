@@ -60,7 +60,10 @@ export const AGENT_BUILDER_NAV_ENABLED_SETTING_ID = 'agentBuilder:navEnabled';
 export const AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID = 'agentBuilder:experimentalFeatures';
 export const AGENT_BUILDER_BASH_SUPPORT_SETTING_ID = 'agentBuilder:bashSupport';
 export const AGENT_BUILDER_API_DISCOVERY_SETTING_ID = 'agentBuilder:apiDiscovery';
+export const AGENT_BUILDER_THREADS_SETTING_ID = 'agentBuilder:threads';
 export const AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS = 'agentBuilder:prePromptWorkflowIds';
+export const AGENT_BUILDER_INCLUDE_FROZEN_BY_DEFAULT_SETTING_ID =
+  'agentBuilder:includeFrozenByDefault';
 export const AGENT_BUILDER_DEDUCTIVE_ENABLED_SETTING_ID = 'agentBuilder:deductiveEnabled';
 export const AGENT_BUILDER_DEDUCTIVE_ENDPOINT_SETTING_ID = 'agentBuilder:deductiveEndpoint';
 export const AGENT_BUILDER_DEDUCTIVE_API_KEY_SETTING_ID = 'agentBuilder:deductiveApiKey';
@@ -190,11 +193,9 @@ export const AI_CHAT_EXPERIENCE_TYPE = 'aiAssistant:preferredChatExperience';
 export const AI_ANONYMIZATION_SETTINGS = 'ai:anonymizationSettings';
 export const OBSERVABILITY_SEARCH_EXCLUDED_DATA_TIERS = 'observability:searchExcludedDataTiers';
 export const OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS = 'observability:streamsEnableGroupStreams';
-export const OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS = 'observability:streamsEnableQueryStreams';
 export const OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS = 'observability:streamsEnableContentPacks';
 export const OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS =
   'observability:streamsEnableWiredStreamViews';
-export const OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS = 'observability:streamsEnableDraftStreams';
 export const OBSERVABILITY_STREAMS_ENABLE_CANVAS = 'observability:streamsEnableCanvas';
 export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG =
   'observability:streamsSigEventsTuningConfig';

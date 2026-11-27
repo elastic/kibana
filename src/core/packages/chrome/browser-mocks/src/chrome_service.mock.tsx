@@ -238,6 +238,8 @@ const createStartContractMock = () => {
       registerCustomizeNavigationHandler: jest.fn(),
       registerNavigationLinks: jest.fn(),
       getRegisteredNavigationLinks$: jest.fn().mockReturnValue(new BehaviorSubject([])),
+      registerNavTreeDependencies: jest.fn(),
+      getNavTreeDependencies: jest.fn().mockReturnValue([]),
     }),
     controls,
     help,

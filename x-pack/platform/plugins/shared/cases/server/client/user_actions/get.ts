@@ -6,13 +6,13 @@
  */
 
 import type { CaseUserActionsDeprecatedResponse } from '../../../common/types/api';
-import { CaseUserActionsDeprecatedResponseRt } from '../../../common/types/api';
+import { CaseUserActionsDeprecatedResponseSchema } from '../../../common/types/api';
 import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import type { UserActionGet } from './types';
 import { extractAttributes } from './utils';
-import { decodeOrThrow } from '../../common/runtime_types';
+import { decodeOrThrowZod } from '../../common/runtime_types';
 
 export const get = async (
   { caseId }: UserActionGet,
@@ -37,7 +37,9 @@ export const get = async (
 
     const res = extractAttributes(userActions);
 
-    return decodeOrThrow(CaseUserActionsDeprecatedResponseRt)(res);
+    return decodeOrThrowZod(CaseUserActionsDeprecatedResponseSchema)(
+      res
+    ) as CaseUserActionsDeprecatedResponse;
   } catch (error) {
     throw createCaseError({
       message: `Failed to retrieve user actions case id: ${caseId}: ${error}`,

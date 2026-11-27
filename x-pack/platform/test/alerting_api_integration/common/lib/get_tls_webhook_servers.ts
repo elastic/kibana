@@ -7,7 +7,7 @@
 
 import fs from 'fs';
 import https from 'https';
-import getPort from 'get-port';
+import getPort, { portNumbers } from 'get-port';
 import { KBN_KEY_PATH, KBN_CERT_PATH } from '@kbn/dev-utils';
 
 interface TlsWebhookURLs {
@@ -26,16 +26,16 @@ export async function getTlsWebhookServerUrls(
 ): Promise<TlsWebhookURLs> {
   let port: number;
 
-  port = await getPort({ port: getPort.makeRange(portRangeStart, portRangeEnd) });
+  port = await getPort({ port: portNumbers(portRangeStart, portRangeEnd) });
   const noCustom = `https://localhost:${port}`;
 
-  port = await getPort({ port: getPort.makeRange(portRangeStart, portRangeEnd) });
+  port = await getPort({ port: portNumbers(portRangeStart, portRangeEnd) });
   const rejectUnauthorizedFalse = `https://localhost:${port}`;
 
-  port = await getPort({ port: getPort.makeRange(portRangeStart, portRangeEnd) });
+  port = await getPort({ port: portNumbers(portRangeStart, portRangeEnd) });
   const rejectUnauthorizedTrue = `https://localhost:${port}`;
 
-  port = await getPort({ port: getPort.makeRange(portRangeStart, portRangeEnd) });
+  port = await getPort({ port: portNumbers(portRangeStart, portRangeEnd) });
   const caFile = `https://localhost:${port}`;
 
   return {

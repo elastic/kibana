@@ -1,0 +1,421 @@
+{
+  "components": {
+    "securitySchemes": {
+      "openapi_authorization": {
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "title": "Users API"
+  },
+  "openapi": "3.0.0",
+  "paths": {
+    "/users/{userId}": {
+      "get": {
+        "operationId": "user",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "login_type",
+            "required": false,
+            "schema": {
+              "enum": [
+                0,
+                1,
+                11,
+                21,
+                23,
+                24,
+                27,
+                97,
+                98,
+                99,
+                100,
+                101
+              ],
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "encrypted_email",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search_by_unique_id",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    {
+                      "properties": {
+                        "created_at": {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        "dept": {
+                          "type": "string"
+                        },
+                        "display_name": {
+                          "maxLength": 128,
+                          "type": "string"
+                        },
+                        "email": {
+                          "type": "string"
+                        },
+                        "first_name": {
+                          "maxLength": 64,
+                          "type": "string"
+                        },
+                        "last_client_version": {
+                          "type": "string"
+                        },
+                        "last_login_time": {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        "last_name": {
+                          "maxLength": 64,
+                          "type": "string"
+                        },
+                        "pmi": {
+                          "format": "int64",
+                          "type": "integer"
+                        },
+                        "role_name": {
+                          "type": "string"
+                        },
+                        "timezone": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "enum": [
+                            1,
+                            2,
+                            4,
+                            99
+                          ],
+                          "type": "integer"
+                        },
+                        "use_pmi": {
+                          "default": false,
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "type"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "properties": {
+                        "account_id": {
+                          "type": "string"
+                        },
+                        "account_number": {
+                          "format": "int64",
+                          "type": "integer"
+                        },
+                        "cluster": {
+                          "type": "string"
+                        },
+                        "cms_user_id": {
+                          "type": "string"
+                        },
+                        "company": {
+                          "type": "string"
+                        },
+                        "cost_center": {
+                          "type": "string"
+                        },
+                        "created_at": {
+                          "deprecated": true,
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        "custom_attributes": {
+                          "items": {
+                            "properties": {
+                              "key": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "value": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "division_ids": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "employee_unique_id": {
+                          "type": "string"
+                        },
+                        "group_ids": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "im_group_ids": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "jid": {
+                          "type": "string"
+                        },
+                        "job_title": {
+                          "type": "string"
+                        },
+                        "language": {
+                          "type": "string"
+                        },
+                        "license_info_list": {
+                          "items": {
+                            "properties": {
+                              "license_option": {
+                                "enum": [
+                                  2,
+                                  4,
+                                  8,
+                                  16,
+                                  32,
+                                  64,
+                                  128,
+                                  33554432,
+                                  134217728,
+                                  1073741824,
+                                  536870912,
+                                  268435456,
+                                  4398046511104,
+                                  18014398509481984,
+                                  72057594037927940,
+                                  576460752303423500,
+                                  144115188075855870,
+                                  137438953472,
+                                  1099511627776,
+                                  549755813888,
+                                  274877906944,
+                                  2199023255552,
+                                  4294967296,
+                                  34359738368,
+                                  17179869184,
+                                  8589934592,
+                                  68719476736
+                                ],
+                                "type": "integer"
+                              },
+                              "license_type": {
+                                "enum": [
+                                  "MEETING",
+                                  "ZOOM_WORKPLACE_BUNDLE"
+                                ],
+                                "type": "string"
+                              },
+                              "subscription_id": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "location": {
+                          "type": "string"
+                        },
+                        "login_types": {
+                          "items": {
+                            "enum": [
+                              0,
+                              1,
+                              11,
+                              21,
+                              23,
+                              24,
+                              27,
+                              97,
+                              98,
+                              99,
+                              100,
+                              101
+                            ],
+                            "type": "integer"
+                          },
+                          "type": "array"
+                        },
+                        "manager": {
+                          "format": "email",
+                          "type": "string"
+                        },
+                        "personal_meeting_url": {
+                          "type": "string"
+                        },
+                        "phone_country": {
+                          "deprecated": true,
+                          "type": "string"
+                        },
+                        "phone_number": {
+                          "deprecated": true,
+                          "type": "string"
+                        },
+                        "phone_numbers": {
+                          "items": {
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "country": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "enum": [
+                                  "Mobile",
+                                  "Office",
+                                  "Home",
+                                  "Fax"
+                                ],
+                                "type": "string"
+                              },
+                              "number": {
+                                "type": "string"
+                              },
+                              "verified": {
+                                "type": "boolean"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "pic_url": {
+                          "type": "string"
+                        },
+                        "plan_united_type": {
+                          "enum": [
+                            "1",
+                            "2",
+                            "4",
+                            "8",
+                            "16",
+                            "32",
+                            "64",
+                            "128",
+                            "256",
+                            "512",
+                            "1024",
+                            "2048",
+                            "4096",
+                            "8192",
+                            "16384",
+                            "32768",
+                            "65536",
+                            "131072"
+                          ],
+                          "type": "string"
+                        },
+                        "pronouns": {
+                          "type": "string"
+                        },
+                        "pronouns_option": {
+                          "enum": [
+                            1,
+                            2,
+                            3
+                          ],
+                          "type": "integer"
+                        },
+                        "role_id": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "enum": [
+                            "pending",
+                            "active",
+                            "inactive"
+                          ],
+                          "type": "string"
+                        },
+                        "use_pmi": {
+                          "default": false,
+                          "type": "boolean"
+                        },
+                        "user_created_at": {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        "vanity_url": {
+                          "type": "string"
+                        },
+                        "verified": {
+                          "type": "integer"
+                        },
+                        "zoom_one_type": {
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {},
+          "404": {},
+          "429": {}
+        },
+        "security": [
+          {
+            "openapi_authorization": []
+          }
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.zoom.us/v2"
+    }
+  ]
+}

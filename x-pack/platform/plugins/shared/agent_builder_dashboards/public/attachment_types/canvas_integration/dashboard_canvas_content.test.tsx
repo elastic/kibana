@@ -11,7 +11,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
-import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
+import { ActionButtonType, type ActionButton } from '@kbn/agent-builder-browser/attachments';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
@@ -39,11 +39,11 @@ describe('DashboardCanvasAttachment', () => {
     overrides: Partial<Pick<DashboardApi, 'isManaged' | 'isEditableByUser'>> = {}
   ): DashboardApi & {
     children$: BehaviorSubject<Record<string, unknown>>;
-    dataViews$: BehaviorSubject<any[]>;
+    dataSources$: BehaviorSubject<any[]>;
     isApproximate$: BehaviorSubject<boolean>;
   } => {
     const children$ = new BehaviorSubject<Record<string, unknown>>({});
-    const dataViews$ = new BehaviorSubject<any[]>([]);
+    const dataSources$ = new BehaviorSubject<any[]>([]);
     const filters$ = new BehaviorSubject<Filter[]>([]);
     const isApproximate$ = new BehaviorSubject(false);
     const query$ = new BehaviorSubject<Query | undefined>(undefined);
@@ -54,7 +54,7 @@ describe('DashboardCanvasAttachment', () => {
       locator: {
         navigate: jest.fn().mockResolvedValue(undefined),
       },
-      dataViews$,
+      dataSources$,
       filters$,
       forceRefresh: jest.fn(),
       isApproximate$,
@@ -77,7 +77,7 @@ describe('DashboardCanvasAttachment', () => {
       ...overrides,
     } as unknown as DashboardApi & {
       children$: BehaviorSubject<Record<string, unknown>>;
-      dataViews$: BehaviorSubject<any[]>;
+      dataSources$: BehaviorSubject<any[]>;
       isApproximate$: BehaviorSubject<boolean>;
     };
   };
@@ -239,10 +239,19 @@ describe('DashboardCanvasAttachment', () => {
 
     expect(registerActionButtons).toHaveBeenCalledWith(
       expect.arrayContaining([
-        expect.objectContaining({ label: 'Edit in Dashboards' }),
+        expect.objectContaining({ label: 'Edit in Dashboard' }),
         expect.objectContaining({ label: 'Save' }),
       ])
     );
+  });
+
+  it('registers Edit in Dashboard as the primary action and Save as a secondary action', async () => {
+    const { registerActionButtons } = await renderDashboardCanvasAttachment();
+
+    expect(registerActionButtons).toHaveBeenCalledWith([
+      expect.objectContaining({ label: 'Edit in Dashboard', type: ActionButtonType.PRIMARY }),
+      expect.objectContaining({ label: 'Save', type: ActionButtonType.SECONDARY }),
+    ]);
   });
 
   it('registers disabled action buttons with an explanation when dashboard write access is unavailable', async () => {
@@ -254,7 +263,7 @@ describe('DashboardCanvasAttachment', () => {
     expect(registerActionButtons).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
-          label: 'Edit in Dashboards',
+          label: 'Edit in Dashboard',
           disabled: true,
           disabledReason: 'You need dashboard write permissions to edit or save dashboards.',
         }),
@@ -284,7 +293,7 @@ describe('DashboardCanvasAttachment', () => {
     expect(registerActionButtons).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
-          label: 'Edit in Dashboards',
+          label: 'Edit in Dashboard',
           disabled: true,
           disabledReason: 'Managed dashboards are read-only.',
         }),
@@ -314,7 +323,7 @@ describe('DashboardCanvasAttachment', () => {
     expect(registerActionButtons).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
-          label: 'Edit in Dashboards',
+          label: 'Edit in Dashboard',
           disabled: true,
           disabledReason: 'You do not have permission to edit this dashboard.',
         }),
@@ -327,7 +336,7 @@ describe('DashboardCanvasAttachment', () => {
     );
   });
 
-  describe('Edit in Dashboards disabled states', () => {
+  describe('Edit in Dashboard disabled states', () => {
     it('should not navigate for managed dashboards', async () => {
       const attachmentWithOrigin: DashboardAttachment = {
         ...mockAttachment,
@@ -343,7 +352,7 @@ describe('DashboardCanvasAttachment', () => {
         );
 
       const buttons: ActionButton[] = registerActionButtons.mock.calls.at(-1)?.[0] ?? [];
-      const editButton = buttons.find((b) => b.label === 'Edit in Dashboards');
+      const editButton = buttons.find((b) => b.label === 'Edit in Dashboard');
 
       await act(async () => {
         await editButton?.handler();
@@ -369,7 +378,7 @@ describe('DashboardCanvasAttachment', () => {
         );
 
       const buttons: ActionButton[] = registerActionButtons.mock.calls.at(-1)?.[0] ?? [];
-      const editButton = buttons.find((b) => b.label === 'Edit in Dashboards');
+      const editButton = buttons.find((b) => b.label === 'Edit in Dashboard');
 
       await act(async () => {
         await editButton?.handler();
@@ -385,7 +394,7 @@ describe('DashboardCanvasAttachment', () => {
         await renderDashboardCanvasAttachment({}, { canWriteDashboards: false });
 
       const buttons: ActionButton[] = registerActionButtons.mock.calls.at(-1)?.[0] ?? [];
-      const editButton = buttons.find((b) => b.label === 'Edit in Dashboards');
+      const editButton = buttons.find((b) => b.label === 'Edit in Dashboard');
 
       await act(async () => {
         await editButton?.handler();
@@ -521,7 +530,7 @@ describe('DashboardCanvasAttachment', () => {
     );
 
     act(() => {
-      mockApi.dataViews$.next(nextDataViews as any);
+      mockApi.dataSources$.next(nextDataViews as any);
     });
 
     expect(getLatestSearchBarProps()).toEqual(
@@ -579,13 +588,13 @@ describe('DashboardCanvasAttachment', () => {
     expect(mockApi.forceRefresh).toHaveBeenCalled();
   });
 
-  describe('Edit in Dashboards button', () => {
+  describe('Edit in Dashboard button', () => {
     it('should call closeCanvas and openSidebarConversation', async () => {
       const { registerActionButtons, closeCanvas, openSidebarConversation, mockApi } =
         await renderDashboardCanvasAttachment();
 
       const buttons: ActionButton[] = registerActionButtons.mock.calls.at(-1)?.[0] ?? [];
-      const editButton = buttons.find((b) => b.label === 'Edit in Dashboards');
+      const editButton = buttons.find((b) => b.label === 'Edit in Dashboard');
 
       await act(async () => {
         await editButton?.handler();
@@ -600,7 +609,7 @@ describe('DashboardCanvasAttachment', () => {
       const { registerActionButtons, mockApi } = await renderDashboardCanvasAttachment();
 
       const buttons: ActionButton[] = registerActionButtons.mock.calls.at(-1)?.[0] ?? [];
-      const editButton = buttons.find((b) => b.label === 'Edit in Dashboards');
+      const editButton = buttons.find((b) => b.label === 'Edit in Dashboard');
 
       await act(async () => {
         await editButton?.handler();
@@ -629,7 +638,7 @@ describe('DashboardCanvasAttachment', () => {
       });
 
       const buttons: ActionButton[] = registerActionButtons.mock.calls.at(-1)?.[0] ?? [];
-      const editButton = buttons.find((b) => b.label === 'Edit in Dashboards');
+      const editButton = buttons.find((b) => b.label === 'Edit in Dashboard');
 
       await act(async () => {
         await editButton?.handler();
@@ -658,7 +667,7 @@ describe('DashboardCanvasAttachment', () => {
 
       expect(checkSavedDashboardExist).toHaveBeenCalledWith('existing-dashboard-id');
       const buttons: ActionButton[] = registerActionButtons.mock.calls.at(-1)?.[0] ?? [];
-      const editButton = buttons.find((b) => b.label === 'Edit in Dashboards');
+      const editButton = buttons.find((b) => b.label === 'Edit in Dashboard');
 
       await act(async () => {
         await editButton?.handler();
@@ -685,7 +694,7 @@ describe('DashboardCanvasAttachment', () => {
 
       expect(checkSavedDashboardExist).toHaveBeenCalledWith('deleted-dashboard-id');
       const buttons: ActionButton[] = registerActionButtons.mock.calls.at(-1)?.[0] ?? [];
-      const editButton = buttons.find((b) => b.label === 'Edit in Dashboards');
+      const editButton = buttons.find((b) => b.label === 'Edit in Dashboard');
 
       await act(async () => {
         await editButton?.handler();

@@ -46,11 +46,11 @@ export const defineInferenceFeaturesRoutes = ({
       },
       errorHandler(logger)(async (context, _request, response) => {
         const { uiSettings } = await context.core;
-        const allFeatures = featureRegistry.getAll();
+        const nonHiddenFeatures = featureRegistry.getAll().filter(({ isHidden }) => !isHidden);
 
         const conditionKeys = [
           ...new Set(
-            allFeatures.flatMap((feature) =>
+            nonHiddenFeatures.flatMap((feature) =>
               feature.visibilityCondition ? [feature.visibilityCondition.key] : []
             )
           ),
@@ -73,14 +73,29 @@ export const defineInferenceFeaturesRoutes = ({
           })
         );
 
-        const visibleFeatures = allFeatures.filter((feature) => {
+        const visibleFeatures = nonHiddenFeatures.filter((feature) => {
           const condition = feature.visibilityCondition;
           if (!condition) return true;
           if (!settingValues.has(condition.key)) return true;
           return settingValues.get(condition.key) === condition.value;
         });
 
-        const body: InferenceFeaturesResponse = { features: visibleFeatures };
+        const body: InferenceFeaturesResponse = {
+          features: visibleFeatures.map(({ recommendedEndpoints, ...feature }) => {
+            const recommendedEndpointParameters = Object.fromEntries(
+              recommendedEndpoints.flatMap(({ id, parameters }) =>
+                parameters ? [[id, parameters]] : []
+              )
+            );
+            return {
+              ...feature,
+              recommendedEndpoints: recommendedEndpoints.map(({ id }) => id),
+              ...(Object.keys(recommendedEndpointParameters).length > 0 && {
+                recommendedEndpointParameters,
+              }),
+            };
+          }),
+        };
 
         return response.ok({
           body,

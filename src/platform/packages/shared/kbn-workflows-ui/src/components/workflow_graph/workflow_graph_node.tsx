@@ -415,7 +415,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
   const { stepType, label, isTrigger, stepExecution, preview, step } = node.data;
   const { euiTheme } = useEuiTheme();
   const isTriggerNode = isTrigger || TRIGGER_STEP_TYPES.has(stepType);
-  // Display-only: trigger labels are already human-readable (getTriggerLabel);
+  // Display-only: trigger labels are already human-readable (getTriggerName);
   // step labels are frequently authored as slugs, so deslugify for display.
   // `label` itself must stay untouched — it's used to key execution status.
   const displayLabel = isTriggerNode ? label : deslugifyStepName(label);

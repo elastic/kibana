@@ -75,10 +75,7 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ onClose }) => {
             onClick={onClose}
             flush="left"
           >
-            <FormattedMessage
-              id="xpack.dataVisualizer.file.uploadView.closeButton"
-              defaultMessage="Close"
-            />
+            <FormattedMessage id="indexEditor.file.uploadView.closeButton" defaultMessage="Close" />
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={true} />

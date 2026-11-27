@@ -22,6 +22,7 @@ const createInternalPrebootContractMock = () => {
       ui: true,
       migrator: false,
     },
+    roleNames: ['background_tasks', 'ui'],
   });
   return prebootContract;
 };

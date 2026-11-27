@@ -118,22 +118,18 @@ export const useConversationListMutations = ({
 
   const updatePinnedStatus = useCallback(
     (conversationId: string, pinned: boolean) => {
-      const now = new Date().toISOString();
-
       queryClient.setQueryData<Conversation>(
         queryKeys.conversations.byId(conversationId),
         (current) => {
           if (!current) return current;
           return produce(current, (draft) => {
             draft.pinned = pinned;
-            draft.updated_at = now;
           });
         }
       );
 
-      // Move the row between the pinned and unpinned caches, then patch updated_at everywhere.
+      // Pinning is per-user state, so `updated_at` is left untouched.
       movePinnedConversationBetweenLists({ queryClient, agentId, conversationId, pinned });
-      patchConversationList({ queryClient, agentId, conversationId, values: { updated_at: now } });
 
       conversationsService.updatePinnedStatus({ conversationId, pinned }).catch(() => {
         rollbackConversationCaches(conversationId);

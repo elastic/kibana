@@ -7,7 +7,7 @@
 import React from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-constants';
 import { debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { Suggestion } from '../hooks/use_fetch_synthetics_suggestions';

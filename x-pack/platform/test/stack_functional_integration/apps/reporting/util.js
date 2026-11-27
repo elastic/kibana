@@ -17,13 +17,10 @@ export const putWatcher = async (watch, id, body, client, log) => {
   expect(putWatchResponse.statusCode).to.eql('201');
   expect(putWatchResponse.body._version).to.eql('1');
 };
-export const getWatcher = async (watch, id, client, log, common, tryForTime) => {
-  await common.sleep(10000);
+export const getWatcher = async (watch, id, client, log, tryForTime) => {
   await tryForTime(
     250000,
     async () => {
-      await common.sleep(3000);
-
       await watcherHistory(id, client, log);
 
       const getWatchResponse = await client.watcher.getWatch(watch, { meta: true });
@@ -40,8 +37,22 @@ export const getWatcher = async (watch, id, client, log, common, tryForTime) => 
     },
     async function onFailure(obj) {
       log.debug(`\n### tryForTime-Failure--raw body: \n\t${pretty(obj)}`);
-    }
+    },
+    2000
   );
+};
+// Executions of a deleted watch keep running, and each one has requested its own report
+// (https://github.com/elastic/elasticsearch/issues/165188). Kibana renders reports one at a
+// time, so the next test's report would wait behind them.
+export const waitForReports = async (client, retry, log) => {
+  await retry.waitForWithTimeout('pending reports to finish', 600000, async () => {
+    const { count } = await client.count({
+      index: '.kibana-reporting*',
+      query: { terms: { status: ['pending', 'processing'] } },
+    });
+    log.debug(`Pending reports: ${count}`);
+    return count === 0;
+  });
 };
 export const deleteWatcher = async (watch, id, client, log) => {
   const deleteResponse = await client.watcher.deleteWatch(watch, { meta: true });

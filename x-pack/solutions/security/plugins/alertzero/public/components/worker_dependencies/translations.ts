@@ -11,6 +11,11 @@ export const MISSING_TITLE = i18n.translate('xpack.alertzero.workerDependencies.
   defaultMessage: 'Worker setup needs attention',
 });
 
+export const ONBOARDING_SETTINGS_TITLE = i18n.translate(
+  'xpack.alertzero.workerDependencies.onboardingSettingsTitle',
+  { defaultMessage: 'Settings to enable' }
+);
+
 export const UNKNOWN_TITLE = i18n.translate('xpack.alertzero.workerDependencies.unknownTitle', {
   defaultMessage: 'Could not verify worker setup',
 });
@@ -24,6 +29,17 @@ export const ENABLE_BUTTON_LABEL = i18n.translate(
   'xpack.alertzero.workerDependencies.enableButtonLabel',
   { defaultMessage: 'Enable' }
 );
+
+export const SET_UP_LINK_TEXT = i18n.translate('xpack.alertzero.workerDependencies.setUpLinkText', {
+  defaultMessage: 'Set up',
+});
+
+/** Accessible name for a Set up link, so it names what the link sets up. */
+export const setUpDependencyLinkLabel = (dependencyName: string): string =>
+  i18n.translate('xpack.alertzero.workerDependencies.setUpDependencyLinkLabel', {
+    defaultMessage: 'Set up {dependencyName}',
+    values: { dependencyName },
+  });
 
 export const enableDependencyButtonLabel = (dependencyName: string): string =>
   i18n.translate('xpack.alertzero.workerDependencies.enableDependencyButtonLabel', {
@@ -39,13 +55,14 @@ export const dependencyEnabledTitle = (dependencyName: string): string =>
 
 export const enableDependencyFailedTitle = (dependencyName: string): string =>
   i18n.translate('xpack.alertzero.workerDependencies.enableDependencyFailedTitle', {
-    defaultMessage: 'Could not enable {dependencyName}',
+    defaultMessage: "Couldn't enable {dependencyName}",
     values: { dependencyName },
   });
 
 export const enableDependencyFailedDescription = (dependencyName: string): string =>
   i18n.translate('xpack.alertzero.workerDependencies.enableDependencyFailedDescription', {
-    defaultMessage: 'Could not enable {dependencyName}. Try again or use the link.',
+    defaultMessage:
+      "Couldn't enable {dependencyName}. Try again, or use the link next to it to enable it yourself.",
     values: { dependencyName },
   });
 
@@ -56,7 +73,7 @@ export const CONTEXT_ENGINE_LABEL = i18n.translate(
 
 export const ADVANCED_SETTINGS_LINK_TEXT = i18n.translate(
   'xpack.alertzero.workerDependencies.advancedSettingsLinkText',
-  { defaultMessage: 'Open Advanced Settings' }
+  { defaultMessage: 'Enable in Advanced Settings' }
 );
 
 export const ALERT_ANALYSIS_LABEL = i18n.translate(
@@ -69,11 +86,6 @@ export const ALERT_ANALYSIS_WORKFLOW_LABEL = i18n.translate(
   { defaultMessage: 'Alert Analysis workflow' }
 );
 
-export const ALERT_ANALYSIS_LINK_TEXT = i18n.translate(
-  'xpack.alertzero.workerDependencies.alertAnalysisLinkText',
-  { defaultMessage: 'Open Alert analysis settings' }
-);
-
 export const ATTACK_DISCOVERY_LABEL = i18n.translate(
   'xpack.alertzero.workerDependencies.attackDiscoveryLabel',
   { defaultMessage: 'Attack Discovery workflows' }
@@ -82,11 +94,6 @@ export const ATTACK_DISCOVERY_LABEL = i18n.translate(
 export const DEFEND_LABEL = i18n.translate('xpack.alertzero.workerDependencies.defendLabel', {
   defaultMessage: 'Elastic Defend',
 });
-
-export const DEFEND_LINK_TEXT = i18n.translate(
-  'xpack.alertzero.workerDependencies.defendLinkText',
-  { defaultMessage: 'Set up Elastic Defend' }
-);
 
 export const INGEST_WORKFLOW_LABEL = i18n.translate(
   'xpack.alertzero.workerDependencies.ingestWorkflowLabel',
@@ -100,7 +107,7 @@ export const ENRICH_WORKFLOW_LABEL = i18n.translate(
 
 export const THREAT_WORKFLOW_LINK_TEXT = i18n.translate(
   'xpack.alertzero.workerDependencies.threatWorkflowLinkText',
-  { defaultMessage: 'Open workflow' }
+  { defaultMessage: 'Enable in Workflows' }
 );
 
 export const WORKFLOWS_LIST_LINK_TEXT = i18n.translate(

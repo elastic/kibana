@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-search-strategy';
 import type { AppContextTestRender } from '../../mock/endpoint';
 import { createAppRootMockRenderer, endpointAlertDataMock } from '../../mock/endpoint';
 import {

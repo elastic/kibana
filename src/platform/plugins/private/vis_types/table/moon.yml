@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/visualizations-common'
   - '@kbn/chart-expressions-common'
   - '@kbn/lens-common'
+  - '@kbn/visualizations-components'
 tags:
   - plugin
   - prod
@@ -51,6 +52,4 @@ fileGroups:
     - server/**/*
     - '*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

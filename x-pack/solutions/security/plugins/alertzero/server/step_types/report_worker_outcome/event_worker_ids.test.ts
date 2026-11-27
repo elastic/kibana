@@ -46,6 +46,7 @@ describe('isEventFromItsWorker', () => {
     ['ad_worker_analysis_completed', SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID],
     ['ad_worker_handoff_resolved', SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID],
     ['alert_triage_batch_classified', SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID],
+    ['alert_triage_batch_grouped', SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID],
     ['alert_triage_closure_resolved', SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID],
     ['rule_tuning_review_completed', SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID],
     ['rule_coverage_review_completed', SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID],

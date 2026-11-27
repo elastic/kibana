@@ -25,6 +25,9 @@ export interface SecurityDatasetExample extends Example {
     /** Optional deterministic routing contract enforced by extra evaluators. */
     routing?: EndpointResponseActionsRouting;
     required_tool?: string;
+    /** Optional tool-call budget enforced by the troubleshooting tool usage evaluator. */
+    max_tool_calls?: number;
+    forbidden_tools?: readonly string[];
   };
 }
 

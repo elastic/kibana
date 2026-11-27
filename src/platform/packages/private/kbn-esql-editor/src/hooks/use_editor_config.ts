@@ -9,13 +9,7 @@
 
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { ESQLCallbacks, ESQLTelemetryCallbacks } from '@kbn/esql-types';
-import {
-  ESQLLang,
-  ESQL_LANG_ID,
-  type CodeEditorProps,
-  type MonacoMessage,
-  monaco,
-} from '@kbn/code-editor';
+import { ESQLLang, type CodeEditorProps, type MonacoMessage, monaco } from '@kbn/code-editor';
 import type { EsqlLanguageDeps } from '../types';
 
 // Module-level singleton: maps each Monaco model URI to its ES|QL language
@@ -221,7 +215,6 @@ export const useEditorConfig = ({
       scrollBeyondLastLine: false,
       acceptSuggestionOnTab: 'off',
       tabSize: 2,
-      theme: ESQL_LANG_ID,
       wordWrap: 'on',
       wrappingIndent: 'none',
     }),

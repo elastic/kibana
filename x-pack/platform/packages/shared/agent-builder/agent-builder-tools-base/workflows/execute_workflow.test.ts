@@ -115,6 +115,22 @@ describe('executeWorkflow', () => {
     });
   });
 
+  it('forwards triggeredBy to executeWorkflow when provided', async () => {
+    await executeWorkflow({
+      workflowId: 'wf-1',
+      workflowParams: {},
+      request,
+      spaceId: 'default',
+      workflowApi: mockWorkflowApi,
+      waitForCompletion: false,
+      triggeredBy: 'agent-builder-hook',
+    });
+
+    expect(mockWorkflowApi.executeWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({ workflowId: 'wf-1', triggeredBy: 'agent-builder-hook' })
+    );
+  });
+
   it('returns error when workflow is not found', async () => {
     mockWorkflowApi.executeWorkflow.mockRejectedValue(new Error("Workflow 'missing' not found."));
 

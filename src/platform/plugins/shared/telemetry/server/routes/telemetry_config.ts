@@ -31,6 +31,7 @@ interface RegisterTelemetryConfigRouteOptions {
   config$: Observable<TelemetryConfigType>;
   currentKibanaVersion: string;
   savedObjectsInternalClient$: Observable<SavedObjectsClient>;
+  getIsOptedInFromFeatureFlag: () => boolean | undefined;
 }
 
 export function registerTelemetryConfigRoutes({
@@ -38,6 +39,7 @@ export function registerTelemetryConfigRoutes({
   config$,
   currentKibanaVersion,
   savedObjectsInternalClient$,
+  getIsOptedInFromFeatureFlag,
 }: RegisterTelemetryConfigRouteOptions) {
   const v2Handler: RequestHandler = async (context, req, res) => {
     const config = await firstValueFrom(config$);
@@ -53,6 +55,7 @@ export function registerTelemetryConfigRoutes({
       allowChangingOptInStatus,
       telemetrySavedObject,
       currentKibanaVersion,
+      isOptedInFromFeatureFlag: getIsOptedInFromFeatureFlag(),
     });
 
     const sendUsageFrom = getTelemetrySendUsageFrom({

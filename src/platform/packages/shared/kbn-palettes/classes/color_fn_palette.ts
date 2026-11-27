@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Initializes the EUI vis color store that the `euiPalette*` color functions read from.
+import '@elastic/eui-theme-borealis';
 import type { Optional } from 'utility-types';
 import type { KbnBasePaletteConfig } from './palette';
 import { KbnBasePalette } from './palette';

@@ -7,29 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
-import { savedDataViewSpecSchema } from '@kbn/as-code-data-views-schema';
+import { z, lazySchema } from '@kbn/zod';
+import {
+  savedDataViewSpecSchema,
+  savedDataViewSpecWithScriptedFieldsSchema,
+} from '@kbn/as-code-data-views-schema';
 import {
   asCodeMetaSchema,
   asCodePaginationResponseMetaSchema,
+  asCodeSpacesSchema,
   PAGINATION_MAX_SIZE,
 } from '@kbn/as-code-shared-schemas';
 
 const dataViewsMetaSchema = asCodeMetaSchema.extend({
-  spaces: z
-    .array(z.string().max(1000))
-    .max(100)
+  spaces: asCodeSpacesSchema
     .optional()
     .meta({ description: 'The IDs of the spaces where the data view is available.' }),
 });
 
-export const asCodeResponseSchema = z
-  .object({
-    id: z.string().max(1000).meta({ description: 'The ID of the data view.' }),
-    data: savedDataViewSpecSchema.meta({ description: 'The data view definition.' }),
-    meta: dataViewsMetaSchema.meta({ description: 'Metadata about the data view.' }),
-  })
-  .strict();
+export const asCodeResponseSchema = lazySchema(() =>
+  z
+    .object({
+      id: z.string().max(1000).meta({ description: 'The ID of the data view.' }),
+      data: savedDataViewSpecWithScriptedFieldsSchema.meta({
+        description: 'The data view definition.',
+      }),
+      meta: dataViewsMetaSchema.meta({ description: 'Metadata about the data view.' }),
+    })
+    .strict()
+);
 
 export const asCodeMinimalResponseSchema = z.object({
   id: z.string().max(1000).meta({ description: 'The ID of the data view.' }),

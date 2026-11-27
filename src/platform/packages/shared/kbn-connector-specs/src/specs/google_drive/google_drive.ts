@@ -102,7 +102,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
   metadata: {
     id: '.google_drive',
     displayName: 'Google Drive',
-    description: i18n.translate('core.kibanaConnectorSpecs.googleDrive.metadata.description', {
+    description: i18n.translate('connectorSpecs.googleDrive.metadata.description', {
       defaultMessage: 'Search and access files and folders in Google Drive',
     }),
     minimumLicense: 'enterprise',
@@ -547,7 +547,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
   ].join('\n'),
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.googleDrive.test.description', {
+    description: i18n.translate('connectorSpecs.googleDrive.test.description', {
       defaultMessage: 'Verifies Google Drive connection by fetching user information',
     }),
     handler: async (ctx) => {

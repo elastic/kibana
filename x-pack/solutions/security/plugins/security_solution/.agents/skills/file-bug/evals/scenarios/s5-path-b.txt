@@ -1,0 +1,1 @@
+File finding 1 from my exploratory-tester session. Session dir: $SESSION_DIR (it has findings-flow-1.md and config.json; run parse-findings first). That one is the only finding I am naming.

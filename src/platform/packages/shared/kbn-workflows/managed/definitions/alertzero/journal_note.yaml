@@ -2,9 +2,9 @@ version: "1"
 name: Investigation journal note
 description: >
   Appends a user_message to an Investigation conversation without running the
-  agent (`POST /api/chat/converse` with `trigger_mode: never`; elastic/kibana#290223).
-  AlertZero workers call this at inflection points so the Investigation reads as a
-  journal. A failed note continues rather than failing the caller.
+  agent (`ai.conversation.add_user_message`). AlertZero workers call this at
+  inflection points so the Investigation reads as a journal. A failed note
+  continues rather than failing the caller.
 enabled: true
 tags:
   - security
@@ -21,24 +21,24 @@ triggers:
           type: string
           maxLength: 8000
           description: Human-readable journal line persisted as a user_message.
+        author_name:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: >
+            Display name for the note when the caller runs as a Worker's service account,
+            e.g. "Endpoint Analysis worker". Temporary until service accounts carry a display name
+            (elastic/security-team#20422). Defaults to this workflow's name.
       required:
         - conversation_id
         - message
       additionalProperties: false
 steps:
-  # kibana.request is sent verbatim, so the path is prefixed with the executing space.
   - name: append_note
-    type: kibana.request
+    type: ai.conversation.add_user_message
     with:
-      method: POST
-      path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-      headers:
-        kbn-xsrf: "true"
-        elastic-api-version: "2023-10-31"
-        Content-Type: application/json
-      body:
-        conversation_id: "{{ inputs.conversation_id }}"
-        input: "{{ inputs.message }}"
-        trigger_mode: never
+      conversation_id: "{{ inputs.conversation_id }}"
+      message: "{{ inputs.message }}"
+      author_name: "{{ inputs.author_name | default: workflow.name }}"
     on-failure:
       continue: true

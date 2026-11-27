@@ -23,14 +23,13 @@ import {
   MIGRATION_TYPE_DISAMBIGUATION_BLOCK,
   NAME_NEVER_ID_BLOCK,
 } from './rules/content';
-import { RULE_MIGRATION_SKILLS } from './rules/skill_ids';
+import { RULE_MIGRATION_SKILLS } from './rules/skill_catalog';
 
 export const automaticMigrationRulesInstallRulesSkill = defineSkillType({
-  id: RULE_MIGRATION_SKILLS.INSTALL,
-  name: RULE_MIGRATION_SKILLS.INSTALL,
+  id: RULE_MIGRATION_SKILLS.INSTALL.id,
+  name: RULE_MIGRATION_SKILLS.INSTALL.id,
   basePath: 'skills/security/siem_migrations',
-  description:
-    'Install translated rules from an Automatic Rule Migration into Elastic. Resolves the installable count, confirms scope and enabled-default, and requires Rules: All privileges.',
+  description: RULE_MIGRATION_SKILLS.INSTALL.description,
   content: `
 # Install Automatic Rule Migration Rules
 

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { GenAiFields } from '@kbn/genai-common';
@@ -49,11 +48,6 @@ export function getGenAiTabContent({ isGenAiSpan, genAi, ebt, reportEvent, resou
       defaultMessage: 'GenAI',
     }),
     ...getEbtProps(getGenAiTabEbt(ebt.element)),
-    content: (
-      <>
-        <EuiSpacer size="m" />
-        <GenAiTab genAi={genAi} ebt={{ element: GENAI_TAB_EBT_ELEMENTS.TAB_BODY }} />
-      </>
-    ),
+    content: <GenAiTab genAi={genAi} ebt={{ element: GENAI_TAB_EBT_ELEMENTS.TAB_BODY }} />,
   };
 }

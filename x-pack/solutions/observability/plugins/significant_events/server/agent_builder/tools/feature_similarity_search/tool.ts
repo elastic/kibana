@@ -21,10 +21,14 @@ import {
   featureCandidateSchema,
   searchFeaturesForCandidates,
 } from '../../../lib/significant_events/features/feature_similarity_search';
+import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
+import { reportToolFailure } from '../tool_failure';
 import {
   loadSourceCatalog,
-  resolveSourcesBySlug,
+  resolveSourcesBySlugOrId,
+  presentSlug,
+  restrictCatalogToReadable,
   toSourceRef,
 } from '../../utils/resolve_source_slugs';
 
@@ -33,7 +37,9 @@ export const SIGNIFICANT_EVENTS_FEATURE_SIMILARITY_SEARCH_TOOL_ID =
 
 const featureSimilaritySearchSchema = lazySchema(() =>
   z.object({
-    slug: nightshiftSourceSlugField('Disabled sources are included.'),
+    slug: nightshiftSourceSlugField(
+      'Source being analyzed; the search itself spans every source you can read. Disabled sources are included.'
+    ),
     candidates: z
       .array(featureCandidateSchema)
       .max(MAX_SEARCH_CANDIDATES)
@@ -45,10 +51,12 @@ export const createFeatureSimilaritySearchTool = ({
   getScopedClients,
   server,
   logger,
+  telemetry,
 }: {
   getScopedClients: GetScopedClients;
   server: SignificantEventsServer;
   logger: Logger;
+  telemetry: EbtTelemetryClient;
 }): StaticToolRegistration<typeof featureSimilaritySearchSchema> => {
   const toolDefinition: BuiltinToolDefinition<typeof featureSimilaritySearchSchema> = {
     id: SIGNIFICANT_EVENTS_FEATURE_SIMILARITY_SEARCH_TOOL_ID,
@@ -73,14 +81,20 @@ export const createFeatureSimilaritySearchTool = ({
         });
         await assertCanReadSignificantEvents({ request: context.request, server });
         const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
-        const [source] = resolveSourcesBySlug(catalog, [slug]);
+        const [source] = resolveSourcesBySlugOrId(catalog, [slug]);
         // Stored features are read as the internal user, so check the caller's own data access first.
         await scopedClients.sourcesClient.assertReadable(source.id);
+        const readableCatalog = await restrictCatalogToReadable(
+          catalog,
+          scopedClients.sourcesClient
+        );
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();
 
         const groups = await searchFeaturesForCandidates({
           kiClient,
-          sourceId: source.id,
+          sourceIds: [...readableCatalog.byId.keys()],
+          currentSourceId: source.id,
+          getSourceSlug: (id) => presentSlug(catalog, id),
           candidates,
         });
         const sourceRef = toSourceRef(source);
@@ -93,7 +107,17 @@ export const createFeatureSimilaritySearchTool = ({
         };
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        logger.warn(`Feature similarity search failed: ${message}`);
+        reportToolFailure({
+          error,
+          toolId: SIGNIFICANT_EVENTS_FEATURE_SIMILARITY_SEARCH_TOOL_ID,
+          errorLogMessage: `Feature similarity search failed: ${message}`,
+          errorLogLevel: 'warn',
+          logger,
+          telemetry,
+          request: context.request,
+          runContext: context.runContext,
+          itemCount: candidates.length,
+        });
         return {
           results: [
             {

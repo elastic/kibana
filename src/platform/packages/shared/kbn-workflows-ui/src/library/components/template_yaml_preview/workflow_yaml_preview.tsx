@@ -17,13 +17,9 @@ import { getTypeIconDataUrl } from './get_type_icon_data_url';
 import { computeTypeDecorations, INLINE_HIGHLIGHT_CLASS, type UsedType } from './type_decorations';
 import { getTypeIconBaseStyles } from './type_icon_styles';
 import { useWorkflowsUiServices } from '../../../context';
-import {
-  useWorkflowsMonacoTheme,
-  WORKFLOWS_MONACO_EDITOR_THEME,
-} from '../../../hooks/use_workflows_monaco_theme';
+import { workflowsEditorChromeOverrides } from '../../../lib/workflow_monaco_layout_options';
 
 const READ_ONLY_OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions = {
-  theme: WORKFLOWS_MONACO_EDITOR_THEME,
   readOnly: true,
   domReadOnly: true,
   contextmenu: false,
@@ -94,7 +90,6 @@ export interface WorkflowYamlPreviewProps {
  */
 export const WorkflowYamlPreview = React.memo<WorkflowYamlPreviewProps>(
   ({ yaml, height = '100%', 'data-test-subj': dataTestSubj = 'workflowYamlPreview' }) => {
-    useWorkflowsMonacoTheme();
     const euiThemeContext = useEuiTheme();
     const { workflowsExtensions, triggersActionsUi } = useWorkflowsUiServices();
 
@@ -156,6 +151,7 @@ export const WorkflowYamlPreview = React.memo<WorkflowYamlPreviewProps>(
           value={yaml}
           height={height}
           options={READ_ONLY_OPTIONS}
+          chromeOverrides={workflowsEditorChromeOverrides}
           editorDidMount={handleEditorDidMount}
           onChange={noop}
           dataTestSubj={dataTestSubj}

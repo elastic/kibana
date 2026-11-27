@@ -18,65 +18,56 @@ export const COORDINATOR_LOOKUP_JOIN_PREFIX = '_coordinator';
 export const timeUnitsToSuggest: Literals[] = [
   {
     name: 'y',
-    description: i18n.translate('kbn-esql-language.esql.definitions.dateDurationDefinition.year', {
+    description: i18n.translate('esqlLanguage.esql.definitions.dateDurationDefinition.year', {
       defaultMessage: 'Year (y)',
     }),
   },
   {
     name: 'q',
-    description: i18n.translate(
-      'kbn-esql-language.esql.definitions.dateDurationDefinition.quarter',
-      {
-        defaultMessage: 'Quarter (q)',
-      }
-    ),
+    description: i18n.translate('esqlLanguage.esql.definitions.dateDurationDefinition.quarter', {
+      defaultMessage: 'Quarter (q)',
+    }),
   },
   {
     name: 'mo',
-    description: i18n.translate('kbn-esql-language.esql.definitions.dateDurationDefinition.month', {
+    description: i18n.translate('esqlLanguage.esql.definitions.dateDurationDefinition.month', {
       defaultMessage: 'Month (mo)',
     }),
   },
   {
     name: 'w',
-    description: i18n.translate('kbn-esql-language.esql.definitions.dateDurationDefinition.week', {
+    description: i18n.translate('esqlLanguage.esql.definitions.dateDurationDefinition.week', {
       defaultMessage: 'Week (w)',
     }),
   },
   {
     name: 'd',
-    description: i18n.translate('kbn-esql-language.esql.definitions.dateDurationDefinition.day', {
+    description: i18n.translate('esqlLanguage.esql.definitions.dateDurationDefinition.day', {
       defaultMessage: 'Day (d)',
     }),
   },
   {
     name: 'h',
-    description: i18n.translate('kbn-esql-language.esql.definitions.dateDurationDefinition.hour', {
+    description: i18n.translate('esqlLanguage.esql.definitions.dateDurationDefinition.hour', {
       defaultMessage: 'Hour (h)',
     }),
   },
   {
     name: 'm',
-    description: i18n.translate(
-      'kbn-esql-language.esql.definitions.dateDurationDefinition.minute',
-      {
-        defaultMessage: 'Minute (m)',
-      }
-    ),
+    description: i18n.translate('esqlLanguage.esql.definitions.dateDurationDefinition.minute', {
+      defaultMessage: 'Minute (m)',
+    }),
   },
   {
     name: 's',
-    description: i18n.translate(
-      'kbn-esql-language.esql.definitions.dateDurationDefinition.second',
-      {
-        defaultMessage: 'Second (s)',
-      }
-    ),
+    description: i18n.translate('esqlLanguage.esql.definitions.dateDurationDefinition.second', {
+      defaultMessage: 'Second (s)',
+    }),
   },
   {
     name: 'ms',
     description: i18n.translate(
-      'kbn-esql-language.esql.definitions.dateDurationDefinition.millisecond',
+      'esqlLanguage.esql.definitions.dateDurationDefinition.millisecond',
       {
         defaultMessage: 'Millisecond (ms)',
       }

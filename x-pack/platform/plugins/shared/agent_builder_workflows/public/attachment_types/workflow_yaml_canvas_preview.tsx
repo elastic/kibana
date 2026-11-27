@@ -11,6 +11,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
 import {
   getStepByNameFromNestedSteps,
+  getTriggerName,
   transformWorkflowToGraph,
   type TransformResult,
   type WorkflowYaml,
@@ -19,6 +20,7 @@ import {
   ReactFlowProvider,
   type RenderStepIcon,
   TypeIcon,
+  useOptionalWorkflowsUiServices,
   WorkflowDetailBottomBar,
   type WorkflowDetailBottomBarView,
   WorkflowGraphCanvasWithoutProvider,
@@ -37,7 +39,10 @@ interface ParsedWorkflow {
  * YAML, or for a valid document with the wrong shape (e.g. `steps:` as a
  * mapping), which the graph cannot iterate.
  */
-export const parseWorkflowForGraph = (yaml: string): ParsedWorkflow | undefined => {
+export const parseWorkflowForGraph = (
+  yaml: string,
+  getTriggerLabel?: (triggerType: string) => string
+): ParsedWorkflow | undefined => {
   try {
     const parsed = parseYaml(yaml);
     if (
@@ -49,7 +54,7 @@ export const parseWorkflowForGraph = (yaml: string): ParsedWorkflow | undefined 
       return undefined;
     }
     const workflow = parsed as WorkflowYaml;
-    return { workflow, transformed: transformWorkflowToGraph(workflow) };
+    return { workflow, transformed: transformWorkflowToGraph(workflow, getTriggerLabel) };
   } catch {
     return undefined;
   }
@@ -69,13 +74,25 @@ export const WorkflowYamlCanvasPreview: React.FC<{ yaml: string; showGraph: bool
   showGraph,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const services = useOptionalWorkflowsUiServices();
   const [view, setView] = useState<WorkflowDetailBottomBarView>('graph');
   const [selectedStepId, setSelectedStepId] = useState<string | undefined>();
   const flyoutPanelRef = useRef<HTMLDivElement | null>(null);
+  const getTriggerLabel = useMemo(
+    () =>
+      services
+        ? (triggerType: string) =>
+            getTriggerName(
+              triggerType,
+              services.workflowsExtensions.getTriggerDefinition(triggerType)?.title
+            )
+        : undefined,
+    [services]
+  );
 
   const parsed = useMemo(
-    () => (showGraph ? parseWorkflowForGraph(yaml) : undefined),
-    [yaml, showGraph]
+    () => (showGraph ? parseWorkflowForGraph(yaml, getTriggerLabel) : undefined),
+    [yaml, showGraph, getTriggerLabel]
   );
 
   const activeView = parsed ? view : 'yaml';

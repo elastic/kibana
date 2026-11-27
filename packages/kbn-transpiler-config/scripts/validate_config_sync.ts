@@ -27,7 +27,7 @@
 import { getSharedConfig, USES_STYLED_COMPONENTS, EMOTION_LABEL_FORMAT } from '../src';
 
 // Import directly from babel-preset to compare
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const babelStyledComponents = require('@kbn/babel-preset/styled_components_files');
 
 interface ValidationResult {

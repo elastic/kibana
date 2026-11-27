@@ -16,6 +16,13 @@ const MAX_VIEW_NAME_LENGTH = 255;
 const MAX_VIEW_QUERY_LENGTH = 100_000;
 const MAX_VIEW_DESCRIPTION_LENGTH = 1_000;
 const MAX_VIEWS_PER_CLUSTER = 500;
+const ELASTICSEARCH_WARNING_MESSAGE = /^\d{3} Elasticsearch-\S+ "((?:\\.|[^"\\])*)"/;
+
+const parseViewValidationWarnings = (warnings: string[] | null | undefined): string[] =>
+  (warnings ?? []).map((warning) => {
+    const message = ELASTICSEARCH_WARNING_MESSAGE.exec(warning)?.[1];
+    return message?.replace(/\\"/g, '"') ?? warning;
+  });
 
 interface ElasticsearchError {
   body?: { error?: { type?: unknown } };
@@ -109,6 +116,9 @@ export const registerViewsManagementRoutes = (
       path: `${VIEWS_ROUTE}/{name}`,
       validate: {
         params: schema.object({ name: viewNameSchema }),
+        query: schema.object({
+          validate: schema.boolean({ defaultValue: false }),
+        }),
         body: schema.object({
           query: schema.string({ minLength: 1, maxLength: MAX_VIEW_QUERY_LENGTH }),
           description: schema.maybe(schema.string({ maxLength: MAX_VIEW_DESCRIPTION_LENGTH })),
@@ -122,14 +132,29 @@ export const registerViewsManagementRoutes = (
     async (requestHandlerContext, request, response) => {
       const { name } = request.params;
       const { query, description } = request.body;
+      const validate = request.query?.validate === true;
       try {
         const core = await requestHandlerContext.core;
-        const result = await core.elasticsearch.client.asCurrentUser.esql.putView({
+        const esql = core.elasticsearch.client.asCurrentUser.esql;
+        const putViewRequest = {
           name,
           query,
           ...(description === undefined ? {} : { body: { description } }),
-        });
+          ...(validate ? { querystring: { validate: true } } : {}),
+        };
 
+        if (validate) {
+          const { body, warnings } = await esql.putView(putViewRequest, { meta: true });
+          reportRouteSuccess('views.upsert');
+          return response.ok({
+            body: {
+              ...body,
+              warnings: parseViewValidationWarnings(warnings),
+            },
+          });
+        }
+
+        const result = await esql.putView(putViewRequest);
         reportRouteSuccess('views.upsert');
         return response.ok({ body: result });
       } catch (error) {

@@ -67,7 +67,6 @@ export const mountInlinePanel = async ({
 
 // styles needed to display extra drop targets that are outside of the config panel main area while also allowing to scroll vertically
 const inlineFlyoutStyles = ({ euiTheme }: UseEuiTheme) => `
-  clip-path: none;
   max-inline-size: 800px;
   min-inline-size: 256px;
   background:${euiTheme.colors.backgroundBaseSubdued};
@@ -79,6 +78,10 @@ const inlineFlyoutStyles = ({ euiTheme }: UseEuiTheme) => `
     .euiFlyoutFooter {
       pointer-events: auto;
     }
+  }
+
+  [data-test-subj='euiFlyoutContent'] {
+    overflow: visible !important;
   }
 `;
 

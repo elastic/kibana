@@ -73,6 +73,61 @@ describe('RegisteredAttachmentsPropertyActions', () => {
     expect(await screen.findByText('Delete')).toBeInTheDocument();
   });
 
+  describe('with related removals', () => {
+    const relatedRemoval = {
+      description: 'Also remove the alerts this attack added to the case?',
+      removeOnlyLabel: 'Remove attack only',
+      removeWithRelatedLabel: 'Remove attack and alerts',
+    };
+
+    const openModal = async () => {
+      renderWithTestingProviders(
+        <RegisteredAttachmentsPropertyActions {...props} relatedRemoval={relatedRemoval} />
+      );
+
+      await user.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+      await waitForEuiPopoverOpen();
+      await user.click(await screen.findByTestId('property-actions-user-action-trash'));
+    };
+
+    it('asks whether to delete the related attachments too', async () => {
+      await openModal();
+
+      expect(await screen.findByTestId('remove-with-related-modal-description')).toHaveTextContent(
+        relatedRemoval.description
+      );
+      expect(screen.queryByTestId('property-actions-confirm-modal')).toBeNull();
+      expect(screen.getByText('Remove attachment')).toBeInTheDocument();
+    });
+
+    it('cancels without deleting', async () => {
+      await openModal();
+
+      await user.click(await screen.findByTestId('remove-with-related-modal-cancel'));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('remove-with-related-modal')).not.toBeInTheDocument();
+      });
+      expect(props.onDelete).not.toHaveBeenCalled();
+    });
+
+    it('keeps the related attachments', async () => {
+      await openModal();
+
+      await user.click(await screen.findByText('Remove attack only'));
+
+      expect(props.onDelete).toHaveBeenCalledWith({ includeRelated: false });
+    });
+
+    it('deletes the related attachments too', async () => {
+      await openModal();
+
+      await user.click(await screen.findByText('Remove attack and alerts'));
+
+      expect(props.onDelete).toHaveBeenCalledWith({ includeRelated: true });
+    });
+  });
+
   it('remove attachments correctly', async () => {
     renderWithTestingProviders(<RegisteredAttachmentsPropertyActions {...props} />);
 

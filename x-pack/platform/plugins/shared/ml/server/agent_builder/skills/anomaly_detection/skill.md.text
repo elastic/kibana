@@ -382,10 +382,10 @@ Revise the first-pass config from Phase 1 based on answers. Return to this phase
    - Total anomalies, highest score, time of peak anomaly, top contributing entity (if applicable)
    - Example: *"3 anomalies were found. The most significant spike was on Aug 15 at 14:00 (score 87), driven by host: web-03."*
    - **No-anomaly path** — if zero anomalies were found, explain clearly: *"The model didn't find any unusual patterns in this period — that could mean the data is very consistent, or the detector may need adjustment."* Offer: widen the time range, try a different field or detector, or adjust sensitivity. **Stop here — do not proceed to step 5.**
-5. **Generate inline dashboard** (own todo, only when anomalies exist) — generate via `platform.dashboard.generate_dashboard` with all three panels for every job that just ran. **Always set `time_range` on each panel to the batch analysis window** (e.g. `{"from": "2024-01-01T00:00:00Z", "to": "2024-01-03T23:59:59Z"}`); without it the dashboard defaults to "last 15 minutes" which will show no data for historical jobs:
-   - `ml_anomaly_swimlane` — overall score heatmap (`y: 0`, `h: 10`, `w: 24`)
-   - `ml_anomaly_charts` — multi-series actual vs model bounds (`y: 10`, `h: 15`, `w: 24`)
-   - `ml_single_metric_viewer` — top entity/detector drill-down (`y: 25`, `h: 18`, `w: 24`)
+5. **Generate inline dashboard** (own todo, only when anomalies exist) — generate via `platform.dashboard.generate_dashboard` with all three panels for every job that just ran. **Always set `time_range` in each panel's `config` to the batch analysis window** (e.g. `{"from": "2024-01-01T00:00:00Z", "to": "2024-01-03T23:59:59Z"}`); without it the dashboard defaults to "last 15 minutes" which will show no data for historical jobs. List the panels in this order:
+   - `ml_anomaly_swimlane` — overall score heatmap
+   - `ml_anomaly_charts` — multi-series actual vs model bounds
+   - `ml_single_metric_viewer` — top entity/detector drill-down
    - **Immediately after the dashboard renders — without waiting for user input — ask the Phase 5 approval question.** The dashboard and the approval question are one continuous response.
 
 ---
@@ -396,7 +396,7 @@ Revise the first-pass config from Phase 1 based on answers. Return to this phase
 
 **If yes:**
 1. Create a new job set with the same configuration but without a historical `end` — running from now onwards. Use a distinct `job_id` (append `-realtime` or similar). **Remove `ml-agent-scratch` from the realtime job's `groups`** — that group marks the batch job as temporary and must not be copied onto the permanent job.
-2. **Update the dashboard** — regenerate the inline dashboard (from Phase 4) replacing the batch job IDs with the new realtime job IDs. Keep the same three-panel layout but omit `time_range` on each panel so they track the live time range.
+2. **Update the dashboard** — update the inline dashboard from Phase 4 by editing every panel it created, by their ids, rather than adding new ones next to them. An edit replaces the panel's whole `config`, so resend each panel's full config from Phase 4 with the batch job IDs replaced by the new realtime job IDs (in titles too) and without `time_range`, so the panels track the live time range.
 3. **Offer batch job cleanup** — the batch/historical jobs created during this session are now superseded. Ask the user to confirm before deleting them, naming each job ID explicitly. This is a destructive action — do not delete without explicit approval. If approved, `ml.ad_manage_job_state` (`stop_datafeed`) → `ml.ad_manage_job_state` (`close_job`) → `ml.ad_manage_job_state` (`delete_job`) for each batch job. Batch jobs are tagged `ml-agent-scratch` (set in Phase 3) so no special flags are needed for deletion.
 4. **Offer alerting** — ask: *"Would you like to set up alerting rules so you're notified when anomaly scores exceed a threshold on the new jobs?"*
 
@@ -538,7 +538,7 @@ The `attachment_id` and `version` are returned in the tool result. Always render
 | User asks to "show" / "visualise" / "chart" anomalies | ✓ | — |
 | User wants to save or share results | — | ✓ |
 
-Charts created inline can also be forwarded to `platform.dashboard.generate_dashboard` — the `config` field in the tool result is the panel config payload (with `source: "config"` and the appropriate `type`).
+Charts created inline can also be forwarded to `platform.dashboard.generate_dashboard` — the `config` field in the tool result is the panel config. Its panel `type` is `ml_` followed by the `chart_type`: `ml_anomaly_swimlane`, `ml_anomaly_charts` or `ml_single_metric_viewer`.
 
 ### `ml.create_ml_charts` — chart_type values
 
@@ -555,8 +555,9 @@ Same decision logic as Dashboard Panels (see below) applies for which chart type
 ## Visualize — Dashboard Panels
 
 **License**: Platinum or higher. Decline clearly if not available.
-**Tool**: `platform.dashboard.generate_dashboard` with `source: "config"`. Never use `source: "request"` — no resolver exists for ML panels.
+**Tool**: `platform.dashboard.generate_dashboard` with the ML panel `type` and its `config`. ML panels are authored by value; there is no server-side generation for them.
 **Job IDs**: always from prior `ml.ad_get_job_info` results or explicit user input. Never invent.
+**Panel IDs**: each panel needs its own `id`. Include the job ID (e.g. `my-job-swimlane`) so panels for several jobs do not collide.
 
 ### When to add charts
 
@@ -588,15 +589,16 @@ Heatmap — each row is one `view_by` field value, each column is a time bucket,
 
 ```json
 {
-  "source": "config",
-  "type": "ml_anomaly_swimlane",
-  "grid": { "x": 0, "y": 0, "w": 24, "h": 10 },
-  "config": {
-    "title": "Anomalies of my-job by host.name with severity >= 50",
-    "job_ids": ["my-job"],
-    "swimlane_type": "viewBy",
-    "view_by": "host.name",
-    "severity_threshold": 50
+  "id": "my-job-swimlane",
+  "content": {
+    "type": "ml_anomaly_swimlane",
+    "config": {
+      "title": "Anomalies of my-job by host.name with severity >= 50",
+      "job_ids": ["my-job"],
+      "swimlane_type": "viewBy",
+      "view_by": "host.name",
+      "severity_threshold": 50
+    }
   }
 }
 ```
@@ -616,13 +618,14 @@ Multi-series time series — one chart per anomalous entity/series — showing a
 
 ```json
 {
-  "source": "config",
-  "type": "ml_anomaly_charts",
-  "grid": { "x": 0, "y": 10, "w": 24, "h": 15 },
-  "config": {
-    "title": "Anomaly charts of my-job with severity > 50",
-    "job_ids": ["my-job"],
-    "severity_threshold": 50
+  "id": "my-job-anomaly-charts",
+  "content": {
+    "type": "ml_anomaly_charts",
+    "config": {
+      "title": "Anomaly charts of my-job with severity > 50",
+      "job_ids": ["my-job"],
+      "severity_threshold": 50
+    }
   }
 }
 ```
@@ -642,14 +645,15 @@ Populate `selected_entities` directly from anomaly record fields (`partition_fie
 
 ```json
 {
-  "source": "config",
-  "type": "ml_single_metric_viewer",
-  "grid": { "x": 0, "y": 10, "w": 24, "h": 18 },
-  "config": {
-    "title": "Single metric view for my-job",
-    "job_ids": ["my-job"],
-    "selected_detector_index": 0,
-    "selected_entities": { "host.name": "web-01" }
+  "id": "my-job-single-metric-viewer",
+  "content": {
+    "type": "ml_single_metric_viewer",
+    "config": {
+      "title": "Single metric view for my-job",
+      "job_ids": ["my-job"],
+      "selected_detector_index": 0,
+      "selected_entities": { "host.name": "web-01" }
+    }
   }
 }
 ```
@@ -666,8 +670,4 @@ Populate `selected_entities` directly from anomaly record fields (`partition_fie
 
 ### Layout
 
-Stack in order of increasing specificity: swim lane (overview) → anomaly charts (multi-series detail) → single metric viewer (one-entity drill-down).
-
-- Swim lane: `w: 24`, `h: 10`, `y: 0`.
-- Anomaly charts: `w: 24`, `h: 15`, `y: 10` (when shown alongside swim lane).
-- Single metric viewer: `w: 24`, `h: 18`, `y: 10` (or `y: 25` when anomaly charts are also present).
+List the panels in order of increasing specificity: swim lane (overview) → anomaly charts (multi-series detail) → single metric viewer (one-entity drill-down). The dashboard tool sizes and places them.

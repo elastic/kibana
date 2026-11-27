@@ -10,7 +10,7 @@ import React from 'react';
 import type { EuiExpressionProps } from '@elastic/eui';
 import { EuiExpression, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-constants';
 import { isEmpty } from 'lodash';
 import { allOptionText } from './fields';
 import type { Suggestion } from '../hooks/use_fetch_synthetics_suggestions';

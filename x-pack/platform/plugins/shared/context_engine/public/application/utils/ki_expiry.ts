@@ -5,15 +5,31 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import type { KiStatus } from '../../../common/ki_lifecycle_status';
 import type { KiLifecycleStatus } from '../../../common/step_types/ki';
 
-export type KiStatus = 'active' | 'deleted' | 'expired';
-
-export const KI_STATUS_BADGE_COLOR: Record<KiStatus, 'success' | 'danger' | 'warning'> = {
+/** Only Failed stands out; other statuses use the default badge. */
+export const KI_STATUS_BADGE_COLOR: Record<KiStatus, 'default' | 'success' | 'danger'> = {
   active: 'success',
-  deleted: 'danger',
-  expired: 'warning',
+  deleted: 'default',
+  verification_failed: 'danger',
+  expired: 'default',
 };
+
+export const KI_STATUS_LABEL: Record<KiStatus, string> = {
+  active: i18n.translate('xpack.contextEngine.kiStatus.active', { defaultMessage: 'active' }),
+  deleted: i18n.translate('xpack.contextEngine.kiStatus.deleted', { defaultMessage: 'deleted' }),
+  verification_failed: i18n.translate('xpack.contextEngine.kiStatus.verificationFailed', {
+    defaultMessage: 'failed',
+  }),
+  expired: i18n.translate('xpack.contextEngine.kiStatus.expired', { defaultMessage: 'expired' }),
+};
+
+export const KI_VERIFICATION_FAILED_TITLE = i18n.translate(
+  'xpack.contextEngine.kiStatus.verificationFailedTitle',
+  { defaultMessage: 'Verification failed' }
+);
 
 export const isKiExpired = (expiresAt?: string): boolean => {
   const expiresAtMs = Date.parse(expiresAt ?? '');
@@ -27,8 +43,8 @@ export const resolveKiStatus = (
   lifecycleStatus?: KiLifecycleStatus,
   expiresAt?: string
 ): KiStatus => {
-  if (lifecycleStatus === 'deleted') {
-    return 'deleted';
+  if (lifecycleStatus === 'deleted' || lifecycleStatus === 'verification_failed') {
+    return lifecycleStatus;
   }
   if (isKiExpired(expiresAt)) {
     return 'expired';

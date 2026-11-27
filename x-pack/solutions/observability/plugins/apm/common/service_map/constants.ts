@@ -39,9 +39,37 @@ export const NONGROUPED_SPANS: Record<string, string[]> = {
 export const GROUPABLE_SPAN_TYPE = 'external';
 export const GROUPABLE_SPAN_SUBTYPE = 'http';
 
-// Node dimensions for React Flow service map
-export const SERVICE_NODE_CIRCLE_SIZE = 56;
+/**
+ * Failure rate at or above this share is a warning on the service map (amber ring / text).
+ * Below it, a non-zero rate stays a low (grey) signal.
+ */
+export const FAILURE_RATE_WARNING = 0.01;
+
+/**
+ * Failure rate at or above this share is a problem on the service map (red ring / text).
+ */
+export const FAILURE_RATE_DANGER = 0.05;
+
+/**
+ * Below this many requests over the map range, a failure rate is noise and stays uncoloured
+ * (one failure of five reads as 20%).
+ */
+export const MIN_REQUESTS_FOR_FAILURE_RATE = 20;
+
+/**
+ * A service whose throughput is below this share of the map's median is drawn faded (idle).
+ * Relative, not a fixed rate: on a quiet estate every service would be below any fixed rate.
+ */
+export const IDLE_SHARE_OF_MEDIAN = 0.1;
+
+/** Opacity for idle (low-traffic) service nodes. */
+export const IDLE_NODE_OPACITY = 0.5;
+
+// Node dimensions for React Flow service map (circle for services, square for closed groups)
+export const SERVICE_NODE_SIZE = 56;
 export const DEPENDENCY_NODE_DIAMOND_SIZE = 48;
+/** Max width for service / group labels and badge rows under the node. */
+export const NODE_LABEL_MAX_WIDTH = 220;
 
 /** Border width (px) for service and dependency nodes when not selected. */
 export const NODE_BORDER_WIDTH_DEFAULT = 3;
@@ -58,6 +86,19 @@ export const NODE_HEIGHT = 80;
 export const RANK_SEPARATION = 120;
 export const NODE_SEPARATION = 80;
 export const GRAPH_MARGIN = 50;
+
+/** Space between the members of an open group and the edge of its box. */
+export const GROUP_BOX_PADDING = 24;
+
+/** Room at the top of an open group's box for its label and close button. */
+export const GROUP_BOX_HEADER_HEIGHT = 48;
+
+/**
+ * From this many members, an open group whose own layout is much longer than it is wide (see
+ * `FOLD_ASPECT_RATIO_THRESHOLD`) packs its members into a grid. Members with few or no calls
+ * between them would otherwise line up in one long row or column.
+ */
+export const GROUP_BOX_GRID_MIN_MEMBER_COUNT = 6;
 
 /**
  * Below this node count the service map is never folded into serpentine bands: small maps already

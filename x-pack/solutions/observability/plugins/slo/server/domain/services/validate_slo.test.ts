@@ -23,6 +23,14 @@ describe('validateSLO', () => {
       expect(() => validateSLO(slo)).toThrow('Invalid objective.target');
     });
 
+    it('throws when a rolling time window duration formats past the wire-length bound', () => {
+      // '9999999999999999d' fits the request bound but formats to '10000000000000000d'
+      const slo = createSLO({
+        timeWindow: { duration: Duration.fromString('9999999999999999d'), type: 'rolling' },
+      });
+      expect(() => validateSLO(slo)).toThrow('Invalid time_window.duration');
+    });
+
     it("throws when time window duration unit is 'm'", () => {
       const slo = createSLO({
         timeWindow: { duration: new Duration(1, DurationUnit.Minute), type: 'rolling' },

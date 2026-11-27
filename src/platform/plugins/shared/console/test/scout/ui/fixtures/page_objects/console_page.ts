@@ -15,9 +15,14 @@ import { expect } from '@kbn/scout/ui';
 const NEWLINE_RETRY_TIMEOUT_MS = 20_000;
 const SCROLL_OUTPUT_TIMEOUT_MS = 10_000;
 const MARGIN_CLICK_TIMEOUT_MS = 3_000;
+// `autocomplete_entities` fans out cluster-wide on a real Cloud project, so it outlasts the
+// default expect timeout. Kept well under the 60s per-test budget, which this shares.
+const AUTOCOMPLETE_ENTITIES_TIMEOUT_MS = 30_000;
 
 export class ConsolePage {
   public readonly inputEditor: Locator;
+  public readonly inputEditorContainer: Locator;
+  public readonly appContainer: Locator;
   public readonly outputEditor: Locator;
   public readonly inputEditorLines: Locator;
   public readonly outputEditorContent: Locator;
@@ -93,6 +98,8 @@ export class ConsolePage {
 
   constructor(private readonly page: ScoutPage) {
     this.inputEditor = this.page.getByTestId('consoleMonacoEditor');
+    this.inputEditorContainer = this.page.getByTestId('consoleMonacoEditorContainer');
+    this.appContainer = this.page.getByTestId('console');
     this.outputEditor = this.page.getByTestId('consoleMonacoOutput');
     this.inputEditorLines = this.inputEditor.locator('.view-lines');
     this.outputEditorContent = this.outputEditor.locator('.monaco-scrollable-element');
@@ -192,9 +199,19 @@ export class ConsolePage {
     return this.page.getByRole('dialog', { name: title });
   }
 
+  /**
+   * Console resolves autocomplete and every API reference link from the Elasticsearch spec
+   * definitions it fetches before mounting, and renders an editor that looks fully working
+   * without them. Gate on this so a definition-less Console fails here, rather than later as
+   * a missing suggestion or a documentation tab that never opens.
+   */
+  async waitForActiveApiLoaded() {
+    await expect(this.appContainer).toHaveAttribute('data-console-active-api-status', 'complete');
+  }
+
   async goto() {
-    await this.page.gotoApp('dev_tools', { hash: 'console' });
-    await this.inputEditor.waitFor({ state: 'visible' });
+    await this.page.gotoApp('dev_tools', { hash: 'console', readyWhen: this.inputEditor });
+    await this.waitForActiveApiLoaded();
   }
 
   /**
@@ -205,9 +222,10 @@ export class ConsolePage {
     const encoded = compressToEncodedURIComponent(request);
     await this.page.gotoApp('dev_tools', {
       hash: `console/shell?load_from=data:text/plain,${encoded}`,
+      readyWhen: this.inputEditor,
     });
-    await this.inputEditor.waitFor({ state: 'visible' });
     await this.sendRequestButton.waitFor({ state: 'visible' });
+    await this.waitForActiveApiLoaded();
   }
 
   /**
@@ -611,6 +629,20 @@ export class ConsolePage {
 
   async clearHistory() {
     await this.clearHistoryButton.click();
+  }
+
+  /**
+   * Waits until Console has merged its first `autocomplete_entities` response, so that
+   * cluster-derived suggestions (indices, aliases, templates) are offered. Monaco freezes
+   * the suggestion list when the widget opens, so a test reading those entries has to wait
+   * here before typing rather than polling the widget afterwards.
+   */
+  async waitForAutocompleteEntitiesLoaded() {
+    await expect(this.inputEditorContainer).toHaveAttribute(
+      'data-autocomplete-entities-loaded',
+      'true',
+      { timeout: AUTOCOMPLETE_ENTITIES_TIMEOUT_MS }
+    );
   }
 
   /** The labels currently offered by the autocomplete widget, in the order shown. */

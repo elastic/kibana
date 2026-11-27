@@ -16,7 +16,7 @@ import React, {
   type KeyboardEvent,
 } from 'react';
 import { EuiButtonEmpty, keys } from '@elastic/eui';
-import type { DateRange } from 'react-day-picker';
+import { TZDate, type DateRange } from 'react-day-picker';
 
 import { CalendarView } from './calendar_view';
 import { useCalendarStyles } from './calendar.styles';
@@ -35,6 +35,7 @@ import {
   CALENDAR_SHIFT_MONTHS,
   CALENDAR_SCROLL_EDGE_THRESHOLD,
 } from './calendar.constants';
+import type { FirstDayOfWeek } from '../types';
 
 interface CalendarProps {
   /** The selected date range. */
@@ -42,10 +43,12 @@ interface CalendarProps {
   /** Callback when the user changes the selected range. */
   onRangeChange: (range: DateRange | undefined) => void;
   /**
-   * First day of the week: 0 for Sunday, 1 for Monday.
+   * First day of the week: 0 for Sunday through 6 for Saturday.
    * @default 0
    */
-  firstDayOfWeek?: 0 | 1;
+  firstDayOfWeek?: FirstDayOfWeek;
+  /** IANA time zone used for calendar dates. */
+  timeZone?: string;
 }
 
 interface ScrollAnchor {
@@ -54,8 +57,14 @@ interface ScrollAnchor {
 }
 
 /** Infinite-like month calendar using a fixed window with chunked prepend/append. */
-export function Calendar({ range, onRangeChange, firstDayOfWeek }: CalendarProps) {
+export function Calendar({ range, onRangeChange, firstDayOfWeek, timeZone }: CalendarProps) {
   const styles = useCalendarStyles();
+
+  const referenceDate = useMemo(
+    () => (timeZone ? new TZDate(Date.now(), timeZone) : new Date()),
+    [timeZone]
+  );
+  const rangeStartDate = range?.from && timeZone ? new TZDate(range.from, timeZone) : range?.from;
 
   const scrollerRef = useRef<HTMLDivElement>(null);
   const pendingCenterIndexRef = useRef<number | null>(null);
@@ -63,7 +72,7 @@ export function Calendar({ range, onRangeChange, firstDayOfWeek }: CalendarProps
   const hasCenteredInitiallyRef = useRef(false);
   const isShiftingWindowRef = useRef(false);
   const initialTargetIndexRef = useRef(
-    range?.from ? getIndexFromDate(range.from, TODAY_INDEX) : TODAY_INDEX
+    rangeStartDate ? getIndexFromDate(rangeStartDate, TODAY_INDEX, referenceDate) : TODAY_INDEX
   );
 
   const onRangeChangeRef = useRef(onRangeChange);
@@ -308,7 +317,7 @@ export function Calendar({ range, onRangeChange, firstDayOfWeek }: CalendarProps
         onScroll={handleScroll}
       >
         {monthIndices.map((index) => {
-          const month = getMonthFromIndex(index, TODAY_INDEX);
+          const month = getMonthFromIndex(index, TODAY_INDEX, referenceDate);
           return (
             <div key={index} css={styles.monthItem} data-month-index={index}>
               <CalendarView
@@ -317,6 +326,7 @@ export function Calendar({ range, onRangeChange, firstDayOfWeek }: CalendarProps
                 range={range}
                 setRange={stableOnRangeChange}
                 firstDayOfWeek={firstDayOfWeek}
+                timeZone={timeZone}
               />
             </div>
           );

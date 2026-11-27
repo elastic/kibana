@@ -113,7 +113,7 @@ export async function autocomplete(
       const suggestion: ISuggestionItem = withAutoSuggest({
         label: 'ON',
         text: 'ON ',
-        detail: i18n.translate('kbn-esql-language.esql.autocomplete.join.onKeyword', {
+        detail: i18n.translate('esqlLanguage.esql.autocomplete.join.onKeyword', {
           defaultMessage: 'Specify JOIN field conditions',
         }),
         kind: 'Keyword',

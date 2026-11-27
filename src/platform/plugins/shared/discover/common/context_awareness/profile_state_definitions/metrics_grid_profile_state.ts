@@ -24,6 +24,7 @@ export const METRICS_STATE_DEF: ProfileStateDefinition<MetricsState> = {
     counterAggregation: { type: ProfileStateType.Url },
     gaugeAggregation: { type: ProfileStateType.Url },
     histogramPercentile: { type: ProfileStateType.Url },
+    histogramVisualization: { type: ProfileStateType.Url },
     sortField: { type: ProfileStateType.Url },
     sortDirection: { type: ProfileStateType.Url },
     dimensions: { type: ProfileStateType.Url },

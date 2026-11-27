@@ -122,11 +122,13 @@ export function fromTermsLensApiToLensState(
       ...(secondaryFields.length ? { secondaryFields } : {}),
       size: limit, // it cannot be 0 (zero)
       ...(increase_accuracy != null ? { accuracyMode: increase_accuracy } : {}),
-      ...(includes?.values
-        ? { include: includes.values, includeIsRegex: includes?.as_regex ?? false }
+      // An empty value list adds no include/exclude to the request and the regex flag is only read
+      // with values, so neither is stored.
+      ...(includes?.values?.length
+        ? { include: includes.values, includeIsRegex: includes.as_regex ?? false }
         : {}),
-      ...(excludes?.values
-        ? { exclude: excludes.values, excludeIsRegex: excludes?.as_regex ?? false }
+      ...(excludes?.values?.length
+        ? { exclude: excludes.values, excludeIsRegex: excludes.as_regex ?? false }
         : {}),
       ...(other_bucket != null ? { otherBucket: true } : {}),
       ...(other_bucket?.include_documents_without_field != null

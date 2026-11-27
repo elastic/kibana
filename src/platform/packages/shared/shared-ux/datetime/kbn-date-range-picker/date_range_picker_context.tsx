@@ -23,6 +23,7 @@ import React, {
 import { useGeneratedHtmlId } from '@elastic/eui';
 
 import { useAutoRefresh } from './hooks/use_auto_refresh';
+import { useResolvedTimeRange } from './hooks/use_resolved_time_range';
 import type {
   TimeRangeBounds,
   TimeRangeBoundsOption,
@@ -137,7 +138,7 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   onSettingsChange: (settings: DateRangePickerSettings) => void;
   /**
    * A valid time zone name from the IANA database, e.g. "America/Los_Angeles".
-   * Displayed informally in the panel footer.
+   * Used for calendar day boundaries and displayed in the panel footer.
    */
   timeZone?: string;
   /** Seconds until the next auto-refresh. While paused, this value is frozen at the last countdown value. `null` when auto-refresh is disabled or the interval is invalid. */
@@ -196,6 +197,7 @@ export function DateRangePickerProvider({
   timeZone,
   onRefresh,
   refreshEpoch,
+  resolveEpoch,
   prependBasePath: prependBasePathProp,
   canAccessAdvancedSettings = false,
 }: PropsWithChildren<DateRangePickerProps>) {
@@ -225,9 +227,25 @@ export function DateRangePickerProvider({
   const [text, setText] = useState<string>(() =>
     prettifyValue(value ?? defaultValue ?? '', transformOptions)
   );
-  const timeRange: TimeRange = useMemo(
-    () => textToTimeRange(text, transformOptions),
-    [text, transformOptions]
+  // Relative bounds (e.g. `now-15m`) resolve against the clock, so the resolved dates (and the
+  // absolute dates displayed from them) go stale while `text` is unchanged. Re-resolve on every
+  // refresh: signalled by the host through `refreshEpoch` / `resolveEpoch`, or fired by the
+  // internal auto-refresh timer.
+  const [autoRefreshCount, setAutoRefreshCount] = useState(0);
+  const onAutoRefresh = useMemo(
+    () =>
+      onRefresh &&
+      (() => {
+        setAutoRefreshCount((count) => count + 1);
+        onRefresh();
+      }),
+    [onRefresh]
+  );
+  // Keep `undefined` distinct from `0` so the first real epoch signal still re-resolves.
+  const timeRange = useResolvedTimeRange(
+    text,
+    transformOptions,
+    `${refreshEpoch}:${resolveEpoch}:${autoRefreshCount}`
   );
   const displayText = useMemo(
     () => timeRangeToDisplayText(timeRange, transformOptions),
@@ -291,7 +309,7 @@ export function DateRangePickerProvider({
   const { secondsRemaining: autoRefreshSecondsRemaining } = useAutoRefresh({
     isPaused: refreshTimerPaused,
     intervalMs: settings.autoRefresh?.isEnabled ? settings.autoRefresh.intervalMs : 0,
-    onRefresh,
+    onRefresh: onAutoRefresh,
     refreshEpoch,
   });
 

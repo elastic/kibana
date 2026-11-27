@@ -46,7 +46,7 @@ describe('addFile', () => {
         clientArgs,
         casesClient
       )
-    ).rejects.toThrow(`Invalid value "undefined" supplied to "filename"`);
+    ).rejects.toThrow(`filename: Invalid input: expected string, received undefined`);
   });
 
   it('throws an error if the mimeType is not part of the allowed mime types', async () => {

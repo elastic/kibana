@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type {
+  IndicesResolveIndexResponse,
+  IndicesStatsResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
@@ -95,6 +99,7 @@ describe('countVectors', () => {
   const mockVectorStats = (denseCount: number, sparseCount = 0) => {
     client.asInternalUser.indices.stats.mockResolvedValue({
       _shards: { total: 1, successful: 1, failed: 0 },
+      _all: {},
       indices: {
         vectordb: {
           shards: {
@@ -107,7 +112,7 @@ describe('countVectors', () => {
           },
         },
       },
-    } as any);
+    });
   };
 
   it('sums dense and sparse vector value_counts from operator indices.stats', async () => {
@@ -131,6 +136,7 @@ describe('countVectors', () => {
   it('counts each logical shard once when multiple copies report vectors', async () => {
     client.asInternalUser.indices.stats.mockResolvedValue({
       _shards: { total: 2, successful: 2, failed: 0 },
+      _all: {},
       indices: {
         vectordb: {
           shards: {
@@ -141,7 +147,7 @@ describe('countVectors', () => {
           },
         },
       },
-    } as any);
+    });
 
     await expect(countVectors(client, logger)).resolves.toBe(110);
   });
@@ -149,7 +155,8 @@ describe('countVectors', () => {
   it('treats missing dense/sparse stats as zero', async () => {
     client.asInternalUser.indices.stats.mockResolvedValue({
       _shards: { total: 1, successful: 1, failed: 0 },
-    } as any);
+      _all: {},
+    });
 
     await expect(countVectors(client, logger)).resolves.toBe(0);
   });
@@ -157,12 +164,13 @@ describe('countVectors', () => {
   it('returns null when not all shards responded', async () => {
     client.asInternalUser.indices.stats.mockResolvedValue({
       _shards: { total: 3, successful: 2, failed: 0 },
+      _all: {},
       indices: {
         vectordb: {
           shards: { '0': [{ dense_vector: { value_count: 100 } }] },
         },
       },
-    } as any);
+    });
 
     await expect(countVectors(client, logger)).resolves.toBeNull();
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('2 of 3 shards'));
@@ -173,32 +181,12 @@ describe('fetchIndexStats', () => {
   let client: ScopedClusterClientMock;
   const logger = loggingSystemMock.createLogger();
 
-  beforeEach(() => {
-    client = elasticsearchServiceMock.createScopedClusterClient();
-    mockDocumentCount(0);
-    mockCatIndices([]);
-    mockMetering([]);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  const mockCatIndices = (indices: Array<{ index: string; 'creation.date': string }>) => {
-    client.asCurrentUser.cat.indices.mockResolvedValue(indices);
-  };
-
-  const mockMetering = (
-    indices: Array<{ name: string; num_docs: number; size_in_bytes: number }>
-  ) => {
-    client.asSecondaryAuthUser.transport.request.mockResolvedValue({
-      _total: {
-        num_docs: indices.reduce((sum, i) => sum + i.num_docs, 0),
-        size_in_bytes: indices.reduce((sum, i) => sum + i.size_in_bytes, 0),
-      },
-      indices,
-    });
-  };
+  const FULL_ACCESS = { showPanel: true, showDocuments: true, showTotalSize: true };
+  const APP_LOGS_BACKING_INDICES = [
+    '.ds-logs-app-default-2026.10.21-000001',
+    '.ds-logs-app-default-2026.10.21-000002',
+  ];
+  const forbidden = () => Object.assign(new Error('forbidden'), { statusCode: 403 });
 
   const mockDocumentCount = (count: number, failedShards = 0) => {
     client.asCurrentUser.count.mockResolvedValue({
@@ -207,9 +195,42 @@ describe('fetchIndexStats', () => {
     });
   };
 
+  const mockCatIndices = (indices: Array<{ index: string; 'creation.date': string }>) => {
+    client.asCurrentUser.cat.indices.mockResolvedValue(indices);
+  };
+
+  const mockMetering = (
+    indices: Array<{ name: string; num_docs: number; size_in_bytes: number; datastream?: string }>,
+    dataStreams: string[] = []
+  ) => {
+    client.asSecondaryAuthUser.transport.request.mockResolvedValue({
+      _total: {
+        num_docs: indices.reduce((sum, i) => sum + i.num_docs, 0),
+        size_in_bytes: indices.reduce((sum, i) => sum + i.size_in_bytes, 0),
+      },
+      indices,
+      datastreams: dataStreams.map((name) => ({ name })),
+    });
+  };
+
+  // the request's `filter_path` keeps just the names, and the backing indices of each data stream
+  const mockResolvedIndices = (
+    indices: string[],
+    backingIndicesByDataStream: Record<string, string[]> = {}
+  ) => {
+    client.asCurrentUser.indices.resolveIndex.mockResolvedValue({
+      indices: indices.map((name) => ({ name })),
+      data_streams: Object.entries(backingIndicesByDataStream).map(([name, backingIndices]) => ({
+        name,
+        backing_indices: backingIndices,
+      })),
+    } as IndicesResolveIndexResponse);
+  };
+
   const mockVectorStats = (denseCount: number, sparseCount = 0) => {
     client.asInternalUser.indices.stats.mockResolvedValue({
       _shards: { total: 1, successful: 1, failed: 0 },
+      _all: {},
       indices: {
         vectordb: {
           shards: {
@@ -222,13 +243,17 @@ describe('fetchIndexStats', () => {
           },
         },
       },
-    } as any);
+    });
   };
 
-  // both privileges default to granted; individual tests drop the one they are exercising.
-  // vectorCountEnabled defaults to false (matches the current constant) — pass true to exercise
+  // Both privileges default to granted, and each test drops the one it exercises.
+  // vectorCountEnabled defaults to false to match the current constant. Pass true to exercise
   // the canMonitorAllIndices guard independently of the flag.
-  const getIndexStats = (privileges: Partial<MonitorPrivileges> = {}, vectorCountEnabled = false) =>
+  const getIndexStats = (
+    privileges: Partial<MonitorPrivileges> = {},
+    vectorCountEnabled = false,
+    isServerless = true
+  ) =>
     fetchIndexStats(
       client,
       logger,
@@ -237,250 +262,478 @@ describe('fetchIndexStats', () => {
         canMonitorCluster: true,
         ...privileges,
       },
-      vectorCountEnabled
+      { isServerless, vectorCountEnabled }
     );
 
-  // metering takes no index pattern, so it is the one source that reports on system indices
-  it('excludes dot-prefixed indices and aggregates count/size', async () => {
-    mockMetering([
-      { name: 'products', num_docs: 10, size_in_bytes: 100 },
-      { name: '.kibana', num_docs: 999, size_in_bytes: 999 },
-    ]);
+  beforeEach(() => {
+    client = elasticsearchServiceMock.createScopedClusterClient();
+    mockDocumentCount(0);
+    mockCatIndices([]);
+    mockMetering([]);
+    mockResolvedIndices([]);
+  });
 
-    const result = await getIndexStats();
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
-    expect(result).toEqual({
-      indicesCount: 1,
-      storeSizeBytes: 100,
-      vectorCount: null,
-      documentsCount: 0,
-      newIndex: null,
+  describe('on a stateful deployment', () => {
+    const mockStatefulIndexSizes = (sizes: Record<string, number>) => {
+      client.asCurrentUser.indices.stats.mockResolvedValue({
+        indices: Object.fromEntries(
+          Object.entries(sizes).map(([name, sizeInBytes]) => [
+            name,
+            { primaries: { store: { total_data_set_size_in_bytes: sizeInBytes } } },
+          ])
+        ),
+      } as IndicesStatsResponse);
+    };
+
+    const getStatefulIndexStats = () => getIndexStats({}, false, false);
+
+    // a visible data stream matches the index pattern and expands to its hidden backing indices
+    it('counts each user data stream once, apart from the indices, sized by all of its backing indices', async () => {
+      mockStatefulIndexSizes({
+        products: 100,
+        [APP_LOGS_BACKING_INDICES[0]]: 40,
+        [APP_LOGS_BACKING_INDICES[1]]: 10,
+      });
+      mockResolvedIndices(['products'], { 'logs-app-default': APP_LOGS_BACKING_INDICES });
+      mockDocumentCount(30);
+
+      const result = await getStatefulIndexStats();
+
+      expect(result.indicesCount).toBe(1);
+      expect(result.dataStreamsCount).toBe(1);
+      expect(result.storeSizeBytes).toBe(150);
+      expect(result.dataPanelAccess).toEqual(FULL_ACCESS);
+    });
+
+    // A role with `read` on every index but `monitor` on only some of them counts every index
+    // but sizes only those. Here the data stream's backing indices have no size.
+    it('hides the total size when the sizes leave out indices that were counted', async () => {
+      mockStatefulIndexSizes({ products: 100 });
+      mockResolvedIndices(['products'], { 'logs-app-default': APP_LOGS_BACKING_INDICES });
+      mockDocumentCount(30);
+
+      const result = await getStatefulIndexStats();
+
+      expect(result.dataPanelAccess).toEqual({
+        showPanel: true,
+        showDocuments: true,
+        showTotalSize: false,
+      });
+      expect(result.indicesCount).toBe(1);
+    });
+
+    // `remote_monitoring_collector` can monitor every index but read only `.monitoring-*`
+    it('hides the total size when the sizes cover indices that were not counted', async () => {
+      mockStatefulIndexSizes({ products: 100 });
+      mockResolvedIndices([]);
+
+      const result = await getStatefulIndexStats();
+
+      expect(result.dataPanelAccess.showTotalSize).toBe(false);
+      expect(result.indicesCount).toBe(0);
+    });
+
+    it('treats a resolve response without indices or data streams as having none', async () => {
+      client.asCurrentUser.indices.resolveIndex.mockResolvedValue(
+        {} as IndicesResolveIndexResponse
+      );
+
+      const result = await getStatefulIndexStats();
+
+      expect(result.indicesCount).toBe(0);
+    });
+
+    it('treats a response without indices as an empty deployment', async () => {
+      client.asCurrentUser.indices.stats.mockResolvedValue({} as IndicesStatsResponse);
+
+      const result = await getStatefulIndexStats();
+
+      expect(result.storeSizeBytes).toBe(0);
+    });
+
+    // index stats needs `monitor`, which `viewer` and `editor` do not hold
+    it('hides only the total size from a caller who cannot monitor any index', async () => {
+      client.asCurrentUser.indices.stats.mockRejectedValue(forbidden());
+      mockResolvedIndices(['products']);
+      mockDocumentCount(20);
+
+      const result = await getStatefulIndexStats();
+
+      expect(result).toEqual({
+        dataPanelAccess: { showPanel: true, showDocuments: true, showTotalSize: false },
+        indicesCount: 1,
+        dataStreamsCount: 0,
+        storeSizeBytes: null,
+        vectorCount: null,
+        documentsCount: 20,
+        newIndex: null,
+      });
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    // `_resolve/index` needs `read` or `view_index_metadata`, which a caller with only `monitor` lacks
+    it('hides the panel from a caller who cannot list any index', async () => {
+      client.asCurrentUser.indices.resolveIndex.mockRejectedValue(forbidden());
+      mockStatefulIndexSizes({ products: 100 });
+
+      const result = await getStatefulIndexStats();
+
+      expect(result.dataPanelAccess.showPanel).toBe(false);
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    // `_count` needs `read`, which a caller with only `view_index_metadata` lacks
+    it('hides only the documents from a caller who cannot read any index', async () => {
+      client.asCurrentUser.count.mockRejectedValue(forbidden());
+      client.asCurrentUser.indices.stats.mockRejectedValue(forbidden());
+      mockResolvedIndices(['products']);
+
+      const result = await getStatefulIndexStats();
+
+      expect(result.dataPanelAccess).toEqual({
+        showPanel: true,
+        showDocuments: false,
+        showTotalSize: false,
+      });
+      expect(result.indicesCount).toBe(1);
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('keeps the panel but reports a null size when the index stats call fails', async () => {
+      client.asCurrentUser.indices.stats.mockRejectedValue(new Error('stats down'));
+      mockResolvedIndices(['products']);
+      mockDocumentCount(20);
+
+      const result = await getStatefulIndexStats();
+
+      expect(result.dataPanelAccess).toEqual(FULL_ACCESS);
+      expect(result.indicesCount).toBe(1);
+      expect(result.storeSizeBytes).toBeNull();
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('fetch index sizes'));
+    });
+
+    it('reports a null size when index stats answers with failed shards', async () => {
+      client.asCurrentUser.indices.stats.mockResolvedValue({
+        _shards: { total: 2, successful: 1, failed: 1 },
+        _all: {},
+      } as IndicesStatsResponse);
+      mockResolvedIndices(['products']);
+      mockDocumentCount(20);
+
+      const result = await getStatefulIndexStats();
+
+      expect(result.dataPanelAccess).toEqual(FULL_ACCESS);
+      expect(result.storeSizeBytes).toBeNull();
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('1 shards failed'));
+    });
+
+    it('keeps the panel but reports a null index count when the indices lookup fails', async () => {
+      client.asCurrentUser.indices.resolveIndex.mockRejectedValue(new Error('resolve down'));
+      mockStatefulIndexSizes({ products: 100 });
+
+      const result = await getStatefulIndexStats();
+
+      expect(result.dataPanelAccess).toEqual(FULL_ACCESS);
+      expect(result.indicesCount).toBeNull();
+      expect(result.storeSizeBytes).toBe(100);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('count indices'));
     });
   });
 
-  // metering lists an index as soon as it exists, but its figures only catch up on a refresh
-  it('surfaces a new index whose size metering has not reported yet', async () => {
-    mockCatIndices([{ index: 'brand-new', 'creation.date': String(Date.now() - 60_000) }]);
-    mockMetering([{ name: 'brand-new', num_docs: 0, size_in_bytes: 0 }]);
-    mockDocumentCount(42);
+  describe('on a serverless deployment', () => {
+    // system indices and the backing indices of system and internal data streams are left out by the
+    // request itself
+    it('asks metering only for user indices and user data streams', async () => {
+      await getIndexStats();
 
-    const result = await getIndexStats();
-
-    expect(result.indicesCount).toBe(1);
-    expect(result.newIndex).toEqual(
-      expect.objectContaining({ indexName: 'brand-new', documentsCount: 42, sizeInBytes: 0 })
-    );
-  });
-
-  it('does not fetch vector counts while they are disabled', async () => {
-    mockMetering([{ name: 'vectordb', num_docs: 20, size_in_bytes: 500 }]);
-    mockDocumentCount(20);
-    mockVectorStats(100, 25);
-
-    const result = await getIndexStats();
-
-    expect(result.vectorCount).toBeNull();
-    expect(client.asInternalUser.indices.stats).not.toHaveBeenCalled();
-  });
-
-  it('skips the vector lookup entirely when the caller cannot monitor every index', async () => {
-    mockMetering([{ name: 'vectordb', num_docs: 20, size_in_bytes: 500 }]);
-    mockDocumentCount(20);
-
-    // pass true so the canMonitorAllIndices guard is exercised independently of the feature flag
-    const result = await getIndexStats({ canMonitorAllIndices: false }, true);
-
-    // the scoped counts still resolve; only the cluster-wide vector total is withheld
-    expect(result).toEqual({
-      indicesCount: 1,
-      storeSizeBytes: 500,
-      vectorCount: null,
-      documentsCount: 20,
-      newIndex: null,
-    });
-    expect(client.asInternalUser.indices.stats).not.toHaveBeenCalled();
-  });
-
-  // `_cat/indices` needs cluster `monitor`, which the caller does not hold here
-  it('skips the newest-index lookup when the caller cannot monitor the cluster', async () => {
-    mockMetering([{ name: 'vectordb', num_docs: 20, size_in_bytes: 500 }]);
-    mockCatIndices([{ index: 'vectordb', 'creation.date': String(Date.now() - 60_000) }]);
-    mockDocumentCount(20);
-
-    const result = await getIndexStats({ canMonitorCluster: false });
-
-    expect(result.newIndex).toBeNull();
-    expect(client.asCurrentUser.cat.indices).not.toHaveBeenCalled();
-  });
-
-  // cluster `monitor` gates the newest-index lookup on its own, independent of index `monitor` on *
-  it('surfaces the newest index for a caller that can monitor the cluster but not every index', async () => {
-    mockMetering([{ name: 'vectordb', num_docs: 20, size_in_bytes: 500 }]);
-    mockCatIndices([{ index: 'vectordb', 'creation.date': String(Date.now() - 60_000) }]);
-    mockDocumentCount(20);
-
-    // pass true so the canMonitorAllIndices guard is exercised independently of the feature flag
-    const result = await getIndexStats({ canMonitorAllIndices: false }, true);
-
-    expect(result.newIndex).toEqual(expect.objectContaining({ indexName: 'vectordb' }));
-    // the cluster-wide vector total is still withheld from a caller without index monitor on *
-    expect(result.vectorCount).toBeNull();
-    expect(client.asInternalUser.indices.stats).not.toHaveBeenCalled();
-  });
-
-  it('reports a null vectorCount for an unprivileged caller with an empty deployment', async () => {
-    // pass true so the canMonitorAllIndices guard is exercised independently of the feature flag
-    const result = await getIndexStats({ canMonitorAllIndices: false }, true);
-
-    // 0 would imply "no vectors"; the caller simply isn't allowed to know
-    expect(result.vectorCount).toBeNull();
-    expect(result.indicesCount).toBe(0);
-  });
-
-  it('reports a null vectorCount for a privileged caller while the fetch is disabled', async () => {
-    const result = await getIndexStats();
-
-    expect(result.vectorCount).toBeNull();
-    expect(result.indicesCount).toBe(0);
-    expect(client.asInternalUser.indices.stats).not.toHaveBeenCalled();
-  });
-
-  it('returns a null indicesCount and storeSizeBytes when the metering call fails', async () => {
-    client.asSecondaryAuthUser.transport.request.mockRejectedValue(new Error('metering down'));
-    mockDocumentCount(20);
-
-    const result = await getIndexStats();
-
-    // both stats come from metering, but a count of 0 would claim the deployment is empty, so the
-    // reads that do not depend on it still run
-    expect(result).toEqual({
-      indicesCount: null,
-      storeSizeBytes: null,
-      vectorCount: null,
-      documentsCount: 20,
-      newIndex: null,
-    });
-    expect(logger.warn).toHaveBeenCalled();
-    expect(client.asInternalUser.indices.stats).not.toHaveBeenCalled();
-  });
-
-  it('treats an index_not_found_exception from metering as an empty deployment', async () => {
-    client.asSecondaryAuthUser.transport.request.mockRejectedValue(
-      Object.assign(new Error('no metering data'), {
-        statusCode: 404,
-        body: { error: { type: 'index_not_found_exception' } },
-      })
-    );
-
-    const result = await getIndexStats();
-
-    // a project metering has never reported on is empty, not broken
-    expect(result.indicesCount).toBe(0);
-    expect(result.storeSizeBytes).toBe(0);
-  });
-
-  it('reports a null count for a 404 that is not an index_not_found_exception', async () => {
-    client.asSecondaryAuthUser.transport.request.mockRejectedValue(
-      Object.assign(new Error('no handler found for uri [/_metering/stats]'), { statusCode: 404 })
-    );
-    mockDocumentCount(20);
-
-    const result = await getIndexStats();
-
-    // a metering API that is not there at all says nothing about how many indices exist
-    expect(result.indicesCount).toBeNull();
-    expect(result.storeSizeBytes).toBeNull();
-    expect(logger.warn).toHaveBeenCalled();
-  });
-
-  it('treats a metering response without indices as an empty deployment', async () => {
-    client.asSecondaryAuthUser.transport.request.mockResolvedValue({
-      _total: { num_docs: 0, size_in_bytes: 0 },
+      expect(client.asSecondaryAuthUser.transport.request).toHaveBeenCalledWith({
+        method: 'GET',
+        path: '/_metering/stats/*,-.*,-traces-agent_builder.otel-*',
+      });
     });
 
-    const result = await getIndexStats();
+    // the count and sizes come from the same call, so they cover the same indices
+    it('counts each user data stream once, apart from the indices, sized by all of its backing indices', async () => {
+      mockMetering(
+        [
+          { name: 'products', num_docs: 10, size_in_bytes: 100 },
+          {
+            name: APP_LOGS_BACKING_INDICES[0],
+            num_docs: 50,
+            size_in_bytes: 500,
+            datastream: 'logs-app-default',
+          },
+          {
+            name: APP_LOGS_BACKING_INDICES[1],
+            num_docs: 5,
+            size_in_bytes: 50,
+            datastream: 'logs-app-default',
+          },
+        ],
+        ['logs-app-default']
+      );
 
-    expect(result).toEqual({
-      indicesCount: 0,
-      storeSizeBytes: 0,
-      vectorCount: null,
-      documentsCount: 0,
-      newIndex: null,
+      const result = await getIndexStats();
+
+      expect(result).toEqual({
+        dataPanelAccess: FULL_ACCESS,
+        indicesCount: 1,
+        dataStreamsCount: 1,
+        storeSizeBytes: 650,
+        vectorCount: null,
+        documentsCount: 0,
+        newIndex: null,
+      });
+      expect(client.asCurrentUser.indices.resolveIndex).not.toHaveBeenCalled();
     });
-  });
 
-  it('treats an index reported without a size as contributing nothing to the total', async () => {
-    client.asSecondaryAuthUser.transport.request.mockResolvedValue({
-      _total: { num_docs: 10, size_in_bytes: 100 },
-      indices: [
-        { name: 'sizeless', num_docs: 10 },
-        { name: 'products', num_docs: 10, size_in_bytes: 100 },
-      ],
+    // metering needs `monitor`, `view_index_metadata`, `manage`, or `all` on at least one index
+    it('hides the panel from a caller who cannot meter any index', async () => {
+      client.asSecondaryAuthUser.transport.request.mockRejectedValue(forbidden());
+      mockDocumentCount(10);
+
+      const result = await getIndexStats();
+
+      expect(result).toEqual({
+        dataPanelAccess: { showPanel: false, showDocuments: false, showTotalSize: false },
+        indicesCount: null,
+        dataStreamsCount: null,
+        storeSizeBytes: null,
+        vectorCount: null,
+        documentsCount: 10,
+        newIndex: null,
+      });
+      expect(logger.warn).not.toHaveBeenCalled();
     });
 
-    const result = await getIndexStats();
+    // `_count` needs `read` or `all`, which `monitor` and `view_index_metadata` do not include
+    it('hides only the documents from a caller who cannot read any index', async () => {
+      mockMetering([{ name: 'products', num_docs: 10, size_in_bytes: 100 }]);
+      client.asCurrentUser.count.mockRejectedValue(forbidden());
 
-    expect(result.indicesCount).toBe(2);
-    expect(result.storeSizeBytes).toBe(100);
-  });
+      const result = await getIndexStats();
 
-  it('skips the follow-up reads when the caller has no indices', async () => {
-    const result = await getIndexStats();
-
-    // a genuinely empty deployment reports real zeros for index/doc counts, not null
-    expect(result).toEqual({
-      indicesCount: 0,
-      storeSizeBytes: 0,
-      vectorCount: null,
-      documentsCount: 0,
-      newIndex: null,
+      expect(result).toEqual({
+        dataPanelAccess: { showPanel: true, showDocuments: false, showTotalSize: true },
+        indicesCount: 1,
+        dataStreamsCount: 0,
+        storeSizeBytes: 100,
+        vectorCount: null,
+        documentsCount: null,
+        newIndex: null,
+      });
+      expect(logger.warn).not.toHaveBeenCalled();
     });
-    expect(client.asInternalUser.indices.stats).not.toHaveBeenCalled();
-    expect(client.asCurrentUser.count).not.toHaveBeenCalled();
-    expect(client.asCurrentUser.cat.indices).not.toHaveBeenCalled();
-  });
 
-  it('counts top-level documents rather than reusing the metering num_docs', async () => {
-    // metering counts the hidden nested docs that `semantic_text` chunking creates
-    mockMetering([{ name: 'vectordb', num_docs: 5000, size_in_bytes: 500 }]);
-    mockDocumentCount(500);
+    // a size of 0 would claim the new index is empty
+    it('reports a null new index size when the sizes are unavailable', async () => {
+      mockCatIndices([{ index: 'brand-new', 'creation.date': String(Date.now() - 60_000) }]);
+      client.asSecondaryAuthUser.transport.request.mockRejectedValue(new Error('metering down'));
+      mockDocumentCount(3);
 
-    const result = await getIndexStats();
+      const result = await getIndexStats();
 
-    expect(client.asCurrentUser.count).toHaveBeenCalledWith({
-      index: USER_INDICES_PATTERN,
-      expand_wildcards: ['open'],
+      expect(result.newIndex).toEqual(
+        expect.objectContaining({ indexName: 'brand-new', documentsCount: 3, sizeInBytes: null })
+      );
     });
-    expect(result.documentsCount).toBe(500);
-  });
 
-  it('returns a null documentsCount when shards fail, rather than an undercount', async () => {
-    mockMetering([{ name: 'vectordb', num_docs: 5000, size_in_bytes: 500 }]);
-    mockDocumentCount(120, 1);
+    // the panel and the total size stat read the same source, so they agree
+    it('takes the new index size from the metering stats', async () => {
+      mockCatIndices([{ index: 'brand-new', 'creation.date': String(Date.now() - 60_000) }]);
+      mockMetering([{ name: 'brand-new', num_docs: 3, size_in_bytes: 46121 }]);
+      mockDocumentCount(3);
 
-    const result = await getIndexStats();
+      const result = await getIndexStats();
 
-    expect(result.documentsCount).toBeNull();
-    expect(result.vectorCount).toBeNull();
-    // a partial count resolves rather than throwing, so it needs its own warning
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('1 of 2 shards'));
-  });
-
-  it('returns a null documentsCount (not 0) when the count call fails', async () => {
-    mockMetering([{ name: 'vectordb', num_docs: 10, size_in_bytes: 500 }]);
-    client.asCurrentUser.count.mockRejectedValue(new Error('boom'));
-
-    const result = await getIndexStats();
-
-    // index/size counts are still valid; only the document count is unavailable
-    expect(result).toEqual({
-      indicesCount: 1,
-      storeSizeBytes: 500,
-      vectorCount: null,
-      documentsCount: null,
-      newIndex: null,
+      expect(result.newIndex).toEqual(
+        expect.objectContaining({ indexName: 'brand-new', sizeInBytes: 46121 })
+      );
     });
-    expect(logger.warn).toHaveBeenCalled();
+
+    it('does not fetch vector counts while they are disabled', async () => {
+      mockMetering([{ name: 'vectordb', num_docs: 20, size_in_bytes: 500 }]);
+      mockDocumentCount(20);
+      mockVectorStats(100, 25);
+
+      const result = await getIndexStats();
+
+      expect(result.vectorCount).toBeNull();
+      expect(client.asInternalUser.indices.stats).not.toHaveBeenCalled();
+    });
+
+    it('skips the vector lookup entirely when the caller cannot monitor every index', async () => {
+      mockMetering([{ name: 'vectordb', num_docs: 20, size_in_bytes: 500 }]);
+      mockDocumentCount(20);
+
+      // pass true so the canMonitorAllIndices guard is exercised independently of the feature flag
+      const result = await getIndexStats({ canMonitorAllIndices: false }, true);
+
+      // The scoped counts still resolve. Only the cluster-wide vector total is withheld.
+      expect(result).toEqual({
+        dataPanelAccess: FULL_ACCESS,
+        indicesCount: 1,
+        dataStreamsCount: 0,
+        storeSizeBytes: 500,
+        vectorCount: null,
+        documentsCount: 20,
+        newIndex: null,
+      });
+      expect(client.asInternalUser.indices.stats).not.toHaveBeenCalled();
+    });
+
+    // `_cat/indices` needs cluster `monitor`, which the caller does not hold here
+    it('skips the newest-index lookup when the caller cannot monitor the cluster', async () => {
+      mockMetering([{ name: 'vectordb', num_docs: 20, size_in_bytes: 500 }]);
+      mockCatIndices([{ index: 'vectordb', 'creation.date': String(Date.now() - 60_000) }]);
+      mockDocumentCount(20);
+
+      const result = await getIndexStats({ canMonitorCluster: false });
+
+      expect(result.newIndex).toBeNull();
+      expect(client.asCurrentUser.cat.indices).not.toHaveBeenCalled();
+    });
+
+    // cluster `monitor` gates the newest-index lookup on its own, independent of index `monitor` on *
+    it('surfaces the newest index for a caller that can monitor the cluster but not every index', async () => {
+      mockMetering([{ name: 'vectordb', num_docs: 20, size_in_bytes: 500 }]);
+      mockCatIndices([{ index: 'vectordb', 'creation.date': String(Date.now() - 60_000) }]);
+      mockDocumentCount(20);
+
+      const result = await getIndexStats({ canMonitorAllIndices: false });
+
+      expect(result.newIndex).toEqual(expect.objectContaining({ indexName: 'vectordb' }));
+    });
+
+    it('keeps the panel but reports a null index count and size when the metering call fails', async () => {
+      client.asSecondaryAuthUser.transport.request.mockRejectedValue(new Error('metering down'));
+      mockDocumentCount(20);
+
+      const result = await getIndexStats();
+
+      // a size of 0 would claim the deployment is empty, so the reads that do not depend on metering
+      // still run
+      expect(result).toEqual({
+        dataPanelAccess: FULL_ACCESS,
+        indicesCount: null,
+        dataStreamsCount: null,
+        storeSizeBytes: null,
+        vectorCount: null,
+        documentsCount: 20,
+        newIndex: null,
+      });
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('fetch metered indices'));
+    });
+
+    it('treats an index_not_found_exception from metering as an empty deployment', async () => {
+      client.asSecondaryAuthUser.transport.request.mockRejectedValue(
+        Object.assign(new Error('no metering data'), {
+          statusCode: 404,
+          body: { error: { type: 'index_not_found_exception' } },
+        })
+      );
+
+      const result = await getIndexStats();
+
+      // a project metering has never reported on is empty, not broken
+      expect(result.indicesCount).toBe(0);
+      expect(result.storeSizeBytes).toBe(0);
+      expect(result.dataPanelAccess).toEqual(FULL_ACCESS);
+    });
+
+    it('reports a null size for a 404 that is not an index_not_found_exception', async () => {
+      client.asSecondaryAuthUser.transport.request.mockRejectedValue(
+        Object.assign(new Error('no handler found for uri [/_metering/stats]'), { statusCode: 404 })
+      );
+      mockDocumentCount(20);
+
+      const result = await getIndexStats();
+
+      // a metering API that is not there at all says nothing about how much data exists
+      expect(result.storeSizeBytes).toBeNull();
+      expect(logger.warn).toHaveBeenCalled();
+    });
+
+    it('treats a metering response without indices as an empty deployment', async () => {
+      client.asSecondaryAuthUser.transport.request.mockResolvedValue({
+        _total: { num_docs: 0, size_in_bytes: 0 },
+      });
+
+      const result = await getIndexStats();
+
+      expect(result).toEqual({
+        dataPanelAccess: FULL_ACCESS,
+        indicesCount: 0,
+        dataStreamsCount: 0,
+        storeSizeBytes: 0,
+        vectorCount: null,
+        documentsCount: 0,
+        newIndex: null,
+      });
+    });
+
+    it('treats an index reported without a size as contributing nothing to the total', async () => {
+      client.asSecondaryAuthUser.transport.request.mockResolvedValue({
+        _total: { num_docs: 10, size_in_bytes: 100 },
+        indices: [
+          { name: 'sizeless', num_docs: 10 },
+          { name: 'products', num_docs: 10, size_in_bytes: 100 },
+        ],
+      });
+
+      const result = await getIndexStats();
+
+      expect(result.storeSizeBytes).toBe(100);
+    });
+
+    it('counts top-level documents in user indices and data streams rather than reusing the metering num_docs', async () => {
+      // metering counts the hidden nested docs that `semantic_text` chunking creates
+      mockMetering([{ name: 'vectordb', num_docs: 5000, size_in_bytes: 500 }]);
+      mockDocumentCount(500);
+
+      const result = await getIndexStats();
+
+      // the open-only pattern resolves to user indices and user data streams, so no query is needed
+      expect(client.asCurrentUser.count).toHaveBeenCalledWith({
+        index: USER_INDICES_PATTERN,
+        expand_wildcards: ['open'],
+      });
+      expect(result.documentsCount).toBe(500);
+    });
+
+    it('returns a null documentsCount when shards fail, rather than an undercount', async () => {
+      mockMetering([{ name: 'vectordb', num_docs: 5000, size_in_bytes: 500 }]);
+      mockDocumentCount(120, 1);
+
+      const result = await getIndexStats();
+
+      expect(result.documentsCount).toBeNull();
+      // a partial count resolves rather than throwing, so it needs its own warning
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('1 of 2 shards'));
+    });
+
+    it('returns a null documentsCount (not 0) when the count call fails', async () => {
+      mockMetering([{ name: 'vectordb', num_docs: 10, size_in_bytes: 500 }]);
+      client.asCurrentUser.count.mockRejectedValue(new Error('boom'));
+
+      const result = await getIndexStats();
+
+      // The index and size counts are still valid. Only the document count is unavailable.
+      expect(result).toEqual({
+        dataPanelAccess: FULL_ACCESS,
+        indicesCount: 1,
+        dataStreamsCount: 0,
+        storeSizeBytes: 500,
+        vectorCount: null,
+        documentsCount: null,
+        newIndex: null,
+      });
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('compute document count'));
+    });
   });
 });
 
@@ -516,116 +769,85 @@ describe('fetchNewIndex', () => {
     client.asCurrentUser.cat.indices.mockResolvedValue(indices);
   };
 
-  const metered = (name: string, sizeInBytes: number) => ({
-    name,
-    num_docs: 0,
-    size_in_bytes: sizeInBytes,
-  });
-
   it('returns the newest index created within the last 24 hours', async () => {
     mockCatIndices([created('new-index', 1), created('old-index', 48)]);
     mockIndexCount(100);
 
-    const result = await fetchNewIndex(client, logger, [
-      metered('new-index', 46121),
-      metered('old-index', 2097152),
-    ]);
+    const result = await fetchNewIndex(client, logger);
 
     expect(result).toEqual({
       indexName: 'new-index',
       documentsCount: 100,
-      sizeInBytes: 46121,
       createdAt: hoursAgo(1),
     });
   });
 
-  it('asks Elasticsearch only for the user indices and their creation dates', async () => {
-    mockCatIndices([]);
+  // every rollover creates a backing index, which would otherwise surface as a new index
+  it('ignores data stream backing indices', async () => {
+    mockCatIndices([created('.ds-logs-app-default-2026.10.21-000002', 1), created('products', 6)]);
+    mockIndexCount(7);
 
-    await fetchNewIndex(client, logger, []);
+    const result = await fetchNewIndex(client, logger);
 
-    expect(client.asCurrentUser.cat.indices).toHaveBeenCalledWith({
-      index: USER_INDICES_PATTERN,
-      format: 'json',
-      h: ['index', 'creation.date'],
-      expand_wildcards: ['open'],
-    });
-  });
-
-  // metering is the same source as the aggregate `storeSizeBytes`, so the panel and the tile agree
-  it('takes the size from the metering stats', async () => {
-    mockCatIndices([created('my-index', 1)]);
-    mockIndexCount(3);
-
-    const result = await fetchNewIndex(client, logger, [metered('my-index', 46121)]);
-
-    expect(result!.sizeInBytes).toBe(46121);
-  });
-
-  it('reports a zero size for an index metering has not reported yet', async () => {
-    mockCatIndices([created('brand-new', 1)]);
-
-    const result = await fetchNewIndex(client, logger, []);
-
-    expect(result!.sizeInBytes).toBe(0);
-  });
-
-  // metering's num_docs includes the hidden nested docs `semantic_text` chunking creates
-  it('counts top-level documents with _count scoped to the single index', async () => {
-    mockCatIndices([created('my-index', 1)]);
-    mockIndexCount(42);
-
-    const result = await fetchNewIndex(client, logger, [metered('my-index', 500)]);
-
-    expect(client.asCurrentUser.count).toHaveBeenCalledWith({ index: 'my-index' });
-    expect(result!.documentsCount).toBe(42);
+    expect(result!.indexName).toBe('products');
   });
 
   it('returns null when every index is older than 24 hours', async () => {
     mockCatIndices([created('old-index', 48)]);
 
-    const result = await fetchNewIndex(client, logger, [metered('old-index', 2097152)]);
+    const result = await fetchNewIndex(client, logger);
 
     expect(result).toBeNull();
     expect(client.asCurrentUser.count).not.toHaveBeenCalled();
+  });
+
+  it('skips an index reported without a creation date', async () => {
+    client.asCurrentUser.cat.indices.mockResolvedValue([{ index: 'undated' }]);
+
+    const result = await fetchNewIndex(client, logger);
+
+    expect(result).toBeNull();
   });
 
   it('picks the newest when several indices fall inside the window', async () => {
     mockCatIndices([created('older-index', 12), created('newest-index', 1), created('middle', 6)]);
     mockIndexCount(50);
 
-    const result = await fetchNewIndex(client, logger, [metered('newest-index', 512000)]);
+    const result = await fetchNewIndex(client, logger);
 
     expect(result!.indexName).toBe('newest-index');
     expect(client.asCurrentUser.count).toHaveBeenCalledWith({ index: 'newest-index' });
   });
 
   it('returns null and logs when the index listing fails', async () => {
-    client.asCurrentUser.cat.indices.mockRejectedValue(new Error('forbidden'));
+    client.asCurrentUser.cat.indices.mockRejectedValue(new Error('boom'));
 
-    const result = await fetchNewIndex(client, logger, []);
+    const result = await fetchNewIndex(client, logger);
 
     expect(result).toBeNull();
     expect(logger.warn).toHaveBeenCalled();
+  });
+
+  // cluster `monitor` alone gets the listing called, but it also needs index `monitor`
+  it('returns null without logging when the caller cannot monitor any index', async () => {
+    client.asCurrentUser.cat.indices.mockRejectedValue(
+      Object.assign(new Error('forbidden'), { statusCode: 403 })
+    );
+
+    const result = await fetchNewIndex(client, logger);
+
+    expect(result).toBeNull();
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('returns null and logs when the document count fails', async () => {
     mockCatIndices([created('my-index', 1)]);
     client.asCurrentUser.count.mockRejectedValue(new Error('boom'));
 
-    const result = await fetchNewIndex(client, logger, [metered('my-index', 500)]);
+    const result = await fetchNewIndex(client, logger);
 
     expect(result).toBeNull();
     expect(logger.warn).toHaveBeenCalled();
-  });
-
-  it('returns null when there are no indices at all', async () => {
-    mockCatIndices([]);
-
-    const result = await fetchNewIndex(client, logger, []);
-
-    expect(result).toBeNull();
-    expect(client.asCurrentUser.count).not.toHaveBeenCalled();
   });
 });
 
@@ -686,17 +908,6 @@ describe('fetchApiKeysStats', () => {
         },
       })
     );
-  });
-
-  it('reports 0 expiring keys when none of the keys expire', async () => {
-    client.asCurrentUser.security.queryApiKeys.mockResolvedValue({
-      total: 1,
-      count: 0,
-      api_keys: [],
-      aggregations: { expiring: { doc_count: 0 } },
-    });
-
-    await expect(fetchApiKeysStats(client, logger)).resolves.toEqual({ total: 1, expiring: 0 });
   });
 
   it('reports 0 expiring keys when the aggregation is missing from the response', async () => {

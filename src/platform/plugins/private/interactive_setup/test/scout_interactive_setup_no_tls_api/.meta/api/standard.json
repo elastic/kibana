@@ -1,5 +1,5 @@
 {
-  "sha1": "6cef8dffd0b50a88c1ddd62e9ec91f33da5c68ad",
+  "sha1": "cf128a970414db58b32f069e849033e716ed7954",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -9,11 +9,12 @@
       "title": "Interactive setup - manual configuration flow without TLS rejects configuration with an invalid verification code",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@limit/except-fips"
       ],
       "location": {
         "file": "src/platform/plugins/private/interactive_setup/test/scout_interactive_setup_no_tls_api/api/tests/manual_configuration_flow.spec.ts",
-        "line": 33,
+        "line": 31,
         "column": 56
       }
     },
@@ -22,11 +23,12 @@
       "title": "Interactive setup - manual configuration flow without TLS rejects configuration with invalid credentials",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@limit/except-fips"
       ],
       "location": {
         "file": "src/platform/plugins/private/interactive_setup/test/scout_interactive_setup_no_tls_api/api/tests/manual_configuration_flow.spec.ts",
-        "line": 45,
+        "line": 43,
         "column": 14
       }
     },
@@ -35,11 +37,12 @@
       "title": "Interactive setup - manual configuration flow without TLS configures Kibana, then refuses further requests and boots",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@limit/except-fips"
       ],
       "location": {
         "file": "src/platform/plugins/private/interactive_setup/test/scout_interactive_setup_no_tls_api/api/tests/manual_configuration_flow.spec.ts",
-        "line": 67,
+        "line": 65,
         "column": 18
       }
     }

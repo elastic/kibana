@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import type { TimeRange } from '../../entities_grid/common';
-import { buildLookback } from '../../entities_grid/queries/esql';
+import { TIME_RANGE_DAYS, buildLookback, type TimeRange } from '../../queries/time_range';
 
 /** The selected time range ending now, or the same-length range right before it. */
 export type TilePeriod = 'current' | 'previous';
-
-/** Length of each time range in days; mirrors `TIME_RANGE_DAYS` in `entities_grid/queries/esql.ts`. */
-export const TIME_RANGE_DAYS: Record<TimeRange, number> = { '24h': 1, '7d': 7, '30d': 30 };
 
 /**
  * Returns the ES|QL condition that keeps `field` inside the period. The current period is

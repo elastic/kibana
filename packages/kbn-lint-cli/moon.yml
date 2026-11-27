@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/repo-info'
   - '@kbn/dev-proc-runner'
   - '@kbn/tooling-log'
+  - '@kbn/dev-cli-errors'
 tags:
   - shared-common
   - package
@@ -32,6 +33,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

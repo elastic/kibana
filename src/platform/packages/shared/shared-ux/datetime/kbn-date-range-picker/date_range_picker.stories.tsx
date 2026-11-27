@@ -12,6 +12,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { fn } from '@storybook/test';
 
+import moment from 'moment-timezone';
 import {
   DateRangePicker,
   type DateRangePickerProps,
@@ -22,6 +23,15 @@ import type { DateRangePickerSettings, TimeRangeBoundsOption } from './types';
 const meta: Meta<DateRangePickerProps> = {
   title: 'Date Time/DateRangePicker',
   component: DateRangePicker,
+  // Kibana keeps moment's global zone in sync with `timeZone` via core's
+  // MomentService; Storybook has no core, so mirror it here or selected days
+  // render in the browser's zone instead of the configured one.
+  decorators: [
+    (Story, { args }) => {
+      moment.tz.setDefault(args.timeZone === 'Browser' ? undefined : args.timeZone);
+      return <Story />;
+    },
+  ],
   args: {
     onChange: action('onChange'),
     onInputChange: action('onInputChange'),

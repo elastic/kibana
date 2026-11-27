@@ -12,7 +12,7 @@ import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
-import { getEditPath } from '../common/constants';
+import { getEditPath, LENS_ICON } from '../common/constants';
 import { getAllMigrations } from './migrations/saved_object_migrations';
 import type { CustomVisualizationMigrations } from './migrations/types';
 import { lensItemAttributesSchemaV0 } from './content_management/v0';
@@ -42,7 +42,7 @@ export function setupSavedObjects(
     namespaceType: 'multiple-isolated',
     convertToMultiNamespaceTypeVersion: '8.0.0',
     management: {
-      icon: 'productLens',
+      icon: LENS_ICON,
       defaultSearchField: 'title',
       importableAndExportable: true,
       getTitle: (obj: { attributes: { title: string } }) => obj.attributes.title,

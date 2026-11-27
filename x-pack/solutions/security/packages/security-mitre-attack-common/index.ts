@@ -23,6 +23,7 @@ export {
 
 export {
   THREAT_FRAMEWORK_NAME,
+  THREAT_FRAMEWORK_DISPLAY_NAME,
   getMitreFrameworkByThreatName,
   getMitreFrameworkById,
   buildMitreReferenceUrl,

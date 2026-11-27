@@ -10,7 +10,7 @@
 const { parseExpression } = require('@babel/parser');
 const { default: generate } = require('@babel/generator');
 const tsEstree = require('@typescript-eslint/typescript-estree');
-const traverse = require('eslint-traverse');
+const traverse = require('../helpers/traverse');
 const esTypes = tsEstree.AST_NODE_TYPES;
 const babelTypes = require('@babel/types');
 

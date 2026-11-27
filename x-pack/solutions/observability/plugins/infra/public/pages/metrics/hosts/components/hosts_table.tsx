@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiEmptyPrompt } from '@elastic/eui';
@@ -25,7 +25,7 @@ import { FilterAction } from './table/filter_action';
 export const HostsTable = () => {
   const { loading } = useHostsViewContext();
   const { loading: hostCountLoading, count } = useHostCountContext();
-  const { searchCriteria } = useUnifiedSearchContext();
+  const { searchCriteria, onPreferredSchemaChange } = useUnifiedSearchContext();
   const { data: timeRangeMetadata } = useTimeRangeMetadataContext();
 
   const schemas: DataSchemaFormat[] = useMemo(
@@ -116,6 +116,8 @@ export const HostsTable = () => {
                   <SwitchSchemaMessage
                     dataTestSubj="infraHostsTableNoDataInSelectedSchema"
                     nodeType="host"
+                    targetSchema={schemas[0]}
+                    onSwitchSchema={onPreferredSchemaChange}
                   />
                 ) : (
                   i18n.translate('xpack.infra.waffle.noDataDescription', {

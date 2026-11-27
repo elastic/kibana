@@ -108,12 +108,14 @@ const setup = ({
 
   mockUseSettingsContext.mockReturnValue({
     fields,
+    isLoading: false,
+    loadError: undefined,
+    retry: jest.fn(),
     handleFieldChange,
     unsavedChanges,
     saveAll: jest.fn(),
     isSaving: false,
     cleanUnsavedChanges: jest.fn(),
-    saveSingleSetting: jest.fn(),
     setValidationErrors: jest.fn(),
   });
 

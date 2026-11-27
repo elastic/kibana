@@ -186,6 +186,14 @@ export const configSchema = schema.object({
   entityAnalytics: schema.object({
     riskEngine: schema.object({
       alertSampleSizePerShard: schema.number({ defaultValue: DEFAULT_ALERT_SAMPLE_SIZE }),
+      esqlProfiling: schema.boolean({ defaultValue: true }),
+      esqlProfilingInterval: schema.number({
+        defaultValue: 20,
+        min: 1,
+        max: Number.MAX_SAFE_INTEGER,
+        validate: (value) =>
+          Number.isInteger(value) ? undefined : 'Expected a whole number of pages',
+      }),
     }),
     assetCriticality: schema.object({
       csvUpload: schema.object({

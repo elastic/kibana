@@ -7,6 +7,9 @@
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
+import { ElasticsearchAssetType } from '../../../../../common/types/models';
+import { getPathParts } from '../../archive';
+
 interface TransformAliasSetting {
   alias: string;
   // When move_on_creation: true, all the other indices are removed from the alias,
@@ -49,4 +52,16 @@ export const getDestinationIndexAliases = (aliasSettings: unknown): TransformAli
     ];
   }
   return aliases;
+};
+
+/**
+ * Whether an archive path is installed as a transform asset. `getPathParts` only splits the
+ * first four path segments, so this matches any `<pkgkey>/<anything>/transform/<file>` path,
+ * with or without a file extension. The package upload validator and the installer must share
+ * this predicate: if the validator matched a narrower set of paths, an uploaded archive could
+ * place a transform outside `elasticsearch/` and skip validation while still being installed.
+ */
+export const isTransform = (path: string) => {
+  const pathParts = getPathParts(path);
+  return !path.endsWith('/') && pathParts.type === ElasticsearchAssetType.transform;
 };

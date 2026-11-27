@@ -20,11 +20,12 @@ import {
 export abstract class DiscoverNavigation extends DiscoverAppBase {
   async goto(options: DiscoverGotoOptions) {
     await this.setQueryMode(options.queryMode);
-    await this.page.gotoApp(
-      'discover',
-      options.savedSearchId ? { hash: `/view/${options.savedSearchId}` } : undefined
-    );
-    await this.waitForDiscoverPage();
+    await this.page.gotoApp('discover', {
+      hash: options.savedSearchId ? `/view/${options.savedSearchId}` : undefined,
+      readyWhen: this.page.testSubj.locator('dscPage'),
+      // Covers the cold bundle download plus Discover's slow initialization in serverless CI.
+      readyTimeout: 45_000,
+    });
     if (options.queryMode === 'esql') {
       // Discover discards the seeded mode unless it matches the resolved `discover.isEsqlDefault`.
       await this.selectTextBaseLang({ timeout: 30_000 });

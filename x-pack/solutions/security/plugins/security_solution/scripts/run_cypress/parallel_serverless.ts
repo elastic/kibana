@@ -390,7 +390,7 @@ ${JSON.stringify(argv, null, 2)}
 
       setDefaultToolingLoggingLevel(cypressConfigFile?.env?.TOOLING_LOG_LEVEL);
 
-      // eslint-disable-next-line require-atomic-updates
+      // eslint-disable-next-line @kbn/compat/eslint-require-atomic-updates
       log = prefixedOutputLogger('cy.parallel(svl)', createToolingLogger());
 
       const tier: string = argv.tier;
@@ -642,7 +642,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                   await cloudHandler.deleteSecurityProject(project.id, PROJECT_NAME);
                 } catch (error) {
                   // False positive
-                  // eslint-disable-next-line require-atomic-updates
+                  // eslint-disable-next-line @kbn/compat/eslint-require-atomic-updates
                   result = error;
                   failedSpecFilePaths.push(filePath);
                   log.error(`Cypress runner failed: ${error}`);

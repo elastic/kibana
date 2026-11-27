@@ -17,15 +17,25 @@ export interface SidebarSection {
 export class ManagementPage {
   readonly sidebar;
   readonly appNotFoundContent;
+  readonly cardsNavigationPage;
 
   constructor(private readonly page: ScoutPage) {
-    this.sidebar = page.locator('.kbnSolutionNav');
-    this.appNotFoundContent = page.testSubj.locator('appNotFoundPageContent');
+    this.sidebar = page.getByTestId('mgtSideBarNav');
+    this.appNotFoundContent = page.getByTestId('appNotFoundPageContent');
+    this.cardsNavigationPage = page.getByTestId('cards-navigation-page');
+  }
+
+  appCard(appId: string) {
+    return this.page.getByTestId(`app-card-${appId}`);
+  }
+
+  // Serverless projects replace the sidebar landing with a cards landing page.
+  async gotoCardsLanding(): Promise<void> {
+    await this.page.gotoApp('management', { readyWhen: this.cardsNavigationPage });
   }
 
   async goto(): Promise<void> {
-    await this.page.gotoApp('management');
-    await this.sidebar.waitFor({ state: 'visible' });
+    await this.page.gotoApp('management', { readyWhen: this.sidebar });
   }
 
   /**
@@ -33,8 +43,7 @@ export class ManagementPage {
    * tests that expect the app to be inaccessible (no management privileges).
    */
   async gotoExpectAppNotFound(): Promise<void> {
-    await this.page.gotoApp('management');
-    await this.appNotFoundContent.waitFor({ state: 'visible' });
+    await this.page.gotoApp('management', { readyWhen: this.appNotFoundContent });
   }
 
   /**

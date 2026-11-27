@@ -19,7 +19,7 @@ interface Props {
 export const EmptyPrompt: FunctionComponent<Props> = ({ createField, runtimeFieldsDocsUri }) => {
   return (
     <EuiEmptyPrompt
-      iconType="managementApp"
+      iconType="gear"
       data-test-subj="emptyList"
       title={
         <h2 data-test-subj="title">

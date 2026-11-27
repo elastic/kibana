@@ -182,8 +182,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           (c) => getSourceName(c) === FRONTEND_SERVICE.serviceName
         );
 
-        // The trace-based path includes agent.name on nodes for now; the metrics
-        // fast path does not. Compare service names and metrics only.
+        // Compare service names and metrics between the two paths. The fast path
+        // also resolves agent.name for the instrumented targets (below), so the
+        // service map renders their agent icons.
         expect(traceBasedImmediate.map(getSourceName)).to.eql(
           metricsBasedConnections.map(getSourceName)
         );
@@ -197,12 +198,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           [
             {
               source: { 'service.name': FRONTEND_SERVICE.serviceName },
-              target: { 'service.name': CHECKOUT_SERVICE.serviceName },
+              target: { 'service.name': CHECKOUT_SERVICE.serviceName, 'agent.name': 'java' },
             },
             {
               source: { 'service.name': FRONTEND_SERVICE.serviceName },
               target: {
                 'service.name': RECOMMENDATION_SERVICE.serviceName,
+                'agent.name': 'python',
               },
             },
           ]

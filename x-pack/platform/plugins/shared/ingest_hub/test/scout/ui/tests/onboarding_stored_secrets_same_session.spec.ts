@@ -11,6 +11,7 @@ import { test } from '../fixtures';
 import {
   mockAwsPackage,
   navigateToOnboardingStep,
+  selectStaticKeysAuth,
   useOnboardingFeatureFlag,
 } from '../helpers/onboarding';
 import { ACCESS_KEY_REF, SECRET_KEY_REF, fulfillJson } from '../helpers/stored_secrets';
@@ -118,7 +119,7 @@ test.describe(
       });
 
       // First deploy: Access keys chosen, keys typed in.
-      await page.getByRole('radio', { name: /access keys/i }).click({ force: true });
+      await selectStaticKeysAuth(page);
       await page.testSubj.locator('awsStaticKeysForm-accessKeyId').fill('mi1');
       await page.testSubj.locator('awsStaticKeysForm-secretAccessKey').fill('mis1');
       const deployButton = page.testSubj.locator('managedIntegrationsSection-deployButton');

@@ -23,7 +23,7 @@ describe('findUserActions', () => {
       await expect(
         // @ts-expect-error: excess attribute
         find({ caseId: 'test-case', params: { foo: 'bar' } }, client, clientArgs)
-      ).rejects.toThrow('invalid keys "foo"');
+      ).rejects.toThrow('Excess keys are not allowed');
     });
 
     it(`throws when trying to fetch more than ${MAX_DOCS_PER_PAGE} items`, async () => {

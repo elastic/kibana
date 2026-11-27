@@ -6,30 +6,30 @@ Object {
     "params": Object {
       "_source": false,
       "index": "kibana_sample_data_logs",
-      "query": Object {
-        "bool": Object {
-          "filter": Array [
-            Object {
+      "kibanaQueryContext": Object {
+        "kibanaFilters": Array [
+          Object {
+            "meta": Object {
+              "alias": "test",
+              "disabled": false,
+              "index": "1",
+              "negate": false,
+            },
+            "query": Object {
               "match_phrase": Object {
                 "gender": "male",
               },
             },
-          ],
-          "must": Array [
-            Object {
-              "query_string": Object {
-                "query": "*",
-                "time_zone": true,
-              },
-            },
-            Object {
-              "term": Object {
-                "machine.os.keyword": "osx",
-              },
-            },
-          ],
-          "must_not": Array [],
-          "should": Array [],
+          },
+        ],
+        "kqlQuery": Object {
+          "language": "lucene",
+          "query": "*",
+        },
+      },
+      "query": Object {
+        "term": Object {
+          "machine.os.keyword": "osx",
         },
       },
       "size": 4,
@@ -44,19 +44,23 @@ Object {
   "body": Object {
     "params": Object {
       "index": "test",
-      "query": Object {
-        "bool": Object {
-          "filter": Array [
-            Object {
+      "kibanaQueryContext": Object {
+        "kibanaFilters": Array [
+          Object {
+            "meta": Object {
+              "alias": "test",
+              "disabled": false,
+              "index": "1",
+              "negate": false,
+            },
+            "query": Object {
               "match_phrase": Object {
                 "gender": "male",
               },
             },
-          ],
-          "must": Array [],
-          "must_not": Array [],
-          "should": Array [],
-        },
+          },
+        ],
+        "kqlQuery": undefined,
       },
       "size": 0,
     },
@@ -71,24 +75,27 @@ Object {
     "params": Object {
       "_source": false,
       "index": "kibana_sample_data_logs",
-      "query": Object {
-        "bool": Object {
-          "filter": Array [
-            Object {
+      "kibanaQueryContext": Object {
+        "kibanaFilters": Array [
+          Object {
+            "meta": Object {
+              "alias": "test",
+              "disabled": false,
+              "index": "1",
+              "negate": false,
+            },
+            "query": Object {
               "match_phrase": Object {
                 "gender": "male",
               },
             },
-          ],
-          "must": Array [
-            Object {
-              "term": Object {
-                "machine.os.keyword": "osx",
-              },
-            },
-          ],
-          "must_not": Array [],
-          "should": Array [],
+          },
+        ],
+        "kqlQuery": undefined,
+      },
+      "query": Object {
+        "term": Object {
+          "machine.os.keyword": "osx",
         },
       },
       "size": 4,
@@ -103,19 +110,11 @@ Object {
   "body": Object {
     "params": Object {
       "index": "test",
-      "query": Object {
-        "bool": Object {
-          "filter": Array [],
-          "must": Array [
-            Object {
-              "query_string": Object {
-                "query": "*",
-                "time_zone": true,
-              },
-            },
-          ],
-          "must_not": Array [],
-          "should": Array [],
+      "kibanaQueryContext": Object {
+        "kibanaFilters": undefined,
+        "kqlQuery": Object {
+          "language": "lucene",
+          "query": "*",
         },
       },
       "size": 0,
@@ -131,24 +130,16 @@ Object {
     "params": Object {
       "_source": false,
       "index": "kibana_sample_data_logs",
+      "kibanaQueryContext": Object {
+        "kibanaFilters": undefined,
+        "kqlQuery": Object {
+          "language": "lucene",
+          "query": "*",
+        },
+      },
       "query": Object {
-        "bool": Object {
-          "filter": Array [],
-          "must": Array [
-            Object {
-              "query_string": Object {
-                "query": "*",
-                "time_zone": true,
-              },
-            },
-            Object {
-              "term": Object {
-                "machine.os.keyword": "osx",
-              },
-            },
-          ],
-          "must_not": Array [],
-          "should": Array [],
+        "term": Object {
+          "machine.os.keyword": "osx",
         },
       },
       "size": 4,
@@ -163,13 +154,9 @@ Object {
   "body": Object {
     "params": Object {
       "index": "test",
-      "query": Object {
-        "bool": Object {
-          "filter": Array [],
-          "must": Array [],
-          "must_not": Array [],
-          "should": Array [],
-        },
+      "kibanaQueryContext": Object {
+        "kibanaFilters": undefined,
+        "kqlQuery": undefined,
       },
       "size": 0,
     },

@@ -12,7 +12,7 @@ export const SCAN_FAILURE_TITLE = i18n.translate('xpack.alertzero.scanFailure.ti
 });
 
 export const SCAN_FAILURE_BODY = i18n.translate('xpack.alertzero.scanFailure.body', {
-  defaultMessage: 'These workers reported problems.',
+  defaultMessage: 'These Workers reported problems.',
 });
 
 export const SCAN_FAILURE_UNKNOWN = i18n.translate('xpack.alertzero.scanFailure.unknown', {

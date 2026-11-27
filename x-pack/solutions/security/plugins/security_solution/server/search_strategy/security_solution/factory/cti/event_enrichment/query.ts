@@ -6,6 +6,7 @@
  */
 
 import type { EventEnrichmentRequestOptions } from '../../../../../../common/api/search_strategy';
+import { IOC_TRANSFORM_SOURCE_QUERY } from '../../../../../../common/cti/constants';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { buildIndicatorShouldClauses } from './helpers';
 
@@ -54,6 +55,7 @@ export const buildEventEnrichmentQuery = ({
       bool: {
         should: buildIndicatorShouldClauses(eventFields),
         filter,
+        must_not: [IOC_TRANSFORM_SOURCE_QUERY],
         minimum_should_match: 1,
       },
     },

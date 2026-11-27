@@ -9,11 +9,11 @@
 
 import { i18n } from '@kbn/i18n';
 
-const declarationLabel = i18n.translate('kbn-esql-language.esql.autocomplete.declarationLabel', {
+const declarationLabel = i18n.translate('esqlLanguage.esql.autocomplete.declarationLabel', {
   defaultMessage: 'Declaration:',
 });
 
-const examplesLabel = i18n.translate('kbn-esql-language.esql.autocomplete.examplesLabel', {
+const examplesLabel = i18n.translate('esqlLanguage.esql.autocomplete.examplesLabel', {
   defaultMessage: 'Examples:',
 });
 

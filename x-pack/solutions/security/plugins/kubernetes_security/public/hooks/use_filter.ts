@@ -8,19 +8,27 @@
 import { useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import {
+  getCopyButton,
+  getFilterForValueButton,
+  getFilterOutValueButton,
+} from '@kbn/securitysolution-timeline-components';
 import type { StartPlugins } from '../types';
 
 export const useSetFilter = () => {
-  const { data, timelines } = useKibana<CoreStart & StartPlugins>().services;
-  const { getFilterForValueButton, getFilterOutValueButton, getCopyButton } =
-    timelines.getHoverActions();
+  const { data, notifications } = useKibana<CoreStart & StartPlugins>().services;
 
   const filterManager = useMemo(() => data.query.filterManager, [data.query.filterManager]);
+  const addSuccess = useMemo(
+    () => notifications.toasts.addSuccess.bind(notifications.toasts),
+    [notifications.toasts]
+  );
 
   return {
     getFilterForValueButton,
     getFilterOutValueButton,
     getCopyButton,
     filterManager,
+    addSuccess,
   };
 };

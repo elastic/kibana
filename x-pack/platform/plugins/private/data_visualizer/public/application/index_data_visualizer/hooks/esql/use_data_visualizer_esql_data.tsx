@@ -6,7 +6,7 @@
  */
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
-import { merge, EMPTY } from 'rxjs';
+import { merge } from 'rxjs';
 import { Comparators } from '@elastic/eui';
 import { useUrlState } from '@kbn/ml-url-state';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
@@ -84,7 +84,7 @@ export const useESQLDataVisualizerData = (
 ) => {
   const [lastRefresh, setLastRefresh] = useState(0);
   const { services } = useDataVisualizerKibana();
-  const { uiSettings, executionContext, data, cps } = services;
+  const { uiSettings, executionContext, data } = services;
 
   const parentExecutionContext = useObservable(executionContext?.context$);
 
@@ -301,8 +301,7 @@ export const useESQLDataVisualizerData = (
       const timeUpdateSubscription = merge(
         timefilter.getTimeUpdate$(),
         timefilter.getAutoRefreshFetch$(),
-        mlTimefilterRefresh$,
-        cps?.cpsManager?.getProjectRouting$() ?? EMPTY
+        mlTimefilterRefresh$
       ).subscribe(() => {
         setGlobalState({
           time: timefilter.getTime(),
@@ -338,7 +337,7 @@ export const useESQLDataVisualizerData = (
     timeFieldName,
     queryHistoryStatus,
     exampleDocs,
-  } = useESQLOverallStatsData(fieldStatsRequest);
+  } = useESQLOverallStatsData(fieldStatsRequest, input.requestCancellationManager);
 
   const [metricConfigs, setMetricConfigs] = useState(defaults.metricConfigs);
   const [metricsLoaded] = useState(defaults.metricsLoaded);
@@ -422,6 +421,7 @@ export const useESQLDataVisualizerData = (
     filter: fieldStatsRequest?.filter,
     limit: fieldStatsRequest?.limit ?? DEFAULT_ESQL_LIMIT,
     timeRange: fieldStatsRequest?.timeRange,
+    requestCancellationManager: input.requestCancellationManager,
   });
 
   useEffect(
@@ -710,6 +710,8 @@ export const useESQLDataVisualizerData = (
   return {
     totalCount,
     progress: combinedProgress,
+    // The table shouldn't keep showing a loading state for a cancelled fetch
+    cancelled: Boolean(overallStatsProgress.cancelled || fieldStatsProgress.cancelled),
     overallStatsProgress,
     configs,
     // Column with action to lens, data view editor, etc

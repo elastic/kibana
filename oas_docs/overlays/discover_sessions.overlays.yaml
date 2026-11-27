@@ -15,7 +15,7 @@ actions:
         ## When to use this API
 
         - Use this API to define a complete, self-contained Discover session in a single payload, including tabs based on ES|QL queries or data views.
-        - Use the [Dashboards API](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards/operation/create-dashboard) to embed Discover sessions in dashboards as `discover_session` panels, either inline or linked by ID.
+        - Use the [Dashboards API](../operation/operation-create-dashboard) to embed Discover sessions in dashboards as `discover_session` panels, either inline or linked by ID.
 
         ## Get started
 
@@ -117,3 +117,7 @@ actions:
         description: Discover documentation
         url: https://www.elastic.co/docs/explore-analyze/discover
       x-displayName: Discover sessions
+  # Heatmap drawing stays behind observability.metricsHeatmapsEnabled, so the public spec only documents lnsXY.
+  - target: "$..histogram_visualization.enum[?(@ == 'lnsHeatmap')]"
+    description: Hide the experimental heatmap visualization
+    remove: true

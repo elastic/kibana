@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
+import { EuiNotificationBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { ProcessorEvent } from '@kbn/observability-plugin/common';
@@ -41,15 +41,12 @@ export function getSpanLinksTabContent({ spanLinksCount, traceId, spanId, proces
       </EuiNotificationBadge>
     ),
     content: (
-      <>
-        <EuiSpacer size="m" />
-        <SpanLinks
-          spanLinksCount={spanLinksCount}
-          traceId={traceId}
-          spanId={spanId}
-          processorEvent={processorEvent}
-        />
-      </>
+      <SpanLinks
+        spanLinksCount={spanLinksCount}
+        traceId={traceId}
+        spanId={spanId}
+        processorEvent={processorEvent}
+      />
     ),
   };
 }

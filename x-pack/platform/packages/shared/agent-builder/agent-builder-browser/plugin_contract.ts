@@ -7,6 +7,7 @@
 
 import type { ComponentType, RefAttributes } from 'react';
 import type { EuiFlyoutMenuAction } from '@elastic/eui';
+import type { ConversationStarter } from '@kbn/agent-builder-common';
 import type {
   AttachmentInput,
   ConversationAttachment,
@@ -99,6 +100,23 @@ export interface EmbeddableConversationProps {
   greetingMessage?: string;
 
   /**
+   * Optional conversation starters shown as cards under the input on the empty "new conversation"
+   * screen. They show only while the default Elastic AI agent is selected, so pass its `agentId` to
+   * `openChat` if the sidebar should open with them. They replace the starters of the solution and
+   * the default list; when omitted or empty, those are shown.
+   *
+   * At most 3 are shown, with labels of up to 30 characters. The label is rendered as plain text on
+   * the card. A click sends the optional `prompt` of the starter as the message, or its label when
+   * it has none. Pass already-translated strings.
+   *
+   * Like the rest of this config, they are kept until `clearChatConfig` is called, and `openChat`
+   * options replace them.
+   *
+   * Example: `[{ label: 'Top errors', prompt: 'What are the top errors in the last hour?' }]`
+   */
+  conversationStarters?: readonly ConversationStarter[];
+
+  /**
    * Browser API tools that the agent can use to interact with the page.
    * Tools are executed browser-side when the LLM requests them.
    *
@@ -171,6 +189,8 @@ export interface OpenConversationSidebarOptions extends EmbeddableConversationPr
 export interface OpenConversationDetailsOptions {
   conversationId: string;
   onClose?: () => void;
+  /** Called each time a change made from the flyout, such as a severity or status update, succeeds. */
+  onConversationUpdated?: () => void;
   /** Icon buttons rendered in the flyout menu bar, before the close button (e.g. copy link). */
   trailingActions?: EuiFlyoutMenuAction[];
 }

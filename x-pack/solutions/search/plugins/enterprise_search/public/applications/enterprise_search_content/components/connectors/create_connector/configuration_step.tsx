@@ -23,7 +23,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ConnectorConfigurationComponent, ConnectorStatus } from '@kbn/search-connectors';
+import { ConnectorStatus } from '@kbn/search-connectors';
+import { ConnectorConfigurationComponent } from '@kbn/search-connectors/components';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { Status } from '../../../../../../common/types/api';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 // ============================================================================
 // Panel Grid Schema - ideally we should import the schema from dashboard schemas, but they use config-schema library
@@ -77,26 +77,28 @@ const querySchema = z.object({
 // Time Range Schema
 // ============================================================================
 
-export const timeRangeSchema = z.object({
-  from: z
-    .string()
-    .max(100)
-    .describe(
-      'Start of the time range. Use Kibana date math for relative ranges (e.g. "now-30m", "now-24h", "now-90d") or ISO 8601 strings for absolute dates (e.g. "2024-05-20T00:00:00.000Z").'
-    ),
-  to: z
-    .string()
-    .max(100)
-    .describe(
-      'End of the time range. Use "now" for the current time, or an ISO 8601 string for an absolute end date (e.g. "2024-05-24T23:59:59.999Z").'
-    ),
-  mode: z
-    .union([z.literal('absolute'), z.literal('relative')])
-    .optional()
-    .describe(
-      'Optional mode hint. Use "relative" when from/to use date math expressions, "absolute" when using exact ISO 8601 timestamps.'
-    ),
-});
+export const timeRangeSchema = lazySchema(() =>
+  z.object({
+    from: z
+      .string()
+      .max(100)
+      .describe(
+        'Start of the time range. Use Kibana date math for relative ranges (e.g. "now-30m", "now-24h", "now-90d") or ISO 8601 strings for absolute dates (e.g. "2024-05-20T00:00:00.000Z").'
+      ),
+    to: z
+      .string()
+      .max(100)
+      .describe(
+        'End of the time range. Use "now" for the current time, or an ISO 8601 string for an absolute end date (e.g. "2024-05-24T23:59:59.999Z").'
+      ),
+    mode: z
+      .union([z.literal('absolute'), z.literal('relative')])
+      .optional()
+      .describe(
+        'Optional mode hint. Use "relative" when from/to use date math expressions, "absolute" when using exact ISO 8601 timestamps.'
+      ),
+  })
+);
 
 // ============================================================================
 // Refresh Interval Schema
@@ -111,15 +113,36 @@ const refreshIntervalSchema = z.object({
 // Dashboard Options Schema
 // ============================================================================
 
-const optionsSchema = z.object({
-  auto_apply_filters: z.boolean().optional(),
-  hide_panel_titles: z.boolean().optional(),
-  hide_panel_borders: z.boolean().optional(),
-  use_margins: z.boolean().optional(),
-  sync_colors: z.boolean().optional(),
-  sync_tooltips: z.boolean().optional(),
-  sync_cursor: z.boolean().optional(),
-});
+export const optionsSchema = lazySchema(() =>
+  z.object({
+    auto_apply_filters: z
+      .boolean()
+      .optional()
+      .describe(
+        'When false, control filter changes apply only after the user clicks the update button. Defaults to true.'
+      ),
+    hide_panel_titles: z.boolean().optional().describe('Hide panel titles. Defaults to false.'),
+    hide_panel_borders: z.boolean().optional().describe('Hide panel borders. Defaults to false.'),
+    use_margins: z
+      .boolean()
+      .optional()
+      .describe('Separate panels with a margin. Defaults to true.'),
+    sync_colors: z
+      .boolean()
+      .optional()
+      .describe('Synchronize colors across panels that share a data source. Defaults to false.'),
+    sync_tooltips: z
+      .boolean()
+      .optional()
+      .describe(
+        'Synchronize tooltips across panels. Works only while sync_cursor is on: turning it on needs sync_cursor: true, and turning sync_cursor off turns it off. Defaults to false.'
+      ),
+    sync_cursor: z
+      .boolean()
+      .optional()
+      .describe('Synchronize the cursor position across panels. Defaults to true.'),
+  })
+);
 
 // ============================================================================
 // Access Control Schema
@@ -167,6 +190,7 @@ export const dashboardAttachmentDataSchema = z.object({
   pinned_panels: pinnedPanelsSchema.optional(),
   access_control: accessControlSchema.optional(),
   project_routing: z.string().optional(),
+  esql_approximation: z.boolean().optional(),
 });
 
 export type DashboardAttachmentData = z.infer<typeof dashboardAttachmentDataSchema>;

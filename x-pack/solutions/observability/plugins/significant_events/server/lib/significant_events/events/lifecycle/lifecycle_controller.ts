@@ -35,7 +35,9 @@ export type StatusChange =
   /** The status an operator chose, through the update route or a chat tool. */
   | { kind: 'operator'; status: SignificantEventManualStatus }
   /** The rule backing the event no longer exists. */
-  | { kind: 'rule_deleted' };
+  | { kind: 'rule_deleted' }
+  /** A `recovering` series had no new version for longer than the cleanup timeout. */
+  | { kind: 'recovery_timeout' };
 
 /** Named constructors for a `StatusChange`, so callers never spell out the union. */
 export const StatusChange = {
@@ -46,6 +48,8 @@ export const StatusChange = {
   }),
   /** The rule backing the event no longer exists. */
   ruleDeleted: (): StatusChange => ({ kind: 'rule_deleted' }),
+  /** A `recovering` series had no new version for longer than the cleanup timeout. */
+  recoveryTimedOut: (): StatusChange => ({ kind: 'recovery_timeout' }),
   /** What discovery's stored verdicts say about the event's members after a write is merged. */
   assessed: (outcome: StatusOutcome): StatusChange => ({ kind: 'assessment', outcome }),
 };
@@ -58,7 +62,7 @@ export interface LifecycleState {
 export type LifecycleSkipReason =
   /** The series is already in the state the change asks for. */
   | 'already_in_state'
-  /** Only a breach opens an event: a healthy or unjudged assessment of a closed or new series. */
+  /** A closed series is reopened only by a breach: a healthy or unjudged assessment leaves it closed. */
   | 'not_a_breach';
 
 export type LifecycleDecision =
@@ -78,10 +82,16 @@ const decideAssessment = ({
   const { status } = state;
 
   if (!isLive(status)) {
-    // Only a breach opens or reopens (a new episode on an inactive series).
-    return outcome === 'breached'
-      ? { write: true, status: ALERT_EPISODE_STATUS.ACTIVE }
-      : { write: false, reason: 'not_a_breach' };
+    // A breach opens a new series or reopens a closed one (a new episode).
+    if (outcome === 'breached') return { write: true, status: ALERT_EPISODE_STATUS.ACTIVE };
+    // A closed series stays closed: a healthy or unjudged assessment never reopens it.
+    if (status !== undefined) return { write: false, reason: 'not_a_breach' };
+    // A series with no version yet is born only from evidence that points to an error. Healthy
+    // members mean nothing is failing, so there is nothing to open: `recovering` and `inactive` are
+    // transitions of an event that was active, never a birth. Evidence that cannot be judged opens
+    // it active until it settles.
+    if (outcome === 'recovered') return { write: false, reason: 'not_a_breach' };
+    return { write: true, status: ALERT_EPISODE_STATUS.ACTIVE };
   }
 
   if (outcome === 'breached') {
@@ -129,6 +139,12 @@ export const decideLifecycle = ({
       return isLive(status)
         ? { write: true, status: ALERT_EPISODE_STATUS.INACTIVE }
         : { write: false, reason: 'already_in_state' };
+
+    // Only a recovering series times out: an active one is still breaching, and a closed one is closed.
+    case 'recovery_timeout':
+      return status === ALERT_EPISODE_STATUS.RECOVERING
+        ? { write: true, status: ALERT_EPISODE_STATUS.INACTIVE }
+        : { write: false, reason: 'already_in_state' };
   }
 };
 
@@ -148,6 +164,7 @@ export const requestedStatus = (change: StatusChange): SignificantEventStatus =>
     case 'operator':
       return change.status;
     case 'rule_deleted':
+    case 'recovery_timeout':
       return ALERT_EPISODE_STATUS.INACTIVE;
     case 'assessment':
       return ALERT_EPISODE_STATUS.ACTIVE;

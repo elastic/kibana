@@ -92,7 +92,7 @@ export interface SmlAutocompleteHttpResponse {
 }
 
 /**
- * One row in the @ menu / typeahead. Results are returned in score order;
+ * One row in the # menu / typeahead. Results are returned in score order;
  * consumers iterate without re-sorting.
  */
 export interface SmlAutocompleteHttpResultItem {

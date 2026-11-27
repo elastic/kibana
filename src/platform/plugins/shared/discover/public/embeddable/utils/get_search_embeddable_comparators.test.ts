@@ -193,5 +193,37 @@ describe('getDiscoverSessionEmbeddableComparators', () => {
       expect(runComparator(cmp, undefined, undefined, undefined, { sort: [] })).toBe(true);
       expect(runComparator(cmp, undefined, undefined, { sort: [] }, undefined)).toBe(true);
     });
+
+    it('compares overrides by the table they show on top of the session tab', () => {
+      const c = getDiscoverSessionEmbeddableComparators(false, false, {
+        ...baseTab,
+        column_order: ['message'],
+      });
+      if (!('overrides' in c) || typeof c.overrides !== 'function') {
+        throw new Error('expected overrides function comparator');
+      }
+
+      // An override saved with the session tab's own value shows the same table as none
+      expect(
+        runComparator(c.overrides, undefined, undefined, { column_order: ['message'] }, {})
+      ).toBe(true);
+      expect(
+        runComparator(c.overrides, undefined, undefined, { column_order: ['host.name'] }, {})
+      ).toBe(false);
+    });
+
+    it('treats empty column settings overrides as keeping the session tab widths', () => {
+      const c = getDiscoverSessionEmbeddableComparators(false, false, {
+        ...baseTab,
+        column_settings: { message: { width: 100 } },
+      });
+      if (!('overrides' in c) || typeof c.overrides !== 'function') {
+        throw new Error('expected overrides function comparator');
+      }
+
+      expect(runComparator(c.overrides, undefined, undefined, { column_settings: {} }, {})).toBe(
+        true
+      );
+    });
   });
 });

@@ -104,7 +104,7 @@ const createMockNode = (
     data: {
       id: 'entity-123',
       color: 'primary' as const,
-      shape: 'ellipse' as const,
+      kind: 'entity' as const,
       label: 'Test Entity',
     },
   } as NodeProps;
@@ -596,7 +596,7 @@ describe('useEntityNodeExpandPopover', () => {
         data: {
           id: 'entity-123',
           color: 'primary' as const,
-          shape: 'ellipse' as const,
+          kind: 'entity' as const,
           label: 'Test Entity',
           documentsData: [
             {

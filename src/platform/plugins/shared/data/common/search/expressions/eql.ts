@@ -12,7 +12,6 @@ import { buildEsQuery } from '@kbn/es-query';
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 
 import type { EqlSearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import type { RequestStatistics } from '@kbn/inspector-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { ISearchMethods } from '@kbn/search-types';
 import type { KibanaContext } from '..';
@@ -114,36 +113,8 @@ export const getEqlFn = ({
         dsl.filter = query;
       }
 
-      if (!inspectorAdapters.requests) {
-        inspectorAdapters.requests = new RequestAdapter();
-      }
-
-      const request = inspectorAdapters.requests.start(
-        i18n.translate('data.search.dataRequest.title', {
-          defaultMessage: 'Data',
-        }),
-        {
-          description: i18n.translate('data.search.es_search.dataRequest.description', {
-            defaultMessage:
-              'This request queries Elasticsearch to fetch the data for the visualization.',
-          }),
-        }
-      );
-
-      request.stats({
-        indexPattern: {
-          label: i18n.translate('data.search.es_search.dataViewLabel', {
-            defaultMessage: 'Data view',
-          }),
-          value: args.index,
-          description: i18n.translate('data.search.es_search.indexPatternDescription', {
-            defaultMessage: 'The data view that connected to the Elasticsearch indices.',
-          }),
-        },
-      });
-
       try {
-        const { rawResponse, requestParams } = await searchService.eql(
+        const { rawResponse } = await searchService.eql(
           {
             index: args.index,
             query: args.query,
@@ -151,20 +122,37 @@ export const getEqlFn = ({
             fields: args.field,
             filter: dsl.filter,
           },
-          { abortSignal }
+          {
+            abortSignal,
+            inspector: {
+              adapter: inspectorAdapters.requests ?? new RequestAdapter(),
+              title: i18n.translate('data.search.dataRequest.title', {
+                defaultMessage: 'Data',
+              }),
+              description: i18n.translate('data.search.es_search.dataRequest.description', {
+                defaultMessage:
+                  'This request queries Elasticsearch to fetch the data for the visualization.',
+              }),
+              getRequestStats: () => ({
+                indexPattern: {
+                  label: i18n.translate('data.search.es_search.dataViewLabel', {
+                    defaultMessage: 'Data view',
+                  }),
+                  value: args.index,
+                  description: i18n.translate('data.search.es_search.indexPatternDescription', {
+                    defaultMessage: 'The data view that connected to the Elasticsearch indices.',
+                  }),
+                },
+              }),
+            },
+          }
         );
-
-        const stats: RequestStatistics = {};
-
-        request.stats(stats).ok({ json: { rawResponse }, requestParams });
-        request.json(dsl);
 
         return {
           type: 'eql_raw_response',
           body: rawResponse,
         };
       } catch (e) {
-        request.error({ json: 'attributes' in e ? e.attributes : { message: e.message } });
         throw e;
       }
     },

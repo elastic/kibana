@@ -26,6 +26,7 @@ import { getThemeService } from '../../services';
 import { defaultMapConfig, defaultMabBoxStyle, vegaLayerId } from './constants';
 import { validateZoomSettings, injectMapPropsIntoSpec } from './utils';
 import { TMS_IN_YML_ID } from './service_settings/service_settings_types';
+import type { VegaConfig } from '../../data_model/types';
 
 async function updateVegaView(mapBoxInstance: Map, vegaView: View) {
   const mapCanvas = mapBoxInstance.getCanvas();
@@ -77,14 +78,19 @@ expressionFunction(
 export class VegaMapView extends VegaBaseView {
   private mapBoxInstance?: Map;
 
+  // The parser always sets mapConfig for map specs, which are the only specs this view renders.
+  private get mapConfig(): VegaConfig {
+    return this._descriptor.mapConfig ?? {};
+  }
+
   private get shouldShowZoomControl() {
-    return Boolean(this._parser.mapConfig.zoomControl);
+    return Boolean(this.mapConfig.zoomControl);
   }
 
   private getMapParams(defaults: { maxZoom: number; minZoom: number }): Partial<MapOptions> {
-    const { longitude, latitude, scrollWheelZoom } = this._parser.mapConfig;
+    const { longitude, latitude, scrollWheelZoom } = this.mapConfig;
     const { zoom, maxZoom, minZoom } = validateZoomSettings(
-      this._parser.mapConfig,
+      this.mapConfig,
       defaults,
       this.onWarn.bind(this)
     );
@@ -100,7 +106,7 @@ export class VegaMapView extends VegaBaseView {
   }
 
   private async getEmsTileLayerId() {
-    const { mapStyle, emsTileServiceId } = this._parser.mapConfig;
+    const { mapStyle, emsTileServiceId } = this.mapConfig;
     //
     if (mapStyle) {
       const { darkMode, name } = getThemeService().getTheme();
@@ -219,11 +225,11 @@ export class VegaMapView extends VegaBaseView {
 
   protected async _initViewCustomizations() {
     const vegaView = new View(
-      parse(injectMapPropsIntoSpec(this._parser.spec), undefined, { ast: true }),
+      parse(injectMapPropsIntoSpec(this._descriptor.spec), undefined, { ast: true }),
       this._vegaViewConfig
     );
 
-    this.setDebugValues(vegaView, this._parser.spec, this._parser.vlspec);
+    this._onViewCreated(vegaView);
     this.setView(vegaView);
 
     await this.initMapContainer(vegaView);

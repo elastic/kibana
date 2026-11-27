@@ -10,6 +10,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import { SO_SEARCH_LIMIT } from '../../constants';
 import {
   AgentNotFoundError,
+  AgentRestartPendingError,
   FleetError,
   HostedAgentPolicyRestrictionRelatedError,
 } from '../../errors';
@@ -23,12 +24,15 @@ import type { GetAgentsOptions } from '.';
 import { getAgentById, getAgentsById, getAgentsByKuery } from './crud';
 import { createAgentAction, createErrorActionResults } from './actions';
 import { openPointInTime } from './crud';
+import { throwIfAgentlessAgentPolicy } from './hosted_agent';
 import { RestartActionRunner, restartBatch } from './restart_action_runner';
+import { getPendingRestartActions } from './pending_restart';
 
 export async function restartAgent(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
-  agentId: string
+  agentId: string,
+  options: { force?: boolean } = {}
 ): Promise<{ actionId: string }> {
   const agent = await getAgentById(esClient, soClient, agentId);
 
@@ -43,6 +47,16 @@ export async function restartAgent(
     if (agentPolicy?.is_managed) {
       throw new HostedAgentPolicyRestrictionRelatedError(
         `Cannot restart agent ${agentId} in hosted agent policy ${agentPolicy.id}`
+      );
+    }
+    throwIfAgentlessAgentPolicy(agentPolicy, `Cannot restart managed agent ${agentId}`);
+  }
+
+  if (!options.force) {
+    const pendingRestart = (await getPendingRestartActions(esClient, [agentId])).get(agentId);
+    if (pendingRestart) {
+      throw new AgentRestartPendingError(
+        `Agent ${agentId} already has a pending restart action ${pendingRestart.action_id}. Use force to restart anyway.`
       );
     }
   }
@@ -63,6 +77,7 @@ export async function bulkRestartAgents(
   options: GetAgentsOptions & {
     batchSize?: number;
     includeInactive?: boolean;
+    force?: boolean;
   }
 ): Promise<{ actionId: string }> {
   const currentSpaceId = getCurrentNamespace(soClient);
@@ -82,6 +97,7 @@ export async function bulkRestartAgents(
     const result = await restartBatch(esClient, soClient, givenAgents, {
       spaceId: currentSpaceId,
       total: uniqueAgentIds.length,
+      force: options.force,
     });
     await createErrorActionResults(esClient, result.actionId, missingErrors, 'agent not found');
     return result;
@@ -105,7 +121,10 @@ export async function bulkRestartAgents(
       page: 1,
       perPage: batchSize,
     });
-    return await restartBatch(esClient, soClient, agents, { spaceId: currentSpaceId });
+    return await restartBatch(esClient, soClient, agents, {
+      spaceId: currentSpaceId,
+      force: options.force,
+    });
   }
 
   const runner = new RestartActionRunner(

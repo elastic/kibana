@@ -273,6 +273,12 @@ export const runSubqueriesValidationSuite = (setup: Setup) => {
         ]);
       });
 
+      it('accepts a known source inside an IN subquery when the query starts with ROW', async () => {
+        const { expectErrors } = await setup();
+
+        await expectErrors('ROW x = 1 | WHERE x IN (FROM index | KEEP integerField)', []);
+      });
+
       it('validates commands inside IN subqueries', async () => {
         const { expectErrors } = await setup();
 

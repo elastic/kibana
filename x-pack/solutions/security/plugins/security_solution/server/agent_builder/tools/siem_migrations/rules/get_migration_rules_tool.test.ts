@@ -34,13 +34,13 @@ describe('getMigrationRulesTool', () => {
     });
   });
 
-  it('should project rules to id + titles + translation result + status on a 200', async () => {
+  it('should return queries and descriptions when detail is full; comments only for non-Splunk rules (first comment)', async () => {
     mockFetch.mockResolvedValueOnce({
       fetchOptions: { path: '/internal/siem_migrations/rules/abc/rules' },
       request: new Request('http://localhost/x'),
       response: new Response(null, { status: 200 }),
       body: {
-        total: 2,
+        total: 4,
         data: [
           {
             id: 'rule-1',
@@ -66,12 +66,30 @@ describe('getMigrationRulesTool', () => {
             translation_result: 'failed',
             status: 'failed',
           },
+          {
+            id: 'rule-3',
+            original_rule: { title: 'QRadar rule', vendor: 'qradar', id: 'q-1' },
+            elastic_rule: undefined,
+            translation_result: 'partial',
+            status: 'completed',
+            comments: [
+              { content: 'First comment', created_at: '2024-01-01T00:00:00Z' },
+              { content: 'Second comment', created_at: '2024-01-02T00:00:00Z' },
+            ],
+          },
+          {
+            id: 'rule-4',
+            original_rule: { title: 'QRadar rule without comments', vendor: 'qradar', id: 'q-2' },
+            elastic_rule: undefined,
+            translation_result: 'partial',
+            status: 'completed',
+          },
         ],
       },
     });
 
     const result = (await tool.handler(
-      { migration_id: 'abc', page: 0, per_page: 50 },
+      { migration_id: 'abc', page: 0, per_page: 50, detail: 'full' },
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     )) as ToolHandlerStandardReturn;
 
@@ -86,11 +104,11 @@ describe('getMigrationRulesTool', () => {
       per_page: number;
       data: Array<Record<string, unknown>>;
     };
-    expect(data.total).toBe(2);
+    expect(data.total).toBe(4);
     expect(data.page).toBe(0);
     expect(data.per_page).toBe(50);
     // Projected fields — original query body and query_language are stripped when absent from
-    // the fixture; description and comments are now included.
+    // the fixture. Splunk rules never carry comments; other vendors carry only the first comment.
     expect(data.data[0]).toStrictEqual({
       id: 'rule-1',
       original_rule: {
@@ -110,7 +128,7 @@ describe('getMigrationRulesTool', () => {
       },
       translation_result: 'full',
       status: 'completed',
-      comments: [{ content: 'Initial translation', created_at: '2024-01-01T00:00:00Z' }],
+      comments: [],
     });
     expect(data.data[1]).toStrictEqual({
       id: 'rule-2',
@@ -124,8 +142,101 @@ describe('getMigrationRulesTool', () => {
       elastic_rule: undefined,
       translation_result: 'failed',
       status: 'failed',
-      comments: undefined,
+      comments: [],
     });
+    expect(data.data[2].comments).toStrictEqual({
+      content: 'First comment',
+      created_at: '2024-01-01T00:00:00Z',
+    });
+    expect(data.data[3].comments).toBeUndefined();
+  });
+
+  it('should return only id, titles, installed rule id, translation result and status by default', async () => {
+    mockFetch.mockResolvedValueOnce({
+      fetchOptions: { path: '/internal/siem_migrations/rules/abc/rules' },
+      request: new Request('http://localhost/x'),
+      response: new Response(null, { status: 200 }),
+      body: {
+        total: 16,
+        data: [
+          {
+            id: 'rule-1',
+            original_rule: {
+              title: 'Splunk rule',
+              description: 'Detects something bad',
+              vendor: 'splunk',
+              query: 'index=main | stats count',
+              query_language: 'spl',
+              id: 's-1',
+            },
+            elastic_rule: {
+              id: 'installed-rule-1',
+              title: 'Elastic rule',
+              integration_ids: ['endpoint'],
+              query: 'FROM [indexPattern] | STATS count = COUNT()',
+              query_language: 'esql',
+            },
+            translation_result: 'partial',
+            status: 'completed',
+            comments: [
+              { content: 'Long translation reasoning', created_at: '2024-01-01T00:00:00Z' },
+            ],
+          },
+        ],
+      },
+    });
+
+    // Parse through the tool schema so the default `detail` applies, as it does at runtime.
+    const result = (await tool.handler(
+      tool.schema.parse({ migration_id: 'abc', per_page: 5 }),
+      createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+    )) as ToolHandlerStandardReturn;
+
+    const data = result.results[0].data as { data: Array<Record<string, unknown>> };
+    expect(data.data).toStrictEqual([
+      {
+        id: 'rule-1',
+        original_rule: { title: 'Splunk rule' },
+        elastic_rule: { id: 'installed-rule-1', title: 'Elastic rule' },
+        translation_result: 'partial',
+        status: 'completed',
+      },
+    ]);
+  });
+
+  it('should report the full matching total alongside a summary page', async () => {
+    mockFetch.mockResolvedValueOnce({
+      fetchOptions: { path: '/internal/siem_migrations/rules/abc/rules' },
+      request: new Request('http://localhost/x'),
+      response: new Response(null, { status: 200 }),
+      body: { total: 16, data: [] },
+    });
+
+    const result = (await tool.handler(
+      { migration_id: 'abc', page: 0, per_page: 5, detail: 'summary' },
+      createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+    )) as ToolHandlerStandardReturn;
+
+    expect(result.results[0].data).toEqual(
+      expect.objectContaining({ total: 16, page: 0, per_page: 5 })
+    );
+  });
+
+  it('should not send the detail option to the rules API', async () => {
+    mockFetch.mockResolvedValueOnce({
+      fetchOptions: { path: '/internal/siem_migrations/rules/abc/rules' },
+      request: new Request('http://localhost/x'),
+      response: new Response(null, { status: 200 }),
+      body: { total: 0, data: [] },
+    });
+
+    await tool.handler(
+      { migration_id: 'abc', page: 0, per_page: 5, detail: 'summary' },
+      createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+    );
+
+    const query = (mockFetch.mock.calls[0][1] as { query: Record<string, unknown> }).query;
+    expect(query).not.toHaveProperty('detail');
   });
 
   it('should not impose a hardcoded sort — lets the API default apply when no sort is provided', async () => {
@@ -137,7 +248,7 @@ describe('getMigrationRulesTool', () => {
     });
 
     await tool.handler(
-      { migration_id: 'abc', page: 0, per_page: 50 },
+      { migration_id: 'abc', page: 0, per_page: 50, detail: 'summary' },
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     );
 
@@ -165,6 +276,7 @@ describe('getMigrationRulesTool', () => {
         sort_direction: 'desc',
         search_term: 'failed login',
         is_failed: true,
+        detail: 'summary',
       },
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     );
@@ -195,7 +307,7 @@ describe('getMigrationRulesTool', () => {
     mockFetch.mockRejectedValueOnce(error);
 
     const result = (await tool.handler(
-      { migration_id: 'missing', page: 0, per_page: 50 },
+      { migration_id: 'missing', page: 0, per_page: 50, detail: 'summary' },
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     )) as ToolHandlerStandardReturn;
 

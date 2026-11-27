@@ -32,9 +32,9 @@ const BEHAVIOUR_OS_VALUES: Immutable<BehaviorProtectionOSes[]> = [
   PolicyOperatingSystem.linux,
 ];
 
-const LOCKED_CARD_BEHAVIOR_TITLE = i18n.translate(
-  'xpack.securitySolution.endpoint.policy.details.behavior',
-  { defaultMessage: 'Malicious Behavior' }
+export const BEHAVIOUR_PROTECTION_CARD_TITLE = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.details.behavior_protection',
+  { defaultMessage: 'Malicious behavior' }
 );
 
 export type PerOsBehaviourProtectionCardProps = PolicyFormComponentCommonProps;
@@ -64,7 +64,7 @@ export const PerOsBehaviourProtectionCard = memo(
     if (!isPlatinumPlus) {
       return (
         <SettingLockedCard
-          title={LOCKED_CARD_BEHAVIOR_TITLE}
+          title={BEHAVIOUR_PROTECTION_CARD_TITLE}
           data-test-subj={getTestId('locked')}
         />
       );
@@ -72,10 +72,7 @@ export const PerOsBehaviourProtectionCard = memo(
 
     return (
       <PerOsSettingCard
-        title={i18n.translate(
-          'xpack.securitySolution.endpoint.policy.details.behavior_protection',
-          { defaultMessage: 'Malicious behavior' }
-        )}
+        title={BEHAVIOUR_PROTECTION_CARD_TITLE}
         description={POLICY_SETTING_SECTION_DESCRIPTIONS.maliciousBehavior}
         selected={selected}
         mode={mode}

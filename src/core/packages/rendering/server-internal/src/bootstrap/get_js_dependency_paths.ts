@@ -14,7 +14,7 @@ import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
  * Get JS dependency paths for the unified Rspack compilation.
  *
  * Load order:
- * 1. Webpack shared deps (kbn-ui-shared-deps) — npm externals (React, lodash, etc.)
+ * 1. Rspack shared deps (kbn-ui-shared-deps) — npm externals (React, lodash, etc.)
  * 2. Rspack async chunks (shared + plugin entries) — JSONP modules queue into
  *    `globalThis.rspackChunkkibana_bundle` (Rspack v2 default) before the runtime loads
  * 3. kibana.bundle.js (LAST) — Rspack runtime drains the JSONP queue, then

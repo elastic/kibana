@@ -34,7 +34,7 @@ describe('rethrowInvestigationClientError', () => {
     [new InvalidNotificationDestinationError('Unsupported notification type'), 400],
     [new InvestigationNotFoundError('investigation-1'), 404],
     [new InvestigationUnavailableError('Unavailable'), 503],
-    [new InvestigationQuotaDeniedError(), 429],
+    [new InvestigationQuotaDeniedError('all'), 429],
     [new NightshiftModelNotFoundError('missing-model'), 400],
     [new NightshiftModelBlockedError('blocked-model', 'default-model'), 400],
     [

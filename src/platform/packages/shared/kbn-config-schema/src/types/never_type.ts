@@ -12,7 +12,7 @@ import { Type } from './type';
 
 export class NeverType extends Type<never> {
   constructor() {
-    super(internals.any().forbidden());
+    super(() => internals.any().forbidden());
   }
 
   protected handleError(type: string) {

@@ -14,12 +14,13 @@ import type {
 } from './events';
 import { CONTEXT_ENGINE_EVENT_TYPES, contextEngineServerEbtEvents } from './events';
 
-export type KiWriteAction = 'create' | 'update' | 'delete';
+export type KiWriteAction = 'create' | 'update' | 'delete' | 'restore';
 
 const KI_EVENT_TYPE_BY_ACTION: Record<KiWriteAction, string> = {
   create: CONTEXT_ENGINE_EVENT_TYPES.KiCreate,
   update: CONTEXT_ENGINE_EVENT_TYPES.KiUpdate,
   delete: CONTEXT_ENGINE_EVENT_TYPES.KiDelete,
+  restore: CONTEXT_ENGINE_EVENT_TYPES.KiRestore,
 };
 
 /**

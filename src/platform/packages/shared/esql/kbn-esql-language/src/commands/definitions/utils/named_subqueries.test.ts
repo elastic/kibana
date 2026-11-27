@@ -1,0 +1,153 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { isSource, Parser } from '@elastic/esql';
+import type { ESQLAstQueryExpression, ESQLSource } from '@elastic/esql/types';
+import {
+  findNamedSubqueryForSource,
+  getNamedSubqueries,
+  getNamedSubqueriesAvailableTo,
+  getNextNamedSubqueryName,
+  getReferencedNamedSubqueries,
+  resolveNamedSubquerySources,
+} from './named_subqueries';
+
+const parse = (query: string): ESQLAstQueryExpression => Parser.parse(query).root;
+
+const getSource = (query: string): ESQLSource => {
+  const source = parse(query).commands[0].args.find(isSource);
+
+  if (!source || !isSource(source)) {
+    throw new Error(`Expected a source in query: ${query}`);
+  }
+
+  return source;
+};
+
+describe('getNamedSubqueries', () => {
+  it('extracts LET bindings in declaration order', () => {
+    const root = parse(
+      'SET time_zone = "UTC"; LET first = (FROM logs-*); LET second = (FROM metrics-*); FROM second'
+    );
+
+    const bindings = getNamedSubqueries(root.header);
+
+    expect(bindings.map(({ name }) => name)).toEqual(['first', 'second']);
+    expect(bindings.map(({ query }) => query.commands[0].name)).toEqual(['from', 'from']);
+  });
+
+  it('returns an empty list when the query has no LET header', () => {
+    expect(getNamedSubqueries(parse('FROM logs-*').header)).toEqual([]);
+  });
+});
+
+describe('getNextNamedSubqueryName', () => {
+  it.each([
+    ['FROM logs-*', 'subquery0'],
+    ['LET subquery0 = (FROM logs-*); FROM subquery0', 'subquery1'],
+    ['LET subquery1 = (FROM logs-*); FROM subquery1', 'subquery0'],
+    ['LET subquery0 = (FROM a); LET subquery1 = (FROM b); FROM subquery1', 'subquery2'],
+  ])('returns the first unused name for "%s"', (query, expected) => {
+    expect(getNextNamedSubqueryName(getNamedSubqueries(parse(query).header))).toBe(expected);
+  });
+});
+
+describe('findNamedSubqueryForSource', () => {
+  it('resolves only an unqualified local source', () => {
+    const namedSubqueries = getNamedSubqueries(
+      parse('LET selected = (FROM logs-*); FROM selected').header
+    );
+
+    expect(findNamedSubqueryForSource(getSource('FROM selected'), namedSubqueries)?.name).toBe(
+      'selected'
+    );
+    expect(
+      findNamedSubqueryForSource(getSource('FROM remote:selected'), namedSubqueries)
+    ).toBeUndefined();
+    expect(
+      findNamedSubqueryForSource(getSource('FROM selected::data'), namedSubqueries)
+    ).toBeUndefined();
+  });
+});
+
+describe('getNamedSubqueriesAvailableTo', () => {
+  it('returns only bindings declared before the selected binding', () => {
+    const namedSubqueries = getNamedSubqueries(
+      parse(
+        'LET first = (FROM logs-*); LET second = (FROM first); LET third = (FROM second); FROM third'
+      ).header
+    );
+
+    expect(getNamedSubqueriesAvailableTo(namedSubqueries, namedSubqueries[2])).toEqual(
+      namedSubqueries.slice(0, 2)
+    );
+  });
+});
+
+describe('resolveNamedSubquerySources', () => {
+  it('resolves chained bindings and nested FROM subqueries to index sources', () => {
+    const root = parse(
+      'LET base = (FROM (FROM logs-*)); LET selected = (FROM base); FROM selected'
+    );
+    const sources = resolveNamedSubquerySources(root.commands[0], getNamedSubqueries(root.header));
+
+    expect(sources.map(({ name }) => name)).toEqual(['logs-*']);
+  });
+
+  it('resolves a chain of bindings as long as the query', () => {
+    const bindings = Array.from(
+      { length: 5000 },
+      (_, index) => `LET a${index} = (FROM ${index ? `a${index - 1}` : 'logs-*'});`
+    );
+    const root = parse(`${bindings.join(' ')} FROM a4999`);
+    const sources = resolveNamedSubquerySources(root.commands[0], getNamedSubqueries(root.header));
+
+    expect(sources.map(({ name }) => name)).toEqual(['logs-*']);
+  });
+});
+
+describe('getReferencedNamedSubqueries', () => {
+  it('returns the bindings read directly, by subqueries or by other bindings, in declaration order', () => {
+    const root = parse(
+      'LET base = (FROM logs-*); LET unused = (FROM other); LET selected = (FROM base); LET nested = (FROM metrics-*); FROM (FROM nested), selected'
+    );
+    const referenced = getReferencedNamedSubqueries(
+      root.commands[0],
+      getNamedSubqueries(root.header)
+    );
+
+    expect(referenced.map(({ name }) => name)).toEqual(['base', 'selected', 'nested']);
+  });
+
+  it.each([
+    ['a binding declared later', 'LET a = (FROM b); LET b = (FROM logs-*); FROM a', ['a', 'b']],
+    ['a binding that reads itself', 'LET a = (FROM a); FROM a', ['a']],
+  ])('keeps %s, which Elasticsearch rejects, without reading its sources', (_, query, names) => {
+    const root = parse(query);
+    const namedSubqueries = getNamedSubqueries(root.header);
+
+    expect(
+      getReferencedNamedSubqueries(root.commands[0], namedSubqueries).map(({ name }) => name)
+    ).toEqual(names);
+    expect(resolveNamedSubquerySources(root.commands[0], namedSubqueries)).toEqual([]);
+  });
+
+  it.each(['FROM a, b', 'FROM b, a'])(
+    'reads a binding also referenced too early, whatever the order: %s',
+    (sourceQuery) => {
+      const root = parse(`LET a = (FROM b); LET b = (FROM logs-*); ${sourceQuery}`);
+      const sources = resolveNamedSubquerySources(
+        root.commands[0],
+        getNamedSubqueries(root.header)
+      );
+
+      expect(sources.map(({ name }) => name)).toEqual(['logs-*']);
+    }
+  );
+});

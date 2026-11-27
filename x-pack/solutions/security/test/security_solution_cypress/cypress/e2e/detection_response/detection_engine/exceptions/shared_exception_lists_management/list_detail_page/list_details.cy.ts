@@ -96,11 +96,11 @@ describe('Exception list detail page', { tags: ['@ess', '@serverless'] }, () => 
     editExceptionLisDetails({
       description: { original: UPDATED_LIST_DESCRIPTION, updated: null },
     });
-    cy.get(EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION).should('have.text', 'Add a description');
+    cy.get(EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION).should('not.exist');
 
     // Ensure description removal persisted
     visit(exceptionsListDetailsUrl(getExceptionList1().list_id));
-    cy.get(EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION).should('have.text', 'Add a description');
+    cy.get(EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION).should('not.exist');
   });
 
   // TODO: Flaky in ESS and Serverless: https://github.com/elastic/kibana/pull/169182#issuecomment-1792597980

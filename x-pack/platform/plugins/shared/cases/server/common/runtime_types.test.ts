@@ -5,100 +5,100 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from '@kbn/zod/v4';
 
-import { decodeWithExcessOrThrow } from './runtime_types';
+import { decodeOrThrowZod, decodeWithExcessOrThrowZod } from './runtime_types';
 
 describe('runtime_types', () => {
-  describe('decodeWithExcessOrThrow', () => {
-    it('does not throw when all required fields are present for rt.type', () => {
-      const schemaRt = rt.type({
-        a: rt.string,
-      });
-
-      expect(() => decodeWithExcessOrThrow(schemaRt)({ a: 'hi' })).not.toThrow();
+  describe('decodeWithExcessOrThrowZod', () => {
+    it('does not throw when all required fields are present', () => {
+      const schema = z.object({ a: z.string() });
+      expect(() => decodeWithExcessOrThrowZod(schema)({ a: 'hi' })).not.toThrow();
     });
 
-    it('does not throw when all required fields are present for rt.strict', () => {
-      const schemaRt = rt.strict({
-        a: rt.string,
-      });
-
-      expect(() => decodeWithExcessOrThrow(schemaRt)({ a: 'hi' })).not.toThrow();
-    });
-
-    it('throws when a required field is not present for rt.type', () => {
-      const schemaRt = rt.type({
-        a: rt.string,
-      });
-
-      expect(() => decodeWithExcessOrThrow(schemaRt)({})).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid value \\"undefined\\" supplied to \\"a\\""`
+    it('throws Boom 400 when a required field is missing', () => {
+      const schema = z.object({ a: z.string() });
+      expect(() => decodeWithExcessOrThrowZod(schema)({})).toThrow(
+        expect.objectContaining({
+          isBoom: true,
+          output: expect.objectContaining({ statusCode: 400 }),
+        })
       );
     });
 
-    it('throws when a required field is not present for rt.strict', () => {
-      const schemaRt = rt.strict({
-        a: rt.string,
-      });
+    it('throws when an excess field exists at the top level', () => {
+      const schema = z.object({ a: z.string() });
+      expect(() =>
+        decodeWithExcessOrThrowZod(schema)({ a: 'hi', b: 1 })
+      ).toThrowErrorMatchingInlineSnapshot(`"Excess keys are not allowed"`);
+    });
 
-      expect(() => decodeWithExcessOrThrow(schemaRt)({})).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid value \\"undefined\\" supplied to \\"a\\""`
+    it('throws when a nested excess field exists', () => {
+      const schema = z.object({ a: z.object({ b: z.string() }) });
+      expect(() =>
+        decodeWithExcessOrThrowZod(schema)({ a: { b: 'hi', c: 1 } })
+      ).toThrowErrorMatchingInlineSnapshot(`"Excess keys are not allowed"`);
+    });
+
+    it('returns the parsed object on success', () => {
+      const schema = z.object({ a: z.string() });
+      expect(decodeWithExcessOrThrowZod(schema)({ a: 'hi' })).toStrictEqual({ a: 'hi' });
+    });
+
+    it('throws when an excess field exists inside an array of objects', () => {
+      const schema = z.object({ items: z.array(z.object({ a: z.string() })) });
+      expect(() =>
+        decodeWithExcessOrThrowZod(schema)({ items: [{ a: 'hi' }, { a: 'hi', b: 1 }] })
+      ).toThrowErrorMatchingInlineSnapshot(`"Excess keys are not allowed"`);
+    });
+
+    it('throws when an excess field exists inside a union variant', () => {
+      const schema = z.object({
+        payload: z.union([
+          z.object({ kind: z.literal('a'), value: z.string() }),
+          z.object({ kind: z.literal('b') }),
+        ]),
+      });
+      expect(() =>
+        decodeWithExcessOrThrowZod(schema)({ payload: { kind: 'a', value: 'hi', extra: 1 } })
+      ).toThrowErrorMatchingInlineSnapshot(`"Excess keys are not allowed"`);
+    });
+
+    it('throws when an excess field exists inside a discriminated union variant', () => {
+      const schema = z.object({
+        payload: z.discriminatedUnion('kind', [
+          z.object({ kind: z.literal('a'), value: z.string() }),
+          z.object({ kind: z.literal('b') }),
+        ]),
+      });
+      expect(() =>
+        decodeWithExcessOrThrowZod(schema)({ payload: { kind: 'a', value: 'hi', extra: 1 } })
+      ).toThrowErrorMatchingInlineSnapshot(`"Excess keys are not allowed"`);
+    });
+  });
+
+  describe('decodeOrThrowZod', () => {
+    it('returns the parsed value on success', () => {
+      const schema = z.object({ a: z.string() });
+      expect(decodeOrThrowZod(schema)({ a: 'hi' })).toStrictEqual({ a: 'hi' });
+    });
+
+    it('strips unknown keys silently (no throw)', () => {
+      const schema = z.object({ a: z.string() });
+      expect(decodeOrThrowZod(schema)({ a: 'hi', b: 1 })).toStrictEqual({ a: 'hi' });
+    });
+
+    it('throws when a required field is missing', () => {
+      const schema = z.object({ a: z.string() });
+      expect(() => decodeOrThrowZod(schema)({})).toThrowErrorMatchingInlineSnapshot(
+        `"a: Invalid input: expected string, received undefined"`
       );
     });
 
-    it('throws when an excess field exists for rt.strict', () => {
-      const schemaRt = rt.strict({
-        a: rt.string,
-      });
-
-      expect(() =>
-        decodeWithExcessOrThrow(schemaRt)({ a: 'hi', b: 1 })
-      ).toThrowErrorMatchingInlineSnapshot(`"invalid keys \\"b\\""`);
-    });
-
-    it('does not throw when an excess field exists for rt.type', () => {
-      const schemaRt = rt.type({
-        a: rt.string,
-      });
-
-      expect(() => decodeWithExcessOrThrow(schemaRt)({ a: 'hi', b: 1 })).not.toThrow();
-    });
-
-    it('throws when a nested excess field exists for rt.strict', () => {
-      const schemaRt = rt.strict({
-        a: rt.strict({
-          b: rt.string,
-        }),
-      });
-
-      expect(() =>
-        decodeWithExcessOrThrow(schemaRt)({ a: { b: 'hi', c: 1 } })
-      ).toThrowErrorMatchingInlineSnapshot(`"invalid keys \\"c\\""`);
-    });
-
-    it('does not throw when a nested excess field exists for rt.type', () => {
-      const schemaRt = rt.type({
-        a: rt.type({ b: rt.string }),
-      });
-
-      expect(() => decodeWithExcessOrThrow(schemaRt)({ a: { b: 'hi', c: 1 } })).not.toThrow();
-    });
-
-    it('returns the object after decoding for rt.type', () => {
-      const schemaRt = rt.type({
-        a: rt.string,
-      });
-
-      expect(decodeWithExcessOrThrow(schemaRt)({ a: 'hi' })).toStrictEqual({ a: 'hi' });
-    });
-
-    it('returns the object after decoding for rt.strict', () => {
-      const schemaRt = rt.strict({
-        a: rt.string,
-      });
-
-      expect(decodeWithExcessOrThrow(schemaRt)({ a: 'hi' })).toStrictEqual({ a: 'hi' });
+    it('uses the provided error factory', () => {
+      const schema = z.object({ a: z.string() });
+      class CustomError extends Error {}
+      expect(() => decodeOrThrowZod(schema, (m) => new CustomError(m))({})).toThrow(CustomError);
     });
   });
 });

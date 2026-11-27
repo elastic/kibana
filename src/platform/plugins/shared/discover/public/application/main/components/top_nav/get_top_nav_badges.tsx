@@ -7,24 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import { i18n } from '@kbn/i18n';
 import type { ChromeBreadcrumbsBadge } from '@kbn/core-chrome-browser';
-import type { DiscoverServices } from '../../../../build_services';
-import { SolutionsViewBadge } from './solutions_view_badge';
 
 /**
  * Helper function to build the top nav badges
  */
 export const getTopNavBadges = ({
-  isMobile,
   isManaged,
-  services,
 }: {
-  isMobile: boolean;
   isManaged: boolean;
-  services: DiscoverServices;
 }): ChromeBreadcrumbsBadge[] => {
   const entries: ChromeBreadcrumbsBadge[] = [];
 
@@ -37,17 +30,6 @@ export const getTopNavBadges = ({
         })
       )
     );
-  }
-
-  if (services.spaces && !isMobile) {
-    entries.push({
-      badgeText: i18n.translate('discover.topNav.solutionViewTitle', {
-        defaultMessage: 'Check out context-aware Discover',
-      }),
-      renderCustomBadge: ({ badgeText }) => (
-        <SolutionsViewBadge badgeText={badgeText} services={services} />
-      ),
-    });
   }
 
   return entries;

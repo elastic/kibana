@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createAction, createReducer, current } from 'redux-toolkit-v1';
+import { createAction, createReducer, current } from '@reduxjs/toolkit';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { mapValues, uniq } from 'lodash';
 import type { Filter, Query } from '@kbn/es-query';

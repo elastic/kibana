@@ -6,8 +6,11 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
+import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { ToolType } from '@kbn/agent-builder-common';
 import { createToolNotFoundError, createBadRequestError } from '@kbn/agent-builder-common';
+import type { ToolSchemaContext } from '@kbn/agent-builder-server/tools';
 import type {
   ToolProviderFn,
   ReadonlyToolProvider,
@@ -21,35 +24,51 @@ import type {
 } from '../tool_types/definitions';
 import { isDisabledDefinition } from '../tool_types/definitions';
 import { convertTool } from './converter';
-import { ToolAvailabilityCache } from './availability_cache';
+import type { AvailabilityCache } from '../../common/availability_cache';
 
-export const createBuiltinProviderFn =
-  ({
-    registry,
-    toolTypes,
-  }: {
-    registry: BuiltinToolRegistry;
-    toolTypes: AnyToolTypeDefinition[];
-  }): ToolProviderFn<true> =>
-  async ({ request, space }) => {
+export const createBuiltinProviderFn = ({
+  registry,
+  toolTypes,
+  uiSettings,
+  savedObjects,
+  availabilityCache,
+}: {
+  registry: BuiltinToolRegistry;
+  toolTypes: AnyToolTypeDefinition[];
+  uiSettings: UiSettingsServiceStart;
+  savedObjects: SavedObjectsServiceStart;
+  /** Owned by the caller, so that availability results are reused across requests. */
+  availabilityCache: AvailabilityCache;
+}): ToolProviderFn<true> => {
+  return async ({ request, space }) => {
     return createBuiltinToolProvider({
       registry,
       toolTypes,
       request,
       space,
+      uiSettings,
+      savedObjects,
+      availabilityCache,
     });
   };
+};
 
 export const createBuiltinToolProvider = ({
   registry,
   toolTypes,
   request,
   space,
+  uiSettings,
+  savedObjects,
+  availabilityCache,
 }: {
   registry: BuiltinToolRegistry;
   toolTypes: AnyToolTypeDefinition[];
   request: KibanaRequest;
   space: string;
+  uiSettings: UiSettingsServiceStart;
+  savedObjects: SavedObjectsServiceStart;
+  availabilityCache: AvailabilityCache;
 }): ReadonlyToolProvider => {
   const definitionMap = toolTypes
     .filter((def) => !isDisabledDefinition(def))
@@ -59,7 +78,14 @@ export const createBuiltinToolProvider = ({
     }, {} as Record<ToolType, ToolTypeDefinition | BuiltinToolTypeDefinition>);
 
   const context = { spaceId: space, request };
-  const availabilityCache = new ToolAvailabilityCache();
+  let schemaContext: ToolSchemaContext | undefined;
+  const getSchemaContext = (): ToolSchemaContext => {
+    schemaContext ??= {
+      ...context,
+      uiSettings: uiSettings.asScopedToClient(savedObjects.getScopedClient(request)),
+    };
+    return schemaContext;
+  };
 
   return {
     id: 'builtin',
@@ -76,7 +102,13 @@ export const createBuiltinToolProvider = ({
       if (!definition) {
         throw createBadRequestError(`Unknown type for tool '${toolId}': '${tool.type}'`);
       }
-      return convertTool({ tool, definition, context, cache: availabilityCache });
+      return convertTool({
+        tool,
+        definition,
+        context,
+        getSchemaContext,
+        cache: availabilityCache,
+      });
     },
     list(filters?: ToolProviderListFilters) {
       const typeFilter =
@@ -101,7 +133,13 @@ export const createBuiltinToolProvider = ({
         })
         .map((tool) => {
           const definition = definitionMap[tool.type]!;
-          return convertTool({ tool, definition, context, cache: availabilityCache });
+          return convertTool({
+            tool,
+            definition,
+            context,
+            getSchemaContext,
+            cache: availabilityCache,
+          });
         });
     },
   };

@@ -7,9 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CommandStep, GenericStep, GroupStep, WaitStep } from './types.ts';
+import type { AgentConfig, CommandStep, GenericStep, GroupStep, WaitStep } from './types.ts';
 
 export const commandStep = (step: CommandStep): CommandStep => step;
+
+export const withAgentOverrides = <T extends { agents: AgentConfig }>(
+  defaults: T,
+  overrides: AgentConfig
+): Omit<T, 'agents'> & { agents: AgentConfig } => ({
+  ...defaults,
+  agents: { ...defaults.agents, ...overrides },
+});
 
 export const gateStep = (step: CommandStep): CommandStep => ({
   ...step,

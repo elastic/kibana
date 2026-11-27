@@ -12,6 +12,7 @@ import React, { useMemo } from 'react';
 import classNames from 'classnames';
 import { get } from 'lodash';
 import { ClassNames, css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
 
 import { ErrorComponent } from '../../error';
@@ -67,9 +68,11 @@ function MarkdownVisualization(props) {
   const panelBackgroundColor = model.background_color || backgroundColor;
   const style = { backgroundColor: panelBackgroundColor };
 
+  const { colorMode } = useEuiTheme();
+  const themeIsDark = colorMode === 'DARK';
   const isReversed = useMemo(
-    () => isBackgroundInverted(panelBackgroundColor),
-    [panelBackgroundColor]
+    () => isBackgroundInverted(panelBackgroundColor, themeIsDark),
+    [panelBackgroundColor, themeIsDark]
   );
 
   let markdown;

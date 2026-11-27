@@ -1,0 +1,20 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "**/*.ts"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-sml-plugin",
+    "@kbn/config-schema",
+    "@kbn/features-plugin"
+  ]
+}

@@ -7,8 +7,15 @@
 
 import { useEffect, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { ServiceMapNode, ServiceMapEdge } from '../../../../common/service_map';
-import { DIRECTION_THRESHOLD } from './constants';
+import {
+  isServiceGroupBoxNode,
+  isServiceGroupNode,
+  type ServiceMapNode,
+  type ServiceMapEdge,
+} from '../../../../common/service_map';
+import { DIRECTION_THRESHOLD, NODE_HEIGHT, NODE_WIDTH } from './constants';
+import { findElementByDataId } from './find_element_by_data_id';
+import { getAbsoluteNodePosition } from './get_absolute_node_position';
 
 type ArrowDirection = 'ArrowUp' | 'ArrowDown' | 'ArrowLeft' | 'ArrowRight';
 
@@ -17,7 +24,7 @@ interface UseKeyboardNavigationOptions {
   edges: ServiceMapEdge[];
   selectedNodeId: string | null;
   selectedNodeForPopover: ServiceMapNode | null;
-  selectedEdgeForPopover: ServiceMapEdge | null;
+  selectedEdgeForFlyout: ServiceMapEdge | null;
   onNodeSelect: (node: ServiceMapNode | null) => void;
   onEdgeSelect: (edge: ServiceMapEdge | null) => void;
   onPopoverClose: () => void;
@@ -27,25 +34,37 @@ interface UseKeyboardNavigationOptions {
 
 interface UseKeyboardNavigationResult {
   screenReaderAnnouncement: string;
+  /** Replaces the screen reader announcement, for things that happen outside the keyboard. */
+  announce: (message: string) => void;
   findNodeInDirection: (currentNodeId: string, direction: ArrowDirection) => ServiceMapNode | null;
 }
+
+/** The box of the open group a node is the box of, or a member of. */
+const getOpenGroupBox = (
+  node: ServiceMapNode,
+  nodes: ServiceMapNode[]
+): ServiceMapNode | undefined =>
+  isServiceGroupBoxNode(node)
+    ? node
+    : nodes.find((candidate) => candidate.id === node.parentId && isServiceGroupBoxNode(candidate));
 
 /**
  * Hook that provides keyboard navigation for the service map.
  *
  * Supports:
  * - Arrow keys: Spatial navigation between nodes
- * - Enter/Space: Open popover for focused node
- * - Escape: Close popover
+ * - Enter/Space: Open popover for focused node; open a group, or close an open one
+ * - Escape: Close popover; close the open group the focus is in
  *
- * Also manages screen reader announcements for navigation events.
+ * Also manages screen reader announcements for navigation events. Opening and closing a group is
+ * announced by the graph once it has happened, however it was done.
  */
 export function useKeyboardNavigation({
   nodes,
   edges,
   selectedNodeId,
   selectedNodeForPopover,
-  selectedEdgeForPopover,
+  selectedEdgeForFlyout,
   onNodeSelect,
   onEdgeSelect,
   onPopoverClose,
@@ -55,20 +74,28 @@ export function useKeyboardNavigation({
 
   /**
    * Find the closest node in a given direction from the current node.
-   * Uses spatial positioning and distance calculation.
+   * Uses spatial positioning and distance calculation, from the centre of each node on the map
+   * (members of an open group are placed relative to their box). Hidden nodes and boxes are not
+   * targets: a box is reached with Tab, and its members are the nodes inside it.
    */
   const findNodeInDirection = useCallback(
     (currentNodeId: string, direction: ArrowDirection): ServiceMapNode | null => {
       const currentNode = nodes?.find((n) => n.id === currentNodeId);
       if (!currentNode) return null;
 
-      const current = currentNode.position;
+      const nodesById = new Map(nodes.map((node) => [node.id, node] as const));
+      const getCentre = (node: ServiceMapNode): { x: number; y: number } => {
+        const { x, y } = getAbsoluteNodePosition(node, nodesById);
+        return { x: x + (node.width ?? NODE_WIDTH) / 2, y: y + (node.height ?? NODE_HEIGHT) / 2 };
+      };
+
+      const current = getCentre(currentNode);
       const candidates: Array<{ node: ServiceMapNode; distance: number }> = [];
 
       nodes.forEach((node) => {
-        if (node.id === currentNodeId) return;
+        if (node.id === currentNodeId || node.hidden || isServiceGroupBoxNode(node)) return;
 
-        const pos = node.position;
+        const pos = getCentre(node);
         const dx = pos.x - current.x;
         const dy = pos.y - current.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
@@ -95,7 +122,8 @@ export function useKeyboardNavigation({
       if (!isInteractive) {
         return;
       }
-      if (event.key === 'Escape' && (selectedNodeForPopover || selectedEdgeForPopover)) {
+      // The flyouts close themselves on Escape (EUI), also when a child flyout is focused.
+      if (event.key === 'Escape' && selectedNodeForPopover) {
         event.preventDefault();
         onPopoverClose();
         setScreenReaderAnnouncement(
@@ -104,6 +132,18 @@ export function useKeyboardNavigation({
           })
         );
         return;
+      }
+      // Escape on the box of an open group, or on one of its members, closes the group. Not while a
+      // node is selected: then Escape is for what is open for it (a flyout closes itself on Escape).
+      if (event.key === 'Escape' && !selectedNodeId) {
+        const focusedNodeId = document.activeElement?.closest('[data-id]')?.getAttribute('data-id');
+        const focusedNode = nodes?.find((n) => n.id === focusedNodeId);
+        const box = focusedNode && getOpenGroupBox(focusedNode, nodes);
+        if (box) {
+          event.preventDefault();
+          onNodeSelect(box);
+          return;
+        }
       }
       if (event.key === 'Enter' || event.key === ' ') {
         const activeElement = document.activeElement;
@@ -115,7 +155,7 @@ export function useKeyboardNavigation({
           if (!focusedEdge) return;
           event.preventDefault();
 
-          if (selectedEdgeForPopover?.id === edgeElementId) {
+          if (selectedEdgeForFlyout?.id === edgeElementId) {
             onPopoverClose();
           } else {
             onEdgeSelect(focusedEdge);
@@ -141,6 +181,9 @@ export function useKeyboardNavigation({
 
           if (selectedNodeId === nodeId) {
             onPopoverClose();
+          } else if (isServiceGroupNode(focusedNode) || isServiceGroupBoxNode(focusedNode)) {
+            // Groups open and close instead of being selected, and the graph announces it.
+            onNodeSelect(focusedNode);
           } else {
             onNodeSelect(focusedNode);
             setScreenReaderAnnouncement(
@@ -164,14 +207,25 @@ export function useKeyboardNavigation({
 
           event.preventDefault();
 
-          const nextElement = document.querySelector(`[data-id="${nextNode.id}"]`);
-          if (nextElement instanceof HTMLElement) {
+          const nextElement = findElementByDataId(document, nextNode.id);
+          if (nextElement) {
             nextElement.focus();
+            const nextNodeLabel = nextNode.data.label || nextNode.id;
+            const nextNodeBox = getOpenGroupBox(nextNode, nodes);
+            // A member is not inside its box in the page, so say which group it belongs to.
             setScreenReaderAnnouncement(
-              i18n.translate('xpack.apm.serviceMap.nodeFocused', {
-                defaultMessage: 'Focused on {nodeLabel}',
-                values: { nodeLabel: nextNode.data.label || nextNode.id },
-              })
+              nextNodeBox
+                ? i18n.translate('xpack.apm.serviceMap.nodeFocusedInGroup', {
+                    defaultMessage: 'Focused on {nodeLabel}, in group {groupLabel}',
+                    values: {
+                      nodeLabel: nextNodeLabel,
+                      groupLabel: nextNodeBox.data.label || nextNodeBox.id,
+                    },
+                  })
+                : i18n.translate('xpack.apm.serviceMap.nodeFocused', {
+                    defaultMessage: 'Focused on {nodeLabel}',
+                    values: { nodeLabel: nextNodeLabel },
+                  })
             );
           }
         }
@@ -187,7 +241,7 @@ export function useKeyboardNavigation({
     edges,
     selectedNodeId,
     selectedNodeForPopover,
-    selectedEdgeForPopover,
+    selectedEdgeForFlyout,
     onNodeSelect,
     onEdgeSelect,
     onPopoverClose,
@@ -197,6 +251,7 @@ export function useKeyboardNavigation({
 
   return {
     screenReaderAnnouncement,
+    announce: setScreenReaderAnnouncement,
     findNodeInDirection,
   };
 }

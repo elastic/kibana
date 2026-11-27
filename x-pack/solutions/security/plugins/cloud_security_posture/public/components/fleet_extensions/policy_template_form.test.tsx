@@ -1907,14 +1907,15 @@ describe('<CspPolicyTemplateForm />', () => {
       });
     });
 
-    it.skip('should render setup technology selector for GCP for organisation account type', async () => {
+    it('should render setup technology selector for GCP for organisation account type', async () => {
       const newPackagePolicy = getMockPolicyGCP();
 
       const { getByTestId, queryByTestId, getByLabelText } = render(
         <WrappedComponent
           newPolicy={newPackagePolicy}
           isAgentlessEnabled={true}
-          packageInfo={{ version: '1.6.0' } as PackageInfo}
+          packageInfo={getPackageInfoMock() as PackageInfo}
+          defaultSetupTechnology={SetupTechnology.AGENTLESS}
         />
       );
 
@@ -1950,7 +1951,7 @@ describe('<CspPolicyTemplateForm />', () => {
       });
     });
 
-    it.skip('should render setup technology selector for GCP for single-account', async () => {
+    it('should render setup technology selector for GCP for single-account', async () => {
       const newPackagePolicy = getMockPolicyGCP({
         'gcp.account_type': { value: SINGLE_ACCOUNT, type: 'text' },
       });
@@ -1959,7 +1960,8 @@ describe('<CspPolicyTemplateForm />', () => {
         <WrappedComponent
           newPolicy={newPackagePolicy}
           isAgentlessEnabled={true}
-          packageInfo={{ version: '1.6.0' } as PackageInfo}
+          packageInfo={getPackageInfoMock() as PackageInfo}
+          defaultSetupTechnology={SetupTechnology.AGENTLESS}
         />
       );
 

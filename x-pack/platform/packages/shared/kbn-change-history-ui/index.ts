@@ -22,6 +22,12 @@ export type {
   ChangeHistoryTriggerProps,
   ChangeHistoryListGroupItemProps,
 } from './src/components/modal';
+export { ChangeHistoryPreview } from './src/components/preview';
+export type {
+  ChangeHistoryPreviewProps,
+  ChangeHistoryMonacoLanguage,
+  ChangeHistoryPreviewEditorContext,
+} from './src/components/preview';
 export {
   ChangeHistoryTimeline,
   ChangeHistoryItem,
@@ -88,7 +94,7 @@ export {
   registerChangeHistoryTelemetryEvents,
 } from './src/telemetry';
 export type {
-  ChangeHistoryCompareMode,
+  ChangeHistoryDiffViewMode,
   ChangeHistoryComparisonType,
   ChangeHistoryDiffNavigationSource,
   ChangeHistoryFilterType,

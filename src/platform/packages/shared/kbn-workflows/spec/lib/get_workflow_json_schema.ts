@@ -90,6 +90,45 @@ function stripNestedSchemaIds(node: unknown, isRoot = true): unknown {
   return result;
 }
 
+/**
+ * Wraps each step union alternative in an `if` on its `type` literal so yaml-language-server skips
+ * non-matching alternatives instead of fully validating each of them; nested steps (e.g.
+ * `on-failure.fallback`) otherwise make editor validation and completion take seconds.
+ * MODIFIES the jsonSchema in place.
+ */
+export function guardStepUnionAlternativesByType(jsonSchema: z.core.JSONSchema.JSONSchema): void {
+  const resolve = (node: unknown) =>
+    getOrResolveObject<z.core.JSONSchema.JSONSchema>(node, jsonSchema) ?? undefined;
+
+  const getRequiredTypeLiteral = (alternative: unknown): string | undefined => {
+    const alternativeSchema = resolve(alternative);
+    if (!alternativeSchema?.required?.includes('type')) {
+      return undefined;
+    }
+    const literal = resolve(alternativeSchema.properties?.type)?.const;
+    return typeof literal === 'string' ? literal : undefined;
+  };
+
+  const stepUnion = resolve(resolve(resolve(jsonSchema)?.properties?.steps)?.items);
+  const unionKey = stepUnion?.oneOf ? 'oneOf' : 'anyOf';
+  const alternatives = stepUnion?.[unionKey];
+  if (!stepUnion || !alternatives) {
+    return;
+  }
+
+  stepUnion[unionKey] = alternatives.map((alternative) => {
+    const typeLiteral = getRequiredTypeLiteral(alternative);
+    if (typeLiteral === undefined) {
+      return alternative;
+    }
+    return {
+      if: { properties: { type: { const: typeLiteral } }, required: ['type'] },
+      then: alternative,
+      else: false,
+    };
+  });
+}
+
 // this function MODIFIES the jsonSchema in place
 function filterRequiredFields(ctx: {
   zodSchema: z.core.$ZodTypes;

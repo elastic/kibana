@@ -6,10 +6,12 @@
  */
 
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -23,6 +25,8 @@ import type { AiIndexProperties } from '../common/http_api/ai_indices';
 import type { AiIndexDataReadServiceApi } from './ai_indices/data_read_service';
 import type { AiIndexService } from './ai_indices/service';
 import type { ImprovementsServiceApi } from './improvements/service';
+import type { SessionMemoryService } from './session_memory/types';
+import type { SessionEventsService } from './session_events/types';
 import type { SignalsServiceApi } from './signals/service';
 
 export interface ContextEnginePluginSetup {
@@ -50,6 +54,17 @@ export interface ContextEnginePluginStart {
     esClient: ElasticsearchClient,
     spaceId: string
   ) => ImprovementsServiceApi;
+  /**
+   * Reads and writes as the internal user, so callers check privileges before using it. The
+   * user in each call is the end user the memory is about, and is never checked against the
+   * authenticated user.
+   */
+  getSessionMemoryService: () => SessionMemoryService;
+  /**
+   * Writes as the internal user, so callers check privileges before using it. The user in each
+   * call is the end user the events belong to, and is never checked against the authenticated user.
+   */
+  getSessionEventsService: () => SessionEventsService;
 }
 
 /** Duck-typed so Context Engine does not depend on `@kbn/workflows-management-plugin` (Moon cycle). */
@@ -68,8 +83,11 @@ export interface ContextEngineSetupDependencies {
   features: FeaturesPluginSetup;
   taskManager: TaskManagerSetupContract;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
+  /** Provides the base URL of the Elastic price catalog used to price EIS usage. */
+  cloud?: CloudSetup;
   /** Optional in the manifest; without it a feedback analysis schedule cannot be enabled. */
   workflowsManagement?: { management: WorkflowEnablementApi };
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface ContextEngineStartDependencies {

@@ -9,6 +9,7 @@ import { platformCoreTools, ToolResultType } from '@kbn/agent-builder-common';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { generateEsqlTool } from './generate_esql';
+import { createSchemaContext, resolveToolSchema } from './test_utils';
 
 jest.mock('@kbn/agent-builder-genai-utils', () => {
   const actual = jest.requireActual('@kbn/agent-builder-genai-utils');
@@ -32,10 +33,15 @@ const createHandlerContext = () =>
     events: {},
   } as any);
 
-const run = async (query = 'total sales', includeFrozen?: boolean) => {
-  const tool = generateEsqlTool();
+const run = async ({
+  includeFrozen,
+  includeFrozenByDefault = false,
+  isServerless,
+}: { includeFrozen?: boolean; includeFrozenByDefault?: boolean; isServerless?: boolean } = {}) => {
+  const tool = generateEsqlTool({ isServerless });
+  const schema = await resolveToolSchema(tool, includeFrozenByDefault);
   const result = (await tool.handler(
-    { query, execute_query: true, disable_named_params: false, include_frozen: includeFrozen },
+    schema.parse({ query: 'total sales', include_frozen: includeFrozen }),
     createHandlerContext()
   )) as ToolHandlerStandardReturn;
   return result.results;
@@ -126,11 +132,45 @@ describe('generateEsqlTool', () => {
     });
 
     it('includes frozen tier indices when opted in', async () => {
-      await run('total sales', true);
+      await run({ includeFrozen: true });
 
       expect(generateEsqlMock).toHaveBeenCalledWith(
         expect.objectContaining({ includeFrozen: true })
       );
+    });
+
+    it('includes frozen tier indices by default when the space setting is enabled', async () => {
+      await run({ includeFrozenByDefault: true });
+
+      expect(generateEsqlMock).toHaveBeenCalledWith(
+        expect.objectContaining({ includeFrozen: true })
+      );
+    });
+
+    it('lets the agent override the default', async () => {
+      await run({ includeFrozen: false, includeFrozenByDefault: true });
+
+      expect(generateEsqlMock).toHaveBeenCalledWith(
+        expect.objectContaining({ includeFrozen: false })
+      );
+    });
+
+    describe('in serverless', () => {
+      it('does not expose include_frozen or read the space setting', async () => {
+        const context = createSchemaContext(true);
+        const schema = await generateEsqlTool({ isServerless: true }).getSchema(context);
+
+        expect(schema.shape).not.toHaveProperty('include_frozen');
+        expect(context.uiSettings.get).not.toHaveBeenCalled();
+      });
+
+      it('excludes frozen tier indices even when include_frozen is passed', async () => {
+        await run({ includeFrozen: true, includeFrozenByDefault: true, isServerless: true });
+
+        expect(generateEsqlMock).toHaveBeenCalledWith(
+          expect.objectContaining({ includeFrozen: false })
+        );
+      });
     });
   });
 });

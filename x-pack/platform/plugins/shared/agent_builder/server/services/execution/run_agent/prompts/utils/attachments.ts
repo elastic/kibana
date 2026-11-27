@@ -29,6 +29,16 @@ Always read an attachment before referencing its content in your response. When 
 type first appears in the conversation, a description of that type follows immediately after it.`;
 };
 
+/**
+ * Replaces the ATTACHMENTS section for agents whose `attachment_tools` capability is off, so the
+ * agent knows it sees attachment metadata only and cannot read content.
+ */
+export const attachmentToolsUnavailableNotice = (): string => {
+  return `## ATTACHMENTS
+
+Attachments in this conversation are shown as metadata only (id, type, version). You have no tool to read their content. If a request depends on an attachment's content, say that you cannot open it.`;
+};
+
 export const attachmentTypeInstructions = (attachmentTypes: ProcessedAttachmentType[]): string => {
   if (attachmentTypes.length === 0) {
     return '';

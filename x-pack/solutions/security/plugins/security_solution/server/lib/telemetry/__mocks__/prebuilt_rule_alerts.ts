@@ -3644,6 +3644,6 @@ export const prebuiltRuleAlertsEsql = {
     licence_id: '4a7dde08-e5f8-4e50-80f8-bc85b72b4934',
     package_version: undefined,
     process: { executable: '/tmp/nmap' },
-    task_version: '1.2.0',
+    task_version: '1.3.0',
   },
 };

@@ -42,7 +42,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // for testing set buffer duration to 0 to immediately flush counters into saved objects.
         '--usageCollection.usageCounters.bufferDuration=0',
 
-        `--plugin-path=${path.resolve(__dirname, 'plugins', 'core_plugin_initializer_context')}`,
+        `--plugin-path=${path.resolve(
+          __dirname,
+          '../../test_plugins/node_roles_functional/core_plugin_initializer_context'
+        )}`,
         '--node.roles=["ui","background_tasks"]',
       ],
     },

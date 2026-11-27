@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
+import type { CaseConnectorWithoutName } from '../../../../common/types/domain/connector/v1';
 import type { TemplateSettings } from '../../../../common/types/domain/template/v1';
 import type { TemplateMetadata, TemplateMetadataErrors } from '../utils/template_metadata';
 import { TemplateMetadataForm } from './template_metadata_form';

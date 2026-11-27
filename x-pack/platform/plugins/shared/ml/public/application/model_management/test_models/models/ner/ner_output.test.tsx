@@ -62,7 +62,7 @@ describe('NER output', () => {
     });
 
     test('returns the correct color for class ORG', () => {
-      expect(getClassColor('ORG')).toBe('#16C5C0');
+      expect(getClassColor('ORG')).toBe('#00BDA0');
     });
 
     test('returns the correct color for class MISC', () => {

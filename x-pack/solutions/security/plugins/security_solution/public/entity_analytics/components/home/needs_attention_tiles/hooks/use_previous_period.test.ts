@@ -6,7 +6,6 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { of } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -49,7 +48,7 @@ describe('usePreviousPeriod', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useKibana as jest.Mock).mockReturnValue({
-      services: { data: { search: { search: mockSearch } } },
+      services: { data: { search: { esql: mockSearch } } },
     });
     setQueries({});
   });
@@ -139,6 +138,7 @@ describe('usePreviousPeriod', () => {
       reachesBack: true,
       isHistoryMissing: false,
       isError: true,
+      failure: 'delta',
     });
 
     // A failed history check leaves nothing to follow.
@@ -148,6 +148,7 @@ describe('usePreviousPeriod', () => {
       reachesBack: undefined,
       isHistoryMissing: false,
       isError: true,
+      failure: 'history',
     });
   });
 
@@ -173,25 +174,27 @@ describe('usePreviousPeriod', () => {
     expect(callOf('PrevPeriod')[0]).toEqual(['tilePrevPeriod', 'FROM previous']);
   });
 
-  it('runs each query with the ES|QL strategy, on the local cluster only when asked', async () => {
-    mockSearch.mockReturnValue(
-      of({ rawResponse: { columns: [{ name: 'value' }], values: [[7]] } })
-    );
-    renderHook(() => usePreviousPeriod({ ...options, localOnly: true }));
+  it('runs each query in the local project only', async () => {
+    mockSearch.mockResolvedValue({ rawResponse: { columns: [{ name: 'value' }], values: [[7]] } });
+    renderHook(() => usePreviousPeriod(options));
     expect(await callOf('PrevPeriod')[1]({ signal: undefined })).toBe(7);
     expect(mockSearch).toHaveBeenCalledWith(
-      { params: { query: 'FROM previous' } },
-      expect.objectContaining({ strategy: 'esql_async', projectRouting: '_alias:_origin' })
+      { query: 'FROM previous', projectRouting: '_alias:_origin' },
+      expect.anything()
     );
 
-    mockSearch.mockClear();
-    renderHook(() => usePreviousPeriod(options));
-    await callOf('PrevPeriod')[1]({ signal: undefined });
-    expect(mockSearch.mock.calls[0][1].projectRouting).toBeUndefined();
+    mockSearch.mockResolvedValue({
+      rawResponse: { columns: [{ name: 'reaches_back' }], values: [[true]] },
+    });
+    expect(await callOf('HistoryReachesBack')[1]({ signal: undefined })).toBe(true);
+    expect(mockSearch).toHaveBeenCalledWith(
+      { query: 'FROM guard', projectRouting: '_alias:_origin' },
+      expect.anything()
+    );
   });
 
   it('fails the previous query when its parser throws, so the delta is left out', async () => {
-    mockSearch.mockReturnValue(of({ rawResponse: { columns: [], values: [] } }));
+    mockSearch.mockResolvedValue({ rawResponse: { columns: [], values: [] } });
     renderHook(() =>
       usePreviousPeriod({
         ...options,
@@ -226,7 +229,7 @@ describe('parseReachesBack', () => {
 describe('isDeltaStillComing', () => {
   const base = {
     skip: false,
-    count: 5,
+    hasCount: true,
     isUnavailable: false,
     isError: false,
     isHistoryMissing: false,
@@ -237,9 +240,14 @@ describe('isDeltaStillComing', () => {
     expect(isDeltaStillComing(base)).toBe(true);
   });
 
+  it('does not care how big the count is: a count of 0 that came back is compared too', () => {
+    // `hasCount` is the only thing about the count that matters, so there is no count to pass.
+    expect(isDeltaStillComing({ ...base, hasCount: true })).toBe(true);
+  });
+
   it.each([
     ['skipped', { skip: true }],
-    ['a zero count (the pill is hidden then)', { count: 0 }],
+    ['a count that did not come back', { hasCount: false }],
     ['the query can never run', { isUnavailable: true }],
     ['a failed query', { isError: true }],
     ['the history is too short (the tile says so)', { isHistoryMissing: true }],

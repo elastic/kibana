@@ -67,6 +67,12 @@ export {
   language as yamlLanguage,
 } from 'monaco-editor/languages/definitions/yaml/yaml.js';
 export { jsonDefaults } from 'monaco-editor/languages/features/json/register.js';
+
+export {
+  CODE_EDITOR_DEFAULT_THEME_ID,
+  initializeRegisteredLanguagesTheme,
+} from './languages/theming';
+
 export {
   MenuId,
   MenuRegistry,

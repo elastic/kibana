@@ -8,6 +8,12 @@
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../common/constants';
+import { hashSloId } from '../../lib/telemetry/build_slo_ebt_data';
+import { COMPOSITE_SLO_DELETED_EBT_EVENT_TYPE } from '../../lib/telemetry';
+import {
+  createSloTelemetryReporterMock,
+  getReportedEvents,
+} from '../../lib/telemetry/slo_telemetry_service.mock';
 import { createCompositeSLORepositoryMock } from '../mocks';
 import { deleteCompositeSlo } from './delete_composite_slo';
 
@@ -20,8 +26,9 @@ describe('deleteCompositeSlo', () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     const compositeRepository = createCompositeSLORepositoryMock();
     const logger = loggerMock.create();
+    const telemetry = createSloTelemetryReporterMock();
 
-    await deleteCompositeSlo({ id, spaceId }, { esClient, compositeRepository, logger });
+    await deleteCompositeSlo({ id, spaceId }, { esClient, compositeRepository, logger, telemetry });
 
     expect(compositeRepository.deleteById).toHaveBeenCalledWith(id);
     expect(esClient.delete).toHaveBeenCalledWith({
@@ -36,10 +43,11 @@ describe('deleteCompositeSlo', () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     const compositeRepository = createCompositeSLORepositoryMock();
     const logger = loggerMock.create();
+    const telemetry = createSloTelemetryReporterMock();
     esClient.delete.mockRejectedValueOnce({ statusCode: 404 });
 
     await expect(
-      deleteCompositeSlo({ id, spaceId }, { esClient, compositeRepository, logger })
+      deleteCompositeSlo({ id, spaceId }, { esClient, compositeRepository, logger, telemetry })
     ).resolves.toBeUndefined();
     expect(logger.error).not.toHaveBeenCalled();
   });
@@ -48,13 +56,53 @@ describe('deleteCompositeSlo', () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     const compositeRepository = createCompositeSLORepositoryMock();
     const logger = loggerMock.create();
+    const telemetry = createSloTelemetryReporterMock();
     esClient.delete.mockRejectedValueOnce({ statusCode: 503, message: 'service unavailable' });
 
     await expect(
-      deleteCompositeSlo({ id, spaceId }, { esClient, compositeRepository, logger })
+      deleteCompositeSlo({ id, spaceId }, { esClient, compositeRepository, logger, telemetry })
     ).resolves.toBeUndefined();
     expect(logger.debug).toHaveBeenCalledWith(
       expect.stringContaining(`Failed to delete composite summary doc [${docId}]`)
     );
+  });
+
+  it('reports exactly one composite_slo_deleted event with only the hashed id', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const compositeRepository = createCompositeSLORepositoryMock();
+    const logger = loggerMock.create();
+    const telemetry = createSloTelemetryReporterMock();
+
+    await deleteCompositeSlo({ id, spaceId }, { esClient, compositeRepository, logger, telemetry });
+
+    expect(getReportedEvents(telemetry)).toEqual([
+      [COMPOSITE_SLO_DELETED_EBT_EVENT_TYPE, { composite_slo_id: hashSloId(id) }],
+    ]);
+  });
+
+  it('reports the event even when the summary doc cleanup fails', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const compositeRepository = createCompositeSLORepositoryMock();
+    const logger = loggerMock.create();
+    const telemetry = createSloTelemetryReporterMock();
+    esClient.delete.mockRejectedValueOnce({ statusCode: 503, message: 'service unavailable' });
+
+    await deleteCompositeSlo({ id, spaceId }, { esClient, compositeRepository, logger, telemetry });
+
+    expect(telemetry.report).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not report when deleting the definition fails', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const compositeRepository = createCompositeSLORepositoryMock();
+    const logger = loggerMock.create();
+    const telemetry = createSloTelemetryReporterMock();
+    compositeRepository.deleteById.mockRejectedValueOnce(new Error('not found'));
+
+    await expect(
+      deleteCompositeSlo({ id, spaceId }, { esClient, compositeRepository, logger, telemetry })
+    ).rejects.toThrow('not found');
+
+    expect(telemetry.report).not.toHaveBeenCalled();
   });
 });

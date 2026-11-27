@@ -106,8 +106,7 @@ describe('Policy Advanced Settings section', () => {
 
     const expectedRenderedOptions = AdvancedPolicySchema.filter(
       (advancedOption) =>
-        !(CUSTOM_YARA_RESCAN_INTERVAL_KEYS as readonly string[]).includes(advancedOption.key) &&
-        advancedOption.key !== REGISTRY_CREDENTIAL_HARDENING_KEY
+        !(CUSTOM_YARA_RESCAN_INTERVAL_KEYS as readonly string[]).includes(advancedOption.key)
     );
 
     expectedRenderedOptions.forEach((advancedOption) => {
@@ -367,6 +366,7 @@ describe('Policy Advanced Settings section', () => {
       testSubj.settingRowTestSubjects(REGISTRY_CREDENTIAL_HARDENING_KEY).container;
 
     it('should hide the registry credential hardening option when the experimental flag is off', async () => {
+      mockedContext.setExperimentalFlag({ registryCredentialHardening: false });
       await render(true);
 
       expect(renderResult.queryByTestId(getRchRowContainer())).toBeNull();

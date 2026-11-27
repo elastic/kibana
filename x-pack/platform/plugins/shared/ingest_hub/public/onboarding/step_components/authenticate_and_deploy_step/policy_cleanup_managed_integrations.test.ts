@@ -85,10 +85,22 @@ describe('cleanupManagedIntegrationsPolicies', () => {
       pendingCleanupPolicyIds: { 'inst-a': 'policy-1', 'inst-b': 'policy-2' },
       currentPolicyIdsByInstance: {},
     });
-    expect(mockDeleteAgentless).toHaveBeenCalledWith('policy-1');
-    expect(mockDeleteAgentless).toHaveBeenCalledWith('policy-2');
+    expect(mockDeleteAgentless).toHaveBeenCalledWith('policy-1', undefined);
+    expect(mockDeleteAgentless).toHaveBeenCalledWith('policy-2', undefined);
     expect(ops.toDelete).toContain('policy-1');
     expect(ops.toDelete).toContain('policy-2');
+  });
+
+  it('passes the onboarding deployment id so Fleet lets the flow delete the policies it manages', async () => {
+    await cleanupManagedIntegrationsPolicies({
+      ...BASE_OPTS,
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: {},
+      onboardingDeploymentId: 'deploy-1',
+    });
+    expect(mockDeleteAgentless).toHaveBeenCalledWith('policy-1', {
+      onboarding_deployment_id: 'deploy-1',
+    });
   });
 
   it('returns the ops object', async () => {
@@ -163,6 +175,60 @@ describe('updateManagedIntegrationsPolicy — payload shape', () => {
     expect(payload.namespace).toBe('default');
     // Name preserved from existing policy (not regenerated with a timestamp).
     expect(payload.name).toBe('existing-agentless-name');
+    expect(mockUpdateAgentless.mock.calls[0][2]).toEqual({ query: undefined });
+  });
+
+  it('passes the onboarding deployment id so Fleet lets the flow update the policies it manages', async () => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },
+    });
+    await cleanupManagedIntegrationsPolicies({
+      ...BASE_OPTS,
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+      onboardingDeploymentId: 'deploy-1',
+    });
+    expect(mockUpdateAgentless.mock.calls[0][2]).toEqual({
+      query: { onboarding_deployment_id: 'deploy-1' },
+    });
+  });
+
+  it('keeps the existing namespace of the policy without a global namespace', async () => {
+    mockGetAgentlessPolicy.mockResolvedValue({
+      item: {
+        name: 'existing-agentless-name',
+        namespace: 'existing-ns',
+        package: { version: '2.5.0' },
+      },
+    });
+    mockGetPackageInfo.mockResolvedValue({
+      data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },
+    });
+    await cleanupManagedIntegrationsPolicies({
+      ...BASE_OPTS,
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+    });
+    expect(mockUpdateAgentless.mock.calls[0][1].namespace).toBe('existing-ns');
+  });
+
+  it('sends the global namespace over the existing one', async () => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },
+    });
+    await cleanupManagedIntegrationsPolicies({
+      ...BASE_OPTS,
+      globalNamespace: 'prod',
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+    });
+    expect(mockUpdateAgentless.mock.calls[0][1].namespace).toBe('prod');
   });
 
   it('includes enabled input for the surviving service', async () => {
@@ -228,6 +294,120 @@ describe('updateManagedIntegrationsPolicy — payload shape', () => {
     const payload = mockUpdateAgentless.mock.calls[0][1];
     expect(payload.vars?.access_key_id).toBe('AKID');
     expect(payload.vars?.secret_access_key).toBe('SECRET');
+  });
+
+  describe('reroute permissions', () => {
+    const updateWithPermissions = async (permissions: string[] | undefined) => {
+      mockGetPackageInfo.mockResolvedValue({
+        data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },
+      });
+      await cleanupManagedIntegrationsPolicies({
+        ...BASE_OPTS,
+        policySettings:
+          permissions === undefined ? {} : { additional_datastreams_permissions: permissions },
+        instances: [instance],
+        servicesMap: new Map([['vpcflow', vpcflow]]),
+        pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+        currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+      });
+      return mockUpdateAgentless.mock.calls[0][1];
+    };
+
+    it('sends the chosen permissions as a top-level field', async () => {
+      expect(
+        (await updateWithPermissions(['logs-a-default'])).additional_datastreams_permissions
+      ).toEqual(['logs-a-default']);
+    });
+
+    it('clears them with an empty list, which the agentless API accepts (it rejects null)', async () => {
+      expect((await updateWithPermissions([])).additional_datastreams_permissions).toEqual([]);
+    });
+
+    it('sends nothing when none were ever set', async () => {
+      expect(await updateWithPermissions(undefined)).not.toHaveProperty(
+        'additional_datastreams_permissions'
+      );
+    });
+  });
+
+  describe('custom fields', () => {
+    const updateWithFields = async (value: string | undefined) => {
+      mockGetPackageInfo.mockResolvedValue({
+        data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },
+      });
+      await cleanupManagedIntegrationsPolicies({
+        ...BASE_OPTS,
+        policySettings: value === undefined ? {} : { global_data_tags: value },
+        instances: [instance],
+        servicesMap: new Map([['vpcflow', vpcflow]]),
+        pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+        currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+      });
+      return mockUpdateAgentless.mock.calls[0][1];
+    };
+
+    it('sends the chosen fields as the list Fleet takes', async () => {
+      expect(
+        (await updateWithFields(JSON.stringify([{ name: 'team', value: 'platform' }])))
+          .global_data_tags
+      ).toEqual([{ name: 'team', value: 'platform' }]);
+    });
+
+    it('sends a value of digits only as a number, as Fleet does', async () => {
+      expect(
+        (await updateWithFields(JSON.stringify([{ name: 'priority', value: '1' }])))
+          .global_data_tags
+      ).toEqual([{ name: 'priority', value: 1 }]);
+    });
+
+    it('clears them with an empty list', async () => {
+      expect((await updateWithFields('[]')).global_data_tags).toEqual([]);
+    });
+
+    it('sends nothing when none were ever set', async () => {
+      expect(await updateWithFields(undefined)).not.toHaveProperty('global_data_tags');
+    });
+  });
+
+  describe('proxy URL', () => {
+    const updateWithProxy = async (proxyUrl: string | undefined, pkgVars = ['proxy_url']) => {
+      mockGetPackageInfo.mockResolvedValue({
+        data: {
+          item: {
+            version: '2.5.0',
+            vars: pkgVars.map((name) => ({ name })),
+            policy_templates: [],
+          },
+        },
+      });
+      await cleanupManagedIntegrationsPolicies({
+        ...BASE_OPTS,
+        policySettings: proxyUrl === undefined ? {} : { proxy_url: proxyUrl },
+        instances: [instance],
+        servicesMap: new Map([['vpcflow', vpcflow]]),
+        pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+        currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+      });
+      return mockUpdateAgentless.mock.calls[0][1];
+    };
+
+    it('sends the proxy as a package var, not a top-level field', async () => {
+      const payload = await updateWithProxy('http://proxy:3128');
+      expect(payload.vars?.proxy_url).toBe('http://proxy:3128');
+      expect(payload).not.toHaveProperty('proxy_url');
+    });
+
+    it('clears the proxy with null, since the PUT replaces the whole policy', async () => {
+      expect((await updateWithProxy('')).vars?.proxy_url).toBeNull();
+    });
+
+    it('sends nothing when no proxy was ever set', async () => {
+      expect((await updateWithProxy(undefined)).vars?.proxy_url).toBeUndefined();
+    });
+
+    it('leaves it out when the package does not declare the var', async () => {
+      expect((await updateWithProxy('http://proxy:3128', [])).vars?.proxy_url).toBeUndefined();
+    });
   });
 
   it("sends the policy's stored secret refs back when no keys are in memory", async () => {

@@ -22,6 +22,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { HttpSelfService } from '@kbn/core-http-server';
 import { capitalize } from 'lodash';
 import { dispatchApiRequest, getFailureDetails, prepareApiRequest, targetSchema } from '../../api';
+import { createApiIdentifierSchema } from './api_identifier';
 import { apiFailureToErrorResult } from './errors';
 
 export type ApiExecuteApproval = 'pre_approved' | 'user_confirmed';
@@ -35,23 +36,19 @@ export interface ApiExecuteResultData {
   approval?: ApiExecuteApproval;
 }
 
-const executeSchema = z.object({
-  target: targetSchema,
-  api: z
-    .string()
-    .describe(
-      'The API identifier, formed from the namespace and name (e.g. "indices.create", "bulk", ' +
-        '"cluster.health").'
-    ),
-  params: z
-    .record(z.string(), z.unknown())
-    .optional()
-    .describe(
-      `Flat map of parameter values. Keys must match the field names from the ${internalTools.describeApi} ` +
-        'schema. Supply every parameter here regardless of where it belongs in the request: the ' +
-        'routing into the URL path, query string, and request body is handled automatically.'
-    ),
-});
+const createExecuteSchema = (discoveryEnabled: boolean) =>
+  z.object({
+    target: targetSchema,
+    api: createApiIdentifierSchema(discoveryEnabled),
+    params: z
+      .record(z.string(), z.unknown())
+      .optional()
+      .describe(
+        `Flat map of parameter values. Keys must match the field names from the ${internalTools.describeApi} ` +
+          'schema. Supply every parameter here regardless of where it belongs in the request: the ' +
+          'routing into the URL path, query string, and request body is handled automatically.'
+      ),
+  });
 
 export const createExecuteApiTool = ({
   selfClient,
@@ -59,18 +56,22 @@ export const createExecuteApiTool = ({
 }: {
   selfClient: HttpSelfService;
   discoveryEnabled: boolean;
-}): InternalBuiltinToolDefinition<typeof executeSchema> => {
+}): InternalBuiltinToolDefinition<ReturnType<typeof createExecuteSchema>> => {
   const identifierGuidance = discoveryEnabled
     ? `- Use \`${internalTools.discoverApis}\` to find the \`api\` identifier, then
   \`${internalTools.describeApi}\` to see the \`params\` it accepts.`
-    : `- The \`api\` identifier comes from the instruction you are following, or from what you already
-  know the target exposes. Call \`${internalTools.describeApi}\` first to confirm it exists and to
-  see the \`params\` it accepts, rather than guessing params here.`;
+    : `- Do not call this tool unless a skill or the user explicitly names the operation to call, and
+  use the \`api\` identifier that instruction gives you. Never guess or recall an identifier, even
+  one you are confident exists.
+- Call \`${internalTools.describeApi}\` first to confirm the identifier exists and to see the
+  \`params\` it accepts, rather than guessing params here.`;
 
   return {
     id: internalTools.executeApi,
     type: ToolType.builtin,
-    description: `Execute an HTTP API call on behalf of the current user.
+    description: `Execute an HTTP API call on behalf of the current user${
+      discoveryEnabled ? '' : ', for an operation that a skill or the user explicitly named'
+    }.
 
 ${identifierGuidance}
 - Responses are not summarized, and many of these APIs return very large payloads. Prefer params
@@ -79,7 +80,7 @@ ${identifierGuidance}
   before you see it.
 
 The response is the raw API response body.`,
-    schema: executeSchema,
+    schema: createExecuteSchema(discoveryEnabled),
     handler: async (
       { target, api, params = {} },
       {

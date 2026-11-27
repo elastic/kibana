@@ -48,7 +48,6 @@ dependsOn:
   - '@kbn/actions-plugin'
   - '@kbn/react-hooks'
   - '@kbn/response-ops-rules-apis'
-  - '@kbn/cps'
 tags:
   - shared-browser
   - package
@@ -61,6 +60,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

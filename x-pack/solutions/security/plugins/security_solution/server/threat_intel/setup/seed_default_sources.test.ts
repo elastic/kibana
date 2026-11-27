@@ -7,10 +7,12 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
+  APPROVED_CATALOG_SOURCE_IDS,
   APPROVED_SOURCE_IDS,
   GLOBAL_SPACE_ID,
   CATALOG_SOURCE_URLS,
   THREAT_INTEL_SOURCES_INDEX,
+  resolveCatalogSourceUrl,
 } from '../../../common/threat_intel';
 import { DEFAULT_SOURCES, seedDefaultSources } from './seed_default_sources';
 
@@ -74,40 +76,41 @@ const run = async ({
 };
 
 describe('DEFAULT_SOURCES approved catalog', () => {
-  const ENABLED_ENDPOINTS: Record<string, string> = {
-    'kev:cisa-known-exploited-vulnerabilities':
-      'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json',
+  const APPROVED_ENDPOINTS: Record<string, string> = {
     'vendor_api:elastic-security-labs': 'https://www.elastic.co/security-labs/rss/feed.xml',
-    'rss:mandiant-research': 'https://cloudblog.withgoogle.com/topics/threat-intelligence/rss/',
-    'rss:unit42': 'https://unit42.paloaltonetworks.com/feed/',
-    'rss:talos': 'https://blog.talosintelligence.com/rss/',
-    'rss:crowdstrike': 'https://www.crowdstrike.com/blog/feed/',
     'rss:cisa-alerts': 'https://www.cisa.gov/cybersecurity-advisories/all.xml',
-    'text_indicator_list:maltrail-cobaltstrike':
-      'https://raw.githubusercontent.com/stamparm/trails/main/malware/cobaltstrike.txt',
+    'rss:uk-ncsc': 'https://www.ncsc.gov.uk/api/1/services/v1/news-rss-feed.xml',
+    'rss:cert-fr-alerts': 'https://cert.cyber.gouv.fr/alerte/feed/',
+    'rss:cert-fr-threats': 'https://cert.cyber.gouv.fr/cti/feed/',
+    'rss:cert-eu-advisories': 'https://cert.europa.eu/publications/security-advisories-rss',
+    'rss:cert-eu-threat-intelligence':
+      'https://cert.europa.eu/publications/threat-intelligence-rss',
   };
 
-  const DISABLED_ENDPOINTS: Record<string, string> = {
-    'rss:aws-security': 'https://aws.amazon.com/blogs/security/feed/',
-    'rss:aws-security-bulletins': 'https://aws.amazon.com/security/security-bulletins/rss/feed/',
-    'rss:fortiguard-advisories': 'https://filestore.fortinet.com/fortiguard/rss/ir.xml',
-    'rss:fortiguard-threat-signal':
-      'https://filestore.fortinet.com/fortiguard/rss/threatsignal.xml',
-  };
-
-  it('contains only the twelve approved source IDs and URLs', () => {
-    expect(CATALOG_SOURCE_URLS).toEqual({
-      ...ENABLED_ENDPOINTS,
-      ...DISABLED_ENDPOINTS,
-    });
+  it('contains only the approved source IDs and URLs', () => {
+    expect(CATALOG_SOURCE_URLS).toEqual(APPROVED_ENDPOINTS);
   });
 
-  it('ships exactly eight sources enabled', () => {
-    expect(DEFAULT_SOURCES.filter(({ enabled }) => enabled)).toHaveLength(8);
+  it('ships exactly seven sources enabled', () => {
+    expect(DEFAULT_SOURCES).toHaveLength(7);
+    expect(DEFAULT_SOURCES.every(({ enabled }) => enabled)).toBe(true);
   });
 
-  it('ships exactly four sources disabled', () => {
-    expect(DEFAULT_SOURCES.filter(({ enabled }) => !enabled)).toHaveLength(4);
+  // Product decision for MVP: Continuous Threat Hunt cannot act on pure vulnerability
+  // intel yet, so KEV is out of the catalog until a CVE hunt path exists.
+  it('does not seed or resolve a URL for CISA KEV', () => {
+    expect(DEFAULT_SOURCES.some(({ adapter_type }) => adapter_type === 'kev')).toBe(false);
+    expect(APPROVED_SOURCE_IDS.has('kev:cisa-known-exploited-vulnerabilities')).toBe(false);
+    expect(resolveCatalogSourceUrl('kev:cisa-known-exploited-vulnerabilities')).toBeUndefined();
+  });
+
+  // The list route and the PATCH route only admit approved ids, and reconciliation
+  // disables everything else, so an approved id that is never seeded is invisible
+  // and a seeded id outside the approved list is disabled again on every boot.
+  it('seeds every approved catalog id exactly once', () => {
+    expect(DEFAULT_SOURCES.map(({ id }) => id).sort()).toEqual(
+      [...APPROVED_CATALOG_SOURCE_IDS].sort()
+    );
   });
 
   it('dispatches Elastic Security Labs through the RSS adapter while preserving its stable ID', () => {

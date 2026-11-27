@@ -6,38 +6,19 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import {
   ALERT_TIMELINE_STATUS_LEGEND_ORDER,
-  alertTimelineStatusColor,
   alertTimelineStatusLabel,
 } from './alert_timeline_status_palette';
+import { AlertTimelineStatusDot } from './alert_timeline_status_dot';
 
-const DOT_SIZE_PX = 10;
-
-interface SwatchProps {
-  background: string;
-}
-
-const DotSwatch: React.FC<SwatchProps> = ({ background }) => (
-  <span
-    css={css`
-      display: inline-block;
-      width: ${DOT_SIZE_PX}px;
-      height: ${DOT_SIZE_PX}px;
-      border-radius: 50%;
-      background: ${background};
-    `}
-  />
-);
+const DOT_SIZE = '10px';
 
 export const AlertTimelineLegend: React.FC = () => {
-  const { euiTheme } = useEuiTheme();
-
   const items = ALERT_TIMELINE_STATUS_LEGEND_ORDER.map((status) => ({
     key: status,
-    sample: <DotSwatch background={alertTimelineStatusColor(euiTheme, status)} />,
+    sample: <AlertTimelineStatusDot status={status} size={DOT_SIZE} />,
     label: alertTimelineStatusLabel(status),
   }));
 

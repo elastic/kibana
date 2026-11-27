@@ -88,6 +88,19 @@ export interface DeleteAttachmentArgs {
 }
 
 /**
+ * Arguments for {@link AttachmentPublicClient.restore}.
+ */
+export interface RestoreAttachmentArgs {
+  conversationId: string;
+  attachmentId: string;
+  /**
+   * Who may perform this write. Defaults to `'owner'`.
+   * Pass `'converse'` to let collaborators (or any user on public conversations) write.
+   */
+  access?: AttachmentWriteAccess;
+}
+
+/**
  * Arguments for {@link AttachmentPublicClient.list}.
  */
 export interface ListAttachmentsArgs {
@@ -166,6 +179,7 @@ export interface AttachmentPublicClient {
   get(args: GetAttachmentArgs): Promise<VersionedAttachment>;
   update(args: UpdateAttachmentArgs): Promise<VersionedAttachment>;
   delete(args: DeleteAttachmentArgs): Promise<void>;
+  restore(args: RestoreAttachmentArgs): Promise<VersionedAttachment>;
   list(args: ListAttachmentsArgs): Promise<ListAttachmentsResult>;
   /**
    * Creates multiple attachments in a single write. Per-attachment failures are collected in

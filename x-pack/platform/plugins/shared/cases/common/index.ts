@@ -82,7 +82,7 @@ export {
 
 export type { AttachmentAttributes } from './types/domain';
 export { ConnectorTypes, AttachmentType, ExternalReferenceStorageType } from './types/domain';
-export { getCasesFromAlertsUrl, getCaseFindUserActionsUrl, throwErrors } from './api';
+export { getCasesFromAlertsUrl, getCaseFindUserActionsUrl } from './api';
 export { createUICapabilities, type CasesUiCapabilities } from './utils/capabilities';
 export { getApiTags, type CasesApiTags } from './utils/api_tags';
 export { CaseMetricsFeature } from './types/api';
@@ -112,5 +112,5 @@ export {
 
 export { AttachmentActionType } from './utils/attachment_actions';
 
-export { buildAlertAttachmentPayloadSchema } from './types/domain_zod/attachment/alert/v2';
-export type { AlertAttachmentMetadata } from './types/domain_zod/attachment/alert/v2';
+export { buildAlertAttachmentPayloadSchema } from './types/domain/attachment/alert/v2';
+export type { AlertAttachmentMetadata } from './types/domain/attachment/alert/v2';

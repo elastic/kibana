@@ -71,7 +71,8 @@ export function MetricsExperienceStateProvider({
   const [currentPage, setCurrentPage] = useRestorableState('currentPage', 0);
   const [isFullscreen, setIsFullscreen] = useRestorableState('isFullscreen', false);
   const [flyoutState, setFlyoutState] = useRestorableState('flyoutState', undefined);
-  const { searchTerm } = gridSettings;
+  const resolvedGridSettings = gridSettings ?? METRICS_GRID_SETTINGS_DEFAULTS;
+  const { searchTerm } = resolvedGridSettings;
 
   const isSortingEnabled = useFeatureFlag(
     FEATURE_FLAGS.IS_SORTING_ENABLED,
@@ -82,8 +83,8 @@ export function MetricsExperienceStateProvider({
   const effectiveMetricsSort = isSortingEnabled ? metricsSort : METRICS_GRID_SORT_DEFAULTS;
 
   const selectedDimensions = useMemo<Dimension[]>(
-    () => gridSettings.dimensions.map((name) => ({ name })),
-    [gridSettings.dimensions]
+    () => resolvedGridSettings.dimensions.map((name) => ({ name })),
+    [resolvedGridSettings.dimensions]
   );
 
   const recentlyExploredMetrics = useRecentlyExploredMetrics({
@@ -170,7 +171,7 @@ export function MetricsExperienceStateProvider({
     <MetricsExperienceStateContext.Provider
       value={{
         profileId,
-        gridSettings,
+        gridSettings: resolvedGridSettings,
         recentlyExploredMetrics,
         onMetricExplored,
         currentPage,

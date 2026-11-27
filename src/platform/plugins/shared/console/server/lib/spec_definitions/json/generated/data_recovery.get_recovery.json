@@ -1,0 +1,21 @@
+{
+  "data_recovery.get_recovery": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_data_recovery/recoveries/{recovery_id}"
+    ],
+    "documentation": "",
+    "availability": {
+      "stack": false,
+      "serverless": false
+    }
+  }
+}

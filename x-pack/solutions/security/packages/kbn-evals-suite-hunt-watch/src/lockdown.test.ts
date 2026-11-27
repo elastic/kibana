@@ -22,8 +22,8 @@ describe('lockdown scan', () => {
     const files = listLockdownFiles();
     expect(files).toEqual(
       expect.arrayContaining([
-        'src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/hunt.yaml',
-        'src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/hunt_proposal_gate.yaml',
+        'src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/hunt/hunt.yaml',
+        'src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/hunt/hunt_proposal_gate.yaml',
         'x-pack/solutions/security/plugins/alertzero/server/services/watches/hunt/hunt_coordinator.ts',
       ])
     );
@@ -37,7 +37,11 @@ describe('lockdown scan', () => {
 describe('findForbiddenLiterals', () => {
   it.each([
     ['a decoy IP', 'MATCH(source.ip, "198.51.100.40")', ['198.51.100.40']],
-    ['a principal', "const who = 'dev-user@corp.example';", ['dev-user@corp.example', 'dev-user']],
+    [
+      'a principal',
+      "const who = 'dev-user@corp.example.cloud';",
+      ['dev-user@corp.example.cloud', 'dev-user'],
+    ],
     ['the actor name', 'attributed to TA-DEMO-SHADOW-ADMIN', ['TA-DEMO-SHADOW-ADMIN']],
     [
       'the report id family',

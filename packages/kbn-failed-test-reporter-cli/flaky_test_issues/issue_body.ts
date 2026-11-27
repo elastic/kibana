@@ -8,28 +8,45 @@
  */
 
 import Path from 'path';
-import type { FlakyTestReport, TestFramework } from '@kbn/scout-reporting';
+import {
+  scopeKey,
+  type FlakyTestReport,
+  type JudgedScope,
+  type TestFramework,
+} from '@kbn/scout-reporting';
 import { getIssueMetadata, updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
 import {
+  andList,
   BUILDKITE_ORG_URL,
+  buildkiteJobUrl,
   CATEGORY_LABELS,
   codeBlock,
   collapsed,
+  flakyDays,
   formatBuildLink,
+  formatDateTime,
   formatFailedBranches,
   formatDateRange,
   formatDay,
   formatFailedBuilds,
   formatFullFailureMessage,
   formatPercent,
+  formatScope,
+  formatShortDateTime,
   FRAMEWORK_LABELS,
   inlineCode,
+  isFlakyBranch,
   isPullRequestRef,
+  issueList,
   KIBANA_BLOB_URL,
+  NBSP,
+  pipelineTargetEnvironment,
   plural,
+  previouslyTrackedIn,
   table,
-  targetEnvironment,
   testsTable,
+  type BranchThresholds,
+  type PreviousIssues,
 } from './markdown';
 import type { FlakySuite } from './suites';
 
@@ -49,10 +66,10 @@ export interface FlakySuiteIssueContext {
   /** Numbers of issues that mention the suite's file without being about it. */
   relatedIssues?: number[];
   /**
-   * Numbers of closed issues about one of the suite's tests that failed after they were closed,
-   * which this issue takes over from.
+   * Issues about the suite's tests that this issue replaces: closed before their test failed again,
+   * or open per-test issues closed as its duplicates once filed.
    */
-  supersededIssues?: number[];
+  previousIssues?: PreviousIssues;
 }
 
 export interface FlakySuiteIssueRefreshContext {
@@ -67,6 +84,8 @@ export interface FlakySuiteIssueCommentContext {
   report: FlakyTestReport;
   /** The issue is being reopened: the suite failed again after it was closed. */
   reopened: boolean;
+  /** Metadata of the issue before this refresh, for the flaky tests it has not shown yet. */
+  previous?: RecordedFlakySuiteIssueMetadata;
 }
 
 /** One report's numbers for the suite's worst test, kept in the body so the history survives. */
@@ -104,6 +123,18 @@ export interface FlakySuiteIssueMetadata {
    * it.
    */
   'report.commentedAt'?: string;
+  /**
+   * Tests the owners have seen flaky on the issue: those of the body as filed and of every comment
+   * since. The next comment names the flaky tests missing from it; absent on issues filed before
+   * it was recorded, until their next comment.
+   */
+  'report.shownTestIds'?: string[];
+  /**
+   * Issues the suite issue replaces that its tests table doesn't name: those it replaced after it
+   * was filed, and those of tests beyond the table's rows. The body's "Previously tracked in" line
+   * lists them.
+   */
+  'suite.previousIssues'?: number[];
 }
 
 /** What an issue body records; older issues lack some of it. */
@@ -153,6 +184,7 @@ export const readFlakySuiteIssueMetadata = (
     'report.count': typeof count === 'number' ? count : undefined,
     'report.history': Array.isArray(history) ? history.filter(isSnapshot) : [],
     'report.commentedAt': typeof commentedAt === 'string' ? commentedAt : undefined,
+    'report.shownTestIds': stringsOf(metadataValue(body, 'report.shownTestIds')),
   };
 };
 
@@ -220,26 +252,32 @@ export const flakySuiteIssueMetadata = (
   const pipelines = failedPipelines(suite, report);
   const history = [...(previous?.['report.history'] ?? []), snapshot(suite, report)];
   const commentedAt = comment ? report.generatedAt.toISOString() : previous?.['report.commentedAt'];
+  const testIds = suite.tests.map((test) => test.testId);
+  // a new issue shows its tests in the body, a refresh's comment only those flaky where it says
+  const shownNow = previous ? commentedTestIds(suite, report.thresholds) : testIds;
+  const shownTestIds =
+    !previous || comment
+      ? union(shownNow, previous?.['report.shownTestIds'])
+      : previous['report.shownTestIds'];
   return {
     'suite.filePath': suite.filePath,
     ...(suite.suiteTitle ? { 'suite.title': suite.suiteTitle } : {}),
     'suite.framework': suite.framework,
-    'suite.testIds': union(
-      suite.tests.map((test) => test.testId),
-      previous?.['suite.testIds']
-    ),
+    'suite.testIds': union(testIds, previous?.['suite.testIds']),
     'suite.branches': union(failedBranches(suite), previous?.['suite.branches']),
     'suite.pipelines': [
       ...(previous?.['suite.pipelines'] ?? []).filter((pipeline) => !pipelines.includes(pipeline)),
       ...pipelines,
     ],
     'report.generatedAt': report.generatedAt.toISOString(),
-    // Issues filed before the count was recorded had one report per snapshot
+    // Issues filed before the count was recorded had one report per snapshot, and consistently
+    // failing issues have none
     'report.count': previous
-      ? (previous['report.count'] ?? Math.max(previous['report.history'].length, 1)) + 1
+      ? (previous['report.count'] ?? previous['report.history'].length) + 1
       : 1,
     'report.history': history.slice(-MAX_REPORT_HISTORY),
     ...(commentedAt ? { 'report.commentedAt': commentedAt } : {}),
+    ...(shownTestIds ? { 'report.shownTestIds': shownTestIds } : {}),
   };
 };
 
@@ -264,21 +302,26 @@ const titleCategory = (
 };
 
 /**
- * `Flaky Scout API suite: Lens ESQL dashboard inline editing`, or the file name without a suite
- * title. Display only; issues are matched on their metadata, never on the title.
+ * `<Adjective> Scout API suite: Lens ESQL dashboard inline editing`, or the file name without a
+ * suite title. Display only; issues are matched on their metadata, never on the title.
  */
-export const flakySuiteIssueTitle = (
+export const suiteIssueTitle = (
+  adjective: 'Flaky' | 'Failing',
   suite: Pick<FlakySuite, 'filePath' | 'framework' | 'suiteTitle' | 'configCategory'>
 ): string => {
   const subject = suite.suiteTitle ?? Path.basename(suite.filePath);
   const category = titleCategory(suite.framework, suite.configCategory);
-  const lead = `Flaky ${FRAMEWORK_LABELS[suite.framework].short}${
+  const lead = `${adjective} ${FRAMEWORK_LABELS[suite.framework].short}${
     category ? ` ${category}` : ''
   } suite: `;
   // Nested describe blocks can join into a subject longer than GitHub accepts for a title
   const room = MAX_TITLE_LENGTH - lead.length;
   return lead + (subject.length > room ? `${subject.slice(0, room - 1)}…` : subject);
 };
+
+export const flakySuiteIssueTitle = (
+  suite: Pick<FlakySuite, 'filePath' | 'framework' | 'suiteTitle' | 'configCategory'>
+): string => suiteIssueTitle('Flaky', suite);
 
 /** `Skipped on \`main\` since 2026-09-09.` when the latest run of the worst test was a skip. */
 const skippedNote = (suite: FlakySuite): string | undefined => {
@@ -290,31 +333,64 @@ const skippedNote = (suite: FlakySuite): string | undefined => {
   return `Latest run on ${inlineCode(latestRun.branch)} was skipped (${since}).`;
 };
 
-/** `3 tests in the [\`Default status alert\`](…/default_status_alert.spec.ts) suite appear to be flaky:` */
-const opening = (suite: FlakySuite): string => {
+/**
+ * How many days of the window any of the suite's tests failed on, on the branches it is flaky on;
+ * undefined for reports written before the days were recorded.
+ */
+const failedDayCount = (suite: FlakySuite, { thresholds, window }: FlakyTestReport) => {
+  const days = suite.tests.map((test) => flakyDays(test, thresholds, window.lookbackDays));
+  if (days.length === 0 || days.some((testDays) => testDays === undefined)) {
+    return undefined;
+  }
+  return new Set(days.flatMap((testDays) => [...(testDays?.failed ?? [])])).size;
+};
+
+/**
+ * `3 tests in the [\`Default status alert\`](…/default_status_alert.spec.ts) suite appear to be
+ * flaky. They failed on **2 of the past 7 days**:`, without the days for older reports.
+ */
+const opening = (suite: FlakySuite, report: FlakyTestReport): string => {
   const subject = suite.suiteTitle ?? Path.basename(suite.filePath);
   const link = `[${inlineCode(subject)}](${KIBANA_BLOB_URL}/${suite.filePath})`;
   const count = suite.tests.length;
-  return (
+  const lead =
     `${plural(count, 'test')} in the ${link} suite ` +
-    `${count === 1 ? 'appears' : 'appear'} to be flaky:`
+    `${count === 1 ? 'appears' : 'appear'} to be flaky`;
+  const failedDays = failedDayCount(suite, report);
+  if (failedDays === undefined) {
+    return `${lead}:`;
+  }
+  return (
+    `${lead}. ${count === 1 ? 'It' : 'They'} failed on ` +
+    `**${failedDays} of the past ${report.window.lookbackDays}${NBSP}days**:`
   );
 };
 
-const blobLink = (repoRelativePath: string): string =>
-  `[${inlineCode(repoRelativePath)}](${KIBANA_BLOB_URL}/${repoRelativePath})`;
+/** The deepest folder holding both paths, with its trailing slash; empty when they share none. */
+const commonFolder = (a: string, b: string): string => {
+  const [partsA, partsB] = [a.split('/').slice(0, -1), b.split('/').slice(0, -1)];
+  const shared: string[] = [];
+  for (let index = 0; index < partsA.length && partsA[index] === partsB[index]; index++) {
+    shared.push(partsA[index]);
+  }
+  return shared.map((part) => `${part}/`).join('');
+};
 
-const suiteDetails = (suite: FlakySuite): string => {
-  const framework = FRAMEWORK_LABELS[suite.framework].long;
-  const category = suite.configCategory ? CATEGORY_LABELS[suite.configCategory] : undefined;
-  const rows: string[][] = [
-    ['**Framework**', framework],
-    ...(category ? [['**Category**', `${category} test`]] : []),
-    ['**File**', blobLink(suite.filePath)],
-    ...(suite.configPath ? [['**Config**', blobLink(suite.configPath)]] : []),
-    ['**Owners**', suite.owners.length > 0 ? suite.owners.map(inlineCode).join(', ') : '-'],
-  ];
-  return table(['Field', 'Value'], rows);
+/**
+ * `**Owners** \`elastic/kibana-discover\` · **Config** [\`playwright.config.ts\`](…)`: what the
+ * title and the opening link to the file leave out. The config is named from the folder it shares
+ * with the suite's file.
+ */
+const suiteLine = (suite: FlakySuite): string | undefined => {
+  const config = suite.configPath
+    ? `**Config** [${inlineCode(
+        suite.configPath.slice(commonFolder(suite.filePath, suite.configPath).length)
+      )}](${KIBANA_BLOB_URL}/${suite.configPath})`
+    : undefined;
+  const owners =
+    suite.owners.length > 0 ? `**Owners** ${suite.owners.map(inlineCode).join(', ')}` : undefined;
+  const parts = [owners, config].filter((part) => part !== undefined);
+  return parts.length > 0 ? parts.join(' · ') : undefined;
 };
 
 /** Build counts of one test somewhere: on a branch, on a target. */
@@ -379,45 +455,79 @@ interface BranchSkip {
 }
 
 /**
- * `🔴 \`main\` | 49 / 509 (10%) | [#12345](…#job) · 2026-09-09 06:12 UTC`, or `✅ \`9.1\` | 0 / 58 |`
- * for a clean row, or `⏭️` with when it last ran for a skipped one. Reports written before the
- * build was recorded get the time alone.
+ * `[#12345](…#job) · 9 Sep 06:12`: the newest failure's job and time, on one line. Reports
+ * written before the build was recorded get the time alone.
  */
-const failuresRow = (
-  label: string,
-  { worst, latest }: WorstFailures<BuildCounts>,
-  skip?: BranchSkip
-): string[] => {
-  const failure = latest
-    ? formatBuildLink(
-        { buildUrl: latest.lastFailedBuildUrl, jobId: latest.lastFailedJobId },
-        latest.lastFailedAt
-      )
+const lastFailureCell = ({ lastFailedAt, lastFailedBuildUrl, lastFailedJobId }: BuildCounts) => {
+  const link = lastFailedBuildUrl
+    ? formatBuildLink({ buildUrl: lastFailedBuildUrl, jobId: lastFailedJobId }, undefined)
     : undefined;
-  const skipped = skip
-    ? skip.lastRanAt
-      ? `skipped, last ran ${formatDay(skip.lastRanAt)}`
-      : 'skipped in every run'
-    : undefined;
-  return [
-    `${skip ? '⏭️' : worst.failedBuilds > 0 ? '🔴' : '✅'} ${label}`,
-    worst.failedBuilds > 0 ? formatFailedBuilds(worst) : `0 / ${worst.builds}`,
-    [failure, skipped].filter((part) => part !== undefined).join(' · '),
-  ];
+  const time = lastFailedAt ? formatShortDateTime(lastFailedAt).replace(/ /g, NBSP) : undefined;
+  return [link, time].filter((part) => part !== undefined).join(`${NBSP}·${NBSP}`);
+};
+
+/** `**10%** (49 / 509) | [#12345](…#job) · 9 Sep 06:12`, or `0 / 58 |` for a clean row. */
+const failuresCells = ({ worst, latest }: WorstFailures<BuildCounts>): string[] => [
+  worst.failedBuilds > 0 ? formatFailedBuilds(worst) : `0${NBSP}/${NBSP}${worst.builds}`,
+  latest ? lastFailureCell(latest) : '',
+];
+
+/** What the suite does on a branch, in the order the branch table lists them. */
+const BRANCH_STATUSES = ['flaky', 'failing', 'skipped', 'clean'] as const;
+type BranchStatus = (typeof BRANCH_STATUSES)[number];
+
+/**
+ * Branches where any test of the suite clears the report's thresholds, as in the tests table, by
+ * `scopeKey`: a pipeline judged on its own is told apart from the same branch of the others.
+ */
+const flakyBranches = (suite: FlakySuite, thresholds: BranchThresholds): Set<string> =>
+  new Set(
+    suite.tests.flatMap((test) =>
+      test.byBranch.filter((stats) => isFlakyBranch(stats, thresholds)).map(scopeKey)
+    )
+  );
+
+const branchStatus = (worst: BuildCounts, flaky: boolean, skip?: BranchSkip): BranchStatus => {
+  if (skip) {
+    return 'skipped';
+  }
+  if (flaky) {
+    return 'flaky';
+  }
+  return worst.failedBuilds > 0 ? 'failing' : 'clean';
+};
+
+const BRANCH_STATUS_LABELS: Readonly<Record<BranchStatus, string>> = {
+  flaky: '🔴 **Flaky**',
+  failing: '🟠 **Some failures**',
+  skipped: '⏭️ **Skipped**',
+  clean: '✅ **No failures**',
+};
+
+/** `🔴 **Flaky**: \`main\``, or `⏭️ **Skipped**: \`main\`, last ran 7 Sep` for a skipped branch. */
+const branchCell = (scope: string, status: BranchStatus, skip?: BranchSkip): string => {
+  const cell = `${BRANCH_STATUS_LABELS[status]}: ${scope}`;
+  if (status !== 'skipped') {
+    return cell;
+  }
+  return skip?.lastRanAt
+    ? `${cell}, last ran ${formatDay(skip.lastRanAt)}`
+    : `${cell}, in every run`;
 };
 
 const latestOf = (a: Date | undefined, b: Date | undefined): Date | undefined =>
   a && b ? (a > b ? a : b) : a ?? b;
 
-/** The branches where every setup skips every test of the suite. */
+/** The branches where every setup skips every test of the suite, by `scopeKey`. */
 const branchSkips = (suite: FlakySuite): Map<string, BranchSkip> => {
   const byBranch = new Map<string, BranchSkip & { skipped: boolean }>();
   for (const test of suite.tests) {
-    for (const { branch, skipped, latestExecutionAt } of test.byBranch) {
-      const current = byBranch.get(branch);
-      byBranch.set(branch, {
-        skipped: (current?.skipped ?? true) && skipped === true,
-        lastRanAt: latestOf(current?.lastRanAt, latestExecutionAt),
+    for (const stats of test.byBranch) {
+      const key = scopeKey(stats);
+      const current = byBranch.get(key);
+      byBranch.set(key, {
+        skipped: (current?.skipped ?? true) && stats.skipped === true,
+        lastRanAt: latestOf(current?.lastRanAt, stats.latestExecutionAt),
       });
     }
   }
@@ -428,26 +538,37 @@ const branchSkips = (suite: FlakySuite): Map<string, BranchSkip> => {
   );
 };
 
-/** Which branches the suite fails on, is skipped on and is clean on, at a glance. */
-const failuresByBranch = (suite: FlakySuite): string | undefined => {
+/** `main` or a version branch like `9.4`; feature and pull request branches are not. */
+const isMainOrVersionBranch = (branch: string): boolean =>
+  branch === 'main' || /^\d+\.\d+$/.test(branch);
+
+/** Whether the suite is flaky, fails, is skipped or is clean on `main` and each version branch. */
+const statusByBranch = (suite: FlakySuite, { thresholds }: FlakyTestReport): string | undefined => {
   const skipped = branchSkips(suite);
-  const group = ({ worst }: WorstFailures<BuildCounts & { branch: string }>): number =>
-    skipped.has(worst.branch) ? 1 : worst.failedBuilds > 0 ? 0 : 2;
+  const flaky = flakyBranches(suite, thresholds);
+  // The counts shown are the worst test's, the status covers every test
   const branches = worstPerKey(
     suite,
-    (test) => test.byBranch,
-    (stats) => stats.branch
-  ).sort((a, b) => group(a) - group(b));
+    (test) => test.byBranch.filter(({ branch }) => isMainOrVersionBranch(branch)),
+    (stats) => scopeKey(stats)
+  ).map((row) => {
+    const key = scopeKey(row.worst);
+    const skip = skipped.get(key);
+    return { row, skip, status: branchStatus(row.worst, flaky.has(key), skip) };
+  });
   if (branches.length === 0) {
     return undefined;
   }
-  const rows = branches.map((row) =>
-    failuresRow(inlineCode(row.worst.branch), row, skipped.get(row.worst.branch))
-  );
+  const rows = branches
+    .sort((a, b) => BRANCH_STATUSES.indexOf(a.status) - BRANCH_STATUSES.indexOf(b.status))
+    .map(({ row, skip, status }) => [
+      branchCell(formatScope(row.worst), status, skip),
+      ...failuresCells(row),
+    ]);
   return [
-    '#### Failures by Branch',
+    '#### Status by Branch',
     '',
-    table(['Branch', 'Failed builds', 'Sample failure'], rows),
+    table(['Branch', 'Failed builds', 'Last failure'], rows),
   ].join('\n');
 };
 
@@ -459,23 +580,27 @@ const UNKNOWN_TARGET_MODE = 'unknown';
  * deployment or serverless simulation, ECH, MKI). Runs that recorded no target are left out, so
  * the table only appears for suites that have one.
  */
-const failuresByTarget = (suite: FlakySuite): string | undefined => {
+const statusByTarget = (suite: FlakySuite): string | undefined => {
   const targets = worstPerKey(
     suite,
     (test) => test.byTarget.filter((stats) => stats.mode !== UNKNOWN_TARGET_MODE),
-    (stats) => `${stats.mode} · ${stats.type}`
+    // a pipeline judged on its own, such as FIPS, has rows of its own for the same targets
+    (stats) => [stats.mode, stats.type, stats.pipeline ?? ''].join(' · ')
   );
   if (targets.length === 0) {
     return undefined;
   }
-  const rows = targets.map((row) => {
-    const [target, ...rest] = failuresRow(inlineCode(row.worst.mode), row);
-    return [target, targetEnvironment(row.worst), ...rest];
-  });
+  const rows = targets.map((row) => [
+    `${
+      row.worst.failedBuilds > 0 ? '🔴 **Failures**' : '✅ **No failures**'
+    }: ${pipelineTargetEnvironment(row.worst)}`,
+    inlineCode(row.worst.mode),
+    ...failuresCells(row),
+  ]);
   return [
-    '#### Failures by Target',
+    '#### Status by Target',
     '',
-    table(['Target', 'Environment', 'Failed builds', 'Sample failure'], rows),
+    table(['Environment', 'Target', 'Failed builds', 'Last failure'], rows),
   ].join('\n');
 };
 
@@ -487,10 +612,8 @@ interface SuiteError {
   key: string;
   /** The newest failure's message across the tests. */
   message: string;
-  failures: number;
-  /** Only known when a single test hit the error; a build failing two tests would count twice. */
-  builds?: number;
-  byPipeline: Map<string, number>;
+  /** Build ids per pipeline; a build failing two tests counts once. */
+  byPipeline: Map<string, Set<string>>;
   branches: Set<string>;
   targets: Set<string>;
   /** Titles of the tests that hit the error, in ranking order. */
@@ -501,7 +624,11 @@ interface SuiteError {
   lastFailedJobId?: string;
 }
 
-/** The errors of every test in the suite, merged on the report's key, most failures first. */
+/** Distinct builds with the error; a build belongs to one pipeline, so the counts add up. */
+const errorBuilds = (error: SuiteError): number =>
+  [...error.byPipeline.values()].reduce((sum, builds) => sum + builds.size, 0);
+
+/** The errors of every test in the suite, merged on the report's key, most builds first. */
 const suiteErrors = (suite: FlakySuite): SuiteError[] => {
   const byKey = new Map<string, SuiteError>();
   for (const test of suite.tests) {
@@ -511,10 +638,8 @@ const suiteErrors = (suite: FlakySuite): SuiteError[] => {
         byKey.set(error.key, {
           key: error.key,
           message: error.message,
-          failures: error.failuresCount,
-          builds: error.buildsCount,
           byPipeline: new Map(
-            error.byPipeline.map(({ pipeline, failuresCount }) => [pipeline, failuresCount])
+            error.byPipeline.map(({ pipeline, buildIds }) => [pipeline, new Set(buildIds)])
           ),
           branches: new Set(error.branches),
           targets: new Set(error.targets),
@@ -526,10 +651,11 @@ const suiteErrors = (suite: FlakySuite): SuiteError[] => {
         });
         continue;
       }
-      current.failures += error.failuresCount;
-      current.builds = undefined;
-      for (const { pipeline, failuresCount } of error.byPipeline) {
-        current.byPipeline.set(pipeline, (current.byPipeline.get(pipeline) ?? 0) + failuresCount);
+      for (const { pipeline, buildIds } of error.byPipeline) {
+        current.byPipeline.set(
+          pipeline,
+          new Set([...(current.byPipeline.get(pipeline) ?? []), ...buildIds])
+        );
       }
       for (const branch of error.branches) current.branches.add(branch);
       for (const target of error.targets) current.targets.add(target);
@@ -545,7 +671,9 @@ const suiteErrors = (suite: FlakySuite): SuiteError[] => {
       }
     }
   }
-  return [...byKey.values()].sort((a, b) => b.failures - a.failures || a.key.localeCompare(b.key));
+  return [...byKey.values()].sort(
+    (a, b) => errorBuilds(b) - errorBuilds(a) || a.key.localeCompare(b.key)
+  );
 };
 
 /**
@@ -566,55 +694,65 @@ const errorTitle = (message: string): string => {
 const escapeHtml = (text: string): string =>
   text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-/** `` `kibana-pull-request` (597), `kibana-on-merge` (128) ``, or `` `kibana-on-merge` only ``. */
-const formatErrorPipelines = (byPipeline: Map<string, number>): string => {
-  const entries = [...byPipeline.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+/** `` `kibana-pull-request` (597) and `kibana-on-merge` (128) ``, or `` `kibana-on-merge` ``. */
+const formatErrorPipelines = (byPipeline: Map<string, Set<string>>): string => {
+  const entries = [...byPipeline.entries()]
+    .map(([pipeline, builds]): [string, number] => [pipeline, builds.size])
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
   if (entries.length === 1) {
-    return `${inlineCode(entries[0][0])} only`;
+    return inlineCode(entries[0][0]);
   }
-  return entries.map(([pipeline, failures]) => `${inlineCode(pipeline)} (${failures})`).join(', ');
+  return andList(entries.map(([pipeline, builds]) => `${inlineCode(pipeline)} (${builds})`));
 };
 
 /**
- * One error, collapsed under its share of the suite's failures and its first line; inside, the
- * full message, then where it was seen.
+ * `Hit by *a* and *b* · seen on \`kibana-on-merge\` · \`9.5\` · \`stateful-classic\` · last seen
+ * [#116176](…), 2026-11-11 09:55 UTC`: which tests hit the error when the suite has several, and
+ * where and when it was last seen.
  */
-const errorSection = (suite: FlakySuite, error: SuiteError, totalFailures: number): string => {
-  const counts =
-    error.builds !== undefined
-      ? `${error.failures} in ${plural(error.builds, 'build')}`
-      : `${error.failures} across ${plural(error.tests.length, 'test')}`;
-  const summary =
-    `<b>${formatPercent(error.failures / totalFailures)} of failures</b> (${counts}) · ` +
-    `<code>${escapeHtml(errorTitle(error.message))}</code> · ` +
-    formatDateRange(error.firstFailedAt, error.lastFailedAt);
+const errorDetails = (suite: FlakySuite, error: SuiteError): string => {
   const targets = [...error.targets].filter((target) => target !== UNKNOWN_TARGET_MODE).sort();
   const branches = [...error.branches];
-  const rows: string[][] = [
-    ...(suite.tests.length > 1
-      ? [['**Tests**', error.tests.map((title) => `*${title}*`).join(', ')]]
-      : []),
-    ['**Pipelines**', formatErrorPipelines(error.byPipeline)],
-    [
-      '**Branches**',
-      formatFailedBranches({ failedBranches: branches.length, failedBranchNames: branches }),
-    ],
-    ...(targets.length > 0
-      ? [[`**${targets.length > 1 ? 'Targets' : 'Target'}**`, targets.map(inlineCode).join(', ')]]
-      : []),
-    [
-      '**Last seen**',
-      formatBuildLink(
+  const link = error.lastFailedBuildUrl
+    ? formatBuildLink(
         { buildUrl: error.lastFailedBuildUrl, jobId: error.lastFailedJobId },
-        error.lastFailedAt
-      ),
-    ],
+        undefined
+      )
+    : undefined;
+  const pipelines = formatErrorPipelines(error.byPipeline);
+  const parts = [
+    ...(suite.tests.length > 1
+      ? [`Hit by ${andList(error.tests.map((title) => `*${title}*`))}`, `seen on ${pipelines}`]
+      : [`Seen on ${pipelines}`]),
+    ...(branches.length > 0
+      ? [formatFailedBranches({ failedBranches: branches.length, failedBranchNames: branches })]
+      : []),
+    ...(targets.length > 0 ? [targets.map(inlineCode).join(', ')] : []),
+    `last seen ${[link, formatDateTime(error.lastFailedAt)].filter(Boolean).join(', ')}`,
   ];
+  return parts.join(' · ');
+};
+
+/**
+ * One error, under its share of the suite's failed builds and its first line, collapsed unless
+ * `open`; inside, the full message, then a line on where it was seen.
+ */
+const errorSection = (
+  suite: FlakySuite,
+  error: SuiteError,
+  failedBuilds: number,
+  open: boolean
+): string => {
+  const builds = errorBuilds(error);
+  const share = formatPercent(failedBuilds > 0 ? builds / failedBuilds : 0);
+  const summary =
+    `<b>${share} of failed builds</b> (${builds} of ${failedBuilds}) · ` +
+    `<code>${escapeHtml(errorTitle(error.message))}</code> · ` +
+    formatDateRange(error.firstFailedAt, error.lastFailedAt);
   return collapsed(
     summary,
-    [codeBlock(formatFullFailureMessage(error.message)), table(['Field', 'Value'], rows)].join(
-      '\n\n'
-    )
+    [codeBlock(formatFullFailureMessage(error.message)), errorDetails(suite, error)].join('\n\n'),
+    { open }
   );
 };
 
@@ -626,9 +764,10 @@ const isPullRequestOnly = (error: SuiteError): boolean =>
   error.branches.size > 0 && [...error.branches].every(isPullRequestRef);
 
 /**
- * The suite's distinct errors over the window, most failures first, at most `MAX_ERRORS` shown.
- * Errors seen only on pull request builds are left out, and the section says so, so that it
- * describes what the suite does on real branches.
+ * The suite's distinct errors over the window, most builds first, at most `MAX_ERRORS` shown.
+ * The first is open, so the likely cause shows without a click. Errors seen only on pull request
+ * builds are left out, and the section says so, so that it describes what the suite does on real
+ * branches.
  */
 const failuresByErrorMessage = (suite: FlakySuite): string => {
   const all = suiteErrors(suite);
@@ -643,10 +782,13 @@ const failuresByErrorMessage = (suite: FlakySuite): string => {
   if (errors.length === 0) {
     return ['#### Failures by Error Message', leftOut].join('\n\n');
   }
-  const totalFailures = errors.reduce((sum, error) => sum + error.failures, 0);
+  // A build that hit two errors counts once, so the shares can add up to more than 100%
+  const failedBuilds = new Set(
+    errors.flatMap((error) => [...error.byPipeline.values()].flatMap((builds) => [...builds]))
+  ).size;
   const shown = errors
     .slice(0, MAX_ERRORS)
-    .map((error) => errorSection(suite, error, totalFailures));
+    .map((error, index) => errorSection(suite, error, failedBuilds, index === 0));
   const rest = errors.length - shown.length;
   return [
     '#### Failures by Error Message',
@@ -663,9 +805,10 @@ const pipelineLink = (pipeline: string): string =>
 /**
  * Where else the suite fails: every pipeline and branch, not just the report scope. Rates here
  * are over all branches and say how widely it hurts, not how flaky it is; that is the table above.
+ * Left out when it failed on one pipeline only, which the errors already name.
  */
 const failuresByPipeline = (suite: FlakySuite, report: FlakyTestReport): string | undefined => {
-  if (suite.byPipeline.length === 0) {
+  if (suite.byPipeline.filter(({ failedBuilds }) => failedBuilds > 0).length <= 1) {
     return undefined;
   }
   const scope =
@@ -675,29 +818,35 @@ const failuresByPipeline = (suite: FlakySuite, report: FlakyTestReport): string 
     pipelineLink(stats.pipeline),
     formatFailedBuilds(stats),
     formatFailedBranches(stats),
-    formatBuildLink(
-      { buildUrl: stats.lastFailedBuildUrl, jobId: stats.lastFailedJobId },
-      stats.lastFailedAt
-    ),
+    lastFailureCell(stats),
   ]);
   return [
     '#### Failures by Pipeline',
     '',
     scope,
     '',
-    table(['Pipeline', 'Failed builds', 'Branches', 'Sample failure'], rows),
+    table(['Pipeline', 'Failed builds', 'Branches', 'Last failure'], rows),
   ].join('\n');
 };
 
-const issueList = (numbers: readonly number[]): string =>
-  numbers.map((number) => `#${number}`).join(', ');
-
-const supersededIssues = (ctx: FlakySuiteIssueContext): string | undefined =>
-  ctx.supersededIssues && ctx.supersededIssues.length > 0
-    ? `Previously tracked in ${issueList(
-        ctx.supersededIssues
-      )}, closed before the suite failed again.`
-    : undefined;
+/**
+ * The issues the tests table has no room for: those of tests beyond its rows, which the
+ * "Previously tracked in" line lists instead.
+ */
+const unlistedPreviousIssues = (
+  suite: FlakySuite,
+  { previousIssues }: FlakySuiteIssueContext
+): number[] => {
+  if (!previousIssues) {
+    return [];
+  }
+  const numbersOf = (tests: FlakySuite['tests']) =>
+    tests.flatMap(({ testId }) => previousIssues.get(testId) ?? []);
+  const listed = new Set(numbersOf(suite.tests.slice(0, MAX_TEST_ROWS)));
+  return [...new Set(numbersOf(suite.tests.slice(MAX_TEST_ROWS)))].filter(
+    (number) => !listed.has(number)
+  );
+};
 
 const relatedIssues = (ctx: FlakySuiteIssueContext): string | undefined =>
   ctx.relatedIssues && ctx.relatedIssues.length > 0
@@ -705,41 +854,62 @@ const relatedIssues = (ctx: FlakySuiteIssueContext): string | undefined =>
     : undefined;
 
 /** What a report found about the suite: its flaky tests, then the failures from every angle. */
-const reportSections = (suite: FlakySuite, report: FlakyTestReport): Array<string | undefined> => [
+const reportSections = (
+  suite: FlakySuite,
+  { report, previousIssues }: FlakySuiteIssueContext
+): Array<string | undefined> => [
   testsTable(suite.tests, {
     withDashboardLinks: true,
     maxRows: MAX_TEST_ROWS,
     thresholds: report.thresholds,
+    lookbackDays: report.window.lookbackDays,
+    previousIssues,
   }),
   skippedNote(suite),
 ];
 
 const failureSections = (suite: FlakySuite, report: FlakyTestReport): Array<string | undefined> => [
   failuresByErrorMessage(suite),
-  failuresByBranch(suite),
-  failuresByTarget(suite),
+  statusByBranch(suite, report),
+  statusByTarget(suite),
   failuresByPipeline(suite, report),
 ];
 
 const joinSections = (sections: ReadonlyArray<string | undefined>): string =>
   sections.filter((section) => section !== undefined).join('\n\n');
 
-/** Full issue body for a new suite issue, including the hidden metadata. */
-export const renderFlakySuiteIssueBody = (suite: FlakySuite, ctx: FlakySuiteIssueContext): string =>
-  updateIssueMetadata(
+export const SKIP_TIP =
+  '> [!TIP]\n' +
+  "> Review the failures. If you'd like to skip the test, ask the #kibana-operations team " +
+  'to `/skip` it, or skip the test case manually.';
+
+/**
+ * Full issue body for a new suite issue, including the hidden metadata. The issues it replaces are
+ * named next to their test in the tests table.
+ */
+export const renderFlakySuiteIssueBody = (
+  suite: FlakySuite,
+  ctx: FlakySuiteIssueContext
+): string => {
+  const unlisted = unlistedPreviousIssues(suite, ctx);
+  return updateIssueMetadata(
     joinSections([
-      opening(suite),
-      ...reportSections(suite, ctx.report),
-      '### Suite',
-      suiteDetails(suite),
+      opening(suite, ctx.report),
+      ...reportSections(suite, ctx),
+      suiteLine(suite),
       '### Failures',
       ...failureSections(suite, ctx.report),
-      supersededIssues(ctx),
+      SKIP_TIP,
+      unlisted.length > 0 ? previouslyTrackedIn(unlisted) : undefined,
       relatedIssues(ctx),
     ]),
-    flakySuiteIssueMetadata(suite, ctx.report),
+    {
+      ...flakySuiteIssueMetadata(suite, ctx.report),
+      ...(unlisted.length > 0 ? { 'suite.previousIssues': unlisted } : {}),
+    },
     FLAKY_TEST_SUITE_METADATA_PREFIX
   );
+};
 
 /**
  * The body of a refreshed issue: the text stays as filed, a record of what the suite did then,
@@ -758,30 +928,163 @@ export const refreshFlakySuiteIssueMetadata = (
     FLAKY_TEST_SUITE_METADATA_PREFIX
   );
 
-const SKIP_TIP =
-  '> [!TIP]\n' +
-  "> Review the failures. If you'd like to skip the test, ask the #kibana-operations team " +
-  'to `/skip` it, or skip the test case manually.';
+/** `[6 Nov](…#job)`, the day of the newest failure linked to its job when the build is known. */
+const lastFailedLink = ({
+  lastFailedAt,
+  lastFailedBuildUrl,
+  lastFailedJobId,
+}: BuildCounts): string | undefined => {
+  if (!lastFailedAt) {
+    return undefined;
+  }
+  const day = formatDay(lastFailedAt);
+  return lastFailedBuildUrl
+    ? `[${day}](${buildkiteJobUrl(lastFailedBuildUrl, lastFailedJobId)})`
+    : day;
+};
 
 /**
- * The comment of a refresh that found new failures: this report's numbers for the suite, as the
- * body keeps the ones it was filed with, then how to skip it. In elastic/kibana a `kibanamachine`
- * comment runs the failed-test alert of elastic/kibana-operations `triage/` (a Slack message for
- * teams opted in to existing-failure alerts), which reads the report count from the body's
- * metadata, so the metadata is updated first.
+ * Whether no report has found the suite flaky yet: a consistently failing issue, which the daily
+ * report now finds flaky for the first time.
+ */
+const neverFlaky = (previous: RecordedFlakySuiteIssueMetadata | undefined): boolean =>
+  previous !== undefined && previous['report.history'].length === 0;
+
+/**
+ * The flaky tests the issue has not shown, when it records the ones it has, or every flaky test
+ * when it has never been flaky.
+ */
+const newlyFlakyTestIds = (
+  suite: FlakySuite,
+  previous: RecordedFlakySuiteIssueMetadata | undefined
+): Set<string> => {
+  const shown = previous?.['report.shownTestIds'] ?? (neverFlaky(previous) ? [] : undefined);
+  return new Set(
+    shown ? suite.tests.map(({ testId }) => testId).filter((id) => !shown.includes(id)) : []
+  );
+};
+
+/** `still flaky`, or `now flaky` on an issue that has never been flaky, when it was closed too. */
+const flakyState = (reopened: boolean, first: boolean): string => {
+  if (first) {
+    return reopened ? 'now flaky, after this issue was closed' : 'now flaky';
+  }
+  return reopened ? 'flaky again after this issue was closed' : 'still flaky';
+};
+
+/** `10% of builds (49 / 509)` */
+const buildNumbers = ({ buildFailRate, failedBuilds, builds }: BuildCounts): string =>
+  `${formatPercent(buildFailRate)} of builds (${failedBuilds} / ${builds})`;
+
+const withLastFailed = (numbers: string, latest: BuildCounts | undefined): string => {
+  const lastFailed = latest ? lastFailedLink(latest) : undefined;
+  return lastFailed ? `${numbers}, last failed ${lastFailed}` : numbers;
+};
+
+type FlakySuiteTest = FlakySuite['tests'][number];
+
+/**
+ * The test's counts on those of the branches given where it is flaky itself, highest rate first,
+ * as in the body's tests table: a stray failure on another branch is left out.
+ */
+const flakyOn = (
+  test: FlakySuiteTest,
+  branches: readonly JudgedScope[],
+  thresholds: BranchThresholds
+) => {
+  const keys = new Set(branches.map(scopeKey));
+  return test.byBranch
+    .filter((stats) => keys.has(scopeKey(stats)) && isFlakyBranch(stats, thresholds))
+    .sort((a, b) => b.buildFailRate - a.buildFailRate);
+};
+
+/**
+ * `` - `sorts by status` (newly flaky): 10% of builds (49 / 509), last failed [9 Sep](…) ``: the
+ * test's own numbers on the branches it is flaky on, each named when the comment covers several,
+ * and its newest failure on them.
+ */
+const testLine = (
+  test: FlakySuiteTest,
+  flakyStats: ReturnType<typeof flakyOn>,
+  nameBranches: boolean,
+  newlyFlaky: boolean
+): string => {
+  const name = `${inlineCode(test.title)}${newlyFlaky ? ' (newly flaky)' : ''}`;
+  const numbers = nameBranches
+    ? flakyStats.map((stats) => `${buildNumbers(stats)} on ${formatScope(stats)}`).join(', ')
+    : buildNumbers(flakyStats[0]);
+  const latest = flakyStats.reduce<BuildCounts | undefined>(
+    (newest, stats) =>
+      stats.lastFailedAt && (!newest?.lastFailedAt || stats.lastFailedAt > newest.lastFailedAt)
+        ? stats
+        : newest,
+    undefined
+  );
+  return `- ${name}: ${withLastFailed(numbers, latest)}`;
+};
+
+/**
+ * What a comment covers: the branches where the suite is flaky and not skipped, worst first, a
+ * pipeline judged on its own apart from the same branch of the others.
+ */
+const commentBranches = (suite: FlakySuite, thresholds: BranchThresholds): JudgedScope[] => {
+  const flaky = flakyBranches(suite, thresholds);
+  const skipped = branchSkips(suite);
+  return worstPerKey(
+    suite,
+    (test) => test.byBranch,
+    (stats) => scopeKey(stats)
+  )
+    .map(({ worst }): JudgedScope => ({ branch: worst.branch, pipeline: worst.pipeline }))
+    .filter((scoped) => flaky.has(scopeKey(scoped)) && !skipped.has(scopeKey(scoped)));
+};
+
+/** The tests a comment lists, those flaky on one of its branches, with their counts there. */
+const commentTests = (suite: FlakySuite, thresholds: BranchThresholds) => {
+  const branches = commentBranches(suite, thresholds);
+  return suite.tests
+    .map((test) => ({ test, stats: flakyOn(test, branches, thresholds) }))
+    .filter(({ stats }) => stats.length > 0);
+};
+
+/** The tests a comment names, as many as the body's tests table: what it records as shown. */
+const commentedTestIds = (suite: FlakySuite, thresholds: BranchThresholds): string[] =>
+  commentTests(suite, thresholds)
+    .slice(0, MAX_TEST_ROWS)
+    .map(({ test }) => test.testId);
+
+/**
+ * The comment of a refresh that found new failures: where the suite is flaky and not skipped, then
+ * a line per test flaky there, as many as the body's tests table, with its own numbers and newest
+ * failure, and the tests the issue has not shown marked as newly flaky. The body keeps the full
+ * tables.
  */
 export const renderFlakySuiteIssueComment = (
   suite: FlakySuite,
-  { report, reopened }: FlakySuiteIssueCommentContext
+  { report, reopened, previous }: FlakySuiteIssueCommentContext
 ): string => {
-  const lead = reopened
-    ? 'This test suite appears to be flaky again after this issue was closed'
-    : 'This test suite still appears to be flaky';
-  return joinSections([
-    `${lead}, with ${plural(suite.tests.length, 'flaky test')} over ` +
-      `${formatDateRange(report.window.from, report.window.to)}:`,
-    ...reportSections(suite, report),
-    ...failureSections(suite, report),
-    SKIP_TIP,
-  ]);
+  const first = neverFlaky(previous);
+  const state = flakyState(reopened, first);
+  const leadFor = (count: number) =>
+    count > 1 ? `${plural(count, 'test')} ${state}` : `${state[0].toUpperCase()}${state.slice(1)}`;
+  const branches = commentBranches(suite, report.thresholds);
+  if (branches.length === 0) {
+    return `${leadFor(suite.tests.length)}.`;
+  }
+
+  const where =
+    branches.length === 1 ? `${reopened ? ',' : ''} on ${formatScope(branches[0])}` : '';
+  const newlyFlaky = newlyFlakyTestIds(suite, previous);
+  const listed = commentTests(suite, report.thresholds);
+  const rest = listed.length - MAX_TEST_ROWS;
+  return [
+    `${leadFor(listed.length)}${where}:`,
+    '',
+    ...listed
+      .slice(0, MAX_TEST_ROWS)
+      .map(({ test, stats }) =>
+        testLine(test, stats, branches.length > 1, !first && newlyFlaky.has(test.testId))
+      ),
+    ...(rest > 0 ? ['', `and ${plural(rest, 'more test')}.`] : []),
+  ].join('\n');
 };

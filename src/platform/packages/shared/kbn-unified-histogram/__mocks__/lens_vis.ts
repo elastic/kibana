@@ -9,7 +9,7 @@
 
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { Suggestion } from '@kbn/lens-plugin/public';
+import type { LensSuggestionsApi, Suggestion } from '@kbn/lens-plugin/public';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import type { ChartType } from '@kbn/visualization-utils';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -76,6 +76,7 @@ export const getLensVisMock = async ({
   externalVisContext,
   getModifiedVisAttributes,
   onLensSuggestionsApiCall,
+  onLensSuggestionsApiParams,
 }: {
   filters: QueryParams['filters'];
   query: QueryParams['query'];
@@ -95,6 +96,7 @@ export const getLensVisMock = async ({
     preferredChartType: ChartType | undefined,
     preferredVisAttributes: unknown
   ) => void;
+  onLensSuggestionsApiParams?: (params: Parameters<LensSuggestionsApi>) => void;
 }): Promise<{
   lensService: LensVisService;
   visContext: UnifiedHistogramVisContext | undefined;
@@ -109,6 +111,7 @@ export const getLensVisMock = async ({
           const preferredChartType = params[3];
           const preferredVisAttributes = params[4];
           onLensSuggestionsApiCall?.(preferredChartType, preferredVisAttributes);
+          onLensSuggestionsApiParams?.(params);
           if ('query' in context && context.query === query) {
             return allSuggestions;
           }

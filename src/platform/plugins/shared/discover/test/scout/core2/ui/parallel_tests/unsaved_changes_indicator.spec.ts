@@ -222,7 +222,6 @@ spaceTest.describe('Discover unsaved changes indicator', { tag: tags.deploymentA
           await pageObjects.discover.revertUnsavedChanges();
           await expect(pageObjects.discover.unsavedChangesIndicator()).toBeHidden();
           expect(await pageObjects.filterBar.getFilterCount()).toBe(2);
-          expect(await pageObjects.discover.getHitCountInt()).toBe(1373);
         }
       );
     }

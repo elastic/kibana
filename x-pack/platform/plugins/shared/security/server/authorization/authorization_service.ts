@@ -38,7 +38,7 @@ import type {
 
 import { initAPIAuthorization } from './api_authorization';
 import { initAppAuthorization } from './app_authorization';
-import { checkPrivilegesFactory } from './check_privileges';
+import { checkPrivilegesFactory, type PrivilegeCheckRecovery } from './check_privileges';
 import { checkPrivilegesDynamicallyWithRequestFactory } from './check_privileges_dynamically';
 import { checkSavedObjectsPrivilegesWithRequestFactory } from './check_saved_objects_privileges';
 import { disableUICapabilitiesFactory } from './disable_ui_capabilities';
@@ -50,6 +50,7 @@ import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import { APPLICATION_PREFIX } from '../../common/constants';
 import { canRedirectRequest } from '../authentication';
 import type { OnlineStatusRetryScheduler } from '../elasticsearch';
+import { createOnlineStatusTaskRunner } from '../elasticsearch';
 import { createRedirectHtmlPage } from '../lib/html_page_utils';
 import type { SpacesService } from '../plugin';
 
@@ -70,6 +71,9 @@ interface AuthorizationServiceSetupParams {
   getCurrentUser(request: KibanaRequest): AuthenticatedUser | null;
 
   customBranding: CustomBrandingSetup;
+
+  /** Returns the recovery that request-scoped privilege checks answer on the side for object-level security. */
+  getPrivilegeCheckRecovery?: () => PrivilegeCheckRecovery | undefined;
 }
 
 interface AuthorizationServiceStartParams {
@@ -107,6 +111,7 @@ export class AuthorizationService {
     getSpacesService,
     getCurrentUser,
     customBranding,
+    getPrivilegeCheckRecovery,
   }: AuthorizationServiceSetupParams): AuthorizationServiceSetupInternal {
     this.logger = loggers.get('authorization');
     this.applicationName = `${APPLICATION_PREFIX}${kibanaIndexName}`;
@@ -118,7 +123,8 @@ export class AuthorizationService {
     const { checkPrivilegesWithRequest, checkUserProfilesPrivileges } = checkPrivilegesFactory(
       actions,
       getClusterClient,
-      this.applicationName
+      this.applicationName,
+      getPrivilegeCheckRecovery
     );
 
     const esSecurityConfig = getClusterClient()
@@ -220,18 +226,16 @@ export class AuthorizationService {
 
     this.statusSubscription = online$
       .pipe(
-        switchMap(async ({ scheduleRetry }) => {
-          try {
-            await registerPrivilegesWithCluster(
+        switchMap(
+          createOnlineStatusTaskRunner(() =>
+            registerPrivilegesWithCluster(
               this.logger,
               this.privileges,
               this.applicationName,
               clusterClient
-            );
-          } catch (err) {
-            scheduleRetry();
-          }
-        })
+            )
+          )
+        )
       )
       .subscribe();
   }

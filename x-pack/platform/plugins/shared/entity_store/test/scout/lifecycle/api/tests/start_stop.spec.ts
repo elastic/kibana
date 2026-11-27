@@ -12,6 +12,7 @@ import {
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
 } from '../../../common/fixtures/constants';
+import { taskExists } from '../../../common/fixtures/helpers';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
 
 /**
@@ -66,13 +67,7 @@ apiTest.describe('Entity Store stop/start API tests', { tag: ENTITY_STORE_TAGS }
       expect(stopResponse.statusCode).toBe(200);
 
       // 4. Verify the task has been stopped (task removed from task manager)
-      let taskNotFoundAfterStop = false;
-      try {
-        await kbnClient.savedObjects.get({ type: 'task', id: taskId });
-      } catch {
-        taskNotFoundAfterStop = true;
-      }
-      expect(taskNotFoundAfterStop).toBe(true);
+      expect(await taskExists(kbnClient, taskId)).toBe(false);
 
       // 5. Trigger start endpoint
       const startResponse = await apiClient.put(ENTITY_STORE_ROUTES.public.START, {

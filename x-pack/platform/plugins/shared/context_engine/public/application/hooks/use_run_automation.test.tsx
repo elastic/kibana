@@ -1,0 +1,147 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { coreMock } from '@kbn/core/public/mocks';
+import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { RunWorkflowResponseDto } from '@kbn/workflows';
+import type { RunWorkflowParams } from '@kbn/workflows-ui';
+import { renderHook } from '@testing-library/react';
+import React from 'react';
+import { useRunAutomation } from './use_run_automation';
+
+const mockMutate = jest.fn();
+const mockAddSuccess = jest.fn();
+const mockAddError = jest.fn();
+
+type HttpError = IHttpFetchError<ResponseErrorBody>;
+
+interface RunWorkflowHookOptions {
+  onSuccess: (data: RunWorkflowResponseDto, variables: RunWorkflowParams) => void;
+  onError: (error: HttpError) => void;
+}
+
+let capturedRunWorkflowOptions: RunWorkflowHookOptions | undefined;
+
+const createRunFailedHttpError = (): HttpError => {
+  const body: ResponseErrorBody = { message: 'run failed', statusCode: 500 };
+  return Object.assign(new Error('run failed'), {
+    name: 'HttpFetchError',
+    request: new Request('http://localhost'),
+    body,
+  });
+};
+
+jest.mock('@kbn/workflows-ui', () => ({
+  useRunWorkflow: (options: RunWorkflowHookOptions) => {
+    capturedRunWorkflowOptions = options;
+    return {
+      mutate: mockMutate,
+      isLoading: false,
+    };
+  },
+}));
+
+const renderUseRunAutomation = (options: { onStarted?: (executionId: string) => void } = {}) => {
+  const core = coreMock.createStart();
+  core.application.getUrlForApp.mockReturnValue('/app/workflows/wf-1');
+  core.notifications.toasts.addSuccess = mockAddSuccess;
+  core.notifications.toasts.addError = mockAddError;
+
+  const queryClient = new QueryClient();
+  jest.spyOn(queryClient, 'invalidateQueries');
+
+  const { result } = renderHook(() => useRunAutomation(options), {
+    wrapper: ({ children }) => (
+      <I18nProvider>
+        <QueryClientProvider client={queryClient}>
+          <KibanaContextProvider services={core}>{children}</KibanaContextProvider>
+        </QueryClientProvider>
+      </I18nProvider>
+    ),
+  });
+
+  return { core, result, queryClient };
+};
+
+describe('useRunAutomation', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    capturedRunWorkflowOptions = undefined;
+  });
+
+  it('refreshes the latest execution of the workflow once its run starts', () => {
+    const { queryClient } = renderUseRunAutomation();
+
+    capturedRunWorkflowOptions?.onSuccess(
+      { workflowExecutionId: 'run-1' } as RunWorkflowResponseDto,
+      { id: 'workflow-1', inputs: {} } as RunWorkflowParams
+    );
+
+    expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: ['context_engine', 'workflow_latest_execution', 'workflow-1'],
+    });
+  });
+
+  it('reports the started execution to the caller', () => {
+    const onStarted = jest.fn();
+    renderUseRunAutomation({ onStarted });
+
+    capturedRunWorkflowOptions?.onSuccess(
+      { workflowExecutionId: 'run-1' } as RunWorkflowResponseDto,
+      { id: 'workflow-1', inputs: {} } as RunWorkflowParams
+    );
+
+    expect(onStarted).toHaveBeenCalledWith('run-1');
+  });
+
+  it('delegates runAutomation to useRunWorkflow mutate', () => {
+    const { result } = renderUseRunAutomation();
+
+    result.current.runAutomation('workflow-1', { ticketId: 'T-1' });
+
+    expect(mockMutate).toHaveBeenCalledWith({ id: 'workflow-1', inputs: { ticketId: 'T-1' } });
+  });
+
+  it('shows a success toast with a view-execution link when the run succeeds', () => {
+    renderUseRunAutomation();
+
+    capturedRunWorkflowOptions?.onSuccess(
+      { workflowExecutionId: 'exec-123' },
+      { id: 'workflow-1', inputs: {} }
+    );
+
+    expect(mockAddSuccess).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Workflow run started',
+        actionProps: expect.objectContaining({
+          primary: expect.objectContaining({
+            children: 'View execution',
+            href: '/app/workflows/wf-1',
+          }),
+        }),
+      })
+    );
+  });
+
+  it('shows an error toast when the run fails', () => {
+    renderUseRunAutomation();
+    const error = createRunFailedHttpError();
+
+    capturedRunWorkflowOptions?.onError(error);
+
+    expect(mockAddError).toHaveBeenCalledWith(
+      error,
+      expect.objectContaining({
+        title: 'Unable to run workflow',
+        toastMessage: 'run failed',
+      })
+    );
+  });
+});

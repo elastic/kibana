@@ -19,7 +19,7 @@ import {
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import type { GetAgentOptions, WritableAgentProvider, AgentProviderFn } from '../agent_source';
 import type { ToolsServiceStart } from '../../tools';
-import { AgentAvailabilityCache } from '../builtin/availability_cache';
+import type { AvailabilityCache } from '../../common/availability_cache';
 import { createClient } from './client';
 import type { AgentClient } from './client';
 import type { InternalAgentDefinition } from '../agent_registry';
@@ -33,14 +33,14 @@ export const createPersistedProviderFn = (opts: {
   logger: Logger;
   availabilityByAgentId: Map<string, AgentAvailabilityConfig>;
   hiddenByAgentId: Map<string, boolean>;
+  /** Owned by the caller, so that availability results are reused across requests. */
+  availabilityCache: AvailabilityCache;
 }): AgentProviderFn<false> => {
-  const availabilityCache = new AgentAvailabilityCache();
   return ({ request, space }) => {
     return createPersistedProvider({
       ...opts,
       request,
       space,
-      availabilityCache,
     });
   };
 };
@@ -70,7 +70,7 @@ const createPersistedProvider = async ({
   logger: Logger;
   availabilityByAgentId: Map<string, AgentAvailabilityConfig>;
   hiddenByAgentId: Map<string, boolean>;
-  availabilityCache: AgentAvailabilityCache;
+  availabilityCache: AvailabilityCache;
 }): Promise<WritableAgentProvider> => {
   const client = await createClient({
     elasticsearch,
@@ -95,7 +95,7 @@ const createPersistedProvider = async ({
     get: async (agentId: string, opts?: GetAgentOptions) => {
       const access = opts?.access ?? 'read';
       try {
-        const definition = await client.getWithAccess(agentId, access);
+        const definition = await client.getWithAccess(agentId, { access, runAs: opts?.runAs });
         return toInternalDefinition({
           definition,
           availabilityByAgentId,
@@ -103,7 +103,11 @@ const createPersistedProvider = async ({
           availabilityCache,
         });
       } catch (e) {
-        if (agentId === agentBuilderDefaultAgentId && isAgentNotFoundError(e)) {
+        if (
+          agentId === agentBuilderDefaultAgentId &&
+          opts?.runAs === undefined &&
+          isAgentNotFoundError(e)
+        ) {
           const definition = await ensureDefaultAgent(client);
           return toInternalDefinition({
             definition,
@@ -164,6 +168,15 @@ const createPersistedProvider = async ({
         availabilityCache,
       });
     },
+    setServiceAccount: async (agentId, serviceAccountId) => {
+      const definition = await client.setServiceAccount(agentId, serviceAccountId);
+      return toInternalDefinition({
+        definition,
+        availabilityByAgentId,
+        hiddenByAgentId,
+        availabilityCache,
+      });
+    },
     delete: (agentId: string) => {
       return client.delete({ id: agentId });
     },
@@ -186,7 +199,7 @@ export const toInternalDefinition = ({
   definition: PersistedAgentDefinitionWithPermissions;
   availabilityByAgentId: Map<string, AgentAvailabilityConfig>;
   hiddenByAgentId: Map<string, boolean>;
-  availabilityCache: AgentAvailabilityCache;
+  availabilityCache: AvailabilityCache;
 }): InternalAgentDefinition => {
   const type = definition.type ?? chatAgentTypeId;
   const isSystemCreated = definition.created_by?.username === SYSTEM_USER_ID;

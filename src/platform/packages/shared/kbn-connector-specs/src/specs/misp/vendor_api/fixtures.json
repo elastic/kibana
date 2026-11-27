@@ -1,0 +1,46 @@
+{
+  "checkIndicator": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/attributes/restSearch",
+        "source": "v2"
+      }
+    ]
+  },
+  "checkWarninglist": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/warninglists/checkValue",
+        "source": "v2"
+      }
+    ]
+  },
+  "searchAttributes": {
+    "input": [
+      {
+        "eventId": "42"
+      },
+      {
+        "eventId": "5d1b6a2e-1f4c-4a9e-9b1e-0c2a3d4e5f60"
+      }
+    ],
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/attributes/restSearch",
+        "source": "v2"
+      }
+    ]
+  },
+  "searchEvents": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/events/restSearch",
+        "source": "v2"
+      }
+    ]
+  }
+}

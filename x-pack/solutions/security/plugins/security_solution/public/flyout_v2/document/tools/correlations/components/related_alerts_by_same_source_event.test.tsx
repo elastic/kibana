@@ -56,7 +56,6 @@ const renderRelatedAlertsBySameSourceEvent = () =>
           scopeId={scopeId}
           eventId={eventId}
           onShowAlert={mockOnShowAlert}
-          useLegacyExpandableFlyout={false}
         />
       </DocumentDetailsContext.Provider>
     </TestProviders>

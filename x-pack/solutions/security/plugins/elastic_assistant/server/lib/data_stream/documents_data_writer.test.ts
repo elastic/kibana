@@ -105,6 +105,21 @@ describe('DocumentsDataWriter', () => {
                 },
               },
             ],
+            must_not: [
+              {
+                nested: {
+                  path: 'users',
+                  query: {
+                    bool: {
+                      must_not: [
+                        { term: { 'users.id': 'my_profile_uid' } },
+                        { term: { 'users.name': 'elastic' } },
+                      ],
+                    },
+                  },
+                },
+              },
+            ],
           },
         },
       ],

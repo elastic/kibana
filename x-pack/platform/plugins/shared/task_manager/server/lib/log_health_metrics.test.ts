@@ -332,6 +332,42 @@ describe('logHealthMetrics', () => {
     expect(secondMessage).toMatchObject(health);
   });
 
+  it('should log drift as debug if it exceeds the threshold while Elasticsearch-driven backpressure is active', () => {
+    const logger = loggingSystemMock.create().get();
+    const config = getTaskManagerConfig({
+      monitored_stats_health_verbose_log: {
+        enabled: true,
+        level: 'debug',
+        warn_delayed_task_start_in_seconds: 60,
+      },
+    });
+    const health = getMockMonitoredHealth({
+      stats: {
+        runtime: {
+          value: {
+            drift_by_type: {
+              'taskType:test': {
+                p99: 60000,
+              },
+            },
+            drift: {
+              p99: 60000,
+            },
+          },
+        },
+      },
+    });
+
+    logHealthMetrics(health, logger, config, true, docLinks, true);
+
+    const debugCalls = (logger as jest.Mocked<Logger>).debug.mock.calls;
+    expect(debugCalls[0][0] as string).toBe(
+      `Detected delay task start of 60s for task(s) \"taskType:test\" (which exceeds configured value of 60s)`
+    );
+    expect(debugCalls[1][0] as string).toMatch(/^Latest Monitored Stats: \{.*\}$/);
+    expect((logger as jest.Mocked<Logger>).warn).not.toHaveBeenCalled();
+  });
+
   it('should log as debug if there are no stats', () => {
     const logger = loggingSystemMock.create().get();
     const config = getTaskManagerConfig({
@@ -422,6 +458,19 @@ describe('logHealthMetrics', () => {
     const { calculateHealthStatus } = jest.requireMock('./calculate_health_status');
     expect(calculateHealthStatus).toHaveBeenCalledTimes(1);
     expect(calculateHealthStatus.mock.calls[0][0].stats.capacity_estimation).toBeUndefined();
+  });
+
+  it('should pass whether Elasticsearch-driven backpressure is active to the health status calculation', () => {
+    const logger = loggingSystemMock.create().get();
+    const config = getTaskManagerConfig();
+    const { calculateHealthStatus } = jest.requireMock('./calculate_health_status');
+
+    logHealthMetrics(getMockMonitoredHealth(), logger, config, true, docLinks);
+    logHealthMetrics(getMockMonitoredHealth(), logger, config, true, docLinks, true);
+
+    expect(calculateHealthStatus).toHaveBeenCalledTimes(2);
+    expect(calculateHealthStatus.mock.calls[0][4]).toBe(false);
+    expect(calculateHealthStatus.mock.calls[1][4]).toBe(true);
   });
 });
 

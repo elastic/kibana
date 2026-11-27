@@ -6,7 +6,7 @@
  */
 
 import { nightshiftSourceSlugsField } from '@kbn/nightshift-shared';
-import { findSource, resolveSourcesBySlug, type SourceCatalog } from './resolve_source_slugs';
+import { findSource, resolveSourcesBySlugOrId, type SourceCatalog } from './resolve_source_slugs';
 
 /** Tool input for the stored `source_ids` field. Values are source slugs. */
 export const sourceSlugsSchema = nightshiftSourceSlugsField('Disabled sources are accepted.');
@@ -46,7 +46,7 @@ export function assignStoredSourceIds<T extends SlugScopedEvent>(
 
   return {
     ...rest,
-    source_ids: resolveSourcesBySlug(catalog, slugs).map((source) => source.id),
+    source_ids: resolveSourcesBySlugOrId(catalog, slugs).map((source) => source.id),
     ...(item.signals ? { signals: rewriteNested(item.signals, idOf) } : {}),
     ...(item.causal_features ? { causal_features: rewriteNested(item.causal_features, idOf) } : {}),
     ...(item.blast_radius ? { blast_radius: rewriteNested(item.blast_radius, idOf) } : {}),

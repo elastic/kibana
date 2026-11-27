@@ -51,6 +51,7 @@ const ContextMenuContent = ({ items, closePopover }: ContextMenuProps) => {
             key={i}
             icon={item.icon}
             href={item.href}
+            target={item.target}
             onClick={item.onClick}
             data-test-subj={item['data-test-subj']}
           >
@@ -127,14 +128,17 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   if (userMenuLinks.length) {
     const userMenuLinkMenuItems = userMenuLinks
       .sort(({ order: orderA = Infinity }, { order: orderB = Infinity }) => orderA - orderB)
-      .map(({ label, iconType, href, onClick, content }: UserMenuLink) => ({
-        name: label,
-        icon: <EuiIcon type={iconType} size="m" aria-hidden={true} />,
-        href,
-        onClick,
-        'data-test-subj': `userMenuLink__${label}`,
-        content,
-      }));
+      .map(
+        ({ label, iconType, href, isExternal, dataTestSubj, onClick, content }: UserMenuLink) => ({
+          name: label,
+          icon: <EuiIcon type={iconType} size="m" aria-hidden={true} />,
+          href,
+          ...(isExternal && { target: '_blank' }),
+          onClick,
+          'data-test-subj': dataTestSubj ?? `userMenuLink__${label}`,
+          content,
+        })
+      );
     items.push(...userMenuLinkMenuItems);
   }
 
@@ -198,7 +202,11 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
         panels={[
           {
             id: 0,
-            title: displayName,
+            title: (
+              <span className="eui-displayBlock eui-textTruncate" title={displayName}>
+                {displayName}
+              </span>
+            ),
             content: (
               <ContextMenuContent items={items} closePopover={() => setIsPopoverOpen(false)} />
             ),

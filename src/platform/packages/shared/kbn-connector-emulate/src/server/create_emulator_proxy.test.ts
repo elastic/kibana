@@ -1,0 +1,451 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { Agent as HttpAgent } from 'http';
+import { request as httpRequest } from 'http';
+import type { Agent as HttpsAgent } from 'https';
+import { request as httpsRequest } from 'https';
+import type { CustomHostSettings } from '@kbn/actions-utils';
+import { getCustomAgents } from '@kbn/actions-utils';
+import { loggerMock } from '@kbn/logging-mocks';
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import { CfWorkerJsonSchemaValidator } from '@modelcontextprotocol/sdk/validation/cfworker-provider.js';
+import type { OpenApiDocument } from '../openapi';
+import { combineEmulators, emulatorCredential } from '../fetch/combine_emulators';
+import { createEmulatorFetch } from '../fetch/create_emulator_fetch';
+import { createCertificateAuthority } from './certificate_authority';
+import type { EmulatorProxy } from './create_emulator_proxy';
+import { createEmulatorProxy } from './create_emulator_proxy';
+import {
+  createEmulatorControl,
+  createEmulatorControlHandler,
+  MAX_CONTROL_BODY_BYTES,
+} from './emulator_control';
+
+const spec: OpenApiDocument = {
+  openapi: '3.0.3',
+  info: { title: 'Vendor', version: '1' },
+  servers: [{ url: 'https://api.vendor.example/v1' }, { url: 'http://plain.vendor.example' }],
+  components: {
+    securitySchemes: { key: { type: 'apiKey', in: 'header', name: 'x-api-key' } },
+  },
+  security: [{ key: [] }],
+  paths: {
+    '/items/{id}': {
+      get: {
+        operationId: 'getItem',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
+        responses: {
+          '200': {
+            description: 'The item',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  required: ['id'],
+                  properties: { id: { type: 'integer' } },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/items': {
+      post: {
+        operationId: 'createItem',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['name'],
+                properties: { name: { type: 'string' } },
+              },
+            },
+          },
+        },
+        responses: { '204': { description: 'Created' } },
+      },
+    },
+  },
+};
+
+interface SentRequest {
+  readonly method?: string;
+  readonly body?: string;
+  readonly apiKey?: string;
+  readonly agent: HttpAgent | HttpsAgent | undefined;
+}
+
+const send = (url: string, { method = 'GET', body, apiKey = 'any', agent }: SentRequest) =>
+  new Promise<{ status: number; body: string }>((resolve, reject) => {
+    const request = (url.startsWith('https:') ? httpsRequest : httpRequest)(
+      url,
+      {
+        method,
+        agent,
+        headers: {
+          'x-api-key': apiKey,
+          ...(body === undefined ? {} : { 'content-type': 'application/json' }),
+        },
+      },
+      (response) => {
+        let text = '';
+        response.setEncoding('utf8');
+        response.on('data', (chunk) => (text += chunk));
+        response.on('end', () => resolve({ status: response.statusCode ?? 0, body: text }));
+      }
+    );
+    request.on('error', reject);
+    request.end(body);
+  });
+
+describe('createEmulatorProxy', () => {
+  const certificateAuthority = createCertificateAuthority();
+  let mock: ReturnType<typeof createEmulatorFetch>;
+  let proxy: EmulatorProxy;
+  let proxyUrl: URL;
+
+  // The agents Kibana's actions plugin builds for `xpack.actions.proxyUrl`, trusting the mock's CA
+  // for the vendor host through `xpack.actions.customHostSettings`.
+  const kibanaAgents = (url: string, customHostSettings?: CustomHostSettings) =>
+    getCustomAgents({
+      logger: loggerMock.create(),
+      proxySettings: {
+        proxyUrl: proxyUrl.href,
+        proxyBypassHosts: undefined,
+        proxyOnlyHosts: undefined,
+        proxySSLSettings: {},
+      },
+      sslSettings: { verificationMode: 'full' },
+      customHostSettings,
+      url,
+    });
+
+  const trustingCa = (url: string) =>
+    kibanaAgents(url, {
+      url: new URL(url).origin,
+      ssl: { certificateAuthoritiesData: certificateAuthority.cert },
+    });
+
+  beforeEach(async () => {
+    mock = createEmulatorFetch({ specs: [spec] });
+    proxy = createEmulatorProxy({ fetch: mock.fetch, certificateAuthority });
+    proxyUrl = await proxy.listen();
+  });
+
+  afterEach(async () => {
+    await proxy.close();
+  });
+
+  it('answers HTTPS requests tunnelled through CONNECT, with a certificate for the vendor host', async () => {
+    const url = 'https://api.vendor.example/v1/items/42';
+
+    const response = await send(url, { agent: trustingCa(url).httpsAgent });
+
+    expect(response.status).toBe(200);
+    expect(JSON.parse(response.body)).toEqual({ id: expect.any(Number) });
+    expect(mock.calls).toEqual([
+      expect.objectContaining({
+        request: 'GET https://api.vendor.example/v1/items/42',
+        operation: 'getItem',
+        status: 200,
+        requestViolations: [],
+      }),
+    ]);
+  });
+
+  it('fails the TLS handshake for clients that do not trust the certificate authority', async () => {
+    const url = 'https://api.vendor.example/v1/items/42';
+
+    await expect(send(url, { agent: kibanaAgents(url).httpsAgent })).rejects.toThrow(/certificate/);
+    expect(mock.calls).toEqual([]);
+  });
+
+  it('passes request bodies to the mock, which validates them', async () => {
+    const url = 'https://api.vendor.example/v1/items';
+    const { httpsAgent } = trustingCa(url);
+
+    const invalid = await send(url, { method: 'POST', body: '{"name":1}', agent: httpsAgent });
+    const valid = await send(url, { method: 'POST', body: '{"name":"x"}', agent: httpsAgent });
+
+    expect(invalid.status).toBe(422);
+    expect(JSON.parse(invalid.body)).toEqual({
+      operation: 'createItem',
+      violations: [expect.objectContaining({ path: ['body', 'name'] })],
+    });
+    expect(valid).toEqual({ status: 204, body: '' });
+  });
+
+  it('answers plain HTTP requests sent in absolute form', async () => {
+    const url = 'http://plain.vendor.example/items/7';
+
+    const response = await send(url, { agent: kibanaAgents(url).httpAgent });
+
+    expect(response.status).toBe(200);
+    expect(mock.calls).toEqual([
+      expect.objectContaining({ request: 'GET http://plain.vendor.example/items/7', status: 200 }),
+    ]);
+  });
+
+  it('answers 400 to requests sent to the proxy as if it were the vendor', async () => {
+    const response = await send(new URL('/items/7', proxyUrl).href, { agent: undefined });
+
+    expect(response.status).toBe(400);
+    expect(JSON.parse(response.body)).toEqual(
+      expect.objectContaining({ title: 'Not a proxy request' })
+    );
+  });
+
+  it('answers 400 to absolute-form requests whose URL does not parse', async () => {
+    const response = await new Promise<{ status: number; body: string }>((resolve, reject) => {
+      const request = httpRequest(
+        { host: proxyUrl.hostname, port: proxyUrl.port, path: 'http://%FF/' },
+        (reply) => {
+          let text = '';
+          reply.setEncoding('utf8');
+          reply.on('data', (chunk) => (text += chunk));
+          reply.on('end', () => resolve({ status: reply.statusCode ?? 0, body: text }));
+        }
+      );
+      request.on('error', reject);
+      request.end();
+    });
+
+    expect(response.status).toBe(400);
+    expect(JSON.parse(response.body)).toEqual(
+      expect.objectContaining({ title: 'Invalid request target' })
+    );
+    expect(mock.calls).toEqual([]);
+  });
+
+  it('answers with an async responder, as in-process', async () => {
+    await proxy.close();
+    mock = createEmulatorFetch({
+      specs: [spec],
+      respond: async (operation, _request, { next }) => {
+        await new Promise((resolve) => setTimeout(resolve, 1));
+        return operation.id === 'getItem'
+          ? { statusCode: 200, headers: { 'content-type': 'application/json' }, body: { id: 7 } }
+          : next();
+      },
+    });
+    proxy = createEmulatorProxy({ fetch: mock.fetch, certificateAuthority });
+    proxyUrl = await proxy.listen();
+    const url = 'http://plain.vendor.example/items/7';
+
+    const response = await send(url, { agent: kibanaAgents(url).httpAgent });
+
+    expect(JSON.parse(response.body)).toEqual({ id: 7 });
+    expect(mock.calls).toEqual([
+      expect.objectContaining({ operation: 'getItem', status: 200, responseViolations: [] }),
+    ]);
+  });
+
+  it('answers 502 when the mock throws', async () => {
+    await proxy.close();
+    proxy = createEmulatorProxy({
+      fetch: () => Promise.reject(new Error('boom')),
+      certificateAuthority,
+    });
+    proxyUrl = await proxy.listen();
+    const url = 'http://plain.vendor.example/items/7';
+
+    const response = await send(url, { agent: kibanaAgents(url).httpAgent });
+
+    expect(response.status).toBe(502);
+    expect(JSON.parse(response.body).detail).toContain('boom');
+  });
+
+  describe('with control endpoints', () => {
+    beforeEach(async () => {
+      await proxy.close();
+      proxy = createEmulatorProxy({
+        fetch: mock.fetch,
+        certificateAuthority,
+        control: createEmulatorControlHandler(mock),
+      });
+      proxyUrl = await proxy.listen();
+    });
+
+    it('serves the calls, operations and reset to a control client', async () => {
+      const control = createEmulatorControl(proxyUrl);
+      const url = 'https://api.vendor.example/v1/items/42';
+      await send(url, { agent: trustingCa(url).httpsAgent });
+
+      const { calls, total } = await control.calls();
+      expect(total).toBe(1);
+      expect(calls).toEqual([
+        expect.objectContaining({
+          operation: 'getItem',
+          status: 200,
+          requestViolations: [],
+          responseViolations: [],
+        }),
+      ]);
+      expect((await control.operations()).map(({ protocol }) => protocol)).toEqual([
+        'openapi',
+        'openapi',
+      ]);
+
+      await control.reset();
+      expect(await control.calls()).toEqual({ calls: [], total: 0 });
+    });
+
+    it('serves an MCP server at /_mock/mcp that an MCP client can steer the emulator with', async () => {
+      const client = new Client(
+        { name: 'test', version: '1.0.0' },
+        { jsonSchemaValidator: new CfWorkerJsonSchemaValidator() }
+      );
+      await client.connect(new StreamableHTTPClientTransport(new URL('/_mock/mcp', proxyUrl)));
+      try {
+        const { tools } = await client.listTools();
+        expect(tools.map(({ name }) => name)).toContain('set_fixtures');
+
+        const set = await client.callTool({
+          name: 'set_fixtures',
+          arguments: {
+            fixtures: [
+              {
+                operation: { method: 'GET', path: '/items/{id}' },
+                response: { status: 200, body: { id: 99 } },
+              },
+            ],
+          },
+        });
+        expect(set.isError).toBeFalsy();
+
+        const url = 'https://api.vendor.example/v1/items/42';
+        const response = await send(url, { agent: trustingCa(url).httpsAgent });
+        expect(JSON.parse(response.body)).toEqual({ id: 99 });
+      } finally {
+        await client.close();
+      }
+    });
+
+    it('sets, lists and clears runtime fixtures, and describes operations, for a client', async () => {
+      const control = createEmulatorControl(proxyUrl);
+      const url = 'https://api.vendor.example/v1/items/42';
+      const getItem = { method: 'GET', path: '/items/{id}' };
+
+      expect((await control.describeOperation('getItem')).responses[0].contents[0].sample).toEqual({
+        id: 0,
+      });
+      expect(
+        await control.setFixtures([{ operation: getItem, response: { status: 200, body: {} } }])
+      ).toEqual([expect.objectContaining({ operation: 'GET /items/{id}' })]);
+      expect(
+        await control.setFixtures([
+          { operation: getItem, response: { status: 200, body: { id: 42 } } },
+        ])
+      ).toEqual([]);
+      expect(await control.getFixtures()).toHaveLength(1);
+
+      const response = await send(url, { agent: trustingCa(url).httpsAgent });
+      expect(JSON.parse(response.body)).toEqual({ id: 42 });
+      expect((await control.calls()).calls[0].responseSource).toBe('runtime-fixture');
+
+      await control.clearFixtures({ id: 'getItem' });
+      expect(await control.getFixtures()).toEqual([]);
+    });
+
+    it('answers 413 to a control request whose body is over the limit, without handling it', async () => {
+      const response = await send(new URL('/_mock/fixtures', proxyUrl).href, {
+        method: 'PUT',
+        body: ' '.repeat(MAX_CONTROL_BODY_BYTES + 1),
+        agent: undefined,
+      });
+
+      expect(response.status).toBe(413);
+      expect(JSON.parse(response.body).title).toBe('Body too large');
+    });
+
+    it('keeps answering 400 to other requests sent to the proxy itself', async () => {
+      const response = await send(new URL('/items/7', proxyUrl).href, { agent: undefined });
+
+      expect(response.status).toBe(400);
+    });
+
+    it('sends requests through the proxy to the emulator, even under /_mock', async () => {
+      const plain = 'http://plain.vendor.example/_mock/calls';
+      const tunnelled = 'https://api.vendor.example/v1/_mock/reset';
+
+      const viaAbsoluteForm = await send(plain, { agent: kibanaAgents(plain).httpAgent });
+      const viaConnect = await send(tunnelled, {
+        method: 'POST',
+        agent: trustingCa(tunnelled).httpsAgent,
+      });
+
+      expect(viaAbsoluteForm.status).toBe(404);
+      expect(viaConnect.status).toBe(404);
+      expect(mock.calls.map(({ request }) => request)).toEqual([
+        'GET http://plain.vendor.example/_mock/calls',
+        'POST https://api.vendor.example/v1/_mock/reset',
+      ]);
+    });
+  });
+  describe('with the emulators of several connectors', () => {
+    const itemFixture = (id: number) => [
+      {
+        operation: { method: 'get', path: '/items/{id}' },
+        response: { status: 200, body: { id } },
+      },
+    ];
+
+    beforeEach(async () => {
+      await proxy.close();
+      // Two connectors on one vendor host, each with its own fixtures.
+      const combined = combineEmulators({
+        first: createEmulatorFetch({ specs: [spec], fixtures: itemFixture(1) }),
+        second: createEmulatorFetch({ specs: [spec], fixtures: itemFixture(2) }),
+      });
+      proxy = createEmulatorProxy({
+        fetch: combined.fetch,
+        certificateAuthority,
+        control: createEmulatorControlHandler(combined),
+      });
+      proxyUrl = await proxy.listen();
+    });
+
+    it('answers each connector from its own emulator and scopes the control endpoints to it', async () => {
+      const url = 'https://api.vendor.example/v1/items/42';
+      const first = createEmulatorControl(proxyUrl, { connector: 'first' });
+      const second = createEmulatorControl(proxyUrl, { connector: 'second' });
+
+      const fromSecond = await send(url, {
+        apiKey: emulatorCredential('second'),
+        agent: trustingCa(url).httpsAgent,
+      });
+      const fromFirst = await send(url, {
+        apiKey: emulatorCredential('first'),
+        agent: trustingCa(url).httpsAgent,
+      });
+
+      expect(JSON.parse(fromSecond.body)).toEqual({ id: 2 });
+      expect(JSON.parse(fromFirst.body)).toEqual({ id: 1 });
+      expect((await second.calls()).calls).toEqual([
+        expect.objectContaining({ operation: 'getItem', connector: 'second', status: 200 }),
+      ]);
+      expect((await second.operations()).map(({ connector }) => connector)).toEqual([
+        'second',
+        'second',
+      ]);
+
+      await second.reset();
+      expect(await second.calls()).toEqual({ calls: [], total: 0 });
+      expect((await first.calls()).total).toBe(1);
+      await expect(createEmulatorControl(proxyUrl, { connector: 'third' }).calls()).rejects.toThrow(
+        'failed with 400'
+      );
+    });
+  });
+});

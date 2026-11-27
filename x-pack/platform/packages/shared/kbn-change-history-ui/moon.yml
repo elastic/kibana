@@ -24,6 +24,8 @@ dependsOn:
   - '@kbn/logging-mocks'
   - '@kbn/core-http-browser'
   - '@kbn/storybook'
+  - '@kbn/code-editor'
+  - '@kbn/css-utils'
 tags:
   - shared-browser
   - package
@@ -38,6 +40,4 @@ fileGroups:
     - .storybook/**/*.ts
     - .storybook/**/*.tsx
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

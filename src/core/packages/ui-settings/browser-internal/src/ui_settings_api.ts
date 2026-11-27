@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { buildPath } from '@kbn/core-http-browser';
 import { BehaviorSubject } from 'rxjs';
 import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
 
-import type { UiSettingsState } from '@kbn/core-ui-settings-browser';
+import type { UiSettingsRuntimeState } from '@kbn/core-ui-settings-browser';
 import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
 
 export interface UiSettingsApiResponse {
-  settings: UiSettingsState;
+  settings: UiSettingsRuntimeState;
 }
 
 export interface ValidationApiResponse {
@@ -104,9 +105,13 @@ export class UiSettingsApi {
    * Sends a validation request to the server for the provided key+value pair.
    */
   public async validate(key: string, value: any): Promise<ValidationApiResponse> {
-    return await this.sendRequest('POST', `/internal/kibana/settings/${key}/validate`, {
-      value,
-    });
+    return await this.sendRequest(
+      'POST',
+      buildPath('/internal/kibana/settings/{key}/validate', { key }),
+      {
+        value,
+      }
+    );
   }
 
   /**

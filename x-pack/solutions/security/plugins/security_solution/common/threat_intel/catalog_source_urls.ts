@@ -15,20 +15,25 @@ import type { APPROVED_CATALOG_SOURCE_IDS } from './constants';
  * and list routes resolve the fetch URL from this map by stable source id.
  */
 export const CATALOG_SOURCE_URLS = {
-  'kev:cisa-known-exploited-vulnerabilities':
-    'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json',
   'vendor_api:elastic-security-labs': 'https://www.elastic.co/security-labs/rss/feed.xml',
-  'rss:mandiant-research': 'https://cloudblog.withgoogle.com/topics/threat-intelligence/rss/',
-  'rss:unit42': 'https://unit42.paloaltonetworks.com/feed/',
-  'rss:talos': 'https://blog.talosintelligence.com/rss/',
-  'rss:crowdstrike': 'https://www.crowdstrike.com/blog/feed/',
   'rss:cisa-alerts': 'https://www.cisa.gov/cybersecurity-advisories/all.xml',
-  'text_indicator_list:maltrail-cobaltstrike':
-    'https://raw.githubusercontent.com/stamparm/trails/main/malware/cobaltstrike.txt',
-  'rss:aws-security': 'https://aws.amazon.com/blogs/security/feed/',
-  'rss:aws-security-bulletins': 'https://aws.amazon.com/security/security-bulletins/rss/feed/',
-  'rss:fortiguard-advisories': 'https://filestore.fortinet.com/fortiguard/rss/ir.xml',
-  'rss:fortiguard-threat-signal': 'https://filestore.fortinet.com/fortiguard/rss/threatsignal.xml',
+  // Open Government Licence v3.0 (attribution required):
+  // https://www.ncsc.gov.uk/section/about-this-website/terms-and-conditions
+  // News only, by product decision. NCSC's aggregate feed (`all-rss-feed.xml`) is mostly
+  // blog posts and guidance; the news feed is where exploitation and state-actor
+  // advisories and incident notices land. Per-type siblings: `report-`, `guidance-`,
+  // `blog-post-rss-feed.xml`.
+  'rss:uk-ncsc': 'https://www.ncsc.gov.uk/api/1/services/v1/news-rss-feed.xml',
+  // Licence Ouverte / Open Licence 2.0 (attribution required):
+  // https://cert.cyber.gouv.fr/mentions-legales/
+  // CERT-FR's IOC feed (`/ioc/feed/`) is deliberately not here: it has published nothing
+  // since July 2024, and its entries are short summaries whose indicators live in linked
+  // STIX/MISP attachments the RSS adapter never fetches.
+  'rss:cert-fr-alerts': 'https://cert.cyber.gouv.fr/alerte/feed/',
+  'rss:cert-fr-threats': 'https://cert.cyber.gouv.fr/cti/feed/',
+  // CC BY 4.0 (attribution required): https://cert.europa.eu/legal-notice
+  'rss:cert-eu-advisories': 'https://cert.europa.eu/publications/security-advisories-rss',
+  'rss:cert-eu-threat-intelligence': 'https://cert.europa.eu/publications/threat-intelligence-rss',
 } as const satisfies Record<(typeof APPROVED_CATALOG_SOURCE_IDS)[number], string>;
 
 /** Returns the catalog fetch URL for a source id, if it is part of the approved set. */

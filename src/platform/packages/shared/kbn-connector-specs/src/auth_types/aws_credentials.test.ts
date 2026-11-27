@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AxiosHeaders } from 'axios';
+import axios, { AxiosHeaders } from 'axios';
 import type { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import type { AuthContext } from '../connector_spec';
 import { AwsCredentialsAuth } from './aws_credentials';
+import { sha256Hash } from './aws_crypto_helpers';
 
 // The jest environment has no Web Crypto; fake the hash/signature primitives.
 jest.mock('./aws_crypto_helpers', () => ({
@@ -67,6 +68,62 @@ describe('AwsCredentialsAuth', () => {
     } as unknown as InternalAxiosRequestConfig;
     const unsigned = await interceptor(nonAwsConfig);
     expect(unsigned.headers.get('Authorization')).toBeUndefined();
+  });
+
+  it('signs a global-endpoint form request in us-east-1 and keeps its content type', async () => {
+    const interceptor = await getInterceptor();
+    const contentType = 'application/x-www-form-urlencoded; charset=utf-8';
+
+    const config = {
+      url: 'https://iam.amazonaws.com/',
+      method: 'post',
+      data: 'Action=ListUsers&Version=2010-05-08',
+      headers: new AxiosHeaders({ 'Content-Type': contentType }),
+    } as unknown as InternalAxiosRequestConfig;
+    const signed = await interceptor(config);
+
+    expect(signed.headers.get('Authorization')).toContain('/us-east-1/iam/aws4_request');
+    expect(signed.headers.get('Content-Type')).toBe(contentType);
+  });
+
+  it.each([
+    ['a JSON string with a trailing newline', '{"a": 1}\n', { 'Content-Type': 'application/json' }],
+    ['a non-JSON string without a Content-Type', 'hello', {}],
+    ['an object', { a: 1 }, {}],
+  ])('sends %s exactly as signed', async (_, body, headers) => {
+    let sent: unknown;
+    const client = axios.create({
+      adapter: async (config) => {
+        sent = config.data;
+        return { status: 200, statusText: 'OK', headers: {}, config, data: {} };
+      },
+    });
+    await AwsCredentialsAuth.configure(mockContext, client, SECRET);
+
+    await client.post(
+      'https://lambda.us-east-1.amazonaws.com/2015-03-31/functions/fn/invocations',
+      body,
+      { headers }
+    );
+
+    const signedBody = typeof body === 'string' ? body : JSON.stringify(body);
+    expect(sent).toBe(signedBody);
+    expect(sha256Hash).toHaveBeenCalledWith(signedBody);
+  });
+
+  it('signs with `awsSigningName` instead of the endpoint prefix when it is set', async () => {
+    const interceptor = await getInterceptor();
+
+    const config = {
+      url: 'https://bedrock-runtime.us-east-1.amazonaws.com/model/my-model/invoke',
+      method: 'post',
+      data: '{}',
+      headers: new AxiosHeaders(),
+      awsSigningName: 'bedrock',
+    } as unknown as InternalAxiosRequestConfig;
+    const signed = await interceptor(config);
+
+    expect(signed.headers.get('Authorization')).toContain('/us-east-1/bedrock/aws4_request');
   });
 
   // Regression test: query params passed via axios's `params` option (as

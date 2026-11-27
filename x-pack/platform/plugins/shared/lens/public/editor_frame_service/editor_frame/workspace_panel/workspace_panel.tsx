@@ -84,7 +84,7 @@ import {
   selectActiveDatasourceId,
   selectSearchSessionId,
   selectAutoApplyEnabled,
-  selectTriggerApplyChanges,
+  selectApplyChangesCounter,
   selectDatasourceLayers,
   applyChanges,
   selectChangesApplied,
@@ -171,7 +171,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const datasourceStates = useLensSelector(selectDatasourceStates);
   const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
   const changesApplied = useLensSelector(selectChangesApplied);
-  const triggerApply = useLensSelector(selectTriggerApplyChanges);
+  const applyChangesCounter = useLensSelector(selectApplyChangesCounter);
+  const lastAppliedChangesCounter = useRef(applyChangesCounter);
   const datasourceLayers = useLensSelector((state) => selectDatasourceLayers(state, datasourceMap));
   const searchSessionId = useLensSelector(selectSearchSessionId);
 
@@ -302,7 +303,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   );
 
   const shouldApplyExpression =
-    autoApplyEnabled || !initialWorkspaceRenderComplete.current || triggerApply;
+    autoApplyEnabled ||
+    !initialWorkspaceRenderComplete.current ||
+    applyChangesCounter !== lastAppliedChangesCounter.current;
   const activeVisualization = visualization.activeId
     ? visualizationMap[visualization.activeId]
     : null;
@@ -397,13 +400,14 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   useEffect(() => {
     if (shouldApplyExpression) {
+      lastAppliedChangesCounter.current = applyChangesCounter;
       setLocalState((s) => ({
         ...s,
         expressionToRender: unappliedExpression,
         errors: workspaceErrors(),
       }));
     }
-  }, [unappliedExpression, shouldApplyExpression, workspaceErrors]);
+  }, [unappliedExpression, shouldApplyExpression, workspaceErrors, applyChangesCounter]);
 
   const expressionExists = Boolean(localState.expressionToRender);
 

@@ -6,11 +6,72 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { HuntIoc, huntResultSchema, isoDatetimeSchema } from '@kbn/alertzero-common';
+import {
+  HuntIoc,
+  HuntIocType,
+  huntEvidenceFieldsSchema,
+  huntResultSchema,
+  isoDatetimeSchema,
+} from '@kbn/alertzero-common';
 import { ATTACHMENT_ENTITY_FIELDS } from './attachment_entity';
 import { alertZeroAttachmentDataSchema } from './attachment_data_schema';
 import { SEVERITY_LEVELS } from './attachment_enums';
 import { EVENT_SOURCE_INDEX_ERROR, isAllowedEventSourceIndex } from './event_source_index';
+
+/** Graded basis for why the SSE is a hit. */
+const SSE_BASIS_LEVELS = ['ioc_strong', 'ioc_weak', 'behavior_only', 'ioc_and_behavior'] as const;
+
+const matchedIocRefSchema = lazySchema(() =>
+  z.object({
+    type: HuntIocType,
+    value: z.string().min(1).max(2048),
+    field: z.string().min(1).max(128),
+  })
+);
+
+const detectionMatchedOnSchema = lazySchema(() =>
+  z.object({
+    field: z.string().min(1).max(128),
+    value: z.string().min(1).max(2048),
+  })
+);
+
+const detectionSchema = lazySchema(() =>
+  z
+    .object({
+      id: z.string().min(1).max(256),
+      kind: z.enum(['ioc', 'behavior']),
+      /** IOC type when `kind` is `ioc`; readers prefer it over parsing the id. */
+      ioc_type: HuntIocType.optional(),
+      technique_id: z.string().min(1).max(32).optional(),
+      technique_name: z.string().min(1).max(256).optional(),
+      /** ECS field the matching clause hit; required when `kind` is `ioc`. */
+      field: z.string().min(1).max(128).optional(),
+      basis: z.enum(SSE_BASIS_LEVELS),
+      matched_on: z.array(detectionMatchedOnSchema).max(20),
+      hosts: z.array(z.string().min(1).max(512)).max(50).optional(),
+      users: z.array(z.string().min(1).max(512)).max(50).optional(),
+      host_count: z.number().int().min(0).optional(),
+      user_count: z.number().int().min(0).optional(),
+      /** True when `host_count` / `user_count` is a lower bound: the producer capped the names it kept. */
+      hosts_truncated: z.boolean().optional(),
+      users_truncated: z.boolean().optional(),
+      total: z.number().int().min(0),
+      first_seen: isoDatetimeSchema.optional(),
+      last_seen: isoDatetimeSchema.optional(),
+      /** True when host/user/time came from the sampled hits, not aggregations. */
+      from_sample: z.boolean().optional(),
+    })
+    .superRefine((detection, ctx) => {
+      if (detection.kind === 'ioc' && detection.field === undefined) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'field is required when kind is "ioc"',
+          path: ['field'],
+        });
+      }
+    })
+);
 
 /**
  * Significant Security Event (SSE) attachment schema.
@@ -34,6 +95,10 @@ const entityRefSchema = lazySchema(() =>
   z.object({
     field: z.enum(ATTACHMENT_ENTITY_FIELDS),
     value: z.string().min(1).max(2048),
+    // Where the hunt saw this entity. Absent means unknown (an older attachment, or a
+    // source breakdown that was cut off), not local.
+    local: z.boolean().optional(),
+    remote_clusters: z.array(z.string().min(1).max(255)).max(20).optional(),
   })
 );
 
@@ -61,11 +126,17 @@ const eventRefSchema = lazySchema(() =>
         "Concrete backing index from the hit's _index (for data streams, the .ds-... name), not the data stream or alias name"
       ),
     timestamp: isoDatetimeSchema.optional(),
+    host: z.string().min(1).max(512).optional(),
+    user: z.string().min(1).max(512).optional(),
+    fields: huntEvidenceFieldsSchema.optional(),
     matched: z
       .object({
         ioc: HuntIoc.optional(),
+        iocs: z.array(matchedIocRefSchema).max(10).optional(),
         technique_id: z.string().min(1).max(32).optional(),
         field: z.string().min(1).max(128),
+        /** Id of the detection this event belongs to. */
+        detection: z.string().min(1).max(256).optional(),
       })
       .optional(),
   })
@@ -157,6 +228,13 @@ const mapsToProposalSchema = lazySchema(() =>
 export const significantSecurityEventAttachmentDataSchema = lazySchema(() =>
   alertZeroAttachmentDataSchema.extend({
     title: z.string().trim().min(1).max(512),
+    /**
+     * Hit-centric headline. Optional so old stored payloads still parse; the reader
+     * adapter derives it when absent. Never the report id.
+     */
+    summary: z.string().trim().min(1).max(512).optional(),
+    /** Graded basis for the hit. Optional on old payloads; adapter classifies. */
+    basis: z.enum(SSE_BASIS_LEVELS).optional(),
     severity: z.enum(SEVERITY_LEVELS),
     confidence: z.number().min(0).max(1),
     status: z.enum(['open', 'investigating', 'resolved', 'false_positive']),
@@ -182,13 +260,18 @@ export const significantSecurityEventAttachmentDataSchema = lazySchema(() =>
     entities: z.array(entityRefSchema).max(50),
     alerts: z.array(alertRefSchema).max(50).optional(),
     events: z.array(eventRefSchema).max(50).optional(),
-    timeline: z.array(timelineEntrySchema).max(50),
+    /** Hit-centric detections (IOCs and behaviors that matched). Adapter derives when absent. */
+    detections: z.array(detectionSchema).max(30).optional(),
+    // Legacy: new payloads omit it (event and alert refs carry the same evidence). Optional
+    // without a default so validation never writes an empty array back.
+    timeline: z.array(timelineEntrySchema).max(50).optional(),
     hypothesis_tested: z.string().min(1).max(4000),
     hunt_result: huntResultSchema.optional(),
     evidence_for: z.array(evidenceItemSchema).max(50),
     evidence_against: z.array(evidenceItemSchema).max(50),
     maps_to_proposal: mapsToProposalSchema,
-    evaluation_record_ref: z.string().min(1).max(512),
+    // Optional: the hunt mapper still writes it, other producers may not. Print only when present.
+    evaluation_record_ref: z.string().min(1).max(512).optional(),
     truncated: z.boolean().optional(),
     truncated_original_count: z.number().int().min(0).optional(),
     report_revision: z.string().min(1).max(256).optional(),

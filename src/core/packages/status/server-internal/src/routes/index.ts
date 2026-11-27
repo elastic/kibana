@@ -9,3 +9,4 @@
 
 export { registerStatusRoute } from './status';
 export { registerPrebootStatusRoute } from './status_preboot';
+export { registerReadyRoute } from './ready';

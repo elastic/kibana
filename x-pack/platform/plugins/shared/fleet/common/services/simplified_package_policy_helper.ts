@@ -51,6 +51,8 @@ export type SimplifiedPackagePolicyStreams = Record<
     enabled?: undefined | boolean;
     vars?: SimplifiedVars;
     condition?: AgentConditionExpression | null;
+    /** Selected option per stream-level var_group (package-spec ≥ 3.6.0). */
+    var_group_selections?: Record<string, string>;
   }
 >;
 
@@ -173,6 +175,7 @@ function formatStreams(
       enabled: isInputAllowed === false ? false : stream.enabled,
       vars: formatVars(stream.vars),
       ...(stream.condition !== undefined ? { condition: stream.condition } : {}),
+      ...(stream.var_group_selections ? { var_group_selections: stream.var_group_selections } : {}),
     };
 
     return acc;
@@ -318,6 +321,7 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
         enabled: streamEnabled,
         vars: streamsLevelVars,
         condition: streamCondition,
+        var_group_selections: streamVarGroupSelections,
       } = streamVal;
       const packagePolicyStream = streamsMap.get(streamId);
       if (!packagePolicyStream) {
@@ -335,6 +339,11 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
 
       if (streamCondition !== undefined) {
         packagePolicyStream.condition = streamCondition;
+      }
+
+      // Stream-level var_groups are only validated when the policy carries the selection.
+      if (streamVarGroupSelections) {
+        packagePolicyStream.var_group_selections = streamVarGroupSelections;
       }
     });
   });

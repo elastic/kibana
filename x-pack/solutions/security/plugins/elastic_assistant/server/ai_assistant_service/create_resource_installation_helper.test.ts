@@ -150,6 +150,21 @@ describe('createResourceInstallationHelper', () => {
     });
   });
 
+  test(`should install a namespace once when it is added again before the first install settles`, async () => {
+    const installFn = jest.fn().mockResolvedValue(undefined);
+    const helper = createResourceInstallationHelper(
+      logger,
+      getCommonInitPromise(true, 10),
+      installFn
+    );
+
+    helper.add('test1');
+    helper.add('test1');
+
+    expect(await helper.getInitializedResources('test1')).toEqual({ result: true });
+    expect(installFn).toHaveBeenCalledTimes(1);
+  });
+
   test(`should retry using new common init function if specified`, async () => {
     const helper = createResourceInstallationHelper(
       logger,

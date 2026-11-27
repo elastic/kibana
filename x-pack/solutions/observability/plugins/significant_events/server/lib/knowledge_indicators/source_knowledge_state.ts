@@ -7,11 +7,15 @@
 
 import { randomUUID } from 'node:crypto';
 import pLimit from 'p-limit';
+import { setTimeout as sleep } from 'timers/promises';
 import type { SavedObjectsClientContract, SavedObjectsType } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
-import { StatusError } from '../errors/status_error';
+import {
+  getSourceWriteConflictReason,
+  SourceWriteConflictError,
+} from '../errors/source_write_conflict_error';
 
 /** Internal checkpoint and write lease for a source in one space. */
 export const SOURCE_KNOWLEDGE_STATE_TYPE = 'nightshift-source-knowledge-state';
@@ -19,6 +23,7 @@ export const SOURCE_KNOWLEDGE_STATE_TYPE = 'nightshift-source-knowledge-state';
 interface SourceKnowledgeState {
   revision?: string;
   onboardingScheduled?: boolean;
+  onboardingReservedAt?: number | null;
   lease: { owner: string; expiresAt: number } | null;
 }
 
@@ -31,6 +36,10 @@ const stateSchema = schema.object({
       expiresAt: schema.number(),
     })
   ),
+});
+
+const stateSchemaV2 = stateSchema.extends({
+  onboardingReservedAt: schema.maybe(schema.nullable(schema.number())),
 });
 
 /** Stores the applied query revision and serializes cleanup with final KI/rule writes. */
@@ -48,12 +57,69 @@ export const sourceKnowledgeStateSavedObjectType: SavedObjectsType = {
         forwardCompatibility: stateSchema.extends({}, { unknowns: 'ignore' }),
       },
     },
+    '2': {
+      changes: [],
+      schemas: {
+        create: stateSchemaV2,
+        forwardCompatibility: stateSchemaV2.extends({}, { unknowns: 'ignore' }),
+      },
+    },
   },
 };
 
 // Inference runs outside the lease. A stopped writer leaves this grace period for
 // its in-flight storage requests to finish before cleanup can acquire the lease.
 const WRITE_LEASE_MS = 30 * 60_000;
+
+/** How long a user- or tool-initiated write waits for another write to release the lease. */
+export const SOURCE_WRITE_LEASE_WAIT_MS = 5_000;
+
+const LEASE_RETRY_MIN_DELAY_MS = 100;
+const LEASE_RETRY_MAX_DELAY_MS = 1_000;
+
+const createLeaseHeldError = () =>
+  new SourceWriteConflictError(
+    'lease_held',
+    'Source knowledge is being updated; retry after the current write finishes'
+  );
+
+/** Losing the race to take the lease means another writer holds it. */
+const rethrowConflictAsLeaseHeld = (error: unknown): never => {
+  if (error instanceof Error && SavedObjectsErrorHelpers.isConflictError(error)) {
+    throw createLeaseHeldError();
+  }
+  throw error;
+};
+
+/** Runs `attempt` again, with a growing delay, for as long as it fails on a held lease and `signal` is not aborted. */
+const retryWhileLeaseHeld = async <T>(
+  maxWaitMs: number,
+  attempt: () => Promise<T>,
+  signal?: AbortSignal
+): Promise<T> => {
+  signal?.throwIfAborted();
+  const startedAt = Date.now();
+  let delayMs = LEASE_RETRY_MIN_DELAY_MS;
+  for (;;) {
+    try {
+      return await attempt();
+    } catch (error) {
+      const remainingMs = maxWaitMs - (Date.now() - startedAt);
+      if (
+        getSourceWriteConflictReason(error) !== 'lease_held' ||
+        remainingMs <= 0 ||
+        signal?.aborted
+      ) {
+        throw error;
+      }
+      await sleep(Math.min(delayMs, remainingMs), undefined, { signal }).catch(() => undefined);
+      if (signal?.aborted) {
+        throw error;
+      }
+      delayMs = Math.min(delayMs * 2, LEASE_RETRY_MAX_DELAY_MS);
+    }
+  }
+};
 
 /** Coordinates source knowledge mutations across Kibana nodes without holding a lock during inference. */
 export interface SourceKnowledgeStateClient {
@@ -82,6 +148,13 @@ export interface SourceKnowledgeStateClient {
      * without re-enabling it. The revision check and the lease still apply.
      */
     allowDisabled?: boolean;
+    /**
+     * How long to keep retrying while another write holds the lease. Omitted means fail
+     * immediately. A stale revision or a disabled source is never retried.
+     */
+    waitForLeaseMs?: number;
+    /** Stops the wait for the lease, e.g. when the HTTP request is aborted. A write that holds the lease still completes. */
+    signal?: AbortSignal;
     run: () => Promise<T>;
   }): Promise<T>;
 }
@@ -119,25 +192,23 @@ export const createSourceKnowledgeStateClient = ({
       }
     }
     if (stored?.attributes.lease && stored.attributes.lease.expiresAt > Date.now()) {
-      throw new StatusError(
-        'Source knowledge is being updated; retry after the current write finishes',
-        409
-      );
+      throw createLeaseHeldError();
     }
     const lease = { owner: randomUUID(), expiresAt: Date.now() + WRITE_LEASE_MS };
     let state: SourceKnowledgeState = { ...stored?.attributes, lease };
-    const locked = stored
-      ? await repository.update<SourceKnowledgeState>(
+    const locked = await (stored
+      ? repository.update<SourceKnowledgeState>(
           SOURCE_KNOWLEDGE_STATE_TYPE,
           sourceId,
           { lease },
           { namespace: space, version: stored.version }
         )
-      : await repository.create<SourceKnowledgeState>(SOURCE_KNOWLEDGE_STATE_TYPE, state, {
+      : repository.create<SourceKnowledgeState>(SOURCE_KNOWLEDGE_STATE_TYPE, state, {
           id: sourceId,
           namespace: space,
           overwrite: false,
-        });
+        })
+    ).catch(rethrowConflictAsLeaseHeld);
     let version = locked.version;
     const serializeCheckpoint = pLimit(1);
     const checkpoint = (patch: Partial<SourceKnowledgeState>): Promise<void> =>
@@ -186,6 +257,45 @@ export const createSourceKnowledgeStateClient = ({
     }
   };
 
+  const writeOnce: SourceKnowledgeStateClient['write'] = ({
+    sourceId,
+    expectedRevision,
+    allowDisabled = false,
+    run,
+  }) =>
+    runExclusive({
+      sourceId,
+      run: async (state, checkpoint) => {
+        const { source } = await sourcesClient.get(sourceId);
+        if (!source.enabled && !allowDisabled) {
+          throw new SourceWriteConflictError(
+            'source_disabled',
+            'The source is disabled; enable it before writing results'
+          );
+        }
+        if (expectedRevision !== undefined && expectedRevision !== source.esql_updated_at) {
+          throw new SourceWriteConflictError(
+            'stale_revision',
+            'The source query changed since this request was prepared; reload and try again'
+          );
+        }
+        if (state.revision !== undefined && state.revision !== source.esql_updated_at) {
+          throw new SourceWriteConflictError(
+            'reconcile_pending',
+            'The source query changed and its knowledge is still being reset; retry shortly'
+          );
+        }
+        if (state.revision === undefined) {
+          await checkpoint({
+            revision: source.esql_updated_at,
+            onboardingScheduled: false,
+            onboardingReservedAt: null,
+          });
+        }
+        return run();
+      },
+    });
+
   return {
     runExclusive,
     retire: ({ sourceId, run }) => runExclusive({ sourceId, run, deleteWhenDone: true }),
@@ -205,26 +315,7 @@ export const createSourceKnowledgeStateClient = ({
       }
       return sourceIds;
     },
-    write: ({ sourceId, expectedRevision, allowDisabled = false, run }) =>
-      runExclusive({
-        sourceId,
-        run: async (state, checkpoint) => {
-          const { source } = await sourcesClient.get(sourceId);
-          if (
-            (!source.enabled && !allowDisabled) ||
-            (expectedRevision !== undefined && expectedRevision !== source.esql_updated_at) ||
-            (state.revision !== undefined && state.revision !== source.esql_updated_at)
-          ) {
-            throw new StatusError(
-              'Source knowledge has changed; onboard the current source query before writing results',
-              409
-            );
-          }
-          if (state.revision === undefined) {
-            await checkpoint({ revision: source.esql_updated_at, onboardingScheduled: false });
-          }
-          return run();
-        },
-      }),
+    write: ({ waitForLeaseMs = 0, signal, ...args }) =>
+      retryWhileLeaseHeld(waitForLeaseMs, () => writeOnce(args), signal),
   };
 };

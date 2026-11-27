@@ -32,10 +32,14 @@ const useStyles = () => {
       maxWidth: MAX_SUMMARY_ACTIONS_CONTAINER_WIDTH,
       minWidth: MIN_SUMMARY_ACTIONS_CONTAINER_WIDTH,
     }),
-    ilmPhaseFilterContainer: css({
+    filtersContainer: css({
       width: '100%',
-      maxWidth: 432,
       alignSelf: 'flex-end',
+      flexGrow: 0,
+    }),
+    ilmPhaseFilterContainer: css({
+      maxWidth: 432,
+      minWidth: 0,
     }),
     rollupContainer: css({
       marginTop: 'auto',
@@ -43,11 +47,16 @@ const useStyles = () => {
   };
 };
 
-const DataQualitySummaryComponent: React.FC = () => {
+interface Props {
+  summaryFilters?: React.ReactNode;
+}
+
+const DataQualitySummaryComponent: React.FC<Props> = ({ summaryFilters }) => {
   const styles = useStyles();
   const { isILMAvailable } = useDataQualityContext();
   const { totalIndices, totalDocsCount, totalIndicesChecked, totalIncompatible, totalSizeInBytes } =
     useResultsRollupContext();
+  const hasSummaryFilters = summaryFilters != null && typeof summaryFilters !== 'boolean';
 
   return (
     <EuiPanel paddingSize="l" data-test-subj="dataQualitySummary" hasShadow={true}>
@@ -63,10 +72,23 @@ const DataQualitySummaryComponent: React.FC = () => {
         </EuiFlexItem>
 
         <EuiFlexItem css={styles.flexItem} grow={false}>
-          {isILMAvailable && (
-            <div css={styles.ilmPhaseFilterContainer}>
-              <IlmPhaseFilter />
-            </div>
+          {(hasSummaryFilters || isILMAvailable) && (
+            <EuiFlexGroup
+              css={styles.filtersContainer}
+              alignItems="center"
+              gutterSize="s"
+              justifyContent="flexEnd"
+              responsive={false}
+              wrap={true}
+              data-test-subj="dataQualitySummaryFilters"
+            >
+              {hasSummaryFilters && <EuiFlexItem grow={false}>{summaryFilters}</EuiFlexItem>}
+              {isILMAvailable && (
+                <EuiFlexItem css={styles.ilmPhaseFilterContainer}>
+                  <IlmPhaseFilter />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           )}
           <div css={styles.rollupContainer}>
             <StatsRollup

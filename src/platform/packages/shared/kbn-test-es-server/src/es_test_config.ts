@@ -52,7 +52,7 @@ class EsTestConfig {
         port: parseInt(testEsUrl.port, 10),
         username: testEsUrl.auth?.split(':')[0],
         password: testEsUrl.auth?.split(':')[1],
-        auth: testEsUrl.auth,
+        auth: testEsUrl.auth === null ? undefined : testEsUrl.auth,
       };
     }
 

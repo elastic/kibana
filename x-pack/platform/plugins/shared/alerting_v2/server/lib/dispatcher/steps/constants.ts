@@ -7,18 +7,6 @@
 
 import type { DispatchFailureReason as SchemaDispatchFailureReason } from '@kbn/alerting-v2-schemas';
 
-export const ACTION_POLICY_EVENT_PROVIDER = 'alerting_v2' as const;
-
-export const ACTION_POLICY_EVENT_ACTIONS = {
-  DISPATCHED: 'dispatched',
-  THROTTLED: 'throttled',
-  UNMATCHED: 'unmatched',
-  DISPATCH_FAILED: 'dispatch_failed',
-} as const;
-
-export type ActionPolicyEventAction =
-  (typeof ACTION_POLICY_EVENT_ACTIONS)[keyof typeof ACTION_POLICY_EVENT_ACTIONS];
-
 /**
  * Machine-readable causes for a failed action-group → workflow dispatch. Stored
  * as `kibana.alerting_v2.dispatcher.failure_reason` on `dispatch_failed` events

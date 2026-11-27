@@ -62,6 +62,22 @@ describe('HeaderRightContent', () => {
       expect(label).toBeInTheDocument();
     });
 
+    it('does not show for an agentless policy', () => {
+      const testRenderer = createFleetTestRendererMock();
+
+      const { queryByText } = testRenderer.render(
+        <HeaderRightContent
+          isLoading={false}
+          agentPolicy={{ ...agentPolicy, supports_agentless: true } as any}
+          addAgent={jest.fn()}
+          isAddAgentHelpPopoverOpen={false}
+          setIsAddAgentHelpPopoverOpen={jest.fn()}
+        />
+      );
+
+      expect(queryByText(labelText)).not.toBeInTheDocument();
+    });
+
     it('does not show when user is unauthorized', () => {
       jest.mocked(useAuthz).mockReturnValue({
         fleet: {

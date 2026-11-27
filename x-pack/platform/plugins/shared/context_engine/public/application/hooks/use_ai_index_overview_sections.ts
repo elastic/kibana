@@ -10,19 +10,22 @@ import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
 interface UseAiIndexOverviewSectionsParams {
   aiIndex: GetAiIndexResponse | undefined;
   isLoading: boolean;
+  hasKnowledgeIndicators: boolean;
+  isKnowledgeIndicatorsLoading: boolean;
 }
 
 export interface AiIndexOverviewSections {
   hideEditControls: boolean;
+  showOnboardingPanel: boolean;
   showAutomationsPanel: boolean;
-  showSignalsSection: boolean;
-  showSignalsPanel: boolean;
 }
 
 /** Progressive disclosure for Overview tab sections on the AI index detail page. */
 export const useAiIndexOverviewSections = ({
   aiIndex,
   isLoading,
+  hasKnowledgeIndicators,
+  isKnowledgeIndicatorsLoading,
 }: UseAiIndexOverviewSectionsParams): AiIndexOverviewSections => {
   const isManaged = aiIndex?.managed === true;
   const hasSources = (aiIndex?.sources.length ?? 0) > 0;
@@ -30,8 +33,8 @@ export const useAiIndexOverviewSections = ({
 
   return {
     hideEditControls: isLoading || isManaged,
+    showOnboardingPanel:
+      !isManaged && !isLoading && !isKnowledgeIndicatorsLoading && !hasKnowledgeIndicators,
     showAutomationsPanel: isManaged || isLoading || hasSources || hasAutomations,
-    showSignalsSection: false,
-    showSignalsPanel: false,
   };
 };

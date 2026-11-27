@@ -48,7 +48,7 @@ export const StepLayout: React.FC<StepLayoutProps> = ({
   `;
 
   const expansionStyles = css`
-    padding-top: ${euiTheme.size.s};
+    padding-top: ${euiTheme.size.base};
   `;
 
   return (
@@ -80,7 +80,14 @@ export const StepLayout: React.FC<StepLayoutProps> = ({
             })
           : {})}
       >
-        <EuiFlexItem grow={false}>{label}</EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            min-width: 0;
+          `}
+        >
+          {label}
+        </EuiFlexItem>
         {isClickable && isExpandable && (
           <EuiFlexItem grow={false}>
             <EuiIcon

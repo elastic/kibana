@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { SampleDataRegistrySetup } from '@kbn/home-plugin/server';
-import { APP_ICON, createWorkspacePath } from '../../common/constants';
+import { createWorkspacePath } from '../../common/constants';
 
 const datasetId = 'ecommerce';
 
@@ -383,7 +383,7 @@ export function registerEcommerceSampleDataLink(sampleDataRegistry: SampleDataRe
       },
       getPath: createWorkspacePath,
       label: i18n.translate('xpack.graph.sampleData.label', { defaultMessage: 'Graph' }),
-      icon: APP_ICON,
+      icon: 'cluster',
     },
   ]);
 }

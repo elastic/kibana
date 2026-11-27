@@ -10,12 +10,13 @@ import { FleetPackagePolicyGenerator } from '../../../../../common/endpoint/data
 import { policyFactory } from '../../../../../common/endpoint/models/policy_config';
 import { ProtectionModes } from '../../../../../common/endpoint/types';
 import type { PolicyConfig } from '../../../../../common/endpoint/types';
-import { createEndpointPolicySnapshot } from '../domain/endpoint_policy_snapshot';
-import { normalizeEndpointPolicy } from '../domain/normalized_endpoint_policy';
-import { buildPolicyChangeAssessment } from '../domain/impact';
-import type { PolicyChangeCapabilities, PolicyChangeOperation } from '../domain/impact';
-import type { ApplyPolicyChangePreview } from '../services/apply_policy_change';
-import type { EndpointCountResult } from '../services/count_endpoints';
+import { createEndpointPolicySnapshot } from '../../../../endpoint/services/policy_management/domain/endpoint_policy_snapshot';
+import { normalizeEndpointPolicy } from '../../../../endpoint/services/policy_management/domain/normalized_endpoint_policy';
+import { buildPolicyChangeAssessment } from '../../../../endpoint/services/policy_management/domain/impact';
+import type { PolicyChangeCapabilities } from '../../../../endpoint/services/policy_management/domain/impact';
+import type { PolicyChangeOperation } from '../../../../../common/workflows/step_types/endpoint/policies/policy_change_operation';
+import type { ApplyPolicyChangePreview } from '../../../../endpoint/services/policy_management/services/apply_policy_change';
+import type { EndpointCountResult } from '../../../../endpoint/services/policy_management/services/count_endpoints';
 import {
   renderApplyPolicyChangeConfirmation,
   selectApplyPreviewFacts,
@@ -177,7 +178,7 @@ describe('renderApplyPolicyChangeConfirmation', () => {
     expect(lines[19]).toBe('Policy ID: policy\\-1');
   });
 
-  it('renders an eligible coupled change with all rows and no side effects', () => {
+  it('renders an eligible per-OS change with one direct row and no side effects', () => {
     const preview = createPreview([
       { op: 'set_field', path: 'windows.popup.malware.enabled', value: false },
     ]);
@@ -186,7 +187,7 @@ describe('renderApplyPolicyChangeConfirmation', () => {
     expect(definition).toEqual(
       expect.objectContaining({
         color: 'warning',
-        title: 'Apply 3 change(s) to "Endpoint Policy"?',
+        title: 'Apply 1 change(s) to "Endpoint Policy"?',
       })
     );
     expect(definition.message).not.toContain('Warnings:');
@@ -194,8 +195,9 @@ describe('renderApplyPolicyChangeConfirmation', () => {
     expect(lines[0]).toBe('| Setting | From | To | Origin |');
     expect(lines[1]).toBe('| --- | --- | --- | --- |');
     expect(lines[2]).toBe('| windows\\.popup\\.malware\\.enabled | true | false | direct |');
-    expect(lines[3]).toBe('| mac\\.popup\\.malware\\.enabled | true | false | coupled |');
-    expect(lines[4]).toBe('| linux\\.popup\\.malware\\.enabled | true | false | coupled |');
+    expect(
+      lines.filter((line) => line.endsWith(' | direct |') || line.endsWith(' | coupled |'))
+    ).toHaveLength(1);
     expect(definition.message).toContain('Derived setting updates: none');
   });
 

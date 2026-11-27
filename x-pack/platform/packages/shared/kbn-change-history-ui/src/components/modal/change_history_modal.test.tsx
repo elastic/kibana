@@ -425,6 +425,79 @@ describe('ChangeHistoryModal', () => {
     });
   });
 
+  it('clears compare mode when the new current version is auto-selected after a restore', async () => {
+    const historicalItem = {
+      id: 'evt-2',
+      timestamp: '2026-06-15T12:00:00.000Z',
+      actor: { name: 'Bob' },
+      action: 'Updated',
+    };
+    const restoredItem = {
+      id: 'evt-9',
+      timestamp: '2026-06-17T12:00:00.000Z',
+      actor: { name: 'Alice' },
+      action: 'Restored',
+      isCurrent: true,
+    };
+
+    const adapter = createAdapter({
+      listChanges: jest
+        .fn()
+        .mockResolvedValueOnce({ items: [listItem, historicalItem], total: 2 })
+        .mockResolvedValue({
+          items: [restoredItem, { ...listItem, isCurrent: false }, historicalItem],
+          total: 3,
+        }),
+      getChange: jest.fn().mockImplementation(({ changeId }) =>
+        Promise.resolve({
+          ...(changeId === 'evt-2'
+            ? historicalItem
+            : changeId === 'evt-9'
+            ? restoredItem
+            : listItem),
+          snapshot: changeId === 'evt-2' ? TEST_SNAPSHOT_OLDER : TEST_SNAPSHOT,
+        })
+      ),
+      restoreChange: jest.fn().mockResolvedValue(undefined),
+    });
+
+    renderModal({
+      adapter,
+      features: { restore: true },
+      permissions: { canRestore: true },
+      renderPreview: ({ change, compareMode }) => (
+        <div data-test-subj="previewState">{`${change.id}|${compareMode?.type ?? 'none'}`}</div>
+      ),
+    });
+
+    openModal();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('previewState')).toHaveTextContent('evt-1|none');
+    });
+
+    // Open the actions menu on the historical row and compare it to the selected version.
+    fireEvent.click(screen.getByTestId('changeHistoryRowActionsButton'));
+    fireEvent.click(screen.getByTestId('changeHistoryCompareToThisVersion'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('previewState')).toHaveTextContent('evt-1|vs_row');
+    });
+
+    // Restore the same historical row from its actions menu.
+    fireEvent.click(screen.getByTestId('changeHistoryRowActionsButton'));
+    fireEvent.click(screen.getByTestId('changeHistoryRestoreThisVersion'));
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+    await waitFor(() => {
+      expect(adapter.restoreChange).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('previewState')).toHaveTextContent('evt-9|none');
+    });
+  });
+
   it('hides restore button for the current version', async () => {
     const adapter = createAdapter({
       restoreChange: jest.fn().mockResolvedValue(undefined),

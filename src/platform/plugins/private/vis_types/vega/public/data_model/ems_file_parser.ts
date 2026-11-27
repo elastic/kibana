@@ -8,8 +8,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
 import type {
   IServiceSettings,
   FileLayer,
@@ -23,6 +21,8 @@ import type { Data, UrlObject, EmsQueryRequest } from './types';
 export class EmsFileParser {
   _serviceSettings: IServiceSettings;
   _fileLayersP?: Promise<FileLayer[]>;
+  /** EMS file URLs written into the spec, which the view loads without the external URL check. */
+  readonly trustedUrls: string[] = [];
 
   constructor(serviceSettings: IServiceSettings) {
     this._serviceSettings = serviceSettings;
@@ -77,7 +77,8 @@ export class EmsFileParser {
 
       // This URL can bypass loader sanitization at the later stage
       const url = await this._serviceSettings.getUrlForRegionLayer(foundLayer);
-      obj.url = bypassExternalUrlCheck(url);
+      this.trustedUrls.push(url);
+      obj.url = url;
     }
   }
 }

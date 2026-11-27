@@ -42,6 +42,23 @@ describe('CloseCaseModal', () => {
     expect(screen.getByText(i18n.CLOSE_CASE_MODAL_TITLE)).toBeInTheDocument();
   });
 
+  it('refers to detections, since attacks sync with the case status too', () => {
+    renderWithTestingProviders(
+      <CloseCaseModal
+        closeReasonOptions={defaultCloseReasonOptions}
+        onClose={onClose}
+        onSubmit={onSubmit}
+        onCloseReasonOptionsChange={onCloseReasonOptionsChange}
+      />
+    );
+
+    expect(screen.getByText('Select detection close reason')).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText('Reason for closing attached detections')
+    ).toBeInTheDocument();
+    expect(screen.getByText('Detections already closed will not be updated')).toBeInTheDocument();
+  });
+
   it('renders the disclaimer callout', () => {
     renderWithTestingProviders(
       <CloseCaseModal

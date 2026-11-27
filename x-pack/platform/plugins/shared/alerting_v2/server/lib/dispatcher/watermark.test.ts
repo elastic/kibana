@@ -23,14 +23,14 @@ const makeResult = (overrides: Partial<DispatcherPipelineResult>): DispatcherPip
 });
 
 describe('computeNextWatermark', () => {
-  describe('aborted before StoreActionsStep (recordedAlerts undefined)', () => {
+  describe('aborted', () => {
     it('does not advance the watermark', () => {
       const result = computeNextWatermark({
         input: BASE_INPUT,
         result: makeResult({
           completed: false,
           haltReason: 'aborted',
-          finalState: { input: BASE_INPUT }, // recordedAlerts undefined
+          finalState: { input: BASE_INPUT },
         }),
       });
 
@@ -48,28 +48,11 @@ describe('computeNextWatermark', () => {
             scan: AlertScan.of({
               alerts: [createAlert({ last_event_timestamp: '2026-01-22T07:34:00.000Z' })],
             }),
-            // recordedAlerts still undefined — StoreActionsStep not reached
           },
         }),
       });
 
       expect(result.toISOString()).toBe('2026-01-22T07:30:00.000Z');
-    });
-  });
-
-  describe('aborted after StoreActionsStep (recordedAlerts defined)', () => {
-    it('advances to windowEnd when some alerts were recorded', () => {
-      const result = computeNextWatermark({
-        input: BASE_INPUT,
-        result: makeResult({
-          completed: false,
-          haltReason: 'aborted',
-          finalState: { input: BASE_INPUT, recordedAlerts: 5 },
-        }),
-      });
-
-      // Not truncated, not no_alerts/no_actions — falls through to windowEnd
-      expect(result.toISOString()).toBe('2026-01-22T07:35:00.000Z');
     });
   });
 
@@ -91,6 +74,17 @@ describe('computeNextWatermark', () => {
           haltReason: 'inline_stats_too_large',
           finalState: { input: BASE_INPUT },
         }),
+      });
+
+      expect(result.toISOString()).toBe('2026-01-22T07:30:00.000Z');
+    });
+  });
+
+  describe('commit_failed halt', () => {
+    it('does not advance the watermark', () => {
+      const result = computeNextWatermark({
+        input: BASE_INPUT,
+        result: makeResult({ completed: false, haltReason: 'commit_failed' }),
       });
 
       expect(result.toISOString()).toBe('2026-01-22T07:30:00.000Z');
@@ -175,6 +169,51 @@ describe('computeNextWatermark', () => {
     });
   });
 
+  describe('deferred scan', () => {
+    const scan = AlertScan.of({
+      alerts: [
+        createAlert({ alert_id: 'e1', last_event_timestamp: '2026-01-22T07:21:00.000Z' }),
+        createAlert({ alert_id: 'e2', last_event_timestamp: '2026-01-22T07:32:00.000Z' }),
+        createAlert({ alert_id: 'e3', last_event_timestamp: '2026-01-22T07:33:00.000Z' }),
+      ],
+    }).withDeferredTail(({ alert_id: alertId }) => alertId === 'e3');
+
+    it('advances to the truncation edge on a no_actions halt instead of windowEnd', () => {
+      const result = computeNextWatermark({
+        input: BASE_INPUT,
+        result: makeResult({
+          completed: false,
+          haltReason: 'no_actions',
+          finalState: { input: BASE_INPUT, scan },
+        }),
+      });
+
+      expect(result.toISOString()).toBe('2026-01-22T07:32:00.000Z');
+    });
+
+    it('advances to the truncation edge on normal completion', () => {
+      const result = computeNextWatermark({
+        input: BASE_INPUT,
+        result: makeResult({ finalState: { input: BASE_INPUT, scan } }),
+      });
+
+      expect(result.toISOString()).toBe('2026-01-22T07:32:00.000Z');
+    });
+
+    it('still does not advance on an aborted halt', () => {
+      const result = computeNextWatermark({
+        input: BASE_INPUT,
+        result: makeResult({
+          completed: false,
+          haltReason: 'aborted',
+          finalState: { input: BASE_INPUT, scan },
+        }),
+      });
+
+      expect(result.toISOString()).toBe('2026-01-22T07:30:00.000Z');
+    });
+  });
+
   describe('normal completion (not truncated)', () => {
     it('advances to windowEnd', () => {
       const result = computeNextWatermark({
@@ -184,7 +223,6 @@ describe('computeNextWatermark', () => {
           finalState: {
             input: BASE_INPUT,
             scan: AlertScan.of({ alerts: [createAlert()] }),
-            recordedAlerts: 1,
           },
         }),
       });

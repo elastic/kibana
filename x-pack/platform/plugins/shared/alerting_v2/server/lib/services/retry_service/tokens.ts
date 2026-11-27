@@ -6,6 +6,6 @@
  */
 
 import { createToken } from '@kbn/core-di';
-import type { IRetryService } from './alerting_retry_service';
+import type { IRetryService } from './types';
 
 export const RetryServiceToken = createToken<IRetryService>('alerting_v2.RetryService');

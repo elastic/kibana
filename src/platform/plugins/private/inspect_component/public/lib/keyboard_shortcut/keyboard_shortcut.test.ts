@@ -7,9 +7,52 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isKeyboardShortcut } from './keyboard_shortcut';
+import {
+  isCopyKeyboardShortcut,
+  isGrabKeyboardShortcut,
+  isKeyboardShortcut,
+} from './keyboard_shortcut';
 
 describe('keyboard_shortcut', () => {
+  describe('isCopyKeyboardShortcut', () => {
+    it('should only match the physical C key pressed with meta or ctrl alone', () => {
+      const event = { metaKey: true, ctrlKey: false, code: 'KeyC', key: 'c' } as KeyboardEvent;
+
+      expect(isCopyKeyboardShortcut(event)).toBe(true);
+      expect(
+        isCopyKeyboardShortcut({ ...event, metaKey: false, ctrlKey: true } as KeyboardEvent)
+      ).toBe(true);
+      expect(isCopyKeyboardShortcut({ ...event, metaKey: false } as KeyboardEvent)).toBe(false);
+      expect(isCopyKeyboardShortcut({ ...event, shiftKey: true } as KeyboardEvent)).toBe(false);
+      expect(isCopyKeyboardShortcut({ ...event, code: 'KeyV', key: 'v' } as KeyboardEvent)).toBe(
+        false
+      );
+    });
+  });
+
+  describe('isGrabKeyboardShortcut', () => {
+    it('should only match when the shift key is pressed together with the inspect shortcut', () => {
+      const event = { metaKey: true, ctrlKey: false, code: 'Quote', key: '"' } as KeyboardEvent;
+
+      expect(isGrabKeyboardShortcut({ ...event, shiftKey: true } as KeyboardEvent)).toBe(true);
+      expect(isKeyboardShortcut({ ...event, shiftKey: true } as KeyboardEvent)).toBe(false);
+      expect(isGrabKeyboardShortcut({ ...event, shiftKey: false } as KeyboardEvent)).toBe(false);
+    });
+
+    it('should leave the inspect shortcut to layouts where typing a single quote needs shift', () => {
+      const event = {
+        metaKey: true,
+        ctrlKey: false,
+        shiftKey: true,
+        code: 'Backslash',
+        key: "'",
+      } as KeyboardEvent;
+
+      expect(isGrabKeyboardShortcut(event)).toBe(false);
+      expect(isKeyboardShortcut(event)).toBe(true);
+    });
+  });
+
   describe('isKeyboardShortcut', () => {
     it('should return true when meta key and single quote are pressed', () => {
       const event = {

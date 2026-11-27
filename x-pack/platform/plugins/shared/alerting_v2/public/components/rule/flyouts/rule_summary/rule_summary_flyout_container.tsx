@@ -7,7 +7,6 @@
 
 import React, { useState } from 'react';
 import { CoreStart, useService } from '@kbn/core-di-browser';
-import { i18n } from '@kbn/i18n';
 import { useFetchSourceRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_source_rule';
 import { useFetchRule } from '../../../../hooks/use_fetch_rule';
 import { useDeleteRule } from '../../../../hooks/use_delete_rule';
@@ -19,8 +18,6 @@ import type { RuleApiResponse } from '../../../../services/rules_api';
 import { DeleteConfirmationModal } from '../../modals/delete_confirmation_modal';
 import { UpdateApiKeyConfirmationModal } from '../../modals/update_api_key_confirmation_modal';
 import { useRuleChangeHistoryModal } from '../../modals/change_history';
-import { EntityNotFoundFlyout } from '../../../entity_not_found_flyout';
-import { LoadingFlyout } from '../../../loading_flyout';
 import { RuleSummaryFlyout } from './rule_summary_flyout';
 import { SourceRuleSummaryFlyout } from '../source_rule_summary_flyout';
 
@@ -58,39 +55,19 @@ export const RuleSummaryFlyoutContainer = ({
     rule: sourceRule,
     ruleDetailsHref: sourceRuleDetailsHref,
     isLoading: isLoadingSourceRule,
-    isError: isSourceRuleError,
   } = useFetchSourceRule({
     ruleId: isSourceRule ? ruleId : undefined,
     http,
     initialRule: isSourceRule ? cachedRule : undefined,
   });
 
-  if ((!isSourceRule && isLoading) || (isSourceRule && isLoadingSourceRule)) {
-    return <LoadingFlyout type="overlay" ownFocus={false} onClose={onClose} />;
-  }
-
-  if (isSourceRule && sourceRule) {
+  if (isSourceRule) {
     return (
       <SourceRuleSummaryFlyout
         rule={sourceRule}
+        isLoading={isLoadingSourceRule}
         ruleCategory={sourceRuleInfo?.category}
         ruleDetailsHref={sourceRuleDetailsHref}
-        onClose={onClose}
-      />
-    );
-  }
-
-  if (isSourceRule || isSourceRuleError || isError || !rule) {
-    return (
-      <EntityNotFoundFlyout
-        type="overlay"
-        ownFocus={false}
-        title={i18n.translate('xpack.alertingV2.rule.summaryFlyout.notFoundTitle', {
-          defaultMessage: 'Rule not found',
-        })}
-        body={i18n.translate('xpack.alertingV2.rule.summaryFlyout.notFoundBody', {
-          defaultMessage: 'The rule may have been deleted or you may not have access to it.',
-        })}
         onClose={onClose}
       />
     );
@@ -99,7 +76,9 @@ export const RuleSummaryFlyoutContainer = ({
   return (
     <>
       <RuleSummaryFlyout
-        rule={rule}
+        ruleId={ruleId}
+        rule={isError ? undefined : rule}
+        isLoading={isLoading}
         canWrite={canWrite}
         isToggleLoading={isToggling}
         session="start"

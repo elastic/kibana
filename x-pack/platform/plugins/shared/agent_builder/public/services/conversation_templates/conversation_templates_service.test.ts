@@ -33,7 +33,7 @@ describe('ConversationTemplatesService', () => {
     const service = new ConversationTemplatesService();
     service.registerTab('overview', overviewTab);
 
-    expect(() => service.registerTab('overview', overviewTab)).toThrowError(
+    expect(() => service.registerTab('overview', overviewTab)).toThrow(
       'Conversation template tab "overview" is already registered.'
     );
   });
@@ -49,7 +49,7 @@ describe('ConversationTemplatesService', () => {
     const service = new ConversationTemplatesService();
     service.registerTemplateUIDefinition('phishing', phishingDefinition);
 
-    expect(() => service.registerTemplateUIDefinition('phishing', phishingDefinition)).toThrowError(
+    expect(() => service.registerTemplateUIDefinition('phishing', phishingDefinition)).toThrow(
       'Conversation template "phishing" already has a UI definition.'
     );
   });

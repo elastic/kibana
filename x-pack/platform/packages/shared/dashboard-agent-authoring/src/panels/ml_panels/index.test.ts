@@ -6,13 +6,10 @@
  */
 
 import { MAX_STRING_LENGTH } from '@kbn/ml-server-schemas/constants';
-import { buildConfigPanelContent, getConfigPanelEditError } from '..';
+import { buildConfigPanelContent, planPanelContent } from '..';
 import {
   anomalyChartsPanelConfigSchema,
   anomalySwimlaneConfigSchema,
-  editAnomalyChartsPanelConfigInputSchema,
-  editAnomalySwimlaneConfigInputSchema,
-  editSingleMetricViewerConfigInputSchema,
   singleMetricViewerConfigSchema,
 } from '.';
 
@@ -74,30 +71,6 @@ describe('ml_anomaly_charts registry entry', () => {
           title: 'Anomaly charts of job-1',
         },
       });
-    });
-  });
-
-  describe('getConfigPanelEditError', () => {
-    it('accepts editing an anomaly charts panel', () => {
-      expect(
-        getConfigPanelEditError('ml_anomaly_charts', {
-          id: 'panel-1',
-          type: 'ml_anomaly_charts',
-          config: { job_ids: ['job-1'] },
-          grid: { x: 0, y: 0, w: 24, h: 10 },
-        })
-      ).toBeUndefined();
-    });
-
-    it('rejects editing a non-charts panel', () => {
-      expect(
-        getConfigPanelEditError('ml_anomaly_charts', {
-          id: 'panel-1',
-          type: 'lens',
-          config: {},
-          grid: { x: 0, y: 0, w: 12, h: 5 },
-        })
-      ).toMatch(/panel-1.*lens.*cannot be edited as anomaly charts/);
     });
   });
 });
@@ -173,21 +146,6 @@ describe('anomalySwimlaneConfigSchema', () => {
   });
 });
 
-describe('ml_anomaly_swimlane registry entry', () => {
-  describe('getConfigPanelEditError', () => {
-    it('accepts editing a swim lane panel', () => {
-      expect(
-        getConfigPanelEditError('ml_anomaly_swimlane', {
-          id: 'panel-1',
-          type: 'ml_anomaly_swimlane',
-          config: { job_ids: ['job-1'], swimlane_type: 'overall' },
-          grid: { x: 0, y: 0, w: 24, h: 10 },
-        })
-      ).toBeUndefined();
-    });
-  });
-});
-
 describe('singleMetricViewerConfigSchema', () => {
   it('accepts bounded selected_entities, function_description, and forecast_id', () => {
     expect(
@@ -225,70 +183,30 @@ describe('singleMetricViewerConfigSchema', () => {
   });
 });
 
-describe('ml_single_metric_viewer registry entry', () => {
-  describe('getConfigPanelEditError', () => {
-    it('accepts editing a single metric viewer panel', () => {
-      expect(
-        getConfigPanelEditError('ml_single_metric_viewer', {
+describe('ML panel edits', () => {
+  it.each([
+    ['ml_anomaly_charts', 'anomaly charts'],
+    ['ml_anomaly_swimlane', 'anomaly swim lane'],
+    ['ml_single_metric_viewer', 'single metric viewer'],
+  ])('rejects an edit of a %s panel with another type', (type, label) => {
+    expect(
+      planPanelContent({
+        id: 'panel-1',
+        content: {
+          type: 'markdown',
+          config: { content: 'new', settings: { open_links_in_new_tab: true } },
+        },
+        existingPanel: {
           id: 'panel-1',
-          type: 'ml_single_metric_viewer',
+          type,
           config: { job_ids: ['job-1'] },
-          grid: { x: 0, y: 0, w: 24, h: 18 },
-        })
-      ).toBeUndefined();
+          grid: { x: 0, y: 0, w: 24, h: 15 },
+        },
+      })
+    ).toEqual({
+      error: expect.stringContaining(
+        `Panel "panel-1" is a ${label} panel. Edit it with type: "${type}".`
+      ),
     });
-  });
-});
-
-describe('ML edit_panels input schemas', () => {
-  it('accepts an anomaly charts edit', () => {
-    expect(
-      editAnomalyChartsPanelConfigInputSchema.safeParse({
-        source: 'config',
-        type: 'ml_anomaly_charts',
-        panelId: 'charts-1',
-        config: { job_ids: ['job-1'], severity_threshold: 50, title: 'Updated charts' },
-      }).success
-    ).toBe(true);
-  });
-
-  it('accepts a swim lane edit', () => {
-    expect(
-      editAnomalySwimlaneConfigInputSchema.safeParse({
-        source: 'config',
-        type: 'ml_anomaly_swimlane',
-        panelId: 'swim-1',
-        config: {
-          job_ids: ['job-1'],
-          swimlane_type: 'viewBy',
-          view_by: 'host.name',
-          severity_threshold: 75,
-        },
-      }).success
-    ).toBe(true);
-  });
-
-  it('accepts a single metric viewer edit', () => {
-    expect(
-      editSingleMetricViewerConfigInputSchema.safeParse({
-        source: 'config',
-        type: 'ml_single_metric_viewer',
-        panelId: 'smv-1',
-        config: {
-          job_ids: ['job-1'],
-          selected_entities: { 'host.name': 'web-01' },
-        },
-      }).success
-    ).toBe(true);
-  });
-
-  it('rejects an edit missing panelId', () => {
-    expect(
-      editAnomalyChartsPanelConfigInputSchema.safeParse({
-        source: 'config',
-        type: 'ml_anomaly_charts',
-        config: { job_ids: ['job-1'] },
-      }).success
-    ).toBe(false);
   });
 });

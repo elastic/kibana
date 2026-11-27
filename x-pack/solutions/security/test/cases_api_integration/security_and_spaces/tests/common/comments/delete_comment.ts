@@ -109,7 +109,7 @@ export default ({ getService }: FtrProviderContext): void => {
         })) as Error;
 
         expect(error.message).to.be(
-          `This comment ${patchedCase.comments![0].id} does not exist in fake-id.`
+          `This attachment ${patchedCase.comments![0].id} does not exist in case fake-id.`
         );
       });
 

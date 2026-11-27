@@ -7,6 +7,8 @@
 
 import type { BaseLLM } from '@langchain/core/language_models/llms';
 import type { Logger } from '@kbn/core/server';
+import type { AttackDiscoveryTemplateCompletion } from '@kbn/discoveries';
+import { handleModelRefusal } from '@kbn/discoveries';
 import type { ZodType } from '@kbn/zod/v4';
 
 import type { BaseGraphState, GraphInsightTypes } from '../../../graphs';
@@ -25,6 +27,7 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
   getCombinedPromptFn,
   responseIsHallucinated,
   generationSchema,
+  completeWithTemplate,
 }: {
   llm: BaseLLM;
   logger?: Logger;
@@ -36,6 +39,7 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
   }) => string;
   responseIsHallucinated: (response: string) => boolean;
   generationSchema: ZodType<{ insights: T[] }>;
+  completeWithTemplate?: AttackDiscoveryTemplateCompletion;
 }): ((state: BaseGraphState<T>) => Promise<BaseGraphState<T>>) => {
   const generate = async (state: BaseGraphState<T>): Promise<BaseGraphState<T>> => {
     logger?.debug(() => `---GENERATE---`);
@@ -73,10 +77,16 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
         () => `generate node is invoking the chain (${llmType}), attempt ${generationAttempts}`
       );
 
-      const rawResponse = await chain.invoke({
-        format_instructions: formatInstructions,
-        query,
-      });
+      const rawResponse = completeWithTemplate
+        ? await completeWithTemplate({
+            alerts: anonymizedDocs,
+            phase: combinedGenerations ? 'continue' : 'generate',
+            ...(combinedGenerations ? { partial: combinedGenerations } : {}),
+          })
+        : await chain.invoke({
+            format_instructions: formatInstructions,
+            query,
+          });
 
       // LOCAL MUTATION:
       partialResponse = extractJson(rawResponse); // remove the surrounding ```json```
@@ -153,6 +163,8 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
         unrefinedResults,
       };
     } catch (error) {
+      handleModelRefusal({ error, logger, nodeName: 'generate', state });
+
       const parsingError = `generate node is unable to parse (${llm._llmType()}) response from attempt ${generationAttempts}; (this may be an incomplete response from the model): ${error}`;
       logger?.debug(() => parsingError); // logged at debug level because the error is expected when the model returns an incomplete response
 

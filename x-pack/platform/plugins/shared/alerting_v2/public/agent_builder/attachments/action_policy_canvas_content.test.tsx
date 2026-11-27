@@ -8,7 +8,8 @@
 import React from 'react';
 import { render, act } from '@testing-library/react';
 import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
-import { OBSERVABILITY_ALERTING_HOST } from '../../observability_alerting_host';
+import { OBSERVABILITY_ALERTING_HOST } from '../../../common/locators';
+import { getFrequencyLabel, getGroupingModeLabel } from '../../components/action_policy/labels';
 import { ActionPolicyCanvasContent } from './action_policy_canvas_content';
 
 const flushPromises = async () => {
@@ -61,6 +62,7 @@ jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
     const services: Record<string, unknown> = {
       notifications: mockNotificationsService,
+      application: { getUrlForApp: (appId: string) => `/app/${appId}` },
       uiSettings: {
         get: () => false,
       },
@@ -72,18 +74,12 @@ jest.mock('@kbn/core-di-browser', () => ({
   },
 }));
 
-jest.mock('../../components/action_policy/details_flyout/action_policy_definition_list', () => ({
-  ActionPolicyDefinitionList: (props: Record<string, unknown>) => (
-    <div data-test-subj="mockDefinitionList">{JSON.stringify(Object.keys(props))}</div>
-  ),
-}));
-
 const defaultData = {
   name: 'My Policy',
   description: 'A test policy',
   destinations: [{ type: 'workflow' as const, id: 'wf-1' }],
   matcher: { tags: ['abc'] },
-  groupingMode: 'per_alert' as const,
+  grouping: { mode: 'per_alert' as const },
   throttle: { strategy: 'on_status_change' as const },
 };
 
@@ -148,14 +144,31 @@ describe('ActionPolicyCanvasContent', () => {
   });
 
   describe('rendering', () => {
-    it('renders the policy name', async () => {
-      const { getByText } = await renderCanvas();
-      expect(getByText('My Policy')).toBeDefined();
+    it('renders the Definition, Notification and Destinations sections of the shared summary', async () => {
+      const { getByTestId } = await renderCanvas();
+      expect(getByTestId('actionPolicyDetailsFlyoutDefinition')).toBeDefined();
+      expect(getByTestId('actionPolicyDetailsFlyoutNotification')).toBeDefined();
+      expect(getByTestId('actionPolicyDetailsFlyoutDestinations')).toBeDefined();
     });
 
-    it('renders the ActionPolicyDefinitionList', async () => {
+    it('maps the attachment grouping and throttle to the Notification section', async () => {
       const { getByTestId } = await renderCanvas();
-      expect(getByTestId('mockDefinitionList')).toBeDefined();
+      expect(getByTestId('actionPolicyDetailsFlyoutDispatchModeBlock').textContent).toContain(
+        getGroupingModeLabel('per_alert')
+      );
+      expect(getByTestId('actionPolicyDetailsFlyoutFrequencyBlock').textContent).toContain(
+        getFrequencyLabel({ strategy: 'on_status_change' }, 'per_alert')
+      );
+    });
+
+    it('renders the policy description', async () => {
+      const { getByText } = await renderCanvas();
+      expect(getByText('A test policy')).toBeDefined();
+    });
+
+    it('does not render the "See all affected rules" link', async () => {
+      const { queryByTestId } = await renderCanvas();
+      expect(queryByTestId('actionPolicyDetailsFlyoutSeeAffectedRulesLink')).toBeNull();
     });
   });
 
@@ -202,6 +215,22 @@ describe('ActionPolicyCanvasContent', () => {
       expect(mockAddDanger).toHaveBeenCalledWith(expect.stringContaining('Failed to create'));
       expect(mockAddSuccess).not.toHaveBeenCalled();
     });
+
+    it('shows a danger toast when linking the created policy to the attachment fails', async () => {
+      const updateOrigin = jest.fn().mockRejectedValue(new Error('Conversation update failed'));
+      const { registerActionButtons } = await renderCanvas(
+        { data: { id: 'pre-assigned-id' } },
+        { updateOrigin }
+      );
+
+      const buttons = getLastRegisteredButtons(registerActionButtons);
+      await buttons.find((b) => b.label === 'Create policy')!.handler();
+
+      expect(mockAddDanger).toHaveBeenCalledWith(
+        expect.stringContaining('Conversation update failed')
+      );
+      expect(mockAddSuccess).not.toHaveBeenCalled();
+    });
   });
 
   describe('action buttons for persisted (saved) policies', () => {
@@ -232,8 +261,8 @@ describe('ActionPolicyCanvasContent', () => {
       expect(buttons.find((b) => b.label === 'Create policy')).toBeUndefined();
     });
 
-    it('Update Policy handler calls upsertActionPolicy with data.id', async () => {
-      const { registerActionButtons } = await renderCanvas({
+    it('Update Policy handler calls upsertActionPolicy with data.id, then refreshes the origin', async () => {
+      const { registerActionButtons, updateOrigin } = await renderCanvas({
         origin: 'policy-123',
         data: { id: 'policy-123' },
       });
@@ -246,13 +275,17 @@ describe('ActionPolicyCanvasContent', () => {
         'policy-123',
         expect.objectContaining({ name: 'My Policy' })
       );
+      expect(updateOrigin).toHaveBeenCalledWith('policy-123');
+      expect(mockUpsertActionPolicy.mock.invocationCallOrder[0]).toBeLessThan(
+        updateOrigin.mock.invocationCallOrder[0]
+      );
       expect(mockAddSuccess).toHaveBeenCalled();
     });
 
     it('shows a danger toast when update fails', async () => {
       mockUpsertActionPolicy.mockRejectedValueOnce({ message: 'Conflict' });
 
-      const { registerActionButtons } = await renderCanvas({
+      const { registerActionButtons, updateOrigin } = await renderCanvas({
         origin: 'policy-123',
         data: { id: 'policy-123' },
       });
@@ -263,6 +296,21 @@ describe('ActionPolicyCanvasContent', () => {
 
       expect(mockAddDanger).toHaveBeenCalledWith(expect.stringContaining('Failed to update'));
       expect(mockAddSuccess).not.toHaveBeenCalled();
+      expect(updateOrigin).not.toHaveBeenCalled();
+    });
+
+    it('still reports success when refreshing the origin fails after the policy was saved', async () => {
+      const updateOrigin = jest.fn().mockRejectedValue(new Error('Conversation update failed'));
+      const { registerActionButtons } = await renderCanvas(
+        { origin: 'policy-123', data: { id: 'policy-123' } },
+        { updateOrigin }
+      );
+
+      const buttons = getLastRegisteredButtons(registerActionButtons);
+      await buttons.find((b) => b.label === 'Update Policy')!.handler();
+
+      expect(mockAddSuccess).toHaveBeenCalled();
+      expect(mockAddDanger).not.toHaveBeenCalled();
     });
 
     it('View in Policies handler navigates with the observability host', async () => {
@@ -327,7 +375,9 @@ describe('ActionPolicyCanvasContent', () => {
 
       expect(mockGetWorkflow).toHaveBeenCalledWith('wf-1');
       expect(mockGetWorkflow).toHaveBeenCalledWith('wf-2');
-      expect(mockGetWorkflow).toHaveBeenCalledTimes(2);
+      // The destination cards in the summary also fetch each workflow to show its name.
+      const requestedIds = new Set(mockGetWorkflow.mock.calls.map(([id]) => id));
+      expect(requestedIds).toEqual(new Set(['wf-1', 'wf-2']));
     });
   });
 

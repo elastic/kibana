@@ -52,7 +52,7 @@ describe('registerFeaturePrivileges', () => {
       id: 'alerting',
       label: 'Universal Alerting',
       order: 1000,
-      euiIconType: 'watchesApp',
+      euiIconType: 'warning',
     });
   });
 
@@ -73,6 +73,19 @@ describe('registerFeaturePrivileges', () => {
     for (const feature of Object.values(ALERTING_V2_FEATURES)) {
       expect(getRegisteredFeature(feature.id).privilegesTooltip).toBeUndefined();
     }
+  });
+
+  it('grants write access to external sources on alerts `all` and read access on alerts `read`', () => {
+    const alertsFeature = getRegisteredFeature(ALERTING_V2_FEATURES.alerts.id);
+
+    expect(alertsFeature.privileges?.all.savedObject).toEqual({
+      all: ['alerting_external_source'],
+      read: [],
+    });
+    expect(alertsFeature.privileges?.read.savedObject).toEqual({
+      all: [],
+      read: ['alerting_external_source'],
+    });
   });
 
   it('forwards the `alerts` privilege to the `all` and `read` privileges of the alerts feature', () => {

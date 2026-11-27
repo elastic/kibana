@@ -63,7 +63,7 @@ export const SlackChannelSelector = ({
   return (
     <EuiFormRow
       label={i18n.translate(
-        'xpack.responseOps.alertingV2RuleForm.actionForm.slackChannelSelector.label',
+        'xpack.alertingV2.alertingV2RuleForm.actionForm.slackChannelSelector.label',
         { defaultMessage: 'Channel' }
       )}
       fullWidth
@@ -76,7 +76,7 @@ export const SlackChannelSelector = ({
         isLoading={isFetching}
         isDisabled={connectorId === null}
         placeholder={i18n.translate(
-          'xpack.responseOps.alertingV2RuleForm.actionForm.slackChannelSelector.placeholder',
+          'xpack.alertingV2.alertingV2RuleForm.actionForm.slackChannelSelector.placeholder',
           { defaultMessage: 'Select a channel' }
         )}
         options={options}

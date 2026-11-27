@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type * as rt from 'io-ts';
-
 import type {
   SavedObjectMigrationContext,
   SavedObjectReference,
@@ -14,8 +12,12 @@ import type {
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import type { CaseAttributes, CaseConnector } from '../../../../common/types/domain';
-import { CaseConnectorRt, ExternalServiceRt } from '../../../../common/types/domain';
+import type {
+  CaseAttributes,
+  CaseConnector,
+  ExternalService as CaseExternalService,
+} from '../../../../common/types/domain';
+import { CaseConnectorSchema, ExternalServiceSchema } from '../../../../common/types/domain';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
@@ -138,7 +140,7 @@ export function isCreateCaseConnector(
     return (
       isCreateConnector(action, actionFields) &&
       unsafeCase.connector !== undefined &&
-      CaseConnectorRt.is(unsafeCase.connector)
+      CaseConnectorSchema.safeParse(unsafeCase.connector).success
     );
   } catch {
     return false;
@@ -222,13 +224,14 @@ function isUpdateCaseConnector(
   actionDetails: unknown
 ): actionDetails is CaseConnector {
   try {
-    return isUpdateConnector(action, actionFields) && CaseConnectorRt.is(actionDetails);
+    return (
+      isUpdateConnector(action, actionFields) &&
+      CaseConnectorSchema.safeParse(actionDetails).success
+    );
   } catch {
     return false;
   }
 }
-
-type CaseExternalService = rt.TypeOf<typeof ExternalServiceRt>;
 
 function isPushConnector(
   action: string,
@@ -236,7 +239,7 @@ function isPushConnector(
   actionDetails: unknown
 ): actionDetails is CaseExternalService {
   try {
-    return isPush(action, actionFields) && ExternalServiceRt.is(actionDetails);
+    return isPush(action, actionFields) && ExternalServiceSchema.safeParse(actionDetails).success;
   } catch {
     return false;
   }

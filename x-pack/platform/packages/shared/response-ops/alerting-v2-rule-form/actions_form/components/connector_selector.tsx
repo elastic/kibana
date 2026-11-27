@@ -94,7 +94,7 @@ export const ConnectorSelector = ({
   return (
     <>
       <EuiFormRow
-        label={i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.connector.label', {
+        label={i18n.translate('xpack.alertingV2.alertingV2RuleForm.actionForm.connector.label', {
           defaultMessage: 'Connector',
         })}
         labelAppend={
@@ -108,7 +108,7 @@ export const ConnectorSelector = ({
                 }
               : { onClick: () => setIsCreateFlyoutOpen(true) })}
           >
-            {i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.connector.createNew', {
+            {i18n.translate('xpack.alertingV2.alertingV2RuleForm.actionForm.connector.createNew', {
               defaultMessage: '+ Create new connector',
             })}
           </EuiLink>
@@ -125,7 +125,7 @@ export const ConnectorSelector = ({
           isLoading={isLoading}
           isInvalid={!!error}
           placeholder={i18n.translate(
-            'xpack.responseOps.alertingV2RuleForm.actionForm.connector.placeholder',
+            'xpack.alertingV2.alertingV2RuleForm.actionForm.connector.placeholder',
             {
               defaultMessage: 'Select a connector',
             }

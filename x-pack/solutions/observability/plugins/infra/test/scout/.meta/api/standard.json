@@ -1,5 +1,5 @@
 {
-  "sha1": "9d2259695048e3c3ef0bb20c9d62da2e51eb92f9",
+  "sha1": "7117df751fa280f7d57b344d93b98076e18cc144",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1118,8 +1118,24 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/node_details_semconv_pods.spec.ts",
-        "line": 102,
+        "line": 103,
         "column": 48
+      }
+    },
+    {
+      "id": "b1630f3ffad49cd-4fb85a9734ca9e5",
+      "title": "API /api/metrics/node_details (semconv pods) sums network traffic across interfaces for an OpenTelemetry pod",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/node_details_semconv_pods.spec.ts",
+        "line": 149,
+        "column": 16
       }
     },
     {
@@ -1134,8 +1150,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/node_details_semconv_pods.spec.ts",
-        "line": 146,
-        "column": 79
+        "line": 177,
+        "column": 24
       }
     },
     {
@@ -1150,8 +1166,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/node_details_semconv_pods.spec.ts",
-        "line": 157,
-        "column": 7
+        "line": 189,
+        "column": 82
       }
     },
     {
@@ -1166,8 +1182,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/node_details_semconv_pods.spec.ts",
-        "line": 169,
-        "column": 7
+        "line": 201,
+        "column": 80
       }
     },
     {

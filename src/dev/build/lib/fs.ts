@@ -22,7 +22,6 @@ import { globby } from 'globby';
 import pMap from 'p-map';
 import del from 'del';
 import * as tar from 'tar';
-import { pack as tarFsPack } from 'tar-fs';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 export function assertAbsolute(path: string) {
@@ -274,17 +273,21 @@ export async function compressTar({
   const folder = rootDirectoryName || basename(source);
 
   let fileCount = 0;
-  const packStream = tarFsPack(source, {
-    map(header) {
-      if (header.type === 'file') {
-        fileCount += 1;
-      }
-      if (createRootDirectory) {
-        header.name = folder + '/' + header.name;
-      }
-      return header;
+  // packing '.' under a prefix emits the root directory entry; without a prefix it would emit './' names
+  const entries = createRootDirectory ? ['.'] : await Fsp.readdir(source);
+  const packStream = tar.c(
+    {
+      cwd: source,
+      prefix: createRootDirectory ? folder : undefined,
+      onWriteEntry: ({ type }) => {
+        // hardlinked files are written as 'Link' entries
+        if (type === 'File' || type === 'Link') {
+          fileCount += 1;
+        }
+      },
     },
-  });
+    entries
+  );
 
   const gzip = createGzip({ level: gzipLevel });
   const output = fs.createWriteStream(destination);

@@ -115,7 +115,7 @@ describe('DocumentationSection', () => {
       await waitFor(() => {
         expect(screen.getByRole('link', { name: /Learn more/ })).toHaveAttribute(
           'href',
-          coreStart.docLinks.links.aiAssistantSettings
+          coreStart.docLinks.links.agentBuilder.replaceKnowledgeBaseContent
         );
       });
     });

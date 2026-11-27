@@ -3,7 +3,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
   name: bk-kibana-package-registry-verify-and-promote
-  description: Promote package-registry/distribution:lite
+  description: Promote package-registry/distribution:lite-slim
   links:
     - url: 'https://buildkite.com/elastic/kibana-package-registry-verify-and-promote'
       title: Pipeline link
@@ -16,7 +16,7 @@ spec:
     kind: Pipeline
     metadata:
       name: kibana / package registry verify and promote
-      description: Verify and promote docker.elastic.co/package-registry/distribution:lite
+      description: Verify and promote docker.elastic.co/package-registry/distribution:lite-slim
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
@@ -25,7 +25,7 @@ spec:
         REPORT_FAILED_TESTS_TO_GITHUB: 'true'
         SCOUT_REPORTER_ENABLED: 'true'
         SCOUT_TEST_RUN_SCOPE: 'package-registry-verify'
-        FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE: 'docker.elastic.co/package-registry/distribution:lite'
+        FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE: 'docker.elastic.co/package-registry/distribution:lite-slim'
       repository: elastic/kibana
       branch_configuration: main
       default_branch: main

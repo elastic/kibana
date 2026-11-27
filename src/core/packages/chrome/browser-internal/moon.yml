@@ -48,8 +48,8 @@ dependsOn:
   - '@kbn/react-kibana-context-render'
   - '@kbn/recently-accessed'
   - '@kbn/core-user-profile-browser-mocks'
-  - '@kbn/core-i18n-browser'
-  - '@kbn/core-theme-browser'
+  - '@kbn/core-theme-browser-internal-types'
+  - '@kbn/core-ui-settings-common'
   - '@kbn/core-user-profile-browser'
   - '@kbn/core-ui-settings-browser'
   - '@kbn/core-user-profile-common'
@@ -75,6 +75,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

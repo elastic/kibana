@@ -19,6 +19,8 @@ project:
 dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-dashboards-common'
+  - '@kbn/agent-builder-visualizations-common'
+  - '@kbn/dashboard-agent-authoring'
   - '@kbn/evals'
   - '@kbn/lens-common'
   - '@kbn/lens-embeddable-utils'
@@ -35,6 +37,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

@@ -9,9 +9,12 @@ import type { AlertSnapshot } from '../../common';
 import {
   buildFollowUpMessage,
   recoverSubjectsFromInputs,
+  toSlackThreadKey,
+  toAutomationVia,
   toStartSubjects,
   toSubjectKeys,
   withoutRecordedSubjects,
+  workflowSubjectInputSchema,
 } from './investigation_subjects';
 
 const makeAlert = (id: string): AlertSnapshot => ({
@@ -25,7 +28,64 @@ const makeAlert = (id: string): AlertSnapshot => ({
   start: '2026-08-24T12:00:00.000Z',
 });
 
+describe('toSlackThreadKey', () => {
+  // Must equal the key the Relay sends as `relay.origin.external_conversation_id`.
+  it("builds the Relay's thread key", () => {
+    expect(
+      toSlackThreadKey({ workspace: 'T1', channel: 'C1', threadTs: '1700000000.000100' })
+    ).toBe('slack:T1:C1:1700000000.000100');
+  });
+});
+
+describe('toAutomationVia', () => {
+  it('records the automation name, linking to its page through the automation locator', () => {
+    expect(toAutomationVia({ id: 'a1', name: 'Payments alerts' })).toEqual({
+      label: 'Payments alerts',
+      locator: { id: 'NIGHTSHIFT_AUTOMATION_LOCATOR', params: { automationId: 'a1' } },
+    });
+  });
+
+  it('cuts a long name, and links no id longer than a subject records', () => {
+    expect(toAutomationVia({ id: 'a'.repeat(300), name: 'n'.repeat(600) })).toEqual({
+      label: 'n'.repeat(500),
+    });
+  });
+
+  it.each([{}, { id: 'a1' }, { name: 'Payments alerts' }, { id: '', name: '' }])(
+    'records nothing for %p',
+    (automation) => {
+      expect(toAutomationVia(automation)).toBeUndefined();
+    }
+  );
+});
+
 describe('toStartSubjects', () => {
+  it('records the via on every subject of a start an automation made', () => {
+    const via = { label: 'Payments alerts' };
+
+    expect(
+      toStartSubjects({
+        subject: { type: 'alert', id: 'alert-1' },
+        alerts: [makeAlert('alert-1'), makeAlert('alert-2')],
+        triggerType: 'automatic',
+        investigationId: 'inv-1',
+        slackThread: { workspace: 'T1', channel: 'C1', thread_ts: '1.1' },
+        via,
+      }).map((subject) => subject.via)
+    ).toEqual([via, via, via]);
+  });
+
+  it('records no via for a start without one', () => {
+    const subjects = toStartSubjects({
+      subject: { type: 'alert', id: 'alert-1' },
+      alerts: [makeAlert('alert-1')],
+      triggerType: 'manual',
+      investigationId: 'inv-1',
+    });
+
+    expect(subjects[0]).not.toHaveProperty('via');
+  });
+
   it('records one alert subject per snapshot, carrying the snapshot', () => {
     expect(
       toStartSubjects({
@@ -94,12 +154,44 @@ describe('toStartSubjects', () => {
         type: 'slack_thread',
         id: 'slack:T1:C1:1.1',
         triggerType: 'automatic',
-        slack: { channel: 'C1', thread_ts: '1.1' },
+        slack: {
+          channel: 'C1',
+          thread_ts: '1.1',
+          permalink: 'https://app.slack.com/client/T1/C1/thread/C1-1.1',
+        },
       },
     ]);
     expect(toSubjectKeys(subjects, 'inv-1')).toEqual([
       { type: 'manual', id: 'slack:C1:1.1' },
       { type: 'slack_thread', id: 'slack:T1:C1:1.1' },
+    ]);
+  });
+
+  it('records a Slack thread that is the named subject once, under the Relay key', () => {
+    const subjects = toStartSubjects({
+      subject: { type: 'slack_thread', id: 'relay-key', summary: 'Disk full' },
+      triggerType: 'automatic',
+      investigationId: 'inv-1',
+      slackThread: {
+        workspace: 'T1',
+        channel: 'C1',
+        thread_ts: '1.1',
+        external_conversation_id: 'relay-key',
+      },
+    });
+
+    expect(subjects).toEqual([
+      {
+        type: 'slack_thread',
+        id: 'relay-key',
+        triggerType: 'automatic',
+        summary: 'Disk full',
+        slack: {
+          channel: 'C1',
+          thread_ts: '1.1',
+          permalink: 'https://app.slack.com/client/T1/C1/thread/C1-1.1',
+        },
+      },
     ]);
   });
 });
@@ -198,5 +290,29 @@ describe('buildFollowUpMessage', () => {
         newAlerts: [],
       })
     ).toMatch(/^This continues the investigation[\s\S]*\n\nCheckout errors re-opened$/);
+  });
+});
+
+describe('workflowSubjectInputSchema', () => {
+  const withParams = (params: Record<string, string>) => ({
+    type: 'alert',
+    id: 'alert-1',
+    via: { label: 'Payments alerts', locator: { id: 'SOME_LOCATOR', params } },
+  });
+
+  it('accepts a via the subject store accepts', () => {
+    expect(workflowSubjectInputSchema.safeParse(withParams({ automationId: 'a-1' })).success).toBe(
+      true
+    );
+  });
+
+  it('rejects locator params the subject store would reject', () => {
+    const tooManyKeys = Object.fromEntries(
+      Array.from({ length: 51 }, (_, index) => [`key${index}`, 'x'])
+    );
+    expect(workflowSubjectInputSchema.safeParse(withParams(tooManyKeys)).success).toBe(false);
+    expect(
+      workflowSubjectInputSchema.safeParse(withParams({ automationId: 'x'.repeat(8_000) })).success
+    ).toBe(false);
   });
 });

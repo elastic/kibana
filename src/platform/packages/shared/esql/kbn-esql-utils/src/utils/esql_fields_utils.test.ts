@@ -55,6 +55,19 @@ describe('esql fields helpers', () => {
       expect(isESQLColumnSortable(flattenedField)).toBeFalsy();
     });
 
+    it('returns false for nested fields', () => {
+      const nestedField = {
+        id: 'my_nested',
+        name: 'my_nested',
+        meta: {
+          type: 'nested',
+          esType: 'nested',
+        },
+        isNull: false,
+      } as DatatableColumn;
+      expect(isESQLColumnSortable(nestedField)).toBeFalsy();
+    });
+
     it('returns false for number_range fields', () => {
       const rangeField = {
         id: 'my_range',
@@ -135,6 +148,19 @@ describe('esql fields helpers', () => {
       expect(isESQLColumnGroupable(flattenedField)).toBeFalsy();
     });
 
+    it('returns false for nested fields', () => {
+      const nestedField = {
+        id: 'my_nested',
+        name: 'my_nested',
+        meta: {
+          type: 'nested',
+          esType: 'nested',
+        },
+        isNull: false,
+      } as DatatableColumn;
+      expect(isESQLColumnGroupable(nestedField)).toBeFalsy();
+    });
+
     it('returns false for number_range fields', () => {
       const rangeField = {
         id: 'my_range',
@@ -195,6 +221,19 @@ describe('esql fields helpers', () => {
         name: 'my_flattened',
         type: 'flattened',
         esTypes: ['flattened'],
+        searchable: true,
+        aggregatable: false,
+        isNull: false,
+      };
+
+      expect(isESQLFieldGroupable(fieldSpec)).toBeFalsy();
+    });
+
+    it('returns false for nested fields', () => {
+      const fieldSpec: FieldSpec = {
+        name: 'my_nested',
+        type: 'nested',
+        esTypes: ['nested'],
         searchable: true,
         aggregatable: false,
         isNull: false,

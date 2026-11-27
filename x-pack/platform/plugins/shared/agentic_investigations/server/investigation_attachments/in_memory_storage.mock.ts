@@ -69,6 +69,10 @@ export const createInMemoryStorage = <TStored extends StoredInvestigationAttachm
       entries.set(id, { source, seqNo: ++seqNo });
     },
     search: jest.fn(async (request) => {
+      if (request._source === false) {
+        // Like the storage adapter, which migrates every hit's source.
+        throw new Error('Source must be an object, got undefined');
+      }
       const filter = request.query?.bool?.filter;
       const clauses = Array.isArray(filter) ? filter : filter ? [filter] : [];
       const hits = [...entries.entries()]

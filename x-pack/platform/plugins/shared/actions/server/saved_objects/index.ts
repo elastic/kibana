@@ -53,7 +53,7 @@ import {
   userConnectorTokenModelVersions,
 } from './model_versions';
 import { connectorModelVersions } from './model_versions/connector_model_versions';
-import { actionEncryptedRegistrationV3 } from './action_encryption';
+import { actionEncryptedRegistrationV4 } from './action_encryption';
 import { userConnectorTokenEncryptedRegistrationV2 } from './user_connector_token_encryption';
 
 export function setupSavedObjects(
@@ -138,9 +138,9 @@ export function setupSavedObjects(
 
   // Encrypted attributes
   // - `secrets` and inbound last-saver `apiKey` / `uiamApiKey` are encrypted
-  // - `config` will be included in AAD
+  // - `actionTypeId`, `isMissingSecrets`, `config`, and optional `specVersion` are included in AAD
   // - everything else excluded from AAD
-  encryptedSavedObjects.registerType(actionEncryptedRegistrationV3);
+  encryptedSavedObjects.registerType(actionEncryptedRegistrationV4);
 
   savedObjects.registerType({
     name: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,

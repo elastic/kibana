@@ -11,8 +11,7 @@ javascript:
   dedupeOnLockfileChange: true # Dedupe dependencies when the lockfile changes.
   syncProjectWorkspaceDependencies: false
 
-node:
-  syncVersionManagerConfig: nvm
+node: {}
 
 # Required by moon v2 when javascript.packageManager is pnpm — enables the pnpm
 # toolchain for `command: pnpm` tasks and moon-initiated installs/dedupe.

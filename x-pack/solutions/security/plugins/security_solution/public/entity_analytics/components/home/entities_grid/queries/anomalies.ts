@@ -5,26 +5,26 @@
  * 2.0.
  */
 
+import { ML_ANOMALY_INDICES } from '../../../../../../common/entity_analytics/anomalies/constants';
 import { ANOMALY_COUNT_FIELD, getEntityId, getEntityIds, getNumber } from '../common';
 import type { QueryArgs, Row } from '../common';
 import { IN_VIEW_AGGREGATION, IN_VIEW_FIELD, buildEntitiesInViewBranch } from './entities_in_view';
+import { buildLookback } from '../../queries/time_range';
 import {
   ANOMALY_RECORD_FILTER,
   ID_LIST_CHUNK_SIZE,
-  ML_ANOMALY_INDICES,
   buildAnomalyJobFilter,
   buildEntityAggregations,
   buildFilterClause,
   buildIdentityPrefilter,
   buildJoinedPageSteps,
-  buildLookback,
   buildStatsByEntityClause,
   SET_UNMAPPED_NULLIFY,
   toList,
   fetchInChunks,
 } from './esql';
 import type { EntityAggregation } from './esql';
-import { buildEuidStages } from './euid_pipeline';
+import { buildEuidStages } from '../../queries/euid_evals';
 import {
   buildRollUpOverAliasesSteps,
   getMergedRowsByEntity,

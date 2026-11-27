@@ -1,0 +1,119 @@
+{
+  "operations": {
+    "getAttachment": [
+      {
+        "method": "get",
+        "path": "/me/messages/{message-id}/attachments/{attachment-id}",
+        "source": "v1"
+      }
+    ],
+    "getMessage": [
+      {
+        "method": "get",
+        "path": "/me/messages/{message-id}",
+        "source": "v1"
+      }
+    ],
+    "listAttachments": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "offsetParam": "$skip",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/me/messages/{message-id}/attachments",
+        "source": "v1"
+      }
+    ],
+    "listFolders": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 10,
+          "request": {
+            "offsetParam": "$skip",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/me/mailFolders",
+        "source": "v1"
+      }
+    ],
+    "listMessages": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 10,
+          "request": {
+            "offsetParam": "$skip",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/me/mailFolders/{mailFolder-id}/messages",
+        "source": "v1"
+      },
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 10,
+          "request": {
+            "offsetParam": "$skip",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/me/messages",
+        "source": "v1"
+      }
+    ],
+    "searchMessages": [
+      {
+        "method": "post",
+        "pagination": {
+          "defaultSize": 25,
+          "request": {
+            "in": "body",
+            "offsetParam": "requests[0].from",
+            "sizeParam": "requests[0].size"
+          },
+          "response": {
+            "itemsPath": "value[0].hitsContainers[0].hits",
+            "totalPath": "value[0].hitsContainers[0].total"
+          },
+          "style": "offset"
+        },
+        "path": "/search/query",
+        "source": "v1"
+      }
+    ]
+  },
+  "sources": {
+    "v1": {
+      "apiVersion": "v1.0",
+      "fetchedAt": "2026-10-07T20:21:22.762Z",
+      "format": "openapi",
+      "url": "https://raw.githubusercontent.com/microsoftgraph/msgraph-metadata/master/openapi/v1.0/openapi.yaml"
+    }
+  }
+}

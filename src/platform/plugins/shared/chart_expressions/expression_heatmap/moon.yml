@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/chart-test-jest-helpers'
   - '@kbn/field-formats-common'
   - '@kbn/visualizations-common'
+  - '@kbn/visualizations-components'
 tags:
   - plugin
   - prod
@@ -50,6 +51,4 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

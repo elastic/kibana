@@ -73,7 +73,6 @@ const toRuleExecutionView = ({
   return {
     id,
     rule: { id: rule.id, version: rule.version ?? undefined },
-    space_id: spaceId,
     started_at: startedAt,
     ended_at: endedAt,
     timings: { duration_ms: duration, scheduled_delay_ms: scheduledDelay },
@@ -100,7 +99,7 @@ export const toListRuleExecutionsResponse = ({
     page,
     per_page: perPage,
     search_matches: searchMatches
-      ? { rules: searchMatches.rules, is_truncated: searchMatches.isTruncated }
+      ? { rule_count: searchMatches.ruleCount, is_truncated: searchMatches.isTruncated }
       : undefined,
   };
 };

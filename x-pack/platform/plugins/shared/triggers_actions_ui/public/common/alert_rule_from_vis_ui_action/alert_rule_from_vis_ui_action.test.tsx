@@ -19,7 +19,7 @@ import { BehaviorSubject } from 'rxjs';
 import { AlertRuleFromVisAction } from './alert_rule_from_vis_ui_action';
 import * as AlertFlyoutComponentModule from './rule_flyout_component';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
-import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { AggregateQuery } from '@kbn/es-query';
 
 // Cold-loading the real flyout chunk would be charged to whichever test runs first; the real
 // `getRuleFlyoutComponent` is covered by `rule_flyout_component.test.tsx` with this same mock.
@@ -448,12 +448,30 @@ describe('AlertRuleFromVisAction', () => {
     `);
   });
 
+  describe('isCompatible', () => {
+    it('is compatible with a Lens panel that runs an ES|QL query', async () => {
+      const embeddable = getLensApiMock({
+        esql$: new BehaviorSubject<AggregateQuery[]>([
+          { esql: 'FROM index | STATS count = COUNT(*)' },
+        ]),
+      });
+      expect(await action.isCompatible({ embeddable })).toBe(true);
+    });
+
+    it('is not compatible with a Lens panel that does not use ES|QL', async () => {
+      const embeddable = getLensApiMock({
+        esql$: new BehaviorSubject<AggregateQuery[]>([]),
+      });
+      expect(await action.isCompatible({ embeddable })).toBe(false);
+    });
+  });
+
   describe('when executed without a data parameter', () => {
     it('derives data from the embeddable and uses placeholder threshold values', async () => {
       const embeddable = getLensApiMock({
-        query$: new BehaviorSubject<Query | AggregateQuery | undefined>({
-          esql: 'FROM index | STATS count = COUNT(*)',
-        }),
+        esql$: new BehaviorSubject<AggregateQuery[]>([
+          { esql: 'FROM index | STATS count = COUNT(*)' },
+        ]),
         getInspectorAdapters: jest.fn(() => ({
           tables: {
             tables: {
@@ -517,9 +535,9 @@ describe('AlertRuleFromVisAction', () => {
     });
     it('uses placeholder split values when the X axis is not a timestamp', async () => {
       const embeddable = getLensApiMock({
-        query$: new BehaviorSubject<Query | AggregateQuery | undefined>({
-          esql: 'FROM index | STATS count = COUNT(*) BY group',
-        }),
+        esql$: new BehaviorSubject<AggregateQuery[]>([
+          { esql: 'FROM index | STATS count = COUNT(*) BY group' },
+        ]),
         getInspectorAdapters: jest.fn(() => ({
           tables: {
             tables: {

@@ -6,7 +6,6 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { GET_NOTIFICATIONS_PATH, NOTIFICATION_CENTER_API_VERSION } from '../../common/routes';
 import type { Notification } from '../../common/types';
 import { NOTIFICATION_DATA_STREAM_NAME } from '../../server/storage/notification_data_stream';
 import { OVERRIDES_KEY, READ_ALL_BEFORE_KEY } from '../../server/storage/user_storage';
@@ -14,16 +13,25 @@ import { OVERRIDES_KEY, READ_ALL_BEFORE_KEY } from '../../server/storage/user_st
 export interface SeedTarget {
   esUrl: string;
   kibanaUrl: string;
-  username: string;
-  password: string;
+  /**
+   * Credentials for the direct Elasticsearch writes. Appending to and deleting from a system
+   * data stream needs `allow_restricted_indices`, which `superuser` grants for reads only
+   * (`ReservedRolesStore.SUPERUSER_ROLE_DESCRIPTOR`), so `elastic` cannot seed.
+   */
+  esAuth: { username: string; password: string };
+  /** Credentials for Kibana. Read state is keyed by profile, so this is whoever opens the bell. */
+  kibanaAuth: { username: string; password: string };
 }
 
 const LOCAL_HOSTNAMES = new Set(['localhost', '127.0.0.1', '[::1]']);
 
-export const createEsClient = ({ esUrl, username, password }: SeedTarget): Client =>
+export const createEsClient = ({ esUrl, esAuth }: SeedTarget): Client =>
   new Client({
     node: esUrl,
-    auth: { username, password },
+    auth: esAuth,
+    // Elasticsearch serves a system data stream only to a caller whose product origin the
+    // descriptor allows. Without this the bulk append and the cleanup delete are both refused.
+    headers: { 'x-elastic-product-origin': 'kibana' },
     // Serverless dev clusters serve a self-signed cert. Local only: a remote https cluster
     // reached over an unverified connection is nobody's intent.
     ...(esUrl.startsWith('https:') &&
@@ -34,34 +42,6 @@ const HEADERS = {
   'kbn-xsrf': 'seed-notifications',
   'x-elastic-internal-origin': 'kibana',
   'content-type': 'application/json',
-};
-
-/**
- * Never send this alongside a session cookie: HTTP authentication wins over the session, and the
- * request loses the `profile_uid` that read state is keyed by.
- */
-const basicAuth = ({ username, password }: SeedTarget) => ({
-  authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
-});
-
-/**
- * Read the list route once, which is what makes the plugin create its data stream.
- *
- * Writing first lets Elasticsearch auto-create a plain index under the same name, which then
- * permanently blocks the plugin from creating it — hence the one status check here.
- */
-export const createDataStream = async (target: SeedTarget): Promise<void> => {
-  const url = `${target.kibanaUrl}${GET_NOTIFICATIONS_PATH}`;
-  const response = await fetch(url, {
-    headers: {
-      ...HEADERS,
-      ...basicAuth(target),
-      'elastic-api-version': NOTIFICATION_CENTER_API_VERSION,
-    },
-  });
-  if (!response.ok) {
-    throw new Error(`${url} returned ${response.status}: ${await response.text()}`);
-  }
 };
 
 /** Append notifications the way the plugin does, and wait for them to become searchable. */
@@ -87,6 +67,9 @@ export const writeNotifications = async (
 export const clearNotifications = async (esClient: Client): Promise<number> => {
   const { deleted } = await esClient.deleteByQuery({
     index: NOTIFICATION_DATA_STREAM_NAME,
+    // Nothing has created the stream until a producer writes to it, and `--clean` still has to
+    // reset the read horizon on a cluster that has never been seeded.
+    ignore_unavailable: true,
     refresh: true,
     conflicts: 'proceed',
     query: { match_all: {} },
@@ -99,7 +82,10 @@ export const clearNotifications = async (esClient: Client): Promise<number> => {
  * session carries one — a plain `Authorization: Basic` request has no read state at all.
  */
 const login = async (target: SeedTarget): Promise<string> => {
-  const { kibanaUrl, username, password } = target;
+  const {
+    kibanaUrl,
+    kibanaAuth: { username, password },
+  } = target;
   const response = await fetch(`${kibanaUrl}/internal/security/login`, {
     method: 'POST',
     headers: HEADERS,

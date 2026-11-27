@@ -35,7 +35,7 @@ import { EsqlFunctionNames } from './function_names';
 const addDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.OPERATOR,
   name: EsqlFunctionNames.ADD,
-  description: i18n.translate('kbn-esql-language.esql.definitions.add', {
+  description: i18n.translate('esqlLanguage.esql.definitions.add', {
     defaultMessage:
       'Add two values. In case of numeric fields, if either field is multivalued then the result is `null`.\nFor dense_vector operations, both arguments should be dense_vectors. Inequal vector dimensions generate null result.\n',
   }),
@@ -549,7 +549,7 @@ const addDefinition: FunctionDefinition = {
 const divDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.OPERATOR,
   name: EsqlFunctionNames.DIV,
-  description: i18n.translate('kbn-esql-language.esql.definitions.div', {
+  description: i18n.translate('esqlLanguage.esql.definitions.div', {
     defaultMessage:
       'Divide one value by another. For numeric operands, if either field is multivalued\nthen the result is `null`.',
   }),
@@ -867,7 +867,7 @@ const divDefinition: FunctionDefinition = {
 const equalsDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.OPERATOR,
   name: EsqlFunctionNames.EQUALS,
-  description: i18n.translate('kbn-esql-language.esql.definitions.equals', {
+  description: i18n.translate('esqlLanguage.esql.definitions.equals', {
     defaultMessage:
       'Check if two fields are equal. If either field is multivalued then the result is `null`.',
   }),
@@ -1555,7 +1555,7 @@ const equalsDefinition: FunctionDefinition = {
 const greaterThanDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.OPERATOR,
   name: EsqlFunctionNames.GREATER_THAN,
-  description: i18n.translate('kbn-esql-language.esql.definitions.greater_than', {
+  description: i18n.translate('esqlLanguage.esql.definitions.greater_than', {
     defaultMessage:
       'Check if one field is greater than another. If either field is multivalued then the result is `null`.',
   }),
@@ -1988,7 +1988,7 @@ const greaterThanDefinition: FunctionDefinition = {
 const greaterThanOrEqualDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.OPERATOR,
   name: EsqlFunctionNames.GREATER_THAN_OR_EQUAL,
-  description: i18n.translate('kbn-esql-language.esql.definitions.greater_than_or_equal', {
+  description: i18n.translate('esqlLanguage.esql.definitions.greater_than_or_equal', {
     defaultMessage:
       'Check if one field is greater than or equal to another. If either field is multivalued then the result is `null`.',
   }),
@@ -2421,7 +2421,7 @@ const greaterThanOrEqualDefinition: FunctionDefinition = {
 const inDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.OPERATOR,
   name: EsqlFunctionNames.IN,
-  description: i18n.translate('kbn-esql-language.esql.definitions.in', {
+  description: i18n.translate('esqlLanguage.esql.definitions.in', {
     defaultMessage:
       'The `IN` operator allows testing whether a field or expression equals an element in a list of literals, fields or expressions.',
   }),
@@ -2734,7 +2734,7 @@ const inDefinition: FunctionDefinition = {
 const isNotNullDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.OPERATOR,
   name: EsqlFunctionNames.IS_NOT_NULL,
-  description: i18n.translate('kbn-esql-language.esql.definitions.is_not_null', {
+  description: i18n.translate('esqlLanguage.esql.definitions.is_not_null', {
     defaultMessage: 'Returns `false` if the value is `NULL`, `true` otherwise.',
   }),
   preview: false,
@@ -3106,7 +3106,7 @@ const isNotNullDefinition: FunctionDefinition = {
 const isNullDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.OPERATOR,
   name: EsqlFunctionNames.IS_NULL,
-  description: i18n.translate('kbn-esql-language.esql.definitions.is_null', {
+  description: i18n.translate('esqlLanguage.esql.definitions.is_null', {
     defaultMessage: 'Returns `true` if the value is `NULL`, `false` otherwise.',
   }),
   preview: false,
@@ -3478,7 +3478,7 @@ const isNullDefinition: FunctionDefinition = {
 const lessThanDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.OPERATOR,
   name: EsqlFunctionNames.LESS_THAN,
-  description: i18n.translate('kbn-esql-language.esql.definitions.less_than', {
+  description: i18n.translate('esqlLanguage.esql.definitions.less_than', {
     defaultMessage:
       'Check if one field is less than another. If either field is multivalued then the result is `null`.',
   }),
@@ -3911,7 +3911,7 @@ const lessThanDefinition: FunctionDefinition = {
 const lessThanOrEqualDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.OPERATOR,
   name: EsqlFunctionNames.LESS_THAN_OR_EQUAL,
-  description: i18n.translate('kbn-esql-language.esql.definitions.less_than_or_equal', {
+  description: i18n.translate('esqlLanguage.esql.definitions.less_than_or_equal', {
     defaultMessage:
       'Check if one field is less than or equal to another. If either field is multivalued then the result is `null`.',
   }),
@@ -4344,7 +4344,7 @@ const lessThanOrEqualDefinition: FunctionDefinition = {
 const likeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.OPERATOR,
   name: EsqlFunctionNames.LIKE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.like', {
+  description: i18n.translate('esqlLanguage.esql.definitions.like', {
     defaultMessage:
       'Use `LIKE` to filter data based on string patterns using wildcards. `LIKE`\nusually acts on a field placed on the left-hand side of the operator, but it can\nalso act on a constant (literal) expression. The right-hand side of the operator\nrepresents the pattern, which can be a string literal, a query parameter, or any\nconstant expression such as a call to `CONCAT` or `TO_LOWER`.\n\nThe following wildcard characters are supported:\n\n* `*` matches zero or more characters.\n* `?` matches one character.',
   }),
@@ -4411,7 +4411,7 @@ const likeDefinition: FunctionDefinition = {
 const matchOperatorDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.OPERATOR,
   name: EsqlFunctionNames.MATCH_OPERATOR,
-  description: i18n.translate('kbn-esql-language.esql.definitions.match_operator', {
+  description: i18n.translate('esqlLanguage.esql.definitions.match_operator', {
     defaultMessage:
       'Use the match operator (`:`) to perform a match query on the specified field or expression.\nUsing `:` is equivalent to using the `match` query in the Elasticsearch Query DSL.\n\nThe match operator is equivalent to the match function.\n\nFor using the function syntax, or adding match query parameters, you can use the\nmatch function.\n\n`:` returns true if the provided query matches the row.',
   }),
@@ -5046,7 +5046,7 @@ const matchOperatorDefinition: FunctionDefinition = {
 const modDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.OPERATOR,
   name: EsqlFunctionNames.MOD,
-  description: i18n.translate('kbn-esql-language.esql.definitions.mod', {
+  description: i18n.translate('esqlLanguage.esql.definitions.mod', {
     defaultMessage:
       'Divide one number by another and return the remainder. If either field is multivalued then the result is `null`.',
   }),
@@ -5245,7 +5245,7 @@ const modDefinition: FunctionDefinition = {
 const mulDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.OPERATOR,
   name: EsqlFunctionNames.MUL,
-  description: i18n.translate('kbn-esql-language.esql.definitions.mul', {
+  description: i18n.translate('esqlLanguage.esql.definitions.mul', {
     defaultMessage:
       'Multiply two values together. For numeric fields, if either field is multivalued\nthen the result is `null`. For dense_vector operations, both arguments should be dense_vectors. Inequal vector dimensions generate\nnull result.\n',
   }),
@@ -5563,7 +5563,7 @@ const mulDefinition: FunctionDefinition = {
 const negDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.OPERATOR,
   name: EsqlFunctionNames.NEG,
-  description: i18n.translate('kbn-esql-language.esql.definitions.neg', {
+  description: i18n.translate('esqlLanguage.esql.definitions.neg', {
     defaultMessage: 'Returns the negation of the argument.',
   }),
   preview: false,
@@ -5633,7 +5633,7 @@ const negDefinition: FunctionDefinition = {
 const notEqualsDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.OPERATOR,
   name: EsqlFunctionNames.NOT_EQUALS,
-  description: i18n.translate('kbn-esql-language.esql.definitions.not_equals', {
+  description: i18n.translate('esqlLanguage.esql.definitions.not_equals', {
     defaultMessage:
       'Check if two fields are unequal. If either field is multivalued then the result is `null`.',
   }),
@@ -6321,7 +6321,7 @@ const notEqualsDefinition: FunctionDefinition = {
 const notInDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.OPERATOR,
   name: EsqlFunctionNames.NOT_IN,
-  description: i18n.translate('kbn-esql-language.esql.definitions.not_in', {
+  description: i18n.translate('esqlLanguage.esql.definitions.not_in', {
     defaultMessage:
       'The `NOT IN` operator allows testing whether a field or expression does *not* equal any element in a list of literals, fields or expressions.',
   }),
@@ -6634,7 +6634,7 @@ const notInDefinition: FunctionDefinition = {
 const notLikeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.OPERATOR,
   name: EsqlFunctionNames.NOT_LIKE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.not_like', {
+  description: i18n.translate('esqlLanguage.esql.definitions.not_like', {
     defaultMessage:
       'Use `LIKE` to filter data based on string patterns using wildcards. `LIKE`\nusually acts on a field placed on the left-hand side of the operator, but it can\nalso act on a constant (literal) expression. The right-hand side of the operator\nrepresents the pattern, which can be a string literal, a query parameter, or any\nconstant expression such as a call to `CONCAT` or `TO_LOWER`.\n\nThe following wildcard characters are supported:\n\n* `*` matches zero or more characters.\n* `?` matches one character.',
   }),
@@ -6701,7 +6701,7 @@ const notLikeDefinition: FunctionDefinition = {
 const notRlikeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.OPERATOR,
   name: EsqlFunctionNames.NOT_RLIKE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.not_rlike', {
+  description: i18n.translate('esqlLanguage.esql.definitions.not_rlike', {
     defaultMessage:
       'Use `RLIKE` to filter data based on string patterns using\nregular expressions. `RLIKE` usually acts on a field placed on\nthe left-hand side of the operator, but it can also act on a constant (literal)\nexpression. The right-hand side of the operator represents the pattern, which can\nbe a string literal, a query parameter, or any constant expression such as a call\nto `CONCAT` or `TO_UPPER`.',
   }),
@@ -6768,7 +6768,7 @@ const notRlikeDefinition: FunctionDefinition = {
 const rlikeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.OPERATOR,
   name: EsqlFunctionNames.RLIKE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.rlike', {
+  description: i18n.translate('esqlLanguage.esql.definitions.rlike', {
     defaultMessage:
       'Use `RLIKE` to filter data based on string patterns using\nregular expressions. `RLIKE` usually acts on a field placed on\nthe left-hand side of the operator, but it can also act on a constant (literal)\nexpression. The right-hand side of the operator represents the pattern, which can\nbe a string literal, a query parameter, or any constant expression such as a call\nto `CONCAT` or `TO_UPPER`.',
   }),
@@ -6837,7 +6837,7 @@ const rlikeDefinition: FunctionDefinition = {
 const subDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.OPERATOR,
   name: EsqlFunctionNames.SUB,
-  description: i18n.translate('kbn-esql-language.esql.definitions.sub', {
+  description: i18n.translate('esqlLanguage.esql.definitions.sub', {
     defaultMessage:
       'Subtract one value from another. In case of numeric fields, if either field is multivalued\nthen the result is `null`. For dense_vector fields, both arguments should be dense_vectors. Inequal vector dimensions generate\nnull result.\n',
   }),

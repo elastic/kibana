@@ -10,8 +10,10 @@ import { schema } from '@kbn/config-schema';
 
 export const transformHealthRuleParamsSchema = schema.object(
   {
-    includeTransforms: schema.arrayOf(schema.string()),
-    excludeTransforms: schema.nullable(schema.arrayOf(schema.string(), { defaultValue: [] })),
+    includeTransforms: schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 }),
+    excludeTransforms: schema.nullable(
+      schema.arrayOf(schema.string({ maxLength: 1000 }), { defaultValue: [], maxSize: 1000 })
+    ),
     testsConfig: schema.nullable(
       schema.object({
         notStarted: schema.nullable(

@@ -46,8 +46,7 @@ export const EditorMenu: FC<Props> = ({
           trigger: { id: ADD_CANVAS_ELEMENT_TRIGGER },
         };
         const actionName = item.getDisplayName(context);
-        const icon =
-          (item.id === 'addVegaPanelAction' ? 'code' : item.getIconType(context)) ?? 'empty';
+        const icon = item.getIconType(context) ?? 'empty';
         return {
           name: actionName,
           icon: typeof icon === 'string' ? icon : 'empty',

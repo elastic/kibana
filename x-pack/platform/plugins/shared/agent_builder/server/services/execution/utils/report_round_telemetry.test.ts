@@ -17,6 +17,7 @@ import {
   ConversationRoundStatus,
 } from '@kbn/agent-builder-common';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
+import { attachmentEventFixture } from '../../../test_utils/timeline';
 import { mergeModelUsage } from '../../conversation/client/merge_rounds';
 import { buildExecutionTelemetry, reportRoundTelemetry } from './report_round_telemetry';
 
@@ -276,6 +277,63 @@ describe('buildExecutionTelemetry', () => {
     // the round event fires exactly once, on the terminal execution
     expect(reports.filter((report) => report.isRoundTerminal)).toHaveLength(1);
     expect(reports[2].isRoundTerminal).toBe(true);
+  });
+});
+
+describe('reportRoundTelemetry', () => {
+  it("passes the round's stored and new attachment events as input attachment events", () => {
+    const analyticsService = {
+      reportRoundComplete: jest.fn(),
+      reportExecutionComplete: jest.fn(),
+    };
+    const storedForRound = attachmentEventFixture({
+      id: 'stored-img',
+      source: 'chat_input',
+      attachmentType: 'image',
+      executionId: 'r1::execution',
+      triggerEventId: 'r1::user_message',
+    });
+    const storedForOtherRound = attachmentEventFixture({
+      id: 'other-img',
+      source: 'chat_input',
+      attachmentType: 'image',
+      executionId: 'r0::execution',
+      triggerEventId: 'r0::user_message',
+    });
+    const produced = attachmentEventFixture({
+      id: 'new-img',
+      source: 'chat_input',
+      attachmentType: 'image',
+    });
+
+    reportRoundTelemetry({
+      event: completeEvent({
+        resumed: true,
+        resume_execution: { follow_up_round: round() },
+        attachment_events: [produced],
+      }),
+      conversation: conversation({
+        schema_version: CONVERSATION_SCHEMA_VERSION,
+        rounds: [round()],
+        events: [
+          storedForOtherRound,
+          pauseTerminatedEvent('2026-01-01T00:00:00.000Z'),
+          storedForRound,
+        ],
+      }),
+      agentId: 'agent-1',
+      executionId: 'execution-1',
+      modelProvider: 'OpenAI' as never,
+      meteringService: { reportExecution: jest.fn().mockResolvedValue(undefined) } as never,
+      analyticsService: analyticsService as never,
+      logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as never,
+    });
+
+    const expected = expect.objectContaining({
+      inputAttachmentEvents: [storedForRound, produced],
+    });
+    expect(analyticsService.reportExecutionComplete).toHaveBeenCalledWith(expected);
+    expect(analyticsService.reportRoundComplete).toHaveBeenCalledWith(expected);
   });
 });
 

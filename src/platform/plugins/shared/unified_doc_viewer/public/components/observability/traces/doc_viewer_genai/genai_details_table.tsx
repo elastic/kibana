@@ -21,26 +21,32 @@ import {
   ATTRIBUTE_GEN_AI_RESPONSE_ID,
   ATTRIBUTE_GEN_AI_RESPONSE_MODEL,
   ATTRIBUTE_GEN_AI_SYSTEM,
+  ATTRIBUTE_GEN_AI_USAGE_CACHE_WRITE_INPUT_TOKENS,
+  ATTRIBUTE_GEN_AI_USAGE_CACHE_READ_INPUT_TOKENS,
   ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS,
   ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS,
+  ATTRIBUTE_GEN_AI_USAGE_REASONING_OUTPUT_TOKENS,
 } from '@kbn/genai-common';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import type { ContentFrameworkTableProps } from '../../../content_framework';
+import type { FieldConfiguration } from '../../../content_framework';
 import { ContentFrameworkTable } from '../../../content_framework';
+import { FormattedValue } from '../../../content_framework/table/components/formatted_value';
 
 /**
- * Expands a canonical `attributes.gen_ai.*` field name into the three key
+ * Expands a canonical `attributes.gen_ai.*` field name into the four key
  * shapes produced by the different ingest paths:
  *   1. attributes.gen_ai.*  — OTel / EDOT ingest
  *   2. gen_ai.*             — bare OTel (no attributes. prefix)
  *   3. labels.gen_ai_*      — APM Server ingest (dots → underscores)
+ *   4. numeric_labels.gen_ai_* — APM Server ingest of numeric attributes
  * Only fields present on the hit are rendered by ContentFrameworkTable.
  */
 const fallbackShapes = (attributeName: string): string[] => {
   const bare = attributeName.replace(/^attributes\./, '');
-  return [attributeName, bare, `labels.${bare.replace(/\./g, '_')}`];
+  const labelName = bare.replace(/\./g, '_');
+  return [attributeName, bare, `labels.${labelName}`, `numeric_labels.${labelName}`];
 };
 
 const PROVIDER_TITLE = i18n.translate(
@@ -71,6 +77,19 @@ const DETAIL_FIELD_TITLES: Record<string, string> = {
     'unifiedDocViewer.observability.traces.genAi.details.outputTokens',
     { defaultMessage: 'Output tokens' }
   ),
+  [ATTRIBUTE_GEN_AI_USAGE_REASONING_OUTPUT_TOKENS]: i18n.translate(
+    'unifiedDocViewer.observability.traces.genAi.details.reasoningOutputTokensLabel',
+    { defaultMessage: 'Reasoning output tokens' }
+  ),
+  // Shown with their share of the input tokens, see buildFieldConfigurations.
+  [ATTRIBUTE_GEN_AI_USAGE_CACHE_READ_INPUT_TOKENS]: i18n.translate(
+    'unifiedDocViewer.observability.traces.genAi.details.cacheReadTokens',
+    { defaultMessage: 'Cache read tokens' }
+  ),
+  [ATTRIBUTE_GEN_AI_USAGE_CACHE_WRITE_INPUT_TOKENS]: i18n.translate(
+    'unifiedDocViewer.observability.traces.genAi.details.cacheWriteTokens',
+    { defaultMessage: 'Cache write tokens' }
+  ),
   [ATTRIBUTE_GEN_AI_RESPONSE_MODEL]: i18n.translate(
     'unifiedDocViewer.observability.traces.genAi.details.responseModel',
     { defaultMessage: 'Response model' }
@@ -96,12 +115,6 @@ const DETAIL_FIELD_TITLES: Record<string, string> = {
   [ATTRIBUTE_GEN_AI_REQUEST_SEED]: 'seed',
 };
 
-const FIELD_CONFIGURATIONS: ContentFrameworkTableProps['fieldConfigurations'] = Object.fromEntries(
-  Object.entries(DETAIL_FIELD_TITLES).flatMap(([attributeName, title]) =>
-    fallbackShapes(attributeName).map((fieldName) => [fieldName, { title }])
-  )
-);
-
 export type GenAiDetailsTableProps = Pick<
   DocViewRenderProps,
   'hit' | 'dataView' | 'textBasedHits' | 'filter' | 'onAddColumn' | 'onRemoveColumn' | 'columns'
@@ -110,7 +123,8 @@ export type GenAiDetailsTableProps = Pick<
 /**
  * Resolves each canonical detail attribute to the single field name it is
  * actually stored under on this hit, picking the first present shape in
- * priority order (mirrors `rawValue()` in `get_genai_fields.ts`). A document
+ * priority order (like `rawValue()` in `get_genai_fields.ts`, which does not try
+ * the `numeric_labels.*` shape, so the table can show rows it does not). A document
  * can carry a value under more than one shape at once (e.g. a derived bare
  * `gen_ai.*` field alongside the mapped `attributes.gen_ai.*` one) — without
  * this de-duplication every present shape would render as its own row.
@@ -119,6 +133,94 @@ export type GenAiDetailsTableProps = Pick<
 // mirror the value-aware presence check of `hasGenAiData`.
 const hasValue = (value: unknown): boolean =>
   value != null && (!Array.isArray(value) || value.some((element) => element != null));
+
+const CACHE_TOKEN_ATTRIBUTES = [
+  ATTRIBUTE_GEN_AI_USAGE_CACHE_READ_INPUT_TOKENS,
+  ATTRIBUTE_GEN_AI_USAGE_CACHE_WRITE_INPUT_TOKENS,
+];
+
+const toFiniteNumber = (value: unknown): number | undefined => {
+  const raw = Array.isArray(value) ? value.find((element) => element != null) : value;
+  const parsed = typeof raw === 'string' ? Number(raw) : raw;
+  return typeof parsed === 'number' && Number.isFinite(parsed) ? parsed : undefined;
+};
+
+/**
+ * The share of the input tokens that were read from, or written to, the prompt cache, as a whole
+ * percentage, kept within 1-99 unless it is exactly 0 or 100. Undefined when it cannot be told: the input tokens are missing or zero, or the cache
+ * tokens exceed them, which happens when a provider reports them apart from the input tokens
+ * instead of as a part of it.
+ */
+export function getCachePercentage(cacheTokens: unknown, inputTokens: unknown): number | undefined {
+  const cache = toFiniteNumber(cacheTokens);
+  const input = toFiniteNumber(inputTokens);
+  if (cache === undefined || input === undefined || input <= 0 || cache > input) {
+    return undefined;
+  }
+  // 0% and 100% are only shown when exact: a partial share never rounds onto either end.
+  if (cache === 0) {
+    return 0;
+  }
+  if (cache === input) {
+    return 100;
+  }
+  return Math.min(99, Math.max(1, Math.round((cache / input) * 100)));
+}
+
+const FIELD_CONFIGURATIONS: Record<string, FieldConfiguration> = Object.fromEntries(
+  Object.entries(DETAIL_FIELD_TITLES).flatMap(([attributeName, title]) =>
+    fallbackShapes(attributeName).map((fieldName): [string, FieldConfiguration] => [
+      fieldName,
+      { title },
+    ])
+  )
+);
+
+const getCachePercentageLabel = (percentage: number): string =>
+  i18n.translate('unifiedDocViewer.observability.traces.genAi.details.cachePercentage', {
+    defaultMessage: '({percentage}%)',
+    values: { percentage },
+  });
+
+const withCachePercentage =
+  (inputTokens: unknown): FieldConfiguration['formatter'] =>
+  (value, formattedValue) => {
+    const percentage = getCachePercentage(value, inputTokens);
+    return (
+      <FormattedValue
+        truncate
+        value={
+          percentage === undefined ? (
+            formattedValue
+          ) : (
+            <>
+              {formattedValue} {getCachePercentageLabel(percentage)}
+            </>
+          )
+        }
+      />
+    );
+  };
+
+/**
+ * The static titles, with the cache token rows layered on top to also show their percentage of the
+ * input tokens: a formatter only sees its own field's value, so it is built from the hit.
+ */
+function buildFieldConfigurations(
+  flattened: Record<string, unknown>
+): Record<string, FieldConfiguration> {
+  const inputTokens = fallbackShapes(ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS)
+    .map((fieldName) => flattened[fieldName])
+    .find(hasValue);
+  const formatter = withCachePercentage(inputTokens);
+  const cacheConfigurations = CACHE_TOKEN_ATTRIBUTES.flatMap((attributeName) =>
+    fallbackShapes(attributeName).map((fieldName): [string, FieldConfiguration] => [
+      fieldName,
+      { title: DETAIL_FIELD_TITLES[attributeName], formatter },
+    ])
+  );
+  return { ...FIELD_CONFIGURATIONS, ...Object.fromEntries(cacheConfigurations) };
+}
 
 export function getGenAiDetailFieldNames(flattened: Record<string, unknown>): string[] {
   const isPresent = (attributeName: string) =>
@@ -158,13 +260,17 @@ export function GenAiDetailsTable({
   columns,
 }: GenAiDetailsTableProps) {
   const fieldNames = useMemo(() => getGenAiDetailFieldNames(hit.flattened), [hit]);
+  const fieldConfigurations = useMemo(
+    () => buildFieldConfigurations(hit.flattened),
+    [hit.flattened]
+  );
 
   return (
     <ContentFrameworkTable
       id="genAiDetailsTable"
       data-test-subj="unifiedDocViewerObsTracesGenAiDetails"
       fieldNames={fieldNames}
-      fieldConfigurations={FIELD_CONFIGURATIONS}
+      fieldConfigurations={fieldConfigurations}
       hit={hit}
       dataView={dataView}
       textBasedHits={textBasedHits}

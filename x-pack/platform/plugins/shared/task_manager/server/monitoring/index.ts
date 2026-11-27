@@ -19,11 +19,11 @@ import type { TaskExecutionControlService } from '../execution_control';
 export type { MonitoringStats, RawMonitoringStats } from './monitoring_stats_stream';
 export {
   HealthStatus,
+  isEsBackpressureActive,
   summarizeMonitoringStats,
   createAggregators,
   createMonitoringStatsStream,
 } from './monitoring_stats_stream';
-
 export interface CreateMonitoringStatsOpts {
   taskStore: TaskStore;
   elasticsearchAndSOAvailability$: Observable<boolean>;

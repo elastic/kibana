@@ -22,10 +22,15 @@ import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import {
+  saveWorkflowToAiIndex as saveWorkflowToAiIndexWithAccess,
+  type SaveAutomationResult,
+} from '@kbn/context-engine-plugin/server/automation_templates/save_workflow';
+import {
   AI_INDEX_ATTACHMENT_TYPE,
   WORKFLOW_YAML_ATTACHMENT_TYPE,
 } from '../../../../common/agent_builder_attachments';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
+import { InsufficientPrivilegesError } from '../../../errors';
 
 export interface SaveAutomationParams {
   workflowAttachmentId?: string;
@@ -50,11 +55,7 @@ export interface RunAutomationResult {
   errorMessage?: string;
 }
 
-export interface SaveAutomationResult {
-  aiIndexId: string;
-  workflowId: string;
-  status: 'saved_and_attached' | 'attached' | 'already_attached';
-}
+export type { SaveAutomationResult };
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 
@@ -293,7 +294,7 @@ const assertWorkflowReadAccess = async ({
   const security = await getSecurityStart();
   const canRead = await hasWorkflowReadPrivilege({ security, request, spaceId });
   if (!canRead) {
-    throw new Error(
+    throw new InsufficientPrivilegesError(
       `Unauthorized to reference workflow '${workflowId}'. The workflowsManagement read privilege is required.`
     );
   }
@@ -316,7 +317,7 @@ const assertWorkflowCreateAccess = async ({
   const security = await getSecurityStart();
   const canCreate = await hasWorkflowCreatePrivilege({ security, request, spaceId });
   if (!canCreate) {
-    throw new Error(
+    throw new InsufficientPrivilegesError(
       'Unauthorized to create a workflow. The workflowsManagement create privilege is required.'
     );
   }
@@ -336,7 +337,7 @@ const assertWorkflowUpdateAccess = async ({
   const security = await getSecurityStart();
   const canUpdate = await hasWorkflowUpdatePrivilege({ security, request, spaceId });
   if (!canUpdate) {
-    throw new Error(
+    throw new InsufficientPrivilegesError(
       `Unauthorized to update workflow '${workflowId}'. The workflowsManagement update privilege is required.`
     );
   }
@@ -391,7 +392,7 @@ const resolveWorkflowSource = (
  * reverts the workflow without anyone asking for that. None of this can fail a save that has
  * already persisted and attached, so every step only warns.
  */
-const syncAttachmentsToSavedWorkflow = async ({
+export const syncAttachmentsToSavedWorkflow = async ({
   source,
   workflowId,
   attachments,
@@ -474,50 +475,7 @@ const syncAttachmentsToSavedWorkflow = async ({
   }
 };
 
-const persistWorkflow = async ({
-  yaml,
-  existingWorkflowId,
-  workflowsManagement,
-  spaceId,
-  request,
-  getSecurityStart,
-}: {
-  yaml: string;
-  existingWorkflowId?: string;
-  workflowsManagement: WorkflowsManagementApi;
-  spaceId: string;
-  request: KibanaRequest;
-  getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
-}): Promise<{ workflowId: string; newlyCreated: boolean }> => {
-  if (existingWorkflowId !== undefined) {
-    await assertWorkflowUpdateAccess({
-      workflowId: existingWorkflowId,
-      spaceId,
-      request,
-      getSecurityStart,
-    });
-
-    // Confirmed as an overwrite before overwriting: the user approved replacing a workflow that
-    // exists. If it does not, `updateWorkflow` would fail with a message about the id rather than
-    // about the choice, and the caller has a create available that it may not think to fall back
-    // to. A workflow can also have been deleted since the attachment recorded it.
-    const target = await workflowsManagement.getWorkflow(existingWorkflowId, spaceId, request);
-    if (!target) {
-      throw new Error(
-        `Workflow '${existingWorkflowId}' was not found in this space, so there is nothing to ` +
-          `overwrite. Omit workflowId to save this definition as a new automation.`
-      );
-    }
-
-    await workflowsManagement.updateWorkflow(existingWorkflowId, { yaml }, spaceId, request);
-    return { workflowId: existingWorkflowId, newlyCreated: false };
-  }
-
-  await assertWorkflowCreateAccess({ spaceId, request, getSecurityStart });
-  const created = await workflowsManagement.createWorkflow({ yaml }, spaceId, request);
-
-  return { workflowId: created.id, newlyCreated: true };
-};
+export { collectWorkflowValidationErrors } from '@kbn/context-engine-plugin/server/automation_templates/save_workflow';
 
 /**
  * Starts a saved automation, enabling its definition first when it is disabled. Never throws: the
@@ -704,55 +662,68 @@ export const saveAutomationHandler = async ({
   }
 
   const source = resolveWorkflowSource(params, attachments);
-  const { existingWorkflowId } = source;
-  const isUpdate = existingWorkflowId !== undefined;
-
-  // Fail-fast: reject before createWorkflow/updateWorkflow when the index cannot accept this automation.
-  await aiIndexService.assertCanAcceptAutomation(
+  const result = await saveWorkflowToAiIndex({
     aiIndexId,
-    spaceId,
-    existingWorkflowId ? { type: 'workflow', value: existingWorkflowId } : undefined
-  );
-
-  const { workflowId, newlyCreated } = await persistWorkflow({
-    yaml: source.yaml,
-    existingWorkflowId,
-    workflowsManagement,
-    spaceId,
+    workflowYaml: source.yaml,
+    existingWorkflowId: source.existingWorkflowId,
     request,
+    spaceId,
+    logger,
+    getAiIndexService,
     getSecurityStart,
+    getWorkflowsManagement,
   });
 
-  let result: SaveAutomationResult;
-  try {
-    const attachStatus = await aiIndexService.addAutomation(aiIndexId, spaceId, {
-      type: 'workflow',
-      value: workflowId,
-    });
-
-    await syncAttachmentsToSavedWorkflow({ source, workflowId, attachments, logger });
-
-    result = {
-      aiIndexId,
-      workflowId,
-      status: isUpdate || attachStatus === 'attached' ? 'saved_and_attached' : 'already_attached',
-    };
-  } catch (error) {
-    if (newlyCreated) {
-      try {
-        await workflowsManagement.deleteWorkflows([workflowId], spaceId, request);
-      } catch (deleteError) {
-        logger.warn(`Failed to roll back workflow '${workflowId}' after attach failure`, {
-          error: deleteError,
-        });
-      }
-    }
-
-    throw error;
-  }
+  await syncAttachmentsToSavedWorkflow({
+    source,
+    workflowId: result.workflowId,
+    attachments,
+    logger,
+  });
 
   return result;
 };
+
+/**
+ * Creates or overwrites a workflow and attaches it to an AI index, deleting a newly created
+ * workflow when attaching it fails. Callers must check Context Engine write access first.
+ */
+export const saveWorkflowToAiIndex = ({
+  aiIndexId,
+  workflowYaml,
+  existingWorkflowId,
+  request,
+  spaceId,
+  logger,
+  getAiIndexService,
+  getSecurityStart,
+  getWorkflowsManagement,
+}: {
+  aiIndexId: string;
+  workflowYaml: string;
+  existingWorkflowId?: string;
+  request: KibanaRequest;
+  spaceId: string;
+  logger: Logger;
+  getAiIndexService: () => Promise<AiIndexService>;
+  getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
+  getWorkflowsManagement: () => WorkflowsManagementApi;
+}): Promise<SaveAutomationResult> =>
+  saveWorkflowToAiIndexWithAccess({
+    aiIndexId,
+    workflowYaml,
+    existingWorkflowId,
+    request,
+    spaceId,
+    logger,
+    getAiIndexService,
+    workflowsManagement: getWorkflowsManagement(),
+    access: {
+      assertCanCreate: () => assertWorkflowCreateAccess({ spaceId, request, getSecurityStart }),
+      assertCanUpdate: (workflowId) =>
+        assertWorkflowUpdateAccess({ workflowId, spaceId, request, getSecurityStart }),
+    },
+  });
 
 export const getSaveAutomationErrorMessage = (error: unknown): string => {
   if (error instanceof Error) {

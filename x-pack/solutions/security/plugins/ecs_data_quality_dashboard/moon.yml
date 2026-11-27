@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/ecs-data-quality-dashboard-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/security-threat-hunting'
+  defaultOwner: '@elastic/security-investigations'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/ecs-data-quality-dashboard-plugin'
   description: Moon project for @kbn/ecs-data-quality-dashboard-plugin
   channel: ''
-  owner: '@elastic/security-threat-hunting'
+  owner: '@elastic/security-investigations'
   sourceRoot: x-pack/solutions/security/plugins/ecs_data_quality_dashboard
 dependsOn:
   - '@kbn/core'
@@ -46,6 +46,4 @@ fileGroups:
     - server/**/*
     - server/**/*.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

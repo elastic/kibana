@@ -13,6 +13,10 @@ Examples that should NOT trigger a service map visual:
 - "What are the dependencies of payment-service?" — answer with text, no map needed
 - "Draw the architecture for frontend" — if the user wants a generic architecture diagram rather than an observability service map, prefer the generic graph skill
 
+Choose the map view from what the user asked for:
+- **Scoped** — the user asks about one service, its dependencies, or a problem around it: render the interactive **contextual** map focused on that service (the default).
+- **Full topology** — the user explicitly asks for the whole architecture or all services: render the **full** view (`"view": "full"`).
+
 ## How to Create a Service Map
 
 ### Step 1: Get the topology data
@@ -24,7 +28,7 @@ Call `get_service_topology` to retrieve the service dependency graph.
 get_service_topology(serviceName: "checkout", direction: "both", depth: 2, start: "now-15m", end: "now")
 ```
 
-Prefer `direction: "both"` with `depth: 2` when the result will be rendered as a map: it gives users a broader view without requiring another fetch.
+Prefer `direction: "both"` with `depth: 2` when the result will be rendered as a map: the interactive map initially shows only the service's direct neighborhood, and the extra hop gives users room to expand nodes without re-fetching. Use a larger depth only if the user explicitly asks for a wider map.
 
 **For upstream callers only:**
 ```
@@ -36,7 +40,7 @@ get_service_topology(serviceName: "payment-service", direction: "upstream", star
 get_service_topology(serviceName: "frontend", direction: "downstream", start: "now-15m", end: "now")
 ```
 
-If the user asks for the full topology without naming a specific service, first call `get_services` to discover available services, then call `get_service_topology` for a central service (like the frontend or entry point) with `direction: "both"` to get the broadest view.
+If the user asks for the full topology without naming a specific service, first call `get_services` to discover available services, then call `get_service_topology` for a central service (like the frontend or entry point) with `direction: "both"` to get the broadest view, and set `"view": "full"` on the attachment.
 
 ### Step 2: Create the service map attachment
 
@@ -50,12 +54,17 @@ Pass the topology data directly to `attachments.add`:
     "connections": <connections array from get_service_topology result>,
     "nodeMetadata": <nodeMetadata object from get_service_topology result>,
     "serviceName": "checkout",
-    "title": "Service Map — checkout"
+    "title": "Service Map — checkout",
+    "timeRange": { "start": "now-15m", "end": "now" }
   }
 }
 ```
 
+Add `"view": "full"` only for a full-topology request; omit `view` for scoped maps.
+
 The `data.connections` field should contain the exact connections array returned by `get_service_topology`. The `data.nodeMetadata` field should contain the exact `nodeMetadata` object returned alongside it — it carries per-service `alertsCount`, `sloStatus`, `sloCount`, and ML anomaly fields (`anomalySeverity`, `anomalyScore`), which render as alert, SLO, and anomaly badges on the service nodes. Pass both through verbatim; do NOT transform, restructure, or compute positions — the renderer handles layout and styling automatically. If `get_service_topology` did not return `nodeMetadata`, omit the field.
+
+The `data.timeRange` field should repeat the `start` and `end` you passed to `get_service_topology` — it scopes the map's drill-down views (service details, dependency metrics) and its link to the full Service Map. If the conversation is scoped to a specific environment (for example from an alert's `service.environment`), pass that same `environment` to `get_service_topology` and set `data.environment` to it — it scopes the badge counts, the drill-down views and the link (the topology graph itself always spans all environments).
 
 ### Step 3: Render the attachment
 
@@ -70,6 +79,6 @@ After creating the attachment, render it inline:
 - If `get_service_topology` returns an empty `connections` array, do NOT create a service map attachment. Instead, tell the user that no topology data was found for the requested service or time range.
 - Do NOT compute node positions or build React Flow JSON — the attachment renderer handles all layout and styling
 - Do NOT use the generic graph attachment (`type: "graph"`) for service maps — use `type: "observability.service-map"`
-- Set `serviceName` in the data whenever the map is scoped to a specific service: it becomes the focal node of the rendered map
-- Throughput and error rate are shown as labels on edges when available
-- The map is a static visual — node click popovers and links to APM pages are not yet available
+- Set `serviceName` in the data whenever the map is scoped to a specific service: it becomes the focal node of the interactive map. Without it (or with `"view": "full"`) the map falls back to a static, non-interactive rendering.
+- The interactive map focuses on the service's direct connections; users can expand collapsed dependencies, adjust hop depth and visible-node limits, click nodes to open service details, click edges for dependency metrics, and jump to the full Service Map in APM. Do not repeat those details in prose — describe what the topology shows instead.
+- Edge latency/throughput/error-rate labels are only shown in the static view; in the interactive map they are available by clicking an edge.

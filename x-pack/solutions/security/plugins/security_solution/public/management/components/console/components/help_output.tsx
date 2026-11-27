@@ -26,6 +26,7 @@ export const HelpOutput = memo<HelpOutputProps>(({ title, children }) => {
   return (
     <EuiPanel
       hasShadow={false}
+      hasBorder={false}
       color="transparent"
       paddingSize="none"
       data-test-subj={getTestId('helpOutput')}

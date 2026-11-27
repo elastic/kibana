@@ -141,6 +141,23 @@ describe('useOnboardingOverride', () => {
       expect(tile.categories).toEqual(['aws', 'security', 'observability']);
     });
 
+    it('sets the collection size to the number of services behind the tile', () => {
+      const guardduty = { ...makeCard('aws', 'epr:aws-guardduty'), title: 'Amazon GuardDuty' };
+      const cloudtrail = { ...makeCard('aws', 'epr:aws-cloudtrail'), title: 'AWS CloudTrail' };
+      const otel = { ...makeCard('aws_cloudtrail_otel'), title: 'AWS CloudTrail OpenTelemetry' };
+      const { result } = renderHook(() => useOnboardingOverride());
+      const [tile] = result.current.applyOnboardingOverride([guardduty, cloudtrail, otel]);
+
+      expect(tile.collectionSize).toBe(2);
+    });
+
+    it('does not set a collection size when no service is hidden behind the tile', () => {
+      const { result } = renderHook(() => useOnboardingOverride());
+      const [tile] = result.current.applyOnboardingOverride([makeCard('aws', 'epr:aws')]);
+
+      expect(tile.collectionSize).toBeUndefined();
+    });
+
     it('leaves OpenTelemetry and content packages out of the search members', () => {
       const real = { ...makeCard('aws', 'epr:aws-cloudtrail'), title: 'AWS CloudTrail' };
       const otel = { ...makeCard('aws_cloudtrail_otel'), title: 'AWS CloudTrail OpenTelemetry' };
@@ -180,7 +197,7 @@ describe('useOnboardingOverride', () => {
       tile.onCardClick?.();
       expect(mockNavigateToApp).toHaveBeenCalledWith('onboarding', {
         path: '/aws',
-        state: { newSession: true },
+        state: { newSession: true, returnUrl: window.location.href },
       });
     });
 
@@ -195,7 +212,7 @@ describe('useOnboardingOverride', () => {
 
       expect(mockNavigateToApp).toHaveBeenCalledWith('onboarding', {
         path: '/aws',
-        state: { newSession: true },
+        state: { newSession: true, returnUrl: window.location.href },
       });
     });
 

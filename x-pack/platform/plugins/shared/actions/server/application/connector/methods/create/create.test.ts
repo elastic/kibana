@@ -27,12 +27,14 @@ import { connectorTokenClientMock } from '../../../../lib/connector_token_client
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { z } from '@kbn/zod';
 import { z as z4 } from '@kbn/zod/v4';
+import type { ConnectorSpec } from '@kbn/connector-specs';
 import {
   connectorTypeHasInboundEvents,
   connectorTypeIsDual,
   getConnectorSpec,
 } from '@kbn/connector-specs';
 import { authTypeRegistryMock } from '../../../../auth_types/auth_type_registry.mock';
+import { actionsConfigMock } from '../../../../actions_config.mock';
 import { generateConfigSchema } from '../../../../lib/single_file_connectors/generate_config_schema';
 import { securityServiceMock } from '@kbn/core/server/mocks';
 import { encodeApiKey } from '../../../../inbound/event_identity/encode_api_key';
@@ -79,6 +81,8 @@ const getAxiosInstanceWithAuth = jest.fn();
 const actionTypeRegistry: ActionTypeRegistry = {
   get: jest.fn(),
   has: jest.fn(),
+  getSpec: jest.fn(),
+  isSpecActionType: jest.fn().mockReturnValue(false),
   isSystemActionType: jest.fn().mockReturnValue(false),
   ensureActionTypeEnabled: jest.fn(),
   isDeprecated: jest.fn().mockReturnValue(false),
@@ -595,6 +599,273 @@ describe('create()', () => {
 
       expect(actionTypeRegistry.ensureActionTypeEnabled).toHaveBeenCalledWith('my-connector-type');
     });
+  });
+
+  describe('spec versions', () => {
+    const firstSpec: ConnectorSpec = {
+      metadata: {
+        id: 'my-connector-type',
+        displayName: 'Versioned connector',
+        description: 'A connector with versioned schemas',
+        minimumLicense: 'basic',
+        supportedFeatureIds: ['alerting'],
+      },
+      schema: z4.object({
+        endpoint: z4.string().meta({ validate: { allowedHosts: true } }),
+        retries: z4.number().default(3),
+      }),
+      auth: { types: ['api_key_header'] },
+      actions: {},
+      test: { enabled: false, handler: jest.fn() },
+    };
+    const secondSpec: ConnectorSpec = {
+      ...firstSpec,
+      schema: z4.object({ region: z4.string() }),
+      auth: { types: ['basic'] },
+    };
+    const action = {
+      name: 'Versioned connector',
+      actionTypeId: 'my-connector-type',
+      config: { endpoint: 'https://example.com' },
+      secrets: { authType: 'api_key_header', apiKey: 'secret' },
+    };
+    const configurationUtilities = actionsConfigMock.create();
+    const originalConfigurationUtilities = actionTypeRegistry.getUtils();
+    let registeredActionType: ReturnType<typeof getConnectorType>;
+
+    beforeEach(() => {
+      configurationUtilities.ensureUriAllowed.mockReset();
+      jest.mocked(actionTypeRegistry.getUtils).mockReturnValue(configurationUtilities);
+      registeredActionType = getConnectorType({
+        source: ACTION_TYPE_SOURCES.spec,
+        spec: secondSpec,
+        specs: new Map([
+          ['2.0', secondSpec],
+          ['1.10', firstSpec],
+          ['1.9', firstSpec],
+          ['1.3', firstSpec],
+        ]),
+        validate: {
+          config: { schema: z4.object({ unrelated: z4.string() }) },
+          secrets: { schema: z4.object({ unrelated: z4.string() }) },
+          params: { schema: z4.object({}) },
+        },
+        preSaveHook,
+        postSaveHook,
+      });
+      jest.mocked(actionTypeRegistry.get).mockReturnValue(registeredActionType);
+      unsecuredSavedObjectsClient.create.mockImplementation(async (_type, attributes, options) => ({
+        id: options?.id ?? 'mock-saved-object-id',
+        type: 'action',
+        attributes,
+        references: [],
+      }));
+    });
+
+    afterEach(() => {
+      jest.mocked(actionTypeRegistry.getUtils).mockReturnValue(originalConfigurationUtilities);
+    });
+
+    test.each([
+      [undefined, '1.10'],
+      ['1', '1.10'],
+      ['1.3', '1.3'],
+    ])(
+      'resolves %s to %s and saves parsed config and secrets together',
+      async (requested, exact) => {
+        const result = await create({
+          context: mockContext,
+          action: { ...action, specVersion: requested },
+        });
+
+        expect(result.specVersion).toBe(exact);
+        expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+          'action',
+          expect.objectContaining({
+            specVersion: exact,
+            config: { ...action.config, retries: 3, authType: 'api_key_header' },
+            secrets: { ...action.secrets, headerField: 'Api-Key' },
+          }),
+          { id: 'mock-saved-object-id' }
+        );
+        expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledWith(
+          action.config.endpoint
+        );
+        expect(result).not.toHaveProperty('secrets');
+      }
+    );
+
+    test.each(['2', '2.0'])('uses the requested major schema for %s', async (specVersion) => {
+      const result = await create({
+        context: mockContext,
+        action: {
+          ...action,
+          config: { region: 'west' },
+          secrets: { authType: 'basic', username: 'user', password: 'secret' },
+          specVersion,
+        },
+      });
+
+      expect(result).toMatchObject({
+        specVersion: '2.0',
+        config: { region: 'west', authType: 'basic' },
+      });
+    });
+
+    test.each(['3', '1.8'])(
+      'rejects unknown version %s before hooks or writes',
+      async (specVersion) => {
+        await expect(
+          create({ context: mockContext, action: { ...action, specVersion } })
+        ).rejects.toMatchObject({
+          output: {
+            statusCode: 400,
+            payload: {
+              message: `Unknown spec_version "${specVersion}" for connector type "my-connector-type".`,
+            },
+          },
+        });
+        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+        expect(preSaveHook).not.toHaveBeenCalled();
+        expect(postSaveHook).not.toHaveBeenCalled();
+      }
+    );
+
+    test.each([
+      '',
+      'latest',
+      '*',
+      '^1',
+      '1.x',
+      '1.3.0',
+      '1.3-beta',
+      '01',
+      '1.03',
+      ' 1',
+      '1\n',
+      '1'.repeat(33),
+    ])('rejects malformed selector %j', async (specVersion) => {
+      await expect(
+        create({ context: mockContext, action: { ...action, specVersion } })
+      ).rejects.toMatchObject({
+        output: {
+          statusCode: 400,
+          payload: { message: expect.stringContaining('Invalid spec_version') },
+        },
+      });
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(preSaveHook).not.toHaveBeenCalled();
+    });
+
+    test.each([new Map<string, ConnectorSpec>(), new Map([['2.0', secondSpec]])])(
+      'rejects an omitted version when major 1 is unavailable',
+      async (specs) => {
+        jest.mocked(actionTypeRegistry.get).mockReturnValue({ ...registeredActionType, specs });
+        await expect(create({ context: mockContext, action })).rejects.toMatchObject({
+          output: { statusCode: 400, payload: { message: expect.stringContaining('"1"') } },
+        });
+        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      }
+    );
+
+    test('ignores malformed and oversized registered versions when resolving a major', async () => {
+      registeredActionType.specs?.set('1.99.0', firstSpec);
+      registeredActionType.specs?.set(`1.${'9'.repeat(31)}`, firstSpec);
+      const result = await create({ context: mockContext, action });
+      expect(result.specVersion).toBe('1.10');
+    });
+
+    test.each([
+      { config: { region: 'west' }, secrets: action.secrets, field: 'config' },
+      {
+        config: action.config,
+        secrets: { authType: 'basic', username: 'user', password: 'secret' },
+        field: 'secrets',
+      },
+    ])('rejects $field valid only for another version', async ({ config, secrets, field }) => {
+      await expect(
+        create({
+          context: mockContext,
+          action: { ...action, config, secrets, specVersion: '1.3' },
+        })
+      ).rejects.toMatchObject({
+        output: {
+          statusCode: 400,
+          payload: { message: expect.stringContaining(`error validating connector type ${field}`) },
+        },
+      });
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(preSaveHook).not.toHaveBeenCalled();
+      expect(postSaveHook).not.toHaveBeenCalled();
+    });
+
+    test('runs custom config validation from the selected spec', async () => {
+      configurationUtilities.ensureUriAllowed.mockImplementation(() => {
+        throw new Error('Host is not allowed');
+      });
+      await expect(create({ context: mockContext, action })).rejects.toMatchObject({
+        output: {
+          statusCode: 400,
+          payload: { message: expect.stringContaining('Host is not allowed') },
+        },
+      });
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(preSaveHook).not.toHaveBeenCalled();
+    });
+
+    test('does not change registered validators when creating different versions', async () => {
+      const { validate, specs } = registeredActionType;
+      await create({ context: mockContext, action });
+      await create({
+        context: mockContext,
+        action: {
+          ...action,
+          config: { region: 'west' },
+          secrets: { authType: 'basic', username: 'user', password: 'secret' },
+          specVersion: '2',
+        },
+      });
+      expect(registeredActionType.validate).toBe(validate);
+      expect(registeredActionType.specs).toBe(specs);
+      expect(registeredActionType.spec).toBe(secondSpec);
+      expect(() => validate.config.schema.parse(action.config)).toThrow();
+    });
+
+    test.each([undefined, firstSpec])(
+      'preserves unversioned creation for spec %p',
+      async (spec) => {
+        jest.mocked(actionTypeRegistry.get).mockReturnValue(
+          getConnectorType({
+            spec,
+            source: spec ? ACTION_TYPE_SOURCES.spec : ACTION_TYPE_SOURCES.stack,
+          })
+        );
+        const result = await create({
+          context: mockContext,
+          action: { ...action, config: {}, secrets: {} },
+        });
+        expect(result).not.toHaveProperty('specVersion');
+        expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).not.toHaveProperty(
+          'specVersion'
+        );
+      }
+    );
+
+    test.each([undefined, firstSpec])(
+      'rejects explicit versions without a version map',
+      async (spec) => {
+        jest.mocked(actionTypeRegistry.get).mockReturnValue(
+          getConnectorType({
+            spec,
+            source: spec ? ACTION_TYPE_SOURCES.spec : ACTION_TYPE_SOURCES.stack,
+          })
+        );
+        await expect(
+          create({ context: mockContext, action: { ...action, specVersion: '1' } })
+        ).rejects.toMatchObject({ output: { statusCode: 400 } });
+        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      }
+    );
   });
 
   describe('authMode', () => {
@@ -1115,8 +1386,31 @@ describe('create()', () => {
       expect(connectorCreateCounter.add).toHaveBeenCalledWith(1, {
         'connector.type': 'my-connector-type',
         'connector.auth_type': 'ears',
+        'connector.spec_based': false,
         success: true,
       });
+    });
+
+    test('flags a spec-based connector type', async () => {
+      (actionTypeRegistry.isSpecActionType as jest.Mock).mockReturnValueOnce(true);
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          isMissingSecrets: false,
+          config: {},
+        },
+        references: [],
+      });
+
+      await create(createParams);
+
+      expect(connectorCreateCounter.add).toHaveBeenCalledWith(
+        1,
+        expect.objectContaining({ 'connector.spec_based': true })
+      );
     });
 
     test('records an unauthorized creation', async () => {
@@ -1127,6 +1421,7 @@ describe('create()', () => {
       expect(connectorCreateCounter.add).toHaveBeenCalledWith(1, {
         'connector.type': 'my-connector-type',
         'connector.auth_type': 'ears',
+        'connector.spec_based': false,
         success: false,
         'error.type': 'unauthorized',
       });
@@ -1152,6 +1447,7 @@ describe('create()', () => {
       expect(connectorCreateCounter.add).toHaveBeenCalledWith(1, {
         'connector.type': 'unknown',
         'connector.auth_type': 'unknown',
+        'connector.spec_based': false,
         success: false,
         'error.type': 'unauthorized',
       });
@@ -1176,6 +1472,7 @@ describe('create()', () => {
       expect(connectorCreateCounter.add).toHaveBeenCalledWith(1, {
         'connector.type': 'my-connector-type',
         'connector.auth_type': 'none',
+        'connector.spec_based': false,
         success: false,
         'error.type': 'unauthorized',
       });
@@ -1191,6 +1488,7 @@ describe('create()', () => {
       expect(connectorCreateCounter.add).toHaveBeenCalledWith(1, {
         'connector.type': 'my-connector-type',
         'connector.auth_type': 'ears',
+        'connector.spec_based': false,
         success: false,
         'error.type': 'conflict',
       });

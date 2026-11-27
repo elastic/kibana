@@ -22,6 +22,7 @@ export interface TemplateContext {
   imageTag: string;
   dockerBuildDir: string;
   dockerTargetFilename: string;
+  skipDockerImageArchive?: boolean;
   dockerBuildDate: string;
   usePublicArtifact?: boolean;
   publicArtifactSubdomain: string;

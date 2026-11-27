@@ -85,6 +85,7 @@ export const SourceConfigurationSettings = ({
     source,
     sourceExists,
     isLoading,
+    loadSource,
   } = useSourceContext();
 
   const {
@@ -113,7 +114,7 @@ export const SourceConfigurationSettings = ({
 
   const isWriteable = shouldAllowEdit && (!Boolean(source) || source?.origin !== 'internal');
 
-  const { metricIndicesExist, remoteClustersExist } = source?.status ?? {};
+  const { metricIndicesExist, metricIndicesStatus, remoteClustersExist } = source?.status ?? {};
 
   const { hasInfraMLCapabilities } = useInfraMLCapabilitiesContext();
 
@@ -160,8 +161,10 @@ export const SourceConfigurationSettings = ({
                 metricAliasFieldProps={indicesConfigurationProps.metricAlias}
                 readOnly={!isWriteable}
                 metricIndicesExist={metricIndicesExist}
+                metricIndicesStatus={metricIndicesStatus}
                 remoteClustersExist={remoteClustersExist}
-                isMetricAliasChanged={Boolean(getUnsavedChanges().metricAlias)}
+                onRetryMetricIndicesCheck={loadSource}
+                isMetricAliasChanged={'metricAlias' in getUnsavedChanges()}
                 numberOfInfraRules={numberOfInfraRules}
               />
             </EuiPanel>

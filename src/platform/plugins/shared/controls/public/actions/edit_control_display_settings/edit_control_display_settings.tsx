@@ -54,7 +54,7 @@ export class EditControlDisplaySettingsAction
   }
 
   public getIconType() {
-    return 'gear';
+    return 'ruler';
   }
 
   public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {

@@ -19,6 +19,10 @@ import {
   searchFilter,
   aggregation,
   querySortField,
+  urlString,
+  pemCertificate,
+  version,
+  boundedString,
   unboundedString,
 } from './src/helpers';
 
@@ -72,10 +76,11 @@ import {
   URIType,
   StreamType,
   Lazy,
+  setLazyConfigSchemaDisabled,
 } from './src/types';
 
 export type { AnyType, ConditionalType, TypeOf, Props, SchemaStructureEntry, NullableProps };
-export { ObjectType, Type };
+export { ObjectType, Type, setLazyConfigSchemaDisabled };
 export type { SchemaValidationOptions } from './src/types';
 export { ByteSizeValue } from './src/byte_size_value';
 export { SchemaTypeError, ValidationError } from './src/errors';
@@ -91,9 +96,20 @@ export {
   searchFilter,
   aggregation,
   querySortField,
+  urlString,
+  pemCertificate,
+  version,
+  boundedString,
   unboundedString,
 } from './src/helpers';
-export type { SchemaHelper, StringWarnOptions, UnboundedStringOptions } from './src/helpers';
+export type {
+  SchemaHelper,
+  StringWarnOptions,
+  UnboundedStringOptions,
+  BoundedStringHelper,
+  BoundedStringOptions,
+  BoundedStringWarnOptions,
+} from './src/helpers';
 
 function any(options?: TypeOptions<any>) {
   return new AnyType(options);
@@ -803,6 +819,10 @@ export const schema = {
   searchFilter,
   aggregation,
   querySortField,
+  urlString,
+  pemCertificate,
+  version,
+  boundedString,
   unboundedString,
   string,
   uri,
@@ -818,9 +838,13 @@ import {
   META_FIELD_X_OAS_DEPRECATED,
   META_FIELD_X_OAS_MAX_LENGTH,
   META_FIELD_X_OAS_MIN_LENGTH,
+  META_FIELD_X_OAS_PLANNED_MAX_LENGTH,
+  META_FIELD_X_OAS_PLANNED_MIN_LENGTH,
   META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES,
   META_FIELD_X_OAS_DISCRIMINATOR,
   META_FIELD_X_OAS_DISCRIMINATOR_DEFAULT_CASE,
+  X_KIBANA_PLANNED_MAX_LENGTH,
+  X_KIBANA_PLANNED_MIN_LENGTH,
 } from './src/oas_meta_fields';
 
 export const metaFields = Object.freeze({
@@ -831,7 +855,11 @@ export const metaFields = Object.freeze({
   META_FIELD_X_OAS_DEPRECATED,
   META_FIELD_X_OAS_MAX_LENGTH,
   META_FIELD_X_OAS_MIN_LENGTH,
+  META_FIELD_X_OAS_PLANNED_MAX_LENGTH,
+  META_FIELD_X_OAS_PLANNED_MIN_LENGTH,
   META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES,
   META_FIELD_X_OAS_DISCRIMINATOR,
   META_FIELD_X_OAS_DISCRIMINATOR_DEFAULT_CASE,
+  X_KIBANA_PLANNED_MAX_LENGTH,
+  X_KIBANA_PLANNED_MIN_LENGTH,
 });

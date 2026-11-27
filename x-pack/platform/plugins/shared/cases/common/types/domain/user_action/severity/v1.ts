@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
-import { CaseSeverityRt } from '../../case/v1';
+import { z } from '@kbn/zod/v4';
+import { CaseSeveritySchema } from '../../case/v1';
 import { UserActionTypes } from '../action/v1';
 
-export const SeverityUserActionPayloadRt = rt.strict({ severity: CaseSeverityRt });
+export const SeverityUserActionPayloadSchema = z.object({ severity: CaseSeveritySchema });
 
-export const SeverityUserActionRt = rt.strict({
-  type: rt.literal(UserActionTypes.severity),
-  payload: SeverityUserActionPayloadRt,
+export const SeverityUserActionSchema = z.object({
+  type: z.literal(UserActionTypes.severity),
+  payload: SeverityUserActionPayloadSchema,
 });

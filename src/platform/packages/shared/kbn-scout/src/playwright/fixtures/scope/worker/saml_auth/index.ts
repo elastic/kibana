@@ -129,6 +129,7 @@ export const samlAuthFixture = coreWorkerFixtures.extend<{}, { samlAuth: SamlAut
        * When running tests against Cloud, ensure the `.ftr/role_users.json` file is populated with the required roles
        * and credentials. Each worker uses a unique custom role named `custom_role_worker_<index>`.
        * If running tests in parallel, make sure the file contains enough entries to accommodate all workers.
+       * On ECH, these entries aren't needed when `customSamlProviderName` is set in the config.
        * The file should be structured as follows:
        * {
        *   "custom_role_worker_1": { "username": ..., "password": ... },

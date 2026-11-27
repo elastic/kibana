@@ -5,11 +5,17 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { fetcher } from './fetcher';
+import type { GetCompositeSoClient } from './fetcher';
 import type { Usage } from './type';
 
-export function registerSloUsageCollector(usageCollection?: UsageCollectionSetup): void {
+export function registerSloUsageCollector(
+  usageCollection: UsageCollectionSetup | undefined,
+  logger: Logger,
+  getCompositeSoClient: GetCompositeSoClient
+): void {
   if (!usageCollection) {
     return;
   }
@@ -105,9 +111,78 @@ export function registerSloUsageCollector(usageCollection?: UsageCollectionSetup
           },
         },
       },
+      composite: {
+        definitions: {
+          total: {
+            type: 'long',
+            _meta: {
+              description: 'The total number of composite SLO definitions in the cluster',
+            },
+          },
+        },
+        by_status: {
+          enabled: {
+            type: 'long',
+            _meta: {
+              description: 'The number of enabled composite SLOs in the cluster',
+            },
+          },
+          disabled: {
+            type: 'long',
+            _meta: {
+              description: 'The number of disabled composite SLOs in the cluster',
+            },
+          },
+        },
+        by_budgeting_method: {
+          occurrences: {
+            type: 'long',
+            _meta: {
+              description:
+                'The number of composite SLOs using the occurrences budgeting method in the cluster',
+            },
+          },
+        },
+        by_composite_method: {
+          weightedAverage: {
+            type: 'long',
+            _meta: {
+              description:
+                'The number of composite SLOs using the weighted average composite method in the cluster',
+            },
+          },
+        },
+        members: {
+          min: {
+            type: 'long',
+            _meta: {
+              description: 'The minimum number of members in a composite SLO in the cluster',
+            },
+          },
+          avg: {
+            type: 'float',
+            _meta: {
+              description: 'The average number of members per composite SLO in the cluster',
+            },
+          },
+          max: {
+            type: 'long',
+            _meta: {
+              description: 'The maximum number of members in a composite SLO in the cluster',
+            },
+          },
+          at_max_count: {
+            type: 'long',
+            _meta: {
+              description:
+                'The number of composite SLOs in the cluster that have reached the maximum number of members',
+            },
+          },
+        },
+      },
     },
     isReady: () => true,
-    fetch: fetcher,
+    fetch: (context) => fetcher(context, logger, getCompositeSoClient),
   });
 
   // register usage collector

@@ -134,6 +134,15 @@ describe('processFetchParams', () => {
     expect(result.breakdown).toBeUndefined();
   });
 
+  it('returns undefined breakdown field if the data view field is not aggregatable', async () => {
+    const params: UnifiedHistogramFetchParamsExternal = {
+      ...commonParams,
+      breakdownField: 'message',
+    };
+    const result = await processParams(params);
+    expect(result.breakdown).toEqual({ field: undefined });
+  });
+
   it('returns correct breakdown for an ES|QL source with a matching column', async () => {
     const columns = [{ id: '1', name: 'foo', meta: { type: 'string' } }] as DatatableColumn[];
     EsqlSource.clearCache();
@@ -149,6 +158,23 @@ describe('processFetchParams', () => {
       breakdownField: 'foo',
     });
     expect(result.breakdown?.field?.name).toBe('foo');
+  });
+
+  it('returns undefined breakdown field for an ES|QL source with a non-groupable column', async () => {
+    const columns = [{ id: '1', name: 'foo', meta: { type: 'unknown' } }] as DatatableColumn[];
+    EsqlSource.clearCache();
+    const esqlSource = await EsqlSource.create({
+      query: 'from logs',
+      timeFieldName: '@timestamp',
+      resultColumns: columns,
+    });
+    const result = await processParams({
+      ...commonParams,
+      dataSource: esqlSource,
+      query: { esql: 'from logs' },
+      breakdownField: 'foo',
+    });
+    expect(result.breakdown).toEqual({ field: undefined });
   });
 
   it('returns undefined breakdown for an ES|QL source with a transformational command', async () => {

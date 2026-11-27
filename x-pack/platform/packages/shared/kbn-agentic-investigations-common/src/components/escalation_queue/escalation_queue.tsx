@@ -54,11 +54,13 @@ interface EscalationQueueProps {
    * Cmd/middle-click to open in a new tab and showing the URL on hover.
    */
   getHref?: (escalation: EscalationQueueItem) => string | undefined;
+  /** When false, cards are inert and show a tooltip naming the missing privilege. Defaults to true. */
+  canOpenInvestigationDetails?: boolean;
   /** An Impact filter is applied, so an empty list means "no match" rather than "no escalations". */
   isFiltered?: boolean;
   /**
    * Explanatory content rendered at the bottom of the section body. When the bucket is empty
-   * and unfiltered it replaces the "No escalations" line.
+   * and unfiltered it replaces the "No open escalations" or "No closed escalations" line.
    */
   note?: React.ReactNode;
 }
@@ -94,6 +96,7 @@ export const EscalationQueue = memo<EscalationQueueProps>(
     onClickCard,
     selectedConversationId,
     getHref,
+    canOpenInvestigationDetails = true,
     isFiltered = false,
     note,
   }) => {
@@ -153,6 +156,7 @@ export const EscalationQueue = memo<EscalationQueueProps>(
                   onClickCard={onClickCard}
                   isSelected={escalation.id === selectedConversationId}
                   href={getHref?.(escalation)}
+                  canOpenInvestigationDetails={canOpenInvestigationDetails}
                 />
               ))}
               {/* Sibling of the cards so the last card keeps its divider above it. */}
@@ -170,7 +174,7 @@ export const EscalationQueue = memo<EscalationQueueProps>(
             <EuiText size="xs" color="subdued">
               {isFiltered
                 ? ESCALATION_QUEUE_LABELS.emptyQueueWithFilter
-                : ESCALATION_QUEUE_LABELS.emptyQueue}
+                : ESCALATION_QUEUE_LABELS.emptyQueue[status]}
             </EuiText>
           </EuiPanel>
           {loadMoreButton}
