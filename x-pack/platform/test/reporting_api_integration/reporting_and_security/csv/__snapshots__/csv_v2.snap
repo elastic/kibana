@@ -19,6 +19,232 @@ Object {
 }
 `;
 
+exports[`Reporting APIs CSV Generation from Saved Search ID export from timebased data view locator params without a saved search, or on top of one columns and sort of the locator params, over the ones of the saved search csv file matches 1`] = `
+"order_date,category,order_id
+2019-07-11 00:00:00.000,Men's Clothing,589476
+2019-07-11 00:00:00.000,Women's Clothing, Women's Shoes,589477
+2019-07-11 00:00:00.000,Men's Clothing, Men's Shoes,589489
+2019-07-11 00:00:00.000,Women's Accessories, Women's Clothing,589499
+2019-07-11 00:00:00.000,Women's Accessories, Women's Shoes,589508
+2019-07-11 00:00:00.000,Men's Clothing,589530
+2019-07-11 00:00:00.000,Women's Clothing, Women's Shoes,589532
+2019-07-11 00:00:00.000,Women's Clothing,589544
+2019-07-11 00:00:00.000,Women's Accessories,589545
+2019-07-11 00:00:00.000,Men's Clothing,589547
+2019-07-11 00:00:00.000,Men's Clothing,589577
+2019-07-11 00:00:00.000,Women's Clothing, Women's Accessories,589596
+2019-07-11 00:00:00.000,Women's Clothing,589597
+2019-07-11 00:00:00.000,Women's Shoes, Women's Accessories,589603
+2019-07-11 00:00:00.000,Women's Clothing, Women's Shoes,589616
+2019-07-11 00:00:00.000,Men's Accessories, Men's Clothing,589630
+2019-07-11 00:00:00.000,Women's Accessories, Women's Clothing,589631
+2019-07-11 00:00:00.000,Women's Clothing,589633
+2019-07-11 00:00:00.000,Men's Shoes, Men's Clothing,589641
+2019-07-11 00:00:00.000,Men's Accessories, Men's Clothing,589661
+2019-07-11 00:00:00.000,Women's Clothing, Women's Accessories,589682
+2019-07-11 00:00:00.000,Men's Clothing, Men's Shoes,589684
+2019-07-11 00:00:00.000,Men's Shoes, Men's Accessories,589688
+2019-07-11 00:00:00.000,Women's Clothing,589698
+2019-07-11 00:00:00.000,Women's Clothing,589722
+2019-07-11 00:00:00.000,Women's Accessories, Women's Clothing,589726
+2019-07-11 00:00:00.000,Women's Shoes, Women's Clothing,589727
+2019-07-11 00:00:00.000,Men's Clothing,589728
+2019-07-11 00:00:00.000,Men's Clothing, Men's Shoes,589731
+2019-07-11 00:00:00.000,Men's Clothing,589765
+2019-07-11 00:00:00.000,Men's Clothing,589766
+2019-07-11 00:00:00.000,Men's Shoes, Women's Accessories,589783
+2019-07-11 00:00:00.000,Men's Shoes, Men's Accessories,589787
+2019-07-11 00:00:00.000,Men's Clothing, Men's Shoes,589794
+2019-07-11 00:00:00.000,Women's Clothing,589797
+2019-07-11 00:00:00.000,Women's Accessories, Women's Clothing,589807
+2019-07-11 00:00:00.000,Women's Clothing,589809
+2019-07-11 00:00:00.000,Women's Clothing, Women's Shoes,589819
+2019-07-11 00:00:00.000,Men's Clothing,589822
+2019-07-11 00:00:00.000,Women's Shoes, Women's Clothing,589832
+2019-07-11 00:00:00.000,Men's Clothing,589844
+2019-07-11 00:00:00.000,Men's Clothing, Men's Accessories,589882
+2019-07-11 00:00:00.000,Men's Clothing, Men's Shoes,589885
+2019-07-11 00:00:00.000,Women's Clothing, Women's Shoes,589894
+2019-07-11 00:00:00.000,Men's Clothing,589902
+2019-07-11 00:00:00.000,Women's Clothing,589911
+2019-07-11 00:00:00.000,Men's Clothing,589926
+2019-07-11 00:00:00.000,Women's Clothing,589931
+2019-07-11 00:00:00.000,Women's Clothing,589947
+2019-07-11 00:00:00.000,Women's Shoes, Women's Clothing,589948
+2019-07-11 00:00:00.000,Women's Shoes,589979
+2019-07-11 00:00:00.000,Women's Clothing,589983
+2019-07-11 00:00:00.000,Men's Clothing,590001
+2019-07-11 00:00:00.000,Women's Accessories, Women's Shoes,590003
+2019-07-11 00:00:00.000,Men's Clothing, Men's Accessories,590007
+2019-07-11 00:00:00.000,Women's Clothing,590027
+2019-07-11 00:00:00.000,Men's Clothing, Men's Shoes,590035
+2019-07-11 00:00:00.000,Women's Clothing,590037
+2019-07-11 00:00:00.000,Men's Shoes,590042
+2019-07-11 00:00:00.000,Men's Clothing,590050
+2019-07-11 00:00:00.000,Women's Shoes, Women's Accessories,590074
+2019-07-11 00:00:00.000,Women's Shoes,590088
+2019-07-11 00:00:00.000,Women's Clothing,590093
+2019-07-11 00:00:00.000,Women's Shoes, Women's Clothing,590107
+2019-07-11 00:00:00.000,Men's Clothing, Men's Shoes,590128
+2019-07-11 00:00:00.000,Women's Clothing, Women's Shoes,590154
+2019-07-11 00:00:00.000,Women's Shoes,590162
+2019-07-11 00:00:00.000,Men's Clothing, Men's Shoes,590163
+2019-07-11 00:00:00.000,Women's Clothing, Women's Shoes,590192
+2019-07-11 00:00:00.000,Men's Clothing, Men's Shoes,590194
+2019-07-11 00:00:00.000,Men's Clothing, Men's Shoes,590195
+2019-07-11 00:00:00.000,Men's Clothing,590208
+2019-07-11 00:00:00.000,Men's Clothing,590227
+2019-07-11 00:00:00.000,Women's Clothing,590236
+2019-07-11 00:00:00.000,Women's Shoes, Women's Clothing,590248
+2019-07-11 00:00:00.000,Women's Clothing,590264
+2019-07-11 00:00:00.000,Men's Clothing,590267
+2019-07-11 00:00:00.000,Women's Accessories, Women's Clothing,590268
+2019-07-11 00:00:00.000,Women's Accessories, Women's Clothing,590280
+2019-07-11 00:00:00.000,Men's Clothing, Men's Shoes,590298
+2019-07-11 00:00:00.000,Men's Clothing,590305
+2019-07-11 00:00:00.000,Women's Clothing,590314
+2019-07-11 00:00:00.000,Men's Clothing,590321
+2019-07-11 00:00:00.000,Women's Shoes, Women's Accessories,590328
+2019-07-11 00:00:00.000,Men's Clothing,590331
+2019-07-11 00:00:00.000,Men's Clothing,590351
+2019-07-11 00:00:00.000,Women's Shoes,590352
+2019-07-11 00:00:00.000,Women's Clothing,590381
+2019-07-11 00:00:00.000,Men's Clothing, Men's Accessories,590382
+2019-07-11 00:00:00.000,Women's Accessories, Women's Clothing,590389
+2019-07-11 00:00:00.000,Women's Accessories, Men's Accessories,590398
+2019-07-11 00:00:00.000,Women's Shoes,590411
+2019-07-11 00:00:00.000,Women's Accessories, Women's Shoes,590431
+2019-07-11 00:00:00.000,Men's Accessories, Men's Clothing,590432
+2019-07-11 00:00:00.000,Men's Clothing,590437
+2019-07-11 00:00:00.000,Men's Clothing,590446
+2019-07-11 00:00:00.000,Women's Clothing,590456
+2019-07-11 00:00:00.000,Men's Clothing,590470
+2019-07-11 00:00:00.000,Women's Clothing,590476
+2019-07-11 00:00:00.000,Women's Clothing,590494
+2019-07-11 00:00:00.000,Men's Clothing, Men's Accessories,590501
+2019-07-11 00:00:00.000,Men's Shoes, Men's Accessories,590509
+2019-07-11 00:00:00.000,Men's Shoes, Men's Clothing,590510
+2019-07-11 00:00:00.000,Women's Accessories, Women's Shoes,590521
+2019-07-11 00:00:00.000,Women's Clothing,590529
+2019-07-11 00:00:00.000,Men's Shoes,590547
+2019-07-11 00:00:00.000,Men's Shoes, Men's Clothing,590560
+2019-07-11 00:00:00.000,Women's Clothing,590561
+"
+`;
+
+exports[`Reporting APIs CSV Generation from Saved Search ID export from timebased data view locator params without a saved search, or on top of one data view id only (unsaved search) csv file matches 1`] = `
+"order_date,category,currency,order_id
+2019-07-11 00:00:00.000,Men's Clothing,EUR,589476
+2019-07-11 00:00:00.000,Women's Clothing, Women's Shoes,EUR,589477
+2019-07-11 00:00:00.000,Men's Clothing, Men's Shoes,EUR,589489
+2019-07-11 00:00:00.000,Women's Accessories, Women's Clothing,EUR,589499
+2019-07-11 00:00:00.000,Women's Accessories, Women's Shoes,EUR,589508
+2019-07-11 00:00:00.000,Men's Clothing,EUR,589530
+2019-07-11 00:00:00.000,Women's Clothing, Women's Shoes,EUR,589532
+2019-07-11 00:00:00.000,Women's Clothing,EUR,589544
+2019-07-11 00:00:00.000,Women's Accessories,EUR,589545
+2019-07-11 00:00:00.000,Men's Clothing,EUR,589547
+2019-07-11 00:00:00.000,Men's Clothing,EUR,589577
+2019-07-11 00:00:00.000,Women's Clothing, Women's Accessories,EUR,589596
+2019-07-11 00:00:00.000,Women's Clothing,EUR,589597
+2019-07-11 00:00:00.000,Women's Shoes, Women's Accessories,EUR,589603
+2019-07-11 00:00:00.000,Women's Clothing, Women's Shoes,EUR,589616
+2019-07-11 00:00:00.000,Men's Accessories, Men's Clothing,EUR,589630
+2019-07-11 00:00:00.000,Women's Accessories, Women's Clothing,EUR,589631
+2019-07-11 00:00:00.000,Women's Clothing,EUR,589633
+2019-07-11 00:00:00.000,Men's Shoes, Men's Clothing,EUR,589641
+2019-07-11 00:00:00.000,Men's Accessories, Men's Clothing,EUR,589661
+2019-07-11 00:00:00.000,Women's Clothing, Women's Accessories,EUR,589682
+2019-07-11 00:00:00.000,Men's Clothing, Men's Shoes,EUR,589684
+2019-07-11 00:00:00.000,Men's Shoes, Men's Accessories,EUR,589688
+2019-07-11 00:00:00.000,Women's Clothing,EUR,589698
+2019-07-11 00:00:00.000,Women's Clothing,EUR,589722
+2019-07-11 00:00:00.000,Women's Accessories, Women's Clothing,EUR,589726
+2019-07-11 00:00:00.000,Women's Shoes, Women's Clothing,EUR,589727
+2019-07-11 00:00:00.000,Men's Clothing,EUR,589728
+2019-07-11 00:00:00.000,Men's Clothing, Men's Shoes,EUR,589731
+2019-07-11 00:00:00.000,Men's Clothing,EUR,589765
+2019-07-11 00:00:00.000,Men's Clothing,EUR,589766
+2019-07-11 00:00:00.000,Men's Shoes, Women's Accessories,EUR,589783
+2019-07-11 00:00:00.000,Men's Shoes, Men's Accessories,EUR,589787
+2019-07-11 00:00:00.000,Men's Clothing, Men's Shoes,EUR,589794
+2019-07-11 00:00:00.000,Women's Clothing,EUR,589797
+2019-07-11 00:00:00.000,Women's Accessories, Women's Clothing,EUR,589807
+2019-07-11 00:00:00.000,Women's Clothing,EUR,589809
+2019-07-11 00:00:00.000,Women's Clothing, Women's Shoes,EUR,589819
+2019-07-11 00:00:00.000,Men's Clothing,EUR,589822
+2019-07-11 00:00:00.000,Women's Shoes, Women's Clothing,EUR,589832
+2019-07-11 00:00:00.000,Men's Clothing,EUR,589844
+2019-07-11 00:00:00.000,Men's Clothing, Men's Accessories,EUR,589882
+2019-07-11 00:00:00.000,Men's Clothing, Men's Shoes,EUR,589885
+2019-07-11 00:00:00.000,Women's Clothing, Women's Shoes,EUR,589894
+2019-07-11 00:00:00.000,Men's Clothing,EUR,589902
+2019-07-11 00:00:00.000,Women's Clothing,EUR,589911
+2019-07-11 00:00:00.000,Men's Clothing,EUR,589926
+2019-07-11 00:00:00.000,Women's Clothing,EUR,589931
+2019-07-11 00:00:00.000,Women's Clothing,EUR,589947
+2019-07-11 00:00:00.000,Women's Shoes, Women's Clothing,EUR,589948
+2019-07-11 00:00:00.000,Women's Shoes,EUR,589979
+2019-07-11 00:00:00.000,Women's Clothing,EUR,589983
+2019-07-11 00:00:00.000,Men's Clothing,EUR,590001
+2019-07-11 00:00:00.000,Women's Accessories, Women's Shoes,EUR,590003
+2019-07-11 00:00:00.000,Men's Clothing, Men's Accessories,EUR,590007
+2019-07-11 00:00:00.000,Women's Clothing,EUR,590027
+2019-07-11 00:00:00.000,Men's Clothing, Men's Shoes,EUR,590035
+2019-07-11 00:00:00.000,Women's Clothing,EUR,590037
+2019-07-11 00:00:00.000,Men's Shoes,EUR,590042
+2019-07-11 00:00:00.000,Men's Clothing,EUR,590050
+2019-07-11 00:00:00.000,Women's Shoes, Women's Accessories,EUR,590074
+2019-07-11 00:00:00.000,Women's Shoes,EUR,590088
+2019-07-11 00:00:00.000,Women's Clothing,EUR,590093
+2019-07-11 00:00:00.000,Women's Shoes, Women's Clothing,EUR,590107
+2019-07-11 00:00:00.000,Men's Clothing, Men's Shoes,EUR,590128
+2019-07-11 00:00:00.000,Women's Clothing, Women's Shoes,EUR,590154
+2019-07-11 00:00:00.000,Women's Shoes,EUR,590162
+2019-07-11 00:00:00.000,Men's Clothing, Men's Shoes,EUR,590163
+2019-07-11 00:00:00.000,Women's Clothing, Women's Shoes,EUR,590192
+2019-07-11 00:00:00.000,Men's Clothing, Men's Shoes,EUR,590194
+2019-07-11 00:00:00.000,Men's Clothing, Men's Shoes,EUR,590195
+2019-07-11 00:00:00.000,Men's Clothing,EUR,590208
+2019-07-11 00:00:00.000,Men's Clothing,EUR,590227
+2019-07-11 00:00:00.000,Women's Clothing,EUR,590236
+2019-07-11 00:00:00.000,Women's Shoes, Women's Clothing,EUR,590248
+2019-07-11 00:00:00.000,Women's Clothing,EUR,590264
+2019-07-11 00:00:00.000,Men's Clothing,EUR,590267
+2019-07-11 00:00:00.000,Women's Accessories, Women's Clothing,EUR,590268
+2019-07-11 00:00:00.000,Women's Accessories, Women's Clothing,EUR,590280
+2019-07-11 00:00:00.000,Men's Clothing, Men's Shoes,EUR,590298
+2019-07-11 00:00:00.000,Men's Clothing,EUR,590305
+2019-07-11 00:00:00.000,Women's Clothing,EUR,590314
+2019-07-11 00:00:00.000,Men's Clothing,EUR,590321
+2019-07-11 00:00:00.000,Women's Shoes, Women's Accessories,EUR,590328
+2019-07-11 00:00:00.000,Men's Clothing,EUR,590331
+2019-07-11 00:00:00.000,Men's Clothing,EUR,590351
+2019-07-11 00:00:00.000,Women's Shoes,EUR,590352
+2019-07-11 00:00:00.000,Women's Clothing,EUR,590381
+2019-07-11 00:00:00.000,Men's Clothing, Men's Accessories,EUR,590382
+2019-07-11 00:00:00.000,Women's Accessories, Women's Clothing,EUR,590389
+2019-07-11 00:00:00.000,Women's Accessories, Men's Accessories,EUR,590398
+2019-07-11 00:00:00.000,Women's Shoes,EUR,590411
+2019-07-11 00:00:00.000,Women's Accessories, Women's Shoes,EUR,590431
+2019-07-11 00:00:00.000,Men's Accessories, Men's Clothing,EUR,590432
+2019-07-11 00:00:00.000,Men's Clothing,EUR,590437
+2019-07-11 00:00:00.000,Men's Clothing,EUR,590446
+2019-07-11 00:00:00.000,Women's Clothing,EUR,590456
+2019-07-11 00:00:00.000,Men's Clothing,EUR,590470
+2019-07-11 00:00:00.000,Women's Clothing,EUR,590476
+2019-07-11 00:00:00.000,Women's Clothing,EUR,590494
+"
+`;
+
+exports[`Reporting APIs CSV Generation from Saved Search ID export from timebased data view locator params without a saved search, or on top of one data view id only (unsaved search) job response data is correct, with the data view name as title 1`] = `
+Object {
+  "contentDisposition": "attachment; filename=ecommerce.csv",
+  "contentType": "text/csv; charset=utf-8",
+  "title": "ecommerce",
+}
+`;
+
 exports[`Reporting APIs CSV Generation from Saved Search ID export from timebased data view timezone formatting export with custom timezone and timeRange from locator params csv file matches 1`] = `
 "order_date,category,currency,customer_id,order_id,day_of_week_i,products.created_on,sku
 2019-07-11 16:00:00.000,Women's Shoes, Women's Clothing,EUR,5,730531,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0025200252, ZO0217402174, ZO0034800348, ZO0144701447

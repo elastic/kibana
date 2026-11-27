@@ -18,22 +18,29 @@ import type { DiscoverAppLocatorParams } from '../../common';
 export const titleFromLocatorFactory = (services: LocatorServicesDeps) => {
   /**
    * Allows consumers to derive a title of a search in Disocver from DiscoverAppLocatorParams.
-   * For now, this assumes the DiscoverAppLocatorParams contain a reference to a saved search. In the future,
-   * the params may only contain a reference to a DataView
+   * Uses the title of the saved search, or the name of the data view when the params only
+   * contain a reference to a data view.
    *
    * @public
    */
   const titleFromLocator = async (
     params: DiscoverAppLocatorParams & { title?: string }
   ): Promise<string> => {
-    const { savedSearchId, title: paramsTitle } = params;
+    const { savedSearchId, dataViewId, title: paramsTitle } = params;
 
     if (paramsTitle) {
       return paramsTitle;
     }
 
+    if (!savedSearchId && dataViewId) {
+      const dataView = await services.dataViewsService.get(dataViewId);
+      return dataView.getName();
+    }
+
     if (!savedSearchId) {
-      throw new Error(`DiscoverAppLocatorParams must contain a saved search reference`);
+      throw new Error(
+        `DiscoverAppLocatorParams must contain a saved search reference or a data view reference`
+      );
     }
 
     const { savedObjects } = services;

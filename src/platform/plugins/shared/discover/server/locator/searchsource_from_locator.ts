@@ -7,55 +7,73 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SearchSource, TimeRange } from '@kbn/data-plugin/common';
+import type { ISearchSource, TimeRange } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
-import type { SavedSearch } from '@kbn/saved-search-plugin/common';
-import { getSavedSearch } from '@kbn/saved-search-plugin/server';
-import { SORT_DEFAULT_ORDER_SETTING, getSortForSearchSource } from '@kbn/discover-utils';
+import type { AggregateQuery, Filter, Query, RangeFilter } from '@kbn/es-query';
+import {
+  SORT_DEFAULT_ORDER_SETTING,
+  getSortForSearchSource,
+  isNestedFieldParent,
+} from '@kbn/discover-utils';
 import type { LocatorServicesDeps } from '.';
 import type { DiscoverAppLocatorParams } from '../../common';
 import { getColumns } from './columns_from_locator';
+import { resolveLocatorSearch } from './resolve_locator_search';
 
 // Shortcut for return type of searchSource.getField('filter');
 type FilterResponse = undefined | Filter | Filter[] | (() => Filter | Filter[] | undefined);
 
 // flattens filter objects coming from different sources
 function normalizeFilter(savedSearchFilterTmp?: FilterResponse) {
-  let savedSearchFilter: Filter[] | undefined;
-  if (savedSearchFilterTmp && Array.isArray(savedSearchFilterTmp)) {
-    // can not include functions: could be recursive
-    savedSearchFilter = [...savedSearchFilterTmp.filter((f) => typeof f !== 'function')];
-  } else if (savedSearchFilterTmp && typeof savedSearchFilterTmp !== 'function') {
-    savedSearchFilter = [savedSearchFilterTmp];
+  if (!savedSearchFilterTmp) {
+    return undefined;
   }
-  return savedSearchFilter;
+
+  if (Array.isArray(savedSearchFilterTmp)) {
+    // can not include functions: could be recursive
+    return savedSearchFilterTmp.filter((f) => f && typeof f !== 'function').map((f) => ({ ...f })); // shallow copy to avoid mutating the source filters
+  }
+
+  if (typeof savedSearchFilterTmp !== 'function') {
+    return [{ ...savedSearchFilterTmp }];
+  }
+
+  return undefined;
 }
 
 /*
- * Combine the time range filter from the job request body with any filters that have been saved into the saved search object
+ * Whether the filters of the locator params replace the filters that have been saved into the saved search.
+ * Discover sends the full current state of the search, which includes an explicit data view (`dataViewId`) and
+ * the saved filters that were not removed, so its filters replace the saved ones. The params that only have a
+ * saved search and some filters (for example, of an API script) add them to the saved ones.
+ * TODO: also consider `dataViewSpec`, when the ad hoc data views are supported.
+ */
+const replacesSavedFilters = (params: DiscoverAppLocatorParams): boolean =>
+  params.filters !== undefined && Boolean(params.dataViewId);
+
+/*
+ * Combine the time range filter with the filters of the search: the filters in the locator params and the ones
+ * that have been saved into the saved search object (see `replacesSavedFilters`).
  * NOTE: if the filters that were saved into the search are NOT an array, it may be a function, and can not be supported.
  */
 const getFilters = (
   timeFieldName: string | undefined,
   index: DataView,
-  savedSearch: SavedSearch,
-  searchSource: SearchSource,
+  savedSearchTimeRange: TimeRange | undefined,
+  searchSource: ISearchSource,
   params: DiscoverAppLocatorParams
 ) => {
   const filters: Filter[] = [];
 
   // Set a time range filter from (1) DiscoverAppLocatorParams or (2) SavedSearch
   if (timeFieldName) {
-    const timeRange = params.timeRange
-      ? params.timeRange
-      : savedSearch.timeRange
-      ? (savedSearch.timeRange as TimeRange)
-      : null;
+    const timeRange = params.timeRange ?? savedSearchTimeRange;
 
     if (timeRange) {
-      filters.push({
-        meta: { index: index.id },
+      // `meta.field` identifies the time filter: `overrideTimeRange` (@kbn/generate-csv) looks for it to
+      // re-anchor a relative range to `forceNow`, which reporting sets when it runs a scheduled report.
+      const timeRangeFilter: RangeFilter = {
+        meta: { index: index.id, field: timeFieldName, params: {}, type: 'range' },
         query: {
           range: {
             [timeFieldName]: {
@@ -65,17 +83,20 @@ const getFilters = (
             },
           },
         },
-      });
+      };
+      filters.push(timeRangeFilter);
     }
   }
 
-  const savedSearchFilter = normalizeFilter(searchSource.getField('filter'));
-  if (savedSearchFilter) {
-    filters.push(...savedSearchFilter);
+  const savedFilters = replacesSavedFilters(params)
+    ? undefined
+    : normalizeFilter(searchSource.getField('filter'));
+  if (savedFilters) {
+    filters.push(...savedFilters);
   }
-  const paramsFilter = normalizeFilter(params.filters);
-  if (paramsFilter) {
-    filters.push(...paramsFilter);
+  const paramsFilters = normalizeFilter(params.filters);
+  if (paramsFilters) {
+    filters.push(...paramsFilters);
   }
 
   return filters;
@@ -84,7 +105,7 @@ const getFilters = (
 /*
  * Pick the query from the job request body vs any query that has been saved into the saved search object.
  */
-const getQuery = (searchSource: SearchSource, params: DiscoverAppLocatorParams) => {
+const getQuery = (searchSource: ISearchSource, params: DiscoverAppLocatorParams) => {
   let query: Query | AggregateQuery | undefined;
   const paramsQuery = params.query;
   const savedSearchQuery = searchSource.getField('query');
@@ -109,33 +130,47 @@ export function searchSourceFromLocatorFactory(services: LocatorServicesDeps) {
    */
   const searchSourceFromLocator = async (
     params: DiscoverAppLocatorParams
-  ): Promise<SearchSource> => {
-    if (!params.savedSearchId) {
-      throw new Error(`Saved Search ID is required in DiscoverAppLocatorParams`);
-    }
+  ): Promise<ISearchSource> => {
+    const {
+      savedSearch,
+      dataView: index,
+      searchSource,
+    } = await resolveLocatorSearch(services, params);
 
-    const savedSearch = await getSavedSearch(params.savedSearchId, services);
+    // Columns in the locator params (current state) take precedence over the ones of the saved search.
+    // Like the sort, an explicit empty array is kept on purpose: it means the columns were cleared, so all
+    // the fields are exported instead of the columns of the saved search (same as the Discover UI).
+    const columnsSource = params.columns ?? savedSearch?.columns;
+    const { columns, timeFieldName } = await getColumns(services, index, {
+      columns: columnsSource,
+    });
 
-    const searchSource = savedSearch.searchSource.createCopy();
-    const index = searchSource.getField('index');
-
-    if (!index) {
-      throw new Error(`Search Source is missing the "index" field`);
-    }
-
-    const { columns, timeFieldName } = await getColumns(services, index, savedSearch);
-
-    // Inject columns
-    if (columns) {
-      searchSource.setField('fields', columns);
-    } else {
-      searchSource.setField('fields', ['*']);
-    }
+    // Inject columns, the same way as the Discover UI does when it builds the search source for reports:
+    // unmapped fields are included and nested field roots are expanded to their leaf fields.
+    searchSource.setField(
+      'fields',
+      columns?.length
+        ? columns.map((column) => ({
+            field: isNestedFieldParent(column, index) ? `${column}.*` : column,
+            include_unmapped: true,
+          }))
+        : [{ field: '*', include_unmapped: true }]
+    );
 
     // Inject updated filters
-    const filters = getFilters(timeFieldName, index, savedSearch, searchSource, params);
-    if (filters.length > 0) {
+    const filters = getFilters(
+      timeFieldName,
+      index,
+      savedSearch?.timeRange as TimeRange | undefined,
+      searchSource,
+      params
+    );
+    // `filters` has the full list of filters, so the ones of the saved search are removed when they are replaced,
+    // even if there are no filters left
+    if (filters.length > 0 || replacesSavedFilters(params)) {
       searchSource.removeField('filter');
+    }
+    if (filters.length > 0) {
       searchSource.setField('filter', filters);
     }
 
@@ -146,17 +181,16 @@ export function searchSourceFromLocatorFactory(services: LocatorServicesDeps) {
       searchSource.setField('query', query);
     }
 
-    // Inject sort
-    if (savedSearch.sort) {
-      const defaultSortDir = await services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING);
-
-      const sort = getSortForSearchSource({
-        sort: savedSearch.sort as Array<[string, string]>,
-        dataView: index,
-        defaultSortDir,
-      });
-      searchSource.setField('sort', sort);
-    }
+    // Inject sort: locator params (current state) take precedence over the saved search.
+    // Unlike the columns, an explicit empty sort is kept on purpose: it means the sort was cleared,
+    // so the default sort applies instead of the one of the saved search (same as the Discover UI).
+    const defaultSortDir = await services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING);
+    const sort = getSortForSearchSource({
+      sort: (params.sort ?? savedSearch?.sort) as Array<[string, string]> | undefined,
+      dataView: index,
+      defaultSortDir,
+    });
+    searchSource.setField('sort', sort);
 
     return searchSource;
   };

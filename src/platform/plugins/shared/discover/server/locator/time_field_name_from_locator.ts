@@ -15,6 +15,9 @@ import type { DiscoverAppLocatorParams } from '../../common';
  */
 export const timeFieldNameFromLocatorFactory = (services: LocatorServicesDeps) => {
   /**
+   * Returns the time field of an ES|QL search. It only reads `dataViewSpec`, and it is only used for
+   * ES|QL searches: the classic (data view) search does not call it.
+   *
    * @public
    */
   const timeFieldNameFromLocator = async (

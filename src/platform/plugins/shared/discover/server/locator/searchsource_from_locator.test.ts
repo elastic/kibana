@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Boom from '@hapi/boom';
 import type { IUiSettingsClient, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
-import type { ISearchStartSearchSource, SearchSource } from '@kbn/data-plugin/common';
+import type { ISearchStartSearchSource, SearchSource, TimeRange } from '@kbn/data-plugin/common';
+import type { Filter } from '@kbn/es-query';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionTabAttributes } from '@kbn/saved-search-plugin/server';
@@ -62,6 +64,7 @@ let searchSourceStart: ISearchStartSearchSource;
 let mockServices: Services;
 let mockSavedSearch: SavedObject<SavedSearchAttributes>;
 let mockDataView: DataView;
+let dataViewsService: jest.Mocked<Pick<DataViewsService, 'get'>>;
 
 // mock search source belonging to the saved search
 let mockSearchSource: SearchSource;
@@ -76,10 +79,13 @@ beforeAll(async () => {
   uiSettingsClient = coreMock.createStart().uiSettings.asScopedToClient(soClient);
   searchSourceStart = await dataStartMock.search.searchSource.asScoped(request);
 
+  dataViewsService = { get: jest.fn() };
+
   mockServices = {
     searchSourceStart,
     savedObjects: soClient,
     uiSettings: uiSettingsClient,
+    dataViewsService: dataViewsService as unknown as DataViewsService,
   };
 
   const soClientGet = soClient.get;
@@ -103,7 +109,16 @@ beforeEach(() => {
 
   mockSearchSource = createSearchSourceMock();
   mockSearchSource.setField('index', mockDataView);
-  searchSourceStart.create = jest.fn().mockResolvedValue(mockSearchSource);
+  dataViewsService.get.mockReset();
+
+  // like the real one, the index is loaded from its id (the data views that are not mocked are ignored)
+  searchSourceStart.create = jest.fn().mockImplementation(async (fields?: { index?: string }) => {
+    const dataView = fields?.index ? await dataViewsService.get(fields.index) : undefined;
+    if (dataView) {
+      mockSearchSource.setField('index', dataView);
+    }
+    return mockSearchSource;
+  });
 
   const uiSettingsGet = uiSettingsClient.get;
   uiSettingsClient.get = jest.fn().mockImplementation((key: string) => {
@@ -113,6 +128,25 @@ beforeEach(() => {
     return uiSettingsGet(key);
   });
 });
+
+const createDataViewWithSortableField = () =>
+  createStubDataView({
+    spec: {
+      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      name: 'testIndexRefName',
+      timeFieldName: 'timestamp',
+      fields: {
+        response: {
+          name: 'response',
+          type: 'string',
+          esTypes: ['keyword'],
+          searchable: true,
+          aggregatable: true,
+          readFromDocValues: true,
+        },
+      },
+    },
+  });
 
 test('with saved search containing a filter', async () => {
   const testFilter = {
@@ -138,34 +172,110 @@ test('with locator params containing a filter', async () => {
   expect(searchSource.getSerializedFields().filter).toEqual([testFilter]);
 });
 
-test('with saved search and locator params both containing a filter', async () => {
-  // search source belonging to the saved search
-  mockSearchSource.setField('filter', {
+describe('filters of the saved search and of the locator params', () => {
+  const savedFilter = {
     meta: { index: 'logstash-*' },
     query: { term: { host: 'elastic.co' } },
+  };
+  const paramsFilter = {
+    meta: { index: 'logstash-*' },
+    query: { term: { os: 'Palm Pilot' } },
+  };
+
+  beforeEach(() => {
+    // search source belonging to the saved search
+    mockSearchSource.setField('filter', savedFilter);
   });
 
-  // locator params
-  mockPayload = [
-    {
-      params: {
-        savedSearchId: mockSavedSearchId,
-        filters: [
-          {
-            meta: { index: 'logstash-*' },
-            query: { term: { os: 'Palm Pilot' } },
-          },
-        ],
-      },
-    },
-  ];
+  describe('with a data view in the locator params (the full state of the search)', () => {
+    // the data view of the locator params is the one of the saved search
+    const dataViewId = '90943e30-9a47-11e8-b64d-95841ca0b247';
 
-  const provider = searchSourceFromLocatorFactory(mockServices);
-  const searchSource = await provider(mockPayload[0].params);
-  expect(searchSource.getSerializedFields().filter).toEqual([
-    { meta: { index: 'logstash-*' }, query: { term: { host: 'elastic.co' } } },
-    { meta: { index: 'logstash-*' }, query: { term: { os: 'Palm Pilot' } } },
-  ]);
+    beforeEach(() => {
+      dataViewsService.get.mockResolvedValue(mockDataView);
+    });
+
+    test('the filters of the locator params replace the ones of the saved search', async () => {
+      const provider = searchSourceFromLocatorFactory(mockServices);
+      const searchSource = await provider({
+        savedSearchId: mockSavedSearchId,
+        dataViewId,
+        filters: [paramsFilter],
+      });
+
+      // the saved filter was removed in the UI, and the locator params have the current filters
+      expect(searchSource.getSerializedFields().filter).toEqual([paramsFilter]);
+    });
+
+    test('empty filters remove the ones of the saved search', async () => {
+      const provider = searchSourceFromLocatorFactory(mockServices);
+      const searchSource = await provider({
+        savedSearchId: mockSavedSearchId,
+        dataViewId,
+        filters: [],
+      });
+
+      expect(searchSource.getSerializedFields().filter).toBeUndefined();
+    });
+
+    test('keeps the time range filter next to the filters of the locator params', async () => {
+      const provider = searchSourceFromLocatorFactory(mockServices);
+      const searchSource = await provider({
+        savedSearchId: mockSavedSearchId,
+        dataViewId,
+        filters: [paramsFilter],
+        timeRange: { from: 'now-15m', to: 'now' },
+      });
+
+      expect(searchSource.getSerializedFields().filter).toEqual([
+        expect.objectContaining({ meta: expect.objectContaining({ field: 'timestamp' }) }),
+        paramsFilter,
+      ]);
+    });
+
+    test('uses the filters of the saved search if the locator params do not have filters', async () => {
+      const provider = searchSourceFromLocatorFactory(mockServices);
+      const searchSource = await provider({ savedSearchId: mockSavedSearchId, dataViewId });
+
+      expect(searchSource.getSerializedFields().filter).toEqual([savedFilter]);
+    });
+
+    test('does not use the filters of the saved search for a data view that replaces its data view', async () => {
+      const otherDataView = createStubDataView({
+        spec: { id: 'other-data-view', name: 'other', timeFieldName: 'event.created' },
+      });
+      dataViewsService.get.mockResolvedValue(otherDataView);
+
+      const provider = searchSourceFromLocatorFactory(mockServices);
+      const searchSource = await provider({
+        savedSearchId: mockSavedSearchId,
+        dataViewId: 'other-data-view',
+        filters: [],
+      });
+
+      expect(searchSource.getField('index')).toBe(otherDataView);
+      expect(searchSource.getSerializedFields().filter).toBeUndefined();
+    });
+  });
+
+  describe('without a data view in the locator params (a saved search with some filters)', () => {
+    test('adds the filters of the locator params to the ones of the saved search', async () => {
+      const provider = searchSourceFromLocatorFactory(mockServices);
+      const searchSource = await provider({
+        savedSearchId: mockSavedSearchId,
+        filters: [paramsFilter],
+      });
+
+      expect(searchSource.getSerializedFields().filter).toEqual([savedFilter, paramsFilter]);
+    });
+
+    test('keeps the filters of the saved search with empty filters', async () => {
+      const provider = searchSourceFromLocatorFactory(mockServices);
+      const searchSource = await provider({ savedSearchId: mockSavedSearchId, filters: [] });
+
+      expect(searchSource.getSerializedFields().filter).toEqual([savedFilter]);
+    });
+  });
 });
 
 test('with locator params containing a timeRange', async () => {
@@ -178,6 +288,9 @@ test('with locator params containing a timeRange', async () => {
     {
       meta: {
         index: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        field: 'timestamp',
+        params: {},
+        type: 'range',
       },
       query: {
         range: { timestamp: { format: 'strict_date_optional_time', gte: 'now-15m', lte: 'now' } },
@@ -210,5 +323,497 @@ test('with saved search containing ["_source"]', async () => {
 
   const provider = searchSourceFromLocatorFactory(mockServices);
   const searchSource = await provider(mockPayload[0].params);
-  expect(searchSource.getSerializedFields().fields).toEqual(['*']);
+  expect(searchSource.getSerializedFields().fields).toEqual([
+    { field: '*', include_unmapped: true },
+  ]);
+});
+
+test('with saved search without columns and locator params containing a timeRange', async () => {
+  mockSavedSearch = {
+    ...defaultSavedSearch,
+    attributes: {
+      ...defaultSavedSearch.attributes,
+      tabs: [
+        {
+          id: 'tab-1',
+          label: 'Tab 1',
+          attributes: {
+            columns: [],
+            sort: [['test', '134']],
+            kibanaSavedObjectMeta: {
+              searchSourceJSON:
+                '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"testIndexRefName"}',
+            },
+          } as unknown as DiscoverSessionTabAttributes,
+        },
+      ],
+    },
+  };
+  const testTimeRange = { from: 'now-15m', to: 'now', mode: 'absolute' as const };
+
+  const provider = searchSourceFromLocatorFactory(mockServices);
+  const searchSource = await provider({
+    savedSearchId: mockSavedSearchId,
+    timeRange: testTimeRange,
+  });
+
+  expect(searchSource.getSerializedFields().filter).toEqual([
+    {
+      meta: {
+        index: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        field: 'timestamp',
+        params: {},
+        type: 'range',
+      },
+      query: {
+        range: { timestamp: { format: 'strict_date_optional_time', gte: 'now-15m', lte: 'now' } },
+      },
+    },
+  ]);
+});
+
+describe('with locator params containing a dataViewId (unsaved search)', () => {
+  beforeEach(() => {
+    mockSearchSource.removeField('index');
+    dataViewsService.get.mockResolvedValue(mockDataView);
+  });
+
+  test('builds the search source from the locator params', async () => {
+    const testTimeRange = { from: 'now-15m', to: 'now', mode: 'absolute' as const };
+    const testQuery = { query: 'response:200', language: 'kuery' };
+
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    const searchSource = await provider({
+      dataViewId: mockDataView.id,
+      columns: ['response', 'url'],
+      timeRange: testTimeRange,
+      query: testQuery,
+    });
+
+    const fields = searchSource.getSerializedFields();
+    expect(dataViewsService.get).toHaveBeenCalledWith(mockDataView.id);
+    expect(searchSource.getField('index')).toBe(mockDataView);
+    expect(fields.fields).toEqual([
+      { field: 'timestamp', include_unmapped: true },
+      { field: 'response', include_unmapped: true },
+      { field: 'url', include_unmapped: true },
+    ]);
+    expect(fields.query).toEqual(testQuery);
+    expect(fields.filter).toEqual([
+      {
+        meta: { index: mockDataView.id, field: 'timestamp', params: {}, type: 'range' },
+        query: {
+          range: { timestamp: { format: 'strict_date_optional_time', gte: 'now-15m', lte: 'now' } },
+        },
+      },
+    ]);
+  });
+
+  test('uses all fields without columns', async () => {
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    const searchSource = await provider({ dataViewId: mockDataView.id });
+    expect(searchSource.getSerializedFields().fields).toEqual([
+      { field: '*', include_unmapped: true },
+    ]);
+  });
+
+  test('uses the sort of the locator params', async () => {
+    dataViewsService.get.mockResolvedValue(createDataViewWithSortableField());
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    const searchSource = await provider({
+      dataViewId: mockDataView.id,
+      sort: [['response', 'asc']],
+    });
+    expect(searchSource.getField('sort')).toEqual([{ response: 'asc' }]);
+  });
+});
+
+test('sort of the locator params takes precedence over the saved search sort', async () => {
+  mockSearchSource.setField('index', createDataViewWithSortableField());
+  const provider = searchSourceFromLocatorFactory(mockServices);
+  const searchSource = await provider({
+    savedSearchId: mockSavedSearchId,
+    sort: [['response', 'asc']],
+  });
+  expect(searchSource.getField('sort')).toEqual([{ response: 'asc' }]);
+});
+
+test('columns of the locator params take precedence over the saved search columns', async () => {
+  const provider = searchSourceFromLocatorFactory(mockServices);
+  const searchSource = await provider({ savedSearchId: mockSavedSearchId, columns: ['url'] });
+  expect(searchSource.getSerializedFields().fields).toEqual([
+    { field: 'timestamp', include_unmapped: true },
+    { field: 'url', include_unmapped: true },
+  ]);
+});
+
+test('dataViewId of the locator params takes precedence over the saved search data view', async () => {
+  const otherDataView = createStubDataView({
+    spec: { id: 'other-data-view', name: 'other', timeFieldName: 'event.created' },
+  });
+  dataViewsService.get.mockResolvedValue(otherDataView);
+
+  const provider = searchSourceFromLocatorFactory(mockServices);
+  const searchSource = await provider({
+    savedSearchId: mockSavedSearchId,
+    dataViewId: 'other-data-view',
+  });
+
+  expect(searchSource.getField('index')).toBe(otherDataView);
+  expect(searchSource.getSerializedFields().fields?.[0]).toEqual({
+    field: 'event.created',
+    include_unmapped: true,
+  });
+});
+
+test('does not load the data view of the saved search if dataViewId replaces it', async () => {
+  const otherDataView = createStubDataView({
+    spec: { id: 'other-data-view', name: 'other', timeFieldName: 'event.created' },
+  });
+  dataViewsService.get.mockImplementation(async (id: string) => {
+    // the data view of the saved search was deleted
+    if (id === '90943e30-9a47-11e8-b64d-95841ca0b247') {
+      throw Boom.notFound(`Saved object [index-pattern/${id}] not found`);
+    }
+    return otherDataView;
+  });
+
+  const provider = searchSourceFromLocatorFactory(mockServices);
+  const searchSource = await provider({
+    savedSearchId: mockSavedSearchId,
+    dataViewId: 'other-data-view',
+  });
+
+  expect(searchSource.getField('index')).toBe(otherDataView);
+  expect(dataViewsService.get).toHaveBeenCalledTimes(1);
+  expect(dataViewsService.get).toHaveBeenCalledWith('other-data-view');
+});
+
+test('throws without a saved search or data view reference', async () => {
+  const provider = searchSourceFromLocatorFactory(mockServices);
+  await expect(provider({ columns: ['url'] })).rejects.toThrow(
+    'DiscoverAppLocatorParams must contain a saved search reference'
+  );
+});
+
+test('expands nested field roots to their leaf fields and includes unmapped fields', async () => {
+  const dataViewWithNestedField = createStubDataView({
+    spec: {
+      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      name: 'testIndexRefName',
+      timeFieldName: 'timestamp',
+      fields: {
+        'items.name': {
+          name: 'items.name',
+          type: 'string',
+          esTypes: ['keyword'],
+          searchable: true,
+          aggregatable: true,
+          readFromDocValues: true,
+          subType: { nested: { path: 'items' } },
+        },
+      },
+    },
+  });
+  mockSearchSource.setField('index', dataViewWithNestedField);
+
+  const provider = searchSourceFromLocatorFactory(mockServices);
+  const searchSource = await provider({
+    savedSearchId: mockSavedSearchId,
+    columns: ['items', 'extra_unmapped'],
+  });
+
+  expect(searchSource.getSerializedFields().fields).toEqual([
+    { field: 'timestamp', include_unmapped: true },
+    { field: 'items.*', include_unmapped: true },
+    { field: 'extra_unmapped', include_unmapped: true },
+  ]);
+});
+
+describe('locator params validation', () => {
+  test('throws for columns that are not an array of strings', async () => {
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    await expect(
+      provider({
+        savedSearchId: mockSavedSearchId,
+        columns: ['url', 1] as unknown as string[],
+      })
+    ).rejects.toThrow('"columns" must be an array of strings');
+  });
+
+  test.each([
+    ['not an array', 'bytes'],
+    ['an item that is not a pair', [['bytes']]],
+    ['an invalid direction', [['bytes', 'ascending']]],
+    ['a field that is not a string', [[1, 'asc']]],
+  ])('throws for sort with %s', async (_description, sort) => {
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    await expect(
+      provider({ savedSearchId: mockSavedSearchId, sort: sort as unknown as string[][] })
+    ).rejects.toThrow('"sort" must be an array of [field, "asc" | "desc"] pairs');
+  });
+
+  test.each([
+    [
+      'an object (the spec of an ad hoc data view)',
+      { title: 'logs-*', timeFieldName: '@timestamp' },
+    ],
+    ['an empty string', ''],
+    ['a number', 123],
+    ['null', null],
+  ])('throws for a data view id that is %s', async (_description, dataViewId) => {
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    await expect(provider({ dataViewId: dataViewId as unknown as string })).rejects.toThrow(
+      '"dataViewId" must be a non-empty string'
+    );
+
+    // an object must not reach the search source, which would create an ad hoc data view with it
+    expect(searchSourceStart.create).not.toHaveBeenCalled();
+    expect(dataViewsService.get).not.toHaveBeenCalled();
+  });
+
+  test.each([
+    ['an object', { id: 'abc' }],
+    ['an empty string', ''],
+    ['a number', 123],
+    ['null', null],
+  ])('throws for a saved search id that is %s', async (_description, savedSearchId) => {
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    await expect(provider({ savedSearchId: savedSearchId as unknown as string })).rejects.toThrow(
+      '"savedSearchId" must be a non-empty string'
+    );
+  });
+
+  test('throws for an invalid data view id, even with a saved search id', async () => {
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    await expect(
+      provider({
+        savedSearchId: mockSavedSearchId,
+        dataViewId: { title: 'logs-*' } as unknown as string,
+      })
+    ).rejects.toThrow('"dataViewId" must be a non-empty string');
+  });
+
+  test('accepts an empty sort', async () => {
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    await expect(provider({ savedSearchId: mockSavedSearchId, sort: [] })).resolves.toBeDefined();
+  });
+});
+
+// the time range of a saved search is stored in its tab
+const setSavedSearchTimeRange = (timeRange: { from: string; to: string }) => {
+  const [tab] = defaultSavedSearch.attributes.tabs;
+  mockSavedSearch = {
+    ...defaultSavedSearch,
+    attributes: {
+      ...defaultSavedSearch.attributes,
+      tabs: [
+        {
+          ...tab,
+          attributes: { ...tab.attributes, timeRestore: true, timeRange },
+        },
+      ],
+    },
+  };
+};
+
+describe('filters', () => {
+  test('does not mutate the filters of the locator params', async () => {
+    const testFilter = {
+      meta: { index: 'logstash-*' },
+      query: { term: { host: 'elastic.co' } },
+    };
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    const searchSource = await provider({
+      savedSearchId: mockSavedSearchId,
+      filters: [testFilter],
+    });
+
+    const [filter] = searchSource.getSerializedFields().filter as Filter[];
+    expect(filter).toEqual(testFilter);
+    expect(filter).not.toBe(testFilter);
+  });
+
+  test.each([
+    ['null', null],
+    ['not an array', { query: { term: { host: 'elastic.co' } } }],
+    ['an array with null', [null]],
+    ['an array with a value that is not a filter', ['host:elastic.co']],
+  ])(
+    'throws for filters that are %s, instead of reading them as no filters',
+    async (_d, filters) => {
+      const provider = searchSourceFromLocatorFactory(mockServices);
+      await expect(
+        provider({ savedSearchId: mockSavedSearchId, filters: filters as unknown as Filter[] })
+      ).rejects.toThrow('"filters" must be an array of filters');
+    }
+  );
+
+  test.each([
+    ['without "to"', { from: 'now-15m' }],
+    ['without "from"', { to: 'now' }],
+    ['with empty dates', { from: '', to: '' }],
+    ['with an invalid date', { from: 'garbage', to: 'now' }],
+    ['with an invalid date math', { from: 'now-15m', to: 'now-' }],
+    ['that is not an object', 'now-15m'],
+    ['that is null', null],
+  ])(
+    'throws for a time range %s, instead of exporting without a time filter',
+    async (_d, range) => {
+      const provider = searchSourceFromLocatorFactory(mockServices);
+      await expect(
+        provider({ savedSearchId: mockSavedSearchId, timeRange: range as unknown as TimeRange })
+      ).rejects.toThrow('"timeRange" must have a valid "from" and "to"');
+    }
+  );
+
+  test.each([
+    ['dates', { from: '2026-11-05T00:00:00.000Z', to: '2026-11-19T00:00:00.000Z' }],
+    ['date math', { from: 'now-15m', to: 'now' }],
+    ['rounded date math', { from: 'now/d', to: 'now/d' }],
+  ])('accepts a time range with %s', async (_d, timeRange) => {
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    const searchSource = await provider({ savedSearchId: mockSavedSearchId, timeRange });
+
+    expect(searchSource.getSerializedFields().filter).toEqual([
+      expect.objectContaining({
+        query: {
+          range: {
+            timestamp: {
+              format: 'strict_date_optional_time',
+              gte: timeRange.from,
+              lte: timeRange.to,
+            },
+          },
+        },
+      }),
+    ]);
+  });
+
+  test('uses the time range of the saved search if the locator params do not have one', async () => {
+    setSavedSearchTimeRange({ from: 'now-7d', to: 'now' });
+
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    const searchSource = await provider({ savedSearchId: mockSavedSearchId });
+
+    expect(searchSource.getSerializedFields().filter).toEqual([
+      expect.objectContaining({
+        query: {
+          range: {
+            timestamp: { format: 'strict_date_optional_time', gte: 'now-7d', lte: 'now' },
+          },
+        },
+      }),
+    ]);
+  });
+
+  test('the time range of the locator params takes precedence over the one of the saved search', async () => {
+    setSavedSearchTimeRange({ from: 'now-7d', to: 'now' });
+
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    const searchSource = await provider({
+      savedSearchId: mockSavedSearchId,
+      timeRange: { from: 'now-15m', to: 'now' },
+    });
+
+    expect(searchSource.getSerializedFields().filter).toEqual([
+      expect.objectContaining({
+        query: {
+          range: {
+            timestamp: { format: 'strict_date_optional_time', gte: 'now-15m', lte: 'now' },
+          },
+        },
+      }),
+    ]);
+  });
+});
+
+describe('errors', () => {
+  test('rethrows the Boom error of a saved search that is not found, as it is', async () => {
+    const boomError = Boom.notFound('Saved object [search/missing-search] not found');
+    (soClient.get as jest.Mock).mockRejectedValueOnce(boomError);
+
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    const error = await provider({ savedSearchId: 'missing-search' }).catch((e) => e);
+
+    expect(error).toBe(boomError);
+    expect(error.output.statusCode).toBe(404);
+  });
+
+  test('rethrows Boom errors as they are', async () => {
+    const boomError = Boom.notFound('Saved object [index-pattern/missing-data-view] not found');
+    dataViewsService.get.mockRejectedValueOnce(boomError);
+
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    const error = await provider({ dataViewId: 'missing-data-view' }).catch((e) => e);
+
+    expect(error).toBe(boomError);
+    expect(error.output.statusCode).toBe(404);
+  });
+
+  test('adds context to the message and keeps the original error as the cause', async () => {
+    const originalError = Object.assign(new Error('Saved object not found'), { statusCode: 404 });
+    dataViewsService.get.mockRejectedValueOnce(originalError);
+
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    const error = await provider({ dataViewId: 'missing-data-view' }).catch((e) => e);
+
+    expect(error.cause).toBe(originalError);
+    expect(error.message).toBe(
+      'Failed to resolve the search from DiscoverAppLocatorParams (dataViewId: missing-data-view): Saved object not found'
+    );
+    // the original error is not modified
+    expect(originalError.message).toBe('Saved object not found');
+  });
+});
+
+describe('time field', () => {
+  test('applies the time range filter, but does not add the time column, if the time column is hidden', async () => {
+    (uiSettingsClient.get as jest.Mock).mockImplementation((key: string) =>
+      key === DOC_HIDE_TIME_COLUMN_SETTING ? true : undefined
+    );
+    const timeRange = { from: 'now-15m', to: 'now' };
+
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    const searchSource = await provider({ savedSearchId: mockSavedSearchId, timeRange });
+
+    const { fields, filter } = searchSource.getSerializedFields();
+    expect(filter).toEqual([
+      expect.objectContaining({
+        meta: expect.objectContaining({ field: 'timestamp' }),
+        query: {
+          range: { timestamp: { format: 'strict_date_optional_time', gte: 'now-15m', lte: 'now' } },
+        },
+      }),
+    ]);
+    expect(fields).toEqual(
+      ['response', 'url', 'clientip', 'machine.os', 'tags'].map((field) => ({
+        field,
+        include_unmapped: true,
+      }))
+    );
+  });
+});
+
+describe('fields', () => {
+  test('uses the columns of the saved search as fields, with the time field first', async () => {
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    const searchSource = await provider({ savedSearchId: mockSavedSearchId });
+
+    expect(searchSource.getSerializedFields().fields).toEqual(
+      ['timestamp', 'response', 'url', 'clientip', 'machine.os', 'tags'].map((field) => ({
+        field,
+        include_unmapped: true,
+      }))
+    );
+  });
+
+  test('uses all the fields if the columns of the locator params are cleared, instead of the saved search columns', async () => {
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    const searchSource = await provider({ savedSearchId: mockSavedSearchId, columns: [] });
+
+    expect(searchSource.getSerializedFields().fields).toEqual([
+      { field: '*', include_unmapped: true },
+    ]);
+  });
 });

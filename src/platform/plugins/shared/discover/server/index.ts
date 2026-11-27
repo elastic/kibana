@@ -9,6 +9,7 @@
 
 import type { KibanaRequest, PluginInitializerContext } from '@kbn/core/server';
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type {
   ColumnsFromLocatorFn,
   SearchSourceFromLocatorFn,
@@ -20,6 +21,7 @@ import type {
 
 export interface DiscoverServerPluginStartDeps {
   data: DataPluginStart;
+  dataViews: DataViewsServerPluginStart;
 }
 
 export interface LocatorServiceScopedClient {
