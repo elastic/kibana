@@ -545,26 +545,28 @@ export class DataStreamDataClient<TExecution extends { id: string }>
             originalIndex: i,
           });
         } else {
-          // No version. An upsert becomes a create. Stamp the current time only when the
-          // lookup confirmed the document is absent and the write has no date field.
+          // No version. An upsert becomes a create. A write without the date field gets the
+          // current time when the lookup confirmed the document is absent, and fails otherwise.
           if (item.operation === 'upsert') {
-            const dateValue = this.deps.dateField ? item.document[this.deps.dateField] : undefined;
-            let createItem: BulkPlainItem<TExecution> = item;
-            if (typeof dateValue === 'string') {
-              createItem = withTimestamp(item);
-            } else if (confirmedMissing.has(id) && this.deps.dateField) {
-              createItem = {
-                ...item,
-                document: {
-                  ...item.document,
-                  '@timestamp': new Date(Date.now()).toISOString(),
+            const hasDate = typeof item.document[this.deps.dateField] === 'string';
+            if (!hasDate && !confirmedMissing.has(id)) {
+              preFailed.push({
+                id,
+                originalIndex: i,
+                error: {
+                  type: 'illegal_state_exception',
+                  reason: `[_doc][${id}]: could not confirm the document is missing`,
                 },
-              };
+              });
+            } else {
+              const document = hasDate
+                ? withTimestamp(item).document
+                : { ...item.document, '@timestamp': new Date().toISOString() };
+              sendable.push({
+                item: { ...item, document, operation: 'create', index: this.deps.dataStreamName },
+                originalIndex: i,
+              });
             }
-            sendable.push({
-              item: { ...createItem, operation: 'create', index: this.deps.dataStreamName },
-              originalIndex: i,
-            });
           } else {
             preFailed.push({
               id,

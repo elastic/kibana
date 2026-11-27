@@ -181,39 +181,23 @@ describe('DataStreamDataClient', () => {
     }
   });
 
-  it('does not stamp the current time when the version lookup did not confirm the document is absent', async () => {
+  it('fails an upsert locally when the version lookup did not confirm the document is absent', async () => {
     const { esClient, versionManager, dataAccess } = createClient();
     versionManager.bulkGetVersions.mockResolvedValue({
       versions: {},
       confirmedMissing: new Set(),
     });
-    esClient.bulk.mockResolvedValue({
-      errors: false,
-      items: [
-        {
-          create: {
-            _id: 'a',
-            _index: BACKING_INDEX,
-            result: 'created',
-            _seq_no: 1,
-            _primary_term: 1,
-          },
-        },
-      ],
-    } as never);
 
-    await dataAccess.bulk({
+    const result = await dataAccess.bulk({
       items: [{ operation: 'upsert', document: { id: 'a', status: 'cancelled' } }],
     });
 
-    expect(esClient.bulk).toHaveBeenCalledWith(
-      expect.objectContaining({
-        operations: [
-          { create: { _id: 'a', _index: DATA_STREAM } },
-          { id: 'a', status: 'cancelled' },
-        ],
-      })
-    );
+    expect(esClient.bulk).not.toHaveBeenCalled();
+    expect(result.errors).toBe(true);
+    expect(result.items[0].error).toEqual({
+      type: 'illegal_state_exception',
+      reason: '[_doc][a]: could not confirm the document is missing',
+    });
   });
 
   it('does not rewrite a true create 409 into an update', async () => {
