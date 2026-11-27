@@ -193,6 +193,25 @@ describe('mergeShardDatasets', () => {
     expect(mergeShardDatasets([[], []])).toEqual([]);
   });
 
+  it('carries erroredOutEvaluators through the merge', () => {
+    const merged = mergeShardDatasets([
+      [{ datasetId: 'd', datasetName: 'd', evaluators: [], erroredOutEvaluators: ['Trajectory'] }],
+      [{ datasetId: 'd', datasetName: 'd', evaluators: [], erroredOutEvaluators: ['Trajectory'] }],
+    ]);
+
+    expect(merged[0].erroredOutEvaluators).toEqual(['Trajectory']);
+  });
+
+  it('drops an errored-out evaluator that another shard graded', () => {
+    const merged = mergeShardDatasets([
+      [{ datasetId: 'd', datasetName: 'd', evaluators: [], erroredOutEvaluators: ['Factuality'] }],
+      [ds('d', 'Factuality', 8, 4)],
+    ]);
+
+    expect(merged[0].erroredOutEvaluators).toBeUndefined();
+    expect(merged[0].evaluators[0].count).toBe(4);
+  });
+
   it('does not mutate its input', () => {
     const shard = [ds('prefix:alerts', 'Factuality', 8, 6)];
     mergeShardDatasets([shard, [ds('prefix:alerts', 'Factuality', 2, 2)]]);

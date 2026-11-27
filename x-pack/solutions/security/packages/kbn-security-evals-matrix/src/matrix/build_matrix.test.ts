@@ -7,7 +7,8 @@
 
 import { buildMatrix, rowCommitShas } from './build_matrix';
 import { parseMatrixConfig, type MatrixConfig } from './load_matrix_config';
-import type { AggregatedModelScores } from './query_matrix_scores';
+import type { ExperimentStats } from '@kbn/evals';
+import { experimentStatsToDatasets, type AggregatedModelScores } from './query_matrix_scores';
 
 const config: MatrixConfig = parseMatrixConfig({
   columns: [
@@ -1282,6 +1283,72 @@ describe('errored-evaluator guard', () => {
     expect(matrix.proprietary[0].judgedQuality).toEqual({
       kind: 'insufficient-evaluators',
       evaluators: ['Factuality'],
+    });
+  });
+});
+
+describe('zero-count evaluator stats', () => {
+  const cfg: MatrixConfig = parseMatrixConfig({
+    showOverall: false,
+    columns: [{ id: 'rules', label: 'Rules', suites: ['suite-a'] }],
+    models: [{ id: 'm1', label: 'M1' }],
+  });
+
+  const toStats = (entries: ExperimentStats['stats']): ExperimentStats => ({
+    taskModel: { id: 'm1' },
+    evaluatorModel: { id: 'judge' },
+    totalRepetitions: 1,
+    stats: entries,
+  });
+
+  const rowsFor = (stats: ExperimentStats['stats']): AggregatedModelScores[] => [
+    {
+      modelId: 'm1',
+      suites: [
+        {
+          suiteId: 'suite-a',
+          experimentId: 'e-a',
+          datasets: experimentStatsToDatasets(toStats(stats)),
+        },
+      ],
+    },
+  ];
+
+  const zero = (evaluatorName: string): ExperimentStats['stats'][number] => ({
+    datasetId: 'd1',
+    datasetName: 'D1',
+    evaluatorName,
+    stats: { mean: 0, median: 0, stdDev: 0, min: 0, max: 0, count: 0 },
+  });
+
+  it('reports insufficient-evaluators, not not-recommended, when every evaluator has count 0', () => {
+    const matrix = buildMatrix(rowsFor([zero('Trajectory'), zero('SkillInvoked')]), cfg);
+
+    expect(matrix.proprietary[0].cells.rules).toEqual({
+      kind: 'insufficient-evaluators',
+      evaluators: ['Trajectory', 'SkillInvoked'],
+    });
+  });
+
+  it('reports insufficient-evaluators when a count-0 evaluator sits beside a scored one', () => {
+    // Same semantics as the prefix path: a cell-relevant evaluator that produced no score
+    // withholds the cell rather than publishing the mean of the survivors.
+    const matrix = buildMatrix(
+      rowsFor([
+        {
+          datasetId: 'd1',
+          datasetName: 'D1',
+          evaluatorName: 'Factuality',
+          stats: { mean: 0.9, median: 0.9, stdDev: 0, min: 0.9, max: 0.9, count: 5 },
+        },
+        zero('Trajectory'),
+      ]),
+      cfg
+    );
+
+    expect(matrix.proprietary[0].cells.rules).toEqual({
+      kind: 'insufficient-evaluators',
+      evaluators: ['Trajectory'],
     });
   });
 });
