@@ -189,7 +189,8 @@ describe('describeAiIndex', () => {
       includeMemory: true,
     });
 
-    expect(response).toContain('\nMemory\nMemory writes are enabled');
+    expect(response).toContain('\nMemory\nThis AI index takes memories.');
+    expect(response).toContain(`with \`${aiIndex.id}\` in aiIndexIds`);
     expect(response).toContain('\nKnowledge item types\n"document": 3\n');
     expect(response).not.toContain('"memory.session": 2');
     expect(response).not.toContain('"memory.session_fact": 7');

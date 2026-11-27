@@ -7,6 +7,7 @@
 
 import type { AuditEvent } from '@kbn/core-security-server';
 import type { EcsEvent } from '@kbn/core/server';
+import type { ForgetResult } from '../session_memory/types';
 
 export enum AiIndexAuditAction {
   CREATE = 'ai_index_create',
@@ -202,6 +203,23 @@ export const sessionMemoryForgetAuditEvent = ({
       message: failure.message,
     },
   };
+};
+
+/** Maps one forget result to the failure its audit event reports, or undefined on success. */
+export const auditFailureForResult = (result: ForgetResult): 'not_found' | Error | undefined => {
+  switch (result.outcome) {
+    case 'forgotten':
+    case 'already_forgotten':
+      return undefined;
+    case 'not_found':
+      return 'not_found';
+    case 'failed':
+      return Object.assign(new Error(result.error), { name: 'failed' });
+    default: {
+      const exhaustive: never = result;
+      throw new Error(`Unsupported forget result: ${JSON.stringify(exhaustive)}`);
+    }
+  }
 };
 
 export interface SessionMemoryRememberAuditEventParams {

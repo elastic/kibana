@@ -6,7 +6,7 @@
  */
 
 import type { ToolAvailabilityConfig } from '@kbn/agent-builder-server';
-import type { CoreStart } from '@kbn/core/server';
+import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import {
   CONTEXT_ENGINE_ENABLED_SETTING_ID,
   CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID,
@@ -26,6 +26,18 @@ export const aiIndexToolsAvailability: ToolAvailabilityConfig = {
   },
 };
 
+export const isContextEngineMemoryEnabled = async ({
+  coreStart,
+  request,
+}: {
+  coreStart: CoreStart;
+  request: KibanaRequest;
+}): Promise<boolean> => {
+  const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+  const globalUiSettings = coreStart.uiSettings.globalAsScopedToClient(savedObjectsClient);
+  return globalUiSettings.get<boolean>(CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID).catch(() => false);
+};
+
 export const createMemoryToolsAvailability = (
   getCoreStart: () => Promise<CoreStart>
 ): ToolAvailabilityConfig => ({
@@ -39,11 +51,7 @@ export const createMemoryToolsAvailability = (
     }
 
     const coreStart = await getCoreStart();
-    const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
-    const globalUiSettings = coreStart.uiSettings.globalAsScopedToClient(savedObjectsClient);
-    const memoryEnabled = await globalUiSettings
-      .get<boolean>(CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID)
-      .catch(() => false);
+    const memoryEnabled = await isContextEngineMemoryEnabled({ coreStart, request });
     return memoryEnabled
       ? { status: 'available' }
       : { status: 'unavailable', reason: 'Context Engine memory is disabled.' };

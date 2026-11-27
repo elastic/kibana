@@ -27,7 +27,6 @@ import {
 } from '../../common/constants';
 import type {
   ForgetSessionMemoriesResponse,
-  ForgetSessionMemoryResult,
   RememberSessionMemoryResponse,
 } from '../../common/http_api/session_memory';
 import { validateAiIndexId, validateNonBlank } from '../../common/validation';
@@ -35,6 +34,7 @@ import { assertAiIndicesWritable } from '../ai_indices/assert_ai_indices_writabl
 import { AiIndexNotFoundError, AiIndexWriteForbiddenError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
 import {
+  auditFailureForResult,
   sessionMemoryForgetAuditEvent,
   sessionMemoryRememberAuditEvent,
 } from '../audit/audit_events';
@@ -202,24 +202,6 @@ const forgetResponseSchema = () =>
     },
     { meta: { description: 'The outcome for every requested memory.' } }
   );
-
-const auditFailureForResult = (
-  result: ForgetSessionMemoryResult
-): 'not_found' | Error | undefined => {
-  switch (result.outcome) {
-    case 'forgotten':
-    case 'already_forgotten':
-      return undefined;
-    case 'not_found':
-      return 'not_found';
-    case 'failed':
-      return Object.assign(new Error(result.error), { name: 'failed' });
-    default: {
-      const exhaustive: never = result;
-      throw new Error(`Unsupported forget result: ${JSON.stringify(exhaustive)}`);
-    }
-  }
-};
 
 /** Registers the public `_remember` and `_forget` session memory routes. */
 export const registerSessionMemoryRoutes = ({

@@ -67,13 +67,16 @@ export const registerAgentBuilderTools = ({
   agentBuilder.tools.register(
     createRememberTool({
       getAiIndexService: async () => (await getContextEngineStart()).getAiIndexService(),
+      getSessionMemoryService: async () =>
+        (await getContextEngineStart()).getSessionMemoryService(),
       getCoreStart,
       getSecurityStart,
     })
   );
   agentBuilder.tools.register(
     createForgetTool({
-      getAiIndexService: async () => (await getContextEngineStart()).getAiIndexService(),
+      getSessionMemoryService: async () =>
+        (await getContextEngineStart()).getSessionMemoryService(),
       getCoreStart,
       getSecurityStart,
     })
