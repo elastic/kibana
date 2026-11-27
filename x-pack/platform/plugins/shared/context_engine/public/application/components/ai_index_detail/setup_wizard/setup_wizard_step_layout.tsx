@@ -155,14 +155,14 @@ export const SetupWizardStepLayout = ({
           <EuiFlexItem />
           {!isFirstStep && (
             <EuiFlexItem grow={false}>
-              <EuiButton
+              <EuiButtonEmpty
                 onClick={onBack}
                 isDisabled={isBusy}
                 data-test-subj="contextSetupWizardBack"
                 {...getEbtProps({ element: ebtElement, action: ebtAction.BACK, detail: id })}
               >
                 {backLabel}
-              </EuiButton>
+              </EuiButtonEmpty>
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
