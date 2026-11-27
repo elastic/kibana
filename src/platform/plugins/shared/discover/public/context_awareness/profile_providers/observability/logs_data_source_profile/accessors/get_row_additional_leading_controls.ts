@@ -14,57 +14,64 @@ import type { AggregateQuery } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { BasicPrettyPrinter, mutate, parse } from '@elastic/esql';
 import { IGNORED_FIELD } from '@kbn/discover-utils/src/field_constants';
+import type { ProfileProviderServices } from '../../../profile_provider_services';
 import type { LogsDataSourceProfileProvider } from '../profile';
+import { createSurroundingLogsControl } from './surrounding_logs_control';
 
-export const getRowAdditionalLeadingControls: LogsDataSourceProfileProvider['profile']['getRowAdditionalLeadingControls'] =
+export const createGetRowAdditionalLeadingControls =
+  (
+    services: ProfileProviderServices
+  ): LogsDataSourceProfileProvider['profile']['getRowAdditionalLeadingControls'] =>
+  (prev, { context, toolkit }) =>
+  (params) => {
+    const additionalControls = prev(params) || [];
+    const { query, dataView } = params;
+    const { updateESQLQuery, setExpandedDoc } = toolkit.actions;
 
-    (prev, { context, toolkit }) =>
-    (params) => {
-      const additionalControls = prev(params) || [];
-      const { query } = params;
-      const { updateESQLQuery, setExpandedDoc } = toolkit.actions;
+    const isDegradedDocsControlEnabled = isOfAggregateQueryType(query)
+      ? queryContainsMetadataIgnored(query)
+      : true;
 
-      const isDegradedDocsControlEnabled = isOfAggregateQueryType(query)
-        ? queryContainsMetadataIgnored(query)
-        : true;
+    const addIgnoredMetadataToQuery = updateESQLQuery
+      ? () => {
+          updateESQLQuery((prevQuery) => {
+            const { root } = parse(prevQuery);
+            // Add _ignored field to metadata directive if not present
+            mutate.commands.from.metadata.upsert(root, IGNORED_FIELD);
 
-      const addIgnoredMetadataToQuery = updateESQLQuery
-        ? () => {
-            updateESQLQuery((prevQuery) => {
-              const { root } = parse(prevQuery);
-              // Add _ignored field to metadata directive if not present
-              mutate.commands.from.metadata.upsert(root, IGNORED_FIELD);
-
-              return BasicPrettyPrinter.print(root);
-            });
-          }
-        : undefined;
-
-      const leadingControlClick =
-        (
-          openDocViewer: NonNullable<typeof setExpandedDoc>,
-          actionName: 'stacktrace' | 'quality_issues'
-        ) =>
-        (props: RowControlRowProps) => {
-          context.logOverviewContext$.next({
-            recordId: props.record.id,
-            initialAccordionSection: actionName,
+            return BasicPrettyPrinter.print(root);
           });
-          openDocViewer(props.record, { initialTabId: 'doc_view_logs_overview' });
-        };
+        }
+      : undefined;
 
-      return setExpandedDoc
-        ? [
-            ...additionalControls,
-            createDegradedDocsControl({
-              enabled: isDegradedDocsControlEnabled,
-              addIgnoredMetadataToQuery,
-              onClick: leadingControlClick(setExpandedDoc, 'quality_issues'),
-            }),
-            createStacktraceControl({ onClick: leadingControlClick(setExpandedDoc, 'stacktrace') }),
-          ]
-        : additionalControls;
-    };
+    const leadingControlClick =
+      (
+        openDocViewer: NonNullable<typeof setExpandedDoc>,
+        actionName: 'stacktrace' | 'quality_issues'
+      ) =>
+      (props: RowControlRowProps) => {
+        context.logOverviewContext$.next({
+          recordId: props.record.id,
+          initialAccordionSection: actionName,
+        });
+        openDocViewer(props.record, { initialTabId: 'doc_view_logs_overview' });
+      };
+
+    const surroundingLogsControl = createSurroundingLogsControl(services, dataView);
+
+    const docViewerControls = setExpandedDoc
+      ? [
+          createDegradedDocsControl({
+            enabled: isDegradedDocsControlEnabled,
+            addIgnoredMetadataToQuery,
+            onClick: leadingControlClick(setExpandedDoc, 'quality_issues'),
+          }),
+          createStacktraceControl({ onClick: leadingControlClick(setExpandedDoc, 'stacktrace') }),
+        ]
+      : [];
+
+    return [...additionalControls, ...docViewerControls, surroundingLogsControl];
+  };
 
 const queryContainsMetadataIgnored = (query: AggregateQuery) =>
   retrieveMetadataColumns(query.esql).includes('_ignored');
