@@ -108,7 +108,11 @@ describe('Security Solution plugin', () => {
   describe('legacy `siem` app', () => {
     it('redirects only once the deepLinks it resolves the legacy route with are registered', async () => {
       const { legacySiemApp, license$, registeredDeepLinks } = startPlugin();
-      void mountLegacySiemApp(legacySiemApp);
+      const deepLinkIdsAtRedirect: string[][] = [];
+      (manageOldSiemRoutes as jest.Mock).mockImplementationOnce(() => {
+        deepLinkIdsAtRedirect.push(registeredDeepLinks.flat().map(({ id }) => id));
+      });
+      await mountLegacySiemApp(legacySiemApp);
 
       // The links are only processed once the license resolves, which can outlast the debounce
       // of the deepLinks updater. Nothing must be registered, nor redirected, until then.
@@ -120,20 +124,43 @@ describe('Security Solution plugin', () => {
       license$.next(licensingMock.createLicense({ license: { type: 'platinum' } }));
       await jest.advanceTimersByTimeAsync(1000);
 
-      expect(manageOldSiemRoutes).toHaveBeenCalledTimes(1);
-      const deepLinkIds = registeredDeepLinks[registeredDeepLinks.length - 1].map(({ id }) => id);
-      expect(deepLinkIds).toContain(SecurityPageName.alerts);
+      expect(deepLinkIdsAtRedirect).toHaveLength(1);
+      expect(deepLinkIdsAtRedirect[0]).toContain(SecurityPageName.alerts);
     });
 
     it('redirects when the Security Solution app is not accessible and no deepLink is registered', async () => {
       const { legacySiemApp, license$, registeredDeepLinks } = startPlugin({ accessible: false });
-      void mountLegacySiemApp(legacySiemApp);
+      await mountLegacySiemApp(legacySiemApp);
 
       license$.next(licensingMock.createLicense({ license: { type: 'platinum' } }));
       await jest.advanceTimersByTimeAsync(1000);
 
       expect(registeredDeepLinks).toHaveLength(0);
       expect(manageOldSiemRoutes).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not redirect before the legacy app mount has resolved', async () => {
+      const { legacySiemApp } = startPlugin({ accessible: false });
+      await jest.advanceTimersByTimeAsync(1000);
+
+      await mountLegacySiemApp(legacySiemApp);
+
+      expect(manageOldSiemRoutes).not.toHaveBeenCalled();
+
+      await jest.advanceTimersByTimeAsync(0);
+
+      expect(manageOldSiemRoutes).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not redirect once the legacy app has been unmounted', async () => {
+      const { legacySiemApp, license$ } = startPlugin();
+      const unmount = await mountLegacySiemApp(legacySiemApp);
+
+      unmount();
+      license$.next(licensingMock.createLicense({ license: { type: 'platinum' } }));
+      await jest.advanceTimersByTimeAsync(1000);
+
+      expect(manageOldSiemRoutes).not.toHaveBeenCalled();
     });
   });
 });

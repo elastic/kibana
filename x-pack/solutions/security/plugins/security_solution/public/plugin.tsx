@@ -7,7 +7,15 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject, combineLatestWith, firstValueFrom, ReplaySubject, Subject } from 'rxjs';
+import {
+  asyncScheduler,
+  BehaviorSubject,
+  combineLatestWith,
+  first,
+  observeOn,
+  ReplaySubject,
+  Subject,
+} from 'rxjs';
 import type * as H from 'history';
 import type {
   AppMountParameters,
@@ -211,11 +219,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
         const { manageOldSiemRoutes } = await this.lazyHelpersForRoutes();
         // The legacy routes are resolved through the Security Solution app deepLinks, so the
-        // redirect can only happen once those deepLinks have been registered.
-        await firstValueFrom(this.deepLinksRegistered$);
-        manageOldSiemRoutes(coreStart);
+        // redirect can only happen once those deepLinks have been registered. It must not start
+        // before Core has settled this mount, which would end the destination app's loading
+        // state early, and is cancelled if the user leaves before it happens.
+        const redirectSubscription = this.deepLinksRegistered$
+          .pipe(first(), observeOn(asyncScheduler))
+          .subscribe(() => manageOldSiemRoutes(coreStart));
 
-        return () => true;
+        return () => redirectSubscription.unsubscribe();
       },
     });
 
