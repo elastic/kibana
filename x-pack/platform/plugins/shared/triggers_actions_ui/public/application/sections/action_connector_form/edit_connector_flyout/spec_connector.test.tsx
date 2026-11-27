@@ -62,6 +62,8 @@ describe('spec connector edit flyout Test tab', () => {
       required: ['config', 'secrets'],
     },
     is_testable: isTestable,
+    action_schemas: {},
+    actions: [],
   });
 
   const specConnector = createMockActionConnector({

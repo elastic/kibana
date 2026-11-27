@@ -23,7 +23,19 @@ describe('transformConnectorSpecResponse', () => {
         is_technical_preview: true,
       },
       schema: { type: 'object', properties: {} },
+      action_schemas: {
+        sendMessage: {
+          input: { type: 'object', properties: { text: { type: 'string' } } },
+          description: 'Send a message',
+          scope: 'write',
+        },
+      },
+      alerting: {
+        default_action: 'sendMessage',
+        message_field: 'text',
+      },
       is_testable: true,
+      actions: [],
     });
 
     expect(result.metadata).toEqual({
@@ -37,6 +49,17 @@ describe('transformConnectorSpecResponse', () => {
       isTechnicalPreview: true,
     });
     expect(result.schema).toEqual({ type: 'object', properties: {} });
+    expect(result.actionSchemas).toEqual({
+      sendMessage: {
+        input: { type: 'object', properties: { text: { type: 'string' } } },
+        description: 'Send a message',
+        scope: 'write',
+      },
+    });
+    expect(result.alerting).toEqual({
+      defaultAction: 'sendMessage',
+      messageField: 'text',
+    });
     expect(result.isTestable).toBe(true);
   });
 
@@ -50,6 +73,7 @@ describe('transformConnectorSpecResponse', () => {
         supported_feature_ids: ['cases'],
       },
       schema: {},
+      action_schemas: {},
       is_testable: false,
     });
 
@@ -60,6 +84,8 @@ describe('transformConnectorSpecResponse', () => {
       minimumLicense: 'gold',
       supportedFeatureIds: ['cases'],
     });
+    expect(result.actionSchemas).toEqual({});
+    expect(result.alerting).toBeUndefined();
     expect(result.isTestable).toBe(false);
   });
 

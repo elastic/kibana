@@ -118,7 +118,7 @@ export const AwsLambdaConnector: ConnectorSpec = {
       defaultMessage:
         'Invoke AWS Lambda functions, list available functions, and get function details',
     }),
-    minimumLicense: 'gold',
+    minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 

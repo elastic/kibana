@@ -90,6 +90,17 @@ describe('getConnectorSpecRoute', () => {
           secrets: { type: 'object', properties: {} },
         },
       },
+      actionSchemas: {
+        sendMessage: {
+          input: { type: 'object', properties: { text: { type: 'string' } } },
+          description: 'Send a message',
+          scope: 'write',
+        },
+      },
+      alerting: {
+        defaultAction: 'sendMessage',
+        messageField: 'text',
+      },
       isTestable: true,
       actions: [{ name: 'listIncidents', description: 'List incidents', isTool: true }],
     };
@@ -103,6 +114,11 @@ describe('getConnectorSpecRoute', () => {
         is_technical_preview: true,
       },
       schema: clientResult.schema,
+      action_schemas: clientResult.actionSchemas,
+      alerting: {
+        default_action: 'sendMessage',
+        message_field: 'text',
+      },
       is_testable: true,
       actions: [{ name: 'listIncidents', description: 'List incidents', is_tool: true }],
     };
@@ -142,6 +158,7 @@ describe('getConnectorSpecRoute', () => {
         supportedFeatureIds: ['alerting'],
       },
       schema: {},
+      actionSchemas: {},
       isTestable: false,
       actions: [],
     } as never);

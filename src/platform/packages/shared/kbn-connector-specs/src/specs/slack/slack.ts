@@ -219,10 +219,15 @@ export const Slack: ConnectorSpec = {
       defaultMessage:
         'Send messages and Block Kit cards, edit and react to messages, upload files, list channels and users, read conversation history and thread replies, search messages, and look up users by email in Slack',
     }),
-    minimumLicense: 'enterprise',
+    minimumLicense: 'gold',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
+    supportedFeatureIds: ['alerting', 'workflows', 'agentBuilder', 'contextEngine'],
     docsUrl: `https://www.elastic.co/docs/reference/kibana/connectors-kibana/slack-v2-action-type`,
+  },
+
+  alerting: {
+    defaultAction: 'sendMessage',
+    messageField: 'text',
   },
 
   auth: {

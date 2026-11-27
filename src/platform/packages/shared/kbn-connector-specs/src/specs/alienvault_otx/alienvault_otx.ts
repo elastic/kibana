@@ -33,7 +33,7 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
     description: i18n.translate('connectorSpecs.alienvaultOtx.metadata.description', {
       defaultMessage: 'Community-driven threat intelligence from Open Threat Exchange',
     }),
-    minimumLicense: 'gold',
+    minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 

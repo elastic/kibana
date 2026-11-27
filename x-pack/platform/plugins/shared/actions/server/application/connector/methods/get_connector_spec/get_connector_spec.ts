@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { getRegisteredSpec } from '../../../../specs_client/lib/get_registered_spec';
 import { serializeSpecDetail } from '../../../../specs_client/lib/serialize_spec_detail';
@@ -33,6 +34,15 @@ export async function getConnectorSpecAsJsonSchema({
   return {
     metadata: registered.spec.metadata,
     schema: detail.formSchema,
+    ...(registered.spec.alerting !== undefined ? { alerting: registered.spec.alerting } : {}),
+    actionSchemas: Object.fromEntries(
+      detail.actions
+        .filter(({ name }) => name !== TEST_CONNECTOR_SUB_ACTION)
+        .map(({ name, description, scope, inputSchema }) => [
+          name,
+          { input: inputSchema, ...(description !== undefined ? { description } : {}), scope },
+        ])
+    ),
     isTestable: detail.isTestable,
     authTypeIds: detail.authTypeIds,
     hasInboundEvents: detail.hasInboundEvents,

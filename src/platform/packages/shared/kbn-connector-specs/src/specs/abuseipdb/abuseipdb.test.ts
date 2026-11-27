@@ -25,6 +25,10 @@ describe('AbuseIPDBConnector', () => {
     jest.clearAllMocks();
   });
 
+  it('requires an enterprise license', () => {
+    expect(AbuseIPDBConnector.metadata.minimumLicense).toBe('enterprise');
+  });
+
   describe('checkIp action', () => {
     it('should call API with correct parameters and return IP details', async () => {
       const mockResponse = {
