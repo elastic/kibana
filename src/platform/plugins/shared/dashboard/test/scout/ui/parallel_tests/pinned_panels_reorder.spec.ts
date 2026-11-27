@@ -82,17 +82,22 @@ spaceTest.describe('Dashboard pinned panels reorder', { tag: tags.stateful.class
   });
 
   spaceTest.afterAll(async ({ kbnClient, scoutSpace }) => {
-    // read before cleaning so a failed lookup never leaves the setting behind
-    const currentDefaultIndex = await kbnClient.uiSettings.get('defaultIndex', {
-      space: scoutSpace.id,
-    });
-
-    await scoutSpace.savedObjects.cleanStandardList();
-
     // cleaning the saved objects deletes the data view but not the default index setting. Only
     // unset it when it points to this suite's data view: creating a data view leaves an existing
     // default alone, and writing the setting fails when it is locked via uiSettings.overrides
-    if (dataViewId && currentDefaultIndex === dataViewId) {
+    let ownsDefaultIndex = false;
+
+    try {
+      // read before cleaning; a failed lookup rejects here but must not skip the cleanup below
+      const currentDefaultIndex = await kbnClient.uiSettings.get('defaultIndex', {
+        space: scoutSpace.id,
+      });
+      ownsDefaultIndex = Boolean(dataViewId) && currentDefaultIndex === dataViewId;
+    } finally {
+      await scoutSpace.savedObjects.cleanStandardList();
+    }
+
+    if (ownsDefaultIndex) {
       await scoutSpace.uiSettings.unset('defaultIndex');
     }
   });
