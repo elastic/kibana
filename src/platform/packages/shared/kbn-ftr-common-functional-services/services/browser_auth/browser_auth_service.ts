@@ -24,6 +24,12 @@ export interface LoginByCookieOptions {
    * Pass the actual target app URL to avoid a second navigation in the caller.
    */
   targetUrl?: string;
+  /**
+   * Whether to delete cookies and clear session and local storage before injecting the cookie.
+   * Defaults to true. Pass false for an implicit login from the `/login` redirect, where only the
+   * session is missing and the caller's pre-navigation localStorage seeds must survive.
+   */
+  clearBrowserState?: boolean;
 }
 
 /**
@@ -72,6 +78,15 @@ export class BrowserAuthService extends FtrService {
       );
     }
 
+    await this.ensureOnKibanaOrigin();
+
+    this.log.debug('[browserAuth] deleting all cookies and clearing storage');
+    await this.browser.deleteAllCookies();
+    await this.browser.clearSessionStorage();
+    await this.browser.clearLocalStorage();
+  }
+
+  private async ensureOnKibanaOrigin(): Promise<void> {
     const hostPort = this.deployment.getHostPort();
     const currentUrl: string = await this.browser.getCurrentUrl();
 
@@ -83,11 +98,6 @@ export class BrowserAuthService extends FtrService {
       const alert = await this.browser.getAlert();
       if (alert) await alert.accept();
     }
-
-    this.log.debug('[browserAuth] deleting all cookies and clearing storage');
-    await this.browser.deleteAllCookies();
-    await this.browser.clearSessionStorage();
-    await this.browser.clearLocalStorage();
   }
 
   /**
@@ -104,13 +114,17 @@ export class BrowserAuthService extends FtrService {
       );
     }
 
-    const { expectUserMenuButton = true, targetUrl } = options;
+    const { expectUserMenuButton = true, targetUrl, clearBrowserState = true } = options;
 
-    await this.cleanBrowserState();
+    if (clearBrowserState) {
+      await this.cleanBrowserState();
 
-    // cleanBrowserState() wipes localStorage. Restore the flag that suppresses the
-    // welcome screen so it does not overlay the UI after the first navigation.
-    await this.browser.setLocalStorageItem(HOME_WELCOME_LOCAL_STORAGE_KEY, 'false');
+      // cleanBrowserState() wipes localStorage. Restore the flag that suppresses the
+      // welcome screen so it does not overlay the UI after the first navigation.
+      await this.browser.setLocalStorageItem(HOME_WELCOME_LOCAL_STORAGE_KEY, 'false');
+    } else {
+      await this.ensureOnKibanaOrigin();
+    }
 
     this.log.debug(`[browserAuth] injecting 'sid' cookie`);
     await this.browser.setCookie('sid', cookie.value);
