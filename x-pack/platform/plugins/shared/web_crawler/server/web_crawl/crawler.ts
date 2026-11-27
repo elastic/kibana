@@ -527,10 +527,11 @@ export const crawlSite = async ({
       // Found closer to a start URL in the meantime, the page is crawled again from there, and its
       // links are followed from there. It is indexed here all the same, in case that request
       // fails, and at that depth, so that whichever of the two is indexed last leaves the same.
-      const knownDepth = depthByPage.get(getPageKey(pageUrl)) ?? depth;
+      const pageKey = getPageKey(pageUrl);
+      const getKnownDepth = (): number => depthByPage.get(pageKey) ?? depth;
 
       // Links are queued before the page is indexed, so idle workers start on them right away.
-      if (knownDepth === depth && depth < maxDepth) {
+      if (getKnownDepth() === depth && depth < maxDepth) {
         const links = extractLinks(page.content, pageUrl, fileExtensions);
         if (links.length >= MAX_LINKS_PER_PAGE) {
           hasDroppedLinks = true;
@@ -543,7 +544,8 @@ export const crawlSite = async ({
         title: page.title ?? pageUrl,
         description: page.description,
         content: truncateContent(page.content),
-        depth: knownDepth,
+        // Read only now: the page may have been found closer while its links were queued.
+        depth: getKnownDepth(),
         crawl_id: crawlId,
         crawl_scope: crawlScope,
         crawled_at: new Date().toISOString(),

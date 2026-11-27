@@ -839,6 +839,35 @@ describe('crawlSite', () => {
       ).toEqual([2, 2]);
     });
 
+    it('is indexed at the shallower depth when it is found there while its links are queued', async () => {
+      const releaseSlow = hold(`${ORIGIN}/slow`);
+      const releaseRobots = hold('http://example.com/robots.txt');
+      mockSite({
+        [SEED_URL]: pageLinkingTo(['/fast', '/slow']),
+        [`${ORIGIN}/fast`]: pageLinkingTo(['/deep']),
+        [`${ORIGIN}/deep`]: pageLinkingTo(['/target']),
+        [`${ORIGIN}/slow`]: pageLinkingTo(['/target']),
+        [`${ORIGIN}/target`]: pageLinkingTo(['http://example.com/x']),
+        'http://example.com/x': pageLinkingTo([]),
+      });
+      const getTargetRequests = () =>
+        getPageRequests().filter((pageUrl) => pageUrl === `${ORIGIN}/target`);
+
+      const crawling = crawl({ maxDepth: 4 });
+      await waitUntil(() => getRequestedUrls().includes('http://example.com/robots.txt'));
+      releaseSlow();
+      await waitUntil(() => getTargetRequests().length === 2);
+      await letCrawlRun();
+      releaseRobots();
+      await crawling;
+
+      expect(
+        getIndexedDocuments()
+          .filter(({ url }) => url === `${ORIGIN}/target`)
+          .map(({ depth }) => depth)
+      ).toEqual([2, 2]);
+    });
+
     it('is still indexed, at the shallower depth, when the request from there fails', async () => {
       const releaseSlow = hold(`${ORIGIN}/slow`);
       const releaseTarget = hold(`${ORIGIN}/target`);
