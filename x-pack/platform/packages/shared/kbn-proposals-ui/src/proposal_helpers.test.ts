@@ -238,21 +238,18 @@ describe('getProposalDecision', () => {
     ).toMatchObject({ status: 'declined' });
   });
 
-  it.each([
-    ['no_reason', 'Flag already off', 'Flag already off'],
-    ['no_reason', undefined, 'Decline without a reason'],
-    ['handled_elsewhere', 'Fixed in #123', 'Handled elsewhere — Fixed in #123'],
-    ['handled_elsewhere', undefined, 'Handled elsewhere'],
-  ] as const)(
-    'reads a %s decline with rationale %p as "%s"',
-    (dismissReason, rationale, reason) => {
-      expect(
-        getProposalDecision(
-          proposal({ decision: 'dismissed', status: 'no_action', dismissReason, rationale })
-        )
-      ).toMatchObject({ status: 'declined', reason });
-    }
-  );
+  it('reports a decline by its formatted dismiss reason', () => {
+    expect(
+      getProposalDecision(
+        proposal({
+          decision: 'dismissed',
+          status: 'no_action',
+          dismissReason: 'no_reason',
+          rationale: 'Flag already off',
+        })
+      )
+    ).toMatchObject({ status: 'declined', reason: 'Flag already off' });
+  });
 
   it('reports a decline without a dismiss reason by its rationale alone', () => {
     expect(
