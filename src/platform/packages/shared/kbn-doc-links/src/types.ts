@@ -764,6 +764,7 @@ export interface DocLinks {
   };
   readonly synthetics: {
     readonly featureRoles: string;
+    readonly deleteAbandonedPackagePolicy: string;
   };
   readonly telemetry: {
     readonly settings: string;
