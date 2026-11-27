@@ -345,6 +345,8 @@
       "@kbn/content-management-utils/*": ["./src/platform/packages/shared/kbn-content-management-utils/*"],
       "@kbn/content-packs-schema": ["./x-pack/platform/packages/shared/kbn-content-packs-schema"],
       "@kbn/content-packs-schema/*": ["./x-pack/platform/packages/shared/kbn-content-packs-schema/*"],
+      "@kbn/content-sanitization": ["./x-pack/platform/packages/shared/kbn-content-sanitization"],
+      "@kbn/content-sanitization/*": ["./x-pack/platform/packages/shared/kbn-content-sanitization/*"],
       "@kbn/control-group-renderer": ["./src/platform/packages/shared/controls/control-group-renderer"],
       "@kbn/control-group-renderer/*": ["./src/platform/packages/shared/controls/control-group-renderer/*"],
       "@kbn/controls-constants": ["./src/platform/packages/shared/controls/controls-constants"],

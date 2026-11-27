@@ -886,6 +886,9 @@ importers:
       '@kbn/content-packs-schema':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-content-packs-schema
+      '@kbn/content-sanitization':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/kbn-content-sanitization
       '@kbn/control-group-renderer':
         specifier: workspace:*
         version: link:src/platform/packages/shared/controls/control-group-renderer
@@ -8475,6 +8478,8 @@ importers:
   x-pack/platform/packages/shared/kbn-classic-stream-flyout: {}
 
   x-pack/platform/packages/shared/kbn-content-packs-schema: {}
+
+  x-pack/platform/packages/shared/kbn-content-sanitization: {}
 
   x-pack/platform/packages/shared/kbn-data-forge: {}
 
