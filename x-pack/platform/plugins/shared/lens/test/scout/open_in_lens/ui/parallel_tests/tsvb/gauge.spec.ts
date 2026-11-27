@@ -7,7 +7,12 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { createOpenInLensSuiteSetup, spaceTest, testData } from '../../fixtures';
+import {
+  createOpenInLensSuiteSetup,
+  expectNoConvertToLensByTitle,
+  spaceTest,
+  testData,
+} from '../../fixtures';
 
 spaceTest.describe('TSVB Gauge - Open in Lens', { tag: tags.deploymentAgnostic }, () => {
   const openInLensSuite = createOpenInLensSuiteSetup({
@@ -27,25 +32,17 @@ spaceTest.describe('TSVB Gauge - Open in Lens', { tag: tags.deploymentAgnostic }
     const { dashboard } = pageObjects;
 
     await spaceTest.step('unsupported metric has no Convert to Lens action', async () => {
-      const hasAction = await dashboard.panelHasAction(
-        testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
-        'Gauge - Unsupported metric'
-      );
-      expect(hasAction).toBe(false);
+      await expectNoConvertToLensByTitle({ dashboard }, 'Gauge - Unsupported metric');
     });
 
     await spaceTest.step('invalid panel has no Convert to Lens action', async () => {
-      const hasAction = await dashboard.panelHasAction(
-        testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
-        'Gauge - Invalid panel'
-      );
-      expect(hasAction).toBe(false);
+      await expectNoConvertToLensByTitle({ dashboard }, 'Gauge - Invalid panel');
     });
   });
 
   spaceTest('should convert basic gauge to Lens', async ({ page, pageObjects }) => {
     const { dashboard, lens } = pageObjects;
-    await dashboard.clickPanelAction(
+    await dashboard.clickContextMenuAction(
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Gauge - Basic'
     );
@@ -57,7 +54,7 @@ spaceTest.describe('TSVB Gauge - Open in Lens', { tag: tags.deploymentAgnostic }
 
   spaceTest('should convert gauge with metric params', async ({ page, pageObjects }) => {
     const { dashboard, lens } = pageObjects;
-    await dashboard.clickPanelAction(
+    await dashboard.clickContextMenuAction(
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Gauge - Value count'
     );
@@ -71,7 +68,7 @@ spaceTest.describe('TSVB Gauge - Open in Lens', { tag: tags.deploymentAgnostic }
 
   spaceTest('should convert color ranges', async ({ page, pageObjects }) => {
     const { dashboard, lens } = pageObjects;
-    await dashboard.clickPanelAction(
+    await dashboard.clickContextMenuAction(
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Gauge - Color ranges'
     );
@@ -99,7 +96,7 @@ spaceTest.describe('TSVB Gauge - Open in Lens', { tag: tags.deploymentAgnostic }
     'should bring ignore global filters at series level over',
     async ({ page, pageObjects }) => {
       const { dashboard, lens } = pageObjects;
-      await dashboard.clickPanelAction(
+      await dashboard.clickContextMenuAction(
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Gauge - Ignore global filters series'
       );
@@ -112,7 +109,7 @@ spaceTest.describe('TSVB Gauge - Open in Lens', { tag: tags.deploymentAgnostic }
     'should bring ignore global filters at panel level over',
     async ({ page, pageObjects }) => {
       const { dashboard, lens } = pageObjects;
-      await dashboard.clickPanelAction(
+      await dashboard.clickContextMenuAction(
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Gauge - Ignore global filters panel'
       );

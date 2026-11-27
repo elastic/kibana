@@ -10,6 +10,9 @@ import type { ApiServicesFixture } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { createLogstashLensEditorSuiteSetup, spaceTest, testData } from '../fixtures';
 
+// Never compatible for a user with write access, in any view mode, so the frequently changing
+// action subscriptions can't add it after the actions have loaded. That makes asserting its
+// absence safe with `expectHasNoHoverAction`.
 const SHOW_CONFIG_ACTION = 'embeddablePanelAction-ACTION_SHOW_CONFIG_PANEL';
 
 /** Creates a dashboard with one by-value Lens panel via the dashboard API. */
@@ -88,7 +91,8 @@ spaceTest.describe(
 
         await spaceTest.step('the action is absent in edit mode', async () => {
           await dashboard.openDashboardWithIdInEditMode(dashboardId);
-          expect(await dashboard.panelHasAction(SHOW_CONFIG_ACTION)).toBe(false);
+          await dashboard.expectHasNoHoverAction(SHOW_CONFIG_ACTION);
+          await dashboard.expectHasNoContextMenuAction(SHOW_CONFIG_ACTION);
         });
 
         await spaceTest.step('the action is absent in view mode', async () => {
@@ -97,7 +101,8 @@ spaceTest.describe(
           // button in view mode.
           await page.testSubj.click('dashboardViewOnlyMode');
           await expect(page.testSubj.locator('dashboardEditMode')).toBeVisible();
-          expect(await dashboard.panelHasAction(SHOW_CONFIG_ACTION)).toBe(false);
+          await dashboard.expectHasNoHoverAction(SHOW_CONFIG_ACTION);
+          await dashboard.expectHasNoContextMenuAction(SHOW_CONFIG_ACTION);
         });
       }
     );
@@ -121,7 +126,7 @@ spaceTest.describe(
         await spaceTest.step('the action is available to a viewer', async () => {
           await browserAuth.loginAsViewer();
           await dashboard.openDashboardWithId(dashboardId);
-          expect(await dashboard.panelHasAction(SHOW_CONFIG_ACTION)).toBe(true);
+          await dashboard.expectHasHoverAction(SHOW_CONFIG_ACTION);
         });
       }
     );

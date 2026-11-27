@@ -37,10 +37,7 @@ spaceTest.describe(
         expect(await dataGrid.getDocTableRowCount()).toBeGreaterThan(0);
 
         await dashboard.unlinkFromLibrary(testData.SAVED_SEARCH_TITLE);
-        await dashboard.clickPanelAction(
-          'embeddablePanelAction-editPanel',
-          testData.SAVED_SEARCH_TITLE
-        );
+        await dashboard.openEditPanel(testData.SAVED_SEARCH_TITLE);
         await discover.waitUntilTabIsLoaded();
         await queryBar.setQuery('test');
         await discover.submitQuery();
@@ -66,10 +63,7 @@ spaceTest.describe(
         await dashboard.waitForRenderComplete();
 
         await dashboard.unlinkFromLibrary(testData.SAVED_SEARCH_TITLE);
-        await dashboard.clickPanelAction(
-          'embeddablePanelAction-editPanel',
-          testData.SAVED_SEARCH_TITLE
-        );
+        await dashboard.openEditPanel(testData.SAVED_SEARCH_TITLE);
         await discover.waitUntilTabIsLoaded();
         await queryBar.setQuery('test');
         await discover.submitQuery();
@@ -98,10 +92,7 @@ spaceTest.describe(
         await dashboard.waitForRenderComplete();
 
         await dashboard.unlinkFromLibrary(testData.SAVED_SEARCH_TITLE);
-        await dashboard.clickPanelAction(
-          'embeddablePanelAction-editPanel',
-          testData.SAVED_SEARCH_TITLE
-        );
+        await dashboard.openEditPanel(testData.SAVED_SEARCH_TITLE);
         await discover.waitUntilTabIsLoaded();
         await expect(page.testSubj.locator('unifiedTabs_tabsBar')).toBeHidden();
         await discover.saveEditorSessionAsNew(savedAsTitle);

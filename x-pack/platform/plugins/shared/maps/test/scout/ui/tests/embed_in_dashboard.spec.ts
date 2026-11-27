@@ -182,7 +182,7 @@ test.describe('Maps - embed in dashboard', { tag: '@local-stateful-classic' }, (
     const { dashboard, filterBar, maps } = pageObjects;
 
     await dashboard.switchToEditMode();
-    await dashboard.clickPanelAction('embeddablePanelAction-editPanel', GEO_GRID_EXAMPLE);
+    await dashboard.openEditPanel(GEO_GRID_EXAMPLE);
     await maps.waitForLayersToLoad();
 
     await filterBar.addFilter({ field: 'machine.os', operator: 'is', value: 'ios' });

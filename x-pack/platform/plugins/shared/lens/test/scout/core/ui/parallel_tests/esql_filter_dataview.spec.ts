@@ -209,7 +209,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('reopen the inline editor and change the query', async () => {
-          await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
+          await dashboard.openEditPanel();
           await waitForEsqlEditorReady(page, esqlEditor);
 
           await setEsqlQueryAndRun(page, esqlEditor, WILDCARD_ESQL_QUERY);

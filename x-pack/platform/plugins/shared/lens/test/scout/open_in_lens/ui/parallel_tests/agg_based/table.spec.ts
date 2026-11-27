@@ -9,7 +9,7 @@ import type { ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
-  canConvertToLensByTitle,
+  expectNoConvertToLensByTitle,
   convertToLensByTitle,
   createOpenInLensSuiteSetup,
   spaceTest,
@@ -38,7 +38,7 @@ spaceTest.describe('Lens open in Lens — agg-based Table', { tag: tags.deployme
 
   spaceTest('should not allow converting of unsupported aggregations', async ({ pageObjects }) => {
     const { dashboard } = pageObjects;
-    expect(await canConvertToLensByTitle({ dashboard }, 'Table - Unsupported Agg')).toBe(false);
+    await expectNoConvertToLensByTitle({ dashboard }, 'Table - Unsupported Agg');
   });
 
   spaceTest('should convert aggregation with params', async ({ pageObjects }) => {

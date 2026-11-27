@@ -127,8 +127,7 @@ spaceTest.describe('Lens editor from dashboard', { tag: '@local-stateful-classic
       await dashboard.waitForPanelsToLoad(1);
       await dashboard.waitForRenderComplete();
 
-      await dashboard.clickPanelAction('embeddablePanelAction-openInspector');
-      await inspector.panel.waitFor({ state: 'visible' });
+      await dashboard.openInspector();
       await inspector.openInspectorRequestsView();
       await inspector.requests.requestChooser.click();
       await expect(page.getByRole('listbox').getByRole('option')).toHaveCount(2);

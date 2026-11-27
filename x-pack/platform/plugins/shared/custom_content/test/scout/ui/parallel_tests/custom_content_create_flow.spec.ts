@@ -123,7 +123,7 @@ spaceTest.describe('Custom content panel create flow', { tag: [...tags.stateful.
     const iframe = customContentPanel.getPanelIframe();
     await expect(iframe.locator('#v1')).toHaveText('version one');
 
-    await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
+    await dashboard.openEditPanel();
     await expect(customContentPanel.editFlyoutTitle).toBeVisible();
 
     await customContentPanel.setTemplate('<p id="v2">version two</p>');
@@ -144,7 +144,7 @@ spaceTest.describe('Custom content panel create flow', { tag: [...tags.stateful.
 
       await expect(customContentPanel.panel).toBeVisible();
 
-      await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
+      await dashboard.openEditPanel();
       await expect(customContentPanel.editFlyoutTitle).toBeVisible();
       await customContentPanel.cancel();
 

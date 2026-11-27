@@ -62,7 +62,7 @@ test.describe('Canvas visualization embeddable', { tag: ['@local-stateful-classi
       timeout: EXTENDED_TIMEOUT,
     });
 
-    await canvas.editPanel(VEGA.libraryName);
+    await canvas.openEditPanel(VEGA.libraryName);
     await expect(page.testSubj.locator('vegaLibraryEditorBody')).toBeVisible();
   });
 

@@ -14,6 +14,7 @@ import { expect } from '..';
 import { AppMenu } from './app_menu';
 import { Chrome } from './chrome';
 import { RenderablePage } from './utils/renderable_page';
+import { PanelActions } from './panel_actions';
 import { Toasts } from './toasts';
 
 type CommonlyUsedTimeRange =
@@ -41,6 +42,7 @@ export class DashboardApp {
   private readonly renderable: RenderablePage;
   private readonly toasts: Toasts;
   private readonly appMenu: AppMenu;
+  private readonly panelActions: PanelActions;
   private readonly chrome: Chrome;
   // Dashboard shell and mode controls
   private readonly settingsFlyout;
@@ -90,6 +92,7 @@ export class DashboardApp {
     this.renderable = new RenderablePage(page);
     this.toasts = new Toasts(page);
     this.appMenu = new AppMenu(page);
+    this.panelActions = new PanelActions(page);
     this.chrome = new Chrome(page);
 
     // Dashboard shell and mode controls
@@ -262,6 +265,13 @@ export class DashboardApp {
    */
   async getIsInViewMode(): Promise<boolean> {
     return (await this.getViewMode()) === 'view';
+  }
+
+  /**
+   * Checks if the dashboard is in edit mode.
+   */
+  async getIsInEditMode(): Promise<boolean> {
+    return (await this.getViewMode()) === 'edit';
   }
 
   /**
@@ -749,7 +759,12 @@ export class DashboardApp {
   }
 
   async openCustomizePanel(title?: string) {
-    await this.clickPanelAction('embeddablePanelAction-ACTION_CUSTOMIZE_PANEL', title);
+    // The customize panel hover action is only available in edit mode.
+    if (await this.getIsInEditMode()) {
+      await this.clickHoverAction('embeddablePanelAction-ACTION_CUSTOMIZE_PANEL', title);
+    } else {
+      await this.clickContextMenuAction('embeddablePanelAction-ACTION_CUSTOMIZE_PANEL', title);
+    }
     await expect(this.customizePanelFlyout).toBeVisible();
   }
 
@@ -828,25 +843,12 @@ export class DashboardApp {
   // ============================================================
 
   /**
-   * Formats a panel title for use in test subject selectors.
-   */
-  private formatTitleForTestSubj(title: string): string {
-    return title.replace(/\s/g, '');
-  }
-
-  /**
    * Gets the hover actions wrapper for a panel by title.
    *
    * @param title - Panel title. If empty, finds first panel by class.
    */
   getPanelHoverActionsLocator(title?: string) {
-    if (!title) {
-      // Fallback: find first panel by class when no title provided
-      return this.page.locator('.embPanel__hoverActionsAnchor');
-    }
-    return this.page.testSubj.locator(
-      `embeddablePanelHoverActions-${this.formatTitleForTestSubj(title)}`
-    );
+    return this.panelActions.getPanelHoverActionsLocator(title);
   }
 
   /**
@@ -854,20 +856,7 @@ export class DashboardApp {
    * Scrolls the panel into view and clicks the menu toggle.
    */
   async openPanelContextMenu(title?: string) {
-    const panelWrapper = this.getPanelHoverActionsLocator(title);
-    await panelWrapper.scrollIntoViewIfNeeded();
-    await panelWrapper.hover();
-
-    const contextMenuOpen = panelWrapper.locator(
-      '[data-test-subj="embeddablePanelContextMenuOpen"]'
-    );
-    if (await contextMenuOpen.isVisible()) {
-      return;
-    }
-
-    const menuIcon = panelWrapper.locator('[data-test-subj="embeddablePanelToggleMenuIcon"]');
-    await menuIcon.click();
-    await expect(contextMenuOpen).toBeVisible();
+    await this.panelActions.openPanelContextMenu(title);
   }
 
   async navigateToLensEditorFromPanel(title?: string) {
@@ -880,48 +869,28 @@ export class DashboardApp {
   }
 
   /**
-   * Checks if a panel action exists as a descendant of the panel wrapper.
+   * Clicks a quick action in the panel's hover actions row.
+   * Fails if the action is not a quick action for the current view mode.
    */
-  private async panelActionExistsInWrapper(
-    actionTestSubj: string,
-    panelWrapper: ReturnType<typeof this.getPanelHoverActionsLocator>
-  ): Promise<boolean> {
-    // Check if the action is a descendant of the panel wrapper (not globally visible)
-    const actionInPanel = panelWrapper.locator(`[data-test-subj="${actionTestSubj}"]`);
-    return actionInPanel.isVisible();
+  async clickHoverAction(actionTestSubj: string, title?: string) {
+    await this.panelActions.clickHoverAction(actionTestSubj, title);
   }
 
   /**
-   * Clicks a panel action from the hover actions or context menu.
-   *
-   * Key difference from before: checks if action is DESCENDANT of panel wrapper,
-   * not just globally visible. This prevents clicking wrong panel's actions.
+   * Opens the panel's context menu and clicks an action in it.
+   * Fails if the action is not a context menu action for the current view mode.
    */
-  async clickPanelAction(actionTestSubj: string, title?: string) {
-    const panelWrapper = this.getPanelHoverActionsLocator(title);
-    await panelWrapper.scrollIntoViewIfNeeded();
-    await panelWrapper.hover();
+  async clickContextMenuAction(actionTestSubj: string, title?: string) {
+    await this.panelActions.clickContextMenuAction(actionTestSubj, title);
+  }
 
-    // Check if action exists as descendant of panel wrapper
-    const existsInWrapper = await this.panelActionExistsInWrapper(actionTestSubj, panelWrapper);
-
-    if (existsInWrapper) {
-      // Click the action within the panel wrapper
-      const actionInPanel = panelWrapper.locator(`[data-test-subj="${actionTestSubj}"]`);
-      await actionInPanel.click();
-    } else {
-      // Open context menu and click action. The menu renders in a portal outside the panel, so it
-      // cannot be panel-scoped; filtering to the visible match skips the hidden quick-action
-      // buttons that every other panel on the dashboard renders under the same test subject.
-      await this.openPanelContextMenu(title);
-      await this.page.testSubj.locator(actionTestSubj).filter({ visible: true }).click();
-      // Wait for context menu to close after clicking the action
-      await expect(this.page.testSubj.locator('embeddablePanelContextMenuOpen')).toBeHidden();
-    }
+  /** Clicks the Edit hover action, which is only available in edit mode. */
+  async openEditPanel(title?: string) {
+    await this.clickHoverAction('embeddablePanelAction-editPanel', title);
   }
 
   async editLinkedDiscoverPanel(title: string) {
-    await this.clickPanelAction('embeddablePanelAction-editPanel', title);
+    await this.openEditPanel(title);
     await this.editInDiscoverLink.waitFor({ state: 'visible' });
     await this.editInDiscoverLink.click();
   }
@@ -929,7 +898,7 @@ export class DashboardApp {
   /** Generates and downloads a CSV report for a Discover session panel. */
   async exportPanelAsCsv(title?: string): Promise<Download> {
     await this.toasts.dismissAll();
-    await this.clickPanelAction('embeddablePanelAction-generateCsvReport', title);
+    await this.clickContextMenuAction('embeddablePanelAction-generateCsvReport', title);
 
     const downloadButton = this.page.testSubj.locator('downloadCompletedReportButton');
     // Report generation runs asynchronously and can be slow on shared CI workers.
@@ -948,7 +917,7 @@ export class DashboardApp {
     const panels = this.page.testSubj.locator('embeddablePanel');
     const initialCount = await panels.count();
 
-    await this.clickPanelAction('embeddablePanelAction-clonePanel', title);
+    await this.clickContextMenuAction('embeddablePanelAction-clonePanel', title);
     await this.page.waitForFunction(
       (expectedCount) =>
         document.querySelectorAll('[data-test-subj="embeddablePanel"]').length > expectedCount,
@@ -961,7 +930,7 @@ export class DashboardApp {
    * Unlinks a panel from the library and verifies it is unlinked.
    */
   async unlinkFromLibrary(title?: string) {
-    await this.clickPanelAction('embeddablePanelAction-unlinkFromLibrary', title);
+    await this.clickContextMenuAction('embeddablePanelAction-unlinkFromLibrary', title);
     await expect(this.page.testSubj.locator('unlinkPanelSuccess')).toBeVisible();
     // Verify the panel is now unlinked
     await this.expectNotLinkedToLibrary(title);
@@ -969,7 +938,12 @@ export class DashboardApp {
 
   /** Opens the inspector flyout for the given panel (or the first panel if omitted). */
   async openInspector(title?: string) {
-    await this.clickPanelAction('embeddablePanelAction-openInspector', title);
+    // The inspector hover action is only available in view mode.
+    if (await this.getIsInViewMode()) {
+      await this.clickHoverAction('embeddablePanelAction-openInspector', title);
+    } else {
+      await this.clickContextMenuAction('embeddablePanelAction-openInspector', title);
+    }
     await this.page.testSubj.locator('inspectorPanel').waitFor({ state: 'visible' });
   }
 
@@ -995,7 +969,7 @@ export class DashboardApp {
    * Saves a panel to the library and verifies it is linked.
    */
   async saveToLibrary(newTitle: string, currentTitle?: string) {
-    await this.clickPanelAction('embeddablePanelAction-saveToLibrary', currentTitle);
+    await this.clickContextMenuAction('embeddablePanelAction-saveToLibrary', currentTitle);
 
     // Fill in the new title
     await this.savedObjectTitleInput.fill(newTitle);
@@ -1008,59 +982,40 @@ export class DashboardApp {
   }
 
   /**
-   * Checks if a panel has a specific action available.
-   * Checks both hover actions and context menu.
+   * Asserts that a quick action is visible in the panel's hover actions row (throws if not found).
    *
-   * Uses count() > 0 to include hidden elements.
-   * (finds elements even if not visible).
+   * @param actionTestSubj - `data-test-subj` of the quick action that must be in the hover row.
+   * @param title - Panel title. If omitted, uses the first panel.
    */
-  async panelHasAction(actionTestSubj: string, title?: string): Promise<boolean> {
-    const panelWrapper = this.getPanelHoverActionsLocator(title);
-    await panelWrapper.scrollIntoViewIfNeeded();
-    await panelWrapper.hover();
-
-    // Check if action exists in panel wrapper (hover actions)
-    // Using count() to include hidden elements
-    const existsInWrapper = await this.panelActionExistsInWrapper(actionTestSubj, panelWrapper);
-    if (existsInWrapper) {
-      return true;
-    }
-
-    // Check in context menu
-    await this.openPanelContextMenu(title);
-    // Use count() > 0 to find elements even if hidden
-    const actionInMenu = this.page.testSubj.locator(actionTestSubj);
-    const count = await actionInMenu.count();
-
-    // Close menu by pressing Escape
-    await this.page.keyboard.press('Escape');
-    return count > 0;
+  async expectHasHoverAction(actionTestSubj: string, title?: string) {
+    await this.panelActions.expectHasHoverAction(actionTestSubj, title);
   }
 
   /**
-   * Asserts that a panel action exists (throws if not found).
+   * Asserts that a quick action is NOT visible in the panel's hover actions row. Only use this for
+   * an action that cannot become compatible later: it does not cover quick actions that the
+   * frequently changing action subscriptions add afterwards (e.g. Edit, Show configuration).
+   *
+   * @param actionTestSubj - `data-test-subj` of the quick action that must not be in the hover row.
+   * @param title - Panel title. If omitted, uses the first panel.
    */
-  async expectExistsPanelAction(actionTestSubj: string, title?: string) {
-    const exists = await this.panelHasAction(actionTestSubj, title);
-    if (!exists) {
-      // Collect available actions for better error message
-      await this.openPanelContextMenu(title);
-      const allActions = await this.page
-        .locator('[data-test-subj^="embeddablePanelAction-"]')
-        .all();
-      const actionNames: string[] = [];
-      for (const action of allActions) {
-        const testSubj = await action.getAttribute('data-test-subj');
-        if (testSubj) actionNames.push(testSubj);
-      }
-      await this.page.keyboard.press('Escape');
+  async expectHasNoHoverAction(actionTestSubj: string, title?: string) {
+    await this.panelActions.expectHasNoHoverAction(actionTestSubj, title);
+  }
 
-      throw new Error(
-        `Expected panel action "${actionTestSubj}" to exist for panel "${
-          title || 'first panel'
-        }". Available actions: [${actionNames.join(', ')}]`
-      );
-    }
+  /** Asserts that an action is listed in the panel's context menu (throws if not found). */
+  async expectHasContextMenuAction(actionTestSubj: string, title?: string) {
+    await this.panelActions.expectHasContextMenuAction(actionTestSubj, title);
+  }
+
+  /**
+   * Asserts that an action is NOT listed in the panel's context menu.
+   *
+   * @param actionTestSubj - `data-test-subj` of the action that must not be in the context menu.
+   * @param title - Panel title. If omitted, uses the first panel.
+   */
+  async expectHasNoContextMenuAction(actionTestSubj: string, title?: string) {
+    await this.panelActions.expectHasNoContextMenuAction(actionTestSubj, title);
   }
 
   /**
@@ -1071,7 +1026,7 @@ export class DashboardApp {
    * may not be available in view mode.
    */
   async expectLinkedToLibrary(title?: string) {
-    await this.expectExistsPanelAction('embeddablePanelAction-unlinkFromLibrary', title);
+    await this.expectHasContextMenuAction('embeddablePanelAction-unlinkFromLibrary', title);
   }
 
   /**
@@ -1082,7 +1037,7 @@ export class DashboardApp {
    * may not be available in view mode.
    */
   async expectNotLinkedToLibrary(title?: string) {
-    await this.expectExistsPanelAction('embeddablePanelAction-saveToLibrary', title);
+    await this.expectHasContextMenuAction('embeddablePanelAction-saveToLibrary', title);
   }
 
   async openInlineEditor(id: string) {
@@ -1244,24 +1199,11 @@ export class DashboardApp {
    * expansion that asserts the maximized layout, use `maximizePanel`.
    */
   async togglePanelExpand(title?: string) {
-    if (title) {
-      await this.clickPanelAction('embeddablePanelAction-togglePanel', title);
-      return;
-    }
-    const panelWrapper = this.page.locator('.embPanel__hoverActionsAnchor >> nth=0');
-    await panelWrapper.scrollIntoViewIfNeeded();
-    await panelWrapper.hover();
-    const toggleAction = panelWrapper.locator(
-      '[data-test-subj="embeddablePanelAction-togglePanel"]'
-    );
-    if (await toggleAction.isVisible()) {
-      await toggleAction.click();
+    // The expand/minimize hover action is only available in view mode.
+    if (await this.getIsInViewMode()) {
+      await this.clickHoverAction('embeddablePanelAction-togglePanel', title);
     } else {
-      await panelWrapper.locator('[data-test-subj="embeddablePanelToggleMenuIcon"]').click();
-      await expect(
-        panelWrapper.locator('[data-test-subj="embeddablePanelContextMenuOpen"]')
-      ).toBeVisible();
-      await this.page.testSubj.click('embeddablePanelAction-togglePanel');
+      await this.clickContextMenuAction('embeddablePanelAction-togglePanel', title);
     }
   }
 

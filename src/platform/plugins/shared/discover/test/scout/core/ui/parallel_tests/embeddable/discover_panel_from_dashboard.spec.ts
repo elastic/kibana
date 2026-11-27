@@ -66,7 +66,7 @@ spaceTest.describe(
         await dashboard.saveDashboard(EXISTING_DASHBOARD_TITLE);
         await dashboard.ensureEditMode();
 
-        await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
+        await dashboard.openEditPanel();
         await discover.waitUntilTabIsLoaded();
         await discover.writeAndSubmitKqlQuery('test');
         await discover.openSaveSearchAsModal();

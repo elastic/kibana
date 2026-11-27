@@ -94,7 +94,7 @@ spaceTest.describe(
           await expect(page.testSubj.locator('dashboardEditMode')).toBeVisible();
 
           // "View Discover session" navigates to Discover in the same tab.
-          await dashboard.clickPanelAction(
+          await dashboard.clickHoverAction(
             'embeddablePanelAction-ACTION_VIEW_SAVED_SEARCH',
             testData.SESSION_WITH_CONTROL_TITLE
           );
@@ -128,10 +128,7 @@ spaceTest.describe(
           INITIAL_SELECTION
         );
 
-        await dashboard.clickPanelAction(
-          'embeddablePanelAction-editPanel',
-          testData.SESSION_WITH_CONTROL_TITLE
-        );
+        await dashboard.openEditPanel(testData.SESSION_WITH_CONTROL_TITLE);
         await pageObjects.discover.waitUntilTabIsLoaded();
 
         await expect(

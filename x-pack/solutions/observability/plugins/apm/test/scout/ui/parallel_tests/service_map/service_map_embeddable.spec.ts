@@ -120,7 +120,7 @@ test.describe(
         // current `time_range` (now 24 hours) into the suggestions endpoint
         // so the service / environment combo boxes can resolve
         // `service-map-test` reliably.
-        await pageObjects.dashboard.clickPanelAction('embeddablePanelAction-editPanel');
+        await pageObjects.dashboard.openEditPanel();
         await expect(
           page.getByRole('heading', { name: 'Edit service map', level: 2 })
         ).toBeVisible();
@@ -274,7 +274,7 @@ test.describe(
       });
 
       await test.step('edit the panel: set service/env/KQL filters and enable filter sync', async () => {
-        await pageObjects.dashboard.clickPanelAction('embeddablePanelAction-editPanel');
+        await pageObjects.dashboard.openEditPanel();
         await expect(
           page.getByRole('heading', { name: 'Edit service map', level: 2 })
         ).toBeVisible();
@@ -325,7 +325,7 @@ test.describe(
         await expect(pageObjects.serviceMapPage.serviceMapEmbeddable).toBeVisible();
 
         // Re-open the editor and confirm the sync toggle stayed on after save + reload.
-        await pageObjects.dashboard.clickPanelAction('embeddablePanelAction-editPanel');
+        await pageObjects.dashboard.openEditPanel();
         await expect(
           page.getByRole('heading', { name: 'Edit service map', level: 2 })
         ).toBeVisible();

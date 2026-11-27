@@ -39,7 +39,7 @@ spaceTest.describe(
         await dataGrid.waitForLoad();
         expect(await dataGrid.getDocTableRowCount()).toBeGreaterThan(0);
 
-        await dashboard.clickPanelAction('embeddablePanelAction-editPanel', ESQL_SESSION_TITLE);
+        await dashboard.openEditPanel(ESQL_SESSION_TITLE);
         await discover.openInlineEditorInDiscover();
 
         expect(await discover.getCurrentQueryName()).toBe(`Editing ${ESQL_SESSION_TITLE}`);
@@ -67,7 +67,7 @@ spaceTest.describe(
         await dashboard.addSavedSearch(ESQL_SESSION_TITLE);
         await dashboard.waitForRenderComplete();
 
-        await dashboard.clickPanelAction('embeddablePanelAction-editPanel', ESQL_SESSION_TITLE);
+        await dashboard.openEditPanel(ESQL_SESSION_TITLE);
         await discover.openInlineEditorInDiscover();
 
         expect(await discover.getCurrentQueryName()).toBe(`Editing ${ESQL_SESSION_TITLE}`);

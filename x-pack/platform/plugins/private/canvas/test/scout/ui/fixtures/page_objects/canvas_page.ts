@@ -6,6 +6,7 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout';
+import { PanelActions } from '@kbn/scout';
 
 /**
  * Canvas page object for Scout UI tests.
@@ -16,6 +17,8 @@ import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout';
  * - UI interactions and selectors are centralized here.
  */
 export class CanvasPage {
+  private readonly panelActions: PanelActions;
+
   // ── Workpad listing ────────────────────────────────────────────────────────
 
   /** Rows in the workpad listing table. */
@@ -76,6 +79,7 @@ export class CanvasPage {
   public readonly generateReportButton: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+    this.panelActions = new PanelActions(page);
     this.workpadListItems = this.page.testSubj.locator(
       'canvasWorkpadTable > canvasWorkpadTableWorkpad'
     );
@@ -313,51 +317,27 @@ export class CanvasPage {
     return this.page.testSubj.locator(`embeddablePanelHeading-${titleId}`);
   }
 
-  /**
-   * Hover-actions wrapper for an embeddable panel — by title, or the first panel
-   * when no title is given. Mirrors the FTR `getPanelWrapper` selector strategy.
-   */
-  private panelHoverActions(title?: string): Locator {
-    if (!title) {
-      // eslint-disable-next-line playwright/no-nth-methods
-      return this.page.locator('.embPanel__hoverActionsAnchor').first();
-    }
-    return this.page.testSubj.locator(`embeddablePanelHoverActions-${title.replace(/\s/g, '')}`);
-  }
-
   /** Open the context menu for an embeddable panel. */
   async openPanelContextMenu(title?: string) {
-    const wrapper = this.panelHoverActions(title);
-    await wrapper.scrollIntoViewIfNeeded();
-    await wrapper.hover();
-    const contextMenuOpen = this.page.testSubj.locator('embeddablePanelContextMenuOpen');
-    if (await contextMenuOpen.isVisible()) {
-      return;
-    }
-    await wrapper.locator('[data-test-subj="embeddablePanelToggleMenuIcon"]').click();
-    await contextMenuOpen.waitFor({ state: 'visible' });
+    await this.panelActions.openPanelContextMenu(title);
+  }
+
+  /** Click a quick action in the panel's hover actions row. */
+  async clickHoverAction(actionTestSubj: string, title?: string) {
+    await this.panelActions.clickHoverAction(actionTestSubj, title);
   }
 
   /**
-   * Click a panel action, preferring the hover action if it is present and
-   * falling back to the context menu otherwise (mirrors FTR `clickPanelAction`).
+   * Open the panel's context menu and click an action in it.
+   * Fails if the action is not a context menu action for the current view mode.
    */
-  async clickPanelAction(actionTestSubj: string, title?: string) {
-    const wrapper = this.panelHoverActions(title);
-    await wrapper.scrollIntoViewIfNeeded();
-    await wrapper.hover();
-    const actionInWrapper = wrapper.locator(`[data-test-subj="${actionTestSubj}"]`);
-    if (await actionInWrapper.isVisible()) {
-      await actionInWrapper.click();
-      return;
-    }
-    await this.openPanelContextMenu(title);
-    await this.page.testSubj.locator(actionTestSubj).click();
+  async clickContextMenuAction(actionTestSubj: string, title?: string) {
+    await this.panelActions.clickContextMenuAction(actionTestSubj, title);
   }
 
   /** Click the "Edit" panel action to open the embeddable's editor (inline or full). */
-  async editPanel(title?: string) {
-    await this.clickPanelAction('embeddablePanelAction-editPanel', title);
+  async openEditPanel(title?: string) {
+    await this.clickHoverAction('embeddablePanelAction-editPanel', title);
   }
 
   /** Within a saved-search inline-edit flyout, click "Edit in Discover". */

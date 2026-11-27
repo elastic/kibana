@@ -118,6 +118,11 @@ export const PresentationPanelHoverActions = ({
   const [quickActions, setQuickActions] = useState<Action<EmbeddableApiContext>[]>([]);
   const [contextMenuPanels, setContextMenuPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean>(false);
+  // True until the compatibility checks for the context menu actions and quick actions have
+  // finished. Exposed as `data-actions-loading` so tests can wait for the context menu to be
+  // complete. It only covers the context menu: quick actions added or removed afterwards by the
+  // frequently changing action subscriptions (e.g. Edit) are not reflected.
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const dragHandleRef = useRef<HTMLButtonElement | null>(null);
 
   const { euiTheme } = useEuiTheme();
@@ -214,6 +219,7 @@ export const PresentationPanelHoverActions = ({
   useEffect(() => {
     let canceled = false;
     const apiContext = { embeddable: api };
+    setIsLoading(true);
 
     (async () => {
       let compatibleActions = (await (async () => {
@@ -256,6 +262,7 @@ export const PresentationPanelHoverActions = ({
       setQuickActions(
         compatibleActions.filter(({ id }) => (quickActionIds as readonly string[]).includes(id))
       );
+      setIsLoading(false);
     })();
 
     return () => {
@@ -387,6 +394,7 @@ export const PresentationPanelHoverActions = ({
         <div
           className={classNames('embPanel__hoverActions', className)}
           data-test-subj={`hover-actions-${api.uuid}`}
+          data-actions-loading={isLoading}
         >
           {dragHandle}
           {/* Wrapping all "right actions" in a span so that flex space-between works as expected */}

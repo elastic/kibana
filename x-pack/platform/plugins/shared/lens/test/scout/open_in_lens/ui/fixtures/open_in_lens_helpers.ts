@@ -130,16 +130,16 @@ export async function convertToLensByTitle(
   { dashboard }: Pick<PageObjects, 'dashboard'>,
   panelTitle: string
 ): Promise<void> {
-  await dashboard.clickPanelAction(DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION, panelTitle);
+  await dashboard.clickContextMenuAction(DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION, panelTitle);
 }
 
 /**
- * Returns true when the "Open in Lens" panel action is available for the panel
- * with the given title.
+ * Asserts that the "Open in Lens" panel action is NOT available for the panel with the given
+ * title.
  */
-export async function canConvertToLensByTitle(
+export async function expectNoConvertToLensByTitle(
   { dashboard }: Pick<PageObjects, 'dashboard'>,
   panelTitle: string
-): Promise<boolean> {
-  return dashboard.panelHasAction(DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION, panelTitle);
+): Promise<void> {
+  await dashboard.expectHasNoContextMenuAction(DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION, panelTitle);
 }

@@ -493,7 +493,7 @@ export async function openPanelInlineEditorAndWaitVisible(
   { dashboard, lens }: DashboardAndLens,
   panelTitle?: string
 ) {
-  await dashboard.clickPanelAction('embeddablePanelAction-editPanel', panelTitle);
+  await dashboard.openEditPanel(panelTitle);
   await expect(lens.workspace.inlineEditor).toBeVisible();
 }
 

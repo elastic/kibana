@@ -22,6 +22,7 @@ import { DiscoverApp } from './discover';
 import { FilterBar } from './filter_bar';
 import { InspectorPage } from './inspector';
 import { MapsPage } from './maps_page';
+import { PanelActions } from './panel_actions';
 import { QueryBar } from './query_bar';
 import { Toasts } from './toasts';
 import { createLazyPageObject } from './utils';
@@ -51,6 +52,7 @@ export {
   UnifiedTabs,
   ListingTable,
   EmbeddableAlertsTablePage,
+  PanelActions,
 };
 
 export interface PageObjectsFixtures {

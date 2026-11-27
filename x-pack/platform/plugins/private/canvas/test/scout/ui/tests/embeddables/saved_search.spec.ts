@@ -59,7 +59,7 @@ test.describe('Canvas saved search embeddable', { tag: ['@local-stateful-classic
       timeout: EXTENDED_TIMEOUT,
     });
 
-    await canvas.editPanel();
+    await canvas.openEditPanel();
     await canvas.clickEditInDiscover();
 
     await expect(page.testSubj.locator('dscPage')).toBeVisible({ timeout: EXTENDED_TIMEOUT });
