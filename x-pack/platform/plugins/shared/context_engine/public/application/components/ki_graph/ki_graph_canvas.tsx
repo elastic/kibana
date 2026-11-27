@@ -25,11 +25,13 @@ import '@xyflow/react/dist/style.css';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { KiGraphLayoutTuningPanel } from './ki_graph_layout_tuning_panel';
 import type { KiGraph, KiGraphNodeData } from './types';
+import { getMemorySpotlightModel } from './get_memory_spotlight_model';
 import { getSpotlightModel } from './get_spotlight_model';
 import { getKiGraphNodeMinimapColor } from './ki_graph_glyph_styles';
 import { KiGraphEdge } from './ki_graph_edge';
 import { KiGraphLegend } from './ki_graph_legend';
 import { KiGraphNode } from './ki_graph_node';
+import type { KiGraphSource } from './ki_graph_source';
 import { KiGraphSpotlight } from './ki_graph_spotlight';
 import type { KiGraphFlowEdge, KiGraphFlowNode, KiGraphFlowNodeData } from './use_ki_graph_layout';
 import {
@@ -76,6 +78,8 @@ interface KiGraphCanvasProps {
   selectedId?: string;
   onSelect: (node: KiGraphNodeData | undefined) => void;
   onViewDocument: (node: KiGraphNodeData) => void;
+  onViewSource: (source: KiGraphSource) => void;
+  isViewerOpen: boolean;
 }
 
 const KiGraphCanvasInner = ({
@@ -84,21 +88,32 @@ const KiGraphCanvasInner = ({
   selectedId,
   onSelect,
   onViewDocument,
+  onViewSource,
+  isViewerOpen,
 }: KiGraphCanvasProps) => {
   const { euiTheme, colorMode } = useEuiTheme();
   const { fitView, setCenter, getNode } = useReactFlow<KiGraphFlowNode, KiGraphFlowEdge>();
   const [hoveredId, setHoveredId] = useState<string | undefined>();
+  const [memorySource, setMemorySource] = useState<KiGraphSource | undefined>();
   const [isSpotlightReady, setIsSpotlightReady] = useState(false);
   const [layoutParams, setLayoutParams] = useState<KiGraphLayoutTuningParams>(
     DEFAULT_KI_GRAPH_LAYOUT_TUNING_PARAMS
   );
   const skipLayoutFitViewRef = useRef(true);
+  const skipGraphFitViewRef = useRef(true);
+  const wasSpotlightOpenRef = useRef(false);
+  const prevSelectedIdRef = useRef<string | undefined>(undefined);
+  const readyTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const {
     nodes: layoutNodes,
     edges,
     labelNodes,
     layoutDurationMs,
-  } = useKiGraphLayout(graph, { selectedId, hoveredId }, layoutParams);
+  } = useKiGraphLayout(
+    graph,
+    { selectedId: memorySource === undefined ? selectedId : undefined, hoveredId },
+    layoutParams
+  );
   const visibleLabelIds = useVisibleLabelIds(labelNodes);
   const selectedNode = useMemo(
     () => (selectedId === undefined ? undefined : graph.nodes.find((n) => n.kiId === selectedId)),
@@ -109,6 +124,19 @@ const KiGraphCanvasInner = ({
     () => (selectedId === undefined ? undefined : getSpotlightModel(graph, selectedId)),
     [graph, selectedId]
   );
+  const memorySpotlightModel = useMemo(
+    () =>
+      memorySource === undefined
+        ? undefined
+        : getMemorySpotlightModel(graph, memorySource.id, memorySource),
+    [graph, memorySource]
+  );
+  const isSpotlightOpen = selectedId !== undefined || memorySource !== undefined;
+
+  const closeSpotlight = useCallback(() => {
+    setMemorySource(undefined);
+    onSelect(undefined);
+  }, [onSelect]);
 
   const nodes = useMemo(
     () =>
@@ -134,55 +162,101 @@ const KiGraphCanvasInner = ({
   }, [layoutParams, fitView]);
 
   useEffect(() => {
-    setIsSpotlightReady(false);
-
-    const selected = selectedId === undefined ? undefined : getNode(selectedId);
-    if (selectedId === undefined || selected === undefined) {
-      const fitTimeout = setTimeout(() => fitView({ padding: FIT_PADDING, duration: 300 }), 100);
-      return () => clearTimeout(fitTimeout);
+    if (skipGraphFitViewRef.current) {
+      skipGraphFitViewRef.current = false;
+      return;
     }
+    const frame = requestAnimationFrame(() => {
+      fitView({ padding: FIT_PADDING, duration: 300 });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [graph, fitView]);
+
+  useEffect(() => {
+    const spotlightWasOpen = wasSpotlightOpenRef.current;
+    const prevSelectedId = prevSelectedIdRef.current;
+
+    if (memorySource !== undefined) {
+      setIsSpotlightReady(true);
+      wasSpotlightOpenRef.current = true;
+      return;
+    }
+
+    if (selectedId === undefined) {
+      clearTimeout(readyTimeoutRef.current);
+      setIsSpotlightReady(false);
+      wasSpotlightOpenRef.current = false;
+      prevSelectedIdRef.current = undefined;
+      return;
+    }
+
+    const selected = getNode(selectedId);
+    if (selected === undefined) {
+      setIsSpotlightReady(false);
+      wasSpotlightOpenRef.current = true;
+      prevSelectedIdRef.current = selectedId;
+      return;
+    }
+
+    const spotlightStaysOpen =
+      spotlightWasOpen && prevSelectedId !== undefined && selectedId === prevSelectedId;
+    const neighborSelected =
+      spotlightWasOpen && prevSelectedId !== undefined && selectedId !== prevSelectedId;
+
+    if (spotlightStaysOpen || neighborSelected) {
+      wasSpotlightOpenRef.current = true;
+      prevSelectedIdRef.current = selectedId;
+      return;
+    }
+
+    setIsSpotlightReady(false);
+    wasSpotlightOpenRef.current = true;
+    prevSelectedIdRef.current = selectedId;
 
     const centerX = selected.position.x + (selected.width ?? 0) / 2;
     const centerY = selected.position.y + (selected.height ?? 0) / 2;
     setCenter(centerX, centerY, { zoom: SPOTLIGHT_ZOOM, duration: CAMERA_DURATION_MS });
-    // The wires are anchored to the cards, so the overlay waits for the camera to settle.
-    const readyTimeout = setTimeout(() => setIsSpotlightReady(true), CAMERA_DURATION_MS);
-    return () => clearTimeout(readyTimeout);
-  }, [fitView, setCenter, getNode, graph, selectedId]);
+    // Not cleared on cleanup: a re-run mid-glide takes the "stays open" branch and must not lose it.
+    readyTimeoutRef.current = setTimeout(() => setIsSpotlightReady(true), CAMERA_DURATION_MS);
+  }, [setCenter, getNode, selectedId, memorySource]);
+
+  useEffect(() => () => clearTimeout(readyTimeoutRef.current), []);
 
   useEffect(() => {
-    if (selectedId === undefined) {
+    if (!isSpotlightOpen) {
       return;
     }
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === keys.ESCAPE) {
-        onSelect(undefined);
+      if (event.key !== keys.ESCAPE || isViewerOpen) {
+        return;
       }
+      closeSpotlight();
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [selectedId, onSelect]);
+  }, [isSpotlightOpen, closeSpotlight, isViewerOpen]);
 
   const reactFlowColorMode = colorMode === COLOR_MODES_STANDARD.dark ? 'dark' : 'light';
 
   const handleNodeClick: NodeMouseHandler<KiGraphFlowNode> = useCallback(
     (_event, node) => {
+      setMemorySource(undefined);
       onSelect(toKiGraphNodeData(node.data));
     },
     [onSelect]
   );
 
   const handlePaneClick = useCallback(() => {
-    onSelect(undefined);
-  }, [onSelect]);
+    closeSpotlight();
+  }, [closeSpotlight]);
 
   const handleNodeMouseEnter: NodeMouseHandler<KiGraphFlowNode> = useCallback(
     (_event, node) => {
-      if (selectedId === undefined) {
+      if (!isSpotlightOpen) {
         setHoveredId(node.id);
       }
     },
-    [selectedId]
+    [isSpotlightOpen]
   );
 
   const handleNodeMouseLeave: NodeMouseHandler<KiGraphFlowNode> = useCallback(() => {
@@ -192,11 +266,11 @@ const KiGraphCanvasInner = ({
   // Only user gestures carry an event, so the programmatic camera glide never exits.
   const handleMove: OnMove = useCallback(
     (event, viewport) => {
-      if (event !== null && selectedId !== undefined && viewport.zoom < SPOTLIGHT_EXIT_ZOOM) {
-        onSelect(undefined);
+      if (event !== null && isSpotlightOpen && viewport.zoom < SPOTLIGHT_EXIT_ZOOM) {
+        closeSpotlight();
       }
     },
-    [selectedId, onSelect]
+    [isSpotlightOpen, closeSpotlight]
   );
 
   const minimapNodeColor: GetMiniMapNodeAttribute<KiGraphFlowNode> = useCallback(
@@ -204,9 +278,17 @@ const KiGraphCanvasInner = ({
     [euiTheme]
   );
 
-  const handleCloseSpotlight = useCallback(() => {
-    onSelect(undefined);
-  }, [onSelect]);
+  const handleSelectNeighbor = useCallback(
+    (node: KiGraphNodeData) => {
+      setMemorySource(undefined);
+      onSelect(node);
+    },
+    [onSelect]
+  );
+
+  const handleSelectSource = useCallback((source: KiGraphSource) => {
+    setMemorySource(source);
+  }, []);
 
   const backgroundDotColor = transparentize(euiTheme.colors.darkShade, 0.35);
 
@@ -286,14 +368,19 @@ const KiGraphCanvasInner = ({
           }}
         />
       </ReactFlow>
-      {spotlightModel !== undefined && isSpotlightReady ? (
+      {isSpotlightReady &&
+      (memorySpotlightModel !== undefined ||
+        (memorySource === undefined && spotlightModel !== undefined)) ? (
         <KiGraphSpotlight
-          model={spotlightModel}
-          onSelectNeighbor={onSelect}
+          model={memorySource === undefined ? spotlightModel : undefined}
+          memory={memorySpotlightModel}
+          onSelectNeighbor={handleSelectNeighbor}
           onViewDocument={onViewDocument}
-          onClose={handleCloseSpotlight}
-          sources={sources}
-          isLoadingSources={isLoadingSources}
+          onViewSource={onViewSource}
+          onSelectSource={handleSelectSource}
+          onClose={closeSpotlight}
+          sources={memorySource === undefined ? sources : undefined}
+          isLoadingSources={memorySource === undefined ? isLoadingSources : false}
         />
       ) : null}
     </div>

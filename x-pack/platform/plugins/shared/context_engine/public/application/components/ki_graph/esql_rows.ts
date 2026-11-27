@@ -33,6 +33,26 @@ export const getString = (value: EsqlCellValue | undefined): string | undefined 
   return typeof scalar === 'string' && scalar.length > 0 ? scalar : undefined;
 };
 
+/** Collects scalar strings from a multi-valued ES|QL column. */
+export const getStrings = (value: EsqlCellValue | undefined): readonly string[] => {
+  if (value === undefined || value === null) {
+    return [];
+  }
+  if (Array.isArray(value)) {
+    const strings: string[] = [];
+    for (const item of value) {
+      for (const part of getStrings(item)) {
+        strings.push(part);
+      }
+    }
+    return strings;
+  }
+  if (typeof value === 'string' && value.length > 0) {
+    return [value];
+  }
+  return [];
+};
+
 export const getNumber = (value: EsqlCellValue | undefined): number | undefined => {
   const scalar = firstValue(value);
   if (typeof scalar === 'number') {

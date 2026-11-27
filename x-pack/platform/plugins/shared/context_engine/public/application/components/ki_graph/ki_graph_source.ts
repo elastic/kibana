@@ -7,6 +7,7 @@
 
 export interface KiGraphSource {
   id: string;
+  index: string;
   title: string;
   agentName?: string;
   conversationId?: string;

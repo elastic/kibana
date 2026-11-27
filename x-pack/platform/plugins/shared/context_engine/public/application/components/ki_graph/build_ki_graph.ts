@@ -16,7 +16,10 @@ import {
 } from '../../../../common/dreaming';
 import type { KiGraph, KiGraphEdge, KiGraphNodeData, KiGraphNodeKind } from './types';
 import type { EsqlCellRecord } from './esql_rows';
-import { getAttribute, getNumber, getString } from './esql_rows';
+import { getAttribute, getNumber, getString, getStrings } from './esql_rows';
+import { getMemoryIdsFromKiUris } from './ki_graph_memory_uri';
+
+const REFERENCE_URI_FIELD = 'references.uri';
 
 const nodeKindForType = (type: string): { kind: KiGraphNodeKind; subtype: string } | undefined => {
   if (type.startsWith(FACT_TYPE_PREFIX)) {
@@ -71,6 +74,7 @@ export const buildKiGraph = (records: readonly EsqlCellRecord[], limit: number):
     const title = getString(record.title) ?? kiId;
     const occurrences = getNumber(getAttribute(record.attributes, OCCURRENCES_ATTRIBUTE));
     const lastSeenAt = getString(getAttribute(record.attributes, LAST_SEEN_AT_ATTRIBUTE));
+    const derivedFromIds = getMemoryIdsFromKiUris(getStrings(record[REFERENCE_URI_FIELD]));
     nodesById.set(kiId, {
       kiId,
       index,
@@ -79,6 +83,7 @@ export const buildKiGraph = (records: readonly EsqlCellRecord[], limit: number):
       title,
       ...(occurrences !== undefined ? { occurrences } : {}),
       ...(lastSeenAt !== undefined ? { lastSeenAt } : {}),
+      ...(derivedFromIds.length > 0 ? { derivedFromIds } : {}),
     });
   }
 

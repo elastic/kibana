@@ -26,7 +26,10 @@ export interface SpotlightModel {
   outgoingCount: number;
 }
 
-const compareNeighbors = (left: KiGraphNodeData, right: KiGraphNodeData): number => {
+export const compareSpotlightNeighbors = (
+  left: KiGraphNodeData,
+  right: KiGraphNodeData
+): number => {
   const leftOccurrences = left.occurrences;
   const rightOccurrences = right.occurrences;
 
@@ -73,7 +76,7 @@ const bucketsToGroups = (buckets: RelationBuckets): SpotlightGroup[] => {
 
   for (const [relation, byNeighbor] of buckets) {
     const neighbors = [...byNeighbor.values()].sort((left, right) =>
-      compareNeighbors(left.node, right.node)
+      compareSpotlightNeighbors(left.node, right.node)
     );
     groups.push({
       relation,

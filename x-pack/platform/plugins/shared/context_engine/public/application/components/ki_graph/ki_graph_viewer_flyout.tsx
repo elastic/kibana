@@ -9,7 +9,7 @@ import { EuiFlyout, EuiFlyoutBody, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { KiViewer } from '../ki/view/ki_viewer';
-import type { KiGraphNodeData } from './types';
+import type { KiGraphViewerTarget } from './types';
 
 const viewerFlyoutTitle = i18n.translate('xpack.contextEngine.kiGraph.viewerFlyoutTitle', {
   defaultMessage: 'Knowledge document',
@@ -17,11 +17,11 @@ const viewerFlyoutTitle = i18n.translate('xpack.contextEngine.kiGraph.viewerFlyo
 
 interface KiGraphViewerFlyoutProps {
   aiIndexId: string;
-  node: KiGraphNodeData;
+  target: KiGraphViewerTarget;
   onClose: () => void;
 }
 
-export const KiGraphViewerFlyout = ({ aiIndexId, node, onClose }: KiGraphViewerFlyoutProps) => {
+export const KiGraphViewerFlyout = ({ aiIndexId, target, onClose }: KiGraphViewerFlyoutProps) => {
   const titleId = useGeneratedHtmlId({ prefix: 'contextKiGraphViewerFlyoutTitle' });
 
   return (
@@ -37,9 +37,9 @@ export const KiGraphViewerFlyout = ({ aiIndexId, node, onClose }: KiGraphViewerF
           {viewerFlyoutTitle}
         </span>
         <KiViewer
-          key={`${node.index}:${node.kiId}`}
+          key={`${target.index}:${target.kiId}`}
           aiIndexId={aiIndexId}
-          selectedKi={{ kiId: node.kiId, index: node.index }}
+          selectedKi={{ kiId: target.kiId, index: target.index }}
         />
       </EuiFlyoutBody>
     </EuiFlyout>

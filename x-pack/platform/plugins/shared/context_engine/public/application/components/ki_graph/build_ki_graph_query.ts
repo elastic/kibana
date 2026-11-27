@@ -19,6 +19,6 @@ export const buildKiGraphQuery = (dest: string): string =>
     `FROM ${JSON.stringify(dest)} METADATA _id, _index`,
     'EVAL id = COALESCE(id, _id)',
     `WHERE type LIKE "${FACT_TYPE_PREFIX}*" OR type LIKE "${ENTITY_TYPE_PREFIX}*" OR type == "${RELATIONSHIP_KI_TYPE}"`,
-    'KEEP id, _index, type, title, attributes',
+    'KEEP id, _index, type, title, attributes, references.uri',
     `LIMIT ${KI_GRAPH_MAX_ROWS}`,
   ].join('\n| ');

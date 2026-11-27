@@ -7,6 +7,11 @@
 
 export type KiGraphNodeKind = 'fact' | 'entity';
 
+export interface KiGraphViewerTarget {
+  kiId: string;
+  index: string;
+}
+
 export interface KiGraphNodeData {
   kiId: string;
   index: string;
@@ -16,6 +21,8 @@ export interface KiGraphNodeData {
   title: string;
   occurrences?: number;
   lastSeenAt?: string;
+  /** Memory KI ids from `ki://` reference URIs on this document. */
+  derivedFromIds?: readonly string[];
 }
 
 export interface KiGraphEdgeData {

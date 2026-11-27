@@ -16,9 +16,10 @@ import { getAiIndexSettingsPath } from '../../paths';
 import { AiIndexDetailPanelEmptyState } from '../ai_index_detail/ai_index_detail_panel_empty_prompt';
 import { KiGraphCanvas } from './ki_graph_canvas';
 import { KI_GRAPH_MAX_ROWS } from './build_ki_graph_query';
+import type { KiGraphSource } from './ki_graph_source';
 import { useKiGraphStyles } from './ki_graph_styles';
 import { KiGraphViewerFlyout } from './ki_graph_viewer_flyout';
-import type { KiGraphNodeData } from './types';
+import type { KiGraphNodeData, KiGraphViewerTarget } from './types';
 
 const errorTitle = i18n.translate('xpack.contextEngine.kiGraph.errorTitle', {
   defaultMessage: 'Unable to load the graph',
@@ -56,7 +57,7 @@ export const KiGraphPanel = ({ aiIndex }: KiGraphPanelProps) => {
   const { navigateToContextEngine } = useNavigation();
   const styles = useKiGraphStyles();
   const [selectedNode, setSelectedNode] = useState<KiGraphNodeData | undefined>();
-  const [viewerNode, setViewerNode] = useState<KiGraphNodeData | undefined>();
+  const [viewerNode, setViewerNode] = useState<KiGraphViewerTarget | undefined>();
 
   const openSettings = useCallback(() => {
     navigateToContextEngine(getAiIndexSettingsPath(aiIndex.id));
@@ -67,7 +68,11 @@ export const KiGraphPanel = ({ aiIndex }: KiGraphPanelProps) => {
   }, []);
 
   const handleViewDocument = useCallback((node: KiGraphNodeData) => {
-    setViewerNode(node);
+    setViewerNode({ kiId: node.kiId, index: node.index });
+  }, []);
+
+  const handleViewSource = useCallback((source: KiGraphSource) => {
+    setViewerNode({ kiId: source.id, index: source.index });
   }, []);
 
   const handleCloseViewer = useCallback(() => {
@@ -153,11 +158,17 @@ export const KiGraphPanel = ({ aiIndex }: KiGraphPanelProps) => {
             selectedId={selectedNode?.kiId}
             onSelect={handleSelect}
             onViewDocument={handleViewDocument}
+            onViewSource={handleViewSource}
+            isViewerOpen={viewerNode !== undefined}
           />
         </div>
       </div>
       {viewerNode ? (
-        <KiGraphViewerFlyout aiIndexId={aiIndex.id} node={viewerNode} onClose={handleCloseViewer} />
+        <KiGraphViewerFlyout
+          aiIndexId={aiIndex.id}
+          target={viewerNode}
+          onClose={handleCloseViewer}
+        />
       ) : null}
     </EuiPanel>
   );

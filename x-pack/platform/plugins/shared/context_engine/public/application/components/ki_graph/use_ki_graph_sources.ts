@@ -17,10 +17,9 @@ import { contextEngineQueryKeys } from '../../hooks/query_keys';
 import { useKibana } from '../../hooks/use_kibana';
 import { readKiGovernance } from '../ki/view/metadata/view_ki_document_helpers';
 import { getWriterAgentId } from '../ki/view/metadata/view_ki_writer_helpers';
+import { KI_GRAPH_MEMORY_URI_PREFIX, getMemoryIdsFromKiUris } from './ki_graph_memory_uri';
 import type { KiGraphSource } from './ki_graph_source';
 import type { KiGraphNodeData } from './types';
-
-const KI_URI_PREFIX = 'ki://';
 const CONVERSATION_URI_PREFIX = 'conversation://';
 const MEMORY_SESSION_ID_ATTRIBUTE = 'memory.session_id';
 const MAX_GRAPH_SOURCES = 5;
@@ -33,25 +32,21 @@ export const getMemoryIdsFromReferences = (
   if (references === undefined) {
     return [];
   }
-  const ids: string[] = [];
+  const uris: string[] = [];
   for (const ref of references) {
     if (ref.relation !== 'derived_from') {
       continue;
     }
     const uri = ref.uri;
-    if (uri === undefined || !uri.startsWith(KI_URI_PREFIX)) {
+    if (uri === undefined || !uri.startsWith(KI_GRAPH_MEMORY_URI_PREFIX)) {
       continue;
     }
-    const memoryId = uri.slice(KI_URI_PREFIX.length);
-    if (memoryId.length === 0) {
-      continue;
-    }
-    ids.push(memoryId);
-    if (ids.length >= MAX_GRAPH_SOURCES) {
+    uris.push(uri);
+    if (uris.length >= MAX_GRAPH_SOURCES) {
       break;
     }
   }
-  return ids;
+  return getMemoryIdsFromKiUris(uris);
 };
 
 const getConversationId = (document: KiDocument): string | undefined => {
@@ -84,7 +79,7 @@ const getRecordedAt = (document: KiDocument): string | undefined => {
   return undefined;
 };
 
-const memoryKiToGraphSource = ({ id, document }: GetKiResponse): KiGraphSource => {
+const memoryKiToGraphSource = (index: string, { id, document }: GetKiResponse): KiGraphSource => {
   const governance = readKiGovernance(document);
   const agentId =
     governance.createdBy !== undefined
@@ -96,6 +91,7 @@ const memoryKiToGraphSource = ({ id, document }: GetKiResponse): KiGraphSource =
 
   return {
     id,
+    index,
     title,
     ...(agentId !== undefined ? { agentName: agentId } : {}),
     ...(conversationId !== undefined ? { conversationId } : {}),
@@ -152,7 +148,7 @@ export const useKiGraphSources = (
         if (result.status !== 'fulfilled') {
           continue;
         }
-        sources.push(memoryKiToGraphSource(result.value));
+        sources.push(memoryKiToGraphSource(node.index, result.value));
       }
       return sources;
     },

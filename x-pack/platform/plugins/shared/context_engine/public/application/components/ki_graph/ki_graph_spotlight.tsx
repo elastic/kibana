@@ -28,7 +28,9 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { formatKiTypeLabel } from '../../utils/ki_display';
 import { KiFormattedDate } from '../ki/shared/ki_formatted_date';
 import { kiLabelCapitalizeCss } from '../ki/shared/ki_type_display';
+import type { MemorySpotlightModel } from './get_memory_spotlight_model';
 import type { SpotlightGroup, SpotlightModel } from './get_spotlight_model';
+import { KiGraphMemoryHero } from './ki_graph_memory_hero';
 import { getKiGraphNodeIcon } from './ki_graph_node_icon';
 import type { KiGraphSource } from './ki_graph_source';
 import type { KiGraphNodeData, KiGraphNodeKind } from './types';
@@ -96,6 +98,13 @@ const derivedFromLabel = i18n.translate('xpack.contextEngine.kiGraph.spotlight.d
   defaultMessage: 'derived from',
 });
 
+const knowledgeFromMemoryLabel = i18n.translate(
+  'xpack.contextEngine.kiGraph.spotlight.knowledgeFromMemory',
+  {
+    defaultMessage: 'Knowledge from this memory',
+  }
+);
+
 const occurrencesBadgeLabel = (count: number): string =>
   i18n.translate('xpack.contextEngine.kiGraph.spotlight.occurrencesBadge', {
     defaultMessage: '{count, plural, one {# occurrence} other {# occurrences}}',
@@ -147,9 +156,12 @@ const shortConversationId = (conversationId: string): string => {
 };
 
 export interface KiGraphSpotlightProps {
-  model: SpotlightModel;
+  model?: SpotlightModel;
+  memory?: MemorySpotlightModel;
   onSelectNeighbor: (node: KiGraphNodeData) => void;
   onViewDocument: (node: KiGraphNodeData) => void;
+  onViewSource: (source: KiGraphSource) => void;
+  onSelectSource: (source: KiGraphSource) => void;
   onClose: () => void;
   sources?: readonly KiGraphSource[];
   isLoadingSources?: boolean;
@@ -194,6 +206,7 @@ const SpotlightColumnHeader = ({ label }: SpotlightColumnHeaderProps) => (
 interface SpotlightSourceCardProps {
   source: KiGraphSource;
   registerRef: (key: string) => (element: HTMLDivElement | null) => void;
+  onSelectSource: (source: KiGraphSource) => void;
 }
 
 const sourceMemoryIconType = (hasAgent: boolean): 'compute' | 'comment' =>
@@ -220,8 +233,10 @@ const SpotlightSourceIconTile = ({ hasAgent }: { hasAgent: boolean }) => {
   );
 };
 
-const SpotlightSourceCard = ({ source, registerRef }: SpotlightSourceCardProps) => {
+const SpotlightSourceCard = ({ source, registerRef, onSelectSource }: SpotlightSourceCardProps) => {
   const { euiTheme } = useEuiTheme();
+  const smallFontSize = useEuiFontSize('s').fontSize;
+  const extraSmallFontSize = useEuiFontSize('xs').fontSize;
 
   const SPOTLIGHT_SOURCE_TEXT_MAX = 220;
 
@@ -231,9 +246,11 @@ const SpotlightSourceCard = ({ source, registerRef }: SpotlightSourceCardProps) 
     minWidth: 0,
   });
 
-  const titleCss = css(euiTextTruncate(`${SPOTLIGHT_SOURCE_TEXT_MAX}px`), {
+  const titleLinkCss = css(euiTextTruncate(`${SPOTLIGHT_SOURCE_TEXT_MAX}px`), {
     display: 'block',
     maxWidth: SPOTLIGHT_SOURCE_TEXT_MAX,
+    fontWeight: euiTheme.font.weight.semiBold,
+    fontSize: smallFontSize,
   });
 
   const agentCss = css(euiTextTruncate(`${SPOTLIGHT_SOURCE_TEXT_MAX}px`), {
@@ -244,7 +261,7 @@ const SpotlightSourceCard = ({ source, registerRef }: SpotlightSourceCardProps) 
   const conversationCss = css(euiTextTruncate(`${SPOTLIGHT_SOURCE_TEXT_MAX}px`), {
     display: 'block',
     fontFamily: euiTheme.font.familyCode,
-    fontSize: euiTheme.font.scale.xs,
+    fontSize: extraSmallFontSize,
     color: euiTheme.colors.textSubdued,
     maxWidth: SPOTLIGHT_SOURCE_TEXT_MAX,
   });
@@ -274,11 +291,15 @@ const SpotlightSourceCard = ({ source, registerRef }: SpotlightSourceCardProps) 
         <div css={rowCss}>
           <SpotlightSourceIconTile hasAgent={source.agentName !== undefined} />
           <div css={bodyCss}>
-            <EuiText size="s">
-              <strong css={titleCss} title={source.title}>
-                {source.title}
-              </strong>
-            </EuiText>
+            <EuiLink
+              css={titleLinkCss}
+              color="text"
+              onClick={() => onSelectSource(source)}
+              title={source.title}
+              data-test-subj={`contextKiGraphSpotlightSourceLink-${source.id}`}
+            >
+              {source.title}
+            </EuiLink>
             {source.agentName !== undefined ? (
               <EuiText size="xs" color="subdued">
                 <span css={agentCss} title={source.agentName}>
@@ -449,14 +470,15 @@ const spotlightFadeIn = keyframes`
   to { opacity: 1; }
 `;
 
-export const KiGraphSpotlight = ({
+const KiGraphNodeSpotlight = ({
   model,
   onSelectNeighbor,
   onViewDocument,
+  onSelectSource,
   onClose,
   sources,
   isLoadingSources,
-}: KiGraphSpotlightProps) => {
+}: KiGraphSpotlightProps & { model: SpotlightModel }) => {
   const { euiTheme } = useEuiTheme();
   const wirePillFontSize = useEuiFontSize('xs').fontSize;
   const containerRef = useRef<HTMLDivElement>(null);
@@ -486,7 +508,7 @@ export const KiGraphSpotlight = ({
 
   useEffect(() => {
     setLayoutRevision((value) => value + 1);
-  }, [sources, isLoadingSources, model.incoming, model.outgoing]);
+  }, [sources, isLoadingSources, model.node.kiId, model.incoming, model.outgoing]);
 
   const showSourcesSection =
     isLoadingSources === true || (sources !== undefined && sources.length > 0);
@@ -714,6 +736,7 @@ export const KiGraphSpotlight = ({
                     key={source.id}
                     source={source}
                     registerRef={registerGroup}
+                    onSelectSource={onSelectSource}
                   />
                 ))
               )}
@@ -725,7 +748,7 @@ export const KiGraphSpotlight = ({
               <SpotlightColumnHeader label={mentionedByLabel} />
               {model.incoming.map((group) => (
                 <SpotlightGroupCard
-                  key={group.relation}
+                  key={`${model.node.kiId}-${group.relation}`}
                   group={group}
                   side="incoming"
                   registerRef={registerGroup}
@@ -816,7 +839,7 @@ export const KiGraphSpotlight = ({
               <SpotlightColumnHeader label={connectedToLabel} />
               {model.outgoing.map((group) => (
                 <SpotlightGroupCard
-                  key={group.relation}
+                  key={`${model.node.kiId}-${group.relation}`}
                   group={group}
                   side="outgoing"
                   registerRef={registerGroup}
@@ -836,4 +859,237 @@ export const KiGraphSpotlight = ({
       ))}
     </div>
   );
+};
+
+const relationWireLabel = (relation: string): string =>
+  relation === 'derived_from' ? derivedFromLabel : relation;
+
+const KiGraphMemorySpotlight = ({
+  memory,
+  onSelectNeighbor,
+  onViewSource,
+  onClose,
+}: KiGraphSpotlightProps & { memory: MemorySpotlightModel }) => {
+  const { euiTheme } = useEuiTheme();
+  const wirePillFontSize = useEuiFontSize('xs').fontSize;
+  const containerRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
+  const groupElementsRef = useRef<Map<string, HTMLDivElement>>(new Map());
+  const [layoutRevision, setLayoutRevision] = useState(0);
+
+  const registerGroup = useCallback(
+    (key: string) => (element: HTMLDivElement | null) => {
+      if (element === null) {
+        groupElementsRef.current.delete(key);
+        return;
+      }
+      groupElementsRef.current.set(key, element);
+    },
+    []
+  );
+
+  const getGroupElement = useCallback(
+    (key: string): HTMLElement | undefined => groupElementsRef.current.get(key),
+    []
+  );
+
+  const onExpandedChange = useCallback(() => {
+    setLayoutRevision((value) => value + 1);
+  }, []);
+
+  useEffect(() => {
+    setLayoutRevision((value) => value + 1);
+  }, [memory.source.id, memory.group]);
+
+  const groupKey = spotlightGroupKey('outgoing', memory.group.relation);
+
+  const wireSpecs = useMemo((): readonly SpotlightWireSpec[] => {
+    if (memory.group.count === 0) {
+      return [];
+    }
+    return [
+      {
+        id: `memory-out-${memory.source.id}`,
+        side: 'outgoing',
+        relation: relationWireLabel(memory.group.relation),
+        groupKey,
+      },
+    ];
+  }, [memory.group.count, memory.group.relation, memory.source.id, groupKey]);
+
+  const wirePaths = useSpotlightWires(
+    containerRef,
+    heroRef,
+    wireSpecs,
+    getGroupElement,
+    layoutRevision
+  );
+
+  const wireStroke = euiTheme.colors.lightShade;
+
+  const rootCss = css({
+    position: 'absolute',
+    inset: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: transparentize(euiTheme.colors.backgroundBaseSubdued, SPOTLIGHT_BACKDROP_ALPHA),
+    animation: `${spotlightFadeIn} ${euiTheme.animation.fast} ease-out`,
+    pointerEvents: 'auto',
+    boxSizing: 'border-box',
+    overflow: 'hidden',
+  });
+
+  const wireLayerCss = css({
+    position: 'absolute',
+    inset: 0,
+    width: '100%',
+    height: '100%',
+    pointerEvents: 'none',
+  });
+
+  const gridCss = css({
+    position: 'relative',
+    display: 'grid',
+    gridTemplateColumns: `minmax(220px, 1fr) ${SPOTLIGHT_HERO_WIDTH}px minmax(220px, 1fr)`,
+    gap: SPOTLIGHT_COLUMN_GAP,
+    alignItems: 'center',
+    width: '100%',
+    maxHeight: '100%',
+    padding: euiTheme.size.l,
+    boxSizing: 'border-box',
+    pointerEvents: 'none',
+  });
+
+  const sectionCss = css({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: euiTheme.size.m,
+    maxHeight: '100%',
+    overflowY: 'auto',
+    pointerEvents: 'auto',
+  });
+
+  const columnCss = css({
+    maxHeight: '100%',
+    minWidth: 0,
+    overflowY: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: euiTheme.size.l,
+    pointerEvents: 'auto',
+  });
+
+  const wirePillCss = (left: number, top: number) =>
+    css({
+      position: 'absolute',
+      left,
+      top,
+      transform: 'translate(-50%, -50%)',
+      pointerEvents: 'none',
+      zIndex: euiTheme.levels.content,
+      maxWidth: PILL_MAX_WIDTH,
+      padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
+      fontSize: wirePillFontSize,
+      fontWeight: euiTheme.font.weight.semiBold,
+      lineHeight: euiTheme.font.lineHeightMultiplier,
+      color: euiTheme.colors.textPrimary,
+      background: euiTheme.colors.backgroundLightPrimary,
+      borderRadius: euiTheme.border.radius.medium,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    });
+
+  const handleBackdropClick = (event: React.MouseEvent<HTMLDivElement>): void => {
+    if (event.target === event.currentTarget) {
+      onClose();
+    }
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      css={rootCss}
+      data-test-subj="contextKiGraphSpotlightMemory"
+      onClick={handleBackdropClick}
+      role="presentation"
+    >
+      <svg css={wireLayerCss} aria-hidden data-test-subj="contextKiGraphSpotlightWires">
+        <defs>
+          <marker
+            id={SPOTLIGHT_WIRE_MARKER_ID}
+            markerWidth="8"
+            markerHeight="8"
+            refX="7"
+            refY="4"
+            orient="auto"
+            markerUnits="strokeWidth"
+          >
+            <path
+              d="M 0 0 L 8 4 L 0 8"
+              fill="none"
+              stroke={wireStroke}
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </marker>
+        </defs>
+        {wirePaths.map((wire) => (
+          <path
+            key={wire.id}
+            d={wire.path}
+            fill="none"
+            stroke={wireStroke}
+            strokeWidth={1.5}
+            markerEnd={`url(#${SPOTLIGHT_WIRE_MARKER_ID})`}
+          />
+        ))}
+      </svg>
+
+      <div css={gridCss}>
+        <div css={columnCss} data-test-subj="contextKiGraphSpotlightIncoming" />
+
+        <KiGraphMemoryHero
+          source={memory.source}
+          heroRef={heroRef}
+          onClose={onClose}
+          onViewSource={onViewSource}
+        />
+
+        <div css={columnCss} data-test-subj="contextKiGraphSpotlightOutgoing">
+          {memory.group.count > 0 ? (
+            <div css={sectionCss}>
+              <SpotlightColumnHeader label={knowledgeFromMemoryLabel} />
+              <SpotlightGroupCard
+                key={`memory-${memory.source.id}-${memory.group.relation}`}
+                group={memory.group}
+                side="outgoing"
+                registerRef={registerGroup}
+                onSelectNeighbor={onSelectNeighbor}
+                onExpandedChange={onExpandedChange}
+              />
+            </div>
+          ) : null}
+        </div>
+      </div>
+
+      {wirePaths.map((wire) => (
+        <span key={`${wire.id}-pill`} css={wirePillCss(wire.pillX, wire.pillY)}>
+          {wire.relation}
+        </span>
+      ))}
+    </div>
+  );
+};
+
+export const KiGraphSpotlight = (props: KiGraphSpotlightProps) => {
+  if (props.memory !== undefined) {
+    return <KiGraphMemorySpotlight {...props} memory={props.memory} />;
+  }
+  if (props.model === undefined) {
+    return null;
+  }
+  return <KiGraphNodeSpotlight {...props} model={props.model} />;
 };
