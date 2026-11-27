@@ -153,17 +153,15 @@ describe('Box', () => {
         arguments: {
           query: 'Q3 budget',
           limit: 20,
-          offset: undefined,
-          folder_id: undefined,
+          ancestor_folder_id: undefined,
         },
       });
     });
 
-    it('passes optional offset and folderId', async () => {
+    it('passes an ancestor folder, which is the only narrowing the tool takes', async () => {
       await Box.actions.searchFilesKeyword.handler(mockContext, {
         query: 'report',
         limit: 10,
-        offset: 20,
         folderId: '987654321',
       });
 
@@ -172,8 +170,7 @@ describe('Box', () => {
         arguments: {
           query: 'report',
           limit: 10,
-          offset: 20,
-          folder_id: '987654321',
+          ancestor_folder_id: '987654321',
         },
       });
     });
@@ -190,7 +187,7 @@ describe('Box', () => {
 
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'search_folders_by_name',
-        arguments: { query: 'Projects', limit: 20 },
+        arguments: { folder_name: 'Projects', limit: 20 },
       });
     });
 
@@ -202,7 +199,7 @@ describe('Box', () => {
 
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'search_folders_by_name',
-        arguments: { query: 'Finance', limit: 5 },
+        arguments: { folder_name: 'Finance', limit: 5 },
       });
     });
   });
@@ -290,41 +287,16 @@ describe('Box', () => {
     });
   });
 
-  describe('listRecentItems action', () => {
-    it('is exposed as a tool', () => {
-      expect(Box.actions.listRecentItems.isTool).toBe(true);
-    });
-
-    it('calls list_recent_items with default limit', async () => {
-      const input = parse('listRecentItems', {});
-      await Box.actions.listRecentItems.handler(mockContext, input);
-
-      expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'list_recent_items',
-        arguments: { limit: 100 },
-      });
-    });
-
-    it('passes custom limit', async () => {
-      await Box.actions.listRecentItems.handler(mockContext, { limit: 10 });
-
-      expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'list_recent_items',
-        arguments: { limit: 10 },
-      });
-    });
-  });
-
   describe('getComments action', () => {
     it('is exposed as a tool', () => {
       expect(Box.actions.getComments.isTool).toBe(true);
     });
 
-    it('calls get_file_comments with file ID', async () => {
+    it('calls list_file_comments with file ID', async () => {
       await Box.actions.getComments.handler(mockContext, { fileId: '123456789' });
 
       expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'get_file_comments',
+        name: 'list_file_comments',
         arguments: { file_id: '123456789' },
       });
     });
@@ -335,7 +307,7 @@ describe('Box', () => {
       expect(Box.actions.searchByMetadata.isTool).toBe(true);
     });
 
-    it('calls search_by_metadata_query with required fields and defaults', async () => {
+    it('calls search_files_metadata with the template in `from` and defaults', async () => {
       const input = parse('searchByMetadata', {
         query: 'amount >= 100',
         templateKey: 'invoiceTemplate',
@@ -343,11 +315,10 @@ describe('Box', () => {
       await Box.actions.searchByMetadata.handler(mockContext, input);
 
       expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'search_by_metadata_query',
+        name: 'search_files_metadata',
         arguments: {
+          from: 'enterprise.invoiceTemplate',
           query: 'amount >= 100',
-          template_key: 'invoiceTemplate',
-          scope: 'enterprise',
           ancestor_folder_id: undefined,
           limit: 20,
         },
@@ -364,11 +335,10 @@ describe('Box', () => {
       });
 
       expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'search_by_metadata_query',
+        name: 'search_files_metadata',
         arguments: {
+          from: 'global.contractTemplate',
           query: 'status = "active"',
-          template_key: 'contractTemplate',
-          scope: 'global',
           ancestor_folder_id: '987654',
           limit: 50,
         },
@@ -453,7 +423,7 @@ describe('Box', () => {
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'ai_extract_freeform',
         arguments: {
-          file_id: '999888777',
+          file_ids: ['999888777'],
           prompt: 'Extract the vendor name, invoice date, and total amount.',
         },
       });
@@ -475,7 +445,7 @@ describe('Box', () => {
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'ai_extract_structured_from_metadata_template',
         arguments: {
-          file_id: '123',
+          file_ids: ['123'],
           template_key: 'invoiceTemplate',
           scope: 'enterprise',
         },
@@ -492,7 +462,7 @@ describe('Box', () => {
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'ai_extract_structured_from_metadata_template',
         arguments: {
-          file_id: '456',
+          file_ids: ['456'],
           template_key: 'globalTemplate',
           scope: 'global',
         },
@@ -611,7 +581,6 @@ describe('Box', () => {
       expect(typeof Box.skill).toBe('string');
       expect(Box.skill).toContain('searchFilesKeyword');
       expect(Box.skill).toContain('aiQaSingleFile');
-      expect(Box.skill).toContain('listRecentItems');
       expect(Box.skill).toContain('searchByMetadata');
     });
   });
