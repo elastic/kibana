@@ -95,6 +95,7 @@ dependsOn:
   - '@kbn/cps-utils'
   - '@kbn/core-saved-objects-common'
   - '@kbn/workflows-extensions'
+  - '@kbn/alerting-v2-schemas'
 tags:
   - plugin
   - prod
