@@ -66,8 +66,8 @@ interface MobileDocument {
   exception?: boolean;
   /** The resource `deployment.environment.name`; none unless set. */
   environment?: string;
-  /** An `elastic.app.start` event, with its type unless left out. */
-  appStart?: { type?: string; durationMs: number };
+  /** An `elastic.app.start` event, with its type and duration unless left out. */
+  appStart?: { type?: string; durationMs?: number };
   /** A span in the traces index; a log event otherwise. */
   isSpan?: boolean;
   /** `TIMESTAMP` unless set. */
@@ -87,21 +87,44 @@ export const BUSY_WARM_START_ENVIRONMENT = 'production';
  * The app starts of `MOBILE_APPS.busyAndroid`, in sessions it already has: cold starts that
  * average 2 s, warm starts that average 400 ms (in `BUSY_WARM_START_ENVIRONMENT`), a cold start
  * from a background launch above the 60 s guard, and a `hot` one, which neither average counts.
- * Not whole numbers, so the duration is mapped as a float, as the SDKs send it.
+ * Whole numbers, so the averages are exact whether the shared logs stream maps the duration as a
+ * `long` or a float.
  */
 const BUSY_APP_STARTS: Array<{ type: string; durationMs: number; environment?: string }> = [
-  { type: 'cold', durationMs: 1000.5 },
+  { type: 'cold', durationMs: 1000 },
   { type: 'cold', durationMs: 2000 },
-  { type: 'cold', durationMs: 2999.5 },
-  { type: 'warm', durationMs: 300.5, environment: BUSY_WARM_START_ENVIRONMENT },
-  { type: 'warm', durationMs: 499.5, environment: BUSY_WARM_START_ENVIRONMENT },
-  { type: 'cold', durationMs: 120_000.5 },
-  { type: 'hot', durationMs: 50.5 },
+  { type: 'cold', durationMs: 3000 },
+  { type: 'warm', durationMs: 300, environment: BUSY_WARM_START_ENVIRONMENT },
+  { type: 'warm', durationMs: 500, environment: BUSY_WARM_START_ENVIRONMENT },
+  { type: 'cold', durationMs: 120_000 },
+  { type: 'hot', durationMs: 50 },
 ];
 
 /** The averages and counts the routes answer for `BUSY_APP_STARTS`. */
 export const BUSY_COLD_START = { avg: 2000, count: 3 };
 export const BUSY_WARM_START = { avg: 400, count: 2 };
+
+/**
+ * The cold starts of `MOBILE_APPS.boundaryAndroid`, in the sessions it already has on the edges of
+ * the periods: at the time range's start, one on each of the guard's inclusive limits, which
+ * count, a negative one and one without a duration, which don't; one at the previous period's
+ * start, and one at the time range's end, which neither period includes.
+ */
+const BOUNDARY_APP_STARTS: Array<{
+  edge: keyof typeof BOUNDARY_TIMESTAMPS;
+  durationMs?: number;
+}> = [
+  { edge: 'start', durationMs: 0 },
+  { edge: 'start', durationMs: 60_000 },
+  { edge: 'start', durationMs: -1 },
+  { edge: 'start' },
+  { edge: 'previousStart', durationMs: 1500 },
+  { edge: 'end', durationMs: 5000 },
+];
+
+/** The cold start averages and counts the routes answer for `BOUNDARY_APP_STARTS`. */
+export const BOUNDARY_COLD_START = { avg: 30_000, count: 2 };
+export const BOUNDARY_PREVIOUS_COLD_START = { avg: 1500, count: 1 };
 
 const MOBILE_DOCUMENTS: MobileDocument[] = [
   // React Native, Android: `versionName` as the release, `versionCode` as the build.
@@ -188,6 +211,16 @@ const MOBILE_DOCUMENTS: MobileDocument[] = [
     installationId: 'installation-boundary',
     sessionId: `boundary-${edge}`,
     timestamp,
+  })),
+  ...BOUNDARY_APP_STARTS.map(({ edge, durationMs }) => ({
+    ...EDOT_MOBILE,
+    serviceName: MOBILE_APPS.boundaryAndroid,
+    sdkLanguage: 'java',
+    osName: 'Android',
+    installationId: 'installation-boundary',
+    sessionId: `boundary-${edge}`,
+    timestamp: BOUNDARY_TIMESTAMPS[edge],
+    appStart: { type: 'cold', durationMs },
   })),
   // Only releases that aren't numeric: `build-b` first, then `build-a`, which text order puts first.
   ...[
@@ -322,7 +355,9 @@ const documents = MOBILE_DOCUMENTS.map((doc, index) => ({
       ...(doc.appStart
         ? {
             ...(doc.appStart.type ? { 'start.type': doc.appStart.type } : {}),
-            'elastic.app.start.duration': doc.appStart.durationMs,
+            ...(doc.appStart.durationMs !== undefined
+              ? { 'elastic.app.start.duration': doc.appStart.durationMs }
+              : {}),
           }
         : {}),
     },

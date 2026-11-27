@@ -56,7 +56,7 @@ export const NO_APP_STARTS_DESCRIPTION = i18n.translate(
   'xpack.digitalExperience.mobile.appStart.noDataDescription',
   {
     defaultMessage:
-      'The SDK sent no app start events (elastic.app.start) in the time range and filters.',
+      'No app start events (elastic.app.start) in the data you can read, in the time range and filters.',
   }
 );
 
@@ -83,9 +83,16 @@ export const NO_STARTS_OF_TYPE: Readonly<Record<StartType, string>> = {
 export const appStartTooltip = (type: StartType, count: number, previousCount?: number): string => {
   const description = APP_START_DESCRIPTIONS[type];
   if (count === 0) {
-    return i18n.translate('xpack.digitalExperience.mobile.appStart.tooltipNoStarts', {
-      defaultMessage: '{description} {noStarts}',
-      values: { description, noStarts: NO_STARTS_OF_TYPE[type] },
+    const noStarts = NO_STARTS_OF_TYPE[type];
+    if (previousCount === undefined) {
+      return i18n.translate('xpack.digitalExperience.mobile.appStart.tooltipNoStarts', {
+        defaultMessage: '{description} {noStarts}',
+        values: { description, noStarts },
+      });
+    }
+    return i18n.translate('xpack.digitalExperience.mobile.appStart.tooltipNoStartsWithPrevious', {
+      defaultMessage: '{description} {noStarts} The previous period has {previousStarts}.',
+      values: { description, noStarts, previousStarts: appStartCountLabel(type, previousCount) },
     });
   }
   const starts = appStartCountLabel(type, count);

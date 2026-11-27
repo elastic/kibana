@@ -190,8 +190,10 @@ on serverless and stateful.
   stats, so the tiles and the release column need no query of their own; `kpiStats()` stays as it
   is for the applications list. Every value comes with the starts it averages, shown in its
   tooltip. The **Health summary** tiles show the averages against the previous period (a rise is
-  red) and read "No data" when the SDK sent no app start (older SDKs, or EDOT React Native before
-  its native SDKs send it). The release table's **Avg. cold start** holds back a release under 100
+  red, but a change under 2%, `NEGLIGIBLE_RELATIVE_CHANGE`, stays neutral, as on every compared
+  KPI) and read "No data" when no start of the type counts in the readable data (older SDKs, EDOT
+  React Native before its native SDKs send it, or logs the user can't read); while comparing, the
+  tooltip still names the previous period's starts. The release table's **Avg. cold start** holds back a release under 100
   sessions, as its error rate, and shows a dash without cold starts. The **Performance** section
   (`mobile_overview/performance/`), below the release health, draws each average over time from
   `GET .../mobile_applications/{serviceName}/app_starts` (the releases route's params): every

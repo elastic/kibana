@@ -89,11 +89,12 @@ describe('Performance', () => {
     expect(refresh).toHaveBeenCalled();
   });
 
-  it('says the SDK sent no app starts, without charts, when there were none', () => {
+  it('says no app starts were found in the readable data, without charts, when there were none', () => {
     renderSection({ appStarts: { ...APP_STARTS, points: [] } });
 
+    // Not "the SDK sent none": a user who can't read the logs sees no starts either
     expect(screen.getByTestId('digitalExperienceMobilePerformanceEmpty')).toHaveTextContent(
-      'The SDK sent no app start events (elastic.app.start)'
+      'No app start events (elastic.app.start) in the data you can read'
     );
     expect(AppStartChart).not.toHaveBeenCalled();
   });

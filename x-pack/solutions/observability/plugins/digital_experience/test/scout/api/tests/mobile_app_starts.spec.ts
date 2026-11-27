@@ -9,6 +9,9 @@ import { apiTest } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { MobileAppStartsResponse, MobileKpisResponse } from '../../../../common/types/mobile';
 import {
+  BOUNDARY_COLD_START,
+  BOUNDARY_PREVIOUS_COLD_START,
+  BOUNDARY_TIMESTAMPS,
   BUSY_COLD_START,
   BUSY_RELEASE,
   BUSY_WARM_START,
@@ -20,7 +23,16 @@ import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 import { testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
 
-const { COMMON_HEADERS, TIME_RANGE, mobileAppStartsPath, mobileKpisPath } = testData;
+const {
+  COMMON_HEADERS,
+  NEW_YORK_TIME_ZONE,
+  THIRTY_DAYS,
+  TIME_RANGE,
+  mobileAppStartsPath,
+  mobileKpisPath,
+} = testData;
+
+const NO_STARTS = { avg: null, count: 0 };
 
 apiTest.describe(
   'Digital Experience mobile app starts API',
@@ -65,6 +77,52 @@ apiTest.describe(
     );
 
     apiTest(
+      'compares the starts with the previous period, the guard limits included and nothing on the range end',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+
+        const response = await apiClient.get(mobileKpisPath(MOBILE_APPS.boundaryAndroid), {
+          headers: { ...COMMON_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(200);
+        const { coldStart, warmStart } = response.body as MobileKpisResponse;
+        // 0 ms and 60 s count, a negative start and one without a duration don't
+        expect(coldStart).toStrictEqual({
+          value: BOUNDARY_COLD_START.avg,
+          previous: BOUNDARY_PREVIOUS_COLD_START.avg,
+          delta: BOUNDARY_COLD_START.avg - BOUNDARY_PREVIOUS_COLD_START.avg,
+          count: BOUNDARY_COLD_START.count,
+          previousCount: BOUNDARY_PREVIOUS_COLD_START.count,
+        });
+        expect(warmStart).toMatchObject({ value: null, count: 0, previousCount: 0 });
+      }
+    );
+
+    apiTest(
+      'charts only the starts of the time range, not those of the previous period nor its end',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+
+        const response = await apiClient.get(mobileAppStartsPath(MOBILE_APPS.boundaryAndroid), {
+          headers: { ...COMMON_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(200);
+        const { points } = response.body as MobileAppStartsResponse;
+        expect(points.filter(({ cold }) => cold.count > 0)).toStrictEqual([
+          {
+            timestamp: Date.parse(BOUNDARY_TIMESTAMPS.start),
+            cold: BOUNDARY_COLD_START,
+            warm: NO_STARTS,
+          },
+        ]);
+      }
+    );
+
+    apiTest(
       'has no average for an application whose SDK sent no app starts',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
@@ -102,7 +160,6 @@ apiTest.describe(
         // others empty: no starts and no average, so the charts leave a gap
         expect(histogram.interval.unit).toBe('s');
         const intervalMs = histogram.interval.value * 1000;
-        const empty = { avg: null, count: 0 };
         expect(points).toStrictEqual(
           Array.from(
             { length: (histogram.end - histogram.start) / intervalMs },
@@ -110,7 +167,41 @@ apiTest.describe(
           ).map((timestamp) =>
             timestamp === Date.parse(TIMESTAMP)
               ? { timestamp, cold: BUSY_COLD_START, warm: BUSY_WARM_START }
-              : { timestamp, cold: empty, warm: empty }
+              : { timestamp, cold: NO_STARTS, warm: NO_STARTS }
+          )
+        );
+      }
+    );
+
+    apiTest(
+      "lines the buckets up with the user's time zone, the populated one in place of its empty one",
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+
+        const response = await apiClient.get(
+          mobileAppStartsPath(MOBILE_APPS.busyAndroid, {
+            start: THIRTY_DAYS.start,
+            end: THIRTY_DAYS.end,
+            timeZone: NEW_YORK_TIME_ZONE,
+          }),
+          { headers: { ...COMMON_HEADERS, ...cookieHeader }, responseType: 'json' }
+        );
+
+        expect(response).toHaveStatusCode(200);
+        const { histogram, points } = response.body as MobileAppStartsResponse;
+        // 12-hour buckets from New York's midnight and noon (05:00 and 17:00 UTC in January)
+        expect(histogram.interval).toStrictEqual({ value: 12 * 60 * 60, unit: 's' });
+        const twelveHours = 12 * 60 * 60 * 1000;
+        const populated = Date.parse('2021-01-18T05:00:00.000Z');
+        // All 60 buckets of the 30 days: the starts' bucket once, not next to an empty one
+        expect(points).toStrictEqual(
+          Array.from(
+            { length: 60 },
+            (_, index) => Date.parse(THIRTY_DAYS.start) + index * twelveHours
+          ).map((timestamp) =>
+            timestamp === populated
+              ? { timestamp, cold: BUSY_COLD_START, warm: BUSY_WARM_START }
+              : { timestamp, cold: NO_STARTS, warm: NO_STARTS }
           )
         );
       }
