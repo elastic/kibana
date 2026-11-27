@@ -6,11 +6,16 @@
  */
 
 import {
+  ENTITY_ANALYTICS_UI_NAVIGATION_CONTENT,
+  CHAT_HANDLED_NAVIGATION_INTENTS,
   ENTITY_RESOLUTION_GROUP_TAB,
   EDIT_WATCHLIST_URL_PARAM,
   ENTITY_ANALYTICS_HOME_TABLE_SCOPE,
   ENTITY_RESOLUTION_PANEL,
   buildResolutionFlyoutTemplate,
+  UI_ONLY_NAVIGATION_INTENTS,
+  WATCHLISTS_UI_NAVIGATION_CONTENT,
+  RESOLUTION_UI_NAVIGATION_CONTENT,
   buildWatchlistEditPath,
 } from './ui_navigation';
 import {
@@ -75,5 +80,38 @@ describe('buildWatchlistEditPath', () => {
     expect(buildWatchlistEditPath('wl-123')).toBe(
       '/app/security/entity_analytics_management/watchlists?editWatchlistId=wl-123'
     );
+  });
+});
+
+describe('UI-only intent manifests stay in sync with the skill content', () => {
+  const allContent = [
+    ENTITY_ANALYTICS_UI_NAVIGATION_CONTENT,
+    WATCHLISTS_UI_NAVIGATION_CONTENT,
+    RESOLUTION_UI_NAVIGATION_CONTENT,
+  ].join('\n');
+
+  it('documents every UI_ONLY_NAVIGATION_INTENTS entry as UI-only', () => {
+    const undocumented = UI_ONLY_NAVIGATION_INTENTS.filter(
+      (intent) => !allContent.includes(intent.marker)
+    ).map((intent) => intent.id);
+
+    expect(undocumented).toEqual([]);
+  });
+
+  it('documents every CHAT_HANDLED_NAVIGATION_INTENTS entry as not-UI-only', () => {
+    const undocumented = CHAT_HANDLED_NAVIGATION_INTENTS.filter(
+      (intent) => !allContent.includes(intent.marker)
+    ).map((intent) => intent.id);
+
+    expect(undocumented).toEqual([]);
+  });
+
+  it('keeps the UI-only and chat-handled intents disjoint', () => {
+    const uiOnly: string[] = UI_ONLY_NAVIGATION_INTENTS.map((intent) => intent.id);
+    const chatHandled: string[] = CHAT_HANDLED_NAVIGATION_INTENTS.map((intent) => intent.id);
+
+    expect(new Set(uiOnly).size).toBe(uiOnly.length);
+    expect(new Set(chatHandled).size).toBe(chatHandled.length);
+    expect(uiOnly.filter((id) => chatHandled.includes(id))).toEqual([]);
   });
 });
