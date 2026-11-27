@@ -144,7 +144,7 @@ describe('requestEarsRevoke', () => {
     ).rejects.toMatchObject({
       name: 'EarsRequestError',
       message:
-        'Auth redirect service returned a redirect (HTTP 307). Set xpack.actions.auth.ears.url to the URL it redirects to.',
+        'Auth redirect service returned a redirect (HTTP 307). Set xpack.actions.auth.ears.url to an EARS base URL that serves its endpoints without redirecting.',
       status: 307,
       earsRequestId: 'req-307',
     });
