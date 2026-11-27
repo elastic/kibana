@@ -164,6 +164,53 @@ describe('restoreKnowledge', () => {
     });
   });
 
+  it('leaves out archived Wiki pages', async () => {
+    const esClient = createTarget();
+    const wikiHit = (slug: string, status: string) => ({
+      _id: `ops:wiki_service_${slug}`,
+      _source: {
+        '@timestamp': '2026-11-09T18:47:11.893Z',
+        attributes: { space_id: 'ops', slug, status },
+      },
+    });
+    const established = wikiHit('checkout-api', 'established');
+
+    const metadata = await restoreKnowledge({
+      esClient,
+      log,
+      systems: ['wiki'],
+      env: ENV,
+      createSourceClient: () =>
+        createSource({
+          [KNOWLEDGE_INDICES.wiki]: [established, wikiHit('legacy-gateway', 'archived')],
+        }),
+    });
+
+    expect(esClient.bulk.mock.calls[0][0].operations).toEqual([
+      { index: { _index: KNOWLEDGE_INDICES.wiki, _id: 'default:wiki_service_checkout-api' } },
+      toTargetSpace(established, 'ops', 'default').source,
+    ]);
+    expect(metadata.knowledge_wiki_documents).toBe(1);
+  });
+
+  it('fails before clearing anything when every Wiki page is archived', async () => {
+    const esClient = createTarget();
+    const archived = {
+      _id: 'ops:wiki_service_legacy-gateway',
+      _source: { attributes: { space_id: 'ops', status: 'archived' } },
+    };
+    await expect(
+      restoreKnowledge({
+        esClient,
+        log,
+        systems: ['wiki'],
+        env: ENV,
+        createSourceClient: () => createSource({ [KNOWLEDGE_INDICES.wiki]: [archived] }),
+      })
+    ).rejects.toThrow('no wiki documents in space ops');
+    expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+  });
+
   it('fails before clearing anything when the source space has no documents', async () => {
     const esClient = createTarget();
     await expect(
