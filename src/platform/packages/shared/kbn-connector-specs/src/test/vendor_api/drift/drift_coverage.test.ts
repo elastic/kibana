@@ -178,7 +178,9 @@ describe('summarizeDriftCoverage', () => {
     expect(connectors[0].unreachableSources).toEqual(['rest']);
   });
 
-  it('reads the sources of a report written before coverage existed', () => {
+  // Such a report reads `unchanged` for a source pinned to a commit too, so its sources can't
+  // tell whether the connector follows the vendor.
+  it('leaves it unknown whether connectors of a report without coverage detect changes', () => {
     const old = [
       legacy('.github', { rest: { status: 'unchanged' } }),
       legacy('.box', { mcp: { status: 'pinned' } }),
@@ -190,8 +192,8 @@ describe('summarizeDriftCoverage', () => {
     expect(totals).toMatchObject({
       checked: 2,
       withoutCoverage: 2,
-      detectVendorChanges: 1,
-      pinnedOnly: 1,
+      detectVendorChanges: 0,
+      pinnedOnly: 0,
     });
   });
 });
@@ -244,7 +246,7 @@ describe('renderCoverageAnnotation', () => {
     );
 
     expect(markdown).toContain(
-      'Of the 1 connector checked, 1 can detect a vendor change. The report has no action counts for them.'
+      'Of the 1 connector checked, 0 can detect a vendor change (unknown for 1 connector the report has no coverage for). The report has no action counts for them.'
     );
     expect(markdown).not.toContain('<details>');
   });

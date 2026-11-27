@@ -64,7 +64,10 @@ export interface CoverageTotals {
   readonly pinnedOnly: number;
   /** Checked connectors a source of which couldn't be fetched this run. */
   readonly unreachable: number;
-  /** Checked connectors whose drift entry has no coverage, from a report written before it. */
+  /**
+   * Checked connectors whose drift entry has no coverage, from a report written before it. Neither
+   * their actions nor whether they can detect a vendor change are known.
+   */
   readonly withoutCoverage: number;
   /** Tracked actions of the checked connectors that have coverage. */
   readonly trackedActions: number;
@@ -88,17 +91,10 @@ export interface DriftCoverageSummary {
 
 const isChecked = (entry: DriftReportEntry): entry is ConnectorDrift => !('error' in entry);
 
-const sourcesWith = ({ sources }: ConnectorDrift, status: string): string[] =>
+const unreachableSourcesOf = ({ sources }: ConnectorDrift): string[] =>
   Object.keys(sources)
-    .filter((name) => sources[name].status === status)
+    .filter((name) => sources[name].status === 'unreachable')
     .sort();
-
-const unreachableSourcesOf = (entry: ConnectorDrift): string[] => sourcesWith(entry, 'unreachable');
-
-// Read from the source statuses, which every report has, rather than from `coverage`, which
-// reports written before it lack. A captured source is reported as `pinned`.
-const followsVendor = (entry: ConnectorDrift): boolean =>
-  Object.keys(entry.sources).length > sourcesWith(entry, 'pinned').length;
 
 /**
  * Combines the coverage report, which describes every connector, with a drift report, which
@@ -142,12 +138,13 @@ export const summarizeDriftCoverage = (
       unrecorded: documents.length - recorded - exempt.length,
       checked: checked.length,
       failed: report.length - checked.length,
-      detectVendorChanges: checked.filter(
-        (entry) => followsVendor(entry) && unreachableSourcesOf(entry).length === 0
+      // Only `coverage` says which sources follow the vendor: a report written before it reads
+      // `unchanged` for a source pinned to a commit too, so its connectors are left unknown.
+      detectVendorChanges: connectors.filter(
+        ({ followingSources, unreachableSources }) =>
+          followingSources.length > 0 && unreachableSources.length === 0
       ).length,
-      pinnedOnly: checked.filter(
-        (entry) => Object.keys(entry.sources).length > 0 && !followsVendor(entry)
-      ).length,
+      pinnedOnly: connectors.filter(({ followingSources }) => followingSources.length === 0).length,
       unreachable: unreachable.length,
       withoutCoverage: checked.length - connectors.length,
       trackedActions: sum(connectors.map(({ trackedActions }) => trackedActions)),
@@ -175,6 +172,9 @@ const checkedSentence = (totals: CoverageTotals): string => {
       ? `${verb(totals.pinnedOnly, 'only has', 'only have')} pinned sources`
       : '',
     totals.unreachable > 0 ? `${totals.unreachable} had a source that couldn't be fetched` : '',
+    totals.withoutCoverage > 0
+      ? `unknown for ${plural(totals.withoutCoverage, 'connector')} the report has no coverage for`
+      : '',
   ].filter(Boolean);
   const unknown =
     totals.withoutCoverage > 0
