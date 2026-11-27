@@ -20,6 +20,8 @@ export type {
   SaveSessionEventsInput,
   SessionMemoryClient,
 } from './session_memory_client/client';
+export { AiIndexNotFoundError } from './ai_indices/errors/ai_index_not_found_error';
+export { AiIndexWriteForbiddenError } from './ai_indices/errors/ai_index_write_forbidden_error';
 export {
   ContextEngineDisabledError,
   MemoryDisabledError,

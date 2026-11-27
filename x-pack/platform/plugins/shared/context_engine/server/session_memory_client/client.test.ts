@@ -51,7 +51,7 @@ describe('session memory client', () => {
   let grantedPrivileges: Set<string>;
   let notWritableDests: Set<string>;
   let getCurrentProfileId: jest.Mock<Promise<string | null>>;
-  let atSpace: jest.Mock;
+  let checkPrivileges: jest.Mock;
   let aiIndexService: { get: jest.Mock };
   let sessionEvents: jest.Mocked<Pick<SessionEventsService, 'saveEvents'>>;
   let sessionMemory: jest.Mocked<Pick<SessionMemoryService, 'get' | 'remember' | 'forget'>>;
@@ -60,7 +60,14 @@ describe('session memory client', () => {
   let auditLog: jest.Mock;
 
   const createClient = () => {
-    const uiSettingsClient = { get: jest.fn(async (key: string) => settings[key]) };
+    const uiSettingsClient = {
+      get: jest.fn(async (key: string) => {
+        if (!(key in settings)) {
+          throw new Error(`failed to read ${key}`);
+        }
+        return settings[key];
+      }),
+    };
     const deps = {
       core: {
         savedObjects: { getScopedClient: jest.fn(() => ({})) },
@@ -72,7 +79,7 @@ describe('session memory client', () => {
         security: { audit: { asScoped: jest.fn(() => ({ log: auditLog })) } },
       },
       authz: {
-        checkPrivilegesWithRequest: jest.fn(() => ({ atSpace })),
+        checkPrivilegesDynamicallyWithRequest: jest.fn(() => checkPrivileges),
         actions: { api: { get: actionOf } },
       },
       spaces: { spacesService: { getSpaceId: () => 'marketing' } },
@@ -98,12 +105,11 @@ describe('session memory client', () => {
     grantedPrivileges = new Set([actionOf(apiPrivileges.writeContextEngine)]);
     notWritableDests = new Set();
     getCurrentProfileId = jest.fn(async () => callerUserId);
-    atSpace = jest.fn(async (spaceId: string, payload: CheckPrivilegesPayload) => ({
+    checkPrivileges = jest.fn(async (payload: CheckPrivilegesPayload) => ({
       hasAllRequested: false,
       username: 'jdoe',
       privileges: {
         kibana: [payload.kibana ?? []].flat().map((privilege) => ({
-          resource: spaceId,
           privilege,
           authorized: grantedPrivileges.has(privilege),
         })),
@@ -154,6 +160,12 @@ describe('session memory client', () => {
       expect(auditLog).not.toHaveBeenCalled();
     });
 
+    it('reports Context Engine as off without reading the memory setting', async () => {
+      settings = { [CONTEXT_ENGINE_ENABLED_SETTING_ID]: false };
+
+      await expect(save({})).rejects.toThrow(ContextEngineDisabledError);
+    });
+
     it('throws and audits nothing while memory is turned off', async () => {
       settings[CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID] = false;
 
@@ -174,21 +186,31 @@ describe('session memory client', () => {
       expect(response).toEqual({ results: [{ id: 'evt-1', status: 'created' }] });
     });
 
-    it('checks the Kibana privileges and write on every backing index in one call', async () => {
+    it('checks the Kibana privileges, then write on every backing index', async () => {
       await save({ aiIndexIds: ['ops', 'sales'] });
 
       expect(aiIndexService.get.mock.calls).toEqual([
         ['ops', 'marketing'],
         ['sales', 'marketing'],
       ]);
-      expect(atSpace).toHaveBeenCalledTimes(1);
-      expect(atSpace).toHaveBeenCalledWith('marketing', {
-        kibana: [actionOf(apiPrivileges.writeContextEngine), actionOf(apiPrivileges.manageMemory)],
-        elasticsearch: {
-          cluster: [],
-          index: { 'ai-index-ds-ops': ['write'], 'ai-index-ds-sales': ['write'] },
-        },
-      });
+      expect(checkPrivileges.mock.calls).toEqual([
+        [
+          {
+            kibana: [
+              actionOf(apiPrivileges.writeContextEngine),
+              actionOf(apiPrivileges.manageMemory),
+            ],
+          },
+        ],
+        [
+          {
+            elasticsearch: {
+              cluster: [],
+              index: { 'ai-index-ds-ops': ['write'], 'ai-index-ds-sales': ['write'] },
+            },
+          },
+        ],
+      ]);
     });
 
     it('throws Forbidden and audits it when the caller lacks the write privilege', async () => {
@@ -316,15 +338,15 @@ describe('session memory client', () => {
         );
       });
 
-      it('reports a caller error before an AI index error', async () => {
+      it('does not look up AI indices for a caller it rejects, since that can create one', async () => {
         callerUserId = null;
-        aiIndexService.get.mockRejectedValueOnce(new AiIndexNotFoundError('missing'));
 
-        await expect(save({ aiIndexIds: ['missing'] })).rejects.toThrow(MemoryForbiddenError);
+        await expect(save({ aiIndexIds: ['ops'] })).rejects.toThrow(MemoryForbiddenError);
+        expect(aiIndexService.get).not.toHaveBeenCalled();
       });
 
       it('audits and rethrows unexpected errors while checking privileges', async () => {
-        atSpace.mockRejectedValueOnce(new Error('es unreachable'));
+        checkPrivileges.mockRejectedValueOnce(new Error('es unreachable'));
 
         await expect(save({ aiIndexIds: ['ops'] })).rejects.toThrow('es unreachable');
         expect(sessionEvents.saveEvents).not.toHaveBeenCalled();
@@ -339,7 +361,7 @@ describe('session memory client', () => {
         await save({});
 
         expect(aiIndexService.get).not.toHaveBeenCalled();
-        expect(atSpace.mock.calls[0][1].elasticsearch.index).toEqual({});
+        expect(checkPrivileges).toHaveBeenCalledTimes(1);
         expect(savedInput()).toMatchObject({ aiIndexIds: [] });
       });
     });

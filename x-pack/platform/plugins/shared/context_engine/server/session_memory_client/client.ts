@@ -14,14 +14,13 @@ import {
 } from '@kbn/management-settings-ids';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { AiIndexItem } from '../../common/http_api/ai_indices';
 import type { SaveSessionEventsResponse } from '../../common/http_api/session_events';
 import type {
   ForgetSessionMemoryResult,
   RememberSessionMemoryResponse,
 } from '../../common/http_api/session_memory';
 import { apiPrivileges } from '../../common/features';
-import { AiIndexNotFoundError, AiIndexWriteForbiddenError } from '../ai_indices/errors';
+import { AiIndexWriteForbiddenError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
 import {
   sessionEventsSaveAuditEvent,
@@ -89,21 +88,13 @@ export interface SessionMemoryClient {
 
 export interface SessionMemoryClientDeps {
   core: Pick<CoreStart, 'uiSettings' | 'savedObjects' | 'userProfile' | 'security'>;
-  authz: Pick<SecurityPluginStart['authz'], 'checkPrivilegesWithRequest' | 'actions'>;
+  authz: Pick<SecurityPluginStart['authz'], 'checkPrivilegesDynamicallyWithRequest' | 'actions'>;
   spaces?: SpacesPluginStart;
   aiIndexService: Pick<AiIndexService, 'get'>;
   sessionEvents: Pick<SessionEventsService, 'saveEvents'>;
   sessionMemory: Pick<SessionMemoryService, 'get' | 'remember' | 'forget'>;
   backgroundWrites: BackgroundWriteTracker;
   logger: Logger;
-}
-
-/** What one privilege check says the caller may do. */
-interface Access {
-  canWrite: boolean;
-  canManageMemory: boolean;
-  /** The first requested AI index that is missing, else the first one the caller cannot write. */
-  aiIndexError?: AiIndexNotFoundError | AiIndexWriteForbiddenError;
 }
 
 const unique = <T>(values: readonly T[]): T[] => [...new Set(values)];
@@ -157,77 +148,36 @@ export const createSessionMemoryClient = (
   const auditLogger = core.security.audit.asScoped(request);
   const writeAction = authz.actions.api.get(apiPrivileges.writeContextEngine);
   const manageMemoryAction = authz.actions.api.get(apiPrivileges.manageMemory);
+  // Checks the request's space, or globally without Spaces, like route authorization does.
+  const checkPrivileges = authz.checkPrivilegesDynamicallyWithRequest(request);
 
   const assertEnabled = async ({ memory }: { memory: boolean }): Promise<void> => {
     const soClient = core.savedObjects.getScopedClient(request);
-    const [contextEngineEnabled, memoryEnabled] = await Promise.all([
-      core.uiSettings.asScopedToClient(soClient).get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID),
-      memory
-        ? core.uiSettings
-            .globalAsScopedToClient(soClient)
-            .get<boolean>(CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID)
-        : true,
-    ]);
+    const contextEngineEnabled = await core.uiSettings
+      .asScopedToClient(soClient)
+      .get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID);
     if (!contextEngineEnabled) {
       throw new ContextEngineDisabledError();
     }
+    const memoryEnabled =
+      !memory ||
+      (await core.uiSettings
+        .globalAsScopedToClient(soClient)
+        .get<boolean>(CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID));
     if (!memoryEnabled) {
       throw new MemoryDisabledError();
     }
   };
 
-  const lookUpAiIndex = async (id: string): Promise<AiIndexItem | AiIndexNotFoundError> => {
-    try {
-      return await aiIndexService.get(id, space);
-    } catch (error) {
-      if (error instanceof AiIndexNotFoundError) {
-        return error;
-      }
-      throw error;
-    }
-  };
-
-  /** Checks the Kibana privileges and `write` on every AI index's backing index in one call. */
-  const checkAccess = async (aiIndexIds: readonly string[]): Promise<Access> => {
-    const lookups = await Promise.all(aiIndexIds.map(lookUpAiIndex));
-    const aiIndices = lookups.filter(
-      (lookup): lookup is AiIndexItem => !(lookup instanceof AiIndexNotFoundError)
-    );
-    const dests = unique(aiIndices.map(({ dest }) => dest.value));
-    const { privileges } = await authz.checkPrivilegesWithRequest(request).atSpace(space, {
-      kibana: [writeAction, manageMemoryAction],
-      elasticsearch: {
-        cluster: [],
-        index: Object.fromEntries(dests.map((dest) => [dest, ['write']])),
-      },
-    });
-
-    const hasKibanaPrivilege = (action: string) =>
-      privileges.kibana.some(({ privilege, authorized }) => privilege === action && authorized);
-    const canWriteIndex = (dest: string) =>
-      privileges.elasticsearch.index[dest]?.some(
-        ({ privilege, authorized }) => privilege === 'write' && authorized
-      ) === true;
-    const notWritable = aiIndices.find(({ dest }) => !canWriteIndex(dest.value));
-
-    return {
-      canWrite: hasKibanaPrivilege(writeAction),
-      canManageMemory: hasKibanaPrivilege(manageMemoryAction),
-      aiIndexError:
-        lookups.find((lookup) => lookup instanceof AiIndexNotFoundError) ??
-        (notWritable && new AiIndexWriteForbiddenError(notWritable.id)),
-    };
-  };
-
   /** Returns the user to write for: `requestedUserId`, else the caller. */
-  const resolveTargetUser = async (
-    requestedUserId: string | undefined,
-    { canWrite, canManageMemory }: Access
-  ): Promise<string> => {
-    if (!canWrite) {
+  const resolveTargetUser = async (requestedUserId: string | undefined): Promise<string> => {
+    const { privileges } = await checkPrivileges({ kibana: [writeAction, manageMemoryAction] });
+    const hasPrivilege = (action: string) =>
+      privileges.kibana.some(({ privilege, authorized }) => privilege === action && authorized);
+    if (!hasPrivilege(writeAction)) {
       throw new MemoryForbiddenError(WRITE_REQUIRED_MESSAGE);
     }
-    if (requestedUserId !== undefined && canManageMemory) {
+    if (requestedUserId !== undefined && hasPrivilege(manageMemoryAction)) {
       return requestedUserId;
     }
     const callerUserId = (await core.userProfile.getCurrentProfileId({ request })) ?? undefined;
@@ -241,6 +191,34 @@ export const createSessionMemoryClient = (
     return userId;
   };
 
+  /**
+   * Throws `AiIndexNotFoundError` for an AI index missing from the space, and
+   * `AiIndexWriteForbiddenError` when the caller cannot write an AI index's backing index. Run it
+   * only for an authorized caller: looking up a managed AI index can create it.
+   */
+  const assertAiIndicesWritable = async (aiIndexIds: readonly string[]): Promise<void> => {
+    if (aiIndexIds.length === 0) {
+      return;
+    }
+    const aiIndices = await Promise.all(aiIndexIds.map((id) => aiIndexService.get(id, space)));
+    const dests = unique(aiIndices.map(({ dest }) => dest.value));
+    const { privileges } = await checkPrivileges({
+      elasticsearch: {
+        cluster: [],
+        index: Object.fromEntries(dests.map((dest) => [dest, ['write']])),
+      },
+    });
+    const notWritable = aiIndices.find(
+      ({ dest }) =>
+        !privileges.elasticsearch.index[dest.value]?.some(
+          ({ privilege, authorized }) => privilege === 'write' && authorized
+        )
+    );
+    if (notWritable) {
+      throw new AiIndexWriteForbiddenError(notWritable.id);
+    }
+  };
+
   return {
     async saveEvents({ sessionId, userId: requestedUserId, aiIndexIds = [], events }) {
       await assertEnabled({ memory: true });
@@ -251,11 +229,8 @@ export const createSessionMemoryClient = (
 
       let response: SaveSessionEventsResponse;
       try {
-        const access = await checkAccess(uniqueAiIndexIds);
-        targetUserId = await resolveTargetUser(requestedUserId, access);
-        if (access.aiIndexError) {
-          throw access.aiIndexError;
-        }
+        targetUserId = await resolveTargetUser(requestedUserId);
+        await assertAiIndicesWritable(uniqueAiIndexIds);
         response = await sessionEvents.saveEvents(
           { space, userId: targetUserId },
           { sessionId, aiIndexIds: uniqueAiIndexIds, events }
@@ -293,11 +268,8 @@ export const createSessionMemoryClient = (
 
       let scope: SessionMemoryScope;
       try {
-        const access = await checkAccess(uniqueAiIndexIds);
-        targetUserId = await resolveTargetUser(requestedUserId, access);
-        if (access.aiIndexError) {
-          throw access.aiIndexError;
-        }
+        targetUserId = await resolveTargetUser(requestedUserId);
+        await assertAiIndicesWritable(uniqueAiIndexIds);
         scope = { space, userId: targetUserId };
         if (id !== undefined && !(await sessionMemory.get(scope, id))) {
           throw new SessionMemoryNotFoundError(id);
@@ -341,7 +313,7 @@ export const createSessionMemoryClient = (
 
       let results: ForgetSessionMemoryResult[];
       try {
-        targetUserId = await resolveTargetUser(requestedUserId, await checkAccess([]));
+        targetUserId = await resolveTargetUser(requestedUserId);
         results = await sessionMemory.forget({ space, userId: targetUserId }, uniqueIds);
       } catch (error) {
         const failure = toError(error);
