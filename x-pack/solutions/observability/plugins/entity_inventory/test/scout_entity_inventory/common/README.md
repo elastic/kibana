@@ -63,7 +63,7 @@ source's `TS` plan comes before its `FROM` plan.
 | Window           | Entity                  | Read by         | Restarts samples            | available                             | restarts              |
 | ---------------- | ----------------------- | --------------- | --------------------------- | ------------------------------------- | --------------------- |
 | 2026-11-01 10:01 | checkout/cart-api       | `FROM`          | 4, 5                        | 3                                     | 5                     |
-| 2026-11-01 10:01 | checkout/payments       | `FROM`          | 1, 1                        | 2                                     | 1                     |
+| 2026-11-01 10:01 | checkout/payments       | `FROM`          | 2, 1                        | 2                                     | 2 (`last` would be 1) |
 | 2026-11-01 10:01 | platform/ingress        | `FROM`          | 0, 0                        | 1                                     | 0                     |
 | 2026-11-05 10:01 | streaming/tsds-shared   | `FROM` and `TS` | 10 (data stream), 12 (tsds) | 5                                     | 12                    |
 | 2026-11-05 10:00 | streaming/standard-only | `FROM`          | 3                           | 1                                     | 3                     |

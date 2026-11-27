@@ -113,7 +113,7 @@
           "desired": 3
         },
         "container": {
-          "restarts": 1
+          "restarts": 2
         }
       }
     }

@@ -488,7 +488,7 @@ apiTest.describe(
         expect(payments?.['kubernetes.deployment.name']).toBe('payments');
         expect(payments?.['k8s.deployment.available']).toBe(2);
         expect(payments?.['k8s.deployment.desired']).toBe(3);
-        expect(payments?.['k8s.container.restarts']).toBe(1);
+        expect(payments?.['k8s.container.restarts']).toBe(2);
 
         const ingress = rows.find((row) => row['entity.id'] === 'k8s.deployment:platform/ingress');
         expect(ingress?.['kubernetes.deployment.name']).toBe('ingress');
