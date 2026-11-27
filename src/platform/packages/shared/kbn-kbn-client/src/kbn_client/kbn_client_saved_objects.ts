@@ -54,6 +54,7 @@ interface IndexOptions<Attributes> {
   migrationVersion?: MigrationVersion;
   references?: Reference[];
   space?: string;
+  initialNamespaces?: string[];
 }
 
 interface UpdateOptions<Attributes> extends IndexOptions<Attributes> {
@@ -220,14 +221,13 @@ export class KbnClientSavedObjects {
     const { data } = await this.requester.request<SavedObjectResponse<Attributes>>({
       description: 'create saved object',
       path: this.buildCreatePath(options),
-      query: {
-        overwrite: options.overwrite,
-      },
+      query: options.overwrite !== undefined ? { overwrite: options.overwrite } : undefined,
       method: 'POST',
       body: {
         attributes: options.attributes,
         migrationVersion: options.migrationVersion,
         references: options.references,
+        initialNamespaces: options.initialNamespaces,
       },
     });
     return data;
@@ -244,9 +244,7 @@ export class KbnClientSavedObjects {
       path: options.space
         ? uriencode`/s/${options.space}/internal/ftr/kbn_client_so/${options.type}/${options.id}`
         : uriencode`/internal/ftr/kbn_client_so/${options.type}/${options.id}`,
-      query: {
-        overwrite: options.overwrite,
-      },
+      query: options.overwrite !== undefined ? { overwrite: options.overwrite } : undefined,
       method: 'PUT',
       body: {
         attributes: options.attributes,
