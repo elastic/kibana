@@ -352,6 +352,38 @@ export const SORT_BY_CREATE_AT = i18n.translate(
   }
 );
 
+export const SORT_ORDER_ASCENDING = i18n.translate(
+  'xpack.securitySolution.exceptions.sortOrderAscending',
+  {
+    defaultMessage: 'ascending',
+  }
+);
+
+export const SORT_ORDER_DESCENDING = i18n.translate(
+  'xpack.securitySolution.exceptions.sortOrderDescending',
+  {
+    defaultMessage: 'descending',
+  }
+);
+
+export const getSortByAriaLabel = (field: string, order: string) =>
+  i18n.translate('xpack.securitySolution.exceptions.sortByAriaLabel', {
+    defaultMessage: 'Sort by: {field}, {order}',
+    values: { field, order },
+  });
+
+export const getSortMenuItemOrderLabel = (order: string) =>
+  i18n.translate('xpack.securitySolution.exceptions.sortMenuItemOrderLabel', {
+    defaultMessage: 'sorted {order}',
+    values: { order },
+  });
+
+export const getSortChangedAnnouncement = (field: string, order: string) =>
+  i18n.translate('xpack.securitySolution.exceptions.sortChangedAnnouncement', {
+    defaultMessage: 'Sorted by {field}, {order}',
+    values: { field, order },
+  });
+
 export const EXPIRED_EXCEPTIONS_MODAL_CANCEL_BUTTON = i18n.translate(
   'xpack.securitySolution.exceptions.expiredExceptionModalCancelButton',
   {
