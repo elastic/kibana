@@ -271,7 +271,7 @@ describe('connector_setup toSurfaceComposition', () => {
         label: 'Configure in Kibana',
         app: 'agent_builder',
         path: '/agents/ops-agent/connectors',
-        ...(primary ? { primary } : {}),
+        ...(primary ? { style: 'primary' } : {}),
       },
     ],
   });

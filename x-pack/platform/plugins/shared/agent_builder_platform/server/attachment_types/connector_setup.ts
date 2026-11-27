@@ -139,7 +139,7 @@ export const createConnectorSetupAttachmentType = ({
               app: AGENT_BUILDER_APP_ID,
               // The agent's connectors page assigns the connectors created there to the agent.
               path: `/agents/${encodeURIComponent(agentId)}/connectors`,
-              ...(origin ? {} : { primary: true }),
+              ...(origin ? {} : { style: 'primary' }),
             },
           ],
         },

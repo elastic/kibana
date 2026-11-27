@@ -9,6 +9,7 @@ import { definePrimitivePack } from '@elastic/isomer-sdk';
 import { ISOMER_STYLE_COLLECTOR, isomerStyleAdapter } from '@kbn/isomer-theme';
 import type {
   ActionsNode,
+  ChoicesNode,
   CodeNode,
   ContextNode,
   DividerNode,
@@ -22,6 +23,7 @@ import type {
 } from './primitives';
 import {
   actions,
+  choices,
   code,
   context,
   divider,
@@ -44,6 +46,7 @@ export const componentsPrimitives = [
   divider,
   quote,
   actions,
+  choices,
   link,
   fields,
   code,
@@ -59,6 +62,7 @@ export type ComponentsNode =
   | DividerNode
   | QuoteNode
   | ActionsNode
+  | ChoicesNode
   | LinkNode
   | FieldsNode
   | CodeNode
@@ -76,7 +80,7 @@ export const componentsPack = definePrimitivePack({
       { title: 'Narrative and content', types: ['markdown'] },
       {
         title: 'Message layout',
-        types: ['header', 'section', 'context', 'divider', 'quote', 'actions', 'link'],
+        types: ['header', 'section', 'context', 'divider', 'quote', 'actions', 'choices', 'link'],
       },
       { title: 'Data', types: ['fields', 'code', 'table'] },
     ],
