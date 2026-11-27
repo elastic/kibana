@@ -279,7 +279,9 @@ describe('evals.suites.json evals decision', () => {
     // without regressionReportGates overrides) and is a temporary path until it folds
     // into regressionGate: https://github.com/elastic/search-team/issues/17503
     const problems = suites
-      .filter((suite) => suite.regressionGate && (suite.pinnedBaseline || suite.regressionReportGates))
+      .filter(
+        (suite) => suite.regressionGate && (suite.pinnedBaseline || suite.regressionReportGates)
+      )
       .map(({ id }) => `${id}: regressionGate and the pinned report are mutually exclusive`);
 
     expect(problems).toEqual([]);
