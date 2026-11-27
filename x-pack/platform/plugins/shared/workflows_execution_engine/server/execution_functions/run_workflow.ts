@@ -45,6 +45,10 @@ export interface RunWorkflowResult {
   shouldDeleteTask?: boolean;
 }
 
+// A FAILED execution does not throw out of the loop, so derive the span outcome from its status.
+const getLoopSpanOutcome = (status: ExecutionStatus): 'success' | 'failure' =>
+  status === ExecutionStatus.FAILED ? 'failure' : 'success';
+
 async function runWorkflowWithRequest({
   workflowRunId,
   spaceId,
@@ -267,7 +271,7 @@ async function runWorkflowWithRequest({
       signal,
       workflowTaskManager,
     });
-    loopSpan?.setOutcome('success');
+    loopSpan?.setOutcome(getLoopSpanOutcome(workflowRuntime.getWorkflowExecutionStatus()));
   } catch (error) {
     loopSpan?.setOutcome('failure');
     throw error;

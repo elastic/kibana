@@ -10,6 +10,7 @@ import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WORKFLOW_EXECUTION_FAILED_TRIGGER_ID } from '@kbn/workflows-extensions/server';
 import { buildWorkflowExecutionFailedPayload } from './build_workflow_execution_failed_payload';
+import { logWorkflowExecutionFailure } from './log_workflow_execution_failure';
 import type { EmitEvent } from '../trigger_events';
 import type { FailedStepContext } from '../workflow_context_manager/workflow_execution_state';
 
@@ -46,10 +47,9 @@ export async function emitWorkflowExecutionFailedEventIfFailed(params: {
     if (execution.isTestRun) {
       return;
     }
-    const payload = buildWorkflowExecutionFailedPayload(
-      execution,
-      workflowExecutionState.getLastFailedStepContext()
-    );
+    const failedStepContext = workflowExecutionState.getLastFailedStepContext();
+    logWorkflowExecutionFailure({ logger, execution, failedStepContext });
+    const payload = buildWorkflowExecutionFailedPayload(execution, failedStepContext);
     await emitEvent({
       triggerId: WORKFLOW_EXECUTION_FAILED_TRIGGER_ID,
       payload,
