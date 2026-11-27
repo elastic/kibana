@@ -19,6 +19,7 @@ import { AppHeader } from '@kbn/app-header';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useHistory } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ESQLDataGridState } from '@kbn/esql-datagrid/public';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import type { DataSetWithName, DataSource } from '../../common';
@@ -35,6 +36,7 @@ import { dataSetToFormValues, emptyDatasetFormValues } from './dataset_form_init
 import { StepAdditional } from './options_step/step_additional';
 import { StepDataset } from './define_step/step_dataset';
 import { StepMapping } from './mapping_step/step_mapping';
+import { StepPreview } from './preview_step/step_preview';
 import { StepReview } from './review_step/step_review';
 import { getValidStepIds } from './step_validity';
 import type { DatasetWizardStepContent, DatasetWizardStepId } from './types';
@@ -44,12 +46,13 @@ const STEPS: Array<{ id: DatasetWizardStepId; label: string }> = [
   { id: 'dataset', label: createDatasetWizardStrings.datasetStepLabel },
   { id: 'settings', label: createDatasetWizardStrings.additionalStepLabel },
   { id: 'mapping', label: createDatasetWizardStrings.mappingStepLabel },
+  { id: 'preview', label: createDatasetWizardStrings.previewStepLabel },
   { id: 'review', label: createDatasetWizardStrings.reviewStepLabel },
 ];
 const LAST_STEP_INDEX = STEPS.length - 1;
 const INITIAL_STEP_CONTENT: DatasetWizardStepContent = { validate: async () => true };
 const NARROW_STEPS: DatasetWizardStepId[] = ['dataset'];
-const OPTIONAL_STEP_IDS: DatasetWizardStepId[] = ['settings'];
+const OPTIONAL_STEP_IDS: DatasetWizardStepId[] = ['settings', 'preview'];
 
 const MAX_WIDTH_NARROW_PX = 600;
 const MAX_WIDTH_WIDE_PX = 1024;
@@ -95,6 +98,7 @@ export function CreateDatasetWizardPage({
 
   const [activeStepIndex, setActiveStepIndex] = useState(0);
   const [stepContent, setStepContent] = useState(INITIAL_STEP_CONTENT);
+  const [previewGridState, setPreviewGridState] = useState<ESQLDataGridState>({});
   // Field rules only run while their step is mounted, so a step can only be skipped over once it
   // has passed validation, and its result is re-recorded whenever it is left in either direction.
   // A saved dataset's steps start out validated when its values pass them; a new dataset's
@@ -267,6 +271,12 @@ export function CreateDatasetWizardPage({
                   )}
                   {activeStepId === 'settings' && <StepAdditional />}
                   {activeStepId === 'mapping' && <StepMapping />}
+                  {activeStepId === 'preview' && (
+                    <StepPreview
+                      gridState={previewGridState}
+                      onGridStateChange={setPreviewGridState}
+                    />
+                  )}
                   {activeStepId === 'review' && <StepReview dataSources={dataSources} />}
                 </div>
               </WizardStepProvider>

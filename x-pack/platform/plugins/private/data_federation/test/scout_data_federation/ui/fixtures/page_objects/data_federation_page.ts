@@ -29,6 +29,7 @@ export class DataFederationPage {
   readonly createDatasetWizard;
   readonly createDatasetWizardAdditionalStep;
   readonly createDatasetWizardMappingStep;
+  readonly createDatasetWizardPreviewStep;
   readonly createDatasetWizardReviewStep;
   readonly wizardNextButton;
   readonly wizardBackButton;
@@ -69,6 +70,7 @@ export class DataFederationPage {
       'createDatasetWizardAdditionalStep'
     );
     this.createDatasetWizardMappingStep = page.testSubj.locator('createDatasetWizardMappingStep');
+    this.createDatasetWizardPreviewStep = page.testSubj.locator('createDatasetWizardPreviewStep');
     this.createDatasetWizardReviewStep = page.testSubj.locator('createDatasetWizardReviewStep');
     this.wizardNextButton = page.testSubj.locator('nextButton');
     this.wizardBackButton = page.testSubj.locator('backButton');
@@ -192,8 +194,7 @@ export class DataFederationPage {
     // Mapping step defaults to "Timeseries data" enabled (requires @timestamp source field path).
     await this.page.testSubj.locator('createDatasetWizardTimestampPath').fill('timestamp');
 
-    await this.wizardNextButton.click();
-    await this.createDatasetWizardReviewStep.waitFor({ state: 'visible' });
+    await this.goToDatasetReviewStep();
     await this.wizardNextButton.click();
     await this.createDatasetWizard.waitFor({ state: 'hidden' });
   }
@@ -212,8 +213,7 @@ export class DataFederationPage {
     await this.createDatasetWizardAdditionalStep.waitFor({ state: 'visible' });
     await this.wizardNextButton.click();
     await this.createDatasetWizardMappingStep.waitFor({ state: 'visible' });
-    await this.wizardNextButton.click();
-    await this.createDatasetWizardReviewStep.waitFor({ state: 'visible' });
+    await this.goToDatasetReviewStep();
     await this.wizardNextButton.click();
     await this.createDatasetWizard.waitFor({ state: 'hidden' });
   }
@@ -259,12 +259,18 @@ export class DataFederationPage {
     await this.getMappingFieldRow(name).waitFor({ state: 'visible' });
   }
 
+  /** Advances from the mapping step through the preview step to the review step. */
   async goToDatasetReviewStep(): Promise<void> {
+    await this.wizardNextButton.click();
+    await this.createDatasetWizardPreviewStep.waitFor({ state: 'visible' });
     await this.wizardNextButton.click();
     await this.createDatasetWizardReviewStep.waitFor({ state: 'visible' });
   }
 
+  /** Returns from the review step through the preview step to the mapping step. */
   async goBackToDatasetMappingStep(): Promise<void> {
+    await this.wizardBackButton.click();
+    await this.createDatasetWizardPreviewStep.waitFor({ state: 'visible' });
     await this.wizardBackButton.click();
     await this.createDatasetWizardMappingStep.waitFor({ state: 'visible' });
   }
