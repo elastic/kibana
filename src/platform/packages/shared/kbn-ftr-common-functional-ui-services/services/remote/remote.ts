@@ -13,6 +13,7 @@ import type { BrowserConfig } from './webdriver';
 import { initWebDriver } from './webdriver';
 import { Browsers } from './browsers';
 import { dismissOpenDialog } from './dismiss_open_dialog';
+import { createBrowserVideoCapture } from './browser_video_capture';
 
 export async function RemoteProvider({ getService }: FtrProviderContext) {
   const lifecycle = getService('lifecycle');
@@ -56,6 +57,95 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   };
 
   const { driver, consoleLog$ } = await initWebDriver(log, browserType, lifecycle, browserConfig);
+  lifecycle.cleanup.add(async () => {
+    await tryWebDriverCall(async () => {
+      await driver.quit();
+    });
+  });
+  let recordingWindow: string | undefined;
+  let recordingWindowVersion = 0;
+  if (lifecycle.browserVideoRecorder) {
+    if (![Browsers.Chrome, Browsers.ChromiumEdge].includes(browserType)) {
+      throw new Error('FTR browser video recording requires Chrome or Chromium Edge');
+    }
+    recordingWindow = await driver.getWindowHandle();
+    const capture = await createBrowserVideoCapture(driver, () => recordingWindow);
+    lifecycle.browserVideoRecorder.setCaptureFrame(capture.captureFrame, capture.close);
+  }
+  if (lifecycle.waitRecorder) {
+    driver.wait = new Proxy(driver.wait, {
+      apply(target, thisArg, args) {
+        const finish = lifecycle.waitRecorder?.beginWait('webdriverWait', 'driver.wait');
+        try {
+          const result = Reflect.apply(target, thisArg, args);
+          Promise.resolve(result).then(
+            () => finish?.(),
+            () => finish?.()
+          );
+          return result;
+        } catch (error) {
+          finish?.();
+          throw error;
+        }
+      },
+    });
+    driver.execute = new Proxy(driver.execute, {
+      apply(target, thisArg, args) {
+        const [command] = args;
+        const name: string = command.getName();
+        if (
+          lifecycle.browserVideoRecorder &&
+          ['switchToWindow', 'newWindow', 'close'].includes(name)
+        ) {
+          const previousWindow = recordingWindow;
+          const windowVersion = ++recordingWindowVersion;
+          recordingWindow = undefined;
+          return Promise.resolve(Reflect.apply(target, thisArg, args)).then(
+            (result) => {
+              if (name !== 'close') {
+                // Resolve named windows without delaying the original command's result.
+                driver.getWindowHandle().then(
+                  (handle) => {
+                    if (recordingWindowVersion === windowVersion) recordingWindow = handle;
+                  },
+                  (error) => {
+                    log.debug(
+                      'Unable to resolve active window for video capture: %s',
+                      error.message
+                    );
+                  }
+                );
+              }
+              return result;
+            },
+            (error) => {
+              if (recordingWindowVersion === windowVersion) recordingWindow = previousWindow;
+              throw error;
+            }
+          );
+        }
+        if (
+          !['findElement', 'findElements', 'findChildElement', 'findChildElements'].includes(name)
+        ) {
+          return Reflect.apply(target, thisArg, args);
+        }
+        const selector = command.getParameters().value;
+        const label = typeof selector === 'string' ? `${name}(${selector})` : name;
+        const finish = lifecycle.waitRecorder?.beginWait('lookup', label);
+        try {
+          const result = Reflect.apply(target, thisArg, args);
+          Promise.resolve(result).then(
+            () => finish?.(),
+            () => finish?.()
+          );
+          return result;
+        } catch (error) {
+          finish?.();
+          throw error;
+        }
+      },
+    });
+  }
   const caps = await driver.getCapabilities();
 
   log.info(`Remote initialized: ${caps.get('browserName')} ${caps.get('browserVersion')}}`);
@@ -115,12 +205,6 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
       await driver.manage().window().setRect({ width, height });
       await clearBrowserStorage('sessionStorage');
       await clearBrowserStorage('localStorage');
-    });
-  });
-
-  lifecycle.cleanup.add(async () => {
-    await tryWebDriverCall(async () => {
-      await driver.quit();
     });
   });
 

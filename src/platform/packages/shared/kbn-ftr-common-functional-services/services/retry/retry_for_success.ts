@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Lifecycle } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { inspect } from 'util';
 import { delay } from '@kbn/test-jest-helpers';
@@ -38,6 +39,7 @@ async function runAttempt<T>(block: () => Promise<T>): Promise<{ result: T } | {
 }
 
 interface Options<T> {
+  lifecycle?: Lifecycle;
   timeout: number;
   methodName: string;
   block: () => Promise<T>;
@@ -50,7 +52,17 @@ interface Options<T> {
 }
 
 export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>): Promise<T> {
+  if (options.lifecycle?.waitRecorder) {
+    return options.lifecycle.recordWait('retry', options.methodName, () =>
+      runRetryForSuccess(log, options)
+    );
+  }
+  return runRetryForSuccess(log, options);
+}
+
+async function runRetryForSuccess<T>(log: ToolingLog, options: Options<T>): Promise<T> {
   const {
+    lifecycle,
     description,
     timeout,
     methodName,
@@ -62,8 +74,18 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>): 
     initialDelay,
   } = options;
 
+  const sleep = async (ms: number): Promise<void> => {
+    if (lifecycle?.waitRecorder) {
+      await lifecycle.recordWait('retryDelay', `${methodName}: delay(${ms})`, async () => {
+        await delay(ms);
+      });
+    } else {
+      await delay(ms);
+    }
+  };
+
   if (typeof initialDelay === 'number') {
-    await delay(initialDelay);
+    await sleep(initialDelay);
   }
 
   const start = Date.now();
@@ -100,6 +122,6 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>): 
       lastError = attempt.error;
     }
 
-    await delay(retryDelay);
+    await sleep(retryDelay);
   }
 }
