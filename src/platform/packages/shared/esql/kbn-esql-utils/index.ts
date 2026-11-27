@@ -11,6 +11,8 @@ export {
   getESQLAdHocDataview,
   getESQLAdHocDataviewId,
   getESQLTimeField,
+  getResolvedESQLTimeField,
+  type ResolvedESQLTimeField,
   getIndexPatternFromESQLQuery,
   getIndexPatternsFromESQLQuery,
   getSourceCommandFromESQLQuery,

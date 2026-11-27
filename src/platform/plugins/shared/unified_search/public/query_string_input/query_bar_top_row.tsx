@@ -1547,6 +1547,7 @@ export const QueryBarTopRow = React.memo(
             queryStats={props.esqlQueryStats}
             enableResourceBrowser={props.enableResourceBrowser}
             enableCreateView={props.enableCreateView}
+            showNoTimeFieldWarning={Boolean(showDatePicker)}
             onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
             onVisorNlResultReady={onVisorNlResultReady}
             hasExternalVisor

@@ -96,6 +96,11 @@ export interface ESQLEditorProps {
    * Shows the action to create an ES|QL view from the current query.
    */
   enableCreateView?: boolean;
+  /**
+   * Warns, in the warnings popover, when the source of the query has no time field.
+   * For hosts with a time picker, which the warning explains how to enable. Defaults to false.
+   */
+  showNoTimeFieldWarning?: boolean;
   /** Stats about the last request made */
   queryStats?: ESQLQueryStats;
   /** Callback invoked when the ES|QL docs flyout (opened from the help menu) toggles visibility */
