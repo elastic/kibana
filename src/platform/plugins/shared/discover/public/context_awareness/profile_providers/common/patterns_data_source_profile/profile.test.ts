@@ -294,6 +294,20 @@ describe('patternsDataSourceProfileProvider', () => {
       expect(newQuery).not.toContain('SAMPLE');
     });
 
+    it('uses the regular label when SAMPLE selects pattern rows before a second STATS', async () => {
+      const query = {
+        esql: 'FROM logs-* | STATS n = COUNT(*) BY Pattern = CATEGORIZE(message) | SAMPLE 0.1 | STATS total = SUM(n) BY Pattern | RENAME Pattern AS p',
+      };
+      const updateESQLQuery = jest.fn();
+      const { action } = await getViewMatchingResultsAction(updateESQLQuery, query);
+      const context = createContext({ field: { ...PATTERN_FIELD, name: 'p' }, query });
+
+      expect(await action.isCompatible?.(context)).toBe(true);
+      expect(action.getDisplayName(context)).toBe('View matching results');
+      await action.execute(context);
+      expect(updateESQLQuery).toHaveBeenCalledWith(expect.stringContaining('WHERE MATCH(message,'));
+    });
+
     it('uses the regular label when the query has no sample or retains an earlier sample', async () => {
       const { action } = await getViewMatchingResultsAction();
       expect(action.getDisplayName(createContext())).toBe('View matching results');

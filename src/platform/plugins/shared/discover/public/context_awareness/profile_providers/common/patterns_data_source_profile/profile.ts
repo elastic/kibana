@@ -49,9 +49,10 @@ const searchesBeyondSample = (cell: AdditionalCellActionContext) => {
     return false;
   }
   const { commands } = Parser.parse(cell.query.esql).root;
-  const statsIndex = commands.findLastIndex(({ name }) => name === 'stats');
+  // getCategorizeColumns resolves the pattern columns from the first STATS.
+  const patternStatsIndex = commands.findIndex(({ name }) => name === 'stats');
   const sampledInputs = commands.filter(
-    ({ name }, index) => name === 'sample' && index < statsIndex
+    ({ name }, index) => name === 'sample' && index < patternStatsIndex
   );
   if (!sampledInputs.length) {
     return false;
