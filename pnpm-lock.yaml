@@ -4815,8 +4815,8 @@ importers:
         specifier: 3.24.3
         version: 3.24.3(@types/node@24.10.13)
       node-diff3:
-        specifier: 3.2.1
-        version: 3.2.1
+        specifier: 4.0.0
+        version: 4.0.0
       node-fetch:
         specifier: 2.7.0
         version: 2.7.0
@@ -21339,8 +21339,8 @@ packages:
     resolution: {integrity: sha512-VijLXbi3UACN69I0JVXJsX4tjACjNoQDgv2gTF6sx2wWEi8tkSg2eX8p5gSIFi8z2+DL3oHmY6OyKce38SDolg==}
     engines: {node: ^18 || ^20 || >= 21}
 
-  node-diff3@3.2.1:
-    resolution: {integrity: sha512-eKZcJ8RtMQ3cIaA15EgmtwG927fYnRlhtdA4Q9HAcCpAZPQhhU2XptnTH9GeAkMiX2bAXxlJSAFa9shFbztPgw==}
+  node-diff3@4.0.0:
+    resolution: {integrity: sha512-U6ROYD85/70rtvHRa3mmB2PUHNT9R+K3Oo5WLnCtVl3aZ2GPY+lgB+vrIfwy5P/fr+Avng+loYDgk+MglPgwMQ==}
     engines: {bun: '>=1.3.10'}
 
   node-domexception@1.0.0:
@@ -38738,7 +38738,7 @@ snapshots:
   node-addon-api@8.9.2:
     optional: true
 
-  node-diff3@3.2.1: {}
+  node-diff3@4.0.0: {}
 
   node-domexception@1.0.0: {}
 

@@ -1627,7 +1627,7 @@
     "murmurhash": "2.0.1",
     "mustache": "4.2.0",
     "mysql2": "3.24.3",
-    "node-diff3": "3.2.1",
+    "node-diff3": "4.0.0",
     "node-fetch": "2.7.0",
     "node-forge": "1.4.3",
     "nodemailer": "10.3.1",
