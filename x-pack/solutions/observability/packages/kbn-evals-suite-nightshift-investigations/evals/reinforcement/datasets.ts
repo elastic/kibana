@@ -17,11 +17,14 @@ const exampleSchema = lazySchema(() =>
     input: z.object({
       question: z.string().min(1),
       response: z.string(),
-      prior_tree: z.object({
-        tree_id: z.string().min(1),
-        version: z.number().int().min(1),
-        markdown: z.string().min(1),
-      }),
+      follow_up: z.object({ causal_confirmed: z.boolean() }).optional(),
+      prior_tree: z
+        .object({
+          tree_id: z.string().min(1),
+          version: z.number().int().min(1),
+          markdown: z.string().min(1),
+        })
+        .optional(),
       tool_calls: z.array(
         z.object({
           tool_id: z.string().min(1),

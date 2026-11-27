@@ -998,8 +998,8 @@ const persistSubmission = async ({
   // Dry run against what was read, so bad paths or merges are reported before anything is written.
   updateCounts(existing ? storedCountsOf(existing) : undefined);
 
-  // A traversal names the confirmed causal path outright. Without one, fall back to the old signal
-  // until the turn prompts ask for traversals: a taken edge an existing tree did not have. Only an
+  // A traversal names the confirmed causal path outright. The turn prompts ask for traversals; for a
+  // submit that omits them, fall back to a taken edge the existing tree did not have. Only an
   // existing tree is promoted; a tree created this turn, on this or an earlier attempt, starts
   // tentative either way.
   const reinforced =

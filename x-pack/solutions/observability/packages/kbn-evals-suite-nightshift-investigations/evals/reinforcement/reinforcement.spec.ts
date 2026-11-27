@@ -27,8 +27,10 @@ import {
 } from './datasets';
 import {
   MERGED_NODES_EVALUATOR,
+  PROMPT_CHECK_EVALUATORS,
   SUBMIT_ARGUMENTS_EVALUATOR,
   createMergedNodesEvaluator,
+  promptCheckEvaluators,
   submitArgumentsEvaluator,
 } from './judges';
 import {
@@ -43,10 +45,19 @@ const suiteTags = [...tags.stateful.classic, ...tags.serverless.observability.co
 /** Service accounts, space binding and managed workflow install can take minutes on a cold start. */
 const SETUP_TIMEOUT_MS = 5 * 60_000;
 /**
- * Share of runs that must finish with consistent submit arguments. Nothing in the prompt asks for
- * traversals yet, so a model misses one now and then: one miss in four replays passes, two fail.
+ * Share of runs that must finish with consistent submit arguments. A model still slips on a long
+ * submit now and then, so an occasional miss passes; unfinished runs count as misses.
  */
 const MIN_CONSISTENT_RATE = 0.75;
+/** Mean the merged-nodes judge must reach: an LLM grade is noisier than the code checks. */
+const MIN_JUDGE_MEAN = 0.75;
+
+interface ExperimentScore {
+  evaluator: { name: string; score?: number | null; explanation?: string | null };
+}
+
+const listExplanations = (scores: ExperimentScore[]): string =>
+  scores.map((score) => `- ${score.evaluator.explanation ?? 'no explanation'}`).join('\n');
 
 const assertReinforcementScores = async ({
   experiment,
@@ -66,13 +77,7 @@ const assertReinforcementScores = async ({
     getExperimentDatasetExamples: (
       experimentId: string,
       datasetId: string
-    ) => Promise<{
-      examples: Array<{
-        scores: Array<{
-          evaluator: { name: string; score?: number | null; explanation?: string | null };
-        }>;
-      }>;
-    }>;
+    ) => Promise<{ examples: Array<{ scores: ExperimentScore[] }> }>;
   };
   log: { info: (message: string) => void };
   judgeCount: number;
@@ -118,22 +123,57 @@ const assertReinforcementScores = async ({
   const names = new Set(
     examples.flatMap((example) => example.scores.map((score) => score.evaluator.name))
   );
-  expect(names).toEqual(new Set([SUBMIT_ARGUMENTS_EVALUATOR, MERGED_NODES_EVALUATOR]));
-  const structural = examples.flatMap((example) =>
-    example.scores.filter((score) => score.evaluator.name === SUBMIT_ARGUMENTS_EVALUATOR)
+  expect(names).toEqual(
+    new Set([SUBMIT_ARGUMENTS_EVALUATOR, ...PROMPT_CHECK_EVALUATORS, MERGED_NODES_EVALUATOR])
   );
-  expect(structural).toHaveLength(runs.length);
+  const scoresOf = (name: string): ExperimentScore[] => {
+    const scores = examples.flatMap((example) =>
+      example.scores.filter((score) => score.evaluator.name === name)
+    );
+    expect(scores).toHaveLength(runs.length);
+    return scores;
+  };
+
+  // Soft assertions, so one run reports every bar it misses.
   // A run that did not finish scores 0 here too, so it counts against the same rate.
+  const structural = scoresOf(SUBMIT_ARGUMENTS_EVALUATOR);
   const failures = structural.filter((score) => score.evaluator.score !== 1);
-  const rate = (structural.length - failures.length) / structural.length;
-  expect(
-    rate,
-    `${structural.length - failures.length} of ${
-      structural.length
-    } runs submitted consistent arguments:\n${failures
-      .map((score) => `- ${score.evaluator.explanation ?? 'no explanation'}`)
-      .join('\n')}`
-  ).toBeGreaterThanOrEqual(MIN_CONSISTENT_RATE);
+  expect
+    .soft(
+      (structural.length - failures.length) / structural.length,
+      `${structural.length - failures.length} of ${
+        structural.length
+      } runs submitted consistent arguments:\n${listExplanations(failures)}`
+    )
+    .toBeGreaterThanOrEqual(MIN_CONSISTENT_RATE);
+
+  // The prompt checks are the #573 acceptance bar and merges_declared is the require_merge gate:
+  // every scored run passes. A run that did not finish is unscored here, since the rate above
+  // already counts it, and so is a round without require_merge for merges_declared.
+  for (const name of PROMPT_CHECK_EVALUATORS) {
+    const scored = scoresOf(name).filter((score) => score.evaluator.score != null);
+    const failed = scored.filter((score) => score.evaluator.score !== 1);
+    expect
+      .soft(
+        failed.length,
+        `${scored.length - failed.length} of ${
+          scored.length
+        } scored runs passed ${name}:\n${listExplanations(failed)}`
+      )
+      .toBe(0);
+  }
+
+  const judged = scoresOf(MERGED_NODES_EVALUATOR);
+  const judgeMean =
+    judged.reduce((sum, score) => sum + (score.evaluator.score ?? 0), 0) / judged.length;
+  expect
+    .soft(
+      judgeMean,
+      `${MERGED_NODES_EVALUATOR} mean is ${judgeMean.toFixed(2)}. Runs below 1:\n${listExplanations(
+        judged.filter((score) => score.evaluator.score !== 1)
+      )}`
+    )
+    .toBeGreaterThanOrEqual(MIN_JUDGE_MEAN);
   expect(rollbackErrors, 'Every replay must roll back its decision trees').toEqual([]);
 };
 
@@ -156,6 +196,7 @@ evaluate.describe('Nightshift decision-tree reinforcement', { tag: suiteTags }, 
     }) => {
       const judges = [
         submitArgumentsEvaluator,
+        ...promptCheckEvaluators,
         createMergedNodesEvaluator({
           inferenceClient: inferenceClient.bindTo({ connectorId: evaluationConnector.id }),
           evaluationConnector,
@@ -175,8 +216,8 @@ evaluate.describe('Nightshift decision-tree reinforcement', { tag: suiteTags }, 
           connectorId: connector.id,
           workflowIds,
         });
-      // A first Customer-0 investigation creates a new tree, and merged_nodes is rejected on a
-      // new tree. The default replays rounds that already have a prior tree, including one merge.
+      // The default replays the committed rounds: first rounds and follow-ups on a seeded tree,
+      // and one first round that creates a new tree.
       if (!liveDataset || tracesFile) {
         const dataset = tracesFile
           ? reinforcementDataset(loadReinforcementExamples(tracesFile), TRACES_FILE_DATASET_NAME)

@@ -12,12 +12,23 @@ import { NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { submitArgumentsEvaluator } from './judges';
 import { runReinforcementExample, treesAfterRun } from './task';
 import { reinforcementExamples } from './traces';
-import type { SubmitArguments } from './types';
+import type { ReinforcementExample, SubmitArguments } from './types';
 
 jest.mock('timers/promises', () => ({ setTimeout: jest.fn().mockResolvedValue(undefined) }));
 
 const [example] = reinforcementExamples;
 const CASE_ID = example.metadata.case_id;
+const byCaseId = (caseId: string): ReinforcementExample => {
+  const found = reinforcementExamples.find(({ metadata }) => metadata.case_id === caseId);
+  if (!found) throw new Error(`No committed round ${caseId}`);
+  return found;
+};
+const seededIdOf = ({ input, metadata }: ReinforcementExample): string => {
+  if (!input.prior_tree) throw new Error(`${metadata.case_id} seeds no prior tree`);
+  return input.prior_tree.tree_id;
+};
+const priorMarkdownOf = ({ input }: ReinforcementExample): string | undefined =>
+  input.prior_tree?.markdown;
 const SEEDED_HEAD_ID = 'default:dtree_eql-slo-burn-rate';
 const OTHER_HEAD_ID = 'default:dtree_checkout-high-latency';
 const EXECUTION_ID = 'execution-1';
@@ -64,9 +75,27 @@ const fieldOf = (source: Source, field: string): unknown =>
       source
     );
 
-/** An in-memory decision tree index that records each write in `events`. */
+interface WriteRequest {
+  id: string;
+  if_seq_no?: number;
+}
+
+/**
+ * An in-memory decision tree index that records each write in `events`. Every document carries a
+ * sequence number that each write through the client bumps; `touch` simulates another writer.
+ */
 const fakeEsClient = (events: string[], initial: Record<string, Source>) => {
   const docs = new Map<string, Source>(Object.entries(initial));
+  const seqNos = new Map<string, number>();
+  const seqNoOf = (id: string): number => seqNos.get(id) ?? 0;
+  const touch = (id: string) => seqNos.set(id, seqNoOf(id) + 1);
+  const assertVersion = ({ id, if_seq_no: ifSeqNo }: WriteRequest) => {
+    if (ifSeqNo !== undefined && ifSeqNo !== seqNoOf(id)) {
+      throw Object.assign(new Error('version conflict'), {
+        meta: { statusCode: 409, body: { error: { type: 'version_conflict_engine_exception' } } },
+      });
+    }
+  };
   const matches = (request: SearchRequest, source: Source): boolean =>
     (request.query?.bool?.filter ?? []).every(({ term = {}, terms = {} }) =>
       [
@@ -82,31 +111,55 @@ const fakeEsClient = (events: string[], initial: Record<string, Source>) => {
     search: jest.fn(async (request: SearchRequest) => {
       const hits = [...docs.entries()]
         .filter(([, source]) => matches(request, source))
-        .map(([id, source]) => ({ _id: id, _source: source }));
+        .map(([id, source]) => ({
+          _id: id,
+          _source: source,
+          _seq_no: seqNoOf(id),
+          _primary_term: 1,
+        }));
       return { hits: { hits } };
     }),
-    index: jest.fn(async ({ id, document }: { id: string; document: Source }) => {
-      events.push(`es:index ${id}`);
-      docs.set(id, document);
+    index: jest.fn(async (request: WriteRequest & { document: Source }) => {
+      assertVersion(request);
+      events.push(`es:index ${request.id}`);
+      docs.set(request.id, request.document);
+      touch(request.id);
       return {};
     }),
-    delete: jest.fn(async ({ id }: { id: string }) => {
-      events.push(`es:delete ${id}`);
-      docs.delete(id);
+    delete: jest.fn(async (request: WriteRequest) => {
+      assertVersion(request);
+      events.push(`es:delete ${request.id}`);
+      docs.delete(request.id);
+      touch(request.id);
       return {};
     }),
   };
-  return { esClient: esClient as unknown as Client, docs };
+  return { esClient: esClient as unknown as Client, docs, touch };
 };
 
-const completedWith = (submissions: unknown[]) => ({
+const completedWith = (
+  submissions: unknown[],
+  { turnKind, appliedWrites }: { turnKind?: string; appliedWrites?: unknown[] } = {}
+) => ({
   id: EXECUTION_ID,
   status: ExecutionStatus.COMPLETED,
   stepExecutions: [
+    ...(turnKind
+      ? [
+          {
+            stepId: 'prepare_turn',
+            status: ExecutionStatus.COMPLETED,
+            output: { turn_kind: turnKind, skipped: false },
+          },
+        ]
+      : []),
     {
       stepId: 'reinforce_decision_trees',
       status: ExecutionStatus.COMPLETED,
-      output: { submissions_json: JSON.stringify(submissions) },
+      output: {
+        submissions_json: JSON.stringify(submissions),
+        ...(appliedWrites ? { applied_writes: appliedWrites } : {}),
+      },
     },
   ],
 });
@@ -331,8 +384,8 @@ describe('runReinforcementExample', () => {
   });
 
   it('grades every tree a submit names, read before the rollback', async () => {
-    const negativeRound = reinforcementExamples[3];
-    const seededId = negativeRound.input.prior_tree.tree_id;
+    const negativeRound = byCaseId('customer0-es-proxy-unconfirmed-2026-09-14');
+    const seededId = seededIdOf(negativeRound);
     const editedCheckout = [
       '```mermaid',
       'flowchart TD',
@@ -369,8 +422,8 @@ describe('runReinforcementExample', () => {
     expect(output.trees).toEqual([
       {
         tree_id: seededId,
-        prior_mermaid: negativeRound.input.prior_tree.markdown,
-        submitted_mermaid: negativeRound.input.prior_tree.markdown,
+        prior_mermaid: priorMarkdownOf(negativeRound),
+        submitted_mermaid: priorMarkdownOf(negativeRound),
       },
       {
         tree_id: 'symptom:checkout-high-latency',
@@ -397,7 +450,7 @@ describe('runReinforcementExample', () => {
       readExecution: async () =>
         completedWith([
           { traversals: [{ tree_id: 'symptom:eql-slo-burn-rat', visited_path: ['S1'] }] },
-          { traversals: [{ tree_id: example.input.prior_tree.tree_id, visited_path: ['S1'] }] },
+          { traversals: [{ tree_id: seededIdOf(example), visited_path: ['S1'] }] },
         ]),
     });
 
@@ -408,9 +461,186 @@ describe('runReinforcementExample', () => {
       example,
     });
 
-    expect(output.trees?.map(({ tree_id: treeId }) => treeId)).toEqual([
-      example.input.prior_tree.tree_id,
-    ]);
+    expect(output.trees?.map(({ tree_id: treeId }) => treeId)).toEqual([seededIdOf(example)]);
+  });
+
+  describe('follow-up rounds', () => {
+    const followUp = byCaseId('customer0-otel-gateway-followup-confirmed-2026-09-14');
+
+    it('replays the round with its verdict and records what the server ran and wrote', async () => {
+      const events: string[] = [];
+      const { esClient } = fakeEsClient(events, {});
+      const fetch = fakeFetch(events, {
+        readExecution: async () =>
+          completedWith([], {
+            turnKind: 'feedback_reinforcement',
+            appliedWrites: [
+              {
+                store: 'decision_tree',
+                item_id: 'symptom:otel-gateway-errors',
+                action: 'reinforce',
+                after_content: 'tree',
+              },
+            ],
+          }),
+      });
+
+      const output = await runReinforcementExample({
+        esClient,
+        fetch: fetch as unknown as HttpHandler,
+        connectorId: 'connector',
+        example: followUp,
+      });
+
+      expect(runInputs(fetch).replay_causal_confirmed).toBe(true);
+      expect(output).toMatchObject({
+        turn_kind: 'feedback_reinforcement',
+        causal_confirmed: true,
+        applied_writes: [
+          { store: 'decision_tree', item_id: 'symptom:otel-gateway-errors', action: 'reinforce' },
+        ],
+      });
+      expect(output.applied_writes?.[0]).not.toHaveProperty('after_content');
+      expect(output.execution_error).toBeUndefined();
+    });
+
+    it('fails the round when the server ran it as a first round', async () => {
+      const events: string[] = [];
+      const { esClient } = fakeEsClient(events, {});
+      const fetch = fakeFetch(events, {
+        readExecution: async () => completedWith([], { turnKind: 'initial_investigation' }),
+      });
+
+      const output = await runReinforcementExample({
+        esClient,
+        fetch: fetch as unknown as HttpHandler,
+        connectorId: 'connector',
+        example: followUp,
+      });
+
+      expect(output.turn_kind).toBe('initial_investigation');
+      expect(output.execution_error).toContain('replay_causal_confirmed was ignored');
+    });
+
+    it('puts back the learning slots it wrote and leaves another writer alone', async () => {
+      const events: string[] = [];
+      const learning = (content: string, conversationId: string): Source => ({
+        type: 'decision_tree_learning',
+        content,
+        attributes: { space_id: 'default', conversation_id: conversationId },
+      });
+      const existing = learning('earlier learning', 'earlier-investigation');
+      const { esClient, docs } = fakeEsClient(events, {
+        'default:dtree_learning_otel-gateway-errors_remediation': existing,
+      });
+      const fetch: jest.Mock = fakeFetch(events, {
+        readExecution: async () => {
+          const replayId = replayIdOf(fetch);
+          docs.set(
+            'default:dtree_learning_otel-gateway-errors_remediation',
+            learning('replay learning', replayId)
+          );
+          docs.set(
+            'default:dtree_learning_otel-gateway-errors_system_dependency',
+            learning('new replay learning', replayId)
+          );
+          docs.set(
+            'default:dtree_learning_es-proxy-errors_remediation',
+            learning('foreign learning', 'other-investigation')
+          );
+          return completedWith([], { turnKind: 'feedback_reinforcement' });
+        },
+      });
+
+      const output = await runReinforcementExample({
+        esClient,
+        fetch: fetch as unknown as HttpHandler,
+        connectorId: 'connector',
+        example: followUp,
+      });
+
+      expect(output.rollback_error).toBeUndefined();
+      expect(docs.get('default:dtree_learning_otel-gateway-errors_remediation')).toEqual(existing);
+      expect(docs.has('default:dtree_learning_otel-gateway-errors_system_dependency')).toBe(false);
+      expect(docs.get('default:dtree_learning_es-proxy-errors_remediation')?.content).toBe(
+        'foreign learning'
+      );
+    });
+
+    it('leaves a learning slot alone when another writer changes it during the rollback', async () => {
+      const slot = 'default:dtree_learning_otel-gateway-errors_remediation';
+      const learning = (content: string, conversationId: string): Source => ({
+        type: 'decision_tree_learning',
+        content,
+        attributes: { space_id: 'default', conversation_id: conversationId },
+      });
+      const { esClient, docs, touch } = fakeEsClient([], {
+        [slot]: learning('earlier learning', 'earlier-investigation'),
+      });
+      const fetch: jest.Mock = fakeFetch([], {
+        readExecution: async () => {
+          docs.set(slot, learning('replay learning', replayIdOf(fetch)));
+          touch(slot);
+          return completedWith([], { turnKind: 'feedback_reinforcement' });
+        },
+      });
+      const search = (esClient.search as jest.Mock).getMockImplementation();
+      (esClient.search as jest.Mock).mockImplementation(async (request: SearchRequest) => {
+        const response = await search?.(request);
+        // Another investigation writes the slot after the rollback listed it.
+        const query = JSON.stringify(request);
+        if (query.includes('decision_tree_learning') && query.includes('conversation_id')) {
+          docs.set(slot, learning('newer learning', 'other-investigation'));
+          touch(slot);
+        }
+        return response;
+      });
+
+      const output = await runReinforcementExample({
+        esClient,
+        fetch: fetch as unknown as HttpHandler,
+        connectorId: 'connector',
+        example: followUp,
+      });
+
+      expect(output.rollback_error).toBeUndefined();
+      expect(docs.get(slot)?.content).toBe('newer learning');
+    });
+  });
+
+  it('seeds nothing for a round without a prior tree and grades the tree the run created', async () => {
+    const newTreeRound = byCaseId('customer0-uiam-pod-loss-initial-2026-09-14');
+    const created = '```mermaid\nflowchart TD\n    S1([uiam 503s]) --> X1((Escalate))\n```';
+    const events: string[] = [];
+    const { esClient, docs } = fakeEsClient(events, { [OTHER_HEAD_ID]: otherTree });
+    const fetch: jest.Mock = fakeFetch(events, {
+      readExecution: async () => {
+        docs.set('default:dtree_uiam-503s', head('uiam-503s', created, replayIdOf(fetch)));
+        return completedWith([
+          { symptom_trees: [{ tree_id: 'symptom:uiam-503s' }], traversals: [] },
+        ]);
+      },
+    });
+
+    const output = await runReinforcementExample({
+      esClient,
+      fetch: fetch as unknown as HttpHandler,
+      connectorId: 'connector',
+      example: newTreeRound,
+    });
+
+    expect(events.filter((event) => event.startsWith('es:index'))).toEqual([]);
+    expect(runInputs(fetch)).not.toHaveProperty('replay_causal_confirmed');
+    expect(output).toMatchObject({
+      tree_id: 'symptom:uiam-503s',
+      causal_confirmed: false,
+      submitted_mermaid: created,
+      trees: [
+        { tree_id: 'symptom:uiam-503s', prior_mermaid: undefined, submitted_mermaid: created },
+      ],
+    });
+    expect(output.prior_mermaid).toBeUndefined();
+    expect([...docs.keys()]).toEqual([OTHER_HEAD_ID]);
   });
 
   describe('rollback', () => {
