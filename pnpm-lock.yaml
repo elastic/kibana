@@ -4686,8 +4686,8 @@ importers:
         specifier: 11.1.8
         version: 11.1.8
       immer-v9:
-        specifier: npm:immer@9.0.21
-        version: immer@9.0.21
+        specifier: npm:immer@11.2.10
+        version: immer@11.2.10
       inquirer:
         specifier: 8.2.7
         version: 8.2.7(@types/node@24.10.13)
@@ -19332,6 +19332,9 @@ packages:
 
   immer@11.1.8:
     resolution: {integrity: sha512-/tbkHMW7y10Lx6i1crLjD4/OhNkRG+Fo7byZHtah0547nIeXYcpIXaUh0IAQY6gO5459qpGGYapcEOHtFXkIuA==}
+
+  immer@11.2.10:
+    resolution: {integrity: sha512-pzANBj+0A9u+prdhBJ14DVi44vCvVUQzBa8DKt6I0AMCokPHtt722BK9IX5bFC70xUSU9TnzLRIJLTGqIzjEFw==}
 
   immer@9.0.21:
     resolution: {integrity: sha512-bc4NBHqOqSfRW7POMkHd51LvClaeMXpm8dx0e8oE2GORbq5aRK7Bxl4FyzVLdGtLmvLKL7BTDBG5ACQm4HWjTA==}
@@ -36243,6 +36246,8 @@ snapshots:
   immediate@3.0.6: {}
 
   immer@11.1.8: {}
+
+  immer@11.2.10: {}
 
   immer@9.0.21: {}
 
