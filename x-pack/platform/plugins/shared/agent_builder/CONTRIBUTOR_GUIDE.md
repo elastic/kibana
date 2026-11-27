@@ -1443,6 +1443,8 @@ Use `events.ui.activeConversation$` when you need to react to the conversation c
 
 The non-null payload is:
 
+- `agentId?: string` - the agent selected for the chat surface. An embedded chat that has not selected one reports `undefined` and uses the default agent. This is the selection, not necessarily the agent of the bound conversation: an embedded chat without a selection can resume a conversation of a custom agent and still report `undefined`. Use `conversation.agent_id` when you need the agent of a loaded conversation
+- `sessionTag?: string` - the session tag of the embedded chat that published the binding, or `undefined` for the full-page chat. Every chat surface publishes to this stream, so compare it with your own session tag to react only to your chat
 - `id?: string` - the currently bound conversation id, or `undefined` when the chat is currently bound to a new conversation
 - `conversation?: Conversation` - the fully loaded conversation when it has been successfully fetched (undefined for new conversations, while loading, or on fetch errors)
 

@@ -57,8 +57,24 @@ jest.mock('../../utils/refresh_lists_on_agent_changes', () => ({
   refreshListsOnAgentChanges: (...args: Parameters<typeof mockRefreshListsOnAgentChanges>) =>
     mockRefreshListsOnAgentChanges(...args),
 }));
-// Rendered by the component but irrelevant here (it has its own dependencies).
-jest.mock('./conversation_change_notifier', () => ({ ConversationChangeNotifier: () => null }));
+const mockNotifyConversationChange = jest.fn();
+jest.mock('./conversation_change_notifier', () => {
+  const { useEffect } = jest.requireActual<typeof import('react')>('react');
+  return {
+    ConversationChangeNotifier: ({
+      agentId,
+      sessionTag,
+    }: {
+      agentId?: string;
+      sessionTag?: string;
+    }) => {
+      useEffect(() => {
+        mockNotifyConversationChange({ agentId, sessionTag });
+      }, [agentId, sessionTag]);
+      return null;
+    },
+  };
+});
 // Render the spinner as a marker so we can assert the isReady gate.
 jest.mock('../../components/redirects/redirect_loading', () => ({
   RedirectLoading: () => <div>loading-spinner</div>,
@@ -107,11 +123,13 @@ const renderEmbeddableProvider = ({
   getConversation = jest.fn().mockResolvedValue({ id: 'conversation-a' }),
   children = <ContextSpy />,
   conversationStarters,
+  onRegisterCallbacks,
 }: {
   sessionTag?: string;
   getConversation?: jest.Mock;
   children?: React.ReactNode;
   conversationStarters?: readonly ConversationStarter[];
+  onRegisterCallbacks?: (callbacks: EmbeddableConversationCallbacks) => void;
 } = {}) => {
   let callbacks: EmbeddableConversationCallbacks | undefined;
   const coreStart = coreMock.createStart();
@@ -135,6 +153,7 @@ const renderEmbeddableProvider = ({
       autoSendInitialMessage
       onRegisterCallbacks={(registered) => {
         callbacks = registered;
+        onRegisterCallbacks?.(registered);
       }}
     >
       {children}
@@ -210,6 +229,28 @@ describe('PinnedConversationProvider', () => {
     expect(screen.getByText('agent:elastic-ai-agent')).toBeInTheDocument();
   });
 
+  it('tells the notifier which chat it belongs to', () => {
+    mockUseEffectiveSpaceDefaultAgent.mockReturnValue({
+      effectiveDefaultAgentId: null,
+      isRestricted: false,
+      isReady: true,
+    });
+
+    render(
+      <PinnedConversationProvider
+        baseValue={{ ...baseValue, sessionTag: 'workflow-editor:a' }}
+        agentId="custom-workflow-agent"
+      >
+        <AgentIdConsumer />
+      </PinnedConversationProvider>
+    );
+
+    expect(mockNotifyConversationChange).toHaveBeenLastCalledWith({
+      agentId: 'custom-workflow-agent',
+      sessionTag: 'workflow-editor:a',
+    });
+  });
+
   it('withholds the chat (spinner) until the effective default is ready', () => {
     mockUseEffectiveSpaceDefaultAgent.mockReturnValue({
       effectiveDefaultAgentId: null,
@@ -237,6 +278,29 @@ describe('EmbeddableConversationsProvider initial message', () => {
       isRestricted: false,
       isReady: true,
     });
+  });
+
+  it('registers sidebar callbacks before publishing the conversation binding', () => {
+    const order: string[] = [];
+    mockNotifyConversationChange.mockImplementationOnce(() => {
+      order.push('conversation');
+    });
+
+    renderEmbeddableProvider({
+      onRegisterCallbacks: () => {
+        order.push('callbacks');
+      },
+    });
+
+    expect(order).toEqual(['callbacks', 'conversation']);
+  });
+
+  it('publishes the conversation binding under the chat session tag', () => {
+    renderEmbeddableProvider({ sessionTag: TAG_B });
+
+    expect(mockNotifyConversationChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ sessionTag: TAG_B })
+    );
   });
 
   it('keeps the initial message when there is no conversation to continue', async () => {

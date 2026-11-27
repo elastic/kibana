@@ -11,6 +11,13 @@ import type { BrowserChatEvent } from './events';
 
 export interface ActiveConversation {
   /**
+   * Agent selected for the chat surface, undefined for an embedded chat using the default agent.
+   * Not necessarily the agent of the bound conversation: use `conversation.agent_id` for that.
+   */
+  agentId?: string;
+  /** Session tag of the embedded chat that published this binding; the full-page chat has none. */
+  sessionTag?: string;
+  /**
    * Active conversation id, if one already exists.
    * Undefined means we're currently in a new conversation.
    */

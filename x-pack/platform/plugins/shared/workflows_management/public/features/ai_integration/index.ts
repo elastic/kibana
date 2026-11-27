@@ -22,7 +22,11 @@ export {
 export { findLinkedWorkflowAttachment, WORKFLOW_EDITOR_ATTACHMENT_ID } from './attachment_link';
 
 export {
+  getWorkflowEditorSessionTag,
+  isWorkflowEditorSessionTag,
   setLastCreateSessionId,
+  setLastCreateChat,
+  takeCarriedChatFor,
   carryConversationToWorkflow,
   hasPersistedConversation,
   setSidebarOpen,
