@@ -118,10 +118,6 @@ export default ({ getService }: FtrProviderContext) => {
           await privMonRolesUtils.cleanupCustomRoleForServerless();
         }
       });
-      it('should allow init for user with full privileges', async () => {
-        const res = await authHelper.initEngineForRole(READ_ALL_INDICES_ROLE, privMonUtils);
-        expect(res.status).to.eql(200);
-      });
       it('should return forbidden for user without correct kibana privileges ', async () => {
         const res = await authHelper.initEngineForRole(
           READ_NO_INDEX_ROLE_NO_PRIVILEGES_ROLE,

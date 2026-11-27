@@ -9,18 +9,10 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Entity Analytics - Privilege Monitoring', function () {
-    loadTestFile(require.resolve('./monitoring_entity_source_crud'));
-    // Split engine tests into separate files for better isolation and reduced flakiness
+    // The engine, schedule, sync and privileged users tests were removed with the privilege
+    // monitoring task: they need the task to run. The routes they covered are removed later.
     loadTestFile(require.resolve('./engine_health'));
-    loadTestFile(require.resolve('./engine_init'));
-    loadTestFile(require.resolve('./engine_workflow'));
-    loadTestFile(require.resolve('./engine_schedule'));
-    loadTestFile(require.resolve('./engine_integrations_sync'));
-    loadTestFile(require.resolve('./engine_default_sources'));
     loadTestFile(require.resolve('./search_indices'));
     loadTestFile(require.resolve('./privilege_monitoring_privileges_check'));
-    loadTestFile(require.resolve('./privileged_users/api'));
-    loadTestFile(require.resolve('./privileged_users/task'));
-    loadTestFile(require.resolve('./privileged_users/migrations'));
   });
 }

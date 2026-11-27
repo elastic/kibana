@@ -7,5 +7,3 @@
 
 export * from './privmon_utils';
 export * from './role_utils';
-export * from './plain_index_sync_utils';
-export * from './entity_source_fixtures';

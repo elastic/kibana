@@ -147,8 +147,8 @@ import {
   ENDPOINT_SEARCH_STRATEGY,
 } from '../common/endpoint/constants';
 
-import { registerPrivilegeMonitoringTask } from './lib/entity_analytics/privilege_monitoring/tasks/privilege_monitoring_task';
 import { registerLeadGenerationTask } from './lib/entity_analytics/lead_generation/tasks';
+import { removeRetiredPrivmonTasks } from './lib/entity_analytics/utils/remove_retired_privmon_tasks';
 import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import { registerRiskScoreMaintainer } from './lib/entity_analytics/risk_score/maintainer/register_risk_score_maintainer';
 import { accessesFrequentlyMaintainer } from './lib/entity_analytics/maintainers/accesses';
@@ -442,16 +442,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.entityStore?.registerEntityMaintainer(administersMaintainer);
     plugins.entityStore?.registerEntityMaintainer(supervisesMaintainer);
     plugins.entityStore?.registerEntityMaintainer(ownsMaintainer);
-
-    registerPrivilegeMonitoringTask({
-      getStartServices: core.getStartServices,
-      taskManager: plugins.taskManager,
-      logger: this.logger,
-      telemetry: core.analytics,
-      kibanaVersion: pluginContext.env.packageInfo.version,
-      experimentalFeatures,
-      config: this.config,
-    });
 
     registerLeadGenerationTask({
       getStartServices: core.getStartServices,
@@ -1155,6 +1145,24 @@ export class Plugin implements ISecuritySolutionPlugin {
           esClient: core.elasticsearch.client.asInternalUser,
         })
         .catch(() => {}); // it shouldn't refuse, but just in case
+
+      // The privilege monitoring task type is no longer registered. Remove any
+      // leftover Task Manager documents so they don't linger as orphans after upgrade.
+      // This does not block startup, and anything it misses is retried on the next start.
+      removeRetiredPrivmonTasks({
+        taskRepo: core.savedObjects.createInternalRepository(['task']),
+        logger: this.logger,
+      })
+        .then((removed) => {
+          if (removed > 0) {
+            this.logger.info(`Removed ${removed} leftover privilege monitoring task document(s)`);
+          }
+        })
+        .catch((error) => {
+          this.logger.warn(
+            `Failed to remove leftover privilege monitoring task documents: ${error.message}`
+          );
+        });
     }
 
     const uiSettingsClient = core.uiSettings.asScopedToClient(

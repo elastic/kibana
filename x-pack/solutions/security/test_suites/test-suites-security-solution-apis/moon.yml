@@ -60,7 +60,6 @@ dependsOn:
   - '@kbn/test-suites-xpack-platform'
   - '@kbn/response-ops-rule-params'
   - '@kbn/securitysolution-exceptions-common'
-  - '@kbn/std'
   - '@kbn/securitysolution-utils'
   - '@kbn/security-solution-test-api-clients'
   - '@kbn/setup-node-env'
