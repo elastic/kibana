@@ -193,6 +193,7 @@ export const withCrashGroupHistory = (
   return query.pipe`WHERE ${isListed}`.pipe`STATS
       ${resultColumn('releases')} = VALUES(${resultColumn('crashRelease')}),
       ${resultColumn('unversioned')} = COUNT(*) WHERE ${resultColumn('crashRelease')} IS NULL,
+      ${resultColumn('iosReports')} = COUNT(*) WHERE ${isIosReport()},
       ${resultColumn('firstSeen')} = MIN(${crashTime}),
       ${resultColumn('firstRelease')} = FIRST(${resultColumn('crashRelease')}, ${crashTime})
     BY ${fingerprint}`.pipe`LIMIT ${fingerprints.length}`;
@@ -222,6 +223,8 @@ export interface CrashGroupHistoryRow {
   [RESULT_COLUMNS.releases]?: string | string[] | null;
   /** Crashes without a release, which `releases` leaves out. */
   [RESULT_COLUMNS.unversioned]?: number | null;
+  /** EDOT iOS reports in the lookback, which the range's crashes of the group may not have. */
+  [RESULT_COLUMNS.iosReports]?: number | null;
   [RESULT_COLUMNS.firstSeen]: string;
   [RESULT_COLUMNS.firstRelease]?: string | null;
 }

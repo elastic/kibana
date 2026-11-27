@@ -288,6 +288,23 @@ describe('getCrashGroups, the newest release', () => {
     expect(client.esql.query).toHaveBeenCalledTimes(2);
   });
 
+  it('never marks new a group whose EDOT iOS reports are only in the lookback', async () => {
+    const { client, esClient } = createTracedEsClientMock();
+    client.esql.query
+      .mockResolvedValueOnce(esqlResponse([groupRow('sigkill', { exception_type: 'SIGKILL' })]))
+      .mockResolvedValueOnce(esqlResponse([historyRow('sigkill', { ios_reports: 1 })]));
+
+    const [group] = await getCrashGroups({
+      esClient,
+      filters: { serviceName: 'transit-companion' },
+      start: START,
+      end: END,
+    });
+
+    expect(group.newInRelease).toBeNull();
+    expect(client.esql.query).toHaveBeenCalledTimes(2);
+  });
+
   it('looks for the newest release only once a group crashed on one release alone', async () => {
     const { client, esClient } = createTracedEsClientMock();
     client.esql.query

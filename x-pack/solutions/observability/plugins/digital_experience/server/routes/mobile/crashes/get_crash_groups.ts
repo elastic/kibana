@@ -124,6 +124,7 @@ export const getCrashGroups = async ({
     const history = historyByFingerprint.get(row[RESULT_COLUMNS.fingerprint]);
     const releases = castArray(history?.[RESULT_COLUMNS.releases] ?? []);
     return !row[RESULT_COLUMNS.iosReports] &&
+      !history?.[RESULT_COLUMNS.iosReports] &&
       !history?.[RESULT_COLUMNS.unversioned] &&
       releases.length === 1
       ? releases[0]

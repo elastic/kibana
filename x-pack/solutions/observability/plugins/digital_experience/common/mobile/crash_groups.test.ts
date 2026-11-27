@@ -121,8 +121,8 @@ describe('withCrashGroupHistory', () => {
 
     expect(query).toContain('| WHERE fingerprint IN ("abc", "d\\"e")');
     expect(query).toContain(
-      // The crashes without a release too, which `VALUES` leaves out.
-      '| STATS releases = VALUES(crash_release), unversioned = COUNT(*) WHERE crash_release IS NULL, first_seen = MIN(crash_time), first_release = FIRST(crash_release, crash_time) BY fingerprint | LIMIT 2'
+      // The crashes without a release too, which `VALUES` leaves out, and the lookback's iOS reports.
+      '| STATS releases = VALUES(crash_release), unversioned = COUNT(*) WHERE crash_release IS NULL, ios_reports = COUNT(*) WHERE `attributes.exception.stacktrace` LIKE "Incident Identifier:*", first_seen = MIN(crash_time), first_release = FIRST(crash_release, crash_time) BY fingerprint | LIMIT 2'
     );
   });
 });
