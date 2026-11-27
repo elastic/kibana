@@ -104,7 +104,7 @@ export const VISIBILITY = i18n.translate('xpack.securitySolution.ruleSets.editor
 export const VISIBILITY_SPACE = i18n.translate(
   'xpack.securitySolution.ruleSets.editor.visibilitySpace',
   {
-    defaultMessage: 'Everybody in this space',
+    defaultMessage: 'Public',
   }
 );
 export const VISIBILITY_PRIVATE = i18n.translate(

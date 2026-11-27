@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useEffect, useRef, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiResizableButton } from '@elastic/eui';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { RulesFacetPanel } from '../../../rule_sets/facets/rules_facet_panel';
 import { useRuleSetDraft } from '../../../rule_sets/components/use_rule_set_draft';
 import {
@@ -56,6 +57,107 @@ const useStickyAppHeaderHeight = () => {
   return height;
 };
 
+const FACET_PANEL_WIDTH = { initial: 260, min: 200, max: 480, step: 20 };
+// Leave room for the table and the gap between the columns in a narrow window.
+const MIN_TABLE_SPACE = 440;
+
+const clampFacetWidth = (width: number, max: number) =>
+  Math.min(max, Math.max(FACET_PANEL_WIDTH.min, Math.round(width)));
+
+const measureFacetPanel = (handle: HTMLButtonElement) => {
+  const panel = handle.parentElement;
+  const layout = panel?.parentElement;
+  if (!panel || !layout) return;
+  return {
+    width: Math.round(panel.getBoundingClientRect().width),
+    max: clampFacetWidth(layout.clientWidth - MIN_TABLE_SPACE, FACET_PANEL_WIDTH.max),
+    direction: getComputedStyle(panel).direction === 'rtl' ? -1 : 1,
+  };
+};
+
+const ResizableRulesFacetPanel = ({ offset }: { offset: string }) => {
+  const [savedWidth = FACET_PANEL_WIDTH.initial, saveWidth] = useLocalStorage<number>(
+    'securitySolution.rulesTable.facetPanelWidth',
+    FACET_PANEL_WIDTH.initial
+  );
+  const [dragWidth, setDragWidth] = useState<number>();
+  const drag = useRef<{
+    pointerId: number;
+    startX: number;
+    width: number;
+    max: number;
+    direction: number;
+  }>();
+
+  const getDragWidth = (event: React.PointerEvent<HTMLButtonElement>) => {
+    const current = drag.current;
+    if (current?.pointerId !== event.pointerId) return;
+    return clampFacetWidth(
+      current.width + (event.clientX - current.startX) * current.direction,
+      current.max
+    );
+  };
+
+  return (
+    <EuiFlexItem
+      grow={false}
+      css={{
+        width: dragWidth ?? clampFacetWidth(savedWidth, FACET_PANEL_WIDTH.max),
+        maxWidth: `max(${FACET_PANEL_WIDTH.min}px, calc(100% - ${MIN_TABLE_SPACE}px))`,
+        position: 'sticky',
+        top: `calc(${offset} + 8px)`,
+      }}
+    >
+      <div
+        css={{
+          maxHeight: `calc(var(--kbn-application--content-height, 100vh) - ${offset} - 8px - ${BOTTOM_SPACE})`,
+          overflowY: 'auto',
+        }}
+      >
+        <RulesFacetPanel />
+      </div>
+      <EuiResizableButton
+        isHorizontal
+        alignIndicator="start"
+        accountForScrollbars="before"
+        css={{ position: 'absolute', insetBlock: 0, insetInlineStart: '100%', touchAction: 'none' }}
+        data-test-subj="ruleFacetPanelResize"
+        onPointerDown={(event) => {
+          if (event.button !== 0 || drag.current) return;
+          const panel = measureFacetPanel(event.currentTarget);
+          if (!panel) return;
+          event.preventDefault();
+          event.currentTarget.setPointerCapture(event.pointerId);
+          drag.current = { ...panel, pointerId: event.pointerId, startX: event.clientX };
+        }}
+        onPointerMove={(event) => {
+          const width = getDragWidth(event);
+          if (width !== undefined) setDragWidth(width);
+        }}
+        onPointerUp={(event) => {
+          const width = getDragWidth(event);
+          if (width !== undefined && width !== drag.current?.width) saveWidth(width);
+        }}
+        onLostPointerCapture={(event) => {
+          if (drag.current?.pointerId !== event.pointerId) return;
+          drag.current = undefined;
+          setDragWidth(undefined);
+        }}
+        onKeyDown={(event) => {
+          if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+          const panel = measureFacetPanel(event.currentTarget);
+          if (!panel) return;
+          event.preventDefault();
+          const delta =
+            event.key === 'ArrowRight' ? FACET_PANEL_WIDTH.step : -FACET_PANEL_WIDTH.step;
+          const width = clampFacetWidth(panel.width + delta * panel.direction, panel.max);
+          if (width !== panel.width) saveWidth(width);
+        }}
+      />
+    </EuiFlexItem>
+  );
+};
+
 /**
  * Facets left, table right. The panel sticks below the Kibana headers and fits the visible part of
  * the application, so it stays in view while the table scrolls; a long panel scrolls on its own.
@@ -67,20 +169,7 @@ const RulesWithFacets = ({ selectedTab }: { selectedTab: AllRulesTabs }) => {
   const offset = `(var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0px)) + ${headerHeight}px)`;
   return (
     <EuiFlexGroup gutterSize="l" alignItems="flexStart" responsive={false}>
-      {isOpen && (
-        <EuiFlexItem
-          grow={false}
-          css={{
-            width: 260,
-            position: 'sticky',
-            top: `calc(${offset} + 8px)`,
-            maxHeight: `calc(var(--kbn-application--content-height, 100vh) - ${offset} - 8px - ${BOTTOM_SPACE})`,
-            overflowY: 'auto',
-          }}
-        >
-          <RulesFacetPanel />
-        </EuiFlexItem>
-      )}
+      {isOpen && <ResizableRulesFacetPanel offset={offset} />}
       <EuiFlexItem css={{ minWidth: 0, position: 'relative' }}>
         <RulesTables selectedTab={selectedTab} />
       </EuiFlexItem>

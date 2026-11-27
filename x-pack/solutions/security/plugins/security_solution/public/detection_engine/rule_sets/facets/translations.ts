@@ -135,17 +135,27 @@ export const HIDE_FILTERS = i18n.translate('xpack.securitySolution.ruleSets.face
 });
 
 export const FIND_TAG = i18n.translate('xpack.securitySolution.ruleSets.facets.findTag', {
-  defaultMessage: 'Find a tag in all groups',
+  defaultMessage: 'Find tags',
 });
 
 export const NO_TAGS_MATCH = i18n.translate('xpack.securitySolution.ruleSets.facets.noTagsMatch', {
   defaultMessage: 'No tags match',
 });
 
-export const MORE_TAG_MATCHES = (count: number) =>
-  i18n.translate('xpack.securitySolution.ruleSets.facets.moreTagMatches', {
+export const FIND_FILTERS = i18n.translate('xpack.securitySolution.ruleSets.facets.findFilters', {
+  defaultMessage: 'Find filters',
+});
+
+export const NO_FILTERS_MATCH = i18n.translate(
+  'xpack.securitySolution.ruleSets.facets.noFiltersMatch',
+  { defaultMessage: 'No filters match' }
+);
+
+export const MORE_FILTER_MATCHES = (count: number) =>
+  i18n.translate('xpack.securitySolution.ruleSets.facets.moreFilterMatches', {
     values: { count },
-    defaultMessage: '{count} more: type more of the tag',
+    defaultMessage:
+      '{count, plural, one {# more match} other {# more matches}}. Keep typing to narrow the results.',
   });
 
 export const SHOW_ALL = (count: number) =>

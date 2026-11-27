@@ -28,7 +28,7 @@ import {
   SearchSuggestions,
   useRecentAiSearches,
 } from '../../../../rule_sets/search/search_suggestions';
-import type { RuleSearchBoxMode } from '../../../../rule_management/logic/types';
+import type { FilterOptions, RuleSearchBoxMode } from '../../../../rule_management/logic/types';
 
 const FilterWrapper = styled(EuiFlexGroup)`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};
@@ -53,18 +53,19 @@ const RulesTableFiltersComponent = ({ selectedTab }: RulesTableFiltersProps) => 
   const searchStatus = useRuleSearchStatus();
   const boxMode = searchBoxMode(searchStatus, filterOptions.searchMode);
   const { recent, remember } = useRecentAiSearches();
-  const handleOnSearch = useCallback(
-    (filterString: string) => {
-      const text = filterString.trim();
+  const handleApplyFilter = useCallback(
+    (options: Partial<FilterOptions>) => {
       startTransaction({ name: RULES_TABLE_ACTIONS.FILTER });
-      if (text && boxMode === 'ai') remember(text);
-      setFilterOptions({ filter: text, members: undefined });
+      if (options.filter && boxMode === 'ai') remember(options.filter);
+      setFilterOptions(options);
     },
     [boxMode, remember, setFilterOptions, startTransaction]
   );
-  const handleApplyFilter = useCallback(() => {
-    startTransaction({ name: RULES_TABLE_ACTIONS.FILTER });
-  }, [startTransaction]);
+  const handleOnSearch = useCallback(
+    (filterString: string) =>
+      handleApplyFilter({ filter: filterString.trim(), members: undefined }),
+    [handleApplyFilter]
+  );
   const handleSearchModeChange = useCallback(
     (searchMode: RuleSearchBoxMode) => {
       startTransaction({ name: RULES_TABLE_ACTIONS.FILTER });

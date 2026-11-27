@@ -52,11 +52,11 @@ export const useFilterSearchOptions = (
   });
   const integrationTitles = useIntegrationTitles();
   const scope = { ...filterOptions, filter: '', members: undefined };
+  // The search needs rule integration IDs even when the facet panel is hidden.
   const { data: counts, isLoading: loadingCounts } = useFacetCounts({
     conditions: scope.conditions ?? {},
     params: ruleQueryParams(scope),
     filter: convertRulesFilterToKQL(scope) || undefined,
-    enabled: fieldId === 'integration' || fieldId === 'type',
   });
 
   const tags = metadata?.aggregated_fields.tags ?? EMPTY_VALUES;

@@ -135,7 +135,7 @@ describe('findRulesSkill', () => {
     const { getStartServices, mockLogger } = createMockDeps();
     const skill = createFindRulesSkill({ getStartServices, logger: mockLogger });
     expect(skill.content).toMatch(/which of them are network/);
-    expect(skill.content).toMatch(/fresh.*security\.discover_rule_tags/);
+    expect(skill.content).toMatch(/fresh `security\.find_rules` query/);
     expect(skill.content).toMatch(/carry-over filters/);
   });
 
@@ -218,10 +218,11 @@ describe('findRulesSkill', () => {
     expect(skill.content).toContain('excludeTags: ["Custom"]');
   });
 
-  it('content requires tag discovery before tag filtering', () => {
+  it('content uses known tag values directly and discovers unknown values', () => {
     const { getStartServices, mockLogger } = createMockDeps();
     const skill = createFindRulesSkill({ getStartServices, logger: mockLogger });
-    expect(skill.content).toMatch(/Before filtering by tag/i);
+    expect(skill.content).toMatch(/exact tag values.*directly/i);
+    expect(skill.content).toMatch(/exact tag values for their requested filter are unknown/i);
     expect(skill.content).toMatch(/exact tag values/i);
     expect(skill.content).toMatch(/with `\{\}`/i);
     expect(skill.content).toContain('security.find_rules');

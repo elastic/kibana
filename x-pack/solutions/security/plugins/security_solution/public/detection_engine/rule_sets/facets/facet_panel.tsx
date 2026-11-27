@@ -29,11 +29,12 @@ import type { RuleSetConditions } from '../../../../common/api/detection_engine/
 import type {
   FacetCountsResult,
   FacetField,
+  FacetLabels,
   FacetSection,
   FacetSelection,
   FacetValue,
 } from './facet_fields';
-import { allFacetFields, hasSelection, tagFieldOf } from './facet_fields';
+import { allFacetFields, hasSelection } from './facet_fields';
 import { useMitreConfiguration } from '../../../common/hooks/mitre/use_mitre_configuration';
 import { useIntegrationTitles } from '../components/group_by_fields';
 import * as i18n from './translations';
@@ -42,17 +43,45 @@ const VISIBLE_VALUES = 5;
 const SEARCH_FROM = 10;
 const VISIBLE_TAG_GROUPS = 6;
 const NO_VALUES: FacetValue[] = [];
-const MAX_TAG_MATCHES = 50;
+const MAX_FILTER_MATCHES = 50;
 
-/** Every tag that the conditions include or exclude, in "Other tags" or in a tag group. */
-const selectedTags = (conditions: RuleSetConditions): string[] => [
-  ...(conditions.tags?.include ?? []),
-  ...(conditions.tags?.exclude ?? []),
-  ...Object.values(conditions.tag_categories ?? {}).flatMap((values) => [
-    ...(values.include ?? []),
-    ...(values.exclude ?? []),
-  ]),
-];
+const findFilterMatches = (
+  query: string,
+  fields: FacetField[],
+  valuesById: Map<string, FacetValue[]>,
+  conditions: RuleSetConditions,
+  labels: FacetLabels,
+  includeFieldLabels = true
+) => {
+  const normalize = (text: string) =>
+    text
+      .trim()
+      .toLocaleLowerCase()
+      .replace(/\s*:\s*/g, ':');
+  const terms = normalize(query).split(/\s+/);
+  if (!terms[0]) return;
+
+  const groups = [];
+  let total = 0;
+  for (const field of fields) {
+    const selection = field.get(conditions);
+    const byValue = new Map(valuesById.get(field.id)?.map((value) => [value.value, value]));
+    for (const value of [...selection.include, ...selection.exclude]) {
+      if (!byValue.has(value)) {
+        byValue.set(value, { value, label: field.valueLabel(value, labels), count: 0 });
+      }
+    }
+    const fieldLabel = field.section === 'tags' ? `${i18n.TAGS} ${field.label}` : field.label;
+    const matches = [...byValue.values()].filter(({ label, value }) => {
+      const searchable = normalize(`${includeFieldLabels ? fieldLabel : ''} ${label} ${value}`);
+      return terms.every((term) => searchable.includes(term));
+    });
+    const visible = matches.slice(0, Math.max(0, MAX_FILTER_MATCHES - total));
+    total += matches.length;
+    if (visible.length) groups.push({ field, selection, values: visible });
+  }
+  return { groups, total };
+};
 
 const usePanelStyles = () => {
   const { euiTheme } = useEuiTheme();
@@ -483,8 +512,9 @@ export const FacetPanel = ({
     [techniques, subtechniques]
   );
   const [showAllTagGroups, setShowAllTagGroups] = useState(false);
+  const [filterSearch, setFilterSearch] = useState('');
   const [tagSearch, setTagSearch] = useState('');
-  const fields = allFacetFields(counts, conditions);
+  const fields = useMemo(() => allFacetFields(counts, conditions), [counts, conditions]);
 
   // The latest conditions and callback, so the handler passed to the memoized groups never changes.
   const latest = useRef({ conditions, onChange });
@@ -499,30 +529,16 @@ export const FacetPanel = ({
   const valuesById = useMemo(() => {
     const byId = new Map<string, FacetValue[]>();
     if (counts) {
-      allFacetFields(counts, {}).forEach((field) =>
+      fields.forEach((field) =>
         byId.set(field.id, field.values(counts, { integrationTitles, techniqueTitles }))
       );
     }
     return byId;
-  }, [counts, integrationTitles, techniqueTitles]);
+  }, [counts, fields, integrationTitles, techniqueTitles]);
   const valuesOf = (field: FacetField) => valuesById.get(field.id) ?? NO_VALUES;
 
-  // One search over the tags of all groups, like the tags filter of the table had.
-  const tagTerm = tagSearch.trim().toLowerCase();
-  const tagMatches = useMemo(() => {
-    if (!tagTerm) return [];
-    const byTag = new Map(Object.entries(counts?.counts.tags ?? {}));
-    // Counts of a group with a selection come without that selection, as in the group itself.
-    Object.values(counts?.tagCategoryCounts ?? {}).forEach((bucket) =>
-      Object.entries(bucket).forEach(([tag, count]) => byTag.set(tag, count))
-    );
-    selectedTags(conditions).forEach((tag) => {
-      if (!byTag.has(tag)) byTag.set(tag, 0);
-    });
-    return [...byTag.entries()]
-      .filter(([tag]) => tag.toLowerCase().includes(tagTerm))
-      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
-  }, [tagTerm, counts, conditions]);
+  const labels = { integrationTitles, techniqueTitles };
+  const searchMatches = findFilterMatches(filterSearch, fields, valuesById, conditions, labels);
 
   if (isLoading && !counts) {
     return <EuiSkeletonText lines={10} />;
@@ -545,6 +561,9 @@ export const FacetPanel = ({
   };
 
   const tagFields = fields.filter(({ section }) => section === 'tags');
+  const tagMatches = searchMatches
+    ? undefined
+    : findFilterMatches(tagSearch, tagFields, valuesById, conditions, labels, false);
   const shownTagFields = showAllTagGroups
     ? tagFields
     : tagFields.filter(
@@ -552,70 +571,101 @@ export const FacetPanel = ({
       );
   const hiddenTagGroups = tagFields.length - shownTagFields.length;
 
+  const renderMatches = (matches: ReturnType<typeof findFilterMatches>, tagsOnly = false) => {
+    if (!matches) return null;
+    return (
+      <div data-test-subj={tagsOnly ? 'ruleFacetTagSearchResults' : 'ruleFacetSearchResults'}>
+        {matches.total === 0 && (
+          <EuiText size="xs" color="subdued" role="status">
+            {tagsOnly ? i18n.NO_TAGS_MATCH : i18n.NO_FILTERS_MATCH}
+          </EuiText>
+        )}
+        {matches.groups.map(({ field, selection, values }) => (
+          <div key={field.id} data-test-subj={`ruleFacetSearchGroup-${field.id}`}>
+            <EuiText size="xs" color="subdued">
+              <strong>
+                {!tagsOnly && field.section === 'tags' && field.id !== 'tags' && `${i18n.TAGS} · `}
+                {field.label}
+              </strong>
+            </EuiText>
+            {values.map((value) => (
+              <FacetValueRow
+                key={value.value}
+                field={field}
+                value={value}
+                selection={selection}
+                onChange={(next) => onFieldChange(field, next)}
+                styles={styles}
+                countsByMeaning={counts?.byMeaning}
+              />
+            ))}
+            <EuiSpacer size="xs" />
+          </div>
+        ))}
+        {matches.total > MAX_FILTER_MATCHES && (
+          <EuiText size="xs" color="subdued">
+            {i18n.MORE_FILTER_MATCHES(matches.total - MAX_FILTER_MATCHES)}
+          </EuiText>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div css={isFetching ? styles.updating : undefined} data-test-subj="ruleFacetPanel">
-      {fields.filter(({ section }) => section === 'rule').map(renderGroup)}
-
-      <div css={styles.section}>
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>{SECTION_TITLES.state}</EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiIconTip content={i18n.RULE_STATE_HELP} type="info" size="s" color="subdued" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
-      {fields.filter(({ section }) => section === 'state').map(renderGroup)}
-
-      <div css={styles.section}>{SECTION_TITLES.tags}</div>
       <EuiFieldSearch
         compressed
         fullWidth
         isClearable
-        placeholder={i18n.FIND_TAG}
-        value={tagSearch}
-        onChange={(e) => setTagSearch(e.target.value)}
-        data-test-subj="ruleFacetTagSearch"
+        placeholder={i18n.FIND_FILTERS}
+        aria-label={i18n.FIND_FILTERS}
+        value={filterSearch}
+        onChange={(event) => setFilterSearch(event.target.value)}
+        data-test-subj="ruleFacetSearch"
       />
       <EuiSpacer size="xs" />
-      {tagTerm &&
-        (tagMatches.length === 0 ? (
-          <EuiText size="xs" color="subdued">
-            {i18n.NO_TAGS_MATCH}
-          </EuiText>
-        ) : (
-          <>
-            {tagMatches.slice(0, MAX_TAG_MATCHES).map(([tag, count]) => {
-              const field = tagFieldOf(tag);
-              return (
-                <FacetValueRow
-                  key={tag}
-                  field={field}
-                  value={{ value: tag, label: tag, count }}
-                  selection={field.get(conditions)}
-                  onChange={(next) => onFieldChange(field, next)}
-                  styles={styles}
-                />
-              );
-            })}
-            {tagMatches.length > MAX_TAG_MATCHES && (
-              <EuiText size="xs" color="subdued">
-                {i18n.MORE_TAG_MATCHES(tagMatches.length - MAX_TAG_MATCHES)}
-              </EuiText>
-            )}
-          </>
-        ))}
-      {!tagTerm && shownTagFields.map(renderGroup)}
-      {!tagTerm && (hiddenTagGroups > 0 || showAllTagGroups) && (
-        <EuiButtonEmpty
-          size="xs"
-          flush="left"
-          iconType={showAllTagGroups ? 'chevronSingleUp' : 'chevronSingleDown'}
-          onClick={() => setShowAllTagGroups(!showAllTagGroups)}
-          data-test-subj="ruleFacetMoreTagGroups"
-        >
-          {showAllTagGroups ? i18n.FEWER_TAG_GROUPS : i18n.MORE_TAG_GROUPS(hiddenTagGroups)}
-        </EuiButtonEmpty>
-      )}
+      {renderMatches(searchMatches)}
+      <div hidden={Boolean(searchMatches)}>
+        {fields.filter(({ section }) => section === 'rule').map(renderGroup)}
+
+        <div css={styles.section}>
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>{SECTION_TITLES.state}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIconTip content={i18n.RULE_STATE_HELP} type="info" size="s" color="subdued" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+        {fields.filter(({ section }) => section === 'state').map(renderGroup)}
+
+        <div css={styles.section}>{SECTION_TITLES.tags}</div>
+        <EuiFieldSearch
+          compressed
+          fullWidth
+          isClearable
+          placeholder={i18n.FIND_TAG}
+          aria-label={i18n.FIND_TAG}
+          value={tagSearch}
+          onChange={(event) => setTagSearch(event.target.value)}
+          data-test-subj="ruleFacetTagSearch"
+        />
+        <EuiSpacer size="xs" />
+        {renderMatches(tagMatches, true)}
+        <div hidden={Boolean(tagMatches)}>
+          {shownTagFields.map(renderGroup)}
+          {(hiddenTagGroups > 0 || showAllTagGroups) && (
+            <EuiButtonEmpty
+              size="xs"
+              flush="left"
+              iconType={showAllTagGroups ? 'chevronSingleUp' : 'chevronSingleDown'}
+              onClick={() => setShowAllTagGroups(!showAllTagGroups)}
+              data-test-subj="ruleFacetMoreTagGroups"
+            >
+              {showAllTagGroups ? i18n.FEWER_TAG_GROUPS : i18n.MORE_TAG_GROUPS(hiddenTagGroups)}
+            </EuiButtonEmpty>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

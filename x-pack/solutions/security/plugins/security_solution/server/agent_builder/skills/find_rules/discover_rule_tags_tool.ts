@@ -34,7 +34,7 @@ export const createDiscoverRuleTagsInlineTool = ({
   description:
     'Discover available tag values across all Security detection rules. ' +
     'Returns tag names and their rule counts. ' +
-    'Call this before filtering by tag in `security.find_rules`. ' +
+    'Use it to list tags or resolve unknown exact values for a requested tag filter. ' +
     'Does NOT return rule names or metadata.',
   schema: discoverRuleTagsSchema,
   handler: async (_input, { request }) => {

@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import type { EuiFieldSearchProps, EuiIconProps, EuiSelectableOption } from '@elastic/eui';
 import { SEARCH_PLACEHOLDER, SEARCH_RULES } from '../../common/translations';
+import type { FilterOptions } from '../../rule_management/logic/types';
 import { useRulesTableContext } from '../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import { useRuleSetsQuery } from '../api';
 import { TAGS } from '../facets/translations';
@@ -30,8 +31,9 @@ import {
 import type { SearchFacetValue } from './rule_filter_search_options';
 import * as i18n from './translations';
 
-const MAX_SUGGESTIONS = 5;
-const MAX_VALUE_ROWS = 8;
+const MAX_SUGGESTIONS = 7;
+const MAX_FIELD_VALUE_ROWS = 8;
+const OPTION_ROW_HEIGHT = 32;
 const EMPTY_VALUES: SearchFacetValue[] = [];
 
 interface Picker {
@@ -62,13 +64,14 @@ type SearchOption = EuiSelectableOption<{ data?: OptionAction }>;
 
 interface RuleSearchWithFiltersProps {
   onSearch: (value: string) => void;
-  onApplyFilter: () => void;
+  onApplyFilter: (options: Partial<FilterOptions>) => void;
   placeholder?: string;
   recentSearches?: ReactNode;
   prepend?: EuiFieldSearchProps['prepend'];
 }
 
 const lowerCase = (value: string) => value.trim().toLocaleLowerCase();
+const normalizeValueText = (value: string) => lowerCase(value).replace(/\s*:\s*/g, ':');
 
 const valuePlaceholder = (fieldId: string) => {
   switch (fieldId) {
@@ -114,29 +117,98 @@ const searchValueOptions = (values: SearchFacetValue[]): SearchOption[] =>
 const findFields = (term: string) =>
   term.length >= 2 ? SEARCH_FIELDS.filter(({ label }) => lowerCase(label).includes(term)) : [];
 
-const findValues = (term: string, values: Map<string, SearchFacetValue[]>) => {
+const getActiveTerm = (text: string, caret: number) => {
+  // A category and its value can be typed with or without spaces around the colon.
+  for (const match of text.matchAll(/[^\s:]+(?:\s*:\s*[^\s:]*)?/g)) {
+    const start = match.index!;
+    const end = start + match[0].length;
+    if (start > caret) return;
+    if (caret <= end) {
+      return {
+        term: match[0],
+        remainingText: [text.slice(0, start).trimEnd(), text.slice(end).trimStart()]
+          .filter(Boolean)
+          .join(' ')
+          .trim(),
+      };
+    }
+  }
+};
+
+enum MatchQuality {
+  Exact,
+  TagPart,
+  Prefix,
+  Word,
+  Partial,
+}
+
+const matchQuality = ({ label, value, field }: SearchFacetValue, term: string) => {
+  const normalizedLabel = normalizeValueText(label);
+  const normalizedValue = normalizeValueText(value);
+  if (normalizedLabel === term || normalizedValue === term) return MatchQuality.Exact;
+  if (!normalizedLabel.includes(term) && !normalizedValue.includes(term)) return;
+
+  const tagValue =
+    field.section === 'tags' ? normalizedLabel.slice(normalizedLabel.indexOf(':') + 1) : '';
+  if (tagValue && (tagValue === term || normalizedLabel.startsWith(`${term}:`))) {
+    return MatchQuality.TagPart;
+  }
+
+  // Technique labels display the ID before the name, so either can match from the start.
+  const name = normalizedLabel.replace(`${normalizedValue} · `, '');
+  if (name === term) return MatchQuality.Exact;
+  if (name.startsWith(term) || tagValue.startsWith(term) || normalizedValue.startsWith(term)) {
+    return MatchQuality.Prefix;
+  }
+  if (name.split(/[^\p{L}\p{N}]+/u).includes(term)) return MatchQuality.Word;
+  return MatchQuality.Partial;
+};
+
+const findValues = (text: string, values: Map<string, SearchFacetValue[]>) => {
+  const term = normalizeValueText(text);
   if (term.length < 2) return EMPTY_VALUES;
-  return [...values.values()]
-    .flatMap((fieldValues) =>
-      fieldValues.filter(
-        ({ label, field }) =>
-          lowerCase(label).includes(term) || lowerCase(`${label} ${field.label}`).includes(term)
-      )
-    )
-    .sort((a, b) => Number(lowerCase(b.value) === term) - Number(lowerCase(a.value) === term))
-    .slice(0, MAX_SUGGESTIONS);
+
+  const matches = [];
+  for (const fieldValues of values.values()) {
+    for (const suggestion of fieldValues) {
+      const quality = matchQuality(suggestion, term);
+      if (quality !== undefined) matches.push({ suggestion, quality });
+    }
+  }
+  matches.sort(
+    (a, b) =>
+      a.quality - b.quality ||
+      a.suggestion.label.length - b.suggestion.label.length ||
+      a.suggestion.label.localeCompare(b.suggestion.label)
+  );
+
+  const types = new Set<string>();
+  const firstByType: SearchFacetValue[] = [];
+  const remaining: SearchFacetValue[] = [];
+  for (const { suggestion, quality } of matches) {
+    const type = suggestion.field.section === 'tags' ? TAGS_FIELD_ID : suggestion.field.id;
+    if (quality <= MatchQuality.Word && !types.has(type)) {
+      types.add(type);
+      firstByType.push(suggestion);
+    } else {
+      remaining.push(suggestion);
+    }
+  }
+  return [...firstByType, ...remaining].slice(0, MAX_SUGGESTIONS);
 };
 
 const getPickerOptions = (
   text: string,
+  caret: number,
   picker: Picker | undefined,
   values: Map<string, SearchFacetValue[]>
 ): { options: SearchOption[]; remainingText?: string } => {
-  const term = lowerCase(text);
-  const fields = findFields(term);
   if (picker) {
+    const fields = findFields(lowerCase(text));
+    const valueTerm = normalizeValueText(text);
     const matches = (values.get(picker.fieldId) ?? EMPTY_VALUES).filter(({ label }) =>
-      lowerCase(label).includes(term)
+      normalizeValueText(label).includes(valueTerm)
     );
     return {
       options: [
@@ -146,6 +218,11 @@ const getPickerOptions = (
     };
   }
 
+  const activeTerm = getActiveTerm(text, caret);
+  if (!activeTerm) return { options: [] };
+
+  const term = lowerCase(activeTerm.term);
+  const fields = findFields(term);
   const inline = fields.find(
     ({ id, label }) => fieldHasInlineValues(id) && lowerCase(label) === term
   );
@@ -154,13 +231,8 @@ const getPickerOptions = (
     : fields.length
     ? EMPTY_VALUES
     : findValues(term, values);
-  const trailingWord = text.trim().match(/\s+(\S{3,})$/);
-  const trailingFields =
-    fields.length === 0 && matches.length === 0 && trailingWord
-      ? findFields(lowerCase(trailingWord[1]))
-      : [];
   const filterOptions = [
-    ...searchFieldOptions(inline ? [] : [...fields, ...trailingFields]),
+    ...searchFieldOptions(inline ? [] : fields),
     ...searchValueOptions(matches),
   ];
   if (filterOptions.length === 0) return { options: [] };
@@ -175,7 +247,7 @@ const getPickerOptions = (
       { label: i18n.FILTER_SUGGESTIONS, isGroupLabel: true },
       ...filterOptions,
     ],
-    remainingText: trailingFields.length ? text.trim().slice(0, trailingWord?.index) : undefined,
+    remainingText: activeTerm.remainingText,
   };
 };
 
@@ -189,11 +261,12 @@ export const RuleSearchWithFilters = ({
 }: RuleSearchWithFiltersProps) => {
   const {
     state: { filterOptions },
-    actions: { setFilterOptions },
   } = useRulesTableContext();
   const { data: ruleSets } = useRuleSetsQuery();
   const selectedSet = ruleSets?.find((set) => set.id === filterOptions.ruleSetId);
   const [text, setText] = useState(filterOptions.filter);
+  const [caret, setCaret] = useState<number | null>(null);
+  const searchInput = useRef<HTMLInputElement | null>(null);
   const [open, setOpen] = useState(false);
   const [picker, setPicker] = useState<Picker>();
   const pickerPanel = useRef<HTMLElement | null>(null);
@@ -205,13 +278,20 @@ export const RuleSearchWithFilters = ({
 
   useEffect(() => {
     setText(filterOptions.filter);
+    setCaret(null);
     setPicker(undefined);
     setOpen(false);
     navigatedOptions.current = false;
   }, [filterOptions.filter, filterOptions.ruleSetId]);
 
-  const { options, remainingText } = getPickerOptions(text, picker, values);
-  const scrollable = options.length > MAX_VALUE_ROWS;
+  const { options, remainingText } = getPickerOptions(text, caret ?? text.length, picker, values);
+  const syncCaret = (input: HTMLInputElement) => {
+    if (!picker && input.selectionEnd !== caret) {
+      setCaret(input.selectionEnd);
+      navigatedOptions.current = false;
+    }
+  };
+  const scrollable = Boolean(picker) && options.length > MAX_FIELD_VALUE_ROWS;
   const showRecent = !picker && !text.trim() && recentSearches != null;
   const isOpen = open && (picker != null || options.length > 0 || showRecent);
   const resizePicker = useCallback((width: number) => {
@@ -256,17 +336,24 @@ export const RuleSearchWithFilters = ({
   const apply = ({ field, value }: SearchFacetValue) => {
     const conditions = filterOptions.conditions ?? {};
     const selection = field.get(conditions);
-    if (!selection.include.includes(value)) {
-      const next = field.set(conditions, {
-        include: field.single ? [value] : [...selection.include, value],
-        exclude: selection.exclude.filter((excluded) => excluded !== value),
+    const searchText = picker?.searchText ?? remainingText ?? filterOptions.filter;
+    const searchChanged = searchText !== filterOptions.filter;
+    const alreadySelected = selection.include.includes(value);
+    if (!alreadySelected || searchChanged) {
+      const next = alreadySelected
+        ? conditions
+        : field.set(conditions, {
+            include: field.single ? [value] : [...selection.include, value],
+            exclude: selection.exclude.filter((excluded) => excluded !== value),
+          });
+      onApplyFilter({
+        ...facetFilterState(filterOptions, next, selectedSet),
+        ...(searchChanged ? { filter: searchText } : {}),
       });
-      onApplyFilter();
-      setFilterOptions(facetFilterState(filterOptions, next, selectedSet));
     }
     refocus.current = Boolean(picker);
     navigatedOptions.current = false;
-    setText(picker?.searchText ?? filterOptions.filter);
+    setText(searchText);
     setPicker(undefined);
     setOpen(false);
   };
@@ -282,10 +369,10 @@ export const RuleSearchWithFilters = ({
         emptyMessage={i18n.NO_FILTER_MATCHES}
         noMatchesMessage={i18n.NO_FILTER_MATCHES}
         options={showRecent ? [] : options}
-        height={scrollable ? MAX_VALUE_ROWS * 32 : undefined}
+        height={scrollable ? MAX_FIELD_VALUE_ROWS * OPTION_ROW_HEIGHT : undefined}
         listProps={
           scrollable
-            ? { showIcons: false, rowHeight: 32 }
+            ? { showIcons: false, rowHeight: OPTION_ROW_HEIGHT }
             : { showIcons: false, isVirtualized: false }
         }
         searchProps={{
@@ -295,13 +382,22 @@ export const RuleSearchWithFilters = ({
           placeholder: fieldId ? valuePlaceholder(fieldId) : placeholder ?? SEARCH_PLACEHOLDER,
           prepend,
           value: text,
-          onFocus: () => {
+          inputRef: (input) => {
+            searchInput.current = input;
+          },
+          onFocus: (event) => {
             if (!refocus.current) setOpen(true);
+            syncCaret(event.currentTarget);
             refocus.current = false;
           },
-          onClick: () => setOpen(true),
+          onClick: (event) => {
+            syncCaret(event.currentTarget);
+            setOpen(true);
+          },
+          onSelect: (event) => syncCaret(event.currentTarget),
           onChange: (query) => {
             if (query === text) return;
+            if (searchInput.current) syncCaret(searchInput.current);
             navigatedOptions.current = false;
             setText(query);
             setOpen(true);

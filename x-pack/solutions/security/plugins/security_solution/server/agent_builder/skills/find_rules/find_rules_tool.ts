@@ -67,9 +67,7 @@ export const findRulesSchema = lazySchema(() =>
         .max(MAX_STRING_LENGTH)
         .optional()
         .describe(
-          'Free-text search across rule name, index patterns, and MITRE tactic/technique fields. ' +
-            'For category-flavored words like "network", "endpoint", "windows", also call ' +
-            '`security.discover_rule_tags` — a tag filter is usually more precise than free text.'
+          'Keyword search across rule name, index patterns, and MITRE tactic/technique fields.'
         ),
       enabled: z.boolean().optional().describe('Match enabled (true) or disabled (false) rules.'),
       ruleSource: z
@@ -88,12 +86,14 @@ export const findRulesSchema = lazySchema(() =>
         .array(z.string().min(1).max(MAX_TAG_LENGTH))
         .optional()
         .describe(
-          'Exact tag values to include (OR). Discover values first via `security.discover_rule_tags`.'
+          'Exact tag values to include (OR). Use `security.discover_rule_tags` if the values are unknown.'
         ),
       excludeTags: z
         .array(z.string().min(1).max(MAX_TAG_LENGTH))
         .optional()
-        .describe('Exclude rules with any of these tags.'),
+        .describe(
+          'Exclude rules with any of these exact tags. Use `security.discover_rule_tags` if the values are unknown.'
+        ),
       mitreTechnique: z
         .string()
         .regex(/^(AML\.)?T\d{4}(\.\d{3})?$/i)
@@ -252,8 +252,8 @@ function buildNoResultsHint(total: number, hasTagFilter: boolean): string {
   if (total > 0) return '';
 
   return hasTagFilter
-    ? ' The filter included tag values — those values may not exist in this space. Call `security.discover_rule_tags` to list available tags.'
-    : ' Consider broadening the filter or calling `security.discover_rule_tags` to explore available tag values.';
+    ? ' The filter included tag values — those values may not exist in this space. If the exact values are uncertain, check them with `security.discover_rule_tags`.'
+    : ' Consider broadening the filter if the user wants a wider search.';
 }
 
 export const createFindRulesInlineTool = ({
@@ -263,11 +263,9 @@ export const createFindRulesInlineTool = ({
   id: FIND_RULES_INLINE_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Find, list, and sort Security detection rules using structured filters. ' +
-    'Returns rule names, metadata, and total count. ' +
-    'Always call `security.discover_rule_tags` in the same turn immediately before calling this tool — every turn, not just the first. ' +
-    'Do NOT call this tool without a preceding `security.discover_rule_tags` call in the same response. ' +
-    'Use the freshly discovered tag list to decide which tag values (if any) to include in the filter. ' +
+    'Find, list, and sort Security detection rules by meaning or with structured filters. ' +
+    'Pass the query and any exact filters in the same call. Returns rule names, metadata, and total count. ' +
+    'Use `security.discover_rule_tags` separately to list tags or confirm an unknown exact tag value. ' +
     'Read-only: never suggest enabling, disabling, editing, or deleting rules.',
   schema: findRulesSchema,
   handler: async (input, { request }) => {
