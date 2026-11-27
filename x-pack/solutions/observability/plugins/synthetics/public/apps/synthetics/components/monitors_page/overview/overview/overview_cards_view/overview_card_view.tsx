@@ -14,7 +14,6 @@ import {
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
-import InfiniteLoader from 'react-window-infinite-loader';
 import { FixedSizeList, type ListChildComponentProps } from 'react-window';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
@@ -36,6 +35,7 @@ import type { GroupByState } from '../../../../../state/overview/models';
 import { useInfiniteOverviewTrendsRequests } from '../../../hooks/use_infinite_overview_trends_requests';
 import { useOverviewStatusState } from '../../../hooks/use_overview_status';
 import { monitorsForCardView } from './monitors_for_card_view';
+import { useInfiniteLoader } from './use_infinite_loader';
 
 const ITEM_HEIGHT = METRIC_ITEM_HEIGHT + 12;
 const MAX_LIST_HEIGHT = 800;
@@ -166,100 +166,102 @@ const UnGroupedCardView = ({
   // Append sentinel rows so the loader has an unloaded region to prefetch into.
   const itemCount = hasMore ? loadedRows + PREFETCH_ROWS : loadedRows;
   const listHeight = Math.min(ITEM_HEIGHT * itemCount, MAX_LIST_HEIGHT);
+  const isItemLoaded = useCallback(
+    (idx: number) =>
+      idx < loadedRows &&
+      listItems[idx].every((m) => !!trendData[m.configId + (m.locations[0]?.id ?? '')]),
+    [loadedRows, listItems, trendData]
+  );
+  const loadMoreItems = useCallback(
+    (start: number, stop: number) => {
+      const clampedStop = Math.min(stop, loadedRows - 1);
+      if (loadedRows > 0 && clampedStop >= start) {
+        setSliceToFetch({ startIndex: start, endIndex: clampedStop });
+      }
+      // Nearing the loaded rows means the sentinel region is in view:
+      // pull the next page of monitors from the server.
+      if (stop >= loadedRows - 1) {
+        loadMoreMonitors();
+      }
+    },
+    [loadedRows, loadMoreMonitors]
+  );
+  const onItemsRendered = useInfiniteLoader({
+    isItemLoaded,
+    itemCount,
+    loadMoreItems,
+    minimumBatchSize: MIN_BATCH_SIZE,
+    threshold: LIST_THRESHOLD,
+  });
 
   return (
     <>
       <div style={{ height: listHeight, paddingLeft: 5 }}>
         {loaded && cardMonitors.length ? (
           <EuiAutoSizer>
-            {({ width }: EuiAutoSize) => (
-              <InfiniteLoader
-                isItemLoaded={(idx: number) =>
-                  idx < loadedRows &&
-                  listItems[idx].every((m) => !!trendData[m.configId + (m.locations[0]?.id ?? '')])
-                }
-                itemCount={itemCount}
-                loadMoreItems={(start, stop: number) => {
-                  const clampedStop = Math.min(stop, loadedRows - 1);
-                  if (loadedRows > 0 && clampedStop >= start) {
-                    setSliceToFetch({ startIndex: start, endIndex: clampedStop });
-                  }
-                  // Nearing the loaded rows means the sentinel region is in view:
-                  // pull the next page of monitors from the server.
-                  if (stop >= loadedRows - 1) {
-                    loadMoreMonitors();
-                  }
-                }}
-                minimumBatchSize={MIN_BATCH_SIZE}
-                threshold={LIST_THRESHOLD}
-              >
-                {({ onItemsRendered, ref }) => {
-                  updateRowCount(width);
-
-                  return (
-                    <FixedSizeList
-                      height={listHeight + 16}
-                      width={width}
-                      onItemsRendered={onItemsRendered}
-                      itemSize={ITEM_HEIGHT}
-                      itemCount={itemCount}
-                      itemData={listItems}
-                      ref={ref}
-                    >
-                      {({
-                        index: listIndex,
-                        style,
-                        data: listData,
-                      }: React.PropsWithChildren<
-                        ListChildComponentProps<OverviewStatusMetaData[][]>
-                      >) => {
-                        const row = listData[listIndex];
-                        if (!row) {
-                          return (
-                            <EuiFlexGroup
-                              data-test-subj={`overview-grid-row-${listIndex}-loading`}
-                              gutterSize="m"
-                              css={{ ...style }}
-                            >
-                              {Array.from({ length: rowCount }).map((_, idx) => (
-                                <EuiFlexItem key={idx}>
-                                  <MetricItemPlaceholder />
-                                </EuiFlexItem>
-                              ))}
-                            </EuiFlexGroup>
-                          );
-                        }
-                        setCurrentIndex(listIndex);
-                        return (
-                          <EuiFlexGroup
-                            data-test-subj={`overview-grid-row-${listIndex}`}
-                            gutterSize="m"
-                            css={{ ...style }}
+            {({ width }: EuiAutoSize) => {
+              updateRowCount(width);
+              return (
+                <FixedSizeList
+                  height={listHeight + 16}
+                  width={width}
+                  onItemsRendered={onItemsRendered}
+                  itemSize={ITEM_HEIGHT}
+                  itemCount={itemCount}
+                  itemData={listItems}
+                >
+                  {({
+                    index: listIndex,
+                    style,
+                    data: listData,
+                  }: React.PropsWithChildren<
+                    ListChildComponentProps<OverviewStatusMetaData[][]>
+                  >) => {
+                    const row = listData[listIndex];
+                    if (!row) {
+                      return (
+                        <EuiFlexGroup
+                          data-test-subj={`overview-grid-row-${listIndex}-loading`}
+                          gutterSize="m"
+                          css={{ ...style }}
+                        >
+                          {Array.from({ length: rowCount }).map((_, idx) => (
+                            <EuiFlexItem key={idx}>
+                              <MetricItemPlaceholder />
+                            </EuiFlexItem>
+                          ))}
+                        </EuiFlexGroup>
+                      );
+                    }
+                    setCurrentIndex(listIndex);
+                    return (
+                      <EuiFlexGroup
+                        data-test-subj={`overview-grid-row-${listIndex}`}
+                        gutterSize="m"
+                        css={{ ...style }}
+                      >
+                        {row.map((monitor, idx) => (
+                          <EuiFlexItem
+                            data-test-subj="syntheticsOverviewGridItem"
+                            key={listIndex * rowCount + idx}
                           >
-                            {row.map((monitor, idx) => (
-                              <EuiFlexItem
-                                data-test-subj="syntheticsOverviewGridItem"
-                                key={listIndex * rowCount + idx}
-                              >
-                                <MetricItem
-                                  monitor={monitor}
-                                  onClick={setFlyoutConfigCallback}
-                                  isInteractive={isInteractive}
-                                />
-                              </EuiFlexItem>
-                            ))}
-                            {row.length % rowCount !== 0 &&
-                              Array.from({
-                                length: rowCount - row.length,
-                              }).map((_, idx) => <EuiFlexItem key={`filler-${idx}`} />)}
-                          </EuiFlexGroup>
-                        );
-                      }}
-                    </FixedSizeList>
-                  );
-                }}
-              </InfiniteLoader>
-            )}
+                            <MetricItem
+                              monitor={monitor}
+                              onClick={setFlyoutConfigCallback}
+                              isInteractive={isInteractive}
+                            />
+                          </EuiFlexItem>
+                        ))}
+                        {row.length % rowCount !== 0 &&
+                          Array.from({
+                            length: rowCount - row.length,
+                          }).map((_, idx) => <EuiFlexItem key={`filler-${idx}`} />)}
+                      </EuiFlexGroup>
+                    );
+                  }}
+                </FixedSizeList>
+              );
+            }}
           </EuiAutoSizer>
         ) : (
           <OverviewLoader />
