@@ -7,10 +7,7 @@
 
 import { getFlattenedObject } from '@kbn/std';
 
-import {
-  MAX_OBSERVABLE_DESCRIPTION_LENGTH,
-  MAX_OBSERVABLE_VALUE_LENGTH,
-} from '../../../common/constants';
+import { MAX_OBSERVABLE_VALUE_LENGTH } from '../../../common/constants';
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import type { Case } from '../../../common/types/domain';
 import type { AlertInfo } from '../../common/types';
@@ -142,18 +139,17 @@ export const extractAndAddObservables = async (
       return;
     }
 
-    // Extracted values bypass the request schemas, so the length bounds are enforced here. Values are
-    // skipped rather than truncated, which would corrupt the indicator; only the count is logged.
+    // Extracted values bypass the request schemas, so the length bound is enforced here; the
+    // description is always the fixed auto-extract text. Values are skipped rather than truncated,
+    // which would corrupt the indicator; only the count is logged.
     const observablesWithinBounds = observables.filter(
-      ({ value, description }) =>
-        value.length <= MAX_OBSERVABLE_VALUE_LENGTH &&
-        (description ?? '').length <= MAX_OBSERVABLE_DESCRIPTION_LENGTH
+      ({ value }) => value.length <= MAX_OBSERVABLE_VALUE_LENGTH
     );
     const skippedCount = observables.length - observablesWithinBounds.length;
 
     if (skippedCount > 0) {
       logger.warn(
-        `[extractAndAddObservables] Skipped ${skippedCount} observable(s) for case ${caseId}: the value or description exceeds the maximum length`
+        `[extractAndAddObservables] Skipped ${skippedCount} observable(s) for case ${caseId}: the value exceeds the maximum length`
       );
     }
 

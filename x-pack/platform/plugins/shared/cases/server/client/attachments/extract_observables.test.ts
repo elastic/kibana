@@ -328,7 +328,7 @@ describe('extractAndAddObservables', () => {
         expect.objectContaining({ value: '1.2.3.4' }),
       ]);
       expect(clientArgs.logger.warn).toHaveBeenCalledWith(
-        '[extractAndAddObservables] Skipped 1 observable(s) for case case-1: the value or description exceeds the maximum length'
+        '[extractAndAddObservables] Skipped 1 observable(s) for case case-1: the value exceeds the maximum length'
       );
       expect(JSON.stringify((clientArgs.logger.warn as jest.Mock).mock.calls)).not.toContain(
         overLengthValue
