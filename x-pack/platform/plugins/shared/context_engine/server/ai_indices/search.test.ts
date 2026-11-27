@@ -304,9 +304,9 @@ describe('searchAiIndices', () => {
         }
       );
 
-      await expect(searchAiIndices(baseParams)).rejects.toEqual(
-        new AiIndexThrottledError('too many requests')
-      );
+      const result = searchAiIndices(baseParams);
+      await expect(result).rejects.toBeInstanceOf(AiIndexThrottledError);
+      await expect(result).rejects.toMatchObject({ message: 'too many requests' });
       expect(esClient.esql.query).not.toHaveBeenCalled();
     });
   });
