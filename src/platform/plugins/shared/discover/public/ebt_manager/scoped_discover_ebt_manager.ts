@@ -29,6 +29,7 @@ import {
   CONTEXTUAL_PROFILE_ID,
   CONTEXTUAL_PROFILE_LEVEL,
   CONTEXTUAL_PROFILE_RESOLVED_EVENT_TYPE,
+  GROUP_SIMILAR_MESSAGES_CLICK,
   FIELD_USAGE_EVENT_NAME,
   FIELD_USAGE_EVENT_TYPE,
   QUERY_FIELDS_USAGE_EVENT_TYPE,
@@ -492,6 +493,10 @@ export class ScopedDiscoverEBTManager {
     };
 
     this.reportEvent(TABS_EVENT_TYPE, eventData);
+  }
+
+  public trackGroupSimilarMessagesClick() {
+    this.reportEvent?.(GROUP_SIMILAR_MESSAGES_CLICK, {});
   }
 
   public trackCascadeEvent({ eventName, ...payload }: CascadeEBTEvent) {

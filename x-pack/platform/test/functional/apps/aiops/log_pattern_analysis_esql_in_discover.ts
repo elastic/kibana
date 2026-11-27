@@ -53,6 +53,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
     });
 
+    it('groups similar messages and drills back into the filtered results', async () => {
+      const source =
+        'FROM logstash-* | WHERE @message IS NOT NULL | LIMIT 1000 | RENAME @message AS message | KEEP message';
+      await monacoEditor.setCodeEditorValue(source);
+      await testSubjects.click('querySubmitButton');
+      await discover.waitUntilTabIsLoaded();
+      await testSubjects.click('dscGroupSimilarMessagesButton');
+      await discover.waitUntilTabIsLoaded();
+      await unifiedFieldList.waitUntilFieldlistHasCountOfFields(2);
+      expect(await dataGrid.getHeaderFields()).to.eql(['count', 'pattern']);
+      await dataGrid.clickCellExpandButton(0, { columnName: 'pattern' });
+      await dataGrid.clickCellExpandPopoverAction('patterns-action-view-docs-in-discover');
+      await discover.waitUntilTabIsLoaded();
+      expect(await monacoEditor.getCodeEditorValue()).to.contain(source + '\n  | WHERE MATCH(');
+      await aiops.logPatternAnalysisPage.assertDiscoverDocCountGreaterThan(0);
+    });
+
     it('should render categorize fields correctly', async () => {
       // set query to be categorize command
       // ensure the columns are correct
