@@ -47,11 +47,6 @@ const RESULTS: Record<Assessment['status'], string> = {
   ),
 };
 
-const RULE = i18n.translate('xpack.digitalExperience.report.scorecard.assessment.rule', {
-  defaultMessage:
-    "Google's test: LCP, INP and CLS all good at the 75th percentile, INP only when it has samples.",
-});
-
 /** Whether this period passes Google's Core Web Vitals assessment, and whether the previous did. */
 export function CoreWebVitalsAssessment({
   current,
@@ -68,24 +63,20 @@ export function CoreWebVitalsAssessment({
       data-status={status}
       size="s"
       title={TITLES[status]}
-      text={
-        <>
-          {failing.length > 0 && (
-            <p>
-              {i18n.translate('xpack.digitalExperience.report.scorecard.assessment.failing', {
+      text={[
+        ...(failing.length > 0
+          ? [
+              i18n.translate('xpack.digitalExperience.report.scorecard.assessment.failing', {
                 defaultMessage: 'Not good at the 75th percentile: {vitals}.',
                 values: { vitals: failing.map((vital) => VITAL_LABELS[vital]).join(', ') },
-              })}
-            </p>
-          )}
-          <p>
-            {i18n.translate('xpack.digitalExperience.report.scorecard.assessment.previous', {
-              defaultMessage: 'Previous period: {result}. {rule}',
-              values: { result: RESULTS[previous.status], rule: RULE },
-            })}
-          </p>
-        </>
-      }
+              }),
+            ]
+          : []),
+        i18n.translate('xpack.digitalExperience.report.scorecard.assessment.previous', {
+          defaultMessage: 'Previous period: {result}.',
+          values: { result: RESULTS[previous.status] },
+        }),
+      ].join(' ')}
     />
   );
 }

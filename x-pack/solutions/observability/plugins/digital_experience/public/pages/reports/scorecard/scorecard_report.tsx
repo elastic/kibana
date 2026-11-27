@@ -104,6 +104,11 @@ const SAMPLES_TOOLTIP = i18n.translate('xpack.digitalExperience.report.scorecard
     "How many samples this period's value comes from, e.g. the timed page loads or the HTTP requests.",
 });
 
+const RATING_TOOLTIP = i18n.translate('xpack.digitalExperience.report.scorecard.ratingTooltip', {
+  defaultMessage:
+    "Google's rating of the 75th percentile. The assessment passes when LCP, INP and CLS are all good, INP only when it has samples.",
+});
+
 const GOOD_TOOLTIP = i18n.translate('xpack.digitalExperience.report.scorecard.goodTooltip', {
   defaultMessage: "The share of this period's samples that Google rates good.",
 });
@@ -133,6 +138,7 @@ const columnsOf = (
   const vitalColumns: Array<EuiBasicTableColumn<ScorecardMeasure>> = [
     {
       name: COLUMN_LABELS.rating,
+      nameTooltip: { content: RATING_TOOLTIP },
       render: ({ rating }: ScorecardMeasure) =>
         rating === null ? (
           <EmptyCellValue />

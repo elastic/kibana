@@ -17,6 +17,7 @@ const formatters = {
 describe('formatMeasureValue', () => {
   it.each([
     [1234, 'count', '1234'],
+    [1362.75, 'count', '1363'],
     [850, 'ms', '850 ms'],
     [2500, 'ms', '2.50 s'],
     [0.1234, 'score', '0.123'],
