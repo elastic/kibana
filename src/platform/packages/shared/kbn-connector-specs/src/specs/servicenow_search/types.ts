@@ -539,3 +539,40 @@ export const QueryUsersInputSchema = lazySchema(() =>
 export type QueryUsersInput = z.infer<typeof QueryUsersInputSchema>;
 
 export const WhoAmIInputSchema = lazySchema(() => z.object({}));
+
+export const SendA2AMessageInputSchema = lazySchema(() =>
+  z.object({
+    agentId: z
+      .string()
+      .min(1)
+      .max(200)
+      .describe('The sys_id of the target ServiceNow AI Agent in AI Agent Studio'),
+    prompt: z
+      .string()
+      .min(1)
+      .max(20_000)
+      .describe('Natural language message text to send to the ServiceNow AI Agent'),
+    contextId: z
+      .string()
+      .max(200)
+      .optional()
+      .describe(
+        'Optional A2A contextId (result.contextId from a previous turn) to continue a multi-turn conversation'
+      ),
+    taskId: z
+      .string()
+      .max(200)
+      .optional()
+      .describe(
+        'Optional A2A taskId (result.id from a previous input-required turn) to resume an in-progress task alongside contextId'
+      ),
+    messageId: z
+      .string()
+      .max(200)
+      .optional()
+      .describe(
+        'Optional unique message identifier for the JSON-RPC 2.0 A2A message payload (auto-generated UUID v4 when omitted)'
+      ),
+  })
+);
+export type SendA2AMessageInput = z.infer<typeof SendA2AMessageInputSchema>;
