@@ -8,6 +8,7 @@
 import { v5 as uuidv5 } from 'uuid';
 import { MAX_NAME_LENGTH, type CreateRuleData } from '@kbn/alerting-v2-schemas';
 import { stableStringify } from '@kbn/std';
+import { cutText } from '../../utils/string_utils';
 
 /** Namespace of the engine's rule ids. Changing it gives every managed rule a new id. */
 const RULE_ID_NAMESPACE = 'e04d28ab-9856-4cf7-bda8-1341f14f17b5';
@@ -36,21 +37,6 @@ export const getOwningStrategy = (tags: string[]): string | undefined =>
 /** The source a rule watches, read from its tags, or `undefined` when none is tagged. */
 export const getWatchedSource = (tags: string[]): string | undefined =>
   tags.find((tag) => tag.startsWith(SOURCE_TAG_PREFIX))?.slice(SOURCE_TAG_PREFIX.length);
-
-/**
- * The longest start of `text` within `maxLength` UTF-16 units, the unit Alerting counts a name in,
- * cut between characters so an emoji is never split into half a surrogate pair.
- */
-const cutToLength = (text: string, maxLength: number): string => {
-  let cut = '';
-  for (const character of text) {
-    if (cut.length + character.length > maxLength) {
-      break;
-    }
-    cut += character;
-  }
-  return cut;
-};
 
 /**
  * The id of a managed rule. It hashes everything the rule runs with (the final query, project
@@ -101,5 +87,6 @@ export const getManagedRuleName = ({
   const prefix = `${strategyName}: `;
   const suffix = ` (${ruleId.slice(0, 8)})`;
   const room = Math.max(MAX_NAME_LENGTH - prefix.length - suffix.length, 0);
-  return `${prefix}${cutToLength(title, room)}${suffix}`;
+  // Alerting counts a name in UTF-16 units, and a cut never leaves half of an emoji.
+  return `${prefix}${cutText(title, room).text}${suffix}`;
 };
