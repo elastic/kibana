@@ -57,6 +57,22 @@ describe('createEvidenceLookupEvaluator', () => {
     expect(await score([esqlStep([], groupedQuery)])).toBe(0);
   });
 
+  it('scores 0 for an ungrouped aggregate whose alias or string contains "by"', async () => {
+    const aliasQuery = 'FROM logs-* | STATS `stand by` = COUNT(*)';
+    const stringQuery =
+      'FROM logs-* | EVAL note = "grouped by user | host" | STATS failures = COUNT(*)';
+
+    expect(await score([esqlStep([[0]], aliasQuery)])).toBe(0);
+    expect(await score([esqlStep([[0]], stringQuery)])).toBe(0);
+  });
+
+  it('scores 0 for an ungrouped aggregate that projects a false flag over zero matches', async () => {
+    const flagQuery = 'FROM logs-* | STATS hits = COUNT(*) | EVAL found = hits > 0';
+
+    expect(await score([esqlStep([[0, false]], flagQuery)])).toBe(0);
+    expect(await score([esqlStep([[3, true]], flagQuery)])).toBe(1);
+  });
+
   it('scores 1 for a projected event row whose only value is false or 0', async () => {
     const projectedFalse = 'FROM logs-* | WHERE event.outcome == "success" | KEEP is_internal';
     const projectedZero = 'FROM logs-* | WHERE event.outcome == "success" | KEEP failure_count';

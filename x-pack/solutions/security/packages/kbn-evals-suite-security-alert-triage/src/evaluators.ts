@@ -126,20 +126,38 @@ const MAX_EVIDENCE_ESQL_CALLS = 3;
 // An ES|QL aggregate without BY returns one row even over zero matches (COUNT is 0, the others are
 // null). A grouped aggregate returns no rows over zero matches, and a projected event row is a match
 // whatever its values are, so `false` or `0` in an event field must still count.
+// Quoted strings and backticked names are removed first, so a `|` or the word "by" inside them does
+// not change how the commands are read.
+const QUOTED_TEXT = /"(?:\\.|[^"\\])*"|`[^`]*`/g;
+
 const isUngroupedAggregate = (query: string | undefined): boolean =>
   (query ?? '')
+    .replace(QUOTED_TEXT, '""')
     .split('|')
     .map((command) => command.trim())
     .some((command) => /^STATS\b/i.test(command) && !/\bBY\b/i.test(command));
+
+// In an ungrouped aggregate, a flag such as `hits > 0` is false over zero matches, so only a count
+// above zero, a non-empty string or `true` shows that events matched.
+const isAggregateEvidence = (cell: unknown): boolean => {
+  if (Array.isArray(cell)) {
+    return cell.some(isAggregateEvidence);
+  }
+  if (typeof cell === 'number') {
+    return cell > 0;
+  }
+  if (typeof cell === 'string') {
+    return cell !== '';
+  }
+  return cell === true;
+};
 
 const hasMatchingRow = (data: unknown): boolean => {
   const { query, values = [] } = (data ?? {}) as { query?: string; values?: unknown[][] };
   if (!isUngroupedAggregate(query)) {
     return values.length > 0;
   }
-  return values.some((row) =>
-    row.some((cell) => cell !== null && cell !== undefined && cell !== 0 && cell !== '')
-  );
+  return values.some((row) => row.some(isAggregateEvidence));
 };
 
 /**
