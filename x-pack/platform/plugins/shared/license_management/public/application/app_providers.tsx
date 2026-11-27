@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
-import { Provider } from 'react-redux-v7';
+import { Provider } from 'react-redux';
 
 import { KibanaRenderContextProvider } from '../shared_imports';
 import type { AppDependencies } from './app_context';
 import { AppContextProvider } from './app_context';
 import { licenseManagementStore } from './store';
+import { toLicenseState } from './store/reducers/license';
 
 interface Props {
   appDependencies: AppDependencies;
@@ -40,7 +41,7 @@ export const AppProviders = ({ appDependencies, children }: Props) => {
     licensing: plugins.licensing,
     breadcrumbService: services.breadcrumbService,
   };
-  const initialState = { license: initialLicense };
+  const initialState = { license: toLicenseState(initialLicense) };
 
   const store = licenseManagementStore(initialState, thunkServices);
 

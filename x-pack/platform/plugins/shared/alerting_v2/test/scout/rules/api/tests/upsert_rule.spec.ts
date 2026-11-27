@@ -230,6 +230,28 @@ apiTest.describe('Upsert rule API', { tag: testData.API_ENGINE_TAG }, () => {
   );
 
   apiTest(
+    'builder: should reject an unregistered builder type when replacing an existing rule',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'upsert-builder-rule' } })
+      );
+
+      const response = await apiClient.put(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: buildCreateRuleData({
+          metadata: { name: 'upsert-builder-rule', builder: { type: 'not-a-builder' } },
+        }),
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BUILDER_TYPE_UNKNOWN');
+      expect(response.body.details).toStrictEqual({ builder_type: 'not-a-builder' });
+
+      const stored = await apiServices.alertingV2.rules.get(created.id);
+      expect(stored.metadata.builder).toBeUndefined();
+    }
+  );
+
+  apiTest(
     'validation: should reject ids longer than ID_MAX_LENGTH with a 400',
     async ({ apiClient }) => {
       const tooLongId = 'a'.repeat(ID_MAX_LENGTH + 1);

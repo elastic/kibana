@@ -14,6 +14,7 @@ import {
   EuiLink,
   EuiText,
   EuiTextColor,
+  EuiToolTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import type {
@@ -49,6 +50,7 @@ const SORT_FIELDS = {
   clickCount: 'click_count',
   jsErrorCount: 'js_error_count',
   failedRequestCount: 'http_failed_request_count',
+  frustration: 'frustration_count',
 } as const satisfies Partial<Record<keyof SessionSummary, SessionSortField>>;
 
 type SortableColumn = keyof typeof SORT_FIELDS;
@@ -66,6 +68,7 @@ export type SessionsOptionalColumnId =
   | 'clicks'
   | 'jsErrors'
   | 'failedRequests'
+  | 'frustration'
   | 'environment'
   | 'location'
   | 'entryPage'
@@ -96,6 +99,9 @@ const COLUMN_LABELS: Record<SessionsOptionalColumnId, string> = {
   }),
   failedRequests: i18n.translate('xpack.digitalExperience.sessions.table.failedRequestsColumn', {
     defaultMessage: 'Failed requests',
+  }),
+  frustration: i18n.translate('xpack.digitalExperience.sessions.table.frustrationColumn', {
+    defaultMessage: 'Frustration',
   }),
   environment: i18n.translate('xpack.digitalExperience.sessions.table.environmentColumn', {
     defaultMessage: 'Environment',
@@ -139,6 +145,7 @@ export const SESSIONS_OPTIONAL_COLUMNS: ReadonlyArray<{
     'clicks',
     'jsErrors',
     'failedRequests',
+    'frustration',
     'environment',
     'location',
     'entryPage',
@@ -303,6 +310,7 @@ export function SessionsTable({
       ) : (
         formatNumber(count)
       );
+    const renderFrustrationCount = renderProblemCount('digitalExperienceSessionFrustration');
     const optionalColumns: Record<SessionsOptionalColumnId, EuiBasicTableColumn<SessionSummary>> = {
       journey: {
         field: 'journey',
@@ -351,6 +359,37 @@ export function SessionsTable({
         sortable: true,
         ...numberColumn(),
         render: renderProblemCount('digitalExperienceSessionFailedRequests'),
+      },
+      frustration: {
+        field: 'frustration',
+        name: COLUMN_LABELS.frustration,
+        sortable: true,
+        ...numberColumn(),
+        render: ({
+          rageClicks,
+          deadClicks,
+          errorClicks,
+          total: frustratedClicks,
+        }: SessionSummary['frustration']) =>
+          frustratedClicks > 0 ? (
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.digitalExperience.sessions.table.frustrationBreakdown',
+                {
+                  defaultMessage: '{rage} rage, {dead} dead, {error} error clicks',
+                  values: {
+                    rage: formatNumber(rageClicks),
+                    dead: formatNumber(deadClicks),
+                    error: formatNumber(errorClicks),
+                  },
+                }
+              )}
+            >
+              <span tabIndex={0}>{renderFrustrationCount(frustratedClicks)}</span>
+            </EuiToolTip>
+          ) : (
+            renderFrustrationCount(frustratedClicks)
+          ),
       },
       environment: {
         field: 'environment',

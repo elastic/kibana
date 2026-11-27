@@ -114,7 +114,7 @@ const templateOriginSchema: RootSchema<TemplateOriginFields> = {
     type: 'keyword',
     _meta: {
       description:
-        'How the workflow was created from the template: install (setup form), import (template file upload), or remix (Remix with AI)',
+        'How the workflow was created from the template: catalog (installed from a catalog template), import (installed from a template file), or remix (Remix with AI)',
       optional: true,
     },
   },

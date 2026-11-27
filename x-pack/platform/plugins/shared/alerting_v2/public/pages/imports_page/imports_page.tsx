@@ -22,7 +22,7 @@ export const ImportsPage = () => {
 
   return (
     <div data-test-subj="alertingV2ImportsPage">
-      <AppHeader sticky={false} title={IMPORTS_PAGE_TITLE} spacing="bleed" />
+      <AppHeader title={IMPORTS_PAGE_TITLE} spacing="bleed" />
       <EuiSpacer size="m" />
       <ImportsTable items={imports} isLoading={isLoading} error={error} />
     </div>

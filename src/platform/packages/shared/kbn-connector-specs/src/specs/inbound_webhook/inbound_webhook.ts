@@ -87,7 +87,6 @@ export const InboundWebhook: ConnectorSpec = {
     minimumLicense: 'gold',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows'],
-    docsUrl: '',
   },
 
   auth: {

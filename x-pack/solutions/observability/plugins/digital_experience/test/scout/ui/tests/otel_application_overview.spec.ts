@@ -61,6 +61,35 @@ test.describe(
       await expect(digitalExperience.otelOverviewTopClicks).toContainText('#add-to-cart');
     });
 
+    test('lists the frustrated elements, linking to the sessions that hit them', async ({
+      page,
+      pageObjects: { digitalExperience },
+    }) => {
+      await digitalExperience.gotoApplication(testData.OTEL_APPS.shop, {
+        ...testData.TIME_RANGE,
+        source: 'otel',
+      });
+
+      const [element] = testData.OTEL_SHOP_USAGE.frustratedElements;
+      await expect(digitalExperience.frustrationRow(element.cssSelector)).toContainText(
+        `${element.rageClicks} rage`
+      );
+      await expect(digitalExperience.frustrationRow(element.cssSelector)).toContainText(
+        `${element.deadClicks} dead`
+      );
+
+      await digitalExperience.frustrationSessionsLink(element.cssSelector).click();
+
+      await expect(page).toHaveURL(/\/otel-shop\/sessions/);
+      await expect(page).toHaveURL(/withFrustration=true/);
+      await expect(page).toHaveURL(
+        new RegExp(`frustrationTarget=${encodeURIComponent(element.cssSelector)}`)
+      );
+      await expect(page.getByTestId('digitalExperienceSessionsFrustrationTarget')).toHaveText(
+        `Element: ${element.cssSelector}`
+      );
+    });
+
     test('shows the top errors on the Overview, linked to the Errors tab', async ({
       page,
       pageObjects: { digitalExperience },
@@ -200,9 +229,7 @@ test.describe(
         await expect(digitalExperience.otelOverviewPageLoads).toContainText(
           testData.OTEL_SHOP_SAFARI_PAGE_LOADS
         );
-        await expect(digitalExperience.overviewPill('browser', 'Safari')).toContainText(
-          'Browser: Safari'
-        );
+        await expect(digitalExperience.overviewPill('browser')).toContainText('Browser: Safari');
       });
 
       await test.step('keeps the filters on the Errors tab, which they narrow too', async () => {
@@ -266,8 +293,8 @@ test.describe(
         await digitalExperience.excludeOverviewFilter('browser', 'Safari');
 
         await expect(digitalExperience.otelOverviewPageLoads).toContainText(withoutSafari);
-        await expect(digitalExperience.overviewPill('browser', 'Safari')).toContainText(
-          'Browser: not Safari'
+        await expect(digitalExperience.overviewPill('browser', { exclude: true })).toContainText(
+          'NOT Browser: Safari'
         );
         await expect
           .poll(() => filtersParam(page))
@@ -318,25 +345,22 @@ test.describe(
         await expect(digitalExperience.otelOverviewPageLoads).toContainText(
           testData.OTEL_SHOP_CHROME_PAGE_LOADS
         );
-        await expect(digitalExperience.overviewPill('browser', 'Safari')).toContainText(
-          'Browser: Safari'
+        await expect(digitalExperience.overviewPill('browser')).toContainText(
+          'Browser: Safari, Chrome'
         );
-        await expect(digitalExperience.overviewPill('browser', 'Chrome')).toContainText(
-          'Browser: Chrome'
-        );
-        await expect(digitalExperience.overviewPill('os', 'macOS')).toContainText('OS: macOS');
+        await expect(digitalExperience.overviewPill('os')).toContainText('OS: macOS');
         await expect
           .poll(() => filtersParam(page))
           .toMatch(filtersWith('browser', '!\\(Safari,Chrome\\)'));
         await expect.poll(() => filtersParam(page)).toMatch(filtersWith('os', '\\(query:macOS\\)'));
       });
 
-      await test.step('removes a value with its pill', async () => {
-        await digitalExperience.overviewPill('os', 'macOS').getByRole('button').click();
+      await test.step('removes the values of a filter with its pill', async () => {
+        await digitalExperience.overviewPill('os').getByRole('button').click();
 
-        await expect(digitalExperience.overviewPill('os', 'macOS')).toBeHidden();
+        await expect(digitalExperience.overviewPill('os')).toBeHidden();
         await expect.poll(() => filtersParam(page)).not.toContain('key:os');
-        await expect(digitalExperience.overviewPill('browser', 'Chrome')).toBeVisible();
+        await expect(digitalExperience.overviewPill('browser')).toBeVisible();
       });
 
       await test.step('removes every filter with Clear all', async () => {
@@ -368,9 +392,7 @@ test.describe(
         await expect(digitalExperience.otelOverviewPageLoads).toContainText(
           testData.OTEL_SHOP_SAFARI_PAGE_LOADS
         );
-        await expect(digitalExperience.overviewPill('browser', 'Safari')).toContainText(
-          'Browser: Safari'
-        );
+        await expect(digitalExperience.overviewPill('browser')).toContainText('Browser: Safari');
         await expect(
           digitalExperience.overviewBreakdownFilter('browser', 'Safari')
         ).toHaveAttribute('aria-pressed', 'true');
@@ -379,7 +401,7 @@ test.describe(
       await test.step('takes the filter off when the row is clicked again', async () => {
         await digitalExperience.overviewBreakdownFilter('browser', 'Safari').click();
 
-        await expect(digitalExperience.overviewPill('browser', 'Safari')).toBeHidden();
+        await expect(digitalExperience.overviewPill('browser')).toBeHidden();
         await expect(digitalExperience.otelOverviewPageLoads).toContainText(
           testData.OTEL_SHOP_PAGE_LOADS
         );
@@ -388,9 +410,9 @@ test.describe(
       await test.step('narrows the page loads to a page of the top pages', async () => {
         await digitalExperience.overviewTopPageFilter('/products').click();
 
-        await expect(
-          digitalExperience.overviewPill('pageUrl', 'https://otel-shop.example.com/products')
-        ).toBeVisible();
+        await expect(digitalExperience.overviewPill('pageUrl')).toContainText(
+          'Page: https://otel-shop.example.com/products'
+        );
         await expect(digitalExperience.otelOverviewPageLoads).toContainText('2');
       });
     });
@@ -413,7 +435,7 @@ test.describe(
       await digitalExperience.overviewFiltersApply.click();
 
       await expect(digitalExperience.otelOverviewPageLoads).toContainText('2');
-      await expect(digitalExperience.overviewPill('appVersion', '1.2.0')).toContainText(
+      await expect(digitalExperience.overviewPill('appVersion')).toContainText(
         'App version: 1.2.0'
       );
     });
@@ -436,7 +458,7 @@ test.describe(
 
         // Two of the page loads are of /products.
         await expect(digitalExperience.otelOverviewPageLoads).toContainText('2');
-        await expect(digitalExperience.overviewPill('pageContains', 'PRODUCTS')).toContainText(
+        await expect(digitalExperience.overviewPill('pageContains')).toContainText(
           'URL contains: PRODUCTS'
         );
       });
@@ -447,9 +469,9 @@ test.describe(
         await digitalExperience.overviewFiltersApply.click();
 
         await expect(digitalExperience.otelOverviewPageLoads).toContainText('3');
-        await expect(digitalExperience.overviewPill('pageContains', 'PRODUCTS')).toContainText(
-          'URL contains: not PRODUCTS'
-        );
+        await expect(
+          digitalExperience.overviewPill('pageContains', { exclude: true })
+        ).toContainText('NOT URL contains: PRODUCTS');
       });
     });
 
@@ -502,7 +524,7 @@ test.describe(
         await views.click();
         await apply.click();
 
-        await expect(digitalExperience.overviewPill('browser', 'Safari')).toBeVisible();
+        await expect(digitalExperience.overviewPill('browser')).toContainText('Browser: Safari');
         await expect(digitalExperience.otelOverviewPageLoads).toContainText(
           testData.OTEL_SHOP_SAFARI_PAGE_LOADS
         );
@@ -674,9 +696,9 @@ test.describe(
       });
 
       await test.step('keeps what a hidden filter selects as a pill, and in the flyout', async () => {
-        await expect(
-          digitalExperience.overviewPill('pageUrl', 'https://otel-shop.example.com/')
-        ).toBeVisible();
+        await expect(digitalExperience.overviewPill('pageUrl')).toContainText(
+          'Page: https://otel-shop.example.com/'
+        );
         await expect(digitalExperience.overviewAllFilters).toBeVisible();
 
         await digitalExperience.overviewAllFilters.click();

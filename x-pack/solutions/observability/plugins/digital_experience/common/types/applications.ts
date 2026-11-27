@@ -22,8 +22,8 @@ export const APPLICATION_TYPES = ['web', 'mobile'] as const;
 export type ApplicationType = (typeof APPLICATION_TYPES)[number];
 
 /**
- * The tabs of an application's page, in display order. The Overview is the page at the
- * application's own path; the others are below it, named after the tab.
+ * Every tab an application's page can have. The Overview is the page at the application's own
+ * path; the others are below it, named after the tab.
  */
 export const APPLICATION_TAB_IDS = [
   'overview',
@@ -31,9 +31,29 @@ export const APPLICATION_TAB_IDS = [
   'errors',
   'network',
   'reports',
+  'crashes',
 ] as const;
 
 export type ApplicationTabId = (typeof APPLICATION_TAB_IDS)[number];
+
+/** The tabs of an EDOT Browser application's page, in display order. */
+export const WEB_APPLICATION_TAB_IDS = [
+  'overview',
+  'sessions',
+  'errors',
+  'network',
+  'reports',
+] as const satisfies readonly ApplicationTabId[];
+
+export type WebApplicationTabId = (typeof WEB_APPLICATION_TAB_IDS)[number];
+
+/** The tabs of a mobile application's page, in display order. */
+export const MOBILE_APPLICATION_TAB_IDS = [
+  'overview',
+  'crashes',
+] as const satisfies readonly ApplicationTabId[];
+
+export type MobileApplicationTabId = (typeof MOBILE_APPLICATION_TAB_IDS)[number];
 
 /** Share of samples per rating, each between 0 and 1; the three add up to 1. */
 export interface VitalRatings {
@@ -88,8 +108,7 @@ export interface WebApplicationSummary {
   pageLoads: { count: number };
   /**
    * Sessions that started in the time range, as `ApplicationsResponse.sessionsOverTime` counts
-   * them, `null` when the source doesn't count them. Only the sessions index does: the raw events
-   * and Classic RUM don't.
+   * them; `null` for Classic RUM, which doesn't count sessions.
    */
   sessions: { count: number } | null;
   webVitals: WebVitals;
@@ -145,16 +164,16 @@ export interface ApplicationsResponse {
   applications: ApplicationSummary[];
   /**
    * The environments in the time range, whatever the `environment` filter, for the picker. Each
-   * environment field keeps its 100 most used: Classic RUM has one, EDOT Browser two
-   * (`service.environment` and `deployment.environment.name`), so up to 300 in total. Names longer than the route accepts are left out.
+   * source keeps its 100 most used, so up to 200 in total. Names longer than the route accepts are
+   * left out.
    */
   environments: string[];
   /** Page loads over the time range in the selected environment, per source. */
   pageLoadsOverTime: PageLoadsOverTime;
   /**
    * The EDOT Browser sessions that started in each bucket of the time range in the selected
-   * environment, in the same buckets as `pageLoadsOverTime`. `null` when the sessions index did not
-   * answer, as the raw events and Classic RUM don't count sessions.
+   * environment, in the same buckets as `pageLoadsOverTime`. `null` when the EDOT Browser source
+   * did not load, as Classic RUM doesn't count sessions.
    */
   sessionsOverTime: TimeSeriesPoint[] | null;
   /** Sources whose search failed while others loaded, so their rows are missing; empty when none. */

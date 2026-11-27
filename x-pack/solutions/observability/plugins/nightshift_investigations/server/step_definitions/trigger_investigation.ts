@@ -18,7 +18,11 @@ import pRetry, { AbortError } from 'p-retry';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { NightshiftSettingsLocator } from '../../common/locators';
-import { notifyInvestigationQuotaReached } from '../lib/notifications/notify_investigation_quota_reached';
+import {
+  getLimitNoticeTargets,
+  notifyInvestigationLimitReached,
+  type LimitNoticeReason,
+} from '../lib/notifications/notify_investigation_quota_reached';
 import { DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID, toSlackThreadSubjectId } from '../../common';
 import {
   triggerInvestigationStepCommonDefinition,
@@ -191,6 +195,22 @@ export const triggerInvestigationStepDefinition = (
       )?.slice(0, MAX_ID_LENGTH);
       const title =
         input.title && input.title !== subjectId ? input.title : alertTitle ?? input.title;
+      const notifyLimitReached = (reason: LimitNoticeReason) =>
+        notifyInvestigationLimitReached({
+          getSoClient: () => getAutomationsSoClient(request, spaceId),
+          getActions,
+          request,
+          spaceId,
+          targets: getLimitNoticeTargets({
+            slackThread: input.slack_thread,
+            notificationDestinations: input.notificationDestinations,
+          }),
+          reason,
+          settingsLocator,
+          kibanaUrl,
+          signal: context.abortSignal,
+          logger: context.logger,
+        });
       try {
         const result = await client.start(
           {
@@ -256,27 +276,21 @@ export const triggerInvestigationStepDefinition = (
               input.subject_type === 'significant_event' ? subjectId : significantEventAlertId,
             ...alertIdentity,
           });
+          if (input.automation_id) {
+            await notifyLimitReached({
+              type: 'automation',
+              automationId: input.automation_id,
+              automationName: automationName ?? input.automation_id,
+              limit: error.limit,
+            });
+          }
           return { output: { skip_reason: 'daily_limit' as const, daily_limit: error.limit } };
         }
         if (error instanceof InvestigationQuotaDeniedError) {
           context.logger.info(
             `Skipped investigation of ${input.subject_type}/${subjectId}: ${error.message}`
           );
-          if (input.slack_thread) {
-            await notifyInvestigationQuotaReached({
-              getSoClient: () => getAutomationsSoClient(request, spaceId),
-              getActions,
-              deniedBy: error.deniedBy,
-              request,
-              spaceId,
-              slackThread: input.slack_thread,
-              settingsLocator,
-              kibanaUrl,
-              limit: error.limit,
-              signal: context.abortSignal,
-              logger: context.logger,
-            });
-          }
+          await notifyLimitReached({ type: 'quota', deniedBy: error.deniedBy, limit: error.limit });
           return { output: { skip_reason: 'investigation_limit' as const } };
         }
         throw error;

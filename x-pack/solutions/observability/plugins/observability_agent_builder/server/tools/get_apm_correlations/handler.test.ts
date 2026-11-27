@@ -7,6 +7,7 @@
 
 import {
   elasticsearchServiceMock,
+  httpServerMock,
   loggingSystemMock,
   type ScopedClusterClientMock,
 } from '@kbn/core/server/mocks';
@@ -31,6 +32,7 @@ const createSearchResponse = (total: number) => ({
 const BASE_ARGS = {
   core: {} as ObservabilityAgentBuilderCoreSetup,
   plugins: {} as ObservabilityAgentBuilderPluginSetupDependencies,
+  request: httpServerMock.createKibanaRequest(),
   logger: loggingSystemMock.createLogger(),
   start: '2026-01-01T00:00:00.000Z',
   end: '2026-01-01T01:00:00.000Z',

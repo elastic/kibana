@@ -53,12 +53,15 @@ export const SESSION_ATTRIBUTE_FIELDS = {
     'attributes.device.model.name',
     'resource.attributes.device.type',
   ],
+  // `SOURCE_MOBILE_FIELDS`: the device when there is no model or type.
+  mobile: ['resource.attributes.browser.mobile', 'attributes.browser.mobile'],
   countryIso: [
     'attributes.client.geo.country_iso_code',
     'resource.attributes.client.geo.country_iso_code',
   ],
   region: ['attributes.client.geo.region_name', 'resource.attributes.client.geo.region_name'],
   city: ['attributes.client.geo.city_name', 'resource.attributes.client.geo.city_name'],
+  appVersion: ['resource.attributes.service.version', 'attributes.service.version'],
 } as const;
 
 export type SessionAttribute = keyof typeof SESSION_ATTRIBUTE_FIELDS;

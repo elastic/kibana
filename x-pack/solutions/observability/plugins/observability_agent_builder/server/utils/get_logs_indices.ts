@@ -5,29 +5,25 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
-import { SavedObjectsClient } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 
 import type { ObservabilityAgentBuilderCoreSetup } from '../types';
 
 export async function getLogsIndices({
   core,
+  request,
   logger,
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
+  request: KibanaRequest;
   logger: Logger;
 }): Promise<string[]> {
-  const [coreStart, pluginsStart] = await core.getStartServices();
-  const savedObjectsClient = new SavedObjectsClient(
-    coreStart.savedObjects.createInternalRepository()
-  );
+  const [, pluginsStart] = await core.getStartServices();
 
   try {
     const logsDataAccess = pluginsStart.logsDataAccess;
     const logSourcesService =
-      await logsDataAccess.services.logSourcesServiceFactory.getLogSourcesService(
-        savedObjectsClient
-      );
+      await logsDataAccess.services.logSourcesServiceFactory.getScopedLogSourcesService(request);
 
     const logSources = await logSourcesService.getLogSources();
     return logSources.map(({ indexPattern }) => indexPattern);

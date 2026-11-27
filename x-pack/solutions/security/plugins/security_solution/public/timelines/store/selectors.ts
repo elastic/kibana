@@ -26,6 +26,7 @@ export const getTimelineShowStatusByIdSelector = () =>
     show: timeline?.show ?? false,
     updated: timeline?.updated ?? undefined,
     changed: timeline?.changed ?? false,
+    savePromptDismissed: timeline?.savePromptDismissed ?? false,
   }));
 
 const selectCallOutUnauthorizedMsg = (state: State): boolean =>

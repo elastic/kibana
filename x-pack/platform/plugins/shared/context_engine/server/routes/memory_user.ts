@@ -61,6 +61,9 @@ export const resolveMemoryUser = async ({
   userProfile: { getCurrentProfileId: () => Promise<string | null> };
   requestedUserId?: string;
 }): Promise<ResolvedMemoryUser> => {
+  if (requestedUserId !== undefined && request.authzResult?.[apiPrivileges.manageMemory] === true) {
+    return { ok: true, userId: requestedUserId };
+  }
   const callerUserId = (await userProfile.getCurrentProfileId()) ?? undefined;
   const userId = requestedUserId ?? callerUserId;
   if (userId === undefined) {

@@ -19,6 +19,8 @@ export const ATTRIBUTE_GEN_AI_REQUEST_MAX_TOKENS = 'attributes.gen_ai.request.ma
 export const ATTRIBUTE_GEN_AI_REQUEST_SEED = 'attributes.gen_ai.request.seed';
 export const ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS = 'attributes.gen_ai.usage.input_tokens';
 export const ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS = 'attributes.gen_ai.usage.output_tokens';
+export const ATTRIBUTE_GEN_AI_USAGE_REASONING_OUTPUT_TOKENS =
+  'attributes.gen_ai.usage.reasoning.output_tokens';
 export const ATTRIBUTE_GEN_AI_USAGE_CACHE_READ_INPUT_TOKENS =
   'attributes.gen_ai.usage.cache_read.input_tokens';
 export const ATTRIBUTE_GEN_AI_USAGE_CACHE_WRITE_INPUT_TOKENS =

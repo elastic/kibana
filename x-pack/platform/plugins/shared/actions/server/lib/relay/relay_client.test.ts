@@ -619,6 +619,63 @@ describe('RelayClient', () => {
     });
   });
 
+  describe('isChannelBound', () => {
+    const channelUrl = 'https://relay.test/v1/slack/tenants/team-A/bindings/C123';
+
+    it('GETs the per-channel binding endpoint and returns true', async () => {
+      requestMock.mockResolvedValue({
+        status: 200,
+        data: { scope_type: 'SUB', scope_id: 'C123' },
+      } as never);
+
+      await expect(createClient().isChannelBound('team-A', 'C123')).resolves.toBe(true);
+
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({ url: channelUrl, method: 'get' })
+      );
+    });
+
+    it('returns false on a 404 with the not_bound reason', async () => {
+      requestMock.mockResolvedValue({
+        status: 404,
+        data: { message: "This channel isn't connected.", reason: 'not_bound' },
+      } as never);
+
+      await expect(createClient().isChannelBound('team-A', 'C123')).resolves.toBe(false);
+    });
+
+    it('throws on a 404 without the not_bound reason', async () => {
+      requestMock.mockResolvedValue({ status: 404, data: 'Not Found' } as never);
+
+      await expect(createClient().isChannelBound('team-A', 'C123')).rejects.toMatchObject({
+        statusCode: 404,
+      });
+    });
+
+    it('throws on a 403', async () => {
+      requestMock.mockResolvedValue({
+        status: 403,
+        data: { message: 'not connected', reason: 'not_connected' },
+      } as never);
+
+      await expect(createClient().isChannelBound('team-A', 'C123')).rejects.toMatchObject({
+        statusCode: 403,
+      });
+    });
+
+    it('encodes special characters in tenantKey and channelId', async () => {
+      requestMock.mockResolvedValue({ status: 200, data: {} } as never);
+
+      await createClient().isChannelBound('team/A', 'C 1');
+
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://relay.test/v1/slack/tenants/team%2FA/bindings/C%201',
+        })
+      );
+    });
+  });
+
   describe('unbindChannel', () => {
     it('DELETEs the per-channel unbind endpoint', async () => {
       requestMock.mockResolvedValue({ status: 200, data: { status: 'unbound' } } as never);

@@ -17,6 +17,7 @@ import {
   useEuiTheme,
   type IconType,
 } from '@elastic/eui';
+import { getEbtProps, type EbtClickAttrs } from '@kbn/ebt-click';
 
 interface SourceCardAction {
   label: string;
@@ -24,6 +25,7 @@ interface SourceCardAction {
   onClick: () => void;
   disabledReason?: string;
   'data-test-subj'?: string;
+  ebt?: EbtClickAttrs;
 }
 
 export function SourceCard({
@@ -107,6 +109,7 @@ export function SourceCard({
         isDisabled={action.disabledReason !== undefined}
         aria-label={`${action.label} ${title}`}
         data-test-subj={action['data-test-subj']}
+        {...(action.ebt && getEbtProps(action.ebt))}
       >
         {action.label}
       </EuiButton>

@@ -359,12 +359,16 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
         reason: 'terms_other_bucket_not_supported',
       },
     },
+    // Two Top values with Other on the outer dimension: the outer typed key drives the remap and
+    // the inner `LIMIT n BY key` runs per outer group, including Other. The dataset has 5
+    // operating systems, so size 2 groups three of them into Other; its last row is the third
+    // host kept inside Other, aggregated over every remaining document of those three systems.
     {
       group: 'top_n',
       dataset: logs,
-      description: 'nested terms with other bucket on the outer dimension is not convertible yet',
+      description: 'nested terms with other bucket on the outer dimension ranked by metric DESC',
       columns: {
-        col1: terms('geo.src', {
+        col1: terms('machine.os.keyword', {
           size: 2,
           orderBy: { type: 'column', columnId: 'col3' },
           orderDirection: 'desc',
@@ -378,6 +382,200 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
         col3: metric('average', 'bytes'),
       },
       columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | WHERE machine.os.keyword IS NOT NULL | EVAL key_machine_os_keyword = CASE(machine.os.keyword IN (${logsFrom} | ${logsWhere} | WHERE machine.os.keyword IS NOT NULL | STATS rank_machine_os_keyword = AVG(bytes) BY machine.os.keyword | SORT rank_machine_os_keyword DESC, machine.os.keyword ASC | LIMIT 2 | KEEP machine.os.keyword), machine.os.keyword, NULL) | INLINE STATS rank_machine_os_keyword = AVG(bytes) BY key_machine_os_keyword | STATS AVG(bytes) BY rank_machine_os_keyword, key_machine_os_keyword, host.keyword | SORT \`AVG(bytes)\` DESC | LIMIT 3 BY key_machine_os_keyword | EVAL named_machine_os_keyword = CASE(key_machine_os_keyword IS NULL, 0::LONG, 1::LONG) | SORT named_machine_os_keyword DESC, rank_machine_os_keyword DESC, key_machine_os_keyword ASC, \`AVG(bytes)\` DESC | EVAL machine.os.keyword = COALESCE(TO_STRING(key_machine_os_keyword), "Other"::KEYWORD) | DROP named_machine_os_keyword, key_machine_os_keyword, rank_machine_os_keyword`,
+        columnNames: ['AVG(bytes)', 'host.keyword', 'machine.os.keyword'],
+        expectedSourceIds: {
+          'AVG(bytes)': ['col3'],
+          'machine.os.keyword': ['col1'],
+          'host.keyword': ['col2'],
+        },
+        // Other is win 7, win 8 and osx; its third host is www.elastic.co: 2938 documents,
+        // 14803157 bytes.
+        expectedLastRow: {
+          'machine.os.keyword': 'Other',
+          'host.keyword': 'www.elastic.co',
+          'AVG(bytes)': 14803157 / 2938,
+        },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'nested terms with other bucket on the outer dimension ranked by metric ASC',
+      columns: {
+        col1: terms('machine.os.keyword', {
+          size: 2,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'asc',
+          otherBucket: true,
+        }),
+        col2: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | WHERE machine.os.keyword IS NOT NULL | EVAL key_machine_os_keyword = CASE(machine.os.keyword IN (${logsFrom} | ${logsWhere} | WHERE machine.os.keyword IS NOT NULL | STATS rank_machine_os_keyword = AVG(bytes) BY machine.os.keyword | SORT rank_machine_os_keyword ASC, machine.os.keyword ASC | LIMIT 2 | KEEP machine.os.keyword), machine.os.keyword, NULL) | INLINE STATS rank_machine_os_keyword = AVG(bytes) BY key_machine_os_keyword | STATS AVG(bytes) BY rank_machine_os_keyword, key_machine_os_keyword, host.keyword | SORT \`AVG(bytes)\` DESC | LIMIT 3 BY key_machine_os_keyword | EVAL named_machine_os_keyword = CASE(key_machine_os_keyword IS NULL, 0::LONG, 1::LONG) | SORT named_machine_os_keyword DESC, rank_machine_os_keyword ASC, key_machine_os_keyword ASC, \`AVG(bytes)\` DESC | EVAL machine.os.keyword = COALESCE(TO_STRING(key_machine_os_keyword), "Other"::KEYWORD) | DROP named_machine_os_keyword, key_machine_os_keyword, rank_machine_os_keyword`,
+        columnNames: ['AVG(bytes)', 'host.keyword', 'machine.os.keyword'],
+        expectedSourceIds: {
+          'AVG(bytes)': ['col3'],
+          'machine.os.keyword': ['col1'],
+          'host.keyword': ['col2'],
+        },
+        // Other is win xp, ios and win 8; its third host is www.elastic.co: 2831 documents,
+        // 14692951 bytes.
+        expectedLastRow: {
+          'machine.os.keyword': 'Other',
+          'host.keyword': 'www.elastic.co',
+          'AVG(bytes)': 14692951 / 2831,
+        },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'nested terms with other bucket on the outer dimension ranked alphabetically',
+      columns: {
+        col1: terms('machine.os.keyword', {
+          size: 2,
+          orderBy: { type: 'alphabetical' },
+          orderDirection: 'asc',
+          otherBucket: true,
+        }),
+        col2: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | WHERE machine.os.keyword IS NOT NULL | EVAL key_machine_os_keyword = CASE(machine.os.keyword IN (${logsFrom} | ${logsWhere} | WHERE machine.os.keyword IS NOT NULL | STATS COUNT(*) BY machine.os.keyword | SORT machine.os.keyword ASC | LIMIT 2 | KEEP machine.os.keyword), machine.os.keyword, NULL) | STATS AVG(bytes) BY key_machine_os_keyword, host.keyword | SORT \`AVG(bytes)\` DESC | LIMIT 3 BY key_machine_os_keyword | EVAL named_machine_os_keyword = CASE(key_machine_os_keyword IS NULL, 0::LONG, 1::LONG) | SORT named_machine_os_keyword DESC, key_machine_os_keyword ASC, \`AVG(bytes)\` DESC | EVAL machine.os.keyword = COALESCE(TO_STRING(key_machine_os_keyword), "Other"::KEYWORD) | DROP named_machine_os_keyword, key_machine_os_keyword`,
+        columnNames: ['AVG(bytes)', 'host.keyword', 'machine.os.keyword'],
+        expectedSourceIds: {
+          'AVG(bytes)': ['col3'],
+          'machine.os.keyword': ['col1'],
+          'host.keyword': ['col2'],
+        },
+        // Other is win 7, win 8 and win xp; its third host is www.elastic.co: 2894 documents,
+        // 14884033 bytes.
+        expectedLastRow: {
+          'machine.os.keyword': 'Other',
+          'host.keyword': 'www.elastic.co',
+          'AVG(bytes)': 14884033 / 2894,
+        },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'nested terms with other bucket on the inner dimension is not convertible',
+      columns: {
+        col1: terms('machine.os.keyword', {
+          size: 2,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col2: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+          otherBucket: true,
+        }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: false,
+        reason: 'terms_other_bucket_not_supported',
+      },
+    },
+    // Both dimensions share one result column, so the Other key would replace the inner group
+    // that DSL expands into the remaining values.
+    {
+      group: 'top_n',
+      dataset: logs,
+      description:
+        'nested terms on the same field with other bucket on the outer dimension is not convertible',
+      columns: {
+        col1: terms('host.keyword', {
+          size: 2,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+          otherBucket: true,
+        }),
+        col2: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: false,
+        reason: 'terms_other_bucket_same_field_not_supported',
+      },
+    },
+    // A multi-field inner dimension does not share the outer result column, so the blocker
+    // reported is its own rather than the same-field Other one.
+    {
+      group: 'top_n',
+      dataset: logs,
+      description:
+        'nested terms with other bucket on the outer dimension and a multi-field inner dimension on the same field reports multiple fields',
+      columns: {
+        col1: terms('host.keyword', {
+          size: 2,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+          otherBucket: true,
+        }),
+        col2: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+          secondaryFields: ['geo.dest'],
+        }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: false,
+        reason: 'terms_multiple_fields_not_supported',
+      },
+    },
+    // The nested Other path limits by the outer key only, so a bucket between the two Top
+    // values would pick the inner top N across every date bucket instead of per date bucket.
+    {
+      group: 'top_n',
+      dataset: logs,
+      description:
+        'nested terms with a date histogram between and other bucket on the outer dimension is not convertible',
+      columns: {
+        col1: terms('machine.os.keyword', {
+          size: 2,
+          orderBy: { type: 'column', columnId: 'col4' },
+          orderDirection: 'desc',
+          otherBucket: true,
+        }),
+        col2: dateHistogram('timestamp', { interval: '1d' }),
+        col3: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col4' },
+          orderDirection: 'desc',
+        }),
+        col4: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3', 'col4'],
       expected: {
         success: false,
         reason: 'terms_other_bucket_not_supported',
@@ -983,6 +1181,47 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
           'AVG(bytes)': ['col3'],
           'geo.src': ['col1'],
           'host.keyword': ['col2'],
+        },
+      },
+    },
+    // Two Top values on the same field collapse into one result column that both Lens columns
+    // read from, so the inner `LIMIT n BY` sees one row per outer value, as DSL does.
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'two terms on the same field without other bucket',
+      columns: {
+        col1: terms('host.keyword', {
+          size: 2,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col2: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | ${outerTopNFilter({
+          field: 'host.keyword',
+          score: 'rank_host_keyword = AVG(bytes)',
+          sort: 'rank_host_keyword DESC',
+          size: 2,
+        })} | INLINE STATS rank_host_keyword = AVG(bytes) BY host.keyword | STATS AVG(bytes) BY rank_host_keyword, host.keyword | SORT \`AVG(bytes)\` DESC | LIMIT 3 BY host.keyword | SORT rank_host_keyword DESC, \`AVG(bytes)\` DESC | DROP rank_host_keyword`,
+        columnNames: ['AVG(bytes)', 'host.keyword'],
+        expectedSourceIds: {
+          'AVG(bytes)': ['col3'],
+          'host.keyword': ['col1', 'col2'],
+        },
+        // One row per outer host; the second of the top 2 is cdn.elastic-elastic-elastic.org:
+        // 2255 documents, 12602429 bytes.
+        expectedLastRow: {
+          'host.keyword': 'cdn.elastic-elastic-elastic.org',
+          'AVG(bytes)': 12602429 / 2255,
         },
       },
     },

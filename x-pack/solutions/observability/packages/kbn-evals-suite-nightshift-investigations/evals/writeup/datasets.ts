@@ -20,6 +20,9 @@ import {
   type WriteupExample,
 } from './types';
 
+/** A writeup conversations file (a `.json` path) rather than a stored dataset's name. */
+export const isWriteupDatasetFile = (name: string): boolean => name.endsWith('.json');
+
 /**
  * The default dataset: synthetic ORCA investigations with scripted follow-ups, stored in the golden
  * cluster and kept in `gs://nightshift-datasets/investigation-engine/writeup/orca/v1/`. Its goldens
@@ -261,22 +264,16 @@ export const validateOrcaWriteupDataset = (
 };
 
 /**
- * The writeup dataset to run: a stored dataset by name (`NIGHTSHIFT_DATASET_NAME`), a conversations
- * file (`NIGHTSHIFT_WRITEUP_EXAMPLES_FILE`), or the pinned ORCA release.
+ * The writeup dataset to run, from `NIGHTSHIFT_DATASET_NAME`: a stored dataset's name, a conversations
+ * file (a `.json` path, for data kept outside the repository), or unset for the pinned ORCA release.
  */
 export const loadWriteupDataset = async (
   client: Pick<EvalsClient, 'getDatasetByName'>,
-  {
-    datasetName = process.env.NIGHTSHIFT_DATASET_NAME,
-    examplesFile = process.env.NIGHTSHIFT_WRITEUP_EXAMPLES_FILE,
-  }: { datasetName?: string; examplesFile?: string } = {}
+  datasetName: string | undefined = process.env.NIGHTSHIFT_DATASET_NAME?.trim() || undefined
 ): Promise<EvaluationDataset<WriteupExample>> => {
-  if (datasetName && examplesFile) {
-    throw new Error(
-      'Choose either NIGHTSHIFT_DATASET_NAME or NIGHTSHIFT_WRITEUP_EXAMPLES_FILE, not both'
-    );
+  if (datasetName && isWriteupDatasetFile(datasetName)) {
+    return toWriteupDataset(readWriteupFile(datasetName));
   }
-  if (examplesFile) return toWriteupDataset(readWriteupFile(examplesFile));
 
   const name = datasetName ?? ORCA_WRITEUP_RELEASE.name;
   const dataset = await client.getDatasetByName(name);

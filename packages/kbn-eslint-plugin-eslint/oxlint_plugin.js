@@ -38,6 +38,7 @@ module.exports = eslintCompatPlugin({
     no_viz_naming: require('./rules/no_viz_naming'),
     scout_no_describe_configure: require('./rules/scout_no_describe_configure'),
     scout_prefer_both_arch_tags: require('./rules/scout_prefer_both_arch_tags'),
+    scout_require_tags: require('./rules/scout_require_tags'),
     scout_max_one_describe: require('./rules/scout_max_one_describe'),
     scout_test_file_naming: require('./rules/scout_test_file_naming'),
     scout_require_api_client_in_api_test: require('./rules/scout_require_api_client_in_api_test'),

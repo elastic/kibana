@@ -17,6 +17,7 @@ import type { QueryArgs, Row } from '../common';
 import { IN_VIEW_AGGREGATION, IN_VIEW_FIELD, buildEntitiesInViewBranch } from './entities_in_view';
 import {
   ENTITY_TYPE_FILTER,
+  SET_UNMAPPED_NULLIFY,
   buildEntityAggregations,
   buildJoinedPageSteps,
   buildStatsByEntityClause,
@@ -30,6 +31,7 @@ import type { ComputedColumn } from './computed_column';
 const GROUP_KEY = `COALESCE(${RESOLVED_TO_FIELD}, ${ENTITY_ID_FIELD})`;
 
 const buildGroupSizeSortWithValueQuery = (args: QueryArgs, limit: number): string[] => [
+  SET_UNMAPPED_NULLIFY,
   `FROM ${getEntityAlias(args.namespace)}`,
   `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NOT NULL`,
   `| EVAL \`entity.id\` = ${RESOLVED_TO_FIELD}`,
@@ -39,6 +41,7 @@ const buildGroupSizeSortWithValueQuery = (args: QueryArgs, limit: number): strin
 ];
 
 const buildGroupSizeSortAllQuery = (args: QueryArgs): string[] => [
+  SET_UNMAPPED_NULLIFY,
   'FROM (',
   `FROM ${getEntityAlias(args.namespace)}`,
   `| WHERE ${ENTITY_TYPE_FILTER}`,

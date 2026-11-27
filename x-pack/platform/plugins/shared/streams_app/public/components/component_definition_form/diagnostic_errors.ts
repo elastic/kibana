@@ -20,6 +20,20 @@ export interface DiagnosticFieldErrors {
   unmatched: StreamsUnit.Diagnostic[];
 }
 
+/** A detail of a diagnostic as text. */
+export const formatDiagnosticDetail = (value: StreamsUnit.DiagnosticDetail): string =>
+  typeof value === 'string' ? value : JSON.stringify(value);
+
+/** The message of a diagnostic with its details, such as the allowed values, for a field error. */
+const describeDiagnostic = ({ message, details }: StreamsUnit.Diagnostic): string => {
+  const entries = Object.entries(details ?? {});
+  return entries.length === 0
+    ? message
+    : `${message} (${entries
+        .map(([name, value]) => `${name}: ${formatDiagnosticDetail(value)}`)
+        .join('; ')})`;
+};
+
 /**
  * Places configuration service diagnostics on the form fields they point at. `config` is the
  * entries that were submitted, so `/config/<index>` resolves to the entry's name, which is the
@@ -52,7 +66,7 @@ export const toFieldErrors = (
       unmatched.push(diagnostic);
       continue;
     }
-    errors[pointer] = diagnostic.message;
+    errors[pointer] = describeDiagnostic(diagnostic);
   }
   return { errors, unmatched };
 };

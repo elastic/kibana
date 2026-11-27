@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/* @notice
+/*
  * The ORCA grader port in @kbn/evals-suite-nightshift-investigations (`orca/check_prediction.ts`)
  * is adapted from the ORCA benchmark's verifier `check_prediction.py`
  * (https://github.com/ORCA-bench/ORCA-bench), from "ORCA: How Ready Are Language Model Agents for

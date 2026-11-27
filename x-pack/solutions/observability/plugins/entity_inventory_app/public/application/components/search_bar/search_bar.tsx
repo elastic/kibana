@@ -45,7 +45,7 @@ export const EntityInventorySearchBar = () => {
     <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
       <EuiFlexItem>
         <SearchBar
-          key={searchBarKey}
+          key={`${entityCategory}:${searchBarKey}`}
           appName={ENTITY_INVENTORY_APP_NAME}
           dataTestSubj="entityInventorySearchBar"
           displayStyle="inPage"

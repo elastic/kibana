@@ -89,15 +89,13 @@ describe('createUiamApiKeyProfileIdResolver', () => {
     expect(clusterClient.asScoped).not.toHaveBeenCalled();
   });
 
-  it('logs a failed lookup as an error, unless UIAM no longer authenticates the key', async () => {
+  it('throws a failed lookup, unless UIAM no longer authenticates the key', async () => {
     uiam.getApiKeyCreator.mockRejectedValueOnce(Boom.unauthorized('Authentication failed'));
     await expect(resolve(request)).resolves.toBeUndefined();
-    expect(logger.error).not.toHaveBeenCalled();
 
-    uiam.getApiKeyCreator.mockRejectedValueOnce(new Error('UIAM is down'));
-    await expect(resolve(request)).resolves.toBeUndefined();
-    expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to resolve the creator of a UIAM API key')
-    );
+    const failure = new Error('UIAM is down');
+    uiam.getApiKeyCreator.mockRejectedValueOnce(failure);
+    await expect(resolve(request)).rejects.toBe(failure);
+    expect(logger.error).not.toHaveBeenCalled();
   });
 });
