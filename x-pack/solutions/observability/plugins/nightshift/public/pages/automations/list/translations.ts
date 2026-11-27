@@ -26,6 +26,41 @@ export const listLabels = {
   automationColumn: i18n.translate('xpack.nightshift.automations.automationColumn', {
     defaultMessage: 'Automations',
   }),
+  destinationColumn: i18n.translate('xpack.nightshift.automations.destinationColumnLabel', {
+    defaultMessage: 'Destination',
+  }),
+  slackThreadDestination: i18n.translate(
+    'xpack.nightshift.automations.slackThreadDestinationLabel',
+    {
+      defaultMessage: 'Original Slack thread',
+    }
+  ),
+  noDestination: i18n.translate('xpack.nightshift.automations.noDestinationLabel', {
+    defaultMessage: 'No destination',
+  }),
+  lastRunColumn: i18n.translate('xpack.nightshift.automations.lastRunColumnLabel', {
+    defaultMessage: 'Last run',
+  }),
+  lastRunTooltip: i18n.translate('xpack.nightshift.automations.lastRunColumnTooltip', {
+    defaultMessage:
+      'Start time of the latest recorded run, including skipped runs. The selected time range does not affect this value.',
+  }),
+  loadingLastRun: i18n.translate('xpack.nightshift.automations.loadingLastRunLabel', {
+    defaultMessage: 'Loading last run',
+  }),
+  noRunsRecorded: i18n.translate('xpack.nightshift.automations.noRunsRecordedLabel', {
+    defaultMessage: 'No runs recorded',
+  }),
+  lastRunUnavailable: i18n.translate('xpack.nightshift.automations.lastRunUnavailableLabel', {
+    defaultMessage: 'Unavailable',
+  }),
+  lastRunLoadErrorTitle: i18n.translate('xpack.nightshift.automations.lastRunLoadErrorTitle', {
+    defaultMessage: 'Could not load last run times',
+  }),
+  lastRunLoadErrorDescription: i18n.translate(
+    'xpack.nightshift.automations.lastRunLoadErrorDescription',
+    { defaultMessage: 'This only affects the Last run column.' }
+  ),
   enabled: i18n.translate('xpack.nightshift.automations.enabledColumn', {
     defaultMessage: 'Enabled',
   }),
@@ -159,7 +194,7 @@ export const runCountColumns = [
     tooltip: i18n.translate('xpack.nightshift.automations.successfulColumnTooltip', {
       defaultMessage: 'Successful runs in the selected time range.',
     }),
-    width: '108px',
+    width: '94px',
     getViewLabel: (count: number) =>
       i18n.translate('xpack.nightshift.automations.viewSuccessfulRuns', {
         defaultMessage: 'View {count} successful in run history',
@@ -174,7 +209,7 @@ export const runCountColumns = [
     tooltip: i18n.translate('xpack.nightshift.automations.failedColumnTooltip', {
       defaultMessage: 'Failed runs in the selected time range.',
     }),
-    width: '88px',
+    width: '64px',
     getViewLabel: (count: number) =>
       i18n.translate('xpack.nightshift.automations.viewFailedRuns', {
         defaultMessage: 'View {count} failed in run history',
@@ -189,7 +224,7 @@ export const runCountColumns = [
     tooltip: i18n.translate('xpack.nightshift.automations.skippedColumnTooltip', {
       defaultMessage: 'Triggers skipped by the Daily trigger limit in the selected time range.',
     }),
-    width: '96px',
+    width: '76px',
     getViewLabel: (count: number) =>
       i18n.translate('xpack.nightshift.automations.viewSkippedRuns', {
         defaultMessage: 'View {count} skipped in run history',
