@@ -23,7 +23,7 @@ export const EVIDENCE_MAX_MESSAGE_LENGTH = 500;
  * - `query_failed`: the query is not valid ES|QL, Elasticsearch rejected it, a shard failed, the
  *   response was partial (a skipped cluster or project), or it was missing its `columns` or
  *   `values`. A shard failure is an error, never a result with fewer rows.
- * - `timeout`: the query ran longer than its timeout.
+ * - `timeout`: the query ran longer than its timeout or the client's request timeout.
  * - `aborted`: the caller's signal fired, for example because the run ended.
  */
 export const EVIDENCE_ERROR_REASONS = ['query_failed', 'timeout', 'aborted'] as const;
@@ -59,7 +59,9 @@ export interface FoundEvidence {
 /**
  * The query ran and returned nothing to read: no rows, or one row whose every cell was null (an
  * aggregate over no matches, which a single matched row with no value cannot be told apart from).
- * A real negative, unlike an error. More rows with no value are `found`, with empty rows.
+ * Not a refutation: the window may have passed, the data may not have arrived yet, or the query may
+ * not match what the rule counted, so the judge reads it as no evidence. More rows with no value
+ * are `found`, with empty rows.
  */
 export interface EmptyEvidence {
   result: 'empty';

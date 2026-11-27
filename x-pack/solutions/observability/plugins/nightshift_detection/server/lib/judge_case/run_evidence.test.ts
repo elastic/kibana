@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { EVIDENCE_MAX_CELL_LENGTH } from './evidence_types';
 import { runEvidence } from './run_evidence';
@@ -217,7 +218,7 @@ describe('runEvidence', () => {
         true,
       ],
     ])(
-      'keeps %s as found with empty rows, not as a negative',
+      'keeps %s as found with empty rows, not as empty',
       async (_title, response, rowCount, rowsTruncated) => {
         const esClient = createClient();
         respondWith(esClient, response);
@@ -411,6 +412,17 @@ describe('runEvidence', () => {
       } finally {
         jest.useRealTimers();
       }
+    });
+
+    it("reports the client's own request timeout as a timeout, not query_failed", async () => {
+      const esClient = createClient();
+      esClient.esql.query.mockRejectedValue(new errors.TimeoutError('Request timed out'));
+
+      expect(await runEvidence({ esClient, query: QUERY })).toEqual({
+        result: 'error',
+        reason: 'timeout',
+        message: 'Request timed out',
+      });
     });
 
     it('reports an abort-shaped error as query_failed when neither signal fired', async () => {

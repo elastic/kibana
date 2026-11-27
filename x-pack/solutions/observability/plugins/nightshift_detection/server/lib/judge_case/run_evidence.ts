@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { esql, Parser } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { timeoutSignal } from '@kbn/std';
@@ -116,7 +117,7 @@ const toResult = (table: EsqlTable): EvidenceResult => {
     .filter(({ index }) => keptValues.some((rowValues) => (rowValues[index] ?? null) !== null));
   if (keptColumns.length === 0) {
     // No rows, or one row whose every cell is null: an aggregate over no matches. More rows than
-    // that matched documents whose kept cells hold no value, so they stay a match, not a negative.
+    // that matched documents whose kept cells hold no value, so they stay a match, not `empty`.
     if (values.length <= 1) {
       return { result: 'empty' };
     }
@@ -165,9 +166,9 @@ export const runEvidence = async ({
     return ABORTED;
   }
   // `Parser.parse` never throws; the composer does on a syntax error.
-  const { errors } = Parser.parse(query);
-  if (errors.length > 0) {
-    return queryFailed(`the evidence query is not valid ES|QL: ${errors[0].message}`);
+  const { errors: syntaxErrors } = Parser.parse(query);
+  if (syntaxErrors.length > 0) {
+    return queryFailed(`the evidence query is not valid ES|QL: ${syntaxErrors[0].message}`);
   }
   const effectiveTimeoutMs = resolveTimeoutMs(timeoutMs);
 
@@ -205,6 +206,14 @@ export const runEvidence = async ({
         result: 'error',
         reason: 'timeout',
         message: `evidence query exceeded ${effectiveTimeoutMs} ms`,
+      };
+    }
+    // The client's own request timeout can fire first, when it is set shorter than this one.
+    if (error instanceof errors.TimeoutError) {
+      return {
+        result: 'error',
+        reason: 'timeout',
+        message: cutText(getErrorMessage(error), EVIDENCE_MAX_MESSAGE_LENGTH).text,
       };
     }
     return queryFailed(getErrorMessage(error));
