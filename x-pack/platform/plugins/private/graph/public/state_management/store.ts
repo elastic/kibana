@@ -29,6 +29,7 @@ import type { MetaDataState } from './meta_data';
 import { metaDataReducer, registerMetaDataListeners } from './meta_data';
 import type { WorkspaceState } from './workspace';
 import { registerWorkspaceListeners, workspaceReducer } from './workspace';
+import { createWorkspacePositionMiddleware } from './workspace_position_middleware';
 
 export interface GraphState {
   fields: FieldsState;
@@ -96,7 +97,10 @@ export const createGraphStore = (deps: GraphStoreDependencies): Store => {
         // graph state and actions carry non-serializable values (e.g. Workspace instances)
         serializableCheck: false,
         immutableCheck: false,
-      }).prepend(listenerMiddleware.middleware),
+      }).prepend(
+        createWorkspacePositionMiddleware(deps.getWorkspace),
+        listenerMiddleware.middleware
+      ),
   });
 
   registerGraphListeners(listenerMiddleware.startListening, deps, store.getState());
