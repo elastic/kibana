@@ -21,6 +21,7 @@ import type { UpdateOriginResponse } from '@kbn/agent-builder-common';
 import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from '@kbn/core/public';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import { dashboardStateToAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import {
@@ -114,9 +115,34 @@ export const registerDashboardAppIntegration = ({
   let attachments: Array<DashboardAttachment & { version?: number }> | undefined;
   let conversationId: string | undefined;
 
+  /**
+   * Pointed attachments staged by another mount of a dashboard without an origin. The unsaved
+   * dashboard takes the one it shows, e.g. once the user came back to it, while another unsaved
+   * dashboard shows other data, so never takes it.
+   */
+  const getRemountCandidates = () =>
+    (attachments ?? []).filter(
+      ({ id, origin }) =>
+        !origin &&
+        !stagedDashboards.isStagedFromSavedDashboard(id) &&
+        stagedDashboards.isOtherDashboardPointerTarget(id, api)
+    );
+
+  const findShownAttachment = async <TAttachment extends DashboardAttachment>(
+    candidates: TAttachment[],
+    dashboardState: DashboardState
+  ): Promise<TAttachment | undefined> => {
+    for (const attachment of candidates) {
+      if (await isAttachmentShownInDashboard({ areEqual, dashboardState, data: attachment.data })) {
+        return attachment;
+      }
+    }
+    return undefined;
+  };
+
   const stageOpenDashboard = async () => {
     const { attributes: dashboardState } = api.getSerializedState();
-    const { origin, attachment: dashboardAttachment } = resolveDashboardAttachmentLink({
+    const link = resolveDashboardAttachmentLink({
       api,
       canWriteDashboards,
       attachments: attachments ?? [],
@@ -124,6 +150,12 @@ export const registerDashboardAppIntegration = ({
       isOtherDashboardPointerTarget: (attachmentId) =>
         stagedDashboards.isOtherDashboardPointerTarget(attachmentId, api),
     });
+    const { origin } = link;
+    const remountCandidates =
+      !link.attachment && link.linkable && origin === undefined ? getRemountCandidates() : [];
+    const dashboardAttachment = remountCandidates.length
+      ? await findShownAttachment(remountCandidates, dashboardState)
+      : link.attachment;
     const isNewConversation = !conversationId;
     // another dashboard staged under the draft id keeps it, e.g. for a panel pointer to it
     const draftId =
@@ -282,6 +314,8 @@ export const registerDashboardAppIntegration = ({
     api,
     checkSavedDashboardExist,
     getAttachments: () => attachments,
+    isStagedFromOtherDashboard: (attachmentId) =>
+      stagedDashboards.isStagedFromOtherDashboard(attachmentId, api),
     updateOrigin: chat.updateOrigin,
   });
 
