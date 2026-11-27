@@ -59,7 +59,10 @@ const services = {
 } as unknown as TracesLatencyMapViewProps['services'];
 
 const renderView = (overrides: Partial<TracesLatencyMapViewProps> = {}) => {
-  const actions = { updateESQLQuery: jest.fn(), setExpandedDoc: jest.fn() };
+  const actions = {
+    updateESQLQuery: jest.fn(),
+    setExpandedDocByQuery: jest.fn().mockResolvedValue('.ds-traces-apm-000001::span-1::'),
+  };
   const view = render(
     <TracesLatencyMapView
       indexPattern="traces-apm*"
@@ -309,124 +312,45 @@ describe('TracesLatencyMapView', () => {
   });
 
   it('opens the newest span of a clicked cell in the document flyout', async () => {
-    answerWith({ columns: [{ name: 'service.name', type: 'keyword' }], values: [['cart']] });
     const { actions, mapProps } = renderView({
       filters: ['service.name == "cart"', selectionClause],
     });
     await act(() => mapProps.onCellClick!(cell));
-    const [params] = esql.mock.lastCall ?? [];
+    const [params] = actions.setExpandedDocByQuery.mock.lastCall ?? [];
     // The cell bounds the span, under the query's own filters but not the selection:
     // cells outside a committed selection must stay clickable.
-    expect(params?.query).toContain(selectionToEsqlCondition(cell));
-    expect(params?.query).toContain('service.name == "cart"');
-    expect(params?.query).not.toContain(selectionClause);
-    expect(params?.dropNullColumns).toBe(true);
-    expect(actions.setExpandedDoc).toHaveBeenCalledWith(
-      expect.objectContaining({ flattened: { 'service.name': 'cart' } }),
-      // The flyout opens on the traces Overview, not the field table.
-      { initialTabId: 'doc_view_obs_traces_overview' }
-    );
-  });
-
-  const spanWithIdentity: ESQLSearchResponse = {
-    columns: [
-      { name: 'service.name', type: 'keyword' },
-      { name: '_id', type: 'keyword' },
-      { name: '_index', type: 'keyword' },
-    ],
-    values: [['cart', 'span-1', '.ds-traces-apm-000001']],
-  };
-
-  it('gives the opened span its real identity when the metadata is there', async () => {
-    answerWith(spanWithIdentity);
-    const { actions, mapProps } = renderView();
-    await act(() => mapProps.onCellClick!(cell));
-    // The identity lets the traces document profile recognize the record, and the flyout
-    // write a URL reference from raw._id/_index.
-    expect(actions.setExpandedDoc).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: '.ds-traces-apm-000001::span-1::',
-        raw: expect.objectContaining({ _id: 'span-1', _index: '.ds-traces-apm-000001' }),
-      }),
-      { initialTabId: 'doc_view_obs_traces_overview' }
-    );
-  });
-
-  it('opens a span outside the selection without an identity to link to', async () => {
-    // A link restores its document through the query, selection and all: this span could
-    // never come back that way. Its fields stay, the index among them, for the profile.
-    answerWith(spanWithIdentity);
-    const { actions, mapProps } = renderView({
-      filters: ['service.name == "cart"', selectionClause],
-    });
-    await act(() => mapProps.onCellClick!(cell));
-    const [record] = actions.setExpandedDoc.mock.lastCall ?? [];
-    expect(record?.id).toBe(`traceLatencyMapExampleSpan-${cell.from}-${cell.minDuration}`);
-    expect(record?.raw).toEqual({ 'service.name': 'cart' });
-    expect(record?.flattened).toEqual(
-      expect.objectContaining({ _id: 'span-1', _index: '.ds-traces-apm-000001' })
-    );
-  });
-
-  it('keeps the identity of a span inside the selection', async () => {
-    answerWith(spanWithIdentity);
-    const inside = { ...cell, from: selection.from, to: '2026-10-26T10:01:00.000Z' };
-    const { actions, mapProps } = renderView({
-      filters: ['service.name == "cart"', selectionClause],
-    });
-    await act(() =>
-      mapProps.onCellClick!({ ...inside, minDuration: 1_000_000, maxDuration: 2_000_000 })
-    );
-    expect(actions.setExpandedDoc.mock.lastCall?.[0]?.id).toBe('.ds-traces-apm-000001::span-1::');
-  });
-
-  it('keeps the identity of a span on the selection edge: the bounds round as the query does', async () => {
-    answerWith(spanWithIdentity);
-    const { actions, mapProps } = renderView({
-      filters: ['service.name == "cart"', selectionClause],
-    });
-    // A cell edge is a fraction of a nanosecond below the written bound, which rounded up.
-    await act(() =>
-      mapProps.onCellClick!({
-        ...cell,
-        from: selection.from,
-        to: '2026-10-26T10:01:00.000Z',
-        minDuration: selection.minDuration - 0.4,
-        maxDuration: 2_000_000,
-      })
-    );
-    expect(actions.setExpandedDoc.mock.lastCall?.[0]?.id).toBe('.ds-traces-apm-000001::span-1::');
+    expect(params?.esql).toContain(selectionToEsqlCondition(cell));
+    expect(params?.esql).toContain('service.name == "cart"');
+    expect(params?.esql).not.toContain(selectionClause);
+    // The flyout opens on the traces Overview, not the field table.
+    expect(params?.initialTabId).toBe('doc_view_obs_traces_overview');
   });
 
   it('abandons a pending span lookup when the map source changes', async () => {
-    let resolveLookup: (value: { rawResponse: ESQLSearchResponse }) => void = () => {};
-    esql.mockImplementation(
-      (_params, options) =>
-        new Promise((resolve, reject) => {
-          resolveLookup = resolve;
-          options?.abortSignal?.addEventListener('abort', () => reject(new Error('aborted')));
-        })
-    );
+    let resolveLookup: (id: string) => void = () => {};
     const view = renderView();
+    view.actions.setExpandedDocByQuery.mockImplementation(
+      () => new Promise((resolve) => (resolveLookup = resolve))
+    );
     const clicked = view.mapProps.onCellClick!(cell);
     // A filter pill changed: the documents are different now.
     view.rerender({ filters: ['service.name == "checkout"'] });
-    expect(esql.mock.lastCall?.[1]?.abortSignal?.aborted).toBe(true);
-    resolveLookup({ rawResponse: spanWithIdentity });
+    expect(view.actions.setExpandedDocByQuery.mock.lastCall?.[0]?.abortSignal?.aborted).toBe(
+      true
+    );
+    resolveLookup('.ds-traces-apm-000001::span-1::');
     await act(() => clicked);
-    expect(view.actions.setExpandedDoc).not.toHaveBeenCalled();
+    expect(jest.mocked(LatencyMap).mock.lastCall?.[0].activeCell).toBeUndefined();
   });
 
   it('leaves the view as it is when the cell has no span to open', async () => {
-    esql.mockRejectedValue(new Error('shards failed'));
     const { actions, mapProps } = renderView();
+    actions.setExpandedDocByQuery.mockRejectedValue(new Error('shards failed'));
     await act(() => mapProps.onCellClick!(cell));
-    expect(actions.setExpandedDoc).not.toHaveBeenCalled();
     expect(jest.mocked(LatencyMap).mock.lastCall?.[0].activeCell).toBeUndefined();
   });
 
   it('keeps the clicked cell active while its document is open, and releases it when the flyout closes', async () => {
-    answerWith(spanWithIdentity);
     const view = renderView();
     await act(() => view.mapProps.onCellClick!(cell));
     const lastMapProps = () => jest.mocked(LatencyMap).mock.lastCall?.[0] as LatencyMapProps;
@@ -441,7 +365,6 @@ describe('TracesLatencyMapView', () => {
   });
 
   it('releases the active cell when another document opens, or the map changes', async () => {
-    answerWith(spanWithIdentity);
     const view = renderView();
     await act(() => view.mapProps.onCellClick!(cell));
     view.rerender({ expandedDocId: '.ds-traces-apm-000001::span-1::' });
@@ -475,7 +398,6 @@ describe('TracesLatencyMapView', () => {
     expect(esql).toHaveBeenCalledWith(
       {
         query: 'FROM traces-apm*',
-        dropNullColumns: undefined,
         kibanaQueryContext: {
           kibanaFilters: searchContext.filters,
           esqlVariables: searchContext.esqlVariables,

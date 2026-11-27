@@ -31,6 +31,7 @@ import {
 } from '../../../../components/discover_grid_flyout';
 import {
   DEFAULT_EXPANDED_DOC_OWNER,
+  QUERY_EXPANDED_DOC_OWNER,
   internalStateActions,
   useAppStateSelector,
   useCurrentTabAction,
@@ -101,9 +102,11 @@ export const DiscoverDocumentFlyout = memo(
       linkability: expandedDocLinkability,
       query: shareQuery,
     });
+    const isDefaultOwner = expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER;
+    const isQueryLookup = expandedDocOwner === QUERY_EXPANDED_DOC_OWNER;
     const flyoutMenuTrailingActions = useMemo<EuiFlyoutMenuAction[] | undefined>(
-      () => (expandedDoc ? shareDirectLinkActions : undefined),
-      [expandedDoc, shareDirectLinkActions]
+      () => (expandedDoc && !isQueryLookup ? shareDirectLinkActions : undefined),
+      [expandedDoc, isQueryLookup, shareDirectLinkActions]
     );
 
     const setExpandedDoc = useCurrentTabAction(internalStateActions.setExpandedDoc);
@@ -158,7 +161,7 @@ export const DiscoverDocumentFlyout = memo(
     );
 
     const flyoutDataSource =
-      !expandedDocOwner || expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER
+      !expandedDocOwner || isDefaultOwner || isQueryLookup
         ? currentDataSource
         : cascadedLeafDataSource;
 

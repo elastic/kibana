@@ -51,13 +51,22 @@ export const createContextAwarenessToolkit = ({
       },
       setExpandedDoc: (record, options) => {
         internalState.dispatch(
-          internalStateActions.setExpandedDocExtPointAction({
+          internalStateActions.setExpandedDoc({
             tabId,
             expandedDoc: record,
             initialDocViewerTabId: options?.initialTabId,
           })
         );
       },
+      setExpandedDocByQuery: ({ esql, initialTabId, abortSignal }) =>
+        internalState.dispatch(
+          internalStateActions.setExpandedDocByQuery({
+            tabId,
+            esqlQueryText: esql,
+            initialDocViewerTabId: initialTabId,
+            abortSignal,
+          })
+        ),
     },
     getStateAdapter: createProfileStateAdapterFactory({
       profileStateRegistry,

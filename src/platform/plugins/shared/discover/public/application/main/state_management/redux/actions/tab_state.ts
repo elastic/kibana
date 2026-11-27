@@ -40,7 +40,8 @@ import {
   getExpandedDocRef,
   matchesExpandedDocRef,
 } from '../../../utils/expanded_doc';
-import { DEFAULT_EXPANDED_DOC_OWNER } from '../constants';
+import { DEFAULT_EXPANDED_DOC_OWNER, QUERY_EXPANDED_DOC_OWNER } from '../constants';
+import { fetchEsqlQueryDoc } from '../../../data_fetching/fetch_expanded_doc';
 import { isEqualState } from '../../utils/state_comparators';
 import {
   internalStateSlice,
@@ -54,7 +55,6 @@ import {
   type ProfileStateDefaultsHandling,
 } from '../../../../../../common/context_awareness';
 import type { ProfileStateMutationOptions } from '../../../../../context_awareness';
-import { recordHasContext } from '../../../../../context_awareness/profiles_manager/record_has_context';
 import { selectTab } from '../selectors';
 import {
   selectDataSourceProfileId,
@@ -180,28 +180,57 @@ export const setExpandedDoc: InternalStateThunkActionCreator<[ExpandedDocPayload
     );
   };
 
-type ExpandedDocExtPointPayload = TabActionPayload<{
-  expandedDoc: DataTableRecord | undefined;
+type ExpandedDocByQueryPayload = TabActionPayload<{
+  esqlQueryText: string;
   initialDocViewerTabId?: string;
+  abortSignal?: AbortSignal;
 }>;
 
-/** Sets the expanded document for a profile, which may hand in a record Discover did not fetch. */
-export const setExpandedDocExtPointAction: InternalStateThunkActionCreator<
-  [ExpandedDocExtPointPayload]
-> = ({ tabId, expandedDoc, initialDocViewerTabId }) =>
-  function setExpandedDocExtPointActionThunkFn(dispatch, _getState, { runtimeStateManager }) {
-    // A record from outside the fetch paths (a chart section's, for example) is not the
-    // proxy `resolveDocumentProfile` creates: without its lazy `context`, the flyout would
-    // fall back to the default document profile and show the generic viewer for a document
-    // a profile knows better. A record that carries its context passes through untouched.
-    const resolvedDoc =
-      expandedDoc && !recordHasContext(expandedDoc)
-        ? selectTabRuntimeState(runtimeStateManager, tabId)
-            .scopedProfilesManager$.getValue()
-            .resolveDocumentProfile({ record: expandedDoc })
-        : expandedDoc;
+/**
+ * Fetches the first row of an ES|QL query under the tab's filters, variables, time range and
+ * search session, and opens it without a shareable link. Resolves to the opened document's ID.
+ */
+export const setExpandedDocByQuery: InternalStateThunkActionCreator<
+  [ExpandedDocByQueryPayload],
+  Promise<string | undefined>
+> = ({ tabId, esqlQueryText, initialDocViewerTabId, abortSignal }) =>
+  async function setExpandedDocByQueryThunkFn(
+    dispatch,
+    getState,
+    { services, runtimeStateManager }
+  ) {
+    const { data, filterManager } = services;
+    const { esqlVariables, dataRequestParams } = selectTab(getState(), tabId);
+    const record = await fetchEsqlQueryDoc({
+      esqlQueryText,
+      data,
+      kibanaQueryContext: {
+        kibanaFilters: filterManager.getFilters(),
+        esqlVariables,
+        timeRange:
+          dataRequestParams.timeRangeAbsolute ?? data.query.timefilter.timefilter.getAbsoluteTime(),
+      },
+      searchSessionId: dataRequestParams.searchSessionId,
+      abortSignal,
+    });
 
-    dispatch(setExpandedDoc({ tabId, expandedDoc: resolvedDoc, initialDocViewerTabId }));
+    if (!record || abortSignal?.aborted) {
+      return undefined;
+    }
+
+    const { scopedProfilesManager$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const resolvedDoc = scopedProfilesManager$.getValue().resolveDocumentProfile({ record });
+
+    dispatch(
+      setExpandedDoc({
+        tabId,
+        expandedDoc: resolvedDoc,
+        expandedDocOwner: QUERY_EXPANDED_DOC_OWNER,
+        initialDocViewerTabId,
+      })
+    );
+
+    return resolvedDoc.id;
   };
 
 type DocViewerShareableStatePayload = TabActionPayload<{
