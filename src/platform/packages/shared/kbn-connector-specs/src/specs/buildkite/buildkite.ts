@@ -176,7 +176,7 @@ export const Buildkite: ConnectorSpec = {
       isTool: true,
       scope: 'write',
       description:
-        'Trigger a new build on a Buildkite pipeline for a specific commit and branch, with optional message, environment variables, and meta-data. Returns the created build, including its number and state. This is the core action for kicking off CI/CD from a workflow.',
+        'Trigger a new build on a Buildkite pipeline for a specific commit, branch and message, with optional environment variables and meta-data. Returns the created build, including its number and state. This is the core action for kicking off CI/CD from a workflow.',
       input: CreateBuildInputSchema,
       handler: async (ctx, input: CreateBuildInput) => {
         return callToolJson(
