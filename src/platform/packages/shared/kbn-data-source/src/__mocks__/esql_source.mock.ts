@@ -9,7 +9,8 @@
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { EsqlSource } from '../sources/esql_source';
-import type { Column } from '../types';
+import type { Column, FormatterField } from '../types';
+import { getFormatterEsTypes } from '../formatter_field';
 import { registerEsqlSourceInDataViewsCache } from '../cache_adapter';
 import { buildFilterableFieldSpecs } from '../filterable_fields';
 import { createMockDataViewsService } from './data_views_service.mock';
@@ -37,9 +38,9 @@ export const createMockEsqlSource = (
     getColumns: () => columns as Column[],
     getColumn: (name: string) => columns.find((c) => c.name === name) as Column | undefined,
     getFormatter: (
-      field: { type: string; esTypes?: string[] },
+      field: FormatterField,
       fieldFormats: { getDefaultInstance: (type: string, esTypes?: string[]) => unknown }
-    ) => fieldFormats.getDefaultInstance(field.type, field.esTypes),
+    ) => fieldFormats.getDefaultInstance(field.type, getFormatterEsTypes(field)),
     getEmptyColumnNames: () => resultColumns.filter(({ isNull }) => isNull).map(({ name }) => name),
     getFilterableFields: async () => columns as Column[],
     toFilterableSource: async () => ({

@@ -13,6 +13,7 @@ import { FieldFormatsRegistry, baseFormatters } from '@kbn/field-formats-plugin/
 import type { FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
 import { DataViewSource } from './data_view_source';
 import { EsqlSource } from './esql_source';
+import { createMockEsqlSource } from '../__mocks__/esql_source.mock';
 
 // The date formatters are registered by the plugin, not by `baseFormatters`, so dates map to another one.
 // `date_nanos` is keyed by an Elasticsearch type (`es: true`), which wins over the Kibana type `date`.
@@ -154,6 +155,20 @@ describe('getFormatter', () => {
 
       expect(source.getFormatter(date, fieldFormats).type.id).toBe('relative_date');
       expect(source.getFormatter(nanosDate, fieldFormats).type.id).toBe('duration');
+    });
+
+    it('is what the shared mock answers too, so consumer tests format like production', async () => {
+      const fieldFormats = buildFieldFormats();
+      const source = await EsqlSource.create({ query: 'FROM logs-*', resultColumns: [] });
+      const mock = createMockEsqlSource([
+        { name: 'precise_time', type: 'date', esType: 'date_nanos', source: 'index' },
+      ]);
+      const [column] = mock.getColumns();
+
+      expect(mock.getFormatter(column, fieldFormats).type.id).toBe('duration');
+      expect(mock.getFormatter(column, fieldFormats).type.id).toBe(
+        source.getFormatter(column, fieldFormats).type.id
+      );
     });
 
     it('formats a field of source.fields and of the filterable source as they are', async () => {
