@@ -1,5 +1,5 @@
 {
-  "sha1": "2012ed67b78c5bf5dfb5a8a11f468fbf804c56cd",
+  "sha1": "09a9a3f64480aa33885ec9275d8611c20b833fe7",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -16,8 +16,8 @@
       }
     },
     {
-      "id": "e37bb1f0da89caf-d841ae4002c7e33",
-      "title": "Policy details - policy settings unsaved changes unsaved changes guard",
+      "id": "e37bb1f0da89caf-982241f4054dffc",
+      "title": "Policy details - policy settings unsaved changes guard",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

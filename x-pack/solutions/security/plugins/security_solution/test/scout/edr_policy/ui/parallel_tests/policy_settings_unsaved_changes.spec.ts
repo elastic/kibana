@@ -9,7 +9,7 @@ import { expect } from '@kbn/scout-security/ui';
 import { spaceTest, tags } from '../fixtures';
 
 spaceTest.describe(
-  'Policy details - policy settings unsaved changes',
+  'Policy details - policy settings',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth }) => {
@@ -18,23 +18,21 @@ spaceTest.describe(
 
     spaceTest('unsaved changes guard', async ({ page, pageObjects, endpointPolicy }) => {
       const { policySettings, policyDetailsUnsavedChangesModal, protectionUpdates } = pageObjects;
-      let initialMalwareState = '';
 
-      await spaceTest.step('a change to the form enables the save button', async () => {
-        await policySettings.goto(endpointPolicy.id);
-        await expect(policySettings.saveButton).toBeDisabled();
-        await expect(policySettings.protectionUpdatesTab).toBeVisible();
-        initialMalwareState =
-          (await policySettings.malwareProtectionSwitch.getAttribute('aria-checked')) ?? '';
-        expect(['true', 'false']).toContain(initialMalwareState);
+      const initialMalwareChecked = await spaceTest.step(
+        'a change to the form enables the save button',
+        async () => {
+          await policySettings.goto(endpointPolicy.id);
+          await expect(policySettings.saveButton).toBeDisabled();
+          await expect(policySettings.protectionUpdatesTab).toBeVisible();
+          const initial = await policySettings.malwareProtectionSwitch.isChecked();
 
-        await policySettings.toggleMalwareProtection();
-        await expect(policySettings.malwareProtectionSwitch).toHaveAttribute(
-          'aria-checked',
-          initialMalwareState === 'true' ? 'false' : 'true'
-        );
-        await expect(policySettings.saveButton).toBeEnabled();
-      });
+          await policySettings.toggleMalwareProtection();
+          await expect(policySettings.malwareProtectionSwitch).toBeChecked({ checked: !initial });
+          await expect(policySettings.saveButton).toBeEnabled();
+          return initial;
+        }
+      );
 
       await spaceTest.step('Back keeps the user and the change on the tab', async () => {
         await policySettings.openProtectionUpdatesTab();
@@ -55,10 +53,9 @@ spaceTest.describe(
       await spaceTest.step('the discarded change is gone on the settings tab', async () => {
         await protectionUpdates.openSettingsTab();
         await expect(page).toHaveURL(/\/settings/);
-        await expect(policySettings.malwareProtectionSwitch).toHaveAttribute(
-          'aria-checked',
-          initialMalwareState
-        );
+        await expect(policySettings.malwareProtectionSwitch).toBeChecked({
+          checked: initialMalwareChecked,
+        });
         await expect(policySettings.saveButton).toBeDisabled();
       });
     });
