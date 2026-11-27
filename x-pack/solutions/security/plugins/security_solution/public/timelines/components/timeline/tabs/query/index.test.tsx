@@ -630,6 +630,86 @@ describe('query tab with unified timeline', () => {
 
   describe('columns', () => {
     it(
+      'should move column left/right correctly ',
+      async () => {
+        const { container } = renderTestComponents();
+
+        await waitFor(() => {
+          expect(screen.getByTestId('discoverDocTable')).toBeVisible();
+        });
+
+        const messageColumnIndex =
+          customColumnOrder.findIndex((header) => header.id === 'message') +
+          //  offset for additional leading columns on left
+          3;
+
+        expect(container.querySelector('[data-gridcell-column-id="message"]')).toHaveAttribute(
+          'data-gridcell-column-index',
+          String(messageColumnIndex)
+        );
+
+        expect(container.querySelector('[data-gridcell-column-id="message"]')).toBeInTheDocument();
+
+        fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-message'));
+
+        await waitFor(() => {
+          expect(screen.getByTitle('Move left')).toBeEnabled();
+        });
+
+        fireEvent.click(screen.getByTitle('Move left'));
+
+        await waitFor(() => {
+          expect(container.querySelector('[data-gridcell-column-id="message"]')).toHaveAttribute(
+            'data-gridcell-column-index',
+            String(messageColumnIndex - 1)
+          );
+        });
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+
+    it(
+      'should sort date column',
+      async () => {
+        const { container } = renderTestComponents();
+        await waitFor(() => {
+          expect(screen.getByTestId('discoverDocTable')).toBeVisible();
+        });
+
+        expect(
+          container.querySelector('[data-gridcell-column-id="@timestamp"]')
+        ).toBeInTheDocument();
+
+        fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-@timestamp'));
+
+        await waitFor(() => {
+          expect(screen.getByTitle('Sort Old-New')).toBeVisible();
+        });
+        expect(screen.getByTitle('Unsort New-Old')).toBeVisible();
+
+        useTimelineEventsSpy.mockClear();
+        fireEvent.click(screen.getByTitle('Sort Old-New'));
+
+        await waitFor(() => {
+          expect(useTimelineEventsSpy).toHaveBeenNthCalledWith(
+            1,
+            expect.objectContaining({
+              sort: [
+                {
+                  direction: 'asc',
+                  esTypes: ['date'],
+                  field: '@timestamp',
+                  type: 'date',
+                },
+              ],
+            })
+          );
+        });
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+
+    it(
       'should sort string column correctly',
       async () => {
         const { container } = renderTestComponents();
