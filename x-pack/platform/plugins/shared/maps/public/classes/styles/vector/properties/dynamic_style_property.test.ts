@@ -6,9 +6,15 @@
  */
 
 import { DynamicStyleProperty, percentilesValuesToFieldMeta } from './dynamic_style_property';
+import { MockField, MockStyle } from './test_helpers/test_util';
 import type { IField } from '../../../fields/field';
 import type { IVectorLayer } from '../../../layers/vector_layer';
-import { type RawValue, VECTOR_STYLES } from '../../../../../common/constants';
+import { DataRequest } from '../../../util/data_request';
+import {
+  type RawValue,
+  SOURCE_META_DATA_REQUEST_ID,
+  VECTOR_STYLES,
+} from '../../../../../common/constants';
 
 describe('percentilesValuesToFieldMeta', () => {
   test('should return null when values is not defined', () => {
@@ -47,6 +53,41 @@ describe('percentilesValuesToFieldMeta', () => {
       { percentile: '25.0', value: 375.0 },
       { percentile: '75.0', value: 550.0 },
     ]);
+  });
+});
+
+describe('getRangeFieldMeta', () => {
+  test.each([
+    {
+      name: 'falls back to the feature range when Elasticsearch has no values',
+      stats: { count: 0, min: null, max: null, avg: null, std_deviation: null },
+      expected: { min: 10, max: 30, delta: 20 },
+    },
+    {
+      name: 'preserves a valid zero-valued Elasticsearch range',
+      stats: { count: 2, min: 0, max: 0, avg: 0, std_deviation: 0 },
+      expected: { min: 0, max: 0, delta: 0 },
+    },
+  ])('$name', ({ stats, expected }) => {
+    const style = new MockStyle({ min: 10, max: 30 });
+    const dataRequest = new DataRequest({
+      dataId: SOURCE_META_DATA_REQUEST_ID,
+      data: { foobar_range: stats },
+    });
+    const layer = {
+      getStyle: () => style,
+      getDataRequest: (dataId: string) =>
+        dataId === SOURCE_META_DATA_REQUEST_ID ? dataRequest : undefined,
+    } as unknown as IVectorLayer;
+    const property = new DynamicStyleProperty(
+      { field_meta_options: { is_enabled: true } },
+      VECTOR_STYLES.FILL_COLOR,
+      new MockField({ fieldName: 'foobar', dataType: 'number' }),
+      layer,
+      () => null
+    );
+
+    expect(property.getRangeFieldMeta()).toMatchObject(expected);
   });
 });
 
