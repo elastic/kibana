@@ -48,7 +48,7 @@ export const assertWatchlistNameIsAvailable = async (
     throw createWatchlistValidationError(
       409,
       i18n.translate('xpack.securitySolution.entityAnalytics.watchlists.api.nameAlreadyExists', {
-        defaultMessage: 'A watchlist named "{name}" already exists',
+        defaultMessage: 'A watchlist named "{name}" already exists for this space',
         values: { name: trimmed },
       })
     );

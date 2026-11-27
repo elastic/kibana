@@ -138,7 +138,10 @@ export class WatchlistEntitySourceClient {
       await validateIndexPermissions(esClient, indexPatternToCheck);
     }
 
-    // Step 2: handle API key fields
+    // Step 2. Check if the name is already taken
+    await this.assertNameUniqueness(entitySource);
+
+    // Step 3: handle API key fields
     const wasIndex = currentSource.type === 'index';
     const isNowIndex = newType === 'index';
     const indexPatternChanged =
@@ -169,9 +172,8 @@ export class WatchlistEntitySourceClient {
       apiKey = { apiKeyId: null, apiKey: null };
     }
 
-    // Step 3: Update entity source
+    // Step 4: Update entity source
     const newEntitySource = { ..._.omit(entitySource, ['id', 'apiKeyId', 'apiKey']), ...apiKey };
-    await this.assertNameUniqueness(entitySource);
     const { attributes } =
       await this.dependencies.soClient.update<MonitoringEntitySourceAttributes>(
         watchlistEntitySourceTypeName,

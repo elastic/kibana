@@ -130,7 +130,7 @@ describe('WatchlistConfigClient', () => {
 
         await expect(client.create({ name: '  test-01 ', riskModifier: 0 })).rejects.toMatchObject({
           statusCode: 409,
-          message: 'A watchlist named "test-01" already exists',
+          message: 'A watchlist named "test-01" already exists for this space',
         });
         expect(soClientMock.create).not.toHaveBeenCalled();
       });

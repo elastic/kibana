@@ -205,6 +205,23 @@ describe('updateWatchlistWithSources', () => {
     expect(fakes.linkedSources().map(({ id }) => id)).toEqual(['idx-1']);
   });
 
+  it('rejects two data sources with the same name and changes nothing', async () => {
+    const fakes = createFakes({ sources: [indexSource], managed: true });
+
+    await expect(
+      run(fakes, {
+        watchlist: { name: 'original', riskModifier: 1 },
+        entitySources: [
+          { ...storeInput, name: 'vendors' },
+          { type: 'index', name: 'vendors', indexPattern: 'logs-*' },
+        ],
+      })
+    ).rejects.toMatchObject({ statusCode: 400 });
+
+    expect(fakes.linkedSources().map(({ id }) => id)).toEqual(['idx-1']);
+    expect([...fakes.state.sources.keys()]).toEqual(['idx-1']);
+  });
+
   describe('when removing the old data source goes wrong', () => {
     it('keeps it linked if it cannot be deleted, so a later save finds it again', async () => {
       const fakes = createFakes({ sources: [indexSource] });

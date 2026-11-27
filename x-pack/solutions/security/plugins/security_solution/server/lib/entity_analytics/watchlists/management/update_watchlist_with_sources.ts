@@ -227,6 +227,7 @@ const validateSources = async ({
   sourceIdByType: Map<RuleBasedSourceType, MonitoringEntitySource>;
 }): Promise<void> => {
   const seenTypes = new Set<RuleBasedSourceType>();
+  const seenNames = new Set<string>();
 
   for (const input of inputs) {
     if (seenTypes.has(input.type)) {
@@ -242,6 +243,21 @@ const validateSources = async ({
       );
     }
     seenTypes.add(input.type);
+
+    // Names are only checked against stored sources below, so two inputs could ask for the same one
+    if (seenNames.has(input.name)) {
+      throw createWatchlistValidationError(
+        400,
+        i18n.translate(
+          'xpack.securitySolution.entityAnalytics.watchlists.api.duplicateSourceName',
+          {
+            defaultMessage: 'Data sources must have different names: "{name}"',
+            values: { name: input.name },
+          }
+        )
+      );
+    }
+    seenNames.add(input.name);
 
     await sourceClient.validate({
       ...toSourceAttributes(input),
@@ -264,6 +280,9 @@ const removeSources = async ({
   createdSources: MonitoringEntitySource[];
 }): Promise<void> => {
   for (const source of createdSources) {
+    // Delete first: if the delete fails, the source stays linked to the watchlist, so it is not lost
+    // and can still be removed later, for example when the save is retried.
+    // Unlinking it first would leave a hidden source that still holds its name and API key.
     let isDeleted = false;
     try {
       await sourceClient.delete(source.id);

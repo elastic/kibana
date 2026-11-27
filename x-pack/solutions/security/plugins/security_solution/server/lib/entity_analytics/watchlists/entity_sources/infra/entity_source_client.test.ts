@@ -412,6 +412,30 @@ describe('WatchlistEntitySourceClient', () => {
       );
     });
 
+    it('leaves the API key alone when the new name is taken', async () => {
+      soClient.get.mockResolvedValue({
+        id: 'source-id',
+        type: watchlistEntitySourceTypeName,
+        references: [],
+        attributes: { type: 'index', name: 'Mine', indexPattern: 'old-*', apiKeyId: 'old-kid' },
+      } as never);
+      soClient.find.mockResolvedValue({
+        saved_objects: [{ id: 'other-id', attributes: { name: 'Taken' } }],
+        total: 1,
+      } as never);
+
+      await expect(
+        client.update(
+          { id: 'source-id', name: 'Taken', indexPattern: 'new-*' },
+          httpServerMock.createKibanaRequest()
+        )
+      ).rejects.toThrow('already exists');
+
+      expect(mockInvalidateEntitySourceApiKey).not.toHaveBeenCalled();
+      expect(mockGrantEntitySourceApiKey).not.toHaveBeenCalled();
+      expect(soClient.update).not.toHaveBeenCalled();
+    });
+
     it('validates index permissions when the source type is index', async () => {
       const sourceAttributes = {
         type: 'index' as const,
