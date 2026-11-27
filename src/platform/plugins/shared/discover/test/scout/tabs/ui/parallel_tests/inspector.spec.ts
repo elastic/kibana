@@ -8,7 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../fixtures';
+import { selectInspectorRequest, spaceTest } from '../fixtures';
 
 spaceTest.describe('Discover tabs - inspector', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
@@ -32,13 +32,12 @@ spaceTest.describe('Discover tabs - inspector', { tag: '@local-stateful-classic'
     await expect(inspector.panel).toBeVisible();
   });
 
-  spaceTest('displays request stats in the inspector', async ({ pageObjects }) => {
+  spaceTest('displays request stats in the inspector', async ({ page, pageObjects }) => {
     const { inspector, unifiedTabs } = pageObjects;
 
     await unifiedTabs.openInspectorForActiveTab();
     await inspector.openInspectorRequestsView();
-    await inspector.requests.requestChooser.click();
-    await inspector.requests.documentsRequest.click();
+    await selectInspectorRequest(page, 'Documents');
     await inspector.requests.statisticsTab.click();
 
     const requestStats = await inspector.getTableData();

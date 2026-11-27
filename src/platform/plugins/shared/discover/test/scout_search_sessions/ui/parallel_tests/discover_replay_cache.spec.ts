@@ -20,6 +20,7 @@ import {
   RELATIVE_TIME_DEFAULTS,
   goToDashboards,
   refetchDiscover,
+  selectInspectorRequest,
   waitForDiscoverResults,
 } from '../fixtures';
 
@@ -51,8 +52,7 @@ spaceTest.describe('Discover replay cache', { tag: '@local-stateful-classic' }, 
       const openDocumentsRequest = async () => {
         await unifiedTabs.openInspectorForActiveTab();
         await inspector.openInspectorRequestsView();
-        await inspector.requests.requestChooser.click();
-        await inspector.requests.documentsRequest.click();
+        await selectInspectorRequest(page, 'Documents');
       };
 
       const firstTabHits = await spaceTest.step('loads a second tab', async () => {

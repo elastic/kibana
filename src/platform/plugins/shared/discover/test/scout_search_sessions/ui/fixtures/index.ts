@@ -52,6 +52,8 @@ export {
   waitForDiscoverResults,
 } from './replay_cache';
 
+export { selectInspectorRequest } from '../../../scout/common/ui/fixtures';
+
 export {
   getSessionCookieHeader,
   findLoadedDashboardId,
