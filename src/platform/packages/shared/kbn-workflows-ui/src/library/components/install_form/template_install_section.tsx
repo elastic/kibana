@@ -30,6 +30,7 @@ import { TemplateRequirements } from './template_requirements';
 import { useWorkflowsCapabilities } from '../../../hooks/use_workflows_capabilities';
 import type { WorkflowsCreateRouteState } from '../../../navigation';
 import { type InstallSource, useInstallTemplate } from '../../hooks/use_install_template';
+import { useTemplateSetupTelemetry } from '../../telemetry/use_template_setup_telemetry';
 
 /**
  * The two steps of the template detail view: the template's summary
@@ -155,7 +156,11 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
       [installMode, template.raw, template.metadata.slug]
     );
 
-    const { mutate: installTemplate, isLoading: isInstalling } = useInstallTemplate(installSource, {
+    const {
+      mutate: installTemplate,
+      isLoading: isInstalling,
+      status: installStatus,
+    } = useInstallTemplate(installSource, {
       onSuccess: ({ workflowId }) => {
         notifications.toasts.addSuccess(
           i18n.translate('workflowsUi.library.install.successToast', {
@@ -178,6 +183,15 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
       },
     });
 
+    const { reportRemixClicked } = useTemplateSetupTelemetry({
+      template,
+      installMode,
+      fields,
+      step,
+      fieldErrors: clientErrors,
+      installStatus,
+    });
+
     const handleInstall = useCallback(() => {
       setInstallError(undefined);
       setServerErrors({});
@@ -191,6 +205,7 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
     // defaults or `<name>` placeholders.
     const { slug: templateSlug, version: templateVersion } = template.metadata;
     const handleRemix = useCallback(() => {
+      reportRemixClicked();
       void application.navigateToApp(WORKFLOWS_APP_ID, {
         path: '/create',
         state: {
@@ -198,7 +213,7 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
           template: { slug: templateSlug, version: templateVersion },
         } satisfies WorkflowsCreateRouteState,
       });
-    }, [application, previewYaml, templateSlug, templateVersion]);
+    }, [application, previewYaml, reportRemixClicked, templateSlug, templateVersion]);
 
     const handleSetup = useCallback(() => onStepChange('setup'), [onStepChange]);
 

@@ -9,6 +9,8 @@
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { analyticsServiceMock } from '@kbn/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { UploadTemplateFlyout } from './upload_template_flyout';
 
 const VALID_TEMPLATE = `
@@ -26,11 +28,15 @@ steps:
     type: console
 `;
 
-const selectFile = (content: string, name = 'template.yml') => {
+const selectFile = (
+  content: string,
+  name = 'template.yml',
+  text: () => Promise<string> = () => Promise.resolve(content)
+) => {
   const input = document.querySelector('input[type="file"]') as HTMLInputElement;
   const file = new File([content], name, { type: 'application/x-yaml' });
   // jsdom's File does not implement `.text()`; stub it for the component read.
-  Object.defineProperty(file, 'text', { value: () => Promise.resolve(content) });
+  Object.defineProperty(file, 'text', { value: text });
   fireEvent.change(input, { target: { files: [file] } });
 };
 
@@ -71,5 +77,78 @@ describe('UploadTemplateFlyout', () => {
 
     fireEvent.click(screen.getByTestId('workflowLibraryUploadCancel'));
     expect(onClose).toHaveBeenCalled();
+  });
+
+  describe('telemetry', () => {
+    let analytics: ReturnType<typeof analyticsServiceMock.createAnalyticsServiceStart>;
+
+    const renderFlyout = () =>
+      render(
+        <KibanaContextProvider services={{ analytics }}>
+          <UploadTemplateFlyout onClose={jest.fn()} onUploaded={jest.fn()} />
+        </KibanaContextProvider>
+      );
+
+    beforeEach(() => {
+      analytics = analyticsServiceMock.createAnalyticsServiceStart();
+    });
+
+    it('reports opening the import', () => {
+      renderFlyout();
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith('workflows_template_import_opened', {});
+    });
+
+    it('reports a valid template file', async () => {
+      renderFlyout();
+
+      selectFile(VALID_TEMPLATE);
+
+      await waitFor(() =>
+        expect(analytics.reportEvent).toHaveBeenCalledWith(
+          'workflows_template_import_file_validated',
+          { success: true }
+        )
+      );
+    });
+
+    it('reports a file that is not a valid template', async () => {
+      renderFlyout();
+
+      selectFile('not: a valid template\n');
+
+      await waitFor(() =>
+        expect(analytics.reportEvent).toHaveBeenCalledWith(
+          'workflows_template_import_file_validated',
+          { success: false, errorType: 'template_parse' }
+        )
+      );
+    });
+
+    it('reports a file that is too large without reading it', () => {
+      renderFlyout();
+
+      selectFile('a'.repeat(512 * 1024 + 1));
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        'workflows_template_import_file_validated',
+        { success: false, errorType: 'file_too_large' }
+      );
+    });
+
+    it('reports a file that could not be read', async () => {
+      renderFlyout();
+
+      selectFile(VALID_TEMPLATE, 'template.yml', () =>
+        Promise.reject(new Error('NotReadableError'))
+      );
+
+      await waitFor(() =>
+        expect(analytics.reportEvent).toHaveBeenCalledWith(
+          'workflows_template_import_file_validated',
+          { success: false, errorType: 'file_read_failed' }
+        )
+      );
+    });
   });
 });

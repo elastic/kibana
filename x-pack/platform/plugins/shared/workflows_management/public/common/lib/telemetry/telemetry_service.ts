@@ -6,7 +6,7 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
-import { runWorkflowExecutedEventType } from '@kbn/workflows-ui';
+import { loadLibraryTelemetryEventTypes, runWorkflowExecutedEventType } from '@kbn/workflows-ui';
 import { workflowsTelemetryEvents } from './events/workflows';
 import type { TelemetryServiceClient, TelemetryServiceSetupParams } from './types';
 
@@ -22,6 +22,15 @@ export class TelemetryService {
     workflowsTelemetryEvents.forEach((eventConfig) => analytics.registerEventType(eventConfig));
     // Reported by the shared RunWorkflowPanel that other plugins render, which cannot register it itself.
     analytics.registerEventType(runWorkflowExecutedEventType);
+    // Reported by the shared Workflow Template library components, which load long after setup.
+    // Loaded on demand to keep the event schemas out of the page-load bundle.
+    void loadLibraryTelemetryEventTypes()
+      .then((eventTypes) =>
+        eventTypes.forEach((eventType) => analytics.registerEventType(eventType))
+      )
+      .catch(() => {
+        // Telemetry registration must not break plugin setup.
+      });
 
     // Lazy-load via @kbn/change-history-ui/telemetry to avoid pulling React UI into page-load bundle.
     void import('@kbn/change-history-ui/telemetry')

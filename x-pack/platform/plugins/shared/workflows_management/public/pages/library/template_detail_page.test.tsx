@@ -78,7 +78,7 @@ describe('LibraryTemplateDetailPage', () => {
     jest.clearAllMocks();
     mockOnLoaded = undefined;
     mockShowGraphPreview = undefined;
-    mockUseTemplate.mockReturnValue({ error: null });
+    mockUseTemplate.mockReturnValue({ error: null, isLoadingError: false });
   });
 
   it('resets breadcrumbs to Library when the route slug changes', () => {
@@ -116,7 +116,7 @@ describe('LibraryTemplateDetailPage', () => {
 
   it('renders the not-found page when the template does not exist', () => {
     const services = buildEnabledServices();
-    mockUseTemplate.mockReturnValue({ error: createHttpFetchError(404) });
+    mockUseTemplate.mockReturnValue({ error: createHttpFetchError(404), isLoadingError: true });
 
     render(<LibraryTemplateDetailPage {...routeProps('no-such-template')} />, {
       wrapper: getTestProvider({ services }),
@@ -127,11 +127,14 @@ describe('LibraryTemplateDetailPage', () => {
 
     fireEvent.click(screen.getByTestId('workflowLibraryTemplateNotFoundBackButton'));
     expect(services.application.navigateToUrl).toHaveBeenCalledWith('/app/workflows/library');
+    expect(services.analytics.reportEvent).toHaveBeenCalledWith('workflows_template_load_failed', {
+      errorType: 'template_not_found',
+    });
   });
 
   it('keeps the template detail for errors other than not found', () => {
     const services = buildEnabledServices();
-    mockUseTemplate.mockReturnValue({ error: createHttpFetchError(500) });
+    mockUseTemplate.mockReturnValue({ error: createHttpFetchError(500), isLoadingError: true });
 
     render(<LibraryTemplateDetailPage {...routeProps('first-template')} />, {
       wrapper: getTestProvider({ services }),
@@ -139,5 +142,21 @@ describe('LibraryTemplateDetailPage', () => {
 
     expect(screen.queryByTestId('workflowLibraryTemplateNotFoundPage')).not.toBeInTheDocument();
     expect(screen.getByTestId('mockTemplateDetail')).toBeInTheDocument();
+    expect(services.analytics.reportEvent).toHaveBeenCalledWith('workflows_template_load_failed', {
+      errorType: 'fetch_failed',
+    });
+  });
+
+  it('reports no load failure while the template loads', () => {
+    const services = buildEnabledServices();
+
+    render(<LibraryTemplateDetailPage {...routeProps('first-template')} />, {
+      wrapper: getTestProvider({ services }),
+    });
+
+    expect(services.analytics.reportEvent).not.toHaveBeenCalledWith(
+      'workflows_template_load_failed',
+      expect.anything()
+    );
   });
 });

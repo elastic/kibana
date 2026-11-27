@@ -64,6 +64,26 @@ describe('LibraryCatalogBrowserPage', () => {
     );
   });
 
+  it('reports a GitHub link click and opens the link in a new tab', () => {
+    const services = buildEnabledServices();
+    const openWindow = jest.spyOn(window, 'open').mockImplementation(() => null);
+
+    render(<LibraryCatalogBrowserPage />, { wrapper: getTestProvider({ services }) });
+
+    fireEvent.click(screen.getByRole('button', { name: 'More' }));
+    fireEvent.click(screen.getByTestId('workflowLibraryRequestLink'));
+
+    expect(services.analytics.reportEvent).toHaveBeenCalledWith('workflows_template_link_clicked', {
+      link: 'request_template',
+    });
+    expect(openWindow).toHaveBeenCalledWith(
+      'https://github.com/elastic/workflows/issues/new?template=template_request.yml',
+      '_blank',
+      'noopener,noreferrer'
+    );
+    openWindow.mockRestore();
+  });
+
   it('navigates to the template detail route via the library deep link when a template is selected', () => {
     const services = buildEnabledServices();
 
