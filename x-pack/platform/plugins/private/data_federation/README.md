@@ -23,6 +23,14 @@ For S3, the user can set up the AWS side either by running the manual AWS CLI st
 
 `dataFederation:enabled` (registered by this plugin, enabled by default) controls whether the management app is enabled in the browser. The app also requires the `manageFederatedData` capability and, in stateful, an Enterprise license. It only affects the UI: data sources and datasets keep working through the API and in ES|QL queries. It is the user-facing switch, as opposed to `xpack.dataFederation.enabled`, which is a deploy-time kill switch resolved by core: when it is `false` the plugin is not loaded at all, so neither the routes nor the advanced setting exist.
 
+## Connection testing
+
+The data source flyout has a **Test connection** action that checks the configuration currently in the form without saving it. Elasticsearch answers with one of three statuses: `success`, `failure` (with a reason), or `untestable` — the settings are valid but cannot be verified at the data source level, for example anonymous or bucket-scoped credentials.
+
+The Kibana route proxies to Elasticsearch `POST /_query/data_source/_test` ([elasticsearch#157686](https://github.com/elastic/elasticsearch/pull/157686)), which only the cluster `manage` privilege grants: users who manage data sources through `global.data_source` get a 403 from the test even though they can save.
+
+Secrets of a saved data source are read back redacted, so a test started from the edit flyout only covers the credentials the user re-entered.
+
 ## Feature flags
 
 | Key | Default | Description |
