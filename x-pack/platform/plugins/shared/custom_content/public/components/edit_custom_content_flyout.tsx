@@ -144,6 +144,7 @@ export const EditCustomContentFlyout = ({
       isNewPanel: isNewPanel ?? false,
       hasTemplate: Boolean(draftTemplate),
       hasEsqlQuery: queriesToSave.length > 0,
+      esqlQueryCount: queriesToSave.length,
       templateSizeBytes: draftTemplate.length,
     });
     onSave(queriesToSave, draftTemplate || undefined);

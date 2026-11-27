@@ -299,6 +299,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           isNewPanel,
           hasTemplate: Boolean(template$.getValue()),
           hasEsqlQuery: esqlQueries$.getValue().length > 0,
+          esqlQueryCount: esqlQueries$.getValue().length,
         });
         let hasSaved = false;
         const flyoutRef = openLazyFlyout({
@@ -536,6 +537,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               if (isGenerating$.getValue()) isGenerating$.next(false);
               getTelemetry().trackAgentUpdateApplied({
                 hasEsqlQuery: Boolean(data.esql_query),
+                esqlQueryCount: esqlQueries$.getValue().length,
                 templateSizeBytes: data.panel_template.length,
               });
             });
