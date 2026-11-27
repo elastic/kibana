@@ -459,7 +459,7 @@ describe('getShare', () => {
 
       expect(props?.title).toBe("This link won't include the open result");
       expect(props?.text).toBe(
-        "It comes from a query other than the current one, so the link can't restore it."
+        getExpandedDocLinkDisabledReason(ExpandedDocLinkability.QueryLookup)
       );
     });
 

@@ -26,6 +26,7 @@ const expandedDocLinkabilityEbtDetails: Record<ExpandedDocLinkability, string> =
   [ExpandedDocLinkability.EsqlUnsupportedSource]: 'esqlUnsupportedSource',
   [ExpandedDocLinkability.EsqlMissingMetadata]: 'esqlMissingMetadata',
   [ExpandedDocLinkability.EsqlTransformational]: 'esqlTransformational',
+  [ExpandedDocLinkability.QueryLookup]: 'queryLookup',
 };
 
 const EsqlMissingMetadataToastText = ({ example }: { example: string }) => (

@@ -16,6 +16,7 @@ import {
   getExpandedDocLinkDisabledReason,
   getExpandedDocLinkability,
   getExpandedDocRef,
+  getQueryLookupLinkability,
   matchesExpandedDocRef,
 } from './expanded_doc';
 
@@ -117,6 +118,22 @@ describe('canQueryRestoreDoc', () => {
   it('rejects an ES|QL query that does not read the identity, even if the record has it', () => {
     expect(canQueryRestoreDoc({ esql: 'FROM logs' }, doc)).toBe(false);
     expect(canQueryRestoreDoc({ esql: 'FROM logs METADATA _id' }, doc)).toBe(false);
+  });
+});
+
+describe('getQueryLookupLinkability', () => {
+  const doc = buildDataTableRecord({ _id: '1', _index: 'i' }, dataViewMock);
+
+  it('asks for the identity metadata when the current query does not read it', () => {
+    expect(getQueryLookupLinkability({ esql: 'FROM logs' }, doc)).toBe(
+      ExpandedDocLinkability.EsqlMissingMetadata
+    );
+  });
+
+  it('reports the lookup when the current query reads the identity but does not find the document', () => {
+    expect(getQueryLookupLinkability({ esql: 'FROM logs METADATA _id, _index' }, doc)).toBe(
+      ExpandedDocLinkability.QueryLookup
+    );
   });
 });
 

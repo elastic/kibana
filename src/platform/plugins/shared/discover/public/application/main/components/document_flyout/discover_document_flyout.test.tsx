@@ -304,9 +304,25 @@ describe('DiscoverDocumentFlyout', () => {
       linkability: ExpandedDocLinkability.EsqlTransformational,
       ebtDetail: 'esqlTransformational',
     },
+    {
+      name: 'a result opened from another query that the current one does not find',
+      query: { esql: 'FROM logs-* METADATA _id, _index' },
+      expandedDoc: buildDataTableRecord(outOfResultsHit, dataViewMock),
+      expandedDocOwner: QUERY_EXPANDED_DOC_OWNER,
+      linkability: ExpandedDocLinkability.QueryLookup,
+      ebtDetail: 'queryLookup',
+    },
   ])(
     'explains why a link cannot be copied for $name',
-    async ({ query, expandedDoc, linkability, ebtDetail, toastLifeTimeMs, expectedToastText }) => {
+    async ({
+      query,
+      expandedDoc,
+      expandedDocOwner,
+      linkability,
+      ebtDetail,
+      toastLifeTimeMs,
+      expectedToastText,
+    }) => {
       const services = createDiscoverServicesMock();
       let toastText: React.ReactNode = null;
 
@@ -324,7 +340,7 @@ describe('DiscoverDocumentFlyout', () => {
         hits: esHitsMock,
         query,
         services,
-        initialFlyout: { type: 'openDocument', document: expandedDoc },
+        initialFlyout: { type: 'openDocument', document: expandedDoc, expandedDocOwner },
       });
 
       const disabledReason = getExpandedDocLinkDisabledReason(linkability);
@@ -348,21 +364,6 @@ describe('DiscoverDocumentFlyout', () => {
       expect(copyToClipboard).not.toHaveBeenCalled();
     }
   );
-
-  it('hides the copy link action for a document opened from another query', async () => {
-    await setup({
-      hits: esHitsMock,
-      query: { esql: 'FROM logs-* METADATA _id, _index' },
-      initialFlyout: {
-        type: 'openDocument',
-        document: buildDataTableRecord(outOfResultsHit, dataViewMock),
-        expandedDocOwner: QUERY_EXPANDED_DOC_OWNER,
-      },
-    });
-
-    expect(await screen.findByTestId('docViewerFlyout')).toBeVisible();
-    expect(screen.queryByTestId('discoverDocFlyoutShareDirectLink')).not.toBeInTheDocument();
-  });
 
   it('renders nothing when no document is expanded', async () => {
     await setup({ initialFlyout: { type: 'closed' } });

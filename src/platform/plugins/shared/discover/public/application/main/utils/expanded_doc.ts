@@ -53,6 +53,8 @@ export enum ExpandedDocLinkability {
   EsqlMissingMetadata = 'EsqlMissingMetadata',
   /** The ES|QL query derives its rows, so they do not correspond to documents that can be refetched */
   EsqlTransformational = 'EsqlTransformational',
+  /** The document was fetched by another query, which the current query does not find again */
+  QueryLookup = 'QueryLookup',
 }
 
 /** Whether the ES|QL source command supports linking to individual documents. */
@@ -103,11 +105,27 @@ export const getExpandedDocLinkability = (
  */
 export const canQueryRestoreDoc = (
   query: Query | AggregateQuery | undefined,
-  doc: DataTableRecord
+  doc: DataTableRecord | undefined
 ): boolean =>
   getExpandedDocLinkability(query, doc) === ExpandedDocLinkability.Linkable &&
   (!isOfAggregateQueryType(query) ||
     ['_id', '_index'].every((field) => retrieveMetadataColumns(query.esql).includes(field)));
+
+/** Explains why a document fetched by another query has no link under the current query. */
+export const getQueryLookupLinkability = (
+  query: Query | AggregateQuery | undefined,
+  doc: DataTableRecord | undefined
+): ExpandedDocLinkability => {
+  const linkability = getExpandedDocLinkability(query, doc);
+
+  if (linkability !== ExpandedDocLinkability.Linkable) {
+    return linkability;
+  }
+
+  return canQueryRestoreDoc(query, doc)
+    ? ExpandedDocLinkability.QueryLookup
+    : ExpandedDocLinkability.EsqlMissingMetadata;
+};
 
 /** Returns the shared explanation for a document-link restriction. */
 export const getExpandedDocLinkDisabledReason = (
@@ -126,6 +144,10 @@ export const getExpandedDocLinkDisabledReason = (
       return i18n.translate('discover.expandedDoc.esqlTransformationalDescription', {
         defaultMessage:
           'Links to individual results are unavailable for queries that transform rows, such as STATS or KEEP.',
+      });
+    case ExpandedDocLinkability.QueryLookup:
+      return i18n.translate('discover.expandedDoc.queryLookupDescription', {
+        defaultMessage: "The current query doesn't return this result, so a link can't restore it.",
       });
     default:
       return undefined;
