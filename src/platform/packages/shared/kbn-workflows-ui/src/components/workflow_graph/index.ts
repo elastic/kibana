@@ -8,6 +8,10 @@
  */
 
 // The canvas loads lazily through one shared chunk; see `lazy_workflow_graph_canvas.tsx`.
+export {
+  WorkflowGraphCanvasWithoutProvider,
+  preloadWorkflowGraphCanvas,
+} from './lazy_workflow_graph_canvas';
 export type { WorkflowGraphCanvasProps } from './workflow_graph_canvas';
 export type {
   NodeConfigWarningReason,
@@ -40,4 +44,3 @@ export { INSERT_FLASH_MS, INSERT_LAYOUT_MS } from './use_insert_layout_animation
 // the canvas calls it on first render and workflows_management panels call it themselves.
 export { ensureWorkflowGraphEuiIcons } from './ensure_eui_icons';
 export { loadTypeIconMasks } from './type_icon_masks';
-export { WorkflowGraphCanvasWithoutProvider } from './workflow_graph_canvas';
