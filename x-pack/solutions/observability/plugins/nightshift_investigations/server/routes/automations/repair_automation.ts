@@ -15,7 +15,7 @@ import { isAutomationWorkflowMissing } from '../../lib/automations/is_automation
 import { automationCompletionSchema } from '../../lib/automations/schemas';
 import { validateScheduledAutomation } from '../../lib/automations/validate_scheduled_automation';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
-import { INVALID_WORKFLOW_MESSAGE } from './invalid_workflow_message';
+import { assertValidWorkflowYaml, invalidWorkflowMessage } from './assert_valid_workflow_yaml';
 
 export const repairAutomationRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'POST /internal/nightshift/automations/{id}/repair',
@@ -77,18 +77,14 @@ export const repairAutomationRoute = createNightshiftInvestigationsServerRoute({
       updatedAt: new Date().toISOString(),
     };
     validateScheduledAutomation(automation);
-    const replacement = await workflows.management.createWorkflow(
-      {
-        yaml: generateWorkflowYaml({
-          automationId: id,
-          automation,
-          serviceAccountId,
-          universalAlerts: isUniversalAlertingAvailable(),
-        }),
-      },
-      spaceId,
-      request
-    );
+    const yaml = generateWorkflowYaml({
+      automationId: id,
+      automation,
+      serviceAccountId,
+      universalAlerts: isUniversalAlertingAvailable(),
+    });
+    await assertValidWorkflowYaml({ management: workflows.management, yaml, spaceId, request });
+    const replacement = await workflows.management.createWorkflow({ yaml }, spaceId, request);
     const removeReplacement = async () => {
       try {
         const result = await workflows.management.deleteWorkflows(
@@ -105,7 +101,7 @@ export const repairAutomationRoute = createNightshiftInvestigationsServerRoute({
     };
     if (!replacement.valid) {
       await removeReplacement();
-      throw badRequest(INVALID_WORKFLOW_MESSAGE);
+      throw badRequest(invalidWorkflowMessage());
     }
     try {
       await soClient.update<NightshiftAutomationAttributes>(

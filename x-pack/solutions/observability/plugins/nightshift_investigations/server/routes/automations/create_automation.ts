@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { badRequest, serverUnavailable } from '@hapi/boom';
+import { badRequest, isBoom, serverUnavailable } from '@hapi/boom';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { getUserDisplayName } from '@kbn/user-profile-components/server';
@@ -20,7 +20,7 @@ import { validateScheduledAutomation } from '../../lib/automations/validate_sche
 import { validateSlackChannelsBound } from '../../lib/automations/validate_slack_channels_bound';
 import { validateThreadCompletion } from '../../lib/automations/validate_thread_completion';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
-import { INVALID_WORKFLOW_MESSAGE } from './invalid_workflow_message';
+import { assertValidWorkflowYaml, invalidWorkflowMessage } from './assert_valid_workflow_yaml';
 import { triggerRowSchema } from './trigger_row_schema';
 
 const triggerSchema = z.object({
@@ -129,10 +129,16 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
         serviceAccountId,
         universalAlerts: isUniversalAlertingAvailable(),
       });
+      await assertValidWorkflowYaml({
+        management: workflowsManagement.management,
+        yaml,
+        spaceId,
+        request,
+      });
       workflow = await workflowsManagement.management.createWorkflow({ yaml }, spaceId, request);
     } catch (err) {
       await soClient.delete(NIGHTSHIFT_AUTOMATION_SO_TYPE, created.id);
-      throw badRequest(`Failed to create backing workflow: ${err.message}`);
+      throw isBoom(err) ? err : badRequest(`Failed to create backing workflow: ${err.message}`);
     }
     const workflowId = workflow.id;
 
@@ -147,7 +153,7 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
       if (workflowResult.status === 'rejected' || workflowResult.value.failures.length > 0) {
         logger.warn(`Could not remove invalid workflow ${workflowId} in space ${spaceId}`);
       }
-      throw badRequest(INVALID_WORKFLOW_MESSAGE);
+      throw badRequest(invalidWorkflowMessage());
     }
 
     try {

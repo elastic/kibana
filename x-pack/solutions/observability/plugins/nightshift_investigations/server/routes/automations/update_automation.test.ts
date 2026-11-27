@@ -8,7 +8,6 @@
 import { conflict, forbidden } from '@hapi/boom';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { parse } from 'yaml';
 import { updateAutomationRoute } from './update_automation';
 import { createRouteContext, createServiceAccountService } from './test_helpers';
@@ -18,10 +17,10 @@ const { handler, params } = updateAutomationRoute['PUT /internal/nightshift/auto
 const soClient = { get: jest.fn(), update: jest.fn() };
 const getAutomationsSoClient = jest.fn().mockReturnValue(soClient);
 const updateWorkflow = jest.fn();
-const getWorkflow = jest.fn();
+const validateWorkflow = jest.fn();
 const getWorkflowsManagement = jest
   .fn()
-  .mockReturnValue({ management: { updateWorkflow, getWorkflow } });
+  .mockReturnValue({ management: { updateWorkflow, validateWorkflow } });
 
 const existing = {
   name: 'Triage',
@@ -38,7 +37,6 @@ const existing = {
 };
 
 const checkChannelBound = jest.fn();
-const logger = loggingSystemMock.createLogger();
 
 const call = (body: Record<string, unknown>) =>
   handler({
@@ -50,7 +48,6 @@ const call = (body: Record<string, unknown>) =>
     getSlackChannelBindingChecker: () => checkChannelBound,
     getInvestigatorServiceAccountService: () => serviceAccountService,
     context: createRouteContext(),
-    logger,
   } as never);
 
 let serviceAccountService = createServiceAccountService();
@@ -59,8 +56,8 @@ beforeEach(() => {
   jest.resetAllMocks();
   checkChannelBound.mockResolvedValue(true);
   getAutomationsSoClient.mockReturnValue(soClient);
-  getWorkflowsManagement.mockReturnValue({ management: { updateWorkflow, getWorkflow } });
-  getWorkflow.mockResolvedValue({ yaml: 'previous: yaml' });
+  getWorkflowsManagement.mockReturnValue({ management: { updateWorkflow, validateWorkflow } });
+  validateWorkflow.mockResolvedValue({ valid: true, diagnostics: [] });
   updateWorkflow.mockResolvedValue({ valid: true, validationErrors: [] });
   serviceAccountService = createServiceAccountService();
   soClient.get.mockResolvedValue({ attributes: existing });
@@ -324,29 +321,25 @@ it('rejects clearing instructions on a saved scheduled automation', async () => 
   expect(soClient.update).not.toHaveBeenCalled();
 });
 
-it('restores the previous workflow YAML and keeps the automation when the new YAML is invalid', async () => {
-  updateWorkflow.mockResolvedValueOnce({ valid: false, validationErrors: ['bad liquid'] });
+it('rejects an invalid workflow before writing it and keeps the automation', async () => {
+  validateWorkflow.mockResolvedValue({
+    valid: false,
+    diagnostics: [
+      { severity: 'error', message: 'bad liquid' },
+      { severity: 'warning', message: 'just a warning' },
+    ],
+  });
   await expect(call({ name: 'Changed' })).rejects.toMatchObject({
-    message: 'Failed to update backing workflow: bad liquid',
+    message: 'The automation workflow is not valid: bad liquid.',
     output: { statusCode: 400 },
   });
-  expect(updateWorkflow).toHaveBeenLastCalledWith(
-    'workflow-1',
-    { yaml: 'previous: yaml' },
-    'default',
-    expect.anything()
-  );
+  expect(updateWorkflow).not.toHaveBeenCalled();
   expect(soClient.update).not.toHaveBeenCalled();
 });
 
-it('reports the validation error when restoring the previous YAML fails', async () => {
-  updateWorkflow
-    .mockResolvedValueOnce({ valid: false, validationErrors: ['bad liquid'] })
-    .mockRejectedValueOnce(new Error('restore failed'));
-  await expect(call({ name: 'Changed' })).rejects.toMatchObject({
-    message: 'Failed to update backing workflow: bad liquid',
-  });
-  expect(logger.warn).toHaveBeenCalled();
+it('does not validate a pause-only update', async () => {
+  await call({ isEnabled: false });
+  expect(validateWorkflow).not.toHaveBeenCalled();
 });
 
 it('disables a scheduled automation through the normal workflow update', async () => {

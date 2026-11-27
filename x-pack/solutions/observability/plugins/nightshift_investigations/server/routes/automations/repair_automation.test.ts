@@ -31,6 +31,7 @@ const attributes = {
 const soClient = { get: jest.fn(), update: jest.fn() };
 const assertWorkflowAccess = jest.fn();
 const createWorkflow = jest.fn();
+const validateWorkflow = jest.fn();
 const deleteWorkflows = jest.fn();
 const logger = loggingSystemMock.createLogger();
 let serviceAccountService = createServiceAccountService();
@@ -38,7 +39,7 @@ const resources = () => ({
   request: httpServerMock.createKibanaRequest(),
   getAutomationsSoClient: () => soClient,
   getWorkflowsManagement: () => ({
-    management: { assertWorkflowAccess, createWorkflow, deleteWorkflows },
+    management: { assertWorkflowAccess, createWorkflow, deleteWorkflows, validateWorkflow },
   }),
   getInvestigatorServiceAccountService: () => serviceAccountService,
   isUniversalAlertingAvailable: () => true,
@@ -62,6 +63,7 @@ beforeEach(() => {
   soClient.get.mockResolvedValue({ id: 'automation', attributes, version: 'v1' });
   assertWorkflowAccess.mockRejectedValue(new WorkflowNotFoundError('old'));
   createWorkflow.mockResolvedValue({ id: 'new', valid: true });
+  validateWorkflow.mockResolvedValue({ valid: true, diagnostics: [] });
   deleteWorkflows.mockResolvedValue({ failures: [] });
 });
 
@@ -141,6 +143,18 @@ it('removes the disabled replacement if linking fails', async () => {
   soClient.update.mockRejectedValue(error);
   await expect(callRepair()).rejects.toBe(error);
   expect(deleteWorkflows).toHaveBeenCalledWith(['new'], 'default', expect.anything());
+});
+
+it('rejects an invalid workflow before creating a replacement', async () => {
+  validateWorkflow.mockResolvedValue({
+    valid: false,
+    diagnostics: [{ severity: 'error', message: 'bad liquid' }],
+  });
+  await expect(callRepair()).rejects.toMatchObject({
+    message: 'The automation workflow is not valid: bad liquid.',
+    output: { statusCode: 400 },
+  });
+  expect(createWorkflow).not.toHaveBeenCalled();
 });
 
 it('deletes the replacement and rejects when its workflow is invalid', async () => {

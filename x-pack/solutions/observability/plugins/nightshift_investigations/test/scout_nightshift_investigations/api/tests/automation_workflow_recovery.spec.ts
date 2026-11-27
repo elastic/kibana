@@ -45,12 +45,22 @@ const createRequest =
       ...(body ? { body } : {}),
     });
 
+const INVALID_MESSAGE = expect.stringContaining('The automation workflow is not valid');
+const invalidInstructions = 'Check the queue {% if %} depth';
+const dailyTrigger = {
+  rows: [{ kind: 'schedule', schedulePreset: 'daily', time: '03:00', timezone: 'UTC' }],
+};
+
 apiTest.describe(
   'Automation backing workflow repair',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let cookieHeader: Record<string, string>;
     let automation: Automation | undefined;
+    const strays: string[] = [];
+    const trackIfCreated = (response: { statusCode: number; body: unknown }) => {
+      if (response.statusCode === 200) strays.push((response.body as Automation).id);
+    };
 
     apiTest.beforeAll(async ({ apiServices, samlAuth }) => {
       await apiServices.core.settings({
@@ -65,6 +75,11 @@ apiTest.describe(
         expect(
           await createRequest(apiClient, () => cookieHeader)('delete', `${PATH}/${automation.id}`)
         ).toHaveStatusCode(200);
+      for (const id of strays) {
+        expect(
+          await createRequest(apiClient, () => cookieHeader)('delete', `${PATH}/${id}`)
+        ).toHaveStatusCode(200);
+      }
       await apiServices.core.settings({
         'feature_flags.overrides': { [NIGHTSHIFT_ENABLED_FLAG]: null },
       });
@@ -78,17 +93,55 @@ apiTest.describe(
         const created = await request('post', PATH, {
           name,
           isEnabled: true,
-          trigger: {
-            rows: [{ kind: 'schedule', schedulePreset: 'daily', time: '03:00', timezone: 'UTC' }],
-          },
-          execution: { promptTemplate: 'Check the queue {% if %} depth' },
+          trigger: dailyTrigger,
+          execution: { promptTemplate: invalidInstructions },
           completions: [],
           runtime: { dailyDispatchLimit: 3 },
         });
+        trackIfCreated(created);
         expect(created).toHaveStatusCode(400);
+        expect(created.body).toMatchObject({ message: INVALID_MESSAGE });
         const list = await request('get', PATH);
         expect(list).toHaveStatusCode(200);
         expect(JSON.stringify(list.body)).not.toContain(name);
+      }
+    );
+
+    apiTest(
+      'keeps an enabled automation and its workflow when an edit makes it invalid',
+      async ({ apiClient }) => {
+        const request = createRequest(apiClient, () => cookieHeader);
+        const created = await request('post', PATH, {
+          name: uniqueId('scout-invalid-edit'),
+          isEnabled: true,
+          trigger: dailyTrigger,
+          execution: { promptTemplate: 'Review health.' },
+          completions: [],
+          runtime: { dailyDispatchLimit: 3 },
+        });
+        trackIfCreated(created);
+        expect(created).toHaveStatusCode(200);
+        const { id, workflowId } = created.body as Automation;
+        const before = await request('get', `api/workflows/workflow/${workflowId}`);
+        expect(before.body).toMatchObject({ valid: true, enabled: true });
+
+        const rejected = await request('put', `${PATH}/${id}`, {
+          execution: { promptTemplate: invalidInstructions },
+        });
+        expect(rejected).toHaveStatusCode(400);
+        expect(rejected.body).toMatchObject({ message: INVALID_MESSAGE });
+
+        const after = await request('get', `api/workflows/workflow/${workflowId}`);
+        expect(after.body).toMatchObject({
+          valid: true,
+          enabled: true,
+          yaml: (before.body as { yaml: string }).yaml,
+        });
+        const current = await request('get', `${PATH}/${id}`);
+        expect(current.body).toMatchObject({
+          isEnabled: true,
+          execution: { promptTemplate: 'Review health.' },
+        });
       }
     );
 

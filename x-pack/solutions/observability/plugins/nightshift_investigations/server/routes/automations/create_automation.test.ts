@@ -18,8 +18,9 @@ const soClient = { create: jest.fn(), update: jest.fn(), delete: jest.fn() };
 const getAutomationsSoClient = jest.fn().mockReturnValue(soClient);
 const createWorkflow = jest.fn();
 const deleteWorkflows = jest.fn();
+const validateWorkflow = jest.fn();
 const getWorkflowsManagement = jest.fn().mockReturnValue({
-  management: { createWorkflow, deleteWorkflows },
+  management: { createWorkflow, deleteWorkflows, validateWorkflow },
 });
 
 const body = {
@@ -56,6 +57,7 @@ beforeEach(() => {
   soClient.create.mockResolvedValue({ id: 'automation-1' });
   createWorkflow.mockResolvedValue({ id: 'workflow-1', valid: true });
   deleteWorkflows.mockResolvedValue({ failures: [] });
+  validateWorkflow.mockResolvedValue({ valid: true, diagnostics: [] });
 });
 
 it('creates a disabled automation by default', async () => {
@@ -119,6 +121,20 @@ it('removes the automation when the workflow cannot be created', async () => {
   createWorkflow.mockRejectedValue(new Error('invalid yaml'));
 
   await expect(call()).rejects.toThrow('Failed to create backing workflow: invalid yaml');
+  expect(soClient.delete).toHaveBeenCalledWith('nightshift-automation', 'automation-1');
+});
+
+it('rejects an invalid workflow before creating it and removes the automation', async () => {
+  validateWorkflow.mockResolvedValue({
+    valid: false,
+    diagnostics: [{ severity: 'error', message: 'bad liquid' }],
+  });
+
+  await expect(call()).rejects.toMatchObject({
+    message: 'The automation workflow is not valid: bad liquid.',
+    output: { statusCode: 400 },
+  });
+  expect(createWorkflow).not.toHaveBeenCalled();
   expect(soClient.delete).toHaveBeenCalledWith('nightshift-automation', 'automation-1');
 });
 
