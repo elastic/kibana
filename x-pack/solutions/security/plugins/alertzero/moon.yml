@@ -56,6 +56,7 @@ dependsOn:
   - '@kbn/agent-builder-server'
   - '@kbn/agent-builder-plugin'
   - '@kbn/agent-builder-genai-utils'
+  - '@kbn/inference-tracing'
   - '@kbn/core-spaces-common'
   - '@kbn/logging-mocks'
   - '@kbn/core-http-server-mocks'

@@ -1,0 +1,114 @@
+{
+  "rule": {
+    "source": "prebuilt",
+    "rule_id": "f59668de-caa0-4b84-94c1-3a1549e1e798"
+  },
+  "chain": "wmi-lateral",
+  "step": "WMI remote execution (source side, wks-karen-06)",
+  "positive": {
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "process"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "start",
+            "kind": "event"
+          },
+          "host": {
+            "name": "wks-karen-06",
+            "id": "azqa-wks-karen-06",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-karen-06"
+          },
+          "user": {
+            "name": "karen.d",
+            "domain": "CORP",
+            "id": "S-1-5-21-1111-2222-3333-1105"
+          },
+          "process": {
+            "name": "WMIC.exe",
+            "executable": "C:\\Windows\\System32\\WMIC.exe",
+            "command_line": "wmic /node:dc-fs-09 process call create cmd.exe",
+            "args": [
+              "wmic",
+              "/node:dc-fs-09",
+              "process",
+              "call",
+              "create",
+              "cmd.exe"
+            ],
+            "entity_id": "azqa-WMIC.exe-508526",
+            "parent": {
+              "name": "cmd.exe",
+              "executable": "C:\\Windows\\System32\\cmd.exe",
+              "entity_id": "azqa-cmd.exe-924631"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "negative": {
+    "twin_delta": "WMIC targets localhost (excluded), not a remote node",
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "process"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "start",
+            "kind": "event"
+          },
+          "host": {
+            "name": "wks-karen-06",
+            "id": "azqa-wks-karen-06",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-karen-06"
+          },
+          "user": {
+            "name": "karen.d",
+            "domain": "CORP",
+            "id": "S-1-5-21-1111-2222-3333-1105"
+          },
+          "process": {
+            "name": "WMIC.exe",
+            "executable": "C:\\Windows\\System32\\WMIC.exe",
+            "command_line": "wmic /node:localhost process list brief",
+            "args": [
+              "wmic",
+              "/node:localhost",
+              "process",
+              "list",
+              "brief"
+            ],
+            "entity_id": "azqa-WMIC.exe-553056",
+            "parent": {
+              "name": "cmd.exe",
+              "executable": "C:\\Windows\\System32\\cmd.exe",
+              "entity_id": "azqa-cmd.exe-924631"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "rule": {
+    "source": "prebuilt",
+    "rule_id": "8d696bd0-5756-11f0-8e3b-f661ea17fbcd"
+  },
+  "chain": "entra-cloud",
+  "step": "jordan.park legacy ROPC sign-in without MFA",
+  "positive": {
+    "docs": [
+      {
+        "stream": "logs-azure.signinlogs",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "authentication"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "Sign-in activity",
+            "outcome": "success",
+            "kind": "event"
+          },
+          "cloud": {
+            "provider": "azure"
+          },
+          "user": {
+            "name": "jordan.park@corp.example.com",
+            "email": "jordan.park@corp.example.com"
+          },
+          "source": {
+            "ip": "198.51.100.88"
+          },
+          "user_agent": {
+            "original": "BAV2ROPC"
+          },
+          "azure": {
+            "signinlogs": {
+              "properties": {
+                "user_principal_name": "jordan.park@corp.example.com",
+                "user_type": "Member",
+                "authentication_requirement": "singleFactorAuthentication",
+                "authentication_protocol": "ropc",
+                "app_id": "00000002-0000-0ff1-ce00-000000000000"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "negative": {
+    "twin_delta": "Sign-in used MFA and a modern auth protocol",
+    "docs": [
+      {
+        "stream": "logs-azure.signinlogs",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "authentication"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "Sign-in activity",
+            "outcome": "success",
+            "kind": "event"
+          },
+          "cloud": {
+            "provider": "azure"
+          },
+          "user": {
+            "name": "jordan.park@corp.example.com",
+            "email": "jordan.park@corp.example.com"
+          },
+          "source": {
+            "ip": "198.51.100.88"
+          },
+          "user_agent": {
+            "original": "BAV2ROPC"
+          },
+          "azure": {
+            "signinlogs": {
+              "properties": {
+                "user_principal_name": "jordan.park@corp.example.com",
+                "user_type": "Member",
+                "authentication_requirement": "multiFactorAuthentication",
+                "authentication_protocol": "none",
+                "app_id": "00000002-0000-0ff1-ce00-000000000000"
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}

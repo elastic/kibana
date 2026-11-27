@@ -1,0 +1,7 @@
+{
+  "type": "functional-tests",
+  "id": "@kbn/evals-suite-alertzero-hunt-watch",
+  "owner": "@elastic/security-investigations",
+  "group": "security",
+  "visibility": "private"
+}
