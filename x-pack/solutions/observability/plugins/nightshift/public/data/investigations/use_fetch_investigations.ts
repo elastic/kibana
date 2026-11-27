@@ -37,6 +37,8 @@ export interface FetchInvestigationsParams {
   severities?: InvestigationSeverityFilterValue[];
   status?: 'open' | 'closed';
   query?: string;
+  /** A user profile uid: only investigations assigned to this user. */
+  assignee?: string;
   /** Only investigations last modified within this window (ISO 8601). */
   updatedAfter?: string;
   updatedBefore?: string;
@@ -97,6 +99,7 @@ export const useFetchInvestigations = ({
   severities,
   status = 'open',
   query,
+  assignee,
   updatedAfter,
   updatedBefore,
   refetchInterval = false,
@@ -121,6 +124,7 @@ export const useFetchInvestigations = ({
       severities,
       status,
       query,
+      assignee,
       updatedAfter,
       updatedBefore,
     ],
@@ -142,6 +146,7 @@ export const useFetchInvestigations = ({
               }),
           ...(severities?.length ? { severity: severities } : {}),
           ...(query ? { query } : {}),
+          ...(assignee ? { assignee } : {}),
           ...(updatedAfter ? { updated_after: updatedAfter } : {}),
           ...(updatedBefore ? { updated_before: updatedBefore } : {}),
         },

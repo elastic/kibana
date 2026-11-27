@@ -50,6 +50,20 @@ export const buildNightshiftEventsPageUrl = (
   return new URL(getUrlForApp(NIGHTSHIFT_APP_ID, { path }), window.location.origin).toString();
 };
 
+/** Query param that limits the homepage to the investigations assigned to the current user. */
+export const NIGHTSHIFT_MINE_QUERY_PARAM = 'mine';
+
+export const getNightshiftMineFromSearch = (search: string): boolean =>
+  new URLSearchParams(search).get(NIGHTSHIFT_MINE_QUERY_PARAM) === 'true';
+
+export const setNightshiftMineParam = (params: URLSearchParams, isMine: boolean): void => {
+  if (isMine) {
+    params.set(NIGHTSHIFT_MINE_QUERY_PARAM, 'true');
+  } else {
+    params.delete(NIGHTSHIFT_MINE_QUERY_PARAM);
+  }
+};
+
 export const NIGHTSHIFT_RULE_ID_QUERY_PARAM = 'ruleId';
 
 export const getNightshiftRuleIdFromSearch = (search: string): string | undefined =>

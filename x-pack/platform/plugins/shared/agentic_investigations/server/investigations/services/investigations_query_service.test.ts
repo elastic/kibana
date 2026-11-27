@@ -673,6 +673,22 @@ describe('InvestigationsQueryService', () => {
       expect(searchFilter(client)).not.toContain('metadata.severity');
     });
 
+    it('lists only the investigations assigned to the given user, in memory', async () => {
+      const { service, client } = setup({
+        searchResults: [
+          conversation('mine', { metadata: { status: 'open', assignees: ['u_me', 'u_other'] } }),
+          conversation('theirs', { metadata: { status: 'open', assignees: ['u_other'] } }),
+          conversation('nobody'),
+        ],
+      });
+
+      const response = await service.list(request, parseQuery({ assignee: 'u_me' }));
+
+      expect(response.results.map(({ id }) => id)).toEqual(['mine']);
+      expect(response.pagination.total).toBe(1);
+      expect(searchFilter(client)).not.toContain('assignees');
+    });
+
     it('counts pending proposals per investigation when the caller may read them', async () => {
       const countPendingByConversationIds = jest.fn().mockResolvedValue(new Map([['conv-1', 2]]));
       const proposals = {

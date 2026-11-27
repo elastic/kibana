@@ -72,6 +72,8 @@ export const investigationFiltersSchema = lazySchema(() =>
     in_progress: z
       .union([z.boolean(), z.enum(['true', 'false']).transform((value) => value === 'true')])
       .optional(),
+    /** User profile uids: only investigations assigned to any of them. */
+    assignee: multiValued(z.string().min(1).max(MAX_ID_LENGTH)),
     subject_type: multiValued(z.enum(INVESTIGATION_SUBJECT_TYPES)),
     subject_id: multiValued(z.string().min(1).max(MAX_SUBJECT_ID_LENGTH)),
     /** Impacted entity id or name, matched exactly. */
