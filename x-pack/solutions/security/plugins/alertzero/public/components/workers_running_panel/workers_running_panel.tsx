@@ -13,8 +13,9 @@ const TITLE = i18n.translate('xpack.alertzero.workersRunningPanel.title', {
   defaultMessage: 'Workers are running in the background',
 });
 
-const BODY = i18n.translate('xpack.alertzero.workersRunningPanel.body', {
-  defaultMessage: 'Proposals land here as each Worker finishes. Nothing needs you right now.',
+const BODY = i18n.translate('xpack.alertzero.workersRunningPanel.nothingNeedsApprovalBody', {
+  defaultMessage:
+    'Proposals land here as each Worker finishes. Nothing needs your approval right now.',
 });
 
 export const WorkersRunningPanel: React.FC = () => (
