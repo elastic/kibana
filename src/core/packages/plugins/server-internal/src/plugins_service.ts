@@ -297,6 +297,13 @@ export class PluginsService implements CoreService<
               this.coreContext.configService.addDynamicConfigPaths(plugin.configPath, configKeys);
             }
           }
+          if (configDescriptor.metaSettings) {
+            Object.entries(configDescriptor.metaSettings).forEach(
+              ([metaSetting, metaSettingValue]) => {
+                this.coreContext.configService.addMetaSetting(metaSetting, metaSettingValue);
+              }
+            );
+          }
           this.coreContext.configService.setSchema(plugin.configPath, configDescriptor.schema);
         }
       })
