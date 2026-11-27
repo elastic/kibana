@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  BaseEdge,
-  type EdgeProps,
-  type InternalNode,
-  useInternalNode,
-} from '@xyflow/react';
+import { BaseEdge, type EdgeProps, type InternalNode, useInternalNode } from '@xyflow/react';
 import React, { memo, useMemo } from 'react';
 import { useKiGraphUiStore } from './ki_graph_ui_store';
 import type { KiGraphFlowEdge, KiGraphFlowNode } from './use_ki_graph_layout';
