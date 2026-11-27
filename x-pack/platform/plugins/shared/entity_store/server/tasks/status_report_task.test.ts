@@ -1214,6 +1214,21 @@ describe('status report task — usage, resolution state & metadata telemetry', 
       // 10k target over 100k docs
       expect(sampleQuery).toContain('SAMPLE 0.1');
     });
+
+    it('returns the grown sample size together with the error when another step fails', async () => {
+      getLocalIndexPatterns.mockResolvedValue(['logs-*']);
+      esqlQuery.mockImplementation(async (params: { query: string }) => {
+        if (isResolutionStateQuery(params)) throw new Error('boom');
+        return params.query.includes('totalDocs')
+          ? { columns: [{ name: 'totalDocs', type: 'long' }], values: [[100_000]] }
+          : { columns: [], values: [] };
+      });
+
+      expect(await runStatusReportTask({ logCoverageTargetDocs: 10_000 })).toEqual({
+        state: { namespace: NAMESPACE, logCoverageTargetDocs: 15_000 },
+        error: expect.any(Error),
+      });
+    });
   });
 
   describe('entity metadata', () => {

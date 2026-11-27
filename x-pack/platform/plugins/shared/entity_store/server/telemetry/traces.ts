@@ -41,15 +41,35 @@ export const runWithSpan = <T>({ name, namespace, attributes = {}, cb }: RunWith
     cb
   );
 
-export const wrapTaskRun = <T>({
+/**
+ * A run that returns `error` still resolves, so its span would end OK. Throw the error inside the
+ * span so it records the failure, then hand the result back to Task Manager unchanged.
+ */
+export const wrapTaskRun = async <T>({
   spanName,
   namespace,
   attributes = {},
   run,
-}: WrapTaskRunParams<T>): Promise<T> =>
-  runWithSpan({
-    name: spanName,
-    namespace,
-    attributes,
-    cb: run,
-  });
+}: WrapTaskRunParams<T>): Promise<T> => {
+  const failed: { error?: unknown; result?: T } = {};
+  try {
+    return await runWithSpan({
+      name: spanName,
+      namespace,
+      attributes,
+      cb: async () => {
+        const result = await run();
+        const error = (result as { error?: unknown } | undefined)?.error;
+        if (error) {
+          failed.error = error;
+          failed.result = result;
+          throw error;
+        }
+        return result;
+      },
+    });
+  } catch (e) {
+    if (e === failed.error && failed.result !== undefined) return failed.result;
+    throw e;
+  }
+};
