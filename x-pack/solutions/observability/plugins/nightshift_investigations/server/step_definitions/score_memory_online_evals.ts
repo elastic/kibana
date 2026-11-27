@@ -427,8 +427,8 @@ export const scoreMemoryOnlineEvalsStepDefinition = ({
         loadedRound.source === 'persisted_round'
           ? loadedRound.roundId || undefined
           : requestedRoundId && parseRoundAliasIndex(requestedRoundId) === undefined
-          ? requestedRoundId
-          : undefined;
+            ? requestedRoundId
+            : undefined;
       const sampleSeed =
         input.background_trace_id ||
         (conversationId && resolvedRoundId ? `${conversationId}:${resolvedRoundId}` : execution.id);

@@ -29,7 +29,7 @@ const table = (values: Array<Array<string | number | null>>): ESQLSearchResponse
       ...['yi', 'spans', 'failed'].map((name) => ({ name, type: 'long' })),
     ],
     values,
-  } as ESQLSearchResponse);
+  }) as ESQLSearchResponse;
 
 /** A bimodal histogram of `spans` in all, half at row 5 and half at row 15. */
 const bimodalHistogram = (service: string, name: string, spans: number): OperationHistogram => {

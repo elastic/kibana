@@ -169,7 +169,7 @@ const nodeHttpFetch = (agent: HttpsAgent | undefined): DistributorFetch => {
               headers: {
                 get: (name) => {
                   const value = res.headers[name.toLowerCase()];
-                  return Array.isArray(value) ? value.join(', ') : value ?? null;
+                  return Array.isArray(value) ? value.join(', ') : (value ?? null);
                 },
               },
               text: async () => text,

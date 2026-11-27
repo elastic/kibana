@@ -294,25 +294,27 @@ function TrialInvestigationCard({
             border: ${borderWidth} solid
               ${isActive ? 'transparent' : euiTheme.colors.borderBaseSuccess};
             background-color: ${euiTheme.colors.emptyShade};
-            ${cellBorder
-              ? css`
-                  background-image: linear-gradient(
-                      ${euiTheme.colors.emptyShade},
-                      ${euiTheme.colors.emptyShade}
-                    ),
-                    ${cellBorder};
-                  background-origin: border-box;
-                  background-clip: padding-box, border-box;
-                `
-              : ''}
+            ${
+              cellBorder
+                ? css`
+                    background-image:
+                      linear-gradient(${euiTheme.colors.emptyShade}, ${euiTheme.colors.emptyShade}),
+                      ${cellBorder};
+                    background-origin: border-box;
+                    background-clip: padding-box, border-box;
+                  `
+                : ''
+            }
             /* Solid strong ring when open — keeps panel radius (gradient can clip corners). */
-            ${isSelected
-              ? css`
-                  border-color: ${selectedBorder};
-                  background-image: none;
-                  background-color: ${euiTheme.colors.emptyShade};
-                `
-              : ''}
+            ${
+              isSelected
+                ? css`
+                    border-color: ${selectedBorder};
+                    background-image: none;
+                    background-color: ${euiTheme.colors.emptyShade};
+                  `
+                : ''
+            }
           `}
         >
           <InvestigationCard
@@ -525,10 +527,10 @@ function AutomationCards({
           // SourceCard disables whenever a reason is set (including a generic fallback).
           disabledReason: canManage
             ? undefined
-            : editDisabledReason ??
+            : (editDisabledReason ??
               i18n.translate('xpack.nightshift.onboarding.automate.createUnavailable', {
                 defaultMessage: 'You cannot create automations right now.',
-              }),
+              })),
           'data-test-subj': 'nightshiftOnboardingCreateAutomation',
         }}
       />

@@ -42,7 +42,7 @@ const createKbnClient = (): KbnClient =>
       }
       return { data: { id: 'default' } };
     }),
-  } as unknown as KbnClient);
+  }) as unknown as KbnClient;
 
 const createEsClient = ({
   bulk,
@@ -57,7 +57,7 @@ const createEsClient = ({
     count: jest.fn().mockResolvedValue({ count: 0 }),
     updateByQuery: jest.fn().mockResolvedValue({}),
     indices: { refresh: jest.fn().mockResolvedValue({}) },
-  } as unknown as Client);
+  }) as unknown as Client;
 
 const runIndexEndpointHostDocs = (client: Client, kbnClient: KbnClient) =>
   indexEndpointHostDocs({

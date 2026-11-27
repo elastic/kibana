@@ -1,8 +1,8 @@
 {
   "type": "shared-common",
-  "id": "@kbn/eslint-config",
+  "id": "@kbn/oxfmt",
   "owner": "@elastic/kibana-operations",
   "group": "platform",
-  "visibility": "private",
+  "visibility": "shared",
   "devOnly": true
 }

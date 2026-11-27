@@ -257,7 +257,7 @@ export const createDreamingScheduleService = ({
   };
 
   const automationFor = (workflow: DreamingWorkflow, aiIndexId: string, spaceId: string) =>
-    ({ type: 'workflow', value: workflow.workflowIdFor(aiIndexId, spaceId) } as const);
+    ({ type: 'workflow', value: workflow.workflowIdFor(aiIndexId, spaceId) }) as const;
 
   const attachedWorkflows = DREAMING_WORKFLOWS.filter(
     (workflow): workflow is AttachedDreamingWorkflow => workflow.attach

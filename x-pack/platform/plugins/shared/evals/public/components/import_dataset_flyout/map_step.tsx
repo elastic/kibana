@@ -44,14 +44,12 @@ export const MapStep = ({ columns, rows, mapping, onMappingChange }: MapStepProp
       width: '80px',
       valign: 'top',
     },
-    ...columns.map(
-      (column): EuiBasicTableColumn<ImportRow> => ({
-        field: 'values',
-        name: column,
-        valign: 'top',
-        render: (values: ImportRow['values']) => formatPreviewValue(values[column]),
-      })
-    ),
+    ...columns.map((column): EuiBasicTableColumn<ImportRow> => ({
+      field: 'values',
+      name: column,
+      valign: 'top',
+      render: (values: ImportRow['values']) => formatPreviewValue(values[column]),
+    })),
   ];
 
   return (

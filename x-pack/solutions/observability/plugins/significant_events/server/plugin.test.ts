@@ -36,7 +36,7 @@ const createSetupDeps = ({
   ({
     nightshiftSources: { onSourceChange },
     ...(workflowsExtensions ? { workflowsExtensions } : {}),
-  } as unknown as SignificantEventsPluginSetupDependencies);
+  }) as unknown as SignificantEventsPluginSetupDependencies;
 
 describe('SignificantEventsPlugin setup', () => {
   beforeEach(() => {

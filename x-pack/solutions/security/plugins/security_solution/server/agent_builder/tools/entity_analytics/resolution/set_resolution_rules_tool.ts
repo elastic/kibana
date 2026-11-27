@@ -22,7 +22,7 @@ import { getResolutionToolAvailability } from './resolution_availability';
 
 const RULE_ID_VALUES = Object.values(RESOLUTION_RULE_IDS) as [
   ResolutionRuleId,
-  ...ResolutionRuleId[]
+  ...ResolutionRuleId[],
 ];
 
 const schema = z.object({

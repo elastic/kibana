@@ -25,7 +25,7 @@ const PLATFORM_ASSUMER_SERVICE_ACCOUNT_IDS: Readonly<
 /** Every name a caller may pass in `platformAssumers`. */
 export const PLATFORM_ASSUMERS = Object.keys(PLATFORM_ASSUMER_SERVICE_ACCOUNT_IDS) as [
   ServiceAccountPlatformAssumer,
-  ...ServiceAccountPlatformAssumer[]
+  ...ServiceAccountPlatformAssumer[],
 ];
 
 /** Maps validated assumer names to the ids UIAM expects in `assumable_by`. */

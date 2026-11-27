@@ -7,7 +7,10 @@
 
 /** Thrown when the loaded alert documents exceed the caller's `maxBytes` budget. */
 export class AlertDocumentsTooLargeError extends Error {
-  constructor(public readonly limitBytes: number, public readonly loadedBytes: number) {
+  constructor(
+    public readonly limitBytes: number,
+    public readonly loadedBytes: number
+  ) {
     super(
       `The loaded alert documents exceed the ${limitBytes} byte limit (at least ${loadedBytes} bytes). Load fewer alerts or fewer fields.`
     );

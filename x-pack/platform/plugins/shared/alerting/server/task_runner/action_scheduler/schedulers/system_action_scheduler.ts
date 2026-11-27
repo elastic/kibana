@@ -32,9 +32,8 @@ export class SystemActionScheduler<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData
-> implements IActionScheduler<State, Context, ActionGroupIds, RecoveryActionGroupId>
-{
+  AlertData extends RuleAlertData,
+> implements IActionScheduler<State, Context, ActionGroupIds, RecoveryActionGroupId> {
   private actions: RuleSystemAction[] = [];
   private snoozedAlertIdsSet: Set<string> = new Set();
 
@@ -56,7 +55,7 @@ export class SystemActionScheduler<
     this.snoozedAlertIdsSet = context.activeSnoozedIds ?? new Set();
 
     // only process system actions when rule type supports summarized alerts
-    this.actions = canGetSummarizedAlerts ? context.rule.systemActions ?? [] : [];
+    this.actions = canGetSummarizedAlerts ? (context.rule.systemActions ?? []) : [];
   }
 
   public get priority(): number {

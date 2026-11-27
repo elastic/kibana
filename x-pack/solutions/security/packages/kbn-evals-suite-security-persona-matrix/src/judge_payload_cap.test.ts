@@ -29,7 +29,7 @@ const buildOutput = (steps: unknown[]) => ({
   traceId: 'trace-1',
 });
 
-const buildLog = () => ({ info: jest.fn() } as unknown as ToolingLog);
+const buildLog = () => ({ info: jest.fn() }) as unknown as ToolingLog;
 
 describe('capJudgePayload', () => {
   it('returns the same object and an empty report when both limits are off', () => {
@@ -255,7 +255,7 @@ describe('withJudgePayloadCap', () => {
     return { inner: { name: 'criteria', kind: 'LLM', evaluate } as unknown as Evaluator, evaluate };
   };
   const callArgs = (output: unknown) =>
-    ({ input: {}, output, expected: {}, metadata: {} } as Parameters<Evaluator['evaluate']>[0]);
+    ({ input: {}, output, expected: {}, metadata: {} }) as Parameters<Evaluator['evaluate']>[0];
 
   it('feeds the inner judge the capped copy and records what was trimmed', async () => {
     const { inner, evaluate } = buildInner();

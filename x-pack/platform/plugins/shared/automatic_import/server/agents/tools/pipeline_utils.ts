@@ -125,8 +125,8 @@ export const validateCustomFieldNames = (
           suggestedPath === undefined
             ? 'No usable name is left after conversion; choose a descriptive snake_case name.'
             : allPaths.has(suggestedPath)
-            ? `'${suggestedPath}' already exists: merge the two fields or choose a distinct snake_case name.`
-            : `Rename it to '${suggestedPath}'.`;
+              ? `'${suggestedPath}' already exists: merge the two fields or choose a distinct snake_case name.`
+              : `Rename it to '${suggestedPath}'.`;
         errors.push(
           `Field '${fieldPath}' is not a valid custom field name: '${invalid.join(
             "', '"

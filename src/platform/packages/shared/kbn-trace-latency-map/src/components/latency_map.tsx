@@ -151,12 +151,12 @@ const isSameSelection = (a?: LatencyMapSelection, b?: LatencyMapSelection) =>
   a === b ||
   Boolean(
     a &&
-      b &&
-      a.from === b.from &&
-      a.to === b.to &&
-      a.minDuration === b.minDuration &&
-      a.maxDuration === b.maxDuration &&
-      Boolean(a.failedOnly) === Boolean(b.failedOnly)
+    b &&
+    a.from === b.from &&
+    a.to === b.to &&
+    a.minDuration === b.minDuration &&
+    a.maxDuration === b.maxDuration &&
+    Boolean(a.failedOnly) === Boolean(b.failedOnly)
   );
 
 /** Until the chart tells where its cells are, the pixels of the geometry mean nothing. */
@@ -366,7 +366,7 @@ export function LatencyMap({
         minDuration: rowToDuration(cell.yi, stats!),
         maxDuration: rowToDuration(cell.yi + 1, stats!),
         // With "failed only" the map shows the failed spans alone, and so does the cell.
-        spans: failedOnly ? failed : counts?.spans ?? 0,
+        spans: failedOnly ? failed : (counts?.spans ?? 0),
         failed,
         failedOnly,
       };

@@ -143,8 +143,10 @@ const CompactRow = ({
     inline-size: 100%;
     margin: 0;
     padding: ${euiTheme.size.m} ${euiTheme.size.base};
-    ${isNested &&
-    `padding-inline-start: calc(${euiTheme.size.base} + ${euiTheme.size.xl} + ${euiTheme.size.m});`}
+    ${
+      isNested &&
+      `padding-inline-start: calc(${euiTheme.size.base} + ${euiTheme.size.xl} + ${euiTheme.size.m});`
+    }
     border: none;
     background: transparent;
     color: inherit;
@@ -152,20 +154,22 @@ const CompactRow = ({
     text-align: start;
     text-decoration: none;
     ${isTrailingHoverOnly && `--subject-trailing-opacity: 0;`}
-    ${isInteractive &&
-    css`
-      cursor: pointer;
-      &:hover,
-      &:focus-visible {
-        background: ${euiTheme.colors.backgroundBaseInteractiveHover};
-        text-decoration: none;
-        --subject-trailing-opacity: 1;
-      }
-      &:focus-visible {
-        outline: ${euiTheme.focus.width} solid ${euiTheme.focus.color};
-        outline-offset: -${euiTheme.focus.width};
-      }
-    `}
+    ${
+      isInteractive &&
+      css`
+        cursor: pointer;
+        &:hover,
+        &:focus-visible {
+          background: ${euiTheme.colors.backgroundBaseInteractiveHover};
+          text-decoration: none;
+          --subject-trailing-opacity: 1;
+        }
+        &:focus-visible {
+          outline: ${euiTheme.focus.width} solid ${euiTheme.focus.color};
+          outline-offset: -${euiTheme.focus.width};
+        }
+      `
+    }
   `;
   const trailingStyles = css`
     display: inline-flex;

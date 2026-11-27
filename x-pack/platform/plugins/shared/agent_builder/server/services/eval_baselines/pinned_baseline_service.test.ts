@@ -60,7 +60,7 @@ const getScoreDocument = (overrides?: Partial<EvaluationScoreDocument>) =>
       git: { branch: 'main', commit_sha: 'abc123' },
     },
     ...overrides,
-  } as unknown as EvaluationScoreDocument);
+  }) as unknown as EvaluationScoreDocument;
 
 const getPointer = () => ({
   baseline_id: 'baseline-1',

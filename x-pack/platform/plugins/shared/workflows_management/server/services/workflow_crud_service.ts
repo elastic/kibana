@@ -734,9 +734,9 @@ export class WorkflowCrudService {
       isManaged: params.isManaged,
     });
     const profileId = params.request
-      ? (await this.deps
+      ? ((await this.deps
           .getCoreStart()
-          .userProfile.getCurrentProfileId({ request: params.request })) ?? undefined
+          .userProfile.getCurrentProfileId({ request: params.request })) ?? undefined)
       : undefined;
     if (profileId) {
       prepared.workflowData.owner_id = profileId;
@@ -1357,7 +1357,7 @@ export class WorkflowCrudService {
       return null;
     }
     const { valid, definition } = keepEnabledUnlessDeclared(yaml, yamlResult, enabled);
-    return valid ? definition ?? null : null;
+    return valid ? (definition ?? null) : null;
   }
 
   /** `isManaged` is the stored workflow's: its YAML is validated before the document is read. */
@@ -1447,7 +1447,7 @@ export class WorkflowCrudService {
     request?: KibanaRequest
   ): Promise<DeleteWorkflowsResponse> {
     const profileId = request
-      ? (await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request })) ?? undefined
+      ? ((await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request })) ?? undefined)
       : undefined;
     const isAdmin =
       options?.force === true &&
@@ -1905,7 +1905,7 @@ export class WorkflowCrudService {
     failures: Array<{ id: string; error: string }>;
   }> {
     const profileId = request
-      ? (await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request })) ?? undefined
+      ? ((await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request })) ?? undefined)
       : undefined;
     let canModifyBoundWorkflows = !request;
     if (request && this.deps.getServiceAccountBindings?.()?.isEnabled()) {

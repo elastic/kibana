@@ -80,7 +80,9 @@ const wrapperStyles = ({ euiTheme }: UseEuiTheme) => css`
   width: 100%;
   border-radius: ${CONVERSATION_INPUT_SHELL_RADIUS}px;
   ${euiCanAnimate} {
-    transition: background-color ${euiTheme.animation.fast} ease-out, box-shadow 250ms;
+    transition:
+      background-color ${euiTheme.animation.fast} ease-out,
+      box-shadow 250ms;
   }
 `;
 
@@ -119,7 +121,8 @@ const headerStyles = ({ euiTheme }: UseEuiTheme) => css`
   grid-template-rows: 0fr;
   visibility: hidden;
   ${euiCanAnimate} {
-    transition: grid-template-rows ${euiTheme.animation.fast} ease-out,
+    transition:
+      grid-template-rows ${euiTheme.animation.fast} ease-out,
       visibility 0s linear ${euiTheme.animation.fast};
   }
 `;
@@ -408,8 +411,8 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   const placeholder = isAgentDeleted
     ? disabledPlaceholder(agentId)
     : isBoundAgentForbidden
-    ? labels.executionIdentity.chatForbiddenPlaceholder
-    : enabledPlaceholder;
+      ? labels.executionIdentity.chatForbiddenPlaceholder
+      : enabledPlaceholder;
 
   const editorContainerStyles = css`
     display: flex;
@@ -578,8 +581,8 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
       content.length > STEER_MESSAGE_MAX_LENGTH
         ? steerTooLongMessage
         : messageEditorController.getPlaceholderNames().length > 0
-        ? imageInSteerMessage
-        : undefined;
+          ? imageInSteerMessage
+          : undefined;
 
     // Retry uncertain sends through steering, also after the run ends.
     if (canSteer || isUnansweredSteer(content)) {

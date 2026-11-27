@@ -45,14 +45,12 @@ export const riskScoresIndex: FixtureIndex = {
   fields: {
     '@timestamp': DATE,
     ...Object.fromEntries(
-      RISK_ENTITY_TYPES.flatMap(
-        (type): Array<[string, MappingProperty]> => [
-          [`${type}.risk.id_field`, KEYWORD],
-          [`${type}.risk.id_value`, KEYWORD],
-          [`${type}.risk.calculated_score_norm`, FLOAT],
-          [`${type}.risk.score_type`, KEYWORD],
-        ]
-      )
+      RISK_ENTITY_TYPES.flatMap((type): Array<[string, MappingProperty]> => [
+        [`${type}.risk.id_field`, KEYWORD],
+        [`${type}.risk.id_value`, KEYWORD],
+        [`${type}.risk.calculated_score_norm`, FLOAT],
+        [`${type}.risk.score_type`, KEYWORD],
+      ])
     ),
   },
   buildDocs: (now) => [

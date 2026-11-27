@@ -397,7 +397,7 @@ describe('StepIoService', () => {
       // 9-byte entries fit under an uncapped admit rule; five more push the first out of a 45-byte LRU.
       const { service, state, stepExecutionRepository } = buildHarness({ maxBytes: 45 });
       const others = ['b', 'c', 'd', 'e', 'f'].map(
-        (id) => ({ id, output: { v: 'b' } } as unknown as EsWorkflowStepExecution)
+        (id) => ({ id, output: { v: 'b' } }) as unknown as EsWorkflowStepExecution
       );
       stepExecutionRepository.getStepExecutionsByIds.mockImplementation(async () => {
         writeOutput(service, 'a', { v: 'cached' }, 9);
@@ -423,7 +423,7 @@ describe('StepIoService', () => {
         writeOutput(service, 'a', { v: 'cached' }, 9);
         state.clearFlushedOutputs(['a']);
         return ['b', 'c', 'd', 'e', 'f'].map(
-          (id) => ({ id, output: { v: 'b' } } as unknown as EsWorkflowStepExecution)
+          (id) => ({ id, output: { v: 'b' } }) as unknown as EsWorkflowStepExecution
         );
       });
 
@@ -439,7 +439,7 @@ describe('StepIoService', () => {
       state.clearFlushedOutputs(['a']);
       stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue(
         ['b', 'c', 'd', 'e', 'f'].map(
-          (id) => ({ id, output: { v: 'b' } } as unknown as EsWorkflowStepExecution)
+          (id) => ({ id, output: { v: 'b' } }) as unknown as EsWorkflowStepExecution
         )
       );
 

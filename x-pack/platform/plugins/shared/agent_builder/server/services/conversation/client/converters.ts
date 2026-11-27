@@ -288,8 +288,8 @@ export const fromEs = (
     existingAttachments && existingAttachments.length > 0
       ? existingAttachments
       : hasLegacyRoundAttachments
-      ? migrateRoundAttachments(deserializedRounds)
-      : [];
+        ? migrateRoundAttachments(deserializedRounds)
+        : [];
 
   const refsByRound =
     attachmentsForRefs.length > 0

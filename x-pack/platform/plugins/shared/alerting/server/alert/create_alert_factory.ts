@@ -17,7 +17,7 @@ import type { RawRuleSnoozedInstance } from '../saved_objects/schemas/raw_rule';
 export interface AlertFactory<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
-  ActionGroupIds extends string
+  ActionGroupIds extends string,
 > {
   create: (id: string) => PublicAlert<State, Context, ActionGroupIds>;
   get: (id: string) => PublicAlert<State, Context, ActionGroupIds> | null;
@@ -33,7 +33,7 @@ export interface AlertFactory<
 export type PublicAlertFactory<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
-  ActionGroupIds extends string
+  ActionGroupIds extends string,
 > = Pick<AlertFactory<State, Context, ActionGroupIds>, 'create' | 'done'> & {
   alertLimit: Pick<
     AlertFactory<State, Context, ActionGroupIds>['alertLimit'],
@@ -44,14 +44,14 @@ export type PublicAlertFactory<
 export interface AlertFactoryDoneUtils<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
-  ActionGroupIds extends string
+  ActionGroupIds extends string,
 > {
   getRecoveredAlerts: () => Array<Alert<State, Context, ActionGroupIds>>;
 }
 
 export interface CreateAlertFactoryOpts<
   State extends AlertInstanceState,
-  Context extends AlertInstanceContext
+  Context extends AlertInstanceContext,
 > {
   alerts: Record<string, Alert<State, Context>>;
   logger: Logger;
@@ -64,7 +64,7 @@ export interface CreateAlertFactoryOpts<
 export function createAlertFactory<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
-  ActionGroupIds extends string
+  ActionGroupIds extends string,
 >({
   alerts,
   logger,
@@ -178,7 +178,7 @@ export function createAlertFactory<
 export function getPublicAlertFactory<
   State extends AlertInstanceState = AlertInstanceState,
   Context extends AlertInstanceContext = AlertInstanceContext,
-  ActionGroupIds extends string = string
+  ActionGroupIds extends string = string,
 >(
   alertFactory: AlertFactory<State, Context, ActionGroupIds>
 ): PublicAlertFactory<State, Context, ActionGroupIds> {

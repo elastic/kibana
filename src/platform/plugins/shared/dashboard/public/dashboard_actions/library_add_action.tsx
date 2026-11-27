@@ -52,11 +52,11 @@ export type AddPanelToLibraryActionApi = CanAccessViewMode &
 const isApiCompatible = (api: unknown | null): api is AddPanelToLibraryActionApi =>
   Boolean(
     apiCanAccessViewMode(api) &&
-      apiHasLibraryTransforms(api) &&
-      apiHasType(api) &&
-      apiHasUniqueId(api) &&
-      apiHasParentApi(api) &&
-      typeof (api.parentApi as PresentationContainer)?.replacePanel === 'function'
+    apiHasLibraryTransforms(api) &&
+    apiHasType(api) &&
+    apiHasUniqueId(api) &&
+    apiHasParentApi(api) &&
+    typeof (api.parentApi as PresentationContainer)?.replacePanel === 'function'
   );
 
 export class AddToLibraryAction implements Action<EmbeddableApiContext> {

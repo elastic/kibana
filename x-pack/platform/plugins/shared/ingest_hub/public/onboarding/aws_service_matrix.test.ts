@@ -1005,7 +1005,7 @@ describe('AWS service matrix', () => {
           cw_ds: { inputs: ['aws-cloudwatch'], defaultEnabledInputs: [] },
         },
         ...overrides,
-      } as unknown as AwsServiceMatrixEntry);
+      }) as unknown as AwsServiceMatrixEntry;
 
     it('keeps the only data stream of a single-stream service', () => {
       const single = multiStream({ dataStreams: ['cw_ds'] });

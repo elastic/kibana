@@ -53,7 +53,10 @@ function readEsErrorBody(data: unknown): { type?: string; reason?: string } | nu
 }
 
 export class EsApiError extends Error {
-  constructor(message: string, public readonly statusCode?: number) {
+  constructor(
+    message: string,
+    public readonly statusCode?: number
+  ) {
     super(message);
   }
 }

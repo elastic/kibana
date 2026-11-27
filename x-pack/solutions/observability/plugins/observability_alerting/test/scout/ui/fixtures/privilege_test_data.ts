@@ -83,7 +83,7 @@ const waitForRuleAlertIds = async (
       },
       { ignore: [404] }
     );
-    const hits = 'hits' in result ? result.hits?.hits ?? [] : [];
+    const hits = 'hits' in result ? (result.hits?.hits ?? []) : [];
     const alertIds = hits
       .map((hit) => hit._source?.['kibana.alert.uuid'])
       .filter((id): id is string => typeof id === 'string');

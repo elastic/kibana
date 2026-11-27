@@ -17,7 +17,7 @@ import {
 const agentClientWith = (agents: Array<{ id: string }>): AgentClient =>
   ({
     listAgents: jest.fn().mockResolvedValue({ agents, total: agents.length }),
-  } as unknown as AgentClient);
+  }) as unknown as AgentClient;
 
 const esClientWith = (
   hits: Array<{ _source?: unknown }>,
@@ -26,7 +26,7 @@ const esClientWith = (
   ({
     search: jest.fn().mockResolvedValue({ hits: { hits } }),
     security: { hasPrivileges },
-  } as unknown as ElasticsearchClient);
+  }) as unknown as ElasticsearchClient;
 
 describe('makeResolveHostEnrollment', () => {
   it('returns enrolled: false for every host when no agent client is available', async () => {
@@ -342,7 +342,7 @@ describe('makeResolveHostEnrollment', () => {
 
 describe('makeScopedResolveHostEnrollment', () => {
   const agentService = (listAgents = jest.fn()) => {
-    const asInternalScopedUser = jest.fn(() => ({ listAgents } as unknown as AgentClient));
+    const asInternalScopedUser = jest.fn(() => ({ listAgents }) as unknown as AgentClient);
     return { service: { asInternalScopedUser } as unknown as AgentService, asInternalScopedUser };
   };
 

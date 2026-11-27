@@ -190,7 +190,7 @@ describe('change_point_summary_series', () => {
         filters: [],
         timeRange: { from: 'now-1d', to: 'now' },
         dataView: { isTimeBased: () => false },
-      } as unknown as ChangePointFetchParams);
+      }) as unknown as ChangePointFetchParams;
 
     it('is stable for equivalent parameters', () => {
       const base = createCacheParams();

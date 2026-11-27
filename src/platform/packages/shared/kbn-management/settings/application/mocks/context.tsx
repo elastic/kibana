@@ -58,8 +58,8 @@ export const createSettingsApplicationServicesMock = (
         scope === 'namespace'
           ? getSettingsMock(undefined, undefined, settingsSolution)
           : hasGlobalSettings
-          ? getGlobalSettingsMock(undefined, undefined, settingsSolution)
-          : {}
+            ? getGlobalSettingsMock(undefined, undefined, settingsSolution)
+            : {}
       ),
   },
   getAllowlistedSettings: (_scope, _solution, definitions) =>

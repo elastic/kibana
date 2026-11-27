@@ -40,7 +40,7 @@ describe('createWorkflowExecutionsSpendSource', () => {
         index: string;
         allow_partial_search_results: boolean;
         query: { bool: { filter: unknown[]; must_not: unknown[] } };
-      }
+      },
     ];
     expect(request.index).toBe('.workflows-executions');
     expect(request.allow_partial_search_results).toBe(false);

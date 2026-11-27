@@ -70,11 +70,11 @@ const crashesInRange = (
   const query = inRange(crashes, crashTime).pipe`EVAL ${crashRelease} = ${reportRelease()},
       ${crashOsVersion} = ${reportOsVersion()}`.pipe`EVAL
       ${crashRelease} = COALESCE(${nonEmpty(crashRelease)}, ${nonEmpty(
-    mobileColumn('serviceVersion')
-  )}),
+        mobileColumn('serviceVersion')
+      )}),
       ${crashOsVersion} = COALESCE(${nonEmpty(crashOsVersion)}, ${nonEmpty(
-    mobileColumn('osVersion')
-  )})`;
+        mobileColumn('osVersion')
+      )})`;
   return release ? query.pipe`WHERE ${crashRelease} == ${{ release }}` : query;
 };
 
@@ -171,8 +171,8 @@ export const withCrashGroupStats = (query: ComposerQuery): ComposerQuery => {
       ${resultColumn('lastRelease')} = LAST(${resultColumn('crashRelease')}, ${crashTime}),
       ${resultColumn('iosReports')} = COUNT(*) WHERE ${isIosReport()},
       ${resultColumn('storedFingerprints')} = COUNT(*) WHERE ${mobileColumn(
-    'exceptionFingerprint'
-  )} IS NOT NULL
+        'exceptionFingerprint'
+      )} IS NOT NULL
     BY ${resultColumn('fingerprint')}`.pipe`SORT ${users} DESC, ${events} DESC`
     .pipe`LIMIT ${ERROR_GROUPS_ROWS}`;
 };

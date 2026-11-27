@@ -43,7 +43,7 @@ export const buildIlmPreviewPhases = ({
   // computes the same proportional widths as the applied lifecycle summary.
   const phasesWithResolvedMinAge = phases.map((phase) => ({
     name: phase.name,
-    min_age: phase.name === 'hot' ? phase.min_age ?? '0d' : phase.min_age,
+    min_age: phase.name === 'hot' ? (phase.min_age ?? '0d') : phase.min_age,
   }));
   const growValues = getIlmPhaseGrowValues(phasesWithResolvedMinAge);
   const growByPhase = phases.reduce<Record<string, GrowValue | false>>((acc, phase, i) => {
@@ -64,7 +64,7 @@ export const buildIlmPreviewPhases = ({
     const minAge =
       phaseName === 'hot'
         ? // ILM hot is effectively 0 when missing.
-          phase.min_age ?? '0d'
+          (phase.min_age ?? '0d')
         : phase.min_age;
 
     const downsample = (() => {
@@ -158,6 +158,6 @@ export const buildDlmPreviewModel = ({
     downsampleSteps,
     retentionPeriod: retentionPeriod ?? null,
     dataPhasesCount: phases.length,
-    downsampleStepsCount: indexMode === 'time_series' ? downsampleSteps?.length ?? 0 : null,
+    downsampleStepsCount: indexMode === 'time_series' ? (downsampleSteps?.length ?? 0) : null,
   };
 };

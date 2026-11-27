@@ -47,7 +47,9 @@ const isSnoozable = (
   episode: AlertEpisode,
   extension?: EpisodeActionExtension<EpisodeSnoozePayload>
 ): boolean =>
-  episode.source_id == null ? episode.series_id != null : extension?.isCompatible(episode) ?? false;
+  episode.source_id == null
+    ? episode.series_id != null
+    : (extension?.isCompatible(episode) ?? false);
 
 const isCurrentlySnoozed = (episode: AlertEpisode): boolean =>
   isEpisodeSnoozed(episode.last_snooze_action, episode.snoozed_until);
@@ -109,12 +111,10 @@ export const createSnoozeAction = (
       nativeExecute: (eps, http) =>
         bulkSnoozeSeriesActions(
           http,
-          uniqueBySeries(eps).map(
-            (ep): BulkSnoozeSeriesActionItem => ({
-              series_id: ep.series_id,
-              ...(snoozedUntil === null ? {} : { snoozed_until: snoozedUntil }),
-            })
-          )
+          uniqueBySeries(eps).map((ep): BulkSnoozeSeriesActionItem => ({
+            series_id: ep.series_id,
+            ...(snoozedUntil === null ? {} : { snoozed_until: snoozedUntil }),
+          }))
         ),
       extension,
       extensionContext: payload,

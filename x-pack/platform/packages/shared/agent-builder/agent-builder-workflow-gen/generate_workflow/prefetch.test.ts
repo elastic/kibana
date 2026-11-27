@@ -33,7 +33,7 @@ const buildApi = (
       jest.fn().mockResolvedValue({ connectorTypes: {}, totalConnectors: 0 }),
     getTriggerSchemaOptions:
       overrides.getTriggerSchemaOptions ?? jest.fn().mockReturnValue({ includePageTrigger: false }),
-  } as any);
+  }) as any;
 
 beforeEach(() => {
   getAllConnectorsMock.mockReset();
@@ -156,7 +156,7 @@ describe('prefetch helpers', () => {
           description: type,
           paramsSchema: {},
           outputSchema: {},
-        } as unknown as ConnectorContractUnion);
+        }) as unknown as ConnectorContractUnion;
 
       getAllConnectorsMock.mockReturnValue([
         createStep('custom.internal'),

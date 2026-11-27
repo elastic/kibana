@@ -3388,14 +3388,14 @@ describe('Authenticator', () => {
           failure === 'no session'
             ? AuthenticationResult.notHandled()
             : failure === 'redirect'
-            ? AuthenticationResult.redirectTo('/login')
-            : AuthenticationResult.succeeded(
-                {
-                  ...user,
-                  ...(failure === 'different username' ? { username: 'other-user' } : {}),
-                },
-                { authHeaders: failure === 'no headers' ? undefined : renewedHeaders }
-              )
+              ? AuthenticationResult.redirectTo('/login')
+              : AuthenticationResult.succeeded(
+                  {
+                    ...user,
+                    ...(failure === 'different username' ? { username: 'other-user' } : {}),
+                  },
+                  { authHeaders: failure === 'no headers' ? undefined : renewedHeaders }
+                )
         );
         await expect(authenticator.reauthenticate(request, originalHeaders)).resolves.toBeNull();
         expect(mockOptions.authHeadersStorage.set).not.toHaveBeenCalled();

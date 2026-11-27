@@ -41,7 +41,7 @@ const createActionsConfigUtilsMock = (
     })),
     isEarsEnabled: jest.fn(() => overrides.earsEnabled ?? false),
     isCatalogEnabled: jest.fn(() => overrides.catalogEnabled ?? false),
-  } as unknown as ActionsConfigurationUtilities);
+  }) as unknown as ActionsConfigurationUtilities;
 
 const createConnectorSpecResponseBody = (
   includeSpecVersion: boolean

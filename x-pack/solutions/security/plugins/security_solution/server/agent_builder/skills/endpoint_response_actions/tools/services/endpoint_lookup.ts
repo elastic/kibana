@@ -732,8 +732,8 @@ export function createEndpointLookupService(
         ...(metadata.truncated && metadata.total !== undefined
           ? { totalCandidates: metadata.total }
           : listCut
-          ? { totalCandidates: distinct.length }
-          : {}),
+            ? { totalCandidates: distinct.length }
+            : {}),
       };
     }
 

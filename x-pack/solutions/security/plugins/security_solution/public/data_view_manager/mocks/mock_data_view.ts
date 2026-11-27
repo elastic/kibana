@@ -28,7 +28,7 @@ export const getMockDataView = (fieldFormats: FieldFormatsStartCommon = fieldFor
           // A plain object is not a valid React child, so an object or array value renders as text
           convertToReact: (value: unknown) =>
             typeof value === 'object' && value !== null ? JSON.stringify(value) : value,
-        } as unknown as FieldFormat),
+        }) as unknown as FieldFormat,
     },
   });
 

@@ -62,13 +62,11 @@ export const getMobileAppStarts = async ({
     timeZone,
   });
 
-  const points = rows.map(
-    (row): MobileAppStartPoint => ({
-      timestamp: Date.parse(row[RESULT_COLUMNS.bucket]),
-      cold: toAppStart(row, 'cold'),
-      warm: toAppStart(row, 'warm'),
-    })
-  );
+  const points = rows.map((row): MobileAppStartPoint => ({
+    timestamp: Date.parse(row[RESULT_COLUMNS.bucket]),
+    cold: toAppStart(row, 'cold'),
+    warm: toAppStart(row, 'warm'),
+  }));
   // Every bucket, so the charts leave a gap where there were no starts
   const timestamps = allBucketTimestamps(
     bucketTimestamps,

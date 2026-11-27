@@ -80,9 +80,9 @@ export interface ISource<TSourceDescriptor = Record<string, unknown>> {
   getUpdateDueToTimeslice(prevMeta: DataRequestMeta, timeslice?: Timeslice): boolean;
 }
 
-export class AbstractSource<TSourceDescriptor = Record<string, unknown>>
-  implements ISource<TSourceDescriptor>
-{
+export class AbstractSource<
+  TSourceDescriptor = Record<string, unknown>,
+> implements ISource<TSourceDescriptor> {
   readonly _descriptor: TSourceDescriptor;
 
   constructor(descriptor: TSourceDescriptor) {

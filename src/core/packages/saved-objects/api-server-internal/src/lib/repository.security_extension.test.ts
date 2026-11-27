@@ -1028,7 +1028,7 @@ describe('SavedObjectsRepository Security Extension', () => {
             type: obj._source?.type,
             id: obj._id!.slice(obj._id!.lastIndexOf(':') + 1), // find removes the space/type from the ID in the original raw doc
             existingNamespaces:
-              obj._source?.namespaces ?? obj._source?.namespace ? [obj._source?.namespace] : [],
+              (obj._source?.namespaces ?? obj._source?.namespace) ? [obj._source?.namespace] : [],
           };
         }),
       });

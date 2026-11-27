@@ -259,7 +259,7 @@ export class SyntheticsPrivateLocation {
         const isBrowser = config.type === MonitorTypeEnum.BROWSER;
         // An omitted condition runs the monitor on every agent. Browser monitors
         // only run on elastic-agent-complete, so they must not use that fallback.
-        const eligibleAgentIds = isBrowser ? conditionHosts?.completeAgentIds ?? [] : agentIds;
+        const eligibleAgentIds = isBrowser ? (conditionHosts?.completeAgentIds ?? []) : agentIds;
         const existingAgentId = agentIdFromCondition(existingCondition);
 
         if (existingAgentId && eligibleAgentIds.includes(existingAgentId)) {

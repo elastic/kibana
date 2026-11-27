@@ -55,10 +55,10 @@ describe('installAutomationTemplateHandler', () => {
     spaceId: 'default',
     attachments: { getAll: () => attachments } as never,
     logger: loggingSystemMock.createLogger(),
-    getAiIndexService: async () => ({} as never),
-    getCoreStart: async () => ({} as never),
+    getAiIndexService: async () => ({}) as never,
+    getCoreStart: async () => ({}) as never,
     getSecurityStart: async () => undefined,
-    getWorkflowsManagement: () => ({} as never),
+    getWorkflowsManagement: () => ({}) as never,
   });
 
   const aiIndexAttachment = {

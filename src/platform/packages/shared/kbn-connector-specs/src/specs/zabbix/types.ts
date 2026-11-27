@@ -192,7 +192,7 @@ export const UnsuppressProblemInputSchema = lazySchema(() =>
 export type UnsuppressProblemInput = z.infer<typeof UnsuppressProblemInputSchema>;
 
 export const MaintenanceTimeWindowRefine = <
-  T extends { activeSince?: number; activeTill?: number }
+  T extends { activeSince?: number; activeTill?: number },
 >(
   v: T
 ) => {

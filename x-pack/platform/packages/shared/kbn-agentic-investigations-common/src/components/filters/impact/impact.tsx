@@ -68,8 +68,8 @@ const PillBadge: React.FC<PillBadgeProps> = ({
   const interactiveProps = onClick
     ? { onClick, onClickAriaLabel: ariaLabel }
     : focusable
-    ? { role: 'note', tabIndex: 0, 'aria-label': ariaLabel }
-    : {};
+      ? { role: 'note', tabIndex: 0, 'aria-label': ariaLabel }
+      : {};
   const isIconOnly = label === undefined && iconType !== undefined;
   // Icon-only pills get the same horizontal footprint as a short text pill.
   const padding = isIconOnly ? `${euiTheme.size.xs} ${euiTheme.size.m}` : euiTheme.size.xs;

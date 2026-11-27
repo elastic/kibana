@@ -37,14 +37,14 @@ describe('GenAI Settings Plugin', () => {
   const createCoreSetupMock = (): CoreSetup<any, any> =>
     ({
       getStartServices: jest.fn(),
-    } as any);
+    }) as any;
 
   const createCoreStartMock = (
     capabilities: Partial<CoreStart['application']['capabilities']>
   ): CoreStart =>
     ({
       application: { capabilities },
-    } as any);
+    }) as any;
 
   const createPlugin = () =>
     new GenAiSettingsPlugin({

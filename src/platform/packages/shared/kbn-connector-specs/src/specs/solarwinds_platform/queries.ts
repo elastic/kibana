@@ -174,8 +174,8 @@ export const buildGetNodeQuery = (input: GetNodeInput): SwqlStatement => {
     input.nodeId !== undefined
       ? ['n.NodeID', input.nodeId]
       : input.ipAddress !== undefined
-      ? ['n.IPAddress', input.ipAddress]
-      : ['n.Caption', input.caption];
+        ? ['n.IPAddress', input.ipAddress]
+        : ['n.Caption', input.caption];
   return {
     query: `SELECT TOP 2 ${NODE_DETAIL_COLUMNS.join(
       ', '

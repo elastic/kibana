@@ -26,7 +26,7 @@ const makeAttachment = (overrides: Partial<VersionedAttachment> = {}): Versioned
     ],
     active: true,
     ...overrides,
-  } as VersionedAttachment);
+  }) as VersionedAttachment;
 
 const makeConversation = (
   id: string,
@@ -37,7 +37,7 @@ const makeConversation = (
     title: `Conversation ${id}`,
     attachments,
     permissions: {},
-  } as unknown as ConversationWithPermissions);
+  }) as unknown as ConversationWithPermissions;
 
 const buildDeps = () => {
   const logger = {

@@ -169,8 +169,8 @@ const scopeEntries = (changes: readonly SpecChange[]): Entry[] => {
     scope === undefined
       ? `${scheme} (scheme)`
       : schemes.size > 1
-      ? `${scopeName(scope)} (${scheme})`
-      : scopeName(scope);
+        ? `${scopeName(scope)} (${scheme})`
+        : scopeName(scope);
   const scopesByShort = new Map<string, Set<string | undefined>>();
   for (const [, grant] of changed) {
     const short = shortOf(grant);
@@ -400,8 +400,8 @@ const entriesOf = (change: SpecChange): Entry[] | undefined => {
         resolved === undefined
           ? fieldName
           : /(^|\/)items$/.test(unselected(resolved))
-          ? 'items'
-          : fieldOf(resolved);
+            ? 'items'
+            : fieldOf(resolved);
       return [
         {
           area: entryArea,

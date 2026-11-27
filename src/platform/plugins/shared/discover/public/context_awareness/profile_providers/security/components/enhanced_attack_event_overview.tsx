@@ -16,8 +16,7 @@ import type { SecuritySolutionAttackFlyoutOverviewTabFeature } from '@kbn/discov
 const noop = () => {};
 
 export interface EnhancedAttackEventOverviewProps
-  extends DocViewRenderProps,
-    DocViewRestorableStateProps {
+  extends DocViewRenderProps, DocViewRestorableStateProps {
   overviewTab?: SecuritySolutionAttackFlyoutOverviewTabFeature;
   refreshData?: () => void;
 }

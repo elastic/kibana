@@ -236,9 +236,10 @@ export const attributeQueryParts = <TFields extends AttributeFields>(
     // The fields are cleaned into attributes only once per session, after the last stage:
     // cleaning every event's fields took about 40% of the query.
     stats: Object.entries(groups).flatMap(([group, attributes]) =>
-      groupFields(attributes).map(
-        (field): Stat => [rawColumn(field), `LAST(TO_STRING(${field}), ${seenColumn(group)})`]
-      )
+      groupFields(attributes).map((field): Stat => [
+        rawColumn(field),
+        `LAST(TO_STRING(${field}), ${seenColumn(group)})`,
+      ])
     ),
     evals: Object.entries(fields).map(
       ([attribute, candidates]) =>

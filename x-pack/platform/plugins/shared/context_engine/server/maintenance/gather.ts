@@ -381,14 +381,12 @@ export const gatherMaintenance = async (
       .map(([id]) => id)
   );
   needsReview.push(
-    ...[...unsummarizable].map(
-      (id): MaintenanceChange => ({
-        id,
-        change: 'needs_review',
-        reason:
-          'Some of the memories it came from were deleted, and nothing maintenance can read is left to summarize it from.',
-      })
-    )
+    ...[...unsummarizable].map((id): MaintenanceChange => ({
+      id,
+      change: 'needs_review',
+      reason:
+        'Some of the memories it came from were deleted, and nothing maintenance can read is left to summarize it from.',
+    }))
   );
   const batched = reviewed.filter(({ id }) => !unsummarizable.has(id));
 
@@ -475,8 +473,8 @@ export const gatherMaintenance = async (
         ? lastSwept
         : ''
       : firstDroppedSweep === 0
-      ? sweepAfterId ?? ''
-      : swept[firstDroppedSweep - 1].id;
+        ? (sweepAfterId ?? '')
+        : swept[firstDroppedSweep - 1].id;
 
   return {
     reviewed: batched.length,

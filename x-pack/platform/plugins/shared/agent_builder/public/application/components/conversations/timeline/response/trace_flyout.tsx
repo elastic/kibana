@@ -52,10 +52,10 @@ export const TraceFlyout: React.FC<TraceFlyoutProps> = ({ traceId, initialSpans,
   const fetchTrace = useMemo(() => createEsTraceFetcher(data.search.search), [data.search.search]);
 
   const isFromFile = Boolean(initialSpans);
-  const traceSpansResult = useTraceSpans(isFromFile ? null : traceId ?? null, { fetchTrace });
+  const traceSpansResult = useTraceSpans(isFromFile ? null : (traceId ?? null), { fetchTrace });
 
   const spans = useMemo(
-    () => (isFromFile ? initialSpans ?? [] : traceSpansResult.spans),
+    () => (isFromFile ? (initialSpans ?? []) : traceSpansResult.spans),
     [isFromFile, initialSpans, traceSpansResult.spans]
   );
   const durationMs = isFromFile ? undefined : traceSpansResult.durationMs;

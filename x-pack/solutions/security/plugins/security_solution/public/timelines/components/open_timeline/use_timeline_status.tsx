@@ -53,8 +53,8 @@ export const useTimelineStatus = ({
       templateTimelineType == null
         ? null
         : templateTimelineType === TemplateTimelineTypeEnum.elastic
-        ? TimelineStatusEnum.immutable
-        : TimelineStatusEnum.active,
+          ? TimelineStatusEnum.immutable
+          : TimelineStatusEnum.active,
     [templateTimelineType]
   );
 

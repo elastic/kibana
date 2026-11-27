@@ -26,14 +26,14 @@
   const POLLING = ['/health', '/status', '/metrics', '/fleet-setup', '/api/security/me'];
 
   const counts = {};
-  requests.forEach(r => {
+  requests.forEach((r) => {
     const key = r.method + ' ' + r.url.split('?')[0];
     counts[key] = (counts[key] || 0) + 1;
   });
 
   const findings = [];
   Object.entries(counts).forEach(([key, n]) => {
-    if (n >= 2 && !POLLING.some(p => key.includes(p))) {
+    if (n >= 2 && !POLLING.some((p) => key.includes(p))) {
       findings.push({
         type: 'duplicate_api_call',
         key,
@@ -44,4 +44,4 @@
   });
 
   return { findings };
-})(/*REQUESTS*/)
+})(/*REQUESTS*/);

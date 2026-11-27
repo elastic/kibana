@@ -44,7 +44,7 @@ const makeQualityResult = (
     markdownComments: [],
     ecsVersion: '8.11.0',
     error: null,
-  } as const);
+  }) as const;
 
 const ALL_CATEGORIES: MainCategories[] = [
   'Endpoint',

@@ -94,7 +94,7 @@ export const CONNECTORS_SKILLS_BASE_PATH = 'skills/platform/connectors' satisfie
  */
 export interface SkillDefinition<
   TName extends string = string,
-  TBasePath extends DirectoryPath = DirectoryPath
+  TBasePath extends DirectoryPath = DirectoryPath,
 > {
   /**
    * Stable unique identifier for the skill.

@@ -17,7 +17,7 @@ import {
   withLowScoreLogging,
 } from './evaluator_utils';
 
-const createLog = () => ({ warning: jest.fn() } as unknown as ToolingLog);
+const createLog = () => ({ warning: jest.fn() }) as unknown as ToolingLog;
 
 const stubEvaluator = (result: EvaluationResult): Evaluator => ({
   name: 'Stub',

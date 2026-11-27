@@ -183,7 +183,7 @@ describe('AlertEpisodeDetailsFlyout', () => {
         openChat: jest.fn(),
         addAttachment: jest.fn(),
         events: { ui: { activeConversation$: of(activeConversation) } },
-      } as unknown as NonNullable<typeof mockServices.agentBuilder>);
+      }) as unknown as NonNullable<typeof mockServices.agentBuilder>;
 
     it('does not offer add to chat when Agent Builder is not provided', () => {
       mockUseEpisodeDetailsHeaderData.mockReturnValue({ ...baseHeaderData, episode: mockEpisode });

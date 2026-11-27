@@ -34,7 +34,8 @@ import {
 import { useCascadedDocumentsContext } from '../cascaded_documents_provider';
 
 interface ESQLDataCascadeLeafCellProps
-  extends Pick<
+  extends
+    Pick<
       UnifiedDataTableProps,
       | 'dataGridDensityState'
       | 'showTimeCol'

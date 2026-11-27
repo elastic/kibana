@@ -292,7 +292,7 @@ export async function updateAgentBasedPolicy(
       // otherwise keep the policy's current policy_ids so agent policies attached outside the
       // wizard are not detached.
       policy_ids:
-        selectedAgentPolicyIds.length > 0 ? selectedAgentPolicyIds : existingPolicyIds ?? [],
+        selectedAgentPolicyIds.length > 0 ? selectedAgentPolicyIds : (existingPolicyIds ?? []),
     } as unknown as Parameters<typeof sendUpdatePackagePolicy>[1],
     { query: toOnboardingDeploymentQuery(opts.onboardingDeploymentId) }
   );

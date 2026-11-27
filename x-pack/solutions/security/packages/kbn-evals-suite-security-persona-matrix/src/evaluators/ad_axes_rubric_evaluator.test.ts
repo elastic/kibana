@@ -25,7 +25,7 @@ jest.mock('@kbn/inference-prompt-utils', () => ({
 
 const executeUntilValidMock = executeUntilValid as jest.MockedFunction<typeof executeUntilValid>;
 const verdict = (args: unknown) =>
-  ({ toolCalls: [{ function: { name: 'grade', arguments: args } }] } as never);
+  ({ toolCalls: [{ function: { name: 'grade', arguments: args } }] }) as never;
 
 const goodArgs = {
   coverage: 8,

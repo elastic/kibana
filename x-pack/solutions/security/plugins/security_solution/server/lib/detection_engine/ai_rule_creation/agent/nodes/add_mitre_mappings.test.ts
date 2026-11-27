@@ -140,7 +140,7 @@ const buildState = () =>
     userQuery: 'detect model theft',
     rule: { query: 'from logs-*' },
     errors: [],
-  } as unknown as Parameters<ReturnType<typeof addMitreMappingsNode>>[0]);
+  }) as unknown as Parameters<ReturnType<typeof addMitreMappingsNode>>[0];
 
 const mockModelResponse = (response: unknown): void => {
   (MITRE_MAPPING_SELECTION_PROMPT.pipe as jest.Mock).mockReturnValue({

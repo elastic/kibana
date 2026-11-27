@@ -43,7 +43,7 @@ const createAttributes = (ignoreGlobalFilters: boolean) =>
         },
       },
     },
-  } as unknown as LensRuntimeState['attributes']);
+  }) as unknown as LensRuntimeState['attributes'];
 
 const fetchContextSpy = jest.fn();
 

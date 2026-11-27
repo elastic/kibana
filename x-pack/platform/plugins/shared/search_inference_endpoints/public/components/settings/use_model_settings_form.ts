@@ -249,7 +249,7 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
             const saved = savedMap.has(f.featureId) ? savedEndpoints.get(f.featureId) : undefined;
             return [
               f.featureId,
-              saved ? getSavedEfforts(saved) : effectiveRecommendedEfforts[f.featureId] ?? {},
+              saved ? getSavedEfforts(saved) : (effectiveRecommendedEfforts[f.featureId] ?? {}),
             ];
           })
         )

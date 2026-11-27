@@ -496,8 +496,8 @@ export const assessPagination = (
     Object.keys(selectors).length > 0 || (size && itemsPath !== undefined)
       ? `it takes ${names.join(', ')}`
       : itemsPath === ''
-      ? 'it returns an array'
-      : undefined;
+        ? 'it returns an array'
+        : undefined;
   if (!reason) {
     return { listLike: false };
   }

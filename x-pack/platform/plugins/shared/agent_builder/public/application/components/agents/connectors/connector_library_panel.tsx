@@ -62,7 +62,7 @@ export const ConnectorLibraryPanel = <T extends ConnectorLibraryConnector>({
       allConnectors.map((c) => ({
         ...c,
         description: registry?.has(c.actionTypeId)
-          ? registry.get(c.actionTypeId).actionTypeTitle ?? c.actionTypeId
+          ? (registry.get(c.actionTypeId).actionTypeTitle ?? c.actionTypeId)
           : c.actionTypeId,
       })),
     [allConnectors, registry]

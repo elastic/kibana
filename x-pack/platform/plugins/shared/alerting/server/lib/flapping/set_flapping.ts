@@ -15,7 +15,7 @@ export function setFlapping<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupIds extends string
+  RecoveryActionGroupIds extends string,
 >(
   flappingSettings: RulesSettingsFlappingProperties,
   activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
@@ -40,7 +40,7 @@ export function setFlapping<
  */
 export function setFlappingOnOngoingRecoveredAlerts<
   State extends AlertInstanceState,
-  Context extends AlertInstanceContext
+  Context extends AlertInstanceContext,
 >(
   flappingSettings: RulesSettingsFlappingProperties,
   ongoingRecoveredAlerts: Record<string, Alert<State, Context>> = {}
@@ -57,7 +57,7 @@ export function isAlertFlapping<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 >(
   flappingSettings: RulesSettingsFlappingProperties,
   alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>

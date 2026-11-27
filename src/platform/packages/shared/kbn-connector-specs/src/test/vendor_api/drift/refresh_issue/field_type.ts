@@ -310,8 +310,8 @@ const lookupIn = ({ id, text, operation }: SpecChange, document: unknown): Looku
   const root = id.startsWith('response-')
     ? schemaOfContent(document, responseOf(spec.responses, text), text)
     : id.startsWith('request-') || id.startsWith('new-')
-    ? schemaOfContent(document, spec.requestBody, text)
-    : undefined;
+      ? schemaOfContent(document, spec.requestBody, text)
+      : undefined;
   if (root === undefined) {
     return {};
   }
