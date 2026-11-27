@@ -27,6 +27,11 @@ import {
   TraceReadinessError,
   type AwaitTraceReadyResult,
 } from '../../evaluators/trace_readiness';
+import {
+  buildSpanStoreSearchMock,
+  getOpenllmetryLangchainSpans,
+  OPENLLMETRY_LANGCHAIN_TRACE_IDS,
+} from '../evaluators/test_helpers';
 import { registerGetTraceEvidenceRoute } from './get_trace_evidence';
 
 jest.mock('../../evaluators/evidence/evidence_service');
@@ -185,6 +190,42 @@ describe('GET /internal/evals/traces/{traceId}/evidence', () => {
       })
     );
     expect(extractSelectedEvidenceMock).toHaveBeenCalledWith(expect.any(Object), undefined);
+  });
+
+  it('auto-detects openllmetry-langchain for OpenLLMetry LangChain spans', async () => {
+    const actualEvidenceService = jest.requireActual(
+      '../../evaluators/evidence/evidence_service'
+    ) as typeof evidenceServiceModule;
+    hasTraceDocumentsMock.mockImplementation(actualEvidenceService.hasTraceDocuments);
+    hasResolvedEvidenceMock.mockImplementation(actualEvidenceService.hasResolvedEvidence);
+    extractSelectedEvidenceMock.mockImplementation(actualEvidenceService.extractSelectedEvidence);
+    const traceId = OPENLLMETRY_LANGCHAIN_TRACE_IDS.mcpTool;
+    const { handler, context, coreContext } = setup();
+    coreContext.elasticsearch.client.asCurrentUser.search.mockImplementation(
+      buildSpanStoreSearchMock(getOpenllmetryLangchainSpans(traceId)) as unknown as Parameters<
+        typeof coreContext.elasticsearch.client.asCurrentUser.search.mockImplementation
+      >[0]
+    );
+
+    const result = await handler(context, request({ traceId }), kibanaResponseFactory);
+
+    expect(result.status).toBe(200);
+    expect(result.payload).toEqual(
+      expect.objectContaining({
+        status: 'resolved',
+        trace_id: traceId,
+        profile: 'openllmetry-langchain',
+        evidence: expect.objectContaining({
+          steps: [
+            expect.objectContaining({
+              tool_id: 'platform_core_list_indices',
+              tool_call_id: 'toolu_01JCNeSqFzLuXb9LadRKmEtj',
+              arguments: {},
+            }),
+          ],
+        }),
+      })
+    );
   });
 
   it('returns all-profile diagnostics for an explicit unnormalizable trace', async () => {

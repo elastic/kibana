@@ -39,6 +39,10 @@ import { registerEvaluateRoute } from '../routes/evaluators/evaluate';
 import { registerResolveInstrumentationRoute } from '../routes/evaluators/resolve_instrumentation';
 import { registerValidateRoute } from '../routes/evaluators/validate';
 import { registerGetTraceEvidenceRoute } from '../routes/traces/get_trace_evidence';
+import {
+  getOpenllmetryLangchainSpans,
+  OPENLLMETRY_LANGCHAIN_TRACE_IDS,
+} from '../routes/evaluators/test_helpers';
 
 const logger = loggingSystemMock.createLogger();
 const LOGS_INDEX = 'logs-evals-evidence-reconstruction-it';
@@ -49,6 +53,41 @@ const ELASTIC_CONVENTION_TRACE_ID = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 const OTEL_EVENTS_TRACE_ID = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
 const OTEL_ATTRIBUTES_TRACE_ID = 'cccccccccccccccccccccccccccccccc';
 const CLAUDE_CODE_TRACE_ID = 'dddddddddddddddddddddddddddddddd';
+const OPENLLMETRY_LANGCHAIN_TRACE_ID = OPENLLMETRY_LANGCHAIN_TRACE_IDS.subAgent;
+const OPENLLMETRY_LANGCHAIN_SCOPE = 'opentelemetry.instrumentation.langchain';
+
+// Captured deepagents trace: a `task` (Command) tool call that delegates to a sub-agent,
+// which calls one MCP tool. The harness root and `execute_task` spans are not in the
+// fixture, so they are added here to prove the profile ignores them.
+const buildOpenllmetryLangchainDocuments = (): Array<Record<string, unknown>> => [
+  {
+    trace_id: OPENLLMETRY_LANGCHAIN_TRACE_ID,
+    span_id: 'deepagentroot000',
+    '@timestamp': '2026-11-27T10:58:28.000Z',
+    name: 'deep_agent',
+    scope: { name: 'deep-agent-harness' },
+    attributes: {},
+  },
+  {
+    trace_id: OPENLLMETRY_LANGCHAIN_TRACE_ID,
+    span_id: 'executetaskmodel',
+    parent_span_id: 'deepagentroot000',
+    '@timestamp': '2026-11-27T10:58:28.100Z',
+    name: 'execute_task model',
+    scope: { name: OPENLLMETRY_LANGCHAIN_SCOPE },
+    attributes: { 'gen_ai.operation.name': 'execute_task' },
+  },
+  {
+    trace_id: OPENLLMETRY_LANGCHAIN_TRACE_ID,
+    span_id: 'executetasktools',
+    parent_span_id: 'deepagentroot000',
+    '@timestamp': '2026-11-27T10:58:30.600Z',
+    name: 'execute_task tools',
+    scope: { name: OPENLLMETRY_LANGCHAIN_SCOPE },
+    attributes: { 'gen_ai.operation.name': 'execute_task' },
+  },
+  ...getOpenllmetryLangchainSpans(OPENLLMETRY_LANGCHAIN_TRACE_ID),
+];
 
 const groundednessJudgeResponse: GroundednessAnalysis = {
   summary_verdict: 'GROUNDED',
@@ -66,6 +105,56 @@ const groundednessJudgeResponse: GroundednessAnalysis = {
       explanation: 'Tool output supports the claim.',
     },
   ],
+};
+
+interface FixtureMessage {
+  parts: Array<{ content: string }>;
+}
+
+const getFixtureAttribute = (span: Record<string, unknown>, key: string): string =>
+  String((span.attributes as Record<string, unknown>)[key]);
+
+// Reads the expected round straight from the fixture JSON paths, independent of the parser.
+const buildExpectedOpenllmetryLangchainRound = () => {
+  const spans = getOpenllmetryLangchainSpans(OPENLLMETRY_LANGCHAIN_TRACE_ID);
+  const chatSpans = spans.filter(({ name }) => String(name).endsWith('.chat'));
+  const [taskSpan, listIndicesSpan] = spans.filter(({ name }) =>
+    String(name).startsWith('execute_tool ')
+  );
+  const [firstInput]: FixtureMessage[] = JSON.parse(
+    getFixtureAttribute(chatSpans[0], 'gen_ai.input.messages')
+  );
+  const [finalOutput]: FixtureMessage[] = JSON.parse(
+    getFixtureAttribute(chatSpans[chatSpans.length - 1], 'gen_ai.output.messages')
+  );
+  const taskResult: {
+    output: { update: { messages: Array<{ kwargs: { content: string } }> } };
+  } = JSON.parse(getFixtureAttribute(taskSpan, 'gen_ai.tool.call.result'));
+  const listIndicesResult: {
+    output: { kwargs: { content: Array<{ text: string }> } };
+  } = JSON.parse(getFixtureAttribute(listIndicesSpan, 'gen_ai.tool.call.result'));
+  const taskArguments: { inputs: Record<string, string> } = JSON.parse(
+    getFixtureAttribute(taskSpan, 'gen_ai.tool.call.arguments')
+  );
+
+  return {
+    input: { message: firstInput.parts[0].content },
+    response: { message: finalOutput.parts[0].content },
+    steps: [
+      {
+        tool_id: 'task',
+        tool_call_id: 'toolu_01JwRv5DeqrZnbKgW56FHiri',
+        arguments: taskArguments.inputs,
+        result: taskResult.output.update.messages[0].kwargs.content,
+      },
+      {
+        tool_id: 'platform_core_list_indices',
+        tool_call_id: 'toolu_01TtKmqUnNo2HkHhZ69pSBvB',
+        arguments: {},
+        result: JSON.parse(listIndicesResult.output.kwargs.content[0].text),
+      },
+    ],
+  };
 };
 
 const cleanupEvidenceIndices = async (esClient: ElasticsearchClient) => {
@@ -348,6 +437,16 @@ const indexFixtures = async (esClient: ElasticsearchClient) => {
     )
   );
 
+  await Promise.all(
+    buildOpenllmetryLangchainDocuments().map((document, index) =>
+      esClient.index({
+        index: TRACES_INDEX,
+        id: `openllmetry-langchain-${index}`,
+        document: { ...document, 'trace.id': document.trace_id },
+      })
+    )
+  );
+
   await esClient.indices.refresh({ index: [LOGS_INDEX, TRACES_INDEX] });
 };
 
@@ -609,6 +708,54 @@ describe('trace evidence reconstruction integration', () => {
         },
       ],
     });
+  });
+
+  it('normalizes openllmetry-langchain evidence with sub-agent and Command tool steps', async () => {
+    const evidence = await normalizeEvidence(
+      createTraceAccessor({ esClient, traceId: OPENLLMETRY_LANGCHAIN_TRACE_ID }),
+      getInstrumentationProfile('openllmetry-langchain')
+    );
+
+    expect(evidence).toEqual(buildExpectedOpenllmetryLangchainRound());
+    expect(evidence.input.message).toMatch(/^Use the task tool to delegate/);
+    expect(evidence.response.message).toMatch(/^The sub-agent found/);
+  });
+
+  it('auto-detects openllmetry-langchain through the resolve and evidence routes', async () => {
+    const { resolveMappingsHandler, evidenceHandler } = setupRoutes();
+    const resolveContext = buildContext() as unknown as Parameters<
+      typeof resolveMappingsHandler
+    >[0];
+    const evidenceContext = buildContext() as unknown as Parameters<typeof evidenceHandler>[0];
+
+    const resolveResponse = await resolveMappingsHandler(
+      resolveContext,
+      { body: { trace_id: OPENLLMETRY_LANGCHAIN_TRACE_ID } } as unknown as Parameters<
+        typeof resolveMappingsHandler
+      >[1],
+      kibanaResponseFactory
+    );
+    const evidenceResponse = await evidenceHandler(
+      evidenceContext,
+      {
+        params: { traceId: OPENLLMETRY_LANGCHAIN_TRACE_ID },
+        query: { wait: 'none' },
+      } as unknown as Parameters<typeof evidenceHandler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(resolveResponse.status).toBe(200);
+    expect(
+      (resolveResponse.payload as ResolveInstrumentationResponse).recommended_instrumentation
+    ).toEqual({ profile: 'openllmetry-langchain' });
+    expect(evidenceResponse.status).toBe(200);
+    expect(evidenceResponse.payload as GetTraceEvidenceResponse).toEqual(
+      expect.objectContaining({
+        status: 'resolved',
+        profile: 'openllmetry-langchain',
+        evidence: buildExpectedOpenllmetryLangchainRound(),
+      })
+    );
   });
 
   it('returns immediate Claude Code and explicit OTel evidence through the route', async () => {

@@ -25,6 +25,7 @@ export interface EvidenceRound {
 export type EvidenceSource = 'traces' | 'logs';
 export type EvidenceMessageSelectMode = 'first' | 'last';
 export type EvidenceMessageParseMode = 'string' | 'genai_messages' | 'anthropic_message';
+export type EvidenceToolCallsParseMode = 'prefixed_json' | 'langchain_envelope';
 export const EVIDENCE_ITEM_KEYS = {
   userQuery: 'user_query',
   agentResponse: 'agent_response',
@@ -49,7 +50,7 @@ export interface EvidenceMessageItemSpec {
 export interface EvidenceToolCallsItemSpec {
   source: EvidenceSource;
   filter: EvidenceFilterTerm[];
-  parse?: 'prefixed_json';
+  parse?: EvidenceToolCallsParseMode;
   fields: {
     tool_call_id: string;
     tool_id: string;

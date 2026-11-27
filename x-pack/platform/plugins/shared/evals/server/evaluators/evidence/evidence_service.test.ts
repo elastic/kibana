@@ -6,6 +6,10 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import {
+  getOpenllmetryLangchainSpans,
+  OPENLLMETRY_LANGCHAIN_TRACE_IDS,
+} from '../../routes/evaluators/test_helpers';
 import { createTraceAccessor } from '../trace_accessor';
 import {
   extractEvidence,
@@ -16,6 +20,7 @@ import {
   normalizeEvidence,
 } from './evidence_service';
 import { getInstrumentationProfile } from './resolve_instrumentation';
+import type { ToolCallEvidence } from './types';
 
 describe('normalizeEvidence', () => {
   const traceId = '0af7651916cd43dd8448eb211c80319c';
@@ -374,14 +379,18 @@ describe('normalizeEvidence', () => {
         }),
       })
     );
-    expect(searchMock).toHaveBeenCalledTimes(11);
-    const executeToolSearches = searchMock.mock.calls.filter(([request]) =>
-      request.query.bool.filter.some(
-        (filter: Record<string, unknown>) =>
-          (filter.term as Record<string, unknown> | undefined)?.[
-            'attributes.gen_ai.operation.name'
-          ] === 'execute_tool'
-      )
+    expect(searchMock).toHaveBeenCalledTimes(14);
+    // otel-genai-events and otel-genai-attributes share one execute_tool search;
+    // openllmetry-langchain adds a scope.name filter, so it runs its own.
+    const executeToolSearches = searchMock.mock.calls.filter(
+      ([request]) =>
+        request.query.bool.filter.length === 2 &&
+        request.query.bool.filter.some(
+          (filter: Record<string, unknown>) =>
+            (filter.term as Record<string, unknown> | undefined)?.[
+              'attributes.gen_ai.operation.name'
+            ] === 'execute_tool'
+        )
     );
     expect(executeToolSearches).toHaveLength(1);
   });
@@ -1049,6 +1058,415 @@ describe('normalizeEvidence', () => {
           result: '[TOOL RESULT: Shell]\n{"ok":true}',
         },
       ],
+    });
+  });
+
+  const LANGCHAIN_TRACES = OPENLLMETRY_LANGCHAIN_TRACE_IDS;
+
+  describe('langchain_envelope tool payloads', () => {
+    const baseMapping = getInstrumentationProfile('otel-genai-attributes');
+    const langchainMapping = {
+      ...baseMapping,
+      tool_calls: { ...baseMapping.tool_calls, parse: 'langchain_envelope' as const },
+    };
+
+    const getToolSpans = (fixtureTraceId: string): Array<Record<string, unknown>> =>
+      getOpenllmetryLangchainSpans(fixtureTraceId).filter(
+        (span) =>
+          (span.attributes as Record<string, unknown>)['gen_ai.operation.name'] === 'execute_tool'
+      );
+
+    const buildToolSpan = (
+      second: number,
+      attributes: Record<string, unknown>
+    ): Record<string, unknown> => ({
+      '@timestamp': `2026-11-27T12:00:0${second}.000Z`,
+      attributes: {
+        'gen_ai.operation.name': 'execute_tool',
+        'gen_ai.tool.name': 'some_tool',
+        ...attributes,
+      },
+    });
+
+    const normalizeSteps = async (
+      toolSpans: Array<Record<string, unknown>>,
+      mapping: typeof baseMapping = langchainMapping
+    ) => {
+      const { esClient, searchMock } = createEsClient();
+      const traceAccessor = createTraceAccessor({ traceId, esClient });
+      searchMock
+        .mockResolvedValueOnce({ hits: { hits: [] } })
+        .mockResolvedValueOnce({ hits: { hits: [] } })
+        .mockResolvedValueOnce({
+          hits: { hits: toolSpans.map((span) => ({ _source: span })) },
+        });
+      const { steps } = await normalizeEvidence(traceAccessor, mapping);
+      return steps;
+    };
+
+    it('unwraps inputs, lifts tool_call_id and joins and parses MCP text blocks', async () => {
+      const steps = await normalizeSteps(getToolSpans(LANGCHAIN_TRACES.mcpTool));
+
+      expect(steps).toHaveLength(1);
+      const [{ result, ...step }] = steps;
+      expect(step).toEqual({
+        tool_call_id: 'toolu_01JCNeSqFzLuXb9LadRKmEtj',
+        tool_id: 'platform_core_list_indices',
+        arguments: {},
+      });
+      expect(result).toEqual({
+        results: [expect.objectContaining({ type: 'other', data: expect.any(Object) })],
+      });
+    });
+
+    it('keeps string content and never reads input_str', async () => {
+      const [readFileSpan] = getToolSpans(LANGCHAIN_TRACES.readFile);
+      const attributes = readFileSpan.attributes as Record<string, unknown>;
+      const envelope = JSON.parse(attributes['gen_ai.tool.call.arguments'] as string);
+      attributes['gen_ai.tool.call.arguments'] = JSON.stringify({
+        ...envelope,
+        input_str: '{"file_path": "/not/read"}',
+      });
+
+      const [step] = await normalizeSteps([readFileSpan]);
+
+      expect(step.tool_id).toBe('read_file');
+      expect(step.tool_call_id).toBe('toolu_01VfEtP9mQEKL8p653H2xeDT');
+      expect(step.arguments).toEqual({
+        file_path: '/skills/esql-investigation/SKILL.md',
+        limit: 1000,
+      });
+      expect(step.result).toEqual(expect.stringMatching(/^ {5}1\t---\n {5}2\tname: esql/));
+    });
+
+    it('takes content from Command update messages for write_todos', async () => {
+      const steps = await normalizeSteps(getToolSpans(LANGCHAIN_TRACES.writeTodos));
+
+      expect(steps.map(({ tool_id: toolId }) => toolId)).toEqual([
+        'write_todos',
+        'platform_core_list_indices',
+        'write_todos',
+        'write_todos',
+      ]);
+      expect(steps[0]).toEqual({
+        tool_call_id: 'toolu_0148BSaWXK3UtX9EdKjUVhAu',
+        tool_id: 'write_todos',
+        arguments: {
+          todos: [
+            { content: 'List the indices', status: 'in_progress' },
+            { content: 'Report how many indices there are', status: 'pending' },
+          ],
+        },
+        result:
+          "Updated todo list to [{'content': 'List the indices', 'status': 'in_progress'}, " +
+          "{'content': 'Report how many indices there are', 'status': 'pending'}]",
+      });
+    });
+
+    it('takes the sub-agent answer from Command update messages for task', async () => {
+      const steps = await normalizeSteps(getToolSpans(LANGCHAIN_TRACES.subAgent));
+
+      expect(steps.map(({ tool_id: toolId }) => toolId)).toEqual([
+        'task',
+        'platform_core_list_indices',
+      ]);
+      const [taskStep] = steps;
+      expect(taskStep.tool_call_id).toBe('toolu_01JwRv5DeqrZnbKgW56FHiri');
+      expect(taskStep.arguments).toEqual(
+        expect.objectContaining({ subagent_type: 'general-purpose' })
+      );
+      expect(taskStep.result).toEqual(
+        expect.stringMatching(/^Here is the full report based on the results/)
+      );
+    });
+
+    it('keeps a raised tool error step without a result', async () => {
+      const steps = await normalizeSteps(getToolSpans(LANGCHAIN_TRACES.raisedToolError));
+
+      expect(steps).toEqual([
+        {
+          tool_call_id: 'toolu_017NDvXXswUGZ8uQjrZ3LVb5',
+          tool_id: 'platform_core_get_index_mapping',
+          arguments: { indices: '42' },
+        },
+      ]);
+    });
+
+    it('parses a soft MCP error like any MCP result', async () => {
+      const steps = await normalizeSteps(getToolSpans(LANGCHAIN_TRACES.softMcpError));
+
+      expect(steps).toEqual([
+        {
+          tool_call_id: 'toolu_01Gpdxr5RdfEgTfgn1qejNUd',
+          tool_id: 'platform_core_execute_esql',
+          arguments: { query: 'FROM this-index-does-not-exist-xyz | LIMIT 1' },
+          result: {
+            results: [
+              expect.objectContaining({
+                type: 'error',
+                data: { message: expect.stringContaining('Unknown index') },
+              }),
+            ],
+          },
+        },
+      ]);
+    });
+
+    it('prefers the tool_call_id field, then falls back to the ToolMessage tool_call_id', async () => {
+      const toolMessage = {
+        lc: 1,
+        type: 'constructor',
+        id: ['langchain', 'schema', 'messages', 'ToolMessage'],
+        kwargs: { content: 'ok', type: 'tool', tool_call_id: 'from-tool-message' },
+      };
+
+      const steps = await normalizeSteps([
+        buildToolSpan(1, {
+          'gen_ai.tool.call.id': 'from-field',
+          'gen_ai.tool.call.arguments': JSON.stringify({
+            inputs: { q: 1 },
+            kwargs: { tool_call_id: 'from-arguments' },
+          }),
+          'gen_ai.tool.call.result': JSON.stringify({ output: toolMessage }),
+        }),
+        buildToolSpan(2, {
+          'gen_ai.tool.call.arguments': JSON.stringify({ inputs: { q: 2 }, kwargs: {} }),
+          'gen_ai.tool.call.result': JSON.stringify({ output: toolMessage }),
+        }),
+      ]);
+
+      expect(steps).toEqual([
+        { tool_call_id: 'from-field', tool_id: 'some_tool', arguments: { q: 1 }, result: 'ok' },
+        {
+          tool_call_id: 'from-tool-message',
+          tool_id: 'some_tool',
+          arguments: { q: 2 },
+          result: 'ok',
+        },
+      ]);
+    });
+
+    it('picks the ToolMessage answering the call among other Command update messages', async () => {
+      const buildMessage = (className: string, kwargs: Record<string, unknown>) => ({
+        lc: 1,
+        type: 'constructor',
+        id: ['langchain', 'schema', 'messages', className],
+        kwargs,
+      });
+      const buildCommandResult = (messages: unknown[]): string =>
+        JSON.stringify({ output: { graph: null, update: { messages }, resume: null, goto: [] } });
+      const humanMessage = buildMessage('HumanMessage', { content: 'not a result', type: 'human' });
+      const otherToolMessage = buildMessage('ToolMessage', {
+        content: 'other call',
+        type: 'tool',
+        tool_call_id: 'call-other',
+      });
+      const answeringToolMessage = buildMessage('ToolMessage', {
+        content: 'this call',
+        type: 'tool',
+        tool_call_id: 'call-1',
+      });
+
+      const steps = await normalizeSteps([
+        buildToolSpan(1, {
+          'gen_ai.tool.call.arguments': JSON.stringify({
+            inputs: { q: 1 },
+            kwargs: { tool_call_id: 'call-1' },
+          }),
+          'gen_ai.tool.call.result': buildCommandResult([
+            humanMessage,
+            otherToolMessage,
+            answeringToolMessage,
+          ]),
+        }),
+        buildToolSpan(2, {
+          'gen_ai.tool.call.arguments': JSON.stringify({ inputs: { q: 2 }, kwargs: {} }),
+          'gen_ai.tool.call.result': buildCommandResult([
+            humanMessage,
+            buildMessage('ToolMessage', { content: 'by class name', tool_call_id: 'call-2' }),
+          ]),
+        }),
+      ]);
+
+      expect(steps).toEqual([
+        { tool_call_id: 'call-1', tool_id: 'some_tool', arguments: { q: 1 }, result: 'this call' },
+        {
+          tool_call_id: 'call-2',
+          tool_id: 'some_tool',
+          arguments: { q: 2 },
+          result: 'by class name',
+        },
+      ]);
+    });
+
+    it('falls back to the parsed raw value for unrecognized envelopes', async () => {
+      const steps = await normalizeSteps([
+        buildToolSpan(1, {
+          'gen_ai.tool.call.arguments': '{"query":"x"}',
+          'gen_ai.tool.call.result': '{"output":{"rows":2}}',
+        }),
+        buildToolSpan(2, {
+          'gen_ai.tool.call.arguments': JSON.stringify({ inputs: null, input_str: 'raw' }),
+          'gen_ai.tool.call.result': 'plain text',
+        }),
+        buildToolSpan(3, {
+          'gen_ai.tool.call.result': JSON.stringify({
+            output: { update: { messages: [{ kwargs: { type: 'tool' } }] } },
+          }),
+        }),
+      ]);
+
+      expect(steps).toEqual([
+        { tool_id: 'some_tool', arguments: { query: 'x' }, result: { rows: 2 } },
+        {
+          tool_id: 'some_tool',
+          arguments: { inputs: null, input_str: 'raw' },
+          result: 'plain text',
+        },
+        {
+          tool_id: 'some_tool',
+          result: { update: { messages: [{ kwargs: { type: 'tool' } }] } },
+        },
+      ]);
+    });
+
+    it('keeps the raw parsed envelope when parse mode is not set', async () => {
+      const [span] = getToolSpans(LANGCHAIN_TRACES.mcpTool);
+
+      const [step] = await normalizeSteps([span], baseMapping);
+
+      expect(step.tool_call_id).toBeUndefined();
+      expect(step.arguments).toEqual(
+        expect.objectContaining({ input_str: '{}', inputs: {}, kwargs: expect.any(Object) })
+      );
+      expect(step.result).toEqual({
+        output: expect.objectContaining({ lc: 1, type: 'constructor' }),
+        kwargs: expect.any(Object),
+      });
+    });
+  });
+
+  describe('openllmetry-langchain auto-detect', () => {
+    const OTHER_SCOPE = 'some.other.instrumentation';
+
+    const resolveSourceField = (source: unknown, path: string): unknown => {
+      if (source === null || typeof source !== 'object') {
+        return undefined;
+      }
+      const record = source as Record<string, unknown>;
+      if (path in record) {
+        return record[path];
+      }
+      const segments = path.split('.');
+      for (let index = 1; index < segments.length; index++) {
+        const head = segments.slice(0, index).join('.');
+        if (head in record) {
+          return resolveSourceField(record[head], segments.slice(index).join('.'));
+        }
+      }
+      return undefined;
+    };
+
+    interface SearchRequest {
+      index: string;
+      query: { bool: { filter: Array<{ term?: Record<string, unknown> }> } };
+    }
+
+    // Applies the term filters of each request to the given spans, like Elasticsearch would.
+    const createSpanStore = (spans: Array<Record<string, unknown>>) => {
+      const { esClient, searchMock } = createEsClient();
+      searchMock.mockImplementation(({ index, query }: SearchRequest) => {
+        if (index !== 'traces-*') {
+          return Promise.resolve({ hits: { hits: [] } });
+        }
+        const terms = query.bool.filter
+          .flatMap(({ term }) => (term ? Object.entries(term) : []))
+          .filter(([field]) => field !== 'trace.id');
+        const hits = spans
+          .filter((span) =>
+            terms.every(([field, value]) => resolveSourceField(span, field) === value)
+          )
+          .map((span) => ({ _source: span }));
+        return Promise.resolve({ hits: { hits } });
+      });
+      return createTraceAccessor({ traceId, esClient });
+    };
+
+    const expectCleanSteps = (steps: ToolCallEvidence[]) => {
+      expect(steps.length).toBeGreaterThan(0);
+      for (const step of steps) {
+        expect(step.tool_call_id).toEqual(expect.any(String));
+        expect(step.arguments).not.toEqual(expect.objectContaining({ kwargs: expect.anything() }));
+        expect(step.arguments).not.toEqual(
+          expect.objectContaining({ input_str: expect.anything() })
+        );
+        expect(JSON.stringify(step.result)).not.toContain('"lc":1');
+      }
+    };
+
+    it.each([
+      ['MCP tool', LANGCHAIN_TRACES.mcpTool, ['platform_core_list_indices']],
+      [
+        'read_file plus MCP calls',
+        LANGCHAIN_TRACES.readFile,
+        ['read_file', 'platform_core_list_indices', 'platform_core_get_index_mapping'],
+      ],
+      ['write_todos plus MCP', LANGCHAIN_TRACES.writeTodos, undefined],
+      ['task plus sub-agent', LANGCHAIN_TRACES.subAgent, ['task', 'platform_core_list_indices']],
+    ])(
+      'selects openllmetry-langchain with clean steps for the %s trace',
+      async (_label, fixtureTraceId, expectedToolIds) => {
+        const traceAccessor = createSpanStore(getOpenllmetryLangchainSpans(fixtureTraceId));
+
+        const { selected } = await extractSelectedEvidence(traceAccessor);
+
+        expect(selected?.profile).toBe('openllmetry-langchain');
+        expect(selected?.round.input.message).not.toBe('');
+        expect(selected?.round.response.message).not.toBe('');
+        const steps = selected?.round.steps ?? [];
+        expectCleanSteps(steps);
+        if (expectedToolIds) {
+          expect(steps.map(({ tool_id: toolId }) => toolId)).toEqual(expectedToolIds);
+        }
+      }
+    );
+
+    it('keeps the main agent question and answer for the sub-agent trace', async () => {
+      const traceAccessor = createSpanStore(
+        getOpenllmetryLangchainSpans(LANGCHAIN_TRACES.subAgent)
+      );
+
+      const { selected } = await extractSelectedEvidence(traceAccessor);
+
+      expect(selected?.round.input.message).toMatch(/^Use the task tool to de/);
+      expect(selected?.round.response.message).toMatch(/^The sub-agent found/);
+      expect(selected?.round.steps.map(({ tool_id: toolId }) => toolId)).toEqual([
+        'task',
+        'platform_core_list_indices',
+      ]);
+      expect(selected?.round.steps[0].tool_call_id).toBe('toolu_01JwRv5DeqrZnbKgW56FHiri');
+      expect(selected?.round.steps[1].tool_call_id).toBe('toolu_01TtKmqUnNo2HkHhZ69pSBvB');
+    });
+
+    it('keeps otel-genai-attributes for GenAI spans from another scope', async () => {
+      const spans = getOpenllmetryLangchainSpans(LANGCHAIN_TRACES.mcpTool).map((span) => ({
+        ...span,
+        scope: { name: OTHER_SCOPE },
+      }));
+      const traceAccessor = createSpanStore(spans);
+
+      const { selected, profiles } = await extractSelectedEvidence(traceAccessor);
+
+      expect(selected?.profile).toBe('otel-genai-attributes');
+      expect(profiles?.find(({ profile }) => profile === 'openllmetry-langchain')).toEqual(
+        expect.objectContaining({
+          evidence: {
+            user_query: expect.objectContaining({ status: 'not_found' }),
+            agent_response: expect.objectContaining({ status: 'not_found' }),
+            tool_calls: expect.objectContaining({ status: 'not_found' }),
+          },
+        })
+      );
     });
   });
 });

@@ -64,6 +64,27 @@ const otelGenAiAttributes: InstrumentationProfileSpec = {
   },
 };
 
+const OPENLLMETRY_LANGCHAIN_SCOPE = 'opentelemetry.instrumentation.langchain';
+
+const openllmetryLangchain: InstrumentationProfileSpec = {
+  user_query: {
+    ...otelGenAiAttributes.user_query,
+    filter: [{ field: 'scope.name', value: OPENLLMETRY_LANGCHAIN_SCOPE }],
+  },
+  agent_response: {
+    ...otelGenAiAttributes.agent_response,
+    filter: [{ field: 'scope.name', value: OPENLLMETRY_LANGCHAIN_SCOPE }],
+  },
+  tool_calls: {
+    ...otelGenAiAttributes.tool_calls,
+    filter: [
+      { field: 'attributes.gen_ai.operation.name', value: 'execute_tool' },
+      { field: 'scope.name', value: OPENLLMETRY_LANGCHAIN_SCOPE },
+    ],
+    parse: 'langchain_envelope',
+  },
+};
+
 const elasticInference: InstrumentationProfileSpec = {
   user_query: {
     source: 'traces',
@@ -124,6 +145,7 @@ export const INSTRUMENTATION_PROFILES: Record<InstrumentationProfile, Instrument
   {
     'otel-genai-events': otelGenAiEvents,
     'elastic-inference': elasticInference,
+    'openllmetry-langchain': openllmetryLangchain,
     'otel-genai-attributes': otelGenAiAttributes,
     'claude-code': claudeCode,
   };

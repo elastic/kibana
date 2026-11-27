@@ -44,7 +44,13 @@ export const DirectionEnum = Direction.enum;
  * Telemetry convention used to reconstruct normalized evaluator evidence.
  */
 export const InstrumentationProfile = lazySchema(() =>
-  z.enum(['elastic-inference', 'otel-genai-events', 'otel-genai-attributes', 'claude-code'])
+  z.enum([
+    'elastic-inference',
+    'otel-genai-events',
+    'otel-genai-attributes',
+    'claude-code',
+    'openllmetry-langchain',
+  ])
 );
 export type InstrumentationProfile = z.infer<typeof InstrumentationProfile>;
 export type InstrumentationProfileEnum = typeof InstrumentationProfile.enum;
@@ -274,7 +280,13 @@ export const EvaluationTraceId = lazySchema(() =>
 export type EvaluationTraceId = z.infer<typeof EvaluationTraceId>;
 
 export const EvaluationInstrumentationProfile = lazySchema(() =>
-  z.enum(['elastic-inference', 'otel-genai-events', 'otel-genai-attributes', 'claude-code'])
+  z.enum([
+    'elastic-inference',
+    'otel-genai-events',
+    'otel-genai-attributes',
+    'claude-code',
+    'openllmetry-langchain',
+  ])
 );
 export type EvaluationInstrumentationProfile = z.infer<typeof EvaluationInstrumentationProfile>;
 export type EvaluationInstrumentationProfileEnum = typeof EvaluationInstrumentationProfile.enum;

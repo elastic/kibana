@@ -80,5 +80,6 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - server/**/*.json
     - '!target/**/*'
 tasks: {}
