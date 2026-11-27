@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { getAdjustedInterval } from '@kbn/charts-plugin/public';
 import type { HistogramBuckets } from '../../common/types/applications';
 
@@ -19,12 +19,14 @@ export interface TimeChartXDomain {
   range: Pick<HistogramBuckets, 'start' | 'end'>;
   /** Whether the chart draws bars, whose histogram mode spans each bucket. */
   hasBars: boolean;
+  /** The end of the last bucket, which may be longer than `minInterval`, e.g. March. */
+  lastBucketEnd: number;
 }
 
 /**
  * The x domain of a date histogram chart over the range of `histogram`, as Lens computes it
- * (`getXDomain` in `expression_xy`): bars' histogram mode draws past `max` by one interval, areas
- * add it to `max`.
+ * (`getXDomain` in `expression_xy`): bars' histogram mode draws past `max` by one interval, lines
+ * and areas add it to `max`.
  */
 export const getTimeChartXDomain = ({
   points,
@@ -52,11 +54,20 @@ export const getTimeChartXDomain = ({
   });
   const nominalInterval = moment.duration(value, unit).asMilliseconds();
   const maxKey = Math.max(end - nominalInterval, keys[keys.length - 1]);
+  // Calendar buckets vary in length, e.g. March; the points are the full grid, as in Lens
+  const lastBucketEnd =
+    unit === 's'
+      ? maxKey + nominalInterval
+      : moment
+          .tz(keys[keys.length - 1], timeZone)
+          .add(value, unit)
+          .valueOf();
   return {
     min: Math.min(keys[0], start),
-    max: hasBars ? maxKey : maxKey + nominalInterval,
+    max: hasBars ? maxKey : lastBucketEnd,
     minInterval: unit === 's' ? nominalInterval : getAdjustedInterval(keys, value, unit, timeZone),
     range: { start, end },
     hasBars,
+    lastBucketEnd,
   };
 };

@@ -105,6 +105,13 @@ module.exports = (request, options) => {
     });
   }
 
+  if (request === 'monaco-editor') {
+    return resolve.sync('monaco-editor/esm/vs/editor/editor.api.js', {
+      basedir: options.basedir,
+      extensions: options.extensions,
+    });
+  }
+
   if (request === `elastic-apm-node`) {
     return APM_AGENT_MOCK;
   }

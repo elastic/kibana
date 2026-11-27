@@ -135,6 +135,7 @@ describe('detectDrift', () => {
           unmatched: [],
           snapshotProblems: [],
           latestProblems: [],
+          latestViolations: [],
           fieldUse: { 'main GET /items': { read: [], copied: [], returned: [''] } },
           tracked: true,
           fieldChanges: [],
@@ -177,6 +178,41 @@ describe('detectDrift', () => {
     });
   });
 
+  it('gives a change the type of its field, read from the refreshed snapshot', async () => {
+    documents[SPEC_URL] = specYaml({
+      itemProperties: '{ name: { type: string }, color: { type: string, enum: [red, blue] } }',
+    });
+    diffEntries = [
+      {
+        ...entry('response-optional-property-added', 1),
+        text: 'added the optional property `color` to the response with the `200` status',
+      },
+      entry('api-path-added', 1),
+    ];
+
+    const { sources } = await detect();
+
+    expect(sources.main.changes).toMatchObject([
+      { id: 'response-optional-property-added', type: 'red | blue' },
+      { id: 'api-path-added' },
+    ]);
+    expect(sources.main.changes?.[1]).not.toHaveProperty('type');
+  });
+
+  it('gives a changed field the type it had before as well as the one it has', async () => {
+    documents[SPEC_URL] = specYaml({ itemProperties: '{ name: { type: integer } }' });
+    diffEntries = [
+      {
+        ...entry('response-property-type-changed', 1),
+        text: "the `name` response's property `type` changed from `string` to `integer` for status `200`",
+      },
+    ];
+
+    const { sources } = await detect();
+
+    expect(sources.main.changes).toMatchObject([{ type: 'integer', typeBefore: 'string' }]);
+  });
+
   it('reports vendor drift when an action fails against the latest spec only', async () => {
     documents[SPEC_URL] = specYaml({ itemsPath: '/v2/items' });
     diffEntries = [entry('api-path-removed-without-deprecation', 3)];
@@ -199,6 +235,27 @@ describe('detectDrift', () => {
         unmatched: [],
         snapshotProblems: [],
         latestProblems: [expect.stringMatching(/^GET \/items matches no operation of any source/)],
+      },
+    ]);
+  });
+
+  it('names the operation a request the latest spec rejects was matched to', async () => {
+    documents[SPEC_URL] = specYaml().replace(
+      '    get:\n',
+      '    get:\n      security: [{ bearerAuth: [] }]\n'
+    ).concat(`components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer }
+`);
+    diffEntries = [entry('api-security-added', 3)];
+
+    const drift = await detect();
+
+    expect(drift.actions).toMatchObject([
+      {
+        action: 'getItems',
+        latestProblems: [expect.stringContaining('Request has no credentials for the operation')],
+        latestViolations: [{ source: 'main', operation: 'GET /items' }],
       },
     ]);
   });

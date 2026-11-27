@@ -96,20 +96,6 @@ export const createRuleExceptionItem = (ruleId: string, exceptionListItems: Rule
     failOnStatusCode: false,
   });
 
-export const updateExceptionListItem = (
-  exceptionListItemId: string,
-  exceptionListItemUpdate?: Partial<ExceptionListItem>
-) =>
-  rootRequest({
-    method: 'PUT',
-    url: '/api/exception_lists/items',
-    body: {
-      item_id: exceptionListItemId,
-      ...exceptionListItemUpdate,
-    },
-    failOnStatusCode: false,
-  });
-
 export const deleteExceptionList = (listId: string, namespaceType: string = 'default') =>
   rootRequest({
     method: 'DELETE',

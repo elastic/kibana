@@ -19,6 +19,7 @@ import { getOriginalId } from '@kbn/transpose-utils';
 
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import type { FormatFactory, IFieldFormat } from '@kbn/field-formats-plugin/common';
+import { getLowerBound } from '@kbn/chart-expressions-common';
 import { defaultPaletteParams } from '../constants';
 import type { HeatmapSortPredicate } from '../../common/types';
 
@@ -115,6 +116,88 @@ export const findMinMaxByColumnId = (columnIds: string[], table: Datatable | und
     }
   }
   return minMax;
+};
+
+/** Numeric key, or the lower bound of an ES|QL range such as "0.4..0.45". */
+const bucketLowerBound = (value: unknown): number | undefined => {
+  if (typeof value === 'number') {
+    // typeof NaN and Infinity is 'number'; neither is a histogram step.
+    return Number.isFinite(value) ? value : undefined;
+  }
+  // Categorical labels stay out. getLowerBound('10') would otherwise become 10.
+  if (typeof value !== 'string' || !value.includes('..')) {
+    return undefined;
+  }
+  const lower = getLowerBound(value);
+  return Number.isFinite(lower) ? lower : undefined;
+};
+
+/** Inserts blank Y rows for missing numeric-histogram steps, using the original interval width. */
+export const fillMissingHeatmapYBuckets = (
+  rows: Datatable['rows'],
+  yAccessor: string | undefined,
+  valueAccessor: string | undefined,
+  interval: number | undefined
+): Datatable['rows'] => {
+  if (!yAccessor || !valueAccessor || interval == null || !(interval > 0) || rows.length === 0) {
+    return rows;
+  }
+
+  const rowIndexes = rows.map((row) => {
+    const y = bucketLowerBound(row[yAccessor]);
+    return y == null ? undefined : Math.round(y / interval);
+  });
+  const templatePosition = rowIndexes.findIndex((index) => index != null);
+  if (templatePosition === -1) {
+    return rows;
+  }
+  const template = rows[templatePosition];
+
+  const presentIndexes = [...new Set(rowIndexes)]
+    .filter((index): index is number => index != null)
+    .sort((a, b) => a - b);
+  const minIndex = presentIndexes[0];
+  const maxIndex = presentIndexes[presentIndexes.length - 1];
+  if (
+    presentIndexes.length === maxIndex - minIndex + 1 ||
+    !Number.isSafeInteger(minIndex) ||
+    !Number.isSafeInteger(maxIndex)
+  ) {
+    return rows;
+  }
+
+  const presentIndexSet = new Set(presentIndexes);
+  const yIsRange = typeof template[yAccessor] === 'string';
+  const inserted = new Set<number>();
+  const filled: Datatable['rows'] = [];
+  let previousIndex: number | undefined;
+  for (let position = 0; position < rows.length; position++) {
+    const row = rows[position];
+    const index = rowIndexes[position];
+    // Place each missing step between the buckets that surround it, following the
+    // direction of the rows. The first histogram row is already written by then, so
+    // the copied X value is on the axis and X order stays unchanged.
+    if (index != null && previousIndex != null && index !== previousIndex) {
+      const step = index > previousIndex ? 1 : -1;
+      for (let bucketIndex = previousIndex + step; bucketIndex !== index; bucketIndex += step) {
+        if (presentIndexSet.has(bucketIndex) || inserted.has(bucketIndex)) {
+          continue;
+        }
+        inserted.add(bucketIndex);
+        const lower = bucketIndex * interval;
+        filled.push({
+          ...template,
+          [yAccessor]: yIsRange ? `${lower}..${(bucketIndex + 1) * interval}` : lower,
+          [valueAccessor]: null,
+        });
+      }
+    }
+    filled.push(row);
+    if (index != null) {
+      previousIndex = index;
+    }
+  }
+  return filled;
 };
 
 export const getSortPredicate = (column: DatatableColumn, predicate?: HeatmapSortPredicate) => {

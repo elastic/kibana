@@ -11,6 +11,9 @@
 export const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
+/** Orders strings by their code units, for output that doesn't depend on the locale. */
+export const byText = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
+
 /** The message of a thrown value, which needn't be an `Error`. */
 export const errorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);

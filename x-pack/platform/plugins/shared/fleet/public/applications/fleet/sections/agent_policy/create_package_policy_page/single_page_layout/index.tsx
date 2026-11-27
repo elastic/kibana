@@ -589,12 +589,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   }
   const { getAgentlessStatusForPackage } = useAgentless();
   const { isAgentless, isDefaultDeploymentMode } = getAgentlessStatusForPackage(packageInfo);
-  const enableSimplifiedAgentlessUX = ExperimentalFeaturesService.get().enableSimplifiedAgentlessUX;
   const { enableIntegrationTileClickToAdd } = ExperimentalFeaturesService.get();
 
   const useCheckableCardsForSetupTechnologySelector = useMemo(() => {
-    return !replaceDefineStepView && enableSimplifiedAgentlessUX && isDefaultDeploymentMode;
-  }, [replaceDefineStepView, enableSimplifiedAgentlessUX, isDefaultDeploymentMode]);
+    return !replaceDefineStepView && isDefaultDeploymentMode;
+  }, [replaceDefineStepView, isDefaultDeploymentMode]);
 
   const replaceStepConfigurePackagePolicy =
     replaceDefineStepView && packageInfo?.name ? (

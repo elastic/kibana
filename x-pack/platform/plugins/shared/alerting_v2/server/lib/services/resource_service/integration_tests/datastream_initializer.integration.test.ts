@@ -113,6 +113,7 @@ describe('DatastreamInitializer .rule-events (integration)', () => {
         },
       },
       routing_tags: { type: 'keyword', ignore_above: 128 },
+      reason: { type: 'keyword' },
     });
   };
 

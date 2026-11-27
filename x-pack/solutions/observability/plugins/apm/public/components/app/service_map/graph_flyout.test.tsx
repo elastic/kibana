@@ -11,6 +11,8 @@ import type { ServiceMapNode, ServiceMapEdge } from '../../../../common/service_
 import { MOCK_EUI_THEME_FOR_USE_THEME } from './constants';
 import { ServiceMapGraph } from './graph';
 
+const mockFitView = jest.fn();
+
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
@@ -67,6 +69,7 @@ jest.mock('@xyflow/react', () => {
         {nodes.map((node) => (
           <button
             key={node.id}
+            data-id={node.id}
             data-test-subj={`serviceMapNode-${node.id}`}
             onClick={(event) => onNodeClick?.(event, node)}
           >
@@ -95,9 +98,13 @@ jest.mock('@xyflow/react', () => {
     ]),
     useEdgesState: jest.fn((initialEdges: unknown[]) => [initialEdges, jest.fn(), jest.fn()]),
     useReactFlow: jest.fn(() => ({
-      fitView: jest.fn(),
+      fitView: mockFitView,
       zoomIn: jest.fn(),
       zoomOut: jest.fn(),
+      getViewport: () => ({ x: 0, y: 0, zoom: 0.5 }),
+      getNodes: () => [],
+      getNodesBounds: () => ({ x: 0, y: 0, width: 0, height: 0 }),
+      setCenter: jest.fn(),
     })),
   };
 });
@@ -119,10 +126,10 @@ jest.mock('./use_reduced_motion', () => ({
   }),
 }));
 
+const mockAnnounce = jest.fn();
+
 jest.mock('./use_keyboard_navigation', () => ({
-  useKeyboardNavigation: () => ({
-    screenReaderAnnouncement: '',
-  }),
+  useKeyboardNavigation: () => ({ screenReaderAnnouncement: '', announce: mockAnnounce }),
 }));
 
 jest.mock('./service_map_minimap', () => ({
@@ -329,5 +336,58 @@ describe('ServiceMapGraph request flyout selection', () => {
     fireEvent.click(screen.getByTestId('serviceMapEdge-opbeans-java~postgresql'));
 
     expect(screen.queryByTestId('requestFlyoutMock')).not.toBeInTheDocument();
+  });
+});
+
+describe('ServiceMapGraph when what is selected leaves the map', () => {
+  const otherService: ServiceMapNode = {
+    ...serviceNode,
+    id: 'opbeans-node',
+    data: { ...serviceNode.data, id: 'opbeans-node', label: 'opbeans-node' },
+  } as ServiceMapNode;
+
+  it('closes the service flyout when the selected service is no longer on the map', () => {
+    const { rerender } = render(<ServiceMapGraph {...defaultProps} />);
+    fireEvent.click(screen.getByTestId('serviceMapNode-opbeans-java'));
+    expect(screen.getByTestId('serviceFlyoutMock')).toBeInTheDocument();
+
+    // For example a refresh or a new time range that no longer has the service.
+    rerender(<ServiceMapGraph {...defaultProps} nodes={[otherService]} edges={[]} />);
+
+    expect(screen.queryByTestId('serviceFlyoutMock')).not.toBeInTheDocument();
+  });
+
+  it('keeps the service flyout open when the selected service is still on the map', () => {
+    const { rerender } = render(<ServiceMapGraph {...defaultProps} />);
+    fireEvent.click(screen.getByTestId('serviceMapNode-opbeans-java'));
+
+    rerender(<ServiceMapGraph {...defaultProps} nodes={[serviceNode, otherService]} edges={[]} />);
+
+    expect(screen.getByTestId('serviceFlyoutMock')).toHaveTextContent('opbeans-java');
+  });
+
+  it('closes the request flyout when the selected call is no longer on the map', () => {
+    const { rerender } = render(<ServiceMapGraph {...defaultProps} />);
+    fireEvent.click(screen.getByTestId('serviceMapEdge-opbeans-java~postgresql'));
+    expect(screen.getByTestId('requestFlyoutMock')).toBeInTheDocument();
+
+    // Both services are still there, but the call is another one.
+    rerender(
+      <ServiceMapGraph
+        {...defaultProps}
+        edges={[{ ...serviceToDependencyEdge, id: 'opbeans-java~postgresql~other' }]}
+      />
+    );
+
+    expect(screen.queryByTestId('requestFlyoutMock')).not.toBeInTheDocument();
+  });
+
+  it('keeps the request flyout open when the selected call is still on the map', () => {
+    const { rerender } = render(<ServiceMapGraph {...defaultProps} />);
+    fireEvent.click(screen.getByTestId('serviceMapEdge-opbeans-java~postgresql'));
+
+    rerender(<ServiceMapGraph {...defaultProps} nodes={[...defaultProps.nodes, otherService]} />);
+
+    expect(screen.getByTestId('requestFlyoutMock')).toBeInTheDocument();
   });
 });

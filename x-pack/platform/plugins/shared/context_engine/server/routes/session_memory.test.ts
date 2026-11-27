@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { Type } from '@kbn/config-schema';
 import type { IRouter, RequestHandler } from '@kbn/core/server';
 import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { registerSessionMemoryRoutes } from './session_memory';
@@ -26,6 +28,7 @@ import {
 import { apiPrivileges } from '../../common/features';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
+import { BackgroundWriteTracker } from '../session_memory/background_write_tracker';
 import type { SessionMemoryService } from '../session_memory/types';
 
 interface RegisteredRoute {
@@ -61,6 +64,8 @@ describe('session memory routes', () => {
   let service: jest.Mocked<SessionMemoryService>;
   let getSpaces: jest.Mock<Promise<SpacesPluginStart>>;
   let authzResult: Record<string, boolean>;
+  let backgroundWrites: BackgroundWriteTracker;
+  let registerRoutes: (tracker?: BackgroundWriteTracker) => void;
 
   const createContext = () =>
     ({
@@ -106,8 +111,17 @@ describe('session memory routes', () => {
     routes = {};
     service = {
       remember: jest.fn(async (_scope, { id }) => ({ id: id ?? 'unused' })),
-      get: jest.fn(),
+      get: jest.fn(async ({ userId }, id) => ({
+        id,
+        sessionId: 's1',
+        userId,
+        aiIndexIds: [],
+        content: 'existing',
+        attributes: {},
+        revisedAt: '2026-11-08T09:00:00.000Z',
+      })),
       forget: jest.fn(),
+      readRevised: jest.fn(),
     };
     getSessionMemoryService = jest.fn(async () => service);
     getSpaces = jest.fn(
@@ -128,14 +142,19 @@ describe('session memory routes', () => {
       },
     } as unknown as IRouter;
 
-    registerSessionMemoryRoutes({
-      router,
-      getSpaces,
-      getSessionMemoryService,
-      getAiIndexService: () => aiIndexService as unknown as AiIndexService,
-      isMemoryEnabled: async () => memoryEnabled,
-      logger,
-    });
+    registerRoutes = (tracker = backgroundWrites) => {
+      registerSessionMemoryRoutes({
+        router,
+        getSpaces,
+        getSessionMemoryService,
+        getAiIndexService: () => aiIndexService as unknown as AiIndexService,
+        isMemoryEnabled: async () => memoryEnabled,
+        backgroundWrites: tracker,
+        logger,
+      });
+    };
+    backgroundWrites = new BackgroundWriteTracker({ logger });
+    registerRoutes();
     route = routes[SESSION_MEMORY_FORGET_PATH];
   });
 
@@ -464,11 +483,63 @@ describe('session memory routes', () => {
         ]);
       });
 
-      it('revises the memory named by id and returns that id', async () => {
+      it('revises an existing memory named by id and returns that id', async () => {
         await callRoute({ ...body, ai_index_ids: undefined, id: 'm1' });
 
+        expect(service.get).toHaveBeenCalledWith({ space: 'marketing', userId: 'jdoe' }, 'm1');
         expect(response.accepted).toHaveBeenCalledWith({ body: { id: 'm1' } });
         expect(remembered()[1]).toMatchObject({ id: 'm1' });
+      });
+
+      it('does not look up the memory when id is omitted', async () => {
+        await callRoute({ ...body, ai_index_ids: undefined });
+
+        expect(service.get).not.toHaveBeenCalled();
+        expect(response.accepted).toHaveBeenCalledTimes(1);
+      });
+
+      it('returns 404, audits failure, and remembers nothing when revising a missing or forgotten id', async () => {
+        service.get.mockResolvedValueOnce(undefined);
+
+        await callRoute({ ...body, ai_index_ids: undefined, id: 'missing-id' });
+
+        expect(response.notFound).toHaveBeenCalledWith({
+          body: { message: "Session memory 'missing-id' not found" },
+        });
+        expect(response.accepted).not.toHaveBeenCalled();
+        expect(service.remember).not.toHaveBeenCalled();
+        expect(auditedEvents()).toEqual([
+          expect.objectContaining({
+            event: expect.objectContaining({
+              action: 'memory_remember',
+              type: ['change'],
+              outcome: 'failure',
+            }),
+            error: { code: 'NotFound', message: "Session memory 'missing-id' not found" },
+            user: { target: { id: 'jdoe' } },
+            kibana: { saved_object: { type: 'session_memory', id: 'missing-id' } },
+          }),
+        ]);
+      });
+
+      it('audits and rethrows when looking up a revision id fails', async () => {
+        service.get.mockRejectedValueOnce(new Error('search failed'));
+
+        await expect(callRoute({ ...body, ai_index_ids: undefined, id: 'm1' })).rejects.toThrow(
+          'search failed'
+        );
+        expect(service.remember).not.toHaveBeenCalled();
+        expect(auditedEvents()).toEqual([
+          expect.objectContaining({
+            event: expect.objectContaining({
+              action: 'memory_remember',
+              type: ['change'],
+              outcome: 'failure',
+            }),
+            error: { code: 'Error', message: 'search failed' },
+            kibana: { saved_object: { type: 'session_memory', id: 'm1' } },
+          }),
+        ]);
       });
 
       it("files the memory under the caller's profile when user_id is left out", async () => {
@@ -692,16 +763,18 @@ describe('session memory routes', () => {
 
     describe('a failed write', () => {
       beforeEach(() => {
-        service.remember.mockRejectedValueOnce(new Error('inference unavailable'));
+        service.remember.mockRejectedValueOnce(
+          Object.assign(new Error('contains secret memory content'), { name: 'TimeoutError' })
+        );
       });
 
-      it('still answers 202, logs the error with the memory id, and audits the failure', async () => {
+      it('still answers 202, logs only the error name with the memory id, and audits the failure', async () => {
         await callRoute({ ...body, ai_index_ids: undefined });
         await flushPromises();
 
         expect(response.accepted).toHaveBeenCalledTimes(1);
         expect(logger.error).toHaveBeenCalledWith(
-          `Failed to remember session memory [id=${acceptedId().id}]: inference unavailable`
+          `Failed to remember session memory [id=${acceptedId().id}]: TimeoutError`
         );
         expect(auditedEvents()).toEqual([
           expect.objectContaining({
@@ -709,14 +782,44 @@ describe('session memory routes', () => {
               acceptedId().id
             }] of session [id=s1]`,
             event: expect.objectContaining({ action: 'memory_remember', outcome: 'failure' }),
-            error: { code: 'Error', message: 'inference unavailable' },
+            error: { code: 'TimeoutError', message: 'TimeoutError' },
           }),
         ]);
       });
 
-      it('logs and audits non-Error rejections with no unhandled rejection', async () => {
+      it('logs ResponseError status without leaking ES reason or body', async () => {
         service.remember.mockReset();
-        service.remember.mockRejectedValueOnce('raw rejection');
+        service.remember.mockRejectedValueOnce(
+          new errors.ResponseError(
+            elasticsearchClientMock.createApiResponse({
+              statusCode: 400,
+              body: {
+                error: {
+                  type: 'mapper_parsing_exception',
+                  reason: "Preview of field's value: 'top-secret memory content'",
+                },
+              },
+            })
+          )
+        );
+
+        await callRoute({ ...body, ai_index_ids: undefined });
+        await flushPromises();
+
+        expect(logger.error).toHaveBeenCalledWith(
+          `Failed to remember session memory [id=${acceptedId().id}]: ResponseError (status 400)`
+        );
+        expect(auditedEvents()).toEqual([
+          expect.objectContaining({
+            event: expect.objectContaining({ action: 'memory_remember', outcome: 'failure' }),
+            error: { code: 'ResponseError', message: 'ResponseError (status 400)' },
+          }),
+        ]);
+      });
+
+      it('logs and audits non-Error rejections without leaking the rejected value', async () => {
+        service.remember.mockReset();
+        service.remember.mockRejectedValueOnce('raw rejection with secret content');
         const unhandled = jest.fn();
         process.on('unhandledRejection', unhandled);
         try {
@@ -728,12 +831,12 @@ describe('session memory routes', () => {
 
         expect(unhandled).not.toHaveBeenCalled();
         expect(logger.error).toHaveBeenCalledWith(
-          `Failed to remember session memory [id=${acceptedId().id}]: raw rejection`
+          `Failed to remember session memory [id=${acceptedId().id}]: Error`
         );
         expect(auditedEvents()).toEqual([
           expect.objectContaining({
             event: expect.objectContaining({ action: 'memory_remember', outcome: 'failure' }),
-            error: { code: 'Error', message: 'raw rejection' },
+            error: { code: 'Error', message: 'Error' },
           }),
         ]);
       });
@@ -804,6 +907,78 @@ describe('session memory routes', () => {
         await callRoute(body);
 
         expect(auditLog).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('backpressure and shutdown', () => {
+      it('returns 429 with Retry-After and audits failure when in-flight writes hit maxInFlight', async () => {
+        registerRoutes(new BackgroundWriteTracker({ maxInFlight: 1, logger }));
+        route = routes[SESSION_MEMORY_REMEMBER_PATH];
+
+        let finishFirst!: () => void;
+        service.remember.mockReturnValueOnce(
+          new Promise((resolve) => {
+            finishFirst = () => resolve({ id: 'm1' });
+          })
+        );
+
+        await callRoute({ ...body, ai_index_ids: undefined, id: 'm1' });
+        expect(response.accepted).toHaveBeenCalledTimes(1);
+
+        await callRoute({ ...body, ai_index_ids: undefined, id: 'm2' });
+
+        expect(response.customError).toHaveBeenCalledWith({
+          statusCode: 429,
+          body: { message: expect.stringContaining('Too many session memory writes') },
+          headers: { 'Retry-After': '1' },
+        });
+        expect(service.remember).toHaveBeenCalledTimes(1);
+        expect(auditedEvents()).toEqual([
+          expect.objectContaining({
+            event: expect.objectContaining({ action: 'memory_remember', outcome: 'failure' }),
+            error: expect.objectContaining({ code: 'TooManyRequests' }),
+            user: { target: { id: 'jdoe' } },
+            kibana: { saved_object: { type: 'session_memory', id: 'm2' } },
+          }),
+        ]);
+
+        finishFirst();
+        await flushPromises();
+
+        await callRoute({ ...body, ai_index_ids: undefined, id: 'm3' });
+        expect(response.accepted).toHaveBeenCalledTimes(2);
+      });
+
+      it('returns 429 with Retry-After and audits failure while draining on shutdown', async () => {
+        let finishPending!: () => void;
+        service.remember.mockReturnValueOnce(
+          new Promise((resolve) => {
+            finishPending = () => resolve({ id: 'm1' });
+          })
+        );
+
+        await callRoute({ ...body, ai_index_ids: undefined, id: 'm1' });
+        const drainPromise = backgroundWrites.drain();
+
+        await callRoute({ ...body, ai_index_ids: undefined });
+
+        expect(response.customError).toHaveBeenCalledWith({
+          statusCode: 429,
+          body: { message: expect.stringContaining('Too many session memory writes') },
+          headers: { 'Retry-After': '1' },
+        });
+        expect(service.remember).toHaveBeenCalledTimes(1);
+        expect(auditedEvents()).toEqual([
+          expect.objectContaining({
+            event: expect.objectContaining({ action: 'memory_remember', outcome: 'failure' }),
+            error: expect.objectContaining({ code: 'TooManyRequests' }),
+            user: { target: { id: 'jdoe' } },
+          }),
+        ]);
+        expect(auditedEvents()[0]).not.toHaveProperty('kibana');
+
+        finishPending();
+        await drainPromise;
       });
     });
   });

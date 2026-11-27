@@ -17,6 +17,7 @@ import {
   overviewFiltersParamIssue,
   readOverviewFilters,
 } from '../../common/overview_filters_param';
+import { toElasticsearchTimeZone } from '../../common/time_zone';
 import { MAX_ENVIRONMENT_LENGTH, MAX_SERVICE_NAME_LENGTH } from '../lib/constants';
 
 const MAX_TIME_ZONE_LENGTH = 64;
@@ -53,7 +54,8 @@ export const timeZoneShape = () => ({
     .refine((value) => UTC_OFFSET.test(value) || moment.tz.zone(value) !== null, {
       message: 'Unknown time zone',
     })
-    .default('UTC'),
+    .default('UTC')
+    .transform(toElasticsearchTimeZone),
 });
 
 /** The query of a route over a time range and an optional environment; `start` precedes `end`. */
