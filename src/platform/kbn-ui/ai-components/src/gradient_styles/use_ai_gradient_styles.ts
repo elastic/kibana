@@ -112,15 +112,37 @@ const gradientLabelCss = (
   color: transparent !important;
   -webkit-text-fill-color: transparent !important;
 
+  @media (forced-colors: active) {
+    background: none !important;
+    background-clip: initial !important;
+    -webkit-background-clip: initial !important;
+    color: CanvasText !important;
+    -webkit-text-fill-color: CanvasText !important;
+  }
+
   ${hoverGradient
     ? `button:hover:not(:disabled) &,
-      button:focus-visible:not(:disabled) & {
+      button:focus-visible:not(:disabled) &,
+      a:hover:not(:disabled) &,
+      a:focus-visible:not(:disabled) & {
         background: ${hoverGradient} !important;
         background-clip: text !important;
         -webkit-background-clip: text !important;
+      }
+      
+      @media (forced-colors: active) {
+        button:hover:not(:disabled) &,
+        button:focus-visible:not(:disabled) &,
+        a:hover:not(:disabled) &,
+        a:focus-visible:not(:disabled) & {
+          background: none !important;
+          background-clip: initial !important;
+          -webkit-background-clip: initial !important;
+        }
       }`
     : ''}
-  button:disabled & {
+  button:disabled &,
+  a:disabled & {
     color: ${euiTheme.colors.textDisabled} !important;
     background: none !important;
     -webkit-text-fill-color: ${euiTheme.colors.textDisabled} !important;
@@ -134,9 +156,21 @@ const plainLabelCss = (euiTheme: UseEuiTheme['euiTheme'], color: string) => css`
   -webkit-background-clip: initial !important;
   color: ${color} !important;
   -webkit-text-fill-color: currentColor !important;
-  button:disabled & {
+
+  @media (forced-colors: active) {
+    color: CanvasText !important;
+    -webkit-text-fill-color: CanvasText !important;
+  }
+
+  button:disabled &,
+  a:disabled & {
     color: ${euiTheme.colors.textDisabled} !important;
     -webkit-text-fill-color: ${euiTheme.colors.textDisabled} !important;
+
+    @media (forced-colors: active) {
+      color: GrayText !important;
+      -webkit-text-fill-color: GrayText !important;
+    }
   }
 `;
 
@@ -193,7 +227,8 @@ const iconFillGradientCss = ({
 const resolveVariantStyles = (
   variant: AiButtonVariant,
   euiTheme: UseEuiTheme['euiTheme'],
-  buttonGradientAngle: number
+  buttonGradientAngle: number,
+  highContrastMode: UseEuiTheme['highContrastMode']
 ) => {
   const {
     colors,
@@ -219,7 +254,9 @@ const resolveVariantStyles = (
         buttonBackground: 'transparent',
         hoverBackground: hoverGradient,
         labelColor: defaultLabelColor,
-        labelCss: gradientLabelCss(euiTheme, labelGradient, `${hoverGradient}, ${labelGradient}`),
+        labelCss: highContrastMode
+          ? plainLabelCss(euiTheme, defaultLabelColor)
+          : gradientLabelCss(euiTheme, labelGradient, `${hoverGradient}, ${labelGradient}`),
       };
 
     case 'outlined':
@@ -236,7 +273,9 @@ const resolveVariantStyles = (
           }
         ),
         labelColor: defaultLabelColor,
-        labelCss: gradientLabelCss(euiTheme, labelGradient, `${hoverGradient}, ${labelGradient}`),
+        labelCss: highContrastMode
+          ? plainLabelCss(euiTheme, defaultLabelColor)
+          : gradientLabelCss(euiTheme, labelGradient, `${hoverGradient}, ${labelGradient}`),
       };
 
     case 'accent': {
@@ -279,12 +318,12 @@ export const useAiButtonGradientStyles = ({
   variant = 'base',
   iconOnly,
 }: AiButtonGradientOptions = {}): AiButtonGradientStyles => {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, highContrastMode } = useEuiTheme();
 
   return useMemo(() => {
     const buttonGradientAngle = resolveGradientAngle({ iconOnly, variant });
     const { buttonBackground, hoverBackground, borderGradient, labelColor, labelCss } =
-      resolveVariantStyles(variant, euiTheme, buttonGradientAngle);
+      resolveVariantStyles(variant, euiTheme, buttonGradientAngle, highContrastMode);
 
     const buttonCss = css`
       background: ${buttonBackground} !important;
@@ -316,7 +355,7 @@ export const useAiButtonGradientStyles = ({
     `;
 
     return { buttonCss, labelCss };
-  }, [variant, iconOnly, euiTheme]);
+  }, [variant, iconOnly, euiTheme, highContrastMode]);
 };
 
 export const useSvgAiGradient = ({ variant }: AiButtonGradientOptions = {}): SvgAiGradient => {
