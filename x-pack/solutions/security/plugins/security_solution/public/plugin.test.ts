@@ -7,6 +7,7 @@
 
 import { Subject } from 'rxjs';
 import type { App, AppDeepLink, AppUpdater } from '@kbn/core/public';
+import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { ILicense } from '@kbn/licensing-types';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
@@ -16,7 +17,7 @@ import {
   ALERTS_UI_READ,
 } from '@kbn/security-solution-features/constants';
 
-import { APP_UI_ID, SECURITY_FEATURE_ID } from '../common/constants';
+import { APP_UI_ID, ATTACK_DISCOVERY_FEATURE_ID, SECURITY_FEATURE_ID } from '../common/constants';
 import { SecurityPageName } from './app/types';
 import { appLinks, getFilteredLinks } from './app/links';
 import { manageOldSiemRoutes } from './helpers';
@@ -42,7 +43,10 @@ jest.mock('./app/links', () => ({
 
 const LEGACY_SIEM_APP_ID = 'siem';
 
-const startPlugin = ({ accessible = true }: { accessible?: boolean } = {}) => {
+const startPlugin = ({
+  accessible = true,
+  navigationTree,
+}: { accessible?: boolean; navigationTree?: NavigationTreeDefinition } = {}) => {
   const coreSetup = coreMock.createSetup();
   const coreStart = coreMock.createStart();
 
@@ -52,6 +56,7 @@ const startPlugin = ({ accessible = true }: { accessible?: boolean } = {}) => {
       ? {
           [SECURITY_FEATURE_ID]: { show: true },
           [ALERTS_FEATURE_ID]: { [ALERTS_UI_READ]: true, [ALERTS_UI_DETECTIONS]: true },
+          [ATTACK_DISCOVERY_FEATURE_ID]: { 'attack-discovery': true },
         }
       : {}),
   };
@@ -87,7 +92,12 @@ const startPlugin = ({ accessible = true }: { accessible?: boolean } = {}) => {
     }
   });
 
-  plugin.start(coreStart, { licensing: { license$ } } as unknown as StartPlugins);
+  const { setSolutionNavigationTree } = plugin.start(coreStart, {
+    licensing: { license$ },
+  } as unknown as StartPlugins);
+  if (navigationTree) {
+    setSolutionNavigationTree(navigationTree);
+  }
 
   return { legacySiemApp, license$, registeredDeepLinks };
 };
@@ -135,6 +145,63 @@ describe('Security Solution plugin', () => {
 
       expect(registeredDeepLinks).toHaveLength(0);
       expect(manageOldSiemRoutes).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('deepLinks', () => {
+    it('shows Detections and hides Attack Discovery in the classic side nav while the filtered links are still pending', async () => {
+      (getFilteredLinks as jest.Mock).mockReturnValue(new Promise(() => {}));
+      const { license$, registeredDeepLinks } = startPlugin();
+      await jest.advanceTimersByTimeAsync(1000);
+      const registeredBeforeLicense = registeredDeepLinks.length;
+
+      license$.next(licensingMock.createLicense({ license: { type: 'enterprise' } }));
+      await jest.advanceTimersByTimeAsync(1000);
+
+      expect(getFilteredLinks).toHaveBeenCalledTimes(1);
+      expect(registeredDeepLinks.length).toBeGreaterThan(registeredBeforeLicense);
+      const deepLinks = registeredDeepLinks[registeredDeepLinks.length - 1];
+      const deepLinkIds = deepLinks.map(({ id }) => id);
+      expect(deepLinkIds).not.toContain(SecurityPageName.alerts);
+      const detectionsDeepLink = deepLinks.find(
+        ({ id }) => id === SecurityPageName.alertDetections
+      );
+      expect(detectionsDeepLink?.visibleIn).toContain('classicSideNav');
+      const attackDiscoveryDeepLink = deepLinks.find(
+        ({ id }) => id === SecurityPageName.attackDiscovery
+      );
+      expect(attackDiscoveryDeepLink?.visibleIn).toEqual([]);
+    });
+
+    it('shows Detections and hides Attack Discovery in the project side nav while the filtered links are still pending', async () => {
+      (getFilteredLinks as jest.Mock).mockReturnValue(new Promise(() => {}));
+      const { license$, registeredDeepLinks } = startPlugin({
+        navigationTree: {
+          body: [
+            { id: SecurityPageName.alertDetections },
+            { id: SecurityPageName.attackDiscovery },
+          ],
+        },
+      });
+      await jest.advanceTimersByTimeAsync(1000);
+      const registeredBeforeLicense = registeredDeepLinks.length;
+
+      license$.next(licensingMock.createLicense({ license: { type: 'enterprise' } }));
+      await jest.advanceTimersByTimeAsync(1000);
+
+      expect(getFilteredLinks).toHaveBeenCalledTimes(1);
+      expect(registeredDeepLinks.length).toBeGreaterThan(registeredBeforeLicense);
+      const deepLinks = registeredDeepLinks[registeredDeepLinks.length - 1];
+      const deepLinkIds = deepLinks.map(({ id }) => id);
+      expect(deepLinkIds).not.toContain(SecurityPageName.alerts);
+      const detectionsDeepLink = deepLinks.find(
+        ({ id }) => id === SecurityPageName.alertDetections
+      );
+      expect(detectionsDeepLink?.visibleIn).toContain('projectSideNav');
+      const attackDiscoveryDeepLink = deepLinks.find(
+        ({ id }) => id === SecurityPageName.attackDiscovery
+      );
+      expect(attackDiscoveryDeepLink?.visibleIn).toEqual([]);
     });
   });
 });

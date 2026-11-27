@@ -1032,11 +1032,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     }
 
     // Configuration of AppLinks updater registration based on license and capabilities
-    const {
-      appLinks: initialAppLinks,
-      getFilteredLinks,
-      registerDeepLinksUpdater,
-    } = await this.lazyApplicationLinks();
+    const { getAppLinks, getFilteredLinks, registerDeepLinksUpdater } =
+      await this.lazyApplicationLinks();
 
     registerDeepLinksUpdater(this.appUpdater$, solutionNavigationTree$);
 
@@ -1047,7 +1044,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       deepLinksSubscription.unsubscribe();
     });
 
-    const appLinksToUpdate$ = new BehaviorSubject<AppLinkItems>(initialAppLinks);
+    const appLinksToUpdate$ = new BehaviorSubject<AppLinkItems>(
+      getAppLinks(this.experimentalFeatures)
+    );
 
     appLinksToUpdate$.pipe(combineLatestWith(license$)).subscribe(([appLinks, license]) => {
       const params: ApplicationLinksUpdateParams = {
