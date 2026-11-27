@@ -160,7 +160,10 @@ export class DashboardApp {
     id: string,
     opts: { waitForRender?: boolean } = { waitForRender: true }
   ) {
-    await this.page.gotoApp('dashboards', { hash: `/view/${id}` });
+    await this.page.gotoApp('dashboards', {
+      hash: `/view/${id}`,
+      readyWhen: this.dashboardViewport,
+    });
     if (opts.waitForRender) {
       await this.waitForRenderComplete();
     }

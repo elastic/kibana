@@ -67,10 +67,10 @@ spaceTest.describe(
         // Reopen as viewer. The viewer's "copy link" is a synchronous redirect URL,
         // whereas the editor path builds a short URL first and the
         // clipboard write after that await does not land in headless Chromium.
+        // A cookie swap under a live page triggers a logout redirect on the next 401.
+        await page.goto('about:blank');
         await browserAuth.loginAsViewer();
-        await dashboard.openDashboardWithId(dashboardId!, { waitForRender: false });
-        await page.reload();
-        await dashboard.waitForRenderComplete();
+        await dashboard.openDashboardWithId(dashboardId!);
         await dataGrid.waitForDocTableRendered();
 
         await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
