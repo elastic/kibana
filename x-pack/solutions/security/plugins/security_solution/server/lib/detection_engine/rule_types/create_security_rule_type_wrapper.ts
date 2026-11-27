@@ -22,13 +22,17 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   getExceptions,
   getRuleRangeTuples,
+  getUncoveredGap,
+  didSearchComplete,
+  hasOnlyUserErrors,
+  parseInterval,
   isMachineLearningParams,
   isEsqlParams,
   getDisabledActionsWarningText,
 } from './utils/utils';
 import { runExecutionValidation } from './validation';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
-import type { CreateSecurityRuleTypeWrapper } from './types';
+import type { CreateSecurityRuleTypeWrapper, RuleRangeTuple } from './types';
 import { getListClient } from './utils/get_list_client';
 import { checkErrorDetails } from './utils/check_error_details';
 // eslint-disable-next-line no-restricted-imports
@@ -347,7 +351,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           if (remainingGap.asMilliseconds() > 0) {
             const gapDuration = `${remainingGap.humanize()} (${remainingGap.asMilliseconds()}ms)`;
-            const gapErrorMessage = `${gapDuration} were not queried between this rule execution and the last execution, so signals may have been missed. Consider increasing your look behind time or adding more Kibana instances`;
+            // The run itself completes, saves its state and advances the catch-up anchor, and the
+            // uncovered period is recorded as a gap below, so this is a warning (partial failure)
+            // rather than a failed execution.
+            const gapWarningMessage = `${gapDuration} were not queried between this rule execution and the last execution, so signals may have been missed. Consider increasing your look behind time or adding more Kibana instances`;
             if (analytics) {
               try {
                 sendGapDetectedTelemetryEvent({
@@ -366,8 +373,14 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 logger.info(`Failed to send gap detected telemetry event: ${error}`);
               }
             }
-            ruleExecutionLogger.error(gapErrorMessage, { userError: true });
+            ruleExecutionLogger.warn(gapWarningMessage);
           }
+
+          // Tuples that need no gap: their search completed, or it failed for a user error (an
+          // invalid query, a missing index or field) that would fail identically on every gap
+          // fill attempt. Any other tuple was not actually covered by this run, either because
+          // its search failed or because the run threw before reaching it.
+          const coveredTuples = new Set<RuleRangeTuple>();
 
           try {
             const { listClient, exceptionsClient } = getListClient({
@@ -465,6 +478,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 );
                 runResult.warningMessages.forEach((message) => ruleExecutionLogger.warn(message));
 
+                if (didSearchComplete(runResult) || hasOnlyUserErrors(runResult)) {
+                  coveredTuples.add(tuple);
+                }
+
                 const createdSignals = result.createdSignals.concat(runResult.createdSignals);
                 const warningMessages = result.warningMessages.concat(runResult.warningMessages);
                 result = {
@@ -547,7 +564,37 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               userError: checkErrorDetails(error).isUserError,
             });
           } finally {
-            await ruleExecutionLogger.close();
+            try {
+              // The anchor still advances for this run, so record the execution slices it did not
+              // cover as a gap (merged with the drift gap detected above, unless that gap is
+              // attributed to the rule having been disabled) to keep them visible and fillable.
+              const uncoveredTuples = skipExecution
+                ? []
+                : tuples.filter((tuple) => !coveredTuples.has(tuple));
+              if (uncoveredTuples.length > 0) {
+                const uncoveredGap = getUncoveredGap({
+                  driftGap: gap,
+                  driftGapReason: detectedGapReason,
+                  uncoveredTuples,
+                  intervalDuration: parseInterval(interval),
+                });
+                if (uncoveredGap) {
+                  const { range, reason } = uncoveredGap;
+                  ruleExecutionLogger.logMetrics({
+                    gap_duration_s: Math.round(
+                      (Date.parse(range.lte) - Date.parse(range.gte)) / 1000
+                    ),
+                    gap_range: range,
+                    gap_reason: experimentalFeatures.gapReasonDetectionEnabled ? reason : undefined,
+                  });
+                }
+              }
+            } catch (gapError) {
+              // Never let gap bookkeeping prevent the execution status from being written.
+              logger.warn(`Failed to record uncovered gap range: ${gapError}`);
+            } finally {
+              await ruleExecutionLogger.close();
+            }
           }
 
           if (!isPreview && analytics) {

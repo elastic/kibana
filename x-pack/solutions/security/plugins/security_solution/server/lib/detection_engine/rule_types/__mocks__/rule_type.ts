@@ -148,17 +148,21 @@ export const createRuleTypeMocks = (
     executor: async ({
       params,
       previousStartedAt,
+      rule,
     }: {
       params: Record<string, unknown>;
       previousStartedAt?: Date | null;
+      rule?: Partial<ReturnType<typeof createDefaultAlertExecutorOptions>['rule']>;
     }) => {
+      const defaultOptions = createDefaultAlertExecutorOptions({
+        params,
+        alertId: v4(),
+        state: {},
+        logger: loggerMock,
+      });
       return alertExecutor({
-        ...createDefaultAlertExecutorOptions({
-          params,
-          alertId: v4(),
-          state: {},
-          logger: loggerMock,
-        }),
+        ...defaultOptions,
+        rule: { ...defaultOptions.rule, ...rule },
         ...(previousStartedAt !== undefined ? { previousStartedAt } : {}),
         runOpts: {
           completeRule: getCompleteRuleMock(params as QueryRuleParams),
