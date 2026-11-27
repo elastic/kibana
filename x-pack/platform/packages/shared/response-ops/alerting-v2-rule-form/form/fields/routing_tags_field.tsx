@@ -53,10 +53,6 @@ export const RoutingTagsField = () => {
           <EuiFormRow
             label={ROUTING_TAGS_LABEL}
             labelAppend={OPTIONAL_LABEL}
-            helpText={i18n.translate('xpack.alertingV2.ruleForm.routingTagsHelpText', {
-              defaultMessage:
-                'Action policies apply when they share at least one of these routing tags.',
-            })}
             isInvalid={!!error}
             error={error?.message}
             fullWidth

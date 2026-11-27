@@ -30,14 +30,7 @@ describe('ScheduleField', () => {
   it('renders help text', () => {
     render(<ScheduleField />, { wrapper: createFormWrapper() });
 
-    expect(screen.getByText('Set the frequency to check the alert conditions')).toBeInTheDocument();
-  });
-
-  it('renders tooltip icon', () => {
-    render(<ScheduleField />, { wrapper: createFormWrapper() });
-
-    // The EuiIconTip renders a span with "Info" text
-    expect(screen.getByText('Info')).toBeInTheDocument();
+    expect(screen.getByText('How often the rule runs.')).toBeInTheDocument();
   });
 
   it('renders correctly in flyout layout', () => {

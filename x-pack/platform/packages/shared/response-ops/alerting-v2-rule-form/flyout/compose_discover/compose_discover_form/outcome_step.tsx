@@ -83,6 +83,15 @@ export function OutcomeStep({
           />
           <EuiSpacer size="m" />
           <EuiHorizontalRule margin="m" />
+          <EuiTitle size="xs">
+            <h3>
+              <FormattedMessage
+                id="xpack.alertingV2.composeDiscover.outcome.recoveryConditionsTitle"
+                defaultMessage="Recovery conditions"
+              />
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
           <RecoveryConditionStep
             state={state}
             dispatch={dispatch}

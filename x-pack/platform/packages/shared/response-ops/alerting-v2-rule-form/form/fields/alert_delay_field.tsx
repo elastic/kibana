@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButtonGroup, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow, EuiIconTip, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { DELAY_MODE } from '../types';
@@ -125,9 +125,22 @@ export const AlertDelayField = () => {
 
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.alertingV2.ruleForm.alertDelay.label', {
-        defaultMessage: 'Alert delay',
-      })}
+      label={
+        <>
+          {i18n.translate('xpack.alertingV2.ruleForm.alertDelay.label', {
+            defaultMessage: 'Alert delay',
+          })}{' '}
+          <EuiIconTip
+            type="info"
+            color="text"
+            content={i18n.translate('xpack.alertingV2.ruleForm.alertDelay.tooltip', {
+              defaultMessage:
+                'How long a breach must last before the alert becomes active. Use this to ignore brief spikes.',
+            })}
+            iconProps={{ 'data-test-subj': 'alertDelayHelpTip' }}
+          />
+        </>
+      }
       fullWidth
       data-test-subj="alertDelayFormRow"
     >

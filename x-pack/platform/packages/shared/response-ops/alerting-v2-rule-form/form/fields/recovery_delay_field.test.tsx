@@ -38,6 +38,14 @@ describe('RecoveryDelayField', () => {
     expect(screen.getByText('Recovery delay')).toBeInTheDocument();
   });
 
+  it('renders an info tip on the label', () => {
+    render(<RecoveryDelayField />, {
+      wrapper: createFormWrapper({ kind: 'alert' }),
+    });
+
+    expect(screen.getByTestId('recoveryDelayHelpTip')).toBeInTheDocument();
+  });
+
   it('defaults to immediate mode', () => {
     render(<RecoveryDelayField />, {
       wrapper: createFormWrapper({ kind: 'alert' }),

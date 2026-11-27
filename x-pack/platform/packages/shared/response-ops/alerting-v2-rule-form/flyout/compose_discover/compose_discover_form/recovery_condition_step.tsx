@@ -150,7 +150,7 @@ export function RecoveryConditionStep({
 
       {isCustom && renderCustomRecovery && (
         <>
-          <EuiSpacer size="l" />
+          <EuiSpacer size="m" />
           <EuiHorizontalRule margin="none" />
           <EuiSpacer size="m" />
           {React.createElement(renderCustomRecovery, { state, dispatch })}
@@ -159,6 +159,12 @@ export function RecoveryConditionStep({
 
       {strategy !== recoveryStrategy.manual && (
         <>
+          {isCustom && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiHorizontalRule margin="none" />
+            </>
+          )}
           <EuiSpacer size="m" />
           <RecoveryDelayField />
         </>

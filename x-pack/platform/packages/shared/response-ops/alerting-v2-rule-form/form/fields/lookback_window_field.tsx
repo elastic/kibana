@@ -16,6 +16,10 @@ import { useRuleFormMeta } from '../contexts';
 
 const LOOKBACK_WINDOW_ROW_ID = 'ruleV2FormLookbackWindowField';
 
+const LOOKBACK_HELP_TEXT = i18n.translate('xpack.alertingV2.ruleForm.lookbackWindowHelpText', {
+  defaultMessage: 'How far back each run searches, using the time field.',
+});
+
 const LOOKBACK_LESS_THAN_INTERVAL_WARNING = i18n.translate(
   'xpack.alertingV2.ruleForm.schedule.lookbackLessThanIntervalWarning',
   {
@@ -60,7 +64,15 @@ export const LookbackWindowField = () => {
             label={i18n.translate('xpack.alertingV2.ruleForm.lookbackWindowLabel', {
               defaultMessage: 'Lookback Window',
             })}
-            helpText={showIntervalWarning ? LOOKBACK_LESS_THAN_INTERVAL_WARNING : undefined}
+            helpText={
+              showIntervalWarning ? (
+                <>
+                  {LOOKBACK_HELP_TEXT} {LOOKBACK_LESS_THAN_INTERVAL_WARNING}
+                </>
+              ) : (
+                LOOKBACK_HELP_TEXT
+              )
+            }
             isInvalid={!!error}
             fullWidth
           >

@@ -384,6 +384,7 @@ describe('shell shared fields', () => {
 
     expect(screen.getByTestId('composeDiscoverKindSelect')).toBeInTheDocument();
     expect(screen.getByText('Alert conditions')).toBeInTheDocument();
+    expect(screen.getByText('Recovery conditions')).toBeInTheDocument();
     expect(screen.getByTestId('alertDelayFormRow')).toBeInTheDocument();
     expect(screen.getByTestId('composeDiscoverRecoveryType')).toBeInTheDocument();
     expect(screen.queryByText('Rule execution')).not.toBeInTheDocument();
@@ -397,6 +398,7 @@ describe('shell shared fields', () => {
 
     expect(screen.getByTestId('composeDiscoverKindSelect')).toBeInTheDocument();
     expect(screen.queryByText('Alert conditions')).not.toBeInTheDocument();
+    expect(screen.queryByText('Recovery conditions')).not.toBeInTheDocument();
     expect(screen.queryByTestId('alertDelayFormRow')).not.toBeInTheDocument();
     expect(screen.queryByTestId('composeDiscoverRecoveryType')).not.toBeInTheDocument();
   });

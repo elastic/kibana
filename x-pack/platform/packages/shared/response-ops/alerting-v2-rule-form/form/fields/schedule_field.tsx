@@ -13,7 +13,7 @@ import {
   validateMinDuration,
 } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiIconTip } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
 import { RuleSchedule } from './rule_schedule';
@@ -58,22 +58,9 @@ export const ScheduleField = () => {
             defaultMessage: 'Schedule',
           })}
           fullWidth
-          helpText={
-            <>
-              {i18n.translate('xpack.alertingV2.ruleForm.scheduleHelpText', {
-                defaultMessage: 'Set the frequency to check the alert conditions',
-              })}
-              &nbsp;
-              <EuiIconTip
-                position="right"
-                type="question"
-                content={i18n.translate('xpack.alertingV2.ruleForm.scheduleTooltip', {
-                  defaultMessage:
-                    'The frequency of how often the rule runs. This check can be delayed based on the Kibana polling frequency.',
-                })}
-              />
-            </>
-          }
+          helpText={i18n.translate('xpack.alertingV2.ruleForm.scheduleHelpText', {
+            defaultMessage: 'How often the rule runs.',
+          })}
           isInvalid={!!error}
         >
           <RuleSchedule

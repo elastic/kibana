@@ -5,14 +5,29 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useFormContext, useFormState } from 'react-hook-form';
 import { Parser, isColumn } from '@elastic/esql';
 import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getEsqlColumns } from '@kbn/esql-utils';
-import { EuiComboBox, EuiFormRow, EuiSelect, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { css } from '@emotion/react';
+import {
+  EuiButtonIcon,
+  EuiCode,
+  EuiCodeBlock,
+  EuiComboBox,
+  EuiFormRow,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSelect,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { getRuleProjectRouting } from '../../../utils/get_rule_project_routing';
 import type { ComposeDiscoverAction, ComposeDiscoverState } from '../types';
 import type { FormValues } from '../../../form/types';
@@ -20,6 +35,55 @@ import { EsqlQuerySummarySection, getEsqlSummaryState } from './esql_query_summa
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
 import { useComposeDiscoverTimeField } from '../use_compose_discover_time_field';
 import { getTimeFieldResolutionQuery } from '../get_time_field_resolution_query';
+
+const LabelWithInfoPopover = ({
+  label,
+  title,
+  body,
+  maxWidth = 280,
+  'data-test-subj': dataTestSubj,
+}: {
+  label: React.ReactNode;
+  title: string;
+  body: React.ReactNode;
+  maxWidth?: number;
+  'data-test-subj'?: string;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
+
+  return (
+    <>
+      {label}{' '}
+      <EuiPopover
+        isOpen={isOpen}
+        closePopover={() => setIsOpen(false)}
+        anchorPosition="upCenter"
+        panelPaddingSize="m"
+        aria-labelledby={popoverTitleId}
+        button={
+          <EuiToolTip content={title} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="info"
+              color="text"
+              size="xs"
+              aria-label={title}
+              onClick={() => setIsOpen((open) => !open)}
+              data-test-subj={dataTestSubj}
+            />
+          </EuiToolTip>
+        }
+      >
+        <EuiPopoverTitle id={popoverTitleId} paddingSize="m">
+          {title}
+        </EuiPopoverTitle>
+        <EuiText size="s" css={css({ maxWidth })}>
+          {body}
+        </EuiText>
+      </EuiPopover>
+    </>
+  );
+};
 
 interface AlertConditionStepProps {
   state: ComposeDiscoverState;
@@ -127,10 +191,73 @@ export function AlertConditionStep({
     <>
       <EuiTitle size="xs">
         <h3>
-          <FormattedMessage
-            id="xpack.alertingV2.composeDiscover.alertCondition.esqlQueryTitle"
-            defaultMessage="ES|QL query"
-          />
+          {isAlert ? (
+            <LabelWithInfoPopover
+              label={i18n.translate(
+                'xpack.alertingV2.composeDiscover.alertCondition.esqlQueryTitle',
+                { defaultMessage: 'ES|QL query' }
+              )}
+              title={i18n.translate(
+                'xpack.alertingV2.composeDiscover.alertCondition.esqlQueryHelpTitle',
+                { defaultMessage: 'ES|QL query' }
+              )}
+              maxWidth={320}
+              body={
+                <>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.alertingV2.composeDiscover.alertCondition.esqlQueryHelpIntro"
+                      defaultMessage="The query has two parts. The sandbox can split one pipeline into them automatically."
+                    />
+                  </p>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.alertingV2.composeDiscover.alertCondition.esqlQueryHelpBaseLabel"
+                      defaultMessage="{label} selects the data to evaluate:"
+                      values={{
+                        label: (
+                          <strong>
+                            {i18n.translate(
+                              'xpack.alertingV2.composeDiscover.alertCondition.esqlQueryHelpBaseTerm',
+                              { defaultMessage: 'Base query' }
+                            )}
+                          </strong>
+                        ),
+                      }}
+                    />
+                  </p>
+                  <EuiCodeBlock language="esql" fontSize="s" paddingSize="s">
+                    {`FROM logs-*\n| STATS errors = COUNT(*) BY host.name`}
+                  </EuiCodeBlock>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.alertingV2.composeDiscover.alertCondition.esqlQueryHelpAlertLabel"
+                      defaultMessage="{label} filters which of those rows are a breach:"
+                      values={{
+                        label: (
+                          <strong>
+                            {i18n.translate(
+                              'xpack.alertingV2.composeDiscover.alertCondition.esqlQueryHelpAlertTerm',
+                              { defaultMessage: 'Alert condition' }
+                            )}
+                          </strong>
+                        ),
+                      }}
+                    />
+                  </p>
+                  <EuiCodeBlock language="esql" fontSize="s" paddingSize="s">
+                    {'| WHERE errors > 10'}
+                  </EuiCodeBlock>
+                </>
+              }
+              data-test-subj="composeDiscoverEsqlQueryHelp"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.alertingV2.composeDiscover.alertCondition.esqlQueryTitle"
+              defaultMessage="ES|QL query"
+            />
+          )}
         </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
@@ -162,6 +289,12 @@ export function AlertConditionStep({
         label={i18n.translate('xpack.alertingV2.composeDiscover.alertCondition.timeFieldLabel', {
           defaultMessage: 'Time field',
         })}
+        helpText={i18n.translate(
+          'xpack.alertingV2.composeDiscover.alertCondition.timeFieldHelpText',
+          {
+            defaultMessage: 'The timestamp used for the lookback window. Defaults to @timestamp.',
+          }
+        )}
         fullWidth
         isInvalid={timeFieldInvalid}
         error={
@@ -189,9 +322,70 @@ export function AlertConditionStep({
       </EuiFormRow>
       <EuiSpacer size="m" />
       <EuiFormRow
-        label={i18n.translate('xpack.alertingV2.composeDiscover.alertCondition.groupFieldsLabel', {
-          defaultMessage: 'Group fields',
-        })}
+        label={
+          <LabelWithInfoPopover
+            label={i18n.translate(
+              'xpack.alertingV2.composeDiscover.alertCondition.groupFieldsLabel',
+              { defaultMessage: 'Group fields' }
+            )}
+            title={i18n.translate(
+              'xpack.alertingV2.composeDiscover.alertCondition.groupFieldsHelpTitle',
+              { defaultMessage: 'Group fields' }
+            )}
+            body={
+              isAlert ? (
+                <>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.alertingV2.composeDiscover.alertCondition.groupFieldsHelpBodyAlertIntro"
+                      defaultMessage="Track multiple subjects independently. Each unique combination of these fields gets its own alert with a separate lifecycle. One group can stay active while another recovers."
+                    />
+                  </p>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.alertingV2.composeDiscover.alertCondition.groupFieldsHelpBodyAlertStatsBy"
+                      defaultMessage="Values should match the columns from your query's {statsBy} clause."
+                      values={{
+                        statsBy: <EuiCode>{'STATS … BY'}</EuiCode>,
+                      }}
+                    />
+                  </p>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.alertingV2.composeDiscover.alertCondition.groupFieldsHelpBodyAlertEmpty"
+                      defaultMessage="Leave empty to track everything as one combined alert."
+                    />
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.alertingV2.composeDiscover.alertCondition.groupFieldsHelpBodySignalIntro"
+                      defaultMessage="Record matches per subject. Each unique combination of these fields is tracked independently."
+                    />
+                  </p>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.alertingV2.composeDiscover.alertCondition.groupFieldsHelpBodySignalStatsBy"
+                      defaultMessage="Values should match the columns from your query's {statsBy} clause."
+                      values={{
+                        statsBy: <EuiCode>{'STATS … BY'}</EuiCode>,
+                      }}
+                    />
+                  </p>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.alertingV2.composeDiscover.alertCondition.groupFieldsHelpBodySignalEmpty"
+                      defaultMessage="Leave empty to record everything as one combined set of events."
+                    />
+                  </p>
+                </>
+              )
+            }
+            data-test-subj="composeDiscoverGroupFieldsHelp"
+          />
+        }
         fullWidth
       >
         <EuiComboBox

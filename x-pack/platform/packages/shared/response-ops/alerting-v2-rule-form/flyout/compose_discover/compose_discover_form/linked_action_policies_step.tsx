@@ -45,7 +45,7 @@ const actionPoliciesDescription = i18n.translate(
   'xpack.alertingV2.alertingV2RuleForm.linkedActionPolicies.description',
   {
     defaultMessage:
-      'Routing tags determine which action policies apply. Catch-all action policies match all alerts.',
+      'Policies apply when they share a routing tag with this rule. Catch-all policies match all alerts.',
   }
 );
 
