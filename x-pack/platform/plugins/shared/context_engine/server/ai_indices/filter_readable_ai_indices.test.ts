@@ -70,6 +70,124 @@ describe('probeAiIndices', () => {
       { id: 'degraded', failure: { reason: '1 shard(s) failed', privilege: false } },
     ]);
   });
+
+  it('marks not-yet-created indices as missing and existing readable ones as not', async () => {
+    msearch.mockResolvedValue({
+      responses: [
+        ok(),
+        failed(404, 'index_not_found_exception', 'no such index [ai-index-idx-missing]'),
+      ],
+    });
+
+    const result = await probeAiIndices({
+      ...params,
+      aiIndices: ['readable', 'missing'].map((id) => aiIndex(id)),
+    });
+
+    expect(
+      result.map(({ aiIndex: { id }, failure, missing }) => ({ id, failure, missing }))
+    ).toEqual([
+      { id: 'readable', failure: undefined, missing: undefined },
+      { id: 'missing', failure: undefined, missing: true },
+    ]);
+    expect(result[0]).not.toHaveProperty('missing');
+    expect(logger.debug).not.toHaveBeenCalled();
+  });
+
+  it('marks per-item, wrapped shard-rejection, and shard-level 429 failures as throttled', async () => {
+    msearch.mockResolvedValue({
+      responses: [
+        failed(429, 'es_rejected_execution_exception', 'too many requests'),
+        {
+          status: 500,
+          error: {
+            type: 'search_phase_execution_exception',
+            reason: 'partial shards failure',
+            failed_shards: [
+              {
+                shard: 0,
+                reason: {
+                  type: 'search_phase_execution_exception',
+                  caused_by: {
+                    type: 'es_rejected_execution_exception',
+                    reason: 'rejected execution',
+                  },
+                },
+              },
+            ],
+          },
+        },
+        {
+          status: 503,
+          error: {
+            type: 'search_phase_execution_exception',
+            reason: 'all shards failed',
+            root_cause: [
+              { type: 'es_rejected_execution_exception', reason: 'queue capacity reached' },
+            ],
+          },
+        },
+        ok({
+          _shards: {
+            ...shards,
+            total: 2,
+            successful: 1,
+            failed: 1,
+            failures: [
+              {
+                status: 'TOO_MANY_REQUESTS',
+                reason: { type: 'es_rejected_execution_exception', reason: 'overloaded' },
+              },
+            ],
+          },
+        }),
+        failed(403, 'security_exception', 'unauthorized'),
+        {
+          status: 500,
+          error: {
+            type: 'search_phase_execution_exception',
+            reason: 'all shards failed',
+            failed_shards: [{ shard: 0, reason: { type: 'script_exception', reason: 'bad' } }],
+          },
+        },
+      ],
+    });
+
+    const result = await probeAiIndices({
+      ...params,
+      aiIndices: [
+        'rejected',
+        'wrapped-failed-shard',
+        'wrapped-root-cause',
+        'shard-throttled',
+        'forbidden',
+        'other-phase-error',
+      ].map((id) => aiIndex(id)),
+    });
+
+    expect(result.map(({ aiIndex: { id }, failure }) => ({ id, failure }))).toEqual([
+      {
+        id: 'rejected',
+        failure: { reason: 'too many requests', privilege: false, throttled: true },
+      },
+      {
+        id: 'wrapped-failed-shard',
+        failure: { reason: 'partial shards failure', privilege: false, throttled: true },
+      },
+      {
+        id: 'wrapped-root-cause',
+        failure: { reason: 'all shards failed', privilege: false, throttled: true },
+      },
+      {
+        id: 'shard-throttled',
+        failure: { reason: '1 shard(s) failed', privilege: false, throttled: true },
+      },
+      { id: 'forbidden', failure: { reason: 'unauthorized', privilege: true } },
+      { id: 'other-phase-error', failure: { reason: 'all shards failed', privilege: false } },
+    ]);
+    expect(result[4].failure).not.toHaveProperty('throttled');
+    expect(result[5].failure).not.toHaveProperty('throttled');
+  });
 });
 
 describe('filterReadableAiIndices', () => {

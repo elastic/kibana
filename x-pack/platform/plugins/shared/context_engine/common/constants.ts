@@ -41,6 +41,7 @@ export const KI_HISTOGRAM_DAYS = 30;
 export const SESSION_EVENTS_SAVE_PATH = `${PUBLIC_API_PATH}/memory/_save_event`;
 export const SESSION_MEMORY_FORGET_PATH = `${PUBLIC_API_PATH}/memory/_forget`;
 export const SESSION_MEMORY_REMEMBER_PATH = `${PUBLIC_API_PATH}/memory/_remember`;
+export const RECALL_PATH = `${PUBLIC_API_PATH}/_recall`;
 
 /** Shared bounds for session memory and session events HTTP routes. */
 export const MAX_MEMORY_ID_LENGTH = 256;
@@ -162,6 +163,15 @@ export const MAX_AI_INDEX_DESCRIBE_FIELDS = 500;
 export const MAX_AI_INDEX_DESCRIBE_METADATA_BYTES = 20 * 1024 * 1024;
 export const MAX_AI_INDEX_DESCRIBE_TYPE_COUNTS = 20;
 export const MAX_AI_INDEX_DESCRIBE_TAG_COUNTS = 20;
+
+export const RECALL_AI_INDEX_PREFIX = 'ai_index:';
+export const MAX_RECALL_QUERY_LENGTH = 4096;
+export const MAX_RECALL_SESSION_IDS = 100;
+export const MAX_RECALL_INCLUDE_ITEMS = MAX_MEMORY_AI_INDEX_IDS + 2;
+export const MAX_RECALL_INCLUDE_ENTRY_LENGTH =
+  RECALL_AI_INDEX_PREFIX.length + MAX_AI_INDEX_ID_LENGTH;
+export const MIN_RECALL_TOKEN_BUDGET = 1000;
+export const MAX_RECALL_TOKEN_BUDGET = 25000;
 
 export const MAX_FEEDBACK_ANALYSIS_INTERVAL_LENGTH = 16;
 export const MAX_FEEDBACK_ANALYSIS_TIME_RANGE_FROM_LENGTH = 64;

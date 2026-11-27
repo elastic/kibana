@@ -30,11 +30,15 @@ export interface QueryAiIndicesParams extends QueryAiIndicesRequest {
   aiIndexDests?: AiIndexDest[];
 }
 
+export interface ExecuteAiIndexQueryParams extends QueryAiIndicesParams {
+  allowPartialResults?: boolean;
+}
+
 /**
- * Runs caller-supplied ES|QL with server-owned lifecycle filters, space and user filters, and
- * row cap. `allow_partial_results` may silently drop failed shards.
+ * Runs server-constructed ES|QL with server-owned lifecycle filters, space and user filters, and
+ * row cap without enforcing public `_query` request-size bounds. Callers must validate inputs.
  */
-export const queryAiIndices = async ({
+export const executeAiIndexQuery = async ({
   esClient,
   spaceId,
   query,
@@ -42,12 +46,8 @@ export const queryAiIndices = async ({
   limit,
   user_id: userId,
   aiIndexDests = [],
-}: QueryAiIndicesParams): Promise<QueryAiIndicesResponse> => {
-  const validationError = validateQueryAiIndicesRequest({ query, params, limit, user_id: userId });
-  if (validationError) {
-    throw new InvalidAiIndexQueryError(validationError);
-  }
-
+  allowPartialResults = true,
+}: ExecuteAiIndexQueryParams): Promise<QueryAiIndicesResponse> => {
   const namedParams: EsqlNamedValue[] = Object.entries(params ?? {}).map(([name, value]) => ({
     [name]: value,
   }));
@@ -61,7 +61,7 @@ export const queryAiIndices = async ({
         ),
         filter: buildAiIndexReadFilter({ spaceId, userId }),
         drop_null_columns: true,
-        allow_partial_results: true,
+        allow_partial_results: allowPartialResults,
         ...(namedParams.length > 0 ? { params: namedParams } : {}),
       },
       { maxResponseSize: MAX_AI_INDEX_QUERY_RESPONSE_BYTES }
@@ -73,4 +73,19 @@ export const queryAiIndices = async ({
     }
     throw error;
   }
+};
+
+/**
+ * Runs caller-supplied ES|QL with server-owned lifecycle filters, space and user filters, and
+ * row cap. `allow_partial_results` may silently drop failed shards.
+ */
+export const queryAiIndices = async (
+  request: QueryAiIndicesParams
+): Promise<QueryAiIndicesResponse> => {
+  const { query, params, limit, user_id: userId } = request;
+  const validationError = validateQueryAiIndicesRequest({ query, params, limit, user_id: userId });
+  if (validationError) {
+    throw new InvalidAiIndexQueryError(validationError);
+  }
+  return executeAiIndexQuery(request);
 };

@@ -19,7 +19,10 @@ import { describeAiIndex } from './describe';
 import { AiIndexNotReadableError } from './errors';
 import { filterReadableAiIndices, probeAiIndices } from './filter_readable_ai_indices';
 import { queryAiIndices } from './query';
+import { searchAiIndices, type AiIndexSearchResult, type SearchAiIndicesRequest } from './search';
 import type { AiIndexService } from './service';
+
+export type { AiIndexSearchResult, SearchAiIndicesRequest } from './search';
 
 /** Caller-scoped AI-index reads. One instance per request; shared by HTTP routes and agent tools. */
 export interface AiIndexDataReadServiceApi {
@@ -32,6 +35,8 @@ export interface AiIndexDataReadServiceApi {
    * failed. `ids` limits which entries are checked.
    */
   list(ids?: string[]): Promise<AiIndexItem[]>;
+  /** Hybrid search over the readable AI Indices in this space, scoped to `userId`. */
+  search(request: SearchAiIndicesRequest): Promise<AiIndexSearchResult[]>;
 }
 
 export class AiIndexDataReadService implements AiIndexDataReadServiceApi {
@@ -106,6 +111,24 @@ export class AiIndexDataReadService implements AiIndexDataReadServiceApi {
       return readable;
     } catch (error) {
       auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.LIST, error }));
+      throw error;
+    }
+  }
+
+  async search(request: SearchAiIndicesRequest): Promise<AiIndexSearchResult[]> {
+    const { esClient, spaceId, auditLogger, aiIndexService, logger } = this.deps;
+    try {
+      const results = await searchAiIndices({
+        esClient,
+        aiIndexService,
+        logger,
+        spaceId,
+        ...request,
+      });
+      auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.QUERY }));
+      return results;
+    } catch (error) {
+      auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.QUERY, error }));
       throw error;
     }
   }

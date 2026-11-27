@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { MsearchRequestItem, MsearchResponseItem } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  ErrorCause,
+  MsearchRequestItem,
+  MsearchResponseItem,
+  ShardFailure,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AiIndexItem } from '../../common/http_api/ai_indices';
 
@@ -18,7 +23,8 @@ interface ProbeAiIndicesParams {
 export interface ProbedAiIndex {
   aiIndex: AiIndexItem;
   /** Absent when readable. `privilege` is true for a refusal, false for unavailability. */
-  failure?: { reason: string; privilege: boolean };
+  failure?: { reason: string; privilege: boolean; throttled?: boolean };
+  missing?: boolean;
 }
 
 /** Strict index options on purpose: `ignore_unavailable` silently drops unreadable indices. */
@@ -49,6 +55,33 @@ const failureReason = (item: MsearchResponseItem): string | undefined => {
 const isPrivilegeFailure = (item: MsearchResponseItem): boolean =>
   'error' in item && item.status === 403 && item.error.type === 'security_exception';
 
+const isThrottledShardFailure = ({ status, reason }: ShardFailure): boolean =>
+  status === 'TOO_MANY_REQUESTS' || hasThrottledCause(reason);
+
+const hasThrottledCause = (cause: ErrorCause | undefined): boolean => {
+  if (!cause) {
+    return false;
+  }
+  if (cause.type === 'es_rejected_execution_exception') {
+    return true;
+  }
+  if (hasThrottledCause(cause.caused_by)) {
+    return true;
+  }
+  if (cause.root_cause?.some(hasThrottledCause) || cause.suppressed?.some(hasThrottledCause)) {
+    return true;
+  }
+  const failedShards: ShardFailure[] | undefined = Array.isArray(cause.failed_shards)
+    ? cause.failed_shards
+    : undefined;
+  return failedShards?.some(isThrottledShardFailure) ?? false;
+};
+
+const isThrottledFailure = (item: MsearchResponseItem): boolean =>
+  'error' in item
+    ? item.status === 429 || hasThrottledCause(item.error)
+    : item._shards.failures?.some(isThrottledShardFailure) ?? false;
+
 /**
  * Probes whether the caller can read each AI Index's backing index: one `msearch` as the caller,
  * one probe per entry. A backing index that does not exist yet is readable: the entry was just
@@ -71,14 +104,21 @@ export const probeAiIndices = async ({
   return aiIndices.map((aiIndex, index) => {
     const response = responses[index];
     if (isMissingIndex(aiIndex.dest.value, response)) {
-      return { aiIndex };
+      return { aiIndex, missing: true };
     }
     const reason = failureReason(response);
     if (reason === undefined) {
       return { aiIndex };
     }
     logger.debug(`AI index '${aiIndex.id}' is not readable: ${reason}`);
-    return { aiIndex, failure: { reason, privilege: isPrivilegeFailure(response) } };
+    return {
+      aiIndex,
+      failure: {
+        reason,
+        privilege: isPrivilegeFailure(response),
+        ...(isThrottledFailure(response) ? { throttled: true } : {}),
+      },
+    };
   });
 };
 
