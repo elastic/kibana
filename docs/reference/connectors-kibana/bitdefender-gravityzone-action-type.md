@@ -27,7 +27,7 @@ You can create connectors in **{{stack-manage-app}}** → **{{connectors-ui}}**.
 6. In the **Control Center API** section of the same page, copy the **Access URL**.
 
 :::{note}
-The connection test always calls a **Network** API endpoint, so the **Network** API area must be enabled on your key even if none of the actions you plan to run require it. A key with only **Policies** enabled, for example, will pass `listPolicies` but fail the connection test.
+The connection test always calls a **Network** API endpoint. If you use **Save & test**, the **Network** API area must be enabled on the key or the test will fail. If you only need actions in another area (for example `listPolicies`), you can keep the key scoped to **Policies** only and use **Save** instead of **Save & test** to skip the test.
 :::
 
 ### Connector configuration [bitdefender-gravityzone-connector-configuration]
