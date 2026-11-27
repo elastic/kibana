@@ -222,7 +222,10 @@ const datatableConfigRowsOptionsNoESQLSchema = lazySchema(() =>
     /**
      * Color configuration
      */
-    color: z.union([colorMappingSchema, autoColorSchema]).default(AUTO_COLOR).optional(),
+    color: z.union([colorMappingSchema, autoColorSchema]).optional().meta({
+      description:
+        'Color configuration for datatable rows. Defaults to `auto`. Ignored without `apply_color_to`.',
+    }),
     /**
      * Whether to enable the one click filter
      */
@@ -245,14 +248,10 @@ const datatableConfigRowsOptionsESQLSchema = lazySchema(() =>
     /**
      * Color configuration
      */
-    color: z
-      .union([colorByValueSchema, colorMappingSchema, autoColorSchema])
-      .default(AUTO_COLOR)
-      .optional()
-      .meta({
-        description:
-          'Color configuration for ESQL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',
-      }),
+    color: z.union([colorByValueSchema, colorMappingSchema, autoColorSchema]).optional().meta({
+      description:
+        'Color configuration for ES|QL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.',
+    }),
   })
 );
 
@@ -261,14 +260,10 @@ const datatableConfigMetricsOptionsSchema = lazySchema(() =>
     /**
      * Color configuration
      */
-    color: z
-      .union([colorByValueSchema, colorMappingSchema, autoColorSchema])
-      .default(AUTO_COLOR)
-      .optional()
-      .meta({
-        description:
-          'Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',
-      }),
+    color: z.union([colorByValueSchema, colorMappingSchema, autoColorSchema]).optional().meta({
+      description:
+        'Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.',
+    }),
     /**
      * Alignment of the columns
      */

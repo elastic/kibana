@@ -16,6 +16,7 @@ import { pick } from 'lodash';
 import React, { useEffect, useMemo, useState, type FC } from 'react';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs';
+import type { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import type { PublishesFilters } from '@kbn/presentation-publishing';
 import {
   ChangePointDetectionControlsContextProvider,
@@ -65,6 +66,8 @@ export interface ChangePointDetectionProps {
   onRenderComplete: () => void;
   onError: (error: Error) => void;
   filtersApi?: PublishesFilters;
+  /** Optional manager used by dashboard panels to cancel in-flight and pending requests */
+  requestCancellationManager?: RequestCancellationManager;
   parentApi: unknown;
 }
 
@@ -87,6 +90,7 @@ const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
   embeddingOrigin,
   lastReloadRequestTime,
   filtersApi,
+  requestCancellationManager,
   parentApi,
 }) => {
   const deps = useMemo(() => {
@@ -165,6 +169,7 @@ const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
                     onLoading={onLoading}
                     onRenderComplete={onRenderComplete}
                     onError={onError}
+                    requestCancellationManager={requestCancellationManager}
                     parentApi={parentApi}
                   />
                 </ChangePointDetectionControlsContextProvider>

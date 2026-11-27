@@ -27,7 +27,7 @@ import { SessionsTab } from '../sessions/sessions_tab';
 import { OtelOverview } from './otel_overview/otel_overview';
 
 /** Tabs of the Application view, in display order. */
-const APPLICATION_TAB_IDS = ['overview', 'errors', 'network', 'sessions'] as const;
+const APPLICATION_TAB_IDS = ['overview', 'sessions', 'errors', 'network'] as const;
 
 export type ApplicationTabId = (typeof APPLICATION_TAB_IDS)[number];
 

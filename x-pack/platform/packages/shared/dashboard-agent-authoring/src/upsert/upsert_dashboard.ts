@@ -16,7 +16,7 @@ import type {
   ResolveControlFieldCapabilities,
   ResolveEsqlControlColumnType,
 } from '../types';
-import type { PanelAuthoringNote } from '../resolve_panel';
+import type { PanelAuthoringNote, PanelHeightHint } from '../resolve_panel';
 import type { DashboardFailure } from '../utils';
 import { discardInvalidChanges, type DashboardValidator } from '../validate_dashboard';
 import { applyPlan } from './apply';
@@ -40,6 +40,8 @@ export interface DashboardUpsertResult extends ChangedIds {
   dashboardData: DashboardAttachmentData;
   failures: DashboardFailure[];
   panelAuthoringNotes: PanelAuthoringNote[];
+  /** The height that panels resolved in this call need, for the layout step. */
+  panelHeightHints: PanelHeightHint[];
 }
 
 /**
@@ -147,6 +149,11 @@ export const executeDashboardUpsert = async ({
     panelAuthoringNotes: panels.flatMap(({ id, authoringNote }): PanelAuthoringNote[] =>
       authoringNote && !validationResult.discardedPanelIds.has(id)
         ? [{ panelId: id, authoringNote }]
+        : []
+    ),
+    panelHeightHints: panels.flatMap(({ id, heightHint }): PanelHeightHint[] =>
+      heightHint !== undefined && !validationResult.discardedPanelIds.has(id)
+        ? [{ panelId: id, heightPx: heightHint }]
         : []
     ),
   };

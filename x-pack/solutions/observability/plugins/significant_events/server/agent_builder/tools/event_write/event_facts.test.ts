@@ -173,13 +173,33 @@ describe('computeEventFacts', () => {
     }
   });
 
-  it('floors an inactive event to low', () => {
+  it('rates a new inactive event on its evidence', () => {
     expect(
       facts({
         signals: [makeSignal()],
         candidateOverrides: { status: 'inactive', severity: 'high' },
       }).severity
-    ).toBe('low');
+    ).toBe('high');
+  });
+
+  it('preserves the stored severity when closing an existing event', () => {
+    expect(
+      facts({
+        signals: [makeSignal({ verdict: 'refutes' })],
+        candidateOverrides: { status: 'inactive', severity: 'low' },
+        stored: makeStored([makeSignal()], { severity: 'critical' }),
+      }).severity
+    ).toBe('critical');
+  });
+
+  it('rates a reopened episode from its new evidence', () => {
+    expect(
+      facts({
+        signals: [makeSignal()],
+        candidateOverrides: { severity: 'medium' },
+        stored: makeStored([makeSignal()], { status: 'inactive', severity: 'high' }),
+      }).severity
+    ).toBe('medium');
   });
 
   it('judges the merged member-union of stored and submitted signals', () => {
@@ -252,7 +272,12 @@ describe('computeEventFacts', () => {
   it('refuses signals without a proposed severity rather than guessing one', () => {
     expect(() =>
       facts({ signals: [makeSignal()], candidateOverrides: { severity: undefined } })
-    ).toThrow('needs a proposed severity');
+    ).toThrow(
+      expect.objectContaining({
+        code: 'validation_error',
+        message: expect.stringContaining('needs a proposed severity'),
+      })
+    );
   });
 
   it('is unchanged however many topology entities the event lists', () => {

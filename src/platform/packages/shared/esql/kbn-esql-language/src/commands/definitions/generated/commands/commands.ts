@@ -70,6 +70,10 @@ export const commandsMetadata: Record<string, ElasticsearchCommandDefinition> = 
     type: 'command',
     name: 'inline_stats',
   },
+  into: {
+    type: 'command',
+    name: 'into',
+  },
   ip_location: {
     type: 'command',
     name: 'ip_location',
@@ -786,6 +790,7 @@ export enum EsqlCommandNames {
   GROK = 'grok',
   HIGHLIGHT = 'highlight',
   INLINE_STATS = 'inline_stats',
+  INTO = 'into',
   IP_LOCATION = 'ip_location',
   KEEP = 'keep',
   LIMIT = 'limit',

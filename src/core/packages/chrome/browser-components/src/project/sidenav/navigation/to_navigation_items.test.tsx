@@ -16,7 +16,7 @@ import type {
 } from '@kbn/core-chrome-browser';
 
 // use require to bypass unnecessary TypeScript checks for JSON imports
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const navigationTree = require('./mocks/mock_security_tree.json') as NavigationTreeDefinitionUI;
 
 const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});

@@ -14,6 +14,7 @@ import {
   AI_INDEX_KI_RESTORE_PATH,
 } from '../../../common/constants';
 import type { KiLifecycleStatus } from '../../../common/step_types/ki';
+import type { KiStatus } from '../../../common/ki_lifecycle_status';
 import type {
   DeleteKiResponse,
   GetKiResponse,
@@ -28,13 +29,13 @@ interface ListKisArgs {
   size?: number;
   type?: string;
   query?: string;
-  lifecycleStatus?: KiLifecycleStatus[];
+  status?: KiStatus[];
   signal?: AbortSignal;
 }
 
 export const listKis = (
   http: HttpStart,
-  { aiIndexId, size, type, query, lifecycleStatus, signal }: ListKisArgs
+  { aiIndexId, size, type, query, status, signal }: ListKisArgs
 ): Promise<ListKisResponse> =>
   http.get<ListKisResponse>(buildPath(AI_INDEX_KI_LIST_PATH, { aiIndexId }), {
     version: AI_INDEX_INTERNAL_API_VERSION,
@@ -42,7 +43,7 @@ export const listKis = (
       ...(size !== undefined ? { size } : {}),
       ...(type !== undefined ? { type } : {}),
       ...(query !== undefined ? { query } : {}),
-      ...(lifecycleStatus !== undefined ? { lifecycle_status: lifecycleStatus } : {}),
+      ...(status !== undefined ? { status } : {}),
     },
     ...(signal ? { signal } : {}),
   });

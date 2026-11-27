@@ -5,42 +5,43 @@
  * 2.0.
  */
 
-import { withSpan } from '@kbn/apm-utils';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { bucketKeys } from '../../../lib/helpers/aggregations';
 import { withNotDefined } from '../../../lib/helpers/environment';
+import { toTimeSeries } from '../../../lib/helpers/time_series';
 import { SESSIONS_SEARCH_SPAN_NAME } from '../constants';
 import type { SourceApplications } from '../types';
-import type { GetOtelApplicationsParams } from './get_otel_applications';
+import type { SearchParams } from './search_requests';
 import { sessionsSearch } from './sessions_search_requests';
 import type { SessionsAggregations } from './sessions_search_responses';
-import {
-  toSessionsApplication,
-  toSessionsTimeSeries,
-  toStartedSessionsTimeSeries,
-} from './sessions_to_application';
+import { toSessionsApplication, toSessionsTimeSeries } from './sessions_to_application';
 
 /**
  * EDOT Browser applications and their metrics from the sessions index, in one search. It reads what
  * the current user can read there, so it fails for a user without access to the index.
  */
-export const getSessionsApplications = ({
-  esClient,
-  signal,
+export const getSessionsApplications = async ({
+  tracedEsClient,
   ...searchParams
-}: GetOtelApplicationsParams): Promise<SourceApplications> =>
-  withSpan(SESSIONS_SEARCH_SPAN_NAME, async () => {
-    const response = await esClient.search(sessionsSearch(searchParams), { signal });
-    const aggregations = response.aggregations as unknown as SessionsAggregations | undefined;
+}: SearchParams & {
+  /** Searches as the current user and cancels with the HTTP request. */
+  tracedEsClient: TracedElasticsearchClient;
+}): Promise<SourceApplications> => {
+  const response = await tracedEsClient.search(
+    SESSIONS_SEARCH_SPAN_NAME,
+    sessionsSearch(searchParams)
+  );
+  const aggregations = response.aggregations as unknown as SessionsAggregations | undefined;
 
-    return {
-      applications: (aggregations?.inEnvironment.applications.buckets ?? []).map(
-        toSessionsApplication
-      ),
-      environments: withNotDefined(
-        bucketKeys(aggregations?.environments),
-        aggregations?.environmentNotDefined.doc_count ?? 0
-      ),
-      pageLoadsOverTime: toSessionsTimeSeries(aggregations?.inEnvironment),
-      sessionsOverTime: toStartedSessionsTimeSeries(aggregations?.inEnvironment),
-    };
-  });
+  return {
+    applications: (aggregations?.inEnvironment.applications.buckets ?? []).map(
+      toSessionsApplication
+    ),
+    environments: withNotDefined(
+      bucketKeys(aggregations?.environments),
+      aggregations?.environmentNotDefined.doc_count ?? 0
+    ),
+    pageLoadsOverTime: toSessionsTimeSeries(aggregations?.inEnvironment),
+    sessionsOverTime: toTimeSeries(aggregations?.inEnvironment.startedInRange.pageLoadsOverTime),
+  };
+};

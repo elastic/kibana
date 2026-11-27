@@ -102,6 +102,7 @@ const getIndexManagementCtx = (overrides: Partial<AppDependencies> = {}): AppDep
       enableFailureStoreRetentionDisabling: true,
       enableIndexMode: true,
       enableVectorCount: false,
+      showManagedDataStreamsByDefault: true,
       isServerless: false,
     },
     history: { push: jest.fn() } as unknown as AppDependencies['history'],

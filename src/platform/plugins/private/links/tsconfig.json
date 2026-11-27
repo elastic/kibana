@@ -46,7 +46,8 @@
     "@kbn/as-code-utils",
     "@kbn/as-code-shared-transforms",
     "@kbn/as-code-shared-telemetry",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/dashboard-constants"
   ],
   "exclude": ["target/**/*"]
 }

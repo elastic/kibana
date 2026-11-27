@@ -206,6 +206,27 @@ describe('renderInvestigationSlackMessage', () => {
     expect(json).not.toContain('Less likely');
   });
 
+  it('shows the result of an open hypothesis, not how it would be settled', () => {
+    const message = render({
+      investigation: completed({
+        hypotheses: [
+          {
+            candidate: 'Retry storm',
+            confidence: 0.4,
+            status: 'investigating',
+            reason:
+              '**Tested:** retry rate.\n**Result:** retries doubled at 14:05. Unresolved.\n**Settled by:** Refuted if retries stay flat after the rollback; confirmed if they fall.',
+          },
+        ],
+      }),
+    });
+    const details = detailsOf(message);
+
+    expect(details).toContain('retries doubled at 14:05. Unresolved.');
+    expect(details).not.toContain('Settled by');
+    expect(details).not.toContain('retries stay flat');
+  });
+
   it('keeps the affected entities when the impact text is long', () => {
     const summary = `Checkout failed. ${'Orders were rejected after the deploy. '.repeat(60)}`;
     const message = render({

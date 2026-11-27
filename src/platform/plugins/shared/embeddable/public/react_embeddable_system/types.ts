@@ -111,6 +111,11 @@ export interface EmbeddablePublicDefinition<
    * Provide layout contraints to customize resize behavior
    */
   layoutConstraints?: LayoutConstraints;
+
+  /**
+   * Determine whether an incoming embeddable state duplicates an existing embeddable state of the same type.
+   */
+  isDuplicate?: (incomingState: SerializedState, existingState: SerializedState) => boolean;
 }
 
 export type LayoutConstraints = {

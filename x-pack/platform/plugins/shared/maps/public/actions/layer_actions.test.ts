@@ -51,17 +51,17 @@ describe('layer_actions', () => {
     const notifyLicensedFeatureUsageMock = jest.fn();
 
     beforeEach(() => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       require('../licensed_features').notifyLicensedFeatureUsage = (feature: LICENSED_FEATURES) => {
         notifyLicensedFeatureUsageMock(feature);
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       require('../reducers/non_serializable_instances').getMapReady = () => {
         return true;
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       require('../selectors/map_selectors').createLayerInstance = () => {
         return {
           getLicensedFeatures() {
@@ -182,25 +182,25 @@ describe('layer_actions', () => {
     let originalSyncDataForLayerId: unknown;
 
     beforeEach(() => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       originalGetLayerById = require('../selectors/map_selectors').getLayerById;
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       originalSyncDataForLayerId = require('./data_request_actions').syncDataForLayerId;
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       require('./data_request_actions').syncDataForLayerId = syncDataForLayerIdMock;
     });
 
     afterEach(() => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       require('../selectors/map_selectors').getLayerById = originalGetLayerById;
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       require('./data_request_actions').syncDataForLayerId = originalSyncDataForLayerId;
       jest.resetAllMocks();
     });
 
     it('should dispatch SET_LAYER_VISIBILITY and trigger data sync when making a hidden layer visible', () => {
       const hiddenLayer = { getId: () => LAYER_ID, isVisible: () => false };
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       require('../selectors/map_selectors').getLayerById = () => hiddenLayer;
 
       const action = setLayerVisibility(LAYER_ID, true);
@@ -215,7 +215,7 @@ describe('layer_actions', () => {
 
     it('should not dispatch when layer visibility already matches the desired state', () => {
       const visibleLayer = { getId: () => LAYER_ID, isVisible: () => true };
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       require('../selectors/map_selectors').getLayerById = () => visibleLayer;
 
       const action = setLayerVisibility(LAYER_ID, true);

@@ -22,7 +22,7 @@ export const ALERTZERO_ACTION_ADD_RULE_EXCEPTION_WORKFLOW = {
   id: ALERTZERO_ACTION_ADD_RULE_EXCEPTION_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 3,
+  version: 4,
   get yaml() {
     return readManagedWorkflowYaml(__dirname, 'action_add_rule_exception.yaml');
   },

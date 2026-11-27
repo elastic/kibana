@@ -311,7 +311,6 @@ function generateScheduledWorkflow(
           ...(automation.execution.promptTemplate
             ? { message: `Instructions:\n${automation.execution.promptTemplate}` }
             : {}),
-          ...(schedule.scopeQuery ? { scope_query: schedule.scopeQuery } : {}),
           ...(automation.runtime.timeoutSeconds !== undefined
             ? { timeout_seconds: automation.runtime.timeoutSeconds }
             : {}),

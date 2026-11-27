@@ -155,11 +155,13 @@ const readVendorProduct = (value: unknown): string | undefined => {
  * Loads the hunt inputs for one report from `.kibana-threat-reports`, scoped to
  * the acting space. Returns null when the report is not visible there. IOC
  * kinds Tier 1 cannot map to an ECS field (for example `user`) are dropped.
- * Adjudicated-out IOCs (`reference`, `denied`, deferred) are also dropped from
- * `iocs` and reported on `excluded_iocs` when any remain. Every loaded field is
- * clamped to the same bounds the HTTP schemas enforce on caller-supplied input
- * (text length, IOC and technique counts and lengths), so a stored report
- * cannot bypass the Tier 1 query or Tier 2 input bounds.
+ * Adjudicated-out IOCs (`reference`, `denied`, deferred) and non-routable
+ * `ip` / `cidr` values (loopback, RFC1918, and the shared special-use set) are
+ * also dropped from `iocs` and reported on `excluded_iocs` when any remain.
+ * The value check covers legacy docs that lack a `reference` tier. Every loaded
+ * field is clamped to the same bounds the HTTP schemas enforce on
+ * caller-supplied input (text length, IOC and technique counts and lengths), so
+ * a stored report cannot bypass the Tier 1 query or Tier 2 input bounds.
  *
  * `esClient` must be the internal user: the reports index is plugin-owned and
  * hidden, and Kibana feature privileges grant no Elasticsearch access to it, so

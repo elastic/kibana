@@ -95,6 +95,7 @@ test.describe('Stack Management — ingest, security, and stack sections', () =>
                 'rollup_jobs',
                 'transform',
                 'remote_clusters',
+                'content_connectors',
               ],
             },
             { sectionId: 'kibana', sectionLinks: ['settings'] },

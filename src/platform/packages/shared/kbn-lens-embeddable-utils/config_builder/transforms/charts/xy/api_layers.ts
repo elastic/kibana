@@ -42,11 +42,10 @@ import type { LensApiStaticValueOperation } from '../../../schema/metric_ops';
 import { isEsqlTableTypeDataSource } from '../../../utils';
 import {
   AUTO_COLOR,
-  DEFAULT_CATEGORICAL_COLOR_MAPPING,
   fromColorMappingLensStateToAPI,
   fromStaticColorLensStateToAPI,
 } from '../../coloring';
-import { DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING, DEFAULT_REFERENCE_LINE_AXIS } from './defaults';
+import { DEFAULT_REFERENCE_LINE_AXIS, getDefaultBreakdownColorMapping } from './defaults';
 import { getValueApiColumn } from '../../columns/esql_column';
 import { toApiFilterLanguage } from '../../columns/filter';
 import {
@@ -88,10 +87,11 @@ function convertDataLayerToAPI(
   | Omit<DataLayerTypeESQL, 'type' | 'data_source'> {
   const yConfigMap = new Map(visualization.yConfig?.map((y) => [y.forAccessor, y]));
   const yAccessorModesMap = getYAccessorAxisModeMap(visualization, (accessor) => accessor);
-  const defaultColorMapping =
-    visualization.seriesType === 'line'
-      ? DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING
-      : DEFAULT_CATEGORICAL_COLOR_MAPPING;
+  const defaultColorMapping = getDefaultBreakdownColorMapping(visualization.seriesType);
+  // The runtime ignores the static Y color while the breakdown is active (not collapsed), and the
+  // breakdown color mapping while it is collapsed.
+  const hasActiveBreakdown =
+    (visualization.splitAccessors?.length ?? 0) > 0 && !visualization.collapseFn;
 
   if (isFormBasedLayer(layer)) {
     const x = visualization.xAccessor
@@ -128,7 +128,7 @@ function convertDataLayerToAPI(
           const onAxis = resolveAxisId(yAccessorModesMap.get(accessor) ?? 'left');
           return {
             ...apiOperation,
-            ...(breakdown_by
+            ...(hasActiveBreakdown
               ? {}
               : { color: fromStaticColorLensStateToAPI(yConfig?.color) ?? AUTO_COLOR }),
             axis: onAxis,
@@ -155,7 +155,7 @@ function convertDataLayerToAPI(
               ...breakdown_by,
               ...(visualization.collapseFn ? { collapse_by: visualization.collapseFn } : {}),
               ...(aggregate_first ? { aggregate_first: true } : {}),
-              color,
+              ...(hasActiveBreakdown ? { color } : {}),
             },
           }
         : {}),
@@ -173,7 +173,7 @@ function convertDataLayerToAPI(
     const axis = resolveAxisId(yAccessorModesMap.get(accessor) ?? 'left');
     return {
       ...getValueApiColumn(accessor, layer),
-      ...(breakdown_by ? {} : { color: fromStaticColorLensStateToAPI(yColor) ?? AUTO_COLOR }),
+      ...(hasActiveBreakdown ? {} : { color: fromStaticColorLensStateToAPI(yColor) ?? AUTO_COLOR }),
       axis,
     };
   });
@@ -189,7 +189,7 @@ function convertDataLayerToAPI(
       ? {
           breakdown_by: {
             ...breakdown_by,
-            color,
+            ...(hasActiveBreakdown ? { color } : {}),
             ...(visualization.collapseFn ? { collapse_by: visualization.collapseFn } : {}),
           },
         }

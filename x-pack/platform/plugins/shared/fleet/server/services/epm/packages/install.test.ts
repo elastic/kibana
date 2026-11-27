@@ -937,6 +937,28 @@ describe('install', () => {
         expect(installStateMachine._stateMachineInstallPackage).not.toHaveBeenCalled();
       });
 
+      it('should not install a package listed as FIPS incompatible even without flagged templates', async () => {
+        jest.mocked(Registry.getPackage).mockResolvedValue({
+          packageInfo: {
+            ...nonFipsPackageInfo,
+            name: 'elastic_connectors',
+            policy_templates: [{ name: 'github' }],
+          },
+          paths: [],
+        } as any);
+
+        const response = await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'elastic_connectors',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
+
+        expect(response.error).toBeInstanceOf(PackageFipsIncompatibleError);
+        expect(installStateMachine._stateMachineInstallPackage).not.toHaveBeenCalled();
+      });
+
       it('should install a non FIPS package when FIPS is enabled but using force flag', async () => {
         const response = await install(true);
 

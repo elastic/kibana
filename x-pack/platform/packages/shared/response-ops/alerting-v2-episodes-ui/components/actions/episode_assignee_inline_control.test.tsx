@@ -111,6 +111,16 @@ describe('EpisodeAssigneeInlineControl', () => {
       );
     });
 
+    it('uses block wrappers so a long assignee name can truncate inside its cell', () => {
+      renderControl({ assigneeUid: 'uid-existing' });
+
+      const button = screen.getByTestId('alertingV2EpisodeAssigneeChangeButton');
+      expect(screen.getByTestId('alertingV2EpisodeAssigneeInlinePopover')).toHaveStyle({
+        display: 'block',
+      });
+      expect(button.closest('.euiToolTipAnchor')).toHaveStyle({ display: 'block' });
+    });
+
     it('opens the picker when the assignee is clicked', async () => {
       renderControl({ assigneeUid: 'uid-existing' });
 

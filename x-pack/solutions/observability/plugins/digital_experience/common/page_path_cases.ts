@@ -6,8 +6,8 @@
  */
 
 /**
- * Page labels for raw URLs: `toPagePath` must label them like this, as the session timeline and
- * the journey of the sessions index have to agree on a page.
+ * Page labels for raw URLs. `toPagePath` labels the journey and entry/exit pages of the session
+ * summaries and the session timeline, so both agree with these cases.
  */
 export const PAGE_PATH_CASES: ReadonlyArray<readonly [raw: string | null, page: string | null]> = [
   ['https://shop.example/', '/'],

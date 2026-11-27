@@ -50,7 +50,7 @@ const NIGHTSHIFT_OPERATOR_ROLE: KibanaRole = {
 
 const CLASSIFY_STEP = 'classify_for_online_evals';
 const SCORE_STEP = 'score_reference_free';
-const REFERENCE_FREE_JUDGE_COUNT = 3;
+const REFERENCE_FREE_JUDGE_COUNT = 4;
 /**
  * Every test waits on at most two runs, each up to the poll timeout, so a slow run fails on the
  * poll's message with the runs it last saw rather than on the test timeout.

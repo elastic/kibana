@@ -16,7 +16,7 @@ import {
 import type { KiDocument } from '../../../../../../common/http_api/knowledge_indicators';
 import type { KiLifecycleStatus } from '../../../../../../common/step_types/ki';
 import { formatKiTypeLabel } from '../../../../utils/ki_display';
-import { KiLifecycleStatusBadge } from '../../shared/ki_lifecycle_status_badge';
+import { KiStatusBadge } from '../../shared/ki_status_badge';
 import { KiTypeDisplay } from '../../shared/ki_type_display';
 
 const customAppHeaderBadge = ({
@@ -64,11 +64,7 @@ export const getViewKiHeaderBadges = (
             color: KI_STATUS_BADGE_COLOR[kiStatus],
             dataTestSubj: 'contextViewKiStatusBadge',
             renderBadge: (dataTestSubj) => (
-              <KiLifecycleStatusBadge
-                lifecycleStatus={lifecycleStatus}
-                expiresAt={document.expires_at}
-                data-test-subj={dataTestSubj}
-              />
+              <KiStatusBadge status={kiStatus} data-test-subj={dataTestSubj} />
             ),
           }),
         ]

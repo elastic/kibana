@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings, Tooltip } from '@elastic/charts';
 import {
   EuiButtonGroup,
@@ -21,6 +20,7 @@ import { useElasticChartsTheme } from '@kbn/charts-theme';
 import type { TimeSeriesPoint } from '../../../../common/types/applications';
 import { ChartArea } from '../../../components/chart_area';
 import { useFormatters } from '../../../hooks/use_formatters';
+import { usePersistedChoice } from '../../../hooks/use_persisted_choice';
 import { PAGE_LOADS_LABEL, SESSIONS_LABEL, SESSIONS_UNAVAILABLE_LABEL } from '../../../labels';
 import type { TimeRangeSelect } from '../../../utils/brush_time_range';
 import { onBrushTimeRange } from '../../../utils/brush_time_range';
@@ -29,7 +29,9 @@ const CHART_HEIGHT = 140;
 
 const METRIC_STORAGE_KEY = 'xpack.digitalExperience.applications.chartMetric';
 
-type ChartMetric = 'pageLoads' | 'sessions';
+const CHART_METRICS = ['pageLoads', 'sessions'] as const;
+
+type ChartMetric = (typeof CHART_METRICS)[number];
 
 const METRIC_LABELS: Record<ChartMetric, string> = {
   pageLoads: PAGE_LOADS_LABEL,
@@ -48,16 +50,6 @@ const NO_DATA: Record<ChartMetric, string> = {
 const METRIC_LEGEND = i18n.translate('xpack.digitalExperience.pageLoadsChart.metricLegend', {
   defaultMessage: 'Chart metric',
 });
-
-const toChartMetric = (value: string | undefined): ChartMetric =>
-  value === 'sessions' ? 'sessions' : 'pageLoads';
-
-/** The metric the user last picked, kept across visits; page loads by default. */
-const useChartMetric = (): [ChartMetric, (metric: ChartMetric) => void] => {
-  const [saved, setSaved] = useLocalStorage<ChartMetric>(METRIC_STORAGE_KEY, 'pageLoads');
-  // Anything else in the storage, e.g. from an older version, falls back to page loads.
-  return [toChartMetric(saved), setSaved];
-};
 
 /**
  * Page loads, or the sessions that started, over the time range, where dragging over the bars
@@ -79,14 +71,19 @@ export function PageLoadsChart({
 }) {
   const baseTheme = useElasticChartsTheme();
   const { formatDate, timeZone } = useFormatters();
-  const [chosenMetric, setChosenMetric] = useChartMetric();
+  // The metric the user last picked, kept across visits; page loads by default.
+  const [chosenMetric, setChosenMetric] = usePersistedChoice(
+    METRIC_STORAGE_KEY,
+    CHART_METRICS,
+    'pageLoads'
+  );
 
-  // While the first answer is loading, the sessions are not known to be missing yet.
-  const sessionsUnavailable = !isLoading && sessions === null;
-  const metric: ChartMetric =
-    chosenMetric === 'sessions' && !sessionsUnavailable ? 'sessions' : 'pageLoads';
-  const points = metric === 'sessions' ? sessions ?? [] : pageLoads;
-  const label = METRIC_LABELS[metric];
+  // While loading, sessions may still arrive; after it, `null` means they can't be counted.
+  const canShowSessions = isLoading || sessions !== null;
+  const shownMetric: ChartMetric =
+    chosenMetric === 'sessions' && canShowSessions ? 'sessions' : 'pageLoads';
+  const points = shownMetric === 'sessions' ? sessions ?? [] : pageLoads;
+  const label = METRIC_LABELS[shownMetric];
   const hasData = points.some(({ count }) => count > 0);
 
   return (
@@ -112,13 +109,13 @@ export function PageLoadsChart({
               {
                 id: 'sessions',
                 label: SESSIONS_LABEL,
-                isDisabled: sessionsUnavailable,
-                toolTipContent: sessionsUnavailable ? SESSIONS_UNAVAILABLE_LABEL : undefined,
+                isDisabled: !canShowSessions,
+                toolTipContent: canShowSessions ? undefined : SESSIONS_UNAVAILABLE_LABEL,
                 'data-test-subj': 'digitalExperienceChartMetric-sessions',
               },
             ]}
-            idSelected={metric}
-            onChange={(id) => setChosenMetric(toChartMetric(id))}
+            idSelected={shownMetric}
+            onChange={setChosenMetric}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -127,7 +124,7 @@ export function PageLoadsChart({
         height={CHART_HEIGHT}
         isLoading={isLoading}
         hasData={hasData}
-        emptyMessage={NO_DATA[metric]}
+        emptyMessage={NO_DATA[shownMetric]}
       >
         <Chart size={{ height: CHART_HEIGHT }}>
           <Settings
@@ -140,7 +137,7 @@ export function PageLoadsChart({
           <Axis id="time" position={Position.Bottom} />
           <Axis id="count" position={Position.Left} gridLine={{ visible: true }} ticks={4} />
           <BarSeries
-            id={metric}
+            id={shownMetric}
             name={label}
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}

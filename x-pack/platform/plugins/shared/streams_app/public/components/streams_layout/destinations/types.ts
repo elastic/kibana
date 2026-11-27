@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { UnitDestinationSignal, UnitDestinationSignalTargets } from '@kbn/streams-schema';
+import type {
+  OtelDataStreamName,
+  OtelDataStreamNameError,
+  UnitDestinationSignal,
+  UnitDestinationSignalTargets,
+} from '@kbn/streams-schema';
 import type { DestinationNameValidationError } from './destination_helpers';
 /**
  * Destination storage choices shown in the create form.
@@ -23,19 +28,16 @@ export const REMOTE_ELASTICSEARCH_TYPE = 'remote_elasticsearch' as const;
 export type DestinationType = 'elasticsearch' | typeof REMOTE_ELASTICSEARCH_TYPE | 's3';
 
 export type DestinationSignal = UnitDestinationSignal;
-/** Signals whose indices are named `<signal>-<dataset>-<namespace>`. */
+/** Signals whose fixed indices are named `<signal>-<dataset>.otel-<namespace>`. */
 export type PrefixedDestinationSignal = Exclude<DestinationSignal, 'docs'>;
 /** How an Elasticsearch destination chooses its indices. */
 export type DestinationIndexMode = 'static' | 'auto';
 
-export type StaticIndexValidationError =
+export type FreeFormIndexValidationError =
   | 'template'
   | 'invalidName'
   | 'uppercase'
-  | 'invalidCharacter'
-  | 'signalPattern';
-
-export type FreeFormIndexValidationError = Exclude<StaticIndexValidationError, 'signalPattern'>;
+  | 'invalidCharacter';
 
 export type DocsWritePatternValidationError =
   | 'template'
@@ -43,6 +45,9 @@ export type DocsWritePatternValidationError =
   | 'uppercase'
   | 'invalidCharacter'
   | 'docsPrefix';
+
+/** An empty dataset means the signal is not sent, so it is not an error in the form. */
+export type OtelNameValidationError = Exclude<OtelDataStreamNameError, 'datasetRequired'>;
 
 export type AutoWritePatternValidationError =
   | 'required'
@@ -93,6 +98,9 @@ export type DestinationViewModel =
 /** Fixed mode: one name composed onto every signal, or a name per signal. */
 export type StaticIndexNaming = 'shared' | 'perSignal';
 
+/** Fixed mode name parts, kept apart from the composed index so a half-typed name survives. */
+export type StaticNames = Record<PrefixedDestinationSignal, OtelDataStreamName>;
+
 /** Per-type form state. Each destination type owns its own slice. */
 export interface ElasticsearchDestinationFormData {
   /** When true, omit `index` so ES composes names from document metadata. */
@@ -101,6 +109,7 @@ export interface ElasticsearchDestinationFormData {
   useCustomWritePatterns: boolean;
   customSignals: DestinationSignal[];
   staticNaming: StaticIndexNaming;
+  staticNames: StaticNames;
   /** Static index, or auto write pattern, for logs. */
   logsIndex: string;
   metricsIndex: string;
@@ -115,7 +124,13 @@ export interface ElasticsearchDestinationFormData {
 export interface RemoteElasticsearchDestinationFormData
   extends Pick<
     ElasticsearchDestinationFormData,
-    'auto' | 'staticNaming' | 'logsIndex' | 'metricsIndex' | 'tracesIndex' | 'docsIndex'
+    | 'auto'
+    | 'staticNaming'
+    | 'staticNames'
+    | 'logsIndex'
+    | 'metricsIndex'
+    | 'tracesIndex'
+    | 'docsIndex'
   > {
   endpoint: string;
   apiKey: string;
@@ -145,13 +160,15 @@ export interface DocsWritePatternEntryError {
   error: DocsWritePatternValidationError;
 }
 
+export type SignalIndexValidationError = OtelNameValidationError | AutoWritePatternValidationError;
+
 export interface DestinationCreationFormErrors {
   destinationName?: DestinationNameValidationError;
   staticIndexes?: 'required';
   customSignals?: 'required';
-  logsIndex?: StaticIndexValidationError | AutoWritePatternValidationError;
-  metricsIndex?: StaticIndexValidationError | AutoWritePatternValidationError;
-  tracesIndex?: StaticIndexValidationError | AutoWritePatternValidationError;
+  logsIndex?: SignalIndexValidationError;
+  metricsIndex?: SignalIndexValidationError;
+  tracesIndex?: SignalIndexValidationError;
   docsIndex?: FreeFormIndexValidationError;
   /** Undefined when no entry fails, never an empty list. */
   docsWritePatterns?: 'required' | 'tooMany' | DocsWritePatternEntryError[];
@@ -175,11 +192,20 @@ export type S3FieldsErrors = Pick<
   'region' | 'bucket' | 'accessKeyId' | 'secretAccessKey'
 >;
 
+const EMPTY_OTEL_NAME: OtelDataStreamName = { dataset: '', namespace: 'default' };
+
+export const EMPTY_STATIC_NAMES: StaticNames = {
+  logs: EMPTY_OTEL_NAME,
+  metrics: EMPTY_OTEL_NAME,
+  traces: EMPTY_OTEL_NAME,
+};
+
 export const EMPTY_ELASTICSEARCH_DESTINATION_FORM: ElasticsearchDestinationFormData = {
   auto: true,
   useCustomWritePatterns: false,
   customSignals: [],
   staticNaming: 'shared',
+  staticNames: EMPTY_STATIC_NAMES,
   logsIndex: '',
   metricsIndex: '',
   tracesIndex: '',
@@ -190,6 +216,7 @@ export const EMPTY_ELASTICSEARCH_DESTINATION_FORM: ElasticsearchDestinationFormD
 export const EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM: RemoteElasticsearchDestinationFormData = {
   auto: true,
   staticNaming: 'shared',
+  staticNames: EMPTY_STATIC_NAMES,
   logsIndex: '',
   metricsIndex: '',
   tracesIndex: '',

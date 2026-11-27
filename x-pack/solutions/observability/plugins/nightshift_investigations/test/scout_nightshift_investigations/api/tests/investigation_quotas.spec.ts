@@ -98,11 +98,11 @@ apiTest.describe(
       async ({ apiClient }) => {
         const changed = await putInvestigationQuotas(apiClient, manageEnginesCookie, {
           enabled: false,
-          limits: { manual_investigation: 7, automatic_investigation: null },
+          limits: { manual_investigation: 0, automatic_investigation: null },
         });
         expect(changed).toHaveStatusCode(200);
         expect(changed.body.enabled).toBe(false);
-        expect(changed.body.limits.manual_investigation).toBe(7);
+        expect(changed.body.limits.manual_investigation).toBe(0);
         expect(changed.body.limits.automatic_investigation).toBeNull();
 
         const afterOtherChange = await putInvestigationQuotas(apiClient, manageEnginesCookie, {
@@ -111,7 +111,7 @@ apiTest.describe(
         expect(afterOtherChange).toHaveStatusCode(200);
         expect(afterOtherChange.body.limits).toStrictEqual({
           automatic_investigation: null,
-          manual_investigation: 7,
+          manual_investigation: 0,
           total_investigation: 9,
         });
 
@@ -122,7 +122,7 @@ apiTest.describe(
 
     apiTest('rejects invalid updates', async ({ apiClient }) => {
       for (const body of [
-        { limits: { manual_investigation: 0 } },
+        { limits: { manual_investigation: -1 } },
         { limits: { manual_investigation: 10_001 } },
         { limits: { investigation: 3 } },
         { limits: {} },

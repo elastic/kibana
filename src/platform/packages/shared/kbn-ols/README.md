@@ -101,6 +101,11 @@ An ACL is in one of three states (`AclState`):
 - `invalid`: the ACL is damaged, for example it has an unsupported version or no owner, and grants no ordinary
   access at all.
 
+The `acl` field has the Elasticsearch mapping `ACL_MAPPING`, and every rule in this README assumes it. It indexes
+or rejects every stored value: it sets no `ignore_above` and no `ignore_malformed`, and `version` doesn't coerce. It
+ignores keys it doesn't define, and maps `entries` as `nested`, so that one entry's kind, ID, and level always match
+together.
+
 ## Reading a stored ACL
 
 These are the rules for reading a stored ACL, and the fixture table follows them. Each rule has to hold both when
@@ -164,7 +169,8 @@ values that Elasticsearch indexes for it. It returns `undefined` when no ACL fie
 
 Numbers have one limit. Elasticsearch indexes a number in a `keyword` field with the text that the document used, so
 `1.0` becomes `"1.0"`, and `1e2` becomes `"1e2"`. Kibana gets the source as parsed JSON, where both are numbers, so
-the reader returns `"1"` and `"100"`. A number in its shortest form, such as `1` or `42`, reads the same both ways.
+the reader returns `"1"` and `"100"`. For `1.0`, the filter matches a principal whose ID is `"1.0"`, and the
+evaluator matches one whose ID is `"1"`. A number in its shortest form, such as `1` or `42`, reads the same both ways.
 Kibana writes every keyword ACL value as a string, so only a direct write to the index can store such a number. User
 profile UIDs start with `u_`, service account IDs contain `/`, and no level or principal kind is a number. So this
 difference cannot change who gets access. A later principal kind whose IDs can be plain numbers, such as groups, has
@@ -306,9 +312,15 @@ at `manage`, and a principal that can't even view the object is left out.
 
 Most fixtures use `FIXTURE_POLICY`, where entries grant only `use`. A few use `FIXTURE_POLICY_ALL_LEVELS`, where
 `view`, `use`, and `edit` all differ, to cover the rules that need several levels: duplicate entries, and the lowest
-of several allowed entry levels.
+of several allowed entry levels. Others use `FIXTURE_POLICY_MANAGE_ENTRIES`, where an entry can grant `manage`, to
+cover access management through an entry: a `manage` grant, the lowest level when an entry also stores `use`, a
+level the policy doesn't allow next to `manage`, and a grant that matches only one principal kind.
 
 The expectations are written by hand, and that's the point: they are the contract. Both the code that evaluates one
 object and the query that filters a search must produce exactly these answers, so a list can never show an object
 that opening it would deny. When you add a shape, decide its expected access from the rules above, not from what any
 implementation returns.
+
+The fixtures are checked against a real Elasticsearch with `ACL_MAPPING`: each shape is accepted or rejected as the
+fixture says, and both the filter and the evaluator, on the source that Elasticsearch returns, grant exactly the
+expected access.

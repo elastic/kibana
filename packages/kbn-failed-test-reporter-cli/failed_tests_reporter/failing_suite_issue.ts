@@ -26,10 +26,10 @@ import {
   plural,
   table,
   targetEnvironment,
-  testDashboardUrl,
   type PreviousIssues,
 } from '../flaky_test_issues/markdown';
 import { getIssueMetadata, updateIssueMetadata } from './issue_metadata';
+import { testHistoryUrl } from './test_history_dashboard';
 
 const KIBANA_COMPARE_URL = 'https://github.com/elastic/kibana/compare';
 
@@ -216,7 +216,7 @@ const testsList = (suite: FailingSuite, { previousIssues }: FailingSuiteIssueCon
     ...suite.tests.map((test) => {
       const previous = previousIssues?.get(test.testId) ?? [];
       return (
-        `- ${inlineCode(test.title)} · [history](${testDashboardUrl(test.testId)})` +
+        `- ${inlineCode(test.title)} · [history](${testHistoryUrl(test.testId)})` +
         (previous.length > 0 ? ` · previously tracked in ${issueList(previous)}` : '')
       );
     }),

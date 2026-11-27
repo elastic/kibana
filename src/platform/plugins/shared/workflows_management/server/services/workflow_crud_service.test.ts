@@ -500,6 +500,58 @@ describe('WorkflowCrudService', () => {
     });
   });
 
+  describe('indexCalledWorkflowIds', () => {
+    it('stores the workflows that unindexed workflows run, unless they were saved meanwhile', async () => {
+      const core = {
+        ...coreMock.createStart(),
+        elasticsearch: elasticsearchServiceMock.createStart(),
+      };
+      const { deps, client } = makeDeps(undefined, { getCoreStart: () => core });
+      const definition = {
+        steps: [{ name: 'run', type: 'workflow.execute', with: { 'workflow-id': 'child' } }],
+      };
+      core.elasticsearch.client.asInternalUser.mget.mockResolvedValue({
+        docs: [
+          {
+            _index: workflowIndexName,
+            _id: 'old',
+            found: true,
+            _seq_no: 3,
+            _primary_term: 2,
+            _source: makeSource({ definition } as Partial<WorkflowProperties>),
+          },
+          {
+            _index: workflowIndexName,
+            _id: 'saved',
+            found: true,
+            _seq_no: 4,
+            _primary_term: 2,
+            _source: makeSource({ calledWorkflowIds: [], calledWorkflowIdsIndexed: true }),
+          },
+        ],
+      } as any);
+      client.bulk.mockResolvedValue({ items: [{ index: { status: 200 } }] });
+
+      await new WorkflowCrudService(deps).indexCalledWorkflowIds(['old', 'saved']);
+
+      const { operations } = client.bulk.mock.calls[0][0];
+      expect(operations).toEqual([
+        {
+          index: expect.objectContaining({
+            _id: 'old',
+            if_seq_no: 3,
+            if_primary_term: 2,
+            document: expect.objectContaining({
+              definition,
+              calledWorkflowIds: ['child'],
+              calledWorkflowIdsIndexed: true,
+            }),
+          }),
+        },
+      ]);
+    });
+  });
+
   describe('getWorkflowDocumentsWithVersionByIds', () => {
     const makeMgetDeps = () => {
       const core = {

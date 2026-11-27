@@ -12,8 +12,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { FakeConnectors } from '../mocks/actions_plugin_mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
 
-// Failing: See https://github.com/elastic/kibana/issues/302843
-describe.skip('workflow output eviction', () => {
+describe('workflow output eviction', () => {
   let workflowRunFixture: WorkflowRunFixture;
 
   beforeEach(() => {
@@ -140,8 +139,7 @@ steps:
     });
   });
 
-  // Failing: See https://github.com/elastic/kibana/issues/302843
-  describe.skip('with high eviction threshold', () => {
+  describe('with high eviction threshold', () => {
     beforeEach(() => {
       // Set threshold very high so nothing gets evicted
       (workflowRunFixture.configMock as Record<string, unknown>).eviction = {
@@ -185,8 +183,7 @@ steps:
   });
 });
 
-// Failing: See https://github.com/elastic/kibana/issues/302843
-describe.skip('workflow output targeted rehydration', () => {
+describe('workflow output targeted rehydration', () => {
   let workflowRunFixture: WorkflowRunFixture;
 
   // 4-step workflow: step_a → step_b → pause → step_c
@@ -232,8 +229,7 @@ steps:
     expect(execution?.status).toBe(ExecutionStatus.WAITING);
   });
 
-  // Failing: See https://github.com/elastic/kibana/issues/302842
-  describe.skip('after resume', () => {
+  describe('after resume', () => {
     beforeAll(async () => {
       await workflowRunFixture.resumeWorkflowAtScheduledTime();
     });

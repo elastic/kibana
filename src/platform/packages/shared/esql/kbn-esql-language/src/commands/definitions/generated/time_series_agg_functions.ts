@@ -2359,6 +2359,23 @@ const firstOverTimeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'boolean',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to compute the first over time value',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'counter_double',
           optional: false,
           description: 'the metric field to calculate the value for',
@@ -2817,6 +2834,23 @@ const lastOverTimeDefinition: FunctionDefinition = {
   preview: false,
   alias: undefined,
   signatures: [
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'boolean',
+          optional: false,
+          description: 'the metric field to calculate the latest value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to find the latest value',
+        },
+      ],
+      returnType: 'boolean',
+    },
     {
       params: [
         {

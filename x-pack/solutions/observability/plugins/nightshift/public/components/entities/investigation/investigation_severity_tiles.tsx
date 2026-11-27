@@ -32,14 +32,17 @@ const LOADING_COUNT_ARIA_LABEL = i18n.translate(
   { defaultMessage: 'Loading count' }
 );
 
-/** A muted tier has no section to scroll to, so its tile reads as a figure rather than a control. */
-type SeverityTileState = 'muted' | 'interactive';
+/**
+ * `muted` — tier never present on the unfiltered page (no fill, grey icon).
+ * `present` — tier exists unfiltered but has no scroll target right now (keep fill + colour; no hover).
+ * `interactive` — section is on screen; click scrolls to it.
+ */
+type SeverityTileState = 'muted' | 'present' | 'interactive';
 
 interface SeverityTileStateStyles {
   /** `EuiPanel`'s `color` prop when a state needs a filled panel; omit for border-only. */
   panelColor?: EuiPanelProps['color'];
   panel?: SerializedStyles;
-  count?: SerializedStyles;
 }
 
 interface SeverityIconBoxStyles {
@@ -54,7 +57,9 @@ const getSeverityTileStyles = (
   iconBox: Readonly<Record<Severity, SeverityIconBoxStyles>>;
   iconGlyphRotateUp: SerializedStyles;
   label: SerializedStyles;
+  labelMuted: SerializedStyles;
   count: SerializedStyles;
+  countMuted: SerializedStyles;
   byState: Readonly<Record<SeverityTileState, SeverityTileStateStyles>>;
 } => {
   const { euiTheme } = euiThemeContext;
@@ -98,19 +103,24 @@ const getSeverityTileStyles = (
     label: css`
       font-weight: ${euiTheme.font.weight.medium};
     `,
+    labelMuted: css`
+      color: ${euiTheme.colors.textDisabled};
+    `,
     // Same stack/weight as Lens metric values (`echMetricText__value` + Elastic UI Numeric).
     count: css`
       font-family: 'Elastic UI Numeric', ${euiTheme.font.family};
       font-weight: ${euiTheme.font.weight.medium};
     `,
+    countMuted: css`
+      color: ${euiTheme.colors.textDisabled};
+    `,
     byState: {
-      // Empty tiles: border only, no panel fill; count/icon stay muted.
+      // Never-present tiles: border only, no panel fill.
       muted: {
         panelColor: 'transparent',
-        count: css`
-          color: ${euiTheme.colors.textDisabled};
-        `,
       },
+      // Filtered-to-zero but present: keep the plain fill; not clickable.
+      present: {},
       // Clickable EuiPanel defaults to hover shadow `m`; use `xs` for a lighter lift.
       interactive: {
         panel: css`
@@ -127,6 +137,9 @@ const getSeverityTileStyles = (
 
 export interface InvestigationSeverityTilesProps {
   severityCounts: SeverityCounts;
+  /** Severities that have at least one open investigation before search/list filters. */
+  presentSeverities: ReadonlySet<Severity>;
+  /** Severities whose list section is currently rendered (and can be scrolled to). */
   scrollableSeverities: ReadonlySet<Severity>;
   isLoading: boolean;
   onSeverityClick: (severity: Severity) => void;
@@ -134,6 +147,7 @@ export interface InvestigationSeverityTilesProps {
 
 export const InvestigationSeverityTiles = ({
   severityCounts,
+  presentSeverities,
   scrollableSeverities,
   isLoading,
   onSeverityClick,
@@ -145,9 +159,18 @@ export const InvestigationSeverityTiles = ({
     <EuiFlexGroup gutterSize="m" responsive={false}>
       {SEVERITY_OPTIONS.map((severity) => {
         const count = severityCounts[severity];
-        const isMuted = !scrollableSeverities.has(severity);
-        const stateStyles = styles.byState[isMuted ? 'muted' : 'interactive'];
+        const isPresent = presentSeverities.has(severity);
+        const isScrollable = scrollableSeverities.has(severity);
+        // Never-present → fully muted. Present but filtered empty → keep fill + colour; zero stays muted.
+        const tileState: SeverityTileState = !isPresent
+          ? 'muted'
+          : isScrollable
+          ? 'interactive'
+          : 'present';
+        const isMuted = tileState === 'muted';
+        const stateStyles = styles.byState[tileState];
         const icon = SEVERITY_TILE_ICON[severity];
+        const countIsMuted = isMuted || count === 0;
 
         return (
           <EuiFlexItem key={severity}>
@@ -158,19 +181,24 @@ export const InvestigationSeverityTiles = ({
               color={stateStyles.panelColor}
               css={stateStyles.panel}
               data-test-subj={`nightshiftSeverityTile-${severity}`}
-              onClick={isMuted ? undefined : () => onSeverityClick(severity)}
-              {...(isMuted
-                ? {}
-                : getEbtProps({
+              data-tile-state={tileState}
+              onClick={isScrollable ? () => onSeverityClick(severity) : undefined}
+              {...(isScrollable
+                ? getEbtProps({
                     action: NIGHTSHIFT_EBT_ACTIONS.VIEW_SEVERITY_INVESTIGATIONS,
                     element: NIGHTSHIFT_EBT_ELEMENTS.SEVERITY_TILES,
                     // The tier is the point of the click; the count rides on the page-view event.
                     detail: severity,
-                  }))}
+                  })
+                : {})}
             >
               <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiText color="default" size="xs" css={styles.label}>
+                  <EuiText
+                    color="default"
+                    size="xs"
+                    css={[styles.label, isMuted ? styles.labelMuted : undefined]}
+                  >
                     {getSeverityLabel(severity)}
                   </EuiText>
                 </EuiFlexItem>
@@ -204,7 +232,10 @@ export const InvestigationSeverityTiles = ({
                       </EuiFlexItem>
                     ) : (
                       <EuiFlexItem grow={false}>
-                        <EuiTitle size="l" css={[styles.count, stateStyles.count]}>
+                        <EuiTitle
+                          size="l"
+                          css={[styles.count, countIsMuted ? styles.countMuted : undefined]}
+                        >
                           <span
                             aria-label={i18n.translate(
                               'xpack.nightshift.investigations.severityTileCountAriaLabel',

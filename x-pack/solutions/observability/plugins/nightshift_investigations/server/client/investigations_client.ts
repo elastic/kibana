@@ -42,6 +42,7 @@ import {
 import { assertNever } from '@kbn/std';
 import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
+import { UNKNOWN_ALERT_FIELD } from '../lib/alert_snapshot';
 import { assertNightshiftSpace } from '../lib/assert_nightshift_space';
 import { installAssistantAgent } from '../lib/install_assistant_agent';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
@@ -535,7 +536,6 @@ export class NightshiftInvestigationsClient {
       message,
       instructions,
       timeout_seconds,
-      source_ids,
       connector_id,
       context = {},
       notificationDestinations,
@@ -677,7 +677,6 @@ export class NightshiftInvestigationsClient {
         // Kept as a workflow input for callers that read it off the run. Agent Builder titles the
         // investigation from the first round instead.
         ...(title ? { title } : {}),
-        ...(source_ids?.length ? { source_ids } : {}),
         ...(connector_id?.trim() ? { connector_id: resolvedConnectorId } : {}),
         investigation_id: investigationId,
         subjects: newSubjects,
@@ -1618,6 +1617,15 @@ export class NightshiftInvestigationsClient {
       snapshot: alertSubject?.snapshot,
     });
 
+    // The recovery context has no `alerts`, so the rule type travels on its own for online evals.
+    // The step passes an empty string when the rule event has no type.
+    const snapshotRuleType = alertSubject?.snapshot?.rule_type_id;
+    const alertRuleType =
+      alertInput.ruleTypeId ||
+      (typeof snapshotRuleType === 'string' && snapshotRuleType !== UNKNOWN_ALERT_FIELD
+        ? snapshotRuleType
+        : '');
+
     const spaceId = this.getSpaceId();
     this.warnOnSpaceMismatch(spaceId);
     const workflow = await this.getInvestigationWorkflow(spaceId);
@@ -1628,6 +1636,7 @@ export class NightshiftInvestigationsClient {
         source: 'alert',
         follow_up: ALERT_RECOVERED_FOLLOW_UP,
         entry_point: 'alert_recovery' satisfies InvestigationEntryPoint,
+        ...(alertRuleType ? { alert_rule_type: alertRuleType } : {}),
       },
     });
     this.telemetry?.reportInvestigationStarted({

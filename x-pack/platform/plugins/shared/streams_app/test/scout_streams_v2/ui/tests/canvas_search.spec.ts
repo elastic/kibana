@@ -33,7 +33,11 @@ const MOCK_UNIT = {
         name: DESTINATION_NAME,
         type: 'elasticsearch',
         supported_telemetry: SUPPORTED_TELEMETRY,
-        config: [{ name: 'index', value: 'logs-canvas-search' }],
+        config: SUPPORTED_TELEMETRY.map((signal) => ({
+          name: 'index',
+          telemetry: [signal],
+          value: `${signal}-canvas_search.otel-default`,
+        })),
       },
     ],
     pipelines: [

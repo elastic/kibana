@@ -340,13 +340,13 @@ export const SEVERITY_OPTIONS = [
  * with its own rubric. Order of `SEVERITY_OPTIONS` is part of this contract (most-severe first).
  */
 export const SEVERITY_CONTRACT_RULE = dedent`
-    Severity rates the situation the grounding evidence confirms.
+    Severity rates the situation the grounding evidence confirms. Recovery changes the event's status, not its severity: a recovering or inactive event keeps the severity of the incident it records.
 
     Decide in order and stop at the first match:
     - "critical": a global outage affecting all or most customers; several distinct core operations confirmed blocked at once; a mandatory service, job, or platform-critical operation confirmed blocked end-to-end so the component can no longer perform its primary function — unless the block is confined to a single endpoint or lookup path affecting only that one operation, which stays at "high"; or confirmed active exposure of PII, PCI DSS data, SSNs, credentials, secrets, or tokens.
     - "high": the affected operation fails or is blocked on the verified path, or is broadly degraded, intermittent, or partially failing for a significant subset, as the evidence measures it. An error signature on the operation's path with no signals showing the operation failing to complete is not enough: that is "medium".
     - "medium": minor confirmed degradation with limited reach, signals say the operation is slow, or cannot say whether it is failing or completing.
-    - "low": confirmed recovery, or confirmed absence of impact: noise, a false alarm, or a non-issue, including an internal dependency error the system demonstrably tolerates.
+    - "low": confirmed absence of impact: noise, a false alarm, or a non-issue, including an internal dependency error the system demonstrably tolerates.
 
     Rate what the evidence shows, with the numbers measured: how much of the operation fails, how many parties are affected, and for how long. A signal's evidence that could not be collected (a query that timed out or returned nothing) is no evidence, not ambiguous evidence: it adds nothing to the rating. Weigh scope by what the operations do, not by how many detections fired. Signals on the same operation overlap: rate it from its most direct failure measure (the share of attempts that fail), never by adding shares across signals or taking the highest of differently scoped ones.
     A mandatory component is one that the event's blast_radius shows other services depending on; when it shows none, that clause does not apply.

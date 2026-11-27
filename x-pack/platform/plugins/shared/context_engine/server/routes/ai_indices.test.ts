@@ -1088,7 +1088,7 @@ describe('ai indices routes', () => {
         { name: 'type' },
         { name: 'title' },
         { name: 'updated_at' },
-        { name: 'lifecycle_status' },
+        { name: 'ki_status' },
       ],
       values,
     });
@@ -1114,8 +1114,49 @@ describe('ai indices routes', () => {
     const validateListKisQuery = (query: unknown) =>
       getQuerySchema('GET', AI_INDEX_KI_LIST_PATH).validate(query);
 
-    it('accepts scalar lifecycle_status as sent by ?lifecycle_status=deleted', () => {
-      expect(() => validateListKisQuery({ size: 25, lifecycle_status: 'deleted' })).not.toThrow();
+    it('accepts scalar status as sent by ?status=deleted', () => {
+      expect(() => validateListKisQuery({ size: 25, status: 'deleted' })).not.toThrow();
+    });
+
+    it('accepts expired in status and the title sort', () => {
+      expect(() =>
+        validateListKisQuery({ size: 25, status: ['active', 'expired'], sort: 'title' })
+      ).not.toThrow();
+      expect(() => validateListKisQuery({ size: 25, status: 'expired' })).not.toThrow();
+    });
+
+    it('defaults sort to updated and rejects unknown sort values', () => {
+      expect(validateListKisQuery({ size: 25 })).toEqual(
+        expect.objectContaining({ sort: 'updated' })
+      );
+      expect(() => validateListKisQuery({ size: 25, sort: 'type' })).toThrow();
+    });
+
+    it('rejects more statuses than exist', () => {
+      expect(() =>
+        validateListKisQuery({
+          size: 25,
+          status: ['active', 'deleted', 'verification_failed', 'expired', 'active'],
+        })
+      ).toThrow();
+    });
+
+    it('passes sort to the list query', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      esEsqlQuery
+        .mockResolvedValueOnce(probe)
+        .mockResolvedValueOnce(rows([]))
+        .mockResolvedValueOnce(totals(0))
+        .mockResolvedValueOnce(buckets([]));
+
+      await callRoute('GET', AI_INDEX_KI_LIST_PATH, {
+        params: { aiIndexId: 'customer_support' },
+        query: { size: 25, sort: 'title' },
+      });
+
+      expect(esEsqlQuery.mock.calls[1][0].query).toContain(
+        'SORT title_sort ASC NULLS LAST, id ASC'
+      );
     });
 
     it('returns the current Knowledge Indicators from the destination', async () => {
@@ -1151,14 +1192,14 @@ describe('ai indices routes', () => {
               index: kiBackingIndex,
               type: 'playbook',
               title: 'Refund playbook',
-              lifecycle_status: 'active',
+              status: 'active',
             },
           ],
         },
       });
     });
 
-    it('passes lifecycle_status to the list query', async () => {
+    it('passes status to the list query', async () => {
       aiIndexService.get.mockResolvedValue(aiIndexItem);
       esEsqlQuery
         .mockResolvedValueOnce(probe)
@@ -1168,10 +1209,10 @@ describe('ai indices routes', () => {
 
       await callRoute('GET', AI_INDEX_KI_LIST_PATH, {
         params: { aiIndexId: 'customer_support' },
-        query: { size: 25, lifecycle_status: ['deleted'] },
+        query: { size: 25, status: ['deleted'] },
       });
 
-      expect(esEsqlQuery.mock.calls[1][0].query).toContain('WHERE lifecycle_status IN ("deleted")');
+      expect(esEsqlQuery.mock.calls[1][0].query).toContain('WHERE ki_status IN ("deleted")');
     });
 
     it('passes type filter to Elasticsearch', async () => {
@@ -1282,6 +1323,12 @@ describe('ai indices routes', () => {
   describe('GET /internal/context_engine/ai_index/{aiIndexId}/kis/{kiId}', () => {
     const validateGetKiQuery = (query: unknown) =>
       getQuerySchema('GET', AI_INDEX_KI_BY_ID_PATH).validate(query);
+
+    it('rejects expired lifecycle_status', () => {
+      expect(() =>
+        validateGetKiQuery({ index: kiBackingIndex, lifecycle_status: 'expired' })
+      ).toThrow();
+    });
 
     it('accepts scalar lifecycle_status as sent by ?lifecycle_status=deleted', () => {
       expect(() =>

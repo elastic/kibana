@@ -50,6 +50,14 @@ interface WorkerLogLine {
         coverage: number;
         captureDurationMs: number;
         samples: number;
+        frames: Array<{ name: string; location?: string; percent: number }>;
+        kibanaFrames: Array<{
+          name: string;
+          location?: string;
+          percent: number;
+          callers: Array<{ name: string; location?: string }>;
+        }>;
+        topKibanaFrame?: { location?: string; percent: number };
         nodes: number;
         heapUsed: number;
         stopReason: string;
@@ -322,7 +330,9 @@ describe('event loop watchdog in a child process', () => {
       const lines = profileLogLines(result);
       expect(lines).toHaveLength(1);
       expect(lines[0]).toMatchObject({
-        message: expect.stringMatching(/^Event loop block profiled: block ~\d+ms \(profiled after/),
+        message: expect.stringMatching(
+          /^Event loop block profile #1: block ~\d+ms \(profiled after/
+        ),
         log: { level: 'INFO', logger: 'metrics.event_loop_watchdog' },
         kibana: { event_loop_watchdog: { profile: { stopReason: 'block_ended' } } },
       });
@@ -333,6 +343,9 @@ describe('event loop watchdog in a child process', () => {
       expect(profile?.coverage).toBeGreaterThan(0);
       expect(profile?.coverage).toBeLessThanOrEqual(1);
       expect(profile?.captureDurationMs).toBeGreaterThan(0);
+      expect(profile?.topKibanaFrame?.location).toMatch(
+        /^src\/core\/packages\/core\/server\/integration_tests\/event_loop_watchdog\/fixtures\/watchdog_harness\.ts:\d+$/
+      );
       expect(restarts(result)).toEqual([]);
     }, 120_000);
 
@@ -358,11 +371,50 @@ describe('event loop watchdog in a child process', () => {
       const [line] = profileLogLines(result);
       const profile = line.kibana?.event_loop_watchdog?.profile;
       expect(profile?.stopReason).toBe('max_duration');
-      expect(profile?.nodes).toBeGreaterThan(10_000);
+      // At least 11.9k nodes; loadDeepCode(2_000, 40) produces ~21k on macOS, ~25k on Linux arm64, ~21k on amd64.
+      // That profile serialises to ~2.8 MB+, so this covers the MB dimension as well as node count; the raw
+      // profile size isn't on the capture line by design, so node count is what's asserted here.
+      expect(profile?.nodes).toBeGreaterThanOrEqual(11_900);
+      expect(profile?.frames.length).toBeGreaterThan(0);
+      expect(profile?.kibanaFrames.length).toBeGreaterThan(0);
       expect(profile?.heapUsed).toBeGreaterThan(0);
       // No out-of-memory restart at the shipped limit.
       expect(restarts(result)).toEqual([]);
     }, 150_000);
+
+    it('profiles three large blocks in a row without restarting or growing the worker heap', async () => {
+      const result = await runHarness('profile_repeated', { timeoutMs: 180_000 });
+      expectCleanExit(result);
+      const profiles = profileLogLines(result);
+      expect(profiles).toHaveLength(3);
+      for (const line of profiles) {
+        const profile = line.kibana?.event_loop_watchdog?.profile;
+        expect(profile?.nodes).toBeGreaterThanOrEqual(11_900);
+        expect(profile?.frames.length).toBeGreaterThan(0);
+        expect(profile?.kibanaFrames.length).toBeGreaterThan(0);
+      }
+      expect(restarts(result)).toEqual([]);
+
+      const firstCaptureAt = Date.parse(profiles[0]['@timestamp']);
+      const thirdCaptureAt = Date.parse(profiles[2]['@timestamp']);
+      const statsBeforeFirst = statsLogLines(result).filter(
+        (line) => Date.parse(line['@timestamp']) < firstCaptureAt
+      );
+      const statsAfterThird = statsLogLines(result).filter(
+        (line) => Date.parse(line['@timestamp']) > thirdCaptureAt
+      );
+      expect(statsBeforeFirst.length).toBeGreaterThan(0);
+      expect(statsAfterThird.length).toBeGreaterThan(0);
+      const heapBeforeFirst =
+        statsBeforeFirst[statsBeforeFirst.length - 1].kibana?.event_loop_watchdog?.stats
+          ?.heapUsed ?? NaN;
+      const heapAfterThird =
+        statsAfterThird[statsAfterThird.length - 1].kibana?.event_loop_watchdog?.stats?.heapUsed ??
+        NaN;
+      // Measured deltas across 10 runs were all negative (-138 KB to -320 KB); 4 MB is a
+      // deliberately loose guard against per-capture retention, not a tight regression bound.
+      expect(heapAfterThird - heapBeforeFirst).toBeLessThan(4 * 1024 * 1024);
+    }, 210_000);
 
     it("ends the main thread's profile when the worker crashes while profiling", async () => {
       const result = await runHarness('profile_crash');

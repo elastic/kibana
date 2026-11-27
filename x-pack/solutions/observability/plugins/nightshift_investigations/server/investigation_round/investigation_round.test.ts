@@ -119,6 +119,29 @@ describe('server/investigation_round', () => {
       ]);
     });
 
+    it('uses the latest trace id of a round resumed after human-in-the-loop', async () => {
+      const getConversation = jest.fn().mockResolvedValue({
+        id: 'conv-1',
+        rounds: [{ id: 'round-1', trace_id: ['trace-paused', 'trace-resumed'], steps: [] }],
+      });
+      const agentBuilder = {
+        conversations: {
+          getScopedClient: jest.fn().mockResolvedValue({ get: getConversation }),
+        },
+      } as unknown as AgentBuilderPluginStart;
+
+      const loaded = await loadInvestigationRound({
+        agentBuilder,
+        request,
+        conversationId: 'conv-1',
+        roundId: 'round-1',
+        logger,
+        retryDelaysMs: [1],
+      });
+
+      expect(loaded.traceId).toBe('trace-resumed');
+    });
+
     it('stops reading on the first attempt when the caller cannot read the conversation', async () => {
       // A service-account-bound agent in a conversation its owner keeps private: the read is
       // denied as not-found, and no amount of waiting makes it readable.

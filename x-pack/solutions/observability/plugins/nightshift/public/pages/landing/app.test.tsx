@@ -161,7 +161,11 @@ function setSections({
   mockUseInvestigationSections.mockReturnValue({
     sections,
     severityCounts,
+    // Tests without a search treat filtered and unfiltered counts as the same.
+    unfilteredSeverityCounts: severityCounts,
     areSeverityCountsLoading,
+    areUnfilteredSeverityCountsLoading: false,
+    areSeverityCountsStale: false,
     hasSeverityCountsError,
     hasActiveInvestigations: hasActiveInvestigations || resolvedActiveCount > 0,
     activeInvestigationCount: resolvedActiveCount,
@@ -747,6 +751,23 @@ describe('NightshiftApp', () => {
         'nightshift_investigation_viewed',
         expect.objectContaining({ investigation_id: 'conversation-9', source: 'deepLink' })
       )
+    );
+  });
+
+  it('does not send a whitespace-only search term to the API', () => {
+    renderApp({ initialEntries: ['/?q=%20%20'] });
+
+    expect(mockUseInvestigationSections).toHaveBeenLastCalledWith(
+      expect.objectContaining({ query: undefined })
+    );
+    expect(screen.getByTestId('nightshiftInvestigationsSearchInput')).toHaveValue('  ');
+  });
+
+  it('sends the trimmed search term to the API', () => {
+    renderApp({ initialEntries: ['/?q=%20checkout%20'] });
+
+    expect(mockUseInvestigationSections).toHaveBeenLastCalledWith(
+      expect.objectContaining({ query: 'checkout' })
     );
   });
 

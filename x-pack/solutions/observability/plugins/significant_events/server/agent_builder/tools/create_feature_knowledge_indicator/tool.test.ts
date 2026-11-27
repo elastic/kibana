@@ -291,10 +291,10 @@ describe('ki_feature_create tool', () => {
         success: false,
         source_id: 'logs.test',
         space_id: 'space-a',
-        knowledge_indicator_id: 'feature-1',
         error_message: 'write failed',
       })
     );
+    expect(reported).not.toHaveProperty('knowledge_indicator_id');
   });
 
   it('tells the agent whether a refused write is worth retrying', async () => {

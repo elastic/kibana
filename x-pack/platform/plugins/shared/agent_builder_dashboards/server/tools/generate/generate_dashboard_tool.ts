@@ -186,6 +186,7 @@ Changes are applied one by one: failed ones are listed in \`failures\` with the 
           removed,
           failures,
           panelAuthoringNotes,
+          panelHeightHints,
         } = await executeDashboardUpsert({
           dashboardData: latestVersion?.data,
           upsert,
@@ -212,6 +213,7 @@ Changes are applied one by one: failed ones are listed in \`failures\` with the 
             originalPanels: latestVersion?.data.panels ?? [],
             dashboardData: validatedDashboardData,
             instructions: layout,
+            heightHints: panelHeightHints,
             arrangeLayout: createLayoutArranger({ modelProvider }),
             logger,
           });

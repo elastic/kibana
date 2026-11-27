@@ -21,7 +21,7 @@ import { useNavigation } from '../../../hooks/use_navigation';
 import { usePrefetchKi } from '../../../hooks/use_prefetch_ki';
 import { getViewKiPath } from '../../../paths';
 import { KiFormattedDate } from '../shared/ki_formatted_date';
-import { KiLifecycleStatusBadge } from '../shared/ki_lifecycle_status_badge';
+import { KiStatusBadge } from '../shared/ki_status_badge';
 import { KiTypeDisplay } from '../shared/ki_type_display';
 import { getKiDisplayTitle } from './list_ki_helpers';
 
@@ -73,15 +73,13 @@ export const ListKiTable = ({ aiIndexId, kis, isRefetching = false }: ListKiTabl
         ),
       },
       {
-        field: 'lifecycle_status',
+        field: 'status',
         name: i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.columnStatus', {
           defaultMessage: 'Status',
         }),
         sortable: false,
         width: '10%',
-        render: (lifecycleStatus: ListKiTableRow['lifecycle_status'], ki) => (
-          <KiLifecycleStatusBadge lifecycleStatus={lifecycleStatus} expiresAt={ki.expires_at} />
-        ),
+        render: (status: ListKiTableRow['status']) => <KiStatusBadge status={status} />,
       },
       {
         field: 'updated_at',

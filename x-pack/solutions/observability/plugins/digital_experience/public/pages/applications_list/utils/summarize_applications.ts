@@ -17,8 +17,8 @@ import type {
 export interface ApplicationsSummary {
   applications: number;
   /**
-   * Sessions of the EDOT Browser applications, `null` when there is none or when one was read from
-   * the raw events, which don't count sessions: a total of only some would read as all of them.
+   * Sessions that started in the time range, of the EDOT Browser applications. `null` when they
+   * were not counted: the raw events don't, nor does Classic RUM.
    */
   sessions: number | null;
   pageLoads: number;
@@ -41,20 +41,13 @@ const hasPoorCoreWebVitals = ({ webVitals: { lcp, inp, cls } }: ApplicationSumma
 const countNames = (applications: ApplicationSummary[]): number =>
   new Set(applications.map(({ serviceName }) => serviceName)).size;
 
-/** Classic RUM has no sessions, so only EDOT Browser rows count, and each must know its own. */
+/**
+ * The sessions of the rows that count them. Only EDOT Browser rows read from the sessions index do,
+ * and all of them do or none, as they come from one source, so Classic RUM rows have none to add.
+ */
 const countSessions = (applications: ApplicationSummary[]): number | null => {
-  const otelApplications = applications.filter(({ source }) => source === APPLICATION_SOURCE.otel);
-  if (otelApplications.length === 0) {
-    return null;
-  }
-  let total = 0;
-  for (const { sessions } of otelApplications) {
-    if (sessions === null) {
-      return null;
-    }
-    total += sessions.count;
-  }
-  return total;
+  const counts = applications.flatMap(({ sessions }) => (sessions ? [sessions.count] : []));
+  return counts.length > 0 ? counts.reduce((total, count) => total + count, 0) : null;
 };
 
 /**

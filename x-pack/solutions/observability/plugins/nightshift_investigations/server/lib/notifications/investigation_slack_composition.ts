@@ -159,7 +159,7 @@ const leadNodes = (findings: Finding[]): ComponentsNode[] =>
     );
 
 const RESULT_SECTION =
-  /\*\*Result:?\*\*:?\s*([\s\S]*?)(?=\s+\*\*[Tt]ested:?\*\*:?|\n\s*\*\*[A-Z][a-z]+(?::\*\*|\*\*:)|$)/i;
+  /\*\*Result:?\*\*:?\s*([\s\S]*?)(?=\s+\*\*[Tt]ested:?\*\*:?|\n\s*\*\*[A-Z][a-z]+(?: [a-z]+)*(?::\*\*|\*\*:)|$)/i;
 const TESTED_SECTION = /\*\*Tested:?\*\*:?[^\n]*(?:\n|$)/gi;
 
 const hypothesisDetail = (reason: string): string => {

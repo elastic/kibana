@@ -18,7 +18,8 @@ const FILTER_KEYS = [
   'os',
   'country',
   'entryPage',
-  'hasErrors',
+  'withJsErrors',
+  'withFailedRequests',
   'duration',
 ] as const satisfies ReadonlyArray<keyof SessionsListUrlQuery>;
 
@@ -28,7 +29,8 @@ export interface SessionsListState {
   os?: string;
   country?: string;
   entryPage?: string;
-  hasErrors: boolean;
+  withJsErrors: boolean;
+  withFailedRequests: boolean;
   duration?: DurationBucket;
   sortField: SessionSortField;
   sortDirection: 'asc' | 'desc';
@@ -51,7 +53,8 @@ export const useSessionsListQuery = () => {
       os: query.os,
       country: query.country,
       entryPage: query.entryPage,
-      hasErrors: query.hasErrors ?? false,
+      withJsErrors: query.withJsErrors ?? false,
+      withFailedRequests: query.withFailedRequests ?? false,
       duration: query.duration,
       sortField: query.sortField ?? 'start_time',
       sortDirection: query.sortDirection ?? 'desc',
@@ -79,9 +82,7 @@ export const useSessionsListQuery = () => {
     [update]
   );
 
-  const hasActiveFilters = FILTER_KEYS.some((key) =>
-    key === 'hasErrors' ? state.hasErrors : Boolean(state[key])
-  );
+  const hasActiveFilters = FILTER_KEYS.some((key) => Boolean(state[key]));
 
   return { state, update, setSearch, clearFilters, hasActiveFilters };
 };

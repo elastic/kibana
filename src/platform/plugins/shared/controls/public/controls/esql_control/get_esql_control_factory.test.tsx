@@ -337,4 +337,29 @@ describe('ESQLControlApi', () => {
       expect(() => api.cancelRequests()).not.toThrow();
     });
   });
+
+  describe('isDuplicate', () => {
+    const createState = (variableName: string): OptionsListESQLControlState => ({
+      ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
+      selected_options: ['option1'],
+      available_options: ['option1', 'option2'],
+      variable_name: variableName,
+      variable_type: 'values',
+      control_type: 'STATIC_VALUES',
+    });
+
+    test('returns true when both states have the same non-empty variable_name', () => {
+      expect(factory.isDuplicate?.(createState('geo_dest'), createState('geo_dest'))).toBe(true);
+    });
+
+    test('returns false when states have different variable_name values', () => {
+      expect(factory.isDuplicate?.(createState('geo_dest'), createState('service_name'))).toBe(
+        false
+      );
+    });
+
+    test('returns false when variable_name is empty', () => {
+      expect(factory.isDuplicate?.(createState(''), createState(''))).toBe(false);
+    });
+  });
 });

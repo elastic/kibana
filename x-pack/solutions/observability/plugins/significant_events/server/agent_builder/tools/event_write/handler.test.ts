@@ -643,6 +643,37 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
     expect(alertEventsClient.createAlertEvent).toHaveBeenCalledTimes(1);
   });
 
+  it('keeps an incident’s severity through recovery without redundant writes', async () => {
+    const eventId = 'checkout-recovery';
+    const active = makeStoredEvent(eventId, {
+      severity: 'high',
+      signals: [makeDetectionSignal({ ruleUuid: 'rule-1' })],
+    });
+    const findByEventId = jest.fn().mockResolvedValue({ hits: [active] });
+    const eventSearchClient = makeEventSearchClient({ findByEventId });
+    const recovery: EventsWriteInput = {
+      ...baseInput,
+      event_id: eventId,
+      status: undefined,
+      severity: 'low',
+      signals: [makeDetectionSignal({ ruleUuid: 'rule-1', verdict: 'refutes' })],
+    };
+
+    const [result] = await eventsWriteBulkHandler({ eventSearchClient, inputs: [recovery] });
+    expect(result).toMatchObject({ written: true, status: 'recovering', severity: 'high' });
+    const [recovering] = writtenDocs();
+    expect(recovering).toMatchObject({ status: 'recovering', severity: 'high' });
+
+    findByEventId.mockResolvedValue({ hits: [active, recovering] });
+    const [repeated] = await eventsWriteBulkHandler({ eventSearchClient, inputs: [recovery] });
+    expect(repeated).toMatchObject({
+      written: false,
+      reason: 'unchanged_outcome',
+      severity: 'high',
+    });
+    expect(writtenDocs()).toHaveLength(1);
+  });
+
   describe('a continuation onto a recovering event', () => {
     const eventId = 'checkout-recovering';
     const recovering = () => makeStoredEvent(eventId, { status: 'recovering', severity: 'high' });
@@ -999,15 +1030,15 @@ describe('eventsWriteBulkHandler — agent-proposed severity', () => {
     }
   );
 
-  it('floors an inactive event to low', async () => {
+  it('rates a new inactive event on its evidence', async () => {
     const [result] = await write({
       status: 'inactive',
       severity: 'critical',
       signals: [failingSignal('rule-1')],
     });
 
-    expect(result).toMatchObject({ written: true, status: 'inactive', severity: 'low' });
-    expect(writtenDocs()[0].severity).toBe('low');
+    expect(result).toMatchObject({ written: true, status: 'inactive', severity: 'critical' });
+    expect(writtenDocs()[0].severity).toBe('critical');
   });
 
   it('refuses an event with signals but no proposed severity, instead of guessing one', async () => {

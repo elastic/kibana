@@ -910,7 +910,6 @@ const result = await context.contextManager.callKibanaApi<{ id: string }>({
 **Not supported (use the `kibana.request` YAML step instead):**
 
 - Multipart / `form_data` uploads
-- Custom fetcher options (TLS, redirects, keep-alive, undici Agent options)
 - Streaming / SSE responses
 - Overriding URL resolution (the request always targets this Kibana instance)
 

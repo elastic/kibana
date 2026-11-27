@@ -7,7 +7,7 @@
 
 import type { OtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server';
+import type { RunContext, ToolHandlerStandardReturn } from '@kbn/agent-builder-server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import {
@@ -15,6 +15,7 @@ import {
   assertCanReadSignificantEvents,
 } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
+import { reportToolFailure } from '../tool_failure';
 import type { SourceToolDeps } from './source_tool_deps';
 import { formatSourceToolError } from './source_tool_error';
 
@@ -25,18 +26,23 @@ const PRIVILEGE_ASSERTIONS = {
 
 /** Runs `run` after the access and privilege checks, turning any failure into an error result for the agent. */
 export const runSourceTool = async ({
+  toolId,
   action,
   privilege,
   request,
+  runContext,
   getScopedClients,
   server,
   logger,
+  telemetry,
   run,
 }: SourceToolDeps & {
+  toolId: string;
   /** What the tool does, as it reads in "Failed to <action>: <reason>". */
   action: string;
   privilege: keyof typeof PRIVILEGE_ASSERTIONS;
   request: KibanaRequest;
+  runContext?: RunContext;
   run: (params: { sourcesClient: SourcesClient }) => Promise<OtherResult['data']>;
 }): Promise<ToolHandlerStandardReturn> => {
   try {
@@ -47,7 +53,15 @@ export const runSourceTool = async ({
     return { results: [{ type: ToolResultType.other, data: await run({ sourcesClient }) }] };
   } catch (error) {
     const message = `Failed to ${action}: ${formatSourceToolError(error)}`;
-    logger.error(message);
+    reportToolFailure({
+      error,
+      toolId,
+      errorLogMessage: message,
+      logger,
+      telemetry,
+      request,
+      runContext,
+    });
     return { results: [{ type: ToolResultType.error, data: { message } }] };
   }
 };

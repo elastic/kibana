@@ -37,6 +37,7 @@ import type {
   WorkflowStatsDto,
 } from '@kbn/workflows';
 import type { ManagedWorkflowId } from '@kbn/workflows/managed';
+import type { ManagedFilter } from '@kbn/workflows/server';
 import type {
   ExecuteManagedWorkflowOptions,
   GetManagedWorkflowStatusOptions,
@@ -84,6 +85,7 @@ import type {
   RestoreWorkflowVersionResponseDto,
   WorkflowChangesHistoryResponse,
 } from '../../common/lib/workflow_change_history/types';
+import type { WorkflowLookupItem } from '../../common/lib/workflow_dependents/types';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { getHistoryForWorkflow } from '../lib/get_workflow_change_history';
 import {
@@ -102,6 +104,8 @@ import type {
   ProcessedWaitForInputFacets,
   ProcessedWaitForInputFilters,
   WaitForInputListResult,
+  WorkflowExecutionStatusCounts,
+  WorkflowExecutionStatusCountsParams,
   WorkflowExecutionStatusItem,
 } from '../services/workflow_execution_query_service';
 import { WorkflowExecutionQueryService } from '../services/workflow_execution_query_service';
@@ -521,6 +525,24 @@ export class WorkflowsService {
     return this.searchService.getWorkflowsSubscribedToTrigger(triggerId, spaceId);
   }
 
+  public async indexCalledWorkflowIds(ids: string[]): Promise<void> {
+    await this.ensureInitialized();
+    await this.crudService.indexCalledWorkflowIds(ids);
+  }
+
+  public async findWorkflowsCalling(
+    workflowIds: string[],
+    spaceId: string,
+    options: {
+      accessControlFilter?: estypes.QueryDslQueryContainer;
+      includeUnindexed?: boolean;
+      managedFilter?: ManagedFilter;
+    }
+  ): Promise<WorkflowLookupItem[]> {
+    await this.ensureInitialized();
+    return this.searchService.findWorkflowsCalling(workflowIds, spaceId, options);
+  }
+
   public async getWorkflows(
     params: GetWorkflowsParams,
     spaceId: string,
@@ -600,6 +622,14 @@ export class WorkflowsService {
   ): Promise<WorkflowExecutionListDto> {
     await this.ensureInitialized();
     return this.executionQueryService.getWorkflowExecutions(params, spaceId);
+  }
+
+  public async getWorkflowExecutionStatusCounts(
+    params: WorkflowExecutionStatusCountsParams,
+    spaceId: string
+  ): Promise<WorkflowExecutionStatusCounts> {
+    await this.ensureInitialized();
+    return this.executionQueryService.getWorkflowExecutionStatusCounts(params, spaceId);
   }
 
   public async searchExecutionsView(

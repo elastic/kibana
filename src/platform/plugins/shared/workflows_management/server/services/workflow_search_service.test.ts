@@ -122,6 +122,76 @@ describe('WorkflowSearchService', () => {
     });
   });
 
+  describe('findWorkflowsCalling', () => {
+    it('finds unindexed workflows by the indexing marker, since an empty list is not indexed', async () => {
+      const { deps, esClient } = makeDeps();
+      esClient.openPointInTime.mockResolvedValue({ id: 'pit-1' } as any);
+      esClient.search.mockResolvedValue({ hits: { hits: [] } } as any);
+
+      const service = new WorkflowSearchService(deps);
+      await service.findWorkflowsCalling(['child'], 'default', { includeUnindexed: true });
+
+      const searchArgs = esClient.search.mock.calls[0][0] as any;
+      expect(searchArgs.query.bool.must).toContainEqual({
+        bool: {
+          should: [
+            { terms: { calledWorkflowIds: ['child'] } },
+            { bool: { must_not: [{ term: { calledWorkflowIdsIndexed: true } }] } },
+          ],
+          minimum_should_match: 1,
+        },
+      });
+      expect(searchArgs.allow_partial_search_results).toBe(false);
+    });
+
+    it('fails rather than return some of the callers when there are too many to read', async () => {
+      const { deps, esClient } = makeDeps();
+      esClient.openPointInTime.mockResolvedValue({ id: 'pit-1' } as any);
+      const fullPage = Array.from({ length: 1000 }, (_, index) => ({
+        _id: `wf-${index}`,
+        _source: { name: 'Caller', enabled: true, definition: {} },
+        sort: [index],
+      }));
+      esClient.search.mockResolvedValue({ hits: { hits: fullPage } } as any);
+
+      const service = new WorkflowSearchService(deps);
+
+      await expect(service.findWorkflowsCalling(['child'], 'default', {})).rejects.toThrow(
+        'found more workflows than it can read'
+      );
+      expect(esClient.closePointInTime).toHaveBeenCalledWith({ id: 'pit-1' });
+    });
+
+    it('returns whether each caller is managed, which decides what it can run', async () => {
+      const { deps, esClient } = makeDeps();
+      esClient.openPointInTime.mockResolvedValue({ id: 'pit-1' } as any);
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            { _id: 'a', _source: { name: 'A', enabled: true, definition: {}, managed: true } },
+            { _id: 'b', _source: { name: 'B', enabled: true, definition: {} } },
+          ],
+        },
+      } as any);
+
+      const service = new WorkflowSearchService(deps);
+      const callers = await service.findWorkflowsCalling(['child'], 'default', {});
+      await service.findWorkflowsCalling(['child'], 'default', { managedFilter: 'unmanaged' });
+
+      expect((esClient.search.mock.calls[0][0] as any)._source).toContain('managed');
+      expect((esClient.search.mock.calls[0][0] as any).query.bool.must_not).not.toContainEqual({
+        term: { managed: true },
+      });
+      expect((esClient.search.mock.calls[1][0] as any).query.bool.must_not).toContainEqual({
+        term: { managed: true },
+      });
+      expect(callers.map(({ id, managed }) => [id, managed])).toEqual([
+        ['a', true],
+        ['b', false],
+      ]);
+    });
+  });
+
   describe('getWorkflows', () => {
     it('returns a page with total, page, size, and mapped results', async () => {
       const { deps, storageClient } = makeDeps();

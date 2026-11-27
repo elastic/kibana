@@ -1,5 +1,5 @@
 {
-  "sha1": "2faa523979876e06c431084e9e42a49120a23da0",
+  "sha1": "c76beacf837dcf777c1a849f7642b36daf382ff9",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -51,7 +51,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/data_quality/doc_counts_failed.spec.ts",
-        "line": 26,
+        "line": 27,
         "column": 34
       }
     },
@@ -71,7 +71,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/data_quality/doc_counts_ingestion_failure_store.spec.ts",
-        "line": 29,
+        "line": 30,
         "column": 36
       }
     },

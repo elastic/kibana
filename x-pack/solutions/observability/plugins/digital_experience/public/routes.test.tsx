@@ -98,7 +98,7 @@ describe('digitalExperienceRouter', () => {
   it('removes invalid sessions list params', () => {
     const location = {
       ...locationOf('/my-app/sessions'),
-      search: `?source=otel&hasErrors=true&duration=forever&sortField=user&page=1001&perPage=30&os=&country=${'X'.repeat(
+      search: `?source=otel&withJsErrors=true&withFailedRequests=true&duration=forever&sortField=error_count&page=1001&perPage=30&os=&country=${'X'.repeat(
         17
       )}&browser=Chrome`,
     };
@@ -106,7 +106,12 @@ describe('digitalExperienceRouter', () => {
     expect(() => digitalExperienceRouter.matchRoutes(location)).toThrow(
       expect.objectContaining({
         patched: expect.objectContaining({
-          query: { source: 'otel', hasErrors: 'true', browser: 'Chrome' },
+          query: {
+            source: 'otel',
+            withJsErrors: 'true',
+            withFailedRequests: 'true',
+            browser: 'Chrome',
+          },
         }),
       })
     );
@@ -115,12 +120,21 @@ describe('digitalExperienceRouter', () => {
   it('reads the sessions list params as their types', () => {
     const location = {
       ...locationOf('/my-app/sessions'),
-      search: '?source=otel&hasErrors=true&page=2&perPage=50&browser=Chrome',
+      search:
+        '?source=otel&withJsErrors=true&withFailedRequests=false&sortField=http_failed_request_count&page=2&perPage=50&browser=Chrome',
     };
 
     expect(digitalExperienceRouter.getParams('/{serviceName}/sessions', location)).toEqual({
       path: { serviceName: 'my-app' },
-      query: { source: 'otel', hasErrors: true, page: 2, perPage: 50, browser: 'Chrome' },
+      query: {
+        source: 'otel',
+        withJsErrors: true,
+        withFailedRequests: false,
+        sortField: 'http_failed_request_count',
+        page: 2,
+        perPage: 50,
+        browser: 'Chrome',
+      },
     });
   });
 
@@ -128,8 +142,8 @@ describe('digitalExperienceRouter', () => {
     expect(
       digitalExperienceRouter.link('/{serviceName}/sessions/{sessionId}', {
         path: { serviceName: 'my-app', sessionId: 'abc' },
-        query: { source: 'otel', hasErrors: true, perPage: 50 },
+        query: { source: 'otel', withFailedRequests: true, perPage: 50 },
       })
-    ).toBe('/my-app/sessions/abc?hasErrors=true&perPage=50&source=otel');
+    ).toBe('/my-app/sessions/abc?perPage=50&source=otel&withFailedRequests=true');
   });
 });

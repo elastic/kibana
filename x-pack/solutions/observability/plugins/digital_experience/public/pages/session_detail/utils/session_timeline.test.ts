@@ -64,6 +64,24 @@ describe('groupEventsByVisit', () => {
     ]);
   });
 
+  it('puts a late web vital on the page it measured, where the visit counts it', () => {
+    const groups = groupEventsByVisit(visits, [
+      // Settled when `/` was left, so it arrives during `/cart`, naming `/`.
+      { ...event('web_vital', 11_000, 'LCP'), page: '/' },
+      { ...event('web_vital', 12_000, 'CLS'), page: '/cart' },
+      event('web_vital', 13_000, 'INP'),
+      // A page with no visit before it stays with the open one.
+      { ...event('web_vital', 14_000, 'FCP'), page: '/checkout' },
+    ]);
+
+    expect(
+      groups.map(({ visit: { page }, events }) => [page, events.map(({ name }) => name)])
+    ).toEqual([
+      ['/', ['LCP']],
+      ['/cart', ['CLS', 'INP', 'FCP']],
+    ]);
+  });
+
   it('puts events before the first visit in it', () => {
     const [first] = groupEventsByVisit(visits, [event('click', -2_000)]);
     expect(first.events.map(({ kind }) => kind)).toEqual(['click']);

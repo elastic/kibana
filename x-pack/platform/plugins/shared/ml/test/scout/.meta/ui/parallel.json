@@ -1,0 +1,89 @@
+{
+  "sha1": "1abfbf162d511259f961d4baf3ef08c5c0d2cbc7",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "94604daa15e67f7-5c932242efd01c6",
+      "title": "Load farequote data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/parallel_tests/global.setup.ts",
+        "line": 6,
+        "column": 1
+      }
+    },
+    {
+      "id": "bfa12494067854b-2919b56fc2cd0d9",
+      "title": "anomaly charts in dashboard creates an anomaly charts panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/parallel_tests/anomaly_charts_dashboard_embeddable.spec.ts",
+        "line": 64,
+        "column": 33
+      }
+    },
+    {
+      "id": "bbb0d86a6635f29-009ba820dd0e947",
+      "title": "anomaly swim lane embedded in dashboard - request cancellation cancels in-flight searches when navigating away from the dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/parallel_tests/anomaly_swimlane_embeddable_cancellation.spec.ts",
+        "line": 65,
+        "column": 33
+      }
+    },
+    {
+      "id": "bbb0d86a6635f29-031bcd1880132e5",
+      "title": "anomaly swim lane embedded in dashboard - request cancellation cancels in-flight searches when clicking the cancel button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/parallel_tests/anomaly_swimlane_embeddable_cancellation.spec.ts",
+        "line": 67,
+        "column": 15
+      }
+    },
+    {
+      "id": "b6a1436d2070b79-30c3cb6a5a28299",
+      "title": "single metric viewer embedded in dashboard - request cancellation cancels in-flight searches when navigating away from the dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/parallel_tests/single_metric_viewer_embeddable_cancellation.spec.ts",
+        "line": 64,
+        "column": 48
+      }
+    },
+    {
+      "id": "b6a1436d2070b79-5485ad12d1d58a7",
+      "title": "single metric viewer embedded in dashboard - request cancellation cancels in-flight searches when clicking the cancel button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/parallel_tests/single_metric_viewer_embeddable_cancellation.spec.ts",
+        "line": 67,
+        "column": 7
+      }
+    }
+  ]
+}

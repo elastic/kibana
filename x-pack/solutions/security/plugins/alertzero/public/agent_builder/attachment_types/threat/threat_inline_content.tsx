@@ -28,7 +28,7 @@ import { FormattedRelative } from '@kbn/i18n-react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { QueryClientProvider, useQuery } from '@kbn/react-query';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
-import { isHuntEligibleIoc } from '@kbn/alertzero-common';
+import { isHuntEligibleIoc, isNonRoutableIpIoc } from '@kbn/alertzero-common';
 import type { AttachmentNavigationDeps } from '../navigation';
 import { buildDiscoverThreatReportNestedIocUrl } from '../navigation';
 import { IocBadge, discoverAction } from '../shared/ioc_badge';
@@ -160,6 +160,11 @@ const formatIocTierLabel = (ioc: ThreatIoc): string | undefined => {
   if (asBoolean(ioc.deferred_unreviewed) === true) {
     return i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.iocTierPendingReview', {
       defaultMessage: 'Pending review',
+    });
+  }
+  if (isNonRoutableIpIoc(ioc)) {
+    return i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.iocTierNonRoutable', {
+      defaultMessage: 'Non-routable address',
     });
   }
   switch (asString(ioc.tier)) {
@@ -354,6 +359,8 @@ const renderIocsSection = (
   for (const ioc of nonDenied) {
     if (
       isHuntEligibleIoc({
+        type: asString(ioc.type),
+        value: asString(ioc.value),
         tier: asString(ioc.tier),
         deferred_unreviewed: asBoolean(ioc.deferred_unreviewed),
       })

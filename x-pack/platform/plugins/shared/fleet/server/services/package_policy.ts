@@ -58,6 +58,7 @@ import {
   getRegistryStreamWithDataStreamForInputType,
   syncDataStreamTypeFromVar,
   validateFleetSavedObjectId,
+  isPackageNameFipsIncompatible,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -4158,14 +4159,15 @@ function assertFipsCompatiblePackageOrThrow(
     return;
   }
   const action = oldInputs ? 'update' : 'create';
-  if (!oldInputs && isPackageFipsIncompatible(pkgInfo.policy_templates)) {
+  if (!oldInputs && isPackageFipsIncompatible(pkgInfo.policy_templates, pkgInfo.name)) {
     throw new PackageFipsIncompatibleError(
       `Cannot create a package policy for ${pkgInfo.name}: the integration is not FIPS compatible`
     );
   }
+  const isWholePackageNonFips = isPackageNameFipsIncompatible(pkgInfo.name);
   const nonFipsTemplates = new Set(
     (pkgInfo.policy_templates ?? [])
-      .filter((template) => template.fips_compatible === false)
+      .filter((template) => isWholePackageNonFips || template.fips_compatible === false)
       .map((template) => template.name)
   );
   const nonFipsInput = packagePolicy.inputs.find((input) => {

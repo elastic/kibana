@@ -12,7 +12,16 @@ import { SAMPLING_INTERVAL_US } from './constants';
 
 /** The parts of a V8 CPU profile (`Profiler.Profile`) the watchdog reads. */
 export interface CpuProfile {
-  nodes: ReadonlyArray<{ id: number; callFrame: { functionName: string } }>;
+  nodes: ReadonlyArray<{
+    id: number;
+    callFrame: {
+      functionName: string;
+      url?: string;
+      /** 0-based; -1 when unknown. */
+      lineNumber?: number;
+    };
+    children?: readonly number[];
+  }>;
   /** Microseconds; when profiling was requested, before the first sample. */
   startTime: number;
   endTime: number;

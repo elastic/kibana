@@ -10,7 +10,7 @@
 import { z, lazySchema } from '@kbn/zod';
 import { LENS_TAGCLOUD_DEFAULT_STATE } from '@kbn/lens-common';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
-import { colorMappingSchema } from '../color';
+import { colorMappingSchema, DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../color';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import { orientationSchema } from '../enums';
@@ -23,7 +23,7 @@ const tagcloudConfigTagsByOptionsShape = {
   /**
    * Color configuration
    */
-  color: colorMappingSchema.optional(),
+  color: colorMappingSchema.default(DEFAULT_CATEGORICAL_COLOR_MAPPING).optional(),
 };
 
 const tagcloudStylingSchema = lazySchema(() =>

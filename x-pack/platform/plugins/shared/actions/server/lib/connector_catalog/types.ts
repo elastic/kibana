@@ -5,6 +5,21 @@
  * 2.0.
  */
 
+import type {
+  ActionType,
+  ActionTypeConfig,
+  ActionTypeParams,
+  ActionTypeSecrets,
+} from '../../types';
+
+/** The type a catalog definition builds into. */
+export type CatalogActionType = ActionType<
+  ActionTypeConfig,
+  ActionTypeSecrets,
+  ActionTypeParams,
+  unknown
+>;
+
 export interface CatalogDefinitionRef {
   id: string;
   version: string;

@@ -36,6 +36,8 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
     plugins,
     isServerless,
     isUxEnabled,
+    sessionsSettings,
+    getSessionsServices,
     logger,
   }): Promise<ApplicationsResponse> => {
     const { environment } = params.query;
@@ -92,11 +94,14 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
           })
       : undefined;
 
+    const { taskManager, sessionsReadable } = await getSessionsServices();
     return getApplications({
       getOtelApplications: () =>
         getOtelApplicationsFromBestSource({
           esClient,
-          internalEsClient,
+          taskManager,
+          sessionsSettings,
+          sessionsReadable,
           start,
           end,
           environment,

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
 import { getDocId, type EsHitRecord } from '@kbn/discover-utils';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import moment from 'moment';
@@ -180,17 +179,6 @@ describe('fetchEsql', () => {
       expect.objectContaining({
         kibanaQueryContext: expect.objectContaining({ timeRange: absoluteTimeRange }),
       }),
-      expect.anything()
-    );
-  });
-
-  it('passes the Kibana locale to the search method', async () => {
-    mockEsqlResult([], []);
-
-    await fetchEsql(fetchEsqlMockProps);
-
-    expect(discoverServiceMock.data.search.esql).toHaveBeenCalledWith(
-      expect.objectContaining({ locale: i18n.getLocale() }),
       expect.anything()
     );
   });
