@@ -200,7 +200,7 @@ export function withRemovedOtlpHeaders(
 /**
  * The exporter an output has once an update is saved. The update is merged into the saved
  * exporter, unless it changes the protocol: the settings of the previous protocol are removed,
- * the shared headers are kept.
+ * the headers and TLS settings, shared by both protocols, are kept.
  */
 function getMergedOtlpExporter(
   update: OtlpExporterConfig | undefined,
