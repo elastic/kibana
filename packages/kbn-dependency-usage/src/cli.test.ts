@@ -43,8 +43,8 @@ describe('dependency-usage CLI', () => {
     jest.resetAllMocks();
   });
 
-  it('should handle verbose option', () => {
-    const argv = parser.parse(['--paths', './plugins', '--verbose']);
+  it('should handle verbose option', async () => {
+    const argv = await parser.parseAsync(['--paths', './plugins', '--verbose']);
     expect(argv.verbose).toBe(true);
 
     expect(identifyDependencyUsageWithCruiser).toHaveBeenCalledWith(
@@ -54,8 +54,8 @@ describe('dependency-usage CLI', () => {
     );
   });
 
-  it('should group results by specified group-by option', () => {
-    const argv = parser.parse(['--paths', './src', '--group-by', 'owner']);
+  it('should group results by specified group-by option', async () => {
+    const argv = await parser.parseAsync(['--paths', './src', '--group-by', 'owner']);
     expect(argv['group-by']).toBe('owner');
 
     expect(identifyDependencyUsageWithCruiser).toHaveBeenCalledWith(
@@ -65,8 +65,8 @@ describe('dependency-usage CLI', () => {
     );
   });
 
-  it('should use default values when optional arguments are not provided', () => {
-    const argv = parser.parse([]);
+  it('should use default values when optional arguments are not provided', async () => {
+    const argv = await parser.parseAsync([]);
     expect(argv.paths).toEqual(['.']);
     expect(argv['dependency-name']).toBeUndefined();
     expect(argv['collapse-depth']).toBe(1);
@@ -74,24 +74,24 @@ describe('dependency-usage CLI', () => {
   });
 
   it('should throw an error if summary is used without dependency-name', () => {
-    expect(() => {
-      parser.parse(['--summary', '--paths', './src']);
-    }).toThrow('Summary option can only be used when a dependency name is provided');
+    expect(() => parser.parseSync(['--summary', '--paths', './src'])).toThrow(
+      'Summary option can only be used when a dependency name is provided'
+    );
   });
 
   it('should validate collapse-depth as a positive integer', () => {
-    expect(() => {
-      parser.parse(['--paths', './src', '--collapse-depth', '0']);
-    }).toThrow('Collapse depth must be a positive integer');
+    expect(() => parser.parseSync(['--paths', './src', '--collapse-depth', '0'])).toThrow(
+      'Collapse depth must be a positive integer'
+    );
   });
 
-  it('should output results to specified output path', () => {
-    const argv = parser.parse(['--paths', './src', '--output-path', './output.json']);
+  it('should output results to specified output path', async () => {
+    const argv = await parser.parseAsync(['--paths', './src', '--output-path', './output.json']);
     expect(argv['output-path']).toBe('./output.json');
   });
 
-  it('should print results to console if no output path is specified', () => {
-    const argv = parser.parse(['--paths', './src']);
+  it('should print results to console if no output path is specified', async () => {
+    const argv = await parser.parseAsync(['--paths', './src']);
     expect(argv['output-path']).toBeUndefined();
   });
 });

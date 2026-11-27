@@ -55,7 +55,7 @@ const loadAllIndices = (esUrl: string, kibanaUrl: string, mappingsDir: string) =
 };
 
 const main = () => {
-  const { argv } = yargs(process.argv.slice(2))
+  const argv = yargs(process.argv.slice(2))
     .option('es-url', {
       demandOption: false,
       type: 'string',
@@ -73,7 +73,8 @@ const main = () => {
       type: 'string',
       description: 'The name of the directory with all the mapping folders',
     })
-    .help();
+    .help()
+    .parseSync();
 
   const { 'es-url': esUrl, 'kibana-url': kibanaUrl, 'mappings-dir': mappingsDir } = argv;
   loadAllIndices(esUrl, kibanaUrl, mappingsDir);

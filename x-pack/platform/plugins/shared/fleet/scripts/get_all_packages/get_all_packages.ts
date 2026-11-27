@@ -21,7 +21,7 @@ const KIBANA_PASSWORD = 'changeme';
 const KIBANA_VERSION = kibanaPackageJson.version;
 const PUBLIC_VERSION_V1 = '2023-10-31';
 
-const { base = '', prerelease = false, batchSize = 1 } = yargs(process.argv).argv;
+const { base = '', prerelease = false, batchSize = 1 } = yargs(process.argv).parseSync();
 
 const logger = new ToolingLog({
   level: 'info',

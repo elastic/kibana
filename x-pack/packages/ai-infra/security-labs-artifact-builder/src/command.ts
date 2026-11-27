@@ -6,7 +6,7 @@
  */
 
 import Path from 'path';
-import yargs from 'yargs';
+import yargs, { type Argv } from 'yargs';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getSecurityLabsUtcTimestampVersion } from '@kbn/product-doc-common';
 import { DEFAULT_ELSER } from './tasks/create_index';
@@ -25,7 +25,7 @@ const parseList = (value: string): string[] =>
     .map((item) => item.trim())
     .filter(Boolean);
 
-function options(y: yargs.Argv) {
+function options(y: Argv) {
   return y
     .version(false) // Disable built-in version flag to avoid conflict
     .option('artifactVersion', {

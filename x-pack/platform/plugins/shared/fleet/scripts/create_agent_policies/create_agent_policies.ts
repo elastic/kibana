@@ -158,7 +158,7 @@ export async function run() {
     _,
     $0,
     ...otherArgs
-  } = yargs(process.argv.slice(2)).argv;
+  } = yargs(process.argv.slice(2)).parseSync();
   if (Object.keys(otherArgs).length) {
     logger.error(`Unknown arguments: ${Object.keys(otherArgs).join(', ')}`);
     printUsage();

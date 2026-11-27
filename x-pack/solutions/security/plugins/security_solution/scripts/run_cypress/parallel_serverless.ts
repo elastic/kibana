@@ -324,7 +324,7 @@ export const cli = () => {
         // return process.exit(0);
       }
 
-      const { argv } = yargs(process.argv.slice(2))
+      const argv = yargs(process.argv.slice(2))
         .coerce('configFile', (arg) => (_.isArray(arg) ? _.last(arg) : arg))
         .coerce('spec', (arg) => (_.isArray(arg) ? _.last(arg) : arg))
         .coerce('env', (arg: string) =>
@@ -363,7 +363,8 @@ export const cli = () => {
           alias: 'b',
           type: 'string',
           default: '',
-        });
+        })
+        .parseSync();
 
       log.info(`
 ----------------------------------------------

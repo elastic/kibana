@@ -901,6 +901,94 @@ function rewriteLazyObjects(parsed, source) {
   }
 }
 
+// Jest runs CommonJS output inside a wrapper whose parameters are `require`, `__dirname` and
+// `__filename`, so an ES module that declares one of those names at the top level (e.g. yargs'
+// `const require = createRequire(import.meta.url)`) fails with "Identifier has already been
+// declared". Babel's CommonJS transform renamed such bindings; SWC does not, so rename every
+// reference here. A top-level declaration means no reference in the file can reach the wrapper.
+const CJS_WRAPPER_NAMES = ['require', '__dirname', '__filename'];
+
+const NON_REFERENCE_KEYS = new Map([
+  ['MemberExpression', 'property'],
+  ['SuperPropExpression', 'property'],
+  ['ImportSpecifier', 'imported'],
+  ['ExportSpecifier', 'exported'],
+  ['ExportNamespaceSpecifier', 'name'],
+  ['LabeledStatement', 'label'],
+  ['BreakStatement', 'label'],
+  ['ContinueStatement', 'label'],
+]);
+
+function getTopLevelBindingNames(ast) {
+  return new Set(
+    ast.body.flatMap((item) => {
+      if (item.type === 'ImportDeclaration') {
+        return item.specifiers.map(({ local }) => local.value);
+      }
+
+      const declaration = item.type === 'ExportDeclaration' ? item.declaration : item;
+      return getDeclarationIdentifiers(declaration).map(({ value }) => value);
+    })
+  );
+}
+
+function renameCjsWrapperBindings(parsed, source) {
+  const topLevelNames = getTopLevelBindingNames(parsed.ast);
+  const renames = new Map(
+    CJS_WRAPPER_NAMES.filter((name) => topLevelNames.has(name)).map((name) => [
+      name,
+      `__kbnJestEsm_${name}`,
+    ])
+  );
+
+  if (renames.size === 0) {
+    return;
+  }
+
+  const visit = (node, parent, key) => {
+    if (!node || typeof node !== 'object') {
+      return;
+    }
+
+    if (Array.isArray(node)) {
+      node.forEach((item) => visit(item, parent, key));
+      return;
+    }
+
+    if (node.type === 'Identifier' && renames.has(node.value)) {
+      const renamed = renames.get(node.value);
+      const isPropertyName = key === 'key' && parent.type !== 'AssignmentPatternProperty';
+
+      if (isPropertyName || NON_REFERENCE_KEYS.get(parent.type) === key) {
+        return;
+      }
+
+      if (
+        (parent.type === 'ObjectExpression' && key === 'properties') ||
+        parent.type === 'AssignmentPatternProperty'
+      ) {
+        // shorthand `{ require }` keeps its property name
+        source.overwrite(parsed.start(node), parsed.end(node), `${node.value}: ${renamed}`);
+      } else if (parent.type === 'ExportSpecifier' && !parent.exported) {
+        source.overwrite(parsed.start(node), parsed.end(node), `${renamed} as ${node.value}`);
+      } else if (parent.type === 'ImportSpecifier' && !parent.imported) {
+        source.overwrite(parsed.start(node), parsed.end(node), `${node.value} as ${renamed}`);
+      } else {
+        source.overwrite(parsed.start(node), parsed.end(node), renamed);
+      }
+      return;
+    }
+
+    for (const [childKey, value] of Object.entries(node)) {
+      if (childKey !== 'span') {
+        visit(value, node.type ? node : parent, node.type ? childKey : key);
+      }
+    }
+  };
+
+  visit(parsed.ast);
+}
+
 // babel-plugin-add-module-exports exposed a sole default export directly through module.exports.
 function hasSoleDefaultExport(ast) {
   const exportNames = new Set();
@@ -947,6 +1035,8 @@ const ENUM_KEYWORD = /\benum\b/;
 const JEST_MOCK_CALL = /\bjest\s*\.\s*mock\s*\(/;
 const LAZY_OBJECT_CALL = /\blazyObject\s*\(/;
 const DEFAULT_EXPORT = /\bexport\s+default\b|\bas\s+default\b|\bexport\s*\{[^}]*\bdefault\b/;
+const CJS_WRAPPER_DECLARATION =
+  /\b(?:const|let|var|function|class|import)\s+(?:require|__dirname|__filename)\b/;
 
 function prepareSource(sourceText, sourcePath) {
   // .ts files can't contain JSX
@@ -956,8 +1046,16 @@ function prepareSource(sourceText, sourcePath) {
   const rewriteMocks = JEST_MOCK_CALL.test(sourceText);
   const rewriteLazy = sourceText.includes(LAZY_OBJECT_MODULE) && LAZY_OBJECT_CALL.test(sourceText);
   const checkDefaultExport = DEFAULT_EXPORT.test(sourceText);
+  const renameWrapperBindings = CJS_WRAPPER_DECLARATION.test(sourceText);
 
-  if (!normalizeJsx && !inlineEnums && !rewriteMocks && !rewriteLazy && !checkDefaultExport) {
+  if (
+    !normalizeJsx &&
+    !inlineEnums &&
+    !rewriteMocks &&
+    !rewriteLazy &&
+    !checkDefaultExport &&
+    !renameWrapperBindings
+  ) {
     return { code: sourceText, hoistedModuleNames: new Set(), soleDefaultExport: false };
   }
 
@@ -979,6 +1077,10 @@ function prepareSource(sourceText, sourcePath) {
 
   if (rewriteLazy) {
     rewriteLazyObjects(parsed, source);
+  }
+
+  if (renameWrapperBindings) {
+    renameCjsWrapperBindings(parsed, source);
   }
 
   const soleDefaultExport = checkDefaultExport && hasSoleDefaultExport(parsed.ast);

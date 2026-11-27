@@ -160,7 +160,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
 
   let result: ParsedPreviewCommand | undefined;
 
-  yargs(tokens)
+  void yargs(tokens)
     .options(SCHEDULE_OPTIONS)
 
     .command(

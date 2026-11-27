@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { argv } from 'yargs';
+import yargs from 'yargs';
 import { execSync } from 'child_process';
 import moment from 'moment';
 import path from 'path';
@@ -14,6 +14,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getEsClient } from '../shared/get_es_client';
 import { parseIndexUrl } from '../shared/parse_index_url';
+const argv = yargs(process.argv.slice(2)).parseSync();
 
 async function run() {
   const archiveName = 'apm_8.0.0';

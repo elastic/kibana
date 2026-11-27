@@ -750,4 +750,29 @@ export function update() {
       ).not.toBe(first);
     });
   });
+
+  describe('ES modules declaring CommonJS wrapper names', () => {
+    it('renames top-level require and __dirname bindings so the module runs in the wrapper', () => {
+      const moduleExports = evaluate(
+        `
+          import { createRequire } from 'node:module';
+          const require = createRequire('/repo/example.mjs');
+          const __dirname = '/esm/dir';
+          const shim = { require, dirname: __dirname, other: { require: 1 }.require };
+          export { require, shim };
+        `,
+        {
+          filename: '/repo/example.mjs',
+          modules: { 'node:module': { createRequire: () => 'local-require' } },
+        }
+      );
+
+      expect(moduleExports.require).toBe('local-require');
+      expect(moduleExports.shim).toEqual({
+        require: 'local-require',
+        dirname: '/esm/dir',
+        other: 1,
+      });
+    });
+  });
 });
