@@ -398,7 +398,7 @@ describe('CsvGenerator', () => {
         {
           abortSignal: expect.any(AbortSignal),
           strategy: 'es',
-          transport: { maxRetries: 0, requestTimeout: '30s' },
+          transport: { maxRetries: 1, requestTimeout: '30s' },
         }
       );
 
@@ -801,7 +801,7 @@ describe('CsvGenerator', () => {
         {
           abortSignal: expect.any(AbortSignal),
           strategy: 'es',
-          transport: { maxRetries: 0, requestTimeout: `${timeFromNowInMs}ms` },
+          transport: { maxRetries: 1, requestTimeout: `${timeFromNowInMs}ms` },
         }
       );
 
@@ -889,7 +889,7 @@ describe('CsvGenerator', () => {
         {
           abortSignal: expect.any(AbortSignal),
           strategy: 'es',
-          transport: { maxRetries: 0, requestTimeout: `${timeFromNowInMs}ms` },
+          transport: { maxRetries: 1, requestTimeout: `${timeFromNowInMs}ms` },
         }
       );
     });
@@ -1598,7 +1598,7 @@ describe('CsvGenerator', () => {
       {
         abortSignal: expect.any(AbortSignal),
         strategy: 'es',
-        transport: { maxRetries: 0, requestTimeout: '30s' },
+        transport: { maxRetries: 1, requestTimeout: '30s' },
       }
     );
   });
