@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { BaseStepDefinition } from '@kbn/workflows';
 import { StepCategory } from '@kbn/workflows';
+import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { z } from '@kbn/zod/v4';
 import {
   MAX_TITLE_LENGTH,
@@ -82,7 +82,7 @@ export const createProposalStepOutputSchema = z.object({
   expiresAt: z.string().optional(),
 });
 
-export const createProposalStepCommonDefinition: BaseStepDefinition<
+export const createProposalStepCommonDefinition: CommonStepDefinition<
   typeof createProposalStepInputSchema,
   typeof createProposalStepOutputSchema
 > = {
@@ -96,6 +96,7 @@ export const createProposalStepCommonDefinition: BaseStepDefinition<
   }),
   category: StepCategory.Kibana,
   stability: 'beta',
+  exposure: 'internal',
   inputSchema: createProposalStepInputSchema,
   outputSchema: createProposalStepOutputSchema,
   documentation: {

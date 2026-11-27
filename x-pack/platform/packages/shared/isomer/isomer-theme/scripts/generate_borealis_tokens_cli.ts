@@ -7,8 +7,9 @@
 
 import { writeFileSync } from 'fs';
 import Path from 'path';
-import { format, resolveConfig } from 'prettier';
 import { run } from '@kbn/dev-cli-runner';
+import { formatWithOxfmt } from '@kbn/oxfmt';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { computeBorealisTokens } from './compute_borealis_tokens';
 
 const OUTPUT = Path.resolve(__dirname, '../src/borealis_tokens.generated.ts');
@@ -31,7 +32,6 @@ export const borealisLight: BorealisTokenValues = ${JSON.stringify(light, null, 
 export const borealisDark: BorealisTokenValues = ${JSON.stringify(dark, null, 2)};
 `;
 
-  const config = await resolveConfig(OUTPUT);
-  writeFileSync(OUTPUT, await format(source, { ...config, parser: 'typescript' }));
+  writeFileSync(OUTPUT, await formatWithOxfmt(Path.relative(REPO_ROOT, OUTPUT), source));
   log.success(`Wrote ${Path.relative(process.cwd(), OUTPUT)}`);
 });

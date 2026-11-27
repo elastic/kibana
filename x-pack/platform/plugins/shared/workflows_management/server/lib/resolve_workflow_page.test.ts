@@ -34,9 +34,9 @@ const setup = (
         } as WorkflowProperties);
   const getWorkflowSource = jest.fn(async () => workflow);
   const pagesSystemClient = {
-    verifyPageSecret: jest.fn(
-      async (): Promise<VerifyPageSecretResult> => ({ workflowCreatedAt: WORKFLOW_CREATED_AT })
-    ),
+    verifyPageSecret: jest.fn(async (): Promise<VerifyPageSecretResult> => ({
+      workflowCreatedAt: WORKFLOW_CREATED_AT,
+    })),
   };
   const serviceAccountBindings = {
     isEnabled: jest.fn(() => bindingsEnabled),

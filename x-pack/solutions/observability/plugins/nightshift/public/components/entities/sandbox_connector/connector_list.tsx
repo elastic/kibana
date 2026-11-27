@@ -60,8 +60,8 @@ export function ConnectorList({
             connector.is_preconfigured
               ? preconfiguredTooltip
               : canOpenDetails
-              ? undefined
-              : editNoPermissionTooltip
+                ? undefined
+                : editNoPermissionTooltip
           }
           onDelete={() => onDelete(connector)}
           ebtElement={ebtElement}
@@ -69,10 +69,10 @@ export function ConnectorList({
             connector.is_preconfigured
               ? preconfiguredTooltip
               : !canDelete
-              ? deleteNoPermissionTooltip
-              : !canEditAgent
-              ? noAgentPermissionReason
-              : undefined
+                ? deleteNoPermissionTooltip
+                : !canEditAgent
+                  ? noAgentPermissionReason
+                  : undefined
           }
         />
       ))}

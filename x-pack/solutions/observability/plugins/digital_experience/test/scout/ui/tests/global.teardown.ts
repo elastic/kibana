@@ -6,6 +6,7 @@
  */
 
 import { globalTeardownHook } from '@kbn/scout-oblt';
+import { deleteMobileCrashData } from '../../common/fixtures/mobile_crash_data';
 import { deleteMobileData } from '../../common/fixtures/mobile_data';
 import { deleteOtelRumData } from '../../common/fixtures/otel_rum_data';
 import { deleteSessionsData } from '../../common/fixtures/sessions_data';
@@ -22,6 +23,7 @@ globalTeardownHook(
     const results = await Promise.allSettled([
       deleteOtelRumData(esClient),
       deleteMobileData(esClient),
+      deleteMobileCrashData(esClient),
       deleteSessionsData(esClient, kbnClient),
     ]);
     const failures = results.flatMap((result) =>

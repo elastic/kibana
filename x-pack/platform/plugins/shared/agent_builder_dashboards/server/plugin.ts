@@ -27,15 +27,12 @@ import {
 import { createDashboardSmlType } from './sml_types';
 import { createDashboardAppStateValidator } from './tools/generate/validate_dashboard_app_state';
 
-export class AgentBuilderDashboardsPlugin
-  implements
-    Plugin<
-      AgentBuilderDashboardsPluginSetup,
-      AgentBuilderDashboardsPluginStart,
-      AgentBuilderDashboardsSetupDependencies,
-      AgentBuilderDashboardsStartDependencies
-    >
-{
+export class AgentBuilderDashboardsPlugin implements Plugin<
+  AgentBuilderDashboardsPluginSetup,
+  AgentBuilderDashboardsPluginStart,
+  AgentBuilderDashboardsSetupDependencies,
+  AgentBuilderDashboardsStartDependencies
+> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

@@ -1080,7 +1080,7 @@ describe('StreamsUnitService', () => {
     const decryptingClient = (stored: SavedObject<StreamsConfigurationSavedObjectAttributes>) =>
       ({
         getDecryptedAsInternalUser: jest.fn().mockResolvedValue(stored),
-      } as unknown as EncryptedSavedObjectsClient);
+      }) as unknown as EncryptedSavedObjectsClient;
 
     it('persists the prepared blobs next to the secrets', async () => {
       const soClient = createSoClient();
@@ -1249,7 +1249,7 @@ describe('StreamsUnitService', () => {
     const decrypting = (stored: SavedObject<StreamsConfigurationSavedObjectAttributes>) =>
       ({
         getDecryptedAsInternalUser: jest.fn().mockResolvedValue(stored),
-      } as unknown as EncryptedSavedObjectsClient);
+      }) as unknown as EncryptedSavedObjectsClient;
 
     // `get` is the version re-read before the PUT; `create` answers a write with version v2.
     const soClientAt = (currentVersion: string) => {

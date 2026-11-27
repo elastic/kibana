@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isValidElement } from 'react';
-import { render } from '@testing-library/react';
+import React, { isValidElement } from 'react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { ReactElement } from 'react';
-import { EuiSwitch, EuiToolTip, type EuiThemeComputed } from '@elastic/eui';
+import { EuiContextMenu, EuiSwitch, EuiToolTip, type EuiThemeComputed } from '@elastic/eui';
 import {
   createReturnFocus,
   getDisplayedItemsAllowedAmount,
@@ -483,6 +484,34 @@ describe('utils', () => {
       expect(result).not.toHaveProperty('data-ebt-action');
       expect(result).not.toHaveProperty('data-ebt-element');
       expect(result).not.toHaveProperty('data-ebt-detail');
+    });
+
+    describe('when the popover is dismissed', () => {
+      const anchorElement = document.createElement('button');
+
+      afterEach(() => {
+        anchorElement.remove();
+      });
+
+      it('should return focus past the dismissed popover item, even while it is still mounted', async () => {
+        const user = userEvent.setup();
+        const run = jest.fn();
+        document.body.append(anchorElement);
+
+        const panelItem = mapAppMenuItemToPanelItem(
+          { ...baseItem, run },
+          undefined,
+          jest.fn(),
+          undefined,
+          anchorElement
+        );
+        render(<EuiContextMenu initialPanelId={0} panels={[{ id: 0, items: [panelItem] }]} />);
+
+        await user.click(screen.getByText('Test item'));
+        run.mock.calls[0][0].returnFocus();
+
+        expect(document.activeElement).toBe(anchorElement);
+      });
     });
 
     it('should include tooltip content and title', () => {
@@ -1088,7 +1117,7 @@ describe('utils', () => {
         run: jest.fn(),
         iconType: 'gear',
         ...overrides,
-      } as AppMenuItemType);
+      }) as AppMenuItemType;
 
     it('should return an empty array when no items are provided', () => {
       expect(processStaticItems()).toEqual([]);

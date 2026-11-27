@@ -27,13 +27,13 @@ const makeEpisode = (id: string, overrides: Partial<AlertEpisode> = {}): AlertEp
     last_timestamp: '2026-04-23T00:00:00Z',
     duration: 0,
     ...overrides,
-  } as AlertEpisode);
+  }) as AlertEpisode;
 
 const makeSourceEpisode = (id: string): AlertEpisode =>
   ({
     ...makeEpisode(id),
     source_id: 'classic-alerts',
-  } as AlertEpisode);
+  }) as AlertEpisode;
 
 const makeDeps = (): CompositeActionDeps => ({
   http: httpServiceMock.createStartContract(),

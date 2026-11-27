@@ -170,7 +170,7 @@ describe('getIndexFields', () => {
       transport: {
         request: overrides?.transport ?? jest.fn(),
       },
-    } as unknown as ElasticsearchClient);
+    }) as unknown as ElasticsearchClient;
 
   beforeEach(() => {
     jest.clearAllMocks();

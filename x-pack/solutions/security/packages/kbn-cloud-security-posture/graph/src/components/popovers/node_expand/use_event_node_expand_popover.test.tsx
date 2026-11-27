@@ -75,7 +75,7 @@ const createMockEventNode = (): NodeProps =>
       color: 'primary',
       kind: 'event',
     },
-  } as unknown as NodeProps);
+  }) as unknown as NodeProps;
 
 const createMockSingleEventNode = (): NodeProps => {
   const base = createMockEventNode();

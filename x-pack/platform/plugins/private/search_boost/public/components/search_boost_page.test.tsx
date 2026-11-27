@@ -79,6 +79,9 @@ const renderPage = (http = createHttp(), initialPath = '/', canOpenIndexManageme
 
 const fetchError = (body: object) => Object.assign(new Error('Request failed'), { body });
 
+const getFlyoutButton = (name: 'Close' | 'Delete') =>
+  within(screen.getByTestId('dataStreamFlyout')).getByRole('button', { name });
+
 describe('SearchBoostPage', () => {
   afterEach(() => {
     contentListQueryClient.clear();
@@ -260,12 +263,12 @@ describe('SearchBoostPage', () => {
     expect(screen.getByTestId('dataStreamFlyout')).toHaveTextContent('logs-nginx-default');
     expect(history.location.pathname).toBe('/rules/web-logs');
 
-    await userEvent.click(screen.getByRole('button', { name: 'Close' }));
+    await userEvent.click(getFlyoutButton('Close'));
     expect(screen.queryByTestId('dataStreamFlyout')).not.toBeInTheDocument();
     expect(http.get).toHaveBeenCalledTimes(2);
 
-    await userEvent.click(screen.getByRole('link', { name: 'logs-nginx-default' }));
-    await userEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    await userEvent.click(link);
+    await userEvent.click(getFlyoutButton('Delete'));
     await waitFor(() => expect(http.get).toHaveBeenCalledTimes(4));
   });
 
@@ -275,7 +278,7 @@ describe('SearchBoostPage', () => {
     await userEvent.click(await screen.findByRole('link', { name: 'logs-nginx-default' }));
     http.get.mockRejectedValue(fetchError({ statusCode: 500, message: 'Something broke' }));
 
-    await userEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    await userEvent.click(getFlyoutButton('Delete'));
 
     expect(await screen.findByTestId('searchBoostLoadError')).toHaveTextContent('Something broke');
 

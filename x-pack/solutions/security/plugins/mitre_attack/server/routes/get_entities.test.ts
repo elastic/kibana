@@ -38,7 +38,7 @@ describe('registerGetEntitiesRoute', () => {
   ) =>
     ({
       mitreAttack: Promise.resolve({ getMitreDataClient }),
-    } as any);
+    }) as any;
 
   const getHandler = () =>
     router.versioned.getRoute('get', GET_MITRE_ENTITIES_URL).versions['1'].handler;

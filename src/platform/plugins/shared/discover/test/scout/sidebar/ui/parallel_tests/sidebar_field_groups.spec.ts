@@ -182,9 +182,8 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
         ]);
 
         await unifiedFieldList.expectSidebarSectionFieldCount('popular', 4);
-        const popularAfterRuntimeField = await unifiedFieldList.getSidebarSectionFieldNames(
-          'popular'
-        );
+        const popularAfterRuntimeField =
+          await unifiedFieldList.getSidebarSectionFieldNames('popular');
         expect(popularAfterRuntimeField[0]).toBe(runtimeFieldName);
         expect(popularAfterRuntimeField).toContain('@message');
         expect(popularAfterRuntimeField).toContain('extension');

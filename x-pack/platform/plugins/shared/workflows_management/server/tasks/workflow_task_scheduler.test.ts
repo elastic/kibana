@@ -24,10 +24,10 @@ const makeTaskInstance = (
     id,
     scheduledAt: new Date('2030-01-01T00:00:00.000Z'),
     ...overrides,
-  } as unknown as ConcreteTaskInstance);
+  }) as unknown as ConcreteTaskInstance;
 
 const makeFetchResult = (ids: string[]): FetchReturn =>
-  ({ docs: ids.map((id) => ({ id })), versionMap: new Map() } as unknown as FetchReturn);
+  ({ docs: ids.map((id) => ({ id })), versionMap: new Map() }) as unknown as FetchReturn;
 
 const makeBulkError = (id: string, statusCode: number, message: string) => ({
   id,
@@ -71,7 +71,7 @@ const makeMockTaskManager = (
     removeIfExists: jest.fn().mockResolvedValue(undefined),
     bulkUpdateSchedules: jest.fn().mockResolvedValue({ tasks: [], errors: [] }),
     ...overrides,
-  } as any);
+  }) as any;
 
 const mockRequest = {} as KibanaRequest;
 

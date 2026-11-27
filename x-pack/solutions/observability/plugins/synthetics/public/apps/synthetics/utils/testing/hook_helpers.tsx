@@ -72,7 +72,7 @@ export const HookWrapper = ({
 }: PropsWithChildren<HookWrapperProps>) => {
   const testState = useMemo(() => mergeTestState(state), [state]);
   const routerHistory = useMemo(
-    () => (url ? getHistoryFromUrl(url) : history ?? createMemoryHistory()),
+    () => (url ? getHistoryFromUrl(url) : (history ?? createMemoryHistory())),
     [url, history]
   );
 

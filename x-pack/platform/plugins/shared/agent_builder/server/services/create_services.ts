@@ -42,6 +42,7 @@ import { createSpaceSettingsService } from './space_settings';
 import { PinnedBaselineService } from './eval_baselines/pinned_baseline_service';
 import { SurfacesServiceImpl } from './surfaces';
 import { ConversationTemplatesService } from './conversation/templates';
+import { createPrincipalKeyResolver } from './common/principal_key';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -178,6 +179,9 @@ export class ServiceManager {
 
     const conversationEvents = this.services.conversationEvents.start();
 
+    // Shared by the tool, skill and agent availability caches.
+    const getPrincipalKey = createPrincipalKeyResolver({ security });
+
     const tools = this.services.tools.start({
       getRunner,
       spaces,
@@ -186,6 +190,7 @@ export class ServiceManager {
       savedObjects,
       actions,
       securityPlugin,
+      getPrincipalKey,
     });
 
     const skillsServiceStart = this.services.skills.start({
@@ -195,6 +200,7 @@ export class ServiceManager {
       getToolRegistry: tools.getRegistry,
       uiSettings,
       savedObjects,
+      getPrincipalKey,
     });
 
     const agents = this.services.agents.start({
@@ -204,6 +210,7 @@ export class ServiceManager {
       uiSettings,
       savedObjects,
       toolsService: tools,
+      getPrincipalKey,
     });
 
     const hooks = this.services.hooks.start({ security, spaces });

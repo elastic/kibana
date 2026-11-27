@@ -7,19 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Every rule enabled here (and in the sibling modules) is intentionally absent from
-// `@kbn/eslint-config` so each rule runs in exactly one linter. When enabling a rule here,
-// delete it from packages/kbn-eslint-config/*.js; when removing one, add it back there.
-// A rule whose ESLint options are stricter than oxlint's implementation must stay in ESLint.
-// The `@kbn/kbn-monaco` rules also run in ESLint to support editors using its extension.
+// Every Kibana lint rule is configured here and in the sibling modules. Most were ported from
+// the former `@kbn/eslint-config` package and root `.eslintrc.js`, which have been removed.
 //
 // oxlint loads this through the repo-root `oxlint.config.mjs` and resolves `files`,
 // `ignorePatterns`, and `jsPlugins` paths relative to that root entry. Rule sets are spread
 // rather than passed through `extends`, which drops rule options in oxlint
 // (https://github.com/oxc-project/oxc/issues/22230).
-//
-// ESLint plugins run here through `jsPlugins` stay registered (with no rules) in the ESLint
-// config, because ESLint rejects `eslint-disable` directives that name rules it does not know.
 
 import { defineConfig, type OxlintConfig, type OxlintOverride } from 'oxlint';
 
@@ -170,10 +164,10 @@ export default defineConfig<OxlintConfig>({
     ...unusedVarsOverrides,
     ...movedFromEslintOverrides,
     {
-      // ESLint skips hidden files and directories, except nested `.eslintrc.js` files and the
-      // directories `.eslintignore` re-includes. Rules moved from ESLint stay off there.
+      // ESLint skipped hidden files and directories, except the directories `.eslintignore`
+      // re-includes. Rules moved from ESLint stay off there.
       files: ['**/.*/**', '**/.*'],
-      excludeFiles: ['**/.buildkite/**', '**/.github/**', '**/.storybook/**', '**/.eslintrc.js'],
+      excludeFiles: ['**/.buildkite/**', '**/.github/**', '**/.storybook/**'],
       rules: Object.fromEntries([...movedFromEslintRuleNames].map((name) => [name, 'off'])),
     },
   ],

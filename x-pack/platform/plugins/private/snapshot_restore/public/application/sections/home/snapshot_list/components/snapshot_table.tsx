@@ -180,18 +180,18 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
                   defaultMessage: 'Restore',
                 })
               : state === SNAPSHOT_STATE.IN_PROGRESS
-              ? i18n.translate(
-                  'xpack.snapshotRestore.snapshotList.table.actionRestoreDisabledInProgressTooltip',
-                  {
-                    defaultMessage: `Can't restore in-progress snapshot`,
-                  }
-                )
-              : i18n.translate(
-                  'xpack.snapshotRestore.snapshotList.table.actionRestoreDisabledInvalidTooltip',
-                  {
-                    defaultMessage: `Can't restore invalid snapshot`,
-                  }
-                );
+                ? i18n.translate(
+                    'xpack.snapshotRestore.snapshotList.table.actionRestoreDisabledInProgressTooltip',
+                    {
+                      defaultMessage: `Can't restore in-progress snapshot`,
+                    }
+                  )
+                : i18n.translate(
+                    'xpack.snapshotRestore.snapshotList.table.actionRestoreDisabledInvalidTooltip',
+                    {
+                      defaultMessage: `Can't restore invalid snapshot`,
+                    }
+                  );
             return (
               <EuiToolTip content={label}>
                 <EuiButtonIcon
@@ -221,8 +221,8 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
                 {(deleteSnapshotPrompt) => {
                   const isDeleteDisabled = Boolean(
                     managedRepository &&
-                      repository === managedRepository &&
-                      isLastSuccessfulSnapshot
+                    repository === managedRepository &&
+                    isLastSuccessfulSnapshot
                   );
                   const label = isDeleteDisabled
                     ? i18n.translate(

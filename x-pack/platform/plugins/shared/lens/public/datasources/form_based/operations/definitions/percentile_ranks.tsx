@@ -96,9 +96,9 @@ export const percentileRanksOperation: OperationDefinition<
 
     return Boolean(
       newField &&
-        supportedFieldTypes.includes(newField.type) &&
-        newField.aggregatable &&
-        (!newField.aggregationRestrictions || !newField.aggregationRestrictions.percentile_ranks)
+      supportedFieldTypes.includes(newField.type) &&
+      newField.aggregatable &&
+      (!newField.aggregationRestrictions || !newField.aggregationRestrictions.percentile_ranks)
     );
   },
   getDefaultLabel: (column, columns, indexPattern) =>

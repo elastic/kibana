@@ -22,7 +22,7 @@ XSS is a class of attacks where malicious scripts are injected into vulnerable w
   - **Browser DOM:** `Element.innerHTML` and `Element.outerHTML`.
 - If using the aforementioned unsafe functions or assignments is absolutely necessary, follow [these XSS prevention rules](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html#xss-prevention-rules) to ensure that user input is not inserted into unsafe locations and that it is escaped properly.
 - Use EUI components to build your UI, particularly when rendering `href` links. Otherwise, sanitize user input before rendering links to ensure that they do not use the `javascript:` protocol.
-- Don't use the `eval`, `Function`, and `_.template` functions -- these are restricted by ESLint rules.
+- Don't use the `eval`, `Function`, and `_.template` functions -- these are restricted by lint rules.
 - Be careful when using `setTimeout` and `setInterval` in client-side code. If an attacker can manipulate the arguments and pass a string to one of these, it is evaluated dynamically, which is equivalent to the dangerous `eval` function.
 
 ## Cross-Site Request Forgery (CSRF/XSRF)
@@ -41,11 +41,11 @@ CSRF is a class of attacks where a user is forced to execute an action on a vuln
 [_OWASP reference for Command Injection_](https://owasp.org/www-community/attacks/Command_Injection),
 [_OWASP reference for Code Injection_](https://owasp.org/www-community/attacks/Code_Injection)
 
-RCE is a class of attacks where an attacker executes malicious code or commands on a vulnerable server. {{kib}} defends against this by using ESLint rules to restrict vulnerable functions, and by hooking into or hardening usage of these in third-party dependencies.
+RCE is a class of attacks where an attacker executes malicious code or commands on a vulnerable server. {{kib}} defends against this by using lint rules to restrict vulnerable functions, and by hooking into or hardening usage of these in third-party dependencies.
 
 **Best practices**
 
-- Don't use the `eval`, `Function`, and `_.template` functions -- these are restricted by ESLint rules.
+- Don't use the `eval`, `Function`, and `_.template` functions -- these are restricted by lint rules.
 - Don't use dynamic `require`.
 - Check for usages of templating libraries. Ensure that user-provided input doesn't influence the template and is used only as data for rendering the template.
 - Take extra caution when spawning child processes with any user input or parameters that are user-controlled.

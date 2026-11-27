@@ -365,7 +365,9 @@ Report one verdict. Take every rule name and id from a tool result.`;
 const prebuiltRuleNames = (calls: ToolCallStep[]): string[] =>
   calls.flatMap((call) => {
     const results: unknown = call.results;
-    const parsed = (typeof results === 'string' ? JSON.parse(results) : results ?? []) as unknown[];
+    const parsed = (
+      typeof results === 'string' ? JSON.parse(results) : (results ?? [])
+    ) as unknown[];
     return parsed.flatMap((result) => {
       const rules = (result as { data?: { rules?: Array<{ name?: unknown }> } })?.data?.rules;
       return (rules ?? []).map((rule) => rule.name).filter((name): name is string => !!name);

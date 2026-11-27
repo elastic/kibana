@@ -90,7 +90,7 @@ const createMockClients = (): Partial<SynthtraceClients> =>
     infraEsClient: {},
     syntheticsEsClient: {},
     streamsClient: {},
-  } as Partial<SynthtraceClients>);
+  }) as Partial<SynthtraceClients>;
 
 describe('logs_and_metrics_custom_error_rate', () => {
   const mockLogger = createMockLogger();

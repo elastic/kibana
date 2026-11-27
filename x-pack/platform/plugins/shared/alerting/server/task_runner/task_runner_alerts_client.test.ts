@@ -1881,7 +1881,7 @@ describe('Task Runner', () => {
       State extends AlertInstanceState = never,
       Context extends AlertInstanceContext = never,
       ActionGroupIds extends string = 'default',
-      RecoveryActionGroupId extends string = 'recovered'
+      RecoveryActionGroupId extends string = 'recovered',
     >({
       alertsClientToUse,
       alertsClientNotToUse,
@@ -1912,6 +1912,7 @@ describe('Task Runner', () => {
         recoveredAlertsFromState: {},
         ruleLabel: "test:1: 'rule-name'",
         runTimestamp: undefined,
+        shouldUntrackOrphanedAlerts: true,
         snoozedInstances: [],
         startedAt: new Date(DATE_1970),
       });

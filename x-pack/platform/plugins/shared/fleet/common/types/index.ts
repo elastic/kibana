@@ -8,6 +8,7 @@
 export * from './models';
 export * from './rest_spec';
 
+import type { CloudProvider } from './models/cloud_connector';
 import type {
   PreconfiguredAgentPolicy,
   PreconfiguredPackage,
@@ -37,6 +38,7 @@ export interface FleetConfigType {
     isDefault?: boolean;
     api?: {
       url?: string;
+      rumUrl?: string;
       tls?: {
         certificate?: string;
         key?: string;
@@ -98,6 +100,7 @@ export interface FleetConfigType {
     bundledPackageLocation?: string;
     testSecretsIndex?: string;
     disableBundledPackagesCache?: boolean;
+    provisioningCallbackVerifierUrls?: Partial<Record<CloudProvider, string>>;
   };
   internal?: {
     useMeteringApi?: boolean;

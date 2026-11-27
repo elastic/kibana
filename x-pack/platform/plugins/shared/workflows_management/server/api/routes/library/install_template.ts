@@ -56,7 +56,7 @@ export function registerInstallTemplateRoute(
       withAvailabilityCheck(async (context, request, response) => {
         // Filled in once the template is read from the catalog, so a failure
         // before that never reports the slug from the URL.
-        const installDetails: TemplateInstallDetails = { origin: 'install' };
+        const installDetails: TemplateInstallDetails = { origin: 'catalog' };
         try {
           const { uiSettings } = await context.core;
           const enabled = await uiSettings.globalClient.get<boolean>(
@@ -69,7 +69,7 @@ export function registerInstallTemplateRoute(
           const templateOrigin: TemplateOriginFields = {
             templateSlug: slug,
             templateVersion: version,
-            templateOrigin: 'install',
+            templateOrigin: 'catalog',
           };
           installDetails.storedOrigin = templateOrigin;
           installDetails.installForm = install?.form ?? [];

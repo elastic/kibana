@@ -23,15 +23,15 @@ describe('registerStepDefinitions', () => {
 
     registerStepDefinitions({
       workflowsExtensions,
-      getAiIndexService: () => ({} as AiIndexService),
+      getAiIndexService: () => ({}) as AiIndexService,
       isContextEngineEnabled: async () => true,
       isDreamingAvailable: async () => true,
       checkWritePrivilege: async () => true,
       ...telemetry,
       verifyKi: jest.fn(),
       feedbackAnalysis: {
-        getAiIndexService: () => ({} as AiIndexService),
-        getImprovementsService: () => ({} as ImprovementsServiceApi),
+        getAiIndexService: () => ({}) as AiIndexService,
+        getImprovementsService: () => ({}) as ImprovementsServiceApi,
         getAuditLogger: async () => undefined,
         isContextEngineEnabled: async () => true,
         isFeedbackLoopEnabled: async () => true,
@@ -39,12 +39,12 @@ describe('registerStepDefinitions', () => {
         logger: telemetry.logger,
       },
       dreaming: {
-        getAiIndexService: () => ({} as AiIndexService),
+        getAiIndexService: () => ({}) as AiIndexService,
         isContextEngineEnabled: async () => true,
         isMemoryEnabled: async () => true,
         checkReadPrivilege: async () => true,
-        getSessionMemoryService: async () => ({} as SessionMemoryService),
-        getSessionEventsService: async () => ({} as SessionEventsService),
+        getSessionMemoryService: async () => ({}) as SessionMemoryService,
+        getSessionEventsService: async () => ({}) as SessionEventsService,
       },
     });
 

@@ -68,7 +68,7 @@ describe('validateMonitorPrivateLocationSpaces', () => {
     ({
       [ConfigKey.LOCATIONS]: locations,
       [ConfigKey.KIBANA_SPACES]: spaces,
-    } as unknown as MonitorFields);
+    }) as unknown as MonitorFields;
 
   const makePrivateLocations = (
     locs: Array<{ id: string; label: string; spaces?: string[] }>

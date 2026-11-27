@@ -17,8 +17,10 @@ import { getGraphEntryPoint } from '../../../shared/utils/get_graph_entry_point'
 import { useGraphPreview } from '../hooks/use_graph_preview';
 import { EventKind } from '../constants/event_kinds';
 
-export interface GraphPreviewContainerProps
-  extends Pick<GraphPreviewPanelProps, 'onShowGraph' | 'showIcon'> {
+export interface GraphPreviewContainerProps extends Pick<
+  GraphPreviewPanelProps,
+  'onShowGraph' | 'showIcon'
+> {
   hit: DataTableRecord;
 }
 

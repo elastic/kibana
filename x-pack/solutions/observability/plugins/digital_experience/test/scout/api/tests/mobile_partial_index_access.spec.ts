@@ -8,13 +8,19 @@
 import { apiTest } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { ApplicationsResponse } from '../../../../common/types/applications';
-import type { MobileKpisResponse } from '../../../../common/types/mobile';
+import type { MobileAppStartsResponse, MobileKpisResponse } from '../../../../common/types/mobile';
 import { MOBILE_APPS } from '../../common/fixtures/mobile_data';
 import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 import { findMobileApplication, testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
 
-const { APPLICATIONS_IN_TIME_RANGE_PATH, COMMON_HEADERS, createRole, mobileKpisPath } = testData;
+const {
+  APPLICATIONS_IN_TIME_RANGE_PATH,
+  COMMON_HEADERS,
+  createRole,
+  mobileAppStartsPath,
+  mobileKpisPath,
+} = testData;
 
 /** Reads the OTel traces but not the logs, which hold most of the mobile events. */
 const NO_OTEL_LOGS_ROLE = {
@@ -101,6 +107,32 @@ apiTest.describe(
           isPartial: true,
           hasData: false,
         });
+      }
+    );
+
+    apiTest(
+      'reads no app starts from the logs without access to them',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser(NO_OTEL_LOGS_ROLE);
+        const request = {
+          headers: { ...COMMON_HEADERS, ...cookieHeader },
+          responseType: 'json' as const,
+        };
+
+        // Its app starts are logs, which the viewer API specs see
+        const appStarts = await apiClient.get(
+          mobileAppStartsPath(MOBILE_APPS.busyAndroid),
+          request
+        );
+        const kpis = await apiClient.get(mobileKpisPath(MOBILE_APPS.busyAndroid), request);
+
+        expect(appStarts).toHaveStatusCode(200);
+        expect((appStarts.body as MobileAppStartsResponse).points).toStrictEqual([]);
+        expect(kpis).toHaveStatusCode(200);
+        const { coldStart, warmStart } = kpis.body as MobileKpisResponse;
+        [coldStart, warmStart].forEach((start) =>
+          expect(start).toMatchObject({ value: null, count: 0 })
+        );
       }
     );
 

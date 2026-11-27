@@ -181,7 +181,7 @@
   "sources": {
     "v2": {
       "apiVersion": "2.0",
-      "fetchedAt": "2026-10-07T20:20:09.393Z",
+      "fetchedAt": "2026-11-23T11:13:36.463Z",
       "format": "openapi",
       "url": "https://dac-static.atlassian.com/cloud/bitbucket/swagger.v3.json"
     }

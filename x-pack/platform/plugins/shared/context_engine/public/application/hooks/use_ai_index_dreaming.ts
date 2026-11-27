@@ -15,26 +15,30 @@ interface UseAiIndexDreamingResult {
   dreaming: AiIndexDreamingConfig | undefined;
   workflowIds: string[];
   isLoading: boolean;
+  /** True when the request failed. `dreaming` is then unknown, not off. */
+  isError: boolean;
 }
 
-/** Fetches an AI index's dreaming config, when `enabled`. */
+/** Fetches an AI index's dreaming config, when `enabled`. `retry` overrides the client default. */
 export const useAiIndexDreaming = (
   aiIndexId: string,
-  { enabled }: { enabled: boolean }
+  { enabled, retry }: { enabled: boolean; retry?: number }
 ): UseAiIndexDreamingResult => {
   const {
     services: { http },
   } = useKibana();
 
-  const { data, isInitialLoading } = useQuery({
+  const { data, isInitialLoading, isError } = useQuery({
     queryKey: contextEngineQueryKeys.aiIndex.dreaming(aiIndexId),
     queryFn: ({ signal }) => getAiIndexDreaming(http, { aiIndexId, signal }),
     enabled,
+    ...(retry !== undefined ? { retry } : {}),
   });
 
   return {
     dreaming: data?.dreaming,
     workflowIds: data?.workflow_ids ?? [],
     isLoading: isInitialLoading,
+    isError,
   };
 };

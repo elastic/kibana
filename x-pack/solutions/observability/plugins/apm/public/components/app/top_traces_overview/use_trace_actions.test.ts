@@ -90,7 +90,7 @@ describe('useTraceActions', () => {
     expect(mockGetRedirectUrl).toHaveBeenCalledTimes(1);
 
     const [args] = mockGetRedirectUrl.mock.calls[0] as [
-      { timeRange: { from: string; to: string }; query: { esql: string } }
+      { timeRange: { from: string; to: string }; query: { esql: string } },
     ];
     expect(args.timeRange).toEqual({ from: 'now-15m', to: 'now' });
     expect(args.query.esql).toContain(`FROM ${TRACES_INDEX}`);

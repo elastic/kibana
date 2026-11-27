@@ -10,7 +10,7 @@ import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids'
 import { contextEngineSkillAvailability } from './context_engine_skill_availability';
 
 const contextWith = (get: jest.Mock): AvailabilityContext =>
-  ({ uiSettings: { get }, request: {}, spaceId: 'default' } as unknown as AvailabilityContext);
+  ({ uiSettings: { get }, request: {}, spaceId: 'default' }) as unknown as AvailabilityContext;
 
 describe('contextEngineSkillAvailability', () => {
   it('caches per space', () => {

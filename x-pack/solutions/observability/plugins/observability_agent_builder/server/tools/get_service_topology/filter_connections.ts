@@ -134,7 +134,7 @@ export function filterUpstreamConnections(
       // This handles external dependencies like "postgres" where the user queries by the
       // resource name and there is no resolved target['service.name'].
       const connsByDep =
-        currentService === rootServiceName ? reverseAdjacencyByDep.get(currentService) ?? [] : [];
+        currentService === rootServiceName ? (reverseAdjacencyByDep.get(currentService) ?? []) : [];
 
       // Process both sets of connections, deduplicating by edge key
       for (const conn of [...connsByService, ...connsByDep]) {

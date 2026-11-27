@@ -15,8 +15,7 @@ import { showErrorToast } from '@kbn/cloud-security-posture';
 import type { FindingsGroupingAggregation, NumberOrNull } from '@kbn/cloud-security-posture';
 import { useKibana } from '../../../common/hooks/use_kibana';
 
-export interface FindingsRootGroupingAggregation
-  extends RootAggregation<FindingsGroupingAggregation> {
+export interface FindingsRootGroupingAggregation extends RootAggregation<FindingsGroupingAggregation> {
   failedFindings?: {
     doc_count?: NumberOrNull;
   };

@@ -28,7 +28,7 @@ describe('attachment tools', () => {
       validate: (input: unknown) => ({ valid: true, data: input }),
       format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
       isReadonly: false,
-    } as any);
+    }) as any;
 
   beforeEach(() => {
     attachmentManager = createAttachmentStateManager([], { getTypeDefinition });
@@ -51,7 +51,7 @@ describe('attachment tools', () => {
   const formatContext = { request: httpServerMock.createKibanaRequest(), spaceId: 'default' };
 
   const toolContext = (manager: AttachmentStateManager = attachmentManager) =>
-    ({ attachments: manager.forToolCall('call-1') } as unknown as ToolHandlerContext);
+    ({ attachments: manager.forToolCall('call-1') }) as unknown as ToolHandlerContext;
 
   const getTools = () =>
     createAttachmentTools({
@@ -242,7 +242,7 @@ describe('attachment tools', () => {
             }),
             resolve: async () => resolvedData,
             isReadonly: false,
-          } as unknown as AttachmentTypeDefinition),
+          }) as unknown as AttachmentTypeDefinition,
       } as any;
       const resolveAttachmentManager = createAttachmentStateManager([], {
         getTypeDefinition: customAttachmentsService.getTypeDefinition,

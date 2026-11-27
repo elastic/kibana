@@ -68,10 +68,9 @@ export interface Presentable<Context = unknown> {
   readonly grouping?: PresentableGrouping<Context>;
 }
 
-export interface PresentableGroup<Context = unknown>
-  extends Partial<
-    Pick<Presentable<Context>, 'getDisplayName' | 'getDisplayNameTooltip' | 'getIconType' | 'order'>
-  > {
+export interface PresentableGroup<Context = unknown> extends Partial<
+  Pick<Presentable<Context>, 'getDisplayName' | 'getDisplayNameTooltip' | 'getIconType' | 'order'>
+> {
   id: string;
 }
 

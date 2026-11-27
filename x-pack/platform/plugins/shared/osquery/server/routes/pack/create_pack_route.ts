@@ -32,6 +32,7 @@ import {
   groupAgentPolicyIdsByPackagePolicy,
   makePackKey,
   resolveSharedPackagePolicyShard,
+  resolveSharedIntegrationOverdelivery,
   validatePackScheduleFields,
   buildScheduleResponseSlice,
   buildExecutionDefaultsResponseSlice,
@@ -317,7 +318,11 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           updated_at: attributes.updated_at,
           updated_by: attributes.updated_by,
           updated_by_profile_uid: attributes.updated_by_profile_uid,
-          policy_ids: attributes.policy_ids,
+          // Agent policy attachments live on `references`, not `attributes`
+          // (same contract as read/update), so derive them from there.
+          policy_ids: packSO.references
+            .filter(({ type }) => type === LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE)
+            .map(({ id }) => id),
           shards: attributes.shards,
           saved_object_id: packSO.id,
           // Discriminated response — see buildScheduleResponseSlice.
@@ -328,9 +333,14 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           ...buildExecutionDefaultsResponseSlice(packSO.attributes),
         };
 
+        const warnings = attributes.enabled
+          ? resolveSharedIntegrationOverdelivery(data.policy_ids ?? [], packagePolicies, shards)
+          : [];
+
         return response.ok({
           body: {
             data,
+            ...(warnings.length ? { warnings } : {}),
           },
         });
       }

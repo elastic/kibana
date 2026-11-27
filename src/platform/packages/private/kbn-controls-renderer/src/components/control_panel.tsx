@@ -96,9 +96,9 @@ export const ControlPanel = ({
     () =>
       Boolean(
         api && // Check to make sure onApiAvailable has returned; control panels initialize their own apis internally
-          selectedPanel &&
-          apiPublishesRelatedPanels(selectedPanel) &&
-          selectedPanelRelatedPanels.includes(id)
+        selectedPanel &&
+        apiPublishesRelatedPanels(selectedPanel) &&
+        selectedPanelRelatedPanels.includes(id)
       ),
     [api, selectedPanel, selectedPanelRelatedPanels, id]
   );

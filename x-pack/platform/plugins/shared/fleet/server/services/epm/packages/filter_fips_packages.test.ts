@@ -15,7 +15,7 @@ const makeTemplate = (name: string, fipsCompatible?: boolean) => ({
 });
 
 const makePkg = (name: string, templates?: Array<ReturnType<typeof makeTemplate>>) =>
-  ({ name, id: name, policy_templates: templates } as any);
+  ({ name, id: name, policy_templates: templates }) as any;
 
 describe('filterOutNonFipsPolicyTemplates', () => {
   it('keeps packages with no policy_templates', () => {

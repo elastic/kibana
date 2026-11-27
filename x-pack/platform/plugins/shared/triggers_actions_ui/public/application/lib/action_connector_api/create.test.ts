@@ -55,6 +55,39 @@ describe('createActionConnector', () => {
     `);
   });
 
+  test('maps spec_version on the create request and response', async () => {
+    http.post.mockResolvedValueOnce({
+      connector_type_id: 'test',
+      name: 'Versioned connector',
+      config: {},
+      id: '123',
+      spec_version: '1.3',
+    });
+
+    const result = await createActionConnector({
+      http,
+      connector: {
+        actionTypeId: 'test',
+        name: 'Versioned connector',
+        config: {},
+        secrets: {},
+        specVersion: '1.3',
+      },
+    });
+
+    expect(http.post).toHaveBeenCalledWith('/api/actions/connector', {
+      body: JSON.stringify({
+        name: 'Versioned connector',
+        config: {},
+        secrets: {},
+        connector_type_id: 'test',
+        spec_version: '1.3',
+      }),
+    });
+    expect(result.specVersion).toBe('1.3');
+    expect(result).not.toHaveProperty('spec_version');
+  });
+
   test('should call create action API with specific id when provided', async () => {
     const apiResponse = {
       connector_type_id: 'test',

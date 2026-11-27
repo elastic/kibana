@@ -8,6 +8,8 @@
  */
 
 import type { CustomAnnotationTooltip } from '@elastic/charts';
+import type { Observable } from 'rxjs';
+import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import type { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import type {
   ManualPointEventAnnotationArgs,
@@ -17,6 +19,28 @@ import type { AvailableAnnotationIcon } from '@kbn/event-annotation-common';
 import type { XY_VIS_RENDERER } from '../constants';
 import type { AllowedXYOverrides, XYProps } from './expression_functions';
 
+export type XYOverlayDatum = DatatableRow;
+
+export type XYOverlayAccessor = string | ((datum: XYOverlayDatum) => number);
+
+/**
+ * Points drawn over the chart on the Y axis of the data layer `layerId`.
+ * Overlays are provided at render time and never persisted.
+ */
+export interface XYPointsOverlay {
+  readonly type: 'points';
+  readonly id: string;
+  readonly layerId: string;
+  readonly title: string;
+  readonly data: XYOverlayDatum[];
+  readonly xAccessor: XYOverlayAccessor;
+  readonly yAccessor: XYOverlayAccessor;
+  /** Whether a click on a point is handled; only then does it take priority over the base series. */
+  readonly clickable: boolean;
+}
+
+export type XYOverlay = XYPointsOverlay;
+
 export interface XYChartProps {
   args: XYProps;
   syncTooltips: boolean;
@@ -24,6 +48,7 @@ export interface XYChartProps {
   syncColors: boolean;
   canNavigateToLens?: boolean;
   overrides?: AllowedXYOverrides & AllowedSettingsOverrides & AllowedChartOverrides;
+  overlays$?: Observable<readonly XYOverlay[]>;
 }
 
 export interface XYRender {

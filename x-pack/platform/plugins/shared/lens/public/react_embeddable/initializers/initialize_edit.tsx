@@ -342,9 +342,9 @@ export function initializeEditApi(
       isEditingEnabled: () => {
         return Boolean(
           parentApi &&
-            apiHasAppContext(parentApi) &&
-            canEdit() &&
-            panelManagementApi.isEditingEnabled()
+          apiHasAppContext(parentApi) &&
+          canEdit() &&
+          panelManagementApi.isEditingEnabled()
         );
       },
       isReadOnlyEnabled: () => {
@@ -357,8 +357,8 @@ export function initializeEditApi(
           read: Boolean(parentApi && apiHasAppContext(parentApi) && canShowConfig()),
           write: Boolean(
             capabilities.dashboard_v2?.showWriteControls &&
-              !isManaged(getState()) &&
-              isEditableByUser
+            !isManaged(getState()) &&
+            isEditableByUser
           ),
         };
       },

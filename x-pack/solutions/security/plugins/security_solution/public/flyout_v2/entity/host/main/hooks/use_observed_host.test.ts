@@ -70,7 +70,7 @@ const buildStoreResult = (
     error: null,
     inspect: undefined,
     refetch: jest.fn(),
-  } as unknown as EntityFromStoreResult<HostItem>);
+  }) as unknown as EntityFromStoreResult<HostItem>;
 
 describe('useObservedHost', () => {
   beforeEach(() => {

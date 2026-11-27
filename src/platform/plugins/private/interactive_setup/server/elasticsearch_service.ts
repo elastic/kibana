@@ -126,7 +126,10 @@ export class ElasticsearchService {
    */
   private connectionStatusClient?: ICustomClusterClient;
 
-  constructor(private readonly logger: Logger, private kibanaVersion: string) {}
+  constructor(
+    private readonly logger: Logger,
+    private kibanaVersion: string
+  ) {}
 
   public setup({
     elasticsearch,

@@ -18,8 +18,8 @@ import { useKibana } from '../../../common/lib/kibana';
 export type UpdateMigrationBody<T extends MigrationType> = T extends 'rule'
   ? UpdateRuleMigrationRequestBody
   : T extends 'dashboard'
-  ? UpdateDashboardMigrationRequestBody
-  : UpdateWorkflowMigrationRequestBody;
+    ? UpdateDashboardMigrationRequestBody
+    : UpdateWorkflowMigrationRequestBody;
 
 export interface UpdateMigrationArgs<T extends MigrationType> {
   migrationId: string;

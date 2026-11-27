@@ -19,9 +19,7 @@ export interface TaskBackpressureMetric extends JsonObject {
   reason: BackpressureReason | null;
 }
 
-export class TaskBackpressureMetricsAggregator
-  implements ITaskMetricsAggregator<TaskBackpressureMetric>
-{
+export class TaskBackpressureMetricsAggregator implements ITaskMetricsAggregator<TaskBackpressureMetric> {
   private snapshot: TaskBackpressureMetric = this.initialMetric();
 
   public initialMetric(): TaskBackpressureMetric {

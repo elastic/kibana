@@ -259,10 +259,13 @@ export function systemRoutes(
             )
           );
 
-          const result = indices.reduce((acc, cur, i) => {
-            acc[cur] = { exists: results[i] };
-            return acc;
-          }, {} as Record<string, { exists: boolean }>);
+          const result = indices.reduce(
+            (acc, cur, i) => {
+              acc[cur] = { exists: results[i] };
+              return acc;
+            },
+            {} as Record<string, { exists: boolean }>
+          );
 
           return response.ok({
             body: result,

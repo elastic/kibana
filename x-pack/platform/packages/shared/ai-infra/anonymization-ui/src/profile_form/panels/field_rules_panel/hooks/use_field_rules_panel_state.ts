@@ -112,7 +112,7 @@ export const useFieldRulesPanelState = ({
 
         const nextEntityClass =
           action === FIELD_RULE_ACTION_ANONYMIZE && !targetRule.anonymized
-            ? suggestEntityClassForField(field) ?? 'MISC'
+            ? (suggestEntityClassForField(field) ?? 'MISC')
             : undefined;
 
         return applyFieldAction(prev, field, action, { entityClass: nextEntityClass });

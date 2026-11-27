@@ -31,7 +31,7 @@ export type TrackedAlertsSearch<AlertData extends RuleAlertData> = (
 ) => Promise<SearchResult<AlertData>>;
 
 export function createEmptyTrackedAlerts<
-  AlertData extends RuleAlertData
+  AlertData extends RuleAlertData,
 >(): TrackedAADAlerts<AlertData> {
   return {
     indices: {},

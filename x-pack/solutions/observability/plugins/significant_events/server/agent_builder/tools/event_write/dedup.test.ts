@@ -75,12 +75,12 @@ const makeActiveEvent = (overrides: Partial<SignificantEvent> = {}): Significant
     summary: 'Test summary',
     confidence: 0.8,
     ...overrides,
-  } as SignificantEvent);
+  }) as SignificantEvent;
 
 const makeClient = (
   hits: SignificantEvent[] = []
 ): jest.Mocked<Pick<RuleEventsClient, 'findLatestLive'>> & RuleEventsClient =>
-  ({ findLatestLive: jest.fn().mockResolvedValue({ hits }) } as never);
+  ({ findLatestLive: jest.fn().mockResolvedValue({ hits }) }) as never;
 
 const dedupCandidates = (inputs: EventsWriteInput[]): DedupCandidate[] =>
   buildWriteCandidates(inputs).filter((c): c is DedupCandidate => c.mode === 'dedup');
@@ -421,7 +421,7 @@ describe('resolveDedupSkips', () => {
 const makeInactiveClient = (
   hits: SignificantEvent[] = []
 ): jest.Mocked<Pick<RuleEventsClient, 'findLatestInactiveByIdentity'>> & RuleEventsClient =>
-  ({ findLatestInactiveByIdentity: jest.fn().mockResolvedValue({ hits, heads: [] }) } as never);
+  ({ findLatestInactiveByIdentity: jest.fn().mockResolvedValue({ hits, heads: [] }) }) as never;
 
 describe('fetchInactiveEventsForReuse', () => {
   const now = Date.parse('2026-10-28T12:00:00.000Z');
@@ -614,7 +614,7 @@ describe('findRulesHeldByOtherEvents', () => {
       source_ids: ['logs.other'],
       signals,
       ...overrides,
-    } as SignificantEvent);
+    }) as SignificantEvent;
   const candidateFor = ({
     eventId = 'target',
     ruleUuids,

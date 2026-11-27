@@ -97,14 +97,14 @@ const createDashboardClient = ({
     }),
     create: jest.fn(),
     update: jest.fn(),
-  } as jest.Mocked<DashboardPluginStart['client']>);
+  }) as jest.Mocked<DashboardPluginStart['client']>;
 
 const createLogger = (): Logger =>
   ({
     warn: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
-const createSavedObjectsClient = () => ({} as never);
+const createSavedObjectsClient = () => ({}) as never;
 
 describe('dashboardSmlType', () => {
   it('equals DASHBOARD_KI_TYPE', () => {

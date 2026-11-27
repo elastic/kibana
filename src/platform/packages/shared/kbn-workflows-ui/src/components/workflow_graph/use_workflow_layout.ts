@@ -367,7 +367,8 @@ export function useWorkflowLayout({
       const label = typeof data.label === 'string' ? data.label : undefined;
       const explicitExec = stepExecutionMap?.[label ?? n.id] ?? stepExecutionMap?.[n.id];
       const exec =
-        explicitExec ?? (n.type === 'trigger' ? syntheticTriggerExecution ?? undefined : undefined);
+        explicitExec ??
+        (n.type === 'trigger' ? (syntheticTriggerExecution ?? undefined) : undefined);
 
       return {
         id: n.id,
@@ -492,7 +493,7 @@ export function useWorkflowLayout({
         const sourceExec =
           getExec(e.source) ??
           (nodeById.get(e.source)?.type === 'trigger'
-            ? syntheticTriggerExecution ?? undefined
+            ? (syntheticTriggerExecution ?? undefined)
             : undefined);
         traversed = sourceExec?.status === ExecutionStatus.COMPLETED;
       }

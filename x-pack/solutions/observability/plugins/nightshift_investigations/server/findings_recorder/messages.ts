@@ -142,14 +142,12 @@ const turnMessages = (
       content: text ?? null,
       ...(toolCalls.length > 0 ? { toolCalls } : {}),
     },
-    ...calls.map(
-      (call): Message => ({
-        role: MessageRole.Tool,
-        name: replayToolName(call.tool_id),
-        toolCallId: call.tool_call_id,
-        response: resultText(call, resultPaths.get(call.tool_call_id)),
-      })
-    ),
+    ...calls.map((call): Message => ({
+      role: MessageRole.Tool,
+      name: replayToolName(call.tool_id),
+      toolCallId: call.tool_call_id,
+      response: resultText(call, resultPaths.get(call.tool_call_id)),
+    })),
   ];
 };
 

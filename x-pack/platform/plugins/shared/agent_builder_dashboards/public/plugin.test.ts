@@ -41,7 +41,7 @@ describe('AgentBuilderDashboardsPlugin', () => {
       analytics: {},
       chrome: {},
       notifications: { toasts: {} },
-    } as unknown as CoreStart);
+    }) as unknown as CoreStart;
 
   const createStartDependencies = () =>
     ({
@@ -61,7 +61,7 @@ describe('AgentBuilderDashboardsPlugin', () => {
         registerActionAsync,
         attachAction,
       },
-    } as unknown as AgentBuilderDashboardsPluginPublicStartDependencies);
+    }) as unknown as AgentBuilderDashboardsPluginPublicStartDependencies;
 
   beforeEach(() => {
     registerActionAsync.mockClear();

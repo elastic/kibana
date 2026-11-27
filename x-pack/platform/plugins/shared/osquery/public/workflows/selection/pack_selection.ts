@@ -175,16 +175,16 @@ export const createPackSelection = (http: HttpSetup): PropertySelectionHandler<s
               values: { name: escapeMarkdown(option.label ?? value) },
             })
           : validationErrors.has(value)
-          ? validationErrors.get(value) ?? ''
-          : lookupError
-          ? i18n.translate('xpack.osquery.workflows.selection.pack.loadFailed', {
-              defaultMessage: 'Could not load packs: {reason}',
-              values: { reason: escapeMarkdown(lookupError) },
-            })
-          : i18n.translate('xpack.osquery.workflows.selection.pack.notFound', {
-              defaultMessage: 'No pack named "{name}" in this space.',
-              values: { name: escapeMarkdown(value) },
-            }),
+            ? (validationErrors.get(value) ?? '')
+            : lookupError
+              ? i18n.translate('xpack.osquery.workflows.selection.pack.loadFailed', {
+                  defaultMessage: 'Could not load packs: {reason}',
+                  values: { reason: escapeMarkdown(lookupError) },
+                })
+              : i18n.translate('xpack.osquery.workflows.selection.pack.notFound', {
+                  defaultMessage: 'No pack named "{name}" in this space.',
+                  values: { name: escapeMarkdown(value) },
+                }),
         links: [
           {
             text: i18n.translate('xpack.osquery.workflows.selection.pack.manage', {

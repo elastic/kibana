@@ -29,7 +29,7 @@ export type QuickActionIds = [
   string?,
   string?,
   string?,
-  string?
+  string?,
 ];
 
 type QuickActionViewMode = Extract<ViewMode, 'view' | 'edit'>;

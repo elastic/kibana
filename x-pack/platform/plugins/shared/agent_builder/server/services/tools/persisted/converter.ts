@@ -16,7 +16,7 @@ export const convertPersistedDefinition = <
   TType extends ToolType,
   TConfig extends object,
   TPersistedConfig extends object = TConfig,
-  TSchema extends ZodObject<any> = ZodObject<any>
+  TSchema extends ZodObject<any> = ZodObject<any>,
 >({
   tool,
   definition,

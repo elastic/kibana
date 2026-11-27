@@ -44,12 +44,11 @@ jest.mock('./investigation_card_actions', () => ({
 }));
 
 const mockUseInvestigationAssignees = jest.fn(
-  (_investigations: InvestigationSummary[]) => (item: InvestigationSummary) =>
-    (
-      <button type="button" data-test-subj={`assignees-${item.id}`}>
-        {(item.metadata.assignees ?? []).join(',')}
-      </button>
-    )
+  (_investigations: InvestigationSummary[]) => (item: InvestigationSummary) => (
+    <button type="button" data-test-subj={`assignees-${item.id}`}>
+      {(item.metadata.assignees ?? []).join(',')}
+    </button>
+  )
 );
 
 jest.mock('./use_investigation_assignees', () => ({

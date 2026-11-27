@@ -27,13 +27,15 @@ export const AnomaliesBorderedVisPanel: React.FC<AnomaliesBorderedVisPanelProps>
     css={css`
       padding: 16px 24px;
       ${heightPx !== undefined ? `height: ${heightPx}px;` : ''}
-      ${centerContent
-        ? `
+      ${
+        centerContent
+          ? `
           display: flex;
           align-items: center;
           justify-content: center;
         `
-        : ''}
+          : ''
+      }
     `}
   >
     {children}

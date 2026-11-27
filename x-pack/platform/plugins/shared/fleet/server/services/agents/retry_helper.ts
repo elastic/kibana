@@ -30,7 +30,10 @@ export type AgentPagingFailure = 'rejected-checkpoint' | 'expired-point-in-time'
  * agent cursor — clearing it on one of those would throw away a cursor that still works.
  */
 export class AgentPagingError extends Error {
-  constructor(public readonly kind: AgentPagingFailure, public readonly cause: Error) {
+  constructor(
+    public readonly kind: AgentPagingFailure,
+    public readonly cause: Error
+  ) {
     super(cause.message);
     this.name = 'AgentPagingError';
   }

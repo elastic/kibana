@@ -104,7 +104,7 @@ describe('getEntityRiskScoreHistoryTool', () => {
       () =>
         ({
           getRiskScoreHistory: mockGetRiskScoreHistory,
-        } as unknown as RiskScoreDataClient)
+        }) as unknown as RiskScoreDataClient
     );
 
     mockCheckPrivileges = jest.fn().mockResolvedValue({ hasAllRequested: true });

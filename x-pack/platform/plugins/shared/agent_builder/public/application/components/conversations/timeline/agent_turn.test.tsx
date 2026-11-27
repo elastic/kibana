@@ -136,8 +136,8 @@ describe('AgentTurn', () => {
         item.status === 'failed'
           ? screen.getByTestId('agentBuilderExecutionFailed')
           : item.status === 'aborted'
-          ? screen.getByText('Response stopped by Jane Doe')
-          : screen.getByTestId('response');
+            ? screen.getByText('Response stopped by Jane Doe')
+            : screen.getByTestId('response');
       expect(content.parentElement?.previousElementSibling).toBeNull();
     }
   );
