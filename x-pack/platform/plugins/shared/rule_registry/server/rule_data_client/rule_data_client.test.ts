@@ -548,6 +548,71 @@ describe('RuleDataClient', () => {
             { meta: true }
           );
         });
+
+        const indexNotFoundBulkResponse = (): estypes.BulkResponse => ({
+          took: 1,
+          errors: true,
+          items: [
+            {
+              create: {
+                _index: '.alerts-observability.apm.alerts-default',
+                _id: '1',
+                status: 404,
+                error: {
+                  type: 'index_not_found_exception',
+                  reason: 'no such index [.alerts-observability.apm.alerts-default]',
+                },
+              },
+            },
+          ],
+        });
+
+        test('reinstalls namespace-level resources and retries when the write target is missing', async () => {
+          scopedClusterClient.bulk
+            .mockResponseOnce(indexNotFoundBulkResponse())
+            .mockResponseOnce({ took: 1, errors: false, items: [] });
+          const ruleDataClient = new RuleDataClient(
+            getRuleDataClientOptions({ isUsingDataStreams })
+          );
+          const writer = await ruleDataClient.getWriter();
+
+          await delay();
+
+          mockResourceInstaller.installAndUpdateNamespaceLevelResources.mockClear();
+
+          const response = await writer.bulk({});
+
+          expect(
+            mockResourceInstaller.installAndUpdateNamespaceLevelResources
+          ).toHaveBeenCalledTimes(1);
+          expect(scopedClusterClient.bulk).toHaveBeenCalledTimes(2);
+          expect(response?.body.errors).toBe(false);
+          expect(logger.warn).toHaveBeenCalled();
+        });
+
+        test('logs a single concise error when the write target is still missing after reinstall', async () => {
+          scopedClusterClient.bulk
+            .mockResponseOnce(indexNotFoundBulkResponse())
+            .mockResponseOnce(indexNotFoundBulkResponse());
+          const ruleDataClient = new RuleDataClient(
+            getRuleDataClientOptions({ isUsingDataStreams })
+          );
+          const writer = await ruleDataClient.getWriter();
+
+          await delay();
+
+          logger.error.mockClear();
+          mockResourceInstaller.installAndUpdateNamespaceLevelResources.mockClear();
+
+          await writer.bulk({});
+
+          expect(logger.error).toHaveBeenCalledTimes(1);
+          expect(logger.error).toHaveBeenCalledWith(
+            'Could not write alerts for the observability.apm registration context because the write target ".alerts-observability.apm.alerts-default" does not exist and could not be created.'
+          );
+          // The full 404 bulk body must not be logged as an error on every execution.
+          expect(logger.error).not.toHaveBeenCalledWith(expect.any(errors.ResponseError));
+        });
       });
     });
   }
