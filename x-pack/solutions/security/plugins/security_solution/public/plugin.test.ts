@@ -32,7 +32,10 @@ jest.mock('./plugin_services', () => ({
   })),
 }));
 
-jest.mock('./helpers');
+jest.mock('./helpers', () => ({
+  ...jest.requireActual('./helpers'),
+  manageOldSiemRoutes: jest.fn(),
+}));
 
 jest.mock('./app/links', () => ({
   ...jest.requireActual('./app/links'),
@@ -91,8 +94,10 @@ const startPlugin = ({ accessible = true }: { accessible?: boolean } = {}) => {
   return { legacySiemApp, license$, registeredDeepLinks };
 };
 
-const mountLegacySiemApp = (legacySiemApp: App) =>
-  legacySiemApp.mount({} as Parameters<App['mount']>[0]);
+const mountLegacySiemApp = (legacySiemApp: App, params = coreMock.createAppMountParameters()) =>
+  legacySiemApp.mount(params);
+
+const getLoader = (element: HTMLElement) => element.querySelector('[role="progressbar"]');
 
 describe('Security Solution plugin', () => {
   beforeEach(() => {
@@ -161,6 +166,20 @@ describe('Security Solution plugin', () => {
       await jest.advanceTimersByTimeAsync(1000);
 
       expect(manageOldSiemRoutes).not.toHaveBeenCalled();
+    });
+
+    it('shows a loader once the legacy app mount has resolved, until it is unmounted', async () => {
+      const { legacySiemApp } = startPlugin();
+      const params = coreMock.createAppMountParameters();
+      const { element } = params;
+      const unmount = await mountLegacySiemApp(legacySiemApp, params);
+
+      expect(manageOldSiemRoutes).not.toHaveBeenCalled();
+      expect(getLoader(element)).not.toBeNull();
+
+      unmount();
+
+      expect(getLoader(element)).toBeNull();
     });
   });
 });

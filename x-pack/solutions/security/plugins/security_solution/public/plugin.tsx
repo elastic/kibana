@@ -214,10 +214,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       appRoute: 'app/siem',
       title: 'SIEM',
       visibleIn: [],
-      mount: async (_params: AppMountParameters) => {
+      mount: async ({ element }: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
 
-        const { manageOldSiemRoutes } = await this.lazyHelpersForRoutes();
+        const { manageOldSiemRoutes, renderLegacySiemRoutesLoader } =
+          await this.lazyHelpersForRoutes();
+        // Core removes its own loading placeholder once this mount resolves, before the redirect.
+        const unmountLoader = renderLegacySiemRoutesLoader(coreStart, element);
         // The legacy routes are resolved through the Security Solution app deepLinks, so the
         // redirect can only happen once those deepLinks have been registered. It must not start
         // before Core has settled this mount, which would end the destination app's loading
@@ -226,7 +229,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           .pipe(first(), observeOn(asyncScheduler))
           .subscribe(() => manageOldSiemRoutes(coreStart));
 
-        return () => redirectSubscription.unsubscribe();
+        return () => {
+          redirectSubscription.unsubscribe();
+          unmountLoader();
+        };
       },
     });
 

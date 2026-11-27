@@ -8,6 +8,7 @@
 import { ALERT_RULE_NAME, ALERT_RULE_PARAMETERS, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { get, has, isEmpty } from 'lodash/fp';
 import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
 import type { RouteProps } from 'react-router-dom';
 import { matchPath } from 'react-router-dom';
 
@@ -34,6 +35,7 @@ import type {
 } from '../common/search_strategy/security_solution';
 import type { TimelineEqlResponse } from '../common/search_strategy/timeline';
 import { NoPrivilegesPage } from './common/components/no_privileges';
+import { PageLoader } from './common/components/page_loader';
 import { SecurityPageName } from './app/types';
 import type { InspectResponse, StartedSubPlugins, StartServices } from './types';
 import { CASES_SUB_PLUGIN_KEY } from './types';
@@ -66,6 +68,17 @@ export const parseRoute = (location: Pick<Location, 'hash' | 'pathname' | 'searc
     pageName,
     path,
     search,
+  };
+};
+
+/** Renders a page loader into the legacy `siem` app element and returns the function removing it. */
+export const renderLegacySiemRoutesLoader = (
+  coreStart: CoreStart,
+  element: HTMLElement
+): (() => void) => {
+  render(coreStart.rendering.addContext(<PageLoader />), element);
+  return () => {
+    unmountComponentAtNode(element);
   };
 };
 
