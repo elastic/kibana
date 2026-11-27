@@ -26,6 +26,7 @@ import { countSkippedEvidence, trimToBudget } from './trim_to_budget';
 const {
   max_candidates: MAX_CANDIDATES,
   members_per_event: MEMBERS_PER_EVENT,
+  member_rows: MEMBER_ROWS,
   max_reasons: MAX_REASONS,
   max_alerts: MAX_ALERTS,
   max_notes: MAX_NOTES,
@@ -38,6 +39,8 @@ interface PlannedItem {
   title: string;
   query: string;
   earlierEpisode: boolean;
+  /** Evidence of an event's member, not of the signal itself. */
+  member: boolean;
 }
 
 /** An event as the case shows it, and what reading its members asks for. */
@@ -70,6 +73,7 @@ const planEvent = (
       title: cutFreeText(member.title),
       query: member.evidence_esql,
       earlierEpisode,
+      member: true,
     })
   );
   const { members: _members, ...eventFields } = event;
@@ -89,12 +93,18 @@ const planEvent = (
   };
 };
 
+/** A member's evidence is context for a join, so it keeps fewer rows than the signal's own. */
+const limitMemberRows = (result: ReadEvidenceResult): ReadEvidenceResult =>
+  result.result === 'found' && result.rows.length > MEMBER_ROWS
+    ? { ...result, rows: result.rows.slice(0, MEMBER_ROWS), rows_truncated: true }
+    : result;
+
 const toEvidence = (item: PlannedItem, result: ReadEvidenceResult): CaseEvidence => ({
   id: item.id,
   ...(item.earlierEpisode ? { earlier_episode: true } : {}),
   title: item.title,
   query: item.query,
-  ...result,
+  ...(item.member ? limitMemberRows(result) : result),
 });
 
 const keepAlerts = (alerts: CaseAlert[]): CaseAlert[] =>
@@ -109,10 +119,16 @@ const keepAlerts = (alerts: CaseAlert[]): CaseAlert[] =>
  * empty or skipped item; they stay in the case with their status.
  */
 export const buildCase = async (params: BuildCaseParams): Promise<JudgeCase> => {
-  const { kind, signal, reader, alerts, notes, maxChars } = params;
+  const { kind, signal, reader, alerts, notes, maxEvidenceChars } = params;
 
   const planned: PlannedItem[] = [
-    { id: 'E1', title: signal.data.title, query: signal.data.evidence_esql, earlierEpisode: false },
+    {
+      id: 'E1',
+      title: signal.data.title,
+      query: signal.data.evidence_esql,
+      earlierEpisode: false,
+      member: false,
+    },
   ];
   const omitted: CaseOmitted = { candidates: 0, members: 0, reasons: 0, alerts: 0, notes: 0 };
   let candidates: CaseCandidateSummary[] = [];
@@ -146,23 +162,18 @@ export const buildCase = async (params: BuildCaseParams): Promise<JudgeCase> => 
   const results = await Promise.all(planned.map(({ query }) => reader.read(query)));
   const evidence = planned.map((item, index) => toEvidence(item, results[index]));
 
-  const judgeCase: Omit<JudgeCase, 'budget'> = {
+  const { evidence: fitted, budget } = trimToBudget({ evidence, maxEvidenceChars });
+
+  return {
     kind,
     signal,
     candidates,
     ...(closedEvent ? { closed_event: closedEvent } : {}),
     alerts: keepAlerts(alerts),
     notes: notes.slice(0, MAX_NOTES).map(cutFreeText),
-    evidence,
+    evidence: fitted,
     omitted,
-    skipped_evidence: countSkippedEvidence(evidence),
-  };
-  const { evidence: trimmedEvidence, budget } = trimToBudget({ judgeCase, maxChars });
-
-  return {
-    ...judgeCase,
-    evidence: trimmedEvidence,
-    skipped_evidence: countSkippedEvidence(trimmedEvidence),
+    skipped_evidence: countSkippedEvidence(fitted),
     budget,
   };
 };

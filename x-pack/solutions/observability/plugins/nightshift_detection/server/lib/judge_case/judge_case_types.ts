@@ -78,7 +78,7 @@ interface CaseEvidenceBase {
 
 /**
  * One evidence item, by status:
- * - `found`: the query returned rows, a sample of at most 5.
+ * - `found`: the query returned rows, a sample of at most 5 for E1 and fewer for a member.
  * - `empty`: the query ran and returned nothing to read. No evidence, never a refutation.
  * - `error`: the query failed, timed out or was aborted. No evidence.
  * - `skipped`: the query was not read, for the run's query cap, or dropped for the case's size
@@ -106,17 +106,15 @@ export interface CaseSkippedEvidence {
   case_budget: number;
 }
 
-/** The size of the serialized case against its budget. */
+/**
+ * The size of the case's evidence against its budget. The rest of the case is bounded by its own
+ * caps (counts and string lengths) and by the signal schema, not by this budget.
+ */
 export interface CaseBudget {
-  max_chars: number;
-  /** Characters of the whole serialized case, this object included. */
-  used_chars: number;
-  /** An evidence item was reduced or dropped to fit. */
-  trimmed: boolean;
-  /**
-   * The case is still over `max_chars` after every evidence step. The signal, candidates, alerts and
-   * notes are not trimmed and E1 is never dropped, so they can cause it.
-   */
+  max_evidence_chars: number;
+  /** Characters of the serialized evidence items, E1 included. */
+  evidence_chars: number;
+  /** The evidence is still over `max_evidence_chars` after every member was dropped: E1 alone is over it. */
   over_budget: boolean;
 }
 
@@ -142,8 +140,8 @@ interface BuildCaseBaseParams {
   reader: EvidenceReader;
   alerts: CaseAlert[];
   notes: string[];
-  /** The case's size budget; a value that is not a positive integer is ignored. */
-  maxChars?: number;
+  /** The evidence size budget; a value that is not a positive integer is ignored. */
+  maxEvidenceChars?: number;
 }
 
 /** What `buildCase` takes, by the kind of case. */

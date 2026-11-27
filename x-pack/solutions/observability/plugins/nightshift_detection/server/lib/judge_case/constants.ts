@@ -12,12 +12,14 @@
 export const JUDGE_CASE_SETTINGS = {
   /** Distinct evidence queries one run starts; a query past it is skipped, so one run cannot flood Elasticsearch. */
   max_evidence_queries_per_run: 40,
-  /** Characters of the serialized case; over it, evidence is trimmed in a fixed order. */
-  max_chars: 60_000,
+  /** Characters of the serialized evidence of one case; over it, members are dropped from the last. */
+  max_evidence_chars: 60_000,
   /** Candidate events kept in a join case; the rest are counted in `omitted`. */
   max_candidates: 3,
   /** Members of one event whose evidence is read, so a large event does not fill the case. */
   members_per_event: 2,
+  /** Rows kept of a member's evidence: it is context for a join, so it needs fewer than the signal's own. */
+  member_rows: 2,
   /** Reasons kept per candidate. */
   max_reasons: 5,
   /** Breached alerts kept in a case. */
@@ -26,6 +28,4 @@ export const JUDGE_CASE_SETTINGS = {
   max_notes: 10,
   /** Longest free-text string the caller gave (notes, titles, summaries, reasons), in UTF-16 code units. */
   text_max_length: 1_000,
-  /** Longest cell, in UTF-16 code units, once the last trimming step runs. */
-  trimmed_cell_length: 200,
 } as const;

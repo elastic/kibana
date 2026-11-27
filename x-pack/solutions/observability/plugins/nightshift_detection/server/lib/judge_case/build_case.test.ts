@@ -102,7 +102,7 @@ describe('buildCase', () => {
       { id: 'E1', title: 'signal title', query: 'FROM signal', ...FOUND },
     ]);
     expect(result.skipped_evidence).toEqual({ query_cap: 0, case_budget: 0 });
-    expect(result.budget).toMatchObject({ max_chars: 60_000, trimmed: false, over_budget: false });
+    expect(result.budget).toMatchObject({ max_evidence_chars: 60_000, over_budget: false });
   });
 
   it('join numbers up to 2 members per candidate E2 to En and skips the signal own member', async () => {
@@ -252,22 +252,72 @@ describe('buildCase', () => {
     expect(runEvidenceMock).toHaveBeenCalledTimes(1);
   });
 
-  it('trims to the budget and reports it', async () => {
-    const rows = Array.from({ length: 5 }, (_, n) => ({ n, text: 'x'.repeat(100) }));
-    const bigFound: ReadEvidenceResult = {
-      result: 'found',
-      rows,
-      rows_truncated: false,
-      cells_truncated: false,
-    };
-    const reader = fakeReader({ 'FROM a': bigFound, 'FROM b': bigFound });
+  const fiveRows: ReadEvidenceResult = {
+    result: 'found',
+    rows: Array.from({ length: 5 }, (_, n) => ({ n, text: 'x'.repeat(100) })),
+    rows_truncated: false,
+    cells_truncated: false,
+  };
+
+  it('keeps 2 rows of a member’s evidence and all rows of the signal’s own, and flags the cut', async () => {
+    const reader = fakeReader({ 'FROM signal': fiveRows, 'FROM a': fiveRows });
+    const candidates = [candidate(event('ev', [member('a')]))];
+
+    const { evidence } = await buildCase({ ...base, kind: 'join', reader, candidates });
+
+    const [own, memberEvidence] = evidence;
+    expect(own.result === 'found' && own.rows).toHaveLength(5);
+    expect(own.result === 'found' && own.rows_truncated).toBe(false);
+    expect(memberEvidence.result === 'found' && memberEvidence.rows).toHaveLength(2);
+    expect(memberEvidence.result === 'found' && memberEvidence.rows_truncated).toBe(true);
+  });
+
+  it('does not flag a member whose evidence already fits in 2 rows', async () => {
+    const reader = fakeReader();
+    const candidates = [candidate(event('ev', [member('a')]))];
+
+    const { evidence } = await buildCase({ ...base, kind: 'join', reader, candidates });
+
+    expect(evidence[1].result === 'found' && evidence[1].rows_truncated).toBe(false);
+  });
+
+  it('drops members from the last to fit the evidence budget and reports it', async () => {
+    const answers = { 'FROM signal': fiveRows, 'FROM a': fiveRows, 'FROM b': fiveRows };
     const candidates = [candidate(event('ev', [member('a'), member('b')]))];
+    const whole = await buildCase({
+      ...base,
+      kind: 'join',
+      reader: fakeReader(answers),
+      candidates,
+    });
+    // Exactly what E1, E2 and a dropped E3 take, so only E3 has to go.
+    const [first, second, third] = whole.evidence;
+    const droppedThird = { id: 'E3', title: third.title, result: 'skipped', reason: 'case_budget' };
+    const maxEvidenceChars = [first, second, droppedThird].reduce(
+      (total, item) => total + JSON.stringify(item).length,
+      0
+    );
 
-    const result = await buildCase({ ...base, kind: 'join', reader, candidates, maxChars: 900 });
+    const result = await buildCase({
+      ...base,
+      kind: 'join',
+      reader: fakeReader(answers),
+      candidates,
+      maxEvidenceChars,
+    });
 
-    expect(result.budget.trimmed).toBe(true);
-    expect(result.budget.max_chars).toBe(900);
-    expect(JSON.stringify(result).length).toBe(result.budget.used_chars);
-    expect(result.skipped_evidence.case_budget).toBeGreaterThan(0);
+    expect(result.evidence.map(({ id, result: status }) => [id, status])).toEqual([
+      ['E1', 'found'],
+      ['E2', 'found'],
+      ['E3', 'skipped'],
+    ]);
+    expect(result.skipped_evidence).toEqual({ query_cap: 0, case_budget: 1 });
+    expect(result.budget).toMatchObject({
+      max_evidence_chars: maxEvidenceChars,
+      over_budget: false,
+    });
+    expect(result.budget.evidence_chars).toBe(
+      result.evidence.reduce((total, item) => total + JSON.stringify(item).length, 0)
+    );
   });
 });
