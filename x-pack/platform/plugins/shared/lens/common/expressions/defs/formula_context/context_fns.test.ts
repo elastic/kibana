@@ -38,6 +38,34 @@ describe('interval', () => {
     expect(result).toEqual(0);
   });
 
+  it('should not throw for a decimal targetBars', () => {
+    const context = {
+      getSearchContext: () => ({ timeRange: { from: 'now-15m', to: 'now' } }),
+    } as ExecutionContext<Adapters>;
+
+    expect(formulaIntervalFn.fn(undefined, { targetBars: 50.5 }, context)).toBeGreaterThan(0);
+    expect(formulaIntervalFn.fn(undefined, { targetBars: -3 }, context)).toBeGreaterThan(0);
+  });
+
+  it('should pick the interval in the given time zone', () => {
+    // 100 hours. In UTC that is exactly 100 hourly buckets. In Asia/Kolkata (+05:30) the range starts
+    // at 05:30 local, so it touches 101 local hours, and 1h no longer fits.
+    const context = {
+      getSearchContext: () => ({
+        timeRange: { from: '2024-01-01T00:00:00.000Z', to: '2024-01-05T04:00:00.000Z' },
+      }),
+    } as ExecutionContext<Adapters>;
+    const hour = 36e5;
+
+    expect(formulaIntervalFn.fn(undefined, { targetBars: 100, timeZone: 'UTC' }, context)).toBe(
+      hour
+    );
+    expect(formulaIntervalFn.fn(undefined, { targetBars: 100 }, context)).toBe(hour);
+    expect(
+      formulaIntervalFn.fn(undefined, { targetBars: 100, timeZone: 'Asia/Kolkata' }, context)
+    ).toBe(3 * hour);
+  });
+
   it('should return a valid value > 0 if both timeRange and targetBars is passed', () => {
     const result = formulaIntervalFn.fn(undefined, { targetBars: 100 }, {
       getSearchContext: () => ({

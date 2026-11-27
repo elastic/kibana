@@ -170,9 +170,10 @@ export const intervalOperation = createContextValueBasedOperation<IntervalIndexP
   description: i18n.translate('xpack.lens.formula.interval.help', {
     defaultMessage: 'The specified minimum interval for the date histogram, in milliseconds (ms).',
   }),
-  getExpressionFunction: ({ targetBars }: ContextValues) =>
+  getExpressionFunction: ({ targetBars, timeZone }: ContextValues) =>
     buildExpressionFunction<ExpressionFunctionFormulaInterval>('formula_interval', {
       targetBars,
+      timeZone,
     }),
   getErrorMessage: getIntervalErrorMessages,
 });

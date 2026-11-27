@@ -168,6 +168,7 @@ function getExpressionForLayer(
             dateRange,
             now: nowInstant,
             targetBars: histogramBarsTarget,
+            timeZone: uiSettings.get('dateFormat:tz'),
           })
         );
       }

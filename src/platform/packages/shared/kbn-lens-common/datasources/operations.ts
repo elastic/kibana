@@ -188,6 +188,7 @@ export interface LensConstantContextValues {
   dateRange?: DateRange;
   now?: Date;
   targetBars?: number;
+  timeZone?: string;
 }
 
 export interface TimeRangeIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
