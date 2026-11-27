@@ -17,7 +17,7 @@ const applyTaskManagerDeprecations = (settings: Record<string, unknown> = {}) =>
   const deprecations = config.deprecations!(configDeprecationFactory);
   const deprecationMessages: string[] = [];
   const _config = {
-    [CONFIG_PATH]: settings,
+    xpack: { task_manager: settings },
   };
   const { config: migrated } = applyDeprecations(
     _config,
@@ -41,8 +41,33 @@ describe('deprecations', () => {
     const { messages } = applyTaskManagerDeprecations({ max_workers: 1000 });
     expect(messages).toMatchInlineSnapshot(`
       Array [
+        "Configuring \\"xpack.task_manager.max_workers\\" is deprecated and will be removed in a future version. Remove this setting and use \\"xpack.task_manager.capacity\\" instead.",
         "setting \\"xpack.task_manager.max_workers\\" (1000) greater than 100 is deprecated.",
       ]
     `);
+  });
+
+  it.each([true, false])(
+    'logs a warning if unsafe.authenticate_background_task_utilization is set to %s',
+    (value) => {
+      const { messages, migrated } = applyTaskManagerDeprecations({
+        unsafe: { authenticate_background_task_utilization: value },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "Configuring \\"xpack.task_manager.unsafe.authenticate_background_task_utilization\\" is deprecated and will be removed in 10.0.0. Remove this setting; the background task utilization API will always require authentication.",
+        ]
+      `);
+      expect(migrated.xpack.task_manager.unsafe.authenticate_background_task_utilization).toBe(
+        value
+      );
+    }
+  );
+
+  it('does not log a warning if unsafe.authenticate_background_task_utilization is not set', () => {
+    const { messages } = applyTaskManagerDeprecations({
+      unsafe: { exclude_task_types: ['foo'] },
+    });
+    expect(messages).toEqual([]);
   });
 });
