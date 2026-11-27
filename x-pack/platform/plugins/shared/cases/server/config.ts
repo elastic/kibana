@@ -174,6 +174,17 @@ export const ConfigSchema = schema.object({
   runWorkflows: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
+  // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
+  // Gates the "what is new since your last visit" view: its routes and its UI.
+  // The `cases-last-viewed` saved object type is always registered.
+  deltaView: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+    // Not exposed to the browser: the delta response tells the UI if a summary is available.
+    // Needs the `inference` plugin and a default connector (for example the EIS default).
+    aiSummary: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
+  }),
   enabled: schema.boolean({ defaultValue: true }),
 });
 

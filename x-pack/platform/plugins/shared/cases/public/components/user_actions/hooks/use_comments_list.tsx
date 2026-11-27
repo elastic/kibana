@@ -13,6 +13,11 @@ import { UserToolTip } from '../../user_profiles/user_tooltip';
 import { Username } from '../../user_profiles/username';
 import { CaseUserAvatar } from '../../user_profiles/user_avatar';
 import { ShowMoreActivities } from '../show_more_activities';
+import {
+  createLastVisitDivider,
+  hasAfterLastVisitClass,
+  hasNewActivityClass,
+} from '../new_activity';
 import * as i18n from '../translations';
 
 interface UseCommentsListArgs {
@@ -25,6 +30,10 @@ interface UseCommentsListArgs {
   shouldShowCommentEditor: boolean;
   currentUserProfile: CurrentUserProfile;
   commentEditor: React.ReactNode;
+  /** Insert a "Last visit" divider before the first activity after the last visit. */
+  showLastVisitDivider?: boolean;
+  /** Number of new activities on the case. Used to see if collapsed activities hide new ones. */
+  newActivityTotal?: number;
 }
 
 export const useCommentsList = ({
@@ -37,6 +46,8 @@ export const useCommentsList = ({
   shouldShowCommentEditor,
   currentUserProfile,
   commentEditor,
+  showLastVisitDivider = false,
+  newActivityTotal = 0,
 }: UseCommentsListArgs): EuiCommentProps[] => {
   const handleShowMore = useCallback(() => {
     if (fetchNextPage) {
@@ -67,6 +78,15 @@ export const useCommentsList = ({
 
     items.push(...builtLastPageActions);
 
+    // With collapsed activities, new ones may be hidden and the divider would sit in the wrong place.
+    const hasHiddenNewActivity =
+      Boolean(hasNextPage) && items.filter(hasNewActivityClass).length < newActivityTotal;
+    const firstNewIndex =
+      showLastVisitDivider && !hasHiddenNewActivity ? items.findIndex(hasAfterLastVisitClass) : -1;
+    if (firstNewIndex > 0) {
+      items.splice(firstNewIndex, 0, createLastVisitDivider());
+    }
+
     if (shouldShowCommentEditor) {
       items.push({
         username: (
@@ -92,5 +112,7 @@ export const useCommentsList = ({
     shouldShowCommentEditor,
     currentUserProfile,
     commentEditor,
+    showLastVisitDivider,
+    newActivityTotal,
   ]);
 };

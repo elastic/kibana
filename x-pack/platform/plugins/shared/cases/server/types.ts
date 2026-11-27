@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { IRouter, CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
 
 /**
@@ -102,6 +103,11 @@ export interface CasesServerStartDependencies {
    * dataViews or flip the flag off.
    */
   dataViews?: DataViewsServerPluginStart;
+  /**
+   * Inference plugin — needed by the AI summary of the delta view. Optional: without it
+   * (or without a default connector) the summary is not offered.
+   */
+  inference?: InferenceServerStart;
 }
 
 export interface CaseRequestContext {

@@ -17,6 +17,8 @@ import { KibanaServices } from '../../common/lib/kibana';
 import { CasesPageBody } from '../app/cases_page_body';
 import { CaseDetailsAppHeader } from './components/case_details_header';
 import { CaseViewTabContent } from './components/case_view_tab_content';
+import { WhatsNewPanel } from './components/whats_new/whats_new_panel';
+import { JumpToNewActivityProvider } from './components/whats_new/jump_to_new_activity_context';
 import { CaseDetailsTour } from './tour/case_details_tour';
 import { useCaseRefreshRef } from './hooks/use_case_refresh_ref';
 
@@ -39,7 +41,7 @@ export const CaseViewPage = React.memo<CaseViewPageComponentProps>(({ caseData, 
   useCaseRefreshRef({ refreshRef, isLoading });
 
   return (
-    <>
+    <JumpToNewActivityProvider>
       <CaseDetailsAppHeader
         caseData={caseData}
         onUpdateField={onUpdateField}
@@ -49,6 +51,7 @@ export const CaseViewPage = React.memo<CaseViewPageComponentProps>(({ caseData, 
       <CasesPageBody>
         {showMetrics && <CaseViewMetrics data-test-subj="case-view-metrics" caseId={caseData.id} />}
         <EuiSpacer size="l" />
+        <WhatsNewPanel caseId={caseData.id} />
         {KibanaServices.getConfig()?.attachments?.enabled === true && (
           <LensAttachReturnConsumer caseId={caseData.id} />
         )}
@@ -60,7 +63,7 @@ export const CaseViewPage = React.memo<CaseViewPageComponentProps>(({ caseData, 
         />
       </CasesPageBody>
       <CaseDetailsTour caseData={caseData} />
-    </>
+    </JumpToNewActivityProvider>
   );
 });
 CaseViewPage.displayName = 'CaseViewPage';

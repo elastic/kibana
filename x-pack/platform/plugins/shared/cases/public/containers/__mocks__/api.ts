@@ -78,6 +78,15 @@ export const findCaseUserActions = async (
   signal: AbortSignal
 ): Promise<FindCaseUserActions> => Promise.resolve(findCaseUserActionsResponse);
 
+export const getCaseDelta = async (caseId: string, signal?: AbortSignal) =>
+  Promise.resolve({ since: null, counts: { alerts: 0, comments: 0, changes: 0, evidence: 0 } });
+
+export const getCaseDeltaSummary = async (caseId: string, signal?: AbortSignal) =>
+  Promise.resolve({ summary: '', sources: [] });
+
+export const recordCaseView = async (caseId: string, markSeen = false, signal?: AbortSignal) =>
+  Promise.resolve({ since: null });
+
 export const getCaseUserActionsStats = async (
   caseId: string,
   signal: AbortSignal

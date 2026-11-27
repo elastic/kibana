@@ -5,10 +5,19 @@
  * 2.0.
  */
 
-import { getCaseUserActionStatsUrl, getCaseUsersUrl } from '@kbn/cases-plugin/common/api';
+import {
+  getCaseDeltaUrl,
+  getCaseDeltaViewedUrl,
+  getCaseDeltaSummaryUrl,
+  getCaseUserActionStatsUrl,
+  getCaseUsersUrl,
+} from '@kbn/cases-plugin/common/api';
 import { CASE_FIND_USER_ACTIONS_URL } from '@kbn/cases-plugin/common/constants';
 import type {
+  CaseDeltaResponse,
+  CaseDeltaSummaryResponse,
   CaseUserActionStatsResponse,
+  CaseViewedResponse,
   GetCaseUsersResponse,
   UserActionFindRequest,
   UserActionFindResponse,
@@ -88,4 +97,66 @@ export const getCaseUsers = async ({
     .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);
   return users;
+};
+
+export const getCaseDelta = async ({
+  supertest,
+  caseId,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CaseDeltaResponse> => {
+  const { body: delta } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${getCaseDeltaUrl(caseId)}`)
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return delta;
+};
+
+export const recordCaseView = async ({
+  supertest,
+  caseId,
+  markSeen = false,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  markSeen?: boolean;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CaseViewedResponse> => {
+  const { body: viewed } = await supertest
+    .post(`${getSpaceUrlPrefix(auth.space)}${getCaseDeltaViewedUrl(caseId)}`)
+    .set('kbn-xsrf', 'true')
+    .auth(auth.user.username, auth.user.password)
+    .send({ markSeen })
+    .expect(expectedHttpCode);
+
+  return viewed;
+};
+
+export const summarizeCaseDelta = async ({
+  supertest,
+  caseId,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CaseDeltaSummaryResponse> => {
+  const { body: summary } = await supertest
+    .post(`${getSpaceUrlPrefix(auth.space)}${getCaseDeltaSummaryUrl(caseId)}`)
+    .set('kbn-xsrf', 'true')
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return summary;
 };

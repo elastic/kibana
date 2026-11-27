@@ -17,6 +17,7 @@ import type {
   TemplatesService,
   FieldDefinitionsService,
 } from '.';
+import type { LastViewedService } from './last_viewed';
 import type { AttachmentGetter } from './attachments/operations/get';
 import type { DeleteAttachmentArgs } from './attachments/types';
 import type { LicensingService } from './licensing';
@@ -270,4 +271,16 @@ export const createFieldDefinitionsServiceMock = (): FieldDefinitionsServiceMock
   });
 
   return service as unknown as FieldDefinitionsServiceMock;
+};
+
+type LastViewedServiceMock = jest.Mocked<LastViewedService>;
+
+export const createLastViewedServiceMock = (): LastViewedServiceMock => {
+  const service: PublicMethodsOf<LastViewedService> = lazyObject({
+    getSeenAt: jest.fn(),
+    record: jest.fn(),
+  });
+
+  // the cast here is required because jest.Mocked tries to include private members and would throw an error
+  return service as unknown as LastViewedServiceMock;
 };

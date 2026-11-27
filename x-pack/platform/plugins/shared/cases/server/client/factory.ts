@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type {
   KibanaRequest,
   SavedObjectsServiceStart,
@@ -38,7 +39,7 @@ import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespac
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { FilesStart } from '@kbn/files-plugin/server';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
-import { KIBANA_SYSTEM_USERNAME } from '../../common/constants';
+import { CASE_LAST_VIEWED_SAVED_OBJECT, KIBANA_SYSTEM_USERNAME } from '../../common/constants';
 import { Authorization } from '../authorization/authorization';
 import {
   CaseConfigureService,
@@ -49,9 +50,12 @@ import {
   AlertService,
   TemplatesService,
   FieldDefinitionsService,
+  LastViewedService,
 } from '../services';
 
 import { AuthorizationAuditLogger } from '../authorization';
+import type { DeltaSummarizer } from '../services/delta_summary/summarizer';
+import { createDeltaSummarizer } from '../services/delta_summary/summarizer';
 import type { CasesClient } from '.';
 import { createCasesClient } from '.';
 import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
@@ -88,6 +92,7 @@ interface CasesClientFactoryArgs {
   filesPluginStart: FilesStart;
   usageCounter?: IUsageCounter;
   config: ConfigType;
+  inference?: InferenceServerStart;
   casesEventBus?: CasesEventBus;
   closeReasonValidator?: (
     closeReason: string,
@@ -236,7 +241,15 @@ export class CasesClientFactory {
       request,
       closeReasonValidator: boundCloseReasonValidator,
       clientSource,
+      deltaSummarizer: this.createDeltaSummarizer(request),
     };
+  }
+
+  private createDeltaSummarizer(request: KibanaRequest): DeltaSummarizer | undefined {
+    const { inference, config } = this.options ?? {};
+    return inference != null && config?.deltaView.aiSummary.enabled
+      ? createDeltaSummarizer({ inference, request, logger: this.logger })
+      : undefined;
   }
 
   private validateInitialization(): asserts this is this & { options: CasesClientFactoryArgs } {
@@ -264,7 +277,12 @@ export class CasesClientFactory {
   ): SavedObjectsClientContract {
     this.validateInitialization();
     return savedObjectsService.getScopedClient(request, {
-      includedHiddenTypes: getSavedObjectsTypes(this.options.config),
+      // The last-viewed type is internal state: it stays out of the shared type list so it gets
+      // no feature privilege and is not exported.
+      includedHiddenTypes: [
+        ...getSavedObjectsTypes(this.options.config),
+        CASE_LAST_VIEWED_SAVED_OBJECT,
+      ],
       // this tells the security plugin to not perform SO authorization and audit logging since we are handling
       // that manually using our Authorization class and audit logger.
       excludedExtensions: [SECURITY_EXTENSION_ID],
@@ -376,6 +394,10 @@ export class CasesClientFactory {
 
     return {
       templatesService,
+      lastViewedService: new LastViewedService({
+        log: this.logger,
+        unsecuredSavedObjectsClient,
+      }),
       fieldDefinitionsService,
       alertsService: new AlertService(
         esClient,

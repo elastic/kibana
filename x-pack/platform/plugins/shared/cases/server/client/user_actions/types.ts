@@ -17,6 +17,10 @@ export interface UserActionGet {
   caseId: string;
 }
 
+export interface UserActionRecordView extends UserActionGet {
+  markSeen?: boolean;
+}
+
 export type GetConnectorsRequest = UserActionGet;
 export type GetUsersRequest = UserActionGet;
 

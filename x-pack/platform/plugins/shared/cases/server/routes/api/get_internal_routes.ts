@@ -30,6 +30,9 @@ import { patchObservableRoute } from './observables/patch_observable';
 import { bulkDeleteObservablesRoute } from './observables/bulk_delete_observables';
 import { deleteObservableRoute } from './observables/delete_observable';
 import { findUserActionsRoute } from './internal/find_user_actions';
+import { getCaseDeltaRoute } from './internal/get_case_delta';
+import { recordCaseViewRoute } from './internal/record_case_view';
+import { summarizeCaseDeltaRoute } from './internal/summarize_case_delta';
 import { findCasesContainingAllDocumentsRoute } from './internal/find_cases_containing_all_documents';
 import type { ConfigType } from '../../config';
 import { getTemplateRoutes } from './templates';
@@ -66,6 +69,10 @@ export const getInternalRoutes = (
     deleteObservableRoute,
     similarCaseRoute,
     findUserActionsRoute,
+    ...(config.deltaView.enabled ? [getCaseDeltaRoute, recordCaseViewRoute] : []),
+    ...(config.deltaView.enabled && config.deltaView.aiSummary.enabled
+      ? [summarizeCaseDeltaRoute]
+      : []),
     findCasesContainingAllDocumentsRoute,
     ...getTemplateRoutes(config),
     ...getFieldDefinitionRoutes(config),

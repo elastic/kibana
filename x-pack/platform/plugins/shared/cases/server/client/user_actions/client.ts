@@ -7,6 +7,9 @@
 
 import type {
   CaseUserActionsDeprecatedResponse,
+  CaseDeltaResponse,
+  CaseDeltaSummaryResponse,
+  CaseViewedResponse,
   CaseUserActionStatsResponse,
   GetCaseConnectorsResponse,
   GetCaseUsersResponse,
@@ -17,8 +20,16 @@ import { get } from './get';
 import { getConnectors } from './connectors';
 import { getStats } from './stats';
 import { getUsers } from './users';
-import type { GetConnectorsRequest, UserActionFind, UserActionGet, GetUsersRequest } from './types';
+import type {
+  GetConnectorsRequest,
+  UserActionFind,
+  UserActionGet,
+  UserActionRecordView,
+  GetUsersRequest,
+} from './types';
 import { find } from './find';
+import { getDelta, recordView } from './delta';
+import { summarizeCaseDelta } from './delta_summary';
 import type { CasesClient } from '../client';
 /**
  * API for interacting the actions performed by a user when interacting with the cases entities.
@@ -38,6 +49,18 @@ export interface UserActionsSubClient {
    */
   stats(params: UserActionGet): Promise<CaseUserActionStatsResponse>;
   /**
+   * Counts the user actions by other users since the user's window start, grouped by category
+   */
+  getDelta(params: UserActionGet): Promise<CaseDeltaResponse>;
+  /**
+   * Summarizes the delta with the default AI model. Cites the delta items as sources
+   */
+  summarizeDelta(params: UserActionGet): Promise<CaseDeltaSummaryResponse>;
+  /**
+   * Records that the user opened the case and returns the start of the "what is new" window
+   */
+  recordView(params: UserActionRecordView): Promise<CaseViewedResponse>;
+  /**
    * Retrieves all users participating in a case
    */
   getUsers(params: GetUsersRequest): Promise<GetCaseUsersResponse>;
@@ -55,6 +78,9 @@ export const createUserActionsSubClient = (
     getAll: (params) => get(params, clientArgs),
     getConnectors: (params) => getConnectors(params, clientArgs),
     stats: (params) => getStats(params, casesClient, clientArgs),
+    getDelta: (params) => getDelta(params, casesClient, clientArgs),
+    recordView: (params) => recordView(params, casesClient, clientArgs),
+    summarizeDelta: (params) => summarizeCaseDelta(params, casesClient, clientArgs),
     getUsers: (params) => getUsers(params, casesClient, clientArgs),
   };
 

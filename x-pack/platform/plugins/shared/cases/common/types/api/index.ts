@@ -8,6 +8,7 @@
 // Latest
 export * from './configure/latest';
 export * from './user_action/latest';
+export * from './delta/latest';
 export * from './document/latest';
 export * from './case/latest';
 export * from './external_service/latest';
@@ -25,6 +26,7 @@ export type * from './workflow/latest';
 // V1
 export * as configureApiV1 from './configure/v1';
 export * as userActionApiV1 from './user_action/v1';
+export * as deltaApiV1 from './delta/v1';
 export * as alertApiV1 from './document/v1';
 export * as statsApiV1 from './stats/v1';
 export * as caseApiV1 from './case/v1';

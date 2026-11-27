@@ -55,6 +55,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./internal/search_cases'));
     loadTestFile(require.resolve('./internal/replace_custom_field'));
     loadTestFile(require.resolve('./internal/find_user_actions.ts'));
+    loadTestFile(require.resolve('./internal/case_delta'));
 
     // NOTE: The attachments-framework suites are flag-sensitive and run under
     // their own configs with the feature flag pinned

@@ -26,9 +26,11 @@ import type {
   AlertService,
   TemplatesService,
   FieldDefinitionsService,
+  LastViewedService,
 } from '../services';
 import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
 import type { LicensingService } from '../services/licensing';
+import type { DeltaSummarizer } from '../services/delta_summary/summarizer';
 import type { NotificationService } from '../services/notifications/types';
 import type { User } from '../common/types/user';
 import type { ConfigType } from '../config';
@@ -47,6 +49,7 @@ export interface CasesServices {
   notificationService: NotificationService;
   templatesService: TemplatesService;
   fieldDefinitionsService: FieldDefinitionsService;
+  lastViewedService: LastViewedService;
 }
 
 /**
@@ -68,6 +71,8 @@ export interface CasesClientArgs {
   readonly fileService: FileServiceStart;
   readonly usageCounter?: IUsageCounter;
   readonly config: ConfigType;
+  /** Present only when the AI summary is enabled and the inference plugin is installed. */
+  readonly deltaSummarizer?: DeltaSummarizer;
   readonly casesEventBus?: CasesEventBus;
   readonly request: KibanaRequest;
   readonly closeReasonValidator?: (closeReason: string, owner: string) => Promise<boolean>;

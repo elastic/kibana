@@ -15,6 +15,9 @@ import type {
   CasePostRequest,
   CaseResolveResponse,
   CasesSearchResponse,
+  CaseDeltaResponse,
+  CaseDeltaSummaryResponse,
+  CaseViewedResponse,
   CaseUserActionStatsResponse,
   GetCaseConnectorsResponse,
   SingleCaseMetricsResponse,
@@ -56,6 +59,9 @@ import {
   getCaseFindUserActionsUrl,
   getCaseConnectorsUrl,
   getCaseUsersUrl,
+  getCaseDeltaUrl,
+  getCaseDeltaViewedUrl,
+  getCaseDeltaSummaryUrl,
   getCaseUserActionStatsUrl,
   getCustomFieldReplaceUrl,
   getCaseCreateObservableUrl,
@@ -265,6 +271,35 @@ export const findCaseUserActions = async (
     latestAttachments: convertAttachmentsToCamelCase(response.latestAttachments),
   };
 };
+
+export const getCaseDelta = async (
+  caseId: string,
+  signal?: AbortSignal
+): Promise<CaseDeltaResponse> =>
+  KibanaServices.get().http.fetch<CaseDeltaResponse>(getCaseDeltaUrl(caseId), {
+    method: 'GET',
+    signal,
+  });
+
+export const getCaseDeltaSummary = async (
+  caseId: string,
+  signal?: AbortSignal
+): Promise<CaseDeltaSummaryResponse> =>
+  KibanaServices.get().http.fetch<CaseDeltaSummaryResponse>(getCaseDeltaSummaryUrl(caseId), {
+    method: 'POST',
+    signal,
+  });
+
+export const recordCaseView = async (
+  caseId: string,
+  markSeen = false,
+  signal?: AbortSignal
+): Promise<CaseViewedResponse> =>
+  KibanaServices.get().http.fetch<CaseViewedResponse>(getCaseDeltaViewedUrl(caseId), {
+    method: 'POST',
+    body: JSON.stringify({ markSeen }),
+    signal,
+  });
 
 export const getCaseUserActionsStats = async (
   caseId: string,

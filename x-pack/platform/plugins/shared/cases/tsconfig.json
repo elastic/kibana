@@ -109,6 +109,8 @@
     "@kbn/workflows",
     "@kbn/workflows-ui",
     "@kbn/workflows-management-plugin",
+    "@kbn/inference-plugin",
+    "@kbn/inference-common",
     "@kbn/agent-builder-plugin",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-server",
