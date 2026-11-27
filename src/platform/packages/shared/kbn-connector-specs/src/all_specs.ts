@@ -103,3 +103,4 @@ export * from './specs/redis/redis';
 export * from './specs/sentinelone/sentinelone';
 export * from './specs/microsoft_sql_server/microsoft_sql_server';
 export * from './specs/trend_vision_one/trend_vision_one';
+export * from './specs/crowdstrike2/crowdstrike2';

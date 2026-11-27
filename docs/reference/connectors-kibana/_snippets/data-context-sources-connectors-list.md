@@ -93,6 +93,7 @@
 
 **Endpoint security**
 
+- [CrowdStrike Falcon](/reference/connectors-kibana/crowdstrike2-action-type.md): Triage alerts, look up and contain hosts, run Real Time Response, manage IOCs, and check reputation and sandbox verdicts.
 - [SentinelOne (v2)](/reference/connectors-kibana/sentinelone-v2-action-type.md): Find and isolate endpoints, triage and mitigate threats, run remote scripts, retrieve files, and manage blocklists, exclusions, indicators, firewall and detection rules.
 - [TrendAI Vision One](/reference/connectors-kibana/trend-vision-one-action-type.md): Read Workbench alerts, Observed Attack Techniques detections, endpoints, response tasks, and sandbox analysis results.
 

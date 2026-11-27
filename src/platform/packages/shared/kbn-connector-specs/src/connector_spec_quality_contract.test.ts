@@ -30,7 +30,9 @@ const AVAILABILITY_STATEMENTS = {
   workflowsOnly: /\*\*Workflows\*\* only/i,
 };
 type Availability = keyof typeof AVAILABILITY_STATEMENTS;
-const NOT_YET_AVAILABLE_MARKER = '_(not yet available)_';
+const NOT_YET_AVAILABLE_MARKERS = ['_(not yet available)_', '_(API only)_'];
+const stripMarkers = (line: string): string =>
+  NOT_YET_AVAILABLE_MARKERS.reduce((text, marker) => text.split(marker).join(''), line);
 const WORKFLOW_USE_CLAIM =
   /\b(workflow[- ]only|workflow steps?|reserved for workflows|available to workflows|(?:from|in|for|by) (?:a |your )?workflows?|workflows? or agents?|workflows and agents|workflow authors?)\b/gi;
 const INTERNAL_VOCABULARY =
@@ -252,8 +254,8 @@ describe('connector spec quality contracts', () => {
           .readFileSync(docsPagePath, 'utf8')
           .split('\n')
           .map((line) => ({
-            name: toHeadingKey(line.split(NOT_YET_AVAILABLE_MARKER).join('')),
-            marked: line.includes(NOT_YET_AVAILABLE_MARKER),
+            name: toHeadingKey(stripMarkers(line)),
+            marked: NOT_YET_AVAILABLE_MARKERS.some((marker) => line.includes(marker)),
           }));
         const unmarked = Object.entries(spec.actions)
           .filter(([, action]) => !action.isTool)
@@ -283,8 +285,8 @@ describe('connector spec quality contracts', () => {
           .readFileSync(docsPagePath, 'utf8')
           .split('\n')
           .map((line) => line.trim())
-          .filter((line) => line.endsWith(NOT_YET_AVAILABLE_MARKER))
-          .map((line) => line.slice(0, -NOT_YET_AVAILABLE_MARKER.length).trim())
+          .filter((line) => NOT_YET_AVAILABLE_MARKERS.some((marker) => line.endsWith(marker)))
+          .map((line) => stripMarkers(line).trim())
           .filter((heading) => !unavailableActionKeys.has(toHeadingKey(heading)));
 
         expect(wronglyMarked).toEqual([]);
