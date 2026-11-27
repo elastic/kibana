@@ -29,7 +29,7 @@ import { HIDDEN_INDEX_SEARCH_OPTIONS } from '../lib/es_options';
 import { redactUrl } from '../adapters/http_client';
 import { THREAT_INTEL_READ_AUTHZ, THREAT_INTEL_WRITE_AUTHZ } from './lib/authz';
 import { rejectUntilBootstrapped } from './lib/bootstrap_ready';
-import { ensureIndicatorAliasForSpace } from '../setup/indicator_alias';
+import { ensureIndicatorAliasOncePerSpace } from '../setup/indicator_alias';
 import type { RouteRegistrationDeps } from '.';
 
 interface ThreatIntelSourceDoc {
@@ -243,16 +243,6 @@ export const loadSourceReportStatsByAdapterId = async ({
 };
 
 /**
- * `ensureIndicatorAliasForSpace` is a bootstrap-time ES alias write. Every space
- * needs it run once (bootstrap covers spaces that already existed; spaces
- * created afterward need it on their first list_sources call), but re-running it
- * on every read request adds an ES write to a page-load-level GET. Cache the
- * space ids already ensured this process lifetime so only the first request per
- * space pays for it. Lost on restart, but restart re-runs bootstrap anyway.
- */
-const spacesWithEnsuredAlias = new Set<string>();
-
-/**
  * POST `/internal/threat_intel/sources/list` — source catalog enriched with
  * report counts / last ingest / env hits from `.kibana-threat-reports*`.
  */
@@ -291,10 +281,7 @@ export const registerListSourcesRoute = ({
         const size = request.body.size ?? 500;
 
         try {
-          if (!spacesWithEnsuredAlias.has(spaceId)) {
-            await ensureIndicatorAliasForSpace({ esClient, spaceId, logger });
-            spacesWithEnsuredAlias.add(spaceId);
-          }
+          await ensureIndicatorAliasOncePerSpace({ esClient, spaceId, logger });
           const [searchResponse, reportStatsByAdapterId] = await Promise.all([
             esClient.search<ThreatIntelSourceDoc>({
               index: THREAT_INTEL_SOURCES_INDEX,

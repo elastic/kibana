@@ -7,7 +7,11 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { THREAT_INTEL_INDICATORS_INDEX } from '../../../common/threat_intel';
-import { ensureIndicatorAliasForSpace, indicatorAliasForSpace } from './indicator_alias';
+import {
+  ensureIndicatorAliasForSpace,
+  ensureIndicatorAliasOncePerSpace,
+  indicatorAliasForSpace,
+} from './indicator_alias';
 
 // Derived rather than hardcoded so the suite follows the constant. The one property
 // worth pinning independently is asserted below: the name must stay outside `.kibana`.
@@ -275,5 +279,36 @@ describe('ensureIndicatorAliasForSpace', () => {
     expect(logger.get('indicator-alias').error).toHaveBeenCalledWith(
       expect.stringContaining('Do not point a detection rule at the raw index')
     );
+  });
+});
+
+describe('ensureIndicatorAliasOncePerSpace', () => {
+  it('returns the alias name and only writes the first time a space is seen', async () => {
+    const { esClient, logger } = setup({});
+
+    const first = await ensureIndicatorAliasOncePerSpace({
+      esClient,
+      spaceId: 'once-space',
+      logger,
+    });
+    const second = await ensureIndicatorAliasOncePerSpace({
+      esClient,
+      spaceId: 'once-space',
+      logger,
+    });
+
+    expect(first).toBe(`${INDEX}-once-space`);
+    expect(second).toBe(first);
+    expect(esClient.indices.getAlias).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.putAlias).toHaveBeenCalledTimes(1);
+  });
+
+  it('ensures each space separately', async () => {
+    const { esClient, logger } = setup({});
+
+    await ensureIndicatorAliasOncePerSpace({ esClient, spaceId: 'space-a', logger });
+    await ensureIndicatorAliasOncePerSpace({ esClient, spaceId: 'space-b', logger });
+
+    expect(esClient.indices.putAlias).toHaveBeenCalledTimes(2);
   });
 });

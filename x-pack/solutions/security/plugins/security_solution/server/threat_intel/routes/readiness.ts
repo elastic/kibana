@@ -7,6 +7,7 @@
 
 import { READINESS_API_PATH, readinessResponseSchema } from '../../../common/threat_intel';
 import { getThreatIntelReadiness } from '../services/readiness';
+import { ensureIndicatorAliasOncePerSpace } from '../setup/indicator_alias';
 import { resolveCurrentSpaceId } from '../lib/space_filter';
 import { THREAT_INTEL_READ_AUTHZ } from './lib/authz';
 import type { RouteRegistrationDeps } from '.';
@@ -54,7 +55,15 @@ export const registerReadinessRoute = ({
             getInference,
             getSearchInferenceEndpoints,
           });
-          return response.ok({ body: result });
+          if (result.status === 'blocked') {
+            return response.ok({ body: result });
+          }
+          const indicatorAlias = await ensureIndicatorAliasOncePerSpace({
+            esClient,
+            spaceId,
+            logger,
+          });
+          return response.ok({ body: { ...result, indicatorAlias } });
         } catch (err) {
           logger.warn(`threat_intel readiness failed: ${(err as Error).message}`);
           return response.customError({
