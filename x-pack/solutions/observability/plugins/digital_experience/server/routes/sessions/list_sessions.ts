@@ -253,6 +253,7 @@ export const toSessionSummary = (doc: StoredSessionDocument): SessionSummary => 
       total: numberOr(doc.frustration_count, 0),
     },
     bounced: doc.bounced ?? pageViewCount === 1,
+    hasReplay: doc.has_replay ?? null,
     entryPage: stringOrNull(doc.entry_page),
     exitPage: stringOrNull(doc.exit_page),
     journey: Array.isArray(doc.journey) ? doc.journey : [],

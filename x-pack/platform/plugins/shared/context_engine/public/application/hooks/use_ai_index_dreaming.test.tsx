@@ -56,4 +56,54 @@ describe('useAiIndexDreaming', () => {
 
     await waitFor(() => expect(result.current.workflowIds).toEqual([]));
   });
+
+  it('is an error when the request fails', async () => {
+    const core = coreMock.createStart();
+    core.http.get.mockRejectedValue(new Error('Request timed out'));
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const { result } = renderHook(() => useAiIndexDreaming('support', { enabled: true }), {
+      wrapper: ({ children }) => (
+        <QueryClientProvider client={queryClient}>
+          <KibanaContextProvider services={core}>{children}</KibanaContextProvider>
+        </QueryClientProvider>
+      ),
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(result.current.dreaming).toBeUndefined();
+  });
+
+  it('retries a failed request as many times as `retry` says', async () => {
+    const core = coreMock.createStart();
+    core.http.get.mockRejectedValue(new Error('Request timed out'));
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retryDelay: 0 } } });
+    const { result } = renderHook(
+      () => useAiIndexDreaming('support', { enabled: true, retry: 1 }),
+      {
+        wrapper: ({ children }) => (
+          <QueryClientProvider client={queryClient}>
+            <KibanaContextProvider services={core}>{children}</KibanaContextProvider>
+          </QueryClientProvider>
+        ),
+      }
+    );
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(core.http.get).toHaveBeenCalledTimes(2);
+  });
+
+  it('is not an error when disabled', () => {
+    const core = coreMock.createStart();
+    const queryClient = new QueryClient();
+    const { result } = renderHook(() => useAiIndexDreaming('support', { enabled: false }), {
+      wrapper: ({ children }) => (
+        <QueryClientProvider client={queryClient}>
+          <KibanaContextProvider services={core}>{children}</KibanaContextProvider>
+        </QueryClientProvider>
+      ),
+    });
+
+    expect(result.current.isError).toBe(false);
+    expect(core.http.get).not.toHaveBeenCalled();
+  });
 });

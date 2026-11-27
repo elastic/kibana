@@ -106,6 +106,17 @@ describe('action_type_model_utils', () => {
       expect(await model.validateParams({}, null)).toEqual({ errors: {} });
     });
 
+    it.each([undefined, '1.3'])(
+      'preserves the served spec version %s in the form model',
+      (specVersion) => {
+        const model = transformSpecToActionTypeModel(
+          { ...baseSpec, metadata: { ...baseSpec.metadata, specVersion } },
+          docLinks
+        );
+        expect(model.specVersion).toBe(specVersion);
+      }
+    );
+
     it('sets isTestable from the spec response', () => {
       const testableModel = transformSpecToActionTypeModel(
         { ...baseSpec, isTestable: true },

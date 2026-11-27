@@ -138,8 +138,8 @@ export const createProposalTool = ({
     tags: ['proposals'],
     excludeFromMcp: true,
     availability: {
-      // Per principal, so it cannot be cached per space.
-      cacheMode: 'none',
+      // Per principal: a hint only, creating the proposal enforces access again.
+      cacheMode: 'space-user',
       handler: async ({ request, spaceId }) => {
         try {
           await assertAvailable(request);

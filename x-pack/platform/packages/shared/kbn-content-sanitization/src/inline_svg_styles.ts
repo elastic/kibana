@@ -6,6 +6,7 @@
  */
 
 import type { DOMWindow } from 'jsdom';
+import { getFragmentId } from './href';
 
 // Keep the synchronous pre-pass cheap on hostile input; registry icons stay far below each one.
 const MAX_STYLE_TEXT_LENGTH = 16_384;
@@ -71,7 +72,7 @@ const BASIC_SHAPES: ReadonlySet<string> = new Set([
   'polyline',
   'polygon',
 ]);
-// DOMPurify drops <use> and strips the href <image> needs, so only these still draw after sanitization.
+// Elements that draw without an href; <use> and <image> draw only if sanitization keeps theirs.
 const DRAWING_ELEMENTS: ReadonlySet<string> = new Set([...BASIC_SHAPES, 'text']);
 // `overflow` has no effect on a basic shape, so Illustrator's `style="overflow:visible;"` on <use> can be dropped.
 const OVERFLOW_DECLARATION = /^overflow\s*:\s*[a-z]+$/i;
@@ -470,6 +471,17 @@ const getHrefTarget = (
   return href.startsWith('#') ? elementsById.get(href.slice(1)) : undefined;
 };
 
+// Undefined unless every href of the <use> is one that sanitization could keep (it trims values first) and
+// all of them name the same target.
+const getUseTargetId = (use: Element): string | undefined => {
+  const ids = new Set(
+    Array.from(use.attributes)
+      .filter(({ localName }) => toAsciiLowerCase(localName) === 'href')
+      .map(({ value }) => getFragmentId(value.trim()))
+  );
+  return ids.size === 1 ? ids.values().next().value : undefined;
+};
+
 interface Copy {
   readonly elements: readonly Element[];
   readonly target: Element;
@@ -507,8 +519,8 @@ const readStops = (gradient: Element): Stops => {
   };
 };
 
-// DOMPurify strips href and drops <use>, so gradients inheriting through href would paint nothing and clip
-// paths built from <use> would hide their shape.
+// Sanitization strips any href that is not a plain same-document reference, so gradients inheriting through
+// it would paint nothing and clip paths built from <use> would hide their shape.
 const planReferences = (
   elements: readonly Element[],
   elementsById: ReadonlyMap<string, Element>
@@ -653,20 +665,27 @@ interface InlinedReference {
 interface InlinedSvg {
   readonly svg: string;
   readonly references: readonly InlinedReference[];
-  // Element count of everything the references reach; fewer after sanitization means content was removed.
-  readonly dependencies: ReadonlyMap<string, number>;
+  readonly dependencies: ReadonlyMap<string, Dependency>;
 }
 
-// Undefined when anything reachable still needs an href that sanitization strips.
+// Counts for everything a reference reaches; fewer after sanitization means content was removed.
+interface Dependency {
+  readonly elements: number;
+  readonly useReferences: number;
+}
+
+const isUseReference = (element: Element): boolean => kindOf(element) === 'use' && hasHref(element);
+
+// Undefined when anything reachable still needs an href that sanitization may strip.
 const collectDependencies = (
   ids: readonly string[],
   elements: readonly Element[],
   resolvedGradients: ReadonlySet<Element>
-): Map<string, number> | undefined => {
+): Map<string, Dependency> | undefined => {
   const elementsById = indexById(elements, collectForeignElements(elements));
   const descendants = countDescendants(elements);
   const positions = new Map(elements.map((element, index) => [element, index]));
-  const dependencies = new Map<string, number>();
+  const dependencies = new Map<string, Dependency>();
   // Iterating a Set also visits the ids added to it during the loop.
   const pending = new Set(ids);
   // Subtrees of nested ids overlap, so each element's attributes are read only the first time.
@@ -675,23 +694,36 @@ const collectDependencies = (
   for (const id of pending) {
     const target = elementsById.get(id);
     const count = (target && descendants.get(target)) ?? 0;
-    dependencies.set(id, count);
     const start = target && positions.get(target);
     if (start === undefined) {
+      dependencies.set(id, { elements: count, useReferences: 0 });
       continue;
     }
     // A subtree is contiguous in document order.
-    for (const element of elements.slice(start, start + count + 1)) {
+    let useReferences = 0;
+    for (let index = start; index <= start + count; index++) {
+      const element = elements[index];
       steps += 1;
       if (steps > MAX_RESOLUTION_STEPS) {
         return undefined;
+      }
+      if (isUseReference(element)) {
+        useReferences++;
       }
       if (scanned.has(element)) {
         continue;
       }
       scanned.add(element);
       if (hasHref(element) && !resolvedGradients.has(element)) {
-        return undefined;
+        // Sanitization keeps a <use> reference only if what it reaches still exists, which breaksReference checks.
+        const referencedId = kindOf(element) === 'use' ? getUseTargetId(element) : undefined;
+        if (referencedId === undefined) {
+          return undefined;
+        }
+        pending.add(referencedId);
+        if (pending.size > MAX_REFERENCED_IDS) {
+          return undefined;
+        }
       }
       for (const { value } of Array.from(element.attributes)) {
         // CSS escapes can spell url() in a way LOCAL_URL doesn't see, e.g. `u\72l(#id)`.
@@ -707,6 +739,7 @@ const collectDependencies = (
         }
       }
     }
+    dependencies.set(id, { elements: count, useReferences });
   }
   return dependencies;
 };
@@ -781,6 +814,7 @@ const inlineSupportedStyles = (svgContent: string, window: DOMWindow): InlinedSv
 interface SanitizedTree {
   readonly foreignElements: ReadonlySet<Element>;
   readonly subtree: (element: Element) => readonly Element[];
+  readonly elementsById: ReadonlyMap<string, Element>;
 }
 
 // A pattern tile defaults to zero width and height, and a zero-sized tile paints nothing.
@@ -793,11 +827,19 @@ const hasPatternTile = (pattern: Element): boolean =>
 // Descriptive children such as <title> leave a clip path, mask, pattern or filter hiding whatever uses it.
 const isRenderableTarget = (
   target: Element,
-  { foreignElements, subtree }: SanitizedTree
+  { foreignElements, subtree, elementsById }: SanitizedTree
 ): boolean => {
   const isSvg = (element: Element): boolean => !foreignElements.has(element);
-  const draws = (element: Element): boolean =>
+  const drawsItself = (element: Element): boolean =>
     isSvg(element) && DRAWING_ELEMENTS.has(kindOf(element));
+  // Inside a clip path a <use> may only reference a shape or text, so only those count everywhere.
+  const draws = (element: Element): boolean => {
+    if (kindOf(element) !== 'use') {
+      return drawsItself(element);
+    }
+    const shape = getHrefTarget(element, elementsById);
+    return isSvg(element) && shape !== undefined && drawsItself(shape);
+  };
   const kind = kindOf(target);
   const children = Array.from(target.children).filter(isSvg);
   if (GRADIENT_ELEMENTS.has(kind)) {
@@ -848,13 +890,20 @@ const breaksReference = (
       const start = (positions.get(element) ?? 0) + 1;
       return elements.slice(start, start + (descendants.get(element) ?? 0));
     },
+    elementsById,
   };
-  const isIntact = (id: string, before: number): boolean => {
+  // Sanitization can strip the href of a <use> it keeps, which leaves the element but draws nothing.
+  const countResolvedUseReferences = (target: Element): number =>
+    [target, ...tree.subtree(target)].filter(
+      (element) => kindOf(element) === 'use' && getHrefTarget(element, elementsById) !== undefined
+    ).length;
+  const isIntact = (id: string, before: Dependency): boolean => {
     const target = elementsById.get(id);
     return (
       target !== undefined &&
       isRenderableTarget(target, tree) &&
-      (descendants.get(target) ?? 0) === before
+      (descendants.get(target) ?? 0) === before.elements &&
+      countResolvedUseReferences(target) === before.useReferences
     );
   };
   return (

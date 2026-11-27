@@ -19,7 +19,10 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
-import { CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID } from '../common/constants';
+import {
+  CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID,
+  CONTEXT_ENGINE_SETUP_WIZARD_ENABLED_SETTING_ID,
+} from '../common/constants';
 import { apiPrivileges } from '../common/features';
 import type {
   ContextEnginePluginSetup,
@@ -57,6 +60,7 @@ import { AiIndexService } from './ai_indices/service';
 import { AiIndexRegistry } from './ai_indices/registry';
 import { ImprovementsService } from './improvements/service';
 import { installImprovementsIndexTemplate } from './improvements/storage';
+import { BackgroundWriteTracker } from './session_memory/background_write_tracker';
 import { createSessionMemoryService } from './session_memory/service';
 import { createSessionEventsService } from './session_events/service';
 import { SignalsService } from './signals/service';
@@ -102,6 +106,7 @@ export class ContextEnginePlugin
   private isGlobalMemoryEnabled: () => Promise<boolean> = async () => false;
   private readonly aiIndexRegistry = new AiIndexRegistry();
   private readonly aiIndexChanges: AiIndexChangeNotifier;
+  private readonly rememberWriteTracker: BackgroundWriteTracker;
   private spendService?: SpendService;
   private priceCatalogBaseUrl = DEFAULT_PRICE_CATALOG_BASE_URL;
   private analyticsService?: ContextEngineAnalyticsService;
@@ -116,6 +121,9 @@ export class ContextEnginePlugin
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
     this.aiIndexChanges = new AiIndexChangeNotifier(this.logger.get('ai_index_changes'));
+    this.rememberWriteTracker = new BackgroundWriteTracker({
+      logger: this.logger.get('session_memory'),
+    });
   }
 
   setup(
@@ -200,6 +208,20 @@ export class ContextEnginePlugin
         }),
         description: i18n.translate('xpack.contextEngine.uiSettings.memory.description', {
           defaultMessage: 'Enables memory capabilities for Context Engine AI indices.',
+        }),
+        schema: schema.boolean(),
+        value: false,
+        experimental: true,
+        requiresPageReload: false,
+        readonly: false,
+      },
+      [CONTEXT_ENGINE_SETUP_WIZARD_ENABLED_SETTING_ID]: {
+        name: i18n.translate('xpack.contextEngine.uiSettings.setupWizard.name', {
+          defaultMessage: 'Context Engine setup wizard',
+        }),
+        description: i18n.translate('xpack.contextEngine.uiSettings.setupWizard.description', {
+          defaultMessage:
+            'Shows a setup wizard on the Overview of an AI index that is not set up yet.',
         }),
         schema: schema.boolean(),
         value: false,
@@ -467,6 +489,7 @@ export class ContextEnginePlugin
       },
       getAiIndexService,
       isMemoryEnabled,
+      backgroundWrites: this.rememberWriteTracker,
       logger: this.logger.get('session_memory'),
     });
 
@@ -635,5 +658,7 @@ export class ContextEnginePlugin
     };
   }
 
-  stop() {}
+  async stop(): Promise<void> {
+    await this.rememberWriteTracker.drain();
+  }
 }

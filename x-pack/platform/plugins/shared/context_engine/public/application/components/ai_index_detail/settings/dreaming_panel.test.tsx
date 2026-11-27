@@ -113,6 +113,7 @@ const renderPanel = (props: ReturnType<typeof aiIndexWith>, isLoading: boolean =
     dreaming: props.dreaming,
     workflowIds: props.dreaming?.enabled ? ['wf-dreaming'] : [],
     isLoading,
+    isError: false,
   });
   return render(panel(props));
 };

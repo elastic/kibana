@@ -140,7 +140,7 @@
     },
     "http": {
       "apiVersion": "0.0.1",
-      "fetchedAt": "2026-10-07T20:19:45.508Z",
+      "fetchedAt": "2026-11-23T11:13:23.190Z",
       "format": "openapi",
       "url": "https://raw.githubusercontent.com/grafana/grafana/main/public/openapi3.json"
     }

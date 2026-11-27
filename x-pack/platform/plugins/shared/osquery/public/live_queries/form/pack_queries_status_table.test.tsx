@@ -11,6 +11,8 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiProvider } from '@elastic/eui';
 
 import { PackQueriesStatusTable } from './pack_queries_status_table';
+import { QueryDetailsFlyout } from './query_details_flyout';
+import { useErrorToast } from '../../common/hooks/use_error_toast';
 import { useExportFiltersContext } from '../../results/export_filters_context';
 import type { ExportFiltersStore } from '../../results/export_filters_context';
 
@@ -34,8 +36,9 @@ jest.mock('../../routes/saved_queries/edit/tabs', () => ({
   ResultTabs: () => <div data-test-subj="mock-result-tabs" />,
 }));
 jest.mock('./query_details_flyout', () => ({
-  QueryDetailsFlyout: () => null,
+  QueryDetailsFlyout: jest.fn(() => null),
 }));
+jest.mock('../../common/hooks/use_error_toast');
 jest.mock('./pack_results_header', () => ({
   PackResultsHeader: () => null,
 }));
@@ -186,6 +189,97 @@ describe('PackQueriesStatusTable — view in Discover/Lens bounds', () => {
         executionCount: 7,
         timestamp: startDate,
       })
+    );
+  });
+});
+
+describe('PackQueriesStatusTable — query details flyout failures', () => {
+  const flyoutError = new Error('Query details flyout failed');
+  const setErrorToast = jest.fn();
+  const queryDetailsFlyoutMock = jest.mocked(QueryDetailsFlyout);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.mocked(useErrorToast).mockReturnValue(setErrorToast);
+    queryDetailsFlyoutMock.mockImplementation(() => {
+      throw flyoutError;
+    });
+  });
+
+  afterEach(() => {
+    queryDetailsFlyoutMock.mockImplementation(() => null);
+    jest.restoreAllMocks();
+  });
+
+  it('keeps the table mounted and toasts when the query details flyout throws', () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    renderWithContext(
+      <PackQueriesStatusTable
+        actionId="parent-action-id"
+        agentIds={['agent-1']}
+        data={twoItemData}
+      />
+    );
+    const rows = screen.getAllByRole('row');
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'View query' })[0]);
+
+    for (const row of rows) {
+      expect(row).toBeInTheDocument();
+    }
+
+    expect(screen.getByText('query-1')).toBeInTheDocument();
+    expect(screen.getByText('query-2')).toBeInTheDocument();
+    expect(setErrorToast).toHaveBeenCalledTimes(1);
+    expect(setErrorToast).toHaveBeenCalledWith(flyoutError, {
+      title: 'Unable to show query details',
+      toastMessage: 'Unable to show query details',
+    });
+  });
+
+  it('reopens the flyout after a contained failure', () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    renderWithContext(
+      <PackQueriesStatusTable
+        actionId="parent-action-id"
+        agentIds={['agent-1']}
+        data={twoItemData}
+      />
+    );
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'View query' })[0]);
+
+    expect(setErrorToast).toHaveBeenCalledTimes(1);
+    queryDetailsFlyoutMock.mockImplementation(({ action }) => (
+      <div data-test-subj="mock-query-details-flyout">{action.query}</div>
+    ));
+    expect(screen.queryByTestId('mock-query-details-flyout')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'View query' })[0]);
+
+    expect(screen.getByTestId('mock-query-details-flyout')).toHaveTextContent('SELECT 1;');
+    expect(screen.getByText('query-1')).toBeInTheDocument();
+    expect(screen.getByText('query-2')).toBeInTheDocument();
+    expect(setErrorToast).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('PackQueriesStatusTable — query details flyout session props', () => {
+  it('opens the details flyout standalone at size m outside a managed flyout', () => {
+    const queryDetailsFlyoutMock = jest.mocked(QueryDetailsFlyout);
+    renderWithContext(
+      <PackQueriesStatusTable
+        actionId="parent-action-id"
+        agentIds={['agent-1']}
+        data={twoItemData}
+      />
+    );
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'View query' })[0]);
+
+    expect(queryDetailsFlyoutMock).toHaveBeenCalledWith(
+      expect.objectContaining({ flyoutProps: { session: 'never', size: 'm' } }),
+      expect.anything()
     );
   });
 });

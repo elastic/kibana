@@ -10,9 +10,9 @@
 import type { ConnectorDrift, DriftReportEntry } from './detect_drift';
 import { DRIFT_ISSUE_LABEL } from './issue_marker';
 import { drifted, healthy } from './drift_fixtures';
-import { renderDriftIssue } from './issue';
+import { renderDriftIssue } from './drift_issue';
 import type { DriftIssue, IssueTracker, SurfaceDriftOptions } from './surface_drift';
-import { renderRefreshPr, surfaceDrift } from './surface_drift';
+import { surfaceDrift } from './surface_drift';
 
 const refreshable: ConnectorDrift = {
   ...healthy,
@@ -266,14 +266,3 @@ describe('surfaceDrift', () => {
 });
 
 // Sentry's spec moved `/api/0` from its paths into its server URL, which an overlay correction
-
-describe('renderRefreshPr', () => {
-  it('lists the changes per connector', () => {
-    expect(
-      renderRefreshPr([
-        refreshable,
-        { ...refreshable, connector: '.moved', sources: {}, operationsChanged: true },
-      ])
-    ).toContain('- main: added `title` (`response-optional-property-added`)');
-  });
-});

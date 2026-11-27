@@ -57,6 +57,7 @@ export interface ActionConnectorProps<Config, Secrets> {
   authMode?: 'shared' | 'per-user';
   userAuthStatus?: ConnectorUserAuthStatus;
   isInboundEventsEnabled?: boolean;
+  specVersion?: string;
 }
 
 export type SystemAction = Omit<ActionConnectorProps<never, never>, 'config' | 'secrets'> & {
@@ -144,6 +145,7 @@ export interface CustomConnectorSelectionItem {
 
 export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, ActionParams = any> {
   id: string;
+  specVersion?: string;
   iconClass: IconType;
   selectMessage: string;
   selectMessagePreconfigured?: string;

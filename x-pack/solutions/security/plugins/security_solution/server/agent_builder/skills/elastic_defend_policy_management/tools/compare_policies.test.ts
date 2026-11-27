@@ -14,19 +14,22 @@ import { policyFactory } from '../../../../../common/endpoint/models/policy_conf
 import { ProtectionModes } from '../../../../../common/endpoint/types';
 import { createMockEndpointAppContextService } from '../../../../endpoint/mocks';
 import { createToolHandlerContext } from '../../../__mocks__/test_helpers';
-import { describePathWritability, getFieldRegistry } from '../domain/field_registry';
-import { hashPolicyConfig } from '../domain/hash_policy_config';
-import { normalize } from '../domain/normalize_policy_config';
-import type { EndpointPolicyBaseline } from '../domain/normalized_endpoint_policy';
-import type { EndpointPolicyManagementService } from '../services/endpoint_policy_management_service';
-import type { EndpointPolicyRead } from '../services/read_policy';
+import {
+  describePathWritability,
+  getFieldRegistry,
+} from '../../../../endpoint/services/policy_management/domain/field_registry';
+import { hashPolicyConfig } from '../../../../endpoint/services/policy_management/domain/hash_policy_config';
+import { normalize } from '../../../../endpoint/services/policy_management/domain/normalize_policy_config';
+import type { EndpointPolicyBaseline } from '../../../../endpoint/services/policy_management/domain/normalized_endpoint_policy';
+import type { EndpointPolicyManagementService } from '../../../../endpoint/services/policy_management/services/endpoint_policy_management_service';
+import type { EndpointPolicyRead } from '../../../../endpoint/services/policy_management/services/read_policy';
 import {
   COMPARE_POLICIES_TOOL_ID,
   comparePoliciesSchema,
   createComparePoliciesTool,
 } from './compare_policies';
 import { createPolicyTool } from './create_policy_tool';
-import { toPresentationHash } from './trim_policy_result';
+import { toPresentationHash } from '../../../../endpoint/services/policy_management/presentation/trim_policy_result';
 
 jest.mock('./create_policy_tool', () => ({
   createPolicyTool: jest.fn(),

@@ -34,6 +34,8 @@ export interface CreateAndEnrollEndpointHostOptions
   useClosestVersionMatch?: boolean;
   /** If the local cache of agent downloads should be used. Defaults to `true` */
   useCache?: boolean;
+  /** Time budget in ms for creating the Vagrant VM (CI only), including its retry. Defaults to no budget. */
+  vagrantCreateBudgetMs?: number;
 }
 
 export interface CreateAndEnrollEndpointHostResponse {
@@ -58,6 +60,7 @@ export const createAndEnrollEndpointHost = async ({
   forceVersion = false,
   useClosestVersionMatch = false,
   useCache = true,
+  vagrantCreateBudgetMs,
 }: CreateAndEnrollEndpointHostOptions): Promise<CreateAndEnrollEndpointHostResponse> => {
   const log = prefixedOutputLogger('createAndEnrollEndpointHost()', _log);
   let agentVersion = version;
@@ -89,6 +92,7 @@ export const createAndEnrollEndpointHost = async ({
         disk,
         cpus,
         memory,
+        createBudgetMs: vagrantCreateBudgetMs,
       })
     : await createVm({
         type: 'multipass',

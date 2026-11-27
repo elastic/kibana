@@ -560,6 +560,22 @@ describe('Datadog', () => {
     });
   });
 
+  describe('searchLogs input bounds', () => {
+    it.each([
+      [5000, true],
+      [5001, false],
+    ])('limit %d valid=%s', (limit, expected) => {
+      expect(
+        Datadog.actions.searchLogs.input.safeParse({
+          query: 'service:api',
+          from: '2024-01-15T00:00:00Z',
+          to: '2024-01-15T01:00:00Z',
+          limit,
+        }).success
+      ).toBe(expected);
+    });
+  });
+
   describe('free-text field bounds', () => {
     const { scheduleDowntime, createIncident } = Datadog.actions;
 

@@ -10,12 +10,13 @@ import { FleetPackagePolicyGenerator } from '../../../../../common/endpoint/data
 import { policyFactory } from '../../../../../common/endpoint/models/policy_config';
 import { ProtectionModes } from '../../../../../common/endpoint/types';
 import type { PolicyConfig } from '../../../../../common/endpoint/types';
-import { createEndpointPolicySnapshot } from '../domain/endpoint_policy_snapshot';
-import { normalizeEndpointPolicy } from '../domain/normalized_endpoint_policy';
-import { buildPolicyChangeAssessment } from '../domain/impact';
-import type { PolicyChangeCapabilities, PolicyChangeOperation } from '../domain/impact';
-import type { ApplyPolicyChangePreview } from '../services/apply_policy_change';
-import type { EndpointCountResult } from '../services/count_endpoints';
+import { createEndpointPolicySnapshot } from '../../../../endpoint/services/policy_management/domain/endpoint_policy_snapshot';
+import { normalizeEndpointPolicy } from '../../../../endpoint/services/policy_management/domain/normalized_endpoint_policy';
+import { buildPolicyChangeAssessment } from '../../../../endpoint/services/policy_management/domain/impact';
+import type { PolicyChangeCapabilities } from '../../../../endpoint/services/policy_management/domain/impact';
+import type { PolicyChangeOperation } from '../../../../../common/workflows/step_types/endpoint/policies/policy_change_operation';
+import type { ApplyPolicyChangePreview } from '../../../../endpoint/services/policy_management/services/apply_policy_change';
+import type { EndpointCountResult } from '../../../../endpoint/services/policy_management/services/count_endpoints';
 import {
   renderApplyPolicyChangeConfirmation,
   selectApplyPreviewFacts,
