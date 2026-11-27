@@ -143,9 +143,8 @@ apiTest.describe('context engine dreaming templates API', { tag: tags.stateful.c
       });
       await kbnClient.uiSettings.waitForEventualCacheRefresh();
 
-      const { cookieHeader: unprivilegedCookie } = await samlAuth.asInteractiveUser(
-        NO_CONTEXT_ENGINE_ROLE
-      );
+      const { cookieHeader: unprivilegedCookie } =
+        await samlAuth.asInteractiveUser(NO_CONTEXT_ENGINE_ROLE);
       const forbiddenResponse = await apiClient.get(DREAMING_TEMPLATES_PATH, {
         headers: { ...INTERNAL_API_HEADERS, ...unprivilegedCookie },
         responseType: 'json',

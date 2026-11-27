@@ -252,7 +252,7 @@ export function MobileCrashFlyout({
   // a crash without a type.
   const title =
     group || latestCrash
-      ? group?.type ?? latestCrash?.type ?? UNKNOWN_ERROR_TYPE_LABEL
+      ? (group?.type ?? latestCrash?.type ?? UNKNOWN_ERROR_TYPE_LABEL)
       : CRASH_DETAILS_TITLE;
   const counts = group
     ? [

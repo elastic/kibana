@@ -32,7 +32,7 @@ describe('getEffectiveNamespace', () => {
 
 describe('deploysAsPolicy', () => {
   const service = (deploymentMethods: unknown[]) =>
-    ({ deploymentMethods } as unknown as AwsServiceMatrixEntry);
+    ({ deploymentMethods }) as unknown as AwsServiceMatrixEntry;
 
   it('is true for every service under agent-based', () => {
     expect(deploysAsPolicy(service([{ method: 'ecf' }]), 'agent_based')).toBe(true);
@@ -61,7 +61,7 @@ describe('getEcfStackNamespace', () => {
       deploymentMethods: [{ method: 'ecf' }],
       ecfLogType: 'cloudtrail',
       ...fields,
-    } as unknown as AwsServiceMatrixEntry);
+    }) as unknown as AwsServiceMatrixEntry;
 
   it('is the namespace the unified stack was launched with', () => {
     expect(
@@ -97,7 +97,7 @@ describe('followsGlobalNamespace', () => {
       deploymentMethods: [{ method: 'ecf' }],
       ecfLogType: 'cloudtrail',
       ...fields,
-    } as unknown as AwsServiceMatrixEntry);
+    }) as unknown as AwsServiceMatrixEntry;
 
   it('is true for a service deployed as a policy', () => {
     expect(followsGlobalNamespace(ecfService(), 'agent_based')).toBe(true);

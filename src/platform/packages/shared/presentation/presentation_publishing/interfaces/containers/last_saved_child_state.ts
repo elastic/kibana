@@ -19,7 +19,7 @@ export const apiHasLastSavedChildState = <SerializedState extends object = objec
 ): api is HasLastSavedChildState<SerializedState> => {
   return Boolean(
     api &&
-      (api as HasLastSavedChildState).lastSavedStateForChild$ &&
-      (api as HasLastSavedChildState).getLastSavedStateForChild
+    (api as HasLastSavedChildState).lastSavedStateForChild$ &&
+    (api as HasLastSavedChildState).getLastSavedStateForChild
   );
 };

@@ -128,7 +128,10 @@ export class DigitalExperiencePage {
   public readonly platformFilter: Locator;
   public readonly platformList: EuiSelectableObject;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.mainContainer = page.getByTestId('digitalExperienceMainContainer');
     this.applicationsTable = page.components.basicTable('digitalExperienceApplicationsTable');
     this.environmentFilter = page.getByTestId('digitalExperienceEnvironmentFilter');

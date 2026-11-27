@@ -2698,7 +2698,7 @@ describe('createRumClient', () => {
       .mocked(SslConfig)
       .mockImplementation(
         ({ certificate, key, certificateAuthorities }) =>
-          ({ certificate, key, certificateAuthorities: [certificateAuthorities] } as any)
+          ({ certificate, key, certificateAuthorities: [certificateAuthorities] }) as any
       );
   });
 

@@ -19,7 +19,7 @@ const sourceIndexPatternFor = (
   ({
     title: 'rule-source',
     fields: fields.map((f) => ({ type: 'string', ...f })) as DataViewFieldBase[],
-  } as DataViewBase);
+  }) as DataViewBase;
 
 // Field is not on the stub alerts index, so treated as non-ECS.
 const runtimeFieldExceptionItems = [

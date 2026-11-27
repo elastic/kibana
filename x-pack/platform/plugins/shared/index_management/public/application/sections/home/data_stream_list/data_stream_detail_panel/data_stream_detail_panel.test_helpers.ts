@@ -106,4 +106,4 @@ export const createMockAppContext = (): AppDependencies =>
       showManagedDataStreamsByDefault: true,
       isServerless: false,
     },
-  } as unknown as AppDependencies);
+  }) as unknown as AppDependencies;

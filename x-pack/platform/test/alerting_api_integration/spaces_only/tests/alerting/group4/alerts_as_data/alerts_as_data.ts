@@ -650,8 +650,9 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
           const alertDocsRun1 = await queryForAlertDocs<PatternFiringAlert>(ruleId);
           expect(alertDocsRun1.length).to.equal(2);
 
-          const orphanedAlertDocRun1 = alertDocsRun1.find((doc) => doc._id === orphanedAlertUuid)!
-            ._source!;
+          const orphanedAlertDocRun1 = alertDocsRun1.find(
+            (doc) => doc._id === orphanedAlertUuid
+          )!._source!;
           expect(orphanedAlertDocRun1[ALERT_STATUS]).to.equal('untracked');
           expect(orphanedAlertDocRun1[ALERT_TRACKED]).to.equal(false);
           expect(orphanedAlertDocRun1[ALERT_END]).to.match(timestampPattern);

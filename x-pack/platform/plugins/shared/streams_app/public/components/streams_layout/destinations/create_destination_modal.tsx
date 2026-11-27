@@ -177,18 +177,21 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
           defaultMessage: 'Enter a destination name.',
         })
       : destinationNameError === 'duplicate'
-      ? i18n.translate('xpack.streams.destinations.destinationNameDuplicateErrorMessage', {
-          defaultMessage: 'A destination with this name already exists.',
-        })
-      : destinationNameError === 'tooLong'
-      ? i18n.translate('xpack.streams.destinations.destinationNameTooLongErrorMessage', {
-          defaultMessage: 'This name is too long for this destination type.',
-        })
-      : destinationNameError === 'credentialConflict'
-      ? i18n.translate('xpack.streams.destinations.destinationNameCredentialConflictErrorMessage', {
-          defaultMessage: 'This name conflicts with an existing credential.',
-        })
-      : undefined;
+        ? i18n.translate('xpack.streams.destinations.destinationNameDuplicateErrorMessage', {
+            defaultMessage: 'A destination with this name already exists.',
+          })
+        : destinationNameError === 'tooLong'
+          ? i18n.translate('xpack.streams.destinations.destinationNameTooLongErrorMessage', {
+              defaultMessage: 'This name is too long for this destination type.',
+            })
+          : destinationNameError === 'credentialConflict'
+            ? i18n.translate(
+                'xpack.streams.destinations.destinationNameCredentialConflictErrorMessage',
+                {
+                  defaultMessage: 'This name conflicts with an existing credential.',
+                }
+              )
+            : undefined;
   const createError = apiKeyError ?? persistenceError;
   // Create sits below the details step, so the body is usually scrolled past the callout. Create is
   // also disabled while it runs, which drops focus to the body, so the callout takes it.

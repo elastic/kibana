@@ -209,7 +209,7 @@ const runScenario = async (
   clearTimeout(killTimer);
 
   const durationMs = Date.now() - started;
-  const exitCode = timedOut ? 'timeout' : result.exitCode ?? 1;
+  const exitCode = timedOut ? 'timeout' : (result.exitCode ?? 1);
   const output = result.all ?? `${result.stdout ?? ''}\n${result.stderr ?? ''}`;
 
   const evaluation = evaluateScenario(scenario, exitCode, output);

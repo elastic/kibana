@@ -100,7 +100,7 @@ const createMockToolRegistry = (toolIds: string[] = []): ToolRegistry =>
       if (!toolIds.includes(id)) throw new Error(`Tool ${id} is not available`);
       return { id };
     }),
-  } as unknown as ToolRegistry);
+  }) as unknown as ToolRegistry;
 
 describe('createSkillRegistry', () => {
   const builtinSkill1 = createMockInternalSkillDefinition({
@@ -979,7 +979,7 @@ describe('createSkillRegistry', () => {
           content: 'c',
           requiresAllRegistryTools,
           getRegistryTools: () => [toolA],
-        } as unknown as SkillDefinition);
+        }) as unknown as SkillDefinition;
       const createWith = (availableToolIds: string[]) =>
         createSkillRegistry({
           builtinProvider: createBuiltinSkillProvider(

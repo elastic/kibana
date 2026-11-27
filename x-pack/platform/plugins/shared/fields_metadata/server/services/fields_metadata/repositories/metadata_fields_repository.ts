@@ -37,15 +37,18 @@ export class MetadataFieldsRepository {
       return FieldsMetadataDictionary.create(this.metadataFields);
     }
 
-    const fields = fieldNames.reduce((fieldsMetadata, fieldName) => {
-      const field = this.getByName(fieldName);
+    const fields = fieldNames.reduce(
+      (fieldsMetadata, fieldName) => {
+        const field = this.getByName(fieldName);
 
-      if (field) {
-        fieldsMetadata[fieldName] = field;
-      }
+        if (field) {
+          fieldsMetadata[fieldName] = field;
+        }
 
-      return fieldsMetadata;
-    }, {} as Record<MetadataFieldName, FieldMetadata>);
+        return fieldsMetadata;
+      },
+      {} as Record<MetadataFieldName, FieldMetadata>
+    );
 
     return FieldsMetadataDictionary.create(fields);
   }

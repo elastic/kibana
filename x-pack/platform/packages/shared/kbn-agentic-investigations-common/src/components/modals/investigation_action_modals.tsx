@@ -30,7 +30,7 @@ export interface EscalationModalRenderProps {
  * it would strip the `actionInput` an approval has to submit.
  */
 export interface InvestigationActionModalsProps<
-  TProposal extends ApprovalProposal = ApprovalProposal
+  TProposal extends ApprovalProposal = ApprovalProposal,
 > {
   /** Action awaiting confirmation, or `null` when no action modal is open. */
   action: CardActionType | null;
@@ -123,11 +123,11 @@ export const InvestigationActionModals = <TProposal extends ApprovalProposal = A
       : null}
 
     {(action === 'createEscalation' || action === 'attachToEscalation') && investigation
-      ? renderEscalationModal?.({
+      ? (renderEscalationModal?.({
           mode: action === 'createEscalation' ? 'create' : 'addToExisting',
           investigation,
           onClose: onCloseAction,
-        }) ?? null
+        }) ?? null)
       : null}
   </>
 );

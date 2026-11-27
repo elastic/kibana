@@ -21,9 +21,12 @@ import { hasDigitalExperienceAccess } from './capabilities';
 import { APPLICATIONS_LABEL, DIGITAL_EXPERIENCE_LABEL } from './labels';
 import type { DigitalExperienceSetupDeps, DigitalExperienceStartDeps } from './types';
 
-export class DigitalExperiencePlugin
-  implements Plugin<void, void, DigitalExperienceSetupDeps, DigitalExperienceStartDeps>
-{
+export class DigitalExperiencePlugin implements Plugin<
+  void,
+  void,
+  DigitalExperienceSetupDeps,
+  DigitalExperienceStartDeps
+> {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   /** Whether this user sees Digital Experience, decided once per page load in `start`. */
   private readonly isVisible$ = new ReplaySubject<boolean>(1);

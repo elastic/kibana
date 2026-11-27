@@ -69,7 +69,7 @@ describe('getRuleEventsTool', () => {
       attachmentId: 'attach-1',
       episodeId: 'ep-1',
       logger: loggerService,
-      getEpisodesClient: () => ({ get, getEvents } as unknown as EpisodesClient),
+      getEpisodesClient: () => ({ get, getEvents }) as unknown as EpisodesClient,
       getPrivilegeChecker: () => createPrivilegeCheckerMock(canReadResult),
     });
 

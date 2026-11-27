@@ -50,9 +50,8 @@ export interface ReasoningPromptOptions {
 export type ReasoningPromptResponseOf<
   TPrompt extends Prompt = Prompt,
   TPromptOptions extends PromptOptions<TPrompt> = PromptOptions<TPrompt>,
-  TToolCallbacks extends ToolCallbacksOfToolOptions<
-    ToolOptionsOfPrompt<TPrompt>
-  > = ToolCallbacksOfToolOptions<ToolOptionsOfPrompt<TPrompt>>
+  TToolCallbacks extends ToolCallbacksOfToolOptions<ToolOptionsOfPrompt<TPrompt>> =
+    ToolCallbacksOfToolOptions<ToolOptionsOfPrompt<TPrompt>>,
 > = PromptResponse<TPromptOptions> & {
   input: Array<
     MessageOf<

@@ -22,7 +22,10 @@ import type {
 
 /** Reads workflow execution logs. */
 export class WorkflowLogsQueryService implements IWorkflowLogsQueryService {
-  constructor(private logsRepository: LogsRepository, private readonly logger: Logger) {}
+  constructor(
+    private logsRepository: LogsRepository,
+    private readonly logger: Logger
+  ) {}
 
   private transformPaginationParams(params: BaseLogsParams): Partial<RepositorySearchLogsParams> {
     const { size = 200, page = 1, ...rest } = params;

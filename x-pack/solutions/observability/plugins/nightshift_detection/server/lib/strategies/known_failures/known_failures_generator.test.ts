@@ -119,7 +119,7 @@ const createContext = ({
           ])
         ),
     },
-  } as unknown as GeneratorContext);
+  }) as unknown as GeneratorContext;
 
 describe('KnownFailuresGenerator', () => {
   // A wrong id reads another indicator's rows, or none.

@@ -112,8 +112,8 @@ export function fetchAll(
     const loadingDataSource = isEsqlQuery
       ? esqlSource
       : dataView.id
-      ? new DataViewSource(dataView)
-      : undefined;
+        ? new DataViewSource(dataView)
+        : undefined;
 
     // Mark all subjects as loading
     sendLoadingMsg(dataSubjects.main$);
@@ -206,8 +206,8 @@ export function fetchAll(
             dataSource: isEsqlQuery
               ? fetchedDataSource
               : dataView.id
-              ? new DataViewSource(dataView)
-              : undefined,
+                ? new DataViewSource(dataView)
+                : undefined,
             esqlHeaderWarning,
             interceptedWarnings,
             approximationApplied,

@@ -121,7 +121,7 @@ export const skipWhenNoSignificantEvents = (output: TaskOutput): string | undefi
 /** LLM evaluator: grades whether each signal's `description` follows the expected verification account structure. */
 export const createEvidenceDescriptionEvaluator = <
   TExample extends Example,
-  TOutput extends TaskOutput
+  TOutput extends TaskOutput,
 >({
   criteriaFn,
   transformOutput,
@@ -139,7 +139,7 @@ export const createEvidenceDescriptionEvaluator = <
 /** LLM evaluator: grades the distinctness, safety, and operator usefulness of event narrative fields. */
 export const createNarrativeFieldsEvaluator = <
   TExample extends Example,
-  TOutput extends TaskOutput
+  TOutput extends TaskOutput,
 >({
   criteriaFn,
   transformOutput,
@@ -156,7 +156,7 @@ export const createNarrativeFieldsEvaluator = <
 /** LLM evaluator: grades whether signal confirmation and event decisions match grounded evidence. */
 export const createSignalEvidenceConsistencyEvaluator = <
   TExample extends Example,
-  TOutput extends TaskOutput
+  TOutput extends TaskOutput,
 >({
   criteriaFn,
   transformOutput,

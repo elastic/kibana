@@ -20,7 +20,7 @@ const detection = (
     verdict,
     metadata: { rule_uuid: rule, rule_name: rule },
     ...extra,
-  } as SignalEntry);
+  }) as SignalEntry;
 
 describe('memberOutcomeOfSignal', () => {
   it.each<[string, SignalEntry, ReturnType<typeof memberOutcomeOfSignal>]>([

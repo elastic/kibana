@@ -190,7 +190,7 @@ export class CustomResolutionRulesClient {
   async update(id: string, patch: CustomResolutionRuleUpdate): Promise<CustomResolutionRule> {
     const savedObject = await this.getSavedObject(id);
     const current = toRule(savedObject);
-    const nextFilter = patch.filter === null ? undefined : patch.filter ?? current.filter;
+    const nextFilter = patch.filter === null ? undefined : (patch.filter ?? current.filter);
     const next: CustomResolutionRuleFields = {
       name: patch.name ?? current.name,
       namespaces: patch.namespaces ?? current.namespaces,

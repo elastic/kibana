@@ -28,7 +28,7 @@ const so = (id: string): SavedObject<RawRule> =>
       params: { foo: true },
       actions: [],
     },
-  } as unknown as SavedObject<RawRule>);
+  }) as unknown as SavedObject<RawRule>;
 
 describe('bulkUpdate utils', () => {
   describe('loadRulesByIds', () => {

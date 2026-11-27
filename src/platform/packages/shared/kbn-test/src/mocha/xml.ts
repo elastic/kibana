@@ -37,7 +37,10 @@ export class XmlElement {
   private readonly attributes: string[] = [];
   private readonly children: Array<XmlElement | { cdata: string }> = [];
 
-  constructor(private readonly name: string, attrs: Record<string, AttributeValue> = {}) {
+  constructor(
+    private readonly name: string,
+    attrs: Record<string, AttributeValue> = {}
+  ) {
     this.att(attrs);
   }
 

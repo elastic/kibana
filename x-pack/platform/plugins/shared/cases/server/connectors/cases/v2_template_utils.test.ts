@@ -104,7 +104,7 @@ describe('resolveV2Template', () => {
         getAuthors: jest.fn(),
         ...impl,
       },
-    } as unknown as CasesClient);
+    }) as unknown as CasesClient;
 
   beforeEach(() => jest.clearAllMocks());
 
@@ -186,7 +186,7 @@ describe('resolveV2TemplateForLegacyKey', () => {
           total: templates.length,
         }),
       },
-    } as unknown as CasesClient);
+    }) as unknown as CasesClient;
 
   beforeEach(() => jest.clearAllMocks());
 
@@ -325,7 +325,7 @@ describe('buildExtendedFieldsFromTemplate', () => {
           .fn()
           .mockResolvedValue({ fieldDefinitions: defs, total: defs.length }),
       },
-    } as unknown as CasesClient);
+    }) as unknown as CasesClient;
 
   it('returns an empty map when the definition has no fields', async () => {
     const result = await buildExtendedFieldsFromTemplate(

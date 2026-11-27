@@ -72,11 +72,9 @@ export function useOverviewAlertsCount({ from, to }: Props) {
           // inside it would still be counted for by the markers.
           { range: { 'kibana.alert.start': { gte: from, lte: to } } },
           ...(parsedMonitorIdFilter ? [parsedMonitorIdFilter] : []),
-          ...parsedFilters.map(
-            (filter): estypes.QueryDslQueryContainer => ({
-              terms: { [filter.field]: (filter.values ?? []).map(String) },
-            })
-          ),
+          ...parsedFilters.map((filter): estypes.QueryDslQueryContainer => ({
+            terms: { [filter.field]: (filter.values ?? []).map(String) },
+          })),
           ...(parsedLocations?.length
             ? [
                 {

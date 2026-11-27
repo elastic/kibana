@@ -23,7 +23,7 @@ const createMockPkg = (overrides: Partial<PackageInfo> = {}): PackageInfo =>
     data_streams: [],
     vars: [],
     ...overrides,
-  } as unknown as PackageInfo);
+  }) as unknown as PackageInfo;
 
 describe('deprecation_helpers', () => {
   describe('hasNewDeprecations', () => {

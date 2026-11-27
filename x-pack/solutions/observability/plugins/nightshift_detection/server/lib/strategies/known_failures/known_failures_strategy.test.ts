@@ -56,7 +56,7 @@ const createContext = (
       listQueries: async ({ sourceIds }) =>
         queries.filter(({ source_id: sourceId }) => sourceIds.includes(sourceId)),
     } as Partial<KnowledgeIndicatorReader>,
-  } as unknown as ResourceContext);
+  }) as unknown as ResourceContext;
 
 describe('KnownFailuresStrategy', () => {
   describe('resources', () => {

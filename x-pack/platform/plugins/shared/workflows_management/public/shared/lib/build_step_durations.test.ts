@@ -28,7 +28,7 @@ const makeStepInfo = (stepId: string, stepType: string, parentStepId?: string): 
     lineEnd: 5,
     propInfos: {},
     parentStepId,
-  } as unknown as StepInfo);
+  }) as unknown as StepInfo;
 
 const makeExec = (
   stepId: string,
@@ -42,7 +42,7 @@ const makeExec = (
     executionTimeMs,
     scopeStack,
     status: 'completed',
-  } as unknown as WorkflowStepExecutionDto);
+  }) as unknown as WorkflowStepExecutionDto;
 
 // ---------------------------------------------------------------------------
 // buildStepDurations

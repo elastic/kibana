@@ -13,7 +13,7 @@ import {
 } from '@kbn/agentic-investigations-plugin/common';
 import { INVESTIGATION_POLL_INTERVAL_MS, useInvestigation } from './use_investigation';
 
-const createHttp = () => ({ get: jest.fn() } as unknown as HttpSetup & { get: jest.Mock });
+const createHttp = () => ({ get: jest.fn() }) as unknown as HttpSetup & { get: jest.Mock };
 
 describe('useInvestigation', () => {
   afterEach(() => jest.useRealTimers());

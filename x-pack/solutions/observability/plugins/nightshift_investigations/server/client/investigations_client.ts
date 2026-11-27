@@ -364,7 +364,7 @@ const toNotifiableInvestigation = (
   fallbackTitle: string | undefined
 ): NotifiableInvestigation => ({
   investigation_id: id,
-  title: titlePending ? fallbackTitle ?? '' : title,
+  title: titlePending ? (fallbackTitle ?? '') : title,
   ...(metadata.severity && { severity: metadata.severity }),
   ...(metadata.summary && { summary: metadata.summary }),
   ...(metadata.verdict && { verdict: metadata.verdict }),
@@ -1411,8 +1411,8 @@ export class NightshiftInvestigationsClient {
         ...(typeof context?.is_follow_up === 'boolean'
           ? { is_follow_up: context.is_follow_up }
           : entryPoint === 'alert_recovery'
-          ? { is_follow_up: true }
-          : {}),
+            ? { is_follow_up: true }
+            : {}),
         ...(asString(context?.nightshift_automation_id)
           ? { automation_id: asString(context?.nightshift_automation_id) }
           : {}),

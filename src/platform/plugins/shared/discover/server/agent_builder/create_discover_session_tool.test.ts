@@ -66,7 +66,7 @@ const createLogger = (): Logger =>
     info: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 const createAttachments = () => ({
   getActive: jest.fn().mockReturnValue([]),

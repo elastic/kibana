@@ -389,7 +389,7 @@ describe('handleCoverageOverviewRequest', () => {
     });
 
     const makeRule = (id: string, threat: unknown[]): Rule =>
-      ({ id, name: id, enabled: true, params: { threat } } as unknown as Rule);
+      ({ id, name: id, enabled: true, params: { threat } }) as unknown as Rule;
 
     const enterpriseBuckets = {
       framework: 'enterprise' as const,

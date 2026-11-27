@@ -117,7 +117,7 @@ export const getSessionsStatus = async ({
     summarizedUntil,
     lastRunAt: state.lastRunAt ?? null,
     lastSuccessAt: state.lastSuccessAt ?? null,
-    enabledBy: canManage ? task.userScope?.userName ?? null : null,
+    enabledBy: canManage ? (task.userScope?.userName ?? null) : null,
   };
   // Turned off on purpose: neither rebuilding nor failing, as the task doesn't run.
   if (task.enabled === false) {
@@ -132,7 +132,7 @@ export const getSessionsStatus = async ({
     !!task.userScope &&
     state.failedApiKeyId !== task.userScope.apiKeyId;
   const apiKeyInvalid = !task.userScope || (state.apiKeyInvalid === true && !replacedKeyFailed);
-  const recordedError = replacedKeyFailed ? null : state.lastError ?? null;
+  const recordedError = replacedKeyFailed ? null : (state.lastError ?? null);
   // Elasticsearch errors can name the user who enabled sessions, their roles and indices, so
   // only users who manage sessions are told why a run failed; the others just that one did.
   const lastError: SessionsRunError | null =

@@ -460,8 +460,8 @@ export const claimGrounding: Evaluator = {
         claimSource === undefined
           ? false
           : claimSource === 'entity_store'
-          ? seededEntityIds.has(claim.id ?? '')
-          : seededEventIds.has(claim.id ?? '');
+            ? seededEntityIds.has(claim.id ?? '')
+            : seededEventIds.has(claim.id ?? '');
       if (!claim.source) {
         claimProblems.push('no source');
       }

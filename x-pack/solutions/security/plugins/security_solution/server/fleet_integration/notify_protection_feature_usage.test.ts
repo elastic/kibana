@@ -15,13 +15,13 @@ import { createFeatureUsageServiceMock } from '../endpoint/services/feature_usag
 const buildPolicyData = (policy: PolicyConfig): PolicyData =>
   ({
     inputs: [{ config: { policy: { value: policy } } }],
-  } as unknown as PolicyData);
+  }) as unknown as PolicyData;
 
 const buildNewPackagePolicy = (policy: PolicyConfig): NewPackagePolicy =>
   ({
     id: 'policy-id',
     inputs: [{ config: { policy: { value: policy } } }],
-  } as unknown as NewPackagePolicy);
+  }) as unknown as NewPackagePolicy;
 
 describe('notifyProtectionFeatureUsage ransomware notifications', () => {
   it('notifies once when ransomware becomes newly enabled on Linux', async () => {

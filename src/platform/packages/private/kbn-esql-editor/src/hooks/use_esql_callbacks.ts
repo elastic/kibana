@@ -50,7 +50,7 @@ type MemoizedFieldsFromESQL = MemoizedFn<
       timeRange: TimeRange;
       signal?: AbortSignal;
       variables?: ESQLControlVariable[];
-    }
+    },
   ],
   ReturnType<typeof getEsqlSourceColumns>
 >;
@@ -60,7 +60,7 @@ type MemoizedSources = MemoizedFn<
     CoreStart,
     (() => Promise<ILicense | undefined>) | undefined,
     ((sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>) | undefined,
-    AbortSignal | undefined
+    AbortSignal | undefined,
   ],
   ReturnType<typeof getESQLSources>
 >;

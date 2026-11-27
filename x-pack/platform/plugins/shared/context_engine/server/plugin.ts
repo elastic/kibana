@@ -80,15 +80,12 @@ const CONTEXT_ENGINE_WORKFLOW_OWNER = 'contextEngine';
 
 const DEFAULT_PRICE_CATALOG_BASE_URL = 'https://cloud.elastic.co';
 
-export class ContextEnginePlugin
-  implements
-    Plugin<
-      ContextEnginePluginSetup,
-      ContextEnginePluginStart,
-      ContextEngineSetupDependencies,
-      ContextEngineStartDependencies
-    >
-{
+export class ContextEnginePlugin implements Plugin<
+  ContextEnginePluginSetup,
+  ContextEnginePluginStart,
+  ContextEngineSetupDependencies,
+  ContextEngineStartDependencies
+> {
   private logger: Logger;
   private aiIndexService?: AiIndexService;
   private signalsService?: SignalsService;

@@ -57,7 +57,7 @@ const archiveIteratorWithChangelog = (pkgName: string, pkgVersion: string, chang
   );
 
 const packagePolicy = (id: string, pkgName: string, version: string) =>
-  ({ id, name: id, package: { name: pkgName, title: pkgName, version } } as PackagePolicy);
+  ({ id, name: id, package: { name: pkgName, title: pkgName, version } }) as PackagePolicy;
 
 describe('breaking changes', () => {
   const logger = { warn: jest.fn(), debug: jest.fn() };
@@ -361,7 +361,7 @@ Review the breaking changes and confirm the upgrade from the test integration in
               /Removed the foo input\./,
               `Removed ${path.split('-')[0]}.`
             ),
-          } as any)
+          }) as any
       );
 
       const promise = assertPackagePoliciesUpgradeAcknowledged([

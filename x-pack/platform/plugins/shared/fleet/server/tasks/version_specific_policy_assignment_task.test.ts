@@ -1016,7 +1016,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
 
     describe('package policies of the agent policies', () => {
       const packagePolicy = (id: string) =>
-        ({ id, name: id, package: { name: 'test-package', version: '1.0.0' } } as PackagePolicy);
+        ({ id, name: id, package: { name: 'test-package', version: '1.0.0' } }) as PackagePolicy;
 
       const runWithTwoAgentPolicies = async () => {
         mockAgentPolicyService.fetchAllAgentPolicies = getMockAgentPolicyFetchAllAgentPolicies([

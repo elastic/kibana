@@ -85,7 +85,7 @@ describe('executeWorkflowTool', () => {
           prompt: { type: 'confirmation', ...definition },
         })),
       },
-    } as any);
+    }) as any;
 
   beforeEach(() => {
     executeWorkflowMock.mockReset();
@@ -123,7 +123,7 @@ describe('executeWorkflowTool', () => {
           actions: { api: { get: (a: string) => `api:${a}` } },
           checkPrivilegesWithRequest: () => ({ atSpace }),
         },
-      } as any);
+      }) as any;
     const getAvailabilityWith = (
       isWorkflowsAvailable: boolean,
       securityGetter: Parameters<typeof executeWorkflowTool>[0]['getSecurity']
@@ -186,7 +186,7 @@ describe('executeWorkflowTool', () => {
             actions: { api: { get: (a: string) => `api:${a}` } },
             checkPrivilegesWithRequest: () => ({ atSpace }),
           },
-        } as any);
+        }) as any;
       const tool = executeWorkflowTool({ workflowsManagement, getSecurity: denyingSecurity });
 
       const result = await invokeHandler(
@@ -423,7 +423,7 @@ steps:
             actions: { api: { get: (a: string) => `api:${a}` } },
             checkPrivilegesWithRequest: () => ({ atSpace }),
           },
-        } as any);
+        }) as any;
       const tool = executeWorkflowTool({
         workflowsManagement: { management: { getWorkflow } } as any,
         getSecurity: executeOnlySecurity,
@@ -545,7 +545,7 @@ steps:
               actions: { api: { get: (a: string) => `api:${a}` } },
               checkPrivilegesWithRequest: () => ({ atSpace }),
             },
-          } as any),
+          }) as any,
       });
 
       const result = (await tool.handler(

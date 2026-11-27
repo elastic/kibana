@@ -69,9 +69,12 @@ export const createStatsFromSamples = ({ samples }: { samples: SampleDoc[] }): S
 
   return {
     sampleCount: samples.length,
-    fieldStats: fullStats.reduce((record, entry) => {
-      record[entry.fieldPath] = omit(entry, ['fieldPath']);
-      return record;
-    }, {} as Record<string, FieldStats>),
+    fieldStats: fullStats.reduce(
+      (record, entry) => {
+        record[entry.fieldPath] = omit(entry, ['fieldPath']);
+        return record;
+      },
+      {} as Record<string, FieldStats>
+    ),
   };
 };

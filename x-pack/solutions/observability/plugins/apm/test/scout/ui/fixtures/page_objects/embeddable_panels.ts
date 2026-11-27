@@ -16,7 +16,10 @@ const PANEL_TITLE_SELECTOR = '[data-test-subj="embeddablePanelTitle"]';
 const LEGEND_ITEM_LABEL_SELECTOR = '.echLegendItem__label';
 
 export class EmbeddablePanels {
-  constructor(private readonly page: ScoutPage, private readonly root?: Locator) {}
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly root?: Locator
+  ) {}
 
   private get scope(): Locator {
     return this.root ?? this.page.locator(':root');

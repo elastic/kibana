@@ -160,10 +160,13 @@ export const runInitializationFlows = async (
     )}], failed: [${failedFlows.join(', ')}]`
   );
 
-  const flowResults = allResults.reduce((acc, { id, result }) => {
-    acc[id] = result;
-    return acc;
-  }, {} as Record<InitializationFlowId, InitializationFlowResult<unknown>>);
+  const flowResults = allResults.reduce(
+    (acc, { id, result }) => {
+      acc[id] = result;
+      return acc;
+    },
+    {} as Record<InitializationFlowId, InitializationFlowResult<unknown>>
+  );
 
   // Each flow's runtime routing ensures the correct result type per flow ID.
   // The static type cannot capture this, so we cast at the boundary.

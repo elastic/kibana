@@ -61,7 +61,7 @@ describe('wikiHydrateStepDefinition', () => {
       abortSignal: new AbortController().signal,
       stepId: 'hydrate_wiki',
       stepType: 'nightshift.wikiHydrate',
-    } as never);
+    }) as never;
 
   it('hydrates the sandbox with the request-scoped ES client', async () => {
     const sandboxStart = makeSandboxStart();

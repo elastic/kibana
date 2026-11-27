@@ -148,8 +148,8 @@ export function TimeWindowButtons({ config }: { config: TimeWindowButtonsConfig 
           (isInvalid
             ? translations.cannotZoomInInvalid
             : isWindowDurationZero
-            ? translations.cannotZoomInFurther
-            : translations.zoomInTooltip),
+              ? translations.cannotZoomInFurther
+              : translations.zoomInTooltip),
         'data-test-subj': 'dateRangePickerZoomInButton',
       });
     }

@@ -263,9 +263,9 @@ describe('Lens XY overlay providers', () => {
       const withoutData = createExemplarsOverlayProvider({
         id: 'withoutData',
         fetchOverlay: async () =>
-          ({ type: 'points', title: 'No data' } as Awaited<
+          ({ type: 'points', title: 'No data' }) as Awaited<
             ReturnType<LensXYOverlayProvider['fetchOverlay']>
-          >),
+          >,
       });
 
       const { overlays, failures } = await runActiveProviders({

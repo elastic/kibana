@@ -19,12 +19,12 @@ const createAgentPolicy = (
   ({
     id,
     active_agents_per_version: versions,
-  } as unknown as AgentPolicy);
+  }) as unknown as AgentPolicy;
 
 const createPackageInfo = (agentVersionCondition?: string): PackageInfo =>
   ({
     conditions: agentVersionCondition ? { agent: { version: agentVersionCondition } } : undefined,
-  } as unknown as PackageInfo);
+  }) as unknown as PackageInfo;
 
 describe('getIncompatibleAgentVersionStatus', () => {
   beforeEach(() => {

@@ -27,8 +27,10 @@ import { FieldRowProvider } from '../services';
 /**
  * Props for a {@link FieldInput} Storybook story.
  */
-export interface StoryProps<T extends SettingType>
-  extends Pick<KnownTypeToMetadata<T>, 'userValue' | 'value'> {
+export interface StoryProps<T extends SettingType> extends Pick<
+  KnownTypeToMetadata<T>,
+  'userValue' | 'value'
+> {
   /** Simulate if the UiSetting is custom. */
   isCustom: boolean;
   /** Simulate if the UiSetting is deprecated. */
@@ -94,7 +96,7 @@ export const getStory = (
         </FieldRowProvider>
       ),
     ],
-  } as Meta<typeof Component>);
+  }) as Meta<typeof Component>;
 
 /**
  * Default argument values for a {@link FieldInput} Storybook story.

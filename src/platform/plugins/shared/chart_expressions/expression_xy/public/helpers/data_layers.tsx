@@ -135,7 +135,7 @@ export const getSeriesXScaleType = (
   layer: CommonXYDataLayerConfig,
   xColumnId: string | undefined,
   defaultXScaleType: XScaleType
-): XScaleType => (xColumnId ? layer.xScaleType ?? defaultXScaleType : XScaleTypes.ORDINAL);
+): XScaleType => (xColumnId ? (layer.xScaleType ?? defaultXScaleType) : XScaleTypes.ORDINAL);
 
 /** Y scale of a series: the axis scale, switched to binary for `bytes` columns on a linear axis. */
 export const getSeriesYScaleType = (

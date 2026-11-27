@@ -29,7 +29,7 @@ const spec = (id: string, actions: string[], events: string[] = []): ConnectorSp
     ...(events.length > 0
       ? { events: { definitions: Object.fromEntries(events.map((name) => [name, {}])) } }
       : {}),
-  } as unknown as ConnectorSpec);
+  }) as unknown as ConnectorSpec;
 
 const mcpRequest = { method: 'post', path: '/mcp', reason: 'The vendor MCP server' };
 
@@ -60,7 +60,7 @@ const recorded = ({
         { format, url: 'https://example.com/spec', fetchedAt: '2026-01-01T00:00:00.000Z' },
       ])
     ),
-  } as unknown as VendorApiManifest);
+  }) as unknown as VendorApiManifest;
 
 const manifest = (...formats: string[]): VendorApiManifest =>
   recorded({ sources: Object.fromEntries(formats.map((format, index) => [`v${index}`, format])) });
@@ -438,7 +438,7 @@ describe('getAvailability', () => {
     ({
       metadata: { id: '.x', supportedFeatureIds: features },
       actions,
-    } as unknown as ConnectorSpec);
+    }) as unknown as ConnectorSpec;
 
   it.each([
     ['both', ['workflows', 'agentBuilder', 'contextEngine']],

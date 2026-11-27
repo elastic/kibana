@@ -87,7 +87,7 @@ describe('formatSyntheticsPolicy vault secret_stores', () => {
           ],
         },
       ],
-    } as unknown as NewPackagePolicy);
+    }) as unknown as NewPackagePolicy;
 
   const format = (
     password: string,

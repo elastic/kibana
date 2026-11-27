@@ -64,7 +64,7 @@ export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
   useEffect(() => {
     if (isMlCpsEnabled && cpsManager) {
       setProjectRouting((prev) =>
-        prev === undefined ? cpsManager.getDefaultProjectRouting() ?? undefined : prev
+        prev === undefined ? (cpsManager.getDefaultProjectRouting() ?? undefined) : prev
       );
     }
   }, [isMlCpsEnabled, cpsManager]);

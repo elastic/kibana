@@ -64,7 +64,7 @@ const alertZeroApp = (homeVisibleIn: string[]) =>
   ({
     visibleIn: [],
     deepLinks: [{ id: 'home', visibleIn: homeVisibleIn }],
-  } as unknown as PublicAppInfo);
+  }) as unknown as PublicAppInfo;
 
 const mockSolutionSideNav = jest.fn((_: SolutionSideNavProps) => <></>);
 jest.mock('@kbn/security-solution-side-nav', () => ({

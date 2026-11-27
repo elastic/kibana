@@ -73,7 +73,7 @@ interface BaseTemplate {
 }
 
 const componentNames = (value: string | readonly string[] | undefined): string[] => {
-  const names = typeof value === 'string' ? [value] : value ?? [];
+  const names = typeof value === 'string' ? [value] : (value ?? []);
   return names.filter((name) => name.length > 0);
 };
 

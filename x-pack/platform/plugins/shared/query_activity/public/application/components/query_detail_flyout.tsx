@@ -147,12 +147,12 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
         defaultMessage: 'Query cancelled',
       })
     : isStopRequested
-    ? i18n.translate('xpack.queryActivity.flyout.stoppingQueryText', {
-        defaultMessage: 'Cancelling the query…',
-      })
-    : i18n.translate('xpack.queryActivity.flyout.stopQueryButton', {
-        defaultMessage: 'Cancel query',
-      });
+      ? i18n.translate('xpack.queryActivity.flyout.stoppingQueryText', {
+          defaultMessage: 'Cancelling the query…',
+        })
+      : i18n.translate('xpack.queryActivity.flyout.stopQueryButton', {
+          defaultMessage: 'Cancel query',
+        });
 
   return (
     <FlyoutTemplate onClose={onClose} size="m" maxWidth={691}>
@@ -300,8 +300,8 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
                     query.queryType === 'ES|QL'
                       ? 'esql'
                       : query.queryType === 'SQL'
-                      ? 'sql'
-                      : 'json'
+                        ? 'sql'
+                        : 'json'
                   }
                   lineNumbers
                   overflowHeight="100%"

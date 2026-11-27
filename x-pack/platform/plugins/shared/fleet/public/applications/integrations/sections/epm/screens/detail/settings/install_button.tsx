@@ -54,7 +54,7 @@ export function InstallButton(props: InstallationButtonProps) {
 
   const numOfKnowledgeBaseAssets = integrationKnowledgeEnabled
     ? 0
-    : assets.elasticsearch?.knowledge_base?.length ?? 0;
+    : (assets.elasticsearch?.knowledge_base?.length ?? 0);
 
   const numOfAssets =
     Object.entries(assets).reduce(

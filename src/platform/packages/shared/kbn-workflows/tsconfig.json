@@ -18,7 +18,8 @@
     "@kbn/core-user-profile-common",
     "@kbn/core-user-settings-types",
     "@kbn/picomatcher",
-    "@kbn/repo-packages"
+    "@kbn/repo-packages",
+    "@kbn/oxfmt"
   ],
   "exclude": ["target/**/*"]
 }

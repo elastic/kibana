@@ -200,16 +200,16 @@ describe('RiskInputsTab', () => {
             data: [],
           }
         : isResolutionFilter(params)
-        ? {
-            loading: false,
-            error: false,
-            data: [],
-          }
-        : {
-            loading: false,
-            error: false,
-            data: [riskScore],
-          }
+          ? {
+              loading: false,
+              error: false,
+              data: [],
+            }
+          : {
+              loading: false,
+              error: false,
+              data: [riskScore],
+            }
     );
   });
 
@@ -1108,8 +1108,8 @@ describe('RiskInputsTab', () => {
       params?.skip
         ? { loading: false, error: false, data: [] }
         : isResolutionFilter(params)
-        ? { loading: false, error: false, data: [riskScore] }
-        : { loading: false, error: false, data: [] }
+          ? { loading: false, error: false, data: [riskScore] }
+          : { loading: false, error: false, data: [] }
     );
 
     const { getByRole } = render(
@@ -1147,8 +1147,8 @@ describe('RiskInputsTab', () => {
       params?.skip
         ? { loading: false, error: false, data: [] }
         : isResolutionFilter(params)
-        ? { loading: false, error: false, data: [riskScore] }
-        : { loading: false, error: false, data: [riskScore] }
+          ? { loading: false, error: false, data: [riskScore] }
+          : { loading: false, error: false, data: [riskScore] }
     );
 
     const { getByText, getByRole, getByTestId } = render(
@@ -1224,8 +1224,8 @@ describe('RiskInputsTab', () => {
       params?.skip
         ? { loading: false, error: false, data: [] }
         : isResolutionFilter(params)
-        ? { loading: false, error: false, data: [resolutionScore] }
-        : { loading: false, error: false, data: [entityScore] }
+          ? { loading: false, error: false, data: [resolutionScore] }
+          : { loading: false, error: false, data: [entityScore] }
     );
 
     const { getByText, getByTestId } = render(
@@ -1421,8 +1421,8 @@ describe('RiskInputsTab', () => {
         params?.skip
           ? { loading: false, error: false, data: [] }
           : isResolutionFilter(params)
-          ? { loading: false, error: false, data: [resolutionRiskScore] }
-          : { loading: false, error: false, data: [entityRiskScore] }
+            ? { loading: false, error: false, data: [resolutionRiskScore] }
+            : { loading: false, error: false, data: [entityRiskScore] }
       );
       mockUseRiskContributingAlerts.mockReturnValue({
         loading: false,
@@ -1779,8 +1779,8 @@ describe('RiskInputsTab', () => {
           params?.skip
             ? { loading: false, error: false, data: [] }
             : isResolutionFilter(params)
-            ? { loading: false, error: false, data: [resolutionRiskScore] }
-            : { loading: false, error: false, data: [riskScore] }
+              ? { loading: false, error: false, data: [resolutionRiskScore] }
+              : { loading: false, error: false, data: [riskScore] }
         );
       };
 

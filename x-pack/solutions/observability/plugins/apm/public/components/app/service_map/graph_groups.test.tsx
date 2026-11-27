@@ -417,7 +417,7 @@ describe('ServiceMapGraph service groups', () => {
           ...(type === 'serviceGroup' ? closedGroup : box),
           id: quotedId,
           data: { ...(type === 'serviceGroup' ? closedGroup : box).data, id: quotedId },
-        } as ServiceMapNode);
+        }) as ServiceMapNode;
       const { rerender } = render(
         <ServiceMapGraph {...groupProps} nodes={[quoted('serviceGroup')]} />
       );

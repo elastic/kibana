@@ -34,7 +34,7 @@ const question = (promptId: string): ConversationRoundStep =>
     type: ConversationRoundStepType.askUserQuestion,
     prompt_id: promptId,
     questions: [],
-  } as unknown as ConversationRoundStep);
+  }) as unknown as ConversationRoundStep;
 
 const terminated = (nodes: string[], askPromptIds: string[] = []): ExecutionTerminatedEvent =>
   ({
@@ -57,7 +57,7 @@ const terminated = (nodes: string[], askPromptIds: string[] = []): ExecutionTerm
         })),
       },
     },
-  } as unknown as ExecutionTerminatedEvent);
+  }) as unknown as ExecutionTerminatedEvent;
 
 const placedIds = (placement: RoundAttachmentPlacement): string[] =>
   [

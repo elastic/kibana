@@ -43,7 +43,7 @@ const attachment = (data: unknown): EntityAttachment =>
     id: 'a',
     type: 'security.entity',
     data: data as EntityAttachment['data'],
-  } as EntityAttachment);
+  }) as EntityAttachment;
 
 const renderDispatcher = (data: unknown) =>
   render(

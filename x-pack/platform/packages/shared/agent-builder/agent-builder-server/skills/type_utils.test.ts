@@ -37,9 +37,8 @@ type TestDirectoryPath = FilePathsFromStructure<TestDirectoryStructure>;
  * Type helper to check if a type is exactly equal to another type
  */
 type Expect<T extends true> = T;
-type Equal<X, Y> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2
-  ? true
-  : false;
+type Equal<X, Y> =
+  (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2 ? true : false;
 
 /**
  * Type helper to verify that a path is included in the valid paths

@@ -28,9 +28,12 @@ export interface StartDependencies {
   lens: LensPublicStart;
 }
 
-export class LensExemplarsExamplePlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies>
-{
+export class LensExemplarsExamplePlugin implements Plugin<
+  void,
+  void,
+  SetupDependencies,
+  StartDependencies
+> {
   private coreStart?: CoreStart;
   private isExemplarsEnabled = false;
   private featureFlagSubscription?: Subscription;

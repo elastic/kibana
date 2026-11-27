@@ -53,7 +53,7 @@ export const AiIndexDescriptionField = ({
     isInvalid={error !== undefined}
     error={error}
     helpText={
-      error === undefined ? warning ?? (hasHelpText ? descriptionHelpText : undefined) : undefined
+      error === undefined ? (warning ?? (hasHelpText ? descriptionHelpText : undefined)) : undefined
     }
   >
     <EuiTextArea

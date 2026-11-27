@@ -50,7 +50,7 @@ describe('addPathParamToUrl', () => {
 });
 
 describe('excludeContentCards', () => {
-  const card = (id: string, type?: string) => ({ id, type } as IntegrationCardItem);
+  const card = (id: string, type?: string) => ({ id, type }) as IntegrationCardItem;
 
   it('removes content-only packages and keeps everything else', () => {
     const cards = [
@@ -70,7 +70,7 @@ describe('excludeContentCards', () => {
 
 describe('isFeaturedCard', () => {
   const card = (id: string, extra: Partial<IntegrationCardItem> = {}) =>
-    ({ id, ...extra } as IntegrationCardItem);
+    ({ id, ...extra }) as IntegrationCardItem;
   const collection = card('collection:nginx', {
     isCollectionCard: true,
     groupMembers: [card('epr:nginx'), card('epr:nginx_otel')],

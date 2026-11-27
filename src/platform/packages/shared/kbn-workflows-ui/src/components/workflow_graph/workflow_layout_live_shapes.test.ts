@@ -52,7 +52,7 @@ const workflow = (steps: Step[], triggerTypes = ['manual']): WorkflowYaml =>
     enabled: true,
     triggers: triggerTypes.map((type) => ({ type, enabled: true })),
     steps,
-  } as unknown as WorkflowYaml);
+  }) as unknown as WorkflowYaml;
 
 const UUID_LABEL = 'f4f436c8-5c4a-4f61-b0cc-9e0d2a7b1c35';
 

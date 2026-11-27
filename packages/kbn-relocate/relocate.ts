@@ -74,7 +74,8 @@ const relocateModules = async (toMove: Package[], log: ToolingLog): Promise<numb
     await safeExec('node scripts/build_plugin_list_docs');
     await safeExec('node scripts/generate codeowners');
     await safeExec('node scripts/lint_packages --fix');
-    await safeExec('node scripts/eslint --no-cache --fix');
+    await safeExec('node scripts/lint --fix');
+    await safeExec('node scripts/oxfmt');
     await safeExec('node scripts/precommit_hook --fix');
 
     // single commit per module now

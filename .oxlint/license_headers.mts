@@ -159,10 +159,7 @@ const requireLicenseHeader = (files: string[], license: string): OxlintOverride 
 export const licenseHeaderOverrides: OxlintOverride[] = [
   requireLicenseHeader(['**/*.{js,mjs,ts,tsx}'], TRIPLE_ELV2_SSPL1_AGPL3_LICENSE_HEADER),
   requireLicenseHeader(
-    [
-      'packages/kbn-eslint-config/**/*.{js,mjs,ts,tsx}',
-      'src/platform/packages/shared/kbn-datemath/**/*.{js,mjs,ts,tsx}',
-    ],
+    ['src/platform/packages/shared/kbn-datemath/**/*.{js,mjs,ts,tsx}'],
     APACHE_2_0_LICENSE_HEADER
   ),
   requireLicenseHeader(['x-pack/**/*.{js,mjs,ts,tsx}'], ELV2_LICENSE_HEADER),

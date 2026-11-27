@@ -22,7 +22,7 @@ const round = (steps: unknown[]): ConversationRound =>
     input: { message: 'Why did the checkout alert fire?' },
     response: { message: 'A bad deploy of the payments service.' },
     steps,
-  } as unknown as ConversationRound);
+  }) as unknown as ConversationRound;
 
 describe('buildOnlineEvalsEvidence', () => {
   it("takes the round's input, tool calls and final response, skipping other steps", () => {

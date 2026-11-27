@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const LINT_LABEL = 'lint';
-export const LINT_LOG_PREFIX = `[${LINT_LABEL}]`;
+export { OXFMT_BIN_PATH, OXFMT_CONFIG_PATH, runOxfmt, formatWithOxfmt } from './src/oxfmt';

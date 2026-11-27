@@ -26,7 +26,7 @@ const alertAttachment = (
       index: '.alerts-security.alerts-default',
       ...(sourceAttachmentIds != null ? { sourceAttachmentIds } : {}),
     },
-  } as unknown as CaseAttachmentWithId);
+  }) as unknown as CaseAttachmentWithId;
 
 describe('getCaseAlertAttachments', () => {
   it('reads the alert ids and whether an attack attached them', () => {

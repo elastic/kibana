@@ -28,7 +28,7 @@ const episode = (ruleTypeId: string): AlertEpisode =>
     'episode.id': 'e1',
     source_id: 'v1',
     source_action_context: { ruleTypeId },
-  } as AlertEpisode);
+  }) as AlertEpisode;
 
 const renderWriteAccess = ({
   authorizedToCreateAnyRules = false,

@@ -33,10 +33,13 @@ const isAlertTriggerEvent = (event: unknown): event is UnvalidatedAlertTriggerEv
  */
 function extractRuleFromAlert(alert: Record<string, unknown>): AlertEventRule | null {
   const ruleKeys = ['uuid', 'name', 'consumer', 'producer', 'rule_type_id'];
-  const ruleValues = ruleKeys.reduce((acc, key) => {
-    acc[key] = get(alert, `kibana.alert.rule.${key}`);
-    return acc;
-  }, {} as Record<string, unknown>);
+  const ruleValues = ruleKeys.reduce(
+    (acc, key) => {
+      acc[key] = get(alert, `kibana.alert.rule.${key}`);
+      return acc;
+    },
+    {} as Record<string, unknown>
+  );
 
   if (!Object.values(ruleValues).every(isString)) {
     return null;
