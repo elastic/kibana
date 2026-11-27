@@ -37,5 +37,6 @@ export { DEFAULT_TIME_SLIDER_STATE } from './src/time_slider_constants';
 export {
   ACTION_CREATE_CONTROL,
   ACTION_CREATE_ESQL_CONTROL,
+  ACTION_CREATE_ESQL_CONTROL_FROM_VALUE_CLICK,
   ACTION_CREATE_TIME_SLIDER,
 } from './src/control_action_constants';

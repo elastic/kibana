@@ -31,6 +31,10 @@ import type { initializeLabelManager } from '../control_labels';
 import type { TemporaryState } from '../data_controls/options_list_control/temporay_state_manager';
 import type { OptionsListPublishesOptions, OptionsListSelectionsApi } from '../types';
 
+export interface CanSetSelectedOptions {
+  setSelectedOptions: (options: string[]) => void;
+}
+
 export type ESQLControlApi<State> = DefaultEmbeddableApi<
   State extends { control_type: 'STATIC_VALUES' } ? StaticESQLControl : QueryESQLControl
 > &
@@ -41,6 +45,7 @@ export type ESQLControlApi<State> = DefaultEmbeddableApi<
   HasEditCapabilities &
   PublishesDataLoading &
   PublishesTooltipLabel &
+  CanSetSelectedOptions &
   CanIndicateRelatedSiblings &
   ReturnType<typeof initializeLabelManager>['api'] &
   SupportsJsonExport;

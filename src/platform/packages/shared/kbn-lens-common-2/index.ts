@@ -8,6 +8,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { CanUpdateESQLQuery } from '@kbn/esql-types';
 import type {
   CanCancelRequests,
   HasEditCapabilities,
@@ -125,6 +126,8 @@ export type LensApi = Simplify<
     PublishesUnsavedChanges &
     PublishesProjectRoutingOverrides &
     PublishesEsql &
+    // Lets the container rewrite the ES|QL query of by-value panels
+    CanUpdateESQLQuery &
     // Lens specific API methods:
     // Let the container know when the data has been loaded/updated
     LensInspectorAdapters &
