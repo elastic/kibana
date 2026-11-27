@@ -9,14 +9,22 @@ import { buildChainWorld, getChainIds, type FpTpChainDefinition } from './chain'
 import { FP_TP_BASE_TIME, FP_TP_RAW_EVENT_WINDOW_MS } from './constants';
 import {
   withCommandLine,
+  withEventDestination,
   withFilePath,
   withNetworkDestination,
+  withoutAlertBridges,
   withoutEventCategory,
   withoutEventIds,
   withoutProcessParent,
   withProcessExecutable,
   withProcessParent,
 } from './mutations';
+
+interface ProcessFields {
+  readonly pid: number;
+  readonly entity_id: string;
+  readonly parent?: { readonly pid: number };
+}
 
 const RUN_MARKER = 'run-marker';
 
@@ -169,6 +177,28 @@ describe('chain mutations', () => {
     );
   });
 
+  it('returns the new destination in the message after withEventDestination', () => {
+    const [, event] = withEventDestination(world, ids.eventId('beacon'), {
+      domain: 'manage.microsoft.com',
+      ip: '20.190.128.10',
+      port: 443,
+    }).events;
+    expect(event.source.message).toBe(
+      'powershell.exe connected to manage.microsoft.com (20.190.128.10:443)'
+    );
+  });
+
+  it('returns a message with only the address after withEventDestination without a domain', () => {
+    const [, event] = withEventDestination(world, ids.eventId('beacon'), {
+      ip: '198.51.100.7',
+      port: 8443,
+    }).events;
+    expect([event.source.destination, event.source.message]).toEqual([
+      { ip: '198.51.100.7', port: 8443 },
+      'powershell.exe connected to 198.51.100.7:8443',
+    ]);
+  });
+
   it('returns a message without a parent after withoutProcessParent', () => {
     const [event] = withoutProcessParent(world, 'powershell.exe').events;
     expect(event.source.message).toBe('powershell.exe started');
@@ -210,6 +240,10 @@ describe('chain mutations', () => {
       'withNetworkDestination',
       () => withNetworkDestination(world, 'nope.example', { domain: 'a', ip: '1.1.1.1', port: 1 }),
     ],
+    [
+      'withEventDestination',
+      () => withEventDestination(world, ids.eventId('start'), { ip: '1.1.1.1', port: 1 }),
+    ],
     ['withoutEventIds', () => withoutEventIds(world, [ids.eventId('start'), 'nope'])],
   ])('throws from %s when no raw event matches', (_name, rewrite) => {
     expect(rewrite).toThrow('No raw event matches');
@@ -219,6 +253,38 @@ describe('chain mutations', () => {
     expect(withoutEventIds(world, [ids.eventId('start')]).events.map(({ id }) => id)).toEqual([
       ids.eventId('beacon'),
     ]);
+  });
+
+  it('returns new pids and entity ids without the original trailing digits or prefix after withoutAlertBridges', () => {
+    const [before] = world.events;
+    const [after] = withoutAlertBridges(world).events;
+    const { process: original } = before.source as { process: ProcessFields };
+    const { process: separated } = after.source as { process: ProcessFields };
+    expect(separated.pid % 100).not.toBe(original.pid % 100);
+    expect(separated.parent?.pid).not.toBe(original.parent?.pid);
+    expect(separated.entity_id).not.toBe(original.entity_id);
+    expect(separated.entity_id).toMatch(/^ad-scenario-entity-/);
+  });
+
+  it('throws from withoutAlertBridges when two alerts cite one raw event', () => {
+    const [alert] = world.alerts;
+    expect(() => withoutAlertBridges({ ...world, alerts: [alert, alert] })).toThrow(
+      'is cited by more than one alert'
+    );
+  });
+
+  it('throws from withoutAlertBridges when no alert cites a raw event', () => {
+    const [alert] = world.alerts;
+    const citingStartOnly = {
+      ...alert,
+      source: {
+        ...alert.source,
+        'kibana.alert.ancestors': [{ id: ids.eventId('start') }],
+      },
+    };
+    expect(() => withoutAlertBridges({ ...world, alerts: [citingStartOnly] })).toThrow(
+      `No alert cites raw event ${ids.eventId('beacon')}`
+    );
   });
 
   it('returns no network events after withoutEventCategory', () => {

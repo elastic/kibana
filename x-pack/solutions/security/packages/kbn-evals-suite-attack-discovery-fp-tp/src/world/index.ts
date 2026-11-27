@@ -48,8 +48,10 @@ export { asRecord, withFieldMessage } from './event_message';
 export { joinKibanaUrl } from './join_kibana_url';
 export {
   withCommandLine,
+  withEventDestination,
   withFilePath,
   withNetworkDestination,
+  withoutAlertBridges,
   withoutEventCategory,
   withoutEventIds,
   withoutProcessParent,

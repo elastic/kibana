@@ -6,8 +6,9 @@
  */
 
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
+import { getTestTimeoutMs } from './src/test_timeout';
 
 export default createPlaywrightEvalsConfig({
   testDir: `${__dirname}/evals`,
-  timeout: 60 * 60_000,
+  timeout: getTestTimeoutMs(process.env.EVAL_REPETITIONS),
 });
