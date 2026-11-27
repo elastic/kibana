@@ -8,7 +8,7 @@
     "**/*.ts",
     "**/*.mjs",
     "**/*.cjs",
-    "../../typings/**/*"
+    "../../typings/getopts.d.ts"
   ],
   "exclude": [
     "target/**/*",

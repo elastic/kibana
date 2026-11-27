@@ -14,7 +14,7 @@ import { promisify } from 'util';
 import { pipeline, Transform } from 'stream';
 import Fs from 'fs';
 
-import getopts from 'getopts';
+import getopts = require('getopts');
 import del from 'del';
 
 import { buildSnapshot, log } from '../utils';

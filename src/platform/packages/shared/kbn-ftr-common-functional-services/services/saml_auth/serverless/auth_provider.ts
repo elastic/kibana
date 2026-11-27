@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import getopts from 'getopts';
+import getopts = require('getopts');
 import type { ServerlessProjectType } from '@kbn/es';
 import { SERVERLESS_ROLES_ROOT_PATH } from '@kbn/es';
 import { type Config } from '@kbn/test';

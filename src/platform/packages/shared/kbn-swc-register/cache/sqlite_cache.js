@@ -12,7 +12,7 @@ const Path = require('path');
 const Crypto = require('crypto');
 const { DatabaseSync } = require('node:sqlite');
 
-const chalk = require('chalk');
+const { default: chalk } = require('chalk');
 
 const GLOBAL_ATIME = new Date().setHours(0, 0, 0, 0);
 const MINUTE = 1000 * 60;

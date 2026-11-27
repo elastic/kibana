@@ -16,7 +16,7 @@ import { dashSuffix } from './util';
 export class Build {
   private buildDesc: string = '';
   private name = 'kibana';
-  private logTag = chalk`{cyan [  kibana  ]}`;
+  private logTag = chalk.cyan('[  kibana  ]');
 
   constructor(private config: Config, private bufferLogs = false) {}
 

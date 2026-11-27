@@ -12,7 +12,7 @@ import { SamlSessionManager } from '@kbn/test';
 import expect from '@kbn/expect';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { resolve } from 'path';
-import getopts from 'getopts';
+import getopts = require('getopts');
 import type { ServerlessProjectType } from '@kbn/es';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { getAuthProvider } from './get_auth_provider';

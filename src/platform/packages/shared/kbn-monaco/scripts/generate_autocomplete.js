@@ -11,7 +11,7 @@ const { join } = require('path');
 const { readdirSync, readFileSync, writeFileSync } = require('fs');
 const minimist = require('minimist');
 const semver = require('semver');
-const ora = require('ora');
+const ora = require('ora').default;
 const del = require('del');
 
 const {

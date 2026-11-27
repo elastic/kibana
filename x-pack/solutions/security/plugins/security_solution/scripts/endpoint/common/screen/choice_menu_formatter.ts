@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { green } from 'chalk';
+import chalk from 'chalk';
 import { isChoice } from './type_gards';
 import type { Choice } from './types';
 import { DataFormatter } from './data_formatter';
@@ -55,7 +55,7 @@ export class ChoiceMenuFormatter extends DataFormatter {
         title = choice;
       }
 
-      return green(`[${key}] `) + title;
+      return chalk.green(`[${key}] `) + title;
     });
   }
 }

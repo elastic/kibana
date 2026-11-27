@@ -10,7 +10,7 @@
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
-import chalk from 'chalk';
+import chalkTemplate from 'chalk-template';
 import fs from 'fs';
 import fetch from 'node-fetch';
 import path from 'path';
@@ -129,7 +129,7 @@ run(
     }
   },
   {
-    description: chalk`
+    description: chalkTemplate`
       Display the Chromium git commit that correlates to a given Puppeteer release.
 
       -  node scripts/chromium_version 5.5.0  {dim # gets the Chromium commit for Puppeteer v5.5.0}

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { green } from 'chalk';
+import chalk from 'chalk';
 import { SCREEN_ROW_MAX_WIDTH } from './constants';
 import { DataFormatter } from './data_formatter';
 
@@ -23,7 +23,7 @@ export class ProgressFormatter extends DataFormatter {
     const progressPrct = `${prctDone}%`;
 
     return `[ ${'='.repeat(repeatValue).padEnd(MAX_WIDTH)} ] ${
-      prctDone === 100 ? green(progressPrct) : progressPrct
+      prctDone === 100 ? chalk.green(progressPrct) : progressPrct
     }`;
   }
 }

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import getopts from 'getopts';
+import getopts = require('getopts');
 import { promises as fs } from 'fs';
 import { relative } from 'path';
 import { spawn } from 'child_process';

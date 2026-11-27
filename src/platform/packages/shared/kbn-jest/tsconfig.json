@@ -11,7 +11,8 @@
   "include": [
     "**/*.ts",
     "**/*.js",
-    "src/jest_flags.json"
+    "src/jest_flags.json",
+    "../../../../../typings/getopts.d.ts"
   ],
   "exclude": [
     "types/**/*",

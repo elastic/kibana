@@ -12,6 +12,7 @@ import { resolve } from 'path';
 import * as Rx from 'rxjs';
 import execa from 'execa';
 import chalk from 'chalk';
+import chalkTemplate from 'chalk-template';
 import { first, tap } from 'rxjs';
 import dedent from 'dedent';
 
@@ -114,7 +115,7 @@ run(
         const resolveConflicts = async () => {
           log.error(chalk.red('Conflict resolution required'));
           log.info(
-            dedent(chalk`
+            dedent(chalkTemplate`
               Please resolve the merge conflicts in ${repoDir} in another terminal window.
               Once the conflicts are resolved run the following in the other window:
 

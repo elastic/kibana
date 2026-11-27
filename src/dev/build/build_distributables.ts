@@ -63,7 +63,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
 
   log.verbose('building distributables with options:', options);
 
-  log.write(`--- ${chalk`{dim [ global ]}`} Kibana build tasks`);
+  log.write(`--- ${chalk.dim('[ global ]')} Kibana build tasks`);
 
   const config = await Config.create(options);
   const globalRun = createRunner({ config, log });

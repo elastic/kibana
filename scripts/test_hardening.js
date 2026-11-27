@@ -10,7 +10,7 @@
 var execFileSync = require('child_process').execFileSync;
 var path = require('path');
 var syncGlob = require('glob').sync;
-var program = require('commander');
+var program = require('commander').program;
 
 program
   .name('node scripts/test_hardening.js')

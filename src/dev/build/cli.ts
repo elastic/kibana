@@ -10,7 +10,7 @@
 import { resolve } from 'path';
 
 import dedent from 'dedent';
-import chalk from 'chalk';
+import chalkTemplate from 'chalk-template';
 
 import { buildDistributables } from './build_distributables';
 import { isErrorLogged } from './lib';
@@ -28,7 +28,7 @@ if (unknownFlags.length) {
 
 if (showHelp) {
   log.write(
-    dedent(chalk`
+    dedent(chalkTemplate`
       {dim usage:} node scripts/build
 
       build the Kibana distributable
