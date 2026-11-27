@@ -105,6 +105,8 @@
     "@kbn/response-ops-retry-service",
     "@kbn/openapi-generator",
     "@kbn/deeplinks-workflows",
+    "@kbn/deeplinks-analytics",
+    "@kbn/share-plugin",
     "@kbn/charts-theme",
     "@kbn/workflows-extensions",
     "@kbn/workflows",
