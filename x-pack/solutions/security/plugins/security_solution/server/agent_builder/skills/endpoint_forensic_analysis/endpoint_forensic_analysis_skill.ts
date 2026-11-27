@@ -14,6 +14,7 @@ import { getConfigurationTroubleshootingSkillName } from '../configuration_troub
 import type { InvestigationIocCategory } from '../../attachments/investigation_iocs';
 import { MAX_IOCS_PER_CATEGORY } from '../../attachments/investigation_iocs';
 import { securityTool } from '../../tools/constants';
+import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import {
   resolveSearchWindow,
   searchWindowShape,
@@ -228,6 +229,15 @@ Trace outbound internal connections from source host; correlate with process cre
 ### 7. Persistence
 Enumerate registry run keys, scheduled tasks, services, and startup items from telemetry indices.
 
+## Attaching alerts to a case
+
+Only when the analyst asks to attach alerts to a case. Forensic reconstruction uses the telemetry indices, not alerts.
+- Look the alerts up in the \`alerts_index\` the discovery tool returned (the current space): \`FROM <alerts_index> METADATA _id, _index\`.
+- Never hardcode \`${DEFAULT_ALERTS_INDEX}-default\`, \`.siem-signals-*\`, or another space's index.
+- If the \`alerts_index\` does not exist, the space has no alerts; do not query another index.
+- This skill has no case tool. Alerts are attached with the Cases attachments tool (\`platform.core.cases.manage_attachments\`, mode \`add_alerts\`, \`{alertId, index}\`); this rule is about which values to pass there.
+- Pass \`_id\` and \`_index\` unchanged from the \`METADATA _id, _index\` columns. \`_index\` is the backing index (\`.internal.alerts-security.alerts-<space>-00000N\`); do not rewrite it to the alias. \`kibana.alert.uuid\` equals \`_id\`.
+
 ## Tool Selection Guardrails
 
 - **Always** call \`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID}\` before ES|QL.
@@ -274,6 +284,7 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
           } catch (error) {
             discoveryError = error instanceof Error ? error.message : String(error);
           }
+          const alertsIndex = `${DEFAULT_ALERTS_INDEX}-${context.spaceId}`;
           const missingPatterns = discoveryError
             ? []
             : ENDPOINT_TELEMETRY_INDEX_PATTERNS.filter(
@@ -291,6 +302,7 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
                   ...(discoveryError ? { index_discovery_error: discoveryError } : {}),
                   scoped_hosts: hosts ?? [],
                   searched_window: searchedWindow,
+                  alerts_index: alertsIndex,
                   guidance:
                     `Next: platform.core.generate_esql then platform.core.execute_esql scoped to host.name and ` +
                     `this exact range: ${toEsqlTimestampClause(searchedWindow)}. ${
