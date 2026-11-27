@@ -29,7 +29,7 @@ export const apiPublishesAwaitingRequiredFilters = (
 ): unknownApi is PublishesAwaitingRequiredFilters => {
   return Boolean(
     unknownApi &&
-      (unknownApi as PublishesAwaitingRequiredFilters)?.awaitingRequiredFilters$ !== undefined
+    (unknownApi as PublishesAwaitingRequiredFilters)?.awaitingRequiredFilters$ !== undefined
   );
 };
 
