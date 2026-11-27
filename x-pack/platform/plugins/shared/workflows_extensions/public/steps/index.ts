@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+import type { RegisterInternalStepDefinitionsOptions } from '../../server/steps/register_internal_step_definitions_options';
 import type { PublicStepRegistry } from '../step_registry';
 
-export const registerInternalStepDefinitions = (stepRegistry: PublicStepRegistry) => {
+export const registerInternalStepDefinitions = (
+  stepRegistry: PublicStepRegistry,
+  { experimentalSteps }: RegisterInternalStepDefinitionsOptions
+) => {
   stepRegistry.register(() => import('./data/data_map_step').then((m) => m.dataMapStepDefinition));
   stepRegistry.register(() =>
     import('./data/data_dedupe_step').then((m) => m.dataDedupeStepDefinition)
@@ -39,4 +43,10 @@ export const registerInternalStepDefinitions = (stepRegistry: PublicStepRegistry
   stepRegistry.register(() =>
     import('./workflow/get_last_run_step').then((m) => m.getLastRunStepDefinition)
   );
+
+  if (experimentalSteps.javaScriptStep) {
+    stepRegistry.register(() =>
+      import('./javascript/javascript_step').then((m) => m.scriptsJavaScriptStepDefinition)
+    );
+  }
 };

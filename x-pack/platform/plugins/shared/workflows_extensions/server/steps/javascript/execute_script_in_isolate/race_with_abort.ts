@@ -1,0 +1,52 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type ivm from 'isolated-vm';
+import { createAbortError } from './create_abort_error';
+
+export const raceWithAbort = async <T>(
+  promise: Promise<T>,
+  abortSignal: AbortSignal,
+  isolate: ivm.Isolate
+): Promise<T> => {
+  if (abortSignal.aborted) {
+    if (!isolate.isDisposed) {
+      isolate.dispose();
+    }
+    throw createAbortError();
+  }
+
+  return new Promise<T>((resolve, reject) => {
+    let settled = false;
+
+    const onAbort = () => {
+      if (settled) return;
+      settled = true;
+      if (!isolate.isDisposed) {
+        isolate.dispose();
+      }
+      reject(createAbortError());
+    };
+
+    abortSignal.addEventListener('abort', onAbort, { once: true });
+
+    promise.then(
+      (value) => {
+        if (settled) return;
+        settled = true;
+        abortSignal.removeEventListener('abort', onAbort);
+        resolve(value);
+      },
+      (error) => {
+        if (settled) return;
+        settled = true;
+        abortSignal.removeEventListener('abort', onAbort);
+        reject(error);
+      }
+    );
+  });
+};

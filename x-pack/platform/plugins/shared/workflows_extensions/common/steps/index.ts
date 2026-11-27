@@ -6,4 +6,5 @@
  */
 
 export * from './data';
+export * from './javascript';
 export * from './workflow';

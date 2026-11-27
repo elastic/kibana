@@ -17,6 +17,11 @@ import type {
   WorkflowsExtensionsPublicPluginStart,
   WorkflowsExtensionsPublicPluginStartDeps,
 } from './types';
+import type {
+  WorkflowsExtensionsConfig,
+  WorkflowsExtensionsExperimentalStepsConfig,
+} from '../common/experimental_steps_config';
+import { resolveExperimentalStepsConfig } from '../common/experimental_steps_config';
 
 export class WorkflowsExtensionsPublicPlugin implements Plugin<
   WorkflowsExtensionsPublicPluginSetup,
@@ -26,9 +31,13 @@ export class WorkflowsExtensionsPublicPlugin implements Plugin<
 > {
   private readonly stepRegistry: PublicStepRegistry;
   private readonly triggerRegistry: PublicTriggerRegistry;
+  private readonly config: WorkflowsExtensionsConfig;
+  private readonly experimentalStepsConfig: WorkflowsExtensionsExperimentalStepsConfig;
   private removeTestBridge?: () => void;
 
   constructor(initializerContext: PluginInitializerContext) {
+    this.config = initializerContext.config.get<WorkflowsExtensionsConfig>();
+    this.experimentalStepsConfig = resolveExperimentalStepsConfig(this.config.experimentalSteps);
     this.stepRegistry = new PublicStepRegistry(initializerContext.logger.get());
     this.triggerRegistry = new PublicTriggerRegistry();
   }
@@ -37,7 +46,9 @@ export class WorkflowsExtensionsPublicPlugin implements Plugin<
     _core: CoreSetup,
     _plugins: WorkflowsExtensionsPublicPluginSetupDeps
   ): WorkflowsExtensionsPublicPluginSetup {
-    registerInternalStepDefinitions(this.stepRegistry);
+    registerInternalStepDefinitions(this.stepRegistry, {
+      experimentalSteps: this.experimentalStepsConfig,
+    });
     registerInternalTriggerDefinitions(this.triggerRegistry);
 
     return {

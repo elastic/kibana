@@ -17,10 +17,15 @@ import {
   dataRegexReplaceStepDefinition,
   dataStringifyJsonStepDefinition,
 } from './data';
+import { scriptsJavaScriptStepDefinition } from './javascript/javascript_step';
+import type { RegisterInternalStepDefinitionsOptions } from './register_internal_step_definitions_options';
 import { getLastRunStepDefinition } from './workflow';
 import type { ServerStepRegistry } from '../step_registry/step_registry';
 
-export const registerInternalStepDefinitions = (serverStepRegistry: ServerStepRegistry) => {
+export const registerInternalStepDefinitions = (
+  serverStepRegistry: ServerStepRegistry,
+  { experimentalSteps }: RegisterInternalStepDefinitionsOptions
+) => {
   serverStepRegistry.register(dataMapStepDefinition);
   serverStepRegistry.register(dataDedupeStepDefinition);
   serverStepRegistry.register(dataFilterStepDefinition);
@@ -32,4 +37,8 @@ export const registerInternalStepDefinitions = (serverStepRegistry: ServerStepRe
   serverStepRegistry.register(dataParseJsonStepDefinition);
   serverStepRegistry.register(dataStringifyJsonStepDefinition);
   serverStepRegistry.register(getLastRunStepDefinition);
+
+  if (experimentalSteps.javaScriptStep) {
+    serverStepRegistry.register(scriptsJavaScriptStepDefinition);
+  }
 };
