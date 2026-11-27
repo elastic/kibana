@@ -166,6 +166,8 @@ describe('FROM Validation', () => {
       test('no errors on correct METADATA ... usage', () => {
         fromExpectErrors('from index metadata _id', []);
         fromExpectErrors('from index metadata _id, \t\n _index\n ', []);
+        fromExpectErrors('from index metadata _tsid', []);
+        fromExpectErrors('from index metadata _size', []);
       });
 
       describe('validates fields', () => {

@@ -25,7 +25,9 @@ export const validateCommandArguments = (
   callbacks: ICommandCallbacks = {}
 ) => {
   const messages: ESQLMessage[] = [];
-  for (const arg of command.args) {
+  for (const commandArg of command.args) {
+    const arg =
+      !Array.isArray(commandArg) && commandArg.type === 'order' ? commandArg.args[0] : commandArg;
     if (!Array.isArray(arg)) {
       if (isFunctionExpression(arg)) {
         messages.push(

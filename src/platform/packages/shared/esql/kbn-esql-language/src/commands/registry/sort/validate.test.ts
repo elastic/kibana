@@ -66,4 +66,19 @@ describe('SORT Validation', () => {
       getNoValidCallSignatureError('+', ['double', 'text']),
     ]);
   });
+
+  test('validates sort keys that have an order or nulls modifier', () => {
+    sortExpectErrors('from a_index | sort wrongField desc', ['Unknown column "wrongField"']);
+    sortExpectErrors('from a_index | sort wrongField nulls last', ['Unknown column "wrongField"']);
+    sortExpectErrors('from a_index | sort doubleField asc, wrongField desc nulls first', [
+      'Unknown column "wrongField"',
+    ]);
+    sortExpectErrors('from a_index | sort nope_fn(doubleField) desc', ['Unknown function NOPE_FN']);
+    sortExpectErrors('from a_index | sort sin(textField) desc', [
+      getNoValidCallSignatureError('sin', ['text']),
+    ]);
+    sortExpectErrors('from a_index | sort doubleField + textField asc nulls last', [
+      getNoValidCallSignatureError('+', ['double', 'text']),
+    ]);
+  });
 });
