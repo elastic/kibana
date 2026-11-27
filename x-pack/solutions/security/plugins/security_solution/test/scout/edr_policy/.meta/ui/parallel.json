@@ -1,0 +1,147 @@
+{
+  "sha1": "c820a2cb7ca978f4a6c71723e5d8b40a135c62e0",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "d23f78d1b0418df-74be088127f7292",
+      "title": "Prepare Fleet for EDR policy tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_policy/ui/parallel_tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "0cb2fe552c5c976-2e4434cc3d407d1",
+      "title": "Policy details - protection updates (edit) renders tab content",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_policy/ui/parallel_tests/protection_updates_edit.spec.ts",
+        "line": 31,
+        "column": 64
+      }
+    },
+    {
+      "id": "0cb2fe552c5c976-82c9fe30c883264",
+      "title": "Policy details - protection updates (edit) unsaved changes guard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_policy/ui/parallel_tests/protection_updates_edit.spec.ts",
+        "line": 55,
+        "column": 22
+      }
+    },
+    {
+      "id": "0cb2fe552c5c976-adb59e84079f0e7",
+      "title": "Policy details - protection updates (edit) custom date",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_policy/ui/parallel_tests/protection_updates_edit.spec.ts",
+        "line": 68,
+        "column": 15
+      }
+    },
+    {
+      "id": "0cb2fe552c5c976-5bd362eef19d551",
+      "title": "Policy details - protection updates (edit) no modal on custom date",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_policy/ui/parallel_tests/protection_updates_edit.spec.ts",
+        "line": 93,
+        "column": 22
+      }
+    },
+    {
+      "id": "0cb2fe552c5c976-0ca77909bfea8f7",
+      "title": "Policy details - protection updates (edit) back to latest",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_policy/ui/parallel_tests/protection_updates_edit.spec.ts",
+        "line": 104,
+        "column": 22
+      }
+    },
+    {
+      "id": "0cb2fe552c5c976-76c90be2b0e53c5",
+      "title": "Policy details - protection updates (edit) update note",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_policy/ui/parallel_tests/protection_updates_edit.spec.ts",
+        "line": 122,
+        "column": 33
+      }
+    },
+    {
+      "id": "6697618e49aaa94-5bf6ef13523d3d6",
+      "title": "Policy details - protection updates (read only) with note",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_policy/ui/parallel_tests/protection_updates_read_only.spec.ts",
+        "line": 31,
+        "column": 58
+      }
+    },
+    {
+      "id": "6697618e49aaa94-ee9421ed22ab685",
+      "title": "Policy details - protection updates (read only) without note",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_policy/ui/parallel_tests/protection_updates_read_only.spec.ts",
+        "line": 52,
+        "column": 20
+      }
+    }
+  ]
+}
