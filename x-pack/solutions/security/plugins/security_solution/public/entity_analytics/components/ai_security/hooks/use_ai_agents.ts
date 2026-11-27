@@ -36,15 +36,25 @@ import {
 import {
   buildDescendantProcessesQuery,
   buildOtelEventsQuery,
+  buildOwnProcessEndsQuery,
   buildOwnProcessesQuery,
   buildProcessSideEffectsQuery,
+  buildRunAlertsQuery,
 } from '../queries/activity_queries';
-import { isDefined, toAgentAlert, toAgentRow, toRelatedEntity } from '../queries/parse_rows';
+import {
+  isDefined,
+  toAgentAlert,
+  toAgentRow,
+  toInventoryPerson,
+  toRelatedEntity,
+} from '../queries/parse_rows';
 import { buildAgentContext } from '../queries/build_agent_context';
 import {
   buildAgentActivity,
+  toEndedProcessIds,
   toOtelRecord,
   toProcessEvent,
+  toRunAlert,
   toSideEffects,
 } from '../activity/build_agent_activity';
 import type { AgentActivity, OtelMatch, OtelRecord, SideEffects } from '../activity/types';
@@ -54,8 +64,16 @@ import type {
   AgentIdentity,
   AgentInventoryRow,
   AgentRow,
+  InventoryPerson,
 } from '../types';
-import { firstString, isClaudeCode, parseAgentId, toNumber, toStringArray } from '../utils';
+import {
+  firstString,
+  getSignedInAccounts,
+  isClaudeCode,
+  parseAgentId,
+  toNumber,
+  toStringArray,
+} from '../utils';
 
 type SearchService = DataPublicPluginStart['search'];
 type EsqlRecord = Record<string, unknown>;
@@ -120,7 +138,36 @@ export interface AgentInventory {
   readonly alertsUnavailable: boolean;
 }
 
-/** One row per agent install in the space, with its open alert count. */
+/** The agents and the resolved people they act for. A failed people read leaves the raw emails. */
+const readAgentsAndPeople = async (
+  search: SearchService,
+  space: string,
+  signal?: AbortSignal
+): Promise<{ agents: AgentRow[]; peopleById: Map<string, InventoryPerson> }> => {
+  const agents = (await esqlRecords(search, buildAgentInventoryQuery(space), 'inventory', signal))
+    .map(toAgentRow)
+    .filter(isDefined);
+  const personIds = Array.from(new Set(agents.flatMap((agent) => agent.accountIds)));
+  const people = personIds.length
+    ? await optionalRecords(
+        search,
+        buildEntitiesByIdQuery(space, personIds, personIds.length),
+        'people',
+        signal
+      )
+    : { records: [] };
+  return {
+    agents,
+    peopleById: new Map(
+      people.records
+        .map(toInventoryPerson)
+        .filter(isDefined)
+        .map((person) => [person.entityId, person])
+    ),
+  };
+};
+
+/** One row per agent install in the space, with its open alert count and the people it acts for. */
 export const useAiAgentsInventory = () => {
   const { data } = useKibana().services;
   const spaceId = useSpaceId();
@@ -129,8 +176,8 @@ export const useAiAgentsInventory = () => {
     enabled: !!spaceId,
     queryFn: async ({ signal }): Promise<AgentInventory> => {
       const space = spaceId ?? 'default';
-      const [agents, alerts] = await Promise.all([
-        esqlRecords(data.search, buildAgentInventoryQuery(space), 'inventory', signal),
+      const [{ agents, peopleById }, alerts] = await Promise.all([
+        readAgentsAndPeople(data.search, space, signal),
         optionalRecords(data.search, buildAgentAlertCountsQuery(space), 'alert_counts', signal),
       ]);
       const alertCounts = new Map(
@@ -140,10 +187,11 @@ export const useAiAgentsInventory = () => {
         ])
       );
       return {
-        rows: agents
-          .map(toAgentRow)
-          .filter(isDefined)
-          .map((row) => ({ ...row, alertCount: alertCounts.get(row.entityId) ?? 0 })),
+        rows: agents.map((row) => ({
+          ...row,
+          alertCount: alertCounts.get(row.entityId) ?? 0,
+          accounts: getSignedInAccounts(row, peopleById),
+        })),
         alertsUnavailable: alerts.failed,
       };
     },
@@ -289,26 +337,39 @@ export const useAiAgentActivity = (agent: AgentRow | AgentIdentity | undefined) 
           ACTIVITY_LOOKBACK_MARGIN_MS
       ).toISOString();
 
-      const [ownRecords, descendantRecords, sideEffectRecords] = await Promise.all([
-        recordsIfIndexExists(
-          data.search,
-          buildOwnProcessesQuery(space, agent, from),
-          'own',
-          signal
-        ),
-        recordsIfIndexExists(
-          data.search,
-          buildDescendantProcessesQuery(space, agent, from),
-          'descendants',
-          signal
-        ),
-        optionalRecords(
-          data.search,
-          buildProcessSideEffectsQuery(space, agent, from),
-          'effects',
-          signal
-        ),
-      ]);
+      const [ownRecords, descendantRecords, sideEffectRecords, endRecords, alertRecords] =
+        await Promise.all([
+          recordsIfIndexExists(
+            data.search,
+            buildOwnProcessesQuery(space, agent, from),
+            'own',
+            signal
+          ),
+          recordsIfIndexExists(
+            data.search,
+            buildDescendantProcessesQuery(space, agent, from),
+            'descendants',
+            signal
+          ),
+          optionalRecords(
+            data.search,
+            buildProcessSideEffectsQuery(space, agent, from),
+            'effects',
+            signal
+          ),
+          optionalRecords(
+            data.search,
+            buildOwnProcessEndsQuery(space, agent, from),
+            'ends',
+            signal
+          ),
+          optionalRecords(
+            data.search,
+            buildRunAlertsQuery(space, agent.entityId, from),
+            'run_alerts',
+            signal
+          ),
+        ]);
       const ownEvents = ownRecords.map(toProcessEvent).filter(isDefined);
       const descendantEvents = descendantRecords.map(toProcessEvent).filter(isDefined);
       const sideEffects: Map<string, SideEffects> = toSideEffects(sideEffectRecords.records);
@@ -358,6 +419,9 @@ export const useAiAgentActivity = (agent: AgentRow | AgentIdentity | undefined) 
           otelEvents,
           otelMatch,
           rootArgs,
+          endedProcessIds: endRecords.failed ? undefined : toEndedProcessIds(endRecords.records),
+          alerts: alertRecords.records.map(toRunAlert).filter(isDefined),
+          now: Date.now(),
           truncated:
             ownRecords.length >= ACTIVITY_MAX_PROCESS_EVENTS ||
             descendantRecords.length >= ACTIVITY_MAX_PROCESS_EVENTS,

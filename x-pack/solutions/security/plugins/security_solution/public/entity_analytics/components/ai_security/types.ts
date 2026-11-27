@@ -51,8 +51,26 @@ export interface AgentStoreContext {
   readonly computedAt: string;
 }
 
+/** A person an install acts for, read from their resolved primary user row. */
+export interface InventoryPerson {
+  readonly entityId: string;
+  /** `user.full_name`, else `entity.name`. */
+  readonly name: string;
+  readonly emails: readonly string[];
+  readonly watchlistIds: readonly string[];
+}
+
+/** One account an install signed in with: the resolved person when the store has one. */
+export interface SignedInAccount {
+  readonly person?: InventoryPerson;
+  /** The raw emails on the agent row that belong to this account. */
+  readonly emails: readonly string[];
+}
+
 export interface AgentInventoryRow extends AgentRow {
   readonly alertCount: number;
+  /** Resolved people first, then emails no person row claims. */
+  readonly accounts: readonly SignedInAccount[];
 }
 
 /** A host, user or agent row related to the agent. */

@@ -6,7 +6,7 @@
  */
 
 import { getAiAgentContextFieldPath } from '@kbn/entity-store/common/domain/definitions/ai_agent_context';
-import { toAgentRow, toAgentStoreContext } from './parse_rows';
+import { toAgentRow, toAgentStoreContext, toInventoryPerson } from './parse_rows';
 import { ENTITY_ROW_COLUMNS } from './agent_queries';
 
 const entityId = 'ai_agent:claude_code@host-1@ec2-user';
@@ -64,6 +64,32 @@ describe('toAgentRow', () => {
 
   it('has no store context on a row the maintainer has not reached', () => {
     expect(toAgentRow({ 'entity.id': entityId })?.storeContext).toBeUndefined();
+  });
+});
+
+describe('toInventoryPerson', () => {
+  it("names the person from user.full_name, then entity.name, and keeps the person's watchlists", () => {
+    expect(
+      toInventoryPerson({
+        'entity.id': 'user:alex@okta',
+        'entity.name': 'alex',
+        'user.full_name': 'Alex Doe',
+        'user.email': ['alex@example.com', 'alex.doe@example.com'],
+        'entity.attributes.watchlists': 'departing-employees',
+      })
+    ).toEqual({
+      entityId: 'user:alex@okta',
+      name: 'Alex Doe',
+      emails: ['alex@example.com', 'alex.doe@example.com'],
+      watchlistIds: ['departing-employees'],
+    });
+    expect(toInventoryPerson({ 'entity.id': 'user:sam@okta', 'entity.name': 'sam' })?.name).toBe(
+      'sam'
+    );
+  });
+
+  it('skips a row with no ID', () => {
+    expect(toInventoryPerson({ 'user.full_name': 'Alex Doe' })).toBeUndefined();
   });
 });
 

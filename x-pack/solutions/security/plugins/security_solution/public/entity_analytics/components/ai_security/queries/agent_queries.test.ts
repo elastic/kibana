@@ -6,7 +6,20 @@
  */
 
 import { ALERT_OPEN_STATUS_FILTER } from '../../home/entities_grid/queries/alerts';
-import { buildAgentAlertCountsQuery, buildAgentAlertsQuery } from './agent_queries';
+import {
+  buildAgentAlertCountsQuery,
+  buildAgentAlertsQuery,
+  buildEntitiesByIdQuery,
+} from './agent_queries';
+
+describe('buildEntitiesByIdQuery', () => {
+  it('reads rows by ID, 100 by default or as many as asked for', () => {
+    expect(buildEntitiesByIdQuery('default', ['user:a', 'user:b'])).toContain('| LIMIT 100');
+    const query = buildEntitiesByIdQuery('gen-demo', ['user:a', 'user:b'], 2);
+    expect(query).toContain('entity.id IN ("user:a", "user:b")');
+    expect(query).toContain('| LIMIT 2');
+  });
+});
 
 describe('agent alert queries', () => {
   it('reads only open alerts for the flyout, with the filter the AI security table counts with', () => {

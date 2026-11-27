@@ -8,7 +8,7 @@
 import type { RiskSeverity } from '../../../../common/search_strategy';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import { AI_AGENT_ID_PREFIX, POC_MOCK_TAG } from './constants';
-import type { AgentIdentity } from './types';
+import type { AgentIdentity, AgentRow, InventoryPerson, SignedInAccount } from './types';
 
 /** ES|QL and `_source` return a keyword as a string or an array; this reads either as an array. */
 export const toStringArray = (value: unknown): string[] => {
@@ -110,6 +110,46 @@ export const getAgentTitle = (
 ): string => `${getAgentDisplayName(agentName)} · ${userName}@${hostName ?? hostId}`;
 
 export const isClaudeCode = (agentName: string): boolean => agentName === 'claude_code';
+
+/**
+ * The accounts an install signed in with. Each resolved person with a row is one account, and a raw
+ * email joins the person whose row carries it. The maintainer resolves every ID from at least one
+ * of the agent's emails, so one unclaimed email and one unclaimed person are the same account.
+ */
+export const getSignedInAccounts = (
+  { accountIds, accountEmails }: Pick<AgentRow, 'accountIds' | 'accountEmails'>,
+  peopleById: ReadonlyMap<string, InventoryPerson>
+): SignedInAccount[] => {
+  const people = Array.from(new Set(accountIds)).flatMap((id) => {
+    const person = peopleById.get(id);
+    return person ? [person] : [];
+  });
+  const emailsByPerson = new Map<string, string[]>(people.map((person) => [person.entityId, []]));
+  const unclaimedEmails: string[] = [];
+  accountEmails.forEach((email) => {
+    const owner = people.find((person) =>
+      person.emails.some((personEmail) => personEmail.toLowerCase() === email.toLowerCase())
+    );
+    if (owner) emailsByPerson.get(owner.entityId)?.push(email);
+    else unclaimedEmails.push(email);
+  });
+  const unclaimedPeople = people.filter(({ entityId }) => !emailsByPerson.get(entityId)?.length);
+  if (unclaimedPeople.length === 1 && unclaimedEmails.length === 1) {
+    emailsByPerson.set(unclaimedPeople[0].entityId, unclaimedEmails.splice(0, 1));
+  }
+  return [
+    ...people.map((person) => ({ person, emails: emailsByPerson.get(person.entityId) ?? [] })),
+    ...unclaimedEmails.map((email) => ({ emails: [email] })),
+  ];
+};
+
+/** What the "Signed in as" cell shows for an account: the person's name, else the raw email. */
+export const getAccountLabel = ({ person, emails }: SignedInAccount): string =>
+  person?.name ?? emails[0] ?? '';
+
+/** The emails behind an account: those the install used, else the person's own. */
+export const getAccountEmails = ({ person, emails }: SignedInAccount): readonly string[] =>
+  emails.length > 0 ? emails : person?.emails ?? [];
 
 /**
  * The command inside a Claude Code tool shell, which wraps each Bash tool call as

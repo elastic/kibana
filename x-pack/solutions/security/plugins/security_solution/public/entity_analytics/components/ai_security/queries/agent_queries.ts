@@ -155,13 +155,17 @@ export const buildAgentContextQuery = ({
 };
 
 /** Rows by ID, used to follow `resolution.resolved_to` to the person's primary row. */
-export const buildEntitiesByIdQuery = (spaceId: string, entityIds: readonly string[]): string =>
+export const buildEntitiesByIdQuery = (
+  spaceId: string,
+  entityIds: readonly string[],
+  limit: number = 100
+): string =>
   [
     SET_UNMAPPED_NULLIFY,
     `FROM ${getEntityAlias(spaceId)}`,
     `| WHERE entity.id IN (${toList(entityIds)})`,
     `| KEEP ${ENTITY_ROW_COLUMNS.join(', ')}`,
-    '| LIMIT 100',
+    `| LIMIT ${limit}`,
   ].join('\n');
 
 /** The agent's own events: its three identity fields, descendants left out. */

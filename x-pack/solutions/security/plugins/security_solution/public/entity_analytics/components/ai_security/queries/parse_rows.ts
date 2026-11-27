@@ -6,7 +6,13 @@
  */
 
 import { getAiAgentContextFieldPath } from '@kbn/entity-store/common/domain/definitions/ai_agent_context';
-import type { AgentAlert, AgentRow, AgentStoreContext, RelatedEntity } from '../types';
+import type {
+  AgentAlert,
+  AgentRow,
+  AgentStoreContext,
+  InventoryPerson,
+  RelatedEntity,
+} from '../types';
 import {
   firstString,
   isMockRow,
@@ -101,6 +107,23 @@ export const toAgentRow = (row: EsqlRecord): AgentRow | undefined => {
     dependsOnIds: toStringArray(row['entity.relationships.depends_on.ids']),
     dataSources: toStringArray(row['entity.source']),
     storeContext: toAgentStoreContext(row),
+  };
+};
+
+/** A person's primary user row, named by `user.full_name`, then `entity.name`, then email. */
+export const toInventoryPerson = (row: EsqlRecord): InventoryPerson | undefined => {
+  const entityId = firstString(row['entity.id']);
+  if (!entityId) return undefined;
+  const emails = toStringArray(row['user.email']);
+  return {
+    entityId,
+    name:
+      firstString(row['user.full_name']) ??
+      firstString(row['entity.name']) ??
+      emails[0] ??
+      entityId,
+    emails,
+    watchlistIds: toStringArray(row['entity.attributes.watchlists']),
   };
 };
 
