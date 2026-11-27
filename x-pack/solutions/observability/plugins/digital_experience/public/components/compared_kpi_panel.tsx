@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import { EuiBadge, EuiText, EuiToolTip } from '@elastic/eui';
 import type { EuiBadgeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -56,6 +57,8 @@ const changeIcon = ({ direction }: FormattedChange): EuiBadgeProps['iconType'] =
   return direction > 0 ? 'sortUp' : 'sortDown';
 };
 
+const ellipsisCss = css({ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' });
+
 const previousPeriodLabel = (previous: string) =>
   i18n.translate('xpack.digitalExperience.comparedKpiPanel.previous', {
     defaultMessage: 'Previous period: {previous}',
@@ -86,6 +89,7 @@ export function ComparedKpiPanel({
       label={title}
       hint={tooltip}
       isLoading={isLoading}
+      isEmpty={!value || value.value === null}
       value={
         <span data-test-subj={`${dataTestSubj}Value`}>
           {!value || value.value === null ? NOT_ENOUGH_DATA_LABEL : formatValue(value.value)}
@@ -106,7 +110,12 @@ export function ComparedKpiPanel({
         isComparing && value ? (
           // Short, so the panel keeps its height; the tooltip spells it out.
           value.previous === null ? (
-            <EuiText size="xs" color="subdued" data-test-subj={`${dataTestSubj}Previous`}>
+            <EuiText
+              size="xs"
+              color="subdued"
+              css={ellipsisCss}
+              data-test-subj={`${dataTestSubj}Previous`}
+            >
               <FormattedMessage
                 id="xpack.digitalExperience.comparedKpiPanel.noPrevious"
                 defaultMessage="vs {previous}"
@@ -118,6 +127,7 @@ export function ComparedKpiPanel({
               <EuiText
                 size="xs"
                 color="subdued"
+                css={ellipsisCss}
                 tabIndex={0}
                 data-test-subj={`${dataTestSubj}Previous`}
               >

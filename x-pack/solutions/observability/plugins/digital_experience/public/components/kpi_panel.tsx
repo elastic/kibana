@@ -19,15 +19,16 @@ import {
 } from '@elastic/eui';
 
 /**
- * A KPI panel of a KPI row: the label on top, and the change, the value and the previous value
- * stacked at the bottom, so the values of a row line up whatever the length of the labels. The
- * panel keeps its height with or without the change and the previous value, so toggling Compare
- * does not resize the row; the value keeps its place while loading, so the row does not jump.
+ * A KPI panel of a KPI row: the label on top, and the value with the change and the previous value
+ * beside each other below it, at the bottom, so the values of a row line up whatever the length of
+ * the labels. The line of the change is reserved, so toggling Compare moves nothing; the value
+ * keeps its place while loading, so the row does not jump.
  */
 export function KpiPanel({
   label,
   hint,
   value,
+  isEmpty = false,
   isLoading,
   change,
   previous,
@@ -37,17 +38,19 @@ export function KpiPanel({
   /** How the value is calculated. */
   hint?: string;
   value: ReactNode;
+  /** The value says there is none, e.g. not enough data: shown as a note, not as a number. */
+  isEmpty?: boolean;
   isLoading: boolean;
-  /** Above the value, at the right, e.g. its change against the previous period. */
+  /** Below the value, e.g. its change against the previous period. */
   change?: ReactNode;
-  /** Below the value, e.g. the value of the previous period. */
+  /** Beside the change, e.g. the value of the previous period. */
   previous?: ReactNode;
   'data-test-subj': string;
 }) {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiFlexItem>
+    <EuiFlexItem css={{ minInlineSize: euiTheme.base * 9 }}>
       <EuiPanel hasBorder paddingSize="m" css={{ blockSize: '100%' }}>
         <div
           data-test-subj={dataTestSubj}
@@ -55,7 +58,7 @@ export function KpiPanel({
             display: 'flex',
             flexDirection: 'column',
             blockSize: '100%',
-            minBlockSize: euiTheme.base * 8,
+            minBlockSize: euiTheme.base * 7,
           }}
         >
           <EuiFlexGroup alignItems="flexStart" gutterSize="xs" responsive={false}>
@@ -75,17 +78,37 @@ export function KpiPanel({
             )}
           </EuiFlexGroup>
           <div css={{ marginBlockStart: 'auto' }}>
-            {change && (
-              <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
-                <EuiFlexItem grow={false}>{change}</EuiFlexItem>
-              </EuiFlexGroup>
-            )}
             <EuiSkeletonTitle isLoading={isLoading} size="m">
-              <EuiTitle size="m">
-                <p>{value}</p>
-              </EuiTitle>
+              {isEmpty ? (
+                <EuiText size="s" color="subdued">
+                  <p>{value}</p>
+                </EuiText>
+              ) : (
+                <EuiTitle size="m">
+                  <p css={{ whiteSpace: 'nowrap' }}>{value}</p>
+                </EuiTitle>
+              )}
             </EuiSkeletonTitle>
-            {previous}
+            {/* Always as tall as the change, so the value keeps its place with Compare on or off. */}
+            <EuiFlexGroup
+              alignItems="center"
+              gutterSize="s"
+              responsive={false}
+              css={{
+                minBlockSize: euiTheme.size.l,
+                // In a narrow page, as the panels of the Overview get in then, they take a line each.
+                '@container (max-width: 759px)': {
+                  flexDirection: 'column',
+                  alignItems: 'flex-start',
+                  gap: euiTheme.size.xs,
+                  minBlockSize: 0,
+                },
+              }}
+            >
+              {change && <EuiFlexItem grow={false}>{change}</EuiFlexItem>}
+              {/* On one line whatever the width; a previous value too long for it is cut. */}
+              {previous && <EuiFlexItem css={{ minInlineSize: 0 }}>{previous}</EuiFlexItem>}
+            </EuiFlexGroup>
           </div>
         </div>
       </EuiPanel>
