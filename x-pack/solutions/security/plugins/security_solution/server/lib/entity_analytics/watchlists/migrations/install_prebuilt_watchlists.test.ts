@@ -14,7 +14,9 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { installPrebuiltWatchlists, getPrebuiltWatchlists } from './install_prebuilt_watchlists';
 import {
   getPrivilegedUserWatchlistSavedObjectId,
+  getUnsanctionedAiAgentsWatchlistSavedObjectId,
   PRIVILEGED_USER_WATCHLIST_NAME,
+  UNSANCTIONED_AI_AGENTS_WATCHLIST_NAME,
 } from '../../../../../common/entity_analytics/watchlists/constants';
 import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 
@@ -492,9 +494,55 @@ describe('installPrebuiltWatchlists', function () {
     });
   });
 
-  it('has no duplicate prebuilt watchlist names', () => {
-    const names = getPrebuiltWatchlists('default').map((w) => w.name);
-    expect(new Set(names).size).toBe(names.length);
+  it.each([false, true])(
+    'has no duplicate prebuilt watchlist names (AI security PoC %s)',
+    (entityAnalyticsAiSecurityPoc) => {
+      const names = getPrebuiltWatchlists('default', { entityAnalyticsAiSecurityPoc }).map(
+        (w) => w.name
+      );
+      expect(new Set(names).size).toBe(names.length);
+    }
+  );
+
+  describe('Unsanctioned AI agents watchlist', () => {
+    it('is not a prebuilt watchlist without the AI security PoC flag', () => {
+      expect(getPrebuiltWatchlists('default').map(({ id }) => id)).not.toContain(
+        getUnsanctionedAiAgentsWatchlistSavedObjectId('default')
+      );
+    });
+
+    it('is created per space as a managed watchlist with no entity source', async () => {
+      mockSoClient.find.mockResolvedValue(buildSpacesResponse(['gen-demo']));
+      mockWatchlistGet.mockRejectedValue(new Error('Saved object not found'));
+
+      await installPrebuiltWatchlists({
+        auditLogger: mockAuditLogger,
+        logger: mockLogger,
+        getStartServices: mockGetStartServices,
+        kibanaVersion: '9.0.0',
+        hasEncryptionKey: true,
+        experimentalFeatures: {
+          entityAnalyticsWatchlistEnabled: true,
+          entityAnalyticsAiSecurityPoc: true,
+        } as ExperimentalFeatures,
+      });
+
+      expect(mockWatchlistCreate).toHaveBeenCalledWith(
+        {
+          name: UNSANCTIONED_AI_AGENTS_WATCHLIST_NAME,
+          description: expect.any(String),
+          managed: true,
+          riskModifier: 1.5,
+        },
+        { id: getUnsanctionedAiAgentsWatchlistSavedObjectId('gen-demo') }
+      );
+      // Only the privileged watchlist's okta and ad sources, in each of the two spaces.
+      expect(mockEntitySourceCreate).toHaveBeenCalledTimes(4);
+      expect(mockAddEntitySourceReference).not.toHaveBeenCalledWith(
+        getUnsanctionedAiAgentsWatchlistSavedObjectId('gen-demo'),
+        expect.anything()
+      );
+    });
   });
 
   it('every prebuilt entity_analytics_integration source has integrations.syncMarkerIndex', () => {

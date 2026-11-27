@@ -18,8 +18,9 @@ import type { SecurityAgentBuilderAttachments } from '../../../../common/constan
  * helpers already emit `<namespace>:<type>:<hex>`, which satisfies this
  * pattern, so the regex is a belt-and-braces regression detector — not a
  * substitute for hashing. The UUIDs `attachments.add` returns match it too.
+ * `_` is allowed for the `ai_agent` type segment.
  */
-const AUTOLINK_SAFE_ATTACHMENT_ID_PATTERN = /^[a-z0-9:.-]+$/;
+const AUTOLINK_SAFE_ATTACHMENT_ID_PATTERN = /^[a-z0-9:._-]+$/;
 
 /**
  * Returns a pre-formatted `<render_attachment id="..." version="..." />`

@@ -112,7 +112,7 @@ describe('buildRenderAttachmentTag', () => {
       const attrValueMatch = tag.match(/ id="([^"]+)"/);
       expect(attrValueMatch).not.toBeNull();
       const idInTag = attrValueMatch![1];
-      expect(idInTag).toMatch(/^[a-z0-9:.]+$/);
+      expect(idInTag).toMatch(/^[a-z0-9:._]+$/);
       expect(idInTag).not.toMatch(/[@\s<>/]/);
     });
   });

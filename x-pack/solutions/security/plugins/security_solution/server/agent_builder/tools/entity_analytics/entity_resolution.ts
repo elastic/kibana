@@ -25,7 +25,7 @@ export const ENTITY_STORE_RESOLVED_TO_FIELD = 'entity.relationships.resolution.r
 export const ENTITY_STORE_NAMESPACE_FIELD = 'entity.namespace';
 
 export type EntityType = z.infer<typeof IdentifierType>;
-export const ENTITY_IDENTIFIER_TYPES = ['host', 'user', 'service', 'generic'] as const;
+export const ENTITY_IDENTIFIER_TYPES = ['host', 'user', 'service', 'generic', 'ai_agent'] as const;
 export type EntityIdentifierType = (typeof ENTITY_IDENTIFIER_TYPES)[number];
 export const isEntityType = (value: unknown): value is EntityIdentifierType =>
   typeof value === 'string' && (ENTITY_IDENTIFIER_TYPES as readonly string[]).includes(value);

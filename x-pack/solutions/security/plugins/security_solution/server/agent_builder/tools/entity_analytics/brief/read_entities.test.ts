@@ -7,7 +7,12 @@
 
 import type { SignalCardId } from '../../../../../common/entity_analytics/home/constants';
 import type { BriefCandidate } from './types';
-import { rankCandidates, toAttachmentIdentifier, withGroupValues } from './read_entities';
+import {
+  getBriefEntityType,
+  rankCandidates,
+  toAttachmentIdentifier,
+  withGroupValues,
+} from './read_entities';
 
 const candidate = (
   id: string,
@@ -122,5 +127,20 @@ describe('toAttachmentIdentifier', () => {
     expect(
       toAttachmentIdentifier({ ...candidate('host:solo', ['riskMovers'], 40), members: [] })
     ).not.toHaveProperty('mode');
+  });
+});
+
+describe('getBriefEntityType', () => {
+  it('reads an AI agent as generic, so the brief stays on its four types', () => {
+    const id = 'ai_agent:claude_code@host-id-1@ec2-user';
+    expect(getBriefEntityType({ entity: { id, EngineMetadata: { Type: 'ai_agent' } } }, id)).toBe(
+      'generic'
+    );
+  });
+
+  it('keeps a known type', () => {
+    expect(
+      getBriefEntityType({ entity: { id: 'host:a', EngineMetadata: { Type: 'host' } } }, 'host:a')
+    ).toBe('host');
   });
 });

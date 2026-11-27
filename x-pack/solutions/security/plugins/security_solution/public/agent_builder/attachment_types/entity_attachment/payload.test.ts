@@ -65,6 +65,16 @@ describe('normaliseEntityAttachment', () => {
     expect(result?.entities[0].entityStoreId).toBe("user:Lena Medhurst@Lena's MacBook Pro@local");
   });
 
+  it('accepts an AI agent payload keyed on its entity ID', () => {
+    const entityStoreId = 'ai_agent:claude_code@host-1@ec2-user';
+    const result = normaliseEntityAttachment(
+      buildAttachment({ identifierType: 'ai_agent', identifier: entityStoreId, entityStoreId })
+    );
+    expect(result?.entities).toEqual([
+      { identifierType: 'ai_agent', identifier: entityStoreId, entityStoreId },
+    ]);
+  });
+
   it('drops malformed entityStoreId on a single-entity payload', () => {
     const result = normaliseEntityAttachment(
       buildAttachment({

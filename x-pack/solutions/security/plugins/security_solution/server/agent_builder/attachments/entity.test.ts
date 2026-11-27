@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SECURITY_ENTITY_RISK_SCORE_TOOL_ID } from '../tools';
+import { SECURITY_ENTITY_RISK_SCORE_TOOL_ID, SECURITY_GET_ENTITY_TOOL_ID } from '../tools';
 import { createEntityAttachmentType, MAX_ENTITIES_PER_ATTACHMENT } from './entity';
 
 describe('createEntityAttachmentType', () => {
@@ -62,6 +62,22 @@ describe('createEntityAttachmentType', () => {
         identifierType: 'generic',
         identifier: 'generic-1',
         attachmentLabel: 'Risk Entity',
+      };
+
+      const result = await attachmentType.validate(input);
+
+      expect(result.valid).toBe(true);
+      if (result.valid) {
+        expect(result.data).toEqual(input);
+      }
+    });
+
+    it('returns valid for an AI agent sent with its entity id', async () => {
+      const input = {
+        identifierType: 'ai_agent',
+        identifier: 'claude_code@ec2-user@build-01',
+        entityStoreId: 'ai_agent:claude_code@host-id-1@ec2-user',
+        attachmentLabel: 'ai_agent: claude_code@ec2-user@build-01',
       };
 
       const result = await attachmentType.validate(input);
@@ -337,6 +353,11 @@ describe('createEntityAttachmentType', () => {
             { identifierType: 'user', identifier: 'username-1' },
             { identifierType: 'service', identifier: 'service-1' },
             { identifierType: 'generic', identifier: 'generic-1' },
+            {
+              identifierType: 'ai_agent',
+              identifier: 'claude_code@ec2-user@build-01',
+              entityStoreId: 'ai_agent:claude_code@host-id-1@ec2-user',
+            },
           ],
         };
 
@@ -427,6 +448,16 @@ describe('createEntityAttachmentType', () => {
       expect(description).toContain('attachment_id');
       expect(description).toContain('current_version');
       expect(description?.toLowerCase()).toContain('verbatim');
+    });
+
+    it('tells the agent to look an AI agent up by its entity id, not its display name', () => {
+      const description = attachmentType.getAgentDescription?.();
+
+      expect(description).toContain('`ai_agent`');
+      expect(description).toContain('ai_agent:<product>@<host.id>@<user.name>');
+      expect(description).toContain(
+        `Look the agent up with \`${SECURITY_GET_ENTITY_TOOL_ID}\`, passing \`entityStoreId\` as \`entityId\``
+      );
     });
 
     it('does not leak the removed {riskEntityData} placeholder', () => {

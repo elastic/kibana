@@ -126,6 +126,31 @@ describe('entity_resolution', () => {
       }
     });
 
+    it('resolves an AI agent row to an ai_agent identity', async () => {
+      mockExecuteEsql.mockResolvedValueOnce({
+        columns: singleHostRow.columns,
+        values: [
+          ['ai_agent:claude_code@host-id-1@ec2-user', 'claude_code@ec2-user@build-01', 'ai_agent'],
+        ],
+      });
+
+      const result = await resolveSingleEntity({
+        esClient,
+        spaceId: 'default',
+        entityId: 'ai_agent:claude_code@host-id-1@ec2-user',
+        entityType: 'ai_agent',
+      });
+
+      expect(result.status).toBe('resolved');
+      if (result.status === 'resolved') {
+        expect(result.identity).toEqual({
+          identifierType: 'ai_agent',
+          identifier: 'claude_code@ec2-user@build-01',
+          entityStoreId: 'ai_agent:claude_code@host-id-1@ec2-user',
+        });
+      }
+    });
+
     it('includes the identity namespace when the row projects it', async () => {
       mockExecuteEsql.mockResolvedValueOnce({
         columns: [

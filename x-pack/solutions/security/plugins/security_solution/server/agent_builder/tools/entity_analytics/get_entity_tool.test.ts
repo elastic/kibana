@@ -1908,6 +1908,82 @@ describe('getEntityTool', () => {
         expect(addCall.data.riskStats).toBeDefined();
         expect(addCall.data.resolutionRiskStats).toBeUndefined();
       });
+
+      it('resolves an AI agent by its entity id and embeds the agent risk stats', async () => {
+        const agentId = 'ai_agent:claude_code@host-id-1@ec2-user';
+        const agentName = 'claude_code@ec2-user@build-01';
+        const agentAttachmentId = buildSingleEntityAttachmentId('ai_agent', agentName);
+        (executeEsql as jest.Mock).mockResolvedValueOnce({
+          columns: primaryHitResponse.columns,
+          values: [[agentId, agentName, 'ai_agent']],
+        });
+        mockEsClient.asCurrentUser.search.mockResolvedValueOnce({
+          ...buildRiskSearchResponse([]),
+          hits: {
+            hits: [
+              {
+                _id: 'risk-doc-0',
+                _index: 'risk-score.risk-score-default',
+                _source: {
+                  ai_agent: {
+                    risk: buildRiskRecord({ id_field: 'entity.id', id_value: agentId }),
+                  },
+                },
+              },
+            ],
+            total: { value: 1, relation: 'eq' as const },
+          },
+        });
+
+        const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+        (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
+        (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+          id: agentAttachmentId,
+          current_version: 1,
+        });
+
+        const result = (await tool.handler(
+          { entityType: 'ai_agent', entityId: agentId },
+          context
+        )) as ToolHandlerStandardReturn;
+
+        expect(result.results.map(({ type }) => type)).toEqual([
+          ToolResultType.esqlResults,
+          ToolResultType.other,
+        ]);
+        expect((result.results[1] as OtherResult).data).toEqual({
+          attachmentId: agentAttachmentId,
+          version: 1,
+          renderTag: buildRenderAttachmentTag({ attachmentId: agentAttachmentId, version: 1 }),
+        });
+        expect(executeEsql).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.stringContaining(`WHERE entity.id == "${agentId}"`),
+          })
+        );
+        const searchCall = mockEsClient.asCurrentUser.search.mock.calls[0][0] as {
+          query: { bool: { filter: unknown[] } };
+        };
+        expect(searchCall.query.bool.filter).toContainEqual({
+          terms: { 'ai_agent.risk.id_value': [agentId, agentName] },
+        });
+        const addCall = (context.attachments.add as jest.Mock).mock.calls[0][0];
+        expect(addCall).toEqual(
+          expect.objectContaining({
+            id: agentAttachmentId,
+            type: SecurityAgentBuilderAttachments.entity,
+            description: `ai_agent: ${agentName}`,
+          })
+        );
+        expect(addCall.data).toEqual(
+          expect.objectContaining({
+            identifierType: 'ai_agent',
+            identifier: agentName,
+            entityStoreId: agentId,
+            riskStats: expect.objectContaining({ id_value: agentId, calculated_score_norm: 75 }),
+          })
+        );
+      });
     });
   });
 });
