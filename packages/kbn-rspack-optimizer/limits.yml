@@ -101,6 +101,7 @@ pageLoadAssetSize:
   home: 9254
   imageEmbeddable: 1654
   inbox: 1580
+  indexExplorer: 2000
   indexLifecycleManagement: 32072
   indexManagement: 583
   inference: 5940
