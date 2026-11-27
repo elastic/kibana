@@ -30,6 +30,7 @@
     "@kbn/field-types",
     "@kbn/field-utils",
     "@kbn/file-upload-common",
+    "@kbn/agent-builder-browser",
     "@kbn/file-upload-plugin",
     "@kbn/i18n-react",
     "@kbn/i18n",

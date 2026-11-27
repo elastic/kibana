@@ -24,6 +24,7 @@ import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/publ
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 
 export interface DataVisualizerSetupDependencies {
   home?: HomePublicPluginSetup;
@@ -32,6 +33,7 @@ export interface DataVisualizerSetupDependencies {
   uiActions?: UiActionsSetup;
 }
 export interface DataVisualizerStartDependencies {
+  agentBuilder?: AgentBuilderPluginStart;
   analytics: AnalyticsServiceStart;
   charts: ChartsPluginStart;
   cloud?: CloudStart;

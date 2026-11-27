@@ -25,3 +25,5 @@ export {
   LinkCard,
   type LinkCardProps,
 } from './src/file_upload_component/components/results_links/link_card';
+
+export { createFileUploadAttachmentDefinition } from './src/file_upload_component/components/agent_builder/file_upload_attachment_definition';

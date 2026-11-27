@@ -7,6 +7,7 @@
 
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { FileUploadAgentBuilderDefinitions } from './agent_builder';
 
 export interface StartDeps {
   security?: SecurityPluginStart;
@@ -14,4 +15,9 @@ export interface StartDeps {
 
 export interface SetupDeps {
   usageCollection: UsageCollectionSetup;
+}
+
+export interface FileUploadServerPluginSetup {
+  /** Returns the Agent Builder file upload attachment type and skill, for a consumer to register. */
+  getAgentBuilderDefinitions: () => FileUploadAgentBuilderDefinitions;
 }

@@ -328,6 +328,9 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'skill-management',
   'connector-authoring',
   'connector-discovery',
+
+  // Platform – File upload (registered by the data visualizer plugin)
+  'file-upload',
 ] as const;
 
 export type AgentBuilderBuiltinSkill = (typeof AGENT_BUILDER_BUILTIN_SKILLS)[number];
@@ -460,6 +463,9 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Platform – Proposals
   'platform.proposal',
+
+  // Platform – File upload (registered by the data visualizer plugin)
+  'platform.file_upload',
 
   // Platform – Agentic Investigations
   'investigation_impact',

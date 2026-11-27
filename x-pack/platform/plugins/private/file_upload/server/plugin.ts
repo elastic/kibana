@@ -18,16 +18,17 @@ import { UI_SETTING_MAX_FILE_SIZE, MAX_FILE_SIZE } from '@kbn/file-upload-common
 import { fileUploadRoutes } from './routes';
 import { initFileUploadTelemetry } from './telemetry';
 import { setupCapabilities } from './capabilities';
-import type { StartDeps, SetupDeps } from './types';
+import type { StartDeps, SetupDeps, FileUploadServerPluginSetup } from './types';
+import { createFileUploadAgentBuilderDefinitions } from './agent_builder';
 
-export class FileUploadPlugin implements Plugin {
+export class FileUploadPlugin implements Plugin<FileUploadServerPluginSetup> {
   private readonly _logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
     this._logger = initializerContext.logger.get();
   }
 
-  setup(coreSetup: CoreSetup<StartDeps, unknown>, plugins: SetupDeps) {
+  setup(coreSetup: CoreSetup<StartDeps, unknown>, plugins: SetupDeps): FileUploadServerPluginSetup {
     fileUploadRoutes(coreSetup, this._logger);
 
     setupCapabilities(coreSetup);
@@ -55,6 +56,17 @@ export class FileUploadPlugin implements Plugin {
     });
 
     initFileUploadTelemetry(coreSetup, plugins.usageCollection);
+
+    return {
+      getAgentBuilderDefinitions: () =>
+        createFileUploadAgentBuilderDefinitions({
+          getEsClient: async (request) => {
+            const [coreStart] = await coreSetup.getStartServices();
+            return coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+          },
+          logger: this._logger.get('agent_builder'),
+        }),
+    };
   }
 
   start(core: CoreStart) {}

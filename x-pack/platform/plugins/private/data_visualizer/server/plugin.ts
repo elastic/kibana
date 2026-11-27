@@ -42,6 +42,12 @@ export class DataVisualizerPlugin implements Plugin<void, void, SetupDeps, Start
         transformOut,
       }),
     });
+
+    if (plugins.agentBuilder) {
+      const { attachmentType, skill } = plugins.fileUpload.getAgentBuilderDefinitions();
+      plugins.agentBuilder.attachments.registerType(attachmentType);
+      plugins.agentBuilder.skills.register(skill);
+    }
   }
 
   start(core: CoreStart) {}

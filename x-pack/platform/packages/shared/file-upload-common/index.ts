@@ -60,3 +60,11 @@ export {
   getFieldsFromGrokPattern,
   replaceFieldInGrokPattern,
 } from './src/grok_pattern_utils/grok_pattern';
+
+export {
+  FILE_UPLOAD_ATTACHMENT_TYPE,
+  FILE_UPLOAD_SKILL_ID,
+  FILE_UPLOAD_AGENT_BUILDER_LOCATION,
+  fileUploadAttachmentDataSchema,
+} from './src/agent_builder';
+export type { FileUploadAttachmentData, FileUploadAttachment } from './src/agent_builder';
