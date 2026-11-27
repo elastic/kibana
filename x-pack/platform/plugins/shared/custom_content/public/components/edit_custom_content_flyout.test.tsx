@@ -178,9 +178,25 @@ describe('EditCustomContentFlyout', () => {
         isNewPanel: false,
         hasTemplate: true,
         hasEsqlQuery: true,
+        esqlQueryCount: 1,
         templateSizeBytes: '<div></div>'.length,
       });
     });
+  });
+
+  it('reports how many queries a panel is saved with', async () => {
+    mockUseEditFlyoutState.mockReturnValue({
+      ...baseFlyoutState,
+      draftQueries: drafts('FROM logs', 'FROM metrics'),
+      draftTemplate: '<div></div>',
+    });
+    render(<EditCustomContentFlyout {...defaultProps} />);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Apply and close' }));
+
+    expect(mockTelemetry.trackPanelSaved).toHaveBeenCalledWith(
+      expect.objectContaining({ hasEsqlQuery: true, esqlQueryCount: 2 })
+    );
   });
 
   it('is enabled when a query is added or removed, even if the first is unchanged', () => {

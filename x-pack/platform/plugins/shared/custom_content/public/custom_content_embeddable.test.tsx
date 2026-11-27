@@ -680,6 +680,7 @@ describe('customContentEmbeddableFactory', () => {
         isNewPanel: false,
         hasTemplate: true,
         hasEsqlQuery: true,
+        esqlQueryCount: 1,
       });
 
       await renderFlyoutContent();
@@ -999,6 +1000,7 @@ describe('customContentEmbeddableFactory', () => {
       expect(mockTelemetry.trackAgentUpdateApplied).toHaveBeenCalledTimes(1);
       expect(mockTelemetry.trackAgentUpdateApplied).toHaveBeenCalledWith({
         hasEsqlQuery: false,
+        esqlQueryCount: 0,
         templateSizeBytes: '<p>mine</p>'.length,
       });
       expectGenerating(false);
@@ -1015,6 +1017,11 @@ describe('customContentEmbeddableFactory', () => {
       );
 
       expect(embeddable.api.serializeState().esql_query).toEqual(['FROM a', 'FROM b']);
+      expect(mockTelemetry.trackAgentUpdateApplied).toHaveBeenCalledWith({
+        hasEsqlQuery: true,
+        esqlQueryCount: 2,
+        templateSizeBytes: '<p>mine</p>'.length,
+      });
     });
 
     it('ignores additional queries that come without a main query, and does not keep them for later', async () => {

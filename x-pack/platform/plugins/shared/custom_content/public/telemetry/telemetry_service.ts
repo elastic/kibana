@@ -26,7 +26,7 @@ export class CustomContentTelemetryService {
     }
   }
 
-  trackPanelAdded(source: 'dashboard_panel' | 'agent_generated') {
+  trackPanelAdded(source: 'dashboard_panel') {
     this._reportEvent(CUSTOM_CONTENT_PANEL_ADDED, { source });
   }
 
@@ -34,11 +34,13 @@ export class CustomContentTelemetryService {
     isNewPanel: boolean;
     hasTemplate: boolean;
     hasEsqlQuery: boolean;
+    esqlQueryCount: number;
   }) {
     this._reportEvent(CUSTOM_CONTENT_EDIT_FLYOUT_OPENED, {
       is_new_panel: params.isNewPanel,
       has_template: params.hasTemplate,
       has_esql_query: params.hasEsqlQuery,
+      esql_query_count: params.esqlQueryCount,
     });
   }
 
@@ -46,12 +48,14 @@ export class CustomContentTelemetryService {
     isNewPanel: boolean;
     hasTemplate: boolean;
     hasEsqlQuery: boolean;
+    esqlQueryCount: number;
     templateSizeBytes: number;
   }) {
     this._reportEvent(CUSTOM_CONTENT_PANEL_SAVED, {
       is_new_panel: params.isNewPanel,
       has_template: params.hasTemplate,
       has_esql_query: params.hasEsqlQuery,
+      esql_query_count: params.esqlQueryCount,
       template_size_bytes: params.templateSizeBytes,
     });
   }
@@ -73,9 +77,14 @@ export class CustomContentTelemetryService {
     });
   }
 
-  trackAgentUpdateApplied(params: { hasEsqlQuery: boolean; templateSizeBytes: number }) {
+  trackAgentUpdateApplied(params: {
+    hasEsqlQuery: boolean;
+    esqlQueryCount: number;
+    templateSizeBytes: number;
+  }) {
     this._reportEvent(CUSTOM_CONTENT_AGENT_UPDATE_APPLIED, {
       has_esql_query: params.hasEsqlQuery,
+      esql_query_count: params.esqlQueryCount,
       template_size_bytes: params.templateSizeBytes,
     });
   }

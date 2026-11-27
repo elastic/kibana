@@ -24,7 +24,7 @@ export const registerCustomContentAnalyticsEvents = once((analytics: AnalyticsSe
       source: {
         type: 'keyword',
         _meta: {
-          description: 'How the panel was added. Possible values: dashboard_panel|agent_generated',
+          description: 'How the panel was added. Possible values: dashboard_panel',
         },
       },
     },
@@ -45,6 +45,10 @@ export const registerCustomContentAnalyticsEvents = once((analytics: AnalyticsSe
         type: 'boolean',
         _meta: { description: 'Whether the panel already had a saved ES|QL query.' },
       },
+      esql_query_count: {
+        type: 'long',
+        _meta: { description: 'Number of ES|QL queries the panel had when the flyout opened.' },
+      },
     },
   });
 
@@ -62,6 +66,10 @@ export const registerCustomContentAnalyticsEvents = once((analytics: AnalyticsSe
       has_esql_query: {
         type: 'boolean',
         _meta: { description: 'Whether the panel was saved with an ES|QL query.' },
+      },
+      esql_query_count: {
+        type: 'long',
+        _meta: { description: 'Number of ES|QL queries the panel was saved with.' },
       },
       template_size_bytes: {
         type: 'long',
@@ -111,6 +119,10 @@ export const registerCustomContentAnalyticsEvents = once((analytics: AnalyticsSe
       has_esql_query: {
         type: 'boolean',
         _meta: { description: 'Whether the agent update included an ES|QL query.' },
+      },
+      esql_query_count: {
+        type: 'long',
+        _meta: { description: 'Number of ES|QL queries in the agent update.' },
       },
       template_size_bytes: {
         type: 'long',
