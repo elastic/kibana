@@ -20,7 +20,6 @@ import {
   type IAdditionalFields,
   type NamedSubquery,
 } from '@kbn/esql-language';
-import { escapeRegExp } from 'lodash';
 import { LRUCache } from 'lru-cache';
 import { parseEsqlCached } from './parse_esql_cached';
 
@@ -251,6 +250,31 @@ const computedColumnsCache = new LRUCache<string, ReadonlySet<string>>({
   sizeCalculation: (_columns, query) => Math.max(1, query.length),
 });
 
+// Matches `*` as any text, without a regular expression, as many `*` in a pattern written in a
+// query could make one backtrack for a long time.
+const matchesWildcard = (pattern: string, value: string): boolean => {
+  let valueIndex = 0;
+  let patternIndex = 0;
+  let starIndex = -1;
+  let starValueIndex = 0;
+  while (valueIndex < value.length) {
+    if (pattern[patternIndex] === '*') {
+      starIndex = patternIndex++;
+      starValueIndex = valueIndex;
+    } else if (pattern[patternIndex] === value[valueIndex]) {
+      patternIndex++;
+      valueIndex++;
+    } else if (starIndex >= 0) {
+      patternIndex = starIndex + 1;
+      valueIndex = ++starValueIndex;
+    } else {
+      return false;
+    }
+  }
+  while (pattern[patternIndex] === '*') patternIndex++;
+  return patternIndex === pattern.length;
+};
+
 // The registry does not apply a wildcard in KEEP or DROP to the columns that the query creates.
 // As the fields of the sources are not known here, the columns are only the created ones, so the
 // wildcard is applied to them directly.
@@ -265,10 +289,8 @@ const applyWildcardProjection = (
   if (!patterns.some((name) => name.includes('*'))) {
     return undefined;
   }
-  const matchers = patterns.map(
-    (name) => new RegExp(`^${name.split('*').map(escapeRegExp).join('.*')}$`)
-  );
-  const isMatch = ({ name }: ESQLColumnData) => matchers.some((matcher) => matcher.test(name));
+  const isMatch = ({ name }: ESQLColumnData) =>
+    patterns.some((pattern) => matchesWildcard(pattern, name));
   return columns.filter((column) => isMatch(column) === (command.name === 'keep'));
 };
 

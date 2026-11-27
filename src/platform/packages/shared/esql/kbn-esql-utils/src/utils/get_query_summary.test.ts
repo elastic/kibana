@@ -308,6 +308,15 @@ describe('getComputedColumnsInOutput', () => {
     expect(await getColumns(`${eval_} | KEEP tag, size*, bytes`)).toEqual(['size_class', 'tag']);
     expect(await getColumns(`${eval_} | DROP size*`)).toEqual(['tag']);
     expect(await getColumns(`${eval_} | DROP raw_*`)).toEqual(['size_class', 'tag']);
+    expect(await getColumns(`${eval_} | KEEP *ize*c*s`)).toEqual(['size_class']);
+    expect(await getColumns(`${eval_} | KEEP *`)).toEqual(['size_class', 'tag']);
+  });
+
+  it('does not take long for a wildcard with many asterisks that almost matches', async () => {
+    const stars = Array(30).fill('a*').join('');
+    const start = Date.now();
+    await getColumns(`FROM logs | EVAL ${'a'.repeat(200)} = 1 | KEEP ${stars}b`);
+    expect(Date.now() - start).toBeLessThan(1000);
   });
 
   it('returns no columns for a query that does not create any', async () => {
