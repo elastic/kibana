@@ -74,6 +74,7 @@ const ebtAction = {
     FINISH: 'setup_wizard_finish',
     EXIT: 'setup_wizard_exit',
     GO_TO_STEP: 'setup_wizard_go_to_step',
+    OPEN_SETTINGS: 'setup_wizard_open_settings',
   },
   overview: {
     OPEN_STAT_CARD: 'open_stat_card',

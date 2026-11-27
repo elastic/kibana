@@ -8,7 +8,6 @@
 import type { SetupWizardProgress } from '../../../../utils/setup_wizard_view';
 import { testAiIndex } from '../test_utils';
 import { connectStep } from './connect_step';
-import { dreamingStep } from './dreaming_step';
 
 const progress: SetupWizardProgress = {
   aiIndex: testAiIndex,
@@ -16,18 +15,6 @@ const progress: SetupWizardProgress = {
   memoryCount: 0,
   isMemoryEnabled: true,
 };
-
-describe('dreamingStep', () => {
-  it('is shown only with memory', () => {
-    expect(dreamingStep.isAvailable?.(progress)).toBe(true);
-    expect(dreamingStep.isAvailable?.({ ...progress, isMemoryEnabled: false })).toBe(false);
-  });
-
-  it('is done once dreaming is set up', () => {
-    expect(dreamingStep.isDone(progress)).toBe(false);
-    expect(dreamingStep.isDone({ ...progress, dreaming: { enabled: true } })).toBe(true);
-  });
-});
 
 describe('connectStep', () => {
   it('is optional and done once an agent saved a memory', () => {

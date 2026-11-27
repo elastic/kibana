@@ -14,7 +14,6 @@ import {
   EuiSpacer,
   EuiTextArea,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import React from 'react';
 import { DreamingTemplatePicker } from '../../dreaming_setup/dreaming_template_picker';
@@ -24,6 +23,7 @@ import {
   discardChangesLabel,
   loadErrorTitle,
   saveChangesLabel,
+  startFromLabel,
   summaryHelpText,
   summaryLabel,
 } from '../../dreaming_setup/translations';
@@ -31,13 +31,6 @@ import { useDreamingSetupDraft } from '../../dreaming_setup/use_dreaming_setup_d
 import type { DreamingTemplateConfig } from '../../../../../common/dreaming_templates';
 import { DreamingLearnsRows } from './dreaming_learns_rows';
 import { SettingsRow } from './settings_row';
-
-const startFromLabel = i18n.translate(
-  'xpack.contextEngine.aiIndexDetail.dreaming.setup.startFrom',
-  {
-    defaultMessage: 'Start from',
-  }
-);
 
 interface DreamingSetupFormProps {
   isSaving: boolean;
