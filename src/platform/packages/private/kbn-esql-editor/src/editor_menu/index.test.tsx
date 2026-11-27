@@ -16,15 +16,34 @@ import { ESQLMenu } from '.';
 import { EsqlEditorActionsProvider } from '../editor_actions_context';
 import { EsqlEditorActionsRegister } from '../editor_actions_register';
 
+const mockUseNlToEsqlCheck = jest.fn(() => false);
+jest.mock('../hooks/use_nl_to_esql_check', () => ({
+  useNlToEsqlCheck: () => mockUseNlToEsqlCheck(),
+}));
+
 jest.mock('./help_popover', () => {
   const ReactActual = jest.requireActual('react');
   return {
-    HelpPopover: (props: { hideRecommendedQueries?: boolean }) =>
+    HelpPopover: (props: {
+      hideRecommendedQueries?: boolean;
+      onDocsFlyoutOpenChange?: (isOpen: boolean) => void;
+    }) =>
       ReactActual.createElement('button', {
         type: 'button',
         'data-test-subj': 'esql-help-popover-button',
         'data-hide-recommended': String(Boolean(props.hideRecommendedQueries)),
+        onClick: () => props.onDocsFlyoutOpenChange?.(true),
       }),
+    HelpMenuContent: (props: { onOpenDocs: () => void }) =>
+      ReactActual.createElement('button', {
+        type: 'button',
+        'data-test-subj': 'esql-help-menu-content',
+        onClick: props.onOpenDocs,
+      }),
+    HelpDocsFlyout: (props: { isOpen: boolean }) =>
+      props.isOpen
+        ? ReactActual.createElement('div', { 'data-test-subj': 'esql-docs-flyout' })
+        : null,
   };
 });
 
@@ -68,6 +87,97 @@ describe('ESQLMenu', () => {
 
   afterEach(() => {
     localStorage.clear();
+  });
+
+  it('keeps the docs flyout open when the footer switches to the collapsed layout', async () => {
+    const Harness = () => {
+      const [collapse, setCollapse] = React.useState(false);
+      return (
+        <>
+          <button data-test-subj="collapse" onClick={() => setCollapse(true)} />
+          <ESQLMenu collapseActions={collapse} />
+        </>
+      );
+    };
+    await act(async () => {
+      render(
+        <KibanaContextProvider services={services as any}>
+          <EsqlEditorActionsProvider>
+            <EsqlEditorActionsRegister editorIsInline={false} currentQuery="" />
+            <Harness />
+          </EsqlEditorActionsProvider>
+        </KibanaContextProvider>
+      );
+    });
+
+    fireEvent.click(screen.getByTestId('esql-help-popover-button'));
+    expect(await screen.findByTestId('esql-docs-flyout')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('collapse'));
+    expect(await screen.findByTestId('ESQLEditor-more-actions')).toBeInTheDocument();
+    expect(screen.getByTestId('esql-docs-flyout')).toBeInTheDocument();
+  });
+
+  it('opens the docs flyout from the overflow menu and closes the menu', async () => {
+    await renderMenu({ collapseActions: true });
+    fireEvent.click(screen.getByTestId('ESQLEditor-more-actions'));
+    const panel = await screen.findByTestId('ESQLEditor-more-actions-panel');
+    fireEvent.click(within(panel).getByTestId('esql-help-popover-button'));
+    fireEvent.click(await screen.findByTestId('esql-help-menu-content'));
+
+    expect(await screen.findByTestId('esql-docs-flyout')).toBeInTheDocument();
+  });
+
+  describe('when collapseActions is set', () => {
+    afterEach(() => mockUseNlToEsqlCheck.mockReturnValue(false));
+
+    it('renders the natural-language search row in the overflow menu without crashing', async () => {
+      mockUseNlToEsqlCheck.mockReturnValue(true);
+      await renderMenu(
+        { collapseActions: true, onPrettifyQuery: jest.fn(), enableCreateView: true },
+        { editorIsInline: true, currentQuery: 'FROM logs-*' }
+      );
+
+      fireEvent.click(screen.getByTestId('ESQLEditor-more-actions'));
+
+      const panel = await screen.findByTestId('ESQLEditor-more-actions-panel');
+      expect(within(panel).getByTestId('esql-menu-button')).toBeInTheDocument();
+    });
+
+    it('keeps only the first three actions inline and moves the rest under an ellipsis button', async () => {
+      await renderMenu(
+        { collapseActions: true, onPrettifyQuery: jest.fn(), enableCreateView: true },
+        { currentQuery: 'FROM logs-*' }
+      );
+
+      expect(screen.getByTestId('ESQLEditor-toggleWordWrap')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Create view' })).toBeInTheDocument();
+      expect(screen.queryByTestId('ESQLEditor-toggle-starred-query-icon')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ESQLEditor-toggle-query-history-icon')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('esql-help-popover-button')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('ESQLEditor-more-actions'));
+
+      const panel = await screen.findByTestId('ESQLEditor-more-actions-panel');
+      expect(within(panel).getByTestId('ESQLEditor-toggle-starred-query-icon')).toBeInTheDocument();
+      expect(within(panel).getByTestId('ESQLEditor-toggle-query-history-icon')).toBeInTheDocument();
+      expect(screen.queryByTestId('esql-help-menu-content')).not.toBeInTheDocument();
+
+      // help is nested: it opens as its own panel inside the same menu
+      fireEvent.click(within(panel).getByTestId('esql-help-popover-button'));
+      expect(await screen.findByTestId('esql-help-menu-content')).toBeInTheDocument();
+    });
+
+    it('does not render the ellipsis button when everything fits', async () => {
+      await renderMenu({ collapseActions: true, hideHistory: true });
+      expect(screen.queryByTestId('ESQLEditor-more-actions')).not.toBeInTheDocument();
+    });
+  });
+
+  it('does not collapse actions by default', async () => {
+    await renderMenu();
+    expect(screen.queryByTestId('ESQLEditor-more-actions')).not.toBeInTheDocument();
+    expect(screen.getByTestId('ESQLEditor-toggle-query-history-icon')).toBeInTheDocument();
   });
 
   it('does not render the visor (search) button by default when the editor is not inline', async () => {

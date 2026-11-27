@@ -41,3 +41,7 @@ export const removeStarredQueryLabel = i18n.translate(
     defaultMessage: 'Remove ES|QL query from Starred',
   }
 );
+
+export const moreActionsLabel = i18n.translate('esqlEditor.menu.moreActionsLabel', {
+  defaultMessage: 'More actions',
+});

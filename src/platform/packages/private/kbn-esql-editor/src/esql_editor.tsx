@@ -264,6 +264,8 @@ const ESQLEditorInternal = function ESQLEditor({
   const [measuredEditorWidth, setMeasuredEditorWidth] = useState(0);
 
   const isSpaceReduced = Boolean(editorIsInline) && measuredEditorWidth < BREAKPOINT_WIDTH;
+  // unlike isSpaceReduced, this applies to every editor (e.g. Discover), not just the inline one
+  const collapseMenuActions = measuredEditorWidth > 0 && measuredEditorWidth < BREAKPOINT_WIDTH;
 
   const [isHistoryOpen, setIsHistoryOpen] = useRestorableState('isHistoryOpen', false);
   const [starredQueriesService, setStarredQueriesService] =
@@ -1079,6 +1081,7 @@ const ESQLEditorInternal = function ESQLEditor({
           onPrettifyQuery={onPrettifyQuery}
           editorIsInline={editorIsInline}
           isSpaceReduced={isSpaceReduced}
+          collapseMenuActions={collapseMenuActions}
           isHistoryOpen={isHistoryOpen}
           setIsHistoryOpen={onClickQueryHistory}
           isLanguageComponentOpen={isLanguageComponentOpen}
