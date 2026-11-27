@@ -269,6 +269,50 @@ describe('TimeBuckets', () => {
     expect(nyBuckets.getInterval().expression).toEqual('1w');
   });
 
+  test('manual interval with a fractional or invalid maxBars does not throw', () => {
+    const bounds = {
+      min: moment.utc('2024-01-01T00:00:00.000Z'),
+      max: moment.utc('2024-01-02T00:00:00.000Z'),
+    };
+    const intervalFor = (maxBars: number) => {
+      const timeBuckets = new TimeBuckets({ ...timeBucketConfig, 'histogram:maxBars': maxBars });
+      timeBuckets.setBounds(bounds);
+      timeBuckets.setInterval('1m');
+      return timeBuckets.getInterval();
+    };
+
+    // 50.5 behaves like 50: 1m over one day is 1440 buckets, so it is scaled up.
+    expect(intervalFor(50.5).expression).toEqual(intervalFor(50).expression);
+    expect(intervalFor(50.5).scaled).toBe(true);
+    // Without a usable cap, the manual interval is kept as is.
+    expect(intervalFor(0).expression).toEqual('1m');
+    expect(intervalFor(0.5).scaled).toBeFalsy();
+    expect(intervalFor(NaN).scaled).toBeFalsy();
+  });
+
+  test('auto keeps a calendar pick as a calendar duration', () => {
+    const timeBuckets = new TimeBuckets({
+      ...timeBucketConfig,
+      'histogram:barTarget': 100,
+      'histogram:maxBars': 1000,
+      'dateFormat:tz': 'UTC',
+    });
+    timeBuckets.setBounds({
+      min: moment.utc('2020-01-01T00:00:00.000Z'),
+      max: moment.utc('2024-01-01T00:00:00.000Z'),
+    });
+    timeBuckets.setInterval(autoInterval);
+
+    const interval = timeBuckets.getInterval();
+
+    expect(interval.expression).toEqual('1M');
+    expect(interval.months()).toBe(1);
+    // A fixed 30 days would land on March 2, past the March 1 bucket.
+    expect(moment.utc('2023-02-01').add(interval).toISOString()).toEqual(
+      '2023-03-01T00:00:00.000Z'
+    );
+  });
+
   test('auto is not scaled when maxBars is smaller than the auto bucket count', () => {
     const timeBuckets = new TimeBuckets({
       ...timeBucketConfig,

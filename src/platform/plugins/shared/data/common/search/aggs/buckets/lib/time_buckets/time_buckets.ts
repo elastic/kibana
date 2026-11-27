@@ -98,7 +98,12 @@ function decoratePicked(picked: DateInterval): TimeBucketsInterval {
   const esValue = split?.value ?? 0;
   const esUnit = (split?.unit ?? 'ms') as EsInterval['unit'];
   const prettyUnits = moment.normalizeUnits(esUnit) as moment.unitOfTime.Base;
-  return Object.assign(moment.duration(picked.nominalMs), {
+  // Keep calendar picks as calendar durations, so adding 1M to a bucket key moves to the next month.
+  const duration =
+    picked.kind === 'calendar'
+      ? moment.duration(esValue, esUnit)
+      : moment.duration(picked.nominalMs);
+  return Object.assign(duration, {
     description: getPreciseDurationDescription(esValue, prettyUnits),
     esValue,
     esUnit,
@@ -340,9 +345,10 @@ export class TimeBuckets {
       this._lb.valueOf() < this._ub.valueOf()
     ) {
       const range = toZonedRange(this._lb, this._ub, this._timeBucketConfig['dateFormat:tz']);
-      const maxBars = this._timeBucketConfig['histogram:maxBars'];
+      // The setting is any number, but the picker needs a positive integer. Without one, skip the cap.
+      const maxBars = Math.floor(Number(this._timeBucketConfig['histogram:maxBars']));
       const manual = toPickerInterval(this._i, this._originalInterval);
-      if (!fitsInBuckets(manual, range, maxBars)) {
+      if (maxBars >= 1 && !fitsInBuckets(manual, range, maxBars)) {
         const scaled = decoratePicked(pickDateRounding(maxBars, range));
         const preScaled = decorateInterval(this._i);
         return Object.assign(scaled, {
