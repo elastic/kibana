@@ -17,6 +17,7 @@ export {
   SERVERLESS_NODES,
   ES_SERVERLESS_REPO_KIBANA,
   ES_SERVERLESS_REPO_ELASTICSEARCH,
+  ES_SERVERLESS_DEFAULT_IMAGE,
   LINKED_CLUSTER_PORT_OFFSET,
   getServerlessNodes,
   getSharedServerlessParams,
@@ -31,7 +32,9 @@ export {
   isServerlessProjectTier,
   readRolesFromResource,
   readRolesDescriptorsFromResource,
+  formatBytes,
 } from './src/utils';
+export { getSnapshotCacheFilename } from './src/utils/find_local_cached_snapshot';
 export { getUiamContainers } from './src/utils/docker_uiam';
 export type { ArtifactLicense } from './src/artifact';
 export {
