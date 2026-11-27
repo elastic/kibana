@@ -44,6 +44,7 @@ describe('createContextAwarenessToolkit', () => {
     return {
       internalState: toolkit.internalState,
       profileStateRegistry: services.profileStateRegistry,
+      services,
       tabId: persistedTab.id,
     };
   };
@@ -100,6 +101,32 @@ describe('createContextAwarenessToolkit', () => {
       tabId,
       expandedDoc: undefined,
       initialDocViewerTabId: 'overview',
+    });
+  });
+
+  it('maps setExpandedDocByQuery params to the setExpandedDocByQuery action', async () => {
+    const { internalState, profileStateRegistry, services, tabId } = await setup();
+    const setExpandedDocByQuerySpy = jest.spyOn(internalStateActions, 'setExpandedDocByQuery');
+    jest
+      .spyOn(services.data.search, 'esql')
+      .mockResolvedValue({ rawResponse: { columns: [], values: [] } });
+    const abortSignal = new AbortController().signal;
+
+    await createContextAwarenessToolkit({
+      internalState,
+      profileStateRegistry,
+      tabId,
+    }).actions.setExpandedDocByQuery?.({
+      esql: 'FROM traces-*',
+      initialTabId: 'overview',
+      abortSignal,
+    });
+
+    expect(setExpandedDocByQuerySpy).toHaveBeenCalledWith({
+      tabId,
+      esqlQueryText: 'FROM traces-*',
+      initialDocViewerTabId: 'overview',
+      abortSignal,
     });
   });
 

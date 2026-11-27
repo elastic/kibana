@@ -27,7 +27,7 @@ import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import type { DiscoverServices } from '../../../../build_services';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
-import { internalStateActions } from '../../state_management/redux';
+import { QUERY_EXPANDED_DOC_OWNER, internalStateActions } from '../../state_management/redux';
 import { FetchStatus } from '../../../types';
 import { DiscoverDocumentFlyout } from './discover_document_flyout';
 import {
@@ -93,7 +93,7 @@ const searchResponseFor = (hit: EsHitRecord): Promise<IKibanaSearchResponse> =>
 
 type InitialFlyout =
   | { type: 'restoreFromRef'; ref: ExpandedDocRef }
-  | { type: 'openDocument'; document: DataTableRecord }
+  | { type: 'openDocument'; document: DataTableRecord; expandedDocOwner?: string }
   | { type: 'closed' };
 
 const setup = async ({
@@ -161,6 +161,7 @@ const setup = async ({
         internalStateActions.setExpandedDoc({
           tabId: toolkit.getCurrentTab().id,
           expandedDoc: initialFlyout.document,
+          expandedDocOwner: initialFlyout.expandedDocOwner,
         })
       );
     }
@@ -347,6 +348,21 @@ describe('DiscoverDocumentFlyout', () => {
       expect(copyToClipboard).not.toHaveBeenCalled();
     }
   );
+
+  it('hides the copy link action for a document opened from another query', async () => {
+    await setup({
+      hits: esHitsMock,
+      query: { esql: 'FROM logs-* METADATA _id, _index' },
+      initialFlyout: {
+        type: 'openDocument',
+        document: buildDataTableRecord(outOfResultsHit, dataViewMock),
+        expandedDocOwner: QUERY_EXPANDED_DOC_OWNER,
+      },
+    });
+
+    expect(await screen.findByTestId('docViewerFlyout')).toBeVisible();
+    expect(screen.queryByTestId('discoverDocFlyoutShareDirectLink')).not.toBeInTheDocument();
+  });
 
   it('renders nothing when no document is expanded', async () => {
     await setup({ initialFlyout: { type: 'closed' } });

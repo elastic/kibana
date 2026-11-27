@@ -395,6 +395,7 @@ describe('tab_state actions', () => {
       const tab = selectTab(internalState.getState(), tabId);
       expect(refetchQueries()).toHaveLength(1);
       expect(tab.expandedDoc?.raw._id).toBe('span-1');
+      expect(tab.expandedDoc && 'context' in tab.expandedDoc).toBe(true);
       expect(tab.expandedDocOwner).toBe(QUERY_EXPANDED_DOC_OWNER);
       expect(tab.appState.expandedDoc).toBeUndefined();
     });

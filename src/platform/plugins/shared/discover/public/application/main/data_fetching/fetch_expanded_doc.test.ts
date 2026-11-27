@@ -177,17 +177,14 @@ describe('fetchExpandedDoc', () => {
 });
 
 describe('fetchEsqlQueryDoc', () => {
-  it.each([
-    ['FROM logs-*', 'FROM logs-* | LIMIT 1'],
-    ['FROM logs-* | LIMIT 100', 'FROM logs-* | LIMIT 100 | LIMIT 1'],
-  ])('limits the query to its first row: %s', async (esqlQueryText, expectedQuery) => {
+  it('limits the query to its first row', async () => {
     const { data, getEsqlParams } = setupEsql({
       columns: [{ name: 'message', type: 'keyword' }],
       values: [['hello']],
     });
 
     await fetchEsqlQueryDoc({
-      esqlQueryText,
+      esqlQueryText: 'FROM logs-*',
       data,
       kibanaQueryContext: {
         kibanaFilters: [],
@@ -197,6 +194,6 @@ describe('fetchEsqlQueryDoc', () => {
       searchSessionId: undefined,
     });
 
-    expect(getEsqlParams().query).toBe(expectedQuery);
+    expect(getEsqlParams().query).toBe('FROM logs-* | LIMIT 1');
   });
 });

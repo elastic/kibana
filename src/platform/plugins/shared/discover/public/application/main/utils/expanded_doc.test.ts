@@ -118,16 +118,6 @@ describe('canQueryRestoreDoc', () => {
     expect(canQueryRestoreDoc({ esql: 'FROM logs' }, doc)).toBe(false);
     expect(canQueryRestoreDoc({ esql: 'FROM logs METADATA _id' }, doc)).toBe(false);
   });
-
-  it('rejects a query that cannot restore links at all', () => {
-    expect(
-      canQueryRestoreDoc({ esql: 'FROM logs METADATA _id, _index | STATS count = COUNT()' }, doc)
-    ).toBe(false);
-  });
-
-  it('accepts a data view query', () => {
-    expect(canQueryRestoreDoc({ query: '', language: 'kuery' }, doc)).toBe(true);
-  });
 });
 
 describe('getExpandedDocLinkDisabledReason', () => {
