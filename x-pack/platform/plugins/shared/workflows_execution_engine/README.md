@@ -440,6 +440,17 @@ const response = await workflowsExecutionEngine.executeWorkflow(
 
 ## Data Storage
 
+`workflowsExecutionEngine.storage.source` selects `plain_index` or `data_stream` while Kibana is running. The same key in kibana.yml is the fallback, and a flag change leaves that file unchanged.
+
+Set a runtime override:
+
+```
+PUT /internal/feature-flags/overrides/workflowsExecutionEngine.storage.source
+{ "value": "data_stream" }
+```
+
+`DELETE` that path to clear the override. The next evaluation uses kibana.yml.
+
 The plugin stores data in Elasticsearch using the following indices:
 
 ### Workflow Executions Index

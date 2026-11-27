@@ -62,8 +62,7 @@ const buildExecution = (
 describe('createAwaitExecutionsStepDefinition', () => {
   let executions: EsWorkflowExecution[];
   let dependencies: AwaitExecutionsStepDependencies;
-  let rehydrateStepOutputs: jest.Mock;
-  let releaseReadOutputPins: jest.Mock;
+  let readBatch: jest.Mock;
   let innerStepIdsByStep: Record<string, string[]>;
   let stepExecutions: StepExecutionMetadata[];
   let stepOutputs: Record<string, JsonValue>;
@@ -104,8 +103,10 @@ describe('createAwaitExecutionsStepDefinition', () => {
     stepExecutions = [];
     stepOutputs = {};
     awaitScopeStack = [];
-    rehydrateStepOutputs = jest.fn().mockResolvedValue(undefined);
-    releaseReadOutputPins = jest.fn();
+    readBatch = jest.fn(
+      async ({ refs }: { refs: Array<{ executionId: string }> }) =>
+        new Map(refs.map(({ executionId }) => [executionId, stepOutputs[executionId]]))
+    );
 
     const readExecutions = async (ids: string[]) =>
       new Map(
@@ -117,8 +118,6 @@ describe('createAwaitExecutionsStepDefinition', () => {
       stepExecutionRuntime: {
         workflowExecution: { id: PARENT_EXECUTION_ID },
         stepExecutionId: AWAIT_STEP_EXECUTION_ID,
-        rehydrateStepOutputs,
-        releaseReadOutputPins,
       } as unknown as AwaitExecutionsStepDependencies['stepExecutionRuntime'],
       workflowExecutionRepository: {
         getWorkflowExecutionStatusesByIds: jest.fn(
@@ -136,12 +135,14 @@ describe('createAwaitExecutionsStepDefinition', () => {
       },
       workflowExecutionState: {
         getAllStepExecutions: () => stepExecutions,
-        getStepExecution: (id: string) =>
-          id === AWAIT_STEP_EXECUTION_ID ? { scopeStack: awaitScopeStack } : undefined,
+        getStepExecution: (id: string) => {
+          if (id === AWAIT_STEP_EXECUTION_ID) {
+            return { scopeStack: awaitScopeStack };
+          }
+          return stepExecutions.find((stepExecution) => stepExecution.id === id);
+        },
       } as unknown as AwaitExecutionsStepDependencies['workflowExecutionState'],
-      stepIoService: {
-        getStepOutput: (stepExecutionId: string) => stepOutputs[stepExecutionId],
-      },
+      stepIoService: { readBatch },
       spaceId: SPACE_ID,
       workflowLogger: { logDebug: jest.fn() } as unknown as IWorkflowEventLogger,
     };
@@ -422,8 +423,10 @@ describe('createAwaitExecutionsStepDefinition', () => {
       await expect(start({ 'from-steps': ['run_agent'] })).resolves.toEqual({
         output: { results: [expect.objectContaining({ executionId: 'a', status: 'completed' })] },
       });
-      expect(rehydrateStepOutputs).toHaveBeenCalledWith(['step-exec-0']);
-      expect(releaseReadOutputPins).toHaveBeenCalled();
+      expect(readBatch).toHaveBeenCalledWith({
+        type: 'output',
+        refs: [{ executionId: 'step-exec-0', contextId: 'run_agent' }],
+      });
     });
 
     it('covers every branch and iteration nested in a referenced step, in run order', async () => {
@@ -504,7 +507,7 @@ describe('createAwaitExecutionsStepDefinition', () => {
         'Steps "maybe_enrich" started no workflow executions before this step. ' +
           'They must contain a workflow.executeAsync step that ran earlier on this path.'
       );
-      expect(rehydrateStepOutputs).not.toHaveBeenCalled();
+      expect(readBatch).not.toHaveBeenCalled();
     });
 
     it.each([
@@ -518,7 +521,7 @@ describe('createAwaitExecutionsStepDefinition', () => {
         `"from-steps" references steps that contain this step: "${stepName}". ` +
           'They have not finished when this step runs.'
       );
-      expect(rehydrateStepOutputs).not.toHaveBeenCalled();
+      expect(readBatch).not.toHaveBeenCalled();
     });
 
     it('fails when a referenced step does not exist', async () => {

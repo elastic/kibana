@@ -17,6 +17,13 @@ describe('postProcessOpenapiZodGen', () => {
     );
   });
 
+  it('rewrites the bare zod import that openapi-ts emits for zod v4', () => {
+    const input = `import { z } from 'zod';\nexport const x = z.string();`;
+    expect(postProcessOpenapiZodGen(input)).toBe(
+      `import { z } from '@kbn/zod/v4';\nexport const x = z.string();`
+    );
+  });
+
   it('rewrites z.iso.datetime and adds isoDateTime import', () => {
     const input = `import { z } from 'zod/v4';\nexport const t = z.optional(z.iso.datetime());`;
     expect(postProcessOpenapiZodGen(input)).toBe(

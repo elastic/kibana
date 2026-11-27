@@ -74,7 +74,7 @@ export class EMSTMSSource extends AbstractSource implements ITMSSource {
     this._descriptor = emsTmsDescriptor;
   }
 
-  renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {
+  renderSourceSettingsEditor({ onChange }: SourceEditorArgs<EMSTMSSourceDescriptor>) {
     return <UpdateSourceEditor onChange={onChange} config={this._descriptor} />;
   }
 

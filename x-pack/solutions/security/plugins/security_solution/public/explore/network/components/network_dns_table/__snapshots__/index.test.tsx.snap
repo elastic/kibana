@@ -186,9 +186,11 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                     class="euiSwitch__icons emotion-euiSwitch__icons-off-enabled"
                   >
                     <span
+                      aria-hidden="true"
                       data-euiicon-type="check"
                     />
                     <span
+                      aria-hidden="true"
                       data-euiicon-type="cross"
                     />
                   </span>
@@ -267,6 +269,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                       Registered domain
                     </span>
                     <span
+                      aria-hidden="true"
                       class="euiTableSortIcon euiTableSortIcon--sortable"
                       color="subdued"
                       data-euiicon-type="sortable"
@@ -301,6 +304,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                       Total queries
                     </span>
                     <span
+                      aria-hidden="true"
                       class="euiTableSortIcon"
                       data-euiicon-type="sortDown"
                     />
@@ -334,6 +338,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                       Unique domains
                     </span>
                     <span
+                      aria-hidden="true"
                       class="euiTableSortIcon euiTableSortIcon--sortable"
                       color="subdued"
                       data-euiicon-type="sortable"
@@ -368,6 +373,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                       DNS bytes in
                     </span>
                     <span
+                      aria-hidden="true"
                       class="euiTableSortIcon euiTableSortIcon--sortable"
                       color="subdued"
                       data-euiicon-type="sortable"
@@ -402,6 +408,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                       DNS bytes out
                     </span>
                     <span
+                      aria-hidden="true"
                       class="euiTableSortIcon euiTableSortIcon--sortable"
                       color="subdued"
                       data-euiicon-type="sortable"
@@ -933,6 +940,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
               Rows per page: 10
             </span>
             <span
+              aria-hidden="true"
               color="inherit"
               data-euiicon-type="chevronSingleDown"
             />

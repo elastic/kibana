@@ -27,7 +27,7 @@ describe('usageSearch', () => {
     });
   });
 
-  it('filters the browser documents of the application, page loads, clicks and frustration only', () => {
+  it('filters the browser documents of the application, page loads, clicks, frustration, vitals and errors only', () => {
     const { filter } = usageSearch(PARAMS).query.bool;
 
     expect(filter).toContainEqual({ term: { 'telemetry.sdk.language': 'webjs' } });
@@ -37,11 +37,35 @@ describe('usageSearch', () => {
         event_name: [
           'browser.navigation_timing',
           'browser.user_action.click',
-          'browser.frustration.rage_click',
-          'browser.frustration.dead_click',
-          'browser.frustration.error_click',
+          'elastic.frustration.rage_click',
+          'elastic.frustration.dead_click',
+          'elastic.frustration.error_click',
+          'browser.web_vital',
+          'exception',
         ],
       },
+    });
+  });
+
+  it('groups the web vitals and JS errors by route, to join them to the rows of the top pages', () => {
+    const { pageSignals } = inEnvironment(usageSearch(PARAMS)).aggs;
+
+    expect(pageSignals.filter).toEqual({
+      bool: { filter: [{ terms: { event_name: ['browser.web_vital', 'exception'] } }] },
+    });
+    // By the indexed route, no script: these events carry no URL to fall back to. More candidates
+    // than rows, as the pages with the most vitals need not be the most loaded.
+    expect(pageSignals.aggs.pages.terms).toEqual({ field: 'attributes.url.template', size: 30 });
+    expect(pageSignals.aggs.pages.aggs.lcp).toEqual({
+      filter: { term: { 'browser.web_vital.name': { value: 'lcp', case_insensitive: true } } },
+      aggs: {
+        value: {
+          percentiles: { field: 'browser.web_vital.value', percents: [75], keyed: false },
+        },
+      },
+    });
+    expect(pageSignals.aggs.pages.aggs.jsErrors).toEqual({
+      filter: { term: { event_name: 'exception' } },
     });
   });
 

@@ -288,6 +288,7 @@ describe('Outputs preconfiguration', () => {
             auth_type: 'keytab',
             config_path: '/etc/krb5.conf',
             keytab: '/etc/kafka.keytab',
+            username: 'kafka',
             realm: 'EXAMPLE.COM',
           },
         },
@@ -1662,6 +1663,7 @@ describe('Outputs preconfiguration', () => {
         auth_type: 'keytab',
         config_path: '/etc/krb5.conf',
         keytab: '/etc/kafka.keytab',
+        username: 'kafka',
         realm: 'EXAMPLE.COM',
       };
       const kerberosOutput = (fields: Record<string, unknown> = {}) =>
