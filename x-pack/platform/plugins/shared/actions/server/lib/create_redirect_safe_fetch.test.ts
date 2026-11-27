@@ -131,6 +131,38 @@ describe('createRedirectSafeFetch', () => {
     expect(removeListener).toHaveBeenCalledWith('abort', expect.any(Function));
   });
 
+  test.each([
+    ['errors', (body: PassThrough) => body.emit('error', new Error('incorrect header check'))],
+    ['closes before it ends', (body: PassThrough) => body.destroy()],
+  ])('aborts the final request when its body %s', async (_, endEarly) => {
+    const controller = new AbortController();
+    const body = new PassThrough();
+    body.on('error', () => {});
+    fetch.mockResolvedValueOnce(new Response(body, { status: 200 }));
+    const safeFetch = createRedirectSafeFetch({ configurationUtilities, logger, fetch });
+
+    await safeFetch('https://api.example.com/v1', { signal: controller.signal });
+    endEarly(body);
+    await new Promise(setImmediate);
+
+    expect(sentInit(0).signal?.aborted).toBe(true);
+  });
+
+  test('does not abort the final request after its body ends cleanly', async () => {
+    const body = new PassThrough();
+    fetch.mockResolvedValueOnce(new Response(body, { status: 200 }));
+    const safeFetch = createRedirectSafeFetch({ configurationUtilities, logger, fetch });
+
+    const response = await safeFetch('https://api.example.com/v1', {
+      signal: new AbortController().signal,
+    });
+    body.end('ok');
+    await response.text();
+    await new Promise(setImmediate);
+
+    expect(sentInit(0).signal?.aborted).toBe(false);
+  });
+
   test("passes the caller's abort to the request in flight", async () => {
     const controller = new AbortController();
     fetch

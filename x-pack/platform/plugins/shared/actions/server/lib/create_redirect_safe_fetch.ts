@@ -99,16 +99,30 @@ export const createRedirectSafeFetch = ({
 
     const location = response.headers.get('location');
     if (!REDIRECT_STATUSES.has(response.status) || location == null) {
-      // The caller can still cancel while the body streams; detach once the body is done.
+      // The caller can still cancel while the body streams. After a clean end only the listener is
+      // removed; a body that errors or closes early also aborts the hop so its socket closes.
       const detach = () => callerSignal?.removeEventListener('abort', abortHop);
       const { body } = response;
-      if (body?.once) {
-        body.once('end', detach);
-        body.once('close', detach);
-        body.once('error', detach);
-      } else {
+      if (!body?.once) {
         detach();
+        return response;
       }
+      let settled = false;
+      const settle = (cleanEnd: boolean) => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        detach();
+        if (!cleanEnd) {
+          // node-fetch reports the abort as another error on the body.
+          body.on('error', () => {});
+          hop.abort();
+        }
+      };
+      body.once('end', () => settle(true));
+      body.once('close', () => settle(false));
+      body.once('error', () => settle(false));
       return response;
     }
 
