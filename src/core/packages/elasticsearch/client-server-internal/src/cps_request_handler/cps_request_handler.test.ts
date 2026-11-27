@@ -110,6 +110,205 @@ describe('getCpsRequestHandler', () => {
         expect(params.body).toBeUndefined();
       });
 
+      it('strips caller-supplied project_routing when the API does not support it', () => {
+        const onRequest = getCpsRequestHandler(true, PROJECT_ROUTING_ORIGIN, mockLogger);
+        const params: TransportRequestParams = {
+          method: 'POST',
+          path: '/my-index/_update_by_query',
+          meta: { name: 'update_by_query', acceptedParams: noProjectRouting as any },
+          body: { query: { match_all: {} }, project_routing: 'should-be-stripped' },
+        };
+
+        onRequest({ scoped: true }, params, {}, mockLogger);
+
+        expect(params.body).toEqual({ query: { match_all: {} } });
+        expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+        expect(mockLogger.warn.mock.calls[0][0]).toContain('update_by_query');
+        expect(mockLogger.warn.mock.calls[0][0]).toContain('project_routing');
+      });
+
+      it('strips caller-supplied project_routing from the querystring when unsupported', () => {
+        const onRequest = getCpsRequestHandler(true, PROJECT_ROUTING_ORIGIN, mockLogger);
+        const params: TransportRequestParams = {
+          method: 'POST',
+          path: '/my-index/_update_by_query',
+          meta: { name: 'update_by_query', acceptedParams: noProjectRouting as any },
+          querystring: { project_routing: 'should-be-stripped', refresh: true },
+        };
+
+        onRequest({ scoped: true }, params, {}, mockLogger);
+
+        expect(params.querystring).toEqual({ refresh: true });
+        expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+      });
+
+      it('strips caller-supplied project_routing from an NDJSON bulkBody when unsupported', () => {
+        const onRequest = getCpsRequestHandler(true, PROJECT_ROUTING_ORIGIN, mockLogger);
+        const params: TransportRequestParams = {
+          method: 'POST',
+          path: '/_bulk',
+          meta: { name: 'bulk', acceptedParams: noProjectRouting as any },
+          bulkBody: [
+            { index: { _index: 'my-index' }, project_routing: 'should-be-stripped' },
+            { title: 'doc' },
+          ],
+        };
+
+        onRequest({ scoped: true }, params, {}, mockLogger);
+
+        expect(params.bulkBody).toEqual([{ index: { _index: 'my-index' } }, { title: 'doc' }]);
+        expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not warn or modify the request when the API does not support project_routing and none was supplied', () => {
+        const onRequest = getCpsRequestHandler(true, PROJECT_ROUTING_ORIGIN, mockLogger);
+        const params: TransportRequestParams = {
+          method: 'POST',
+          path: '/my-index/_update_by_query',
+          meta: { name: 'update_by_query', acceptedParams: noProjectRouting as any },
+          body: { query: { match_all: {} } },
+        };
+
+        onRequest({ scoped: true }, params, {}, mockLogger);
+
+        expect(params.body).toEqual({ query: { match_all: {} } });
+        expect(mockLogger.warn).not.toHaveBeenCalled();
+      });
+
+      it('reports the bypass reason unchanged when an unsupported project_routing is stripped', () => {
+        const onRequest = getCpsRequestHandler(true, PROJECT_ROUTING_ORIGIN, mockLogger);
+        const params: TransportRequestParams = {
+          method: 'POST',
+          path: '/my-index/_update_by_query',
+          meta: { name: 'update_by_query', acceptedParams: noProjectRouting as any },
+          body: { project_routing: 'should-be-stripped' },
+        };
+        const options = {};
+
+        onRequest({ scoped: true }, params, options, mockLogger);
+
+        expect((options as any).context.cpsRoutingContext).toEqual(
+          expect.objectContaining({
+            routingType: 'none',
+            routingAccepted: false,
+            bypassReason: 'api_does_not_support_routing',
+            unsupportedParamStripped: true,
+          })
+        );
+      });
+
+      it('reports unsupportedParamStripped as false when nothing was stripped', () => {
+        const onRequest = getCpsRequestHandler(true, PROJECT_ROUTING_ORIGIN, mockLogger);
+        const params: TransportRequestParams = {
+          method: 'POST',
+          path: '/my-index/_update_by_query',
+          meta: { name: 'update_by_query', acceptedParams: noProjectRouting as any },
+          body: { query: { match_all: {} } },
+        };
+        const options = {};
+
+        onRequest({ scoped: true }, params, options, mockLogger);
+
+        expect((options as any).context.cpsRoutingContext).toEqual(
+          expect.objectContaining({
+            routingType: 'none',
+            bypassReason: 'api_does_not_support_routing',
+            unsupportedParamStripped: false,
+          })
+        );
+      });
+
+      it('reports unsupportedParamStripped as false on the inject path', () => {
+        const onRequest = getCpsRequestHandler(true, PROJECT_ROUTING_ORIGIN, mockLogger);
+        const params: TransportRequestParams = {
+          method: 'GET',
+          path: '/_search',
+          meta: { name: 'search', acceptedParams: bodyAcceptedParams as any },
+          body: { query: { match_all: {} } },
+        };
+        const options = {};
+
+        onRequest({ scoped: true }, params, options, mockLogger);
+
+        expect((options as any).context.cpsRoutingContext).toEqual(
+          expect.objectContaining({
+            routingType: 'injected',
+            unsupportedParamStripped: false,
+          })
+        );
+      });
+
+      it('reports unsupportedParamStripped as false on the PIT strip path', () => {
+        const onRequest = getCpsRequestHandler(true, PROJECT_ROUTING_ORIGIN, mockLogger);
+        const params: TransportRequestParams = {
+          method: 'POST',
+          path: '/_search',
+          meta: { name: 'search', acceptedParams: bodyAcceptedParams as any },
+          body: { pit: { id: 'abc123' }, project_routing: 'should-be-removed' },
+        };
+        const options = {};
+
+        onRequest({ scoped: true }, params, options, mockLogger);
+
+        expect((options as any).context.cpsRoutingContext).toEqual(
+          expect.objectContaining({
+            routingType: 'stripped',
+            unsupportedParamStripped: false,
+          })
+        );
+      });
+
+      it('reports unsupportedParamStripped as false for raw transport callers', () => {
+        const onRequest = getCpsRequestHandler(true, PROJECT_ROUTING_ORIGIN, mockLogger);
+        const params: TransportRequestParams = {
+          method: 'POST',
+          path: '/my-index/_search',
+          body: { query: { match_all: {} }, project_routing: 'must-be-preserved' },
+        };
+        const options = {};
+
+        onRequest({ scoped: true }, params, options, mockLogger);
+
+        expect((options as any).context.cpsRoutingContext).toEqual(
+          expect.objectContaining({
+            routingType: 'none',
+            bypassReason: 'missing_accepted_params',
+            unsupportedParamStripped: false,
+          })
+        );
+      });
+
+      it('leaves project_routing untouched for raw transport callers without acceptedParams', () => {
+        const onRequest = getCpsRequestHandler(true, PROJECT_ROUTING_ORIGIN, mockLogger);
+        // transport.request() callers set no meta, so the client cannot tell us whether the API
+        // accepts project_routing. Their value may well be valid, so it must be preserved.
+        const params: TransportRequestParams = {
+          method: 'POST',
+          path: '/my-index/_search',
+          body: { query: { match_all: {} }, project_routing: 'must-be-preserved' },
+        };
+
+        onRequest({ scoped: true }, params, {}, mockLogger);
+
+        expect((params.body as Record<string, unknown>).project_routing).toBe('must-be-preserved');
+        expect(mockLogger.warn).not.toHaveBeenCalled();
+      });
+
+      it('leaves project_routing untouched for legacy flat-array acceptedParams', () => {
+        const onRequest = getCpsRequestHandler(true, PROJECT_ROUTING_ORIGIN, mockLogger);
+        const params: TransportRequestParams = {
+          method: 'POST',
+          path: '/my-index/_search',
+          meta: { name: 'search', acceptedParams: ['index', 'query'] },
+          body: { query: { match_all: {} }, project_routing: 'must-be-preserved' },
+        };
+
+        onRequest({ scoped: true }, params, {}, mockLogger);
+
+        expect((params.body as Record<string, unknown>).project_routing).toBe('must-be-preserved');
+        expect(mockLogger.warn).not.toHaveBeenCalled();
+      });
+
       it('does not override project_routing already present in body', () => {
         const onRequest = getCpsRequestHandler(true, PROJECT_ROUTING_ORIGIN, mockLogger);
         const params: TransportRequestParams = {
@@ -151,6 +350,22 @@ describe('getCpsRequestHandler', () => {
 
         expect((params.body as Record<string, unknown>)?.project_routing).toBeUndefined();
         expect((params.body as Record<string, unknown>)?.pit).toEqual({ id: 'abc123' });
+        expect(mockLogger.warn).not.toHaveBeenCalled();
+      });
+
+      it('does not warn when the API accepts project_routing', () => {
+        const onRequest = getCpsRequestHandler(true, PROJECT_ROUTING_ORIGIN, mockLogger);
+        const params: TransportRequestParams = {
+          method: 'GET',
+          path: '/_search',
+          meta: { name: 'search', acceptedParams: bodyAcceptedParams as any },
+          body: { query: { match_all: {} }, project_routing: 'caller-supplied' },
+        };
+
+        onRequest({ scoped: true }, params, {}, mockLogger);
+
+        expect((params.body as Record<string, unknown>).project_routing).toBe('caller-supplied');
+        expect(mockLogger.warn).not.toHaveBeenCalled();
       });
 
       it('preserves existing body fields when injecting', () => {
@@ -488,6 +703,29 @@ describe('getCpsRequestHandler', () => {
         onRequest({ scoped: true }, params, {}, mockLogger);
 
         expect(params.bulkBody as string).toMatch(/\n$/);
+      });
+
+      it('does not warn when stripping because CPS is disabled', () => {
+        const onRequest = getCpsRequestHandler(false, PROJECT_ROUTING_ORIGIN, mockLogger);
+        const params: TransportRequestParams = {
+          method: 'POST',
+          path: '/_msearch',
+          meta: { name: 'msearch', acceptedParams: queryAcceptedParams as any },
+          body: { project_routing: 'should-be-stripped' },
+          querystring: { project_routing: 'should-be-stripped' },
+          bulkBody: [{ index: 'my-index', project_routing: 'should-be-stripped' }],
+        };
+        const options = {};
+
+        onRequest({ scoped: true }, params, options, mockLogger);
+
+        expect(mockLogger.warn).not.toHaveBeenCalled();
+        expect((options as any).context.cpsRoutingContext).toEqual(
+          expect.objectContaining({
+            routingType: 'stripped',
+            unsupportedParamStripped: false,
+          })
+        );
       });
 
       it('does not fail when bulkBody is absent', () => {
