@@ -51,13 +51,17 @@ const renderTab = ({
   investigationOverrides,
   proposedActionsContent,
   proposedActionsCount,
+  isSummaryLoading,
   showLoadingSection,
+  sections,
 }: {
   attachments?: VersionedAttachment[];
   investigationOverrides?: Partial<Investigation>;
   proposedActionsContent?: React.ReactNode;
   proposedActionsCount?: React.ReactNode;
+  isSummaryLoading?: boolean;
   showLoadingSection?: boolean;
+  sections?: React.ComponentProps<typeof OverviewTab>['sections'];
 } = {}) =>
   render(
     <OverviewTab
@@ -66,7 +70,9 @@ const renderTab = ({
       groupedAttachments={groupedAttachments}
       proposedActionsContent={proposedActionsContent}
       proposedActionsCount={proposedActionsCount}
+      isSummaryLoading={isSummaryLoading}
       showLoadingSection={showLoadingSection}
+      sections={sections}
     />
   );
 
@@ -248,40 +254,52 @@ describe('OverviewTab', () => {
     expect(screen.queryByText("What's happened")).not.toBeInTheDocument();
   });
 
-  it('ends in a loading skeleton when the host asks for one', () => {
+  it('shows a loading note and skeleton when the host asks for one', () => {
     renderTab({ showLoadingSection: true });
 
     expect(screen.getByTestId('investigationOverviewLoadingSection')).toBeInTheDocument();
-    expect(screen.getByText('Investigating…')).toBeInTheDocument();
+    expect(
+      screen.getByText('Still investigating. This flyout will update with new findings.')
+    ).toBeInTheDocument();
   });
 
-  it('shows a "What\'s happened" skeleton while loading without a summary', () => {
+  it('puts the loading section above the reasoning', () => {
+    renderTab({ showLoadingSection: true, sections: { reasoning: <div>Tree</div> } });
+
+    const loadingSection = screen.getByTestId('investigationOverviewLoadingSection');
+    expect(loadingSection.compareDocumentPosition(screen.getByText('Tree'))).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+  });
+
+  it('shows a "What\'s happened" skeleton above the trigger while the summary loads', () => {
     renderTab({
       attachments: [],
       investigationOverrides: { summary: undefined },
-      showLoadingSection: true,
+      isSummaryLoading: true,
+      sections: { subjects: <div>Trigger</div> },
     });
 
     expect(screen.getByText("What's happened")).toBeInTheDocument();
-    expect(screen.getByTestId('investigationOverviewSummarySkeleton')).toBeInTheDocument();
+    const skeleton = screen.getByTestId('investigationOverviewSummarySkeleton');
+    expect(skeleton.compareDocumentPosition(screen.getByText('Trigger'))).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+    expect(screen.queryByTestId('investigationOverviewLoadingSection')).not.toBeInTheDocument();
   });
 
-  it('shows the summary instead of the skeleton once it arrives', () => {
-    renderTab({ attachments: [], showLoadingSection: true });
-
-    expect(screen.getByText(investigation.summary)).toBeInTheDocument();
-    expect(screen.queryByTestId('investigationOverviewSummarySkeleton')).not.toBeInTheDocument();
-  });
-
-  it('holds back the "Proposed actions" block while loading', () => {
-    renderTab({ proposedActionsContent: <div>Rows</div>, showLoadingSection: true });
+  it.each([
+    ['the summary loads', { isSummaryLoading: true }],
+    ['findings load', { showLoadingSection: true }],
+  ])('holds back the "Proposed actions" block while %s', (_, loading) => {
+    renderTab({ proposedActionsContent: <div>Rows</div>, ...loading });
 
     expect(screen.queryByText('Proposed actions')).not.toBeInTheDocument();
     expect(screen.queryByText('Rows')).not.toBeInTheDocument();
   });
 
   it('shows the "Proposed actions" block when not loading', () => {
-    renderTab({ proposedActionsContent: <div>Rows</div>, showLoadingSection: false });
+    renderTab({ proposedActionsContent: <div>Rows</div> });
 
     expect(screen.getByText('Proposed actions')).toBeInTheDocument();
     expect(screen.getByText('Rows')).toBeInTheDocument();
@@ -291,5 +309,6 @@ describe('OverviewTab', () => {
     renderTab({ showLoadingSection: false });
 
     expect(screen.queryByTestId('investigationOverviewLoadingSection')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('investigationOverviewSummarySkeleton')).not.toBeInTheDocument();
   });
 });

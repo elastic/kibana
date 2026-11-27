@@ -35,8 +35,13 @@ export interface OverviewTabProps {
   /** Shown beside the "Proposed actions" heading; owned by the same host as the content. */
   proposedActionsCount?: React.ReactNode;
   /**
-   * Whether the tab ends in a skeleton section, saying more is coming. A host shows it while an
-   * agent works on an investigation that has nothing to show yet.
+   * Whether the summary is still being written. "What's happened" then shows a skeleton in place of
+   * the summary, above the trigger, instead of vanishing.
+   */
+  isSummaryLoading?: boolean;
+  /**
+   * Whether a short note and a skeleton stand in for the findings an agent has not written yet
+   * (impact, conclusion). Shown above the reasoning, so the hypothesis tree can appear under it.
    */
   showLoadingSection?: boolean;
 }
@@ -68,9 +73,14 @@ export const OverviewTab = memo<OverviewTabProps>(
     proposedActionsContent,
     proposedActionsCount,
     sections = {},
+    isSummaryLoading = false,
     showLoadingSection = false,
   }) => {
     const { subjects, impact, conclusion, reasoning } = sections;
+    // Proposed actions are held back while the overview is still filling in, so an empty list
+    // does not read as a finished investigation with nothing to do.
+    const showProposedActions =
+      Boolean(proposedActionsContent) && !isSummaryLoading && !showLoadingSection;
 
     return (
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -79,7 +89,7 @@ export const OverviewTab = memo<OverviewTabProps>(
             summary={investigation.summary}
             attachments={attachments}
             groupedAttachments={groupedAttachments}
-            isLoading={showLoadingSection}
+            isLoading={isSummaryLoading}
           />
         </EuiFlexItem>
 
@@ -93,6 +103,12 @@ export const OverviewTab = memo<OverviewTabProps>(
           </EuiFlexItem>
         ) : (
           <ImpactSection attachments={attachments} />
+        )}
+
+        {showLoadingSection && (
+          <EuiFlexItem grow={false}>
+            <OverviewLoadingSection />
+          </EuiFlexItem>
         )}
 
         {conclusion && (
@@ -111,7 +127,7 @@ export const OverviewTab = memo<OverviewTabProps>(
           </EuiFlexItem>
         )}
 
-        {proposedActionsContent && !showLoadingSection && (
+        {showProposedActions && (
           <EuiFlexItem>
             <DetailsBlock
               title={DETAILS_FLYOUT_LABELS.sections.proposedActions}
@@ -119,12 +135,6 @@ export const OverviewTab = memo<OverviewTabProps>(
             >
               {proposedActionsContent}
             </DetailsBlock>
-          </EuiFlexItem>
-        )}
-
-        {showLoadingSection && (
-          <EuiFlexItem grow={false}>
-            <OverviewLoadingSection />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

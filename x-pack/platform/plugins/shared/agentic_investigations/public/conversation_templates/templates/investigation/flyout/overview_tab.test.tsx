@@ -155,44 +155,62 @@ describe('InvestigationOverview', () => {
     expect(screen.queryByTestId('investigationHypothesisTreeButton')).not.toBeInTheDocument();
   });
 
-  it('shows a loading skeleton while an agent works on an investigation with nothing to show yet', () => {
-    mockUseInvestigation.mockReturnValue({ data: emptyInvestigation });
+  describe('while an agent works on a just-started investigation', () => {
+    const summary = { metadata: { status: 'open', summary: 'Checkout p99 tripled.' } };
+    const triggerOnly = { ...emptyInvestigation, subjects: investigation.subjects };
+    const runningConversation = { ...conversation, metadata: { status: 'open' } };
 
-    renderOverview({ ...conversation, metadata: { status: 'open' } });
+    it('shows "What\'s happened" as a skeleton above the trigger, and nothing else, when only the trigger is known', () => {
+      mockUseInvestigation.mockReturnValue({ data: triggerOnly });
 
-    expect(screen.getByTestId('investigationOverviewLoadingSection')).toBeInTheDocument();
-  });
+      renderOverview(runningConversation);
 
-  it('keeps the loading skeleton once only the trigger is known, with what happened as a skeleton and no proposed actions', () => {
-    mockUseInvestigation.mockReturnValue({
-      data: { ...emptyInvestigation, subjects: investigation.subjects },
+      expect(screen.getByText("What's happened")).toBeInTheDocument();
+      expect(screen.getByTestId('investigationOverviewSummarySkeleton')).toBeInTheDocument();
+      expect(screen.getByText('Why is checkout slow?')).toBeInTheDocument();
+      expect(screen.queryByTestId('investigationOverviewLoadingSection')).not.toBeInTheDocument();
+      expect(screen.queryByText('Proposed actions')).not.toBeInTheDocument();
+      expect(screen.queryByText('Proposed rows')).not.toBeInTheDocument();
     });
 
-    renderOverview({ ...conversation, metadata: { status: 'open' } });
+    it('swaps the skeleton for the summary and puts a loading note under the trigger once the summary is written', () => {
+      mockUseInvestigation.mockReturnValue({ data: { ...triggerOnly, ...summary } });
 
-    expect(screen.getByTestId('investigationOverviewLoadingSection')).toBeInTheDocument();
-    expect(screen.getByText("What's happened")).toBeInTheDocument();
-    expect(screen.getByTestId('investigationOverviewSummarySkeleton')).toBeInTheDocument();
-    expect(screen.getByText('Why is checkout slow?')).toBeInTheDocument();
-    expect(screen.queryByText('Proposed actions')).not.toBeInTheDocument();
-    expect(screen.queryByText('Proposed rows')).not.toBeInTheDocument();
-  });
+      renderOverview(runningConversation);
 
-  it.each([
-    ['a summary', { metadata: { status: 'open', summary: 'Checkout p99 tripled.' } }],
-    ['an impact', { impact: investigation.impact }],
-    ['a conclusion', { metadata: { status: 'open', verdict: 'A bad deploy.' } }],
-    ['hypotheses', { hypotheses: investigation.hypotheses }],
-  ])('drops the loading skeleton and shows proposed actions once there is %s', (_, findings) => {
-    mockUseInvestigation.mockReturnValue({
-      data: { ...emptyInvestigation, subjects: investigation.subjects, ...findings },
+      expect(screen.getByText('Checkout p99 tripled.')).toBeInTheDocument();
+      expect(screen.queryByTestId('investigationOverviewSummarySkeleton')).not.toBeInTheDocument();
+      expect(screen.getByTestId('investigationOverviewLoadingSection')).toBeInTheDocument();
+      expect(screen.queryByText('Proposed actions')).not.toBeInTheDocument();
     });
 
-    renderOverview({ ...conversation, metadata: { status: 'open' } });
+    it('shows the hypothesis tree under the loading note while findings are still missing', () => {
+      mockUseInvestigation.mockReturnValue({
+        data: { ...triggerOnly, ...summary, hypotheses: investigation.hypotheses },
+      });
 
-    expect(screen.queryByTestId('investigationOverviewLoadingSection')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('investigationOverviewSummarySkeleton')).not.toBeInTheDocument();
-    expect(screen.getByText('Proposed actions')).toBeInTheDocument();
+      renderOverview(runningConversation);
+
+      const loadingSection = screen.getByTestId('investigationOverviewLoadingSection');
+      const reasoning = screen.getByTestId('investigationOverviewReasoning');
+      expect(loadingSection.compareDocumentPosition(reasoning)).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING
+      );
+      expect(screen.queryByText('Proposed actions')).not.toBeInTheDocument();
+    });
+
+    it.each([
+      ['an impact', { impact: investigation.impact }],
+      ['a conclusion', { metadata: { status: 'open', verdict: 'A bad deploy.' } }],
+    ])('ends the loading state and shows proposed actions once there is %s', (_, findings) => {
+      mockUseInvestigation.mockReturnValue({ data: { ...triggerOnly, ...findings } });
+
+      renderOverview(runningConversation);
+
+      expect(screen.queryByTestId('investigationOverviewLoadingSection')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('investigationOverviewSummarySkeleton')).not.toBeInTheDocument();
+      expect(screen.getByText('Proposed actions')).toBeInTheDocument();
+    });
   });
 
   it('renders no loading skeleton while an agent works on an investigation that has findings', () => {
@@ -224,6 +242,7 @@ describe('InvestigationOverview', () => {
     renderOverview({ ...conversation, metadata: { status: 'open' } });
 
     expect(screen.queryByTestId('investigationOverviewLoadingSection')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('investigationOverviewSummarySkeleton')).not.toBeInTheDocument();
   });
 
   it('renders no loading skeleton once the investigation is no longer in progress', () => {

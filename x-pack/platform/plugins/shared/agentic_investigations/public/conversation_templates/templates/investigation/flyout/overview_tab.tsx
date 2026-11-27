@@ -136,16 +136,15 @@ export const InvestigationOverview: React.FC<
     [data, conversation.metadata?.verdict, onOpenEntity]
   );
 
-  // The skeleton only stands in for an empty overview. Once there is anything to read, such as
-  // when an agent resumes after a proposal is decided, the header's running state is enough. The
-  // subjects are the trigger, known from the start, so they do not count as findings.
-  const { impact, conclusion, reasoning } = sections;
-  const hasFindings =
-    Boolean(investigation.summary?.trim()) ||
-    Boolean(impact) ||
-    Boolean(conclusion) ||
-    Boolean(reasoning) ||
-    (data?.proposals.length ?? 0) > 0;
+  // While an agent works, the overview fills in step by step: first only the trigger is known, so
+  // "What's happened" shows a skeleton above it; once the summary is written, a note and a skeleton
+  // stand in for the findings still to come, with the hypothesis tree appearing under them. Real
+  // findings (impact, conclusion) or a proposal end the loading state, such as when an agent
+  // resumes after a proposal is decided. Proposed actions stay hidden until then.
+  const { impact, conclusion } = sections;
+  const hasSummary = Boolean(investigation.summary?.trim());
+  const awaitingFindings =
+    (data?.in_progress ?? false) && !impact && !conclusion && (data?.proposals.length ?? 0) === 0;
 
   return (
     <OverviewTab
@@ -155,7 +154,8 @@ export const InvestigationOverview: React.FC<
       proposedActionsContent={proposedActionsContent}
       proposedActionsCount={proposedActionsCount}
       sections={sections}
-      showLoadingSection={(data?.in_progress ?? false) && !hasFindings}
+      isSummaryLoading={awaitingFindings && !hasSummary}
+      showLoadingSection={awaitingFindings && hasSummary}
     />
   );
 };

@@ -64,7 +64,7 @@ export const WhatsHappenedBlock = memo<WhatsHappenedBlockProps>(
         )}
         {showSkeleton && (
           <EuiSkeletonText
-            lines={2}
+            lines={3}
             size="s"
             isLoading
             contentAriaLabel={DETAILS_FLYOUT_LABELS.sections.overview}

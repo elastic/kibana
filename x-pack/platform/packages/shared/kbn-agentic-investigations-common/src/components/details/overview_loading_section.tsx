@@ -6,19 +6,13 @@
  */
 
 import React, { memo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSkeletonText,
-  EuiSkeletonTitle,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiText } from '@elastic/eui';
 import { OVERVIEW_SECTION_LABELS } from './overview_translations';
 
 /**
  * A placeholder for the sections an agent has not written yet, shown while it works on an
- * investigation that has nothing to show so far. A short note says more is coming, and the skeleton
- * stands in for a section heading and its body, so the flyout does not read as empty.
+ * investigation. A short note says more is coming, and the skeleton stands in for the sections still
+ * to come, so the flyout does not read as finished.
  */
 export const OverviewLoadingSection = memo(() => (
   <EuiFlexGroup
@@ -30,14 +24,6 @@ export const OverviewLoadingSection = memo(() => (
       <EuiText size="s" color="subdued">
         <p>{OVERVIEW_SECTION_LABELS.loading}</p>
       </EuiText>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiSkeletonTitle
-        size="xs"
-        css={{ inlineSize: '40%' }}
-        isLoading
-        announceLoadedStatus={false}
-      />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <EuiSkeletonText
