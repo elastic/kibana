@@ -222,6 +222,11 @@ const internalStateSliceDef = createSlice({
         tab.initializationState = { initializationStatus: TabInitializationStatus.Disconnected };
       }),
 
+    resetTabInitialization: (state, action: TabAction) =>
+      withTab(state, action.payload, (tab) => {
+        tab.initializationState = { initializationStatus: TabInitializationStatus.NotStarted };
+      }),
+
     setForceFetchOnSelect: (state, action: TabAction<Pick<TabState, 'forceFetchOnSelect'>>) =>
       withTab(state, action.payload, (tab) => {
         tab.forceFetchOnSelect = action.payload.forceFetchOnSelect;
@@ -614,9 +619,20 @@ const internalStateSliceDef = createSlice({
 
     builder.addCase(initializeSingleTab.fulfilled, (state, action) =>
       withTab(state, action.meta.arg, (tab) => {
-        if (tab.initializationState.initializationStatus !== TabInitializationStatus.Disconnected) {
+        if (tab.initializationState.initializationStatus === TabInitializationStatus.Disconnected) {
+          return;
+        }
+
+        const { showNoDataPage, missingDataViewId } = action.payload;
+
+        if (missingDataViewId) {
           tab.initializationState = {
-            initializationStatus: action.payload.showNoDataPage
+            initializationStatus: TabInitializationStatus.MissingDataView,
+            missingDataViewId,
+          };
+        } else {
+          tab.initializationState = {
+            initializationStatus: showNoDataPage
               ? TabInitializationStatus.NoData
               : TabInitializationStatus.Complete,
           };

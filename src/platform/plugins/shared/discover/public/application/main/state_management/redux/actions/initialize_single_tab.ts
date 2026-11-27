@@ -46,7 +46,7 @@ import {
   TAB_STATE_URL_KEY,
 } from '../../../../../../common/constants';
 import type { TabsUrlState } from '../../../../../../common/types';
-import { fromSavedObjectTabToSearchSource } from '../tab_mapping_utils';
+import { fromSavedObjectTabToDataView } from '../tab_mapping_utils';
 import { createInternalStateAsyncThunk, extractEsqlVariables } from '../utils';
 import { isNonEmptyEsqlQuery } from '../../utils/is_non_empty_esql_query';
 import { fetchData, updateAttributes } from './tab_state';
@@ -60,6 +60,12 @@ export interface InitializeSingleTabsParams {
   esqlControls: ControlPanelsState<OptionsListESQLControlState> | undefined;
   defaultUrlState: DiscoverAppState | undefined;
   profileState?: ProfileStateMap;
+}
+
+export interface InitializeSingleTabResult {
+  showNoDataPage: boolean;
+  /** The ID of the saved data view of the tab when it no longer exists */
+  missingDataViewId?: string;
 }
 
 export const initializeSingleTab = createInternalStateAsyncThunk(
@@ -81,7 +87,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       getState,
       extra: { services, runtimeStateManager, urlStateStorage, searchSessionManager },
     }
-  ) {
+  ): Promise<InitializeSingleTabResult> {
     const { dataStateContainer$, customizationService$, scopedEbtManager$ } = selectTabRuntimeState(
       runtimeStateManager,
       tabId
@@ -204,15 +210,23 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       .getValue()
       .trackPerformanceEvent('discoverLoadSavedSearch');
 
-    const persistedTabSearchSource = persistedTab
-      ? await fromSavedObjectTabToSearchSource({ tab: persistedTab, services })
-      : undefined;
-    const currentDataView = persistedTabSearchSource?.getField('index');
+    const { dataView: currentDataView, missingDataViewId } = persistedTab
+      ? await fromSavedObjectTabToDataView({ tab: persistedTab, services })
+      : { dataView: undefined, missingDataViewId: undefined };
     const { dataViewId, initialAdHocDataViewSpec } = getInitialDataViewTarget({
       dataSource: urlAppState?.dataSource,
       initialDataViewIdOrSpec: tabInitialInternalState?.serializedSearchSource?.index,
       currentDataView,
     });
+
+    // A classic tab can't open with a deleted saved data view unless the URL or a replacement
+    // picked by the user points to another one, so let the user select a replacement instead.
+    // ES|QL tabs don't depend on the saved data view and open as usual. This is checked before
+    // the no data fallback below, which would hide the tabs bar and block the other tabs.
+    if (missingDataViewId && !isEsqlMode && (!dataViewId || dataViewId === missingDataViewId)) {
+      await dispatch(loadDataViewListOnce());
+      return { showNoDataPage: false, missingDataViewId };
+    }
 
     const canOpen =
       hasDataView ||
@@ -304,6 +318,26 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       defaultProfileEsqlQuery,
       query: openingQuery,
     });
+
+    // Filters of the deleted data view are rebound to the replacement so they remain editable and
+    // saving the session no longer references the deleted data view. Scripted filters are also
+    // disabled since their scripts may fail with the replacement data view.
+    if (missingDataViewId && !esqlSource && dataView.id && initialAppState.filters) {
+      const replacementDataViewId = dataView.id;
+      initialAppState.filters = initialAppState.filters.map((filter) => {
+        if (filter.meta.index !== missingDataViewId) {
+          return filter;
+        }
+
+        const meta = { ...filter.meta, index: replacementDataViewId };
+
+        if (filter.query?.script) {
+          meta.disabled = true;
+        }
+
+        return { ...filter, meta };
+      });
+    }
 
     const initialGlobalState: TabStateGlobalState = {
       ...(persistedTab?.timeRestore && (esqlSource?.isTimeBased() ?? dataView.isTimeBased())

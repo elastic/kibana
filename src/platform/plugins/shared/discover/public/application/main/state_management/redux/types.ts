@@ -179,6 +179,7 @@ export enum TabInitializationStatus {
   NoData = 'NoData',
   Disconnected = 'Disconnected',
   Error = 'Error',
+  MissingDataView = 'MissingDataView',
 }
 
 export const PROFILE_APP_STATE_DEFAULT_FIELDS = [
@@ -223,8 +224,15 @@ export const HEAVY_STATE_KEYS = [
 
 export interface TabState extends TabItem {
   initializationState:
-    | { initializationStatus: Exclude<TabInitializationStatus, TabInitializationStatus.Error> }
-    | { initializationStatus: TabInitializationStatus.Error; error: Error | SerializedError };
+    | {
+        initializationStatus: Exclude<
+          TabInitializationStatus,
+          TabInitializationStatus.Error | TabInitializationStatus.MissingDataView
+        >;
+      }
+    | { initializationStatus: TabInitializationStatus.Error; error: Error | SerializedError }
+    // The saved data view of the tab no longer exists, so the user has to pick a replacement
+    | { initializationStatus: TabInitializationStatus.MissingDataView; missingDataViewId: string };
 
   // Indicates the tab was created via "+" and should not auto-fetch on init.
   skipInitialFetch?: boolean;

@@ -724,6 +724,33 @@ export const disconnectTab: InternalStateThunkActionCreator<[TabActionPayload]> 
     dispatch(internalStateSlice.actions.disconnectTab({ tabId }));
   };
 
+/** Clears the runtime state of a tab so it can be initialized again from its tab state */
+export const clearTabRuntimeState: InternalStateThunkActionCreator<
+  [TabActionPayload],
+  Promise<void>
+> = ({ tabId }) =>
+  async function clearTabRuntimeStateThunkFn(
+    dispatch,
+    getState,
+    { runtimeStateManager, urlStateStorage }
+  ) {
+    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+    tabRuntimeState.dataStateContainer$.getValue()?.cancel();
+    dispatch(stopSyncing({ tabId }));
+    tabRuntimeState.customizationService$.getValue()?.cleanup();
+    tabRuntimeState.dataStateContainer$.next(undefined);
+    tabRuntimeState.customizationService$.next(undefined);
+    tabRuntimeState.currentDataSource$.next(undefined);
+
+    // The URL state of the current tab would otherwise override its tab state when initializing
+    if (tabId === getState().tabs.unsafeCurrentId) {
+      await Promise.all([
+        urlStateStorage.set(APP_STATE_URL_KEY, undefined, { replace: true }),
+        urlStateStorage.set(PROFILE_STATE_URL_KEY, undefined, { replace: true }),
+      ]);
+    }
+  };
+
 function differenceIterateeByTabId(tab: TabState) {
   return tab.id;
 }

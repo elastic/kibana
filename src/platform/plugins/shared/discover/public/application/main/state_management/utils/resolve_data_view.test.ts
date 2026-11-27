@@ -82,9 +82,14 @@ describe('Resolve data view tests', () => {
     test.each([
       ['the initial ad hoc data view', { initialAdHocDataViewSpec: { id: 'ad-hoc-data-view' } }],
       ['an ad hoc data view on the saved tab', { currentDataView: adHocDataView }],
+      ['an ad hoc data view of another tab', { adHocDataViews: [adHocDataView] }],
       [
         'a profile data view',
-        { adHocDataViews: [adHocDataView], defaultProfileAdHocDataViewIds: ['ad-hoc-data-view'] },
+        {
+          dataViewId: undefined,
+          adHocDataViews: [adHocDataView],
+          defaultProfileAdHocDataViewIds: ['ad-hoc-data-view'],
+        },
       ],
     ])('opens with %s', (_, overrides) => {
       expect(canOpenWithoutPersistedDataViews({ ...withoutAlternatives, ...overrides })).toBe(true);

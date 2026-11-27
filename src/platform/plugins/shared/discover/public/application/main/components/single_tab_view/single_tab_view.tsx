@@ -18,6 +18,7 @@ import type { ProfileStateMap } from '../../../../../common/context_awareness';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DiscoverAppState } from '../../state_management/redux';
 import { getDataStateContainer } from '../../state_management/discover_data_state_container';
+import { getCurrentUrlState } from '../../state_management/utils/cleanup_url_state';
 import {
   RuntimeStateProvider,
   internalStateActions,
@@ -46,6 +47,8 @@ import { DiscoverMainApp } from './main_app';
 import { ScopedServicesProvider } from '../../../../components/scoped_services_provider';
 import { HideTabsBar } from '../tabs_view/hide_tabs_bar';
 import { InitializationError } from './initialization_error';
+import { MissingDataViewPrompt } from './missing_data_view_prompt';
+import { ResetDiscoverTopNavMenu } from '../top_nav/discover_topnav_menu';
 import type { DiscoverSearchSessionManager } from '../../state_management/discover_search_session';
 
 export interface SingleTabViewProps {
@@ -145,6 +148,51 @@ export const SingleTabView = ({
 
   if (currentTabInitializationState.initializationStatus === TabInitializationStatus.Error) {
     return <InitializationError error={currentTabInitializationState.error} />;
+  }
+
+  if (
+    currentTabInitializationState.initializationStatus === TabInitializationStatus.MissingDataView
+  ) {
+    // Applied on top of the URL state so overrides from a link are kept
+    const initializeWithReplacement = (dataViewId: string, urlState: DiscoverAppState) => {
+      initializeTab.current({
+        defaultUrlState: { ...urlState, dataSource: createDataViewDataSource({ dataViewId }) },
+      });
+    };
+
+    return (
+      <>
+        <ResetDiscoverTopNavMenu />
+        <MissingDataViewPrompt
+          missingDataViewId={currentTabInitializationState.missingDataViewId}
+          adHocDataViews={adHocDataViews}
+          onSelectDataView={(dataViewId) =>
+            initializeWithReplacement(dataViewId, getCurrentUrlState(urlStateStorage, services))
+          }
+          onDataViewCreated={async (dataView) => {
+            // Read before refreshing the list, after which the URL can belong to another tab
+            const urlState = getCurrentUrlState(urlStateStorage, services);
+
+            if (dataView.isPersisted()) {
+              await dispatch(internalStateActions.loadDataViewList());
+              // The availability check runs once, so a data view created afterwards is marked here
+              dispatch(
+                internalStateActions.setInitializationState({
+                  hasESData: true,
+                  hasDataView: true,
+                })
+              );
+            } else {
+              dispatch(internalStateActions.appendAdHocDataViews(dataView));
+            }
+
+            if (dataView.id) {
+              initializeWithReplacement(dataView.id, urlState);
+            }
+          }}
+        />
+      </>
+    );
   }
 
   if (currentTabInitializationState.initializationStatus === TabInitializationStatus.NoData) {

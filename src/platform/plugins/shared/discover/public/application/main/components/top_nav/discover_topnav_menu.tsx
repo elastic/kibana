@@ -106,3 +106,19 @@ export const DiscoverTopNavMenu = ({
 
   return null;
 };
+
+/**
+ * Clears the top nav menu for tab states rendered without the main app, which would otherwise
+ * keep showing the menu of the previously rendered tab
+ */
+export const ResetDiscoverTopNavMenu = () => {
+  const { topNavBadges$, topNavMenu$, topNavShare$ } = useContext(discoverTopNavMenuContext);
+
+  useLayoutEffect(() => {
+    topNavBadges$.next(undefined);
+    topNavMenu$.next(undefined);
+    topNavShare$.next(undefined);
+  }, [topNavBadges$, topNavMenu$, topNavShare$]);
+
+  return null;
+};

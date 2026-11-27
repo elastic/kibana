@@ -10,7 +10,14 @@
 import { cloneDeep } from 'lodash';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
-import { getTabDataView, internalStateActions, selectTab, selectTabRuntimeState } from '..';
+import {
+  getTabDataView,
+  internalStateActions,
+  selectHasUnsavedChanges,
+  selectTab,
+  selectTabRuntimeState,
+  TabInitializationStatus,
+} from '..';
 import type { InternalStateStore } from '../internal_state';
 import { internalStateSlice } from '../internal_state';
 import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
@@ -20,7 +27,7 @@ import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_wi
 import { dataViewWithNoTimefieldMock } from '../../../../../__mocks__/data_view_no_timefield';
 import { createResolvedMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { mockControlState } from '../../../../../__mocks__/esql_controls';
-import { DataSourceType } from '../../../../../../common/data_sources';
+import { createDataViewDataSource, DataSourceType } from '../../../../../../common/data_sources';
 import * as resolveEsqlSourceModule from '../../../data_fetching/resolve_esql_source';
 
 const markUnsavedTabs = (internalState: InternalStateStore, tabIds: string[]) =>
@@ -263,6 +270,115 @@ describe('resetDiscoverSession', () => {
     expect(
       selectTabRuntimeState(runtimeStateManager, updatedDiscoverSession.tabs[0].id)
     ).toBeDefined();
+  });
+
+  it('should ask again for a replacement of a tab whose saved data view no longer exists', async () => {
+    const services = createDiscoverServicesMock();
+    const toolkit = getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [dataViewWithTimefieldMock],
+    });
+    // The saved data view is not among the persisted ones, like a data view deleted after saving
+    const persistedTab = getPersistedTabMock({ dataView: dataViewWithNoTimefieldMock, services });
+    const savedDataSource = createDataViewDataSource({
+      dataViewId: dataViewWithNoTimefieldMock.id!,
+    });
+    const hasUnsavedChanges = () =>
+      selectHasUnsavedChanges(toolkit.internalState.getState(), {
+        runtimeStateManager: toolkit.runtimeStateManager,
+        services,
+      }).hasUnsavedChanges;
+
+    await toolkit.initializeTabs({
+      persistedDiscoverSession: createDiscoverSessionMock({ id: 'test-id', tabs: [persistedTab] }),
+    });
+    await toolkit.initializeSingleTab({ tabId: persistedTab.id, skipWaitForDataFetching: true });
+    await toolkit.initializeSingleTab({
+      tabId: persistedTab.id,
+      defaultUrlState: {
+        dataSource: createDataViewDataSource({ dataViewId: dataViewWithTimefieldMock.id! }),
+      },
+    });
+    expect(hasUnsavedChanges()).toBe(true);
+
+    await toolkit.internalState.dispatch(internalStateActions.resetDiscoverSession()).unwrap();
+
+    const tabRuntimeState = selectTabRuntimeState(toolkit.runtimeStateManager, persistedTab.id);
+    expect(getTabDataView(tabRuntimeState)).toBeUndefined();
+    expect(tabRuntimeState.dataStateContainer$.getValue()).toBeUndefined();
+    expect(hasUnsavedChanges()).toBe(false);
+
+    let tab = selectTab(toolkit.internalState.getState(), persistedTab.id);
+    expect(tab.initializationState).toEqual({
+      initializationStatus: TabInitializationStatus.NotStarted,
+    });
+    expect(tab.appState.dataSource).toEqual(savedDataSource);
+
+    await toolkit.initializeSingleTab({ tabId: persistedTab.id, skipWaitForDataFetching: true });
+
+    tab = selectTab(toolkit.internalState.getState(), persistedTab.id);
+    expect(tab.initializationState).toEqual({
+      initializationStatus: TabInitializationStatus.MissingDataView,
+      missingDataViewId: dataViewWithNoTimefieldMock.id,
+    });
+  });
+
+  it('should keep a tab with a replacement data view usable when resetting another tab fails', async () => {
+    const services = createDiscoverServicesMock();
+    const toolkit = getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [dataViewWithTimefieldMock],
+    });
+    const missingDataViewTab = getPersistedTabMock({
+      tabId: 'missing',
+      dataView: dataViewWithNoTimefieldMock,
+      services,
+    });
+    const otherTab = getPersistedTabMock({
+      tabId: 'other',
+      dataView: dataViewWithTimefieldMock,
+      services,
+    });
+
+    await toolkit.initializeTabs({
+      persistedDiscoverSession: createDiscoverSessionMock({
+        id: 'test-id',
+        tabs: [missingDataViewTab, otherTab],
+      }),
+    });
+    await toolkit.initializeSingleTab({
+      tabId: missingDataViewTab.id,
+      skipWaitForDataFetching: true,
+    });
+    await toolkit.initializeSingleTab({
+      tabId: missingDataViewTab.id,
+      defaultUrlState: {
+        dataSource: createDataViewDataSource({ dataViewId: dataViewWithTimefieldMock.id! }),
+      },
+    });
+    await toolkit.initializeSingleTab({ tabId: otherTab.id });
+
+    // The lookup of the other tab's data view fails while resetting
+    const createSearchSource = services.data.search.searchSource.create;
+    services.data.search.searchSource.create = jest.fn(async (fields) =>
+      fields?.index === dataViewWithTimefieldMock.id
+        ? Promise.reject(new Error('lookup failed'))
+        : createSearchSource(fields)
+    );
+
+    await expect(
+      toolkit.internalState.dispatch(internalStateActions.resetDiscoverSession()).unwrap()
+    ).rejects.toHaveProperty('message', 'lookup failed');
+
+    const tabRuntimeState = selectTabRuntimeState(
+      toolkit.runtimeStateManager,
+      missingDataViewTab.id
+    );
+    expect(getTabDataView(tabRuntimeState)).toBe(dataViewWithTimefieldMock);
+    expect(tabRuntimeState.dataStateContainer$.getValue()).toBeDefined();
+    expect(
+      selectTab(toolkit.internalState.getState(), missingDataViewTab.id).initializationState
+    ).toEqual({ initializationStatus: TabInitializationStatus.Complete });
   });
 
   it('resolves an ES|QL tab with its control variables', async () => {

@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE, type DataView } from '@kbn/data-views-plugin/common';
 import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import type { DiscoverTabType } from '@kbn/discover-session-constants';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { isEqual, isObject, isUndefined, omitBy } from 'lodash';
 import { createDataSource } from '../../../../../common/data_sources';
 import type { ProfileStateRegistry } from '../../../../../common/context_awareness';
@@ -123,6 +124,35 @@ export const fromSavedObjectTabToSearchSource = async ({
   services: DiscoverServices;
 }): Promise<ISearchSource> => {
   return services.data.search.searchSource.create(tab.serializedSearchSource);
+};
+
+/**
+ * Loads the data view of a saved tab, reporting the ID of a persisted data view that no longer
+ * exists instead of throwing.
+ */
+export const fromSavedObjectTabToDataView = async ({
+  tab,
+  services,
+}: {
+  tab: DiscoverSessionTab;
+  services: DiscoverServices;
+}): Promise<{ dataView: DataView | undefined; missingDataViewId: string | undefined }> => {
+  try {
+    const searchSource = await fromSavedObjectTabToSearchSource({ tab, services });
+    return { dataView: searchSource.getField('index'), missingDataViewId: undefined };
+  } catch (error) {
+    const { index } = tab.serializedSearchSource;
+
+    if (
+      error instanceof SavedObjectNotFound &&
+      error.savedObjectType === DATA_VIEW_SAVED_OBJECT_TYPE &&
+      typeof index === 'string'
+    ) {
+      return { dataView: undefined, missingDataViewId: index };
+    }
+
+    throw error;
+  }
 };
 
 /**

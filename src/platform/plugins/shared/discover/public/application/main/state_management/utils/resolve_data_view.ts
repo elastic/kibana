@@ -268,7 +268,7 @@ export const getInitialDataViewTarget = ({
 
 /**
  * Whether a tab can open without persisted data views: in ES|QL mode, or with an ad hoc data view
- * from the location state, the tab or a profile.
+ * from the location state, the tab, a profile or another tab of the session.
  */
 export const canOpenWithoutPersistedDataViews = ({
   isEsqlMode,
@@ -290,6 +290,9 @@ export const canOpenWithoutPersistedDataViews = ({
   const hasInitialAdHocDataView =
     Boolean(dataViewId) && initialAdHocDataViewSpec?.id === dataViewId;
   const hasCurrentAdHocDataView = currentDataView?.isPersisted() === false;
+  // Ad hoc data views of the other tabs can be picked as a replacement for a deleted data view
+  const hasSessionAdHocDataView =
+    Boolean(dataViewId) && adHocDataViews.some(({ id }) => id === dataViewId);
   const hasProfileDataView = adHocDataViews.some(
     ({ id }) => id && defaultProfileAdHocDataViewIds.includes(id)
   );
@@ -299,6 +302,7 @@ export const canOpenWithoutPersistedDataViews = ({
     locationStateHasDataViewSpec ||
     hasInitialAdHocDataView ||
     hasCurrentAdHocDataView ||
+    hasSessionAdHocDataView ||
     hasProfileDataView
   );
 };
