@@ -32,6 +32,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { DashboardCanvasAttachmentProps } from './async_services';
 import type { ShownAttachmentVersion } from './dashboard_integration/dashboard_app_integration';
+import type { StagedDashboards } from './staged_dashboards';
 
 export interface IdGenerator {
   readonly current: string;
@@ -68,6 +69,7 @@ export const registerDashboardAttachmentUiDefinition = ({
   dashboardPlugin,
   canWriteDashboards,
   draftAttachmentId,
+  stagedDashboards,
   toasts,
 }: {
   agentBuilder: AgentBuilderPluginStart;
@@ -78,6 +80,7 @@ export const registerDashboardAttachmentUiDefinition = ({
   dashboardPlugin: DashboardStart;
   canWriteDashboards: boolean;
   draftAttachmentId: IdGenerator;
+  stagedDashboards: StagedDashboards;
   toasts: NotificationsStart['toasts'];
 }): (() => void) => {
   let dashboardApi: DashboardApi | undefined;
@@ -124,6 +127,7 @@ export const registerDashboardAttachmentUiDefinition = ({
                   dashboardLocator,
                   toasts,
                   draftAttachmentId,
+                  stagedDashboards,
                   checkSavedDashboardExist,
                   setShownAttachmentVersion: (shown) => shownAttachmentVersion$.next(shown),
                   getUpdateOrigin: (attachmentId) => updateOriginByAttachmentId.get(attachmentId),
@@ -209,3 +213,6 @@ export const registerDashboardAttachmentUiDefinition = ({
     shownAttachmentVersion$.complete();
   };
 };
+
+export { registerDashboardPanelAttachmentUiDefinition } from './dashboard_panel_ui_definition';
+export { createStagedDashboards, type StagedDashboards } from './staged_dashboards';

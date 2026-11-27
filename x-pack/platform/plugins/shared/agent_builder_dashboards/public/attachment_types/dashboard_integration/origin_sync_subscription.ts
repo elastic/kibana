@@ -18,11 +18,14 @@ import type { UpdateOriginResponse } from '@kbn/agent-builder-common';
 export const createOriginSyncSubscription = ({
   api,
   getAttachments,
+  isStagedFromOtherDashboard,
   checkSavedDashboardExist,
   updateOrigin,
 }: {
   api: DashboardApi;
   getAttachments: () => undefined | DashboardAttachment[];
+  /** Whether another dashboard staged the attachment, e.g. another unsaved one without an origin. */
+  isStagedFromOtherDashboard: (attachmentId: string) => boolean;
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
   updateOrigin: (
     attachmentId: string,
@@ -37,12 +40,14 @@ export const createOriginSyncSubscription = ({
     if (!attachments) {
       return;
     }
-    const attachmentToSync = attachments.find(({ origin }) => {
-      if (origin === previousDashboardId || origin === dashboardId) {
-        return true;
-      }
-      return false;
-    });
+    // another unsaved dashboard's attachment has no origin either
+    const attachmentToSync = attachments.find(
+      ({ id, origin }) =>
+        origin === dashboardId ||
+        (previousDashboardId
+          ? origin === previousDashboardId
+          : !origin && !isStagedFromOtherDashboard(id))
+    );
     if (attachmentToSync) {
       return updateOrigin(attachmentToSync.id, dashboardId);
     }

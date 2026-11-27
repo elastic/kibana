@@ -21,9 +21,10 @@ const editScenario = (gold: Parameters<typeof layoutEditExample>[0]): DashboardD
  * Edits of the seeded sectioned logs dashboard beyond moving ES|QL panels:
  * the non-ES|QL panel kinds, controls, data the cluster does not have,
  * visualizations from earlier in the conversation, section renames, and
- * dashboard options (tagged `settings_edit`). Each example combines several
- * asks, so one run covers more than one gap. The section rename must also
- * leave every dashboard setting alone.
+ * panel pointers that scope only the message they come with, and dashboard
+ * options (tagged `settings_edit`). Each example combines several asks, so
+ * one run covers more than one gap. The section rename must also leave every
+ * dashboard setting alone.
  */
 export const DASHBOARD_EDIT_SCENARIO_EXAMPLES: DashboardDatasetExample[] = [
   editScenario({
@@ -152,6 +153,17 @@ export const DASHBOARD_EDIT_SCENARIO_EXAMPLES: DashboardDatasetExample[] = [
     },
     panelEdits: [{ panel: 'errors-4xx', color: 'red' }],
     structure: { sectionCount: 3 },
+  }),
+  editScenario({
+    question: 'make these red',
+    panelPointerAttachments: ['errors-4xx', 'errors-5xx'],
+    laterMessage: 'which operating system sends the most requests?',
+    layoutEdit: { changes: [] },
+    panelEdits: [
+      { panel: 'errors-4xx', color: 'red' },
+      { panel: 'errors-5xx', color: 'red' },
+    ],
+    laterMessageKeepsDashboard: true,
   }),
   editScenario({
     question: 'hide the panel titles and borders and stop syncing the cursor across panels',

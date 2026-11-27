@@ -25,7 +25,7 @@ export {
   isRowClickTriggerContext,
   isValueClickTriggerContext,
 } from './ui_actions/triggers';
-export { EXPORT_ACTION_GROUP } from './ui_actions/constants';
+export { ADD_TO_CHAT_ACTION_ID, EXPORT_ACTION_GROUP } from './ui_actions/constants';
 
 export type {
   CellValueContext,

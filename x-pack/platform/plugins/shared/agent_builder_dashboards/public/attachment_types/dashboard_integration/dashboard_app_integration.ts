@@ -21,6 +21,7 @@ import type { UpdateOriginResponse } from '@kbn/agent-builder-common';
 import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from '@kbn/core/public';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import { dashboardStateToAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import {
@@ -29,23 +30,22 @@ import {
 } from '@kbn/presentation-publishing';
 import { createChatAdapter } from './chat_adapter';
 import {
-  findDashboardAttachment,
   isAttachmentShownInDashboard,
   isOpenDashboardUpdate,
   reconcileStaging,
+  resolveDashboardAttachmentLink,
   type AreDashboardStatesEqual,
 } from './reconcile';
 import {
   APPLY_AGENT_CHANGES_ERROR_TITLE,
   applyAttachment,
-  canApplyAgentChangesInPlace,
   type ApplyAttachmentOutcome,
 } from './show_attachment';
 import { createOriginSyncSubscription } from './origin_sync_subscription';
 import { createOtherDashboardUpdateNotifier } from './other_dashboard_update_notifier';
 import type { DashboardLocator } from './open_in_dashboard_app';
 import { handlePreview } from '../handle_preview';
-import type { IdGenerator } from '..';
+import type { IdGenerator, StagedDashboards } from '..';
 
 /**
  * Layout manager refreshes `getSerializedState()` panel configs only after
@@ -69,6 +69,12 @@ export interface DashboardAppIntegrationParams {
   dashboardLocator?: DashboardLocator;
   toasts: NotificationsStart['toasts'];
   draftAttachmentId: IdGenerator;
+  /**
+   * Which dashboard each attachment was staged from. Agent changes to a dashboard the user can't
+   * edit open in a new dashboard, so such a dashboard is staged without an origin, and this tells
+   * which updates are its own.
+   */
+  stagedDashboards: StagedDashboards;
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
   /** Called with the attachment version the open dashboard shows, `undefined` when it shows none. */
   setShownAttachmentVersion: (shown: ShownAttachmentVersion | undefined) => void;
@@ -99,6 +105,7 @@ export const registerDashboardAppIntegration = ({
   dashboardLocator,
   toasts,
   draftAttachmentId,
+  stagedDashboards,
   checkSavedDashboardExist,
   setShownAttachmentVersion,
   getUpdateOrigin,
@@ -107,26 +114,60 @@ export const registerDashboardAppIntegration = ({
   // agent updates carry no version until the conversation that has them is published
   let attachments: Array<DashboardAttachment & { version?: number }> | undefined;
   let conversationId: string | undefined;
-  // Attachments staged from this dashboard without an origin, because agent changes to a dashboard
-  // the user can't edit open in a new dashboard, which the origin then follows on save. One per
-  // conversation started here, so switching back to an earlier conversation still finds its own.
-  const unlinkedStagedAttachmentIds = new Set<string>();
 
-  // a dashboard that can't be linked, e.g. a managed one, is staged as a new attachment every time
-  const isLinkable = () => canWriteDashboards && canApplyAgentChangesInPlace(api);
+  /**
+   * Pointed attachments staged by another mount of a dashboard without an origin. The unsaved
+   * dashboard takes the one it shows, e.g. once the user came back to it, while another unsaved
+   * dashboard shows other data, so never takes it.
+   */
+  const getRemountCandidates = () =>
+    (attachments ?? []).filter(
+      ({ id, origin }) =>
+        !origin &&
+        !stagedDashboards.isStagedFromSavedDashboard(id) &&
+        stagedDashboards.isOtherDashboardPointerTarget(id, api)
+    );
+
+  const findShownAttachment = async <TAttachment extends DashboardAttachment>(
+    candidates: TAttachment[],
+    dashboardState: DashboardState
+  ): Promise<TAttachment | undefined> => {
+    for (const attachment of candidates) {
+      if (await isAttachmentShownInDashboard({ areEqual, dashboardState, data: attachment.data })) {
+        return attachment;
+      }
+    }
+    return undefined;
+  };
 
   const stageOpenDashboard = async () => {
-    const linkable = isLinkable();
-    const dashboardId = linkable ? api.savedObjectId$.getValue() : undefined;
-    const dashboardAttachment = linkable
-      ? findDashboardAttachment({ attachments: attachments ?? [], dashboardId })
-      : undefined;
+    const { attributes: dashboardState } = api.getSerializedState();
+    const link = resolveDashboardAttachmentLink({
+      api,
+      canWriteDashboards,
+      attachments: attachments ?? [],
+      isStagedFromSavedDashboard: stagedDashboards.isStagedFromSavedDashboard,
+      isOtherDashboardPointerTarget: (attachmentId) =>
+        stagedDashboards.isOtherDashboardPointerTarget(attachmentId, api),
+    });
+    const { origin } = link;
+    const remountCandidates =
+      !link.attachment && link.linkable && origin === undefined ? getRemountCandidates() : [];
+    const dashboardAttachment = remountCandidates.length
+      ? await findShownAttachment(remountCandidates, dashboardState)
+      : link.attachment;
+    const isNewConversation = !conversationId;
+    // another dashboard staged under the draft id keeps it, e.g. for a panel pointer to it
+    const draftId =
+      isNewConversation && !dashboardAttachment
+        ? stagedDashboards.getDraftId(draftAttachmentId, api)
+        : draftAttachmentId.current;
     const attachmentId = reconcileStaging({
       dashboardAttachmentId: dashboardAttachment?.id,
-      isNewConversation: !conversationId,
-      draftAttachmentId: draftAttachmentId.current,
+      isNewConversation,
+      isDraftStagedFromDashboard: stagedDashboards.isStagedFrom(draftId, api),
+      draftAttachmentId: draftId,
     });
-    const { attributes: dashboardState } = api.getSerializedState();
     const isShown = dashboardAttachment
       ? await isAttachmentShownInDashboard({
           areEqual,
@@ -142,19 +183,14 @@ export const registerDashboardAppIntegration = ({
     if (!attachmentId) {
       return;
     }
+    // the dashboard takes the attachment's updates, e.g. a copy opened for agent changes
+    stagedDashboards.add(attachmentId, api);
     // the conversation already has what the dashboard shows, e.g. the agent's applied changes
     if (isShown) {
       chat.unstage(attachmentId);
       return;
     }
-    if (!linkable) {
-      unlinkedStagedAttachmentIds.add(attachmentId);
-    }
-    chat.stage({
-      id: attachmentId,
-      origin: dashboardId,
-      data: dashboardStateToAttachmentData(dashboardState),
-    });
+    chat.stage({ id: attachmentId, origin, data: dashboardStateToAttachmentData(dashboardState) });
   };
 
   // never throws, since a throw would end the integration
@@ -203,7 +239,9 @@ export const registerDashboardAppIntegration = ({
     const isOpenDashboard = isOpenDashboardUpdate({
       attachment,
       dashboardId: api.savedObjectId$.getValue(),
-      isStagedFromDashboard: (attachmentId) => unlinkedStagedAttachmentIds.has(attachmentId),
+      isStagedFromDashboard: (attachmentId) => stagedDashboards.isStagedFrom(attachmentId, api),
+      isStagedFromOtherDashboard: (attachmentId) =>
+        stagedDashboards.isStagedFromOtherDashboard(attachmentId, api),
     });
     // without write access, opening another dashboard would show unsaved changes that look saved
     if (!canWriteDashboards) {
@@ -217,7 +255,12 @@ export const registerDashboardAppIntegration = ({
       return undefined;
     }
     try {
-      return await applyAttachment({ attachment, api, dashboardLocator, toasts });
+      const outcome = await applyAttachment({ attachment, api, dashboardLocator, toasts });
+      // the new dashboard, e.g. an editable copy of a managed one, takes the attachment's next updates
+      if (outcome === 'opened-new-dashboard') {
+        stagedDashboards.remove(attachment.id);
+      }
+      return outcome;
     } catch (error) {
       toasts.addError(error, { title: APPLY_AGENT_CHANGES_ERROR_TITLE });
       return undefined;
@@ -271,6 +314,8 @@ export const registerDashboardAppIntegration = ({
     api,
     checkSavedDashboardExist,
     getAttachments: () => attachments,
+    isStagedFromOtherDashboard: (attachmentId) =>
+      stagedDashboards.isStagedFromOtherDashboard(attachmentId, api),
     updateOrigin: chat.updateOrigin,
   });
 

@@ -18,8 +18,10 @@
     "@kbn/agent-builder-visualizations-common",
     "@kbn/zod",
     "@kbn/as-code-dashboard-schema",
+    "@kbn/dashboard-markdown-schemas",
     "@kbn/lens-embeddable-utils",
     "@kbn/lens-common",
-    "@kbn/visualizations-common"
+    "@kbn/visualizations-common",
+    "@kbn/custom-content-common"
   ]
 }

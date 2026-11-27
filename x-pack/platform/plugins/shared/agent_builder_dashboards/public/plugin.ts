@@ -11,13 +11,20 @@ import {
   OPEN_DASHBOARD_CHAT_ACTION_ID,
   ENHANCE_DASHBOARD_ACTION_ID,
 } from '@kbn/dashboard-plugin/public';
+import { ADD_TO_CHAT_ACTION_ID } from '@kbn/embeddable-plugin/public';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type {
   AgentBuilderDashboardsPluginPublicSetup,
   AgentBuilderDashboardsPluginPublicStart,
   AgentBuilderDashboardsPluginPublicSetupDependencies,
   AgentBuilderDashboardsPluginPublicStartDependencies,
 } from './types';
-import { createIdGenerator, registerDashboardAttachmentUiDefinition } from './attachment_types';
+import {
+  createIdGenerator,
+  createStagedDashboards,
+  registerDashboardAttachmentUiDefinition,
+  registerDashboardPanelAttachmentUiDefinition,
+} from './attachment_types';
 
 export class AgentBuilderDashboardsPlugin implements Plugin<
   AgentBuilderDashboardsPluginPublicSetup,
@@ -44,6 +51,7 @@ export class AgentBuilderDashboardsPlugin implements Plugin<
     plugins: AgentBuilderDashboardsPluginPublicStartDependencies
   ): AgentBuilderDashboardsPluginPublicStart {
     const draftAttachmentId = createIdGenerator();
+    const stagedDashboards = createStagedDashboards();
     const canWriteDashboards =
       core.application.capabilities.dashboard_v2?.showWriteControls === true;
 
@@ -56,8 +64,10 @@ export class AgentBuilderDashboardsPlugin implements Plugin<
       data: plugins.data,
       dashboardPlugin: plugins.dashboard,
       draftAttachmentId,
+      stagedDashboards,
       toasts: core.notifications.toasts,
     });
+    registerDashboardPanelAttachmentUiDefinition(plugins.agentBuilder);
 
     if (core.application.capabilities.agentBuilder?.show === true) {
       plugins.uiActions.registerActionAsync(OPEN_DASHBOARD_CHAT_ACTION_ID, async () => {
@@ -65,6 +75,22 @@ export class AgentBuilderDashboardsPlugin implements Plugin<
           await import('./dashboard_empty_screen/open_dashboard_chat_action');
         return createOpenDashboardChatAction(plugins.agentBuilder.openChat);
       });
+
+      plugins.uiActions.registerActionAsync(ADD_TO_CHAT_ACTION_ID, async () => {
+        const { createDashboardAddToChatAction } = await import('./add_to_chat/add_to_chat_action');
+        return createDashboardAddToChatAction({
+          agentBuilder: plugins.agentBuilder,
+          analytics: core.analytics,
+          areEqual: plugins.dashboard.areEqual,
+          dashboardAppApi$: plugins.dashboard.dashboardAppClientApi$,
+          canWriteDashboards,
+          draftAttachmentId,
+          nowProvider: plugins.data.nowProvider,
+          stagedDashboards,
+          toasts: core.notifications.toasts,
+        });
+      });
+      plugins.uiActions.attachAction(ON_OPEN_PANEL_MENU, ADD_TO_CHAT_ACTION_ID);
 
       plugins.uiActions.registerActionAsync(ENHANCE_DASHBOARD_ACTION_ID, async () => {
         const { createEnhanceDashboardAction } = await import('./enhance/enhance_dashboard_action');

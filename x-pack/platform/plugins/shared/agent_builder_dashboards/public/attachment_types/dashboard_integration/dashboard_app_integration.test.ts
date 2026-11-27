@@ -19,7 +19,7 @@ import {
   MANUAL_CHANGES_DEBOUNCE_MS,
   registerDashboardAppIntegration,
 } from './dashboard_app_integration';
-import type { IdGenerator } from '..';
+import { createStagedDashboards, type IdGenerator } from '..';
 import { DASHBOARD_UPDATED_UI_EVENT } from '../../../common';
 import type { DashboardLocator } from './open_in_dashboard_app';
 
@@ -227,6 +227,7 @@ describe('registerDashboardAppIntegration', () => {
       dashboardLocator,
       toasts,
       draftAttachmentId,
+      stagedDashboards: createStagedDashboards(),
       checkSavedDashboardExist,
       setShownAttachmentVersion,
       getUpdateOrigin,
@@ -650,6 +651,52 @@ describe('registerDashboardAppIntegration', () => {
       attachmentId: 'dashboard-attachment-id',
       version: 1,
     });
+  });
+
+  const lensPanel = (id: string) => ({
+    type: 'lens',
+    id,
+    grid: { x: 0, y: 0, w: 24, h: 15 },
+    config: { type: 'metric' },
+  });
+  const showPanels = (panelIds: string[]) =>
+    mockApi.getSerializedState.mockReturnValue({
+      attributes: { title: 'Test Dashboard', panels: panelIds.map(lensPanel) },
+    });
+
+  it('keeps the pointer to a panel deleted from the dashboard in the chat input', async () => {
+    showPanels(['panel-1', 'panel-2']);
+    register();
+    emitConversationChange({});
+    await jest.runOnlyPendingTimersAsync();
+    removeAttachment.mockClear();
+    addAttachment.mockClear();
+
+    showPanels(['panel-2']);
+    simulateDashboardStateChange();
+    await jest.advanceTimersByTimeAsync(MANUAL_CHANGES_DEBOUNCE_MS);
+
+    // nothing leaves the chat input, so the pointer stays, while the dashboard it points at is
+    // restaged under the same id without the deleted panel
+    expect(removeAttachment).not.toHaveBeenCalled();
+    expect(addAttachment).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        id: 'draft-attachment-id-1',
+        data: expect.objectContaining({ panels: [expect.objectContaining({ id: 'panel-2' })] }),
+      })
+    );
+  });
+
+  it("keeps the pointers to the dashboard's panels in the chat input when the user leaves it", async () => {
+    showPanels(['panel-1', 'panel-2']);
+    register();
+    emitConversationChange({});
+    await jest.runOnlyPendingTimersAsync();
+    removeAttachment.mockClear();
+
+    cleanup();
+
+    expect(removeAttachment).not.toHaveBeenCalled();
   });
 
   it('keeps the staged dashboard in the chat input when the user leaves the dashboard', () => {

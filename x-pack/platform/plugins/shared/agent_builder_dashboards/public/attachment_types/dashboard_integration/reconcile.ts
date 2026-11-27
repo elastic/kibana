@@ -6,7 +6,7 @@
  */
 
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { DashboardApi, DashboardStart } from '@kbn/dashboard-plugin/public';
 import type {
   DashboardAttachment,
   DashboardAttachmentData,
@@ -15,6 +15,7 @@ import {
   getComparableAttachmentState,
   getComparableDashboardState,
 } from '@kbn/agent-builder-dashboards-common';
+import { canApplyAgentChangesInPlace } from './show_attachment';
 
 /** Compares two dashboard states with the comparators each panel's embeddable definition provides. */
 export type AreDashboardStatesEqual = DashboardStart['areEqual'];
@@ -44,45 +45,89 @@ export const isAttachmentShownInDashboard = async ({
   return areEqual(baseline, comparableState).catch(() => false);
 };
 
+export interface DashboardAttachmentLink<TAttachment> {
+  /** Whether agent changes apply to the open dashboard. */
+  linkable: boolean;
+  /** The saved id to stage with; `undefined` when unsaved or not linkable. */
+  origin: string | undefined;
+  attachment: TAttachment | undefined;
+}
+
 /**
- * The attachment the open dashboard stands for: the one whose origin is the dashboard, which for an
- * unsaved dashboard is one without an origin.
+ * Finds the attachment whose origin is the open dashboard (none for an unsaved one). Dashboards the
+ * agent can't change in place, e.g. managed ones, are never linked. An unsaved dashboard never links
+ * to a copy staged from a saved dashboard, since that copy has no origin either, nor to another
+ * dashboard a panel pointer points at, so staging it never changes what the pointer shows.
  */
-export const findDashboardAttachment = <TAttachment extends DashboardAttachment>({
+export const resolveDashboardAttachmentLink = <
+  TAttachment extends { id: string; origin?: string },
+>({
+  api,
+  canWriteDashboards,
   attachments,
-  dashboardId,
+  isStagedFromSavedDashboard,
+  isOtherDashboardPointerTarget,
 }: {
-  attachments: TAttachment[];
-  /** The saved id of the dashboard, `undefined` for an unsaved one. */
-  dashboardId: string | undefined;
-}): TAttachment | undefined => attachments.find(({ origin }) => origin === dashboardId);
+  api: DashboardApi;
+  canWriteDashboards: boolean;
+  attachments: readonly TAttachment[];
+  isStagedFromSavedDashboard: (attachmentId: string) => boolean;
+  isOtherDashboardPointerTarget: (attachmentId: string) => boolean;
+}): DashboardAttachmentLink<TAttachment> => {
+  if (!canWriteDashboards || !canApplyAgentChangesInPlace(api)) {
+    return { linkable: false, origin: undefined, attachment: undefined };
+  }
+  const origin = api.savedObjectId$.getValue();
+  return {
+    linkable: true,
+    origin,
+    attachment: attachments.find(
+      ({ id, origin: attachmentOrigin }) =>
+        attachmentOrigin === origin &&
+        (origin !== undefined ||
+          (!isStagedFromSavedDashboard(id) && !isOtherDashboardPointerTarget(id)))
+    ),
+  };
+};
 
 /**
  * The id the chat input stages the open dashboard under: its attachment, or a new attachment when
- * the conversation is new. `undefined` leaves the chat input as it is.
+ * the conversation is new or the open dashboard is already staged under the draft id, e.g. by "Add
+ * to chat". `undefined` leaves the chat input as it is.
  */
 export const reconcileStaging = ({
   dashboardAttachmentId,
   isNewConversation,
+  isDraftStagedFromDashboard,
   draftAttachmentId,
 }: {
   dashboardAttachmentId: string | undefined;
   isNewConversation: boolean;
+  isDraftStagedFromDashboard: boolean;
   draftAttachmentId: string;
 }): string | undefined =>
-  dashboardAttachmentId ?? (isNewConversation ? draftAttachmentId : undefined);
+  dashboardAttachmentId ??
+  (isNewConversation || isDraftStagedFromDashboard ? draftAttachmentId : undefined);
 
 /**
- * Whether an agent update belongs to the open dashboard: an unsaved dashboard takes every update,
- * a saved one those of its attachment, or of one it staged without an origin because it can't be
- * edited.
+ * Whether an agent update belongs to the open dashboard: a saved one takes those of its attachment,
+ * or of one it staged without an origin because it can't be edited. An unsaved one takes every
+ * update without an origin, except those of another dashboard staged for a panel pointer, so
+ * editing a pointed panel never replaces the unsaved dashboard.
  */
 export const isOpenDashboardUpdate = ({
   attachment: { id, origin },
   dashboardId,
   isStagedFromDashboard,
+  isStagedFromOtherDashboard,
 }: {
   attachment: DashboardAttachment;
   dashboardId: string | undefined;
   isStagedFromDashboard: (attachmentId: string) => boolean;
-}): boolean => !dashboardId || origin === dashboardId || (!origin && isStagedFromDashboard(id));
+  isStagedFromOtherDashboard: (attachmentId: string) => boolean;
+}): boolean => {
+  if (!dashboardId) {
+    return !origin && !isStagedFromOtherDashboard(id);
+  }
+  return origin === dashboardId || (!origin && isStagedFromDashboard(id));
+};

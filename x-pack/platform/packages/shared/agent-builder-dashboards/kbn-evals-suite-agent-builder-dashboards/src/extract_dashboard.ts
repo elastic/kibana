@@ -41,6 +41,22 @@ export const getToolErrors = (steps: Step[]): ToolError[] =>
       : []
   );
 
+/** Every dashboard attachment the steps' `generate_dashboard` calls wrote, without duplicates. */
+export const getWrittenDashboardIds = (steps: Step[]): string[] => {
+  const ids = steps.flatMap((step) => {
+    if (step.type !== 'tool_call' || step.tool_id !== GENERATE_DASHBOARD_TOOL_ID) {
+      return [];
+    }
+    const results = Array.isArray(step.results) ? step.results : [];
+    return results.flatMap((result) =>
+      isRecord(result) && isRecord(result.data) && typeof result.data.attachment_id === 'string'
+        ? [result.data.attachment_id]
+        : []
+    );
+  });
+  return [...new Set(ids)];
+};
+
 /**
  * Attachment id written by the last successful `generate_dashboard` call. The
  * tool result only carries a compact summary; the full dashboard (panel

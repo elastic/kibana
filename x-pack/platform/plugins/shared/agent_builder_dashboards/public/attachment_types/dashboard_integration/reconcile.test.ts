@@ -43,6 +43,7 @@ describe('isOpenDashboardUpdate', () => {
         attachment: buildAttachment(origin),
         dashboardId,
         isStagedFromDashboard: (attachmentId) => stagedAttachmentIds.includes(attachmentId),
+        isStagedFromOtherDashboard: () => false,
       })
     ).toBe(expected);
   });

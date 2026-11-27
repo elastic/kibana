@@ -33,9 +33,10 @@ interface PanelKindBase {
    * existing config. A section of the skill for inline kinds, the top of the reference otherwise.
    */
   readonly guidance?: string;
-  /** Whether an existing panel of the kind's embeddable type can be edited. Defaults to true. */
-  readonly canEdit?: (panel: AttachmentPanel) => boolean;
-  /** Names the panels `canEdit` rejects in edit errors, e.g. "Lens panel that is not backed by ES|QL". */
+  /**
+   * Names the panels of this kind `isAgentEditablePanel` rejects in edit errors, e.g. "Lens panel
+   * that is not backed by ES|QL".
+   */
   readonly uneditableDescription?: string;
   /**
    * Set when the embeddable type registers its schema whenever it is registered at all, so a missing

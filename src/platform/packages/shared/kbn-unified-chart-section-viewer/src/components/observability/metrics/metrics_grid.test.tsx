@@ -1561,6 +1561,7 @@ describe('MetricsGrid', () => {
         'ACTION_SHOW_CONFIG_PANEL',
         'ACTION_VIEW_SAVED_SEARCH',
         'togglePanel',
+        'addToChat',
       ];
 
       renderMetricsGrid();
