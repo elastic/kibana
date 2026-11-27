@@ -52,7 +52,7 @@ function buildEnabledServices(): StartServicesMock {
 const routeProps = (slug: string) =>
   ({
     match: { params: { slug } },
-  } as RouteComponentProps<{ slug: string }>);
+  }) as RouteComponentProps<{ slug: string }>;
 
 describe('LibraryTemplateDetailPage', () => {
   beforeEach(() => {

@@ -205,12 +205,14 @@ export function KnowledgeIndicatorsTable(): React.ReactElement {
         css={css`
           overflow-x: auto;
           min-width: 0;
-          ${isOperationInProgress
-            ? `
+          ${
+            isOperationInProgress
+              ? `
                 pointer-events: none;
                 opacity: 0.6;
               `
-            : ''}
+              : ''
+          }
         `}
       >
         <EuiInMemoryTable<KnowledgeIndicator>

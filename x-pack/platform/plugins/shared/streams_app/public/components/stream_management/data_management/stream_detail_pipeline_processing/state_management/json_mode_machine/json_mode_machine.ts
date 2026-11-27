@@ -146,10 +146,10 @@ const getSimulatableSteps = (context: JsonModeContext, stepIdBreakpoint?: string
     context.simulationMode === 'complete'
       ? context.nextPipelineDefinition.steps
       : additiveChanges.isPurelyAdditive
-      ? context.nextPipelineDefinition.steps.filter((step) =>
-          additiveChanges.newStepIds.includes(step.customIdentifier)
-        )
-      : [];
+        ? context.nextPipelineDefinition.steps.filter((step) =>
+            additiveChanges.newStepIds.includes(step.customIdentifier)
+          )
+        : [];
 
   return getStepsUpToBreakpoint(steps, stepIdBreakpoint);
 };

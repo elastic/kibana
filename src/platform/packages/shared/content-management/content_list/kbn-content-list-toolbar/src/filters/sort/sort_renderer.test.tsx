@@ -18,12 +18,10 @@ import {
 import type { Query } from '@elastic/eui';
 import { SortRenderer } from './sort_renderer';
 
-const mockFindItems = jest.fn(
-  async (_params: FindItemsParams): Promise<FindItemsResult> => ({
-    items: [],
-    total: 0,
-  })
-);
+const mockFindItems = jest.fn(async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+  items: [],
+  total: 0,
+}));
 
 const createWrapper =
   (options?: {
@@ -37,10 +35,10 @@ const createWrapper =
     const sorting = sortFields
       ? { fields: sortFields, initialSort }
       : sortOptions
-      ? { options: sortOptions, initialSort }
-      : initialSort
-      ? { initialSort }
-      : undefined;
+        ? { options: sortOptions, initialSort }
+        : initialSort
+          ? { initialSort }
+          : undefined;
 
     return (
       <ContentListProvider

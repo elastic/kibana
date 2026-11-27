@@ -444,7 +444,7 @@ export function WorkflowDetailBottomBar({
 
             {testWorkflowButton ? (
               <EuiFlexItem grow={false}>
-                {compact ? testWorkflowButtonCompact ?? testWorkflowButton : testWorkflowButton}
+                {compact ? (testWorkflowButtonCompact ?? testWorkflowButton) : testWorkflowButton}
               </EuiFlexItem>
             ) : null}
           </EuiFlexGroup>

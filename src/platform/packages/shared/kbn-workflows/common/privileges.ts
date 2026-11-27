@@ -13,16 +13,16 @@ import { WORKFLOWS_MANAGEMENT_FEATURE_ID } from './constants';
 // Api actions are not scoped by feature ID, so we scope it by adding the feature ID ("workflowsManagement") as prefix.
 // example: security.authz.requiredPrivileges: ["workflowsManagement:create"]
 export enum WorkflowsManagementApiActions {
-  'create' = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:create`,
-  'read' = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:read`,
-  'readManaged' = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:managed:read`,
-  'update' = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:update`,
-  'updateManaged' = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:managed:update`,
-  'delete' = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:delete`,
-  'execute' = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:execute`,
-  'readExecution' = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:readExecution`,
-  'readManagedExecution' = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:managed:readExecution`,
-  'cancelExecution' = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:cancelExecution`,
+  create = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:create`,
+  read = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:read`,
+  readManaged = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:managed:read`,
+  update = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:update`,
+  updateManaged = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:managed:update`,
+  delete = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:delete`,
+  execute = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:execute`,
+  readExecution = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:readExecution`,
+  readManagedExecution = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:managed:readExecution`,
+  cancelExecution = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:cancelExecution`,
 }
 
 /**
@@ -70,13 +70,13 @@ export const WorkflowsManagementOperationPrivileges = {
 // UI actions are scoped by feature ID ("workflowsManagement"), so no need to add any prefix.
 // example: application.capabilities.workflowsManagement.createWorkflow
 export enum WorkflowsManagementUiActions {
-  'create' = 'createWorkflow',
-  'read' = 'readWorkflow',
-  'readManaged' = 'readManagedWorkflow',
-  'update' = 'updateWorkflow',
-  'delete' = 'deleteWorkflow',
-  'execute' = 'executeWorkflow',
-  'readExecution' = 'readWorkflowExecution',
-  'readManagedExecution' = 'readManagedWorkflowExecution',
-  'cancelExecution' = 'cancelWorkflowExecution',
+  create = 'createWorkflow',
+  read = 'readWorkflow',
+  readManaged = 'readManagedWorkflow',
+  update = 'updateWorkflow',
+  delete = 'deleteWorkflow',
+  execute = 'executeWorkflow',
+  readExecution = 'readWorkflowExecution',
+  readManagedExecution = 'readManagedWorkflowExecution',
+  cancelExecution = 'cancelWorkflowExecution',
 }

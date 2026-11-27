@@ -56,7 +56,7 @@ const execution = (
     triggeredBy: extras?.triggeredBy,
     finishedAt: FINISHED_AT,
     context: extras?.parentId ? { parentWorkflowExecutionId: extras.parentId } : undefined,
-  } as FailedExecutionPage['results'][number]);
+  }) as FailedExecutionPage['results'][number];
 
 const page = (ids: Array<string | null>, total: number): FailedExecutionPage => ({
   results: ids.map((id) => execution(id)),
@@ -197,7 +197,7 @@ describe('ScanFailuresService', () => {
       total: 1,
     } satisfies FailedExecutionPage;
     const latestWith = (status: ExecutionStatus) => async () =>
-      ({ status } as FailedExecutionPage['results'][number]);
+      ({ status }) as FailedExecutionPage['results'][number];
 
     it('drops a Worker whose failed workflow has since completed', async () => {
       const latest = jest.fn(latestWith(ExecutionStatus.COMPLETED));
@@ -273,7 +273,7 @@ describe('ScanFailuresService', () => {
             }),
           ],
           total: 1,
-        } satisfies FailedExecutionPage)
+        }) satisfies FailedExecutionPage
     );
     const { service } = createService(search);
 
@@ -391,9 +391,10 @@ describe('ScanFailuresService', () => {
       id: parentId,
       triggeredBy: 'scheduled',
     });
-    const search = jest.fn(
-      async (): Promise<FailedExecutionPage> => ({ results: [child], total: 1 })
-    );
+    const search = jest.fn(async (): Promise<FailedExecutionPage> => ({
+      results: [child],
+      total: 1,
+    }));
     const { service } = createService(
       search,
       new Map([
@@ -434,9 +435,10 @@ describe('ScanFailuresService', () => {
       id: rootId,
       triggeredBy: 'scheduled',
     });
-    const search = jest.fn(
-      async (): Promise<FailedExecutionPage> => ({ results: [review], total: 1 })
-    );
+    const search = jest.fn(async (): Promise<FailedExecutionPage> => ({
+      results: [review],
+      total: 1,
+    }));
     const { service } = createService(
       search,
       new Map([
@@ -538,7 +540,7 @@ describe('ScanFailuresService', () => {
             }),
           ],
           total: 3,
-        } satisfies FailedExecutionPage)
+        }) satisfies FailedExecutionPage
     );
     const { service } = createService(search);
 

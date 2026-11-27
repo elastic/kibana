@@ -566,7 +566,7 @@ describe('Lens App', () => {
       services.dataViews.get = jest
         .fn()
         .mockImplementation(
-          async (id) => ({ id, isTimeBased: () => true, isPersisted: () => true } as DataView)
+          async (id) => ({ id, isTimeBased: () => true, isPersisted: () => true }) as DataView
         );
       await renderApp();
       expect(services.unifiedSearch.ui.AggregateQuerySearchBar).toHaveBeenCalledWith(
@@ -578,7 +578,7 @@ describe('Lens App', () => {
       services.dataViews.get = jest
         .fn()
         .mockImplementation(
-          async (id) => ({ id, isTimeBased: () => true, isPersisted: () => true } as DataView)
+          async (id) => ({ id, isTimeBased: () => true, isPersisted: () => true }) as DataView
         );
 
       await renderApp({
@@ -599,7 +599,7 @@ describe('Lens App', () => {
       services.dataViews.get = jest
         .fn()
         .mockImplementation(
-          async (id) => ({ id, isTimeBased: () => true, isPersisted: () => true } as DataView)
+          async (id) => ({ id, isTimeBased: () => true, isPersisted: () => true }) as DataView
         );
 
       await renderApp({

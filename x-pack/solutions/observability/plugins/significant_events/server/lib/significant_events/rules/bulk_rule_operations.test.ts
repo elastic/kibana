@@ -49,17 +49,15 @@ describe('runBulkRuleOperation', () => {
 
   it('aggregates counts, successful ids and failures across supported-size batches in order', async () => {
     const ids = makeRuleIds(MAX_BULK_ITEMS + 2);
-    const run = jest.fn(
-      async (chunk: string[]): Promise<BulkResponse> => ({
-        affected_count: chunk.length - 1,
-        errors: [
-          {
-            id: chunk[0],
-            error: { code: ALERTING_ERROR_CODES.RULE_VERSION_CONFLICT, message: 'Conflict' },
-          },
-        ],
-      })
-    );
+    const run = jest.fn(async (chunk: string[]): Promise<BulkResponse> => ({
+      affected_count: chunk.length - 1,
+      errors: [
+        {
+          id: chunk[0],
+          error: { code: ALERTING_ERROR_CODES.RULE_VERSION_CONFLICT, message: 'Conflict' },
+        },
+      ],
+    }));
 
     await expect(runBulkRuleOperation(ids, run)).resolves.toEqual({
       affectedCount: ids.length - 2,

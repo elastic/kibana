@@ -177,10 +177,10 @@ export function isServiceConfigIncomplete(
     let activeInputs = dsVars.enabledInputs.length
       ? dsVars.enabledInputs
       : isSingleDs
-      ? service.inputs ?? dsInfo?.inputs ?? []
-      : dsInfo?.defaultEnabledInputs?.length
-      ? dsInfo.defaultEnabledInputs
-      : dsInfo?.inputs?.slice(0, 1) ?? [];
+        ? (service.inputs ?? dsInfo?.inputs ?? [])
+        : dsInfo?.defaultEnabledInputs?.length
+          ? dsInfo.defaultEnabledInputs
+          : (dsInfo?.inputs?.slice(0, 1) ?? []);
     const dsView = makeDsView(service, dsId);
     // Stored input selections outlive a method switch. Under ECF only the inputs ECF can route
     // count (WAF: S3 only); a selection left over from agent-based (e.g. CloudWatch only) would
@@ -201,7 +201,7 @@ export function isServiceConfigIncomplete(
         getRequiredTextFields(dsView, inp, selections).some((f) => {
           const meta = resolveFieldMeta(dsView, inp, f);
           const raw = dsVars.varsByInput?.[inp]?.[f];
-          const effective = meta ? toTyped(raw, meta) : raw ?? '';
+          const effective = meta ? toTyped(raw, meta) : (raw ?? '');
           if (Array.isArray(effective)) return effective.length === 0;
           return typeof effective === 'string' && effective.trim() === '';
         })

@@ -28,7 +28,7 @@ describe('getWritableMemoryAiIndex', () => {
       aiIndexId: 'support',
       spaceId: 'space-1',
       request,
-      getAiIndexService: async () => ({ get } as unknown as AiIndexService),
+      getAiIndexService: async () => ({ get }) as unknown as AiIndexService,
       getCoreStart: async () => coreStart,
     });
 

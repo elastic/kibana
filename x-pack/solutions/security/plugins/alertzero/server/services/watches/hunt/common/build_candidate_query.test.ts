@@ -51,13 +51,11 @@ const searchResponseWithCoverage = (
 ): SearchResponse<unknown, unknown> => ({
   ...searchResponseOf(hits.map(({ id }) => id)),
   hits: {
-    hits: hits.map(
-      ({ id, spaceId, coveragePending }): SearchHit<unknown> => ({
-        _index: 'reports',
-        _id: id,
-        _source: { evidence: [{ space_id: spaceId, coverage_pending: coveragePending }] },
-      })
-    ),
+    hits: hits.map(({ id, spaceId, coveragePending }): SearchHit<unknown> => ({
+      _index: 'reports',
+      _id: id,
+      _source: { evidence: [{ space_id: spaceId, coverage_pending: coveragePending }] },
+    })),
     total: { value: hits.length, relation: 'eq' },
   },
 });

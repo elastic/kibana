@@ -83,8 +83,8 @@ const mockList = ({ items }: { items: TimelineItem[] }) => (
         {item.kind === 'agentTurn'
           ? item.status
           : item.kind === 'userMessage'
-          ? (item.event.data.attachment_refs ?? []).map((ref) => ref.attachment_id).join(',')
-          : ''}
+            ? (item.event.data.attachment_refs ?? []).map((ref) => ref.attachment_id).join(',')
+            : ''}
       </li>
     ))}
   </ul>
@@ -145,7 +145,7 @@ const setState = ({
 };
 
 const conversationWith = (events: ConversationEvent[], attachments?: VersionedAttachment[]) =>
-  ({ id: conversationId, events, attachments, rounds: [] } as unknown as Conversation);
+  ({ id: conversationId, events, attachments, rounds: [] }) as unknown as Conversation;
 
 const renderedItems = () => screen.getAllByTestId('item').map((el) => el.textContent);
 
@@ -410,7 +410,7 @@ describe('TimelineConnector', () => {
       mockOnTurnRender.mock.calls.filter(([renderedKey]) => renderedKey === key).length;
 
     const chunk = (text_chunk: string) =>
-      ({ type: 'message_chunk', data: { message_id: 'm', text_chunk } } as unknown as ChatEvent);
+      ({ type: 'message_chunk', data: { message_id: 'm', text_chunk } }) as unknown as ChatEvent;
 
     it('does not render the saved turns again for every streamed event', async () => {
       mockUseRealTimeline.current = true;

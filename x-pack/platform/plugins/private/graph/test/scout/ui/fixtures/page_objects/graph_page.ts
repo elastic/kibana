@@ -73,7 +73,10 @@ export class GraphPage {
   private readonly drilldownsSettingsTab: Locator;
   private readonly addDrilldownButton: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.contentList = new ContentListWrapper(page);
     this.appMenu = new AppMenu(page);
     this.createGraphPromptButton = this.page.getByTestId('graphCreateGraphPromptButton');

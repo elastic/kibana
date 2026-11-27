@@ -75,7 +75,7 @@ const summary = (overrides: Partial<MemoryPageSummary> = {}): MemoryPageSummary 
     usefulness: 0.5,
     confidence: 0.8,
     ...overrides,
-  } as MemoryPageSummary);
+  }) as MemoryPageSummary;
 
 const listResult = (pages: MemoryPageSummary[]): MemoryListResult => ({
   pages,
@@ -102,7 +102,7 @@ const asQueryResult = (overrides: Record<string, unknown>) =>
     isFetchingNextPage: false,
     fetchNextPage: jest.fn(),
     ...overrides,
-  } as unknown as ReturnType<typeof useMemoryPages>);
+  }) as unknown as ReturnType<typeof useMemoryPages>;
 
 const renderTab = () =>
   render(

@@ -14,7 +14,7 @@ const createScrollContainer = ({ scrollTop }: { scrollTop: number }) => {
 
   Object.defineProperty(container, 'scrollHeight', { value: 1000, configurable: true });
   Object.defineProperty(container, 'clientHeight', { value: 400, configurable: true });
-  container.getBoundingClientRect = () => ({ top: 0, bottom: 400 } as DOMRect);
+  container.getBoundingClientRect = () => ({ top: 0, bottom: 400 }) as DOMRect;
 
   container.scrollTop = scrollTop;
 
@@ -41,10 +41,10 @@ const withItem = (
   { top, bottom }: { top: number; bottom: number }
 ) => {
   const timelineContent = document.createElement('div');
-  timelineContent.getBoundingClientRect = () => ({ top: 0 } as DOMRect);
+  timelineContent.getBoundingClientRect = () => ({ top: 0 }) as DOMRect;
   const item = document.createElement('div');
   item.setAttribute('data-timeline-item-key', 'round-1::user_message');
-  item.getBoundingClientRect = () => ({ top, bottom } as DOMRect);
+  item.getBoundingClientRect = () => ({ top, bottom }) as DOMRect;
   timelineContent.appendChild(item);
   scrollContainer.firstElementChild!.appendChild(timelineContent);
   return timelineContent;

@@ -14,7 +14,7 @@ import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
  */
 export const getCreatedDocumentIds = (bulkResponse: BulkResponse): string[] =>
   bulkResponse.items.flatMap((item) =>
-    item.create?.result === 'created' ? item.create._id ?? [] : []
+    item.create?.result === 'created' ? (item.create._id ?? []) : []
   );
 
 /**

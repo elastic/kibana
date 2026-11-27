@@ -105,7 +105,7 @@ const executionSteps = ({ stepEvents, terminal }: ExecutionBucket): Conversation
     terminal?.type === TimelineEventType.executionTerminated ? terminal : undefined;
   const raw =
     stepEvents.length === 0
-      ? terminated?.data.steps ?? []
+      ? (terminated?.data.steps ?? [])
       : [...new Map(stepEvents.map((event) => [event.id, event])).values()]
           .sort((a, b) => a.data.sequence - b.data.sequence)
           .map((event) => event.data.step);

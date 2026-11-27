@@ -92,12 +92,12 @@ export const useWorkflowEditorLink = ({
     const effectiveWorkflowId = workflowId.startsWith('workflow-')
       ? workflowId
       : resolvedWorkflowId === undefined
-      ? undefined
-      : resolvedWorkflowId !== null
-      ? resolvedWorkflowId
-      : workflowId in WORKFLOW_ID_ALIASES_TO_TAGS
-      ? null
-      : workflowId;
+        ? undefined
+        : resolvedWorkflowId !== null
+          ? resolvedWorkflowId
+          : workflowId in WORKFLOW_ID_ALIASES_TO_TAGS
+            ? null
+            : workflowId;
     if (effectiveWorkflowId == null) {
       return null;
     }

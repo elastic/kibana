@@ -23,7 +23,7 @@ export const useGetLicenseInfo = () => {
         : license && license.isAvailable && license.isActive && license.type === 'trial';
     return {
       isTrial: isInTrial ?? false,
-      licenseType: isInTrial ? 'trial' : license?.type ?? 'basic',
+      licenseType: isInTrial ? 'trial' : (license?.type ?? 'basic'),
       hasEnterpriseLicense: !!(
         license &&
         license.isAvailable &&

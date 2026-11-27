@@ -918,7 +918,7 @@ const InternalUnifiedDataTable = React.forwardRef<
             pageIndex: currentPageIndex,
             pageSize: currentPageSize,
             pageSizeOptions: isInteractive
-              ? rowsPerPageOptions ?? getRowsPerPageOptions(currentPageSize)
+              ? (rowsPerPageOptions ?? getRowsPerPageOptions(currentPageSize))
               : [],
           }
         : undefined;

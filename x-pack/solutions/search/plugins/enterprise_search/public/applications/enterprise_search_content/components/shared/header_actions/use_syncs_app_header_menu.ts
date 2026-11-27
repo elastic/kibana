@@ -52,12 +52,12 @@ export const useSyncsAppHeaderMenu = (): AppHeaderMenu | undefined => {
           defaultMessage: 'Waiting for sync',
         })
       : isSyncing && connector.status !== ConnectorStatus.ERROR
-      ? i18n.translate('xpack.enterpriseSearch.content.index.syncButton.syncing.label', {
-          defaultMessage: 'Syncing',
-        })
-      : i18n.translate('xpack.enterpriseSearch.content.index.syncButton.label', {
-          defaultMessage: 'Sync',
-        });
+        ? i18n.translate('xpack.enterpriseSearch.content.index.syncButton.syncing.label', {
+            defaultMessage: 'Syncing',
+          })
+        : i18n.translate('xpack.enterpriseSearch.content.index.syncButton.label', {
+            defaultMessage: 'Sync',
+          });
 
     return {
       primaryActionItem: {

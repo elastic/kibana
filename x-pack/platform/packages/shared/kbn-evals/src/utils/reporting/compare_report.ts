@@ -97,8 +97,8 @@ export function formatCompareReport({
       result.pValue === null
         ? chalk.gray('n/a')
         : isSignificant
-        ? chalk.bold.green('yes')
-        : chalk.gray('no');
+          ? chalk.bold.green('yes')
+          : chalk.gray('no');
 
     const rows = rowsByDataset.get(result.datasetName) ?? [];
     rows.push([

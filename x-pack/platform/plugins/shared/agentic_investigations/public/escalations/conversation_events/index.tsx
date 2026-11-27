@@ -25,7 +25,7 @@ import { InvestigationLink } from './investigation_link';
 
 type Definition<
   TType extends string,
-  TData = EscalationInvestigationEventData
+  TData = EscalationInvestigationEventData,
 > = ConversationEventUIDefinition<TType, TData>;
 
 const getHeader = () => ({
@@ -42,7 +42,7 @@ export const createEscalationConversationEventUiDefinitions = ({
 }): [
   Definition<typeof ESCALATION_CREATED_FROM_INVESTIGATION_EVENT_TYPE>,
   Definition<typeof ESCALATION_INVESTIGATION_LINKED_EVENT_TYPE>,
-  Definition<typeof ESCALATION_ATTACHMENTS_SYNCED_EVENT_TYPE, EscalationAttachmentsSyncedEventData>
+  Definition<typeof ESCALATION_ATTACHMENTS_SYNCED_EVENT_TYPE, EscalationAttachmentsSyncedEventData>,
 ] => {
   const renderLink = ({
     investigation_id: id,

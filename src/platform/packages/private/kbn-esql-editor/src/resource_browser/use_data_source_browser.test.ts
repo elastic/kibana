@@ -23,7 +23,7 @@ const createTelemetryService = () =>
     trackResourceBrowserOpened: jest.fn(),
     trackResourceBrowserItemToggled: jest.fn(),
     trackViewSelected: jest.fn(),
-  } as unknown as jest.Mocked<ESQLEditorTelemetryService>);
+  }) as unknown as jest.Mocked<ESQLEditorTelemetryService>;
 
 const renderDataSourceBrowser = async (telemetryService: ESQLEditorTelemetryService) => {
   const model = {

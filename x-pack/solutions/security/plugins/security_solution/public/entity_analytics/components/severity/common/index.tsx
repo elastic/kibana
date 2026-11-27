@@ -28,12 +28,14 @@ const RiskBadge = styled('div', {
     padding-right: ${euiTheme.size.s};
     padding-left: ${euiTheme.size.xs};
 
-    ${(severity === 'Critical' || severity === 'High') &&
-    !hideBackgroundColor &&
-    css`
-      background-color: ${color};
-      border-radius: 999px; // pill shaped
-    `};
+    ${
+      (severity === 'Critical' || severity === 'High') &&
+      !hideBackgroundColor &&
+      css`
+        background-color: ${color};
+        border-radius: 999px; // pill shaped
+      `
+    };
   `}
 `;
 

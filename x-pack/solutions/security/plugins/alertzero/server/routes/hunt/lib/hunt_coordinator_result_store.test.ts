@@ -22,7 +22,7 @@ const makeClient = () =>
   ({
     create: jest.fn().mockResolvedValue({}),
     update: jest.fn().mockResolvedValue({}),
-  } as unknown as jest.Mocked<Pick<AttachmentPublicClient, 'create' | 'update'>>);
+  }) as unknown as jest.Mocked<Pick<AttachmentPublicClient, 'create' | 'update'>>;
 
 const target = (client: ReturnType<typeof makeClient>) => ({
   client: client as unknown as AttachmentPublicClient,

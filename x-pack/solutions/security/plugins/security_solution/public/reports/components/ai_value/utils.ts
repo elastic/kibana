@@ -34,12 +34,12 @@ export const getPercentInfo = ({
     color: isZero
       ? 'hollow'
       : isNegative
-      ? colorFamily === 'bright' || !colors
-        ? 'danger'
-        : colors?.backgroundBaseDanger
-      : colorFamily === 'bright' || !colors
-      ? 'success'
-      : colors?.backgroundBaseSuccess,
+        ? colorFamily === 'bright' || !colors
+          ? 'danger'
+          : colors?.backgroundBaseDanger
+        : colorFamily === 'bright' || !colors
+          ? 'success'
+          : colors?.backgroundBaseSuccess,
     note: isZero
       ? i18n.NO_CHANGE(statType)
       : i18n.STAT_DIFFERENCE({

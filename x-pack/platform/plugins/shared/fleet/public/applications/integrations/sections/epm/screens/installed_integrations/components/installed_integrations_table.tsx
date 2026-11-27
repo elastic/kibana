@@ -193,20 +193,21 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                                   }
                                 )
                               : isDeprecated
-                              ? i18n.translate(
-                                  'xpack.fleet.installedIntegrations.deprecatedTooltip',
-                                  {
-                                    defaultMessage: 'This integration is deprecated',
-                                  }
-                                )
-                              : hasDeprecatedPolicyTemplates
-                              ? i18n.translate(
-                                  'xpack.fleet.installedIntegrations.deprecatedPolicyTemplatesTooltip',
-                                  {
-                                    defaultMessage: 'This integration contains deprecated features',
-                                  }
-                                )
-                              : undefined
+                                ? i18n.translate(
+                                    'xpack.fleet.installedIntegrations.deprecatedTooltip',
+                                    {
+                                      defaultMessage: 'This integration is deprecated',
+                                    }
+                                  )
+                                : hasDeprecatedPolicyTemplates
+                                  ? i18n.translate(
+                                      'xpack.fleet.installedIntegrations.deprecatedPolicyTemplatesTooltip',
+                                      {
+                                        defaultMessage:
+                                          'This integration contains deprecated features',
+                                      }
+                                    )
+                                  : undefined
                           }
                         />
                       </EuiFlexItem>
@@ -444,27 +445,27 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                                 }
                               )
                             : !licenseService.isEnterprise()
-                            ? i18n.translate(
-                                'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationsNoEnterpriseLabel',
-                                {
-                                  defaultMessage:
-                                    'Rollback integrations requires an enterprise license.',
-                                }
-                              )
-                            : isRollbackTTLExpired(item)
-                            ? i18n.translate(
-                                'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationsTTLExpiredLabel',
-                                {
-                                  defaultMessage:
-                                    'Rollback is no longer allowed for this integration.',
-                                }
-                              )
-                            : i18n.translate(
-                                'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationLabel',
-                                {
-                                  defaultMessage: 'Rollback integration',
-                                }
-                              ),
+                              ? i18n.translate(
+                                  'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationsNoEnterpriseLabel',
+                                  {
+                                    defaultMessage:
+                                      'Rollback integrations requires an enterprise license.',
+                                  }
+                                )
+                              : isRollbackTTLExpired(item)
+                                ? i18n.translate(
+                                    'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationsTTLExpiredLabel',
+                                    {
+                                      defaultMessage:
+                                        'Rollback is no longer allowed for this integration.',
+                                    }
+                                  )
+                                : i18n.translate(
+                                    'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationLabel',
+                                    {
+                                      defaultMessage: 'Rollback integration',
+                                    }
+                                  ),
                       },
                       !authz.integrations.installPackages,
                       i18n.translate(

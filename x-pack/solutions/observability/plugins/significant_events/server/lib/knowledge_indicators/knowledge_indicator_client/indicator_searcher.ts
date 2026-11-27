@@ -237,8 +237,8 @@ export class IndicatorSearcher {
       hasQueryKind && options.ruleUnbacked === 'exclude'
         ? esql.exp`${esql.col(QUERY_RULE_BACKED)} == true`
         : hasQueryKind && options.ruleUnbacked === 'only'
-        ? esql.exp`${esql.col(QUERY_RULE_BACKED)} == false`
-        : undefined;
+          ? esql.exp`${esql.col(QUERY_RULE_BACKED)} == false`
+          : undefined;
 
     // Phase 1: ES|QL latest-per-group reduction (space-scoped by the revision reader).
     const where = combineWhere(

@@ -104,7 +104,9 @@ const collapsibleRegionStyles = ({ euiTheme }: UseEuiTheme) => {
       opacity: 1;
       visibility: visible;
       @media (prefers-reduced-motion: no-preference) {
-        transition: grid-template-rows ${duration} ${easing}, opacity ${duration} ${easing},
+        transition:
+          grid-template-rows ${duration} ${easing},
+          opacity ${duration} ${easing},
           visibility 0s;
       }
     `,
@@ -113,7 +115,9 @@ const collapsibleRegionStyles = ({ euiTheme }: UseEuiTheme) => {
       opacity: 0;
       visibility: hidden;
       @media (prefers-reduced-motion: no-preference) {
-        transition: grid-template-rows ${duration} ${easing}, opacity ${duration} ${easing},
+        transition:
+          grid-template-rows ${duration} ${easing},
+          opacity ${duration} ${easing},
           visibility 0s ${duration};
       }
     `,
@@ -251,7 +255,7 @@ export const HeaderZone = ({
   const titleLoadingNode = renderTitleLoading(isLoading);
   // The collapsed title truncates, so a string title gets a native hover reveal. A node title is
   // left untitled: a native `title` on its ancestor would cover any tooltip the node renders.
-  const collapsedTitleText = typeof title === 'string' ? titleText ?? title : undefined;
+  const collapsedTitleText = typeof title === 'string' ? (titleText ?? title) : undefined;
   const headerTestSubj = resolveZoneTestSubj(dataTestSubj, rootTestSubj, 'Header');
 
   // Every block kind carries its `instanceId` forward as its React key, so reordering or

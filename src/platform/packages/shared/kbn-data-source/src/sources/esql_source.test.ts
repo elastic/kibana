@@ -696,7 +696,7 @@ describe('EsqlSource', () => {
         post: jest.fn(async (path: string) =>
           path === TIMEFIELD_ROUTE ? { timeField: '@timestamp' } : { columns: [] }
         ),
-      } as unknown as HttpStart);
+      }) as unknown as HttpStart;
 
     it('skips the time field request when set to false', async () => {
       const http = createHttp();
@@ -761,7 +761,7 @@ describe('EsqlSource', () => {
         post: jest.fn(async (path: string) =>
           path === TIMEFIELD_ROUTE ? { timeField: '@timestamp' } : { columns: [] }
         ),
-      } as unknown as HttpStart);
+      }) as unknown as HttpStart;
 
     it('resolves the time field without requesting the schema', async () => {
       const http = createHttp();
@@ -842,7 +842,7 @@ describe('EsqlSource', () => {
           const { query } = JSON.parse(body) as { query: string };
           return { columns: (schemas[query] ?? []).map((name) => ({ name, esType: 'keyword' })) };
         }),
-      } as unknown as HttpStart);
+      }) as unknown as HttpStart;
 
     const names = (columns: ReadonlyArray<{ name: string }>) => columns.map(({ name }) => name);
 

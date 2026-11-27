@@ -10,7 +10,7 @@
 import type { WorkflowYaml } from '@kbn/workflows';
 import { extractReferencedWorkflowIds } from './extract_workflow_references';
 
-const makeDefinition = (steps: unknown[]): WorkflowYaml => ({ steps } as unknown as WorkflowYaml);
+const makeDefinition = (steps: unknown[]): WorkflowYaml => ({ steps }) as unknown as WorkflowYaml;
 
 describe('extractReferencedWorkflowIds', () => {
   it('should return empty array for a definition with no steps', () => {

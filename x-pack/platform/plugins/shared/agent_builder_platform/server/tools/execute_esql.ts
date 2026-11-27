@@ -162,7 +162,7 @@ ${isServerless ? '' : dataTiersSection}## API documentation
       } = toolParams;
       const usesTimeRangeParams = hasStartEndParams(esqlQuery);
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
-      const timeRangeParams = usesTimeRangeParams ? buildTimeRangeParams(timeRange) ?? [] : [];
+      const timeRangeParams = usesTimeRangeParams ? (buildTimeRangeParams(timeRange) ?? []) : [];
 
       const params: Array<Record<string, FieldValue>> = [
         ...Object.entries(esqlParams).map(([key, value]) => {

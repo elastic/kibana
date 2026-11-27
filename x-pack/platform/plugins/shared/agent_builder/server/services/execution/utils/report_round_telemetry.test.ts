@@ -50,10 +50,10 @@ const conversation = (parts: Partial<Conversation> = {}): Conversation =>
     updated_at: '2026-01-01T00:00:00.000Z',
     rounds: [],
     ...parts,
-  } as Conversation);
+  }) as Conversation;
 
 const completeEvent = (data: Partial<RoundCompleteEvent['data']>): RoundCompleteEvent =>
-  ({ type: ChatEventType.roundComplete, data: { round: round(), ...data } } as RoundCompleteEvent);
+  ({ type: ChatEventType.roundComplete, data: { round: round(), ...data } }) as RoundCompleteEvent;
 
 /** The stored terminal of execution `index`, which the next resume measures its latency against. */
 const terminatedEvent = (index: number, createdAt: string) =>
@@ -64,7 +64,7 @@ const terminatedEvent = (index: number, createdAt: string) =>
     execution_id: index === 0 ? 'r1::execution' : `r1::execution::${index}`,
     actor: { type: 'agent', id: 'agent-1' },
     data: {},
-  } as unknown as NonNullable<Conversation['events']>[number]);
+  }) as unknown as NonNullable<Conversation['events']>[number];
 
 const pauseTerminatedEvent = (createdAt: string) => terminatedEvent(0, createdAt);
 

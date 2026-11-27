@@ -98,16 +98,20 @@ export function OnboardingStepsCard({
                     height: ${indicatorSize};
                     justify-content: center;
                     width: ${indicatorSize};
-                    background: ${isComplete
-                      ? euiTheme.colors.backgroundLightSuccess
-                      : isCurrent
-                      ? euiTheme.colors.backgroundLightPrimary
-                      : euiTheme.colors.backgroundBaseSubdued};
-                    color: ${isComplete
-                      ? euiTheme.colors.textSuccess
-                      : isCurrent
-                      ? euiTheme.colors.textPrimary
-                      : euiTheme.colors.textSubdued};
+                    background: ${
+                      isComplete
+                        ? euiTheme.colors.backgroundLightSuccess
+                        : isCurrent
+                          ? euiTheme.colors.backgroundLightPrimary
+                          : euiTheme.colors.backgroundBaseSubdued
+                    };
+                    color: ${
+                      isComplete
+                        ? euiTheme.colors.textSuccess
+                        : isCurrent
+                          ? euiTheme.colors.textPrimary
+                          : euiTheme.colors.textSubdued
+                    };
                   `}
                 >
                   {isComplete ? <EuiIcon type="check" size="m" aria-hidden={true} /> : index + 1}
@@ -138,9 +142,9 @@ export function OnboardingStepsCard({
                   size="s"
                   color={isCurrent || isComplete ? 'default' : 'subdued'}
                   css={css`
-                    font-weight: ${isCurrent
-                      ? euiTheme.font.weight.semiBold
-                      : euiTheme.font.weight.regular};
+                    font-weight: ${
+                      isCurrent ? euiTheme.font.weight.semiBold : euiTheme.font.weight.regular
+                    };
                     ${hint ? '' : `line-height: ${indicatorSize};`}
                   `}
                 >

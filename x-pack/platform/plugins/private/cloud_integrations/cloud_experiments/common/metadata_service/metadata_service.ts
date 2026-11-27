@@ -113,7 +113,10 @@ export class MetadataService {
   private readonly _userMetadata$ = new BehaviorSubject<FlatMetadata | undefined>(undefined);
   private readonly stop$ = new Subject<void>();
 
-  constructor(private readonly config: MetadataServiceConfig, private readonly logger: Logger) {}
+  constructor(
+    private readonly config: MetadataServiceConfig,
+    private readonly logger: Logger
+  ) {}
 
   public setup(initialUserMetadata: FlatMetadata) {
     this._userMetadata$.next(initialUserMetadata);

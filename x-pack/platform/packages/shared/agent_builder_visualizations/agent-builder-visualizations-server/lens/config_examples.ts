@@ -15,11 +15,12 @@ type ConfigInput<T extends SupportedChartType> = z.input<ChartTypeRegistry[T]['s
 type WithoutDataSource<T> = T extends unknown ? Omit<T, 'data_source'> : never;
 
 /** A Lens config as the model writes it. The system injects every `data_source`. */
-export type AuthoredLensConfig<T extends SupportedChartType> = ConfigInput<T> extends {
-  layers: Array<infer Layer>;
-}
-  ? Omit<ConfigInput<T>, 'layers'> & { layers: Array<WithoutDataSource<Layer>> }
-  : WithoutDataSource<ConfigInput<T>>;
+export type AuthoredLensConfig<T extends SupportedChartType> =
+  ConfigInput<T> extends {
+    layers: Array<infer Layer>;
+  }
+    ? Omit<ConfigInput<T>, 'layers'> & { layers: Array<WithoutDataSource<Layer>> }
+    : WithoutDataSource<ConfigInput<T>>;
 
 export interface LensConfigExample {
   /** The data shape or request the example fits. */

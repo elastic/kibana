@@ -39,7 +39,7 @@ export type ActionRequestComponentProps<
   /** The response action output as defined in the ActionDetails when action completes */
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
   /** The action's parameters as defined in the ActionDetails for the command */
-  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
 > = CommandExecutionComponentProps<
   { comment?: string } & TArgs,
   CommandResponseActionApiState<TOutputContent, TParameters>,

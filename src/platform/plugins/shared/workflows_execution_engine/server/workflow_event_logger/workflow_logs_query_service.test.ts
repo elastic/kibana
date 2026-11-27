@@ -14,7 +14,7 @@ import type { LogsRepository } from '../repositories/logs_repository';
 const createLoggerMock = () =>
   ({
     error: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 describe('WorkflowLogsQueryService', () => {
   it('maps paging fields for repository search helpers', async () => {

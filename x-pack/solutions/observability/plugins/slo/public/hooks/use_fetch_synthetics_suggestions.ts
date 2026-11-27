@@ -68,7 +68,7 @@ export function useFetchSyntheticsSuggestions({
   });
 
   return {
-    suggestions: isInitialLoading ? [] : data?.[fieldName] ?? [],
+    suggestions: isInitialLoading ? [] : (data?.[fieldName] ?? []),
     isLoading: isInitialLoading || isLoading || isRefetching,
     isSuccess,
     isError,

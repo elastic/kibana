@@ -64,7 +64,7 @@ const createEvent = (investigations?: SignificantEvent['investigations']): Signi
     severity: 'high',
     confidence: 0.9,
     investigations,
-  } as SignificantEvent);
+  }) as SignificantEvent;
 
 describe('useSignificantEventsList', () => {
   beforeEach(() => {

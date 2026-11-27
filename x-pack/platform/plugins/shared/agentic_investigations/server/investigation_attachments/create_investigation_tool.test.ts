@@ -42,7 +42,7 @@ const contextWith = (stack: ToolHandlerContext['runContext']['stack']) =>
   ({
     request: httpServerMock.createKibanaRequest(),
     runContext: { runId: 'run-1', stack },
-  } as unknown as ToolHandlerContext);
+  }) as unknown as ToolHandlerContext;
 
 const run = async (tool: ReturnType<typeof createTool>, context: ToolHandlerContext) =>
   (await tool.handler({ value: 'x' }, context)) as ToolHandlerStandardReturn;

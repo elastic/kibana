@@ -145,7 +145,7 @@ describe('addRoundCompleteEvent', () => {
     ({
       type: ChatEventType.messageComplete,
       data: { message_id: 'm', message_content: content },
-    } as ChatAgentEvent);
+    }) as ChatAgentEvent;
 
   /** The chat events of a run that completed, with its final state fed to the tracker. */
   const completedRun = (

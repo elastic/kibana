@@ -184,7 +184,7 @@ describe('ApplyMaintenanceWindowStep', () => {
     });
 
     const result = await step.execute(state, logger);
-    const suppressed = result.type === 'continue' ? result.data?.triage?.suppressed ?? [] : [];
+    const suppressed = result.type === 'continue' ? (result.data?.triage?.suppressed ?? []) : [];
 
     expect(suppressed).toHaveLength(expectedSuppressed);
   });

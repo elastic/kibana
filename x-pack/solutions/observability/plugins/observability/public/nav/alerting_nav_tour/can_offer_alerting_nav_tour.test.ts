@@ -26,7 +26,7 @@ const buildCore = ({
   ({
     notifications: { tours: { isEnabled: () => toursEnabled } },
     chrome: { getActiveSolutionNavId: () => solutionNavId },
-  } as unknown as CoreStart);
+  }) as unknown as CoreStart;
 
 describe('canOfferAlertingNavTour', () => {
   beforeEach(() => {

@@ -43,7 +43,7 @@ describe('classifyDetection', () => {
         SignalVerdict,
         ProbeOutcome,
         DetectionClassification['decision'],
-        SkipReason | NeedsAgentReason
+        SkipReason | NeedsAgentReason,
       ]
     >([
       ['breaching with rows', 'confirms', withRows, 'skip', 'still_breaching'],

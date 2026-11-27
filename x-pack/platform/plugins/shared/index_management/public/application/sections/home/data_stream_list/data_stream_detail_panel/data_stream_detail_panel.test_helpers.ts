@@ -105,4 +105,4 @@ export const createMockAppContext = (): AppDependencies =>
       enableIndexMode: true,
       isServerless: false,
     },
-  } as unknown as AppDependencies);
+  }) as unknown as AppDependencies;

@@ -12,7 +12,7 @@ import { SOURCES_TYPES } from '@kbn/esql-types';
 import { EsqlService } from './esql_service';
 
 const makeClient = (resolveIndexMock: jest.Mock) =>
-  ({ indices: { resolveIndex: resolveIndexMock } } as unknown as ElasticsearchClient);
+  ({ indices: { resolveIndex: resolveIndexMock } }) as unknown as ElasticsearchClient;
 
 const emptyResponse = { indices: [], aliases: [], data_streams: [] };
 
@@ -117,7 +117,7 @@ describe('EsqlService.getAllIndices', () => {
 
 describe('EsqlService ES|QL views', () => {
   const makeViewsClient = (getView: jest.Mock) =>
-    ({ esql: { getView } } as unknown as ElasticsearchClient);
+    ({ esql: { getView } }) as unknown as ElasticsearchClient;
 
   it('gets all views through the generated Elasticsearch client', async () => {
     const response = {

@@ -12,9 +12,11 @@ import { registerStarredDashboardsCountRoute } from './routes/starred_dashboards
 import { registerSearchSkills } from './skills/register_search_skills';
 import type { ElasticsearchHomeServerSetupDependencies } from './types';
 
-export class ElasticsearchHomePlugin
-  implements Plugin<void, void, ElasticsearchHomeServerSetupDependencies>
-{
+export class ElasticsearchHomePlugin implements Plugin<
+  void,
+  void,
+  ElasticsearchHomeServerSetupDependencies
+> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

@@ -285,8 +285,8 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
                 deleteProvider={handleDeleteProvider}
                 field={
                   index > 0
-                    ? dataProvider.queryMatch.displayField ?? dataProvider.queryMatch.field
-                    : group[0].queryMatch.displayField ?? group[0].queryMatch.field
+                    ? (dataProvider.queryMatch.displayField ?? dataProvider.queryMatch.field)
+                    : (group[0].queryMatch.displayField ?? group[0].queryMatch.field)
                 }
                 kqlQuery={index > 0 ? dataProvider.kqlQuery : group[0].kqlQuery}
                 isEnabled={index > 0 ? dataProvider.enabled : group[0].enabled}
@@ -295,8 +295,8 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
                 onDataProviderEdited={handleDataProviderEdited}
                 operator={
                   index > 0
-                    ? dataProvider.queryMatch.operator ?? IS_OPERATOR
-                    : group[0].queryMatch.operator ?? IS_OPERATOR
+                    ? (dataProvider.queryMatch.operator ?? IS_OPERATOR)
+                    : (group[0].queryMatch.operator ?? IS_OPERATOR)
                 }
                 register={dataProvider}
                 providerId={index > 0 ? group[0].id : dataProvider.id}

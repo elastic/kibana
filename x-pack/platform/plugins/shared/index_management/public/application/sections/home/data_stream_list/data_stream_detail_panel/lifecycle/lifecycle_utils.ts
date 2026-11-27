@@ -93,8 +93,8 @@ export const getTemplateIlmSettings = (
     typeof templateIlmNameRaw === 'string' && templateIlmNameRaw.length > 0
       ? templateIlmNameRaw
       : fallbackToTemplateIlmPolicy
-      ? template.ilmPolicy?.name
-      : undefined;
+        ? template.ilmPolicy?.name
+        : undefined;
   const preferIlmRaw = templateIndexLifecycle?.prefer_ilm;
   const preferIlm = typeof preferIlmRaw === 'boolean' ? preferIlmRaw : true; // ES default
 

@@ -54,18 +54,18 @@ export const getUpdateProposalStepDefinition = ({
           input.decision === undefined
             ? undefined
             : answered
-            ? (await resolveUser(request)) ?? {
-                username: respondedBy,
-                fullName: null,
-                email: null,
-              }
-            : await resolveStepUser({
-                request,
-                executionId: workflowContext.execution.id,
-                spaceId,
-                resolveUser,
-                resolveWorkerUser,
-              });
+              ? ((await resolveUser(request)) ?? {
+                  username: respondedBy,
+                  fullName: null,
+                  email: null,
+                })
+              : await resolveStepUser({
+                  request,
+                  executionId: workflowContext.execution.id,
+                  spaceId,
+                  resolveUser,
+                  resolveWorkerUser,
+                });
 
         const proposal = await getProposalsService().update(
           {

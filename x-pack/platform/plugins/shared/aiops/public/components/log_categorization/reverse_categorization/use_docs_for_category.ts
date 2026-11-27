@@ -77,8 +77,8 @@ export function useDocsForCategory() {
         const timeIndex = response.columns.findIndex((column) => column.name === timeField);
 
         const results = response.values.map((row) => ({
-          message: String(fieldIndex >= 0 ? row[fieldIndex] ?? '' : ''),
-          timestamp: String(timeIndex >= 0 ? row[timeIndex] ?? '' : ''),
+          message: String(fieldIndex >= 0 ? (row[fieldIndex] ?? '') : ''),
+          timestamp: String(timeIndex >= 0 ? (row[timeIndex] ?? '') : ''),
         }));
 
         return {

@@ -159,7 +159,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
     const openModal = useCallback(() => setIsModalOpen(true), []);
     const closeModal = useCallback(() => setIsModalOpen(false), []);
 
-    const approvalPhase: ApprovalPhase = decision ? decision.status : isSubmitting ?? 'pending';
+    const approvalPhase: ApprovalPhase = decision ? decision.status : (isSubmitting ?? 'pending');
 
     const badge = getApprovalOutcomeBadge(approvalPhase) ?? PENDING_BADGE;
 

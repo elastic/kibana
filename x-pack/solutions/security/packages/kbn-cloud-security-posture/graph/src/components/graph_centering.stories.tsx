@@ -101,12 +101,12 @@ const createEntityNode = ({
       shape === 'ellipse'
         ? 'user'
         : shape === 'hexagon'
-        ? 'storage'
-        : shape === 'diamond'
-        ? 'globe'
-        : 'globe',
+          ? 'storage'
+          : shape === 'diamond'
+            ? 'globe'
+            : 'globe',
     toolbarItemsFn: storybookToolbarItems,
-  } as NodeViewModel);
+  }) as NodeViewModel;
 
 const createRelationshipStoryNode = ({
   id,
@@ -122,7 +122,7 @@ const createRelationshipStoryNode = ({
     shape: 'relationship',
     label,
     isOrigin,
-  } as NodeViewModel);
+  }) as NodeViewModel;
 
 const createLabelNode = ({
   id,

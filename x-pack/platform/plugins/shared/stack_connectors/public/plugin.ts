@@ -23,9 +23,11 @@ export interface StackConnectorsPublicSetupDeps {
   actions: ActionsPublicPluginSetup;
 }
 
-export class StackConnectorsPublicPlugin
-  implements Plugin<Setup, Start, StackConnectorsPublicSetupDeps>
-{
+export class StackConnectorsPublicPlugin implements Plugin<
+  Setup,
+  Start,
+  StackConnectorsPublicSetupDeps
+> {
   private config: StackConnectorsConfigType;
   readonly experimentalFeatures: ExperimentalFeatures;
 

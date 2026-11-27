@@ -64,9 +64,10 @@ spaceTest.describe('Data view field list filters', { tag: tags.deploymentAgnosti
         async () => {
           await expect
             .poll(async () =>
-              (
-                await pageObjects.dataViewDetail.getFieldNames()
-              ).slice(0, expectedUnfilteredStart.length)
+              (await pageObjects.dataViewDetail.getFieldNames()).slice(
+                0,
+                expectedUnfilteredStart.length
+              )
             )
             .toStrictEqual(expectedUnfilteredStart);
         }
@@ -88,9 +89,10 @@ spaceTest.describe('Data view field list filters', { tag: tags.deploymentAgnosti
           await pageObjects.dataViewDetail.setSchemaFieldTypeFilter('indexed');
           await expect
             .poll(async () =>
-              (
-                await pageObjects.dataViewDetail.getFieldNames()
-              ).slice(0, expectedUnfilteredStart.length)
+              (await pageObjects.dataViewDetail.getFieldNames()).slice(
+                0,
+                expectedUnfilteredStart.length
+              )
             )
             .toStrictEqual(expectedUnfilteredStart);
         }

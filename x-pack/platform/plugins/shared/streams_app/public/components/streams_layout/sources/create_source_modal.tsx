@@ -95,10 +95,10 @@ export const CreateSourceModal = ({ sources, onClose }: CreateSourceModalProps) 
           defaultMessage: 'Enter a source name.',
         })
       : sourceNameError === 'duplicate'
-      ? i18n.translate('xpack.streams.sources.sourceNameDuplicateError', {
-          defaultMessage: 'A source with this name already exists.',
-        })
-      : undefined;
+        ? i18n.translate('xpack.streams.sources.sourceNameDuplicateError', {
+            defaultMessage: 'A source with this name already exists.',
+          })
+        : undefined;
   const isSetup = Boolean(createdSource && !isCreatingSource && !isCreateFailed);
   const modalTitle = i18n.translate('xpack.streams.sources.createSourceModalTitle', {
     defaultMessage: 'Create source',

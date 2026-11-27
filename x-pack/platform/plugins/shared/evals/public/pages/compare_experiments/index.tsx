@@ -157,8 +157,8 @@ const DiffValue: React.FC<{
     diff === 0 || direction === 'neutral'
       ? null
       : improved
-      ? i18n.DIFF_IMPROVED
-      : i18n.DIFF_REGRESSED;
+        ? i18n.DIFF_IMPROVED
+        : i18n.DIFF_REGRESSED;
   const discordantHint = discordantPairs
     ? i18n.getDiscordantPairsHint(discordantPairs.targetOnly, discordantPairs.baselineOnly)
     : null;
@@ -864,8 +864,8 @@ export const CompareExperimentsPage: React.FC = () => {
                 csvCopyState === 'copied'
                   ? 'check'
                   : csvCopyState === 'failed'
-                  ? 'warning'
-                  : 'upload'
+                    ? 'warning'
+                    : 'upload'
               }
               onClick={handleCsvExport}
               disabled={csvCopyState !== 'idle'}
@@ -873,8 +873,8 @@ export const CompareExperimentsPage: React.FC = () => {
               {csvCopyState === 'copied'
                 ? i18n.EXPORT_CSV_COPIED
                 : csvCopyState === 'failed'
-                ? i18n.EXPORT_CSV_FAILED
-                : i18n.EXPORT_CSV}
+                  ? i18n.EXPORT_CSV_FAILED
+                  : i18n.EXPORT_CSV}
             </EuiButton>
           </EuiFlexItem>
         )}

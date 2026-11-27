@@ -132,7 +132,7 @@ describe('ingestInboundEvent', () => {
         headers,
         handleEvents,
       },
-    } as ReturnType<typeof getConnectorSpec>);
+    }) as ReturnType<typeof getConnectorSpec>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -204,7 +204,7 @@ describe('ingestInboundEvent', () => {
       inMemoryConnectors: overrides?.inMemoryConnectors ?? [],
       remoteAddress: overrides?.omitRemoteAddress
         ? undefined
-        : overrides?.remoteAddress ?? '203.0.113.4',
+        : (overrides?.remoteAddress ?? '203.0.113.4'),
       rateLimiter: overrides?.rateLimiter ?? rateLimiter,
     });
     mapIngestResultToResponse(result, response);

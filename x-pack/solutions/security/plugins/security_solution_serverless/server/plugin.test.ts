@@ -84,7 +84,7 @@ const createMinimalSetupDeps = (alertzero?: {
     cloud: {} as SecuritySolutionServerlessPluginSetupDeps['cloud'],
     actions: {} as SecuritySolutionServerlessPluginSetupDeps['actions'],
     alertzero: alertzero ? { ...alertzero, setServerlessTierAvailable: jest.fn() } : undefined,
-  } as unknown as SecuritySolutionServerlessPluginSetupDeps);
+  }) as unknown as SecuritySolutionServerlessPluginSetupDeps;
 
 describe('SecuritySolutionServerlessPlugin', () => {
   describe('setup — alertzero project-setting allowlist', () => {

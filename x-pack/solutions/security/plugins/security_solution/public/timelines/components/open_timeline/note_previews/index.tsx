@@ -250,7 +250,7 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
                   (acc, [id, noteIds]) => (noteIds.includes(note.noteId ?? '') ? id : acc),
                   null
                 )
-              : note.eventId ?? null;
+              : (note.eventId ?? null);
           return {
             'data-test-subj': `note-preview-${note.savedObjectId}`,
             username: defaultToEmptyTag(note.updatedBy),

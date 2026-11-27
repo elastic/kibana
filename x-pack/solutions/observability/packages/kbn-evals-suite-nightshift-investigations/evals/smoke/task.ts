@@ -47,7 +47,7 @@ export const summarizeSeedData = async ({
 
   return {
     indices,
-    documentCount: typeof total === 'number' ? total : total?.value ?? 0,
+    documentCount: typeof total === 'number' ? total : (total?.value ?? 0),
     latestTimestamp: response.aggregations?.latest_timestamp.value_as_string ?? null,
   };
 };

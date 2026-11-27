@@ -12,9 +12,9 @@ import { createRouteDependencies } from '../test_utils';
 import { RunRuleRoute } from './run_rule_route';
 
 const createRulesClientStub = () =>
-  ({ runRuleNow: jest.fn().mockResolvedValue(undefined) } as unknown as jest.Mocked<
+  ({ runRuleNow: jest.fn().mockResolvedValue(undefined) }) as unknown as jest.Mocked<
     Pick<RulesClient, 'runRuleNow'>
-  >);
+  >;
 
 describe('RunRuleRoute', () => {
   const request = httpServerMock.createKibanaRequest({ params: { id: 'rule-1' } });

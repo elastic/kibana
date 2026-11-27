@@ -72,7 +72,7 @@ describe('uploadConfigToVault', () => {
     const [command, args, options] = mockedExeca.mock.calls[0] as unknown as [
       string,
       string[],
-      execa.Options
+      execa.Options,
     ];
     expect(command).toBe('vault');
     expect(args).toEqual(['kv', 'put', 'kv/ci-shared/kbn-evals/golden', 'config=-']);
@@ -137,7 +137,7 @@ describe('retrieveConfigFromVault', () => {
     const [, args, options] = mockedExeca.mock.calls[0] as unknown as [
       string,
       string[],
-      execa.Options
+      execa.Options,
     ];
     expect(args).toEqual([
       'kv',

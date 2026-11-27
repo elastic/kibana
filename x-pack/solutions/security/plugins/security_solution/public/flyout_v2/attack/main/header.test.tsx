@@ -86,7 +86,7 @@ const createMockHit = (overrides: Partial<DataTableRecord> = {}): DataTableRecor
     },
     isAnchor: false,
     ...overrides,
-  } as DataTableRecord);
+  }) as DataTableRecord;
 
 const mockUseGetAttackFlyoutLink = useGetAttackFlyoutLink as jest.Mock;
 

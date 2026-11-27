@@ -51,7 +51,7 @@ const conversation = (
     attachments: [],
     permissions: { rename: true, delete: true, update_access_control: true },
     ...overrides,
-  } as ConversationWithoutRoundsWithPermissions);
+  }) as ConversationWithoutRoundsWithPermissions;
 
 const subject = (
   conversationId: string,
@@ -900,10 +900,10 @@ describe('InvestigationsQueryService', () => {
           ({
             listByConversationIds: jest.fn().mockResolvedValue([]),
             getDocumentService: () => ({ searchConversationIds: jest.fn() }),
-          } as unknown as ImpactService),
+          }) as unknown as ImpactService,
         getSubjectsService: () => subjectsService,
         getHypothesesService: () =>
-          ({ findByConversationId: jest.fn() } as unknown as HypothesesService),
+          ({ findByConversationId: jest.fn() }) as unknown as HypothesesService,
         getProposals: () => undefined,
         inProgress: {
           findInProgressIds: jest.fn().mockResolvedValue(new Set()),

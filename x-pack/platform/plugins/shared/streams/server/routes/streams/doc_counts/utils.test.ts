@@ -22,7 +22,7 @@ const makeDataStream = (name: string, indexNames: Array<string | undefined>): Da
   ({
     name,
     indices: indexNames.map((index_name) => ({ index_name })),
-  } as DataStreams[number]);
+  }) as DataStreams[number];
 
 describe('getAllBackingIndicesByStream', () => {
   it('returns all backing indices for each stream, not just the write index', () => {
@@ -257,7 +257,7 @@ describe('getDataStreamsMeteringStats', () => {
 
 describe('getDataStreamsWithIndexNames', () => {
   const makeClient = (getDataStream: jest.Mock) =>
-    ({ indices: { getDataStream } } as unknown as ElasticsearchClient);
+    ({ indices: { getDataStream } }) as unknown as ElasticsearchClient;
 
   const notFoundError = () =>
     new errors.ResponseError({

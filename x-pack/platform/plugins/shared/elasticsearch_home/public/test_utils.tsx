@@ -61,5 +61,4 @@ export const renderWithHomeContext = (ui: ReactElement, options: HomeTestContext
 /** Wrapper for `renderHook`, for hooks that read the home page's services or config. */
 export const homeContextWrapper =
   (options: HomeTestContextOptions = {}) =>
-  ({ children }: PropsWithChildren) =>
-    <HomeTestContext {...options}>{children}</HomeTestContext>;
+  ({ children }: PropsWithChildren) => <HomeTestContext {...options}>{children}</HomeTestContext>;

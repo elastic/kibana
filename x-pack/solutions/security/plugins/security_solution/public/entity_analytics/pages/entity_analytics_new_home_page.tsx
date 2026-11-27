@@ -458,7 +458,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
         openEntityAlertsInsights({
           entityType,
           value:
-            entityType === SecurityEntityType.generic ? entity.entityId : entity.entityName ?? '',
+            entityType === SecurityEntityType.generic ? entity.entityId : (entity.entityName ?? ''),
           entityId: entity.entityId,
           scopeId,
           mode: getEntityViewMode(rowMode),

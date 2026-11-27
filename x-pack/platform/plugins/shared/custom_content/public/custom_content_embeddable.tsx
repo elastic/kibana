@@ -159,7 +159,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const effectiveTimeRange$ = new BehaviorSubject<TimeRange | undefined>(
       timeRangeManager.api.timeRange$.getValue() ??
         (apiPublishesTimeRange(parentApi)
-          ? parentApi.timeRange$.getValue() ?? undefined
+          ? (parentApi.timeRange$.getValue() ?? undefined)
           : undefined)
     );
     const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
@@ -237,9 +237,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           parentApi,
           returnFocus,
           loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
-            const { EditCustomContentFlyout } = await import(
-              './components/edit_custom_content_flyout'
-            );
+            const { EditCustomContentFlyout } =
+              await import('./components/edit_custom_content_flyout');
 
             const handleSave = (
               newEsqlQuery: string | undefined,

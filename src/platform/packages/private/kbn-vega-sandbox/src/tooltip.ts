@@ -135,7 +135,11 @@ export class TooltipHandler {
   private readonly position: NonNullable<VegaSandboxTooltipConfig['position']>;
   private readonly textTruncate: boolean;
 
-  constructor(private readonly container: HTMLElement, view: View, opts: VegaSandboxTooltipConfig) {
+  constructor(
+    private readonly container: HTMLElement,
+    view: View,
+    opts: VegaSandboxTooltipConfig
+  ) {
     this.centerOnMark = normalizeCenterOnMark(opts.centerOnMark);
     this.padding = normalizePadding(opts.padding);
     this.position = opts.position ?? 'top';

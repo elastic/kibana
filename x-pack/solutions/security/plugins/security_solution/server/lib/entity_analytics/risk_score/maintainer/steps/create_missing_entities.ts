@@ -108,9 +108,8 @@ export const createMissingEntities = async ({
       `not_in_store scores (${result.skipped.length} had no representative alert document)`
   );
 
-  const { created, alreadyExists, skipped, failed } = await crudClient.createEntitiesFromSource(
-    requests
-  );
+  const { created, alreadyExists, skipped, failed } =
+    await crudClient.createEntitiesFromSource(requests);
 
   result.created.push(...created);
   result.alreadyExists.push(...alreadyExists);

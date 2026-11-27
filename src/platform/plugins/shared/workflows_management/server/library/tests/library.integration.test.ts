@@ -47,8 +47,8 @@ const startFixtureServer = async (): Promise<FixtureServer> => {
         filePath.endsWith('.json')
           ? 'application/json'
           : filePath.endsWith('.yaml')
-          ? 'application/yaml'
-          : 'application/octet-stream'
+            ? 'application/yaml'
+            : 'application/octet-stream'
       );
       res.end(data);
     } catch {

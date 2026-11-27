@@ -110,7 +110,7 @@ const stubExecutor = (): EvalsExecutorClient =>
       return [];
     },
     getDatasetRunResults: async () => [],
-  } as unknown as EvalsExecutorClient);
+  }) as unknown as EvalsExecutorClient;
 
 const judgeStub = (name: string): Evaluator => ({
   name,

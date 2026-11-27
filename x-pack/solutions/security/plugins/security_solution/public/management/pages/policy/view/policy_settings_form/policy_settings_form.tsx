@@ -31,9 +31,8 @@ import { useGetDeviceControlUpsellComponent } from './hooks/use_get_device_contr
 import { DeviceControlCard } from './components/cards/device_control_card';
 
 const PerOsPolicySettingsForm = lazy(async () => {
-  const { PerOsPolicySettingsForm: LazyPerOsPolicySettingsForm } = await import(
-    './per_os/per_os_policy_settings_form'
-  );
+  const { PerOsPolicySettingsForm: LazyPerOsPolicySettingsForm } =
+    await import('./per_os/per_os_policy_settings_form');
 
   return { default: LazyPerOsPolicySettingsForm };
 });

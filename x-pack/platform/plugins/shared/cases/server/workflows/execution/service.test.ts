@@ -121,14 +121,14 @@ describe('CasesWorkflowRunService', () => {
       caseId: 'case-1',
       attachmentType: 'security.alert',
       attachmentId,
-    } as const);
+    }) as const;
   const alertsOrigin = (attachmentIds: string[]) =>
     ({
       type: 'cases.attachments',
       caseId: 'case-1',
       attachmentType: 'security.alert',
       attachmentIds,
-    } as const);
+    }) as const;
   const defaultBody: RunCaseWorkflowRequest = {
     caseIds: ['case-1'],
     inputs: { event: { caseIds: ['case-1'] } },

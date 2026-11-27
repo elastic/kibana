@@ -46,15 +46,12 @@ interface CloudConnectedStartDeps {
   licensing: LicensingPluginStart;
 }
 
-export class CloudConnectedPlugin
-  implements
-    Plugin<
-      CloudConnectedPluginSetup,
-      CloudConnectedPluginStart,
-      CloudConnectedSetupDeps,
-      CloudConnectedStartDeps
-    >
-{
+export class CloudConnectedPlugin implements Plugin<
+  CloudConnectedPluginSetup,
+  CloudConnectedPluginStart,
+  CloudConnectedSetupDeps,
+  CloudConnectedStartDeps
+> {
   private readonly logger: Logger;
   private readonly config: CloudConnectConfig;
   private licenseSubscription?: Subscription;

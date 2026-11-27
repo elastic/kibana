@@ -308,7 +308,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
 
   // The table is only filtered by the first entities of a tile that has more: say how many of the
   // tile's entities it shows. The numbers wait for the table's own total, like the plain one.
-  const toolbarTotal = total == null ? undefined : cappedTile?.total ?? total;
+  const toolbarTotal = total == null ? undefined : (cappedTile?.total ?? total);
   const shown = cappedTile ? total : isAtLoadLimit ? rows.length : undefined;
   const limitNote = useMemo(
     () =>

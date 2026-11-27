@@ -15,10 +15,10 @@ const regexRule = (overrides: Partial<AnonymizationRule> = {}): AnonymizationRul
     entityClass: 'IP',
     pattern: '\\d+',
     ...overrides,
-  } as AnonymizationRule);
+  }) as AnonymizationRule;
 
 const nerRule = (overrides: Partial<AnonymizationRule> = {}): AnonymizationRule =>
-  ({ type: 'NER', enabled: true, modelId: 'model', ...overrides } as AnonymizationRule);
+  ({ type: 'NER', enabled: true, modelId: 'model', ...overrides }) as AnonymizationRule;
 
 describe('addAnonymizationInstruction', () => {
   it('returns the system prompt unchanged when no rule is enabled', () => {

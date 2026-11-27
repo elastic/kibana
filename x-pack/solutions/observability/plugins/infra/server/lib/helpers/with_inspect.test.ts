@@ -12,10 +12,10 @@ const createMockResponse = () =>
   ({
     ok: jest.fn(({ body }) => ({ body, statusCode: 200 })),
     customError: jest.fn(({ statusCode, body }) => ({ statusCode, body })),
-  } as unknown as KibanaResponseFactory);
+  }) as unknown as KibanaResponseFactory;
 
 const createMockRequest = (query: Record<string, unknown> = {}) =>
-  ({ query } as unknown as KibanaRequest);
+  ({ query }) as unknown as KibanaRequest;
 
 describe('withInspect', () => {
   afterEach(() => {

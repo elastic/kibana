@@ -16,14 +16,14 @@ import type { z, ZodObject } from '@kbn/zod/v4';
 // Utility type to rename multiple fields in a type
 export type RenameFields<
   T,
-  Renames extends { [K in keyof Renames]: K extends keyof T ? string : never }
+  Renames extends { [K in keyof Renames]: K extends keyof T ? string : never },
 > = Omit<T, keyof Renames> & {
   [K in keyof Renames as Renames[K]]: K extends keyof T ? T[K] : never;
 };
 
 export type RenameFieldsAndRemoveAction<
   T,
-  Renames extends { [K in keyof Renames]: K extends keyof T ? string : never }
+  Renames extends { [K in keyof Renames]: K extends keyof T ? string : never },
 > = Omit<RenameFields<T, Renames>, 'action'>;
 
 /** Zod object shape: record of string keys to Zod types */
@@ -34,7 +34,7 @@ type ZodObjectShape = Record<string, z.ZodType>;
  */
 export function zodRenameFields<
   T extends ZodObject<ZodObjectShape>,
-  Renames extends Record<string, string>
+  Renames extends Record<string, string>,
 >(schema: T, renames: Renames): ZodObject<ZodObjectShape> {
   // Remove old fields
   const newSchema = schema.omit(
@@ -57,7 +57,7 @@ export function zodRenameFields<
  */
 export function zodRenameFieldsAndRemoveAction<
   T extends ZodObject<ZodObjectShape>,
-  Renames extends Record<string, string>
+  Renames extends Record<string, string>,
 >(schema: T, renames: Renames): ZodObject<ZodObjectShape> {
   return zodRenameFields(schema, renames).omit({ action: true });
 }
