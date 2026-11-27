@@ -815,13 +815,12 @@ describe('triage match decisions step in on mode', () => {
       ],
       [{ _id: 'late', _source: source('C:\\x.exe'), sort: [1, 'z'] }],
     ];
-    callKibanaApi.mockImplementation(
-      async (params: { path: string; body?: Record<string, any> }) =>
-        params.path.endsWith('/signals/search') &&
-        params.body?.size !== 0 &&
-        !params.body?.query?.bool?.filter?.[0]?.ids
-          ? { body: { hits: { hits: pages.shift() ?? [] } } }
-          : inner(params)
+    callKibanaApi.mockImplementation(async (params: { path: string; body?: Record<string, any> }) =>
+      params.path.endsWith('/signals/search') &&
+      params.body?.size !== 0 &&
+      !params.body?.query?.bool?.filter?.[0]?.ids
+        ? { body: { hits: { hits: pages.shift() ?? [] } } }
+        : inner(params)
     );
 
     const { output } = await run();
@@ -874,13 +873,12 @@ describe('triage match decisions step in on mode', () => {
       ],
       [{ _id: 'late', _source: source('C:\\x.exe'), sort: [1, 'z'] }],
     ];
-    callKibanaApi.mockImplementation(
-      async (params: { path: string; body?: Record<string, any> }) =>
-        params.path.endsWith('/signals/search') &&
-        params.body?.size !== 0 &&
-        !params.body?.query?.bool?.filter?.[0]?.ids
-          ? { body: { hits: { hits: pages.shift() ?? [] } } }
-          : inner(params)
+    callKibanaApi.mockImplementation(async (params: { path: string; body?: Record<string, any> }) =>
+      params.path.endsWith('/signals/search') &&
+      params.body?.size !== 0 &&
+      !params.body?.query?.bool?.filter?.[0]?.ids
+        ? { body: { hits: { hits: pages.shift() ?? [] } } }
+        : inner(params)
     );
 
     const { output } = await run();

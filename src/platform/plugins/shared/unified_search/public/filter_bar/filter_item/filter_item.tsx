@@ -387,14 +387,13 @@ export const getFilterItemEditorContainerStyle = ({ euiTheme }: UseEuiTheme) =>
 
 const filterItemStyles = {
   /** @todo important style should be remove after fixing elastic/eui/issues/6314. */
-  popoverDragAndDrop: (euiThemeContext: UseEuiTheme) =>
-    css`
-      // Always needed for popover with drag & drop in them
-      transform: none !important;
-      transition: none !important;
-      filter: none !important;
-      ${euiShadowMedium(euiThemeContext)}
-    `,
+  popoverDragAndDrop: (euiThemeContext: UseEuiTheme) => css`
+    // Always needed for popover with drag & drop in them
+    transform: none !important;
+    transition: none !important;
+    filter: none !important;
+    ${euiShadowMedium(euiThemeContext)}
+  `,
   filterItemEditorContainer: getFilterItemEditorContainerStyle,
   filterItem: ({ euiTheme }: UseEuiTheme) =>
     css({

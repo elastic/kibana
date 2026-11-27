@@ -282,8 +282,8 @@ const getButtonBorderCss =
   (insetValue: string) =>
   ({ euiTheme }: UseEuiTheme) =>
     css`
-    position: relative;
-    inset-${insetValue}: -${mathWithUnits(euiTheme.border.width.thin, (x) => x / 2)};
+      position: relative;
+      inset-${insetValue}: -${mathWithUnits(euiTheme.border.width.thin, (x) => x / 2)};
     `;
 
 const buttonBorderStyles = {

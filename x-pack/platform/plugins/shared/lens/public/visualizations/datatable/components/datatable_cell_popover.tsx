@@ -18,14 +18,13 @@ import {
 } from './helpers';
 
 const datatableCellPopoverStyles = {
-  message: ({ euiTheme }: UseEuiTheme) =>
-    css`
-      padding: ${euiTheme.size.s};
-      color: ${euiTheme.colors.textSubdued};
-      border-block-start: ${euiTheme.border.thin};
-      margin-block: ${euiTheme.size.s} -${euiTheme.size.s};
-      margin-inline: -${euiTheme.size.s};
-    `,
+  message: ({ euiTheme }: UseEuiTheme) => css`
+    padding: ${euiTheme.size.s};
+    color: ${euiTheme.colors.textSubdued};
+    border-block-start: ${euiTheme.border.thin};
+    margin-block: ${euiTheme.size.s} -${euiTheme.size.s};
+    margin-inline: -${euiTheme.size.s};
+  `,
 };
 
 const LensDatatableCellPopover = ({

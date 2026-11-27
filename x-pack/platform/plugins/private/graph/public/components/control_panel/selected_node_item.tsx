@@ -64,11 +64,9 @@ export const SelectedNodeItem = ({
     >
       <svg width="24" height="24" aria-hidden="true">
         <circle
-          css={({ euiTheme }: UseEuiTheme) =>
-            css`
-              fill: ${euiTheme.colors.mediumShade};
-            `
-          }
+          css={({ euiTheme }: UseEuiTheme) => css`
+            fill: ${euiTheme.colors.mediumShade};
+          `}
           r="10"
           cx="12"
           cy="12"

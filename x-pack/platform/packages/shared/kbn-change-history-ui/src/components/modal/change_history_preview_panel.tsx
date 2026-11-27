@@ -40,18 +40,17 @@ const usePreviewFrameStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   return useMemo(
-    () =>
-      css`
-        display: flex;
-        flex-direction: column;
-        flex: 1 1 auto;
-        min-height: 0;
-        overflow: hidden;
-        margin: ${euiTheme.size.s};
-        border-radius: ${euiTheme.border.radius.small};
-        border: ${euiTheme.border.thin};
-        background: ${euiTheme.colors.backgroundBaseSubdued};
-      `,
+    () => css`
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: hidden;
+      margin: ${euiTheme.size.s};
+      border-radius: ${euiTheme.border.radius.small};
+      border: ${euiTheme.border.thin};
+      background: ${euiTheme.colors.backgroundBaseSubdued};
+    `,
     [euiTheme]
   );
 };

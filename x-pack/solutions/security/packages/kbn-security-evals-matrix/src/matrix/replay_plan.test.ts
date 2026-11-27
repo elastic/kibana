@@ -23,13 +23,13 @@ import {
 /** Dataset reference lookup, standing in for the suite's prompts file. */
 const refs = (exampleId: string) =>
   (
-    ({
+    {
       'persona-001': 'host-42',
       'persona-002': 'A2',
       'persona-003': 'ref-3',
       'persona-broken': 'e',
       p2: 'e',
-    }) as Record<string, string>
+    } as Record<string, string>
   )[exampleId];
 
 function doc(overrides: Record<string, unknown> = {}): EvaluationScoreDocument {

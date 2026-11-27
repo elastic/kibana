@@ -84,13 +84,11 @@ export function AccessAgreementPage({ http, fatalErrors, notifications }: Props)
             `}
           >
             <div
-              css={({ euiTheme }) =>
-                css`
-                  max-height: '400px';
-                  padding: ${euiTheme.size.base} ${euiTheme.size.l} 0;
-                  ${overFlowMixin};
-                `
-              }
+              css={({ euiTheme }) => css`
+                max-height: '400px';
+                padding: ${euiTheme.size.base} ${euiTheme.size.l} 0;
+                ${overFlowMixin};
+              `}
             >
               <EuiText textAlign="left">
                 <ReactMarkdown>{accessAgreement}</ReactMarkdown>
@@ -98,11 +96,9 @@ export function AccessAgreementPage({ http, fatalErrors, notifications }: Props)
             </div>
           </EuiFlexItem>
           <EuiFlexItem
-            css={({ euiTheme }) =>
-              css`
-                padding: ${euiTheme.size.base} ${euiTheme.size.l} ${euiTheme.size.l};
-              `
-            }
+            css={({ euiTheme }) => css`
+              padding: ${euiTheme.size.base} ${euiTheme.size.l} ${euiTheme.size.l};
+            `}
           >
             <div
               css={css`

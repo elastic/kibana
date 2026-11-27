@@ -13,10 +13,9 @@ export const useCanvasTextAreaCodeStyles = (): SerializedStyles => {
   const scrollBar = useEuiScrollBar();
 
   return useMemo(
-    () =>
-      css`
-        ${scrollBar}
-      `,
+    () => css`
+      ${scrollBar}
+    `,
     [scrollBar]
   );
 };

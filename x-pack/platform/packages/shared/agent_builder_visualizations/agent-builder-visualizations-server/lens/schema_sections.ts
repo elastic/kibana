@@ -84,10 +84,7 @@ export const filterSchemaSections = (
 };
 
 /** Sections that hold the fields a config validation error points at. */
-export const getFailingSchemaSections = (
-  chartType: SupportedChartType,
-  error: unknown
-): string[] =>
+export const getFailingSchemaSections = (chartType: SupportedChartType, error: unknown): string[] =>
   error instanceof z.ZodError
     ? filterSchemaSections(
         chartType,

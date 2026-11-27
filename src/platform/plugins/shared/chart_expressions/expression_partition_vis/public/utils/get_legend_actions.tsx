@@ -48,14 +48,13 @@ const hasFilterCellAction = (actions: CellValueAction[]) => {
 };
 
 const footerMessageStyles = {
-  root: ({ euiTheme }: UseEuiTheme) =>
-    css`
-      padding: ${euiTheme.size.m};
-      color: ${euiTheme.colors.textSubdued};
-      border-block-start: ${euiTheme.border.thin};
-      margin-block: ${euiTheme.size.s} -${euiTheme.size.s};
-      margin-inline: -${euiTheme.size.s};
-    `,
+  root: ({ euiTheme }: UseEuiTheme) => css`
+    padding: ${euiTheme.size.m};
+    color: ${euiTheme.colors.textSubdued};
+    border-block-start: ${euiTheme.border.thin};
+    margin-block: ${euiTheme.size.s} -${euiTheme.size.s};
+    margin-inline: -${euiTheme.size.s};
+  `,
 };
 
 const PopoverFooterMessage = ({ message }: { message: string }) => {

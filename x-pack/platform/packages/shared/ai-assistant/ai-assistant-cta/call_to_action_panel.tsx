@@ -35,11 +35,9 @@ export const CallToActionCard = ({
     display={color}
     title={
       <EuiText
-        css={({ euiTheme }) =>
-          css`
-            font-weight: ${euiTheme.font.weight.medium};
-          `
-        }
+        css={({ euiTheme }) => css`
+          font-weight: ${euiTheme.font.weight.medium};
+        `}
       >
         {title}
       </EuiText>

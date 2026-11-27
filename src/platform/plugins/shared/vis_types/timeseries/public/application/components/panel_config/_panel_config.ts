@@ -10,7 +10,6 @@
 import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-export const panelConfigContainerStyles = ({ euiTheme }: UseEuiTheme) =>
-  css`
-    padding: ${euiTheme.size.base};
-  `;
+export const panelConfigContainerStyles = ({ euiTheme }: UseEuiTheme) => css`
+  padding: ${euiTheme.size.base};
+`;

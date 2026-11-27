@@ -607,11 +607,10 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
   const [selectedRepetitions, setSelectedRepetitions] = useState<Record<string, number>>({});
 
   const selectedRowClassName = useMemo(
-    () =>
-      css`
-        outline: 2px solid ${euiTheme.colors.primary};
-        outline-offset: -2px;
-      `,
+    () => css`
+      outline: 2px solid ${euiTheme.colors.primary};
+      outline-offset: -2px;
+    `,
     [euiTheme.colors.primary]
   );
 

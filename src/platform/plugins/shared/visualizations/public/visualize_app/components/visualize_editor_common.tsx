@@ -55,25 +55,24 @@ const flexParentStyle = css({
 });
 
 const visEditorCommonStyles = {
-  base: (euiThemeContext: UseEuiTheme) =>
-    css`
-      height: '100%';
-      ${flexParentStyle};
-      ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
-        .visualization {
-          // While we are on a small screen the visualization is below the
-          // editor. In this cases it needs a minimum height, since it would otherwise
-          // maybe end up with 0 height since it just gets the flexbox rest of the screen.
-          min-height: calc(${euiThemeContext.euiTheme.size.l} * 10);
-        }
+  base: (euiThemeContext: UseEuiTheme) => css`
+    height: '100%';
+    ${flexParentStyle};
+    ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
+      .visualization {
+        // While we are on a small screen the visualization is below the
+        // editor. In this cases it needs a minimum height, since it would otherwise
+        // maybe end up with 0 height since it just gets the flexbox rest of the screen.
+        min-height: calc(${euiThemeContext.euiTheme.size.l} * 10);
       }
-      > .visualize {
-        height: 100%;
-        flex: 1 1 auto;
-        display: flex;
-        z-index: 0; // Without setting this to 0 you will run into a bug where the filter bar modal is hidden under a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457
-      }
-    `,
+    }
+    > .visualize {
+      height: 100%;
+      flex: 1 1 auto;
+      display: flex;
+      z-index: 0; // Without setting this to 0 you will run into a bug where the filter bar modal is hidden under a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457
+    }
+  `,
   content: css`
     width: 100%;
     z-index: 0;

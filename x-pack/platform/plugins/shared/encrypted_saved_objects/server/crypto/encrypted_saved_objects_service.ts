@@ -729,8 +729,10 @@ export class EncryptedSavedObjectsService {
       clone.registerType(dangerouslyExposeAttributes(registration));
     }
 
-    for (const [type, { attributesToEncrypt, attributesToIncludeInAAD, enforceRandomId }] of this
-      .typeDefinitions) {
+    for (const [
+      type,
+      { attributesToEncrypt, attributesToIncludeInAAD, enforceRandomId },
+    ] of this.typeDefinitions) {
       if (!clone.isRegistered(type)) {
         clone.registerType(
           dangerouslyExposeAttributes({

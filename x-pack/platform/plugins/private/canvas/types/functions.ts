@@ -73,7 +73,7 @@ import type { initFunctions as initClientFunctions } from '../public/functions';
 // prettier-ignore
 export type ExpressionFunctionFactory<Name extends string, Input, Arguments, Output> =
   // @ts-expect-error upgrade typescript v4.9.5
-  () => ExpressionFunctionDefinition<Name, Input, Arguments, Output>
+  () => ExpressionFunctionDefinition<Name, Input, Arguments, Output>;
 
 /**
  * `FunctionFactory` exists as a name shim between the `ExpressionFunction` type and

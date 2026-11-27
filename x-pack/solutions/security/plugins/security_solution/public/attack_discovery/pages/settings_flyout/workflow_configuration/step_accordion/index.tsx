@@ -42,12 +42,11 @@ const StepAccordionComponent: React.FC<StepAccordionProps> = ({
   const avatarColor = hasError ? euiTheme.colors.danger : euiTheme.colors.primary;
 
   const stepStyle = useMemo(
-    () =>
-      css`
-        position: relative;
-        ${
-          !isLast
-            ? `
+    () => css`
+      position: relative;
+      ${
+        !isLast
+          ? `
             padding-block-end: ${euiTheme.size.xl};
             &::before {
               content: '';
@@ -58,17 +57,16 @@ const StepAccordionComponent: React.FC<StepAccordionProps> = ({
               border-inline-start: ${euiTheme.border.thick};
             }
           `
-            : ''
-        }
-      `,
+          : ''
+      }
+    `,
     [euiTheme.border.thick, euiTheme.border.width.thick, euiTheme.size.xl, isLast]
   );
 
   const contentIndentStyle = useMemo(
-    () =>
-      css`
-        padding-inline-start: calc(${euiTheme.size.xl} + ${euiTheme.size.m});
-      `,
+    () => css`
+      padding-inline-start: calc(${euiTheme.size.xl} + ${euiTheme.size.m});
+    `,
     [euiTheme.size.m, euiTheme.size.xl]
   );
 
