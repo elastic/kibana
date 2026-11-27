@@ -25,8 +25,6 @@ import type {
 } from '../../../../entity_analytics/components/ai_security/types';
 import { getAgentTitle } from '../../../../entity_analytics/components/ai_security/utils';
 import { getAgentIconType } from '../../../../entity_analytics/components/ai_security/components/agent_logo';
-import { useWatchlistLookup } from '../../../../entity_analytics/components/ai_security/hooks/use_watchlist_lookup';
-import { WatchlistBadge } from './components/watchlist_badge';
 import { AI_AGENT_TEST_IDS } from './test_ids';
 import { ENTITY_TYPE_BADGE } from './translations';
 
@@ -36,10 +34,8 @@ export interface AiAgentHeaderProps {
   readonly isLoading: boolean;
 }
 
-/** Title, one badge row (entity type, risk when scored, the agent's own watchlists) and last seen. */
+/** Title, at most two badges (entity type and risk level when scored) and last seen. */
 export const AiAgentHeader = memo(({ identity, agent, isLoading }: AiAgentHeaderProps) => {
-  const watchlistLookup = useWatchlistLookup();
-  const watchlists = watchlistLookup(agent?.watchlistIds ?? []);
   return (
     <div data-test-subj={AI_AGENT_TEST_IDS.header}>
       <FlyoutTitle
@@ -53,18 +49,9 @@ export const AiAgentHeader = memo(({ identity, agent, isLoading }: AiAgentHeader
         </EuiFlexItem>
         {agent?.riskLevel && (
           <EuiFlexItem grow={false} data-test-subj={AI_AGENT_TEST_IDS.riskBadge}>
-            <RiskLevelBadge riskLevel={agent.riskLevel} riskScore={agent.riskScore} />
+            <RiskLevelBadge riskLevel={agent.riskLevel} />
           </EuiFlexItem>
         )}
-        {watchlists.map((watchlist) => (
-          <EuiFlexItem
-            grow={false}
-            key={watchlist.id}
-            data-test-subj={AI_AGENT_TEST_IDS.headerWatchlist}
-          >
-            <WatchlistBadge watchlist={watchlist} />
-          </EuiFlexItem>
-        ))}
       </EuiFlexGroup>
       {isLoading ? (
         <>

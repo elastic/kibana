@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import type {
   AgentIdentity,
@@ -65,25 +65,15 @@ describe('AiAgentHeader', () => {
     expect(screen.getByTestId(AI_AGENT_TEST_IDS.header)).not.toHaveTextContent('Risk');
   });
 
-  it('shows the normalised score and risk level once the agent is scored', () => {
-    renderHeader({ agent: { ...agent, riskLevel: 'Moderate', riskScore: 64.7641 } });
-    expect(screen.getByTestId(AI_AGENT_TEST_IDS.riskBadge)).toHaveTextContent(
-      'Risk: 64.76 Moderate'
-    );
+  it('shows the risk level without the score once the agent is scored', () => {
+    renderHeader({ agent: { ...agent, riskLevel: 'High', riskScore: 73.3812 } });
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.riskBadge)).toHaveTextContent('Risk: High');
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.header)).not.toHaveTextContent('73.38');
   });
 
-  it("names the agent's own watchlists, with the risk modifier in a tooltip", async () => {
+  it("keeps the agent's watchlists out of the header", () => {
     renderHeader({ agent: { ...agent, watchlistIds: ['agents-for-departing-employees'] } });
-    const badge = screen.getByText('Agents acting for departing employees');
-    expect(screen.getByTestId(AI_AGENT_TEST_IDS.headerWatchlist)).toContainElement(badge);
-    fireEvent.mouseOver(badge);
-    await waitFor(() => expect(screen.getByText('Risk modifier 1.5')).toBeInTheDocument());
-  });
-
-  it('renders nothing for watchlists when the agent is on none', () => {
-    renderHeader();
-    expect(screen.queryByTestId(AI_AGENT_TEST_IDS.headerWatchlist)).not.toBeInTheDocument();
-    expect(screen.queryByText('None')).not.toBeInTheDocument();
+    expect(screen.queryByText('Agents acting for departing employees')).not.toBeInTheDocument();
   });
 
   it('shows when the agent was last seen as relative time', () => {

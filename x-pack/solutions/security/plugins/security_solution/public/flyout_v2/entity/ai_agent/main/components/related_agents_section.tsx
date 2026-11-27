@@ -20,7 +20,7 @@ import {
 import { css } from '@emotion/react';
 import type { RelatedEntity } from '../../../../../entity_analytics/components/ai_security/types';
 import { getAgentDisplayName } from '../../../../../entity_analytics/components/ai_security/utils';
-import { RiskLevelBadge } from '../../../shared/components/risk_level_badge';
+import { RiskScoreLevel } from '../../../../../entity_analytics/components/severity/common';
 import { EntityLink, useOpenRelatedEntity, type OpenRelatedEntity } from './entity_link';
 import { AI_AGENT_TEST_IDS } from '../test_ids';
 import { relatedAgentsTitle, SAME_ACCOUNT, SAME_HOST } from '../translations';
@@ -55,7 +55,7 @@ const AgentList = ({
             </EuiFlexItem>
             {row.riskLevel && (
               <EuiFlexItem grow={false}>
-                <RiskLevelBadge riskLevel={row.riskLevel} />
+                <RiskScoreLevel severity={row.riskLevel} />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

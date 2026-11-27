@@ -54,7 +54,7 @@ describe('RelatedAgentsSection', () => {
     renderSection();
     expect(screen.getByText('Related agents (2)')).toBeInTheDocument();
     expect(screen.getByTestId(AI_AGENT_TEST_IDS.sameAccount)).toHaveTextContent(
-      'Same accountClaude Code · aquinn · dev-laptop-02Risk: Low'
+      'Same accountClaude Code · aquinn · dev-laptop-02Low'
     );
     expect(screen.getByTestId(AI_AGENT_TEST_IDS.sameHost)).toHaveTextContent(
       'Same hostCursor · ec2-user · ci-build-01'
@@ -64,6 +64,11 @@ describe('RelatedAgentsSection', () => {
   it('counts an install that is on both lists once', () => {
     renderSection({ sameHost: [...otherAgentsOnHost, ...otherInstallsOnAccount] });
     expect(screen.getByText('Related agents (2)')).toBeInTheDocument();
+  });
+
+  it('shows related risk as a level, not a pill', () => {
+    renderSection();
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.sameAccount)).not.toHaveTextContent('Risk:');
   });
 
   it('leaves out an empty list', () => {
