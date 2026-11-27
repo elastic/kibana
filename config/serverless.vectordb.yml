@@ -34,6 +34,9 @@ xpack.serverless.vectordb.enabled: true
 ## Enable the shared Elasticsearch home page
 xpack.elasticsearchHome.enabled: true
 
+## Load the web crawler, which stays behind the webCrawler.enabled feature flag
+xpack.webCrawler.enabled: true
+
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/vectordb
 

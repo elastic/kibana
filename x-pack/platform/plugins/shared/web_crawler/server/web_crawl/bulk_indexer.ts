@@ -1,0 +1,216 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { createHash } from 'crypto';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { waitFor } from './document_extraction';
+import { getPageKey } from './links';
+
+// Keep requests small: `semantic_text` runs inference on every document at ingest
+export const BULK_SIZE = 20;
+export const MAX_BULK_BYTES = 1024 * 1024;
+export const MAX_CONCURRENT_BULKS = 3;
+const MAX_BUFFERED_DOCUMENTS = BULK_SIZE * MAX_CONCURRENT_BULKS;
+const MAX_BUFFERED_BYTES = MAX_BULK_BYTES * MAX_CONCURRENT_BULKS;
+const TOO_MANY_REQUESTS = 429;
+export const BULK_RETRY_DELAYS_MS = [1_000, 4_000];
+
+export interface CrawledDocument {
+  url: string;
+  title: string;
+  description?: string;
+  content: string;
+  depth: number;
+  crawl_id: string;
+  crawl_scope: string;
+  crawled_at: string;
+  url_host: string;
+  url_path: string;
+  url_path_dir1?: string;
+  url_path_dir2?: string;
+  url_path_dir3?: string;
+}
+
+interface BufferedDocument {
+  document: CrawledDocument;
+  bytes: number;
+}
+
+interface BulkIndexerOptions {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  signal: AbortSignal;
+  indexName: string;
+  onIndexed: () => void;
+  /** Called once, when a whole bulk request fails */
+  onError: (error: Error) => void;
+}
+
+export interface BulkIndexer {
+  /** Only waits when indexing has fallen behind */
+  add: (document: CrawledDocument) => Promise<void>;
+  /** Flushes the queue and waits for all requests */
+  drain: () => Promise<void>;
+  /** Waits for in-flight requests and drops what's still queued */
+  settle: () => Promise<void>;
+  getCounts: () => { documentsCount: number; failedCount: number; lastError?: Error };
+}
+
+/** Deterministic per page so we don't index the same page twice if it surfaces under multiple urls. */
+export const getDocumentId = (url: string): string =>
+  createHash('sha256').update(getPageKey(url)).digest('hex');
+
+/**
+ * Indexes crawled pages without holding up the extraction of further pages.
+ *
+ * A request is sent as soon as there is a document and nothing in flight, so a slow crawl indexes
+ * promptly, while a fast one fills whole batches and runs several requests side by side. Requests
+ * and documents rejected with a 429 are retried after a pause.
+ */
+export const createBulkIndexer = ({
+  esClient,
+  logger,
+  signal,
+  indexName,
+  onIndexed,
+  onError,
+}: BulkIndexerOptions): BulkIndexer => {
+  const buffer: BufferedDocument[] = [];
+  let bufferedBytes = 0;
+  const inFlight = new Set<Promise<void>>();
+  // A page can be indexed twice if it's found again closer to a start URL. Count it once.
+  const indexedIds = new Set<string>();
+  let failedCount = 0;
+  let lastError: Error | undefined;
+  let hasFailed = false;
+  let isDraining = false;
+
+  const requestBulk = (batch: CrawledDocument[]) =>
+    esClient.bulk(
+      {
+        index: indexName,
+        operations: batch.flatMap((document) => [
+          { index: { _id: getDocumentId(document.url) } },
+          document,
+        ]),
+      },
+      { signal }
+    );
+
+  const send = async (batch: CrawledDocument[]): Promise<void> => {
+    let pending = batch;
+    for (let attempt = 0; pending.length > 0; attempt++) {
+      const retryDelayMs = BULK_RETRY_DELAYS_MS[attempt];
+      const canRetry = retryDelayMs !== undefined;
+      const rejected: CrawledDocument[] = [];
+      try {
+        const { items } = await requestBulk(pending);
+        items.forEach(({ index: result }, position) => {
+          if (result?.status === TOO_MANY_REQUESTS && canRetry) {
+            rejected.push(pending[position]);
+          } else if (result?.error) {
+            failedCount++;
+            lastError = new Error(result.error.reason ?? result.error.type);
+            logger.debug(
+              `Web crawl could not index a page into ${indexName}: ${result.error.reason}`
+            );
+          } else {
+            indexedIds.add(getDocumentId(pending[position].url));
+          }
+        });
+        onIndexed();
+      } catch (error) {
+        if (error?.statusCode !== TOO_MANY_REQUESTS || !canRetry || signal.aborted) {
+          throw error;
+        }
+        rejected.push(...pending);
+      }
+      pending = rejected;
+      if (pending.length > 0) {
+        await waitFor(retryDelayMs ?? 0, signal);
+        if (signal.aborted) {
+          return;
+        }
+      }
+    }
+  };
+
+  const takeBatch = (): CrawledDocument[] => {
+    const batch: CrawledDocument[] = [];
+    let batchBytes = 0;
+    while (
+      buffer.length > 0 &&
+      batch.length < BULK_SIZE &&
+      (batch.length === 0 || batchBytes + buffer[0].bytes <= MAX_BULK_BYTES)
+    ) {
+      const [{ document, bytes }] = buffer.splice(0, 1);
+      batch.push(document);
+      batchBytes += bytes;
+    }
+    bufferedBytes -= batchBytes;
+    return batch;
+  };
+
+  const pump = () => {
+    while (
+      !hasFailed &&
+      !signal.aborted &&
+      buffer.length > 0 &&
+      inFlight.size < MAX_CONCURRENT_BULKS &&
+      (isDraining ||
+        inFlight.size === 0 ||
+        buffer.length >= BULK_SIZE ||
+        bufferedBytes >= MAX_BULK_BYTES)
+    ) {
+      const request: Promise<void> = send(takeBatch())
+        .catch((error: Error) => {
+          if (!hasFailed) {
+            hasFailed = true;
+            onError(error);
+          }
+        })
+        .finally(() => {
+          inFlight.delete(request);
+          pump();
+        });
+      inFlight.add(request);
+    }
+  };
+
+  const settle = async () => {
+    while (inFlight.size > 0) {
+      await Promise.all(inFlight);
+    }
+  };
+
+  return {
+    add: async (document) => {
+      if (hasFailed || signal.aborted) {
+        return;
+      }
+      const bytes = Buffer.byteLength(document.content);
+      buffer.push({ document, bytes });
+      bufferedBytes += bytes;
+      pump();
+      while (
+        (buffer.length >= MAX_BUFFERED_DOCUMENTS || bufferedBytes >= MAX_BUFFERED_BYTES) &&
+        !hasFailed &&
+        !signal.aborted &&
+        inFlight.size > 0
+      ) {
+        await Promise.race(inFlight);
+      }
+    },
+    drain: async () => {
+      isDraining = true;
+      pump();
+      await settle();
+    },
+    settle,
+    getCounts: () => ({ documentsCount: indexedIds.size, failedCount, lastError }),
+  };
+};
