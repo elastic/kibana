@@ -11,43 +11,67 @@ import { MustacheRenderLimitError } from './mustache_render_limit_error';
 const nestedSections = (depth: number): string => '{{#a}}'.repeat(depth) + '{{/a}}'.repeat(depth);
 
 describe('renderBoundedMustache', () => {
-  it('renders a normal template', () => {
-    expect(renderBoundedMustache('Hello {{name}}', { name: 'world' })).toBe('Hello world');
+  describe('normal rendering', () => {
+    it('renders a simple template', () => {
+      expect(renderBoundedMustache('Hello {{name}}', { name: 'world' })).toBe('Hello world');
+    });
+
+    it('renders a section over an array', () => {
+      expect(renderBoundedMustache('{{#items}}{{.}} {{/items}}', { items: [1, 2, 3] })).toBe(
+        '1 2 3 '
+      );
+    });
+
+    it('renders an empty string for a missing optional field rather than throwing', () => {
+      expect(renderBoundedMustache('a{{missing}}b', {})).toBe('ab');
+      expect(renderBoundedMustache('a{{{missing}}}b', {})).toBe('ab');
+      expect(renderBoundedMustache('a{{missing}}b', { missing: null })).toBe('ab');
+    });
+
+    it('renders non-string values by coercing them, like Mustache does', () => {
+      expect(renderBoundedMustache('{{{n}}}', { n: 42 })).toBe('42');
+      expect(renderBoundedMustache('{{{list}}}', { list: [1, 2, 3] })).toBe('1,2,3');
+    });
   });
 
-  it('renders sections over arrays', () => {
-    expect(renderBoundedMustache('{{#items}}{{.}} {{/items}}', { items: [1, 2, 3] })).toBe(
-      '1 2 3 '
-    );
+  describe('work (operations) limit', () => {
+    // Small depth + small budget: this trips the budget, but also finishes on its own if the
+    // budget were removed, so a broken guard cannot hang the Jest worker.
+    it('rejects an exponentially expanding nested-section template', () => {
+      expect(() =>
+        renderBoundedMustache(nestedSections(10), { a: [{}, {}] }, { maxOperations: 50 })
+      ).toThrow(MustacheRenderLimitError);
+    });
+
+    it('charges for iterating a section over an array even when the body emits nothing', () => {
+      const a = Array.from({ length: 100 }, () => ({}));
+      expect(() => renderBoundedMustache('{{#a}}{{/a}}', { a }, { maxOperations: 20 })).toThrow(
+        MustacheRenderLimitError
+      );
+    });
   });
 
-  it('rejects a deeply nested section template that expands exponentially', () => {
-    expect(() => renderBoundedMustache(nestedSections(30), { a: [{}, {}] })).toThrow(
-      MustacheRenderLimitError
-    );
+  describe('depth limit', () => {
+    it('rejects deeply nested sections before a stack overflow, as a limit error', () => {
+      expect(() =>
+        renderBoundedMustache(nestedSections(5000), { a: {} }, { maxDepth: 100 })
+      ).toThrow(MustacheRenderLimitError);
+    });
   });
 
-  it('rejects quickly rather than stalling on the exponential blow-up', () => {
-    const start = Date.now();
-    expect(() => renderBoundedMustache(nestedSections(40), { a: [{}, {}] })).toThrow(
-      MustacheRenderLimitError
-    );
-    // An unbounded render at this depth would take days.
-    expect(Date.now() - start).toBeLessThan(2000);
-  });
+  describe('output length limit', () => {
+    it('rejects a small template whose output exceeds the length budget', () => {
+      const a = Array.from({ length: 100 }, () => ({ big: 'x'.repeat(50) }));
+      expect(() =>
+        renderBoundedMustache('{{#a}}{{{big}}}{{/a}}', { a }, { maxOutputLength: 500 })
+      ).toThrow(MustacheRenderLimitError);
+    });
 
-  it('rejects a shallow section over a very large array', () => {
-    const a = Array.from({ length: 2_000_000 }, () => ({}));
-    expect(() => renderBoundedMustache('{{#a}}{{#a}}x{{/a}}{{/a}}', { a })).toThrow(
-      MustacheRenderLimitError
-    );
-  });
-
-  it('rejects a template whose output exceeds the length budget', () => {
-    const big = 'x'.repeat(100_000);
-    const a = Array.from({ length: 100 }, () => ({ big }));
-    expect(() => renderBoundedMustache('{{#a}}{{{big}}}{{/a}}', { a })).toThrow(
-      MustacheRenderLimitError
-    );
+    it('measures coerced non-string output so a number cannot disable the cap', () => {
+      const a = Array.from({ length: 100 }, () => ({ n: 123456 }));
+      expect(() =>
+        renderBoundedMustache('{{#a}}{{{n}}}{{/a}}', { a }, { maxOutputLength: 100 })
+      ).toThrow(MustacheRenderLimitError);
+    });
   });
 });

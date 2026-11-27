@@ -8,36 +8,55 @@
 import Mustache from 'mustache';
 import { MustacheRenderLimitError } from './mustache_render_limit_error';
 
-/** Nested sections multiply the token count, so we cap it to fail fast on exponential templates. */
-const MAX_RENDER_TOKENS = 1_000_000;
+/** Bounds on a single render. Overridable so tests can trip a limit with small inputs. */
+export interface MustacheRenderLimits {
+  /** Max render passes charged; each section iteration counts, so this caps total work. */
+  maxOperations?: number;
+  /** Max characters the render may emit, bounding memory for small templates with large output. */
+  maxOutputLength?: number;
+  /** Max section nesting, keeping the render off a stack overflow and bounding context lookups. */
+  maxDepth?: number;
+}
 
-/**
- * Catches templates which use few tokens, but still build a huge string, like a big value repeated over
- * a large array.
- */
-const MAX_OUTPUT_LENGTH = 1_000_000;
+const DEFAULT_LIMITS: Required<MustacheRenderLimits> = {
+  maxOperations: 1_000_000,
+  maxOutputLength: 1_000_000,
+  maxDepth: 100,
+};
 
 class BoundedWriter extends Mustache.Writer {
-  private tokensProcessed = 0;
+  private operations = 0;
   private outputLength = 0;
+  private depth = 0;
 
-  private countTokens(count: number) {
-    this.tokensProcessed += count;
-    if (this.tokensProcessed > MAX_RENDER_TOKENS) {
+  constructor(private readonly limits: Required<MustacheRenderLimits>) {
+    super();
+  }
+
+  private chargeOperations(tokenCount: number): void {
+    // Charge one per pass on top of the tokens so an empty section body still costs something:
+    // Mustache re-enters this method once per array element even when the body emits nothing.
+    this.operations += tokenCount + 1;
+    if (this.operations > this.limits.maxOperations) {
       throw new MustacheRenderLimitError(
-        `Template exceeds the maximum render complexity of ${MAX_RENDER_TOKENS} operations.`
+        `Template exceeds the maximum render complexity of ${this.limits.maxOperations} operations.`
       );
     }
   }
 
-  private countOutput(value: string): string {
-    this.outputLength += value.length;
-    if (this.outputLength > MAX_OUTPUT_LENGTH) {
+  private chargeOutput(value: unknown): void {
+    // Mustache skips `undefined`/`null` values and coerces everything else with `String` before
+    // appending, so measure the coerced text rather than a raw `.length` (which is wrong, or
+    // absent, for numbers, booleans, and arrays).
+    if (value === undefined || value === null) {
+      return;
+    }
+    this.outputLength += typeof value === 'string' ? value.length : String(value).length;
+    if (this.outputLength > this.limits.maxOutputLength) {
       throw new MustacheRenderLimitError(
-        `Template exceeds the maximum rendered length of ${MAX_OUTPUT_LENGTH} characters.`
+        `Template exceeds the maximum rendered length of ${this.limits.maxOutputLength} characters.`
       );
     }
-    return value;
   }
 
   renderTokens(
@@ -47,12 +66,24 @@ class BoundedWriter extends Mustache.Writer {
     originalTemplate?: string,
     config?: Parameters<Mustache.Writer['renderTokens']>[4]
   ): string {
-    this.countTokens(tokens.length);
-    return super.renderTokens(tokens, context, partials, originalTemplate, config);
+    this.chargeOperations(tokens.length);
+    this.depth += 1;
+    if (this.depth > this.limits.maxDepth) {
+      throw new MustacheRenderLimitError(
+        `Template exceeds the maximum section nesting depth of ${this.limits.maxDepth}.`
+      );
+    }
+    try {
+      return super.renderTokens(tokens, context, partials, originalTemplate, config);
+    } finally {
+      this.depth -= 1;
+    }
   }
 
   unescapedValue(token: string[], context: Mustache.Context): string {
-    return this.countOutput(super.unescapedValue(token, context));
+    const value = super.unescapedValue(token, context);
+    this.chargeOutput(value);
+    return value;
   }
 
   escapedValue(
@@ -60,19 +91,30 @@ class BoundedWriter extends Mustache.Writer {
     context: Mustache.Context,
     config?: Parameters<Mustache.Writer['escapedValue']>[2]
   ): string {
-    return this.countOutput(super.escapedValue(token, context, config));
+    const value = super.escapedValue(token, context, config);
+    this.chargeOutput(value);
+    return value;
   }
 
   rawValue(token: string[]): string {
-    return this.countOutput(super.rawValue(token));
+    const value = super.rawValue(token);
+    this.chargeOutput(value);
+    return value;
   }
 }
 
 /**
- * Renders a Mustache template so caller-supplied templates can't stall the event loop or exhaust
- * memory. Throws `MustacheRenderLimitError` when a limit is hit.
+ * Renders a Mustache template with bounded work, output, and nesting so caller-supplied templates
+ * cannot stall the event loop or exhaust memory. Throws `MustacheRenderLimitError` when a limit is
+ * hit.
+ *
+ * A fresh writer is used per call so these templates do not populate Mustache's process-global
+ * template cache, which is never evicted.
  */
-export function renderBoundedMustache(template: string, view: unknown): string {
-  // A fresh writer keeps these templates out of Mustache's global cache, which is never evicted.
-  return new BoundedWriter().render(template, view);
+export function renderBoundedMustache(
+  template: string,
+  view: unknown,
+  limits: MustacheRenderLimits = {}
+): string {
+  return new BoundedWriter({ ...DEFAULT_LIMITS, ...limits }).render(template, view);
 }

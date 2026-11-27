@@ -8,6 +8,7 @@
 import {
   type ChatCompleteRetryConfiguration,
   isInferenceProviderError,
+  isInferenceRequestError,
   isToolValidationError,
   isInferenceRequestAbortedError,
 } from '@kbn/inference-common';
@@ -24,7 +25,9 @@ const STATUS_NO_RETRY = [
   409, // Conflict
 ];
 
-const retryAll = () => true;
+// A request error (4xx) is a deterministic client error: retrying re-does the work and still fails,
+// so it is never retried, even under `retryOn: 'all'`.
+const retryAll = (err: Error) => !isInferenceRequestError(err);
 
 const isRecoverable = (err: any) => {
   // tool validation error are from malformed json or generation not matching the schema
