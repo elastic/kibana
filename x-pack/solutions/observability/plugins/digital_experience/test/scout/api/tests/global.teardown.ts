@@ -6,6 +6,7 @@
  */
 
 import { globalTeardownHook } from '@kbn/scout-oblt';
+import { deleteMobileCrashData } from '../../common/fixtures/mobile_crash_data';
 import { deleteMobileData } from '../../common/fixtures/mobile_data';
 import { deleteOtelRumData } from '../../common/fixtures/otel_rum_data';
 import { deleteTimeZoneData } from '../../common/fixtures/time_zone_data';
@@ -23,6 +24,7 @@ globalTeardownHook(
       deleteOtelRumData(esClient),
       deleteTimeZoneData(esClient),
       deleteMobileData(esClient),
+      deleteMobileCrashData(esClient),
     ]);
     const failures = results.flatMap((result) =>
       result.status === 'rejected' ? [result.reason] : []

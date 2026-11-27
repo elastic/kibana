@@ -24,7 +24,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
-import { CONTEXT_ENGINE_APP_ID } from '../../../common/features';
+import { CONTEXT_ENGINE_APP_ID, uiPrivileges } from '../../../common/features';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import { AI_INDEX_CREATED_LOCATION_STATE } from '../ai_index_created_location_state';
 import {
@@ -37,8 +37,11 @@ import {
 } from '../paths';
 import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
 import { AiIndexDetailPage } from './ai_index_detail_page';
+import { SETUP_WIZARD_STORAGE_KEY } from '../utils/setup_wizard_storage';
+import { SETUP_WIZARD_STEPS } from '../components/ai_index_detail/setup_wizard';
 import { RECENT_KNOWLEDGE_DOCUMENTS_QUERY } from '../components/ai_index_detail';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
+import { useSetupWizardEnabled } from '../hooks/use_setup_wizard_enabled';
 import { useAiIndexDreaming } from '../hooks/use_ai_index_dreaming';
 import type { LatestWorkflowExecution } from '../hooks/use_latest_workflow_execution';
 
@@ -127,6 +130,10 @@ jest.mock('../hooks/use_memory_enabled', () => ({
   useMemoryEnabled: jest.fn(() => true),
 }));
 
+jest.mock('../hooks/use_setup_wizard_enabled', () => ({
+  useSetupWizardEnabled: jest.fn(() => true),
+}));
+
 jest.mock('../hooks/use_ai_index_dreaming', () => ({
   useAiIndexDreaming: jest.fn(),
 }));
@@ -154,6 +161,7 @@ jest.mock('../hooks/use_agent_builder_agents', () => ({
 }));
 
 const mockUseMemoryEnabled = jest.mocked(useMemoryEnabled);
+const mockUseSetupWizardEnabled = jest.mocked(useSetupWizardEnabled);
 const mockUseAiIndexDreaming = jest.mocked(useAiIndexDreaming);
 const preferenceDreaming = { enabled: true, facts: [{ type: 'preference' }] };
 
@@ -185,6 +193,7 @@ const createServices = () => {
   );
   services.application.capabilities = {
     ...services.application.capabilities,
+    contextEngine: { show: true, [uiPrivileges.write]: true },
     workflowsManagement: {
       ...services.application.capabilities.workflowsManagement,
       createWorkflow: true,
@@ -246,6 +255,13 @@ const renderWithProviders = (
   );
 };
 
+const closeSetupWizard = (aiIndexId = 'my-ai-index') => {
+  window.localStorage.setItem(
+    SETUP_WIZARD_STORAGE_KEY,
+    JSON.stringify({ [`/${aiIndexId}`]: 'closed' })
+  );
+};
+
 const waitForAiIndexDetailLoaded = async () => {
   await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
 };
@@ -287,16 +303,196 @@ describe('AiIndexDetailPage', () => {
     mockGetWorkflowExecutions.mockResolvedValue({ results: [] });
     mockUseListKi.mockImplementation(() => defaultListKiMock);
     mockUseMemoryEnabled.mockReturnValue(true);
+    mockUseSetupWizardEnabled.mockReturnValue(true);
     mockUseAiIndexDreaming.mockReturnValue({
       dreaming: undefined,
       workflowIds: [],
       isLoading: false,
+      isError: false,
     });
+    // Most tests are about the normal Overview, so the setup wizard starts closed.
+    closeSetupWizard();
   });
 
   afterEach(() => {
     jest.clearAllMocks();
     mockUseListKi.mockImplementation(() => defaultListKiMock);
+    window.localStorage.clear();
+  });
+
+  describe('setup wizard', () => {
+    beforeEach(() => {
+      window.localStorage.clear();
+    });
+
+    it('shows the setup wizard on the Overview while setup is not done', async () => {
+      const services = createServices();
+      services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
+
+      renderWithProviders(services);
+
+      expect(await screen.findByTestId('contextSetupWizard')).toBeInTheDocument();
+      expect(screen.queryByTestId('contextOverviewStatCards')).not.toBeInTheDocument();
+      // Nothing is set up, so the wizard opens on its first step.
+      expect(
+        screen.getByTestId(`contextSetupWizardPanel-${SETUP_WIZARD_STEPS[0].id}`)
+      ).toBeInTheDocument();
+    });
+
+    it('shows the spinner, not the Overview skeleton, while the AI index loads', async () => {
+      const services = createServices();
+      let resolveAiIndexGet: (value: GetAiIndexResponse) => void = () => {};
+      services.http.get.mockImplementation(
+        () =>
+          new Promise<GetAiIndexResponse>((resolve) => {
+            resolveAiIndexGet = resolve;
+          })
+      );
+
+      renderWithProviders(services);
+
+      expect(await screen.findByTestId('contextAiIndexOverviewLoading')).toBeInTheDocument();
+      expect(screen.queryByTestId('contextOverviewStatCards')).not.toBeInTheDocument();
+
+      resolveAiIndexGet({ ...aiIndex, sources: [] });
+
+      expect(await screen.findByTestId('contextSetupWizard')).toBeInTheDocument();
+      expect(screen.queryByTestId('contextAiIndexOverviewLoading')).not.toBeInTheDocument();
+    });
+
+    it('shows the Overview after loading when the AI index is managed', async () => {
+      const services = createServices();
+      services.http.get.mockResolvedValue({ ...aiIndex, managed: true, sources: [] });
+
+      renderWithProviders(services);
+
+      expect(await screen.findByTestId('contextOverviewStatCards')).toBeInTheDocument();
+      expect(screen.queryByTestId('contextSetupWizard')).not.toBeInTheDocument();
+    });
+
+    it('opens the step saved in local storage after a refresh', async () => {
+      const { id: lastStepId } = SETUP_WIZARD_STEPS[SETUP_WIZARD_STEPS.length - 1];
+      window.localStorage.setItem(
+        SETUP_WIZARD_STORAGE_KEY,
+        JSON.stringify({ '/my-ai-index': lastStepId })
+      );
+      const services = createServices();
+      services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
+
+      renderWithProviders(services);
+
+      expect(
+        await screen.findByTestId(`contextSetupWizardPanel-${lastStepId}`)
+      ).toBeInTheDocument();
+    });
+
+    it('shows the normal Overview after Exit setup and remembers it', async () => {
+      const services = createServices();
+      services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
+
+      renderWithProviders(services);
+      fireEvent.click(await screen.findByTestId('contextSetupWizardExit'));
+
+      await waitFor(() =>
+        expect(screen.queryByTestId('contextSetupWizard')).not.toBeInTheDocument()
+      );
+      expect(JSON.parse(window.localStorage.getItem(SETUP_WIZARD_STORAGE_KEY) ?? '')).toEqual({
+        '/my-ai-index': 'closed',
+      });
+    });
+
+    it('shows the wizard instead of the AI index created callout', async () => {
+      const services = createServices();
+      services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
+
+      renderWithProviders(services, AI_INDEX_CREATED_LOCATION_STATE);
+      fireEvent.click(await screen.findByTestId('contextSetupWizardExit'));
+
+      await waitFor(() =>
+        expect(screen.queryByTestId('contextSetupWizard')).not.toBeInTheDocument()
+      );
+      expect(screen.queryByTestId('contextAiIndexCreatedCallout')).not.toBeInTheDocument();
+    });
+
+    it('opens the saved step again after a visit to another tab', async () => {
+      const services = createServices();
+      services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
+
+      const { id: lastStepId } = SETUP_WIZARD_STEPS[SETUP_WIZARD_STEPS.length - 1];
+
+      renderWithProviders(services);
+      fireEvent.click(await screen.findByTestId(`contextSetupWizardStep-${lastStepId}`));
+      expect(
+        await screen.findByTestId(`contextSetupWizardPanel-${lastStepId}`)
+      ).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('contextAiIndexDetailTab-settings'));
+      await waitFor(() =>
+        expect(screen.queryByTestId('contextSetupWizard')).not.toBeInTheDocument()
+      );
+      fireEvent.click(screen.getByTestId('contextAiIndexDetailTab-overview'));
+
+      expect(
+        await screen.findByTestId(`contextSetupWizardPanel-${lastStepId}`)
+      ).toBeInTheDocument();
+    });
+
+    it('shows the normal Overview when the memory count request fails', async () => {
+      mockUseListKi.mockImplementation(({ type }: { type?: string }) =>
+        type?.startsWith('memory.')
+          ? { ...defaultListKiMock, total: 0, error: new Error('Request timed out') }
+          : defaultListKiMock
+      );
+      const services = createServices();
+      services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
+
+      renderWithProviders(services);
+      await waitForAiIndexDetailLoaded();
+
+      await waitFor(() =>
+        expect(screen.queryByTestId('contextAiIndexOverviewLoading')).not.toBeInTheDocument()
+      );
+      expect(screen.queryByTestId('contextSetupWizard')).not.toBeInTheDocument();
+    });
+
+    it('shows the normal Overview while the setup wizard setting is off', async () => {
+      mockUseSetupWizardEnabled.mockReturnValue(false);
+      const services = createServices();
+      services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
+
+      renderWithProviders(services);
+      await waitForAiIndexDetailLoaded();
+
+      expect(screen.queryByTestId('contextAiIndexOverviewLoading')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('contextSetupWizard')).not.toBeInTheDocument();
+    });
+
+    it('never shows the setup wizard for a managed AI index', async () => {
+      const services = createServices();
+      services.http.get.mockResolvedValue({ ...aiIndex, managed: true, sources: [] });
+
+      renderWithProviders(services);
+      await waitForAiIndexDetailLoaded();
+
+      await waitFor(() =>
+        expect(screen.queryByTestId('contextAiIndexOverviewLoading')).not.toBeInTheDocument()
+      );
+      expect(screen.queryByTestId('contextSetupWizard')).not.toBeInTheDocument();
+    });
+
+    it('shows the normal Overview to a user who cannot write', async () => {
+      const services = createServices();
+      services.application.capabilities = {
+        ...services.application.capabilities,
+        contextEngine: { show: true, [uiPrivileges.write]: false },
+      };
+      services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
+
+      renderWithProviders(services);
+
+      expect(await screen.findByTestId('contextOverviewStatCards')).toBeInTheDocument();
+      expect(screen.queryByTestId('contextSetupWizard')).not.toBeInTheDocument();
+    });
   });
 
   it('shows a dismissible success callout when navigated from AI index creation', async () => {
@@ -465,6 +661,7 @@ describe('AiIndexDetailPage', () => {
       dreaming: preferenceDreaming,
       workflowIds: [],
       isLoading: false,
+      isError: false,
     });
     const services = createServices();
     services.http.get.mockResolvedValue(aiIndex);
@@ -775,10 +972,13 @@ describe('AiIndexDetailPage', () => {
 
     await waitForAiIndexDetailLoaded();
 
-    const requests = mockUseListKi.mock.calls.map(([args]) => ({
-      ...args,
-      notifyOnError: undefined,
-    }));
+    // The setup wizard counts memories per type with its own requests, so those are left out.
+    const requests = mockUseListKi.mock.calls
+      .filter(([{ type }]) => type === undefined)
+      .map(([args]) => ({
+        ...args,
+        notifyOnError: undefined,
+      }));
     expect(requests).toContainEqual({ aiIndexId: aiIndex.id, ...RECENT_KNOWLEDGE_DOCUMENTS_QUERY });
     expect(new Set(requests.map((request) => JSON.stringify(request))).size).toBe(1);
   });
@@ -838,6 +1038,7 @@ describe('AiIndexDetailPage', () => {
 
   it('does not show the previous AI index summary while the new one loads', async () => {
     const otherAiIndex: GetAiIndexResponse = { ...aiIndex, id: 'other-ai-index' };
+    closeSetupWizard(otherAiIndex.id);
     // `useListKi` keeps the previous AI index's response (25 documents) while this one loads.
     mockUseListKi.mockImplementation(() => ({
       ...defaultListKiMock,

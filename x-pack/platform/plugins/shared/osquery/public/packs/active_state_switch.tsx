@@ -13,11 +13,13 @@ import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '../common/lib/kibana';
 import { useAgentPolicies } from '../agent_policies/use_agent_policies';
+import { expandToSharedIntegrations } from '../agent_policies/expand_to_shared_integrations';
 import { ConfirmDeployAgentPolicyModal } from './form/confirmation_modal';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useUpdatePack } from './use_update_pack';
 import { PACKS_ID } from './constants';
 import type { PackSavedObject } from './types';
+import { addSharedIntegrationWarningToasts } from './shared_integration_warning_toast';
 
 const euiLoadingSpinnerCss = ({ euiTheme }: UseEuiTheme) => ({
   marginRight: euiTheme.size.s,
@@ -33,23 +35,45 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
   const {
     application: {
       capabilities: { osquery: permissions },
+      getUrlForApp,
+      navigateToApp,
     },
     notifications: { toasts },
+    analytics,
+    i18n: i18nStart,
+    theme,
   } = useKibana().services;
+  const startServices = useMemo(
+    () => ({ analytics, i18n: i18nStart, theme }),
+    [analytics, i18nStart, theme]
+  );
   const setErrorToast = useErrorToast();
   const [confirmationModal, setConfirmationModal] = useState(false);
 
   const hideConfirmationModal = useCallback(() => setConfirmationModal(false), []);
 
-  const { data } = useAgentPolicies();
+  const { data, isFetched: agentPoliciesFetched, isError: agentPoliciesError } = useAgentPolicies();
+  // The shared-integration groups come from this query; until it answers, the delivered
+  // set (and with it the need for a confirmation) is unknown.
+  const agentPoliciesLoading = !agentPoliciesFetched && !agentPoliciesError;
+
+  // Fleet delivers a pack to every agent policy of a shared integration, so
+  // expand the saved targets by their group. `effective_policy_ids` alone is
+  // not enough: a disabled pack has no wire block and reports `[]`.
+  const deliveredPolicyIds = useMemo(() => {
+    const ids = expandToSharedIntegrations(item.policy_ids, data?.groupsByPackagePolicyId);
+    (item.effective_policy_ids ?? []).forEach((id) => ids.add(id));
+
+    return [...ids];
+  }, [data?.groupsByPackagePolicyId, item.effective_policy_ids, item.policy_ids]);
 
   const agentCount = useMemo(
     () =>
-      item.policy_ids.reduce(
+      deliveredPolicyIds.reduce(
         (acc, policyId) => acc + (data?.agentPoliciesById[policyId]?.agents || 0),
         0
       ),
-    [data?.agentPoliciesById, item.policy_ids]
+    [data?.agentPoliciesById, deliveredPolicyIds]
   );
 
   const { isLoading, mutateAsync } = useUpdatePack({
@@ -72,6 +96,15 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
                 },
               })
         );
+        addSharedIntegrationWarningToasts({
+          warnings: response?.warnings,
+          packId: item.saved_object_id,
+          toasts,
+          queryClient,
+          getUrlForApp,
+          navigateToApp,
+          startServices,
+        });
       },
     },
   });
@@ -82,12 +115,14 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
   }, [hideConfirmationModal, item, mutateAsync]);
 
   const handleToggleActiveClick = useCallback(() => {
-    if (agentCount) {
+    // If the agent policies could not be loaded, ask anyway: the pack may reach agents
+    // through a shared integration we cannot see.
+    if (agentCount || (agentPoliciesError && item.policy_ids.length > 0)) {
       return setConfirmationModal(true);
     }
 
     handleToggleActive();
-  }, [agentCount, handleToggleActive]);
+  }, [agentCount, agentPoliciesError, handleToggleActive, item.policy_ids.length]);
 
   const hasNoPolicies = item.policy_ids.length === 0;
   const zeroPolicyGuardActive = hasNoPolicies && !item.enabled;
@@ -95,7 +130,9 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
   const euiSwitch = (
     <EuiSwitch
       checked={!!item.enabled}
-      disabled={!permissions.writePacks || isLoading || zeroPolicyGuardActive}
+      disabled={
+        !permissions.writePacks || isLoading || agentPoliciesLoading || zeroPolicyGuardActive
+      }
       showLabel={false}
       aria-label={item.name}
       label=""
@@ -117,12 +154,12 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
       ) : (
         euiSwitch
       )}
-      {confirmationModal && agentCount && (
+      {confirmationModal && (agentCount > 0 || agentPoliciesError) && (
         <ConfirmDeployAgentPolicyModal
           onConfirm={handleToggleActive}
           onCancel={hideConfirmationModal}
-          agentCount={agentCount}
-          agentPolicyCount={item.policy_ids.length}
+          agentCount={agentPoliciesError ? undefined : agentCount}
+          agentPolicyCount={deliveredPolicyIds.length}
         />
       )}
     </>

@@ -147,7 +147,8 @@ export interface SearchExecutionsViewParams {
   startedBefore?: string;
   finishedAfter?: string;
   finishedBefore?: string;
-  collapse?: WorkflowExecutionCollapseField;
+  /** Use `workflowId` for single-page latest-per-workflow lookups. `total` counts executions before collapse. */
+  collapse?: WorkflowExecutionCollapseField | 'workflowId';
   sortField?: string;
   sortOrder?: WorkflowExecutionSortOrder;
   page?: number;

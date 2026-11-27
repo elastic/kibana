@@ -7,6 +7,7 @@
 
 import { schema, type Type } from '@kbn/config-schema';
 import type { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
+import type { RouteSecurity } from '@kbn/core-http-server';
 import { isResponseError } from '@kbn/es-errors';
 import {
   AI_INDEX_API_VERSION,
@@ -21,18 +22,37 @@ import {
   RECALL_AI_INDEX_PREFIX,
   RECALL_PATH,
 } from '../../common/constants';
+import { apiPrivileges } from '../../common/features';
 import type { RecallIncludeEntry } from '../../common/http_api/recall';
 import { validateNonBlank } from '../../common/validation';
 import type { AiIndexDataReadServiceApi } from '../ai_indices/data_read_service';
 import { AiIndexThrottledError } from '../ai_indices/errors';
 import { needsMemoryEnabled, validateRecallIncludeEntry } from '../recall/include';
 import type { RecallService } from '../recall/service';
+import {
+  MANAGE_MEMORY_REQUIRED_MESSAGE,
+  MEMORY_DISABLED_MESSAGE,
+} from '../session_memory_client/errors';
 import type { GetAiIndexDataReadServiceParams } from '../types';
 import { formatEsError } from '../utils/format_es_error';
 import { CONTEXT_ENGINE_DOCS_NOTE } from './constants';
-import { MEMORY_READ_SECURITY, resolveMemoryUser } from './memory_user';
 import { errorResponseSchema } from './schemas/ai_indices_schema';
-import { MEMORY_DISABLED_MESSAGE, withContextEngineFeatureFlag } from './with_feature_flag';
+import { withContextEngineFeatureFlag } from './with_feature_flag';
+
+const MEMORY_READ_SECURITY: RouteSecurity = {
+  authz: {
+    requiredPrivileges: [apiPrivileges.readContextEngine],
+    extendedPrivileges: [apiPrivileges.manageMemory],
+  },
+};
+
+const canRecallUser = async (
+  request: KibanaRequest,
+  userProfile: { getCurrentProfileId: () => Promise<string | null> },
+  requestedUserId: string
+): Promise<boolean> =>
+  request.authzResult?.[apiPrivileges.manageMemory] === true ||
+  (await userProfile.getCurrentProfileId()) === requestedUserId;
 
 const recallIncludeEntrySchema = schema.boundedString({
   minLength: 1,
@@ -201,13 +221,8 @@ export const registerRecallRoutes = ({
 
         const { elasticsearch, userProfile } = await ctx.core;
         try {
-          const resolvedUser = await resolveMemoryUser({
-            request,
-            userProfile,
-            requestedUserId: request.body.user_id,
-          });
-          if (!resolvedUser.ok) {
-            return response.forbidden({ body: { message: resolvedUser.error.message } });
+          if (!(await canRecallUser(request, userProfile, request.body.user_id))) {
+            return response.forbidden({ body: { message: MANAGE_MEMORY_REQUIRED_MESSAGE } });
           }
 
           const aiIndexDataReadService = getAiIndexDataReadService({
@@ -215,13 +230,7 @@ export const registerRecallRoutes = ({
             request,
           });
           const recallService = await getRecallService();
-          const body = await recallService.recall(
-            { aiIndexDataReadService },
-            {
-              ...request.body,
-              user_id: resolvedUser.userId,
-            }
-          );
+          const body = await recallService.recall({ aiIndexDataReadService }, request.body);
           return response.ok({ body });
         } catch (error) {
           if (isResponseError(error) && error.statusCode === 429) {

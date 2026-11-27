@@ -48,6 +48,9 @@ describe('DigitalExperienceLocatorDefinition', () => {
     expect(await pathOf({ serviceName: 'storefront-web', tab: 'reports' })).toBe(
       '/storefront-web/reports'
     );
+    expect(await pathOf({ serviceName: 'shop-mobile', tab: 'crashes' })).toBe(
+      '/shop-mobile/crashes'
+    );
   });
 
   it('opens the Overview for a tab it does not know', async () => {
@@ -108,6 +111,19 @@ describe('DigitalExperienceLocatorDefinition', () => {
       release: '2.0.0',
       compare: 'true',
     });
+  });
+
+  it('keeps the crash group whose detail the Crashes tab has open', async () => {
+    const path = await pathOf({
+      serviceName: 'shop-mobile',
+      tab: 'crashes',
+      source: 'otel',
+      applicationType: 'mobile',
+      crashGroup: 'abc123',
+    });
+
+    expect(path.split('?')[0]).toBe('/shop-mobile/crashes');
+    expect(new URLSearchParams(path.split('?')[1]).get('crashGroup')).toBe('abc123');
   });
 
   it('keeps the state of the Sessions list, with its numbers and booleans', async () => {

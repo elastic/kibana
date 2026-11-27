@@ -8,11 +8,13 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { PointerEvent, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiDelayRender,
   EuiFlexGroup,
   EuiLoadingChart,
+  EuiProgress,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
@@ -29,33 +31,42 @@ import type {
   RunEsql,
   TraceSource,
 } from '../types';
-import { LATENCY_MAP_INNER_ROWS, durationToRow, rowToDuration } from '../query/duration_rows';
+import { LATENCY_MAP_INNER_ROWS, rowToDuration } from '../query/duration_rows';
 import { getMapSource } from '../query/latency_map_query';
 import { getCellKey } from '../query/parse';
+import type { LatencyGrid } from '../query/parse';
+import { getTimeGridKey } from '../query/time_grid';
+import type { TimeGrid } from '../query/time_grid';
 import { clampRange, isSameRange } from '../geometry/cell_range';
 import type { Cell, CellRange } from '../geometry/cell_range';
 import { LAYOUT, getTimeBinsForWidth } from '../geometry/layout';
 import { createMapGeometry } from '../geometry/map_geometry';
-import type { PlotArea, Point } from '../geometry/map_geometry';
-import { isSamePlot } from '../geometry/plot_calibration';
+import type { MapGeometry, PlotArea } from '../geometry/map_geometry';
+import { estimatePlot } from '../geometry/plot_calibration';
 import { formatDuration, formatTimestamp } from '../geometry/ticks';
 import { useLatencyGrid } from '../hooks/use_latency_grid';
 import { useLatencyMapColors } from '../hooks/use_latency_map_colors';
+import { usePlotCalibration } from '../hooks/use_plot_calibration';
+import { useSelectionGestures } from '../hooks/use_selection_gestures';
 import { useSettledWidth } from '../hooks/use_settled_width';
-import { endGesture, moveGesture, startGesture } from '../selection/gesture';
-import type { Gesture } from '../selection/gesture';
+import { getMapBands } from '../operations/operation_bands';
+import type { LatencyMapOperation } from '../operations/operation_bands';
+import { operationToEsqlCondition } from '../operations/to_esql';
+import type { DurationBand } from '../operations/detect_bands';
 import { getKeyboardRange, reduceKeyboard } from '../selection/keyboard';
 import type { KeyboardState } from '../selection/keyboard';
-import { getSelectionCounts } from '../selection/counts';
+import { getGridTotals, getSelectionCounts, isFailureRegion } from '../selection/counts';
+import { findSlowestPercentile, getSlowestRange } from '../selection/slowest';
+import type { SlowestPercentile } from '../selection/slowest';
 import { selectionToEsqlCondition } from '../selection/to_esql';
+import { BandMarkers } from './band_markers';
 import { CellDetails } from './cell_details';
 import { LatencyHeatmap } from './latency_heatmap';
 import { LatencyMapLegend } from './legend';
 import { MapHeader } from './map_header';
-import type { SlowestPercentile } from './map_header';
-import { SelectionBar } from './selection_bar';
-import { OVERLAY_CONTROL_ATTRIBUTE, SelectionOverlay } from './selection_overlay';
-import { getCountText } from './unit_text';
+import { SelectionSummary } from './selection_summary';
+import { SelectionOverlay } from './selection_overlay';
+import { getCountText, getSlowestLabel } from './unit_text';
 
 export interface LatencyMapProps {
   /** The traces to map: index pattern, time range and filters. */
@@ -80,6 +91,16 @@ export interface LatencyMapProps {
   /** The selection. The map is controlled: pass back what `onSelectionCommit` gives. */
   selection?: LatencyMapSelection;
   /**
+   * Whether the host filters the query to failed spans (`FAILED_SPAN_CONDITION`). With
+   * `onFailedOnlyChange`, the errors filter is the host's: the filter asks the host to
+   * write or remove that filter, a selection's condition never carries the failure clause
+   * itself, and this prop is what the filter shows. Without it, the filter is the map's own
+   * state and a selection says `failedOnly` on its own.
+   */
+  failedOnly?: boolean;
+  /** The errors filter changed, for hosts that keep the failure filter in their query. */
+  onFailedOnlyChange?: (failedOnly: boolean) => void;
+  /**
    * Called once a draw, move or resize ends, and when the selection is cleared, with the
    * selection and its ES|QL condition (both undefined on clear). The map never navigates.
    */
@@ -89,12 +110,33 @@ export interface LatencyMapProps {
   ) => void;
   /** A click on a cell with spans. The selection is left as it is. */
   onCellClick?: (cell: LatencyMapCell) => void;
+  /**
+   * The cell whose span the host has open after `onCellClick` (in a flyout, say): outlined,
+   * apart from the selection, until the host takes it back.
+   */
+  activeCell?: LatencyMapSelection;
   /** The duration statistics of the range once known, and whether the map is sampled. */
   onStats?: (stats: DurationStats & { sampled: boolean }) => void;
   /** The map of a source finished loading. */
   onLoad?: (source: TraceSource) => void;
   /** Buttons and links of the host, next to the selection's bounds. */
   renderSelectionActions?: (selection: LatencyMapSelection, esqlCondition: string) => ReactNode;
+  /**
+   * Narrow the host to one operation, with the operation's ES|QL condition
+   * (`operationToEsqlCondition`), ready to put in a query. With this, the map loads the
+   * per-operation duration histograms and offers the duration-groups dropdown; a focused
+   * map draws the groups as labelled bands right of the plot, where a click selects one.
+   */
+  onFocusOperation?: (operation: LatencyMapOperation, esqlCondition: string) => void;
+  /** The operation the host is narrowed to: shows the badge and reserves the band gutter. */
+  focusedOperation?: LatencyMapOperation;
+  onClearOperation?: () => void;
+  /**
+   * The host is refetching what follows the map's query, such as the documents after a
+   * committed selection: the loading line runs while it does. The map's own queries show
+   * the same line on their own.
+   */
+  isUpdating?: boolean;
   /** Height of the chart, axes included, in pixels. */
   height?: number;
   /** IANA time zone of the time axis. The browser's when absent. */
@@ -103,6 +145,19 @@ export interface LatencyMapProps {
 }
 
 const withoutFailedOnly = ({ failedOnly, ...selection }: LatencyMapSelection) => selection;
+
+/** Value equality of selections: the host re-parses the prop from its query every render. */
+const isSameSelection = (a?: LatencyMapSelection, b?: LatencyMapSelection) =>
+  a === b ||
+  Boolean(
+    a &&
+      b &&
+      a.from === b.from &&
+      a.to === b.to &&
+      a.minDuration === b.minDuration &&
+      a.maxDuration === b.maxDuration &&
+      Boolean(a.failedOnly) === Boolean(b.failedOnly)
+  );
 
 /** Until the chart tells where its cells are, the pixels of the geometry mean nothing. */
 const UNCALIBRATED: PlotArea = { left: 0, top: 0, colWidth: 1, rowHeight: 1 };
@@ -119,11 +174,18 @@ export function LatencyMap({
   mapFilters,
   selectionCondition,
   selection,
+  failedOnly: hostFailedOnly,
+  onFailedOnlyChange,
   onSelectionCommit,
   onCellClick,
+  activeCell,
   onStats,
   onLoad,
   renderSelectionActions,
+  onFocusOperation,
+  focusedOperation,
+  onClearOperation,
+  isUpdating,
   height = LAYOUT.defaultHeight,
   timeZone,
   'data-test-subj': dataTestSubj = 'traceLatencyMap',
@@ -136,10 +198,36 @@ export function LatencyMap({
   // Nothing is loaded before the map is measured, and a resize is followed once it stops, into
   // the time columns of its tier: dragging a window edge does not load the data again.
   const settledWidth = useSettledWidth(measuredWidth);
-  const targetBins = getTimeBinsForWidth(settledWidth);
+  // With the operations feature, the band gutter always counts against the bin tier, so
+  // bands appearing after the grid change the margin but never the tier - nothing reloads.
+  const operationsEnabled = Boolean(onFocusOperation || focusedOperation);
+  const targetBins = getTimeBinsForWidth(
+    settledWidth,
+    operationsEnabled ? LAYOUT.bandLabelsWidth : 0
+  );
   const mapSource = getMapSource(source, { unit, selectionCondition, mapFilters });
-  const { grid, stats, timeGrid, sampled, isLoading, isEmpty, error, loadedSource } =
-    useLatencyGrid({ source: mapSource, runEsql, targetBins, enabled: settledWidth > 0 });
+  const { grid, stats, timeGrid, sampling, operations, isLoading, isEmpty, error, loadedSource } =
+    useLatencyGrid({
+      source: mapSource,
+      runEsql,
+      targetBins,
+      enabled: settledWidth > 0,
+      loadOperations: operationsEnabled,
+    });
+  const sampled = Boolean(sampling);
+  const mapBands = useMemo(
+    () => (operations && stats ? getMapBands(operations, stats) : undefined),
+    [operations, stats]
+  );
+  // The bands of the one operation the map shows, when its durations fall into groups: an
+  // operation with one group has nothing to mark, and gets no gutter.
+  const focusedBands =
+    mapBands?.focused && mapBands.focused.bands.length > 0 ? mapBands.focused : undefined;
+  // Room for the band labels only while bands are drawn. A host focused on one operation
+  // likely has bands to show, so the room is there from the start and the map does not shift
+  // later; once its histogram says otherwise, the room goes.
+  const showBands = mapBands ? Boolean(focusedBands) : Boolean(focusedOperation);
+  const rightMargin = operationsEnabled && showBands ? LAYOUT.bandLabelsWidth : 0;
 
   const callbacks = useRef({ onStats, onLoad });
   callbacks.current = { onStats, onLoad };
@@ -150,20 +238,15 @@ export function LatencyMap({
     if (loadedSource) callbacks.current.onLoad?.(loadedSource);
   }, [loadedSource]);
 
-  // Where the chart put its cells. Known from the first cell it tells of, and only for as long as
-  // the chart keeps its size and its columns.
-  const plotKey = `${width}x${height}:${timeGrid?.fromMs}:${timeGrid?.binMs}:${timeGrid?.bins}`;
-  const [calibrated, setCalibrated] = useState<{ key: string; plot: PlotArea }>();
-  const plot = calibrated?.key === plotKey ? calibrated.plot : undefined;
-  const handlePlot = useCallback(
-    (next: PlotArea) =>
-      setCalibrated((previous) =>
-        previous?.key === plotKey && isSamePlot(previous.plot, next)
-          ? previous
-          : { key: plotKey, plot: next }
-      ),
-    [plotKey]
-  );
+  // A new grid (the map resized into another tier, or its range changed) puts cells elsewhere.
+  const gridKey = getTimeGridKey(timeGrid);
+  // Where the chart put its cells, for as long as it keeps its height and its columns.
+  const { plot, handlePlot } = usePlotCalibration({
+    plotKey: `${height}:${gridKey}`,
+    width,
+    rightMargin,
+    timeGrid,
+  });
 
   const geometry = useMemo(
     () =>
@@ -172,50 +255,104 @@ export function LatencyMap({
         : undefined,
     [stats, timeGrid, plot]
   );
+  // The bands are read with the map, not found under the pointer: until the chart has told
+  // where its cells are, they go by where its layout puts the plot.
+  const bandGeometry = useMemo(
+    () =>
+      plot || !focusedBands || !stats || !timeGrid
+        ? geometry
+        : createMapGeometry({
+            plot: estimatePlot({
+              // The chart is as wide as the map is measured, below the map's least width too.
+              width: measuredWidth || width,
+              height,
+              rightMargin,
+              bins: timeGrid.bins,
+            }),
+            timeGrid,
+            stats,
+          }),
+    [plot, focusedBands, stats, timeGrid, geometry, measuredWidth, width, height, rightMargin]
+  );
 
-  const [failedOnly, setFailedOnly] = useState(Boolean(selection?.failedOnly));
-  const selectionFailedOnly = selection ? Boolean(selection.failedOnly) : undefined;
+  // With `onFailedOnlyChange` the host's query filter owns the outcome and the prop is the
+  // filter; a selection whose condition still carries the failure clause (a shared URL from
+  // before the host filter) shows as failed too. Without it, the map keeps its own state.
+  const controlled = onFailedOnlyChange !== undefined;
+
+  // A commit shows at once: the committed selection (or clear) stays rendered while the host
+  // round-trips it through its query, so the box never snaps back to its old place. The prop
+  // takes over as soon as it moves - to the committed value, or wherever else the host went.
+  const [pendingCommit, setPendingCommit] = useState<{
+    selection: LatencyMapSelection | undefined;
+    propAtCommit: LatencyMapSelection | undefined;
+  }>();
+  const selectionProp = useRef(selection);
+  selectionProp.current = selection;
   useEffect(() => {
-    if (selectionFailedOnly !== undefined) setFailedOnly(selectionFailedOnly);
+    setPendingCommit((pending) => {
+      if (!pending) return pending;
+      // The prop moved since the commit: whatever it says now wins, pending or not.
+      if (!isSameSelection(selection, pending.propAtCommit)) return undefined;
+      // The prop already says what was committed: nothing left to wait for.
+      if (isSameSelection(selection, pending.selection)) return undefined;
+      return pending;
+    });
+  }, [selection]);
+  const displaySelection = pendingCommit ? pendingCommit.selection : selection;
+
+  const [localFailedOnly, setLocalFailedOnly] = useState(Boolean(displaySelection?.failedOnly));
+  const selectionFailedOnly = displaySelection ? Boolean(displaySelection.failedOnly) : undefined;
+  useEffect(() => {
+    if (selectionFailedOnly !== undefined) setLocalFailedOnly(selectionFailedOnly);
   }, [selectionFailedOnly]);
+  const failedOnly = controlled
+    ? Boolean(hostFailedOnly || displaySelection?.failedOnly)
+    : localFailedOnly;
+  // Once the user chooses an outcome with the errors filter, a drawn region keeps it: the failure
+  // inference below only speaks while the user has not.
+  const outcomeChosen = useRef(false);
 
   const commit = useCallback(
-    (next: LatencyMapSelection | undefined) =>
+    (next: LatencyMapSelection | undefined) => {
+      if (!next) outcomeChosen.current = false;
+      setPendingCommit({ selection: next, propAtCommit: selectionProp.current });
       onSelectionCommit(
         next,
         next && selectionToEsqlCondition(next, { unit, scope: selectionCondition })
-      ),
+      );
+    },
     [onSelectionCommit, unit, selectionCondition]
   );
 
-  const gestureRef = useRef<Gesture>();
-  const [draft, setDraft] = useState<CellRange>();
+  // The percentile the user picked on the menu: when several percentiles coincide on the same
+  // rows (a spike holding most spans), the committed range alone cannot tell them apart.
+  const [chosenSlowest, setChosenSlowest] = useState<SlowestPercentile>();
   const [keyboard, setKeyboard] = useState<KeyboardState>();
   const [hoverCell, setHoverCell] = useState<Cell>();
-  // A press on the chart starts a brush, a press on the selection's own grip or handles a move.
-  const [isBrushing, setIsBrushing] = useState(false);
-  const [isMoving, setIsMoving] = useState(false);
 
-  // A new grid (the map resized, or its range changed) puts cells elsewhere: a cursor, an anchor or
-  // a move in progress would point at cells that are no longer there, or past the new edge.
-  const gridKey = timeGrid ? `${timeGrid.fromMs}:${timeGrid.binMs}:${timeGrid.bins}` : undefined;
-  useEffect(() => {
-    setKeyboard(undefined);
-    setDraft(undefined);
-    setHoverCell(undefined);
-    gestureRef.current = undefined;
-    setIsMoving(false);
-    setIsBrushing(false);
-  }, [gridKey]);
-
-  const committedRange = useMemo(
-    () => (geometry && selection ? geometry.selectionToRange(selection) : undefined),
-    [geometry, selection]
+  // The same object for as long as it covers the same cells: a host handing the selection in
+  // a new object each render (parsed from its query, say) must not redraw the chart.
+  const committedRangeRef = useRef<CellRange>();
+  const committedRange = useMemo(() => {
+    const next =
+      geometry && displaySelection ? geometry.selectionToRange(displaySelection) : undefined;
+    const previous = committedRangeRef.current;
+    if (next && previous && isSameRange(next, previous)) return previous;
+    committedRangeRef.current = next;
+    return next;
+  }, [geometry, displaySelection]);
+  // The cell whose span the host has open, outlined until the host takes it back.
+  const activeRect = useMemo(
+    () =>
+      geometry && plot && activeCell
+        ? geometry.rangeToRect(geometry.selectionToRange(activeCell))
+        : undefined,
+    [geometry, plot, activeCell]
   );
-  // The selection as the chart draws it, by what is on: a move, the keyboard, the selection.
-  const highlight = draft ?? (keyboard ? getKeyboardRange(keyboard) : undefined) ?? committedRange;
-  const overlayRange = draft ?? committedRange;
-
+  // Every span of the map, failed and not: the errors switch needs to know whether there are
+  // any, and a drawn region is read against them.
+  const gridTotals = useMemo(() => (grid ? getGridTotals(grid) : undefined), [grid]);
   const describeCell = useCallback(
     (cell: Cell) => {
       const counts = grid?.cells.get(getCellKey(cell.xi, cell.yi, grid.bins));
@@ -231,30 +368,107 @@ export function LatencyMap({
         // With "failed only" the map shows the failed spans alone, and so does the cell.
         spans: failedOnly ? failed : counts?.spans ?? 0,
         failed,
+        failedOnly,
       };
     },
     [grid, timeGrid, stats, failedOnly]
   );
 
+  // The outcome a region is about, as a commit resolves it. With a host filter the failure
+  // clause is the host's, never the selection's - unless the selection carries its own
+  // (inferred, or from a shared URL) while the host filter is off: moving or resizing that
+  // region keeps it about failures. A new region (drawn, from the keyboard, a shortcut)
+  // starts afresh: where failures concentrate it is about them, as long as the user has not
+  // chosen an outcome with the errors filter - on its own under a host filter too, so that
+  // clearing the region takes the inference away with it.
+  const resolveRegion = useCallback(
+    (
+      range: CellRange,
+      mapGeometry: MapGeometry,
+      { ofSelection = false } = {}
+    ): LatencyMapSelection => {
+      const ownFailedOnly = ofSelection ? displaySelection?.failedOnly : undefined;
+      const next = mapGeometry.rangeToSelection(
+        range,
+        controlled ? (hostFailedOnly ? undefined : ownFailedOnly) : failedOnly
+      );
+      const filterOn = controlled ? Boolean(hostFailedOnly) : failedOnly;
+      if (filterOn || next.failedOnly || outcomeChosen.current || !grid || !timeGrid || !stats) {
+        return next;
+      }
+      const counts = getSelectionCounts({ grid, timeGrid, stats, selection: next });
+      return gridTotals && isFailureRegion(counts, gridTotals)
+        ? { ...next, failedOnly: true }
+        : next;
+    },
+    [displaySelection, controlled, hostFailedOnly, failedOnly, grid, timeGrid, stats, gridTotals]
+  );
+
+  // What a keyboard region would commit: its bounds, with the counts of the cells it covers,
+  // over the outcome Enter would commit it with (and the host filter's, which counts failed
+  // spans alone whatever the region says). Of a map that has its cells: an empty range has
+  // a geometry and no grid.
+  const describeRange = (
+    range: CellRange,
+    mapGeometry: MapGeometry,
+    counted: { grid: LatencyGrid; timeGrid: TimeGrid; stats: DurationStats }
+  ) => {
+    const rangeSelection = resolveRegion(range, mapGeometry);
+    // Failed spans alone: by the region's own clause, or the host's filter over it.
+    const regionFailedOnly = Boolean(rangeSelection.failedOnly || (controlled && hostFailedOnly));
+    const counts = getSelectionCounts({
+      ...counted,
+      selection: regionFailedOnly ? { ...rangeSelection, failedOnly: true } : rangeSelection,
+    });
+    return {
+      fromMs: Date.parse(rangeSelection.from),
+      toMs: Date.parse(rangeSelection.to),
+      minDuration: rangeSelection.minDuration,
+      maxDuration: rangeSelection.maxDuration,
+      spans: counts.spans,
+      failed: counts.failed,
+      failedOnly: regionFailedOnly,
+    };
+  };
+
   // Over the selection's own bounds, which the host's condition uses, not over the cells it was
   // snapped to: after a resize those are not the same spans.
   const selectedCounts = useMemo(
     () =>
-      grid && timeGrid && stats && selection
-        ? getSelectionCounts({ grid, timeGrid, stats, selection })
+      grid && timeGrid && stats && displaySelection
+        ? getSelectionCounts({
+            grid,
+            timeGrid,
+            stats,
+            // Under a host's failure filter the selection condition does not say failed
+            // itself, but the query returns failed spans alone, and so must the counts.
+            selection: failedOnly ? { ...displaySelection, failedOnly: true } : displaySelection,
+          })
         : { spans: 0, failed: 0, estimated: false },
-    [grid, timeGrid, stats, selection]
+    [grid, timeGrid, stats, displaySelection, failedOnly]
   );
 
   // Stable, so renders that change nothing of the chart do not reach the memoized heatmap.
   const commitRange = useCallback(
-    (requested: CellRange) => {
+    (requested: CellRange, label?: string, { ofSelection = false } = {}) => {
       if (!geometry) return;
       const range = clampRange(requested, geometry.bins, geometry.rows);
-      if (selection && committedRange && isSameRange(range, committedRange)) return;
-      commit(geometry.rangeToSelection(range, failedOnly));
+      const next = resolveRegion(range, geometry, { ofSelection });
+      // The same cells about the same spans: nothing to commit, and neither is a move or a
+      // resize that lands where it started, whatever the cells would be read as afresh. A
+      // new region over the same cells about every span where the selection was about
+      // failures (or the reverse) is a change.
+      if (
+        displaySelection &&
+        committedRange &&
+        isSameRange(range, committedRange) &&
+        (ofSelection || Boolean(next.failedOnly) === Boolean(displaySelection.failedOnly))
+      ) {
+        return;
+      }
+      commit(label ? { ...next, label } : next);
     },
-    [geometry, selection, committedRange, commit, failedOnly]
+    [geometry, displaySelection, committedRange, commit, resolveRegion]
   );
 
   const clickCell = useCallback(
@@ -274,63 +488,80 @@ export function LatencyMap({
     [geometry, onCellClick, describeCell, failedOnly]
   );
 
-  const getPoint = (event: PointerEvent<SVGSVGElement>): Point => {
-    const box = event.currentTarget.getBoundingClientRect();
-    return { x: event.clientX - box.left, y: event.clientY - box.top };
-  };
-  const cancelGesture = () => {
-    gestureRef.current = undefined;
-    setDraft(undefined);
-    setIsMoving(false);
-  };
+  // The map's wrapper takes the keyboard, and gives it up on focus loss or a pointer press.
+  const [layer, setLayer] = useState<HTMLDivElement | null>(null);
+  const commitGesture = useCallback(
+    (range: CellRange, options?: { ofSelection?: boolean }) =>
+      commitRange(range, undefined, options),
+    [commitRange]
+  );
+  // Any press takes the keyboard cursor away, as a click takes the focus.
+  const dropCursor = useCallback(() => setKeyboard(undefined), []);
+  const { draft, isDrawing, isMoving, cancelGesture, resetGestures, overlayHandlers } =
+    useSelectionGestures({
+      container,
+      layer,
+      geometry,
+      plot,
+      committedRange,
+      width,
+      height,
+      onCommitRange: commitGesture,
+      onClickCell: clickCell,
+      onPress: dropCursor,
+    });
 
-  const onOverlayPointerDown = (event: PointerEvent<SVGSVGElement>) => {
-    if (!geometry || !plot || event.button !== 0) return;
-    const gesture = startGesture(getPoint(event), geometry, committedRange);
-    if (!gesture) return;
-    gestureRef.current = gesture;
-    setIsMoving(true);
-    (event.target as Element).setPointerCapture?.(event.pointerId);
-  };
+  // A new grid puts cells elsewhere: a cursor, an anchor or a move in progress would point at
+  // cells that are no longer there, or past the new edge.
+  useEffect(() => {
+    setKeyboard(undefined);
+    setHoverCell(undefined);
+    resetGestures();
+    setPendingCommit(undefined);
+  }, [gridKey, resetGestures]);
 
-  const onOverlayPointerMove = (event: PointerEvent<SVGSVGElement>) => {
-    if (!geometry || !gestureRef.current) return;
-    const range = moveGesture(gestureRef.current, getPoint(event), geometry);
-    setDraft((previous) => (previous && isSameRange(previous, range) ? previous : range));
-  };
+  // The selection as the chart draws it, by what is on: a move, the keyboard, the selection.
+  const highlight = draft ?? (keyboard ? getKeyboardRange(keyboard) : undefined) ?? committedRange;
+  const overlayRange = draft ?? committedRange;
 
-  const onOverlayPointerUp = (event: PointerEvent<SVGSVGElement>) => {
-    const gesture = gestureRef.current;
-    if (!geometry || !gesture) return;
-    const end = endGesture(gesture, getPoint(event), geometry);
-    cancelGesture();
-    (event.target as Element).releasePointerCapture?.(event.pointerId);
-    if (end.type === 'range') commitRange(end.range);
-    else if (end.type === 'click') clickCell(end.cell);
+  const focusOperation = useCallback(
+    (operation: LatencyMapOperation) =>
+      onFocusOperation?.(operation, operationToEsqlCondition(operation)),
+    [onFocusOperation]
+  );
+
+  // A band covers every column: its duration rows across the whole range.
+  const selectBand = (band: DurationBand, label: string) => {
+    if (!geometry) return;
+    commitRange({ x0: 0, x1: geometry.bins, y0: band.lowRow, y1: band.highRow + 1 }, label);
   };
 
   const selectSlowest = (percentile: SlowestPercentile) => {
     if (!geometry || !stats) return;
-    const row = Math.floor(durationToRow(percentile === 99 ? stats.p99 : stats.p95, stats));
-    commitRange({
-      x0: 0,
-      x1: geometry.bins,
-      y0: Math.min(geometry.rows - 1, Math.max(0, row)),
-      y1: geometry.rows,
-    });
+    setChosenSlowest(percentile);
+    commitRange(getSlowestRange(stats, percentile, geometry), getSlowestLabel(unit, percentile));
   };
 
   const changeFailedOnly = (next: boolean) => {
-    setFailedOnly(next);
-    if (selection) {
-      commit(next ? { ...selection, failedOnly: true } : withoutFailedOnly(selection));
+    outcomeChosen.current = true;
+    if (controlled) {
+      onFailedOnlyChange?.(next);
+      // The host filter owns the outcome now: a selection condition still carrying the
+      // failure clause of its own (a shared URL from before) is normalized out of it.
+      if (displaySelection?.failedOnly) commit(withoutFailedOnly(displaySelection));
+      return;
+    }
+    setLocalFailedOnly(next);
+    if (displaySelection) {
+      commit(
+        next ? { ...displaySelection, failedOnly: true } : withoutFailedOnly(displaySelection)
+      );
     }
   };
 
   const onKeyDown = (event: KeyboardEvent) => {
     if (!geometry) return;
-    if (event.key === 'Escape' && gestureRef.current) {
-      cancelGesture();
+    if (event.key === 'Escape' && cancelGesture()) {
       event.preventDefault();
       return;
     }
@@ -345,9 +576,14 @@ export function LatencyMap({
     const result = reduceKeyboard(start, event, geometry.bins, geometry.rows);
     if (!result.handled) return;
     event.preventDefault();
+    if (result.action?.type === 'click') {
+      // The pointer's click, from the keyboard: Enter on the bare cursor opens the cell.
+      clickCell(result.action.cell);
+      return;
+    }
     if (result.action?.type === 'clear') {
       setKeyboard(undefined);
-      if (selection) commit(undefined);
+      if (displaySelection) commit(undefined);
       return;
     }
     if (result.action?.type === 'commit') {
@@ -360,10 +596,9 @@ export function LatencyMap({
     }
   };
 
-  // The map's wrapper takes the keyboard, and gives it up on focus loss or a pointer press. The
-  // listeners are added to the element, not as props, which jsx-a11y reads as a static element
-  // taking events. They read the latest handler through a ref, so they are added only once.
-  const [layer, setLayer] = useState<HTMLDivElement | null>(null);
+  // The keyboard listeners are added to the element, not as props, which jsx-a11y reads as a
+  // static element taking events. They read the latest handler through a ref, so they are
+  // added only once.
   const latestKeyDown = useRef(onKeyDown);
   latestKeyDown.current = onKeyDown;
   useEffect(() => {
@@ -372,30 +607,27 @@ export function LatencyMap({
     const handleFocusOut = (event: FocusEvent) => {
       if (!layer.contains(event.relatedTarget as Node | null)) setKeyboard(undefined);
     };
-    // Capturing, so that the chart below cannot stop it. A press anywhere but on the selection's
-    // own controls is the chart's brush, which draws a new region while the old one lets go.
-    const handlePointerDown = (event: Event) => {
-      setKeyboard(undefined);
-      if (!(event.target as Element).closest?.(`[${OVERLAY_CONTROL_ATTRIBUTE}]`)) {
-        setIsBrushing(true);
-      }
-    };
-    const handlePointerEnd = () => setIsBrushing(false);
     layer.addEventListener('keydown', handleKeyDown);
     layer.addEventListener('focusout', handleFocusOut);
-    layer.addEventListener('pointerdown', handlePointerDown, true);
-    window.addEventListener('pointerup', handlePointerEnd);
-    window.addEventListener('pointercancel', handlePointerEnd);
     return () => {
       layer.removeEventListener('keydown', handleKeyDown);
       layer.removeEventListener('focusout', handleFocusOut);
-      layer.removeEventListener('pointerdown', handlePointerDown, true);
-      window.removeEventListener('pointerup', handlePointerEnd);
-      window.removeEventListener('pointercancel', handlePointerEnd);
     };
   }, [layer]);
 
-  const keyboardCell = geometry && keyboard ? describeCell(keyboard.cursor) : undefined;
+  // Stable, so renders that change nothing of the chart do not reach the memoized heatmap.
+  const latestCommitRange = useRef(commitRange);
+  latestCommitRange.current = commitRange;
+  const onBrush = useCallback((range: CellRange) => latestCommitRange.current(range), []);
+
+  // The keyboard's readout: the cursor's cell or, while Shift is extending a region, the whole
+  // region - the bounds and counts that Enter would commit, as the summary will say them.
+  const keyboardCell =
+    geometry && grid && timeGrid && stats && keyboard
+      ? keyboard.anchor
+        ? describeRange(getKeyboardRange(keyboard), geometry, { grid, timeGrid, stats })
+        : describeCell(keyboard.cursor)
+      : undefined;
   const summary = stats
     ? i18n.translate('traceLatencyMap.summary', {
         defaultMessage:
@@ -442,7 +674,7 @@ export function LatencyMap({
                 defaultMessage: 'No traces in this time range.',
               })
             : i18n.translate('traceLatencyMap.emptySpans', {
-                defaultMessage: 'No spans in this time range.',
+                defaultMessage: 'No spans with a duration in this time range.',
               })}
         </EuiText>
       </EuiFlexGroup>
@@ -462,19 +694,22 @@ export function LatencyMap({
   } else {
     body = (
       <>
-        {/* The map is the widget: the chart brushes, the keys select. Announced as one. */}
+        {/* The map is the widget: the pointer draws, the keys select. Announced as one. */}
         <div
           ref={setLayer}
           role="application"
           tabIndex={0}
           aria-label={i18n.translate('traceLatencyMap.interactiveLabel', {
             defaultMessage:
-              'Latency map. Arrow keys move between cells, Shift and arrow keys select a region, Enter commits it, Escape clears.',
+              'Latency map. Arrow keys move between cells, Enter opens the cell, Shift and arrow keys select a region, Enter commits it, Escape clears.',
           })}
           aria-busy={isLoading}
           css={css`
             position: relative;
             opacity: ${isLoading ? 0.5 : 1};
+            /* While a region is being drawn the chart keeps its hands off the pointer:
+               no tooltip trailing the drag, and no brush of its own. */
+            ${isDrawing ? `[data-test-subj='traceLatencyMapChart'] { pointer-events: none; }` : ''}
             &:focus-visible {
               outline: ${euiTheme.focus.width} solid ${euiTheme.colors.primary};
             }
@@ -487,23 +722,36 @@ export function LatencyMap({
             stats={stats}
             unit={unit}
             sampled={sampled}
+            canClick={Boolean(onCellClick)}
             timeZone={timeZone}
             colors={colors}
             failedOnly={failedOnly}
             height={height}
+            rightMargin={rightMargin}
             highlight={highlight}
             summary={summary}
-            onBrush={commitRange}
+            onBrush={onBrush}
             onCellClick={clickCell}
             onPlot={handlePlot}
             onCellHover={setHoverCell}
           />
+          {focusedBands && bandGeometry && (
+            <BandMarkers
+              operationBands={focusedBands}
+              geometry={bandGeometry}
+              colors={colors}
+              width={width}
+              height={height}
+              onSelectBand={selectBand}
+            />
+          )}
           {plot && !keyboard && (
             <SelectionOverlay
               geometry={geometry}
               rect={overlayRange && geometry.rangeToRect(overlayRange)}
+              activeRect={activeRect}
               hoverRect={
-                hoverCell && !draft && !isBrushing && !isMoving
+                hoverCell && !draft && !isDrawing && !isMoving
                   ? geometry.rangeToRect({
                       x0: hoverCell.xi,
                       x1: hoverCell.xi + 1,
@@ -515,31 +763,27 @@ export function LatencyMap({
               colors={colors}
               width={width}
               height={height}
-              showHandles={!isBrushing}
+              showHandles={!isDrawing}
               isMoving={isMoving}
-              onPointerDown={onOverlayPointerDown}
-              onPointerMove={onOverlayPointerMove}
-              onPointerUp={onOverlayPointerUp}
-              onPointerCancel={cancelGesture}
+              {...overlayHandlers}
             />
           )}
         </div>
-        {keyboardCell && (
-          <CellDetails {...keyboardCell} unit={unit} sampled={sampled} timeZone={timeZone} />
-        )}
         <EuiScreenReaderOnly>
           <div aria-live="polite" data-test-subj="traceLatencyMapAnnouncement">
             {keyboardCell
               ? // One message, so translations can reorder it; 'to', not a dash, which a
                 // screen reader would skip.
                 i18n.translate('traceLatencyMap.cellAnnouncement', {
-                  defaultMessage: '{fromTime} to {toTime}, {minDuration} to {maxDuration}, {count}',
+                  defaultMessage:
+                    '{fromTime} to {toTime}, {minDuration} to {maxDuration}, {count}{failedOnly, select, true {, failed only} other {}}',
                   values: {
                     fromTime: formatTimestamp(keyboardCell.fromMs, timeZone),
                     toTime: formatTimestamp(keyboardCell.toMs, timeZone),
                     minDuration: formatDuration(keyboardCell.minDuration),
                     maxDuration: formatDuration(keyboardCell.maxDuration),
                     count: getCountText(unit, keyboardCell.spans, sampled),
+                    failedOnly: String(keyboardCell.failedOnly),
                   },
                 })
               : ''}
@@ -549,14 +793,72 @@ export function LatencyMap({
     );
   }
 
+  // As text on the header's left, next to the statistics. Shown in the error state too:
+  // the selection still filters the host's documents, so the way to clear it must not go
+  // down with the map (the counts do, so they are left out).
+  const selectionSummary = displaySelection && (geometry || error) && (
+    <SelectionSummary
+      selection={displaySelection}
+      spans={grid ? selectedCounts.spans : undefined}
+      failed={grid ? selectedCounts.failed : undefined}
+      failedOnly={failedOnly}
+      unit={unit}
+      sampled={sampled || selectedCounts.estimated}
+      timeZone={timeZone}
+      actions={renderSelectionActions?.(
+        displaySelection,
+        selectionToEsqlCondition(displaySelection, { unit, scope: selectionCondition })
+      )}
+    />
+  );
+
+  // The slowest shortcut the committed selection matches, shown on the menu's button: the
+  // percentile the user picked on the menu when several coincide on the same rows.
+  const activeSlowest = useMemo(
+    () =>
+      committedRange && geometry && stats
+        ? findSlowestPercentile(committedRange, stats, geometry, chosenSlowest)
+        : undefined,
+    [committedRange, geometry, stats, chosenSlowest]
+  );
+
   return (
-    <div ref={setContainer} data-test-subj={dataTestSubj}>
+    <div
+      ref={setContainer}
+      css={css`
+        position: relative;
+      `}
+      data-test-subj={dataTestSubj}
+    >
+      {/* One line for anything in flight: the map's own queries and the host's follow-up
+          (the documents after a commit). Delayed as in the unified histogram, so fast
+          queries never flash it. */}
+      {(isUpdating || isLoading) && (
+        <EuiDelayRender delay={500}>
+          <EuiProgress
+            size="xs"
+            color="accent"
+            position="absolute"
+            css={{ zIndex: 1 }}
+            data-test-subj="traceLatencyMapProgressBar"
+          />
+        </EuiDelayRender>
+      )}
       <MapHeader
+        stats={isEmpty ? undefined : stats}
+        failedCount={gridTotals?.failed}
         failedOnly={failedOnly}
         onFailedOnlyChange={changeFailedOnly}
         onSelectSlowest={selectSlowest}
-        sampled={sampled && Boolean(grid) && !isEmpty}
+        activeSlowest={activeSlowest}
+        sampling={grid && !isEmpty ? sampling : undefined}
         isDisabled={!geometry || isEmpty}
+        selectionSummary={selectionSummary || undefined}
+        onClearSelection={selectionSummary ? () => commit(undefined) : undefined}
+        operationsWithGroups={onFocusOperation ? mapBands?.operations : undefined}
+        onFocusOperation={onFocusOperation ? focusOperation : undefined}
+        focusedOperation={focusedOperation}
+        onClearOperation={onClearOperation}
       />
       <EuiSpacer size="s" />
       {body}
@@ -566,22 +868,12 @@ export function LatencyMap({
           <LatencyMapLegend colors={colors} unit={unit} />
         </>
       )}
-      {selection && geometry && !error && (
+      {/* Under the legend, which stays where it is: the readout is the only thing that
+          appears and goes with the cursor, and nothing renders below it. */}
+      {keyboardCell && (
         <>
-          <EuiSpacer size="s" />
-          <SelectionBar
-            selection={selection}
-            spans={selectedCounts.spans}
-            failed={selectedCounts.failed}
-            unit={unit}
-            sampled={sampled || selectedCounts.estimated}
-            timeZone={timeZone}
-            onClear={() => commit(undefined)}
-            actions={renderSelectionActions?.(
-              selection,
-              selectionToEsqlCondition(selection, { unit, scope: selectionCondition })
-            )}
-          />
+          <EuiSpacer size="xs" />
+          <CellDetails {...keyboardCell} unit={unit} sampled={sampled} timeZone={timeZone} />
         </>
       )}
     </div>

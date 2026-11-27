@@ -33,8 +33,10 @@ import type { AiIndexDataReadServiceApi } from '../ai_indices/data_read_service'
 import { AiIndexThrottledError } from '../ai_indices/errors';
 import type { RecallService } from '../recall/service';
 import type { GetAiIndexDataReadServiceParams } from '../types';
-import { MANAGE_MEMORY_REQUIRED_MESSAGE } from './memory_user';
-import { MEMORY_DISABLED_MESSAGE } from './with_feature_flag';
+import {
+  MANAGE_MEMORY_REQUIRED_MESSAGE,
+  MEMORY_DISABLED_MESSAGE,
+} from '../session_memory_client/errors';
 
 interface RegisteredRoute {
   config: {

@@ -58,10 +58,10 @@ export interface SessionDocument {
   http_failed_request_count: number;
   bounced: boolean;
   /**
-   * Whether the session has a recorded replay, from the `elastic.replay.start` records session
-   * replay writes to `logs-rum.replay.otel-*`, which `SESSIONS_SOURCE_INDICES` already covers.
-   * Mapped so session replay can start writing it without a `SESSIONS_VERSION` bump and a rebuild;
-   * nothing sets it yet, so it is absent rather than `false`. Readers expose it as `hasReplay`.
+   * Whether the session has a recorded replay: at least one `elastic.replay.start` record, which
+   * session replay writes to `logs-rum.replay.otel-*` once per recorded segment. Absent on a
+   * summary written without it, which readers take as unknown, not as `false`. Readers expose it
+   * as `hasReplay`.
    */
   has_replay?: boolean;
   /**
