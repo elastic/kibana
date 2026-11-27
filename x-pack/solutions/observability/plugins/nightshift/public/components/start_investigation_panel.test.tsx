@@ -68,6 +68,19 @@ describe('StartInvestigationPanel', () => {
     expect(startInvestigation).toHaveBeenCalledTimes(2);
   });
 
+  it('submits Cmd/Ctrl + Enter through a bubbling click so click telemetry fires', () => {
+    const windowClick = jest.fn();
+    window.addEventListener('click', windowClick);
+    renderPanel();
+
+    fireEvent.change(getInput(), { target: { value: 'Why is checkout slow?' } });
+    fireEvent.keyDown(getInput(), { key: 'Enter', ctrlKey: true });
+    window.removeEventListener('click', windowClick);
+
+    expect(windowClick).toHaveBeenCalledTimes(1);
+    expect(startInvestigation).toHaveBeenCalledTimes(1);
+  });
+
   it('closes with Escape', () => {
     renderPanel();
 

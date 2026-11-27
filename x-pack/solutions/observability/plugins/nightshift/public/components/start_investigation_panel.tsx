@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiFormRow,
@@ -44,6 +44,8 @@ export function StartInvestigationPanel({
   const [message, setMessage] = useState('');
   const { startInvestigation, isStarting } = useStartInvestigation({ onStarted: onClose });
 
+  const submitButtonRef = useRef<HTMLButtonElement | null>(null);
+
   const trimmedMessage = message.trim();
   const canSubmit = trimmedMessage.length > 0 && !isStarting;
 
@@ -54,15 +56,12 @@ export function StartInvestigationPanel({
     startInvestigation(trimmedMessage);
   }, [canSubmit, startInvestigation, trimmedMessage]);
 
-  const handleKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-      if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
-        event.preventDefault();
-        handleSubmit();
-      }
-    },
-    [handleSubmit]
-  );
+  const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+      event.preventDefault();
+      submitButtonRef.current?.click();
+    }
+  }, []);
 
   return (
     <EuiModal
@@ -124,6 +123,7 @@ export function StartInvestigationPanel({
 
       <EuiModalFooter>
         <EuiButton
+          buttonRef={submitButtonRef}
           data-test-subj="nightshiftStartInvestigationSubmitButton"
           disabled={!canSubmit}
           fill

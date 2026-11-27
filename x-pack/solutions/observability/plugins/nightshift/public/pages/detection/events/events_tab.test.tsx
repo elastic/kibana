@@ -138,6 +138,20 @@ describe('EventsTab', () => {
     expect(screen.getByTestId('eventFlyoutStub')).toHaveTextContent('Payment errors');
   });
 
+  it('lets the open control click reach window so click telemetry fires', () => {
+    const windowClick = jest.fn();
+    window.addEventListener('click', windowClick);
+    const history = renderTab();
+    const entriesBefore = history.length;
+
+    fireEvent.click(screen.getByTestId('nightshiftOpenEvent-event-1'));
+    window.removeEventListener('click', windowClick);
+
+    expect(windowClick).toHaveBeenCalledTimes(1);
+    expect(history.length).toBe(entriesBefore + 1);
+    expect(new URLSearchParams(history.location.search).get('eventId')).toBe('event-1');
+  });
+
   it('sorts by a column header and keeps the choice in the URL', () => {
     // EUI's sticky header renders an aria-hidden clone of every header cell; click the real one.
     const sortButton = (field: string) => {

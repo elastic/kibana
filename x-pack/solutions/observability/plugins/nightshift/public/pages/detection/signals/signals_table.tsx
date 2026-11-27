@@ -69,10 +69,8 @@ export const SignalsTable = ({
         minWidth: '280px',
         render: (_ruleName: string | undefined, signal: Detection) => (
           <EuiLink
-            onClick={(event: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
-              event.stopPropagation();
-              onSignalClick(signal);
-            }}
+            onClick={() => onSignalClick(signal)}
+            data-prevent-row-click
             ref={(element) => onOpenLinkMount(signal.detection_id, element)}
             data-test-subj={`nightshiftSignalRule-${signal.detection_id}`}
             {...getEbtProps({
@@ -144,7 +142,12 @@ export const SignalsTable = ({
       rowProps={(signal) => ({
         isSelected: signal.detection_id === selectedSignalId,
         'data-test-subj': `nightshiftDetectionSignalRow-${signal.detection_id}`,
-        onClick: () => onSignalClick(signal),
+        onClick: (clickEvent: React.MouseEvent) => {
+          if ((clickEvent.target as HTMLElement).closest('[data-prevent-row-click]')) {
+            return;
+          }
+          onSignalClick(signal);
+        },
       })}
       noItemsMessage={isLoading ? LOADING_SIGNALS_MESSAGE : ''}
     />
