@@ -77,6 +77,9 @@ export const ALLOWED_KEY_REGEX = new RegExp(String.raw`^${IDENT}${PATH_TAIL}*(?:
 
 export const PROPERTY_PATH_REGEX = new RegExp(String.raw`^${IDENT}${PATH_TAIL}*$`);
 
+/** A single key that Liquid can read with dot access (`ep`, not `kibana.alert.reason`). */
+export const SINGLE_IDENTIFIER_REGEX = new RegExp(String.raw`^${IDENT}$`);
+
 // Liquid-specific regex patterns
 // Matches: {{ variable | filter_prefix (but not {{ variable | filter }})
 export const LIQUID_FILTER_REGEX = /\{\{\s*[^}]*\|\s*(\w*)\s*$/;

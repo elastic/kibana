@@ -15,6 +15,7 @@ import {
   matchLastUnfinishedVariable,
   matchVariable,
   PROPERTY_PATH_REGEX,
+  SINGLE_IDENTIFIER_REGEX,
   UNFINISHED_VARIABLE_REGEX_GLOBAL,
   VARIABLE_REGEX_GLOBAL,
 } from './regex';
@@ -155,6 +156,19 @@ describe('regex patterns', () => {
         expect(ALLOWED_KEY_REGEX.test(path)).toBe(false);
       });
     });
+  });
+
+  describe('SINGLE_IDENTIFIER_REGEX', () => {
+    it.each(['user', 'rule_id', '$var', '_private'])('should match identifier %s', (key) => {
+      expect(SINGLE_IDENTIFIER_REGEX.test(key)).toBe(true);
+    });
+
+    it.each(['kibana.alert.message', 'bo.0.la', 'items[0]', 'my-key', '95.0', ''])(
+      'should not match %s',
+      (key) => {
+        expect(SINGLE_IDENTIFIER_REGEX.test(key)).toBe(false);
+      }
+    );
   });
 
   describe('PROPERTY_PATH_REGEX', () => {
