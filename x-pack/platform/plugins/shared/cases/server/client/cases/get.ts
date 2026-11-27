@@ -48,6 +48,7 @@ import {
   flattenCaseSavedObject,
   countUserAttachments,
   countEventsForID,
+  mergeObservablesPreview,
 } from '../../common/utils';
 import { parseFieldDefinitionsToInlineFields } from '../../../common/utils';
 import { enrichCasesWithFieldLabels } from './utils';
@@ -409,6 +410,8 @@ export interface GetParams {
   includeComments?: boolean;
 }
 
+type AttachmentFields = Omit<Parameters<typeof flattenCaseSavedObject>[0], 'savedObject'>;
+
 /**
  * Retrieves a case and optionally its comments.
  *
@@ -419,7 +422,7 @@ export const get = async (
   clientArgs: CasesClientArgs
 ): Promise<Case> => {
   const {
-    services: { caseService, attachmentService },
+    services: { caseService, attachmentService, observableService },
     logger,
     authorization,
   } = clientArgs;
@@ -434,40 +437,47 @@ export const get = async (
       entities: [{ owner: theCase.attributes.owner, id: theCase.id }],
     });
 
-    if (!includeComments) {
-      const commentStats = await attachmentService.getter.getCaseAttatchmentStats({
-        caseIds: [theCase.id],
-      });
-      const flattenedCase = flattenCaseSavedObject({
-        savedObject: theCase,
-        ...(commentStats.has(theCase.id)
+    const getAttachmentFields = async (): Promise<AttachmentFields> => {
+      if (!includeComments) {
+        const commentStats = await attachmentService.getter.getCaseAttatchmentStats({
+          caseIds: [theCase.id],
+        });
+        return commentStats.has(theCase.id)
           ? {
               totalAlerts: commentStats.get(theCase.id)?.alerts,
               totalComment: commentStats.get(theCase.id)?.userComments,
               totalEvents: commentStats.get(theCase.id)?.events,
             }
-          : {}),
-      });
-      return decodeOrThrowZod(CaseSchema)(
-        await enrichCaseWithFieldLabels(flattenedCase, clientArgs)
-      );
-    }
+          : {};
+      }
 
-    const theComments = (await caseService.getAllCaseComments({
-      id,
-      options: {
-        sortField: 'created_at',
-        sortOrder: 'asc',
-      },
-    })) as SavedObjectsFindResponse<AttachmentAttributes>;
+      const theComments = (await caseService.getAllCaseComments({
+        id,
+        options: {
+          sortField: 'created_at',
+          sortOrder: 'asc',
+        },
+      })) as SavedObjectsFindResponse<AttachmentAttributes>;
 
-    const res = flattenCaseSavedObject({
-      savedObject: theCase,
-      comments: theComments.saved_objects,
-      totalComment: countUserAttachments(theComments.saved_objects),
-      totalAlerts: countAlertsForID({ comments: theComments, id }),
-      totalEvents: countEventsForID({ comments: theComments }),
-    });
+      return {
+        comments: theComments.saved_objects,
+        totalComment: countUserAttachments(theComments.saved_objects),
+        totalAlerts: countAlertsForID({ comments: theComments, id }),
+        totalEvents: countEventsForID({ comments: theComments }),
+      };
+    };
+
+    const [attachmentFields, observablesPreviews] = await Promise.all([
+      getAttachmentFields(),
+      observableService.getter.getPreviews([
+        { id: theCase.id, observables: theCase.attributes.observables },
+      ]),
+    ]);
+
+    const res = mergeObservablesPreview(
+      flattenCaseSavedObject({ savedObject: theCase, ...attachmentFields }),
+      observablesPreviews.get(theCase.id)
+    );
 
     return decodeOrThrowZod(CaseSchema)(await enrichCaseWithFieldLabels(res, clientArgs));
   } catch (error) {
@@ -485,7 +495,7 @@ export const resolve = async (
   clientArgs: CasesClientArgs
 ): Promise<CaseResolveResponse> => {
   const {
-    services: { caseService },
+    services: { caseService, observableService },
     logger,
     authorization,
   } = clientArgs;
@@ -512,29 +522,38 @@ export const resolve = async (
       ],
     });
 
-    if (!includeComments) {
-      const flattenedCase = flattenCaseSavedObject({ savedObject: resolvedSavedObject });
-      return decodeOrThrowZod(CaseResolveResponseSchema)({
-        ...resolveData,
-        case: await enrichCaseWithFieldLabels(flattenedCase, clientArgs),
-      });
-    }
+    const getAttachmentFields = async (): Promise<AttachmentFields> => {
+      if (!includeComments) {
+        return {};
+      }
 
-    const theComments = (await caseService.getAllCaseComments({
-      id: resolvedSavedObject.id,
-      options: {
-        sortField: 'created_at',
-        sortOrder: 'asc',
-      },
-    })) as SavedObjectsFindResponse<AttachmentAttributes>;
+      const theComments = (await caseService.getAllCaseComments({
+        id: resolvedSavedObject.id,
+        options: {
+          sortField: 'created_at',
+          sortOrder: 'asc',
+        },
+      })) as SavedObjectsFindResponse<AttachmentAttributes>;
 
-    const flattenedCase = flattenCaseSavedObject({
-      savedObject: resolvedSavedObject,
-      comments: theComments.saved_objects,
-      totalComment: theComments.total,
-      totalEvents: countEventsForID({ comments: theComments }),
-      totalAlerts: countAlertsForID({ comments: theComments, id: resolvedSavedObject.id }),
-    });
+      return {
+        comments: theComments.saved_objects,
+        totalComment: theComments.total,
+        totalEvents: countEventsForID({ comments: theComments }),
+        totalAlerts: countAlertsForID({ comments: theComments, id: resolvedSavedObject.id }),
+      };
+    };
+
+    const [attachmentFields, observablesPreviews] = await Promise.all([
+      getAttachmentFields(),
+      observableService.getter.getPreviews([
+        { id: resolvedSavedObject.id, observables: resolvedSavedObject.attributes.observables },
+      ]),
+    ]);
+
+    const flattenedCase = mergeObservablesPreview(
+      flattenCaseSavedObject({ savedObject: resolvedSavedObject, ...attachmentFields }),
+      observablesPreviews.get(resolvedSavedObject.id)
+    );
 
     const res = {
       ...resolveData,

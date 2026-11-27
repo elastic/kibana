@@ -7,6 +7,8 @@
 
 import Boom from '@hapi/boom';
 import { MAX_BULK_GET_CASES } from '../../../common/constants';
+import type { Observable } from '../../../common/types/domain';
+import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { mockCases } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import { bulkGet } from './bulk_get';
@@ -40,6 +42,89 @@ describe('bulkGet', () => {
 
     expect(res.errors).toEqual([]);
     expect(res.cases[0]).toEqual(expect.objectContaining({ totalEvents: 3, totalComment: 1 }));
+  });
+
+  describe('observables', () => {
+    const fieldObservable: Observable = {
+      id: 'field-1',
+      typeKey: 'observable-type-ipv4',
+      value: '10.0.0.1',
+      description: null,
+      createdAt: '2026-11-06T09:30:00.000Z',
+      updatedAt: null,
+    };
+    const typeObservable: Observable = { ...fieldObservable, id: 'type-1', value: '10.0.0.2' };
+    const caseWithObservables: CaseSavedObjectTransformed = {
+      ...caseSO,
+      attributes: { ...caseSO.attributes, observables: [fieldObservable], total_observables: 1 },
+    };
+    const otherCase: CaseSavedObjectTransformed = { ...mockCases[1] };
+
+    const createArgs = () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [caseWithObservables, otherCase],
+      });
+      clientArgs.authorization.getAndEnsureAuthorizedEntities.mockResolvedValue({
+        authorized: [caseWithObservables, otherCase],
+        unauthorized: [],
+      });
+      clientArgs.services.observableService.getter.getPreviews.mockResolvedValue(
+        new Map([[caseWithObservables.id, { count: 3, oldest: [typeObservable] }]])
+      );
+      return clientArgs;
+    };
+
+    it('lists the field first, then the oldest objects, and counts both stores', async () => {
+      const clientArgs = createArgs();
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
+
+      const res = await bulkGet({ ids: [caseWithObservables.id, otherCase.id] }, clientArgs);
+
+      expect(res.cases[0]).toMatchObject({
+        observables: [fieldObservable, typeObservable],
+        total_observables: 4,
+      });
+      expect(res.cases[1]).toMatchObject({ observables: [], total_observables: 0 });
+    });
+
+    it("requests the authorized cases' previews in one call, passing their field observables", async () => {
+      const clientArgs = createArgs();
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
+
+      await bulkGet({ ids: [caseWithObservables.id, otherCase.id] }, clientArgs);
+
+      expect(clientArgs.services.observableService.getter.getPreviews).toHaveBeenCalledTimes(1);
+      expect(clientArgs.services.observableService.getter.getPreviews).toHaveBeenCalledWith([
+        { id: caseWithObservables.id, observables: [fieldObservable] },
+        { id: otherCase.id, observables: otherCase.attributes.observables },
+      ]);
+    });
+
+    it('requests the previews alongside the attachment totals', async () => {
+      const clientArgs = createArgs();
+      let totalsResolved = false;
+      let previewsRequestedBeforeTotals = false;
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockImplementation(
+        async () => {
+          await new Promise(setImmediate);
+          totalsResolved = true;
+          return new Map();
+        }
+      );
+      clientArgs.services.observableService.getter.getPreviews.mockImplementation(async () => {
+        previewsRequestedBeforeTotals = !totalsResolved;
+        return new Map();
+      });
+
+      await bulkGet({ ids: [caseWithObservables.id, otherCase.id] }, clientArgs);
+
+      expect(previewsRequestedBeforeTotals).toBe(true);
+    });
   });
 
   describe('errors', () => {

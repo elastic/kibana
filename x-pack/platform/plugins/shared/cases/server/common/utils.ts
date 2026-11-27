@@ -46,6 +46,7 @@ import {
   CASE_VIEW_TAB_PATH,
   FILE_ATTACHMENT_TYPE,
   GENERAL_CASES_OWNER,
+  MAX_OBSERVABLES_PER_CASE,
   OWNER_INFO,
   PERSISTABLE_ATTACHMENT_TYPES,
   UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP,
@@ -77,6 +78,7 @@ import {
   toStringArray,
 } from '../../common/utils/attachments';
 import { toUnifiedAttributes } from '../services/attachments/operations/utils';
+import type { CaseWithFieldObservables, ObservablesPreview } from '../services/observables';
 import { AttachmentTransformedAttributesSchema } from './types/attachments_v1';
 import { decodeOrThrowZod } from './runtime_types';
 
@@ -196,6 +198,25 @@ export const flattenCaseSavedObject = ({
   totalEvents,
   ...savedObject.attributes,
 });
+
+/**
+ * Lists the case field's observables first, then the case's oldest `cases-observables` objects
+ * while fewer than 50 are listed, and counts both stores in `total_observables`. A field that
+ * holds more than 50, which an import can write, is listed in full.
+ */
+export const mergeObservablesPreview = <T extends CaseWithFieldObservables>(
+  theCase: T,
+  preview: ObservablesPreview | undefined
+): T & { total_observables: number } => {
+  const { observables } = theCase;
+  const room = Math.max(0, MAX_OBSERVABLES_PER_CASE - observables.length);
+
+  return {
+    ...theCase,
+    observables: [...observables, ...(preview?.oldest ?? []).slice(0, room)],
+    total_observables: observables.length + (preview?.count ?? 0),
+  };
+};
 
 export const transformComments = (
   comments: SavedObjectsFindResponse<AttachmentAttributesV2>

@@ -17,7 +17,9 @@ import type { ObservableServiceContext, ObservableToCreate } from './types';
 import { logged, throwOnErrors } from './utils';
 
 export type {
+  CaseWithFieldObservables,
   FindObservablesPageArgs,
+  GetObservablesPreviewsOptions,
   ObservableKey,
   ObservableSortField,
   ObservablesPageItem,

@@ -16,6 +16,7 @@ import Boom from '@hapi/boom';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { LICENSING_CASE_OBSERVABLES_FEATURE } from '../../common/constants';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
+import { mockObservablesPreviewSearchFailure } from '../../services/mocks';
 import { mockCases } from '../../mocks';
 import {
   OBSERVABLE_TYPE_HOSTNAME,
@@ -1588,6 +1589,207 @@ describe('optimistic concurrency on observable writes', () => {
       ).rejects.toThrow(`observable id ${mockObservable.id} not found`);
 
       expect(mockUserActionService.creator.createUserAction).not.toHaveBeenCalled();
+    });
+  });
+});
+
+describe('observable write responses', () => {
+  const mockObservableService = mockClientArgs.services.observableService;
+  const typeObservable: Observable = {
+    id: 'type-1',
+    typeKey: OBSERVABLE_TYPE_HOSTNAME.key,
+    value: 'host-1',
+    description: null,
+    createdAt: '2026-11-06T09:30:00.000Z',
+    updatedAt: null,
+  };
+
+  const patchedObservables = (): Observable[] =>
+    mockCaseService.patchCase.mock.calls[0][0].updatedAttributes.observables ?? [];
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
+    mockClientArgs.authorization.ensureAuthorized.mockResolvedValue(undefined);
+    mockCaseService.patchCase.mockImplementation(async ({ originalCase, updatedAttributes }) => ({
+      ...originalCase,
+      attributes: updatedAttributes,
+    }));
+    mockObservableService.getter.getPreviews.mockResolvedValue(
+      new Map([[caseSO.id, { count: 3, oldest: [typeObservable] }]])
+    );
+  });
+
+  afterAll(() => {
+    mockObservableService.getter.getPreviews.mockResolvedValue(new Map());
+  });
+
+  it('addObservable lists the field first, then the oldest objects, and counts both stores', async () => {
+    mockCaseService.getCase.mockResolvedValue(caseSOWithObservables);
+
+    const result = await addObservable(
+      caseSO.id,
+      { observable: { typeKey: OBSERVABLE_TYPE_IPV4.key, value: '10.0.0.9', description: null } },
+      mockClientArgs,
+      mockCasesClient
+    );
+
+    expect(result.observables.map(({ value }) => value)).toEqual([
+      mockObservable.value,
+      '10.0.0.9',
+      typeObservable.value,
+    ]);
+    expect(result.total_observables).toBe(5);
+    expect(mockObservableService.getter.getPreviews).toHaveBeenCalledWith(
+      [expect.objectContaining({ id: caseSO.id, observables: patchedObservables() })],
+      { ignoreErrors: true }
+    );
+    expect(patchedObservables().map(({ value }) => value)).toEqual([
+      mockObservable.value,
+      '10.0.0.9',
+    ]);
+  });
+
+  it('bulkAddObservables lists the field first, then the oldest objects, and counts both stores', async () => {
+    mockCaseService.getCase.mockResolvedValue(caseSOWithObservables);
+
+    const result = await bulkAddObservables(
+      {
+        caseId: caseSO.id,
+        observables: [{ typeKey: OBSERVABLE_TYPE_IPV4.key, value: '10.0.0.9', description: null }],
+      },
+      mockClientArgs,
+      mockCasesClient
+    );
+
+    expect(result.observables.map(({ value }) => value)).toEqual([
+      mockObservable.value,
+      '10.0.0.9',
+      typeObservable.value,
+    ]);
+    expect(result.total_observables).toBe(5);
+    expect(patchedObservables().map(({ value }) => value)).toEqual([
+      mockObservable.value,
+      '10.0.0.9',
+    ]);
+  });
+
+  it('updateObservable lists the field first, then the oldest objects, and counts both stores', async () => {
+    mockCaseService.getCase.mockResolvedValue(caseSOWithObservables);
+
+    const result = await updateObservable(
+      caseSO.id,
+      mockObservable.id,
+      { observable: { value: '10.0.0.9', description: 'Updated' } },
+      mockClientArgs,
+      mockCasesClient
+    );
+
+    expect(result.observables.map(({ id }) => id)).toEqual([mockObservable.id, typeObservable.id]);
+    expect(result.total_observables).toBe(4);
+    expect(patchedObservables().map(({ id }) => id)).toEqual([mockObservable.id]);
+  });
+
+  it('bulkDeleteObservables lists the field first, then the oldest objects, and counts both stores', async () => {
+    mockCaseService.getCase.mockResolvedValue(caseSOWithMultipleObservables);
+
+    const result = await bulkDeleteObservables(
+      { caseId: caseSO.id, observableIds: [mockObservable2.id] },
+      mockClientArgs
+    );
+
+    expect(result.observables.map(({ id }) => id)).toEqual([
+      mockObservable.id,
+      mockObservable3.id,
+      typeObservable.id,
+    ]);
+    expect(result.total_observables).toBe(5);
+    expect(patchedObservables().map(({ id }) => id)).toEqual([
+      mockObservable.id,
+      mockObservable3.id,
+    ]);
+  });
+
+  /*
+   * FAILURE SCENARIO: the preview search fails after an observable write is saved.
+   * Symptom: the write succeeds and its response lists the case field's observables only.
+   * Log signature: `Failed to get the observables previews of 1 cases` (error, from the service).
+   * Trigger: Elasticsearch rejects or times out the search on `.kibana_alerting_cases`.
+   * Recovery: none needed; the observablesAdded trigger still fires and the next read lists both stores.
+   */
+  describe('when the preview fails', () => {
+    beforeEach(() => {
+      mockObservablesPreviewSearchFailure(mockObservableService);
+    });
+
+    it('addObservable succeeds, lists the field alone and emits observablesAdded', async () => {
+      mockCaseService.getCase.mockResolvedValue(caseSOWithObservables);
+
+      const result = await addObservable(
+        caseSO.id,
+        { observable: { typeKey: OBSERVABLE_TYPE_IPV4.key, value: '10.0.0.9', description: null } },
+        mockClientArgs,
+        mockCasesClient
+      );
+
+      expect(result.observables.map(({ value }) => value)).toEqual([
+        mockObservable.value,
+        '10.0.0.9',
+      ]);
+      expect(result.total_observables).toBe(2);
+      expect(mockClientArgs.casesEventBus.emitObservablesAdded).toHaveBeenCalledTimes(1);
+    });
+
+    it('bulkAddObservables succeeds, lists the field alone and emits observablesAdded', async () => {
+      mockCaseService.getCase.mockResolvedValue(caseSOWithObservables);
+
+      const result = await bulkAddObservables(
+        {
+          caseId: caseSO.id,
+          observables: [
+            { typeKey: OBSERVABLE_TYPE_IPV4.key, value: '10.0.0.9', description: null },
+          ],
+        },
+        mockClientArgs,
+        mockCasesClient
+      );
+
+      expect(result.observables.map(({ value }) => value)).toEqual([
+        mockObservable.value,
+        '10.0.0.9',
+      ]);
+      expect(result.total_observables).toBe(2);
+      expect(mockClientArgs.casesEventBus.emitObservablesAdded).toHaveBeenCalledTimes(1);
+    });
+
+    it('updateObservable succeeds and lists the field alone', async () => {
+      mockCaseService.getCase.mockResolvedValue(caseSOWithObservables);
+
+      const result = await updateObservable(
+        caseSO.id,
+        mockObservable.id,
+        { observable: { value: '10.0.0.9', description: 'Updated' } },
+        mockClientArgs,
+        mockCasesClient
+      );
+
+      expect(result.observables.map(({ id }) => id)).toEqual([mockObservable.id]);
+      expect(result.total_observables).toBe(1);
+    });
+
+    it('bulkDeleteObservables succeeds and lists the field alone', async () => {
+      mockCaseService.getCase.mockResolvedValue(caseSOWithMultipleObservables);
+
+      const result = await bulkDeleteObservables(
+        { caseId: caseSO.id, observableIds: [mockObservable2.id] },
+        mockClientArgs
+      );
+
+      expect(result.observables.map(({ id }) => id)).toEqual([
+        mockObservable.id,
+        mockObservable3.id,
+      ]);
+      expect(result.total_observables).toBe(2);
     });
   });
 });

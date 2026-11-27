@@ -15,6 +15,7 @@ import {
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
   CASE_CONFIGURE_SAVED_OBJECT,
+  CASE_OBSERVABLE_SAVED_OBJECT,
   CASE_REPORTERS_URL,
   CASE_SAVED_OBJECT,
   CASE_TAGS_URL,
@@ -33,6 +34,7 @@ import type {
   SingleCaseMetricsResponse,
 } from '@kbn/cases-plugin/common';
 import type { CasePersistedAttributes } from '@kbn/cases-plugin/server/common/types/case';
+import type { ObservablePersistedAttributes } from '@kbn/cases-plugin/server/common/types/observable';
 import type { SavedObjectsRawDocSource } from '@kbn/core/server';
 import type { ConfigurationPersistedAttributes } from '@kbn/cases-plugin/server/common/types/configure';
 import type {
@@ -156,7 +158,19 @@ export const deleteAllCaseItems = async (es: Client) => {
     deleteMappings(es),
     deleteTemplates(es),
     deleteFieldDefinitions(es),
+    deleteCaseObservables(es),
   ]);
+};
+
+export const deleteCaseObservables = async (es: Client): Promise<void> => {
+  await es.deleteByQuery({
+    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    q: `type:${CASE_OBSERVABLE_SAVED_OBJECT}`,
+    wait_for_completion: true,
+    refresh: true,
+    body: {},
+    conflicts: 'proceed',
+  });
 };
 
 export const deleteCasesUserActions = async (es: Client): Promise<void> => {
@@ -321,6 +335,67 @@ export const seedUserActions = async ({
       coreMigrationVersion: '8.8.0',
     },
   ]).flat();
+
+  const response = await es.bulk({ operations, refresh: 'wait_for' });
+  expect(response.errors).to.be(false);
+};
+
+export interface ObservableToSeed {
+  id: string;
+  typeKey: string;
+  value: string;
+  createdAt: string;
+}
+
+/** Writes `cases-observables` objects of a case straight to the index; no API writes them yet. */
+export const seedObservables = async ({
+  es,
+  caseId,
+  observables,
+  owner = 'securitySolutionFixture',
+  space = 'default',
+}: {
+  es: Client;
+  caseId: string;
+  observables: ObservableToSeed[];
+  owner?: string;
+  space?: string;
+}): Promise<void> => {
+  const operations = observables.flatMap(({ id, typeKey, value, createdAt }) => {
+    const attributes: ObservablePersistedAttributes = {
+      owner,
+      type_key: typeKey,
+      value,
+      description: null,
+      source_attachment_id: null,
+      created_at: createdAt,
+      created_by: { username: 'elastic', full_name: null, email: null },
+      updated_at: null,
+      updated_by: null,
+    };
+
+    return [
+      {
+        index: {
+          _index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          _id: `${CASE_OBSERVABLE_SAVED_OBJECT}:${id}`,
+        },
+      },
+      {
+        type: CASE_OBSERVABLE_SAVED_OBJECT,
+        [CASE_OBSERVABLE_SAVED_OBJECT]: attributes,
+        references: [
+          { type: CASE_SAVED_OBJECT, id: caseId, name: `associated-${CASE_SAVED_OBJECT}` },
+        ],
+        namespaces: [space],
+        created_at: createdAt,
+        updated_at: createdAt,
+        managed: false,
+        coreMigrationVersion: '8.8.0',
+        typeMigrationVersion: '10.1.0',
+      },
+    ];
+  });
 
   const response = await es.bulk({ operations, refresh: 'wait_for' });
   expect(response.errors).to.be(false);

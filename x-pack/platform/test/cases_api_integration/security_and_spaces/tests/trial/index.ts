@@ -49,6 +49,8 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./internal/observables'));
     // end-to-end observable extraction via the attachment bulkCreate side effect
     loadTestFile(require.resolve('./internal/extract_observables'));
+    // case responses list observables from the case field and the `cases-observables` type
+    loadTestFile(require.resolve('./internal/observables_preview'));
 
     // Internal routes
     loadTestFile(require.resolve('./internal/get_user_action_stats'));

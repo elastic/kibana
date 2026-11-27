@@ -27,7 +27,25 @@ export interface ObservableKey {
 export interface ObservableToCreate extends ObservableKey {
   id: string;
   description: string | null;
+  /**
+   * Stamp the observables of one request one millisecond apart, in request order: previews and
+   * pages sort oldest first and break ties by type key and value, not by request order.
+   */
   createdAt: string;
+}
+
+export interface CaseWithFieldObservables {
+  id: string;
+  /** The observables stored in the case's `observables` field. */
+  observables: Observable[];
+}
+
+export interface GetObservablesPreviewsOptions {
+  /**
+   * Log a failed search and return no previews instead of rejecting, for the response of a write
+   * that is already saved: failing it would report the write as failed and skip what runs after.
+   */
+  ignoreErrors?: boolean;
 }
 
 export interface ObservablesPreview {

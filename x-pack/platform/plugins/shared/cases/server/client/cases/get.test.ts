@@ -6,10 +6,11 @@
  */
 
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
-import type { Template, AttachmentAttributes } from '../../../common/types/domain';
+import type { Template, AttachmentAttributes, Observable } from '../../../common/types/domain';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { mockCases, mockCaseComments } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
+import { mockObservablesPreviewSearchFailure } from '../../services/mocks';
 import { CaseStatuses } from '../../../common/types/domain';
 import { MAX_ATTACHMENT_IDS_PER_CASES_LOOKUP } from '../../../common/constants';
 import { Operations } from '../../authorization';
@@ -426,6 +427,160 @@ describe('get', () => {
           data: { content: legacyComment.comment },
         }),
       ]);
+    });
+  });
+
+  describe('observables', () => {
+    const fieldObservable: Observable = {
+      id: 'field-1',
+      typeKey: 'observable-type-ipv4',
+      value: '10.0.0.1',
+      description: null,
+      createdAt: '2026-11-06T09:30:00.000Z',
+      updatedAt: null,
+    };
+    const typeObservable: Observable = { ...fieldObservable, id: 'type-1', value: '10.0.0.2' };
+    const caseSO: CaseSavedObjectTransformed = {
+      ...mockCases[0],
+      attributes: {
+        ...mockCases[0].attributes,
+        observables: [fieldObservable],
+        total_observables: 1,
+      },
+    };
+    const previews = new Map([[caseSO.id, { count: 3, oldest: [typeObservable] }]]);
+
+    const createArgs = () => {
+      const args = createCasesClientMockArgs();
+      args.services.caseService.getCase.mockResolvedValue(caseSO);
+      args.services.caseService.getResolveCase.mockResolvedValue({
+        saved_object: caseSO,
+        outcome: 'exactMatch',
+      });
+      args.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 10,
+        page: 1,
+      });
+      args.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(new Map());
+      args.services.observableService.getter.getPreviews.mockResolvedValue(previews);
+      return args;
+    };
+
+    /**
+     * Delays the read that `delayRead` mocks by a macrotask, and resolves to whether the preview was
+     * requested before that read resolved, which happens only when both run alongside.
+     */
+    const isPreviewRequestedAlongside = async (
+      args: ReturnType<typeof createArgs>,
+      delayRead: (delayed: <T>(value: T) => Promise<T>) => void,
+      call: () => Promise<unknown>
+    ): Promise<boolean> => {
+      let readResolved = false;
+      let previewRequestedBeforeRead = false;
+
+      delayRead(async (value) => {
+        await new Promise(setImmediate);
+        readResolved = true;
+        return value;
+      });
+      args.services.observableService.getter.getPreviews.mockImplementation(async () => {
+        previewRequestedBeforeRead = !readResolved;
+        return previews;
+      });
+
+      await call();
+      return previewRequestedBeforeRead;
+    };
+
+    describe.each([false, true])('get with includeComments: %s', (includeComments) => {
+      it('lists the field first, then the oldest objects, and counts both stores', async () => {
+        const args = createArgs();
+
+        const result = await get({ id: caseSO.id, includeComments }, args);
+
+        expect(result.observables).toEqual([fieldObservable, typeObservable]);
+        expect(result.total_observables).toBe(4);
+        expect(args.services.observableService.getter.getPreviews).toHaveBeenCalledWith([
+          { id: caseSO.id, observables: [fieldObservable] },
+        ]);
+      });
+
+      /**
+       * FAILURE SCENARIO: Observables preview search fails
+       * Symptom: Opening a case returns an error instead of the case
+       * Log signature: `Failed to get case id: mock-id-1`
+       * Trigger: The search of `cases-observables` objects fails, such as when Elasticsearch is unavailable
+       * Recovery: Self-heals once the search succeeds again
+       */
+      it('fails the read when the preview fails, rather than returning a wrong total', async () => {
+        const args = createArgs();
+        mockObservablesPreviewSearchFailure(args.services.observableService);
+
+        await expect(get({ id: caseSO.id, includeComments }, args)).rejects.toThrow(
+          'Failed to get case id: mock-id-1: Error: search failed'
+        );
+      });
+    });
+
+    it('get requests the preview alongside the attachment totals', async () => {
+      const args = createArgs();
+
+      await expect(
+        isPreviewRequestedAlongside(
+          args,
+          (delayed) =>
+            args.services.attachmentService.getter.getCaseAttatchmentStats.mockImplementation(() =>
+              delayed(new Map())
+            ),
+          () => get({ id: caseSO.id, includeComments: false }, args)
+        )
+      ).resolves.toBe(true);
+    });
+
+    it('get with comments requests the preview alongside the comments', async () => {
+      const args = createArgs();
+
+      await expect(
+        isPreviewRequestedAlongside(
+          args,
+          (delayed) =>
+            args.services.caseService.getAllCaseComments.mockImplementation(() =>
+              delayed({ saved_objects: [], total: 0, per_page: 10, page: 1 })
+            ),
+          () => get({ id: caseSO.id, includeComments: true }, args)
+        )
+      ).resolves.toBe(true);
+    });
+
+    describe.each([false, true])('resolve with includeComments: %s', (includeComments) => {
+      it('lists the field first, then the oldest objects, and counts both stores', async () => {
+        const args = createArgs();
+
+        const { case: theCase } = await resolve({ id: caseSO.id, includeComments }, args);
+
+        expect(theCase.observables).toEqual([fieldObservable, typeObservable]);
+        expect(theCase.total_observables).toBe(4);
+        expect(args.services.observableService.getter.getPreviews).toHaveBeenCalledWith([
+          expect.objectContaining({ id: caseSO.id, observables: [fieldObservable] }),
+        ]);
+      });
+    });
+
+    it('resolve with comments requests the preview alongside the comments', async () => {
+      const args = createArgs();
+
+      await expect(
+        isPreviewRequestedAlongside(
+          args,
+          (delayed) =>
+            args.services.caseService.getAllCaseComments.mockImplementation(() =>
+              delayed({ saved_objects: [], total: 0, per_page: 10, page: 1 })
+            ),
+          () => resolve({ id: caseSO.id, includeComments: true }, args)
+        )
+      ).resolves.toBe(true);
     });
   });
 });

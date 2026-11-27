@@ -52,10 +52,13 @@ import {
   createSavedObjectReferences,
   createCaseSavedObjectResponse,
   basicCaseFields,
+  basicESCaseFields,
   createSOFindResponse,
   createErrorSO,
 } from '../test_utils';
 import { AttachmentService } from '../attachments';
+import type { ObservableServiceMock } from '../mocks';
+import { createObservableServiceMock } from '../mocks';
 import type {
   CaseSavedObjectTransformed,
   CasePersistedAttributes,
@@ -183,13 +186,16 @@ describe('CasesService', () => {
   });
 
   let service: CasesService;
+  let observableService: ObservableServiceMock;
 
   beforeEach(() => {
     jest.resetAllMocks();
+    observableService = createObservableServiceMock();
     service = new CasesService({
       log: mockLogger,
       unsecuredSavedObjectsClient,
       attachmentService,
+      observableService,
       // Tests don't exercise the analytics v2 path; the no-op writers
       // keep every hook a tight no-op.
       analyticsV2Writer: V2_NOOP_WRITER,
@@ -4010,6 +4016,144 @@ describe('CasesService', () => {
         });
       });
     });
+
+    describe('observables previews', () => {
+      const fieldObservable = {
+        id: 'field-1',
+        typeKey: 'observable-type-ipv4',
+        value: '10.0.0.1',
+        description: null,
+        createdAt: '2026-11-06T09:30:00.000Z',
+        updatedAt: null,
+      };
+      const typeObservable = { ...fieldObservable, id: 'type-1', value: '10.0.0.2' };
+
+      /**
+       * Resolves the attachment totals a macrotask later, and reports whether the previews were
+       * requested before then, which happens only when both run alongside.
+       */
+      const trackPreviewsRequestedBeforeTotals = (): (() => boolean) => {
+        let totalsResolved = false;
+        let previewsRequestedBeforeTotals = false;
+
+        jest
+          .spyOn(attachmentService.getter, 'getCaseAttatchmentStats')
+          .mockImplementation(async () => {
+            await new Promise(setImmediate);
+            totalsResolved = true;
+            return new Map();
+          });
+        observableService.getter.getPreviews.mockImplementation(async () => {
+          previewsRequestedBeforeTotals = !totalsResolved;
+          return new Map([['1', { count: 3, oldest: [typeObservable] }]]);
+        });
+
+        return () => previewsRequestedBeforeTotals;
+      };
+
+      describe('findCasesGroupedByID', () => {
+        beforeEach(() => {
+          unsecuredSavedObjectsClient.find.mockResolvedValue(
+            createSOFindResponse([
+              createFindSO({ caseId: '1', overrides: { observables: [fieldObservable] } }),
+              createFindSO({ caseId: '2' }),
+            ])
+          );
+        });
+
+        it('lists the field first, then the oldest objects, and counts both stores', async () => {
+          trackPreviewsRequestedBeforeTotals();
+
+          const { casesMap } = await service.findCasesGroupedByID({ caseOptions: {} });
+
+          expect(casesMap.get('1')).toMatchObject({
+            observables: [fieldObservable, typeObservable],
+            total_observables: 4,
+          });
+          expect(casesMap.get('2')).toMatchObject({ observables: [], total_observables: 0 });
+        });
+
+        it("requests every case's preview in one call, passing its field observables", async () => {
+          trackPreviewsRequestedBeforeTotals();
+
+          await service.findCasesGroupedByID({ caseOptions: {} });
+
+          expect(observableService.getter.getPreviews).toHaveBeenCalledTimes(1);
+          expect(observableService.getter.getPreviews).toHaveBeenCalledWith([
+            { id: '1', observables: [fieldObservable] },
+            { id: '2', observables: [] },
+          ]);
+        });
+
+        it('requests the previews alongside the attachment totals', async () => {
+          const previewsRequestedBeforeTotals = trackPreviewsRequestedBeforeTotals();
+
+          await service.findCasesGroupedByID({ caseOptions: {} });
+
+          expect(previewsRequestedBeforeTotals()).toBe(true);
+        });
+      });
+
+      describe('searchCasesGroupedByID', () => {
+        beforeEach(() => {
+          Object.assign(unsecuredSavedObjectsClient, {
+            search: jest.fn().mockResolvedValue({
+              hits: {
+                hits: [
+                  {
+                    _id: `${CASE_SAVED_OBJECT}:1`,
+                    _source: {
+                      cases: { ...basicESCaseFields, observables: [fieldObservable] },
+                      references: [],
+                    },
+                  },
+                  {
+                    _id: `${CASE_SAVED_OBJECT}:2`,
+                    _source: { cases: basicESCaseFields, references: [] },
+                  },
+                ],
+                total: { value: 2 },
+              },
+            }),
+          });
+        });
+
+        it('lists the field first, then the oldest objects, and counts both stores', async () => {
+          trackPreviewsRequestedBeforeTotals();
+
+          const { casesMap } = await service.searchCasesGroupedByID({
+            caseOptions: {},
+            namespaces: ['default'],
+          });
+
+          expect(casesMap.get('1')).toMatchObject({
+            observables: [fieldObservable, typeObservable],
+            total_observables: 4,
+          });
+          expect(casesMap.get('2')).toMatchObject({ observables: [], total_observables: 0 });
+        });
+
+        it("requests every case's preview in one call, passing its field observables", async () => {
+          trackPreviewsRequestedBeforeTotals();
+
+          await service.searchCasesGroupedByID({ caseOptions: {}, namespaces: ['default'] });
+
+          expect(observableService.getter.getPreviews).toHaveBeenCalledTimes(1);
+          expect(observableService.getter.getPreviews).toHaveBeenCalledWith([
+            expect.objectContaining({ id: '1', observables: [fieldObservable] }),
+            expect.objectContaining({ id: '2', observables: [] }),
+          ]);
+        });
+
+        it('requests the previews alongside the attachment totals', async () => {
+          const previewsRequestedBeforeTotals = trackPreviewsRequestedBeforeTotals();
+
+          await service.searchCasesGroupedByID({ caseOptions: {}, namespaces: ['default'] });
+
+          expect(previewsRequestedBeforeTotals()).toBe(true);
+        });
+      });
+    });
   });
 
   describe('cases-analytics v2 writer integration', () => {
@@ -4041,6 +4185,7 @@ describe('CasesService', () => {
         log: mockLogger,
         unsecuredSavedObjectsClient,
         attachmentService,
+        observableService,
         analyticsV2Writer,
         analyticsV2ActivityWriter,
         analyticsV2AttachmentsWriter,

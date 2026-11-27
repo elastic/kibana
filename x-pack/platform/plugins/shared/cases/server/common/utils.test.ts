@@ -7,9 +7,14 @@
 
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
-import { OWNER_INFO, SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import {
+  MAX_OBSERVABLES_PER_CASE,
+  OWNER_INFO,
+  SECURITY_SOLUTION_OWNER,
+} from '../../common/constants';
 import {
   flattenCaseSavedObject,
+  mergeObservablesPreview,
   transformNewComment,
   countAlerts,
   countAlertsForID,
@@ -39,6 +44,7 @@ import type {
   Case,
   CaseConnector,
   EventAttachmentPayload,
+  Observable,
   UserCommentAttachmentPayload,
 } from '../../common/types/domain';
 import {
@@ -1033,6 +1039,99 @@ describe('common utils', () => {
           "version": "WzAsMV0=",
         }
       `);
+    });
+  });
+
+  describe('mergeObservablesPreview', () => {
+    const createObservables = (count: number, prefix: string): Observable[] =>
+      Array.from({ length: count }, (_, index) => ({
+        id: `${prefix}-${index}`,
+        typeKey: 'observable-type-ipv4',
+        value: `10.0.0.${index}`,
+        description: null,
+        createdAt: '2026-11-06T09:30:00.000Z',
+        updatedAt: null,
+      }));
+
+    const ids = (observables: Observable[]): string[] => observables.map(({ id }) => id);
+
+    it('lists the field first, then the oldest objects until 50 are listed', () => {
+      const field = createObservables(10, 'field');
+      const oldest = createObservables(50, 'type');
+
+      const merged = mergeObservablesPreview(
+        { id: 'case-1', observables: field },
+        { count: 200, oldest }
+      );
+
+      expect(ids(merged.observables)).toEqual([...ids(field), ...ids(oldest.slice(0, 40))]);
+    });
+
+    it('counts both stores in the total', () => {
+      const merged = mergeObservablesPreview(
+        { id: 'case-1', observables: createObservables(10, 'field') },
+        { count: 200, oldest: createObservables(40, 'type') }
+      );
+
+      expect(merged.total_observables).toBe(210);
+    });
+
+    it('keeps the order of the objects the service returned', () => {
+      const oldest = createObservables(3, 'type').reverse();
+
+      const merged = mergeObservablesPreview(
+        { id: 'case-1', observables: [] },
+        { count: 3, oldest }
+      );
+
+      expect(ids(merged.observables)).toEqual(['type-2', 'type-1', 'type-0']);
+    });
+
+    it('lists every observable of a field that holds more than 50, and none of the type', () => {
+      const field = createObservables(MAX_OBSERVABLES_PER_CASE + 10, 'field');
+
+      const merged = mergeObservablesPreview(
+        { id: 'case-1', observables: field },
+        { count: 5, oldest: [] }
+      );
+
+      expect(ids(merged.observables)).toEqual(ids(field));
+      expect(merged.total_observables).toBe(MAX_OBSERVABLES_PER_CASE + 15);
+    });
+
+    it('lists only the type for a case whose field is empty', () => {
+      const oldest = createObservables(MAX_OBSERVABLES_PER_CASE, 'type');
+
+      const merged = mergeObservablesPreview(
+        { id: 'case-1', observables: [] },
+        { count: 75, oldest }
+      );
+
+      expect(ids(merged.observables)).toEqual(ids(oldest));
+      expect(merged.total_observables).toBe(75);
+    });
+
+    it('lists and counts only the field when the case has no objects of the type', () => {
+      const field = createObservables(3, 'field');
+
+      const merged = mergeObservablesPreview({ id: 'case-1', observables: field }, undefined);
+
+      expect(merged.observables).toEqual(field);
+      expect(merged.total_observables).toBe(3);
+    });
+
+    it('keeps the other fields of the case', () => {
+      const merged = mergeObservablesPreview(
+        { id: 'case-1', observables: [], title: 'a case', total_observables: 0 },
+        { count: 1, oldest: createObservables(1, 'type') }
+      );
+
+      expect(merged).toEqual({
+        id: 'case-1',
+        title: 'a case',
+        observables: createObservables(1, 'type'),
+        total_observables: 1,
+      });
     });
   });
 

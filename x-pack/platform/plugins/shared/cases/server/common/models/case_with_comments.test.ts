@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { Observable } from '../../../common/types/domain';
 import { CaseStatuses } from '../../../common/types/domain';
 import { createCasesClientMockArgs } from '../../client/mocks';
+import { mockObservablesPreviewSearchFailure } from '../../services/mocks';
 import { mockCaseComments, mockCases } from '../../mocks';
 import { CaseCommentModel } from './case_with_comments';
 import {
@@ -1728,6 +1730,90 @@ describe('CaseCommentModel', () => {
 
       clientArgs.services.caseService.getCase.mockResolvedValue(theCase);
       clientArgs.services.caseService.patchCase.mockResolvedValue(theCase);
+    });
+  });
+
+  describe('encodeWithComments', () => {
+    const fieldObservable: Observable = {
+      id: 'field-1',
+      typeKey: 'observable-type-ipv4',
+      value: '10.0.0.1',
+      description: null,
+      createdAt: '2026-11-06T09:30:00.000Z',
+      updatedAt: null,
+    };
+    const typeObservable: Observable = { ...fieldObservable, id: 'type-1', value: '10.0.0.2' };
+    const caseWithObservables = {
+      ...theCase,
+      attributes: { ...theCase.attributes, observables: [fieldObservable], total_observables: 1 },
+    };
+
+    const createModel = async (): Promise<CaseCommentModel> => {
+      clientArgs.services.caseService.getCase.mockResolvedValueOnce(caseWithObservables);
+      return CaseCommentModel.create(caseWithObservables.id, clientArgs);
+    };
+
+    beforeEach(() => {
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 10,
+        page: 1,
+      });
+      clientArgs.services.observableService.getter.getPreviews.mockResolvedValue(
+        new Map([[caseWithObservables.id, { count: 3, oldest: [typeObservable] }]])
+      );
+    });
+
+    afterAll(() => {
+      clientArgs.services.observableService.getter.getPreviews.mockResolvedValue(new Map());
+    });
+
+    it('lists the field first, then the oldest objects, and counts both stores', async () => {
+      const encoded = await (await createModel()).encodeWithComments();
+
+      expect(encoded.observables).toEqual([fieldObservable, typeObservable]);
+      expect(encoded.total_observables).toBe(4);
+      expect(clientArgs.services.observableService.getter.getPreviews).toHaveBeenCalledWith(
+        [{ id: caseWithObservables.id, observables: [fieldObservable] }],
+        { ignoreErrors: true }
+      );
+    });
+
+    it('requests the preview alongside the comments', async () => {
+      const modelWithObservables = await createModel();
+      let commentsResolved = false;
+      let previewRequestedBeforeComments = false;
+      clientArgs.services.caseService.getAllCaseComments.mockImplementation(async () => {
+        await new Promise(setImmediate);
+        commentsResolved = true;
+        return { saved_objects: [], total: 0, per_page: 10, page: 1 };
+      });
+      clientArgs.services.observableService.getter.getPreviews.mockImplementation(async () => {
+        previewRequestedBeforeComments = !commentsResolved;
+        return new Map();
+      });
+
+      await modelWithObservables.encodeWithComments();
+
+      expect(previewRequestedBeforeComments).toBe(true);
+    });
+
+    /*
+     * FAILURE SCENARIO: the preview search fails after an attachment write is saved.
+     * Symptom: the write succeeds and its response lists the case field's observables only.
+     * Log signature: `Failed to get the observables previews of 1 cases` (error, from the service).
+     * Trigger: Elasticsearch rejects or times out the search on `.kibana_alerting_cases`.
+     * Recovery: none needed; the next read lists both stores.
+     */
+    it('lists and counts the field alone when the preview fails', async () => {
+      const modelWithObservables = await createModel();
+      mockObservablesPreviewSearchFailure(clientArgs.services.observableService);
+
+      const encoded = await modelWithObservables.encodeWithComments();
+
+      expect(encoded.observables).toEqual([fieldObservable]);
+      expect(encoded.total_observables).toBe(1);
     });
   });
 });

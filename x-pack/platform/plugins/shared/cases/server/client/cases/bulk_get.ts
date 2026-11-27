@@ -12,7 +12,7 @@ import type { CasesBulkGetRequest, CasesBulkGetResponse } from '../../../common/
 import { CasesBulkGetResponseSchema, CasesBulkGetRequestSchema } from '../../../common/types/api';
 import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runtime_types';
 import { createCaseError, generateCaseErrorResponse, isSOError } from '../../common/error';
-import { flattenCaseSavedObject } from '../../common/utils';
+import { flattenCaseSavedObject, mergeObservablesPreview } from '../../common/utils';
 import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
@@ -28,7 +28,7 @@ export const bulkGet = async (
   clientArgs: CasesClientArgs
 ): Promise<CasesBulkGetResponse> => {
   const {
-    services: { caseService, attachmentService },
+    services: { caseService, attachmentService, observableService },
     logger,
     authorization,
   } = clientArgs;
@@ -49,9 +49,14 @@ export const bulkGet = async (
         operation: Operations.bulkGetCases,
       });
 
-    const commentTotals = await attachmentService.getter.getCaseAttatchmentStats({
-      caseIds: authorizedCases.map((theCase) => theCase.id),
-    });
+    const [commentTotals, observablesPreviews] = await Promise.all([
+      attachmentService.getter.getCaseAttatchmentStats({
+        caseIds: authorizedCases.map((theCase) => theCase.id),
+      }),
+      observableService.getter.getPreviews(
+        authorizedCases.map(({ id, attributes }) => ({ id, observables: attributes.observables }))
+      ),
+    ]);
 
     const flattenedCases = authorizedCases.map((theCase) => {
       const { userComments, alerts, events } = commentTotals.get(theCase.id) ?? {
@@ -60,12 +65,15 @@ export const bulkGet = async (
         events: 0,
       };
 
-      return flattenCaseSavedObject({
-        savedObject: theCase,
-        totalComment: userComments,
-        totalAlerts: alerts,
-        totalEvents: events,
-      });
+      return mergeObservablesPreview(
+        flattenCaseSavedObject({
+          savedObject: theCase,
+          totalComment: userComments,
+          totalAlerts: alerts,
+          totalEvents: events,
+        }),
+        observablesPreviews.get(theCase.id)
+      );
     });
 
     const errors = constructErrors(soBulkGetErrors, unauthorizedCases);
