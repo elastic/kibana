@@ -12,13 +12,14 @@ import { expect } from '@kbn/scout/api';
 const SECRETS_PATH = 'internal/workflows/secrets';
 const INTERNAL_HEADERS = { 'kbn-xsrf': 'scout', 'x-elastic-internal-origin': 'kibana' };
 const HEADERS = { ...INTERNAL_HEADERS, 'elastic-api-version': '1' };
-const VALUE = 'correct-horse-battery-staple';
-const NEW_VALUE = 'another-long-secret-value';
 const DEFAULT_SPACE = 'default';
 // Unique to this run, so that leftovers of an interrupted run never collide with it.
 const RUN_ID = Math.random().toString(36).slice(2, 8);
-/** A secret name or space id unique to this run. */
+/** A secret name, space id or value unique to this run. */
 const unique = (name: string) => `${name}_${RUN_ID}`;
+// Unique to this run, so that finding one in a response can only mean this run's secret leaked.
+const VALUE = unique('correct-horse-battery-staple');
+const NEW_VALUE = unique('another-long-secret-value');
 const MANAGE_SECRETS_ACTION = 'api:workflowsManagement:secrets:manage';
 
 /** A role with these Workflows privileges, in these spaces, and nothing else. */
@@ -323,10 +324,12 @@ apiTest.describe('Workflow secrets routes', { tag: LOCAL_STATEFUL_CLASSIC }, () 
           updatedBy: updaterId,
         });
       }
-      // No response has a value field, nor contains a value under any other field.
+      // No response has a value field, nor contains a value anywhere else in its body.
       for (const secret of [created.body, updated.body, listedSecret]) {
         expect(secret.value).toBeUndefined();
-        const text = JSON.stringify(secret);
+      }
+      for (const body of [created.body, updated.body, listed.body]) {
+        const text = JSON.stringify(body);
         expect(text).not.toContain(VALUE);
         expect(text).not.toContain(NEW_VALUE);
       }
