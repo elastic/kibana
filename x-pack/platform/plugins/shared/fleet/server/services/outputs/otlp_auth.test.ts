@@ -427,6 +427,14 @@ describe('OTLP output authentication', () => {
           validateOtlpAuth({
             auth: managedIdentity,
             hasCredential: false,
+            // the URL parser repairs it, the collector does not
+            exporter: { endpoint: 'https:/collector.example.com:4318', protocol: 'http/protobuf' },
+          })
+        ).toThrow('auth.type "azure" requires https endpoints, otlp_exporter.endpoint is not one');
+        expect(() =>
+          validateOtlpAuth({
+            auth: managedIdentity,
+            hasCredential: false,
             exporter: { ...exporter, traces_endpoint: 'https://:4318/v1/traces' },
           })
         ).toThrow(
