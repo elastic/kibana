@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiMarkdownFormat, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import { TimeAwareMarkdown } from '@kbn/agentic-investigations-common';
 import type { InvestigationEvidence } from '../../common/evidence';
 import { EvidenceChart } from './evidence_chart';
 
@@ -39,7 +40,7 @@ export const EvidenceView: React.FC<EvidenceViewProps> = ({
           <EvidenceChart chart={chart} />
         ))}
       {chart && hasDescription && <EuiSpacer size="s" />}
-      {hasDescription && <EuiMarkdownFormat textSize="s">{description ?? ''}</EuiMarkdownFormat>}
+      {hasDescription && <TimeAwareMarkdown textSize="s">{description ?? ''}</TimeAwareMarkdown>}
     </div>
   );
 };
