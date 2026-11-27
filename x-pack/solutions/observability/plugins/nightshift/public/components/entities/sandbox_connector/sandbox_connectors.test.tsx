@@ -170,7 +170,7 @@ describe('SandboxConnectorsTable', () => {
     );
   });
 
-  it('removes a connector from the agent and confirms with a toast', async () => {
+  it('removes a connector from the agent without a success toast', async () => {
     const { agents, addSuccess } = setup({
       connectors: [connector('github'), connector('telemetry', true)],
     });
@@ -179,11 +179,9 @@ describe('SandboxConnectorsTable', () => {
 
     await expectRemoved(agents, 'github');
     await waitFor(() =>
-      expect(addSuccess).toHaveBeenCalledWith({ title: 'Connector github removed' })
-    );
-    await waitFor(() =>
       expect(screen.queryByTestId('nightshiftConnectorRemove-github')).not.toBeInTheDocument()
     );
+    expect(addSuccess).not.toHaveBeenCalled();
   });
 
   it('locks disable when the user cannot edit the agent', async () => {
