@@ -575,7 +575,7 @@ describe('WorkflowGraphCanvas creation-state chrome', () => {
         workflow={emptyWorkflow}
         showZoomControls
         edit={edit}
-        emptyState={<div data-test-subj="customEmptyState">Create me</div>}
+        emptyState={<div data-test-subj="customEmptyState">{'Create me'}</div>}
       />
     );
 
@@ -624,7 +624,7 @@ describe('WorkflowGraphCanvas creation-state chrome', () => {
         {...baseProps}
         workflow={emptyWorkflow}
         edit={emptyStateEdit}
-        emptyState={<div data-test-subj="customEmptyState">Create me</div>}
+        emptyState={<div data-test-subj="customEmptyState">{'Create me'}</div>}
       />
     );
     expect(screen.getByTestId('customEmptyState')).toBeInTheDocument();
@@ -643,7 +643,7 @@ describe('WorkflowGraphCanvas creation-state chrome', () => {
         {...baseProps}
         workflow={emptyWorkflow}
         edit={emptyStateEdit}
-        emptyState={<div data-test-subj="customEmptyState">Create me</div>}
+        emptyState={<div data-test-subj="customEmptyState">{'Create me'}</div>}
         pendingInsert={{ phase: 'choosing', context: { mode: 'step' } }}
       />
     );

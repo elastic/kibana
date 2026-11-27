@@ -180,7 +180,7 @@ export function PickerHeader({
               <React.Fragment key={`${segment.path}-${i}`}>
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs" color="subdued">
-                    ›
+                    {'›'}
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
