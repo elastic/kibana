@@ -54,6 +54,13 @@ async function assertProxyCrossSpacePrivileges(request: KibanaRequest, proxyId: 
   const { outputs, fleetServerHosts, downloadSources } = await getFleetProxyRelatedSavedObjects(
     proxyId
   );
+  // If any related object is itself a global default, policies that inherit the default (and
+  // never reference the object by id) are affected too, in every policy space. Pull in all policy
+  // spaces for that case rather than only the explicitly-referencing policies.
+  const relatedDefault =
+    outputs.some((o) => o.is_default || o.is_default_monitoring) ||
+    fleetServerHosts.some((h) => h.is_default) ||
+    downloadSources.some((d) => d.is_default);
   const results = await Promise.all([
     ...outputs.flatMap((o) => [
       agentPolicyService.getSpacesForPoliciesUsingOutput(o.id),
@@ -65,6 +72,7 @@ async function assertProxyCrossSpacePrivileges(request: KibanaRequest, proxyId: 
     ...downloadSources.map((d) =>
       agentPolicyService.getSpacesForPoliciesUsingDownloadSource(d.id)
     ),
+    ...(relatedDefault ? [agentPolicyService.getAllPolicySpaceIds()] : []),
   ]);
   if (results.some((r) => r.truncated)) {
     throw new FleetProxyUnauthorizedError(

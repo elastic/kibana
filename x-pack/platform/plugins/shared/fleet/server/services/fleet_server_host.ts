@@ -466,8 +466,9 @@ class FleetServerHostService {
           apiPrivileges: ['fleet-agent-policies-all'],
           errorMessage: `Insufficient privileges to update Fleet Server host ${id}: it is used by agent policies in spaces you are not authorized to access`,
         });
-        // Promoting a host to the global default affects policies across their spaces.
-        if (data.is_default && !originalItem.is_default) {
+        // Editing a host that is (or becomes) the global default affects every policy that
+        // inherits the default, in all policy spaces — not only policies that reference it by id.
+        if (originalItem.is_default || data.is_default) {
           await assertCanManageDefaultFleetServerHost(options.request);
         }
       }

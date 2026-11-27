@@ -317,8 +317,9 @@ class DownloadSourceService {
           apiPrivileges: ['fleet-agent-policies-all'],
           errorMessage: `Insufficient privileges to update download source ${id}: it is used by agent policies in spaces you are not authorized to access`,
         });
-        // Promoting a download source to the global default affects policies across their spaces.
-        if (newData.is_default && !originalItem.is_default) {
+        // Editing a download source that is (or becomes) the global default affects every policy
+        // that inherits the default, in all policy spaces — not only policies that reference it.
+        if (originalItem.is_default || newData.is_default) {
           await assertCanManageDefaultDownloadSource(options.request);
         }
       }

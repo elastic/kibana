@@ -1304,10 +1304,15 @@ class OutputService {
     }
     const errorMessage = `Insufficient privileges to ${action} output ${id}: it is used by agent policies in spaces you are not authorized to access`;
     // Agent-policy spaces only need fleet-agent-policies-all.
-    // Package-policy spaces also need integrations-all because bumping/removing an output
-    // rewrites package policies too. Check them separately so a user with integrations-all
-    // only in the spaces that actually have package policies is not incorrectly blocked in
-    // agent-only spaces.
+    // On delete, package-policy spaces also need integrations-all because removeOutputFromAll
+    // rewrites package policies. On update the package policies are not rewritten (only their
+    // parent agent policies are bumped), so integrations-all must not be required there — it
+    // would 403 a Settings admin who legitimately holds Agent policies: All in every space.
+    // Check the two space sets separately so integrations-all is only demanded where relevant.
+    const packagePolicyPrivileges =
+      action === 'delete'
+        ? ['integrations-all', 'fleet-agent-policies-all']
+        : ['fleet-agent-policies-all'];
     await assertPrivilegesInSpaces({
       request,
       spaceIds: agentPolicySpaces.spaceIds,
@@ -1317,7 +1322,7 @@ class OutputService {
     await assertPrivilegesInSpaces({
       request,
       spaceIds: packagePolicySpaces.spaceIds,
-      apiPrivileges: ['integrations-all', 'fleet-agent-policies-all'],
+      apiPrivileges: packagePolicyPrivileges,
       errorMessage,
     });
   }
@@ -1414,11 +1419,14 @@ class OutputService {
     // policies in other spaces rely on. Skipped for preconfiguration (kibana.yml is trusted).
     if (request && !fromPreconfiguration) {
       await this.assertOutputCrossSpacePrivileges(id, request, 'update');
-      // Promoting an output to the global default affects policies in all spaces.
-      const becomesDefault =
-        (data.is_default && !originalOutput.is_default) ||
-        (data.is_default_monitoring && !originalOutput.is_default_monitoring);
-      if (becomesDefault) {
+      // Editing an output that is (or becomes) the global default affects every policy that
+      // inherits the default, in all policy spaces — not only policies that reference it by id.
+      const affectsDefault =
+        originalOutput.is_default ||
+        originalOutput.is_default_monitoring ||
+        data.is_default ||
+        data.is_default_monitoring;
+      if (affectsDefault) {
         await this.assertCanManageDefaultOutput(request);
       }
     }
