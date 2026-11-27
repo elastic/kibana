@@ -109,6 +109,17 @@ export function ESQLMenu({
 
   const [showStardust, setShowStardust] = useState(false);
   const [isOverflowOpen, setIsOverflowOpen] = useState(false);
+  // One docs flyout shared by the inline Help button and the overflow menu, owned here so it
+  // survives the footer switching between the two layouts. Mounted on first open to keep the
+  // help code lazy.
+  const [isDocsFlyoutOpen, setIsDocsFlyoutOpen] = useState(false);
+  const [hasOpenedDocsFlyout, setHasOpenedDocsFlyout] = useState(false);
+  const onDocsFlyoutOpenChange = useCallback((isOpen: boolean) => {
+    setIsDocsFlyoutOpen(isOpen);
+    if (isOpen) {
+      setHasOpenedDocsFlyout(true);
+    }
+  }, []);
   const [queryToSave, setQueryToSave] = useState<string>();
   const [hasSeenCreateView, setHasSeenCreateView] = useLocalStorage<boolean>(
     'esqlEditor.hasSeenCreateView',
@@ -215,6 +226,8 @@ export function ESQLMenu({
           onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
           docsFlyoutSize={docsFlyoutSize}
           hideRecommendedQueries={hideRecommendedQueries}
+          isDocsFlyoutOpen={isDocsFlyoutOpen}
+          onDocsFlyoutOpenChange={onDocsFlyoutOpenChange}
         />
       </Suspense>
     </EuiFlexItem>
@@ -243,16 +256,14 @@ export function ESQLMenu({
     }
   }, [isOverflowOpen]);
   const closeOverflow = useCallback(() => setIsOverflowOpen(false), []);
-  // The docs flyout lives outside the overflow popover so it outlives the menu closing
-  const [isDocsFlyoutOpen, setIsDocsFlyoutOpen] = useState(false);
   const openDocs = useCallback(() => {
     if (editorActions?.editorIsInline) {
       editorActions.toggleLanguageComponent();
     } else {
-      setIsDocsFlyoutOpen((isOpen) => !isOpen);
+      onDocsFlyoutOpenChange(!isDocsFlyoutOpen);
     }
     setIsOverflowOpen(false);
-  }, [editorActions]);
+  }, [editorActions, isDocsFlyoutOpen, onDocsFlyoutOpenChange]);
 
   // `menuItem` is how the action is shown under the ellipsis button. Only the actions that can
   // land there (everything after the first three) need one.
@@ -372,17 +383,17 @@ export function ESQLMenu({
               data-test-subj="ESQLEditor-more-actions-panel"
             />
           </EuiPopover>
-          {!editorActions?.editorIsInline && (
-            <Suspense fallback={null}>
-              <LazyHelpDocsFlyout
-                isOpen={isDocsFlyoutOpen}
-                onOpenChange={setIsDocsFlyoutOpen}
-                onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
-                docsFlyoutSize={docsFlyoutSize}
-              />
-            </Suspense>
-          )}
         </EuiFlexItem>
+      )}
+      {!editorActions?.editorIsInline && hasOpenedDocsFlyout && (
+        <Suspense fallback={null}>
+          <LazyHelpDocsFlyout
+            isOpen={isDocsFlyoutOpen}
+            onOpenChange={onDocsFlyoutOpenChange}
+            onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
+            docsFlyoutSize={docsFlyoutSize}
+          />
+        </Suspense>
       )}
       {queryToSave !== undefined && (
         <CreateViewModal

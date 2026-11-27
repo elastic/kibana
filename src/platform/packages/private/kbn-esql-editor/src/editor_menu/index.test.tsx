@@ -24,15 +24,26 @@ jest.mock('../hooks/use_nl_to_esql_check', () => ({
 jest.mock('./help_popover', () => {
   const ReactActual = jest.requireActual('react');
   return {
-    HelpPopover: (props: { hideRecommendedQueries?: boolean }) =>
+    HelpPopover: (props: {
+      hideRecommendedQueries?: boolean;
+      onDocsFlyoutOpenChange?: (isOpen: boolean) => void;
+    }) =>
       ReactActual.createElement('button', {
         type: 'button',
         'data-test-subj': 'esql-help-popover-button',
         'data-hide-recommended': String(Boolean(props.hideRecommendedQueries)),
+        onClick: () => props.onDocsFlyoutOpenChange?.(true),
       }),
-    HelpMenuContent: () =>
-      ReactActual.createElement('div', { 'data-test-subj': 'esql-help-menu-content' }),
-    HelpDocsFlyout: () => null,
+    HelpMenuContent: (props: { onOpenDocs: () => void }) =>
+      ReactActual.createElement('button', {
+        type: 'button',
+        'data-test-subj': 'esql-help-menu-content',
+        onClick: props.onOpenDocs,
+      }),
+    HelpDocsFlyout: (props: { isOpen: boolean }) =>
+      props.isOpen
+        ? ReactActual.createElement('div', { 'data-test-subj': 'esql-docs-flyout' })
+        : null,
   };
 });
 
@@ -76,6 +87,45 @@ describe('ESQLMenu', () => {
 
   afterEach(() => {
     localStorage.clear();
+  });
+
+  it('keeps the docs flyout open when the footer switches to the collapsed layout', async () => {
+    const Harness = () => {
+      const [collapse, setCollapse] = React.useState(false);
+      return (
+        <>
+          <button data-test-subj="collapse" onClick={() => setCollapse(true)} />
+          <ESQLMenu collapseActions={collapse} />
+        </>
+      );
+    };
+    await act(async () => {
+      render(
+        <KibanaContextProvider services={services as any}>
+          <EsqlEditorActionsProvider>
+            <EsqlEditorActionsRegister editorIsInline={false} currentQuery="" />
+            <Harness />
+          </EsqlEditorActionsProvider>
+        </KibanaContextProvider>
+      );
+    });
+
+    fireEvent.click(screen.getByTestId('esql-help-popover-button'));
+    expect(await screen.findByTestId('esql-docs-flyout')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('collapse'));
+    expect(await screen.findByTestId('ESQLEditor-more-actions')).toBeInTheDocument();
+    expect(screen.getByTestId('esql-docs-flyout')).toBeInTheDocument();
+  });
+
+  it('opens the docs flyout from the overflow menu and closes the menu', async () => {
+    await renderMenu({ collapseActions: true });
+    fireEvent.click(screen.getByTestId('ESQLEditor-more-actions'));
+    const panel = await screen.findByTestId('ESQLEditor-more-actions-panel');
+    fireEvent.click(within(panel).getByTestId('esql-help-popover-button'));
+    fireEvent.click(await screen.findByTestId('esql-help-menu-content'));
+
+    expect(await screen.findByTestId('esql-docs-flyout')).toBeInTheDocument();
   });
 
   describe('when collapseActions is set', () => {

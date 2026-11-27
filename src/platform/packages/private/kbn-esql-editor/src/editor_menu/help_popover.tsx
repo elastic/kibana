@@ -296,18 +296,40 @@ export const HelpPopover: React.FC<{
    * can't apply a picked query — i.e. no `submitEsqlQuery` action is wired.
    */
   hideRecommendedQueries?: boolean;
-}> = ({ onESQLDocsFlyoutVisibilityChanged, docsFlyoutSize, hideRecommendedQueries }) => {
+  /**
+   * Lets the host own the docs flyout's open state (and render the flyout itself), so it survives
+   * this component unmounting, e.g. when the footer switches to its collapsed layout.
+   */
+  isDocsFlyoutOpen?: boolean;
+  onDocsFlyoutOpenChange?: (isOpen: boolean) => void;
+}> = ({
+  onESQLDocsFlyoutVisibilityChanged,
+  docsFlyoutSize,
+  hideRecommendedQueries,
+  isDocsFlyoutOpen,
+  onDocsFlyoutOpenChange,
+}) => {
   const kibana = useKibana<ESQLEditorDeps>();
   const { docLinks } = kibana.services.core;
 
   const { euiTheme } = useEuiTheme();
   const actions = useEsqlEditorActions();
   const [isESQLMenuPopoverOpen, setIsESQLMenuPopoverOpen] = useState(false);
-  const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
+  const isDocsFlyoutControlled = onDocsFlyoutOpenChange !== undefined;
+  const [isLocalLanguageComponentOpen, setIsLocalLanguageComponentOpen] = useState(false);
+  const isLanguageComponentOpen = isDocsFlyoutControlled
+    ? Boolean(isDocsFlyoutOpen)
+    : isLocalLanguageComponentOpen;
+  const setIsLanguageComponentOpen = isDocsFlyoutControlled
+    ? onDocsFlyoutOpenChange
+    : setIsLocalLanguageComponentOpen;
 
   useEffect(() => {
-    onESQLDocsFlyoutVisibilityChanged?.(isLanguageComponentOpen);
-  }, [isLanguageComponentOpen, onESQLDocsFlyoutVisibilityChanged]);
+    // when the host owns the flyout it reports its visibility itself
+    if (!isDocsFlyoutControlled) {
+      onESQLDocsFlyoutVisibilityChanged?.(isLanguageComponentOpen);
+    }
+  }, [isDocsFlyoutControlled, isLanguageComponentOpen, onESQLDocsFlyoutVisibilityChanged]);
 
   const toggleLanguageComponent = useCallback(() => {
     if (actions?.editorIsInline) {
@@ -317,7 +339,7 @@ export const HelpPopover: React.FC<{
     }
     setIsLanguageComponentOpen(!isLanguageComponentOpen);
     setIsESQLMenuPopoverOpen(false);
-  }, [actions, isLanguageComponentOpen]);
+  }, [actions, isLanguageComponentOpen, setIsLanguageComponentOpen]);
 
   const onHelpMenuVisibilityChange = useCallback(
     (status: boolean) => {
@@ -370,7 +392,7 @@ export const HelpPopover: React.FC<{
           <EuiContextMenu initialPanelId={0} panels={esqlContextMenuPanels} />
         </div>
       </EuiPopover>
-      {!actions?.editorIsInline && (
+      {!actions?.editorIsInline && !isDocsFlyoutControlled && (
         <LanguageDocumentationFlyout
           searchInDescription
           linkToDocumentation={docLinks?.links?.query?.queryESQL ?? ''}
