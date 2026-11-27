@@ -32638,6 +32638,8 @@ paths:
                     end_date: '2025-03-10T23:59:59.999Z'
                     start_date: '2025-03-01T00:00:00.000Z'
             schema:
+              discriminator:
+                propertyName: action
               oneOf:
                 - $ref: '#/components/schemas/Security_Detections_API_BulkDeleteRules'
                 - $ref: '#/components/schemas/Security_Detections_API_BulkDisableRules'
@@ -209130,12 +209132,11 @@ components:
         - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadTimeline'
         - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadRuleActions'
         - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadSchedule'
-        - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadAlertSuppression'
-    Security_Detections_API_BulkActionEditPayloadAlertSuppression:
-      anyOf:
         - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadSetAlertSuppression'
         - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadSetAlertSuppressionForThreshold'
         - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadDeleteAlertSuppression'
+      discriminator:
+        propertyName: type
     Security_Detections_API_BulkActionEditPayloadDeleteAlertSuppression:
       type: object
       properties:

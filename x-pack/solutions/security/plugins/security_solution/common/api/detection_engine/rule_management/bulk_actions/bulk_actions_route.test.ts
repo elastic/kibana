@@ -34,7 +34,7 @@ describe('Perform bulk action request schema', () => {
       expectParseError(result);
 
       expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-        `"action: Invalid input: expected \\"delete\\", action: Invalid input: expected \\"disable\\", action: Invalid input: expected \\"enable\\", action: Invalid input: expected \\"export\\", action: Invalid input: expected \\"duplicate\\", and 6 more"`
+        `"action: Invalid discriminator value. Expected 'delete' | 'disable' | 'enable' | 'export' | 'duplicate' | 'run' | 'fill_gaps' | 'edit'"`
       );
     });
 
@@ -46,7 +46,7 @@ describe('Perform bulk action request schema', () => {
       expectParseError(result);
 
       expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-        `"action: Invalid input: expected \\"delete\\", action: Invalid input: expected \\"disable\\", action: Invalid input: expected \\"enable\\", action: Invalid input: expected \\"export\\", action: Invalid input: expected \\"duplicate\\", and 6 more"`
+        `"action: Invalid discriminator value. Expected 'delete' | 'disable' | 'enable' | 'export' | 'duplicate' | 'run' | 'fill_gaps' | 'edit'"`
       );
     });
 
@@ -74,7 +74,7 @@ describe('Perform bulk action request schema', () => {
       expectParseError(result);
 
       expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-        `"ids: Invalid input: expected array, received string, action: Invalid input: expected \\"delete\\", ids: Invalid input: expected array, received string, action: Invalid input: expected \\"disable\\", ids: Invalid input: expected array, received string, and 13 more"`
+        `"ids: Invalid input: expected array, received string"`
       );
     });
   });
@@ -154,7 +154,7 @@ describe('Perform bulk action request schema', () => {
       expectParseError(result);
 
       expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-        `"action: Invalid input: expected \\"delete\\", action: Invalid input: expected \\"disable\\", action: Invalid input: expected \\"enable\\", action: Invalid input: expected \\"export\\", action: Invalid input: expected \\"duplicate\\", and 5 more"`
+        `"run: Invalid input: expected object, received undefined"`
       );
     });
 
@@ -185,7 +185,7 @@ describe('Perform bulk action request schema', () => {
         expectParseError(result);
 
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"action: Invalid input: expected \\"delete\\", action: Invalid input: expected \\"disable\\", action: Invalid input: expected \\"enable\\", action: Invalid input: expected \\"export\\", action: Invalid input: expected \\"duplicate\\", and 5 more"`
+          `"edit: Invalid input: expected array, received undefined"`
         );
       });
 
@@ -200,7 +200,7 @@ describe('Perform bulk action request schema', () => {
         expectParseError(result);
 
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"action: Invalid input: expected \\"delete\\", action: Invalid input: expected \\"disable\\", action: Invalid input: expected \\"enable\\", action: Invalid input: expected \\"export\\", action: Invalid input: expected \\"duplicate\\", and 5 more"`
+          `"edit: Invalid input: expected array, received object"`
         );
       });
     });
@@ -217,7 +217,7 @@ describe('Perform bulk action request schema', () => {
         expectParseError(result);
 
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"action: Invalid input: expected \\"delete\\", action: Invalid input: expected \\"disable\\", action: Invalid input: expected \\"enable\\", action: Invalid input: expected \\"export\\", action: Invalid input: expected \\"duplicate\\", and 20 more"`
+          `"edit.0.value: Invalid input: expected array, received string"`
         );
       });
 
@@ -279,7 +279,7 @@ describe('Perform bulk action request schema', () => {
         expectParseError(result);
 
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"action: Invalid input: expected \\"delete\\", action: Invalid input: expected \\"disable\\", action: Invalid input: expected \\"enable\\", action: Invalid input: expected \\"export\\", action: Invalid input: expected \\"duplicate\\", and 20 more"`
+          `"edit.0.value: Invalid input: expected array, received string"`
         );
       });
 
@@ -527,7 +527,7 @@ describe('Perform bulk action request schema', () => {
 
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"action: Invalid input: expected \\"delete\\", action: Invalid input: expected \\"disable\\", action: Invalid input: expected \\"enable\\", action: Invalid input: expected \\"export\\", action: Invalid input: expected \\"duplicate\\", and 18 more"`
+          `"edit.0.value: Invalid input: expected object, received array"`
         );
       });
 
@@ -549,7 +549,7 @@ describe('Perform bulk action request schema', () => {
 
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"action: Invalid input: expected \\"delete\\", action: Invalid input: expected \\"disable\\", action: Invalid input: expected \\"enable\\", action: Invalid input: expected \\"export\\", action: Invalid input: expected \\"duplicate\\", and 21 more"`
+          `"edit.0.value.timeline_id: Invalid input: expected string, received undefined"`
         );
       });
 
@@ -587,7 +587,7 @@ describe('Perform bulk action request schema', () => {
 
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"action: Invalid input: expected \\"delete\\", action: Invalid input: expected \\"disable\\", action: Invalid input: expected \\"enable\\", action: Invalid input: expected \\"export\\", action: Invalid input: expected \\"duplicate\\", and 18 more"`
+          `"edit.0.value: Invalid input: expected object, received array"`
         );
       });
 
@@ -632,7 +632,7 @@ describe('Perform bulk action request schema', () => {
 
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"action: Invalid input: expected \\"delete\\", action: Invalid input: expected \\"disable\\", action: Invalid input: expected \\"enable\\", action: Invalid input: expected \\"export\\", action: Invalid input: expected \\"duplicate\\", and 21 more"`
+          `"edit.0.value.interval: Invalid input: expected string, received undefined"`
         );
       });
 
@@ -654,7 +654,7 @@ describe('Perform bulk action request schema', () => {
 
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"action: Invalid input: expected \\"delete\\", action: Invalid input: expected \\"disable\\", action: Invalid input: expected \\"enable\\", action: Invalid input: expected \\"export\\", action: Invalid input: expected \\"duplicate\\", and 21 more"`
+          `"edit.0.value.lookback: Invalid input: expected string, received undefined"`
         );
       });
 
@@ -692,7 +692,7 @@ describe('Perform bulk action request schema', () => {
 
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"action: Invalid input: expected \\"delete\\", action: Invalid input: expected \\"disable\\", action: Invalid input: expected \\"enable\\", action: Invalid input: expected \\"export\\", action: Invalid input: expected \\"duplicate\\", and 18 more"`
+          `"edit.0.value: Invalid input: expected object, received array"`
         );
       });
 
@@ -714,7 +714,7 @@ describe('Perform bulk action request schema', () => {
 
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"action: Invalid input: expected \\"delete\\", action: Invalid input: expected \\"disable\\", action: Invalid input: expected \\"enable\\", action: Invalid input: expected \\"export\\", action: Invalid input: expected \\"duplicate\\", and 22 more"`
+          `"edit.0.value.actions: Invalid input: expected array, received undefined"`
         );
       });
 

@@ -514,7 +514,7 @@ export type BulkActionEditPayloadDeleteAlertSuppression = z.infer<
 >;
 
 export const BulkActionEditPayloadAlertSuppressionInternal = lazySchema(() =>
-  z.union([
+  z.discriminatedUnion('type', [
     BulkActionEditPayloadSetAlertSuppression,
     BulkActionEditPayloadSetAlertSuppressionForThreshold,
     BulkActionEditPayloadDeleteAlertSuppression,
@@ -528,14 +528,16 @@ export const BulkActionEditPayloadAlertSuppression =
   BulkActionEditPayloadAlertSuppressionInternal as z.ZodType<BulkActionEditPayloadAlertSuppression>;
 
 export const BulkActionEditPayloadInternal = lazySchema(() =>
-  z.union([
+  z.discriminatedUnion('type', [
     BulkActionEditPayloadTags,
     BulkActionEditPayloadIndexPatterns,
     BulkActionEditPayloadInvestigationFields,
     BulkActionEditPayloadTimeline,
     BulkActionEditPayloadRuleActions,
     BulkActionEditPayloadSchedule,
-    BulkActionEditPayloadAlertSuppression,
+    BulkActionEditPayloadSetAlertSuppression,
+    BulkActionEditPayloadSetAlertSuppressionForThreshold,
+    BulkActionEditPayloadDeleteAlertSuppression,
   ])
 );
 
@@ -582,7 +584,7 @@ export type PerformRulesBulkActionRequestQueryInput = z.input<
 >;
 
 export const PerformRulesBulkActionRequestBody = lazySchema(() =>
-  z.union([
+  z.discriminatedUnion('action', [
     BulkDeleteRules,
     BulkDisableRules,
     BulkEnableRules,
