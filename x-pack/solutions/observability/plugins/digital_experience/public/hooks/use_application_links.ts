@@ -53,6 +53,7 @@ export interface ApplicationLinks {
    * filters and query, which it doesn't apply but its back link restores.
    */
   frustrationHref: string;
+  crashesHref: string;
   sessionsHref: (sessionsQuery?: SessionsListUrlQuery) => string;
   sessionHref: (sessionId: string, sessionsQuery?: SessionsListUrlQuery) => string;
 }
@@ -116,6 +117,9 @@ export const useApplicationLinks = (
       ),
       frustrationHref: toHref(
         router.link('/{serviceName}/frustration', { path: { serviceName }, query: tabQuery })
+      ),
+      crashesHref: toHref(
+        router.link('/{serviceName}/crashes', { path: { serviceName }, query: tabQuery })
       ),
       sessionsHref: (sessionsQuery = {}) =>
         toHref(

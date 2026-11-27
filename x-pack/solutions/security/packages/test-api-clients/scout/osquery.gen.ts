@@ -41,6 +41,7 @@ import type {
   OsqueryDeletePacksResponse,
   OsqueryFindPacksRequestQueryInput,
   OsqueryFindPacksResponse,
+  OsqueryGetPacksDetailsRequestQueryInput,
   OsqueryGetPacksDetailsRequestParamsInput,
   OsqueryGetPacksDetailsResponse,
   OsqueryUpdatePacksRequestParamsInput,
@@ -615,16 +616,19 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       encodePathParams(props.params)
     )}`;
 
-    return apiClient.get<ScoutResponseBody<TResponseType, OsqueryGetPacksDetailsResponse>>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: options.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.get<ScoutResponseBody<TResponseType, OsqueryGetPacksDetailsResponse>>(
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: options.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
    * Get the details of a saved query using the query ID.
@@ -944,6 +948,7 @@ export interface OsqueryGetLiveQueryResultsProps {
   params: OsqueryGetLiveQueryResultsRequestParamsInput;
 }
 export interface OsqueryGetPacksDetailsProps {
+  query: OsqueryGetPacksDetailsRequestQueryInput;
   params: OsqueryGetPacksDetailsRequestParamsInput;
 }
 export interface OsqueryGetSavedQueryDetailsProps {
