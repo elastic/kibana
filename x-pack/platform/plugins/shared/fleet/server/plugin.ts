@@ -152,6 +152,8 @@ import { registerDeployAgentPoliciesTask } from './services/agent_policies/deplo
 import { DeleteUnenrolledAgentsTask } from './tasks/delete_unenrolled_agents_task';
 import { registerBumpMigratedAgentPoliciesTask } from './services/agent_policies/bump_migrated_agent_policies_task';
 import { registerBumpAgentPoliciesByIdTask } from './services/agent_policies/bump_agent_policies_by_id_task';
+import type { AgentlessRumClient } from './services/agents/agentless_agent';
+import { agentlessAgentService } from './services/agents/agentless_agent';
 import { UpgradeAgentlessDeploymentsTask } from './tasks/agentless/upgrade_agentless_deployment';
 import { SyncIntegrationsTask } from './tasks/sync_integrations/sync_integrations_task';
 import { AutomaticAgentUpgradeTask } from './tasks/automatic_agent_upgrade_task';
@@ -283,6 +285,7 @@ export interface FleetStartContract {
   fleetSetupCompleted: () => Promise<void>;
   agentless: {
     enabled: boolean;
+    createRumClient: () => AgentlessRumClient;
   };
   authz: {
     fromRequest(request: KibanaRequest): Promise<FleetAuthz>;
@@ -1009,6 +1012,7 @@ export class FleetPlugin
       },
       agentless: {
         enabled: this.configInitialValue.agentless?.enabled ?? false,
+        createRumClient: () => agentlessAgentService.createRumClient(),
       },
       fleetSetupCompleted: () => fleetSetupPromise,
       packageService: this.setupPackageService(

@@ -60,6 +60,21 @@ describe('buildRenameSourceFieldMap', () => {
     });
   });
 
+  it.each([
+    'FROM logs | RENAME service.name AS name | DESCRIBE',
+    'FROM logs | RENAME service.name AS name | DESCRIBE | RENAME name AS label',
+    'FROM logs | RENAME service.name AS name | STATS name = COUNT(*)',
+    'LET x = (FROM logs | RENAME service.name AS name | DESCRIBE); FROM x',
+  ])('invalidates a rename when a command defines a new value under the same name: %s', (query) => {
+    expect(buildRenameSourceFieldMap(query)).toEqual(new Map());
+  });
+
+  it('preserves a rename when only the sibling branch returns the field', () => {
+    const query =
+      'FROM logs | RENAME extension AS name | FORK (EVAL name = "temporary" | DROP name) (KEEP name)';
+    expect(resolve('name', query)).toBe('extension');
+  });
+
   describe('EVAL and synthetic columns', () => {
     it('does not unwind through EVAL output that only appears as the old side of RENAME', () => {
       const query =

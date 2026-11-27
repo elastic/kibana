@@ -7,15 +7,27 @@
 
 import { registerInvestigationEvaluation } from './register_evaluation';
 import { ORCA_DEMO_COMMIT } from './custom_context';
-import { loadOrcaDataset, resolveOrcaRun, resolveOrcaTelemetryVariant } from './orca_dataset';
+import {
+  loadOrcaDataset,
+  resolveOrcaRun,
+  resolveOrcaTelemetryVariant,
+  selectOrcaSlice,
+} from './orca_dataset';
 
-const run = resolveOrcaRun();
+const { release, slice } = resolveOrcaRun();
 const telemetryVariant = resolveOrcaTelemetryVariant();
-const { release, slice } = run;
 
 registerInvestigationEvaluation({
   name: 'orcabench',
-  loadDataset: (client) => loadOrcaDataset(client, run),
+  loadDataset: (client) => loadOrcaDataset(client, release),
+  ...(slice
+    ? {
+        selectExamples: (examples) => selectOrcaSlice(examples, slice),
+        // Slices of one build run as separate experiments, so each post-run check sees only its
+        // own scores; they still share the execution and dataset the comparison groups by.
+        experimentName: `Nightshift ORCA investigation traces (slice ${slice.index}/${slice.count})`,
+      }
+    : {}),
   // Execute exactly the fetched, validated snapshot rather than resolving mutable contents again.
   trustUpstreamDataset: false,
   orca: true,

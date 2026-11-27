@@ -36,7 +36,7 @@ spec:
         # changes out.
         FLAKY_TESTS_GITHUB_REPO: 'elastic/kibana'
         # Suite issues created per run, worst suites first
-        FLAKY_TESTS_MAX_NEW_ISSUES: '10'
+        FLAKY_TESTS_MAX_NEW_ISSUES: '50'
         # Leave out flaky tests that were skipped since
         FLAKY_TESTS_OMIT_SKIPPED_TESTS: 'true'
         # Refresh the suite issues of suites flaky again: a comment with the new numbers on new

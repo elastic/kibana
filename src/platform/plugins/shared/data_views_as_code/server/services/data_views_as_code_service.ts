@@ -21,7 +21,8 @@ import type { DataViewsService } from '@kbn/data-views-plugin/server';
 import { omit } from 'lodash';
 import { getMeta } from '@kbn/as-code-shared-schemas';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { badRequest } from '@hapi/boom';
+import { badRequest, Boom, forbidden } from '@hapi/boom';
+import { ALL_SPACES_ID, UNKNOWN_SPACE } from '@kbn/core-spaces-common';
 import type { asCodePaginatedResponseSchema } from '../rest_routes/schema';
 
 export class DataViewsAsCodeService {
@@ -64,7 +65,8 @@ export class DataViewsAsCodeService {
   }
 
   private async mapDataView(dataView: DataViewLazy) {
-    const dataViewSpec = await dataView.toMinimalSpec();
+    const namespaces = dataView.namespaces;
+    const dataViewSpec = { ...(await dataView.toMinimalSpec()), namespaces };
     if (dataView.getFieldAttrs().size > 0)
       dataViewSpec.fieldAttrs = Object.fromEntries(dataView.getFieldAttrs().entries());
 
@@ -89,7 +91,7 @@ export class DataViewsAsCodeService {
       meta: {
         managed: dataView.managed,
         version: dataView.version,
-        spaces: dataView.namespaces,
+        spaces: namespaces,
       },
     };
   }
@@ -99,8 +101,9 @@ export class DataViewsAsCodeService {
     return this.mapDataView(result);
   }
 
-  public async create(spec: AsCodeSavedDataView) {
+  public async create(spec: AsCodeSavedDataView, currentSpaceId: string) {
     this.validateFieldFormatTypes(spec);
+    this.validateSpaces([], spec.spaces, currentSpaceId);
 
     const dataViewSpec = toStoredDataView(spec);
 
@@ -113,10 +116,11 @@ export class DataViewsAsCodeService {
     return this.dataViewsService.delete(id);
   }
 
-  public async upsert(id: string, spec: Omit<AsCodeSavedDataView, 'id'>) {
+  public async upsert(id: string, spec: Omit<AsCodeSavedDataView, 'id'>, currentSpaceId: string) {
     this.validateFieldFormatTypes(spec);
 
     const existingDataView = await this.getDataViewLazy(id);
+    this.validateSpaces(existingDataView?.namespaces ?? [], spec.spaces, currentSpaceId);
 
     if (!!existingDataView) {
       // The id can be a legacy alias, for that we use the resolved id.
@@ -127,7 +131,10 @@ export class DataViewsAsCodeService {
         toStoredDataView({ id: resolvedId, ...spec })
       );
 
-      // 2. Update the saved object with the new data view instance.
+      // 2. Update the spaces of the data view
+      await this.updateSpaces(resolvedId, existingDataView, spec.spaces, currentSpaceId);
+
+      // 3. Update the saved object with the new data view instance.
       await this.savedObjectsClient.update(
         DATA_VIEW_SAVED_OBJECT_TYPE,
         resolvedId,
@@ -135,10 +142,10 @@ export class DataViewsAsCodeService {
         { mergeAttributes: false, refresh: true }
       );
 
-      // 3 . Clear the data view service cache
+      // 4 . Clear the data view service cache
       this.dataViewsService.clearInstanceCache(resolvedId);
 
-      // 4. Return the updated data view.
+      // 5. Return the updated data view.
       return {
         action: 'updated',
         // After that, it needs to be refetched, otherwise it won't get the meta fields correctly.
@@ -150,6 +157,63 @@ export class DataViewsAsCodeService {
       toStoredDataView({ id, ...spec })
     );
     return { action: 'created', body: await this.mapDataView(createdDataView) };
+  }
+
+  private validateSpaces(
+    existingSpaces: string[],
+    requestedSpaces: string[] | undefined,
+    currentSpaceId: string
+  ) {
+    // An unknown space means the data view is shared with a space the user has no access to,
+    // either currently or in the request, so it can't be written.
+    if (existingSpaces.includes(UNKNOWN_SPACE) || requestedSpaces?.includes(UNKNOWN_SPACE))
+      throw forbidden('Cannot write a data view in an unknown space.');
+
+    if (!requestedSpaces) return;
+
+    // `*` makes the data view available in every space, including the url one.
+    const includesCurrentSpace =
+      requestedSpaces.includes(currentSpaceId) || requestedSpaces.includes(ALL_SPACES_ID);
+    if (!includesCurrentSpace)
+      throw badRequest(
+        `The requested spaces must include the current space. Make sure that the spaces array includes ${currentSpaceId}.`
+      );
+  }
+
+  private async updateSpaces(
+    id: string,
+    existingDataView: DataViewLazy,
+    bodySpaces: string[] | undefined,
+    currentSpaceId: string
+  ) {
+    const hasBodySpaces = bodySpaces && bodySpaces.length > 0;
+    const spacesToUpdate = hasBodySpaces ? bodySpaces : [currentSpaceId];
+
+    // Body spaces have priority over the current space when updating.
+    const spacesToAdd = spacesToUpdate.filter(
+      (space) => !existingDataView.namespaces.includes(space)
+    );
+    const spacesToRemove = existingDataView.namespaces.filter(
+      (space) => !spacesToUpdate.includes(space)
+    );
+    if (spacesToAdd.length === 0 && spacesToRemove.length === 0) {
+      // Nothing to update
+      return;
+    }
+
+    const { objects } = await this.savedObjectsClient.updateObjectsSpaces(
+      [{ id, type: DATA_VIEW_SAVED_OBJECT_TYPE }],
+      spacesToAdd,
+      spacesToRemove
+    );
+
+    // `updateObjectsSpaces` reports failures per object instead of throwing.
+    const failure = objects.find(({ error }) => !!error)?.error;
+    if (failure) {
+      throw new Boom(`Failed to update data view spaces: ${failure.message}`, {
+        statusCode: failure.statusCode,
+      });
+    }
   }
 
   private async getDataViewLazy(id: string) {

@@ -37,10 +37,10 @@ export const resetSLORoute = createSloServerRoute({
     plugins,
     corePlugins,
     getScopedClients,
-    commonResourcesInstalled,
+    resourceInstallState,
   }) => {
     await assertPlatinumLicense(plugins);
-    await commonResourcesInstalled;
+    await resourceInstallState.ensureInstalled();
 
     const {
       scopedClusterClient,

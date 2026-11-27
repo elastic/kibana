@@ -11,9 +11,9 @@ import type { AlertEventDocument } from '@kbn/alerting-v2-schemas';
 import { getIngestTimestampPipeline } from './ingest_timestamp_pipeline';
 import type { ResourceDefinition } from './types';
 
-// v10 adds `routing.tags`. Increment whenever
-// `ALERT_EVENTS_MAPPINGS` changes so the update is applied to the current write index.
-export const ALERT_EVENTS_DATA_STREAM_VERSION = 10;
+// v11 adds `routing.tags`. v10 adds `reason`. Increment whenever `ALERT_EVENTS_MAPPINGS`
+// changes so the update is applied to the current write index.
+export const ALERT_EVENTS_DATA_STREAM_VERSION = 11;
 export const ALERT_EVENTS_BACKING_INDEX = '.ds-.rule-events-*';
 export const ALERT_EVENTS_RESOURCE_KEY = `data_stream:${ALERT_EVENTS_DATA_STREAM}`;
 
@@ -33,7 +33,7 @@ export type {
 } from '@kbn/alerting-v2-schemas';
 
 export const buildRuleEventDocument = (params: AlertEventDocument): AlertEventDocument => {
-  const { scheduled_timestamp, alert, severity, ...required } = params;
+  const { scheduled_timestamp, alert, severity, reason, ...required } = params;
 
   const doc: AlertEventDocument = { ...required };
 
@@ -51,6 +51,10 @@ export const buildRuleEventDocument = (params: AlertEventDocument): AlertEventDo
 
   if (severity !== undefined) {
     doc.severity = severity;
+  }
+
+  if (reason !== undefined) {
+    doc.reason = reason;
   }
 
   return doc;

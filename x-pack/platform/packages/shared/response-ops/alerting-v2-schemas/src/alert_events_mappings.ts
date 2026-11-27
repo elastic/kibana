@@ -61,5 +61,6 @@ export const ALERT_EVENTS_MAPPINGS: MappingsDefinition = {
         tags: { type: 'keyword', ignore_above: 128 },
       },
     },
+    reason: { type: 'keyword' },
   },
 };

@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import {
   aiAssistantLogsIndexPattern,
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
-import { useEditableSettings } from '@kbn/management-settings-hooks';
+import { SettingDefinitionsLoadError, useEditableSettings } from '@kbn/management-settings-hooks';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { LogSourcesSettingSynchronisationInfo } from '@kbn/logs-data-access-plugin/public';
@@ -35,8 +36,22 @@ export function UISettings({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseR
     ...(knowledgeBase.status.value?.enabled ? [aiAssistantSearchConnectorIndexPattern] : []),
   ];
 
-  const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
-    useEditableSettings({ settingsKeys, settingsClient: settings.client });
+  const {
+    fields,
+    isLoading,
+    loadError,
+    retry,
+    handleFieldChange,
+    unsavedChanges,
+    saveAll,
+    isSaving,
+    cleanUnsavedChanges,
+  } = useEditableSettings({
+    settingsKeys,
+    settingsClient: settings.client,
+    metadataClient: settings.metadata,
+    scope: 'namespace',
+  });
 
   const canEditAdvancedSettings = capabilities.advancedSettings?.save;
 
@@ -61,6 +76,29 @@ export function UISettings({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseR
 
   return (
     <>
+      {isLoading && (
+        <>
+          <EuiFlexGroup justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner
+                size="xl"
+                data-test-subj="observabilityAiAssistantManagementSettingsLoading"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer />
+        </>
+      )}
+      {loadError && (
+        <>
+          <SettingDefinitionsLoadError
+            error={loadError}
+            onRetry={retry}
+            data-test-subj="observabilityAiAssistantManagementSettingsLoadError"
+          />
+          <EuiSpacer />
+        </>
+      )}
       {settingsKeys.map((settingKey) => {
         const field = fields[settingKey];
 
