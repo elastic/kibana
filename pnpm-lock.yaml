@@ -6889,8 +6889,8 @@ importers:
         specifier: 18.2.0
         version: 18.2.0(react@18.2.0)
       recast:
-        specifier: 0.24.0
-        version: 0.24.0
+        specifier: 0.24.3
+        version: 0.24.3
       resolve:
         specifier: 1.22.14
         version: 1.22.14
@@ -22692,8 +22692,8 @@ packages:
     resolution: {integrity: sha512-mFAyJq9vUbSTARLZUvAEf1z3YxlvAwswbmxMx2mPA/MSm4KmpwvwvhsH/NIrZhyOuwD60Lzyw2qh83uCbgTPYw==}
     engines: {node: '>= 4'}
 
-  recast@0.24.0:
-    resolution: {integrity: sha512-dN08tw9Kl2i8oDBy16NhxBh6qOqsEqmGYpX1xaxPmgz6/6ukopSuysLfvLbieuDMY57jEz6eTmNz6lqH54kuqQ==}
+  recast@0.24.3:
+    resolution: {integrity: sha512-2h8jQB0mhpO1LQu/FO9w6QV9+zGi+inBPiTa2yzSr74/yEL1g+vwodmDallpTojoqQhmtveaUONF62vI4OReMg==}
     engines: {node: '>= 22'}
 
   rechoir@0.8.0:
@@ -40376,7 +40376,7 @@ snapshots:
       tiny-invariant: 1.3.3
       tslib: 2.9.1
 
-  recast@0.24.0:
+  recast@0.24.3:
     dependencies:
       ast-types: 0.16.3
       esprima: 4.0.1
