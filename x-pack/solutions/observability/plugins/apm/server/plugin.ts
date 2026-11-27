@@ -24,6 +24,7 @@ import { registerAssistantFunctions } from './assistant_functions';
 import { registerDeprecations } from './deprecations';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
 import { createApmTelemetry } from './lib/apm_telemetry';
+import { setupRum } from './lib/rum/setup_rum';
 import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
 import {
   APM_RULE_TYPE_ALERT_CONTEXT,
@@ -64,6 +65,7 @@ export class APMPlugin implements Plugin<
 > {
   private currentConfig?: APMConfig;
   private logger?: Logger;
+  private stopRum?: () => void;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -80,6 +82,12 @@ export class APMPlugin implements Plugin<
 
     const currentConfig = this.initContext.config.get<APMConfig>();
     this.currentConfig = currentConfig;
+    this.stopRum = setupRum(
+      core,
+      plugins.taskManager,
+      currentConfig.managedRumEnabled,
+      logger.get('rum')
+    );
 
     if (
       plugins.taskManager &&
@@ -302,5 +310,7 @@ export class APMPlugin implements Plugin<
     });
   }
 
-  public stop() {}
+  public stop() {
+    this.stopRum?.();
+  }
 }

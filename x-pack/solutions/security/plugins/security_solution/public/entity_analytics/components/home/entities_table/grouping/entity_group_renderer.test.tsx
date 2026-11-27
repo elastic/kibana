@@ -8,7 +8,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { RawBucket } from '@kbn/grouping';
-import { createGroupPanelRenderer, createGroupStatsRenderer } from './entity_group_renderer';
+import {
+  createGroupPanelRenderer,
+  createGroupStatsRenderer,
+  createGroupToggleAriaLabelGetter,
+} from './entity_group_renderer';
 import type { EntitiesGroupingAggregation, TargetMetadataMap } from './use_fetch_grouped_data';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
 import { ENTITY_GROUPING_OPTIONS, TEST_SUBJ_RESOLUTION_GROUP_OPEN_FLYOUT } from '../constants';
@@ -197,6 +201,26 @@ describe('createGroupPanelRenderer', () => {
       expect(screen.queryByText('target-id')).not.toBeInTheDocument();
       expect(screen.getByTestId(TEST_SUBJ_RESOLUTION_GROUP_OPEN_FLYOUT)).toBeInTheDocument();
     });
+  });
+
+  it('gives the flyout button an accessible name that includes the entity name', () => {
+    const metadata: TargetMetadataMap = new Map([
+      [
+        'target-id',
+        { name: 'james-hue', type: EntityType.user, riskScore: null, individualRiskScore: null },
+      ],
+    ]);
+    const renderer = createGroupPanelRenderer(metadata);
+    render(
+      <TestProviders>
+        {renderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, createMockBucket({ key: 'target-id' }))}
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId(TEST_SUBJ_RESOLUTION_GROUP_OPEN_FLYOUT)).toHaveAttribute(
+      'aria-label',
+      'View details for james-hue'
+    );
   });
 
   it('returns undefined for unknown group types', () => {
@@ -436,5 +460,41 @@ describe('createGroupStatsRenderer', () => {
       expect(stats).toHaveLength(1);
       expect(stats[0].title).toBe('Entities:');
     });
+  });
+});
+
+describe('createGroupToggleAriaLabelGetter', () => {
+  const metadata: TargetMetadataMap = new Map([
+    [
+      'target-id',
+      { name: 'james-hue', type: EntityType.user, riskScore: null, individualRiskScore: null },
+    ],
+  ]);
+
+  it('returns a toggle label distinct from the flyout label for resolution groups', () => {
+    const getLabel = createGroupToggleAriaLabelGetter(metadata);
+
+    expect(
+      getLabel(ENTITY_GROUPING_OPTIONS.RESOLUTION, createMockBucket({ key: 'target-id' }))
+    ).toBe('Expand entity row for james-hue');
+  });
+
+  it('falls back to the entity id when metadata is missing', () => {
+    const getLabel = createGroupToggleAriaLabelGetter(emptyMetadata);
+
+    expect(
+      getLabel(ENTITY_GROUPING_OPTIONS.RESOLUTION, createMockBucket({ key: 'unknown-id' }))
+    ).toBe('Expand entity row for unknown-id');
+  });
+
+  it('names entity type and custom-field group toggles by the group value', () => {
+    const getLabel = createGroupToggleAriaLabelGetter(metadata);
+
+    expect(getLabel(ENTITY_GROUPING_OPTIONS.ENTITY_TYPE, createMockBucket({ key: 'host' }))).toBe(
+      'Expand group host'
+    );
+    expect(
+      getLabel('some.custom.field', createMockBucket({ key: 'k', key_as_string: 'value-1' }))
+    ).toBe('Expand group value-1');
   });
 });

@@ -34,6 +34,25 @@ export function setFlapping<
   }
 }
 
+/**
+ * Recalculates flapping for alerts that stayed recovered, once their flapping history is updated for this run.
+ * Only alerts that are already flapping are recalculated, so a recovered alert can stop flapping but not start.
+ */
+export function setFlappingOnOngoingRecoveredAlerts<
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext
+>(
+  flappingSettings: RulesSettingsFlappingProperties,
+  ongoingRecoveredAlerts: Record<string, Alert<State, Context>> = {}
+): void {
+  for (const id of keys(ongoingRecoveredAlerts)) {
+    const alert = ongoingRecoveredAlerts[id];
+    if (alert.getFlapping()) {
+      alert.setFlapping(isAlertFlapping(flappingSettings, alert));
+    }
+  }
+}
+
 export function isAlertFlapping<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,

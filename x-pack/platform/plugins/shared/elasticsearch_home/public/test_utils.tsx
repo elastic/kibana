@@ -10,6 +10,7 @@ import type { PropsWithChildren, ReactElement } from 'react';
 import { render } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { ElasticsearchHomeProvider } from './context';
 import type { ElasticsearchHomePageProps, ElasticsearchHomeServices } from './types';
@@ -44,13 +45,15 @@ const HomeTestContext = ({
 }: PropsWithChildren<HomeTestContextOptions>) => (
   <EuiThemeProvider>
     <I18nProvider>
-      <ElasticsearchHomeProvider
-        // a component only reads the handful of services it needs, so a partial stands in
-        services={{ ...baseServices, ...services } as ElasticsearchHomeServices}
-        config={{ ...testConfig, ...config }}
-      >
-        {children}
-      </ElasticsearchHomeProvider>
+      {chromeServiceMock.createStartContract().withProvider(
+        <ElasticsearchHomeProvider
+          // a component only reads the handful of services it needs, so a partial stands in
+          services={{ ...baseServices, ...services } as ElasticsearchHomeServices}
+          config={{ ...testConfig, ...config }}
+        >
+          {children}
+        </ElasticsearchHomeProvider>
+      )}
     </I18nProvider>
   </EuiThemeProvider>
 );

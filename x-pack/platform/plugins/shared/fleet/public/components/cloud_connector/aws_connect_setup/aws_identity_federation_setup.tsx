@@ -176,7 +176,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
     created: callbackCreated,
     start: startCallback,
     cancel: cancelCallback,
-  } = useProvisioningCallback({ enabled: isAwsIdentityFederationEnabled });
+  } = useProvisioningCallback({ enabled: isAwsIdentityFederationEnabled, provider: 'aws' });
   // True while a manual Create is retiring the pending record.
   const [isHandingOff, setIsHandingOff] = useState(false);
   // Waiting on the stack, or on the server making the identity from its report.

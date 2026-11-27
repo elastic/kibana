@@ -47,8 +47,8 @@ triggers:
           type: number
           default: 10
           minimum: 1
-          maximum: 1000
-          description: 'Max rules per discovery invocation. Caps agent message size; remaining detections are picked up on the next cycle.'
+          maximum: 100
+          description: 'Max rules sent to the agent per discovery invocation, at most the 100 rows the classifier reads. Caps agent message size; remaining detections are picked up on the next cycle. The classifier applies this limit last, so detections that wait never take a slot from one that shows a change.'
         flakyRuleDetectionThreshold:
           type: number
           default: 10
@@ -61,60 +61,24 @@ triggers:
           type: number
           default: 80
           description: 'Rules with severity_score at or above this value are never suppressed, however frequently they fire. Default matches the 80-critical investigation boundary; set above 100 to disable the exemption.'
-        classifierProbeWindowMinutes:
-          type: number
-          default: 20
-          minimum: 15
-          maximum: 360
-          description: "Window, ending now, over which the classifier re-runs a rule's stored query. Keep it short: on c0, windows over about 30 minutes let earlier matches hide recoveries from the agent."
-        classifierProbeTimeoutMs:
-          type: number
-          default: 8000
-          minimum: 1000
-          maximum: 30000
-          description: 'Per-probe timeout for re-running a stored query. A probe that times out sends its detection to the agent.'
-        classifierProbeConcurrency:
-          type: number
-          default: 5
-          minimum: 1
-          maximum: 10
-          description: 'Maximum stored-query probes the classifier runs at once.'
         classifierMaxSkipAgeHours:
           type: number
           default: 24
           minimum: 1
           maximum: 720
-          description: "A detection is never skipped on the strength of a verdict older than this many hours (the rule's last verification in its live series): it goes to the agent, so a long-running event is re-judged at least this often."
+          description: "A detection is never skipped when the last look at its rule is older than this many hours: the later of the live event's last verification and the agent's last review of the rule; a review counts only if the detection fired after it. It goes to the agent, so a long-running event is re-judged at least this often."
         classifierLiveLookbackDays:
           type: number
           default: 90
           minimum: 1
           maximum: 90
           description: "How many days back the classifier looks for the live events a detection belongs to. It matches the default 90-day `.rule-events` retention and is capped at 90: if retention is raised, a live event with no version in the last 90 days reads as not a live member and its detections go to the agent, and nothing warns about it."
-        classifierBudgetMs:
-          type: number
-          default: 20000
-          minimum: 2000
-          maximum: 60000
-          description: 'Shared time budget for all probes of one run. Probes not started when it is spent send their detection to the agent.'
         classifierReviewFreshMinutes:
           type: number
           default: 240
           minimum: 15
           maximum: 1440
-          description: "How long the agent's last review of a rule stands in for its verdict while the rule's match count is unchanged. It is also the minimum gap between hand-offs of a held-back rule's change to the agent."
-        classifierBaselineBucketMinutes:
-          type: number
-          default: 5
-          minimum: 1
-          maximum: 60
-          description: "Bucket size of the rule's match series the classifier reads: its baseline, and its state at a review. Must not exceed classifierProbeWindowMinutes."
-        classifierBaselineWindowMinutes:
-          type: number
-          default: 300
-          minimum: 60
-          maximum: 1440
-          description: "How far back the classifier reads the rule's match series: the baseline sample, and how old a verdict or review can be and still be compared. classifierBaselineWindowMinutes / classifierBaselineBucketMinutes must be 11 to 288."
+          description: "How long the gate keeps a detection from the agent. A held-back rule's change waits while a review of the rule that covers it is newer than this. A detection that reaches the agent only for a reason that shows no observable change (its series is old, another rule is joining the event, a member has no verdict, or its rule is flaky and in no live event) waits for a run that has a detection that does: a rule whose breach state disagrees with its stored verdict, or a rule in no live event that is not flaky. It goes once its rule's oldest unprocessed detection is this old. Keep it below `detectionLookback`: a detection that only waits and leaves the `get_detections` window before this age is never released."
         rootTriggeredBy:
           type: string
           description: 'Root workflow trigger type propagated by a managed driver.'
@@ -135,8 +99,6 @@ outputs:
   - name: needsAgentCount
     type: number
   - name: classifierReasonCounts
-    type: string
-  - name: classifierProbeStatusCounts
     type: string
   - name: classifierFailed
     type: boolean
@@ -213,7 +175,6 @@ steps:
           heldBackCount: 0
           needsAgentCount: 0
           classifierReasonCounts: '{}'
-          classifierProbeStatusCounts: '{}'
           classifierFailed: false
 
   # Copy workflow.spaceId into variables so ES body Liquid expressions can reference it.
@@ -252,9 +213,11 @@ steps:
         | EVAL score = severity_score + staleness_minutes
         | SORT held_back ASC, score DESC, @timestamp ASC, _id ASC
         | LIMIT ?1
-        | KEEP rule_uuid, _source, score, recent_detection_count, flaky_probe, held_back, last_reviewed_at
+        | KEEP rule_uuid, _source, score, recent_detection_count, flaky_probe, held_back, last_reviewed_at, oldest_unprocessed
       params:
-        - '${{ inputs.detectionBatchMax }}'
+        # The pool the classifier reads (its MAX_CLASSIFIED_ROWS), not the agent's batch: the classifier
+        # caps what the agent gets at detectionBatchMax, after it has held the rows that wait.
+        - 100
         - '${{ inputs.flakyRuleDetectionThreshold }}'
         - '${{ inputs.flakyRuleProbeAfterMinutes }}'
         - '${{ inputs.flakyRuleExemptSeverityScore }}'
@@ -282,15 +245,10 @@ steps:
       rows: '${{ steps.get_detections.output.values }}'
       columns: "${{ steps.get_detections.output.columns | map: 'name' }}"
       space_id: '{{ variables.spaceId }}'
-      probe_window_minutes: '${{ inputs.classifierProbeWindowMinutes }}'
-      probe_timeout_ms: '${{ inputs.classifierProbeTimeoutMs }}'
-      probe_concurrency: '${{ inputs.classifierProbeConcurrency }}'
-      budget_ms: '${{ inputs.classifierBudgetMs }}'
       max_skip_age_hours: '${{ inputs.classifierMaxSkipAgeHours }}'
       live_lookback_days: '${{ inputs.classifierLiveLookbackDays }}'
       review_fresh_minutes: '${{ inputs.classifierReviewFreshMinutes }}'
-      baseline_bucket_minutes: '${{ inputs.classifierBaselineBucketMinutes }}'
-      baseline_window_minutes: '${{ inputs.classifierBaselineWindowMinutes }}'
+      batch_max: '${{ inputs.detectionBatchMax }}'
 
   # Detections the classifier skipped are done: stamp them processed so they leave the queue. This
   # runs before the batch gate, so it does not depend on the agent running or succeeding. A failed
@@ -412,7 +370,6 @@ steps:
           heldBackCount: '${{ steps.classify_detections.output.held_back_count | default: 0 }}'
           needsAgentCount: '${{ steps.classify_detections.output.needs_agent_count | default: 0 }}'
           classifierReasonCounts: "${{ steps.classify_detections.output.reason_counts | json | default: '{}' }}"
-          classifierProbeStatusCounts: "${{ steps.classify_detections.output.probe_status_counts | json | default: '{}' }}"
           classifierFailed: '${{ steps.classify_detections.error != null or steps.classify_detections.output.failed == true }}'
 
   # -----------------------------------------------------------------------
@@ -593,5 +550,4 @@ steps:
       heldBackCount: '${{ steps.classify_detections.output.held_back_count | default: 0 }}'
       needsAgentCount: '${{ steps.classify_detections.output.needs_agent_count | default: 0 }}'
       classifierReasonCounts: "${{ steps.classify_detections.output.reason_counts | json | default: '{}' }}"
-      classifierProbeStatusCounts: "${{ steps.classify_detections.output.probe_status_counts | json | default: '{}' }}"
       classifierFailed: '${{ steps.classify_detections.error != null or steps.classify_detections.output.failed == true }}'

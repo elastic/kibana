@@ -39,3 +39,8 @@ export const connectorEventSchema = <TShape extends z.ZodRawShape>(
         })
       ),
   });
+
+const connectorEventHubSchema = connectorEventSchema(z.object({}));
+
+/** Hub fields {@link connectorEventSchema} adds. A spoke schema supplies the other fields. */
+export type ConnectorEventHubFields = z.infer<typeof connectorEventHubSchema>;

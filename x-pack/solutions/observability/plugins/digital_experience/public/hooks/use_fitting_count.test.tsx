@@ -14,17 +14,29 @@ import { useFittingCount } from './use_fitting_count';
  * the last item of the row then starts below the first.
  */
 let capacity = Number.POSITIVE_INFINITY;
+/** How many buttons the row of their own holds, when the row wraps whatever their number. */
+let ownRowCapacity = Number.POSITIVE_INFINITY;
 const offsetTop = jest.spyOn(HTMLElement.prototype, 'offsetTop', 'get');
+const boundingRect = jest.spyOn(Element.prototype, 'getBoundingClientRect');
 
 beforeEach(() => {
   capacity = Number.POSITIVE_INFINITY;
+  ownRowCapacity = Number.POSITIVE_INFINITY;
+  boundingRect.mockImplementation(function (this: HTMLElement) {
+    const buttons = Number(this.dataset.buttons ?? 0);
+    const right = this.dataset.position === 'last' && buttons > ownRowCapacity ? 200 : 50;
+    return { right } as DOMRect;
+  });
   offsetTop.mockImplementation(function (this: HTMLElement) {
     const buttons = Number(this.dataset.buttons ?? 0);
     return this.dataset.position === 'last' && buttons > capacity ? 40 : 0;
   });
 });
 
-afterAll(() => offsetTop.mockRestore());
+afterAll(() => {
+  offsetTop.mockRestore();
+  boundingRect.mockRestore();
+});
 
 function Harness({ total, min, resetKey }: { total: number; min?: number; resetKey?: string }) {
   const { count, containerRef } = useFittingCount({ total, min, resetKey });
@@ -81,6 +93,22 @@ describe('useFittingCount', () => {
   it('brings every item back when the row wraps without any, e.g. a control with no room', () => {
     capacity = -1;
     render(<Harness total={4} />);
+
+    expect(shown()).toBe(4);
+  });
+
+  it('keeps the most that end within the row of their own when the row wraps whatever their number', () => {
+    capacity = -1;
+    ownRowCapacity = 2;
+    render(<Harness total={4} />);
+
+    expect(shown()).toBe(2);
+  });
+
+  it('never goes below the minimum on the row of their own', () => {
+    capacity = -1;
+    ownRowCapacity = 1;
+    render(<Harness total={4} min={3} />);
 
     expect(shown()).toBe(4);
   });

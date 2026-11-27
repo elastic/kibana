@@ -122,7 +122,7 @@ export class AgentBuilderPlugin implements Plugin<
   private activeSidebarRef: ConversationSidebarRef | null = null;
   private sidebarCallbacks: {
     updateProps: (props: EmbeddableConversationProps) => void;
-    resetBrowserApiTools: () => void;
+    resetChatConfig: () => void;
     addAttachment: (attachment: AttachmentInput) => void;
     removeAttachmentById: (attachmentId: string) => void;
   } | null = null;
@@ -432,8 +432,8 @@ export class AgentBuilderPlugin implements Plugin<
       clearChatConfig: () => {
         this.conversationActiveConfig = {};
         if (this.activeSidebarRef && this.sidebarCallbacks) {
-          // Removes stale browserApiTools from the sidebar
-          this.sidebarCallbacks.resetBrowserApiTools();
+          // Removes the stale browserApiTools and conversationStarters of the page from the sidebar
+          this.sidebarCallbacks.resetChatConfig();
         }
       },
       openChat: (options?: OpenConversationSidebarOptions) => {
