@@ -92,6 +92,12 @@ export const MOBILE_APPLICATION_EBT_ELEMENTS = {
   COMPARE_TOGGLE: 'mobileCompareToggle',
 } as const;
 
+export const MOBILE_CRASHES_EBT_ELEMENTS = {
+  RETRY: 'mobileCrashesRetry',
+  CRASH_GROUP: 'mobileCrashGroup',
+  OPEN_SESSION: 'mobileCrashOpenSession',
+} as const;
+
 export const APPLICATIONS_LIST_EBT_ELEMENTS = {
   APPLICATION_LINK: 'applicationLink',
   DOCS_LINK: 'applicationsDocsLink',

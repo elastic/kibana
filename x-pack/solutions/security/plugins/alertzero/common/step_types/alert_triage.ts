@@ -528,11 +528,25 @@ const matchFpDecisionsOutputSchema = lazySchema(() =>
     capped: z
       .number()
       .describe('Matches left for the normal path because the decision reached its daily cap.'),
-    close_failures: z.number().describe('Decisions whose alerts could not all be closed.'),
+    close_failures: z
+      .number()
+      .describe(
+        'Approved decisions whose alerts could not all be closed, or that could not be read before the close. Each decision counts once.'
+      ),
     notes_missing: z
       .number()
       .describe(
         'Alerts a decision closed or skipped that have no note: a failed write, or past the time limit.'
+      ),
+    unsettled_decisions: z
+      .number()
+      .describe(
+        'Decisions whose alerts the sweep could not check or put back after it wrote to them: the decision could not be read again, or a revoke that landed in between could not be undone. The sweep leaves the alerts as they are, and they may still carry the decision tag, but that is not certain: a revoke that ran in the meantime can have taken the tag off an alert before the sweep closed it. If the decision was revoked, run the revoke again: it finds the alerts that still carry the tag. An alert that does not carry it is not found and needs a manual review.'
+      ),
+    blocked_by_verdict: z
+      .number()
+      .describe(
+        'Matches of an approved decision that was not acted on, because an alert of its key has a true positive or inconclusive verdict.'
       ),
     left_for_notes: z
       .number()
@@ -555,7 +569,9 @@ const matchFpDecisionsOutputSchema = lazySchema(() =>
       ),
     tag_failures: z
       .number()
-      .describe('Tag updates that failed. Those alerts match again next sweep.'),
+      .describe(
+        'Decisions whose alerts could not all be tagged, or, for a dismissal, that could not be read before the tags. Each decision counts once. Those alerts match again next sweep.'
+      ),
   })
 );
 

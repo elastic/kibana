@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { BaseStepDefinition } from '@kbn/workflows';
 import { StepCategory } from '@kbn/workflows';
+import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { z } from '@kbn/zod/v4';
 import {
   dismissReasonSchema,
@@ -38,7 +38,7 @@ export const getProposalStepOutputSchema = z.object({
   rationale: z.string().max(MAX_RATIONALE_LENGTH).optional(),
 });
 
-export const getProposalStepCommonDefinition: BaseStepDefinition<
+export const getProposalStepCommonDefinition: CommonStepDefinition<
   typeof getProposalStepInputSchema,
   typeof getProposalStepOutputSchema
 > = {
@@ -51,6 +51,7 @@ export const getProposalStepCommonDefinition: BaseStepDefinition<
   }),
   category: StepCategory.Kibana,
   stability: 'beta',
+  exposure: 'internal',
   inputSchema: getProposalStepInputSchema,
   outputSchema: getProposalStepOutputSchema,
   documentation: {

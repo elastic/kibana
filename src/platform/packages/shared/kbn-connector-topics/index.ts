@@ -8,6 +8,7 @@
  */
 
 export { connectorEventSchema } from './src/events/connector_event_schema';
+export type { ConnectorEventHubFields } from './src/events/connector_event_schema';
 export type {
   ConnectorEventBusData,
   ConnectorEventTopicDefinition,

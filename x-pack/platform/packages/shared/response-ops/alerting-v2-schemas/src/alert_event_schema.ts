@@ -6,6 +6,7 @@
  */
 
 import { lazySchema, z } from '@kbn/zod/v4';
+import { MAX_REASON_TEMPLATE_LENGTH } from './constants';
 import { alertEventSeveritySchema } from './severity';
 
 const alertEventStatusSchema = lazySchema(() => z.enum(['breached', 'recovered', 'no_data']));
@@ -39,6 +40,7 @@ export const alertEventSchema = lazySchema(() =>
       .optional(),
     space_id: z.string(),
     severity: alertEventSeveritySchema.optional(),
+    reason: z.string().max(MAX_REASON_TEMPLATE_LENGTH).optional(),
   })
 );
 
