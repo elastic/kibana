@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parseDocument, isMap, isSeq } from 'yaml';
+import { parse as parseYaml, parseDocument, isMap, isSeq } from 'yaml';
 import type { YAMLMap, YAMLSeq } from 'yaml';
 import { normalizeFieldDefinitionName } from '../../../../common/utils';
 import { FIELD_DEFAULT_SNIPPETS } from './template_field_snippets';
@@ -81,6 +81,8 @@ interface FieldEntryLocation {
   /** 1-based line of the entry's last content line. */
   endLine: number;
   control?: string;
+  /** The library field name a `$ref` entry points at. */
+  ref?: string;
   /** Effective, unique-within-template name (`name`, or `$ref` when unnamed). */
   name?: string;
 }
@@ -116,6 +118,7 @@ const getFieldsShape = (doc: ReturnType<typeof parseDocument>, source: string): 
       startLine,
       endLine,
       control: scalarString(item.get('control')),
+      ref: scalarString(item.get('$ref')),
       name: getEffectiveFieldName(item),
     };
   });
@@ -133,13 +136,43 @@ const findEntryAtLine = (
   return entries.find((entry) => line >= entry.startLine && line <= entry.endLine);
 };
 
+/** The subset of a field-library definition needed to resolve a `$ref` entry's control. */
+export interface LibraryFieldDefinitionLike {
+  name: string;
+  definition?: string;
+}
+
+const resolveLibraryControl = (
+  ref: string,
+  libraryFields: readonly LibraryFieldDefinitionLike[]
+): string | undefined => {
+  const normalizedRef = normalizeFieldDefinitionName(ref);
+  const match = libraryFields.find(
+    (field) => normalizeFieldDefinitionName(field.name) === normalizedRef
+  );
+  if (!match?.definition) {
+    return undefined;
+  }
+  try {
+    const parsed: unknown = parseYaml(match.definition);
+    return parsed != null && typeof parsed === 'object'
+      ? scalarString((parsed as Record<string, unknown>).control)
+      : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
 /**
- * The inline field entry (one with a `control`) the cursor sits on, or `null`. Drives whether the
- * Validation / Conditional-logic menu branches are enabled and which rules they offer.
+ * The field entry the cursor sits on, with its control, or `null`. Drives whether the Validation /
+ * Conditional-logic menu branches are enabled and which rules they offer. A `$ref` entry takes its
+ * control from the matching library definition in `libraryFields`; an unresolvable `$ref` yields
+ * `null`, since the rules to offer depend on the control.
  */
 export const getFieldControlAtLine = (
   yaml: string,
-  line: number | undefined
+  line: number | undefined,
+  libraryFields: readonly LibraryFieldDefinitionLike[] = []
 ): { control: string; name?: string } | null => {
   if (!yaml || yaml.trim() === '') {
     return null;
@@ -157,10 +190,13 @@ export const getFieldControlAtLine = (
   }
   const { entries } = getFieldsShape(doc, yaml);
   const entry = findEntryAtLine(entries, line);
-  if (!entry || entry.control == null) {
+  if (!entry) {
     return null;
   }
-  return { control: entry.control, name: entry.name };
+  const control =
+    entry.control ??
+    (entry.ref != null ? resolveLibraryControl(entry.ref, libraryFields) : undefined);
+  return control != null ? { control, name: entry.name } : null;
 };
 
 /**
@@ -282,9 +318,14 @@ export interface ApplyFieldBlockResult {
 
 /**
  * Adds a single rule under a field's `validation` or `display` block (creating the block if needed),
- * targeting the inline field the cursor is on. Returns:
+ * targeting the field the cursor is on. On a `$ref` entry the rule is written to the entry's own
+ * per-template override block, so `exists` only considers what the template already overrides.
+ * At resolve time (`applyRefFieldOverride`) a `display` override replaces the library field's
+ * `display` outright, and a `validation` override merges key-by-key except that any
+ * `required`/`required_when`/`required_on_close` key drops the library's whole requirement family.
+ * Returns:
  *  - `invalid`    — the buffer has YAML errors and can't be re-serialized; nothing changed.
- *  - `no-field`   — the cursor is not on an inline (control) field; nothing changed.
+ *  - `no-field`   — the cursor is not on an inline (control) or `$ref` field; nothing changed.
  *  - `exists`     — that rule key is already present; left untouched so authored values are never
  *                   clobbered.
  *  - `applied`    — the rule was added with the supplied scaffold value.
@@ -307,8 +348,7 @@ export const applyFieldBlock = (
 
   const { seq, entries } = getFieldsShape(doc, yaml ?? '');
   const at = findEntryAtLine(entries, cursorLine);
-  // Only inline fields (those with a `control`) accept validation / display blocks.
-  if (!seq || !at || at.control == null) {
+  if (!seq || !at || (at.control == null && at.ref == null)) {
     return { yaml, status: 'no-field' };
   }
 
