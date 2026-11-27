@@ -7,11 +7,12 @@
 
 import React, { type ReactNode, useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiThemeProvider, useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
+import { EuiThemeProvider, useEuiTheme } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
+import { SecurityKibanaPageTemplate } from '../../../common/components/navigation/security_kibana_page_template';
 import { AlertsContextProvider } from '../../../detections/components/alerts_table/alerts_context';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
@@ -28,17 +29,10 @@ import { SecurityPageName } from '../../types';
  * Need to apply the styles via a className to effect the containing bottom bar
  * rather than applying them to the timeline bar directly
  */
-const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<
-  Omit<KibanaPageTemplateProps, 'ref'> & {
-    $isShowingTimelineOverlay?: boolean;
-    $addBottomPadding?: boolean;
-    theme: EuiThemeComputed; // using computed EUI theme to be consistent with user profile theming
-  }
->`
-  .kbnSolutionNav__sidebar:not(.kbnSolutionNav__sidebar--shrink) {
-    background-color: ${({ theme }) => theme.colors.emptyShade};
-  }
-
+const StyledKibanaPageTemplate = styled(SecurityKibanaPageTemplate)<{
+  $isShowingTimelineOverlay?: boolean;
+  $addBottomPadding?: boolean;
+}>`
   /* EuiPageTemplate writes min-height inline (max(0, 100vh)). While a panel is maximized,
      that minimum is taller than the app content area and is not a definite height, so
      Dashboard's height: 100% collapses. Pin this page to the content box instead. */
@@ -118,7 +112,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
 
     // The bottomBar by default has a set 'dark' colorMode that doesn't match the global colorMode from the Advanced Settings
     // To keep the mode in sync, we pass in the globalColorMode to the bottom bar here
-    const { euiTheme, colorMode: globalColorMode } = useEuiTheme();
+    const { colorMode: globalColorMode } = useEuiTheme();
 
     // There is some logic in the StyledKibanaPageTemplate that checks for children presence, and we dont even need to render the children
     // solutionNavProps is momentarily initialized to undefined, this check prevents the children from being re-rendered in the initial load
@@ -132,7 +126,6 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
      */
     return (
       <StyledKibanaPageTemplate
-        theme={euiTheme}
         $isShowingTimelineOverlay={isShowingTimelineOverlay}
         paddingSize="none"
         solutionNav={solutionNavProps ?? undefined}
