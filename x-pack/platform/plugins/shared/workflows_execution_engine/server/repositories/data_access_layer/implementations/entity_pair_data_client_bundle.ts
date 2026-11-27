@@ -63,14 +63,14 @@ const createEntityPair = (
           dataRetention,
           definition: WORKFLOW_EXECUTIONS_DATA_STREAM_DEFINITION,
           dateField: 'createdAt',
-          additionalIndexesToQuery: ['.workflows-executions'],
+          additionalIndexesToQuery: [WORKFLOWS_EXECUTIONS_INDEX],
         }),
         step: new DataStreamEntityLifecycle<EsWorkflowStepExecution>({
           logger,
           dataRetention,
           definition: STEP_EXECUTIONS_DATA_STREAM_DEFINITION,
           dateField: 'startedAt',
-          additionalIndexesToQuery: ['.workflows-step-executions'],
+          additionalIndexesToQuery: [WORKFLOWS_STEP_EXECUTIONS_INDEX],
         }),
       };
     default: {
@@ -97,10 +97,13 @@ export class EntityPairDataClientBundle implements DataClientBundle {
     );
   }
 
-  initStart(coreStart: CoreStart): Promise<void> {
-    return Promise.all([this.workflow.initStart(coreStart), this.step.initStart(coreStart)]).then(
-      () => undefined
-    );
+  async initStart(coreStart: CoreStart): Promise<void> {
+    try {
+      await Promise.all([this.workflow.initStart(coreStart), this.step.initStart(coreStart)]);
+    } catch (error) {
+      await this.stop();
+      throw error;
+    }
   }
 
   stop(): Promise<void> {

@@ -149,16 +149,7 @@ export class DeferredDataClientBundle implements DataClientBundle {
   }
 
   private createDataClientBundle(source: ExecutionStorageSource): DataClientBundle {
-    switch (source) {
-      case 'plain_index':
-        return new EntityPairDataClientBundle('plain_index', this.deps);
-      case 'data_stream':
-        return new EntityPairDataClientBundle('data_stream', this.deps);
-      default: {
-        const unexpected: never = source;
-        throw new Error(`Unsupported storage source: ${unexpected}`);
-      }
-    }
+    return new EntityPairDataClientBundle(source, this.deps);
   }
 
   private createReady(): Promise<void> {

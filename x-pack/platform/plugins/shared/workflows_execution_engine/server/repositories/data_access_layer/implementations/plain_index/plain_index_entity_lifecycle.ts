@@ -18,7 +18,7 @@ import type { DataClient, EntityLifecycle } from '../../types';
 
 const UNKNOWN_RESOURCE_TIMEOUT_MS = 20 * 60 * 1000;
 
-export interface PlainIndexEntityLifecycleDeps<TDoc extends { id: string }> {
+export interface PlainIndexEntityLifecycleDeps {
   logger: Logger;
   indexName: string;
   mappings: MappingTypeMapping;
@@ -31,11 +31,9 @@ export class PlainIndexEntityLifecycle<TDoc extends { id: string }>
   private esClient: ElasticsearchClient | undefined;
   private stopped = false;
 
-  constructor(private readonly deps: PlainIndexEntityLifecycleDeps<TDoc>) {}
+  constructor(private readonly deps: PlainIndexEntityLifecycleDeps) {}
 
-  initSetup(_coreSetup: CoreSetup): Promise<void> {
-    return Promise.resolve();
-  }
+  async initSetup(_coreSetup: CoreSetup): Promise<void> {}
 
   async initStart(coreStart: CoreStart): Promise<void> {
     const esClient = createRetryingEsClient(

@@ -38,6 +38,7 @@ export class DataStreamEntityLifecycle<TDoc extends { id: string }>
 {
   private esClient: ElasticsearchClient | undefined;
   private metadataManager: DataStreamMetadataManager | undefined;
+  private stopped = false;
 
   constructor(private readonly deps: DataStreamEntityLifecycleDeps<TDoc>) {}
 
@@ -57,6 +58,9 @@ export class DataStreamEntityLifecycle<TDoc extends { id: string }>
 
   async initStart(coreStart: CoreStart): Promise<void> {
     await coreStart.dataStreams.initializeClient(this.deps.definition.name);
+    if (this.stopped) {
+      throw new Error('Data stream initialization aborted: plugin stopped');
+    }
 
     this.esClient = createRetryingEsClient(
       coreStart.elasticsearch.client.asInternalUser,
@@ -71,6 +75,7 @@ export class DataStreamEntityLifecycle<TDoc extends { id: string }>
   }
 
   async stop(): Promise<void> {
+    this.stopped = true;
     this.metadataManager?.dispose();
   }
 
