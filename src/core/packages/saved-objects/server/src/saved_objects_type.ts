@@ -8,6 +8,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { AccessPolicy } from '@kbn/ols';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsNamespaceType } from '@kbn/core-saved-objects-common';
@@ -208,6 +209,14 @@ export interface SavedObjectsType<Attributes = any> {
    * in server_types.ts.
    */
   supportsAccessControl?: boolean;
+
+  /**
+   * Platform object-level security (OLS) policy for objects of this type: which general access and
+   * entry access the type allows, the general access new objects get, and what each operation
+   * needs. Only `multiple-isolated` types can declare it, and a type cannot also set
+   * `supportsAccessControl`. The policy is registered whether or not OLS is enabled.
+   */
+  accessPolicy?: AccessPolicy;
 
   /**
    * An optional function that, given a document without a `typeMigrationVersion`, returns an

@@ -35,6 +35,7 @@ import type {
   SavedObjectsEncryptionExtensionFactory,
   SavedObjectsSecurityExtensionFactory,
   SavedObjectsSpacesExtensionFactory,
+  SavedObjectsOlsExtensionFactory,
   SavedObjectsExtensions,
   SavedObjectsExtensionFactory,
 } from '@kbn/core-saved-objects-server';
@@ -127,6 +128,7 @@ export class SavedObjectsService implements CoreService<
   private encryptionExtensionFactory?: SavedObjectsEncryptionExtensionFactory;
   private securityExtensionFactory?: SavedObjectsSecurityExtensionFactory;
   private spacesExtensionFactory?: SavedObjectsSpacesExtensionFactory;
+  private olsExtensionFactory?: SavedObjectsOlsExtensionFactory;
   private accessControlTransforms?: SavedObjectsAccessControlTransforms;
 
   private migrator$ = new Subject<IKibanaMigrator>();
@@ -225,6 +227,15 @@ export class SavedObjectsService implements CoreService<
           throw new Error('spaces extension is already set, and can only be set once');
         }
         this.spacesExtensionFactory = factory;
+      },
+      setOlsExtension: (factory) => {
+        if (this.started) {
+          throw new Error('cannot call `setOlsExtension` after service startup.');
+        }
+        if (this.olsExtensionFactory) {
+          throw new Error('OLS extension is already set, and can only be set once');
+        }
+        this.olsExtensionFactory = factory;
       },
       setAccessControlTransforms: (transforms) => {
         if (this.started) {
@@ -385,6 +396,7 @@ export class SavedObjectsService implements CoreService<
       encryptionExtensionFactory: this.encryptionExtensionFactory,
       securityExtensionFactory: this.securityExtensionFactory,
       spacesExtensionFactory: this.spacesExtensionFactory,
+      olsExtensionFactory: this.olsExtensionFactory,
     });
 
     if (this.clientFactoryProvider) {
@@ -480,6 +492,7 @@ export class SavedObjectsService implements CoreService<
       encryptionExtension: createExt(ENCRYPTION_EXTENSION_ID, this.encryptionExtensionFactory),
       securityExtension: undefined, // Always undefined for internal clients
       spacesExtension: createExt(SPACES_EXTENSION_ID, this.spacesExtensionFactory),
+      olsExtension: undefined, // Always undefined for internal clients, which are system paths
     };
   }
 

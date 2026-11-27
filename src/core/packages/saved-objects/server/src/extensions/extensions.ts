@@ -8,14 +8,15 @@
  */
 
 import type { ISavedObjectsEncryptionExtension } from './encryption';
+import type { ISavedObjectsOlsExtension } from './ols';
 import type { ISavedObjectsSecurityExtension } from './security';
 import type { ISavedObjectsSpacesExtension } from './spaces';
 
 /**
- * The SavedObjectsExtensions interface contains the intefaces for three
+ * The SavedObjectsExtensions interface contains the intefaces for four
  * extensions to the saved objects repository. These extensions augment
  * the funtionality of the saved objects repository to provide encryption,
- * security, and spaces features.
+ * security, spaces, and object-level security (OLS) features.
  */
 export interface SavedObjectsExtensions {
   /** The encryption extension - handles encrypting and decrypting attributes of saved objects */
@@ -24,8 +25,14 @@ export interface SavedObjectsExtensions {
   securityExtension?: ISavedObjectsSecurityExtension;
   /** The spaces extension - handles retrieving the current space and retrieving available spaces */
   spacesExtension?: ISavedObjectsSpacesExtension;
+  /**
+   * The OLS extension - enforces platform object-level security (OLS) for types with an access
+   * policy. Unlike the other extensions, a scoped client cannot exclude it.
+   */
+  olsExtension?: ISavedObjectsOlsExtension;
 }
 
 export const ENCRYPTION_EXTENSION_ID = 'encryptedSavedObjects' as const;
 export const SECURITY_EXTENSION_ID = 'security' as const;
 export const SPACES_EXTENSION_ID = 'spaces' as const;
+export const OLS_EXTENSION_ID = 'ols' as const;
