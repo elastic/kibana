@@ -29,6 +29,7 @@
     "@kbn/presentation-publishing",
     "@kbn/content-management-utils",
     "@kbn/field-formats-plugin",
+    "@kbn/field-types",
     "@kbn/std",
     "@kbn/esql-types",
     "@kbn/css-utils",

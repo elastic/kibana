@@ -38,7 +38,6 @@ import {
   LazyFieldPicker,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
-import { asyncForEach } from '@kbn/std';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { triggers } from '@kbn/ui-actions-plugin/public';
@@ -56,6 +55,9 @@ import { DataControlEditorStrings } from '../data_control_constants';
 import type { DataControlEditorState } from './types';
 import type { ReopenDataControlEditorOverrides } from '../open_data_control_editor';
 import { ConfigureValuesQuery } from './configure_values_query';
+import { useControlSource } from './use_control_source';
+import type { ControlTypeContext } from './use_control_type';
+import { useControlType } from './use_control_type';
 
 export interface ControlEditorProps<State extends DataControlEditorState = DataControlEditorState> {
   initialState: Partial<State>;
@@ -106,25 +108,23 @@ const useControlActionRegistry = (): ControlActionRegistry => {
 };
 
 const CompatibleControlTypesComponent = ({
-  data_view_id,
-  field_name,
+  controlActionRegistry,
+  controlTypeContext,
+  isCompatible,
   selectedControlType: selectedAction,
   setSelectedControlType: setSelectedAction,
-}: Partial<DataControlEditorState> & {
+}: {
+  controlActionRegistry: ControlActionRegistry;
+  controlTypeContext: ControlTypeContext;
+  /** Whether each control type can be used for the field of the context */
+  isCompatible: { [type: string]: boolean };
   selectedControlType?: string;
   setSelectedControlType: (type: string) => void;
 }) => {
-  const controlActionRegistry = useControlActionRegistry();
-  const [isCompatible, setIsCompatible] = useState<{ [type: string]: boolean }>({});
-
-  const controlTypeContext = useMemo(
-    () => ({
-      trigger: triggers[CONTROL_MENU_TRIGGER],
-      embeddable: undefined, // parentApi isn't necessary for this
-      state: { data_view_id, field_name },
-    }),
-    [data_view_id, field_name]
-  );
+  const {
+    state: { field_name },
+    source,
+  } = controlTypeContext;
 
   const sortedActionArray: CreateControlTypeAction[] = useMemo(() => {
     // Destructuring `a` and `b` in the sort() call messes with internal binding of `this` within the underlying
@@ -137,23 +137,11 @@ const CompatibleControlTypesComponent = ({
     });
   }, [controlActionRegistry]);
 
-  useEffect(() => {
-    const asyncGetCompatibility = async () => {
-      const compatibilityMap: { [type: string]: boolean } = {};
-      await asyncForEach(Object.values(controlActionRegistry ?? {}), async (action) => {
-        const compatible = await action.isCompatible(controlTypeContext);
-        compatibilityMap[action.id] = compatible;
-      });
-      setIsCompatible(compatibilityMap);
-    };
-    asyncGetCompatibility();
-  }, [controlActionRegistry, controlTypeContext]);
-
   return (
     <EuiSkeletonRectangle isLoading={!sortedActionArray.length} width="100px" height="100px">
       <EuiKeyPadMenu data-test-subj={`controlTypeMenu`} aria-label={'type'}>
         {(sortedActionArray ?? []).map((action) => {
-          const disabled = !isCompatible[action.id];
+          const disabled = !isCompatible[action.type];
           const keyPadMenuItem = (
             <EuiKeyPadMenuItem
               key={action.type}
@@ -178,7 +166,7 @@ const CompatibleControlTypesComponent = ({
               key={`disabled__${action.type}`}
               content={DataControlEditorStrings.manageControl.dataSource.getControlTypeErrorMessage(
                 {
-                  fieldSelected: Boolean(data_view_id && field_name),
+                  fieldSelected: Boolean(source && field_name),
                   controlType: action.type,
                 }
               )}
@@ -232,6 +220,8 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
   const [esqlQueryValidation, setESQLQueryValidation] = useState<boolean>(
     isEdit && isESQLValuesSource ? true : false
   );
+  // a query has a source once it has run, even with no results, and not on every keystroke
+  const [ranEsqlQuery, setRanEsqlQuery] = useState<string | undefined>();
   const parentESQLVariables = useStateFromPublishingSubject(
     (parentApi as PublishesESQLVariables)?.esqlVariables$
   );
@@ -245,30 +235,35 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
   });
 
   const {
-    loading: dataViewLoading,
-    value: { selectedDataView } = {
-      selectedDataView: undefined,
-    },
+    source: filterableSource,
+    dataView: selectedDataView,
+    loading: sourceLoading,
     error: fieldListError,
-  } = useAsync(async () => {
-    if (!editorState.data_view_id) {
-      return;
-    }
-    const dataView = await dataViewsService.get(editorState.data_view_id);
-    return {
-      selectedDataView: dataView,
-    };
-  }, [editorState.data_view_id]);
+  } = useControlSource({
+    state: { ...editorState, esql_query: ranEsqlQuery },
+    enabled: isESQLValuesSource ? Boolean(ranEsqlQuery) : Boolean(editorState.data_view_id),
+    parentApi,
+  });
+
+  const {
+    controlTypeContext,
+    isCompatible,
+    controlType: effectiveControlType,
+    isControlTypeConfirmed,
+  } = useControlType({
+    controlActionRegistry,
+    fieldName: editorState.field_name,
+    source: filterableSource,
+    selectedControlType,
+  });
 
   const CustomSettingsComponent = useMemo(() => {
-    if (!selectedControlType) return;
+    if (!effectiveControlType) return;
     const CustomSettings =
-      controlActionRegistry[selectedControlType]?.extension?.CustomOptionsComponent;
-    if (!CustomSettings || !selectedDataView || !editorState.field_name) return;
+      controlActionRegistry[effectiveControlType]?.extension?.CustomOptionsComponent;
+    if (!CustomSettings || !filterableSource || !editorState.field_name) return;
 
-    const field = editorState.field_name
-      ? selectedDataView?.getFieldByName(editorState.field_name)
-      : undefined;
+    const field = filterableSource.getFieldByName(editorState.field_name);
     if (!field) return;
 
     return (
@@ -282,21 +277,21 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
         />
       </div>
     );
-  }, [selectedDataView, initialState, editorState, controlActionRegistry, selectedControlType]);
+  }, [filterableSource, initialState, editorState, controlActionRegistry, effectiveControlType]);
 
   const valuesSourceValid = useMemo(() => {
     if (isESQLValuesSource) return esqlQueryValidation;
-    const hasFieldName = !!editorState.field_name;
-    const hasSelectedDataView = !!selectedDataView;
-    return hasFieldName && hasSelectedDataView;
-  }, [isESQLValuesSource, editorState.field_name, selectedDataView, esqlQueryValidation]);
+    return Boolean(
+      editorState.field_name && filterableSource?.getFieldByName(editorState.field_name)
+    );
+  }, [isESQLValuesSource, editorState.field_name, filterableSource, esqlQueryValidation]);
 
   const onChangeValuesSource = useCallback(
     (nextSource: string) => {
       const nextEsqlQuery =
         nextSource === ControlValuesSource.ESQL && !editorState.esql_query
           ? DataControlEditorStrings.manageControl.dataSource.getDefaultValuesQuery(
-              selectedDataView,
+              filterableSource,
               editorState.field_name
             )
           : undefined;
@@ -306,7 +301,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
         ...(nextEsqlQuery ? { esql_query: nextEsqlQuery } : {}),
       });
     },
-    [editorState, selectedDataView]
+    [editorState, filterableSource]
   );
   const esqlQueryNeedsRunning = useMemo(
     () => !valuesSourceValid && isESQLValuesSource,
@@ -314,30 +309,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
   );
 
   const onChangeField = useCallback(
-    async (nextFieldName: string, nextFieldDisplayName?: string) => {
-      const controlContext = {
-        trigger: triggers[CONTROL_MENU_TRIGGER],
-        embeddable: undefined,
-        state: { field_name: nextFieldName, data_view_id: editorState.data_view_id },
-      };
-
-      /**
-       * make sure that the new field is compatible with the selected control type and, if it's not,
-       * reset the selected control type to the **first** compatible control type
-       */
-      if (
-        !selectedControlType ||
-        !(await controlActionRegistry[selectedControlType!]?.isCompatible(controlContext))
-      ) {
-        const firstCompatible = await (async () => {
-          for (const action of Object.values(controlActionRegistry)) {
-            if (await action?.isCompatible(controlContext)) return action;
-          }
-          return undefined;
-        })();
-        if (firstCompatible) setSelectedControlType(firstCompatible.type);
-      }
-
+    (nextFieldName: string, nextFieldDisplayName?: string) => {
       /**
        * set the control title (i.e. the one set by the user) + default title (i.e. the field display name)
        */
@@ -348,7 +320,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
         setPanelTitle(newDefaultTitle);
       }
     },
-    [controlActionRegistry, editorState.data_view_id, editorState.title, selectedControlType]
+    [editorState.title]
   );
 
   return (
@@ -445,7 +417,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                       onChangeField(field.name, field.displayName);
                       setControlOptionsValid(true); // reset options state
                     }}
-                    selectableProps={{ isLoading: dataViewListLoading || dataViewLoading }}
+                    selectableProps={{ isLoading: dataViewListLoading || sourceLoading }}
                   />
                 )}
               </EuiFormRow>
@@ -457,19 +429,22 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
               // ConfigureValuesQuery only touches base DataControlEditorState fields
               updateEditorState={(state) => {
                 updateEditorState(state as Partial<State>);
-                if (state.field_name) onChangeField(state.field_name);
+                if (state.field_name) {
+                  setRanEsqlQuery(state.esql_query);
+                  onChangeField(state.field_name);
+                }
               }}
               setESQLQueryValidation={setESQLQueryValidation}
               isEdit={isEdit}
               esqlVariables={parentESQLVariables}
               parentApi={parentApi}
-              selectedControlType={selectedControlType}
+              selectedControlType={effectiveControlType}
               reopenEditor={
                 reopenEditor
                   ? (esqlOverrides) =>
                       reopenEditor({
                         initialState: { ...editorState, ...(esqlOverrides as Partial<State>) },
-                        controlType: selectedControlType,
+                        controlType: effectiveControlType,
                         initialDefaultPanelTitle: defaultPanelTitle,
                       })
                   : undefined
@@ -482,9 +457,10 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
             {/* wrapping in `div` so that focus gets passed properly to the form row */}
             <div>
               <CompatibleControlTypesComponent
-                data_view_id={editorState.data_view_id}
-                field_name={editorState.field_name}
-                selectedControlType={selectedControlType}
+                controlActionRegistry={controlActionRegistry}
+                controlTypeContext={controlTypeContext}
+                isCompatible={isCompatible}
+                selectedControlType={effectiveControlType}
                 setSelectedControlType={setSelectedControlType}
               />
             </div>
@@ -529,23 +505,24 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                 data-test-subj="control-editor-save"
                 fill
                 color="primary"
-                disabled={
-                  !(controlOptionsValid && Boolean(selectedControlType) && valuesSourceValid)
-                }
+                disabled={!(controlOptionsValid && isControlTypeConfirmed && valuesSourceValid)}
                 hasAriaDisabled={esqlQueryNeedsRunning}
                 onClick={() => {
                   const transformedState: Partial<State> | undefined =
-                    selectedControlType && editorConfig && editorConfig.controlStateTransform
+                    effectiveControlType && editorConfig && editorConfig.controlStateTransform
                       ? (editorConfig.controlStateTransform(
                           editorState,
-                          selectedControlType
+                          effectiveControlType
                         ) as Partial<State>)
                       : undefined;
 
-                  if (selectedControlType && (!controlId || controlType !== selectedControlType)) {
+                  if (
+                    effectiveControlType &&
+                    (!controlId || controlType !== effectiveControlType)
+                  ) {
                     // we need to create a new control from scratch
                     try {
-                      controlActionRegistry[selectedControlType]?.execute({
+                      controlActionRegistry[effectiveControlType]?.execute({
                         trigger: triggers[CONTROL_MENU_TRIGGER],
                         embeddable: parentApi,
                         state: transformedState ?? editorState,
@@ -560,7 +537,8 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                     // the control already exists with the expected type, so just update it
                     onUpdate(transformedState ?? editorState);
                   }
-                  onSave(editorState.data_view_id);
+                  // the source of a query is not a data view that a next control can start from
+                  onSave(selectedDataView?.id);
                 }}
               >
                 {DataControlEditorStrings.manageControl.getSaveChangesTitle()}

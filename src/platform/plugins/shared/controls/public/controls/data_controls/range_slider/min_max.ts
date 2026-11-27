@@ -19,7 +19,8 @@ import type {
 import type { Observable } from 'rxjs';
 import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
 import { max, min } from 'lodash';
-import { dataService, dataViewsService } from '../../../services/kibana_services';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { dataService } from '../../../services/kibana_services';
 import { buildESQLPreFilter, getFetchContextFilters, getFetchContextTimeRange } from '../utils';
 import type { ValuesSourceFetchPlan } from '../types';
 import { getESQLSingleColumnValues } from '../../../../common/options_list';
@@ -89,7 +90,7 @@ export function minMax$({
               })
             : await getDslMinMax({
                 abortSignal: abortController.signal,
-                dataSource,
+                dataView: valuesSourceFetchPlan.dataView,
                 field,
                 query: isOfAggregateQueryType(controlFetchContext.query)
                   ? undefined
@@ -164,21 +165,19 @@ export async function getEsqlMinMax({
 
 export async function getDslMinMax({
   abortSignal,
-  dataSource,
+  dataView,
   field,
   filters,
   query,
   timeRange,
 }: {
   abortSignal: AbortSignal;
-  dataSource: FilterableSource;
+  dataView: DataView;
   field: FilterableField;
   filters?: Filter[];
   query?: Query;
   timeRange?: TimeRange;
 }): Promise<{ min: number | undefined; max: number | undefined }> {
-  const dataView = await dataViewsService.get(dataSource.id ?? '');
-
   const searchSource = await dataService.search.searchSource.create();
   searchSource.setField('size', 0);
   searchSource.setField('index', dataView);

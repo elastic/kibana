@@ -2126,7 +2126,6 @@
     "controls.createControlAction.tooltip": "向您的仪表板添加控件。",
     "controls.dataControl.creationError": "必须定义数据视图和字段才能创建控件。",
     "controls.dataControl.creationErrorESQL": "必须先定义一个值查询，才能创建控件。",
-    "controls.dataControl.esqlDataViewDeriveFailed": "无法从 ES|QL 查询中获得数据视图",
     "controls.dataControl.esqlMissingQuery": "变量控件缺少查询",
     "controls.dataControl.fieldNotFound": "找不到字段：{fieldName}",
     "controls.displaySettingsPopover.applyButton": "应用",

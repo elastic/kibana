@@ -9,6 +9,7 @@
 
 import type { DataControlState } from '@kbn/controls-schemas';
 import type { FilterableField } from '@kbn/data-source';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TextContextTypeConvert } from '@kbn/field-formats-plugin/common';
 import type { HasPanelCapabilities } from '@kbn/presentation-publishing';
 import type {
@@ -36,9 +37,11 @@ export interface PublishesField {
  * the data source.
  * - `esql`: values are fetched with an ES|QL query. `query` is the user supplied query for
  *   `ControlValuesSource.ESQL` and a generated query for `ControlValuesSource.FIELD`.
- * - `dsl`: values are fetched with a DSL request on a data view field.
+ * - `dsl`: values are fetched with a DSL request on a field of `dataView`.
  */
-export type ValuesSourceFetchPlan = { fetchMode: 'esql'; query?: string } | { fetchMode: 'dsl' };
+export type ValuesSourceFetchPlan =
+  | { fetchMode: 'esql'; query?: string }
+  | { fetchMode: 'dsl'; dataView: DataView };
 
 export interface PublishesValuesSourceFetchPlan {
   valuesSourceFetchPlan$: PublishingSubject<ValuesSourceFetchPlan | undefined>;

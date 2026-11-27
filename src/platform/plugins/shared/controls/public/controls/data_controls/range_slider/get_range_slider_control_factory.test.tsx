@@ -23,6 +23,7 @@ import { rangeSliderControlSchema, type RangeSliderControlState } from '@kbn/con
 import { ControlValuesSource } from '@kbn/controls-constants';
 import type { Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { RangeSliderControlApi } from './types';
+import { EsqlSource } from '@kbn/data-source';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 const DEFAULT_TOTAL_RESULTS = 20;
@@ -90,7 +91,18 @@ describe('RangeSliderControlApi', () => {
     } as unknown as DataView;
   });
 
-  dataViewsService.find = jest.fn().mockResolvedValue([{ id: 'myDataViewId' }]);
+  const esqlField = { name: 'myFieldName', type: 'number', aggregatable: true, searchable: true };
+  jest.spyOn(EsqlSource, 'forDataset').mockResolvedValue({
+    kind: 'esql',
+    toFilterableSource: async () => ({
+      kind: 'esql',
+      id: 'esqlDatasetId',
+      title: 'bytes-*',
+      fields: [esqlField],
+      getFieldByName: (name: string) => (name === esqlField.name ? esqlField : undefined),
+      isTimeBased: () => false,
+    }),
+  } as unknown as EsqlSource);
 
   beforeEach(() => {
     totalResults = DEFAULT_TOTAL_RESULTS;
@@ -152,6 +164,74 @@ describe('RangeSliderControlApi', () => {
           },
         ])
       );
+    });
+
+    test('should apply the saved range of an ES|QL control once its column arrives, before it is built', async () => {
+      let resolveQuery: () => void = () => {};
+      const queryResolved = new Promise<void>((resolve) => (resolveQuery = resolve));
+      (dataService.search.esql as jest.Mock).mockImplementation(async () => {
+        await queryResolved;
+        return {
+          rawResponse: {
+            columns: [{ name: 'myFieldName', type: 'long' }],
+            values: [[42], [256], [1024]],
+          },
+        };
+      });
+
+      const building = factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState: {
+          ...DEFAULT_RANGE_SLIDER_STATE,
+          values_source: ControlValuesSource.ESQL,
+          esql_query: 'FROM bytes-* | KEEP myFieldName',
+          value: ['100', '200'],
+        } as RangeSliderControlState,
+        finalizeApi,
+        uuid,
+        parentApi,
+      });
+      resolveQuery();
+      const { api } = await building;
+
+      expect(api.appliedFilters$.value).toEqual([
+        expect.objectContaining({
+          query: { range: { myFieldName: { gte: 100, lte: 200 } } },
+        }),
+      ]);
+      expect(api.serializeState().value).toEqual(['100', '200']);
+    });
+
+    test('should keep the range of an ES|QL control when only the text of its query changes', async () => {
+      (dataService.search.esql as jest.Mock).mockResolvedValue({
+        rawResponse: {
+          columns: [{ name: 'myFieldName', type: 'long' }],
+          values: [[42], [256], [1024]],
+        },
+      });
+      const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState: {
+          ...DEFAULT_RANGE_SLIDER_STATE,
+          values_source: ControlValuesSource.ESQL,
+          esql_query: 'FROM bytes-* | KEEP myFieldName',
+          value: ['100', '200'],
+        } as RangeSliderControlState,
+        finalizeApi,
+        uuid,
+        parentApi,
+      });
+      await waitFor(() => expect(api.appliedFilters$.value).toBeDefined());
+
+      api.setEsqlQuery('// same values\nFROM bytes-* | KEEP myFieldName | SORT myFieldName');
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(api.serializeState().value).toEqual(['100', '200']);
+      expect(api.appliedFilters$.value).toEqual([
+        expect.objectContaining({
+          query: { range: { myFieldName: { gte: 100, lte: 200 } } },
+        }),
+      ]);
     });
 
     test('should set blocking error when data view is not found', async () => {

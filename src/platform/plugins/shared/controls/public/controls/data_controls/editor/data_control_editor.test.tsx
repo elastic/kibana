@@ -18,6 +18,7 @@ import type { RenderResult } from '@testing-library/react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import type { DataControlState } from '@kbn/controls-schemas';
 import { ControlValuesSource } from '@kbn/controls-constants';
+import { EsqlSource } from '@kbn/data-source';
 import {
   getMockedOptionsListControlFactory,
   getMockedRangeSliderControlFactory,
@@ -31,6 +32,20 @@ import type { CreateControlTypeAction } from '../../../actions/control_panel_act
 
 // Stub out the ES|QL editor so we don't mount Monaco in tests; we only care about the
 // surrounding editor's reaction to the values_source toggle.
+const mockGetESQLSingleColumnValues = jest.fn();
+// only the query is faked; the checks on its result are the real ones
+jest.mock('../../../../common/options_list/get_esql_single_column_values', () => {
+  const { getESQLSingleColumnValues } = jest.requireActual(
+    '../../../../common/options_list/get_esql_single_column_values'
+  );
+  return {
+    getESQLSingleColumnValues: Object.assign(
+      (...args: unknown[]) => mockGetESQLSingleColumnValues(...args),
+      getESQLSingleColumnValues
+    ),
+  };
+});
+
 jest.mock('@kbn/esql/public', () => ({
   ESQLLangEditor: () => <div data-test-subj="mock-esql-editor" />,
 }));
@@ -210,6 +225,20 @@ describe('Data control editor', () => {
         expect(getPressedAttribute(controlEditor, 'create__optionsList')).toBe('true');
         expect(getPressedAttribute(controlEditor, 'create__rangeSlider')).toBe('false');
       });
+
+      test('falls back to the first compatible control type when the next field does not fit the selected one', async () => {
+        await act(async () => {
+          fireEvent.click(controlEditor.getByTestId('create__rangeSlider'));
+        });
+        expect(getPressedAttribute(controlEditor, 'create__rangeSlider')).toBe('true');
+
+        await selectField(controlEditor, 'machine.os.raw');
+
+        await waitFor(() => {
+          expect(getPressedAttribute(controlEditor, 'create__optionsList')).toBe('true');
+        });
+        expect(getPressedAttribute(controlEditor, 'create__rangeSlider')).toBe('false');
+      });
     });
 
     test('renders custom settings when provided', async () => {
@@ -232,6 +261,53 @@ describe('Data control editor', () => {
 
       // Toggling ES|QL on requires a successful query run before the control can be saved.
       expect(saveButton).toHaveAttribute('aria-disabled', 'true');
+    });
+  });
+
+  describe('editing an ES|QL control', () => {
+    test('keeps the control types of a query that has no results in the time range', async () => {
+      mockGetESQLSingleColumnValues.mockResolvedValue({
+        values: [],
+        column: { name: 'machine.os.raw', type: 'keyword' },
+      });
+      const field = { name: 'machine.os.raw', type: 'string', aggregatable: true };
+      jest.spyOn(EsqlSource, 'forDataset').mockResolvedValue({
+        kind: 'esql',
+        toFilterableSource: async () => ({
+          kind: 'esql',
+          id: 'esqlDatasetId',
+          title: 'logs',
+          fields: [field],
+          getFieldByName: () => field,
+          isTimeBased: () => false,
+        }),
+      } as unknown as EsqlSource);
+      (uiActionsService as Writable<typeof uiActionsService>).getTriggerActions = jest
+        .fn()
+        .mockResolvedValue(mockRegisteredTriggerActions);
+
+      const controlEditor = render(
+        <I18nProvider>
+          <DataControlEditor
+            ariaLabelledBy="control-editor-title-input"
+            onCancel={() => {}}
+            onSave={() => {}}
+            parentApi={dashboardApi}
+            initialState={{
+              values_source: ControlValuesSource.ESQL,
+              esql_query: 'FROM logs | STATS BY machine.os.raw',
+            }}
+            controlId="myControlId"
+            controlType="optionsList"
+            onUpdate={() => {}}
+          />
+        </I18nProvider>
+      );
+
+      await waitFor(() => {
+        expect(controlEditor.getByTestId('create__optionsList')).toBeEnabled();
+      });
+      expect(getPressedAttribute(controlEditor, 'create__optionsList')).toBe('true');
     });
   });
 
@@ -282,6 +358,18 @@ describe('Data control editor', () => {
       expect(getPressedAttribute(controlEditor, 'create__optionsList')).toBe('false');
       expect(getPressedAttribute(controlEditor, 'create__rangeSlider')).toBe('true');
       expect(getPressedAttribute(controlEditor, 'create__search')).toBe('false');
+    });
+
+    test('cannot save a field that is not in the data view', async () => {
+      const controlEditor = await mountComponent({
+        initialState: {
+          field_name: 'columnOfAnotherIndex',
+        },
+        controlType: 'optionsList',
+        controlId: 'testId',
+      });
+
+      expect(controlEditor.getByTestId('control-editor-save')).toBeDisabled();
     });
   });
 

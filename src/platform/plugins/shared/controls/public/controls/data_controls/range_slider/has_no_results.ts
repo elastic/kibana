@@ -15,7 +15,8 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
 import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
-import { dataService, dataViewsService } from '../../../services/kibana_services';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { dataService } from '../../../services/kibana_services';
 import { getESQLSingleColumnValues } from '../../../../common/options_list';
 import { getControlsTimezone } from '../../utils';
 import { buildESQLPreFilter, getFetchContextFilters, getFetchContextTimeRange } from '../utils';
@@ -81,7 +82,7 @@ export function hasNoResults$({
               })
             : await hasNoDslResults({
                 abortSignal: abortController.signal,
-                dataSource,
+                dataView: valuesSourceFetchPlan.dataView,
                 rangeFilter,
                 query: isOfAggregateQueryType(controlFetchContext.query)
                   ? undefined
@@ -157,21 +158,19 @@ export async function hasNoEsqlResults({
 
 export async function hasNoDslResults({
   abortSignal,
-  dataSource,
+  dataView,
   filters,
   query,
   rangeFilter,
   timeRange,
 }: {
   abortSignal: AbortSignal;
-  dataSource: FilterableSource;
+  dataView: DataView;
   filters?: Filter[];
   query?: Query;
   rangeFilter: Filter;
   timeRange?: TimeRange;
 }): Promise<boolean> {
-  const dataView = await dataViewsService.get(dataSource.id ?? '');
-
   const searchSource = await dataService.search.searchSource.create();
   searchSource.setField('size', 0);
   searchSource.setField('index', dataView);

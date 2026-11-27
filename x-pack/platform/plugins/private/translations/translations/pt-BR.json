@@ -2143,7 +2143,6 @@
     "controls.createControlAction.tooltip": "Adicione um controle ao seu dashboard.",
     "controls.dataControl.creationError": "É necessário definir a visualização de dados e o campo para criar um controle.",
     "controls.dataControl.creationErrorESQL": "Uma consulta de valores deve ser definida para criar um controle.",
-    "controls.dataControl.esqlDataViewDeriveFailed": "Não foi possível derivar uma data view da consulta ES|QL",
     "controls.dataControl.esqlMissingQuery": "O controle de variável não tem uma consulta definida",
     "controls.dataControl.fieldNotFound": "Não foi possível localizar o campo: {fieldName}",
     "controls.displaySettingsPopover.applyButton": "Aplicar",
