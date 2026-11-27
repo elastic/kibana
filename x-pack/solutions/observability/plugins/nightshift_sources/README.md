@@ -233,36 +233,53 @@ administrator enables Nightshift and runs once a day. Task Manager captures that
 credentials; enabling Nightshift again refreshes them. Disabling Nightshift in the last space
 that has it removes the task and invalidates those credentials. Each run sends one
 `nightshift-sources-daily-volume` EBT event, with one entry per configured source of every space
-(`space_id` is on the entry) holding its `enabled` state, `doc_count`, `raw_bytes_estimated` and `disk_bytes_estimated` over
-the past 24 hours. `doc_count` runs the stored query (its `WHERE` included) with those credentials, so
+(`space_id` is on the entry) holding its `enabled` state, `doc_count`, `json_bytes_estimated` and
+either `disk_bytes_estimated` (stateful) or `metered_bytes_estimated` (serverless) over the past
+24 hours. `doc_count` runs the stored query (its `WHERE` included) with those credentials, so
 it is the volume the source reads, not what was ingested; under cross-project search it fans out to
 every linked project, as the source's own reads do.
-`raw_bytes_estimated` is `doc_count` times the average `_source` JSON size of a random sample of
+`json_bytes_estimated` is `doc_count` times the average `_source` JSON size of a random sample of
 about 10,000 documents the query matched in the window (`SAMPLE`, or every document when there
 are fewer), computed by ES|QL where the documents live
 (`BYTE_LENGTH(JSON_EXTRACT(_source, "$"))`), so it is reported for local and remote sources alike.
 The sample is random because a plain `LIMIT` reads in storage order and can land on a few
-unrepresentative indices. When that query fails (`JSON_EXTRACT` on `_source` needs 9.4+ on the
-executing cluster), about 200 sampled documents are fetched and measured in Kibana instead;
-`SAMPLE` itself needs 9.1+. On logsdb and other synthetic-source indices the size is of the
-rebuilt JSON. A source whose
-`_source` cannot be read (a source over a view) gets no `raw_bytes_estimated`.
-`disk_bytes_estimated` is `doc_count` times the average stored document size of the local indices
-behind the query, read from `indices.stats` on
-stateful and `_metering/stats` on serverless. Neither size API reaches linked projects or remote
-clusters, so that local average is extrapolated to their documents; `has_remote` marks the
-entries where a remote cluster contributed. A source with no local index gets no
-`disk_bytes_estimated`. Raw JSON is several times larger than stored bytes, so the two fields are
-not interchangeable. Each source is measured on its own, so overlapping sources (`logs*` and
+unrepresentative indices. `JSON_EXTRACT` on `_source` needs 9.4+ on the executing cluster. On
+logsdb and other synthetic-source indices the size is of the rebuilt JSON; on indices that store
+`_source` it is of the bytes as they were sent, whitespace included. A source whose JSON size
+query fails (a remote cluster older than that) or whose `_source` cannot be read (a source over
+a view) gets no `json_bytes_estimated`.
+
+The stored size is `doc_count` times the average stored document size of the local indices behind
+the query. The two deployment types read different quantities, so each fills its own field and
+never the other:
+
+- `disk_bytes_estimated`, stateful only: the on-disk size, from `indices.stats`
+  (`total_data_set_size_in_bytes`). The JSON size is several times larger.
+- `metered_bytes_estimated`, serverless only: the metered size, from `_metering/stats`. On
+  Observability projects that API does not return a disk size but the size of the documents'
+  field values, without field names or JSON structure and without the root fields metering
+  excludes. The ratio to the JSON size depends on the documents, so neither can be derived from
+  the other.
+
+Neither size API takes a filter or a time range, so the average covers every document of those
+indices, not only the ones the query matched in the window. `has_filter` marks the sources with a
+`WHERE`, whose stored size is off by however much the matched documents differ in size from that
+average; `json_bytes_estimated` applies the filter and has no such bias. Neither API reaches
+linked projects or remote clusters either, so the local average is extrapolated to their
+documents; `has_remote` marks the entries where a remote cluster contributed. A source with no
+local index gets neither field.
+
+Each source is measured on its own, so overlapping sources (`logs*` and
 `logs-otel.generic-*`) count the same documents more than once; summing across sources can
 double count. Disabled sources are still measured and marked with `enabled: false`, so the event
 covers every configured source. A source whose query fails is reported with `status: error` (or
 `timeout`) and the Elasticsearch error type, without blocking the others. A query that runs but
 is incomplete (a skipped remote cluster or linked project, `is_partial`) is reported with
-`status: partial`: `doc_count` is then a lower bound, both byte estimates are omitted, and
+`status: partial`: `doc_count` is then a lower bound, as are the byte estimates extrapolated from
+it (the JSON size sample comes from the clusters that answered), and
 `clusters_total` / `clusters_unsuccessful` say how many clusters did not answer (every cluster
-skipped gives `partial` with `doc_count: 0`, not an empty window). Nothing is sent when no source
-is configured, or when Task Manager aborts the run. The event carries no title, slug, view name
+skipped gives `partial` with `doc_count: 0` and no byte estimates, not an empty window). Nothing
+is sent when no source is configured, or when Task Manager aborts the run. The event carries no title, slug, view name
 or query text.
 
 ## Development

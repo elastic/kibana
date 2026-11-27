@@ -154,6 +154,8 @@ export {
 
 export { conditionToESQLFilterAst } from './src/condition_to_esql_filter';
 
+export { withTimeRange } from './src/with_time_range';
+
 export {
   DEFAULT_RUN_QUOTA_TIME_ZONE,
   MAX_RUN_LIMIT,
