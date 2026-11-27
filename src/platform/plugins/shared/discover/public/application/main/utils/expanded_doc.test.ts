@@ -11,6 +11,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import {
   ExpandedDocLinkability,
+  canQueryRestoreDoc,
   getEsqlMissingMetadataExample,
   getExpandedDocLinkDisabledReason,
   getExpandedDocLinkability,
@@ -103,6 +104,29 @@ describe('getExpandedDocLinkability', () => {
         docWithMetadata
       )
     ).toBe(ExpandedDocLinkability.EsqlTransformational);
+  });
+});
+
+describe('canQueryRestoreDoc', () => {
+  const doc = buildDataTableRecord({ _id: '1', _index: 'i' }, dataViewMock);
+
+  it('accepts an ES|QL query that reads _id and _index', () => {
+    expect(canQueryRestoreDoc({ esql: 'FROM logs METADATA _id, _index' }, doc)).toBe(true);
+  });
+
+  it('rejects an ES|QL query that does not read the identity, even if the record has it', () => {
+    expect(canQueryRestoreDoc({ esql: 'FROM logs' }, doc)).toBe(false);
+    expect(canQueryRestoreDoc({ esql: 'FROM logs METADATA _id' }, doc)).toBe(false);
+  });
+
+  it('rejects a query that cannot restore links at all', () => {
+    expect(
+      canQueryRestoreDoc({ esql: 'FROM logs METADATA _id, _index | STATS count = COUNT()' }, doc)
+    ).toBe(false);
+  });
+
+  it('accepts a data view query', () => {
+    expect(canQueryRestoreDoc({ query: '', language: 'kuery' }, doc)).toBe(true);
   });
 });
 

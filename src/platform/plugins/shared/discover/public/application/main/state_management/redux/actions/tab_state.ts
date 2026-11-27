@@ -41,7 +41,7 @@ import {
   matchesExpandedDocRef,
 } from '../../../utils/expanded_doc';
 import { DEFAULT_EXPANDED_DOC_OWNER, QUERY_EXPANDED_DOC_OWNER } from '../constants';
-import { fetchEsqlQueryDoc } from '../../../data_fetching/fetch_expanded_doc';
+import { fetchEsqlQueryDoc, refetchThroughQuery } from '../../../data_fetching/fetch_expanded_doc';
 import { isEqualState } from '../../utils/state_comparators';
 import {
   internalStateSlice,
@@ -61,6 +61,7 @@ import {
   selectCurrentProfileUrlState,
   selectCurrentProfileStateDefinition,
   selectTabRuntimeState,
+  getTabDataView,
 } from '../runtime_state';
 import type {
   DiscoverAppState,
@@ -188,7 +189,8 @@ type ExpandedDocByQueryPayload = TabActionPayload<{
 
 /**
  * Fetches the first row of an ES|QL query under the tab's filters, variables, time range and
- * search session, and opens it without a shareable link. Resolves to the opened document's ID.
+ * search session, and opens it with a shareable link only when the current query finds it again.
+ * Resolves to the opened document's ID.
  */
 export const setExpandedDocByQuery: InternalStateThunkActionCreator<
   [ExpandedDocByQueryPayload],
@@ -218,14 +220,27 @@ export const setExpandedDocByQuery: InternalStateThunkActionCreator<
       return undefined;
     }
 
-    const { scopedProfilesManager$ } = selectTabRuntimeState(runtimeStateManager, tabId);
-    const resolvedDoc = scopedProfilesManager$.getValue().resolveDocumentProfile({ record });
+    const { query } = selectTab(getState(), tabId).appState;
+    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+    const dataView = getTabDataView(tabRuntimeState);
+    // Links are restored through the current query, so only a document it finds again gets one.
+    const restorableRecord = dataView
+      ? await refetchThroughQuery({ record, query, dataView, data, abortSignal })
+      : undefined;
+
+    if (abortSignal?.aborted) {
+      return undefined;
+    }
+
+    const resolvedDoc = tabRuntimeState.scopedProfilesManager$
+      .getValue()
+      .resolveDocumentProfile({ record: restorableRecord ?? record });
 
     dispatch(
       setExpandedDoc({
         tabId,
         expandedDoc: resolvedDoc,
-        expandedDocOwner: QUERY_EXPANDED_DOC_OWNER,
+        expandedDocOwner: restorableRecord ? DEFAULT_EXPANDED_DOC_OWNER : QUERY_EXPANDED_DOC_OWNER,
         initialDocViewerTabId,
       })
     );

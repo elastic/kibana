@@ -279,7 +279,7 @@ export function TracesLatencyMapView({
 
   // Opens the newest span of a clicked cell in Discover's document flyout, leaving the
   // query and the selection as they are. Discover runs the lookup itself, under its own
-  // filters and session, and opens the span without a link: the editor query may not return it.
+  // filters and session, and links the span only if the editor query finds it again.
   const openExampleSpan = useCallback(
     async (cell: LatencyMapCell) => {
       if (!setExpandedDocByQuery) return;
