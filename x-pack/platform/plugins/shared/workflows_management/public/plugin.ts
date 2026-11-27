@@ -52,6 +52,7 @@ import { stepSchemas } from '../common/step_schemas';
 /** The server config the browser gets (`exposeToBrowser`). */
 interface WorkflowsManagementPublicConfig {
   pages: { enabled: boolean };
+  import: { maxPayloadBytes?: number };
 }
 
 export class WorkflowsPlugin
@@ -73,10 +74,13 @@ export class WorkflowsPlugin
   private appVisibilitySubscription?: Subscription;
   private recentlyViewedWorkflows?: RecentlyAccessed;
   private readonly pagesEnabled: boolean;
+  private readonly importMaxPayloadBytes: number | undefined;
 
   constructor(initializerContext: PluginInitializerContext<WorkflowsManagementPublicConfig>) {
     this.logger = initializerContext.logger.get('WorkflowsManagement');
-    this.pagesEnabled = initializerContext.config.get().pages.enabled;
+    const config = initializerContext.config.get();
+    this.pagesEnabled = config.pages.enabled;
+    this.importMaxPayloadBytes = config.import.maxPayloadBytes;
     this.appUpdater$ = new Subject<AppUpdater>();
     this.telemetryService = new TelemetryService();
     this.availabilityService = new AvailabilityService();
@@ -339,6 +343,7 @@ export class WorkflowsPlugin
         telemetry: this.telemetryService.getClient(),
         agentBuilder,
         recentlyViewed: this.getRecentlyViewedWorkflows(coreStart),
+        importMaxPayloadBytes: this.importMaxPayloadBytes,
       },
     };
 

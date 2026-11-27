@@ -29,6 +29,7 @@ import {
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { WorkflowPreview } from '../../../common/lib/export/workflow_preview';
 import type {
   ImportWorkflowsResult,
@@ -38,6 +39,7 @@ import { useWorkflowActions } from '../../../entities/workflows/model/use_workfl
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { WorkflowsTriggersList } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
+import { getImportPayloadTooLargeMessage } from '../lib/import_payload_limit';
 
 const ACCEPTED_FILE_TYPES = '.yml,.yaml,.zip';
 const MB_SIZE_BYTES = 1024 * 1024;
@@ -84,6 +86,22 @@ function ImportWorkflowsCallouts({
   }
   return (
     <>
+      {preflightResult.payloadTooLarge ? (
+        <>
+          <EuiSpacer size="m" />
+          <KbnDangerCallout
+            announceOnMount
+            title={i18n.translate('workflows.importFlyout.payloadTooLargeTitle', {
+              defaultMessage: 'This file is too large to import in one request',
+            })}
+            size="s"
+            data-test-subj="import-workflows-payload-too-large"
+          >
+            {getImportPayloadTooLargeMessage(preflightResult.payloadTooLarge)}
+          </KbnDangerCallout>
+        </>
+      ) : null}
+
       {preflightResult.conflictCheckFailed ? (
         <>
           <EuiSpacer size="m" />
@@ -279,7 +297,11 @@ export const ImportWorkflowsFlyout: React.FC<ImportWorkflowsFlyoutProps> = ({ on
   }, [preflightResult, conflictResolution, importMutate, notifications, telemetry]);
 
   const hasConflicts = (preflightResult?.conflicts.length ?? 0) > 0;
-  const canImport = selectedFiles !== null && !isImporting && !isCheckingConflicts;
+  const canImport =
+    selectedFiles !== null &&
+    !isImporting &&
+    !isCheckingConflicts &&
+    !preflightResult?.payloadTooLarge;
   const hasWorkflowPreviews = (preflightResult?.workflows?.length ?? 0) > 0;
 
   const conflictIds = useMemo(

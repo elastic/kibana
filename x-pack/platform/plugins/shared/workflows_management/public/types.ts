@@ -99,6 +99,8 @@ export interface WorkflowsPublicPluginStartAdditionalServices {
     agentBuilder?: AgentBuilderPluginStart;
     availability: AvailabilityService;
     recentlyViewed: RecentlyAccessed;
+    /** `workflowsManagement.import.maxPayloadBytes`; unset when the server default applies. */
+    importMaxPayloadBytes?: number;
   };
 }
 

@@ -22,6 +22,12 @@ import type { BulkCreateWorkflowsResponse, BulkDeleteWorkflowsResponse } from '@
 import { useRunWorkflow, useWorkflowsApi } from '@kbn/workflows-ui';
 import { rewriteWorkflowReferences } from '../../../common/lib/export/rewrite_workflow_references';
 import type { WorkflowPreview } from '../../../common/lib/export/workflow_preview';
+import {
+  DEFAULT_IMPORT_MAX_PAYLOAD_BYTES,
+  getPayloadTooLarge,
+  ImportPayloadTooLargeError,
+} from '../../../features/import_workflows/lib/import_payload_limit';
+import type { ImportPayloadTooLarge } from '../../../features/import_workflows/lib/import_payload_limit';
 import { parseImportFile } from '../../../features/import_workflows/lib/parse_import_file';
 import type {
   WorkflowStepTriggerTab,
@@ -63,6 +69,11 @@ export interface PreflightImportResult {
    * conflicts were not verified and the import may fail.
    */
   conflictCheckFailed?: boolean;
+  /**
+   * Set when the conflict check was rejected for exceeding the request size limit. The import
+   * request carries the same workflows, so it would be rejected too and the import is blocked.
+   */
+  payloadTooLarge?: ImportPayloadTooLarge;
 }
 
 export interface ImportWorkflowsResult {
@@ -385,6 +396,9 @@ export function useWorkflowActions() {
     },
   });
 
+  const importMaxPayloadBytes =
+    workflowsManagement.importMaxPayloadBytes ?? DEFAULT_IMPORT_MAX_PAYLOAD_BYTES;
+
   const preflightImportWorkflows = useMutation<PreflightImportResult, HttpError, { file: File }>({
     mutationKey: ['POST', 'workflows', '_import', 'preflight'],
     mutationFn: async ({ file }) => {
@@ -398,14 +412,16 @@ export function useWorkflowActions() {
       // to prevent the preview from rendering.
       let conflicts: string[] = [];
       let conflictCheckFailed = false;
+      let payloadTooLarge: ImportPayloadTooLarge | undefined;
       if (clientResult.rawWorkflows.length > 0) {
+        const workflows = clientResult.rawWorkflows.map(({ id, yaml }) => ({ id, yaml }));
         try {
-          const conflictResponse = await api.checkWorkflowIdConflicts({
-            workflows: clientResult.rawWorkflows.map(({ id, yaml }) => ({ id, yaml })),
-          });
+          const conflictResponse = await api.checkWorkflowIdConflicts({ workflows });
           conflicts = conflictResponse.existingIds;
-        } catch {
-          conflictCheckFailed = true;
+        } catch (error) {
+          payloadTooLarge =
+            getPayloadTooLarge(error, workflows, importMaxPayloadBytes) ?? undefined;
+          conflictCheckFailed = payloadTooLarge === undefined;
         }
       }
 
@@ -414,6 +430,7 @@ export function useWorkflowActions() {
         totalWorkflows: clientResult.totalWorkflows,
         conflicts,
         conflictCheckFailed,
+        payloadTooLarge,
         parseErrors: clientResult.parseErrors,
         workflows: clientResult.workflows,
         rawWorkflows: clientResult.rawWorkflows,
@@ -423,11 +440,11 @@ export function useWorkflowActions() {
 
   const importWorkflows = useMutation<
     BulkCreateWorkflowsResponse,
-    HttpError,
+    HttpError | ImportPayloadTooLargeError,
     ImportWorkflowsParams
   >({
     mutationKey: ['POST', 'workflows', '_bulk_create'],
-    mutationFn: ({ workflows, overwrite, generateNewIds, conflictIds }) => {
+    mutationFn: async ({ workflows, overwrite, generateNewIds, conflictIds }) => {
       // Build base mapping from the original (export) persisted ID to the
       // desired import ID (slug-of-name or UUID fallback). This is always
       // needed because cross-workflow `workflow-id` references in the YAML
@@ -467,7 +484,16 @@ export function useWorkflowActions() {
         }));
       }
 
-      return api.bulkCreateWorkflows({ workflows: processedWorkflows, overwrite });
+      try {
+        return await api.bulkCreateWorkflows({ workflows: processedWorkflows, overwrite });
+      } catch (error) {
+        const payloadTooLarge = getPayloadTooLarge(
+          error,
+          processedWorkflows,
+          importMaxPayloadBytes
+        );
+        throw payloadTooLarge ? new ImportPayloadTooLargeError(payloadTooLarge) : error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workflows'] });
