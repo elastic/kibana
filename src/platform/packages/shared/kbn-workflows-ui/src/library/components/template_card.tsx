@@ -36,17 +36,16 @@ export const TemplateCard = React.memo<TemplateCardProps>(({ template, onSelect 
   // Emotion label (class `css-…-euiCard__footer`), so it must be matched with a
   // substring attribute selector, not `.euiCard__footer`.
   const cardCss = useMemo(
-    () =>
-      css`
-        transition: box-shadow ${euiTheme.animation.fast} ease-in;
-        &:hover,
-        &:focus-within {
-          ${hoverShadow}
-        }
-        [class*='euiCard__footer'] {
-          margin-top: ${euiTheme.size.l};
-        }
-      `,
+    () => css`
+      transition: box-shadow ${euiTheme.animation.fast} ease-in;
+      &:hover,
+      &:focus-within {
+        ${hoverShadow}
+      }
+      [class*='euiCard__footer'] {
+        margin-top: ${euiTheme.size.l};
+      }
+    `,
     [hoverShadow, euiTheme.animation.fast, euiTheme.size.l]
   );
 

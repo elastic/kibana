@@ -27,31 +27,30 @@ export const getLinkCss = ({
 }: {
   euiTheme: EuiThemeComputed<{}>;
   iconSide?: 'left' | 'right';
-}) =>
-  css`
-    align-items: center;
-    display: inline-flex;
-    vertical-align: top;
-    white-space: nowrap;
-    ${
-      iconSide === 'left' &&
-      css`
-        .euiIcon {
-          margin-right: ${euiTheme.size.xs};
-        }
-      `
-    }
-    ${
-      iconSide === 'right' &&
-      css`
-        flex-direction: row-reverse;
+}) => css`
+  align-items: center;
+  display: inline-flex;
+  vertical-align: top;
+  white-space: nowrap;
+  ${
+    iconSide === 'left' &&
+    css`
+      .euiIcon {
+        margin-right: ${euiTheme.size.xs};
+      }
+    `
+  }
+  ${
+    iconSide === 'right' &&
+    css`
+      flex-direction: row-reverse;
 
-        .euiIcon {
-          margin-left: ${euiTheme.size.xs};
-        }
-      `
-    }
-  `;
+      .euiIcon {
+        margin-left: ${euiTheme.size.xs};
+      }
+    `
+  }
+`;
 
 export interface LinkIconProps extends LinkProps {
   children: string | ReactNode;

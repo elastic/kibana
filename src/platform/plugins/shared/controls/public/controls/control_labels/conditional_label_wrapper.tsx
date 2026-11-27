@@ -137,26 +137,24 @@ const labelWrapperStyles = {
       whiteSpace: 'nowrap',
       textOverflow: 'ellipsis',
     }),
-  clickableLabel: ({ euiTheme }: UseEuiTheme) =>
-    css`
-      ${euiTextTruncate()};
-      padding: ${euiTheme.size.xs} ${euiTheme.size.s} 1px;
-      font-weight: ${euiTheme.font.weight.regular};
-      padding-bottom: ${euiTheme.size.xxs};
-      margin-bottom: -${euiTheme.size.xxs};
-      z-index: 1;
-      /* Style the button as focused when the inner span is in focus */
-      &:focus-visible,
-      &:has(:focus-visible) {
-        outline: 2px solid ${euiTheme.colors.primary};
-        outline-offset: -${euiTheme.size.xxs};
-      }
-    `,
-  clickableLabelInner: ({ euiTheme }: UseEuiTheme) =>
-    css`
-      /* Apply focus outline to the button instead */
-      &:focus-visible {
-        outline: none;
-      }
-    `,
+  clickableLabel: ({ euiTheme }: UseEuiTheme) => css`
+    ${euiTextTruncate()};
+    padding: ${euiTheme.size.xs} ${euiTheme.size.s} 1px;
+    font-weight: ${euiTheme.font.weight.regular};
+    padding-bottom: ${euiTheme.size.xxs};
+    margin-bottom: -${euiTheme.size.xxs};
+    z-index: 1;
+    /* Style the button as focused when the inner span is in focus */
+    &:focus-visible,
+    &:has(:focus-visible) {
+      outline: 2px solid ${euiTheme.colors.primary};
+      outline-offset: -${euiTheme.size.xxs};
+    }
+  `,
+  clickableLabelInner: ({ euiTheme }: UseEuiTheme) => css`
+    /* Apply focus outline to the button instead */
+    &:focus-visible {
+      outline: none;
+    }
+  `,
 };

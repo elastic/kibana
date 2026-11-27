@@ -136,10 +136,9 @@ export function FlyoutToolbar<S>({
 }
 
 const styles = {
-  dialog: ({ euiTheme }: UseEuiTheme) =>
-    css`
-      z-index: ${euiTheme.levels.menu};
-    `,
+  dialog: ({ euiTheme }: UseEuiTheme) => css`
+    z-index: ${euiTheme.levels.menu};
+  `,
   flyoutContent: ({ euiTheme }: UseEuiTheme) =>
     css({
       padding: euiTheme.size.base,

@@ -24,23 +24,22 @@ export interface ChangeHistoryMonacoHostProps {
 }
 
 const monacoDiffPreviewStyles = {
-  monacoHost: (themeContext: UseEuiTheme) =>
-    css`
-      flex: 1 1 auto;
-      min-height: 0;
+  monacoHost: (themeContext: UseEuiTheme) => css`
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    padding: 0 ${themeContext.euiTheme.size.m};
+    & > div {
       height: 100%;
-      padding: 0 ${themeContext.euiTheme.size.m};
-      & > div {
-        height: 100%;
-      }
+    }
 
-      /* Monaco draws its own scrollbars; match EUI's thin, rounded scrollbar. */
-      .monaco-scrollable-element > .scrollbar > .slider {
-        width: calc(${themeContext.euiTheme.size.s} * 0.75) !important;
-        border-radius: ${themeContext.euiTheme.border.radius.medium} !important;
-        margin-right: 2px;
-      }
-    `,
+    /* Monaco draws its own scrollbars; match EUI's thin, rounded scrollbar. */
+    .monaco-scrollable-element > .scrollbar > .slider {
+      width: calc(${themeContext.euiTheme.size.s} * 0.75) !important;
+      border-radius: ${themeContext.euiTheme.border.radius.medium} !important;
+      margin-right: 2px;
+    }
+  `,
   unifiedDiffLayout: css(buildChangeHistoryUnifiedDiffLayoutStyles()),
   monacoHostSplit: css({
     padding: 0,

@@ -82,8 +82,8 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Com
   protected updateSuggestions = debounce(async (query: string = '') => {
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
-    const { indexPattern, field, timeRangeForSuggestionsOverride, filtersForSuggestions } = this
-      .props as PhraseSuggestorProps;
+    const { indexPattern, field, timeRangeForSuggestionsOverride, filtersForSuggestions } =
+      this.props as PhraseSuggestorProps;
     if (!field || !this.isSuggestingValues()) {
       return;
     }

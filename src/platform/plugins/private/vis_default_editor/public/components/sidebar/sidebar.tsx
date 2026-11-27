@@ -58,22 +58,21 @@ const defaultEditorSideBarStyles = {
       },
     }),
   form: css({ ...flexParentStyle('auto'), maxWidth: '100%' }),
-  config: (euiThemeContext: UseEuiTheme) =>
-    css`
-      &.visEditorSidebar__config {
-        padding: ${euiThemeContext.euiTheme.size.s};
+  config: (euiThemeContext: UseEuiTheme) => css`
+    &.visEditorSidebar__config {
+      padding: ${euiThemeContext.euiTheme.size.s};
 
-        > * {
-          flex-grow: 0;
-        }
-
-        ${euiBreakpoint(euiThemeContext, ['l', 'xl'])} {
-          overflow: auto;
-          ${flexParentStyle('1px')};
-          ${euiScrollBarStyles(euiThemeContext)};
-        }
+      > * {
+        flex-grow: 0;
       }
-    `,
+
+      ${euiBreakpoint(euiThemeContext, ['l', 'xl'])} {
+        overflow: auto;
+        ${flexParentStyle('1px')};
+        ${euiScrollBarStyles(euiThemeContext)};
+      }
+    }
+  `,
   configIsHidden: css({
     '&.visEditorSidebar__config-isHidden': {
       display: 'none',

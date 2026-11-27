@@ -59,10 +59,10 @@ export class WorkflowRunFixture {
   public readonly fakeKibanaRequest = {} as KibanaRequest;
   public readonly workflowExecutionRepositoryMock = new WorkflowExecutionRepositoryMock();
   public readonly stepExecutionRepositoryMock = new StepExecutionRepositoryMock();
-  private readonly workflowExecutionRepository = this
-    .workflowExecutionRepositoryMock as unknown as WorkflowExecutionRepository;
-  private readonly stepExecutionRepository = this
-    .stepExecutionRepositoryMock as unknown as StepExecutionRepository;
+  private readonly workflowExecutionRepository =
+    this.workflowExecutionRepositoryMock as unknown as WorkflowExecutionRepository;
+  private readonly stepExecutionRepository =
+    this.stepExecutionRepositoryMock as unknown as StepExecutionRepository;
   public readonly taskManagerMock = TaskManagerMock.create();
   public readonly workflowsExecutionEngineMock = workflowsExecutionEngineMock.createStart();
   public readonly internalResumeWorkflowExecutionMock = jest.fn().mockResolvedValue(undefined);

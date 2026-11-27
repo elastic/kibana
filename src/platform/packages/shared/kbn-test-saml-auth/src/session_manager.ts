@@ -266,8 +266,7 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
       ? createHash('sha256').update(`elastic_${userName}`).digest().readUInt32BE(0).toString()
       : `elastic_${userName}`;
     this.log.debug(
-      `Creating new local SAML session for a user '${username}' with role '${role}' (serverless: ${!!this
-        .serverless}, uiam: ${!!this.serverless?.uiam}, uiam organization roles: ${JSON.stringify(
+      `Creating new local SAML session for a user '${username}' with role '${role}' (serverless: ${!!this.serverless}, uiam: ${!!this.serverless?.uiam}, uiam organization roles: ${JSON.stringify(
         organizationRoles
       )}, uiam project roles: ${JSON.stringify(projectRoles)})`
     );

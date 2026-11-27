@@ -41,12 +41,11 @@ const visualizationContainerStyles = {
       flex: '1 1 100%',
       flexDirection: 'column',
     }),
-  inEmbPanel: (euiThemeContext: UseEuiTheme) =>
-    css`
-      .embPanel & {
-        ${euiScrollBarStyles(euiThemeContext)}; /* Force a better looking scrollbar */
-      }
-    `,
+  inEmbPanel: (euiThemeContext: UseEuiTheme) => css`
+    .embPanel & {
+      ${euiScrollBarStyles(euiThemeContext)}; /* Force a better looking scrollbar */
+    }
+  `,
 };
 
 export const VisualizationContainer = ({

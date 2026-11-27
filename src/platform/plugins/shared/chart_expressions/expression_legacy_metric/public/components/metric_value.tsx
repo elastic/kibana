@@ -101,11 +101,10 @@ export const MetricVisValue = (props: MetricVisValueProps) => {
 };
 
 const styles = {
-  legacyMtrVisValue: ({ euiTheme }: UseEuiTheme) =>
-    css`
-      ${euiTextTruncate()};
-      font-weight: ${euiTheme.font.weight.bold};
-    `,
+  legacyMtrVisValue: ({ euiTheme }: UseEuiTheme) => css`
+    ${euiTextTruncate()};
+    font-weight: ${euiTheme.font.weight.bold};
+  `,
   legacyMtrVisContainer: ({ euiTheme }: UseEuiTheme) =>
     css({
       '&.legacyMtrVis__container': {

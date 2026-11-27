@@ -99,7 +99,7 @@ export function scalingTransformation([x, y]: Vector2): Matrix3 {
     x, 0, 0,
     0, y, 0,
     0, 0, 0
-  ]
+  ];
 }
 
 /**
@@ -112,5 +112,5 @@ export function translationTransformation([x, y]: Vector2): Matrix3 {
     1, 0, x,
     0, 1, y,
     0, 0, 0
-  ]
+  ];
 }

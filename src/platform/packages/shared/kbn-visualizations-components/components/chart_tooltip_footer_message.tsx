@@ -13,14 +13,13 @@ import { euiFontSize, type UseEuiTheme } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 const chartTooltipFooterMessageStyles = {
-  root: (euiThemeContext: UseEuiTheme) =>
-    css`
-      color: ${euiThemeContext.euiTheme.colors.textSubdued};
-      ${euiFontSize(euiThemeContext, 'xs', { unit: 'px' })};
-      font-weight: ${euiThemeContext.euiTheme.font.weight.regular};
-      width: 0;
-      min-width: 100%;
-    `,
+  root: (euiThemeContext: UseEuiTheme) => css`
+    color: ${euiThemeContext.euiTheme.colors.textSubdued};
+    ${euiFontSize(euiThemeContext, 'xs', { unit: 'px' })};
+    font-weight: ${euiThemeContext.euiTheme.font.weight.regular};
+    width: 0;
+    min-width: 100%;
+  `,
 };
 
 /** Renders a styled message in the footer of a chart tooltip. */

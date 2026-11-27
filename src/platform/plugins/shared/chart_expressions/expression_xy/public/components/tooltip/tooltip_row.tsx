@@ -25,12 +25,10 @@ export const TooltipRow: FC<TooltipData> = ({ label, value }) => {
         `}
       >
         <div
-          css={({ euiTheme }) =>
-            css`
-              max-width: calc(${euiTheme.size.xl} * 5);
-              overflow-wrap: break-word;
-            `
-          }
+          css={({ euiTheme }) => css`
+            max-width: calc(${euiTheme.size.xl} * 5);
+            overflow-wrap: break-word;
+          `}
         >
           {label}
         </div>

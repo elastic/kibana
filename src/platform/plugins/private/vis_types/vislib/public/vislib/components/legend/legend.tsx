@@ -76,26 +76,25 @@ const visLegendStyles = {
     minHeight: 0,
     height: `100%`,
   }),
-  toggle: ({ euiTheme }: UseEuiTheme) =>
-    css`
-      border-radius: ${euiTheme.border.radius.medium};
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      display: flex;
-      padding: ${euiTheme.size.xs};
-      margin: ${euiTheme.size.s};
-      background-color: ${euiTheme.colors.backgroundBasePlain};
-      transition:
-        opacity ${euiTheme.animation.fast} ${euiTheme.animation.resistance},
-        background-color ${euiTheme.animation.fast} ${euiTheme.animation.resistance}
-          ${euiTheme.animation.extraSlow};
+  toggle: ({ euiTheme }: UseEuiTheme) => css`
+    border-radius: ${euiTheme.border.radius.medium};
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    padding: ${euiTheme.size.xs};
+    margin: ${euiTheme.size.s};
+    background-color: ${euiTheme.colors.backgroundBasePlain};
+    transition:
+      opacity ${euiTheme.animation.fast} ${euiTheme.animation.resistance},
+      background-color ${euiTheme.animation.fast} ${euiTheme.animation.resistance}
+        ${euiTheme.animation.extraSlow};
 
-      &:focus {
-        box-shadow: none;
-        background-color: ${euiTheme.focus.backgroundColor} !important;
-      }
-    `,
+    &:focus {
+      box-shadow: none;
+      background-color: ${euiTheme.focus.backgroundColor} !important;
+    }
+  `,
   openToggle: ({ euiTheme }: UseEuiTheme) =>
     css({
       backgroundColor: chroma(euiTheme.colors.darkestShade).alpha(0.1).css(),

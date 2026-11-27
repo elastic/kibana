@@ -63,16 +63,16 @@ describe('useLabelMarquee', () => {
       };
     });
 
-    jest
-      .spyOn(Element.prototype, 'clientWidth', 'get')
-      .mockImplementation(function (this: Element) {
-        return getWidth(this);
-      });
-    jest
-      .spyOn(HTMLElement.prototype, 'offsetWidth', 'get')
-      .mockImplementation(function (this: HTMLElement) {
-        return getWidth(this);
-      });
+    jest.spyOn(Element.prototype, 'clientWidth', 'get').mockImplementation(function (
+      this: Element
+    ) {
+      return getWidth(this);
+    });
+    jest.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockImplementation(function (
+      this: HTMLElement
+    ) {
+      return getWidth(this);
+    });
 
     // The label always reports the gutter padding so the content-box math is exercised.
     jest

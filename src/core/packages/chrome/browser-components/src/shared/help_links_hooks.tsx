@@ -96,20 +96,18 @@ export const useHelpMenuItems = ({
   const { hasUnreadNews } = helpLinks;
 
   const appNameStyle = useMemo(
-    () =>
-      css`
-        font-weight: ${euiTheme.font.weight.bold};
-      `,
+    () => css`
+      font-weight: ${euiTheme.font.weight.bold};
+    `,
     [euiTheme.font.weight.bold]
   );
 
   const unreadLabelStyle = useMemo(
-    () =>
-      css`
-        display: inline-flex;
-        align-items: center;
-        gap: ${euiTheme.size.xs};
-      `,
+    () => css`
+      display: inline-flex;
+      align-items: center;
+      gap: ${euiTheme.size.xs};
+    `,
     [euiTheme.size.xs]
   );
 

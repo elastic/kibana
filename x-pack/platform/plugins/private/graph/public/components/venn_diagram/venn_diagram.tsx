@@ -63,11 +63,10 @@ export function VennDiagram({ leftValue, rightValue, overlap }: VennDiagramProps
 }
 
 const styles = {
-  left: ({ euiTheme }: UseEuiTheme) =>
-    css`
-      fill: ${euiTheme.colors.danger};
-      fill-opacity: 0.5;
-    `,
+  left: ({ euiTheme }: UseEuiTheme) => css`
+    fill: ${euiTheme.colors.danger};
+    fill-opacity: 0.5;
+  `,
 
   right: ({ euiTheme }: UseEuiTheme) => css`
     fill: ${euiTheme.colors.primary};

@@ -28,7 +28,7 @@ export function tryPollutingPrototypes(): PollutionResult {
 
   // Attempt to pollute Object.prototype
   try {
-    (({}) as any).__proto__.polluted = true;
+    ({} as any).__proto__.polluted = true;
   } catch (e) {
     result.object.error = e.message;
   } finally {

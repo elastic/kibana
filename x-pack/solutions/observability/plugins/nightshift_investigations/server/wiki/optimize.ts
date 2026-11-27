@@ -810,17 +810,16 @@ export const optimizeWiki = async ({
       (page) => !isTouchedHere(page) && !isNamed(page) && isRelatedServicePage(page)
     ),
   ].slice(0, MAX_PAGE_BODIES);
-  const pageBodies = (await Promise.all(wanted.map((page) => store.get(page.id)))).flatMap(
-    (page) =>
-      page && page.status !== 'archived'
-        ? [
-            {
-              slug: slugOf(page),
-              entity_type: page.entity_type,
-              content: page.content,
-            },
-          ]
-        : []
+  const pageBodies = (await Promise.all(wanted.map((page) => store.get(page.id)))).flatMap((page) =>
+    page && page.status !== 'archived'
+      ? [
+          {
+            slug: slugOf(page),
+            entity_type: page.entity_type,
+            content: page.content,
+          },
+        ]
+      : []
   );
 
   const { edits } = await proposeEdits({

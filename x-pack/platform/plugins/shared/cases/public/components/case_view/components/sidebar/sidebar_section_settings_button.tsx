@@ -22,12 +22,11 @@ export const SidebarSectionSettingsButton: FC<SidebarSectionSettingsButtonProps>
 }) => {
   const { euiTheme } = useEuiTheme();
   const iconStyles = useMemo(
-    () =>
-      css`
-        .euiButtonIcon__icon {
-          color: ${euiTheme.colors.textSubdued};
-        }
-      `,
+    () => css`
+      .euiButtonIcon__icon {
+        color: ${euiTheme.colors.textSubdued};
+      }
+    `,
     [euiTheme]
   );
 

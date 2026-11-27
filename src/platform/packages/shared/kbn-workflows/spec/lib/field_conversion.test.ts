@@ -411,10 +411,8 @@ describe('applyInputDefaults', () => {
       },
     });
 
-    const result = applyInputDefaults(
-      { settings: { name: '{{ user }}' } },
-      inputsSchema,
-      (value) => (value === '{{ user }}' ? 'Alice' : value)
+    const result = applyInputDefaults({ settings: { name: '{{ user }}' } }, inputsSchema, (value) =>
+      value === '{{ user }}' ? 'Alice' : value
     );
 
     expect(result).toEqual({

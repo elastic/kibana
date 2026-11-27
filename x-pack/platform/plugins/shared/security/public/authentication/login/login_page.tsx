@@ -151,16 +151,15 @@ export class LoginPage extends Component<Props, State> {
         ? false
         : allowLogin && layout === 'form';
 
-    const loginWelcomeStyle = (euiTheme: EuiThemeComputed) =>
-      css`
-        position: relative;
-        margin: auto;
-        max-width: 460px;
-        padding-left: ${euiTheme.size.xl};
-        padding-right: ${euiTheme.size.xl};
-        z-index: 10;
-        text-align: center;
-      `;
+    const loginWelcomeStyle = (euiTheme: EuiThemeComputed) => css`
+      position: relative;
+      margin: auto;
+      max-width: 460px;
+      padding-left: ${euiTheme.size.xl};
+      padding-right: ${euiTheme.size.xl};
+      z-index: 10;
+      text-align: center;
+    `;
 
     const contentHeaderStyles = (euiTheme: EuiThemeComputed) => [
       loginWelcomeStyle(euiTheme),

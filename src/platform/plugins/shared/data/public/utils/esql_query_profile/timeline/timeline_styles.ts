@@ -186,10 +186,9 @@ export const useTimelineStyles = () => {
       planningColor: css`
         background: ${euiTheme.colors.warning};
       `,
-      groupColor: (groupIndex: number) =>
-        css`
-          background: ${groupColors[groupIndex % groupColors.length]};
-        `,
+      groupColor: (groupIndex: number) => css`
+        background: ${groupColors[groupIndex % groupColors.length]};
+      `,
     };
   }, [euiTheme, small, labelColumn]);
 };

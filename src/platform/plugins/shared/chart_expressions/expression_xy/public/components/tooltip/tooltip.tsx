@@ -156,34 +156,33 @@ const styles = {
     }
   `,
 
-  customToolTip: (euiThemeContext: UseEuiTheme) =>
-    css`
-      z-index: ${euiThemeContext.euiTheme.levels.toast};
-      pointer-events: none;
+  customToolTip: (euiThemeContext: UseEuiTheme) => css`
+    z-index: ${euiThemeContext.euiTheme.levels.toast};
+    pointer-events: none;
 
-      padding: ${euiThemeContext.euiTheme.size.s};
-      border-radius: ${euiThemeContext.euiTheme.border.radius.medium};
-      max-width: calc(${euiThemeContext.euiTheme.size.xl} * 10);
-      overflow: hidden;
-      border: ${euiThemeContext.euiTheme.border.width.thin} solid
-        ${euiThemeContext.euiTheme.components.tooltipBorderFloating};
+    padding: ${euiThemeContext.euiTheme.size.s};
+    border-radius: ${euiThemeContext.euiTheme.border.radius.medium};
+    max-width: calc(${euiThemeContext.euiTheme.size.xl} * 10);
+    overflow: hidden;
+    border: ${euiThemeContext.euiTheme.border.width.thin} solid
+      ${euiThemeContext.euiTheme.components.tooltipBorderFloating};
 
-      ${euiFontSize(euiThemeContext, 's')}
-      color: ${euiThemeContext.euiTheme.colors.textParagraph};
+    ${euiFontSize(euiThemeContext, 's')}
+    color: ${euiThemeContext.euiTheme.colors.textParagraph};
 
-      ${euiShadow(euiThemeContext, 'l', { border: 'none' })}
-      background-color: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
+    ${euiShadow(euiThemeContext, 'l', { border: 'none' })}
+    background-color: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
 
-      table {
-        table-layout: fixed;
-        width: 100%;
+    table {
+      table-layout: fixed;
+      width: 100%;
 
-        td,
-        th {
-          text-align: left;
-          padding: ${euiThemeContext.euiTheme.size.xs};
-          overflow-wrap: break-word;
-        }
+      td,
+      th {
+        text-align: left;
+        padding: ${euiThemeContext.euiTheme.size.xs};
+        overflow-wrap: break-word;
       }
-    `,
+    }
+  `,
 };
