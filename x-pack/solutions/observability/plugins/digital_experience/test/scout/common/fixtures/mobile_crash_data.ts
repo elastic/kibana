@@ -388,7 +388,9 @@ const documents = [
         ...(crash.type ? { 'exception.type': crash.type } : {}),
         ...(crash.message ? { 'exception.message': crash.message } : {}),
         ...(crash.stacktrace ? { 'exception.stacktrace': crash.stacktrace } : {}),
-        ...(crash.storedFingerprint ? { 'exception.fingerprint': crash.storedFingerprint } : {}),
+        ...(crash.storedFingerprint
+          ? { 'elastic.error.grouping_key': crash.storedFingerprint }
+          : {}),
       },
     },
   })),

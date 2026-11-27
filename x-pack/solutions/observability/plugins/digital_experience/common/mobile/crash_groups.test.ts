@@ -69,7 +69,9 @@ describe('withCrashFingerprint', () => {
       crashEvents({ serviceName: 'ride-ios', start: START, end: END })
     ).toRequest();
 
-    expect(query).toContain('| EVAL fingerprint = COALESCE(`attributes.exception.fingerprint`');
+    expect(query).toContain(
+      '| EVAL fingerprint = COALESCE(`attributes.elastic.error.grouping_key`'
+    );
   });
 });
 
@@ -97,7 +99,7 @@ describe('withCrashGroupStats', () => {
     expect(query).toContain('BY fingerprint');
     // Stored fingerprints, which can be of any type, so the group's type can't narrow its crashes.
     expect(query).toContain(
-      'stored_fingerprints = COUNT(*) WHERE `attributes.exception.fingerprint` IS NOT NULL'
+      'stored_fingerprints = COUNT(*) WHERE `attributes.elastic.error.grouping_key` IS NOT NULL'
     );
     // EDOT iOS reports, whose fingerprint changes with every build, so they are never marked new.
     expect(query).toContain(
@@ -130,7 +132,7 @@ describe('withCrashTypes', () => {
 
   it('keeps the crashes of the types, and those with a stored fingerprint, of any type', () => {
     expect(withCrashTypes(crashes(), ['SIGSEGV', 'SIGABRT', 'SIGSEGV']).print('basic')).toContain(
-      '| WHERE `attributes.exception.fingerprint` IS NOT NULL OR (`attributes.exception.type` IN ("SIGSEGV", "SIGABRT"))'
+      '| WHERE `attributes.elastic.error.grouping_key` IS NOT NULL OR (`attributes.exception.type` IN ("SIGSEGV", "SIGABRT"))'
     );
   });
 
@@ -162,7 +164,7 @@ describe('crash group detail', () => {
 
   it('reads the latest crash with its stack trace and session', () => {
     expect(withLatestCrash(groupCrashes()).print('basic')).toContain(
-      '| SORT crash_time DESC | LIMIT 1 | EVAL exception_type = `attributes.exception.type`, message = `attributes.exception.message`, stacktrace = `attributes.exception.stacktrace`, release = crash_release, os_version = crash_os_version, device_model = COALESCE(CASE(`resource.attributes.device.model.name` != "", `resource.attributes.device.model.name`, NULL), CASE(`resource.attributes.device.model.identifier` != "", `resource.attributes.device.model.identifier`, NULL)), session_id = CASE(`attributes.session.id` != "", `attributes.session.id`, NULL), stored_fingerprint = `attributes.exception.fingerprint`, reported_at = @timestamp | KEEP crash_time, reported_at, exception_type, message, stacktrace, release, os_version, device_model, session_id, stored_fingerprint'
+      '| SORT crash_time DESC | LIMIT 1 | EVAL exception_type = `attributes.exception.type`, message = `attributes.exception.message`, stacktrace = `attributes.exception.stacktrace`, release = crash_release, os_version = crash_os_version, device_model = COALESCE(CASE(`resource.attributes.device.model.name` != "", `resource.attributes.device.model.name`, NULL), CASE(`resource.attributes.device.model.identifier` != "", `resource.attributes.device.model.identifier`, NULL)), session_id = CASE(`attributes.session.id` != "", `attributes.session.id`, NULL), stored_fingerprint = `attributes.elastic.error.grouping_key`, reported_at = @timestamp | KEEP crash_time, reported_at, exception_type, message, stacktrace, release, os_version, device_model, session_id, stored_fingerprint'
     );
   });
 

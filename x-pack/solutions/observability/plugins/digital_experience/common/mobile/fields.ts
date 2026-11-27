@@ -60,7 +60,7 @@ export const MOBILE_FIELDS = {
   exceptionMessage: attributeField(EXCEPTION_MESSAGE),
   exceptionStacktrace: attributeField(EXCEPTION_STACKTRACE),
   /** A crash's group, once ingest stores one; no SDK or pipeline writes it yet. */
-  exceptionFingerprint: attributeField('exception.fingerprint'),
+  exceptionFingerprint: attributeField('elastic.error.grouping_key'),
   eventName: OTEL_EVENT_NAME,
   /** When the SDK observed a log record: EDOT iOS sets only this one to a crash's time. */
   observedTimestamp: OTEL_OBSERVED_TIMESTAMP,

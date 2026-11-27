@@ -158,7 +158,7 @@ describe('crashFingerprint', () => {
   const printed = esql`FROM logs`.pipe`EVAL fingerprint = ${crashFingerprint()}`.print('basic');
 
   it('prefers the stored fingerprint', () => {
-    expect(printed).toContain('COALESCE(`attributes.exception.fingerprint`, SHA256(');
+    expect(printed).toContain('COALESCE(`attributes.elastic.error.grouping_key`, SHA256(');
   });
 
   it('reads JavaScript errors from their message and other crashes from their stack trace', () => {

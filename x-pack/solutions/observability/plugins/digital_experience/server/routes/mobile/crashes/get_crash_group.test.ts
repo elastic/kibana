@@ -189,7 +189,7 @@ describe('getCrashGroup', () => {
     expect(breakdownRequests).toHaveLength(3);
     breakdownRequests.forEach(({ query }) =>
       expect(query).toContain(
-        'WHERE `attributes.exception.fingerprint` IS NOT NULL OR (`attributes.exception.type` IN ("SIGTRAP"))'
+        'WHERE `attributes.elastic.error.grouping_key` IS NOT NULL OR (`attributes.exception.type` IN ("SIGTRAP"))'
       )
     );
     expect(requests[0].query).not.toContain('`attributes.exception.type` IN');
