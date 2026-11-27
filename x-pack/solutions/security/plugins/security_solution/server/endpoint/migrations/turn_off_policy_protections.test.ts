@@ -10,7 +10,11 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { EndpointInternalFleetServicesInterface } from '../services/fleet';
 
-import { ALL_PRODUCT_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
+import type { UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
+import {
+  ALL_PRODUCT_FEATURE_KEYS,
+  ProductFeatureSecurityKey,
+} from '@kbn/security-solution-features/keys';
 import { turnOffPolicyProtectionsIfNotSupported } from './turn_off_policy_protections';
 import { FleetPackagePolicyGenerator } from '../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import type { PolicyData } from '../../../common/endpoint/types';
@@ -20,13 +24,15 @@ import {
 } from '../../../common/endpoint/models/policy_config_helpers';
 import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
 import { createProductFeaturesServiceMock } from '../../lib/product_features_service/mocks';
-import { merge } from 'lodash';
+import { cloneDeep, merge } from 'lodash';
 import {
   DefaultPolicyNotificationMessage,
   DefaultPolicyRuleNotificationMessage,
 } from '../../../common/endpoint/models/policy_config';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createEndpointFleetServicesFactoryMock } from '../services/fleet/endpoint_fleet_services_factory.mocks';
+import { setExportProviders } from '../../../common/endpoint/models/export_providers';
+import { validatePolicyAgainstProductFeatures } from '../../fleet_integration/handlers/validate_policy_against_product_features';
 
 describe('Turn Off Policy Protections Migration', () => {
   let esClient: ElasticsearchClient;
@@ -588,6 +594,80 @@ describe('Turn Off Policy Protections Migration', () => {
         expect(updatedPolicyValue.windows.popup.memory_protection.message).toBe('');
         expect(updatedPolicyValue.windows.popup).not.toHaveProperty('device_control');
         expect(updatedPolicyValue.mac.popup).not.toHaveProperty('device_control');
+      });
+    });
+
+    describe('Export providers', () => {
+      const addExportProviders = (policy: PolicyData): PolicyData => {
+        policy.inputs[0].config.policy.value = setExportProviders(
+          policy.inputs[0].config.policy.value,
+          [{ id: 'azure-1', type: 'azure_blob', account_name: 'acct', container: 'dumps' }]
+        );
+        return policy;
+      };
+
+      const getUpdatedPolicies = (): UpdatePackagePolicyWithId[] => {
+        const mockCalls = (fleetServices.packagePolicy.bulkUpdate as jest.Mock).mock.calls;
+        expect(mockCalls).toHaveLength(1);
+        return mockCalls[0][2];
+      };
+
+      it('removes export providers and the pinned manifest on a Complete to Essentials downgrade', async () => {
+        productFeatureService = createFilteredProductFeaturesServiceMock([
+          ProductFeatureSecurityKey.endpointResponseActions,
+          ProductFeatureSecurityKey.endpointProtectionUpdates,
+          ProductFeatureSecurityKey.endpointCustomNotification,
+          ProductFeatureSecurityKey.endpointRegistryCredentialHardening,
+          ProductFeatureSecurityKey.endpointTrustedDevices,
+        ]);
+        mockPolicyListResponse({
+          items: [addExportProviders(generatePolicyMock(false, true, false))],
+        });
+
+        await callTurnOffPolicyProtections();
+
+        const [update] = getUpdatedPolicies();
+        const updatedPolicyValue = update.inputs[0].config?.policy.value;
+        for (const os of ['windows', 'mac', 'linux'] as const) {
+          expect(updatedPolicyValue[os]).not.toHaveProperty('response_actions');
+        }
+        expect(updatedPolicyValue.global_manifest_version).toBe('latest');
+        // The package policy update callback must accept the update, or Fleet rejects all of it
+        expect(() =>
+          validatePolicyAgainstProductFeatures(update.inputs, productFeatureService)
+        ).not.toThrow();
+      });
+
+      it('removes export providers when they are the only unsupported setting', async () => {
+        productFeatureService = createFilteredProductFeaturesServiceMock([
+          ProductFeatureSecurityKey.endpointResponseActions,
+        ]);
+        const policy = generatePolicyMock(false, false, false);
+        const policyValueWithoutProviders = cloneDeep(policy.inputs[0].config.policy.value);
+        mockPolicyListResponse({ items: [addExportProviders(policy)] });
+
+        await callTurnOffPolicyProtections();
+
+        const [update] = getUpdatedPolicies();
+        expect(update.inputs[0].config?.policy.value).toEqual(policyValueWithoutProviders);
+      });
+
+      it('keeps export providers when endpointResponseActions is enabled', async () => {
+        productFeatureService = createFilteredProductFeaturesServiceMock([
+          ProductFeatureSecurityKey.endpointProtectionUpdates,
+        ]);
+        mockPolicyListResponse({
+          items: [addExportProviders(generatePolicyMock(false, true, false))],
+        });
+
+        await callTurnOffPolicyProtections();
+
+        const [update] = getUpdatedPolicies();
+        const updatedPolicyValue = update.inputs[0].config?.policy.value;
+        for (const os of ['windows', 'mac', 'linux'] as const) {
+          expect(updatedPolicyValue[os].response_actions.export_providers).toHaveLength(1);
+        }
+        expect(updatedPolicyValue.global_manifest_version).toBe('latest');
       });
     });
   });

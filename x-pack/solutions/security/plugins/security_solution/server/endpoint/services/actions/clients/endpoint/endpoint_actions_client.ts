@@ -19,6 +19,13 @@ import { CustomHttpRequestError } from '../../../../../utils/custom_http_request
 import { getActionRequestExpiration } from '../../utils';
 import { ResponseActionsClientError } from '../errors';
 import { stringify } from '../../../../utils/stringify';
+import {
+  getExportPath,
+  isValidExportPath,
+} from '../../../../../../common/endpoint/service/response_actions/export_providers';
+import { getExportProviders } from '../../../../../../common/endpoint/models/export_providers';
+import { createExportCredentials } from '../../export_providers/create_export_credentials';
+import { catchAndWrapError } from '../../../../utils';
 import type { HapiReadableStream } from '../../../../../types';
 import type {
   ResponseActionsApiCommandNames,
@@ -70,6 +77,8 @@ import type {
   EndpointScript,
   EndpointActionDataParameterTypes,
   ResponseActionScriptsApiResponse,
+  ExportProvider,
+  PolicyData,
 } from '../../../../../../common/endpoint/types';
 import type {
   CommonResponseActionMethodOptions,
@@ -77,6 +86,18 @@ import type {
   OmitUnsupportedAttributes,
 } from '../lib/types';
 import { DEFAULT_EXECUTE_ACTION_TIMEOUT } from '../../../../../../common/endpoint/service/response_actions/constants';
+
+/**
+ * What `export` adds to a get-file / memory-dump action: nothing when it isn't set, `error` when the
+ * export can't be dispatched, else all the other fields
+ */
+interface PreparedExport {
+  error?: string;
+  exportPath?: string;
+  /** The Fleet action's `expiration`, which the SAS lifetime is derived from */
+  expiration?: string;
+  credentials?: { sas: string };
+}
 
 const getInvalidAgentsWarning = (invalidAgents: string[]) =>
   invalidAgents.length
@@ -139,16 +160,29 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     // requires is checked up front in `validateCommandCapabilities()`.)
     if (
       (actionRequest.command === 'get-file' || actionRequest.command === 'memory-dump') &&
-      actionRequest.parameters?.export !== undefined &&
-      !this.options.endpointService.experimentalFeatures.responseActionsEndpointFileExport
+      actionRequest.parameters?.export !== undefined
     ) {
-      return {
-        isValid: false,
-        error: new ResponseActionsClientError(
-          `${actionRequest.command} \`export\` parameter is not enabled`,
-          400
-        ),
-      };
+      if (!this.options.endpointService.experimentalFeatures.responseActionsEndpointFileExport) {
+        return {
+          isValid: false,
+          error: new ResponseActionsClientError(
+            `${actionRequest.command} \`export\` parameter is not enabled`,
+            400
+          ),
+        };
+      }
+
+      // An exported file goes to a single blob, so it cannot be shared by several hosts in one
+      // action (also checked by the route schemas, which don't cover the other callers of this client)
+      if (actionRequest.endpoint_ids.length > 1) {
+        return {
+          isValid: false,
+          error: new ResponseActionsClientError(
+            `${actionRequest.command} \`export\` supports one host per request`,
+            400
+          ),
+        };
+      }
     }
 
     // Memory Dump: ensure that agents/Endpoint support this command
@@ -370,6 +404,105 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     }
   }
 
+  /**
+   * Checks the `export` provider of a get-file / memory-dump request against the host's Elastic
+   * Defend policy and returns the blob path, the Fleet action expiration and the SAS for that blob.
+   * Failures the user can fix are returned as `{ error }` (reported like the capability errors);
+   * anything else is thrown as is.
+   *
+   * Runs once per request, from `handleResponseAction()`: `validateRequest()` also runs when the
+   * action request document is written, after the action was dispatched.
+   */
+  private async prepareExport({
+    command,
+    actionReq,
+    actionId,
+    agentId,
+  }: {
+    command: ResponseActionsApiCommandNames;
+    actionReq: Pick<ResponseActionsRequestBody, 'parameters'>;
+    actionId: string;
+    agentId: string;
+  }): Promise<PreparedExport> {
+    const { parameters } = actionReq;
+    const exportProviderId = parameters && 'export' in parameters ? parameters.export : undefined;
+
+    if (
+      (command !== 'get-file' && command !== 'memory-dump') ||
+      typeof exportProviderId !== 'string'
+    ) {
+      return {};
+    }
+
+    const exportPath = getExportPath(actionId);
+
+    // Endpoint rejects an action whose `export_path` breaks the contract format
+    if (!isValidExportPath(exportPath)) {
+      throw new ResponseActionsClientError(
+        `Export path [${exportPath}] generated for action [${actionId}] is not a valid export path`,
+        500
+      );
+    }
+
+    // The same (cached) agent policy info `validateRequest()` loaded and the request document records
+    const [agentPolicyInfo] = await this.fetchAgentPolicyInfo([agentId]);
+
+    if (!agentPolicyInfo) {
+      return { error: `Agent [${agentId}] is not assigned to an agent policy` };
+    }
+
+    const { spaceId } = this.options;
+    const fleetServices = this.options.endpointService.getInternalFleetServices(spaceId);
+    // `getByIDs()`, not `get()`: `get()` reports every error other than not found as a bad request
+    const [packagePolicy] = await fleetServices.packagePolicy
+      .getByIDs(
+        fleetServices.savedObjects.createInternalScopedSoClient({ spaceId }),
+        [agentPolicyInfo.integrationPolicyId],
+        { ignoreMissing: true }
+      )
+      .catch(catchAndWrapError);
+
+    if (!packagePolicy) {
+      return {
+        error: `No Elastic Defend integration policy found for agent policy [${agentPolicyInfo.agentPolicyId}]`,
+      };
+    }
+
+    const policy = packagePolicy as PolicyData;
+    const provider: ExportProvider | undefined = getExportProviders(
+      policy.inputs[0].config.policy.value
+    ).find((candidate) => candidate.id === exportProviderId);
+
+    if (!provider) {
+      return {
+        error: `Export provider [${exportProviderId}] was not found in the Elastic Defend policy of agent [${agentId}]`,
+      };
+    }
+
+    if (!this.options.endpointService.getExportProviderKeyClient().isEncryptionAvailable()) {
+      return {
+        error: `Kibana can't read the storage account key: set xpack.encryptedSavedObjects.encryptionKey`,
+      };
+    }
+
+    const expiration = getActionRequestExpiration();
+    const credentials = await createExportCredentials({
+      endpointService: this.options.endpointService,
+      packagePolicyId: policy.id,
+      provider,
+      exportPath,
+      actionExpiration: expiration,
+    });
+
+    if (!credentials) {
+      return {
+        error: `Export provider [${exportProviderId}] has no storage account key. Set the key on the Storage providers tab of the Elastic Defend policy`,
+      };
+    }
+
+    return { exportPath, expiration, credentials: { sas: credentials.sas } };
+  }
+
   private async handleResponseAction<
     TOptions extends ResponseActionsRequestBody = ResponseActionsRequestBody,
     TResponse extends ActionDetails = ActionDetails,
@@ -392,14 +525,29 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     const { hosts, ruleName, ruleId, error } = this.getMethodOptions<TMethodOptions>(options);
     let actionError: string | undefined = validationError?.message || error;
     let actionRequestMeta: Record<string, unknown> | undefined;
+    let preparedExport: PreparedExport = {};
+
+    if (!actionError) {
+      preparedExport = await this.prepareExport({
+        command,
+        actionReq,
+        actionId,
+        agentId: validatedAgents.valid[0],
+      });
+      actionError = preparedExport.error;
+    }
 
     if (actionError && !this.options.isAutomated) {
       throw new ResponseActionsClientError(actionError, 400);
     }
 
+    const parameters = preparedExport.exportPath
+      ? { ...actionReq.parameters, export_path: preparedExport.exportPath }
+      : actionReq.parameters;
+
     // Dispatch action to Endpoint using Fleet
     if (!actionError) {
-      let actionParams = actionReq.parameters;
+      let actionParams = parameters;
 
       // For runscript, we pass allow some additional data to the Endpoint which does
       // not come from the action request
@@ -445,6 +593,8 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
             comment: actionReq.comment,
             parameters: actionParams as EndpointActionDataParameterTypes,
           },
+          expiration: preparedExport.expiration,
+          credentials: preparedExport.credentials,
         });
       } catch (e) {
         // If not in Automated mode, then just throw, else save the error and write
@@ -478,6 +628,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       command,
       comment,
       meta: actionRequestMeta,
+      parameters,
     } as ResponseActionsClientWriteActionRequestToEndpointIndexOptions);
 
     // Update cases
@@ -508,9 +659,14 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     actionId = uuidv4(),
     agents,
     data,
+    expiration = getActionRequestExpiration(),
+    credentials,
   }: Pick<FleetActionRequest, 'agents'> & {
     actionId?: string;
     data: LogsEndpointAction['EndpointActions']['data'];
+    expiration?: string;
+    /** Fleet action only (signed), never the action request document */
+    credentials?: PreparedExport['credentials'];
   }): Promise<FleetActionRequest> {
     const [messageSigningService, fleetActionsService] = await Promise.all([
       this.options.endpointService.getMessageSigningService(),
@@ -521,12 +677,14 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       input_type: 'endpoint',
       type: 'INPUT_ACTION',
       timeout: 300, // 5 minutes
-      expiration: getActionRequestExpiration(),
+      expiration,
       user_id: this.options.username,
       action_id: actionId || uuidv4(),
       agents,
       // Casting needed because Fleet type definition, which accepts any object, but was not defined using `any`
-      data: data as unknown as FleetActionRequest['data'],
+      data: (credentials
+        ? { ...data, credentials }
+        : data) as unknown as FleetActionRequest['data'],
     };
     const signedAction = await messageSigningService.sign(fleetActionDoc);
 
@@ -535,7 +693,18 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       signature: signedAction.signature,
     };
 
-    this.log.debug(`Signed Fleet endpoint action request:\n${stringify(fleetActionDoc)}`);
+    // `signed.data` is the base64 of the whole document, SAS included
+    if (credentials) {
+      this.log.debug(
+        `Signed Fleet endpoint action request:\n${stringify({
+          ...fleetActionDoc,
+          data: { ...fleetActionDoc.data, credentials: '[redacted]' },
+          signed: fleetActionDoc.signed && { ...fleetActionDoc.signed, data: '[redacted]' },
+        })}`
+      );
+    } else {
+      this.log.debug(`Signed Fleet endpoint action request:\n${stringify(fleetActionDoc)}`);
+    }
 
     return fleetActionsService.create(fleetActionDoc).catch((err) => {
       const error = new ResponseActionsClientError(
@@ -543,7 +712,8 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
           data.command
         }] response action request for agents [${agents.join(', ')}] failed with: ${err.message}`,
         500,
-        err
+        // The Elasticsearch error keeps the serialized request, SAS included, and gets logged
+        credentials ? undefined : err
       );
       this.log.error(error);
       throw error;

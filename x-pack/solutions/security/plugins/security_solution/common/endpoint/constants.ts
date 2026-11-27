@@ -77,6 +77,8 @@ export const METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE = `${BASE_INTERNAL_ENDPOI
 export const BASE_POLICY_RESPONSE_ROUTE = `${BASE_ENDPOINT_ROUTE}/policy_response`;
 export const BASE_POLICY_ROUTE = `${BASE_ENDPOINT_ROUTE}/policy`;
 export const PROTECTION_UPDATES_NOTE_ROUTE = `${BASE_ENDPOINT_ROUTE}/protection_updates_note/{package_policy_id}`;
+/** Sets or replaces the storage account key of one export provider (internal, version '1') */
+export const EXPORT_PROVIDER_KEY_ROUTE = `${BASE_INTERNAL_ENDPOINT_ROUTE}/policy/{package_policy_id}/export_providers/{provider_id}/key`;
 
 /** Suggestions routes */
 export const SUGGESTIONS_INTERNAL_ROUTE = `${BASE_INTERNAL_ENDPOINT_ROUTE}/suggestions/{suggestion_type}`;
@@ -102,6 +104,7 @@ export const RUN_SCRIPT_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/run_script`;
 export const MEMORY_DUMP_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/memory_dump`;
 export const CANCEL_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/cancel`;
 export const CUSTOM_SCRIPTS_ROUTE = `${BASE_INTERNAL_ENDPOINT_ACTION_ROUTE}/custom_scripts`;
+export const EXPORT_PROVIDERS_ROUTE = `${BASE_INTERNAL_ENDPOINT_ACTION_ROUTE}/export_providers`;
 
 /** Endpoint Actions Routes */
 export const ACTION_STATUS_ROUTE = `${BASE_ENDPOINT_ROUTE}/action_status`;

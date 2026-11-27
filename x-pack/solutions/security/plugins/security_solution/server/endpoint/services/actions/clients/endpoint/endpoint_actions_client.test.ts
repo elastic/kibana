@@ -17,6 +17,7 @@ import {
 } from '../../../../../../common/endpoint/constants';
 
 import { DEFAULT_EXECUTE_ACTION_TIMEOUT } from '../../../../../../common/endpoint/service/response_actions/constants';
+import type { EndpointCapabilities } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { applyEsClientSearchMock } from '../../../../mocks/utils.mock';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { BaseDataGenerator } from '../../../../../../common/endpoint/data_generators/base_data_generator';
@@ -30,7 +31,17 @@ import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import { ALLOWED_ACTION_REQUEST_TAGS } from '../../constants';
 import { EndpointMetadataGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
 import { ScriptsLibraryMock } from '../../../scripts_library/mocks';
-import type { ActionDetails } from '../../../../../../common/endpoint/types';
+import type {
+  ActionDetails,
+  ExportProvider,
+  PolicyData,
+} from '../../../../../../common/endpoint/types';
+import { FleetAgentGenerator } from '../../../../../../common/endpoint/data_generators/fleet_agent_generator';
+import { FleetPackagePolicyGenerator } from '../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
+import { setExportProviders } from '../../../../../../common/endpoint/models/export_providers';
+import { exportProviderKeyMocks } from '../../../../lib/export_provider_keys/mocks';
+import type { ExportProviderKeyClientInterface } from '../../../../lib/export_provider_keys/types';
+import { stringify } from '../../../../utils/stringify';
 
 jest.mock('../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../action_details_by_id');
@@ -54,6 +65,390 @@ describe('EndpointActionsClient', () => {
       endpoint_ids: ['1-2-3', 'invalid-id', '1-2-3'],
       case_ids: ['case-a'],
     };
+  };
+
+  // Valid-format (base64, 88 chars) mock storage account key - never a real credential.
+  const EXPORT_PROVIDER_ACCOUNT_KEY =
+    'MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZg==';
+  const EXPORT_AGENT_POLICY_ID = 'export-agent-policy-1';
+
+  /**
+   * Configures the mocked host's Elastic Defend policy (the one the agent targeted by
+   * `getCommonResponseActionOptions()` resolves to, through Fleet) to have `provider` configured,
+   * and, by default, a usable stored account key for it. `fetchAgentsById()`/`packagePolicy.list()`
+   * feed `fetchAgentPolicyInfo()`, and `packagePolicy.getByIDs()` returns the same package policy
+   * when `prepareExport()` reads it by id.
+   */
+  const setupExportProviderPolicy = (
+    provider: ExportProvider,
+    { hasAccountKey = true }: { hasAccountKey?: boolean } = {}
+  ): {
+    packagePolicy: PolicyData;
+    exportProviderKeyClient: jest.Mocked<ExportProviderKeyClientInterface>;
+  } => {
+    const fleetServices = classConstructorOptions.endpointService.getInternalFleetServices();
+    const packagePolicy = new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy({
+      policy_ids: [EXPORT_AGENT_POLICY_ID],
+    });
+
+    packagePolicy.inputs[0].config.policy.value = setExportProviders(
+      packagePolicy.inputs[0].config.policy.value,
+      [provider]
+    );
+
+    (fleetServices.fetchAgentsById as jest.Mock).mockImplementation(async (ids: string[]) =>
+      ids.map((id) =>
+        new FleetAgentGenerator('seed').generate({ id, policy_id: EXPORT_AGENT_POLICY_ID })
+      )
+    );
+    (fleetServices.packagePolicy.list as jest.Mock).mockResolvedValue({
+      items: [packagePolicy],
+      page: 1,
+      perPage: 10_000,
+      total: 1,
+    });
+    (fleetServices.packagePolicy.getByIDs as jest.Mock).mockResolvedValue([packagePolicy]);
+
+    const exportProviderKeyClient = exportProviderKeyMocks.createClient();
+
+    if (hasAccountKey) {
+      exportProviderKeyClient.getAccountKey.mockResolvedValue(EXPORT_PROVIDER_ACCOUNT_KEY);
+    }
+
+    jest
+      .spyOn(classConstructorOptions.endpointService, 'getExportProviderKeyClient')
+      .mockReturnValue(exportProviderKeyClient);
+
+    return { packagePolicy, exportProviderKeyClient };
+  };
+
+  /**
+   * The `export` credential checks, shared by get-file and memory-dump. `callWithExport` sends
+   * `command` with `export` set to `provider-1` to a host reporting `capabilities`.
+   */
+  const describeExportCredentials = (
+    command: 'get-file' | 'memory-dump',
+    capabilities: EndpointCapabilities[],
+    callWithExport: () => Promise<ActionDetails>
+  ) => {
+    describe('and resolving export credentials', () => {
+      const PROVIDER: ExportProvider = {
+        id: 'provider-1',
+        type: 'azure_blob',
+        account_name: 'acct',
+        container: 'dumps',
+      };
+
+      beforeEach(() => {
+        const generator = new EndpointMetadataGenerator('seed');
+
+        applyEsClientSearchMock({
+          esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+          index: metadataCurrentIndexPattern,
+          response: generator.toEsSearchResponse([
+            generator.toEsSearchHit(
+              generator.generate({
+                elastic: { agent: { id: '1-2-3' } },
+                Endpoint: { capabilities },
+              })
+            ),
+          ]),
+        });
+      });
+
+      it('sends the SAS to Fleet only, and never writes it (or the account key) to the action request document', async () => {
+        setupExportProviderPolicy(PROVIDER);
+
+        // Serialized when `sign()` is called: the Fleet document is mutated afterwards
+        const signedDocuments: string[] = [];
+        (
+          classConstructorOptions.endpointService.getMessageSigningService().sign as jest.Mock
+        ).mockImplementationOnce(async (doc: unknown) => {
+          signedDocuments.push(JSON.stringify(doc));
+          return { data: Buffer.from(JSON.stringify(doc)), signature: 'thisisasignature' };
+        });
+
+        await callWithExport();
+
+        const fleetActionsClient =
+          await classConstructorOptions.endpointService.getFleetActionsClient();
+        const [fleetActionDoc] = (fleetActionsClient.create as jest.Mock).mock.calls[0];
+
+        expect(fleetActionDoc.data.parameters.export_path).toEqual(
+          `${fleetActionDoc.action_id}/upload.zip`
+        );
+        expect(Object.keys(fleetActionDoc.data.credentials)).toEqual(['sas']);
+        expect(fleetActionDoc.data.credentials.sas).toEqual(expect.stringContaining('sr=b'));
+        expect(fleetActionDoc.data.credentials.sas).toEqual(expect.stringContaining('sp=rcw'));
+        expect(signedDocuments).toHaveLength(1);
+        expect(JSON.parse(signedDocuments[0]).data.credentials).toEqual(
+          fleetActionDoc.data.credentials
+        );
+
+        const [requestDocCall] = (
+          classConstructorOptions.esClient.index as jest.Mock
+        ).mock.calls.find(([request]) => request.index === ENDPOINT_ACTIONS_INDEX);
+        const requestDocJson = JSON.stringify(requestDocCall.document);
+
+        expect(requestDocCall.document.EndpointActions.data.parameters.export_path).toEqual(
+          `${fleetActionDoc.action_id}/upload.zip`
+        );
+        expect(requestDocJson).not.toContain('credentials');
+        expect(requestDocJson).not.toContain(fleetActionDoc.data.credentials.sas);
+      });
+
+      it('calls `getAccountKey` exactly once, with the policy id and the provider', async () => {
+        const { packagePolicy, exportProviderKeyClient } = setupExportProviderPolicy(PROVIDER);
+
+        await callWithExport();
+
+        expect(exportProviderKeyClient.getAccountKey).toHaveBeenCalledTimes(1);
+        expect(exportProviderKeyClient.getAccountKey).toHaveBeenCalledWith(
+          packagePolicy.id,
+          PROVIDER
+        );
+      });
+
+      it('mints a SAS that expires 24h after the Fleet action `expiration`, truncated to the second', async () => {
+        setupExportProviderPolicy(PROVIDER);
+
+        await callWithExport();
+
+        const fleetActionsClient =
+          await classConstructorOptions.endpointService.getFleetActionsClient();
+        const [fleetActionDoc] = (fleetActionsClient.create as jest.Mock).mock.calls[0];
+        const expectedExpiresOn = new Date(
+          Math.floor((Date.parse(fleetActionDoc.expiration) + 24 * 60 * 60 * 1000) / 1000) * 1000
+        );
+        const expectedSe = `${expectedExpiresOn.toISOString().slice(0, 19)}Z`;
+
+        expect(decodeURIComponent(fleetActionDoc.data.credentials.sas)).toContain(
+          `se=${expectedSe}`
+        );
+      });
+
+      it('never logs the SAS or the signed payload, logging a redacted copy instead', async () => {
+        setupExportProviderPolicy(PROVIDER);
+
+        await callWithExport();
+
+        const fleetActionsClient =
+          await classConstructorOptions.endpointService.getFleetActionsClient();
+        const [fleetActionDoc] = (fleetActionsClient.create as jest.Mock).mock.calls[0];
+        const debugMock = classConstructorOptions.endpointService.createLogger().debug as jest.Mock;
+        const loggedMessages = debugMock.mock.calls.map(([message]) =>
+          typeof message === 'function' ? message() : message
+        );
+
+        expect(
+          loggedMessages.some((message) => message.includes(fleetActionDoc.data.credentials.sas))
+        ).toBe(false);
+        expect(loggedMessages.some((message) => message.includes(fleetActionDoc.signed.data))).toBe(
+          false
+        );
+        expect(loggedMessages.some((message) => message.includes('[redacted]'))).toBe(true);
+      });
+
+      it('rejects with a 400 and the exact message when the provider is not in the policy, dispatching nor writing anything', async () => {
+        const { exportProviderKeyClient } = setupExportProviderPolicy({
+          ...PROVIDER,
+          id: 'some-other-provider',
+        });
+
+        await expect(callWithExport()).rejects.toMatchObject({
+          statusCode: 400,
+          message: `Export provider [${PROVIDER.id}] was not found in the Elastic Defend policy of agent [1-2-3]`,
+        });
+
+        const fleetActionsClient =
+          await classConstructorOptions.endpointService.getFleetActionsClient();
+
+        expect(fleetActionsClient.create as jest.Mock).not.toHaveBeenCalled();
+        expect(
+          (classConstructorOptions.esClient.index as jest.Mock).mock.calls.some(
+            ([request]) => request.index === ENDPOINT_ACTIONS_INDEX
+          )
+        ).toBe(false);
+        expect(exportProviderKeyClient.getAccountKey).not.toHaveBeenCalled();
+      });
+
+      it('rejects with a 400 and the exact message when the provider has no stored account key, dispatching nor writing anything', async () => {
+        setupExportProviderPolicy(PROVIDER, { hasAccountKey: false });
+
+        await expect(callWithExport()).rejects.toMatchObject({
+          statusCode: 400,
+          message: `Export provider [${PROVIDER.id}] has no storage account key. Set the key on the Storage providers tab of the Elastic Defend policy`,
+        });
+
+        const fleetActionsClient =
+          await classConstructorOptions.endpointService.getFleetActionsClient();
+
+        expect(fleetActionsClient.create as jest.Mock).not.toHaveBeenCalled();
+        expect(
+          (classConstructorOptions.esClient.index as jest.Mock).mock.calls.some(
+            ([request]) => request.index === ENDPOINT_ACTIONS_INDEX
+          )
+        ).toBe(false);
+      });
+
+      it('rejects with a 400 and the exact message when encryption is unavailable, without calling `getAccountKey`', async () => {
+        const { exportProviderKeyClient } = setupExportProviderPolicy(PROVIDER);
+
+        exportProviderKeyClient.isEncryptionAvailable.mockReturnValue(false);
+
+        await expect(callWithExport()).rejects.toMatchObject({
+          statusCode: 400,
+          message: `Kibana can't read the storage account key: set xpack.encryptedSavedObjects.encryptionKey`,
+        });
+
+        const fleetActionsClient =
+          await classConstructorOptions.endpointService.getFleetActionsClient();
+
+        expect(fleetActionsClient.create as jest.Mock).not.toHaveBeenCalled();
+        expect(
+          (classConstructorOptions.esClient.index as jest.Mock).mock.calls.some(
+            ([request]) => request.index === ENDPOINT_ACTIONS_INDEX
+          )
+        ).toBe(false);
+        expect(exportProviderKeyClient.getAccountKey).not.toHaveBeenCalled();
+      });
+
+      it("returns a 400 when the agent's Elastic Defend package policy no longer exists", async () => {
+        const { packagePolicy } = setupExportProviderPolicy(PROVIDER);
+        const fleetServices = classConstructorOptions.endpointService.getInternalFleetServices();
+
+        (fleetServices.packagePolicy.getByIDs as jest.Mock).mockResolvedValue([]);
+
+        await expect(callWithExport()).rejects.toMatchObject({
+          statusCode: 400,
+          message: `No Elastic Defend integration policy found for agent policy [${EXPORT_AGENT_POLICY_ID}]`,
+        });
+        expect(fleetServices.packagePolicy.getByIDs as jest.Mock).toHaveBeenCalledWith(
+          expect.anything(),
+          [packagePolicy.id],
+          { ignoreMissing: true }
+        );
+        expect(
+          (await classConstructorOptions.endpointService.getFleetActionsClient())
+            .create as jest.Mock
+        ).not.toHaveBeenCalled();
+      });
+
+      it('returns a 400 when the Fleet agent is not assigned to an agent policy', async () => {
+        setupExportProviderPolicy(PROVIDER);
+        const fleetServices = classConstructorOptions.endpointService.getInternalFleetServices();
+
+        (fleetServices.fetchAgentsById as jest.Mock).mockImplementation(async (ids: string[]) =>
+          ids.map((id) => ({
+            ...new FleetAgentGenerator('seed').generate({ id }),
+            policy_id: undefined,
+          }))
+        );
+
+        await expect(callWithExport()).rejects.toMatchObject({
+          statusCode: 400,
+          message: 'Agent [1-2-3] is not assigned to an agent policy',
+        });
+        expect(fleetServices.packagePolicy.getByIDs as jest.Mock).not.toHaveBeenCalled();
+        expect(
+          (await classConstructorOptions.endpointService.getFleetActionsClient())
+            .create as jest.Mock
+        ).not.toHaveBeenCalled();
+      });
+
+      it('does not report a non-"not found" policy lookup error as a 400', async () => {
+        setupExportProviderPolicy(PROVIDER);
+        const fleetServices = classConstructorOptions.endpointService.getInternalFleetServices();
+
+        (fleetServices.packagePolicy.getByIDs as jest.Mock).mockRejectedValue(
+          new Error('ES is unavailable')
+        );
+
+        const error = await callWithExport().catch((e) => e);
+
+        expect(error).toBeInstanceOf(Error);
+        expect(error.message).toContain('ES is unavailable');
+        expect(error.statusCode).not.toBe(400);
+        expect(
+          (await classConstructorOptions.endpointService.getFleetActionsClient())
+            .create as jest.Mock
+        ).not.toHaveBeenCalled();
+      });
+
+      it('does not resolve any export credentials when the feature flag is disabled, and never calls Fleet lookups or `getAccountKey` for it', async () => {
+        Object.assign(classConstructorOptions.endpointService.experimentalFeatures, {
+          responseActionsEndpointFileExport: false,
+        });
+
+        const fleetServices = classConstructorOptions.endpointService.getInternalFleetServices();
+        const getAccountKeySpy = jest.spyOn(
+          classConstructorOptions.endpointService.getExportProviderKeyClient(),
+          'getAccountKey'
+        );
+
+        await expect(callWithExport()).rejects.toMatchObject({
+          message: `${command} \`export\` parameter is not enabled`,
+          statusCode: 400,
+        });
+
+        expect(fleetServices.fetchAgentsById as jest.Mock).not.toHaveBeenCalled();
+        expect(fleetServices.packagePolicy.list as jest.Mock).not.toHaveBeenCalled();
+        expect(fleetServices.packagePolicy.getByIDs as jest.Mock).not.toHaveBeenCalled();
+        expect(getAccountKeySpy).not.toHaveBeenCalled();
+      });
+
+      it("doesn't keep the Fleet error, which holds the serialized request and the SAS, when the Fleet action can't be created", async () => {
+        setupExportProviderPolicy(PROVIDER);
+
+        const fleetActionsClient =
+          await classConstructorOptions.endpointService.getFleetActionsClient();
+        let sas = '';
+
+        (fleetActionsClient.create as jest.Mock).mockImplementationOnce(
+          async (doc: { data: { credentials: { sas: string } } }) => {
+            sas = doc.data.credentials.sas;
+            // Like the Elasticsearch client's `ResponseError`, which keeps the serialized request
+            throw Object.assign(new Error('index_closed_exception'), {
+              meta: { meta: { request: { params: { body: JSON.stringify(doc) } } } },
+            });
+          }
+        );
+
+        const error = await callWithExport().catch((e) => e);
+        const errorLogMock = classConstructorOptions.endpointService.createLogger()
+          .error as jest.Mock;
+
+        expect(sas).not.toEqual('');
+        expect(error.statusCode).toEqual(500);
+        expect(error.message).toContain('index_closed_exception');
+        // How the route error handler logs it
+        expect(stringify(error, 20)).not.toContain(sas);
+        expect(stringify(errorLogMock.mock.calls, 20)).not.toContain(sas);
+      });
+    });
+  };
+
+  /** Two hosts that support `export` for get-file and memory-dump, so only the host count can fail */
+  const mockTwoExportCapableHosts = (): string[] => {
+    const generator = new EndpointMetadataGenerator('seed');
+    const agentIds = ['agent-1', 'agent-2'];
+
+    applyEsClientSearchMock({
+      esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+      index: metadataCurrentIndexPattern,
+      response: generator.toEsSearchResponse(
+        agentIds.map((id) =>
+          generator.toEsSearchHit(
+            generator.generate({
+              elastic: { agent: { id } },
+              Endpoint: { capabilities: ['memdump_process', 'file_export'] },
+            })
+          )
+        )
+      ),
+    });
+
+    return agentIds;
   };
 
   beforeEach(() => {
@@ -823,6 +1218,23 @@ describe('EndpointActionsClient', () => {
           });
         });
 
+        it('should reject more than one host without dispatching the action', async () => {
+          await expect(
+            endpointActionsClient.getFile(
+              responseActionsClientMock.createGetFileOptions({
+                endpoint_ids: mockTwoExportCapableHosts(),
+                parameters: { path: 'C:\\file.txt', export: 'provider-1' },
+              })
+            )
+          ).rejects.toMatchObject({
+            message: 'get-file `export` supports one host per request',
+            statusCode: 400,
+          });
+          expect(
+            (await classConstructorOptions.endpointService.getFleetActionsClient()).create
+          ).not.toHaveBeenCalled();
+        });
+
         it('should succeed and keep `export` in the Fleet action and the action request when endpoint supports the `file_export` capability', async () => {
           const generator = new EndpointMetadataGenerator('seed');
 
@@ -831,9 +1243,18 @@ describe('EndpointActionsClient', () => {
             index: metadataCurrentIndexPattern,
             response: generator.toEsSearchResponse([
               generator.toEsSearchHit(
-                generator.generate({ Endpoint: { capabilities: ['file_export'] } })
+                generator.generate({
+                  elastic: { agent: { id: '1-2-3' } },
+                  Endpoint: { capabilities: ['file_export'] },
+                })
               ),
             ]),
+          });
+          setupExportProviderPolicy({
+            id: 'provider-1',
+            type: 'azure_blob',
+            account_name: 'acct',
+            container: 'dumps',
           });
 
           const parameters = { path: 'C:\\file.txt', export: 'provider-1' };
@@ -847,24 +1268,69 @@ describe('EndpointActionsClient', () => {
             )
           ).resolves.toBeDefined();
 
-          // Dropping `export` would silently turn the export into a normal upload to Fleet
-          expect(
-            (await classConstructorOptions.endpointService.getFleetActionsClient())
-              .create as jest.Mock
-          ).toHaveBeenCalledWith(
-            expect.objectContaining({ data: expect.objectContaining({ parameters }) })
-          );
+          // Dropping `export` would silently turn the export into a normal upload to Fleet. Kibana
+          // adds `export_path` on top (the blob path Endpoint uploads to), derived from the action id.
+          const fleetActionsClient =
+            await classConstructorOptions.endpointService.getFleetActionsClient();
+          const [fleetActionDoc] = (fleetActionsClient.create as jest.Mock).mock.calls[0];
+          const expectedParameters = {
+            ...parameters,
+            export_path: `${fleetActionDoc.action_id}/upload.zip`,
+          };
+
+          expect(fleetActionDoc.data.parameters).toEqual(expectedParameters);
           expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
             expect.objectContaining({
               index: ENDPOINT_ACTIONS_INDEX,
               document: expect.objectContaining({
                 EndpointActions: expect.objectContaining({
-                  data: expect.objectContaining({ parameters }),
+                  data: expect.objectContaining({ parameters: expectedParameters }),
                 }),
               }),
             }),
             expect.anything()
           );
+        });
+
+        describeExportCredentials('get-file', ['file_export'], () =>
+          endpointActionsClient.getFile(
+            responseActionsClientMock.createGetFileOptions({
+              ...getCommonResponseActionOptions(),
+              parameters: { path: 'C:\\file.txt', export: 'provider-1' },
+            })
+          )
+        );
+
+        it('does not resolve export credentials for an action that does not set `export`', async () => {
+          const generator = new EndpointMetadataGenerator('seed');
+
+          applyEsClientSearchMock({
+            esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+            index: metadataCurrentIndexPattern,
+            response: generator.toEsSearchResponse([
+              generator.toEsSearchHit(generator.generate({ Endpoint: { capabilities: [] } })),
+            ]),
+          });
+
+          const getAccountKeySpy = jest.spyOn(
+            classConstructorOptions.endpointService.getExportProviderKeyClient(),
+            'getAccountKey'
+          );
+
+          await endpointActionsClient.getFile(
+            responseActionsClientMock.createGetFileOptions({
+              ...getCommonResponseActionOptions(),
+              parameters: { path: 'C:\\file.txt' },
+            })
+          );
+
+          const fleetActionsClient =
+            await classConstructorOptions.endpointService.getFleetActionsClient();
+          const [fleetActionDoc] = (fleetActionsClient.create as jest.Mock).mock.calls[0];
+
+          expect(fleetActionDoc.data.parameters).not.toHaveProperty('export_path');
+          expect(fleetActionDoc.data).not.toHaveProperty('credentials');
+          expect(getAccountKeySpy).not.toHaveBeenCalled();
         });
 
         describe('and `force` is also set to `true`', () => {
@@ -958,13 +1424,67 @@ describe('EndpointActionsClient', () => {
               response: generator.toEsSearchResponse([
                 generator.toEsSearchHit(
                   generator.generate({
+                    elastic: { agent: { id: '1-2-3' } },
                     Endpoint: { capabilities: ['get_file_force', 'file_export'] },
                   })
                 ),
               ]),
             });
+            setupExportProviderPolicy({
+              id: 'provider-1',
+              type: 'azure_blob',
+              account_name: 'acct',
+              container: 'dumps',
+            });
 
             await expect(getFileWithForceAndExport()).resolves.toBeDefined();
+          });
+        });
+
+        describe('and `paths` is set instead of `path`', () => {
+          const getFileWithPathsAndExport = () =>
+            endpointActionsClient.getFile(
+              createGetFileOptions({ paths: ['/one', '/two'], export: 'provider-1' })
+            );
+
+          const mockEndpointCapabilities = (capabilities: EndpointCapabilities[]) => {
+            const generator = new EndpointMetadataGenerator('seed');
+
+            applyEsClientSearchMock({
+              esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+              index: metadataCurrentIndexPattern,
+              response: generator.toEsSearchResponse([
+                generator.toEsSearchHit(
+                  // Endpoint 9.5/9.6 get multi-path through a backport but not export, so pin a
+                  // version whose generated capabilities include neither
+                  generator.generate({ agent: { version: '9.6.0' }, Endpoint: { capabilities } })
+                ),
+              ]),
+            });
+          };
+
+          it('should reject a host that reports `get_file_multi_path` but not `file_export`', async () => {
+            mockEndpointCapabilities(['get_file_multi_path']);
+
+            const error = await getFileWithPathsAndExport().catch((e) => e);
+
+            expect(error).toMatchObject({ statusCode: 400 });
+            expect(error.message).toContain(
+              'The following agent IDs do not support exporting files to external storage'
+            );
+            expect(error.message).not.toContain('do not support the get-file `paths` parameter');
+          });
+
+          it('should succeed when the host reports both `get_file_multi_path` and `file_export`', async () => {
+            mockEndpointCapabilities(['get_file_multi_path', 'file_export']);
+            setupExportProviderPolicy({
+              id: 'provider-1',
+              type: 'azure_blob',
+              account_name: 'acct',
+              container: 'dumps',
+            });
+
+            await expect(getFileWithPathsAndExport()).resolves.toBeDefined();
           });
         });
       });
@@ -1343,6 +1863,23 @@ describe('EndpointActionsClient', () => {
           });
         });
 
+        it('should reject more than one host without dispatching the action', async () => {
+          await expect(
+            endpointActionsClient.memoryDump(
+              responseActionsClientMock.createMemoryDumpActionOption({
+                endpoint_ids: mockTwoExportCapableHosts(),
+                parameters: { type: 'process', pid: 123, export: 'provider-1' },
+              })
+            )
+          ).rejects.toMatchObject({
+            message: 'memory-dump `export` supports one host per request',
+            statusCode: 400,
+          });
+          expect(
+            (await classConstructorOptions.endpointService.getFleetActionsClient()).create
+          ).not.toHaveBeenCalled();
+        });
+
         it('should succeed and keep `export` in the Fleet action and the action request when endpoint supports both `memdump_process` and `file_export`', async () => {
           const generator = new EndpointMetadataGenerator('seed');
 
@@ -1352,10 +1889,17 @@ describe('EndpointActionsClient', () => {
             response: generator.toEsSearchResponse([
               generator.toEsSearchHit(
                 generator.generate({
+                  elastic: { agent: { id: '1-2-3' } },
                   Endpoint: { capabilities: ['memdump_process', 'file_export'] },
                 })
               ),
             ]),
+          });
+          setupExportProviderPolicy({
+            id: 'provider-1',
+            type: 'azure_blob',
+            account_name: 'acct',
+            container: 'dumps',
           });
 
           const parameters = { type: 'process' as const, pid: 123, export: 'provider-1' };
@@ -1369,23 +1913,69 @@ describe('EndpointActionsClient', () => {
             )
           ).resolves.toBeDefined();
 
-          expect(
-            (await classConstructorOptions.endpointService.getFleetActionsClient())
-              .create as jest.Mock
-          ).toHaveBeenCalledWith(
-            expect.objectContaining({ data: expect.objectContaining({ parameters }) })
-          );
+          const fleetActionsClient =
+            await classConstructorOptions.endpointService.getFleetActionsClient();
+          const [fleetActionDoc] = (fleetActionsClient.create as jest.Mock).mock.calls[0];
+          const expectedParameters = {
+            ...parameters,
+            export_path: `${fleetActionDoc.action_id}/upload.zip`,
+          };
+
+          expect(fleetActionDoc.data.parameters).toEqual(expectedParameters);
           expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
             expect.objectContaining({
               index: ENDPOINT_ACTIONS_INDEX,
               document: expect.objectContaining({
                 EndpointActions: expect.objectContaining({
-                  data: expect.objectContaining({ parameters }),
+                  data: expect.objectContaining({ parameters: expectedParameters }),
                 }),
               }),
             }),
             expect.anything()
           );
+        });
+
+        describeExportCredentials('memory-dump', ['memdump_process', 'file_export'], () =>
+          endpointActionsClient.memoryDump(
+            responseActionsClientMock.createMemoryDumpActionOption({
+              ...getCommonResponseActionOptions(),
+              parameters: { type: 'process' as const, pid: 123, export: 'provider-1' },
+            })
+          )
+        );
+
+        it('does not resolve export credentials for an action that does not set `export`', async () => {
+          const generator = new EndpointMetadataGenerator('seed');
+
+          applyEsClientSearchMock({
+            esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+            index: metadataCurrentIndexPattern,
+            response: generator.toEsSearchResponse([
+              generator.toEsSearchHit(
+                generator.generate({ Endpoint: { capabilities: ['memdump_process'] } })
+              ),
+            ]),
+          });
+
+          const getAccountKeySpy = jest.spyOn(
+            classConstructorOptions.endpointService.getExportProviderKeyClient(),
+            'getAccountKey'
+          );
+
+          await endpointActionsClient.memoryDump(
+            responseActionsClientMock.createMemoryDumpActionOption({
+              ...getCommonResponseActionOptions(),
+              parameters: { type: 'process', pid: 123 },
+            })
+          );
+
+          const fleetActionsClient =
+            await classConstructorOptions.endpointService.getFleetActionsClient();
+          const [fleetActionDoc] = (fleetActionsClient.create as jest.Mock).mock.calls[0];
+
+          expect(fleetActionDoc.data.parameters).not.toHaveProperty('export_path');
+          expect(fleetActionDoc.data).not.toHaveProperty('credentials');
+          expect(getAccountKeySpy).not.toHaveBeenCalled();
         });
       });
     });

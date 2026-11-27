@@ -181,15 +181,17 @@ export const sendEndpointActionResponse = async (
 
     // With `export`, Endpoint uploads the file to the export provider instead of to Fleet and, only
     // on success, reports where it went (memory-dump also reports the dump's file name)
-    const exportProviderId =
-      isGetFileAction(action) || isMemoryDumpAction(action) ? action.parameters?.export : undefined;
+    const exportParameters =
+      isGetFileAction(action) || isMemoryDumpAction(action) ? action.parameters : undefined;
+    const exportProviderId = exportParameters?.export;
     const outputContent = endpointResponse.EndpointActions.data.output?.content;
 
     if (exportProviderId && outputContent && !endpointResponse.error) {
       Object.assign(outputContent, {
         exported: endpointActionGenerator.generateExportedOutput({
           export: exportProviderId,
-          path: `${action.id}/upload.zip`,
+          // Actions created before `export_path` existed don't have it on their request doc
+          path: exportParameters?.export_path ?? `${action.id}/upload.zip`,
         }),
         ...(action.command === 'memory-dump' && 'path' in outputContent
           ? { file_name: basename(outputContent.path) }

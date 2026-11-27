@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type {
   PostPackagePolicyCreateCallback,
@@ -40,6 +41,16 @@ import { updateAntivirusRegistrationEnabled } from '../../common/endpoint/utils/
 import { validatePolicyAgainstProductFeatures } from './handlers/validate_policy_against_product_features';
 import { validateEndpointPackagePolicy } from './handlers/validate_endpoint_package_policy';
 import {
+  removeExportProviderSettings,
+  validateExportProviderSettings,
+} from './handlers/validate_export_providers';
+import {
+  filterExportProviderKeyReferences,
+  rejectExportProviderCredentialsOnCreate,
+  rejectResponseActionsInOverrides,
+  validateExportProviderCredentials,
+} from './handlers/export_provider_credentials';
+import {
   isPolicySetToEventCollectionOnly,
   ensureOnlyEventCollectionIsAllowed,
   isBillablePolicy,
@@ -61,7 +72,10 @@ import type { IRequestContextFactory } from '../request_context_factory';
 import { installEndpointSecurityPrebuiltRule } from '../lib/detection_engine/prebuilt_rules/logic/integrations/install_endpoint_security_prebuilt_rule';
 import { createPolicyArtifactManifest } from './handlers/create_policy_artifact_manifest';
 import { createDefaultPolicy } from './handlers/create_default_policy';
-import { validatePolicyAgainstLicense } from './handlers/validate_policy_against_license';
+import {
+  validateExportProvidersAgainstLicense,
+  validatePolicyAgainstLicense,
+} from './handlers/validate_policy_against_license';
 import { validateIntegrationConfig } from './handlers/validate_integration_config';
 import { removePolicyFromArtifacts } from './handlers/remove_policy_from_artifacts';
 import { notifyProtectionFeatureUsage } from './notify_protection_feature_usage';
@@ -130,6 +144,30 @@ const shouldUpdateMetaValues = (
   );
 };
 
+const isExportProvidersEnabled = (
+  productFeatures: ProductFeaturesService,
+  experimentalFeatures: ExperimentalFeatures
+): boolean =>
+  productFeatures.isEnabled(ProductFeatureSecurityKey.endpointResponseActions) &&
+  experimentalFeatures.responseActionsEndpointFileExport;
+
+/**
+ * Fleet merges `overrides` into the agent policy after every callback check, so `response_actions`
+ * there would bypass them. Like the rest of the feature, checked only with export providers enabled.
+ */
+const rejectResponseActionsInOverridesIfEnabled = (
+  packagePolicy: NewPackagePolicy,
+  productFeatures: ProductFeaturesService,
+  experimentalFeatures: ExperimentalFeatures
+): void => {
+  if (
+    isEndpointPackagePolicy(packagePolicy) &&
+    isExportProvidersEnabled(productFeatures, experimentalFeatures)
+  ) {
+    rejectResponseActionsInOverrides(packagePolicy);
+  }
+};
+
 /**
  * Callback to handle creation of PackagePolicies in Fleet
  */
@@ -151,9 +189,34 @@ export const getPackagePolicyCreateCallback = (
     context,
     request
   ): Promise<NewPackagePolicy> => {
+    // Both paths below keep `overrides` (with a request only `inputs` is replaced)
+    rejectResponseActionsInOverridesIfEnabled(
+      newPackagePolicy,
+      productFeatures,
+      experimentalFeatures
+    );
+
     // callback is called outside request context
     if (!context || !request) {
       logger.debug('PackagePolicyCreateCallback called outside request context. Skipping...');
+
+      const endpointPolicyData = newPackagePolicy as NewPolicyData;
+      const incomingPolicyValue = endpointPolicyData.inputs?.[0]?.config?.policy?.value;
+
+      // The incoming policy is kept here (with a request it's replaced by the defaults below),
+      // so it gets the export provider checks and gating of an update
+      if (isEndpointPackagePolicy(newPackagePolicy) && incomingPolicyValue) {
+        if (isExportProvidersEnabled(productFeatures, experimentalFeatures)) {
+          rejectExportProviderCredentialsOnCreate(incomingPolicyValue);
+          validateExportProviderSettings(endpointPolicyData.inputs[0].config);
+          validateExportProvidersAgainstLicense(incomingPolicyValue, licenseService, logger);
+        } else {
+          endpointPolicyData.inputs[0].config = removeExportProviderSettings(
+            endpointPolicyData.inputs[0].config
+          );
+        }
+      }
+
       return newPackagePolicy;
     }
 
@@ -292,6 +355,12 @@ export const getPackagePolicyUpdateCallback = (
     const endpointIntegrationData = newPackagePolicy as NewPolicyData;
 
     try {
+      rejectResponseActionsInOverridesIfEnabled(
+        newPackagePolicy,
+        productFeatures,
+        experimentalFeatures
+      );
+
       // The advanced settings UI may delete mac.ransomware.mode when cleared;
       // restore the default before validation so the typed field is never missing.
       const policyValue = endpointIntegrationData.inputs?.[0]?.config?.policy?.value as
@@ -351,6 +420,16 @@ export const getPackagePolicyUpdateCallback = (
         );
       }
 
+      // Stripped before license validation for the same reason as custom YARA signatures above.
+      if (
+        !isExportProvidersEnabled(productFeatures, experimentalFeatures) &&
+        endpointIntegrationData.inputs?.[0]?.config?.policy?.value
+      ) {
+        endpointIntegrationData.inputs[0].config = removeExportProviderSettings(
+          endpointIntegrationData.inputs[0].config
+        );
+      }
+
       // Validate that Endpoint Security policy is valid against current license
       if (endpointIntegrationData.inputs?.[0]?.config?.policy?.value) {
         validatePolicyAgainstLicense(
@@ -364,6 +443,39 @@ export const getPackagePolicyUpdateCallback = (
 
       // Make sure policy includes general expected data
       validateEndpointPackagePolicy(endpointIntegrationData.inputs, 'update');
+
+      if (endpointIntegrationData.inputs?.[0]?.config?.policy?.value) {
+        const policyConfig = endpointIntegrationData.inputs[0].config.policy;
+        const packagePolicyId = endpointIntegrationData.id as string;
+        const exportProvidersPolicyValue = policyConfig.value as PolicyConfig;
+
+        // Reject a plaintext key or a malformed reference before deciding which references to keep
+        validateExportProviderCredentials(exportProvidersPolicyValue);
+
+        // Drop references this package policy may not keep (foreign, missing or retired keys)
+        const filteredPolicyValue = await filterExportProviderKeyReferences({
+          policy: exportProvidersPolicyValue,
+          packagePolicyId,
+          getStoredPolicy: () =>
+            endpointServices
+              .getInternalFleetServices()
+              .packagePolicy.get(soClient, packagePolicyId)
+              .then((storedPolicy) => storedPolicy ?? undefined)
+              .catch((error) => {
+                if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+                  return undefined;
+                }
+                throw error;
+              }),
+          keyClient: endpointServices.getExportProviderKeyClient(),
+          logger,
+          now: Date.now(),
+        });
+
+        policyConfig.value = filteredPolicyValue;
+
+        validateExportProviderSettings(endpointIntegrationData.inputs[0].config);
+      }
     } catch (error) {
       // Fleet swallows callback errors lacking `apiPassThrough` and persists the payload unvalidated,
       // so any unexpected failure while checking it must be converted into a rejection.
@@ -600,8 +712,9 @@ export const getPackagePolicyDeleteCallback = (
   const exceptionsClient = endpointServices.getExceptionListsClient();
   const logger = endpointServices.createLogger('endpointPolicyDeleteCallback');
 
-  return async (deletePackagePolicy): Promise<void> => {
+  return async (deletePackagePolicy, _soClient, _esClient, _context, request): Promise<void> => {
     const policiesToRemove: Array<Promise<void>> = [];
+    const deletedEndpointPolicyIds: string[] = [];
 
     for (const policy of deletePackagePolicy) {
       if (isEndpointPackagePolicy(policy)) {
@@ -609,6 +722,10 @@ export const getPackagePolicyDeleteCallback = (
 
         policiesToRemove.push(removePolicyFromArtifacts(exceptionsClient, policy, logger));
         policiesToRemove.push(removeProtectionUpdatesNote(endpointServices, policy));
+
+        if (policy.success === true) {
+          deletedEndpointPolicyIds.push(policy.id);
+        }
       }
     }
 
@@ -617,6 +734,26 @@ export const getPackagePolicyDeleteCallback = (
     policiesToRemove.push(
       updateDeletedPolicyResponseActions(endpointServices, deletePackagePolicy)
     );
+
+    // The owner is gone, so every key of these policies can go too; cleanup would get to them
+    // eventually, but there is no reason to wait. The deletes are audited for the user who deleted
+    // the policies, when Fleet passes the request.
+    if (deletedEndpointPolicyIds.length > 0) {
+      policiesToRemove.push(
+        endpointServices
+          .getExportProviderKeyClient()
+          .deleteKeysForPackagePolicies(deletedEndpointPolicyIds, {
+            auditLogger: request ? endpointServices.security?.audit.asScoped(request) : undefined,
+          })
+          .catch((error) => {
+            logger.warn(
+              `Failed to delete export provider keys of deleted policies [${deletedEndpointPolicyIds.join(
+                ', '
+              )}]: ${error instanceof Error ? error.message : String(error)}`
+            );
+          })
+      );
+    }
 
     await Promise.all(policiesToRemove);
 

@@ -7,6 +7,7 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import type { AppHeaderTab } from '@kbn/app-header';
+import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -16,6 +17,9 @@ import { UnsavedChangesConfirmModal } from './unsaved_changes_confirm_modal';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { ProtectionUpdatesLayout } from '../protection_updates/protection_updates_layout';
+import { StorageProvidersLayout } from '../storage_providers/storage_providers_layout';
+import { STORAGE_PROVIDERS_TAB_LABEL } from '../storage_providers/translations';
+import { useProductFeatureKeys } from '../../../../../common/hooks/use_product_feature_keys';
 import { PolicySettingsLayout } from '../policy_settings_layout';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import {
@@ -32,6 +36,7 @@ import {
   getPolicyEventFiltersPath,
   getPolicyHostIsolationExceptionsPath,
   getPolicyProtectionUpdatesPath,
+  getPolicyStorageProvidersPath,
   getPolicyTrustedAppsPath,
   getPolicyTrustedDevicesPath,
   getTrustedAppsListPath,
@@ -49,6 +54,7 @@ import {
   isOnPolicyTrustedAppsView,
   isOnPolicyTrustedDevicesView,
   isOnProtectionUpdatesView,
+  isOnStorageProvidersView,
   policyDetails,
   policyIdFromParams,
 } from '../../store/policy_details/selectors';
@@ -89,6 +95,7 @@ enum PolicyTabKeys {
   HOST_ISOLATION_EXCEPTIONS = 'hostIsolationExceptions',
   BLOCKLISTS = 'blocklists',
   PROTECTION_UPDATES = 'protectionUpdates',
+  STORAGE_PROVIDERS = 'storageProviders',
   TRUSTED_DEVICES = 'trustedDevices',
   ENDPOINT_EXCEPTIONS = 'endpointExceptions',
   CUSTOM_YARA_SIGNATURES = 'customYaraSignatures',
@@ -128,6 +135,8 @@ function getPathForPolicyTab(tabId: PolicyTabKeys, policyId: string): string {
       return getPolicyCustomYaraSignaturesPath(policyId);
     case PolicyTabKeys.PROTECTION_UPDATES:
       return getPolicyProtectionUpdatesPath(policyId);
+    case PolicyTabKeys.STORAGE_PROVIDERS:
+      return getPolicyStorageProvidersPath(policyId);
     default:
       return getPolicyDetailPath(policyId);
   }
@@ -152,6 +161,7 @@ export const usePolicyTabs = (): UsePolicyTabsResult => {
   const isInCustomYaraSignaturesTab = usePolicyDetailsSelector(isOnCustomYaraSignaturesView);
   const isInEndpointExceptionsTab = usePolicyDetailsSelector(isOnEndpointExceptionsView);
   const isInProtectionUpdatesTab = usePolicyDetailsSelector(isOnProtectionUpdatesView);
+  const isInStorageProvidersTab = usePolicyDetailsSelector(isOnStorageProvidersView);
   const policyId = usePolicyDetailsSelector(policyIdFromParams);
 
   const [unsavedChanges, setUnsavedChanges] = useState<
@@ -191,6 +201,7 @@ export const usePolicyTabs = (): UsePolicyTabsResult => {
     canWriteEndpointExceptions,
     canReadCustomYaraSignatures,
     canWriteCustomYaraSignatures,
+    canReadPolicyManagement,
     loading: isPrivilegesLoading,
   } = useUserPrivileges().endpointPrivileges;
 
@@ -202,9 +213,23 @@ export const usePolicyTabs = (): UsePolicyTabsResult => {
     'customYaraSignaturesEnabled'
   );
 
+  const isEndpointFileExportEnabled = useIsExperimentalFeatureEnabled(
+    'responseActionsEndpointFileExport'
+  );
+  // Without this product feature (serverless: Endpoint Complete), the server removes export
+  // providers from the policy on save
+  const hasResponseActionsProductFeature = useProductFeatureKeys().has(
+    ProductFeatureSecurityKey.endpointResponseActions
+  );
+
   const isEnterprise = useLicense().isEnterprise();
   const isTrustedDevicesEnabled =
     isEnterprise && isTrustedDevicesFeatureEnabled && canReadTrustedDevices;
+  const isStorageProvidersEnabled =
+    isEndpointFileExportEnabled &&
+    isEnterprise &&
+    canReadPolicyManagement &&
+    hasResponseActionsProductFeature;
 
   const getHostIsolationExceptionsApiClientInstance = useCallback(
     () => HostIsolationExceptionsApiClient.getInstance(http),
@@ -601,6 +626,20 @@ export const usePolicyTabs = (): UsePolicyTabsResult => {
             'data-test-subj': 'policyProtectionUpdatesTab',
           }
         : undefined,
+
+      [PolicyTabKeys.STORAGE_PROVIDERS]: isStorageProvidersEnabled
+        ? {
+            id: PolicyTabKeys.STORAGE_PROVIDERS,
+            name: STORAGE_PROVIDERS_TAB_LABEL,
+            content: (
+              <>
+                <EuiSpacer />
+                <StorageProvidersLayout policy={policyItem} />
+              </>
+            ),
+            'data-test-subj': 'policyStorageProvidersTab',
+          }
+        : undefined,
     };
   }, [
     policyItem,
@@ -630,6 +669,7 @@ export const usePolicyTabs = (): UsePolicyTabsResult => {
     getCustomYaraSignaturesApiClientInstance,
     canWriteCustomYaraSignatures,
     isEnterprise,
+    isStorageProvidersEnabled,
   ]);
 
   // tabsList preserves the PolicyTabKeys declaration order (object literal key order above).
@@ -662,6 +702,8 @@ export const usePolicyTabs = (): UsePolicyTabsResult => {
       selectedTab = tabs[PolicyTabKeys.CUSTOM_YARA_SIGNATURES];
     } else if (isInProtectionUpdatesTab) {
       selectedTab = tabs[PolicyTabKeys.PROTECTION_UPDATES];
+    } else if (isInStorageProvidersTab) {
+      selectedTab = tabs[PolicyTabKeys.STORAGE_PROVIDERS];
     }
 
     return selectedTab ?? defaultTab;
@@ -676,6 +718,7 @@ export const usePolicyTabs = (): UsePolicyTabsResult => {
     isInEndpointExceptionsTab,
     isInCustomYaraSignaturesTab,
     isInProtectionUpdatesTab,
+    isInStorageProvidersTab,
   ]);
 
   const [unsavedChangesModal, setUnsavedChangesModal] = useState<{
@@ -698,16 +741,20 @@ export const usePolicyTabs = (): UsePolicyTabsResult => {
   // be confirmed before the URL changes.
   const onTabClick = useCallback(
     (tabId: PolicyTabKeys) => {
+      // Checked against the tab whose content is shown, not the URL: an unavailable tab's URL
+      // (e.g. storage providers) shows the policy settings form
+      const { id: selectedTabId } = currentSelectedTab;
       if (
-        (isInSettingsTab && unsavedChanges[PolicyTabKeys.SETTINGS]) ||
-        (isInProtectionUpdatesTab && unsavedChanges[PolicyTabKeys.PROTECTION_UPDATES])
+        (selectedTabId === PolicyTabKeys.SETTINGS ||
+          selectedTabId === PolicyTabKeys.PROTECTION_UPDATES) &&
+        unsavedChanges[selectedTabId]
       ) {
         setUnsavedChangesModal({ showModal: true, nextTabId: tabId });
       } else {
         changeTab(tabId);
       }
     },
-    [changeTab, isInProtectionUpdatesTab, isInSettingsTab, unsavedChanges]
+    [changeTab, currentSelectedTab, unsavedChanges]
   );
 
   const cancelUnsavedChangesModal = useCallback(() => {
