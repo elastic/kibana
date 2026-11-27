@@ -19,6 +19,24 @@ const searchCompleted = (response: {
   _shards?: { failed: number };
 }): boolean => response.timed_out !== true && (response._shards?.failed ?? 0) === 0;
 
+/** A missing optional legacy index is absence. Any other non-`found: false` read is not. */
+const blocksConfirmedMiss = (
+  doc: { _id?: string; _index?: string; found?: boolean; error?: { type?: string } },
+  legacyIndexes: ReadonlySet<string>
+): boolean => {
+  if (!doc._id) {
+    return false;
+  }
+  if (
+    doc.error?.type === 'index_not_found_exception' &&
+    doc._index !== undefined &&
+    legacyIndexes.has(doc._index)
+  ) {
+    return false;
+  }
+  return !('found' in doc) || doc.found !== false;
+};
+
 export interface VersionLookup {
   versions: Record<string, Required<DocumentVersionFields>>;
   /** Ids every read reported as absent. An errored or partial read is not in this set. */
@@ -89,6 +107,7 @@ export class DocumentVersionManager {
       .concat(this.deps.additionalIndexesToQuery ?? []);
     const versions: Record<string, Required<DocumentVersionFields>> = {};
     const found = new Set<string>();
+    const legacyIndexes = new Set(this.deps.additionalIndexesToQuery ?? []);
     // Present until a read says otherwise. An error doc has no `found` field, so it drops out.
     const confirmedMissing = new Set(ids);
 
@@ -99,7 +118,7 @@ export class DocumentVersionManager {
     });
 
     for (const doc of mgetResponse.docs) {
-      if (doc._id && (!('found' in doc) || doc.found !== false)) {
+      if (doc._id && blocksConfirmedMiss(doc, legacyIndexes)) {
         confirmedMissing.delete(doc._id);
       }
       if (

@@ -114,6 +114,56 @@ describe('DocumentVersionManager', () => {
     expect([...lookup.confirmedMissing]).toEqual(['a']);
   });
 
+  it('confirms a miss when the legacy index does not exist', async () => {
+    const { esClient, manager } = createManager();
+    esClient.mget.mockResolvedValue({
+      docs: [
+        { _id: 'a', _index: OLDER_INDEX, found: false },
+        { _id: 'a', _index: NEWER_INDEX, found: false },
+        {
+          _id: 'a',
+          _index: LEGACY_INDEX,
+          error: { type: 'index_not_found_exception' },
+        },
+      ],
+    } as never);
+    esClient.search.mockResolvedValue({
+      timed_out: false,
+      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      hits: { hits: [] },
+    } as never);
+
+    const lookup = await manager.bulkGetVersions(['a']);
+
+    expect(lookup.versions).toEqual({});
+    expect([...lookup.confirmedMissing]).toEqual(['a']);
+  });
+
+  it('does not confirm a miss when a backing index is missing', async () => {
+    const { esClient, manager } = createManager();
+    esClient.mget.mockResolvedValue({
+      docs: [
+        {
+          _id: 'a',
+          _index: OLDER_INDEX,
+          error: { type: 'index_not_found_exception' },
+        },
+        { _id: 'a', _index: NEWER_INDEX, found: false },
+        { _id: 'a', _index: LEGACY_INDEX, found: false },
+      ],
+    } as never);
+    esClient.search.mockResolvedValue({
+      timed_out: false,
+      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      hits: { hits: [] },
+    } as never);
+
+    const lookup = await manager.bulkGetVersions(['a']);
+
+    expect(lookup.versions).toEqual({});
+    expect(lookup.confirmedMissing.size).toBe(0);
+  });
+
   it('does not confirm a miss when mget returns an error for the id', async () => {
     const { esClient, manager } = createManager();
     esClient.mget.mockResolvedValue({
