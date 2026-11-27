@@ -8,7 +8,7 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { BoundInferenceClient } from '@kbn/inference-common';
+import type { BoundInferenceClient, InferenceTaskType } from '@kbn/inference-common';
 import {
   aiAnonymizationSettings,
   parseLegacyAnonymizationRules,
@@ -16,7 +16,6 @@ import {
 } from '@kbn/ai-anonymization-common';
 import type { AnonymizationFailureMode, AnonymizationRule } from '@kbn/ai-anonymization-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
   GEN_AI_SETTINGS_INFERENCE_STREAMING,
@@ -40,7 +39,7 @@ import type {
   InferenceSetupDependencies,
   InferenceStartDependencies,
 } from './types';
-import { getConnectorList } from './util/get_connector_list';
+import { getConnectorList, type GetConnectorListFilter } from './util/get_connector_list';
 import { loadDefaultConnector } from './util/load_default_connector';
 import { getConnectorById, getConnectorByIdWithoutClientRequest } from './util/get_connector_by_id';
 import { getInferenceEndpoints } from './util/get_inference_endpoints';
@@ -421,13 +420,14 @@ export class InferencePlugin
         });
       },
 
-      getConnectorList: async (request: KibanaRequest) => {
+      getConnectorList: async (request: KibanaRequest, filter?: GetConnectorListFilter) => {
         const esClient = core.elasticsearch.client.asInternalUser;
         return getConnectorList({
           actions: pluginsStart.actions,
           request,
           esClient,
           logger: this.logger,
+          taskType: filter?.taskType,
         });
       },
       getDefaultConnector: async (request: KibanaRequest) => {

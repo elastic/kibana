@@ -9,6 +9,7 @@ import type { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ApiPrivileges } from '@kbn/core-security-server';
 import { i18n } from '@kbn/i18n';
+import { uniqBy } from 'lodash';
 import type { InferenceConnector } from '@kbn/inference-common';
 import {
   INFERENCE_SETTINGS_SO_TYPE,
@@ -18,6 +19,7 @@ import {
 } from '../../common/constants';
 import type { InferenceSettingsAttributes, InferenceSettingsResponse } from '../../common/types';
 import { APIRoutes } from '../../common/types';
+import type { InferenceTaskType } from '../types';
 import { inferenceSettingsSchemaV2 } from '../saved_objects/schema/v2';
 import type { InferenceFeatureRegistry } from '../inference_feature_registry';
 import { resolveFeatureEndpoints } from '../inference_endpoints';
@@ -33,33 +35,39 @@ const EMPTY_SETTINGS: InferenceSettingsResponse = {
   data: { features: [] },
 };
 
+interface ResolvedEndpointId {
+  id: string;
+  taskType: InferenceTaskType;
+}
+
+/** The endpoint ids every sub-feature resolves to, each with the task type it is looked up by. */
 const resolveAllEndpointIds = (
   settings: InferenceSettingsAttributes,
   featureRegistry: InferenceFeatureRegistry,
   logger: Logger
-): string[] => {
+): ResolvedEndpointId[] => {
   const soFeaturesMap = new Map(settings.features.map((f) => [f.feature_id, f]));
 
   const resolvedEndpointIds = featureRegistry
     .getAll()
     .filter((f) => f.parentFeatureId !== undefined)
-    .flatMap((f) =>
-      resolveFeatureEndpoints(featureRegistry, soFeaturesMap, f.featureId, logger).endpoints.map(
-        ({ id }) => id
+    .flatMap(({ featureId, taskType }) =>
+      resolveFeatureEndpoints(featureRegistry, soFeaturesMap, featureId, logger).endpoints.map(
+        ({ id }) => ({ id, taskType })
       )
     );
 
-  return [...new Set(resolvedEndpointIds)];
+  return uniqBy(resolvedEndpointIds, ({ id, taskType }) => `${taskType}:${id}`);
 };
 
 const findInvalidEndpoints = async (
-  ids: string[],
-  checkConnector: (id: string) => Promise<InferenceConnector>
+  endpointIds: ResolvedEndpointId[],
+  checkConnector: (id: string, taskType: InferenceTaskType) => Promise<InferenceConnector>
 ): Promise<string[]> => {
   const invalid: string[] = [];
-  for (const id of ids) {
+  for (const { id, taskType } of endpointIds) {
     try {
-      await checkConnector(id);
+      await checkConnector(id, taskType);
     } catch {
       invalid.push(id);
     }
@@ -76,7 +84,11 @@ export const defineInferenceSettingsRoutes = ({
   logger: Logger;
   router: IRouter;
   featureRegistry: InferenceFeatureRegistry;
-  getConnectorById: (id: string, request: KibanaRequest) => Promise<InferenceConnector>;
+  getConnectorById: (
+    id: string,
+    request: KibanaRequest,
+    taskType?: InferenceTaskType
+  ) => Promise<InferenceConnector>;
 }) => {
   router.versioned
     .get({
@@ -127,8 +139,8 @@ export const defineInferenceSettingsRoutes = ({
         if (settingsBody.data.features.length > 0) {
           try {
             const ids = resolveAllEndpointIds(settingsBody.data, featureRegistry, logger);
-            invalidEndpoints = await findInvalidEndpoints(ids, (id) =>
-              getConnectorById(id, request)
+            invalidEndpoints = await findInvalidEndpoints(ids, (id, taskType) =>
+              getConnectorById(id, request, taskType)
             );
           } catch (e) {
             logger.warn(`Failed to validate inference endpoints: ${e.message}`);

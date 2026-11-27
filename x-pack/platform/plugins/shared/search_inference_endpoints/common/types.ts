@@ -9,6 +9,7 @@ import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type {
   ChatCompletionReasoning,
   InferenceConnector,
+  InferenceTaskType,
   EisInferenceEndpointMetadata,
   CspRegion,
 } from '@kbn/inference-common';
@@ -90,7 +91,7 @@ export interface InferenceFeatureResponse {
   parentFeatureId?: string;
   featureName: string;
   featureDescription: string;
-  taskType: string;
+  taskType: InferenceTaskType;
   maxNumberOfEndpoints?: number;
   recommendedEndpoints: string[];
   recommendedEndpointParameters?: Record<string, InferenceEndpointParameters>;

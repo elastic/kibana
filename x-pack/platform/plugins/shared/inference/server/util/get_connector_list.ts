@@ -8,25 +8,34 @@
 import type { KibanaRequest, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { InferenceConnector } from '@kbn/inference-common';
+import type { InferenceConnector, InferenceTaskType } from '@kbn/inference-common';
 import {
   isSupportedConnector,
   connectorToInference,
   InferenceConnectorType,
+  COMPLETION_TASK_TYPE,
 } from '@kbn/inference-common';
 import type { ActionsClientProvider } from '../types';
 import { getInferenceEndpoints } from './get_inference_endpoints';
 
 const OCR_ONLY_PROPERTY = 'ocr-only';
 
-interface GetConnectorListWithRequestOptions {
+export interface GetConnectorListFilter {
+  /**
+   * The task type of the inference endpoints to list, `chat_completion` by default. Any other task
+   * type lists only inference endpoints: stack connectors are chat models.
+   */
+  taskType?: InferenceTaskType;
+}
+
+interface GetConnectorListWithRequestOptions extends GetConnectorListFilter {
   actions: ActionsClientProvider;
   request: KibanaRequest;
   esClient: ElasticsearchClient;
   logger: Logger;
 }
 
-interface GetConnectorListWithActionsClientOptions {
+interface GetConnectorListWithActionsClientOptions extends GetConnectorListFilter {
   actionsClient: PublicMethodsOf<ActionsClient>;
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -48,12 +57,17 @@ const getActionsClient = async (
 export const getConnectorList = async (
   options: GetConnectorListOptions
 ): Promise<InferenceConnector[]> => {
-  const { esClient, logger } = options;
+  const { esClient, logger, taskType = COMPLETION_TASK_TYPE } = options;
 
   const [connectorsResult, endpointsResult] = await Promise.allSettled([
-    getStackConnectors(options),
-    getInferenceEndpoints({ esClient, taskType: 'chat_completion' }),
+    taskType === COMPLETION_TASK_TYPE ? getStackConnectors(options) : [],
+    getInferenceEndpoints({ esClient, taskType }),
   ]);
+
+  // Another task type has no stack connectors to fall back on, so a failed lookup is an error.
+  if (taskType !== COMPLETION_TASK_TYPE && endpointsResult.status === 'rejected') {
+    throw endpointsResult.reason;
+  }
 
   if (connectorsResult.status === 'rejected' && endpointsResult.status === 'rejected') {
     throw new Error(

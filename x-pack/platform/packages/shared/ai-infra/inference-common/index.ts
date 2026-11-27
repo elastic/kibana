@@ -178,11 +178,14 @@ export {
   defaultInferenceEndpoints,
   INFERENCE_ENDPOINT_INTERNAL_API_VERSION,
   InferenceEndpointProvider,
+  COMPLETION_TASK_TYPE,
+  DECISION_TASK_TYPE,
   elasticModelIds,
   type EisInferenceEndpointMetadata,
   type EisInferenceEndpointCapabilities,
   type CspRegion,
   type InferenceEndpointRequestBody,
+  type InferenceTaskType,
 } from './src/inference_endpoints';
 
 export {

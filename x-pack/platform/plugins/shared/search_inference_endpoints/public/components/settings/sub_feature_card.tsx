@@ -67,15 +67,17 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   canManage = true,
   discardVersion = 0,
 }) => {
-  const { data: connectors = [] } = useConnectors();
+  const { data: connectors = [] } = useConnectors(feature.taskType);
   const { features: registeredFeatures } = useRegisteredFeatures();
   const supportedEffortLevels = useSupportedEffortLevels();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
   const [listWidth, setListWidth] = useState<number | undefined>(undefined);
   const listRef = useRef<HTMLDivElement>(null);
-  const { regionDeniedEndpointIds, availableEndpointIds } =
-    useRegionAvailableEndpoints(endpointIds);
+  const { regionDeniedEndpointIds, availableEndpointIds } = useRegionAvailableEndpoints(
+    endpointIds,
+    feature.taskType
+  );
   const {
     hasAvailableRecommendedEndpoints,
     isUsingRecommendedDefaults,

@@ -8,6 +8,7 @@
 export const AGENT_BUILDER_PARENT_INFERENCE_FEATURE_ID = 'agent_builder_parent';
 export const AGENT_BUILDER_INFERENCE_FEATURE_ID = 'agent_builder';
 export const AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID = 'agent_builder_fast';
+export const AGENT_BUILDER_DECISION_INFERENCE_FEATURE_ID = 'agent_builder_decision';
 
 export const AGENT_BUILDER_RECOMMENDED_ENDPOINTS = [
   '.anthropic-claude-5.5-opus-chat_completion', // Claude Opus 5.5, GA 2026-09-22

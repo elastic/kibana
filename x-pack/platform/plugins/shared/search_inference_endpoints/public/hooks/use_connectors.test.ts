@@ -43,6 +43,23 @@ describe('useConnectors', () => {
     expect(mockGet).toHaveBeenCalledWith('/internal/inference/connectors', {});
   });
 
+  it('asks for the models of another task type, cached apart from chat models', async () => {
+    mockGet.mockResolvedValue({ connectors: [] });
+
+    const { Wrapper, queryClient } = createWrapper();
+    const { result } = renderHook(() => useConnectors('decision'), { wrapper: Wrapper });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(mockGet).toHaveBeenCalledWith('/internal/inference/connectors', {
+      query: { taskType: 'decision' },
+    });
+    expect(queryClient.getQueryState([INFERENCE_CONNECTORS_QUERY_KEY, 'decision'])).toBeDefined();
+    expect(
+      queryClient.getQueryState([INFERENCE_CONNECTORS_QUERY_KEY, 'chat_completion'])
+    ).toBeUndefined();
+  });
+
   it('returns the connectors from the response', async () => {
     const connectors = [
       { connectorId: 'c1', name: 'Test Connector', isPreconfigured: false },
@@ -65,7 +82,9 @@ describe('useConnectors', () => {
     renderHook(() => useConnectors(), { wrapper: Wrapper });
 
     await waitFor(() =>
-      expect(queryClient.getQueryState([INFERENCE_CONNECTORS_QUERY_KEY])).toBeDefined()
+      expect(
+        queryClient.getQueryState([INFERENCE_CONNECTORS_QUERY_KEY, 'chat_completion'])
+      ).toBeDefined()
     );
   });
 

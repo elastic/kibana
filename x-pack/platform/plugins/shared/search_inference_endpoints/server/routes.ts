@@ -8,7 +8,7 @@
 import type { IRouter, KibanaRequest } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceTaskType as EsInferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { fetchInferenceEndpoints } from './lib/fetch_inference_endpoints';
 import { defineInferenceSettingsRoutes } from './routes/inference_settings';
@@ -20,7 +20,7 @@ import {
   type GetInferenceClient,
 } from './routes/test_inference_endpoint';
 import type { InferenceFeatureRegistry } from './inference_feature_registry';
-import type { ResolvedInferenceEndpoints } from './types';
+import type { InferenceTaskType, ResolvedInferenceEndpoints } from './types';
 import { APIRoutes } from './types';
 import { errorHandler } from './utils/error_handler';
 import { deleteInferenceEndpoint } from './lib/delete_inference_endpoint';
@@ -38,8 +38,15 @@ export function defineRoutes({
   router: IRouter;
   featureRegistry: InferenceFeatureRegistry;
   getForFeature: (featureId: string, request: KibanaRequest) => Promise<ResolvedInferenceEndpoints>;
-  getConnectorList: (request: KibanaRequest) => Promise<InferenceConnector[]>;
-  getConnectorById: (id: string, request: KibanaRequest) => Promise<InferenceConnector>;
+  getConnectorList: (
+    request: KibanaRequest,
+    taskType?: InferenceTaskType
+  ) => Promise<InferenceConnector[]>;
+  getConnectorById: (
+    id: string,
+    request: KibanaRequest,
+    taskType?: InferenceTaskType
+  ) => Promise<InferenceConnector>;
   getInferenceClient: GetInferenceClient;
 }) {
   defineInferenceSettingsRoutes({ logger, router, featureRegistry, getConnectorById });
@@ -109,7 +116,7 @@ export function defineRoutes({
       const { scanUsage } = request.query;
       const result = await deleteInferenceEndpoint(
         asCurrentUser,
-        type as InferenceTaskType,
+        type as EsInferenceTaskType,
         id,
         scanUsage ?? false
       );

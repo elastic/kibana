@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
+import type { EisInferenceEndpointMetadata, InferenceTaskType } from '@kbn/inference-common';
 
 export interface InferenceEndpoint {
   inferenceId: string;
@@ -18,10 +17,7 @@ export interface InferenceEndpoint {
   metadata?: EisInferenceEndpointMetadata;
 }
 
-/**
- * Retrieves all available inference endpoints, optionally filtered to
- * only `chat_completion` task type endpoints.
- */
+/** Retrieves all available inference endpoints, optionally filtered to one task type. */
 export const getInferenceEndpoints = async ({
   esClient,
   taskType,

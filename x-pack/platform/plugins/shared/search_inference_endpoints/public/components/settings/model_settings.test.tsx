@@ -561,6 +561,32 @@ describe('ModelSettings', () => {
       expect(screen.queryByTestId('eolModelsCallout')).not.toBeInTheDocument();
     });
 
+    it('warns about a deprecated decision model assigned to a decision feature', () => {
+      const decisionFeature: InferenceFeatureConfig = {
+        ...childFeature,
+        featureId: 'decision_child',
+        taskType: 'decision',
+      };
+      mockUseConnectors.mockImplementation((taskType?: string) => ({
+        data: taskType === 'decision' ? [deprecatedConnector] : [gaConnector],
+        isLoading: false,
+      }));
+      mockUseModelSettingsForm.mockReturnValue({
+        ...defaultFormState,
+        assignments: { decision_child: ['ep-dep'] },
+        sections: [{ ...defaultFormState.sections[0], children: [decisionFeature] }],
+      });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(mockUseConnectors).toHaveBeenCalledWith('decision', { enabled: true });
+      expect(screen.getByTestId('deprecatedModelsCallout')).toHaveTextContent('Deprecated Model');
+    });
+
     it('renders the danger callout when an EOL connector is assigned to a feature', () => {
       mockUseConnectors.mockReturnValue({ data: [eolConnector], isLoading: false });
       mockUseModelSettingsForm.mockReturnValue({

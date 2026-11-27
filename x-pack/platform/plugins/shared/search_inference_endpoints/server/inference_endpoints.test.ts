@@ -159,6 +159,39 @@ describe('getForFeature', () => {
     });
   });
 
+  it('does not fall back to the Kibana default chat endpoint for a feature of another task type', async () => {
+    const defaultEp = defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION;
+    registry.register(createValidFeature({ featureId: 'f1', taskType: 'decision' }));
+
+    await expect(
+      getForFeature(registry, createSoClient(), createGetConnectorById([defaultEp]), 'f1', logger)
+    ).resolves.toEqual({ endpoints: [], warnings: [], soEntryFound: false });
+  });
+
+  it('does not inherit endpoints from a parent of another task type', async () => {
+    registry.register(
+      createValidFeature({
+        featureId: 'parent',
+        taskType: 'chat_completion',
+        recommendedEndpoints: ['chat-rec'],
+      })
+    );
+    registry.register(
+      createValidFeature({ featureId: 'child', parentFeatureId: 'parent', taskType: 'decision' })
+    );
+    const soClient = createSoClient([{ feature_id: 'parent', endpoints: [{ id: 'chat-so' }] }]);
+
+    await expect(
+      getForFeature(
+        registry,
+        soClient,
+        createGetConnectorById(['chat-rec', 'chat-so']),
+        'child',
+        logger
+      )
+    ).resolves.toEqual({ endpoints: [], warnings: [], soEntryFound: false });
+  });
+
   it('walks the fallback chain to parent recommendedEndpoints', async () => {
     registry.register(createValidFeature({ featureId: 'parent', recommendedEndpoints: ['prec1'] }));
     registry.register(createValidFeature({ featureId: 'child', parentFeatureId: 'parent' }));

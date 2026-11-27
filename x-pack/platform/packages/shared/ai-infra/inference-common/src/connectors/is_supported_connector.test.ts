@@ -7,11 +7,8 @@
 
 import type { RawConnector } from './connectors';
 import { InferenceConnectorType } from './connectors';
-import {
-  isSupportedConnectorType,
-  isSupportedConnector,
-  COMPLETION_TASK_TYPE,
-} from './is_supported_connector';
+import { isSupportedConnectorType, isSupportedConnector } from './is_supported_connector';
+import { COMPLETION_TASK_TYPE } from '../inference_endpoints';
 
 const createRawConnector = (parts: Partial<RawConnector>): RawConnector => {
   return {

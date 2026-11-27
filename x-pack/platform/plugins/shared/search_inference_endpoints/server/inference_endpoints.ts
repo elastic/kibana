@@ -9,7 +9,11 @@ import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { type InferenceConnector, defaultInferenceEndpoints } from '@kbn/inference-common';
-import { INFERENCE_SETTINGS_SO_TYPE, INFERENCE_SETTINGS_ID } from '../common/constants';
+import {
+  CHAT_COMPLETION_TASK_TYPE,
+  INFERENCE_SETTINGS_SO_TYPE,
+  INFERENCE_SETTINGS_ID,
+} from '../common/constants';
 import type { InferenceSettingsAttributes } from '../common/types';
 import type { InferenceFeatureRegistry } from './inference_feature_registry';
 import type {
@@ -102,6 +106,9 @@ interface ResolvedFeatureEndpoints {
  * 3. First non-empty recommendedEndpoints found in the chain
  * 4. Kibana default chat-completion endpoint
  *
+ * A feature only inherits from parents of its own task type, and only a chat completion feature
+ * falls back to the Kibana default: a `decision` feature can't use a chat model.
+ *
  * SO override endpoints carry only their own stored parameters; they never inherit
  * parameters declared in recommendedEndpoints.
  */
@@ -122,6 +129,7 @@ export const resolveFeatureEndpoints = (
     );
     return { endpoints: [], warnings: [], soEntryFound: false };
   }
+  const { taskType } = current;
   let recEntry = current.recommendedEndpoints?.length
     ? { featureId: current.featureId, recommendedEndpoints: current.recommendedEndpoints }
     : undefined;
@@ -167,7 +175,7 @@ export const resolveFeatureEndpoints = (
 
       visited.add(currentId);
       current = registry.get(currentId);
-      if (!current) {
+      if (!current || current.taskType !== taskType) {
         break;
       }
       if (!recEntry && current.recommendedEndpoints.length) {
@@ -200,7 +208,7 @@ export const resolveFeatureEndpoints = (
   return {
     endpoints:
       recEntry?.recommendedEndpoints ??
-      (opts?.onlyReturnConfigured
+      (opts?.onlyReturnConfigured || taskType !== CHAT_COMPLETION_TASK_TYPE
         ? []
         : [{ id: defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION }]),
     warnings: [],

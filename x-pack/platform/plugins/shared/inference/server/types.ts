@@ -10,7 +10,6 @@ import type {
   PluginSetupContract as ActionsPluginSetup,
   ActionsClient,
 } from '@kbn/actions-plugin/server';
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -31,6 +30,7 @@ import type {
   FeatureChatCompleteAPI,
   InferenceClient,
   InferenceConnector,
+  InferenceTaskType,
 } from '@kbn/inference-common';
 import type { InferenceChatModel, InferenceChatModelBaseParams } from '@kbn/inference-langchain';
 import type { InferenceCallbacks } from '@kbn/inference-common/src/chat_complete';
@@ -39,6 +39,7 @@ import type {
   AnonymizationPluginSetup,
 } from '@kbn/anonymization-plugin/server';
 import type { AiAnonymizationSettingsPluginSetup } from '@kbn/ai-anonymization-settings-plugin/server';
+import type { GetConnectorListFilter } from './util/get_connector_list';
 import type { InferenceEndpoint } from './util/get_inference_endpoints';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
@@ -246,9 +247,13 @@ export interface InferenceServerStart {
    * Returns a list of all available inference connectors.
    *
    * @param request - The Kibana request to scope the operation to
+   * @param filter - Lists the inference endpoints of another task type instead of chat models
    * @returns A promise that resolves to an array of inference connectors
    */
-  getConnectorList: (request: KibanaRequest) => Promise<InferenceConnector[]>;
+  getConnectorList: (
+    request: KibanaRequest,
+    filter?: GetConnectorListFilter
+  ) => Promise<InferenceConnector[]>;
 
   /**
    * Retrieves the default inference connector configured for the system.

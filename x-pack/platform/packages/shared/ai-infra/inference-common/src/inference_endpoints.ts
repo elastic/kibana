@@ -5,6 +5,17 @@
  * 2.0.
  */
 
+import type { InferenceTaskType as EsInferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+
+export const COMPLETION_TASK_TYPE = 'chat_completion';
+export const DECISION_TASK_TYPE = 'decision';
+
+/**
+ * The task types an inference endpoint can have: Elasticsearch has `decision`, which its client's
+ * types lack. Remove `DECISION_TASK_TYPE` here once the client's `InferenceTaskType` includes it.
+ */
+export type InferenceTaskType = EsInferenceTaskType | typeof DECISION_TASK_TYPE;
+
 /**
  * Version of the internal inference endpoint HTTP API (`/internal/_inference/*`).
  */

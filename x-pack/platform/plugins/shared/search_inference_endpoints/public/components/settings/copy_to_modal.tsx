@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { InferenceTaskType } from '@kbn/inference-common';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
@@ -30,7 +31,7 @@ import { EventType } from '../../analytics/constants';
 interface CopyToModalProps {
   sourceFeatureName: string;
   currentFeatureId: string;
-  taskType: string;
+  taskType: InferenceTaskType;
   /**
    * The source row lists only prompt-template endpoints. Targets that do not
    * are excluded, and a messages row cannot copy onto a template-only row.
@@ -50,7 +51,7 @@ export const isCopyTargetDisabled = ({
   allowTemplateRequiredModels: boolean;
   currentFeatureId: string;
   feature: Pick<InferenceFeatureConfig, 'allowTemplateRequiredModels' | 'featureId' | 'taskType'>;
-  taskType: string;
+  taskType: InferenceTaskType;
 }): boolean => {
   if (
     !feature.taskType ||

@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import type { InferenceTaskType } from '@kbn/inference-common';
 import { isConnectorUnavailableUnderRegionPolicy } from '../utils/is_unavailable_under_region_policy';
 import { useConnectors } from './use_connectors';
 
@@ -17,8 +18,11 @@ interface RegionAvailableEndpoints {
 /**
  * Returns the region-denied endpoint IDs and the assigned endpoints the region policy allows.
  */
-export const useRegionAvailableEndpoints = (endpointIds: string[]): RegionAvailableEndpoints => {
-  const { data: connectors = [] } = useConnectors();
+export const useRegionAvailableEndpoints = (
+  endpointIds: string[],
+  taskType?: InferenceTaskType
+): RegionAvailableEndpoints => {
+  const { data: connectors = [] } = useConnectors(taskType);
 
   const regionDeniedEndpointIds = useMemo(
     () =>
