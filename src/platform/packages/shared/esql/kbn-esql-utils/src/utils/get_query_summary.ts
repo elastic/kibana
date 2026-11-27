@@ -250,56 +250,19 @@ const computedColumnsCache = new LRUCache<string, ReadonlySet<string>>({
   sizeCalculation: (_columns, query) => Math.max(1, query.length),
 });
 
-// Matches `*` as any text, without a regular expression, as many `*` in a pattern written in a
-// query could make one backtrack for a long time.
-const matchesWildcard = (pattern: string, value: string): boolean => {
-  let valueIndex = 0;
-  let patternIndex = 0;
-  let starIndex = -1;
-  let starValueIndex = 0;
-  while (valueIndex < value.length) {
-    if (pattern[patternIndex] === '*') {
-      starIndex = patternIndex++;
-      starValueIndex = valueIndex;
-    } else if (pattern[patternIndex] === value[valueIndex]) {
-      patternIndex++;
-      valueIndex++;
-    } else if (starIndex >= 0) {
-      patternIndex = starIndex + 1;
-      valueIndex = ++starValueIndex;
-    } else {
-      return false;
-    }
-  }
-  while (pattern[patternIndex] === '*') patternIndex++;
-  return patternIndex === pattern.length;
-};
-
-// The registry does not apply a wildcard in KEEP or DROP to the columns that the query creates.
-// As the fields of the sources are not known here, the columns are only the created ones, so the
-// wildcard is applied to them directly.
-const applyWildcardProjection = (
-  command: ESQLAstCommand,
-  columns: ESQLColumnData[]
-): ESQLColumnData[] | undefined => {
-  if (command.name !== 'keep' && command.name !== 'drop') {
-    return undefined;
-  }
-  const patterns = command.args.filter(isColumn).map(({ name }) => name);
-  if (!patterns.some((name) => name.includes('*'))) {
-    return undefined;
-  }
-  const isMatch = ({ name }: ESQLColumnData) =>
-    patterns.some((pattern) => matchesWildcard(pattern, name));
-  return columns.filter((column) => isMatch(column) === (command.name === 'keep'));
-};
+// The registry does not apply a wildcard in KEEP or DROP to the columns that the query creates, so
+// the output of a query that projects with one is unknown.
+const hasWildcardProjection = (command: ESQLAstCommand): boolean =>
+  (command.name === 'keep' || command.name === 'drop') &&
+  command.args.some((arg) => isColumn(arg) && arg.name.includes('*'));
 
 /**
  * Returns the columns that the query creates (EVAL, STATS, DISSECT, ...) and that are part of its output.
  * Each command knows the columns that it leaves (`columnsAfter`), so STATS, KEEP, DROP or RENAME are considered.
  * The fields of the sources are not asked for, so there are no requests and the index fields are not included,
  * except the ones that STATS groups by.
- * A query with syntax errors has no columns, Elasticsearch reports its errors when it runs.
+ * A query with syntax errors has no columns, Elasticsearch reports its errors when it runs. A query with a
+ * wildcard in KEEP or DROP has none either, as its output is unknown, so the pills are not applied to it.
  * @param query The ES|QL query.
  * @returns The names of the columns.
  */
@@ -310,7 +273,7 @@ export async function getComputedColumnsInOutput(query: string): Promise<Readonl
   }
 
   const { root, errors } = parseEsqlCached(query);
-  if (errors.length > 0) {
+  if (errors.length > 0 || root.commands.some(hasWildcardProjection)) {
     return new Set();
   }
 
@@ -326,11 +289,6 @@ export async function getComputedColumnsInOutput(query: string): Promise<Readonl
   const unmappedFieldsStrategy = getUnmappedFieldsStrategy(root.header);
   let columns: ESQLColumnData[] = [];
   for (const command of root.commands) {
-    const projected = applyWildcardProjection(command, columns);
-    if (projected) {
-      columns = projected;
-      continue;
-    }
     const columnsAfter = esqlCommandRegistry.getCommandByName(command.name)?.methods.columnsAfter;
     if (columnsAfter) {
       columns = await columnsAfter(
