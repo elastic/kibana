@@ -103,6 +103,6 @@ export async function assertCanManageDefaultSettings(
     request,
     spaceIds: affectedSpaceIds,
     apiPrivileges: ['fleet-agent-policies-all'],
-    errorMessage: `Insufficient privileges to set a global default ${objectType}: it affects agent policies in spaces you are not authorized to access`,
+    errorMessage: `Insufficient privileges to set a global default ${objectType}: it affects agent policies in every space, which requires the Fleet "Agent policies: All" privilege in each existing space (equivalently, an All Spaces grant). On a cluster where space awareness is not enabled, an All Spaces grant is required.`,
   });
 }

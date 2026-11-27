@@ -2291,6 +2291,54 @@ describe('Agent policy', () => {
     });
   });
 
+  describe('getSpacesForPoliciesUsingOutput', () => {
+    it('maps a legacy policy returned without namespaces to all spaces (*)', async () => {
+      const soClient = createSavedObjectClientMock();
+
+      // A space-agnostic (legacy) policy comes back with no namespaces. It must not be dropped:
+      // it spans every space, so the result must force a global privilege check via '*'.
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [{ id: 'legacy-policy', namespaces: undefined }],
+        total: 1,
+        per_page: 10000,
+        page: 1,
+      } as any);
+
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValue(
+        soClient
+      );
+
+      const { spaceIds, truncated } = await agentPolicyService.getSpacesForPoliciesUsingOutput(
+        'output-id-123'
+      );
+
+      expect(spaceIds).toEqual(new Set(['*']));
+      expect(truncated).toBe(false);
+    });
+
+    it('collects the concrete namespaces of space-aware policies', async () => {
+      const soClient = createSavedObjectClientMock();
+
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [
+          { id: 'p1', namespaces: ['default'] },
+          { id: 'p2', namespaces: ['space-a'] },
+        ],
+        total: 2,
+        per_page: 10000,
+        page: 1,
+      } as any);
+
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValue(
+        soClient
+      );
+
+      const { spaceIds } = await agentPolicyService.getSpacesForPoliciesUsingOutput('output-id-123');
+
+      expect(spaceIds).toEqual(new Set(['default', 'space-a']));
+    });
+  });
+
   describe('update', () => {
     it('should update is_managed property, if given', async () => {
       // ignore unrelated unique name constraint

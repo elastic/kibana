@@ -606,7 +606,7 @@ class DownloadSourceService {
     const downloadSources = await this.soClient.find<DownloadSourceSOAttributes>({
       type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
       searchFields: ['proxy_id'],
-      search: proxyId,
+      search: escapeSearchQueryPhrase(proxyId),
       perPage: SO_SEARCH_LIMIT,
     });
 

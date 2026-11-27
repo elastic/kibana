@@ -1356,7 +1356,9 @@ class OutputService {
     }
 
     if (request) {
-      await this.assertOutputCrossSpacePrivileges(id, request, 'delete');
+      // Use the resolved output id: the request may address the output by its saved-object id,
+      // but policies reference its public id, which is what the space lookups match against.
+      await this.assertOutputCrossSpacePrivileges(originalOutput.id, request, 'delete');
     }
 
     await packagePolicyService.removeOutputFromAll(
@@ -1420,7 +1422,8 @@ class OutputService {
     // Outputs are space-agnostic: verify cross-space authorization before mutating one that
     // policies in other spaces rely on. Skipped for preconfiguration (kibana.yml is trusted).
     if (request && !fromPreconfiguration) {
-      await this.assertOutputCrossSpacePrivileges(id, request, 'update');
+      // Use the resolved output id (policies reference the public id, not the saved-object id).
+      await this.assertOutputCrossSpacePrivileges(originalOutput.id, request, 'update');
       // Editing an output that is (or becomes) the global default affects every policy that
       // inherits the default, in all policy spaces — not only policies that reference it by id.
       const affectsDefault =

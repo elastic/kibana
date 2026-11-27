@@ -156,8 +156,20 @@ describe('getAllSpaceIds', () => {
     expect(res).toEqual({ spaceIds: new Set(['default', 'space1', 'space2']), truncated: false });
   });
 
-  it('returns the global scope (*) without listing spaces when space awareness is disabled', async () => {
+  it('returns the global scope (*) without listing spaces when the feature flag is off', async () => {
     mockFeatureFlag(false);
+
+    const res = await getAllSpaceIds();
+
+    expect(res).toEqual({ spaceIds: new Set(['*']), truncated: false });
+    expect(mockFind).not.toHaveBeenCalled();
+  });
+
+  it('returns the global scope (*) when the flag is on but Fleet has not migrated', async () => {
+    // Legacy policies are still space-agnostic until migration completes, so a global grant is
+    // required even though the feature flag is enabled.
+    mockFeatureFlag(true);
+    mockGetSettings({ use_space_awareness_migration_status: 'pending' });
 
     const res = await getAllSpaceIds();
 

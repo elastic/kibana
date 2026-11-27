@@ -46,35 +46,50 @@ import { getAllSpaceIds } from './spaces/helpers';
  * sources (themselves space-agnostic). Mutating or deleting a proxy redirects traffic for every
  * agent policy that uses one of those objects, across every space. Fail closed unless the caller
  * holds Fleet privileges in all of those spaces.
+ *
+ * Takes the already-fetched related objects so the caller authorizes against the exact same set it
+ * then mutates (no second lookup that could race), and fails closed when that set is incomplete.
  */
-async function assertProxyCrossSpacePrivileges(request: KibanaRequest, proxyId: string) {
+async function assertProxyCrossSpacePrivileges(
+  request: KibanaRequest,
+  proxyId: string,
+  related: Awaited<ReturnType<typeof getFleetProxyRelatedSavedObjects>>
+) {
   const security = appContextService.getSecurity();
   if (!security || !security.authz.mode.useRbacForRequest(request)) {
     return;
   }
-  const { outputs, fleetServerHosts, downloadSources } = await getFleetProxyRelatedSavedObjects(
-    proxyId
-  );
+  const { outputs, fleetServerHosts, downloadSources, truncated } = related;
+  if (truncated) {
+    throw new FleetProxyUnauthorizedError(
+      `Unable to verify authorization for proxy ${proxyId}: too many related settings objects to enumerate`
+    );
+  }
   // If any related object is itself a global default, policies that inherit the default (and
-  // never reference the object by id) are affected too, in every policy space. Pull in all policy
-  // spaces for that case rather than only the explicitly-referencing policies.
+  // never reference the object by id) are affected too, in every space. Pull in all spaces for
+  // that case rather than only the explicitly-referencing policies.
   const relatedDefault =
     outputs.some((o) => o.is_default || o.is_default_monitoring) ||
     fleetServerHosts.some((h) => h.is_default) ||
     downloadSources.some((d) => d.is_default);
-  const results = await Promise.all([
+  const lookups: Array<() => Promise<{ spaceIds: Set<string>; truncated: boolean }>> = [
     ...outputs.flatMap((o) => [
-      agentPolicyService.getSpacesForPoliciesUsingOutput(o.id),
-      packagePolicyService.getSpacesForPoliciesUsingOutput(o.id),
+      () => agentPolicyService.getSpacesForPoliciesUsingOutput(o.id),
+      () => packagePolicyService.getSpacesForPoliciesUsingOutput(o.id),
     ]),
-    ...fleetServerHosts.map((h) =>
-      agentPolicyService.getSpacesForPoliciesUsingFleetServerHost(h.id)
+    ...fleetServerHosts.map(
+      (h) => () => agentPolicyService.getSpacesForPoliciesUsingFleetServerHost(h.id)
     ),
-    ...downloadSources.map((d) =>
-      agentPolicyService.getSpacesForPoliciesUsingDownloadSource(d.id)
+    ...downloadSources.map(
+      (d) => () => agentPolicyService.getSpacesForPoliciesUsingDownloadSource(d.id)
     ),
-    ...(relatedDefault ? [getAllSpaceIds()] : []),
-  ]);
+    ...(relatedDefault ? [() => getAllSpaceIds()] : []),
+  ];
+  // Bound concurrency: a proxy shared by many settings objects would otherwise start every
+  // cross-space policy search at once. Matches the limit used by the policy-bump path.
+  const results = await pMap(lookups, (lookup) => lookup(), {
+    concurrency: MAX_CONCURRENT_FLEET_PROXIES_OPERATIONS,
+  });
   if (results.some((r) => r.truncated)) {
     throw new FleetProxyUnauthorizedError(
       `Unable to verify authorization for proxy ${proxyId}: too many agent policies to enumerate`
@@ -208,10 +223,14 @@ export async function deleteFleetProxy(
     throw new FleetProxyUnauthorizedError(`Cannot delete ${id} preconfigured proxy`);
   }
 
+  // Read the related objects once and authorize against that exact set, then detach the same set,
+  // so a reference added between an authorization read and the detach cannot slip through.
+  const related = await getFleetProxyRelatedSavedObjects(id);
+  const { outputs, fleetServerHosts, downloadSources } = related;
+
   if (options?.request && !options.fromPreconfiguration) {
-    await assertProxyCrossSpacePrivileges(options.request, id);
+    await assertProxyCrossSpacePrivileges(options.request, id, related);
   }
-  const { outputs, fleetServerHosts, downloadSources } = await getFleetProxyRelatedSavedObjects(id);
 
   if (
     // download sources cannot be preconfigured
@@ -246,7 +265,8 @@ export async function updateFleetProxy(
   }
 
   if (options?.request && !options.fromPreconfiguration) {
-    await assertProxyCrossSpacePrivileges(options.request, id);
+    const related = await getFleetProxyRelatedSavedObjects(id);
+    await assertProxyCrossSpacePrivileges(options.request, id, related);
   }
 
   await soClient.update<FleetProxySOAttributes>(
@@ -330,16 +350,27 @@ async function updateRelatedSavedObject(
 }
 
 export async function getFleetProxyRelatedSavedObjects(proxyId: string) {
-  const [{ items: fleetServerHosts }, { items: outputs }, { items: downloadSources }] =
-    await Promise.all([
-      fleetServerHostService.listAllForProxyId(proxyId),
-      outputService.listAllForProxyId(proxyId),
-      downloadSourceService.listAllForProxyId(proxyId),
-    ]);
+  const [
+    { items: fleetServerHosts, total: fleetServerHostsTotal },
+    { items: outputs, total: outputsTotal },
+    { items: downloadSources, total: downloadSourcesTotal },
+  ] = await Promise.all([
+    fleetServerHostService.listAllForProxyId(proxyId),
+    outputService.listAllForProxyId(proxyId),
+    downloadSourceService.listAllForProxyId(proxyId),
+  ]);
+
+  // True when any related-object listing was capped: the set of settings objects using the proxy
+  // is then incomplete, so callers that authorize against it must fail closed.
+  const truncated =
+    fleetServerHosts.length < fleetServerHostsTotal ||
+    outputs.length < outputsTotal ||
+    downloadSources.length < downloadSourcesTotal;
 
   return {
     fleetServerHosts,
     outputs,
     downloadSources,
+    truncated,
   };
 }
