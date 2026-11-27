@@ -16,6 +16,7 @@ import {
   getOtlpAuthHeaderName,
   getOtlpAuthSecretKey,
   getOtlpExporterEndpoints,
+  isOtlpHttpsUrlWithHost,
   isValidOtlpAuthCredential,
   isValidOtlpGrpcMetadataKey,
   OTLP_AUTH_SECRET_KEYS,
@@ -176,22 +177,6 @@ const OTLP_HTTP_ENDPOINT_FIELDS = [
   'profiles_endpoint',
 ] as const;
 
-/**
- * Whether the endpoint is an https URL with a host. The `https://` prefix is checked on the raw
- * value: the URL parser repairs a value such as `https:/collector.example.com`, that the collector
- * does not parse as having a host, and Fleet publishes the value as it is.
- */
-const isHttpsUrlWithHost = (endpoint: string): boolean => {
-  if (!/^https:\/\//i.test(endpoint)) {
-    return false;
-  }
-  try {
-    return new URL(endpoint).hostname !== '';
-  } catch {
-    return false;
-  }
-};
-
 /** Throws if the Azure authentication of an output is not complete for its method. */
 function validateOtlpAzureAuth(
   auth: OtlpAzureAuth,
@@ -213,7 +198,7 @@ function validateOtlpAzureAuth(
     if (field !== 'endpoint' && (endpoint === '' || endpoint === null || endpoint === undefined)) {
       return false;
     }
-    return typeof endpoint !== 'string' || !isHttpsUrlWithHost(endpoint);
+    return typeof endpoint !== 'string' || !isOtlpHttpsUrlWithHost(endpoint);
   });
   if (insecureEndpointField) {
     throw new OutputInvalidError(
