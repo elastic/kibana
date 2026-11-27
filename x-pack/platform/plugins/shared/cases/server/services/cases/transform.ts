@@ -127,6 +127,7 @@ export function transformAttributesToESModel(caseAttributes: Partial<CaseTransfo
     status,
     incremental_id,
     settings,
+    total_observables: totalObservables,
     ...restAttributes
   } = caseAttributes;
   const { connector_id: pushConnectorId, ...restExternalService } = external_service ?? {};
@@ -162,10 +163,30 @@ export function transformAttributesToESModel(caseAttributes: Partial<CaseTransfo
           extractObservables: settings.extractObservables ?? false,
         },
       }),
-      total_observables: restAttributes.observables?.length ?? 0,
+      ...buildTotalObservablesAttribute(totalObservables, restAttributes.observables),
     },
     referenceHandler: buildReferenceHandler(connector?.id, pushConnectorId),
   };
+}
+
+/**
+ * Returns the total_observables a case write should persist. Returns no attribute when the write supplies
+ * neither a total nor observables, so a partial update keeps the stored total.
+ */
+function buildTotalObservablesAttribute(
+  totalObservables: CaseTransformedAttributes['total_observables'] | undefined,
+  observables: CaseTransformedAttributes['observables'] | undefined
+): Pick<CasePersistedAttributes, 'total_observables'> {
+  // A supplied total wins, because observables stored outside the case field count toward it.
+  if (totalObservables != null) {
+    return { total_observables: totalObservables };
+  }
+
+  if (observables !== undefined) {
+    return { total_observables: observables.length };
+  }
+
+  return {};
 }
 
 export function transformESModelToCase(

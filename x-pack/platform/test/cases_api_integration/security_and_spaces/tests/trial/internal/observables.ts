@@ -7,7 +7,15 @@
 
 import expect from '@kbn/expect';
 
-import { MAX_OBSERVABLES_PER_CASE, OBSERVABLE_TYPE_IPV4 } from '@kbn/cases-plugin/common/constants';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import {
+  CASE_SAVED_OBJECT,
+  MAX_OBSERVABLE_DESCRIPTION_LENGTH,
+  MAX_OBSERVABLE_VALUE_LENGTH,
+  MAX_OBSERVABLES_PER_CASE,
+  OBSERVABLE_TYPE_HOSTNAME,
+  OBSERVABLE_TYPE_IPV4,
+} from '@kbn/cases-plugin/common/constants';
 import type { Case } from '@kbn/cases-plugin/common';
 import type { ObservablesUserAction } from '@kbn/cases-plugin/common/types/domain';
 import { UserActionTypes } from '@kbn/cases-plugin/common/types/domain';
@@ -23,6 +31,8 @@ import {
   bulkDeleteObservables,
   getCase,
   findCaseUserActions,
+  getSOFromKibanaIndex,
+  updateCase,
 } from '../../../../common/lib/api';
 
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -97,6 +107,173 @@ export default ({ getService }: FtrProviderContext): void => {
           expectedHttpCode: 400,
         });
       });
+
+      it('adds an observable whose value and description are at the maximum length', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+
+        const updatedCase = await addObservable({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            observable: {
+              value: 'h'.repeat(MAX_OBSERVABLE_VALUE_LENGTH),
+              typeKey: OBSERVABLE_TYPE_HOSTNAME.key,
+              description: 'd'.repeat(MAX_OBSERVABLE_DESCRIPTION_LENGTH),
+            },
+          },
+        });
+
+        expect(updatedCase.observables.length).to.be(1);
+      });
+
+      it('returns bad request when the value or description exceeds the maximum length', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+
+        await addObservable({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            observable: {
+              value: 'h'.repeat(MAX_OBSERVABLE_VALUE_LENGTH + 1),
+              typeKey: OBSERVABLE_TYPE_HOSTNAME.key,
+              description: null,
+            },
+          },
+          expectedHttpCode: 400,
+        });
+
+        await addObservable({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            observable: {
+              value: 'host-1',
+              typeKey: OBSERVABLE_TYPE_HOSTNAME.key,
+              description: 'd'.repeat(MAX_OBSERVABLE_DESCRIPTION_LENGTH + 1),
+            },
+          },
+          expectedHttpCode: 400,
+        });
+
+        const { observables } = await getCase({ supertest, caseId: postedCase.id });
+        expect(observables).to.eql([]);
+      });
+
+      it('keeps every observable when they are added in parallel', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+        const values = ['10.0.0.1', '10.0.0.2', '10.0.0.3'];
+
+        // Each version conflict has one winner, so three writers always finish within the three write attempts.
+        await Promise.all(
+          values.map((value) =>
+            addObservable({
+              supertest,
+              caseId: postedCase.id,
+              params: {
+                observable: { value, typeKey: OBSERVABLE_TYPE_IPV4.key, description: null },
+              },
+            })
+          )
+        );
+
+        const { observables } = await getCase({ supertest, caseId: postedCase.id });
+        expect(observables.map(({ value }) => value).sort()).to.eql(values);
+      });
+    });
+
+    describe('stored observable count', () => {
+      it('keeps total_observables when a case update does not touch observables', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+
+        await addObservable({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            observable: { value: '10.0.0.1', typeKey: OBSERVABLE_TYPE_IPV4.key, description: null },
+          },
+        });
+        const caseWithObservables = await addObservable({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            observable: { value: '10.0.0.2', typeKey: OBSERVABLE_TYPE_IPV4.key, description: null },
+          },
+        });
+
+        await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: caseWithObservables.id,
+                version: caseWithObservables.version,
+                title: 'new title',
+              },
+            ],
+          },
+        });
+
+        const { body } = await getSOFromKibanaIndex({
+          es,
+          soType: CASE_SAVED_OBJECT,
+          soId: postedCase.id,
+        });
+        expect(body._source?.[CASE_SAVED_OBJECT].total_observables).to.be(2);
+      });
+    });
+
+    describe('observable stored before the length bounds', () => {
+      const legacyValue = 'h'.repeat(MAX_OBSERVABLE_VALUE_LENGTH + 1);
+
+      const addLegacyObservable = async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+        const {
+          observables: [observable],
+        } = await addObservable({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            observable: {
+              value: 'host-1',
+              typeKey: OBSERVABLE_TYPE_HOSTNAME.key,
+              description: null,
+            },
+          },
+        });
+
+        // The request bounds reject this value, so it is written straight to the saved object.
+        await es.update({
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          id: `${CASE_SAVED_OBJECT}:${postedCase.id}`,
+          doc: { [CASE_SAVED_OBJECT]: { observables: [{ ...observable, value: legacyValue }] } },
+          refresh: true,
+        });
+
+        return { caseId: postedCase.id, observableId: observable.id };
+      };
+
+      it('edits the description and keeps the over-length value', async () => {
+        const { caseId, observableId } = await addLegacyObservable();
+
+        const updatedCase = await updateObservable({
+          supertest,
+          params: { observable: { value: legacyValue, description: 'triaged' } },
+          caseId,
+          observableId,
+        });
+
+        expect(updatedCase.observables[0].value).to.be(legacyValue);
+        expect(updatedCase.observables[0].description).to.be('triaged');
+      });
+
+      it('deletes the over-length observable', async () => {
+        const { caseId, observableId } = await addLegacyObservable();
+
+        await deleteObservable({ supertest, caseId, observableId, expectedHttpCode: 204 });
+
+        const { observables } = await getCase({ supertest, caseId });
+        expect(observables.length).to.be(0);
+      });
     });
 
     describe('update observable', () => {
@@ -153,6 +330,34 @@ export default ({ getService }: FtrProviderContext): void => {
           params: { observable: { description: '', value: 'not ip' } },
           caseId: postedCase.id,
           observableId: observable.id as string,
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('returns bad request when an edit changes the value to one over the maximum length', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+
+        const {
+          observables: [observable],
+        } = await addObservable({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            observable: {
+              value: 'host-1',
+              typeKey: OBSERVABLE_TYPE_HOSTNAME.key,
+              description: null,
+            },
+          },
+        });
+
+        await updateObservable({
+          supertest,
+          params: {
+            observable: { value: 'h'.repeat(MAX_OBSERVABLE_VALUE_LENGTH + 1), description: null },
+          },
+          caseId: postedCase.id,
+          observableId: observable.id,
           expectedHttpCode: 400,
         });
       });

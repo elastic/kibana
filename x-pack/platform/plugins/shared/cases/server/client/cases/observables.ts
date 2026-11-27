@@ -7,6 +7,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import Boom from '@hapi/boom';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { MAX_OBSERVABLES_PER_CASE } from '../../../common/constants';
 import type { Observable } from '../../../common/types/domain';
@@ -33,6 +34,7 @@ import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { flattenCaseSavedObject } from '../../common/utils';
 import { LICENSING_CASE_OBSERVABLES_FEATURE } from '../../common/constants';
 import {
+  validateChangedObservableLengths,
   validateDuplicatedObservablesInRequest,
   validateObservableTypeKeyExists,
   validateObservableValue,
@@ -55,6 +57,106 @@ const ensureUpdateAuthorized = async (
   });
 };
 
+const MAX_OBSERVABLES_WRITE_ATTEMPTS = 3;
+
+interface ObservablesWrite<TResult> {
+  observables: Observable[];
+  result: TResult;
+}
+
+interface ObservablesWriteArgs<TResult, TComputed extends ObservablesWrite<TResult> | undefined> {
+  caseId: string;
+  prefetchedCase?: CaseSavedObjectTransformed;
+  caseService: CasesClientArgs['services']['caseService'];
+  compute: (retrievedCase: CaseSavedObjectTransformed) => TComputed;
+}
+
+interface ObservablesWriteOutcome<TResult> {
+  retrievedCase: CaseSavedObjectTransformed;
+  patchedCase: Awaited<ReturnType<CasesClientArgs['services']['caseService']['patchCase']>>;
+  result: TResult;
+}
+
+/**
+ * Reads the case, lets `compute` derive the new observables list from it, and writes the list
+ * with the case version. On a version conflict the case is re-read and `compute` runs again, so a
+ * concurrent writer's observables are never overwritten. `compute` returns undefined when there
+ * is nothing to write.
+ *
+ * Authorization runs once, against the first read. A saved object import can overwrite the case
+ * with a different owner, so a re-read whose owner changed fails with a conflict rather than being
+ * written under the first read's authorization.
+ */
+function writeObservablesWithRetry<TResult>(
+  args: ObservablesWriteArgs<TResult, ObservablesWrite<TResult>>
+): Promise<ObservablesWriteOutcome<TResult>>;
+function writeObservablesWithRetry<TResult>(
+  args: ObservablesWriteArgs<TResult, ObservablesWrite<TResult> | undefined>
+): Promise<ObservablesWriteOutcome<TResult> | undefined>;
+async function writeObservablesWithRetry<TResult>({
+  caseId,
+  prefetchedCase,
+  caseService,
+  compute,
+}: ObservablesWriteArgs<TResult, ObservablesWrite<TResult> | undefined>): Promise<
+  ObservablesWriteOutcome<TResult> | undefined
+> {
+  let ownerAtFirstRead: string | undefined;
+
+  for (let attempt = 1; attempt <= MAX_OBSERVABLES_WRITE_ATTEMPTS; attempt++) {
+    const retrievedCase =
+      attempt === 1 && prefetchedCase ? prefetchedCase : await caseService.getCase({ id: caseId });
+
+    ownerAtFirstRead ??= retrievedCase.attributes.owner;
+    if (retrievedCase.attributes.owner !== ownerAtFirstRead) {
+      throw Boom.conflict(
+        `The owner of case ${caseId} changed while its observables were being saved. Retry the request.`
+      );
+    }
+
+    const write = compute(retrievedCase);
+    if (!write) {
+      return;
+    }
+
+    try {
+      const patchedCase = await caseService.patchCase({
+        caseId: retrievedCase.id,
+        originalCase: retrievedCase,
+        version: retrievedCase.version,
+        updatedAttributes: {
+          observables: write.observables,
+          total_observables: write.observables.length,
+        },
+      });
+
+      return { retrievedCase, patchedCase, result: write.result };
+    } catch (error) {
+      if (!SavedObjectsErrorHelpers.isConflictError(error as Error)) {
+        throw error;
+      }
+    }
+  }
+
+  throw Boom.conflict(
+    `The observables of case ${caseId} were modified concurrently ${MAX_OBSERVABLES_WRITE_ATTEMPTS} times in a row. Retry the request.`
+  );
+}
+
+/**
+ * Wraps an observable write failure in a 400, keeping a version conflict's 409 so the caller knows to retry.
+ */
+const toObservableWriteError = (message: string, error: unknown): Boom.Boom =>
+  Boom.isBoom(error, 409) ? error : Boom.badRequest(`${message}: ${error}`);
+
+type ApplyObservablesResult =
+  | {
+      status: 'added';
+      caseWithPatch: CaseSavedObjectTransformed;
+      newlyAddedObservables: Observable[];
+    }
+  | { status: 'skipped'; reason: 'nothing_new' | 'limit_reached' };
+
 /**
  * License-agnostic core that dedupes, caps, persists, and records a user action
  * for a set of observables on a case. Callers MUST enforce the Platinum license
@@ -62,7 +164,8 @@ const ensureUpdateAuthorized = async (
  *
  * Skips both the patchCase write and the user action write when no new
  * observables were added (idempotency — avoids a no-op SO write on every
- * re-extraction of the same alert).
+ * re-extraction of the same alert), and reports whether that was because
+ * every observable was already stored or because the case is full.
  *
  * @param prefetchedCase - Optional already-fetched SO to avoid an extra getCase
  *   round-trip. When provided, `caseId` is ignored for the initial fetch.
@@ -72,58 +175,67 @@ export const applyObservablesToCase = async (
   observables: ObservablePost[],
   clientArgs: CasesClientArgs,
   prefetchedCase?: CaseSavedObjectTransformed
-) => {
+): Promise<ApplyObservablesResult> => {
   const {
     services: { caseService, userActionService },
     user,
   } = clientArgs;
 
   if (observables.length === 0) {
-    return;
+    return { status: 'skipped', reason: 'nothing_new' };
   }
 
-  const retrievedCase = prefetchedCase ?? (await caseService.getCase({ id: caseId }));
+  // Set by the last `compute` run, which is the one that decided there was nothing to write.
+  let skipReason: 'nothing_new' | 'limit_reached' = 'nothing_new';
 
-  const currentObservables = retrievedCase.attributes.observables ?? [];
-  // Build a key-set from existing observables so we never overwrite or collapse
-  // them — even when two stored rows share the same typeKey+value (reachable
-  // via SO import or data written before the dedupe path was added).
-  const existingKeys = new Set(
-    currentObservables.map(({ typeKey, value }) => `${typeKey}-${value}`)
-  );
+  const written = await writeObservablesWithRetry({
+    caseId,
+    prefetchedCase,
+    caseService,
+    compute: (retrievedCase) => {
+      const currentObservables = retrievedCase.attributes.observables ?? [];
+      // Build a key-set from existing observables so we never overwrite or collapse
+      // them — even when two stored rows share the same typeKey+value (reachable
+      // via SO import or data written before the dedupe path was added).
+      const existingKeys = new Set(
+        currentObservables.map(({ typeKey, value }) => `${typeKey}-${value}`)
+      );
 
-  // Dedupe incoming entries against existing ones and against each other.
-  // processObservables mints ids/timestamps for ObservablePost entries and
-  // skips repeats, so it is safe to call for every incoming entry.
-  const incomingMap = new Map<string, Observable>();
-  observables.forEach((observable) => {
-    if (existingKeys.has(`${observable.typeKey}-${observable.value}`)) {
-      return;
-    }
-    processObservables(incomingMap, observable);
-  });
+      // Dedupe incoming entries against existing ones and against each other.
+      // processObservables mints ids/timestamps for ObservablePost entries and
+      // skips repeats, so it is safe to call for every incoming entry.
+      const incomingMap = new Map<string, Observable>();
+      observables.forEach((observable) => {
+        if (existingKeys.has(`${observable.typeKey}-${observable.value}`)) {
+          return;
+        }
+        processObservables(incomingMap, observable);
+      });
 
-  // Respect the per-case cap: add as many new observables as fit.
-  const remainingCapacity = Math.max(0, MAX_OBSERVABLES_PER_CASE - currentObservables.length);
-  const newlyAddedObservables = Array.from(incomingMap.values()).slice(0, remainingCapacity);
+      // Respect the per-case cap: add as many new observables as fit.
+      const remainingCapacity = Math.max(0, MAX_OBSERVABLES_PER_CASE - currentObservables.length);
+      const newlyAddedObservables = Array.from(incomingMap.values()).slice(0, remainingCapacity);
 
-  // Nothing new was added — skip both the patch write and the user action to
-  // avoid a no-op SO write on every idempotent re-extraction (e.g. the same
-  // alert being attached multiple times).
-  if (newlyAddedObservables.length === 0) {
-    return;
-  }
+      // Nothing new was added — skip both the patch write and the user action to
+      // avoid a no-op SO write on every idempotent re-extraction (e.g. the same
+      // alert being attached multiple times).
+      if (newlyAddedObservables.length === 0) {
+        skipReason = incomingMap.size > 0 ? 'limit_reached' : 'nothing_new';
+        return;
+      }
 
-  const finalObservables = [...currentObservables, ...newlyAddedObservables];
-
-  const patchedCase = await caseService.patchCase({
-    caseId: retrievedCase.id,
-    originalCase: retrievedCase,
-    updatedAttributes: {
-      observables: finalObservables,
-      total_observables: finalObservables.length,
+      return {
+        observables: [...currentObservables, ...newlyAddedObservables],
+        result: newlyAddedObservables,
+      };
     },
   });
+
+  if (!written) {
+    return { status: 'skipped', reason: skipReason };
+  }
+
+  const { retrievedCase, patchedCase, result: newlyAddedObservables } = written;
 
   await userActionService.creator.createUserAction({
     userAction: {
@@ -141,6 +253,7 @@ export const applyObservablesToCase = async (
   // trigger after a successful decode — never emit from inside this function
   // because bulk callers decode *after* calling applyObservablesToCase.
   return {
+    status: 'added',
     caseWithPatch: {
       ...retrievedCase,
       ...patchedCase,
@@ -193,20 +306,16 @@ export const addObservable = async (
 
     validateObservableValue(paramArgs.observable.typeKey, paramArgs.observable.value);
 
-    const currentObservables = retrievedCase.attributes.observables ?? [];
-
-    if (currentObservables.length === MAX_OBSERVABLES_PER_CASE) {
-      throw Boom.forbidden(`Max ${MAX_OBSERVABLES_PER_CASE} observables per case is allowed.`);
-    }
-
     const applied = await applyObservablesToCase(
       caseId,
       [paramArgs.observable],
       clientArgs,
       retrievedCase
     );
-    if (!applied) {
-      throw Boom.badRequest('Invalid duplicated observables in request.');
+    if (applied.status === 'skipped') {
+      throw applied.reason === 'limit_reached'
+        ? Boom.forbidden(`Max ${MAX_OBSERVABLES_PER_CASE} observables per case is allowed.`)
+        : Boom.badRequest('Invalid duplicated observables in request.');
     }
 
     const res = flattenCaseSavedObject({ savedObject: applied.caseWithPatch });
@@ -221,12 +330,17 @@ export const addObservable = async (
       observablesForEmit: applied.newlyAddedObservables,
     };
   })().catch((error) => {
-    throw Boom.badRequest(`Failed to add observable: ${error}`);
+    throw toObservableWriteError('Failed to add observable', error);
   });
 
   emitObservablesAddedEvent(clientArgs, caseForEmit, observablesForEmit);
   return decodedCase;
 };
+
+const isUnchangedObservable = (stored: Observable, original: Observable | undefined): boolean =>
+  stored.value === original?.value &&
+  stored.description === original?.description &&
+  stored.updatedAt === original?.updatedAt;
 
 export const updateObservable = async (
   caseId: string,
@@ -256,46 +370,61 @@ export const updateObservable = async (
     const retrievedCase = await caseService.getCase({ id: caseId });
     await ensureUpdateAuthorized(authorization, retrievedCase);
 
-    const currentObservables = retrievedCase.attributes.observables ?? [];
-
-    const observableIndex = currentObservables.findIndex(
-      (observable) => observable.id === observableId
+    const originalObservable = retrievedCase.attributes.observables?.find(
+      ({ id }) => id === observableId
     );
 
-    if (observableIndex === -1) {
-      throw Boom.notFound(`Failed to update observable: observable id ${observableId} not found`);
-    }
+    const written = await writeObservablesWithRetry({
+      caseId,
+      prefetchedCase: retrievedCase,
+      caseService,
+      compute: (currentCase) => {
+        const currentObservables = currentCase.attributes.observables ?? [];
 
-    validateObservableValue(
-      currentObservables[observableIndex].typeKey,
-      paramArgs.observable.value
-    );
+        const observableIndex = currentObservables.findIndex(
+          (observable) => observable.id === observableId
+        );
 
-    const updatedObservables = [...currentObservables];
-    updatedObservables[observableIndex] = {
-      ...updatedObservables[observableIndex],
-      ...paramArgs.observable,
-      updatedAt: new Date().toISOString(),
-    };
+        if (observableIndex === -1) {
+          throw Boom.notFound(
+            `Failed to update observable: observable id ${observableId} not found`
+          );
+        }
 
-    validateDuplicatedObservablesInRequest({
-      requestFields: updatedObservables,
-    });
+        if (!isUnchangedObservable(currentObservables[observableIndex], originalObservable)) {
+          throw Boom.conflict(
+            `Observable id ${observableId} was modified by another request. Reload the case and try again.`
+          );
+        }
 
-    const updatedCase = await caseService.patchCase({
-      caseId: retrievedCase.id,
-      originalCase: retrievedCase,
-      updatedAttributes: {
-        observables: updatedObservables,
-        total_observables: updatedObservables.length,
+        validateChangedObservableLengths(currentObservables[observableIndex], paramArgs.observable);
+        validateObservableValue(
+          currentObservables[observableIndex].typeKey,
+          paramArgs.observable.value
+        );
+
+        const updatedObservables = [...currentObservables];
+        updatedObservables[observableIndex] = {
+          ...updatedObservables[observableIndex],
+          ...paramArgs.observable,
+          updatedAt: new Date().toISOString(),
+        };
+
+        validateDuplicatedObservablesInRequest({
+          requestFields: updatedObservables,
+        });
+
+        return { observables: updatedObservables, result: undefined };
       },
     });
+
+    const { retrievedCase: latestCase, patchedCase: updatedCase } = written;
 
     await userActionService.creator.createUserAction({
       userAction: {
         type: UserActionTypes.observables,
-        caseId: retrievedCase.id,
-        owner: retrievedCase.attributes.owner,
+        caseId: latestCase.id,
+        owner: latestCase.attributes.owner,
         user,
         payload: {
           observables: { count: 1, actionType: 'update' },
@@ -305,16 +434,16 @@ export const updateObservable = async (
 
     const res = flattenCaseSavedObject({
       savedObject: {
-        ...retrievedCase,
+        ...latestCase,
         ...updatedCase,
-        attributes: { ...retrievedCase.attributes, ...updatedCase?.attributes },
-        references: retrievedCase.references,
+        attributes: { ...latestCase.attributes, ...updatedCase?.attributes },
+        references: latestCase.references,
       },
     });
 
     return decodeOrThrowZod(CaseSchema)(res);
   } catch (error) {
-    throw Boom.badRequest(`Failed to update observable: ${error}`);
+    throw toObservableWriteError('Failed to update observable', error);
   }
 };
 
@@ -344,28 +473,31 @@ export const deleteObservable = async (
     const retrievedCase = await caseService.getCase({ id: caseId });
     await ensureUpdateAuthorized(authorization, retrievedCase);
 
-    const updatedObservables = retrievedCase.attributes.observables.filter(
-      (observable) => observable.id !== observableId
-    );
+    const { retrievedCase: latestCase } = await writeObservablesWithRetry({
+      caseId,
+      prefetchedCase: retrievedCase,
+      caseService,
+      compute: (currentCase) => {
+        const updatedObservables = currentCase.attributes.observables.filter(
+          (observable) => observable.id !== observableId
+        );
 
-    // NOTE: same length of observables pre and post filter means that the observable id has not been found
-    if (updatedObservables.length === retrievedCase.attributes.observables.length) {
-      throw Boom.notFound(`Failed to delete observable: observable id ${observableId} not found`);
-    }
+        // NOTE: same length of observables pre and post filter means that the observable id has not been found
+        if (updatedObservables.length === currentCase.attributes.observables.length) {
+          throw Boom.notFound(
+            `Failed to delete observable: observable id ${observableId} not found`
+          );
+        }
 
-    await caseService.patchCase({
-      caseId: retrievedCase.id,
-      originalCase: retrievedCase,
-      updatedAttributes: {
-        observables: updatedObservables,
-        total_observables: updatedObservables.length,
+        return { observables: updatedObservables, result: undefined };
       },
     });
+
     await userActionService.creator.createUserAction({
       userAction: {
         type: UserActionTypes.observables,
-        caseId: retrievedCase.id,
-        owner: retrievedCase.attributes.owner,
+        caseId: latestCase.id,
+        owner: latestCase.attributes.owner,
         user,
         payload: {
           observables: { count: 1, actionType: 'delete' },
@@ -373,7 +505,7 @@ export const deleteObservable = async (
       },
     });
   } catch (error) {
-    throw Boom.badRequest(`Failed to delete observable id: ${observableId}: ${error}`);
+    throw toObservableWriteError(`Failed to delete observable id: ${observableId}`, error);
   }
 };
 
@@ -425,7 +557,7 @@ export const bulkAddObservables = async (
       clientArgs,
       retrievedCase
     );
-    if (!applied) {
+    if (applied.status === 'skipped') {
       throw Boom.badRequest(`Failed to add observable`);
     }
     const res = flattenCaseSavedObject({ savedObject: applied.caseWithPatch });
@@ -436,7 +568,7 @@ export const bulkAddObservables = async (
       observablesForEmit: applied.newlyAddedObservables,
     };
   })().catch((error) => {
-    throw Boom.badRequest(`Failed to add observable: ${error}`);
+    throw toObservableWriteError('Failed to add observable', error);
   });
 
   emitObservablesAddedEvent(clientArgs, caseForEmit, observablesForEmit);
@@ -468,39 +600,42 @@ export const bulkDeleteObservables = async (
   await ensureUpdateAuthorized(authorization, retrievedCase);
 
   const idsToDelete = new Set(paramArgs.observableIds);
-  const currentObservables = retrievedCase.attributes.observables ?? [];
-  const currentIdSet = new Set(currentObservables.map(({ id }) => id));
 
-  const missingIds = [...idsToDelete].filter((id) => !currentIdSet.has(id));
-  if (missingIds.length > 0) {
-    throw Boom.notFound(
-      `Failed to bulk delete observables: observable ids not found: ${missingIds.join(', ')}`
-    );
-  }
+  const {
+    retrievedCase: latestCase,
+    patchedCase: updatedCase,
+    result: removedCount,
+  } = await writeObservablesWithRetry({
+    caseId: paramArgs.caseId,
+    prefetchedCase: retrievedCase,
+    caseService,
+    compute: (currentCase) => {
+      const currentObservables = currentCase.attributes.observables ?? [];
+      const currentIdSet = new Set(currentObservables.map(({ id }) => id));
 
-  const removedObservables = currentObservables.filter((observable) =>
-    idsToDelete.has(observable.id)
-  );
-  const updatedObservables = currentObservables.filter(
-    (observable) => !idsToDelete.has(observable.id)
-  );
-  const removedCount = removedObservables.length;
+      const missingIds = [...idsToDelete].filter((id) => !currentIdSet.has(id));
+      if (missingIds.length > 0) {
+        throw Boom.notFound(
+          `Failed to bulk delete observables: observable ids not found: ${missingIds.join(', ')}`
+        );
+      }
 
-  const updatedCase = await caseService.patchCase({
-    caseId: retrievedCase.id,
-    originalCase: retrievedCase,
-    version: retrievedCase.version,
-    updatedAttributes: {
-      observables: updatedObservables,
-      total_observables: updatedObservables.length,
+      const updatedObservables = currentObservables.filter(
+        (observable) => !idsToDelete.has(observable.id)
+      );
+
+      return {
+        observables: updatedObservables,
+        result: currentObservables.length - updatedObservables.length,
+      };
     },
   });
 
   await userActionService.creator.createUserAction({
     userAction: {
       type: UserActionTypes.observables,
-      caseId: retrievedCase.id,
-      owner: retrievedCase.attributes.owner,
+      caseId: latestCase.id,
+      owner: latestCase.attributes.owner,
       user,
       payload: {
         observables: { count: removedCount, actionType: 'delete' },
@@ -510,10 +645,10 @@ export const bulkDeleteObservables = async (
 
   const res = flattenCaseSavedObject({
     savedObject: {
-      ...retrievedCase,
+      ...latestCase,
       ...updatedCase,
-      attributes: { ...retrievedCase.attributes, ...updatedCase?.attributes },
-      references: retrievedCase.references,
+      attributes: { ...latestCase.attributes, ...updatedCase?.attributes },
+      references: latestCase.references,
     },
   });
 
