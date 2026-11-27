@@ -5,7 +5,21 @@
  * 2.0.
  */
 
+import type { IntervalHistogram } from 'perf_hooks';
+import { monitorEventLoopDelay } from 'perf_hooks';
+
 import { startTaskTimer, startEventLoopMonitoring } from './task_events';
+
+jest.mock('perf_hooks', () => ({
+  monitorEventLoopDelay: jest.fn(),
+}));
+
+const monitorEventLoopDelayMock = monitorEventLoopDelay as jest.MockedFunction<
+  typeof monitorEventLoopDelay
+>;
+
+const createHistogramMock = (max: number) =>
+  ({ enable: jest.fn(), disable: jest.fn(), max } as unknown as IntervalHistogram);
 
 const DelayIterations = 4;
 const DelayMillis = 250;
@@ -25,29 +39,17 @@ async function nonBlockingDelay(millis: number) {
   }
 }
 
-async function blockingDelay(millis: number) {
-  // get task in async queue
-  await nonBlockingDelay(0);
-
-  const end = Date.now() + millis;
-
-  // eslint-disable-next-line no-empty
-  while (Date.now() <= end) {}
-}
-
 async function nonBlockingTask() {
   for (let i = 0; i < DelayIterations; i++) {
     await nonBlockingDelay(DelayMillis);
   }
 }
 
-async function blockingTask() {
-  for (let i = 0; i < DelayIterations; i++) {
-    await blockingDelay(DelayMillis);
-  }
-}
-
 describe('task_events', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('startTaskTimer', async () => {
     const stopTaskTimer = startTaskTimer();
     await nonBlockingTask();
@@ -57,33 +59,29 @@ describe('task_events', () => {
   });
 
   describe('startEventLoopMonitoring', () => {
-    test('non-blocking', async () => {
+    test('monitoring', () => {
+      const eldHistogram = createHistogramMock(1_500_000);
+      monitorEventLoopDelayMock.mockReturnValue(eldHistogram);
+
       const stopMonitoring = startEventLoopMonitoring({
         monitor: true,
         warn_threshold: 5000,
       });
-      await nonBlockingTask();
+      expect(eldHistogram.enable).toHaveBeenCalledTimes(1);
+      expect(eldHistogram.disable).not.toHaveBeenCalled();
+
       const eventLoopBlockMs = stopMonitoring();
-      expect(eventLoopBlockMs).toBeLessThan(DelayMillis);
+      expect(eldHistogram.disable).toHaveBeenCalledTimes(1);
+      expect(eventLoopBlockMs).toBe(2);
     });
 
-    test('blocking', async () => {
-      const stopMonitoring = startEventLoopMonitoring({
-        monitor: true,
-        warn_threshold: 5000,
-      });
-      await blockingTask();
-      const eventLoopBlockMs = stopMonitoring();
-      expect(eventLoopBlockMs).not.toBeLessThan(DelayMillis);
-    });
-
-    test('not monitoring', async () => {
+    test('not monitoring', () => {
       const stopMonitoring = startEventLoopMonitoring({
         monitor: false,
         warn_threshold: 5000,
       });
-      await blockingTask();
       const eventLoopBlockMs = stopMonitoring();
+      expect(monitorEventLoopDelayMock).not.toHaveBeenCalled();
       expect(eventLoopBlockMs).toBe(0);
     });
   });
