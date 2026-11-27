@@ -69,9 +69,22 @@ export const BulkDeleteObservablesRequestSchema = z.object({
   }),
 });
 
+export const BulkGetObservablesRequestSchema = lazySchema(() =>
+  z.object({
+    caseId: z.string(),
+    observableIds: limitedArraySchema({
+      codec: BoundedObservableIdSchema,
+      min: 1,
+      max: MAX_OBSERVABLES_PER_CASE,
+      fieldName: 'observableIds',
+    }),
+  })
+);
+
 export type ObservablePost = z.infer<typeof ObservablePostSchema>;
 export type ObservablePatch = z.infer<typeof ObservablePatchSchema>;
 export type AddObservableRequest = z.infer<typeof AddObservableRequestSchema>;
 export type UpdateObservableRequest = z.infer<typeof UpdateObservableRequestSchema>;
 export type BulkAddObservablesRequest = z.infer<typeof BulkAddObservablesRequestSchema>;
 export type BulkDeleteObservablesRequest = z.infer<typeof BulkDeleteObservablesRequestSchema>;
+export type BulkGetObservablesRequest = z.infer<typeof BulkGetObservablesRequestSchema>;

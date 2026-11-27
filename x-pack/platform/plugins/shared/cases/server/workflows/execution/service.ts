@@ -17,6 +17,7 @@ import {
   CASE_SAVED_OBJECT,
   CASES_WORKFLOW_EXECUTION_METADATA_SCHEMA_VERSION,
   CASES_WORKFLOW_EXECUTION_SOURCE,
+  OBSERVABLE_ID_MAX_LENGTH,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
   OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
 } from '../../../common/constants';
@@ -80,6 +81,46 @@ const resolveObservableEventFields = (
   }
 
   return undefined;
+};
+
+const getOriginObservableIds = (origin: RunCaseWorkflowRequest['origin']): string[] => {
+  if (origin?.type === OBSERVABLE_WORKFLOW_ORIGIN_TYPE) {
+    return [origin.observableId];
+  }
+
+  if (origin?.type === OBSERVABLES_WORKFLOW_ORIGIN_TYPE) {
+    return origin.observableIds;
+  }
+
+  return [];
+};
+
+/**
+ * A case response lists at most 50 observables, so an observable origin can name ones it leaves
+ * out. Adds those, from either store, to the case that the origin check, the event fields and the
+ * activity record read. Ids the case does not hold stay missing and fail the origin check.
+ */
+const withOriginObservables = async (
+  theCase: Awaited<ReturnType<CasesClient['cases']['get']>>,
+  origin: RunCaseWorkflowRequest['origin'],
+  casesClient: CasesClient
+): Promise<Awaited<ReturnType<CasesClient['cases']['get']>>> => {
+  const listedIds = new Set(theCase.observables.map(({ id }) => id));
+  // An origin id can be longer than any observable id; such an id is left for the origin check to reject.
+  const unlistedIds = [...new Set(getOriginObservableIds(origin))].filter(
+    (id) => !listedIds.has(id) && id.length <= OBSERVABLE_ID_MAX_LENGTH
+  );
+
+  if (unlistedIds.length === 0) {
+    return theCase;
+  }
+
+  const unlisted = await casesClient.cases.bulkGetObservables({
+    caseId: theCase.id,
+    observableIds: unlistedIds,
+  });
+
+  return { ...theCase, observables: [...theCase.observables, ...unlisted] };
 };
 
 interface RunWorkflowParams {
@@ -224,7 +265,11 @@ export class CasesWorkflowRunService {
       const needsComments =
         body.origin.type === ATTACHMENT_WORKFLOW_ORIGIN_TYPE ||
         body.origin.type === ATTACHMENTS_WORKFLOW_ORIGIN_TYPE;
-      theCase = await casesClient.cases.get({ id: caseIds[0], includeComments: needsComments });
+      theCase = await withOriginObservables(
+        await casesClient.cases.get({ id: caseIds[0], includeComments: needsComments }),
+        body.origin,
+        casesClient
+      );
       // Fetch alert and event attachments in parallel, each only when their inputs are present.
       // Separate fetches (instead of a combined [alert, event] call) prevent cross-type false matches
       // — an event attachment should never satisfy an alert membership check, and vice versa.

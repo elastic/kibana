@@ -428,5 +428,40 @@ describe('extractAndAddObservables', () => {
         expect.stringContaining('No new observables added')
       );
     });
+
+    it('skips a value the case holds in the observables type and counts that type in the stored total', async () => {
+      licensingService.isAtLeastPlatinum.mockResolvedValue(true);
+      alertsService.getAlerts.mockResolvedValue({
+        docs: [makeEcsDoc({ 'source.ip': '1.2.3.4', 'host.name': 'host-1' })],
+      });
+      caseService.getCase.mockResolvedValue(caseSO);
+      caseService.patchCase.mockResolvedValue(caseSO);
+      const { getter } = clientArgs.services.observableService;
+      getter.countForCase.mockResolvedValue(1);
+      getter.findExisting.mockResolvedValue([
+        {
+          id: 'type-observable-1',
+          typeKey: OBSERVABLE_TYPE_IPV4.key,
+          value: '1.2.3.4',
+          description: null,
+          createdAt: '2026-11-06T09:30:00.000Z',
+          updatedAt: null,
+        },
+      ]);
+
+      await extractAndAddObservables('case-1', [alertAttachment], makeCase(true), clientArgs);
+
+      const [[patchArgs]] = caseService.patchCase.mock.calls;
+      expect(patchArgs.updatedAttributes).toEqual({
+        observables: [expect.objectContaining({ value: 'host-1' })],
+        total_observables: 2,
+      });
+      expect(clientArgs.casesEventBus.emitObservablesAdded).toHaveBeenCalledWith(
+        clientArgs.request,
+        expect.objectContaining({
+          observableIds: [patchArgs.updatedAttributes.observables?.[0].id],
+        })
+      );
+    });
   });
 });

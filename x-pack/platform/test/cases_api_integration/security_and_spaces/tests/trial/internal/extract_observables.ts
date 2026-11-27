@@ -7,7 +7,8 @@
 
 import expect from '@kbn/expect';
 
-import { OBSERVABLE_TYPE_IPV4 } from '@kbn/cases-plugin/common/constants';
+import { CASE_SAVED_OBJECT, OBSERVABLE_TYPE_IPV4 } from '@kbn/cases-plugin/common/constants';
+import type { Observable } from '@kbn/cases-plugin/common/types/domain';
 import { buildUnifiedAlertReq, getPostCaseRequest } from '../../../../common/lib/mock';
 import {
   createCase,
@@ -15,6 +16,8 @@ import {
   bulkCreateAttachments,
   createComment,
   getCase,
+  getSOFromKibanaIndex,
+  seedObservables,
 } from '../../../../common/lib/api';
 
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -247,6 +250,47 @@ export default ({ getService }: FtrProviderContext): void => {
         // ext-alert-1 contributes source.ip 1.2.3.4 + destination.ip 10.0.0.1,
         // ext-alert-2 contributes source.ip 5.6.7.8 → 3 distinct observables total
         expect(refreshedCase.observables.length).to.be(3);
+      });
+
+      it('skips a value the case holds in the cases-observables type', async () => {
+        const theCase = await createCase(
+          supertest,
+          getPostCaseRequest({ settings: { syncAlerts: false, extractObservables: true } })
+        );
+        await seedObservables({
+          es,
+          caseId: theCase.id,
+          observables: [
+            {
+              id: 'type-1',
+              typeKey: OBSERVABLE_TYPE_IPV4.key,
+              value: '1.2.3.4',
+              createdAt: '2026-11-06T09:30:00.000Z',
+            },
+          ],
+        });
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: theCase.id,
+          params: [
+            buildUnifiedAlertReq('securitySolutionFixture', {
+              alertId: 'ext-alert-1',
+              index: alertIndex,
+              rule: { id: 'rule-1', name: 'Rule 1' },
+            }),
+          ],
+          expectedHttpCode: 200,
+        });
+
+        const { body } = await getSOFromKibanaIndex({
+          es,
+          soType: CASE_SAVED_OBJECT,
+          soId: theCase.id,
+        });
+        const storedCase = body._source?.[CASE_SAVED_OBJECT];
+        expect(storedCase.observables.map(({ value }: Observable) => value)).to.eql(['10.0.0.1']);
+        expect(storedCase.total_observables).to.be(2);
       });
     });
 

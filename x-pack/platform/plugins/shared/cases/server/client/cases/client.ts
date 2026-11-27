@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Case, CaseCustomField, User } from '../../../common/types/domain';
+import type { Case, CaseCustomField, Observable, User } from '../../../common/types/domain';
 import type {
   CasePostRequest,
   CasesFindResponse,
@@ -28,6 +28,7 @@ import type {
   UpdateObservableRequest,
   BulkAddObservablesRequest,
   BulkDeleteObservablesRequest,
+  BulkGetObservablesRequest,
   CasesPatchResponse,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
@@ -65,6 +66,7 @@ import {
   addObservable,
   bulkAddObservables,
   bulkDeleteObservables,
+  bulkGetObservables,
   deleteObservable,
   updateObservable,
 } from './observables';
@@ -183,6 +185,10 @@ export interface CasesSubClient {
    */
   bulkDeleteObservables(params: BulkDeleteObservablesRequest): Promise<Case>;
   /**
+   * Returns the case's observables with the given ids, including ones the case response leaves out
+   */
+  bulkGetObservables(params: BulkGetObservablesRequest): Promise<Observable[]>;
+  /**
    * Returns the fully-formed `extended_fields` a caller may apply — the owner's global field-library
    * fields plus, when a template is in scope, that template's fields. Pass `caseId` to derive owner +
    * applied template from an existing case, or `owner` (+ optional `templateId`) for a prospective case.
@@ -214,6 +220,7 @@ const usageCounterByMethod = {
   deleteObservable: 'delete_observable',
   bulkAddObservables: 'bulk_add_observables',
   bulkDeleteObservables: 'bulk_delete_observables',
+  bulkGetObservables: null,
   getApplicableFields: null,
 } as const satisfies Record<keyof CasesSubClient, string | null>;
 
@@ -294,6 +301,8 @@ export const createCasesSubClient = (
       clientArgs,
       (params: BulkDeleteObservablesRequest) => bulkDeleteObservables(params, clientArgs)
     ),
+    bulkGetObservables: (params: BulkGetObservablesRequest) =>
+      bulkGetObservables(params, clientArgs),
     getApplicableFields: (params: GetApplicableFieldsParams) =>
       getApplicableFields(params, clientArgs),
   };

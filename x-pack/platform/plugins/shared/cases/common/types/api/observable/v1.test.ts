@@ -16,6 +16,7 @@ import {
   AddObservableRequestSchema,
   BulkAddObservablesRequestSchema,
   BulkDeleteObservablesRequestSchema,
+  BulkGetObservablesRequestSchema,
   UpdateObservableRequestSchema,
 } from './v1';
 
@@ -153,6 +154,46 @@ describe('BulkDeleteObservablesRequestSchema', () => {
     expect(BulkDeleteObservablesRequestSchema.safeParse({ caseId: 'case-1' }).success).toBe(false);
     expect(BulkDeleteObservablesRequestSchema.safeParse({ observableIds: ['obs-1'] }).success).toBe(
       false
+    );
+  });
+});
+
+describe('BulkGetObservablesRequestSchema', () => {
+  it('has expected attributes in request', () => {
+    const validRequest = { caseId: 'case-1', observableIds: ['obs-1', 'obs-2'] };
+    const result = BulkGetObservablesRequestSchema.safeParse(validRequest);
+
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(validRequest);
+  });
+
+  it('rejects an empty observableIds array', () => {
+    expect(
+      parseErrors(BulkGetObservablesRequestSchema, { caseId: 'case-1', observableIds: [] })
+    ).toContain(
+      'The length of the field observableIds is too short. Array must be of length >= 1.'
+    );
+  });
+
+  it('rejects observableIds longer than MAX_OBSERVABLES_PER_CASE', () => {
+    expect(
+      parseErrors(BulkGetObservablesRequestSchema, {
+        caseId: 'case-1',
+        observableIds: new Array(MAX_OBSERVABLES_PER_CASE + 1).fill('obs-id'),
+      })
+    ).toContain(
+      `The length of the field observableIds is too long. Array must be of length <= ${MAX_OBSERVABLES_PER_CASE}.`
+    );
+  });
+
+  it('rejects observableIds entries longer than OBSERVABLE_ID_MAX_LENGTH', () => {
+    expect(
+      parseErrors(BulkGetObservablesRequestSchema, {
+        caseId: 'case-1',
+        observableIds: ['a'.repeat(OBSERVABLE_ID_MAX_LENGTH + 1)],
+      })
+    ).toContain(
+      `The length of the observableId is too long. The maximum length is ${OBSERVABLE_ID_MAX_LENGTH}.`
     );
   });
 });

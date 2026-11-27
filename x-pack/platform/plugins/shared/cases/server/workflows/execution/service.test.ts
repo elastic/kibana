@@ -11,7 +11,7 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import { z } from '@kbn/zod/v4';
 import type { DocumentResponse, RunCaseWorkflowRequest } from '../../../common/types/api';
 import type { Case } from '../../../common/types/domain';
-import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { OBSERVABLE_ID_MAX_LENGTH, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { createCasesClientMock, createCasesClientMockArgs } from '../../client/mocks';
 import type { CasesRequestHandlerContext } from '../../types';
 import { CasesWorkflowRunService } from './service';
@@ -631,7 +631,146 @@ describe('CasesWorkflowRunService', () => {
         origin: { type: 'cases.observable', caseId: 'case-1', observableId: 'observable-1' },
       })
     ).rejects.toThrow('Observable "observable-1" does not belong to case "case-1".');
+    expect(casesClient.cases.bulkGetObservables).toHaveBeenCalledWith({
+      caseId: 'case-1',
+      observableIds: ['observable-1'],
+    });
     expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
+  });
+
+  describe('observables the case response leaves out', () => {
+    const unlistedObservable = {
+      id: 'unlisted-1',
+      typeKey: 'observable-type-hostname',
+      value: 'host-1.example.com',
+      description: null,
+      createdAt: '2026-11-06T09:30:00.000Z',
+      updatedAt: null,
+    };
+
+    beforeEach(() => {
+      casesClient.cases.get.mockResolvedValue({
+        ...theCase,
+        observables: [{ id: 'listed-1', typeKey: 'observable-type-ipv4', value: '1.2.3.4' }],
+      } as unknown as Case);
+    });
+
+    it('accepts a cases.observable origin held outside the case response', async () => {
+      casesClient.cases.bulkGetObservables.mockResolvedValueOnce([unlistedObservable]);
+
+      await expect(
+        run({
+          caseIds: ['case-1'],
+          inputs: {},
+          origin: { type: 'cases.observable', caseId: 'case-1', observableId: 'unlisted-1' },
+        })
+      ).resolves.toEqual({ workflowExecutionId: 'execution-1', activityStatus: 'succeeded' });
+
+      expect(casesClient.cases.bulkGetObservables).toHaveBeenCalledWith({
+        caseId: 'case-1',
+        observableIds: ['unlisted-1'],
+      });
+      expect(management.runWorkflowWithAlertPreprocessing).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventOverrides: {
+            caseIds: ['case-1'],
+            observableIds: ['unlisted-1'],
+            observableTypeKeys: ['observable-type-hostname'],
+          },
+        })
+      );
+      expect(
+        clientArgs.services.userActionService.creator.bulkCreateUserAction
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userActions: [
+            expect.objectContaining({
+              payload: expect.objectContaining({
+                origin: {
+                  type: 'cases.observable',
+                  id: 'unlisted-1',
+                  typeKey: 'observable-type-hostname',
+                  value: 'host-1.example.com',
+                },
+              }),
+            }),
+          ],
+        })
+      );
+    });
+
+    it('reads only the unlisted ids of a cases.observables origin and keeps the inputs index-aligned', async () => {
+      casesClient.cases.bulkGetObservables.mockResolvedValueOnce([unlistedObservable]);
+
+      await run({
+        caseIds: ['case-1'],
+        inputs: {},
+        origin: {
+          type: 'cases.observables',
+          caseId: 'case-1',
+          observableIds: ['unlisted-1', 'listed-1'],
+        },
+      });
+
+      expect(casesClient.cases.bulkGetObservables).toHaveBeenCalledWith({
+        caseId: 'case-1',
+        observableIds: ['unlisted-1'],
+      });
+      expect(management.runWorkflowWithAlertPreprocessing).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventOverrides: {
+            caseIds: ['case-1'],
+            observableIds: ['unlisted-1', 'listed-1'],
+            observableTypeKeys: ['observable-type-hostname', 'observable-type-ipv4'],
+          },
+        })
+      );
+    });
+
+    it('does not read observables when the case response lists every origin id', async () => {
+      await run({
+        caseIds: ['case-1'],
+        inputs: {},
+        origin: { type: 'cases.observable', caseId: 'case-1', observableId: 'listed-1' },
+      });
+
+      expect(casesClient.cases.bulkGetObservables).not.toHaveBeenCalled();
+      expect(management.runWorkflowWithAlertPreprocessing).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not read observables for an origin that names none', async () => {
+      await run(defaultBody);
+
+      expect(casesClient.cases.bulkGetObservables).not.toHaveBeenCalled();
+    });
+
+    it('rejects an origin id that neither store holds', async () => {
+      await expect(
+        run({
+          caseIds: ['case-1'],
+          inputs: {},
+          origin: {
+            type: 'cases.observables',
+            caseId: 'case-1',
+            observableIds: ['listed-1', 'missing-1'],
+          },
+        })
+      ).rejects.toThrow('Observable "missing-1" does not belong to case "case-1".');
+      expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
+    });
+
+    it('rejects an origin id longer than any observable id without reading observables', async () => {
+      const longId = 'a'.repeat(OBSERVABLE_ID_MAX_LENGTH + 1);
+
+      await expect(
+        run({
+          caseIds: ['case-1'],
+          inputs: {},
+          origin: { type: 'cases.observable', caseId: 'case-1', observableId: longId },
+        })
+      ).rejects.toThrow(`Observable "${longId}" does not belong to case "case-1".`);
+      expect(casesClient.cases.bulkGetObservables).not.toHaveBeenCalled();
+    });
   });
 
   it('passes observableIds and observableTypeKeys (not values) via eventOverrides for cases.observable', async () => {

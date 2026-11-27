@@ -35,7 +35,7 @@ export const bulkDeleteObservablesRoute = createCasesRoute({
   routerOptions: {
     access: 'internal',
     summary: `Bulk delete case observables`,
-    description: `Removes up to ${MAX_OBSERVABLES_PER_CASE} observables from a case in a single write. All requested ids must exist on the case; returns 404 if any are missing.`,
+    description: `Removes up to ${MAX_OBSERVABLES_PER_CASE} observables from a case. All requested ids must exist on the case; returns 404 if any are missing and removes none.`,
   },
   handler: async ({ context, request, response }) => {
     try {
