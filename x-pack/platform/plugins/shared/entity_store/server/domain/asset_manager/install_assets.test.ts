@@ -27,6 +27,7 @@ import {
   getMetadataEntitiesDataStreamName,
   getLegacySecurityMetadataEntitiesDataStreamName,
 } from './metadata_data_stream';
+import { getResolutionRunsDataStreamName } from './resolution_runs_data_stream';
 import { ALL_ENTITY_TYPES } from '../../../common/domain/definitions/entity_schema';
 
 jest.mock('../../infra/elasticsearch');
@@ -201,7 +202,11 @@ describe('uninstallElasticsearchAssets', () => {
     });
 
     expect(deleteIndex).toHaveBeenCalledTimes(4);
-    expect(deleteDataStream).toHaveBeenCalledTimes(4);
+    expect(deleteDataStream).toHaveBeenCalledTimes(5);
+    expect(deleteDataStream).toHaveBeenCalledWith(
+      expect.anything(),
+      getResolutionRunsDataStreamName(namespace)
+    );
     expect(deleteIndexTemplate).toHaveBeenCalledTimes(2);
     expect(deleteComponentTemplate).toHaveBeenCalledTimes(ALL_ENTITY_TYPES.length);
   });

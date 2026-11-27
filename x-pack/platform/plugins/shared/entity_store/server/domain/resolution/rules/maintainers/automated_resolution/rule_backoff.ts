@@ -57,6 +57,22 @@ export const getBackoffUntil = (
 };
 
 /**
+ * True when the rule was switched on after it last failed. That is a person asking for a retry, so
+ * the backoff is ignored and the failure streak starts again from zero.
+ */
+export const wasBackoffResetByToggle = (
+  state: PerRuleState | undefined,
+  enabledChangedAt: string | undefined
+): boolean => {
+  const lastFailedAt = state?.lastFailedAt;
+  return (
+    typeof lastFailedAt === 'string' &&
+    typeof enabledChangedAt === 'string' &&
+    Date.parse(enabledChangedAt) > Date.parse(lastFailedAt)
+  );
+};
+
+/**
  * Records a failed run so it is visible in the maintainer state and the rule waits
  * before retrying. A deterministic failure, such as a query too large for the
  * circuit breaker, would otherwise repeat on every tick.

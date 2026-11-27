@@ -13,6 +13,19 @@ export {
 } from './rule_registry';
 export { ResolutionRulesClient, type EffectiveResolutionRule } from './rule_client';
 export {
+  checkEntityRules,
+  ENTITY_RULE_CHECK_STATUSES,
+  type EntityRuleCheck,
+  type EntityRuleCheckDeps,
+  type EntityRuleCheckResult,
+  type EntityRuleCheckStatus,
+  summarizeRulesHealth,
+  type RuleHealth,
+  type RulesHealth,
+  type RuleHealthStatus,
+  type RuleLastRun,
+} from './check';
+export {
   CustomResolutionRuleCreate,
   CustomResolutionRuleIdParams,
   CustomResolutionRulePreviewRequest,

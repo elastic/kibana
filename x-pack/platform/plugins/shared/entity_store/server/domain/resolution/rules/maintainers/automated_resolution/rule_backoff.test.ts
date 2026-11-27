@@ -11,6 +11,7 @@ import {
   getConsecutiveFailures,
   getRuleBackoffDelayMs,
   MAX_LAST_ERROR_LENGTH,
+  wasBackoffResetByToggle,
   withRuleFailure,
 } from './rule_backoff';
 import { EMPTY_RULE_STATE } from './types';
@@ -68,5 +69,25 @@ describe('rule backoff', () => {
     expect(getBackoffUntil(failed, NOW + 5 * MINUTE)).toBeUndefined();
     expect(getBackoffUntil(EMPTY_RULE_STATE, NOW)).toBeUndefined();
     expect(getBackoffUntil(undefined, NOW)).toBeUndefined();
+  });
+
+  describe('wasBackoffResetByToggle', () => {
+    const failed = withRuleFailure(EMPTY_RULE_STATE, 'boom', NOW);
+    const after = new Date(NOW + MINUTE).toISOString();
+    const before = new Date(NOW - MINUTE).toISOString();
+
+    it('is true when the rule was switched on after it last failed', () => {
+      expect(wasBackoffResetByToggle(failed, after)).toBe(true);
+    });
+
+    it('is false when it was switched on before the last failure', () => {
+      expect(wasBackoffResetByToggle(failed, before)).toBe(false);
+    });
+
+    it('is false when the rule was never switched, or has no failure time', () => {
+      expect(wasBackoffResetByToggle(failed, undefined)).toBe(false);
+      expect(wasBackoffResetByToggle(EMPTY_RULE_STATE, after)).toBe(false);
+      expect(wasBackoffResetByToggle(undefined, after)).toBe(false);
+    });
   });
 });

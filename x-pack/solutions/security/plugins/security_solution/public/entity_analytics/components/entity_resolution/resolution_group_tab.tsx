@@ -27,6 +27,7 @@ import { useLinkEntities } from './hooks/use_link_entities';
 import { useUnlinkEntities } from './hooks/use_unlink_entities';
 import { useCanModifyResolution } from './hooks/use_can_modify_resolution';
 import { ResolutionGroupTable } from './resolution_group_table';
+import { ResolutionRuleCheck } from './resolution_rule_check';
 import { AddEntitiesSection } from './add_entities_section';
 import { ConfirmResolutionModal } from './confirm_resolution_modal';
 import { getEntityId, getEntityName, getResolutionRiskScore } from './helpers';
@@ -236,6 +237,8 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
+        <EuiSpacer size="m" />
+        <ResolutionRuleCheck entityId={entityId} />
         <EuiSpacer size="m" />
         <ResolutionGroupTable
           group={group ?? null}

@@ -16,6 +16,7 @@ import { useLinkEntities } from './hooks/use_link_entities';
 import { useUnlinkEntities } from './hooks/use_unlink_entities';
 import { useSearchEntities } from './hooks/use_search_entities';
 import { useCanModifyResolution } from './hooks/use_can_modify_resolution';
+import { useResolutionRuleCheck } from './hooks/use_resolution_rule_check';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
@@ -24,6 +25,7 @@ jest.mock('./hooks/use_link_entities');
 jest.mock('./hooks/use_unlink_entities');
 jest.mock('./hooks/use_search_entities');
 jest.mock('./hooks/use_can_modify_resolution');
+jest.mock('./hooks/use_resolution_rule_check');
 jest.mock('../../../common/lib/kibana/kibana_react', () => ({
   useKibana: jest.fn(),
 }));
@@ -39,6 +41,7 @@ const mockUseLinkEntities = useLinkEntities as jest.Mock;
 const mockUseUnlinkEntities = useUnlinkEntities as jest.Mock;
 const mockUseSearchEntities = useSearchEntities as jest.Mock;
 const mockUseCanModifyResolution = useCanModifyResolution as jest.Mock;
+const mockUseResolutionRuleCheck = useResolutionRuleCheck as jest.Mock;
 
 const mockFetch = jest.fn();
 const mockAddError = jest.fn();
@@ -59,6 +62,11 @@ describe('ResolutionGroupTab', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseCanModifyResolution.mockReturnValue({ canModify: true, isLoading: false });
+    mockUseResolutionRuleCheck.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isError: false,
+    });
     (useKibana as jest.Mock).mockReturnValue({ services: { http: { fetch: mockFetch } } });
     (useAppToasts as jest.Mock).mockReturnValue({ addError: mockAddError });
     mockUseLinkEntities.mockReturnValue({ mutate: mockLinkMutate, isLoading: false });

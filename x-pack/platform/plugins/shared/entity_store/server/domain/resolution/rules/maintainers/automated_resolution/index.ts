@@ -17,6 +17,12 @@ import {
   type PerRuleState,
 } from './types';
 import { migrate } from './migrate';
+import {
+  buildFailureRecord,
+  buildSuccessRecord,
+  writeResolutionRunRecords,
+  type ResolutionRunRecord,
+} from './resolution_run_records';
 import { RESOLUTION_RULE_CONFIGS } from '../..';
 import { runEsqlMatcherRule } from '../../matcher';
 import { runRelatedUserAliasResolution } from '../related_user_alias_resolution';
@@ -25,6 +31,7 @@ import {
   clearRuleFailure,
   getBackoffUntil,
   getConsecutiveFailures,
+  wasBackoffResetByToggle,
   withRuleFailure,
 } from './rule_backoff';
 
@@ -61,6 +68,8 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
     const effectiveRules = new Map(
       (await resolutionRulesClient.getEffectiveRules()).map((rule) => [rule.id, rule])
     );
+    const enabledChangedAt = await resolutionRulesClient.getEnabledChangedAt();
+    const runRecords: ResolutionRunRecord[] = [];
     const mutatedIds = new Set<string>();
     let backfillStarted = false;
 
@@ -76,7 +85,15 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
         continue;
       }
 
-      const ruleState = state.rules[ruleConfig.id] ?? EMPTY_RULE_STATE;
+      const savedRuleState = state.rules[ruleConfig.id] ?? EMPTY_RULE_STATE;
+      // Switching a rule on after its last failure asks for a retry: ignore the wait and start the
+      // failure streak again from zero.
+      const ruleState = wasBackoffResetByToggle(
+        state.rules[ruleConfig.id],
+        enabledChangedAt.get(ruleConfig.id)
+      )
+        ? clearRuleFailure(savedRuleState)
+        : savedRuleState;
       const backoffUntil = getBackoffUntil(ruleState, Date.now());
       if (backoffUntil) {
         logger.debug(
@@ -133,14 +150,20 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
         }
 
         await esClient.indices.refresh({ index });
+        if (!signal.aborted) {
+          runRecords.push(buildSuccessRecord(ruleConfig.id, ruleStates[ruleConfig.id], Date.now()));
+        }
       } catch (error) {
         const failedState = withRuleFailure(ruleState, getErrorMessage(error), Date.now());
         ruleStates[ruleConfig.id] = failedState;
+        runRecords.push(buildFailureRecord(ruleConfig.id, failedState, Date.now()));
         logger.warn(
           `Resolution rule '${ruleConfig.id}' failed: ${error}. Next attempt at ${failedState.nextAttemptAt}`
         );
       }
     }
+
+    await writeResolutionRunRecords({ esClient, namespace, logger, records: runRecords });
 
     if (!signal.aborted) {
       // A throw here would reject the run and lose the OOTB watermarks advanced above.

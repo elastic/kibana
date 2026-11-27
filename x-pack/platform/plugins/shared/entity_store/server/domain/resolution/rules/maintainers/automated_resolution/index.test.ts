@@ -15,6 +15,7 @@ import {
 import { automatedResolutionMaintainerConfig, MAINTAINER_ID } from '.';
 import { runRelatedUserAliasResolution } from '../related_user_alias_resolution';
 import { runEsqlMatcherRule } from '../../matcher';
+import { writeResolutionRunRecords } from './resolution_run_records';
 import { AUTOMATED_RESOLUTION_STATE_VERSION, type AutomatedResolutionState } from './types';
 import { resolveLatestEntitiesIndexName } from '../../../../asset_manager/resolve_entity_store_indices';
 import * as customRules from './custom_rules';
@@ -30,6 +31,11 @@ jest.mock('../related_user_alias_resolution', () => ({
 
 jest.mock('../../matcher', () => ({
   runEsqlMatcherRule: jest.fn(),
+}));
+
+jest.mock('./resolution_run_records', () => ({
+  ...jest.requireActual('./resolution_run_records'),
+  writeResolutionRunRecords: jest.fn(),
 }));
 
 jest.mock('../../../../asset_manager/resolve_entity_store_indices', () => ({
@@ -78,7 +84,8 @@ const runConfig = async (
   persistedState: unknown,
   effectiveRules = DEFAULT_EFFECTIVE_RULES,
   signal: AbortSignal = new AbortController().signal,
-  getCustomRules: jest.Mock = jest.fn().mockResolvedValue([])
+  getCustomRules: jest.Mock = jest.fn().mockResolvedValue([]),
+  enabledChangedAt: Map<string, string> = new Map()
 ): Promise<AutomatedResolutionState> => {
   const context = {
     status: {
@@ -97,6 +104,7 @@ const runConfig = async (
     cpsEsClient: esClient,
     resolutionRulesClient: {
       getEffectiveRules: jest.fn().mockResolvedValue(effectiveRules),
+      getEnabledChangedAt: jest.fn().mockResolvedValue(enabledChangedAt),
       getCustomRules,
       getCustomRule: jest
         .fn()
@@ -304,6 +312,121 @@ describe('automatedResolutionMaintainerConfig', () => {
 
       expect(calledRuleIds()).toContain(EMAIL_RULE);
       expect(result.rules[EMAIL_RULE]).toEqual(matcherState);
+    });
+
+    describe('run records', () => {
+      const writtenRecords = () =>
+        (writeResolutionRunRecords as jest.Mock).mock.calls.flatMap(
+          ([{ records }]) => records as Array<{ rule: { id: string }; event: { outcome: string } }>
+        );
+
+      it('writes one success record for every rule that ran, and none for a disabled rule', async () => {
+        await runConfig(createEsClient(), {
+          version: AUTOMATED_RESOLUTION_STATE_VERSION,
+          rules: watermarkedRules,
+        });
+
+        const ids = writtenRecords().map(({ rule }) => rule.id);
+        expect(ids).toEqual(expect.arrayContaining([EMAIL_RULE]));
+        expect(ids).not.toContain(ALIAS_RESOLUTION_RULE);
+        expect(writtenRecords().every(({ event }) => event.outcome === 'success')).toBe(true);
+      });
+
+      it('writes a failure record when a rule throws', async () => {
+        (runEsqlMatcherRule as jest.Mock).mockImplementation(async ({ ruleId }) => {
+          if (ruleId === EMAIL_RULE) {
+            throw new Error('boom');
+          }
+          return matcherState;
+        });
+
+        await runConfig(createEsClient(), {
+          version: AUTOMATED_RESOLUTION_STATE_VERSION,
+          rules: watermarkedRules,
+        });
+
+        expect(writtenRecords().find(({ rule }) => rule.id === EMAIL_RULE)?.event.outcome).toBe(
+          'failure'
+        );
+      });
+
+      it('writes nothing for a rule that is backing off', async () => {
+        await runConfig(createEsClient(), {
+          version: AUTOMATED_RESOLUTION_STATE_VERSION,
+          rules: {
+            ...watermarkedRules,
+            [EMAIL_RULE]: {
+              ...matcherState,
+              consecutiveFailures: 2,
+              nextAttemptAt: new Date(Date.now() + 60_000).toISOString(),
+            },
+          },
+        });
+
+        expect(writtenRecords().map(({ rule }) => rule.id)).not.toContain(EMAIL_RULE);
+      });
+    });
+
+    describe('retry after the rule is switched on', () => {
+      const failedAt = '2026-11-17T10:00:00.000Z';
+      const backingOff = {
+        ...matcherState,
+        lastError: 'boom',
+        lastFailedAt: failedAt,
+        consecutiveFailures: 5,
+        nextAttemptAt: new Date(Date.now() + 3 * 60 * 60_000).toISOString(),
+      };
+      const persisted = {
+        version: AUTOMATED_RESOLUTION_STATE_VERSION,
+        rules: { ...watermarkedRules, [EMAIL_RULE]: backingOff },
+      };
+
+      it('runs a backing-off rule that was switched on after its last failure', async () => {
+        const result = await runConfig(
+          createEsClient(),
+          persisted,
+          DEFAULT_EFFECTIVE_RULES,
+          new AbortController().signal,
+          jest.fn().mockResolvedValue([]),
+          new Map([[EMAIL_RULE, '2026-11-17T11:00:00.000Z']])
+        );
+
+        expect(calledRuleIds()).toContain(EMAIL_RULE);
+        expect(result.rules[EMAIL_RULE].consecutiveFailures).toBeUndefined();
+      });
+
+      it('starts the failure streak again from one when the retry fails', async () => {
+        (runEsqlMatcherRule as jest.Mock).mockImplementation(async ({ ruleId }) => {
+          if (ruleId === EMAIL_RULE) {
+            throw new Error('still broken');
+          }
+          return matcherState;
+        });
+
+        const result = await runConfig(
+          createEsClient(),
+          persisted,
+          DEFAULT_EFFECTIVE_RULES,
+          new AbortController().signal,
+          jest.fn().mockResolvedValue([]),
+          new Map([[EMAIL_RULE, '2026-11-17T11:00:00.000Z']])
+        );
+
+        expect(result.rules[EMAIL_RULE].consecutiveFailures).toBe(1);
+      });
+
+      it('keeps the backoff when the rule was switched on before its last failure', async () => {
+        await runConfig(
+          createEsClient(),
+          persisted,
+          DEFAULT_EFFECTIVE_RULES,
+          new AbortController().signal,
+          jest.fn().mockResolvedValue([]),
+          new Map([[EMAIL_RULE, '2026-11-17T09:00:00.000Z']])
+        );
+
+        expect(calledRuleIds()).not.toContain(EMAIL_RULE);
+      });
     });
   });
 

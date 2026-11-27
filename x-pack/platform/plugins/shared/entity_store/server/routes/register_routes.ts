@@ -30,6 +30,8 @@ import {
   registerResolutionUnlink,
   registerResolutionGroup,
   registerResolutionRulesList,
+  registerResolutionEntityCheck,
+  registerResolutionRulesHealth,
   registerResolutionRulesEnable,
   registerResolutionRulesDisable,
   registerCustomResolutionRulesRoutes,
@@ -66,6 +68,8 @@ export function registerRoutes(router: EntityStorePluginRouter) {
   registerResolutionUnlink(router);
   registerResolutionGroup(router);
   registerResolutionRulesList(router);
+  registerResolutionEntityCheck(router);
+  registerResolutionRulesHealth(router);
   registerResolutionRulesEnable(router);
   registerResolutionRulesDisable(router);
   registerCustomResolutionRulesRoutes(router);
