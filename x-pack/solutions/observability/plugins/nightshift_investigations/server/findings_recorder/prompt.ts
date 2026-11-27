@@ -12,15 +12,15 @@ import { RECORDER_RESULTS_DIR } from './constants';
 const timeTag = (isoTimestamp: string) => `<time datetime="${isoTimestamp}"></time>`;
 
 /**
- * How times are written in the Markdown fields. The UI renders the tag as a relative time with
- * the exact time, in the reader's time zone, on hover. Only the Markdown fields carry it, and the
+ * How times are written in the Markdown fields. The UI renders the tag as a clock time in the
+ * reader's time zone, with the date when it is not today, and the relative time on hover. Only the Markdown fields carry it, and the
  * agent's own reply never does, because that reply is shown in a chat that cannot render it.
  */
 const TIMES = (fields: string) => `## Times
 
 In ${fields}, write every time as an empty time tag with a full ISO 8601 UTC timestamp, such as ${timeTag(
   '2026-08-09T14:02:00Z'
-)}. The reader's screen shows it as a relative time ('2 hours ago') with the exact time, in their own time zone, on hover. Never write a bare time such as 14:02Z or 14:02 UTC there. A tag stands for one moment, so a window is two tags. Take each date and time from the transcript and never guess a date. A length of time ('for 40 minutes') stays in words. Keep the tag out of every value that is plain text.`;
+)}. The reader's screen shows it as a clock time in their own time zone, with the date when it is not today ('14:02' or 'Aug 9, 14:02'), so write it where a clock time fits ('began at', 'from ... to ...'). The screen adds the date, so never put 'today', 'yesterday', 'this morning' or a date next to a tag. Never write a bare time such as 14:02Z or 14:02 UTC there. A tag stands for one moment, so a window is two tags. Take each date and time from the transcript and never guess a date. A length of time ('for 40 minutes') stays in words. Keep the tag out of every value that is plain text.`;
 
 /**
  * The recorder's system prompt. Deliberately small: it carries only what is needed to fill the

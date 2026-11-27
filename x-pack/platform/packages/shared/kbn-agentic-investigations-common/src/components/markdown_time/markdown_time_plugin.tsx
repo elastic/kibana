@@ -12,7 +12,12 @@ import type { Node } from 'unist';
 import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { COMPLETE_TIME_TAG, getTimeTagDatetime, parseTimeTagDatetime } from './time_tag';
+import {
+  COMPLETE_TIME_TAG,
+  formatTimeTagLabel,
+  getTimeTagDatetime,
+  parseTimeTagDatetime,
+} from './time_tag';
 
 /** Kibana's default `dateFormat`, for when the UI settings are not available in context. */
 const FALLBACK_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
@@ -161,7 +166,7 @@ const useDateFormat = (): string => {
   return settings?.client.get<string>('dateFormat') ?? FALLBACK_DATE_FORMAT;
 };
 
-/** A time from the agent's prose: relative in the text, absolute in the viewer's zone on hover. */
+/** A time from the agent's prose: in the viewer's zone in the text, with the relative and UTC time on hover. */
 export const MarkdownTime = ({
   dateTime,
   children,
@@ -178,6 +183,7 @@ export const MarkdownTime = ({
 
   const tooltipContent = (
     <>
+      <div>{parsed.fromNow()}</div>
       <div>{parsed.format(dateFormat)}</div>
       <div>
         {i18n.translate('xpack.agenticInvestigations.markdownTime.utcValue', {
@@ -199,7 +205,7 @@ export const MarkdownTime = ({
           text-underline-offset: 2px;
         `}
       >
-        {parsed.fromNow()}
+        {formatTimeTagLabel(parsed)}
       </time>
     </EuiToolTip>
   );

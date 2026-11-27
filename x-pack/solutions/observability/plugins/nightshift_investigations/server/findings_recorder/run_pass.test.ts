@@ -1645,6 +1645,9 @@ describe('runFindingsPass with workspace files', () => {
       expect(prompt).toContain(tag);
       expect(prompt).toContain('Never write a bare time such as 14:02Z or 14:02 UTC');
       expect(prompt).toContain('a window is two tags');
+      expect(prompt).toContain(
+        "never put 'today', 'yesterday', 'this morning' or a date next to a tag"
+      );
       expect(prompt).toContain('Keep the tag out of every value that is plain text');
       // The examples and the time-window rule use tags, not bare UTC times.
       expect(prompt).toContain(

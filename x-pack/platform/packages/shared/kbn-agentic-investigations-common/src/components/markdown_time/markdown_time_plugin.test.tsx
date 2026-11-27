@@ -78,22 +78,40 @@ describe('markdown time tag', () => {
       ['an empty tag', TAG],
       ['a self-closed tag', '<time datetime="2026-11-24T17:20:00Z"/>'],
       ['a tag with fallback text', '<time datetime="2026-11-24T17:20:00Z">17:20Z</time>'],
-    ])('renders %s as a relative time with no raw markup', (_, tag) => {
+    ])('renders %s as a time in the viewer zone with no raw markup', (_, tag) => {
       const { container } = renderText(`Errors began at ${tag}, then recovered.`);
 
       const time = screen.getByTestId('agenticInvestigationsMarkdownTime');
-      expect(time).toHaveTextContent('2 days ago');
+      expect(time).toHaveTextContent('Nov 25, 02:20');
       expect(time).toHaveAttribute('datetime', '2026-11-24T17:20:00Z');
-      expect(container).toHaveTextContent('Errors began at 2 days ago, then recovered.');
+      expect(container).toHaveTextContent('Errors began at Nov 25, 02:20, then recovered.');
       expect(container).not.toHaveTextContent('<time');
       expect(container).not.toHaveTextContent('17:20Z');
+    });
+
+    it.each([
+      ['only the clock time for today', '2026-11-26T20:00:00Z', '05:00'],
+      ['the day for an earlier day this year', '2026-03-01T00:00:00Z', 'Mar 1, 09:00'],
+      ['the year for an earlier year', '2025-03-01T00:00:00Z', 'Mar 1, 2025, 09:00'],
+    ])('shows %s', (_, datetime, expected) => {
+      renderText(`at <time datetime="${datetime}"></time>`);
+
+      expect(screen.getByTestId('agenticInvestigationsMarkdownTime')).toHaveTextContent(expected);
+    });
+
+    it('keeps the start and end of a window apart', () => {
+      const { container } = renderText(
+        `from ${TAG} to <time datetime="2026-11-24T18:05:00Z"></time>`
+      );
+
+      expect(container).toHaveTextContent('from Nov 25, 02:20 to Nov 25, 03:05');
     });
 
     it('renders a tag that opens a block as a time', () => {
       renderText(`<time datetime="2026-11-24T17:20:00Z"/>\nstarted the incident`);
 
       expect(screen.getByTestId('agenticInvestigationsMarkdownTime')).toHaveTextContent(
-        '2 days ago'
+        'Nov 25, 02:20'
       );
       expect(screen.getByText(/started the incident/)).toBeInTheDocument();
     });
@@ -106,7 +124,7 @@ describe('markdown time tag', () => {
       expect(screen.getAllByRole('listitem')).toHaveLength(2);
     });
 
-    it('shows the time in the viewer zone and the UTC value in the tooltip', async () => {
+    it('shows the relative time, the full time in the viewer zone and the UTC value in the tooltip', async () => {
       renderText(`at ${TAG}`);
 
       await act(async () => {
@@ -114,6 +132,7 @@ describe('markdown time tag', () => {
       });
 
       const tooltip = await screen.findByRole('tooltip');
+      expect(tooltip).toHaveTextContent('2 days ago');
       expect(tooltip).toHaveTextContent('Nov 25, 2026 @ 02:20:00.000');
       expect(tooltip).toHaveTextContent('UTC: 2026-11-24T17:20:00Z');
     });

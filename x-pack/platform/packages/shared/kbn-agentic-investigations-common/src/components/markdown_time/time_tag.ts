@@ -28,3 +28,14 @@ export const parseTimeTagDatetime = (value: string | undefined): moment.Moment |
   const parsed = moment(value, moment.ISO_8601, true);
   return parsed.isValid() ? parsed : undefined;
 };
+
+/**
+ * The inline label for a time, in the viewer's zone: the clock time for today, with the day for
+ * this year and with the year for older times, so it reads as a point in a sentence or a window.
+ */
+export const formatTimeTagLabel = (time: moment.Moment, now: moment.Moment = moment()): string => {
+  const local = moment(time);
+  if (local.isSame(now, 'day')) return local.format('HH:mm');
+  if (local.isSame(now, 'year')) return local.format('MMM D, HH:mm');
+  return local.format('MMM D, YYYY, HH:mm');
+};

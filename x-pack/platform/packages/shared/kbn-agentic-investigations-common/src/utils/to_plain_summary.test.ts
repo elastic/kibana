@@ -5,29 +5,40 @@
  * 2.0.
  */
 
+import moment from 'moment-timezone';
 import { firstParagraph, toPlainSummary } from './to_plain_summary';
 
 describe('toPlainSummary', () => {
   describe('time tags', () => {
     const NOW = new Date('2026-11-26T17:20:00Z').getTime();
     let originalNow: () => number;
+    let defaultZone: string;
 
     beforeEach(() => {
       originalNow = Date.now;
       Date.now = () => NOW;
+      defaultZone = moment.tz.guess();
+      moment.tz.setDefault('UTC');
     });
 
     afterEach(() => {
       Date.now = originalNow;
+      moment.tz.setDefault(defaultZone);
     });
 
     it.each([
       '<time datetime="2026-11-24T17:20:00Z"></time>',
       '<time datetime="2026-11-24T17:20:00Z"/>',
       '<time datetime="2026-11-24T17:20:00Z">17:20Z</time>',
-    ])('replaces %s with a relative time', (tag) => {
+    ])('replaces %s with the time in the viewer zone', (tag) => {
       expect(toPlainSummary(`Jumped at ${tag} and **ended** later.`)).toBe(
-        'Jumped at 2 days ago and ended later.'
+        'Jumped at Nov 24, 17:20 and ended later.'
+      );
+    });
+
+    it('shows only the clock time for today', () => {
+      expect(toPlainSummary('Jumped at <time datetime="2026-11-26T09:05:00Z"></time>.')).toBe(
+        'Jumped at 09:05.'
       );
     });
 

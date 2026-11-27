@@ -43,7 +43,7 @@ describe('WhatsHappenedBlock', () => {
     expect(screen.getByText('Session cookie replayed')).toBeInTheDocument();
   });
 
-  it('renders a time tag in the summary as a relative time', () => {
+  it('renders a time tag in the summary as a time element', () => {
     const { container } = render(
       <WhatsHappenedBlock
         summary='Errors began at <time datetime="2020-11-24T17:20:00Z"></time>.'

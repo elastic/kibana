@@ -7,14 +7,15 @@
 
 import {
   COMPLETE_TIME_TAG,
+  formatTimeTagLabel,
   getTimeTagDatetime,
   parseTimeTagDatetime,
 } from '../components/markdown_time/time_tag';
 
-/** A `<time>` tag as plain text: a relative time, or its inner text or raw text if it has no valid one. */
+/** A `<time>` tag as plain text: its time in the viewer's zone, or its inner text or raw text if it has no valid one. */
 const timeTagToText = (tag: string, innerText = ''): string => {
   const parsed = parseTimeTagDatetime(getTimeTagDatetime(tag));
-  return parsed ? parsed.fromNow() : innerText || tag;
+  return parsed ? formatTimeTagLabel(parsed) : innerText || tag;
 };
 
 /** A markdown summary as one line of plain text, for the card's clamped preview. */

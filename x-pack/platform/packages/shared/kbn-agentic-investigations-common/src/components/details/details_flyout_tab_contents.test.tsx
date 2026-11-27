@@ -191,7 +191,7 @@ describe('OverviewTab', () => {
     );
   });
 
-  it('renders a time tag in the conclusion as a relative time', () => {
+  it('renders a time tag in the conclusion as a time element', () => {
     render(
       <OverviewTab
         investigation={investigation}
