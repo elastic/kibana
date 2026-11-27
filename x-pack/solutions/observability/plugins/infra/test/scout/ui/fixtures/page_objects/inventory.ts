@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type KibanaUrl, type Locator, type ScoutPage } from '@kbn/scout-oblt';
+import { type Locator, type ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import {
   EXTENDED_TIMEOUT,
@@ -86,11 +86,7 @@ export class InventoryPage {
   public readonly ruleFlyoutSaveButton: Locator;
   public readonly ruleFlyoutConfirmCreateButton: Locator;
 
-  constructor(
-    private readonly page: ScoutPage,
-    private readonly kbnUrl: KibanaUrl,
-    private readonly savedViews: SavedViews
-  ) {
+  constructor(private readonly page: ScoutPage, private readonly savedViews: SavedViews) {
     this.datePickerInput = this.page.getByTestId('waffleDatePicker').getByRole('textbox');
 
     this.inventorySwitcherButton = this.page.getByTestId('openInventorySwitcher');
@@ -201,7 +197,7 @@ export class InventoryPage {
   }
 
   public async goToPage(opts: { skipLoadWait?: boolean } = {}) {
-    await this.page.goto(`${this.kbnUrl.app('metrics')}/inventory`);
+    await this.page.gotoApp('metrics/inventory');
     if (!opts.skipLoadWait) {
       await this.waitForPageToLoad();
       await this.waitForNodesToLoad();
@@ -209,15 +205,11 @@ export class InventoryPage {
   }
 
   public async goToPageWithSavedView(savedViewId: string) {
-    const appUrl = `${this.kbnUrl.app('metrics')}/inventory`;
-
-    const url = this.kbnUrl.get(appUrl, {
+    await this.page.gotoApp('metrics/inventory', {
       params: {
         inventoryViewId: `'${savedViewId}'`,
       },
     });
-
-    await this.page.goto(url);
 
     await this.waitForPageToLoad();
   }
@@ -231,16 +223,12 @@ export class InventoryPage {
     assetId: string;
     entityType: 'host' | 'container';
   }) {
-    const appUrl = `${this.kbnUrl.app('metrics')}/inventory`;
-
-    const url = this.kbnUrl.get(appUrl, {
+    await this.page.gotoApp('metrics/inventory', {
       params: {
         assetDetailsFlyout: `(detailsItemId:${assetId},entityType:${entityType})`,
         inventoryViewId: `'${savedViewId}'`,
       },
     });
-
-    await this.page.goto(url);
 
     await this.waitForPageToLoad();
   }

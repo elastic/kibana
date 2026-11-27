@@ -79,7 +79,7 @@ export const test = baseWithSynthtrace.extend<
 
     const extendedPageObjects = {
       ...pageObjects,
-      inventoryPage: createLazyPageObject(InventoryPage, page, kbnUrl, savedViews),
+      inventoryPage: createLazyPageObject(InventoryPage, page, savedViews),
       assetDetailsPage: createLazyPageObject(AssetDetailsPage, page, kbnUrl),
       hostsPage: createLazyPageObject(HostsPage, page, kbnUrl),
       nodeDetailsPage: createLazyPageObject(NodeDetailsPage, page, kbnUrl),
@@ -111,8 +111,16 @@ export const test = baseWithSynthtrace.extend<
 
 export interface InfraParallelTestFixtures extends ObltParallelTestFixtures {
   pageObjects: ObltParallelTestFixtures['pageObjects'] & {
+    inventoryPage: InventoryPage;
+    savedViews: SavedViews;
     logsMlAnomaliesPage: LogsMlAnomaliesPage;
     logsMlCategoriesPage: LogsMlCategoriesPage;
+  };
+}
+
+export interface InfraParallelWorkerFixtures extends ObltParallelWorkerFixtures {
+  apiServices: ObltParallelWorkerFixtures['apiServices'] & {
+    inventoryViews: InventoryViewApiService;
   };
 }
 
@@ -126,16 +134,32 @@ export interface InfraParallelTestFixtures extends ObltParallelTestFixtures {
  * spec points the space's `observability:logSources` setting at its own index. Running them in the
  * default space would make them depend on jobs or settings that other suites may have created,
  * changed or left behind there.
+ *
+ * The inventory saved views spec needs it too: making a view the default writes the space's metrics
+ * source configuration, which every other inventory spec reads when it loads the page.
  */
-export const spaceTest = spaceBase.extend<InfraParallelTestFixtures, ObltParallelWorkerFixtures>({
+export const spaceTest = spaceBase.extend<InfraParallelTestFixtures, InfraParallelWorkerFixtures>({
   pageObjects: async (
     { pageObjects, page },
     use: (pageObjects: InfraParallelTestFixtures['pageObjects']) => Promise<void>
   ) => {
+    const savedViews = createLazyPageObject(SavedViews, page);
+
     await use({
       ...pageObjects,
+      inventoryPage: createLazyPageObject(InventoryPage, page, savedViews),
+      savedViews,
       logsMlAnomaliesPage: createLazyPageObject(LogsMlAnomaliesPage, page),
       logsMlCategoriesPage: createLazyPageObject(LogsMlCategoriesPage, page),
+    });
+  },
+  apiServices: async (
+    { apiServices, kbnClient, log, scoutSpace },
+    use: (apiServices: InfraParallelWorkerFixtures['apiServices']) => Promise<void>
+  ) => {
+    await use({
+      ...apiServices,
+      inventoryViews: getInventoryViewsApiService({ kbnClient, log, spaceId: scoutSpace.id }),
     });
   },
 });
