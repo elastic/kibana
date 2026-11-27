@@ -14,6 +14,6 @@ const ALERTZERO_COMMON_ROOT = resolve(__dirname, '../..');
 
 generate({
   rootDir: ALERTZERO_COMMON_ROOT,
-  sourceGlob: './impl/schemas/**/*.schema.yaml',
+  sourceGlob: './impl/**/*.schema.yaml',
   templateName: 'zod_operation_schema',
 });
