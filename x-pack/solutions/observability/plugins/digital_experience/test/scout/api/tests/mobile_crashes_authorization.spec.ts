@@ -56,11 +56,11 @@ apiTest.describe(
 
     // The detail returns stack traces and session events: both routes need both privileges.
     for (const [privilege, role] of [
-      ['Digital Experience', APM_ONLY_ROLE],
-      ['APM', DIGITAL_EXPERIENCE_ONLY_ROLE],
+      ['read_digital_experience', APM_ONLY_ROLE],
+      ['apm', DIGITAL_EXPERIENCE_ONLY_ROLE],
     ] as const) {
       apiTest(
-        `answers 403 to the crash routes without the ${privilege} privilege`,
+        `answers 403 to the crash routes naming the ${privilege} privilege, without it`,
         async ({ apiClient, samlAuth }) => {
           const { cookieHeader } = await samlAuth.asInteractiveUser(role);
           const paths = [
@@ -74,6 +74,11 @@ apiTest.describe(
               responseType: 'json',
             });
             expect(response).toHaveStatusCode(403);
+            // Kibana's own check, before the route reads any data, rather than an Elasticsearch
+            // access denial, which would be a 403 too
+            expect((response.body as { message: string }).message).toContain(
+              `is unauthorized for user, this action is granted by the Kibana privileges [${privilege}]`
+            );
           }
         }
       );
