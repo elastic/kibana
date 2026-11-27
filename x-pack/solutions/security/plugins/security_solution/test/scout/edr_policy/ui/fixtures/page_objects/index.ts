@@ -7,12 +7,14 @@
 
 import type { ScoutPage, SecurityPageObjects } from '@kbn/scout-security';
 import { createLazyPageObject } from '@kbn/scout-security';
+import { AgentPolicySettingsPage } from './agent_policy_settings';
 import { PolicyDetailsUnsavedChangesModal } from './policy_details_unsaved_changes_modal';
 import { ProtectionUpdatesPage } from './protection_updates';
 
 export interface PolicyPageObjects extends SecurityPageObjects {
   protectionUpdates: ProtectionUpdatesPage;
   policyDetailsUnsavedChangesModal: PolicyDetailsUnsavedChangesModal;
+  agentPolicySettings: AgentPolicySettingsPage;
 }
 
 export const extendPageObjects = (
@@ -22,4 +24,5 @@ export const extendPageObjects = (
   ...pageObjects,
   protectionUpdates: createLazyPageObject(ProtectionUpdatesPage, page),
   policyDetailsUnsavedChangesModal: createLazyPageObject(PolicyDetailsUnsavedChangesModal, page),
+  agentPolicySettings: createLazyPageObject(AgentPolicySettingsPage, page),
 });
