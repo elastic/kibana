@@ -22,10 +22,9 @@ export const DEFAULT_VAGRANTFILE = path.join(__dirname, 'vagrant', 'Vagrantfile'
 
 const MAX_BUFFER = 1024 * 1024 * 5; // 5MB
 
-// The enrolledEndpoint fixture gives the whole setup 10 minutes, and Fleet setup plus the agent download run
-// before the VM is created. Keep destroy, `vagrant up` and one retry inside this budget.
-export const VAGRANT_CREATE_BUDGET_MS = 360_000;
-export const VAGRANT_UP_TIMEOUT_MS = 300_000;
+// Two attempts of `vagrant destroy` (up to ~95s) plus `vagrant up` fit inside the 30 minute Cypress
+// `createEndpointHost` task. It also matches the Vagrantfile's `config.vm.boot_timeout`.
+export const VAGRANT_UP_TIMEOUT_MS = 600_000;
 const MIN_VAGRANT_UP_TIMEOUT_MS = 30_000;
 /** A retry needs a `vagrant destroy` (up to ~95s) and a real `vagrant up` attempt. */
 const MIN_RETRY_BUDGET_MS = 180_000;
@@ -375,6 +374,11 @@ interface CreateVagrantVmOptions extends BaseVmCreateOptions {
    */
   vagrantFile?: string;
   log?: ToolingLog;
+  /**
+   * Total time in ms for `vagrant destroy`, `vagrant up` and its retry. Set it when the caller has a
+   * setup timeout shorter than two full attempts. Unset, each attempt gets `VAGRANT_UP_TIMEOUT_MS`.
+   */
+  createBudgetMs?: number;
 }
 
 /**
@@ -388,6 +392,7 @@ const createVagrantVm = async ({
   memory,
   cpus,
   disk,
+  createBudgetMs,
 }: CreateVagrantVmOptions): Promise<HostVm> => {
   log.debug(`Using Vagrantfile: ${vagrantFile}`);
 
@@ -434,22 +439,25 @@ const createVagrantVm = async ({
   }
 
   const MAX_ATTEMPTS = 2;
-  const deadline = Date.now() + VAGRANT_CREATE_BUDGET_MS;
+  const deadline = createBudgetMs === undefined ? undefined : Date.now() + createBudgetMs;
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     try {
       await destroyVagrantMachine(VAGRANT_CWD, log);
 
-      // Kill a hung `vagrant up` rather than let it hold the job-wide Vagrant machine lock. The
-      // timeout never runs past the creation budget, so a hang is cleaned up inside the caller's setup time.
+      // Kill a hung `vagrant up` rather than let it hold the job-wide Vagrant machine lock. With a
+      // creation budget, the timeout never runs past it, so a hang is cleaned up inside the caller's setup time.
       const vagrantUpResponse = (
         await execa.command('vagrant up', {
           env: vagrantEnv,
           stdio: ['inherit', 'pipe', 'pipe'],
-          timeout: Math.max(
-            MIN_VAGRANT_UP_TIMEOUT_MS,
-            Math.min(VAGRANT_UP_TIMEOUT_MS, deadline - Date.now())
-          ),
+          timeout:
+            deadline === undefined
+              ? VAGRANT_UP_TIMEOUT_MS
+              : Math.max(
+                  MIN_VAGRANT_UP_TIMEOUT_MS,
+                  Math.min(VAGRANT_UP_TIMEOUT_MS, deadline - Date.now())
+                ),
         })
       ).stdout;
 
@@ -466,7 +474,7 @@ const createVagrantVm = async ({
       }
 
       // A second attempt that cannot finish in the remaining budget would only outlast the caller's timeout.
-      if (deadline - Date.now() < MIN_RETRY_BUDGET_MS) {
+      if (deadline !== undefined && deadline - Date.now() < MIN_RETRY_BUDGET_MS) {
         log.warning('Not retrying vagrant up: the remaining creation budget is too short');
         throw e;
       }
