@@ -139,6 +139,7 @@ describe('entityStoreMetrics', () => {
         'kibana.entity_store.extraction.task.duration_ms',
         'kibana.entity_store.extraction.query.duration_ms',
         'kibana.entity_store.extraction.ingest.duration_ms',
+        'kibana.entity_store.extraction.ingest.refresh.duration_ms',
         'kibana.entity_store.extraction.probe_query.duration_ms',
       ];
 

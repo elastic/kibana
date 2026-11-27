@@ -1241,7 +1241,6 @@ export class LogsExtractionClient {
         targetIndex: latestIndex,
         logger: this.logger,
         signal: opts?.signal,
-        refresh: true,
         onDropped: () => entityStoreMetrics.extractionBulkDropped.add(1, metricAttributes),
       });
       entityStoreMetrics.extractionIngestDurationMs.record(
@@ -1272,7 +1271,41 @@ export class LogsExtractionClient {
       }
     } while (pagination);
 
+    // Make the writes of this slice searchable before the next slice reads them. Refresh when:
+    // - this run read entity rows for the slice, or
+    // - this run resumes the slice from an earlier run that stopped inside it (`entityPagination` is set in that case).
+    if (addedToTotalCount > 0 || entityPagination !== undefined) {
+      await this.refreshLatestIndex({ latestIndex, signal: opts?.signal, metricAttributes });
+    }
+
     return { addedToTotalCount, addedToPageCount, state };
+  }
+
+  /**
+   * Refreshes the latest index to make the entities written for a slice searchable.
+   *
+   * The error is not caught, on purpose. The run stops and the checkpoint stays before this slice.
+   * Upserts are idempotent, so the next run safely reads the slice again. A refresh that succeeds
+   * but reports failed shards counts as a failed refresh: some writes may not be searchable yet.
+   */
+  private async refreshLatestIndex({
+    latestIndex,
+    signal,
+    metricAttributes,
+  }: {
+    latestIndex: string;
+    signal?: AbortSignal;
+    metricAttributes: ExtractionAttributes;
+  }): Promise<void> {
+    const refreshStart = Date.now();
+    const response = await this.esClient.indices.refresh({ index: latestIndex }, { signal });
+    const { failed = 0, total = 0 } = response._shards ?? {};
+    if (failed > 0) {
+      throw new Error(`The refresh of ${latestIndex} failed on ${failed} of ${total} shards`);
+    }
+    const refreshMs = Date.now() - refreshStart;
+    entityStoreMetrics.extractionIngestRefreshDurationMs.record(refreshMs, metricAttributes);
+    this.logger.debug(`Refreshed ${latestIndex} at the end of the slice in ${refreshMs} ms`);
   }
 
   /**

@@ -300,11 +300,23 @@ export const entityStoreMetrics = {
   }),
 
   extractionIngestDurationMs: histogram<ExtractionAttributes>(m('extraction.ingest.duration_ms'), {
-    description: 'Duration of each ingestEntities bulk write call',
+    description:
+      'Duration of each ingestEntities bulk write call, one per entity page. It does not include the refresh, which runs once per slice and is in extraction.ingest.refresh.duration_ms',
     unit: 'ms',
     valueType: ValueType.DOUBLE,
     advice: { explicitBucketBoundaries: DURATION_MS_BOUNDARIES },
   }),
+
+  extractionIngestRefreshDurationMs: histogram<ExtractionAttributes>(
+    m('extraction.ingest.refresh.duration_ms'),
+    {
+      description:
+        'Duration of the refresh of the latest index at the end of a log slice, so the next slice can read what this slice wrote',
+      unit: 'ms',
+      valueType: ValueType.DOUBLE,
+      advice: { explicitBucketBoundaries: DURATION_MS_BOUNDARIES },
+    }
+  ),
 
   extractionProbeQueryDurationMs: histogram<ExtractionAttributes>(
     m('extraction.probe_query.duration_ms'),

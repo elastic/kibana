@@ -56,10 +56,23 @@ describe('ingestEntities', () => {
       esqlResponse: makeEsqlResponse(4),
       targetIndex: TARGET_INDEX,
       logger,
-      refresh: false,
     });
 
     expect(outcome).toEqual({ created: 2, updated: 1, noop: 1 });
+  });
+
+  it('does not refresh the index', async () => {
+    const impl = mockHelpersBulk([], ['created']);
+
+    await ingestEntities({
+      esClient,
+      esqlResponse: makeEsqlResponse(1),
+      targetIndex: TARGET_INDEX,
+      logger,
+    });
+
+    expect(impl.mock.calls[0][0]).not.toHaveProperty('refreshOnCompletion');
+    expect(esClient.indices.refresh).not.toHaveBeenCalled();
   });
 
   it('accounts for every row sent: created + updated + noop + dropped', async () => {
@@ -75,7 +88,6 @@ describe('ingestEntities', () => {
       esqlResponse: makeEsqlResponse(rowCount),
       targetIndex: TARGET_INDEX,
       logger,
-      refresh: false,
       onDropped,
     });
 
@@ -92,7 +104,6 @@ describe('ingestEntities', () => {
       esqlResponse: makeEsqlResponse(0),
       targetIndex: TARGET_INDEX,
       logger,
-      refresh: false,
     });
 
     expect(outcome).toEqual({ created: 0, updated: 0, noop: 0 });
@@ -106,7 +117,6 @@ describe('ingestEntities', () => {
       esqlResponse: makeEsqlResponse(2),
       targetIndex: TARGET_INDEX,
       logger,
-      refresh: false,
     });
     expect(logger.error).not.toHaveBeenCalled();
   });
@@ -122,7 +132,6 @@ describe('ingestEntities', () => {
       esqlResponse: makeEsqlResponse(3),
       targetIndex: TARGET_INDEX,
       logger,
-      refresh: false,
     });
     expect(logger.error).toHaveBeenCalledTimes(1);
     expect(logger.error).toHaveBeenCalledWith(
@@ -142,7 +151,6 @@ describe('ingestEntities', () => {
       esqlResponse: makeEsqlResponse(2),
       targetIndex: TARGET_INDEX,
       logger,
-      refresh: false,
       onDropped,
     });
     expect(onDropped).toHaveBeenCalledTimes(2);
@@ -156,7 +164,6 @@ describe('ingestEntities', () => {
       esqlResponse: makeEsqlResponse(2),
       targetIndex: TARGET_INDEX,
       logger,
-      refresh: false,
       onDropped,
     });
     expect(onDropped).not.toHaveBeenCalled();
@@ -173,7 +180,6 @@ describe('ingestEntities', () => {
       esqlResponse: makeEsqlResponse(3),
       targetIndex: TARGET_INDEX,
       logger,
-      refresh: false,
     });
     expect(logger.error).toHaveBeenCalledTimes(1);
     const [message] = logger.error.mock.calls[0];
@@ -188,7 +194,6 @@ describe('ingestEntities', () => {
       esqlResponse: makeEsqlResponse(0),
       targetIndex: TARGET_INDEX,
       logger,
-      refresh: false,
     });
     expect(esClient.helpers.bulk).not.toHaveBeenCalled();
     expect(logger.error).not.toHaveBeenCalled();
