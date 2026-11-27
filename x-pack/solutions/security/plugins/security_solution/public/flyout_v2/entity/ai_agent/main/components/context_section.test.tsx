@@ -34,7 +34,6 @@ const storeContext: AgentStoreContext = {
   personMfaEnabled: true,
   hostCriticality: 'high_impact',
   sharedAccountInstalls: 2,
-  runsAsRoot: false,
   computedAt: new Date(Date.now() - 5 * 60_000).toISOString(),
 };
 
@@ -319,10 +318,9 @@ describe('ContextSection', () => {
       expect(panel).toHaveTextContent('Host criticalityHigh Impact');
       expect(panel).toHaveTextContent('Account shared with 2 other installs');
       expect(panel).not.toHaveTextContent("Person's criticality");
-      expect(within(panel).queryByText('Runs as root')).not.toBeInTheDocument();
     });
 
-    it('shows person criticality and runs as root only when the row has them', () => {
+    it('shows person criticality only when the row has it', () => {
       renderSection({
         ...fullContext,
         agent: {
@@ -331,17 +329,12 @@ describe('ContextSection', () => {
             ...storeContext,
             personCriticality: 'extreme_impact',
             sharedAccountInstalls: 0,
-            runsAsRoot: true,
           },
         },
       });
       const panel = screen.getByTestId(AI_AGENT_TEST_IDS.storeContext);
       expect(panel).toHaveTextContent("Person's criticalityExtreme Impact");
       expect(panel).not.toHaveTextContent('Account shared');
-      expect(within(panel).getByText('Runs as root')).toBeInTheDocument();
-      expect(
-        within(screen.getByTestId(AI_AGENT_TEST_IDS.runsAs)).getByText('Runs as root')
-      ).toBeInTheDocument();
     });
 
     it('says when the maintainer has not written the row yet', () => {

@@ -12,14 +12,12 @@ describe('read_context_rows', () => {
     expect(
       toAgentContextRow({
         'entity.id': ['ai_agent:claude_code@h1@ec2-user'],
-        'user.name': ['ec2-user'],
         'entity.relationships.acts_on_behalf_of.ids': ['user:a@okta', 'user:a@entra_id'],
         'entity.relationships.acts_on_behalf_of.raw_identifiers.user.email': ['a@x.io'],
         'entity.relationships.depends_on.ids': ['host:h1'],
       })
     ).toEqual({
       id: 'ai_agent:claude_code@h1@ec2-user',
-      userName: 'ec2-user',
       personIds: ['user:a@okta', 'user:a@entra_id'],
       personEmails: ['a@x.io'],
       hostIds: ['host:h1'],
@@ -29,12 +27,13 @@ describe('read_context_rows', () => {
   it('treats missing relationships as empty and skips rows without an ID', () => {
     expect(toAgentContextRow({ 'entity.id': ['ai_agent:x'] })).toEqual({
       id: 'ai_agent:x',
-      userName: undefined,
       personIds: [],
       personEmails: [],
       hostIds: [],
     });
-    expect(toAgentContextRow({ 'user.name': ['root'] })).toBeUndefined();
+    expect(
+      toAgentContextRow({ 'entity.relationships.depends_on.ids': ['host:h1'] })
+    ).toBeUndefined();
     expect(toAgentContextRow(undefined)).toBeUndefined();
   });
 

@@ -20,7 +20,6 @@ const TERMS_CHUNK_SIZE = 5_000;
 const FIELDS = {
   id: 'entity.id',
   type: 'entity.EngineMetadata.Type',
-  userName: 'user.name',
   personIds: 'entity.relationships.acts_on_behalf_of.ids',
   personEmails: 'entity.relationships.acts_on_behalf_of.raw_identifiers.user.email',
   hostIds: 'entity.relationships.depends_on.ids',
@@ -52,7 +51,6 @@ export const toAgentContextRow = (fields: HitFields): AgentContextRow | undefine
   }
   return {
     id,
-    userName: readString(fields, FIELDS.userName),
     personIds: readStrings(fields, FIELDS.personIds),
     personEmails: readStrings(fields, FIELDS.personEmails),
     hostIds: readStrings(fields, FIELDS.hostIds),
@@ -123,7 +121,7 @@ export const readAgentRows = async (
     esClient,
     index,
     { term: { [FIELDS.type]: 'ai_agent' } },
-    [FIELDS.id, FIELDS.userName, FIELDS.personIds, FIELDS.personEmails, FIELDS.hostIds],
+    [FIELDS.id, FIELDS.personIds, FIELDS.personEmails, FIELDS.hostIds],
     signal
   )) {
     const row = toAgentContextRow(fields);

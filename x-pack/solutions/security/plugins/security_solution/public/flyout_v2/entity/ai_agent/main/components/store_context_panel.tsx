@@ -32,7 +32,6 @@ import {
   PERSON_CRITICALITY_LABEL,
   PERSON_MFA_LABEL,
   PERSON_WATCHLISTS_LABEL,
-  RUNS_AS_ROOT,
   sharedAccountBadge,
   STORE_CONTEXT_MISSING,
   STORE_CONTEXT_TITLE,
@@ -76,7 +75,6 @@ export const StoreContextPanel = memo(
       personCriticality,
       hostCriticality,
       sharedAccountInstalls = 0,
-      runsAsRoot,
       computedAt,
     } = storeContext;
     const listItems = [
@@ -145,21 +143,10 @@ export const StoreContextPanel = memo(
         </EuiText>
         <EuiSpacer size="xs" />
         <EuiDescriptionList compressed type="column" columnWidths={[1, 2]} listItems={listItems} />
-        {(sharedAccountInstalls > 0 || runsAsRoot) && (
+        {sharedAccountInstalls > 0 && (
           <>
             <EuiSpacer size="xs" />
-            <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-              {sharedAccountInstalls > 0 && (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="warning">{sharedAccountBadge(sharedAccountInstalls)}</EuiBadge>
-                </EuiFlexItem>
-              )}
-              {runsAsRoot && (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="danger">{RUNS_AS_ROOT}</EuiBadge>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
+            <EuiBadge color="warning">{sharedAccountBadge(sharedAccountInstalls)}</EuiBadge>
           </>
         )}
       </EuiPanel>

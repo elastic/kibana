@@ -17,7 +17,6 @@ const contextColumns = {
   [getAiAgentContextFieldPath('person_mfa_enabled')]: false,
   [getAiAgentContextFieldPath('host_criticality')]: 'high_impact',
   [getAiAgentContextFieldPath('shared_account_installs')]: 2,
-  [getAiAgentContextFieldPath('runs_as_root')]: false,
   [getAiAgentContextFieldPath('computed_at')]: '2026-11-26T23:35:19.675Z',
 };
 
@@ -29,7 +28,6 @@ describe('toAgentStoreContext', () => {
       personMfaEnabled: false,
       hostCriticality: 'high_impact',
       sharedAccountInstalls: 2,
-      runsAsRoot: false,
       computedAt: '2026-11-26T23:35:19.675Z',
     });
   });

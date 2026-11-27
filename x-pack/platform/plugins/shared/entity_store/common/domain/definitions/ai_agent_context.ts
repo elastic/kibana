@@ -23,7 +23,6 @@ export interface AiAgentContext {
   host_criticality: string | null;
   /** Other `ai_agent` rows that act for the same account. */
   shared_account_installs: number | null;
-  runs_as_root: boolean;
   computed_at: string;
 }
 
@@ -35,7 +34,6 @@ export const AI_AGENT_CONTEXT_FIELD_TYPES = {
   person_mfa_enabled: 'boolean',
   host_criticality: 'keyword',
   shared_account_installs: 'long',
-  runs_as_root: 'boolean',
   computed_at: 'date',
 } as const satisfies Record<keyof AiAgentContext, 'keyword' | 'boolean' | 'long' | 'date'>;
 

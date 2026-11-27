@@ -11,7 +11,6 @@ import { CriticalityLevels } from '../../../../../common/entity_analytics/asset_
 /** The parts of an `ai_agent` row the context is computed from. */
 export interface AgentContextRow {
   id: string;
-  userName?: string;
   /** `entity.relationships.acts_on_behalf_of.ids` */
   personIds: readonly string[];
   /** `entity.relationships.acts_on_behalf_of.raw_identifiers.user.email` */
@@ -28,8 +27,6 @@ export interface RelatedContextRow {
   criticality?: string;
   mfaEnabled?: boolean;
 }
-
-const ROOT_USER_NAME = 'root';
 
 const CRITICALITY_RANK: Readonly<Record<string, number>> = {
   [CriticalityLevels.LOW_IMPACT]: 1,
@@ -158,7 +155,6 @@ export const computeAiAgentContexts = ({
         person_mfa_enabled: combineMfa(personRows),
         host_criticality: highestCriticality(hostRows),
         shared_account_installs: countSharedInstalls(agent.id),
-        runs_as_root: agent.userName === ROOT_USER_NAME,
         computed_at: now,
       };
       return [agent.id, context];

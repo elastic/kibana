@@ -62,9 +62,6 @@ Object {
         "entity.attributes.ai_agent_context.person_watchlists": Object {
           "type": "keyword",
         },
-        "entity.attributes.ai_agent_context.runs_as_root": Object {
-          "type": "boolean",
-        },
         "entity.attributes.ai_agent_context.shared_account_installs": Object {
           "type": "long",
         },
@@ -439,9 +436,6 @@ Object {
         },
         "entity.attributes.ai_agent_context.person_watchlists": Object {
           "type": "keyword",
-        },
-        "entity.attributes.ai_agent_context.runs_as_root": Object {
-          "type": "boolean",
         },
         "entity.attributes.ai_agent_context.shared_account_installs": Object {
           "type": "long",

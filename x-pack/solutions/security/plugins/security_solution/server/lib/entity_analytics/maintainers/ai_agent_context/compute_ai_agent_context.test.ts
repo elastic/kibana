@@ -12,7 +12,6 @@ import { buildAiAgentContextUpdate } from '.';
 const NOW = '2026-01-01T00:00:00.000Z';
 
 const agent = (overrides: Partial<AgentContextRow> & { id: string }): AgentContextRow => ({
-  userName: 'dev',
   personIds: [],
   personEmails: [],
   hostIds: [],
@@ -161,17 +160,6 @@ describe('computeAiAgentContexts', () => {
     });
   });
 
-  it('marks agents running as root', () => {
-    const contexts = computeAiAgentContexts({
-      agents: [agent({ id: 'ai_agent:a', userName: 'root' }), agent({ id: 'ai_agent:b' })],
-      relatedRows: [],
-      now: NOW,
-    });
-
-    expect(contexts.get('ai_agent:a')?.runs_as_root).toBe(true);
-    expect(contexts.get('ai_agent:b')?.runs_as_root).toBe(false);
-  });
-
   describe('stale values', () => {
     it('keeps the account but clears person and host facts when those rows disappear', () => {
       const context = contextOf(
@@ -210,7 +198,6 @@ describe('computeAiAgentContexts', () => {
                 person_mfa_enabled: null,
                 host_criticality: null,
                 shared_account_installs: null,
-                runs_as_root: false,
                 computed_at: NOW,
               },
             },

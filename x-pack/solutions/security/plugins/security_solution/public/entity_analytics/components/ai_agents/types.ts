@@ -48,7 +48,6 @@ export interface AgentStoreContext {
   readonly hostCriticality?: CriticalityLevelWithUnassigned;
   /** Other installs that act for the same account. */
   readonly sharedAccountInstalls?: number;
-  readonly runsAsRoot?: boolean;
   readonly computedAt: string;
 }
 

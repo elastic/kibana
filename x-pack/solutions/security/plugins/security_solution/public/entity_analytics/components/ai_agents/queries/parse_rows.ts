@@ -69,7 +69,6 @@ export const toAgentStoreContext = (row: EsqlRecord): AgentStoreContext | undefi
     personMfaEnabled: toBoolean(row[getAiAgentContextFieldPath('person_mfa_enabled')]),
     hostCriticality: toCriticality(row[getAiAgentContextFieldPath('host_criticality')]),
     sharedAccountInstalls: toNumber(row[getAiAgentContextFieldPath('shared_account_installs')]),
-    runsAsRoot: toBoolean(row[getAiAgentContextFieldPath('runs_as_root')]),
     computedAt,
   };
 };

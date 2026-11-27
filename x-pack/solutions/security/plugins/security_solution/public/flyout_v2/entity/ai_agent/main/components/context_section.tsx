@@ -142,9 +142,8 @@ const getPersonWatchlistIds = (
   rowFacts?: AgentStoreContext
 ): readonly string[] => rowFacts?.personWatchlistIds ?? person.watchlistIds;
 
-/** The row's `runs_as_root` comes first, then the OS user name. */
 const isRunningAsRoot = ({ agent, runsAs }: AgentContext): boolean =>
-  agent?.storeContext?.runsAsRoot ?? (agent?.userName ?? runsAs?.userName) === 'root';
+  (agent?.userName ?? runsAs?.userName) === 'root';
 
 const SignedInBadge = ({ isCurrent, signedInAt }: { isCurrent: boolean; signedInAt?: string }) => {
   if (!isCurrent) return <EuiBadge color="hollow">{PREVIOUS_ACCOUNT}</EuiBadge>;
