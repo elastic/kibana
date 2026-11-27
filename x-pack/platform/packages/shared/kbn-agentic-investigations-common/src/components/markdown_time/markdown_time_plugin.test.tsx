@@ -107,6 +107,17 @@ describe('markdown time tag', () => {
       expect(container).toHaveTextContent('from Nov 25, 02:20 to Nov 25, 03:05');
     });
 
+    it('adds the UTC offset to a clock time that repeats when DST ends', () => {
+      moment.tz.setDefault('America/Los_Angeles');
+      const { container } = renderText(
+        'from <time datetime="2026-11-01T08:55:00Z"></time> to <time datetime="2026-11-01T09:05:00Z"></time>, then <time datetime="2026-11-01T11:00:00Z"></time>'
+      );
+
+      expect(container).toHaveTextContent(
+        'from Nov 1, 01:55 (UTC-07:00) to Nov 1, 01:05 (UTC-08:00), then Nov 1, 03:00'
+      );
+    });
+
     it('renders a tag that opens a block as a time', () => {
       renderText(`<time datetime="2026-11-24T17:20:00Z"/>\nstarted the incident`);
 

@@ -14,6 +14,7 @@ import type { JsonObject } from '@kbn/utility-types';
 import type { Severity } from '@kbn/significant-events-schema';
 import type { NotificationPhase } from './notification_routing';
 import type { NotifiableInvestigation } from './notification_delivery';
+import { timeTagsToText } from './time_tags_to_text';
 
 export type SlackBlock = JsonObject & { type: string };
 
@@ -277,6 +278,21 @@ const openInvestigation = (url: string): ComponentsNode => ({
   buttons: [{ label: 'View Full Investigation', url, primary: true }],
 });
 
+// The recorder writes times as `<time>` tags, which Slack would show as raw markup.
+const withReadableTimes = (investigation: NotifiableInvestigation): NotifiableInvestigation => {
+  const { summary, verdict, impact, hypotheses } = investigation;
+  return {
+    ...investigation,
+    summary: summary && timeTagsToText(summary),
+    verdict: verdict && timeTagsToText(verdict),
+    impact: impact && { ...impact, summary: impact.summary && timeTagsToText(impact.summary) },
+    hypotheses: hypotheses?.map((hypothesis) => ({
+      ...hypothesis,
+      reason: hypothesis.reason && timeTagsToText(hypothesis.reason),
+    })),
+  };
+};
+
 const timedOutLabel = (): string =>
   i18n.translate('xpack.nightshiftInvestigations.notifications.timedOutLabel', {
     defaultMessage: 'Investigation timed out',
@@ -317,7 +333,8 @@ export const buildInvestigationSlackComposition = ({
     ];
   }
 
-  const findings = findingsOf(investigation);
+  const readable = withReadableTimes(investigation);
+  const findings = findingsOf(readable);
 
   return [
     title,
@@ -326,7 +343,7 @@ export const buildInvestigationSlackComposition = ({
       automation
     ),
     ...leadNodes(findings),
-    ...detailsSection(findings, investigation.hypotheses, investigation.recommendations),
+    ...detailsSection(findings, readable.hypotheses, readable.recommendations),
     openInvestigation(url),
   ];
 };

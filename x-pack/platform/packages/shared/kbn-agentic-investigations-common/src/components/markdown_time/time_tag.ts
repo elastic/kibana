@@ -29,13 +29,28 @@ export const parseTimeTagDatetime = (value: string | undefined): moment.Moment |
   return parsed.isValid() ? parsed : undefined;
 };
 
+/** Whether the clock time occurs twice in the viewer's zone, as in the hour repeated when DST ends. */
+const isRepeatedClockTime = (local: moment.Moment): boolean => {
+  const offset = local.utcOffset();
+  return (
+    local.clone().subtract(1, 'hour').utcOffset() > offset ||
+    local.clone().add(1, 'hour').utcOffset() < offset
+  );
+};
+
+const labelFormat = (local: moment.Moment, now: moment.Moment): string => {
+  if (local.isSame(now, 'day')) return 'HH:mm';
+  if (local.isSame(now, 'year')) return 'MMM D, HH:mm';
+  return 'MMM D, YYYY, HH:mm';
+};
+
 /**
  * The inline label for a time, in the viewer's zone: the clock time for today, with the day for
  * this year and with the year for older times, so it reads as a point in a sentence or a window.
+ * A clock time that occurs twice (when DST ends) also gets its UTC offset, so it stays unambiguous.
  */
 export const formatTimeTagLabel = (time: moment.Moment, now: moment.Moment = moment()): string => {
   const local = moment(time);
-  if (local.isSame(now, 'day')) return local.format('HH:mm');
-  if (local.isSame(now, 'year')) return local.format('MMM D, HH:mm');
-  return local.format('MMM D, YYYY, HH:mm');
+  const label = local.format(labelFormat(local, now));
+  return isRepeatedClockTime(local) ? `${label} (UTC${local.format('Z')})` : label;
 };
