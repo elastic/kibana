@@ -810,9 +810,7 @@ describe('DiscoverDocumentFlyout', () => {
     });
     expect(services.locator.getRedirectUrl).toHaveBeenCalledWith(
       expect.objectContaining({
-        // The nested grid query, asking for the identity metadata too, so the reference
-        // the link carries can be refetched on restore (fetch_expanded_doc.ts).
-        query: { esql: cascadeQuery!.esql.replace('FROM logs', 'FROM logs METADATA _id, _index') },
+        query: cascadeQuery,
         columns: [],
         expandedDoc: {
           id: esHitsMock[0]._id,

@@ -11,11 +11,11 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import {
   ExpandedDocLinkability,
+  canQueryRestoreDoc,
   getEsqlMissingMetadataExample,
   getExpandedDocLinkDisabledReason,
   getExpandedDocLinkability,
   getExpandedDocRef,
-  hasEsqlIdentityMetadata,
   matchesExpandedDocRef,
 } from './expanded_doc';
 
@@ -94,14 +94,6 @@ describe('getExpandedDocLinkability', () => {
     );
   });
 
-  it('reports a query without METADATA as unlinkable even when the document has identity', () => {
-    // A record may carry _id/_index from elsewhere (a chart section's own lookup): a ref
-    // restored through this query could never be refetched, so none is written.
-    expect(getExpandedDocLinkability({ esql: 'FROM logs' }, docWithMetadata)).toBe(
-      ExpandedDocLinkability.EsqlMissingMetadata
-    );
-  });
-
   it('reports a transformational ES|QL query as unlinkable regardless of the document', () => {
     expect(
       getExpandedDocLinkability({ esql: 'FROM logs | STATS count() BY host' }, docWithMetadata)
@@ -115,19 +107,26 @@ describe('getExpandedDocLinkability', () => {
   });
 });
 
-describe('hasEsqlIdentityMetadata', () => {
-  it('finds _id and _index in the source command, whatever their order or case', () => {
-    expect(hasEsqlIdentityMetadata('FROM logs METADATA _id, _index | LIMIT 10')).toBe(true);
-    expect(hasEsqlIdentityMetadata('from logs metadata _index, _id')).toBe(true);
+describe('canQueryRestoreDoc', () => {
+  const doc = buildDataTableRecord({ _id: '1', _index: 'i' }, dataViewMock);
+
+  it('accepts an ES|QL query that reads _id and _index', () => {
+    expect(canQueryRestoreDoc({ esql: 'FROM logs METADATA _id, _index' }, doc)).toBe(true);
   });
 
-  it('requires both identity fields, in the query itself', () => {
-    expect(hasEsqlIdentityMetadata('FROM logs')).toBe(false);
-    expect(hasEsqlIdentityMetadata('FROM logs METADATA _id')).toBe(false);
-    // A literal elsewhere in the query is not the source command's METADATA.
-    expect(hasEsqlIdentityMetadata('FROM logs | WHERE message == "METADATA _id, _index"')).toBe(
-      false
-    );
+  it('rejects an ES|QL query that does not read the identity, even if the record has it', () => {
+    expect(canQueryRestoreDoc({ esql: 'FROM logs' }, doc)).toBe(false);
+    expect(canQueryRestoreDoc({ esql: 'FROM logs METADATA _id' }, doc)).toBe(false);
+  });
+
+  it('rejects a query that cannot restore links at all', () => {
+    expect(
+      canQueryRestoreDoc({ esql: 'FROM logs METADATA _id, _index | STATS count = COUNT()' }, doc)
+    ).toBe(false);
+  });
+
+  it('accepts a data view query', () => {
+    expect(canQueryRestoreDoc({ query: '', language: 'kuery' }, doc)).toBe(true);
   });
 });
 

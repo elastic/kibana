@@ -72,18 +72,9 @@ export const getEsqlMissingMetadataExample = (esql: string): string => {
   return `${sourceCommand} ${indexPattern} METADATA _id, _index`;
 };
 
-/** Whether the ES|QL query's source command asks for the `_id` and `_index` metadata. */
-export const hasEsqlIdentityMetadata = (esql: string): boolean => {
-  const metadata = retrieveMetadataColumns(esql);
-  return metadata.includes('_id') && metadata.includes('_index');
-};
-
 /**
- * Determines whether a document is deep linkable. Transformational ES|QL rows cannot be reliably
- * refetched, and restoring a reference refetches through the query itself, so the query must ask
- * for the identity metadata - a record may carry `_id`/`_index` from elsewhere (a chart section's
- * own lookup), which a query without METADATA could never resolve again. The document's own
- * metadata is checked on the instance because query edits do not change open rows.
+ * Determines whether a document is deep linkable. Transformational ES|QL rows cannot be reliably refetched,
+ * and metadata is checked directly on the document instance because query edits do not change open rows.
  */
 export const getExpandedDocLinkability = (
   query: Query | AggregateQuery | undefined,
@@ -101,14 +92,22 @@ export const getExpandedDocLinkability = (
     return ExpandedDocLinkability.EsqlTransformational;
   }
 
-  if (!hasEsqlIdentityMetadata(query.esql)) {
-    return ExpandedDocLinkability.EsqlMissingMetadata;
-  }
-
   return getExpandedDocRef(doc)
     ? ExpandedDocLinkability.Linkable
     : ExpandedDocLinkability.EsqlMissingMetadata;
 };
+
+/**
+ * Whether the query can restore a record fetched elsewhere: the record carries its own identity,
+ * so the query must read `_id` and `_index` as well.
+ */
+export const canQueryRestoreDoc = (
+  query: Query | AggregateQuery | undefined,
+  doc: DataTableRecord
+): boolean =>
+  getExpandedDocLinkability(query, doc) === ExpandedDocLinkability.Linkable &&
+  (!isOfAggregateQueryType(query) ||
+    ['_id', '_index'].every((field) => retrieveMetadataColumns(query.esql).includes(field)));
 
 /** Returns the shared explanation for a document-link restriction. */
 export const getExpandedDocLinkDisabledReason = (

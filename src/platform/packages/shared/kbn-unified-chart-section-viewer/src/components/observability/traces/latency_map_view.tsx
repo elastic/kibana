@@ -13,8 +13,6 @@ import { EuiPanel } from '@elastic/eui';
 import { cleanFilter, getTimeZoneFromSettings, isFilterDisabled } from '@kbn/es-query';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import { getDocId } from '@kbn/discover-utils';
-import type { DataTableRecord } from '@kbn/discover-utils';
 import {
   FAILED_SPAN_CONDITION,
   LatencyMap,
@@ -89,17 +87,6 @@ const getContextKey = (
       : {}),
   });
 
-/**
- * Whether the cell lies within the selection: its spans are among the selection's. The
- * bounds are compared as the query writes them - whole nanoseconds, rounded up - so a cell
- * starting on the selection's own edge is inside it.
- */
-const isCellWithin = (cell: LatencyMapCell, selection: LatencyMapSelection) =>
-  Date.parse(cell.from) >= Date.parse(selection.from) &&
-  Date.parse(cell.to) <= Date.parse(selection.to) &&
-  Math.ceil(cell.minDuration) >= Math.ceil(selection.minDuration) &&
-  Math.ceil(cell.maxDuration) <= Math.ceil(selection.maxDuration);
-
 /** The named params a query filter reads the time range through. */
 const TIME_PARAMS = ['_tstart', '_tend'];
 
@@ -120,7 +107,7 @@ export function TracesLatencyMapView({
   isChartLoading,
   expandedDocId,
 }: TracesLatencyMapViewProps) {
-  const { updateESQLQuery, setExpandedDoc } = actions;
+  const { updateESQLQuery, setExpandedDocByQuery } = actions;
   const selectionClause = filters.find(isSelectionCondition);
   // One object per clause: parsed anew every render, the map would redraw for nothing.
   const selection = useMemo(
@@ -160,12 +147,9 @@ export function TracesLatencyMapView({
   // that names them, and clips nothing: the map's queries carry their own absolute range.
   // The session is not part of the source's key: a refresh does not reload the map.
   const searchEsql = useCallback(
-    (
-      query: string,
-      { signal, dropNullColumns }: { signal?: AbortSignal; dropNullColumns?: boolean }
-    ) =>
+    (query: string, { signal }: { signal?: AbortSignal }) =>
       services.data.search.esql(
-        { query, dropNullColumns, kibanaQueryContext: { kibanaFilters, esqlVariables, timeRange } },
+        { query, kibanaQueryContext: { kibanaFilters, esqlVariables, timeRange } },
         {
           abortSignal: signal,
           sessionId: searchSessionId,
@@ -294,58 +278,38 @@ export function TracesLatencyMapView({
   }, [source]);
 
   // Opens the newest span of a clicked cell in Discover's document flyout, leaving the
-  // query and the selection as they are. Without _id and _index Discover shows the span as
-  // given, rather than looking it up in the current query, which may not read that metadata.
+  // query and the selection as they are. Discover runs the lookup itself, under its own
+  // filters and session, and links the span only if the editor query finds it again.
   const openExampleSpan = useCallback(
     async (cell: LatencyMapCell) => {
-      if (!setExpandedDoc) return;
+      if (!setExpandedDocByQuery) return;
       clickAbortRef.current?.abort();
       const controller = new AbortController();
       clickAbortRef.current = controller;
       setActiveCell(cell);
-      let rawResponse;
+      let openedId;
       try {
-        ({ rawResponse } = await searchEsql(
-          buildExampleSpanQuery({ indexPattern, filters: baseFilters, cell }),
-          // One row of wide traces indices: without this every mapped field comes back null.
-          { signal: controller.signal, dropNullColumns: true }
-        ));
+        openedId = await setExpandedDocByQuery({
+          esql: buildExampleSpanQuery({ indexPattern, filters: baseFilters, cell }),
+          // The traces Overview front and center, not the field table. The id is the traces
+          // document profile's (discover traces_document_profile doc_viewer accessor); as a
+          // package this cannot import it, and an unknown id just falls back to the default.
+          initialTabId: 'doc_view_obs_traces_overview',
+          abortSignal: controller.signal,
+        });
       } catch {
         // Without the span there is nothing to open; the view stays as it is.
         if (!controller.signal.aborted) setActiveCell(undefined);
         return;
       }
       if (controller.signal.aborted) return;
-      const { columns, values } = rawResponse;
-      const [firstRow] = values;
-      if (!firstRow) {
+      if (!openedId) {
         setActiveCell(undefined);
         return;
       }
-      const row = Object.fromEntries(columns.map((column, i) => [column.name, firstRow[i]]));
-      // With its real identity (METADATA _id, _index) the traces document profile
-      // recognizes the record and the flyout can write a URL reference; the fallback id
-      // keeps a span without metadata openable, shown as given. A reference is restored
-      // through the Discover query itself, selection and all: a span outside the selection
-      // could never come back that way, so it is opened without the identity to link to,
-      // its fields (the index among them, for the profile) as they are.
-      const restorable = !selection || isCellWithin(cell, selection);
-      const { _id, _index, ...withoutIdentity } = row;
-      const raw = (restorable ? row : withoutIdentity) as DataTableRecord['raw'];
-      const id =
-        restorable && typeof _id === 'string' && typeof _index === 'string'
-          ? getDocId(raw)
-          : `traceLatencyMapExampleSpan-${cell.from}-${cell.minDuration}`;
-      openedDocIdRef.current = id;
-      setExpandedDoc(
-        { id, raw, flattened: row },
-        // The traces Overview front and center, not the field table. The id is the traces
-        // document profile's (discover traces_document_profile doc_viewer accessor); as a
-        // package this cannot import it, and an unknown id just falls back to the default.
-        { initialTabId: 'doc_view_obs_traces_overview' }
-      );
+      openedDocIdRef.current = openedId;
     },
-    [setExpandedDoc, indexPattern, baseFilters, searchEsql, selection]
+    [setExpandedDocByQuery, indexPattern, baseFilters]
   );
 
   if (!source) return null;
@@ -369,7 +333,7 @@ export function TracesLatencyMapView({
         failedOnly={failedOnly}
         onFailedOnlyChange={changeFailedOnly}
         onSelectionCommit={commitSelection}
-        onCellClick={setExpandedDoc ? openExampleSpan : undefined}
+        onCellClick={setExpandedDocByQuery ? openExampleSpan : undefined}
         activeCell={activeCell}
         onFocusOperation={updateESQLQuery ? focusOperation : undefined}
         focusedOperation={focusedOperation}

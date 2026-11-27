@@ -10,7 +10,9 @@
 import { waitFor } from '@testing-library/react';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import {
+  DEFAULT_EXPANDED_DOC_OWNER,
   DEFAULT_TAB_STATE,
+  QUERY_EXPANDED_DOC_OWNER,
   createTabItem,
   type DiscoverAppState,
   internalStateActions,
@@ -330,68 +332,125 @@ describe('tab_state actions', () => {
     });
   });
 
-  describe('setExpandedDocExtPointAction', () => {
-    const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewMockWithTimeField);
+  describe('setExpandedDocByQuery', () => {
+    const span = { _id: 'span-1', _index: 'traces-a', 'span.name': 'GET /' };
+    const lookupQuery = 'FROM traces-* METADATA _id, _index';
 
-    const setupWithResolveSpy = async () => {
-      const { internalState, runtimeStateManager, tabId } = await setup();
-      const scopedProfilesManager = selectTabRuntimeState(
-        runtimeStateManager,
-        tabId
-      ).scopedProfilesManager$.getValue();
-      const resolveSpy = jest.spyOn(scopedProfilesManager, 'resolveDocumentProfile');
-
-      return { internalState, scopedProfilesManager, resolveSpy, tabId };
+    const setupLookup = async ({
+      editorQuery,
+      refetchedRow,
+    }: {
+      editorQuery: string;
+      refetchedRow?: typeof span;
+    }) => {
+      const toolkit = await setup();
+      const toResponse = (row?: typeof span) => ({
+        rawResponse: {
+          columns: Object.keys(span).map((name) => ({ name, type: 'keyword' })),
+          values: row ? [Object.values(row)] : [],
+        },
+      });
+      const isRefetch = (query: string) => query.includes('_id ==');
+      const esql = jest
+        .spyOn(toolkit.services.data.search, 'esql')
+        .mockImplementation(async ({ query }) =>
+          toResponse(isRefetch(query) ? refetchedRow : span)
+        );
+      toolkit.internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId: toolkit.tabId,
+          appState: { query: { esql: editorQuery } },
+        })
+      );
+      const refetchQueries = () => esql.mock.calls.map(([{ query }]) => query).filter(isRefetch);
+      return { ...toolkit, esql, isRefetch, refetchQueries, toResponse };
     };
 
-    it('should resolve the document profile of a record Discover did not fetch', async () => {
-      const { internalState, resolveSpy, tabId } = await setupWithResolveSpy();
+    it('links a document the current query finds again', async () => {
+      const { internalState, tabId, refetchQueries } = await setupLookup({
+        editorQuery: 'FROM traces-* METADATA _id, _index',
+        refetchedRow: span,
+      });
 
-      // A raw record (a chart section's, for example) gains the lazy document context,
-      // so the flyout can pick its document profile.
-      internalState.dispatch(
-        internalStateActions.setExpandedDocExtPointAction({
-          tabId,
-          expandedDoc,
-          initialDocViewerTabId: 'overview',
-        })
+      const openedId = await internalState.dispatch(
+        internalStateActions.setExpandedDocByQuery({ tabId, esqlQueryText: lookupQuery })
       );
 
       const tab = selectTab(internalState.getState(), tabId);
-
-      expect(resolveSpy).toHaveBeenCalledWith({ record: expandedDoc });
-      expect(tab.expandedDoc && 'context' in tab.expandedDoc).toBe(true);
-      expect(tab.expandedDoc?.raw).toBe(expandedDoc.raw);
-      expect(tab.initialDocViewerTabId).toBe('overview');
+      expect(refetchQueries()).toHaveLength(1);
+      expect(openedId).toBe(tab.expandedDoc?.id);
+      expect(tab.expandedDocOwner).toBe(DEFAULT_EXPANDED_DOC_OWNER);
+      expect(tab.appState.expandedDoc).toEqual({ id: 'span-1', index: 'traces-a' });
     });
 
-    it('should store a record that carries its context as it is', async () => {
-      const { internalState, scopedProfilesManager, resolveSpy, tabId } =
-        await setupWithResolveSpy();
-      const resolvedDoc = scopedProfilesManager.resolveDocumentProfile({ record: expandedDoc });
-      resolveSpy.mockClear();
+    it('opens without a link a document the current query does not find', async () => {
+      const { internalState, tabId, refetchQueries } = await setupLookup({
+        editorQuery: 'FROM traces-* METADATA _id, _index | WHERE span.name == "other"',
+      });
 
-      internalState.dispatch(
-        internalStateActions.setExpandedDocExtPointAction({ tabId, expandedDoc: resolvedDoc })
+      await internalState.dispatch(
+        internalStateActions.setExpandedDocByQuery({ tabId, esqlQueryText: lookupQuery })
       );
 
-      expect(resolveSpy).not.toHaveBeenCalled();
-      expect(selectTab(internalState.getState(), tabId).expandedDoc).toBe(resolvedDoc);
+      const tab = selectTab(internalState.getState(), tabId);
+      expect(refetchQueries()).toHaveLength(1);
+      expect(tab.expandedDoc?.raw._id).toBe('span-1');
+      expect(tab.expandedDocOwner).toBe(QUERY_EXPANDED_DOC_OWNER);
+      expect(tab.appState.expandedDoc).toBeUndefined();
     });
 
-    it('should close the flyout without resolving anything', async () => {
-      const { internalState, resolveSpy, tabId } = await setupWithResolveSpy();
+    it('opens without a link when the current query changes during the refetch', async () => {
+      const { internalState, tabId, esql, isRefetch, refetchQueries, toResponse } =
+        await setupLookup({
+          editorQuery: 'FROM traces-* METADATA _id, _index',
+          refetchedRow: span,
+        });
+      let resolveRefetch: (response: ReturnType<typeof toResponse>) => void = () => {};
+      esql.mockImplementation(async ({ query }) => {
+        if (!isRefetch(query)) {
+          return toResponse(span);
+        }
+        return new Promise((resolve) => {
+          resolveRefetch = resolve;
+        });
+      });
 
-      internalState.dispatch(
-        internalStateActions.setExpandedDocExtPointAction({ tabId, expandedDoc })
+      const opening = internalState.dispatch(
+        internalStateActions.setExpandedDocByQuery({ tabId, esqlQueryText: lookupQuery })
       );
-      resolveSpy.mockClear();
+      await waitFor(() => expect(refetchQueries()).toHaveLength(1));
       internalState.dispatch(
-        internalStateActions.setExpandedDocExtPointAction({ tabId, expandedDoc: undefined })
+        internalStateActions.updateAppState({
+          tabId,
+          appState: {
+            query: {
+              esql: 'FROM traces-* METADATA _id, _index | WHERE span.name == "other"',
+            },
+          },
+        })
+      );
+      resolveRefetch(toResponse(span));
+      await opening;
+
+      const tab = selectTab(internalState.getState(), tabId);
+      expect(tab.expandedDoc?.raw._id).toBe('span-1');
+      expect(tab.expandedDocOwner).toBe(QUERY_EXPANDED_DOC_OWNER);
+      expect(tab.appState.expandedDoc).toBeUndefined();
+    });
+
+    it('skips the refetch when the current query cannot restore links', async () => {
+      const { internalState, tabId, refetchQueries } = await setupLookup({
+        editorQuery: 'FROM traces-*',
+      });
+
+      await internalState.dispatch(
+        internalStateActions.setExpandedDocByQuery({ tabId, esqlQueryText: lookupQuery })
       );
 
-      expect(resolveSpy).not.toHaveBeenCalled();
-      expect(selectTab(internalState.getState(), tabId).expandedDoc).toBeUndefined();
+      const tab = selectTab(internalState.getState(), tabId);
+      expect(refetchQueries()).toHaveLength(0);
+      expect(tab.expandedDocOwner).toBe(QUERY_EXPANDED_DOC_OWNER);
+      expect(tab.appState.expandedDoc).toBeUndefined();
     });
   });
 
@@ -1059,13 +1118,6 @@ describe('tab_state actions', () => {
         rowHeight: undefined,
       });
 
-      // A reference is only written when the query can refetch it: give it the metadata.
-      internalState.dispatch(
-        internalStateActions.updateAppState({
-          tabId,
-          appState: { query: { esql: 'FROM test-index METADATA _id, _index' } },
-        })
-      );
       const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewMockWithTimeField);
       internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
       expect(getCurrentTab().appState.expandedDoc).toEqual({
