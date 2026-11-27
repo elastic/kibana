@@ -9,6 +9,7 @@ import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
 import { getDefaultEsqlQueryTool } from '../tools/get_default_esql_query_tool';
+import { RUN_ATTACK_DISCOVERY_TOOL_ID } from '../tools/run_attack_discovery_tool';
 
 /**
  * Skill definition for building ES|QL queries that retrieve security alerts
@@ -32,6 +33,21 @@ modifying existing queries.
 
 ## Workflow
 
+### Execute before you hand a query on
+
+A query returned by \`platform.core.generate_esql\` is unverified: it can parse and still match
+nothing, for example a full-text predicate on a field that does not carry the term. Before a
+query leaves this skill — to the ES|QL editor via \`update_esql_query\`, or to
+\`${RUN_ATTACK_DISCOVERY_TOOL_ID}\` as \`esql_query\` — run that exact query with
+\`platform.core.execute_esql\` and read the row count.
+
+- **Rows returned**: hand the query on unchanged.
+- **Zero rows**: do not hand it on. Tell the user no alerts matched, show the query you ran, and
+  ask whether to widen the time window or change the filter. Never call
+  \`${RUN_ATTACK_DISCOVERY_TOOL_ID}\` with a query you have not executed, or with one that returned
+  zero rows.
+- **Error**: fix the query and execute it again before handing it on.
+
 ### Building a new query from scratch
 
 1. Call the \`security.attack-discovery.get_default_esql_query\` tool to retrieve the default
@@ -41,9 +57,9 @@ modifying existing queries.
    default query from step 1 in the \`additionalContext\` parameter as a starting point, along
    with the index \`.alerts-security.alerts-default\` (or the appropriate space-specific index)
    and a natural language description of what alerts the user wants to retrieve.
-3. Use the \`platform.core.execute_esql\` tool to test the query against real data and verify
-   the results look correct.
-4. Call the \`update_esql_query\` browser API tool with the final query to update the ES|QL
+3. Run the query with the \`platform.core.execute_esql\` tool and apply the rules in
+   **Execute before you hand a query on**. This step is required, not a spot check.
+4. Call the \`update_esql_query\` browser API tool with the executed query to update the ES|QL
    editor in the Attack Discovery settings UI.
 
 ### Modifying an existing query
@@ -56,9 +72,9 @@ When the user already has an ES|QL query and wants to modify it:
 2. **Preserve the existing KEEP fields** from the user's query. The KEEP clause reflects the
    user's chosen anonymization settings. Do not replace or remove KEEP fields unless the user
    explicitly asks to change them.
-3. Use the \`platform.core.execute_esql\` tool to verify the modified query returns the
-   expected results.
-4. Call the \`update_esql_query\` browser API tool with the updated query.
+3. Run the modified query with the \`platform.core.execute_esql\` tool and apply the rules in
+   **Execute before you hand a query on**.
+4. Call the \`update_esql_query\` browser API tool with the executed query.
 
 ## ES|QL Best Practices for Attack Discovery Alerts
 
@@ -150,8 +166,8 @@ Use this tool to construct or modify ES|QL queries. Key parameters:
 
 ### \`platform.core.execute_esql\`
 
-Use this tool to test a query against real data before updating the editor. Pass the full
-ES|QL query string as the \`query\` parameter.
+Required before any query leaves this skill, whether it goes to the editor or to
+\`${RUN_ATTACK_DISCOVERY_TOOL_ID}\`. Pass the full ES|QL query string as the \`query\` parameter.
 
 ### \`update_esql_query\` (browser API tool)
 
