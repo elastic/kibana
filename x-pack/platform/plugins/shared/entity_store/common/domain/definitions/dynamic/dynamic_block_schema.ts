@@ -11,8 +11,6 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 /** Most sources one `dynamic` block may declare. */
 export const MAX_SOURCES = 16;
-/** Most query plans one definition may expand to, since each plan is a concurrent query. */
-export const MAX_QUERY_PLANS = 32;
 /** Longest index pattern of a source. */
 export const MAX_INDEX_PATTERN_LENGTH = 256;
 /** Longest ES|QL filter of a source or metric. */
@@ -190,8 +188,8 @@ export const dynamicSourceSchema = lazySchema(() =>
       // piece of ES|QL an author writes; validated for length only, placement is the generator's job.
       filter: filterSchema.optional(),
       attributes: z.array(dynamicAttributeSchema).max(MAX_ATTRIBUTES_PER_SOURCE).optional(),
-      // At most `MAX_METRICS_PER_SOURCE` per source; the block schema caps the query plans they
-      // expand into across sources.
+      // How many metrics this source declares — that is the registration cap. Concurrent query
+      // plan count is the generator's concern after probes, not a definition worst-case gate.
       metrics: z.array(dynamicMetricSchema).max(MAX_METRICS_PER_SOURCE).optional(),
     })
     .superRefine(({ attributes = [], metrics = [] }, ctx) => {

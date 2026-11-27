@@ -74,8 +74,6 @@ export {
 } from './domain/asset_manager/resolve_entity_store_indices';
 export { ENGINE_METADATA_TYPE_FIELD } from './domain/logs_extraction/query_builder_commons';
 export { getFieldValue } from '../common/domain/euid/commons';
-export { canonicalizeEsqlFilter } from './domain/definitions/canonical_filter';
-export type { CanonicalEsqlFilterResult } from './domain/definitions/canonical_filter';
 export { EngineDescriptorTypeName } from './domain/saved_objects/engine_descriptor/types';
 export { EntityStoreGlobalStateTypeName } from './domain/saved_objects/global_state/types';
 export { EntityStorePreferencesTypeName } from './domain/saved_objects/preferences/types';

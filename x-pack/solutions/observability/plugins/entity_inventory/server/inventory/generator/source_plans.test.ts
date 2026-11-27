@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import {
-  MAX_QUERY_PLANS,
-  type DynamicSource,
-  type EntityDefinitionWithoutId,
-} from '@kbn/entity-store/common';
+import type { DynamicSource, EntityDefinitionWithoutId } from '@kbn/entity-store/common';
 import { k8sDeploymentFixture, k8sNodeFixture } from '../__fixtures__/definitions';
 import { probeAllAs } from '../__fixtures__/source_probes';
 import { InventoryDefinitionError } from './errors';
 import { assertSafeIndexPattern } from './esql_syntax';
 import { planSources } from './source_plans';
 import type { SourceProbe } from './types';
+import { MAX_QUERY_PLANS } from './types';
 
 const withSources = (sources: DynamicSource[]): EntityDefinitionWithoutId => ({
   ...k8sNodeFixture,
