@@ -313,6 +313,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Elastic Defend Policy Management Agent Builder skill
    */
   elasticDefendPolicyManagementSkill: true,
+  elasticDefendPolicyManagementUniversalSkill: false,
 
   /**
    * Enables the investigate-rule Agent Builder skill.

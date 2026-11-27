@@ -19,11 +19,23 @@ export const POLICY_CHANGE_PROTECTIONS = POLICY_COUPLING_PROTECTIONS;
 
 export type PolicyChangeProtection = PolicyCouplingProtection;
 
-export const policyChangeOperationSchema = lazySchema(() =>
+interface PolicyChangeOperationDescriptions {
+  readonly protectionLevel?: string;
+  readonly field?: string;
+}
+
+const createPolicyChangeOperationSchema = (
+  enabledOperationDescription?: string,
+  fieldValueDescription?: string,
+  operationDescriptions: PolicyChangeOperationDescriptions = {}
+) =>
   z.discriminatedUnion('op', [
     z
       .object({
-        op: z.literal('set_protection_enabled'),
+        op:
+          enabledOperationDescription === undefined
+            ? z.literal('set_protection_enabled')
+            : z.literal('set_protection_enabled').describe(enabledOperationDescription),
         protection: z.enum(POLICY_CHANGE_PROTECTIONS),
         enabled: z.boolean(),
       })
@@ -36,28 +48,50 @@ export const policyChangeOperationSchema = lazySchema(() =>
       })
       .strict()
       .describe(
-        'Represents the product protection-level control for a protection area. It carries the protection-card OS coupling and popup synchronization that the product applies for that control.'
+        operationDescriptions.protectionLevel ??
+          'Represents the product protection-level control for a protection area. It carries the protection-card OS coupling and popup synchronization that the product applies for that control.'
       ),
     z
       .object({
         op: z.literal('set_field'),
         path: policyPathInputSchema,
-        value: z.unknown(),
+        value:
+          fieldValueDescription === undefined
+            ? z.unknown()
+            : z.unknown().describe(fieldValueDescription),
       })
       .strict()
       .describe(
-        'Names one directly requested policy path. Canonical dependent changes may be applied and reported as coupled effects. Protection-card mode-and-popup semantics belong to set_protection_level. Use set_field for explicit path intent.'
+        operationDescriptions.field ??
+          'Names one directly requested policy path. Canonical dependent changes may be applied and reported as coupled effects. Protection-card mode-and-popup semantics belong to set_protection_level. Use set_field for explicit path intent.'
       ),
-  ])
-);
+  ]);
 
-export const assessPolicyChangeParamsSchema = lazySchema(() =>
+export const policyChangeOperationSchema = lazySchema(() => createPolicyChangeOperationSchema());
+
+export const createAssessPolicyChangeParamsSchema = (
+  enabledOperationDescription?: string,
+  fieldValueDescription?: string,
+  operationDescriptions: PolicyChangeOperationDescriptions = {}
+) =>
   z
     .object({
       idOrName: policyIdentifierInputSchema,
-      changes: z.array(policyChangeOperationSchema).min(1).max(POLICY_CHANGES_MAX),
+      changes: z
+        .array(
+          createPolicyChangeOperationSchema(
+            enabledOperationDescription,
+            fieldValueDescription,
+            operationDescriptions
+          )
+        )
+        .min(1)
+        .max(POLICY_CHANGES_MAX),
     })
-    .strict()
+    .strict();
+
+export const assessPolicyChangeParamsSchema = lazySchema(() =>
+  createAssessPolicyChangeParamsSchema()
 );
 
 export type PolicyChangeOperation = z.infer<typeof policyChangeOperationSchema>;

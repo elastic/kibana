@@ -8,11 +8,9 @@
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
-import {
-  policyReferenceInputSchema,
-  toPolicyRef,
-} from '../../../../endpoint/services/policy_management/domain/input_schemas';
+import { toPolicyRef } from '../../../../endpoint/services/policy_management/domain/input_schemas';
 import type { PolicyRef } from '../../../../endpoint/services/policy_management/domain/input_schemas';
+import { createPolicyReferenceInputSchema } from '../../../../../common/workflows/step_types/endpoint/policies/policy_reference';
 import { createPolicyTool } from './create_policy_tool';
 import {
   COMPARE_POLICIES_MAX_RESULT_TOKENS,
@@ -22,22 +20,7 @@ import {
 export const COMPARE_POLICIES_TOOL_ID = 'security.policy_management.compare_policies';
 
 export const comparePoliciesSchema = lazySchema(() => {
-  const comparePoliciesIdOrNameSelectorSchema = z
-    .object({
-      idOrName: policyReferenceInputSchema.shape.idOrName.unwrap(),
-    })
-    .strict();
-
-  const comparePoliciesPresetSelectorSchema = z
-    .object({
-      preset: policyReferenceInputSchema.shape.preset.unwrap(),
-    })
-    .strict();
-
-  const comparePoliciesSideSchema = z.union([
-    comparePoliciesIdOrNameSelectorSchema,
-    comparePoliciesPresetSelectorSchema,
-  ]);
+  const comparePoliciesSideSchema = createPolicyReferenceInputSchema();
 
   return z.object({
     from: comparePoliciesSideSchema.describe(

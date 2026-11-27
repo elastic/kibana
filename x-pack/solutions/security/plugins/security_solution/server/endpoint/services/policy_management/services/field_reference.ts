@@ -5,8 +5,16 @@
  * 2.0.
  */
 
+import type { PolicyOperatingSystem } from '../../../../../common/endpoint/types';
+import type {
+  FIELD_REFERENCE_MATCH_MODES,
+  FIELD_REFERENCE_DOCUMENTATION_AVAILABILITY,
+  FIELD_REFERENCE_LONG_FORM_GUIDANCE,
+  FIELD_REFERENCE_UNKNOWN_PATH_REASON,
+} from '../../../../../common/workflows/step_types/endpoint/policies/output_vocabularies';
+
 import {
-  getPolicyFieldReferenceParamsSchema,
+  policyFieldReferenceSelectorInputSchema,
   type GetPolicyFieldReferenceSelector,
 } from '../../../../../common/workflows/step_types/endpoint/policies/field_reference';
 
@@ -31,9 +39,10 @@ import {
   type SetFieldValueDomain,
 } from '../domain/impact/validate_set_field_value';
 
-export type FieldReferenceDocumentationAvailability = 'absent' | 'present';
+export type FieldReferenceDocumentationAvailability =
+  (typeof FIELD_REFERENCE_DOCUMENTATION_AVAILABILITY)[number];
 
-export type FieldReferenceLongFormGuidance = 'not_retrieved_by_this_tool';
+export type FieldReferenceLongFormGuidance = typeof FIELD_REFERENCE_LONG_FORM_GUIDANCE;
 
 export interface FieldReferenceWritabilityFacts {
   readonly writable: boolean;
@@ -48,7 +57,7 @@ export interface PresentedFieldReferenceEntry extends FieldReferenceWritabilityF
 
 export interface ExactFieldReferenceResult extends FieldReferenceWritabilityFacts {
   readonly found: true;
-  readonly match: 'exact';
+  readonly match: typeof FIELD_REFERENCE_MATCH_MODES.exact;
   readonly path: string;
   readonly documentationAvailability: FieldReferenceDocumentationAvailability;
   readonly longFormGuidance: FieldReferenceLongFormGuidance;
@@ -57,7 +66,7 @@ export interface ExactFieldReferenceResult extends FieldReferenceWritabilityFact
 
 export interface ProtectionKeyFieldReferenceResult {
   readonly found: true;
-  readonly match: 'protection_key_path';
+  readonly match: typeof FIELD_REFERENCE_MATCH_MODES.protection_key_path;
   readonly path: string;
   readonly longFormGuidance: FieldReferenceLongFormGuidance;
   readonly entries: readonly PresentedFieldReferenceEntry[];
@@ -65,7 +74,7 @@ export interface ProtectionKeyFieldReferenceResult {
 
 export interface OsLessRemainderFieldReferenceResult {
   readonly found: true;
-  readonly match: 'os_less_remainder';
+  readonly match: typeof FIELD_REFERENCE_MATCH_MODES.os_less_remainder;
   readonly path: string;
   readonly longFormGuidance: FieldReferenceLongFormGuidance;
   readonly entries: readonly PresentedFieldReferenceEntry[];
@@ -73,9 +82,9 @@ export interface OsLessRemainderFieldReferenceResult {
 
 export interface UnknownFieldReferenceResult {
   readonly found: false;
-  readonly match: 'none';
+  readonly match: typeof FIELD_REFERENCE_MATCH_MODES.none;
   readonly path: string;
-  readonly reason: 'unknown_path';
+  readonly reason: typeof FIELD_REFERENCE_UNKNOWN_PATH_REASON;
 }
 
 export type FieldReferenceSearchHit = PolicyFieldSearchHit & FieldReferenceWritabilityFacts;
@@ -94,7 +103,7 @@ export type FieldReferenceResult =
 export const parseGetPolicyFieldReferenceParams = (
   value: unknown
 ): GetPolicyFieldReferenceSelector => {
-  const parsed = getPolicyFieldReferenceParamsSchema.safeParse(value);
+  const parsed = policyFieldReferenceSelectorInputSchema.safeParse(value);
   if (!parsed.success) {
     throw new PolicyChangePreparationError(
       POLICY_CHANGE_PREPARATION_ERROR_CODE.invalid_input,
@@ -102,18 +111,7 @@ export const parseGetPolicyFieldReferenceParams = (
     );
   }
 
-  const { path, keywords, os } = parsed.data;
-  if (path !== undefined && keywords === undefined && os === undefined) {
-    return { path };
-  }
-  if (keywords !== undefined && path === undefined) {
-    return os === undefined ? { keywords } : { keywords, os };
-  }
-
-  throw new PolicyChangePreparationError(
-    POLICY_CHANGE_PREPARATION_ERROR_CODE.invalid_input,
-    POLICY_CHANGE_SCHEMA_MESSAGE
-  );
+  return parsed.data;
 };
 
 const documentationAvailabilityOf = (
@@ -181,7 +179,7 @@ export const lookupFieldReference = (path: string): FieldReferenceResult => {
 
 export const searchFieldReference = (
   keywords: readonly string[],
-  os?: 'windows' | 'mac' | 'linux'
+  os?: `${PolicyOperatingSystem}`
 ): SearchFieldReferenceResult => {
   const search = searchPolicyFields(keywords, os);
   return {

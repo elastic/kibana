@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type { POLICY_USAGE_CLASSIFICATIONS } from '../../../../../common/workflows/step_types/endpoint/policies/output_vocabularies';
 import type { EndpointCountResult } from './count_endpoints';
 
-export type PolicyUsageClassification = 'used' | 'unused' | 'undetermined';
+export type PolicyUsageClassification = (typeof POLICY_USAGE_CLASSIFICATIONS)[number];
 
 export type ClassifiedPolicyUsage = Readonly<{
   classification: PolicyUsageClassification;

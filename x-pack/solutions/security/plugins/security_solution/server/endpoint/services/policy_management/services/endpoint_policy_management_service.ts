@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { LIST_USAGE_UNAVAILABLE } from '../../../../../common/workflows/step_types/endpoint/policies/output_vocabularies';
 import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
 import { EndpointAuthorizationError } from '../../../errors';
 import {
@@ -16,7 +17,8 @@ import {
 } from '../../../../../common/endpoint/service/authz';
 import type { PolicyDiffEntry } from '../domain/diff_policy_config';
 import type { AssessPolicyChangeParams } from '../../../../../common/workflows/step_types/endpoint/policies/policy_change_operation';
-import type { EndpointPolicyBaselinePreset, PolicyRef } from '../domain/input_schemas';
+import type { EndpointPolicyPreset } from '../../../../../common/endpoint/constants';
+import type { PolicyRef } from '../domain/input_schemas';
 import { diffPolicyConfig } from '../domain/diff_policy_config';
 import type { AssessPolicyChangeDto } from './assess_change';
 import { assessChange } from './assess_change';
@@ -62,7 +64,7 @@ export type ListedPolicyItem = ListPolicyItem & {
 export type ListPoliciesResult = Omit<ListPoliciesDto, 'items'> & {
   items: readonly ListedPolicyItem[];
   usage_truncated?: true;
-  usage_unavailable?: 'requires_endpoint_list_read';
+  usage_unavailable?: typeof LIST_USAGE_UNAVAILABLE;
 };
 
 export type PolicyComparison = Readonly<{
@@ -83,7 +85,7 @@ export interface EndpointPolicyManagementService {
   ): Promise<ListPoliciesResult>;
   getPolicy(reference: Readonly<{ idOrName: string }>): Promise<EndpointPolicyRead>;
   getPolicyBaseline(
-    preset: EndpointPolicyBaselinePreset
+    preset: EndpointPolicyPreset
   ): Promise<ReturnType<typeof getEndpointPolicyBaseline>>;
   comparePolicies(from: PolicyRef, to: PolicyRef): Promise<PolicyComparison>;
   assessPolicyChange(input: AssessPolicyChangeParams): Promise<AssessPolicyChangeDto>;
@@ -95,8 +97,6 @@ export interface EndpointPolicyManagementService {
     input: Readonly<{ callSource: ApplyPolicyCallSource }>
   ): Promise<ApplyPolicyChangeResult>;
 }
-
-const LIST_USAGE_UNAVAILABLE = 'requires_endpoint_list_read' as const;
 
 const attachUsage = async (
   items: readonly ListPolicyItem[],

@@ -11,13 +11,15 @@ import type {
   NewPackagePolicy,
   PackagePolicyCreateExtensionComponentProps,
 } from '@kbn/fleet-plugin/public';
-import type { EndpointPreset } from '../constants';
+import type { EndpointPolicyPreset } from '../../../../../../../../common/endpoint/constants';
+import { ENDPOINT_POLICY_PRESET } from '../../../../../../../../common/endpoint/constants';
 import { ENDPOINT_INTEGRATION_CONFIG_KEY } from '../constants';
 import { HelpTextWithPadding } from './help_text_with_padding';
 import { DATA_COLLECTION, DATA_COLLECTION_HELP_TEXT } from '../translations';
 import { useGetProtectionsUnavailableComponent } from '../../../policy_settings_form/hooks/use_get_protections_unavailable_component';
 
 const NOOP = () => {};
+const preset: EndpointPolicyPreset = ENDPOINT_POLICY_PRESET.DATA_COLLECTION;
 
 type EndpointEventCollectionPresetProps = PackagePolicyCreateExtensionComponentProps;
 
@@ -27,7 +29,6 @@ type EndpointEventCollectionPresetProps = PackagePolicyCreateExtensionComponentP
 export const EndpointEventCollectionPreset = memo<EndpointEventCollectionPresetProps>(
   ({ onChange, newPolicy }) => {
     const UpsellToIncludePolicyProtections = useGetProtectionsUnavailableComponent();
-    const preset: EndpointPreset = 'DataCollection';
     const policyInputs: NewPackagePolicy['inputs'] = useMemo(() => {
       return [
         {

@@ -9,38 +9,66 @@ import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extens
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 
 export interface RegisterEndpointWorkflowStepsDeps {
-  experimentalFeatures: Pick<ExperimentalFeatures, 'automaticTroubleshootingUniversalSkill'>;
+  experimentalFeatures: Pick<
+    ExperimentalFeatures,
+    'automaticTroubleshootingUniversalSkill' | 'elasticDefendPolicyManagementUniversalSkill'
+  >;
 }
 
 export const registerEndpointWorkflowSteps = (
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup,
   deps: RegisterEndpointWorkflowStepsDeps
 ): void => {
-  if (!deps.experimentalFeatures.automaticTroubleshootingUniversalSkill) {
-    return;
+  const { automaticTroubleshootingUniversalSkill, elasticDefendPolicyManagementUniversalSkill } =
+    deps.experimentalFeatures;
+  if (automaticTroubleshootingUniversalSkill || elasticDefendPolicyManagementUniversalSkill) {
+    workflowsExtensions.registerStepDefinition(() =>
+      import('./steps').then((m) => m.searchIntegrationKnowledgePublicStepDefinition)
+    );
   }
+  if (elasticDefendPolicyManagementUniversalSkill) {
+    workflowsExtensions.registerStepDefinition(() =>
+      import('./steps').then((m) => m.getEndpointPolicyFieldReferencePublicStepDefinition)
+    );
+    workflowsExtensions.registerStepDefinition(() =>
+      import('./steps').then((m) => m.listEndpointPoliciesPublicStepDefinition)
+    );
+    workflowsExtensions.registerStepDefinition(() =>
+      import('./steps').then((m) => m.getEndpointPolicyPublicStepDefinition)
+    );
+    workflowsExtensions.registerStepDefinition(() =>
+      import('./steps').then((m) => m.getEndpointPolicyBaselinePublicStepDefinition)
+    );
+    workflowsExtensions.registerStepDefinition(() =>
+      import('./steps').then((m) => m.compareEndpointPoliciesPublicStepDefinition)
+    );
+    workflowsExtensions.registerStepDefinition(() =>
+      import('./steps').then((m) => m.getEndpointPolicyRolloutStatusPublicStepDefinition)
+    );
+    workflowsExtensions.registerStepDefinition(() =>
+      import('./steps').then((m) => m.assessEndpointPolicyChangePublicStepDefinition)
+    );
+  }
+  if (automaticTroubleshootingUniversalSkill) {
+    workflowsExtensions.registerStepDefinition(() =>
+      import('./steps').then((m) => m.findEndpointArtifactsPublicStepDefinition)
+    );
 
-  workflowsExtensions.registerStepDefinition(() =>
-    import('./steps').then((m) => m.findEndpointArtifactsPublicStepDefinition)
-  );
-  workflowsExtensions.registerStepDefinition(() =>
-    import('./steps').then((m) => m.searchIntegrationKnowledgePublicStepDefinition)
-  );
+    workflowsExtensions.registerStepDefinition(() =>
+      import('./steps').then((m) => m.resolveEndpointHostsPublicStepDefinition)
+    );
+    workflowsExtensions.registerStepDefinition(() =>
+      import('./steps').then((m) => m.getEndpointHostDiagnosticsPublicStepDefinition)
+    );
+    workflowsExtensions.registerStepDefinition(() =>
+      import('./steps').then((m) => m.getEndpointPackageStatusPublicStepDefinition)
+    );
+    workflowsExtensions.registerStepDefinition(() =>
+      import('./steps').then((m) => m.getEndpointInventoryCountsPublicStepDefinition)
+    );
 
-  workflowsExtensions.registerStepDefinition(() =>
-    import('./steps').then((m) => m.resolveEndpointHostsPublicStepDefinition)
-  );
-  workflowsExtensions.registerStepDefinition(() =>
-    import('./steps').then((m) => m.getEndpointHostDiagnosticsPublicStepDefinition)
-  );
-  workflowsExtensions.registerStepDefinition(() =>
-    import('./steps').then((m) => m.getEndpointPackageStatusPublicStepDefinition)
-  );
-  workflowsExtensions.registerStepDefinition(() =>
-    import('./steps').then((m) => m.getEndpointInventoryCountsPublicStepDefinition)
-  );
-
-  workflowsExtensions.registerStepDefinition(() =>
-    import('./steps').then((m) => m.finalizeTroubleshootingDiagnosisPublicStepDefinition)
-  );
+    workflowsExtensions.registerStepDefinition(() =>
+      import('./steps').then((m) => m.finalizeTroubleshootingDiagnosisPublicStepDefinition)
+    );
+  }
 };

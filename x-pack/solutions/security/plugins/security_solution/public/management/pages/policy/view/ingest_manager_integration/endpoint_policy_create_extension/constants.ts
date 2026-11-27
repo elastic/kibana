@@ -6,6 +6,7 @@
  */
 
 import { deepFreeze } from '@kbn/std';
+import { ENDPOINT_POLICY_PRESET } from '../../../../../../../common/endpoint/constants';
 import {
   DATA_COLLECTION,
   EDR_COMPLETE,
@@ -18,22 +19,20 @@ import {
 export const ENDPOINT_INTEGRATION_CONFIG_KEY = 'ENDPOINT_INTEGRATION_CONFIG';
 
 export const endpointPresetsMapping = deepFreeze({
-  NGAV: {
+  [ENDPOINT_POLICY_PRESET.NGAV]: {
     label: NGAV,
     note: NGAV_NOTE,
   },
-  EDREssential: {
+  [ENDPOINT_POLICY_PRESET.EDR_ESSENTIAL]: {
     label: EDR_ESSENTIAL,
     note: EDR_NOTE,
   },
-  EDRComplete: {
+  [ENDPOINT_POLICY_PRESET.EDR_COMPLETE]: {
     label: EDR_COMPLETE,
     note: EDR_NOTE,
   },
-  DataCollection: {
+  [ENDPOINT_POLICY_PRESET.DATA_COLLECTION]: {
     label: DATA_COLLECTION,
     note: null,
   },
 });
-
-export type EndpointPreset = keyof typeof endpointPresetsMapping;

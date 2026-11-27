@@ -78,10 +78,15 @@ const isProtectionMode = (value: unknown): value is ProtectionModes =>
   value === ProtectionModes.detect ||
   value === ProtectionModes.off;
 
+type WeakenedProtectionMode = Extract<
+  PolicyAssessmentAdvisory,
+  { code: 'protection_weakened' }
+>['to'];
+
 const protectionWeakenedText = (
   protection: PolicyChangeProtection,
   os: readonly PolicyOperatingSystem[],
-  to: 'detect' | 'off'
+  to: WeakenedProtectionMode
 ): string => {
   const oses = os.map((entry) => ADVISORY_OS_TITLES[entry]).join(', ');
   const family = ADVISORY_PROTECTION_TITLES[protection];
@@ -90,10 +95,9 @@ const protectionWeakenedText = (
     : `${family} protection on ${oses} is turned off: this protection no longer detects or blocks threats.`;
 };
 
-interface ProtectionModeDecrease {
-  readonly detect: readonly PolicyOperatingSystem[];
-  readonly off: readonly PolicyOperatingSystem[];
-}
+type ProtectionModeDecrease = Readonly<
+  Record<WeakenedProtectionMode, readonly PolicyOperatingSystem[]>
+>;
 
 const getProtectionModeDecrease = (
   currentConfig: PolicyConfig,
@@ -146,8 +150,8 @@ const buildProtectionWeakenedAdvisories = (
               code: 'protection_weakened' as const,
               protection,
               os: decreasedToDetect,
-              to: 'detect' as const,
-              text: protectionWeakenedText(protection, decreasedToDetect, 'detect'),
+              to: ProtectionModes.detect as const,
+              text: protectionWeakenedText(protection, decreasedToDetect, ProtectionModes.detect),
             },
           ]
         : []),
@@ -157,8 +161,8 @@ const buildProtectionWeakenedAdvisories = (
               code: 'protection_weakened' as const,
               protection,
               os: decreasedToOff,
-              to: 'off' as const,
-              text: protectionWeakenedText(protection, decreasedToOff, 'off'),
+              to: ProtectionModes.off as const,
+              text: protectionWeakenedText(protection, decreasedToOff, ProtectionModes.off),
             },
           ]
         : []),

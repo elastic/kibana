@@ -6,6 +6,7 @@
  */
 
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { ENDPOINT_POLICY_LIST_POPULATION } from '../../../../../common/workflows/step_types/endpoint/policies/output_vocabularies';
 import { createEndpointPolicySnapshot } from '../domain/endpoint_policy_snapshot';
 import {
   normalizeEndpointPolicy,
@@ -39,7 +40,7 @@ export type ListPolicyItem = Readonly<{
 }>;
 
 export type ListPoliciesDto = Readonly<{
-  population: 'endpoint_package_policies';
+  population: typeof ENDPOINT_POLICY_LIST_POPULATION;
   page: number;
   per_page: number;
   items: readonly ListPolicyItem[];

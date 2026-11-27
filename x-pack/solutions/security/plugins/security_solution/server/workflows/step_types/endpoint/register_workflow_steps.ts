@@ -20,8 +20,21 @@ import {
   type EndpointConfigurationTroubleshootingAnalyticsReporter,
 } from './configuration_troubleshooting/finalize';
 
+import {
+  createGetEndpointPolicyFieldReferenceStepDefinition,
+  createListEndpointPoliciesStepDefinition,
+  createGetEndpointPolicyStepDefinition,
+  createGetEndpointPolicyBaselineStepDefinition,
+  createCompareEndpointPoliciesStepDefinition,
+  createGetEndpointPolicyRolloutStatusStepDefinition,
+  createAssessEndpointPolicyChangeStepDefinition,
+} from './policies/steps';
+
 export interface RegisterEndpointWorkflowStepsDeps {
-  experimentalFeatures: Pick<ExperimentalFeatures, 'automaticTroubleshootingUniversalSkill'>;
+  experimentalFeatures: Pick<
+    ExperimentalFeatures,
+    'automaticTroubleshootingUniversalSkill' | 'elasticDefendPolicyManagementUniversalSkill'
+  >;
   analytics: EndpointConfigurationTroubleshootingAnalyticsReporter;
   getInternalEsClient: () => Promise<ElasticsearchClient> | ElasticsearchClient;
   endpointAppContextService: EndpointAppContextService;
@@ -31,31 +44,56 @@ export const registerEndpointWorkflowSteps = (
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
   deps: RegisterEndpointWorkflowStepsDeps
 ): void => {
-  if (!deps.experimentalFeatures.automaticTroubleshootingUniversalSkill) {
-    return;
+  const { automaticTroubleshootingUniversalSkill, elasticDefendPolicyManagementUniversalSkill } =
+    deps.experimentalFeatures;
+  if (automaticTroubleshootingUniversalSkill || elasticDefendPolicyManagementUniversalSkill) {
+    workflowsExtensions.registerStepDefinition(
+      createSearchIntegrationKnowledgeStepDefinition({
+        getInternalEsClient: deps.getInternalEsClient,
+      })
+    );
   }
+  if (elasticDefendPolicyManagementUniversalSkill) {
+    workflowsExtensions.registerStepDefinition(
+      createGetEndpointPolicyFieldReferenceStepDefinition(deps.endpointAppContextService)
+    );
+    workflowsExtensions.registerStepDefinition(
+      createListEndpointPoliciesStepDefinition(deps.endpointAppContextService)
+    );
+    workflowsExtensions.registerStepDefinition(
+      createGetEndpointPolicyStepDefinition(deps.endpointAppContextService)
+    );
+    workflowsExtensions.registerStepDefinition(
+      createGetEndpointPolicyBaselineStepDefinition(deps.endpointAppContextService)
+    );
+    workflowsExtensions.registerStepDefinition(
+      createCompareEndpointPoliciesStepDefinition(deps.endpointAppContextService)
+    );
+    workflowsExtensions.registerStepDefinition(
+      createGetEndpointPolicyRolloutStatusStepDefinition(deps.endpointAppContextService)
+    );
+    workflowsExtensions.registerStepDefinition(
+      createAssessEndpointPolicyChangeStepDefinition(deps.endpointAppContextService)
+    );
+  }
+  if (automaticTroubleshootingUniversalSkill) {
+    workflowsExtensions.registerStepDefinition(findEndpointArtifactsStepDefinition);
 
-  workflowsExtensions.registerStepDefinition(findEndpointArtifactsStepDefinition);
-  workflowsExtensions.registerStepDefinition(
-    createSearchIntegrationKnowledgeStepDefinition({
-      getInternalEsClient: deps.getInternalEsClient,
-    })
-  );
+    workflowsExtensions.registerStepDefinition(
+      createResolveEndpointHostsStepDefinition({
+        endpointAppContextService: deps.endpointAppContextService,
+      })
+    );
+    workflowsExtensions.registerStepDefinition(getEndpointHostDiagnosticsStepDefinition);
+    workflowsExtensions.registerStepDefinition(
+      createGetEndpointPackageStatusStepDefinition(deps.endpointAppContextService.isServerless())
+    );
+    workflowsExtensions.registerStepDefinition(
+      createGetEndpointInventoryCountsStepDefinition(deps.endpointAppContextService)
+    );
 
-  workflowsExtensions.registerStepDefinition(
-    createResolveEndpointHostsStepDefinition({
-      endpointAppContextService: deps.endpointAppContextService,
-    })
-  );
-  workflowsExtensions.registerStepDefinition(getEndpointHostDiagnosticsStepDefinition);
-  workflowsExtensions.registerStepDefinition(
-    createGetEndpointPackageStatusStepDefinition(deps.endpointAppContextService.isServerless())
-  );
-  workflowsExtensions.registerStepDefinition(
-    createGetEndpointInventoryCountsStepDefinition(deps.endpointAppContextService)
-  );
-
-  workflowsExtensions.registerStepDefinition(
-    createFinalizeTroubleshootingDiagnosisStepDefinition({ analytics: deps.analytics })
-  );
+    workflowsExtensions.registerStepDefinition(
+      createFinalizeTroubleshootingDiagnosisStepDefinition({ analytics: deps.analytics })
+    );
+  }
 };

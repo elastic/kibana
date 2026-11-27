@@ -9,10 +9,20 @@ import {
   assessPolicyChangeParamsSchema,
   type AssessPolicyChangeParams,
   type PolicyChangeOperation,
+  type PolicyChangeProtection,
 } from '../../../../../../common/workflows/step_types/endpoint/policies/policy_change_operation';
 
-import type { PolicyConfig, PolicyOperatingSystem } from '../../../../../../common/endpoint/types';
+import type {
+  PolicyConfig,
+  PolicyOperatingSystem,
+  ProtectionModes,
+} from '../../../../../../common/endpoint/types';
 
+import type {
+  PolicyChangeOriginKind,
+  POLICY_ASSESSMENT_ADVISORY_CODES,
+  POLICY_CHANGE_SIDE_EFFECT_REASON,
+} from '../../../../../../common/workflows/step_types/endpoint/policies/output_vocabularies';
 import type { PolicyDiffEntry } from '../diff_policy_config';
 import type { FieldRegistryEntry } from '../field_registry';
 
@@ -29,20 +39,20 @@ export type ProtectionSettingWeakenedSetting =
 
 export type PolicyAssessmentAdvisory =
   | {
-      code: 'protection_weakened';
-      protection: 'malware' | 'ransomware' | 'memory_protection' | 'behavior_protection';
+      code: typeof POLICY_ASSESSMENT_ADVISORY_CODES.protection_weakened;
+      protection: PolicyChangeProtection;
       os: readonly PolicyOperatingSystem[];
-      to: 'detect' | 'off';
+      to: `${ProtectionModes.detect | ProtectionModes.off}`;
       text: string;
     }
   | {
-      code: 'protection_setting_weakened';
+      code: typeof POLICY_ASSESSMENT_ADVISORY_CODES.protection_setting_weakened;
       setting: ProtectionSettingWeakenedSetting;
       os: readonly PolicyOperatingSystem[];
       text: string;
     }
   | {
-      code: 'global_manifest_version_stale';
+      code: typeof POLICY_ASSESSMENT_ADVISORY_CODES.global_manifest_version_stale;
       value: string;
       ageDays: number;
       text: string;
@@ -77,7 +87,7 @@ export interface ExplicitPolicyChange {
   readonly origin: {
     readonly operationIndex: number;
     readonly op: PolicyChangeOperation['op'];
-    readonly kind: 'direct' | 'coupled';
+    readonly kind: PolicyChangeOriginKind;
   };
 }
 
@@ -166,7 +176,7 @@ export interface PolicyChangeSideEffect {
   readonly path: string;
   readonly from: unknown;
   readonly to: unknown;
-  readonly reason: 'derived_field_update';
+  readonly reason: typeof POLICY_CHANGE_SIDE_EFFECT_REASON;
   readonly registry: Pick<FieldRegistryEntry, 'path' | 'os' | 'kind' | 'tier' | 'source'>;
 }
 

@@ -17,10 +17,10 @@ import {
 import {
   normalizeEndpointPolicy,
   type EndpointPolicyBaseline,
-  type EndpointPolicyBaselinePreset,
   type NormalizedEndpointPolicy,
 } from '../domain/normalized_endpoint_policy';
 import type { PolicyRef } from '../domain/input_schemas';
+import type { EndpointPolicyPreset } from '../../../../../common/endpoint/constants';
 import type { NormalizedPolicyConfig } from '../domain/normalized_policy_config';
 import type { PolicyAccessContext } from './access_context';
 import { readPolicyBaseline } from './read_policy_baseline';
@@ -148,7 +148,7 @@ export const getEndpointPolicy = async (
 
 export const getEndpointPolicyBaseline = (
   endpointAppContextService: EndpointAppContextService,
-  preset: EndpointPolicyBaselinePreset
+  preset: EndpointPolicyPreset
 ): EndpointPolicyBaseline => readPolicyBaseline(endpointAppContextService, { preset });
 
 export const resolveEndpointPolicyReference = async (

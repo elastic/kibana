@@ -8,10 +8,12 @@
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
+import { toPolicyRef } from '../../../../endpoint/services/policy_management/domain/input_schemas';
 import {
-  policyReferenceInputSchema,
-  toPolicyRef,
-} from '../../../../endpoint/services/policy_management/domain/input_schemas';
+  createPolicyReferenceInputSchema,
+  policyBaselinePresetInputSchema,
+} from '../../../../../common/workflows/step_types/endpoint/policies/policy_reference';
+import { policyIdentifierInputSchema } from '../../../../../common/workflows/step_types/endpoint/policies/input_schemas';
 import { createPolicyTool } from './create_policy_tool';
 import {
   GET_POLICY_MAX_RESULT_TOKENS,
@@ -22,33 +24,19 @@ import {
 export const GET_POLICY_TOOL_ID = 'security.policy_management.get_policy';
 
 export const getPolicySchema = lazySchema(() => {
-  const getPolicyIdOrNameSelectorSchema = z
-    .object({
-      idOrName: policyReferenceInputSchema.shape.idOrName
-        .unwrap()
-        .describe(
-          'User-supplied live policy identity: saved-object id or exact full stored endpoint policy name in the current space, or a returned policy id. A creation preset does not select the live policy. Valid: {"selector":{"idOrName":"Example policy"}}. Do not send null, an empty string, or placeholder text. These examples are not a policy selection. A presented name with name_string_truncated true is display-only; pass the policy id as later idOrName.'
-        ),
-    })
-    .strict();
+  const idOrNameSchema = policyIdentifierInputSchema.describe(
+    'User-supplied live policy identity: saved-object id or exact full stored endpoint policy name in the current space, or a returned policy id. A creation preset does not select the live policy. Valid: {"selector":{"idOrName":"Example policy"}}. Do not send null, an empty string, or placeholder text. These examples are not a policy selection. A presented name with name_string_truncated true is display-only; pass the policy id as later idOrName.'
+  );
 
-  const getPolicyPresetSelectorSchema = z
-    .object({
-      preset: policyReferenceInputSchema.shape.preset
-        .unwrap()
-        .describe(
-          'An explicitly requested deployment baseline (EDRComplete, NGAV, EDREssential, DataCollection), not a live policy. Valid: {"selector":{"preset":"EDRComplete"}}. Do not send null or placeholder text. These examples are not a policy selection.'
-        ),
-    })
-    .strict();
+  const presetSchema = policyBaselinePresetInputSchema.describe(
+    'An explicitly requested deployment baseline (EDRComplete, NGAV, EDREssential, DataCollection), not a live policy. Valid: {"selector":{"preset":"EDRComplete"}}. Do not send null or placeholder text. These examples are not a policy selection.'
+  );
 
   return z
     .object({
-      selector: z
-        .union([getPolicyIdOrNameSelectorSchema, getPolicyPresetSelectorSchema])
-        .describe(
-          'Exactly one selector object. {"selector":{"idOrName":"Example policy"}} selects a live policy id or exact stored name; {"selector":{"preset":"EDRComplete"}} selects an explicitly requested deployment baseline. The selector object carries exactly one required property. Invalid: {"idOrName":"Example policy"}, {"selector":{"idOrName":"Example policy","preset":"EDRComplete"}}, and {"selector":{}}. Do not send idOrName or preset at the root, both properties in one selector, null, or placeholder text. These examples are not a policy selection.'
-        ),
+      selector: createPolicyReferenceInputSchema(idOrNameSchema, presetSchema).describe(
+        'Exactly one selector object. {"selector":{"idOrName":"Example policy"}} selects a live policy id or exact stored name; {"selector":{"preset":"EDRComplete"}} selects an explicitly requested deployment baseline. The selector object carries exactly one required property. Invalid: {"idOrName":"Example policy"}, {"selector":{"idOrName":"Example policy","preset":"EDRComplete"}}, and {"selector":{}}. Do not send idOrName or preset at the root, both properties in one selector, null, or placeholder text. These examples are not a policy selection.'
+      ),
     })
     .strict();
 });
