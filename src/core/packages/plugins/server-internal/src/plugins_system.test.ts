@@ -859,6 +859,24 @@ describe('initialize', () => {
     );
   });
 
+  it('unlocks soft dependencies after every start() and before any initialize()', async () => {
+    const pluginA = createStartablePlugin('pluginA');
+    const pluginB = createStartablePlugin('pluginB', { required: ['pluginA'] });
+    const deps = coreInternalLifecycleMock.createInternalStart();
+
+    await pluginsSystem.setupPlugins(setupDeps);
+    await pluginsSystem.startPlugins(deps);
+
+    const [readyOrder] = deps.injection.ready.mock.invocationCallOrder;
+    expect(deps.injection.ready).toHaveBeenCalledTimes(1);
+    for (const plugin of [pluginA, pluginB]) {
+      expect(readyOrder).toBeGreaterThan((plugin.start as jest.Mock).mock.invocationCallOrder[0]);
+      expect(readyOrder).toBeLessThan(
+        (plugin.runInitialize as jest.Mock).mock.invocationCallOrder[0]
+      );
+    }
+  });
+
   it('does not wait for initialize() to finish', async () => {
     const pluginA = createStartablePlugin('pluginA');
     (pluginA.runInitialize as jest.Mock).mockImplementation(() => {});

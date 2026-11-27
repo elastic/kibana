@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/di-soft-deps-classic-consumer-example-plugin",
+  "owner": "@elastic/kibana-core",
+  "description": "A classic plugin that uses the greeter of diSoftDepsLookupB through core.injection, with no plugin dependency on it",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "diSoftDepsClassicConsumer",
+    "server": true,
+    "browser": true
+  }
+}

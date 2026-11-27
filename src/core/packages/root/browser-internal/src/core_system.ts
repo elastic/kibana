@@ -456,6 +456,7 @@ export class CoreSystem {
       };
 
       await this.plugins.start(core);
+      this.injection.ready();
 
       // ensure the rootDomElement is empty
       this.rootDomElement.textContent = '';

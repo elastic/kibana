@@ -16,9 +16,50 @@ import {
   type ServiceIdentifier,
 } from 'inversify';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
-import { createToken, OnSetup, OnStart, Setup, Start } from '@kbn/core-di';
+import {
+  createToken,
+  type ExtensionPoint,
+  ExtensionService,
+  OnExtensionsReady,
+  OnSetup,
+  OnStart,
+  Setup,
+  Start,
+} from '@kbn/core-di';
+import {
+  Collect,
+  type Contribution,
+  Contributions,
+  createExtensionService,
+  ExtensionContribution,
+} from './extensions';
 
 type ScopeFactory = (id?: PluginOpaqueId) => Container;
+
+/**
+ * One contribution to an extension point: the contributing plugin's id and name, its long-lived scope, and the slot bound to the value there.
+ */
+interface ExtensionEntry {
+  id: PluginOpaqueId;
+  plugin: string;
+  scope: Container;
+  slot: ServiceIdentifier;
+}
+
+/**
+ * Where `ExtensionService` was resolved inside a fork: the requesting container and the fork that holds the per-request plugin scopes.
+ */
+interface ResolutionOrigin {
+  caller: Container;
+  context: Container;
+}
+
+/**
+ * `pending`: plugins run setup and start. `ready`: every plugin started, and its contributions are indexed by extension point.
+ */
+type Phase =
+  | { name: 'pending' }
+  | { name: 'ready'; extensions: ReadonlyMap<ExtensionPoint<unknown>, readonly ExtensionEntry[]> };
 
 /**
  * Current context to resolve the global services.
@@ -70,10 +111,27 @@ export class PluginModule extends ContainerModule {
     [OnStart as symbol]: new WeakSet<Container>(),
   };
   private bound = new WeakSet<Container>();
+  private scopes = new Set<Container>();
+  private phase: Phase = { name: 'pending' };
 
-  constructor(root: Container, private readonly options?: Omit<ContainerOptions, 'parent'>) {
+  constructor(
+    private readonly root: Container,
+    private readonly options?: Omit<ContainerOptions, 'parent'>
+  ) {
     super(({ bind, onActivation }) => {
+      const getContributions = this.getContributions.bind(this);
+
       bind(Container).toConstantValue(root);
+      bind(Contributions).toConstantValue(getContributions);
+      bind(ExtensionService)
+        .toResolvedValue(
+          (caller: Container, context: Container = caller) =>
+            createExtensionService((point) =>
+              this.getContributions(point, context === root ? undefined : { caller, context })
+            ),
+          [Container, { serviceIdentifier: Context, optional: true }]
+        )
+        .inRequestScope();
       bind(Fork).toDynamicValue(this.getForkFactory.bind(this)).inRequestScope();
       bind(OnSetup).toConstantValue(this.registerGlobals.bind(this));
       bind(Plugin).toDynamicValue(this.getPluginFactory.bind(this)).inRequestScope();
@@ -85,8 +143,41 @@ export class PluginModule extends ContainerModule {
     });
   }
 
+  /**
+   * Marks every plugin as started and indexes their extension point contributions,
+   * then runs each plugin's `collect` hooks once, then each plugin's `OnExtensionsReady` hooks once.
+   */
+  public ready(): void {
+    if (this.phase.name === 'ready') {
+      return;
+    }
+
+    this.phase = { name: 'ready', extensions: this.indexExtensions() };
+    this.runHooks(Collect);
+    this.runHooks(OnExtensionsReady);
+  }
+
   protected getDefaultContract() {
     return undefined;
+  }
+
+  /**
+   * Lists the contributions to the extension point, built in the contributing plugin's scope of the origin fork, or in its long-lived scope without one.
+   */
+  protected getContributions<T>(
+    point: ExtensionPoint<T>,
+    origin?: ResolutionOrigin
+  ): Array<Contribution<T>> {
+    if (this.phase.name !== 'ready') {
+      throw new Error(
+        `Cannot resolve extension point "${point.description}" before all plugins started. Call it in an OnExtensionsReady hook, a request handler, or later.`
+      );
+    }
+
+    return (this.phase.extensions.get(point) ?? []).map(({ id, plugin, scope, slot }) => ({
+      plugin,
+      resolve: () => (origin ? this.resolveIn(origin, id, slot) : scope.get(slot)) as T,
+    }));
   }
 
   protected onContractActivation<T>(
@@ -180,7 +271,17 @@ export class PluginModule extends ContainerModule {
         context
           .bind(id)
           .toConstantValue(scope)
-          .onDeactivation(once(() => scope.unbindAllAsync()));
+          .onDeactivation(
+            once(() => {
+              this.scopes.delete(scope);
+
+              return scope.unbindAllAsync();
+            })
+          );
+
+        if (context === this.root) {
+          this.scopes.add(scope);
+        }
       }
 
       return context.get(id);
@@ -214,6 +315,43 @@ export class PluginModule extends ContainerModule {
             [Context]
           )
           .inRequestScope();
+      }
+    }
+  }
+
+  private resolveIn(
+    { caller, context }: ResolutionOrigin,
+    id: PluginOpaqueId,
+    slot: ServiceIdentifier
+  ) {
+    const target = context.get(Plugin)(id);
+    this.registerGlobals(caller);
+    this.inheritGlobals(target);
+
+    return target.get(slot);
+  }
+
+  private indexExtensions(): Map<ExtensionPoint<unknown>, ExtensionEntry[]> {
+    const extensions = new Map<ExtensionPoint<unknown>, ExtensionEntry[]>();
+    for (const scope of this.scopes) {
+      if (!scope.isCurrentBound(ExtensionContribution)) {
+        continue;
+      }
+
+      const id = scope.get(Id);
+      const plugin = id.description ?? String(id);
+      for (const { point, slot } of scope.getAll(ExtensionContribution)) {
+        extensions.set(point, [...(extensions.get(point) ?? []), { id, plugin, scope, slot }]);
+      }
+    }
+
+    return extensions;
+  }
+
+  private runHooks(hook: ServiceIdentifier<(container: Container) => void>) {
+    for (const scope of [...this.scopes]) {
+      if (scope.isCurrentBound(hook)) {
+        scope.getAll(hook).forEach((callback) => callback(scope));
       }
     }
   }

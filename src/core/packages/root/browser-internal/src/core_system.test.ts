@@ -547,6 +547,14 @@ describe('#start()', () => {
     await startCore();
     expect(MockCoreInjectionService.start).toHaveBeenCalledTimes(1);
   });
+
+  it('calls injection#ready() after plugins#start()', async () => {
+    await startCore();
+    expect(MockCoreInjectionService.ready).toHaveBeenCalledTimes(1);
+    expect(MockPluginsService.start.mock.invocationCallOrder[0]).toBeLessThan(
+      MockCoreInjectionService.ready.mock.invocationCallOrder[0]
+    );
+  });
 });
 
 describe('#stop()', () => {

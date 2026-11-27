@@ -26,7 +26,26 @@ import {
   type ServiceIdentifier,
 } from 'inversify';
 import { once, wrap } from 'lodash';
+import type { ExtensionPoint } from './extension_point';
+import { Logger } from './services/logging';
 import { OnSetup, OnStart } from './services/plugin';
+import { createToken } from './token';
+
+interface Contribution<T> {
+  plugin: string;
+  resolve(): T;
+}
+
+/*
+ * Must stay the same symbols and shapes as the internal tokens in `@kbn/core-di-internal`.
+ */
+const Collect = createToken<(container: Container) => void>('core.di.Collect');
+const Contributions =
+  createToken<<T>(point: ExtensionPoint<T>) => Array<Contribution<T>>>('core.di.Contributions');
+const ExtensionContribution = createToken<{
+  point: ExtensionPoint<unknown>;
+  slot: ServiceIdentifier;
+}>('core.di.ExtensionContribution');
 
 /**
  * Extended container module options providing Kibana-specific features.
@@ -71,6 +90,11 @@ export interface KibanaContainerModuleLoadOptions extends ContainerModuleLoadOpt
   ): void;
 
   /**
+   * Contributes to and collects extension points shared with other plugins.
+   */
+  extensions: KibanaContainerModuleExtensions;
+
+  /**
    * Wraps a handler that will be called after the start phase injecting the listed dependencies.
    * The returned function can be used in dynamic bindings like `toDynamicValue` or `toFactory` or as an `onActivation` handler.
    * @example
@@ -87,6 +111,41 @@ export interface KibanaContainerModuleLoadOptions extends ContainerModuleLoadOpt
   inject<R, A extends unknown[], D extends unknown[]>(
     ...definition: [...dependencies: MapToResolvedValueInjectOptions<D>, inner: Injectable<R, A, D>]
   ): (context: Pick<ResolutionContext, 'getAsync' | 'getAllAsync'>, ...args: A) => Promise<R>;
+}
+
+/**
+ * Contributes to and collects extension points shared with other plugins.
+ * @public
+ */
+export interface KibanaContainerModuleExtensions {
+  /**
+   * Binds one contribution to the extension point in the current plugin, under a private slot rather than the point token.
+   * Each call adds one contribution, so a plugin can contribute to the same point several times.
+   * Other plugins read it only through `ExtensionService` or `collect`, in an `OnExtensionsReady` hook, a request handler, or later.
+   * @example
+   * ```ts
+   * extensions.contribute(Greeter).toConstantValue({ greet: () => 'hello' });
+   * ```
+   * @param point The extension point to contribute to.
+   */
+  contribute<T>(point: ExtensionPoint<T>): KibanaBindToFluentSyntax<T>;
+
+  /**
+   * Registers a handler that will be called once after all plugins started against every contribution to the extension point from any enabled plugin, the current one included.
+   * Every plugin's `collect` handlers run before any plugin's `OnExtensionsReady` hook.
+   * A contribution that fails to build is skipped and logged with the plugin that contributed it.
+   * @example
+   * ```ts
+   * extensions.collect(Widget, WidgetRegistry, (context, widget, registry) => registry.register(widget));
+   * ```
+   * @param point The extension point to collect.
+   * @param dependencies Dependencies to resolve before calling the handler.
+   * @param handler The handler to perform an action with every contribution.
+   */
+  collect<T, A extends unknown[] = any[]>(
+    point: ExtensionPoint<T>,
+    ...args: [...dependencies: MapToResolvedValueInjectOptions<A>, handler: KibanaHandler<T, A>]
+  ): void;
 }
 
 /**
@@ -237,6 +296,10 @@ function resolveAsync<A extends unknown[]>(
   ) as Promise<A>;
 }
 
+function getMessage(reason: unknown): string {
+  return reason instanceof Error ? reason.message : String(reason);
+}
+
 function pop<H extends unknown[], L>(tuple: [...head: H, last: L]): [H, L] {
   return [tuple.slice(0, -1) as H, tuple[tuple.length - 1] as L];
 }
@@ -309,36 +372,78 @@ function toKibanaContainerModuleLoadOptions(
     };
   }
 
-  function createHook(
-    hook: ServiceIdentifier<(container: Container) => void>
-  ): KibanaContainerModuleLoadOptions['onSetup'] | KibanaContainerModuleLoadOptions['onStart'] {
-    return (serviceIdentifier, ...definition) => {
-      const [dependencies, handler] = pop(definition);
-
-      options
-        .bind(hook)
-        .toDynamicValue((context) => (container) => {
-          if (!container.isCurrentBound(serviceIdentifier)) {
-            return;
-          }
-          const kibanaResolutionContext = toKibanaResolutionContext(context);
-          const resolvedDependencies = resolveSync(context, dependencies);
-
-          container.getAll(serviceIdentifier).forEach((injectable) => {
-            handler(...([kibanaResolutionContext, injectable, ...resolvedDependencies] as const));
-          });
-        })
-        .inRequestScope();
-    };
+  function getCurrentBound<T>(container: Container, serviceIdentifier: ServiceIdentifier<T>): T[] {
+    return container.isCurrentBound(serviceIdentifier) ? container.getAll(serviceIdentifier) : [];
   }
+
+  function getContributions<T>(container: Container, point: ExtensionPoint<T>): T[] {
+    return container
+      .get(Contributions)(point)
+      .flatMap(({ plugin, resolve }) => {
+        try {
+          return [resolve()];
+        } catch (reason) {
+          const message = getMessage(reason);
+          container
+            .get(Logger, { optional: true })
+            ?.error(
+              `Skipped the "${point.description}" contribution from plugin "${plugin}" because it failed to build: ${message}`
+            );
+
+          return [];
+        }
+      });
+  }
+
+  function bindHook<T, A extends unknown[]>(
+    hook: ServiceIdentifier<(container: Container) => void>,
+    getInjectables: (container: Container) => T[],
+    definition: [...dependencies: MapToResolvedValueInjectOptions<A>, handler: KibanaHandler<T, A>]
+  ): void {
+    const [dependencies, handler] = pop(definition);
+
+    options
+      .bind(hook)
+      .toDynamicValue((context) => (container) => {
+        const injectables = getInjectables(container);
+        if (!injectables.length) {
+          return;
+        }
+        const kibanaResolutionContext = toKibanaResolutionContext(context);
+        const resolvedDependencies = resolveSync(context, dependencies);
+
+        injectables.forEach((injectable) => {
+          handler(...([kibanaResolutionContext, injectable, ...resolvedDependencies] as const));
+        });
+      })
+      .inRequestScope();
+  }
+
+  const onSetup: KibanaContainerModuleLoadOptions['onSetup'] = (serviceIdentifier, ...definition) =>
+    bindHook(OnSetup, (container) => getCurrentBound(container, serviceIdentifier), definition);
+
+  const onStart: KibanaContainerModuleLoadOptions['onStart'] = (serviceIdentifier, ...definition) =>
+    bindHook(OnStart, (container) => getCurrentBound(container, serviceIdentifier), definition);
+
+  const extensions: KibanaContainerModuleExtensions = {
+    contribute: <T>(point: ExtensionPoint<T>) => {
+      const slot: ServiceIdentifier<T> = Symbol(point.description);
+      options.bind(ExtensionContribution).toConstantValue({ point, slot });
+
+      return bind(slot);
+    },
+    collect: (point, ...definition) =>
+      bindHook(Collect, (container) => getContributions(container, point), definition),
+  };
 
   return {
     ...options,
     bind,
+    extensions,
     inject,
     onActivation,
-    onSetup: createHook(OnSetup),
-    onStart: createHook(OnStart),
+    onSetup,
+    onStart,
   };
 }
 

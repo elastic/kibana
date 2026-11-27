@@ -1,0 +1,89 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { CoreSetup, Plugin } from '@kbn/core/server';
+import { type ExtensionPoint, ExtensionService, OnExtensionsReady } from '@kbn/core-di';
+import {
+  type Greeter,
+  LookupBGreeter,
+  LookupBRequestGreeter,
+} from '@kbn/di-soft-dependencies-example-tokens';
+import { LOOKUP_B_DISABLED, PLUGIN_ID } from '../common';
+
+/** The greeting, `LOOKUP_B_DISABLED`, or `'throws'`, per point in the plugin lifecycle. */
+export interface ClassicConsumerStatus {
+  id: string;
+  setup: string;
+  start: string;
+  onReady: string;
+  initialize: string;
+  request: string;
+  requestGreeting: string;
+}
+
+export class ClassicConsumerPlugin implements Plugin {
+  private extensionService?: ExtensionService;
+  private readonly status: Omit<ClassicConsumerStatus, 'request' | 'requestGreeting'> = {
+    id: PLUGIN_ID,
+    setup: 'not run',
+    start: 'not run',
+    onReady: 'not run',
+    initialize: 'not run',
+  };
+
+  public setup(core: CoreSetup): void {
+    const container = core.injection.getContainer();
+    this.extensionService = container.get(ExtensionService);
+    this.status.setup = this.greetFromLookupB();
+    container.bind(OnExtensionsReady).toConstantValue(() => {
+      this.status.onReady = this.greetFromLookupB();
+    });
+
+    core.http.createRouter().get(
+      {
+        path: `/api/di_soft_deps/${PLUGIN_ID}`,
+        validate: false,
+        options: { access: 'internal' },
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out of authorization as it is a developer example endpoint.',
+          },
+        },
+      },
+      async (_context, _request, response) => {
+        const body: ClassicConsumerStatus = {
+          ...this.status,
+          request: this.greetFromLookupB(),
+          requestGreeting: this.greetFromLookupB(LookupBRequestGreeter),
+        };
+        return response.ok({ body });
+      }
+    );
+  }
+
+  public start(): void {
+    this.status.start = this.greetFromLookupB();
+  }
+
+  public async initialize(): Promise<void> {
+    this.status.initialize = this.greetFromLookupB();
+  }
+
+  // ExtensionService.get throws until every plugin has started, so setup and start record 'throws'.
+  // A classic route handler runs outside a DI request scope, so the request greeter throws there too.
+  private greetFromLookupB(point: ExtensionPoint<Greeter> = LookupBGreeter): string {
+    try {
+      return this.extensionService?.get(point)?.greet() ?? LOOKUP_B_DISABLED;
+    } catch {
+      return 'throws';
+    }
+  }
+}

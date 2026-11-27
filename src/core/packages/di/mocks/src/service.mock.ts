@@ -12,10 +12,16 @@ import { once } from 'lodash';
 import {
   type CoreDiServiceSetup,
   type CoreDiServiceStart,
+  type ExtensionPoint,
+  ExtensionService,
   Scope,
   type ScopedContainer,
 } from '@kbn/core-di';
 import {
+  type Contribution,
+  Contributions,
+  createExtensionService,
+  ExtensionContribution,
   type CoreInjectionService,
   type InternalCoreDiServiceSetup,
   type InternalCoreDiServiceStart,
@@ -28,12 +34,20 @@ function create(): jest.Mocked<PublicMethodsOf<CoreInjectionService>> {
   return lazyObject({
     setup: jest.fn(createInternalSetupContract),
     start: jest.fn(createInternalStartContract),
+    ready: jest.fn(),
   });
 }
 
 function createContainer(options?: ContainerOptions) {
   const container = new Container({ defaultScope: 'Singleton', ...options });
   container.bind(Container).toConstantValue(container);
+  const getContributions = <T>(point: ExtensionPoint<T>): Array<Contribution<T>> =>
+    container
+      .getAll(ExtensionContribution, { optional: true })
+      .filter((contribution) => contribution.point === point)
+      .map(({ slot }) => ({ plugin: 'mock', resolve: () => container.get(slot) as T }));
+  container.bind(Contributions).toConstantValue(getContributions);
+  container.bind(ExtensionService).toConstantValue(createExtensionService(getContributions));
 
   for (const method of [
     'bind',
@@ -89,7 +103,7 @@ function createInternalSetupContract(): jest.MockedObjectDeep<InternalCoreDiServ
 }
 
 function createInternalStartContract(): jest.MockedObjectDeep<InternalCoreDiServiceStart> {
-  return createStartContract();
+  return Object.assign(createStartContract(), { ready: jest.fn() });
 }
 
 /**

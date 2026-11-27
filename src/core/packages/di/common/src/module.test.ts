@@ -8,17 +8,30 @@
  */
 
 import { Container, LazyServiceIdentifier, type ServiceIdentifier } from 'inversify';
-import { OnSetup, OnStart } from './services/plugin';
+import { createExtensionPoint } from './extension_point';
+import { Logger } from './services/logging';
+import { OnExtensionsReady, OnSetup, OnStart } from './services/plugin';
 import { KibanaContainerModule, type KibanaContainerModuleLoadOptions } from './module';
 
-function trigger(hook: typeof OnSetup | typeof OnStart, container: Container): void {
-  return container.getAll(hook, { chained: true }).forEach((fn) => fn(container));
+type Hook = ServiceIdentifier<(container: Container) => void>;
+
+function trigger(hook: Hook, container: Container): void {
+  return container.getAll(hook, { chained: true, optional: true }).forEach((fn) => fn(container));
 }
 
 describe('KibanaContainerModule', () => {
   const token = Symbol.for('something');
   const dependencyToken = Symbol.for('dependency') as ServiceIdentifier<string>;
   const asyncDependencyToken = Symbol.for('async');
+  const point = createExtensionPoint<string>('test.Point');
+  const Collect = Symbol.for('core.di.Collect') as Hook;
+  const Contributions = Symbol.for('core.di.Contributions') as ServiceIdentifier<
+    (point: symbol) => Array<{ plugin: string; resolve(): unknown }>
+  >;
+  const ExtensionContribution = Symbol.for('core.di.ExtensionContribution') as ServiceIdentifier<{
+    point: symbol;
+    slot: ServiceIdentifier;
+  }>;
 
   let container: Container;
   let options: KibanaContainerModuleLoadOptions;
@@ -200,6 +213,89 @@ describe('KibanaContainerModule', () => {
 
       expect(() => trigger(OnStart, container)).not.toThrow();
       expect(onStartHandler).toHaveBeenCalledWith(expect.anything(), 'value', 'something');
+    });
+  });
+
+  describe('extensions.contribute', () => {
+    it('should record one contribution per call, each bound to its own private slot', () => {
+      options.extensions.contribute(point).toConstantValue('value1');
+      options.extensions.contribute(point).toConstantValue('value2');
+
+      const records = container.getAll(ExtensionContribution);
+      expect(records.map((record) => record.point)).toEqual([point, point]);
+      expect(records.map(({ slot }) => container.get(slot))).toEqual(['value1', 'value2']);
+    });
+
+    it('should not bind the extension point token or any registered symbol', () => {
+      options.extensions.contribute(point).toConstantValue('value');
+
+      const [{ slot }] = container.getAll(ExtensionContribution);
+      expect(typeof slot === 'symbol' && Symbol.keyFor(slot)).toBeUndefined();
+      expect(container.isBound(point)).toBe(false);
+    });
+  });
+
+  describe('extensions.collect', () => {
+    let contributions: Array<() => string>;
+    let logger: { error: jest.Mock };
+
+    beforeEach(() => {
+      contributions = [];
+      logger = { error: jest.fn() };
+      container
+        .bind(Contributions)
+        .toConstantValue((requested) =>
+          requested === point
+            ? contributions.map((resolve) => ({ plugin: 'contributor', resolve }))
+            : []
+        );
+      container.bind(dependencyToken).toConstantValue('something');
+      container.bind(Logger as ServiceIdentifier).toConstantValue(logger);
+    });
+
+    it('should call the handler with every contribution only when its hook runs', () => {
+      const handler = jest.fn();
+      options.extensions.collect(point, dependencyToken, handler);
+      contributions.push(
+        () => 'value1',
+        () => 'value2'
+      );
+
+      trigger(OnSetup, container);
+      trigger(OnStart, container);
+      trigger(OnExtensionsReady, container);
+      expect(handler).not.toHaveBeenCalled();
+
+      trigger(Collect, container);
+      expect(handler).toHaveBeenCalledTimes(2);
+      expect(handler).toHaveBeenNthCalledWith(1, expect.anything(), 'value1', 'something');
+      expect(handler).toHaveBeenNthCalledWith(2, expect.anything(), 'value2', 'something');
+    });
+
+    it('should skip and log a contribution that fails to build and pass the others', () => {
+      const handler = jest.fn();
+      options.extensions.collect(point, handler);
+      contributions.push(
+        () => {
+          throw new Error('boom');
+        },
+        () => 'healthy'
+      );
+
+      trigger(Collect, container);
+      expect(handler).toHaveBeenCalledTimes(1);
+      expect(handler).toHaveBeenCalledWith(expect.anything(), 'healthy');
+      expect(logger.error).toHaveBeenCalledWith(
+        'Skipped the "test.Point" contribution from plugin "contributor" because it failed to build: boom'
+      );
+    });
+
+    it('should not call the handler when nothing is contributed', () => {
+      const handler = jest.fn();
+      options.extensions.collect(point, handler);
+
+      expect(() => trigger(Collect, container)).not.toThrow();
+      expect(handler).not.toHaveBeenCalled();
     });
   });
 

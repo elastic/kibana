@@ -75,10 +75,14 @@ export class Greeting {
   }
 }
 
-export const module = new ContainerModule(({ bind }) => {
+const pluginModule = new ContainerModule(({ bind }) => {
   bind(Greeting).toSelf();
 });
+
+export { pluginModule as module };
 ```
+
+Export the module under a different local name: a top-level `const module` collides with the CommonJS `module` variable and the plugin fails to load.
 
 The service should now be available in other container modules.
 
@@ -123,7 +127,10 @@ In this case, the contract returned from the classic definition has precedence o
 
 
 ### Lifecycle Hooks
-It is possible to subscribe to the lifecycle events and run some initialization logic. This can be done via binding `OnSetup` or `OnStart` callbacks. It is allowed to bind multiple of the same kind.
+It is possible to subscribe to the lifecycle events and run some initialization logic. This can be done via binding `OnSetup`, `OnStart`, or `OnExtensionsReady` callbacks. It is allowed to bind multiple of the same kind.
+
+`OnSetup` and `OnStart` run when the plugin sets up and starts.
+`OnExtensionsReady` runs once per plugin after every plugin has started and every plugin's `extensions.collect` handlers have run, so it is the first hook where [extension points](#extension-points) resolve.
 
 There is no dedicated teardown hook alike `stop` in the classic plugins.
 That's done in favor of the built-in [deactivation](https://inversify.io/docs/fundamentals/lifecycle/deactivation/) lifecycle hook.
@@ -145,6 +152,107 @@ export const module = new ContainerModule(({ bind }) => {
   );
 });
 ```
+
+### Extension Points
+A plugin can use what another plugin provides when that plugin is enabled and keep working when it is disabled, with no `requiredPlugins` or `optionalPlugins` entry.
+Without a manifest edge, two plugins can use each other without forming a circular dependency.
+Put the shared extension points and types in a separate package with no runtime code, so the TypeScript project references stay acyclic too.
+
+An extension point is a token created with `createExtensionPoint` from `@kbn/core-di`, typed with its contributions.
+Two extension points with the same id are the same point, so the id must be unique across Kibana:
+```ts
+import { createExtensionPoint } from '@kbn/core-di';
+
+export interface Greeter {
+  greet(): string;
+}
+
+export const Greeter = createExtensionPoint<Greeter>('greeter.Greeter');
+```
+
+`extensions.contribute` from `KibanaContainerModule` adds one contribution and returns the usual binding syntax.
+The contribution stays private to the plugin that contributes it, and other plugins reach it only through `ExtensionService` or `extensions.collect`.
+Register contributions with `extensions.contribute(point)`, not `bind(point)`. A plain `bind` stays local to the plugin and other plugins never see it.
+Each call adds one contribution, so a plugin can contribute to the same point several times:
+```ts
+import { KibanaContainerModule } from '@kbn/core-di';
+import { Greeter } from '@kbn/greeter-extension-points';
+
+const pluginModule = new KibanaContainerModule(({ extensions }) => {
+  extensions.contribute(Greeter).toConstantValue({ greet: () => 'hello' });
+});
+
+export { pluginModule as module };
+```
+
+A consumer reads a contribution through `ExtensionService`.
+`get` returns `undefined` when no enabled plugin contributes, and throws when more than one does, naming the contributing plugins:
+```ts
+import { inject, injectable } from 'inversify';
+import { ExtensionService } from '@kbn/core-di';
+import { Greeter } from '@kbn/greeter-extension-points';
+
+@injectable()
+class Welcome {
+  constructor(@inject(ExtensionService) private readonly extensionService: ExtensionService) {}
+
+  run() {
+    return this.extensionService.get(Greeter)?.greet() ?? 'hello from the fallback';
+  }
+}
+```
+
+`getAll` returns every contribution, the consumer's own included, and throws when one of them fails to build, naming the extension point and the plugin that contributed it.
+A classic plugin gets the service with `core.injection.getContainer().get(ExtensionService)` and binds `OnExtensionsReady` on the same container.
+
+A registry owner collects every contribution once all plugins started with `extensions.collect`, which has the same signature as `onStart`.
+`collect` calls the handler once for every contribution from any enabled plugin, the owner's own included.
+Contributors only contribute to the owner's extension point and never reference the owner plugin:
+```ts
+import { KibanaContainerModule } from '@kbn/core-di';
+import { Widget } from '@kbn/widget-extension-points';
+import { WidgetRegistry } from './widget_registry';
+
+const pluginModule = new KibanaContainerModule(({ bind, extensions }) => {
+  bind(WidgetRegistry).toSelf().inSingletonScope();
+  extensions.collect(Widget, WidgetRegistry, (context, widget, registry) => registry.register(widget));
+});
+
+export { pluginModule as module };
+```
+
+Kibana runs every plugin's `collect` handlers first, then every plugin's `OnExtensionsReady` hooks.
+So a consumer that reads a registry in its `OnExtensionsReady` hook sees every contribution, even when the consumer was set up before the owner.
+
+If a contribution fails to build, `collect` skips it and logs an error through the owner's `Logger`.
+The message names the extension point and the plugin that contributed it.
+The other contributions, including other ones from the same plugin, still reach the handler.
+
+Extension points resolve only after every plugin has started.
+If something reads your registry before plugins start, for example saved objects migrations on the server, extension points do not fit it, and its contributors keep `requiredPlugins`.
+
+Plugins are not ordered relative to each other without a manifest edge, and a contribution can depend on start-only services such as `CoreStart('http')` of the plugin that contributes it.
+So `ExtensionService` throws when it is used before every plugin has started.
+Inject it anywhere, but call `get` and `getAll` in an `OnExtensionsReady` hook, in request handlers, or later.
+Contributions are built in the scope of the plugin that contributes them.
+Inside a request, that is the contributing plugin's request scope, so a contribution can inject `Request`, `Response`, `ApplicationParameters`, or anything else bound with `Scope.expose`, like any other service.
+The consumer does not pass the request to `get` or `getAll`:
+```ts
+import { KibanaContainerModule } from '@kbn/core-di';
+import { Request } from '@kbn/core-di-server';
+import { RequestGreeter } from '@kbn/greeter-extension-points';
+
+const pluginModule = new KibanaContainerModule(({ extensions }) => {
+  extensions
+    .contribute(RequestGreeter)
+    .toResolvedValue((request) => ({ greet: () => `hello from ${request.url.pathname}` }), [Request])
+    .inRequestScope();
+});
+```
+
+Bind a contribution that injects a request-scoped value with `.inRequestScope()`. A singleton contribution is built once and keeps the values of the first request.
+The consumer that reads it must be request-scoped too, such as a route or a service bound with `.inRequestScope()`. A singleton consumer first built inside a request keeps that request's values in later requests, and throws once that request ends.
+Outside a request, for example in an `OnExtensionsReady` hook or through `core.injection.getContainer()`, such a contribution throws, naming the extension point and the plugin that contributed it, and `collect` skips and logs it.
 
 ### Existing Plugins
 The `PluginSetup` and `PluginStart` injection tokens can be used to inject existing plugins without migrating or adapting them. This is similar to accessing plugin dependencies from the lifecycle methods.
