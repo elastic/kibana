@@ -345,15 +345,16 @@ const failedDayCount = (suite: FlakySuite, { thresholds, window }: FlakyTestRepo
   return new Set(days.flatMap((testDays) => [...(testDays?.failed ?? [])])).size;
 };
 
-/** `2 pipelines, 2 branches and 32 PRs` the suite's file failed on; pipelines only for older reports. */
-const failureSpread = ({ byPipeline }: FlakySuite): string | undefined => {
-  const failed = byPipeline.filter(({ failedBuilds }) => failedBuilds > 0);
-  const refs = failed.every(({ failedBranchNames }) => failedBranchNames !== undefined)
-    ? [...new Set(failed.flatMap(({ failedBranchNames }) => failedBranchNames ?? []))]
-    : [];
+/** `2 pipelines, 2 branches and 32 PRs` the suite's tests failed on; none for older reports. */
+const failureSpread = ({ tests }: FlakySuite): string | undefined => {
+  const errors = tests.flatMap((test) => test.errors);
+  const pipelines = new Set(
+    errors.flatMap(({ byPipeline }) => byPipeline.map(({ pipeline }) => pipeline))
+  );
+  const refs = [...new Set(errors.flatMap(({ branches }) => branches))];
   const pullRequests = refs.filter(isPullRequestRef).length;
   const counts: Array<[count: number, singular: string, pluralForm?: string]> = [
-    [failed.length, 'pipeline'],
+    [pipelines.size, 'pipeline'],
     [refs.length - pullRequests, 'branch', 'branches'],
     [pullRequests, 'PR'],
   ];

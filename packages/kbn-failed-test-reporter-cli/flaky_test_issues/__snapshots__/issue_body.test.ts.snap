@@ -72,7 +72,7 @@ Possibly related: #7, #8.
 `;
 
 exports[`renderFlakySuiteIssueBody renders a single-test suite 1`] = `
-"1 test in the [\`Default status alert\`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts) suite appears to be flaky. It failed on **5 of the past 7&nbsp;days**, across 3 pipelines:
+"1 test in the [\`Default status alert\`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts) suite appears to be flaky. It failed on **5 of the past 7&nbsp;days**, across 2 pipelines, 1 branch and 1 PR:
 
 |  | Test | Flaky branches | Past&nbsp;7&nbsp;days |
 |---|---|---|---|

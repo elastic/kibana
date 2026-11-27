@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FlakyTestBranchStats, FlakyTestPipelineStats } from '@kbn/scout-reporting';
+import type {
+  FlakyTestBranchStats,
+  FlakyTestEntry,
+  FlakyTestFileStats,
+} from '@kbn/scout-reporting';
 import { getIssueMetadata, updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
 import {
   FLAKY_TEST_SUITE_METADATA_PREFIX,
@@ -258,8 +262,7 @@ describe('renderFlakySuiteIssueBody', () => {
     expect(renderFlakySuiteIssueBody(single.suite, { report: single.report })).toContain(
       [
         `1 test in the [\`Default status alert\`](https://github.com/elastic/kibana/blob/main/${SUITE_PATH}) suite appears to be flaky. ` +
-          // one of its pipelines comes from a report written before the branch names were recorded
-          'It failed on **5 of the past 7&nbsp;days**, across 3 pipelines:',
+          'It failed on **5 of the past 7&nbsp;days**, across 2 pipelines, 1 branch and 1 PR:',
         '',
         '|  | Test | Flaky branches | Past&nbsp;7&nbsp;days |',
       ].join('\n')
@@ -297,7 +300,7 @@ describe('renderFlakySuiteIssueBody', () => {
     const body = renderFlakySuiteIssueBody(suite, { report });
 
     expect(body).toContain(
-      'suite appear to be flaky. They failed on **3 of the past 7&nbsp;days**:'
+      'suite appear to be flaky. They failed on **3 of the past 7&nbsp;days**, across'
     );
     expect(body).toContain(
       `| another test | **\`main\` 5%&nbsp;(5&nbsp;/&nbsp;100)** | ${[
@@ -312,34 +315,66 @@ describe('renderFlakySuiteIssueBody', () => {
     );
   });
 
-  it('counts the pipelines, branches and PRs the file failed on, leaving out the ones it has none of', () => {
-    const opening = (byPipeline: FlakyTestPipelineStats[]): string => {
-      const { testId } = flakyTest();
-      const report = flakyReport(
-        [flakyTest()],
-        [{ filePath: SUITE_PATH, framework: 'playwright', testIds: [testId], byPipeline }]
-      );
+  it('counts the pipelines, branches and PRs its own tests failed on, leaving out the ones it has none of', () => {
+    const [error] = flakyTest().errors;
+    const opening = (tests: FlakyTestEntry[], files: FlakyTestFileStats[] = []): string => {
+      const report = flakyReport(tests, files);
       const [suite] = groupIntoSuites(report.flaky, report.files);
       return renderFlakySuiteIssueBody(suite, { report }).split('\n')[0];
     };
 
-    // a branch that failed on two pipelines counts once, a pipeline without failures not at all
+    // a pipeline or branch that two tests failed on counts once
     expect(
       opening([
-        pipelineStats({ failedBranchNames: ['8.19', 'main'] }),
-        pipelineStats({
-          pipeline: 'kibana-pull-request',
-          failedBranchNames: ['main', 'pull/1234/head', 'someone:fix-it'],
+        flakyTest({
+          testId: 'a',
+          errors: [{ ...error, branches: ['8.19', 'main', 'someone:fix-it'] }],
         }),
-        pipelineStats({ pipeline: 'kibana-fips', failedBuilds: 0, failedBranchNames: [] }),
+        flakyTest({
+          testId: 'b',
+          title: 'another test',
+          errors: [
+            {
+              ...error,
+              byPipeline: [
+                { pipeline: 'kibana-fips', buildsCount: 1, buildIds: ['fips-1'] },
+                { pipeline: 'kibana-on-merge', buildsCount: 1, buildIds: ['merge-1'] },
+              ],
+              branches: ['main', 'pull/1234/head'],
+            },
+          ],
+        }),
       ])
-    ).toContain('**5 of the past 7&nbsp;days**, across 2 pipelines, 2 branches and 2 PRs:');
-    expect(opening([pipelineStats()])).toContain('days**, across 1 pipeline and 1 branch:');
-    // a report written before the branch names were recorded
-    expect(opening([pipelineStats({ failedBranchNames: undefined })])).toContain(
-      'days**, across 1 pipeline:'
-    );
-    expect(opening([])).toContain('days**:');
+    ).toContain('**5 of the past 7&nbsp;days**, across 3 pipelines, 2 branches and 2 PRs:');
+
+    // what the other suites of its file failed on is not counted
+    const onMain = {
+      ...error,
+      byPipeline: [{ pipeline: 'kibana-on-merge', buildsCount: 1, buildIds: ['merge-1'] }],
+      branches: ['main'],
+    };
+    expect(
+      opening(
+        [flakyTest({ errors: [onMain] })],
+        [
+          {
+            filePath: SUITE_PATH,
+            framework: 'playwright',
+            testIds: [flakyTest().testId, 'in-another-suite'],
+            byPipeline: [
+              pipelineStats(),
+              pipelineStats({
+                pipeline: 'kibana-pull-request',
+                failedBranchNames: ['someone:fix-it'],
+              }),
+            ],
+          },
+        ]
+      )
+    ).toContain('days**, across 1 pipeline and 1 branch:');
+
+    // a report written before the errors were recorded
+    expect(opening([flakyTest({ errors: [] })])).toContain('days**:');
   });
 
   it("lists every branch of the suite, failing ones first with the worst test's counts and the newest failure's job", () => {

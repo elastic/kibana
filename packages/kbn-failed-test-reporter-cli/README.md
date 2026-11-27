@@ -118,7 +118,7 @@ first and at most `--max-new-issues` per run (default 10). The issue is titled
 `Flaky <Framework> [UI|API] suite: <suite title>` (`Flaky Scout API suite: …`,
 `Flaky Jest integration suite: …`) and labelled `failed-test` plus the owning teams' labels (in
 `elastic/kibana` only). The body opens with how many days of the report window the suite's tests
-failed on and how many pipelines, branches and PRs its file failed on, then a row per flaky test: a
+failed on and how many pipelines, branches and PRs they failed on, then a row per flaky test: a
 Kibana logo button that opens its
 [Single test history](https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history), the
 branch it qualified on, and a square per day of the window, oldest first: 🟥 for a day it failed
