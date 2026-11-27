@@ -18,6 +18,7 @@ project:
   sourceRoot: packages/kbn-check-saved-objects-cli
 dependsOn:
   - '@kbn/core-saved-objects-base-server-internal'
+  - '@kbn/core-elasticsearch-server'
   - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/core-plugins-server-internal'
   - '@kbn/dev-cli-runner'
