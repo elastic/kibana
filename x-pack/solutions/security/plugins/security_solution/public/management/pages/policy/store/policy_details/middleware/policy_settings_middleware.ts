@@ -43,7 +43,7 @@ export const policySettingsMiddlewareRunner: MiddlewareRunner = async (
     try {
       policyItem = (await sendGetPackagePolicy(http, id)).item;
       // sets default user notification message if policy config message is empty.
-      // The per-OS form makes each OS's message independently editable, so each one defaults
+      // The policy form makes each OS's message independently editable, so each one defaults
       // from its own value; defaulting them together would overwrite a message the user set on
       // macOS or Linux whenever the Windows one is empty.
       for (const os of [
@@ -57,9 +57,9 @@ export const policySettingsMiddlewareRunner: MiddlewareRunner = async (
         }
       }
 
-      // Only the per-OS form exposes the macOS and Linux ransomware notifications, so their
-      // messages are defaulted alongside it. Optional: a policy predating either OS's ransomware
-      // protection has no popup branch to default.
+      // The macOS and Linux ransomware notifications are editable too, so their messages are
+      // defaulted as well. Optional: a policy predating either OS's ransomware protection has no
+      // popup branch to default.
       for (const os of [PolicyOperatingSystem.mac, PolicyOperatingSystem.linux] as const) {
         const ransomwarePopup = policyItem.inputs[0].config.policy.value[os].popup.ransomware;
 

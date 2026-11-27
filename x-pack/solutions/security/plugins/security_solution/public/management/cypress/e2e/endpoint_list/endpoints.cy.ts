@@ -103,7 +103,7 @@ describe('Endpoints page', { tags: ['@ess', '@serverless'] }, () => {
     );
 
     // make a change to enable save
-    cy.getByTestSubj('endpointPolicyForm-perOsMalware-windows-blocklist-enableDisableSwitch')
+    cy.getByTestSubj('endpointPolicyForm-malware-windows-blocklist-enableDisableSwitch')
       .should('be.visible')
       .as('blocklistSwitch');
     cy.get('@blocklistSwitch').click();
