@@ -46,7 +46,8 @@ jest.mock('../../hooks/use_kibana', () => ({
 }));
 
 const conversationId = 'conv-1';
-const vars = { message: 'hello', conversationId, agentId: 'agent-1' };
+const streamId = 'stream-1';
+const vars = { message: 'hello', conversationId, agentId: 'agent-1', streamId };
 
 const started = createExecutionStartedEvent({
   execution_id: 'round-1::execution',
@@ -139,7 +140,9 @@ describe('useSendMessageMutation', () => {
       source.error(Object.assign(new Error('The operation was aborted.'), { name: 'AbortError' }));
     });
 
-    await waitFor(() => expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId));
+    await waitFor(() =>
+      expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId, streamId)
+    );
     expect(mockGet).not.toHaveBeenCalled();
     expect(resetAttachments).not.toHaveBeenCalled();
     expect(bindings.clearPendingMessage).not.toHaveBeenCalled();
@@ -168,7 +171,7 @@ describe('useSendMessageMutation', () => {
     act(() => streamToCompletion(source));
 
     await waitFor(() => expect(bindings.clearPendingMessage).toHaveBeenCalledWith(conversationId));
-    expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId);
+    expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId, streamId);
     expect(conversationStreamService.getSnapshot(conversationId)).toEqual([]);
   });
 
@@ -180,7 +183,9 @@ describe('useSendMessageMutation', () => {
     await waitFor(() => expect(mockChat).toHaveBeenCalled());
     act(() => streamToCompletion(source));
 
-    await waitFor(() => expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId));
+    await waitFor(() =>
+      expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId, streamId)
+    );
     await waitFor(() => expect(mockGet).toHaveBeenCalled());
     await act(async () => {});
     expect(bindings.clearPendingMessage).not.toHaveBeenCalled();
@@ -224,7 +229,9 @@ describe('useSendMessageMutation', () => {
       source.error(new Error('Converse request was aborted'));
     });
 
-    await waitFor(() => expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId));
+    await waitFor(() =>
+      expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId, streamId)
+    );
     expect(mockGet).toHaveBeenCalledTimes(1);
     await waitFor(() => expect(conversationStreamService.getSnapshot(conversationId)).toEqual([]));
   });
@@ -292,7 +299,7 @@ describe('useSendMessageMutation', () => {
 
     await waitFor(() => expect(bindings.clearPendingMessage).toHaveBeenCalledWith(conversationId));
     expect(mockGet).toHaveBeenCalledTimes(1);
-    expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId);
+    expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId, streamId);
     expect(conversationStreamService.getSnapshot(conversationId)).toEqual([]);
     expect(mockAddDanger).not.toHaveBeenCalled();
   });

@@ -45,7 +45,8 @@ export interface EntityStoreWriteTargets {
  */
 export async function resolveEntityStoreWriteTargets(
   esClient: ElasticsearchClient,
-  namespace: string
+  namespace: string,
+  signal?: AbortSignal
 ): Promise<EntityStoreWriteTargets> {
   const neutral: EntityStoreWriteTargets = {
     latestIndex: getLatestEntitiesIndexName(namespace),
@@ -53,7 +54,7 @@ export async function resolveEntityStoreWriteTargets(
     metadataDataStream: getMetadataEntitiesDataStreamName(namespace),
   };
 
-  if (await hasCollidingNeutralNamespaceAssets(esClient, namespace)) {
+  if (await hasCollidingNeutralNamespaceAssets(esClient, namespace, signal)) {
     return neutral;
   }
 
@@ -62,9 +63,9 @@ export async function resolveEntityStoreWriteTargets(
   const legacyMetadata = getLegacySecurityMetadataEntitiesDataStreamName(namespace);
 
   const [latestIsLegacy, updatesIsLegacy, metadataIsLegacy] = await Promise.all([
-    isConcreteIndexOrDataStream(esClient, legacyLatest),
-    isConcreteIndexOrDataStream(esClient, legacyUpdates),
-    isConcreteIndexOrDataStream(esClient, legacyMetadata),
+    isConcreteIndexOrDataStream(esClient, legacyLatest, signal),
+    isConcreteIndexOrDataStream(esClient, legacyUpdates, signal),
+    isConcreteIndexOrDataStream(esClient, legacyMetadata, signal),
   ]);
 
   return {

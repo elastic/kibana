@@ -72,8 +72,12 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     if (onRegisterCallbacks) {
       onRegisterCallbacks({
         updateProps: (newProps) => setCurrentProps(newProps),
-        resetBrowserApiTools: () =>
-          setCurrentProps((prevProps) => ({ ...prevProps, browserApiTools: undefined })),
+        resetChatConfig: () =>
+          setCurrentProps((prevProps) => ({
+            ...prevProps,
+            browserApiTools: undefined,
+            conversationStarters: undefined,
+          })),
         addAttachment: (attachment) =>
           setCurrentProps((prevProps) => ({
             ...prevProps,
@@ -279,6 +283,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       initialMessage: currentProps.initialMessage,
       autoSendInitialMessage: currentProps.autoSendInitialMessage ?? false,
       greetingMessage: currentProps.greetingMessage,
+      conversationStarters: currentProps.conversationStarters,
       onSubmit: currentProps.onSubmit,
       resetInitialMessage,
       browserApiTools: currentProps.browserApiTools,
@@ -297,6 +302,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       currentProps.initialMessage,
       currentProps.autoSendInitialMessage,
       currentProps.greetingMessage,
+      currentProps.conversationStarters,
       currentProps.onSubmit,
       currentProps.browserApiTools,
       currentProps.attachments,

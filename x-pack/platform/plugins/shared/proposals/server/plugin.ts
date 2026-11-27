@@ -20,6 +20,7 @@ import { initializeManagedWorkflows } from './managed_workflows/initialize_manag
 import { registerRoutes } from './routes/register_routes';
 import { createProposalCreator } from './services/create_proposal';
 import { ProposalsService } from './services/proposals_service';
+import { ActionCatalog } from './services/action_catalog';
 import { createProposalPrivilegesChecker } from './services/check_proposal_privileges';
 import type { ProposalPrivilegesChecker } from './services/check_proposal_privileges';
 import { createProposalUserResolver } from './services/resolve_proposal_user';
@@ -175,7 +176,16 @@ export class ProposalsPlugin
       );
     });
 
+    const actionCatalog = new ActionCatalog(
+      () => ({
+        getWorkflows: (params, spaceId, request) =>
+          this.requireWorkflowsApi().getWorkflows(params, spaceId, { request }),
+      }),
+      this.logger
+    );
+
     return {
+      listActions: (spaceId, request, options) => actionCatalog.list(spaceId, request, options),
       getProposalsService: () => this.requireProposalsService(),
       getProposalPrivileges: () => this.requireProposalPrivileges(),
       createProposal: createProposalCreator({

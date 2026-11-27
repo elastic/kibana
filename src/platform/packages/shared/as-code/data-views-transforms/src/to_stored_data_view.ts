@@ -11,6 +11,7 @@ import type { DataViewSpec } from '@kbn/data-views-types';
 import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
   type AsCodeDataView,
+  type AsCodeDataViewSpec,
   type AsCodeSavedDataView,
 } from '@kbn/as-code-data-views-schema';
 import {
@@ -20,8 +21,8 @@ import {
 } from './to_stored_fields';
 
 // Function overrides to better type the return value depending on the input type
+export function toStoredDataView(dataView: AsCodeDataViewSpec | AsCodeSavedDataView): DataViewSpec;
 export function toStoredDataView(dataView: AsCodeDataView): string | DataViewSpec;
-export function toStoredDataView(dataView: AsCodeSavedDataView): DataViewSpec;
 
 /**
  * Convert an as-code data view back to a stored search-source `index` value
@@ -60,7 +61,7 @@ export function toStoredDataView(
 function isSavedDataView(
   dataView: AsCodeDataView | AsCodeSavedDataView
 ): dataView is AsCodeSavedDataView {
-  return 'id' in dataView;
+  return 'id' in dataView || 'spaces' in dataView;
 }
 
 function getSavedDataViewFields(
@@ -69,5 +70,6 @@ function getSavedDataViewFields(
   if (!isSavedDataView(dataView)) return {};
   return {
     id: dataView.id,
+    ...(dataView.spaces !== undefined && { namespaces: dataView.spaces }),
   };
 }

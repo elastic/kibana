@@ -63,3 +63,14 @@ export type TiledSingleLayerVectorSourceDescriptor = z.output<
 >;
 export type JoinSourceDescriptor = z.output<typeof joinSourceSchema>;
 export type SourceDescriptor = z.output<typeof sourceSchema>;
+
+// The discriminated part of SourceDescriptor: members with a literal `type`, without the
+// fallback member that accepts any `type` string and any key. The fallback breaks narrowing
+// on `type` and widens keyof to string.
+export type DiscriminatedSourceDescriptor = SourceDescriptor extends infer T
+  ? T extends unknown
+    ? string extends keyof T
+      ? never
+      : T
+    : never
+  : never;

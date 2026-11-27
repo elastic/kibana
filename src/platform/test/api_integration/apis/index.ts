@@ -18,7 +18,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     // short_url migrated to Scout: src/platform/plugins/shared/share/test/scout/api/tests/*_short_url.spec.ts
     // suggestions migrated to Scout: src/platform/plugins/shared/kql/test/scout/api/tests/value_suggestions*.spec.ts
     // status migrated to Scout: src/core/test/scout/api/tests/status.spec.ts
-    loadTestFile(require.resolve('./stats'));
+    // stats migrated to Scout: src/platform/plugins/shared/usage_collection/test/scout/api/tests/stats.spec.ts
     // ui_metric migrated to Scout: src/platform/plugins/shared/usage_collection/test/scout/api/tests/ui_metric.spec.ts
     loadTestFile(require.resolve('./ui_counters'));
     loadTestFile(require.resolve('./telemetry'));

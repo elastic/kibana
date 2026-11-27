@@ -8,6 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { SourceFilter } from '../../../common/api/unified_history/types';
 import { buildSpaceIdFilter } from '../../utils/build_space_id_filter';
+import { buildSourceClause } from './resolve_source';
 
 export type SortValues = Array<string | number>;
 
@@ -71,17 +72,16 @@ export const buildLiveActionsQuery = ({
   }
 
   if (activeFilters) {
-    const wantsLive = activeFilters.has('live');
-    const wantsRule = activeFilters.has('rule');
-
-    if (wantsRule && !wantsLive) {
-      // Rule-only: keep actions that have alert_ids
-      filters.push({ exists: { field: 'alert_ids' } });
-    } else if (wantsLive && !wantsRule) {
-      // Live-only: exclude actions that have alert_ids
-      filters.push({ bool: { must_not: { exists: { field: 'alert_ids' } } } });
+    const liveSources = ['live', 'rule', 'workflow'] as const;
+    const selectedSources = liveSources.filter((source) => activeFilters.has(source));
+    if (selectedSources.length > 0 && selectedSources.length < liveSources.length) {
+      filters.push({
+        bool: {
+          should: selectedSources.map(buildSourceClause),
+          minimum_should_match: 1,
+        },
+      });
     }
-    // Both live+rule selected (or neither, which shouldn't reach here): no filter needed
   }
 
   return {

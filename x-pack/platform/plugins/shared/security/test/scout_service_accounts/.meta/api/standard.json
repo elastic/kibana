@@ -1,9 +1,48 @@
 {
-  "sha1": "959d4c859b9da9618dc48008778997e2ead2791f",
+  "sha1": "029a55aea5e2895a43827dac660eae74738274c3",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "0b7abb3917a2dfb-c650d42226c5a04",
+      "title": "Bulk update Elasticsearch service account workload bindings binds, rebinds and unbinds several workloads, each of which runs as its account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/bulk_update_workload_bindings.spec.ts",
+        "line": 108,
+        "column": 7
+      }
+    },
+    {
+      "id": "0b7abb3917a2dfb-1b3b5363fb3ccc3",
+      "title": "Bulk update Elasticsearch service account workload bindings refuses every change of a caller without manage_security, and audits each refusal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/bulk_update_workload_bindings.spec.ts",
+        "line": 195,
+        "column": 23
+      }
+    },
+    {
+      "id": "0b7abb3917a2dfb-dfb93814de247b3",
+      "title": "Bulk update Elasticsearch service account workload bindings changes nothing when two changes name the same workload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/bulk_update_workload_bindings.spec.ts",
+        "line": 272,
+        "column": 9
+      }
+    },
     {
       "id": "9c74fe5c346746e-5cff0607f7ce78a",
       "title": "Create Elasticsearch service accounts creates the account with the requested roles, mints its token, and reports the id, name and roles",

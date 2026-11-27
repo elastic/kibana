@@ -221,7 +221,7 @@ describe('SuppressionIndex', () => {
     // Simulates a pre-existing row where source was not persisted (null)
     const index = SuppressionIndex.of([
       createSuppressionRow({
-        source: 'internal',
+        source: null,
         rule_id: 'rule-1',
         group_hash: 'h1',
         alert_id: 'e1',

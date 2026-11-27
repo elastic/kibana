@@ -119,7 +119,7 @@ const InboundIngressCredentialsComponent: React.FC<InboundIngressCredentialsProp
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.inboundIngress.copyTokenNowDescription"
-              defaultMessage="You will not be able to view it again. Store it with the webhook URL; the token authenticates inbound requests."
+              defaultMessage="This token authenticates requests to the webhook URL. You won't be able to view it again. Save it somewhere secure, such as a password manager. The external tool needs both this token and the webhook URL to send requests."
             />
           </EuiCallOut>
           <EuiSpacer size="m" />
@@ -136,13 +136,13 @@ const InboundIngressCredentialsComponent: React.FC<InboundIngressCredentialsProp
             title={i18n.translate(
               'xpack.triggersActionsUI.sections.inboundIngress.publicBaseUrlMissingTitle',
               {
-                defaultMessage: 'server.publicBaseUrl is not set',
+                defaultMessage: 'This webhook URL is missing the Kibana host',
               }
             )}
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.inboundIngress.publicBaseUrlMissingDescription"
-              defaultMessage="This webhook path is relative and may not be reachable by external services. Set server.publicBaseUrl to show an absolute URL."
+              defaultMessage="External tools can't send requests to a URL without a host. In kibana.yml, set server.publicBaseUrl to the URL that tools use to reach Kibana, then restart Kibana."
             />
           </EuiCallOut>
           <EuiSpacer size="m" />

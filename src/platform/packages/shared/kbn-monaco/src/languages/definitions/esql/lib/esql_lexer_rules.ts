@@ -18,7 +18,7 @@ const brackets = [
 
 // These clause keywords are not exported as a list from @kbn/esql-language. They are kept here
 // to ensure single-quoted and triple-quoted ES|QL strings in Console share the same highlighting.
-const CLAUSE_KEYWORDS = ['by', 'on', 'with', 'metadata'];
+const CLAUSE_KEYWORDS = ['by', 'on', 'with', 'metadata', 'default'];
 
 // The command registry is the source of truth for which commands Kibana supports (it's what
 // drives validation and autocomplete), so it's used here too. The generated `EsqlCommandNames`

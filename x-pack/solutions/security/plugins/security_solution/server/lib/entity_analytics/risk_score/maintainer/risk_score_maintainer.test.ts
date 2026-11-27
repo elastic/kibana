@@ -9,7 +9,7 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import { createRiskScoreMaintainer, type RiskScoreMaintainerDeps } from './risk_score_maintainer';
 import { RiskScoreDataClient } from '../risk_score_data_client';
-import { getConfiguration } from '../../risk_engine/utils/saved_object_configuration';
+import { getConfiguration } from '../configuration/saved_object_configuration';
 import { scoreBaseEntities } from './steps/score_base_entities';
 import { runResolutionScoringStep } from './steps/run_resolution_scoring_step';
 import { resetToZero } from './steps/reset_to_zero';
@@ -19,7 +19,7 @@ import { ensureLookupIndex } from './lookup/lookup_index';
 import { pruneLookupIndex } from './lookup/prune_lookup_index';
 
 jest.mock('../risk_score_data_client');
-jest.mock('../../risk_engine/utils/saved_object_configuration');
+jest.mock('../configuration/saved_object_configuration');
 jest.mock('../../utils/internal_saved_objects_client');
 jest.mock('./steps/score_base_entities');
 jest.mock('./steps/run_resolution_scoring_step');

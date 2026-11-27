@@ -11,8 +11,10 @@ import {
   mapEsqlResponseToDatatable,
   extractEsqlErrorInfo,
   formatAndRethrowEsqlError,
+  getInspectorErrorJson,
 } from './datatable_mapper';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 
 const makeResponse = (
   columns: Array<{ name: string; type: string; _meta?: Record<string, unknown> }>,
@@ -233,29 +235,95 @@ describe('extractEsqlErrorInfo', () => {
   });
 });
 
+describe('getInspectorErrorJson', () => {
+  it('returns the attributes of an Elasticsearch error', () => {
+    const attributes = { type: 'parsing_exception', reason: 'bad syntax' };
+    expect(getInspectorErrorJson(Object.assign(new Error('x'), { attributes }))).toBe(attributes);
+  });
+
+  it('returns the message of an error without attributes', () => {
+    expect(getInspectorErrorJson(new Error('network down'))).toEqual({ message: 'network down' });
+  });
+
+  it.each([[null], [undefined], ['a string'], [42]])(
+    'ignores attributes that are not an object: %p',
+    (attributes) => {
+      expect(getInspectorErrorJson(Object.assign(new Error('boom'), { attributes }))).toEqual({
+        message: 'boom',
+      });
+    }
+  );
+
+  it.each([
+    ['a string', 'plain failure', 'plain failure'],
+    ['null', null, 'null'],
+    ['undefined', undefined, 'undefined'],
+  ])('does not assume a thrown value is an error: %s', (_label, thrown, message) => {
+    expect(getInspectorErrorJson(thrown)).toEqual({ message });
+  });
+});
+
 describe('formatAndRethrowEsqlError', () => {
-  it('prefixes unexpected errors', () => {
-    const err = Object.assign(new Error('connection refused'), { message: 'connection refused' });
-    expect(() => formatAndRethrowEsqlError(err)).toThrow(
-      'Unexpected error from Elasticsearch: connection refused'
-    );
+  const caughtFrom = (thrown: unknown): unknown => {
+    try {
+      formatAndRethrowEsqlError(thrown);
+    } catch (e) {
+      return e;
+    }
+    throw new Error('expected formatAndRethrowEsqlError to throw');
+  };
+
+  describe('errors that Elasticsearch did not report', () => {
+    it('rethrows an error without attributes as it is', () => {
+      const err = new TypeError('Failed to fetch');
+      expect(caughtFrom(err)).toBe(err);
+      expect(err.message).toBe('Failed to fetch');
+    });
+
+    it.each([
+      ['a string', 'plain failure', 'plain failure'],
+      ['null', null, 'null'],
+      ['undefined', undefined, 'undefined'],
+    ])('rethrows %s as an error instead of failing on it', (_label, thrown, message) => {
+      const caught = caughtFrom(thrown);
+      expect(caught).toBeInstanceOf(Error);
+      expect((caught as Error).message).toBe(message);
+    });
+
+    it.each([
+      ['an AbortError', () => new AbortError('timeout')],
+      ['a DOMException abort', () => new DOMException('The operation was aborted', 'AbortError')],
+      [
+        'an abort that carries attributes',
+        () => Object.assign(new DOMException('aborted', 'AbortError'), { attributes: { a: 1 } }),
+      ],
+    ])('rethrows %s unchanged, so callers can still recognize it', (_label, makeError) => {
+      const err = makeError();
+      const message = err.message;
+      const caught = caughtFrom(err);
+      expect(caught).toBe(err);
+      expect((caught as Error).name).toBe('AbortError');
+      expect((caught as Error).message).toBe(message);
+    });
   });
 
-  it('formats parsing_exception with a friendly message', () => {
-    const err = Object.assign(new Error(''), {
-      attributes: { type: 'parsing_exception', reason: 'bad syntax' },
+  describe('errors that Elasticsearch reported', () => {
+    it('formats parsing_exception with a friendly message', () => {
+      const err = Object.assign(new Error(''), {
+        attributes: { type: 'parsing_exception', reason: 'bad syntax' },
+      });
+      expect(() => formatAndRethrowEsqlError(err)).toThrow(
+        "Couldn't parse Elasticsearch ES|QL query. Check your query and try again. Error: bad syntax"
+      );
     });
-    expect(() => formatAndRethrowEsqlError(err)).toThrow(
-      "Couldn't parse Elasticsearch ES|QL query. Check your query and try again. Error: bad syntax"
-    );
-  });
 
-  it('formats other typed errors', () => {
-    const err = Object.assign(new Error(''), {
-      attributes: { type: 'index_not_found_exception', reason: 'index missing' },
+    it('formats other typed errors', () => {
+      const err = Object.assign(new Error(''), {
+        attributes: { type: 'index_not_found_exception', reason: 'index missing' },
+      });
+      expect(() => formatAndRethrowEsqlError(err)).toThrow(
+        'Unexpected error from Elasticsearch: index_not_found_exception - index missing'
+      );
     });
-    expect(() => formatAndRethrowEsqlError(err)).toThrow(
-      'Unexpected error from Elasticsearch: index_not_found_exception - index missing'
-    );
   });
 });

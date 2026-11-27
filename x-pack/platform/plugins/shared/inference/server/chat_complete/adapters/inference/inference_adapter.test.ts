@@ -311,7 +311,7 @@ describe('inferenceAdapter', () => {
           type: InferenceConnectorType.Inference,
           name: 'inference connector',
           connectorId: '.id',
-          config: { provider: 'elastic', inferenceId: '.openai-gpt-5.4-chat_completion' },
+          config: { provider: 'openai', inferenceId: 'openai-gpt-5.4-chat_completion' },
           capabilities: {},
           isInferenceEndpoint: false,
           isPreconfigured: false,
@@ -337,6 +337,42 @@ describe('inferenceAdapter', () => {
           body: expect.objectContaining({
             tools: expect.any(Array),
             reasoning: { effort: 'none' },
+          }),
+        }),
+      });
+    });
+
+    it('omits the reasoning default for EIS connectors', () => {
+      executorMock.getConnector.mockImplementation(() => {
+        return {
+          type: InferenceConnectorType.Inference,
+          name: 'inference connector',
+          connectorId: '.id',
+          config: { provider: 'elastic', inferenceId: '.openai-gpt-5.6-terra-chat_completion' },
+          capabilities: {},
+          isInferenceEndpoint: false,
+          isPreconfigured: false,
+        };
+      });
+
+      inferenceAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools: {
+            foo: { description: 'my tool' },
+          },
+          toolChoice: ToolChoiceType.auto,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(executorMock.invoke).toHaveBeenCalledWith({
+        subAction: 'unified_completion_stream',
+        subActionParams: expect.objectContaining({
+          body: expect.not.objectContaining({
+            reasoning: expect.anything(),
           }),
         }),
       });

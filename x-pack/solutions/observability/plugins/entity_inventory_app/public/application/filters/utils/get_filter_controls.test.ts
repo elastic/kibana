@@ -22,7 +22,10 @@ describe('getCategories', () => {
 
   it('treats a type without a category as its own category', () => {
     expect(
-      getCategories([...types, { type: 'service', name: 'Service', sources: [], attributes: [] }])
+      getCategories([
+        ...types,
+        { type: 'service', name: 'Service', sources: [], attributes: [], suggestedFilters: [] },
+      ])
     ).toEqual(['hosts', 'kubernetes', 'service']);
   });
 });
@@ -139,7 +142,7 @@ describe('getFilterControls', () => {
   });
 
   describe('a page with a single type', () => {
-    it('shows the filters of that type, and only the dimensions', () => {
+    it('shows the filters of that type, and only the suggested ones', () => {
       const controls = getFilterControls({ types, pageCategory: 'hosts' });
 
       expect(controls.categories).toEqual([]);
@@ -152,14 +155,15 @@ describe('getFilterControls', () => {
     expect(getAttributeNames({ types, selectedCategory: 'databases' })).toEqual([]);
   });
 
-  it('shows the dimensions of a type without a category when it is selected as a category', () => {
+  it('shows the suggested filters of a type without a category when it is selected as a category', () => {
     const withService: EntityInventoryTypeDefinition[] = [
       ...types,
       {
         type: 'service',
         name: 'Service',
         sources: [],
-        attributes: [{ name: 'service.environment', dimension: true }],
+        attributes: [{ name: 'service.environment' }],
+        suggestedFilters: ['service.environment'],
       },
     ];
 
@@ -177,14 +181,16 @@ describe('getFilterControls', () => {
         name: 'A',
         category: 'group',
         sources: [],
-        attributes: [{ name: 'a.name', dimension: true }],
+        attributes: [{ name: 'a.name' }],
+        suggestedFilters: ['a.name'],
       },
       {
         type: 'b',
         name: 'B',
         category: 'group',
         sources: [],
-        attributes: [{ name: 'b.name', dimension: true }],
+        attributes: [{ name: 'b.name' }],
+        suggestedFilters: ['b.name'],
       },
     ];
 
@@ -202,10 +208,8 @@ describe('getFilterControls', () => {
         name: 'A',
         category: 'group',
         sources: [],
-        attributes: [
-          { name: 'a.name', label: 'A name', dimension: true },
-          { name: 'b.name', dimension: true },
-        ],
+        attributes: [{ name: 'a.name', label: 'A name' }, { name: 'b.name' }],
+        suggestedFilters: ['a.name', 'b.name'],
       },
     ];
 

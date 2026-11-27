@@ -73,7 +73,7 @@ export interface SummarizeProfileOptions {
 const MAX_FRAMES = 2;
 const MAX_KIBANA_FRAMES = 3;
 const MAX_CALLERS = 2;
-const IDLE = '(idle)';
+export const IDLE = '(idle)';
 const NOT_A_FRAME = new Set(['(program)', IDLE, '(root)']);
 
 interface Counted<T> {
@@ -90,7 +90,7 @@ const bump = <T>(counts: Map<string, Counted<T>>, key: string, value: T): void =
   }
 };
 
-const isKibanaPath = (rel: string | undefined): boolean =>
+export const isKibanaPath = (rel: string | undefined): boolean =>
   rel !== undefined &&
   (rel.startsWith('src/') || rel.startsWith('x-pack/') || rel.startsWith('node_modules/@kbn/'));
 

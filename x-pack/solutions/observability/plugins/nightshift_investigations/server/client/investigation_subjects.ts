@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { buildSlackThreadUrl } from '@kbn/connector-specs';
 import {
   INVESTIGATION_SUBJECT_TRIGGER_TYPES,
@@ -17,7 +17,11 @@ import {
 import type {
   InvestigationSubject as StoredInvestigationSubject,
   InvestigationSubjectKey,
+  SubjectVia,
 } from '@kbn/agentic-investigations-plugin/common';
+import { MAX_VIA_LABEL_LENGTH, subjectViaSchema } from '@kbn/agentic-investigations-plugin/server';
+import { NIGHTSHIFT_AUTOMATION_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import type { NightshiftAutomationLocatorParams } from '@kbn/nightshift-shared';
 import type {
   InvestigationAlertSnapshot,
   InvestigationSubject,
@@ -38,6 +42,7 @@ export { toSlackThreadKey };
 
 const MAX_SLACK_FIELD_LENGTH = 256;
 const MAX_SLACK_PERMALINK_LENGTH = 2048;
+const MAX_AUTOMATION_ID_LENGTH = 256;
 
 /**
  * A subject the start path hands to the investigation workflow in `inputs.subjects`, recorded on
@@ -45,21 +50,24 @@ const MAX_SLACK_PERMALINK_LENGTH = 2048;
  * creation of the conversation, so subjects are only ever recorded there. Agentic investigations
  * validates these again when it stores them.
  */
-export const workflowSubjectInputSchema = z.object({
-  type: z.enum(INVESTIGATION_SUBJECT_TYPES),
-  id: z.string().min(1).max(MAX_SUBJECT_ID_LENGTH),
-  summary: z.string().max(MAX_EVIDENCE_TEXT_LENGTH).optional(),
-  triggerType: z.enum(INVESTIGATION_SUBJECT_TRIGGER_TYPES).optional(),
-  snapshot: investigationAlertSnapshotSchema.optional(),
-  slack: z
-    .object({
-      channel: z.string().min(1).max(MAX_SLACK_FIELD_LENGTH),
-      thread_ts: z.string().min(1).max(MAX_SLACK_FIELD_LENGTH),
-      status_message_ts: z.string().min(1).max(MAX_SLACK_FIELD_LENGTH).optional(),
-      permalink: z.string().max(MAX_SLACK_PERMALINK_LENGTH).optional(),
-    })
-    .optional(),
-});
+export const workflowSubjectInputSchema = lazySchema(() =>
+  z.object({
+    type: z.enum(INVESTIGATION_SUBJECT_TYPES),
+    id: z.string().min(1).max(MAX_SUBJECT_ID_LENGTH),
+    summary: z.string().max(MAX_EVIDENCE_TEXT_LENGTH).optional(),
+    triggerType: z.enum(INVESTIGATION_SUBJECT_TRIGGER_TYPES).optional(),
+    via: subjectViaSchema.optional(),
+    snapshot: investigationAlertSnapshotSchema.optional(),
+    slack: z
+      .object({
+        channel: z.string().min(1).max(MAX_SLACK_FIELD_LENGTH),
+        thread_ts: z.string().min(1).max(MAX_SLACK_FIELD_LENGTH),
+        status_message_ts: z.string().min(1).max(MAX_SLACK_FIELD_LENGTH).optional(),
+        permalink: z.string().max(MAX_SLACK_PERMALINK_LENGTH).optional(),
+      })
+      .optional(),
+  })
+);
 
 export type WorkflowSubjectInput = z.infer<typeof workflowSubjectInputSchema>;
 
@@ -81,14 +89,40 @@ export const toSlackThreadPermalink = (
 const isPlaceholderManualSubject = ({ type, id }: Pick<InvestigationSubject, 'type' | 'id'>) =>
   type === 'manual' && id === DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID;
 
+/**
+ * The automation a start came through, as the subjects' "via": its name, linking to its details
+ * page through the Nightshift automation locator. None without both an id and a name. Cut to what
+ * a subject records; an id that does not fit gets no link, since a cut one would open another page.
+ */
+export const toAutomationVia = ({
+  id,
+  name,
+}: {
+  id?: string;
+  name?: string;
+}): SubjectVia | undefined => {
+  if (!id || !name) {
+    return undefined;
+  }
+  const params = { automationId: id } satisfies NightshiftAutomationLocatorParams;
+  return {
+    label: name.slice(0, MAX_VIA_LABEL_LENGTH),
+    ...(id.length <= MAX_AUTOMATION_ID_LENGTH && {
+      locator: { id: NIGHTSHIFT_AUTOMATION_LOCATOR_ID, params },
+    }),
+  };
+};
+
 const withSlackThread = ({
   primary,
   slackThread,
   triggerType,
+  via,
 }: {
   primary: WorkflowSubjectInput;
   slackThread?: SlackThreadReference;
   triggerType: InvestigationTriggerType;
+  via?: SubjectVia;
 }): { primary: WorkflowSubjectInput; thread: WorkflowSubjectInput[] } => {
   if (!slackThread) {
     return { primary, thread: [] };
@@ -100,7 +134,10 @@ const withSlackThread = ({
   if (primary.type === 'slack_thread' && primary.id === id) {
     return { primary: { ...primary, slack }, thread: [] };
   }
-  return { primary, thread: [{ type: 'slack_thread', id, triggerType, slack }] };
+  return {
+    primary,
+    thread: [{ type: 'slack_thread', id, triggerType, ...(via && { via }), slack }],
+  };
 };
 
 /**
@@ -108,7 +145,8 @@ const withSlackThread = ({
  * per alert snapshot, each carrying its snapshot. A manual investigation without a subject id is
  * recorded under the investigation's own id, so it never matches another investigation. A start
  * about a Slack thread also records the thread, which is how a reply or mention in it finds the
- * investigation; when the thread is the named subject, it is recorded once.
+ * investigation; when the thread is the named subject, it is recorded once. A start that came
+ * through something (an automation) records it as `via` on each of them.
  */
 export const toStartSubjects = ({
   subject,
@@ -116,12 +154,14 @@ export const toStartSubjects = ({
   triggerType,
   investigationId,
   slackThread,
+  via,
 }: {
   subject: InvestigationSubject;
   alerts?: InvestigationAlertSnapshot[];
   triggerType: InvestigationTriggerType;
   investigationId: string;
   slackThread?: SlackThreadReference;
+  via?: SubjectVia;
 }): WorkflowSubjectInput[] => {
   const summary = truncateSummary(subject.summary);
   const { primary, thread } = withSlackThread({
@@ -129,10 +169,12 @@ export const toStartSubjects = ({
       type: subject.type,
       id: isPlaceholderManualSubject(subject) ? investigationId : subject.id,
       triggerType,
+      ...(via && { via }),
       ...(summary ? { summary } : {}),
     },
     slackThread,
     triggerType,
+    via,
   });
 
   if (subject.type !== 'alert') {
@@ -144,6 +186,7 @@ export const toStartSubjects = ({
       type: 'alert',
       id: snapshot.id,
       triggerType,
+      ...(via && { via }),
       snapshot,
       ...(snapshot.id === subject.id && summary ? { summary } : {}),
     })

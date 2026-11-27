@@ -310,6 +310,66 @@ describe('ApprovalContent', () => {
     );
   });
 
+  describe('action details', () => {
+    const basePath = {
+      serverBasePath: '/kbn',
+      prepend: (path: string) => `/kbn/s/ops${path}`,
+    } as unknown as IBasePath;
+    const actionProposal: ApprovalProposal = {
+      ...baseProposal,
+      actionWorkflowId: 'open-a-follow-up-case',
+      action: { name: 'Open a follow-up case' } as ApprovalProposal['action'],
+      actionInput: { title: 'Checkout faults', severity: 'high' },
+    };
+
+    it('links the workflow it runs, by name, in the current space', () => {
+      renderContent({ proposal: actionProposal, basePath, 'data-test-subj': 'card' });
+      const link = screen.getByTestId('card-workflowLink');
+      expect(link).toHaveTextContent('Open a follow-up case');
+      expect(link).toHaveAttribute('href', '/kbn/s/ops/app/workflows/open-a-follow-up-case');
+      expect(screen.queryByTestId('card-executionLink')).not.toBeInTheDocument();
+    });
+
+    it('falls back to the workflow id when the action has no name', () => {
+      renderContent({
+        proposal: { ...actionProposal, action: undefined },
+        'data-test-subj': 'card',
+      });
+      expect(screen.getByTestId('card-workflowLink')).toHaveTextContent('open-a-follow-up-case');
+    });
+
+    it('shows the raw input it will be called with, collapsed', () => {
+      renderContent({ proposal: actionProposal, 'data-test-subj': 'card' });
+      const toggle = screen.getByRole('button', { name: 'Input parameters' });
+      expect(toggle).toHaveAttribute('aria-expanded', 'false');
+      fireEvent.click(toggle);
+      expect(toggle).toHaveAttribute('aria-expanded', 'true');
+      expect(screen.getByTestId('card-actionInputCode')).toHaveTextContent('"severity": "high"');
+    });
+
+    it('links the execution once the action has run', () => {
+      renderContent({
+        proposal: {
+          ...actionProposal,
+          status: 'succeeded',
+          decision: 'approved',
+          actionExecutionId: 'exec-42',
+        },
+        basePath,
+        'data-test-subj': 'card',
+      });
+      expect(screen.getByTestId('card-executionLink')).toHaveAttribute(
+        'href',
+        '/kbn/s/ops/app/workflows/open-a-follow-up-case?tab=executions&executionId=exec-42'
+      );
+    });
+
+    it('renders nothing for a proposal with no action', () => {
+      renderContent({ 'data-test-subj': 'card' });
+      expect(screen.queryByTestId('card-actionDetails')).not.toBeInTheDocument();
+    });
+  });
+
   it('renders a GFM table in the comment, which is how a proposal lists what it touches', () => {
     const { container } = renderContent({
       proposal: {

@@ -985,6 +985,7 @@ exports[`View policy flyout shows all phases 1`] = `
               class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
             >
               <span
+                aria-hidden="true"
                 color="inherit"
                 data-euiicon-type="cross"
               />
@@ -1020,6 +1021,7 @@ exports[`View policy flyout shows all phases 1`] = `
                     Manage
                   </span>
                   <span
+                    aria-hidden="true"
                     color="inherit"
                     data-euiicon-type="chevronSingleUp"
                   />

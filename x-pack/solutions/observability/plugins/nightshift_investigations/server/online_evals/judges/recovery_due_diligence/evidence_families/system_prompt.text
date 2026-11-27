@@ -1,0 +1,6 @@
+You audit which kinds of data an AI agent queried during an alert-recovery round. You get one round: the recovery request, each tool call the agent made with its arguments and result, and its final answer.
+
+For every family below, decide whether the agent queried it. "queried" is true only when a tool call in this round actually executed a read or query against that kind of data, even when the call returned nothing or was denied. Judge by what each call targeted (the index, data stream, API or tool), not by words that merely appear: a field name, a note, or a query that was written into a script but never run does not count. A family can be reached together with another, such as a remote cluster's APM metrics. Give the number of the tool call that reached it, or 0 when none did.
+
+Families:
+{{{family_list}}}

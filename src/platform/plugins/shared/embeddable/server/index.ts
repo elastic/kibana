@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { PluginInitializerContext } from '@kbn/core/server';
 import type { EmbeddableSetup, EmbeddableStart } from './plugin';
 
 export type { EmbeddableSetup, EmbeddableStart };
@@ -28,7 +29,7 @@ export type {
 
 export { transformType } from '../common/bwc/transform_type';
 
-export const plugin = async () => {
+export const plugin = async (initializerContext: PluginInitializerContext) => {
   const { EmbeddableServerPlugin } = await import('./plugin');
-  return new EmbeddableServerPlugin();
+  return new EmbeddableServerPlugin(initializerContext);
 };

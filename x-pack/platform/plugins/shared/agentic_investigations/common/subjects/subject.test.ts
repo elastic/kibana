@@ -47,6 +47,33 @@ describe('alertSubjectSnapshotSchema', () => {
 });
 
 describe('investigationSubjectInputSchema', () => {
+  it('takes an optional "via" with a bounded label and locator', () => {
+    const alert = { type: 'alert', id: 'alert-1' };
+    const locator = { id: 'SOME_LOCATOR', params: { automationId: 'a1', nested: { n: [1] } } };
+
+    expect(investigationSubjectInputSchema.safeParse(alert).success).toBe(true);
+    for (const via of [{ label: 'Payments alerts' }, { label: 'Payments alerts', locator }]) {
+      expect(investigationSubjectInputSchema.safeParse({ ...alert, via }).success).toBe(true);
+    }
+    for (const via of [
+      {},
+      { label: '' },
+      { label: 'n'.repeat(501) },
+      { label: 'x', locator: { id: '', params: {} } },
+      { label: 'x', locator: { id: 'L' } },
+      { label: 'x', locator: { id: 'L', params: { big: 'p'.repeat(8_001) } } },
+      {
+        label: 'x',
+        locator: {
+          id: 'L',
+          params: Object.fromEntries(Array.from({ length: 51 }, (_, i) => [`k${i}`, i])),
+        },
+      },
+    ]) {
+      expect(investigationSubjectInputSchema.safeParse({ ...alert, via }).success).toBe(false);
+    }
+  });
+
   it('accepts each subject type with its own fields', () => {
     for (const input of [
       { type: 'alert', id: 'alert-1', triggerType: 'automatic', snapshot: nightshiftSnapshot },

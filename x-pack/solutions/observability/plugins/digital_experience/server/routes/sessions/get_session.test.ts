@@ -10,7 +10,10 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { SESSIONS_INDEX_PATTERN } from '../../../common/sessions';
 import { TELEMETRY_SDK_LANGUAGE } from '@kbn/apm-types';
 import { BROWSER_SDK_LANGUAGE } from '../../../common/otel_data';
-import { SOURCE_SERVICE_NAME_FIELD, SOURCE_SESSION_ID_FIELD } from '../../lib/otel/source_fields';
+import {
+  SOURCE_SERVICE_NAME_FIELD,
+  SOURCE_SESSION_ID_FIELD,
+} from '../../../common/otel_source_fields';
 import {
   SESSION_TIMELINE_SIZE,
   buildPageVisits,
@@ -32,6 +35,9 @@ const JOURNEY_EVENT_NAMES = [
   'browser.user_action.click',
   'exception',
   'browser.web_vital',
+  'elastic.frustration.rage_click',
+  'elastic.frustration.dead_click',
+  'elastic.frustration.error_click',
 ];
 
 /** Raw events as the `fields` option returns them: arrays of values by dotted name. */
@@ -104,6 +110,14 @@ const eventsResponse = (
   },
 });
 
+const frustration = (eventName: string, attrs: OtelEventFields = {}): OtelEventFields => ({
+  '@timestamp': [at(5_000)],
+  event_name: [eventName],
+  'attributes.browser.css_selector': ['#pay'],
+  'attributes.url.full': ['https://shop.example.com/checkout'],
+  ...attrs,
+});
+
 describe('buildTimeline', () => {
   it('classifies events and computes offsets from the session start', () => {
     const timeline = buildTimeline(events, startMs);
@@ -166,7 +180,137 @@ describe('buildTimeline', () => {
   });
 });
 
+describe('buildTimeline frustration signals', () => {
+  it('lists them as frustration events with the selector and, for rage clicks, the click count', () => {
+    const timeline = buildTimeline(
+      [
+        frustration('elastic.frustration.rage_click', {
+          'attributes.elastic.frustration.click_count': [5],
+        }),
+        frustration('elastic.frustration.dead_click'),
+        frustration('elastic.frustration.error_click', {
+          'attributes.exception.message': ['x is undefined'],
+        }),
+        {
+          '@timestamp': [at(6_000)],
+          event_name: ['browser.user_action.click'],
+          'attributes.browser.css_selector': ['#pay'],
+          'attributes.url.full': ['https://shop.example.com/checkout'],
+        },
+      ],
+      startMs
+    );
+
+    expect(
+      timeline.map(({ kind, name, detail, clickCount }) => ({ kind, name, detail, clickCount }))
+    ).toEqual([
+      {
+        kind: 'frustration',
+        name: 'elastic.frustration.rage_click',
+        detail: '#pay',
+        clickCount: 5,
+      },
+      {
+        kind: 'frustration',
+        name: 'elastic.frustration.dead_click',
+        detail: '#pay',
+        clickCount: null,
+      },
+      {
+        kind: 'frustration',
+        name: 'elastic.frustration.error_click',
+        detail: '#pay',
+        clickCount: null,
+      },
+      { kind: 'click', name: 'browser.user_action.click', detail: '#pay', clickCount: null },
+    ]);
+    expect(timeline[0]).toMatchObject({ offsetMs: 5_000, page: '/checkout' });
+  });
+
+  it('falls back to the XPath when there is no selector', () => {
+    const [event] = buildTimeline(
+      [
+        frustration('elastic.frustration.dead_click', {
+          'attributes.browser.css_selector': undefined,
+          'attributes.target_xpath': ['//*[@id="pay"]'],
+        }),
+      ],
+      startMs
+    );
+
+    expect(event.detail).toBe('//*[@id="pay"]');
+  });
+
+  it('carries the exception of an error click, and its trace, but none for the others', () => {
+    const [errorClick, rageClick] = buildTimeline(
+      [
+        frustration('elastic.frustration.error_click', {
+          'attributes.exception.type': ['TypeError'],
+          'attributes.exception.message': ['cart is undefined'],
+          'attributes.exception.stacktrace': [
+            'TypeError: cart is undefined\n    at pay (app.js:1:2)',
+          ],
+          trace_id: ['t1'],
+          span_id: ['s1'],
+        }),
+        frustration('elastic.frustration.rage_click'),
+      ],
+      startMs
+    );
+
+    expect(errorClick).toMatchObject({
+      exception: {
+        type: 'TypeError',
+        message: 'cart is undefined',
+        stacktrace: 'TypeError: cart is undefined\n    at pay (app.js:1:2)',
+      },
+      stacktrace: null,
+      traceId: 't1',
+      spanId: 's1',
+    });
+    expect(rageClick).not.toHaveProperty('exception');
+  });
+
+  it('keeps an exception without a type or stack trace, as a thrown string reports it', () => {
+    const [event] = buildTimeline(
+      [
+        frustration('elastic.frustration.error_click', {
+          'attributes.exception.message': ['out of stock'],
+        }),
+      ],
+      startMs
+    );
+
+    expect(event.exception).toEqual({ type: null, message: 'out of stock', stacktrace: null });
+  });
+});
+
 describe('buildPageVisits', () => {
+  it('counts frustration signals per visit without counting them as clicks', () => {
+    const visits = buildPageVisits(
+      [
+        {
+          '@timestamp': [at(0)],
+          event_name: ['browser.navigation'],
+          'attributes.url.full': ['https://shop.example.com/checkout'],
+        },
+        {
+          '@timestamp': [at(1_000)],
+          event_name: ['browser.user_action.click'],
+          'attributes.browser.css_selector': ['#pay'],
+        },
+        frustration('elastic.frustration.rage_click'),
+        frustration('elastic.frustration.dead_click'),
+      ],
+      startMs,
+      at(10_000)
+    );
+
+    expect(visits).toEqual([
+      expect.objectContaining({ page: '/checkout', clickCount: 1, frustrationCount: 2 }),
+    ]);
+  });
+
   it('builds the per-page journey with counts and web vitals', () => {
     const visits = buildPageVisits(events, startMs, at(10_000));
 
@@ -179,6 +323,7 @@ describe('buildPageVisits', () => {
         durationMs: 5_000,
         clickCount: 1,
         errorCount: 0,
+        frustrationCount: 0,
         webVitals: { lcp: 1200, inp: null, cls: null, fcp: null, ttfb: null },
         load: null,
       },
@@ -190,6 +335,7 @@ describe('buildPageVisits', () => {
         durationMs: 5_000,
         clickCount: 0,
         errorCount: 1,
+        frustrationCount: 0,
         webVitals: { lcp: null, inp: null, cls: null, fcp: null, ttfb: null },
         load: null,
       },
@@ -369,6 +515,7 @@ describe('getSession', () => {
         'attributes.browser.web_vital.value',
         'attributes.exception.message',
         'resource.attributes.exception.message',
+        'attributes.elastic.frustration.click_count',
       ])
     );
   });

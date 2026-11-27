@@ -34,6 +34,9 @@ const SUBMITTABLE_URL_PATTERN = /^https?:\/\/[^\s]+$/i;
 /** urlscan rejects submissions whose url is outside 5 to 2083 characters. */
 const URLSCAN_MAX_URL_LENGTH = 2083;
 
+/** The longest tag urlscan's submission API accepts. */
+const URLSCAN_MAX_TAG_LENGTH = 30;
+
 /**
  * urlscan documents no search query length limit; the query must fit a task.url clause around
  * any URL scanUrl accepts.
@@ -66,11 +69,11 @@ export const ScanUrlInputSchema = lazySchema(() =>
       ),
     visibility: VisibilitySchema.optional(),
     tags: z
-      .array(z.string().min(1).max(64))
+      .array(z.string().min(1).max(URLSCAN_MAX_TAG_LENGTH))
       .max(10)
       .optional()
       .describe(
-        'Up to 10 free-form tags recorded on the scan, for example ["phishing", "case-4711"]. Useful to correlate a scan back to the alert or case that triggered it, since tags are searchable through task.tags.'
+        `Up to 10 free-form tags of at most ${URLSCAN_MAX_TAG_LENGTH} characters recorded on the scan, for example ["phishing", "case-4711"]. Useful to correlate a scan back to the alert or case that triggered it, since tags are searchable through task.tags.`
       ),
     referer: z
       .string()
@@ -118,10 +121,12 @@ export const ScanUrlAndWaitInputSchema = lazySchema(() =>
       ),
     visibility: VisibilitySchema.optional(),
     tags: z
-      .array(z.string().min(1).max(64))
+      .array(z.string().min(1).max(URLSCAN_MAX_TAG_LENGTH))
       .max(10)
       .optional()
-      .describe('Up to 10 free-form tags recorded on the scan, for example ["phishing"].'),
+      .describe(
+        `Up to 10 free-form tags of at most ${URLSCAN_MAX_TAG_LENGTH} characters recorded on the scan, for example ["phishing"].`
+      ),
     referer: z
       .string()
       .max(URLSCAN_MAX_URL_LENGTH)
@@ -446,6 +451,7 @@ export interface SearchResponse {
   total?: number;
   took?: number;
   has_more?: boolean;
+  search_date_limit_days?: number;
 }
 
 export interface QuotaWindow {

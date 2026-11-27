@@ -5,14 +5,20 @@
  * 2.0.
  */
 
-import type { CoreSetup, Plugin } from '@kbn/core/server';
+import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { SEARCH_BOOST_APP_ID } from '../common/constants';
 import { registerRoutes } from './routes';
 import type { SearchBoostSetupDependencies } from './types';
 
 export class SearchBoostPlugin implements Plugin<void, void, SearchBoostSetupDependencies> {
+  private readonly logger: Logger;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
+  }
+
   public setup(core: CoreSetup, { features }: SearchBoostSetupDependencies) {
-    registerRoutes(core.http.createRouter());
+    registerRoutes(core.http.createRouter(), this.logger);
 
     // Profiles and rules are shown together, so each level needs the privilege for both.
     features.registerElasticsearchFeature({

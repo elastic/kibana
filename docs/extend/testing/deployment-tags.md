@@ -160,10 +160,16 @@ Tags follow this shape:
 
 These are the available tags:
 
-| Helper                   | Use when the test…                                                                                                  |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------- |
-| `tags.limit.only.fips`   | is designed for [FIPS mode](../contributing/ci-and-build/debugging-fips-test-failures.md) (skipped everywhere else) |
-| `tags.limit.except.fips` | is relevant everywhere except in FIPS mode (skipped there)                                                          |
+| Helper                               | Use when the test…                                                                                                  |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| `tags.limit.only.fips`               | is designed for [FIPS mode](../contributing/ci-and-build/debugging-fips-test-failures.md) (skipped everywhere else) |
+| `tags.limit.except.fips`             | is relevant everywhere except in FIPS mode (skipped there)                                                          |
+| `tags.limit.only.upgradeAssistant`   | needs a stack upgrade environment for Upgrade Assistant (skipped everywhere else)                                   |
+| `tags.limit.except.upgradeAssistant` | is relevant everywhere except in that upgrade environment (skipped there)                                           |
+
+::::::{note}
+No CI pipeline declares `upgradeAssistant` yet, so `tags.limit.only.upgradeAssistant` suites don't run on CI. Use it instead of `.skip` for Upgrade Assistant suites that wait on that environment.
+::::::
 
 If a test would need more `except` tags than there are environments it actually applies to, it's an `only` test.
 
@@ -197,3 +203,14 @@ On CI, attributes are declared automatically from the build. Locally, pass them 
 ::::::{note}
 Use tags to **include** suites where they make sense, instead of skipping suites after the fact.
 ::::::
+
+## Lint rules for tags [scout-deployment-tags-lint]
+
+These lint rules check how Scout suites are tagged:
+
+| Rule                                    | What it does                                                                                                                                                                        |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@kbn/eslint/scout_no_deprecated_tags`  | Rejects deprecated string tags such as `@ess` and `@svlOblt`, and per-solution stateful domain tags.                                                                                  |
+| `@kbn/eslint/scout_prefer_both_arch_tags` | Warns when a suite targets only stateful or only serverless. It also understands `tags.local.*`. Enabled for Observability, except for the single-architecture plugins.               |
+| `@kbn/eslint/scout_require_tags`        | Requires every root-level `describe` to declare `tag`. A suite without a `tag` passes if its tests are tagged individually. Enabled for Observability only.                           |
+

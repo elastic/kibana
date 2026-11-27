@@ -500,6 +500,13 @@ export namespace StreamsUnit {
     metadata: UiMetadata;
   }
   export type DiagnosticSeverity = 'error' | 'warning' | 'info';
+  export type DiagnosticDetail =
+    | null
+    | boolean
+    | number
+    | string
+    | DiagnosticDetail[]
+    | { [key: string]: DiagnosticDetail };
   /**
    * A config-distributor finding, from `POST /v1/units/validate`, a rejected publish, or
    * `POST /v1/components/validate`.
@@ -510,5 +517,6 @@ export namespace StreamsUnit {
     message: string;
     path?: string;
     line?: number;
+    details?: Record<string, DiagnosticDetail>;
   }
 }

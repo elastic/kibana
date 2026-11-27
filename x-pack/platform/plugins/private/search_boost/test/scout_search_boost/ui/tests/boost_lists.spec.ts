@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { escapeRegExp } from 'lodash';
 import { getBoostTestData } from '../../common/boost_test_data';
 import { SEARCH_BOOST_READ_ROLE } from '../../common/roles';
 import { test } from '../fixtures';
@@ -63,7 +64,7 @@ test.describe('Search boost rules and profiles', { tag: ['@local-serverless-vect
     await test.step('opens the boost rules filtered by the profile', async () => {
       await indicesProfile.getByTestId('searchBoostProfileRulesLink').click();
       await expect(page).toHaveURL(
-        new RegExp(`/search_boost/rules\\?profile=${testData.indicesProfile}$`)
+        new RegExp(`/search_boost/rules\\?profile=${escapeRegExp(testData.indicesProfile)}$`)
       );
       await expect(searchBoost.row(rulesTable, testData.patternRule)).toBeVisible();
       await expect(searchBoost.row(rulesTable, testData.exactRule)).toBeVisible();

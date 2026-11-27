@@ -31,6 +31,7 @@ import { processOpenAIStream } from './process_openai_stream';
 import { processOpenAIResponse } from './process_openai_response';
 import { emitTokenCountEstimateIfMissing } from './emit_token_count_if_missing';
 import { getTemperatureIfValid } from '../../utils/get_temperature';
+import { resolveOpenAIReasoningEffort } from '../../utils/resolve_chat_completion_reasoning';
 
 export const openAIAdapter: InferenceConnectorAdapter = {
   chatComplete: ({
@@ -42,6 +43,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
     temperature = 0,
     functionCalling = 'auto',
     modelName: modelName,
+    reasoning,
     logger,
     abortSignal,
     metadata,
@@ -75,6 +77,17 @@ export const openAIAdapter: InferenceConnectorAdapter = {
       const toolsForRequest = ensureToolsWhenHistoryHasToolUse({ tools, messages });
       const openAiTools = toolsToOpenAI(toolsForRequest);
       const hasTools = Array.isArray(openAiTools) && openAiTools.length > 0;
+      const modelId = modelName ?? connector.config?.defaultModel;
+      const reasoningEffort = resolveOpenAIReasoningEffort({
+        hasNativeTools: hasTools,
+        model: modelId,
+      });
+
+      if (reasoningEffort && ((reasoning?.effort ?? 'none') !== 'none' || reasoning?.enabled)) {
+        logger.debug(
+          `Overriding the requested reasoning with reasoning_effort "${reasoningEffort}": model "${modelId}" rejects native tools at any other effort`
+        );
+      }
 
       request = {
         stream,
@@ -86,12 +99,13 @@ export const openAIAdapter: InferenceConnectorAdapter = {
               tool_choice: toolChoiceToOpenAI(toolChoice, {
                 connector,
                 tools: toolsForRequest,
-                modelId: modelName ?? connector.config?.defaultModel,
+                modelId,
                 logger,
               }),
               tools: openAiTools,
             }
           : {}),
+        ...(reasoningEffort ? { reasoning_effort: reasoningEffort } : {}),
       };
     }
 

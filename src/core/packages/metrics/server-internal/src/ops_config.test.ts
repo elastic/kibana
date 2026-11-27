@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { opsConfig } from './ops_config';
+import { opsConfig, PROFILING_DIR_MAX_LENGTH } from './ops_config';
 
 const validate = (eventLoopWatchdog: Record<string, unknown>) =>
   opsConfig.schema.validate({ cGroupOverrides: {}, eventLoopWatchdog }).eventLoopWatchdog;
@@ -97,6 +97,40 @@ describe('ops.eventLoopWatchdog config', () => {
         startup: { blockThreshold: '60s', profiling: { startAfter: '2s' } },
       })
     ).not.toThrow();
+  });
+
+  describe('profiling.dir', () => {
+    it('is unset by default', () => {
+      expect(validate({}).profiling.dir).toBeUndefined();
+    });
+
+    it('accepts 1 to PROFILING_DIR_MAX_LENGTH characters', () => {
+      expect(validate({ profiling: { dir: '/' } }).profiling.dir).toBe('/');
+      const max = `/${'a'.repeat(PROFILING_DIR_MAX_LENGTH - 1)}`;
+      expect(validate({ profiling: { dir: max } }).profiling.dir).toBe(max);
+    });
+
+    it('rejects an empty string', () => {
+      expect(() => validate({ profiling: { dir: '' } })).toThrow(
+        '[eventLoopWatchdog.profiling.dir]: value has length [0] but it must have a minimum length of [1].'
+      );
+    });
+
+    it('rejects more than PROFILING_DIR_MAX_LENGTH characters', () => {
+      expect(() =>
+        validate({ profiling: { dir: `/${'a'.repeat(PROFILING_DIR_MAX_LENGTH)}` } })
+      ).toThrow(
+        `[eventLoopWatchdog.profiling.dir]: value has length [${
+          PROFILING_DIR_MAX_LENGTH + 1
+        }] but it must have a maximum length of [${PROFILING_DIR_MAX_LENGTH}].`
+      );
+    });
+
+    it('is not a startup setting', () => {
+      expect(() => validate({ startup: { profiling: { dir: '/a' } } })).toThrow(
+        "[eventLoopWatchdog.startup.profiling.dir]: Additional properties are not allowed ('dir' was unexpected)"
+      );
+    });
   });
 
   it('leaves unset startup.profiling settings undefined', () => {

@@ -33,6 +33,10 @@ const collator = new Intl.Collator(i18n.getLocale());
 const compareValues = (a: unknown, b: unknown): number =>
   typeof a === 'number' && typeof b === 'number' ? a - b : collator.compare(String(a), String(b));
 
+// Missing values, such as sizes that couldn't be loaded, go last in both directions.
+const compareMissing = (a: unknown, b: unknown): number =>
+  Number(a === undefined) - Number(b === undefined);
+
 const useInMemoryDataSource = <T extends ContentListItem>(
   items: T[],
   queryKeyScope: string,
@@ -55,7 +59,9 @@ const useInMemoryDataSource = <T extends ContentListItem>(
           .filter((item) => latest.current.matches(item, params))
           .sort(
             (a, b) =>
-              compareValues(a[field], b[field]) * direction || collator.compare(a.title, b.title)
+              compareMissing(a[field], b[field]) ||
+              compareValues(a[field], b[field]) * direction ||
+              collator.compare(a.title, b.title)
           );
         const start = page.index * page.size;
         return { items: matched.slice(start, start + page.size), total: matched.length };

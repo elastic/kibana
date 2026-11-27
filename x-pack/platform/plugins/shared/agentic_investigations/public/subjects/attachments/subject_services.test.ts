@@ -43,6 +43,7 @@ describe('hasEpisodeFlyoutServices', () => {
   const present = {} as never;
   const all: SubjectServices = {
     http: present,
+    application: present,
     uiSettings: present,
     userProfile: present,
     notifications: present,

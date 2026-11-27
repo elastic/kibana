@@ -262,15 +262,23 @@ describe('resolveSelectiveTestingContext', () => {
     expect(result?.changedFiles).toBe(changedFiles);
   });
 
-  it('passes documentation ignore patterns to getAffectedPackages', async () => {
+  it('passes documentation and bundle-limits ignore patterns to getAffectedPackages', async () => {
     jest.mocked(getAffectedPackages).mockResolvedValueOnce(new Set());
 
-    await resolveSelectiveTestingContext(['src/core/README.md']);
+    await resolveSelectiveTestingContext([
+      'src/core/README.md',
+      'packages/kbn-rspack-optimizer/limits.yml',
+    ]);
 
     expect(getAffectedPackages).toHaveBeenCalledWith(
       undefined,
       expect.objectContaining({
-        ignorePatterns: expect.arrayContaining(['**/README*', '**/*.md', '**/CHANGELOG*']),
+        ignorePatterns: expect.arrayContaining([
+          '**/README*',
+          '**/*.md',
+          '**/CHANGELOG*',
+          'packages/kbn-rspack-optimizer/limits.yml',
+        ]),
       })
     );
   });

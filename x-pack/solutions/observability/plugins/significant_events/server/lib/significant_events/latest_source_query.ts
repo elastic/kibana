@@ -54,12 +54,19 @@ export const queryEsql = async ({
   esClient,
   query,
   filter,
+  allowPartialResults,
 }: {
   esClient: ElasticsearchClient;
   query: ComposerQuery;
   filter?: QueryDslQueryContainer;
+  /** Set to `false` so a shard failure fails the query instead of returning the shards that answered. */
+  allowPartialResults?: boolean;
 }): Promise<ESQLSearchResponse> =>
-  (await esClient.esql.query({ ...toEsqlRequest(query), filter })) as ESQLSearchResponse;
+  (await esClient.esql.query({
+    ...toEsqlRequest(query),
+    filter,
+    ...(allowPartialResults === undefined ? {} : { allow_partial_results: allowPartialResults }),
+  })) as ESQLSearchResponse;
 
 // Converts a columnar ESQLSearchResponse into an array of plain objects keyed by column name.
 export const esqlToObjects = <T extends Record<string, unknown>>(

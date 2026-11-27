@@ -6,12 +6,10 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { calculateAuto } from '@kbn/calculate-auto';
+import { TARGET_BUCKETS } from '../../../common/histogram';
 import type { HistogramInterval, TimeSeriesPoint } from '../../../common/types/applications';
-
-/** About this many buckets over the time range, rounded to a readable interval. */
-const TARGET_BUCKETS = 50;
 
 const CALENDAR_UNITS: ReadonlyArray<HistogramInterval['unit']> = ['d', 'w', 'M', 'y'];
 

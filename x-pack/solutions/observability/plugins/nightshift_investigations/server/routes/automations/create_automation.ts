@@ -6,14 +6,19 @@
  */
 
 import { badRequest, serverUnavailable } from '@hapi/boom';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { getUserDisplayName } from '@kbn/user-profile-components/server';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
-import { automationCompletionSchema, promptTemplateSchema } from '../../lib/automations/schemas';
+import {
+  savedAutomationCompletionSchema,
+  promptTemplateSchema,
+} from '../../lib/automations/schemas';
 import { generateWorkflowYaml } from '../../lib/automations/generate_workflow_yaml';
 import { validateScheduledAutomation } from '../../lib/automations/validate_scheduled_automation';
+import { validateSlackChannelsBound } from '../../lib/automations/validate_slack_channels_bound';
+import { validateThreadCompletion } from '../../lib/automations/validate_thread_completion';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
 import { triggerRowSchema } from './trigger_row_schema';
 
@@ -45,25 +50,28 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
   security: {
     authz: { requiredPrivileges: ['manage_nightshift'] },
   },
-  params: z.object({
-    body: z.object({
-      name: z.string().min(1).max(500),
-      description: z.string().max(5000).optional(),
-      tags: z.array(z.string().max(32)).max(50).optional(),
-      isEnabled: z.boolean().optional(),
-      automationType: z.enum(['custom', 'managed']).optional(),
-      trigger: triggerSchema,
-      execution: executionSchema,
-      completions: z.array(automationCompletionSchema).max(10),
-      runtime: runtimeSchema,
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        name: z.string().min(1).max(500),
+        description: z.string().max(5000).optional(),
+        tags: z.array(z.string().max(32)).max(50).optional(),
+        isEnabled: z.boolean().optional(),
+        automationType: z.enum(['custom', 'managed']).optional(),
+        trigger: triggerSchema,
+        execution: executionSchema,
+        completions: z.array(savedAutomationCompletionSchema).max(10),
+        runtime: runtimeSchema,
+      }),
+    })
+  ),
   handler: async ({
     request,
     params,
     getAutomationsSoClient,
     getWorkflowsManagement,
     isUniversalAlertingAvailable,
+    getSlackChannelBindingChecker,
     getInvestigatorServiceAccountService,
     context,
   }) => {
@@ -99,6 +107,12 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
     };
 
     validateScheduledAutomation(attributes);
+    validateThreadCompletion(attributes);
+    await validateSlackChannelsBound({
+      automation: attributes,
+      request,
+      checker: getSlackChannelBindingChecker(),
+    });
 
     const created = await soClient.create<NightshiftAutomationAttributes>(
       NIGHTSHIFT_AUTOMATION_SO_TYPE,

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { TimeRange } from '@kbn/es-query';
-import type { ISearchGeneric } from '@kbn/search-types';
+import type { ISearchMethods } from '@kbn/search-types';
 import { fetchEsqlData, type FetchEsqlOptions } from './fetch_esql_data';
 import type { TemplateDataset } from './fill_template';
 
@@ -29,7 +29,7 @@ const isAbortError = (error: unknown): boolean =>
  * the panel has several, while the message of a single-query panel is left as it is.
  */
 export const fetchEsqlDatasets = async (
-  search: ISearchGeneric,
+  search: Pick<ISearchMethods, 'esql'>,
   http: HttpStart,
   queries: readonly string[],
   timeRange: TimeRange | undefined,

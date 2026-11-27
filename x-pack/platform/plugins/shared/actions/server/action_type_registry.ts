@@ -253,6 +253,15 @@ export class ActionTypeRegistry {
       actionTypeMaxAttempts: actionType.maxAttempts,
     });
 
+    // Runs before any state change, so a throw here leaves the type unregistered.
+    // No need to notify usage on basic action types
+    if (actionType.minimumLicenseRequired !== 'basic') {
+      this.licensing.featureUsage.register(
+        getActionTypeFeatureUsageName(actionType as unknown as ActionType),
+        actionType.minimumLicenseRequired
+      );
+    }
+
     this.actionTypes.set(actionType.id, {
       ...actionType,
       ...(specs && { specs: new Map([...(registeredActionType?.specs ?? []), ...specs]) }),
@@ -269,13 +278,6 @@ export class ActionTypeRegistry {
           createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
         },
       });
-    }
-    // No need to notify usage on basic action types
-    if (actionType.minimumLicenseRequired !== 'basic') {
-      this.licensing.featureUsage.register(
-        getActionTypeFeatureUsageName(actionType as unknown as ActionType),
-        actionType.minimumLicenseRequired
-      );
     }
   }
 
