@@ -1,0 +1,19 @@
+{
+  "type": "plugin",
+  "id": "@kbn/trailblazer-plugin",
+  "owner": "@elastic/response-ops",
+  "description": "A Trailblazer-style multi-pane browser for exploring Elasticsearch indices, documents, and fields.",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "trailblazer",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "developerExamples"
+    ],
+    "optionalPlugins": [
+      "share"
+    ]
+  }
+}
