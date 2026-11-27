@@ -6,7 +6,10 @@
  */
 
 import { globalSetupHook } from '@kbn/scout-security';
+import { setupFleetForEndpoint } from '../../../../../common/endpoint/data_loaders/setup_fleet_for_endpoint';
 
-globalSetupHook('Global setup', async ({ log }) => {
-  log.debug('[setup] no archive ingestion needed for endpoint details specs');
+globalSetupHook('Prepare Fleet for endpoint specs', async ({ kbnClient, log }) => {
+  log.debug('[setup] initializing Fleet and installing the endpoint package in the default space');
+  // Pre-installing here keeps two workers from racing the first install from their own spaces.
+  await setupFleetForEndpoint(kbnClient, log);
 });

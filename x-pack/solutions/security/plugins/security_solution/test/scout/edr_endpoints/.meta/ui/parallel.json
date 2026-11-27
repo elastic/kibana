@@ -1,12 +1,12 @@
 {
-  "sha1": "20724a8856c1a5cf449832e127134491d514b71b",
+  "sha1": "e16251c618c6e9f8dfee977fa860b028ee69dd81",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "c95d87ddc3dd2fd-62e78b299821a45",
-      "title": "Global setup",
+      "id": "c95d87ddc3dd2fd-b04ff536670e97e",
+      "title": "Prepare Fleet for endpoint specs",
       "expectedStatus": "passed",
       "tags": [],
       "location": {
@@ -167,6 +167,160 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_empty_state.spec.ts",
         "line": 60,
         "column": 38
+      }
+    },
+    {
+      "id": "77881d93862f26b-fdf1cc19b333a33",
+      "title": "Endpoint list RBAC with a Defend policy and no hosts hides the hosts onboarding with fleet none and integrations none",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_policies_exist.spec.ts",
+        "line": 139,
+        "column": 17
+      }
+    },
+    {
+      "id": "77881d93862f26b-4515d40d6994b25",
+      "title": "Endpoint list RBAC with a Defend policy and no hosts hides the hosts onboarding with fleet none and integrations read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_policies_exist.spec.ts",
+        "line": 139,
+        "column": 17
+      }
+    },
+    {
+      "id": "77881d93862f26b-339c28ea0065143",
+      "title": "Endpoint list RBAC with a Defend policy and no hosts hides the hosts onboarding with fleet none and integrations all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_policies_exist.spec.ts",
+        "line": 139,
+        "column": 17
+      }
+    },
+    {
+      "id": "77881d93862f26b-5112ab6e74b1eb0",
+      "title": "Endpoint list RBAC with a Defend policy and no hosts hides the hosts onboarding with fleet read and integrations none",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_policies_exist.spec.ts",
+        "line": 139,
+        "column": 17
+      }
+    },
+    {
+      "id": "77881d93862f26b-2d094353ac4d70c",
+      "title": "Endpoint list RBAC with a Defend policy and no hosts hides the hosts onboarding with fleet read and integrations read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_policies_exist.spec.ts",
+        "line": 139,
+        "column": 17
+      }
+    },
+    {
+      "id": "77881d93862f26b-819782cd1ef8e66",
+      "title": "Endpoint list RBAC with a Defend policy and no hosts hides the hosts onboarding with fleet read and integrations all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_policies_exist.spec.ts",
+        "line": 139,
+        "column": 17
+      }
+    },
+    {
+      "id": "77881d93862f26b-3c4cbd79571ae8c",
+      "title": "Endpoint list RBAC with a Defend policy and no hosts hides the hosts onboarding with fleet all and integrations none",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_policies_exist.spec.ts",
+        "line": 139,
+        "column": 17
+      }
+    },
+    {
+      "id": "77881d93862f26b-850964768e103bc",
+      "title": "Endpoint list RBAC with a Defend policy and no hosts shows the hosts onboarding with fleet all and integrations read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_policies_exist.spec.ts",
+        "line": 139,
+        "column": 17
+      }
+    },
+    {
+      "id": "77881d93862f26b-0ddedf616bfa2d4",
+      "title": "Endpoint list RBAC with a Defend policy and no hosts shows the hosts onboarding with fleet all and integrations all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_policies_exist.spec.ts",
+        "line": 139,
+        "column": 17
+      }
+    },
+    {
+      "id": "77881d93862f26b-9cbbd70f1380f92",
+      "title": "Endpoint list RBAC with a Defend policy and no hosts hides the hosts onboarding with policy management read, fleet all and integrations none",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_policies_exist.spec.ts",
+        "line": 139,
+        "column": 17
+      }
+    },
+    {
+      "id": "77881d93862f26b-a49a056ae17b8fe",
+      "title": "Endpoint list RBAC with a Defend policy and no hosts hides the hosts onboarding with policy management all, fleet all and integrations none",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_policies_exist.spec.ts",
+        "line": 139,
+        "column": 17
       }
     }
   ]
