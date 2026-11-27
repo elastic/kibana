@@ -62,7 +62,7 @@ const setup = async ({
       appState: { query: { esql } },
     })
   );
-  await toolkit.initializeSingleTab({ tabId, skipWaitForDataFetching: true });
+  await toolkit.initializeSingleTab({ tabId });
   const { scopedEbtManager$ } = selectTabRuntimeState(toolkit.runtimeStateManager, tabId);
   const trackClick = jest.spyOn(scopedEbtManager$.getValue(), 'trackFindPatternsClick');
   toolkit.getCurrentTabDataStateContainer().data$.documents$.next({
