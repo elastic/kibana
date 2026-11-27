@@ -9,12 +9,7 @@ import React, { useState } from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
-  EuiButton,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
+  EuiConfirmModal,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -189,61 +184,47 @@ export function WikiPageView({ pageId, canManage, onArchived }: WikiPageViewProp
         </EuiText>
       )}
       {isConfirmingArchive && version !== undefined && (
-        <EuiModal
+        <EuiConfirmModal
           aria-labelledby={archiveTitleId}
-          role="alertdialog"
-          onClose={() => setIsConfirmingArchive(false)}
+          titleProps={{ id: archiveTitleId }}
+          title={i18n.translate('xpack.nightshift.knowledge.wiki.archiveConfirmTitle', {
+            defaultMessage: 'Archive "{title}"?',
+            values: { title: page.title },
+          })}
+          onCancel={() => setIsConfirmingArchive(false)}
+          onConfirm={() =>
+            archivePage(
+              { id: page.id, version },
+              // Closing on failure makes the user review the refreshed page before trying again.
+              { onSuccess: onArchived, onError: () => setIsConfirmingArchive(false) }
+            )
+          }
+          isLoading={isArchiving}
+          cancelButtonText={i18n.translate('xpack.nightshift.knowledge.wiki.archiveConfirmCancel', {
+            defaultMessage: 'Cancel',
+          })}
+          confirmButtonText={i18n.translate(
+            'xpack.nightshift.knowledge.wiki.archiveConfirmButton',
+            { defaultMessage: 'Archive' }
+          )}
+          buttonColor="danger"
+          cancelButtonProps={{ 'data-test-subj': 'nightshiftWikiPageViewCancelButton' }}
+          confirmButtonProps={{
+            'data-test-subj': 'nightshiftWikiPageViewArchiveButton',
+            ...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.CONFIRM_ARCHIVE_WIKI_PAGE,
+              element: NIGHTSHIFT_EBT_ELEMENTS.WIKI_PAGE,
+            }),
+          }}
           data-test-subj="nightshiftWikiArchiveConfirm"
-          initialFocus="[data-test-subj='nightshiftWikiPageViewArchiveButton']"
         >
-          <EuiModalHeader>
-            <EuiModalHeaderTitle id={archiveTitleId}>
-              {i18n.translate('xpack.nightshift.knowledge.wiki.archiveConfirmTitle', {
-                defaultMessage: 'Archive "{title}"?',
-                values: { title: page.title },
-              })}
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
-          <EuiModalBody>
-            <p>
-              <FormattedMessage
-                id="xpack.nightshift.knowledge.wiki.archiveConfirmDescription"
-                defaultMessage="Investigations will stop loading this page. You can restore it later from the Archived filter."
-              />
-            </p>
-          </EuiModalBody>
-          <EuiModalFooter>
-            <EuiButtonEmpty
-              data-test-subj="nightshiftWikiPageViewCancelButton"
-              onClick={() => setIsConfirmingArchive(false)}
-            >
-              {i18n.translate('xpack.nightshift.knowledge.wiki.archiveConfirmCancel', {
-                defaultMessage: 'Cancel',
-              })}
-            </EuiButtonEmpty>
-            <EuiButton
-              data-test-subj="nightshiftWikiPageViewArchiveButton"
-              fill
-              color="danger"
-              isLoading={isArchiving}
-              onClick={() =>
-                archivePage(
-                  { id: page.id, version },
-                  // Closing on failure makes the user review the refreshed page before trying again.
-                  { onSuccess: onArchived, onError: () => setIsConfirmingArchive(false) }
-                )
-              }
-              {...getEbtProps({
-                action: NIGHTSHIFT_EBT_ACTIONS.CONFIRM_ARCHIVE_WIKI_PAGE,
-                element: NIGHTSHIFT_EBT_ELEMENTS.WIKI_PAGE,
-              })}
-            >
-              {i18n.translate('xpack.nightshift.knowledge.wiki.archiveConfirmButton', {
-                defaultMessage: 'Archive',
-              })}
-            </EuiButton>
-          </EuiModalFooter>
-        </EuiModal>
+          <p>
+            <FormattedMessage
+              id="xpack.nightshift.knowledge.wiki.archiveConfirmDescription"
+              defaultMessage="Investigations will stop loading this page. You can restore it later from the Archived filter."
+            />
+          </p>
+        </EuiConfirmModal>
       )}
     </div>
   );
