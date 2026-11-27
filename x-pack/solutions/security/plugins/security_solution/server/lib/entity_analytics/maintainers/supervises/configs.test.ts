@@ -18,11 +18,14 @@ const overrideConfigs = SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS.filter(
   (c): c is OverrideRelationshipIntegrationConfig => c.kind === 'override'
 );
 
-// The IDP configs read raw_identifiers off the entity index. The workday config
-// is log-inverted and shares none of that query shape, so the raw_identifiers
-// assertions below are scoped to these two.
+// Log-inverted configs read the user log index and invert each row's manager
+// field; they share none of the entity-index raw_identifiers query shape.
+const LOG_INVERTED_CONFIG_IDS = ['workday', 'google_workspace'];
+
+// The IDP configs read raw_identifiers off the entity index, so the
+// raw_identifiers assertions below are scoped to these.
 const rawIdentifiersConfigs = SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS.filter(
-  (c) => c.id !== 'workday'
+  (c) => !LOG_INVERTED_CONFIG_IDS.includes(c.id)
 );
 
 // id → (entity.source values, namespace suffix) the config is expected to emit.
@@ -42,10 +45,11 @@ const EXPECTED_SOURCE_BY_ID: Record<string, { entitySources: string[]; namespace
 };
 
 describe('SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
-  it('ships exactly the expected IDP integrations and workday (okta + entra_id + sailpoint + workday)', () => {
+  it('ships exactly the expected IDP and log-inverted integrations (okta + entra_id + sailpoint + workday + google_workspace)', () => {
     expect(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS.map((c) => c.id).sort()).toEqual([
       'entityanalytics_entra_id',
       'entityanalytics_okta',
+      'google_workspace',
       'sailpoint_identity_sc',
       'workday',
     ]);
@@ -165,15 +169,25 @@ describe('SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
   );
 
   describe('lookback window', () => {
-    it('declares disableLookbackWindow on every config', () => {
+    // Google Workspace keeps the engine's lookback: its @timestamp is the
+    // collection time, and the pre-run reset probe reuses the same Step 1 filter.
+    const lookbackDisabledConfigs = SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS.filter(
+      (c) => c.id !== 'google_workspace'
+    );
+
+    it('declares disableLookbackWindow on every config except google_workspace', () => {
       // IDP configs gate on entity.lifecycle.last_seen; Workday gates on event.ingested.
       // Neither wants the engine's @timestamp window.
-      for (const config of SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS) {
+      for (const config of lookbackDisabledConfigs) {
         expect(config.disableLookbackWindow).toBe(true);
       }
+      expect(
+        SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS.find((c) => c.id === 'google_workspace')
+          ?.disableLookbackWindow
+      ).toBeUndefined();
     });
 
-    it.each(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS)(
+    it.each(lookbackDisabledConfigs)(
       '$id: Step 1 actor discovery query omits the @timestamp lookback range',
       (config) => {
         const query = buildActorDiscoveryQuery(config, undefined) as {
@@ -306,6 +320,7 @@ describe('workday (log-inverted) supervises config', () => {
     ).toEqual([
       'entityanalytics_entra_id',
       'entityanalytics_okta',
+      'google_workspace',
       'sailpoint_identity_sc',
       'workday',
     ]);
@@ -501,9 +516,153 @@ describe('workday (log-inverted) supervises config', () => {
       // Okta and Entra read raw_identifiers off the entity index, which is already
       // current-state; they have no stale-edge problem to solve and must not be
       // cleared.
-      for (const config of buildSupervisesConfigs().filter((c) => c.id !== 'workday')) {
+      for (const config of buildSupervisesConfigs().filter(
+        (c) => !LOG_INVERTED_CONFIG_IDS.includes(c.id)
+      )) {
         expect(config.resetRelationshipsBeforeRun).toBeUndefined();
       }
+    });
+  });
+});
+
+describe('google_workspace (log-inverted) supervises config', () => {
+  const MANAGER_FIELD = 'google_workspace.users.manager_email';
+  const getGoogleWorkspaceConfig = () =>
+    buildSupervisesConfigs('2026-09-01T00:00:00.000Z').find(
+      (c): c is OverrideRelationshipIntegrationConfig => c.id === 'google_workspace'
+    )!;
+
+  it('reads the google_workspace users log data stream, not the entity index', () => {
+    expect(getGoogleWorkspaceConfig().indexPattern('default')).toBe(
+      'logs-google_workspace.users-default'
+    );
+  });
+
+  it('declares a user → user override config with target validation', () => {
+    const config = getGoogleWorkspaceConfig();
+    expect(config.kind).toBe('override');
+    expect(config.relationshipKey).toBe('supervises');
+    expect(config.targetEntityType).toBe('user');
+    expect(config.validateTargetIds).toBe(true);
+  });
+
+  it('buckets managers, not reports, in step 1', () => {
+    expect(getGoogleWorkspaceConfig().customActor?.fields).toEqual([MANAGER_FIELD]);
+  });
+
+  it('keeps the engine @timestamp lookback in both steps', () => {
+    const config = getGoogleWorkspaceConfig();
+    expect(config.disableLookbackWindow).toBeUndefined();
+
+    const step1 = buildActorDiscoveryQuery(config, undefined) as {
+      query: { bool: { filter: unknown[] } };
+    };
+    expect(step1.query.bool.filter.some((f) => JSON.stringify(f).includes('"@timestamp"'))).toBe(
+      true
+    );
+    // The window is applied by the engine, never hand-written in the override query.
+    expect(config.esqlQueryOverride('default', ['a@x'])).not.toContain('NOW()');
+  });
+
+  it('ignores the watermark: the config is stateless across runs', () => {
+    const withWatermark = buildSupervisesConfigs('2026-09-01T00:00:00.000Z').find(
+      (c): c is OverrideRelationshipIntegrationConfig => c.id === 'google_workspace'
+    )!;
+    const withoutWatermark = buildSupervisesConfigs().find(
+      (c): c is OverrideRelationshipIntegrationConfig => c.id === 'google_workspace'
+    )!;
+    expect(withWatermark.esqlQueryOverride('default', ['a@x'])).toBe(
+      withoutWatermark.esqlQueryOverride('default', ['a@x'])
+    );
+    expect(withWatermark.compositeAggAdditionalFilters).toEqual(
+      withoutWatermark.compositeAggAdditionalFilters
+    );
+  });
+
+  it('does not prepend the engine preamble (the engine adds it)', () => {
+    expect(getGoogleWorkspaceConfig().esqlQueryOverride('default', ['a@x'])).not.toContain(
+      'unmapped_fields'
+    );
+  });
+
+  it('emits the engine actor and relationship columns', () => {
+    const query = getGoogleWorkspaceConfig().esqlQueryOverride('default', ['a@x']);
+    expect(query).toContain('actorUserId');
+    expect(query).toContain('supervises = VALUES(targetEntityId)');
+  });
+
+  it('collapses each user to the manager of their newest snapshot before expanding', () => {
+    const query = getGoogleWorkspaceConfig().esqlQueryOverride('default', ['a@x']);
+    const collapseIdx = query.indexOf(`LAST(${MANAGER_FIELD}, @timestamp) BY targetEntityId`);
+    const expandIdx = query.indexOf('MV_EXPAND managerKey');
+    expect(collapseIdx).toBeGreaterThanOrEqual(0);
+    expect(expandIdx).toBeGreaterThan(collapseIdx);
+  });
+
+  it('MV_EXPANDs the manager BEFORE building the actor EUID (CONCAT is null on multi-valued input)', () => {
+    const query = getGoogleWorkspaceConfig().esqlQueryOverride('default', ['a@x']);
+    const expandIdx = query.indexOf('MV_EXPAND managerKey');
+    const concatIdx = query.indexOf('CONCAT("user:", managerKey, "@google_workspace")');
+    expect(expandIdx).toBeGreaterThanOrEqual(0);
+    expect(concatIdx).toBeGreaterThan(expandIdx);
+  });
+
+  it('guards against empty, namespace-only and malformed actor EUIDs', () => {
+    const query = getGoogleWorkspaceConfig().esqlQueryOverride('default', ['a@x']);
+    expect(query).toContain('managerKey != ""');
+    expect(query).toContain('actorUserId != "user:@google_workspace"');
+    expect(query).toContain('actorUserId RLIKE ".+:.+@.+"');
+  });
+
+  it('derives the target EUID via the canonical helper, not a hand-built CONCAT', () => {
+    const query = getGoogleWorkspaceConfig().esqlQueryOverride('default', ['a@x']);
+    expect(query).not.toContain('CONCAT("user:", user.');
+    // Ranking is email first, then id, name@domain and name — each scoped by namespace.
+    expect(query).toContain('entity.namespace');
+    expect(query).toContain('user.email');
+  });
+
+  it('emits the host-scoped local branch, which Google Workspace rows must not trigger', () => {
+    // Directory users carry no host.id, so the local (user.name@host.id@local)
+    // ranking arm never matches and the target EUID stays email-keyed.
+    const query = getGoogleWorkspaceConfig().esqlQueryOverride('default', ['a@x']);
+    expect(query).toContain('"local"');
+  });
+
+  describe('actor scoping and row cap', () => {
+    it('scopes Step 2 to the page actor values via positional params', () => {
+      const config = getGoogleWorkspaceConfig();
+      expect(config.scopeToPageActorValues).toBe(true);
+      expect(config.esqlQueryOverride('default', ['a@x', 'b@x', 'c@x'])).toContain(
+        'managerKey IN (?, ?, ?)'
+      );
+    });
+
+    it('caps Step 2 rows at the Step 1 page size, which one actor field cannot exceed', () => {
+      const query = getGoogleWorkspaceConfig().esqlQueryOverride('default', ['a@x']);
+      expect(query).toContain(`LIMIT ${COMPOSITE_PAGE_SIZE}`);
+      // ES|QL silently caps any higher LIMIT at the result truncation maximum.
+      expect(COMPOSITE_PAGE_SIZE).toBeLessThanOrEqual(10_000);
+    });
+
+    it("fits a saturated page's actor values under the LIMIT", () => {
+      const buckets = Array.from({ length: COMPOSITE_PAGE_SIZE }, (_, i) => ({
+        key: { [MANAGER_FIELD]: `manager${i}@example.com` },
+        doc_count: 1,
+      }));
+      const config = getGoogleWorkspaceConfig();
+      const values = getPageActorValues(config, buckets);
+      expect(values.length).toBeLessThanOrEqual(COMPOSITE_PAGE_SIZE);
+      expect(config.esqlQueryOverride('default', values)).toContain(`LIMIT ${COMPOSITE_PAGE_SIZE}`);
+    });
+  });
+
+  it('resets its relationships before each run', () => {
+    // The stream re-emits the full directory every poll, so a manager change must
+    // remove the previous edge; the engine cannot retract, so the config clears
+    // and repopulates instead.
+    expect(getGoogleWorkspaceConfig().resetRelationshipsBeforeRun).toEqual({
+      entitySource: 'google_workspace',
     });
   });
 });
