@@ -31,6 +31,7 @@ import {
   deriveRecoveryDelayModeFromStateTransition,
 } from './state_transition_helpers';
 import { ruleQueryToApiQuery } from './query_mappers';
+import { formReasonToApiReason } from './reason_mappers';
 import {
   apiNoDataToFormNoData,
   apiRecoveryToFormRecovery,
@@ -64,6 +65,7 @@ const parseArtifacts = (artifacts: unknown): FormValues['artifacts'] => {
 interface YamlRuleObject {
   kind: string;
   metadata: { name: string; description?: string; tags?: string[]; routing_tags?: string[] };
+  reason?: { template: string };
   time_field: string;
   schedule: { every: string; lookback: string };
   query: Query;
@@ -83,6 +85,7 @@ const TOP_LEVEL_FIELDS = new Set(
   Object.keys({
     kind: true,
     metadata: true,
+    reason: true,
     time_field: true,
     schedule: true,
     query: true,
@@ -137,6 +140,7 @@ export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
   const allArtifacts = mergeArtifactsByType(values);
   const recovery = formRecoveryToApiRecovery(values);
   const noData = formNoDataToApiNoData(values);
+  const reason = formReasonToApiReason(values);
 
   return {
     kind: values.kind,
@@ -146,6 +150,7 @@ export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
       ...(values.metadata.tags?.length && { tags: values.metadata.tags }),
       ...(values.metadata.routingTags?.length && { routing_tags: values.metadata.routingTags }),
     },
+    ...(reason ? { reason } : {}),
     time_field: values.timeField,
     schedule: {
       every: values.schedule.every,
@@ -222,7 +227,7 @@ const parseQuery = (queryObj: Record<string, unknown> | undefined): RuleQuery =>
   breach: { segment: extractNestedString(queryObj?.breach, 'segment') },
 });
 
-const ALERT_ONLY_KEYS = ['recovery', 'no_data', 'state_transition'] as const;
+const ALERT_ONLY_KEYS = ['reason', 'recovery', 'no_data', 'state_transition'] as const;
 
 /*
  * Both blocks are parsed with the write schema rather than the strategy alone.
@@ -331,6 +336,16 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
     };
   }
 
+  const reasonTemplate = (obj.reason as { template?: unknown } | null | undefined)?.template;
+  if (obj.reason != null && typeof reasonTemplate !== 'string') {
+    return {
+      values: null,
+      error: i18n.translate('xpack.alertingV2.yamlRuleForm.invalidReasonError', {
+        defaultMessage: 'Invalid reason. Set reason.template to a text.',
+      }),
+    };
+  }
+
   const parsedRecovery = parseRecovery(obj.recovery);
   if (obj.recovery !== undefined && parsedRecovery === undefined) {
     return {
@@ -386,6 +401,7 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
           ? (metadata.routing_tags as string[])
           : undefined,
       },
+      ...(typeof reasonTemplate === 'string' ? { reason: { template: reasonTemplate } } : {}),
       timeField: typeof obj.time_field === 'string' ? obj.time_field : '@timestamp',
       schedule: {
         every: typeof schedule?.every === 'string' ? schedule.every : '5m',

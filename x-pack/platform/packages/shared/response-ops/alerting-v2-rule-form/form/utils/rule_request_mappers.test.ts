@@ -58,6 +58,36 @@ describe('rule_request_mappers', () => {
       expect(result.metadata.routing_tags).toEqual(['sre']);
     });
 
+    it('maps the reason of an alert rule', () => {
+      const result = mapFormValuesToRuleRequest({
+        ...baseFormValues,
+        kind: 'alert',
+        reason: { template: 'CPU on {{ data.host.name }}' },
+      });
+
+      expect(result.reason).toEqual({ template: 'CPU on {{ data.host.name }}' });
+    });
+
+    it('omits the reason of a signal rule', () => {
+      const result = mapFormValuesToRuleRequest({
+        ...baseFormValues,
+        kind: 'signal',
+        reason: { template: 'CPU on {{ data.host.name }}' },
+      });
+
+      expect(result).not.toHaveProperty('reason');
+    });
+
+    it('omits a blank reason', () => {
+      const result = mapFormValuesToRuleRequest({
+        ...baseFormValues,
+        kind: 'alert',
+        reason: { template: '   ' },
+      });
+
+      expect(result).not.toHaveProperty('reason');
+    });
+
     it('keeps the breach block when the segment is non-empty', () => {
       const result = mapFormValuesToRuleRequest({
         ...baseFormValues,
@@ -957,6 +987,22 @@ describe('rule_request_mappers', () => {
       });
     });
 
+    it('nullifies a reason the user removed rather than omitting it', () => {
+      const result = mapFormValuesToUpdateRequest({ ...baseFormValues, kind: 'alert' });
+
+      expect(result.reason).toBeNull();
+    });
+
+    it('passes through the reason the user kept', () => {
+      const result = mapFormValuesToUpdateRequest({
+        ...baseFormValues,
+        kind: 'alert',
+        reason: { template: 'Delay {{ data.delay }}' },
+      });
+
+      expect(result.reason).toEqual({ template: 'Delay {{ data.delay }}' });
+    });
+
     it('nullifies routing tags the user emptied rather than omitting them', () => {
       const formValues: FormValues = {
         ...baseFormValues,
@@ -1088,6 +1134,19 @@ describe('rule_request_mappers', () => {
         base: 'FROM logs-* | STATS count() BY host',
       },
     } as RuleResponse;
+
+    it('loads the reason from the rule', () => {
+      const result = mapRuleResponseToFormValues({
+        ...baseRuleResponse,
+        reason: { template: 'Delay {{ data.delay }}' },
+      });
+
+      expect(result.reason).toEqual({ template: 'Delay {{ data.delay }}' });
+    });
+
+    it('leaves the reason unset when the rule has none', () => {
+      expect(mapRuleResponseToFormValues(baseRuleResponse)).not.toHaveProperty('reason');
+    });
 
     it('loads routing tags from the rule', () => {
       const result = mapRuleResponseToFormValues({

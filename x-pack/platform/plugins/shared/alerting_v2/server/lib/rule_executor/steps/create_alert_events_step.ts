@@ -88,6 +88,12 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
           ruleVersion: state.rule.version,
           type: eventType,
           maxGroupsPerExecution: step.maxGroupsPerExecution,
+          reasonRenderer: step.buildReasonRenderer({
+            rule: state.rule,
+            eventType,
+            ruleId: state.input.ruleId,
+            spaceId: state.input.spaceId,
+          }),
           activeGroupHashes: new Set(
             (state.activeGroups ?? []).map(({ group_hash: groupHash }) => groupHash)
           ),

@@ -545,6 +545,48 @@ describe('yaml_form_utils', () => {
       expect(result.error).toBe('Signal rules cannot set metadata.routing_tags.');
     });
 
+    it('rejects a signal rule that sets reason', () => {
+      const yaml = stringify({
+        kind: 'signal',
+        metadata: { name: 'Signal rule' },
+        reason: { template: 'x' },
+        query: { base: 'FROM logs-*' },
+      });
+
+      const result = parseYamlToFormValues(yaml);
+
+      expect(result.values).toBeNull();
+      expect(result.error).toBe('Signal rules cannot set reason.');
+    });
+
+    it('rejects a reason without a text template', () => {
+      const yaml = stringify({
+        kind: 'alert',
+        metadata: { name: 'Alert rule' },
+        reason: { template: 5 },
+        query: { base: 'FROM logs-*' },
+      });
+
+      const result = parseYamlToFormValues(yaml);
+
+      expect(result.values).toBeNull();
+      expect(result.error).toBe('Invalid reason. Set reason.template to a text.');
+    });
+
+    it('reads reason into the form values', () => {
+      const yaml = stringify({
+        kind: 'alert',
+        metadata: { name: 'Alert rule' },
+        reason: { template: 'CPU {{ data.cpu }}' },
+        query: { base: 'FROM logs-*' },
+      });
+
+      const result = parseYamlToFormValues(yaml);
+
+      expect(result.error).toBeNull();
+      expect(result.values?.reason).toEqual({ template: 'CPU {{ data.cpu }}' });
+    });
+
     it('reads metadata.routing_tags into the form values', () => {
       const yaml = stringify({
         kind: 'alert',
@@ -905,6 +947,24 @@ describe('yaml_form_utils', () => {
   });
 
   describe('round-trip stability', () => {
+    it('parse(serialize(values)) preserves the reason', () => {
+      const original: FormValues = {
+        kind: 'alert',
+        metadata: { name: 'Reason rule', enabled: true },
+        reason: { template: 'CPU on {{ data.host.name }}: {{ data.cpu }}%' },
+        timeField: '@timestamp',
+        schedule: { every: '5m', lookback: '1m' },
+        query: { base: 'FROM logs-*', breach: { segment: '' } },
+        stateTransitionAlertDelayMode: 'immediate',
+        stateTransitionRecoveryDelayMode: 'immediate',
+      };
+
+      const result = parseYamlToFormValues(serializeFormToYaml(original));
+
+      expect(result.error).toBeNull();
+      expect(result.values?.reason).toEqual(original.reason);
+    });
+
     it('parse(serialize(values)) preserves routing tags', () => {
       const original: FormValues = {
         kind: 'alert',

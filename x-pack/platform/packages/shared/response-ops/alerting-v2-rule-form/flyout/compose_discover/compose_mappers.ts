@@ -25,6 +25,7 @@ import {
   formNoDataToApiNoData,
   formRecoveryToApiRecovery,
 } from '../../form/utils/lifecycle_mappers';
+import { formReasonToApiReason } from '../../form/utils/reason_mappers';
 import type { FormValues } from '../../form/types';
 
 export const composeFormToCreateRequest = (
@@ -34,6 +35,7 @@ export const composeFormToCreateRequest = (
   const artifacts = mapArtifacts(mergeArtifactsByType(formValues));
   const recovery = formRecoveryToApiRecovery(formValues);
   const noData = formNoDataToApiNoData(formValues);
+  const reason = formReasonToApiReason(formValues);
 
   return {
     kind: formValues.kind,
@@ -46,6 +48,7 @@ export const composeFormToCreateRequest = (
         : {}),
       ...(builderType ? { builder: { type: builderType } } : {}),
     },
+    ...(reason ? { reason } : {}),
     time_field: formValues.timeField,
     schedule: { every: formValues.schedule.every, lookback: formValues.schedule.lookback },
     query: ruleQueryToApiQuery(formValues.query),
@@ -96,6 +99,7 @@ export const mapRuleToComposeFormValues = (rule: RuleResponse): FormValues => {
       tags: rule.metadata.tags,
       routingTags: rule.metadata.routing_tags,
     },
+    ...(rule.reason ? { reason: rule.reason } : {}),
     timeField: rule.time_field,
     schedule: {
       every: rule.schedule.every,
