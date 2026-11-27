@@ -95,14 +95,15 @@ export const crashEvents = ({ start, end, ...filters }: CrashEventsParams): Comp
  * column first compared with `?_tstart`, on that range itself, so it is `observed_timestamp`: when
  * the SDK observed the crash, which OTel sets on every log record and EDOT iOS sets to the crash's
  * time, while `@timestamp` can be the next launch's. The crashes are the Crashes tab's: they
- * happened in the range, and were sent up to `MOBILE_MAX_CRASH_DELAY_HOURS` after it.
+ * happened in the range, and were sent up to `MOBILE_MAX_CRASH_DELAY_HOURS` after it, including
+ * those whose crash time is `@timestamp` because their observed time is unset or later.
  */
 export const crashEventsInDiscoverRange = (filters: MobilePanelFilters): ComposerQuery =>
   crashesInRange(
     filters,
-    (query, crashTime) => query.pipe`WHERE ${mobileColumn(
+    (query, crashTime) => query.pipe`WHERE (${mobileColumn(
       'observedTimestamp'
-    )} >= ?_tstart AND ${mobileColumn('observedTimestamp')} < ?_tend
+    )} >= ?_tstart AND ${mobileColumn('observedTimestamp')} < ?_tend OR ${crashTime} == @timestamp)
       AND @timestamp >= ?_tstart
       AND @timestamp < TO_DATETIME(?_tend) + ${esql.exp(`${MOBILE_MAX_CRASH_DELAY_HOURS} hours`)}
       AND ${crashTime} >= ?_tstart AND ${crashTime} < ?_tend`
