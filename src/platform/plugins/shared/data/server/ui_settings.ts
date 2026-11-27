@@ -301,10 +301,11 @@ export function getUiSettings(
       value: 1000,
       description: i18n.translate('data.advancedSettings.histogram.maxBarsText', {
         defaultMessage: `
-          Limits the density of date and number histograms across Kibana
-          for better performance using a test query. If the test query would too many buckets,
+          Limits the density of manual date intervals and number histograms across Kibana
+          for better performance using a test query. If the test query would return too many buckets,
           the interval between buckets will be increased. This setting applies separately
           to each histogram aggregation, and does not apply to other types of aggregation.
+          Auto date intervals are not limited by this setting, they follow the target buckets setting.
           To find the maximum value of this setting, divide the Elasticsearch 'search.max_buckets'
           value by the maximum number of aggregations in each visualization.
         `,
