@@ -23519,6 +23519,286 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/context_engine/_recall:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/context_engine/_recall</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Searches the stores named in `include` for context relevant to `query`: a user's session events and session memories, and AI indices. Results from all stores are reranked together, most relevant first.
+
+        `token_budget` caps the approximate size of the returned context (defaults to 6000 tokens). Only whole results are returned, so the context can be smaller than the budget. `format` returns the context as one YAML string (`yaml`, the default) or as a list of results (`json`).
+
+        The route needs the `contextEngine:read` privilege. Naming another user in `user_id` also needs `contextEngine:manage_memory`. AI indices are searched as the caller, who needs the Elasticsearch `read` privilege on their backing indices; an AI index the caller cannot read returns no results.
+
+        Each request that queries `session_events` or `session_memory` writes one `memory_recall` audit event.
+
+        Returns 429 when Elasticsearch rejects the request because it is overloaded; retry with backoff.
+
+        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`), or when memory is turned off (`contextEngine:memoryEnabled`) and `include` names `session_events` or `session_memory`.
+
+        **For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**<br/><br/>[Required authorization] Route required privileges: contextEngine:read. Extended privileges (optional, expand functionality when granted): contextEngine:manage_memory.
+      operationId: post-context-engine-recall
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              recallJsonRequestExample:
+                description: Example request to recall context from two sessions and every AI index the caller can read, returned as a list of results.
+                summary: Recall context as JSON
+                value:
+                  format: json
+                  include:
+                    - session_events
+                    - session_memory
+                    - ai_index:*
+                  query: Why is checkout latency up since this morning?
+                  session_ids:
+                    - 3f9c2e1a-7b4d-4c8e-9a61-5d2f0b7e8c43
+                    - 8a1d4f2b-2c6e-4b9a-b7d3-1e5f9c0a2d64
+                  user_id: u_jdoe_profile
+              recallYamlRequestExample:
+                description: Example request to recall context from a user's session events, session memories, and one AI index, returned as YAML within a 6000-token budget.
+                summary: Recall context as YAML
+                value:
+                  include:
+                    - session_events
+                    - session_memory
+                    - ai_index:ops-memory
+                  query: Why is checkout latency up since this morning?
+                  token_budget: 6000
+                  user_id: u_jdoe_profile
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                format:
+                  description: 'The response shape: `yaml` (default) or `json`.'
+                  enum:
+                    - yaml
+                    - json
+                  type: string
+                include:
+                  description: 'The stores to search: `session_events`, `session_memory`, `ai_index:*`, or `ai_index:<ai_index_id>`.'
+                  items:
+                    maxLength: 265
+                    minLength: 1
+                    type: string
+                  maxItems: 102
+                  minItems: 1
+                  type: array
+                query:
+                  description: The question to recall context for.
+                  maxLength: 4096
+                  minLength: 1
+                  type: string
+                session_ids:
+                  description: Narrows `session_events` and `session_memory` results to one or more sessions.
+                  items:
+                    maxLength: 256
+                    minLength: 1
+                    type: string
+                  maxItems: 100
+                  type: array
+                token_budget:
+                  description: Approximate token budget for the returned context (1000 to 25000). Defaults to 6000.
+                  maximum: 25000
+                  minimum: 1000
+                  type: number
+                user_id:
+                  description: Filters results to one user's memories and user-scoped context. Naming another user requires `contextEngine:manage_memory`.
+                  maxLength: 1024
+                  minLength: 1
+                  type: string
+              required:
+                - query
+                - user_id
+                - include
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                recallJsonResponseExample:
+                  description: The recalled results, most relevant first
+                  summary: Context as JSON
+                  value:
+                    results:
+                      - attributes:
+                          service: checkout-service
+                          type: configuration
+                        content: The checkout-service connection pool is capped at 20 connections.
+                        date: '2026-11-15T17:20:00.000Z'
+                        id: ki-42
+                        source: ai_index:ops-memory
+                      - content: The checkout-service deploy at 08:40 is the most likely cause.
+                        date: '2026-11-16T09:58:35.000Z'
+                        id: evt-004
+                        role: assistant
+                        session_id: 3f9c2e1a-7b4d-4c8e-9a61-5d2f0b7e8c43
+                        source: session_events
+                      - attributes:
+                          topic: ownership
+                        content: The user owns the checkout-service on-call rotation.
+                        date: '2026-11-14T11:02:00.000Z'
+                        id: mem-7
+                        session_id: 8a1d4f2b-2c6e-4b9a-b7d3-1e5f9c0a2d64
+                        source: session_memory
+                    took_ms: 212
+                recallYamlResponseExample:
+                  description: The recalled context as one YAML string, ready to add to a prompt
+                  summary: Context as YAML
+                  value:
+                    context: |
+                      results:
+                        - id: ki-42
+                          source: ai_index:ops-memory
+                          date: 2026-11-15T17:20:00.000Z
+                          content: The checkout-service connection pool is capped at 20 connections.
+                        - id: evt-004
+                          session_id: 3f9c2e1a-7b4d-4c8e-9a61-5d2f0b7e8c43
+                          source: session_events
+                          date: 2026-11-16T09:58:35.000Z
+                          role: assistant
+                          content: The checkout-service deploy at 08:40 is the most likely cause.
+                    took_ms: 184
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_context_engine_recall_yaml_response'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_context_engine_recall_json_response'
+          description: The recalled context, in the requested format.
+        '403':
+          content:
+            application/json:
+              examples:
+                manageMemoryRequiredExample:
+                  description: '`user_id` names another user and the caller lacks `contextEngine:manage_memory`'
+                  summary: Another user without manage memory
+                  value:
+                    error: Forbidden
+                    message: Acting on the memory of another user requires the [contextEngine:manage_memory] privilege.
+                    statusCode: 403
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: '`user_id` names another user and the caller lacks `contextEngine:manage_memory`.'
+        '404':
+          content:
+            application/json:
+              examples:
+                contextEngineDisabledExample:
+                  description: Context Engine is turned off in this space
+                  summary: Context Engine turned off
+                  value:
+                    error: Not Found
+                    message: Not Found
+                    statusCode: 404
+                memoryDisabledExample:
+                  description: Context Engine memory is turned off and `include` names a session store
+                  summary: Memory turned off
+                  value:
+                    error: Not Found
+                    message: Context Engine memory is turned off.
+                    statusCode: 404
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: Context Engine is turned off, or memory is turned off and `include` names a session store.
+        '429':
+          content:
+            application/json:
+              examples:
+                tooManyRequestsExample:
+                  description: Elasticsearch rejected the request with 429; retry with backoff
+                  summary: Too many requests
+                  value:
+                    error: Too Many Requests
+                    message: 'es_rejected_execution_exception: too many requests'
+                    statusCode: 429
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: Elasticsearch rejected the request because it is overloaded; retry with backoff.
+      summary: Recall context
+      tags:
+        - context engine
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/context_engine/_recall" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "Content-Type: application/json" \
+              -H "kbn-xsrf: true" \
+              -d '{
+                "query": "Why is checkout latency up since this morning?",
+                "user_id": "u_jdoe_profile",
+                "include": ["session_events", "session_memory", "ai_index:ops-memory"],
+                "token_budget": 6000
+              }'
+        - lang: Console
+          source: |
+            POST kbn:/api/context_engine/_recall
+            {
+              "query": "Why is checkout latency up since this morning?",
+              "user_id": "u_jdoe_profile",
+              "include": ["session_events", "session_memory", "ai_index:ops-memory"],
+              "token_budget": 6000
+            }
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/context_engine/ai_index:
     get:
       description: |-
@@ -162712,6 +162992,134 @@ components:
         - source
         - is_testable
       title: connector_type_response
+      type: object
+    Kibana_HTTP_APIs_context_engine_recall_ai_index_result:
+      additionalProperties: false
+      description: A recalled Knowledge Indicator from an AI index.
+      properties:
+        attributes:
+          additionalProperties:
+            nullable: true
+          description: Other fields of the AI index document.
+          type: object
+        content:
+          description: The recalled text.
+          type: string
+        date:
+          description: When the document was updated.
+          type: string
+        id:
+          description: The result id.
+          type: string
+        source:
+          description: The AI index the result is from, as `ai_index:<ai_index_id>`.
+          type: string
+      required:
+        - id
+        - source
+        - content
+      title: context_engine_recall_ai_index_result
+      type: object
+    Kibana_HTTP_APIs_context_engine_recall_json_response:
+      additionalProperties: false
+      properties:
+        results:
+          description: The recalled results, most relevant first.
+          items:
+            anyOf:
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_context_engine_recall_session_event_result'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_context_engine_recall_session_memory_result'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_context_engine_recall_ai_index_result'
+          type: array
+        took_ms:
+          description: How long the recall took, in milliseconds.
+          type: number
+      required:
+        - results
+        - took_ms
+      title: context_engine_recall_json_response
+      type: object
+    Kibana_HTTP_APIs_context_engine_recall_session_event_result:
+      additionalProperties: false
+      description: A recalled session event.
+      properties:
+        content:
+          description: The recalled text.
+          type: string
+        date:
+          description: When the event happened.
+          type: string
+        id:
+          description: The result id.
+          type: string
+        role:
+          description: Who wrote the message.
+          enum:
+            - user
+            - assistant
+          type: string
+        session_id:
+          description: The session the result is from.
+          type: string
+        source:
+          enum:
+            - session_events
+          type: string
+      required:
+        - id
+        - session_id
+        - source
+        - date
+        - role
+        - content
+      title: context_engine_recall_session_event_result
+      type: object
+    Kibana_HTTP_APIs_context_engine_recall_session_memory_result:
+      additionalProperties: false
+      description: A recalled session memory.
+      properties:
+        attributes:
+          additionalProperties:
+            type: string
+          description: The attributes stored with the memory.
+          type: object
+        content:
+          description: The recalled text.
+          type: string
+        date:
+          description: When the memory was last updated.
+          type: string
+        id:
+          description: The result id.
+          type: string
+        session_id:
+          description: The session the result is from.
+          type: string
+        source:
+          enum:
+            - session_memory
+          type: string
+      required:
+        - id
+        - session_id
+        - source
+        - date
+        - content
+      title: context_engine_recall_session_memory_result
+      type: object
+    Kibana_HTTP_APIs_context_engine_recall_yaml_response:
+      additionalProperties: false
+      properties:
+        context:
+          description: The recalled context as YAML, ready to add to a prompt.
+          type: string
+        took_ms:
+          description: How long the recall took, in milliseconds.
+          type: number
+      required:
+        - context
+        - took_ms
+      title: context_engine_recall_yaml_response
       type: object
     Kibana_HTTP_APIs_context_engine_session_event_assistant:
       additionalProperties: true
