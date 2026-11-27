@@ -39,6 +39,33 @@ export interface RuleDataClientConstructorOptions {
 
 export type WaitResult = Either<Error, ElasticsearchClient>;
 
+/**
+ * Per-item bulk failure status codes that are expected during normal alert writing and
+ * should not be logged as errors. `409` version conflicts happen routinely while
+ * de-duplicating alerts and are already treated as non-fatal by the persistence rule type
+ * wrapper (`errorAggregator([409])`).
+ */
+const IGNORED_BULK_STATUS_CODES: readonly number[] = [409];
+
+/**
+ * Returns true when a bulk response contains at least one per-item failure whose status code
+ * is not in `ignoreStatusCodes`. Elasticsearch flips the top-level `errors` flag to `true` for
+ * any failing item, so this check distinguishes genuine write failures worth logging from
+ * benign/expected outcomes such as version conflicts.
+ */
+const hasNonIgnorableBulkFailures = (
+  body: estypes.BulkResponse,
+  ignoreStatusCodes: readonly number[]
+): boolean =>
+  body.items.some((item) => {
+    const operation = item.create ?? item.index ?? item.update ?? item.delete;
+    return (
+      operation?.error != null &&
+      operation.status != null &&
+      !ignoreStatusCodes.includes(operation.status)
+    );
+  });
+
 export class RuleDataClient implements IRuleDataClient {
   private _isWriteEnabled: boolean = false;
   private _isWriterCacheEnabled: boolean = true;
@@ -234,6 +261,18 @@ export class RuleDataClient implements IRuleDataClient {
             });
 
             if (!response.body.errors) {
+              return response;
+            }
+
+            // Elasticsearch sets the top-level `errors` flag to `true` when ANY bulk item
+            // fails, including benign/expected outcomes such as `409` version conflicts that
+            // occur during alert de-duplication. The persistence rule type wrapper that calls
+            // this writer already treats `409` as non-fatal (see `errorAggregator([409])` in
+            // `create_persistence_rule_type_wrapper.ts`). Branching on the top-level flag alone
+            // caused the entire bulk response (including every successful `201` item) to be
+            // logged as an ERROR, producing large, noisy, and misleading log entries.
+            // Only treat the response as an error when a non-ignorable per-item failure remains.
+            if (!hasNonIgnorableBulkFailures(response.body, IGNORED_BULK_STATUS_CODES)) {
               return response;
             }
 
