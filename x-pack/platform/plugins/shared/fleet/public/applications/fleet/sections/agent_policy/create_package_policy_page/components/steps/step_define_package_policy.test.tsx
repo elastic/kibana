@@ -10,6 +10,7 @@ import { waitFor, act, fireEvent } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 
 import { AwsIdentityFederationSetup } from '../../../../../../../components/cloud_connector/aws_connect_setup/aws_identity_federation_setup';
+import { useGetCloudConnectors } from '../../../../../../../components/cloud_connector/hooks/use_get_cloud_connectors';
 import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
 import { getInheritedNamespace } from '../../../../../../../../common/services';
 
@@ -31,6 +32,11 @@ jest.mock(
     )),
   })
 );
+
+jest.mock('../../../../../../../components/cloud_connector/hooks/use_get_cloud_connectors');
+const mockUseGetCloudConnectors = useGetCloudConnectors as jest.MockedFunction<
+  typeof useGetCloudConnectors
+>;
 
 jest.mock('./components/hooks', () => ({
   ...jest.requireActual('./components/hooks'),
@@ -58,6 +64,20 @@ jest.mock('../../../../../../../hooks/use_space_settings_context', () => ({
     defaultNamespace: 'default',
   }),
 }));
+
+const roleArn = 'arn:aws:iam::123456789012:role/ElasticFederatedIdentity';
+const awsConnectors = [
+  {
+    id: 'connector-1',
+    name: 'First',
+    cloudProvider: 'aws',
+    accountType: 'single-account',
+    vars: { role_arn: { type: 'text', value: roleArn } },
+    packagePolicyCount: 0,
+    created_at: '2026-11-26T10:00:00.000Z',
+    updated_at: '2026-11-26T10:00:00.000Z',
+  },
+];
 
 describe('StepDefinePackagePolicy', () => {
   const packageInfo: PackageInfo = {
@@ -140,6 +160,10 @@ describe('StepDefinePackagePolicy', () => {
     ));
 
   beforeEach(() => {
+    mockUseGetCloudConnectors.mockReturnValue({
+      data: awsConnectors,
+      isLoading: false,
+    } as unknown as ReturnType<typeof useGetCloudConnectors>);
     packagePolicy = {
       name: '',
       description: 'desc',
@@ -608,6 +632,94 @@ describe('StepDefinePackagePolicy', () => {
         ],
       })
     );
+  });
+
+  describe('attaching the AWS identity the shared setup reports', () => {
+    const awsPackage: PackageInfo = {
+      ...packageInfo,
+      name: 'aws',
+      version: '8.17.0',
+      vars: [{ name: 'role_arn', type: 'text', title: 'Role ARN' }],
+      var_groups: [
+        {
+          name: 'credential_type',
+          title: 'Setup Access',
+          selector_title: 'Preferred method',
+          required: true,
+          options: [
+            {
+              name: 'identity_federation',
+              title: 'Identity Federation',
+              provider: 'aws',
+              vars: ['role_arn'],
+            },
+          ],
+        },
+      ],
+    };
+    const awsPolicy: NewPackagePolicy = {
+      ...packagePolicy,
+      supports_agentless: true,
+      var_group_selections: { credential_type: 'identity_federation' },
+      vars: { role_arn: { type: 'text', value: undefined } },
+      inputs: [{ type: 'httpjson', enabled: true, policy_template: 'guardduty', streams: [] }],
+    };
+
+    const renderAwsStep = (policy: NewPackagePolicy) =>
+      testRenderer.render(
+        <StepDefinePackagePolicy
+          packageInfo={awsPackage}
+          packagePolicy={policy}
+          updatePackagePolicy={mockUpdatePackagePolicy}
+          validationResults={validationResults}
+          submitAttempted={false}
+          isAgentlessSelected
+          identityFederation={{ provider: 'aws', onReadyChange: jest.fn() }}
+        />
+      );
+
+    it('writes the selected identity and its role ARN onto the policy', () => {
+      renderResult = renderAwsStep(awsPolicy);
+      mockUpdatePackagePolicy.mockClear();
+
+      act(() => {
+        jest
+          .mocked(AwsIdentityFederationSetup)
+          .mock.lastCall?.[0].onConnectorIdChange?.('connector-1', 'First');
+      });
+
+      expect(mockUpdatePackagePolicy).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          cloud_connector_id: 'connector-1',
+          vars: { role_arn: { type: 'text', value: roleArn } },
+        })
+      );
+    });
+
+    it('removes the identity and its role ARN from the policy when the selection clears', () => {
+      renderResult = renderAwsStep({
+        ...awsPolicy,
+        cloud_connector_id: 'connector-1',
+        vars: { role_arn: { type: 'text', value: roleArn } },
+      });
+      mockUpdatePackagePolicy.mockClear();
+
+      act(() => {
+        jest.mocked(AwsIdentityFederationSetup).mock.lastCall?.[0].onConnectorIdChange?.(undefined);
+      });
+
+      const update = mockUpdatePackagePolicy.mock.lastCall?.[0];
+      expect(update).toHaveProperty('cloud_connector_id', undefined);
+      expect(update?.vars?.role_arn?.value).toBeUndefined();
+    });
+
+    it('passes the policy identity to a remounted setup so it stays selected', () => {
+      renderResult = renderAwsStep({ ...awsPolicy, cloud_connector_id: 'connector-1' });
+
+      expect(jest.mocked(AwsIdentityFederationSetup).mock.lastCall?.[0]).toEqual(
+        expect.objectContaining({ initialConnectorId: 'connector-1' })
+      );
+    });
   });
 
   describe('var group selections state management', () => {

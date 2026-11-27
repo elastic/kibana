@@ -561,13 +561,9 @@ export function useOnSubmit({
   useEffect(() => {
     if (!identityFederationProvider) onIdentityFederationReadyChange(false);
   }, [identityFederationProvider]);
-  const identityFederationSubmitState = identityFederationProvider
-    ? identityFederationReady
-      ? 'pendingAttachment'
-      : 'notReady'
-    : 'inactive';
-  // The create package policy page will attach the selected identity to the policy in ingest-dev#10669.
-  const isIdentityFederationSaveBlocked = identityFederationSubmitState !== 'inactive';
+  // The shared setup reports ready once an identity is created or selected and its template
+  // covers the enabled inputs; until then Save stays blocked. The rest is ordinary validation.
+  const isIdentityFederationSaveBlocked = !!identityFederationProvider && !identityFederationReady;
 
   const newInputs = useMemo(() => {
     const varGroupSelections = packagePolicy.var_group_selections ?? {};

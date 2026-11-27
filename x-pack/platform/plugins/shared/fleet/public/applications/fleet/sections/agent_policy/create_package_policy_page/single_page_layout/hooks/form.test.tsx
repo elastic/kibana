@@ -1400,9 +1400,14 @@ describe('useOnSubmit', () => {
       }
     );
 
-    it.each([{}, { skipConfirmModal: true }, { force: true }])(
-      'blocks a ready AWS identity without a new policy attachment (%j)',
-      async (submitOptions) => {
+    it.each([
+      [{}, false],
+      [{ skipConfirmModal: true }, false],
+      [{ force: true }, false],
+      [{}, true],
+    ])(
+      'submits through the identity guard only once the AWS identity is ready (%j, ready=%s)',
+      async (submitOptions, isReady) => {
         const awsFederationPackage: PackageInfo = {
           ...awsPackageInfo,
           var_groups: [
@@ -1450,16 +1455,21 @@ describe('useOnSubmit', () => {
         });
         await waitFor(() => expect(renderResult.result.current.isAgentlessSelected).toBe(true));
         act(() => {
-          renderResult.result.current.onIdentityFederationReadyChange?.(true);
+          renderResult.result.current.onIdentityFederationReadyChange?.(isReady);
         });
+        expect(renderResult.result.current.isIdentityFederationSaveBlocked).toBe(!isReady);
 
         await act(async () => {
           await renderResult.result.current.onSubmit(submitOptions);
         });
 
-        expect(renderResult.result.current.submitAttempted).toBe(false);
-        expect(sendCreateAgentlessPolicy).not.toHaveBeenCalled();
-        expect(mockReportDeployClicked).not.toHaveBeenCalled();
+        // Not ready: the guard returns before any submit side effect. Ready: the submit runs
+        // and reaches validation (the identity's attachment is covered by its own tests).
+        expect(renderResult.result.current.submitAttempted).toBe(isReady);
+        if (!isReady) {
+          expect(sendCreateAgentlessPolicy).not.toHaveBeenCalled();
+          expect(mockReportDeployClicked).not.toHaveBeenCalled();
+        }
       }
     );
 

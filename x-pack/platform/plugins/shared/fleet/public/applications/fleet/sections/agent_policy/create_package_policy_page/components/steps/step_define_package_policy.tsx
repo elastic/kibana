@@ -888,8 +888,9 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                           {cloudProvider === 'aws' &&
                           identityFederation?.provider === cloudProvider ? (
                             <PackagePolicyAwsIdentityFederationSetup
-                              packageName={packageInfo.name}
-                              inputs={packagePolicy.inputs}
+                              packageInfo={packageInfo}
+                              packagePolicy={packagePolicy}
+                              updatePolicy={handleCloudConnectorUpdate}
                               accountType={accountType}
                               cloud={cloud}
                               iacTemplateUrl={iacTemplateUrl}

@@ -57,15 +57,46 @@ jest.mock(
   () => ({
     AwsIdentityFederationSetup: ({
       onReadyChange,
+      onConnectorIdChange,
     }: {
       onReadyChange: (ready: boolean) => void;
+      onConnectorIdChange: (id: string | undefined, name?: string) => void;
     }) => (
-      <button type="button" onClick={() => onReadyChange(true)}>
+      <button
+        type="button"
+        onClick={() => {
+          onConnectorIdChange('connector-1', 'First');
+          onReadyChange(true);
+        }}
+      >
         Report identity ready
       </button>
     ),
   })
 );
+
+jest.mock('../../../../../../components/cloud_connector/hooks/use_get_cloud_connectors', () => ({
+  useGetCloudConnectors: () => ({
+    data: [
+      {
+        id: 'connector-1',
+        name: 'First',
+        cloudProvider: 'aws',
+        accountType: 'single-account',
+        vars: {
+          role_arn: {
+            type: 'text',
+            value: 'arn:aws:iam::123456789012:role/ElasticFederatedIdentity',
+          },
+        },
+        packagePolicyCount: 0,
+        created_at: '2026-11-26T10:00:00.000Z',
+        updated_at: '2026-11-26T10:00:00.000Z',
+      },
+    ],
+    isLoading: false,
+  }),
+}));
 
 jest.mock('../../../../../../hooks/use_request/agentless_policy');
 
@@ -1396,7 +1427,7 @@ describe('When on the package policy create page', () => {
         (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(getAwsLikePackageInfo());
       });
 
-      test('keeps Save disabled after the shared identity setup reports ready', async () => {
+      test('keeps Save disabled until the shared identity setup reports ready', async () => {
         await act(async () => {
           render(undefined, 'billing');
         });
@@ -1416,9 +1447,7 @@ describe('When on the package policy create page', () => {
           fireEvent.click(identityReady);
         });
 
-        expect(save).toBeDisabled();
-        expect(sendCreateAgentPolicy).not.toHaveBeenCalled();
-        expect(sendCreateAgentlessPolicy).not.toHaveBeenCalled();
+        expect(save).toBeEnabled();
       });
 
       test('should create an agentless policy on save when the deployment mode was not changed', async () => {
