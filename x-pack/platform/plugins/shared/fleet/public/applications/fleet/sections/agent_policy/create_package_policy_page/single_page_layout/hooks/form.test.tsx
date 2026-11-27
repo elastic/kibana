@@ -1338,6 +1338,68 @@ describe('useOnSubmit', () => {
       });
     });
 
+    it.each([
+      { isDefineStepReplaced: true, writesSelections: false },
+      { isDefineStepReplaced: false, writesSelections: true },
+    ])(
+      'writes var group selections only when the define step is not replaced ($isDefineStepReplaced)',
+      async ({ isDefineStepReplaced, writesSelections }) => {
+        const awsFederationPackage: PackageInfo = {
+          ...awsPackageInfo,
+          var_groups: [
+            {
+              name: 'credential_type',
+              title: 'Setup Access',
+              selector_title: 'Preferred method',
+              options: [
+                {
+                  name: 'identity_federation',
+                  title: 'Identity Federation',
+                  provider: 'aws',
+                  vars: ['role_arn'],
+                  hide_in_deployment_modes: ['default'],
+                },
+                { name: 'direct_access_key', title: 'Direct Access Keys', vars: [] },
+              ],
+            },
+          ],
+        };
+        renderResult = testRenderer.renderHook(() => {
+          const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>({
+            name: 'test',
+            namespace: 'default',
+          });
+          return useOnSubmit({
+            agentCount: 0,
+            packageInfo: awsFederationPackage,
+            withSysMonitoring: false,
+            selectedPolicyTab: SelectedPolicyTab.NEW,
+            newAgentPolicy,
+            queryParamsPolicyId: undefined,
+            hasFleetAddAgentsPrivileges: true,
+            setNewAgentPolicy,
+            setSelectedPolicyTab: jest.fn(),
+            isDefineStepReplaced,
+          });
+        });
+        await waitFor(() => expect(renderResult.result.current.isInitialized).toBe(true));
+        act(() => {
+          renderResult.result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
+        });
+        await waitFor(() => expect(renderResult.result.current.isAgentlessSelected).toBe(true));
+
+        if (writesSelections) {
+          await waitFor(() =>
+            expect(renderResult.result.current.packagePolicy.var_group_selections).toBeDefined()
+          );
+        } else {
+          expect(renderResult.result.current.packagePolicy.var_group_selections).toBeUndefined();
+          expect(renderResult.result.current.identityFederationProvider).toBeUndefined();
+          expect(renderResult.result.current.isIdentityFederationSaveBlocked).toBe(false);
+        }
+      }
+    );
+
     it.each([{}, { skipConfirmModal: true }, { force: true }])(
       'blocks a ready AWS identity without a new policy attachment (%j)',
       async (submitOptions) => {

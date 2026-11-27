@@ -215,6 +215,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   const isAddIntegrationFlyout = !!addIntegrationFlyoutProps;
   // Save package policy
+  const replaceDefineStepView = useUIExtension(
+    packageInfo?.name ?? '',
+    'package-policy-replace-define-step'
+  );
+
   const {
     onSubmit,
     updatePackagePolicy,
@@ -258,6 +263,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     setSelectedPolicyTab,
     isAddIntegrationFlyout,
     defaultPolicyData,
+    isDefineStepReplaced: !!replaceDefineStepView,
   });
 
   if (addIntegrationFlyoutProps?.agentPolicy) {
@@ -551,10 +557,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   );
 
   const extensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-create');
-  const replaceDefineStepView = useUIExtension(
-    packagePolicy.package?.name ?? '',
-    'package-policy-replace-define-step'
-  );
   const createBottomExtensionView = useUIExtension(
     packagePolicy.package?.name ?? '',
     'package-policy-create-bottom'

@@ -261,6 +261,8 @@ const DEFAULT_PACKAGE_POLICY = {
   inputs: [],
 };
 
+const ignoreSelectionsChange = () => {};
+
 export function useOnSubmit({
   agentCount,
   selectedPolicyTab,
@@ -274,6 +276,7 @@ export function useOnSubmit({
   setSelectedPolicyTab,
   isAddIntegrationFlyout,
   defaultPolicyData,
+  isDefineStepReplaced = false,
 }: {
   packageInfo?: PackageInfo;
   newAgentPolicy: NewAgentPolicy;
@@ -287,6 +290,8 @@ export function useOnSubmit({
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
   isAddIntegrationFlyout?: boolean;
   defaultPolicyData?: Partial<NewPackagePolicy>;
+  /** A `package-policy-replace-define-step` extension renders the define step instead. */
+  isDefineStepReplaced?: boolean;
 }) {
   const { notifications, docLinks } = useStartServices();
   const { reportCredentialsAdded, reportDeployClicked, reportEnrollmentSucceeded } =
@@ -536,7 +541,8 @@ export function useOnSubmit({
   const packageVarGroups = usePackagePolicyVarGroups({
     varGroups: isInitialized ? varGroups : undefined,
     isAgentlessEnabled: isAgentlessSelected,
-    onSelectionsChange: updatePackagePolicy,
+    // A replaced define step owns its own state: derive the selections but do not write them.
+    onSelectionsChange: isDefineStepReplaced ? ignoreSelectionsChange : updatePackagePolicy,
     packagePolicy,
     hideInVarGroupOptions: hiddenVarGroupOptions,
   });
@@ -545,6 +551,7 @@ export function useOnSubmit({
     packageVarGroups.selections
   );
   const identityFederationProvider =
+    !isDefineStepReplaced &&
     isAgentlessSelected &&
     selectedProvider === AWS_CLOUD_PROVIDER &&
     !packageVarGroups.disabledIdentityFederationProviders.includes(selectedProvider)
