@@ -713,6 +713,29 @@ describe('StepDefinePackagePolicy', () => {
       expect(update?.vars?.role_arn?.value).toBeUndefined();
     });
 
+    it('hands stack-update template details to the page that saves the policy', () => {
+      const onIacTemplateRecorded = jest.fn();
+      renderResult = testRenderer.render(
+        <StepDefinePackagePolicy
+          packageInfo={awsPackage}
+          packagePolicy={awsPolicy}
+          updatePackagePolicy={mockUpdatePackagePolicy}
+          validationResults={validationResults}
+          submitAttempted={false}
+          isAgentlessSelected
+          identityFederation={{ provider: 'aws', onReadyChange: jest.fn(), onIacTemplateRecorded }}
+        />
+      );
+      const template = { iac_key: 'sha256:updated-template' };
+      const launchedFor = { cloudConnectorId: 'connector-1', integrations: [] };
+
+      jest
+        .mocked(AwsIdentityFederationSetup)
+        .mock.lastCall?.[0].onIacTemplateRecorded?.(template, launchedFor);
+
+      expect(onIacTemplateRecorded).toHaveBeenCalledWith(template, launchedFor);
+    });
+
     it('passes the policy identity to a remounted setup so it stays selected', () => {
       renderResult = renderAwsStep({ ...awsPolicy, cloud_connector_id: 'connector-1' });
 

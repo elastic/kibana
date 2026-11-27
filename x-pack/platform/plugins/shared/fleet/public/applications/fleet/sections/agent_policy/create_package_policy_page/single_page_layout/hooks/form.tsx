@@ -73,6 +73,17 @@ import {
 import type { PackagePolicyValidationResults } from '../../services';
 import { getHiddenVarGroupOptionsForPolicyTemplate } from '../../services/var_group_helpers';
 import { usePackagePolicyVarGroups } from '../../components/steps/components/hooks';
+import type {
+  IacRenderedTemplate,
+  IacTemplateLaunchedFor,
+} from '../../../../../../../components/cloud_connector/components/iac_key_check';
+
+import {
+  getIdentityFederationIntegrations,
+  persistRecordedIacTemplate,
+  toRecordedIacTemplate,
+  type RecordedIacTemplate,
+} from './recorded_iac_template';
 import type { PackagePolicyFormState, SavedPolicyResult } from '../../types';
 import type { RegistryVarGroup } from '../../../../../types';
 import { SelectedPolicyTab } from '../../components';
@@ -558,6 +569,13 @@ export function useOnSubmit({
       ? selectedProvider
       : undefined;
   const [identityFederationReady, onIdentityFederationReadyChange] = useState(false);
+  // Stack-update template details wait here until the policy saves (see recorded_iac_template).
+  const [recordedIacTemplate, setRecordedIacTemplate] = useState<RecordedIacTemplate>();
+  const onIacTemplateRecorded = useCallback(
+    (iac: IacRenderedTemplate, launchedFor: IacTemplateLaunchedFor) =>
+      setRecordedIacTemplate(toRecordedIacTemplate(iac, launchedFor)),
+    []
+  );
   useEffect(() => {
     if (!identityFederationProvider) onIdentityFederationReadyChange(false);
   }, [identityFederationProvider]);
@@ -812,6 +830,18 @@ export function useOnSubmit({
           }
         );
 
+        if (identityFederationProvider && packageInfo) {
+          await persistRecordedIacTemplate({
+            recorded: recordedIacTemplate,
+            cloudConnectorId: packagePolicy.cloud_connector_id,
+            integrationsKey: JSON.stringify(
+              getIdentityFederationIntegrations(packageInfo.name, packagePolicy.inputs)
+            ),
+            // The policy is saved either way; only the identity's template details are missing.
+            onError: () => notifications.toasts.addWarning(IAC_TEMPLATE_WRITE_FAILED_TOAST),
+          });
+        }
+
         if (savedPolicyResult.policy.package) {
           await ensurePackageKibanaAssetsInstalled({
             currentSpaceId: spaceId ?? DEFAULT_SPACE_ID,
@@ -931,6 +961,8 @@ export function useOnSubmit({
     },
     [
       isIdentityFederationSaveBlocked,
+      identityFederationProvider,
+      recordedIacTemplate,
       formState,
       hasErrors,
       agentCount,
@@ -985,6 +1017,7 @@ export function useOnSubmit({
     packageVarGroups,
     identityFederationProvider,
     onIdentityFederationReadyChange,
+    onIacTemplateRecorded,
     isIdentityFederationSaveBlocked,
     submitAttempted,
     createDatasetTemplates,

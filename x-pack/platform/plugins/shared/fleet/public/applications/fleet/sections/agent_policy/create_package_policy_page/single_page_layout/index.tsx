@@ -243,6 +243,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     packageVarGroups,
     identityFederationProvider,
     onIdentityFederationReadyChange,
+    onIacTemplateRecorded,
     isIdentityFederationSaveBlocked,
     submitAttempted,
     createDatasetTemplates,
@@ -678,6 +679,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               identityFederationProvider && {
                 provider: identityFederationProvider,
                 onReadyChange: onIdentityFederationReadyChange,
+                onIacTemplateRecorded,
               }
             }
           />
@@ -734,6 +736,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       packageVarGroups,
       identityFederationProvider,
       onIdentityFederationReadyChange,
+      onIacTemplateRecorded,
       setupTechnologySelector,
       useCheckableCardsForSetupTechnologySelector,
       createDatasetTemplates,

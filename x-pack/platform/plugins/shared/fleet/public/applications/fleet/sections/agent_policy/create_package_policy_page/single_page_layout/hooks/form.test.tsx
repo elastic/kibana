@@ -14,6 +14,10 @@ import { createFleetTestRendererMock } from '../../../../../../../mock';
 import type { NewAgentPolicy, PackageInfo } from '../../../../../types';
 import { SetupTechnology } from '../../../../../types';
 import { sendCreateAgentlessPolicy } from '../../../../../../../hooks/use_request/agentless_policy';
+import {
+  sendUpdateCloudConnector,
+  sendVerifyCloudConnectorIacKey,
+} from '../../../../../../../hooks/use_request/cloud_connector';
 
 import { sendGetPackagePolicies, useConfig } from '../../../../../hooks';
 import { SelectedPolicyTab } from '../../components';
@@ -29,6 +33,15 @@ jest.mock('./aws_onboarding_telemetry', () => ({
     reportDeployClicked: jest.fn(),
     reportEnrollmentSucceeded: jest.fn(),
   })),
+}));
+
+jest.mock('../../../../../../../hooks/use_request/cloud_connector', () => ({
+  sendUpdateCloudConnector: jest.fn(),
+  sendVerifyCloudConnectorIacKey: jest.fn(),
+}));
+
+jest.mock('../../../../../services/ensure_kibana_assets_installed', () => ({
+  ensurePackageKibanaAssetsInstalled: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('../../../../../../../hooks/use_request/agentless_policy', () => ({
@@ -1472,6 +1485,113 @@ describe('useOnSubmit', () => {
         }
       }
     );
+
+    describe('template details recorded by an Existing Identity stack update', () => {
+      const recordedTemplate = {
+        iac_key: 'sha256:updated-template',
+        iac_blueprint_id: 'aws/workload_identity_federation',
+        iac_blueprint_version: '1.4.0',
+      };
+      const cloudwatchIntegrations = [
+        {
+          name: 'aws_cloudwatch_input_otel',
+          policyTemplates: [{ name: 'aws', enabledInputs: ['cloudwatch'] }],
+        },
+      ];
+
+      const renderReadyIdentity = async () => {
+        const federationPackage: PackageInfo = {
+          ...awsPackageInfo,
+          var_groups: [
+            {
+              name: 'credential_type',
+              title: 'Setup Access',
+              selector_title: 'Preferred method',
+              options: [
+                {
+                  name: 'identity_federation',
+                  title: 'Identity Federation',
+                  provider: 'aws',
+                  vars: ['role_arn'],
+                  hide_in_deployment_modes: ['default'],
+                },
+              ],
+            },
+          ],
+        };
+        renderResult = testRenderer.renderHook(() => {
+          const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>({
+            name: 'test',
+            namespace: 'default',
+          });
+          return useOnSubmit({
+            agentCount: 0,
+            packageInfo: federationPackage,
+            withSysMonitoring: false,
+            selectedPolicyTab: SelectedPolicyTab.NEW,
+            newAgentPolicy,
+            queryParamsPolicyId: undefined,
+            hasFleetAddAgentsPrivileges: true,
+            setNewAgentPolicy,
+            setSelectedPolicyTab: jest.fn(),
+          });
+        });
+        await waitFor(() => expect(renderResult.result.current.isInitialized).toBe(true));
+        act(() => {
+          renderResult.result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
+        });
+        await waitFor(() => expect(renderResult.result.current.isAgentlessSelected).toBe(true));
+        act(() => {
+          renderResult.result.current.updatePackagePolicy({
+            var_group_selections: { credential_type: 'identity_federation' },
+            cloud_connector_id: 'connector-1',
+            inputs: [{ type: 'cloudwatch', policy_template: 'aws', enabled: true, streams: [] }],
+          });
+          renderResult.result.current.onIdentityFederationReadyChange?.(true);
+          renderResult.result.current.onIacTemplateRecorded?.(recordedTemplate, {
+            cloudConnectorId: 'connector-1',
+            integrations: cloudwatchIntegrations,
+          });
+        });
+      };
+
+      beforeEach(() => {
+        jest.mocked(sendUpdateCloudConnector).mockResolvedValue({ data: {}, error: null } as any);
+        jest
+          .mocked(sendVerifyCloudConnectorIacKey)
+          .mockResolvedValue({ data: {}, error: null } as any);
+      });
+
+      it('stores them on the identity once the policy saves', async () => {
+        jest.mocked(sendCreateAgentlessPolicy).mockResolvedValueOnce({
+          item: {
+            id: 'policy-1',
+            name: 'aws_cloudwatch_input_otel-1',
+            namespace: 'default',
+            package: { name: 'aws_cloudwatch_input_otel', title: 'AWS', version: '0.5.0' },
+            cloud_connector: { cloud_connector_id: 'connector-1' },
+          },
+        } as any);
+        await renderReadyIdentity();
+
+        await act(async () => {
+          await renderResult.result.current.onSubmit({ skipConfirmModal: true });
+        });
+
+        expect(sendUpdateCloudConnector).toHaveBeenCalledWith('connector-1', recordedTemplate);
+      });
+
+      it('leaves the identity untouched when the policy does not save', async () => {
+        await renderReadyIdentity();
+
+        await act(async () => {
+          await renderResult.result.current.onSubmit({ skipConfirmModal: true });
+        });
+
+        expect(sendCreateAgentlessPolicy).toHaveBeenCalled();
+        expect(sendUpdateCloudConnector).not.toHaveBeenCalled();
+      });
+    });
 
     it('calls reportCredentialsAdded and reportDeployClicked with enabled input types on agentless submit', async () => {
       renderResult = testRenderer.renderHook(() =>

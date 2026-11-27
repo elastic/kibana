@@ -13,7 +13,6 @@ import {
   getCredentialStorageScope,
   resolveVarTarget,
 } from '../../../../../../../../../common';
-import { getEnabledInputsByPolicyTemplate } from '../../../../../../../../../common/services';
 import type { AwsIdentityFederationSetupProps } from '../../../../../../../../components/cloud_connector/aws_connect_setup/aws_identity_federation_setup';
 import { AwsIdentityFederationSetup } from '../../../../../../../../components/cloud_connector/aws_connect_setup/aws_identity_federation_setup';
 import { useGetCloudConnectors } from '../../../../../../../../components/cloud_connector/hooks/use_get_cloud_connectors';
@@ -23,20 +22,21 @@ import {
   updateInputVarsWithAwsCredentials,
 } from '../../../../../../../../components/cloud_connector/utils';
 import type { NewPackagePolicy, PackageInfo } from '../../../../../../types';
+import { getIdentityFederationIntegrations } from '../../../single_page_layout/hooks/recorded_iac_template';
 
 type Props = Pick<
   AwsIdentityFederationSetupProps,
-  'cloud' | 'accountType' | 'iacTemplateUrl' | 'onReadyChange'
+  'cloud' | 'accountType' | 'iacTemplateUrl' | 'onReadyChange' | 'onIacTemplateRecorded'
 > & {
   packageInfo: PackageInfo;
   packagePolicy: NewPackagePolicy;
   updatePolicy: UpdatePolicy;
 };
 
-// A stack-update launch must not write the rendered template to the saved connector: the user may
-// never apply it. The template details are kept by the host instead (stored after the policy saves).
-const noopOnIacTemplateRecorded: AwsIdentityFederationSetupProps['onIacTemplateRecorded'] =
-  () => {};
+// A stack-update launch must never write the rendered template to the saved connector: the user may
+// not apply it. The host keeps the details and stores them after the policy saves; without a host
+// recorder they are dropped.
+const ignoreIacTemplate: AwsIdentityFederationSetupProps['onIacTemplateRecorded'] = () => {};
 
 /** The identity's `cloud_connector_id` and role ARN, written where the package keeps credentials. */
 const withAwsIdentity = (
@@ -63,17 +63,13 @@ export function PackagePolicyAwsIdentityFederationSetup({
   packageInfo,
   packagePolicy,
   updatePolicy,
+  onIacTemplateRecorded = ignoreIacTemplate,
   ...setupProps
 }: Props) {
   const packageName = packageInfo.name;
   const { inputs } = packagePolicy;
   const integrations = useMemo(
-    () => [
-      {
-        name: packageName,
-        policyTemplates: getEnabledInputsByPolicyTemplate({ inputs }),
-      },
-    ],
+    () => getIdentityFederationIntegrations(packageName, inputs),
     [packageName, inputs]
   );
 
@@ -117,7 +113,7 @@ export function PackagePolicyAwsIdentityFederationSetup({
       integrations={integrations}
       initialConnectorId={attachedConnectorId}
       onConnectorIdChange={onConnectorIdChange}
-      onIacTemplateRecorded={noopOnIacTemplateRecorded}
+      onIacTemplateRecorded={onIacTemplateRecorded}
     />
   );
 }

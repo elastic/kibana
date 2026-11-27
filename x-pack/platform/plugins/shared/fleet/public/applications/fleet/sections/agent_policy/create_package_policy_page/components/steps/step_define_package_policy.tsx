@@ -61,6 +61,8 @@ import {
   VarGroupSelector,
 } from './components';
 import { useOutputs, usePackagePolicyVarGroups } from './components/hooks';
+import type { AwsIdentityFederationSetupProps } from '../../../../../../../components/cloud_connector/aws_connect_setup/aws_identity_federation_setup';
+
 import { PackagePolicyAwsIdentityFederationSetup } from './components/package_policy_aws_identity_federation_setup';
 import { PackagePolicyOutputSelect } from './components/package_policy_output_select';
 import { useNamespaceCustomization } from './use_namespace_customization';
@@ -94,6 +96,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   identityFederation?: {
     provider: CloudProvider;
     onReadyChange: (isReady: boolean) => void;
+    onIacTemplateRecorded?: AwsIdentityFederationSetupProps['onIacTemplateRecorded'];
   };
 }> = memo(
   ({
@@ -895,6 +898,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                               cloud={cloud}
                               iacTemplateUrl={iacTemplateUrl}
                               onReadyChange={identityFederation.onReadyChange}
+                              onIacTemplateRecorded={identityFederation.onIacTemplateRecorded}
                             />
                           ) : (
                             <CloudConnectorSetup
