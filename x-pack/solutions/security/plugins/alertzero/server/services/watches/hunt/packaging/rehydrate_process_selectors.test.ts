@@ -29,7 +29,7 @@ const esClientWith = (
   ({
     mget: jest.fn().mockResolvedValue({ docs }),
     search: jest.fn().mockResolvedValue(exitSearchResponse(exitedAtByEntityId)),
-  } as unknown as ElasticsearchClient);
+  }) as unknown as ElasticsearchClient;
 
 const found = (index: string, id: string, source: Record<string, unknown>): MgetDoc => ({
   _index: index,

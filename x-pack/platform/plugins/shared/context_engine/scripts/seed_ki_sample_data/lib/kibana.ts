@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { timeoutSignal } from '@kbn/std';
 import { AI_INDEX_API_VERSION } from '../../../common/constants';
 import type { ConnectionConfig } from './connection_config';
 
@@ -22,18 +23,23 @@ export async function kibanaRequest(
 ): Promise<{ status: number; data: unknown }> {
   let response: Response;
   try {
-    response = await fetch(`${config.kibanaUrl}${path}`, {
-      method,
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: generateAuthHeader(config),
-        'kbn-xsrf': 'true',
-        'x-elastic-internal-origin': 'Kibana',
-        'elastic-api-version': AI_INDEX_API_VERSION,
-      },
-      ...(body ? { body: JSON.stringify(body) } : {}),
-    });
+    const deadline = timeoutSignal(REQUEST_TIMEOUT_MS);
+    try {
+      response = await fetch(`${config.kibanaUrl}${path}`, {
+        method,
+        signal: deadline,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: generateAuthHeader(config),
+          'kbn-xsrf': 'true',
+          'x-elastic-internal-origin': 'Kibana',
+          'elastic-api-version': AI_INDEX_API_VERSION,
+        },
+        ...(body ? { body: JSON.stringify(body) } : {}),
+      });
+    } finally {
+      deadline.dispose();
+    }
   } catch (err) {
     const name = err instanceof Error ? err.name : '';
     if (name === 'AbortError' || name === 'TimeoutError') {

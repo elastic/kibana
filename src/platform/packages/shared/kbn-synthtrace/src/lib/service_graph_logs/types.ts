@@ -173,7 +173,7 @@ export interface ServiceFailure {
 /** Infra dep failures cascade to every service that lists that dep. */
 export interface FailureMap<
   TServiceName extends string = string,
-  TDepName extends string = string
+  TDepName extends string = string,
 > {
   services?: Partial<Record<TServiceName, ServiceFailure>>;
   infra?: Partial<Record<TDepName, ServiceFailure>>;

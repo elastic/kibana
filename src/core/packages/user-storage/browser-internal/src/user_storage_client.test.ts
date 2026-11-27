@@ -16,7 +16,7 @@ const apiMock = (): jest.Mocked<UserStorageApi> =>
     get: jest.fn().mockReturnValue(new Promise(() => {})), // never resolves by default
     set: jest.fn(),
     remove: jest.fn(),
-  } as unknown as jest.Mocked<UserStorageApi>);
+  }) as unknown as jest.Mocked<UserStorageApi>;
 
 const buildClient = (initialValues: Record<string, unknown> = {}, available = true) => {
   const api = apiMock();

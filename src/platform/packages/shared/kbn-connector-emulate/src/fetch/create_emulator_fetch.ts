@@ -167,8 +167,8 @@ const loadProtocols = (
     const protocol = isGraphQLSpec(spec)
       ? createGraphQLProtocol(spec, options)
       : isMcpSpec(spec)
-      ? createMcpProtocol(spec, options)
-      : undefined;
+        ? createMcpProtocol(spec, options)
+        : undefined;
     return protocol ? [{ source, protocol }] : [];
   });
 
@@ -193,8 +193,8 @@ const toResponse = ({ statusCode, headers, body }: ContractResponse): Response =
     body === undefined || body === null || NULL_BODY_STATUSES.has(statusCode)
       ? null
       : typeof body === 'string'
-      ? body
-      : JSON.stringify(body);
+        ? body
+        : JSON.stringify(body);
   return new Response(payload, { status: statusCode, headers: { ...headers } });
 };
 

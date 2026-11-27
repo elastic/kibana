@@ -106,7 +106,7 @@ export const create = async () => {
 
     if (count > conversationsCreated) {
       const errorExample =
-        errorResults.length > 0 ? errorResults[0]?.reason?.message ?? 'unknown' : 'unknown';
+        errorResults.length > 0 ? (errorResults[0]?.reason?.message ?? 'unknown') : 'unknown';
       throw new Error(
         `Failed to create all conversations. Expected count: ${count}, Created count: ${conversationsCreated}. Reason: ${errorExample}`
       );

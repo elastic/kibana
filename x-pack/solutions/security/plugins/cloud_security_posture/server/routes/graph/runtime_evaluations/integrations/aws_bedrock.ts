@@ -7,7 +7,7 @@
 
 /* eslint-disable @kbn/compat/typescript-naming-convention */
 
-import type { IntegrationEvaluations } from "../types";
+import type { IntegrationEvaluations } from '../types';
 
 export const aws_bedrockEvaluations = {
   integration: 'aws_bedrock',

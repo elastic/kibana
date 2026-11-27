@@ -200,8 +200,8 @@ export const WorkflowExecuteUnifiedDataTable = memo(function WorkflowExecuteUnif
                 padding-bottom: ${euiTheme.size.xs};
               }
               .unifiedDataTableToolbarControlButton:has(
-                  [data-test-subj='unifiedDataTableSelectionBtn']
-                ),
+                [data-test-subj='unifiedDataTableSelectionBtn']
+              ),
               .unifiedDataTableToolbarControlButton:has([data-test-subj='dscGridSelectAllDocs']) {
                 display: none !important;
               }
@@ -227,7 +227,7 @@ export const WorkflowExecuteUnifiedDataTable = memo(function WorkflowExecuteUnif
             </div>
           )}
           {dataView
-            ? emptyStateContent ?? (
+            ? (emptyStateContent ?? (
                 <div
                   css={css({
                     flex: 1,
@@ -266,7 +266,7 @@ export const WorkflowExecuteUnifiedDataTable = memo(function WorkflowExecuteUnif
                     />
                   </CellActionsProvider>
                 </div>
-              )
+              ))
             : null}
         </div>
       </EuiFlexItem>

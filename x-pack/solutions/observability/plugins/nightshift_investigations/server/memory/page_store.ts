@@ -521,7 +521,7 @@ export const createMemoryPageStore = ({
         const total =
           typeof response.hits.total === 'number'
             ? response.hits.total
-            : response.hits.total?.value ?? 0;
+            : (response.hits.total?.value ?? 0);
         const aggs = response.aggregations as
           | { archived?: { inScope?: { doc_count?: number } } }
           | undefined;

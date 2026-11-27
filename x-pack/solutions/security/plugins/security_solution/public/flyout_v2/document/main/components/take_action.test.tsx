@@ -31,7 +31,7 @@ const createMockHit = (
     raw: { _id: 'test-event-id', _index: 'test-index', ...raw },
     flattened,
     isAnchor: false,
-  } as DataTableRecord);
+  }) as DataTableRecord;
 
 const mockEcsData: Ecs = { _id: 'test-event-id', _index: 'test-index' };
 const mockRefetchFlyoutData = jest.fn().mockResolvedValue(undefined);

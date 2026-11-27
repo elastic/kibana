@@ -28,15 +28,12 @@ import {
   observabilityAiInsightsInferenceFeatures,
 } from './inference_feature';
 
-export class ObservabilityAgentBuilderPlugin
-  implements
-    Plugin<
-      ObservabilityAgentBuilderPluginSetup,
-      ObservabilityAgentBuilderPluginStart,
-      ObservabilityAgentBuilderPluginSetupDependencies,
-      ObservabilityAgentBuilderPluginStartDependencies
-    >
-{
+export class ObservabilityAgentBuilderPlugin implements Plugin<
+  ObservabilityAgentBuilderPluginSetup,
+  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginSetupDependencies,
+  ObservabilityAgentBuilderPluginStartDependencies
+> {
   private readonly logger: Logger;
   private readonly dataRegistry: ObservabilityAgentBuilderDataRegistry;
 

@@ -79,8 +79,8 @@ export const getProposalCaptionParts = (
     isReversible === undefined
       ? undefined
       : isReversible
-      ? { text: APPROVAL_MODAL_TRANSLATIONS.reversible }
-      : { text: APPROVAL_MODAL_TRANSLATIONS.irreversible, isIrreversible: true },
+        ? { text: APPROVAL_MODAL_TRANSLATIONS.reversible }
+        : { text: APPROVAL_MODAL_TRANSLATIONS.irreversible, isIrreversible: true },
     ...(includeRiskDetails
       ? [impactCaptionPart(proposal), deadlineCaptionPart(proposal)].map((text) =>
           text === undefined ? undefined : { text }
@@ -125,9 +125,9 @@ export const getProposalDecision = (proposal: ApprovalProposal): ApprovalDecisio
     return undefined;
   }
   const actorName = proposal.decision
-    ? proposal.decidedBy?.fullName ??
+    ? (proposal.decidedBy?.fullName ??
       proposal.decidedBy?.username ??
-      APPROVAL_MODAL_TRANSLATIONS.unknownActorFallback
+      APPROVAL_MODAL_TRANSLATIONS.unknownActorFallback)
     : undefined;
   const status = approvedStatusFor(proposal);
   return {
@@ -142,8 +142,8 @@ export const getProposalDecision = (proposal: ApprovalProposal): ApprovalDecisio
       status === 'failed' && proposal.executionError
         ? proposal.executionError
         : proposal.dismissReason
-        ? formatDismissReason(proposal.dismissReason, proposal.rationale)
-        : proposal.rationale,
+          ? formatDismissReason(proposal.dismissReason, proposal.rationale)
+          : proposal.rationale,
   };
 };
 

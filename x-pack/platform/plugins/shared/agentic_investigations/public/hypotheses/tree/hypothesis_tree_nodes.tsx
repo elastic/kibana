@@ -208,7 +208,8 @@ const NodeShell = ({
         box-shadow: ${isSelected ? `0 0 0 2px ${roleColors.strongBorder}` : 'none'};
         cursor: pointer;
         opacity: ${isDimmed ? DIMMED_OPACITY : 1};
-        transition: opacity ${euiTheme.animation.normal} ease,
+        transition:
+          opacity ${euiTheme.animation.normal} ease,
           border-color ${euiTheme.animation.fast} ease;
 
         &:hover {
@@ -220,12 +221,14 @@ const NodeShell = ({
           outline-offset: ${euiTheme.focus.width};
         }
 
-        ${revealIndex !== undefined &&
-        css`
-          /* Fill backwards only: keeping the last frame's opacity would override the dimming. */
-          animation: ${nodeReveal} ${euiTheme.animation.slow} ease-out backwards;
-          animation-delay: ${revealIndex * 60}ms;
-        `}
+        ${
+          revealIndex !== undefined &&
+          css`
+            /* Fill backwards only: keeping the last frame's opacity would override the dimming. */
+            animation: ${nodeReveal} ${euiTheme.animation.slow} ease-out backwards;
+            animation-delay: ${revealIndex * 60}ms;
+          `
+        }
 
         @media (prefers-reduced-motion: reduce) {
           animation: none;
@@ -402,9 +405,9 @@ const ActionCard = ({
         position: relative;
         width: 100%;
         text-align: left;
-        border-color: ${isSelected
-          ? euiTheme.colors.borderStrongPrimary
-          : euiTheme.colors.borderBaseSubdued};
+        border-color: ${
+          isSelected ? euiTheme.colors.borderStrongPrimary : euiTheme.colors.borderBaseSubdued
+        };
         box-shadow: ${isSelected ? `0 0 0 1px ${euiTheme.colors.borderStrongPrimary}` : 'none'};
 
         &:hover {

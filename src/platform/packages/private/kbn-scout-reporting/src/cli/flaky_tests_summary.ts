@@ -313,12 +313,12 @@ export const displaySummary = (
       dedent(`\
         Results
           Flaky                : ${summary.totalFlaky}${
-        flakyByFramework ? ` (${flakyByFramework})` : ''
-      }${
-        flakyByBranch
-          ? `\n          Flaky by branch      : ${flakyByBranch} (branch each test qualified on)`
-          : ''
-      }
+            flakyByFramework ? ` (${flakyByFramework})` : ''
+          }${
+            flakyByBranch
+              ? `\n          Flaky by branch      : ${flakyByBranch} (branch each test qualified on)`
+              : ''
+          }
           Consistently failing : ${summary.totalConsistentlyFailing}
         `),
     ]

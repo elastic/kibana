@@ -28,9 +28,12 @@ interface SubscriptionStatusStartDeps {
   cloud?: CloudStart;
 }
 
-export class SubscriptionStatusPlugin
-  implements Plugin<void, void, SubscriptionStatusSetupDeps, SubscriptionStatusStartDeps>
-{
+export class SubscriptionStatusPlugin implements Plugin<
+  void,
+  void,
+  SubscriptionStatusSetupDeps,
+  SubscriptionStatusStartDeps
+> {
   private csp?: string;
   private region?: string;
   private flagSubscription?: Subscription;

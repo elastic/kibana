@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { timeoutSignal } from '@kbn/std';
 import { parse as parseCookie } from 'tough-cookie';
 import { Agent, fetch } from 'undici';
 
@@ -128,24 +129,29 @@ apiTest.describe(
 const grantUiamApiKey = async (accessToken: string) => {
   const dispatcher = new Agent({ connect: { rejectUnauthorized: false } });
   try {
-    const response = await fetch(`${MOCK_IDP_UIAM_SERVICE_URL}/uiam/api/v1/api-keys/_grant`, {
-      method: 'POST',
-      headers: {
-        'User-Agent': 'Kibana-Scout/1.0 (IntegrationTest; Security; build/2025.12.30)',
-        'Content-Type': 'application/json',
-        [ES_CLIENT_AUTHENTICATION_HEADER]: MOCK_IDP_UIAM_SHARED_SECRET,
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: JSON.stringify({
-        description: 'test key',
-        internal: true,
-        role_assignments: { limit: { access: ['application'], resource: ['project'] } },
-      }),
-      dispatcher,
-      signal: AbortSignal.timeout(30_000),
-    });
-    const body = (await response.json()) as { id: string; key: string };
-    return { status: response.status, body };
+    const deadline = timeoutSignal(30_000);
+    try {
+      const response = await fetch(`${MOCK_IDP_UIAM_SERVICE_URL}/uiam/api/v1/api-keys/_grant`, {
+        method: 'POST',
+        headers: {
+          'User-Agent': 'Kibana-Scout/1.0 (IntegrationTest; Security; build/2025.12.30)',
+          'Content-Type': 'application/json',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: MOCK_IDP_UIAM_SHARED_SECRET,
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          description: 'test key',
+          internal: true,
+          role_assignments: { limit: { access: ['application'], resource: ['project'] } },
+        }),
+        dispatcher,
+        signal: deadline,
+      });
+      const body = (await response.json()) as { id: string; key: string };
+      return { status: response.status, body };
+    } finally {
+      deadline.dispose();
+    }
   } finally {
     await dispatcher.close();
   }

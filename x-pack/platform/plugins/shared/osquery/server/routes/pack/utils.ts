@@ -450,7 +450,7 @@ export const convertSOQueriesToPackConfig = (
     : START_DATE_EPOCH_FALLBACK;
 
   const packMode: ScheduleType | undefined = isRruleFeatureEnabled
-    ? packSchedule?.schedule_type ?? undefined
+    ? (packSchedule?.schedule_type ?? undefined)
     : undefined;
 
   const queriesOut: Record<string, Record<string, unknown>> = {};
@@ -748,8 +748,8 @@ export const resolvePackScheduleForUpdate = ({
   }
 
   const scheduleType = request.scheduleTypePresent
-    ? request.schedule_type ?? undefined
-    : current.schedule_type ?? undefined;
+    ? (request.schedule_type ?? undefined)
+    : (current.schedule_type ?? undefined);
 
   const transitioned =
     request.scheduleTypePresent && request.schedule_type !== current.schedule_type;

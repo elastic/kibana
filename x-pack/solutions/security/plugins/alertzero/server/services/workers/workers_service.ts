@@ -361,7 +361,7 @@ export class WorkersService {
     const nextAccount =
       requestedAccount === undefined
         ? readServiceAccountId(currentState?.templateValues)
-        : requestedAccount ?? undefined;
+        : (requestedAccount ?? undefined);
     const nextEnabled = patch.enabled ?? Boolean(status.enabled);
     if (nextEnabled && !nextAccount) {
       return { outcome: 'rejected', what: 'a worker that is enabled without a service account' };
@@ -682,15 +682,15 @@ export class WorkersService {
       state: settingsUnavailable
         ? 'unavailable'
         : degradedReason
-        ? 'degraded'
-        : enabled
-        ? 'ok'
-        : 'paused',
+          ? 'degraded'
+          : enabled
+            ? 'ok'
+            : 'paused',
       ...(settingsUnavailable
         ? { stateReason: 'Worker settings could not be read from durable storage' }
         : degradedReason
-        ? { stateReason: degradedReason }
-        : {}),
+          ? { stateReason: degradedReason }
+          : {}),
       settings,
       settingsRevision,
       // `installed` is any document at this id, including a user workflow that is not ours.

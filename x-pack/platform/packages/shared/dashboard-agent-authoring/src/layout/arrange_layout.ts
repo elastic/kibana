@@ -58,9 +58,8 @@ type Placement = ReadonlyMap<string, string | null>;
 
 const getPlacement = (widgets: Widgets): Placement =>
   new Map(
-    widgets.flatMap(
-      (widget): Array<[string, string | null]> =>
-        isSection(widget) ? widget.panels.map(({ id }) => [id, widget.id]) : [[widget.id, null]]
+    widgets.flatMap((widget): Array<[string, string | null]> =>
+      isSection(widget) ? widget.panels.map(({ id }) => [id, widget.id]) : [[widget.id, null]]
     )
   );
 
@@ -137,7 +136,7 @@ const byReadingOrder = (a: AttachmentPanel, b: AttachmentPanel): number =>
 const getContainerPanels = (widgets: Widgets, sectionId: string | null): AttachmentPanel[] =>
   sectionId === null
     ? widgets.filter((widget): widget is AttachmentPanel => !isSection(widget))
-    : widgets.filter(isSection).find(({ id }) => id === sectionId)?.panels ?? [];
+    : (widgets.filter(isSection).find(({ id }) => id === sectionId)?.panels ?? []);
 
 /** The grids that panels removed from a container, or moved out of it, had there. */
 const getRemovedGrids = (
@@ -159,7 +158,7 @@ const getRemovedGrids = (
 const aliasInstructions = (instructions: string, aliasById: ReadonlyMap<string, string>): string =>
   instructions
     .split(/([^\w-]+)/)
-    .map((word) => (/[^A-Za-z]/.test(word) ? aliasById.get(word) ?? word : word))
+    .map((word) => (/[^A-Za-z]/.test(word) ? (aliasById.get(word) ?? word) : word))
     .join('');
 
 /**

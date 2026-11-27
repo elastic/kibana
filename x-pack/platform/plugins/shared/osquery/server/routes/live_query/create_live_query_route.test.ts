@@ -124,7 +124,7 @@ describe('createLiveQueryRoute', () => {
         }),
       },
       logFactory: { get: jest.fn().mockReturnValue({ debug: jest.fn(), error: jest.fn() }) },
-    } as unknown as OsqueryAppContext);
+    }) as unknown as OsqueryAppContext;
 
   const getRouteHandler = (mockRouter: ReturnType<typeof createMockRouter>): RequestHandler => {
     const route = mockRouter.versioned.getRoute('post', '/api/osquery/live_queries');

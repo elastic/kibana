@@ -20,7 +20,8 @@ export function OnboardingIntroBanner(): React.ReactElement {
       css={css`
         border: ${euiTheme.border.width.thin} solid transparent;
         border-radius: ${euiTheme.border.radius.medium};
-        background-image: linear-gradient(
+        background-image:
+          linear-gradient(
             ${euiTheme.colors.backgroundBasePlain},
             ${euiTheme.colors.backgroundBasePlain}
           ),

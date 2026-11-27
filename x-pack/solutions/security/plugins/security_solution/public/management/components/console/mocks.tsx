@@ -47,11 +47,10 @@ interface ConsoleSelectorsAndActionsMock {
   ): Promise<void>;
 }
 
-export interface ConsoleTestSetup
-  extends Pick<
-    AppContextTestRender,
-    'startServices' | 'coreStart' | 'depsStart' | 'queryClient' | 'history' | 'setExperimentalFlag'
-  > {
+export interface ConsoleTestSetup extends Pick<
+  AppContextTestRender,
+  'startServices' | 'coreStart' | 'depsStart' | 'queryClient' | 'history' | 'setExperimentalFlag'
+> {
   renderConsole(props?: Partial<ConsoleProps>): ReturnType<AppContextTestRender['render']>;
 
   commands: CommandDefinition[];

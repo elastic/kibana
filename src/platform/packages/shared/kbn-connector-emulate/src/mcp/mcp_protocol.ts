@@ -390,10 +390,10 @@ export const createMcpProtocol = (
           : [];
       };
       const requestViolations = messages.flatMap((message) =>
-        isJSONRPCRequest(message) ? violations.get(message.id) ?? rejectedBySdk(message) : []
+        isJSONRPCRequest(message) ? (violations.get(message.id) ?? rejectedBySdk(message)) : []
       );
       const responseViolations = messages.flatMap((message) =>
-        isJSONRPCRequest(message) ? resultViolations.get(message.id) ?? [] : []
+        isJSONRPCRequest(message) ? (resultViolations.get(message.id) ?? []) : []
       );
       const response: ContractResponse =
         replies.length === 0

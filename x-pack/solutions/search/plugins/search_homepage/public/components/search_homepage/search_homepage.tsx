@@ -96,8 +96,8 @@ export const SearchHomepagePage = () => {
               cloud?.isServerlessEnabled
                 ? docLinks.serverlessReleaseNotes
                 : cloud?.isCloudEnabled
-                ? docLinks.hostedCloudReleaseNotes
-                : docLinks.releaseNotes
+                  ? docLinks.hostedCloudReleaseNotes
+                  : docLinks.releaseNotes
             }
             kibanaVersion={
               !cloud?.isServerlessEnabled

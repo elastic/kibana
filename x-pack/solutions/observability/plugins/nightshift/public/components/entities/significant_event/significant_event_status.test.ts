@@ -35,7 +35,7 @@ const mockEvent = (
     severity: 'medium',
     confidence: 0.9,
     ...overrides,
-  } as SignificantEvent);
+  }) as SignificantEvent;
 
 describe('significant_event_status', () => {
   it('classifies active as needs-action', () => {

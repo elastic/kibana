@@ -78,18 +78,16 @@ export const registerTemplate = ({
     });
 
   const LazyConnectedAssignees = makeLazyWithProviders(async () => {
-    const { ConnectedAssignees } = await import(
-      '../shared/connected_assignees/connected_assignees'
-    );
+    const { ConnectedAssignees } =
+      await import('../shared/connected_assignees/connected_assignees');
     return ConnectedAssignees as React.ComponentType<
       React.ComponentProps<typeof ConnectedAssignees>
     >;
   });
 
   const LazyConnectedStatusToggle = makeLazyWithProviders(async () => {
-    const { ConnectedStatusToggle } = await import(
-      '../shared/connected_status/connected_status_toggle'
-    );
+    const { ConnectedStatusToggle } =
+      await import('../shared/connected_status/connected_status_toggle');
     return ConnectedStatusToggle as React.ComponentType<
       React.ComponentProps<typeof ConnectedStatusToggle>
     >;

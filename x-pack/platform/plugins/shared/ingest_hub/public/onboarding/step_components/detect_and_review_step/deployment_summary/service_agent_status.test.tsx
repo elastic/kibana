@@ -81,7 +81,7 @@ const info = (overrides: Partial<ServiceAgentInfo> = {}) =>
     agentPolicy: AGENT_POLICY,
     packagePolicy: PACKAGE_POLICY,
     ...overrides,
-  } as unknown as ServiceAgentInfo);
+  }) as unknown as ServiceAgentInfo;
 
 const renderStatus = (
   agentInfo: ServiceAgentInfo,

@@ -19,7 +19,7 @@ export const alertInstanceFactoryStub = <
   TState extends RuleTypeState,
   TInstanceState extends AlertInstanceState,
   TInstanceContext extends AlertInstanceContext,
-  TActionGroupIds extends string = ''
+  TActionGroupIds extends string = '',
 >(
   id: string
 ) => ({

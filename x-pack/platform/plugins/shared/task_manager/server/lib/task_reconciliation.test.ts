@@ -25,7 +25,7 @@ const mockTask = (overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskIn
     scheduledAt: new Date('2026-07-13T10:00:00.000Z'),
     attempts: 1,
     ...overrides,
-  } as ConcreteTaskInstance);
+  }) as ConcreteTaskInstance;
 
 describe('resetInFlightTasksOwnedByThisNode', () => {
   const logger = mockLogger();

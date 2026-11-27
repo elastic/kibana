@@ -73,16 +73,15 @@ const createUserProfile = (
     suggest: jest.fn(),
     update: jest.fn(),
     partialUpdate: jest.fn(),
-  } as unknown as UserProfileService);
+  }) as unknown as UserProfileService;
 
 const createWrapper =
   (authc: CoreAuthenticationService, userProfile: UserProfileService): FC<PropsWithChildren> =>
-  ({ children }) =>
-    (
-      <CurrentUserProvider authc={authc} userProfile={userProfile}>
-        {children}
-      </CurrentUserProvider>
-    );
+  ({ children }) => (
+    <CurrentUserProvider authc={authc} userProfile={userProfile}>
+      {children}
+    </CurrentUserProvider>
+  );
 
 describe('useCurrentUser', () => {
   it('throws when used outside a CurrentUserProvider', () => {

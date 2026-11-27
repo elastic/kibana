@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export const SUMMARIZE_INVESTIGATION_STEP_ID = 'alertzero.investigation.summarize' as const;
 
@@ -21,14 +21,16 @@ const inputSchema = z.object({
     .describe('Investigation or escalation conversation to read and summarize.'),
 });
 
-const outputSchema = z.object({
-  skipped: z.boolean().describe('True when no summary was written.'),
-  reason: z
-    .enum(['template', 'no_proposal', 'empty', 'no_connector', 'incomplete', 'cancelled'])
-    .optional()
-    .describe('Why the step wrote nothing.'),
-  summary: z.string().optional().describe('Reading written to metadata.summary.'),
-});
+const outputSchema = lazySchema(() =>
+  z.object({
+    skipped: z.boolean().describe('True when no summary was written.'),
+    reason: z
+      .enum(['template', 'no_proposal', 'empty', 'no_connector', 'incomplete', 'cancelled'])
+      .optional()
+      .describe('Why the step wrote nothing.'),
+    summary: z.string().optional().describe('Reading written to metadata.summary.'),
+  })
+);
 
 export const summarizeInvestigationStepCommonDefinition: CommonStepDefinition<
   typeof inputSchema,

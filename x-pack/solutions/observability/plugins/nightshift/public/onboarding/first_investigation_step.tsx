@@ -128,7 +128,7 @@ export function OnboardingFirstInvestigationStep({
     () =>
       execution.status === 'failed' || execution.suggestions?.length === 0
         ? FALLBACK_SUGGESTIONS
-        : execution.suggestions ?? [],
+        : (execution.suggestions ?? []),
     [execution.status, execution.suggestions]
   );
 

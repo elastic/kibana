@@ -12,7 +12,7 @@ const hit = (partial: Pick<SearchHit, '_source' | 'fields'>): SearchHit =>
   ({
     _index: 'kb-artifact-builder-kibana',
     ...partial,
-  } as SearchHit);
+  }) as SearchHit;
 
 describe('documentWithInferenceFields', () => {
   const embeddings = {

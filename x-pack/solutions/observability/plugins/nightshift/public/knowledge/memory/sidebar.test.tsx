@@ -31,7 +31,7 @@ const summary = (overrides: Partial<MemorySummary> = {}): MemorySummary =>
     usefulness: 0,
     confidence: 0,
     ...overrides,
-  } as MemorySummary);
+  }) as MemorySummary;
 
 /** Defaults for a settled, empty, first-page query. */
 const listProps = (overrides: Record<string, unknown> = {}) => ({

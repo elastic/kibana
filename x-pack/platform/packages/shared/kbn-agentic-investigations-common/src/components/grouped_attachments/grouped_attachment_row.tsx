@@ -113,9 +113,11 @@ export const GroupedAttachmentRow = memo<GroupedAttachmentRowProps>(
       inline-size: ${CIRCLE_SIZE_PX}px;
       block-size: ${CIRCLE_SIZE_PX}px;
       border-radius: 50%;
-      background: ${iconColor === 'danger'
-        ? euiTheme.colors.backgroundLightDanger
-        : euiTheme.colors.backgroundLightText};
+      background: ${
+        iconColor === 'danger'
+          ? euiTheme.colors.backgroundLightDanger
+          : euiTheme.colors.backgroundLightText
+      };
     `;
 
     const textStyles = css`

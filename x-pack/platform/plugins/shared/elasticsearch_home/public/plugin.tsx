@@ -21,9 +21,12 @@ const LazyHomePage = dynamic(async () => ({
   default: (await import('./home_page')).HomePage,
 }));
 
-export class ElasticsearchHomePlugin
-  implements Plugin<void, ElasticsearchHomePublicStart, {}, ElasticsearchHomeStartDependencies>
-{
+export class ElasticsearchHomePlugin implements Plugin<
+  void,
+  ElasticsearchHomePublicStart,
+  {},
+  ElasticsearchHomeStartDependencies
+> {
   public setup() {}
 
   public start(

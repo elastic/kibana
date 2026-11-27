@@ -26,14 +26,11 @@ export interface NightshiftInvestigationsPublicStart {
   investigationsClient: NightshiftInvestigationsRepositoryClient;
 }
 
-export class NightshiftInvestigationsPublicPlugin
-  implements
-    Plugin<
-      NightshiftInvestigationsPublicSetup,
-      NightshiftInvestigationsPublicStart,
-      NightshiftInvestigationsPublicSetupDeps
-    >
-{
+export class NightshiftInvestigationsPublicPlugin implements Plugin<
+  NightshiftInvestigationsPublicSetup,
+  NightshiftInvestigationsPublicStart,
+  NightshiftInvestigationsPublicSetupDeps
+> {
   setup(
     _core: CoreSetup,
     { share, workflowsExtensions }: NightshiftInvestigationsPublicSetupDeps

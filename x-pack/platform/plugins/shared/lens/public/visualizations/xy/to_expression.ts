@@ -294,8 +294,8 @@ export const buildXYExpression = (
     legendSize: state.legend.isInside
       ? undefined
       : state.legend.position === Position.Top || state.legend.position === Position.Bottom
-      ? LegendSize.AUTO
-      : state.legend.legendSize ?? LENS_DEFAULT_LEGEND_SIZE,
+        ? LegendSize.AUTO
+        : (state.legend.legendSize ?? LENS_DEFAULT_LEGEND_SIZE),
     layout: state.legend.layout,
     horizontalAlignment:
       state.legend.horizontalAlignment && state.legend.isInside
@@ -472,9 +472,9 @@ const dataLayerToExpression = (
 
   const isHistogramDimension = Boolean(
     xAxisOperation &&
-      xAxisOperation.isBucketed &&
-      xAxisOperation.scale &&
-      xAxisOperation.scale !== 'ordinal'
+    xAxisOperation.isBucketed &&
+    xAxisOperation.scale &&
+    xAxisOperation.scale !== 'ordinal'
   );
 
   const dataFromType = layer.seriesType.split('_');
@@ -527,10 +527,10 @@ const dataLayerToExpression = (
       ? layer.colorMapping
         ? JSON.stringify(layer.colorMapping)
         : !layer.palette
-        ? JSON.stringify(
-            getColorMappingDefaults({ defaultPaletteId: getDefaultPalette(layer.seriesType) })
-          )
-        : undefined
+          ? JSON.stringify(
+              getColorMappingDefaults({ defaultPaletteId: getDefaultPalette(layer.seriesType) })
+            )
+          : undefined
       : undefined,
   });
 

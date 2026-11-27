@@ -26,7 +26,7 @@ describe('useHoverLock', () => {
         y: 0,
         toJSON: () => {},
         ...rect,
-      } as DOMRect);
+      }) as DOMRect;
     return el;
   };
 

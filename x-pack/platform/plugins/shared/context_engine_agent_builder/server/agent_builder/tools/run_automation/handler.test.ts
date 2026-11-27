@@ -52,7 +52,7 @@ describe('runAutomationHandler', () => {
         getWorkflow: getWorkflowMock,
         updateWorkflow: updateWorkflowMock,
         getWorkflowExecution: getWorkflowExecutionMock,
-      } as never),
+      }) as never,
   });
 
   beforeEach(() => {

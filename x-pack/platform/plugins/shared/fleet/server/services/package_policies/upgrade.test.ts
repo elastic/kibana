@@ -427,7 +427,7 @@ describe('Upgrade', () => {
             namespace: 'default',
             policy_ids: [`agent-policy-${id}`],
             inputs: [{ id: 'toto', enabled: true, streams: [], type: 'logs' }],
-          } as any)
+          }) as any
       );
 
       const res = await _packagePoliciesGetUpgradeDryRunDiffs({
@@ -455,7 +455,7 @@ describe('Upgrade', () => {
           namespace: 'default',
           policy_ids: [`agent-policy-${id}`],
           inputs: [{ id: 'toto', enabled: true, streams: [], type: 'logs' }],
-        } as any);
+        }) as any;
       const getPackagePolicy = jest.fn(async (_soClient: unknown, id: string) =>
         id === 'with-condition'
           ? packagePolicyOf(id, 'test-agent-condition')
@@ -725,7 +725,7 @@ describe('Upgrade', () => {
         },
       ]);
 
-      expect(soClient.update).toBeCalledWith(
+      expect(soClient.update).toHaveBeenCalledWith(
         'ingest-package-policies',
         'package-policy-id-test-var-groups',
         expect.objectContaining({
@@ -768,7 +768,7 @@ describe('Upgrade', () => {
         id: 'package-policy-id-test-var-groups-saved',
       });
 
-      expect(soClient.update).toBeCalledWith(
+      expect(soClient.update).toHaveBeenCalledWith(
         'ingest-package-policies',
         'package-policy-id-test-var-groups-saved',
         expect.objectContaining({

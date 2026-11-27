@@ -65,7 +65,7 @@ const buildUsableStatsResponse = ({
         : { value: null },
       indicator_eligible: { doc_count: indicatorEligible },
     },
-  } as const);
+  }) as const;
 
 const buildDefaultDeps = (
   overrides: Partial<ReadinessDeps> = {}

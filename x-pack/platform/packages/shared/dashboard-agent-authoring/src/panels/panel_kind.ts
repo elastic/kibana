@@ -60,7 +60,7 @@ interface ConfigDiscriminator<Type extends string> {
 export const defineConfigPanelKind = <
   const Type extends string,
   AddShape extends ConfigDiscriminator<Type> & z.ZodRawShape,
-  EditShape extends ConfigDiscriminator<Type> & z.ZodRawShape
+  EditShape extends ConfigDiscriminator<Type> & z.ZodRawShape,
 >(kind: {
   type: Type;
   embeddableType: string;
@@ -73,7 +73,7 @@ export const defineConfigPanelKind = <
     source: 'config',
     ...kind,
     addPanelsInputSchema: kind.addInputSchema.extend({ sectionId: sectionIdField }),
-  } as const satisfies ConfigPanelKind);
+  }) as const satisfies ConfigPanelKind;
 
 /** Lens is the default renderer, so its `renderer` field may be optional. */
 type RendererField<Renderer extends string> =
@@ -92,7 +92,7 @@ interface RequestDiscriminator<Renderer extends string> {
 export const defineRequestPanelKind = <
   const Renderer extends string,
   AddShape extends RequestDiscriminator<Renderer> & z.ZodRawShape,
-  EditShape extends RequestDiscriminator<Renderer> & z.ZodRawShape
+  EditShape extends RequestDiscriminator<Renderer> & z.ZodRawShape,
 >(kind: {
   renderer: Renderer;
   embeddableType: string;
@@ -104,4 +104,4 @@ export const defineRequestPanelKind = <
     source: 'request',
     ...kind,
     addPanelsInputSchema: kind.addInputSchema.extend({ sectionId: sectionIdField }),
-  } as const satisfies RequestPanelKind);
+  }) as const satisfies RequestPanelKind;

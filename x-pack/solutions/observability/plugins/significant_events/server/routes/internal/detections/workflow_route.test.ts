@@ -27,7 +27,7 @@ const makeLink = (sourceId: string, ruleId: string): QueryLink =>
     rule_backed: true,
     rule_id: ruleId,
     query: { id: `${ruleId}-query`, severity_score: 90 },
-  } as QueryLink);
+  }) as QueryLink;
 
 const setup = () => {
   const runChangePointScan = jest.fn().mockResolvedValue({ took: 1, by_rule: { buckets: [] } });

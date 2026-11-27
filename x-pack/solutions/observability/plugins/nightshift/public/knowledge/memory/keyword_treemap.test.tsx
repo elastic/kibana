@@ -60,7 +60,7 @@ const summary = (overrides: Partial<MemorySummary> = {}): MemorySummary =>
     usefulness: 0.9,
     confidence: 0.9,
     ...overrides,
-  } as MemorySummary);
+  }) as MemorySummary;
 
 /** Three memories that give the graph a hub, a satellite, and two satellites. */
 const PAGES = [

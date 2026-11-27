@@ -37,8 +37,8 @@ const useQueryRulesetConsoleRequest = (rulesetId: string, enabled: boolean): str
       const criteriaArray = Array.isArray(rule.criteria)
         ? rule.criteria
         : rule.criteria
-        ? [rule.criteria]
-        : [];
+          ? [rule.criteria]
+          : [];
 
       for (const criterion of criteriaArray) {
         if (

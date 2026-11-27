@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { UserSchema } from '../user/v1';
 import { UserActionActionsSchema } from './action/v1';
 import { AssigneesUserActionSchema } from './assignees/v1';
@@ -36,20 +36,24 @@ export { UserActionTypes, UserActionActions } from './action/v1';
 export { StatusUserActionSchema } from './status/v1';
 export type { UserActionType, UserActionAction } from './action/v1';
 
-const PersistedActionSourceSchema = z.object({
-  type: z.string(),
-  id: z.string(),
-  name: z.string().optional(),
-  run_id: z.string().optional(),
-});
+const PersistedActionSourceSchema = lazySchema(() =>
+  z.object({
+    type: z.string(),
+    id: z.string(),
+    name: z.string().optional(),
+    run_id: z.string().optional(),
+  })
+);
 
-const UserActionCommonAttributesSchema = z.object({
-  created_at: z.string(),
-  created_by: UserSchema,
-  owner: z.string(),
-  action: UserActionActionsSchema,
-  source: PersistedActionSourceSchema.nullable().optional(),
-});
+const UserActionCommonAttributesSchema = lazySchema(() =>
+  z.object({
+    created_at: z.string(),
+    created_by: UserSchema,
+    owner: z.string(),
+    action: UserActionActionsSchema,
+    source: PersistedActionSourceSchema.nullable().optional(),
+  })
+);
 
 export const CaseUserActionInjectedDeprecatedIdsSchema = z.object({
   action_id: z.string(),

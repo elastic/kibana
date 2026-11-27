@@ -51,7 +51,10 @@ const ALERTING_APP_META: Record<AlertingApp, AlertingAppMeta> = {
 export class AlertingNavigation {
   public readonly requiredPrivilegesPrompt: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly mountConfig: AlertingMountConfig) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly mountConfig: AlertingMountConfig
+  ) {
     this.requiredPrivilegesPrompt = this.page.testSubj.locator('alertingRequiredPrivilegesPrompt');
   }
 

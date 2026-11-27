@@ -10,19 +10,19 @@
 import type { IClusterClient, KibanaRequest, SecurityServiceStart } from '@kbn/core/server';
 import { getAuthenticatedUser } from './get_user';
 
-const createRequest = (): KibanaRequest => ({ headers: {} } as KibanaRequest);
+const createRequest = (): KibanaRequest => ({ headers: {} }) as KibanaRequest;
 
 const createClusterClient = (): IClusterClient =>
   ({
     asScoped: jest.fn(),
-  } as unknown as IClusterClient);
+  }) as unknown as IClusterClient;
 
 const createSecurity = (user: unknown): SecurityServiceStart =>
   ({
     authc: {
       getCurrentUser: jest.fn().mockReturnValue(user),
     },
-  } as unknown as SecurityServiceStart);
+  }) as unknown as SecurityServiceStart;
 
 describe('getAuthenticatedUser', () => {
   it('returns the profile UID when available', async () => {

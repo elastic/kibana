@@ -83,10 +83,10 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
           defaultMessage: 'Enter a destination name.',
         })
       : destinationNameError === 'duplicate'
-      ? i18n.translate('xpack.streams.destinations.destinationNameDuplicateErrorMessage', {
-          defaultMessage: 'A destination with this name already exists.',
-        })
-      : undefined;
+        ? i18n.translate('xpack.streams.destinations.destinationNameDuplicateErrorMessage', {
+            defaultMessage: 'A destination with this name already exists.',
+          })
+        : undefined;
 
   const selectStorageKind = useCallback(
     (nextStorageKind: DestinationStorageKind) => () => setStorageKind(nextStorageKind),

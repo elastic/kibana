@@ -67,10 +67,10 @@ const flattenToRows = (
       val === null
         ? 'null'
         : Array.isArray(val)
-        ? JSON.stringify(val)
-        : typeof val === 'string'
-        ? val
-        : String(val);
+          ? JSON.stringify(val)
+          : typeof val === 'string'
+            ? val
+            : String(val);
     return [{ field: fullKey, value: display, fieldType }];
   });
 };

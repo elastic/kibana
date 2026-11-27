@@ -182,8 +182,8 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
     return !flappingSettings
       ? spaceFlappingSettings.enabled
       : flappingSettings.enabled !== undefined
-      ? flappingSettings.enabled
-      : true; // default to true if flapping.enabled is undefined
+        ? flappingSettings.enabled
+        : true; // default to true if flapping.enabled is undefined
   }, [spaceFlappingSettings, flappingSettings]);
 
   const flappingFormHeader = useMemo(() => {

@@ -7,7 +7,7 @@
 
 /* eslint-disable @kbn/compat/typescript-naming-convention */
 
-import type { IntegrationEvaluations } from "../types";
+import type { IntegrationEvaluations } from '../types';
 
 export const aws_bedrock_agentcoreEvaluations = {
   integration: 'aws_bedrock_agentcore',

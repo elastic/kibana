@@ -47,9 +47,7 @@ export async function loadInferenceConnectorsForRegisteredSteps(
         async (featureId) =>
           [
             featureId,
-            (
-              await loadConnectors({ http, featureId })
-            ).map((connector) => ({
+            (await loadConnectors({ http, featureId })).map((connector) => ({
               id: connector.id,
               name: connector.name,
               connectorType: connector.actionTypeId,

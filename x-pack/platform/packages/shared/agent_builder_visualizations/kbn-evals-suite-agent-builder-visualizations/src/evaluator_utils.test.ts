@@ -51,7 +51,7 @@ describe('skippedResult', () => {
 });
 
 describe('withLowScoreLogging', () => {
-  const buildLog = () => ({ warning: jest.fn() } as unknown as ToolingLog);
+  const buildLog = () => ({ warning: jest.fn() }) as unknown as ToolingLog;
 
   it('keeps name, kind, and result unchanged', async () => {
     const wrapped = withLowScoreLogging(buildEvaluator(0.5), buildLog());

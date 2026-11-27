@@ -175,7 +175,7 @@ const completeWithPromptTemplate = async ({
   const completionTokens = response.tokens?.completion ?? 0;
 
   return {
-    message: schema ? JSON.stringify(structuredOutput) : response.content ?? '',
+    message: schema ? JSON.stringify(structuredOutput) : (response.content ?? ''),
     structuredOutput,
     elapsedMs: Date.now() - startedAt,
     usage: {

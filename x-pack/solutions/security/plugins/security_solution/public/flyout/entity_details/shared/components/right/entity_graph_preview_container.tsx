@@ -16,8 +16,10 @@ import { getScopeFlyoutTimeRange } from '../../../../../entity_analytics/common/
 
 const DEFAULT_PREVIEW_TIME_RANGE = { from: 'now-30d', to: 'now' } as const;
 
-export interface EntityGraphPreviewContainerProps
-  extends Pick<GraphPreviewPanelProps, 'onShowGraph' | 'showIcon'> {
+export interface EntityGraphPreviewContainerProps extends Pick<
+  GraphPreviewPanelProps,
+  'onShowGraph' | 'showIcon'
+> {
   /** Entity Store v2 entity ID (`entity.id`) to center the graph preview on. */
   entityId: string;
   /** Scope the flyout was opened from; a scope that pins a time range replaces the 30-day default. */

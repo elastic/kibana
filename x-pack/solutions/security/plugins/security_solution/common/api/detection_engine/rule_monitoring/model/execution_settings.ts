@@ -13,10 +13,10 @@ export interface RuleExecutionSettings {
 }
 
 export enum LogLevelSetting {
-  'trace' = 'trace',
-  'debug' = 'debug',
-  'info' = 'info',
-  'warn' = 'warn',
-  'error' = 'error',
-  'off' = 'off',
+  trace = 'trace',
+  debug = 'debug',
+  info = 'info',
+  warn = 'warn',
+  error = 'error',
+  off = 'off',
 }

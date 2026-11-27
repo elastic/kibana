@@ -525,13 +525,13 @@ describe('DataStreamDataClient', () => {
             _index: BACKING_INDEX,
           })),
         },
-      } as never);
+      }) as never;
 
     const bulkPage = (count: number) =>
       ({
         errors: false,
         items: Array.from({ length: count }, (_, i) => updatedBulkItem(`doc-${i}`, i)),
-      } as never);
+      }) as never;
 
     it('pages until a short page and hard-deletes the legacy index', async () => {
       const { esClient, versionManager, dataAccess } = createClient([LEGACY_INDEX]);

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { timeoutSignal } from '@kbn/std';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { KIBANA_API_VERSION } from './constants';
@@ -71,11 +72,16 @@ const kibanaGet = async (connection: KibanaConnection, path: string): Promise<Js
 
   let response: Response;
   try {
-    response = await fetch(url, {
-      method: 'GET',
-      headers,
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-    });
+    const deadline = timeoutSignal(REQUEST_TIMEOUT_MS);
+    try {
+      response = await fetch(url, {
+        method: 'GET',
+        headers,
+        signal: deadline,
+      });
+    } finally {
+      deadline.dispose();
+    }
   } catch (error) {
     const name = error instanceof Error ? error.name : '';
     if (name === 'AbortError' || name === 'TimeoutError') {

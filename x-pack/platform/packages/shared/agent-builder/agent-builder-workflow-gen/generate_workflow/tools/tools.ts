@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { tool } from '@langchain/core/tools';
 import type { StructuredToolInterface } from '@langchain/core/tools';
 import type { ToolCall } from '@kbn/agent-builder-genai-utils/langchain';
@@ -81,14 +81,16 @@ const stepDefinitionSchema = z
   .passthrough();
 
 // Typed so the JSON schema has a type: with `z.unknown()`, models send objects and arrays as strings.
-const jsonValueSchema = z.union([
-  z.array(z.unknown()),
-  z.record(z.string(), z.unknown()),
-  z.string(),
-  z.number(),
-  z.boolean(),
-  z.null(),
-]);
+const jsonValueSchema = lazySchema(() =>
+  z.union([
+    z.array(z.unknown()),
+    z.record(z.string(), z.unknown()),
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.null(),
+  ])
+);
 
 /* ---------- Tool definitions ---------- */
 
@@ -144,11 +146,13 @@ const modifyStepPropertyTool = defineTool({
   name: 'modify_step_property',
   description:
     'Set one property of an existing step by dot path. Missing keys are created; list indexes must exist.',
-  schema: z.object({
-    stepName: z.string(),
-    property: z.string().describe('Dot path (e.g. "type", "with.message", "with.inputs.owner")'),
-    value: jsonValueSchema,
-  }),
+  schema: lazySchema(() =>
+    z.object({
+      stepName: z.string(),
+      property: z.string().describe('Dot path (e.g. "type", "with.message", "with.inputs.owner")'),
+      value: jsonValueSchema,
+    })
+  ),
   mutatesYaml: true,
   execute: async ({ stepName, property, value }, { state }) => {
     const result = modifyStepProperty(state.yaml, stepName, property, value);
@@ -163,10 +167,12 @@ const modifyWorkflowPropertyTool = defineTool({
   description: `Set a workflow property by dot path (e.g. "description", "consts.url", "triggers.0.with.every"). The first segment must be a top-level key: ${WORKFLOW_PROPERTY_KEYS.join(
     ', '
   )}. Missing keys are created; list indexes must exist. Not for steps.`,
-  schema: z.object({
-    property: z.string().describe('Dot path starting with a top-level key'),
-    value: jsonValueSchema.describe('New value at that path'),
-  }),
+  schema: lazySchema(() =>
+    z.object({
+      property: z.string().describe('Dot path starting with a top-level key'),
+      value: jsonValueSchema.describe('New value at that path'),
+    })
+  ),
   mutatesYaml: true,
   execute: async ({ property, value }, { state }) => {
     const result = modifyWorkflowProperty(state.yaml, property, value);

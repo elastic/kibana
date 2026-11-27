@@ -17,9 +17,10 @@ import type {
   AiAnonymizationSettingsPluginStart,
 } from './types';
 
-export class AiAnonymizationSettingsPlugin
-  implements Plugin<AiAnonymizationSettingsPluginSetup, AiAnonymizationSettingsPluginStart>
-{
+export class AiAnonymizationSettingsPlugin implements Plugin<
+  AiAnonymizationSettingsPluginSetup,
+  AiAnonymizationSettingsPluginStart
+> {
   private readonly logger: Logger;
   private readonly patternTesterWorker: PatternTesterWorker;
 

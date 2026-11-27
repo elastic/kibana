@@ -25,7 +25,7 @@ const dataStreamResponse = (backingIndexes: string[], retentionTime?: string) =>
         indices: backingIndexes.map((index_name) => ({ index_name })),
       },
     ],
-  } as never);
+  }) as never;
 
 describe('DataStreamMetadataManager', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;

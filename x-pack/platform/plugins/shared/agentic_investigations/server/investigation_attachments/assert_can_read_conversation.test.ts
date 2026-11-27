@@ -18,7 +18,7 @@ const checkWith = (readable: string[]) => {
       new Map(ids.filter((id) => readable.includes(id)).map((id) => [id, { id }]))
   );
   const check = createConversationReadCheck({
-    getConversationClient: async () => ({ bulkGet } as unknown as ConversationPublicClient),
+    getConversationClient: async () => ({ bulkGet }) as unknown as ConversationPublicClient,
   });
   return { check, bulkGet };
 };

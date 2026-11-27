@@ -758,7 +758,7 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).toBeCalled();
+      expect(mockedOutputService.create).toHaveBeenCalled();
       expect(mockedOutputService.create.mock.calls[0][2]).toMatchObject({
         hosts: ['http://default-es:9200'],
       });
@@ -879,8 +879,8 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
+      expect(mockedOutputService.create).toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
     });
 
     it('should skip the OTLP output but create the non-OTLP output when the version requirement is not met', async () => {
@@ -1677,7 +1677,7 @@ describe('Outputs preconfiguration', () => {
           auth_type: 'kerberos',
           kerberos,
           ...fields,
-        } as any);
+        }) as any;
 
       it('should create the output when Kerberos is allowed', async () => {
         const soClient = savedObjectsClientMock.create();
@@ -1748,7 +1748,7 @@ describe('Outputs preconfiguration', () => {
           oauth2: { client_id: 'my-client', token_url: 'https://idp.example.com/oauth2/token' },
           secrets: { oauth2: { client_secret: 'secretClientSecret' } },
           ...fields,
-        } as any);
+        }) as any;
 
       it('should create the output when OAuth2 is allowed', async () => {
         const soClient = savedObjectsClientMock.create();
@@ -1879,7 +1879,7 @@ describe('Outputs preconfiguration', () => {
           type: 'kafka',
           hosts: ['kafka.co:80'],
           secrets,
-        } as any);
+        }) as any;
 
       it('should not update the output if its nested secrets did not change', async () => {
         const soClient = savedObjectsClientMock.create();
@@ -2004,9 +2004,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     const SCENARIOS: Array<{ name: string; data: PreconfiguredOutput }> = [

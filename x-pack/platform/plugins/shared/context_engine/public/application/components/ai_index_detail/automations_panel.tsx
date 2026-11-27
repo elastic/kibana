@@ -103,10 +103,10 @@ export const AutomationsPanel = ({
         defaultMessage: 'You need the Workflows create privilege to create a workflow.',
       })
     : !canAddMore
-    ? i18n.translate('xpack.contextEngine.aiIndexDetail.automations.maxAutomationsTooltip', {
-        defaultMessage: 'You have reached the maximum number of automations.',
-      })
-    : undefined;
+      ? i18n.translate('xpack.contextEngine.aiIndexDetail.automations.maxAutomationsTooltip', {
+          defaultMessage: 'You have reached the maximum number of automations.',
+        })
+      : undefined;
 
   const addAutomationLabel = i18n.translate(
     'xpack.contextEngine.aiIndexDetail.automations.addButton',

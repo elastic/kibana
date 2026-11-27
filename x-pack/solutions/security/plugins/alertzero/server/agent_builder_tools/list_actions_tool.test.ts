@@ -13,7 +13,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 const request = httpServerMock.createKibanaRequest();
 const logger = () => ({ error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() });
 
-const serviceWith = (list: jest.Mock) => ({ list } as Pick<ActionsService, 'list'>);
+const serviceWith = (list: jest.Mock) => ({ list }) as Pick<ActionsService, 'list'>;
 
 const assertAlertZeroAccess = jest.fn().mockResolvedValue(undefined);
 

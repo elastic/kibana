@@ -30,7 +30,7 @@ jest.mock('@kbn/dashboard-plugin/public', () => ({
 
 const mockDataView = {
   id: 'test-data-view-id',
-  getFieldByName: (name: string) => ({ name, type: 'string' } as unknown as DataViewField),
+  getFieldByName: (name: string) => ({ name, type: 'string' }) as unknown as DataViewField,
 } as unknown as DataView;
 
 // Mutable so a test can change a search input between renders and assert the stale,

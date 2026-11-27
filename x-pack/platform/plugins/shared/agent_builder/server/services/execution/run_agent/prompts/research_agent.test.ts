@@ -34,7 +34,7 @@ describe('getResearchAgentPrompt', () => {
               id: type,
               validate: (input: unknown) => ({ valid: true, data: input }),
               format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
-            } as any),
+            }) as any,
         }),
       },
       configuration: { instructions: '', aiIndices: [] },
@@ -54,7 +54,7 @@ describe('getResearchAgentPrompt', () => {
       resultTransformer: jest.fn(),
       renderers: [],
       ...overrides,
-    } as any);
+    }) as any;
 
   const asText = (m: any): string =>
     Array.isArray(m) ? String(m[1]) : typeof m?.content === 'string' ? m.content : '';
@@ -295,7 +295,7 @@ describe('getResearchAgentPrompt', () => {
               id: type,
               validate: (input: unknown) => ({ valid: true, data: input }),
               format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
-            } as any),
+            }) as any,
         }),
       },
       configuration: {

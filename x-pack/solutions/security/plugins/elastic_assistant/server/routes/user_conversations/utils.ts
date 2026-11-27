@@ -23,8 +23,8 @@ export const getUserFilter = ({
     name && id
       ? `users:{ name: "${name}" OR id: "${id}" }`
       : name
-      ? `users:{ name: "${name}" }`
-      : `users:{ id: "${id}" }`;
+        ? `users:{ name: "${name}" }`
+        : `users:{ id: "${id}" }`;
 
   const sharedFilter = ` OR ${globalUsersFilter}`;
 

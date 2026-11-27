@@ -30,12 +30,12 @@ const buildToolContext = (attachments = buildMockAttachments()): ToolHandlerCont
     logger: loggingSystemMock.createLogger(),
     attachments,
     events: { sendUiEvent: jest.fn() },
-  } as unknown as ToolHandlerContext);
+  }) as unknown as ToolHandlerContext;
 
 const buildRegistry = (
   entries: Array<{ id: string; schema?: z.ZodType }>
 ): UnifiedAttachmentTypeRegistry =>
-  ({ list: () => entries } as unknown as UnifiedAttachmentTypeRegistry);
+  ({ list: () => entries }) as unknown as UnifiedAttachmentTypeRegistry;
 
 const commentSchema = z.object({
   type: z.literal('comment'),

@@ -75,7 +75,11 @@ export class OverviewTab extends AssetDetailsTab {
   private readonly metricsSectionsByMetric: Record<OverviewTabMetricsSection, Locator>;
   private readonly metricsShowAllButtonsByMetric: Record<OverviewTabMetricsSection, Locator>;
 
-  constructor(page: ScoutPage, kbnUrl: KibanaUrl, private readonly assetType: 'Host' | 'Docker') {
+  constructor(
+    page: ScoutPage,
+    kbnUrl: KibanaUrl,
+    private readonly assetType: 'Host' | 'Docker'
+  ) {
     super(page, kbnUrl);
     this.tab = this.page.getByTestId(`infraAssetDetails${this.tabName}Tab`);
     this.tabContent = this.page.getByTestId(`infraAssetDetails${this.tabName}TabContent`);

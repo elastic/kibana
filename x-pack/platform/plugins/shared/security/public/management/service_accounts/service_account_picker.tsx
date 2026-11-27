@@ -167,10 +167,10 @@ export const ServiceAccountPicker = ({
     allowCurrentUser && active === 0
       ? currentUserLabel
       : selected
-      ? `${selected.name} ${selected.roles.join(', ')}`
-      : hasMore
-      ? loadMoreLabel
-      : '';
+        ? `${selected.name} ${selected.roles.join(', ')}`
+        : hasMore
+          ? loadMoreLabel
+          : '';
   useEffect(() => {
     optionRefs.current[active]?.scrollIntoView({ block: 'nearest' });
   }, [active, source.status, selected?.id]);

@@ -21,18 +21,17 @@ type ArtifactInfoEntries = ArtifactInfoEntry & { entries?: ArtifactInfoEntry[] }
 /**
  * A normalized structured that is used internally through out the card's components.
  */
-export interface ArtifactInfo
-  extends Pick<
-    ExceptionListItemSchema,
-    | 'name'
-    | 'created_at'
-    | 'updated_at'
-    | 'created_by'
-    | 'updated_by'
-    | 'description'
-    | 'comments'
-    | 'tags'
-  > {
+export interface ArtifactInfo extends Pick<
+  ExceptionListItemSchema,
+  | 'name'
+  | 'created_at'
+  | 'updated_at'
+  | 'created_by'
+  | 'updated_by'
+  | 'description'
+  | 'comments'
+  | 'tags'
+> {
   effectScope: EffectScope;
   os: OsTypeArray;
   entries: ArtifactInfoEntries[];

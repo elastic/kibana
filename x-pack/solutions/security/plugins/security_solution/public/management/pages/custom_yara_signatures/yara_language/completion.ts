@@ -118,14 +118,12 @@ const SNIPPET_SUGGESTIONS: Suggestion[] = [
 const STATIC_SUGGESTIONS: Suggestion[] = uniqBy(
   [
     ...toKeywordSuggestions(DECLARATION_KEYWORDS, COMPLETION_DETAILS.keyword),
-    ...SECTION_KEYWORDS.map(
-      (section): Suggestion => ({
-        label: section,
-        kind: CompletionItemKind.Keyword,
-        detail: COMPLETION_DETAILS.section,
-        insertText: `${section}:`,
-      })
-    ),
+    ...SECTION_KEYWORDS.map((section): Suggestion => ({
+      label: section,
+      kind: CompletionItemKind.Keyword,
+      detail: COMPLETION_DETAILS.section,
+      insertText: `${section}:`,
+    })),
     ...toKeywordSuggestions(OPERATOR_KEYWORDS, COMPLETION_DETAILS.operator),
     ...toKeywordSuggestions(QUANTIFIER_KEYWORDS, COMPLETION_DETAILS.quantifier),
     ...toKeywordSuggestions(STRING_MODIFIERS, COMPLETION_DETAILS.stringModifier),
@@ -134,22 +132,21 @@ const STATIC_SUGGESTIONS: Suggestion[] = uniqBy(
       COMPLETION_DETAILS.constant,
       CompletionItemKind.Constant
     ),
-    ...BUILT_IN_KEYWORDS.map(
-      (builtIn): Suggestion =>
-        INTEGER_FUNCTION_REGEX.test(builtIn)
-          ? {
-              label: builtIn,
-              kind: CompletionItemKind.Function,
-              detail: COMPLETION_DETAILS.builtIn,
-              insertText: `${builtIn}($0)`,
-              insertTextRules: InsertAsSnippet,
-            }
-          : {
-              label: builtIn,
-              kind: CompletionItemKind.Variable,
-              detail: COMPLETION_DETAILS.builtIn,
-              insertText: builtIn,
-            }
+    ...BUILT_IN_KEYWORDS.map((builtIn): Suggestion =>
+      INTEGER_FUNCTION_REGEX.test(builtIn)
+        ? {
+            label: builtIn,
+            kind: CompletionItemKind.Function,
+            detail: COMPLETION_DETAILS.builtIn,
+            insertText: `${builtIn}($0)`,
+            insertTextRules: InsertAsSnippet,
+          }
+        : {
+            label: builtIn,
+            kind: CompletionItemKind.Variable,
+            detail: COMPLETION_DETAILS.builtIn,
+            insertText: builtIn,
+          }
     ),
     ...SNIPPET_SUGGESTIONS,
   ],
@@ -279,14 +276,12 @@ const getWordSuggestions = (
   range: monaco.IRange,
   isMetaKeyPosition: boolean
 ): monaco.languages.CompletionItem[] => {
-  const ruleSuggestions = uniq(precedingRuleNames).map(
-    (ruleName): Suggestion => ({
-      label: ruleName,
-      kind: CompletionItemKind.Reference,
-      detail: COMPLETION_DETAILS.ruleReference,
-      insertText: ruleName,
-    })
-  );
+  const ruleSuggestions = uniq(precedingRuleNames).map((ruleName): Suggestion => ({
+    label: ruleName,
+    kind: CompletionItemKind.Reference,
+    detail: COMPLETION_DETAILS.ruleReference,
+    insertText: ruleName,
+  }));
 
   return [
     ...(isMetaKeyPosition ? META_KEY_SUGGESTIONS : []),

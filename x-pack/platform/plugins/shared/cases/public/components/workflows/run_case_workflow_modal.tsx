@@ -20,11 +20,10 @@ import { useFocusButtonTrap } from '../use_focus_button';
 import { useCaseWorkflowTags } from './use_run_case_workflow';
 import * as i18n from './translations';
 
-interface RunCaseWorkflowModalProps
-  extends Pick<
-    RunWorkflowPanelProps,
-    'inputs' | 'sortWorkflow' | 'filterWorkflow' | 'onExecute' | 'onExecutionSettled' | 'telemetry'
-  > {
+interface RunCaseWorkflowModalProps extends Pick<
+  RunWorkflowPanelProps,
+  'inputs' | 'sortWorkflow' | 'filterWorkflow' | 'onExecute' | 'onExecutionSettled' | 'telemetry'
+> {
   /** Required: the panel's success toast is suppressed, so the executor must raise its own. */
   runWorkflow: RunWorkflowExecutor;
   onClose: () => void;

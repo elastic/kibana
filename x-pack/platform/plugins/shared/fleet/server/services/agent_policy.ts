@@ -998,7 +998,7 @@ class AgentPolicyService {
     const filter =
       hideAgentlessFilter && userFilter
         ? `(${hideAgentlessFilter}) AND (${userFilter})`
-        : hideAgentlessFilter ?? userFilter;
+        : (hideAgentlessFilter ?? userFilter);
     let agentPoliciesSO;
     try {
       agentPoliciesSO = await soClient.find<AgentPolicySOAttributes>({
@@ -2093,20 +2093,27 @@ class AgentPolicyService {
           );
 
           if (bulkResponse.errors) {
-            const erroredDocuments = bulkResponse.items.reduce((acc, item, idx) => {
-              const value: estypes.BulkResponseItem | undefined = item.index;
-              if (!value || !value.error) {
-                return acc;
-              }
+            const erroredDocuments = bulkResponse.items.reduce(
+              (acc, item, idx) => {
+                const value: estypes.BulkResponseItem | undefined = item.index;
+                if (!value || !value.error) {
+                  return acc;
+                }
 
-              const policy = fleetServerPolicies[idx];
-              acc.push({
-                bulkItem: value,
-                policyId: policy?.policy_id,
-                revisionIdx: policy?.revision_idx,
-              });
-              return acc;
-            }, [] as Array<{ bulkItem: estypes.BulkResponseItem; policyId?: string; revisionIdx?: number }>);
+                const policy = fleetServerPolicies[idx];
+                acc.push({
+                  bulkItem: value,
+                  policyId: policy?.policy_id,
+                  revisionIdx: policy?.revision_idx,
+                });
+                return acc;
+              },
+              [] as Array<{
+                bulkItem: estypes.BulkResponseItem;
+                policyId?: string;
+                revisionIdx?: number;
+              }>
+            );
 
             const errorMessage = `Failed to deploy ${
               erroredDocuments.length
@@ -2878,9 +2885,8 @@ class AgentPolicyService {
     if (agentPolicy?.is_protected) {
       const uninstallTokenService = appContextService.getUninstallTokenService();
 
-      const uninstallTokenError = await uninstallTokenService?.checkTokenValidityForPolicy(
-        policyId
-      );
+      const uninstallTokenError =
+        await uninstallTokenService?.checkTokenValidityForPolicy(policyId);
 
       if (uninstallTokenError) {
         throw new FleetError(

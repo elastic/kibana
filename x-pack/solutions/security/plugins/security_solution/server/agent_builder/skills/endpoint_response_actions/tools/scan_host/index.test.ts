@@ -236,7 +236,7 @@ describe('scanHostTool', () => {
           isPlatinumPlus: () => true,
           isEnterprise: () => false,
           getLicenseInformation: () => ({ isAvailable: true, isActive: true }),
-        } as unknown as ReturnType<EndpointAppContextService['getLicenseService']>)
+        }) as unknown as ReturnType<EndpointAppContextService['getLicenseService']>
     ) as unknown as EndpointAppContextService['getLicenseService'];
 
     const mockResponseActionsClient = { scan: jest.fn() };
@@ -265,9 +265,9 @@ describe('scanHostTool', () => {
       .mockResolvedValue(getEndpointAuthzInitialStateMock({ canWriteScanOperations: false }));
     service.getProductFeaturesService = jest.fn(
       () =>
-        ({ isEnabled: () => false } as unknown as ReturnType<
+        ({ isEnabled: () => false }) as unknown as ReturnType<
           EndpointAppContextService['getProductFeaturesService']
-        >)
+        >
     ) as unknown as EndpointAppContextService['getProductFeaturesService'];
 
     const mockResponseActionsClient = { scan: jest.fn() };
@@ -410,7 +410,7 @@ describe('scanHostTool', () => {
       ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
     })) as unknown as EndpointAppContextService['getInternalFleetServices'];
     service.getInternalResponseActionsClient = jest.fn(
-      () => ({ scan } as never)
+      () => ({ scan }) as never
     ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
 
     const { result } = await confirmThenHandle(scanHostTool(service), {

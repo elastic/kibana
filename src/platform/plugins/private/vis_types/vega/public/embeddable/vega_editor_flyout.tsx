@@ -132,8 +132,8 @@ export const VegaEditorFlyout = ({
   const dataViews = publishedDataViews?.length
     ? publishedDataViews
     : defaultDataView
-    ? [defaultDataView]
-    : [];
+      ? [defaultDataView]
+      : [];
   // Filters on the panel's only ad-hoc data view are stored without its id, because the id isn't a
   // saved object and a reference to it fails import. The search bar gets the id back, because the
   // filter editor opens an empty filter when it can't match one.

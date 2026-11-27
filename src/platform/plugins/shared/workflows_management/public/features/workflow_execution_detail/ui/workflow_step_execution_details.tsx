@@ -214,7 +214,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                             approvalLabels={
                               isOwnWaitingStep
                                 ? approvalLabels
-                                : approvalLabelsForStepExecution(stepExecution) ?? approvalLabels
+                                : (approvalLabelsForStepExecution(stepExecution) ?? approvalLabels)
                             }
                             autoOpen={shouldAutoResume}
                             waitingStepExecutionId={stepExecution?.id}

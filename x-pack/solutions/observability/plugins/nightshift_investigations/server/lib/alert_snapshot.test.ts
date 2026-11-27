@@ -68,7 +68,7 @@ describe('fetchAlertSnapshot', () => {
       getAuthorizedAlertsIndices: jest.fn().mockResolvedValue(['.alerts-observability.test']),
       get: jest.fn().mockResolvedValue(alert),
       ...overrides,
-    } as unknown as AlertsClient);
+    }) as unknown as AlertsClient;
 
   it('loads the alert and returns its snapshot', async () => {
     await expect(fetchAlertSnapshot(makeAlertsClient(), 'alert-1')).resolves.toEqual(

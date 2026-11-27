@@ -17,7 +17,7 @@ const propsFor = (command: 'isolate' | 'unisolate'): Props =>
       command,
       targets: [{ endpointId: 'endpoint-1', hostname: 'host-1', agentType: 'endpoint' }],
     },
-  } as Props);
+  }) as Props;
 
 describe('endpoint case attachment icon', () => {
   const attachment = getEndpointUnifiedAttachment();

@@ -745,7 +745,7 @@ export const removeCustomYaraSignaturesAdvancedSettings = (policy: PolicyConfig)
 });
 
 const removeEnabledCustomYaraSignaturesForOs = <
-  T extends { memory_protection: { custom_yara_signatures?: boolean } }
+  T extends { memory_protection: { custom_yara_signatures?: boolean } },
 >(
   osPolicy: T
 ): T => {
