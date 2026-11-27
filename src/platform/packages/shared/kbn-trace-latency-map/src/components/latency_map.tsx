@@ -151,12 +151,12 @@ const isSameSelection = (a?: LatencyMapSelection, b?: LatencyMapSelection) =>
   a === b ||
   Boolean(
     a &&
-      b &&
-      a.from === b.from &&
-      a.to === b.to &&
-      a.minDuration === b.minDuration &&
-      a.maxDuration === b.maxDuration &&
-      Boolean(a.failedOnly) === Boolean(b.failedOnly)
+    b &&
+    a.from === b.from &&
+    a.to === b.to &&
+    a.minDuration === b.minDuration &&
+    a.maxDuration === b.maxDuration &&
+    Boolean(a.failedOnly) === Boolean(b.failedOnly)
   );
 
 /** Until the chart tells where its cells are, the pixels of the geometry mean nothing. */

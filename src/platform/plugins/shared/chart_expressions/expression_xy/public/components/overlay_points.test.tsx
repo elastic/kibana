@@ -66,7 +66,7 @@ const createLayer = (
       columns: [{ id: 'avg', name: 'avg', meta: { type: 'number', params: { id: formatId } } }],
     },
     ...overrides,
-  } as CommonXYDataLayerConfig);
+  }) as CommonXYDataLayerConfig;
 
 const createHit = (specId: string, datum: XYOverlayDatum): XYChartElementEvent => {
   const geometry: GeometryValue = { x: 0, y: 0, accessor: 'y1', mark: null, datum };

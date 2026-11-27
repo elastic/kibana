@@ -102,5 +102,5 @@ export const toAppStart = (
 ): { avg: number | null; count: number } => {
   const { avg, count } = START_COLUMNS[type];
   const starts = row?.[RESULT_COLUMNS[count]] ?? 0;
-  return { avg: starts > 0 ? row?.[RESULT_COLUMNS[avg]] ?? null : null, count: starts };
+  return { avg: starts > 0 ? (row?.[RESULT_COLUMNS[avg]] ?? null) : null, count: starts };
 };

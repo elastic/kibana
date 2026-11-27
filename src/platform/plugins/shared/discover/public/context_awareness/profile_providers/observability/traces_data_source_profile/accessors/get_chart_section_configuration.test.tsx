@@ -25,7 +25,7 @@ const getConfig = (latencyMapEnabled: boolean) => {
     throw new Error('getChartSectionConfiguration was not created.');
   }
 
-  return accessor(() => ({ replaceDefaultChart: false } as ChartSectionConfiguration), {
+  return accessor(() => ({ replaceDefaultChart: false }) as ChartSectionConfiguration, {
     context: { category: DataSourceCategory.Traces },
     toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
   })();

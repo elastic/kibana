@@ -84,13 +84,11 @@ export function AppStartChart({
   const { formatDate, timeZone } = useFormatters();
   const data = useMemo(
     () =>
-      points.map(
-        ({ timestamp, [type]: { avg, count } }): AppStartDatum => ({
-          timestamp,
-          avg,
-          count,
-        })
-      ),
+      points.map(({ timestamp, [type]: { avg, count } }): AppStartDatum => ({
+        timestamp,
+        avg,
+        count,
+      })),
     [points, type]
   );
   const xDomain = useMemo(
