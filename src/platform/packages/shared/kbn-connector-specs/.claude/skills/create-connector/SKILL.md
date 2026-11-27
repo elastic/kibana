@@ -389,7 +389,7 @@ snapshot of the vendor's spec, so the connector is checked offline against it on
 6. **Run the contract test** and commit the whole `vendor_api/` folder:
 
    ```bash
-   node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/connector_spec_vendor_api_contract.test.ts
+   node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/test/vendor_api/connector_spec_vendor_api_contract.test.ts
    ```
 
 ### Self-review before handing off
@@ -398,7 +398,7 @@ First run the deterministic checks, and fix every failure for your connector:
 
 ```bash
 node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/connector_spec_quality_contract.test.ts
-node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/connector_spec_vendor_api_contract.test.ts
+node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/test/vendor_api/connector_spec_vendor_api_contract.test.ts
 ```
 
 They check that the docs page exists at the URL derived from the connector id, that it states the

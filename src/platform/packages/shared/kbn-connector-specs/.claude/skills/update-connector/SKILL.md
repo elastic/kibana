@@ -132,7 +132,7 @@ handler changes.
 Run each check and fix every failure for this connector:
 
 ```bash
-node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/connector_spec_vendor_api_contract.test.ts
+node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/test/vendor_api/connector_spec_vendor_api_contract.test.ts
 node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/connector_spec_quality_contract.test.ts
 node scripts/jest <connector folder>
 node scripts/type_check --project src/platform/packages/shared/kbn-connector-specs/tsconfig.json

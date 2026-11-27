@@ -322,7 +322,7 @@ Mark task 9 as `completed`.
 
 Mark task 10 as `in_progress`.
 
-Do one final review using the **review-connector** skill. Verify no TODOs/placeholders, consistent naming, no debug artifacts. Rerun the vendor API contract test (`node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/connector_spec_vendor_api_contract.test.ts`) and, if the connector has a `vendor_api/manifest.json`, `node scripts/connector_vendor_api --connector <id> --check`, as fixes made since Task 1 often leave the artifacts out of date. An exempt connector has no manifest, and `--check` fails without one. The review skill will also run docs quality checks (`docs-check-style`, `crosslink-validator`, `frontmatter-audit`, `content-type-checker`, `applies-to-tagging`) on any connector docs. Make any final minor fixes if needed.
+Do one final review using the **review-connector** skill. Verify no TODOs/placeholders, consistent naming, no debug artifacts. Rerun the vendor API contract test (`node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/test/vendor_api/connector_spec_vendor_api_contract.test.ts`) and, if the connector has a `vendor_api/manifest.json`, `node scripts/connector_vendor_api --connector <id> --check`, as fixes made since Task 1 often leave the artifacts out of date. An exempt connector has no manifest, and `--check` fails without one. The review skill will also run docs quality checks (`docs-check-style`, `crosslink-validator`, `frontmatter-audit`, `content-type-checker`, `applies-to-tagging`) on any connector docs. Make any final minor fixes if needed.
 
 Mark task 10 as `completed`.
 
