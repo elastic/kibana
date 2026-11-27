@@ -135,12 +135,16 @@ describe('getAllSpaceIds', () => {
 
   beforeEach(() => {
     mockFind.mockReset();
+    jest.mocked(appContextService.getExperimentalFeatures).mockReset();
+    jest.mocked(getSettingsOrUndefined).mockReset();
     jest.mocked(appContextService.getInternalUserSOClientForSpaces).mockReturnValue({
       find: mockFind,
     } as any);
   });
 
-  it('lists the real space objects (ids) regardless of space-awareness mode', async () => {
+  it('lists the real space objects (ids) when space awareness is enabled', async () => {
+    mockFeatureFlag(true);
+    mockGetSettings({ use_space_awareness_migration_status: 'success' });
     mockFind.mockResolvedValue({
       saved_objects: [{ id: 'default' }, { id: 'space1' }, { id: 'space2' }],
       total: 3,
@@ -152,7 +156,18 @@ describe('getAllSpaceIds', () => {
     expect(res).toEqual({ spaceIds: new Set(['default', 'space1', 'space2']), truncated: false });
   });
 
+  it('returns the global scope (*) without listing spaces when space awareness is disabled', async () => {
+    mockFeatureFlag(false);
+
+    const res = await getAllSpaceIds();
+
+    expect(res).toEqual({ spaceIds: new Set(['*']), truncated: false });
+    expect(mockFind).not.toHaveBeenCalled();
+  });
+
   it('fails closed to a global check when no space can be listed', async () => {
+    mockFeatureFlag(true);
+    mockGetSettings({ use_space_awareness_migration_status: 'success' });
     mockFind.mockResolvedValue({ saved_objects: [], total: 0 });
 
     const res = await getAllSpaceIds();
@@ -161,6 +176,8 @@ describe('getAllSpaceIds', () => {
   });
 
   it('reports truncation when the listing is capped', async () => {
+    mockFeatureFlag(true);
+    mockGetSettings({ use_space_awareness_migration_status: 'success' });
     mockFind.mockResolvedValue({ saved_objects: [{ id: 'default' }], total: 50000 });
 
     const res = await getAllSpaceIds();
