@@ -26,8 +26,6 @@ import { targetsKey } from '../../targets_store';
 export type BTargets = Readonly<{
   /** The tile's fill, against the surface. */
   fill: number;
-  /** The fill's chroma taper, as a percentage of the usual one: lower is more colorful. */
-  fillTaper: number;
   /** A colored value's text, against the surface. */
   ink: number;
   /** The value's text on a fill, against it. Never below WCAG's large-text AA. */
@@ -36,8 +34,6 @@ export type BTargets = Readonly<{
   neutralInk: boolean;
   /** The trend's area color, against the fill. */
   trend: number;
-  /** The same as `fillTaper`, for the trend's area and line. */
-  trendTaper: number;
   /** The line along the top of the trend's area, against the fill. */
   trendLine: number;
   /** The darkest fill dynamic coloring reaches, at the end of its ramp. */
@@ -54,12 +50,10 @@ export type BTargets = Readonly<{
 
 export const DEFAULT_B_TARGETS: BTargets = {
   fill: 6,
-  fillTaper: 65,
   ink: DEFAULT_PARAMS.lc.ink,
   fillInk: 75,
   neutralInk: false,
   trend: 24,
-  trendTaper: 65,
   trendLine: 30,
   dynamicFillMax: 15,
   valueRampMin: 50,
@@ -67,6 +61,21 @@ export const DEFAULT_B_TARGETS: BTargets = {
   showTrendLine: true,
   trendGradient: true,
 };
+
+// Chroma tapers as percentages of the usual ones: higher is duller. The trend is semi-transparent over the fill, so
+// it can be more colorful than the fill.
+const FILL_TAPER = 140;
+const TREND_TAPER = 100;
+const tapered = (percent: number): Params => ({
+  ...DEFAULT_PARAMS,
+  chroma: {
+    ...DEFAULT_PARAMS.chroma,
+    taper: (DEFAULT_PARAMS.chroma.taper * percent) / 100,
+    taperDark: (DEFAULT_PARAMS.chroma.taperDark * percent) / 100,
+  },
+});
+const FILL_PARAMS = tapered(FILL_TAPER);
+const TREND_PARAMS = tapered(TREND_TAPER);
 
 /** The trend's area: Lens's gradient area fill at 2/3 of its opacity, so it costs the value less contrast. */
 export const TREND_OPACITY = 2 / 3;
@@ -146,14 +155,6 @@ const resolve = (
   const surface = SURFACES[mode];
   const p = DEFAULT_PARAMS;
   const extraFill = hasTrend ? 0 : targets.noTrendExtraFill;
-  const tapered = (percent: number): Params => ({
-    ...p,
-    chroma: {
-      ...p.chroma,
-      taper: (p.chroma.taper * percent) / 100,
-      taperDark: (p.chroma.taperDark * percent) / 100,
-    },
-  });
 
   const fill = ramp
     ? model.contrastColor(
@@ -162,19 +163,17 @@ const resolve = (
           rampPosition(color, mode) * (targets.dynamicFillMax - targets.fill) +
           extraFill,
         surface,
-        tapered(targets.fillTaper)
+        FILL_PARAMS
       ).hex
     : model.rolesAt(angle, surface, {
-        ...tapered(targets.fillTaper),
+        ...FILL_PARAMS,
         lc: { ...p.lc, faint: targets.fill + extraFill },
       }).faint;
 
   const trendToward = (toward: Mode) => {
-    // Semi-transparent over the fill, so it can be more colorful than the fill.
-    const params = tapered(targets.trendTaper);
     // Without `exact`, a mark on the fill gets the hue's full correction.
     const onFill = (target: number) =>
-      model.contrastColor(angle, target, surface, params, {
+      model.contrastColor(angle, target, surface, TREND_PARAMS, {
         against: fill,
         polarity: toward,
         exact: true,

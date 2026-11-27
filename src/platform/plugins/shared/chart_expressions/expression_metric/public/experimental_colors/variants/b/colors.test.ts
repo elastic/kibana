@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEFAULT_PARAMS, SURFACES, apcaLc, borealis, contrast } from '@kbn/contrast-roles';
+import {
+  DEFAULT_PARAMS,
+  SURFACES,
+  apcaLc,
+  borealis,
+  contrast,
+  hexToOklch,
+} from '@kbn/contrast-roles';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import {
   DEFAULT_B_TARGETS,
@@ -24,42 +31,25 @@ describe('metricTileColors', () => {
     expect(metricValueColor('#808080', 'light', false)).toBeUndefined();
   });
 
-  it.each(['light', 'dark'] as const)("gives a theme hue the theme's roles on %s", (mode) => {
-    const light = borealis.palettes(SURFACES.light, DEFAULT_PARAMS).roles[1];
-    const { faint, base } = borealis.palettes(SURFACES[mode], DEFAULT_PARAMS).roles[1];
-    const targets = { ...DEFAULT_B_TARGETS, fill: DEFAULT_PARAMS.lc.faint, fillTaper: 100 };
-    expect(metricTileColors(light.base, mode, { ramp: false, hasTrend: true, targets })).toEqual(
-      expect.objectContaining({ fill: faint, bar: base })
-    );
-  });
+  it.each(['light', 'dark'] as const)(
+    "gives a theme hue the theme's base and a fill no more colorful than its faint on %s",
+    (mode) => {
+      const light = borealis.palettes(SURFACES.light, DEFAULT_PARAMS).roles[1];
+      const { faint, base } = borealis.palettes(SURFACES[mode], DEFAULT_PARAMS).roles[1];
+      const targets = { ...DEFAULT_B_TARGETS, fill: DEFAULT_PARAMS.lc.faint };
+      const { fill, bar } = metricTileColors(light.base, mode, {
+        ramp: false,
+        hasTrend: true,
+        targets,
+      })!;
+      expect(bar).toBe(base);
+      expect(hexToOklch(fill).C).toBeLessThanOrEqual(hexToOklch(faint).C);
+    }
+  );
 
   it("keeps a pale base's trend at its contrast against the fill", () => {
     const { fill, trend } = metricTileColors('#FCD883', 'light', { ramp: false, hasTrend: true })!;
     expect(Math.abs(apcaLc(trend, fill))).toBeGreaterThanOrEqual(DEFAULT_B_TARGETS.trend - 1);
-  });
-
-  it('keeps the trend at its contrast while lowering its taper', () => {
-    const trendAt = (trendTaper: number) =>
-      metricTileColors('#F6726A', 'light', {
-        ramp: false,
-        hasTrend: true,
-        targets: { ...DEFAULT_B_TARGETS, trendTaper },
-      })!;
-    const plain = trendAt(100);
-    const vivid = trendAt(0);
-    expect(vivid.trend).not.toBe(plain.trend);
-    expect(Math.abs(apcaLc(vivid.trend, vivid.fill))).toBeCloseTo(DEFAULT_B_TARGETS.trend, -0.5);
-  });
-
-  it('keeps the fill at its contrast while lowering its taper', () => {
-    const fillAt = (fillTaper: number) =>
-      metricTileColors('#F6726A', 'dark', {
-        ramp: false,
-        hasTrend: true,
-        targets: { ...DEFAULT_B_TARGETS, fill: 20, fillTaper },
-      })!.fill;
-    expect(fillAt(0)).not.toBe(fillAt(100));
-    expect(Math.abs(apcaLc(fillAt(0), SURFACES.dark))).toBeCloseTo(20, -0.5);
   });
 
   it('turns the marks on a light fill dark on dark, where light ones fall short', () => {

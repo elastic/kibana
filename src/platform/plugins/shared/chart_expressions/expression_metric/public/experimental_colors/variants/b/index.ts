@@ -24,14 +24,6 @@ const controls: ReadonlyArray<Control<keyof BTargets>> = [
   },
   {
     type: 'range',
-    key: 'fillTaper',
-    label: i18n.translate('expressionMetricVis.experimentalColors.b.fillTaperLabel', {
-      defaultMessage: 'Fill taper (%)',
-    }),
-    max: 600,
-  },
-  {
-    type: 'range',
     key: 'ink',
     label: i18n.translate('expressionMetricVis.experimentalColors.b.inkLabel', {
       defaultMessage: 'Value',
@@ -53,14 +45,6 @@ const controls: ReadonlyArray<Control<keyof BTargets>> = [
       defaultMessage: 'Trend area',
     }),
     max: 100,
-  },
-  {
-    type: 'range',
-    key: 'trendTaper',
-    label: i18n.translate('expressionMetricVis.experimentalColors.b.trendTaperLabel', {
-      defaultMessage: 'Trend taper (%)',
-    }),
-    max: 600,
   },
   {
     type: 'range',
