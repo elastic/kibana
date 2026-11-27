@@ -15,6 +15,28 @@ export function isElasticsearchVersionConflictError(error: Error): boolean {
   return isESClientError(error) && error.meta.statusCode === 409;
 }
 
+/**
+ * Detects environmental Elasticsearch cluster block errors that are not caused by Fleet itself
+ * and cannot be resolved by retrying or rolling back (e.g. a flood-stage disk watermark placing a
+ * `read-only-allow-delete` block on an index). Retrying or rolling back an install in this state
+ * simply hits the same block again, producing a repetitive error storm, so callers should back off
+ * instead. The underlying failure is typically re-wrapped by the time it reaches package install
+ * failure handling, so the error message is inspected as well as the raw ES response.
+ */
+export function isElasticsearchReadOnlyBlockError(error: unknown): boolean {
+  const message =
+    error instanceof Error
+      ? `${error.message}${error.stack ? `\n${error.stack}` : ''}`
+      : String(error);
+
+  return (
+    message.includes('cluster_block_exception') ||
+    message.includes('read-only-allow-delete') ||
+    message.includes('flood-stage watermark') ||
+    message.includes('disk usage exceeded flood-stage watermark')
+  );
+}
+
 interface CatchAndSetErrorStackTrace {
   (error: Error, message?: string): Promise<never>;
   /**
