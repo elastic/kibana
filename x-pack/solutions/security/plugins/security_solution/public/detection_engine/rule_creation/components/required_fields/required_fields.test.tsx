@@ -18,13 +18,6 @@ import {
   createIndexPatternField,
   getSelectToggleButtonForName,
 } from './required_fields.test_helpers';
-import { MAX_UNFOLDED_REQUIRED_FIELDS } from './constants';
-
-/* Lowered so the folding tests don't have to mount two comboboxes per unfolded row 15 times over */
-jest.mock('./constants', () => ({
-  ...jest.requireActual('./constants'),
-  MAX_UNFOLDED_REQUIRED_FIELDS: 5,
-}));
 
 const ADD_REQUIRED_FIELD_BUTTON_TEST_ID = 'addRequiredFieldButton';
 const REQUIRED_FIELDS_GENERAL_WARNING_TEST_ID = 'requiredFieldsGeneralWarning';
@@ -496,26 +489,17 @@ describe('RequiredFields form part', () => {
   });
 
   describe('folding long lists', () => {
-    const FOLDED_FIELDS_COUNT = 5;
-    const longInitialState = Array.from(
-      { length: MAX_UNFOLDED_REQUIRED_FIELDS + FOLDED_FIELDS_COUNT },
-      (_, i) => ({
-        name: `field${i}`,
-        type: 'keyword',
-      })
-    );
-    const lastUnfoldedField = `field${MAX_UNFOLDED_REQUIRED_FIELDS - 1}`;
-    const firstFoldedField = `field${MAX_UNFOLDED_REQUIRED_FIELDS}`;
-    const lastFoldedField = `field${longInitialState.length - 1}`;
+    const longInitialState = Array.from({ length: 20 }, (_, i) => ({
+      name: `field${i}`,
+      type: 'keyword',
+    }));
 
-    it('shows only the unfolded required fields', () => {
+    it('shows only the first 15 required fields', () => {
       render(<TestForm initialState={longInitialState} />);
 
-      expect(screen.getByDisplayValue(lastUnfoldedField)).toBeVisible();
-      expect(screen.queryByDisplayValue(firstFoldedField)).not.toBeInTheDocument();
-      expect(screen.getByTestId('toggleRequiredFieldsFoldButton')).toHaveTextContent(
-        `Show ${FOLDED_FIELDS_COUNT} more`
-      );
+      expect(screen.getByDisplayValue('field14')).toBeVisible();
+      expect(screen.queryByDisplayValue('field15')).not.toBeInTheDocument();
+      expect(screen.getByTestId('toggleRequiredFieldsFoldButton')).toHaveTextContent('Show 5 more');
     });
 
     it('shows and hides the folded required fields', async () => {
@@ -525,17 +509,17 @@ describe('RequiredFields form part', () => {
         fireEvent.click(screen.getByTestId('toggleRequiredFieldsFoldButton'));
       });
 
-      expect(screen.getByDisplayValue(lastFoldedField)).toBeVisible();
+      expect(screen.getByDisplayValue('field19')).toBeVisible();
 
       await act(async () => {
         fireEvent.click(screen.getByTestId('toggleRequiredFieldsFoldButton'));
       });
 
-      expect(screen.queryByDisplayValue(lastFoldedField)).not.toBeInTheDocument();
+      expect(screen.queryByDisplayValue('field19')).not.toBeInTheDocument();
     });
 
     it('does not show the fold button for short lists', () => {
-      render(<TestForm initialState={longInitialState.slice(0, MAX_UNFOLDED_REQUIRED_FIELDS)} />);
+      render(<TestForm initialState={longInitialState.slice(0, 15)} />);
 
       expect(screen.queryByTestId('toggleRequiredFieldsFoldButton')).not.toBeInTheDocument();
     });
@@ -546,7 +530,7 @@ describe('RequiredFields form part', () => {
       await addRequiredFieldRow();
 
       expect(screen.getByTestId('requiredFieldNameSelect-empty')).toBeVisible();
-      expect(screen.queryByDisplayValue(firstFoldedField)).not.toBeInTheDocument();
+      expect(screen.queryByDisplayValue('field15')).not.toBeInTheDocument();
     });
 
     it('submits folded required fields', async () => {
@@ -577,10 +561,8 @@ describe('RequiredFields form part', () => {
       });
 
       expect(screen.getAllByTestId('requiredFieldNameSelect-field0')).toHaveLength(2);
-      expect(screen.queryByDisplayValue(lastFoldedField)).not.toBeInTheDocument();
-      expect(screen.getByTestId('toggleRequiredFieldsFoldButton')).toHaveTextContent(
-        `Show ${FOLDED_FIELDS_COUNT + 1} more`
-      );
+      expect(screen.queryByDisplayValue('field19')).not.toBeInTheDocument();
+      expect(screen.getByTestId('toggleRequiredFieldsFoldButton')).toHaveTextContent('Show 6 more');
     });
 
     it('collapses the list while a revealed required field is still invalid', async () => {
@@ -599,30 +581,26 @@ describe('RequiredFields form part', () => {
         fireEvent.click(screen.getByTestId('toggleRequiredFieldsFoldButton'));
       });
 
-      expect(screen.getByTestId(`requiredFieldNameCompact-${lastFoldedField}`)).toBeVisible();
+      expect(screen.getByTestId('requiredFieldNameCompact-field19')).toBeVisible();
 
       await act(async () => {
         fireEvent.click(screen.getByTestId('toggleRequiredFieldsFoldButton'));
       });
 
-      expect(screen.queryByDisplayValue(lastFoldedField)).not.toBeInTheDocument();
+      expect(screen.queryByDisplayValue('field19')).not.toBeInTheDocument();
       expect(screen.getAllByTestId('requiredFieldNameSelect-field0')).toHaveLength(2);
     });
 
-    it('renders unfolded rows beyond the initially shown ones as compact rows', async () => {
+    it('renders unfolded rows beyond the first 15 as compact rows', async () => {
       render(<TestForm initialState={longInitialState} />);
 
       await act(async () => {
         fireEvent.click(screen.getByTestId('toggleRequiredFieldsFoldButton'));
       });
 
-      expect(screen.getByTestId(`requiredFieldNameSelect-${lastUnfoldedField}`)).toBeVisible();
-      expect(screen.getByTestId(`requiredFieldNameCompact-${firstFoldedField}`)).toHaveValue(
-        firstFoldedField
-      );
-      expect(
-        screen.queryByTestId(`requiredFieldNameSelect-${firstFoldedField}`)
-      ).not.toBeInTheDocument();
+      expect(screen.getByTestId('requiredFieldNameSelect-field14')).toBeVisible();
+      expect(screen.getByTestId('requiredFieldNameCompact-field15')).toHaveValue('field15');
+      expect(screen.queryByTestId('requiredFieldNameSelect-field15')).not.toBeInTheDocument();
     });
 
     it('switches a compact row to comboboxes when its name is focused', async () => {
@@ -633,14 +611,12 @@ describe('RequiredFields form part', () => {
       });
 
       await act(async () => {
-        fireEvent.focus(screen.getByTestId(`requiredFieldNameCompact-${lastFoldedField}`));
+        fireEvent.focus(screen.getByTestId('requiredFieldNameCompact-field19'));
       });
 
+      expect(screen.queryByTestId('requiredFieldNameCompact-field19')).not.toBeInTheDocument();
       expect(
-        screen.queryByTestId(`requiredFieldNameCompact-${lastFoldedField}`)
-      ).not.toBeInTheDocument();
-      expect(
-        screen.getByTestId(`requiredFieldNameSelect-${lastFoldedField}`).querySelector('input')
+        screen.getByTestId('requiredFieldNameSelect-field19').querySelector('input')
       ).toHaveFocus();
     });
 
@@ -655,19 +631,16 @@ describe('RequiredFields form part', () => {
         fireEvent.focus(screen.getAllByTestId('requiredFieldTypeCompact-keyword')[0]);
       });
 
-      expect(screen.getByTestId(`requiredFieldNameSelect-${firstFoldedField}`)).toBeVisible();
+      expect(screen.getByTestId('requiredFieldNameSelect-field15')).toBeVisible();
       expect(
-        screen
-          .getAllByTestId('requiredFieldTypeSelect-keyword')
-          [MAX_UNFOLDED_REQUIRED_FIELDS].querySelector('input')
+        screen.getAllByTestId('requiredFieldTypeSelect-keyword')[15].querySelector('input')
       ).toHaveFocus();
     });
 
     it('submits a required field updated in a compact row', async () => {
       const handleSubmit = jest.fn();
-      const newFieldName = `field${longInitialState.length}`;
       const indexPatternFields: DataViewFieldBase[] = [
-        createIndexPatternField({ name: newFieldName, esTypes: ['keyword'] }),
+        createIndexPatternField({ name: 'field20', esTypes: ['keyword'] }),
       ];
 
       render(
@@ -683,19 +656,19 @@ describe('RequiredFields form part', () => {
       });
 
       await act(async () => {
-        fireEvent.focus(screen.getByTestId(`requiredFieldNameCompact-${lastFoldedField}`));
+        fireEvent.focus(screen.getByTestId('requiredFieldNameCompact-field19'));
       });
 
       await selectEuiComboBoxOption({
-        comboBoxToggleButton: getSelectToggleButtonForName(lastFoldedField),
-        optionText: newFieldName,
+        comboBoxToggleButton: getSelectToggleButtonForName('field19'),
+        optionText: 'field20',
       });
 
       await submitForm();
 
       await waitFor(() => {
         expect(handleSubmit).toHaveBeenCalledWith({
-          data: [...longInitialState.slice(0, -1), { name: newFieldName, type: 'keyword' }],
+          data: [...longInitialState.slice(0, 19), { name: 'field20', type: 'keyword' }],
           isValid: true,
         });
       });
