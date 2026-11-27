@@ -126,10 +126,10 @@ describe('DataView component', () => {
     expect(trigger).not.toHaveAttribute('title');
   });
 
-  it('includes the visible "Data view" label in the accessible name', () => {
-    render(wrapDataViewComponentInContext());
+  it('uses only the data view title as the accessible name when the label is hidden', () => {
+    render(wrapDataViewComponentInContext({ showDataViewLabel: false }));
 
-    expect(screen.getByTestId('dataview-trigger')).toHaveAccessibleName('Data view Dataview 1');
+    expect(screen.getByTestId('dataview-trigger')).toHaveAccessibleName('Dataview 1');
   });
 
   it('resets the inherited text fill color so the truncated label stays readable when disabled', () => {
