@@ -60,7 +60,7 @@ export interface BulkIndexer {
   getCounts: () => { documentsCount: number; failedCount: number; lastError?: Error };
 }
 
-/** The same for every URL of a page, so a page found under another of its URLs replaces its document. */
+/** Deterministic per page so we don't index the same page twice if it surfaces under multiple urls. */
 export const getDocumentId = (url: string): string =>
   createHash('sha256').update(getPageKey(url)).digest('hex');
 
