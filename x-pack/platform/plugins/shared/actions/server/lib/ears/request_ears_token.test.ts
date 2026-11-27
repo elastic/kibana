@@ -183,4 +183,27 @@ describe('requestEarsToken', () => {
       earsRequestId: 'req-400',
     });
   });
+
+  it('throws an EarsRequestError that names the EARS URL setting on a redirect', async () => {
+    mockRequest.mockResolvedValueOnce({
+      status: 307,
+      data: '',
+      headers: { 'x-cloud-request-id': 'req-307', location: 'https://other.example.com' },
+    } as unknown as AxiosResponse);
+
+    await expect(
+      requestEarsToken(
+        'my-provider',
+        logger,
+        { code: 'auth-code', pkceVerifier: 'pkce-verifier' },
+        configurationUtilities
+      )
+    ).rejects.toMatchObject({
+      name: 'EarsRequestError',
+      message:
+        'Auth redirect service returned a redirect (HTTP 307). Set xpack.actions.auth.ears.url to the URL it redirects to.',
+      status: 307,
+      earsRequestId: 'req-307',
+    });
+  });
 });

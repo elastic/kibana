@@ -44,3 +44,19 @@ export class EarsRequestError extends Error {
     this.earsRequestId = earsRequestId;
   }
 }
+
+/**
+ * Returns the error for a redirect from EARS. Requests to EARS carry tokens in the body and never
+ * follow redirects, so the operator has to configure the URL EARS redirects to.
+ */
+export const getEarsRedirectError = (
+  status: number,
+  earsRequestId?: string
+): EarsRequestError | undefined =>
+  status >= 300 && status < 400
+    ? new EarsRequestError({
+        message: `Auth redirect service returned a redirect (HTTP ${status}). Set xpack.actions.auth.ears.url to the URL it redirects to.`,
+        status,
+        earsRequestId,
+      })
+    : undefined;

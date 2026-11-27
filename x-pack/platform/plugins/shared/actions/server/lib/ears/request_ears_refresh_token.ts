@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/core/server';
 import { getEarsEndpointsForProvider, resolveEarsUrl } from './url';
 import { request } from '../axios_utils';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
-import { EarsRequestError, getEarsRequestId } from './ears_request_error';
+import { EarsRequestError, getEarsRedirectError, getEarsRequestId } from './ears_request_error';
 import type { EarsTokenResponse } from './request_ears_token';
 
 export interface EarsRefreshTokenRequestParams {
@@ -54,6 +54,12 @@ export async function requestEarsRefreshToken(
   });
 
   const earsRequestId = getEarsRequestId(res.headers);
+
+  const redirectError = getEarsRedirectError(res.status, earsRequestId);
+  if (redirectError) {
+    logger.warn(redirectError.message);
+    throw redirectError;
+  }
 
   if (res.status === 200) {
     return {
