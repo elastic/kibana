@@ -96,7 +96,7 @@ const StreamDetailFailureStoreInner = ({
     }
 
     const retentionPeriod = isEnabledLifecycleFailureStore(effectiveFailureStore)
-      ? effectiveFailureStore.lifecycle.enabled.data_retention ?? null
+      ? (effectiveFailureStore.lifecycle.enabled.data_retention ?? null)
       : null;
 
     return {

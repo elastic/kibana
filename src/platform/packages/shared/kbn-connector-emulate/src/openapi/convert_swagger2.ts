@@ -233,8 +233,8 @@ export const convertSwagger2 = (source: OpenApiDocument): OpenApiDocument => {
         const requestBody = body
           ? { required: body.required === true, content: toContent(consumes, body.schema) }
           : fields.length > 0
-          ? toFormBody(fields, consumes)
-          : undefined;
+            ? toFormBody(fields, consumes)
+            : undefined;
         const { responses } = operation;
         return [
           [

@@ -23,7 +23,8 @@ import { DescriptionField } from './description_field';
 import { ArtifactEnabledStatus } from './artifact_enabled_status';
 
 export interface CardCompressedHeaderProps
-  extends Pick<CommonProps, 'data-test-subj'>,
+  extends
+    Pick<CommonProps, 'data-test-subj'>,
     Pick<
       ArtifactEntryCollapsibleCardProps,
       'onExpandCollapse' | 'expanded' | 'actions' | 'policies'

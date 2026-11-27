@@ -20,7 +20,7 @@ const createMockHit = (flattened: DataTableRecord['flattened'] = {}): DataTableR
     raw: {},
     flattened,
     isAnchor: false,
-  } as DataTableRecord);
+  }) as DataTableRecord;
 
 describe('parseExistingEnrichments', () => {
   it('returns an empty array if hit has no fields', () => {

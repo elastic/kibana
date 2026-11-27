@@ -15,7 +15,7 @@ const makeStep = (
   ({
     customIdentifier: id,
     parentId,
-  } as StreamlangStepWithUIAttributes);
+  }) as StreamlangStepWithUIAttributes;
 
 const steps: StreamlangStepWithUIAttributes[] = [
   makeStep('root'),

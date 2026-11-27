@@ -13,7 +13,7 @@ import type { WorkflowsExtensionsStartContract } from '../common/types';
 export type PublicStepDefinitionOrLoader<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
-  Config extends z.ZodObject = z.ZodObject
+  Config extends z.ZodObject = z.ZodObject,
 > =
   | PublicStepDefinition<Input, Output, Config>
   | (() => Promise<PublicStepDefinition<Input, Output, Config> | undefined>);
@@ -37,7 +37,7 @@ export interface WorkflowsExtensionsPublicPluginSetup {
   registerStepDefinition<
     Input extends z.ZodType = z.ZodType,
     Output extends z.ZodType = z.ZodType,
-    Config extends z.ZodObject = z.ZodObject
+    Config extends z.ZodObject = z.ZodObject,
   >(
     definition: PublicStepDefinitionOrLoader<Input, Output, Config>
   ): void;

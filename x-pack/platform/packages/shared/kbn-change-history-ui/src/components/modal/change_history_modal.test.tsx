@@ -453,8 +453,8 @@ describe('ChangeHistoryModal', () => {
           ...(changeId === 'evt-2'
             ? historicalItem
             : changeId === 'evt-9'
-            ? restoredItem
-            : listItem),
+              ? restoredItem
+              : listItem),
           snapshot: changeId === 'evt-2' ? TEST_SNAPSHOT_OLDER : TEST_SNAPSHOT,
         })
       ),

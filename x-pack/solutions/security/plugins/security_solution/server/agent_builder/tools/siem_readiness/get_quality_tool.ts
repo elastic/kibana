@@ -99,14 +99,14 @@ export const getQualityTool = (
         categorizedItems.length === 0
           ? ('noData' as const)
           : incompatibleCount > 0
-          ? ('actionsRequired' as const)
-          : ('healthy' as const);
+            ? ('actionsRequired' as const)
+            : ('healthy' as const);
       const filteredSummary =
         filteredStatus === 'noData'
           ? 'No quality check results available for categorized indices.'
           : incompatibleCount > 0
-          ? `${incompatibleCount} of ${categorizedItems.length} indices have incompatible ECS field mappings.`
-          : `All ${categorizedItems.length} checked indices have compatible ECS field mappings.`;
+            ? `${incompatibleCount} of ${categorizedItems.length} indices have incompatible ECS field mappings.`
+            : `All ${categorizedItems.length} checked indices have compatible ECS field mappings.`;
 
       return {
         results: [

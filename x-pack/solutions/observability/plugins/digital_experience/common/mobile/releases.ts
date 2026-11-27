@@ -9,7 +9,9 @@ import type { ComposerQuery } from '@elastic/esql';
 import type { HistogramInterval } from '../types/applications';
 import type { RESULT_COLUMNS } from './fields';
 import { inValues, mobileColumn, resultColumn } from './fields';
+import { appStartStats, withAppStartDurations, type AppStartStats } from './app_starts';
 import { errorRateStats, kpiStats } from './kpis';
+import { MAX_SERIES_ROWS, toEsqlDuration } from './series';
 
 export const TOP_RELEASES = 5;
 
@@ -18,9 +20,6 @@ export const MIN_RELEASE_SESSIONS = 100;
 
 /** Sessions a time bucket needs to draw an error rate. */
 export const MIN_BUCKET_SESSIONS = 10;
-
-/** Above ES|QL's default of 1,000 rows, which a long range of daily buckets passes. */
-export const MAX_SERIES_ROWS = 10_000;
 
 /** Empty, so no real release can collide with it: `withRelease` drops empty ones. */
 export const OTHER_RELEASE_KEY = '';
@@ -31,18 +30,6 @@ export const withRelease = (query: ComposerQuery): ComposerQuery =>
     'serviceVersion'
   )} != ""`;
 
-const DURATION_UNITS: Readonly<Record<HistogramInterval['unit'], string>> = {
-  s: 'second',
-  d: 'day',
-  w: 'week',
-  M: 'month',
-  y: 'year',
-};
-
-/** A histogram interval as an ES|QL duration, e.g. `30 seconds` or `1 day`. */
-export const toEsqlDuration = ({ value, unit }: HistogramInterval): string =>
-  `${value} ${DURATION_UNITS[unit]}${value === 1 ? '' : 's'}`;
-
 const withReleaseGroup = (query: ComposerQuery, releases: readonly string[]): ComposerQuery =>
   withRelease(query).pipe`EVAL ${resultColumn('releaseGroup')} = CASE(
     ${inValues('serviceVersion', releases)},
@@ -50,20 +37,22 @@ const withReleaseGroup = (query: ComposerQuery, releases: readonly string[]): Co
     ${OTHER_RELEASE_KEY}
   )`;
 
-/** The KPIs and first document of each release in the range, most sessions first. */
+/** The KPIs, app starts and first document of each release in the range, most sessions first. */
 export const withReleaseStats = (query: ComposerQuery, limit: number): ComposerQuery =>
-  withRelease(query).pipe`STATS ${kpiStats()}, ${resultColumn('firstSeen')} = MIN(@timestamp)
+  withAppStartDurations(withRelease(query)).pipe`STATS ${kpiStats()}, ${appStartStats()},
+      ${resultColumn('firstSeen')} = MIN(@timestamp)
       BY ${resultColumn('release')} = ${mobileColumn('serviceVersion')}`.pipe`SORT ${resultColumn(
     'sessions'
   )} DESC, ${resultColumn('release')} DESC`.pipe`LIMIT ${limit}`;
 
-/** The KPIs of every release but `releases` together: the "Other" group. */
+/** The KPIs and app starts of every release but `releases` together: the "Other" group. */
 export const withOtherReleaseStats = (
   query: ComposerQuery,
   releases: readonly string[]
 ): ComposerQuery =>
-  withRelease(query).pipe`WHERE NOT (${inValues('serviceVersion', releases)})`
-    .pipe`STATS ${kpiStats()}`;
+  withAppStartDurations(
+    withRelease(query).pipe`WHERE NOT (${inValues('serviceVersion', releases)})`
+  ).pipe`STATS ${kpiStats()}, ${appStartStats()}`;
 
 /** Sessions and exceptions per time bucket and group, in the request's `time_zone`. */
 export const withReleaseSeries = (
@@ -73,8 +62,8 @@ export const withReleaseSeries = (
 ): ComposerQuery =>
   withReleaseGroup(query, releases).pipe`STATS ${errorRateStats()}
     BY ${resultColumn('bucket')} = TBUCKET(${toEsqlDuration(interval)}), ${resultColumn(
-    'releaseGroup'
-  )}`.pipe`SORT ${resultColumn('bucket')} ASC`.pipe`LIMIT ${MAX_SERIES_ROWS}`;
+      'releaseGroup'
+    )}`.pipe`SORT ${resultColumn('bucket')} ASC`.pipe`LIMIT ${MAX_SERIES_ROWS}`;
 
 /** Which of `releases` have documents, e.g. before the range. */
 export const withReleasesSeen = (
@@ -91,12 +80,12 @@ interface ReleaseKpis {
   [RESULT_COLUMNS.exceptions]?: number;
 }
 
-export interface ReleaseStatsRow extends ReleaseKpis {
+export interface ReleaseStatsRow extends ReleaseKpis, AppStartStats {
   [RESULT_COLUMNS.release]: string;
   [RESULT_COLUMNS.firstSeen]: string;
 }
 
-export type OtherReleaseStatsRow = ReleaseKpis;
+export type OtherReleaseStatsRow = ReleaseKpis & AppStartStats;
 
 export interface ReleaseSeriesRow extends Omit<ReleaseKpis, typeof RESULT_COLUMNS.users> {
   [RESULT_COLUMNS.releaseGroup]: string;

@@ -39,7 +39,7 @@ describe('download source handlers', () => {
   const contextWithAuthz = (readSettings: boolean) =>
     ({
       fleet: Promise.resolve({ authz: { fleet: { readSettings } } }),
-    } as any);
+    }) as any;
 
   beforeEach(() => {
     jest.spyOn(downloadSourceService, 'list').mockResolvedValue({

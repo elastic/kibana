@@ -59,7 +59,7 @@ const document = (
     id: 'conv-1',
     events,
     ...(activeExecutionId ? { active_execution: { execution_id: activeExecutionId } } : {}),
-  } as unknown as Conversation);
+  }) as unknown as Conversation;
 
 describe('createIncomingMessages', () => {
   const setup = () => {

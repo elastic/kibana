@@ -57,7 +57,7 @@ const buildExecution = (
     stepExecutionIds: [],
     context: { parentWorkflowExecutionId: PARENT_EXECUTION_ID },
     ...overrides,
-  } as unknown as EsWorkflowExecution);
+  }) as unknown as EsWorkflowExecution;
 
 describe('createAwaitExecutionsStepDefinition', () => {
   let executions: EsWorkflowExecution[];
@@ -447,13 +447,12 @@ describe('createAwaitExecutionsStepDefinition', () => {
 
     const scopeIdFrames =
       (nodeType: string) =>
-      (instance: number): StackFrame[] =>
-        [
-          {
-            stepId: 'scope_owner',
-            nestedScopes: [{ nodeId: 'enter_scope_owner', nodeType, scopeId: String(instance) }],
-          },
-        ];
+      (instance: number): StackFrame[] => [
+        {
+          stepId: 'scope_owner',
+          nestedScopes: [{ nodeId: 'enter_scope_owner', nodeType, scopeId: String(instance) }],
+        },
+      ];
 
     it.each([
       [

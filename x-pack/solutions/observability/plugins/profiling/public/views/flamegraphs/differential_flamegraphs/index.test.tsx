@@ -71,7 +71,7 @@ const createFlamegraph = (totalSamples: number) =>
     TotalSamples: totalSamples,
     TotalAnnualCO2KgsItems: [0],
     TotalAnnualCostsUSDItems: [0],
-  } as unknown as ElasticFlameGraph);
+  }) as unknown as ElasticFlameGraph;
 
 const mockFlamegraphsState = (state: Partial<AsyncState<DifferentialFlamegraphs>>) =>
   jest.mocked(useTimeRangeAsync).mockReturnValue({

@@ -166,7 +166,7 @@ export function QuerySearchBar({
                 showQueryInput={true}
                 disableQueryLanguageSwitcher={true}
                 onClearSavedQuery={() => {}}
-                filters={is(kqlQuerySchema, field.value) ? [] : field.value?.filters ?? []}
+                filters={is(kqlQuerySchema, field.value) ? [] : (field.value?.filters ?? [])}
                 allowSavingQueries={true}
                 showSavedQueryControls={true}
               />

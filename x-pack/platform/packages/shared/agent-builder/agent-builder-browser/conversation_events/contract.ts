@@ -73,7 +73,7 @@ export interface ConversationEventUIDefinition<TType extends string = string, TD
  */
 export type ValidatedConversationEventUIDefinition<
   TType extends string,
-  TData
+  TData,
 > = ConversationEventUIDefinition<TType, TData> & { type: ValidConversationEventType<TType> };
 
 /**

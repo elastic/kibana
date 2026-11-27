@@ -317,8 +317,8 @@ async function loadFromSavedObject(
         !savedObjectId && currentSessionId
           ? currentSessionId
           : !inlineEditing
-          ? data.search.session.start()
-          : undefined,
+            ? data.search.session.start()
+            : undefined,
       persistedDoc: {
         ...doc,
         state: {

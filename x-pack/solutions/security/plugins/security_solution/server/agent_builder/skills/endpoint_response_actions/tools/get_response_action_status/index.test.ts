@@ -108,7 +108,7 @@ describe('getResponseActionStatusTool', () => {
           isPlatinumPlus: () => false,
           isEnterprise: () => false,
           getLicenseInformation: () => ({ isAvailable: true, isActive: true }),
-        } as unknown as ReturnType<EndpointAppContextService['getLicenseService']>)
+        }) as unknown as ReturnType<EndpointAppContextService['getLicenseService']>
     ) as unknown as EndpointAppContextService['getLicenseService'];
 
     const tool = getResponseActionStatusTool(service);
@@ -135,7 +135,7 @@ describe('getResponseActionStatusTool', () => {
       () =>
         ({
           isEnabled: (key: string) => key === 'endpoint_host_isolation',
-        } as unknown as ReturnType<EndpointAppContextService['getProductFeaturesService']>)
+        }) as unknown as ReturnType<EndpointAppContextService['getProductFeaturesService']>
     ) as unknown as EndpointAppContextService['getProductFeaturesService'];
 
     const tool = getResponseActionStatusTool(service);

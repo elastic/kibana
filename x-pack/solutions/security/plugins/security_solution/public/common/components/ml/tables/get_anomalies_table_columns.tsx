@@ -27,7 +27,7 @@ export const getAnomaliesDefaultTableColumns = (
   Columns<Anomaly['jobId'], AnomaliesBy>,
   Columns<Anomaly['entityValue'], AnomaliesBy>,
   Columns<Anomaly['influencers'], AnomaliesBy>,
-  Columns<Anomaly['time'], AnomaliesBy>
+  Columns<Anomaly['time'], AnomaliesBy>,
 ] => [
   {
     name: i18n.DETECTOR,

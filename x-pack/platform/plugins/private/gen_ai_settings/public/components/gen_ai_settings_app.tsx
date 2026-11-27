@@ -14,11 +14,15 @@ import {
   EuiFormRow,
   EuiTitle,
   EuiLink,
+  EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
+import { SettingDefinitionsLoadError } from '@kbn/management-settings-hooks';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { isEmpty } from 'lodash';
 import {
@@ -56,10 +60,25 @@ const isAIChatExperience = (value: unknown): value is AIChatExperience =>
   typeof value === 'string' &&
   (value === AIChatExperience.Classic || value === AIChatExperience.Agent);
 
+// A default passed to `get` replaces the registered default, which can resolve to Classic.
+const getClientChatExperience = (client: IUiSettingsClient): AIChatExperience => {
+  if (!client.isDeclared(AI_CHAT_EXPERIENCE_TYPE)) {
+    return AIChatExperience.Agent;
+  }
+  return client.get(AI_CHAT_EXPERIENCE_TYPE);
+};
+
 export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrumbs }) => {
   const { services } = useKibana();
-  const { application, http, productDocBase, analytics, genAiSettingsApi, notifications } =
-    services;
+  const {
+    application,
+    http,
+    productDocBase,
+    analytics,
+    genAiSettingsApi,
+    notifications,
+    settings,
+  } = services;
   const {
     showSpacesIntegration,
     isPermissionsBased,
@@ -68,7 +87,16 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     showChatExperienceSetting,
     showAnonymizationProfilesSection,
   } = useEnabledFeatures();
-  const { fields, unsavedChanges, isSaving, cleanUnsavedChanges, saveAll } = useSettingsContext();
+  const {
+    fields,
+    isLoading,
+    loadError,
+    retry,
+    unsavedChanges,
+    isSaving,
+    cleanUnsavedChanges,
+    saveAll,
+  } = useSettingsContext();
 
   // Determine current chat experience (including unsaved changes)
   const chatExperienceField = fields[AI_CHAT_EXPERIENCE_TYPE];
@@ -76,7 +104,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     unsavedChanges[AI_CHAT_EXPERIENCE_TYPE]?.unsavedValue ??
     chatExperienceField?.savedValue ??
     chatExperienceField?.defaultValue ??
-    AIChatExperience.Agent;
+    getClientChatExperience(settings.client);
   const isAgentExperience = currentChatExperience === AIChatExperience.Agent;
   const hasAgentBuilderPrivileges = application.capabilities.agentBuilder?.manageAgents === true;
 
@@ -310,6 +338,20 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                     />
                   </EuiFormRow>
                 </EuiDescribedFormGroup>
+              )}
+              {isLoading && (
+                <EuiFlexGroup justifyContent="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner size="xl" data-test-subj="genAiSettingsLoading" />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
+              {loadError && (
+                <SettingDefinitionsLoadError
+                  error={loadError}
+                  onRetry={retry}
+                  data-test-subj="genAiSettingsLoadError"
+                />
               )}
               {showChatExperienceSetting && (
                 <EuiFlexItem>

@@ -7,6 +7,7 @@
 
 import { compact } from 'lodash';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import { toAppStart, type StartType } from '../../../common/mobile/app_starts';
 import { RESULT_COLUMNS } from '../../../common/mobile/fields';
 import { mobilePanelQuery, type MobilePanelFilters } from '../../../common/mobile/filters';
 import {
@@ -15,7 +16,7 @@ import {
   withKpiStats,
   type KpiRow,
 } from '../../../common/mobile/kpis';
-import type { MobileKpisResponse } from '../../../common/types/mobile';
+import type { ComparedAppStart, MobileKpisResponse } from '../../../common/types/mobile';
 import { runEsql, timeFilter } from '../../lib/esql';
 import { withEnvironmentCounts, withOsCounts, withReleaseCounts } from '../../lib/mobile/queries';
 import { toEnvironments, toOsNames, toPlatforms, toReleases } from '../../lib/mobile/rows';
@@ -39,6 +40,16 @@ const kpiOf = (row: KpiRow | undefined, column: keyof KpiRow): number | null =>
 const errorRateOf = (row: KpiRow | undefined): number | null => {
   const sessions = kpiOf(row, RESULT_COLUMNS.sessions);
   return sessions ? (kpiOf(row, RESULT_COLUMNS.exceptions) ?? 0) / sessions : null;
+};
+
+const comparedAppStart = (
+  current: KpiRow | undefined,
+  before: KpiRow | undefined,
+  type: StartType
+): ComparedAppStart => {
+  const now = toAppStart(current, type);
+  const then = toAppStart(before, type);
+  return { ...toComparedValue(now.avg, then.avg), count: now.count, previousCount: then.count };
 };
 
 /**
@@ -97,6 +108,8 @@ export const getMobileKpis = async ({
       kpiOf(before, RESULT_COLUMNS.users)
     ),
     errorRate: toComparedValue(errorRateOf(current), errorRateOf(before)),
+    coldStart: comparedAppStart(current, before, 'cold'),
+    warmStart: comparedAppStart(current, before, 'warm'),
     releases: toReleases(releaseRows),
     osNames: toOsNames(osRows),
     platforms: toPlatforms(

@@ -26,7 +26,7 @@ type GetStartServices = () => Promise<{
  * schemas, config) and only replaces `handler`.
  */
 export const withWorkflowsEnabledGuard = <
-  T extends { handler: (context: never) => Promise<unknown> }
+  T extends { handler: (context: never) => Promise<unknown> },
 >(
   stepDefinition: T,
   getStartServices: GetStartServices

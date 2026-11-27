@@ -18,7 +18,7 @@ import type {
 import type { RunToolReturn } from '../runner/runner';
 import type { ToolHandlerContext } from '../tools/handler';
 
-const createMockRequest = () => ({ headers: {} } as BeforeAgentHookContext['request']);
+const createMockRequest = () => ({ headers: {} }) as BeforeAgentHookContext['request'];
 
 describe('apply_result', () => {
   describe('applyBeforeAgentResult', () => {

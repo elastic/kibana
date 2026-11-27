@@ -42,7 +42,6 @@ export interface SyntheticsUrlParams {
   remoteNames?: string[] | string;
   groupBy?: MonitorOverviewState['groupBy']['field'];
   groupOrderBy?: MonitorOverviewState['groupBy']['order'];
-  packagePolicyId?: string;
   cloneId?: string;
   spaceId?: string;
   useLogicalAndFor?: UseLogicalAndField[];
@@ -105,7 +104,6 @@ export const getSupportedUrlParams = (params: {
     remoteNames,
     groupBy,
     groupOrderBy,
-    packagePolicyId,
     spaceId,
     useLogicalAndFor,
     view,
@@ -117,7 +115,6 @@ export const getSupportedUrlParams = (params: {
   } = filteredParams;
 
   return {
-    packagePolicyId: packagePolicyId || undefined,
     groupBy: groupBy as MonitorOverviewState['groupBy']['field'],
     groupOrderBy: groupOrderBy as MonitorOverviewState['groupBy']['order'],
     pagination,

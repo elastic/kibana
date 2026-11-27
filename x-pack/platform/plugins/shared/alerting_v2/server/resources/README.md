@@ -55,7 +55,8 @@ This stream is the durable history of rule evaluation.
 | `alert.status_count` | `long` | Consecutive count within the current alert status. |
 | `episode.id`, `episode.status`, `episode.status_count` | `alias` | Aliases of the `alert.*` fields, so queries on the pre-v8 names keep working. Aliases are not stored in `_source` and cannot be written. |
 | `severity` | `keyword` | Optional. Best-effort severity extracted from the ES\|QL `severity` column on breached events. One of `info`, `low`, `medium`, `high`, `critical`. |
-| `routing_tags` | `keyword` | Optional, `ignore_above: 128`. Action-policy routing tags. Top-level so events with no `rule` object can set it. Mapped in v9; no writer sets it yet. |
+| `routing.tags` | `keyword` | Optional, `ignore_above: 128`. Action-policy routing tags, nested under `routing`. Top-level so events with no `rule` object can set it. Mapped in v11. No writer sets it yet. |
+| `reason` | `keyword` | Optional. The rule's `reason` template rendered against the query row. Only set on `breached` events built from a query row, at most 1,024 characters. |
 
 Writers:
 

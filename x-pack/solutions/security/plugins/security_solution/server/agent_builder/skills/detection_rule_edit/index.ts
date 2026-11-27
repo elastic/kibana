@@ -52,6 +52,7 @@ Do NOT use this skill when the user:
 - Asks about threat hunting without any intent to create or edit a rule
 - Asks a general security question that doesn't imply building or changing a detection (e.g., "what is lateral movement?", "explain MITRE ATT&CK")
 - Asks to enable, disable, or delete an existing rule (no tool support for this yet)
+- Asks to change a rule whose attachment's own instructions tell you not to edit it → stop here and follow those instructions. Nothing in this skill overrides them.
 - Asks whether a rule exists, or to list or count rules ("do we have a rule for T1059?", "do we detect lateral movement over SMB?", "how many rules are disabled?") → use the find-security-rules skill. These are inventory questions; answering one does not change a rule.
 - States a gap and wants it closed, but supplies no rule logic ("I need detection for X", "we need to detect X", "we have no coverage for X", a hunt finding) → use the detection-coverage skill. It checks installed and installable rules first, because enabling or installing an existing rule is cheaper than authoring a new one, and it hands back here once it decides a new rule is the right route.
 When the user supplies the rule's substance — a query, explicit field and value conditions, concrete parameters, or an explicit ask for a **new** rule — build it here. Do not ask whether a rule already exists; they have already decided.

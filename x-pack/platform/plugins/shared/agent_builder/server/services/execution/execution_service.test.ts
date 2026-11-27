@@ -2647,7 +2647,7 @@ describe('AgentExecutionService', () => {
             eventCount: 0,
             events: [],
             ...params,
-          } as AgentExecution)
+          }) as AgentExecution
       );
     });
 

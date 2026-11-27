@@ -113,7 +113,7 @@ interface TaskRunnerConstructorParams<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData
+  AlertData extends RuleAlertData,
 > {
   context: TaskRunnerContext;
   inMemoryMetrics: InMemoryMetrics;
@@ -140,7 +140,7 @@ export class TaskRunner<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData
+  AlertData extends RuleAlertData,
 > {
   private context: TaskRunnerContext;
   private logger: Logger;
@@ -433,6 +433,8 @@ export class TaskRunner<
           snoozedInstances: activeInstances,
         },
         ruleType: this.ruleType as UntypedNormalizedRuleType,
+        // The task state here is the rule's own, which the ad hoc task runner cannot offer.
+        shouldUntrackOrphanedAlerts: true,
         startedAt: this.taskInstance.startedAt,
         taskInstance: this.taskInstance,
       })

@@ -119,8 +119,7 @@ interface BuildIEndpointAndFleetActionsBulkOperationsOptions {
   responseState?: IndexEndpointAndFleetActionsForHostOptions['responseState'];
 }
 
-interface BuildIEndpointAndFleetActionsBulkOperationsResponse
-  extends IndexedEndpointAndFleetActionsForHostResponse {
+interface BuildIEndpointAndFleetActionsBulkOperationsResponse extends IndexedEndpointAndFleetActionsForHostResponse {
   operations: Required<BulkRequest>['operations'];
 }
 

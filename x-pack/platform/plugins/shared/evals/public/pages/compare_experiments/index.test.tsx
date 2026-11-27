@@ -303,7 +303,7 @@ describe('ExampleDrilldownFlyout', () => {
         ({
           data: buildResponse(experimentId),
           isLoading: false,
-        } as ReturnType<typeof useExperimentDatasetExamples>)
+        }) as ReturnType<typeof useExperimentDatasetExamples>
     );
     mockUseEvalsTraceFetcher.mockReturnValue(jest.fn());
     mockUseTraceSpans.mockReturnValue({
@@ -369,7 +369,7 @@ describe('ExampleDrilldownFlyout', () => {
                 : [example('example-1', 0, [0, 2])],
           },
           isLoading: false,
-        } as ReturnType<typeof useExperimentDatasetExamples>)
+        }) as ReturnType<typeof useExperimentDatasetExamples>
     );
     renderFlyout();
 

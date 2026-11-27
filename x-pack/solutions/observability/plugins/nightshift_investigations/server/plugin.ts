@@ -162,15 +162,12 @@ type ManagedWorkflowsClient = Awaited<
   ReturnType<WorkflowsExtensionsServerPluginStart['initManagedWorkflowsClient']>
 >;
 
-export class NightshiftInvestigationsPlugin
-  implements
-    Plugin<
-      NightshiftInvestigationsServerSetup,
-      NightshiftInvestigationsServerStart,
-      NightshiftInvestigationsSetupDeps,
-      NightshiftInvestigationsStartDeps
-    >
-{
+export class NightshiftInvestigationsPlugin implements Plugin<
+  NightshiftInvestigationsServerSetup,
+  NightshiftInvestigationsServerStart,
+  NightshiftInvestigationsSetupDeps,
+  NightshiftInvestigationsStartDeps
+> {
   private readonly logger: Logger;
   private workflowsManagement?: NightshiftInvestigationsSetupDeps['workflowsManagement'];
   private workflowsExtensionsStart?: NightshiftInvestigationsStartDeps['workflowsExtensions'];

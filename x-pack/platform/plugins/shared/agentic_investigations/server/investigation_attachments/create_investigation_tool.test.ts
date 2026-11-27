@@ -42,7 +42,7 @@ const contextWith = (stack: ToolHandlerContext['runContext']['stack']) =>
   ({
     request: httpServerMock.createKibanaRequest(),
     runContext: { runId: 'run-1', stack },
-  } as unknown as ToolHandlerContext);
+  }) as unknown as ToolHandlerContext;
 
 const run = async (tool: ReturnType<typeof createTool>, context: ToolHandlerContext) =>
   (await tool.handler({ value: 'x' }, context)) as ToolHandlerStandardReturn;
@@ -86,7 +86,7 @@ describe('createInvestigationTool', () => {
     const tool = createTool();
 
     expect(tool).toMatchObject({ id: 'agentic_investigations.test', excludeFromMcp: true });
-    expect(tool.availability?.cacheMode).toBe('none');
+    expect(tool.availability?.cacheMode).toBe('space-user');
   });
 
   it('is unavailable to a principal without the privilege', async () => {

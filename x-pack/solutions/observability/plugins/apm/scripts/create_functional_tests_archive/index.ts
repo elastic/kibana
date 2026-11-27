@@ -205,8 +205,13 @@ async function run() {
   // Delete tmp folder
   execSync(`rm -rf ${tmpDir}`);
 
-  // run ESLint on the generated metadata files
-  execSync('node scripts/eslint x-pack/**/*/archives_metadata.ts --fix', {
+  // apply lint fixes to the generated metadata file, then format it
+  const metadataFilePath = path.join(apiIntegrationDir, 'archives_metadata.ts');
+  execSync(`node scripts/lint --fix ${metadataFilePath}`, {
+    cwd: REPO_ROOT,
+    stdio: 'inherit',
+  });
+  execSync(`node scripts/oxfmt ${metadataFilePath}`, {
     cwd: REPO_ROOT,
     stdio: 'inherit',
   });

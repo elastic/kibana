@@ -41,7 +41,7 @@ const inference = {
 const createFeatureFlagsMock = (enabled = true): FeatureFlagsStart =>
   ({
     getBooleanValue$: jest.fn().mockReturnValue(of(enabled)),
-  } as unknown as FeatureFlagsStart);
+  }) as unknown as FeatureFlagsStart;
 
 const createDependencies = (featureFlags = createFeatureFlagsMock(true)) => ({
   request,

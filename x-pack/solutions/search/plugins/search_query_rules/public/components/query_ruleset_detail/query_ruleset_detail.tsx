@@ -460,8 +460,8 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
             isPermissionError(error)
               ? 'missingPermissions'
               : isNotFoundError(error)
-              ? 'notFound'
-              : 'generic'
+                ? 'notFound'
+                : 'generic'
           }
           data-test-subj="queryRulesetDetailErrorPrompt"
         />

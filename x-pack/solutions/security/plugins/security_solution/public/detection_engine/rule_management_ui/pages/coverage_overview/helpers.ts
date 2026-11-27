@@ -15,7 +15,7 @@ import type {
 import type { CoverageOverviewDashboard } from '../../../rule_management/model/coverage_overview/dashboard';
 
 export const extractSelected = <
-  T extends CoverageOverviewRuleSource | CoverageOverviewRuleActivity
+  T extends CoverageOverviewRuleSource | CoverageOverviewRuleActivity,
 >(
   options: EuiSelectableOption[]
 ): T[] => {
@@ -23,7 +23,7 @@ export const extractSelected = <
 };
 
 export const populateSelected = <
-  T extends CoverageOverviewRuleSource | CoverageOverviewRuleActivity
+  T extends CoverageOverviewRuleSource | CoverageOverviewRuleActivity,
 >(
   allOptions: Array<EuiSelectableOption<{ label: T }>>,
   selected: string[]

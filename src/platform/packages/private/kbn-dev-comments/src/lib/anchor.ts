@@ -323,8 +323,8 @@ const stableRootSelector = (element: Element): string | undefined => {
   const selector = subj
     ? attributeSelector(TEST_SUBJ_ATTR, subj)
     : element.id && !looksGenerated(element.id)
-    ? attributeSelector('id', element.id)
-    : undefined;
+      ? attributeSelector('id', element.id)
+      : undefined;
   return selector && queryAll(document, selector).length === 1 ? selector : undefined;
 };
 

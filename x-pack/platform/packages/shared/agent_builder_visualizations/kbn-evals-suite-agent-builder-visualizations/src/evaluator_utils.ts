@@ -81,7 +81,7 @@ const isAbstention = (result: EvaluationResult): boolean =>
  */
 export const withLowScoreLogging = <
   TExample extends Example = Example,
-  TTaskOutput extends TaskOutput = TaskOutput
+  TTaskOutput extends TaskOutput = TaskOutput,
 >(
   evaluator: Evaluator<TExample, TTaskOutput>,
   log: ToolingLog
@@ -131,7 +131,7 @@ export const withLowScoreLogging = <
  */
 export const skipRefusalExamples = <
   TExample extends Example = Example,
-  TTaskOutput extends TaskOutput = TaskOutput
+  TTaskOutput extends TaskOutput = TaskOutput,
 >(
   evaluator: Evaluator<TExample, TTaskOutput>,
   isRefusalExample: (expected: TExample['output']) => boolean

@@ -449,7 +449,8 @@ node scripts/scout run-tests --arch stateful --domain classic --config x-pack/pl
 ### Linting
 
 ```bash
-node scripts/eslint --fix $(git diff --name-only)
+node scripts/lint --fix $(git diff --name-only)
+node scripts/oxfmt $(git diff --name-only)
 ```
 
 ## Key Domain Invariants

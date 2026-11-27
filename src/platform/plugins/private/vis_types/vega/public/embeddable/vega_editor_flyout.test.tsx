@@ -47,7 +47,7 @@ jest.mock('../components/vega_vis_editor', () => ({
 }));
 
 const createDataView = (id: string, persisted = true): DataView =>
-  ({ id, isPersisted: () => persisted } as DataView);
+  ({ id, isPersisted: () => persisted }) as DataView;
 
 const renderFlyout = ({
   initialQuery,

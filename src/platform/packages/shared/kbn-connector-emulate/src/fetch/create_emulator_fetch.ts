@@ -374,8 +374,8 @@ const loadProtocols = (
     return isGraphQLSpec(spec)
       ? [{ source, protocol: 'graphql', instance: createGraphQLProtocol(spec, options) }]
       : isMcpSpec(spec)
-      ? [{ source, protocol: 'mcp', instance: createMcpProtocol(spec, options) }]
-      : [];
+        ? [{ source, protocol: 'mcp', instance: createMcpProtocol(spec, options) }]
+        : [];
   });
 
 const toProtocolEndpoints = (loaded: readonly LoadedProtocol[]): Map<string, ContractProtocol> =>
@@ -406,8 +406,8 @@ const toResponse = ({ statusCode, headers, body }: ContractResponse): Response =
     body === undefined || body === null || NULL_BODY_STATUSES.has(statusCode)
       ? null
       : typeof body === 'string'
-      ? body
-      : JSON.stringify(body);
+        ? body
+        : JSON.stringify(body);
   return new Response(payload, { status: statusCode, headers: { ...headers } });
 };
 
@@ -575,7 +575,7 @@ export const createEmulatorFetch = ({
       responseSource:
         respond && !deferred.has(context)
           ? 'responder'
-          : engine.servedFrom(operation, routedRequest) ?? 'generated',
+          : (engine.servedFrom(operation, routedRequest) ?? 'generated'),
       status: response.statusCode,
       requestViolations,
       responseViolations,

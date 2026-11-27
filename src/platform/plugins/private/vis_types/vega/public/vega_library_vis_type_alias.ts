@@ -45,4 +45,4 @@ export const getVegaLibraryVisTypeAlias = (openLibraryEditor: (id: string) => Pr
         }),
       },
     },
-  } satisfies VisTypeAlias);
+  }) satisfies VisTypeAlias;

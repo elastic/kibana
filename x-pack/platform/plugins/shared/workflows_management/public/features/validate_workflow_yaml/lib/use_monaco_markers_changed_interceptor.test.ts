@@ -46,7 +46,7 @@ const createFakeModel = ({ id = 'model-1', versionId, value = 'name: test' }: Fa
     id,
     getVersionId: () => versionId,
     getValue: () => value,
-  } as any);
+  }) as any;
 
 describe('useMonacoMarkersChangedInterceptor', () => {
   beforeEach(() => {

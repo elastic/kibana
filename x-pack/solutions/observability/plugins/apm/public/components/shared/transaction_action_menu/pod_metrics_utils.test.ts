@@ -21,7 +21,7 @@ const createDiscoverLocator = () =>
       const esql = params.query?.esql ?? '';
       return `/app/discover#/?_a=(query:(esql:'${esql}'))`;
     }),
-  } as unknown as LocatorPublic<SerializableRecord>);
+  }) as unknown as LocatorPublic<SerializableRecord>;
 
 const createAssetDetailsLocator = () =>
   ({
@@ -29,7 +29,7 @@ const createAssetDetailsLocator = () =>
       ({ entityId, entityType }: { entityId: string; entityType: string }) =>
         `/node-mock/${entityType}/${entityId}`
     ),
-  } as unknown as jest.Mocked<AssetDetailsLocator>);
+  }) as unknown as jest.Mocked<AssetDetailsLocator>;
 
 describe('getPodMetricsLink', () => {
   it('returns undefined when there is no pod id', () => {

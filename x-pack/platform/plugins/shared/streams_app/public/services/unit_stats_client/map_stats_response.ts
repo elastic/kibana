@@ -167,8 +167,10 @@ const mapSourceResult = (
     : classify(EMPTY_SOURCE_STATS, hasSourceData);
 
 /** An id is user-defined, so `constructor` must not be read from `Object.prototype` as a result. */
-const getOwnResult = <TResult>(results: Record<string, TResult>, id: string): TResult | undefined =>
-  Object.hasOwn(results, id) ? results[id] : undefined;
+const getOwnResult = <TResult>(
+  results: Record<string, TResult>,
+  id: string
+): TResult | undefined => (Object.hasOwn(results, id) ? results[id] : undefined);
 
 /** What a request that failed gives to each component it asked for: an error with no numbers. */
 export const mapFailedRequest = (

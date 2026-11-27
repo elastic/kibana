@@ -58,7 +58,7 @@ const makeStoredEvent = (
     summary: 'P99 latency breached SLO',
     confidence: 0.8,
     ...overrides,
-  } as SignificantEvent);
+  }) as SignificantEvent;
 
 type DetectionSignal = Extract<SignalEntry, { type: 'detection' }>;
 
@@ -135,7 +135,7 @@ const makeAlertEventsClient = (
       alert_id: 'alert-1',
     })),
     ...overrides,
-  } as jest.Mocked<AlertEventsClientApi>);
+  }) as jest.Mocked<AlertEventsClientApi>;
 
 let alertEventsClient: jest.Mocked<AlertEventsClientApi>;
 
@@ -153,7 +153,7 @@ const writtenDocs = (): SignificantEvent[] =>
         event_id: ruleEvent.fingerprint,
         status: ruleEvent.alert_status,
         severity: ruleEvent.severity,
-      } as unknown as SignificantEvent)
+      }) as unknown as SignificantEvent
   );
 
 const makeLogger = (): jest.Mocked<Logger> =>
@@ -162,7 +162,7 @@ const makeLogger = (): jest.Mocked<Logger> =>
     warn: jest.fn(),
     info: jest.fn(),
     debug: jest.fn(),
-  } as unknown as jest.Mocked<Logger>);
+  }) as unknown as jest.Mocked<Logger>;
 
 describe('eventsWriteHandler', () => {
   it('writes a new event', async () => {

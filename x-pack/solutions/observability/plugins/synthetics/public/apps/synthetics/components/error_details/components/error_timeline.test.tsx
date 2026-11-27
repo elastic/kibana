@@ -20,7 +20,7 @@ const makePing = (timespan: { gte: string; lt?: string; lte?: string }) =>
     '@timestamp': '2024-08-30T11:04:00.000Z',
     monitor: { timespan },
     state: { started_at: '2024-08-30T11:03:00.000Z' },
-  } as unknown as Ping);
+  }) as unknown as Ping;
 
 const expectedTime = {
   // started_at minus half of the 2 minute timespan

@@ -27,8 +27,6 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
   fi
   .buildkite/scripts/common/activate_service_account.sh --unset-impersonation
 elif [[ "$(pwd)" == "/dev/shm"* ]]; then
-  # pnpm store on tmpfs so the install doesn't fill the small root disk
-  export npm_config_store_dir=/dev/shm/pnpm-store
   if [[ -f ~/.kibana/node_modules.tar.zst ]]; then
     echo "Extracting ~/.kibana/node_modules.tar.zst"
     tar -xf ~/.kibana/node_modules.tar.zst -I "zstd -T0" -C ./

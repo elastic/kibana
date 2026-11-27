@@ -42,7 +42,7 @@ describe('useLabelMarquee', () => {
   // Detached elements have no size, as in a browser.
   const getWidth = (element: Element) =>
     element.isConnected
-      ? widths[element.getAttribute('data-test-subj') as keyof typeof widths] ?? 0
+      ? (widths[element.getAttribute('data-test-subj') as keyof typeof widths] ?? 0)
       : 0;
 
   const getOverflowWidth = () =>

@@ -652,10 +652,10 @@ const runTrackedFindingsPass = async (
     }
     // Only the final pass proposes, so only it is shown what is already proposed.
     const existingProposals = final
-      ? (await deps
+      ? ((await deps
           .getProposals?.()
           ?.list({ request, conversationId })
-          .catch(() => [])) ?? []
+          .catch(() => [])) ?? [])
       : [];
     const { byHandle, notice: proposalsNotice } = buildProposalsContext(
       existingProposals,
@@ -668,7 +668,7 @@ const runTrackedFindingsPass = async (
     ];
     // Only the final pass proposes, so only it is told which workflows a proposal can run.
     actions = final
-      ? (await deps
+      ? ((await deps
           .getProposals?.()
           ?.listActions({ request })
           .catch((error) => {
@@ -678,7 +678,7 @@ const runTrackedFindingsPass = async (
               }`
             );
             return [];
-          })) ?? []
+          })) ?? [])
       : [];
 
     // The final pass can read the investigation's workspace. The round's long tool results are
@@ -921,7 +921,9 @@ const runTrackedFindingsPass = async (
   // Read again here, not before the model call: a user may change it while the model is answering.
   const severityChosenByUser =
     severityNotices(await readConversation(agentBuilder, request, conversationId)).length > 0;
-  const verdict = final ? record?.verdict ?? answer?.slice(0, MAX_METADATA_TEXT_LENGTH) : undefined;
+  const verdict = final
+    ? (record?.verdict ?? answer?.slice(0, MAX_METADATA_TEXT_LENGTH))
+    : undefined;
   // A write replaces the hypothesis and entity lists, so what is stored is read first to keep the
   // evidence of what the pass lists again without any.
   const stored = record
@@ -936,9 +938,9 @@ const runTrackedFindingsPass = async (
           ...(record?.summary
             ? { summary: record.summary }
             : // A final pass without a record replaces an early live summary with the answer.
-            final && answer
-            ? { summary: answer.slice(0, FALLBACK_SUMMARY_CHARS) }
-            : {}),
+              final && answer
+              ? { summary: answer.slice(0, FALLBACK_SUMMARY_CHARS) }
+              : {}),
           ...(final && record?.severity && !severityChosenByUser
             ? { severity: record.severity }
             : {}),

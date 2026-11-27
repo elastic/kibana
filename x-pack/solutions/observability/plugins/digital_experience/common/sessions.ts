@@ -50,6 +50,8 @@ export const MOBILE_SESSIONS_TASK_ID = 'digital_experience:mobile-sessions-summa
 export const MOBILE_SESSIONS_RECONCILE_INTERVAL_MINUTES = 60;
 /** Events that arrive later than this after their time are not summarized. */
 export const MOBILE_SESSIONS_RECONCILE_HOURS = 24;
+/** How late a crash may be sent after it happened, as the next launch sends it. */
+export const MOBILE_MAX_CRASH_DELAY_HOURS = 24;
 
 /** How often the summaries task runs by default. */
 export const SESSIONS_DEFAULT_FREQUENCY = '1m';
@@ -73,6 +75,7 @@ export const SESSIONS_MAX_ID_LENGTH = 256;
  * changed session is rebuilt from this far back.
  */
 export const SESSIONS_MAX_SESSION_HOURS = 24;
+export const SESSIONS_MAX_SESSION_MS = SESSIONS_MAX_SESSION_HOURS * 60 * 60 * 1000;
 /** Max page views kept, in order, for the session journey. */
 export const SESSIONS_JOURNEY_SIZE = 10;
 /**
@@ -242,6 +245,8 @@ export interface SessionSummary {
   failedRequestCount: number;
   frustration: FrustrationCounts;
   bounced: boolean;
+  /** Whether the session has a recorded replay; null when the summary doesn't say i.e. not determined */
+  hasReplay: boolean | null;
   entryPage: string | null;
   exitPage: string | null;
   journey: string[];
@@ -286,19 +291,27 @@ export interface SessionListResponse {
   kpis: SessionListKpis;
 }
 
-/** The events the journey lists; the API leaves out all others, which Discover shows. */
+/** The kinds of events a mobile session's timeline lists. */
+export type MobileSessionEventKind = 'screen' | 'tap' | 'request' | 'error' | 'log';
+
+/**
+ * The events the journey lists; the API leaves out all others, which Discover shows. Mobile
+ * sessions list screens, taps, requests and logs too.
+ */
 export type SessionTimelineEventKind =
   | 'page_view'
   | 'click'
   | 'error'
   | 'web_vital'
-  | 'frustration';
+  | 'frustration'
+  | MobileSessionEventKind;
 
 export interface SessionTimelineEvent {
   kind: SessionTimelineEventKind;
   name: string;
   timestamp: string;
   offsetMs: number;
+  /** The page, or a mobile app's screen, the event happened on. */
   page: string | null;
   detail: string | null;
   /** The clicks a rage click summarizes; `null` for every other event. */
@@ -309,6 +322,10 @@ export interface SessionTimelineEvent {
   spanId: string | null;
   /** The uncaught exception behind an error click; unset for every other event. */
   exception?: SessionTimelineException;
+  /** A mobile request's response status; the browser's requests are listed apart. */
+  statusCode?: number | null;
+  /** A mobile request's duration. */
+  durationMs?: number | null;
 }
 
 /** The uncaught exception a frustration signal names, as an error click does. */

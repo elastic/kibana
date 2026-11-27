@@ -105,9 +105,10 @@ function splitDiffToLines(diffs: Diff[]): Diff[][] {
     (lines, [type, value]) => {
       const currentLines = value.split('\n');
 
-      const [currentLineRemaining, ...nextLines] = currentLines.map(
-        (line: string): Diff => [type, line]
-      );
+      const [currentLineRemaining, ...nextLines] = currentLines.map((line: string): Diff => [
+        type,
+        line,
+      ]);
       const next: Diff[][] = [
         ...lines.slice(0, -1),
         [...lines[lines.length - 1], currentLineRemaining],

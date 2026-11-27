@@ -68,7 +68,7 @@ const getLibraryClient = (): ContentClient =>
       });
       return { hits, pagination: { total } };
     },
-  } as ContentClient);
+  }) as ContentClient;
 
 export interface Props {
   onClose: () => void;

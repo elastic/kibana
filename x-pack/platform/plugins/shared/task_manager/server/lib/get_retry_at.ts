@@ -81,5 +81,5 @@ export function getTimeout(
     return taskDefinition?.timeout ?? DEFAULT_TIMEOUT;
   }
 
-  return task.timeoutOverride ? task.timeoutOverride : taskDefinition?.timeout ?? DEFAULT_TIMEOUT;
+  return task.timeoutOverride ? task.timeoutOverride : (taskDefinition?.timeout ?? DEFAULT_TIMEOUT);
 }

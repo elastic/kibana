@@ -25,7 +25,7 @@ export const useDebouncedText = (
   const [text, setText] = useState(applied ?? '');
 
   useEffect(
-    () => setText((current) => (current.trim() === (applied ?? '') ? current : applied ?? '')),
+    () => setText((current) => (current.trim() === (applied ?? '') ? current : (applied ?? ''))),
     [applied]
   );
 

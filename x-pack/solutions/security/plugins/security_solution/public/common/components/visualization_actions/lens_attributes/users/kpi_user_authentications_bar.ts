@@ -208,4 +208,4 @@ export const getKpiUserAuthenticationsBarLensAttributes: GetLensAttributes = ({ 
         name: `indexpattern-datasource-layer-${layerEventOutcomeFailure}`,
       },
     ],
-  } as LensAttributes);
+  }) as LensAttributes;

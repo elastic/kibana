@@ -16,8 +16,10 @@ export type VirtualizerInstanceType = Virtualizer<Element, Element>;
 
 export type UseVirtualizerOptions = Parameters<typeof useVirtualizer>[0];
 
-export interface CascadeVirtualizerProps<G extends GroupNode>
-  extends Pick<UseVirtualizerOptions, 'getScrollElement' | 'overscan' | 'initialRect'> {
+export interface CascadeVirtualizerProps<G extends GroupNode> extends Pick<
+  UseVirtualizerOptions,
+  'getScrollElement' | 'overscan' | 'initialRect'
+> {
   rows: Array<CascadeTableRow<G>>;
   /**
    * setting a value of true causes the active group root row
@@ -51,24 +53,23 @@ export interface VirtualizerRangeExtractorArgs<G extends GroupNode> {
 /**
  * The part of a virtualizer that the root and the child virtualizers both expose.
  */
-export interface CascadeVirtualizerApi
-  extends Pick<
-    VirtualizerInstanceType,
-    | 'getTotalSize'
-    | 'getVirtualItems'
-    | 'isScrolling'
-    | 'measureElement'
-    | 'scrollOffset'
-    | 'scrollElement'
-    | 'range'
-    | 'measurementsCache'
-    | 'scrollToIndex'
-    | 'measure'
-    | 'scrollToOffset'
-    | 'takeSnapshot'
-    | 'cancelScroll'
-    | 'scrollRect'
-  > {
+export interface CascadeVirtualizerApi extends Pick<
+  VirtualizerInstanceType,
+  | 'getTotalSize'
+  | 'getVirtualItems'
+  | 'isScrolling'
+  | 'measureElement'
+  | 'scrollOffset'
+  | 'scrollElement'
+  | 'range'
+  | 'measurementsCache'
+  | 'scrollToIndex'
+  | 'measure'
+  | 'scrollToOffset'
+  | 'takeSnapshot'
+  | 'cancelScroll'
+  | 'scrollRect'
+> {
   scrollToVirtualizedIndex: (
     offset: number,
     options: {

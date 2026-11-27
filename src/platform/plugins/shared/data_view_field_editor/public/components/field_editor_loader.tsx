@@ -16,9 +16,8 @@ export const FieldEditorLoader: React.FC<Props> = (props) => {
   const [Editor, setEditor] = useState<React.ComponentType<Props> | null>(null);
 
   const loadEditor = useCallback(async () => {
-    const { FieldEditorFlyoutContentContainer } = await import(
-      './field_editor_flyout_content_container'
-    );
+    const { FieldEditorFlyoutContentContainer } =
+      await import('./field_editor_flyout_content_container');
     setEditor(() => FieldEditorFlyoutContentContainer);
   }, []);
 

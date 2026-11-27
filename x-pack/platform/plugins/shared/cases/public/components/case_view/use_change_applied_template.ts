@@ -71,7 +71,7 @@ const buildTemplateSettings = (
 ): CaseSettings => ({
   syncAlerts: settings?.syncAlerts ?? false,
   extractObservables: canStoreExtractObservablesTrue(owner)
-    ? settings?.extractObservables ?? false
+    ? (settings?.extractObservables ?? false)
     : false,
 });
 
@@ -110,8 +110,8 @@ export const useChangeAppliedTemplate = () => {
   return useMutation(
     ({ caseData, newTemplate, extendedFields }: ChangeAppliedTemplateArgs) => {
       const newExtendedFields = newTemplate
-        ? extendedFields ??
-          computeNewExtendedFields(newTemplate.fields, caseData.extendedFields ?? {})
+        ? (extendedFields ??
+          computeNewExtendedFields(newTemplate.fields, caseData.extendedFields ?? {}))
         : {};
       return patchCase({
         caseId: caseData.id,

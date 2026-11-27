@@ -30,7 +30,7 @@ const run = async (): Promise<void> => {
   }
 
   const groups = args.length > 0 ? args.filter(isGeneratedFileGroup) : GENERATED_FILE_GROUPS;
-  const files = renderGeneratedFiles(groups);
+  const files = await renderGeneratedFiles(groups);
   await writeGeneratedFiles(files);
 
   const fileList = files.map(({ path }) => `  ${relative(REPO_ROOT, path)}`).join('\n');

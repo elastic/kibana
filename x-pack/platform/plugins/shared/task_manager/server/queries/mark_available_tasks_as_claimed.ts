@@ -164,7 +164,7 @@ export function getClaimSort(definitions: TaskTypeDictionary): estypes.SortCombi
 // Kept here so it should align with getClaimSort() above.
 // Returns a copy of the tasks passed in.
 export function claimSort<
-  T extends Pick<ConcreteTaskInstance, 'taskType' | 'priority' | 'retryAt' | 'runAt'>
+  T extends Pick<ConcreteTaskInstance, 'taskType' | 'priority' | 'retryAt' | 'runAt'>,
 >(definitions: TaskTypeDictionary, tasks: T[]): T[] {
   // get the task definition priority
   const priorityMap: Record<string, TaskPriority> = {};

@@ -99,13 +99,13 @@ export function ManagementBottomBar({
                       }
                     )
                   : insufficientPrivileges
-                  ? i18n.translate(
-                      'xpack.streams.streamDetailView.managementTab.bottomBar.onlySimulate',
-                      {
-                        defaultMessage: "You don't have sufficient privileges to save changes.",
-                      }
-                    )
-                  : undefined
+                    ? i18n.translate(
+                        'xpack.streams.streamDetailView.managementTab.bottomBar.onlySimulate',
+                        {
+                          defaultMessage: "You don't have sufficient privileges to save changes.",
+                        }
+                      )
+                    : undefined
               }
             >
               <EuiButton

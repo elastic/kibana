@@ -105,7 +105,7 @@ function getFeatureFlagFn(
       case 'boolean': {
         const value$ = service.getBooleanValue$(
           flag.id,
-          isDev ? flag.devFallback ?? flag.fallback : flag.fallback
+          isDev ? (flag.devFallback ?? flag.fallback) : flag.fallback
         );
         return [await firstValueFrom(value$), value$];
       }

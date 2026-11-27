@@ -278,13 +278,11 @@ export const createGraphQLProtocol = (
   });
   return {
     endpoints: spec.endpoints.map((endpoint) => toEndpoint(new URL(endpoint))),
-    operations: [...operationNames].map(
-      (name): NamedOperation => ({
-        name,
-        ...(source === undefined ? {} : { source }),
-        readOnly: name.startsWith('query '),
-      })
-    ),
+    operations: [...operationNames].map((name): NamedOperation => ({
+      name,
+      ...(source === undefined ? {} : { source }),
+      readOnly: name.startsWith('query '),
+    })),
     answerable: operationNames,
     rejectedResponses,
     handle: async (request) => {

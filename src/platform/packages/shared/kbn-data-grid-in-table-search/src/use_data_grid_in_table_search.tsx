@@ -22,8 +22,10 @@ import { getActiveMatchCss } from './get_active_match_css';
 
 export type InTableSearchScrollToCell = UseInTableSearchControlProps['scrollToCell'];
 
-export interface UseDataGridInTableSearchProps
-  extends Pick<UseInTableSearchControlProps, 'rows' | 'visibleColumns'> {
+export interface UseDataGridInTableSearchProps extends Pick<
+  UseInTableSearchControlProps,
+  'rows' | 'visibleColumns'
+> {
   enableInTableSearch?: boolean;
   dataGridWrapper: HTMLElement | null;
   dataGridRef: React.RefObject<EuiDataGridRefProps | null>;
@@ -135,7 +137,7 @@ export const useDataGridInTableSearch = (
     (element: HTMLElement) =>
       Boolean(
         dataGridWrapper?.contains(element) ||
-          additionalSearchScopeElements?.some((scope) => scope.contains(element))
+        additionalSearchScopeElements?.some((scope) => scope.contains(element))
       ),
     [dataGridWrapper, additionalSearchScopeElements]
   );

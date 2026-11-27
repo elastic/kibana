@@ -25,9 +25,10 @@ import type {
 } from './types';
 import { registerLocators } from './locators';
 
-export class SearchInferenceEndpointsPlugin
-  implements Plugin<SearchInferenceEndpointsPluginSetup, SearchInferenceEndpointsPluginStart>
-{
+export class SearchInferenceEndpointsPlugin implements Plugin<
+  SearchInferenceEndpointsPluginSetup,
+  SearchInferenceEndpointsPluginStart
+> {
   private config: SearchInferenceEndpointsConfigType;
   private registerInferenceEndpoints?: ManagementApp;
   private registerModelSettings?: ManagementApp;
@@ -92,9 +93,8 @@ export class SearchInferenceEndpointsPlugin
         }),
         order: 1,
         async mount({ element, history, setBreadcrumbs }: ManagementAppMountParams) {
-          const { renderElasticInferenceServiceApp } = await import(
-            './elastic_inference_service_application'
-          );
+          const { renderElasticInferenceServiceApp } =
+            await import('./elastic_inference_service_application');
           const [coreStart, depsStart] = await core.getStartServices();
           const startDeps: AppPluginStartDependencies = {
             ...depsStart,

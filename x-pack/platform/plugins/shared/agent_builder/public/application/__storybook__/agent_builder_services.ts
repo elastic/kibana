@@ -222,7 +222,7 @@ const defaultServices: AgentBuilderInternalService = {
   isEarsEnabled: false,
   isEarsExperimentalEnabled: false,
   isServerless: false,
-  openSidebarConversation: () => ({} as never),
+  openSidebarConversation: () => ({}) as never,
 };
 
 export const createStorybookAgentBuilderServices = (

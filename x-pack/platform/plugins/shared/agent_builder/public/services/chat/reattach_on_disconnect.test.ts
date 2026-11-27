@@ -16,7 +16,7 @@ import {
 import { isDisconnectError, streamWithReattach } from './reattach_on_disconnect';
 
 const chunk = (text: string) =>
-  ({ type: ChatEventType.messageChunk, data: { text_chunk: text } } as ChatEvent);
+  ({ type: ChatEventType.messageChunk, data: { text_chunk: text } }) as ChatEvent;
 
 const terminated = { type: TimelineEventType.executionTerminated, data: {} } as ChatEvent;
 const conversationUpdated = { type: ChatEventType.conversationUpdated, data: {} } as ChatEvent;

@@ -54,9 +54,33 @@ jest.mock('@elastic/charts', () => {
 jest.mock('../../../../hooks/use_kibana_services');
 
 const RELEASES: MobileReleaseRow[] = [
-  { release: '2.0.0', isOther: false, sessions: 300, users: 10, errorRate: 0.1 },
-  { release: '1.0.0', isOther: false, sessions: 50, users: 5, errorRate: null },
-  { release: '', isOther: true, sessions: 200, users: 8, errorRate: 0.2 },
+  {
+    release: '2.0.0',
+    isOther: false,
+    sessions: 300,
+    users: 10,
+    errorRate: 0.1,
+    coldStart: null,
+    coldStarts: 0,
+  },
+  {
+    release: '1.0.0',
+    isOther: false,
+    sessions: 50,
+    users: 5,
+    errorRate: null,
+    coldStart: null,
+    coldStarts: 0,
+  },
+  {
+    release: '',
+    isOther: true,
+    sessions: 200,
+    users: 8,
+    errorRate: 0.2,
+    coldStart: null,
+    coldStarts: 0,
+  },
 ];
 
 const point = (timestamp: number) => ({ timestamp, sessions: 10, errorRate: 0.1 });

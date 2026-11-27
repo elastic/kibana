@@ -76,9 +76,10 @@ export interface SetupDeps {
 }
 
 /** @internal */
-export class HttpService
-  implements CoreService<InternalHttpServiceSetup, InternalHttpServiceStart>
-{
+export class HttpService implements CoreService<
+  InternalHttpServiceSetup,
+  InternalHttpServiceStart
+> {
   private static readonly generateOasSemaphore = new Semaphore(1);
   private readonly prebootServer: HttpServer;
   private isPrebootServerStopped = false;
@@ -167,7 +168,7 @@ export class HttpService
       registerRouteHandlerContext: (pluginOpaqueId, contextName, provider) =>
         prebootServerRequestHandlerContext.registerContext(pluginOpaqueId, contextName, provider),
       registerRoutes: <
-        DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase
+        DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase,
       >(
         path: string,
         registerCallback: (router: IRouter<DefaultRequestHandlerType>) => void
@@ -253,7 +254,7 @@ export class HttpService
 
       registerRouteHandlerContext: <
         Context extends RequestHandlerContextBase,
-        ContextName extends keyof Context
+        ContextName extends keyof Context,
       >(
         pluginOpaqueId: PluginOpaqueId,
         contextName: ContextName,

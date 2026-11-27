@@ -44,8 +44,9 @@ interface LogContext {
   logTags: { tags: string[] };
 }
 
-export interface ReconcileTrackedAlertsWithStateParams<AlertData extends RuleAlertData>
-  extends LogContext {
+export interface ReconcileTrackedAlertsWithStateParams<
+  AlertData extends RuleAlertData,
+> extends LogContext {
   ruleId: string;
   activeAlertsFromState: Record<string, RawAlertInstance>;
   recoveredAlertsFromState: Record<string, RawAlertInstance>;
@@ -53,8 +54,9 @@ export interface ReconcileTrackedAlertsWithStateParams<AlertData extends RuleAle
   search: TrackedAlertsSearch<AlertData>;
 }
 
-export interface ReconcileTrackedAlertsWithStateResult<AlertData extends RuleAlertData>
-  extends RestoreStateFromTrackedAlertsResult {
+export interface ReconcileTrackedAlertsWithStateResult<
+  AlertData extends RuleAlertData,
+> extends RestoreStateFromTrackedAlertsResult {
   trackedAlerts: TrackedAADAlerts<AlertData>;
 }
 
@@ -158,8 +160,9 @@ function throwIfShardsFailed(shards: SearchResult<RuleAlertData>['_shards']): vo
   );
 }
 
-export interface RestoreStateFromTrackedAlertsParams<AlertData extends RuleAlertData>
-  extends LogContext {
+export interface RestoreStateFromTrackedAlertsParams<
+  AlertData extends RuleAlertData,
+> extends LogContext {
   trackedAlerts: TrackedAADAlerts<AlertData>;
   activeAlertsFromState: Record<string, RawAlertInstance>;
   recoveredAlertsFromState: Record<string, RawAlertInstance>;
@@ -322,7 +325,7 @@ function definedOnly<T extends Record<string, unknown>>(values: T): Partial<T> {
 }
 
 // Keeps log lines bounded for rules with many alerts.
-function formatInstanceIds(instanceIds: string[]): string {
+export function formatInstanceIds(instanceIds: string[]): string {
   const shown = instanceIds.slice(0, MAX_LOGGED_INSTANCE_IDS).join(', ');
   const remaining = instanceIds.length - MAX_LOGGED_INSTANCE_IDS;
   return remaining > 0 ? `${shown} and ${remaining} more` : shown;

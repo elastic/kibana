@@ -341,7 +341,7 @@ Ground first: make sure the target index exists and every field you reference is
         // otherwise the target type names it.
         const renderer: VisualizationRenderer = existingData
           ? getEffectiveRenderer(existingData)
-          : requestedRenderer ?? 'lens';
+          : (requestedRenderer ?? 'lens');
 
         if ((dataQueries || removeAllQueries) && renderer !== 'custom_content') {
           throw new Error(
