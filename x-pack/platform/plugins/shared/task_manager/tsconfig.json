@@ -57,6 +57,15 @@
     "@kbn/scout",
     "@kbn/std",
     "@kbn/mock-idp-utils",
+    "@kbn/repo-info",
+    "@kbn/core-saved-objects-server-mocks",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-saved-objects-api-server-internal",
+    "@kbn/core-saved-objects-migration-server-internal",
+    "@kbn/core-logging-server-internal",
+    "@kbn/core-elasticsearch-server-internal",
+    "@kbn/core-elasticsearch-client-server-internal",
   ],
   "exclude": ["target/**/*"]
 }

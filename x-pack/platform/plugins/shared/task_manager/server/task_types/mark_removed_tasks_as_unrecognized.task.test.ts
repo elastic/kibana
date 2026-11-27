@@ -6,8 +6,10 @@
  */
 
 import { mockLogger } from '../test_utils';
-import { coreMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { SCHEDULE_INTERVAL, taskRunner } from './mark_removed_tasks_as_unrecognized';
+import { elasticsearchServiceMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
+import type { RunContext } from '../task';
+import type { TaskHost } from '../task_type_module';
+import { SCHEDULE_INTERVAL, taskType } from './mark_removed_tasks_as_unrecognized.task';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 
 const createTaskDoc = (id: string = '1'): SearchHit<unknown> => ({
@@ -38,8 +40,12 @@ const createTaskDoc = (id: string = '1'): SearchHit<unknown> => ({
 
 describe('markRemovedTasksAsUnrecognizedTask', () => {
   const logger = mockLogger();
-  const coreSetup = coreMock.createSetup();
   const esClient = elasticsearchServiceMock.createStart();
+  const host: TaskHost = {
+    logger,
+    elasticsearch: esClient.client,
+    savedObjects: savedObjectsServiceMock.createStartContract(),
+  };
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -89,20 +95,12 @@ describe('markRemovedTasksAsUnrecognizedTask', () => {
       ],
     });
 
-    coreSetup.getStartServices.mockResolvedValue([
-      {
-        ...coreMock.createStart(),
-        elasticsearch: esClient,
-      },
-      {},
-      coreMock.createSetup(),
-    ]);
     // @ts-expect-error
     esClient.client.asInternalUser.search.mockResponse({
       hits: { hits: [createTaskDoc('123'), createTaskDoc('456'), createTaskDoc('789')], total: 3 },
     });
 
-    const runner = taskRunner(logger, coreSetup.getStartServices)();
+    const runner = taskType.createTaskRunner({} as RunContext, host);
     const result = await runner.run();
 
     expect(esClient.client.asInternalUser.bulk).toHaveBeenCalledWith({
@@ -127,20 +125,12 @@ describe('markRemovedTasksAsUnrecognizedTask', () => {
   });
 
   it('skips update when there are no removed task types', async () => {
-    coreSetup.getStartServices.mockResolvedValue([
-      {
-        ...coreMock.createStart(),
-        elasticsearch: esClient,
-      },
-      {},
-      coreMock.createSetup(),
-    ]);
     // @ts-expect-error
     esClient.client.asInternalUser.search.mockResponse({
       hits: { hits: [], total: 0 },
     });
 
-    const runner = taskRunner(logger, coreSetup.getStartServices)();
+    const runner = taskType.createTaskRunner({} as RunContext, host);
     const result = await runner.run();
 
     expect(esClient.client.asInternalUser.bulk).not.toHaveBeenCalled();
@@ -152,17 +142,9 @@ describe('markRemovedTasksAsUnrecognizedTask', () => {
   });
 
   it('schedules the next run even when there is an error', async () => {
-    coreSetup.getStartServices.mockResolvedValue([
-      {
-        ...coreMock.createStart(),
-        elasticsearch: esClient,
-      },
-      {},
-      coreMock.createSetup(),
-    ]);
     esClient.client.asInternalUser.search.mockRejectedValueOnce(new Error('foo'));
 
-    const runner = taskRunner(logger, coreSetup.getStartServices)();
+    const runner = taskType.createTaskRunner({} as RunContext, host);
     const result = await runner.run();
 
     expect(esClient.client.asInternalUser.bulk).not.toHaveBeenCalled();
@@ -224,20 +206,12 @@ describe('markRemovedTasksAsUnrecognizedTask', () => {
       ],
     });
 
-    coreSetup.getStartServices.mockResolvedValue([
-      {
-        ...coreMock.createStart(),
-        elasticsearch: esClient,
-      },
-      {},
-      coreMock.createSetup(),
-    ]);
     // @ts-expect-error
     esClient.client.asInternalUser.search.mockResponse({
       hits: { hits: [createTaskDoc('123'), createTaskDoc('456'), createTaskDoc('789')], total: 3 },
     });
 
-    const runner = taskRunner(logger, coreSetup.getStartServices)();
+    const runner = taskType.createTaskRunner({} as RunContext, host);
     const result = await runner.run();
 
     expect(esClient.client.asInternalUser.bulk).toHaveBeenCalledWith({

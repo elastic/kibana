@@ -17,6 +17,11 @@ import type { TaskPollingLifecycle as TaskPollingLifecycleClass } from './pollin
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
 import { TASK_MANAGER_CLAIM_NUDGE_INDEX } from './constants';
+import { defineTaskType } from './task_type_module';
+import { TaskProcessSupervisor } from './task_process/supervisor';
+import { of } from 'rxjs';
+import moment from 'moment';
+import type { RunContext } from './task';
 
 let mockTaskPollingLifecycle = taskPollingLifecycleMock.create({});
 jest.mock('./polling_lifecycle', () => {
@@ -40,6 +45,15 @@ jest.mock('./claim_nudge/claim_nudge_service', () => {
     }),
   };
 });
+
+const mockSupervisor = {
+  start: jest.fn(),
+  stop: jest.fn().mockResolvedValue(undefined),
+  getRoute: jest.fn(),
+};
+jest.mock('./task_process/supervisor', () => ({
+  TaskProcessSupervisor: jest.fn().mockImplementation(() => mockSupervisor),
+}));
 
 const deleteCurrentNodeSpy = jest.spyOn(KibanaDiscoveryService.prototype, 'deleteCurrentNode');
 const discoveryIsStarted = jest.spyOn(KibanaDiscoveryService.prototype, 'isStarted');
@@ -160,6 +174,140 @@ describe('TaskManagerPlugin', () => {
       expect((logger.warn as jest.Mock).mock.calls[0][0]).toBe(
         'Disabling authentication for background task utilization API'
       );
+    });
+  });
+
+  describe('registerTaskType', () => {
+    const setupPlugin = () => {
+      const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>(
+        pluginInitializerContextParams
+      );
+      const plugin = new TaskManagerPlugin(pluginInitializerContext);
+      const core = coreMock.createSetup();
+      const startServices = coreMock.createStart();
+      core.getStartServices.mockResolvedValue([startServices, {} as never, {} as never]);
+      const setup = plugin.setup(core, { usageCollection: undefined });
+      return { plugin, setup, startServices, logger: pluginInitializerContext.logger.get() };
+    };
+
+    test('registers the task types of Task Manager itself as modules', () => {
+      const { plugin } = setupPlugin();
+      const definitions = (plugin as unknown as { definitions: { has(type: string): boolean } })
+        .definitions;
+      expect(definitions.has('task_manager:delete_inactive_background_task_nodes')).toBe(true);
+      expect(definitions.has('task_manager:mark_removed_tasks_as_unrecognized')).toBe(true);
+    });
+
+    test('runs a module with Core as its host', async () => {
+      const { plugin, setup, startServices, logger } = setupPlugin();
+      const createTaskRunner = jest.fn().mockReturnValue({ run: async () => ({ state: {} }) });
+      setup.registerTaskType(defineTaskType({ type: 'test:module', createTaskRunner }));
+
+      const definitions = (
+        plugin as unknown as {
+          definitions: {
+            get(type: string): {
+              createTaskRunner(context: RunContext): { run(): Promise<unknown> };
+            };
+          };
+        }
+      ).definitions;
+      const context = {} as RunContext;
+      await definitions.get('test:module')!.createTaskRunner(context).run();
+
+      expect(createTaskRunner).toHaveBeenCalledWith(context, {
+        logger,
+        elasticsearch: startServices.elasticsearch.client,
+        savedObjects: startServices.savedObjects,
+      });
+    });
+  });
+
+  describe('task execution', () => {
+    const create = (taskExecution?: Record<string, unknown>) => {
+      const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>({
+        ...pluginInitializerContextParams,
+        ...(taskExecution ? { task_execution: taskExecution } : {}),
+      } as TaskManagerConfig);
+      pluginInitializerContext.node.roles.backgroundTasks = true;
+      const core = coreMock.createSetup();
+      (core.elasticsearch.legacy as { config$: unknown }).config$ = of({
+        hosts: ['http://es:9200'],
+        customHeaders: {},
+        requestHeadersWhitelist: [],
+        idleSocketTimeout: moment.duration(1000),
+        dnsCacheTtl: moment.duration(1000),
+        requestTimeout: moment.duration(1000),
+        sniffInterval: false,
+        ssl: { verificationMode: 'full' },
+      });
+      const plugin = new TaskManagerPlugin(pluginInitializerContext);
+      const setup = plugin.setup(core, { usageCollection: undefined });
+      setup.registerTaskType(
+        defineTaskType({
+          type: 'test:module',
+          createTaskRunner: () => ({ run: async () => ({ state: {} }) }),
+        })
+      );
+      plugin.start(coreStart, {
+        cloud: cloudMock.createStart(),
+        licensing: licensingMock.createStart(),
+      });
+      const { taskProcessDispatch } = (TaskPollingLifecycle as jest.Mock).mock.calls.at(-1)[0];
+      return { plugin, taskProcessDispatch };
+    };
+
+    beforeEach(() => {
+      (TaskProcessSupervisor as unknown as jest.Mock).mockClear();
+      mockSupervisor.start.mockClear();
+      mockSupervisor.stop.mockClear();
+      mockSupervisor.getRoute.mockClear();
+    });
+
+    test('runs every task in this process by default', () => {
+      const { taskProcessDispatch } = create();
+      expect(taskProcessDispatch).toBeUndefined();
+      expect(TaskProcessSupervisor).not.toHaveBeenCalled();
+    });
+
+    test('routes the task types registered as modules to the remote pod, and no others', () => {
+      const { taskProcessDispatch } = create({
+        mode: 'remote',
+        remote: { url: 'http://pod:4100/', token: 'secret' },
+      });
+      expect(taskProcessDispatch.getRoute('test:module')).toEqual({
+        url: 'http://pod:4100',
+        token: 'secret',
+      });
+      expect(
+        taskProcessDispatch.getRoute('task_manager:delete_inactive_background_task_nodes')
+      ).toEqual({
+        url: 'http://pod:4100',
+        token: 'secret',
+      });
+      expect(taskProcessDispatch.getRoute('someone:else')).toBeUndefined();
+      expect(TaskProcessSupervisor).not.toHaveBeenCalled();
+    });
+
+    test('starts the supervisor with the Kibana Elasticsearch connection and stops it', async () => {
+      mockSupervisor.getRoute.mockReturnValue({ acquire: jest.fn() });
+      const { plugin, taskProcessDispatch } = create({ mode: 'child_process' });
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(TaskProcessSupervisor).toHaveBeenCalledWith(
+        expect.objectContaining({
+          settings: expect.objectContaining({ getElasticsearchConfig: expect.any(Function) }),
+        })
+      );
+      expect(mockSupervisor.start).toHaveBeenCalledTimes(1);
+      expect(taskProcessDispatch.getRoute('test:module')).toEqual({
+        acquire: expect.any(Function),
+      });
+      expect(taskProcessDispatch.getRoute('someone:else')).toBeUndefined();
+
+      await plugin.stop();
+      expect(mockSupervisor.stop).toHaveBeenCalledTimes(1);
+      deleteCurrentNodeSpy.mockClear();
     });
   });
 

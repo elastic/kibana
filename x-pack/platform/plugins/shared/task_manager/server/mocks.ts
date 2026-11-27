@@ -16,6 +16,7 @@ const createSetupMock = () => {
     index: '.kibana_task_manager',
     addMiddleware: jest.fn(),
     registerTaskDefinitions: jest.fn(),
+    registerTaskType: jest.fn(),
     registerCanEncryptedSavedObjects: jest.fn(),
     registerTaskEventLogger: jest.fn(),
   });

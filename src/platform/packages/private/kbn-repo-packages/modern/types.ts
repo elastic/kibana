@@ -126,6 +126,11 @@ export interface PluginPackageManifest extends PackageManifestBaseFields {
     optionalPlugins?: string[];
     requiredBundles?: string[];
     runtimePluginDependencies?: string[];
+    /**
+     * Paths, relative to the plugin, of files that export a task type module (`taskType`) or a list
+     * of them (`taskTypes`). Each one can be bundled to run in its own process.
+     */
+    taskTypes?: string[];
     enabledOnAnonymousPages?: boolean;
     type?: 'preboot';
     extraPublicDirs?: string[];
