@@ -39,6 +39,28 @@ const KIND = {
   log: 'log',
 } as const satisfies Record<MobileSessionEventKind, MobileSessionEventKind>;
 
+/** `severity_text` of a warning or worse, uppercased, for a log without a `severity_number`. */
+const WARNING_OR_WORSE_TEXTS = ['WARN', 'WARNING', 'ERROR', 'FATAL', 'CRITICAL'] as const;
+
+/**
+ * Whether a log is a warning or worse: by its `severity_number` when set, as 0 is unspecified,
+ * else by its `severity_text`.
+ */
+const isWarningOrWorse = () => {
+  const severityNumber = mobileColumn('severityNumber');
+  const isWarningText = Builder.expression.func.binary('in', [
+    esql.exp`TO_UPPER(${mobileColumn('severity')})`,
+    Builder.expression.list.tuple({
+      values: WARNING_OR_WORSE_TEXTS.map((text) => Builder.expression.literal.string(text)),
+    }),
+  ]);
+  return esql.exp`CASE(
+    ${severityNumber} > 0,
+    ${severityNumber} >= ${OTEL_SEVERITY_WARN},
+    ${isWarningText}
+  )`;
+};
+
 /**
  * The kind of a mobile event, or `null` for one a session timeline doesn't list. Logs are listed
  * from warnings up, so chatty debug and info logs can't push the screens, taps and requests out.
@@ -56,9 +78,7 @@ const eventKind = () =>
     ${KIND.tap},
     ${mobileColumn('eventName')} == ${EVENT_EXCEPTION},
     ${KIND.error},
-    ${mobileColumn('eventName')} IS NULL AND ${mobileColumn(
-    'severityNumber'
-  )} >= ${OTEL_SEVERITY_WARN},
+    ${mobileColumn('eventName')} IS NULL AND ${isWarningOrWorse()},
     ${KIND.log},
     NULL
   )`;

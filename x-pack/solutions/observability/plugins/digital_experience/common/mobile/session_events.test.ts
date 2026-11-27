@@ -62,6 +62,8 @@ describe('sessionEventsBefore', () => {
     );
     expect(query).toContain('event_name IN ("app.widget.click", "app.screen.click"), "tap"');
     expect(query).toContain('event_name == "exception", "error"');
-    expect(query).toContain('event_name IS NULL AND severity_number >= 13, "log"');
+    expect(query).toContain(
+      'event_name IS NULL AND CASE(severity_number > 0, severity_number >= 13, TO_UPPER(severity_text) IN ("WARN", "WARNING", "ERROR", "FATAL", "CRITICAL")), "log"'
+    );
   });
 });
