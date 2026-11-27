@@ -52,10 +52,13 @@ const ESQL_FENCE_REGEX = /```(?:esql|ES\|QL)?\s*\n([\s\S]*?)\n\s*```/i;
  * ES|QL statement. Used only when no tool result and no fenced block was
  * found; we extract from the `FROM` keyword to the end of the message.
  *
- * NB: this is intentionally permissive — the downstream
- * `EsqlValidity` evaluator parses the result with `@kbn/esql-language`, so
- * a non-ES|QL false positive will simply be scored 0 by the validator
- * rather than silently masquerading as a working query.
+ * The slice is NOT graded as-is: it must pass {@link looksLikeEsql}, which
+ * rejects prose that merely contains the English preposition "from" (see
+ * {@link ESQL_BARE_FROM_REGEX}). Relying on the downstream `EsqlValidity`
+ * evaluator to score junk 0 is not enough — the candidate string is also
+ * handed to the execution, result-equivalence and functional-equivalence
+ * evaluators, and the LLM judge describes whatever it is given, so a prose
+ * slice reads as a wrong answer from the model rather than a harness bug.
  */
 const FROM_HEURISTIC_REGEX = /\bFROM\s+[\S]/i;
 
@@ -67,6 +70,40 @@ const FROM_HEURISTIC_REGEX = /\bFROM\s+[\S]/i;
  * should score as a candidate query.
  */
 const ESQL_SOURCE_COMMAND_REGEX = /^\s*(FROM|ROW|SHOW)\b/i;
+
+/**
+ * A real ES|QL pipe command: `| <command>`. The source command alone is
+ * not enough to prove the statement is ES|QL — assistant prose can contain
+ * the English preposition "from" followed by anything — so a pipe is the
+ * cheapest structural evidence that the model emitted the clause grammar
+ * rather than a sentence.
+ */
+const ESQL_PIPE_COMMAND_REGEX = /\|\s*[A-Za-z_@]/;
+
+/**
+ * A single ES|QL index expression: a backticked identifier or a bare index
+ * pattern token. Bare tokens are restricted to the characters an unquoted
+ * index pattern may contain, which excludes whitespace and sentence
+ * punctuation — an English `from <word> <word>` cannot satisfy it.
+ */
+const ESQL_INDEX_TOKEN_PATTERN = '(?:`[^`]+`|[A-Za-z0-9_.*+-]+)';
+
+const ESQL_INDEX_LIST_PATTERN = `${ESQL_INDEX_TOKEN_PATTERN}(?:\\s*,\\s*${ESQL_INDEX_TOKEN_PATTERN})*`;
+
+/**
+ * A complete, pipe-free `FROM` statement: source command, index list, and
+ * the only clause ES|QL allows without a pipe (`METADATA`), with nothing
+ * else in the string.
+ *
+ * This is what stops `from flagged processes. - **Convert to a detection
+ * rule?** This query is read…` from being graded as a candidate query: the
+ * index token is followed by prose, so the statement does not end where a
+ * source command ends.
+ */
+const ESQL_BARE_FROM_REGEX = new RegExp(
+  `^\\s*FROM\\s+${ESQL_INDEX_LIST_PATTERN}(?:\\s+METADATA\\s+${ESQL_INDEX_LIST_PATTERN})?\\s*$`,
+  'i'
+);
 
 /**
  * SQL-only verbs that, when they appear in the message BEFORE a `FROM`
@@ -107,18 +144,34 @@ function precedingTextLooksLikeSql(text: string): boolean {
 }
 
 /**
- * Return `true` when `query` plausibly opens with an ES|QL source
- * command. Used as a final shape guard for free-form extraction paths
- * (fenced block, `FROM` heuristic) so SQL or prose that happens to
- * contain a `FROM` keyword does not propagate as a candidate query.
+ * Return `true` when `query` is shaped like an ES|QL statement rather than
+ * prose or SQL that happens to contain a `FROM` keyword. Used as the shape
+ * guard for the free-form extraction paths (fenced block, `FROM`
+ * heuristic).
  *
- * Tool-call extraction paths (`generate_esql` / `execute_esql`) skip
- * this guard because those tools are contracted to emit ES|QL — adding
- * the check there would regress legitimate edge cases (e.g. an ES|QL
- * statement with unusual leading whitespace or comments).
+ * A statement passes when it opens with a source command (`FROM`, `ROW`,
+ * `SHOW`) AND either:
+ *
+ *   - carries at least one pipe command (`| <command>`), which prose does
+ *     not produce; or
+ *   - for `ROW`/`SHOW`, is an expression statement (their operand has no
+ *     index-token shorthand to check); or
+ *   - for `FROM`, is a complete pipe-free source clause — an index list
+ *     with an optional `METADATA` clause and nothing after it.
+ *
+ * Tool-call extraction paths (`generate_esql` / `execute_esql`) skip this
+ * guard because those tools are contracted to emit ES|QL — adding the check
+ * there would regress legitimate edge cases (e.g. an ES|QL statement with
+ * unusual leading whitespace or comments).
  */
 function looksLikeEsql(query: string): boolean {
-  return ESQL_SOURCE_COMMAND_REGEX.test(query);
+  const source = query.match(ESQL_SOURCE_COMMAND_REGEX);
+  if (!source) return false;
+
+  const command = source[1].toUpperCase();
+  if (command === 'ROW' || command === 'SHOW') return true;
+
+  return ESQL_PIPE_COMMAND_REGEX.test(query) || ESQL_BARE_FROM_REGEX.test(query);
 }
 
 /**
@@ -127,13 +180,20 @@ function looksLikeEsql(query: string): boolean {
  *
  * Strategy (first match wins):
  *
- *   1. **Structured tool result** — scan `steps` for a `tool_call` step with
- *      `tool_id === 'platform.core.generate_esql'` and pull
- *      `results[].data.esql`. If absent, fall through to
- *      `platform.core.execute_esql` whose result carries the same query
- *      under `results[].data.query`. This is the supported, deterministic
+ *   1. **Structured tool result** — the DELIVERED artifact: the LAST
+ *      `tool_call` step with `tool_id === 'platform.core.generate_esql'`,
+ *      pulling `results[].data.esql`. Only when no `generate_esql` result
+ *      exists at all do we fall back to `platform.core.execute_esql`, whose
+ *      result carries the same query under `results[].data.query`, again
+ *      taking the LAST occurrence. This is the supported, deterministic
  *      path and what the LangSmith-era `DefaultAssistantGraph` used to
  *      surface via `result.queries[last]`.
+ *
+ *      Order matters in both directions: taking the FIRST query-bearing
+ *      step grades whatever the agent probed the cluster with while
+ *      surveying it (a `execute_esql` `LIMIT 10` sample, typically) and lets
+ *      a superseded `generate_esql` shadow the query the agent actually
+ *      answered with.
  *   2. **Fenced markdown block** — extract the first triple-backtick block
  *      tagged `esql` / `ES|QL` (or untagged) from the final assistant
  *      message. ```sql blocks are intentionally skipped — see
@@ -150,6 +210,8 @@ function looksLikeEsql(query: string): boolean {
  *      Note that the bare word "with" in prose is NOT treated as a
  *      SQL clause — too many assistant responses say things like
  *      "here is the query with the right filter applied".
+ *      The slice must also pass {@link looksLikeEsql}, so the English
+ *      preposition "from" inside prose is never returned as a candidate.
  *
  * Returns an empty string when no ES|QL could be extracted; the downstream
  * evaluators handle the empty-string case (validity returns 0, execution
@@ -158,17 +220,17 @@ function looksLikeEsql(query: string): boolean {
 export function extractEsqlFromConverseResponse(output: ConverseLikeOutput): string {
   const steps = output?.steps ?? [];
 
-  for (const step of steps) {
-    if (step?.type === 'tool_call') {
-      if (step.tool_id === GENERATE_ESQL_TOOL_ID) {
-        const fromResults = pickEsqlFromResults(step.results, QUERY_RESULT_TYPE, 'esql');
-        if (fromResults) return fromResults;
-      } else if (step.tool_id === EXECUTE_ESQL_TOOL_ID) {
-        const fromResults = pickEsqlFromResults(step.results, ESQL_RESULTS_RESULT_TYPE, 'query');
-        if (fromResults) return fromResults;
-      }
-    }
-  }
+  // 1. The delivered artifact: the LAST `generate_esql` result in the trace.
+  //    A query the agent superseded, and an exploratory `execute_esql` probe
+  //    it ran while surveying the cluster, must both stay out of the graded
+  //    candidate.
+  const generated = pickLastToolEsql(steps, GENERATE_ESQL_TOOL_ID, QUERY_RESULT_TYPE, 'esql');
+  if (generated) return generated;
+
+  // 2. Agents that execute their final query directly, without surfacing a
+  //    `generate_esql` call. Last payload wins for the same reason.
+  const executed = pickLastToolEsql(steps, EXECUTE_ESQL_TOOL_ID, ESQL_RESULTS_RESULT_TYPE, 'query');
+  if (executed) return executed;
 
   const finalMessage = getFinalMessage(output);
   if (!finalMessage) return '';
@@ -194,10 +256,32 @@ export function extractEsqlFromConverseResponse(output: ConverseLikeOutput): str
       // extraction so the validity evaluator scores it 0.
       return '';
     }
-    return finalMessage.slice(fromMatch.index).trim();
+    const candidate = finalMessage.slice(fromMatch.index).trim();
+    // This is the only path that slices arbitrary assistant text, and the
+    // `FROM` it matched may be the English preposition rather than a source
+    // command ("… events from flagged processes. - **Convert …"). Grade the
+    // slice only when it is shaped like an ES|QL statement; otherwise report
+    // "no prediction" rather than a query the model never produced.
+    return looksLikeEsql(candidate) ? candidate : '';
   }
 
   return '';
+}
+
+/**
+ * Internal: collect the ES|QL string carried by the LAST `tool_call` step
+ * for `toolId`. Returns the empty string when no such step yields one.
+ */
+function pickLastToolEsql(
+  steps: ConverseStep[],
+  toolId: string,
+  expectedType: string,
+  fieldName: 'esql' | 'query'
+): string {
+  return steps.reduce((found: string, step) => {
+    if (step?.type !== 'tool_call' || step.tool_id !== toolId) return found;
+    return pickEsqlFromResults(step.results, expectedType, fieldName) || found;
+  }, '');
 }
 
 /**

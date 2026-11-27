@@ -68,6 +68,85 @@ describe('extractEsqlFromConverseResponse', () => {
     expect(extractEsqlFromConverseResponse(out)).toBe('GENERATED');
   });
 
+  // Regression for the weekly #79 extraction defect: the graded candidate
+  // must be the query the agent DELIVERED, not an artifact it passed through
+  // on the way there. Both fixtures are verbatim from golden build
+  // 01a14b73-3b78-4ca6-b2c5-e5ce35986c37 (ex 0 / anthropic-claude-4.6-opus),
+  // where the extractor graded the probe.
+  const PROBE_QUERY = 'FROM postgres-logs* | KEEP message | LIMIT 10';
+  const DELIVERED_QUERY =
+    'FROM postgres-logs* | DISSECT message "%{} duration: %{query_duration} ms" | STATS avg_duration = AVG(query_duration_num)';
+
+  it('grades the generated query, not an earlier execute_esql probe', () => {
+    const out = {
+      steps: [
+        {
+          type: 'tool_call',
+          tool_id: platformCoreTools.listIndices,
+          results: [{ type: 'index_listing', data: { indices: ['postgres-logs*'] } }],
+        },
+        {
+          type: 'tool_call',
+          tool_id: platformCoreTools.executeEsql,
+          results: [{ type: 'esql_results', data: { query: PROBE_QUERY, values: [] } }],
+        },
+        {
+          type: 'tool_call',
+          tool_id: platformCoreTools.generateEsql,
+          results: [{ type: 'query', data: { esql: DELIVERED_QUERY } }],
+        },
+      ],
+      messages: [{ message: `Here is the query:\n\n\`\`\`esql\n${DELIVERED_QUERY}\n\`\`\`` }],
+    };
+
+    expect(extractEsqlFromConverseResponse(out)).toBe(DELIVERED_QUERY);
+  });
+
+  it('returns the LAST generate_esql result when the agent supersedes an earlier one', () => {
+    const out = {
+      steps: [
+        {
+          type: 'tool_call',
+          tool_id: platformCoreTools.generateEsql,
+          results: [{ type: 'query', data: { esql: PROBE_QUERY } }],
+        },
+        {
+          type: 'tool_call',
+          tool_id: platformCoreTools.executeEsql,
+          results: [{ type: 'esql_results', data: { query: PROBE_QUERY, values: [] } }],
+        },
+        {
+          type: 'tool_call',
+          tool_id: platformCoreTools.generateEsql,
+          results: [{ type: 'query', data: { esql: DELIVERED_QUERY } }],
+        },
+      ],
+      messages: [{ message: 'The refined query above is the final answer.' }],
+    };
+
+    expect(extractEsqlFromConverseResponse(out)).toBe(DELIVERED_QUERY);
+  });
+
+  it('still falls back to the LAST execute_esql payload when no generate_esql ran', () => {
+    const out = {
+      steps: [
+        {
+          type: 'tool_call',
+          tool_id: platformCoreTools.executeEsql,
+          results: [{ type: 'esql_results', data: { query: PROBE_QUERY, values: [] } }],
+        },
+        {
+          type: 'tool_call',
+          tool_id: platformCoreTools.executeEsql,
+          results: [{ type: 'esql_results', data: { query: DELIVERED_QUERY, values: [] } }],
+        },
+      ],
+      messages: [],
+    };
+
+    expect(extractEsqlFromConverseResponse(out)).toBe(DELIVERED_QUERY);
+  });
+
   it('skips tool_call steps with non-matching tool_id', () => {
     const out = {
       steps: [
@@ -288,6 +367,41 @@ describe('extractEsqlFromConverseResponse', () => {
           message,
           result: expect.stringMatching(/^FROM /),
         });
+      }
+    });
+
+    it('refuses a FROM that is the English preposition inside prose', () => {
+      // Verbatim from golden build 01a14b73-… (ex 24 / claude-4.6-sonnet),
+      // where this slice reached the validity evaluator as
+      // `from flagged processes. - **Convert to a detection rule?** …` and
+      // failed to parse with `SyntaxError: mismatched input 'processes.'
+      // expecting <EOF>`. All four quality evaluators read the same string,
+      // so prose here reads as a wrong answer from the model.
+      const proseCases = [
+        'No ES|QL query fits this question, but the alert I summarised came from flagged processes. - **Convert to a detection rule?** This query is read-only and can be saved as a rule.',
+        'The matching events come FROM /tmp directories. Ask again with an index pattern.',
+      ];
+      for (const message of proseCases) {
+        expect({
+          message,
+          got: extractEsqlFromConverseResponse({ steps: [], messages: [{ message }] }),
+        }).toEqual({
+          message,
+          got: '',
+        });
+      }
+    });
+
+    it('still accepts a pipe-free FROM over a valid index token (no over-tightening)', () => {
+      const bareCases = [
+        'FROM logs-*',
+        'Sure — FROM nyc_taxis-* ',
+        'Use FROM `logs-production.evaluations.2025.01.01`',
+        'FROM logs-* METADATA _id',
+      ];
+      for (const message of bareCases) {
+        const got = extractEsqlFromConverseResponse({ steps: [], messages: [{ message }] });
+        expect({ message, got }).toEqual({ message, got: expect.stringMatching(/^FROM /) });
       }
     });
 
