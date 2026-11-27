@@ -177,17 +177,25 @@ const ESQL_QUERY = {
 };
 const TIME_RANGE = { from: 'now-24h', to: 'now' };
 
-const getViewMatchingResultsAction = (updateESQLQuery?: UpdateESQLQueryFn) => {
-  const services = createProfileProviderSharedServicesMock();
+const getViewMatchingResultsAction = async (
+  updateESQLQuery?: UpdateESQLQueryFn,
+  query = ESQL_QUERY
+) => {
+  const services = { ...createProfileProviderSharedServicesMock(), aiops: undefined };
   const provider = createPatternsDataSourceProfileProvider(services);
+
+  const resolution = await provider.resolve({
+    rootContext: { profileId: 'default-root-profile', solutionType: SolutionType.Default },
+    dataSource: createEsqlDataSource(),
+    query,
+  });
+  if (!resolution.isMatch) {
+    throw new Error('Expected Patterns profile');
+  }
 
   // Non-null assertion: accessors are optional on the profile type, this one is implemented here.
   const actions = provider.profile.getAdditionalCellActions!(() => [], {
-    context: {
-      category: DataSourceCategory.Default,
-      patternColumns: ['Pattern'],
-      sparklineColumns: [],
-    },
+    context: resolution.context,
     toolkit: { ...EMPTY_CONTEXT_AWARENESS_TOOLKIT, actions: { updateESQLQuery } },
   })();
   const action = actions.find(({ id }) => id === VIEW_MATCHING_RESULTS_ACTION_ID);
@@ -224,7 +232,7 @@ describe('patternsDataSourceProfileProvider', () => {
     });
 
     it('is only compatible with pattern columns of an ES|QL query', async () => {
-      const { action } = getViewMatchingResultsAction();
+      const { action } = await getViewMatchingResultsAction();
 
       expect(await action.isCompatible?.(createContext())).toBe(true);
       expect(
@@ -237,7 +245,7 @@ describe('patternsDataSourceProfileProvider', () => {
 
     it('replaces the query in the current tab, keeping the commands preceding the STATS', async () => {
       const updateESQLQuery = jest.fn();
-      const { action } = getViewMatchingResultsAction(updateESQLQuery);
+      const { action } = await getViewMatchingResultsAction(updateESQLQuery);
 
       await action.execute(createContext());
 
@@ -251,7 +259,7 @@ describe('patternsDataSourceProfileProvider', () => {
 
     it('says the search goes beyond the sample when the drilldown drops a trailing SAMPLE', async () => {
       const updateESQLQuery = jest.fn();
-      const { action } = getViewMatchingResultsAction(updateESQLQuery);
+      const { action } = await getViewMatchingResultsAction(updateESQLQuery);
       const context = createContext({
         query: {
           esql: 'FROM logs-* | WHERE service.name == "checkout" | SAMPLE 0.1 | STATS Count = COUNT(*) BY Pattern = CATEGORIZE(message)',
@@ -270,14 +278,13 @@ describe('patternsDataSourceProfileProvider', () => {
 
     it('warns when opening a renamed pattern drops the sample in the index-only fallback', async () => {
       const updateESQLQuery = jest.fn();
-      const { action } = getViewMatchingResultsAction(updateESQLQuery);
-      const context = createContext({
-        field: { ...PATTERN_FIELD, name: 'p' },
-        query: {
-          esql: 'FROM logs-* | SAMPLE 0.1 | WHERE service.name == "checkout" | STATS Count = COUNT(*) BY Pattern = CATEGORIZE(message) | RENAME Pattern AS p',
-        },
-      });
+      const query = {
+        esql: 'FROM logs-* | SAMPLE 0.1 | WHERE service.name == "checkout" | STATS Count = COUNT(*) BY Pattern = CATEGORIZE(message) | RENAME Pattern AS p',
+      };
+      const { action } = await getViewMatchingResultsAction(updateESQLQuery, query);
+      const context = createContext({ field: { ...PATTERN_FIELD, name: 'p' }, query });
 
+      expect(await action.isCompatible?.(context)).toBe(true);
       expect(action.getDisplayName(context)).toBe(
         'View matching results (searches beyond the sample)'
       );
@@ -287,8 +294,8 @@ describe('patternsDataSourceProfileProvider', () => {
       expect(newQuery).not.toContain('SAMPLE');
     });
 
-    it('uses the regular label when the query has no sample or retains an earlier sample', () => {
-      const { action } = getViewMatchingResultsAction();
+    it('uses the regular label when the query has no sample or retains an earlier sample', async () => {
+      const { action } = await getViewMatchingResultsAction();
       expect(action.getDisplayName(createContext())).toBe('View matching results');
       expect(
         action.getDisplayName(
@@ -302,7 +309,7 @@ describe('patternsDataSourceProfileProvider', () => {
     });
 
     it('opens the query in a new window when the host cannot update the query', async () => {
-      const { action, services } = getViewMatchingResultsAction();
+      const { action, services } = await getViewMatchingResultsAction();
       jest.mocked(services.locator.getRedirectUrl).mockReturnValue('/app/discover#/matching');
 
       await action.execute(createContext());
@@ -317,7 +324,7 @@ describe('patternsDataSourceProfileProvider', () => {
 
     it('does nothing when the cell has no pattern', async () => {
       const updateESQLQuery = jest.fn();
-      const { action } = getViewMatchingResultsAction(updateESQLQuery);
+      const { action } = await getViewMatchingResultsAction(updateESQLQuery);
 
       await action.execute(createContext({ value: null }));
 
