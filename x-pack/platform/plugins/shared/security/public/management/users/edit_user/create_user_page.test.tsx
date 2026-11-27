@@ -16,7 +16,7 @@ import { CreateUserPage } from './create_user_page';
 import { securityMock } from '../../../mocks';
 import { Providers } from '../users_management_app';
 
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
+jest.mock('@elastic/eui/es/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,
   useGeneratedHtmlId: () => `id-${Math.random()}`,
 }));

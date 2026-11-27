@@ -14,7 +14,7 @@ import { KibanaStyledComponentsThemeProvider } from '@kbn/react-kibana-context-s
 import type { PopoverItemsProps } from '.';
 import { PopoverItems } from '.';
 import { render, screen, within } from '@testing-library/react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/es/test/rtl';
 
 const mockTags = ['Elastic', 'Endpoint', 'Data Protection', 'ML', 'Continuous Monitoring'];
 

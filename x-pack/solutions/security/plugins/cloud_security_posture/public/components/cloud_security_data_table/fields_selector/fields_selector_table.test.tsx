@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/es/test/rtl';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { TestProvider } from '../../../test/test_provider';
 import type { FieldsSelectorTableProps } from './fields_selector_table';

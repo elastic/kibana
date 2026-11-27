@@ -9,7 +9,7 @@ import React from 'react';
 import { mapValues } from 'lodash';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/es/test/rtl';
 import { MemoryRouter } from 'react-router-dom';
 import type { AppHeaderBadge } from '@kbn/app-header';
 import type { MlCapabilitiesResponse } from '@kbn/ml-common-types/capabilities';

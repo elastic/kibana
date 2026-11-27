@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import controls from '@elastic/eui/lib/components/icon/svgs/controls.svg';
-import globe from '@elastic/eui/lib/components/icon/svgs/globe.svg';
+import controls from '@elastic/eui/es/components/icon/svgs/controls.svg';
+import globe from '@elastic/eui/es/components/icon/svgs/globe.svg';
 import beta from './icons/beta.svg';
 import bolt from './icons/bolt.svg';
 import branch from './icons/branch.svg';

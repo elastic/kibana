@@ -15,7 +15,7 @@ import { useDocViewerFlyoutSession } from './use_doc_viewer_flyout_session';
 
 // The `@elastic/eui` test build stubs `EuiFlyout`; the flyout manager components are real.
 const { EuiFlyoutMain, EuiFlyoutManager } = jest.requireActual<typeof FlyoutManagerModule>(
-  '@elastic/eui/lib/components/flyout/manager'
+  '@elastic/eui/es/components/flyout/manager'
 );
 
 const DOC_VIEWER_ID = 'docViewerFlyout';

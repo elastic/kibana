@@ -10,7 +10,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import userEvent from '@testing-library/user-event';
 import type { UserEvent } from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/es/test/rtl';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine';
 import { ThreeWayDiffConflict } from '../../../../../../common/api/detection_engine';
 import type {

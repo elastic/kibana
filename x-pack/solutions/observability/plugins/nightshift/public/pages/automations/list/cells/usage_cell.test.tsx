@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { focusEuiToolTipTrigger } from '@elastic/eui/lib/test/rtl';
+import { focusEuiToolTipTrigger } from '@elastic/eui/es/test/rtl';
 import { AutomationUsageCell } from './usage_cell';
 
 describe('AutomationUsageCell', () => {

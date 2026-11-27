@@ -15,7 +15,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { ClusterAddressForm } from './cluster_address_form';
 import { Providers } from './plugin';
 
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
+jest.mock('@elastic/eui/es/services/accessibility/html_id_generator', () => ({
   useGeneratedHtmlId: () => `id-${Math.random()}`,
 }));
 
