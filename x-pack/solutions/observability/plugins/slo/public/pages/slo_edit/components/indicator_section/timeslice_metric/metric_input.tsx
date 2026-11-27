@@ -8,10 +8,13 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFieldNumber, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { AGGREGATION_OPTIONS, aggValueToLabel } from '../../../helpers/aggregation_options';
-import type { Option } from '../../../helpers/create_options';
+import {
+  AGGREGATION_OPTIONS,
+  aggValueToLabel,
+  matchAggregationOption,
+} from '../../../helpers/aggregation_options';
 import { createOptionsFromFields } from '../../../helpers/create_options';
 import { useFormValues } from '../../../hooks/use_form_values';
 import type { CreateSLOForm } from '../../../types';
@@ -57,25 +60,12 @@ export function MetricInput({
     `indicator.params.metric.metrics.${index}.aggregation`,
   ]);
 
-  const [metricFields, setMetricFields] = useState(
-    indexFields.filter((field) => NUMERIC_FIELD_TYPES.includes(field.type))
+  const metricFields = indexFields.filter((field) =>
+    metricAggregation === 'cardinality'
+      ? CARDINALITY_FIELD_TYPES.includes(field.type)
+      : NUMERIC_FIELD_TYPES.includes(field.type)
   );
-  const [aggregationOptions, setAggregationOptions] = useState(AGGREGATION_OPTIONS);
-  const [fieldOptions, setFieldOptions] = useState<Option[]>(createOptionsFromFields(metricFields));
-
-  useEffect(() => {
-    setMetricFields(
-      indexFields.filter((field) =>
-        metricAggregation === 'cardinality'
-          ? CARDINALITY_FIELD_TYPES.includes(field.type)
-          : NUMERIC_FIELD_TYPES.includes(field.type)
-      )
-    );
-  }, [metricAggregation, setMetricFields, indexFields]);
-
-  useEffect(() => {
-    setFieldOptions(createOptionsFromFields(metricFields));
-  }, [metricFields, setFieldOptions]);
+  const fieldOptions = createOptionsFromFields(metricFields);
 
   return (
     <>
@@ -97,7 +87,6 @@ export function MetricInput({
             >
               <EuiComboBox
                 {...field}
-                async
                 fullWidth
                 isClearable={false}
                 singleSelection={{ asPlainText: true }}
@@ -130,12 +119,8 @@ export function MetricInput({
                       ]
                     : []
                 }
-                onSearchChange={(searchValue: string) => {
-                  setAggregationOptions(
-                    AGGREGATION_OPTIONS.filter(({ value }) => value.includes(searchValue))
-                  );
-                }}
-                options={aggregationOptions}
+                options={AGGREGATION_OPTIONS}
+                optionMatcher={matchAggregationOption}
               />
             </EuiFormRow>
           )}
@@ -205,7 +190,6 @@ export function MetricInput({
               >
                 <EuiComboBox
                   {...field}
-                  async
                   fullWidth
                   singleSelection={{ asPlainText: true }}
                   placeholder={i18n.translate(
@@ -237,13 +221,6 @@ export function MetricInput({
                         ]
                       : []
                   }
-                  onSearchChange={(searchValue: string) => {
-                    setFieldOptions(
-                      createOptionsFromFields(metricFields, ({ value }) =>
-                        value.includes(searchValue)
-                      )
-                    );
-                  }}
                   options={fieldOptions}
                 />
               </EuiFormRow>

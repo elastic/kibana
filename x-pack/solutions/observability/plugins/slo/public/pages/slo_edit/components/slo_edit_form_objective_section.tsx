@@ -19,15 +19,13 @@ import {
 import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { TimeWindowType } from '@kbn/slo-schema';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Controller, useFormContext, useFormState, useWatch } from 'react-hook-form';
+import { BUDGETING_METHOD_OPTIONS, TIMEWINDOW_TYPE_OPTIONS } from '../constants';
 import {
-  BUDGETING_METHOD_OPTIONS,
-  CALENDARALIGNED_TIMEWINDOW_OPTIONS,
-  ROLLING_TIMEWINDOW_OPTIONS,
-  TIMEWINDOW_TYPE_OPTIONS,
-} from '../constants';
+  getTimeWindowDurationOptions,
+  pickTimeWindowDuration,
+} from '../helpers/time_window_duration';
 import type { CreateSLOForm } from '../types';
 import { MAX_WIDTH } from '../constants';
 import { AdvancedSettings } from './indicator_section/advanced_settings/advanced_settings';
@@ -50,44 +48,6 @@ export function SloEditFormObjectiveSection() {
   const timeWindowType = useWatch({ control, name: 'timeWindow.type' });
   const indicator = useWatch({ control, name: 'indicator.type' });
   const budgetingMethod = useWatch({ control, name: 'budgetingMethod' });
-
-  const [timeWindowTypeState, setTimeWindowTypeState] = useState<TimeWindowType | undefined>(
-    defaultValues?.timeWindow?.type
-  );
-
-  /**
-   * Two flow to handle: Create and Edit
-   * On create: the default value is set to rolling & 30d (useForm)
-   * When we change the window type (from rolling to calendar for example), we want to select a default duration (picking item 1 in the options)
-   * If we don't, the select will show the option as selected, but the value is still the one from the previous window type, until the user manually changes the value
-   *
-   * On edit: the default value is set with the slo value
-   * When we change the window type, we want to change the selected value as we do in the create flow, but we also want to fallback on the initial default value
-   *
-   */
-  useEffect(() => {
-    if (timeWindowType === 'calendarAligned' && timeWindowTypeState !== timeWindowType) {
-      setTimeWindowTypeState(timeWindowType);
-      const exists = CALENDARALIGNED_TIMEWINDOW_OPTIONS.map((opt) => opt.value).includes(
-        defaultValues?.timeWindow?.duration ?? ''
-      );
-      setValue(
-        'timeWindow.duration',
-        // @ts-ignore
-        exists ? defaultValues?.timeWindow?.duration : CALENDARALIGNED_TIMEWINDOW_OPTIONS[1].value
-      );
-    } else if (timeWindowType === 'rolling' && timeWindowTypeState !== timeWindowType) {
-      const exists = ROLLING_TIMEWINDOW_OPTIONS.map((opt) => opt.value).includes(
-        defaultValues?.timeWindow?.duration ?? ''
-      );
-      setTimeWindowTypeState(timeWindowType);
-      setValue(
-        'timeWindow.duration',
-        // @ts-ignore
-        exists ? defaultValues?.timeWindow?.duration : ROLLING_TIMEWINDOW_OPTIONS[1].value
-      );
-    }
-  }, [timeWindowType, setValue, defaultValues, timeWindowTypeState]);
 
   return (
     <EuiPanel
@@ -138,6 +98,22 @@ export function SloEditFormObjectiveSection() {
                     aria-label={i18n.translate('xpack.slo.sloEdit.timeWindowType.ariaLabel', {
                       defaultMessage: 'Time window',
                     })}
+                    onChange={(event) => {
+                      const selectedOption = TIMEWINDOW_TYPE_OPTIONS.find(
+                        ({ value }) => value === event.target.value
+                      );
+                      if (!selectedOption) {
+                        return;
+                      }
+                      field.onChange(selectedOption.value);
+                      setValue(
+                        'timeWindow.duration',
+                        pickTimeWindowDuration(
+                          selectedOption.value,
+                          defaultValues?.timeWindow?.duration
+                        )
+                      );
+                    }}
                   />
                 )}
               />
@@ -169,11 +145,7 @@ export function SloEditFormObjectiveSection() {
                     required
                     id={timeWindowSelect}
                     data-test-subj="sloFormTimeWindowDurationSelect"
-                    options={
-                      timeWindowType === 'calendarAligned'
-                        ? CALENDARALIGNED_TIMEWINDOW_OPTIONS
-                        : ROLLING_TIMEWINDOW_OPTIONS
-                    }
+                    options={getTimeWindowDurationOptions(timeWindowType)}
                     value={field.value}
                     aria-label={i18n.translate('xpack.slo.sloEdit.timeWindowDuration.ariaLabel', {
                       defaultMessage: 'Duration',

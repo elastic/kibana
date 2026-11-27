@@ -5,33 +5,29 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 export function useShowSections(
   isEditMode: boolean,
   isFormValidating: boolean,
   isIndicatorSectionValid: boolean,
   isObjectiveSectionValid: boolean
-) {
+): { showDescriptionSection: boolean; showObjectiveSection: boolean } {
   const [showDescriptionSection, setShowDescriptionSection] = useState<boolean>(isEditMode);
   const [showObjectiveSection, setShowObjectiveSection] = useState<boolean>(isEditMode);
 
-  useEffect(() => {
-    if (!isFormValidating && !showObjectiveSection && isIndicatorSectionValid) {
-      setShowObjectiveSection(true);
-    }
-  }, [showObjectiveSection, isIndicatorSectionValid, isFormValidating]);
+  if (!isFormValidating && !showObjectiveSection && isIndicatorSectionValid) {
+    setShowObjectiveSection(true);
+  }
 
-  useEffect(() => {
-    if (
-      !isFormValidating &&
-      !showDescriptionSection &&
-      isIndicatorSectionValid &&
-      isObjectiveSectionValid
-    ) {
-      setShowDescriptionSection(true);
-    }
-  }, [showDescriptionSection, isIndicatorSectionValid, isObjectiveSectionValid, isFormValidating]);
+  if (
+    !isFormValidating &&
+    !showDescriptionSection &&
+    isIndicatorSectionValid &&
+    isObjectiveSectionValid
+  ) {
+    setShowDescriptionSection(true);
+  }
 
   return { showDescriptionSection, showObjectiveSection };
 }
