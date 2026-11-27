@@ -30,6 +30,8 @@ jest.mock(
   })
 );
 
+const mockUseEntityRiskScores = useEntityRiskScores as jest.Mock;
+
 const renderSection = (onShowAgent = jest.fn()) =>
   render(
     <TestProviders>
@@ -48,12 +50,12 @@ describe('RiskSummarySection', () => {
   beforeEach(() => {
     flyoutApi = createFlyoutApiMock();
     jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
-    jest.mocked(useEntityRiskScores).mockReturnValue(mockAiAgentEntityRiskScores);
+    mockUseEntityRiskScores.mockReturnValue(mockAiAgentEntityRiskScores);
   });
 
   it('reads the agent base score by its entity ID', () => {
     renderSection();
-    expect(useEntityRiskScores).toHaveBeenCalledWith(EntityType.ai_agent, mockAiAgentId);
+    expect(mockUseEntityRiskScores).toHaveBeenCalledWith(EntityType.ai_agent, mockAiAgentId);
   });
 
   it('shows the shared risk summary with the watchlist modifier contribution', () => {
@@ -79,7 +81,7 @@ describe('RiskSummarySection', () => {
   });
 
   it('renders nothing until the agent has a score', () => {
-    jest.mocked(useEntityRiskScores).mockReturnValue({
+    mockUseEntityRiskScores.mockReturnValue({
       ...mockAiAgentEntityRiskScores,
       base: { ...mockAiAgentRiskScoreState, data: [] },
     });
