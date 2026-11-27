@@ -11,8 +11,8 @@ import {
   CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
   CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID,
   CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
-  CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
-  CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
+  CONTEXT_ENGINE_TRANSCRIPT_DREAMING_BATCH_WORKFLOW_ID,
+  CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import type {
   ContextEngineDreamingWorkflowTemplateValues,
@@ -84,7 +84,7 @@ const isRunInProgressError = (error: unknown): boolean =>
 
 export interface DreamingScheduleService {
   /**
-   * Installs and enables the dreaming and trace dreaming workflows of an AI index that dreams,
+   * Installs and enables the dreaming and transcript dreaming workflows of an AI index that dreams,
    * and its maintenance workflow while maintenance is on, and removes them otherwise.
    */
   reconcile(params: {
@@ -108,13 +108,16 @@ export interface DreamingScheduleService {
 export const dreamingWorkflowIdFor = (aiIndexId: string, spaceId: string): string =>
   `${CONTEXT_ENGINE_DREAMING_WORKFLOW_ID}-${managedWorkflowIdSuffixFor(aiIndexId, spaceId)}`;
 
-/** The id of the trace dreaming workflow of an AI index. */
-export const traceDreamingWorkflowIdFor = (aiIndexId: string, spaceId: string): string =>
-  `${CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID}-${managedWorkflowIdSuffixFor(aiIndexId, spaceId)}`;
+/** The id of the transcript dreaming workflow of an AI index. */
+export const transcriptDreamingWorkflowIdFor = (aiIndexId: string, spaceId: string): string =>
+  `${CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW_ID}-${managedWorkflowIdSuffixFor(
+    aiIndexId,
+    spaceId
+  )}`;
 
-/** The id of the workflow trace dreaming runs each batch of an AI index with. */
-export const traceDreamingBatchWorkflowIdFor = (aiIndexId: string, spaceId: string): string =>
-  `${CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID}-${managedWorkflowIdSuffixFor(
+/** The id of the workflow transcript dreaming runs each batch of an AI index with. */
+export const transcriptDreamingBatchWorkflowIdFor = (aiIndexId: string, spaceId: string): string =>
+  `${CONTEXT_ENGINE_TRANSCRIPT_DREAMING_BATCH_WORKFLOW_ID}-${managedWorkflowIdSuffixFor(
     aiIndexId,
     spaceId
   )}`;
@@ -169,15 +172,15 @@ const DREAMING_WORKFLOWS = [
     attach: true,
   },
   {
-    definitionId: CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
-    label: 'the trace dreaming batch workflow',
-    workflowIdFor: traceDreamingBatchWorkflowIdFor,
+    definitionId: CONTEXT_ENGINE_TRANSCRIPT_DREAMING_BATCH_WORKFLOW_ID,
+    label: 'the transcript dreaming batch workflow',
+    workflowIdFor: transcriptDreamingBatchWorkflowIdFor,
     attach: false,
   },
   {
-    definitionId: CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
-    label: 'trace dreaming',
-    workflowIdFor: traceDreamingWorkflowIdFor,
+    definitionId: CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW_ID,
+    label: 'transcript dreaming',
+    workflowIdFor: transcriptDreamingWorkflowIdFor,
     attach: true,
   },
   {

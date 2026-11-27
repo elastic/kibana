@@ -11,7 +11,9 @@ export { connectorEventSchema } from './src/events/connector_event_schema';
 export type {
   ConnectorEventBusData,
   ConnectorEventTopicDefinition,
+  ConnectorEventTopicName,
 } from './src/events/connector_event_topic';
+export { getConnectorEventTopicName } from './src/events/connector_event_topic';
 export { datadogAlert } from './src/events/datadog';
 export {
   githubCheckRun,

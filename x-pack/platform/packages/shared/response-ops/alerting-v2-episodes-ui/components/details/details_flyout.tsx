@@ -243,17 +243,9 @@ export const AlertEpisodeDetailsFlyout = ({
         actions: menuActions,
         episodes,
         viewDetailsHref,
-        onAddToChat: isAddToChatAvailable ? addToChat : undefined,
         onSuccess: invalidateEpisodeQueries,
       }),
-    [
-      menuActions,
-      episodes,
-      viewDetailsHref,
-      isAddToChatAvailable,
-      addToChat,
-      invalidateEpisodeQueries,
-    ]
+    [menuActions, episodes, viewDetailsHref, invalidateEpisodeQueries]
   );
   const [isRunbookOpen, setIsRunbookOpen] = useState(false);
 
@@ -597,11 +589,14 @@ export const AlertEpisodeDetailsFlyout = ({
         </FlyoutTemplate.Body>
 
         <FlyoutTemplate.Footer data-test-subj={FLYOUT_FOOTER_TEST_SUBJ}>
-          <FlyoutTemplate.Footer.SecondaryAction
-            label={i18n.FLYOUT_CLOSE}
-            onClick={onClose}
-            data-test-subj="alertingV2EpisodeFlyoutCloseButton"
-          />
+          {isAddToChatAvailable && (
+            <FlyoutTemplate.Footer.SecondaryAction
+              variant="ai"
+              iconType="addToChat"
+              onClick={addToChat}
+              data-test-subj="alertingV2EpisodeFlyoutAddToChatButton"
+            />
+          )}
           <FlyoutTemplate.Footer.PrimaryActionMenu
             label={i18n.FLYOUT_TAKE_ACTION}
             aria-label={i18n.FLYOUT_TAKE_ACTION}

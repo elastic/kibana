@@ -22,18 +22,24 @@ let _queryClientPromise: Promise<QueryClientType> | undefined;
  */
 export const getSharedInvestigationsQueryClient = async (): Promise<QueryClientType> => {
   if (!_queryClientPromise) {
-    _queryClientPromise = import('@kbn/react-query').then(
-      ({ QueryClient }) =>
-        new QueryClient({
-          defaultOptions: {
-            queries: {
-              staleTime: 30_000,
-              refetchOnWindowFocus: 'always',
-              refetchOnMount: 'always',
+    _queryClientPromise = import('@kbn/react-query')
+      .then(
+        ({ QueryClient }) =>
+          new QueryClient({
+            defaultOptions: {
+              queries: {
+                staleTime: 30_000,
+                refetchOnWindowFocus: 'always',
+                refetchOnMount: 'always',
+              },
             },
-          },
-        })
-    );
+          })
+      )
+      .catch((error) => {
+        // A failed chunk load must not stay memoized, or no later caller could retry it.
+        _queryClientPromise = undefined;
+        throw error;
+      });
   }
   return _queryClientPromise;
 };

@@ -12,6 +12,7 @@ import {
   getEvalPipeline,
   getEvalTriggerStep,
   getForwardablePrLabels,
+  getRunnableEvalSuites,
   shouldRunEvals,
 } from './eval_pipeline.ts';
 
@@ -53,6 +54,24 @@ const SUITES = {
       ciLabels: ['evals:pinned-judge'],
       configPath: 'x-pack/pinned-judge/playwright.config.ts',
       defaultJudge: 'eis-abc-1',
+    },
+    {
+      id: 'gated',
+      name: 'Gated',
+      ciLabels: ['evals:gated'],
+      configPath: 'x-pack/gated/playwright.config.ts',
+      defaultModelGroups: ['eis/anthropic-claude-5.5-sonnet'],
+      requireDecisionOnPaths: {
+        include: ['x-pack/gated/server/**'],
+        exclude: ['**/*.test.ts'],
+      },
+      regressionGate: {
+        dataset: 'golden',
+        evaluator: 'goal_pass',
+        minAbsoluteDrop: 0.1,
+        alpha: 0.05,
+        maxBaselineAgeDays: 3,
+      },
     },
   ],
 };
@@ -199,6 +218,98 @@ describe('eval_pipeline', () => {
       expect(getForwardablePrLabels('evals:smoke-tests,evals:skip-smoke-tests')).toBe(
         'evals:smoke-tests,evals:skip-smoke-tests'
       );
+    });
+  });
+
+  describe('the generic skip label (`evals:skip`)', () => {
+    it('drops a suite that requires a decision, even alongside its run label', () => {
+      expect(shouldRunEvals('evals:gated,evals:skip')).toBe(false);
+      expect(getEvalPipeline('evals:gated,evals:skip')).toBeNull();
+    });
+
+    it('leaves suites that do not require a decision running', () => {
+      const yaml = getEvalPipeline('evals:smoke-tests,evals:skip') as string;
+      expect(yaml).toContain('kbn-evals-smoke-tests');
+    });
+
+    it('drops decision suites from `evals:all` too', () => {
+      const yaml = getEvalPipeline('evals:all,models:eis/openai-gpt-5.4,evals:skip') as string;
+      expect(yaml).toContain('kbn-evals-agent-builder');
+      expect(yaml).not.toContain('kbn-evals-gated');
+    });
+
+    it('short-circuits before reading suite metadata when it is the only eval label', () => {
+      expect(shouldRunEvals('evals:skip')).toBe(false);
+      expect(readFileSync).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('the judge of a suite with a regression gate', () => {
+    const env = (labels: string, key: string): Record<string, string> =>
+      (parseStep(getEvalPipeline(labels) as string).steps as Array<Record<string, any>>).find(
+        (step) => step.key === key
+      )?.env;
+
+    it('ignores a `models:judge:` label, which would score against a different baseline', () => {
+      expect(
+        env('evals:gated,models:judge:openrouter/openai-gpt-5.4', 'kbn-evals-gated')
+      ).not.toHaveProperty('EVAL_CONNECTOR_ID');
+    });
+
+    it('still applies the label to ungated suites in the same run', () => {
+      expect(
+        env(
+          'evals:gated,evals:smoke-tests,models:judge:openrouter/openai-gpt-5.4',
+          'kbn-evals-smoke-tests'
+        ).EVAL_CONNECTOR_ID
+      ).toBe('openrouter-openai-gpt-5-4');
+    });
+  });
+
+  describe('model groups of a suite with a regression gate', () => {
+    const modelGroups = (labels: string, key: string): string =>
+      (parseStep(getEvalPipeline(labels) as string).steps as Array<Record<string, any>>).find(
+        (step) => step.key === key
+      )?.env.EVAL_MODEL_GROUPS;
+
+    it('keeps the default (gate) model when a `models:*` label adds another', () => {
+      expect(modelGroups('evals:gated,models:eis/openai-gpt-5.4', 'kbn-evals-gated')).toBe(
+        'eis/anthropic-claude-5.5-sonnet,eis/openai-gpt-5.4'
+      );
+    });
+
+    it('still lets a `models:*` label replace the defaults of an ungated suite', () => {
+      expect(
+        modelGroups('evals:smoke-tests,models:eis/openai-gpt-5.4', 'kbn-evals-smoke-tests')
+      ).toBe('eis/openai-gpt-5.4');
+    });
+  });
+
+  describe('getRunnableEvalSuites', () => {
+    it('returns the suites that would run, without skipped ones', () => {
+      expect(getRunnableEvalSuites('evals:gated,evals:smoke-tests').map(({ id }) => id)).toEqual([
+        'smoke-tests',
+        'gated',
+      ]);
+      expect(getRunnableEvalSuites('evals:gated,evals:skip')).toEqual([]);
+    });
+  });
+
+  describe('getEvalTriggerStep with changed files', () => {
+    it('emits the trigger without eval labels when a decision path changed', () => {
+      expect(getEvalTriggerStep('', ['x-pack/gated/server/prompt.md.text'])).not.toBeNull();
+      // Reads the config but skips the per-suite `git ls-tree` that label selection runs.
+      expect(execFileSync).not.toHaveBeenCalled();
+    });
+
+    it('does not emit the trigger for unrelated or excluded files', () => {
+      expect(
+        getEvalTriggerStep('', ['x-pack/gated/server/a.test.ts', 'x-pack/other/index.ts'])
+      ).toBeNull();
+    });
+
+    it('emits the trigger when GitHub capped the file list, since decision paths may be missing', () => {
+      expect(getEvalTriggerStep('', ['x-pack/other/index.ts'], true)).not.toBeNull();
     });
   });
 

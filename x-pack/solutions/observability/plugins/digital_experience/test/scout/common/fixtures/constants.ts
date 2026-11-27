@@ -51,14 +51,23 @@ export const OTEL_SHOP_SAFARI_PAGE_LOADS = '1';
 
 export const STAGING_ENVIRONMENT = 'staging';
 
+// The vitals and errors of the fixture carry no route or URL, as from an app that reports no
+// routes, so no page has any.
+const NO_SIGNALS = { lcpP75Ms: null, inpP75Ms: null, clsP75: null, jsErrors: null };
+
 /**
  * The usage of `OTEL_APPS.shop` inside `TIME_RANGE`; every duration is a
  * single sample, so the percentiles are exact.
  */
 export const OTEL_SHOP_USAGE = {
   topPages: [
-    { url: 'https://otel-shop.example.com/', pageLoads: 3, loadTimeP75Ms: null },
-    { url: 'https://otel-shop.example.com/products', pageLoads: 2, loadTimeP75Ms: 1200 },
+    { url: 'https://otel-shop.example.com/', pageLoads: 3, loadTimeP75Ms: null, ...NO_SIGNALS },
+    {
+      url: 'https://otel-shop.example.com/products',
+      pageLoads: 2,
+      loadTimeP75Ms: 1200,
+      ...NO_SIGNALS,
+    },
   ],
   // A page load without browser attributes and a click without a selector sit in no row.
   breakdowns: {

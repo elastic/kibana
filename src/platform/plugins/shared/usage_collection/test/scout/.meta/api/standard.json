@@ -1,33 +1,124 @@
 {
-  "sha1": "4211e276959afadd6cb8e0ab47f7d646a4758f03",
+  "sha1": "bf12ecd19066375a4059ab2c1753e05293f86125",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "cf10b253d41f9cc-c7a449ef541dd81",
-      "title": "kibana extended stats api returns extended stats payload for authenticated requests",
+      "id": "cf10b253d41f9cc-0edd055356bc2c9",
+      "title": "kibana stats api returns stats without cluster_uuid when no query params are set",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/usage_collection/test/scout/api/tests/stats.spec.ts",
-        "line": 19,
+        "line": 21,
         "column": 30
       }
     },
     {
-      "id": "cf10b253d41f9cc-5dcc682558a1175",
-      "title": "kibana extended stats api returns extended stats payload for unauthenticated requests",
+      "id": "cf10b253d41f9cc-ea547e6b50841ec",
+      "title": "kibana stats api returns stats without cluster_uuid when extended is false",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/usage_collection/test/scout/api/tests/stats.spec.ts",
-        "line": 25,
-        "column": 27
+        "line": 30,
+        "column": 14
+      }
+    },
+    {
+      "id": "cf10b253d41f9cc-99d7f0607e5db4a",
+      "title": "kibana stats api returns stats without authentication",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/usage_collection/test/scout/api/tests/stats.spec.ts",
+        "line": 38,
+        "column": 97
+      }
+    },
+    {
+      "id": "cf10b253d41f9cc-0a00762b3ca6f17",
+      "title": "kibana stats api returns cluster_uuid and usage when extended is present",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/usage_collection/test/scout/api/tests/stats.spec.ts",
+        "line": 45,
+        "column": 12
+      }
+    },
+    {
+      "id": "cf10b253d41f9cc-08d78377f60b7d9",
+      "title": "kibana stats api returns cluster_uuid and usage when extended is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/usage_collection/test/scout/api/tests/stats.spec.ts",
+        "line": 56,
+        "column": 11
+      }
+    },
+    {
+      "id": "cf10b253d41f9cc-455161a2154bfca",
+      "title": "kibana stats api returns extended stats without authentication",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/usage_collection/test/scout/api/tests/stats.spec.ts",
+        "line": 64,
+        "column": 12
+      }
+    },
+    {
+      "id": "cf10b253d41f9cc-c8416d397353705",
+      "title": "kibana stats api returns extended stats in the old format when legacy is present",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/usage_collection/test/scout/api/tests/stats.spec.ts",
+        "line": 69,
+        "column": 22
+      }
+    },
+    {
+      "id": "cf10b253d41f9cc-b7410f4817ced73",
+      "title": "kibana stats api returns an empty usage object when exclude_usage is present",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/usage_collection/test/scout/api/tests/stats.spec.ts",
+        "line": 79,
+        "column": 85
+      }
+    },
+    {
+      "id": "cf10b253d41f9cc-e85ce4f70f4a2c9",
+      "title": "kibana stats api returns an empty usage object when exclude_usage and legacy are present",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/usage_collection/test/scout/api/tests/stats.spec.ts",
+        "line": 89,
+        "column": 14
       }
     },
     {

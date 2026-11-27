@@ -47,9 +47,11 @@ const platformOfDocument = () =>
 /**
  * The EDOT Android and iOS documents of the OTel indices, each with its `platform`. Fields no
  * index maps read as `null` instead of failing the query, e.g. `exception.type` where no app ever
- * threw.
+ * threw. `metadataFields`, e.g. `_index`, are read with the documents.
  */
-export const mobileDocuments = (): ComposerQuery =>
-  esql.from(OTEL_TRACES_INDEX, OTEL_LOGS_INDEX).addSetCommand('unmapped_fields', 'nullify')
+export const mobileDocuments = (metadataFields: string[] = []): ComposerQuery =>
+  esql
+    .from([OTEL_TRACES_INDEX, OTEL_LOGS_INDEX], metadataFields)
+    .addSetCommand('unmapped_fields', 'nullify')
     .pipe`WHERE ${hasMobileSdkName()} OR ${isElasticOnMobileOs()}`.pipe`WHERE ${isNotBrowser()}`
     .pipe`EVAL ${resultColumn('platform')} = ${platformOfDocument()}`;

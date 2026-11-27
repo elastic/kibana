@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { execFileSync } from 'child_process';
 import Fs from 'fs';
 import Path from 'path';
 import { parse as parseYaml } from 'yaml';
 import type { EvalsSuiteMetadataEntry } from './eval_pipeline.ts';
+import { matchesDecisionPaths } from './evals_gate_rules.ts';
 
 // Reads the real config, unlike `eval_pipeline.test.ts` which mocks `fs` with a fixture. These
 // mistakes are only reachable by hand-editing the file, so a PR-time check is the cheapest guard.
@@ -162,6 +164,111 @@ describe('evals.suites.json weeklyEisModelGroups', () => {
           .filter((model) => !requested.has(model))
           .map((model) => `${id}: "${model}" is in weeklyEisModelGroups but not in llm_evals.yml`);
       });
+
+    expect(problems).toEqual([]);
+  });
+});
+
+describe('evals.suites.json evals decision', () => {
+  const decisionSuites = suites.filter((suite) => suite.requireDecisionOnPaths !== undefined);
+  const gatedSuites = suites.filter((suite) => suite.regressionGate !== undefined);
+
+  let trackedFilesCache: string[] | undefined;
+  const getTrackedFiles = (): string[] => {
+    trackedFilesCache ??=
+      decisionSuites.length > 0
+        ? execFileSync('git', ['ls-files'], {
+            cwd: Path.resolve(__dirname, '../../..'),
+            encoding: 'utf-8',
+            maxBuffer: 256 * 1024 * 1024,
+          }).split('\n')
+        : [];
+    return trackedFilesCache;
+  };
+
+  it('only requires a decision for files that run CI', () => {
+    // A PR changing only CI-skippable files (e.g. `.md`) never reaches the eval trigger, so a gated
+    // run label on it would wait forever. Such files must be excluded from the decision paths.
+    const prPipeline = (
+      JSON.parse(Fs.readFileSync(Path.join(__dirname, '../../pull_requests.json'), 'utf-8')) as {
+        jobs: Array<{ pipelineSlug: string; skip_ci_on_only_changed?: string[] }>;
+      }
+    ).jobs.find(({ pipelineSlug }) => pipelineSlug === 'kibana-pull-request');
+    const skippable = (prPipeline?.skip_ci_on_only_changed ?? []).map((re) => new RegExp(re, 'i'));
+
+    const problems = decisionSuites.flatMap(({ id, requireDecisionOnPaths }) =>
+      getTrackedFiles()
+        .filter(
+          (file) =>
+            requireDecisionOnPaths !== undefined &&
+            matchesDecisionPaths(file, requireDecisionOnPaths) &&
+            skippable.some((re) => re.test(file))
+        )
+        .map((file) => `${id}: ${file} requires a decision but doesn't run CI`)
+    );
+
+    expect(problems).toEqual([]);
+  });
+
+  it('lists include globs that each match a tracked file', () => {
+    // A glob that matches nothing (e.g. after a directory move) silently stops requiring a decision.
+    const trackedFiles = getTrackedFiles();
+
+    const problems = decisionSuites.flatMap(({ id, requireDecisionOnPaths }) => {
+      const { include = [], exclude = [] } = requireDecisionOnPaths ?? {};
+      if (include.length === 0) {
+        return [`${id}: requireDecisionOnPaths has no include globs`];
+      }
+      return [
+        ...[...include, ...exclude]
+          .filter((glob) => typeof glob !== 'string' || glob.trim() === '')
+          .map(() => `${id}: requireDecisionOnPaths has an empty glob`),
+        ...include
+          .filter((glob) => {
+            // Narrow to the glob's literal prefix first; a full scan per glob is seconds slow.
+            const prefix = glob.split(/[*?{[]/)[0];
+            return !trackedFiles.some(
+              (file) => file.startsWith(prefix) && Path.matchesGlob(file, glob)
+            );
+          })
+          .map((glob) => `${id}: include glob "${glob}" matches no tracked file`),
+      ];
+    });
+
+    expect(problems).toEqual([]);
+  });
+
+  it('gives every suite that requires a decision a default model', () => {
+    // Without one, the run label satisfies the gate but selects nothing to run.
+    const problems = decisionSuites
+      .filter(({ defaultModelGroups }) => !defaultModelGroups?.length)
+      .map(({ id }) => `${id}: requireDecisionOnPaths needs defaultModelGroups`);
+
+    expect(problems).toEqual([]);
+  });
+
+  it('gives every regression gate a default model, decision paths and sane thresholds', () => {
+    const problems = gatedSuites.flatMap(
+      ({ id, regressionGate, defaultModelGroups, requireDecisionOnPaths }) => {
+        if (!regressionGate) return [];
+        const { dataset, evaluator, alpha, minAbsoluteDrop, maxBaselineAgeDays } = regressionGate;
+        return [
+          // The verdict is computed for the default model, so the gate needs one to run.
+          ...(defaultModelGroups?.length ? [] : [`${id}: regressionGate needs defaultModelGroups`]),
+          // The gate only checks suites whose decision paths a PR touches.
+          ...(requireDecisionOnPaths ? [] : [`${id}: regressionGate needs requireDecisionOnPaths`]),
+          ...(dataset?.trim() ? [] : [`${id}: regressionGate.dataset is empty`]),
+          ...(evaluator?.trim() ? [] : [`${id}: regressionGate.evaluator is empty`]),
+          ...(alpha > 0 && alpha < 1 ? [] : [`${id}: regressionGate.alpha must be in (0, 1)`]),
+          ...(minAbsoluteDrop > 0 && minAbsoluteDrop <= 1
+            ? []
+            : [`${id}: regressionGate.minAbsoluteDrop must be in (0, 1]`]),
+          ...(Number.isInteger(maxBaselineAgeDays) && maxBaselineAgeDays > 0
+            ? []
+            : [`${id}: regressionGate.maxBaselineAgeDays must be a positive integer`]),
+        ];
+      }
+    );
 
     expect(problems).toEqual([]);
   });

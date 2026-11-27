@@ -19,6 +19,8 @@ const dataStream = (
   overrides: Partial<Extract<ResolvedDestinationIndex, { is_data_stream: true }>> = {}
 ): ResolvedDestinationIndex => ({
   name,
+  documents: 0,
+  ingestion_rate: 0,
   is_data_stream: true,
   lifecycle: { dsl: { data_retention: '7d' } },
   failure_store_enabled: false,
@@ -26,28 +28,34 @@ const dataStream = (
   ...overrides,
 });
 
+const regularIndex = (name: string, documents = 0): ResolvedDestinationIndex => ({
+  name,
+  documents,
+  ingestion_rate: documents / 10,
+  is_data_stream: false,
+});
+
 const stats: DestinationIndexStats = {
   timeRange: { start: 0, end: 10_000 },
   docs: { 'logs-a-default': 100, 'logs-b-default': 50 },
   degradedDocs: { 'logs-b-default': 40 },
   failedDocs: undefined,
-  ingestedDocs: { 'logs-a-default': 20 },
   storageBytes: { 'logs-a-default': 2048 },
 };
 
 describe('destination index stats', () => {
-  it('joins bulk stats onto rows, treating indices missing from a response as zero', () => {
+  it('takes what the destination wrote from the resolved indices and joins the index stats onto rows, treating indices missing from a response as zero', () => {
     const [first, second, regular] = buildDestinationIndexRows(
       [
-        dataStream('logs-a-default', { health: 'green' }),
+        dataStream('logs-a-default', { health: 'green', documents: 20, ingestion_rate: 2 }),
         dataStream('logs-b-default', { lifecycle: { ilm: { policy: 'logs' } } }),
-        { name: 'legacy-index', is_data_stream: false },
+        regularIndex('legacy-index', 30),
       ],
       stats
     );
 
     expect(first).toMatchObject({
-      documents: 100,
+      documents: 20,
       throughput: 2,
       storageBytes: 2048,
       quality: 'good',
@@ -55,13 +63,19 @@ describe('destination index stats', () => {
       failureStoreEnabled: false,
     });
     expect(second).toMatchObject({
-      documents: 50,
+      documents: 0,
       throughput: 0,
       storageBytes: 0,
       quality: 'poor',
       retentionMs: Number.POSITIVE_INFINITY,
     });
-    expect(regular).toEqual({ name: 'legacy-index', isDataStream: false, retentionMs: 0 });
+    expect(regular).toEqual({
+      name: 'legacy-index',
+      documents: 30,
+      throughput: 3,
+      isDataStream: false,
+      retentionMs: 0,
+    });
   });
 
   it('leaves quality unknown when failed docs could not be loaded for an enabled failure store', () => {
@@ -72,11 +86,14 @@ describe('destination index stats', () => {
     expect(row.quality).toBeUndefined();
   });
 
-  it('leaves stats unknown before they load', () => {
-    const [row] = buildDestinationIndexRows([dataStream('logs-a-default')], undefined);
+  it('leaves the index stats unknown before they load, but not what the destination wrote', () => {
+    const [row] = buildDestinationIndexRows(
+      [dataStream('logs-a-default', { documents: 5, ingestion_rate: 0.5 })],
+      undefined
+    );
     expect(row).toMatchObject({
-      documents: undefined,
-      throughput: undefined,
+      documents: 5,
+      throughput: 0.5,
       storageBytes: undefined,
       quality: undefined,
     });
@@ -88,17 +105,17 @@ describe('destination index stats', () => {
         dataStream('logs-c-default'),
         dataStream('logs-a-default'),
         dataStream('logs-b-default'),
-        { name: 'legacy-index', is_data_stream: false },
+        regularIndex('legacy-index'),
       ],
       stats
     );
 
     const names = (direction: 'asc' | 'desc') =>
-      sortDestinationIndexRows(rows, { field: 'documents', direction }).map(({ name }) => name);
+      sortDestinationIndexRows(rows, { field: 'storageBytes', direction }).map(({ name }) => name);
 
     expect(names('asc')).toEqual([
-      'logs-c-default',
       'logs-b-default',
+      'logs-c-default',
       'logs-a-default',
       'legacy-index',
     ]);
@@ -137,7 +154,7 @@ describe('destination index stats', () => {
         // Not yet holding failed docs: the first one can arrive after indices were resolved.
         dataStream('logs-empty-default', { failure_store_enabled: true }),
         dataStream('logs-readable-default', { failure_store_enabled: true }),
-        { name: 'legacy-index', is_data_stream: false },
+        regularIndex('legacy-index'),
       ])
     ).toEqual(['logs-empty-default', 'logs-readable-default']);
   });
@@ -166,9 +183,14 @@ describe('destination index stats', () => {
       signal: new AbortController().signal,
     });
 
-    // 3 batches of at most 1000 names, 4 endpoints each (failed counts are not readable),
+    // 3 batches of at most 1000 names, 3 endpoints each (failed counts are not readable),
     // minus the degraded requests skipped after the first batch failed.
-    expect(fetch).toHaveBeenCalledTimes(10);
+    expect(fetch).toHaveBeenCalledTimes(7);
+    expect(
+      fetch.mock.calls.some(
+        ([endpoint]) => endpoint === 'POST /internal/streams/doc_counts/ingestion'
+      )
+    ).toBe(false);
     const requestedNames = fetch.mock.calls
       .filter(([endpoint]) => endpoint === 'POST /internal/streams/doc_counts/total')
       .map(([, { params }]) => params.body.streams.length);

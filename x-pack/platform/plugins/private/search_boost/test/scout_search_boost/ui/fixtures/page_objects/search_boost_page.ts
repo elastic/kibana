@@ -22,7 +22,9 @@ export class SearchBoostPage {
   readonly searchBox: Locator;
   readonly headerTitle: Locator;
   readonly ruleSettings: Locator;
+  readonly matchesTable: Locator;
   readonly profileRulesTable: Locator;
+  readonly dataStreamFlyout: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.dataManagementNavItem = page
@@ -41,7 +43,9 @@ export class SearchBoostPage {
     this.searchBox = page.getByTestId('contentListToolbar-searchBox');
     this.headerTitle = page.getByTestId('appHeaderTitle');
     this.ruleSettings = page.getByTestId('searchBoostRuleSettings');
+    this.matchesTable = page.getByTestId('searchBoostMatchesTable');
     this.profileRulesTable = page.getByTestId('searchBoostProfileRulesTable');
+    this.dataStreamFlyout = page.getByTestId('dataStreamDetailPanel');
   }
 
   async gotoHome() {
@@ -66,6 +70,12 @@ export class SearchBoostPage {
 
   setting(section: Locator, id: string) {
     return section.getByTestId(`searchBoostSetting-${id}`);
+  }
+
+  matchLink(name: string) {
+    return this.matchesTable
+      .getByTestId('searchBoostMatchName')
+      .filter({ hasText: new RegExp(`^${escapeRegExp(name)}$`) });
   }
 
   /** Lists only what matches, so other rules or profiles on the stack can't push it to another page. */

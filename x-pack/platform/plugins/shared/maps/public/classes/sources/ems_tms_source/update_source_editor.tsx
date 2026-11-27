@@ -11,9 +11,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { EmsTmsSourceConfig } from './tile_service_select';
 import { TileServiceSelect } from './tile_service_select';
 import type { OnSourceChangeArgs } from '../source';
+import type { EMSTMSSourceDescriptor } from '../../../../common/descriptor_types';
 
 interface Props {
-  onChange: (...args: OnSourceChangeArgs[]) => Promise<void>;
+  onChange: (...args: OnSourceChangeArgs<EMSTMSSourceDescriptor>[]) => Promise<void>;
   config: EmsTmsSourceConfig;
 }
 

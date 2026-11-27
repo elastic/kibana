@@ -6,6 +6,7 @@
  */
 
 import { applicationsRouteRepository } from './applications/route';
+import { applicationsIngestRouteRepository } from './applications/ingest/route';
 import { errorsRouteRepository } from './errors/route';
 import { mobileRouteRepository } from './mobile/route';
 import { networkRouteRepository } from './network/route';
@@ -16,6 +17,7 @@ import { savedViewsRouteRepository } from './views/route';
 
 export const getGlobalDigitalExperienceServerRouteRepository = () => ({
   ...applicationsRouteRepository,
+  ...applicationsIngestRouteRepository,
   ...mobileRouteRepository,
   ...overviewRouteRepository,
   ...usageRouteRepository,

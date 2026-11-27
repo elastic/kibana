@@ -31,11 +31,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common';
 import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
-import type {
-  ResolvedDestinationIndex,
-  ResolvedDestinationIndexHealth,
+import {
+  UNIT_METRICS_STREAM,
+  type ResolvedDestinationIndex,
+  type ResolvedDestinationIndexHealth,
 } from '@kbn/streams-plugin/common';
-import { IngestionColumn } from '../../stream_list_view/ingestion_column';
 import { RetentionColumn } from '../../stream_list_view/retention_column';
 import { StorageColumn } from '../../stream_list_view/storage_column';
 import {
@@ -44,12 +44,12 @@ import {
   DATA_QUALITY_FILTER_LABEL,
   DATA_QUALITY_GOOD_LABEL,
   DATA_QUALITY_POOR_LABEL,
-  DOCUMENTS_COLUMN_HEADER,
   INGESTION_COLUMN_HEADER,
   RETENTION_COLUMN_HEADER,
   RETENTION_COLUMN_HEADER_ARIA_LABEL,
   STORAGE_COLUMN_HEADER,
 } from '../../stream_list_view/translations';
+import { formatRateParts } from '../../../services/unit_stats_client/format_stats';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -97,6 +97,30 @@ const QUALITY_UNAVAILABLE_TOOLTIP = i18n.translate(
       "Data quality is unavailable because one or more required statistics couldn't be loaded.",
   }
 );
+
+const DOCUMENTS_WRITTEN_COLUMN_HEADER = i18n.translate(
+  'xpack.streams.destinations.indices.documentsWrittenColumnLabel',
+  { defaultMessage: 'Docs written' }
+);
+
+const DOCUMENTS_WRITTEN_COLUMN_TOOLTIP = i18n.translate(
+  'xpack.streams.destinations.indices.documentsWrittenColumnTooltip',
+  {
+    defaultMessage:
+      'Documents this destination wrote to the index in the selected time range, not counting those that went to its failure store. Other writers of the index are not counted.',
+  }
+);
+
+const INGESTION_COLUMN_TOOLTIP = i18n.translate(
+  'xpack.streams.destinations.indices.ingestionColumnTooltip',
+  { defaultMessage: 'Documents this destination wrote per second over the selected time range.' }
+);
+
+const formatIngestionRate = (docsPerSecond: number): string =>
+  i18n.translate('xpack.streams.destinations.indices.ingestionCellValue', {
+    defaultMessage: '{rate} docs/s',
+    values: { rate: formatRateParts(docsPerSecond).value },
+  });
 
 const STATS_UNAVAILABLE_TOOLTIP = i18n.translate(
   'xpack.streams.destinations.indices.statsUnavailableTooltip',
@@ -203,8 +227,8 @@ const EmptyIndicesMessage = ({
   if (hasConnectedSource) {
     return (
       <FormattedMessage
-        id="xpack.streams.destinations.indices.emptyDescription"
-        defaultMessage="No indices match this destination's write scope yet."
+        id="xpack.streams.destinations.indices.noWrittenIndicesDescription"
+        defaultMessage="This destination didn't write to any indices in the selected time range."
       />
     );
   }
@@ -264,6 +288,8 @@ export const DestinationIndicesTable = ({
 
   const isStatsLoading = statsStatus === 'loading';
   const isStatsFailed = statsStatus === 'failed';
+  // The rows of the previous range stay while indices reload, but what they wrote is of that range.
+  const isWritesLoading = indicesStatus === 'loading';
 
   const rows = useMemo(() => buildDestinationIndexRows(indices, stats), [indices, stats]);
   const filteredRows = useMemo(() => {
@@ -355,23 +381,33 @@ export const DestinationIndicesTable = ({
       },
       {
         field: 'documents',
-        name: DOCUMENTS_COLUMN_HEADER,
+        name: DOCUMENTS_WRITTEN_COLUMN_HEADER,
+        nameTooltip: { content: DOCUMENTS_WRITTEN_COLUMN_TOOLTIP },
         sortable: true,
         align: 'right',
         width: STAT_COLUMN_WIDTH,
-        render: (documents: number | undefined, row: DestinationIndexRow) =>
-          renderStat(row, documents, (value) => formatNumber(value, '0,0')),
+        render: (documents: number) =>
+          isWritesLoading ? (
+            <EuiLoadingSpinner size="s" data-test-subj="streamsDestinationIndexWritesLoading" />
+          ) : (
+            <span css={noWrapStyles}>{formatNumber(documents, '0,0')}</span>
+          ),
       },
       {
         field: 'throughput',
         name: INGESTION_COLUMN_HEADER,
+        nameTooltip: { content: INGESTION_COLUMN_TOOLTIP },
         sortable: true,
         align: 'right',
         width: STAT_COLUMN_WIDTH,
-        render: (throughput: number | undefined, row: DestinationIndexRow) =>
-          renderStat(row, throughput, (value) => (
-            <IngestionColumn rate={value} isLoading={false} />
-          )),
+        render: (throughput: number) =>
+          isWritesLoading ? (
+            <EuiLoadingSpinner size="s" data-test-subj="streamsDestinationIndexWritesLoading" />
+          ) : (
+            <span css={noWrapStyles} data-test-subj="streamsDestinationIndexIngestion">
+              {formatIngestionRate(throughput)}
+            </span>
+          ),
       },
       {
         field: 'storageBytes',
@@ -481,7 +517,16 @@ export const DestinationIndicesTable = ({
           ),
       },
     ];
-  }, [isStatsFailed, isStatsLoading, onIndexClick, rangeFrom, rangeTo, router, unitId]);
+  }, [
+    isStatsFailed,
+    isStatsLoading,
+    isWritesLoading,
+    onIndexClick,
+    rangeFrom,
+    rangeTo,
+    router,
+    unitId,
+  ]);
 
   const onTableChange = ({ sort: nextSort, page }: CriteriaWithPagination<DestinationIndexRow>) => {
     if (nextSort) {
@@ -526,9 +571,13 @@ export const DestinationIndicesTable = ({
       >
         <p>
           <FormattedMessage
-            id="xpack.streams.destinations.indices.forbiddenDescription"
-            defaultMessage="Listing indices requires the {privilege} index privilege on the indices this destination writes to. Ask your administrator to grant it."
-            values={{ privilege: <EuiCode>view_index_metadata</EuiCode> }}
+            id="xpack.streams.destinations.indices.forbiddenWrittenIndicesDescription"
+            defaultMessage="Listing indices requires the {readPrivilege} index privilege on {statsStream}, which records where this destination wrote, and {privilege} on the indices it writes to. Ask your administrator to grant them."
+            values={{
+              readPrivilege: <EuiCode>read</EuiCode>,
+              statsStream: <EuiCode>{UNIT_METRICS_STREAM}</EuiCode>,
+              privilege: <EuiCode>view_index_metadata</EuiCode>,
+            }}
           />
         </p>
       </EuiCallOut>
@@ -608,8 +657,8 @@ export const DestinationIndicesTable = ({
         responsiveBreakpoint={false}
         tableLayout="auto"
         scrollableInline
-        tableCaption={i18n.translate('xpack.streams.destinations.indices.tableCaption', {
-          defaultMessage: 'Indices targeted by this destination',
+        tableCaption={i18n.translate('xpack.streams.destinations.indices.writtenTableCaption', {
+          defaultMessage: 'Indices this destination wrote to in the selected time range',
         })}
         items={pageRows}
         itemId="name"

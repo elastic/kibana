@@ -16,6 +16,7 @@ import {
   parseTimeFieldFromESQLQuery,
 } from '@kbn/esql-utils';
 import { Parser, isSubQuery } from '@elastic/esql';
+import { getNamedSubqueries, getReferencedNamedSubqueries } from '@kbn/esql-language';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 import { EsqlService } from '@kbn/esql-server-utils';
 import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
@@ -113,8 +114,10 @@ const resolveTimeField = async (
     return { timeField: undefined };
   }
   const sources = getIndexPatternFromESQLQuery(query);
-  const subqueryArgs = sourceCommand.args.filter(isSubQuery);
-  const hasSubqueries = subqueryArgs.length > 0;
+  // A LET reference reads its body like a subquery.
+  const hasSubqueries =
+    sourceCommand.args.some(isSubQuery) ||
+    getReferencedNamedSubqueries(sourceCommand, getNamedSubqueries(root.header)).length > 0;
   const splitSources = sources
     .split(',')
     .map((s) => s.trim())

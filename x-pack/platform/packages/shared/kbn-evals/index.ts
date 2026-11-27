@@ -39,6 +39,8 @@ export {
   type EnsureEisCcmOptions,
 } from './src/cli/eval_stack';
 
+export { formatProfilesSummary } from './src/cli/profiles';
+
 export {
   ensureEvalInit,
   resolveEvalSuite,

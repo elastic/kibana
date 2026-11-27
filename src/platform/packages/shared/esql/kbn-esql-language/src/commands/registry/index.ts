@@ -11,6 +11,7 @@ import { CommandRegistry } from './registry';
 import { limitCommand } from './limit';
 import { dedupCommand } from './dedup';
 import { dropCommand } from './drop';
+import { describeCommand } from './describe';
 import { keepCommand } from './keep';
 import { forkCommand } from './fork';
 import { renameCommand } from './rename';
@@ -54,6 +55,7 @@ const baseCommands = [
   limitCommand,
   dedupCommand,
   dropCommand,
+  describeCommand,
   forkCommand,
   renameCommand,
   changePointCommand,

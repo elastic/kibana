@@ -228,102 +228,11 @@ describe('StreamNameFormRow', () => {
       expect(screen.getByTestId('streamsAppChildStreamLink')).toHaveTextContent('logs.parent');
     });
 
-    it('accepts the options-object form and preserves default checkRootChildExists=true', () => {
+    it('accepts the options-object form', () => {
       mockRoutingContext.routing = [{ destination: 'logs.parent', isNew: false }];
 
       const { result } = renderHook(() =>
         useChildStreamInput({ streamName: 'logs.parent.child', readOnly: false })
-      );
-
-      expect(result.current.isStreamNameValid).toBe(false);
-      expect(result.current.errorMessage).toBeDefined();
-    });
-
-    it('skips rootChildExists error path when checkRootChildExists is false (query stream case)', () => {
-      mockRoutingContext.routing = [];
-
-      const { result } = renderHook(() =>
-        useChildStreamInput({
-          streamName: 'logs.my-query',
-          readOnly: false,
-          checkRootChildExists: false,
-        })
-      );
-
-      expect(result.current.isStreamNameValid).toBe(true);
-      expect(result.current.errorMessage).toBeUndefined();
-    });
-
-    it('still surfaces duplicate-name error when checkRootChildExists is false', () => {
-      mockRoutingContext.routing = [{ destination: 'logs.my-query', isNew: false }];
-
-      const { result } = renderHook(() =>
-        useChildStreamInput({
-          streamName: 'logs.my-query',
-          readOnly: false,
-          checkRootChildExists: false,
-        })
-      );
-
-      expect(result.current.isStreamNameValid).toBe(false);
-      expect(result.current.errorMessage).toBeDefined();
-    });
-
-    it('surfaces a simple dot-in-partition error when checkRootChildExists is false', () => {
-      mockRoutingContext.routing = [];
-
-      const { result } = renderHook(() =>
-        useChildStreamInput({
-          streamName: 'logs.foo.bar',
-          readOnly: false,
-          checkRootChildExists: false,
-        })
-      );
-
-      expect(result.current.isStreamNameValid).toBe(false);
-      expect(result.current.errorMessage).toBe('Stream name cannot contain the "." character.');
-    });
-
-    it('flags a duplicate when the name is in additionalExistingNames but not in routing', () => {
-      mockRoutingContext.routing = [];
-
-      const { result } = renderHook(() =>
-        useChildStreamInput({
-          streamName: 'logs.existing-query',
-          readOnly: false,
-          checkRootChildExists: false,
-          additionalExistingNames: ['logs.existing-query'],
-        })
-      );
-
-      expect(result.current.isStreamNameValid).toBe(false);
-      expect(result.current.errorMessage).toBe('A stream with this name already exists');
-    });
-
-    it('rejects a partition whose own first character is an invalid prefix (checkRootChildExists: false)', () => {
-      mockRoutingContext.routing = [];
-
-      const { result } = renderHook(() =>
-        useChildStreamInput({
-          streamName: 'logs.-x',
-          readOnly: false,
-          checkRootChildExists: false,
-        })
-      );
-
-      expect(result.current.isStreamNameValid).toBe(false);
-      expect(result.current.errorMessage).toBe('Stream name cannot start with "-".');
-    });
-
-    it('still rejects invalid characters when checkRootChildExists is false', () => {
-      mockRoutingContext.routing = [];
-
-      const { result } = renderHook(() =>
-        useChildStreamInput({
-          streamName: 'logs.MyQuery',
-          readOnly: false,
-          checkRootChildExists: false,
-        })
       );
 
       expect(result.current.isStreamNameValid).toBe(false);

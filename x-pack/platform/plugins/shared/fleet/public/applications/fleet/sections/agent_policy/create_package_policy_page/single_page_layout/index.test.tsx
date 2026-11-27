@@ -175,6 +175,9 @@ import {
 
 import { CreatePackagePolicySinglePage } from '.';
 
+const AGENTLESS_OPTION_SELECTOR = '#SetupTechnologySelector_agentless';
+const AGENT_BASED_OPTION_SELECTOR = '#SetupTechnologySelector_agent-based';
+
 // mock console.debug to prevent noisy logs from console.debugs in ./index.tsx
 let consoleDebugMock: any;
 beforeAll(() => {
@@ -1492,6 +1495,45 @@ describe('When on the package policy create page', () => {
           ).toBeInTheDocument();
           expect(renderResult.getByText('Recommended')).toBeInTheDocument();
         });
+      });
+
+      test('should render the setup technology selector as checkable cards in its own Deployment step when agentless is the default deployment', async () => {
+        (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(
+          getMockPackageInfo({ agentless: { enabled: true, isDefault: true }, dualMode: true })
+        );
+        await act(async () => {
+          render();
+        });
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ)).toBeInTheDocument();
+        });
+        expect(renderResult.getByRole('heading', { name: 'Deployment' })).toBeInTheDocument();
+        expect(renderResult.container.querySelector(AGENTLESS_OPTION_SELECTOR)).toBeChecked();
+        expect(renderResult.container.querySelector(AGENT_BASED_OPTION_SELECTOR)).not.toBeChecked();
+        expect(renderResult.container.querySelector(AGENT_BASED_OPTION_SELECTOR)).toBeEnabled();
+        expect(renderResult.queryByText('Deployment options')).not.toBeInTheDocument();
+        expect(
+          renderResult.getByText('Best for simple setup and faster onboarding.')
+        ).toBeInTheDocument();
+      });
+
+      test('should render the setup technology selector inline when agentless is not the default deployment', async () => {
+        (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(
+          getMockPackageInfo({ agentless: { enabled: true }, dualMode: true })
+        );
+        await act(async () => {
+          render();
+        });
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ)).toBeInTheDocument();
+        });
+        expect(renderResult.queryByRole('heading', { name: 'Deployment' })).not.toBeInTheDocument();
+        expect(renderResult.getByText('Deployment options')).toBeInTheDocument();
+        expect(renderResult.container.querySelector(AGENT_BASED_OPTION_SELECTOR)).toBeChecked();
+        expect(renderResult.container.querySelector(AGENTLESS_OPTION_SELECTOR)).not.toBeChecked();
+        expect(renderResult.container.querySelector(AGENTLESS_OPTION_SELECTOR)).toBeEnabled();
       });
     });
   });
