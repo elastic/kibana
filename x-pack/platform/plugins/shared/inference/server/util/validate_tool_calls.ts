@@ -61,6 +61,8 @@ export function validateToolCalls({
     } catch (error) {
       throw createToolValidationError(`Failed parsing arguments for ${toolCall.function.name}`, {
         name: toolCall.function.name,
+        // Tells the model where its JSON broke, so a retry can fix it instead of repeating it.
+        errorsText: error instanceof Error ? error.message : 'Arguments are not valid JSON',
         arguments: toolCall.function.arguments,
         toolCalls: [toolCall],
       });
