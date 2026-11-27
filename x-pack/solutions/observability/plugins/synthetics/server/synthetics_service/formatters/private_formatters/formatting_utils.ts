@@ -14,6 +14,14 @@ import { HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS } from '../../../../
 export type FormatterFn = (fields: Partial<MonitorFields>, key: ConfigKey) => string | null;
 
 const LIGHTWEIGHT_DEFAULT_TIMEOUT_SECONDS = 16;
+const SAFE_UNQUOTED_YAML_SCALAR = /^[A-Za-z0-9._@-]+$/;
+
+const ensureSafeYamlScalar = (value: string | null): string | null => {
+  if (!value) {
+    return value;
+  }
+  return SAFE_UNQUOTED_YAML_SCALAR.test(value) ? value : JSON.stringify(value);
+};
 
 /**
  * Omits a field from the agent policy when its value matches the Heartbeat
@@ -28,7 +36,8 @@ export const omitDefaultFormatter =
     if (isEqual(value, defaultValue)) {
       return null;
     }
-    return formatter ? formatter(fields, key) : (value as string) ?? null;
+    const formatted = formatter ? formatter(fields, key) : (value as string) ?? null;
+    return typeof formatted === 'string' ? ensureSafeYamlScalar(formatted) : formatted;
   };
 
 /**
@@ -66,7 +75,7 @@ export const tlsValueToStringFormatter: FormatterFn = (fields, key) => {
   if (fields[ConfigKey.METADATA]?.is_tls_enabled) {
     const tlsValue = (fields[key] as string) ?? '';
 
-    return tlsValue || null;
+    return ensureSafeYamlScalar(tlsValue || null);
   } else {
     return null;
   }
@@ -131,5 +140,5 @@ export const privateTimeoutFormatter: FormatterFn = (fields) => {
     return null;
   }
 
-  return secondsToCronFormatter(fields, ConfigKey.TIMEOUT);
+  return ensureSafeYamlScalar(secondsToCronFormatter(fields, ConfigKey.TIMEOUT));
 };

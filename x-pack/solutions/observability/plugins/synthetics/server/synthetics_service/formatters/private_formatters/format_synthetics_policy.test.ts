@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { parse as parseYaml } from 'yaml';
 import { ConfigKey, KerberosAuthType, MonitorTypeEnum } from '../../../../common/runtime_types';
 import { formatSyntheticsPolicy } from './format_synthetics_policy';
 import { PROFILE_VALUES_ENUM, PROFILES_MAP } from '../../../../common/constants/monitor_defaults';
@@ -632,6 +633,109 @@ describe('formatSyntheticsPolicy', () => {
 
     expect(hasInput).toBe(false);
     expect(hasDataStream).toBe(false);
+  });
+
+  describe('YAML injection prevention via parameter substitution', () => {
+    const compileStreamVarsAsYaml = (
+      vars: Record<string, { type?: string; value?: unknown }> = {}
+    ): Record<string, unknown> => {
+      const yamlValues: Record<string, unknown> = {};
+      const lines = Object.entries(vars).flatMap(([key, entry]) => {
+        if (entry?.value == null || entry.value === '') return [];
+        if (entry.type === 'yaml') {
+          yamlValues[`##${key}##`] = parseYaml(String(entry.value));
+          return [`${key}: "##${key}##"`];
+        }
+        return [`${key}: ${String(entry.value)}`];
+      });
+      const rawYaml = lines
+        .join('\n')
+        .replace(/'(?:[^']|'')*'|"(?:[^"\\]|\\.)*"/gs, (m) =>
+          m[0] === "'" || !m.includes('\n')
+            ? m
+            : m.replace(/\n+/g, (nl) => (nl.length === 1 ? ' ' : '\\n'.repeat(nl.length - 1)))
+        );
+      const parsed = parseYaml(rawYaml) as Record<string, unknown>;
+      for (const [k, v] of Object.entries(parsed)) {
+        if (typeof v === 'string' && v in yamlValues) parsed[k] = yamlValues[v];
+      }
+      return parsed;
+    };
+
+    const INJECTION =
+      'F66-INJ"\nsource.inline.script: ZXY=\nsource.inline.encoding: base64\nevil_key: 1\npad: "';
+
+    it('prevents rewriting a browser project monitor into an inline script via ${param}', () => {
+      const { formattedPolicy } = formatSyntheticsPolicy(
+        structuredClone(testNewPolicy) as any,
+        MonitorTypeEnum.BROWSER,
+        {
+          ...browserConfig,
+          'source.inline.encoding': undefined,
+          [ConfigKey.NAME]: '${F66}',
+          [ConfigKey.APM_SERVICE_NAME]: 'svc-${F66}',
+          [ConfigKey.JOURNEY_FILTERS_MATCH]: '${F66}',
+          [ConfigKey.PLAYWRIGHT_OPTIONS]: '{"baseURL":"https://app.internal/${F66}"}',
+          [ConfigKey.TAGS]: ['${F66}'],
+          [ConfigKey.SOURCE_INLINE]: '',
+          [ConfigKey.SOURCE_PROJECT_CONTENT]: 'UEsDBBQAAAAIAFByb2plY3RaaXA=',
+        },
+        { F66: INJECTION },
+        []
+      );
+
+      const compiled = compileStreamVarsAsYaml(
+        formattedPolicy.inputs.find((i: any) => i.type === 'synthetics/browser')!.streams[0].vars
+      );
+      expect(compiled.name).toBe(INJECTION);
+      expect(compiled.tags).toEqual([INJECTION]);
+      expect(compiled.playwright_options).toEqual({ baseURL: `https://app.internal/${INJECTION}` });
+      expect(compiled['source.project.content']).toBe('UEsDBBQAAAAIAFByb2plY3RaaXA=');
+      expect(compiled['source.inline.script']).toBeUndefined();
+      expect(compiled['source.inline.encoding']).toBeUndefined();
+      expect(compiled.evil_key).toBeUndefined();
+    });
+
+    it('prevents YAML key injection across HTTP text, header, body, TLS, and auth fields', () => {
+      const unquoted = 'none\nevil_key: 1\r\nurls: "https://attacker.invalid"';
+      const { formattedPolicy } = formatSyntheticsPolicy(
+        structuredClone(testNewPolicy) as any,
+        MonitorTypeEnum.HTTP,
+        {
+          ...httpPolicy,
+          __ui: { is_tls_enabled: true },
+          [ConfigKey.NAME]: '${Q}',
+          [ConfigKey.URLS]: 'https://victim.internal/${Q}',
+          [ConfigKey.USERNAME]: '${Q}',
+          [ConfigKey.PASSWORD]: '${Q}',
+          'check.request.method': '${U}',
+          [ConfigKey.REQUEST_HEADERS_CHECK]: { Authorization: 'Bearer ${Q}' },
+          [ConfigKey.REQUEST_BODY_CHECK]: { type: 'text', value: 'body=${Q}' },
+          [ConfigKey.TLS_KEY]: '${Q}',
+          [ConfigKey.TLS_KEY_PASSPHRASE]: '${U}',
+          [ConfigKey.TLS_VERIFICATION_MODE]: '${U}' as any,
+          [ConfigKey.KERBEROS]: {
+            enabled: true,
+            auth_type: KerberosAuthType.PASSWORD,
+            realm: '${Q}',
+            username: '${Q}',
+            password: '${Q}',
+          },
+        },
+        { Q: INJECTION, U: unquoted },
+        []
+      );
+
+      const compiled = compileStreamVarsAsYaml(
+        formattedPolicy.inputs.find((i: any) => i.type === 'synthetics/http')!.streams[0].vars
+      );
+      expect(compiled.name).toBe(INJECTION);
+      expect(compiled['ssl.key_passphrase']).toBe(unquoted);
+      expect(compiled['ssl.verification_mode']).toBe(unquoted);
+      expect(compiled['check.request.headers']).toEqual({ Authorization: `Bearer ${INJECTION}` });
+      expect(compiled.evil_key).toBeUndefined();
+      expect(compiled.pad).toBeUndefined();
+    });
   });
 });
 

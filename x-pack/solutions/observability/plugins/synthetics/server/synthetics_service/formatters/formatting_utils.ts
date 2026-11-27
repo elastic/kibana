@@ -13,6 +13,7 @@ import type { ParsedVars } from './lightweight_param_formatter';
 import { replaceVarsWithParams } from './lightweight_param_formatter';
 import variableParser from './variable_parser';
 import { hasNoParams } from './param_utils';
+import { PARAMS_KEYS_TO_SKIP } from './common';
 
 export {
   hasNoParams,
@@ -26,42 +27,49 @@ export type FormatterFn<T = number> = (
   key: ConfigKey
 ) => string | T | null;
 
+const replaceSingleStringWithParams = (
+  value: string,
+  params: Record<string, string>,
+  logger?: Logger
+): string => {
+  if (!value || hasNoParams(value)) {
+    return value;
+  }
+  try {
+    const parsedVars: ParsedVars = variableParser.parse(value);
+    return allParamsAreMissing(parsedVars, params)
+      ? value
+      : replaceVarsWithParams(parsedVars, params);
+  } catch (e) {
+    logger?.error(`error parsing vars for value ${JSON.stringify(value)}, ${e}`);
+    return value;
+  }
+};
+
 export const replaceStringWithParams = (
   value: string | boolean | {} | [],
   params: Record<string, string>,
   logger?: Logger
-) => {
-  if (!value || typeof value === 'boolean' || isEmpty(params)) {
+): string | null => {
+  if (!value || typeof value === 'boolean' || typeof value === 'number' || isEmpty(params)) {
     return value as string | null;
   }
-
-  try {
-    if (typeof value !== 'string') {
-      const strValue = JSON.stringify(value);
-      if (hasNoParams(strValue)) {
-        return value as string | null;
-      }
-
-      const parsedVars: ParsedVars = variableParser.parse(strValue);
-
-      const parseValue = replaceVarsWithParams(parsedVars, params);
-      return JSON.parse(parseValue);
-    }
-    if (hasNoParams(value)) {
-      return value as string | null;
-    }
-
-    const parsedVars: ParsedVars = variableParser.parse(value);
-
-    if (allParamsAreMissing(parsedVars, params)) {
-      return value as string | null;
-    }
-
-    return replaceVarsWithParams(parsedVars, params);
-  } catch (e) {
-    logger?.error(`error parsing vars for value ${JSON.stringify(value)}, ${e}`);
+  if (typeof value === 'string') {
+    return replaceSingleStringWithParams(value, params, logger);
   }
-
+  if (Array.isArray(value)) {
+    return value.map((item: string | boolean | {} | []) =>
+      replaceStringWithParams(item, params, logger)
+    ) as unknown as string | null;
+  }
+  if (typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([k, v]) => [
+        replaceSingleStringWithParams(k, params, logger),
+        replaceStringWithParams(v as string | boolean | {} | [], params, logger),
+      ])
+    ) as unknown as string | null;
+  }
   return value as string | null;
 };
 
@@ -100,6 +108,57 @@ export const resolveHttpAuthParams = <T extends Partial<MonitorFields>>(
   if (ntlm?.enabled) {
     next[ConfigKey.NTLM] = resolveAuthObject(ntlm);
   }
+  return next;
+};
+
+const resolvePlaywrightOptions = (
+  raw: string,
+  params: Record<string, string>,
+  logger?: Logger
+): string => {
+  if (!raw.trim() || hasNoParams(raw)) {
+    return raw;
+  }
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === 'object') {
+      return JSON.stringify(replaceStringWithParams(parsed, params, logger));
+    }
+  } catch {
+    // Fall through to post-substitution JSON normalization.
+  }
+  const replaced = replaceSingleStringWithParams(raw, params, logger);
+  try {
+    return JSON.stringify(JSON.parse(replaced));
+  } catch {
+    return JSON.stringify(replaced);
+  }
+};
+
+/**
+ * Resolves `${params}` on raw monitor fields before private-location YAML/JSON
+ * formatters run, so parameter values cannot break out of serialized scalars.
+ */
+export const resolveMonitorConfigParams = <T extends Partial<MonitorFields>>(
+  config: T,
+  params: Record<string, string>,
+  logger?: Logger
+): T => {
+  const next = resolveHttpAuthParams(config, params, logger);
+  if (isEmpty(params)) {
+    return next;
+  }
+
+  for (const [key, fieldValue] of Object.entries(next)) {
+    if (PARAMS_KEYS_TO_SKIP.includes(key as ConfigKey) || fieldValue == null) {
+      continue;
+    }
+    (next as Record<string, unknown>)[key] =
+      key === ConfigKey.PLAYWRIGHT_OPTIONS && typeof fieldValue === 'string'
+        ? resolvePlaywrightOptions(fieldValue, params, logger)
+        : replaceStringWithParams(fieldValue as string | boolean | {} | [], params, logger);
+  }
+
   return next;
 };
 

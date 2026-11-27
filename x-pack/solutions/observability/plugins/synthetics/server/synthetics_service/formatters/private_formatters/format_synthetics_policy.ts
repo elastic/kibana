@@ -16,8 +16,8 @@ import { throttlingFormatter } from './browser_formatters';
 import {
   formatMWs,
   handleMultilineStringFormatter,
-  replaceStringWithParams,
   resolveHttpAuthParams,
+  resolveMonitorConfigParams,
 } from '../formatting_utils';
 import {
   findMalformedVaultReferences,
@@ -26,7 +26,6 @@ import {
 } from '../vault_param_formatter';
 import { SecretConnectionError, type HeartbeatVaultConfig } from '../../get_secret_connection';
 import { syntheticsPolicyFormatters } from './formatters';
-import { PARAMS_KEYS_TO_SKIP } from '../common';
 
 export const VAULT_SECRET_STORAGE_DISABLED_MESSAGE =
   'Vault secret references require Fleet secret storage, which is not enabled. Enable Fleet secret storage and try again.';
@@ -133,7 +132,7 @@ export const formatSyntheticsPolicy = (
   secretConnections?: HeartbeatVaultConfig[],
   secretStorageEnabled = true
 ) => {
-  const resolvedConfig = resolveHttpAuthParams(config, params);
+  const resolvedConfig = resolveMonitorConfigParams(config, params);
   const configKeys = Object.keys(resolvedConfig) as ConfigKey[];
 
   const formattedPolicy = cloneDeep(newPolicy);
@@ -193,9 +192,6 @@ export const formatSyntheticsPolicy = (
           resolvedConfig[key] === undefined || resolvedConfig[key] === null
             ? null
             : resolvedConfig[key];
-      }
-      if (!PARAMS_KEYS_TO_SKIP.includes(key)) {
-        configItem.value = replaceStringWithParams(configItem.value, params);
       }
       // if value contains a new line we need to add extra \n to escape it
       if (typeof configItem.value === 'string' && configItem.value.includes('\n')) {

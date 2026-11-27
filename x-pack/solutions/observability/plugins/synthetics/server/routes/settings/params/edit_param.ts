@@ -18,6 +18,7 @@ import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 import { findParamVaultReferenceError } from '../secret_connection/connection_utils';
+import { assertCanMutateParamInAllSpaces } from './param_space_authz';
 
 const RequestParamsSchema = z.strictObject({
   id: routeId.describe('The unique identifier for the parameter.'),
@@ -94,6 +95,15 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
           { namespace: spaceId }
         );
 
+      const spaceAuth = await assertCanMutateParamInAllSpaces(
+        routeContext,
+        existingParam.namespaces ?? [spaceId],
+        'update'
+      );
+      if (!spaceAuth.ok) {
+        return spaceAuth.errorResponse;
+      }
+
       const newParam = {
         ...existingParam.attributes,
         ...data,
@@ -126,6 +136,7 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
         return response.notFound({ body: { message: 'Param not found' } });
       }
+      throw getErr;
     }
   },
 });

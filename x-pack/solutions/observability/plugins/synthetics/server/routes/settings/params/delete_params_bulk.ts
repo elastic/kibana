@@ -8,12 +8,10 @@
 import path from 'path';
 import { z } from '@kbn/zod';
 import { MAX_PARAM_BULK_SIZE, routeId } from '../../zod_query';
-import { getExistingParamsInfo } from './delete_param';
+import { deleteParams } from './delete_param';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
-import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import type { DeleteParamsResponse } from '../../../../common/runtime_types';
-import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 
 export const deleteSyntheticsParamsBulkRoute: SyntheticsRestApiRouteFactory<
   DeleteParamsResponse[],
@@ -41,25 +39,5 @@ export const deleteSyntheticsParamsBulkRoute: SyntheticsRestApiRouteFactory<
       }),
     },
   },
-  handler: async ({ savedObjectsClient, request, server, spaceId }) => {
-    const { ids } = request.body;
-
-    const { spaces: existingParamsSpaces, keys: modifiedParamKeys } = await getExistingParamsInfo(
-      savedObjectsClient,
-      ids
-    );
-
-    const result = await savedObjectsClient.bulkDelete(
-      ids.map((id) => ({ type: syntheticsParamType, id })),
-      { force: true }
-    );
-
-    await asyncGlobalParamsPropagation({
-      server,
-      paramsSpacesToSync: existingParamsSpaces,
-      modifiedParamKeys,
-    });
-
-    return result.statuses.map(({ id, success }) => ({ id, deleted: success }));
-  },
+  handler: async (routeContext) => deleteParams(routeContext, routeContext.request.body.ids),
 });
