@@ -4773,8 +4773,8 @@ importers:
         specifier: 6.0.0
         version: 6.0.0
       mime-types:
-        specifier: 2.1.35
-        version: 2.1.35
+        specifier: 3.0.2
+        version: 3.0.2
       minimatch:
         specifier: 11.0.8
         version: 11.0.8
@@ -6391,8 +6391,8 @@ importers:
         specifier: 14.2.0
         version: 14.2.0
       '@types/mime-types':
-        specifier: 2.1.0
-        version: 2.1.0
+        specifier: 3.0.1
+        version: 3.0.1
       '@types/minimist':
         specifier: 1.2.5
         version: 1.2.5
@@ -15163,8 +15163,8 @@ packages:
   '@types/methods@1.1.4':
     resolution: {integrity: sha512-ymXWVrDiCxTBE3+RIrrP533E70eA+9qu7zdWoHuOmGujkYtzf4HQF96b8nwHLqhuf4ykX61IGRIB38CC6/sImQ==}
 
-  '@types/mime-types@2.1.0':
-    resolution: {integrity: sha512-8LDSKVdJxwfJXZAcHRwFDxozsTCo3UmIpDjN1cOnYMTr0h4ivK9I+IdEMdtjnssFm0y66vbnpd21mAgGZ1oGAQ==}
+  '@types/mime-types@3.0.1':
+    resolution: {integrity: sha512-xRMsfuQbnRq1Ef+C+RKaENOxXX87Ygl38W1vDfPHRku02TgQr+Qd8iivLtAMcR0KF5/29xlnFihkTlbqFrGOVQ==}
 
   '@types/minimatch@6.0.0':
     resolution: {integrity: sha512-zmPitbQ8+6zNutpwgcQuLcsEpn/Cj54Kbn7L5pX0Os5kdWplB7xPgEh/g+SWOB/qmows2gpuCaPyduq8ZZRnxA==}
@@ -31313,7 +31313,7 @@ snapshots:
 
   '@types/methods@1.1.4': {}
 
-  '@types/mime-types@2.1.0': {}
+  '@types/mime-types@3.0.1': {}
 
   '@types/minimatch@6.0.0':
     dependencies:
