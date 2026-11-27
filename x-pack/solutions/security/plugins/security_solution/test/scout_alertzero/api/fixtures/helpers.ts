@@ -6,7 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import type { ApiClientFixture } from '@kbn/scout-security';
+import type { ApiClientFixture, EsClient } from '@kbn/scout-security';
 import {
   ALERTZERO_ENABLED_SETTING_ID,
   ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
@@ -57,6 +57,52 @@ export const runCleanupSteps = async (
   }
   if (failures.length > 0) {
     throw new Error(`Cleanup failed:\n${failures.join('\n')}`);
+  }
+};
+
+/**
+ * Polls `read` until it returns a value and returns it, or throws with `what` after `timeoutMs`.
+ * `onPoll` runs before each read, and a throw ends the wait, so a caller can fail fast on a state
+ * that will never lead to the value.
+ */
+export const pollFor = async <T>(
+  what: string,
+  read: () => Promise<T | undefined>,
+  {
+    timeoutMs,
+    intervalMs = 2_000,
+    onPoll,
+  }: { timeoutMs: number; intervalMs?: number; onPoll?: () => void | Promise<void> }
+): Promise<T> => {
+  const deadline = Date.now() + timeoutMs;
+  for (;;) {
+    await onPoll?.();
+    const value = await read();
+    if (value !== undefined) {
+      return value;
+    }
+    if (Date.now() > deadline) {
+      throw new Error(`Timed out after ${timeoutMs}ms waiting for ${what}`);
+    }
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+  }
+};
+
+/**
+ * Deletes the alerts index and the preview alerts index that a deleted space leaves behind. A
+ * rule preview, like a backtest, writes to the second one.
+ */
+export const deleteSpaceAlertsIndex = async (
+  esClient: EsClient,
+  spaceId: string
+): Promise<void> => {
+  // Resolved by name, because wildcard deletes are refused by default.
+  for (const index of [
+    `.alerts-security.alerts-${spaceId}`,
+    `.preview.alerts-security.alerts-${spaceId}`,
+  ]) {
+    const backing = Object.keys(await esClient.indices.get({ index, ignore_unavailable: true }));
+    if (backing.length > 0) await esClient.indices.delete({ index: backing });
   }
 };
 

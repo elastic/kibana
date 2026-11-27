@@ -12,6 +12,7 @@ import type { ApiClientFixture, EsClient, KibanaRole } from '@kbn/scout-security
 import {
   apiTest,
   tags,
+  deleteSpaceAlertsIndex,
   findStepOutput,
   runCleanupSteps,
   runWorkflow,
@@ -285,19 +286,9 @@ apiTest.describe(
         },
         ...[SPACE_A, SPACE_B].flatMap((spaceId) => [
           { name: `delete space ${spaceId}`, run: () => apiServices.spaces.delete(spaceId) },
-          // Deleting the space leaves its alerts index behind. Resolved by name: wildcard
-          // deletes are refused by default.
           {
             name: `delete the alerts index of ${spaceId}`,
-            run: async () => {
-              const backing = Object.keys(
-                await esClient.indices.get({
-                  index: alertsIndex(spaceId),
-                  ignore_unavailable: true,
-                })
-              );
-              if (backing.length > 0) await esClient.indices.delete({ index: backing });
-            },
+            run: () => deleteSpaceAlertsIndex(esClient, spaceId),
           },
         ]),
       ]);

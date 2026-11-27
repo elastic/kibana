@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { apiTest, tags } from '@kbn/scout-security';
+export { apiTest, getPlaywrightTagsFor, tags } from '@kbn/scout-security';
 export {
   ALERTZERO_READ_NO_SECURITY_ROLE,
   ALERTZERO_READ_ONLY_ROLE,
@@ -21,7 +21,9 @@ export {
 } from './constants';
 export {
   cleanupThreatReportsByIds,
+  deleteSpaceAlertsIndex,
   enableAlertZeroInSpace,
+  pollFor,
   readAlertZeroEnabledInSpace,
   readSupplyStatus,
   runCleanupSteps,
@@ -40,3 +42,39 @@ export {
 } from './helpers';
 export { type SupplyWorkflowKey } from './supply_workflow_ids';
 export { findStepOutput, runWorkflow, waitForExecution } from './workflow_runs';
+export {
+  APPLIED_TAG,
+  cleanUpReviewCase,
+  createWorkerServiceAccount,
+  DISMISSED_TAG,
+  driveReview,
+  EXCEPTION_ENTRY,
+  EXCEPTION_PROPOSAL,
+  EXPECTED_BACKTEST_COUNTS,
+  FIXTURE_RISK_SCORE,
+  FP_ALERT_COUNT,
+  FP_PROCESS_NAME,
+  hasBacktestRun,
+  NARROWED_QUERY,
+  OVERBROAD_QUERY,
+  pinModelToEndpoint,
+  pinModelToProxy,
+  QUERY_PROPOSAL,
+  readBacktest,
+  readRule,
+  readRuleExceptionItems,
+  RISK_SCORE_PROPOSAL,
+  runScriptedReviewCase,
+  SEEDED_EVENT_COUNT,
+  seedRuleWithFalsePositives,
+  setRuleTuningWorker,
+  startReviewHarness,
+  TEST_TIMEOUT_MS,
+  TP_EVENT_COUNT,
+  waitForAlertTag,
+  type BacktestOutcome,
+  type ReviewCaseFixtures,
+  type RuleState,
+  type SeededRule,
+} from './rule_tuning';
+export { startScriptedModel, type ScriptedModel } from './scripted_model';
