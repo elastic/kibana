@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { useLocation, useParams } from 'react-router-dom';
@@ -22,9 +21,11 @@ import { Actions } from '../../monitor_details/actions';
 import { useFetchActiveAlerts } from '../../monitor_details/hooks/use_fetch_active_alerts';
 import { useMonitorErrors } from '../../monitor_details/hooks/use_monitor_errors';
 import { useSelectedMonitor } from '../../monitor_details/hooks/use_selected_monitor';
+import { useMonitorName } from '../../../hooks/use_monitor_name';
 import { MonitorDetailsLastRun } from '../../monitor_details/monitor_details_last_run';
 import { MonitorDetailsLocation } from '../../monitor_details/monitor_details_location';
 import { MonitorDetailsPageTitle } from '../../monitor_details/monitor_details_page_title';
+import { MonitorSelector } from '../../monitor_details/monitor_selector/monitor_selector';
 import { MonitorDetailsStatus } from '../../monitor_details/monitor_details_status';
 import { useMonitorDetailsPage } from '../../monitor_details/use_monitor_details_page';
 import { MONITORS_TITLE, SyntheticsHeaderToolbar, SyntheticsPage } from './synthetics_page';
@@ -94,6 +95,9 @@ const MonitorDetailsPageInner = ({
   const { monitorId } = useParams<{ monitorId: string }>();
   const { remoteName } = useGetUrlParams();
   const { monitor } = useSelectedMonitor();
+  const { values: otherMonitors, loading: otherMonitorsLoading } = useMonitorName({ search: '' });
+  const showSwitcher = otherMonitorsLoading || otherMonitors.length > 0;
+  const monitorName = monitor?.name ?? '';
   const isReadOnly = Boolean(remoteName) || isHeartbeatSyntheticsMonitor(monitor);
   const { hasActiveError } = useMonitorErrors();
   const { application } = useKibana<ClientPluginsStart>().services;
@@ -101,7 +105,17 @@ const MonitorDetailsPageInner = ({
 
   return (
     <SyntheticsPage
-      title={monitor?.name ?? ''}
+      title={showSwitcher ? '' : monitorName}
+      badges={
+        showSwitcher
+          ? [
+              {
+                label: monitorName || 'monitor',
+                renderCustomBadge: () => <MonitorSelector />,
+              },
+            ]
+          : undefined
+      }
       back={{
         href: `${syntheticsPath}${MONITORS_ROUTE}`,
         label: MONITORS_TITLE,
@@ -118,7 +132,6 @@ const MonitorDetailsPageInner = ({
       toolbar={
         <>
           <MonitorDetailsPageTitle hideName />
-          <EuiSpacer size="s" />
           <SyntheticsHeaderToolbar>
             <MonitorDetailsLocation />
             <MonitorDetailsStatus />
