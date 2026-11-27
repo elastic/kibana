@@ -71,6 +71,28 @@ apiTest.describe(
     });
 
     apiTest(
+      'rejects an automation whose instructions make the workflow invalid',
+      async ({ apiClient }) => {
+        const request = createRequest(apiClient, () => cookieHeader);
+        const name = uniqueId('scout-invalid');
+        const created = await request('post', PATH, {
+          name,
+          isEnabled: true,
+          trigger: {
+            rows: [{ kind: 'schedule', schedulePreset: 'daily', time: '03:00', timezone: 'UTC' }],
+          },
+          execution: { promptTemplate: 'Check the queue {% if %} depth' },
+          completions: [],
+          runtime: { dailyDispatchLimit: 3 },
+        });
+        expect(created).toHaveStatusCode(400);
+        const list = await request('get', PATH);
+        expect(list).toHaveStatusCode(200);
+        expect(JSON.stringify(list.body)).not.toContain(name);
+      }
+    );
+
+    apiTest(
       'recreates a deleted workflow paused, then allows enabling and editing',
       async ({ apiClient, samlAuth }) => {
         const request = createRequest(apiClient, () => cookieHeader);

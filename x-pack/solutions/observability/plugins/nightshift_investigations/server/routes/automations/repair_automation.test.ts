@@ -61,7 +61,7 @@ beforeEach(() => {
   serviceAccountService = createServiceAccountService();
   soClient.get.mockResolvedValue({ id: 'automation', attributes, version: 'v1' });
   assertWorkflowAccess.mockRejectedValue(new WorkflowNotFoundError('old'));
-  createWorkflow.mockResolvedValue({ id: 'new' });
+  createWorkflow.mockResolvedValue({ id: 'new', valid: true });
   deleteWorkflows.mockResolvedValue({ failures: [] });
 });
 
@@ -143,6 +143,13 @@ it('removes the disabled replacement if linking fails', async () => {
   expect(deleteWorkflows).toHaveBeenCalledWith(['new'], 'default', expect.anything());
 });
 
+it('deletes the replacement and rejects when its workflow is invalid', async () => {
+  createWorkflow.mockResolvedValue({ id: 'new', valid: false });
+  await expect(callRepair()).rejects.toMatchObject({ output: { statusCode: 400 } });
+  expect(deleteWorkflows).toHaveBeenCalledWith(['new'], 'default', expect.anything());
+  expect(soClient.update).not.toHaveBeenCalled();
+});
+
 it('logs a failed cleanup without replacing the linking error', async () => {
   const error = conflict('Changed');
   soClient.update.mockRejectedValue(error);
@@ -157,8 +164,8 @@ it('links only one replacement when two repairs race, cleaning up the loser', as
   let savedVersion = 'v1';
   let linkedId: string | undefined;
   createWorkflow
-    .mockResolvedValueOnce({ id: 'replacement-a' })
-    .mockResolvedValueOnce({ id: 'replacement-b' });
+    .mockResolvedValueOnce({ id: 'replacement-a', valid: true })
+    .mockResolvedValueOnce({ id: 'replacement-b', valid: true });
   soClient.update.mockImplementation(async (_type, _id, changes, { version }) => {
     if (version !== savedVersion) throw conflict('Changed');
     savedVersion = 'v2';

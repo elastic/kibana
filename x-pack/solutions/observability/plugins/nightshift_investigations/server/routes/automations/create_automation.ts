@@ -20,6 +20,7 @@ import { validateScheduledAutomation } from '../../lib/automations/validate_sche
 import { validateSlackChannelsBound } from '../../lib/automations/validate_slack_channels_bound';
 import { validateThreadCompletion } from '../../lib/automations/validate_thread_completion';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
+import { INVALID_WORKFLOW_MESSAGE } from './invalid_workflow_message';
 import { triggerRowSchema } from './trigger_row_schema';
 
 const triggerSchema = z.object({
@@ -74,6 +75,7 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
     getSlackChannelBindingChecker,
     getInvestigatorServiceAccountService,
     context,
+    logger,
   }) => {
     const workflowsManagement = getWorkflowsManagement();
     if (!workflowsManagement) {
@@ -119,7 +121,7 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
       attributes
     );
 
-    let workflowId: string;
+    let workflow: Awaited<ReturnType<typeof workflowsManagement.management.createWorkflow>>;
     try {
       const yaml = generateWorkflowYaml({
         automationId: created.id,
@@ -127,15 +129,25 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
         serviceAccountId,
         universalAlerts: isUniversalAlertingAvailable(),
       });
-      const workflow = await workflowsManagement.management.createWorkflow(
-        { yaml },
-        spaceId,
-        request
-      );
-      workflowId = workflow.id;
+      workflow = await workflowsManagement.management.createWorkflow({ yaml }, spaceId, request);
     } catch (err) {
       await soClient.delete(NIGHTSHIFT_AUTOMATION_SO_TYPE, created.id);
       throw badRequest(`Failed to create backing workflow: ${err.message}`);
+    }
+    const workflowId = workflow.id;
+
+    if (!workflow.valid) {
+      const [soResult, workflowResult] = await Promise.allSettled([
+        soClient.delete(NIGHTSHIFT_AUTOMATION_SO_TYPE, created.id),
+        workflowsManagement.management.deleteWorkflows([workflowId], spaceId, request),
+      ]);
+      if (soResult.status === 'rejected') {
+        logger.warn(`Could not remove automation ${created.id} after its workflow was invalid`);
+      }
+      if (workflowResult.status === 'rejected' || workflowResult.value.failures.length > 0) {
+        logger.warn(`Could not remove invalid workflow ${workflowId} in space ${spaceId}`);
+      }
+      throw badRequest(INVALID_WORKFLOW_MESSAGE);
     }
 
     try {

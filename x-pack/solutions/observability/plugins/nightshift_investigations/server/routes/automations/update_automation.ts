@@ -83,6 +83,7 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
     getSlackChannelBindingChecker,
     getInvestigatorServiceAccountService,
     context,
+    logger,
   }) => {
     const workflowsManagement = getWorkflowsManagement();
     if (!workflowsManagement) {
@@ -144,9 +145,14 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
 
     // Update the workflow first — if it fails, the SO is left unchanged so reads stay consistent.
     if (existing.attributes.workflowId) {
+      const { workflowId } = existing.attributes;
+      const { management } = workflowsManagement;
       try {
-        await workflowsManagement.management.updateWorkflow(
-          existing.attributes.workflowId,
+        const previousYaml = pauseOnly
+          ? undefined
+          : (await management.getWorkflow(workflowId, spaceId, request))?.yaml;
+        const result = await management.updateWorkflow(
+          workflowId,
           pauseOnly
             ? { enabled: false }
             : {
@@ -160,6 +166,16 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
           spaceId,
           request
         );
+        if (!pauseOnly && !result.valid) {
+          if (previousYaml) {
+            await management
+              .updateWorkflow(workflowId, { yaml: previousYaml }, spaceId, request)
+              .catch(() =>
+                logger.warn(`Could not restore workflow ${workflowId} in space ${spaceId}`)
+              );
+          }
+          throw new Error(result.validationErrors.join(', '));
+        }
       } catch (err) {
         if (err instanceof WorkflowNotFoundError) {
           if (!pauseOnly) {
