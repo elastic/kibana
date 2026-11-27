@@ -4428,6 +4428,25 @@ describe('EditOutputFlyout', () => {
         expect(isTlsSectionOpen(utils)).toBe('false');
       });
 
+      it('should keep the section open once an error that opened it is fixed', async () => {
+        const { utils } = renderFlyout(otlpOutputWithTls);
+        fireEvent.click(utils.getByText('Replace Client key, PEM'));
+        fireEvent.click(getTlsToggle(utils));
+        expect(isTlsSectionOpen(utils)).toBe('false');
+
+        fireEvent.click(utils.getByText('Save and apply settings'));
+        await waitFor(() => {
+          expect(isTlsSectionOpen(utils)).toBe('true');
+        });
+
+        change(utils, 'otlpTlsKeyPemInput', KEY_PEM);
+
+        expect(
+          utils.queryByTestId('settingsOutputsFlyout.otlpTlsSettingsErrors')
+        ).not.toBeInTheDocument();
+        expect(isTlsSectionOpen(utils)).toBe('true');
+      });
+
       it('should reject a value that is not PEM in a PEM setting', async () => {
         const { utils } = renderFlyout(otlpOutputWithTls);
         change(utils, 'otlpTlsCaPemInput', '/etc/ssl/ca.pem');

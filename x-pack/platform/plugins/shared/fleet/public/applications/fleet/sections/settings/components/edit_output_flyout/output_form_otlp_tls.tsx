@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiAccordion, EuiIcon, EuiText, EuiTextArea } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -103,6 +103,13 @@ export const OtlpTlsSettings: React.FunctionComponent<{ inputs: OutputFormInputs
   // be seen: its toggle is disabled, and its title says why
   const hasErrors = hasOtlpTlsErrors(inputs);
   const [isOpen, setIsOpen] = useState(() => hasOtlpTlsSettings(inputs));
+
+  // an error opens the section, which then stays open once the error is fixed
+  useEffect(() => {
+    if (hasErrors) {
+      setIsOpen(true);
+    }
+  }, [hasErrors]);
 
   return (
     <EuiAccordion
