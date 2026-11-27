@@ -11,7 +11,6 @@ import { expect } from '@kbn/scout/ui';
 import { test, testData } from '../fixtures';
 import {
   PACKAGES,
-  PRODUCTION_NAMESPACE,
   buildDataStreamName,
   cleanUpAll,
   datasetNames,
@@ -33,6 +32,13 @@ const APACHE_ACCESS_DATASET = 'apache.access';
 /** The integration supplies a display name, which is what the table renders. */
 const APACHE_ACCESS_DISPLAY_NAME = 'Apache access logs';
 const APACHE_INTEGRATION_NAME = 'Apache HTTP Server';
+/**
+ * Namespaces only this file writes to. The page is opened filtered to them, because the list
+ * shows every `logs-*-*` data stream on the cluster and other suites sharing the Scout stack
+ * leave theirs behind (`logs-generic.otel-default`, for one).
+ */
+const NAMESPACE = 'dqfiltersmain';
+const APACHE_NAMESPACE = 'dqfiltersprod';
 
 const ALL_DATASET_NAMES = [APACHE_ACCESS_DISPLAY_NAME, ...datasetNames];
 
@@ -45,8 +51,8 @@ test.describe(
     let uninstallApache: () => Promise<void>;
 
     const ownedDataStreams = [
-      ...datasetNames.map((dataset) => buildDataStreamName({ dataset })),
-      buildDataStreamName({ dataset: APACHE_ACCESS_DATASET, namespace: PRODUCTION_NAMESPACE }),
+      ...datasetNames.map((dataset) => buildDataStreamName({ dataset, namespace: NAMESPACE })),
+      buildDataStreamName({ dataset: APACHE_ACCESS_DATASET, namespace: APACHE_NAMESPACE }),
     ];
 
     // Read-only data, seeded once. Filter state needs no reset — each test gets a
@@ -59,26 +65,29 @@ test.describe(
       );
 
       await indexLogs(logsSynthtraceEsClient, [
-        getInitialTestLogs({ to: TO, count: 4 }),
+        getInitialTestLogs({ to: TO, count: 4, namespace: NAMESPACE }),
         // Malformed docs make this dataset report "Poor" quality.
         getLogsForDataset({
           to: ACTIVE_TO,
           count: 1,
           dataset: datasetNames[2],
           isMalformed: true,
+          namespace: NAMESPACE,
         }),
         getLogsForDataset({
           to: TO,
           count: 10,
           dataset: APACHE_ACCESS_DATASET,
-          namespace: PRODUCTION_NAMESPACE,
+          namespace: APACHE_NAMESPACE,
         }),
       ]);
     });
 
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsViewer();
-      await pageObjects.datasetQuality.goto();
+      await pageObjects.datasetQuality.goto({
+        filters: { namespaces: [NAMESPACE, APACHE_NAMESPACE] },
+      });
     });
 
     test.afterAll(async ({ esClient, log }) => {
@@ -152,23 +161,22 @@ test.describe(
       });
     });
 
+    // Both namespaces start selected, so this narrows by deselecting one of them.
     test('filters for a namespace', async ({ pageObjects }) => {
       expect(
         await pageObjects.datasetQuality.getColumnValues(testData.TABLE_COLUMNS.namespace)
-      ).toContain(PRODUCTION_NAMESPACE);
+      ).toContain(APACHE_NAMESPACE);
 
-      await test.step('keeps only the selected namespace', async () => {
-        await pageObjects.datasetQuality.filterForNamespaces([PRODUCTION_NAMESPACE]);
+      await test.step('drops the data sets of a deselected namespace', async () => {
+        await pageObjects.datasetQuality.filterForNamespaces([APACHE_NAMESPACE]);
 
         await expect
-          .poll(async () =>
-            pageObjects.datasetQuality.getColumnValues(testData.TABLE_COLUMNS.namespace)
-          )
-          .toStrictEqual([PRODUCTION_NAMESPACE]);
+          .poll(async () => pageObjects.datasetQuality.getDatasetNames())
+          .toStrictEqual(datasetNames);
       });
 
-      await test.step('restores every data set when the namespace is deselected', async () => {
-        await pageObjects.datasetQuality.filterForNamespaces([PRODUCTION_NAMESPACE]);
+      await test.step('restores them when the namespace is selected again', async () => {
+        await pageObjects.datasetQuality.filterForNamespaces([APACHE_NAMESPACE]);
 
         await expect
           .poll(async () => pageObjects.datasetQuality.getDatasetNames())

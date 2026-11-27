@@ -59,11 +59,11 @@ export const useQueryBar = (): UseQueryBarUtils => {
           language: SyntaxType.text,
         }
       : search
-      ? { query: search, language: SyntaxType.kuery }
-      : {
-          query: '',
-          language: storage.get(SYNTAX_STORAGE) ?? SyntaxType.text,
-        }
+        ? { query: search, language: SyntaxType.kuery }
+        : {
+            query: '',
+            language: storage.get(SYNTAX_STORAGE) ?? SyntaxType.text,
+          }
   );
 
   const [, updateUrlParams] = useUrlParams();

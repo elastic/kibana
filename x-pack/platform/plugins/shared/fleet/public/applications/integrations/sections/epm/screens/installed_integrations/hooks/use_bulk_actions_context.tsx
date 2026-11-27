@@ -80,8 +80,8 @@ export const BulkActionContextProvider: React.FunctionComponent<{ children: Reac
           action.type === 'bulk_upgrade'
             ? await sendGetOneBulkUpgradePackagesForRq(action.taskId)
             : action.type === 'bulk_uninstall'
-            ? await sendGetOneBulkUninstallPackagesForRq(action.taskId)
-            : await sendGetBulkRollbackInfoPackagesForRq(action.taskId);
+              ? await sendGetOneBulkUninstallPackagesForRq(action.taskId)
+              : await sendGetBulkRollbackInfoPackagesForRq(action.taskId);
 
         if (res.status !== 'pending') {
           await queryClient.invalidateQueries(['get-packages']);
@@ -98,18 +98,18 @@ export const BulkActionContextProvider: React.FunctionComponent<{ children: Reac
                       }
                     )
                   : action.type === 'bulk_uninstall'
-                  ? i18n.translate(
-                      'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkUninstallSuccessTitle',
-                      {
-                        defaultMessage: 'Uninstall succeeded',
-                      }
-                    )
-                  : i18n.translate(
-                      'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkRollbackSuccessTitle',
-                      {
-                        defaultMessage: 'Rollback succeeded',
-                      }
-                    ),
+                    ? i18n.translate(
+                        'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkUninstallSuccessTitle',
+                        {
+                          defaultMessage: 'Uninstall succeeded',
+                        }
+                      )
+                    : i18n.translate(
+                        'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkRollbackSuccessTitle',
+                        {
+                          defaultMessage: 'Rollback succeeded',
+                        }
+                      ),
             });
             if (actionCompletedCallback) {
               actionCompletedCallback('success');
@@ -118,11 +118,11 @@ export const BulkActionContextProvider: React.FunctionComponent<{ children: Reac
             const errorMessage = res.error?.message
               ? res.error?.message
               : res.results
-              ? res.results
-                  .filter((result) => result.error)
-                  .map((result) => `${result.name}: ${result.error?.message}`)
-                  .join('\n')
-              : 'Unexpected error';
+                ? res.results
+                    .filter((result) => result.error)
+                    .map((result) => `${result.name}: ${result.error?.message}`)
+                    .join('\n')
+                : 'Unexpected error';
             const error = new Error(errorMessage);
 
             toasts.addError(error, {
@@ -135,22 +135,62 @@ export const BulkActionContextProvider: React.FunctionComponent<{ children: Reac
                       }
                     )
                   : action.type === 'bulk_uninstall'
-                  ? i18n.translate(
-                      'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkUninstallFailedTitle',
-                      {
-                        defaultMessage: 'Uninstall failed',
-                      }
-                    )
-                  : i18n.translate(
-                      'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkRollbackFailedTitle',
-                      {
-                        defaultMessage: 'Rollback failed',
-                      }
-                    ),
+                    ? i18n.translate(
+                        'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkUninstallFailedTitle',
+                        {
+                          defaultMessage: 'Uninstall failed',
+                        }
+                      )
+                    : i18n.translate(
+                        'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkRollbackFailedTitle',
+                        {
+                          defaultMessage: 'Rollback failed',
+                        }
+                      ),
             });
             if (actionCompletedCallback) {
               actionCompletedCallback('failed');
             }
+          }
+
+          // Package policies blocked by their agents' versions stay on their current package
+          // version, without failing the package upgrade.
+          const skippedPackagePolicies =
+            action.type === 'bulk_upgrade'
+              ? (res.results ?? []).flatMap(({ name, skipped_package_policies: skipped }) =>
+                  (skipped ?? []).map((packagePolicy) => ({ ...packagePolicy, packageName: name }))
+                )
+              : [];
+          if (skippedPackagePolicies.length > 0) {
+            toasts.addWarning({
+              title: i18n.translate(
+                'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkUpgradeSkippedPoliciesTitle',
+                {
+                  defaultMessage:
+                    'Fleet skipped {skippedCount, plural, one {# agent-based policy} other {# agent-based policies}}',
+                  values: { skippedCount: skippedPackagePolicies.length },
+                }
+              ),
+              text: i18n.translate(
+                'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkUpgradeSkippedPoliciesMessage',
+                {
+                  defaultMessage:
+                    "Some agents using {skippedNames} don't satisfy the agent version required by the new integration version and would stop collecting its data. Upgrade those agents, then upgrade {skippedCount, plural, one {this policy} other {these policies}}.",
+                  values: {
+                    skippedCount: skippedPackagePolicies.length,
+                    skippedNames: i18n.formatList(
+                      'conjunction',
+                      skippedPackagePolicies.map(
+                        ({ id, name, packageName, version_condition: versionCondition }) =>
+                          `${name ?? id} (${packageName}${
+                            versionCondition ? ` ${versionCondition}` : ''
+                          })`
+                      )
+                    ),
+                  },
+                }
+              ),
+            });
           }
         }
       },

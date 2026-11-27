@@ -53,7 +53,7 @@ export const getAlertsByTags = async ({
 
   const { total, hits } = response.hits;
   return {
-    total: typeof total === 'number' ? total : total?.value ?? 0,
+    total: typeof total === 'number' ? total : (total?.value ?? 0),
     alerts: hits.flatMap((hit) =>
       hit._id && hit._source ? [{ id: hit._id, source: hit._source }] : []
     ),

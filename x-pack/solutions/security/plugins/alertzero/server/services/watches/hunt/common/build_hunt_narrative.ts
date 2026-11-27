@@ -310,8 +310,8 @@ const describeCoverage = (result: HuntCoordinatorCoreResult): string[] => {
         ? '**Coverage: incomplete, retryable.** The confirmed hit stands, but part of the search did not run for a transient reason, so this run is not a statement about everything the report describes.'
         : '**Coverage: incomplete, retryable.** Part of the search did not run for a transient reason, so the report is not marked as hunted, stays eligible for a later sweep, and this run is not a statement that the environment is clean.'
       : result.has_confirmed_hit
-      ? '**Coverage: incomplete.** The confirmed hit stands, but part of the search did not run, and repeating the run is not expected to change that; the report is retired without a full search.'
-      : '**Coverage: incomplete.** Part of the search did not run, and repeating the run is not expected to change that; the report is retired, but this run is not a statement that the environment is clean.',
+        ? '**Coverage: incomplete.** The confirmed hit stands, but part of the search did not run, and repeating the run is not expected to change that; the report is retired without a full search.'
+        : '**Coverage: incomplete.** Part of the search did not run, and repeating the run is not expected to change that; the report is retired, but this run is not a statement that the environment is clean.',
   ];
   for (const gap of gaps) {
     const key = `${gap.reason}:${gap.detail}`;
@@ -399,12 +399,12 @@ const describeOutcome = (
         ? 'Behavior Hunt derived behaviors from the report text but none matched live activity.'
         : 'Behavior Hunt derived no executable behaviors from the report text.'
       : result.tier2_skipped_reason
-      ? describeTier2Skip(
-          result.tier2_skipped_reason,
-          result.unavailable_model_tiers,
-          result.tier2_skip_detail
-        )
-      : '';
+        ? describeTier2Skip(
+            result.tier2_skipped_reason,
+            result.unavailable_model_tiers,
+            result.tier2_skip_detail
+          )
+        : '';
     return {
       heading: 'Hunt Watch confirmed a hit',
       summary:
@@ -529,8 +529,8 @@ export const buildHuntHeadline = (
     tier1.status === 'no_searchable_terms'
       ? 'IOC Hunt had nothing to search'
       : tier1.counts.total_hits === 0
-      ? 'IOC Hunt found no matches'
-      : `IOC Hunt matched ${plural(tier1.counts.total_hits, 'document')}`;
+        ? 'IOC Hunt found no matches'
+        : `IOC Hunt matched ${plural(tier1.counts.total_hits, 'document')}`;
   let tier2Part: string;
   if (tier2) {
     const confirmed = tier2Confirmed(result).length;

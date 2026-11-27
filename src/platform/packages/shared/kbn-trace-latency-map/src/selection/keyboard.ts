@@ -16,7 +16,11 @@ export interface KeyboardState {
   anchor?: Cell;
 }
 
-export type KeyboardAction = { type: 'commit'; range: CellRange } | { type: 'clear' } | undefined;
+export type KeyboardAction =
+  | { type: 'commit'; range: CellRange }
+  | { type: 'click'; cell: Cell }
+  | { type: 'clear' }
+  | undefined;
 
 const ARROWS: Record<string, Cell> = {
   ArrowLeft: { xi: -1, yi: 0 },
@@ -34,7 +38,8 @@ export const getKeyboardRange = ({ cursor, anchor }: KeyboardState) =>
 /**
  * Arrows move the cursor, Shift+arrows extend a region from where Shift began, Enter commits
  * that region and Escape drops it, or clears the selection when there is none to drop. Enter
- * with no region does nothing: a cursor alone must not replace the selection.
+ * with no region is the pointer's click on the cursor's cell: it opens the cell, and never
+ * replaces the selection.
  */
 export function reduceKeyboard(
   state: KeyboardState,
@@ -49,12 +54,14 @@ export function reduceKeyboard(
       yi: clamp(state.cursor.yi + arrow.yi, rows - 1),
     };
     return {
-      state: { cursor, anchor: shiftKey ? state.anchor ?? state.cursor : undefined },
+      state: { cursor, anchor: shiftKey ? (state.anchor ?? state.cursor) : undefined },
       handled: true,
     };
   }
   if (key === 'Enter') {
-    if (!state.anchor) return { state, handled: false };
+    if (!state.anchor) {
+      return { state, action: { type: 'click', cell: state.cursor }, handled: true };
+    }
     return {
       state: { cursor: state.cursor },
       action: { type: 'commit', range: getKeyboardRange(state) },

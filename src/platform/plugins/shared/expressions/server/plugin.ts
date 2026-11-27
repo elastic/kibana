@@ -16,9 +16,10 @@ export type ExpressionsServerSetup = ExpressionsServiceSetup;
 
 export type ExpressionsServerStart = ExpressionsServiceStart;
 
-export class ExpressionsServerPlugin
-  implements Plugin<ExpressionsServerSetup, ExpressionsServerStart>
-{
+export class ExpressionsServerPlugin implements Plugin<
+  ExpressionsServerSetup,
+  ExpressionsServerStart
+> {
   readonly expressions: ExpressionsService;
 
   constructor(context: PluginInitializerContext) {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiEmptyPrompt,
@@ -41,6 +41,7 @@ import {
   APPLICATIONS_LIST_EBT_ELEMENTS,
   DIGITAL_EXPERIENCE_EBT_ACTIONS,
 } from '../../ebt_constants';
+import { useSessionsStatus } from '../../application/sessions_status_provider';
 import { useApiClient } from '../../hooks/use_api_client';
 import { useApplicationType } from '../../hooks/use_application_type';
 import { useEnvironment } from '../../hooks/use_environment';
@@ -49,9 +50,15 @@ import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { usePlatformFilter } from '../../hooks/use_platform_filter';
 import { useSourceFilter } from '../../hooks/use_source_filter';
 import { useTimeRange } from '../../hooks/use_time_range';
-import { APPLICATIONS_LABEL } from '../../labels';
+import {
+  APPLICATIONS_LABEL,
+  INGEST_FAILED_LABEL,
+  INGEST_MISSING_PRIVILEGES_LABEL,
+  INGEST_REMOTE_LABEL,
+} from '../../labels';
 import { EDOT_BROWSER_DOCS_URL } from '../../utils/doc_links';
 import { toTimeRangeQuery } from '../../utils/time_range_query';
+import type { IngestColumnState } from './components/ingest_column';
 import { MobileApplicationsTable } from './mobile/mobile_applications_table';
 import { MobileAvailabilityCallOut } from './mobile/mobile_availability_callout';
 import { PlatformFilter } from './mobile/platform_filter';
@@ -62,13 +69,17 @@ import {
   isWebApplication,
   mobileApplicationsMatching,
 } from './utils/filter_applications';
+import { ingestChartPoints, toIngestLookup, totalIngest } from './utils/ingest';
 import {
   pageLoadsOfSources,
   sessionsOfSource,
   summarizeApplications,
 } from './utils/summarize_applications';
+import type { IngestSummary } from './web/applications_summary_panel';
 import { ApplicationsSummaryPanel } from './web/applications_summary_panel';
+import { IngestChart } from './web/ingest_chart';
 import { PageLoadsChart } from './web/page_loads_chart';
+import { SessionsSourceStatus } from './web/sessions_source_status';
 import { SourceFilter } from './web/source_filter';
 import {
   PartiallyAvailableSourcesCallOut,
@@ -222,6 +233,15 @@ const FETCH_ERROR_TITLE = i18n.translate('xpack.digitalExperience.applications.f
   defaultMessage: 'Could not load the applications',
 });
 
+const NO_SESSIONS_MESSAGE = i18n.translate('xpack.digitalExperience.applications.noSessions', {
+  defaultMessage: 'EDOT Browser applications show up here once sessions are set up.',
+});
+
+const SESSIONS_REBUILDING_MESSAGE = i18n.translate(
+  'xpack.digitalExperience.applications.sessionsRebuilding',
+  { defaultMessage: 'EDOT Browser applications show up here as sessions are built.' }
+);
+
 const NO_PAGE_LOADS: Pick<PageLoadsOverTime, ApplicationSource> = { otel: [], classic: [] };
 
 const APPLICATION_TYPE_LABELS: Record<ApplicationType, string> = {
@@ -234,7 +254,8 @@ const APPLICATION_TYPE_LABELS: Record<ApplicationType, string> = {
 export function ApplicationsListPage() {
   const { ux } = useKibanaServices();
   const { timeRange, setTimeRange } = useTimeRange();
-  const { timeZone } = useFormatters();
+  const formatters = useFormatters();
+  const { timeZone } = formatters;
   const { environment, setEnvironment } = useEnvironment();
   const { sourceFilter, setSourceFilter } = useSourceFilter();
   const { platformFilter, setPlatformFilter } = usePlatformFilter();
@@ -262,33 +283,108 @@ export function ApplicationsListPage() {
   // Nothing has been fetched before the first request starts.
   const isLoading = loading || (!response && !error);
 
-  // Serverless has no ux plugin and no Classic RUM data; known on the first render, so the filter
-  // row doesn't change once the data loads.
-  const canFilterBySource = ux !== undefined;
-  const mobileAvailability = response?.mobileAvailability ?? 'complete';
   const hasWebApplications = response?.applications.some(isWebApplication) ?? false;
   const hasMobileApplications = response?.applications.some(isMobileApplication) ?? false;
   const unavailableSources = response?.unavailableSources ?? [];
   const hasWebFailures = unavailableSources.length > 0;
-  // Nothing matched in the indices the user can read, without full access: the prompt says so in
-  // place of the setup docs or the environment's empty state, and of the partial access warning.
-  const showsMobileUnreadableDataPrompt =
-    mobileAvailability === 'partial' && !hasMobileApplications;
   const typeWithData =
     !hasWebApplications && !hasWebFailures && hasMobileApplications
       ? APPLICATION_TYPE.mobile
       : APPLICATION_TYPE.web;
-  // Web and mobile applications have their own tab when both have something to show (web rows or a
-  // web retry, and mobile rows), for the mobile retry or unreadable data prompt whatever the web, and
+  const selectedType = applicationType ?? typeWithData;
+  const isMobileTab = selectedType === APPLICATION_TYPE.mobile;
+
+  // Apart from the list, which shows its rows without waiting, and for the shown tab only: ingest
+  // counts every document of the time range. Each value keeps what it was fetched for, so the rows
+  // never show the estimates of another range, environment or tab while the next ones load.
+  const ingestKey = JSON.stringify([timeRange, environment, timeZone, selectedType]);
+  const {
+    value: ingestValue,
+    loading: ingestLoading,
+    error: ingestError,
+    refresh: refreshIngest,
+  } = useAbortableAsync(
+    async ({ signal }) => ({
+      key: ingestKey,
+      response: await apiClient.fetch('GET /internal/digital_experience/applications/ingest', {
+        signal,
+        params: {
+          query: {
+            ...toTimeRangeQuery(timeRange, environment, timeZone),
+            applicationType: selectedType,
+          },
+        },
+      }),
+    }),
+    [apiClient, ingestKey, timeRange, environment, timeZone, selectedType],
+    { unsetValueOnError: true }
+  );
+  const ingestResponse = ingestValue?.key === ingestKey ? ingestValue.response : undefined;
+  const isIngestLoading = ingestLoading || (!ingestResponse && !ingestError);
+  const ingestState = useMemo<IngestColumnState>(
+    () => ({
+      lookup: ingestResponse ? toIngestLookup(ingestResponse) : undefined,
+      isLoading: isIngestLoading,
+      notes: [
+        ...(ingestResponse?.missingPrivileges ? [INGEST_MISSING_PRIVILEGES_LABEL] : []),
+        ...(ingestResponse?.skippedRemoteIndices ? [INGEST_REMOTE_LABEL] : []),
+        ...(ingestError || ingestResponse?.hasFailures ? [INGEST_FAILED_LABEL] : []),
+      ],
+    }),
+    [ingestResponse, isIngestLoading, ingestError]
+  );
+
+  // Sessions are web only, so the Mobile tab the URL picks requests no status; the one the list
+  // opens by itself does, to fetch again once sessions are built
+  const {
+    status: sessionsStatus,
+    refresh: refreshSessionsStatus,
+    enable: enableSessions,
+    enabling: enablingSessions,
+    enableError: enableSessionsError,
+  } = useSessionsStatus({ enabled: applicationType !== APPLICATION_TYPE.mobile });
+  // Once sessions are set up and built, the list has applications it was fetched without.
+  const sessionsReady = sessionsStatus
+    ? sessionsStatus.installed && !sessionsStatus.rebuilding
+    : undefined;
+  // Unknown on the Mobile tab the URL picks, where sessions may still need setting up
+  const mayNeedSessionsSetup =
+    sessionsReady === false ||
+    (sessionsReady === undefined && applicationType === APPLICATION_TYPE.mobile);
+  const wereSessionsReady = useRef(sessionsReady);
+  useEffect(() => {
+    if (wereSessionsReady.current === false && sessionsReady) {
+      refresh();
+    }
+    wereSessionsReady.current = sessionsReady;
+  }, [sessionsReady, refresh]);
+
+  // Serverless has no ux plugin and no Classic RUM data; known on the first render, so the filter
+  // row doesn't change once the data loads.
+  const canFilterBySource = ux !== undefined;
+  const mobileAvailability = response?.mobileAvailability ?? 'complete';
+  // Nothing matched in the indices the user can read, without full access: the prompt says so in
+  // place of the setup docs or the environment's empty state, and of the partial access warning.
+  const showsMobileUnreadableDataPrompt =
+    mobileAvailability === 'partial' && !hasMobileApplications;
+  // Web and mobile applications have their own tab when both have something to show (web rows, a
+  // web retry or sessions maybe still to set up or build, and mobile rows), for the mobile retry or
+  // unreadable data prompt whatever the web, and
   // when the URL picks the type without data, e.g. for the mobile setup docs, with a tab back. The
   // type that alone has data shows no empty tab, e.g. back from a mobile application.
   const showsTabs =
     mobileAvailability === 'unavailable' ||
     showsMobileUnreadableDataPrompt ||
-    ((hasWebApplications || hasWebFailures) && hasMobileApplications) ||
+    ((hasWebApplications || hasWebFailures || mayNeedSessionsSetup) && hasMobileApplications) ||
     (response !== undefined && applicationType !== undefined && applicationType !== typeWithData);
-  const selectedType = applicationType ?? typeWithData;
-  const isMobileTab = selectedType === APPLICATION_TYPE.mobile;
+  // A refresh checks the sessions status again, on the Web tab only: sessions are web only
+  const refreshAll = useCallback(() => {
+    refresh();
+    refreshIngest();
+    if (!isMobileTab) {
+      refreshSessionsStatus();
+    }
+  }, [refresh, refreshIngest, refreshSessionsStatus, isMobileTab]);
   // A filter in the URL is ignored where its control isn't shown, so it can't hide rows, narrow the
   // other tab's count or follow its links: the source only on the Web tab (and not on serverless),
   // the platform only on the Mobile tab, whatever a shared link or a link back carries.
@@ -305,6 +401,10 @@ export function ApplicationsListPage() {
     [response, selectedPlatform, search]
   );
 
+  // Only the EDOT Browser applications are read from the sessions.
+  const showsSessionsStatus =
+    sessionsStatus && !isMobileTab && selectedSource !== APPLICATION_SOURCE.classic;
+
   const items = useMemo(
     () =>
       filterApplications({
@@ -317,16 +417,31 @@ export function ApplicationsListPage() {
 
   // The summary and the chart cover the same rows: every source's, without the search, which only
   // narrows the table.
-  const summary = useMemo(
+  const summarizedApplications = useMemo(
     () =>
-      summarizeApplications(
-        applicationsMatching({
-          applications: response?.applications ?? [],
-          source: selectedSource,
-          search: '',
-        })
-      ),
+      applicationsMatching({
+        applications: response?.applications ?? [],
+        source: selectedSource,
+        search: '',
+      }),
     [response, selectedSource]
+  );
+  const summary = useMemo(
+    () => summarizeApplications(summarizedApplications),
+    [summarizedApplications]
+  );
+  const ingestSummary = useMemo<IngestSummary>(
+    () => ({
+      // The Web tab's: mobile applications are EDOT data too, but have their own tab.
+      bytes: totalIngest(ingestState.lookup, summarizedApplications.filter(isWebApplication)),
+      isLoading: ingestState.isLoading,
+      notes: ingestState.notes,
+    }),
+    [ingestState, summarizedApplications]
+  );
+  const ingestChartData = useMemo(
+    () => (ingestResponse ? ingestChartPoints(ingestResponse.overTime, selectedSource) : []),
+    [ingestResponse, selectedSource]
   );
   const pageLoadsOfResponse = response?.pageLoadsOverTime ?? NO_PAGE_LOADS;
   const pageLoadsOverTime = useMemo(
@@ -390,6 +505,13 @@ export function ApplicationsListPage() {
         />
       );
     }
+    // The callout above says why and what to do.
+    if (showsSessionsStatus && !sessionsStatus.installed) {
+      return NO_SESSIONS_MESSAGE;
+    }
+    if (showsSessionsStatus && sessionsStatus.rebuilding) {
+      return SESSIONS_REBUILDING_MESSAGE;
+    }
     return environment ? noApplicationsInEnvironmentPrompt : noApplicationsPrompt;
   };
 
@@ -447,7 +569,7 @@ export function ApplicationsListPage() {
       <EuiPageSection paddingSize="m" restrictWidth={false}>
         <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
           <EuiFlexItem grow={false}>
-            <TimeRangePicker onRefresh={refresh} />
+            <TimeRangePicker onRefresh={refreshAll} />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
@@ -477,6 +599,18 @@ export function ApplicationsListPage() {
             <EuiSpacer size="m" />
           </>
         )}
+        {showsSessionsStatus && (
+          <SessionsSourceStatus
+            status={sessionsStatus}
+            rangeStart={response?.pageLoadsOverTime.histogram.start}
+            formatters={formatters}
+            canEnable={sessionsStatus.canEnable}
+            canManage={sessionsStatus.canManage}
+            onEnable={enableSessions}
+            enabling={enablingSessions}
+            enableError={enableSessionsError}
+          />
+        )}
         {!isMobileTab && unavailableSources.length > 0 && (
           <>
             <UnavailableSourcesCallOut sources={unavailableSources} />
@@ -497,15 +631,32 @@ export function ApplicationsListPage() {
         )}
         {!isMobileTab && (
           <>
-            <ApplicationsSummaryPanel summary={summary} isLoading={isLoading} />
-            <EuiSpacer size="m" />
-            <PageLoadsChart
-              pageLoads={pageLoadsOverTime}
-              sessions={sessionsOverTime}
-              histogram={response?.pageLoadsOverTime.histogram}
+            <ApplicationsSummaryPanel
+              summary={summary}
               isLoading={isLoading}
-              onTimeRangeSelect={setTimeRange}
+              ingest={ingestSummary}
             />
+            <EuiSpacer size="m" />
+            <EuiFlexGroup gutterSize="m">
+              <EuiFlexItem>
+                <PageLoadsChart
+                  pageLoads={pageLoadsOverTime}
+                  sessions={sessionsOverTime}
+                  histogram={response?.pageLoadsOverTime.histogram}
+                  isLoading={isLoading}
+                  onTimeRangeSelect={setTimeRange}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <IngestChart
+                  points={ingestChartData}
+                  histogram={ingestResponse?.overTime.histogram}
+                  isLoading={isIngestLoading}
+                  notes={ingestState.notes}
+                  onTimeRangeSelect={setTimeRange}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
             <EuiSpacer size="m" />
           </>
         )}
@@ -554,6 +705,7 @@ export function ApplicationsListPage() {
             searchTerm={searchTerm}
             isLoading={isLoading}
             noItemsMessage={getMobileNoItemsMessage()}
+            ingest={ingestState}
           />
         ) : (
           <WebApplicationsTable
@@ -563,6 +715,7 @@ export function ApplicationsListPage() {
             noItemsMessage={getWebNoItemsMessage()}
             visibleColumns={visibleColumns}
             onShowClassicData={showClassicData}
+            ingest={ingestState}
           />
         )}
       </EuiPageSection>

@@ -81,6 +81,12 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsEndpointKillProcessDescendants: true,
 
   /**
+   * Export `get-file` / `memory-dump` output to external storage for Elastic Defend
+   * Release: 9.7
+   */
+  responseActionsEndpointFileExport: false,
+
+  /**
    * Enables CCS prefixing of endpoint indices so a Defend agent shipping to a remote ES output
    * (Fleet remote output) is visible from the managing cluster's Kibana.
    * Release: 9.5
@@ -364,25 +370,16 @@ export const allowedExperimentalValues = Object.freeze({
   mitreAttackUpdatesUIEnabled: true,
 
   /**
-   * Enables the reworked Elastic Defend policy settings form with
-   * per-operating-system protection configuration.
-   * Release: 9.6
-   */
-  perOsPolicySettings: true,
-
-  /**
    * Enables ransomware protection for Linux in Elastic Defend policies.
    * When disabled, `linux.ransomware` is not added to new policies, is stripped from updated
    * ones, and is not shown in the UI.
-   * Requires `perOsPolicySettings`: the Linux toggle exists only in the per-OS policy form, so the
-   * feature is treated as disabled unless both flags are on (`isLinuxRansomwareProtectionEnabled`).
    * Release: 9.6
    */
   linuxRansomwareProtection: true,
 
   /**
    * Enables the AI Data Collection card in the per-OS Elastic Defend policy settings form and
-   * turns AI event enrichment on by default for new policies (requires `perOsPolicySettings`).
+   * turns AI event enrichment on by default for new policies.
    * Release: 9.6
    */
   endpointAiDataCollection: true,

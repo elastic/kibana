@@ -1,8 +1,17 @@
 # Nightshift detection
 
 The detection engine of Nightshift. It runs detection strategies per space on a schedule and stores
-what they find as detection signals. This plugin is server-only and built with Kibana DI
-(`server/setup/`).
+what they find as detection signals. The server is built with Kibana DI (`server/setup/`).
+
+## Inspector
+
+`public/` holds one hidden page for the engine's developers, `/app/nightshiftDetectionDebug`. It
+calls `_tick` and `_reconcile` in the current space and shows what they return. **Set up this
+space** finds or creates the `nightshift_detection` service account as the current user and calls
+`_enable` with it; on stateful the account's role must exist first (`ensureNightshiftServiceAccountRoles`). It has no nav link
+and no gate besides the plugin being enabled, so it is deleted, with `public/` and the
+`nightshiftDetection` entry in `packages/kbn-rspack-optimizer/limits.yml`, before the plugin is
+turned on in any shipped config.
 
 ## Availability
 
@@ -15,7 +24,7 @@ Enterprise license.
 
 Server code is grouped by what it does, so a new feature adds a folder instead of growing a shared one:
 
-- `server/lib/<domain>/`: the logic. `engine/` runs a tick, `strategies/` holds what a tick runs, `signals/` and `state/` store what it finds and where it stopped, `service_account/` binds a space to its account, `workflows/` installs the managed workflows.
+- `server/lib/<domain>/`: the logic. `engine/` runs a tick, `strategies/` holds what a tick runs, `signals/` and `state/` store what it finds and where it stopped, `service_account/` binds a space to its account, `workflows/` installs the managed workflows, `judge_case/` builds what the judge reads from a signal's evidence.
 - `server/routes/<feature>/`: one folder of routes per feature, built on `BaseEngineRoute`.
 - `server/setup/bind_<feature>.ts`: the DI bindings of one feature, loaded from `server/index.ts`.
 

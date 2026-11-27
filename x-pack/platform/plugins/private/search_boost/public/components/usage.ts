@@ -10,16 +10,16 @@ import type { BoostRuleMatch } from '../../common/types';
 export interface BoostUsage {
   /** What the rules match, less any that higher-ranked rules apply to instead. */
   appliesTo: number;
-  storageSizeInBytes: number;
+  /** Left out when any size couldn't be loaded, since a partial total would look complete. */
+  storageSizeInBytes?: number;
 }
 
-export const getUsage = (matches: BoostRuleMatch[]): BoostUsage =>
-  matches
-    .filter(({ outrankedByRuleName }) => !outrankedByRuleName)
-    .reduce<BoostUsage>(
-      (usage, { storageSizeInBytes = 0 }) => ({
-        appliesTo: usage.appliesTo + 1,
-        storageSizeInBytes: usage.storageSizeInBytes + storageSizeInBytes,
-      }),
-      { appliesTo: 0, storageSizeInBytes: 0 }
-    );
+export const getUsage = (matches: BoostRuleMatch[]): BoostUsage => {
+  const applied = matches.filter(({ outrankedByRuleName }) => !outrankedByRuleName);
+  return {
+    appliesTo: applied.length,
+    storageSizeInBytes: applied.some(({ storageSizeInBytes }) => storageSizeInBytes === undefined)
+      ? undefined
+      : applied.reduce((total, { storageSizeInBytes = 0 }) => total + storageSizeInBytes, 0),
+  };
+};

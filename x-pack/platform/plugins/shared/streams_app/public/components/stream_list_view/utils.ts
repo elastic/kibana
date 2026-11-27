@@ -30,7 +30,7 @@ export interface EnrichedStream extends ListStreamDetail {
   retentionMs: number;
   ingestionRate: number;
   storageBytes: number;
-  type: 'wired' | 'classic' | 'query';
+  type: 'wired' | 'classic';
   children?: EnrichedStream[];
 }
 
@@ -178,9 +178,6 @@ const getStreamType = (stream: Streams.all.Definition): EnrichedStream['type'] =
   if (Streams.ClassicStream.Definition.is(stream)) {
     return 'classic';
   }
-  if (Streams.QueryStream.Definition.is(stream)) {
-    return 'query';
-  }
   return 'wired';
 };
 
@@ -189,7 +186,7 @@ export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStrea
   const retentionMs =
     lifecycle && isIlmLifecycle(lifecycle)
       ? Number.POSITIVE_INFINITY
-      : lifecycleToRetentionMs(lifecycle) ?? 0;
+      : (lifecycleToRetentionMs(lifecycle) ?? 0);
   const nameSortKey =
     'children' in node
       ? `${getSegments(node.stream.name).length}_${node.stream.name.toLowerCase()}`

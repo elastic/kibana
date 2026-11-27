@@ -342,7 +342,7 @@ export const useESQLOverallStatsData = (
         }
 
         const columnInfo = columnsResp?.rawResponse
-          ? columnsResp.rawResponse.all_columns ?? columnsResp.rawResponse.columns
+          ? (columnsResp.rawResponse.all_columns ?? columnsResp.rawResponse.columns)
           : [];
 
         const populatedColumns = new Set(columnsResp?.rawResponse.columns.map((c) => c.name));
@@ -366,7 +366,7 @@ export const useESQLOverallStatsData = (
           timeFields.length > 0
             ? timeFields.find((f) => f.name === '@timestamp')
               ? '@timestamp'
-              : dataViewTimeField ?? timeFields[0].name
+              : (dataViewTimeField ?? timeFields[0].name)
             : undefined;
 
         setTableData({ columns, timeFieldName });
@@ -503,12 +503,15 @@ export const useESQLOverallStatsData = (
             error: undefined,
           });
 
-          const columnsWithExamples = columnInfo.reduce((hashmap, curr, idx) => {
-            if (curr.type === 'text' || curr.type === 'geo_point' || curr.type === 'geo_shape') {
-              hashmap[curr.name] = idx;
-            }
-            return hashmap;
-          }, {} as Record<string, number>);
+          const columnsWithExamples = columnInfo.reduce(
+            (hashmap, curr, idx) => {
+              if (curr.type === 'text' || curr.type === 'geo_point' || curr.type === 'geo_shape') {
+                hashmap[curr.name] = idx;
+              }
+              return hashmap;
+            },
+            {} as Record<string, number>
+          );
 
           const exampleDocs = Object.entries(columnsWithExamples).map(([fieldName, idx]) => {
             const examples = [...new Set(columnsResp?.rawResponse?.values.map((row) => row[idx]))]

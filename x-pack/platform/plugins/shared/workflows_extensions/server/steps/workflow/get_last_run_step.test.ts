@@ -80,7 +80,7 @@ describe('workflow.getLastRun', () => {
           ({
             workflow: { id: 'wf/1', spaceId: 'space-1' },
             execution: { id: 'run-current' },
-          } as StepContext)
+          }) as StepContext
       ),
       getFakeRequest: jest.fn(),
       getScopedEsClient: jest.fn(),

@@ -12,10 +12,10 @@ import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { createFlagError } from '@kbn/dev-cli-errors';
-import { ESLint } from 'eslint';
 
 import type { GenerateCommand } from '../generate_command';
 import { ask } from '../lib/ask';
+import { lintAndFormat } from '../lib/lint_and_format';
 import { CONNECTOR_TEMPLATE_DIR } from '../paths';
 
 const CONNECTORS_ROOT = Path.resolve(
@@ -408,19 +408,9 @@ export const ConnectorCommand: GenerateCommand = {
       }
     }
 
-    // run eslint --fix on the generated connector folder and updated spec/icon maps
-    {
-      log.info('Linting generated connector files');
-      const eslint = new ESLint({
-        cache: false,
-        cwd: REPO_ROOT,
-        fix: true,
-        extensions: ['.js', '.mjs', '.ts', '.tsx'],
-      });
-      await ESLint.outputFixes(
-        await eslint.lintFiles([connectorDir, ICONS_MAP_FILE, ALL_SPECS_FILE])
-      );
-    }
+    // apply lint fixes and format the generated connector folder and updated spec/icon maps
+    log.info('Linting and formatting generated connector files');
+    await lintAndFormat(log, [connectorDir, ICONS_MAP_FILE, ALL_SPECS_FILE]);
 
     log.success(`Connector scaffolded at ${Path.relative(REPO_ROOT, connectorDir)}`);
     log.success(`Documentation created at ${Path.relative(REPO_ROOT, docsFilePath)}`);

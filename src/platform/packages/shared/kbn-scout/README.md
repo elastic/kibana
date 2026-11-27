@@ -141,7 +141,7 @@ Synthetic APM / logs / infra data via [`@kbn/synthtrace`](https://github.com/ela
 
 For Observability plugins that normally use `@kbn/scout-oblt`, include both `@kbn/scout-oblt` and `@kbn/scout-synthtrace`.
 
-2. **UI tests (platform)** — merge `synthtraceFixture` into the Scout `test` object, then extend with your plugin fixtures. Use `mergeTests` from `@kbn/scout` (not `playwright/test`) so Scout ESLint rules stay satisfied:
+2. **UI tests (platform)** — merge `synthtraceFixture` into the Scout `test` object, then extend with your plugin fixtures. Use `mergeTests` from `@kbn/scout` (not `playwright/test`) so Scout lint rules stay satisfied:
 
 ```ts
 // e.g. test/scout/ui/fixtures/index.ts

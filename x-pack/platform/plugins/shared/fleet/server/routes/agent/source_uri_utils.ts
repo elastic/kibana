@@ -26,8 +26,8 @@ export const getDownloadSourcesForAgentPolicy = async (
     agentPolicy.download_source_ids && agentPolicy.download_source_ids.length > 0
       ? agentPolicy.download_source_ids
       : agentPolicy.download_source_id
-      ? [agentPolicy.download_source_id]
-      : [defaultDownloadSourceId];
+        ? [agentPolicy.download_source_id]
+        : [defaultDownloadSourceId];
 
   const logger = appContextService.getLogger().get('getDownloadSourcesForAgentPolicy');
   const resolved = await Promise.all(

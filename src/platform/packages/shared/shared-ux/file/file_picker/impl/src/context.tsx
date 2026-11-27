@@ -26,8 +26,10 @@ const FilePickerCtx = createContext<FilePickerContextValue>(
   null as unknown as FilePickerContextValue
 );
 
-interface FilePickerContextProps
-  extends Pick<FilePickerContextValue, 'kind' | 'shouldAllowDelete'> {
+interface FilePickerContextProps extends Pick<
+  FilePickerContextValue,
+  'kind' | 'shouldAllowDelete'
+> {
   pageSize: number;
   multiple: boolean;
   uploadMeta?: unknown;

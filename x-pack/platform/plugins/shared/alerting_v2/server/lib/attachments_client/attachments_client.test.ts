@@ -36,7 +36,7 @@ const record = (
     current_version: 1,
     versions: [{ version: 1, data }],
     ...extra,
-  } as never);
+  }) as never;
 
 describe('createAttachmentsClient', () => {
   let attachments: ToolHandlerContextMock['attachments'];

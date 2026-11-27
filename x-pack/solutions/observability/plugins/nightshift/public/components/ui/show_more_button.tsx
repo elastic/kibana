@@ -10,8 +10,10 @@ import React from 'react';
 import { EuiIcon, EuiLoadingSpinner, EuiText, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export interface ShowMoreButtonProps
-  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'type' | 'children'> {
+export interface ShowMoreButtonProps extends Omit<
+  React.ButtonHTMLAttributes<HTMLButtonElement>,
+  'type' | 'children'
+> {
   /** How many items this click will reveal (capped by what remains). */
   count: number;
   /** How many items are still hidden. */

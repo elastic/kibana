@@ -22,7 +22,7 @@ const makeCase = (overrides: Partial<Case> = {}): Case =>
     observables: [],
     comments: [],
     ...overrides,
-  } as unknown as Case);
+  }) as unknown as Case;
 
 describe('buildActivityOrigin', () => {
   it('returns undefined without an origin', () => {

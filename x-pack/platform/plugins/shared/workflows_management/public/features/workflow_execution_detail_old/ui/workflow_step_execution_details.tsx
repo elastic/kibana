@@ -182,7 +182,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
       ];
     }, [isTriggerPseudoStep, hasError, hasInput, hasOutput, triggerType]);
 
-    const defaultTabId = isWaitingForInput ? 'input' : tabs[0]?.id ?? 'input';
+    const defaultTabId = isWaitingForInput ? 'input' : (tabs[0]?.id ?? 'input');
     const [selectedTabId, setSelectedTabId] = useState<string>(defaultTabId);
 
     useEffect(() => {
@@ -348,7 +348,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                             approvalLabels={
                               isOwnWaitingStep
                                 ? approvalLabels
-                                : approvalLabelsForStepExecution(stepExecution) ?? approvalLabels
+                                : (approvalLabelsForStepExecution(stepExecution) ?? approvalLabels)
                             }
                             autoOpen={shouldAutoResume}
                             waitingStepExecutionId={stepExecution?.id}

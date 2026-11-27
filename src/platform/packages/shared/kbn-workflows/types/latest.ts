@@ -50,6 +50,7 @@ export type {
   WorkflowMgetResponseDto,
   WorkflowTemplateOrigin,
   ChildWorkflowExecutionItem,
+  ExecutionChainHop,
   WorkflowExecutionCollapseField,
   WorkflowExecutionSortField,
   WorkflowExecutionSortOrder,

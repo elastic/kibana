@@ -23,7 +23,7 @@ const createContext = (input: unknown, callKibanaApi: CallApi): DiagnosticsConte
     contextManager: {
       callKibanaApi,
     },
-  } as unknown as DiagnosticsContext);
+  }) as unknown as DiagnosticsContext;
 
 const component = (overrides: Record<string, unknown> = {}) => ({
   id: 'component-default',

@@ -19,7 +19,7 @@ describe('mapAgentPolicySavedObjectToAgentPolicy', () => {
       namespaces: ['default'],
       attributes: { name: 'Policy', namespace: 'default', ...attributes },
       references: [],
-    } as unknown as SavedObject<AgentPolicySOAttributes>);
+    }) as unknown as SavedObject<AgentPolicySOAttributes>;
 
   it('returns the saved object id', () => {
     expect(mapAgentPolicySavedObjectToAgentPolicy(buildSo({})).id).toBe('canonical-id');

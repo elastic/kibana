@@ -13,8 +13,7 @@ import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../types';
 
-export interface ObservabilityAgentBuilderRouteHandlerResources
-  extends DefaultRouteHandlerResources {
+export interface ObservabilityAgentBuilderRouteHandlerResources extends DefaultRouteHandlerResources {
   core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;

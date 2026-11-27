@@ -86,7 +86,7 @@ export function IndexInspectRetention({
 
   const { lifecycle } = metadata;
   const retentionPeriod = isDslLifecycle(lifecycle) ? lifecycle.dsl.data_retention : undefined;
-  const downsampleSteps = isDslLifecycle(lifecycle) ? lifecycle.dsl.downsample ?? null : null;
+  const downsampleSteps = isDslLifecycle(lifecycle) ? (lifecycle.dsl.downsample ?? null) : null;
   const preview = isDslLifecycle(lifecycle)
     ? buildDlmPreviewModel({
         isServerless,
@@ -192,10 +192,10 @@ export function IndexInspectRetention({
 
 function IndexRetentionCard({ lifecycle }: { lifecycle: ClassicIngestStreamEffectiveLifecycle }) {
   const value = isDslLifecycle(lifecycle)
-    ? getTimeSizeAndUnitLabel(lifecycle.dsl.data_retention) ?? '∞'
+    ? (getTimeSizeAndUnitLabel(lifecycle.dsl.data_retention) ?? '∞')
     : isIlmLifecycle(lifecycle)
-    ? lifecycle.ilm.policy
-    : '—';
+      ? lifecycle.ilm.policy
+      : '—';
 
   return (
     <BaseMetricCard

@@ -95,7 +95,7 @@ const buildSource = (overrides: Partial<MonitoringEntitySource> = {}) =>
     name: 'wl-store',
     queryRule: 'host.os.name: "Ubuntu*"',
     ...overrides,
-  } as MonitoringEntitySource);
+  }) as MonitoringEntitySource;
 
 describe('toDataSourceSummary', () => {
   it('drops credentials and internal bookkeeping fields', () => {

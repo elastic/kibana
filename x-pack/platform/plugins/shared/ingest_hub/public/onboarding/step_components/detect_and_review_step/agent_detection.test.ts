@@ -26,7 +26,7 @@ import {
 } from './agent_detection';
 
 const makeAgent = (id: string, status: Agent['status'], policyId = 'policy-1'): Agent =>
-  ({ id, status, policy_id: policyId } as Agent);
+  ({ id, status, policy_id: policyId }) as Agent;
 
 describe('getAgentHealthState', () => {
   it.each([
@@ -492,7 +492,7 @@ describe('assessAgent', () => {
       local_metadata: { elastic: { agent: { version } } },
       components: [{ id: 'system-metrics' }],
       ...overrides,
-    } as unknown as Agent);
+    }) as unknown as Agent;
   const LIVE = { total: 3, stopped: 0 };
 
   const assess = (agent: Agent, overrides: Record<string, unknown> = {}) =>
@@ -949,7 +949,7 @@ describe('liveAgentIds', () => {
 });
 
 describe('findAgentPolicyForAgent', () => {
-  const policy = (id: string) => ({ id } as unknown as AgentPolicy);
+  const policy = (id: string) => ({ id }) as unknown as AgentPolicy;
   const policies = [policy('ap-a'), policy('ap-b')];
 
   it('finds the policy an agent is enrolled in', () => {

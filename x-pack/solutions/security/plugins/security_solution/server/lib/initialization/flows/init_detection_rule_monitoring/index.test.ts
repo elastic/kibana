@@ -30,7 +30,7 @@ const createMockInitializationFlowContext = (
       }),
     },
     logger: loggerMock.create(),
-  } as unknown as InitializationFlowContext);
+  }) as unknown as InitializationFlowContext;
 
 describe('initDetectionRuleMonitoringFlow', () => {
   beforeEach(() => {

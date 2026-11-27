@@ -14,3 +14,6 @@ export const CONNECTOR_ID_SYSTEM = '.http-system';
 export const CONNECTOR_NAME = i18n.translate('connectors.http.title', {
   defaultMessage: 'HTTP',
 });
+
+/** Matches a single HTTP authentication scheme (RFC 9110 §11.1 `token`), e.g. `Bearer`. */
+export const AUTH_SCHEME_REGEX = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/;

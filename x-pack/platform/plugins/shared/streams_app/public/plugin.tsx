@@ -80,15 +80,12 @@ export const renderApp = ({
   };
 };
 
-export class StreamsAppPlugin
-  implements
-    Plugin<
-      StreamsAppPublicSetup,
-      StreamsAppPublicStart,
-      StreamsAppSetupDependencies,
-      StreamsAppStartDependencies
-    >
-{
+export class StreamsAppPlugin implements Plugin<
+  StreamsAppPublicSetup,
+  StreamsAppPublicStart,
+  StreamsAppSetupDependencies,
+  StreamsAppStartDependencies
+> {
   logger: Logger;
   telemetry: StreamsTelemetryService = new StreamsTelemetryService();
   private readonly version: string;

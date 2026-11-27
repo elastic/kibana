@@ -240,7 +240,7 @@ export const ModifierKeyTip = ({ children }: ModifierKeyTipProps) => {
           <EuiText size="xs">
             <EuiTextColor color="subdued">
               {i18n.translate('contentManagement.contentList.filter.modifierKeyHelpText', {
-                defaultMessage: '{modifierKeyPrefix} + click exclude',
+                defaultMessage: '{modifierKeyPrefix} + click to exclude',
                 values: { modifierKeyPrefix },
               })}
             </EuiTextColor>

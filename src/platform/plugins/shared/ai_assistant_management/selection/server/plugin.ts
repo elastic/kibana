@@ -31,15 +31,12 @@ import { classicSetting } from './src/settings/classic_setting';
 import { AIAssistantType } from '../common/ai_assistant_type';
 import { chatExperienceSetting } from './src/settings/chat_experience_setting';
 
-export class AIAssistantManagementSelectionPlugin
-  implements
-    Plugin<
-      AIAssistantManagementSelectionPluginServerSetup,
-      AIAssistantManagementSelectionPluginServerStart,
-      AIAssistantManagementSelectionPluginServerDependenciesSetup,
-      AIAssistantManagementSelectionPluginServerDependenciesStart
-    >
-{
+export class AIAssistantManagementSelectionPlugin implements Plugin<
+  AIAssistantManagementSelectionPluginServerSetup,
+  AIAssistantManagementSelectionPluginServerStart,
+  AIAssistantManagementSelectionPluginServerDependenciesSetup,
+  AIAssistantManagementSelectionPluginServerDependenciesStart
+> {
   private readonly config: AIAssistantManagementSelectionConfig;
   private readonly logger: Logger;
 

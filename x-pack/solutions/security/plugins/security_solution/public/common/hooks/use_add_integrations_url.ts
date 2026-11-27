@@ -36,8 +36,8 @@ export const useAddIntegrationsUrl = () => {
   const integrationsUrl = isThreatIntelligence
     ? ADD_THREAT_INTELLIGENCE_DATA_PATH
     : shouldGoToConfigurations
-    ? CONFIGURATIONS_INTEGRATIONS_PATH
-    : ADD_DATA_PATH;
+      ? CONFIGURATIONS_INTEGRATIONS_PATH
+      : ADD_DATA_PATH;
 
   const href = useMemo(() => prepend(integrationsUrl), [prepend, integrationsUrl]);
 

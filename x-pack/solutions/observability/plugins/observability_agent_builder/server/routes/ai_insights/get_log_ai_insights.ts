@@ -74,6 +74,7 @@ export async function getLogAiInsights({
   const context = await fetchLogContext({
     core,
     plugins,
+    request,
     logger,
     esClient,
     index,
@@ -96,6 +97,7 @@ export async function getLogAiInsights({
 async function fetchLogContext({
   core,
   plugins,
+  request,
   logger,
   esClient,
   index,
@@ -104,6 +106,7 @@ async function fetchLogContext({
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
+  request: KibanaRequest;
   logger: Logger;
   esClient: IScopedClusterClient;
   index?: string;
@@ -159,6 +162,7 @@ async function fetchLogContext({
       const { traces } = await getTraces({
         core,
         plugins,
+        request,
         logger,
         esClient,
         index: traceIndex,

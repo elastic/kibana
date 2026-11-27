@@ -92,7 +92,7 @@ export const getContentListToolbarSubjects = (root: string = CONTENT_LIST_TEST_S
     searchParseError: `${root}-searchParseError`,
     selectionBar: `${root}-selectionBar`,
     skeleton: `${root}-skeleton`,
-  } as const);
+  }) as const;
 
 /**
  * Subjects the selection bar composes from its root `data-test-subj`. Defaults
@@ -106,4 +106,4 @@ export const getContentListSelectionBarSubjects = (
   ({
     root,
     deleteButton: `${root}-deleteButton`,
-  } as const);
+  }) as const;

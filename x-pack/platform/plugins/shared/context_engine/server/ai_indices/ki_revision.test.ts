@@ -12,6 +12,7 @@ import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import {
   appendKiRevision,
   putKiRevision,
+  rewrittenKiTimestamp,
   writeKiRevision,
   type KiRevision,
   type StoredKi,
@@ -276,5 +277,25 @@ describe('putKiRevision', () => {
         failIfExists: true,
       })
     ).rejects.toThrow(new KiConflictError(aiIndexId, kiId));
+  });
+});
+
+describe('rewrittenKiTimestamp', () => {
+  const now = '2026-11-23T10:00:00.000Z';
+  const firstTimestamp = '2026-10-01T08:00:00.000Z';
+
+  it('keeps the first @timestamp on an index dest', () => {
+    expect(rewrittenKiTimestamp(indexDest, { '@timestamp': firstTimestamp }, now)).toBe(
+      firstTimestamp
+    );
+  });
+
+  it('uses now on a data stream, where each revision needs its own time', () => {
+    expect(rewrittenKiTimestamp(dataStreamDest, { '@timestamp': firstTimestamp }, now)).toBe(now);
+  });
+
+  it('uses now for a new KI or one without a @timestamp', () => {
+    expect(rewrittenKiTimestamp(indexDest, undefined, now)).toBe(now);
+    expect(rewrittenKiTimestamp(indexDest, { title: 'no timestamp' }, now)).toBe(now);
   });
 });

@@ -105,12 +105,12 @@ export const tidyWikiOntology = (
         (excluded.has(from) || excluded.has(to)) && TELEMETRY_KINDS.has(kind)
           ? 'excluded'
           : from === to
-          ? 'self_edge'
-          : seen.has(`${from}\u0000${to}\u0000${kind}`)
-          ? 'duplicate'
-          : kind !== 'calls' && seen.has(`${to}\u0000${from}\u0000${kind}`)
-          ? 'mirrored'
-          : undefined;
+            ? 'self_edge'
+            : seen.has(`${from}\u0000${to}\u0000${kind}`)
+              ? 'duplicate'
+              : kind !== 'calls' && seen.has(`${to}\u0000${from}\u0000${kind}`)
+                ? 'mirrored'
+                : undefined;
       if (reason) {
         drop.add(index);
         dropped.push({ line: lines[index].trim(), reason });

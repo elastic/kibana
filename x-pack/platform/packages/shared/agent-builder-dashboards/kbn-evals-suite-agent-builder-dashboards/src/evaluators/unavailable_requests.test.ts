@@ -191,7 +191,7 @@ describe('dashboard unavailable requests evaluator', () => {
             return { indices: [{ name }], aliases: [], data_streams: [] };
           },
         },
-      } as unknown as EsClient);
+      }) as unknown as EsClient;
     const evaluateWith = (client: EsClient) =>
       createUnavailableRequestsEvaluator(client).evaluate({
         input: { question: 'q' },

@@ -52,7 +52,7 @@ export async function runDockerGenerator(
    */
   if (flags.baseImage === 'wolfi')
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:a87a8dce33a59dca76422bcc82e97cf71f8693821f01d06cee8296c3a77dd08d';
+      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:7d65653687fd368eede09f987827ec53f183a1c8c5764bd198c1734d274d2486';
 
   let imageFlavor = '';
   if (flags.baseImage === 'wolfi' && !flags.serverless && !flags.cloud) imageFlavor += `-wolfi`;
@@ -70,8 +70,8 @@ export async function runDockerGenerator(
   const imageNamespace = configuredNamespace
     ? configuredNamespace
     : flags.cloud || flags.serverless
-    ? 'kibana-ci'
-    : 'kibana';
+      ? 'kibana-ci'
+      : 'kibana';
   const imageTag = `docker.elastic.co/${imageNamespace}/kibana`;
   const version = config.getBuildVersion();
   const artifactArchitecture = flags.architecture === 'aarch64' ? 'aarch64' : 'x86_64';

@@ -676,7 +676,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         revision: 1,
         policy_id: '',
         policy_ids: [''],
-      } as PackagePolicy);
+      }) as PackagePolicy;
 
     const hasAgentlessGrant = (descriptor: SecurityRoleDescriptor | undefined) =>
       (descriptor?.indices ?? []).some((index) => [index.names].flat().includes('agentless-*'));
@@ -781,7 +781,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         revision: 1,
         policy_id: '',
         policy_ids: [''],
-      } as PackagePolicy);
+      }) as PackagePolicy;
 
     it('does NOT grant agentless-* permissions when any enabled input is not agentless-eligible', async () => {
       const permissions = await storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [

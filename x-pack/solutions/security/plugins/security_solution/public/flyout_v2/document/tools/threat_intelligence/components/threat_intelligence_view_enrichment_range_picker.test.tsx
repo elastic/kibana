@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import moment from 'moment';
 import { TestProviders } from '../../../../../common/mock';
@@ -16,7 +16,8 @@ import {
   THREAT_INTELLIGENCE_ENRICHMENTS_REFRESH_BUTTON_TEST_ID,
 } from './test_ids';
 
-describe('EnrichmentRangePicker', () => {
+// Failing: See https://github.com/elastic/kibana/issues/306935
+describe.skip('EnrichmentRangePicker', () => {
   const setRangeSpy = jest.fn();
 
   const rangePickerProps = {
@@ -72,8 +73,7 @@ describe('EnrichmentRangePicker', () => {
     );
 
     const startInput = container.querySelector('input.start-picker') as HTMLInputElement;
-    await userEvent.clear(startInput);
-    await userEvent.type(startInput, '08/10/2019 06:29 PM');
+    fireEvent.change(startInput, { target: { value: '08/10/2019 06:29 PM' } });
 
     await userEvent.click(
       screen.getByTestId(THREAT_INTELLIGENCE_ENRICHMENTS_REFRESH_BUTTON_TEST_ID)

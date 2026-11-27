@@ -47,13 +47,19 @@ const sourceResponse = (rows: MockRow[]): ESQLSearchResponse =>
       ...(row.createdAt !== undefined ? [row.createdAt] : []),
       ...(row.operatorClosed !== undefined ? [row.operatorClosed] : []),
     ]),
-  } as unknown as ESQLSearchResponse);
+  }) as unknown as ESQLSearchResponse;
+
+const dataJsonResponse = (dataJsonRows: string[]): ESQLSearchResponse =>
+  ({
+    columns: [{ name: 'data_json', type: 'keyword' }],
+    values: dataJsonRows.map((dataJson) => [dataJson]),
+  }) as unknown as ESQLSearchResponse;
 
 const countResponse = (total: number): ESQLSearchResponse =>
   ({
     columns: [{ name: 'total', type: 'long' }],
     values: [[total]],
-  } as unknown as ESQLSearchResponse);
+  }) as unknown as ESQLSearchResponse;
 
 const dataDoc = {
   event_id: 'agent-event-1',
@@ -122,7 +128,7 @@ const makeStatusAlertEventsClient = (
   ({
     createAlertEvent: jest.fn().mockResolvedValue(undefined),
     ...overrides,
-  } as jest.Mocked<AlertEventsClientApi>);
+  }) as jest.Mocked<AlertEventsClientApi>;
 
 const makeStatusAlertActionsClient = (
   overrides: Partial<jest.Mocked<AlertActionsClientApi>> = {}
@@ -130,7 +136,7 @@ const makeStatusAlertActionsClient = (
   ({
     createEpisodeAction: jest.fn().mockResolvedValue(undefined),
     ...overrides,
-  } as jest.Mocked<AlertActionsClientApi>);
+  }) as jest.Mocked<AlertActionsClientApi>;
 
 const createStatusSearchClient = (
   latest: SignificantEvent | undefined,
@@ -157,6 +163,89 @@ const lastStatusWritten = (client: jest.Mocked<AlertEventsClientApi>) =>
     alert_status: string;
     data: Record<string, unknown>;
   };
+
+describe('findDetectionsWrittenByRun', () => {
+  it('scopes the query to the space, significant events, and workflow execution', async () => {
+    const row: MockRow = {
+      source: ruleEventSource(),
+      dataJson: JSON.stringify({
+        signals: [{ metadata: { detection_id: 'detection-a', rule_uuid: 'rule-a' } }],
+      }),
+    };
+    const { client, query } = createClient(async () => dataJsonResponse([row.dataJson]));
+
+    await expect(
+      client.findDetectionsWrittenByRun({ workflowExecutionId: 'execution-1', limit: 1_000 })
+    ).resolves.toEqual({
+      pairs: [{ detection_id: 'detection-a', rule_uuid: 'rule-a' }],
+      truncated: false,
+    });
+
+    expect(lastQuery(query)).toContain(
+      'WHERE space_id == "default" AND type == "alert" AND source == "elastic.significant_events"'
+    );
+    expect(lastQuery(query)).toContain(
+      'WHERE FIELD_EXTRACT(data, "workflow_execution_id") == "execution-1"'
+    );
+    expect(lastQuery(query)).toContain('EVAL data_json = JSON_EXTRACT(_source, "$.data")');
+    expect(lastQuery(query)).toContain('KEEP data_json');
+    expect(lastQuery(query)).not.toContain('KEEP _source');
+  });
+
+  it('skips an unparseable row and a malformed signal while keeping the valid pairs', async () => {
+    const rows: MockRow[] = [
+      { source: ruleEventSource(), dataJson: '{not json' },
+      {
+        source: ruleEventSource({ group_hash: 'group-hash-2' }),
+        dataJson: JSON.stringify({
+          signals: [
+            { metadata: { detection_id: 'detection-a' } },
+            { metadata: { detection_id: 'detection-b', rule_uuid: 'rule-b' } },
+          ],
+        }),
+      },
+    ];
+    const { client } = createClient(async () =>
+      dataJsonResponse(rows.map(({ dataJson }) => dataJson))
+    );
+
+    await expect(
+      client.findDetectionsWrittenByRun({ workflowExecutionId: 'execution-1', limit: 1_000 })
+    ).resolves.toEqual({
+      pairs: [{ detection_id: 'detection-b', rule_uuid: 'rule-b' }],
+      truncated: false,
+    });
+  });
+
+  it('keeps the first capped rows and marks the result truncated', async () => {
+    const rows: MockRow[] = [
+      {
+        source: ruleEventSource(),
+        dataJson: JSON.stringify({
+          signals: [{ metadata: { detection_id: 'detection-a', rule_uuid: 'rule-a' } }],
+        }),
+      },
+      {
+        source: ruleEventSource({ group_hash: 'group-hash-2' }),
+        dataJson: JSON.stringify({
+          signals: [{ metadata: { detection_id: 'detection-b', rule_uuid: 'rule-b' } }],
+        }),
+      },
+    ];
+    const { client, query } = createClient(async () =>
+      dataJsonResponse(rows.map(({ dataJson }) => dataJson))
+    );
+
+    await expect(
+      client.findDetectionsWrittenByRun({ workflowExecutionId: 'execution-1', limit: 1 })
+    ).resolves.toEqual({
+      pairs: [{ detection_id: 'detection-a', rule_uuid: 'rule-a' }],
+      truncated: true,
+    });
+
+    expect(lastQuery(query)).toContain('LIMIT 2');
+  });
+});
 
 describe('RuleEventsClient', () => {
   describe('updateEventStatus', () => {
@@ -240,7 +329,7 @@ describe('RuleEventsClient', () => {
 
     describe('an operator change', () => {
       const withEpisode = (overrides: Partial<SignificantEvent> = {}) =>
-        ({ ...createStatusEvent(overrides), episode_id: 'episode-7' } as SignificantEvent);
+        ({ ...createStatusEvent(overrides), episode_id: 'episode-7' }) as SignificantEvent;
 
       it.each<['inactive' | 'active', string]>([
         ['inactive', ALERT_EPISODE_ACTION_TYPE.DEACTIVATE],
@@ -552,7 +641,7 @@ describe('RuleEventsClient', () => {
       );
 
     const withEpisode = (overrides: Partial<SignificantEvent> = {}) =>
-      ({ ...createStatusEvent(overrides), episode_id: 'episode-1' } as SignificantEvent);
+      ({ ...createStatusEvent(overrides), episode_id: 'episode-1' }) as SignificantEvent;
 
     beforeEach(() => telemetry.trackEventStatusChanged.mockReset());
 
@@ -1173,7 +1262,7 @@ describe('RuleEventsClient', () => {
               { name: 'episode_id', type: 'keyword' },
             ],
             values: Array.from({ length: 10_000 }, (_, index) => [1, 'event-1', `ep-${index}`]),
-          } as unknown as ESQLSearchResponse)
+          }) as unknown as ESQLSearchResponse
       );
 
       await expect(client.findEventIdsByEpisodeIds(['id-1'])).rejects.toThrow(
@@ -1198,7 +1287,7 @@ describe('RuleEventsClient', () => {
               [1, 'episode-2', 'event-2'],
               [1, 'episode-2', 'event-3'],
             ],
-          } as unknown as ESQLSearchResponse)
+          }) as unknown as ESQLSearchResponse
       );
 
       const eventIdsByEpisode = await client.findEventIdsByEpisodeIds([
@@ -1257,7 +1346,7 @@ describe('RuleEventsClient', () => {
 
     it('leaves the investigation counts out, and runs no query for them, when the episodes could not be read', async () => {
       const { client, query } = createClient(
-        async () => ({ columns: [], values: [] } as unknown as ESQLSearchResponse)
+        async () => ({ columns: [], values: [] }) as unknown as ESQLSearchResponse
       );
 
       const facets = await client.countFacets({
@@ -1421,7 +1510,7 @@ describe('RuleEventsClient', () => {
             reason = 'noise',
           }) => [at, groupHash, episodeId, type, actor, reason]
         ),
-      } as unknown as ESQLSearchResponse);
+      }) as unknown as ESQLSearchResponse;
 
     const heads = [{ groupHash: 'series-1', episodeId: 'episode-1' }];
     const setup = (docs: ActionDoc[] | Error) => {
@@ -1540,7 +1629,7 @@ describe('RuleEventsClient', () => {
       ({
         columns: [{ name: 'group_hash', type: 'keyword' }],
         values: hashes.map((hash) => [hash]),
-      } as unknown as ESQLSearchResponse);
+      }) as unknown as ESQLSearchResponse;
     const actionResponse = (
       rows: Array<[string, string | null, string | null]>
     ): ESQLSearchResponse =>
@@ -1551,7 +1640,7 @@ describe('RuleEventsClient', () => {
           { name: 'reason', type: 'text' },
         ],
         values: rows,
-      } as unknown as ESQLSearchResponse);
+      }) as unknown as ESQLSearchResponse;
     const setup = (actions: ESQLSearchResponse, hashes: string[] = ['group-1']) => {
       const logger = { error: jest.fn() };
       const query = jest.fn(async (request: EsqlRequest) =>
@@ -1592,6 +1681,98 @@ describe('RuleEventsClient', () => {
       expect(text).toContain('space_id == "default"');
       expect(text).toContain('group_hash == "group-1"');
       expect(text).toContain('action_type == "deactivate" AND actor.type == "user"');
+    });
+  });
+
+  describe('findLatestBreachedSignals', () => {
+    const latestResponse = (rows: Array<[string, string]>): ESQLSearchResponse =>
+      ({
+        columns: [
+          { name: 'latest', type: 'date' },
+          { name: 'rule.id', type: 'keyword' },
+        ],
+        values: rows.map(([ruleId, latest]) => [latest, ruleId]),
+      }) as unknown as ESQLSearchResponse;
+
+    it('returns an empty map without querying when no rules are requested', async () => {
+      const { client, query } = createClient(async () => latestResponse([]));
+
+      const latest = await client.findLatestBreachedSignals({
+        ruleUuids: [],
+        from: '2026-10-01T00:00:00.000Z',
+      });
+
+      expect(latest.size).toBe(0);
+      expect(query).not.toHaveBeenCalled();
+    });
+
+    it('rejects partial results, so a failed shard cannot read as rules with no breach', async () => {
+      const { client, query } = createClient(async () => latestResponse([]));
+
+      await client.findLatestBreachedSignals({
+        ruleUuids: ['rule-A'],
+        from: '2026-10-01T00:00:00.000Z',
+      });
+
+      expect(query).toHaveBeenCalledWith(expect.objectContaining({ allow_partial_results: false }));
+    });
+
+    it('asks for the newest breached signal of each requested rule since the bound', async () => {
+      const { client, query } = createClient(async () => latestResponse([]));
+
+      await client.findLatestBreachedSignals({
+        ruleUuids: ['rule-A', 'rule-B'],
+        from: '2026-10-01T00:00:00.000Z',
+      });
+
+      const { query: q, params } = query.mock.calls[0][0] as {
+        query: string;
+        params: unknown[];
+      };
+      expect(q).toContain('space_id == "default"');
+      expect(q).toContain('type == "signal"');
+      expect(q).toContain('status == "breached"');
+      expect(q).toContain('`rule.id` IN ("rule-A", "rule-B")');
+      expect(q).toContain('@timestamp >= TO_DATETIME(?from)');
+      expect(q).toContain('STATS latest = MAX(@timestamp) BY `rule.id`');
+      expect(params).toEqual([{ from: '2026-10-01T00:00:00.000Z' }]);
+    });
+
+    it('maps each rule to the time of its newest breach, as milliseconds', async () => {
+      const { client } = createClient(async () =>
+        latestResponse([['rule-A', '2026-10-19T11:58:00.000Z']])
+      );
+
+      const latest = await client.findLatestBreachedSignals({
+        ruleUuids: ['rule-A', 'rule-B'],
+        from: '2026-10-19T11:50:00.000Z',
+      });
+
+      expect(latest).toEqual(new Map([['rule-A', Date.parse('2026-10-19T11:58:00.000Z')]]));
+    });
+
+    it('fails when a breach row has an invalid timestamp', async () => {
+      const { client } = createClient(async () => latestResponse([['rule-A', 'not a time']]));
+
+      await expect(
+        client.findLatestBreachedSignals({
+          ruleUuids: ['rule-A'],
+          from: '2026-10-01T00:00:00.000Z',
+        })
+      ).rejects.toThrow('invalid breach row');
+    });
+
+    it('fails when the breach index is missing', async () => {
+      const { client } = createClient(async () => {
+        throw new Error('verification_exception: Unknown index [.rule-events]');
+      });
+
+      await expect(
+        client.findLatestBreachedSignals({
+          ruleUuids: ['rule-A'],
+          from: '2026-10-01T00:00:00.000Z',
+        })
+      ).rejects.toThrow('Unknown index');
     });
   });
 
@@ -1917,7 +2098,7 @@ describe('RuleEventsClient', () => {
         createAlertEvent: jest
           .fn()
           .mockResolvedValue({ group_hash: 'hash-1', alert_id: 'alert-1' }),
-      } as jest.Mocked<Pick<AlertEventsClientApi, 'createAlertEvent'>>);
+      }) as jest.Mocked<Pick<AlertEventsClientApi, 'createAlertEvent'>>;
     const clientWith = ({
       head,
       writer,

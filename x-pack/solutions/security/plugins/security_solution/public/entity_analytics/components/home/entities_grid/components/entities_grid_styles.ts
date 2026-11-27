@@ -50,7 +50,9 @@ export const getCellPaddingBlock = (
   return '6px';
 };
 
-export const getColumnWidth = (col: EuiDataGridCustomBodyProps['visibleColumns'][number]): number =>
+export const getColumnWidth = (
+  col: EuiDataGridCustomBodyProps['visibleColumns'][number]
+): number =>
   'width' in col && typeof col.width === 'number'
     ? col.width
     : ('initialWidth' in col && col.initialWidth) || 150;

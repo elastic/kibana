@@ -94,7 +94,7 @@ export const CONNECTORS_SKILLS_BASE_PATH = 'skills/platform/connectors' satisfie
  */
 export interface SkillDefinition<
   TName extends string = string,
-  TBasePath extends DirectoryPath = DirectoryPath
+  TBasePath extends DirectoryPath = DirectoryPath,
 > {
   /**
    * Stable unique identifier for the skill.
@@ -151,6 +151,13 @@ export interface SkillDefinition<
    * Defaults to false.
    */
   hidden?: boolean;
+  /**
+   * When true, the skill cannot work without its registry tools, so it is unavailable when any
+   * tool returned by `getRegistryTools` is unavailable to the caller (not registered, or hidden by
+   * the tool's own availability). Adding a tool to `getRegistryTools` also makes it required.
+   * Defaults to false.
+   */
+  requiresAllRegistryTools?: boolean;
   /**
    * Optional dynamic availability configuration.
    * When provided, the framework evaluates the handler per-request to decide

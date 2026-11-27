@@ -28,8 +28,11 @@ export const useGetMissingResources = (migrationType: MigrationType, onSuccess: 
     (migrationId: string) => {
       if (migrationType === 'rule') {
         return siemMigrations.rules.api.getMissingResources({ migrationId });
-      } else {
+      } else if (migrationType === 'dashboard') {
         return siemMigrations.dashboards.api.getDashboardMigrationMissingResources({ migrationId });
+      } else {
+        // Workflow migrations have no resources (macros, lookups) to upload
+        return Promise.resolve<SiemMigrationResourceBase[]>([]);
       }
     },
     [siemMigrations, migrationType]

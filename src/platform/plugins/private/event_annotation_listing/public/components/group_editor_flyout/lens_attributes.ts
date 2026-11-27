@@ -144,7 +144,7 @@ export const getLensAttributes = (group: EventAnnotationGroupConfig, timeField: 
           },
         ],
     version: 3 as const,
-  } as TypedLensByValueInput['attributes']);
+  }) as TypedLensByValueInput['attributes'];
 
 export const getCurrentTimeField = (attributes: TypedLensByValueInput['attributes']) => {
   return (

@@ -85,7 +85,7 @@ export const AnalyzerPreview = memo(
       return ruleIndices.length > 0 ? ruleIndices : ruleParametersIndices;
     }, [hit]);
     const ancestorId = useMemo(() => getFieldValue(hit, ALERT_ANCESTORS_ID) as string, [hit]);
-    const documentId = shouldUseAncestor ? ancestorId : hit.raw._id ?? ''; // use ancestor as fallback for alert preview
+    const documentId = shouldUseAncestor ? ancestorId : (hit.raw._id ?? ''); // use ancestor as fallback for alert preview
 
     // For rule-preview documents the resolver anchor is the ancestor (see `documentId`), which can
     // live in a linked project even though the preview alert itself is stored locally. Thread the

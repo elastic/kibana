@@ -112,6 +112,23 @@ export const getTextBasedLayerQueries = (
 };
 
 /**
+ * Returns the per-layer ES|QL queries of a text-based document keyed by layer id.
+ */
+export const getTextBasedLayerQueriesById = (
+  attributes: MinimalLensAttributes | undefined
+): Record<string, AggregateQuery> => {
+  const layers = viewDatasourceStates(attributes)?.textBased?.layers;
+  if (!layers) {
+    return {};
+  }
+  return Object.fromEntries(
+    Object.entries(layers).flatMap(([layerId, layer]) =>
+      layer?.query && isOfAggregateQueryType(layer.query) ? [[layerId, layer.query]] : []
+    )
+  );
+};
+
+/**
  * Returns a representative single query for the document:
  * - text-based documents: the first layer query, falling back to a legacy
  *   aggregate value still present in `state.query` (dual-written docs)
@@ -138,7 +155,7 @@ export const EMPTY_KQL_QUERY: Readonly<Query> = { query: '', language: 'kuery' }
  * authoritative — and is dropped. Documents self-clean on next save.
  */
 export const dropLegacyAggregateQuerySlot = <
-  T extends { state?: { query?: Query | AggregateQuery } }
+  T extends { state?: { query?: Query | AggregateQuery } },
 >(
   attributes: T
 ): T => {

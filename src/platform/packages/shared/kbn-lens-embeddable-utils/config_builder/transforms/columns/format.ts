@@ -71,7 +71,7 @@ export function fromFormatAPIToLensState(
       params: {
         decimals: approximate
           ? LENS_FORMAT_DURATION_DECIMALS_DEFAULT
-          : decimals ?? LENS_FORMAT_DURATION_DECIMALS_DEFAULT,
+          : (decimals ?? LENS_FORMAT_DURATION_DECIMALS_DEFAULT),
         ...(!approximate ? { compact: compact ?? LENS_FORMAT_DURATION_COMPACT_DEFAULT } : {}),
         fromUnit,
         toUnit,

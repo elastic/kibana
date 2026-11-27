@@ -329,7 +329,7 @@ export function createEvaluateDataset({
       return {
         errors: [],
         messages: [{ message: last.message }],
-        steps: [...(first.steps ?? []), ...(followUp ? last.steps ?? [] : [])],
+        steps: [...(first.steps ?? []), ...(followUp ? (last.steps ?? []) : [])],
         visualizations,
         esql: visualizations
           .map((visualization) => visualization.esql)

@@ -117,6 +117,10 @@ export function useResponsiveMenu(
     cancelRecalculation,
   ]);
 
+  useLayoutEffect(() => {
+    if (!isOverflowMeasured) recalculateMenuLayout();
+  }, [isOverflowMeasured, recalculateMenuLayout]);
+
   return {
     primaryMenuRef,
     isOverflowMeasured,

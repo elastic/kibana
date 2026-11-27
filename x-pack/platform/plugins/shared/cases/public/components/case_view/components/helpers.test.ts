@@ -382,7 +382,7 @@ describe('Case view helpers', () => {
           updatedAt: null,
           updatedBy: null,
           version: 'WzQ3LDFc',
-        } as unknown as AttachmentUIV2);
+        }) as unknown as AttachmentUIV2;
 
       it('filters dashboard attachments whose title matches case-insensitively', () => {
         const caseData = {
@@ -457,7 +457,7 @@ describe('Case view helpers', () => {
         updatedAt: null,
         updatedBy: null,
         version: 'WzQ3LDFc',
-      } as unknown as AttachmentUIV2);
+      }) as unknown as AttachmentUIV2;
 
     it('filters timeline attachments whose cached title matches case-insensitively', () => {
       const timelineComment = buildTimelineComment();
@@ -535,7 +535,7 @@ describe('Case view helpers', () => {
           updatedAt: null,
           updatedBy: null,
           version: 'WzQ3LDFc',
-        } as unknown as AttachmentUIV2);
+        }) as unknown as AttachmentUIV2;
 
       it('matches on entityName', () => {
         const caseData = { ...basicCase, comments: [buildEntityAttachment()] };

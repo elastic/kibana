@@ -33,6 +33,7 @@ import {
   openTimelineFromSettings,
 } from '../../../../tasks/timeline';
 import { LOADING_INDICATOR } from '../../../../screens/security_header';
+import { TIMELINE_TITLE } from '../../../../screens/timeline';
 import {
   SECURITY_SOLUTION_TAG_ID,
   deleteTimelineDiscoverSessions,
@@ -117,6 +118,9 @@ describe(
             // switch to old timeline
             openTimelineFromSettings();
             openTimelineById(timelineId);
+            // Loading the saved timeline resets the active tab to Query, so a tab clicked
+            // before it lands is switched away from.
+            cy.get(TIMELINE_TITLE).should('have.text', timelineName);
             cy.intercept('POST', '**/internal/search/esql_async').as(ESQL_QUERY_REQ);
             goToEsqlTab();
             cy.get(LOADING_INDICATOR).should('not.exist');

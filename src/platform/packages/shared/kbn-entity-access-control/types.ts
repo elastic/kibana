@@ -15,8 +15,9 @@ export interface AccessControlEntryInput<Role extends string = string> {
   role: Role;
 }
 
-export interface AccessControlEntry<Role extends string = string>
-  extends AccessControlEntryInput<Role> {
+export interface AccessControlEntry<
+  Role extends string = string,
+> extends AccessControlEntryInput<Role> {
   added_at: string;
 }
 

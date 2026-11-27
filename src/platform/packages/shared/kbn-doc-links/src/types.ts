@@ -767,6 +767,7 @@ export interface DocLinks {
   };
   readonly synthetics: {
     readonly featureRoles: string;
+    readonly deleteAbandonedPackagePolicy: string;
   };
   readonly telemetry: {
     readonly settings: string;
@@ -811,6 +812,8 @@ export interface DocLinks {
   readonly contextEngine: {
     readonly overview: string;
     readonly aiIndices: string;
+    readonly sources: string;
+    readonly memory: string;
   };
   readonly agentBuilder: {
     readonly agentBuilder: string;

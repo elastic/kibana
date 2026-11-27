@@ -8,9 +8,9 @@
 import { esql } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { dateRangeQuery } from '@kbn/es-query';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { columnPath } from './esql_categorize';
+import { esqlTimeRange } from './esql_time_range';
 
 const NO_FIELDS_SENTINEL = '<no-fields>';
 // NULLIFY's type for a requested column that no index maps; set by mappings, not values.
@@ -47,15 +47,7 @@ export async function getEsqlColumnSchema({
   signal,
 }: GetEsqlColumnSchemaParams): Promise<EsqlColumnSchema[]> {
   const indices = Array.isArray(index) ? index : [index];
-  const filter =
-    start !== undefined && end !== undefined
-      ? { bool: { filter: dateRangeQuery(start, end) } }
-      : undefined;
-
-  const queryParams = {
-    query: buildSchemaQuery(indices, fields),
-    ...(filter ? { filter } : {}),
-  };
+  const queryParams = { query: buildSchemaQuery(indices, fields, { start, end }) };
   const response = isTracedEsClient(esClient)
     ? ((await esClient.esql(
         'get_esql_column_schema',
@@ -69,15 +61,24 @@ export async function getEsqlColumnSchema({
   return fields?.length ? columns.filter(({ type }) => type !== UNMAPPED_COLUMN_TYPE) : columns;
 }
 
-const buildSchemaQuery = (indices: string[], fields: string[] = []): string => {
+// Inline time range: a request `filter` on an ES|QL view takes minutes on very wide schemas.
+const buildSchemaQuery = (
+  indices: string[],
+  fields: string[] = [],
+  { start, end }: { start?: number; end?: number }
+): string => {
+  const source =
+    start !== undefined && end !== undefined
+      ? esql.from(indices).where`${esqlTimeRange(start, end)}`
+      : esql.from(indices);
+
   const [field, ...otherFields] = fields.map(columnPath);
   if (field === undefined) {
-    return esql.from(indices).limit(0).print('basic');
+    return source.limit(0).print('basic');
   }
 
   // Without NULLIFY, a column that no index maps fails the whole probe.
-  return esql
-    .from(indices)
+  return source
     .keep(field, ...otherFields)
     .limit(0)
     .addSetCommand('unmapped_fields', 'NULLIFY')

@@ -9,11 +9,7 @@ import { of } from 'rxjs';
 import { coreMock, httpServerMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { NIGHTSHIFT_API_PRIVILEGES, NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
-import {
-  checkSandboxAccess,
-  createSandboxToolAvailability,
-  SANDBOX_ACCESS_CACHE_TTL_MS,
-} from './sandbox_tool_availability';
+import { checkSandboxAccess, createSandboxToolAvailability } from './sandbox_tool_availability';
 
 const setup = ({
   enabled = true,
@@ -104,73 +100,10 @@ describe('createSandboxToolAvailability', () => {
     expect(checkPrivileges).not.toHaveBeenCalled();
   });
 
-  describe('per-request reuse', () => {
-    const createAvailability = () => {
-      const { featureFlags } = coreMock.createStart();
-      featureFlags.getBooleanValue$.mockReturnValue(of(true));
-      const checkPrivileges = jest.fn(async () => ({ hasAllRequested: true }));
-      const security = {
-        authz: {
-          mode: { useRbacForRequest: () => true },
-          checkPrivilegesDynamicallyWithRequest: () => checkPrivileges,
-          actions: { api: { get: (operation: string) => `api:${operation}` } },
-        },
-      } as unknown as SecurityPluginStart;
-      let time = 0;
-      const { handler } = createSandboxToolAvailability({
-        getDeps: () => ({ featureFlags, security }),
-        now: () => time,
-      });
-      const uiSettings = uiSettingsServiceMock.createClient();
-      const check = (request = httpServerMock.createKibanaRequest(), spaceId = 'default') =>
-        handler({ request, uiSettings, spaceId });
-      return {
-        check,
-        checkPrivileges,
-        advance: (ms: number) => {
-          time += ms;
-        },
-      };
-    };
+  it('lets Agent Builder cache the result per space and principal for 60 seconds', () => {
+    const availability = createSandboxToolAvailability({ getDeps: () => ({}) });
 
-    it('runs one privilege check for every tool listed on the same request', async () => {
-      const { check, checkPrivileges } = createAvailability();
-      const request = httpServerMock.createKibanaRequest();
-
-      await Promise.all([check(request), check(request), check(request)]);
-
-      expect(checkPrivileges).toHaveBeenCalledTimes(1);
-    });
-
-    it('checks each request separately', async () => {
-      const { check, checkPrivileges } = createAvailability();
-
-      await check();
-      await check();
-
-      expect(checkPrivileges).toHaveBeenCalledTimes(2);
-    });
-
-    it('checks again once the cached result expires', async () => {
-      const { check, checkPrivileges, advance } = createAvailability();
-      const request = httpServerMock.createKibanaRequest();
-
-      await check(request);
-      advance(SANDBOX_ACCESS_CACHE_TTL_MS);
-      await check(request);
-
-      expect(checkPrivileges).toHaveBeenCalledTimes(2);
-    });
-
-    it('does not reuse a failed check', async () => {
-      const { check, checkPrivileges } = createAvailability();
-      const request = httpServerMock.createKibanaRequest();
-      checkPrivileges.mockRejectedValueOnce(new Error('es unavailable'));
-
-      await expect(check(request)).rejects.toThrow('es unavailable');
-      await expect(check(request)).resolves.toEqual({ status: 'available' });
-      expect(checkPrivileges).toHaveBeenCalledTimes(2);
-    });
+    expect(availability).toMatchObject({ cacheMode: 'space-user', cacheTtl: 60 });
   });
 });
 
@@ -183,7 +116,7 @@ describe('checkSandboxAccess', () => {
         checkPrivilegesDynamicallyWithRequest: () => async () => ({ hasAllRequested }),
         actions: { api: { get: (operation: string) => `api:${operation}` } },
       },
-    } as unknown as SecurityPluginStart);
+    }) as unknown as SecurityPluginStart;
   const { featureFlags } = coreMock.createStart();
   featureFlags.getBooleanValue$.mockReturnValue(of(true));
 

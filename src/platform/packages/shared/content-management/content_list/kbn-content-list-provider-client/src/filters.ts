@@ -36,7 +36,7 @@ type ContentListFilterOptions<TOption, TValue extends string> =
 export interface ContentListFilterDefinition<
   TItem extends UserContentCommonSchema = UserContentCommonSchema,
   TValue extends string = string,
-  TOption = unknown
+  TOption = unknown,
 > {
   /** Unique filter id; also used as the query field name when `queryField` is omitted. */
   id: string;
@@ -128,7 +128,7 @@ const toArray = <TValue extends string>(value: MaybeArray<TValue>): TValue[] => 
 export const defineContentListFilter = <
   TItem extends UserContentCommonSchema,
   TValue extends string = string,
-  TOption = unknown
+  TOption = unknown,
 >(
   definition: ContentListFilterDefinition<TItem, TValue, TOption>
 ): ResolvedContentListFilter<TValue> => {

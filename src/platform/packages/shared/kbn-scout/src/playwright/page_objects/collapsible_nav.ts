@@ -14,7 +14,10 @@ import type { ScoutTestConfig } from '../../types';
 export class CollapsibleNav {
   private toggleNavButton: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly config: ScoutTestConfig) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly config: ScoutTestConfig
+  ) {
     this.toggleNavButton = this.page.testSubj.locator(
       this.config.serverless ? 'euiCollapsibleNavButton' : 'toggleNavButton'
     );

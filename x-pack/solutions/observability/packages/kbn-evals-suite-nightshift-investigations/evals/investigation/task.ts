@@ -151,8 +151,8 @@ const roundInterruptionError = (rounds: ConversationRound[]): string | undefined
 const isPersisted = (conversation: { rounds: ConversationRound[] } | undefined): boolean =>
   Boolean(
     conversation &&
-      conversation.rounds.length > 0 &&
-      conversation.rounds.every(({ status }) => status !== ConversationRoundStatus.inProgress)
+    conversation.rounds.length > 0 &&
+    conversation.rounds.every(({ status }) => status !== ConversationRoundStatus.inProgress)
   );
 
 /**
@@ -231,6 +231,9 @@ export const waitForInvestigationToEnd = async (
   }
 };
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
 /** Runs a manual investigation and retains a bounded report with references to its full evidence. */
 export const runInvestigation = async (
   fetch: HttpHandler,
@@ -253,6 +256,8 @@ export const runInvestigation = async (
         body: JSON.stringify({
           subject: { type: 'manual' },
           message: example.input.question,
+          // An example may carry what does not fit in the message, such as an earlier round.
+          ...(isRecord(example.input.context) ? { context: example.input.context } : {}),
           connector_id: connector.id,
         }),
       }
@@ -297,8 +302,8 @@ export const runInvestigation = async (
         const waited = !investigation
           ? `Investigation was not created within ${minutes} minutes`
           : agentStillWorking
-          ? `${STILL_IN_PROGRESS_ERROR_PREFIX}${minutes} minutes`
-          : `${MISSING_CONVERSATION_ERROR_PREFIX}${minutes} minutes`;
+            ? `${STILL_IN_PROGRESS_ERROR_PREFIX}${minutes} minutes`
+            : `${MISSING_CONVERSATION_ERROR_PREFIX}${minutes} minutes`;
         throw new Error(
           lastTransient ? `${waited}. Last read failed: ${errorMessage(lastTransient)}` : waited
         );
@@ -367,7 +372,9 @@ export const runInvestigation = async (
     output.usage = extractUsage(conversation.rounds);
     output.tool_call_count = countToolCalls(conversation.rounds);
     output.traceId = conversation.rounds
-      .flatMap(({ trace_id: traceId }) => (typeof traceId === 'string' ? [traceId] : traceId ?? []))
+      .flatMap(({ trace_id: traceId }) =>
+        typeof traceId === 'string' ? [traceId] : (traceId ?? [])
+      )
       .filter(Boolean)
       .at(-1);
     const accessedTrees = extractAccessedDecisionTrees(conversation.rounds);

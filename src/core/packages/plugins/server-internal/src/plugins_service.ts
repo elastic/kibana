@@ -76,9 +76,10 @@ export interface PluginsServiceDiscoverDeps {
 }
 
 /** @internal */
-export class PluginsService
-  implements CoreService<InternalPluginsServiceSetup, InternalPluginsServiceStart>
-{
+export class PluginsService implements CoreService<
+  InternalPluginsServiceSetup,
+  InternalPluginsServiceStart
+> {
   private readonly log: Logger;
   private readonly prebootPluginsSystem: PluginsSystem<PluginType.preboot>;
   private arePrebootPluginsStopped = false;
@@ -325,6 +326,7 @@ export class PluginsService
             ? this.prebootUiPluginInternalInfo
             : this.standardUiPluginInternalInfo;
         uiPluginInternalInfo.set(plugin.name, {
+          requiredPlugins: plugin.requiredPlugins,
           requiredBundles: plugin.requiredBundles,
           version: plugin.manifest.version,
           publicTargetDir: Path.resolve(plugin.path, 'target/public'),

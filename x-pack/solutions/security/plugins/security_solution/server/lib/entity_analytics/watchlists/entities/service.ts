@@ -120,8 +120,8 @@ export const createWatchlistEntitiesService = ({
           const watchlists = Array.isArray(rawWatchlists)
             ? rawWatchlists
             : typeof rawWatchlists === 'string'
-            ? [rawWatchlists]
-            : undefined;
+              ? [rawWatchlists]
+              : undefined;
 
           if (watchlists) {
             watchlistsByEuid.set(euid, watchlists as string[]);

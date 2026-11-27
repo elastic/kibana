@@ -135,8 +135,8 @@ export const useQueryValidation = ({
           const clientParserStatus = errors?.length
             ? 'error'
             : warnings.length
-            ? 'warning'
-            : 'success';
+              ? 'warning'
+              : 'success';
 
           addQueriesToCache({
             queryString: code,

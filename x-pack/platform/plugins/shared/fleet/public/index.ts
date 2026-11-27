@@ -101,9 +101,9 @@ export { FleetStatusProvider } from './hooks/use_fleet_status';
 export type { FleetStatusProviderProps } from './hooks/use_fleet_status';
 
 export const LazyPackagePolicyInputVarField = lazy(() =>
-  import(
-    './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field'
-  ).then((module) => ({ default: module.PackagePolicyInputVarField }))
+  import('./applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field').then(
+    (module) => ({ default: module.PackagePolicyInputVarField })
+  )
 );
 export type { PackageListGridProps } from './applications/integrations/sections/epm/components/package_list_grid';
 export type { AvailablePackagesHookType } from './applications/integrations/sections/epm/screens/home/hooks/use_available_packages';
@@ -116,9 +116,7 @@ export const PackageList = () => {
   return import('./applications/integrations/sections/epm/components/package_list_grid');
 };
 export const AvailablePackagesHook = () => {
-  return import(
-    './applications/integrations/sections/epm/screens/home/hooks/use_available_packages'
-  );
+  return import('./applications/integrations/sections/epm/screens/home/hooks/use_available_packages');
 };
 export const LocalSearchHook = () => {
   return import('./applications/integrations/hooks/use_local_search');
@@ -202,28 +200,12 @@ export const LazyCloudConnectorSetup = lazy(() =>
 export type { CloudConnectorSetupProps } from './components/cloud_connector';
 export { CLOUD_CONNECTOR_GCP_ASSET_INVENTORY_REUSABLE_MIN_VERSION } from './components/cloud_connector/constants';
 
-// AWS Connect Setup - auth method picker (Identity Federation + Static keys + Temporary keys) for external plugins
-// TODO: LazyAwsConnectSetup appears to have no active external callers. Consider consolidating
-// AwsAuthTypeSelector with ingest_hub's CredentialMethodSelector in a follow-up cleanup.
-// Track: https://github.com/elastic/ingest-dev/issues/9576
-export const LazyAwsConnectSetup = lazy(() =>
-  import('./components/cloud_connector').then((module) => ({
-    default: module.AwsConnectSetup,
-  }))
-);
+// AWS credential types shared by the standalone AWS auth components below
 export type {
-  AwsConnectSetupProps,
-  AwsAuthType,
   AwsStaticKeyCredentials,
   AwsTemporaryKeyCredentials,
   CloudSetupForCloudConnector,
 } from './components/cloud_connector';
-export {
-  AWS_AUTH_TYPE_SELECTOR_TEST_SUBJ,
-  AWS_AUTH_TYPE_IF_CARD_TEST_SUBJ,
-  AWS_AUTH_TYPE_STATIC_KEYS_CARD_TEST_SUBJ,
-  AWS_AUTH_TYPE_TEMPORARY_KEYS_CARD_TEST_SUBJ,
-} from './components/cloud_connector/aws_connect_setup/test_subjects';
 
 // AWS Static Keys Form — standalone credential form for cross-plugin use
 export const LazyAwsStaticKeysForm = lazy(() =>

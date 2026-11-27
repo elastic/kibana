@@ -21,7 +21,7 @@ const items: SourceFiltersTableFilter[] = [{ value: 'tim*', clientId: '1' }];
 const getIndexPatternMock = (fieldNames: string[] = []) =>
   ({
     getNonScriptedFields: () => fieldNames.map((name) => ({ name })),
-  } as unknown as DataView);
+  }) as unknown as DataView;
 
 type RenderTableProps = Partial<React.ComponentProps<typeof Table>>;
 

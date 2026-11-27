@@ -37,7 +37,7 @@ const getMockEventAnnotationService = (savedId?: string) =>
     toExpression: jest.fn(),
     toFetchExpression: jest.fn(),
     renderEventAnnotationGroupSavedObjectFinder: jest.fn(),
-  } as Partial<EventAnnotationServiceType> as EventAnnotationServiceType);
+  }) as Partial<EventAnnotationServiceType> as EventAnnotationServiceType;
 
 describe('annotation group save action', () => {
   describe('save modal', () => {

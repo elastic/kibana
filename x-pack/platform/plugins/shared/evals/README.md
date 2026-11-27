@@ -392,5 +392,6 @@ pnpm openapi:generate
 After regenerating, you may need to fix unused imports added by the generator:
 
 ```bash
-node scripts/eslint --fix x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/**/*.gen.ts
+node scripts/lint --fix x-pack/platform/packages/shared/kbn-evals-common/impl/schemas
+node scripts/oxfmt x-pack/platform/packages/shared/kbn-evals-common/impl/schemas
 ```

@@ -11,6 +11,7 @@ import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { omit } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 import {
   ALERT_ACTION_GROUP,
   ALERT_DURATION,
@@ -54,6 +55,7 @@ import { TEST_CACHE_EXPIRATION_TIME } from '../../create_test_data';
 export default function createAlertsAsDataInstallResourcesTest({ getService }: FtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');
+  const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const objectRemover = new ObjectRemover(supertestWithoutAuth);
 
@@ -621,9 +623,88 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         expect(alertDocRun2._source![ALERT_START]).to.equal(alertDocsRun1[0]._source![ALERT_START]);
       });
     });
+
+    // Versions that did not track alert docs yet could leave an active doc behind that task
+    // state does not know. No run loads such a doc, so it would stay active forever.
+    describe('when an earlier version left an active alert doc behind', () => {
+      for (const { description, tracked } of [
+        { description: 'without the tracked field', tracked: undefined },
+        { description: 'with tracked set to false', tracked: false },
+      ]) {
+        it(`should untrack an active alert doc ${description} that task state does not know`, async () => {
+          // The rule starts disabled so the doc is there before the rule runs for the first time
+          const ruleId = await createPatternFiringRule(
+            { alertA: [true, true] },
+            { enabled: false }
+          );
+          const { alertUuid: orphanedAlertUuid, start: orphanedAlertStart } =
+            await indexOrphanedAlertDoc(ruleId, tracked);
+          await enableRule(ruleId);
+
+          // RUN 1 - alertA is new and the orphaned doc is untracked
+          await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 1 }]]));
+          const stateRun1 = await getTaskState(ruleId, 0);
+          expect(Object.keys(stateRun1.alertInstances)).to.eql(['alertA']);
+          expect(Object.keys(stateRun1.alertRecoveredInstances ?? {})).to.eql([]);
+
+          const alertDocsRun1 = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+          expect(alertDocsRun1.length).to.equal(2);
+
+          const orphanedAlertDocRun1 = alertDocsRun1.find(
+            (doc) => doc._id === orphanedAlertUuid
+          )!._source!;
+          expect(orphanedAlertDocRun1[ALERT_STATUS]).to.equal('untracked');
+          expect(orphanedAlertDocRun1[ALERT_TRACKED]).to.equal(false);
+          expect(orphanedAlertDocRun1[ALERT_END]).to.match(timestampPattern);
+          expect(orphanedAlertDocRun1[ALERT_TIME_RANGE]).to.eql({
+            gte: orphanedAlertStart,
+            lte: orphanedAlertDocRun1[ALERT_END],
+          });
+          // the rest of the doc is left as it was
+          expect(orphanedAlertDocRun1[ALERT_INSTANCE_ID]).to.equal('orphanedAlert');
+          expect(orphanedAlertDocRun1[ALERT_START]).to.equal(orphanedAlertStart);
+          expect(orphanedAlertDocRun1[EVENT_ACTION]).to.equal('active');
+
+          const alertADocRun1 = alertDocsRun1.find((doc) => doc._id !== orphanedAlertUuid)!;
+          expect(alertADocRun1._source![ALERT_INSTANCE_ID]).to.equal('alertA');
+          expect(alertADocRun1._source![ALERT_STATUS]).to.equal('active');
+          expect(alertADocRun1._source![ALERT_TRACKED]).to.equal(true);
+
+          // RUN 2 - alertA is ongoing and the untracked doc is not touched again
+          await runSoon(ruleId);
+          await waitForEventLogDocs(
+            ruleId,
+            new Map([
+              ['execute', { equal: 2 }],
+              ['new-instance', { equal: 1 }],
+              ['active-instance', { equal: 2 }],
+            ])
+          );
+          const stateRun2 = await getTaskState(ruleId, 1);
+          expect(Object.keys(stateRun2.alertInstances)).to.eql(['alertA']);
+
+          const alertDocsRun2 = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+          expect(alertDocsRun2.length).to.equal(2);
+          expect(alertDocsRun2.find((doc) => doc._id === orphanedAlertUuid)!._source).to.eql(
+            orphanedAlertDocRun1
+          );
+          const alertADocRun2 = alertDocsRun2.find((doc) => doc._id === alertADocRun1._id)!;
+          expect(alertADocRun2._source![ALERT_STATUS]).to.equal('active');
+
+          // The cleanup is silent: the orphaned doc never became an alert of the rule, so
+          // neither run logged an event for it.
+          const eventActions = await getAlertingEventActions(ruleId);
+          expect(eventActions).not.to.contain('recovered-instance');
+          expect(eventActions).not.to.contain('untracked-instance');
+        });
+      }
+    });
   });
 
-  async function createPatternFiringRule(pattern: Record<string, boolean[]>): Promise<string> {
+  async function createPatternFiringRule(
+    pattern: Record<string, boolean[]>,
+    overwrites: Record<string, unknown> = {}
+  ): Promise<string> {
     const createdRule = await supertestWithoutAuth
       .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
       .set('kbn-xsrf', 'foo')
@@ -635,12 +716,70 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
           throttle: null,
           params: { pattern },
           actions: [],
+          ...overwrites,
         })
       );
     expect(createdRule.status).to.eql(200);
     const ruleId = createdRule.body.id;
     objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
     return ruleId;
+  }
+
+  async function enableRule(ruleId: string) {
+    const response = await supertestWithoutAuth
+      .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}/_enable`)
+      .set('kbn-xsrf', 'foo');
+    expect(response.status).to.eql(204);
+  }
+
+  // Writes an active alert doc for an alert that is not in the rule's task state. Leaving
+  // `tracked` out gives the doc the shape it had before that field existed.
+  async function indexOrphanedAlertDoc(ruleId: string, tracked?: boolean) {
+    const alertUuid = uuidv4();
+    const start = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    // Kibana creates the alias while it starts. Indexing before that would create a plain
+    // index with the alias name and break the installation.
+    await retry.waitFor(`alias ${alertsAsDataIndex} to exist`, () =>
+      es.indices.existsAlias({ name: alertsAsDataIndex })
+    );
+    await es.index({
+      index: alertsAsDataIndex,
+      id: alertUuid,
+      refresh: true,
+      require_alias: true,
+      document: {
+        '@timestamp': start,
+        [EVENT_ACTION]: 'active',
+        [EVENT_KIND]: 'signal',
+        [ALERT_ACTION_GROUP]: 'default',
+        [ALERT_INSTANCE_ID]: 'orphanedAlert',
+        [ALERT_RULE_CATEGORY]: 'Test: Firing on a Pattern and writing Alerts as Data',
+        [ALERT_RULE_CONSUMER]: 'alertsFixture',
+        [ALERT_RULE_NAME]: 'abc',
+        [ALERT_RULE_PRODUCER]: 'alertsFixture',
+        [ALERT_RULE_TYPE_ID]: 'test.patternFiringAad',
+        [ALERT_RULE_UUID]: ruleId,
+        [ALERT_START]: start,
+        [ALERT_STATUS]: 'active',
+        [ALERT_TIME_RANGE]: { gte: start },
+        [ALERT_UUID]: alertUuid,
+        [ALERT_WORKFLOW_STATUS]: 'open',
+        [SPACE_IDS]: ['space1'],
+        ...(tracked === undefined ? {} : { [ALERT_TRACKED]: tracked }),
+      },
+    });
+    return { alertUuid, start };
+  }
+
+  // Reads every alerting event of the rule. `getEventLog` only returns the actions it waits
+  // for, so it cannot show that an action is absent.
+  async function getAlertingEventActions(ruleId: string): Promise<string[]> {
+    const { body } = await supertest
+      .get(`${getUrlPrefix(Spaces.space1.id)}/_test/event_log/alert/${ruleId}/_find?per_page=5000`)
+      .expect(200);
+    return (body.data as IValidatedEvent[])
+      .filter((event) => event?.event?.provider === 'alerting')
+      .flatMap((event) => (event?.event?.action ? [event.event.action] : []));
   }
 
   async function runSoon(ruleId: string) {

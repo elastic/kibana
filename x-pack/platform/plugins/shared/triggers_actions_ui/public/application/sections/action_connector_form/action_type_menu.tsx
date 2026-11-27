@@ -244,8 +244,8 @@ export const ActionTypeMenu = ({
                   color: 'warning',
                 }
               : item.isExperimental
-              ? { label: TECH_PREVIEW_LABEL, tooltipContent: TECH_PREVIEW_DESCRIPTION }
-              : undefined
+                ? { label: TECH_PREVIEW_LABEL, tooltipContent: TECH_PREVIEW_DESCRIPTION }
+                : undefined
           }
           role="listitem"
           titleSize="xs"

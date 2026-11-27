@@ -37,15 +37,12 @@ export interface FileUploadPluginStartDependencies {
 export type FileUploadPluginSetup = ReturnType<FileUploadPlugin['setup']>;
 export type FileUploadPluginStart = ReturnType<FileUploadPlugin['start']>;
 
-export class FileUploadPlugin
-  implements
-    Plugin<
-      FileUploadPluginSetup,
-      FileUploadPluginStart,
-      FileUploadPluginSetupDependencies,
-      FileUploadPluginStartDependencies
-    >
-{
+export class FileUploadPlugin implements Plugin<
+  FileUploadPluginSetup,
+  FileUploadPluginStart,
+  FileUploadPluginSetupDependencies,
+  FileUploadPluginStartDependencies
+> {
   public setup(core: CoreSetup) {
     registerFileUploadAnalyticsEvents(core.analytics);
   }

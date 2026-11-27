@@ -47,7 +47,7 @@ const getPackageInfo = (installSource: string) =>
       previous_version: '1.0.0',
       is_rollback_ttl_expired: false,
     },
-  } as unknown as PackageInfo);
+  }) as unknown as PackageInfo;
 
 describe('RollbackButton', () => {
   beforeEach(() => {

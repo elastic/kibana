@@ -430,7 +430,7 @@ describe('extractRunAs', () => {
     ({
       steps: [],
       ...(runAs && { settings: { run_as: runAs } }),
-    } as Partial<WorkflowYaml> as WorkflowYaml);
+    }) as Partial<WorkflowYaml> as WorkflowYaml;
 
   it('reports user for an execution with no service account', () => {
     expect(extractRunAs(createMockWorkflowExecution())).toEqual({ runAs: 'user' });

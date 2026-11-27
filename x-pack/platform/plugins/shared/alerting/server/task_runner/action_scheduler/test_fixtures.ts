@@ -22,6 +22,7 @@ import type { NormalizedRuleType } from '../../rule_type_registry';
 import type { RuleTaskInstance, TaskRunnerContext } from '../types';
 import type { AlertingEventLogger } from '../../lib/alerting_event_logger/alerting_event_logger';
 import { Alert } from '../../alert';
+import { RuleResultService } from '../../monitoring/rule_result_service';
 
 const apiKey = Buffer.from('123:abc').toString('base64');
 
@@ -125,7 +126,7 @@ export const getRule = (overrides = {}) =>
     ],
     consumer: 'test-consumer',
     ...overrides,
-  } as unknown as SanitizedRule<RuleTypeParams>);
+  }) as unknown as SanitizedRule<RuleTypeParams>;
 
 export const getRuleType = (): NormalizedRuleType<
   RuleTypeParams,
@@ -171,7 +172,7 @@ export const getDefaultSchedulerContext = <
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData
+  AlertData extends RuleAlertData,
 >(
   loggerMock: Logger,
   actionsPluginMock: jest.Mocked<PluginStartContract>,
@@ -206,4 +207,5 @@ export const getDefaultSchedulerContext = <
   } as unknown as RuleTaskInstance,
   actionsClient: actionsClientMock,
   alertsClient: alertsClientMock,
+  ruleResultService: new RuleResultService(),
 });

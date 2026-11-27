@@ -8,7 +8,9 @@
 import { expect } from '@playwright/test';
 import pMap from 'p-map';
 import { tags } from '@kbn/evals';
-import type { EvaluationDataset, EvalsClient } from '@kbn/evals';
+import type { EvalConnector, EvaluationDataset, EvalsClient, Evaluator } from '@kbn/evals';
+import type { BoundInferenceClient } from '@kbn/inference-common';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import { evaluate } from '../../src/evaluate';
 import { restoreKnowledge } from '../../src/knowledge/restore_knowledge';
@@ -44,6 +46,7 @@ import {
   assertExecutionSuccessRate,
   executionSuccessEvaluator,
   getExecutionFailure,
+  getMinExecutionSuccessRate,
 } from './execution_success';
 
 // CI runs the suite on a serverless observability Scout cluster.
@@ -64,6 +67,10 @@ export const registerInvestigationEvaluation = ({
   bundledSynthetic: bundledSyntheticDataset = !process.env.NIGHTSHIFT_EXAMPLES_FILE &&
     !process.env.NIGHTSHIFT_DATASET_NAME,
   metadata: experimentMetadata = {},
+  selectExamples,
+  prepareExample = (example) => example,
+  extraEvaluators = () => [],
+  excludeEvaluators = [],
   // Experiment ids come from the build, suite, model and this name, so datasets that can run in one
   // build need distinct names or their scores merge.
   experimentName = orca
@@ -78,6 +85,21 @@ export const registerInvestigationEvaluation = ({
   orca?: boolean;
   bundledSynthetic?: boolean;
   metadata?: Record<string, string | number>;
+  /**
+   * The examples to run, by `case_id`. The whole dataset is still stored and scored into, so runs
+   * that split it between them merge into one dataset.
+   */
+  selectExamples?: (examples: InvestigationExample[]) => InvestigationExample[];
+  /** Turns a stored example into the one the investigation runs, e.g. to compose its prompt when the run starts. */
+  prepareExample?: (example: InvestigationExample) => InvestigationExample;
+  /** Evaluators scored in addition to the investigation judges, built with the run's judge connection. */
+  extraEvaluators?: (deps: {
+    inferenceClient: BoundInferenceClient;
+    evaluationConnector: EvalConnector;
+    log: ToolingLog;
+  }) => Array<Evaluator<InvestigationExample, InvestigationTaskOutput>>;
+  /** Evaluators to leave out, by name, when they do not apply to the dataset. */
+  excludeEvaluators?: string[];
   experimentName?: string;
 }): void => {
   evaluate.describe(`Nightshift investigations: ${name}`, { tag: suiteTags }, () => {
@@ -107,10 +129,14 @@ export const registerInvestigationEvaluation = ({
         }
         const orcaCredentials = orca ? resolveOrcaEsCredentials() : undefined;
         const dataset = await loadDataset(evalsClient);
+        const selectedExamples = selectExamples
+          ? selectExamples(dataset.examples)
+          : dataset.examples;
+        const selectedCaseIds = new Set(selectedExamples.map(({ metadata }) => metadata.case_id));
         // An ORCA task reads telemetry only up to its snapshot, through a key whose document-level
         // security stops there.
         const orcaVariant = orca ? resolveOrcaTelemetryVariant() : undefined;
-        const cutoffs = orcaVariant ? getOrcaCutoffs(dataset.examples) : [];
+        const cutoffs = orcaVariant ? getOrcaCutoffs(selectedExamples) : [];
         // The bundled synthetic examples supply their own evidence and must not query a cluster.
         const bundledSynthetic = !orca && bundledSyntheticDataset;
         // Customer-0 judges use the suite's evaluation connector. ORCA judges use a fixed model,
@@ -129,17 +155,18 @@ export const registerInvestigationEvaluation = ({
         };
         // Every task's events must have a rubric, or the task would silently go unscored.
         const orcaRubrics = orca ? await loadOrcaRubrics(evalsClient) : undefined;
-        if (orcaRubrics) assertOrcaRubricsCover(dataset.examples, orcaRubrics);
+        if (orcaRubrics) assertOrcaRubricsCover(selectedExamples, orcaRubrics);
         const judges = createInvestigationJudges(judgeDeps);
         const evaluators = [
           ...judges,
           ...(orcaRubrics ? createOrcaEvaluators(judgeDeps, { rubrics: orcaRubrics }) : []),
           executionSuccessEvaluator,
           ...efficiencyEvaluators,
-        ];
+          ...extraEvaluators(judgeDeps),
+        ].filter(({ name: evaluatorName }) => !excludeEvaluators.includes(evaluatorName));
         const evaluatorsByName = new Map(evaluators.map((each) => [each.name, each]));
         assertScoresWithinQueryLimit({
-          examples: dataset.examples.length,
+          examples: selectedExamples.length,
           repetitions,
           evaluators: evaluators.length,
         });
@@ -151,13 +178,13 @@ export const registerInvestigationEvaluation = ({
               (sum, cutoff) =>
                 sum +
                 Math.ceil(
-                  (dataset.examples.filter((example) => getOrcaCutoff(example) === cutoff).length *
+                  (selectedExamples.filter((example) => getOrcaCutoff(example) === cutoff).length *
                     repetitions) /
                     concurrency
                 ),
               0
             )
-          : Math.ceil((dataset.examples.length * repetitions) / concurrency);
+          : Math.ceil((selectedExamples.length * repetitions) / concurrency);
         const timeoutMs =
           rounds * (INVESTIGATION_TIMEOUT_MS + (orca ? ORCA_SETTLE_MS : 0) + 2 * 60_000) +
           // A report.md is written after its cutoff's turn, so only the last one adds to the run.
@@ -189,6 +216,12 @@ export const registerInvestigationEvaluation = ({
               name: experimentName,
               datasets: [dataset],
               trustUpstreamDataset,
+              ...(selectExamples
+                ? {
+                    selectExample: ({ metadata }: InvestigationExample) =>
+                      selectedCaseIds.has(metadata.case_id),
+                  }
+                : {}),
               concurrency: runConcurrency,
               metadata: {
                 ...experimentMetadata,
@@ -217,7 +250,7 @@ export const registerInvestigationEvaluation = ({
             return apiKey;
           };
           log.info(
-            `ORCA: ${dataset.examples.length} tasks read through ${cutoffs.length} cutoff keys, one cutoff at a time`
+            `ORCA: ${selectedExamples.length} tasks read through ${cutoffs.length} cutoff keys, one cutoff at a time`
           );
           // The keys only serve the investigations, so they are revoked as soon as those finish.
           experimentResults = await withOrcaKeysInvalidated(invalidate, async () => {
@@ -231,7 +264,7 @@ export const registerInvestigationEvaluation = ({
             });
             return runExperiment({
               // Every task enters the gate at once, and the gate runs `concurrency` of them.
-              runConcurrency: dataset.examples.length * repetitions,
+              runConcurrency: selectedExamples.length * repetitions,
               task: (example) =>
                 inCutoff(getOrcaCutoff(example), async () => {
                   const output = await runInvestigation(fetch, example, connector);
@@ -257,16 +290,14 @@ export const registerInvestigationEvaluation = ({
           await saveConnectorSetOnInvestigator(fetch, { withoutConnectors: bundledSynthetic });
           experimentResults = await runExperiment({
             runConcurrency: concurrency,
-            task: (example) => runInvestigation(fetch, example, connector),
+            task: (example) => runInvestigation(fetch, prepareExample(example), connector),
           });
         }
         const [experiment] = experimentResults;
 
         const runs = Object.values(experiment.runs);
-        expect(runs).toHaveLength(dataset.examples.length * repetitions);
-        expect(new Set(runs.map(({ metadata }) => metadata?.case_id))).toEqual(
-          new Set(dataset.examples.map(({ metadata }) => metadata.case_id))
-        );
+        expect(runs).toHaveLength(selectedExamples.length * repetitions);
+        expect(new Set(runs.map(({ metadata }) => metadata?.case_id))).toEqual(selectedCaseIds);
         const scoresPerRun = evaluators.length;
         await expect
           .poll(async () => (await evalsClient.getExperimentScores(experiment.id)).length, {
@@ -289,7 +320,11 @@ export const registerInvestigationEvaluation = ({
         for (const { caseId, reason } of failures) {
           log.warning(`Investigation ${caseId} did not complete: ${reason}`);
         }
-        assertExecutionSuccessRate(failures, runs.length);
+        assertExecutionSuccessRate(
+          failures,
+          runs.length,
+          getMinExecutionSuccessRate({ sliced: Boolean(selectExamples), runs: runs.length })
+        );
         if (orca)
           assertOrcaReportsWritten(runs.map(({ output }) => output as InvestigationTaskOutput));
         const casesWithOrcaTelemetry: string[] = [];

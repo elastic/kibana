@@ -31,7 +31,7 @@ This directory contains custom CodeQL queries designed to detect potential secur
 ### UnsafeDynamicHttpPath.ql
 - **ID**: `js/kibana/unsafe-dynamic-http-path`
 - **Severity**: Error (7.5)
-- **Description**: Detects a dynamically-built string that flows into the path of a browser `http.*` request without `buildPath()` (`@kbn/core-http-browser`) or `encodeURIComponent()`. The data-flow companion to the `@kbn/eslint/no_unsafe_dynamic_http_path` ESLint rule, which only sees the inline call site
+- **Description**: Detects a dynamically-built string that flows into the path of a browser `http.*` request without `buildPath()` (`@kbn/core-http-browser`) or `encodeURIComponent()`. The data-flow companion to the `@kbn/eslint/no_unsafe_dynamic_http_path` lint rule, which only sees the inline call site
 - **Fix**: Encode path parameters with `buildPath()`:
   ```typescript
   // Before (vulnerable)

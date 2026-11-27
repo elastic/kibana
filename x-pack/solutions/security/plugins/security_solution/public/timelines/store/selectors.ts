@@ -26,6 +26,7 @@ export const getTimelineShowStatusByIdSelector = () =>
     show: timeline?.show ?? false,
     updated: timeline?.updated ?? undefined,
     changed: timeline?.changed ?? false,
+    savePromptDismissed: timeline?.savePromptDismissed ?? false,
   }));
 
 const selectCallOutUnauthorizedMsg = (state: State): boolean =>
@@ -155,7 +156,7 @@ export const selectKqlQuery = createSelector(
     const kqlQueryExpression =
       isEmpty(dataProviders) && isEmpty(kqlFilterQueryExpression) && timelineType === 'template'
         ? ' '
-        : kqlFilterQueryExpression ?? '';
+        : (kqlFilterQueryExpression ?? '');
     return { query: kqlQueryExpression, language: 'kuery' };
   }
 );

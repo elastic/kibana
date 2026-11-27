@@ -68,6 +68,7 @@ import { createShouldIncludeExplanations } from './online_evals/should_include_e
 import {
   alertOutcomeJudges,
   memoryJudges,
+  recoveryDueDiligenceJudges,
   referenceFreeJudges,
   wikiJudges,
 } from './online_evals/judges';
@@ -154,21 +155,19 @@ import type {
   NightshiftInvestigationsServerStart,
   NightshiftInvestigationsSetupDeps,
   NightshiftInvestigationsStartDeps,
+  SlackChannelBindingChecker,
 } from './types';
 
 type ManagedWorkflowsClient = Awaited<
   ReturnType<WorkflowsExtensionsServerPluginStart['initManagedWorkflowsClient']>
 >;
 
-export class NightshiftInvestigationsPlugin
-  implements
-    Plugin<
-      NightshiftInvestigationsServerSetup,
-      NightshiftInvestigationsServerStart,
-      NightshiftInvestigationsSetupDeps,
-      NightshiftInvestigationsStartDeps
-    >
-{
+export class NightshiftInvestigationsPlugin implements Plugin<
+  NightshiftInvestigationsServerSetup,
+  NightshiftInvestigationsServerStart,
+  NightshiftInvestigationsSetupDeps,
+  NightshiftInvestigationsStartDeps
+> {
   private readonly logger: Logger;
   private workflowsManagement?: NightshiftInvestigationsSetupDeps['workflowsManagement'];
   private workflowsExtensionsStart?: NightshiftInvestigationsStartDeps['workflowsExtensions'];
@@ -205,6 +204,7 @@ export class NightshiftInvestigationsPlugin
   private telemetry?: NightshiftTelemetryClient;
   private taskManager?: NightshiftInvestigationsStartDeps['taskManager'];
   private detectionSnapshotContributor?: DetectionSnapshotContributor;
+  private slackChannelBindingChecker?: SlackChannelBindingChecker;
   private decisionTreesEnabled = false;
   private assistantEnabled = false;
 
@@ -281,6 +281,7 @@ export class NightshiftInvestigationsPlugin
     for (const judge of [
       ...referenceFreeJudges,
       ...alertOutcomeJudges,
+      ...recoveryDueDiligenceJudges,
       ...wikiJudges,
       ...memoryJudges,
     ]) {
@@ -798,6 +799,7 @@ export class NightshiftInvestigationsPlugin
             return start.userProfile;
           },
           isUniversalAlertingAvailable: () => this.alertingVTwo !== undefined,
+          getSlackChannelBindingChecker: () => this.slackChannelBindingChecker,
           isWikiEnabled: () => this.wikiEnabled,
           listSandboxConnectors,
           listSandboxConnectorTypes,
@@ -877,6 +879,12 @@ export class NightshiftInvestigationsPlugin
           throw new Error('Detection snapshot contributor is already registered');
         }
         this.detectionSnapshotContributor = contributor;
+      },
+      registerSlackChannelBindingChecker: (checker) => {
+        if (this.slackChannelBindingChecker) {
+          throw new Error('Slack channel binding checker is already registered');
+        }
+        this.slackChannelBindingChecker = checker;
       },
     };
   }

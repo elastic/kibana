@@ -260,7 +260,6 @@ export const RuleDetailPage: React.FunctionComponent = () => {
         metadata={headerMetadata}
         menu={menu}
         spacing="bleed"
-        sticky={false}
       />
       <KibanaPageTemplate.Section
         paddingSize="none"

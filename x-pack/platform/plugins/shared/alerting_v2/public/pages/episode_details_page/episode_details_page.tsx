@@ -452,7 +452,6 @@ export function EpisodeDetailsPage({
       `}
     >
       <AppHeader
-        sticky={false}
         title={episodeBreadcrumbTitle}
         back={{
           href: episodesListHref,
@@ -511,7 +510,7 @@ export function EpisodeDetailsPage({
                 <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
                   <AlertEpisodeTimelineSection
                     episodeId={episodeId}
-                    seriesId={episode ? episode.series_id ?? null : undefined}
+                    seriesId={episode ? (episode.series_id ?? null) : undefined}
                     groupHash={groupHash}
                     services={{ data, spaces, userProfile: services.userProfile }}
                   />

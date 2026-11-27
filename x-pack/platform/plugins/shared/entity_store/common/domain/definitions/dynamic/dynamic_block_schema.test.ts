@@ -8,6 +8,8 @@
 import {
   MAX_ATTRIBUTE_NAME_LENGTH,
   MAX_ATTRIBUTES_PER_SOURCE,
+  MAX_DISPLAY_LABEL_LENGTH,
+  MAX_DISPLAY_LABELS,
   MAX_FIELD_PATH_LENGTH,
   MAX_FILTER_LENGTH,
   MAX_INDEX_PATTERN_LENGTH,
@@ -21,6 +23,7 @@ import {
   isLiteralFieldPath,
   literalFieldPathSchema,
   type DynamicAttribute,
+  type DynamicDisplayLabel,
   type DynamicSource,
 } from './dynamic_block_schema';
 
@@ -34,6 +37,14 @@ const source = (overrides: Partial<DynamicSource> = {}): DynamicSource => ({
   indexPattern: 'metrics-system.*',
   ...overrides,
 });
+
+const displayLabel = (overrides: Partial<DynamicDisplayLabel> = {}): DynamicDisplayLabel => ({
+  name: 'k8s.cluster.name',
+  label: 'Cluster',
+  ...overrides,
+});
+
+const blockWithLabels = (displayLabels: unknown) => ({ sources: [source()], displayLabels });
 
 const attributes = (count: number): DynamicAttribute[] =>
   Array.from({ length: count }, (_, index) =>
@@ -87,6 +98,86 @@ describe('dynamicBlockSchema', () => {
         ],
       });
       expect(result.success).toBe(true);
+    });
+  });
+
+  describe('displayLabels', () => {
+    it('is optional', () => {
+      expect(dynamicBlockSchema.safeParse({ sources: [source()] }).success).toBe(true);
+    });
+
+    it('accepts a label for several names', () => {
+      const labels = [
+        displayLabel(),
+        displayLabel({ name: 'kubernetes.namespace', label: 'Namespace' }),
+      ];
+      expect(dynamicBlockSchema.safeParse(blockWithLabels(labels)).success).toBe(true);
+    });
+
+    it('rejects a duplicate name with a path to the duplicate', () => {
+      const result = dynamicBlockSchema.safeParse(
+        blockWithLabels([
+          displayLabel(),
+          displayLabel({ name: 'kubernetes.namespace', label: 'Namespace' }),
+          displayLabel({ label: 'Cluster name' }),
+        ])
+      );
+      expect(result.success).toBe(false);
+      expect(issuePaths(result)).toEqual([['displayLabels', 2, 'name']]);
+      expect(result.error?.issues[0].message).toMatch(/unique within a block/);
+    });
+
+    it('rejects a name that is not a field path', () => {
+      expect(
+        dynamicBlockSchema.safeParse(blockWithLabels([displayLabel({ name: 'k8s cluster' })]))
+          .success
+      ).toBe(false);
+    });
+
+    it(`accepts a name of ${MAX_FIELD_PATH_LENGTH} characters and rejects one more`, () => {
+      const name = 'a'.repeat(MAX_FIELD_PATH_LENGTH);
+      expect(dynamicBlockSchema.safeParse(blockWithLabels([displayLabel({ name })])).success).toBe(
+        true
+      );
+      expect(
+        dynamicBlockSchema.safeParse(blockWithLabels([displayLabel({ name: `${name}a` })])).success
+      ).toBe(false);
+    });
+
+    it('rejects an empty label', () => {
+      expect(
+        dynamicBlockSchema.safeParse(blockWithLabels([displayLabel({ label: '' })])).success
+      ).toBe(false);
+    });
+
+    it(`accepts a label of ${MAX_DISPLAY_LABEL_LENGTH} characters and rejects one more`, () => {
+      const label = 'a'.repeat(MAX_DISPLAY_LABEL_LENGTH);
+      expect(dynamicBlockSchema.safeParse(blockWithLabels([displayLabel({ label })])).success).toBe(
+        true
+      );
+      expect(
+        dynamicBlockSchema.safeParse(blockWithLabels([displayLabel({ label: `${label}a` })]))
+          .success
+      ).toBe(false);
+    });
+
+    it(`accepts ${MAX_DISPLAY_LABELS} labels and rejects one more`, () => {
+      const labels = (count: number) =>
+        Array.from({ length: count }, (_, index) => displayLabel({ name: `a${index}` }));
+      expect(
+        dynamicBlockSchema.safeParse(blockWithLabels(labels(MAX_DISPLAY_LABELS))).success
+      ).toBe(true);
+      expect(
+        dynamicBlockSchema.safeParse(blockWithLabels(labels(MAX_DISPLAY_LABELS + 1))).success
+      ).toBe(false);
+    });
+
+    it('rejects an unknown key on a label', () => {
+      expect(
+        dynamicBlockSchema.safeParse(
+          blockWithLabels([{ ...displayLabel(), description: 'The cluster' }])
+        ).success
+      ).toBe(false);
     });
   });
 
@@ -155,6 +246,41 @@ describe('dynamicBlockSchema', () => {
       });
 
       expect(result.success).toBe(false);
+    });
+  });
+
+  describe('displayLabels and suggestedFilters together', () => {
+    const block = (overrides: Record<string, unknown> = {}) => ({
+      sources: [source({ attributes: [attribute()] })],
+      displayLabels: [displayLabel({ name: 'os_name', label: 'OS' })],
+      suggestedFilters: ['os_name'],
+      ...overrides,
+    });
+
+    it('accepts both, and a label and a filter of the same name are not duplicates', () => {
+      const result = dynamicBlockSchema.safeParse(block());
+
+      expect(result.success).toBe(true);
+      expect(result.data?.displayLabels).toEqual([{ name: 'os_name', label: 'OS' }]);
+      expect(result.data?.suggestedFilters).toEqual(['os_name']);
+    });
+
+    it('reports a duplicate label and a duplicate filter, each under its own path', () => {
+      const result = dynamicBlockSchema.safeParse(
+        block({
+          displayLabels: [
+            displayLabel({ name: 'os_name', label: 'OS' }),
+            displayLabel({ name: 'os_name', label: 'Operating system' }),
+          ],
+          suggestedFilters: ['os_name', 'os_name'],
+        })
+      );
+
+      expect(result.success).toBe(false);
+      expect(issuePaths(result)).toEqual([
+        ['displayLabels', 1, 'name'],
+        ['suggestedFilters', 1],
+      ]);
     });
   });
 

@@ -26,7 +26,8 @@
  * running at the run's `to` are cut off there.
  *
  * Apps (`service.name`), each with three versions where the newest crashes more and starts slower.
- * The newest version rolls out over the first hours of the run, so its share grows over time:
+ * The newest version rolls out over the first hours of the run, to 80% of the installations, so its
+ * share grows over time while the older versions keep a tail:
  * - trailmap-android: Android only
  * - ride-ios: iOS only
  * - transit-companion: both platforms

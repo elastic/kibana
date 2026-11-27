@@ -9,7 +9,10 @@ import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { EXTENDED_TIMEOUT } from '..';
 
 export class DifferentialFunctionsPage {
-  constructor(public readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  constructor(
+    public readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {}
 
   async gotoDifferential() {
     await this.page.goto(`${this.kbnUrl.app('profiling')}/functions/differential`);

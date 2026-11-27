@@ -7,11 +7,20 @@
 
 import { apiTest, type ApiClientFixture, type EsClient, type KbnClient } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import { BROWSER_SDK_LANGUAGE } from '../../../../common/otel_data';
+import {
+  BROWSER_SDK_LANGUAGE,
+  EVENT_DEAD_CLICK,
+  EVENT_ERROR_CLICK,
+  EVENT_RAGE_CLICK,
+  EVENT_REPLAY_EVENT,
+  EVENT_REPLAY_START,
+  FRUSTRATION_CLICK_COUNT,
+} from '../../../../common/otel_data';
 import {
   SESSIONS_INDEX,
   SESSIONS_TASK_ID,
   SESSIONS_TASK_TYPE,
+  type SessionListResponse,
   type SessionsStatus,
 } from '../../../../common/sessions';
 import { deleteSessionsData } from '../../common/fixtures/sessions_data';
@@ -24,13 +33,22 @@ const { COMMON_HEADERS, SESSIONS_ENABLE_PATH } = testData;
 const STATUS_PATH = 'internal/digital_experience/sessions/status';
 const LOGS_INDEX = 'logs-generic.otel-default';
 const TRACES_INDEX = 'traces-generic.otel-default';
+/** Where EDOT Browser's session replay writes, a match of the OTel logs pattern the task reads. */
+const REPLAY_INDEX = 'logs-rum.replay.otel-default';
 
 /** An application and environment no other suite uses, so its summaries are exactly these. */
 const APP = 'dx-sessions-contract';
+const SESSIONS_LIST_PATH = `internal/digital_experience/applications/${APP}/sessions`;
 const ENVIRONMENT = 'dx-sessions-contract-env';
 // Uppercase, as EDOT iOS writes them: the hash ranges take any id.
 const SESSION = 'DX-CONTRACT-SESSION-1';
 const SESSION_AFTER_NEW_KEY = 'DX-CONTRACT-SESSION-2';
+/** In the window of `SESSION`, without its frustration signals, for the frustration filter to leave out. */
+const CALM_SESSION = 'DX-CONTRACT-SESSION-3';
+
+/** The element of the rage clicks; the dead click is on another one. */
+const FRUSTRATED_TARGET = '#pay';
+const DEAD_TARGET = '#coupon';
 
 const SECOND_MS = 1000;
 const MINUTE_MS = 60 * SECOND_MS;
@@ -57,8 +75,9 @@ const url = (path: string) => `https://${APP}.example.com${path}`;
 
 /**
  * One session's OTel events, with something for every field of the summary: three page views of
- * two pages (one by its hash route), a page load, two web vitals, a click, a JS error with the
- * user and location, and three requests: a success, a 503 and one with no response.
+ * two pages (one by its hash route), a page load, two web vitals, a click, two rage clicks, a dead
+ * click and an error click, a JS error with the user and location, and three requests: a success,
+ * a 503 and one with no response.
  */
 const buildEvents = (sessionId: string, startMs: number) => {
   const at = (offsetMs: number) => new Date(startMs + offsetMs).toISOString();
@@ -91,7 +110,10 @@ const buildEvents = (sessionId: string, startMs: number) => {
   };
   return {
     logs: [
-      log(0, 'browser.navigation_timing', { 'url.full': url('/home?ref=ad') }),
+      log(0, 'browser.navigation_timing', {
+        'url.full': url('/home?ref=ad'),
+        'browser.navigation_timing.load_event_end': 1500,
+      }),
       log(0, 'browser.navigation', { 'url.full': url('/home?ref=ad') }),
       log(2 * SECOND_MS, 'browser.web_vital', {
         'browser.web_vital.name': 'LCP',
@@ -100,6 +122,24 @@ const buildEvents = (sessionId: string, startMs: number) => {
       log(3 * SECOND_MS, 'browser.web_vital', {
         'browser.web_vital.name': 'cls',
         'browser.web_vital.value': 0.1,
+      }),
+      log(5 * SECOND_MS, EVENT_RAGE_CLICK, {
+        'browser.css_selector': FRUSTRATED_TARGET,
+        [FRUSTRATION_CLICK_COUNT]: 4,
+        'url.full': url('/home?ref=ad'),
+      }),
+      log(6 * SECOND_MS, EVENT_RAGE_CLICK, {
+        'browser.css_selector': FRUSTRATED_TARGET,
+        [FRUSTRATION_CLICK_COUNT]: 4,
+        'url.full': url('/home?ref=ad'),
+      }),
+      log(7 * SECOND_MS, EVENT_DEAD_CLICK, {
+        'browser.css_selector': DEAD_TARGET,
+        'url.full': url('/home?ref=ad'),
+      }),
+      log(8 * SECOND_MS, EVENT_ERROR_CLICK, {
+        'browser.css_selector': FRUSTRATED_TARGET,
+        'url.full': url('/home?ref=ad'),
       }),
       log(10 * SECOND_MS, 'browser.user_action.click', { 'browser.css_selector': 'a#cart' }),
       log(20 * SECOND_MS, 'browser.navigation', { 'url.full': url('/#/cart') }),
@@ -120,13 +160,60 @@ const buildEvents = (sessionId: string, startMs: number) => {
   };
 };
 
-const ingestEvents = async (esClient: EsClient, sessionId: string, startMs: number) => {
+const REPLAY_EVENT_COUNT = 40;
+
+/**
+ * The records of a recording of the session: the start of its segment just before the first event,
+ * and a record per second to after the last. They carry the application and session of the events,
+ * as the recorder writes them, and are not activity: they must not change the counts and times.
+ */
+const buildReplayRecords = (sessionId: string, startMs: number) => {
+  const segment = `${sessionId}-segment`;
+  const record = (offsetMs: number, eventName: string, attributes: Record<string, unknown>) => ({
+    '@timestamp': new Date(startMs + offsetMs).toISOString(),
+    event_name: eventName,
+    resource,
+    attributes: { 'session.id': sessionId, 'elastic.replay.segment.id': segment, ...attributes },
+  });
+  return [
+    record(-2 * SECOND_MS, EVENT_REPLAY_START, {
+      'elastic.replay.trigger': 'sampled',
+      'elastic.replay.format': 'rrweb/2',
+    }),
+    ...Array.from({ length: REPLAY_EVENT_COUNT }, (_, sequence) =>
+      record((sequence + 1) * SECOND_MS, EVENT_REPLAY_EVENT, {
+        'elastic.replay.sequence': sequence,
+        'elastic.replay.event.type': sequence === 0 ? 2 : 3,
+      })
+    ),
+  ];
+};
+
+const FRUSTRATION_EVENT_NAMES: readonly string[] = [
+  EVENT_RAGE_CLICK,
+  EVENT_DEAD_CLICK,
+  EVENT_ERROR_CLICK,
+];
+
+const ingestEvents = async (
+  esClient: EsClient,
+  sessionId: string,
+  startMs: number,
+  { frustrated = true, replay = false }: { frustrated?: boolean; replay?: boolean } = {}
+) => {
   const { logs, spans } = buildEvents(sessionId, startMs);
+  const logsToIngest = frustrated
+    ? logs
+    : logs.filter(({ event_name: eventName }) => !FRUSTRATION_EVENT_NAMES.includes(eventName));
   const { errors, items } = await esClient.bulk({
     refresh: 'wait_for',
     operations: [
-      ...logs.flatMap((document) => [{ create: { _index: LOGS_INDEX } }, document]),
+      ...logsToIngest.flatMap((document) => [{ create: { _index: LOGS_INDEX } }, document]),
       ...spans.flatMap((document) => [{ create: { _index: TRACES_INDEX } }, document]),
+      ...(replay ? buildReplayRecords(sessionId, startMs) : []).flatMap((document) => [
+        { create: { _index: REPLAY_INDEX } },
+        document,
+      ]),
     ],
   });
   if (errors) {
@@ -136,7 +223,7 @@ const ingestEvents = async (esClient: EsClient, sessionId: string, startMs: numb
 
 const deleteEvents = (esClient: EsClient) =>
   esClient.deleteByQuery({
-    index: [LOGS_INDEX, TRACES_INDEX],
+    index: [LOGS_INDEX, TRACES_INDEX, REPLAY_INDEX],
     query: { term: { 'resource.attributes.service.name': APP } },
     refresh: true,
     ignore_unavailable: true,
@@ -222,7 +309,10 @@ apiTest.describe(
         const startMs = Date.now() - 20 * MINUTE_MS;
 
         await apiTest.step('builds the expected summary from the events', async () => {
-          await ingestEvents(esClient, SESSION, startMs);
+          // The recording has more records than the session has events, from before its first
+          // event to after its last: only that a replay exists reaches the summary.
+          await ingestEvents(esClient, SESSION, startMs, { replay: true });
+          await ingestEvents(esClient, CALM_SESSION, startMs, { frustrated: false });
           const status = await enable(apiClient);
           expect(status).toMatchObject({ installed: true, apiKeyInvalid: false });
 
@@ -230,7 +320,10 @@ apiTest.describe(
             .poll(
               async () => {
                 await runSessionsTask(kbnClient);
-                return (await getSummary(esClient, SESSION)) !== undefined;
+                const summaries = await Promise.all(
+                  [SESSION, CALM_SESSION].map((sessionId) => getSummary(esClient, sessionId))
+                );
+                return summaries.every((summary) => summary !== undefined);
               },
               { timeout: SUMMARIZE_TIMEOUT_MS, intervals: [POLL_MS] }
             )
@@ -240,18 +333,26 @@ apiTest.describe(
           const noSamples = { count: 0, good: 0, needs_improvement: 0, poor: 0 };
           expect(await getSummary(esClient, SESSION)).toStrictEqual({
             session: { id: SESSION },
-            service: { name: APP },
+            service: { name: APP, version: null },
             start_time: at(0),
             end_time: at(30 * SECOND_MS),
             duration_ms: 30 * SECOND_MS,
-            event_count: 11,
+            event_count: 15,
             page_view_count: 3,
             page_load_count: 1,
+            // The frustration events summarize clicks that are counted already.
             click_count: 1,
             js_error_count: 1,
+            rage_click_count: 2,
+            dead_click_count: 1,
+            error_click_count: 1,
+            frustration_count: 4,
+            frustration_targets: [FRUSTRATED_TARGET, DEAD_TARGET],
+            frustration_pages: ['/home'],
             http_request_count: 3,
             http_failed_request_count: 2,
             bounced: false,
+            has_replay: true,
             // Pages in first-view order, once each, without their query string.
             journey: ['/home', '/cart'],
             entry_page: '/home',
@@ -269,6 +370,7 @@ apiTest.describe(
               fcp: noSamples,
               ttfb: noSamples,
             },
+            load_time: { p75: 1500, count: 1 },
             search: [
               SESSION.toLowerCase(),
               'jane@example.com',
@@ -281,6 +383,8 @@ apiTest.describe(
             ],
           });
 
+          expect(await getSummary(esClient, CALM_SESSION)).toMatchObject({ has_replay: false });
+
           await expect
             .poll(
               async () => {
@@ -290,6 +394,44 @@ apiTest.describe(
               { timeout: SUMMARIZE_TIMEOUT_MS, intervals: [POLL_MS] }
             )
             .toStrictEqual({ health: 'healthy', rebuilding: false, hasEnabledBy: true });
+        });
+
+        await apiTest.step('lists the session as frustrated', async () => {
+          const list = async (query: Record<string, string>) => {
+            const response = await apiClient.get(
+              `${SESSIONS_LIST_PATH}?${new URLSearchParams({
+                start: new Date(startMs - MINUTE_MS).toISOString(),
+                end: new Date(startMs + MINUTE_MS).toISOString(),
+                environment: ENVIRONMENT,
+                ...query,
+              })}`,
+              { headers: adminHeaders, responseType: 'json' }
+            );
+            expect(response).toHaveStatusCode(200);
+            return response.body as SessionListResponse;
+          };
+
+          const all = await list({});
+          expect(all.sessions.map(({ sessionId }) => sessionId).sort()).toStrictEqual([
+            SESSION,
+            CALM_SESSION,
+          ]);
+          expect(all.kpis.sessionsWithFrustration).toBe(1);
+
+          const frustrated = await list({ withFrustration: 'true' });
+          expect(frustrated.sessions.map(({ sessionId }) => sessionId)).toStrictEqual([SESSION]);
+          expect(frustrated.sessions[0].frustration).toStrictEqual({
+            rageClicks: 2,
+            deadClicks: 1,
+            errorClicks: 1,
+            total: 4,
+          });
+          expect(frustrated.kpis.sessionsWithFrustration).toBe(1);
+
+          const onTarget = await list({ frustrationTarget: FRUSTRATED_TARGET });
+          expect(onTarget.sessions.map(({ sessionId }) => sessionId)).toStrictEqual([SESSION]);
+          const onOtherTarget = await list({ frustrationTarget: '#nowhere' });
+          expect(onOtherTarget.sessions).toStrictEqual([]);
         });
 
         await apiTest.step('reports an invalidated key, and stops summarizing', async () => {

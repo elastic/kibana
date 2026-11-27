@@ -1,3 +1,4 @@
+oxfmt
 @openfeature/ofrep-web-provider
 cbor2
 @eslint-community/eslint-plugin-eslint-comments
@@ -45,6 +46,7 @@ lightningcss
 browserslist
 react-day-picker
 mysql2
+ioredis
 mssql
 jszip
 @rsdoctor/rspack-plugin

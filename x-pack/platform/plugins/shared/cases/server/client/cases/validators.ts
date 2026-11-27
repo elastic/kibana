@@ -461,14 +461,14 @@ export const validateExtendedFieldsInRequest = async ({
   const templateId =
     updateReq.template === null
       ? null
-      : updateReq.template?.id ?? originalCase.attributes.template?.id;
+      : (updateReq.template?.id ?? originalCase.attributes.template?.id);
 
   // Pin to the explicitly requested version so validation uses the same template version
   // that will be stored, not necessarily the latest.
   const templateVersion =
     updateReq.template === null
       ? undefined
-      : updateReq.template?.version ?? originalCase.attributes.template?.version;
+      : (updateReq.template?.version ?? originalCase.attributes.template?.version);
 
   await validateCaseExtendedFields({
     extendedFields: updateReq.extended_fields,

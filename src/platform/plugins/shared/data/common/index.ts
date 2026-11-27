@@ -526,6 +526,7 @@ export {
   ESQL_SEARCH_STRATEGY,
   ESQL_ASYNC_SEARCH_STRATEGY,
   ESQL_TABLE_TYPE,
+  mapEsqlResponseToDatatable,
   getQueryLanguage,
   getQueryString,
   getQueryStringCharCount,

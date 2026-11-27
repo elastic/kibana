@@ -13,6 +13,10 @@ import {
 } from './helper';
 import { makeEmbeddableServices } from './mocks';
 import expect from 'expect';
+
+jest.mock('../lazy_builder', () => ({
+  getLensBuilder: jest.fn(() => null),
+}));
 import type {
   FormBasedPersistedState,
   TextBasedPersistedState,
@@ -129,7 +133,7 @@ describe('Embeddable helpers', () => {
     });
 
     it('should return structured datasourceStates from nested unknown datasourceStates', () => {
-      const wrap = (ds: unknown) => ({ state: ds, isLoading: false } satisfies DatasourceState);
+      const wrap = (ds: unknown) => ({ state: ds, isLoading: false }) satisfies DatasourceState;
       const mockDatasourceStates: Record<string, unknown> = {
         formBased: wrap(formBasedDSStateMock),
         textBased: wrap(textBasedDSStateMock),

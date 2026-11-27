@@ -54,7 +54,10 @@ export class ServiceMapPage {
   private readonly serviceMapEditorServiceNameComboBoxLoading: Locator;
   private readonly serviceMapEditorEnvironmentComboBoxLoading: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.serviceMap = page.testSubj.locator('serviceMap');
     this.serviceMapGraph = page.testSubj.locator('serviceMapGraph');
     this.serviceMapViewport = this.serviceMapGraph.locator('.react-flow__viewport');
@@ -65,7 +68,7 @@ export class ServiceMapPage {
     this.zoomInBtnControl = this.zoomInBtn;
     this.zoomOutBtnControl = this.zoomOutBtn;
     this.fitViewBtn = this.centerServiceMapBtn;
-    this.noServicesPlaceholder = page.locator('.euiEmptyPrompt__content .euiTitle');
+    this.noServicesPlaceholder = page.getByRole('heading', { name: 'No services available' });
     this.serviceMapPopover = page.testSubj.locator('serviceMapPopover');
     this.serviceMapPopoverContent = page.testSubj.locator('serviceMapPopoverContent');
     this.serviceMapPopoverTitle = page.testSubj.locator('serviceMapPopoverTitle');

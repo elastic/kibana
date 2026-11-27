@@ -168,11 +168,10 @@ describe('sorting resolved rows by risk score', () => {
       'entity.id': id,
       'entity.risk.calculated_score_norm': value,
     });
-    const runQuery = jest.fn(
-      async (steps: readonly string[]): Promise<Row[]> =>
-        steps.join('\n').includes('resolution.risk.calculated_score_norm IS NOT NULL')
-          ? [score('host:g1', 90), score('host:g2', 40)]
-          : [score('host:e1', 70), score('host:e2', 40), score('host:e3', 10)]
+    const runQuery = jest.fn(async (steps: readonly string[]): Promise<Row[]> =>
+      steps.join('\n').includes('resolution.risk.calculated_score_norm IS NOT NULL')
+        ? [score('host:g1', 90), score('host:g2', 40)]
+        : [score('host:e1', 70), score('host:e2', 40), score('host:e3', 10)]
     );
 
     const rows = await fetchSorted(

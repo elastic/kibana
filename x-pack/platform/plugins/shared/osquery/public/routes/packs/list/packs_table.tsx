@@ -13,6 +13,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiLink,
   EuiSkeletonText,
   EuiSpacer,
@@ -144,6 +145,7 @@ const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: bool
     search: searchValue || undefined,
     createdBy: selectedUsersParam,
     enabled: enabledFilter,
+    withEffectivePolicyIds: true,
   });
 
   const items = useMemo(() => data?.data ?? EMPTY_ARRAY, [data?.data]);
@@ -279,7 +281,49 @@ const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: bool
         }),
         truncateText: true,
         width: '10%',
-        render: (policyIds: string[]) => <>{policyIds?.length ?? 0}</>,
+        render: (policyIds: string[], item: PackSavedObject) => {
+          // A disabled pack is normally not compiled into any integration, so the server
+          // reports no effective targets for it. Show its saved targets instead of a
+          // misleading 0, but keep live targets if Fleet still delivers it (failed detach).
+          const effectiveIds =
+            item.enabled || item.effective_policy_ids?.length
+              ? (item.effective_policy_ids ?? policyIds)
+              : policyIds;
+          const effectiveCount = effectiveIds?.length ?? 0;
+          // Count by identity, not by length: an effective set can drop a saved policy
+          // and add others without changing its size.
+          const savedIds = new Set(policyIds ?? []);
+          const extraCount = (effectiveIds ?? []).filter((id) => !savedIds.has(id)).length;
+
+          if (extraCount > 0) {
+            const breakdown = i18n.translate(
+              'xpack.osquery.packs.table.effectivePoliciesBreakdownTooltip',
+              {
+                defaultMessage: '{selected} selected + {extra} via shared integration',
+                values: {
+                  selected: effectiveCount - extraCount,
+                  extra: extraCount,
+                },
+              }
+            );
+
+            return (
+              <>
+                {effectiveCount}{' '}
+                <EuiIconTip
+                  type="info"
+                  size="s"
+                  content={breakdown}
+                  aria-label={breakdown}
+                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                  iconProps={{ 'data-test-subj': 'packEffectivePoliciesInfo' }}
+                />
+              </>
+            );
+          }
+
+          return <>{effectiveCount}</>;
+        },
       });
     }
 

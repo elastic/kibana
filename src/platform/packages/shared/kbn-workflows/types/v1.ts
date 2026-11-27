@@ -148,6 +148,13 @@ export interface WorkflowExecutionExecutedByUser {
   profileUid?: string;
 }
 
+/** One ancestor in a sub-workflow chain, and how it invoked the next run down. */
+export interface ExecutionChainHop {
+  readonly executionId: string;
+  readonly invocation: 'sync' | 'async';
+  readonly workflowId: string;
+}
+
 export interface EsWorkflowExecution {
   spaceId: string;
   id: string;
@@ -210,6 +217,12 @@ export interface EsWorkflowExecution {
   eventChainVisitedWorkflowIds?: string[];
   /** Trigger dispatch id from event-driven scheduling (`context.metadata.eventId`), when set */
   dispatchEventId?: string;
+  /**
+   * Every run above this one in a sub-workflow chain, root first and direct parent last.
+   * Indexed copy of `context.executionChain`, so the runs below any run can be queried.
+   * Absent on top-level runs and on child runs created before the field existed.
+   */
+  executionChain?: ExecutionChainHop[];
   /**
    * Aggregated LLM token usage across all token-consuming steps in this
    * execution, accumulated incrementally as each step finishes. Absent when no
@@ -578,25 +591,24 @@ export interface WorkflowListDto {
   total: number;
   results: WorkflowListItemDto[];
 }
-export interface WorkflowExecutionEngineModel
-  extends Pick<
-    EsWorkflow,
-    | 'id'
-    | 'name'
-    | 'enabled'
-    | 'definition'
-    | 'yaml'
-    | 'managed'
-    | 'managedBy'
-    | 'billable'
-    | 'originManagedWorkflowId'
-    | 'managedVersion'
-    | 'templateSlug'
-    | 'templateVersion'
-    | 'templateOrigin'
-    | 'version'
-    | 'workflowUid'
-  > {
+export interface WorkflowExecutionEngineModel extends Pick<
+  EsWorkflow,
+  | 'id'
+  | 'name'
+  | 'enabled'
+  | 'definition'
+  | 'yaml'
+  | 'managed'
+  | 'managedBy'
+  | 'billable'
+  | 'originManagedWorkflowId'
+  | 'managedVersion'
+  | 'templateSlug'
+  | 'templateVersion'
+  | 'templateOrigin'
+  | 'version'
+  | 'workflowUid'
+> {
   isTestRun?: boolean;
   isEphemeral?: boolean;
   spaceId?: string;
@@ -744,7 +756,7 @@ export interface InternalConnectorContract extends BaseConnectorContract {
 export interface EditorHandlers<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
-  Config extends z.ZodObject = z.ZodObject
+  Config extends z.ZodObject = z.ZodObject,
 > {
   config?: EditorHandlersConfig<Config, Input>;
   input?: EditorHandlersInput<Input, Config>;
@@ -753,7 +765,7 @@ export interface EditorHandlers<
 
 export type EditorHandlersConfig<
   Config extends z.ZodObject = z.ZodObject,
-  Input extends z.ZodType = z.ZodType
+  Input extends z.ZodType = z.ZodType,
 > = {
   [K in DotKeysOf<z.infer<Config>>]?: StepPropertyHandler<
     DotObject<z.infer<Config>>[K],
@@ -764,7 +776,7 @@ export type EditorHandlersConfig<
 
 export type EditorHandlersInput<
   Input extends z.ZodType = z.ZodType,
-  Config extends z.ZodObject = z.ZodObject
+  Config extends z.ZodObject = z.ZodObject,
 > = Input extends z.ZodObject
   ? {
       [K in DotKeysOf<z.infer<Input>>]?: StepPropertyHandler<
@@ -781,7 +793,7 @@ export type EditorHandlersInput<
 export interface DynamicSchema<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
-  Config extends z.ZodObject = z.ZodObject
+  Config extends z.ZodObject = z.ZodObject,
 > {
   /**
    * Dynamic Zod schema for validating step output based on input.
@@ -798,7 +810,7 @@ export interface DynamicSchema<
 export interface StepPropertyHandler<
   T = unknown,
   TConfig extends Record<string, unknown> = Record<string, unknown>,
-  TInput extends Record<string, unknown> = Record<string, unknown>
+  TInput extends Record<string, unknown> = Record<string, unknown>,
 > {
   /**
    * Entity selection configuration for the property.
@@ -818,7 +830,7 @@ type DependsOnValuePath = `config.${string}` | `input.${string}`;
 export interface PropertySelectionHandler<
   T = unknown,
   TConfig extends Record<string, unknown> = Record<string, unknown>,
-  TInput extends Record<string, unknown> = Record<string, unknown>
+  TInput extends Record<string, unknown> = Record<string, unknown>,
 > {
   /**
    * Dot paths (e.g. `config.proxy.ssl`, `input.owner`) whose values are passed in `context.values`
@@ -888,7 +900,7 @@ export interface SelectionDetails {
  */
 export interface StepSelectionValues<
   TConfig extends Record<string, unknown> = Record<string, unknown>,
-  TInput extends Record<string, unknown> = Record<string, unknown>
+  TInput extends Record<string, unknown> = Record<string, unknown>,
 > {
   /** Root-level step properties (everything outside the `with` block). */
   config: RecursivePartial<TConfig>;
@@ -898,7 +910,7 @@ export interface StepSelectionValues<
 
 export interface SelectionContext<
   TConfig extends Record<string, unknown> = Record<string, unknown>,
-  TInput extends Record<string, unknown> = Record<string, unknown>
+  TInput extends Record<string, unknown> = Record<string, unknown>,
 > {
   /** The step type ID (e.g., "onechat.runAgent") */
   stepType: string;

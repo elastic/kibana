@@ -156,8 +156,8 @@ export const EditDlmPhasesFlyout = ({
     isMissingEnterpriseLicense === true
       ? ('enterpriseRequired' as const)
       : defaultRepositoryName
-      ? undefined
-      : ('defaultRepositoryRequired' as const);
+        ? undefined
+        : ('defaultRepositoryRequired' as const);
 
   const triggerFrozenBlockedAction = useCallback(
     (reason: 'enterpriseRequired' | 'defaultRepositoryRequired') => {
