@@ -744,12 +744,9 @@ run_eval_suite() {
   node scripts/evals run --suite "$EVAL_SUITE_ID" "${EVAL_RUN_ARGS[@]}" </dev/null
 }
 
-run_eval_suite
-
-# Scheduled baseline runs (EVAL_PIN_BASELINE=1, e.g. the monthly regression baseline
-# pipeline) pin this run's scores as the new baseline for the suite/model after the run
-# succeeds. PR runs never set this: they only compare against the pinned baseline.
-pin_baseline() {
+# Static pin preconditions, knowable before the suite runs: an off-main or filtered run
+# that can never pin must fail up front, not after an hour of evaluating every model.
+validate_pin_preconditions() {
   if [[ "${EVAL_PIN_BASELINE:-}" != "1" ]]; then
     return 0
   fi
@@ -760,6 +757,16 @@ pin_baseline() {
   if [[ "${BUILDKITE_BRANCH:-}" != "main" && "${EVAL_PIN_BASELINE_ALLOW_BRANCH:-}" != "1" ]]; then
     echo "EVAL_PIN_BASELINE=1 on branch '${BUILDKITE_BRANCH:-unknown}': baselines are pinned from main only. Set EVAL_PIN_BASELINE_ALLOW_BRANCH=1 to pin from another ref deliberately."
     return 1
+  fi
+  # The branch is a build label, not proof of the checked-out code: an on-demand build
+  # selects branch and commit separately. Require the evaluated commit to sit on main's
+  # history too, whenever the ref is available to check against.
+  if [[ "${EVAL_PIN_BASELINE_ALLOW_BRANCH:-}" != "1" ]] &&
+    git rev-parse --verify -q origin/main >/dev/null 2>&1; then
+    if ! git merge-base --is-ancestor HEAD origin/main 2>/dev/null; then
+      echo "EVAL_PIN_BASELINE=1 but the checked-out commit is not on main's history; refusing to pin it as the baseline."
+      return 1
+    fi
   fi
   # An explicitly requested pin that cannot be published must fail the step: a scheduled
   # baseline run finishing green with the active baseline unchanged would go unnoticed.
@@ -773,15 +780,30 @@ pin_baseline() {
     echo "EVAL_PIN_BASELINE=1 with EVAL_SPEC_FILES would pin a subset of the suite as the baseline; refusing."
     return 1
   fi
-  if [[ -z "${EVAL_PROJECT:-}" ]]; then
-    echo "EVAL_PIN_BASELINE=1 requires a per-connector step (EVAL_PROJECT); cannot pin."
-    return 1
-  fi
   # Shards of one suite/model share a composite execution ID but run as independent
   # steps, so a per-shard pin could publish a partial execution as the baseline (and a
   # successful shard would pin even when a sibling shard failed).
   if [[ -n "${EVAL_SHARD_ID:-}" ]]; then
     echo "Baseline pinning is not supported for sharded suites; cannot pin shard ${EVAL_SHARD_ID}."
+    return 1
+  fi
+}
+
+validate_pin_preconditions
+run_eval_suite
+
+# Scheduled baseline runs (EVAL_PIN_BASELINE=1, e.g. the monthly regression baseline
+# pipeline) pin this run's scores as the new baseline for the suite/model after the run
+# succeeds. PR runs never set this: they only compare against the pinned baseline.
+pin_baseline() {
+  if [[ "${EVAL_PIN_BASELINE:-}" != "1" ]]; then
+    return 0
+  fi
+  # Re-checked after the run: the env cannot change mid-step, but a refactor moving the
+  # pre-run call must not silently drop these guards.
+  validate_pin_preconditions || return 1
+  if [[ -z "${EVAL_PROJECT:-}" ]]; then
+    echo "EVAL_PIN_BASELINE=1 requires a per-connector step (EVAL_PROJECT); cannot pin."
     return 1
   fi
 
@@ -800,6 +822,14 @@ pin_baseline() {
   fi
   if [[ -z "$composite" ]]; then
     echo "No execution ID recorded for ${EVAL_SUITE_ID}/${EVAL_PROJECT}; cannot pin baseline."
+    return 1
+  fi
+  # The execution-id key is build-scoped while pin executions are attempt-scoped (the
+  # job-salted TEST_RUN_ID): if this attempt's key write was lost, the key may still hold
+  # a previous attempt's execution, whose export this attempt's ingest marker says
+  # nothing about. Only pin what this attempt exported.
+  if [[ -n "${TEST_RUN_ID:-}" && "$composite" != "${TEST_RUN_ID}::"* ]]; then
+    echo "Execution ${composite} does not belong to this attempt (expected base ${TEST_RUN_ID}); refusing to pin another attempt's scores."
     return 1
   fi
   # A green run can still have holes in its exported scores, and a baseline must be a

@@ -145,6 +145,13 @@ for suite_id in "${SUITE_ARRAY[@]}"; do
       fi
       if [[ -z "$CONNECTOR_COMPOSITE" ]]; then
         echo "No execution ID for connector ${connector_id} in suite ${suite_id}; skipping."
+        # A pinned suite's comment must say this model has no verdict rather than omit
+        # it: the eval job may have died before worker teardown wrote the execution ID.
+        if [[ "$SUITE_PINNED_BASELINE" == "true" && -z "$FRESH_BASELINE_PR_EXPERIMENT_ID" ]]; then
+          printf '### ⚠️ Pinned-baseline comparison unavailable\n\nNo execution ID was recorded for suite `%s` / connector `%s`: the eval run may have failed before exporting scores. See this build'"'"'s eval step logs.\n\n' \
+            "$suite_id" "$connector_id" >>"$MARKDOWN_FILE"
+          HAS_RESULTS="true"
+        fi
         continue
       fi
 

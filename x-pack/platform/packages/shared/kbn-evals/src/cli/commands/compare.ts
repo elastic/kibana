@@ -473,23 +473,32 @@ export const compareCmd: Command<void> = {
     const targetFilter = suiteId ? { suiteId, executionId: targetExperimentId } : undefined;
     const baselineFilter = suiteId ? { suiteId, executionId: baselineExperimentId } : undefined;
 
+    // Anywhere a verdict is computed from these scores (the pinned report, or the merge
+    // gate), the reads must be complete or fail: a truncated read looks like a complete
+    // run and can produce a confidently wrong verdict. Ungated branch comparisons keep
+    // the lenient contract they always had.
+    const scoresGateVerdicts = Boolean(pinnedBaselineId) || Boolean(regressionGate);
     let targetExperimentScores;
     let baselineExperimentScores;
     try {
       [targetExperimentScores, baselineExperimentScores] = await Promise.all([
-        // In pinned mode the target read must be complete or fail: the verdict gates on
-        // it. Elsewhere the lenient contract stays (a failed read degrades to "no
-        // scores", as before this report existed).
         evalsClient.getExperimentScores(targetExperimentId, targetFilter, {
-          requireComplete: Boolean(pinnedBaselineId),
+          requireComplete: scoresGateVerdicts,
         }),
         // A pinned baseline's scores live in the pinned-baselines snapshot, which
         // outlives the retention on the scores data stream.
         pinnedBaselineId
           ? evalsClient.getPinnedBaselineScores(pinnedBaselineId)
-          : evalsClient.getExperimentScores(baselineExperimentId, baselineFilter),
+          : evalsClient.getExperimentScores(baselineExperimentId, baselineFilter, {
+              requireComplete: scoresGateVerdicts,
+            }),
       ]);
     } catch (error) {
+      // The merge gate never blocks on infra problems: record the inconclusive verdict
+      // before surfacing the failure, so the gate reads "not enforced", not "no verdict".
+      if (regressionGate) {
+        writeVerdict(inconclusiveVerdict('the experiment scores could not be read completely'));
+      }
       if (!pinnedBaselineId) {
         throw error;
       }
@@ -620,9 +629,10 @@ export const compareCmd: Command<void> = {
     }
 
     // Coverage is checked per (dataset, evaluator) slice against what was actually
-    // gated, not per dataset: a dataset that lost one evaluator (all-null scores, a
+    // gated, not per dataset: a dataset that lost one evaluator (nulled-out scores, a
     // rejected slice, a removed metric) would otherwise still read as covered and
-    // produce an unqualified pass.
+    // produce an unqualified pass. Slices whose baseline scores are all null never had
+    // anything to gate (no ground truth, metric not reported), so they are not coverage.
     let missingBaselineSlices: string[] = [];
     if (pinnedBaselineId) {
       const gatedSlices = new Set(
@@ -630,6 +640,9 @@ export const compareCmd: Command<void> = {
       );
       const missing = new Map<string, string>();
       for (const score of baselineExperimentScores) {
+        if (!Number.isFinite(score.evaluator.score ?? null)) {
+          continue;
+        }
         const key = `${score.example.dataset.id}|${score.evaluator.name}`;
         if (!gatedSlices.has(key) && !missing.has(key)) {
           missing.set(key, `${score.example.dataset.name} / ${score.evaluator.name}`);
@@ -678,7 +691,10 @@ export const compareCmd: Command<void> = {
       }
 
       const verdictMarkdown = regressionReport
-        ? formatRegressionReportMarkdown(regressionReport, { missingBaselineSlices }) + '\n\n'
+        ? formatRegressionReportMarkdown(regressionReport, {
+            missingBaselineSlices,
+            config: reportConfig,
+          }) + '\n\n'
         : '';
       const markdown = formatMarkdownCompareReport({
         targetExperimentId,

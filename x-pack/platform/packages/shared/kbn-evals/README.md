@@ -334,11 +334,12 @@ deliberately:
 - Pinning an already-pinned execution re-promotes its stored snapshot: that is the rollback
   path after a bad pin.
 
-Until a baseline is pinned for each of the suite's models, a labeled PR gets a
-"No pinned baseline" note instead of a comparison. A suite may ship with the flag on before
-its first pin only when its runs are gated on the owner (as `agent-builder-regression` is:
-label-triggered, with the owner seeding the baselines before announcing the suite);
-otherwise flip `pinnedBaseline` on in a follow-up once the first pin exists.
+Until a baseline is pinned for each of the suite's models, a PR that runs the suite (its
+own label, or `evals:all`) gets an informational "No pinned baseline" note instead of a
+comparison. Seed the baselines before flipping `pinnedBaseline` on; `agent-builder-regression`
+shipped with the flag on accepting that window, because the owner seeds its baselines as
+soon as the registry routes deploy and nothing consumes the suite's comparisons until the
+suite is announced.
 
 #### Per-spec model groups
 

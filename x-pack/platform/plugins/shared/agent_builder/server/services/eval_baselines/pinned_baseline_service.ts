@@ -207,6 +207,12 @@ export class PinnedBaselineService {
           expectedCount: expectedScoreCount,
           stored: true,
         });
+        // This losing attempt may have written score documents the winner never counted
+        // (the attempts read the live scores at different moments). getScores throws on
+        // a snapshot whose document count disagrees with its pointer, so reading the
+        // winner's snapshot back fails this pin loudly instead of answering success
+        // with a baseline no comparison will be able to read.
+        await this.getScores({ baselineId: pointer.baseline_id, spaceId: spaceIds[0] });
         return pointerToResponse(storedPointer);
       }
     }

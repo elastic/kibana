@@ -580,9 +580,13 @@ export class EvalsClient {
       });
 
       const parsed = GetEvaluationExperimentsResponse.parse(getResponseData(response));
-      const match = parsed.experiments.find(
-        (exp) => exp.execution_id != null && exp.execution_id.startsWith(`${baseExecutionId}::`)
-      );
+      // Pin-enabled CI steps salt the base with their Buildkite job ID (see
+      // run_suite.sh), so a build's executions may carry either base form.
+      const match = parsed.experiments.find((exp) => {
+        if (exp.execution_id == null) return false;
+        const base = exp.execution_id.split('::')[0];
+        return base === baseExecutionId || base.startsWith(`${baseExecutionId}-job-`);
+      });
 
       if (!match || !match.execution_id) {
         return undefined;

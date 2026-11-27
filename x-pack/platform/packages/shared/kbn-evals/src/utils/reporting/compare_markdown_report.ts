@@ -10,7 +10,7 @@ import type { Direction, ComparisonResult, RepetitionPolicy } from '@kbn/evals-c
 import type { RegressionGateVerdict } from './regression_gate';
 import { formatDiscordantPairs, getTestLabel } from './test_label';
 
-const DEFAULT_SIGNIFICANCE_THRESHOLD = 0.05;
+export const DEFAULT_SIGNIFICANCE_THRESHOLD = 0.05;
 const STALENESS_WARNING_DAYS = 3;
 
 function formatPValue(value: number | null): string {

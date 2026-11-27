@@ -68,12 +68,16 @@ export const pinBaselineCmd: Command<void> = {
     }
     let expectedScores: number | undefined;
     if (expectedScoresRaw !== undefined) {
-      if (!/^[1-9][0-9]*$/.test(expectedScoresRaw.trim())) {
+      const converted = Number(expectedScoresRaw.trim());
+      // The safe-integer check matters as much as the format: an all-digit value large
+      // enough to overflow converts to a number that serializes as JSON the route cannot
+      // enforce, silently dropping the guard.
+      if (!/^[1-9][0-9]*$/.test(expectedScoresRaw.trim()) || !Number.isSafeInteger(converted)) {
         throw createFlagError(
           `--expect-scores must be a positive integer, got "${expectedScoresRaw}".`
         );
       }
-      expectedScores = Number(expectedScoresRaw.trim());
+      expectedScores = converted;
     }
 
     const evaluationsKbnUrl = process.env.EVAL_KBN_URL;

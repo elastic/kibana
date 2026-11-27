@@ -14,7 +14,10 @@ import {
 } from '@kbn/evals-common';
 import type { EvaluationScoreDocument } from '@kbn/evals-common';
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import { escapeTableCell } from '../../utils/reporting/compare_markdown_report';
+import {
+  escapeTableCell,
+  DEFAULT_SIGNIFICANCE_THRESHOLD,
+} from '../../utils/reporting/compare_markdown_report';
 
 const GATE_ICONS = { pass: '✅', warn: '⚠️', fail: '❌' } as const;
 
@@ -146,7 +149,10 @@ const formatGateChange = (relativeChange: number | null): string =>
  */
 export const formatRegressionReportMarkdown = (
   report: RegressionReport,
-  { missingBaselineSlices = [] }: { missingBaselineSlices?: string[] } = {}
+  {
+    missingBaselineSlices = [],
+    config,
+  }: { missingBaselineSlices?: string[]; config?: RegressionReportConfig } = {}
 ): string => {
   const lines: string[] = [];
   if (report.verdict === 'fail') {
@@ -158,12 +164,27 @@ export const formatRegressionReportMarkdown = (
   } else {
     lines.push(`### ${GATE_ICONS.pass} No regression against the pinned baseline`);
   }
+  // The gates and the detailed table test significance independently, with possibly
+  // different alphas: say so, or a slice can read "regression" up here and "not
+  // significant" in the table below with no visible reason.
+  if (config) {
+    const { failRelativeChange, warnRelativeChange, alpha } = config.defaults;
+    lines.push('');
+    lines.push(
+      `_Gates: fail at a >=${(failRelativeChange * 100).toFixed(0)}% significant worsening ` +
+        `(p < ${alpha}), warn at >=${(warnRelativeChange * 100).toFixed(0)}% or any significant ` +
+        `worsening${config.evaluators ? ', with per-evaluator overrides' : ''}. The comparison ` +
+        `table below marks significance at p < ${DEFAULT_SIGNIFICANCE_THRESHOLD}, independently ` +
+        `of these gates._`
+    );
+  }
   if (missingBaselineSlices.length > 0) {
     lines.push('');
     lines.push(
       `> **Warning**: baseline slice(s) ${missingBaselineSlices
         .map((name) => `\`${name}\``)
-        .join(', ')} are missing from this run, so the verdict does not cover them.`
+        .join(', ')} were not compared in this run (not present, all scores null, or ` +
+        `excluded by the repetition policy), so the verdict does not cover them.`
     );
   }
   const flagged = [...report.regressions, ...report.warnings];
@@ -201,7 +222,9 @@ export const logRegressionReport = (
   }
   if (missingBaselineSlices.length > 0) {
     log.warning(
-      `  Baseline slice(s) missing from this run (not gated): ${missingBaselineSlices.join(', ')}`
+      `  Baseline slice(s) not compared in this run (not gated): ${missingBaselineSlices.join(
+        ', '
+      )}`
     );
   }
   for (const gate of [...report.regressions, ...report.warnings]) {

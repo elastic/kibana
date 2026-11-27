@@ -487,6 +487,47 @@ describe('PinnedBaselineService', () => {
     });
   });
 
+  it('pin fails loudly when the lost race left the winning snapshot unreadable', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const { coreDataStreams, create, search } = createDataStreamsMock();
+    const service = new PinnedBaselineService(logger, coreDataStreams);
+
+    const extraScoreHits = Array.from({ length: 8 }, (_, index) => ({
+      _source: {
+        doc_kind: 'score',
+        baseline: { id: 'baseline-1' },
+        ...getScoreDocument(),
+        example: { ...getScoreDocument().example, id: `example-${index}` },
+      },
+    }));
+    search
+      // No pointer visible when this pin starts.
+      .mockResolvedValueOnce({ hits: { hits: [] } })
+      // The winner's pointer (score_count 7) is stored by the time the write conflicts.
+      .mockResolvedValueOnce({ hits: { hits: [getStoredPointerHit()] } })
+      // getScores read-back: pointer again, then a snapshot polluted to 8 documents by
+      // this losing attempt's own writes.
+      .mockResolvedValueOnce({ hits: { hits: [getStoredPointerHit()] } })
+      .mockResolvedValueOnce({ hits: { hits: extraScoreHits } });
+    create
+      .mockImplementationOnce(async ({ documents }: { documents: Array<{ _id: string }> }) => ({
+        errors: false,
+        items: documents.map((document) => ({ create: { _id: document._id, status: 201 } })),
+      }))
+      .mockImplementationOnce(async () => ({
+        errors: false,
+        items: [{ create: { status: 409 } }],
+      }));
+
+    await expect(
+      service.pin({
+        pointer: getPointer(),
+        scores: [{ id: 'score-doc-1', document: getScoreDocument() }],
+        spaceIds: ['default'],
+      })
+    ).rejects.toThrow(/snapshot is incomplete/);
+  });
+
   it('pin holds the expected count against the winning pointer after losing the race', async () => {
     const logger = loggingSystemMock.createLogger();
     const { coreDataStreams, create, search } = createDataStreamsMock();

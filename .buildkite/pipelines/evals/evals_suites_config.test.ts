@@ -273,13 +273,14 @@ describe('evals.suites.json evals decision', () => {
     expect(problems).toEqual([]);
   });
 
-  it('rejects a suite carrying both regressionGate and regressionReportGates', () => {
+  it('rejects a suite carrying both regressionGate and the pinned report', () => {
     // Two rule engines on one suite compute two verdicts over the same results that can
-    // disagree in one PR comment. regressionReportGates is a temporary path until the
-    // report folds into regressionGate: https://github.com/elastic/search-team/issues/17503
+    // disagree in one PR comment. The report runs for any pinnedBaseline suite (with or
+    // without regressionReportGates overrides) and is a temporary path until it folds
+    // into regressionGate: https://github.com/elastic/search-team/issues/17503
     const problems = suites
-      .filter((suite) => suite.regressionGate && suite.regressionReportGates)
-      .map(({ id }) => `${id}: regressionGate and regressionReportGates are mutually exclusive`);
+      .filter((suite) => suite.regressionGate && (suite.pinnedBaseline || suite.regressionReportGates))
+      .map(({ id }) => `${id}: regressionGate and the pinned report are mutually exclusive`);
 
     expect(problems).toEqual([]);
   });
