@@ -80,7 +80,7 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
             troubleshootingDocUrl ? (
               <FormattedMessage
                 id="xpack.uptime.editPackagePolicy.abandonedPolicyTroubleshootingDescription"
-                defaultMessage="If the corresponding monitor no longer exists, see <link>Synthetics troubleshooting</link> for how to remove an abandoned package policy."
+                defaultMessage="If the corresponding monitor no longer exists, refer to <link>Synthetics troubleshooting</link> for how to remove an abandoned package policy."
                 values={{
                   link: (chunks) => (
                     <EuiLink

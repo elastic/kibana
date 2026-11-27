@@ -39,6 +39,7 @@ describe('MonitorEditPage', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+    jest.restoreAllMocks();
   });
 
   it('renders correctly', async () => {
