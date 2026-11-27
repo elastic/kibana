@@ -7,20 +7,31 @@
 
 import { esql } from '@elastic/esql';
 
+/**
+ * Double-quotes every index in a comma-separated ES|QL source list. Stream names can contain
+ * characters ES|QL parses specially (like parentheses), while quoted sources - plain, wildcard,
+ * or with a `::failures` selector - are always valid.
+ */
+const quoteEsqlSources = (source: string): string =>
+  source
+    .split(',')
+    .map((index) => `"${index.trim()}"`)
+    .join(', ');
+
 /** Total document count in the active time range (`source` may be a stream, view, or comma-separated list). */
 export function buildDataQualityTotalDocCountEsql(source: string): string {
-  return esql.from(source).pipe`STATS doc_count = COUNT(*)`.print();
+  return esql.from(quoteEsqlSources(source)).pipe`STATS doc_count = COUNT(*)`.print();
 }
 
 /** Degraded-doc count: rows with non-null `_ignored` in the time range. */
 export function buildDataQualityDegradedDocCountEsql(source: string): string {
-  return esql.from([source], ['_ignored']).pipe`WHERE _ignored IS NOT NULL`
+  return esql.from([quoteEsqlSources(source)], ['_ignored']).pipe`WHERE _ignored IS NOT NULL`
     .pipe`STATS degraded_doc_count = COUNT(*)`.print();
 }
 
 /** Distinct ignored-field values count in the time range. */
 export function buildDataQualityIgnoredFieldsCountEsql(source: string): string {
-  return esql.from([source], ['_ignored']).pipe`WHERE _ignored IS NOT NULL`
+  return esql.from([quoteEsqlSources(source)], ['_ignored']).pipe`WHERE _ignored IS NOT NULL`
     .pipe`STATS ignored_fields_count = COUNT_DISTINCT(_ignored)`.print('basic');
 }
 
@@ -31,7 +42,7 @@ export function buildDataQualityIgnoredFieldsCountEsql(source: string): string {
 export function buildTopFailureReasonsEsql(streamName: string, limit = 5): string {
   // Plain string query — the backtick-quoted `error.type` field and LIMIT clause
   // are not easily expressed via the typed builder.
-  return `FROM ${streamName}::failures | STATS count = COUNT(*) BY error_type = \`error.type\` | SORT count DESC | LIMIT ${limit}`;
+  return `FROM "${streamName}::failures" | STATS count = COUNT(*) BY error_type = \`error.type\` | SORT count DESC | LIMIT ${limit}`;
 }
 
 const MINUTE_MS = 60 * 1000;
@@ -62,7 +73,7 @@ export function getMeaningfulBucketMs(rangeMs: number, numDataPoints: number): n
 
 /** Ingest histogram: doc_count by @timestamp bucket (`intervalMs` snapped to a meaningful interval). */
 export function buildStreamIngestHistogramEsql(source: string, intervalMs: number): string {
-  return esql.from(source)
+  return esql.from(quoteEsqlSources(source))
     .pipe`STATS doc_count = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${intervalMs} ms)`.print(
     'basic'
   );
