@@ -1568,12 +1568,13 @@ steps:
   #
   # NOTE: the gate reports `decision: approved` with `status: no_action`,
   # `succeeded`, or `failed`. `failed` comes only from an action that marks its
-  # failure non-retryable, and none of the actions here do that today. Then
-  # `approved` is true and `applied` is false: the alerts stay untagged, but the
-  # investigation closes as approved. Any other action failure is re-offered,
-  # and an approval whose action failed through every retry settles as expired
-  # and reports no decision, so it counts as neither approved nor dismissed and
-  # the alerts stay untagged for the next sweep.
+  # failure non-retryable, which the edit and add-exception actions do when the rule
+  # was deleted or changed after the proposal. Then `approved` is true and `applied`
+  # is false, and `action_failed` is true: `resolve_stale_action` decides whether the
+  # alerts are tagged, and the investigation closes as `other`. Any other action
+  # failure is re-offered, and an approval whose action failed through every retry
+  # settles as expired and reports no decision, so it counts as neither approved nor
+  # dismissed and the alerts stay untagged for the next sweep.
   - name: record_proposal_action_decision
     type: data.set
     with:
@@ -1597,6 +1598,41 @@ steps:
           or steps.propose_threshold.output.decision == 'dismissed'
           or steps.propose_schedule.output.decision == 'dismissed'
           or steps.propose_manual.output.decision == 'dismissed' }}
+      # An approved action that failed as non-retryable. Only `or`, since Liquid has no
+      # operator precedence.
+      action_failed: >-
+        ${{ steps.propose_query.output.status == 'failed'
+          or steps.propose_risk_score.output.status == 'failed'
+          or steps.propose_exception.output.status == 'failed'
+          or steps.propose_threshold.output.status == 'failed'
+          or steps.propose_schedule.output.status == 'failed' }}
+
+  # The action says only that the rule changed or is gone, so read the rule again: a 404
+  # means it was deleted. A read that fails some other way says nothing, so
+  # `resolve_stale_action` leaves the alerts untagged for the next sweep.
+  - name: recheck_rule
+    type: kibana.request
+    if: "${{ steps.record_proposal_action_decision.output.action_failed == true }}"
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?id={{ inputs.rule_uuid | url_encode }}"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+    on-failure:
+      continue: true
+
+  # A rule that was changed since the proposal is still there, and later sweeps only pick
+  # up alerts from its latest version, so these alerts do not need to stay untagged. A
+  # deleted rule is never harvested again either way, so there is nothing to tag.
+  - name: resolve_stale_action
+    type: data.set
+    with:
+      processed: >-
+        ${{ steps.record_proposal_action_decision.output.action_failed == true
+          and steps.recheck_rule.error == null
+          and steps.recheck_rule.output.id != null }}
 
   # The action ran inside the gate, so its result is not visible here; re-read the
   # rule to refresh the attachment with the change that actually landed.
@@ -1666,6 +1702,36 @@ steps:
         - "{{ consts.reviewed_tag }}"
         - "{{ consts.applied_tag }}"
 
+  # An approved change whose rule changed since the proposal. Tagged reviewed only: no
+  # change was applied, acknowledged or dismissed.
+  - name: mark_alerts_stale
+    type: security.setAlertTags
+    if: "${{ steps.resolve_stale_action.output.processed == true }}"
+    with:
+      alert_ids: "${{ inputs.alert_ids }}"
+      tags_to_add:
+        - "{{ consts.reviewed_tag }}"
+
+  # The chat otherwise shows an approval with no effect, so the analyst is told why. The
+  # error is cut to 2000 characters: `system-alertzero-journal-note` rejects messages over 8000.
+  - name: note_action_failed
+    type: workflow.execute
+    if: >-
+      ${{ steps.create_investigation.output.conversation_id != null
+        and steps.record_proposal_action_decision.output.action_failed == true }}
+    on-failure:
+      continue: true
+    with:
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
+      inputs:
+        author_name: "{{ consts.author_name }}"
+        conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+        message: |-
+          **The approved change could not be applied.** {{ steps.propose_query.output.executionError | default: steps.propose_risk_score.output.executionError | default: steps.propose_exception.output.executionError | default: steps.propose_threshold.output.executionError | default: steps.propose_schedule.output.executionError | truncate: 2000 }}
+
+          {% if steps.resolve_stale_action.output.processed == true %}The alerts are marked as reviewed.{% else %}The alerts stay untagged.{% endif %}
+
   # An approved change the pipeline does not apply itself is the analyst's to act
   # on. Tagging retires these alerts so later sweeps do not re-open the same gate;
   # the rule returns once new false positives accumulate past the watermark. An
@@ -1698,7 +1764,7 @@ steps:
       conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
       updates:
         status: closed
-        close_reason: resolved
+        close_reason: "{% if steps.record_proposal_action_decision.output.action_failed == true %}other{% else %}resolved{% endif %}"
     on-failure:
       continue: true
 
@@ -1710,7 +1776,7 @@ steps:
     with:
       event: worker_investigation_closed
       investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
-      close_reason: resolved
+      close_reason: "{{ steps.close_investigation_applied.output.metadata.close_reason }}"
 
   - name: close_investigation_dismissed
     type: ai.conversation.metadata.patch

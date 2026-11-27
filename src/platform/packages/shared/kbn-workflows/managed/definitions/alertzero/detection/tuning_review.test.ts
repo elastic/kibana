@@ -316,6 +316,114 @@ describe('tuning_review applied threshold cardinality', () => {
   });
 });
 
+// An action fails as non-retryable when the rule was deleted or changed after the
+// proposal, and the gate then reports it approved with status `failed`.
+describe('tuning_review stale approved action', () => {
+  const engine = createWorkflowLiquidEngine();
+  const withOf = (name: string) => stepByName(name)?.with as Record<string, string> | undefined;
+  const evaluate = (expression: string | undefined, steps: Record<string, unknown>): unknown =>
+    engine.evalValueSync(String(expression).trim().slice(3, -2).trim(), { steps });
+  const renderTemplate = (template: unknown, steps: Record<string, unknown>): string =>
+    engine.parseAndRenderSync(String(template), { steps });
+
+  const actionSteps = [
+    'propose_query',
+    'propose_risk_score',
+    'propose_exception',
+    'propose_threshold',
+    'propose_schedule',
+  ];
+
+  it.each(actionSteps)('action_failed is true when %s failed as non-retryable', (name) => {
+    expect(
+      evaluate(withOf('record_proposal_action_decision')?.action_failed, {
+        [name]: { output: { decision: 'approved', status: 'failed' } },
+      })
+    ).toBe(true);
+  });
+
+  it.each([
+    ['an applied action', { propose_query: { output: { status: 'succeeded' } } }],
+    ['an approved manual change', { propose_manual: { output: { status: 'no_action' } } }],
+    ['no proposal', {}],
+  ])('action_failed is false for %s', (_scenario, steps) => {
+    expect(evaluate(withOf('record_proposal_action_decision')?.action_failed, steps)).toBe(false);
+  });
+
+  it('reads the rule again only after an action failed as non-retryable', () => {
+    const recheck = stepByName('recheck_rule');
+    const names = allSteps.map(({ name }) => name);
+
+    expect(recheck?.type).toBe('kibana.request');
+    expect(recheck?.if).toBe(
+      '${{ steps.record_proposal_action_decision.output.action_failed == true }}'
+    );
+    expect(recheck?.with?.path).toContain('inputs.rule_uuid');
+    expect(names.indexOf('record_proposal_action_decision')).toBeLessThan(
+      names.indexOf('recheck_rule')
+    );
+    expect(names.indexOf('recheck_rule')).toBeLessThan(names.indexOf('resolve_stale_action'));
+  });
+
+  // A changed rule is still there, and later sweeps only pick up alerts from its latest
+  // version, so its alerts are done. A deleted rule is never harvested again, so there is
+  // nothing to tag. A read that failed says nothing, so the alerts stay untagged.
+  it.each([
+    ['a rule changed since', true, null, { id: 'r1' }, true],
+    ['a rule deleted since', true, { message: 'HTTP 404: Not Found' }, {}, false],
+    ['a rule that could not be read', true, { message: 'HTTP 500: boom' }, {}, false],
+    ['an action that did not fail', false, null, { id: 'r1' }, false],
+  ])('tags the alerts for %s: %s', (_scenario, actionFailed, error, rechecked, expected) => {
+    expect(
+      evaluate(withOf('resolve_stale_action')?.processed, {
+        record_proposal_action_decision: { output: { action_failed: actionFailed } },
+        recheck_rule: { error, output: rechecked },
+      })
+    ).toBe(expected);
+  });
+
+  it('tags a stale action as reviewed only', () => {
+    const mark = stepByName('mark_alerts_stale');
+
+    expect(mark?.if).toBe('${{ steps.resolve_stale_action.output.processed == true }}');
+    expect(mark?.with?.tags_to_add).toEqual(['{{ consts.reviewed_tag }}']);
+  });
+
+  it.each([
+    ['a processed stale action', true, 'The alerts are marked as reviewed.'],
+    ['an unprocessed stale action', false, 'The alerts stay untagged.'],
+  ])('journals the action error for %s', (_scenario, processed, ending) => {
+    const note = stepByName('note_action_failed');
+    const { message } = (note?.with?.inputs ?? {}) as { message: string };
+
+    expect(note?.if).toContain(
+      'steps.record_proposal_action_decision.output.action_failed == true'
+    );
+    expect(
+      renderTemplate(message, {
+        propose_exception: { output: { executionError: 'The rule was changed.' } },
+        resolve_stale_action: { output: { processed } },
+      })
+    ).toBe(`**The approved change could not be applied.** The rule was changed.\n\n${ending}`);
+  });
+
+  it.each([
+    ['a stale action', true, 'other'],
+    ['an applied action', false, 'resolved'],
+  ])('closes the investigation for %s as %s', (_scenario, actionFailed, expected) => {
+    const updates = stepByName('close_investigation_applied')?.with?.updates as Record<
+      string,
+      string
+    >;
+
+    expect(
+      renderTemplate(updates.close_reason, {
+        record_proposal_action_decision: { output: { action_failed: actionFailed } },
+      })
+    ).toBe(expected);
+  });
+});
+
 describe('tuning_review proposal text', () => {
   const engine = createWorkflowLiquidEngine();
 
