@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { cutText } from '../text/cut_text';
 import { JUDGE_CASE_SETTINGS } from './constants';
-import { cutText } from './cut_text';
 import type { EvidenceCell, EvidenceRow } from './evidence_types';
 import type { CaseBudget, CaseEvidence, CaseSkippedEvidence, JudgeCase } from './judge_case_types';
 

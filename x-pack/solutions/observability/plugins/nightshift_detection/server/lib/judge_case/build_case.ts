@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { cutText } from '../text/cut_text';
 import { JUDGE_CASE_SETTINGS } from './constants';
-import { cutText } from './cut_text';
 import type { ReadEvidenceResult } from './evidence_types';
 import type {
   BuildCaseParams,
