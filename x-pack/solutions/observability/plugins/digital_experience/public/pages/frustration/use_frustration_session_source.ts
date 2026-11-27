@@ -7,12 +7,9 @@
 
 import { useRef } from 'react';
 import type { SessionsStatus } from '../../../common/sessions';
+import { isWithinSessionsRetention } from '../../../common/sessions';
 import { useSessionsStatus } from '../../application/sessions_status_provider';
 import type { FrustrationSessionSource } from './utils/frustration_esql';
-
-const DAY_MS = 24 * 60 * 60 * 1000;
-// A range as long as the retention, e.g. `now-30d`, is resolved a moment before `now` is read here.
-const RETENTION_SLACK_MS = 60 * 1000;
 
 /**
  * The summaries only once they hold every session of the range: not before sessions are set up,
@@ -28,7 +25,7 @@ export const sessionSourceOf = (
   status?.installed &&
   !status.rebuilding &&
   status.health === 'healthy' &&
-  rangeStart >= now - status.retentionDays * DAY_MS - RETENTION_SLACK_MS
+  isWithinSessionsRetention(rangeStart, status.retentionDays, now)
     ? 'summaries'
     : 'events';
 

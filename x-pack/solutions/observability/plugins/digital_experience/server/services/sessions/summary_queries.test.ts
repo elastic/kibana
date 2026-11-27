@@ -164,6 +164,14 @@ describe('sessionSummaryQuery', () => {
     );
   });
 
+  it('counts a page load once, from its navigation log rather than also its documentLoad span', () => {
+    const { query } = sessionSummaryQuery(REBUILD, ['a']);
+
+    expect(query).toContain('is_page_view = event IN ("browser.navigation"),');
+    expect(query).toContain('page_view_count = COUNT(*) WHERE is_page_view');
+    expect(query).not.toContain('documentLoad');
+  });
+
   it('counts the replay start records apart, and leaves them out of the counts and times of the session', () => {
     const { query } = sessionSummaryQuery(REBUILD, ['a']);
 

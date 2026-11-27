@@ -161,7 +161,9 @@ export const frustrationBase = (params: FrustrationQueryParams): string =>
 
 const firstOf = (fields: readonly string[]): string => `COALESCE(${fields.join(', ')})`;
 
-const NON_EMPTY_SESSION = `${SOURCE_SESSION_ID_FIELD} IS NOT NULL AND ${SOURCE_SESSION_ID_FIELD} != ""`;
+const nonEmpty = (field: string): string => `${field} IS NOT NULL AND ${field} != ""`;
+
+const NON_EMPTY_SESSION = nonEmpty(SOURCE_SESSION_ID_FIELD);
 
 /**
  * The page views and signals of the application's sessions, a session being a non-empty id, as in
@@ -386,8 +388,11 @@ const UNKNOWN_EXCEPTION_LABEL = i18n.translate(
   'xpack.digitalExperience.frustrationDashboard.exceptions.unknownType',
   { defaultMessage: 'Unknown exception' }
 );
-const EXCEPTION_TYPE = `CASE(${SOURCE_EXCEPTION_TYPE_FIELD} IS NOT NULL, ${SOURCE_EXCEPTION_TYPE_FIELD},
-          ${SOURCE_EXCEPTION_MESSAGE_FIELD} IS NOT NULL, ${escapeStringValue(
+// EDOT Browser copies `error.name` as is, which an error can set to "".
+const EXCEPTION_TYPE = `CASE(${nonEmpty(
+  SOURCE_EXCEPTION_TYPE_FIELD
+)}, ${SOURCE_EXCEPTION_TYPE_FIELD},
+          ${nonEmpty(SOURCE_EXCEPTION_MESSAGE_FIELD)}, ${escapeStringValue(
   UNKNOWN_EXCEPTION_LABEL
 )},
           ${escapeStringValue(NO_EXCEPTION_LABEL)})`;

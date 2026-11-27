@@ -65,6 +65,18 @@ export const SESSIONS_MAX_CONCURRENCY = 4;
 export const SESSIONS_SYNC_DELAY_SECONDS = 60;
 /** Sessions are built from, and kept for, this many days of events. */
 export const SESSIONS_LOOKBACK_DAYS = 30;
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+// A range as long as the retention, e.g. `now-30d`, is resolved a moment before `now` is read.
+const RETENTION_SLACK_MS = 60 * 1000;
+
+/** Whether a time range starting at `rangeStart` is within the sessions kept. */
+export const isWithinSessionsRetention = (
+  rangeStart: number,
+  retentionDays: number,
+  now: number = Date.now()
+): boolean => rangeStart >= now - retentionDays * DAY_MS - RETENTION_SLACK_MS;
+
 /**
  * Longest `session.id` that is summarized. The detail route takes ids up to this, so a longer one
  * would be listed and then fail to open; it also bounds what a summary query inlines.

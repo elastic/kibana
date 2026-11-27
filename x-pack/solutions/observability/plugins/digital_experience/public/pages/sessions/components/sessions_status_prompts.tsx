@@ -12,6 +12,7 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import {
   ALL_SESSIONS_INDEX_PATTERN,
+  isWithinSessionsRetention,
   type SessionsSetUpBlocker,
   type SessionsStatus,
 } from '../../../../common/sessions';
@@ -326,10 +327,11 @@ export function SessionsRetentionCallout({
   rangeStart: number;
   formatters: Formatters;
 }) {
-  const earliest = Date.now() - retentionDays * 24 * 60 * 60 * 1000;
-  if (rangeStart >= earliest) {
+  const now = Date.now();
+  if (isWithinSessionsRetention(rangeStart, retentionDays, now)) {
     return null;
   }
+  const earliest = now - retentionDays * 24 * 60 * 60 * 1000;
   return (
     <>
       <KbnInfoCallout

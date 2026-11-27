@@ -108,6 +108,8 @@ export const NAVIGATION_TIMING_LOAD_EVENT_END = 'browser.navigation_timing.load_
 export const EVENT_NAVIGATION_TIMING = 'browser.navigation_timing';
 export const EVENT_WEB_VITAL = 'browser.web_vital';
 export const EVENT_EXCEPTION = 'exception';
+/** EDOT Browser's span of a page load, from its navigation start to its load event. */
+export const EVENT_DOCUMENT_LOAD = 'documentLoad';
 export const EVENT_NAVIGATION = 'browser.navigation';
 export const EVENT_CLICK = 'click';
 export const EVENT_USER_ACTION_CLICK = 'browser.user_action.click';

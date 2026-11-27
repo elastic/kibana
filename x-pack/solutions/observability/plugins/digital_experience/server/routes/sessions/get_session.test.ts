@@ -30,6 +30,7 @@ const at = (offsetMs: number) => new Date(startMs + offsetMs).toISOString();
 const DAY_MS = 24 * 60 * 60 * 1000;
 const JOURNEY_EVENT_NAMES = [
   'browser.navigation',
+  'documentLoad',
   'click',
   'browser.user_action.click',
   'exception',
@@ -413,6 +414,50 @@ describe('buildPageVisits', () => {
       ['/', 0],
       [null, 1],
     ]);
+  });
+
+  describe('a page load, which EDOT Browser logs at DOMContentLoaded but its span starts earlier', () => {
+    const products = {
+      '@timestamp': [at(0)],
+      event_name: ['browser.navigation'],
+      'attributes.url.full': ['https://shop.example.com/products'],
+    };
+    const cartLoad = {
+      '@timestamp': [at(5_000)],
+      name: ['documentLoad'],
+      'attributes.url.full': ['https://shop.example.com/cart'],
+    };
+    const cartError = {
+      '@timestamp': [at(5_200)],
+      event_name: ['exception'],
+      'attributes.exception.type': ['TypeError'],
+      'attributes.url.full': ['https://shop.example.com/cart'],
+    };
+    const cart = {
+      '@timestamp': [at(5_500)],
+      event_name: ['browser.navigation'],
+      'attributes.url.full': ['https://shop.example.com/cart?step=1'],
+    };
+
+    it('starts its visit with the span, so the errors of the loading page stay on it', () => {
+      const visits = buildPageVisits([products, cartLoad, cartError, cart], startMs, at(10_000));
+
+      expect(visits).toEqual([
+        expect.objectContaining({ page: '/products', endTime: at(5_000), errorCount: 0 }),
+        expect.objectContaining({
+          page: '/cart',
+          url: 'https://shop.example.com/cart?step=1',
+          startTime: at(5_000),
+          errorCount: 1,
+        }),
+      ]);
+    });
+
+    it('starts no visit for a span without its page view, which the summary does not count', () => {
+      const visits = buildPageVisits([products, cartLoad, cartError], startMs, at(10_000));
+
+      expect(visits.map(({ page, errorCount }) => [page, errorCount])).toEqual([['/products', 1]]);
+    });
   });
 });
 
