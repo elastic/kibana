@@ -7,10 +7,9 @@
 
 import type { FunctionComponent, MutableRefObject } from 'react';
 import React, { useEffect, useMemo } from 'react';
-import { EuiFlexGroup } from '@elastic/eui';
-import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
-import List from 'react-virtualized/dist/commonjs/List';
-import WindowScroller from 'react-virtualized/dist/commonjs/WindowScroller';
+import { EuiAutoSizer, EuiFlexGroup } from '@elastic/eui';
+import type { ListImperativeAPI } from 'react-virtualized';
+import { List } from 'react-virtualized';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 
 import { DropSpecialLocations } from '../../../constants';
@@ -34,8 +33,7 @@ export interface PrivateProps {
   movingProcessor?: ProcessorInfo;
   movingProcessorLabel?: string;
   // Only passed into the top level list
-  windowScrollerRef?: MutableRefObject<WindowScroller | null>;
-  listRef?: MutableRefObject<List | null>;
+  listRef?: MutableRefObject<ListImperativeAPI | null>;
 }
 
 const isDropZoneAboveDisabled = (processor: ProcessorInfo, selectedProcessor: ProcessorInfo) => {
@@ -72,7 +70,6 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
   movingProcessorLabel,
   onAction,
   level,
-  windowScrollerRef,
   listRef,
 }) => {
   const sectionLabel = processorsTreeI18nTexts.getSectionLabelForSelector(selector);
@@ -178,71 +175,51 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
   };
 
   useEffect(() => {
-    if (windowScrollerRef && windowScrollerRef.current) {
-      windowScrollerRef.current.updatePosition();
-    }
     if (listRef && listRef.current) {
       listRef.current.recomputeRowHeights();
     }
-  }, [processors, listRef, windowScrollerRef, movingProcessor]);
+  }, [processors, listRef, movingProcessor]);
 
   // A list optimized to handle very many items.
   const renderVirtualList = () => {
     return (
-      <WindowScroller
-        ref={windowScrollerRef}
-        scrollElement={document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) ?? window}
-      >
-        {({ height, registerChild, isScrolling, onChildScroll, scrollTop }: any) => {
-          return (
-            <AutoSizer disableHeight>
-              {({ width }) => {
-                return (
-                  <div style={{ width: '100%' }} ref={registerChild}>
-                    <List
-                      ref={listRef}
-                      autoHeight
-                      height={height}
-                      width={width}
-                      overScanRowCount={5}
-                      isScrolling={isScrolling}
-                      onChildScroll={onChildScroll}
-                      scrollTop={scrollTop}
-                      tabIndex={processors.length === 0 ? -1 : 0}
-                      rowCount={processors.length}
-                      rowHeight={({ index }) => {
-                        const processor = processors[index];
-                        return calculateItemHeight({
-                          processor,
-                          isFirstInArray: index === 0,
-                        });
-                      }}
-                      rowRenderer={({ index: idx, style }) => {
-                        const processor = processors[idx];
-                        const above = processors[idx - 1];
-                        const below = processors[idx + 1];
-                        const info: ProcessorInfo = {
-                          id: processor.id,
-                          selector: selectors[idx],
-                          aboveId: above?.id,
-                          belowId: below?.id,
-                        };
+      <EuiAutoSizer disableHeight>
+        {({ width }) => (
+          <div style={{ width: '100%' }}>
+            <List
+              ref={listRef}
+              scrollElement={document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) ?? 'window'}
+              width={width}
+              tabIndex={processors.length === 0 ? -1 : 0}
+              rowCount={processors.length}
+              rowHeight={({ index }) => {
+                const processor = processors[index];
+                return calculateItemHeight({
+                  processor,
+                  isFirstInArray: index === 0,
+                });
+              }}
+              rowRenderer={({ index: idx, style }) => {
+                const processor = processors[idx];
+                const above = processors[idx - 1];
+                const below = processors[idx + 1];
+                const info: ProcessorInfo = {
+                  id: processor.id,
+                  selector: selectors[idx],
+                  aboveId: above?.id,
+                  belowId: below?.id,
+                };
 
-                        return (
-                          <div style={style} key={processor.id}>
-                            {renderRow({ processor, info, idx })}
-                          </div>
-                        );
-                      }}
-                      processors={processors}
-                    />
+                return (
+                  <div style={style} key={processor.id}>
+                    {renderRow({ processor, info, idx })}
                   </div>
                 );
               }}
-            </AutoSizer>
-          );
-        }}
-      </WindowScroller>
+            />
+          </div>
+        )}
+      </EuiAutoSizer>
     );
   };
 

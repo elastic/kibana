@@ -8,7 +8,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import type { List } from 'react-virtualized';
+import type { ListImperativeAPI } from 'react-virtualized';
 import { useScrollToOrigin } from './use_scroll_to_origin';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 
@@ -35,7 +35,7 @@ const itemC = makeItem('c');
 const visibleList = [itemA, itemB, itemC];
 
 const makeListRef = (scrollToRow = jest.fn()) =>
-  ({ current: { scrollToRow } } as unknown as React.MutableRefObject<List>);
+  ({ current: { scrollToRow } } as unknown as React.MutableRefObject<ListImperativeAPI>);
 
 const makeScrollToOriginRef = () => ({ current: () => {} } as React.MutableRefObject<() => void>);
 
@@ -129,7 +129,7 @@ describe('useScrollToOrigin', () => {
       scrollToOriginRef.current();
 
       // 'b' is at index 1
-      expect(scrollToRow).toHaveBeenCalledWith(1);
+      expect(scrollToRow).toHaveBeenCalledWith({ index: 1 });
     });
 
     it('does not call scrollToRow when context span is not in the visible list', () => {
@@ -170,12 +170,12 @@ describe('useScrollToOrigin', () => {
 
       // 'b' starts at index 1
       scrollToOriginRef.current();
-      expect(scrollToRow).toHaveBeenLastCalledWith(1);
+      expect(scrollToRow).toHaveBeenLastCalledWith({ index: 1 });
 
       // after prepending 'x', 'b' moves to index 2
       rerender({ list: extendedList });
       scrollToOriginRef.current();
-      expect(scrollToRow).toHaveBeenLastCalledWith(2);
+      expect(scrollToRow).toHaveBeenLastCalledWith({ index: 2 });
     });
   });
 });
