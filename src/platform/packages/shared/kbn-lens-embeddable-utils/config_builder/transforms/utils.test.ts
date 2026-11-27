@@ -30,7 +30,10 @@ import type {
   ReferenceBasedIndexPatternColumn,
 } from '@kbn/lens-common';
 import type { TextBasedLayer, TextBasedLayerColumn } from '@kbn/lens-common';
-import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
+import {
+  AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+  AS_CODE_DATA_VIEW_SPEC_TYPE,
+} from '@kbn/as-code-data-views-schema';
 import type { LensApiConfig, MetricConfig } from '../schema';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { LensAttributes } from '../types';
@@ -563,6 +566,30 @@ describe('buildDataSourceStateNoESQL', () => {
     columns: {},
     columnOrder: [],
   } as FormBasedLayer;
+
+  test.each(['indexpattern-datasource-layer-layer_1', 'xy-visualization-layer-layer_1'])(
+    'prefers a saved data view over a stale ad hoc reference named %s',
+    (referenceName) => {
+      const result = buildDataSourceStateNoESQL(
+        formBasedLayer,
+        'layer_1',
+        {
+          'my-adhoc-dataview-id': {
+            title: 'missing_remote:logs-*',
+            timeFieldName: '@timestamp',
+          },
+        },
+        [{ type: 'index-pattern', id: 'saved-dataview-id', name: referenceName }],
+        [{ type: 'index-pattern', id: 'my-adhoc-dataview-id', name: referenceName }],
+        referenceName
+      );
+
+      expect(result).toEqual({
+        type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+        ref_id: 'saved-dataview-id',
+      });
+    }
+  );
 
   test('emits allow_hidden_indices for an adhoc dataview with allowHidden', () => {
     const result = buildDataSourceStateNoESQL(
