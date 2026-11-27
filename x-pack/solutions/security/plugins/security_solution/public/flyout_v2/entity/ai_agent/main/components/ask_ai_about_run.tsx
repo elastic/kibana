@@ -147,7 +147,6 @@ export const AskAiAboutRun = memo(({ identity, agent, run }: AskAiAboutRunProps)
       anchorPosition="downRight"
     >
       <EuiContextMenuPanel
-        size="s"
         items={QUESTIONS.map(({ id, label }) => (
           <EuiContextMenuItem
             key={id}

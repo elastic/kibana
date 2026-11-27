@@ -551,49 +551,46 @@ const RunStatusBadge = ({ status }: { status?: RunStatus }) => {
 };
 
 const getOutsideLabel = ({ filesOutside, destinations, workingDirectory }: RunReach) => {
-  const values = {
-    files: filesOutside.length,
-    destinations: destinations.length,
-    directory: workingDirectory ?? '',
-  };
+  const files = filesOutside.length;
+  const destinationCount = destinations.length;
   if (!workingDirectory) {
-    return destinations.length > 0
+    return destinationCount > 0
       ? i18n.translate(
           'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.reach.destinations',
           {
             defaultMessage:
               '{destinations, plural, one {# network destination} other {# network destinations}}',
-            values,
+            values: { destinations: destinationCount },
           }
         )
       : undefined;
   }
-  if (filesOutside.length > 0 && destinations.length > 0) {
+  if (files > 0 && destinationCount > 0) {
     return i18n.translate(
       'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.reach.filesAndDestinationsOutside',
       {
         defaultMessage:
           '{files, plural, one {# file} other {# files}} and {destinations, plural, one {# network destination} other {# network destinations}} outside {directory}',
-        values,
+        values: { files, destinations: destinationCount, directory: workingDirectory },
       }
     );
   }
-  if (filesOutside.length > 0) {
+  if (files > 0) {
     return i18n.translate(
       'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.reach.filesOutside',
       {
         defaultMessage: '{files, plural, one {# file} other {# files}} outside {directory}',
-        values,
+        values: { files, directory: workingDirectory },
       }
     );
   }
-  if (destinations.length > 0) {
+  if (destinationCount > 0) {
     return i18n.translate(
       'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.reach.destinationsOutside',
       {
         defaultMessage:
           '{destinations, plural, one {# network destination} other {# network destinations}} outside {directory}',
-        values,
+        values: { destinations: destinationCount, directory: workingDirectory },
       }
     );
   }
