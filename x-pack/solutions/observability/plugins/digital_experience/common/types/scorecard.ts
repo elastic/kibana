@@ -30,8 +30,9 @@ export interface ScorecardMeasure {
   /** Better, worse or unchanged by the same cutoffs as the Overview's KPIs. */
   direction: ScorecardVerdict;
   /**
-   * The measure over the four periods before this one, per period for a count: how it usually is,
-   * so one unusual period doesn't read as a trend. `null` without data then.
+   * How the measure usually is, so one unusual period doesn't read as a trend: its mean over the
+   * four periods before this one that have data, the web vitals' percentiles over all four.
+   * `null` without data then.
    */
   baseline: number | null;
   /** The change from the baseline, in the unit of `change`. */

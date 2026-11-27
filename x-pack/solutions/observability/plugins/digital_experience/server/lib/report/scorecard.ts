@@ -154,13 +154,10 @@ export const assessCoreWebVitals = (webVitals: WebVitals): CoreWebVitalsAssessme
   return { status: failing.length > 0 ? 'failed' : 'passed', failing };
 };
 
-/** The periods a baseline covers, which it averages its counts over. */
+/** The periods before the current one that a baseline covers. */
 export const BASELINE_PERIODS = 4;
 
-/**
- * The KPIs over the baseline's periods, counts per period: the sessions, page loads and JS errors
- * divided by the number of periods, the rest as measured over all of them.
- */
+/** The KPIs of the baseline: each the mean of its value in the baseline's periods. */
 export interface BaselineKpis {
   sessions: number | null;
   pageLoads: number | null;
@@ -188,7 +185,7 @@ export interface BuildScorecardParams {
   /** The web vitals of the period and of the previous one. */
   webVitals: WebVitals;
   previousWebVitals: WebVitals;
-  /** The KPIs and web vitals over the `BASELINE_PERIODS` periods before this one. */
+  /** The KPIs and web vitals of the `BASELINE_PERIODS` periods before this one. */
   baseline: { kpis: BaselineKpis; webVitals: WebVitals };
   environment?: string;
   environments: string[];

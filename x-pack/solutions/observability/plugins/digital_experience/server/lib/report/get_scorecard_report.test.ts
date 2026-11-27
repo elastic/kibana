@@ -11,7 +11,7 @@ import {
   getOtelOverviewKpis,
   getOtelPeriodKpis,
 } from '../../routes/overview/otel/get_otel_overview_kpis';
-import { getScorecardReport } from './get_scorecard_report';
+import { averageBaselineKpis, getScorecardReport } from './get_scorecard_report';
 
 jest.mock('../../routes/overview/otel/get_otel_overview_kpis');
 
@@ -37,19 +37,34 @@ const response = (environments: string[]) => ({
   },
 });
 
-/** The baseline KPIs over four periods: 40 sessions, 400 page loads and 8 JS errors in all. */
-const BASELINE_KPIS = {
-  sessions: 40,
-  sessionsWithErrors: 4,
+/** The KPIs of one baseline period. */
+const PERIOD_KPIS = {
+  sessions: 10,
+  sessionsWithErrors: 1,
   errorFreeSessions: 0.9,
-  pageLoads: 400,
+  pageLoads: 100,
   loadTime: 1800,
-  loadTimeSamples: 400,
-  jsErrors: 8,
-  httpRequests: 100,
+  loadTimeSamples: 100,
+  jsErrors: 2,
+  httpRequests: 25,
   failedHttpRequests: 1,
-  failedHttpRatio: 0.01,
+  failedHttpRatio: 0.04,
   requestLatency: 250,
+};
+
+/** A period in which the application sent nothing. */
+const NO_KPIS = {
+  sessions: 0,
+  sessionsWithErrors: 0,
+  errorFreeSessions: null,
+  pageLoads: 0,
+  loadTime: null,
+  loadTimeSamples: 0,
+  jsErrors: 0,
+  httpRequests: 0,
+  failedHttpRequests: 0,
+  failedHttpRatio: null,
+  requestLatency: null,
 };
 
 describe('getScorecardReport', () => {
@@ -69,7 +84,7 @@ describe('getScorecardReport', () => {
       requestLatency: compared,
       counts: {},
     } as unknown as Awaited<ReturnType<typeof getOtelOverviewKpis>>);
-    jest.mocked(getOtelPeriodKpis).mockResolvedValue(BASELINE_KPIS);
+    jest.mocked(getOtelPeriodKpis).mockResolvedValue(PERIOD_KPIS);
   });
 
   const run = () =>
@@ -89,9 +104,15 @@ describe('getScorecardReport', () => {
       // The baseline: the four periods before this one.
       expect.objectContaining({ gte: 2 * HOUR, lt: 10 * HOUR }),
     ]);
-    expect(getOtelPeriodKpis).toHaveBeenCalledWith(
-      expect.objectContaining({ start: 2 * HOUR, end: 10 * HOUR })
-    );
+    // The baseline's KPIs: one search per period, so each counts its own sessions.
+    expect(
+      jest.mocked(getOtelPeriodKpis).mock.calls.map(([{ start, end }]) => [start, end])
+    ).toEqual([
+      [2 * HOUR, 4 * HOUR],
+      [4 * HOUR, 6 * HOUR],
+      [6 * HOUR, 8 * HOUR],
+      [8 * HOUR, 10 * HOUR],
+    ]);
   });
 
   it('asks for no page-load percentiles, trend or filter facets', async () => {
@@ -112,7 +133,7 @@ describe('getScorecardReport', () => {
     ]);
   });
 
-  it('averages the counts of the baseline per period, and keeps its rates and percentiles', async () => {
+  it("averages each measure over the baseline's periods", async () => {
     search.mockResolvedValue(response([]));
 
     const report = await run();
@@ -124,15 +145,13 @@ describe('getScorecardReport', () => {
     expect(baselineOf('jsErrors')).toBe(2);
     expect(baselineOf('jsErrorsPer100')).toBe(2);
     expect(baselineOf('loadTime')).toBe(1800);
-    expect(baselineOf('failedRequests')).toBe(0.01);
+    expect(baselineOf('failedRequests')).toBe(0.04);
     expect(report.baselinePeriod).toEqual({ start: 2 * HOUR, end: 10 * HOUR });
   });
 
   it('has no baseline when the application sent nothing then', async () => {
     search.mockResolvedValue(response([]));
-    jest
-      .mocked(getOtelPeriodKpis)
-      .mockResolvedValue({ ...BASELINE_KPIS, sessions: 0, pageLoads: 0 });
+    jest.mocked(getOtelPeriodKpis).mockResolvedValue(NO_KPIS);
 
     const report = await run();
 
@@ -150,5 +169,32 @@ describe('getScorecardReport', () => {
     const report = await run();
 
     expect(report.environments).toEqual(['production', 'qa', 'staging']);
+  });
+});
+
+describe('averageBaselineKpis', () => {
+  it('leaves out the periods without telemetry, e.g. before the application was instrumented', () => {
+    expect(
+      averageBaselineKpis([NO_KPIS, NO_KPIS, PERIOD_KPIS, { ...PERIOD_KPIS, sessions: 30 }])
+    ).toMatchObject({ sessions: 20, pageLoads: 100, loadTime: 1800 });
+  });
+
+  it('keeps a period with only requests or JS errors, which have no session or page load', () => {
+    expect(
+      averageBaselineKpis([
+        {
+          ...NO_KPIS,
+          httpRequests: 4,
+          failedHttpRequests: 1,
+          failedHttpRatio: 0.25,
+          requestLatency: 100,
+        },
+        { ...NO_KPIS, jsErrors: 3 },
+      ])
+    ).toMatchObject({ sessions: 0, jsErrors: 1.5, failedHttpRequests: 0.25, requestLatency: 100 });
+  });
+
+  it('has no baseline without any telemetry', () => {
+    expect(averageBaselineKpis([NO_KPIS, NO_KPIS]).sessions).toBeNull();
   });
 });

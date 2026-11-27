@@ -95,7 +95,7 @@ const BASELINE_TOOLTIP = i18n.translate(
   'xpack.digitalExperience.report.scorecard.baselineTooltip',
   {
     defaultMessage:
-      'The measure over the four periods before this one, counts per period, and the change from it.',
+      'The average of the four periods before this one, the web vitals over all four, and the change from it.',
   }
 );
 

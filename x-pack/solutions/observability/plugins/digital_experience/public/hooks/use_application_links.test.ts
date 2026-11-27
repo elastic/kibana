@@ -181,7 +181,7 @@ describe('useApplicationLinks', () => {
 
     const href = new URL(result.current.scorecardReportHref, 'http://localhost');
     expect(href.searchParams.get('rangeFrom')).toBe('now-7d/d');
-    expect(href.searchParams.get('rangeTo')).toBe('now/d');
+    expect(href.searchParams.get('rangeTo')).toBe('now-1d/d');
     expect(result.current.reportsHref).not.toContain('now-7d');
   });
 });

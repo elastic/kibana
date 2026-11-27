@@ -24,23 +24,42 @@ import {
 const WEB_VITALS_SEARCH_SPAN_NAME = 'get_scorecard_web_vitals';
 const BASELINE_KPIS_SPAN_NAME = 'get_scorecard_baseline_kpis';
 
+/** Whether the application sent anything in a period: a page load, session, JS error or request. */
+const hasTelemetry = ({
+  sessions,
+  pageLoads,
+  jsErrors,
+  httpRequests,
+  requestLatency,
+}: PeriodKpis) =>
+  sessions > 0 || pageLoads > 0 || jsErrors > 0 || httpRequests > 0 || requestLatency !== null;
+
+/** The mean of the values, `null` without any. */
+const meanOf = (values: Array<number | null>): number | null => {
+  const known = values.filter((value): value is number => value !== null);
+  return known.length > 0 ? known.reduce((sum, value) => sum + value, 0) / known.length : null;
+};
+
 /**
- * The baseline's KPIs, its counts per period. `COUNT_DISTINCT` sessions over all the periods count
- * a session that spans two of them once, which per period is close enough. No baseline when the
- * application sent nothing then, e.g. before it was instrumented.
+ * The baseline's KPIs: each the mean of its value in the periods the application sent anything,
+ * so a period before it was instrumented doesn't pull the baseline down. Each period counts its
+ * own distinct sessions, so a session that spans several periods counts in each, as it would in
+ * the current one. No baseline without any such period.
  */
-const toBaselineKpis = (kpis: PeriodKpis): BaselineKpis => {
-  if (kpis.sessions === 0 && kpis.pageLoads === 0) {
+export const averageBaselineKpis = (periods: PeriodKpis[]): BaselineKpis => {
+  const withTelemetry = periods.filter(hasTelemetry);
+  if (withTelemetry.length === 0) {
     return NO_BASELINE_KPIS;
   }
+  const mean = (valueOf: (kpis: PeriodKpis) => number | null) => meanOf(withTelemetry.map(valueOf));
   return {
-    sessions: kpis.sessions / BASELINE_PERIODS,
-    pageLoads: kpis.pageLoads / BASELINE_PERIODS,
-    loadTime: kpis.loadTime,
-    errorFreeSessions: kpis.errorFreeSessions,
-    jsErrors: kpis.jsErrors / BASELINE_PERIODS,
-    failedHttpRequests: kpis.failedHttpRatio,
-    requestLatency: kpis.requestLatency,
+    sessions: mean(({ sessions }) => sessions),
+    pageLoads: mean(({ pageLoads }) => pageLoads),
+    loadTime: mean(({ loadTime }) => loadTime),
+    errorFreeSessions: mean(({ errorFreeSessions }) => errorFreeSessions),
+    jsErrors: mean(({ jsErrors }) => jsErrors),
+    failedHttpRequests: mean(({ failedHttpRatio }) => failedHttpRatio),
+    requestLatency: mean(({ requestLatency }) => requestLatency),
   };
 };
 
@@ -54,7 +73,13 @@ export const getScorecardReport = async ({
 }: ApplicationSearch): Promise<ScorecardReport> => {
   const { serviceName, start, end, environment } = search;
   const previousPeriod = getPreviousPeriod(start, end);
-  const baselinePeriod = { start: start - BASELINE_PERIODS * (end - start), end: start };
+  const periodLength = end - start;
+  const baselinePeriod = { start: start - BASELINE_PERIODS * periodLength, end: start };
+  // The baseline's periods, oldest first, each as long as this one.
+  const baselinePeriods = Array.from({ length: BASELINE_PERIODS }, (_, index) => ({
+    start: baselinePeriod.start + index * periodLength,
+    end: baselinePeriod.start + (index + 1) * periodLength,
+  }));
 
   const webVitalsOf = async (periodStart: number, periodEnd: number) => {
     const { aggregations } = await esClient.search(
@@ -68,13 +93,16 @@ export const getScorecardReport = async ({
     getOtelOverviewKpis({ ...search, esClient }),
     webVitalsOf(start, end),
     webVitalsOf(previousPeriod.start, previousPeriod.end),
-    getOtelPeriodKpis({
-      ...search,
-      esClient,
-      start: baselinePeriod.start,
-      end: baselinePeriod.end,
-      operationName: BASELINE_KPIS_SPAN_NAME,
-    }),
+    Promise.all(
+      baselinePeriods.map((period) =>
+        getOtelPeriodKpis({
+          ...search,
+          esClient,
+          ...period,
+          operationName: BASELINE_KPIS_SPAN_NAME,
+        })
+      )
+    ),
     webVitalsOf(baselinePeriod.start, baselinePeriod.end),
   ]);
 
@@ -83,7 +111,7 @@ export const getScorecardReport = async ({
     serviceName,
     webVitals: current.webVitals,
     previousWebVitals: previous.webVitals,
-    baseline: { kpis: toBaselineKpis(baselineKpis), webVitals: baseline.webVitals },
+    baseline: { kpis: averageBaselineKpis(baselineKpis), webVitals: baseline.webVitals },
     environment,
     // Also those that sent nothing in this period, to tell where a drop in traffic comes from.
     environments: sortEnvironments([

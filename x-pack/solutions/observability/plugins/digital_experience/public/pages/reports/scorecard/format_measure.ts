@@ -48,8 +48,9 @@ export const formatMeasureValue = (
 ): string => {
   switch (unit) {
     case 'count':
-      // Whole, though a baseline averages the count over its periods.
-      return formatNumber(Math.round(value));
+      // A baseline averages a count over its periods: whole from 100 up, where a fraction is noise,
+      // but not below, where one error in four periods reads 0.25, not 0.
+      return formatNumber(Math.abs(value) >= 100 ? Math.round(value) : value);
     case 'ms':
       return formatDurationMs(value);
     case 'score':

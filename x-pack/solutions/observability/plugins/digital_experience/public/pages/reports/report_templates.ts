@@ -8,8 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import type { ReportTemplateId } from '../../../common/types/applications';
 
-/** The range the weekly scorecard opens at: the last seven days up to today, as a schedule has it. */
-export const SCORECARD_TIME_RANGE = { rangeFrom: 'now-7d/d', rangeTo: 'now/d' } as const;
+/**
+ * The range the weekly scorecard opens at: the last seven full days, up to the end of yesterday.
+ * Date math rounds a range's end up, so `now/d` would add the part of today that has passed: an
+ * eighth day, compared with a previous period of eight full ones.
+ */
+export const SCORECARD_TIME_RANGE = { rangeFrom: 'now-7d/d', rangeTo: 'now-1d/d' } as const;
 
 export interface ReportTemplate {
   id: ReportTemplateId;
