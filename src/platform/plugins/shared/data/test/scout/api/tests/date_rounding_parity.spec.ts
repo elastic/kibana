@@ -199,8 +199,14 @@ const ALL_TIMESTAMPS = CASES.flatMap((parityCase) => {
   return Array.from({ length: Math.ceil((to - from) / stepMs) }, (_, i) => from + i * stepMs);
 });
 
-/** Keys of the non-empty buckets for every indexed document in `range`, since case ranges overlap. */
-const expectedKeys = ({ from, to, timeZone }: ZonedDateRange, interval: DateInterval): number[] => {
+/** A non-empty bucket as `[key, doc_count]`. */
+type Bucket = readonly [key: number, count: number];
+
+/** The non-empty buckets for every indexed document in `range`, since case ranges overlap. */
+const expectedBuckets = (
+  { from, to, timeZone }: ZonedDateRange,
+  interval: DateInterval
+): Bucket[] => {
   const rounding = toDslDateRounding(
     interval.kind === 'calendar'
       ? { calendar_interval: interval.expression }
@@ -209,10 +215,12 @@ const expectedKeys = ({ from, to, timeZone }: ZonedDateRange, interval: DateInte
   if (!rounding) {
     throw new Error(`Unsupported interval: ${interval.expression}`);
   }
-  const keys = ALL_TIMESTAMPS.filter((timestamp) => timestamp >= from && timestamp < to).map(
-    (timestamp) => roundToBucketKey(timestamp, rounding, timeZone)
-  );
-  return [...new Set(keys)].sort((a, b) => a - b);
+  const counts = new Map<number, number>();
+  ALL_TIMESTAMPS.filter((timestamp) => timestamp >= from && timestamp < to).forEach((timestamp) => {
+    const key = roundToBucketKey(timestamp, rounding, timeZone);
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  });
+  return [...counts].sort(([a], [b]) => a - b);
 };
 
 const histogramParams = (
@@ -222,12 +230,12 @@ const histogramParams = (
     ? { calendar_interval: interval.expression as estypes.AggregationsCalendarInterval }
     : { fixed_interval: interval.expression };
 
-/** Non-empty `date_histogram` bucket keys per interval for the documents in `range`. */
-const dateHistogramKeys = async (
+/** Non-empty `date_histogram` buckets per interval for the documents in `range`. */
+const dateHistogramBuckets = async (
   esClient: EsClient,
   range: ZonedDateRange,
   intervals: readonly DateInterval[]
-): Promise<Map<string, number[]>> => {
+): Promise<Map<string, Bucket[]>> => {
   const response = await esClient.search<
     unknown,
     Record<string, estypes.AggregationsDateHistogramAggregate>
@@ -254,7 +262,12 @@ const dateHistogramKeys = async (
   return new Map(
     intervals.map(({ expression }) => {
       const buckets = response.aggregations?.[expression]?.buckets;
-      return [expression, Array.isArray(buckets) ? buckets.map(({ key }) => key) : []];
+      return [
+        expression,
+        Array.isArray(buckets)
+          ? buckets.map(({ key, doc_count: count }): Bucket => [key, count])
+          : [],
+      ];
     })
   );
 };
@@ -269,7 +282,7 @@ apiTest.describe(
         index: INDEX,
         mappings: { properties: { '@timestamp': { type: 'date' } } },
       });
-      await esClient.bulk({
+      const bulkResponse = await esClient.bulk({
         index: INDEX,
         refresh: 'wait_for',
         operations: ALL_TIMESTAMPS.flatMap((timestamp) => [
@@ -277,6 +290,8 @@ apiTest.describe(
           { '@timestamp': timestamp },
         ]),
       });
+      // Bulk can succeed overall with item-level failures, which would leave buckets short of documents.
+      expect(bulkResponse.errors, 'bulk indexing rejected some documents').toBe(false);
     });
 
     apiTest.afterAll(async ({ esClient }) => {
@@ -288,9 +303,13 @@ apiTest.describe(
         `fitsInBuckets matches date_histogram bucket counts: ${parityCase.name}`,
         async ({ esClient }) => {
           const range = toRange(parityCase);
-          const keysByInterval = await dateHistogramKeys(esClient, range, parityCase.intervals);
+          const bucketsByInterval = await dateHistogramBuckets(
+            esClient,
+            range,
+            parityCase.intervals
+          );
           for (const interval of parityCase.intervals) {
-            const esBuckets = keysByInterval.get(interval.expression)?.length ?? 0;
+            const esBuckets = bucketsByInterval.get(interval.expression)?.length ?? 0;
             expect(esBuckets, `${interval.expression} returned no ES buckets`).toBeGreaterThan(0);
             expect(
               {
@@ -307,12 +326,17 @@ apiTest.describe(
         `roundToBucketKey matches date_histogram bucket keys: ${parityCase.name}`,
         async ({ esClient }) => {
           const range = toRange(parityCase);
-          const keysByInterval = await dateHistogramKeys(esClient, range, parityCase.intervals);
+          const bucketsByInterval = await dateHistogramBuckets(
+            esClient,
+            range,
+            parityCase.intervals
+          );
           for (const interval of parityCase.intervals) {
+            // Keys and doc counts together, so a document rounded into a neighboring bucket fails.
             expect(
-              keysByInterval.get(interval.expression),
+              bucketsByInterval.get(interval.expression),
               `${parityCase.zone} ${interval.expression}`
-            ).toStrictEqual(expectedKeys(range, interval));
+            ).toStrictEqual(expectedBuckets(range, interval));
           }
         }
       );
@@ -321,12 +345,12 @@ apiTest.describe(
         const range = toRange(parityCase);
         const { maxBuckets } = parityCase;
         const picked = pickDateRounding(maxBuckets, range);
-        const [dslKeys, esqlResponse] = await Promise.all([
-          dateHistogramKeys(esClient, range, [picked]),
+        const [dslBuckets, esqlResponse] = await Promise.all([
+          dateHistogramBuckets(esClient, range, [picked]),
           esClient.esql.query({
             query: `FROM "${INDEX}"
               | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
-              | STATS BY bucket = BUCKET(@timestamp, ${maxBuckets}, ?_tstart, ?_tend)
+              | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, ${maxBuckets}, ?_tstart, ?_tend)
               | SORT bucket`,
             params: [
               { _tstart: new Date(range.from).toISOString() },
@@ -335,10 +359,12 @@ apiTest.describe(
             time_zone: range.timeZone,
           }),
         ]);
-        const esqlKeys = esqlResponse.values.map(([bucket]) => Date.parse(String(bucket)));
-        expect(esqlKeys.length).toBeLessThanOrEqual(maxBuckets);
-        expect(dslKeys.get(picked.expression), `picked ${picked.expression}`).toStrictEqual(
-          esqlKeys
+        const esqlBuckets = esqlResponse.values.map(
+          ([count, bucket]): Bucket => [Date.parse(String(bucket)), Number(count)]
+        );
+        expect(esqlBuckets.length).toBeLessThanOrEqual(maxBuckets);
+        expect(dslBuckets.get(picked.expression), `picked ${picked.expression}`).toStrictEqual(
+          esqlBuckets
         );
       });
     }
