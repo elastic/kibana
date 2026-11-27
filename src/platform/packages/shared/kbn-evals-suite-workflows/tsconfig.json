@@ -14,6 +14,7 @@
     "@kbn/tooling-log",
     "@kbn/core",
     "@kbn/std",
-    "@kbn/workflows"
+    "@kbn/workflows",
+    "@kbn/esql-language"
   ]
 }
